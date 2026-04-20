@@ -481,126 +481,68 @@ export default function Dashboard() {
       )}
 
       {/* ════════════════════════════════════════════════════════════════ */}
-      {/* HOTZFY · INSTITUTIONAL DASHBOARD                                 */}
-      {/* Sério, clean, profissional — Mercury / Ramp / Stripe Atlas       */}
+      {/* HOTZFY · ULTRA PREMIUM DASHBOARD · 4K                            */}
+      {/* Direto ao ponto: dados, gráficos, decisões.                       */}
       {/* ════════════════════════════════════════════════════════════════ */}
       <motion.div
-        initial={{ opacity: 0, y: 8 }}
+        initial={{ opacity: 0, y: 6 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
-        className="relative py-8 md:py-12"
+        transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
+        className="relative py-7 md:py-9"
       >
         {/* ─────────────────────────────────────────────────────────────── */}
-        {/* MASTHEAD · Identidade institucional HOTZFY                       */}
+        {/* COMMAND BAR · Compacta, institucional, direto ao controle        */}
         {/* ─────────────────────────────────────────────────────────────── */}
-        <header className="mb-14 md:mb-20">
-          {/* Ticker / utility strip */}
-          <div className="flex items-center justify-between gap-4 pb-4 border-b border-foreground/10">
-            <div className="flex items-center gap-3">
-              {/* Monogram mark */}
-              <div className="relative h-8 w-8 rounded-[7px] bg-foreground text-background flex items-center justify-center shrink-0 shadow-[0_2px_8px_-2px_hsl(var(--foreground)/0.25)]">
-                <span className="font-display font-black text-[13px] tracking-[-0.06em] leading-none">H</span>
-                <span className="absolute -right-0.5 -bottom-0.5 h-1.5 w-1.5 rounded-full bg-success ring-[1.5px] ring-background animate-pulse" />
+        <header className="mb-8 md:mb-10">
+          <div className="flex items-center justify-between gap-4 flex-wrap">
+            {/* Identity block */}
+            <div className="flex items-center gap-3.5 min-w-0">
+              <div className="relative h-10 w-10 rounded-[9px] bg-foreground text-background flex items-center justify-center shrink-0 shadow-[0_4px_14px_-4px_hsl(var(--foreground)/0.35),inset_0_1px_0_hsl(var(--background)/0.15)]">
+                <span className="font-display font-black text-[15px] tracking-[-0.06em] leading-none">H</span>
+                <span className="absolute -right-0.5 -bottom-0.5 h-2 w-2 rounded-full bg-success ring-[2px] ring-background">
+                  <span className="absolute inset-0 rounded-full bg-success animate-ping opacity-75" />
+                </span>
               </div>
-              <div className="flex items-baseline gap-2.5">
-                <span className="font-display font-bold text-[12.5px] text-foreground tracking-[-0.015em]">HOTZFY</span>
-                <span className="hidden sm:inline-flex items-center gap-1.5 px-2 py-0.5 rounded-[3px] bg-foreground/[0.06] text-[8.5px] font-mono uppercase tracking-[0.18em] text-foreground/70 font-bold">
-                  <span className="h-1 w-1 rounded-full bg-foreground/50" />
-                  Capital · Treasury · Operations
+              <div className="flex flex-col min-w-0">
+                <div className="flex items-center gap-2">
+                  <span className="font-display font-bold text-[14px] text-foreground tracking-[-0.02em] leading-none">HOTZFY</span>
+                  <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-[4px] bg-foreground/[0.06] border border-foreground/[0.06] text-[8.5px] font-mono uppercase tracking-[0.16em] text-foreground/65 font-bold">
+                    <span className="h-1 w-1 rounded-full bg-success animate-pulse" />
+                    Live
+                  </span>
+                </div>
+                <span className="hidden md:inline-block mt-1 font-mono text-[9.5px] uppercase tracking-[0.18em] text-muted-foreground/80 tabular-nums">
+                  {format(new Date(), "EEE · dd MMM yyyy · HH:mm", { locale: ptBR })}
                 </span>
               </div>
             </div>
-            <div className="flex items-center gap-5 text-[9.5px] font-mono uppercase tracking-[0.16em] text-muted-foreground">
-              <span className="hidden md:inline tabular-nums font-medium">{format(new Date(), "EEE · dd MMM yyyy · HH:mm", { locale: ptBR })}</span>
-              <span className="hidden md:inline h-2.5 w-px bg-foreground/15" />
-              <span className="inline-flex items-center gap-1.5">
-                <span className="relative flex h-1.5 w-1.5">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-success opacity-60" />
-                  <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-success" />
-                </span>
-                <span className="text-foreground/80 font-bold tracking-[0.14em]">Live</span>
-              </span>
-            </div>
-          </div>
 
-          {/* Section reference — financial report style */}
-          <div className="flex items-center gap-3 mt-8 mb-6">
-            <span className="font-mono text-[10px] font-bold text-foreground/60 tracking-[0.22em]">§ 01</span>
-            <span className="h-px flex-1 bg-gradient-to-r from-foreground/15 via-foreground/8 to-transparent" />
-            <span className="font-mono text-[10px] uppercase font-bold text-muted-foreground tracking-[0.22em]">Sumário Executivo</span>
-          </div>
+            {/* Controls — single rail */}
+            <div className="flex items-center gap-2 ml-auto flex-wrap">
+              {productsData && productsData.length > 0 && (
+                <Select value={selectedProductId} onValueChange={setSelectedProductId}>
+                  <SelectTrigger className="h-10 w-[200px] text-[12px] font-semibold rounded-[8px] border-foreground/[0.12] bg-card/60 backdrop-blur-xl hover:border-foreground/30 hover:bg-foreground/[0.025] transition-all shadow-[0_1px_2px_hsl(var(--foreground)/0.04)]">
+                    <SelectValue placeholder="Todos os produtos" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">Todos os produtos</SelectItem>
+                    {productsData.map((p) => (
+                      <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              )}
 
-          <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-10">
-            <div className="flex-1 min-w-0">
-              <h1 className="font-display font-semibold text-foreground tracking-[-0.048em] leading-[0.98] text-[40px] md:text-[58px] lg:text-[72px]">
-                {nickname ? (
-                  <>
-                    Bom retorno,
-                    <br />
-                    <span className="italic font-normal bg-gradient-to-br from-foreground/85 via-foreground/60 to-foreground/40 bg-clip-text text-transparent" style={{ fontFamily: "'Cormorant Garamond', 'Playfair Display', Georgia, serif" }}>
-                      {nickname}
-                    </span>
-                    <span className="text-primary">.</span>
-                  </>
-                ) : (
-                  <>
-                    Painel
-                    <br />
-                    <span className="italic font-normal bg-gradient-to-br from-foreground/85 via-foreground/60 to-foreground/40 bg-clip-text text-transparent" style={{ fontFamily: "'Cormorant Garamond', 'Playfair Display', Georgia, serif" }}>
-                      executivo
-                    </span>
-                    <span className="text-primary">.</span>
-                  </>
-                )}
-              </h1>
-              <p className="mt-7 max-w-[560px] text-[13.5px] text-muted-foreground leading-[1.7]">
-                Demonstrativo consolidado de receita líquida, liquidação financeira e indicadores
-                de performance operacional do gateway. Período em análise:{" "}
-                <span className="text-foreground font-semibold">{selectedPeriod.label.toLowerCase()}</span>
-                {approved.length > 0 && (
-                  <>
-                    {" · "}
-                    <span className="text-foreground font-semibold tabular-nums">{approved.length}</span>{" "}
-                    {approved.length === 1 ? "transação processada" : "transações processadas"}.
-                  </>
-                )}
-              </p>
-            </div>
-
-            <div className="flex flex-col items-stretch lg:items-end gap-3 shrink-0">
-              <div className="flex items-center gap-2">
-                {productsData && productsData.length > 0 && (
-                  <Select value={selectedProductId} onValueChange={setSelectedProductId}>
-                    <SelectTrigger className="h-9 w-[180px] text-[11.5px] font-medium rounded-[7px] border-foreground/15 bg-background/40 backdrop-blur-sm hover:border-foreground/35 hover:bg-foreground/[0.02] transition-all">
-                      <SelectValue placeholder="Todos os produtos" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">Todos os produtos</SelectItem>
-                      {productsData.map((p) => (
-                        <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                )}
-                <button
-                  onClick={privacy.toggle}
-                  className="h-9 w-9 inline-flex items-center justify-center rounded-[7px] border border-foreground/15 bg-background/40 backdrop-blur-sm text-muted-foreground hover:text-foreground hover:border-foreground/35 hover:bg-foreground/[0.02] transition-all"
-                  title={privacy.hidden ? "Mostrar valores" : "Ocultar valores"}
-                >
-                  {privacy.hidden ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
-                </button>
-              </div>
-
-              <div className="inline-flex items-center rounded-[7px] border border-foreground/15 bg-background/40 backdrop-blur-sm overflow-hidden shadow-[0_1px_2px_hsl(var(--foreground)/0.04)]">
+              <div className="inline-flex items-center rounded-[8px] border border-foreground/[0.12] bg-card/60 backdrop-blur-xl overflow-hidden shadow-[0_1px_2px_hsl(var(--foreground)/0.04)]">
                 {PERIOD_PRESETS.map((opt, idx) => (
                   <button
                     key={opt.label}
                     onClick={() => { setSelectedPeriod(opt); setIsCustom(false); setCustomRange(undefined); }}
                     className={cn(
-                      "px-3.5 py-2 text-[10.5px] font-bold uppercase tracking-[0.1em] transition-all",
-                      idx > 0 && "border-l border-foreground/10",
+                      "px-3.5 h-10 text-[10.5px] font-bold uppercase tracking-[0.1em] transition-all",
+                      idx > 0 && "border-l border-foreground/[0.08]",
                       !isCustom && selectedPeriod.label === opt.label
-                        ? "bg-foreground text-background shadow-inner"
+                        ? "bg-foreground text-background"
                         : "text-muted-foreground hover:text-foreground hover:bg-foreground/[0.04]"
                     )}
                   >
@@ -611,11 +553,11 @@ export default function Dashboard() {
                   <PopoverTrigger asChild>
                     <button
                       className={cn(
-                        "px-3 py-2 text-[10.5px] font-bold transition-all border-l border-foreground/10 inline-flex items-center gap-1.5",
+                        "px-3 h-10 text-[10.5px] font-bold transition-all border-l border-foreground/[0.08] inline-flex items-center gap-1.5",
                         isCustom ? "bg-foreground text-background" : "text-muted-foreground hover:text-foreground hover:bg-foreground/[0.04]"
                       )}
                     >
-                      <CalendarDays className="h-3 w-3" />
+                      <CalendarDays className="h-3.5 w-3.5" />
                     </button>
                   </PopoverTrigger>
                   <PopoverContent className="w-auto p-0" align="end">
@@ -633,86 +575,88 @@ export default function Dashboard() {
                   </PopoverContent>
                 </Popover>
               </div>
+
+              <button
+                onClick={privacy.toggle}
+                className="h-10 w-10 inline-flex items-center justify-center rounded-[8px] border border-foreground/[0.12] bg-card/60 backdrop-blur-xl text-muted-foreground hover:text-foreground hover:border-foreground/30 hover:bg-foreground/[0.025] transition-all shadow-[0_1px_2px_hsl(var(--foreground)/0.04)]"
+                title={privacy.hidden ? "Mostrar valores" : "Ocultar valores"}
+              >
+                {privacy.hidden ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+              </button>
             </div>
           </div>
         </header>
 
         {/* ─────────────────────────────────────────────────────────────── */}
-        {/* TREASURY STATEMENT · Demonstrativo principal                     */}
+        {/* TREASURY · Receita líquida + Saldo (premium 4K)                  */}
         {/* ─────────────────────────────────────────────────────────────── */}
-        <section className="mb-16 md:mb-20">
-          <div className="flex items-center gap-3 mb-6">
-            <span className="font-mono text-[10px] font-bold text-foreground/60 tracking-[0.22em]">§ 02</span>
-            <span className="h-px flex-1 bg-gradient-to-r from-foreground/15 via-foreground/8 to-transparent" />
-            <span className="font-mono text-[10px] uppercase font-bold text-muted-foreground tracking-[0.22em]">Demonstrativo de Tesouraria</span>
-          </div>
+        <section className="mb-7 md:mb-9">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 md:gap-5">
+            {/* Receita líquida — bloco principal */}
+            <div className="lg:col-span-8 relative rounded-[20px] border border-foreground/[0.09] bg-card overflow-hidden shadow-[0_1px_0_hsl(var(--foreground)/0.04),0_24px_60px_-24px_hsl(var(--foreground)/0.18)] group/block">
+              <div className="absolute inset-0 bg-gradient-to-br from-foreground/[0.025] via-transparent to-transparent pointer-events-none" />
+              <div className="absolute -top-32 -right-32 h-80 w-80 rounded-full bg-primary/[0.06] blur-[120px] pointer-events-none" />
+              <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-foreground/15 to-transparent" />
 
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-px bg-foreground/[0.08] border border-foreground/[0.1] rounded-[12px] overflow-hidden shadow-[0_1px_3px_hsl(var(--foreground)/0.04),0_8px_40px_-12px_hsl(var(--foreground)/0.08)]">
-            {/* Receita líquida — block principal */}
-            <div className="lg:col-span-8 bg-card relative group/block">
-              {/* Subtle radial accent on hover */}
-              <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,hsl(var(--primary)/0.04),transparent_60%)] opacity-0 group-hover/block:opacity-100 transition-opacity duration-700 pointer-events-none" />
-
-              {/* Vertical signature glyph */}
-              <div className="absolute top-0 bottom-0 left-0 w-[36px] flex flex-col items-center justify-between py-7 border-r border-foreground/[0.06] bg-gradient-to-b from-foreground/[0.02] via-foreground/[0.01] to-foreground/[0.02] z-10">
-                <span className="font-mono text-[8.5px] font-bold text-muted-foreground tracking-[0.3em]" style={{ writingMode: "vertical-rl", transform: "rotate(180deg)" }}>NET REVENUE · BRL</span>
-                <span className="font-mono text-[8.5px] font-bold text-foreground/40 tracking-[0.2em]">01</span>
-              </div>
-
-              <div className="relative pl-[54px] pr-8 md:pr-10 lg:pr-12 py-10 md:py-12">
-                <div className="flex items-start justify-between gap-4 mb-7">
+              <div className="relative px-7 md:px-10 lg:px-12 pt-9 pb-9 md:pt-11 md:pb-11">
+                <div className="flex items-start justify-between gap-4 mb-8">
                   <div>
-                    <p className="text-[10px] font-mono font-bold text-muted-foreground uppercase tracking-[0.22em] mb-2">Receita líquida consolidada</p>
-                    <p className="text-[11.5px] text-muted-foreground/80 leading-relaxed">Período: {selectedPeriod.label.toLowerCase()} · valores em reais</p>
+                    <div className="flex items-center gap-2 mb-3">
+                      <span className="font-mono text-[9.5px] font-bold text-muted-foreground uppercase tracking-[0.24em]">Receita Líquida</span>
+                      <span className="h-px w-8 bg-foreground/20" />
+                      <span className="font-mono text-[9.5px] font-bold text-muted-foreground/70 uppercase tracking-[0.18em]">{selectedPeriod.label}</span>
+                    </div>
+                    <p className="text-[12px] text-muted-foreground/80 leading-relaxed">Total apurado · valores em reais (BRL)</p>
                   </div>
-                  <div className="hidden md:inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-success/[0.08] border border-success/15 text-[9.5px] font-mono uppercase tracking-[0.16em] text-success font-bold shrink-0 mt-1">
-                    <span className="h-1 w-1 rounded-full bg-success animate-pulse" />
+                  <div className="hidden md:inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-success/[0.1] border border-success/20 text-[9.5px] font-mono uppercase tracking-[0.16em] text-success font-bold shrink-0 mt-1 shadow-[0_0_12px_-2px_hsl(var(--success)/0.3)]">
+                    <span className="relative flex h-1.5 w-1.5">
+                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-success opacity-60" />
+                      <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-success" />
+                    </span>
                     Apurado
                   </div>
                 </div>
 
-                <div className="font-display font-semibold text-foreground tabular-nums leading-[0.92] tracking-[-0.052em] text-[54px] md:text-[82px] lg:text-[102px]">
+                <div className="font-display font-semibold text-foreground tabular-nums leading-[0.92] tracking-[-0.055em] text-[60px] md:text-[92px] lg:text-[116px]">
                   {privacy.hidden ? (
-                    <span className="text-foreground/25">{CENSORED}</span>
+                    <span className="text-foreground/20">{CENSORED}</span>
                   ) : (
                     <span className="inline-flex items-baseline gap-3">
-                      <span className="text-[0.3em] font-medium text-muted-foreground/60 self-start mt-3 tracking-normal">R$</span>
-                      <span className="bg-gradient-to-br from-foreground via-foreground/95 to-foreground/75 bg-clip-text text-transparent">
+                      <span className="text-[0.28em] font-medium text-muted-foreground/60 self-start mt-3 tracking-normal">R$</span>
+                      <span className="bg-gradient-to-br from-foreground via-foreground/95 to-foreground/70 bg-clip-text text-transparent drop-shadow-[0_2px_24px_hsl(var(--foreground)/0.08)]">
                         <AnimatedNumber value={revenue} formatter={(v) => v.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} />
                       </span>
                     </span>
                   )}
                 </div>
 
-                {/* Tri-column stats — accountant ledger */}
-                <div className="mt-11 grid grid-cols-3 border-t border-foreground/[0.07]">
+                <div className="mt-12 grid grid-cols-3 border-t border-foreground/[0.08]">
                   {[
                     { label: "TPV bruto", code: "GMV", value: privacy.hidden ? CENSORED : fmt(approved.reduce((a, t) => a + Number(t.amount), 0)) },
                     { label: "MDR efetivo", code: "MDR", value: (() => { const gross = approved.reduce((a, t) => a + Number(t.amount), 0); const fees = approved.reduce((a, t) => a + Number(t.fee_amount), 0); return gross > 0 ? `${((fees / gross) * 100).toFixed(2)}%` : "0,00%"; })() },
                     { label: "Ticket médio", code: "AOV", value: privacy.hidden ? CENSORED : fmt(approved.length > 0 ? revenue / approved.length : 0) },
                   ].map((m, i) => (
-                    <div key={i} className={cn("py-6 pr-4 group/stat", i > 0 && "pl-6 border-l border-foreground/[0.07]")}>
-                      <div className="flex items-center gap-1.5 mb-2.5">
-                        <span className="font-mono text-[8.5px] font-bold text-muted-foreground/80 tracking-[0.2em]">{m.code}</span>
-                        <span className="text-[10px] text-muted-foreground/40">·</span>
-                        <span className="text-[10px] font-medium text-muted-foreground tracking-tight">{m.label}</span>
+                    <div key={i} className={cn("py-7 pr-4 group/stat", i > 0 && "pl-7 border-l border-foreground/[0.08]")}>
+                      <div className="flex items-center gap-1.5 mb-3">
+                        <span className="font-mono text-[8.5px] font-bold text-muted-foreground/80 tracking-[0.22em]">{m.code}</span>
+                        <span className="text-[10px] text-muted-foreground/30">·</span>
+                        <span className="text-[10px] font-medium text-muted-foreground tracking-tight uppercase">{m.label}</span>
                       </div>
-                      <p className="text-[17px] md:text-[19px] font-display font-semibold text-foreground tabular-nums tracking-[-0.025em] leading-none transition-transform group-hover/stat:translate-x-0.5 duration-300">{m.value}</p>
+                      <p className="text-[20px] md:text-[24px] font-display font-semibold text-foreground tabular-nums tracking-[-0.028em] leading-none transition-transform group-hover/stat:translate-x-0.5 duration-300">{m.value}</p>
                     </div>
                   ))}
                 </div>
 
-                {/* CTA row */}
-                <div className="mt-10 flex flex-wrap items-center gap-2.5">
-                  <Link to="/financeiro/saques" className="group/cta inline-flex items-center gap-2 h-10 px-4 rounded-[7px] bg-foreground text-background text-[11.5px] font-bold hover:bg-foreground/90 transition-all shadow-[0_2px_6px_-1px_hsl(var(--foreground)/0.2)] hover:shadow-[0_4px_12px_-2px_hsl(var(--foreground)/0.3)] hover:-translate-y-px">
-                    <Wallet className="h-3.5 w-3.5" />
+                <div className="mt-9 flex flex-wrap items-center gap-2.5">
+                  <Link to="/financeiro/saques" className="group/cta inline-flex items-center gap-2 h-11 px-5 rounded-[9px] bg-foreground text-background text-[12px] font-bold hover:bg-foreground/90 transition-all shadow-[0_4px_14px_-4px_hsl(var(--foreground)/0.45),inset_0_1px_0_hsl(var(--background)/0.15)] hover:shadow-[0_8px_24px_-4px_hsl(var(--foreground)/0.55),inset_0_1px_0_hsl(var(--background)/0.15)] hover:-translate-y-px">
+                    <Wallet className="h-4 w-4" />
                     Solicitar saque
                     <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover/cta:translate-x-0.5" />
                   </Link>
-                  <Link to="/vendas" className="inline-flex items-center gap-2 h-10 px-4 rounded-[7px] border border-foreground/15 text-foreground text-[11.5px] font-bold hover:bg-foreground/[0.04] hover:border-foreground/30 transition-all">
+                  <Link to="/vendas" className="inline-flex items-center gap-2 h-11 px-5 rounded-[9px] border border-foreground/[0.14] bg-card/40 backdrop-blur text-foreground text-[12px] font-bold hover:bg-foreground/[0.04] hover:border-foreground/30 transition-all">
                     Ver transações
                   </Link>
-                  <span className="ml-auto hidden md:inline text-[10px] font-mono text-muted-foreground/70 tracking-[0.14em]">
+                  <span className="ml-auto hidden md:inline font-mono text-[9.5px] text-muted-foreground/60 tracking-[0.18em] uppercase">
                     REF · {format(new Date(), "yyyyMMdd")}
                   </span>
                 </div>
@@ -720,65 +664,62 @@ export default function Dashboard() {
             </div>
 
             {/* Saldo / Liquidação */}
-            <div className="lg:col-span-4 bg-card relative group/balance">
-              <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,hsl(var(--primary)/0.05),transparent_60%)] opacity-0 group-hover/balance:opacity-100 transition-opacity duration-700 pointer-events-none" />
+            <div className="lg:col-span-4 relative rounded-[20px] border border-foreground/[0.09] bg-card overflow-hidden shadow-[0_1px_0_hsl(var(--foreground)/0.04),0_24px_60px_-24px_hsl(var(--foreground)/0.18)] group/balance">
+              <div className="absolute inset-0 bg-gradient-to-bl from-foreground/[0.03] via-transparent to-transparent pointer-events-none" />
+              <div className="absolute -top-24 -left-24 h-64 w-64 rounded-full bg-primary/[0.05] blur-[100px] pointer-events-none" />
+              <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-foreground/15 to-transparent" />
 
-              <div className="absolute top-0 bottom-0 left-0 w-[36px] flex flex-col items-center justify-between py-7 border-r border-foreground/[0.06] bg-gradient-to-b from-foreground/[0.02] via-foreground/[0.01] to-foreground/[0.02] z-10">
-                <span className="font-mono text-[8.5px] font-bold text-muted-foreground tracking-[0.3em]" style={{ writingMode: "vertical-rl", transform: "rotate(180deg)" }}>SETTLEMENT</span>
-                <span className="font-mono text-[8.5px] font-bold text-foreground/40 tracking-[0.2em]">02</span>
-              </div>
-
-              <div className="relative pl-[54px] pr-8 md:pr-10 py-10 md:py-12 flex flex-col gap-7 h-full">
+              <div className="relative px-7 md:px-9 pt-9 pb-9 md:pt-11 md:pb-11 flex flex-col gap-7 h-full">
                 <div>
                   <div className="flex items-center justify-between mb-4">
-                    <p className="text-[10px] font-mono font-bold text-muted-foreground uppercase tracking-[0.22em]">Saldo disponível</p>
-                    <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-success/[0.08] border border-success/15 font-mono text-[9px] font-bold text-success tracking-[0.16em] uppercase">
+                    <span className="font-mono text-[9.5px] font-bold text-muted-foreground uppercase tracking-[0.24em]">Saldo Disponível</span>
+                    <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-success/[0.1] border border-success/20 font-mono text-[9px] font-bold text-success tracking-[0.16em] uppercase shadow-[0_0_10px_-2px_hsl(var(--success)/0.3)]">
                       <span className="h-1 w-1 rounded-full bg-success" />
                       Free
                     </span>
                   </div>
-                  <p className="font-display font-semibold tabular-nums leading-[0.95] tracking-[-0.04em] text-[36px] md:text-[44px]">
+                  <p className="font-display font-semibold tabular-nums leading-[0.95] tracking-[-0.04em] text-[40px] md:text-[50px]">
                     {privacy.hidden ? (
-                      <span className="text-foreground/25">{CENSORED}</span>
+                      <span className="text-foreground/20">{CENSORED}</span>
                     ) : (
-                      <span className="bg-gradient-to-br from-foreground via-foreground/95 to-foreground/75 bg-clip-text text-transparent">
+                      <span className="bg-gradient-to-br from-foreground via-foreground/95 to-foreground/70 bg-clip-text text-transparent">
                         <AnimatedNumber value={balance} />
                       </span>
                     )}
                   </p>
-                  <p className="mt-2.5 text-[11px] text-muted-foreground leading-relaxed">Liquidez imediata · saque em D+0 via PIX</p>
+                  <p className="mt-3 text-[11.5px] text-muted-foreground/85 leading-relaxed">Liquidez imediata · saque em D+0 via PIX</p>
                 </div>
 
-                <div className="border-t border-foreground/[0.07] pt-6 space-y-5 flex-1">
+                <div className="border-t border-foreground/[0.08] pt-6 space-y-5 flex-1">
                   <div className="flex items-baseline justify-between gap-3">
                     <div>
                       <div className="flex items-center gap-1.5">
-                        <span className="h-1 w-1 rounded-full bg-warning" />
-                        <p className="text-[10px] font-mono font-bold text-muted-foreground uppercase tracking-[0.18em]">Em análise</p>
+                        <span className="h-1.5 w-1.5 rounded-full bg-warning shadow-[0_0_6px_hsl(var(--warning)/0.6)]" />
+                        <p className="text-[10px] font-mono font-bold text-muted-foreground uppercase tracking-[0.2em]">Em análise</p>
                       </div>
-                      <p className="text-[10.5px] text-muted-foreground/70 mt-1 ml-2.5">Saques em processamento</p>
+                      <p className="text-[10.5px] text-muted-foreground/65 mt-1 ml-3">Saques em processamento</p>
                     </div>
-                    <p className="text-[14.5px] font-display font-semibold text-foreground tabular-nums tracking-tight">
+                    <p className="text-[16px] font-display font-semibold text-foreground tabular-nums tracking-tight">
                       {privacy.hidden ? CENSORED : fmt(withdrawalPending)}
                     </p>
                   </div>
                   <div className="flex items-baseline justify-between gap-3">
                     <div>
                       <div className="flex items-center gap-1.5">
-                        <span className="h-1 w-1 rounded-full bg-info" />
-                        <p className="text-[10px] font-mono font-bold text-muted-foreground uppercase tracking-[0.18em]">Reserva técnica</p>
+                        <span className="h-1.5 w-1.5 rounded-full bg-info shadow-[0_0_6px_hsl(var(--info)/0.6)]" />
+                        <p className="text-[10px] font-mono font-bold text-muted-foreground uppercase tracking-[0.2em]">Reserva técnica</p>
                       </div>
-                      <p className="text-[10.5px] text-muted-foreground/70 mt-1 ml-2.5">Liberação programada · D+30</p>
+                      <p className="text-[10.5px] text-muted-foreground/65 mt-1 ml-3">Liberação programada · D+30</p>
                     </div>
-                    <p className="text-[14.5px] font-display font-semibold text-foreground tabular-nums tracking-tight">
+                    <p className="text-[16px] font-display font-semibold text-foreground tabular-nums tracking-tight">
                       {privacy.hidden ? CENSORED : fmt(transactions.filter(t => t.status === "completed" && !t.retention_released && Number(t.retained_amount) > 0).reduce((a, t) => a + Number(t.retained_amount), 0))}
                     </p>
                   </div>
                 </div>
 
-                <Link to="/financeiro/saques" className="border-t border-foreground/[0.07] pt-4 flex items-center justify-between hover:px-1 transition-all group/link">
-                  <span className="text-[9.5px] font-mono text-muted-foreground tracking-[0.16em] uppercase font-bold group-hover/link:text-foreground transition-colors">Conta operacional</span>
-                  <ChevronRight className="h-3 w-3 text-muted-foreground group-hover/link:text-foreground group-hover/link:translate-x-0.5 transition-all" />
+                <Link to="/financeiro/saques" className="border-t border-foreground/[0.08] pt-4 flex items-center justify-between hover:px-1 transition-all group/link">
+                  <span className="text-[10px] font-mono text-muted-foreground tracking-[0.18em] uppercase font-bold group-hover/link:text-foreground transition-colors">Conta operacional</span>
+                  <ChevronRight className="h-3.5 w-3.5 text-muted-foreground group-hover/link:text-foreground group-hover/link:translate-x-0.5 transition-all" />
                 </Link>
               </div>
             </div>
@@ -786,16 +727,10 @@ export default function Dashboard() {
         </section>
 
         {/* ─────────────────────────────────────────────────────────────── */}
-        {/* PERFORMANCE STRIP                                                */}
+        {/* KPIs · Indicadores operacionais (premium tiles)                  */}
         {/* ─────────────────────────────────────────────────────────────── */}
-        <section className="mb-16 md:mb-20">
-          <div className="flex items-center gap-3 mb-6">
-            <span className="font-mono text-[10px] font-bold text-foreground/60 tracking-[0.22em]">§ 03</span>
-            <span className="h-px flex-1 bg-gradient-to-r from-foreground/15 via-foreground/8 to-transparent" />
-            <span className="font-mono text-[10px] uppercase font-bold text-muted-foreground tracking-[0.22em]">Indicadores Operacionais</span>
-          </div>
-
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-px bg-foreground/[0.08] border border-foreground/[0.1] rounded-[12px] overflow-hidden shadow-[0_1px_3px_hsl(var(--foreground)/0.04),0_8px_30px_-12px_hsl(var(--foreground)/0.06)]">
+        <section className="mb-7 md:mb-9">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-5">
             <EditorialKpi label="Taxa de aprovação" code="APR" value={privacy.hidden ? CENSORED : `${conversion.toFixed(1)}%`} sub={`${approved.length} de ${filteredTx.length} processadas`} accent={conversion >= 80 ? "success" : conversion >= 60 ? "warning" : "destructive"} />
             <EditorialKpi label="Chargeback" code="CBK" value={privacy.hidden ? CENSORED : `${chargebackRate.toFixed(2)}%`} sub={`${chargebacks.length} ${chargebacks.length === 1 ? "disputa" : "disputas"} · meta < 1%`} accent={chargebackRate < 1 ? "success" : chargebackRate < 2 ? "warning" : "destructive"} />
             <EditorialKpi label="Pagamentos pendentes" code="PND" value={pending.length.toString()} sub="Aguardando captura" accent={pending.length > 5 ? "warning" : "neutral"} />
@@ -804,81 +739,90 @@ export default function Dashboard() {
         </section>
 
         {/* ─────────────────────────────────────────────────────────────── */}
-        {/* CHART · Volume processado                                        */}
+        {/* CHART · Série histórica (premium 4K)                             */}
         {/* ─────────────────────────────────────────────────────────────── */}
-        <section className="mb-16 md:mb-20">
-          <div className="flex items-center gap-3 mb-6">
-            <span className="font-mono text-[10px] font-bold text-foreground/60 tracking-[0.22em]">§ 04</span>
-            <span className="h-px flex-1 bg-gradient-to-r from-foreground/15 via-foreground/8 to-transparent" />
-            <span className="font-mono text-[10px] uppercase font-bold text-muted-foreground tracking-[0.22em]">Série Histórica · Volume</span>
-          </div>
+        <section className="mb-7 md:mb-9">
+          <div className="relative rounded-[20px] border border-foreground/[0.09] bg-card overflow-hidden shadow-[0_1px_0_hsl(var(--foreground)/0.04),0_24px_60px_-24px_hsl(var(--foreground)/0.18)]">
+            <div className="absolute inset-0 bg-gradient-to-br from-foreground/[0.02] via-transparent to-transparent pointer-events-none" />
+            <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-foreground/15 to-transparent" />
 
-          <div className="rounded-[12px] border border-foreground/[0.1] bg-card overflow-hidden shadow-[0_1px_3px_hsl(var(--foreground)/0.04),0_8px_30px_-12px_hsl(var(--foreground)/0.06)]">
-            <div className="px-7 md:px-9 pt-8 pb-6 border-b border-foreground/[0.06] flex items-end justify-between gap-6 flex-wrap bg-gradient-to-b from-foreground/[0.015] to-transparent">
+            <div className="relative px-7 md:px-10 pt-8 pb-6 flex items-end justify-between gap-6 flex-wrap">
               <div>
-                <p className="text-[10px] font-mono font-bold text-muted-foreground uppercase tracking-[0.22em] mb-2.5">Receita acumulada</p>
-                <p className="font-display font-semibold tabular-nums tracking-[-0.04em] text-[30px] md:text-[40px] leading-none">
-                  {privacy.hidden ? <span className="text-foreground/25">{CENSORED}</span> : (
-                    <span className="inline-flex items-baseline gap-2 bg-gradient-to-br from-foreground via-foreground/95 to-foreground/75 bg-clip-text text-transparent">
+                <div className="flex items-center gap-2 mb-3">
+                  <span className="font-mono text-[9.5px] font-bold text-muted-foreground uppercase tracking-[0.24em]">Série Histórica</span>
+                  <span className="h-px w-8 bg-foreground/20" />
+                  <span className="font-mono text-[9.5px] font-bold text-muted-foreground/70 uppercase tracking-[0.18em]">Volume</span>
+                </div>
+                <p className="font-display font-semibold tabular-nums tracking-[-0.04em] text-[34px] md:text-[44px] leading-none">
+                  {privacy.hidden ? <span className="text-foreground/20">{CENSORED}</span> : (
+                    <span className="inline-flex items-baseline gap-2 bg-gradient-to-br from-foreground via-foreground/95 to-foreground/70 bg-clip-text text-transparent">
                       <span className="text-[0.4em] font-medium text-muted-foreground/70 not-italic">R$</span>
                       {revenue.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                     </span>
                   )}
                 </p>
-                <p className="text-[11px] text-muted-foreground mt-2.5">
-                  {selectedPeriod.label === "Hoje" ? "Distribuição por hora" : `Distribuição diária · últimos ${selectedPeriod.days} dias`}
+                <p className="text-[11.5px] text-muted-foreground/85 mt-3">
+                  {selectedPeriod.label === "Hoje" ? "Distribuição por hora · America/São Paulo" : `Distribuição diária · últimos ${selectedPeriod.days} dias`}
                 </p>
               </div>
-              <div className="flex items-center gap-4 text-[10px] font-mono uppercase tracking-[0.16em] text-muted-foreground">
-                <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-foreground/[0.05] border border-foreground/[0.08]">
+              <div className="flex items-center gap-3 text-[10px] font-mono uppercase tracking-[0.16em] text-muted-foreground">
+                <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-foreground/[0.05] border border-foreground/[0.08]">
                   <span className="h-1.5 w-1.5 rounded-full bg-foreground" />
-                  <span className="font-bold tracking-[0.14em]">Receita líquida</span>
+                  <span className="font-bold tracking-[0.14em] text-foreground/85">Receita líquida</span>
                 </span>
-                <span className="hidden md:inline tabular-nums font-medium">{chartData.length} pts</span>
+                <span className="hidden md:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-foreground/[0.025] border border-foreground/[0.06] tabular-nums font-medium">
+                  {chartData.length} pts
+                </span>
               </div>
             </div>
-            <div className="h-[280px] md:h-[340px] px-3 pb-5 pt-6 bg-gradient-to-b from-transparent via-foreground/[0.005] to-foreground/[0.01]">
+
+            <div className="relative h-[320px] md:h-[400px] px-3 pb-5 pt-4">
               <ResponsiveContainer width="100%" height="100%">
                 <AreaChart data={chartData} margin={{ top: 12, right: 16, left: 8, bottom: 8 }}>
                   <defs>
                     <linearGradient id="institutional-grad" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="0%" stopColor="hsl(var(--foreground))" stopOpacity={0.28} />
-                      <stop offset="60%" stopColor="hsl(var(--foreground))" stopOpacity={0.08} />
+                      <stop offset="0%" stopColor="hsl(var(--foreground))" stopOpacity={0.32} />
+                      <stop offset="55%" stopColor="hsl(var(--foreground))" stopOpacity={0.1} />
                       <stop offset="100%" stopColor="hsl(var(--foreground))" stopOpacity={0} />
                     </linearGradient>
-                    <pattern id="grid-pattern" width="48" height="48" patternUnits="userSpaceOnUse">
-                      <path d="M 48 0 L 0 0 0 48" fill="none" stroke="hsl(var(--foreground))" strokeOpacity="0.035" strokeWidth="1" />
+                    <linearGradient id="institutional-stroke" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0%" stopColor="hsl(var(--foreground))" stopOpacity={1} />
+                      <stop offset="100%" stopColor="hsl(var(--foreground))" stopOpacity={0.7} />
+                    </linearGradient>
+                    <pattern id="grid-pattern" width="56" height="56" patternUnits="userSpaceOnUse">
+                      <path d="M 56 0 L 0 0 0 56" fill="none" stroke="hsl(var(--foreground))" strokeOpacity="0.04" strokeWidth="1" />
                     </pattern>
                   </defs>
                   <rect width="100%" height="100%" fill="url(#grid-pattern)" />
-                  <XAxis dataKey="name" tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))", fontWeight: 600, letterSpacing: "0.05em" }} tickLine={false} axisLine={false} dy={6} />
-                  <YAxis tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))", fontWeight: 600 }} tickLine={false} axisLine={false} tickFormatter={(v) => v >= 1000 ? `${(v / 1000).toFixed(1)}k` : `${v}`} width={44} />
+                  <XAxis dataKey="name" tick={{ fontSize: 10.5, fill: "hsl(var(--muted-foreground))", fontWeight: 600, letterSpacing: "0.05em" }} tickLine={false} axisLine={false} dy={8} />
+                  <YAxis tick={{ fontSize: 10.5, fill: "hsl(var(--muted-foreground))", fontWeight: 600 }} tickLine={false} axisLine={false} tickFormatter={(v) => v >= 1000 ? `${(v / 1000).toFixed(1)}k` : `${v}`} width={48} />
                   <Tooltip
-                    cursor={{ stroke: "hsl(var(--foreground))", strokeOpacity: 0.25, strokeDasharray: "3 3" }}
-                    contentStyle={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--foreground) / 0.18)", borderRadius: 8, fontSize: 12, fontWeight: 500, padding: "11px 15px", boxShadow: "0 12px 32px -10px hsl(var(--foreground) / 0.22)" }}
-                    labelStyle={{ color: "hsl(var(--muted-foreground))", fontSize: 9.5, textTransform: "uppercase", letterSpacing: "0.14em", fontWeight: 700, marginBottom: 5 }}
+                    cursor={{ stroke: "hsl(var(--foreground))", strokeOpacity: 0.3, strokeDasharray: "3 3" }}
+                    contentStyle={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--foreground) / 0.18)", borderRadius: 10, fontSize: 12.5, fontWeight: 500, padding: "12px 16px", boxShadow: "0 24px 48px -12px hsl(var(--foreground) / 0.28)" }}
+                    labelStyle={{ color: "hsl(var(--muted-foreground))", fontSize: 9.5, textTransform: "uppercase", letterSpacing: "0.16em", fontWeight: 700, marginBottom: 6 }}
                     formatter={(v: number) => [privacy.hidden ? CENSORED : fmt(v), "Receita"]}
                   />
-                  <Area type="monotone" dataKey="vendas" stroke="hsl(var(--foreground))" strokeWidth={1.85} fill="url(#institutional-grad)" />
+                  <Area type="monotone" dataKey="vendas" stroke="url(#institutional-stroke)" strokeWidth={2.25} fill="url(#institutional-grad)" />
                 </AreaChart>
               </ResponsiveContainer>
             </div>
           </div>
         </section>
 
-        {/* CHANNELS + ACTIVITY */}
         {/* ─────────────────────────────────────────────────────────────── */}
         {/* CHANNELS + ACTIVITY                                              */}
         {/* ─────────────────────────────────────────────────────────────── */}
-        <section className="grid grid-cols-1 lg:grid-cols-5 gap-8 lg:gap-10 mb-16">
-          <div className="lg:col-span-3">
-            <div className="flex items-center gap-3 mb-6">
-              <span className="font-mono text-[10px] font-bold text-foreground/60 tracking-[0.22em]">§ 05</span>
-              <span className="h-px flex-1 bg-gradient-to-r from-foreground/15 via-foreground/8 to-transparent" />
-              <span className="font-mono text-[10px] uppercase font-bold text-muted-foreground tracking-[0.22em]">Canais · Mix de Pagamento</span>
+        <section className="grid grid-cols-1 lg:grid-cols-5 gap-4 md:gap-5 mb-10">
+          <div className="lg:col-span-3 relative rounded-[20px] border border-foreground/[0.09] bg-card overflow-hidden shadow-[0_1px_0_hsl(var(--foreground)/0.04),0_24px_60px_-24px_hsl(var(--foreground)/0.18)]">
+            <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-foreground/15 to-transparent" />
+            <div className="px-7 md:px-9 pt-7 pb-5 border-b border-foreground/[0.06]">
+              <div className="flex items-center gap-2">
+                <span className="font-mono text-[9.5px] font-bold text-muted-foreground uppercase tracking-[0.24em]">Canais</span>
+                <span className="h-px w-8 bg-foreground/20" />
+                <span className="font-mono text-[9.5px] font-bold text-muted-foreground/70 uppercase tracking-[0.18em]">Mix de Pagamento</span>
+              </div>
             </div>
-
-            <div className="rounded-[12px] border border-foreground/[0.1] bg-card overflow-hidden divide-y divide-foreground/[0.06] shadow-[0_1px_3px_hsl(var(--foreground)/0.04),0_8px_30px_-12px_hsl(var(--foreground)/0.06)]">
+            <div className="divide-y divide-foreground/[0.06]">
               <EditorialChannelRow index="01" name="PIX" approved={pixApprovedCount} total={pixTotalCount} revenue={pixRevenue} approvalRate={pixConversion} share={revenue > 0 ? (pixRevenue / revenue) * 100 : 0} privacy={privacy.hidden} />
               <EditorialChannelRow index="02" name="Cartão de crédito" approved={cardApprovedCount} total={cardTotalCount} revenue={cardRevenue} approvalRate={cardConversion} share={revenue > 0 ? (cardRevenue / revenue) * 100 : 0} privacy={privacy.hidden} />
               <EditorialChannelRow
@@ -894,90 +838,90 @@ export default function Dashboard() {
             </div>
           </div>
 
-          <div className="lg:col-span-2">
-            <div className="flex items-center gap-3 mb-6">
-              <span className="font-mono text-[10px] font-bold text-foreground/60 tracking-[0.22em]">§ 06</span>
-              <span className="h-px flex-1 bg-gradient-to-r from-foreground/15 via-foreground/8 to-transparent" />
-              <Link to="/vendas" className="font-mono text-[10px] uppercase font-bold text-muted-foreground hover:text-foreground tracking-[0.22em] inline-flex items-center gap-1.5 transition-colors group">
+          <div className="lg:col-span-2 relative rounded-[20px] border border-foreground/[0.09] bg-card overflow-hidden shadow-[0_1px_0_hsl(var(--foreground)/0.04),0_24px_60px_-24px_hsl(var(--foreground)/0.18)]">
+            <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-foreground/15 to-transparent" />
+            <div className="px-6 md:px-7 pt-7 pb-5 border-b border-foreground/[0.06] flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <span className="font-mono text-[9.5px] font-bold text-muted-foreground uppercase tracking-[0.24em]">Atividade</span>
+                <span className="h-px w-8 bg-foreground/20" />
+                <span className="font-mono text-[9.5px] font-bold text-muted-foreground/70 uppercase tracking-[0.18em]">Recente</span>
+              </div>
+              <Link to="/vendas" className="font-mono text-[9.5px] uppercase font-bold text-muted-foreground hover:text-foreground tracking-[0.18em] inline-flex items-center gap-1.5 transition-colors group">
                 Ver tudo <ArrowRight className="h-2.5 w-2.5 transition-transform group-hover:translate-x-0.5" />
               </Link>
             </div>
 
-            <div className="rounded-[12px] border border-foreground/[0.1] bg-card overflow-hidden shadow-[0_1px_3px_hsl(var(--foreground)/0.04),0_8px_30px_-12px_hsl(var(--foreground)/0.06)]">
-              {activity.length === 0 ? (
-                <div className="px-5 py-20 text-center">
-                  <div className="mx-auto h-10 w-10 rounded-full bg-foreground/[0.04] border border-foreground/[0.06] flex items-center justify-center mb-3">
-                    <Activity className="h-4 w-4 text-muted-foreground" />
-                  </div>
-                  <p className="text-[11.5px] text-muted-foreground font-medium">Sem atividade no período</p>
+            {activity.length === 0 ? (
+              <div className="px-5 py-20 text-center">
+                <div className="mx-auto h-10 w-10 rounded-full bg-foreground/[0.04] border border-foreground/[0.06] flex items-center justify-center mb-3">
+                  <Activity className="h-4 w-4 text-muted-foreground" />
                 </div>
-              ) : (
-                <div className="divide-y divide-foreground/[0.06]">
-                  {activity.slice(0, 6).map((item, idx) => {
-                    const isWithdrawal = item.kind === "withdrawal";
-                    const dotColor = item.status === "completed" || item.status === "approved" ? "bg-success"
-                      : item.status === "pending" ? "bg-warning"
-                      : item.status === "refunded" || item.status === "chargeback" || item.status === "rejected" ? "bg-destructive"
-                      : "bg-muted-foreground/40";
-                    const labelText = isWithdrawal ? "Saque solicitado"
-                      : (item.label === "pix" ? "PIX"
-                        : item.label === "credit_card" || item.label === "card" ? "Cartão"
-                          : item.label === "boleto" ? "Boleto" : "Pagamento");
+                <p className="text-[11.5px] text-muted-foreground font-medium">Sem atividade no período</p>
+              </div>
+            ) : (
+              <div className="divide-y divide-foreground/[0.06]">
+                {activity.slice(0, 6).map((item, idx) => {
+                  const isWithdrawal = item.kind === "withdrawal";
+                  const dotColor = item.status === "completed" || item.status === "approved" ? "bg-success shadow-[0_0_8px_hsl(var(--success)/0.6)]"
+                    : item.status === "pending" ? "bg-warning shadow-[0_0_8px_hsl(var(--warning)/0.6)]"
+                    : item.status === "refunded" || item.status === "chargeback" || item.status === "rejected" ? "bg-destructive shadow-[0_0_8px_hsl(var(--destructive)/0.6)]"
+                    : "bg-muted-foreground/40";
+                  const labelText = isWithdrawal ? "Saque solicitado"
+                    : (item.label === "pix" ? "PIX"
+                      : item.label === "credit_card" || item.label === "card" ? "Cartão"
+                        : item.label === "boleto" ? "Boleto" : "Pagamento");
 
-                    return (
-                      <button
-                        key={`${item.kind}-${item.id}`}
-                        onClick={() => {
-                          if (!isWithdrawal) {
-                            const tx = transactions.find(t => t.id === item.id);
-                            if (tx) setDetailTx(tx);
-                          }
-                        }}
-                        className="w-full flex items-center gap-3 px-5 py-4 hover:bg-foreground/[0.025] transition-colors text-left group"
-                      >
-                        <span className="font-mono text-[9px] font-bold text-muted-foreground/50 tracking-[0.1em] tabular-nums w-5 shrink-0">{String(idx + 1).padStart(2, "0")}</span>
-                        <span className={cn("h-1.5 w-1.5 rounded-full shrink-0 ring-2 ring-background", dotColor)} />
-                        <div className="flex-1 min-w-0">
-                          <p className="text-[12.5px] font-semibold text-foreground truncate group-hover:translate-x-0.5 transition-transform">{labelText}</p>
-                          <p className="text-[10px] text-muted-foreground mt-0.5 font-mono tracking-tight">
-                            {item.id.slice(0, 8).toUpperCase()} · {timeAgo(item.createdAt)}
-                          </p>
-                        </div>
-                        <p className="text-[13px] font-display font-semibold text-foreground tabular-nums tracking-tight shrink-0">
-                          {privacy.hidden ? CENSORED : fmt(item.amount)}
+                  return (
+                    <button
+                      key={`${item.kind}-${item.id}`}
+                      onClick={() => {
+                        if (!isWithdrawal) {
+                          const tx = transactions.find(t => t.id === item.id);
+                          if (tx) setDetailTx(tx);
+                        }
+                      }}
+                      className="w-full flex items-center gap-3.5 px-6 py-4 hover:bg-foreground/[0.025] transition-colors text-left group"
+                    >
+                      <span className="font-mono text-[9.5px] font-bold text-muted-foreground/50 tracking-[0.12em] tabular-nums w-5 shrink-0">{String(idx + 1).padStart(2, "0")}</span>
+                      <span className={cn("h-2 w-2 rounded-full shrink-0 ring-2 ring-background", dotColor)} />
+                      <div className="flex-1 min-w-0">
+                        <p className="text-[13px] font-semibold text-foreground truncate group-hover:translate-x-0.5 transition-transform">{labelText}</p>
+                        <p className="text-[10.5px] text-muted-foreground mt-0.5 font-mono tracking-tight">
+                          {item.id.slice(0, 8).toUpperCase()} · {timeAgo(item.createdAt)}
                         </p>
-                      </button>
-                    );
-                  })}
-                </div>
-              )}
-            </div>
+                      </div>
+                      <p className="text-[14px] font-display font-semibold text-foreground tabular-nums tracking-tight shrink-0">
+                        {privacy.hidden ? CENSORED : fmt(item.amount)}
+                      </p>
+                    </button>
+                  );
+                })}
+              </div>
+            )}
           </div>
         </section>
 
         {/* ─────────────────────────────────────────────────────────────── */}
-        {/* COLOPHON · Footer institucional                                  */}
+        {/* COLOPHON                                                          */}
         {/* ─────────────────────────────────────────────────────────────── */}
-        <footer className="pt-8 mt-4 border-t border-foreground/10">
-          <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-6">
-            <div>
-              <div className="flex items-center gap-2.5 mb-3">
-                <div className="h-5 w-5 rounded-[4px] bg-foreground text-background flex items-center justify-center">
-                  <span className="font-display font-black text-[9px] tracking-[-0.06em] leading-none">H</span>
-                </div>
-                <span className="font-display font-bold text-[11px] text-foreground tracking-[-0.01em]">HOTZFY</span>
-                <span className="h-2.5 w-px bg-foreground/15" />
-                <span className="font-mono text-[9.5px] text-muted-foreground uppercase tracking-[0.18em]">Capital Operations</span>
+        <footer className="pt-7 mt-2 border-t border-foreground/[0.08]">
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+            <div className="flex items-center gap-2.5">
+              <div className="h-5 w-5 rounded-[5px] bg-foreground text-background flex items-center justify-center">
+                <span className="font-display font-black text-[9px] tracking-[-0.06em] leading-none">H</span>
               </div>
-              <p className="text-[10.5px] text-muted-foreground/70 max-w-md leading-relaxed">
-                Demonstrativo gerado em tempo real. Os valores apresentados estão sujeitos à conciliação final dos provedores de pagamento e às janelas regulamentares de liquidação.
-              </p>
+              <span className="font-display font-bold text-[11px] text-foreground tracking-[-0.01em]">HOTZFY</span>
+              <span className="h-2.5 w-px bg-foreground/15" />
+              <span className="font-mono text-[9.5px] text-muted-foreground uppercase tracking-[0.18em]">Capital Operations · Treasury</span>
             </div>
-            <div className="flex flex-col items-start md:items-end gap-2 font-mono text-[9.5px] uppercase tracking-[0.16em] text-muted-foreground">
+            <div className="flex items-center gap-4 font-mono text-[9.5px] uppercase tracking-[0.18em] text-muted-foreground">
               <span className="tabular-nums">REF · {format(new Date(), "yyyyMMdd-HHmm")}</span>
               <span className="inline-flex items-center gap-1.5">
-                <span className="h-1.5 w-1.5 rounded-full bg-success" />
-                Sistemas operacionais · uptime 99.99%
+                <span className="relative flex h-1.5 w-1.5">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-success opacity-60" />
+                  <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-success" />
+                </span>
+                Uptime 99.99%
               </span>
             </div>
           </div>
@@ -1293,55 +1237,66 @@ function SmallMetric({ icon, label, value, tone = "info" }: { icon: React.ReactN
   );
 }
 
-/* ─── Editorial dashboard sub-components ─── */
+/* ─── Editorial dashboard sub-components (premium 4K) ─── */
 
 function EditorialKpi({ label, code, value, sub, accent }: { label: string; code?: string; value: string; sub: string; accent: "success" | "warning" | "destructive" | "neutral" }) {
   const accentDot: Record<string, string> = {
-    success: "bg-success shadow-[0_0_8px_hsl(var(--success)/0.5)]",
-    warning: "bg-warning shadow-[0_0_8px_hsl(var(--warning)/0.5)]",
-    destructive: "bg-destructive shadow-[0_0_8px_hsl(var(--destructive)/0.5)]",
+    success: "bg-success shadow-[0_0_10px_hsl(var(--success)/0.6)]",
+    warning: "bg-warning shadow-[0_0_10px_hsl(var(--warning)/0.6)]",
+    destructive: "bg-destructive shadow-[0_0_10px_hsl(var(--destructive)/0.6)]",
     neutral: "bg-muted-foreground/40",
+  };
+  const accentGlow: Record<string, string> = {
+    success: "from-success/[0.04]",
+    warning: "from-warning/[0.04]",
+    destructive: "from-destructive/[0.04]",
+    neutral: "from-foreground/[0.025]",
   };
 
   return (
-    <div className="bg-card px-6 py-7 hover:bg-foreground/[0.02] transition-colors relative group overflow-hidden">
-      {/* Hover sweep line */}
-      <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-foreground/15 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-      <div className="flex items-center justify-between mb-4">
-        <div className="flex items-center gap-2">
-          <span className={cn("h-1.5 w-1.5 rounded-full transition-transform group-hover:scale-125", accentDot[accent])} />
-          <p className="text-[10px] font-mono font-bold text-muted-foreground uppercase tracking-[0.18em] group-hover:text-foreground/80 transition-colors">{label}</p>
+    <div className="relative rounded-[18px] border border-foreground/[0.09] bg-card overflow-hidden shadow-[0_1px_0_hsl(var(--foreground)/0.04),0_18px_40px_-20px_hsl(var(--foreground)/0.15)] hover:shadow-[0_1px_0_hsl(var(--foreground)/0.04),0_28px_60px_-20px_hsl(var(--foreground)/0.22)] hover:-translate-y-px transition-all duration-300 group overflow-hidden">
+      <div className={cn("absolute inset-0 bg-gradient-to-br to-transparent pointer-events-none", accentGlow[accent])} />
+      <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-foreground/12 to-transparent" />
+      {/* Hover sweep */}
+      <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-foreground/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+
+      <div className="relative px-6 py-7 md:px-7 md:py-8">
+        <div className="flex items-center justify-between mb-5">
+          <div className="flex items-center gap-2">
+            <span className={cn("h-1.5 w-1.5 rounded-full transition-transform group-hover:scale-125", accentDot[accent])} />
+            <p className="text-[10px] font-mono font-bold text-muted-foreground uppercase tracking-[0.2em] group-hover:text-foreground/85 transition-colors">{label}</p>
+          </div>
+          {code && <span className="font-mono text-[8.5px] font-bold text-muted-foreground/40 tracking-[0.22em] px-2 py-0.5 rounded-[4px] bg-foreground/[0.04]">{code}</span>}
         </div>
-        {code && <span className="font-mono text-[8.5px] font-bold text-muted-foreground/50 tracking-[0.2em]">{code}</span>}
+        <p className="font-display font-semibold tabular-nums tracking-[-0.045em] leading-none text-[34px] md:text-[42px] bg-gradient-to-br from-foreground via-foreground/95 to-foreground/70 bg-clip-text text-transparent transition-transform group-hover:translate-x-0.5 duration-300">
+          {value}
+        </p>
+        <p className="mt-3.5 text-[11px] text-muted-foreground/85 font-medium leading-relaxed">{sub}</p>
       </div>
-      <p className="font-display font-semibold tabular-nums tracking-[-0.04em] leading-none text-[28px] md:text-[34px] bg-gradient-to-br from-foreground via-foreground/95 to-foreground/75 bg-clip-text text-transparent transition-transform group-hover:translate-x-0.5 duration-300">
-        {value}
-      </p>
-      <p className="mt-3 text-[10.5px] text-muted-foreground/80 font-medium leading-relaxed">{sub}</p>
     </div>
   );
 }
 
 function EditorialChannelRow({ index, name, approved, total, revenue, approvalRate, share, privacy }: { index?: string; name: string; approved: number; total: number; revenue: number; approvalRate: number; share: number; privacy: boolean }) {
   return (
-    <div className="px-6 py-5 hover:bg-foreground/[0.02] transition-colors group relative">
+    <div className="px-7 md:px-9 py-5 md:py-6 hover:bg-foreground/[0.025] transition-colors group relative">
       <div className="flex items-baseline justify-between mb-3 gap-3">
-        <div className="flex items-baseline gap-2.5 min-w-0">
-          {index && <span className="font-mono text-[9px] font-bold text-muted-foreground/50 tracking-[0.16em] tabular-nums shrink-0 group-hover:text-foreground/60 transition-colors">{index}</span>}
-          <p className="text-[13.5px] font-semibold text-foreground tracking-tight truncate group-hover:translate-x-0.5 transition-transform">{name}</p>
+        <div className="flex items-baseline gap-3 min-w-0">
+          {index && <span className="font-mono text-[10px] font-bold text-muted-foreground/45 tracking-[0.18em] tabular-nums shrink-0 group-hover:text-foreground/65 transition-colors">{index}</span>}
+          <p className="text-[14px] md:text-[15px] font-semibold text-foreground tracking-tight truncate group-hover:translate-x-0.5 transition-transform">{name}</p>
         </div>
-        <p className="text-[14.5px] font-display font-semibold text-foreground tabular-nums tracking-tight shrink-0">
+        <p className="text-[16px] md:text-[17px] font-display font-semibold text-foreground tabular-nums tracking-tight shrink-0">
           {privacy ? CENSORED : fmt(revenue)}
         </p>
       </div>
-      <div className="flex items-center gap-3 text-[10px] font-mono text-muted-foreground mb-3 tracking-tight">
-        <span className="uppercase tracking-[0.12em]"><span className="text-foreground font-semibold tabular-nums">{approved}</span><span className="text-muted-foreground/60">/{total}</span></span>
+      <div className="flex items-center gap-3 text-[10.5px] font-mono text-muted-foreground mb-3.5 tracking-tight">
+        <span className="uppercase tracking-[0.14em]"><span className="text-foreground font-bold tabular-nums">{approved}</span><span className="text-muted-foreground/50">/{total}</span></span>
         <span className="text-foreground/15">·</span>
-        <span className="uppercase tracking-[0.12em]">APR <span className="text-foreground font-semibold tabular-nums">{approvalRate.toFixed(1)}%</span></span>
-        <span className="ml-auto uppercase tracking-[0.12em]">SHR <span className="text-foreground font-semibold tabular-nums">{share.toFixed(1)}%</span></span>
+        <span className="uppercase tracking-[0.14em]">APR <span className="text-foreground font-bold tabular-nums">{approvalRate.toFixed(1)}%</span></span>
+        <span className="ml-auto uppercase tracking-[0.14em]">SHR <span className="text-foreground font-bold tabular-nums">{share.toFixed(1)}%</span></span>
       </div>
       <div className="h-[3px] w-full rounded-full bg-foreground/[0.06] overflow-hidden">
-        <div className="h-full rounded-full bg-gradient-to-r from-foreground/80 to-foreground/60 transition-all duration-700 ease-out shadow-[0_0_8px_hsl(var(--foreground)/0.2)]" style={{ width: `${Math.min(share, 100)}%` }} />
+        <div className="h-full rounded-full bg-gradient-to-r from-foreground/85 to-foreground/55 transition-all duration-700 ease-out shadow-[0_0_12px_hsl(var(--foreground)/0.25)]" style={{ width: `${Math.min(share, 100)}%` }} />
       </div>
     </div>
   );
