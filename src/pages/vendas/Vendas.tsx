@@ -1,17 +1,18 @@
 import { useEffect, useState, useMemo, useCallback, useRef } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { useTransactions, useProducts } from "@/hooks/useQueryData";
+import { motion, AnimatePresence } from "framer-motion";
 import {
- ShoppingCart, DollarSign, TrendingUp, CreditCard, Search, X, EyeOff,
- Phone, Mail, Calendar as CalendarIcon, Clock, Hash, Package, ArrowUpRight,
- RefreshCw, Copy, Check, Users, Eye, MessageCircle, ChevronDown,
- Download, FileText, BarChart3, ArrowDownRight, Zap, Filter,
- MoreHorizontal, ExternalLink, Receipt, CheckSquare, Square, CalendarDays,
- Wallet, Target, PieChart, Award, Activity, TrendingDown, AlertTriangle,
- Percent, UserCheck, Layers, ArrowUp, ArrowDown, ChevronUp, Radio, Flame,
- ArrowUpDown, SortAsc, SortDesc, CircleDot, Minus, Sparkles, Box,
- ChevronRight, Star, Shield, Banknote, Globe, Crown, Gauge, BadgeDollarSign,
- Coins, Timer, LayoutGrid, Radar, Signal, Gem, Bolt,
+  ShoppingCart, DollarSign, TrendingUp, CreditCard, Search, X, EyeOff,
+  Phone, Mail, Calendar as CalendarIcon, Clock, Hash, Package, ArrowUpRight,
+  RefreshCw, Copy, Check, Users, Eye, MessageCircle, ChevronDown,
+  Download, FileText, BarChart3, ArrowDownRight, Zap, Filter,
+  MoreHorizontal, ExternalLink, Receipt, CheckSquare, Square, CalendarDays,
+  Wallet, Target, PieChart, Award, Activity, TrendingDown, AlertTriangle,
+  Percent, UserCheck, Layers, ArrowUp, ArrowDown, ChevronUp, Radio, Flame,
+  ArrowUpDown, SortAsc, SortDesc, CircleDot, Minus, Sparkles, Box,
+  ChevronRight, Star, Shield, Banknote, Globe, Crown, Gauge, BadgeDollarSign,
+  Coins, Timer, LayoutGrid, Radar, Signal, Gem, Bolt, Smartphone,
 } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Checkbox } from "@/components/ui/checkbox";
