@@ -285,97 +285,70 @@ function TxRow({ tx, prods, onClick, i }: { tx: Tables<"transactions">; prods: R
  const gross = Number(tx.amount);
 
  return (
-  <tr onClick={onClick} className="group cursor-pointer border-b border-border/25 transition-all hover:bg-muted/15">
-   {/* Left accent rail */}
-   <td className="w-[3px] p-0 relative">
-    <div className={cn(
-      "absolute inset-y-3 left-0 w-[4px] rounded-r-full transition-all duration-300",
-      tx.status === "completed" ? "bg-success group-hover:shadow-[0_0_10px_hsl(var(--success)/0.4)]" : 
-      tx.status === "pending" ? "bg-warning group-hover:shadow-[0_0_10px_hsl(var(--warning)/0.4)]" : 
-      "bg-muted-foreground/30"
-    )} />
-   </td>
+  <tr onClick={onClick} className="group cursor-pointer border-b border-border/40 transition-colors hover:bg-muted/30 last:border-b-0">
    {/* Customer */}
-   <td className="pl-6 pr-3 py-5 align-middle">
-    <div className="flex items-center gap-4">
-     <div className="relative">
-      <Avatar className="h-12 w-12 shrink-0 rounded-2xl border-2 border-border/40 shadow-sm bg-card transition-all group-hover:scale-105 group-hover:border-primary/20">
-       <AvatarFallback className={cn("text-[12px] font-black tracking-tight rounded-2xl", avatarColor(name))}>{initials(name)}</AvatarFallback>
-      </Avatar>
-      {tx.status === "completed" && (
-       <span className="absolute -bottom-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-success ring-[2.5px] ring-card shadow-sm">
-        <Check className="h-2.5 w-2.5 text-success-foreground" strokeWidth={4} />
-       </span>
-      )}
-       {tx.status === "pending" && (
-        <span className="absolute -bottom-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-warning ring-[2.5px] ring-card shadow-sm">
-          <Clock className="h-2.5 w-2.5 text-warning-foreground" strokeWidth={4} />
-        </span>
-       )}
-      </div>
+   <td className="pl-5 pr-3 py-3.5 align-middle">
+    <div className="flex items-center gap-3">
+     <Avatar className="h-9 w-9 shrink-0 rounded-full">
+      <AvatarFallback className={cn("text-[11px] font-semibold rounded-full", avatarColor(name))}>{initials(name)}</AvatarFallback>
+     </Avatar>
      <div className="min-w-0">
-      <p className="truncate text-[14px] font-heading font-black text-foreground leading-tight tracking-[-0.015em] group-hover:text-primary transition-colors">{name}</p>
-      <div className="flex items-center gap-1.5 mt-1.5">
-       {tx.customer_email && <p className="truncate text-[11px] font-medium text-muted-foreground/45 max-w-[180px]">{tx.customer_email}</p>}
+      <p className="truncate text-[13px] font-semibold text-foreground leading-tight">{name}</p>
+      <div className="flex items-center gap-1.5 mt-0.5">
+       {tx.customer_email && <p className="truncate text-[11px] text-muted-foreground/70 max-w-[200px]">{tx.customer_email}</p>}
        {tx.customer_phone && (
-        <>
-         <span className="h-0.5 w-0.5 rounded-full bg-muted-foreground/15 shrink-0" />
-         <a href={`https://wa.me/55${tx.customer_phone.replace(/\D/g, "")}`} target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()} className="flex items-center gap-0.5 text-[10px] text-success/50 hover:text-success transition-colors">
-          <MessageCircle className="h-2.5 w-2.5" />
-         </a>
-        </>
+        <a href={`https://wa.me/55${tx.customer_phone.replace(/\D/g, "")}`} target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()} className="text-muted-foreground/40 hover:text-success transition-colors">
+         <MessageCircle className="h-3 w-3" />
+        </a>
        )}
       </div>
      </div>
     </div>
    </td>
     {/* Product + Date */}
-    <td className="px-3 py-5 align-middle">
-     <div className="min-w-0">
-      <p className="truncate text-[12px] font-heading font-black text-foreground/80 max-w-[200px] leading-tight">{prodName}</p>
-      <p className="text-[10.5px] font-bold text-muted-foreground/35 mt-1.5 tabular-nums">{fmtDate(tx.created_at)} · {fmtTime(tx.created_at)}</p>
-     </div>
+    <td className="px-3 py-3.5 align-middle">
+     <p className="truncate text-[12.5px] text-foreground/80 max-w-[220px] leading-tight">{prodName}</p>
+     <p className="text-[11px] text-muted-foreground/60 mt-0.5 tabular-nums">{fmtDate(tx.created_at)} · {fmtTime(tx.created_at)}</p>
     </td>
     {/* Status */}
-    <td className="px-3 py-5 align-middle">
-     <span className={cn("inline-flex items-center gap-2 rounded-xl px-3 py-1.5 text-[10.5px] font-black tracking-tight border shadow-sm", st.fg, st.bg, st.border)}>
-      <span className="relative flex h-1.5 w-1.5">
-       {tx.status === "pending" && <span className={cn("absolute inset-0 rounded-full animate-ping opacity-40", st.dot)} />}
-       <span className={cn("h-1.5 w-1.5 rounded-full", st.dot)} />
+    <td className="px-3 py-3.5 align-middle">
+     <span className={cn("inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-medium", st.fg, st.bg)}>
+      <span className={cn("h-1.5 w-1.5 rounded-full", st.dot)}>
+       {tx.status === "pending" && <span className={cn("absolute inline-flex h-1.5 w-1.5 rounded-full animate-ping opacity-50", st.dot)} />}
       </span>
       {st.label}
      </span>
     </td>
     {/* Method */}
-    <td className="px-3 py-5 align-middle">
-     <div className="flex items-center gap-3">
-      <span className={cn("flex h-8 w-8 items-center justify-center rounded-xl border-2 shadow-sm transition-transform group-hover:scale-105", method.iconBg, method.border)}><MethodIcon className={cn("h-4 w-4", method.color)} /></span>
-      <span className={cn("text-[11px] font-black tracking-tight", method.color)}>{method.label}</span>
+    <td className="px-3 py-3.5 align-middle">
+     <div className="flex items-center gap-2">
+      <span className={cn("flex h-6 w-6 items-center justify-center rounded-md", method.iconBg)}><MethodIcon className={cn("h-3 w-3", method.color)} /></span>
+      <span className="text-[12px] text-foreground/80">{method.label}</span>
      </div>
     </td>
     {/* Gross */}
-    <td className="px-3 py-5 align-middle text-right">
-     <p className="text-[14px] font-heading font-black text-foreground/85 tabular-nums tracking-[-0.01em]">{fmt(gross)}</p>
-     {fee > 0 && <p className="text-[10px] font-bold text-destructive/40 tabular-nums mt-1">−{fmt(fee)}</p>}
+    <td className="px-3 py-3.5 align-middle text-right">
+     <p className="text-[12.5px] text-foreground/80 tabular-nums">{fmt(gross)}</p>
+     {fee > 0 && <p className="text-[10.5px] text-muted-foreground/60 tabular-nums mt-0.5">−{fmt(fee)}</p>}
     </td>
     {/* Net */}
-    <td className="px-4 py-5 align-middle text-right">
-     <p className={cn("text-[17px] font-heading font-black tabular-nums tracking-[-0.035em] drop-shadow-sm",
-      tx.status === "completed" ? "text-success" : tx.status === "pending" ? "text-warning/80" : "text-foreground/50"
+    <td className="px-4 py-3.5 align-middle text-right">
+     <p className={cn("text-[14px] font-semibold tabular-nums",
+      tx.status === "completed" ? "text-foreground" : tx.status === "pending" ? "text-warning" : "text-muted-foreground"
      )}>{fmt(net)}</p>
     </td>
     {/* Actions */}
-    <td className="pr-6 py-5 align-middle">
-    <div className="flex items-center justify-end opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+    <td className="pr-4 py-3.5 align-middle w-12">
+    <div className="flex items-center justify-end opacity-0 group-hover:opacity-100 transition-opacity">
      <DropdownMenu>
       <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
-       <button className="flex h-8 w-8 items-center justify-center rounded-lg hover:bg-secondary/80 transition-colors"><MoreHorizontal className="h-4 w-4 text-muted-foreground/40" /></button>
+       <button className="flex h-7 w-7 items-center justify-center rounded-md hover:bg-muted transition-colors"><MoreHorizontal className="h-3.5 w-3.5 text-muted-foreground" /></button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-48 rounded-xl border-border/40 bg-popover/95 backdrop-blur-xl p-1">
-       <DropdownMenuItem onClick={(e) => { e.stopPropagation(); onClick(); }} className="gap-2.5 text-[11px] font-heading font-semibold rounded-lg py-2"><Eye className="h-3.5 w-3.5 text-primary" /> Ver detalhes</DropdownMenuItem>
-       {tx.customer_phone && <DropdownMenuItem onClick={(e) => { e.stopPropagation(); navigator.clipboard.writeText(tx.customer_phone!); toast.success("Telefone copiado!"); }} className="gap-2.5 text-[11px] font-heading font-semibold rounded-lg py-2"><Phone className="h-3.5 w-3.5 text-success" /> Copiar telefone</DropdownMenuItem>}
-       {tx.customer_email && <DropdownMenuItem onClick={(e) => { e.stopPropagation(); navigator.clipboard.writeText(tx.customer_email!); toast.success("Email copiado!"); }} className="gap-2.5 text-[11px] font-heading font-semibold rounded-lg py-2"><Mail className="h-3.5 w-3.5 text-info" /> Copiar email</DropdownMenuItem>}
-       {tx.status === "completed" && <><DropdownMenuSeparator className="my-1" /><DropdownMenuItem onClick={(e) => { e.stopPropagation(); toast.info("Entre em contato com o suporte."); }} className="gap-2.5 text-[11px] font-heading font-semibold text-destructive focus:text-destructive rounded-lg py-2"><RefreshCw className="h-3.5 w-3.5" /> Reembolsar</DropdownMenuItem></>}
+      <DropdownMenuContent align="end" className="w-44 rounded-lg border-border bg-popover p-1">
+       <DropdownMenuItem onClick={(e) => { e.stopPropagation(); onClick(); }} className="gap-2 text-[12px] rounded-md py-1.5"><Eye className="h-3.5 w-3.5" /> Ver detalhes</DropdownMenuItem>
+       {tx.customer_phone && <DropdownMenuItem onClick={(e) => { e.stopPropagation(); navigator.clipboard.writeText(tx.customer_phone!); toast.success("Telefone copiado"); }} className="gap-2 text-[12px] rounded-md py-1.5"><Phone className="h-3.5 w-3.5" /> Copiar telefone</DropdownMenuItem>}
+       {tx.customer_email && <DropdownMenuItem onClick={(e) => { e.stopPropagation(); navigator.clipboard.writeText(tx.customer_email!); toast.success("Email copiado"); }} className="gap-2 text-[12px] rounded-md py-1.5"><Mail className="h-3.5 w-3.5" /> Copiar email</DropdownMenuItem>}
+       {tx.status === "completed" && <><DropdownMenuSeparator className="my-1" /><DropdownMenuItem onClick={(e) => { e.stopPropagation(); toast.info("Entre em contato com o suporte."); }} className="gap-2 text-[12px] text-destructive focus:text-destructive rounded-md py-1.5"><RefreshCw className="h-3.5 w-3.5" /> Reembolsar</DropdownMenuItem></>}
       </DropdownMenuContent>
      </DropdownMenu>
     </div>
