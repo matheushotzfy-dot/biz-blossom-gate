@@ -822,15 +822,12 @@ export default function Vendas() {
 
       /* ═══════════ RENDER ═══════════ */
       type KpiTone = "success" | "info" | "warning" | "danger" | "neutral" | "muted";
+      const medpixCount = dateFiltered.filter(t => t.payment_method === "pix" && (t.status === "refunded" || t.status === "chargeback")).length;
       const kpiData: { label: string; icon: typeof CheckSquare; value: string; sub: string; tone: KpiTone }[] = [
-        { label: "Vendas aprovadas",   icon: CheckSquare,    value: hidden ? HIDE : m.approved.length.toLocaleString("pt-BR"),                                                                                                                          sub: `${dateFiltered.length.toLocaleString("pt-BR")} tentativas · ${approvalRate.toFixed(1)}% conversão`,             tone: "neutral" },
-        { label: "Receita líquida",    icon: DollarSign,     value: hidden ? HIDE : fmtCompact(m.totalNet),                                                                                                                                              sub: hidden ? "—" : `Bruto ${fmtCompact(m.totalGross)} · Taxas ${fmtCompact(m.totalFees)}`,                            tone: "success" },
-        { label: "Ticket médio",       icon: Target,         value: hidden ? HIDE : fmtCompact(m.avgTicket),                                                                                                                                             sub: `${m.uniqueCustomers.toLocaleString("pt-BR")} ${m.uniqueCustomers === 1 ? "cliente único" : "clientes únicos"}`, tone: "neutral" },
-        { label: "Receita em PIX",     icon: Zap,            value: hidden ? HIDE : fmtCompact(m.pixRev),                                                                                                                                                sub: `${m.pixCount.toLocaleString("pt-BR")} ${m.pixCount === 1 ? "venda aprovada" : "vendas aprovadas"}`,             tone: "success" },
-        { label: "Receita em Cartão",  icon: CreditCard,     value: hidden ? HIDE : fmtCompact(m.cardRev),                                                                                                                                               sub: `${m.cardCount.toLocaleString("pt-BR")} ${m.cardCount === 1 ? "venda aprovada" : "vendas aprovadas"}`,           tone: "info" },
-        { label: "Reembolsado",        icon: RefreshCw,      value: hidden ? HIDE : fmtCompact(refundedAmount),                                                                                                                                          sub: `${m.refunded.length} ${m.refunded.length === 1 ? "reembolso" : "reembolsos"} · ${m.refundRate.toFixed(2)}%`,    tone: m.refundRate > 5 ? "danger" : "muted" },
-        { label: "Chargebacks",        icon: Shield,         value: hidden ? HIDE : fmtCompact(chargebackAmount),                                                                                                                                        sub: `${m.chargebacks.length} ${m.chargebacks.length === 1 ? "disputa" : "disputas"} · ${m.chargebackRate.toFixed(2)}%`, tone: m.chargebacks.length > 0 ? "danger" : "muted" },
-        { label: "MedPix",             icon: AlertTriangle,  value: dateFiltered.filter(t => t.payment_method === "pix" && (t.status === "refunded" || t.status === "chargeback")).length.toLocaleString("pt-BR"),                                       sub: "PIX contestados ou reembolsados",                                                                              tone: "warning" },
+        { label: "Aprovação",     icon: CheckSquare,   value: `${approvalRate.toFixed(1)}%`,                                                                                                          sub: `${m.approved.length.toLocaleString("pt-BR")} de ${dateFiltered.length.toLocaleString("pt-BR")} tentativas`,         tone: approvalRate >= 70 ? "success" : approvalRate >= 40 ? "warning" : "danger" },
+        { label: "Mix de pagamento", icon: PieChart,   value: m.approved.length === 0 ? "—" : `${Math.round((m.pixCount / Math.max(m.approved.length, 1)) * 100)}% PIX`,                              sub: hidden ? "—" : `${fmtCompact(m.pixRev)} PIX · ${fmtCompact(m.cardRev)} Cartão`,                                       tone: "info" },
+        { label: "Reembolsado",   icon: RefreshCw,     value: hidden ? HIDE : fmtCompact(refundedAmount),                                                                                             sub: `${m.refunded.length} ${m.refunded.length === 1 ? "reembolso" : "reembolsos"} · ${m.refundRate.toFixed(2)}%`,        tone: m.refundRate > 5 ? "danger" : "muted" },
+        { label: "Chargebacks",   icon: Shield,        value: hidden ? HIDE : fmtCompact(chargebackAmount),                                                                                           sub: `${m.chargebacks.length} ${m.chargebacks.length === 1 ? "disputa" : "disputas"} · ${medpixCount} MedPix`,            tone: m.chargebacks.length > 0 || medpixCount > 0 ? "danger" : "muted" },
       ];
 
       const kpiTone: Record<KpiTone, { value: string; iconBg: string; iconFg: string }> = {
@@ -843,7 +840,7 @@ export default function Vendas() {
       };
 
       return (
-        <div className="mx-auto w-full max-w-[1440px] pb-20 space-y-8">
+        <div className="mx-auto w-full max-w-[1440px] pb-20 space-y-6">
 
           {/* ═══════ HEADER ═══════ */}
           <header className="flex flex-col gap-5 pb-1 sm:flex-row sm:items-end sm:justify-between">
@@ -904,79 +901,79 @@ export default function Vendas() {
             </span>
           </div>
 
-          {/* ═══════ HERO: Revenue + Chart unified ═══════ */}
+          {/* ═══════ HERO: Revenue summary + Chart + KPI ribbon ═══════ */}
           <section className="rounded-2xl border border-border bg-card overflow-hidden shadow-[0_1px_2px_rgba(0,0,0,0.04),0_4px_24px_-12px_rgba(0,0,0,0.08)]">
-            <div className="grid grid-cols-1 lg:grid-cols-[400px_1fr]">
-              {/* Left: Revenue summary */}
-              <div className="border-b lg:border-b-0 lg:border-r border-border p-8 lg:p-10 flex flex-col justify-between gap-10 bg-gradient-to-b from-muted/10 to-transparent">
-                <div>
-                  <div className="flex items-center justify-between gap-3 mb-5">
-                    <p className="text-[10.5px] font-heading font-semibold text-muted-foreground/70 uppercase tracking-[0.16em]">Receita líquida</p>
-                    <DeltaBadge cur={m.totalNet} prev={p.totalNet} />
-                  </div>
-                  <p className="text-[52px] lg:text-[58px] font-heading font-semibold tabular-nums tracking-[-0.045em] text-foreground leading-[0.95]">
-                    {hidden ? HIDE : <AnimatedNumber value={m.totalNet} />}
-                  </p>
-                  <p className="text-[12.5px] text-muted-foreground/85 tabular-nums mt-4 font-medium tracking-tight">
-                    Bruto <span className="text-foreground/75 font-semibold">{fmtCompact(m.totalGross)}</span> · Taxas <span className="text-foreground/75 font-semibold">{fmtCompact(m.totalFees)}</span>
-                  </p>
+            {/* Revenue header strip */}
+            <div className="flex flex-col gap-5 border-b border-border px-6 py-5 lg:flex-row lg:items-end lg:justify-between lg:gap-8 lg:px-8 lg:py-6 bg-gradient-to-b from-muted/[0.10] to-transparent">
+              <div className="flex flex-col gap-2 min-w-0">
+                <div className="flex items-center gap-2.5">
+                  <p className="text-[10.5px] font-heading font-semibold text-muted-foreground/70 uppercase tracking-[0.16em]">Receita líquida</p>
+                  <DeltaBadge cur={m.totalNet} prev={p.totalNet} />
                 </div>
-
-                <div className="grid grid-cols-2 gap-x-8 gap-y-6 border-t border-border pt-7">
-                  <div className="group/stat cursor-default">
-                    <p className="text-[10.5px] font-heading font-semibold text-muted-foreground/70 uppercase tracking-[0.14em]">Vendas</p>
-                    <p className="text-[26px] font-heading font-semibold text-foreground tabular-nums leading-none mt-2.5 tracking-[-0.02em] group-hover/stat:text-primary transition-colors">{hidden ? HIDE : m.approved.length.toLocaleString("pt-BR")}</p>
-                    <p className="text-[11.5px] text-muted-foreground/80 mt-2 font-medium tabular-nums">{approvalRate.toFixed(1)}% aprovação</p>
-                  </div>
-                  <div className="group/stat cursor-default">
-                    <p className="text-[10.5px] font-heading font-semibold text-muted-foreground/70 uppercase tracking-[0.14em]">Ticket médio</p>
-                    <p className="text-[26px] font-heading font-semibold text-foreground tabular-nums leading-none mt-2.5 tracking-[-0.02em] group-hover/stat:text-primary transition-colors">{hidden ? HIDE : fmtCompact(m.avgTicket)}</p>
-                    <p className="text-[11.5px] text-muted-foreground/80 mt-2 font-medium tabular-nums">{m.uniqueCustomers} clientes</p>
-                  </div>
-                </div>
+                <p className="text-[40px] sm:text-[46px] lg:text-[52px] font-heading font-semibold tabular-nums tracking-[-0.045em] text-foreground leading-[0.95]">
+                  {hidden ? HIDE : <AnimatedNumber value={m.totalNet} />}
+                </p>
+                <p className="text-[12px] text-muted-foreground/85 tabular-nums font-medium tracking-tight">
+                  Bruto <span className="text-foreground/75 font-semibold">{fmtCompact(m.totalGross)}</span> · Taxas <span className="text-foreground/75 font-semibold">{fmtCompact(m.totalFees)}</span>
+                </p>
               </div>
 
-              {/* Right: Chart */}
-              <div className="p-6 lg:p-8">
-                <div className="flex items-center justify-between px-2 mb-5">
-                  <p className="text-[12.5px] font-heading font-semibold text-foreground tracking-tight">Desempenho no período</p>
-                  <span className="text-[11.5px] text-muted-foreground/80 tabular-nums font-medium">{periodLabel}</span>
+              {/* Inline summary stats */}
+              <div className="flex items-stretch gap-6 sm:gap-8 lg:gap-10 lg:border-l lg:border-border lg:pl-8 shrink-0">
+                <div className="min-w-0">
+                  <p className="text-[10px] font-heading font-semibold text-muted-foreground/70 uppercase tracking-[0.14em]">Vendas</p>
+                  <p className="text-[24px] font-heading font-semibold text-foreground tabular-nums leading-none mt-2 tracking-[-0.02em]">{hidden ? HIDE : m.approved.length.toLocaleString("pt-BR")}</p>
+                  <p className="text-[11px] text-muted-foreground/80 mt-1.5 font-medium tabular-nums">{approvalRate.toFixed(1)}% aprovação</p>
                 </div>
-                <RevenueChart data={metrics.chartData} hidden={hidden} />
+                <div className="min-w-0">
+                  <p className="text-[10px] font-heading font-semibold text-muted-foreground/70 uppercase tracking-[0.14em]">Ticket médio</p>
+                  <p className="text-[24px] font-heading font-semibold text-foreground tabular-nums leading-none mt-2 tracking-[-0.02em]">{hidden ? HIDE : fmtCompact(m.avgTicket)}</p>
+                  <p className="text-[11px] text-muted-foreground/80 mt-1.5 font-medium tabular-nums">{m.uniqueCustomers} clientes</p>
+                </div>
+                <div className="min-w-0 hidden sm:block">
+                  <p className="text-[10px] font-heading font-semibold text-muted-foreground/70 uppercase tracking-[0.14em]">Pendente</p>
+                  <p className="text-[24px] font-heading font-semibold text-warning tabular-nums leading-none mt-2 tracking-[-0.02em]">{m.pending.length.toLocaleString("pt-BR")}</p>
+                  <p className="text-[11px] text-muted-foreground/80 mt-1.5 font-medium tabular-nums">aguardando</p>
+                </div>
               </div>
             </div>
 
-            {/* KPI RIBBON — merged inside hero */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 border-t border-border bg-gradient-to-b from-muted/[0.12] to-transparent">
+            {/* Chart — full width */}
+            <div className="px-4 pt-5 pb-3 lg:px-6 lg:pt-6">
+              <div className="flex items-center justify-between px-2 mb-3">
+                <p className="text-[12px] font-heading font-semibold text-foreground tracking-tight">Desempenho no período</p>
+                <span className="text-[11px] text-muted-foreground/80 tabular-nums font-medium">{periodLabel}</span>
+              </div>
+              <RevenueChart data={metrics.chartData} hidden={hidden} />
+            </div>
+
+            {/* KPI RIBBON — 4 cards */}
+            <div className="grid grid-cols-2 lg:grid-cols-4 border-t border-border bg-gradient-to-b from-muted/[0.12] to-transparent">
               {kpiData.map((kpi, i) => {
                 const tone = kpiTone[kpi.tone];
                 const Icon = kpi.icon;
-                const isFirstCol = i % 4 === 0;
-                const isFirstRow = i < 4;
                 return (
                   <div
                     key={kpi.label}
                     className={cn(
-                      "relative px-6 py-6 transition-all hover:bg-muted/30 group cursor-default",
-                      !isFirstCol && "lg:border-l border-border",
-                      i % 2 !== 0 && "sm:border-l lg:border-l border-border",
-                      !isFirstRow && "border-t border-border",
-                      i === 1 && "sm:border-t-0",
-                      i >= 2 && i < 4 && "sm:border-t border-border lg:border-t-0",
+                      "relative px-5 py-5 transition-all hover:bg-muted/30 group cursor-default",
+                      i > 0 && "lg:border-l border-border",
+                      i % 2 === 1 && "border-l border-border lg:border-l",
+                      i >= 2 && "border-t border-border lg:border-t-0",
                     )}
                   >
-                    <div className="flex items-center justify-between gap-3 mb-3.5">
-                      <p className="text-[10.5px] font-heading font-semibold text-muted-foreground/80 uppercase tracking-[0.12em] truncate">
+                    <div className="flex items-center justify-between gap-3 mb-3">
+                      <p className="text-[10px] font-heading font-semibold text-muted-foreground/80 uppercase tracking-[0.12em] truncate">
                         {kpi.label}
                       </p>
                       <span className={cn("flex h-7 w-7 shrink-0 items-center justify-center rounded-lg transition-transform group-hover:scale-110", tone.iconBg)}>
                         <Icon className={cn("h-3.5 w-3.5", tone.iconFg)} strokeWidth={2.5} />
                       </span>
                     </div>
-                    <p className={cn("text-[24px] font-heading font-semibold tabular-nums leading-none tracking-[-0.03em]", tone.value)}>
+                    <p className={cn("text-[22px] font-heading font-semibold tabular-nums leading-none tracking-[-0.03em]", tone.value)}>
                       {kpi.value}
                     </p>
-                    <p className="mt-2.5 text-[11.5px] text-muted-foreground/85 leading-snug truncate font-medium tabular-nums">
+                    <p className="mt-2 text-[11px] text-muted-foreground/85 leading-snug truncate font-medium tabular-nums">
                       {kpi.sub}
                     </p>
                   </div>
