@@ -539,42 +539,57 @@ export default function Dashboard() {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
-          <StatCard title="Receita Bruta" value={privacy.hidden ? "R$ •••••••" : fmt(revenue)} change={approved.length > 0 ? `${approved.length} vendas` : undefined} changeType="positive" className="bg-card/40 backdrop-blur-xl border-border/50" />
-          <StatCard title="Saldo Disponível" value={privacy.hidden ? CENSORED : fmt(balance)} change={withdrawalPending > 0 ? `${fmt(withdrawalPending)} em análise` : "Pronto para saque"} changeType={balance > 0 ? "positive" : "neutral"} className="bg-card/40 backdrop-blur-xl border-border/50" />
-          <StatCard title="Taxa de Conversão" value={privacy.hidden ? CENSORED : `${conversion.toFixed(1)}%`} change="Total de acessos" className="bg-card/40 backdrop-blur-xl border-border/50" />
-          <StatCard title="Ticket Médio" value={privacy.hidden ? CENSORED : fmt(approved.length > 0 ? revenue / approved.length : 0)} className="bg-card/40 backdrop-blur-xl border-border/50" />
+          <StatCard title="Receita Bruta" value={privacy.hidden ? "R$ •••••••" : fmt(revenue)} icon={DollarSign} change={approved.length > 0 ? `${approved.length} vendas` : undefined} changeType="positive" className="bg-card/40 backdrop-blur-xl border-border/50" />
+          <StatCard title="Saldo Disponível" value={privacy.hidden ? CENSORED : fmt(balance)} icon={Wallet} change={withdrawalPending > 0 ? `${fmt(withdrawalPending)} em análise` : "Pronto para saque"} changeType={balance > 0 ? "positive" : "neutral"} className="bg-card/40 backdrop-blur-xl border-border/50" />
+          <StatCard title="Taxa de Conversão" value={privacy.hidden ? CENSORED : `${conversion.toFixed(1)}%`} icon={TrendingUp} change="Total de acessos" className="bg-card/40 backdrop-blur-xl border-border/50" />
+          <StatCard title="Ticket Médio" value={privacy.hidden ? CENSORED : fmt(approved.length > 0 ? revenue / approved.length : 0)} icon={ShoppingCart} className="bg-card/40 backdrop-blur-xl border-border/50" />
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4">
           <div className="glass-card-hover rounded-2xl p-4 bg-card/40 backdrop-blur-xl border-border/50">
             <p className="text-[9px] font-bold text-muted-foreground/50 uppercase tracking-[0.18em] mb-3">Receita PIX</p>
-            <p className="text-xl font-black text-success tabular-nums">{privacy.hidden ? CENSORED : fmt(pixRevenue)}</p>
+            <div className="flex items-center justify-between">
+              <p className="text-xl font-black text-success tabular-nums">{privacy.hidden ? CENSORED : fmt(pixRevenue)}</p>
+              <PixLogoMark className="h-4 w-4 text-success/50" />
+            </div>
             <p className="text-[10px] text-muted-foreground/60 mt-2 font-bold">{pixConversion.toFixed(1)}% de conversão</p>
           </div>
 
           <div className="glass-card-hover rounded-2xl p-4 bg-card/40 backdrop-blur-xl border-border/50">
             <p className="text-[9px] font-bold text-muted-foreground/50 uppercase tracking-[0.18em] mb-3">Receita Cartão</p>
-            <p className="text-xl font-black text-info tabular-nums">{privacy.hidden ? CENSORED : fmt(cardRevenue)}</p>
+            <div className="flex items-center justify-between">
+              <p className="text-xl font-black text-info tabular-nums">{privacy.hidden ? CENSORED : fmt(cardRevenue)}</p>
+              <CreditCard className="h-4 w-4 text-info/50" />
+            </div>
             <p className="text-[10px] text-muted-foreground/60 mt-2 font-bold">{cardConversion.toFixed(1)}% de conversão</p>
           </div>
 
           <div className="glass-card-hover rounded-2xl p-4 bg-card/40 backdrop-blur-xl border-border/50">
             <p className="text-[9px] font-bold text-muted-foreground/50 uppercase tracking-[0.18em] mb-3">Chargeback</p>
-            <p className={cn("text-xl font-black tabular-nums", chargebackRate > 1 ? "text-destructive" : "text-success/80")}>
-              {privacy.hidden ? CENSORED : `${chargebackRate.toFixed(2)}%`}
-            </p>
+            <div className="flex items-center justify-between">
+              <p className={cn("text-xl font-black tabular-nums", chargebackRate > 1 ? "text-destructive" : "text-success/80")}>
+                {privacy.hidden ? CENSORED : `${chargebackRate.toFixed(2)}%`}
+              </p>
+              <AlertTriangle className="h-4 w-4 text-muted-foreground/30" />
+            </div>
             <p className="text-[10px] text-muted-foreground/60 mt-2 font-bold">{chargebacks.length} ocorrências</p>
           </div>
 
           <div className="glass-card-hover rounded-2xl p-4 bg-card/40 backdrop-blur-xl border-border/50">
             <p className="text-[9px] font-bold text-muted-foreground/50 uppercase tracking-[0.18em] mb-3">Reembolsos</p>
-            <p className="text-xl font-black text-destructive/80 tabular-nums">{privacy.hidden ? CENSORED : fmt(refunded.reduce((acc, t) => acc + Number(t.net_amount), 0))}</p>
+            <div className="flex items-center justify-between">
+              <p className="text-xl font-black text-destructive/80 tabular-nums">{privacy.hidden ? CENSORED : fmt(refunded.reduce((acc, t) => acc + Number(t.net_amount), 0))}</p>
+              <RefreshCw className="h-4 w-4 text-destructive/40" />
+            </div>
             <p className="text-[10px] text-muted-foreground/60 mt-2 font-bold">{refunded.length} vendas devolvidas</p>
           </div>
 
           <div className="glass-card-hover rounded-2xl p-4 bg-card/40 backdrop-blur-xl border-border/50">
             <p className="text-[9px] font-bold text-muted-foreground/50 uppercase tracking-[0.18em] mb-3">Vendas Pendentes</p>
-            <p className="text-xl font-black text-warning tabular-nums">{privacy.hidden ? CENSORED : pending.length}</p>
+            <div className="flex items-center justify-between">
+              <p className="text-xl font-black text-warning tabular-nums">{privacy.hidden ? CENSORED : pending.length}</p>
+              <Clock3 className="h-4 w-4 text-warning/50" />
+            </div>
             <p className="text-[10px] text-muted-foreground/60 mt-2 font-bold">Aguardando pagamento</p>
           </div>
         </div>
@@ -587,33 +602,36 @@ export default function Dashboard() {
           {/* Quick actions — operational support */}
           <div className="rounded-2xl border border-border bg-card flex flex-col overflow-hidden">
             <div className="flex items-center justify-between border-b border-border/60 px-5 py-3.5">
-              <p className="text-[11px] font-heading font-bold uppercase tracking-[0.14em] text-foreground">Ferramentas de escala</p>
-              <Link to="/perfil" className="text-[10px] text-muted-foreground hover:text-foreground transition-colors">Ver todos</Link>
+              <p className="text-[11px] font-heading font-bold uppercase tracking-[0.14em] text-foreground">Ações rápidas</p>
+              <Link to="/perfil" className="text-[10px] text-muted-foreground hover:text-foreground transition-colors">Tudo</Link>
             </div>
             <div className="divide-y divide-border/60 max-h-[560px] overflow-y-auto">
               {[
-                { label: "Criar produto", href: "/vendas/produtos" },
-                { label: "Configurar checkout", href: "/vendas/checkout" },
-                { label: "Link de pagamento", href: "/vendas/links" },
-                { label: "Ver vendas", href: "/vendas" },
-                { label: "Extrato financeiro", href: "/financeiro/extrato" },
-                { label: "Solicitar saque", href: "/financeiro/saques" },
-                { label: "Dados bancários", href: "/financeiro/dados-bancarios" },
-                { label: "Identidade & KYC", href: "/financeiro/identidade" },
-                { label: "Cupons de desconto", href: "/vendas/cupons" },
-                { label: "Área de membros", href: "/vendas/conteudo" },
-                { label: "Programa de afiliados", href: "/vendas/afiliados" },
-                { label: "Apps & Integrações", href: "/integracoes" },
-                { label: "Webhooks & API", href: "/vendas/webhooks" },
-                { label: "Suporte Hotzfy", href: "/suporte" },
+                { label: "Criar produto", href: "/vendas/produtos", icon: Package },
+                { label: "Configurar checkout", href: "/vendas/checkout", icon: CreditCard },
+                { label: "Link de pagamento", href: "/vendas/links", icon: Hash },
+                { label: "Ver vendas", href: "/vendas", icon: BarChart3 },
+                { label: "Extrato financeiro", href: "/financeiro/extrato", icon: FileText },
+                { label: "Solicitar saque", href: "/financeiro/saques", icon: ArrowDownRight },
+                { label: "Dados bancários", href: "/financeiro/dados-bancarios", icon: Banknote },
+                { label: "Identidade & KYC", href: "/financeiro/identidade", icon: ShieldCheck },
+                { label: "Cupons de desconto", href: "/vendas/cupons", icon: Percent },
+                { label: "Área de membros", href: "/vendas/conteudo", icon: GraduationCap },
+                { label: "Programa de afiliados", href: "/vendas/afiliados", icon: Users },
+                { label: "Apps & Integrações", href: "/integracoes", icon: Layers },
+                { label: "Webhooks & API", href: "/vendas/webhooks", icon: Webhook },
+                { label: "Suporte", href: "/suporte", icon: Sparkles },
               ].map((action) => (
                 <Link
                   key={action.href}
                   to={action.href}
-                  className="group flex items-center justify-between px-6 py-4 transition-colors hover:bg-muted/30"
+                  className="group flex items-center gap-3 px-5 py-3 transition-colors hover:bg-muted/30"
                 >
-                  <span className="text-[13px] font-semibold text-foreground/80 group-hover:text-foreground transition-colors">{action.label}</span>
-                  <ChevronRight className="h-3.5 w-3.5 text-muted-foreground/30 group-hover:text-foreground transition-colors" />
+                  <div className="flex h-8 w-8 items-center justify-center rounded-md border border-border/60 bg-background text-muted-foreground group-hover:text-primary group-hover:border-primary/30 transition-colors">
+                    <action.icon className="h-3.5 w-3.5" />
+                  </div>
+                  <span className="flex-1 text-[12.5px] font-semibold text-foreground">{action.label}</span>
+                  <ChevronRight className="h-3.5 w-3.5 text-muted-foreground/40 group-hover:text-foreground transition-colors" />
                 </Link>
               ))}
             </div>
