@@ -908,71 +908,69 @@ export default function Vendas() {
           </div>
 
           {/* ═══════ HERO: Revenue + Chart unified ═══════ */}
-          <section className="rounded-2xl border border-border/40 bg-card overflow-hidden shadow-sm">
-            <div className="grid grid-cols-1 lg:grid-cols-[360px_1fr]">
-              <div className="relative border-b lg:border-b-0 lg:border-r border-border/30 p-8 flex flex-col justify-between gap-10 bg-muted/[0.02]">
-                <div className="absolute left-0 top-8 bottom-8 w-[3px] rounded-r-full bg-success/60 shadow-[0_0_12px_hsl(var(--success)/0.3)]" />
+          <section className="rounded-[24px] border border-border/40 bg-card overflow-hidden shadow-sm">
+            <div className="grid grid-cols-1 lg:grid-cols-[380px_1fr]">
+              <div className="relative border-b lg:border-b-0 lg:border-r border-border/30 p-10 flex flex-col justify-between gap-12 bg-muted/[0.02]">
+                <div className="absolute left-0 top-10 bottom-10 w-[4px] rounded-r-full bg-success shadow-[0_0_15px_hsl(var(--success)/0.4)]" />
                 <div className="pl-4">
-                  <div className="flex items-center gap-2 mb-3">
-                    <p className="text-[9px] font-bold uppercase tracking-[0.2em] text-muted-foreground/50">Receita líquida</p>
+                  <div className="flex items-center gap-2.5 mb-4">
+                    <p className="text-[10px] font-black uppercase tracking-[0.25em] text-muted-foreground/45">Receita líquida</p>
                     <DeltaBadge cur={m.totalNet} prev={p.totalNet} />
                   </div>
-                  <div className="space-y-1">
-                    <p className="text-[52px] font-heading font-black tabular-nums tracking-[-0.06em] text-foreground leading-none drop-shadow-sm">
+                  <div className="space-y-1.5">
+                    <p className="text-[58px] font-heading font-black tabular-nums tracking-[-0.05em] text-foreground leading-[0.9] drop-shadow-sm">
                       {hidden ? HIDE : <AnimatedNumber value={m.totalNet} />}
                     </p>
-                    <p className="text-[12px] font-semibold text-muted-foreground/40 tabular-nums">
+                    <p className="text-[13px] font-bold text-muted-foreground/40 tabular-nums">
                       Bruto {fmtCompact(m.totalGross)} · Taxas {fmtCompact(m.totalFees)}
                     </p>
                   </div>
                 </div>
 
-                <div className="grid grid-cols-2 gap-y-8 pl-4 border-t border-border/30 pt-8">
-                  <div>
-                    <p className="text-[9px] font-bold uppercase tracking-[0.2em] text-muted-foreground/40 mb-2">Vendas</p>
-                    <p className="text-[22px] font-heading font-black text-foreground tabular-nums leading-none">{hidden ? HIDE : m.approved.length.toLocaleString("pt-BR")}</p>
-                    <p className="text-[10px] font-bold text-success mt-1.5">{approvalRate.toFixed(1)}% conversão</p>
+                <div className="grid grid-cols-2 gap-y-10 pl-4 border-t border-border/30 pt-10">
+                  <div className="space-y-1.5">
+                    <p className="text-[10px] font-black uppercase tracking-[0.25em] text-muted-foreground/35 leading-none">Vendas</p>
+                    <p className="text-[26px] font-heading font-black text-foreground tabular-nums leading-none tracking-tight">{hidden ? HIDE : m.approved.length.toLocaleString("pt-BR")}</p>
+                    <p className="text-[11px] font-black text-success/80 flex items-center gap-1.5"><TrendingUp className="h-3 w-3" /> {approvalRate.toFixed(1)}%</p>
                   </div>
-                  <div>
-                    <p className="text-[9px] font-bold uppercase tracking-[0.2em] text-muted-foreground/40 mb-2">Ticket Médio</p>
-                    <p className="text-[22px] font-heading font-black text-foreground tabular-nums leading-none">{hidden ? HIDE : fmtCompact(m.avgTicket)}</p>
-                    <p className="text-[10px] font-bold text-muted-foreground/40 mt-1.5">{m.uniqueCustomers} clientes</p>
+                  <div className="space-y-1.5">
+                    <p className="text-[10px] font-black uppercase tracking-[0.25em] text-muted-foreground/35 leading-none">Ticket Médio</p>
+                    <p className="text-[26px] font-heading font-black text-foreground tabular-nums leading-none tracking-tight">{hidden ? HIDE : fmtCompact(m.avgTicket)}</p>
+                    <p className="text-[11px] font-bold text-muted-foreground/40">{m.uniqueCustomers} clientes</p>
                   </div>
                 </div>
               </div>
 
-              <div className="p-4 lg:p-6 bg-muted/[0.01]">
-                <div className="flex items-center justify-between px-2 mb-4">
-                  <div className="flex items-center gap-2.5">
-                    <div className="h-2 w-2 rounded-full bg-success shadow-[0_0_8px_hsl(var(--success)/0.4)]" />
-                    <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-foreground/80">Desempenho por período</p>
+              <div className="p-6 lg:p-8 bg-muted/[0.01]">
+                <div className="flex items-center justify-between px-2 mb-6">
+                  <div className="flex items-center gap-3">
+                    <div className="h-2.5 w-2.5 rounded-full bg-success shadow-[0_0_10px_hsl(var(--success)/0.6)]" />
+                    <p className="text-[11px] font-black uppercase tracking-[0.2em] text-foreground/80">Desempenho no período</p>
                   </div>
-                  <div className="flex items-center gap-3 text-[10px] font-bold text-muted-foreground/40 uppercase tracking-widest">
+                  <div className="flex items-center gap-4 text-[10px] font-black text-muted-foreground/35 uppercase tracking-widest">
                     <span>{periodLabel}</span>
                   </div>
                 </div>
                 <RevenueChart data={metrics.chartData} hidden={hidden} />
               </div>
             </div>
-          </section>
 
-          {/* ═══════ KPI RIBBON — métricas explícitas ═══════ */}
-          <section className="rounded-2xl border border-border/60 bg-card overflow-hidden shadow-[0_1px_0_hsl(var(--border)/0.4)]">
-            <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8">
+            {/* KPI RIBBON — merged into hero section for tighter hierarchy */}
+            <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 border-t border-border/35 bg-muted/[0.03]">
               {kpiData.map((kpi, i) => (
                 <div key={kpi.label} className={cn(
-                  "px-5 py-5 transition-colors hover:bg-card-inset/40",
-                  i % 4 !== 0 && "sm:border-l border-border/45",
+                  "px-6 py-6 transition-all hover:bg-card/60 group/kpi",
+                  i % 4 !== 0 && "sm:border-l border-border/30",
                   i % 8 !== 0 && "lg:border-l",
-                  i >= 4 && "border-t sm:border-t lg:border-t-0 border-border/45",
+                  i >= 4 && "border-t sm:border-t lg:border-t-0 border-border/30",
                 )}>
-                  <p className="text-[9.5px] font-heading font-bold uppercase tracking-[0.16em] text-muted-foreground/65 leading-none">
+                  <p className="text-[9px] font-black uppercase tracking-[0.2em] text-muted-foreground/50 leading-none group-hover/kpi:text-muted-foreground/80 transition-colors">
                     {kpi.label}
                   </p>
-                  <p className={cn("mt-3 text-[22px] font-heading font-black tabular-nums leading-none tracking-[-0.025em]", kpi.accent)}>
+                  <p className={cn("mt-3.5 text-[22px] font-heading font-black tabular-nums leading-none tracking-[-0.03em]", kpi.accent)}>
                     {kpi.value}
                   </p>
-                  <p className="mt-2 text-[10.5px] text-muted-foreground/65 leading-relaxed truncate">
+                  <p className="mt-2 text-[10.5px] font-bold text-muted-foreground/35 leading-tight truncate group-hover/kpi:text-muted-foreground/50 transition-colors">
                     {kpi.sub}
                   </p>
                 </div>
