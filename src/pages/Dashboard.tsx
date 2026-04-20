@@ -421,9 +421,12 @@ export default function Dashboard() {
   const nickname = profile?.nickname || profile?.full_name?.split(" ")[0] || null;
 
   return (
-    <div className="dashboard-page mx-auto w-full max-w-[1280px] pb-24 px-4 md:px-10 lg:px-14 relative selection:bg-foreground/10">
+    <div className="dashboard-page mx-auto w-full max-w-[1320px] pb-24 px-4 md:px-10 lg:px-14 relative selection:bg-primary/15">
       {/* Hairline grid background — institutional signature */}
-      <div className="pointer-events-none absolute inset-0 -z-10 opacity-[0.035]" aria-hidden style={{ backgroundImage: "linear-gradient(to right, hsl(var(--foreground)) 1px, transparent 1px), linear-gradient(to bottom, hsl(var(--foreground)) 1px, transparent 1px)", backgroundSize: "64px 64px" }} />
+      <div className="pointer-events-none absolute inset-0 -z-10 opacity-[0.025]" aria-hidden style={{ backgroundImage: "linear-gradient(to right, hsl(var(--foreground)) 1px, transparent 1px), linear-gradient(to bottom, hsl(var(--foreground)) 1px, transparent 1px)", backgroundSize: "72px 72px" }} />
+      {/* Soft ambient glow — luxury accent */}
+      <div className="pointer-events-none absolute top-0 right-0 -z-10 h-[480px] w-[480px] rounded-full bg-primary/[0.04] blur-[140px]" aria-hidden />
+      <div className="pointer-events-none absolute top-[600px] left-0 -z-10 h-[400px] w-[400px] rounded-full bg-primary/[0.025] blur-[120px]" aria-hidden />
 
       {/* ─── GREEN FIRE BORDER EFFECT ─── */}
       {fireEffect && (
@@ -492,69 +495,72 @@ export default function Dashboard() {
         {/* ─────────────────────────────────────────────────────────────── */}
         <header className="mb-14 md:mb-20">
           {/* Ticker / utility strip */}
-          <div className="flex items-center justify-between gap-4 pb-3 border-b border-foreground/10">
+          <div className="flex items-center justify-between gap-4 pb-4 border-b border-foreground/10">
             <div className="flex items-center gap-3">
               {/* Monogram mark */}
-              <div className="relative h-7 w-7 rounded-[6px] bg-foreground text-background flex items-center justify-center shrink-0">
-                <span className="font-display font-black text-[12px] tracking-[-0.06em] leading-none">H</span>
-                <span className="absolute -right-0.5 -bottom-0.5 h-1.5 w-1.5 rounded-full bg-success ring-[1.5px] ring-background" />
+              <div className="relative h-8 w-8 rounded-[7px] bg-foreground text-background flex items-center justify-center shrink-0 shadow-[0_2px_8px_-2px_hsl(var(--foreground)/0.25)]">
+                <span className="font-display font-black text-[13px] tracking-[-0.06em] leading-none">H</span>
+                <span className="absolute -right-0.5 -bottom-0.5 h-1.5 w-1.5 rounded-full bg-success ring-[1.5px] ring-background animate-pulse" />
               </div>
               <div className="flex items-baseline gap-2.5">
-                <span className="font-display font-bold text-[12px] text-foreground tracking-[-0.01em]">HOTZFY</span>
-                <span className="hidden sm:inline text-[9.5px] font-mono uppercase tracking-[0.2em] text-muted-foreground">Capital · Treasury · Operations</span>
+                <span className="font-display font-bold text-[12.5px] text-foreground tracking-[-0.015em]">HOTZFY</span>
+                <span className="hidden sm:inline-flex items-center gap-1.5 px-2 py-0.5 rounded-[3px] bg-foreground/[0.06] text-[8.5px] font-mono uppercase tracking-[0.18em] text-foreground/70 font-bold">
+                  <span className="h-1 w-1 rounded-full bg-foreground/50" />
+                  Capital · Treasury · Operations
+                </span>
               </div>
             </div>
             <div className="flex items-center gap-5 text-[9.5px] font-mono uppercase tracking-[0.16em] text-muted-foreground">
-              <span className="hidden md:inline tabular-nums">{format(new Date(), "EEE · dd MMM yyyy · HH:mm", { locale: ptBR })}</span>
+              <span className="hidden md:inline tabular-nums font-medium">{format(new Date(), "EEE · dd MMM yyyy · HH:mm", { locale: ptBR })}</span>
               <span className="hidden md:inline h-2.5 w-px bg-foreground/15" />
               <span className="inline-flex items-center gap-1.5">
                 <span className="relative flex h-1.5 w-1.5">
                   <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-success opacity-60" />
                   <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-success" />
                 </span>
-                <span className="text-foreground/70 font-semibold">Live</span>
+                <span className="text-foreground/80 font-bold tracking-[0.14em]">Live</span>
               </span>
             </div>
           </div>
 
           {/* Section reference — financial report style */}
-          <div className="flex items-center gap-3 mt-7 mb-5">
-            <span className="font-mono text-[10px] font-bold text-muted-foreground tracking-[0.2em]">§ 01</span>
-            <span className="h-px flex-1 bg-foreground/10" />
-            <span className="font-mono text-[10px] uppercase font-semibold text-muted-foreground tracking-[0.2em]">Sumário Executivo</span>
+          <div className="flex items-center gap-3 mt-8 mb-6">
+            <span className="font-mono text-[10px] font-bold text-foreground/60 tracking-[0.22em]">§ 01</span>
+            <span className="h-px flex-1 bg-gradient-to-r from-foreground/15 via-foreground/8 to-transparent" />
+            <span className="font-mono text-[10px] uppercase font-bold text-muted-foreground tracking-[0.22em]">Sumário Executivo</span>
           </div>
 
           <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-10">
             <div className="flex-1 min-w-0">
-              <h1 className="font-display font-semibold text-foreground tracking-[-0.045em] leading-[0.98] text-[40px] md:text-[56px] lg:text-[68px]">
+              <h1 className="font-display font-semibold text-foreground tracking-[-0.048em] leading-[0.98] text-[40px] md:text-[58px] lg:text-[72px]">
                 {nickname ? (
                   <>
                     Bom retorno,
                     <br />
-                    <span className="italic font-normal text-foreground/55" style={{ fontFamily: "'Cormorant Garamond', 'Playfair Display', Georgia, serif" }}>
+                    <span className="italic font-normal bg-gradient-to-br from-foreground/85 via-foreground/60 to-foreground/40 bg-clip-text text-transparent" style={{ fontFamily: "'Cormorant Garamond', 'Playfair Display', Georgia, serif" }}>
                       {nickname}
                     </span>
-                    <span className="text-foreground">.</span>
+                    <span className="text-primary">.</span>
                   </>
                 ) : (
                   <>
                     Painel
                     <br />
-                    <span className="italic font-normal text-foreground/55" style={{ fontFamily: "'Cormorant Garamond', 'Playfair Display', Georgia, serif" }}>
+                    <span className="italic font-normal bg-gradient-to-br from-foreground/85 via-foreground/60 to-foreground/40 bg-clip-text text-transparent" style={{ fontFamily: "'Cormorant Garamond', 'Playfair Display', Georgia, serif" }}>
                       executivo
                     </span>
-                    <span className="text-foreground">.</span>
+                    <span className="text-primary">.</span>
                   </>
                 )}
               </h1>
-              <p className="mt-6 max-w-[520px] text-[13.5px] text-muted-foreground leading-[1.65]">
+              <p className="mt-7 max-w-[560px] text-[13.5px] text-muted-foreground leading-[1.7]">
                 Demonstrativo consolidado de receita líquida, liquidação financeira e indicadores
                 de performance operacional do gateway. Período em análise:{" "}
-                <span className="text-foreground font-medium">{selectedPeriod.label.toLowerCase()}</span>
+                <span className="text-foreground font-semibold">{selectedPeriod.label.toLowerCase()}</span>
                 {approved.length > 0 && (
                   <>
                     {" · "}
-                    <span className="text-foreground font-medium tabular-nums">{approved.length}</span>{" "}
+                    <span className="text-foreground font-semibold tabular-nums">{approved.length}</span>{" "}
                     {approved.length === 1 ? "transação processada" : "transações processadas"}.
                   </>
                 )}
@@ -565,7 +571,7 @@ export default function Dashboard() {
               <div className="flex items-center gap-2">
                 {productsData && productsData.length > 0 && (
                   <Select value={selectedProductId} onValueChange={setSelectedProductId}>
-                    <SelectTrigger className="h-9 w-[180px] text-[11.5px] font-medium rounded-[6px] border-foreground/15 bg-transparent hover:border-foreground/40 transition-colors">
+                    <SelectTrigger className="h-9 w-[180px] text-[11.5px] font-medium rounded-[7px] border-foreground/15 bg-background/40 backdrop-blur-sm hover:border-foreground/35 hover:bg-foreground/[0.02] transition-all">
                       <SelectValue placeholder="Todos os produtos" />
                     </SelectTrigger>
                     <SelectContent>
@@ -578,24 +584,24 @@ export default function Dashboard() {
                 )}
                 <button
                   onClick={privacy.toggle}
-                  className="h-9 w-9 inline-flex items-center justify-center rounded-[6px] border border-foreground/15 bg-transparent text-muted-foreground hover:text-foreground hover:border-foreground/40 transition-colors"
+                  className="h-9 w-9 inline-flex items-center justify-center rounded-[7px] border border-foreground/15 bg-background/40 backdrop-blur-sm text-muted-foreground hover:text-foreground hover:border-foreground/35 hover:bg-foreground/[0.02] transition-all"
                   title={privacy.hidden ? "Mostrar valores" : "Ocultar valores"}
                 >
                   {privacy.hidden ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
                 </button>
               </div>
 
-              <div className="inline-flex items-center rounded-[6px] border border-foreground/15 bg-transparent overflow-hidden">
+              <div className="inline-flex items-center rounded-[7px] border border-foreground/15 bg-background/40 backdrop-blur-sm overflow-hidden shadow-[0_1px_2px_hsl(var(--foreground)/0.04)]">
                 {PERIOD_PRESETS.map((opt, idx) => (
                   <button
                     key={opt.label}
                     onClick={() => { setSelectedPeriod(opt); setIsCustom(false); setCustomRange(undefined); }}
                     className={cn(
-                      "px-3.5 py-2 text-[10.5px] font-semibold uppercase tracking-[0.08em] transition-colors",
+                      "px-3.5 py-2 text-[10.5px] font-bold uppercase tracking-[0.1em] transition-all",
                       idx > 0 && "border-l border-foreground/10",
                       !isCustom && selectedPeriod.label === opt.label
-                        ? "bg-foreground text-background"
-                        : "text-muted-foreground hover:text-foreground hover:bg-foreground/[0.03]"
+                        ? "bg-foreground text-background shadow-inner"
+                        : "text-muted-foreground hover:text-foreground hover:bg-foreground/[0.04]"
                     )}
                   >
                     {opt.label}
@@ -605,8 +611,8 @@ export default function Dashboard() {
                   <PopoverTrigger asChild>
                     <button
                       className={cn(
-                        "px-3 py-2 text-[10.5px] font-semibold transition-colors border-l border-foreground/10 inline-flex items-center gap-1.5",
-                        isCustom ? "bg-foreground text-background" : "text-muted-foreground hover:text-foreground hover:bg-foreground/[0.03]"
+                        "px-3 py-2 text-[10.5px] font-bold transition-all border-l border-foreground/10 inline-flex items-center gap-1.5",
+                        isCustom ? "bg-foreground text-background" : "text-muted-foreground hover:text-foreground hover:bg-foreground/[0.04]"
                       )}
                     >
                       <CalendarDays className="h-3 w-3" />
@@ -635,73 +641,78 @@ export default function Dashboard() {
         {/* TREASURY STATEMENT · Demonstrativo principal                     */}
         {/* ─────────────────────────────────────────────────────────────── */}
         <section className="mb-16 md:mb-20">
-          <div className="flex items-center gap-3 mb-5">
-            <span className="font-mono text-[10px] font-bold text-muted-foreground tracking-[0.2em]">§ 02</span>
-            <span className="h-px flex-1 bg-foreground/10" />
-            <span className="font-mono text-[10px] uppercase font-semibold text-muted-foreground tracking-[0.2em]">Demonstrativo de Tesouraria</span>
+          <div className="flex items-center gap-3 mb-6">
+            <span className="font-mono text-[10px] font-bold text-foreground/60 tracking-[0.22em]">§ 02</span>
+            <span className="h-px flex-1 bg-gradient-to-r from-foreground/15 via-foreground/8 to-transparent" />
+            <span className="font-mono text-[10px] uppercase font-bold text-muted-foreground tracking-[0.22em]">Demonstrativo de Tesouraria</span>
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-px bg-foreground/[0.08] border border-foreground/[0.08] rounded-[10px] overflow-hidden">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-px bg-foreground/[0.08] border border-foreground/[0.1] rounded-[12px] overflow-hidden shadow-[0_1px_3px_hsl(var(--foreground)/0.04),0_8px_40px_-12px_hsl(var(--foreground)/0.08)]">
             {/* Receita líquida — block principal */}
-            <div className="lg:col-span-8 bg-card relative">
+            <div className="lg:col-span-8 bg-card relative group/block">
+              {/* Subtle radial accent on hover */}
+              <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,hsl(var(--primary)/0.04),transparent_60%)] opacity-0 group-hover/block:opacity-100 transition-opacity duration-700 pointer-events-none" />
+
               {/* Vertical signature glyph */}
-              <div className="absolute top-0 bottom-0 left-0 w-[34px] flex flex-col items-center justify-between py-6 border-r border-foreground/[0.06] bg-foreground/[0.015]">
+              <div className="absolute top-0 bottom-0 left-0 w-[36px] flex flex-col items-center justify-between py-7 border-r border-foreground/[0.06] bg-gradient-to-b from-foreground/[0.02] via-foreground/[0.01] to-foreground/[0.02] z-10">
                 <span className="font-mono text-[8.5px] font-bold text-muted-foreground tracking-[0.3em]" style={{ writingMode: "vertical-rl", transform: "rotate(180deg)" }}>NET REVENUE · BRL</span>
-                <span className="font-mono text-[8.5px] font-bold text-muted-foreground/70 tracking-[0.2em]">01</span>
+                <span className="font-mono text-[8.5px] font-bold text-foreground/40 tracking-[0.2em]">01</span>
               </div>
 
-              <div className="pl-[50px] pr-8 md:pr-10 lg:pr-12 py-9 md:py-11">
-                <div className="flex items-start justify-between gap-4 mb-6">
+              <div className="relative pl-[54px] pr-8 md:pr-10 lg:pr-12 py-10 md:py-12">
+                <div className="flex items-start justify-between gap-4 mb-7">
                   <div>
-                    <p className="text-[10px] font-mono font-bold text-muted-foreground uppercase tracking-[0.22em] mb-1.5">Receita líquida consolidada</p>
-                    <p className="text-[11px] text-muted-foreground/80">Período: {selectedPeriod.label.toLowerCase()} · valores em reais</p>
+                    <p className="text-[10px] font-mono font-bold text-muted-foreground uppercase tracking-[0.22em] mb-2">Receita líquida consolidada</p>
+                    <p className="text-[11.5px] text-muted-foreground/80 leading-relaxed">Período: {selectedPeriod.label.toLowerCase()} · valores em reais</p>
                   </div>
-                  <div className="hidden md:flex items-center gap-1.5 text-[9.5px] font-mono uppercase tracking-[0.16em] text-muted-foreground shrink-0 mt-1">
-                    <span className="h-1 w-1 rounded-full bg-success" />
+                  <div className="hidden md:inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-success/[0.08] border border-success/15 text-[9.5px] font-mono uppercase tracking-[0.16em] text-success font-bold shrink-0 mt-1">
+                    <span className="h-1 w-1 rounded-full bg-success animate-pulse" />
                     Apurado
                   </div>
                 </div>
 
-                <div className="font-display font-semibold text-foreground tabular-nums leading-[0.92] tracking-[-0.05em] text-[52px] md:text-[78px] lg:text-[96px]">
+                <div className="font-display font-semibold text-foreground tabular-nums leading-[0.92] tracking-[-0.052em] text-[54px] md:text-[82px] lg:text-[102px]">
                   {privacy.hidden ? (
                     <span className="text-foreground/25">{CENSORED}</span>
                   ) : (
                     <span className="inline-flex items-baseline gap-3">
-                      <span className="text-[0.32em] font-medium text-muted-foreground/70 self-start mt-3 tracking-normal">R$</span>
-                      <AnimatedNumber value={revenue} formatter={(v) => v.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} />
+                      <span className="text-[0.3em] font-medium text-muted-foreground/60 self-start mt-3 tracking-normal">R$</span>
+                      <span className="bg-gradient-to-br from-foreground via-foreground/95 to-foreground/75 bg-clip-text text-transparent">
+                        <AnimatedNumber value={revenue} formatter={(v) => v.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} />
+                      </span>
                     </span>
                   )}
                 </div>
 
                 {/* Tri-column stats — accountant ledger */}
-                <div className="mt-10 grid grid-cols-3 border-t border-foreground/[0.07]">
+                <div className="mt-11 grid grid-cols-3 border-t border-foreground/[0.07]">
                   {[
                     { label: "TPV bruto", code: "GMV", value: privacy.hidden ? CENSORED : fmt(approved.reduce((a, t) => a + Number(t.amount), 0)) },
                     { label: "MDR efetivo", code: "MDR", value: (() => { const gross = approved.reduce((a, t) => a + Number(t.amount), 0); const fees = approved.reduce((a, t) => a + Number(t.fee_amount), 0); return gross > 0 ? `${((fees / gross) * 100).toFixed(2)}%` : "0,00%"; })() },
                     { label: "Ticket médio", code: "AOV", value: privacy.hidden ? CENSORED : fmt(approved.length > 0 ? revenue / approved.length : 0) },
                   ].map((m, i) => (
-                    <div key={i} className={cn("py-5 pr-4", i > 0 && "pl-6 border-l border-foreground/[0.07]")}>
-                      <div className="flex items-center gap-1.5 mb-2">
+                    <div key={i} className={cn("py-6 pr-4 group/stat", i > 0 && "pl-6 border-l border-foreground/[0.07]")}>
+                      <div className="flex items-center gap-1.5 mb-2.5">
                         <span className="font-mono text-[8.5px] font-bold text-muted-foreground/80 tracking-[0.2em]">{m.code}</span>
-                        <span className="text-[10px] text-muted-foreground/60">·</span>
+                        <span className="text-[10px] text-muted-foreground/40">·</span>
                         <span className="text-[10px] font-medium text-muted-foreground tracking-tight">{m.label}</span>
                       </div>
-                      <p className="text-[16px] md:text-[18px] font-display font-semibold text-foreground tabular-nums tracking-[-0.02em] leading-none">{m.value}</p>
+                      <p className="text-[17px] md:text-[19px] font-display font-semibold text-foreground tabular-nums tracking-[-0.025em] leading-none transition-transform group-hover/stat:translate-x-0.5 duration-300">{m.value}</p>
                     </div>
                   ))}
                 </div>
 
                 {/* CTA row */}
-                <div className="mt-9 flex flex-wrap items-center gap-2.5">
-                  <Link to="/financeiro/saques" className="group inline-flex items-center gap-2 h-10 px-4 rounded-[6px] bg-foreground text-background text-[11.5px] font-semibold hover:bg-foreground/90 transition-colors">
+                <div className="mt-10 flex flex-wrap items-center gap-2.5">
+                  <Link to="/financeiro/saques" className="group/cta inline-flex items-center gap-2 h-10 px-4 rounded-[7px] bg-foreground text-background text-[11.5px] font-bold hover:bg-foreground/90 transition-all shadow-[0_2px_6px_-1px_hsl(var(--foreground)/0.2)] hover:shadow-[0_4px_12px_-2px_hsl(var(--foreground)/0.3)] hover:-translate-y-px">
                     <Wallet className="h-3.5 w-3.5" />
                     Solicitar saque
-                    <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" />
+                    <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover/cta:translate-x-0.5" />
                   </Link>
-                  <Link to="/vendas" className="inline-flex items-center gap-2 h-10 px-4 rounded-[6px] border border-foreground/15 text-foreground text-[11.5px] font-semibold hover:bg-foreground/[0.03] hover:border-foreground/30 transition-colors">
+                  <Link to="/vendas" className="inline-flex items-center gap-2 h-10 px-4 rounded-[7px] border border-foreground/15 text-foreground text-[11.5px] font-bold hover:bg-foreground/[0.04] hover:border-foreground/30 transition-all">
                     Ver transações
                   </Link>
-                  <span className="ml-auto hidden md:inline text-[10px] font-mono text-muted-foreground tracking-[0.14em]">
+                  <span className="ml-auto hidden md:inline text-[10px] font-mono text-muted-foreground/70 tracking-[0.14em]">
                     REF · {format(new Date(), "yyyyMMdd")}
                   </span>
                 </div>
@@ -709,20 +720,31 @@ export default function Dashboard() {
             </div>
 
             {/* Saldo / Liquidação */}
-            <div className="lg:col-span-4 bg-card relative">
-              <div className="absolute top-0 bottom-0 left-0 w-[34px] flex flex-col items-center justify-between py-6 border-r border-foreground/[0.06] bg-foreground/[0.015]">
+            <div className="lg:col-span-4 bg-card relative group/balance">
+              <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,hsl(var(--primary)/0.05),transparent_60%)] opacity-0 group-hover/balance:opacity-100 transition-opacity duration-700 pointer-events-none" />
+
+              <div className="absolute top-0 bottom-0 left-0 w-[36px] flex flex-col items-center justify-between py-7 border-r border-foreground/[0.06] bg-gradient-to-b from-foreground/[0.02] via-foreground/[0.01] to-foreground/[0.02] z-10">
                 <span className="font-mono text-[8.5px] font-bold text-muted-foreground tracking-[0.3em]" style={{ writingMode: "vertical-rl", transform: "rotate(180deg)" }}>SETTLEMENT</span>
-                <span className="font-mono text-[8.5px] font-bold text-muted-foreground/70 tracking-[0.2em]">02</span>
+                <span className="font-mono text-[8.5px] font-bold text-foreground/40 tracking-[0.2em]">02</span>
               </div>
 
-              <div className="pl-[50px] pr-8 md:pr-10 py-9 md:py-11 flex flex-col gap-7 h-full">
+              <div className="relative pl-[54px] pr-8 md:pr-10 py-10 md:py-12 flex flex-col gap-7 h-full">
                 <div>
                   <div className="flex items-center justify-between mb-4">
                     <p className="text-[10px] font-mono font-bold text-muted-foreground uppercase tracking-[0.22em]">Saldo disponível</p>
-                    <span className="font-mono text-[9px] font-bold text-success/90 tracking-[0.18em] uppercase">Free</span>
+                    <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-success/[0.08] border border-success/15 font-mono text-[9px] font-bold text-success tracking-[0.16em] uppercase">
+                      <span className="h-1 w-1 rounded-full bg-success" />
+                      Free
+                    </span>
                   </div>
-                  <p className="font-display font-semibold text-foreground tabular-nums leading-[0.95] tracking-[-0.035em] text-[34px] md:text-[42px]">
-                    {privacy.hidden ? <span className="text-foreground/25">{CENSORED}</span> : <AnimatedNumber value={balance} />}
+                  <p className="font-display font-semibold tabular-nums leading-[0.95] tracking-[-0.04em] text-[36px] md:text-[44px]">
+                    {privacy.hidden ? (
+                      <span className="text-foreground/25">{CENSORED}</span>
+                    ) : (
+                      <span className="bg-gradient-to-br from-foreground via-foreground/95 to-foreground/75 bg-clip-text text-transparent">
+                        <AnimatedNumber value={balance} />
+                      </span>
+                    )}
                   </p>
                   <p className="mt-2.5 text-[11px] text-muted-foreground leading-relaxed">Liquidez imediata · saque em D+0 via PIX</p>
                 </div>
@@ -736,7 +758,7 @@ export default function Dashboard() {
                       </div>
                       <p className="text-[10.5px] text-muted-foreground/70 mt-1 ml-2.5">Saques em processamento</p>
                     </div>
-                    <p className="text-[14px] font-semibold text-foreground tabular-nums tracking-tight">
+                    <p className="text-[14.5px] font-display font-semibold text-foreground tabular-nums tracking-tight">
                       {privacy.hidden ? CENSORED : fmt(withdrawalPending)}
                     </p>
                   </div>
@@ -748,16 +770,16 @@ export default function Dashboard() {
                       </div>
                       <p className="text-[10.5px] text-muted-foreground/70 mt-1 ml-2.5">Liberação programada · D+30</p>
                     </div>
-                    <p className="text-[14px] font-semibold text-foreground tabular-nums tracking-tight">
+                    <p className="text-[14.5px] font-display font-semibold text-foreground tabular-nums tracking-tight">
                       {privacy.hidden ? CENSORED : fmt(transactions.filter(t => t.status === "completed" && !t.retention_released && Number(t.retained_amount) > 0).reduce((a, t) => a + Number(t.retained_amount), 0))}
                     </p>
                   </div>
                 </div>
 
-                <div className="border-t border-foreground/[0.07] pt-4 flex items-center justify-between">
-                  <span className="text-[9.5px] font-mono text-muted-foreground tracking-[0.14em] uppercase">Conta operacional</span>
-                  <ChevronRight className="h-3 w-3 text-muted-foreground" />
-                </div>
+                <Link to="/financeiro/saques" className="border-t border-foreground/[0.07] pt-4 flex items-center justify-between hover:px-1 transition-all group/link">
+                  <span className="text-[9.5px] font-mono text-muted-foreground tracking-[0.16em] uppercase font-bold group-hover/link:text-foreground transition-colors">Conta operacional</span>
+                  <ChevronRight className="h-3 w-3 text-muted-foreground group-hover/link:text-foreground group-hover/link:translate-x-0.5 transition-all" />
+                </Link>
               </div>
             </div>
           </div>
@@ -767,13 +789,13 @@ export default function Dashboard() {
         {/* PERFORMANCE STRIP                                                */}
         {/* ─────────────────────────────────────────────────────────────── */}
         <section className="mb-16 md:mb-20">
-          <div className="flex items-center gap-3 mb-5">
-            <span className="font-mono text-[10px] font-bold text-muted-foreground tracking-[0.2em]">§ 03</span>
-            <span className="h-px flex-1 bg-foreground/10" />
-            <span className="font-mono text-[10px] uppercase font-semibold text-muted-foreground tracking-[0.2em]">Indicadores Operacionais</span>
+          <div className="flex items-center gap-3 mb-6">
+            <span className="font-mono text-[10px] font-bold text-foreground/60 tracking-[0.22em]">§ 03</span>
+            <span className="h-px flex-1 bg-gradient-to-r from-foreground/15 via-foreground/8 to-transparent" />
+            <span className="font-mono text-[10px] uppercase font-bold text-muted-foreground tracking-[0.22em]">Indicadores Operacionais</span>
           </div>
 
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-px bg-foreground/[0.08] border border-foreground/[0.08] rounded-[10px] overflow-hidden">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-px bg-foreground/[0.08] border border-foreground/[0.1] rounded-[12px] overflow-hidden shadow-[0_1px_3px_hsl(var(--foreground)/0.04),0_8px_30px_-12px_hsl(var(--foreground)/0.06)]">
             <EditorialKpi label="Taxa de aprovação" code="APR" value={privacy.hidden ? CENSORED : `${conversion.toFixed(1)}%`} sub={`${approved.length} de ${filteredTx.length} processadas`} accent={conversion >= 80 ? "success" : conversion >= 60 ? "warning" : "destructive"} />
             <EditorialKpi label="Chargeback" code="CBK" value={privacy.hidden ? CENSORED : `${chargebackRate.toFixed(2)}%`} sub={`${chargebacks.length} ${chargebacks.length === 1 ? "disputa" : "disputas"} · meta < 1%`} accent={chargebackRate < 1 ? "success" : chargebackRate < 2 ? "warning" : "destructive"} />
             <EditorialKpi label="Pagamentos pendentes" code="PND" value={pending.length.toString()} sub="Aguardando captura" accent={pending.length > 5 ? "warning" : "neutral"} />
@@ -785,59 +807,59 @@ export default function Dashboard() {
         {/* CHART · Volume processado                                        */}
         {/* ─────────────────────────────────────────────────────────────── */}
         <section className="mb-16 md:mb-20">
-          <div className="flex items-center gap-3 mb-5">
-            <span className="font-mono text-[10px] font-bold text-muted-foreground tracking-[0.2em]">§ 04</span>
-            <span className="h-px flex-1 bg-foreground/10" />
-            <span className="font-mono text-[10px] uppercase font-semibold text-muted-foreground tracking-[0.2em]">Série Histórica · Volume</span>
+          <div className="flex items-center gap-3 mb-6">
+            <span className="font-mono text-[10px] font-bold text-foreground/60 tracking-[0.22em]">§ 04</span>
+            <span className="h-px flex-1 bg-gradient-to-r from-foreground/15 via-foreground/8 to-transparent" />
+            <span className="font-mono text-[10px] uppercase font-bold text-muted-foreground tracking-[0.22em]">Série Histórica · Volume</span>
           </div>
 
-          <div className="rounded-[10px] border border-foreground/[0.08] bg-card overflow-hidden">
-            <div className="px-7 md:px-9 pt-7 pb-5 border-b border-foreground/[0.06] flex items-end justify-between gap-6 flex-wrap">
+          <div className="rounded-[12px] border border-foreground/[0.1] bg-card overflow-hidden shadow-[0_1px_3px_hsl(var(--foreground)/0.04),0_8px_30px_-12px_hsl(var(--foreground)/0.06)]">
+            <div className="px-7 md:px-9 pt-8 pb-6 border-b border-foreground/[0.06] flex items-end justify-between gap-6 flex-wrap bg-gradient-to-b from-foreground/[0.015] to-transparent">
               <div>
-                <p className="text-[10px] font-mono font-bold text-muted-foreground uppercase tracking-[0.22em] mb-2">Receita acumulada</p>
-                <p className="font-display font-semibold text-foreground tabular-nums tracking-[-0.035em] text-[28px] md:text-[36px] leading-none">
+                <p className="text-[10px] font-mono font-bold text-muted-foreground uppercase tracking-[0.22em] mb-2.5">Receita acumulada</p>
+                <p className="font-display font-semibold tabular-nums tracking-[-0.04em] text-[30px] md:text-[40px] leading-none">
                   {privacy.hidden ? <span className="text-foreground/25">{CENSORED}</span> : (
-                    <span className="inline-flex items-baseline gap-2">
-                      <span className="text-[0.4em] font-medium text-muted-foreground/70">R$</span>
+                    <span className="inline-flex items-baseline gap-2 bg-gradient-to-br from-foreground via-foreground/95 to-foreground/75 bg-clip-text text-transparent">
+                      <span className="text-[0.4em] font-medium text-muted-foreground/70 not-italic">R$</span>
                       {revenue.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                     </span>
                   )}
                 </p>
-                <p className="text-[11px] text-muted-foreground mt-2">
+                <p className="text-[11px] text-muted-foreground mt-2.5">
                   {selectedPeriod.label === "Hoje" ? "Distribuição por hora" : `Distribuição diária · últimos ${selectedPeriod.days} dias`}
                 </p>
               </div>
               <div className="flex items-center gap-4 text-[10px] font-mono uppercase tracking-[0.16em] text-muted-foreground">
-                <span className="inline-flex items-center gap-1.5">
-                  <span className="h-2 w-2 rounded-sm bg-foreground" />
-                  Receita líquida
+                <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-foreground/[0.05] border border-foreground/[0.08]">
+                  <span className="h-1.5 w-1.5 rounded-full bg-foreground" />
+                  <span className="font-bold tracking-[0.14em]">Receita líquida</span>
                 </span>
-                <span className="hidden md:inline h-3 w-px bg-foreground/15" />
-                <span className="hidden md:inline tabular-nums">{chartData.length} pts</span>
+                <span className="hidden md:inline tabular-nums font-medium">{chartData.length} pts</span>
               </div>
             </div>
-            <div className="h-[280px] md:h-[320px] px-3 pb-5 pt-5 bg-foreground/[0.005]">
+            <div className="h-[280px] md:h-[340px] px-3 pb-5 pt-6 bg-gradient-to-b from-transparent via-foreground/[0.005] to-foreground/[0.01]">
               <ResponsiveContainer width="100%" height="100%">
                 <AreaChart data={chartData} margin={{ top: 12, right: 16, left: 8, bottom: 8 }}>
                   <defs>
                     <linearGradient id="institutional-grad" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="0%" stopColor="hsl(var(--foreground))" stopOpacity={0.22} />
+                      <stop offset="0%" stopColor="hsl(var(--foreground))" stopOpacity={0.28} />
+                      <stop offset="60%" stopColor="hsl(var(--foreground))" stopOpacity={0.08} />
                       <stop offset="100%" stopColor="hsl(var(--foreground))" stopOpacity={0} />
                     </linearGradient>
-                    <pattern id="grid-pattern" width="40" height="40" patternUnits="userSpaceOnUse">
-                      <path d="M 40 0 L 0 0 0 40" fill="none" stroke="hsl(var(--foreground))" strokeOpacity="0.04" strokeWidth="1" />
+                    <pattern id="grid-pattern" width="48" height="48" patternUnits="userSpaceOnUse">
+                      <path d="M 48 0 L 0 0 0 48" fill="none" stroke="hsl(var(--foreground))" strokeOpacity="0.035" strokeWidth="1" />
                     </pattern>
                   </defs>
                   <rect width="100%" height="100%" fill="url(#grid-pattern)" />
                   <XAxis dataKey="name" tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))", fontWeight: 600, letterSpacing: "0.05em" }} tickLine={false} axisLine={false} dy={6} />
                   <YAxis tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))", fontWeight: 600 }} tickLine={false} axisLine={false} tickFormatter={(v) => v >= 1000 ? `${(v / 1000).toFixed(1)}k` : `${v}`} width={44} />
                   <Tooltip
-                    cursor={{ stroke: "hsl(var(--foreground))", strokeOpacity: 0.2, strokeDasharray: "3 3" }}
-                    contentStyle={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--foreground) / 0.15)", borderRadius: 6, fontSize: 12, fontWeight: 500, padding: "10px 14px", boxShadow: "0 8px 24px -8px hsl(var(--foreground) / 0.18)" }}
-                    labelStyle={{ color: "hsl(var(--muted-foreground))", fontSize: 9.5, textTransform: "uppercase", letterSpacing: "0.14em", fontWeight: 700, marginBottom: 4 }}
+                    cursor={{ stroke: "hsl(var(--foreground))", strokeOpacity: 0.25, strokeDasharray: "3 3" }}
+                    contentStyle={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--foreground) / 0.18)", borderRadius: 8, fontSize: 12, fontWeight: 500, padding: "11px 15px", boxShadow: "0 12px 32px -10px hsl(var(--foreground) / 0.22)" }}
+                    labelStyle={{ color: "hsl(var(--muted-foreground))", fontSize: 9.5, textTransform: "uppercase", letterSpacing: "0.14em", fontWeight: 700, marginBottom: 5 }}
                     formatter={(v: number) => [privacy.hidden ? CENSORED : fmt(v), "Receita"]}
                   />
-                  <Area type="monotone" dataKey="vendas" stroke="hsl(var(--foreground))" strokeWidth={1.75} fill="url(#institutional-grad)" />
+                  <Area type="monotone" dataKey="vendas" stroke="hsl(var(--foreground))" strokeWidth={1.85} fill="url(#institutional-grad)" />
                 </AreaChart>
               </ResponsiveContainer>
             </div>
@@ -848,15 +870,15 @@ export default function Dashboard() {
         {/* ─────────────────────────────────────────────────────────────── */}
         {/* CHANNELS + ACTIVITY                                              */}
         {/* ─────────────────────────────────────────────────────────────── */}
-        <section className="grid grid-cols-1 lg:grid-cols-5 gap-8 lg:gap-10 mb-14">
+        <section className="grid grid-cols-1 lg:grid-cols-5 gap-8 lg:gap-10 mb-16">
           <div className="lg:col-span-3">
-            <div className="flex items-center gap-3 mb-5">
-              <span className="font-mono text-[10px] font-bold text-muted-foreground tracking-[0.2em]">§ 05</span>
-              <span className="h-px flex-1 bg-foreground/10" />
-              <span className="font-mono text-[10px] uppercase font-semibold text-muted-foreground tracking-[0.2em]">Canais · Mix de Pagamento</span>
+            <div className="flex items-center gap-3 mb-6">
+              <span className="font-mono text-[10px] font-bold text-foreground/60 tracking-[0.22em]">§ 05</span>
+              <span className="h-px flex-1 bg-gradient-to-r from-foreground/15 via-foreground/8 to-transparent" />
+              <span className="font-mono text-[10px] uppercase font-bold text-muted-foreground tracking-[0.22em]">Canais · Mix de Pagamento</span>
             </div>
 
-            <div className="rounded-[10px] border border-foreground/[0.08] bg-card overflow-hidden divide-y divide-foreground/[0.06]">
+            <div className="rounded-[12px] border border-foreground/[0.1] bg-card overflow-hidden divide-y divide-foreground/[0.06] shadow-[0_1px_3px_hsl(var(--foreground)/0.04),0_8px_30px_-12px_hsl(var(--foreground)/0.06)]">
               <EditorialChannelRow index="01" name="PIX" approved={pixApprovedCount} total={pixTotalCount} revenue={pixRevenue} approvalRate={pixConversion} share={revenue > 0 ? (pixRevenue / revenue) * 100 : 0} privacy={privacy.hidden} />
               <EditorialChannelRow index="02" name="Cartão de crédito" approved={cardApprovedCount} total={cardTotalCount} revenue={cardRevenue} approvalRate={cardConversion} share={revenue > 0 ? (cardRevenue / revenue) * 100 : 0} privacy={privacy.hidden} />
               <EditorialChannelRow
@@ -873,18 +895,18 @@ export default function Dashboard() {
           </div>
 
           <div className="lg:col-span-2">
-            <div className="flex items-center gap-3 mb-5">
-              <span className="font-mono text-[10px] font-bold text-muted-foreground tracking-[0.2em]">§ 06</span>
-              <span className="h-px flex-1 bg-foreground/10" />
-              <Link to="/vendas" className="font-mono text-[10px] uppercase font-semibold text-muted-foreground hover:text-foreground tracking-[0.2em] inline-flex items-center gap-1.5 transition-colors">
-                Ver tudo <ArrowRight className="h-2.5 w-2.5" />
+            <div className="flex items-center gap-3 mb-6">
+              <span className="font-mono text-[10px] font-bold text-foreground/60 tracking-[0.22em]">§ 06</span>
+              <span className="h-px flex-1 bg-gradient-to-r from-foreground/15 via-foreground/8 to-transparent" />
+              <Link to="/vendas" className="font-mono text-[10px] uppercase font-bold text-muted-foreground hover:text-foreground tracking-[0.22em] inline-flex items-center gap-1.5 transition-colors group">
+                Ver tudo <ArrowRight className="h-2.5 w-2.5 transition-transform group-hover:translate-x-0.5" />
               </Link>
             </div>
 
-            <div className="rounded-[10px] border border-foreground/[0.08] bg-card overflow-hidden">
+            <div className="rounded-[12px] border border-foreground/[0.1] bg-card overflow-hidden shadow-[0_1px_3px_hsl(var(--foreground)/0.04),0_8px_30px_-12px_hsl(var(--foreground)/0.06)]">
               {activity.length === 0 ? (
                 <div className="px-5 py-20 text-center">
-                  <div className="mx-auto h-9 w-9 rounded-full bg-foreground/[0.04] flex items-center justify-center mb-3">
+                  <div className="mx-auto h-10 w-10 rounded-full bg-foreground/[0.04] border border-foreground/[0.06] flex items-center justify-center mb-3">
                     <Activity className="h-4 w-4 text-muted-foreground" />
                   </div>
                   <p className="text-[11.5px] text-muted-foreground font-medium">Sem atividade no período</p>
@@ -911,17 +933,17 @@ export default function Dashboard() {
                             if (tx) setDetailTx(tx);
                           }
                         }}
-                        className="w-full flex items-center gap-3 px-5 py-3.5 hover:bg-foreground/[0.025] transition-colors text-left group"
+                        className="w-full flex items-center gap-3 px-5 py-4 hover:bg-foreground/[0.025] transition-colors text-left group"
                       >
                         <span className="font-mono text-[9px] font-bold text-muted-foreground/50 tracking-[0.1em] tabular-nums w-5 shrink-0">{String(idx + 1).padStart(2, "0")}</span>
-                        <span className={cn("h-1.5 w-1.5 rounded-full shrink-0", dotColor)} />
+                        <span className={cn("h-1.5 w-1.5 rounded-full shrink-0 ring-2 ring-background", dotColor)} />
                         <div className="flex-1 min-w-0">
-                          <p className="text-[12px] font-semibold text-foreground truncate group-hover:translate-x-0.5 transition-transform">{labelText}</p>
+                          <p className="text-[12.5px] font-semibold text-foreground truncate group-hover:translate-x-0.5 transition-transform">{labelText}</p>
                           <p className="text-[10px] text-muted-foreground mt-0.5 font-mono tracking-tight">
                             {item.id.slice(0, 8).toUpperCase()} · {timeAgo(item.createdAt)}
                           </p>
                         </div>
-                        <p className="text-[12.5px] font-semibold text-foreground tabular-nums tracking-tight shrink-0">
+                        <p className="text-[13px] font-display font-semibold text-foreground tabular-nums tracking-tight shrink-0">
                           {privacy.hidden ? CENSORED : fmt(item.amount)}
                         </p>
                       </button>
@@ -1275,22 +1297,24 @@ function SmallMetric({ icon, label, value, tone = "info" }: { icon: React.ReactN
 
 function EditorialKpi({ label, code, value, sub, accent }: { label: string; code?: string; value: string; sub: string; accent: "success" | "warning" | "destructive" | "neutral" }) {
   const accentDot: Record<string, string> = {
-    success: "bg-success",
-    warning: "bg-warning",
-    destructive: "bg-destructive",
+    success: "bg-success shadow-[0_0_8px_hsl(var(--success)/0.5)]",
+    warning: "bg-warning shadow-[0_0_8px_hsl(var(--warning)/0.5)]",
+    destructive: "bg-destructive shadow-[0_0_8px_hsl(var(--destructive)/0.5)]",
     neutral: "bg-muted-foreground/40",
   };
 
   return (
-    <div className="bg-card px-6 py-7 hover:bg-foreground/[0.015] transition-colors relative group">
+    <div className="bg-card px-6 py-7 hover:bg-foreground/[0.02] transition-colors relative group overflow-hidden">
+      {/* Hover sweep line */}
+      <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-foreground/15 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
-          <span className={cn("h-1.5 w-1.5 rounded-full", accentDot[accent])} />
-          <p className="text-[10px] font-mono font-bold text-muted-foreground uppercase tracking-[0.18em]">{label}</p>
+          <span className={cn("h-1.5 w-1.5 rounded-full transition-transform group-hover:scale-125", accentDot[accent])} />
+          <p className="text-[10px] font-mono font-bold text-muted-foreground uppercase tracking-[0.18em] group-hover:text-foreground/80 transition-colors">{label}</p>
         </div>
         {code && <span className="font-mono text-[8.5px] font-bold text-muted-foreground/50 tracking-[0.2em]">{code}</span>}
       </div>
-      <p className="font-display font-semibold tabular-nums tracking-[-0.035em] leading-none text-[26px] md:text-[32px] text-foreground">
+      <p className="font-display font-semibold tabular-nums tracking-[-0.04em] leading-none text-[28px] md:text-[34px] bg-gradient-to-br from-foreground via-foreground/95 to-foreground/75 bg-clip-text text-transparent transition-transform group-hover:translate-x-0.5 duration-300">
         {value}
       </p>
       <p className="mt-3 text-[10.5px] text-muted-foreground/80 font-medium leading-relaxed">{sub}</p>
@@ -1300,13 +1324,13 @@ function EditorialKpi({ label, code, value, sub, accent }: { label: string; code
 
 function EditorialChannelRow({ index, name, approved, total, revenue, approvalRate, share, privacy }: { index?: string; name: string; approved: number; total: number; revenue: number; approvalRate: number; share: number; privacy: boolean }) {
   return (
-    <div className="px-6 py-5 hover:bg-foreground/[0.015] transition-colors group">
+    <div className="px-6 py-5 hover:bg-foreground/[0.02] transition-colors group relative">
       <div className="flex items-baseline justify-between mb-3 gap-3">
         <div className="flex items-baseline gap-2.5 min-w-0">
-          {index && <span className="font-mono text-[9px] font-bold text-muted-foreground/50 tracking-[0.16em] tabular-nums shrink-0">{index}</span>}
-          <p className="text-[13px] font-semibold text-foreground tracking-tight truncate">{name}</p>
+          {index && <span className="font-mono text-[9px] font-bold text-muted-foreground/50 tracking-[0.16em] tabular-nums shrink-0 group-hover:text-foreground/60 transition-colors">{index}</span>}
+          <p className="text-[13.5px] font-semibold text-foreground tracking-tight truncate group-hover:translate-x-0.5 transition-transform">{name}</p>
         </div>
-        <p className="text-[14px] font-semibold text-foreground tabular-nums tracking-tight shrink-0">
+        <p className="text-[14.5px] font-display font-semibold text-foreground tabular-nums tracking-tight shrink-0">
           {privacy ? CENSORED : fmt(revenue)}
         </p>
       </div>
@@ -1316,8 +1340,8 @@ function EditorialChannelRow({ index, name, approved, total, revenue, approvalRa
         <span className="uppercase tracking-[0.12em]">APR <span className="text-foreground font-semibold tabular-nums">{approvalRate.toFixed(1)}%</span></span>
         <span className="ml-auto uppercase tracking-[0.12em]">SHR <span className="text-foreground font-semibold tabular-nums">{share.toFixed(1)}%</span></span>
       </div>
-      <div className="h-[2px] w-full rounded-full bg-foreground/[0.06] overflow-hidden">
-        <div className="h-full rounded-full bg-foreground/70 transition-all duration-700 ease-out" style={{ width: `${Math.min(share, 100)}%` }} />
+      <div className="h-[3px] w-full rounded-full bg-foreground/[0.06] overflow-hidden">
+        <div className="h-full rounded-full bg-gradient-to-r from-foreground/80 to-foreground/60 transition-all duration-700 ease-out shadow-[0_0_8px_hsl(var(--foreground)/0.2)]" style={{ width: `${Math.min(share, 100)}%` }} />
       </div>
     </div>
   );
