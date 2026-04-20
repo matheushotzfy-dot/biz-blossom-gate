@@ -855,16 +855,22 @@ export default function Dashboard() {
         {/* CHANNELS + ACTIVITY                                              */}
         {/* ─────────────────────────────────────────────────────────────── */}
         <section className="grid grid-cols-1 lg:grid-cols-5 gap-4 md:gap-5 mb-10">
-          <div className="lg:col-span-3 relative rounded-[20px] border border-foreground/[0.09] bg-card overflow-hidden shadow-[0_1px_0_hsl(var(--foreground)/0.04),0_24px_60px_-24px_hsl(var(--foreground)/0.18)]">
-            <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-foreground/15 to-transparent" />
-            <div className="px-7 md:px-9 pt-7 pb-5 border-b border-foreground/[0.06]">
+          <div className="lg:col-span-3 relative rounded-[22px] border border-foreground/[0.08] bg-gradient-to-br from-card via-card to-card/95 overflow-hidden shadow-[0_1px_0_hsl(var(--background)/0.4)_inset,0_1px_0_hsl(var(--foreground)/0.04),0_30px_70px_-28px_hsl(var(--foreground)/0.22)]">
+            <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-foreground/[0.18] to-transparent" />
+            <div className="absolute -top-20 right-0 h-48 w-72 rounded-full bg-primary/[0.04] blur-[100px] pointer-events-none" />
+            <div className="absolute top-5 right-5 flex flex-col items-end gap-1 pointer-events-none z-10">
+              <span className="font-mono text-[8px] font-bold text-muted-foreground/35 tracking-[0.22em] uppercase">N° 004</span>
+              <span className="h-px w-12 bg-gradient-to-r from-foreground/20 to-transparent" />
+            </div>
+            <div className="relative px-7 md:px-10 pt-9 pb-6 border-b border-foreground/[0.06]">
               <div className="flex items-center gap-2">
-                <span className="font-mono text-[9.5px] font-bold text-muted-foreground uppercase tracking-[0.24em]">Canais</span>
-                <span className="h-px w-8 bg-foreground/20" />
-                <span className="font-mono text-[9.5px] font-bold text-muted-foreground/70 uppercase tracking-[0.18em]">Mix de Pagamento</span>
+                <span className="h-1.5 w-1.5 rounded-full bg-foreground" />
+                <span className="font-mono text-[9.5px] font-bold text-foreground/85 uppercase tracking-[0.26em]">Canais</span>
+                <span className="h-px w-10 bg-gradient-to-r from-foreground/25 to-transparent" />
+                <span className="font-mono text-[9.5px] font-bold text-muted-foreground/65 uppercase tracking-[0.18em]">Mix de Pagamento</span>
               </div>
             </div>
-            <div className="divide-y divide-foreground/[0.06]">
+            <div className="relative divide-y divide-foreground/[0.05]">
               <EditorialChannelRow index="01" name="PIX" approved={pixApprovedCount} total={pixTotalCount} revenue={pixRevenue} approvalRate={pixConversion} share={revenue > 0 ? (pixRevenue / revenue) * 100 : 0} privacy={privacy.hidden} />
               <EditorialChannelRow index="02" name="Cartão de crédito" approved={cardApprovedCount} total={cardTotalCount} revenue={cardRevenue} approvalRate={cardConversion} share={revenue > 0 ? (cardRevenue / revenue) * 100 : 0} privacy={privacy.hidden} />
               <EditorialChannelRow
@@ -880,15 +886,21 @@ export default function Dashboard() {
             </div>
           </div>
 
-          <div className="lg:col-span-2 relative rounded-[20px] border border-foreground/[0.09] bg-card overflow-hidden shadow-[0_1px_0_hsl(var(--foreground)/0.04),0_24px_60px_-24px_hsl(var(--foreground)/0.18)]">
-            <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-foreground/15 to-transparent" />
-            <div className="px-6 md:px-7 pt-7 pb-5 border-b border-foreground/[0.06] flex items-center justify-between">
+          <div className="lg:col-span-2 relative rounded-[22px] border border-foreground/[0.08] bg-gradient-to-br from-card via-card to-card/95 overflow-hidden shadow-[0_1px_0_hsl(var(--background)/0.4)_inset,0_1px_0_hsl(var(--foreground)/0.04),0_30px_70px_-28px_hsl(var(--foreground)/0.22)]">
+            <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-foreground/[0.18] to-transparent" />
+            <div className="absolute -top-16 left-0 h-48 w-64 rounded-full bg-primary/[0.04] blur-[100px] pointer-events-none" />
+            <div className="absolute top-5 right-5 flex flex-col items-end gap-1 pointer-events-none z-10">
+              <span className="font-mono text-[8px] font-bold text-muted-foreground/35 tracking-[0.22em] uppercase">N° 005</span>
+              <span className="h-px w-12 bg-gradient-to-r from-foreground/20 to-transparent" />
+            </div>
+            <div className="relative px-6 md:px-7 pt-9 pb-6 border-b border-foreground/[0.06] flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <span className="font-mono text-[9.5px] font-bold text-muted-foreground uppercase tracking-[0.24em]">Atividade</span>
-                <span className="h-px w-8 bg-foreground/20" />
-                <span className="font-mono text-[9.5px] font-bold text-muted-foreground/70 uppercase tracking-[0.18em]">Recente</span>
+                <span className="h-1.5 w-1.5 rounded-full bg-foreground" />
+                <span className="font-mono text-[9.5px] font-bold text-foreground/85 uppercase tracking-[0.26em]">Atividade</span>
+                <span className="h-px w-8 bg-gradient-to-r from-foreground/25 to-transparent" />
+                <span className="font-mono text-[9.5px] font-bold text-muted-foreground/65 uppercase tracking-[0.18em]">Recente</span>
               </div>
-              <Link to="/vendas" className="font-mono text-[9.5px] uppercase font-bold text-muted-foreground hover:text-foreground tracking-[0.18em] inline-flex items-center gap-1.5 transition-colors group">
+              <Link to="/vendas" className="font-mono text-[9.5px] uppercase font-bold text-muted-foreground hover:text-foreground tracking-[0.2em] inline-flex items-center gap-1.5 transition-colors group">
                 Ver tudo <ArrowRight className="h-2.5 w-2.5 transition-transform group-hover:translate-x-0.5" />
               </Link>
             </div>
