@@ -248,16 +248,14 @@ export default function CheckoutBuilder() {
  })();
 
  // Tab feature counts
- const getTabFeatureCount = (tabId: TabId): number => {
- switch (tabId) {
- case "visual": return [timerEnabled, socialProof, guaranteeEnabled, !!bannerDesktopPreview, !!bannerMobilePreview].filter(Boolean).length;
- case "payment": return [pixEnabled, boletoEnabled, creditCardEnabled].filter(Boolean).length;
- case "form": return [emailConfirm, phoneRequired, cpfRequired, addressRequired, nameOnCardRequired].filter(Boolean).length;
- case "bumps": return orderBumps.length;
- case "cro": return [vslEnabled, fakeViewersEnabled, exitIntentEnabled, progressBarEnabled, testimonialEnabled, scarcityEnabled, whatsappEnabled, discountBadgeEnabled, trustBadgesEnabled].filter(Boolean).length;
- default: return 0;
- }
- };
+  const getTabFeatureCount = (tabId: TabId): number => {
+    switch (tabId) {
+      case "visual": return [timerEnabled, socialProof, guaranteeEnabled, !!bannerDesktopPreview, !!bannerMobilePreview].filter(Boolean).length;
+      case "form": return [emailConfirm, phoneRequired, cpfRequired, addressRequired, nameOnCardRequired].filter(Boolean).length;
+      case "cro": return [vslEnabled, fakeViewersEnabled, exitIntentEnabled, progressBarEnabled, testimonialEnabled, scarcityEnabled, whatsappEnabled, discountBadgeEnabled, trustBadgesEnabled].filter(Boolean).length;
+      default: return 0;
+    }
+  };
 
  // Load product
  useEffect(() => {
@@ -618,35 +616,6 @@ export default function CheckoutBuilder() {
  </>
  )}
 
- {/* ── PAYMENT TAB ── */}
- {activeTab === "payment" && (
- <>
- <SectionHeader icon={CreditCard} title="Pagamento" desc="Formas de pagamento aceitas" badge="Core" />
-
- {/* Payment summary cards */}
- <div className="grid grid-cols-3 gap-2">
- {[
- { enabled: pixEnabled, icon: QrCode, label: "PIX", color: "text-emerald-500", bg: "bg-emerald-500/10 border-emerald-500/20" },
- { enabled: boletoEnabled, icon: FileText, label: "Boleto", color: "text-amber-500", bg: "bg-amber-500/10 border-amber-500/20" },
- { enabled: creditCardEnabled, icon: CreditCard, label: "Cartão", color: "text-blue-500", bg: "bg-blue-500/10 border-blue-500/20" },
- ].map(pm => (
- <div key={pm.label} className={cn(
- "rounded-lg p-3 text-center border transition-all",
- pm.enabled ? pm.bg : "border-border/20 bg-muted/10 opacity-40"
- )}>
- <pm.icon className={cn("h-5 w-5 mx-auto mb-1", pm.enabled ? pm.color : "text-muted-foreground/30")} />
- <p className="text-[10px] font-bold">{pm.label}</p>
- <p className={cn("text-[9px] font-medium mt-0.5", pm.enabled ? "text-success" : "text-muted-foreground/40")}>{pm.enabled ? "Ativo" : "Inativo"}</p>
- </div>
- ))}
- </div>
-
- <ToggleRow icon={QrCode} title="PIX" desc="Pagamento instantâneo — 99% aprovação" checked={pixEnabled} onChange={setPixEnabled} />
- <ToggleRow icon={FileText} title="Boleto Bancário" desc="Vencimento em 3 dias úteis" checked={boletoEnabled} onChange={setBoletoEnabled} />
- <ToggleRow icon={CreditCard} title="Cartão de Crédito" desc="Até 12x sem juros" checked={creditCardEnabled} onChange={setCreditCardEnabled} />
- <ConversionTip text="PIX + Cartão maximiza a conversão. PIX converte 99% e cartão captura quem prefere parcelar." />
- </>
- )}
 
  {/* ── FORM TAB ── */}
  {activeTab === "form" && (
