@@ -1297,22 +1297,24 @@ function SmallMetric({ icon, label, value, tone = "info" }: { icon: React.ReactN
 
 function EditorialKpi({ label, code, value, sub, accent }: { label: string; code?: string; value: string; sub: string; accent: "success" | "warning" | "destructive" | "neutral" }) {
   const accentDot: Record<string, string> = {
-    success: "bg-success",
-    warning: "bg-warning",
-    destructive: "bg-destructive",
+    success: "bg-success shadow-[0_0_8px_hsl(var(--success)/0.5)]",
+    warning: "bg-warning shadow-[0_0_8px_hsl(var(--warning)/0.5)]",
+    destructive: "bg-destructive shadow-[0_0_8px_hsl(var(--destructive)/0.5)]",
     neutral: "bg-muted-foreground/40",
   };
 
   return (
-    <div className="bg-card px-6 py-7 hover:bg-foreground/[0.015] transition-colors relative group">
+    <div className="bg-card px-6 py-7 hover:bg-foreground/[0.02] transition-colors relative group overflow-hidden">
+      {/* Hover sweep line */}
+      <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-foreground/15 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
-          <span className={cn("h-1.5 w-1.5 rounded-full", accentDot[accent])} />
-          <p className="text-[10px] font-mono font-bold text-muted-foreground uppercase tracking-[0.18em]">{label}</p>
+          <span className={cn("h-1.5 w-1.5 rounded-full transition-transform group-hover:scale-125", accentDot[accent])} />
+          <p className="text-[10px] font-mono font-bold text-muted-foreground uppercase tracking-[0.18em] group-hover:text-foreground/80 transition-colors">{label}</p>
         </div>
         {code && <span className="font-mono text-[8.5px] font-bold text-muted-foreground/50 tracking-[0.2em]">{code}</span>}
       </div>
-      <p className="font-display font-semibold tabular-nums tracking-[-0.035em] leading-none text-[26px] md:text-[32px] text-foreground">
+      <p className="font-display font-semibold tabular-nums tracking-[-0.04em] leading-none text-[28px] md:text-[34px] bg-gradient-to-br from-foreground via-foreground/95 to-foreground/75 bg-clip-text text-transparent transition-transform group-hover:translate-x-0.5 duration-300">
         {value}
       </p>
       <p className="mt-3 text-[10.5px] text-muted-foreground/80 font-medium leading-relaxed">{sub}</p>
@@ -1322,13 +1324,13 @@ function EditorialKpi({ label, code, value, sub, accent }: { label: string; code
 
 function EditorialChannelRow({ index, name, approved, total, revenue, approvalRate, share, privacy }: { index?: string; name: string; approved: number; total: number; revenue: number; approvalRate: number; share: number; privacy: boolean }) {
   return (
-    <div className="px-6 py-5 hover:bg-foreground/[0.015] transition-colors group">
+    <div className="px-6 py-5 hover:bg-foreground/[0.02] transition-colors group relative">
       <div className="flex items-baseline justify-between mb-3 gap-3">
         <div className="flex items-baseline gap-2.5 min-w-0">
-          {index && <span className="font-mono text-[9px] font-bold text-muted-foreground/50 tracking-[0.16em] tabular-nums shrink-0">{index}</span>}
-          <p className="text-[13px] font-semibold text-foreground tracking-tight truncate">{name}</p>
+          {index && <span className="font-mono text-[9px] font-bold text-muted-foreground/50 tracking-[0.16em] tabular-nums shrink-0 group-hover:text-foreground/60 transition-colors">{index}</span>}
+          <p className="text-[13.5px] font-semibold text-foreground tracking-tight truncate group-hover:translate-x-0.5 transition-transform">{name}</p>
         </div>
-        <p className="text-[14px] font-semibold text-foreground tabular-nums tracking-tight shrink-0">
+        <p className="text-[14.5px] font-display font-semibold text-foreground tabular-nums tracking-tight shrink-0">
           {privacy ? CENSORED : fmt(revenue)}
         </p>
       </div>
@@ -1338,8 +1340,8 @@ function EditorialChannelRow({ index, name, approved, total, revenue, approvalRa
         <span className="uppercase tracking-[0.12em]">APR <span className="text-foreground font-semibold tabular-nums">{approvalRate.toFixed(1)}%</span></span>
         <span className="ml-auto uppercase tracking-[0.12em]">SHR <span className="text-foreground font-semibold tabular-nums">{share.toFixed(1)}%</span></span>
       </div>
-      <div className="h-[2px] w-full rounded-full bg-foreground/[0.06] overflow-hidden">
-        <div className="h-full rounded-full bg-foreground/70 transition-all duration-700 ease-out" style={{ width: `${Math.min(share, 100)}%` }} />
+      <div className="h-[3px] w-full rounded-full bg-foreground/[0.06] overflow-hidden">
+        <div className="h-full rounded-full bg-gradient-to-r from-foreground/80 to-foreground/60 transition-all duration-700 ease-out shadow-[0_0_8px_hsl(var(--foreground)/0.2)]" style={{ width: `${Math.min(share, 100)}%` }} />
       </div>
     </div>
   );
