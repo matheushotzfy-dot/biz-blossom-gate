@@ -476,260 +476,345 @@ export default function Dashboard() {
       )}
 
       {/* ════════════════════════════════════════════════════════════════ */}
-      {/* GATEWAY EXECUTIVE DASHBOARD — Stripe/Adyen inspired              */}
+      {/* HOTZFY · EDITORIAL EXECUTIVE DASHBOARD                          */}
+      {/* Identidade visual única — luxo discreto, tipografia editorial    */}
       {/* ════════════════════════════════════════════════════════════════ */}
       <motion.div
-        initial={{ opacity: 0, y: 8 }}
+        initial={{ opacity: 0, y: 12 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
-        className="px-4 md:px-6 py-6 space-y-5"
+        transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+        className="relative px-4 md:px-8 lg:px-12 py-8 md:py-12"
       >
-        {/* ─── HEADER BAR ─── */}
-        <header className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-4 pb-5 border-b border-border/40">
-          <div>
-            <div className="flex items-center gap-2 mb-2">
-              <span className="inline-flex items-center gap-1.5 rounded-md bg-success/10 border border-success/20 px-2 py-0.5">
-                <span className="h-1.5 w-1.5 rounded-full bg-success animate-pulse" />
-                <span className="text-[10px] font-bold text-success uppercase tracking-wider">Live</span>
+        {/* Ambient signature glow */}
+        <div className="pointer-events-none absolute inset-x-0 -top-20 h-[420px] -z-10 overflow-hidden">
+          <div className="absolute left-1/2 top-0 -translate-x-1/2 h-[420px] w-[820px] rounded-full bg-primary/[0.07] blur-[120px]" />
+          <div className="absolute right-[10%] top-[60px] h-[260px] w-[260px] rounded-full bg-info/[0.05] blur-[100px]" />
+        </div>
+
+        {/* ─────────────────────────────────────────────────────── */}
+        {/* EDITORIAL HEADER · Magazine masthead style                */}
+        {/* ─────────────────────────────────────────────────────── */}
+        <header className="mb-10 md:mb-14">
+          <div className="flex items-center justify-between gap-4 pb-5 border-b border-foreground/10">
+            <div className="flex items-center gap-3">
+              <span className="text-[10px] font-bold text-foreground/50 uppercase tracking-[0.32em]">
+                Hotzfy
               </span>
-              <span className="text-[10px] font-bold text-muted-foreground/50 uppercase tracking-[0.18em]">
-                Gateway · Painel Executivo
+              <span className="h-3 w-px bg-foreground/15" />
+              <span className="text-[10px] font-medium text-muted-foreground/60 uppercase tracking-[0.28em]">
+                Painel Executivo
               </span>
             </div>
-            <h1 className="text-[22px] md:text-[26px] font-display font-black text-foreground tracking-[-0.03em] leading-tight">
-              Bem-vindo{nickname ? `, ${nickname}` : ""}
-            </h1>
-            <p className="text-[12px] text-muted-foreground/70 font-medium mt-1">
-              {format(new Date(), "EEEE, dd 'de' MMMM 'de' yyyy", { locale: ptBR })} · Atualizado em tempo real
-            </p>
+            <div className="flex items-center gap-3">
+              <span className="hidden md:inline text-[10px] font-medium text-muted-foreground/60 uppercase tracking-[0.24em]">
+                {format(new Date(), "EEEE · dd MMM yyyy", { locale: ptBR })}
+              </span>
+              <span className="inline-flex items-center gap-1.5 rounded-full border border-success/25 bg-success/5 px-2.5 py-1">
+                <span className="relative flex h-1.5 w-1.5">
+                  <span className="absolute inset-0 rounded-full bg-success/50 animate-ping" />
+                  <span className="relative h-1.5 w-1.5 rounded-full bg-success" />
+                </span>
+                <span className="text-[9px] font-bold text-success uppercase tracking-[0.2em]">Live</span>
+              </span>
+            </div>
           </div>
 
-          {/* Right cluster: filters + actions */}
-          <div className="flex flex-wrap items-center gap-2">
-            {/* Product filter */}
-            {productsData && productsData.length > 0 && (
-              <Select value={selectedProductId} onValueChange={setSelectedProductId}>
-                <SelectTrigger className="h-9 w-[180px] text-[12px] font-semibold rounded-lg border-border/60 bg-card/40">
-                  <SelectValue placeholder="Todos os produtos" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">Todos os produtos</SelectItem>
-                  {productsData.map((p) => (
-                    <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            )}
-
-            {/* Period segmented control */}
-            <div className="inline-flex items-center rounded-lg border border-border/60 bg-card/40 backdrop-blur-xl p-0.5 shadow-sm">
-              {PERIOD_PRESETS.map((opt) => (
-                <button
-                  key={opt.label}
-                  onClick={() => { setSelectedPeriod(opt); setIsCustom(false); setCustomRange(undefined); }}
-                  className={cn(
-                    "rounded-md px-3 py-1.5 text-[11px] font-bold transition-all duration-200",
-                    !isCustom && selectedPeriod.label === opt.label
-                      ? "bg-foreground text-background shadow-sm"
-                      : "text-muted-foreground/70 hover:text-foreground"
-                  )}
-                >
-                  {opt.label}
-                </button>
-              ))}
-              <Popover open={datePickerOpen} onOpenChange={setDatePickerOpen}>
-                <PopoverTrigger asChild>
-                  <button
-                    className={cn(
-                      "rounded-md px-3 py-1.5 text-[11px] font-bold transition-all duration-200 flex items-center gap-1.5",
-                      isCustom ? "bg-foreground text-background shadow-sm" : "text-muted-foreground/70 hover:text-foreground"
-                    )}
-                  >
-                    <CalendarDays className="h-3 w-3" />
-                    Custom
-                  </button>
-                </PopoverTrigger>
-                <PopoverContent className="w-auto p-0" align="end">
-                  <Calendar
-                    mode="range"
-                    selected={customRange}
-                    onSelect={(range) => {
-                      setCustomRange(range);
-                      if (range?.from) setIsCustom(true);
-                      if (range?.from && range?.to) setDatePickerOpen(false);
-                    }}
-                    numberOfMonths={2}
-                    locale={ptBR}
-                  />
-                </PopoverContent>
-              </Popover>
+          {/* Editorial title block */}
+          <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-8 mt-8 md:mt-10">
+            <div className="flex-1 min-w-0">
+              <p className="text-[11px] font-bold text-primary/80 uppercase tracking-[0.32em] mb-3">
+                {selectedPeriod.label === "Hoje" ? "Edição de Hoje" : `Edição · ${selectedPeriod.label}`}
+              </p>
+              <h1 className="font-display font-black text-foreground tracking-[-0.045em] leading-[0.92] text-[44px] md:text-[60px] lg:text-[72px]">
+                {nickname ? (
+                  <>
+                    Bem-vindo,<br />
+                    <span className="italic font-medium text-foreground/70" style={{ fontFamily: "Georgia, 'Times New Roman', serif" }}>{nickname}</span>
+                    <span className="text-primary">.</span>
+                  </>
+                ) : (
+                  <>
+                    Painel<br />
+                    <span className="italic font-medium text-foreground/70" style={{ fontFamily: "Georgia, 'Times New Roman', serif" }}>Executivo</span>
+                    <span className="text-primary">.</span>
+                  </>
+                )}
+              </h1>
+              <p className="mt-5 max-w-xl text-[14px] text-muted-foreground leading-relaxed font-medium">
+                Visão consolidada da sua operação em tempo real.
+                {approved.length > 0 && (
+                  <> <span className="text-foreground font-semibold">{approved.length}</span> {approved.length === 1 ? "transação aprovada" : "transações aprovadas"} no período.</>
+                )}
+              </p>
             </div>
 
-            {/* Privacy toggle */}
-            <button
-              onClick={privacy.toggle}
-              className="h-9 w-9 inline-flex items-center justify-center rounded-lg border border-border/60 bg-card/40 backdrop-blur-xl text-muted-foreground hover:text-foreground hover:border-border transition-all"
-              title={privacy.hidden ? "Mostrar valores" : "Ocultar valores"}
-            >
-              {privacy.hidden ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
-            </button>
+            {/* Right: filters as refined controls */}
+            <div className="flex flex-col items-stretch lg:items-end gap-3 shrink-0">
+              <div className="flex items-center gap-1.5">
+                {productsData && productsData.length > 0 && (
+                  <Select value={selectedProductId} onValueChange={setSelectedProductId}>
+                    <SelectTrigger className="h-9 w-[160px] text-[11.5px] font-semibold rounded-full border-foreground/15 bg-background/50 backdrop-blur-xl hover:border-foreground/30 transition-colors">
+                      <SelectValue placeholder="Todos produtos" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">Todos os produtos</SelectItem>
+                      {productsData.map((p) => (
+                        <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                )}
+                <button
+                  onClick={privacy.toggle}
+                  className="h-9 w-9 inline-flex items-center justify-center rounded-full border border-foreground/15 bg-background/50 backdrop-blur-xl text-muted-foreground hover:text-foreground hover:border-foreground/30 transition-all"
+                  title={privacy.hidden ? "Mostrar valores" : "Ocultar valores"}
+                >
+                  {privacy.hidden ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
+                </button>
+              </div>
 
-            <Link
-              to="/financeiro/saques"
-              className="h-9 inline-flex items-center gap-1.5 px-4 rounded-lg bg-foreground text-background text-[12px] font-bold shadow-sm hover:opacity-90 transition-all"
-            >
-              <Wallet className="h-3.5 w-3.5" />
-              Sacar saldo
-            </Link>
+              <div className="inline-flex items-center rounded-full border border-foreground/10 bg-background/40 backdrop-blur-xl p-1">
+                {PERIOD_PRESETS.map((opt) => (
+                  <button
+                    key={opt.label}
+                    onClick={() => { setSelectedPeriod(opt); setIsCustom(false); setCustomRange(undefined); }}
+                    className={cn(
+                      "rounded-full px-3.5 py-1.5 text-[10.5px] font-bold transition-all duration-300",
+                      !isCustom && selectedPeriod.label === opt.label
+                        ? "bg-foreground text-background shadow-[0_2px_8px_-2px_hsl(var(--foreground)/0.4)]"
+                        : "text-muted-foreground/70 hover:text-foreground"
+                    )}
+                  >
+                    {opt.label}
+                  </button>
+                ))}
+                <Popover open={datePickerOpen} onOpenChange={setDatePickerOpen}>
+                  <PopoverTrigger asChild>
+                    <button
+                      className={cn(
+                        "rounded-full px-3 py-1.5 text-[10.5px] font-bold transition-all duration-300 inline-flex items-center gap-1.5",
+                        isCustom ? "bg-foreground text-background shadow-[0_2px_8px_-2px_hsl(var(--foreground)/0.4)]" : "text-muted-foreground/70 hover:text-foreground"
+                      )}
+                    >
+                      <CalendarDays className="h-3 w-3" />
+                    </button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0" align="end">
+                    <Calendar
+                      mode="range"
+                      selected={customRange}
+                      onSelect={(range) => {
+                        setCustomRange(range);
+                        if (range?.from) setIsCustom(true);
+                        if (range?.from && range?.to) setDatePickerOpen(false);
+                      }}
+                      numberOfMonths={2}
+                      locale={ptBR}
+                    />
+                  </PopoverContent>
+                </Popover>
+              </div>
+            </div>
           </div>
         </header>
 
-        {/* ─── PRIMARY KPI ROW — Gateway core metrics ─── */}
-        <section className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-          {/* TPV — Total Payment Volume (gross) */}
-          <GatewayKpi
-            label="TPV · Volume Bruto"
-            value={privacy.hidden ? CENSORED : fmt(approved.reduce((acc, t) => acc + Number(t.amount), 0))}
-            sub={`${approved.length} transações aprovadas`}
-            tone="primary"
-            trend={approved.length > 0 ? "up" : "neutral"}
-          />
-          {/* Net revenue */}
-          <GatewayKpi
-            label="Receita Líquida"
-            value={privacy.hidden ? CENSORED : fmt(revenue)}
-            sub={`Após taxas · MDR efetivo ${(() => {
-              const gross = approved.reduce((acc, t) => acc + Number(t.amount), 0);
-              const fees = approved.reduce((acc, t) => acc + Number(t.fee_amount), 0);
-              return gross > 0 ? `${((fees / gross) * 100).toFixed(2)}%` : "0,00%";
-            })()}`}
-            tone="success"
-            trend="up"
-          />
-          {/* Approval rate */}
-          <GatewayKpi
-            label="Taxa de Aprovação"
-            value={privacy.hidden ? CENSORED : `${conversion.toFixed(2)}%`}
-            sub={`${approved.length} de ${filteredTx.length} processadas`}
-            tone={conversion >= 80 ? "success" : conversion >= 60 ? "warning" : "destructive"}
-            trend={conversion >= 80 ? "up" : "down"}
-          />
-          {/* Chargeback rate */}
-          <GatewayKpi
-            label="Chargeback Rate"
-            value={privacy.hidden ? CENSORED : `${chargebackRate.toFixed(2)}%`}
-            sub={`${chargebacks.length} disputa${chargebacks.length === 1 ? "" : "s"} · meta < 1%`}
-            tone={chargebackRate < 1 ? "success" : chargebackRate < 2 ? "warning" : "destructive"}
-            trend={chargebackRate < 1 ? "up" : "down"}
-          />
-        </section>
+        {/* ─────────────────────────────────────────────────────── */}
+        {/* HERO METRIC · The signature piece                         */}
+        {/* ─────────────────────────────────────────────────────── */}
+        <section className="relative mb-10 md:mb-14">
+          <div className="relative rounded-[28px] border border-foreground/10 bg-gradient-to-br from-card/80 via-card/60 to-card/40 backdrop-blur-2xl overflow-hidden shadow-[0_30px_80px_-30px_hsl(var(--primary)/0.18)]">
+            {/* Inner luxury accents */}
+            <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,hsl(var(--primary)/0.08),transparent_55%)] pointer-events-none" />
+            <div className="absolute -top-40 -right-20 h-[360px] w-[360px] rounded-full bg-primary/[0.08] blur-[100px] pointer-events-none" />
+            <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-foreground/15 to-transparent" />
 
-        {/* ─── MAIN GRID: Chart (left) + Settlement panel (right) ─── */}
-        <section className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-          {/* Chart card */}
-          <div className="lg:col-span-2 rounded-xl border border-border/60 bg-card/60 backdrop-blur-xl overflow-hidden">
-            <div className="flex items-center justify-between px-5 py-3.5 border-b border-border/40">
-              <div>
-                <p className="text-[10px] font-bold text-muted-foreground/50 uppercase tracking-[0.18em]">Volume processado</p>
-                <p className="text-[15px] font-display font-black text-foreground tracking-tight mt-0.5">
-                  {privacy.hidden ? CENSORED : fmt(revenue)}
-                </p>
+            <div className="relative grid grid-cols-1 lg:grid-cols-12 gap-0">
+              {/* Left: hero revenue */}
+              <div className="lg:col-span-7 p-7 md:p-10 lg:p-12 lg:border-r border-foreground/[0.06]">
+                <div className="flex items-center gap-2 mb-6">
+                  <span className="h-px w-8 bg-primary" />
+                  <span className="text-[10px] font-bold text-primary uppercase tracking-[0.32em]">Receita Líquida</span>
+                </div>
+
+                <div className="font-display font-black text-foreground tabular-nums leading-[0.88] tracking-[-0.05em] text-[56px] md:text-[80px] lg:text-[96px]">
+                  {privacy.hidden ? (
+                    <span className="text-foreground/30">{CENSORED}</span>
+                  ) : (
+                    <AnimatedNumber value={revenue} />
+                  )}
+                </div>
+
+                <div className="mt-6 flex flex-wrap items-center gap-x-6 gap-y-2 text-[12px] font-medium text-muted-foreground">
+                  <span className="inline-flex items-center gap-1.5">
+                    <ArrowUpRight className="h-3.5 w-3.5 text-success" strokeWidth={2.5} />
+                    <span>TPV bruto <span className="text-foreground font-bold tabular-nums">{privacy.hidden ? CENSORED : fmt(approved.reduce((a, t) => a + Number(t.amount), 0))}</span></span>
+                  </span>
+                  <span className="text-foreground/20">·</span>
+                  <span>MDR efetivo <span className="text-foreground font-bold tabular-nums">{(() => {
+                    const gross = approved.reduce((a, t) => a + Number(t.amount), 0);
+                    const fees = approved.reduce((a, t) => a + Number(t.fee_amount), 0);
+                    return gross > 0 ? `${((fees / gross) * 100).toFixed(2)}%` : "0,00%";
+                  })()}</span></span>
+                  <span className="text-foreground/20">·</span>
+                  <span>Ticket médio <span className="text-foreground font-bold tabular-nums">{privacy.hidden ? CENSORED : fmt(approved.length > 0 ? revenue / approved.length : 0)}</span></span>
+                </div>
+
+                <div className="mt-8 flex flex-wrap items-center gap-3">
+                  <Link
+                    to="/financeiro/saques"
+                    className="group inline-flex items-center gap-2 h-11 px-5 rounded-full bg-foreground text-background text-[12.5px] font-bold tracking-tight shadow-[0_8px_24px_-8px_hsl(var(--foreground)/0.5)] hover:shadow-[0_12px_32px_-8px_hsl(var(--foreground)/0.6)] transition-all"
+                  >
+                    <Wallet className="h-3.5 w-3.5" />
+                    Sacar saldo
+                    <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" />
+                  </Link>
+                  <Link
+                    to="/vendas"
+                    className="inline-flex items-center gap-2 h-11 px-5 rounded-full border border-foreground/15 text-foreground text-[12.5px] font-bold tracking-tight hover:bg-foreground/5 transition-all"
+                  >
+                    Ver vendas
+                  </Link>
+                </div>
               </div>
-              <div className="flex items-center gap-3 text-[10px] font-semibold text-muted-foreground/60 uppercase tracking-wider">
-                <span className="inline-flex items-center gap-1.5">
-                  <span className="h-2 w-2 rounded-sm bg-primary" />
-                  Receita líquida
-                </span>
+
+              {/* Right: signature side panel — Saldo + Liquidação */}
+              <div className="lg:col-span-5 p-7 md:p-10 lg:p-12 bg-gradient-to-b from-transparent to-foreground/[0.02] flex flex-col justify-between gap-6">
+                <div>
+                  <div className="flex items-center gap-2 mb-5">
+                    <span className="h-px w-8 bg-foreground/20" />
+                    <span className="text-[10px] font-bold text-foreground/50 uppercase tracking-[0.32em]">Saldo Disponível</span>
+                  </div>
+                  <p className="font-display font-black text-foreground tabular-nums leading-none tracking-[-0.04em] text-[40px] md:text-[48px]">
+                    {privacy.hidden ? <span className="text-foreground/30">{CENSORED}</span> : <AnimatedNumber value={balance} />}
+                  </p>
+                  <p className="mt-3 text-[11.5px] text-muted-foreground/70 font-medium">
+                    Pronto para saque imediato
+                  </p>
+                </div>
+
+                <div className="grid grid-cols-2 gap-px bg-foreground/[0.08] rounded-2xl overflow-hidden">
+                  <div className="bg-card/60 backdrop-blur-xl p-5">
+                    <p className="text-[9.5px] font-bold text-muted-foreground/60 uppercase tracking-[0.22em] mb-2">Em análise</p>
+                    <p className="text-[20px] font-display font-black text-foreground tabular-nums tracking-[-0.03em] leading-none">
+                      {privacy.hidden ? CENSORED : fmt(withdrawalPending)}
+                    </p>
+                    <p className="mt-1.5 text-[10px] text-muted-foreground/60 font-medium">Saques processando</p>
+                  </div>
+                  <div className="bg-card/60 backdrop-blur-xl p-5">
+                    <p className="text-[9.5px] font-bold text-muted-foreground/60 uppercase tracking-[0.22em] mb-2">Retido</p>
+                    <p className="text-[20px] font-display font-black text-foreground tabular-nums tracking-[-0.03em] leading-none">
+                      {privacy.hidden ? CENSORED : fmt(transactions.filter(t => t.status === "completed" && !t.retention_released && Number(t.retained_amount) > 0).reduce((a, t) => a + Number(t.retained_amount), 0))}
+                    </p>
+                    <p className="mt-1.5 text-[10px] text-muted-foreground/60 font-medium">Reserva segurança</p>
+                  </div>
+                </div>
               </div>
             </div>
-            <div className="h-[280px] px-2 pt-3 pb-2">
+          </div>
+        </section>
+
+        {/* ─────────────────────────────────────────────────────── */}
+        {/* PERFORMANCE STRIP · Editorial KPI row                     */}
+        {/* ─────────────────────────────────────────────────────── */}
+        <section className="mb-10 md:mb-14">
+          <div className="flex items-baseline justify-between mb-5">
+            <h2 className="text-[11px] font-bold text-foreground/60 uppercase tracking-[0.28em]">
+              <span className="text-primary mr-2">01</span> Performance Operacional
+            </h2>
+            <span className="text-[10px] text-muted-foreground/50 font-medium uppercase tracking-[0.2em]">indicadores chave</span>
+          </div>
+
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-px bg-foreground/[0.06] rounded-2xl overflow-hidden border border-foreground/10">
+            <EditorialKpi
+              label="Aprovação"
+              value={privacy.hidden ? CENSORED : `${conversion.toFixed(1)}%`}
+              sub={`${approved.length} de ${filteredTx.length} processadas`}
+              accent={conversion >= 80 ? "success" : conversion >= 60 ? "warning" : "destructive"}
+            />
+            <EditorialKpi
+              label="Chargeback"
+              value={privacy.hidden ? CENSORED : `${chargebackRate.toFixed(2)}%`}
+              sub={`${chargebacks.length} ${chargebacks.length === 1 ? "disputa" : "disputas"} · meta < 1%`}
+              accent={chargebackRate < 1 ? "success" : chargebackRate < 2 ? "warning" : "destructive"}
+            />
+            <EditorialKpi
+              label="Pendentes"
+              value={pending.length.toString()}
+              sub="Aguardando captura"
+              accent={pending.length > 5 ? "warning" : "neutral"}
+            />
+            <EditorialKpi
+              label="Clientes únicos"
+              value={uniqueCustomers.toString()}
+              sub="No período selecionado"
+              accent="neutral"
+            />
+          </div>
+        </section>
+
+        {/* ─────────────────────────────────────────────────────── */}
+        {/* CHART · Editorial canvas                                  */}
+        {/* ─────────────────────────────────────────────────────── */}
+        <section className="mb-10 md:mb-14">
+          <div className="flex items-baseline justify-between mb-5">
+            <h2 className="text-[11px] font-bold text-foreground/60 uppercase tracking-[0.28em]">
+              <span className="text-primary mr-2">02</span> Volume Processado
+            </h2>
+            <div className="flex items-center gap-3 text-[10px] font-semibold text-muted-foreground/60 uppercase tracking-[0.2em]">
+              <span className="inline-flex items-center gap-1.5">
+                <span className="h-2 w-2 rounded-full bg-primary" />
+                Receita líquida
+              </span>
+            </div>
+          </div>
+
+          <div className="rounded-2xl border border-foreground/10 bg-card/40 backdrop-blur-xl overflow-hidden">
+            <div className="px-6 md:px-8 pt-6 pb-2">
+              <p className="font-display font-black text-foreground tabular-nums tracking-[-0.04em] text-[32px] md:text-[40px] leading-none">
+                {privacy.hidden ? CENSORED : fmt(revenue)}
+              </p>
+              <p className="text-[11.5px] text-muted-foreground/60 font-medium mt-2">
+                {selectedPeriod.label === "Hoje" ? "Distribuição por hora" : `Distribuição diária · últimos ${selectedPeriod.days} dias`}
+              </p>
+            </div>
+            <div className="h-[260px] md:h-[300px] px-3 pb-4">
               <ResponsiveContainer width="100%" height="100%">
-                <AreaChart data={chartData} margin={{ top: 10, right: 16, left: 8, bottom: 4 }}>
+                <AreaChart data={chartData} margin={{ top: 20, right: 20, left: 8, bottom: 8 }}>
                   <defs>
-                    <linearGradient id="gw-grad" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="0%" stopColor="hsl(var(--primary))" stopOpacity={0.28} />
+                    <linearGradient id="editorial-grad" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0%" stopColor="hsl(var(--primary))" stopOpacity={0.32} />
                       <stop offset="100%" stopColor="hsl(var(--primary))" stopOpacity={0} />
                     </linearGradient>
                   </defs>
-                  <XAxis dataKey="name" tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }} tickLine={false} axisLine={false} />
-                  <YAxis tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }} tickLine={false} axisLine={false} tickFormatter={(v) => v >= 1000 ? `${(v/1000).toFixed(1)}k` : `${v}`} width={40} />
+                  <XAxis dataKey="name" tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))", fontWeight: 600 }} tickLine={false} axisLine={false} />
+                  <YAxis tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))", fontWeight: 600 }} tickLine={false} axisLine={false} tickFormatter={(v) => v >= 1000 ? `${(v / 1000).toFixed(1)}k` : `${v}`} width={44} />
                   <Tooltip
-                    contentStyle={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: 10, fontSize: 12, fontWeight: 600 }}
-                    labelStyle={{ color: "hsl(var(--muted-foreground))", fontSize: 10, textTransform: "uppercase", letterSpacing: "0.1em" }}
+                    contentStyle={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: 12, fontSize: 12, fontWeight: 600, boxShadow: "0 12px 40px -12px hsl(var(--primary)/0.2)" }}
+                    labelStyle={{ color: "hsl(var(--muted-foreground))", fontSize: 10, textTransform: "uppercase", letterSpacing: "0.1em", fontWeight: 700 }}
                     formatter={(v: number) => [privacy.hidden ? CENSORED : fmt(v), "Receita"]}
                   />
-                  <Area type="monotone" dataKey="vendas" stroke="hsl(var(--primary))" strokeWidth={2} fill="url(#gw-grad)" />
+                  <Area type="monotone" dataKey="vendas" stroke="hsl(var(--primary))" strokeWidth={2.25} fill="url(#editorial-grad)" />
                 </AreaChart>
               </ResponsiveContainer>
             </div>
           </div>
-
-          {/* Settlement panel — what matters for cash management */}
-          <div className="rounded-xl border border-border/60 bg-card/60 backdrop-blur-xl overflow-hidden flex flex-col">
-            <div className="px-5 py-3.5 border-b border-border/40">
-              <p className="text-[10px] font-bold text-muted-foreground/50 uppercase tracking-[0.18em]">Liquidação · Settlement</p>
-              <p className="text-[15px] font-display font-black text-foreground tracking-tight mt-0.5">Posição de caixa</p>
-            </div>
-            <div className="flex-1 px-5 py-4 space-y-4">
-              {/* Available */}
-              <div>
-                <p className="text-[10px] font-bold text-muted-foreground/50 uppercase tracking-[0.18em]">Saldo disponível</p>
-                <p className="text-[28px] font-display font-black text-foreground tabular-nums tracking-[-0.03em] leading-none mt-1">
-                  {privacy.hidden ? CENSORED : <AnimatedNumber value={balance} />}
-                </p>
-                <p className="text-[11px] text-muted-foreground/60 font-medium mt-1.5">Pronto para saque imediato</p>
-              </div>
-
-              <div className="h-px bg-border/40" />
-
-              {/* In transit */}
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <p className="text-[10px] font-bold text-muted-foreground/50 uppercase tracking-[0.18em] mb-1">Em análise</p>
-                  <p className="text-[16px] font-display font-black text-warning tabular-nums tracking-tight">
-                    {privacy.hidden ? CENSORED : fmt(withdrawalPending)}
-                  </p>
-                  <p className="text-[10px] text-muted-foreground/60 mt-0.5">Saques em processamento</p>
-                </div>
-                <div>
-                  <p className="text-[10px] font-bold text-muted-foreground/50 uppercase tracking-[0.18em] mb-1">Retido</p>
-                  <p className="text-[16px] font-display font-black text-info tabular-nums tracking-tight">
-                    {privacy.hidden ? CENSORED : fmt(transactions.filter(t => t.status === "completed" && !t.retention_released && Number(t.retained_amount) > 0).reduce((acc, t) => acc + Number(t.retained_amount), 0))}
-                  </p>
-                  <p className="text-[10px] text-muted-foreground/60 mt-0.5">Reserva de segurança</p>
-                </div>
-              </div>
-
-              <div className="h-px bg-border/40" />
-
-              {/* Quick actions */}
-              <div className="space-y-2 pt-1">
-                <Link to="/financeiro/extrato" className="flex items-center justify-between px-3 py-2.5 rounded-lg border border-border/40 hover:border-border hover:bg-muted/20 transition-all group">
-                  <span className="text-[12px] font-semibold text-foreground/80 group-hover:text-foreground">Extrato detalhado</span>
-                  <ChevronRight className="h-3.5 w-3.5 text-muted-foreground/40 group-hover:text-foreground transition-colors" />
-                </Link>
-                <Link to="/financeiro/antecipacao" className="flex items-center justify-between px-3 py-2.5 rounded-lg border border-border/40 hover:border-border hover:bg-muted/20 transition-all group">
-                  <span className="text-[12px] font-semibold text-foreground/80 group-hover:text-foreground">Antecipar recebíveis</span>
-                  <ChevronRight className="h-3.5 w-3.5 text-muted-foreground/40 group-hover:text-foreground transition-colors" />
-                </Link>
-              </div>
-            </div>
-          </div>
         </section>
 
-        {/* ─── PAYMENT METHOD BREAKDOWN + RISK SIGNALS ─── */}
-        <section className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-          {/* Payment methods */}
-          <div className="lg:col-span-2 rounded-xl border border-border/60 bg-card/60 backdrop-blur-xl overflow-hidden">
-            <div className="px-5 py-3.5 border-b border-border/40 flex items-center justify-between">
-              <div>
-                <p className="text-[10px] font-bold text-muted-foreground/50 uppercase tracking-[0.18em]">Métodos de pagamento</p>
-                <p className="text-[15px] font-display font-black text-foreground tracking-tight mt-0.5">Performance por canal</p>
-              </div>
-              <span className="text-[10px] font-semibold text-muted-foreground/60 uppercase tracking-wider">{filteredTx.length} processadas</span>
+        {/* ─────────────────────────────────────────────────────── */}
+        {/* PAYMENT METHODS + RECENT ACTIVITY                         */}
+        {/* ─────────────────────────────────────────────────────── */}
+        <section className="grid grid-cols-1 lg:grid-cols-5 gap-6 mb-10">
+          {/* Payment methods column */}
+          <div className="lg:col-span-3">
+            <div className="flex items-baseline justify-between mb-5">
+              <h2 className="text-[11px] font-bold text-foreground/60 uppercase tracking-[0.28em]">
+                <span className="text-primary mr-2">03</span> Canais de Pagamento
+              </h2>
+              <span className="text-[10px] text-muted-foreground/50 font-medium uppercase tracking-[0.2em]">{filteredTx.length} processadas</span>
             </div>
-            <div className="divide-y divide-border/40">
-              <PaymentMethodRow
+
+            <div className="rounded-2xl border border-foreground/10 bg-card/40 backdrop-blur-xl overflow-hidden divide-y divide-foreground/[0.06]">
+              <EditorialChannelRow
                 name="PIX"
                 approved={pixApprovedCount}
                 total={pixTotalCount}
@@ -737,9 +822,8 @@ export default function Dashboard() {
                 approvalRate={pixConversion}
                 share={revenue > 0 ? (pixRevenue / revenue) * 100 : 0}
                 privacy={privacy.hidden}
-                tone="success"
               />
-              <PaymentMethodRow
+              <EditorialChannelRow
                 name="Cartão de Crédito"
                 approved={cardApprovedCount}
                 total={cardTotalCount}
@@ -747,140 +831,98 @@ export default function Dashboard() {
                 approvalRate={cardConversion}
                 share={revenue > 0 ? (cardRevenue / revenue) * 100 : 0}
                 privacy={privacy.hidden}
-                tone="info"
               />
-              <PaymentMethodRow
+              <EditorialChannelRow
                 name="Boleto"
                 approved={filteredTx.filter(t => t.payment_method === "boleto" && t.status === "completed").length}
                 total={filteredTx.filter(t => t.payment_method === "boleto").length}
-                revenue={filteredTx.filter(t => t.payment_method === "boleto" && t.status === "completed").reduce((acc, t) => acc + Number(t.net_amount), 0)}
+                revenue={filteredTx.filter(t => t.payment_method === "boleto" && t.status === "completed").reduce((a, t) => a + Number(t.net_amount), 0)}
                 approvalRate={(() => {
                   const total = filteredTx.filter(t => t.payment_method === "boleto").length;
                   const ok = filteredTx.filter(t => t.payment_method === "boleto" && t.status === "completed").length;
                   return total > 0 ? (ok / total) * 100 : 0;
                 })()}
                 share={(() => {
-                  const rev = filteredTx.filter(t => t.payment_method === "boleto" && t.status === "completed").reduce((acc, t) => acc + Number(t.net_amount), 0);
+                  const rev = filteredTx.filter(t => t.payment_method === "boleto" && t.status === "completed").reduce((a, t) => a + Number(t.net_amount), 0);
                   return revenue > 0 ? (rev / revenue) * 100 : 0;
                 })()}
                 privacy={privacy.hidden}
-                tone="warning"
               />
             </div>
           </div>
 
-          {/* Risk signals */}
-          <div className="rounded-xl border border-border/60 bg-card/60 backdrop-blur-xl overflow-hidden">
-            <div className="px-5 py-3.5 border-b border-border/40 flex items-center gap-2">
-              <ShieldCheck className="h-3.5 w-3.5 text-muted-foreground/60" />
-              <p className="text-[10px] font-bold text-muted-foreground/50 uppercase tracking-[0.18em]">Risk Signals</p>
+          {/* Recent activity column */}
+          <div className="lg:col-span-2">
+            <div className="flex items-baseline justify-between mb-5">
+              <h2 className="text-[11px] font-bold text-foreground/60 uppercase tracking-[0.28em]">
+                <span className="text-primary mr-2">04</span> Atividade
+              </h2>
+              <Link to="/vendas" className="text-[10px] text-muted-foreground/60 hover:text-foreground font-semibold uppercase tracking-[0.2em] transition-colors inline-flex items-center gap-1">
+                Tudo <ArrowRight className="h-2.5 w-2.5" />
+              </Link>
             </div>
-            <div className="divide-y divide-border/40">
-              <RiskRow label="Pendentes" value={pending.length.toString()} hint="Aguardando captura" tone={pending.length > 5 ? "warning" : "neutral"} />
-              <RiskRow label="Reembolsos" value={refunded.length.toString()} hint={privacy.hidden ? CENSORED : `${fmt(refunded.reduce((acc, t) => acc + Number(t.net_amount), 0))} debitados`} tone={refunded.length > 0 ? "warning" : "neutral"} />
-              <RiskRow label="Chargebacks" value={chargebacks.length.toString()} hint={`${chargebackRate.toFixed(2)}% do total`} tone={chargebacks.length > 0 ? "destructive" : "neutral"} />
-              <RiskRow label="Clientes únicos" value={uniqueCustomers.toString()} hint="No período" tone="neutral" />
-              <RiskRow label="Ticket médio" value={privacy.hidden ? CENSORED : fmt(approved.length > 0 ? revenue / approved.length : 0)} hint="Por transação aprovada" tone="neutral" />
-            </div>
-          </div>
-        </section>
 
-        {/* ─── ACTIVITY FEED + OPERATIONAL TOOLS ─── */}
-        <section className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-          {/* Recent activity */}
-          <div className="lg:col-span-2 rounded-xl border border-border/60 bg-card/60 backdrop-blur-xl overflow-hidden">
-            <div className="px-5 py-3.5 border-b border-border/40 flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <Activity className="h-3.5 w-3.5 text-muted-foreground/60" />
-                <p className="text-[10px] font-bold text-muted-foreground/50 uppercase tracking-[0.18em]">Atividade recente</p>
-              </div>
-              <Link to="/vendas" className="text-[10px] font-semibold text-muted-foreground hover:text-foreground transition-colors uppercase tracking-wider">Ver tudo</Link>
-            </div>
-            {activity.length === 0 ? (
-              <div className="px-5 py-12 text-center">
-                <p className="text-[12px] text-muted-foreground/60">Sem atividade no momento</p>
-              </div>
-            ) : (
-              <div className="divide-y divide-border/40">
-                {activity.map((item) => {
-                  const isWithdrawal = item.kind === "withdrawal";
-                  const statusColor = item.status === "completed" || item.status === "approved" ? "text-success bg-success/10 border-success/20"
-                    : item.status === "pending" ? "text-warning bg-warning/10 border-warning/20"
-                    : item.status === "refunded" || item.status === "chargeback" || item.status === "rejected" ? "text-destructive bg-destructive/10 border-destructive/20"
-                    : "text-muted-foreground bg-muted/20 border-border/40";
-                  const statusLabel = item.status === "completed" ? "Aprovada" : item.status === "approved" ? "Aprovado" : item.status === "pending" ? "Pendente" : item.status === "refunded" ? "Reembolso" : item.status === "chargeback" ? "Chargeback" : item.status === "rejected" ? "Recusado" : item.status;
+            <div className="rounded-2xl border border-foreground/10 bg-card/40 backdrop-blur-xl overflow-hidden">
+              {activity.length === 0 ? (
+                <div className="px-5 py-16 text-center">
+                  <div className="mx-auto h-10 w-10 rounded-full bg-foreground/[0.04] flex items-center justify-center mb-3">
+                    <Activity className="h-4 w-4 text-muted-foreground/40" />
+                  </div>
+                  <p className="text-[11.5px] text-muted-foreground/50 font-medium">Sem atividade no momento</p>
+                </div>
+              ) : (
+                <div className="divide-y divide-foreground/[0.06]">
+                  {activity.slice(0, 6).map((item) => {
+                    const isWithdrawal = item.kind === "withdrawal";
+                    const dotColor = item.status === "completed" || item.status === "approved" ? "bg-success"
+                      : item.status === "pending" ? "bg-warning"
+                      : item.status === "refunded" || item.status === "chargeback" || item.status === "rejected" ? "bg-destructive"
+                      : "bg-muted-foreground/40";
+                    const labelText = isWithdrawal ? "Saque solicitado"
+                      : (item.label === "pix" ? "PIX"
+                        : item.label === "credit_card" || item.label === "card" ? "Cartão"
+                          : item.label === "boleto" ? "Boleto" : "Pagamento");
 
-                  return (
-                    <button
-                      key={`${item.kind}-${item.id}`}
-                      onClick={() => {
-                        if (!isWithdrawal) {
-                          const tx = transactions.find(t => t.id === item.id);
-                          if (tx) setDetailTx(tx);
-                        }
-                      }}
-                      className="w-full flex items-center gap-3 px-5 py-3 hover:bg-muted/20 transition-colors text-left"
-                    >
-                      <div className={cn("h-8 w-8 rounded-lg flex items-center justify-center shrink-0", isWithdrawal ? "bg-info/10 text-info" : "bg-primary/10 text-primary")}>
-                        {isWithdrawal ? <ArrowDownRight className="h-3.5 w-3.5" /> : <CreditCard className="h-3.5 w-3.5" />}
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2">
-                          <p className="text-[12.5px] font-semibold text-foreground truncate">
-                            {isWithdrawal ? "Saque solicitado" : (item.label === "pix" ? "PIX" : item.label === "credit_card" || item.label === "card" ? "Cartão de Crédito" : item.label === "boleto" ? "Boleto" : "Pagamento")}
+                    return (
+                      <button
+                        key={`${item.kind}-${item.id}`}
+                        onClick={() => {
+                          if (!isWithdrawal) {
+                            const tx = transactions.find(t => t.id === item.id);
+                            if (tx) setDetailTx(tx);
+                          }
+                        }}
+                        className="w-full flex items-center gap-3 px-5 py-3.5 hover:bg-foreground/[0.03] transition-colors text-left group"
+                      >
+                        <span className={cn("h-2 w-2 rounded-full shrink-0", dotColor)} />
+                        <div className="flex-1 min-w-0">
+                          <p className="text-[12px] font-bold text-foreground truncate">{labelText}</p>
+                          <p className="text-[10px] text-muted-foreground/60 mt-0.5 font-mono tracking-tight">
+                            {item.id.slice(0, 8)} · {timeAgo(item.createdAt)}
                           </p>
-                          <span className={cn("inline-flex items-center gap-1 rounded-md border px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wider", statusColor)}>
-                            {statusLabel}
-                          </span>
                         </div>
-                        <p className="text-[10.5px] text-muted-foreground/60 mt-0.5 font-mono">ID {item.id.slice(0, 8)} · {timeAgo(item.createdAt)}</p>
-                      </div>
-                      <p className="text-[13px] font-display font-black text-foreground tabular-nums tracking-tight shrink-0">
-                        {privacy.hidden ? CENSORED : fmt(item.amount)}
-                      </p>
-                    </button>
-                  );
-                })}
-              </div>
-            )}
-          </div>
-
-          {/* Operational tools */}
-          <div className="rounded-xl border border-border/60 bg-card/60 backdrop-blur-xl overflow-hidden">
-            <div className="px-5 py-3.5 border-b border-border/40 flex items-center gap-2">
-              <Layers className="h-3.5 w-3.5 text-muted-foreground/60" />
-              <p className="text-[10px] font-bold text-muted-foreground/50 uppercase tracking-[0.18em]">Operação</p>
-            </div>
-            <div className="divide-y divide-border/40">
-              {[
-                { label: "Produtos", value: products.toString(), href: "/vendas/produtos", icon: Package },
-                { label: "Configurar checkout", value: "", href: "/vendas/checkout", icon: CreditCard },
-                { label: "Webhooks & API", value: "", href: "/vendas/webhooks", icon: Webhook },
-                { label: "Apps & Integrações", value: "", href: "/integracoes", icon: Layers },
-                { label: "Cupons", value: "", href: "/vendas/cupons", icon: Percent },
-                { label: "Identidade & KYC", value: "", href: "/financeiro/identidade", icon: ShieldCheck },
-                { label: "Dados bancários", value: "", href: "/financeiro/dados-bancarios", icon: Banknote },
-                { label: "Suporte", value: "", href: "/suporte", icon: Sparkles },
-              ].map((action) => (
-                <Link
-                  key={action.href}
-                  to={action.href}
-                  className="flex items-center gap-3 px-5 py-2.5 hover:bg-muted/20 transition-colors group"
-                >
-                  <action.icon className="h-3.5 w-3.5 text-muted-foreground/50 group-hover:text-foreground transition-colors shrink-0" />
-                  <span className="flex-1 text-[12px] font-semibold text-foreground/80 group-hover:text-foreground">{action.label}</span>
-                  {action.value && <span className="text-[11px] font-bold text-muted-foreground tabular-nums">{action.value}</span>}
-                  <ChevronRight className="h-3 w-3 text-muted-foreground/30 group-hover:text-foreground transition-colors" />
-                </Link>
-              ))}
+                        <p className="text-[12.5px] font-display font-black text-foreground tabular-nums tracking-tight shrink-0">
+                          {privacy.hidden ? CENSORED : fmt(item.amount)}
+                        </p>
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
             </div>
           </div>
         </section>
 
-        {/* ─── FOOTER SIGNATURE ─── */}
-        <footer className="flex items-center justify-between pt-4 mt-2 border-t border-border/30 text-[10px] font-semibold text-muted-foreground/40 uppercase tracking-[0.18em]">
-          <span>Hotzfy Gateway · v1.0</span>
-          <span className="flex items-center gap-1.5">
+        {/* ─────────────────────────────────────────────────────── */}
+        {/* EDITORIAL FOOTER                                          */}
+        {/* ─────────────────────────────────────────────────────── */}
+        <footer className="flex items-center justify-between pt-6 mt-2 border-t border-foreground/10">
+          <div className="flex items-center gap-3">
+            <span className="text-[10px] font-bold text-foreground/40 uppercase tracking-[0.32em]">Hotzfy</span>
+            <span className="h-3 w-px bg-foreground/15" />
+            <span className="text-[10px] font-medium text-muted-foreground/40 uppercase tracking-[0.24em]">Painel Executivo · Edição {format(new Date(), "MMM yyyy", { locale: ptBR })}</span>
+          </div>
+          <span className="inline-flex items-center gap-1.5 text-[10px] font-medium text-muted-foreground/40 uppercase tracking-[0.24em]">
             <span className="h-1 w-1 rounded-full bg-success animate-pulse" />
             Sistema operacional
           </span>
@@ -1192,6 +1234,58 @@ function SmallMetric({ icon, label, value, tone = "info" }: { icon: React.ReactN
         <span className="text-[11px] text-muted-foreground/70 font-semibold">{label}</span>
       </div>
       <p className={`text-lg font-display font-black tracking-tight tabular-nums ${s.valueTxt}`}>{value}</p>
+    </div>
+  );
+}
+
+/* ─── Editorial dashboard sub-components ─── */
+
+function EditorialKpi({ label, value, sub, accent }: { label: string; value: string; sub: string; accent: "success" | "warning" | "destructive" | "neutral" }) {
+  const accentDot: Record<string, string> = {
+    success: "bg-success",
+    warning: "bg-warning",
+    destructive: "bg-destructive",
+    neutral: "bg-foreground/30",
+  };
+  const accentText: Record<string, string> = {
+    success: "text-success",
+    warning: "text-warning",
+    destructive: "text-destructive",
+    neutral: "text-foreground",
+  };
+
+  return (
+    <div className="relative bg-card/60 backdrop-blur-xl px-5 py-6 hover:bg-card/80 transition-colors group">
+      <div className="flex items-center gap-2 mb-4">
+        <span className={cn("h-1.5 w-1.5 rounded-full", accentDot[accent])} />
+        <p className="text-[10px] font-bold text-muted-foreground/60 uppercase tracking-[0.22em]">{label}</p>
+      </div>
+      <p className={cn("font-display font-black tabular-nums tracking-[-0.04em] leading-none text-[28px] md:text-[32px]", accentText[accent])}>
+        {value}
+      </p>
+      <p className="mt-2.5 text-[10.5px] text-muted-foreground/60 font-medium leading-relaxed">{sub}</p>
+    </div>
+  );
+}
+
+function EditorialChannelRow({ name, approved, total, revenue, approvalRate, share, privacy }: { name: string; approved: number; total: number; revenue: number; approvalRate: number; share: number; privacy: boolean }) {
+  return (
+    <div className="px-5 md:px-6 py-5 hover:bg-foreground/[0.02] transition-colors">
+      <div className="flex items-baseline justify-between mb-3">
+        <p className="text-[13.5px] font-display font-black text-foreground tracking-[-0.02em]">{name}</p>
+        <p className="text-[15px] font-display font-black text-foreground tabular-nums tracking-[-0.03em]">
+          {privacy ? CENSORED : fmt(revenue)}
+        </p>
+      </div>
+      <div className="flex items-center gap-4 text-[10.5px] text-muted-foreground/70 font-semibold mb-3">
+        <span><span className="text-foreground/80 font-bold tabular-nums">{approved}</span><span className="text-muted-foreground/40">/{total}</span> aprovadas</span>
+        <span className="text-foreground/15">·</span>
+        <span>Aprovação <span className="text-foreground/80 font-bold tabular-nums">{approvalRate.toFixed(1)}%</span></span>
+        <span className="ml-auto text-[10px] uppercase tracking-[0.18em] text-muted-foreground/50">Share <span className="text-foreground/80 font-bold tabular-nums">{share.toFixed(1)}%</span></span>
+      </div>
+      <div className="h-[3px] w-full rounded-full bg-foreground/[0.06] overflow-hidden">
+        <div className="h-full rounded-full bg-foreground/80 transition-all duration-500" style={{ width: `${Math.min(share, 100)}%` }} />
+      </div>
     </div>
   );
 }
