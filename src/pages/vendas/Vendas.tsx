@@ -286,36 +286,38 @@ function TxRow({ tx, prods, onClick, i }: { tx: Tables<"transactions">; prods: R
  const gross = Number(tx.amount);
 
  return (
-  <tr onClick={onClick} className="group cursor-pointer border-b border-border/30 transition-all hover:bg-muted/10">
+  <tr onClick={onClick} className="group cursor-pointer border-b border-border/25 transition-all hover:bg-muted/15">
    {/* Left accent rail */}
    <td className="w-[3px] p-0 relative">
     <div className={cn(
-      "absolute inset-y-2 left-0 w-[3px] rounded-r-full transition-all duration-300",
-      tx.status === "completed" ? "bg-success/50 group-hover:bg-success" : tx.status === "pending" ? "bg-warning/50 group-hover:bg-warning" : "bg-muted-foreground/20 group-hover:bg-muted-foreground/40"
+      "absolute inset-y-3 left-0 w-[4px] rounded-r-full transition-all duration-300",
+      tx.status === "completed" ? "bg-success group-hover:shadow-[0_0_10px_hsl(var(--success)/0.4)]" : 
+      tx.status === "pending" ? "bg-warning group-hover:shadow-[0_0_10px_hsl(var(--warning)/0.4)]" : 
+      "bg-muted-foreground/30"
     )} />
    </td>
    {/* Customer */}
-   <td className="pl-6 pr-3 py-4 align-middle">
+   <td className="pl-6 pr-3 py-5 align-middle">
     <div className="flex items-center gap-4">
      <div className="relative">
-      <Avatar className="h-11 w-11 shrink-0 rounded-xl border border-border/40 shadow-sm bg-card transition-transform group-hover:scale-105">
-       <AvatarFallback className={cn("text-[11px] font-black tracking-tight rounded-xl", avatarColor(name))}>{initials(name)}</AvatarFallback>
+      <Avatar className="h-12 w-12 shrink-0 rounded-2xl border-2 border-border/40 shadow-sm bg-card transition-all group-hover:scale-105 group-hover:border-primary/20">
+       <AvatarFallback className={cn("text-[12px] font-black tracking-tight rounded-2xl", avatarColor(name))}>{initials(name)}</AvatarFallback>
       </Avatar>
       {tx.status === "completed" && (
-       <span className="absolute -bottom-0.5 -right-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-success ring-[2px] ring-card">
-        <Check className="h-2 w-2 text-success-foreground" strokeWidth={4} />
+       <span className="absolute -bottom-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-success ring-[2.5px] ring-card shadow-sm">
+        <Check className="h-2.5 w-2.5 text-success-foreground" strokeWidth={4} />
        </span>
       )}
        {tx.status === "pending" && (
-        <span className="absolute -bottom-0.5 -right-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-warning ring-[2px] ring-card">
-          <Clock className="h-2 w-2 text-warning-foreground" strokeWidth={4} />
+        <span className="absolute -bottom-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-warning ring-[2.5px] ring-card shadow-sm">
+          <Clock className="h-2.5 w-2.5 text-warning-foreground" strokeWidth={4} />
         </span>
        )}
       </div>
      <div className="min-w-0">
-      <p className="truncate text-[13px] font-heading font-bold text-foreground leading-tight tracking-[-0.01em]">{name}</p>
-      <div className="flex items-center gap-1.5 mt-1">
-       {tx.customer_email && <p className="truncate text-[10px] text-muted-foreground/40 max-w-[150px]">{tx.customer_email}</p>}
+      <p className="truncate text-[14px] font-heading font-black text-foreground leading-tight tracking-[-0.015em] group-hover:text-primary transition-colors">{name}</p>
+      <div className="flex items-center gap-1.5 mt-1.5">
+       {tx.customer_email && <p className="truncate text-[11px] font-medium text-muted-foreground/45 max-w-[180px]">{tx.customer_email}</p>}
        {tx.customer_phone && (
         <>
          <span className="h-0.5 w-0.5 rounded-full bg-muted-foreground/15 shrink-0" />
