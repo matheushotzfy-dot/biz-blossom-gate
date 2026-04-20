@@ -490,32 +490,40 @@ export default function Dashboard() {
       <motion.div
         initial={{ opacity: 0, y: 6 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
-        className="relative py-7 md:py-9"
+        transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+        className="relative py-8 md:py-10"
       >
         {/* ─────────────────────────────────────────────────────────────── */}
-        {/* COMMAND BAR · Compacta, institucional, direto ao controle        */}
+        {/* COMMAND BAR · institutional, refined controls                    */}
         {/* ─────────────────────────────────────────────────────────────── */}
-        <header className="mb-8 md:mb-10">
+        <header className="mb-9 md:mb-11">
           <div className="flex items-center justify-between gap-4 flex-wrap">
             {/* Identity block */}
-            <div className="flex items-center gap-3.5 min-w-0">
-              <div className="relative h-10 w-10 rounded-[9px] bg-foreground text-background flex items-center justify-center shrink-0 shadow-[0_4px_14px_-4px_hsl(var(--foreground)/0.35),inset_0_1px_0_hsl(var(--background)/0.15)]">
-                <span className="font-display font-black text-[15px] tracking-[-0.06em] leading-none">H</span>
-                <span className="absolute -right-0.5 -bottom-0.5 h-2 w-2 rounded-full bg-success ring-[2px] ring-background">
+            <div className="flex items-center gap-4 min-w-0">
+              <div className="relative h-11 w-11 rounded-[10px] bg-gradient-to-br from-foreground via-foreground to-foreground/85 text-background flex items-center justify-center shrink-0 shadow-[0_6px_20px_-6px_hsl(var(--foreground)/0.45),inset_0_1px_0_hsl(var(--background)/0.18),inset_0_-1px_0_hsl(var(--foreground)/0.4)]">
+                <span className="font-display font-black text-[16px] tracking-[-0.07em] leading-none">H</span>
+                <span className="absolute -right-0.5 -bottom-0.5 h-2.5 w-2.5 rounded-full bg-success ring-[2.5px] ring-background">
                   <span className="absolute inset-0 rounded-full bg-success animate-ping opacity-75" />
                 </span>
               </div>
               <div className="flex flex-col min-w-0">
-                <div className="flex items-center gap-2">
-                  <span className="font-display font-bold text-[14px] text-foreground tracking-[-0.02em] leading-none">HOTZFY</span>
-                  <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-[4px] bg-foreground/[0.06] border border-foreground/[0.06] text-[8.5px] font-mono uppercase tracking-[0.16em] text-foreground/65 font-bold">
-                    <span className="h-1 w-1 rounded-full bg-success animate-pulse" />
+                <div className="flex items-center gap-2.5">
+                  <span className="font-display font-bold text-[15px] text-foreground tracking-[-0.03em] leading-none">HOTZFY</span>
+                  <span className="h-3 w-px bg-foreground/12" />
+                  <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-[5px] bg-foreground/[0.05] border border-foreground/[0.07] text-[8.5px] font-mono uppercase tracking-[0.18em] text-foreground/70 font-bold">
+                    <span className="relative flex h-1 w-1">
+                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-success opacity-70" />
+                      <span className="relative inline-flex rounded-full h-1 w-1 bg-success" />
+                    </span>
                     Live
                   </span>
+                  <span className="hidden lg:inline-flex items-center gap-1 text-[9px] font-mono uppercase tracking-[0.18em] text-muted-foreground/60 font-bold">
+                    <span className="h-1 w-1 rounded-full bg-foreground/25" />
+                    Treasury
+                  </span>
                 </div>
-                <span className="hidden md:inline-block mt-1 font-mono text-[9.5px] uppercase tracking-[0.18em] text-muted-foreground/80 tabular-nums">
-                  {format(new Date(), "EEE · dd MMM yyyy · HH:mm", { locale: ptBR })}
+                <span className="hidden md:inline-block mt-1.5 font-mono text-[9.5px] uppercase tracking-[0.2em] text-muted-foreground/75 tabular-nums">
+                  {format(new Date(), "EEE · dd MMM yyyy · HH:mm", { locale: ptBR })} <span className="text-muted-foreground/30">· BRT</span>
                 </span>
               </div>
             </div>
@@ -524,7 +532,7 @@ export default function Dashboard() {
             <div className="flex items-center gap-2 ml-auto flex-wrap">
               {productsData && productsData.length > 0 && (
                 <Select value={selectedProductId} onValueChange={setSelectedProductId}>
-                  <SelectTrigger className="h-10 w-[200px] text-[12px] font-semibold rounded-[8px] border-foreground/[0.12] bg-card/60 backdrop-blur-xl hover:border-foreground/30 hover:bg-foreground/[0.025] transition-all shadow-[0_1px_2px_hsl(var(--foreground)/0.04)]">
+                  <SelectTrigger className="h-10 w-[210px] text-[12px] font-semibold rounded-[9px] border-foreground/[0.1] bg-card/70 backdrop-blur-xl hover:border-foreground/25 hover:bg-foreground/[0.025] transition-all shadow-[0_1px_2px_hsl(var(--foreground)/0.04),inset_0_1px_0_hsl(var(--background)/0.4)]">
                     <SelectValue placeholder="Todos os produtos" />
                   </SelectTrigger>
                   <SelectContent>
@@ -536,16 +544,16 @@ export default function Dashboard() {
                 </Select>
               )}
 
-              <div className="inline-flex items-center rounded-[8px] border border-foreground/[0.12] bg-card/60 backdrop-blur-xl overflow-hidden shadow-[0_1px_2px_hsl(var(--foreground)/0.04)]">
+              <div className="inline-flex items-center rounded-[9px] border border-foreground/[0.1] bg-card/70 backdrop-blur-xl overflow-hidden shadow-[0_1px_2px_hsl(var(--foreground)/0.04),inset_0_1px_0_hsl(var(--background)/0.4)]">
                 {PERIOD_PRESETS.map((opt, idx) => (
                   <button
                     key={opt.label}
                     onClick={() => { setSelectedPeriod(opt); setIsCustom(false); setCustomRange(undefined); }}
                     className={cn(
-                      "px-3.5 h-10 text-[10.5px] font-bold uppercase tracking-[0.1em] transition-all",
-                      idx > 0 && "border-l border-foreground/[0.08]",
+                      "px-3.5 h-10 text-[10.5px] font-bold uppercase tracking-[0.12em] transition-all relative",
+                      idx > 0 && "border-l border-foreground/[0.07]",
                       !isCustom && selectedPeriod.label === opt.label
-                        ? "bg-foreground text-background"
+                        ? "bg-foreground text-background shadow-[inset_0_1px_0_hsl(var(--background)/0.15)]"
                         : "text-muted-foreground hover:text-foreground hover:bg-foreground/[0.04]"
                     )}
                   >
@@ -556,8 +564,8 @@ export default function Dashboard() {
                   <PopoverTrigger asChild>
                     <button
                       className={cn(
-                        "px-3 h-10 text-[10.5px] font-bold transition-all border-l border-foreground/[0.08] inline-flex items-center gap-1.5",
-                        isCustom ? "bg-foreground text-background" : "text-muted-foreground hover:text-foreground hover:bg-foreground/[0.04]"
+                        "px-3 h-10 text-[10.5px] font-bold transition-all border-l border-foreground/[0.07] inline-flex items-center gap-1.5",
+                        isCustom ? "bg-foreground text-background shadow-[inset_0_1px_0_hsl(var(--background)/0.15)]" : "text-muted-foreground hover:text-foreground hover:bg-foreground/[0.04]"
                       )}
                     >
                       <CalendarDays className="h-3.5 w-3.5" />
@@ -581,7 +589,7 @@ export default function Dashboard() {
 
               <button
                 onClick={privacy.toggle}
-                className="h-10 w-10 inline-flex items-center justify-center rounded-[8px] border border-foreground/[0.12] bg-card/60 backdrop-blur-xl text-muted-foreground hover:text-foreground hover:border-foreground/30 hover:bg-foreground/[0.025] transition-all shadow-[0_1px_2px_hsl(var(--foreground)/0.04)]"
+                className="h-10 w-10 inline-flex items-center justify-center rounded-[9px] border border-foreground/[0.1] bg-card/70 backdrop-blur-xl text-muted-foreground hover:text-foreground hover:border-foreground/25 hover:bg-foreground/[0.025] transition-all shadow-[0_1px_2px_hsl(var(--foreground)/0.04),inset_0_1px_0_hsl(var(--background)/0.4)]"
                 title={privacy.hidden ? "Mostrar valores" : "Ocultar valores"}
               >
                 {privacy.hidden ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
