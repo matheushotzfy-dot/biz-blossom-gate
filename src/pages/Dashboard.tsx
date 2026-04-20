@@ -469,7 +469,7 @@ export default function Dashboard() {
       {/* ════════════════════════════════════════════════════════════════ */}
       {/* HERO — ONE DOMINANT METRIC                                       */}
       {/* ════════════════════════════════════════════════════════════════ */}
-      <section className="relative mb-4 rounded-2xl border border-border bg-card overflow-hidden">
+      <section className="relative mb-4 rounded-2xl border border-border/50 bg-card/40 backdrop-blur-xl overflow-hidden shadow-sm transition-all hover:shadow-md hover:border-border/80">
         <div className="absolute top-0 left-0 right-0 h-[2px] bg-primary" />
 
         {/* Toolbar */}
@@ -530,7 +530,7 @@ export default function Dashboard() {
                 : `· ${selectedPeriod.label}`}
             </p>
             <div className="flex items-baseline gap-3.5 flex-wrap">
-              <span className="inline-flex items-baseline text-[clamp(2.8rem,9vw,82px)] font-heading font-black leading-none tracking-[-0.06em] text-foreground whitespace-nowrap drop-shadow-sm">
+              <span className="inline-flex items-baseline text-[clamp(2.8rem,9vw,82px)] font-heading font-black leading-none tracking-[-0.06em] text-foreground whitespace-nowrap drop-shadow-[0_0_20px_rgba(var(--primary),0.15)]">
                 {privacy.hidden ? "R$ •••••••" : <AnimatedNumber value={revenue} duration={1000} />}
               </span>
               {approved.length > 0 && (
@@ -565,7 +565,7 @@ export default function Dashboard() {
               <span className="h-1.5 w-1.5 rounded-full bg-success animate-pulse" />
               <p className="text-[9px] font-heading font-bold uppercase tracking-[0.2em] text-muted-foreground/80">Disponível para saque</p>
             </div>
-            <p className="text-[clamp(1.8rem,5vw,46px)] font-heading font-black tabular-nums text-success tracking-[-0.05em] leading-none drop-shadow-sm">
+            <p className="text-[clamp(1.8rem,5vw,46px)] font-heading font-black tabular-nums text-success tracking-[-0.05em] leading-none drop-shadow-[0_0_15px_rgba(var(--success),0.2)]">
               {privacy.hidden ? CENSORED : fmt(Math.abs(balance))}
             </p>
             <div className="mt-5 flex flex-wrap items-center gap-3">
@@ -603,7 +603,7 @@ export default function Dashboard() {
       {/* ════════════════════════════════════════════════════════════════ */}
       {/* DOMINANT CHART AREA                                              */}
       {/* ════════════════════════════════════════════════════════════════ */}
-      <section className="mb-4 rounded-2xl border border-border bg-card overflow-hidden">
+      <section className="mb-4 rounded-2xl border border-border/50 bg-card/40 backdrop-blur-xl overflow-hidden shadow-sm transition-all hover:shadow-md hover:border-border/80">
         <div className="grid grid-cols-1 xl:grid-cols-[1fr_260px]">
           {/* Chart */}
           <div className="flex flex-col border-b xl:border-b-0 xl:border-r border-border/40">
@@ -621,31 +621,65 @@ export default function Dashboard() {
             </div>
             <div className="flex-1 px-2 py-4 min-h-[480px]">
               <ResponsiveContainer width="100%" height="100%">
-                <AreaChart data={chartData} margin={{ top: 10, right: 16, left: -12, bottom: 0 }}>
+                <AreaChart data={chartData} margin={{ top: 20, right: 20, left: -10, bottom: 0 }}>
                   <defs>
                     <linearGradient id="dashboardRevenue" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="0%" stopColor="hsl(var(--primary))" stopOpacity={0.22} />
+                      <stop offset="0%" stopColor="hsl(var(--primary))" stopOpacity={0.25} />
+                      <stop offset="60%" stopColor="hsl(var(--primary))" stopOpacity={0.05} />
                       <stop offset="100%" stopColor="hsl(var(--primary))" stopOpacity={0} />
                     </linearGradient>
+                    <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+                      <feGaussianBlur stdDeviation="3" result="blur" />
+                      <feComposite in="SourceGraphic" in2="blur" operator="over" />
+                    </filter>
                   </defs>
-                  <XAxis dataKey="name" tickLine={false} axisLine={false} dy={8} stroke="hsl(var(--muted-foreground) / 0.5)" fontSize={10} interval={chartData.length > 10 ? Math.ceil(chartData.length / 8) - 1 : 0} />
-                  <YAxis tickLine={false} axisLine={false} width={64} stroke="hsl(var(--muted-foreground) / 0.5)" fontSize={10} tickFormatter={(v) => v >= 1000 ? `R$${(v / 1000).toLocaleString("pt-BR", { minimumFractionDigits: 1, maximumFractionDigits: 1 })}k` : `R$${v.toLocaleString("pt-BR", { minimumFractionDigits: 0 })}`} />
+                  <XAxis 
+                    dataKey="name" 
+                    tickLine={false} 
+                    axisLine={false} 
+                    dy={12} 
+                    stroke="hsl(var(--muted-foreground) / 0.45)" 
+                    fontSize={10} 
+                    fontWeight={500}
+                    interval={chartData.length > 12 ? Math.ceil(chartData.length / 8) - 1 : 0} 
+                  />
+                  <YAxis 
+                    tickLine={false} 
+                    axisLine={false} 
+                    width={60} 
+                    stroke="hsl(var(--muted-foreground) / 0.45)" 
+                    fontSize={10} 
+                    fontWeight={500}
+                    tickFormatter={(v) => v >= 1000 ? `R$${(v / 1000).toLocaleString("pt-BR", { minimumFractionDigits: 1, maximumFractionDigits: 1 })}k` : `R$${v.toLocaleString("pt-BR", { minimumFractionDigits: 0 })}`} 
+                  />
                   <Tooltip
-                    cursor={{ stroke: "hsl(var(--primary) / 0.3)", strokeWidth: 1, strokeDasharray: "4 4" }}
+                    cursor={{ stroke: "hsl(var(--primary) / 0.25)", strokeWidth: 1.5, strokeDasharray: "4 4" }}
                     content={({ active, payload, label }) => {
                       if (!active || !payload?.length) return null;
                       const value = payload[0].value as number;
                       return (
-                        <div className="rounded-lg border border-border bg-card px-3 py-2 shadow-lg">
-                          <p className="text-[9px] font-heading text-muted-foreground/70 uppercase tracking-wider">{label}</p>
-                          <p className="text-[13px] font-heading font-black text-primary tabular-nums mt-0.5">
-                            R$ {value.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                          </p>
+                        <div className="rounded-xl border border-border/50 bg-card/90 backdrop-blur-md px-3.5 py-2.5 shadow-xl ring-1 ring-black/5">
+                          <p className="text-[10px] font-heading font-bold text-muted-foreground/60 uppercase tracking-widest">{label}</p>
+                          <div className="flex items-center gap-2 mt-1">
+                            <div className="h-2 w-2 rounded-full bg-primary" />
+                            <p className="text-[14px] font-heading font-black text-foreground tabular-nums">
+                              R$ {value.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                            </p>
+                          </div>
                         </div>
                       );
                     }}
                   />
-                  <Area type="monotone" dataKey="vendas" stroke="hsl(var(--primary))" strokeWidth={2.2} fill="url(#dashboardRevenue)" dot={false} activeDot={{ r: 5, strokeWidth: 2, fill: "hsl(var(--card))", stroke: "hsl(var(--primary))" }} />
+                  <Area 
+                    type="monotone" 
+                    dataKey="vendas" 
+                    stroke="hsl(var(--primary))" 
+                    strokeWidth={3} 
+                    fill="url(#dashboardRevenue)" 
+                    dot={false} 
+                    activeDot={{ r: 6, strokeWidth: 2.5, fill: "hsl(var(--card))", stroke: "hsl(var(--primary))", filter: "url(#glow)" }} 
+                    animationDuration={1500}
+                  />
                 </AreaChart>
               </ResponsiveContainer>
             </div>
@@ -926,7 +960,7 @@ function MiniHeroCard({ icon, label, value, tone, idx = 0 }: { icon: React.React
   };
 
   return (
-    <div className={`group relative rounded-2xl border border-border/50 bg-card p-3 md:p-4 transition-all duration-200 hover:border-border/80 overflow-hidden animate-fade-in ${STAGGER_CLASSES[idx + 1] || ""}`}>
+    <div className={`group relative rounded-2xl border border-border/40 bg-card/60 backdrop-blur-xl p-3 md:p-4 transition-all duration-300 hover:border-border/80 hover:bg-card/80 shadow-sm hover:shadow-md overflow-hidden animate-fade-in ${STAGGER_CLASSES[idx + 1] || ""}`}>
       {/* Left accent bar */}
       <div className={`absolute left-0 top-0 bottom-0 w-[3px] rounded-full ${accentBar[tone]}`} />
       <div className="relative z-10 pl-1.5">
@@ -952,7 +986,7 @@ function KpiTile({ icon, label, value, helper, tone, delay }: { icon: React.Reac
   };
 
   return (
-    <div className={`group relative rounded-2xl border border-border/50 bg-card p-3.5 md:p-4 transition-all duration-200 hover:border-border/80 overflow-hidden animate-fade-in flex flex-col justify-between min-h-[130px] ${delay || ""}`}>
+    <div className={`group relative rounded-2xl border border-border/40 bg-card/60 backdrop-blur-xl p-3.5 md:p-4 transition-all duration-300 hover:border-border/80 hover:bg-card/80 shadow-sm hover:shadow-md overflow-hidden animate-fade-in flex flex-col justify-between min-h-[130px] ${delay || ""}`}>
       {/* Left accent bar */}
       <div className={`absolute left-0 top-0 bottom-0 w-[3px] rounded-full ${accentBar[tone]}`} />
       <div className="pl-1.5 flex flex-col h-full">
@@ -964,7 +998,7 @@ function KpiTile({ icon, label, value, helper, tone, delay }: { icon: React.Reac
         </div>
         <div className="mt-auto">
           <p className="text-[22px] md:text-[26px] font-display font-black tracking-[-0.03em] text-foreground tabular-nums leading-none">{value}</p>
-          <p className="mt-1.5 text-[10px] md:text-[11px] text-muted-foreground/70 font-medium">{helper}</p>
+          <p className="mt-1.5 text-[10px] md:text-[11px] text-muted-foreground/80 font-medium">{helper}</p>
         </div>
       </div>
     </div>

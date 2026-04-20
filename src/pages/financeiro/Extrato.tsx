@@ -173,7 +173,7 @@ function KpiTile({ label, value, icon: Icon, delta, sparkData, hidden, color = "
  </div>
  {sparkData && sparkData.length > 1 && <Sparkline data={sparkData} color={color} />}
  </div>
- <p className="text-[9px] font-heading uppercase tracking-[0.2em] text-muted-foreground/35 mb-1.5">{label}</p>
+ <p className="text-[9px] font-heading uppercase tracking-[0.2em] text-muted-foreground/60 mb-1.5">{label}</p>
  <div className="flex items-end gap-2">
  <span className="text-2xl font-heading tabular-nums tracking-tight text-foreground leading-none">
  {hidden ? HIDE : <AnimatedNumber value={value} formatter={formatter} />}
@@ -228,7 +228,7 @@ function RevenueChart({ data, hidden }: { data: { label: string; value: number; 
 function SortHead({ label, field, sort, onSort, className }: { label: string; field: SortField; sort: { field: SortField; dir: SortDir }; onSort: (f: SortField) => void; className?: string }) {
  const active = sort.field === field;
  return (
- <th onClick={() => onSort(field)} className={cn("text-left py-3.5 px-4 text-[10px] font-display font-bold text-muted-foreground/40 uppercase tracking-wider cursor-pointer select-none hover:text-foreground/60 transition-colors group", className)}>
+ <th onClick={() => onSort(field)} className={cn("text-left py-3.5 px-4 text-[10px] font-display font-bold text-muted-foreground/60 uppercase tracking-wider cursor-pointer select-none hover:text-foreground/80 transition-colors group", className)}>
  <span className="inline-flex items-center gap-1">
  {label}
  {active
@@ -265,17 +265,17 @@ function TxRow({ tx, prods, onClick, i }: { tx: Tables<"transactions">; prods: R
  </Avatar>
  <div className="min-w-0">
  <p className="text-[12px] font-display font-semibold text-foreground truncate leading-tight">{name}</p>
- {tx.customer_email && <p className="text-[10px] text-muted-foreground/30 truncate mt-0.5 font-mono">{tx.customer_email}</p>}
+ {tx.customer_email && <p className="text-[10px] text-muted-foreground/60 truncate mt-0.5 font-mono">{tx.customer_email}</p>}
  </div>
  </div>
  </td>
  <td className="py-4 px-4">
- <span className="text-[11px] text-muted-foreground/40 truncate block max-w-[140px] font-display">{tx.product_id ? (prods[tx.product_id] || "—") : "—"}</span>
+ <span className="text-[11px] text-muted-foreground/70 truncate block max-w-[140px] font-display">{tx.product_id ? (prods[tx.product_id] || "—") : "—"}</span>
  </td>
  <td className="py-4 px-4">
  <div>
  <span className="text-[13px] font-display font-bold text-foreground tabular-nums tracking-tight">{fmt(Number(tx.amount))}</span>
- <p className="text-[9px] text-muted-foreground/20 tabular-nums mt-0.5 font-mono">líq. {fmt(Number(tx.net_amount))}</p>
+ <p className="text-[9px] text-muted-foreground/50 tabular-nums mt-0.5 font-mono">líq. {fmt(Number(tx.net_amount))}</p>
  </div>
  </td>
  <td className="py-4 px-4">
@@ -291,8 +291,8 @@ function TxRow({ tx, prods, onClick, i }: { tx: Tables<"transactions">; prods: R
  </td>
  <td className="py-4 px-4">
  <div className="flex flex-col">
- <span className="text-[11px] text-muted-foreground/35 tabular-nums font-mono">{fmtDate(tx.created_at)}</span>
- <span className="text-[9px] text-muted-foreground/20 tabular-nums font-mono">{fmtTime(tx.created_at)}</span>
+  <span className="text-[11px] text-muted-foreground/65 tabular-nums font-mono">{fmtDate(tx.created_at)}</span>
+  <span className="text-[9px] text-muted-foreground/50 tabular-nums font-mono">{fmtTime(tx.created_at)}</span>
  </div>
  </td>
  <td className="py-4 px-2">
