@@ -28,11 +28,9 @@ import { motion, AnimatePresence } from "framer-motion";
 
 /* ─── Constants ─── */
 const TABS = [
- { id: "visual", label: "Visual", icon: Palette },
- { id: "payment", label: "Pagamento", icon: CreditCard },
- { id: "form", label: "Formulário", icon: Mail },
- { id: "bumps", label: "Order Bumps", icon: Package },
- { id: "cro", label: "Conversão", icon: Zap },
+  { id: "visual", label: "Design", icon: Palette },
+  { id: "form", label: "Formulário", icon: Mail },
+  { id: "cro", label: "Conversão", icon: Zap },
 ] as const;
 type TabId = typeof TABS[number]["id"];
 
