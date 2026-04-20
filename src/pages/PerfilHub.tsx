@@ -6,8 +6,8 @@ import Perfil from "./Perfil";
 import Identidade from "./financeiro/Identidade";
 
 const TABS: HubTab[] = [
- { id: "perfil", label: "Meu Perfil", icon: User },
- { id: "identidade", label: "Identidade & KYC", icon: UserCircle },
+ { id: "perfil", label: "Meu Perfil" },
+ { id: "identidade", label: "Identidade & KYC" },
 ];
 
 const isValidTab = (value: string | null): value is "perfil" | "identidade" => value === "perfil" || value === "identidade";

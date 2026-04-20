@@ -5,8 +5,8 @@ import Saques from "./Saques";
 import SaquesCrypto from "./SaquesCrypto";
 
 const TABS: HubTab[] = [
- { id: "pix", label: "Saques PIX", icon: ArrowDownToLine },
- { id: "crypto", label: "Saques Crypto", icon: Bitcoin },
+ { id: "pix", label: "Saques PIX" },
+ { id: "crypto", label: "Saques Crypto" },
 ];
 
 export default function SaquesHub() {
