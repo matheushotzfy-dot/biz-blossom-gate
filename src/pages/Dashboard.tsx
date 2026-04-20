@@ -333,6 +333,7 @@ export default function Dashboard() {
     const revenueByDate = new Map<string, number>();
     for (const t of transactions) {
       if (t.status !== "completed") continue;
+      if (selectedProductId !== "all" && t.product_id !== selectedProductId) continue;
       const dateKey = toBrasiliaDate(t.created_at);
       revenueByDate.set(dateKey, (revenueByDate.get(dateKey) || 0) + Number(t.net_amount));
     }
