@@ -588,81 +588,75 @@ export default function Dashboard() {
         </header>
 
         {/* ─────────────────────────────────────────────────────────────── */}
-        {/* TREASURY STATEMENT · Demonstrativo principal                     */}
+        {/* TREASURY · Receita líquida + Saldo (premium 4K)                  */}
         {/* ─────────────────────────────────────────────────────────────── */}
-        <section className="mb-16 md:mb-20">
-          <div className="flex items-center gap-3 mb-6">
-            <span className="font-mono text-[10px] font-bold text-foreground/60 tracking-[0.22em]">§ 02</span>
-            <span className="h-px flex-1 bg-gradient-to-r from-foreground/15 via-foreground/8 to-transparent" />
-            <span className="font-mono text-[10px] uppercase font-bold text-muted-foreground tracking-[0.22em]">Demonstrativo de Tesouraria</span>
-          </div>
+        <section className="mb-7 md:mb-9">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 md:gap-5">
+            {/* Receita líquida — bloco principal */}
+            <div className="lg:col-span-8 relative rounded-[20px] border border-foreground/[0.09] bg-card overflow-hidden shadow-[0_1px_0_hsl(var(--foreground)/0.04),0_24px_60px_-24px_hsl(var(--foreground)/0.18)] group/block">
+              <div className="absolute inset-0 bg-gradient-to-br from-foreground/[0.025] via-transparent to-transparent pointer-events-none" />
+              <div className="absolute -top-32 -right-32 h-80 w-80 rounded-full bg-primary/[0.06] blur-[120px] pointer-events-none" />
+              <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-foreground/15 to-transparent" />
 
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-px bg-foreground/[0.08] border border-foreground/[0.1] rounded-[12px] overflow-hidden shadow-[0_1px_3px_hsl(var(--foreground)/0.04),0_8px_40px_-12px_hsl(var(--foreground)/0.08)]">
-            {/* Receita líquida — block principal */}
-            <div className="lg:col-span-8 bg-card relative group/block">
-              {/* Subtle radial accent on hover */}
-              <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,hsl(var(--primary)/0.04),transparent_60%)] opacity-0 group-hover/block:opacity-100 transition-opacity duration-700 pointer-events-none" />
-
-              {/* Vertical signature glyph */}
-              <div className="absolute top-0 bottom-0 left-0 w-[36px] flex flex-col items-center justify-between py-7 border-r border-foreground/[0.06] bg-gradient-to-b from-foreground/[0.02] via-foreground/[0.01] to-foreground/[0.02] z-10">
-                <span className="font-mono text-[8.5px] font-bold text-muted-foreground tracking-[0.3em]" style={{ writingMode: "vertical-rl", transform: "rotate(180deg)" }}>NET REVENUE · BRL</span>
-                <span className="font-mono text-[8.5px] font-bold text-foreground/40 tracking-[0.2em]">01</span>
-              </div>
-
-              <div className="relative pl-[54px] pr-8 md:pr-10 lg:pr-12 py-10 md:py-12">
-                <div className="flex items-start justify-between gap-4 mb-7">
+              <div className="relative px-7 md:px-10 lg:px-12 pt-9 pb-9 md:pt-11 md:pb-11">
+                <div className="flex items-start justify-between gap-4 mb-8">
                   <div>
-                    <p className="text-[10px] font-mono font-bold text-muted-foreground uppercase tracking-[0.22em] mb-2">Receita líquida consolidada</p>
-                    <p className="text-[11.5px] text-muted-foreground/80 leading-relaxed">Período: {selectedPeriod.label.toLowerCase()} · valores em reais</p>
+                    <div className="flex items-center gap-2 mb-3">
+                      <span className="font-mono text-[9.5px] font-bold text-muted-foreground uppercase tracking-[0.24em]">Receita Líquida</span>
+                      <span className="h-px w-8 bg-foreground/20" />
+                      <span className="font-mono text-[9.5px] font-bold text-muted-foreground/70 uppercase tracking-[0.18em]">{selectedPeriod.label}</span>
+                    </div>
+                    <p className="text-[12px] text-muted-foreground/80 leading-relaxed">Total apurado · valores em reais (BRL)</p>
                   </div>
-                  <div className="hidden md:inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-success/[0.08] border border-success/15 text-[9.5px] font-mono uppercase tracking-[0.16em] text-success font-bold shrink-0 mt-1">
-                    <span className="h-1 w-1 rounded-full bg-success animate-pulse" />
+                  <div className="hidden md:inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-success/[0.1] border border-success/20 text-[9.5px] font-mono uppercase tracking-[0.16em] text-success font-bold shrink-0 mt-1 shadow-[0_0_12px_-2px_hsl(var(--success)/0.3)]">
+                    <span className="relative flex h-1.5 w-1.5">
+                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-success opacity-60" />
+                      <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-success" />
+                    </span>
                     Apurado
                   </div>
                 </div>
 
-                <div className="font-display font-semibold text-foreground tabular-nums leading-[0.92] tracking-[-0.052em] text-[54px] md:text-[82px] lg:text-[102px]">
+                <div className="font-display font-semibold text-foreground tabular-nums leading-[0.92] tracking-[-0.055em] text-[60px] md:text-[92px] lg:text-[116px]">
                   {privacy.hidden ? (
-                    <span className="text-foreground/25">{CENSORED}</span>
+                    <span className="text-foreground/20">{CENSORED}</span>
                   ) : (
                     <span className="inline-flex items-baseline gap-3">
-                      <span className="text-[0.3em] font-medium text-muted-foreground/60 self-start mt-3 tracking-normal">R$</span>
-                      <span className="bg-gradient-to-br from-foreground via-foreground/95 to-foreground/75 bg-clip-text text-transparent">
+                      <span className="text-[0.28em] font-medium text-muted-foreground/60 self-start mt-3 tracking-normal">R$</span>
+                      <span className="bg-gradient-to-br from-foreground via-foreground/95 to-foreground/70 bg-clip-text text-transparent drop-shadow-[0_2px_24px_hsl(var(--foreground)/0.08)]">
                         <AnimatedNumber value={revenue} formatter={(v) => v.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} />
                       </span>
                     </span>
                   )}
                 </div>
 
-                {/* Tri-column stats — accountant ledger */}
-                <div className="mt-11 grid grid-cols-3 border-t border-foreground/[0.07]">
+                <div className="mt-12 grid grid-cols-3 border-t border-foreground/[0.08]">
                   {[
                     { label: "TPV bruto", code: "GMV", value: privacy.hidden ? CENSORED : fmt(approved.reduce((a, t) => a + Number(t.amount), 0)) },
                     { label: "MDR efetivo", code: "MDR", value: (() => { const gross = approved.reduce((a, t) => a + Number(t.amount), 0); const fees = approved.reduce((a, t) => a + Number(t.fee_amount), 0); return gross > 0 ? `${((fees / gross) * 100).toFixed(2)}%` : "0,00%"; })() },
                     { label: "Ticket médio", code: "AOV", value: privacy.hidden ? CENSORED : fmt(approved.length > 0 ? revenue / approved.length : 0) },
                   ].map((m, i) => (
-                    <div key={i} className={cn("py-6 pr-4 group/stat", i > 0 && "pl-6 border-l border-foreground/[0.07]")}>
-                      <div className="flex items-center gap-1.5 mb-2.5">
-                        <span className="font-mono text-[8.5px] font-bold text-muted-foreground/80 tracking-[0.2em]">{m.code}</span>
-                        <span className="text-[10px] text-muted-foreground/40">·</span>
-                        <span className="text-[10px] font-medium text-muted-foreground tracking-tight">{m.label}</span>
+                    <div key={i} className={cn("py-7 pr-4 group/stat", i > 0 && "pl-7 border-l border-foreground/[0.08]")}>
+                      <div className="flex items-center gap-1.5 mb-3">
+                        <span className="font-mono text-[8.5px] font-bold text-muted-foreground/80 tracking-[0.22em]">{m.code}</span>
+                        <span className="text-[10px] text-muted-foreground/30">·</span>
+                        <span className="text-[10px] font-medium text-muted-foreground tracking-tight uppercase">{m.label}</span>
                       </div>
-                      <p className="text-[17px] md:text-[19px] font-display font-semibold text-foreground tabular-nums tracking-[-0.025em] leading-none transition-transform group-hover/stat:translate-x-0.5 duration-300">{m.value}</p>
+                      <p className="text-[20px] md:text-[24px] font-display font-semibold text-foreground tabular-nums tracking-[-0.028em] leading-none transition-transform group-hover/stat:translate-x-0.5 duration-300">{m.value}</p>
                     </div>
                   ))}
                 </div>
 
-                {/* CTA row */}
-                <div className="mt-10 flex flex-wrap items-center gap-2.5">
-                  <Link to="/financeiro/saques" className="group/cta inline-flex items-center gap-2 h-10 px-4 rounded-[7px] bg-foreground text-background text-[11.5px] font-bold hover:bg-foreground/90 transition-all shadow-[0_2px_6px_-1px_hsl(var(--foreground)/0.2)] hover:shadow-[0_4px_12px_-2px_hsl(var(--foreground)/0.3)] hover:-translate-y-px">
-                    <Wallet className="h-3.5 w-3.5" />
+                <div className="mt-9 flex flex-wrap items-center gap-2.5">
+                  <Link to="/financeiro/saques" className="group/cta inline-flex items-center gap-2 h-11 px-5 rounded-[9px] bg-foreground text-background text-[12px] font-bold hover:bg-foreground/90 transition-all shadow-[0_4px_14px_-4px_hsl(var(--foreground)/0.45),inset_0_1px_0_hsl(var(--background)/0.15)] hover:shadow-[0_8px_24px_-4px_hsl(var(--foreground)/0.55),inset_0_1px_0_hsl(var(--background)/0.15)] hover:-translate-y-px">
+                    <Wallet className="h-4 w-4" />
                     Solicitar saque
                     <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover/cta:translate-x-0.5" />
                   </Link>
-                  <Link to="/vendas" className="inline-flex items-center gap-2 h-10 px-4 rounded-[7px] border border-foreground/15 text-foreground text-[11.5px] font-bold hover:bg-foreground/[0.04] hover:border-foreground/30 transition-all">
+                  <Link to="/vendas" className="inline-flex items-center gap-2 h-11 px-5 rounded-[9px] border border-foreground/[0.14] bg-card/40 backdrop-blur text-foreground text-[12px] font-bold hover:bg-foreground/[0.04] hover:border-foreground/30 transition-all">
                     Ver transações
                   </Link>
-                  <span className="ml-auto hidden md:inline text-[10px] font-mono text-muted-foreground/70 tracking-[0.14em]">
+                  <span className="ml-auto hidden md:inline font-mono text-[9.5px] text-muted-foreground/60 tracking-[0.18em] uppercase">
                     REF · {format(new Date(), "yyyyMMdd")}
                   </span>
                 </div>
@@ -670,65 +664,62 @@ export default function Dashboard() {
             </div>
 
             {/* Saldo / Liquidação */}
-            <div className="lg:col-span-4 bg-card relative group/balance">
-              <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,hsl(var(--primary)/0.05),transparent_60%)] opacity-0 group-hover/balance:opacity-100 transition-opacity duration-700 pointer-events-none" />
+            <div className="lg:col-span-4 relative rounded-[20px] border border-foreground/[0.09] bg-card overflow-hidden shadow-[0_1px_0_hsl(var(--foreground)/0.04),0_24px_60px_-24px_hsl(var(--foreground)/0.18)] group/balance">
+              <div className="absolute inset-0 bg-gradient-to-bl from-foreground/[0.03] via-transparent to-transparent pointer-events-none" />
+              <div className="absolute -top-24 -left-24 h-64 w-64 rounded-full bg-primary/[0.05] blur-[100px] pointer-events-none" />
+              <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-foreground/15 to-transparent" />
 
-              <div className="absolute top-0 bottom-0 left-0 w-[36px] flex flex-col items-center justify-between py-7 border-r border-foreground/[0.06] bg-gradient-to-b from-foreground/[0.02] via-foreground/[0.01] to-foreground/[0.02] z-10">
-                <span className="font-mono text-[8.5px] font-bold text-muted-foreground tracking-[0.3em]" style={{ writingMode: "vertical-rl", transform: "rotate(180deg)" }}>SETTLEMENT</span>
-                <span className="font-mono text-[8.5px] font-bold text-foreground/40 tracking-[0.2em]">02</span>
-              </div>
-
-              <div className="relative pl-[54px] pr-8 md:pr-10 py-10 md:py-12 flex flex-col gap-7 h-full">
+              <div className="relative px-7 md:px-9 pt-9 pb-9 md:pt-11 md:pb-11 flex flex-col gap-7 h-full">
                 <div>
                   <div className="flex items-center justify-between mb-4">
-                    <p className="text-[10px] font-mono font-bold text-muted-foreground uppercase tracking-[0.22em]">Saldo disponível</p>
-                    <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-success/[0.08] border border-success/15 font-mono text-[9px] font-bold text-success tracking-[0.16em] uppercase">
+                    <span className="font-mono text-[9.5px] font-bold text-muted-foreground uppercase tracking-[0.24em]">Saldo Disponível</span>
+                    <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-success/[0.1] border border-success/20 font-mono text-[9px] font-bold text-success tracking-[0.16em] uppercase shadow-[0_0_10px_-2px_hsl(var(--success)/0.3)]">
                       <span className="h-1 w-1 rounded-full bg-success" />
                       Free
                     </span>
                   </div>
-                  <p className="font-display font-semibold tabular-nums leading-[0.95] tracking-[-0.04em] text-[36px] md:text-[44px]">
+                  <p className="font-display font-semibold tabular-nums leading-[0.95] tracking-[-0.04em] text-[40px] md:text-[50px]">
                     {privacy.hidden ? (
-                      <span className="text-foreground/25">{CENSORED}</span>
+                      <span className="text-foreground/20">{CENSORED}</span>
                     ) : (
-                      <span className="bg-gradient-to-br from-foreground via-foreground/95 to-foreground/75 bg-clip-text text-transparent">
+                      <span className="bg-gradient-to-br from-foreground via-foreground/95 to-foreground/70 bg-clip-text text-transparent">
                         <AnimatedNumber value={balance} />
                       </span>
                     )}
                   </p>
-                  <p className="mt-2.5 text-[11px] text-muted-foreground leading-relaxed">Liquidez imediata · saque em D+0 via PIX</p>
+                  <p className="mt-3 text-[11.5px] text-muted-foreground/85 leading-relaxed">Liquidez imediata · saque em D+0 via PIX</p>
                 </div>
 
-                <div className="border-t border-foreground/[0.07] pt-6 space-y-5 flex-1">
+                <div className="border-t border-foreground/[0.08] pt-6 space-y-5 flex-1">
                   <div className="flex items-baseline justify-between gap-3">
                     <div>
                       <div className="flex items-center gap-1.5">
-                        <span className="h-1 w-1 rounded-full bg-warning" />
-                        <p className="text-[10px] font-mono font-bold text-muted-foreground uppercase tracking-[0.18em]">Em análise</p>
+                        <span className="h-1.5 w-1.5 rounded-full bg-warning shadow-[0_0_6px_hsl(var(--warning)/0.6)]" />
+                        <p className="text-[10px] font-mono font-bold text-muted-foreground uppercase tracking-[0.2em]">Em análise</p>
                       </div>
-                      <p className="text-[10.5px] text-muted-foreground/70 mt-1 ml-2.5">Saques em processamento</p>
+                      <p className="text-[10.5px] text-muted-foreground/65 mt-1 ml-3">Saques em processamento</p>
                     </div>
-                    <p className="text-[14.5px] font-display font-semibold text-foreground tabular-nums tracking-tight">
+                    <p className="text-[16px] font-display font-semibold text-foreground tabular-nums tracking-tight">
                       {privacy.hidden ? CENSORED : fmt(withdrawalPending)}
                     </p>
                   </div>
                   <div className="flex items-baseline justify-between gap-3">
                     <div>
                       <div className="flex items-center gap-1.5">
-                        <span className="h-1 w-1 rounded-full bg-info" />
-                        <p className="text-[10px] font-mono font-bold text-muted-foreground uppercase tracking-[0.18em]">Reserva técnica</p>
+                        <span className="h-1.5 w-1.5 rounded-full bg-info shadow-[0_0_6px_hsl(var(--info)/0.6)]" />
+                        <p className="text-[10px] font-mono font-bold text-muted-foreground uppercase tracking-[0.2em]">Reserva técnica</p>
                       </div>
-                      <p className="text-[10.5px] text-muted-foreground/70 mt-1 ml-2.5">Liberação programada · D+30</p>
+                      <p className="text-[10.5px] text-muted-foreground/65 mt-1 ml-3">Liberação programada · D+30</p>
                     </div>
-                    <p className="text-[14.5px] font-display font-semibold text-foreground tabular-nums tracking-tight">
+                    <p className="text-[16px] font-display font-semibold text-foreground tabular-nums tracking-tight">
                       {privacy.hidden ? CENSORED : fmt(transactions.filter(t => t.status === "completed" && !t.retention_released && Number(t.retained_amount) > 0).reduce((a, t) => a + Number(t.retained_amount), 0))}
                     </p>
                   </div>
                 </div>
 
-                <Link to="/financeiro/saques" className="border-t border-foreground/[0.07] pt-4 flex items-center justify-between hover:px-1 transition-all group/link">
-                  <span className="text-[9.5px] font-mono text-muted-foreground tracking-[0.16em] uppercase font-bold group-hover/link:text-foreground transition-colors">Conta operacional</span>
-                  <ChevronRight className="h-3 w-3 text-muted-foreground group-hover/link:text-foreground group-hover/link:translate-x-0.5 transition-all" />
+                <Link to="/financeiro/saques" className="border-t border-foreground/[0.08] pt-4 flex items-center justify-between hover:px-1 transition-all group/link">
+                  <span className="text-[10px] font-mono text-muted-foreground tracking-[0.18em] uppercase font-bold group-hover/link:text-foreground transition-colors">Conta operacional</span>
+                  <ChevronRight className="h-3.5 w-3.5 text-muted-foreground group-hover/link:text-foreground group-hover/link:translate-x-0.5 transition-all" />
                 </Link>
               </div>
             </div>
