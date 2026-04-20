@@ -543,12 +543,13 @@ export default function Dashboard() {
         </div>
 
         {/* Receita + Saldo */}
-        <div className="grid grid-cols-1 lg:grid-cols-[1.55fr_1fr] divide-x divide-border border-b border-border">
-          <div className="px-7 md:px-9 py-8">
-            <p className="text-[10px] font-bold uppercase tracking-[0.22em] text-muted-foreground mb-4">
+        <div className="relative grid grid-cols-1 lg:grid-cols-[1.55fr_1fr] divide-x divide-border border-b border-border">
+          <div className="relative px-7 md:px-9 py-8">
+            <p className="text-[10px] font-bold uppercase tracking-[0.22em] text-muted-foreground mb-4 flex items-center gap-2">
+              <span className="h-px w-6 bg-gradient-to-r from-transparent via-foreground/40 to-foreground/40" />
               Receita · {periodLabel}
             </p>
-            <div className="text-[60px] md:text-[88px] font-display font-black tracking-[-0.045em] leading-[0.92] text-foreground tabular-nums">
+            <div className="text-[60px] md:text-[88px] font-display font-black tracking-[-0.045em] leading-[0.92] bg-gradient-to-b from-foreground to-foreground/85 bg-clip-text text-transparent tabular-nums">
               {privacy.hidden ? CENSORED : <AnimatedNumber value={revenue} />}
             </div>
             <div className="mt-7 flex items-center gap-7 flex-wrap">
