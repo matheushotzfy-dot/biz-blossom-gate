@@ -379,139 +379,129 @@ export default function AdminConteudo() {
   const [viewMode, setViewMode] = useState<"grid" | "list">("list");
 
    return (
-    <div className="mx-auto -mt-2 w-full max-w-[1440px] pb-24 md:-mt-3 md:pb-10">
+    <div className="mx-auto w-full max-w-[1340px] px-5 pb-24 sm:px-7 md:pb-10">
       {/* ── Header ── */}
-      <div className="px-5 pt-1 sm:px-7 md:pt-1">
-        <div className="flex items-start justify-between gap-4">
-          <div className="flex items-center gap-3.5">
-            <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-primary/10 border border-border">
-              <GraduationCap className="h-5 w-5 text-primary" strokeWidth={1.8} />
-            </div>
-            <div>
-              <h1 className="font-display text-xl font-extrabold tracking-tight text-foreground sm:text-2xl">
-                Áreas de Membros
-              </h1>
-              <p className="mt-0.5 text-xs text-muted-foreground">
-                Gerencie cursos, conteúdos e acessos dos seus alunos
-              </p>
-            </div>
-          </div>
-          <button
-            onClick={openNew}
-            className="inline-flex h-9 items-center gap-2 rounded-xl bg-primary px-5 text-xs font-semibold text-primary-foreground shadow-sm transition-all duration-200 hover:bg-primary/90 hover:shadow-md hover:-translate-y-px"
-          >
-            <Plus className="h-3.5 w-3.5" strokeWidth={2.5} />
-            Nova área
-          </button>
+      <div className="flex flex-wrap items-end justify-between gap-4 pt-1">
+        <div>
+          <h1 className="font-display text-[28px] font-black tracking-[-0.025em] text-foreground sm:text-[32px]">
+            Áreas de Membros
+          </h1>
+          <p className="mt-1 text-[12.5px] text-muted-foreground">
+            Gerencie cursos, conteúdos e acessos dos seus alunos.
+          </p>
         </div>
+        <button
+          onClick={openNew}
+          className="inline-flex h-10 items-center gap-2 rounded-lg bg-foreground px-4 text-[12.5px] font-bold text-background transition-opacity hover:opacity-90"
+        >
+          <Plus className="h-3.5 w-3.5" strokeWidth={2.5} />
+          Nova área
+        </button>
+      </div>
 
-        {/* ── KPI strip ── */}
-        <div className="mt-5 grid grid-cols-2 gap-px overflow-hidden rounded-xl border border-border bg-border sm:grid-cols-4">
-          {[
-            { label: "Áreas", value: totalCourses, sub: `${publishedCourses} publicadas`, icon: GraduationCap },
-            { label: "Módulos", value: totalModules, sub: `${totalLessonsCount} aulas`, icon: Layers },
-            { label: "Alunos ativos", value: totalStudents, sub: "com acesso", icon: Users },
-            { label: "Receita vinculada", value: fmt(totalRevenue), sub: "produtos conectados", icon: DollarSign, isMoney: true },
-          ].map((kpi) => {
-            const Icon = kpi.icon;
+      {/* ── Stats strip ── */}
+      <div className="mt-5 grid grid-cols-2 divide-x divide-border overflow-hidden rounded-2xl border border-border bg-card md:grid-cols-4">
+        {[
+          { label: "Áreas", value: String(totalCourses), sub: `${publishedCourses} publicadas` },
+          { label: "Conteúdo", value: String(totalModules), sub: `${totalLessonsCount} aulas no total` },
+          { label: "Alunos", value: String(totalStudents), sub: "com acesso ativo" },
+          { label: "Receita vinculada", value: fmt(totalRevenue), sub: `${courses.filter(c => c.product_id).length} produtos conectados` },
+        ].map((stat, i) => (
+          <div key={stat.label} className={cn("px-5 py-4", i >= 2 && "md:border-l-0")}>
+            <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground">{stat.label}</p>
+            <p className="mt-2 text-[22px] font-display font-black tracking-[-0.03em] text-foreground tabular-nums leading-none">
+              {stat.value}
+            </p>
+            <p className="mt-1.5 text-[10.5px] text-muted-foreground">{stat.sub}</p>
+          </div>
+        ))}
+      </div>
+
+      {/* ── Toolbar ── */}
+      <div className="mt-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex items-center gap-0.5 rounded-lg border border-border bg-card p-[3px]">
+          {tabs.map((item) => {
+            const active = filter === item.value;
             return (
-              <div key={kpi.label} className="bg-card px-4 py-3.5">
-                <div className="flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-[0.1em] text-muted-foreground">
-                  <Icon className="h-3 w-3" strokeWidth={2} />
-                  {kpi.label}
-                </div>
-                <div className={cn("mt-1.5 font-numbers font-black tabular-nums tracking-tight text-foreground", kpi.isMoney ? "text-base" : "text-xl")}>
-                  {typeof kpi.value === "number" ? <AnimatedNumber value={kpi.value} /> : kpi.value}
-                </div>
-                <div className="mt-0.5 text-[10px] text-muted-foreground/70">{kpi.sub}</div>
-              </div>
+              <button
+                key={item.value}
+                onClick={() => setFilter(item.value)}
+                className={cn(
+                  "h-7 rounded-md px-3 text-[11.5px] font-semibold transition-colors",
+                  active
+                    ? "bg-muted text-foreground"
+                    : "text-muted-foreground hover:text-foreground"
+                )}
+              >
+                {item.label}
+                {item.count > 0 && (
+                  <span className={cn(
+                    "ml-1.5 text-[10px] tabular-nums",
+                    active ? "text-foreground/60" : "text-muted-foreground/60"
+                  )}>
+                    {item.count}
+                  </span>
+                )}
+              </button>
             );
           })}
         </div>
 
-        {/* ── Toolbar ── */}
-        <div className="mt-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-          <div className="flex items-center gap-0.5 rounded-lg border border-border bg-secondary p-0.5">
-            {tabs.map((item) => {
-              const active = filter === item.value;
-              return (
-                <button
-                  key={item.value}
-                  onClick={() => setFilter(item.value)}
-                  className={cn(
-                    "relative rounded-md px-3 py-1.5 text-[11px] font-semibold transition-all duration-150",
-                    active ? "bg-card text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"
-                  )}
-                >
-                  {item.label}
-                  {item.count > 0 && (
-                    <span className={cn("ml-1 text-[10px] tabular-nums", active ? "text-primary" : "text-muted-foreground/50")}>
-                      {item.count}
-                    </span>
-                  )}
-                </button>
-              );
-            })}
+        <div className="flex items-center gap-2">
+          <div className="relative w-full sm:w-72">
+            <Search className="absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
+            <input
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder="Buscar por nome ou descrição"
+              className="h-9 w-full rounded-lg border border-border bg-card pl-9 pr-9 text-[12.5px] text-foreground placeholder:text-muted-foreground focus:border-foreground/30 focus:outline-none"
+            />
+            {search && (
+              <button onClick={() => setSearch("")} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors">
+                <X className="h-3.5 w-3.5" />
+              </button>
+            )}
           </div>
-
-          <div className="flex items-center gap-2">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground/40" />
-              <input
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                placeholder="Buscar área..."
-                className="h-8 w-full rounded-lg border border-border bg-secondary pl-8 pr-8 text-xs text-foreground placeholder:text-muted-foreground focus:border-primary/40 focus:outline-none focus:ring-1 focus:ring-primary/20 sm:w-56"
-              />
-              {search && (
-                <button onClick={() => setSearch("")} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-muted-foreground/40 hover:text-foreground transition-colors">
-                  <X className="h-3 w-3" />
-                </button>
-              )}
-            </div>
-            <div className="flex items-center gap-0.5 rounded-lg border border-border bg-secondary p-0.5">
-              <button
-                onClick={() => setViewMode("list")}
-                className={cn("flex h-7 w-7 items-center justify-center rounded-md transition-all", viewMode === "list" ? "bg-card text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground")}
-                title="Lista"
-              >
-                <List className="h-3.5 w-3.5" strokeWidth={2} />
-              </button>
-              <button
-                onClick={() => setViewMode("grid")}
-                className={cn("flex h-7 w-7 items-center justify-center rounded-md transition-all", viewMode === "grid" ? "bg-card text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground")}
-                title="Grade"
-              >
-                <Grid3X3 className="h-3.5 w-3.5" strokeWidth={2} />
-              </button>
-            </div>
+          <div className="flex items-center gap-0.5 rounded-lg border border-border bg-card p-[3px]">
+            <button
+              onClick={() => setViewMode("list")}
+              className={cn("flex h-7 w-7 items-center justify-center rounded-md transition-colors", viewMode === "list" ? "bg-muted text-foreground" : "text-muted-foreground hover:text-foreground")}
+              title="Lista"
+            >
+              <List className="h-3.5 w-3.5" strokeWidth={2} />
+            </button>
+            <button
+              onClick={() => setViewMode("grid")}
+              className={cn("flex h-7 w-7 items-center justify-center rounded-md transition-colors", viewMode === "grid" ? "bg-muted text-foreground" : "text-muted-foreground hover:text-foreground")}
+              title="Grade"
+            >
+              <Grid3X3 className="h-3.5 w-3.5" strokeWidth={2} />
+            </button>
           </div>
         </div>
       </div>
 
-      {/* ── Divider ── */}
-      <div className="mx-5 mt-5 h-px bg-border sm:mx-7" />
-
-      {/* ── Course List ── */}
+      {/* ── Workspace ── */}
+      <div className="mt-4">
       {isLoading ? (
-        <div className="flex flex-col items-center justify-center px-6 py-32 text-center">
+        <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-border bg-card px-6 py-20 text-center">
           <Loader2 className="h-6 w-6 text-muted-foreground animate-spin" />
         </div>
       ) : filtered.length === 0 ? (
-        <div className="flex flex-col items-center justify-center px-6 py-32 text-center">
-          <div className="flex h-16 w-16 items-center justify-center rounded-2xl border border-border bg-secondary">
-            <GraduationCap className="h-7 w-7 text-muted-foreground" strokeWidth={1.4} />
+        <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-border bg-card px-6 py-20 text-center">
+          <div className="flex h-14 w-14 items-center justify-center rounded-xl border border-border bg-muted">
+            <GraduationCap className="h-6 w-6 text-muted-foreground" strokeWidth={1.5} />
           </div>
-          <p className="mt-5 text-sm font-semibold text-foreground">
+          <p className="mt-4 text-[14px] font-bold text-foreground">
             {search || filter !== "all" ? "Nenhum resultado" : "Comece por aqui"}
           </p>
-          <p className="mt-1.5 max-w-[260px] text-xs leading-relaxed text-muted-foreground">
+          <p className="mt-1 max-w-[280px] text-[12px] text-muted-foreground">
             {search || filter !== "all" ? "Tente ajustar os filtros para encontrar o que procura." : "Crie sua primeira área de membros e entregue conteúdo."}
           </p>
           {!search && filter === "all" && (
             <button
               onClick={openNew}
-              className="mt-6 inline-flex h-9 items-center gap-2 rounded-xl bg-primary px-5 text-xs font-semibold text-primary-foreground shadow-sm transition-all hover:bg-primary/90"
+              className="mt-5 inline-flex h-9 items-center gap-2 rounded-lg bg-foreground px-4 text-[12px] font-bold text-background hover:opacity-90 transition-opacity"
             >
               <Plus className="h-3.5 w-3.5" strokeWidth={2.5} />
               Criar área
