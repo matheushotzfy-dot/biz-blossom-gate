@@ -1078,6 +1078,86 @@ function PixLogoMark({ className, variant = "teal" }: { className?: string; vari
   );
 }
 
+/* ─── Gateway dashboard sub-components ─── */
+
+function GatewayKpi({ label, value, sub, tone, trend }: { label: string; value: string; sub: string; tone: "primary" | "success" | "warning" | "destructive" | "info"; trend: "up" | "down" | "neutral" }) {
+  const toneAccent: Record<string, string> = {
+    primary: "bg-primary",
+    success: "bg-success",
+    warning: "bg-warning",
+    destructive: "bg-destructive",
+    info: "bg-info",
+  };
+  const toneText: Record<string, string> = {
+    primary: "text-primary",
+    success: "text-success",
+    warning: "text-warning",
+    destructive: "text-destructive",
+    info: "text-info",
+  };
+
+  return (
+    <div className="relative rounded-xl border border-border/60 bg-card/60 backdrop-blur-xl p-4 overflow-hidden hover:border-border transition-colors">
+      <div className={cn("absolute left-0 top-0 bottom-0 w-[2px]", toneAccent[tone])} />
+      <div className="flex items-center justify-between mb-2">
+        <p className="text-[10px] font-bold text-muted-foreground/50 uppercase tracking-[0.16em]">{label}</p>
+        {trend === "up" && <ArrowUpRight className={cn("h-3 w-3", toneText[tone])} strokeWidth={2.5} />}
+        {trend === "down" && <ArrowDownRight className="h-3 w-3 text-destructive" strokeWidth={2.5} />}
+      </div>
+      <p className="text-[22px] md:text-[24px] font-display font-black text-foreground tabular-nums tracking-[-0.03em] leading-none">{value}</p>
+      <p className="text-[10.5px] text-muted-foreground/60 font-medium mt-2">{sub}</p>
+    </div>
+  );
+}
+
+function PaymentMethodRow({ name, approved, total, revenue, approvalRate, share, privacy, tone }: { name: string; approved: number; total: number; revenue: number; approvalRate: number; share: number; privacy: boolean; tone: "success" | "info" | "warning" }) {
+  const toneAccent: Record<string, string> = {
+    success: "bg-success",
+    info: "bg-info",
+    warning: "bg-warning",
+  };
+
+  return (
+    <div className="px-5 py-3.5 hover:bg-muted/10 transition-colors">
+      <div className="flex items-center justify-between mb-2">
+        <div className="flex items-center gap-2">
+          <span className={cn("h-2 w-2 rounded-sm", toneAccent[tone])} />
+          <p className="text-[12.5px] font-bold text-foreground">{name}</p>
+        </div>
+        <p className="text-[13px] font-display font-black text-foreground tabular-nums tracking-tight">
+          {privacy ? CENSORED : fmt(revenue)}
+        </p>
+      </div>
+      <div className="flex items-center gap-4 text-[10.5px] text-muted-foreground/70 font-semibold mb-2">
+        <span><span className="text-foreground/80 font-bold tabular-nums">{approved}</span> / {total} aprovadas</span>
+        <span>Aprovação <span className="text-foreground/80 font-bold tabular-nums">{approvalRate.toFixed(1)}%</span></span>
+        <span className="ml-auto">Share <span className="text-foreground/80 font-bold tabular-nums">{share.toFixed(1)}%</span></span>
+      </div>
+      <div className="h-1 w-full rounded-full bg-muted/30 overflow-hidden">
+        <div className={cn("h-full rounded-full transition-all", toneAccent[tone])} style={{ width: `${Math.min(share, 100)}%` }} />
+      </div>
+    </div>
+  );
+}
+
+function RiskRow({ label, value, hint, tone }: { label: string; value: string; hint: string; tone: "neutral" | "warning" | "destructive" }) {
+  const toneText: Record<string, string> = {
+    neutral: "text-foreground",
+    warning: "text-warning",
+    destructive: "text-destructive",
+  };
+
+  return (
+    <div className="flex items-center justify-between px-5 py-2.5">
+      <div className="min-w-0 flex-1">
+        <p className="text-[12px] font-semibold text-foreground/80">{label}</p>
+        <p className="text-[10px] text-muted-foreground/60 font-medium truncate">{hint}</p>
+      </div>
+      <p className={cn("text-[15px] font-display font-black tabular-nums tracking-tight ml-3", toneText[tone])}>{value}</p>
+    </div>
+  );
+}
+
 function QualityLine({ icon, label, value, tone }: { icon: React.ReactNode; label: string; value: string; tone: "success" | "warning" | "destructive" | "info" }) {
   const styles: Record<string, { bg: string; text: string; ring: string }> = {
     success: { bg: "bg-success/10", text: "text-success", ring: "ring-success/20" },
