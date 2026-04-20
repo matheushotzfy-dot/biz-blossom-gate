@@ -845,17 +845,22 @@ export default function Dashboard() {
         </section>
 
         {/* CHANNELS + ACTIVITY */}
-        <section className="grid grid-cols-1 lg:grid-cols-5 gap-6 mb-10">
+        {/* ─────────────────────────────────────────────────────────────── */}
+        {/* CHANNELS + ACTIVITY                                              */}
+        {/* ─────────────────────────────────────────────────────────────── */}
+        <section className="grid grid-cols-1 lg:grid-cols-5 gap-8 lg:gap-10 mb-14">
           <div className="lg:col-span-3">
-            <div className="flex items-baseline justify-between mb-4">
-              <h2 className="text-[11px] font-semibold text-foreground uppercase tracking-[0.18em]">Canais de pagamento</h2>
-              <span className="text-[10.5px] text-muted-foreground font-medium">{filteredTx.length} processadas</span>
+            <div className="flex items-center gap-3 mb-5">
+              <span className="font-mono text-[10px] font-bold text-muted-foreground tracking-[0.2em]">§ 05</span>
+              <span className="h-px flex-1 bg-foreground/10" />
+              <span className="font-mono text-[10px] uppercase font-semibold text-muted-foreground tracking-[0.2em]">Canais · Mix de Pagamento</span>
             </div>
 
-            <div className="rounded-xl border border-border bg-card overflow-hidden divide-y divide-border">
-              <EditorialChannelRow name="PIX" approved={pixApprovedCount} total={pixTotalCount} revenue={pixRevenue} approvalRate={pixConversion} share={revenue > 0 ? (pixRevenue / revenue) * 100 : 0} privacy={privacy.hidden} />
-              <EditorialChannelRow name="Cartão de crédito" approved={cardApprovedCount} total={cardTotalCount} revenue={cardRevenue} approvalRate={cardConversion} share={revenue > 0 ? (cardRevenue / revenue) * 100 : 0} privacy={privacy.hidden} />
+            <div className="rounded-[10px] border border-foreground/[0.08] bg-card overflow-hidden divide-y divide-foreground/[0.06]">
+              <EditorialChannelRow index="01" name="PIX" approved={pixApprovedCount} total={pixTotalCount} revenue={pixRevenue} approvalRate={pixConversion} share={revenue > 0 ? (pixRevenue / revenue) * 100 : 0} privacy={privacy.hidden} />
+              <EditorialChannelRow index="02" name="Cartão de crédito" approved={cardApprovedCount} total={cardTotalCount} revenue={cardRevenue} approvalRate={cardConversion} share={revenue > 0 ? (cardRevenue / revenue) * 100 : 0} privacy={privacy.hidden} />
               <EditorialChannelRow
+                index="03"
                 name="Boleto"
                 approved={filteredTx.filter(t => t.payment_method === "boleto" && t.status === "completed").length}
                 total={filteredTx.filter(t => t.payment_method === "boleto").length}
@@ -868,24 +873,25 @@ export default function Dashboard() {
           </div>
 
           <div className="lg:col-span-2">
-            <div className="flex items-baseline justify-between mb-4">
-              <h2 className="text-[11px] font-semibold text-foreground uppercase tracking-[0.18em]">Atividade recente</h2>
-              <Link to="/vendas" className="text-[10.5px] text-muted-foreground hover:text-foreground font-medium transition-colors inline-flex items-center gap-1">
+            <div className="flex items-center gap-3 mb-5">
+              <span className="font-mono text-[10px] font-bold text-muted-foreground tracking-[0.2em]">§ 06</span>
+              <span className="h-px flex-1 bg-foreground/10" />
+              <Link to="/vendas" className="font-mono text-[10px] uppercase font-semibold text-muted-foreground hover:text-foreground tracking-[0.2em] inline-flex items-center gap-1.5 transition-colors">
                 Ver tudo <ArrowRight className="h-2.5 w-2.5" />
               </Link>
             </div>
 
-            <div className="rounded-xl border border-border bg-card overflow-hidden">
+            <div className="rounded-[10px] border border-foreground/[0.08] bg-card overflow-hidden">
               {activity.length === 0 ? (
-                <div className="px-5 py-16 text-center">
-                  <div className="mx-auto h-9 w-9 rounded-full bg-muted/40 flex items-center justify-center mb-3">
+                <div className="px-5 py-20 text-center">
+                  <div className="mx-auto h-9 w-9 rounded-full bg-foreground/[0.04] flex items-center justify-center mb-3">
                     <Activity className="h-4 w-4 text-muted-foreground" />
                   </div>
                   <p className="text-[11.5px] text-muted-foreground font-medium">Sem atividade no período</p>
                 </div>
               ) : (
-                <div className="divide-y divide-border">
-                  {activity.slice(0, 6).map((item) => {
+                <div className="divide-y divide-foreground/[0.06]">
+                  {activity.slice(0, 6).map((item, idx) => {
                     const isWithdrawal = item.kind === "withdrawal";
                     const dotColor = item.status === "completed" || item.status === "approved" ? "bg-success"
                       : item.status === "pending" ? "bg-warning"
@@ -905,13 +911,14 @@ export default function Dashboard() {
                             if (tx) setDetailTx(tx);
                           }
                         }}
-                        className="w-full flex items-center gap-3 px-5 py-3.5 hover:bg-muted/30 transition-colors text-left"
+                        className="w-full flex items-center gap-3 px-5 py-3.5 hover:bg-foreground/[0.025] transition-colors text-left group"
                       >
+                        <span className="font-mono text-[9px] font-bold text-muted-foreground/50 tracking-[0.1em] tabular-nums w-5 shrink-0">{String(idx + 1).padStart(2, "0")}</span>
                         <span className={cn("h-1.5 w-1.5 rounded-full shrink-0", dotColor)} />
                         <div className="flex-1 min-w-0">
-                          <p className="text-[12px] font-semibold text-foreground truncate">{labelText}</p>
-                          <p className="text-[10.5px] text-muted-foreground mt-0.5 font-mono tracking-tight">
-                            {item.id.slice(0, 8)} · {timeAgo(item.createdAt)}
+                          <p className="text-[12px] font-semibold text-foreground truncate group-hover:translate-x-0.5 transition-transform">{labelText}</p>
+                          <p className="text-[10px] text-muted-foreground mt-0.5 font-mono tracking-tight">
+                            {item.id.slice(0, 8).toUpperCase()} · {timeAgo(item.createdAt)}
                           </p>
                         </div>
                         <p className="text-[12.5px] font-semibold text-foreground tabular-nums tracking-tight shrink-0">
@@ -926,18 +933,30 @@ export default function Dashboard() {
           </div>
         </section>
 
-        {/* FOOTER */}
-        <footer className="flex flex-col md:flex-row md:items-center md:justify-between gap-3 pt-6 mt-2 border-t border-border">
-          <div className="flex items-center gap-2.5">
-            <span className="text-[10px] font-semibold text-foreground/70 uppercase tracking-[0.18em]">Hotzfy</span>
-            <span className="h-2.5 w-px bg-border" />
-            <span className="text-[10px] font-medium text-muted-foreground uppercase tracking-[0.16em]">
-              Painel de Controle · {format(new Date(), "MMM yyyy", { locale: ptBR })}
-            </span>
-          </div>
-          <div className="flex items-center gap-4">
-            <span className="text-[10px] font-medium text-muted-foreground uppercase tracking-[0.16em]">Dados em tempo real</span>
-            <span className="inline-flex items-center gap-1.5">
+        {/* ─────────────────────────────────────────────────────────────── */}
+        {/* COLOPHON · Footer institucional                                  */}
+        {/* ─────────────────────────────────────────────────────────────── */}
+        <footer className="pt-8 mt-4 border-t border-foreground/10">
+          <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-6">
+            <div>
+              <div className="flex items-center gap-2.5 mb-3">
+                <div className="h-5 w-5 rounded-[4px] bg-foreground text-background flex items-center justify-center">
+                  <span className="font-display font-black text-[9px] tracking-[-0.06em] leading-none">H</span>
+                </div>
+                <span className="font-display font-bold text-[11px] text-foreground tracking-[-0.01em]">HOTZFY</span>
+                <span className="h-2.5 w-px bg-foreground/15" />
+                <span className="font-mono text-[9.5px] text-muted-foreground uppercase tracking-[0.18em]">Capital Operations</span>
+              </div>
+              <p className="text-[10.5px] text-muted-foreground/70 max-w-md leading-relaxed">
+                Demonstrativo gerado em tempo real. Os valores apresentados estão sujeitos à conciliação final dos provedores de pagamento e às janelas regulamentares de liquidação.
+              </p>
+            </div>
+            <div className="flex flex-col items-start md:items-end gap-2 font-mono text-[9.5px] uppercase tracking-[0.16em] text-muted-foreground">
+              <span className="tabular-nums">REF · {format(new Date(), "yyyyMMdd-HHmm")}</span>
+              <span className="inline-flex items-center gap-1.5">
+                <span className="h-1.5 w-1.5 rounded-full bg-success" />
+                Sistemas operacionais · uptime 99.99%
+              </span>
               <span className="h-1.5 w-1.5 rounded-full bg-success" />
               <span className="text-[10px] font-semibold text-foreground/70 uppercase tracking-[0.14em]">Sistema operacional</span>
             </span>
