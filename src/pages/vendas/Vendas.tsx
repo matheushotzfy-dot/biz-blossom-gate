@@ -1127,28 +1127,6 @@ export default function Vendas() {
               </div>
             </div>
 
-            {/* Bottom strip — Volume per hour */}
-            <div className="border-t border-border px-6 lg:px-8 py-5 bg-muted/[0.18]">
-              <div className="flex items-center justify-between mb-3">
-                <div className="flex items-center gap-2.5">
-                  <p className="text-[12.5px] font-heading font-semibold text-foreground tracking-tight">Volume por hora</p>
-                  {peakHour !== null && (
-                    <span className="text-[11px] text-muted-foreground/85 font-medium">Pico <span className="text-foreground font-semibold tabular-nums">{peakHour}h</span></span>
-                  )}
-                </div>
-                <span className="text-[11.5px] text-muted-foreground/85 tabular-nums font-medium">{m.approved.length} aprovadas</span>
-              </div>
-              <div className="flex h-[48px] items-end gap-[3px]">
-                {metrics.hours.map((v, i) => (
-                  <div key={i} className={cn("min-w-0 flex-1 rounded-sm transition-colors",
-                    peakHour === i ? "bg-foreground" : v > 0 ? "bg-foreground/30 hover:bg-foreground/50" : "bg-muted"
-                  )} style={{ height: `${Math.max((v / maxHour) * 100, 4)}%` }} title={`${i}h: ${v} vendas`} />
-                ))}
-              </div>
-              <div className="flex justify-between mt-2 text-[10.5px] text-muted-foreground/70 tabular-nums font-medium">
-                <span>00h</span><span>06h</span><span>12h</span><span>18h</span><span>23h</span>
-              </div>
-            </div>
           </div>
 
          {/* ═══════ TRANSACTIONS ═══════ */}
