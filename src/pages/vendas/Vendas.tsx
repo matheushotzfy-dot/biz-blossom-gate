@@ -876,15 +876,18 @@ export default function Vendas() {
                 <span className="tabular-nums">{m.uniqueCustomers} clientes · {approvalRate.toFixed(1)}% aprovação</span>
               </div>
             </div>
-            <div className="flex items-center gap-2 shrink-0">
-              <button onClick={toggleHidden} className={cn("flex h-9 w-9 items-center justify-center rounded-lg border transition-all", hidden ? "border-foreground/30 bg-muted text-foreground" : "border-border bg-card text-muted-foreground hover:text-foreground hover:border-foreground/20")}>
-                {hidden ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+            <div className="flex items-center gap-3 shrink-0">
+              <button onClick={toggleHidden} className={cn("flex h-10 w-10 items-center justify-center rounded-xl border transition-all duration-300 shadow-sm", hidden ? "border-primary/50 bg-primary/10 text-primary shadow-[0_0_15px_rgba(var(--primary),0.2)]" : "border-border bg-card text-muted-foreground hover:text-foreground hover:border-foreground/20 hover:shadow-md")}>
+                {hidden ? <EyeOff className="h-4.5 w-4.5" /> : <Eye className="h-4.5 w-4.5" />}
               </button>
-              <button onClick={() => window.location.reload()} className="inline-flex h-9 items-center gap-1.5 rounded-lg border border-border bg-card px-3.5 text-[12.5px] font-medium text-muted-foreground hover:text-foreground hover:border-foreground/20 transition-all">
-                <RefreshCw className="h-3.5 w-3.5" /> Atualizar
+              <button onClick={() => window.location.reload()} className="group inline-flex h-10 items-center gap-2 rounded-xl border border-border bg-card px-4 text-[13px] font-bold text-muted-foreground hover:text-foreground hover:border-foreground/20 transition-all duration-300 shadow-sm hover:shadow-md">
+                <RefreshCw className="h-4 w-4 group-hover:rotate-180 transition-transform duration-700" /> 
+                <span className="hidden sm:inline">Atualizar</span>
               </button>
-              <button onClick={() => setShowExportDialog(true)} className="inline-flex h-9 items-center gap-1.5 rounded-lg bg-foreground px-3.5 text-[12.5px] font-semibold text-background hover:bg-foreground/90 transition-colors shadow-sm">
-                <Download className="h-3.5 w-3.5" /> Exportar
+              <button onClick={() => setShowExportDialog(true)} className="relative overflow-hidden group inline-flex h-10 items-center gap-2 rounded-xl bg-foreground px-5 text-[13px] font-black text-background transition-all duration-300 shadow-[0_4px_12px_rgba(0,0,0,0.15)] hover:shadow-[0_6px_20px_rgba(0,0,0,0.2)] hover:-translate-y-0.5 active:translate-y-0">
+                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
+                <Download className="h-4 w-4" /> 
+                <span>Exportar</span>
               </button>
             </div>
           </header>
