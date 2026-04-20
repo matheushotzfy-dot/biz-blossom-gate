@@ -214,11 +214,11 @@ function Sparkline({ data, color = "primary" }: { data: number[]; color?: string
 function SortHead({ label, field, sort, onSort, className }: { label: string; field: SortField; sort: { field: SortField; dir: SortDir }; onSort: (f: SortField) => void; className?: string }) {
  const active = sort.field === field;
  return (
-  <th onClick={() => onSort(field)} className={cn("text-left h-10 px-3 text-[11px] font-medium text-muted-foreground/70 cursor-pointer select-none hover:text-foreground transition-colors group", className)}>
+  <th onClick={() => onSort(field)} className={cn("text-left h-12 px-4 text-[10.5px] font-heading font-semibold uppercase tracking-[0.14em] text-muted-foreground/55 cursor-pointer select-none hover:text-foreground transition-colors group", className)}>
     <span className="inline-flex items-center gap-1.5">
       {label}
       {active
-        ? (sort.dir === "desc" ? <ChevronDown className="h-3 w-3 text-foreground" /> : <ChevronUp className="h-3 w-3 text-foreground" />)
+        ? (sort.dir === "desc" ? <ChevronDown className="h-3.5 w-3.5 text-foreground" /> : <ChevronUp className="h-3.5 w-3.5 text-foreground" />)
         : <ArrowUpDown className="h-3 w-3 opacity-0 group-hover:opacity-50 transition-opacity" />}
     </span>
   </th>
@@ -229,29 +229,31 @@ function SortHead({ label, field, sort, onSort, className }: { label: string; fi
 function RevenueChart({ data, hidden }: { data: { label: string; value: number; previous: number }[]; hidden: boolean }) {
   if (data.length < 2 || hidden) {
     return (
-      <div className="h-[280px] flex flex-col items-center justify-center gap-2">
-        {hidden ? <EyeOff className="h-5 w-5 text-muted-foreground/30" /> : <BarChart3 className="h-5 w-5 text-muted-foreground/30" />}
-        <span className="text-[12px] text-muted-foreground/50">{hidden ? "Valores ocultos" : "Sem dados suficientes"}</span>
+      <div className="h-[320px] flex flex-col items-center justify-center gap-2.5">
+        {hidden ? <EyeOff className="h-6 w-6 text-muted-foreground/30" /> : <BarChart3 className="h-6 w-6 text-muted-foreground/30" />}
+        <span className="text-[12.5px] text-muted-foreground/60 font-medium">{hidden ? "Valores ocultos" : "Sem dados suficientes"}</span>
       </div>
     );
   }
   return (
-    <ResponsiveContainer width="100%" height={280}>
-      <ComposedChart data={data} margin={{ top: 8, right: 8, left: -24, bottom: 0 }}>
+    <ResponsiveContainer width="100%" height={320}>
+      <ComposedChart data={data} margin={{ top: 12, right: 12, left: -18, bottom: 4 }}>
         <defs>
           <linearGradient id="rv-gradient-premium" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor="hsl(var(--foreground))" stopOpacity={0.18} />
+            <stop offset="0%" stopColor="hsl(var(--foreground))" stopOpacity={0.22} />
+            <stop offset="55%" stopColor="hsl(var(--foreground))" stopOpacity={0.06} />
             <stop offset="100%" stopColor="hsl(var(--foreground))" stopOpacity={0} />
           </linearGradient>
         </defs>
-        <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" strokeOpacity={0.4} vertical={false} />
-        <XAxis dataKey="label" tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))", fontWeight: 500 }} axisLine={false} tickLine={false} tickMargin={10} interval="preserveStartEnd" />
-        <YAxis tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))", fontWeight: 500 }} axisLine={false} tickLine={false} tickMargin={8} tickFormatter={(v: number) => v >= 1000 ? `${(v / 1000).toFixed(0)}k` : `${v}`} />
+        <CartesianGrid strokeDasharray="2 4" stroke="hsl(var(--border))" strokeOpacity={0.5} vertical={false} />
+        <XAxis dataKey="label" tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))", fontWeight: 500, letterSpacing: "0.02em" }} axisLine={false} tickLine={false} tickMargin={12} interval="preserveStartEnd" />
+        <YAxis tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))", fontWeight: 500 }} axisLine={false} tickLine={false} tickMargin={10} tickFormatter={(v: number) => v >= 1000 ? `${(v / 1000).toFixed(0)}k` : `${v}`} width={48} />
         <ReTooltip
-          contentStyle={{ background: "hsl(var(--popover))", border: "1px solid hsl(var(--border))", borderRadius: 8, fontSize: 12, padding: "8px 12px", boxShadow: "0 4px 16px hsl(var(--background) / 0.4)" }}
+          contentStyle={{ background: "hsl(var(--popover))", border: "1px solid hsl(var(--border))", borderRadius: 10, fontSize: 12.5, padding: "10px 14px", boxShadow: "0 8px 24px -8px hsl(var(--background) / 0.55)" }}
           formatter={(v: number) => [fmt(v), "Receita"]}
-          labelStyle={{ fontSize: 11, color: "hsl(var(--muted-foreground))", marginBottom: 4, fontWeight: 600 }}
-          cursor={{ stroke: "hsl(var(--border))", strokeWidth: 1, strokeDasharray: "3 3" }}
+          labelStyle={{ fontSize: 10.5, color: "hsl(var(--muted-foreground))", marginBottom: 6, fontWeight: 600, letterSpacing: "0.04em", textTransform: "uppercase" }}
+          itemStyle={{ fontWeight: 600, color: "hsl(var(--foreground))" }}
+          cursor={{ stroke: "hsl(var(--foreground) / 0.25)", strokeWidth: 1, strokeDasharray: "3 3" }}
         />
         <Area
           type="monotone"
@@ -260,7 +262,7 @@ function RevenueChart({ data, hidden }: { data: { label: string; value: number; 
           strokeWidth={2}
           fill="url(#rv-gradient-premium)"
           dot={false}
-          activeDot={{ r: 4, stroke: "hsl(var(--background))", strokeWidth: 2, fill: "hsl(var(--foreground))" }}
+          activeDot={{ r: 5, stroke: "hsl(var(--background))", strokeWidth: 2.5, fill: "hsl(var(--foreground))" }}
         />
       </ComposedChart>
     </ResponsiveContainer>
@@ -285,17 +287,17 @@ function TxRow({ tx, prods, onClick, i }: { tx: Tables<"transactions">; prods: R
  const gross = Number(tx.amount);
 
  return (
-  <tr onClick={onClick} className="group cursor-pointer border-b border-border/40 transition-colors hover:bg-muted/30 last:border-b-0">
+  <tr onClick={onClick} className="group cursor-pointer border-b border-border/50 transition-colors hover:bg-muted/40 last:border-b-0">
    {/* Customer */}
-   <td className="pl-5 pr-3 py-3.5 align-middle">
-    <div className="flex items-center gap-3">
-     <Avatar className="h-9 w-9 shrink-0 rounded-full">
-      <AvatarFallback className={cn("text-[11px] font-semibold rounded-full", avatarColor(name))}>{initials(name)}</AvatarFallback>
+   <td className="pl-6 pr-4 py-5 align-middle">
+    <div className="flex items-center gap-3.5">
+     <Avatar className="h-10 w-10 shrink-0 rounded-full ring-1 ring-border/30">
+      <AvatarFallback className={cn("text-[12px] font-heading font-semibold rounded-full", avatarColor(name))}>{initials(name)}</AvatarFallback>
      </Avatar>
      <div className="min-w-0">
-      <p className="truncate text-[13px] font-semibold text-foreground leading-tight">{name}</p>
-      <div className="flex items-center gap-1.5 mt-0.5">
-       {tx.customer_email && <p className="truncate text-[11px] text-muted-foreground/70 max-w-[200px]">{tx.customer_email}</p>}
+      <p className="truncate text-[14px] font-heading font-semibold text-foreground leading-[1.25] tracking-[-0.01em]">{name}</p>
+      <div className="flex items-center gap-2 mt-1">
+       {tx.customer_email && <p className="truncate text-[11.5px] text-muted-foreground/75 max-w-[220px] leading-tight">{tx.customer_email}</p>}
        {tx.customer_phone && (
         <a href={`https://wa.me/55${tx.customer_phone.replace(/\D/g, "")}`} target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()} className="text-muted-foreground/40 hover:text-success transition-colors">
          <MessageCircle className="h-3 w-3" />
@@ -306,49 +308,49 @@ function TxRow({ tx, prods, onClick, i }: { tx: Tables<"transactions">; prods: R
     </div>
    </td>
     {/* Product + Date */}
-    <td className="px-3 py-3.5 align-middle">
-     <p className="truncate text-[12.5px] text-foreground/80 max-w-[220px] leading-tight">{prodName}</p>
-     <p className="text-[11px] text-muted-foreground/60 mt-0.5 tabular-nums">{fmtDate(tx.created_at)} · {fmtTime(tx.created_at)}</p>
+    <td className="px-4 py-5 align-middle">
+     <p className="truncate text-[13px] font-medium text-foreground/85 max-w-[240px] leading-[1.3] tracking-[-0.005em]">{prodName}</p>
+     <p className="text-[11.5px] text-muted-foreground/70 mt-1 tabular-nums tracking-tight">{fmtDate(tx.created_at)} · {fmtTime(tx.created_at)}</p>
     </td>
     {/* Status */}
-    <td className="px-3 py-3.5 align-middle">
-     <span className={cn("inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-medium", st.fg, st.bg)}>
-      <span className={cn("h-1.5 w-1.5 rounded-full", st.dot)}>
-       {tx.status === "pending" && <span className={cn("absolute inline-flex h-1.5 w-1.5 rounded-full animate-ping opacity-50", st.dot)} />}
+    <td className="px-4 py-5 align-middle">
+     <span className={cn("inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11.5px] font-heading font-semibold tracking-tight", st.fg, st.bg)}>
+      <span className={cn("relative flex h-1.5 w-1.5 rounded-full", st.dot)}>
+       {tx.status === "pending" && <span className={cn("absolute inset-0 inline-flex rounded-full animate-ping opacity-60", st.dot)} />}
       </span>
       {st.label}
      </span>
     </td>
     {/* Method */}
-    <td className="px-3 py-3.5 align-middle">
-     <div className="flex items-center gap-2">
-      <span className={cn("flex h-6 w-6 items-center justify-center rounded-md", method.iconBg)}><MethodIcon className={cn("h-3 w-3", method.color)} /></span>
-      <span className="text-[12px] text-foreground/80">{method.label}</span>
+    <td className="px-4 py-5 align-middle">
+     <div className="flex items-center gap-2.5">
+      <span className={cn("flex h-7 w-7 items-center justify-center rounded-lg ring-1 ring-border/30", method.iconBg)}><MethodIcon className={cn("h-3.5 w-3.5", method.color)} /></span>
+      <span className="text-[12.5px] font-medium text-foreground/85">{method.label}</span>
      </div>
     </td>
     {/* Gross */}
-    <td className="px-3 py-3.5 align-middle text-right">
-     <p className="text-[12.5px] text-foreground/80 tabular-nums">{fmt(gross)}</p>
-     {fee > 0 && <p className="text-[10.5px] text-muted-foreground/60 tabular-nums mt-0.5">−{fmt(fee)}</p>}
+    <td className="px-4 py-5 align-middle text-right">
+     <p className="text-[13.5px] font-medium text-foreground/85 tabular-nums tracking-[-0.01em]">{fmt(gross)}</p>
+     {fee > 0 && <p className="text-[11px] text-muted-foreground/55 tabular-nums mt-0.5">−{fmt(fee)}</p>}
     </td>
     {/* Net */}
-    <td className="px-4 py-3.5 align-middle text-right">
-     <p className={cn("text-[14px] font-semibold tabular-nums",
+    <td className="px-5 py-5 align-middle text-right">
+     <p className={cn("text-[15.5px] font-heading font-semibold tabular-nums tracking-[-0.02em]",
       tx.status === "completed" ? "text-foreground" : tx.status === "pending" ? "text-warning" : "text-muted-foreground"
      )}>{fmt(net)}</p>
     </td>
     {/* Actions */}
-    <td className="pr-4 py-3.5 align-middle w-12">
+    <td className="pr-5 py-5 align-middle w-12">
     <div className="flex items-center justify-end opacity-0 group-hover:opacity-100 transition-opacity">
      <DropdownMenu>
       <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
-       <button className="flex h-7 w-7 items-center justify-center rounded-md hover:bg-muted transition-colors"><MoreHorizontal className="h-3.5 w-3.5 text-muted-foreground" /></button>
+       <button className="flex h-8 w-8 items-center justify-center rounded-md hover:bg-muted transition-colors"><MoreHorizontal className="h-4 w-4 text-muted-foreground" /></button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-44 rounded-lg border-border bg-popover p-1">
-       <DropdownMenuItem onClick={(e) => { e.stopPropagation(); onClick(); }} className="gap-2 text-[12px] rounded-md py-1.5"><Eye className="h-3.5 w-3.5" /> Ver detalhes</DropdownMenuItem>
-       {tx.customer_phone && <DropdownMenuItem onClick={(e) => { e.stopPropagation(); navigator.clipboard.writeText(tx.customer_phone!); toast.success("Telefone copiado"); }} className="gap-2 text-[12px] rounded-md py-1.5"><Phone className="h-3.5 w-3.5" /> Copiar telefone</DropdownMenuItem>}
-       {tx.customer_email && <DropdownMenuItem onClick={(e) => { e.stopPropagation(); navigator.clipboard.writeText(tx.customer_email!); toast.success("Email copiado"); }} className="gap-2 text-[12px] rounded-md py-1.5"><Mail className="h-3.5 w-3.5" /> Copiar email</DropdownMenuItem>}
-       {tx.status === "completed" && <><DropdownMenuSeparator className="my-1" /><DropdownMenuItem onClick={(e) => { e.stopPropagation(); toast.info("Entre em contato com o suporte."); }} className="gap-2 text-[12px] text-destructive focus:text-destructive rounded-md py-1.5"><RefreshCw className="h-3.5 w-3.5" /> Reembolsar</DropdownMenuItem></>}
+      <DropdownMenuContent align="end" className="w-48 rounded-xl border-border bg-popover p-1.5">
+       <DropdownMenuItem onClick={(e) => { e.stopPropagation(); onClick(); }} className="gap-2.5 text-[12.5px] rounded-lg py-2"><Eye className="h-3.5 w-3.5" /> Ver detalhes</DropdownMenuItem>
+       {tx.customer_phone && <DropdownMenuItem onClick={(e) => { e.stopPropagation(); navigator.clipboard.writeText(tx.customer_phone!); toast.success("Telefone copiado"); }} className="gap-2.5 text-[12.5px] rounded-lg py-2"><Phone className="h-3.5 w-3.5" /> Copiar telefone</DropdownMenuItem>}
+       {tx.customer_email && <DropdownMenuItem onClick={(e) => { e.stopPropagation(); navigator.clipboard.writeText(tx.customer_email!); toast.success("Email copiado"); }} className="gap-2.5 text-[12.5px] rounded-lg py-2"><Mail className="h-3.5 w-3.5" /> Copiar email</DropdownMenuItem>}
+       {tx.status === "completed" && <><DropdownMenuSeparator className="my-1" /><DropdownMenuItem onClick={(e) => { e.stopPropagation(); toast.info("Entre em contato com o suporte."); }} className="gap-2.5 text-[12.5px] text-destructive focus:text-destructive rounded-lg py-2"><RefreshCw className="h-3.5 w-3.5" /> Reembolsar</DropdownMenuItem></>}
       </DropdownMenuContent>
      </DropdownMenu>
     </div>
@@ -813,44 +815,44 @@ export default function Vendas() {
       ];
 
       return (
-        <div className="mx-auto w-full max-w-[1440px] pb-20 space-y-5">
+        <div className="mx-auto w-full max-w-[1440px] pb-20 space-y-7">
 
           {/* ═══════ HEADER ═══════ */}
-          <header className="flex flex-col gap-4 pb-2 sm:flex-row sm:items-end sm:justify-between">
-            <div className="space-y-1.5">
-              <h1 className="text-[24px] sm:text-[28px] font-semibold tracking-[-0.02em] text-foreground leading-tight">
+          <header className="flex flex-col gap-5 pb-1 sm:flex-row sm:items-end sm:justify-between">
+            <div className="space-y-2">
+              <h1 className="text-[30px] sm:text-[34px] font-heading font-semibold tracking-[-0.035em] text-foreground leading-[1.05]">
                 Minhas vendas
               </h1>
-              <div className="flex items-center gap-2 text-[12.5px] text-muted-foreground">
+              <div className="flex items-center gap-2.5 text-[12.5px] text-muted-foreground/85 font-medium">
                 <span className="relative flex h-1.5 w-1.5">
                   <span className="absolute inset-0 rounded-full bg-success/50 animate-ping" />
                   <span className="relative h-1.5 w-1.5 rounded-full bg-success" />
                 </span>
                 <span>{lastSaleText ? `Última venda ${lastSaleText}` : "Sem vendas recentes"}</span>
-                <span className="text-muted-foreground/40">·</span>
-                <span>{m.uniqueCustomers} clientes · {approvalRate.toFixed(1)}% aprovação</span>
+                <span className="text-border">·</span>
+                <span className="tabular-nums">{m.uniqueCustomers} clientes · {approvalRate.toFixed(1)}% aprovação</span>
               </div>
             </div>
             <div className="flex items-center gap-2 shrink-0">
-              <button onClick={toggleHidden} className={cn("flex h-8 w-8 items-center justify-center rounded-md border transition-colors", hidden ? "border-foreground/30 bg-muted text-foreground" : "border-border bg-card text-muted-foreground hover:text-foreground hover:border-border")}>
-                {hidden ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
+              <button onClick={toggleHidden} className={cn("flex h-9 w-9 items-center justify-center rounded-lg border transition-all", hidden ? "border-foreground/30 bg-muted text-foreground" : "border-border bg-card text-muted-foreground hover:text-foreground hover:border-foreground/20")}>
+                {hidden ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
               </button>
-              <button onClick={() => window.location.reload()} className="inline-flex h-8 items-center gap-1.5 rounded-md border border-border bg-card px-3 text-[12px] font-medium text-muted-foreground hover:text-foreground hover:border-border transition-colors">
+              <button onClick={() => window.location.reload()} className="inline-flex h-9 items-center gap-1.5 rounded-lg border border-border bg-card px-3.5 text-[12.5px] font-medium text-muted-foreground hover:text-foreground hover:border-foreground/20 transition-all">
                 <RefreshCw className="h-3.5 w-3.5" /> Atualizar
               </button>
-              <button onClick={() => setShowExportDialog(true)} className="inline-flex h-8 items-center gap-1.5 rounded-md bg-foreground px-3 text-[12px] font-semibold text-background hover:bg-foreground/90 transition-colors">
+              <button onClick={() => setShowExportDialog(true)} className="inline-flex h-9 items-center gap-1.5 rounded-lg bg-foreground px-3.5 text-[12.5px] font-semibold text-background hover:bg-foreground/90 transition-colors shadow-sm">
                 <Download className="h-3.5 w-3.5" /> Exportar
               </button>
             </div>
           </header>
 
           {/* ═══════ PERIOD BAR ═══════ */}
-          <div className="flex flex-wrap items-center gap-2">
-            <div className="inline-flex items-center rounded-md border border-border bg-card p-0.5">
+          <div className="flex flex-wrap items-center gap-2.5">
+            <div className="inline-flex items-center rounded-lg border border-border bg-card p-1 shadow-sm">
               {PERIODS.map((opt) => (
                 <button key={opt.label} onClick={() => { setSelectedPeriod(opt); setIsCustom(false); setCustomRange(undefined); }}
-                  className={cn("rounded px-2.5 py-1 text-[11.5px] font-medium transition-colors",
-                    !isCustom && selectedPeriod.label === opt.label ? "bg-foreground text-background" : "text-muted-foreground hover:text-foreground"
+                  className={cn("rounded-md px-3 py-1.5 text-[12px] font-heading font-semibold transition-all tracking-[-0.005em]",
+                    !isCustom && selectedPeriod.label === opt.label ? "bg-foreground text-background shadow-sm" : "text-muted-foreground hover:text-foreground"
                   )}>
                   {opt.label}
                 </button>
@@ -858,8 +860,8 @@ export default function Vendas() {
             </div>
             <Popover open={datePickerOpen} onOpenChange={setDatePickerOpen}>
               <PopoverTrigger asChild>
-                <button className={cn("inline-flex h-8 items-center gap-1.5 rounded-md border px-2.5 text-[11.5px] font-medium transition-colors",
-                  isCustom ? "border-foreground/30 bg-muted text-foreground" : "border-border bg-card text-muted-foreground hover:text-foreground"
+                <button className={cn("inline-flex h-9 items-center gap-2 rounded-lg border px-3 text-[12px] font-heading font-semibold transition-all",
+                  isCustom ? "border-foreground/30 bg-muted text-foreground" : "border-border bg-card text-muted-foreground hover:text-foreground hover:border-foreground/20"
                 )}>
                   <CalendarDays className="h-3.5 w-3.5" />
                   {isCustom && customRange?.from ? customRange.to ? `${format(customRange.from, "dd/MM")} – ${format(customRange.to, "dd/MM")}` : format(customRange.from, "dd/MM/yyyy") : "Personalizado"}
@@ -869,67 +871,67 @@ export default function Vendas() {
                 <Calendar mode="range" selected={customRange} onSelect={(range) => { setCustomRange(range); setIsCustom(true); if (range?.from && range?.to) setTimeout(() => setDatePickerOpen(false), 300); }} numberOfMonths={1} locale={ptBR} disabled={(date) => date > new Date()} className="p-3 pointer-events-auto" classNames={{ day_selected: "bg-primary text-primary-foreground", day_range_middle: "bg-primary/10 text-foreground", day_range_end: "bg-primary text-primary-foreground" }} />
               </PopoverContent>
             </Popover>
-            <span className="ml-auto text-[11.5px] text-muted-foreground tabular-nums">
+            <span className="ml-auto text-[12px] text-muted-foreground/80 tabular-nums font-medium">
               {periodLabel}
             </span>
           </div>
 
           {/* ═══════ HERO: Revenue + Chart unified ═══════ */}
-          <section className="rounded-xl border border-border bg-card overflow-hidden">
-            <div className="grid grid-cols-1 lg:grid-cols-[340px_1fr]">
+          <section className="rounded-2xl border border-border bg-card overflow-hidden shadow-[0_1px_2px_rgba(0,0,0,0.04),0_4px_24px_-12px_rgba(0,0,0,0.08)]">
+            <div className="grid grid-cols-1 lg:grid-cols-[400px_1fr]">
               {/* Left: Revenue summary */}
-              <div className="border-b lg:border-b-0 lg:border-r border-border p-6 lg:p-7 flex flex-col justify-between gap-8">
+              <div className="border-b lg:border-b-0 lg:border-r border-border p-8 lg:p-10 flex flex-col justify-between gap-10 bg-gradient-to-b from-muted/10 to-transparent">
                 <div>
-                  <div className="flex items-center justify-between gap-2 mb-3">
-                    <p className="text-[12px] font-medium text-muted-foreground">Receita líquida</p>
+                  <div className="flex items-center justify-between gap-3 mb-5">
+                    <p className="text-[10.5px] font-heading font-semibold text-muted-foreground/70 uppercase tracking-[0.16em]">Receita líquida</p>
                     <DeltaBadge cur={m.totalNet} prev={p.totalNet} />
                   </div>
-                  <p className="text-[42px] font-semibold tabular-nums tracking-[-0.03em] text-foreground leading-none">
+                  <p className="text-[52px] lg:text-[58px] font-heading font-semibold tabular-nums tracking-[-0.045em] text-foreground leading-[0.95]">
                     {hidden ? HIDE : <AnimatedNumber value={m.totalNet} />}
                   </p>
-                  <p className="text-[12px] text-muted-foreground/80 tabular-nums mt-2.5">
-                    Bruto {fmtCompact(m.totalGross)} · Taxas {fmtCompact(m.totalFees)}
+                  <p className="text-[12.5px] text-muted-foreground/85 tabular-nums mt-4 font-medium tracking-tight">
+                    Bruto <span className="text-foreground/75 font-semibold">{fmtCompact(m.totalGross)}</span> · Taxas <span className="text-foreground/75 font-semibold">{fmtCompact(m.totalFees)}</span>
                   </p>
                 </div>
 
-                <div className="grid grid-cols-2 gap-x-6 gap-y-5 border-t border-border pt-5">
+                <div className="grid grid-cols-2 gap-x-8 gap-y-6 border-t border-border pt-7">
                   <div>
-                    <p className="text-[11px] text-muted-foreground">Vendas</p>
-                    <p className="text-[20px] font-semibold text-foreground tabular-nums leading-none mt-1.5">{hidden ? HIDE : m.approved.length.toLocaleString("pt-BR")}</p>
-                    <p className="text-[11px] text-muted-foreground/80 mt-1.5">{approvalRate.toFixed(1)}% aprovação</p>
+                    <p className="text-[10.5px] font-heading font-semibold text-muted-foreground/70 uppercase tracking-[0.14em]">Vendas</p>
+                    <p className="text-[26px] font-heading font-semibold text-foreground tabular-nums leading-none mt-2.5 tracking-[-0.02em]">{hidden ? HIDE : m.approved.length.toLocaleString("pt-BR")}</p>
+                    <p className="text-[11.5px] text-muted-foreground/80 mt-2 font-medium tabular-nums">{approvalRate.toFixed(1)}% aprovação</p>
                   </div>
                   <div>
-                    <p className="text-[11px] text-muted-foreground">Ticket médio</p>
-                    <p className="text-[20px] font-semibold text-foreground tabular-nums leading-none mt-1.5">{hidden ? HIDE : fmtCompact(m.avgTicket)}</p>
-                    <p className="text-[11px] text-muted-foreground/80 mt-1.5">{m.uniqueCustomers} clientes</p>
+                    <p className="text-[10.5px] font-heading font-semibold text-muted-foreground/70 uppercase tracking-[0.14em]">Ticket médio</p>
+                    <p className="text-[26px] font-heading font-semibold text-foreground tabular-nums leading-none mt-2.5 tracking-[-0.02em]">{hidden ? HIDE : fmtCompact(m.avgTicket)}</p>
+                    <p className="text-[11.5px] text-muted-foreground/80 mt-2 font-medium tabular-nums">{m.uniqueCustomers} clientes</p>
                   </div>
                 </div>
               </div>
 
               {/* Right: Chart */}
-              <div className="p-5 lg:p-6">
-                <div className="flex items-center justify-between px-2 mb-4">
-                  <p className="text-[12px] font-medium text-foreground">Desempenho no período</p>
-                  <span className="text-[11px] text-muted-foreground tabular-nums">{periodLabel}</span>
+              <div className="p-6 lg:p-8">
+                <div className="flex items-center justify-between px-2 mb-5">
+                  <p className="text-[12.5px] font-heading font-semibold text-foreground tracking-tight">Desempenho no período</p>
+                  <span className="text-[11.5px] text-muted-foreground/80 tabular-nums font-medium">{periodLabel}</span>
                 </div>
                 <RevenueChart data={metrics.chartData} hidden={hidden} />
               </div>
             </div>
 
             {/* KPI RIBBON — merged inside hero */}
-            <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 border-t border-border bg-muted/20">
+            <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 border-t border-border bg-muted/[0.18]">
               {kpiData.map((kpi, i) => (
                 <div key={kpi.label} className={cn(
-                  "px-4 py-3.5",
+                  "px-5 py-4.5 group/kpi transition-colors hover:bg-card",
                   i % 4 !== 0 && "sm:border-l border-border",
                   i % 8 !== 0 && "lg:border-l",
                   i >= 4 && "border-t sm:border-t lg:border-t-0 border-border",
                 )}>
-                  <p className="text-[10.5px] text-muted-foreground truncate">{kpi.label}</p>
-                  <p className={cn("mt-1.5 text-[15px] font-semibold tabular-nums leading-none tracking-[-0.01em]", kpi.accent)}>
+                  <p className="text-[10px] font-heading font-semibold text-muted-foreground/65 uppercase tracking-[0.14em] truncate leading-none">{kpi.label}</p>
+                  <p className={cn("mt-2.5 text-[18px] font-heading font-semibold tabular-nums leading-none tracking-[-0.025em]", kpi.accent)}>
                     {kpi.value}
                   </p>
-                  <p className="mt-1.5 text-[10.5px] text-muted-foreground/70 leading-tight truncate">
+                  <p className="mt-2 text-[11px] text-muted-foreground/75 leading-snug truncate font-medium">
                     {kpi.sub}
                   </p>
                 </div>
@@ -938,53 +940,53 @@ export default function Vendas() {
           </section>
 
           {/* ═══════ INTELLIGENCE STRIP ═══════ */}
-          <div className="rounded-xl border border-border bg-card overflow-hidden">
+          <div className="rounded-2xl border border-border bg-card overflow-hidden shadow-[0_1px_2px_rgba(0,0,0,0.04)]">
             <div className="grid grid-cols-1 lg:grid-cols-[1.4fr_1fr] divide-y lg:divide-y-0 lg:divide-x divide-border">
 
               {/* LEFT — Top products */}
-              <div className="p-5 lg:p-6">
-                <div className="flex items-end justify-between mb-4">
+              <div className="p-6 lg:p-8">
+                <div className="flex items-end justify-between mb-6">
                   <div>
-                    <p className="text-[12px] font-medium text-foreground">Top produtos</p>
-                    <p className="text-[11px] text-muted-foreground/80 mt-0.5">Receita líquida no período</p>
+                    <p className="text-[14px] font-heading font-semibold text-foreground tracking-[-0.01em]">Top produtos</p>
+                    <p className="text-[11.5px] text-muted-foreground/80 mt-1 font-medium">Receita líquida no período</p>
                   </div>
                   {metrics.topProducts.length > 0 && (
-                    <span className="text-[11px] tabular-nums text-muted-foreground">
+                    <span className="text-[11.5px] tabular-nums text-muted-foreground/85 font-medium">
                       {metrics.topProducts.length} de {productsRaw.length}
                     </span>
                   )}
                 </div>
                 {metrics.topProducts.length === 0 ? (
-                    <div className="py-12 text-center">
-                      <Package className="h-5 w-5 text-muted-foreground/40 mx-auto mb-3" strokeWidth={1.5} />
-                      <p className="text-[13px] font-medium text-foreground mb-1">Sem vendas no período</p>
-                      <p className="text-[11.5px] text-muted-foreground max-w-[280px] mx-auto leading-relaxed">
+                    <div className="py-14 text-center">
+                      <Package className="h-6 w-6 text-muted-foreground/40 mx-auto mb-4" strokeWidth={1.5} />
+                      <p className="text-[13.5px] font-heading font-semibold text-foreground mb-1.5">Sem vendas no período</p>
+                      <p className="text-[12px] text-muted-foreground max-w-[300px] mx-auto leading-relaxed">
                         {productsRaw.length === 0
                           ? "Cadastre seu primeiro produto para começar."
                           : `${productsRaw.length} produto${productsRaw.length !== 1 ? "s" : ""} cadastrado${productsRaw.length !== 1 ? "s" : ""}, ainda sem conversões aqui.`}
                       </p>
                     </div>
                 ) : (
-                  <div className="space-y-3">
+                  <div className="space-y-4">
                     {metrics.topProducts.slice(0, 5).map((prod, i) => {
                       const maxRev = metrics.topProducts[0]?.revenue || 1;
                       const pct = (prod.revenue / maxRev) * 100;
                       const share = m.totalNet > 0 ? (prod.revenue / m.totalNet) * 100 : 0;
                       return (
                         <div key={prod.id} className="group">
-                          <div className="flex items-center gap-3">
-                            <span className="text-[11px] font-medium text-muted-foreground tabular-nums w-4 shrink-0">{i + 1}</span>
+                          <div className="flex items-center gap-3.5">
+                            <span className="text-[11.5px] font-heading font-semibold text-muted-foreground/65 tabular-nums w-5 shrink-0">{(i + 1).toString().padStart(2, "0")}</span>
                             <div className="min-w-0 flex-1">
                               <div className="flex items-baseline justify-between gap-3">
-                                <p className="truncate text-[12.5px] font-medium text-foreground">{prod.name}</p>
-                                <p className="text-[12.5px] font-semibold text-foreground tabular-nums leading-none shrink-0">{hidden ? HIDE : fmtCompact(prod.revenue)}</p>
+                                <p className="truncate text-[13px] font-heading font-medium text-foreground tracking-[-0.005em]">{prod.name}</p>
+                                <p className="text-[13.5px] font-heading font-semibold text-foreground tabular-nums leading-none shrink-0 tracking-[-0.015em]">{hidden ? HIDE : fmtCompact(prod.revenue)}</p>
                               </div>
-                              <div className="mt-1.5 flex items-center gap-2.5">
-                                <div className="h-[3px] flex-1 rounded-full bg-muted overflow-hidden">
-                                  <div className="h-full rounded-full bg-foreground/40" style={{ width: `${pct}%` }} />
+                              <div className="mt-2 flex items-center gap-3">
+                                <div className="h-1 flex-1 rounded-full bg-muted overflow-hidden">
+                                  <div className="h-full rounded-full bg-foreground/55 transition-all" style={{ width: `${pct}%` }} />
                                 </div>
-                                <span className="text-[10.5px] text-muted-foreground tabular-nums shrink-0 w-20 text-right">
-                                  {prod.sales} · {share.toFixed(0)}%
+                                <span className="text-[10.5px] text-muted-foreground/85 tabular-nums shrink-0 w-24 text-right font-medium">
+                                  {prod.sales} {prod.sales === 1 ? "venda" : "vendas"} · {share.toFixed(0)}%
                                 </span>
                               </div>
                             </div>
@@ -999,35 +1001,35 @@ export default function Vendas() {
               {/* RIGHT — Payment mix + Health */}
               <div className="flex flex-col">
                 {/* Payment methods */}
-                <div className="p-5 lg:p-6 border-b border-border">
-                  <div className="flex items-center justify-between mb-3">
-                    <p className="text-[12px] font-medium text-foreground">Mix de pagamentos</p>
+                <div className="p-6 lg:p-8 border-b border-border">
+                  <div className="flex items-center justify-between mb-4">
+                    <p className="text-[14px] font-heading font-semibold text-foreground tracking-[-0.01em]">Mix de pagamentos</p>
                     {dominantMethod.value > 0 && (
-                      <span className="text-[10.5px] text-muted-foreground">{dominantMethod.label} domina</span>
+                      <span className="text-[11px] text-muted-foreground/85 font-medium"><span className="text-foreground font-semibold">{dominantMethod.label}</span> domina</span>
                     )}
                   </div>
                   {m.totalNet === 0 ? (
-                    <p className="text-[11.5px] text-muted-foreground py-3">Sem atividade no período.</p>
+                    <p className="text-[12px] text-muted-foreground/85 py-4">Sem atividade no período.</p>
                   ) : (
-                    <div className="space-y-2.5">
+                    <div className="space-y-3.5">
                       {paymentMix.map((pm) => {
                         const pct = pm.total > 0 ? (pm.value / pm.total) * 100 : 0;
                         const accentText = pm.color === "success" ? "text-success" : pm.color === "info" ? "text-info" : "text-warning";
                         return (
-                          <div key={pm.label} className="flex items-center gap-3">
-                            <span className={cn("flex h-7 w-7 items-center justify-center rounded-md bg-muted", accentText)}>
+                          <div key={pm.label} className="flex items-center gap-3.5">
+                            <span className={cn("flex h-9 w-9 items-center justify-center rounded-lg bg-muted ring-1 ring-border/30", accentText)}>
                               {pm.icon}
                             </span>
                             <div className="min-w-0 flex-1">
                               <div className="flex items-baseline justify-between gap-2">
-                                <p className="text-[12px] font-medium text-foreground">{pm.label}</p>
-                                <p className="text-[12px] font-semibold text-foreground tabular-nums">{hidden ? HIDE : fmtCompact(pm.value)}</p>
+                                <p className="text-[12.5px] font-heading font-semibold text-foreground tracking-tight">{pm.label}</p>
+                                <p className="text-[13px] font-heading font-semibold text-foreground tabular-nums tracking-[-0.015em]">{hidden ? HIDE : fmtCompact(pm.value)}</p>
                               </div>
-                              <div className="mt-1 flex items-center gap-2">
-                                <div className="h-[2px] flex-1 rounded-full bg-muted overflow-hidden">
-                                  <div className="h-full bg-foreground/40 rounded-full" style={{ width: `${pct}%` }} />
+                              <div className="mt-1.5 flex items-center gap-2.5">
+                                <div className="h-[3px] flex-1 rounded-full bg-muted overflow-hidden">
+                                  <div className="h-full bg-foreground/55 rounded-full transition-all" style={{ width: `${pct}%` }} />
                                 </div>
-                                <span className="text-[10px] text-muted-foreground tabular-nums shrink-0 w-16 text-right">{pm.count} · {pct.toFixed(0)}%</span>
+                                <span className="text-[10.5px] text-muted-foreground/85 tabular-nums shrink-0 w-20 text-right font-medium">{pm.count} · {pct.toFixed(0)}%</span>
                               </div>
                             </div>
                           </div>
@@ -1038,29 +1040,29 @@ export default function Vendas() {
                 </div>
 
                 {/* Health */}
-                <div className="p-5 lg:p-6 flex-1">
-                  <div className="flex items-center justify-between mb-3">
-                    <p className="text-[12px] font-medium text-foreground">Saúde da operação</p>
-                    <span className="text-[11px] text-muted-foreground tabular-nums">{approvalRate.toFixed(1)}% aprov.</span>
+                <div className="p-6 lg:p-8 flex-1">
+                  <div className="flex items-center justify-between mb-4">
+                    <p className="text-[14px] font-heading font-semibold text-foreground tracking-[-0.01em]">Saúde da operação</p>
+                    <span className="text-[11.5px] text-muted-foreground/85 tabular-nums font-medium">{approvalRate.toFixed(1)}% aprov.</span>
                   </div>
                   <div className="grid grid-cols-3 gap-2">
                     {healthItems.map((hi) => {
                       const ok = hi.value <= hi.threshold;
                       return (
-                        <div key={hi.label} className="rounded-md border border-border px-2.5 py-2">
-                          <p className="text-[10.5px] text-muted-foreground">{hi.label}</p>
-                          <p className={cn("mt-1 text-[15px] font-semibold tabular-nums leading-none", ok ? "text-foreground" : "text-destructive")}>{hi.value.toFixed(1)}%</p>
-                          <p className="text-[10px] text-muted-foreground/70 mt-1">máx {hi.threshold}%</p>
+                        <div key={hi.label} className="rounded-lg border border-border px-3 py-2.5 bg-card hover:bg-muted/40 transition-colors">
+                          <p className="text-[10.5px] text-muted-foreground/85 font-medium uppercase tracking-[0.06em]">{hi.label}</p>
+                          <p className={cn("mt-1.5 text-[17px] font-heading font-semibold tabular-nums leading-none tracking-[-0.02em]", ok ? "text-foreground" : "text-destructive")}>{hi.value.toFixed(1)}%</p>
+                          <p className="text-[10.5px] text-muted-foreground/70 mt-1.5 tabular-nums">máx {hi.threshold}%</p>
                         </div>
                       );
                     })}
                   </div>
-                  <div className="mt-3 pt-3 border-t border-border flex items-center justify-between text-[11px]">
-                    <span className="text-muted-foreground">
-                      Reembolso <span className="text-foreground font-medium tabular-nums">{hidden ? HIDE : fmtCompact(refundedAmount)}</span>
+                  <div className="mt-4 pt-4 border-t border-border flex items-center justify-between text-[11.5px] font-medium">
+                    <span className="text-muted-foreground/85">
+                      Reembolso <span className="text-foreground font-semibold tabular-nums">{hidden ? HIDE : fmtCompact(refundedAmount)}</span>
                     </span>
-                    <span className="text-muted-foreground">
-                      Chargeback <span className={cn("font-medium tabular-nums", chargebackAmount > 0 ? "text-destructive" : "text-foreground")}>{hidden ? HIDE : fmtCompact(chargebackAmount)}</span>
+                    <span className="text-muted-foreground/85">
+                      Chargeback <span className={cn("font-semibold tabular-nums", chargebackAmount > 0 ? "text-destructive" : "text-foreground")}>{hidden ? HIDE : fmtCompact(chargebackAmount)}</span>
                     </span>
                   </div>
                 </div>
@@ -1068,47 +1070,47 @@ export default function Vendas() {
             </div>
 
             {/* Bottom strip — Volume per hour */}
-            <div className="border-t border-border px-5 lg:px-6 py-4 bg-muted/20">
-              <div className="flex items-center justify-between mb-2">
-                <div className="flex items-center gap-2">
-                  <p className="text-[12px] font-medium text-foreground">Volume por hora</p>
+            <div className="border-t border-border px-6 lg:px-8 py-5 bg-muted/[0.18]">
+              <div className="flex items-center justify-between mb-3">
+                <div className="flex items-center gap-2.5">
+                  <p className="text-[12.5px] font-heading font-semibold text-foreground tracking-tight">Volume por hora</p>
                   {peakHour !== null && (
-                    <span className="text-[10.5px] text-muted-foreground">Pico {peakHour}h</span>
+                    <span className="text-[11px] text-muted-foreground/85 font-medium">Pico <span className="text-foreground font-semibold tabular-nums">{peakHour}h</span></span>
                   )}
                 </div>
-                <span className="text-[11px] text-muted-foreground tabular-nums">{m.approved.length} aprovadas</span>
+                <span className="text-[11.5px] text-muted-foreground/85 tabular-nums font-medium">{m.approved.length} aprovadas</span>
               </div>
-              <div className="flex h-[40px] items-end gap-[3px]">
+              <div className="flex h-[48px] items-end gap-[3px]">
                 {metrics.hours.map((v, i) => (
                   <div key={i} className={cn("min-w-0 flex-1 rounded-sm transition-colors",
-                    peakHour === i ? "bg-foreground" : v > 0 ? "bg-foreground/30" : "bg-muted"
+                    peakHour === i ? "bg-foreground" : v > 0 ? "bg-foreground/30 hover:bg-foreground/50" : "bg-muted"
                   )} style={{ height: `${Math.max((v / maxHour) * 100, 4)}%` }} title={`${i}h: ${v} vendas`} />
                 ))}
               </div>
-              <div className="flex justify-between mt-1.5 text-[10px] text-muted-foreground/70 tabular-nums">
+              <div className="flex justify-between mt-2 text-[10.5px] text-muted-foreground/70 tabular-nums font-medium">
                 <span>00h</span><span>06h</span><span>12h</span><span>18h</span><span>23h</span>
               </div>
             </div>
           </div>
 
          {/* ═══════ TRANSACTIONS ═══════ */}
-         <section className="overflow-hidden rounded-xl border border-border bg-card">
+         <section className="overflow-hidden rounded-2xl border border-border bg-card shadow-[0_1px_2px_rgba(0,0,0,0.04)]">
            {/* Top contextual ribbon */}
-           <header className="flex items-center justify-between gap-4 border-b border-border px-5 py-4">
+           <header className="flex items-center justify-between gap-4 border-b border-border px-6 py-5">
              <div>
-               <p className="text-[14px] font-semibold text-foreground leading-tight">Transações</p>
-               <p className="text-[11.5px] text-muted-foreground mt-0.5">
+               <p className="text-[16px] font-heading font-semibold text-foreground leading-tight tracking-[-0.015em]">Transações</p>
+               <p className="text-[12px] text-muted-foreground/85 mt-1 font-medium">
                  {sortedFiltered.length.toLocaleString("pt-BR")} resultado{sortedFiltered.length !== 1 ? "s" : ""}
                </p>
              </div>
              <div className="hidden sm:block text-right">
-               <p className="text-[10.5px] text-muted-foreground">Total filtrado</p>
-               <p className="text-[15px] font-semibold text-foreground tabular-nums leading-none mt-1">{hidden ? HIDE : fmt(filteredNetTotal)}</p>
+               <p className="text-[10.5px] text-muted-foreground/75 font-heading font-semibold uppercase tracking-[0.14em]">Total filtrado</p>
+               <p className="text-[18px] font-heading font-semibold text-foreground tabular-nums leading-none mt-1.5 tracking-[-0.02em]">{hidden ? HIDE : fmt(filteredNetTotal)}</p>
              </div>
            </header>
 
            {/* Status tabs */}
-           <div className="border-b border-border px-5">
+           <div className="border-b border-border px-6">
              <div className="flex items-center gap-1 overflow-x-auto no-scrollbar">
                {statusTabs.map((tab) => {
                  const active = statusFilter === tab.value;
@@ -1118,17 +1120,17 @@ export default function Vendas() {
                  };
                  return (
                    <button key={tab.value} onClick={() => setStatusFilter(tab.value)}
-                     className={cn("relative px-3 py-3 text-[12px] font-medium whitespace-nowrap transition-colors",
+                     className={cn("relative px-3.5 py-3.5 text-[12.5px] font-heading font-semibold whitespace-nowrap transition-colors tracking-[-0.005em]",
                        active ? "text-foreground" : "text-muted-foreground hover:text-foreground"
                      )}>
-                     <span className="flex items-center gap-1.5">
+                     <span className="flex items-center gap-2">
                        {dotColors[tab.value] && <span className={cn("h-1.5 w-1.5 rounded-full", dotColors[tab.value], !active && "opacity-50")} />}
                        {tab.label}
-                       <span className={cn("tabular-nums text-[11px] px-1.5 rounded",
-                         active ? "bg-muted text-foreground" : "text-muted-foreground"
+                       <span className={cn("tabular-nums text-[11px] font-semibold px-1.5 rounded",
+                         active ? "bg-muted text-foreground" : "text-muted-foreground/85"
                        )}>{tab.count}</span>
                      </span>
-                     {active && <span className="absolute bottom-0 left-0 right-0 h-[2px] bg-foreground" />}
+                     {active && <span className="absolute bottom-0 left-0 right-0 h-[2px] bg-foreground rounded-t-full" />}
                    </button>
                  );
                })}
@@ -1136,14 +1138,14 @@ export default function Vendas() {
            </div>
 
            {/* Search & Toolbar */}
-           <div className="flex flex-col gap-2.5 border-b border-border px-5 py-3 sm:flex-row sm:items-center sm:justify-between">
-             <div className="relative w-full sm:w-[360px]">
-               <Search className="absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
+           <div className="flex flex-col gap-2.5 border-b border-border px-6 py-3.5 sm:flex-row sm:items-center sm:justify-between">
+             <div className="relative w-full sm:w-[400px]">
+               <Search className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                <input id="vendas-search" value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Buscar por nome, email, telefone ou ID…"
-                 className="h-9 w-full rounded-md border border-border bg-background pl-9 pr-9 text-[12.5px] text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-foreground/40 transition-colors" />
+                 className="h-10 w-full rounded-lg border border-border bg-background pl-10 pr-10 text-[13px] font-medium text-foreground placeholder:text-muted-foreground/65 focus:outline-none focus:border-foreground/30 focus:ring-2 focus:ring-foreground/[0.04] transition-all" />
                {search && <button onClick={() => setSearch("")} className="absolute right-3 top-1/2 -translate-y-1/2"><X className="h-3.5 w-3.5 text-muted-foreground hover:text-foreground transition-colors" /></button>}
              </div>
-             <kbd className="hidden sm:inline-flex h-5 items-center rounded border border-border bg-card px-1.5 text-[10px] text-muted-foreground font-mono">⌘K</kbd>
+             <kbd className="hidden sm:inline-flex h-6 items-center rounded-md border border-border bg-card px-2 text-[10.5px] text-muted-foreground font-mono font-medium">⌘K</kbd>
            </div>
 
            {/* Desktop table */}
@@ -1157,47 +1159,47 @@ export default function Vendas() {
                <>
                  <div className="overflow-x-auto">
                    <table className="w-full min-w-[900px]">
-                     <thead>
-                        <tr className="border-b border-border bg-muted/30">
-                          <SortHead label="Cliente" field="customer" sort={sort} onSort={handleSort} className="pl-5" />
-                          <SortHead label="Produto / Data" field="date" sort={sort} onSort={handleSort} />
-                          <th className="h-10 px-3 text-left text-[11px] font-medium text-muted-foreground/70">Status</th>
-                          <th className="h-10 px-3 text-left text-[11px] font-medium text-muted-foreground/70">Método</th>
-                          <SortHead label="Bruto / Taxa" field="amount" sort={sort} onSort={handleSort} className="text-right" />
-                          <SortHead label="Líquido" field="net" sort={sort} onSort={handleSort} className="text-right px-4" />
-                          <th className="w-12" />
-                        </tr>
-                     </thead>
-                     <tbody>
-                       {visibleItems.length === 0 ? (
-                         <tr><td colSpan={7} className="py-16">
-                           <div className="flex flex-col items-center justify-center">
-                             <ShoppingCart className="mb-2 h-5 w-5 text-muted-foreground/40" />
-                             <p className="text-[13px] font-medium text-foreground">Nenhuma venda encontrada</p>
-                             <p className="mt-1 text-[11.5px] text-muted-foreground">Ajuste o período ou refine a pesquisa.</p>
-                           </div>
-                         </td></tr>
-                       ) : visibleItems.map((tx, i) => (
-                         <TxRow key={tx.id} tx={tx} prods={products} onClick={() => setSelectedTx(tx)} i={i} />
-                       ))}
-                     </tbody>
-                   </table>
-                 </div>
-                 {visibleItems.length > 0 && (
-                   <div className="flex items-center justify-between border-t border-border px-5 py-2.5 bg-muted/20">
-                     <span className="text-[11.5px] text-muted-foreground tabular-nums">
-                       {sortedFiltered.length} transaç{sortedFiltered.length !== 1 ? "ões" : "ão"} · página {currentPage} de {totalPages}
-                     </span>
-                     <div className="flex items-center gap-1.5">
-                       <button disabled={currentPage <= 1} onClick={() => setCurrentPage(p => p - 1)} className="inline-flex h-7 items-center gap-1 rounded-md border border-border bg-card px-2.5 text-[11.5px] font-medium text-foreground hover:bg-muted disabled:opacity-30 disabled:pointer-events-none transition-colors">
-                         <ChevronDown className="h-3 w-3 rotate-90" /> Anterior
-                       </button>
-                       <button disabled={currentPage >= totalPages} onClick={() => setCurrentPage(p => p + 1)} className="inline-flex h-7 items-center gap-1 rounded-md border border-border bg-card px-2.5 text-[11.5px] font-medium text-foreground hover:bg-muted disabled:opacity-30 disabled:pointer-events-none transition-colors">
-                         Próxima <ChevronDown className="h-3 w-3 -rotate-90" />
-                       </button>
-                     </div>
-                   </div>
-                 )}
+                      <thead>
+                         <tr className="border-b border-border bg-muted/30">
+                           <SortHead label="Cliente" field="customer" sort={sort} onSort={handleSort} className="pl-6" />
+                           <SortHead label="Produto / Data" field="date" sort={sort} onSort={handleSort} />
+                           <th className="h-12 px-4 text-left text-[10.5px] font-heading font-semibold uppercase tracking-[0.14em] text-muted-foreground/55">Status</th>
+                           <th className="h-12 px-4 text-left text-[10.5px] font-heading font-semibold uppercase tracking-[0.14em] text-muted-foreground/55">Método</th>
+                           <SortHead label="Bruto / Taxa" field="amount" sort={sort} onSort={handleSort} className="text-right" />
+                           <SortHead label="Líquido" field="net" sort={sort} onSort={handleSort} className="text-right px-5" />
+                           <th className="w-12" />
+                         </tr>
+                      </thead>
+                      <tbody>
+                        {visibleItems.length === 0 ? (
+                          <tr><td colSpan={7} className="py-20">
+                            <div className="flex flex-col items-center justify-center">
+                              <ShoppingCart className="mb-3 h-6 w-6 text-muted-foreground/40" strokeWidth={1.5} />
+                              <p className="text-[13.5px] font-heading font-semibold text-foreground">Nenhuma venda encontrada</p>
+                              <p className="mt-1.5 text-[12px] text-muted-foreground">Ajuste o período ou refine a pesquisa.</p>
+                            </div>
+                          </td></tr>
+                        ) : visibleItems.map((tx, i) => (
+                          <TxRow key={tx.id} tx={tx} prods={products} onClick={() => setSelectedTx(tx)} i={i} />
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                  {visibleItems.length > 0 && (
+                    <div className="flex items-center justify-between border-t border-border px-6 py-3 bg-muted/[0.18]">
+                      <span className="text-[12px] text-muted-foreground/85 tabular-nums font-medium">
+                        {sortedFiltered.length} transaç{sortedFiltered.length !== 1 ? "ões" : "ão"} · página <span className="text-foreground font-semibold">{currentPage}</span> de <span className="text-foreground font-semibold">{totalPages}</span>
+                      </span>
+                      <div className="flex items-center gap-2">
+                        <button disabled={currentPage <= 1} onClick={() => setCurrentPage(p => p - 1)} className="inline-flex h-8 items-center gap-1.5 rounded-lg border border-border bg-card px-3 text-[12px] font-heading font-semibold text-foreground hover:bg-muted disabled:opacity-30 disabled:pointer-events-none transition-colors">
+                          <ChevronDown className="h-3 w-3 rotate-90" /> Anterior
+                        </button>
+                        <button disabled={currentPage >= totalPages} onClick={() => setCurrentPage(p => p + 1)} className="inline-flex h-8 items-center gap-1.5 rounded-lg border border-border bg-card px-3 text-[12px] font-heading font-semibold text-foreground hover:bg-muted disabled:opacity-30 disabled:pointer-events-none transition-colors">
+                          Próxima <ChevronDown className="h-3 w-3 -rotate-90" />
+                        </button>
+                      </div>
+                    </div>
+                  )}
                </>
              )}
            </div>
