@@ -214,12 +214,12 @@ function Sparkline({ data, color = "primary" }: { data: number[]; color?: string
 function SortHead({ label, field, sort, onSort, className }: { label: string; field: SortField; sort: { field: SortField; dir: SortDir }; onSort: (f: SortField) => void; className?: string }) {
  const active = sort.field === field;
  return (
-  <th onClick={() => onSort(field)} className={cn("text-left py-4 px-4 text-[10px] font-heading font-black uppercase tracking-[0.12em] text-muted-foreground/45 cursor-pointer select-none hover:text-foreground transition-all group", className)}>
+  <th onClick={() => onSort(field)} className={cn("text-left h-10 px-3 text-[11px] font-medium text-muted-foreground/70 cursor-pointer select-none hover:text-foreground transition-colors group", className)}>
     <span className="inline-flex items-center gap-1.5">
       {label}
       {active
-        ? (sort.dir === "desc" ? <ChevronDown className="h-3.5 w-3.5 text-primary" /> : <ChevronUp className="h-3.5 w-3.5 text-primary" />)
-        : <ArrowUpDown className="h-3 w-3 opacity-0 group-hover:opacity-40 transition-opacity" />}
+        ? (sort.dir === "desc" ? <ChevronDown className="h-3 w-3 text-foreground" /> : <ChevronUp className="h-3 w-3 text-foreground" />)
+        : <ArrowUpDown className="h-3 w-3 opacity-0 group-hover:opacity-50 transition-opacity" />}
     </span>
   </th>
  );
@@ -229,39 +229,38 @@ function SortHead({ label, field, sort, onSort, className }: { label: string; fi
 function RevenueChart({ data, hidden }: { data: { label: string; value: number; previous: number }[]; hidden: boolean }) {
   if (data.length < 2 || hidden) {
     return (
-      <div className="h-[320px] flex flex-col items-center justify-center gap-2">
-        {hidden ? <EyeOff className="h-6 w-6 text-muted-foreground/20" /> : <BarChart3 className="h-6 w-6 text-muted-foreground/20" />}
-        <span className="text-[11px] text-muted-foreground/40 font-medium">{hidden ? "Valores ocultos" : "Dados insuficientes para visualização"}</span>
+      <div className="h-[280px] flex flex-col items-center justify-center gap-2">
+        {hidden ? <EyeOff className="h-5 w-5 text-muted-foreground/30" /> : <BarChart3 className="h-5 w-5 text-muted-foreground/30" />}
+        <span className="text-[12px] text-muted-foreground/50">{hidden ? "Valores ocultos" : "Sem dados suficientes"}</span>
       </div>
     );
   }
-  const peak = data.reduce((a, b) => (b.value > a.value ? b : a), data[0]);
   return (
-    <ResponsiveContainer width="100%" height={340}>
-      <ComposedChart data={data} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+    <ResponsiveContainer width="100%" height={280}>
+      <ComposedChart data={data} margin={{ top: 8, right: 8, left: -24, bottom: 0 }}>
         <defs>
           <linearGradient id="rv-gradient-premium" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor="hsl(var(--success))" stopOpacity={0.3} />
-            <stop offset="100%" stopColor="hsl(var(--success))" stopOpacity={0.02} />
+            <stop offset="0%" stopColor="hsl(var(--foreground))" stopOpacity={0.18} />
+            <stop offset="100%" stopColor="hsl(var(--foreground))" stopOpacity={0} />
           </linearGradient>
         </defs>
-        <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" strokeOpacity={0.12} vertical={false} />
-        <XAxis dataKey="label" tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground) / 0.4)", fontWeight: 800 }} axisLine={false} tickLine={false} tickMargin={12} interval="preserveStartEnd" />
-        <YAxis tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground) / 0.4)", fontWeight: 800 }} axisLine={false} tickLine={false} tickMargin={10} tickFormatter={(v: number) => v >= 1000 ? `R$${(v / 1000).toFixed(0)}k` : `R$${v}`} />
+        <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" strokeOpacity={0.4} vertical={false} />
+        <XAxis dataKey="label" tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))", fontWeight: 500 }} axisLine={false} tickLine={false} tickMargin={10} interval="preserveStartEnd" />
+        <YAxis tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))", fontWeight: 500 }} axisLine={false} tickLine={false} tickMargin={8} tickFormatter={(v: number) => v >= 1000 ? `${(v / 1000).toFixed(0)}k` : `${v}`} />
         <ReTooltip
-          contentStyle={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--border) / 0.4)", borderRadius: 14, fontSize: 11, padding: "10px 14px", boxShadow: "0 10px 40px -10px hsl(var(--background) / 0.8)", backdropFilter: "blur(8px)" }}
+          contentStyle={{ background: "hsl(var(--popover))", border: "1px solid hsl(var(--border))", borderRadius: 8, fontSize: 12, padding: "8px 12px", boxShadow: "0 4px 16px hsl(var(--background) / 0.4)" }}
           formatter={(v: number) => [fmt(v), "Receita"]}
-          labelStyle={{ fontSize: 9, color: "hsl(var(--muted-foreground) / 0.6)", marginBottom: 6, fontWeight: 900, textTransform: "uppercase", letterSpacing: "0.1em" }}
-          cursor={{ stroke: "hsl(var(--success) / 0.15)", strokeWidth: 20 }}
+          labelStyle={{ fontSize: 11, color: "hsl(var(--muted-foreground))", marginBottom: 4, fontWeight: 600 }}
+          cursor={{ stroke: "hsl(var(--border))", strokeWidth: 1, strokeDasharray: "3 3" }}
         />
         <Area
           type="monotone"
           dataKey="value"
-          stroke="hsl(var(--success))"
-          strokeWidth={4}
+          stroke="hsl(var(--foreground))"
+          strokeWidth={2}
           fill="url(#rv-gradient-premium)"
           dot={false}
-          activeDot={{ r: 6, stroke: "hsl(var(--card))", strokeWidth: 3, fill: "hsl(var(--success))" }}
+          activeDot={{ r: 4, stroke: "hsl(var(--background))", strokeWidth: 2, fill: "hsl(var(--foreground))" }}
         />
       </ComposedChart>
     </ResponsiveContainer>
