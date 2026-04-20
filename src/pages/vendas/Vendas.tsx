@@ -1025,26 +1025,40 @@ export default function Vendas() {
                       </p>
                     </div>
                 ) : (
-                  <div className="space-y-4">
+                  <div className="space-y-5">
                     {metrics.topProducts.slice(0, 5).map((prod, i) => {
                       const maxRev = metrics.topProducts[0]?.revenue || 1;
                       const pct = (prod.revenue / maxRev) * 100;
                       const share = m.totalNet > 0 ? (prod.revenue / m.totalNet) * 100 : 0;
+                      const isLeader = i === 0;
                       return (
                         <div key={prod.id} className="group">
-                          <div className="flex items-center gap-3.5">
-                            <span className="text-[11.5px] font-heading font-semibold text-muted-foreground/65 tabular-nums w-5 shrink-0">{(i + 1).toString().padStart(2, "0")}</span>
+                          <div className="flex items-center gap-4">
+                            <span className={cn(
+                              "flex h-7 w-7 shrink-0 items-center justify-center rounded-md text-[10.5px] font-heading font-bold tabular-nums tracking-tight transition-colors",
+                              isLeader
+                                ? "bg-foreground text-background"
+                                : "bg-muted text-muted-foreground/85 group-hover:text-foreground"
+                            )}>{(i + 1).toString().padStart(2, "0")}</span>
                             <div className="min-w-0 flex-1">
                               <div className="flex items-baseline justify-between gap-3">
-                                <p className="truncate text-[13px] font-heading font-medium text-foreground tracking-[-0.005em]">{prod.name}</p>
-                                <p className="text-[13.5px] font-heading font-semibold text-foreground tabular-nums leading-none shrink-0 tracking-[-0.015em]">{hidden ? HIDE : fmtCompact(prod.revenue)}</p>
+                                <p className="truncate text-[13.5px] font-heading font-semibold text-foreground tracking-[-0.01em] leading-tight">{prod.name}</p>
+                                <p className="text-[14px] font-heading font-bold text-foreground tabular-nums leading-none shrink-0 tracking-[-0.025em]">{hidden ? HIDE : fmtCompact(prod.revenue)}</p>
                               </div>
-                              <div className="mt-2 flex items-center gap-3">
-                                <div className="h-1 flex-1 rounded-full bg-muted overflow-hidden">
-                                  <div className="h-full rounded-full bg-foreground/55 transition-all" style={{ width: `${pct}%` }} />
+                              <div className="mt-2.5 flex items-center gap-3.5">
+                                <div className="h-[6px] flex-1 rounded-full bg-muted/70 overflow-hidden ring-1 ring-border/40">
+                                  <div
+                                    className={cn(
+                                      "h-full rounded-full transition-all duration-700",
+                                      isLeader
+                                        ? "bg-gradient-to-r from-foreground via-foreground to-foreground/85"
+                                        : "bg-gradient-to-r from-foreground/55 to-foreground/35"
+                                    )}
+                                    style={{ width: `${pct}%` }}
+                                  />
                                 </div>
-                                <span className="text-[10.5px] text-muted-foreground/85 tabular-nums shrink-0 w-24 text-right font-medium">
-                                  {prod.sales} {prod.sales === 1 ? "venda" : "vendas"} · {share.toFixed(0)}%
+                                <span className="text-[10.5px] text-muted-foreground/85 tabular-nums shrink-0 w-[110px] text-right font-medium">
+                                  {prod.sales} {prod.sales === 1 ? "venda" : "vendas"} <span className="text-muted-foreground/60">·</span> <span className="text-foreground/85 font-semibold">{share.toFixed(0)}%</span>
                                 </span>
                               </div>
                             </div>
@@ -1069,25 +1083,42 @@ export default function Vendas() {
                   {m.totalNet === 0 ? (
                     <p className="text-[12px] text-muted-foreground/85 py-4">Sem atividade no período.</p>
                   ) : (
-                    <div className="space-y-3.5">
+                    <div className="space-y-4">
                       {paymentMix.map((pm) => {
                         const pct = pm.total > 0 ? (pm.value / pm.total) * 100 : 0;
-                        const accentText = pm.color === "success" ? "text-success" : pm.color === "info" ? "text-info" : "text-warning";
+                        const tone = pm.color === "success" ? {
+                          text: "text-success",
+                          bg: "bg-success/12",
+                          ring: "ring-success/25",
+                          bar: "bg-gradient-to-r from-success to-success/70",
+                        } : pm.color === "info" ? {
+                          text: "text-info",
+                          bg: "bg-info/12",
+                          ring: "ring-info/25",
+                          bar: "bg-gradient-to-r from-info to-info/70",
+                        } : {
+                          text: "text-warning",
+                          bg: "bg-warning/12",
+                          ring: "ring-warning/25",
+                          bar: "bg-gradient-to-r from-warning to-warning/70",
+                        };
                         return (
-                          <div key={pm.label} className="flex items-center gap-3.5">
-                            <span className={cn("flex h-9 w-9 items-center justify-center rounded-lg bg-muted ring-1 ring-border/30", accentText)}>
+                          <div key={pm.label} className="flex items-center gap-3.5 group">
+                            <span className={cn("flex h-10 w-10 items-center justify-center rounded-xl ring-1 transition-all", tone.bg, tone.ring, tone.text, "group-hover:scale-105")}>
                               {pm.icon}
                             </span>
                             <div className="min-w-0 flex-1">
                               <div className="flex items-baseline justify-between gap-2">
-                                <p className="text-[12.5px] font-heading font-semibold text-foreground tracking-tight">{pm.label}</p>
-                                <p className="text-[13px] font-heading font-semibold text-foreground tabular-nums tracking-[-0.015em]">{hidden ? HIDE : fmtCompact(pm.value)}</p>
+                                <p className="text-[13px] font-heading font-semibold text-foreground tracking-[-0.005em]">{pm.label}</p>
+                                <p className="text-[13.5px] font-heading font-bold text-foreground tabular-nums tracking-[-0.02em]">{hidden ? HIDE : fmtCompact(pm.value)}</p>
                               </div>
-                              <div className="mt-1.5 flex items-center gap-2.5">
-                                <div className="h-[3px] flex-1 rounded-full bg-muted overflow-hidden">
-                                  <div className="h-full bg-foreground/55 rounded-full transition-all" style={{ width: `${pct}%` }} />
+                              <div className="mt-2 flex items-center gap-3">
+                                <div className="h-[5px] flex-1 rounded-full bg-muted/70 overflow-hidden ring-1 ring-border/40">
+                                  <div className={cn("h-full rounded-full transition-all duration-700", tone.bar)} style={{ width: `${pct}%` }} />
                                 </div>
-                                <span className="text-[10.5px] text-muted-foreground/85 tabular-nums shrink-0 w-20 text-right font-medium">{pm.count} · {pct.toFixed(0)}%</span>
+                                <span className="text-[10.5px] text-muted-foreground/85 tabular-nums shrink-0 w-[78px] text-right font-medium">
+                                  {pm.count} <span className="text-muted-foreground/55">·</span> <span className={cn("font-semibold", pct > 0 ? tone.text : "text-muted-foreground/65")}>{pct.toFixed(0)}%</span>
+                                </span>
                               </div>
                             </div>
                           </div>
@@ -1101,54 +1132,48 @@ export default function Vendas() {
                 <div className="p-6 lg:p-8 flex-1">
                   <div className="flex items-center justify-between mb-4">
                     <p className="text-[14px] font-heading font-semibold text-foreground tracking-[-0.01em]">Saúde da operação</p>
-                    <span className="text-[11.5px] text-muted-foreground/85 tabular-nums font-medium">{approvalRate.toFixed(1)}% aprov.</span>
+                    <span className={cn(
+                      "text-[11.5px] font-heading font-semibold tabular-nums px-2 py-0.5 rounded-md border",
+                      approvalRate >= 80 ? "text-success bg-success/8 border-success/20" :
+                      approvalRate >= 60 ? "text-warning bg-warning/8 border-warning/20" :
+                      "text-destructive bg-destructive/8 border-destructive/20"
+                    )}>
+                      {approvalRate.toFixed(1)}% aprov.
+                    </span>
                   </div>
-                  <div className="grid grid-cols-3 gap-2">
+                  <div className="grid grid-cols-3 gap-2.5">
                     {healthItems.map((hi) => {
                       const ok = hi.value <= hi.threshold;
+                      const ratio = hi.threshold > 0 ? Math.min((hi.value / hi.threshold) * 100, 100) : 0;
                       return (
-                        <div key={hi.label} className="rounded-lg border border-border px-3 py-2.5 bg-card hover:bg-muted/40 transition-colors">
-                          <p className="text-[10.5px] text-muted-foreground/85 font-medium uppercase tracking-[0.06em]">{hi.label}</p>
-                          <p className={cn("mt-1.5 text-[17px] font-heading font-semibold tabular-nums leading-none tracking-[-0.02em]", ok ? "text-foreground" : "text-destructive")}>{hi.value.toFixed(1)}%</p>
-                          <p className="text-[10.5px] text-muted-foreground/70 mt-1.5 tabular-nums">máx {hi.threshold}%</p>
+                        <div key={hi.label} className={cn(
+                          "rounded-xl border px-3 py-3 transition-all relative overflow-hidden",
+                          ok
+                            ? "border-border/60 bg-muted/[0.18] hover:bg-muted/30"
+                            : "border-destructive/25 bg-destructive/[0.06]"
+                        )}>
+                          <p className="text-[9.5px] text-muted-foreground/85 font-heading font-bold uppercase tracking-[0.12em]">{hi.label}</p>
+                          <p className={cn("mt-2 text-[19px] font-heading font-bold tabular-nums leading-none tracking-[-0.025em]", ok ? "text-foreground" : "text-destructive")}>{hi.value.toFixed(1)}<span className="text-[12px] font-semibold opacity-60">%</span></p>
+                          <div className="mt-2.5 h-[3px] rounded-full bg-muted overflow-hidden">
+                            <div className={cn("h-full rounded-full transition-all", ok ? "bg-foreground/40" : "bg-destructive")} style={{ width: `${ratio}%` }} />
+                          </div>
+                          <p className="text-[9.5px] text-muted-foreground/70 mt-1.5 tabular-nums font-medium">máx {hi.threshold}%</p>
                         </div>
                       );
                     })}
                   </div>
-                  <div className="mt-4 pt-4 border-t border-border flex items-center justify-between text-[11.5px] font-medium">
+                  <div className="mt-4 pt-4 border-t border-border/60 flex items-center justify-between text-[11.5px] font-medium">
                     <span className="text-muted-foreground/85">
-                      Reembolso <span className="text-foreground font-semibold tabular-nums">{hidden ? HIDE : fmtCompact(refundedAmount)}</span>
+                      Reembolso <span className="text-foreground font-semibold tabular-nums ml-0.5">{hidden ? HIDE : fmtCompact(refundedAmount)}</span>
                     </span>
                     <span className="text-muted-foreground/85">
-                      Chargeback <span className={cn("font-semibold tabular-nums", chargebackAmount > 0 ? "text-destructive" : "text-foreground")}>{hidden ? HIDE : fmtCompact(chargebackAmount)}</span>
+                      Chargeback <span className={cn("font-semibold tabular-nums ml-0.5", chargebackAmount > 0 ? "text-destructive" : "text-foreground")}>{hidden ? HIDE : fmtCompact(chargebackAmount)}</span>
                     </span>
                   </div>
                 </div>
               </div>
             </div>
 
-            {/* Bottom strip — Volume per hour */}
-            <div className="border-t border-border px-6 lg:px-8 py-5 bg-muted/[0.18]">
-              <div className="flex items-center justify-between mb-3">
-                <div className="flex items-center gap-2.5">
-                  <p className="text-[12.5px] font-heading font-semibold text-foreground tracking-tight">Volume por hora</p>
-                  {peakHour !== null && (
-                    <span className="text-[11px] text-muted-foreground/85 font-medium">Pico <span className="text-foreground font-semibold tabular-nums">{peakHour}h</span></span>
-                  )}
-                </div>
-                <span className="text-[11.5px] text-muted-foreground/85 tabular-nums font-medium">{m.approved.length} aprovadas</span>
-              </div>
-              <div className="flex h-[48px] items-end gap-[3px]">
-                {metrics.hours.map((v, i) => (
-                  <div key={i} className={cn("min-w-0 flex-1 rounded-sm transition-colors",
-                    peakHour === i ? "bg-foreground" : v > 0 ? "bg-foreground/30 hover:bg-foreground/50" : "bg-muted"
-                  )} style={{ height: `${Math.max((v / maxHour) * 100, 4)}%` }} title={`${i}h: ${v} vendas`} />
-                ))}
-              </div>
-              <div className="flex justify-between mt-2 text-[10.5px] text-muted-foreground/70 tabular-nums font-medium">
-                <span>00h</span><span>06h</span><span>12h</span><span>18h</span><span>23h</span>
-              </div>
-            </div>
           </div>
 
          {/* ═══════ TRANSACTIONS ═══════ */}
