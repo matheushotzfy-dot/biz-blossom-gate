@@ -759,12 +759,17 @@ export default function Dashboard() {
         {/* ─────────────────────────────────────────────────────────────── */}
         {/* KPIs · Indicadores operacionais (premium tiles)                  */}
         {/* ─────────────────────────────────────────────────────────────── */}
-        <section className="mb-7 md:mb-9">
+        <section className="mb-8 md:mb-10">
+          <div className="flex items-center gap-3 mb-5">
+            <span className="font-mono text-[9.5px] font-bold text-muted-foreground uppercase tracking-[0.26em]">Indicadores</span>
+            <span className="h-px flex-1 bg-gradient-to-r from-foreground/12 via-foreground/[0.06] to-transparent" />
+            <span className="font-mono text-[9.5px] font-bold text-muted-foreground/60 uppercase tracking-[0.18em]">Operacionais · 04 KPIs</span>
+          </div>
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-5">
-            <EditorialKpi label="Taxa de aprovação" code="APR" value={privacy.hidden ? CENSORED : `${conversion.toFixed(1)}%`} sub={`${approved.length} de ${filteredTx.length} processadas`} accent={conversion >= 80 ? "success" : conversion >= 60 ? "warning" : "destructive"} />
-            <EditorialKpi label="Chargeback" code="CBK" value={privacy.hidden ? CENSORED : `${chargebackRate.toFixed(2)}%`} sub={`${chargebacks.length} ${chargebacks.length === 1 ? "disputa" : "disputas"} · meta < 1%`} accent={chargebackRate < 1 ? "success" : chargebackRate < 2 ? "warning" : "destructive"} />
-            <EditorialKpi label="Pagamentos pendentes" code="PND" value={pending.length.toString()} sub="Aguardando captura" accent={pending.length > 5 ? "warning" : "neutral"} />
-            <EditorialKpi label="Clientes únicos" code="CST" value={uniqueCustomers.toString()} sub="No período" accent="neutral" />
+            <EditorialKpi label="Taxa de aprovação" code="APR" value={privacy.hidden ? CENSORED : `${conversion.toFixed(1)}%`} sub={`${approved.length} de ${filteredTx.length} processadas`} accent={conversion >= 80 ? "success" : conversion >= 60 ? "warning" : "destructive"} index="01" />
+            <EditorialKpi label="Chargeback" code="CBK" value={privacy.hidden ? CENSORED : `${chargebackRate.toFixed(2)}%`} sub={`${chargebacks.length} ${chargebacks.length === 1 ? "disputa" : "disputas"} · meta < 1%`} accent={chargebackRate < 1 ? "success" : chargebackRate < 2 ? "warning" : "destructive"} index="02" />
+            <EditorialKpi label="Pagamentos pendentes" code="PND" value={pending.length.toString()} sub="Aguardando captura" accent={pending.length > 5 ? "warning" : "neutral"} index="03" />
+            <EditorialKpi label="Clientes únicos" code="CST" value={uniqueCustomers.toString()} sub="No período" accent="neutral" index="04" />
           </div>
         </section>
 
