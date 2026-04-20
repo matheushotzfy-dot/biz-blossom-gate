@@ -676,7 +676,7 @@ export default function AdminConteudo() {
         </div>
       ) : (
         // ─── GRID VIEW ───────────────────────────────────────────
-        <div className="px-5 pt-5 pb-8 sm:px-7">
+        <div>
           <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
             {filtered.map((c) => {
               const stats = courseStats[c.id] || { modules: 0, lessons: 0 };
