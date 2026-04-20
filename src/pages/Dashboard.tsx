@@ -1273,7 +1273,7 @@ function SmallMetric({ icon, label, value, tone = "info" }: { icon: React.ReactN
 
 /* ─── Editorial dashboard sub-components ─── */
 
-function EditorialKpi({ label, value, sub, accent }: { label: string; value: string; sub: string; accent: "success" | "warning" | "destructive" | "neutral" }) {
+function EditorialKpi({ label, code, value, sub, accent }: { label: string; code?: string; value: string; sub: string; accent: "success" | "warning" | "destructive" | "neutral" }) {
   const accentDot: Record<string, string> = {
     success: "bg-success",
     warning: "bg-warning",
@@ -1282,36 +1282,42 @@ function EditorialKpi({ label, value, sub, accent }: { label: string; value: str
   };
 
   return (
-    <div className="bg-card px-6 py-7 hover:bg-muted/20 transition-colors">
-      <div className="flex items-center gap-2 mb-4">
-        <span className={cn("h-1.5 w-1.5 rounded-full", accentDot[accent])} />
-        <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-[0.16em]">{label}</p>
+    <div className="bg-card px-6 py-7 hover:bg-foreground/[0.015] transition-colors relative group">
+      <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center gap-2">
+          <span className={cn("h-1.5 w-1.5 rounded-full", accentDot[accent])} />
+          <p className="text-[10px] font-mono font-bold text-muted-foreground uppercase tracking-[0.18em]">{label}</p>
+        </div>
+        {code && <span className="font-mono text-[8.5px] font-bold text-muted-foreground/50 tracking-[0.2em]">{code}</span>}
       </div>
-      <p className="font-display font-semibold tabular-nums tracking-[-0.03em] leading-none text-[24px] md:text-[30px] text-foreground">
+      <p className="font-display font-semibold tabular-nums tracking-[-0.035em] leading-none text-[26px] md:text-[32px] text-foreground">
         {value}
       </p>
-      <p className="mt-3 text-[11px] text-muted-foreground font-medium leading-relaxed">{sub}</p>
+      <p className="mt-3 text-[10.5px] text-muted-foreground/80 font-medium leading-relaxed">{sub}</p>
     </div>
   );
 }
 
-function EditorialChannelRow({ name, approved, total, revenue, approvalRate, share, privacy }: { name: string; approved: number; total: number; revenue: number; approvalRate: number; share: number; privacy: boolean }) {
+function EditorialChannelRow({ index, name, approved, total, revenue, approvalRate, share, privacy }: { index?: string; name: string; approved: number; total: number; revenue: number; approvalRate: number; share: number; privacy: boolean }) {
   return (
-    <div className="px-6 py-5 hover:bg-muted/20 transition-colors">
-      <div className="flex items-baseline justify-between mb-3">
-        <p className="text-[13px] font-semibold text-foreground tracking-tight">{name}</p>
-        <p className="text-[14px] font-semibold text-foreground tabular-nums tracking-tight">
+    <div className="px-6 py-5 hover:bg-foreground/[0.015] transition-colors group">
+      <div className="flex items-baseline justify-between mb-3 gap-3">
+        <div className="flex items-baseline gap-2.5 min-w-0">
+          {index && <span className="font-mono text-[9px] font-bold text-muted-foreground/50 tracking-[0.16em] tabular-nums shrink-0">{index}</span>}
+          <p className="text-[13px] font-semibold text-foreground tracking-tight truncate">{name}</p>
+        </div>
+        <p className="text-[14px] font-semibold text-foreground tabular-nums tracking-tight shrink-0">
           {privacy ? CENSORED : fmt(revenue)}
         </p>
       </div>
-      <div className="flex items-center gap-3 text-[10.5px] text-muted-foreground font-medium mb-3">
-        <span><span className="text-foreground font-semibold tabular-nums">{approved}</span><span className="text-muted-foreground/60">/{total}</span> aprovadas</span>
-        <span className="text-border">·</span>
-        <span>Aprovação <span className="text-foreground font-semibold tabular-nums">{approvalRate.toFixed(1)}%</span></span>
-        <span className="ml-auto text-[10px] uppercase tracking-[0.14em] text-muted-foreground">Share <span className="text-foreground font-semibold tabular-nums">{share.toFixed(1)}%</span></span>
+      <div className="flex items-center gap-3 text-[10px] font-mono text-muted-foreground mb-3 tracking-tight">
+        <span className="uppercase tracking-[0.12em]"><span className="text-foreground font-semibold tabular-nums">{approved}</span><span className="text-muted-foreground/60">/{total}</span></span>
+        <span className="text-foreground/15">·</span>
+        <span className="uppercase tracking-[0.12em]">APR <span className="text-foreground font-semibold tabular-nums">{approvalRate.toFixed(1)}%</span></span>
+        <span className="ml-auto uppercase tracking-[0.12em]">SHR <span className="text-foreground font-semibold tabular-nums">{share.toFixed(1)}%</span></span>
       </div>
-      <div className="h-[2px] w-full rounded-full bg-border/60 overflow-hidden">
-        <div className="h-full rounded-full bg-foreground/70 transition-all duration-500" style={{ width: `${Math.min(share, 100)}%` }} />
+      <div className="h-[2px] w-full rounded-full bg-foreground/[0.06] overflow-hidden">
+        <div className="h-full rounded-full bg-foreground/70 transition-all duration-700 ease-out" style={{ width: `${Math.min(share, 100)}%` }} />
       </div>
     </div>
   );
