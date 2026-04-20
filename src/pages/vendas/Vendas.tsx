@@ -410,11 +410,11 @@ function MobileCard({ tx, prods, onClick, i }: { tx: Tables<"transactions">; pro
  const statusAccentBar = tx.status === "completed" ? "from-success via-success/40" : tx.status === "pending" ? "from-warning via-warning/40" : tx.status === "failed" ? "from-destructive via-destructive/40" : "from-muted-foreground/20 via-transparent";
 
  return (
-  <div className="group cursor-pointer overflow-hidden rounded-2xl border border-border/15 bg-card active:scale-[0.98] transition-all duration-200" onClick={onClick}>
+  <div className="group cursor-pointer overflow-hidden rounded-[22px] border border-border/15 bg-card/60 backdrop-blur-md active:scale-[0.98] transition-all duration-300 shadow-lg ring-1 ring-white/5" onClick={onClick}>
    {/* Top accent line */}
-   <div className={cn("h-[2px] bg-gradient-to-r to-transparent", statusAccentBar)} />
+   <div className={cn("h-[2.5px] bg-gradient-to-r to-transparent", statusAccentBar)} />
    
-   <div className="p-4 space-y-3">
+   <div className="p-5 space-y-4">
     {/* Row 1: Avatar + Name + Net amount */}
     <div className="flex items-start justify-between gap-3">
      <div className="flex items-center gap-3 min-w-0 flex-1">
