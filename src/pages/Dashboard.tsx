@@ -421,9 +421,12 @@ export default function Dashboard() {
   const nickname = profile?.nickname || profile?.full_name?.split(" ")[0] || null;
 
   return (
-    <div className="dashboard-page mx-auto w-full max-w-[1280px] pb-24 px-4 md:px-10 lg:px-14 relative selection:bg-foreground/10">
+    <div className="dashboard-page mx-auto w-full max-w-[1320px] pb-24 px-4 md:px-10 lg:px-14 relative selection:bg-primary/15">
       {/* Hairline grid background — institutional signature */}
-      <div className="pointer-events-none absolute inset-0 -z-10 opacity-[0.035]" aria-hidden style={{ backgroundImage: "linear-gradient(to right, hsl(var(--foreground)) 1px, transparent 1px), linear-gradient(to bottom, hsl(var(--foreground)) 1px, transparent 1px)", backgroundSize: "64px 64px" }} />
+      <div className="pointer-events-none absolute inset-0 -z-10 opacity-[0.025]" aria-hidden style={{ backgroundImage: "linear-gradient(to right, hsl(var(--foreground)) 1px, transparent 1px), linear-gradient(to bottom, hsl(var(--foreground)) 1px, transparent 1px)", backgroundSize: "72px 72px" }} />
+      {/* Soft ambient glow — luxury accent */}
+      <div className="pointer-events-none absolute top-0 right-0 -z-10 h-[480px] w-[480px] rounded-full bg-primary/[0.04] blur-[140px]" aria-hidden />
+      <div className="pointer-events-none absolute top-[600px] left-0 -z-10 h-[400px] w-[400px] rounded-full bg-primary/[0.025] blur-[120px]" aria-hidden />
 
       {/* ─── GREEN FIRE BORDER EFFECT ─── */}
       {fireEffect && (
