@@ -192,13 +192,18 @@ export default function Dashboard() {
   }, [user?.id, refetchTx]);
 
   const filteredTx = useMemo(() => {
+    let base = transactions;
+    if (selectedProductId !== "all") {
+      base = base.filter(t => t.product_id === selectedProductId);
+    }
+
     // Custom date range
     if (isCustom && customRange?.from) {
       const start = new Date(customRange.from);
       start.setHours(0, 0, 0, 0);
       const end = customRange.to ? new Date(customRange.to) : new Date(customRange.from);
       end.setHours(23, 59, 59, 999);
-      return transactions.filter((t) => {
+      return base.filter((t) => {
         const d = new Date(t.created_at);
         return d >= start && d <= end;
       });
@@ -208,22 +213,22 @@ export default function Dashboard() {
 
     if (selectedPeriod.days === 0) {
       const todayStr = today.toLocaleDateString("pt-BR", { timeZone: "America/Sao_Paulo" });
-      return transactions.filter((t) => toBrasiliaDate(t.created_at) === todayStr);
+      return base.filter((t) => toBrasiliaDate(t.created_at) === todayStr);
     }
 
     if (selectedPeriod.days === 1) {
       const yesterday = new Date(today);
       yesterday.setDate(yesterday.getDate() - 1);
       const yesterdayStr = yesterday.toLocaleDateString("pt-BR", { timeZone: "America/Sao_Paulo" });
-      return transactions.filter((t) => toBrasiliaDate(t.created_at) === yesterdayStr);
+      return base.filter((t) => toBrasiliaDate(t.created_at) === yesterdayStr);
     }
 
     const start = new Date(today);
     start.setDate(start.getDate() - selectedPeriod.days);
     start.setHours(0, 0, 0, 0);
 
-    return transactions.filter((t) => new Date(t.created_at) >= start);
-  }, [transactions, selectedPeriod, isCustom, customRange]);
+    return base.filter((t) => new Date(t.created_at) >= start);
+  }, [transactions, selectedPeriod, isCustom, customRange, selectedProductId]);
 
   // Memoize all derived metrics to avoid recomputing on every render
   const { approved, pending, refunded, chargebacks, revenue, conversion, uniqueCustomers, pixConversion, cardConversion, chargebackRate, pixRevenue, cardRevenue, pixApprovedCount, pixTotalCount, cardApprovedCount, cardTotalCount } = useMemo(() => {
