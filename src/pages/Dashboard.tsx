@@ -960,7 +960,7 @@ function MiniHeroCard({ icon, label, value, tone, idx = 0 }: { icon: React.React
   };
 
   return (
-    <div className={`group relative rounded-2xl border border-border/50 bg-card p-3 md:p-4 transition-all duration-200 hover:border-border/80 overflow-hidden animate-fade-in ${STAGGER_CLASSES[idx + 1] || ""}`}>
+    <div className={`group relative rounded-2xl border border-border/40 bg-card/60 backdrop-blur-xl p-3 md:p-4 transition-all duration-300 hover:border-border/80 hover:bg-card/80 shadow-sm hover:shadow-md overflow-hidden animate-fade-in ${STAGGER_CLASSES[idx + 1] || ""}`}>
       {/* Left accent bar */}
       <div className={`absolute left-0 top-0 bottom-0 w-[3px] rounded-full ${accentBar[tone]}`} />
       <div className="relative z-10 pl-1.5">
@@ -986,7 +986,7 @@ function KpiTile({ icon, label, value, helper, tone, delay }: { icon: React.Reac
   };
 
   return (
-    <div className={`group relative rounded-2xl border border-border/50 bg-card p-3.5 md:p-4 transition-all duration-200 hover:border-border/80 overflow-hidden animate-fade-in flex flex-col justify-between min-h-[130px] ${delay || ""}`}>
+    <div className={`group relative rounded-2xl border border-border/40 bg-card/60 backdrop-blur-xl p-3.5 md:p-4 transition-all duration-300 hover:border-border/80 hover:bg-card/80 shadow-sm hover:shadow-md overflow-hidden animate-fade-in flex flex-col justify-between min-h-[130px] ${delay || ""}`}>
       {/* Left accent bar */}
       <div className={`absolute left-0 top-0 bottom-0 w-[3px] rounded-full ${accentBar[tone]}`} />
       <div className="pl-1.5 flex flex-col h-full">
@@ -998,7 +998,7 @@ function KpiTile({ icon, label, value, helper, tone, delay }: { icon: React.Reac
         </div>
         <div className="mt-auto">
           <p className="text-[22px] md:text-[26px] font-display font-black tracking-[-0.03em] text-foreground tabular-nums leading-none">{value}</p>
-          <p className="mt-1.5 text-[10px] md:text-[11px] text-muted-foreground/70 font-medium">{helper}</p>
+          <p className="mt-1.5 text-[10px] md:text-[11px] text-muted-foreground/80 font-medium">{helper}</p>
         </div>
       </div>
     </div>
