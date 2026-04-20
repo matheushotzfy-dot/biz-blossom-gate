@@ -59,8 +59,6 @@ import type { DateRange } from "react-day-picker";
 import { motion } from "framer-motion";
 import { StatCard } from "@/components/StatCard";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { StatCard } from "@/components/StatCard";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 /* ─────────────────────── Animated Number ─────────────────────── */
 function AnimatedNumber({ value, formatter = fmt, duration = 800 }: { value: number; formatter?: (v: number) => string; duration?: number }) {
