@@ -18,18 +18,18 @@ const FunilVendas = lazy(() => import("./vendas/FunilVendas"));
 const CheckoutWhatsApp = lazy(() => import("./vendas/CheckoutWhatsApp"));
 
 const TABS: HubTab[] = [
- { id: "funil", label: "Funil" },
- { id: "ab", label: "A/B Testing" },
- { id: "cupons", label: "Auto Cupons" },
- { id: "whatsapp", label: "Recuperação" },
- { id: "checkout-wpp", label: "Checkout WhatsApp" },
- { id: "upsell", label: "Upsell" },
- { id: "links", label: "Links" },
- { id: "proof", label: "Proof Popup" },
- { id: "smart", label: "Smart Checkout" },
- { id: "churn", label: "Churn" },
- { id: "calc", label: "Calculadora" },
- { id: "ajuda", label: "Central de Ajuda" },
+ { id: "funil", label: "Funil", icon: Filter },
+ { id: "ab", label: "A/B Testing", icon: FlaskConical },
+ { id: "cupons", label: "Auto Cupons", icon: Ticket },
+ { id: "whatsapp", label: "Recuperação", icon: MessageSquare },
+ { id: "checkout-wpp", label: "Checkout WhatsApp", icon: Phone },
+ { id: "upsell", label: "Upsell", icon: ArrowUpRight },
+ { id: "links", label: "Links", icon: Link2 },
+ { id: "proof", label: "Proof Popup", icon: Eye },
+ { id: "smart", label: "Smart Checkout", icon: Globe },
+ { id: "churn", label: "Churn", icon: UserMinus },
+ { id: "calc", label: "Calculadora", icon: Calculator },
+ { id: "ajuda", label: "Central de Ajuda", icon: HelpCircle },
 ];
 
 const COMPONENTS: Record<string, React.LazyExoticComponent<React.FC>> = {

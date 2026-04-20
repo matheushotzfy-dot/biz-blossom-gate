@@ -186,13 +186,13 @@ function SidebarSectionNav({ section, pathname, isFirst }: SidebarSectionNavProp
                       <span className="absolute left-0 top-1/2 h-5 w-[3px] -translate-y-1/2 rounded-r-full bg-sidebar-primary group-data-[collapsible=icon]:hidden shadow-[0_0_12px_rgba(var(--sidebar-primary),0.6)] animate-pulse-glow" />
                     )}
                     <span className={cn(
-                      "flex h-5 w-5 shrink-0 items-center justify-center transition-all duration-200",
+                      "flex h-8 w-8 shrink-0 items-center justify-center rounded-lg transition-all duration-200",
                       isActive
-                        ? "text-sidebar-primary"
-                        : "text-sidebar-foreground/35 group-hover/nav:text-sidebar-accent-foreground",
+                        ? "bg-sidebar-primary/8 text-sidebar-primary"
+                        : "bg-sidebar-accent/30 text-sidebar-foreground/40 ring-1 ring-sidebar-border/15 group-hover/nav:bg-sidebar-accent/40 group-hover/nav:text-sidebar-accent-foreground",
                     )}>
                       <item.icon
-                        className="h-[18px] w-[18px]"
+                        className="h-[17px] w-[17px]"
                         strokeWidth={isActive ? 2.5 : 2}
                       />
                     </span>

@@ -105,10 +105,10 @@ export function MobileBottomNav() {
  )}
  >
   <div className={cn(
-    "flex items-center justify-center transition-all duration-200",
-    isActive ? "text-primary" : "text-muted-foreground/40"
+  "h-8 w-8 rounded-lg flex items-center justify-center",
+  isActive ? "bg-primary/15" : "bg-muted/40"
   )}>
-    <item.icon className="h-4 w-4" />
+  <item.icon className="h-3.5 w-3.5" />
   </div>
  <span className="text-[9px] font-semibold leading-tight truncate w-full">{item.title}</span>
  </NavLink>

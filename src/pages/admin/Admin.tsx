@@ -100,10 +100,10 @@ export default function Admin() {
  </div>
 
   <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-  <StatCard title="Usuários" value={String(profiles.length)} change="total registrados" changeType="neutral" />
-  <StatCard title="Produtos" value={String(products.length)} change="cadastrados" changeType="neutral" />
-  <StatCard title="Receita Total" value={`R$ ${totalRevenue.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}`} change={`R$ ${totalFees.toFixed(2)} em taxas`} changeType="positive" />
-  <StatCard title="Saques Pendentes" value={`R$ ${pendingAmount.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}`} change={`${pendingWd.length} solicitações`} changeType={pendingWd.length > 0 ? "negative" : "neutral"} />
+  <StatCard title="Usuários" value={String(profiles.length)} icon={Users} change="total registrados" changeType="neutral" />
+  <StatCard title="Produtos" value={String(products.length)} icon={Package} change="cadastrados" changeType="neutral" />
+  <StatCard title="Receita Total" value={`R$ ${totalRevenue.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}`} icon={DollarSign} change={`R$ ${totalFees.toFixed(2)} em taxas`} changeType="positive" />
+  <StatCard title="Saques Pendentes" value={`R$ ${pendingAmount.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}`} icon={ArrowDownToLine} change={`${pendingWd.length} solicitações`} changeType={pendingWd.length > 0 ? "negative" : "neutral"} />
   </div>
 
  <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
