@@ -214,7 +214,7 @@ function Sparkline({ data, color = "primary" }: { data: number[]; color?: string
 function SortHead({ label, field, sort, onSort, className }: { label: string; field: SortField; sort: { field: SortField; dir: SortDir }; onSort: (f: SortField) => void; className?: string }) {
  const active = sort.field === field;
  return (
-  <th onClick={() => onSort(field)} className={cn("text-left h-12 px-4 text-[10.5px] font-heading font-semibold uppercase tracking-[0.14em] text-muted-foreground/55 cursor-pointer select-none hover:text-foreground transition-colors group", className)}>
+  <th onClick={() => onSort(field)} className={cn("text-left h-12 px-4 text-[10.5px] font-heading font-semibold uppercase tracking-[0.14em] text-muted-foreground/70 cursor-pointer select-none hover:text-foreground/90 transition-colors group", className)}>
     <span className="inline-flex items-center gap-1.5">
       {label}
       {active
@@ -327,7 +327,7 @@ function TxRow({ tx, prods, onClick, i }: { tx: Tables<"transactions">; prods: R
      <div className="min-w-0">
       <p className="truncate text-[14px] font-heading font-semibold text-foreground leading-[1.25] tracking-[-0.01em]">{name}</p>
       <div className="flex items-center gap-2 mt-1">
-       {tx.customer_email && <p className="truncate text-[11.5px] text-muted-foreground/75 max-w-[220px] leading-tight">{tx.customer_email}</p>}
+       {tx.customer_email && <p className="truncate text-[11.5px] text-muted-foreground/85 max-w-[220px] leading-tight">{tx.customer_email}</p>}
        {tx.customer_phone && (
         <a href={`https://wa.me/55${tx.customer_phone.replace(/\D/g, "")}`} target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()} className="text-muted-foreground/40 hover:text-success transition-colors">
          <MessageCircle className="h-3 w-3" />
@@ -340,7 +340,7 @@ function TxRow({ tx, prods, onClick, i }: { tx: Tables<"transactions">; prods: R
     {/* Product + Date */}
     <td className="px-4 py-5 align-middle">
      <p className="truncate text-[13px] font-medium text-foreground/85 max-w-[240px] leading-[1.3] tracking-[-0.005em]">{prodName}</p>
-     <p className="text-[11.5px] text-muted-foreground/70 mt-1 tabular-nums tracking-tight">{fmtDate(tx.created_at)} · {fmtTime(tx.created_at)}</p>
+     <p className="text-[11.5px] text-muted-foreground/80 mt-1 tabular-nums tracking-tight">{fmtDate(tx.created_at)} · {fmtTime(tx.created_at)}</p>
     </td>
     {/* Status */}
     <td className="px-4 py-5 align-middle">
