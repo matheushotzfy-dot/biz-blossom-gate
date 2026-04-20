@@ -590,17 +590,19 @@ export default function Dashboard() {
         </div>
 
         {/* KPIs */}
-        <div className="grid grid-cols-2 md:grid-cols-4 divide-x divide-border">
+        <div className="relative grid grid-cols-2 md:grid-cols-4 divide-x divide-border">
           {[
             { label: "Conversão", value: `${conversion.toFixed(1)}%`, icon: Target },
             { label: "Ticket Médio", value: privacy.hidden ? CENSORED : fmt(approved.length > 0 ? revenue / approved.length : 0), icon: Wallet },
             { label: "Clientes Únicos", value: String(uniqueCustomers), icon: Users },
             { label: "Chargeback", value: `${chargebackRate.toFixed(2)}%`, icon: ShieldCheck, danger: chargebackRate > 1 },
           ].map((kpi) => (
-            <div key={kpi.label} className="px-6 md:px-7 py-6">
+            <div key={kpi.label} className="group relative px-6 md:px-7 py-6 transition-colors hover:bg-muted/30">
               <div className="flex items-start justify-between mb-3">
                 <p className="text-[9.5px] font-bold uppercase tracking-[0.2em] text-muted-foreground">{kpi.label}</p>
-                <kpi.icon className="h-3.5 w-3.5 text-muted-foreground" strokeWidth={2} />
+                <div className="h-6 w-6 rounded-md bg-muted/60 border border-border/60 flex items-center justify-center transition-all group-hover:bg-foreground group-hover:border-foreground">
+                  <kpi.icon className="h-3 w-3 text-muted-foreground transition-colors group-hover:text-background" strokeWidth={2.2} />
+                </div>
               </div>
               <p className={cn(
                 "text-[26px] md:text-[30px] font-display font-black tracking-[-0.03em] leading-none tabular-nums",
@@ -608,6 +610,10 @@ export default function Dashboard() {
               )}>
                 {kpi.value}
               </p>
+              <div className={cn(
+                "absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-foreground/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity",
+                (kpi as any).danger && "via-destructive/40"
+              )} />
             </div>
           ))}
         </div>
