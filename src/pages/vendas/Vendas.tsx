@@ -177,16 +177,28 @@ function AnimatedNumber({ value, formatter = fmt, duration = 800 }: { value: num
 
 /* ─────────────────────── Micro Components ─────────────────────── */
 function DeltaBadge({ cur, prev }: { cur: number; prev: number }) {
- if (prev === 0 && cur === 0) return null;
- if (prev === 0) return <span className="text-[9px] font-semibold text-success bg-success/8 px-2 py-0.5 rounded-md inline-flex items-center gap-0.5 border border-success/10"><Sparkles className="h-2.5 w-2.5" />novo</span>;
- const pct = ((cur - prev) / prev) * 100;
- const up = pct >= 0;
- return (
-  <span className={cn("inline-flex items-center gap-0.5 text-[9px] font-bold tabular-nums px-2 py-0.5 rounded-md border", up ? "text-success bg-success/6 border-success/10" : "text-destructive bg-destructive/6 border-destructive/10")}>
- {up ? <ArrowUpRight className="h-2.5 w-2.5" /> : <ArrowDownRight className="h-2.5 w-2.5" />}
- {Math.abs(pct).toFixed(1)}%
-  </span>
- );
+  if (prev === 0 && cur === 0) return null;
+  if (prev === 0) {
+    return (
+      <span className="inline-flex items-center gap-1 text-[10px] font-bold text-success bg-success/10 px-2.5 py-1 rounded-full border border-success/20 shadow-[0_2px_10px_-4px_rgba(34,197,94,0.3)] animate-in fade-in zoom-in duration-500">
+        <Sparkles className="h-2.5 w-2.5" />
+        NOVO
+      </span>
+    );
+  }
+  const pct = ((cur - prev) / prev) * 100;
+  const up = pct >= 0;
+  return (
+    <span className={cn(
+      "inline-flex items-center gap-1 text-[10px] font-bold tabular-nums px-2.5 py-1 rounded-full border transition-all duration-300",
+      up 
+        ? "text-success bg-success/10 border-success/20 shadow-[0_2px_10px_-4px_rgba(34,197,94,0.3)]" 
+        : "text-destructive bg-destructive/10 border-destructive/20 shadow-[0_2px_10px_-4px_rgba(239,68,68,0.2)]"
+    )}>
+      {up ? <ArrowUpRight className="h-3 w-3" strokeWidth={3} /> : <ArrowDownRight className="h-3 w-3" strokeWidth={3} />}
+      {Math.abs(pct).toFixed(1)}%
+    </span>
+  );
 }
 
 function Sparkline({ data, color = "primary" }: { data: number[]; color?: string }) {
