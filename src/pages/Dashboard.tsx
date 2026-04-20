@@ -476,241 +476,160 @@ export default function Dashboard() {
       )}
 
       {/* ════════════════════════════════════════════════════════════════ */}
-      {/* HERO — ONE DOMINANT METRIC                                       */}
+      {/* SINGLE LUXURY CARD — CENTERED                                    */}
       {/* ════════════════════════════════════════════════════════════════ */}
-      <section className="relative mb-6">
-        <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
-          <div className="flex flex-col gap-1">
-            <h1 className="text-2xl font-display font-black text-foreground tracking-tight flex items-center gap-2">
-              Olá{nickname ? `, ${nickname}` : ""} <span className="animate-wave origin-bottom-right">👋</span>
-            </h1>
-            <p className="text-xs text-muted-foreground font-medium">Veja como estão seus negócios hoje.</p>
+      <div className="min-h-[calc(100vh-12rem)] flex items-center justify-center py-8">
+        <motion.section
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+          className="relative w-full max-w-[680px]"
+        >
+          {/* Ambient glow halo */}
+          <div className="absolute -inset-32 pointer-events-none opacity-60">
+            <div className="absolute top-0 left-1/4 h-72 w-72 rounded-full bg-primary/10 blur-[120px]" />
+            <div className="absolute bottom-0 right-1/4 h-72 w-72 rounded-full bg-info/8 blur-[120px]" />
           </div>
 
-          <div className="flex flex-wrap items-center gap-2">
-            <div className="w-[200px]">
-              <Select value={selectedProductId} onValueChange={setSelectedProductId}>
-                <SelectTrigger className="h-9 text-xs font-semibold bg-card/40 backdrop-blur-xl border-border/50">
-                  <div className="flex items-center gap-2 truncate">
-                    <Package className="h-3.5 w-3.5 text-muted-foreground" />
-                    <SelectValue placeholder="Todos os produtos" />
+          {/* Main luxury card */}
+          <div className="relative overflow-hidden rounded-[28px] border border-border/40 bg-gradient-to-b from-card/95 via-card/90 to-card/95 backdrop-blur-2xl shadow-[0_24px_80px_-20px_rgba(0,0,0,0.4),0_8px_32px_-12px_rgba(0,0,0,0.2),inset_0_1px_0_0_hsl(var(--foreground)/0.04)]">
+            {/* Subtle inner glow */}
+            <div className="absolute inset-0 bg-gradient-to-br from-primary/[0.04] via-transparent to-transparent pointer-events-none" />
+            <div className="absolute -top-24 -right-24 h-48 w-48 rounded-full bg-primary/8 blur-[80px] pointer-events-none" />
+            <div className="absolute -bottom-24 -left-24 h-48 w-48 rounded-full bg-info/6 blur-[80px] pointer-events-none" />
+
+            {/* Top hairline accent */}
+            <div className="absolute top-0 left-1/2 -translate-x-1/2 h-px w-3/4 bg-gradient-to-r from-transparent via-primary/40 to-transparent" />
+
+            {/* Card content */}
+            <div className="relative px-10 md:px-14 py-12 md:py-14">
+              {/* Brand mark / monogram */}
+              <div className="flex justify-center mb-8">
+                <div className="relative">
+                  <div className="h-12 w-12 rounded-2xl bg-gradient-to-br from-primary/20 via-primary/10 to-primary/5 border border-primary/20 flex items-center justify-center shadow-[inset_0_1px_0_0_hsl(var(--foreground)/0.08),0_4px_12px_-2px_hsl(var(--primary)/0.2)]">
+                    <Crown className="h-5 w-5 text-primary" strokeWidth={2.2} />
                   </div>
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">Todos os produtos</SelectItem>
-                  {productsData?.map((p) => (
-                    <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="inline-flex items-center rounded-lg border border-border/50 bg-card/40 backdrop-blur-xl p-1 shadow-sm">
-              {PERIOD_PRESETS.map((opt) => (
-                <button key={opt.label} onClick={() => { setSelectedPeriod(opt); setIsCustom(false); setCustomRange(undefined); }}
-                  className={cn("rounded-md px-3 py-1.5 text-[11px] font-bold transition-all",
-                    !isCustom && selectedPeriod.label === opt.label ? "bg-primary text-primary-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"
-                  )}>
-                  {opt.label}
-                </button>
-              ))}
-            </div>
-
-            <Popover open={datePickerOpen} onOpenChange={setDatePickerOpen}>
-              <PopoverTrigger asChild>
-                <button className={cn("h-9 rounded-lg border px-3 text-[11px] font-bold transition-all inline-flex items-center gap-2 shadow-sm",
-                  isCustom ? "border-primary/30 bg-primary/10 text-primary" : "border-border/50 bg-card/40 backdrop-blur-xl text-muted-foreground hover:text-foreground"
-                )}>
-                  <CalendarDays className="h-3.5 w-3.5" />
-                  {isCustom && customRange?.from
-                    ? customRange.to ? `${format(customRange.from, "dd/MM")} – ${format(customRange.to, "dd/MM")}` : format(customRange.from, "dd/MM/yyyy")
-                    : "Personalizado"}
-                </button>
-              </PopoverTrigger>
-              <PopoverContent align="end" className="w-auto overflow-hidden rounded-2xl border border-border/30 bg-popover p-0 shadow-2xl">
-                <Calendar mode="range" selected={customRange} onSelect={(range) => { setCustomRange(range); setIsCustom(true); if (range?.from && range?.to) setTimeout(() => setDatePickerOpen(false), 300); }} numberOfMonths={1} locale={ptBR} disabled={(date) => date > new Date()} className="p-3" classNames={{ day_selected: "bg-primary text-primary-foreground", day_range_middle: "bg-primary/10 text-foreground", day_range_end: "bg-primary text-primary-foreground" }} />
-              </PopoverContent>
-            </Popover>
-
-            <button onClick={privacy.toggle} className={cn("h-9 w-9 rounded-lg border flex items-center justify-center transition-all shadow-sm", privacy.hidden ? "border-primary/30 bg-primary/10 text-primary" : "border-border/50 bg-card/40 backdrop-blur-xl text-muted-foreground hover:text-foreground")} title={privacy.hidden ? "Mostrar" : "Ocultar"}>
-              {privacy.hidden ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-            </button>
-          </div>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
-          <StatCard title="Receita Bruta" value={privacy.hidden ? "R$ •••••••" : fmt(revenue)} icon={DollarSign} change={approved.length > 0 ? `${approved.length} vendas` : undefined} changeType="positive" className="bg-card/40 backdrop-blur-xl border-border/50" />
-          <StatCard title="Saldo Disponível" value={privacy.hidden ? CENSORED : fmt(balance)} icon={Wallet} change={withdrawalPending > 0 ? `${fmt(withdrawalPending)} em análise` : "Pronto para saque"} changeType={balance > 0 ? "positive" : "neutral"} className="bg-card/40 backdrop-blur-xl border-border/50" />
-          <StatCard title="Taxa de Conversão" value={privacy.hidden ? CENSORED : `${conversion.toFixed(1)}%`} icon={TrendingUp} change="Total de acessos" className="bg-card/40 backdrop-blur-xl border-border/50" />
-          <StatCard title="Ticket Médio" value={privacy.hidden ? CENSORED : fmt(approved.length > 0 ? revenue / approved.length : 0)} icon={ShoppingCart} className="bg-card/40 backdrop-blur-xl border-border/50" />
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4">
-          <div className="glass-card-hover rounded-2xl p-4 bg-card/40 backdrop-blur-xl border-border/50">
-            <p className="text-[9px] font-bold text-muted-foreground/50 uppercase tracking-[0.18em] mb-3">Receita PIX</p>
-            <div className="flex items-center justify-between">
-              <p className="text-xl font-black text-success tabular-nums">{privacy.hidden ? CENSORED : fmt(pixRevenue)}</p>
-              <PixLogoMark className="h-4 w-4 text-success/50" />
-            </div>
-            <p className="text-[10px] text-muted-foreground/60 mt-2 font-bold">{pixConversion.toFixed(1)}% de conversão</p>
-          </div>
-
-          <div className="glass-card-hover rounded-2xl p-4 bg-card/40 backdrop-blur-xl border-border/50">
-            <p className="text-[9px] font-bold text-muted-foreground/50 uppercase tracking-[0.18em] mb-3">Receita Cartão</p>
-            <div className="flex items-center justify-between">
-              <p className="text-xl font-black text-info tabular-nums">{privacy.hidden ? CENSORED : fmt(cardRevenue)}</p>
-              <CreditCard className="h-4 w-4 text-info/50" />
-            </div>
-            <p className="text-[10px] text-muted-foreground/60 mt-2 font-bold">{cardConversion.toFixed(1)}% de conversão</p>
-          </div>
-
-          <div className="glass-card-hover rounded-2xl p-4 bg-card/40 backdrop-blur-xl border-border/50">
-            <p className="text-[9px] font-bold text-muted-foreground/50 uppercase tracking-[0.18em] mb-3">Chargeback</p>
-            <div className="flex items-center justify-between">
-              <p className={cn("text-xl font-black tabular-nums", chargebackRate > 1 ? "text-destructive" : "text-success/80")}>
-                {privacy.hidden ? CENSORED : `${chargebackRate.toFixed(2)}%`}
-              </p>
-              <AlertTriangle className="h-4 w-4 text-muted-foreground/30" />
-            </div>
-            <p className="text-[10px] text-muted-foreground/60 mt-2 font-bold">{chargebacks.length} ocorrências</p>
-          </div>
-
-          <div className="glass-card-hover rounded-2xl p-4 bg-card/40 backdrop-blur-xl border-border/50">
-            <p className="text-[9px] font-bold text-muted-foreground/50 uppercase tracking-[0.18em] mb-3">Reembolsos</p>
-            <div className="flex items-center justify-between">
-              <p className="text-xl font-black text-destructive/80 tabular-nums">{privacy.hidden ? CENSORED : fmt(refunded.reduce((acc, t) => acc + Number(t.net_amount), 0))}</p>
-              <RefreshCw className="h-4 w-4 text-destructive/40" />
-            </div>
-            <p className="text-[10px] text-muted-foreground/60 mt-2 font-bold">{refunded.length} vendas devolvidas</p>
-          </div>
-
-          <div className="glass-card-hover rounded-2xl p-4 bg-card/40 backdrop-blur-xl border-border/50">
-            <p className="text-[9px] font-bold text-muted-foreground/50 uppercase tracking-[0.18em] mb-3">Vendas Pendentes</p>
-            <div className="flex items-center justify-between">
-              <p className="text-xl font-black text-warning tabular-nums">{privacy.hidden ? CENSORED : pending.length}</p>
-              <Clock3 className="h-4 w-4 text-warning/50" />
-            </div>
-            <p className="text-[10px] text-muted-foreground/60 mt-2 font-bold">Aguardando pagamento</p>
-          </div>
-        </div>
-      </section>
-
-      {/* ════════════════════════════════════════════════════════════════ */}
-      {/* ACTIONS + ACTIVITY                                               */}
-      {/* ════════════════════════════════════════════════════════════════ */}
-      <section className="grid grid-cols-1 gap-4 xl:grid-cols-[1fr_1.4fr] mb-8">
-          {/* Quick actions — operational support */}
-          <div className="rounded-2xl border border-border bg-card flex flex-col overflow-hidden">
-            <div className="flex items-center justify-between border-b border-border/60 px-5 py-3.5">
-              <p className="text-[11px] font-heading font-bold uppercase tracking-[0.14em] text-foreground">Ações rápidas</p>
-              <Link to="/perfil" className="text-[10px] text-muted-foreground hover:text-foreground transition-colors">Tudo</Link>
-            </div>
-            <div className="divide-y divide-border/60 max-h-[560px] overflow-y-auto">
-              {[
-                { label: "Criar produto", href: "/vendas/produtos", icon: Package },
-                { label: "Configurar checkout", href: "/vendas/checkout", icon: CreditCard },
-                { label: "Link de pagamento", href: "/vendas/links", icon: Hash },
-                { label: "Ver vendas", href: "/vendas", icon: BarChart3 },
-                { label: "Extrato financeiro", href: "/financeiro/extrato", icon: FileText },
-                { label: "Solicitar saque", href: "/financeiro/saques", icon: ArrowDownRight },
-                { label: "Dados bancários", href: "/financeiro/dados-bancarios", icon: Banknote },
-                { label: "Identidade & KYC", href: "/financeiro/identidade", icon: ShieldCheck },
-                { label: "Cupons de desconto", href: "/vendas/cupons", icon: Percent },
-                { label: "Área de membros", href: "/vendas/conteudo", icon: GraduationCap },
-                { label: "Programa de afiliados", href: "/vendas/afiliados", icon: Users },
-                { label: "Apps & Integrações", href: "/integracoes", icon: Layers },
-                { label: "Webhooks & API", href: "/vendas/webhooks", icon: Webhook },
-                { label: "Suporte", href: "/suporte", icon: Sparkles },
-              ].map((action) => (
-                <Link
-                  key={action.href}
-                  to={action.href}
-                  className="group flex items-center gap-3 px-5 py-3 transition-colors hover:bg-muted/30"
-                >
-                  <div className="flex h-8 w-8 items-center justify-center rounded-md border border-border/60 bg-background text-muted-foreground group-hover:text-primary group-hover:border-primary/30 transition-colors">
-                    <action.icon className="h-3.5 w-3.5" />
-                  </div>
-                  <span className="flex-1 text-[12.5px] font-semibold text-foreground">{action.label}</span>
-                  <ChevronRight className="h-3.5 w-3.5 text-muted-foreground/40 group-hover:text-foreground transition-colors" />
-                </Link>
-              ))}
-            </div>
-          </div>
-
-          {/* Activity feed */}
-          <div className="rounded-2xl border border-border bg-card flex flex-col overflow-hidden">
-            <div className="flex items-center justify-between border-b border-border/60 px-5 py-3.5">
-              <p className="text-[11px] font-heading font-bold uppercase tracking-[0.14em] text-foreground">Atividade recente</p>
-              <Link to="/financeiro/extrato" className="inline-flex items-center gap-1 text-[11px] font-semibold text-primary transition-colors hover:text-primary/80">
-                Ver tudo <ChevronRight className="h-3 w-3" />
-              </Link>
-            </div>
-
-            <div className="flex-1 min-h-0 overflow-y-auto px-3 py-3">
-              {activity.length === 0 ? (
-                <div className="flex flex-col items-center justify-center py-16 text-center">
-                  <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-secondary">
-                    <PixLogoMark className="h-6 w-6" />
-                  </div>
-                  <p className="text-sm font-display font-bold text-muted-foreground/40">Sem movimentações ainda</p>
-                  <p className="mt-1 text-[11px] text-muted-foreground/25">Suas vendas aparecerão aqui</p>
+                  <div className="absolute -inset-2 rounded-2xl bg-primary/20 blur-xl opacity-50 -z-10" />
                 </div>
-              ) : (
-                activity.map((item, idx) => {
-                  const txStyles: Record<string, { label: string; pillBg: string; pillText: string; pillBorder: string; iconBg: string; iconText: string }> = {
-                    completed: { label: "Aprovada", pillBg: "bg-success/6", pillText: "text-success", pillBorder: "border-success/10", iconBg: "bg-success/10", iconText: "text-success" },
-                    pending: { label: "Pendente", pillBg: "bg-warning/6", pillText: "text-warning", pillBorder: "border-warning/10", iconBg: "bg-warning/10", iconText: "text-warning" },
-                    failed: { label: "Falhou", pillBg: "bg-destructive/6", pillText: "text-destructive", pillBorder: "border-destructive/10", iconBg: "bg-destructive/10", iconText: "text-destructive" },
-                    refunded: { label: "Reembolso", pillBg: "bg-info/6", pillText: "text-info", pillBorder: "border-info/10", iconBg: "bg-info/10", iconText: "text-info" },
-                    chargeback: { label: "Chargeback", pillBg: "bg-destructive/6", pillText: "text-destructive", pillBorder: "border-destructive/10", iconBg: "bg-destructive/10", iconText: "text-destructive" },
-                    default: { label: "Status", pillBg: "bg-muted/6", pillText: "text-muted-foreground", pillBorder: "border-border/10", iconBg: "bg-muted/10", iconText: "text-muted-foreground" },
-                  };
-                  const wdStyles: Record<string, { label: string; pillBg: string; pillText: string; pillBorder: string; iconBg: string; iconText: string }> = {
-                    pending: { label: "Em análise", pillBg: "bg-warning/6", pillText: "text-warning", pillBorder: "border-warning/10", iconBg: "bg-warning/10", iconText: "text-warning" },
-                    approved: { label: "Aprovado", pillBg: "bg-success/6", pillText: "text-success", pillBorder: "border-success/10", iconBg: "bg-success/10", iconText: "text-success" },
-                    rejected: { label: "Rejeitado", pillBg: "bg-destructive/6", pillText: "text-destructive", pillBorder: "border-destructive/10", iconBg: "bg-destructive/10", iconText: "text-destructive" },
-                    default: { label: "Saque", pillBg: "bg-muted/6", pillText: "text-muted-foreground", pillBorder: "border-border/10", iconBg: "bg-muted/10", iconText: "text-muted-foreground" },
-                  };
-                  const s = item.kind === "transaction" ? txStyles[item.status] || txStyles.default : wdStyles[item.status] || wdStyles.default;
-                  const fullTx = item.kind === "transaction" ? transactions.find(t => t.id === item.id) ?? null : null;
+              </div>
 
-                  return (
-                    <div key={item.id} className={cn("dashboard-activity-row group rounded-[18px] border border-transparent px-3 py-2.5 transition-all hover:border-border/20 hover:bg-background/50", idx < activity.length - 1 && "mb-1")}>
-                      <div className="flex items-center gap-3">
-                        <div className={cn("flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-border/20", s.iconBg, s.iconText)}>
-                          {item.kind === "transaction"
-                            ? item.paymentMethod === "pix"
-                              ? <PixLogoMark className="h-4 w-4" />
-                              : item.paymentMethod === "credit_card" || item.paymentMethod === "card"
-                                ? <CreditCard className="h-4 w-4" />
-                                : <DollarSign className="h-4 w-4" />
-                            : <Wallet className="h-4 w-4" />}
-                        </div>
-                        <div className="min-w-0 flex-1">
-                          <div className="flex flex-wrap items-center gap-2">
-                            <p className="text-[13px] font-display font-black tabular-nums text-foreground">{privacy.hidden ? CENSORED : fmt(item.amount)}</p>
-                            <span className={cn("rounded-full border px-2.5 py-0.5 text-[9px] font-bold", s.pillBg, s.pillText, s.pillBorder)}>
-                              {s.label}
-                            </span>
-                          </div>
-                          <p className="mt-1 truncate text-[10px] text-muted-foreground/45">{item.kind === "transaction" ? `Venda • ${item.label === "credit_card" || item.label === "card" ? "Cartão" : item.label === "pix" ? "PIX" : item.label}` : item.label}</p>
-                        </div>
-                        <div className="flex shrink-0 items-center gap-2">
-                          {fullTx && (
-                            <button onClick={() => setDetailTx(fullTx)} className="flex h-8 w-8 items-center justify-center rounded-xl text-muted-foreground/30 transition-all hover:bg-accent hover:text-foreground">
-                              <Eye className="h-3.5 w-3.5" />
-                            </button>
-                          )}
-                          <span className="text-[9px] font-mono tabular-nums text-muted-foreground/25">{timeAgo(item.createdAt)}</span>
-                        </div>
-                      </div>
-                    </div>
-                  );
-                })
-              )}
+              {/* Greeting */}
+              <div className="text-center mb-10">
+                <p className="text-[10px] font-bold text-muted-foreground/50 uppercase tracking-[0.32em] mb-3">
+                  Painel Executivo
+                </p>
+                <h1 className="text-[28px] md:text-[32px] font-display font-black text-foreground tracking-[-0.04em] leading-[1.1]">
+                  Olá{nickname ? `, ${nickname}` : ""}
+                </h1>
+                <p className="text-[13px] text-muted-foreground/70 font-medium mt-2">
+                  Resumo do seu dia · {format(new Date(), "dd 'de' MMMM", { locale: ptBR })}
+                </p>
+              </div>
+
+              {/* Period selector — minimal */}
+              <div className="flex items-center justify-center mb-10">
+                <div className="inline-flex items-center rounded-full border border-border/40 bg-background/40 backdrop-blur-xl p-1 shadow-sm">
+                  {PERIOD_PRESETS.map((opt) => (
+                    <button
+                      key={opt.label}
+                      onClick={() => { setSelectedPeriod(opt); setIsCustom(false); setCustomRange(undefined); }}
+                      className={cn(
+                        "rounded-full px-4 py-1.5 text-[11px] font-bold transition-all duration-300",
+                        !isCustom && selectedPeriod.label === opt.label
+                          ? "bg-foreground text-background shadow-sm"
+                          : "text-muted-foreground/60 hover:text-foreground"
+                      )}
+                    >
+                      {opt.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Hero metric — Revenue */}
+              <div className="text-center mb-10">
+                <div className="inline-flex items-center gap-2 mb-3">
+                  <div className="h-1 w-1 rounded-full bg-success animate-pulse" />
+                  <p className="text-[10px] font-bold text-muted-foreground/50 uppercase tracking-[0.28em]">
+                    Receita Líquida
+                  </p>
+                  <button onClick={privacy.toggle} className="ml-1 text-muted-foreground/40 hover:text-foreground transition-colors">
+                    {privacy.hidden ? <EyeOff className="h-3 w-3" /> : <Eye className="h-3 w-3" />}
+                  </button>
+                </div>
+                <p className="text-[56px] md:text-[64px] font-display font-black text-foreground tabular-nums tracking-[-0.05em] leading-[0.9]">
+                  {privacy.hidden ? "R$ ••••••" : <AnimatedNumber value={revenue} />}
+                </p>
+                <div className="flex items-center justify-center gap-2 mt-4">
+                  <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-success/10 border border-success/20">
+                    <ArrowUpRight className="h-3 w-3 text-success" strokeWidth={2.5} />
+                    <span className="text-[11px] font-bold text-success tabular-nums">{approved.length} {approved.length === 1 ? "venda" : "vendas"}</span>
+                  </span>
+                  {conversion > 0 && (
+                    <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-muted/40 border border-border/40">
+                      <span className="text-[11px] font-bold text-muted-foreground tabular-nums">{conversion.toFixed(1)}% conv.</span>
+                    </span>
+                  )}
+                </div>
+              </div>
+
+              {/* Hairline divider */}
+              <div className="h-px bg-gradient-to-r from-transparent via-border/60 to-transparent mb-8" />
+
+              {/* Three secondary metrics — refined */}
+              <div className="grid grid-cols-3 gap-2 md:gap-4 mb-8">
+                <div className="text-center px-2 py-3 rounded-xl hover:bg-muted/20 transition-colors">
+                  <p className="text-[9px] font-bold text-muted-foreground/40 uppercase tracking-[0.2em] mb-2">Saldo</p>
+                  <p className="text-[18px] md:text-[20px] font-display font-black text-foreground tabular-nums tracking-[-0.03em] leading-none">
+                    {privacy.hidden ? "•••" : fmt(balance)}
+                  </p>
+                </div>
+                <div className="text-center px-2 py-3 rounded-xl hover:bg-muted/20 transition-colors border-x border-border/30">
+                  <p className="text-[9px] font-bold text-muted-foreground/40 uppercase tracking-[0.2em] mb-2">Ticket Médio</p>
+                  <p className="text-[18px] md:text-[20px] font-display font-black text-foreground tabular-nums tracking-[-0.03em] leading-none">
+                    {privacy.hidden ? "•••" : fmt(approved.length > 0 ? revenue / approved.length : 0)}
+                  </p>
+                </div>
+                <div className="text-center px-2 py-3 rounded-xl hover:bg-muted/20 transition-colors">
+                  <p className="text-[9px] font-bold text-muted-foreground/40 uppercase tracking-[0.2em] mb-2">Pendentes</p>
+                  <p className="text-[18px] md:text-[20px] font-display font-black text-warning tabular-nums tracking-[-0.03em] leading-none">
+                    {privacy.hidden ? "•••" : pending.length}
+                  </p>
+                </div>
+              </div>
+
+              {/* CTA actions */}
+              <div className="flex items-center justify-center gap-3">
+                <Link
+                  to="/vendas"
+                  className="group inline-flex items-center gap-2 h-11 px-5 rounded-full bg-foreground text-background text-[12.5px] font-bold shadow-[0_4px_16px_-4px_hsl(var(--foreground)/0.4)] hover:shadow-[0_6px_20px_-4px_hsl(var(--foreground)/0.5)] hover:-translate-y-0.5 transition-all duration-300"
+                >
+                  Ver vendas
+                  <ArrowRight className="h-3.5 w-3.5 group-hover:translate-x-0.5 transition-transform" />
+                </Link>
+                <Link
+                  to="/financeiro/saques"
+                  className="inline-flex items-center gap-2 h-11 px-5 rounded-full border border-border/60 bg-background/40 backdrop-blur-xl text-foreground text-[12.5px] font-bold hover:bg-muted/30 hover:border-border transition-all duration-300"
+                >
+                  Sacar
+                </Link>
+              </div>
+
+              {/* Bottom signature */}
+              <div className="flex items-center justify-center gap-2 mt-10 pt-6 border-t border-border/30">
+                <div className="h-1 w-1 rounded-full bg-primary/60" />
+                <p className="text-[10px] font-semibold text-muted-foreground/40 uppercase tracking-[0.24em]">
+                  Hotzfy · Painel Premium
+                </p>
+                <div className="h-1 w-1 rounded-full bg-primary/60" />
+              </div>
             </div>
+
+            {/* Bottom hairline accent */}
+            <div className="absolute bottom-0 left-1/2 -translate-x-1/2 h-px w-1/2 bg-gradient-to-r from-transparent via-border/60 to-transparent" />
           </div>
-        </section>
+        </motion.section>
+      </div>
 
       <Dialog open={!!detailTx} onOpenChange={(open) => !open && setDetailTx(null)}>
         <DialogContent className="sm:max-w-[460px] border-border/20 bg-card p-0 gap-0 overflow-hidden rounded-[20px]">
