@@ -661,7 +661,7 @@ export default function Dashboard() {
                 { icon: <PixLogoMark className="h-3.5 w-3.5" />, label: "PIX", conv: pixConversion, revenue: pixRevenue, count: `${pixApprovedCount}/${pixTotalCount}`, color: "text-success" },
                 { icon: <CreditCard className="h-3.5 w-3.5" />, label: "Cartão", conv: cardConversion, revenue: cardRevenue, count: `${cardApprovedCount}/${cardTotalCount}`, color: "text-info" },
               ].map((m) => (
-                <div key={m.label} className="px-5 py-3.5 bg-gradient-to-br from-card to-muted/5">
+                <div key={m.label} className="px-5 py-3 bg-gradient-to-br from-card to-muted/5">
                   <div className="flex items-center justify-between mb-2">
                     <div className="flex items-center gap-2">
                       <span className={m.color}>{m.icon}</span>
@@ -772,9 +772,9 @@ export default function Dashboard() {
                   const fullTx = item.kind === "transaction" ? transactions.find(t => t.id === item.id) ?? null : null;
 
                   return (
-                    <div key={item.id} className={cn("dashboard-activity-row group rounded-[18px] border border-transparent px-3 py-3 transition-all hover:border-border/20 hover:bg-background/50", idx < activity.length - 1 && "mb-1.5")}>
+                    <div key={item.id} className={cn("dashboard-activity-row group rounded-[18px] border border-transparent px-3 py-2.5 transition-all hover:border-border/20 hover:bg-background/50", idx < activity.length - 1 && "mb-1")}>
                       <div className="flex items-center gap-3">
-                        <div className={cn("flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl border border-border/20", s.iconBg, s.iconText)}>
+                        <div className={cn("flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-border/20", s.iconBg, s.iconText)}>
                           {item.kind === "transaction"
                             ? item.paymentMethod === "pix"
                               ? <PixLogoMark className="h-4 w-4" />
@@ -926,7 +926,7 @@ function MiniHeroCard({ icon, label, value, tone, idx = 0 }: { icon: React.React
   };
 
   return (
-    <div className={`group relative rounded-2xl border border-border/50 bg-card p-3.5 md:p-5 transition-all duration-200 hover:border-border/80 overflow-hidden animate-fade-in ${STAGGER_CLASSES[idx + 1] || ""}`}>
+    <div className={`group relative rounded-2xl border border-border/50 bg-card p-3 md:p-4 transition-all duration-200 hover:border-border/80 overflow-hidden animate-fade-in ${STAGGER_CLASSES[idx + 1] || ""}`}>
       {/* Left accent bar */}
       <div className={`absolute left-0 top-0 bottom-0 w-[3px] rounded-full ${accentBar[tone]}`} />
       <div className="relative z-10 pl-1.5">
