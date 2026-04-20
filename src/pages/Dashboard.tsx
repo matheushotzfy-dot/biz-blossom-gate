@@ -458,11 +458,16 @@ export default function Dashboard() {
       )}
 
       {/* ─── BLOCO 1: VISÃO EXECUTIVA ─── */}
-      <section className="rounded-2xl border border-border bg-card overflow-hidden mb-5">
+      <section className="relative rounded-2xl border border-border bg-card overflow-hidden mb-5 shadow-[0_1px_0_0_hsl(var(--border)),0_24px_48px_-24px_hsl(var(--background))]">
+        {/* Ambient glow + dot pattern */}
+        <div aria-hidden className="pointer-events-none absolute inset-0 opacity-[0.035] [background-image:radial-gradient(hsl(var(--foreground))_1px,transparent_1px)] [background-size:18px_18px]" />
+        <div aria-hidden className="pointer-events-none absolute -top-24 -right-24 h-72 w-72 rounded-full bg-primary/[0.06] blur-3xl" />
+        <div aria-hidden className="pointer-events-none absolute -bottom-32 -left-20 h-72 w-72 rounded-full bg-success/[0.05] blur-3xl" />
+
         {/* Header */}
-        <div className="flex items-center justify-between gap-4 px-6 md:px-7 py-4 border-b border-border">
+        <div className="relative flex items-center justify-between gap-4 px-6 md:px-7 py-4 border-b border-border">
           <div className="flex items-center gap-3">
-            <div className="h-8 w-8 rounded-lg bg-muted border border-border flex items-center justify-center">
+            <div className="relative h-8 w-8 rounded-lg bg-gradient-to-br from-muted to-muted/40 border border-border flex items-center justify-center shadow-[inset_0_1px_0_0_hsl(var(--foreground)/0.04)]">
               <BarChart3 className="h-3.5 w-3.5 text-foreground" strokeWidth={2.2} />
             </div>
             <div className="flex flex-col">
