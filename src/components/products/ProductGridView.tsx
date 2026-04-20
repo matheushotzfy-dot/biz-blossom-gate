@@ -54,7 +54,7 @@ export function ProductGridView({ products, copiedId, toolbar, ...handlers }: Pr
     <div className="mx-auto w-full max-w-[1340px]">
       {toolbar && <div className="mb-5">{toolbar}</div>}
 
-      <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 2xl:grid-cols-4">
+      <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
         {products.map((product) => {
           const status = STATUS_META[product.status] || STATUS_META.inactive;
           const deliveryLabel = DELIVERY_LABELS[product.delivery_type] || product.delivery_type;
