@@ -812,7 +812,7 @@ export default function Dashboard() {
                 const statusColor = isCompleted ? "bg-success" : isPending ? "bg-warning" : isFailed ? "bg-destructive" : "bg-muted-foreground";
                 const statusLabel = isCompleted ? "Aprovada" : isPending ? "Pendente" : isFailed ? "Falhou" : item.status;
                 const tx = item.kind === "transaction" ? transactions.find(t => t.id === item.id) : null;
-                const product = tx?.product_id ? products.find(p => p.id === tx.product_id) : null;
+                const product = tx?.product_id ? productsData?.find(p => p.id === tx.product_id) : null;
                 const customerName = tx?.customer_name?.split(" ")[0] || (tx?.customer_email?.split("@")[0]) || null;
                 const method = (item as any).paymentMethod;
                 const Icon = item.kind === "withdrawal" ? Wallet : method === "pix" ? Zap : CreditCard;
