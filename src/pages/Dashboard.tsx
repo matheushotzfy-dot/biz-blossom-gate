@@ -421,7 +421,9 @@ export default function Dashboard() {
   const nickname = profile?.nickname || profile?.full_name?.split(" ")[0] || null;
 
   return (
-    <div className="dashboard-page mx-auto w-full max-w-[1440px] pb-24 px-1 relative">
+    <div className="dashboard-page mx-auto w-full max-w-[1536px] pb-24 px-4 md:px-6 relative selection:bg-primary/20">
+      {/* Decorative noise texture overlay */}
+      <div className="fixed inset-0 pointer-events-none opacity-[0.03] contrast-150 brightness-150 z-[100] mix-blend-overlay" style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E")` }} />
 
       {/* ─── GREEN FIRE BORDER EFFECT ─── */}
       {fireEffect && (
@@ -525,18 +527,18 @@ export default function Dashboard() {
               <p className="text-[11px] font-bold text-primary/80 uppercase tracking-[0.32em] mb-3">
                 {selectedPeriod.label === "Hoje" ? "Edição de Hoje" : `Edição · ${selectedPeriod.label}`}
               </p>
-              <h1 className="font-display font-black text-foreground tracking-[-0.045em] leading-[0.92] text-[44px] md:text-[60px] lg:text-[72px]">
+              <h1 className="font-display font-black tracking-[-0.045em] leading-[0.92] text-[44px] md:text-[60px] lg:text-[72px]">
                 {nickname ? (
                   <>
-                    Bem-vindo,<br />
+                    <span className="text-gradient-premium">Bem-vindo,</span><br />
                     <span className="italic font-medium text-foreground/70" style={{ fontFamily: "Georgia, 'Times New Roman', serif" }}>{nickname}</span>
-                    <span className="text-primary">.</span>
+                    <span className="text-primary animate-pulse">.</span>
                   </>
                 ) : (
                   <>
-                    Painel<br />
+                    <span className="text-gradient-premium">Painel</span><br />
                     <span className="italic font-medium text-foreground/70" style={{ fontFamily: "Georgia, 'Times New Roman', serif" }}>Executivo</span>
-                    <span className="text-primary">.</span>
+                    <span className="text-primary animate-pulse">.</span>
                   </>
                 )}
               </h1>
@@ -621,14 +623,15 @@ export default function Dashboard() {
         {/* ─────────────────────────────────────────────────────── */}
         {/* HERO METRIC · The signature piece                         */}
         {/* ─────────────────────────────────────────────────────── */}
-        <section className="relative mb-10 md:mb-14">
-          <div className="relative rounded-[28px] border border-foreground/10 bg-gradient-to-br from-card/80 via-card/60 to-card/40 backdrop-blur-2xl overflow-hidden shadow-[0_30px_80px_-30px_hsl(var(--primary)/0.18)]">
+        <section className="relative mb-10 md:mb-14 group/hero">
+          <div className="relative rounded-[32px] border border-foreground/10 bg-gradient-to-br from-card/90 via-card/70 to-card/50 backdrop-blur-3xl overflow-hidden shadow-[0_40px_100px_-30px_hsl(var(--primary)/0.25)] transition-all duration-500 hover:shadow-[0_50px_120px_-30px_hsl(var(--primary)/0.35)] mesh-gradient-hero">
             {/* Inner luxury accents */}
-            <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,hsl(var(--primary)/0.08),transparent_55%)] pointer-events-none" />
-            <div className="absolute -top-40 -right-20 h-[360px] w-[360px] rounded-full bg-primary/[0.08] blur-[100px] pointer-events-none" />
-            <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-foreground/15 to-transparent" />
-
-            <div className="relative grid grid-cols-1 lg:grid-cols-12 gap-0">
+            <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,hsl(var(--primary)/0.12),transparent_65%)] pointer-events-none" />
+            <div className="absolute -top-40 -right-20 h-[460px] w-[460px] rounded-full bg-primary/[0.12] blur-[120px] pointer-events-none group-hover/hero:bg-primary/[0.18] transition-colors duration-700" />
+            <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-foreground/20 to-transparent opacity-50" />
+            <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-primary/20 to-transparent opacity-30" />
+            
+            <div className="relative grid grid-cols-1 lg:grid-cols-12 gap-0 z-10">
               {/* Left: hero revenue */}
               <div className="lg:col-span-7 p-7 md:p-10 lg:p-12 lg:border-r border-foreground/[0.06]">
                 <div className="flex items-center gap-2 mb-6">
@@ -636,11 +639,14 @@ export default function Dashboard() {
                   <span className="text-[10px] font-bold text-primary uppercase tracking-[0.32em]">Receita Líquida</span>
                 </div>
 
-                <div className="font-display font-black text-foreground tabular-nums leading-[0.88] tracking-[-0.05em] text-[56px] md:text-[80px] lg:text-[96px]">
+                <div className="font-display font-black text-foreground tabular-nums leading-[0.88] tracking-[-0.05em] text-[56px] md:text-[80px] lg:text-[110px] drop-shadow-[0_0_20px_rgba(var(--primary-rgb),0.15)] group-hover/hero:scale-[1.01] transition-transform duration-700 ease-out">
                   {privacy.hidden ? (
                     <span className="text-foreground/30">{CENSORED}</span>
                   ) : (
-                    <AnimatedNumber value={revenue} />
+                    <div className="inline-flex items-baseline gap-2">
+                      <span className="text-[0.4em] font-medium text-foreground/40 self-center">R$</span>
+                      <AnimatedNumber value={revenue} formatter={(v) => v.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} />
+                    </div>
                   )}
                 </div>
 
@@ -1255,12 +1261,12 @@ function EditorialKpi({ label, value, sub, accent }: { label: string; value: str
   };
 
   return (
-    <div className="relative bg-card/60 backdrop-blur-xl px-5 py-6 hover:bg-card/80 transition-colors group">
-      <div className="flex items-center gap-2 mb-4">
-        <span className={cn("h-1.5 w-1.5 rounded-full", accentDot[accent])} />
-        <p className="text-[10px] font-bold text-muted-foreground/60 uppercase tracking-[0.22em]">{label}</p>
+    <div className="relative bg-card/60 backdrop-blur-xl px-6 py-8 hover:bg-card/80 transition-all duration-300 group overflow-hidden">
+      <div className="flex items-center gap-2.5 mb-5">
+        <span className={cn("h-1.5 w-1.5 rounded-full transition-transform duration-300 group-hover:scale-125", accentDot[accent])} />
+        <p className="text-[10px] font-bold text-muted-foreground/60 uppercase tracking-[0.24em] group-hover:text-foreground/80 transition-colors">{label}</p>
       </div>
-      <p className={cn("font-display font-black tabular-nums tracking-[-0.04em] leading-none text-[28px] md:text-[32px]", accentText[accent])}>
+      <p className={cn("font-display font-black tabular-nums tracking-[-0.04em] leading-none text-[28px] md:text-[36px] transition-transform duration-300 group-hover:translate-x-1", accentText[accent])}>
         {value}
       </p>
       <p className="mt-2.5 text-[10.5px] text-muted-foreground/60 font-medium leading-relaxed">{sub}</p>
