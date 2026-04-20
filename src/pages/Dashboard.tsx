@@ -1140,46 +1140,40 @@ function EditorialKpi({ label, value, sub, accent }: { label: string; value: str
     success: "bg-success",
     warning: "bg-warning",
     destructive: "bg-destructive",
-    neutral: "bg-foreground/30",
-  };
-  const accentText: Record<string, string> = {
-    success: "text-success",
-    warning: "text-warning",
-    destructive: "text-destructive",
-    neutral: "text-foreground",
+    neutral: "bg-muted-foreground/40",
   };
 
   return (
-    <div className="relative bg-card/60 backdrop-blur-xl px-6 py-8 hover:bg-card/80 transition-all duration-300 group overflow-hidden">
-      <div className="flex items-center gap-2.5 mb-5">
-        <span className={cn("h-1.5 w-1.5 rounded-full transition-transform duration-300 group-hover:scale-125", accentDot[accent])} />
-        <p className="text-[10px] font-bold text-muted-foreground/60 uppercase tracking-[0.24em] group-hover:text-foreground/80 transition-colors">{label}</p>
+    <div className="bg-card px-6 py-7 hover:bg-muted/20 transition-colors">
+      <div className="flex items-center gap-2 mb-4">
+        <span className={cn("h-1.5 w-1.5 rounded-full", accentDot[accent])} />
+        <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-[0.16em]">{label}</p>
       </div>
-      <p className={cn("font-display font-black tabular-nums tracking-[-0.04em] leading-none text-[28px] md:text-[36px] transition-transform duration-300 group-hover:translate-x-1", accentText[accent])}>
+      <p className="font-display font-semibold tabular-nums tracking-[-0.03em] leading-none text-[24px] md:text-[30px] text-foreground">
         {value}
       </p>
-      <p className="mt-2.5 text-[10.5px] text-muted-foreground/60 font-medium leading-relaxed">{sub}</p>
+      <p className="mt-3 text-[11px] text-muted-foreground font-medium leading-relaxed">{sub}</p>
     </div>
   );
 }
 
 function EditorialChannelRow({ name, approved, total, revenue, approvalRate, share, privacy }: { name: string; approved: number; total: number; revenue: number; approvalRate: number; share: number; privacy: boolean }) {
   return (
-    <div className="px-5 md:px-6 py-5 hover:bg-foreground/[0.02] transition-colors">
+    <div className="px-6 py-5 hover:bg-muted/20 transition-colors">
       <div className="flex items-baseline justify-between mb-3">
-        <p className="text-[13.5px] font-display font-black text-foreground tracking-[-0.02em]">{name}</p>
-        <p className="text-[15px] font-display font-black text-foreground tabular-nums tracking-[-0.03em]">
+        <p className="text-[13px] font-semibold text-foreground tracking-tight">{name}</p>
+        <p className="text-[14px] font-semibold text-foreground tabular-nums tracking-tight">
           {privacy ? CENSORED : fmt(revenue)}
         </p>
       </div>
-      <div className="flex items-center gap-4 text-[10.5px] text-muted-foreground/70 font-semibold mb-3">
-        <span><span className="text-foreground/80 font-bold tabular-nums">{approved}</span><span className="text-muted-foreground/40">/{total}</span> aprovadas</span>
-        <span className="text-foreground/15">·</span>
-        <span>Aprovação <span className="text-foreground/80 font-bold tabular-nums">{approvalRate.toFixed(1)}%</span></span>
-        <span className="ml-auto text-[10px] uppercase tracking-[0.18em] text-muted-foreground/50">Share <span className="text-foreground/80 font-bold tabular-nums">{share.toFixed(1)}%</span></span>
+      <div className="flex items-center gap-3 text-[10.5px] text-muted-foreground font-medium mb-3">
+        <span><span className="text-foreground font-semibold tabular-nums">{approved}</span><span className="text-muted-foreground/60">/{total}</span> aprovadas</span>
+        <span className="text-border">·</span>
+        <span>Aprovação <span className="text-foreground font-semibold tabular-nums">{approvalRate.toFixed(1)}%</span></span>
+        <span className="ml-auto text-[10px] uppercase tracking-[0.14em] text-muted-foreground">Share <span className="text-foreground font-semibold tabular-nums">{share.toFixed(1)}%</span></span>
       </div>
-      <div className="h-[3px] w-full rounded-full bg-foreground/[0.06] overflow-hidden">
-        <div className="h-full rounded-full bg-foreground/80 transition-all duration-500" style={{ width: `${Math.min(share, 100)}%` }} />
+      <div className="h-[2px] w-full rounded-full bg-border/60 overflow-hidden">
+        <div className="h-full rounded-full bg-foreground/70 transition-all duration-500" style={{ width: `${Math.min(share, 100)}%` }} />
       </div>
     </div>
   );
