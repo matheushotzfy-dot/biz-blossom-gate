@@ -131,7 +131,7 @@ export function MobileBottomNav() {
 
  {/* ═══ Bottom Tab Bar ═══ */}
  <nav className="fixed bottom-0 left-0 right-0 z-50 md:hidden">
- <div className="bg-background border-t border-border">
+ <div className="bg-background/90 backdrop-blur-xl border-t border-border/50">
  <div className="flex items-center justify-around px-1 pb-[env(safe-area-inset-bottom,0px)]">
  {tabs.map((tab) => {
  const isMore = tab.path === "__more__";
@@ -148,12 +148,12 @@ export function MobileBottomNav() {
  }}
  className={cn(
  "flex flex-col items-center gap-0.5 py-2 px-3 min-w-[52px] active:scale-[0.92] transition-all duration-150",
- isActive ? "text-primary" : "text-muted-foreground/60"
+ isActive ? "text-primary" : "text-muted-foreground/80"
  )}
  >
  <div className={cn(
  "h-7 w-7 rounded-lg flex items-center justify-center transition-all duration-200",
- isActive && "bg-primary/12"
+ isActive && "bg-primary/15 shadow-[0_0_15px_rgba(var(--primary),0.25)]"
  )}>
  <tab.icon className={cn("h-[17px] w-[17px]", isActive && "stroke-[2.5]")} />
  </div>
