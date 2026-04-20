@@ -631,77 +631,133 @@ export default function Dashboard() {
           </div>
         </header>
 
-        {/* PRIMARY METRICS · Receita + Saldo */}
-        <section className="grid grid-cols-1 lg:grid-cols-3 gap-px bg-border/60 rounded-xl overflow-hidden border border-border mb-10 md:mb-12">
-          <div className="lg:col-span-2 bg-card p-8 md:p-10 lg:p-12">
-            <div className="flex items-center justify-between mb-6">
-              <p className="text-[10.5px] font-semibold text-muted-foreground uppercase tracking-[0.18em]">Receita líquida</p>
-              <span className="text-[10.5px] font-medium text-muted-foreground tabular-nums">{selectedPeriod.label}</span>
-            </div>
-
-            <div className="font-display font-semibold text-foreground tabular-nums leading-[0.95] tracking-[-0.04em] text-[44px] md:text-[64px] lg:text-[76px]">
-              {privacy.hidden ? (
-                <span className="text-foreground/30">{CENSORED}</span>
-              ) : (
-                <span className="inline-flex items-baseline gap-2.5">
-                  <span className="text-[0.42em] font-medium text-muted-foreground self-center">R$</span>
-                  <AnimatedNumber value={revenue} formatter={(v) => v.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} />
-                </span>
-              )}
-            </div>
-
-            <div className="mt-8 grid grid-cols-3 gap-px bg-border/60 border-y border-border -mx-8 md:-mx-10 lg:-mx-12">
-              {[
-                { label: "TPV bruto", value: privacy.hidden ? CENSORED : fmt(approved.reduce((a, t) => a + Number(t.amount), 0)) },
-                { label: "MDR efetivo", value: (() => { const gross = approved.reduce((a, t) => a + Number(t.amount), 0); const fees = approved.reduce((a, t) => a + Number(t.fee_amount), 0); return gross > 0 ? `${((fees / gross) * 100).toFixed(2)}%` : "0,00%"; })() },
-                { label: "Ticket médio", value: privacy.hidden ? CENSORED : fmt(approved.length > 0 ? revenue / approved.length : 0) },
-              ].map((m, i) => (
-                <div key={i} className="bg-card px-8 md:px-10 lg:px-12 py-5">
-                  <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-[0.16em] mb-1.5">{m.label}</p>
-                  <p className="text-[15px] font-semibold text-foreground tabular-nums tracking-tight">{m.value}</p>
-                </div>
-              ))}
-            </div>
-
-            <div className="mt-8 flex flex-wrap items-center gap-2.5">
-              <Link to="/financeiro/saques" className="group inline-flex items-center gap-2 h-10 px-4 rounded-md bg-foreground text-background text-[12px] font-semibold hover:bg-foreground/90 transition-colors">
-                <Wallet className="h-3.5 w-3.5" />
-                Solicitar saque
-                <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" />
-              </Link>
-              <Link to="/vendas" className="inline-flex items-center gap-2 h-10 px-4 rounded-md border border-border text-foreground text-[12px] font-semibold hover:bg-muted/40 transition-colors">
-                Ver transações
-              </Link>
-            </div>
+        {/* ─────────────────────────────────────────────────────────────── */}
+        {/* TREASURY STATEMENT · Demonstrativo principal                     */}
+        {/* ─────────────────────────────────────────────────────────────── */}
+        <section className="mb-16 md:mb-20">
+          <div className="flex items-center gap-3 mb-5">
+            <span className="font-mono text-[10px] font-bold text-muted-foreground tracking-[0.2em]">§ 02</span>
+            <span className="h-px flex-1 bg-foreground/10" />
+            <span className="font-mono text-[10px] uppercase font-semibold text-muted-foreground tracking-[0.2em]">Demonstrativo de Tesouraria</span>
           </div>
 
-          <div className="bg-card p-8 md:p-10 flex flex-col gap-8">
-            <div>
-              <p className="text-[10.5px] font-semibold text-muted-foreground uppercase tracking-[0.18em] mb-5">Saldo disponível</p>
-              <p className="font-display font-semibold text-foreground tabular-nums leading-none tracking-[-0.03em] text-[32px] md:text-[40px]">
-                {privacy.hidden ? <span className="text-foreground/30">{CENSORED}</span> : <AnimatedNumber value={balance} />}
-              </p>
-              <p className="mt-3 text-[11.5px] text-muted-foreground">Disponível para saque imediato</p>
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-px bg-foreground/[0.08] border border-foreground/[0.08] rounded-[10px] overflow-hidden">
+            {/* Receita líquida — block principal */}
+            <div className="lg:col-span-8 bg-card relative">
+              {/* Vertical signature glyph */}
+              <div className="absolute top-0 bottom-0 left-0 w-[34px] flex flex-col items-center justify-between py-6 border-r border-foreground/[0.06] bg-foreground/[0.015]">
+                <span className="font-mono text-[8.5px] font-bold text-muted-foreground tracking-[0.3em]" style={{ writingMode: "vertical-rl", transform: "rotate(180deg)" }}>NET REVENUE · BRL</span>
+                <span className="font-mono text-[8.5px] font-bold text-muted-foreground/70 tracking-[0.2em]">01</span>
+              </div>
+
+              <div className="pl-[50px] pr-8 md:pr-10 lg:pr-12 py-9 md:py-11">
+                <div className="flex items-start justify-between gap-4 mb-6">
+                  <div>
+                    <p className="text-[10px] font-mono font-bold text-muted-foreground uppercase tracking-[0.22em] mb-1.5">Receita líquida consolidada</p>
+                    <p className="text-[11px] text-muted-foreground/80">Período: {selectedPeriod.label.toLowerCase()} · valores em reais</p>
+                  </div>
+                  <div className="hidden md:flex items-center gap-1.5 text-[9.5px] font-mono uppercase tracking-[0.16em] text-muted-foreground shrink-0 mt-1">
+                    <span className="h-1 w-1 rounded-full bg-success" />
+                    Apurado
+                  </div>
+                </div>
+
+                <div className="font-display font-semibold text-foreground tabular-nums leading-[0.92] tracking-[-0.05em] text-[52px] md:text-[78px] lg:text-[96px]">
+                  {privacy.hidden ? (
+                    <span className="text-foreground/25">{CENSORED}</span>
+                  ) : (
+                    <span className="inline-flex items-baseline gap-3">
+                      <span className="text-[0.32em] font-medium text-muted-foreground/70 self-start mt-3 tracking-normal">R$</span>
+                      <AnimatedNumber value={revenue} formatter={(v) => v.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} />
+                    </span>
+                  )}
+                </div>
+
+                {/* Tri-column stats — accountant ledger */}
+                <div className="mt-10 grid grid-cols-3 border-t border-foreground/[0.07]">
+                  {[
+                    { label: "TPV bruto", code: "GMV", value: privacy.hidden ? CENSORED : fmt(approved.reduce((a, t) => a + Number(t.amount), 0)) },
+                    { label: "MDR efetivo", code: "MDR", value: (() => { const gross = approved.reduce((a, t) => a + Number(t.amount), 0); const fees = approved.reduce((a, t) => a + Number(t.fee_amount), 0); return gross > 0 ? `${((fees / gross) * 100).toFixed(2)}%` : "0,00%"; })() },
+                    { label: "Ticket médio", code: "AOV", value: privacy.hidden ? CENSORED : fmt(approved.length > 0 ? revenue / approved.length : 0) },
+                  ].map((m, i) => (
+                    <div key={i} className={cn("py-5 pr-4", i > 0 && "pl-6 border-l border-foreground/[0.07]")}>
+                      <div className="flex items-center gap-1.5 mb-2">
+                        <span className="font-mono text-[8.5px] font-bold text-muted-foreground/80 tracking-[0.2em]">{m.code}</span>
+                        <span className="text-[10px] text-muted-foreground/60">·</span>
+                        <span className="text-[10px] font-medium text-muted-foreground tracking-tight">{m.label}</span>
+                      </div>
+                      <p className="text-[16px] md:text-[18px] font-display font-semibold text-foreground tabular-nums tracking-[-0.02em] leading-none">{m.value}</p>
+                    </div>
+                  ))}
+                </div>
+
+                {/* CTA row */}
+                <div className="mt-9 flex flex-wrap items-center gap-2.5">
+                  <Link to="/financeiro/saques" className="group inline-flex items-center gap-2 h-10 px-4 rounded-[6px] bg-foreground text-background text-[11.5px] font-semibold hover:bg-foreground/90 transition-colors">
+                    <Wallet className="h-3.5 w-3.5" />
+                    Solicitar saque
+                    <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" />
+                  </Link>
+                  <Link to="/vendas" className="inline-flex items-center gap-2 h-10 px-4 rounded-[6px] border border-foreground/15 text-foreground text-[11.5px] font-semibold hover:bg-foreground/[0.03] hover:border-foreground/30 transition-colors">
+                    Ver transações
+                  </Link>
+                  <span className="ml-auto hidden md:inline text-[10px] font-mono text-muted-foreground tracking-[0.14em]">
+                    REF · {format(new Date(), "yyyyMMdd")}
+                  </span>
+                </div>
+              </div>
             </div>
 
-            <div className="border-t border-border pt-6 space-y-4">
-              <div className="flex items-baseline justify-between gap-3">
-                <div>
-                  <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-[0.16em]">Em análise</p>
-                  <p className="text-[10.5px] text-muted-foreground/80 mt-0.5">Saques processando</p>
-                </div>
-                <p className="text-[15px] font-semibold text-foreground tabular-nums tracking-tight">
-                  {privacy.hidden ? CENSORED : fmt(withdrawalPending)}
-                </p>
+            {/* Saldo / Liquidação */}
+            <div className="lg:col-span-4 bg-card relative">
+              <div className="absolute top-0 bottom-0 left-0 w-[34px] flex flex-col items-center justify-between py-6 border-r border-foreground/[0.06] bg-foreground/[0.015]">
+                <span className="font-mono text-[8.5px] font-bold text-muted-foreground tracking-[0.3em]" style={{ writingMode: "vertical-rl", transform: "rotate(180deg)" }}>SETTLEMENT</span>
+                <span className="font-mono text-[8.5px] font-bold text-muted-foreground/70 tracking-[0.2em]">02</span>
               </div>
-              <div className="flex items-baseline justify-between gap-3">
+
+              <div className="pl-[50px] pr-8 md:pr-10 py-9 md:py-11 flex flex-col gap-7 h-full">
                 <div>
-                  <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-[0.16em]">Reserva de segurança</p>
-                  <p className="text-[10.5px] text-muted-foreground/80 mt-0.5">Liberação programada</p>
+                  <div className="flex items-center justify-between mb-4">
+                    <p className="text-[10px] font-mono font-bold text-muted-foreground uppercase tracking-[0.22em]">Saldo disponível</p>
+                    <span className="font-mono text-[9px] font-bold text-success/90 tracking-[0.18em] uppercase">Free</span>
+                  </div>
+                  <p className="font-display font-semibold text-foreground tabular-nums leading-[0.95] tracking-[-0.035em] text-[34px] md:text-[42px]">
+                    {privacy.hidden ? <span className="text-foreground/25">{CENSORED}</span> : <AnimatedNumber value={balance} />}
+                  </p>
+                  <p className="mt-2.5 text-[11px] text-muted-foreground leading-relaxed">Liquidez imediata · saque em D+0 via PIX</p>
                 </div>
-                <p className="text-[15px] font-semibold text-foreground tabular-nums tracking-tight">
-                  {privacy.hidden ? CENSORED : fmt(transactions.filter(t => t.status === "completed" && !t.retention_released && Number(t.retained_amount) > 0).reduce((a, t) => a + Number(t.retained_amount), 0))}
-                </p>
+
+                <div className="border-t border-foreground/[0.07] pt-6 space-y-5 flex-1">
+                  <div className="flex items-baseline justify-between gap-3">
+                    <div>
+                      <div className="flex items-center gap-1.5">
+                        <span className="h-1 w-1 rounded-full bg-warning" />
+                        <p className="text-[10px] font-mono font-bold text-muted-foreground uppercase tracking-[0.18em]">Em análise</p>
+                      </div>
+                      <p className="text-[10.5px] text-muted-foreground/70 mt-1 ml-2.5">Saques em processamento</p>
+                    </div>
+                    <p className="text-[14px] font-semibold text-foreground tabular-nums tracking-tight">
+                      {privacy.hidden ? CENSORED : fmt(withdrawalPending)}
+                    </p>
+                  </div>
+                  <div className="flex items-baseline justify-between gap-3">
+                    <div>
+                      <div className="flex items-center gap-1.5">
+                        <span className="h-1 w-1 rounded-full bg-info" />
+                        <p className="text-[10px] font-mono font-bold text-muted-foreground uppercase tracking-[0.18em]">Reserva técnica</p>
+                      </div>
+                      <p className="text-[10.5px] text-muted-foreground/70 mt-1 ml-2.5">Liberação programada · D+30</p>
+                    </div>
+                    <p className="text-[14px] font-semibold text-foreground tabular-nums tracking-tight">
+                      {privacy.hidden ? CENSORED : fmt(transactions.filter(t => t.status === "completed" && !t.retention_released && Number(t.retained_amount) > 0).reduce((a, t) => a + Number(t.retained_amount), 0))}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="border-t border-foreground/[0.07] pt-4 flex items-center justify-between">
+                  <span className="text-[9.5px] font-mono text-muted-foreground tracking-[0.14em] uppercase">Conta operacional</span>
+                  <ChevronRight className="h-3 w-3 text-muted-foreground" />
+                </div>
               </div>
             </div>
           </div>
