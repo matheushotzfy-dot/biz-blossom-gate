@@ -161,10 +161,10 @@ function SidebarSectionNav({ section, pathname, isFirst }: SidebarSectionNavProp
   return (
     <SidebarGroup className="px-0 py-0">
       {!isFirst && (
-        <div className="mx-4 my-2.5 h-px bg-sidebar-border/50 group-data-[collapsible=icon]:mx-2 group-data-[collapsible=icon]:my-2" />
+        <div className="mx-4 my-3 h-px bg-sidebar-border/40 group-data-[collapsible=icon]:mx-2.5 group-data-[collapsible=icon]:my-2.5" />
       )}
       <SidebarGroupContent>
-        <SidebarMenu className="gap-1 px-0">
+        <SidebarMenu className="gap-1.5 px-0">
           {section.items.map((item) => {
             const isActive = isItemActive(pathname, item);
             return (
@@ -175,45 +175,41 @@ function SidebarSectionNav({ section, pathname, isFirst }: SidebarSectionNavProp
                     end={item.exact}
                     activeClassName=""
                     className={cn(
-                      "group/nav relative flex h-[48px] w-full items-center gap-3 rounded-xl px-2.5 text-[14px] font-medium transition-all duration-200 group-data-[collapsible=icon]:h-11 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0",
+                      "group/nav relative flex h-[52px] w-full items-center gap-3 rounded-xl px-3 text-[14.5px] font-medium transition-all duration-200 group-data-[collapsible=icon]:h-12 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0",
                       isActive
-                        ? "bg-sidebar-primary/5 text-sidebar-primary font-semibold"
-                        : "text-sidebar-foreground/45 hover:bg-sidebar-accent/20 hover:text-sidebar-accent-foreground",
+                        ? "bg-sidebar-primary/[0.06] text-sidebar-primary font-semibold ring-1 ring-sidebar-primary/40 shadow-[0_0_24px_-8px_hsl(var(--sidebar-primary)/0.45),inset_0_0_0_1px_hsl(var(--sidebar-primary)/0.08)]"
+                        : "text-sidebar-foreground/55 hover:bg-sidebar-accent/30 hover:text-sidebar-accent-foreground",
                     )}
                   >
-                    {/* Active indicator bar */}
-                    {isActive && (
-                      <span className="absolute left-0 top-1/2 h-5 w-[3px] -translate-y-1/2 rounded-r-full bg-sidebar-primary group-data-[collapsible=icon]:hidden shadow-[0_0_12px_rgba(var(--sidebar-primary),0.6)] animate-pulse-glow" />
-                    )}
                     <span className={cn(
-                      "flex h-8 w-8 shrink-0 items-center justify-center rounded-lg transition-all duration-200",
+                      "flex h-9 w-9 shrink-0 items-center justify-center rounded-lg transition-all duration-200",
                       isActive
-                        ? "bg-sidebar-primary/8 text-sidebar-primary"
-                        : "bg-sidebar-accent/30 text-sidebar-foreground/40 ring-1 ring-sidebar-border/15 group-hover/nav:bg-sidebar-accent/40 group-hover/nav:text-sidebar-accent-foreground",
+                        ? "bg-sidebar-primary/10 text-sidebar-primary ring-1 ring-sidebar-primary/25"
+                        : "bg-sidebar-accent/35 text-sidebar-foreground/50 ring-1 ring-sidebar-border/20 group-hover/nav:bg-sidebar-accent/55 group-hover/nav:text-sidebar-accent-foreground",
                     )}>
                       <item.icon
-                        className="h-[17px] w-[17px]"
+                        className="h-[18px] w-[18px]"
                         strokeWidth={isActive ? 2.5 : 2}
                       />
                     </span>
-                    <span className="truncate group-data-[collapsible=icon]:hidden">
+                    <span className="truncate tracking-[-0.005em] group-data-[collapsible=icon]:hidden">
                       {item.title}
                     </span>
                     {item.badge && (
-                      <span className="ml-auto inline-flex items-center gap-1 text-[9px] font-black uppercase tracking-[0.12em] text-sidebar-primary group-data-[collapsible=icon]:hidden">
-                        <span className="relative flex h-1 w-1">
+                      <span className="ml-auto inline-flex items-center gap-1.5 text-[9.5px] font-black uppercase tracking-[0.14em] text-sidebar-primary group-data-[collapsible=icon]:hidden">
+                        <span className="relative flex h-1.5 w-1.5">
                           <span className="absolute inset-0 animate-ping rounded-full bg-sidebar-primary opacity-60" />
-                          <span className="relative h-1 w-1 rounded-full bg-sidebar-primary" />
+                          <span className="relative h-1.5 w-1.5 rounded-full bg-sidebar-primary" />
                         </span>
                         {item.badge}
                       </span>
                     )}
                     {item.count !== undefined && item.count > 0 && !item.badge && (
                       <span className={cn(
-                        "ml-auto rounded px-1.5 py-0.5 text-[10px] font-bold tabular-nums group-data-[collapsible=icon]:hidden",
+                        "ml-auto rounded-md px-1.5 py-0.5 text-[10.5px] font-bold tabular-nums group-data-[collapsible=icon]:hidden",
                         isActive
                           ? "bg-sidebar-primary/15 text-sidebar-primary"
-                          : "bg-sidebar-border/30 text-sidebar-foreground/50",
+                          : "bg-sidebar-border/25 text-sidebar-foreground/55",
                       )}>
                         {item.count}
                       </span>
