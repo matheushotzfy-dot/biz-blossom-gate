@@ -6,9 +6,9 @@ import Indicacoes from "./Indicacoes";
 import Gamificacao from "./Gamificacao";
 
 const TABS: HubTab[] = [
- { id: "premiacoes", label: "Premiações", icon: Trophy },
- { id: "ranking", label: "Ranking & Conquistas", icon: Award },
- { id: "indicacoes", label: "Indicações", icon: Gift },
+ { id: "premiacoes", label: "Premiações" },
+ { id: "ranking", label: "Ranking & Conquistas" },
+ { id: "indicacoes", label: "Indicações" },
 ];
 
 const COMPONENTS: Record<string, React.FC> = {

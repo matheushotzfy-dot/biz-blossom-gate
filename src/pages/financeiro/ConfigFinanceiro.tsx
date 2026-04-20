@@ -20,12 +20,12 @@ const Antecipacao = lazyRetry(() => import("./Antecipacao"));
 const NotasFiscais = lazyRetry(() => import("./NotasFiscais"));
 
 const TABS: HubTab[] = [
- { id: "dados", label: "Dados Bancários", icon: Building2 },
- { id: "adquirente", label: "Adquirente", icon: Landmark },
- { id: "taxas", label: "Taxas", icon: Zap },
- { id: "gastos", label: "Controle de Gastos", icon: PieChart },
- { id: "antecipacao", label: "Antecipação", icon: Banknote },
- { id: "nfe", label: "Notas Fiscais", icon: FileText },
+ { id: "dados", label: "Dados Bancários" },
+ { id: "adquirente", label: "Adquirente" },
+ { id: "taxas", label: "Taxas" },
+ { id: "gastos", label: "Controle de Gastos" },
+ { id: "antecipacao", label: "Antecipação" },
+ { id: "nfe", label: "Notas Fiscais" },
 ];
 
 const COMPONENTS: Record<string, ReturnType<typeof lazyRetry>> = {
