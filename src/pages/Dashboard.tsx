@@ -870,15 +870,15 @@ export default function Dashboard() {
         {/* ─────────────────────────────────────────────────────────────── */}
         {/* CHANNELS + ACTIVITY                                              */}
         {/* ─────────────────────────────────────────────────────────────── */}
-        <section className="grid grid-cols-1 lg:grid-cols-5 gap-8 lg:gap-10 mb-14">
+        <section className="grid grid-cols-1 lg:grid-cols-5 gap-8 lg:gap-10 mb-16">
           <div className="lg:col-span-3">
-            <div className="flex items-center gap-3 mb-5">
-              <span className="font-mono text-[10px] font-bold text-muted-foreground tracking-[0.2em]">§ 05</span>
-              <span className="h-px flex-1 bg-foreground/10" />
-              <span className="font-mono text-[10px] uppercase font-semibold text-muted-foreground tracking-[0.2em]">Canais · Mix de Pagamento</span>
+            <div className="flex items-center gap-3 mb-6">
+              <span className="font-mono text-[10px] font-bold text-foreground/60 tracking-[0.22em]">§ 05</span>
+              <span className="h-px flex-1 bg-gradient-to-r from-foreground/15 via-foreground/8 to-transparent" />
+              <span className="font-mono text-[10px] uppercase font-bold text-muted-foreground tracking-[0.22em]">Canais · Mix de Pagamento</span>
             </div>
 
-            <div className="rounded-[10px] border border-foreground/[0.08] bg-card overflow-hidden divide-y divide-foreground/[0.06]">
+            <div className="rounded-[12px] border border-foreground/[0.1] bg-card overflow-hidden divide-y divide-foreground/[0.06] shadow-[0_1px_3px_hsl(var(--foreground)/0.04),0_8px_30px_-12px_hsl(var(--foreground)/0.06)]">
               <EditorialChannelRow index="01" name="PIX" approved={pixApprovedCount} total={pixTotalCount} revenue={pixRevenue} approvalRate={pixConversion} share={revenue > 0 ? (pixRevenue / revenue) * 100 : 0} privacy={privacy.hidden} />
               <EditorialChannelRow index="02" name="Cartão de crédito" approved={cardApprovedCount} total={cardTotalCount} revenue={cardRevenue} approvalRate={cardConversion} share={revenue > 0 ? (cardRevenue / revenue) * 100 : 0} privacy={privacy.hidden} />
               <EditorialChannelRow
@@ -895,18 +895,18 @@ export default function Dashboard() {
           </div>
 
           <div className="lg:col-span-2">
-            <div className="flex items-center gap-3 mb-5">
-              <span className="font-mono text-[10px] font-bold text-muted-foreground tracking-[0.2em]">§ 06</span>
-              <span className="h-px flex-1 bg-foreground/10" />
-              <Link to="/vendas" className="font-mono text-[10px] uppercase font-semibold text-muted-foreground hover:text-foreground tracking-[0.2em] inline-flex items-center gap-1.5 transition-colors">
-                Ver tudo <ArrowRight className="h-2.5 w-2.5" />
+            <div className="flex items-center gap-3 mb-6">
+              <span className="font-mono text-[10px] font-bold text-foreground/60 tracking-[0.22em]">§ 06</span>
+              <span className="h-px flex-1 bg-gradient-to-r from-foreground/15 via-foreground/8 to-transparent" />
+              <Link to="/vendas" className="font-mono text-[10px] uppercase font-bold text-muted-foreground hover:text-foreground tracking-[0.22em] inline-flex items-center gap-1.5 transition-colors group">
+                Ver tudo <ArrowRight className="h-2.5 w-2.5 transition-transform group-hover:translate-x-0.5" />
               </Link>
             </div>
 
-            <div className="rounded-[10px] border border-foreground/[0.08] bg-card overflow-hidden">
+            <div className="rounded-[12px] border border-foreground/[0.1] bg-card overflow-hidden shadow-[0_1px_3px_hsl(var(--foreground)/0.04),0_8px_30px_-12px_hsl(var(--foreground)/0.06)]">
               {activity.length === 0 ? (
                 <div className="px-5 py-20 text-center">
-                  <div className="mx-auto h-9 w-9 rounded-full bg-foreground/[0.04] flex items-center justify-center mb-3">
+                  <div className="mx-auto h-10 w-10 rounded-full bg-foreground/[0.04] border border-foreground/[0.06] flex items-center justify-center mb-3">
                     <Activity className="h-4 w-4 text-muted-foreground" />
                   </div>
                   <p className="text-[11.5px] text-muted-foreground font-medium">Sem atividade no período</p>
@@ -933,17 +933,17 @@ export default function Dashboard() {
                             if (tx) setDetailTx(tx);
                           }
                         }}
-                        className="w-full flex items-center gap-3 px-5 py-3.5 hover:bg-foreground/[0.025] transition-colors text-left group"
+                        className="w-full flex items-center gap-3 px-5 py-4 hover:bg-foreground/[0.025] transition-colors text-left group"
                       >
                         <span className="font-mono text-[9px] font-bold text-muted-foreground/50 tracking-[0.1em] tabular-nums w-5 shrink-0">{String(idx + 1).padStart(2, "0")}</span>
-                        <span className={cn("h-1.5 w-1.5 rounded-full shrink-0", dotColor)} />
+                        <span className={cn("h-1.5 w-1.5 rounded-full shrink-0 ring-2 ring-background", dotColor)} />
                         <div className="flex-1 min-w-0">
-                          <p className="text-[12px] font-semibold text-foreground truncate group-hover:translate-x-0.5 transition-transform">{labelText}</p>
+                          <p className="text-[12.5px] font-semibold text-foreground truncate group-hover:translate-x-0.5 transition-transform">{labelText}</p>
                           <p className="text-[10px] text-muted-foreground mt-0.5 font-mono tracking-tight">
                             {item.id.slice(0, 8).toUpperCase()} · {timeAgo(item.createdAt)}
                           </p>
                         </div>
-                        <p className="text-[12.5px] font-semibold text-foreground tabular-nums tracking-tight shrink-0">
+                        <p className="text-[13px] font-display font-semibold text-foreground tabular-nums tracking-tight shrink-0">
                           {privacy.hidden ? CENSORED : fmt(item.amount)}
                         </p>
                       </button>
