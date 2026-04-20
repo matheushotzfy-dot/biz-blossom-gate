@@ -214,14 +214,14 @@ function Sparkline({ data, color = "primary" }: { data: number[]; color?: string
 function SortHead({ label, field, sort, onSort, className }: { label: string; field: SortField; sort: { field: SortField; dir: SortDir }; onSort: (f: SortField) => void; className?: string }) {
  const active = sort.field === field;
  return (
-  <th onClick={() => onSort(field)} className={cn("text-left py-3 px-4 text-[9px] font-heading font-black uppercase tracking-[0.18em] text-muted-foreground/35 cursor-pointer select-none hover:text-foreground transition-colors group", className)}>
- <span className="inline-flex items-center gap-1">
- {label}
- {active
- ? (sort.dir === "desc" ? <ChevronDown className="h-3 w-3 text-primary" /> : <ChevronUp className="h-3 w-3 text-primary" />)
- : <ArrowUpDown className="h-3 w-3 opacity-0 group-hover:opacity-30 transition-opacity" />}
- </span>
- </th>
+  <th onClick={() => onSort(field)} className={cn("text-left py-4 px-4 text-[10px] font-heading font-black uppercase tracking-[0.12em] text-muted-foreground/45 cursor-pointer select-none hover:text-foreground transition-all group", className)}>
+    <span className="inline-flex items-center gap-1.5">
+      {label}
+      {active
+        ? (sort.dir === "desc" ? <ChevronDown className="h-3.5 w-3.5 text-primary" /> : <ChevronUp className="h-3.5 w-3.5 text-primary" />)
+        : <ArrowUpDown className="h-3 w-3 opacity-0 group-hover:opacity-40 transition-opacity" />}
+    </span>
+  </th>
  );
 }
 
