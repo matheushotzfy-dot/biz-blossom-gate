@@ -112,7 +112,7 @@ function RevenueCard({ collapsed, revenue, milestone, onOpenRewards }: RevenueCa
     <button
       type="button"
       onClick={onOpenRewards}
-      className="group/rev relative mt-3 block w-full overflow-hidden rounded-xl border border-sidebar-border/30 bg-sidebar-accent/20 p-3 text-left transition-all duration-200 hover:border-sidebar-primary/20 hover:bg-sidebar-accent/40"
+      className="group/rev relative mt-3 block w-full overflow-hidden rounded-xl border border-sidebar-border/30 bg-sidebar-accent/10 p-3 text-left transition-all duration-300 hover:border-sidebar-primary/40 hover:bg-sidebar-accent/25 backdrop-blur-sm"
     >
       <div className="flex items-center gap-2.5">
         <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-sidebar-border/40 bg-sidebar-accent/40">
@@ -183,7 +183,7 @@ function SidebarSectionNav({ section, pathname, isFirst }: SidebarSectionNavProp
                   >
                     {/* Active indicator bar */}
                     {isActive && (
-                      <span className="absolute left-0 top-1/2 h-4 w-[2.5px] -translate-y-1/2 rounded-r-full bg-sidebar-primary group-data-[collapsible=icon]:hidden shadow-[1px_0_4px_-1px_rgba(var(--sidebar-primary),0.3)]" />
+                      <span className="absolute left-0 top-1/2 h-5 w-[3px] -translate-y-1/2 rounded-r-full bg-sidebar-primary group-data-[collapsible=icon]:hidden shadow-[0_0_12px_rgba(var(--sidebar-primary),0.6)] animate-pulse-glow" />
                     )}
                     <span className={cn(
                       "flex h-8 w-8 shrink-0 items-center justify-center rounded-lg transition-all duration-200",

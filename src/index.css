@@ -81,7 +81,7 @@ input[type="number"]::-webkit-inner-spin-button {
     --secondary: 220 6% 13%;
     --secondary-foreground: 0 0% 93%;
     --muted: 220 6% 13%;
-    --muted-foreground: 220 6% 46%;
+    --muted-foreground: 220 10% 65%;
     --accent: 220 6% 14%;
     --accent-foreground: 0 0% 93%;
     --destructive: 0 74% 52%;
