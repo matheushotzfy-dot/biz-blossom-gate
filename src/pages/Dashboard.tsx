@@ -487,46 +487,85 @@ export default function Dashboard() {
         transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
         className="relative py-8 md:py-12"
       >
-        {/* HEADER · masthead institucional */}
-        <header className="mb-12 md:mb-16">
-          <div className="flex items-center justify-between gap-4 pb-4 border-b border-border/60">
-            <div className="flex items-center gap-2.5">
-              <span className="text-[10px] font-semibold text-foreground/70 uppercase tracking-[0.18em]">Hotzfy</span>
-              <span className="h-2.5 w-px bg-border" />
-              <span className="text-[10px] font-medium text-muted-foreground uppercase tracking-[0.16em]">Painel de Controle</span>
+        {/* ─────────────────────────────────────────────────────────────── */}
+        {/* MASTHEAD · Identidade institucional HOTZFY                       */}
+        {/* ─────────────────────────────────────────────────────────────── */}
+        <header className="mb-14 md:mb-20">
+          {/* Ticker / utility strip */}
+          <div className="flex items-center justify-between gap-4 pb-3 border-b border-foreground/10">
+            <div className="flex items-center gap-3">
+              {/* Monogram mark */}
+              <div className="relative h-7 w-7 rounded-[6px] bg-foreground text-background flex items-center justify-center shrink-0">
+                <span className="font-display font-black text-[12px] tracking-[-0.06em] leading-none">H</span>
+                <span className="absolute -right-0.5 -bottom-0.5 h-1.5 w-1.5 rounded-full bg-success ring-[1.5px] ring-background" />
+              </div>
+              <div className="flex items-baseline gap-2.5">
+                <span className="font-display font-bold text-[12px] text-foreground tracking-[-0.01em]">HOTZFY</span>
+                <span className="hidden sm:inline text-[9.5px] font-mono uppercase tracking-[0.2em] text-muted-foreground">Capital · Treasury · Operations</span>
+              </div>
             </div>
-            <div className="flex items-center gap-4">
-              <span className="hidden md:inline text-[10.5px] font-medium text-muted-foreground tabular-nums">
-                {format(new Date(), "dd MMM yyyy", { locale: ptBR })}
-              </span>
+            <div className="flex items-center gap-5 text-[9.5px] font-mono uppercase tracking-[0.16em] text-muted-foreground">
+              <span className="hidden md:inline tabular-nums">{format(new Date(), "EEE · dd MMM yyyy · HH:mm", { locale: ptBR })}</span>
+              <span className="hidden md:inline h-2.5 w-px bg-foreground/15" />
               <span className="inline-flex items-center gap-1.5">
-                <span className="h-1.5 w-1.5 rounded-full bg-success" />
-                <span className="text-[10px] font-semibold text-foreground/80 uppercase tracking-[0.14em]">Operacional</span>
+                <span className="relative flex h-1.5 w-1.5">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-success opacity-60" />
+                  <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-success" />
+                </span>
+                <span className="text-foreground/70 font-semibold">Live</span>
               </span>
             </div>
           </div>
 
-          <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-8 mt-10 md:mt-12">
+          {/* Section reference — financial report style */}
+          <div className="flex items-center gap-3 mt-7 mb-5">
+            <span className="font-mono text-[10px] font-bold text-muted-foreground tracking-[0.2em]">§ 01</span>
+            <span className="h-px flex-1 bg-foreground/10" />
+            <span className="font-mono text-[10px] uppercase font-semibold text-muted-foreground tracking-[0.2em]">Sumário Executivo</span>
+          </div>
+
+          <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-10">
             <div className="flex-1 min-w-0">
-              <p className="text-[10.5px] font-semibold text-muted-foreground uppercase tracking-[0.22em] mb-4">
-                {selectedPeriod.label}
-              </p>
-              <h1 className="font-display font-semibold text-foreground tracking-[-0.035em] leading-[1.05] text-[34px] md:text-[42px] lg:text-[48px]">
-                {nickname ? <>Bem-vindo de volta, {nickname}.</> : <>Painel executivo.</>}
+              <h1 className="font-display font-semibold text-foreground tracking-[-0.045em] leading-[0.98] text-[40px] md:text-[56px] lg:text-[68px]">
+                {nickname ? (
+                  <>
+                    Bom retorno,
+                    <br />
+                    <span className="italic font-normal text-foreground/55" style={{ fontFamily: "'Cormorant Garamond', 'Playfair Display', Georgia, serif" }}>
+                      {nickname}
+                    </span>
+                    <span className="text-foreground">.</span>
+                  </>
+                ) : (
+                  <>
+                    Painel
+                    <br />
+                    <span className="italic font-normal text-foreground/55" style={{ fontFamily: "'Cormorant Garamond', 'Playfair Display', Georgia, serif" }}>
+                      executivo
+                    </span>
+                    <span className="text-foreground">.</span>
+                  </>
+                )}
               </h1>
-              <p className="mt-4 max-w-2xl text-[14px] text-muted-foreground leading-relaxed">
-                Visão consolidada de receita, liquidação e performance operacional.
+              <p className="mt-6 max-w-[520px] text-[13.5px] text-muted-foreground leading-[1.65]">
+                Demonstrativo consolidado de receita líquida, liquidação financeira e indicadores
+                de performance operacional do gateway. Período em análise:{" "}
+                <span className="text-foreground font-medium">{selectedPeriod.label.toLowerCase()}</span>
                 {approved.length > 0 && (
-                  <> <span className="text-foreground font-medium tabular-nums">{approved.length}</span> {approved.length === 1 ? "transação aprovada" : "transações aprovadas"} no período selecionado.</>
+                  <>
+                    {" · "}
+                    <span className="text-foreground font-medium tabular-nums">{approved.length}</span>{" "}
+                    {approved.length === 1 ? "transação processada" : "transações processadas"}.
+                  </>
                 )}
               </p>
             </div>
 
-            <div className="flex flex-col items-stretch lg:items-end gap-2.5 shrink-0">
+            <div className="flex flex-col items-stretch lg:items-end gap-3 shrink-0">
               <div className="flex items-center gap-2">
                 {productsData && productsData.length > 0 && (
                   <Select value={selectedProductId} onValueChange={setSelectedProductId}>
-                    <SelectTrigger className="h-9 w-[180px] text-[12px] font-medium rounded-md border-border bg-background hover:border-foreground/30 transition-colors">
+                    <SelectTrigger className="h-9 w-[180px] text-[11.5px] font-medium rounded-[6px] border-foreground/15 bg-transparent hover:border-foreground/40 transition-colors">
                       <SelectValue placeholder="Todos os produtos" />
                     </SelectTrigger>
                     <SelectContent>
@@ -539,24 +578,24 @@ export default function Dashboard() {
                 )}
                 <button
                   onClick={privacy.toggle}
-                  className="h-9 w-9 inline-flex items-center justify-center rounded-md border border-border bg-background text-muted-foreground hover:text-foreground hover:border-foreground/30 transition-colors"
+                  className="h-9 w-9 inline-flex items-center justify-center rounded-[6px] border border-foreground/15 bg-transparent text-muted-foreground hover:text-foreground hover:border-foreground/40 transition-colors"
                   title={privacy.hidden ? "Mostrar valores" : "Ocultar valores"}
                 >
                   {privacy.hidden ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
                 </button>
               </div>
 
-              <div className="inline-flex items-center rounded-md border border-border bg-background overflow-hidden">
+              <div className="inline-flex items-center rounded-[6px] border border-foreground/15 bg-transparent overflow-hidden">
                 {PERIOD_PRESETS.map((opt, idx) => (
                   <button
                     key={opt.label}
                     onClick={() => { setSelectedPeriod(opt); setIsCustom(false); setCustomRange(undefined); }}
                     className={cn(
-                      "px-3.5 py-2 text-[11px] font-semibold transition-colors",
-                      idx > 0 && "border-l border-border",
+                      "px-3.5 py-2 text-[10.5px] font-semibold uppercase tracking-[0.08em] transition-colors",
+                      idx > 0 && "border-l border-foreground/10",
                       !isCustom && selectedPeriod.label === opt.label
                         ? "bg-foreground text-background"
-                        : "text-muted-foreground hover:text-foreground hover:bg-muted/40"
+                        : "text-muted-foreground hover:text-foreground hover:bg-foreground/[0.03]"
                     )}
                   >
                     {opt.label}
@@ -566,8 +605,8 @@ export default function Dashboard() {
                   <PopoverTrigger asChild>
                     <button
                       className={cn(
-                        "px-3 py-2 text-[11px] font-semibold transition-colors border-l border-border inline-flex items-center gap-1.5",
-                        isCustom ? "bg-foreground text-background" : "text-muted-foreground hover:text-foreground hover:bg-muted/40"
+                        "px-3 py-2 text-[10.5px] font-semibold transition-colors border-l border-foreground/10 inline-flex items-center gap-1.5",
+                        isCustom ? "bg-foreground text-background" : "text-muted-foreground hover:text-foreground hover:bg-foreground/[0.03]"
                       )}
                     >
                       <CalendarDays className="h-3 w-3" />
