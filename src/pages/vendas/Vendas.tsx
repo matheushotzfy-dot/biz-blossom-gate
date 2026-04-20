@@ -941,7 +941,7 @@ export default function Vendas() {
                     <span>{periodLabel}</span>
                   </div>
                 </div>
-                <RevenueChart data={chartData} hidden={hidden} />
+                <RevenueChart data={metrics.chartData} hidden={hidden} />
               </div>
             </div>
           </section>
