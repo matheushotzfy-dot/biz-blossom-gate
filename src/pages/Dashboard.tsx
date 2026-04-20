@@ -776,36 +776,43 @@ export default function Dashboard() {
         {/* ─────────────────────────────────────────────────────────────── */}
         {/* CHART · Série histórica (premium 4K)                             */}
         {/* ─────────────────────────────────────────────────────────────── */}
-        <section className="mb-7 md:mb-9">
-          <div className="relative rounded-[20px] border border-foreground/[0.09] bg-card overflow-hidden shadow-[0_1px_0_hsl(var(--foreground)/0.04),0_24px_60px_-24px_hsl(var(--foreground)/0.18)]">
+        <section className="mb-8 md:mb-10">
+          <div className="relative rounded-[22px] border border-foreground/[0.08] bg-gradient-to-br from-card via-card to-card/95 overflow-hidden shadow-[0_1px_0_hsl(var(--background)/0.4)_inset,0_1px_0_hsl(var(--foreground)/0.04),0_30px_70px_-28px_hsl(var(--foreground)/0.22)]">
             <div className="absolute inset-0 bg-gradient-to-br from-foreground/[0.02] via-transparent to-transparent pointer-events-none" />
-            <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-foreground/15 to-transparent" />
+            <div className="absolute -top-20 left-1/3 h-60 w-[420px] rounded-full bg-primary/[0.04] blur-[120px] pointer-events-none" />
+            <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-foreground/[0.18] to-transparent" />
+            <div className="absolute top-5 right-5 flex flex-col items-end gap-1 pointer-events-none">
+              <span className="font-mono text-[8px] font-bold text-muted-foreground/35 tracking-[0.22em] uppercase">N° 003</span>
+              <span className="h-px w-12 bg-gradient-to-r from-foreground/20 to-transparent" />
+            </div>
 
-            <div className="relative px-7 md:px-10 pt-8 pb-6 flex items-end justify-between gap-6 flex-wrap">
+            <div className="relative px-7 md:px-10 lg:px-12 pt-9 pb-7 flex items-end justify-between gap-6 flex-wrap">
               <div>
-                <div className="flex items-center gap-2 mb-3">
-                  <span className="font-mono text-[9.5px] font-bold text-muted-foreground uppercase tracking-[0.24em]">Série Histórica</span>
-                  <span className="h-px w-8 bg-foreground/20" />
-                  <span className="font-mono text-[9.5px] font-bold text-muted-foreground/70 uppercase tracking-[0.18em]">Volume</span>
+                <div className="flex items-center gap-2 mb-3.5">
+                  <span className="h-1.5 w-1.5 rounded-full bg-foreground" />
+                  <span className="font-mono text-[9.5px] font-bold text-foreground/85 uppercase tracking-[0.26em]">Série Histórica</span>
+                  <span className="h-px w-10 bg-gradient-to-r from-foreground/25 to-transparent" />
+                  <span className="font-mono text-[9.5px] font-bold text-muted-foreground/65 uppercase tracking-[0.18em]">Volume</span>
                 </div>
-                <p className="font-display font-semibold tabular-nums tracking-[-0.04em] text-[34px] md:text-[44px] leading-none">
-                  {privacy.hidden ? <span className="text-foreground/20">{CENSORED}</span> : (
-                    <span className="inline-flex items-baseline gap-2 bg-gradient-to-br from-foreground via-foreground/95 to-foreground/70 bg-clip-text text-transparent">
-                      <span className="text-[0.4em] font-medium text-muted-foreground/70 not-italic">R$</span>
+                <p className="font-display font-semibold tabular-nums tracking-[-0.045em] text-[36px] md:text-[48px] leading-none">
+                  {privacy.hidden ? <span className="text-foreground/15">{CENSORED}</span> : (
+                    <span className="inline-flex items-baseline gap-2.5 bg-gradient-to-br from-foreground via-foreground/97 to-foreground/65 bg-clip-text text-transparent drop-shadow-[0_2px_18px_hsl(var(--foreground)/0.08)]">
+                      <span className="text-[0.38em] font-medium text-muted-foreground/65 not-italic font-sans">R$</span>
                       {revenue.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                     </span>
                   )}
                 </p>
-                <p className="text-[11.5px] text-muted-foreground/85 mt-3">
+                <p className="text-[11.5px] text-muted-foreground/85 mt-3 font-medium">
                   {selectedPeriod.label === "Hoje" ? "Distribuição por hora · America/São Paulo" : `Distribuição diária · últimos ${selectedPeriod.days} dias`}
                 </p>
               </div>
-              <div className="flex items-center gap-3 text-[10px] font-mono uppercase tracking-[0.16em] text-muted-foreground">
-                <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-foreground/[0.05] border border-foreground/[0.08]">
-                  <span className="h-1.5 w-1.5 rounded-full bg-foreground" />
+              <div className="flex items-center gap-2.5 text-[10px] font-mono uppercase tracking-[0.16em] text-muted-foreground">
+                <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-foreground/[0.05] border border-foreground/[0.08] shadow-[inset_0_1px_0_hsl(var(--background)/0.4)]">
+                  <span className="h-1.5 w-1.5 rounded-full bg-foreground shadow-[0_0_6px_hsl(var(--foreground)/0.5)]" />
                   <span className="font-bold tracking-[0.14em] text-foreground/85">Receita líquida</span>
                 </span>
-                <span className="hidden md:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-foreground/[0.025] border border-foreground/[0.06] tabular-nums font-medium">
+                <span className="hidden md:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-foreground/[0.025] border border-foreground/[0.06] tabular-nums font-bold shadow-[inset_0_1px_0_hsl(var(--background)/0.4)]">
+                  <Hash className="h-2.5 w-2.5" />
                   {chartData.length} pts
                 </span>
               </div>
