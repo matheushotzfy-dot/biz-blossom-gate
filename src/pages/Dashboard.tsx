@@ -421,7 +421,9 @@ export default function Dashboard() {
   const nickname = profile?.nickname || profile?.full_name?.split(" ")[0] || null;
 
   return (
-    <div className="dashboard-page mx-auto w-full max-w-[1320px] pb-24 px-4 md:px-8 relative selection:bg-foreground/10">
+    <div className="dashboard-page mx-auto w-full max-w-[1280px] pb-24 px-4 md:px-10 lg:px-14 relative selection:bg-foreground/10">
+      {/* Hairline grid background — institutional signature */}
+      <div className="pointer-events-none absolute inset-0 -z-10 opacity-[0.035]" aria-hidden style={{ backgroundImage: "linear-gradient(to right, hsl(var(--foreground)) 1px, transparent 1px), linear-gradient(to bottom, hsl(var(--foreground)) 1px, transparent 1px)", backgroundSize: "64px 64px" }} />
 
       {/* ─── GREEN FIRE BORDER EFFECT ─── */}
       {fireEffect && (
