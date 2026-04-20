@@ -481,126 +481,68 @@ export default function Dashboard() {
       )}
 
       {/* ════════════════════════════════════════════════════════════════ */}
-      {/* HOTZFY · INSTITUTIONAL DASHBOARD                                 */}
-      {/* Sério, clean, profissional — Mercury / Ramp / Stripe Atlas       */}
+      {/* HOTZFY · ULTRA PREMIUM DASHBOARD · 4K                            */}
+      {/* Direto ao ponto: dados, gráficos, decisões.                       */}
       {/* ════════════════════════════════════════════════════════════════ */}
       <motion.div
-        initial={{ opacity: 0, y: 8 }}
+        initial={{ opacity: 0, y: 6 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
-        className="relative py-8 md:py-12"
+        transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
+        className="relative py-7 md:py-9"
       >
         {/* ─────────────────────────────────────────────────────────────── */}
-        {/* MASTHEAD · Identidade institucional HOTZFY                       */}
+        {/* COMMAND BAR · Compacta, institucional, direto ao controle        */}
         {/* ─────────────────────────────────────────────────────────────── */}
-        <header className="mb-14 md:mb-20">
-          {/* Ticker / utility strip */}
-          <div className="flex items-center justify-between gap-4 pb-4 border-b border-foreground/10">
-            <div className="flex items-center gap-3">
-              {/* Monogram mark */}
-              <div className="relative h-8 w-8 rounded-[7px] bg-foreground text-background flex items-center justify-center shrink-0 shadow-[0_2px_8px_-2px_hsl(var(--foreground)/0.25)]">
-                <span className="font-display font-black text-[13px] tracking-[-0.06em] leading-none">H</span>
-                <span className="absolute -right-0.5 -bottom-0.5 h-1.5 w-1.5 rounded-full bg-success ring-[1.5px] ring-background animate-pulse" />
+        <header className="mb-8 md:mb-10">
+          <div className="flex items-center justify-between gap-4 flex-wrap">
+            {/* Identity block */}
+            <div className="flex items-center gap-3.5 min-w-0">
+              <div className="relative h-10 w-10 rounded-[9px] bg-foreground text-background flex items-center justify-center shrink-0 shadow-[0_4px_14px_-4px_hsl(var(--foreground)/0.35),inset_0_1px_0_hsl(var(--background)/0.15)]">
+                <span className="font-display font-black text-[15px] tracking-[-0.06em] leading-none">H</span>
+                <span className="absolute -right-0.5 -bottom-0.5 h-2 w-2 rounded-full bg-success ring-[2px] ring-background">
+                  <span className="absolute inset-0 rounded-full bg-success animate-ping opacity-75" />
+                </span>
               </div>
-              <div className="flex items-baseline gap-2.5">
-                <span className="font-display font-bold text-[12.5px] text-foreground tracking-[-0.015em]">HOTZFY</span>
-                <span className="hidden sm:inline-flex items-center gap-1.5 px-2 py-0.5 rounded-[3px] bg-foreground/[0.06] text-[8.5px] font-mono uppercase tracking-[0.18em] text-foreground/70 font-bold">
-                  <span className="h-1 w-1 rounded-full bg-foreground/50" />
-                  Capital · Treasury · Operations
+              <div className="flex flex-col min-w-0">
+                <div className="flex items-center gap-2">
+                  <span className="font-display font-bold text-[14px] text-foreground tracking-[-0.02em] leading-none">HOTZFY</span>
+                  <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-[4px] bg-foreground/[0.06] border border-foreground/[0.06] text-[8.5px] font-mono uppercase tracking-[0.16em] text-foreground/65 font-bold">
+                    <span className="h-1 w-1 rounded-full bg-success animate-pulse" />
+                    Live
+                  </span>
+                </div>
+                <span className="hidden md:inline-block mt-1 font-mono text-[9.5px] uppercase tracking-[0.18em] text-muted-foreground/80 tabular-nums">
+                  {format(new Date(), "EEE · dd MMM yyyy · HH:mm", { locale: ptBR })}
                 </span>
               </div>
             </div>
-            <div className="flex items-center gap-5 text-[9.5px] font-mono uppercase tracking-[0.16em] text-muted-foreground">
-              <span className="hidden md:inline tabular-nums font-medium">{format(new Date(), "EEE · dd MMM yyyy · HH:mm", { locale: ptBR })}</span>
-              <span className="hidden md:inline h-2.5 w-px bg-foreground/15" />
-              <span className="inline-flex items-center gap-1.5">
-                <span className="relative flex h-1.5 w-1.5">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-success opacity-60" />
-                  <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-success" />
-                </span>
-                <span className="text-foreground/80 font-bold tracking-[0.14em]">Live</span>
-              </span>
-            </div>
-          </div>
 
-          {/* Section reference — financial report style */}
-          <div className="flex items-center gap-3 mt-8 mb-6">
-            <span className="font-mono text-[10px] font-bold text-foreground/60 tracking-[0.22em]">§ 01</span>
-            <span className="h-px flex-1 bg-gradient-to-r from-foreground/15 via-foreground/8 to-transparent" />
-            <span className="font-mono text-[10px] uppercase font-bold text-muted-foreground tracking-[0.22em]">Sumário Executivo</span>
-          </div>
+            {/* Controls — single rail */}
+            <div className="flex items-center gap-2 ml-auto flex-wrap">
+              {productsData && productsData.length > 0 && (
+                <Select value={selectedProductId} onValueChange={setSelectedProductId}>
+                  <SelectTrigger className="h-10 w-[200px] text-[12px] font-semibold rounded-[8px] border-foreground/[0.12] bg-card/60 backdrop-blur-xl hover:border-foreground/30 hover:bg-foreground/[0.025] transition-all shadow-[0_1px_2px_hsl(var(--foreground)/0.04)]">
+                    <SelectValue placeholder="Todos os produtos" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">Todos os produtos</SelectItem>
+                    {productsData.map((p) => (
+                      <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              )}
 
-          <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-10">
-            <div className="flex-1 min-w-0">
-              <h1 className="font-display font-semibold text-foreground tracking-[-0.048em] leading-[0.98] text-[40px] md:text-[58px] lg:text-[72px]">
-                {nickname ? (
-                  <>
-                    Bom retorno,
-                    <br />
-                    <span className="italic font-normal bg-gradient-to-br from-foreground/85 via-foreground/60 to-foreground/40 bg-clip-text text-transparent" style={{ fontFamily: "'Cormorant Garamond', 'Playfair Display', Georgia, serif" }}>
-                      {nickname}
-                    </span>
-                    <span className="text-primary">.</span>
-                  </>
-                ) : (
-                  <>
-                    Painel
-                    <br />
-                    <span className="italic font-normal bg-gradient-to-br from-foreground/85 via-foreground/60 to-foreground/40 bg-clip-text text-transparent" style={{ fontFamily: "'Cormorant Garamond', 'Playfair Display', Georgia, serif" }}>
-                      executivo
-                    </span>
-                    <span className="text-primary">.</span>
-                  </>
-                )}
-              </h1>
-              <p className="mt-7 max-w-[560px] text-[13.5px] text-muted-foreground leading-[1.7]">
-                Demonstrativo consolidado de receita líquida, liquidação financeira e indicadores
-                de performance operacional do gateway. Período em análise:{" "}
-                <span className="text-foreground font-semibold">{selectedPeriod.label.toLowerCase()}</span>
-                {approved.length > 0 && (
-                  <>
-                    {" · "}
-                    <span className="text-foreground font-semibold tabular-nums">{approved.length}</span>{" "}
-                    {approved.length === 1 ? "transação processada" : "transações processadas"}.
-                  </>
-                )}
-              </p>
-            </div>
-
-            <div className="flex flex-col items-stretch lg:items-end gap-3 shrink-0">
-              <div className="flex items-center gap-2">
-                {productsData && productsData.length > 0 && (
-                  <Select value={selectedProductId} onValueChange={setSelectedProductId}>
-                    <SelectTrigger className="h-9 w-[180px] text-[11.5px] font-medium rounded-[7px] border-foreground/15 bg-background/40 backdrop-blur-sm hover:border-foreground/35 hover:bg-foreground/[0.02] transition-all">
-                      <SelectValue placeholder="Todos os produtos" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">Todos os produtos</SelectItem>
-                      {productsData.map((p) => (
-                        <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                )}
-                <button
-                  onClick={privacy.toggle}
-                  className="h-9 w-9 inline-flex items-center justify-center rounded-[7px] border border-foreground/15 bg-background/40 backdrop-blur-sm text-muted-foreground hover:text-foreground hover:border-foreground/35 hover:bg-foreground/[0.02] transition-all"
-                  title={privacy.hidden ? "Mostrar valores" : "Ocultar valores"}
-                >
-                  {privacy.hidden ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
-                </button>
-              </div>
-
-              <div className="inline-flex items-center rounded-[7px] border border-foreground/15 bg-background/40 backdrop-blur-sm overflow-hidden shadow-[0_1px_2px_hsl(var(--foreground)/0.04)]">
+              <div className="inline-flex items-center rounded-[8px] border border-foreground/[0.12] bg-card/60 backdrop-blur-xl overflow-hidden shadow-[0_1px_2px_hsl(var(--foreground)/0.04)]">
                 {PERIOD_PRESETS.map((opt, idx) => (
                   <button
                     key={opt.label}
                     onClick={() => { setSelectedPeriod(opt); setIsCustom(false); setCustomRange(undefined); }}
                     className={cn(
-                      "px-3.5 py-2 text-[10.5px] font-bold uppercase tracking-[0.1em] transition-all",
-                      idx > 0 && "border-l border-foreground/10",
+                      "px-3.5 h-10 text-[10.5px] font-bold uppercase tracking-[0.1em] transition-all",
+                      idx > 0 && "border-l border-foreground/[0.08]",
                       !isCustom && selectedPeriod.label === opt.label
-                        ? "bg-foreground text-background shadow-inner"
+                        ? "bg-foreground text-background"
                         : "text-muted-foreground hover:text-foreground hover:bg-foreground/[0.04]"
                     )}
                   >
@@ -611,11 +553,11 @@ export default function Dashboard() {
                   <PopoverTrigger asChild>
                     <button
                       className={cn(
-                        "px-3 py-2 text-[10.5px] font-bold transition-all border-l border-foreground/10 inline-flex items-center gap-1.5",
+                        "px-3 h-10 text-[10.5px] font-bold transition-all border-l border-foreground/[0.08] inline-flex items-center gap-1.5",
                         isCustom ? "bg-foreground text-background" : "text-muted-foreground hover:text-foreground hover:bg-foreground/[0.04]"
                       )}
                     >
-                      <CalendarDays className="h-3 w-3" />
+                      <CalendarDays className="h-3.5 w-3.5" />
                     </button>
                   </PopoverTrigger>
                   <PopoverContent className="w-auto p-0" align="end">
@@ -633,6 +575,14 @@ export default function Dashboard() {
                   </PopoverContent>
                 </Popover>
               </div>
+
+              <button
+                onClick={privacy.toggle}
+                className="h-10 w-10 inline-flex items-center justify-center rounded-[8px] border border-foreground/[0.12] bg-card/60 backdrop-blur-xl text-muted-foreground hover:text-foreground hover:border-foreground/30 hover:bg-foreground/[0.025] transition-all shadow-[0_1px_2px_hsl(var(--foreground)/0.04)]"
+                title={privacy.hidden ? "Mostrar valores" : "Ocultar valores"}
+              >
+                {privacy.hidden ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+              </button>
             </div>
           </div>
         </header>
