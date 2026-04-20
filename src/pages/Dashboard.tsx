@@ -161,6 +161,7 @@ export default function Dashboard() {
   const products = productsData?.length ?? 0;
   const [selectedPeriod, setSelectedPeriod] = useState<PeriodPreset>(PERIOD_PRESETS[0]);
   const [customRange, setCustomRange] = useState<DateRange | undefined>();
+  const [selectedProductId, setSelectedProductId] = useState<string>("all");
   const [isCustom, setIsCustom] = useState(false);
   const [datePickerOpen, setDatePickerOpen] = useState(false);
   const [scaleMode, setScaleMode] = useState(false);
