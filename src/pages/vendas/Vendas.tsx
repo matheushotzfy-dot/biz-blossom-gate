@@ -843,7 +843,7 @@ export default function Vendas() {
       };
 
       return (
-        <div className="mx-auto w-full max-w-[1440px] pb-20 space-y-7">
+        <div className="mx-auto w-full max-w-[1440px] pb-20 space-y-8">
 
           {/* ═══════ HEADER ═══════ */}
           <header className="flex flex-col gap-5 pb-1 sm:flex-row sm:items-end sm:justify-between">
@@ -923,14 +923,14 @@ export default function Vendas() {
                 </div>
 
                 <div className="grid grid-cols-2 gap-x-8 gap-y-6 border-t border-border pt-7">
-                  <div>
+                  <div className="group/stat cursor-default">
                     <p className="text-[10.5px] font-heading font-semibold text-muted-foreground/70 uppercase tracking-[0.14em]">Vendas</p>
-                    <p className="text-[26px] font-heading font-semibold text-foreground tabular-nums leading-none mt-2.5 tracking-[-0.02em]">{hidden ? HIDE : m.approved.length.toLocaleString("pt-BR")}</p>
+                    <p className="text-[26px] font-heading font-semibold text-foreground tabular-nums leading-none mt-2.5 tracking-[-0.02em] group-hover/stat:text-primary transition-colors">{hidden ? HIDE : m.approved.length.toLocaleString("pt-BR")}</p>
                     <p className="text-[11.5px] text-muted-foreground/80 mt-2 font-medium tabular-nums">{approvalRate.toFixed(1)}% aprovação</p>
                   </div>
-                  <div>
+                  <div className="group/stat cursor-default">
                     <p className="text-[10.5px] font-heading font-semibold text-muted-foreground/70 uppercase tracking-[0.14em]">Ticket médio</p>
-                    <p className="text-[26px] font-heading font-semibold text-foreground tabular-nums leading-none mt-2.5 tracking-[-0.02em]">{hidden ? HIDE : fmtCompact(m.avgTicket)}</p>
+                    <p className="text-[26px] font-heading font-semibold text-foreground tabular-nums leading-none mt-2.5 tracking-[-0.02em] group-hover/stat:text-primary transition-colors">{hidden ? HIDE : fmtCompact(m.avgTicket)}</p>
                     <p className="text-[11.5px] text-muted-foreground/80 mt-2 font-medium tabular-nums">{m.uniqueCustomers} clientes</p>
                   </div>
                 </div>
@@ -957,7 +957,7 @@ export default function Vendas() {
                   <div
                     key={kpi.label}
                     className={cn(
-                      "relative px-6 py-5 transition-colors hover:bg-card/60",
+                      "relative px-6 py-6 transition-all hover:bg-muted/30 group cursor-default",
                       !isFirstCol && "lg:border-l border-border",
                       i % 2 !== 0 && "sm:border-l lg:border-l border-border",
                       !isFirstRow && "border-t border-border",
@@ -969,8 +969,8 @@ export default function Vendas() {
                       <p className="text-[10.5px] font-heading font-semibold text-muted-foreground/80 uppercase tracking-[0.12em] truncate">
                         {kpi.label}
                       </p>
-                      <span className={cn("flex h-6 w-6 shrink-0 items-center justify-center rounded-md", tone.iconBg)}>
-                        <Icon className={cn("h-3 w-3", tone.iconFg)} strokeWidth={2.25} />
+                      <span className={cn("flex h-7 w-7 shrink-0 items-center justify-center rounded-lg transition-transform group-hover:scale-110", tone.iconBg)}>
+                        <Icon className={cn("h-3.5 w-3.5", tone.iconFg)} strokeWidth={2.5} />
                       </span>
                     </div>
                     <p className={cn("text-[24px] font-heading font-semibold tabular-nums leading-none tracking-[-0.03em]", tone.value)}>
