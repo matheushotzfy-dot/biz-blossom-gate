@@ -183,7 +183,7 @@ function SidebarSectionNav({ section, pathname, isFirst }: SidebarSectionNavProp
                   >
                     {/* Active indicator bar */}
                     {isActive && (
-                      <span className="absolute left-0 top-1/2 h-5 w-[2px] -translate-y-1/2 rounded-r-full bg-sidebar-primary group-data-[collapsible=icon]:hidden" />
+                      <span className="absolute left-0 top-1/2 h-4 w-[2.5px] -translate-y-1/2 rounded-r-full bg-sidebar-primary group-data-[collapsible=icon]:hidden shadow-[1px_0_4px_-1px_rgba(var(--sidebar-primary),0.3)]" />
                     )}
                     <span className={cn(
                       "flex h-8 w-8 shrink-0 items-center justify-center rounded-lg transition-all duration-200",
