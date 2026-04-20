@@ -1261,12 +1261,12 @@ function EditorialKpi({ label, value, sub, accent }: { label: string; value: str
   };
 
   return (
-    <div className="relative bg-card/60 backdrop-blur-xl px-5 py-6 hover:bg-card/80 transition-colors group">
-      <div className="flex items-center gap-2 mb-4">
-        <span className={cn("h-1.5 w-1.5 rounded-full", accentDot[accent])} />
-        <p className="text-[10px] font-bold text-muted-foreground/60 uppercase tracking-[0.22em]">{label}</p>
+    <div className="relative bg-card/60 backdrop-blur-xl px-6 py-8 hover:bg-card/80 transition-all duration-300 group overflow-hidden">
+      <div className="flex items-center gap-2.5 mb-5">
+        <span className={cn("h-1.5 w-1.5 rounded-full transition-transform duration-300 group-hover:scale-125", accentDot[accent])} />
+        <p className="text-[10px] font-bold text-muted-foreground/60 uppercase tracking-[0.24em] group-hover:text-foreground/80 transition-colors">{label}</p>
       </div>
-      <p className={cn("font-display font-black tabular-nums tracking-[-0.04em] leading-none text-[28px] md:text-[32px]", accentText[accent])}>
+      <p className={cn("font-display font-black tabular-nums tracking-[-0.04em] leading-none text-[28px] md:text-[36px] transition-transform duration-300 group-hover:translate-x-1", accentText[accent])}>
         {value}
       </p>
       <p className="mt-2.5 text-[10.5px] text-muted-foreground/60 font-medium leading-relaxed">{sub}</p>
