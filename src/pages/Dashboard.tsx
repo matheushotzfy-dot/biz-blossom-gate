@@ -567,23 +567,24 @@ export default function Dashboard() {
             </div>
           </div>
 
-          <div className="px-7 md:px-8 py-8">
+          <div className="relative px-7 md:px-8 py-8 bg-gradient-to-br from-success/[0.025] via-transparent to-transparent">
             <div className="flex items-center gap-2 mb-4">
               <span className="relative inline-flex h-1.5 w-1.5">
                 <span className="absolute inset-0 rounded-full bg-success animate-ping opacity-60" />
-                <span className="relative h-1.5 w-1.5 rounded-full bg-success" />
+                <span className="relative h-1.5 w-1.5 rounded-full bg-success shadow-[0_0_8px_hsl(var(--success)/0.6)]" />
               </span>
               <p className="text-[10px] font-bold uppercase tracking-[0.22em] text-muted-foreground">Saldo Disponível</p>
             </div>
-            <div className="text-[40px] md:text-[54px] font-display font-black tracking-[-0.04em] leading-[0.95] text-success tabular-nums">
+            <div className="text-[40px] md:text-[54px] font-display font-black tracking-[-0.04em] leading-[0.95] bg-gradient-to-b from-success to-success/80 bg-clip-text text-transparent tabular-nums drop-shadow-[0_0_24px_hsl(var(--success)/0.15)]">
               {privacy.hidden ? CENSORED : <AnimatedNumber value={balance} />}
             </div>
             <Link
               to="/financeiro/saques"
-              className="mt-6 inline-flex items-center gap-2 px-3.5 py-2 rounded-lg bg-foreground text-background text-[11.5px] font-bold hover:opacity-90 transition-opacity group"
+              className="relative mt-6 inline-flex items-center gap-2 px-3.5 py-2 rounded-lg bg-foreground text-background text-[11.5px] font-bold hover:opacity-90 transition-all hover:-translate-y-0.5 hover:shadow-[0_8px_20px_-8px_hsl(var(--foreground)/0.4)] group overflow-hidden"
             >
-              Sacar agora
-              <ArrowRight className="h-3.5 w-3.5 group-hover:translate-x-0.5 transition-transform" />
+              <span className="absolute inset-0 bg-gradient-to-r from-transparent via-background/10 to-transparent translate-x-[-150%] group-hover:translate-x-[150%] transition-transform duration-700" />
+              <span className="relative">Sacar agora</span>
+              <ArrowRight className="relative h-3.5 w-3.5 group-hover:translate-x-0.5 transition-transform" />
             </Link>
           </div>
         </div>
