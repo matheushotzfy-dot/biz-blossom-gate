@@ -1112,7 +1112,7 @@ export default function Vendas() {
                   {metrics.topProducts[0]?.name || "Nenhum produto"}
                 </p>
                 <p className="mt-1 text-[11px] text-muted-foreground/70 font-bold uppercase tracking-wider">
-                  {metrics.topProducts[0]?.count || 0} vendas este período
+                  {metrics.topProducts[0]?.sales || 0} vendas este período
                 </p>
               </div>
             </div>
