@@ -19,7 +19,8 @@ import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { toast } from "sonner";
-import { PageShell, PageTitle, EmptyState, GlassKpi, Panel } from "@/components/PageShell";
+import { PageShell, PageTitle, EmptyState, Panel } from "@/components/PageShell";
+import { KpiRibbon } from "@/components/KpiRibbon";
 import { cn } from "@/lib/utils";
 import type { Tables } from "@/integrations/supabase/types";
 
@@ -293,12 +294,15 @@ export default function Cupons() {
       </div>
 
       {/* ─── KPIs ─── */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-        <GlassKpi label="Total" value={String(coupons.length)} icon={Ticket} tone="primary" sub="cupons criados" delay={0} />
-        <GlassKpi label="Ativos" value={String(activeCoupons.length)} icon={Zap} tone="success" sub="prontos para uso" delay={1} />
-        <GlassKpi label="Utilizações" value={String(totalUses)} icon={Percent} tone="info" sub="vezes resgatados" delay={2} />
-        <GlassKpi label="Desconto Total" value={fmt(totalDiscount)} icon={TrendingDown} tone="warning" sub="já aplicado" delay={3} />
-      </div>
+      <KpiRibbon
+        cols={4}
+        items={[
+          { label: "Total de cupons", value: String(coupons.length), sub: `${coupons.length} ${coupons.length === 1 ? "cupom criado" : "cupons criados"} no total`, tone: "neutral", footer: "todos status" },
+          { label: "Cupons ativos", value: String(activeCoupons.length), sub: `${activeCoupons.length} prontos para uso · ${coupons.filter(c => !c.is_active).length} pausados`, tone: "success", progress: coupons.length > 0 ? (activeCoupons.length / coupons.length) * 100 : 0 },
+          { label: "Utilizações totais", value: String(totalUses), sub: `${totalUses} ${totalUses === 1 ? "vez resgatado" : "vezes resgatados"} no checkout`, tone: "info", footer: "soma de usos" },
+          { label: "Desconto concedido", value: fmt(totalDiscount), sub: totalDiscount > 0 ? "valor total já aplicado em vendas" : "nenhum desconto aplicado ainda", tone: totalDiscount > 0 ? "warning" : "muted", footer: "histórico" },
+        ]}
+      />
 
       {/* ─── Coupon Table ─── */}
       <Panel className="p-0 overflow-hidden">
