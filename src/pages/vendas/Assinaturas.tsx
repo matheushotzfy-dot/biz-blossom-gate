@@ -14,6 +14,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
 import { EmptyState } from "@/components/PageShell";
+import { KpiRibbon, PageHeader } from "@/components/KpiRibbon";
 import { cn } from "@/lib/utils";
 import { motion, AnimatePresence } from "framer-motion";
 
