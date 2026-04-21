@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 import { TransactionDetailPanel } from "@/components/transactions/TransactionDetailPanel";
 import { EmptyState } from "@/components/PageShell";
+import { KpiRibbon, PageHeader } from "@/components/KpiRibbon";
 import type { Tables } from "@/integrations/supabase/types";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -551,171 +552,79 @@ export default function Extrato() {
  : selectedPeriod.label;
 
  /* ═══════════ RENDER ═══════════ */
+ const approvalRate = dateFiltered.length > 0 ? (m.approved.length / dateFiltered.length) * 100 : 0;
+ const refundedCount = dateFiltered.filter(t => t.status === "refunded").length;
+ const refundedAmount = dateFiltered.filter(t => t.status === "refunded").reduce((a, t) => a + Number(t.amount), 0);
+
  return (
- <div className="mx-auto w-full max-w-[1440px] pb-20 px-1 relative">
+ <div className="mx-auto w-full max-w-[1440px] pb-20 space-y-5">
 
- {/* ═══════════════════════════════════════════ */}
- {/* HERO — EXTRATO */}
- {/* ═══════════════════════════════════════════ */}
- <motion.section
- initial={{ opacity: 0 }}
- animate={{ opacity: 1 }}
- transition={{ duration: 0.4 }}
- className="relative mb-10 rounded-2xl border border-border/50 bg-card/95 p-6 sm:p-8 lg:p-10"
- >
+  {/* ═══════ HEADER ═══════ */}
+  <PageHeader
+    eyebrow={
+      <>
+        <span className="h-1.5 w-1.5 rounded-full bg-success animate-pulse" />
+        <span className="text-[10px] font-bold uppercase tracking-[0.18em] text-muted-foreground/60">Extrato em tempo real</span>
+      </>
+    }
+    title="Extrato"
+    subtitle="Transações consolidadas, receita líquida e taxas do período."
+    actions={
+      <>
+        <button onClick={toggleHidden} className={cn("inline-flex h-9 w-9 items-center justify-center rounded-lg border transition-colors", hidden ? "border-foreground/30 bg-foreground/5 text-foreground" : "border-border/60 bg-card text-muted-foreground hover:text-foreground")}>
+          {hidden ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
+        </button>
+        <button onClick={handleExportCSV} className="inline-flex h-9 items-center gap-1.5 rounded-lg bg-primary px-4 text-[12px] font-bold text-primary-foreground hover:bg-primary/90 transition-colors">
+          <Download className="h-3.5 w-3.5" /> Exportar
+        </button>
+      </>
+    }
+  />
 
- <div className="relative z-10">
- {/* Top controls bar */}
- <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between mb-14">
- <div className="flex items-center gap-3">
- <motion.div
- initial={{ width: 0, opacity: 0 }}
- animate={{ width: "auto", opacity: 1 }}
- transition={{ duration: 0.6, delay: 0.2 }}
- className="inline-flex items-center gap-2.5"
- >
- <div className="h-9 w-9 rounded-xl bg-primary/10 border border-primary/15 flex items-center justify-center">
- <Receipt className="h-4.5 w-4.5 text-primary" />
- </div>
- <span className="text-[12px] font-heading uppercase tracking-[0.15em] text-foreground/80 block leading-tight">Extrato</span>
- </motion.div>
- <div className="inline-flex items-center gap-2 rounded-full border border-success/15 bg-success/5 px-3 py-1.5 shadow-[0_0_16px_rgba(34,197,94,0.12)] backdrop-blur-sm">
- <span className="relative flex h-2 w-2">
- <span className="absolute h-full w-full rounded-full bg-success pulse-ring" />
- <span className="absolute h-full w-full animate-ping rounded-full bg-success opacity-30" />
- <span className="relative h-2 w-2 rounded-full bg-success shadow-[0_0_12px_rgba(34,197,94,0.8)]" />
- </span>
- <span className="text-[8px] font-heading uppercase tracking-[0.25em] text-success">Tempo Real</span>
- </div>
- </div>
- <div className="flex flex-wrap items-center gap-1.5">
- <div className="inline-flex items-center rounded-full border border-border/60 bg-card shadow-sm p-0.5">
- {PERIODS.map((opt) => (
- <button
- key={opt.label}
- onClick={() => { setSelectedPeriod(opt); setIsCustom(false); setCustomRange(undefined); }}
- className={cn(
- "rounded-full px-3.5 py-1.5 text-[10px] font-heading transition-all duration-400 active:scale-[0.97]",
- !isCustom && selectedPeriod.label === opt.label
- ? "bg-primary text-primary-foreground shadow-[0_2px_16px_rgba(16,185,129,0.3)]"
- : "text-muted-foreground/35 hover:text-foreground/70"
- )}
- >
- {opt.label}
- </button>
- ))}
- </div>
- <Popover open={datePickerOpen} onOpenChange={setDatePickerOpen}>
- <PopoverTrigger asChild>
- <button className={cn(
- "h-8 rounded-full border px-3.5 text-[10px] font-heading transition-all active:scale-[0.97]",
- isCustom ? "border-primary/20 bg-primary/8 text-primary shadow-[0_0_10px_rgba(16,185,129,0.15)]" : "border-border/10 text-muted-foreground/30 hover:text-foreground hover:border-border/20"
- )}>
- <span className="inline-flex items-center gap-1.5">
- <CalendarDays className="h-3 w-3" />
- {isCustom && customRange?.from
- ? customRange.to ? `${format(customRange.from, "dd/MM")} – ${format(customRange.to, "dd/MM")}` : format(customRange.from, "dd/MM/yyyy")
- : "Custom"}
- </span>
- </button>
- </PopoverTrigger>
- <PopoverContent align="end" className="w-auto overflow-hidden rounded-2xl border border-border/15 bg-card/95 backdrop-blur-xl p-0 shadow-2xl">
- <Calendar mode="range" selected={customRange} onSelect={(range) => { setCustomRange(range); setIsCustom(true); if (range?.from && range?.to) setTimeout(() => setDatePickerOpen(false), 300); }} numberOfMonths={1} locale={ptBR} disabled={(date) => date > new Date()} className="p-3 pointer-events-auto" classNames={{ day_selected: "bg-primary text-primary-foreground", day_range_middle: "bg-primary/10 text-foreground", day_range_end: "bg-primary text-primary-foreground" }} />
- </PopoverContent>
- </Popover>
- <span className="w-px h-5 bg-border/8 mx-1 hidden sm:block" />
- <button onClick={toggleHidden} className={cn("h-8 w-8 rounded-full transition-all active:scale-[0.97] border border-transparent hover:border-border/10", hidden ? "text-primary bg-primary/8" : "text-muted-foreground/25 hover:text-foreground")} title={hidden ? "Mostrar" : "Ocultar"}>
- {hidden ? <EyeOff className="mx-auto h-3.5 w-3.5" /> : <Eye className="mx-auto h-3.5 w-3.5" />}
- </button>
- <button onClick={handleExportCSV} className="h-8 rounded-full px-3.5 text-[10px] font-heading text-muted-foreground/25 transition-all hover:text-foreground border border-transparent hover:border-border/10 active:scale-[0.97] inline-flex items-center gap-1.5">
- <Download className="h-3 w-3" /> Exportar
- </button>
- </div>
- </div>
+  {/* ═══════ PERIOD BAR ═══════ */}
+  <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+    <div className="flex flex-wrap items-center gap-2">
+      <div className="inline-flex items-center rounded-lg border border-border/60 bg-card p-0.5">
+        {PERIODS.map((opt) => (
+          <button key={opt.label} onClick={() => { setSelectedPeriod(opt); setIsCustom(false); setCustomRange(undefined); }}
+            className={cn("rounded-md px-3 py-1.5 text-[12px] font-bold transition-colors",
+              !isCustom && selectedPeriod.label === opt.label ? "bg-foreground text-background" : "text-muted-foreground hover:text-foreground"
+            )}>
+            {opt.label}
+          </button>
+        ))}
+      </div>
+      <Popover open={datePickerOpen} onOpenChange={setDatePickerOpen}>
+        <PopoverTrigger asChild>
+          <button className={cn("inline-flex h-8 items-center gap-1.5 rounded-lg border px-3 text-[12px] font-bold transition-colors",
+            isCustom ? "border-foreground/40 bg-foreground/5 text-foreground" : "border-border/60 bg-card text-muted-foreground hover:text-foreground"
+          )}>
+            <CalendarDays className="h-3.5 w-3.5" />
+            {isCustom && customRange?.from ? customRange.to ? `${format(customRange.from, "dd/MM")} – ${format(customRange.to, "dd/MM")}` : format(customRange.from, "dd/MM/yyyy") : "Personalizado"}
+          </button>
+        </PopoverTrigger>
+        <PopoverContent align="start" className="w-auto overflow-hidden rounded-xl border border-border bg-popover p-0">
+          <Calendar mode="range" selected={customRange} onSelect={(range) => { setCustomRange(range); setIsCustom(true); if (range?.from && range?.to) setTimeout(() => setDatePickerOpen(false), 300); }} numberOfMonths={1} locale={ptBR} disabled={(date) => date > new Date()} className="p-3 pointer-events-auto" classNames={{ day_selected: "bg-primary text-primary-foreground", day_range_middle: "bg-primary/10 text-foreground", day_range_end: "bg-primary text-primary-foreground" }} />
+        </PopoverContent>
+      </Popover>
+    </div>
+    <span className="text-[11.5px] font-semibold text-muted-foreground tabular-nums">
+      {m.uniqueCustomers} {m.uniqueCustomers === 1 ? "cliente" : "clientes"} · {approvalRate.toFixed(1)}% aprovação · {periodLabel}
+    </span>
+  </div>
 
- {/* MAIN FOCAL POINT — Net Revenue */}
- <motion.div
- initial={{ opacity: 0, y: 24 }}
- animate={{ opacity: 1, y: 0 }}
- transition={{ duration: 0.7, delay: 0.15, ease: [0.16, 1, 0.3, 1] }}
- className="mb-10"
- >
- <div className="flex items-center gap-3 mb-5">
- <div className="h-px flex-1 max-w-[48px] bg-gradient-to-r from-primary/40 to-transparent" />
- <p className="text-[10px] font-heading uppercase tracking-[0.3em] text-gradient-premium">Saldo do Período</p>
- <div className="h-px flex-1 max-w-[48px] bg-gradient-to-l from-primary/40 to-transparent" />
- </div>
- <div className="flex items-end gap-5 mb-3">
- <motion.span
- className="text-5xl sm:text-7xl lg:text-[100px] font-heading tabular-nums text-foreground leading-[0.82] [text-shadow:0_0_120px_hsl(var(--primary)/0.3),0_0_60px_hsl(var(--primary)/0.1),0_4px_24px_hsl(var(--background)/0.5)]"
- initial={{ scale: 0.95 }}
- animate={{ scale: 1 }}
- transition={{ duration: 0.5, delay: 0.3 }}
- >
- {hidden ? "R$ •••••••" : <AnimatedNumber value={m.totalNet} />}
- </motion.span>
- {!hidden && <DeltaBadge cur={m.totalNet} prev={p.totalNet} />}
- </div>
- <div className="flex flex-wrap items-center gap-2.5 mt-6">
- {[
- { icon: CalendarDays, text: periodLabel },
- { icon: Check, text: `${m.approved.length} aprovadas`, iconColor: "text-success" },
- { icon: DollarSign, text: `bruto ${hidden ? HIDE : fmtCompact(m.totalGross)}` },
- { icon: Percent, text: `taxas ${hidden ? HIDE : fmtCompact(m.totalFees)}`, iconColor: "text-destructive/60" },
- ].map((chip, i) => (
- <motion.span
- key={i}
- initial={{ opacity: 0, y: 8 }}
- animate={{ opacity: 1, y: 0 }}
- transition={{ delay: 0.4 + i * 0.08 }}
- className="inline-flex items-center gap-1.5 text-[11px] text-muted-foreground/35 font-display border border-border/60 bg-card shadow-sm rounded-full px-3.5 py-1.5"
- >
- <chip.icon className={cn("h-3 w-3", chip.iconColor)} /> {chip.text}
- </motion.span>
- ))}
- </div>
- </motion.div>
+  {/* ═══════ KPI RIBBON ═══════ */}
+  <KpiRibbon
+    items={[
+      { label: "Receita líquida", value: hidden ? HIDE : fmtCompact(m.totalNet), sub: hidden ? "valores ocultos" : `Bruto ${fmtCompact(m.totalGross)} · Taxas ${fmtCompact(m.totalFees)}`, tone: "success", delta: { cur: m.totalNet, prev: p.totalNet } },
+      { label: "Faturamento bruto", value: hidden ? HIDE : fmtCompact(m.totalGross), sub: `${m.approved.length} ${m.approved.length === 1 ? "venda aprovada" : "vendas aprovadas"}`, tone: "info", delta: { cur: m.totalGross, prev: p.totalGross } },
+      { label: "Ticket médio", value: hidden ? HIDE : fmtCompact(m.avgTicket), sub: `${m.uniqueCustomers} ${m.uniqueCustomers === 1 ? "cliente único" : "clientes únicos"}`, tone: "neutral", footer: periodLabel },
+      { label: "Vendas aprovadas", value: hidden ? HIDE : String(m.approved.length), sub: `${dateFiltered.length} tentativas · ${approvalRate.toFixed(1)}% aprovação`, tone: "neutral", progress: approvalRate },
+      { label: "Total em taxas", value: hidden ? HIDE : fmtCompact(m.totalFees), sub: m.totalGross > 0 ? `${((m.totalFees / m.totalGross) * 100).toFixed(2)}% sobre o bruto` : "sem volume no período", tone: "warning", footer: "deduzido do bruto" },
+      { label: "Reembolsos", value: hidden ? HIDE : String(refundedCount), sub: refundedCount > 0 ? `${fmtCompact(refundedAmount)} devolvidos` : "nenhum reembolso", tone: refundedCount > 0 ? "destructive" : "muted", footer: periodLabel },
+    ]}
+  />
 
- {/* Executive Strip */}
- <div className="grid grid-cols-2 lg:grid-cols-4 gap-3.5">
- {[
- { label: "Receita Líquida", value: hidden ? HIDE : fmt(m.totalNet), color: "primary", icon: DollarSign },
- { label: "Faturamento Bruto", value: hidden ? HIDE : fmt(m.totalGross), color: "info", icon: Banknote },
- { label: "Ticket Médio", value: hidden ? HIDE : fmt(m.avgTicket), color: "warning", icon: Receipt },
- { label: "Clientes Únicos", value: hidden ? HIDE : String(m.uniqueCustomers), color: "success", icon: Users },
- ].map((item, idx) => (
- <motion.div
- key={item.label}
- initial={{ opacity: 0, y: 20 }}
- animate={{ opacity: 1, y: 0 }}
- transition={{ duration: 0.5, delay: 0.35 + idx * 0.1, ease: [0.16, 1, 0.3, 1] }}
- className="group relative rounded-2xl border border-border/60 bg-card shadow-sm p-5 overflow-hidden"
- >
- <div className={cn("absolute -top-20 -right-20 w-40 h-40 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-1000 blur-[50px] pointer-events-none", `bg-${item.color}/10`)} />
- <div className="relative z-10 flex items-start justify-between">
- <div>
- <p className="text-[9px] font-heading uppercase tracking-[0.22em] text-muted-foreground/30 mb-2.5">{item.label}</p>
- <p className={cn("text-2xl font-heading tabular-nums tracking-tight leading-none text-foreground")}>{item.value}</p>
- </div>
- <div className={cn("h-11 w-11 rounded-xl flex items-center justify-center border transition-all duration-300 group-hover:scale-110", `bg-${item.color}/8 border-${item.color}/10 text-${item.color}/50`)}>
- <item.icon className="h-5 w-5" />
- </div>
- </div>
- </motion.div>
- ))}
- </div>
- </div>
- </motion.section>
-
- {/* ═══════════════════════════════════════════ */}
- {/* KPI TILES */}
- {/* ═══════════════════════════════════════════ */}
- <section className="grid grid-cols-2 lg:grid-cols-4 gap-3.5 mb-10">
- <KpiTile label="Faturamento Bruto" value={m.totalGross} icon={Banknote} delta={{ cur: m.totalGross, prev: p.totalGross }} sparkData={metrics.dailyGrossArr} hidden={hidden} color="primary" delay={0} />
- <KpiTile label="Vendas Aprovadas" value={m.approved.length} icon={ShoppingCart} delta={{ cur: m.approved.length, prev: p.approved.length }} sparkData={metrics.dailyCountArr} hidden={hidden} color="success" delay={0.05} formatter={(v) => Math.round(v).toString()} />
- <KpiTile label="Clientes Únicos" value={m.uniqueCustomers} icon={Users} hidden={hidden} color="info" delay={0.1} formatter={(v) => Math.round(v).toString()} />
- <KpiTile label="Total em Taxas" value={m.totalFees} icon={Percent} hidden={hidden} color="destructive" delay={0.15} />
- </section>
 
  {/* ═══════════════════════════════════════════ */}
  {/* REVENUE CHART */}

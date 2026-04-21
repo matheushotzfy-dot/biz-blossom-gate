@@ -14,6 +14,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
 import { EmptyState } from "@/components/PageShell";
+import { KpiRibbon, PageHeader } from "@/components/KpiRibbon";
 import { cn } from "@/lib/utils";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -123,139 +124,85 @@ export default function Assinaturas() {
  : subs.filter(s => s.subscriber_email.toLowerCase().includes(search.toLowerCase()) || (s.subscriber_name || "").toLowerCase().includes(search.toLowerCase()));
 
  return (
- <div className="mx-auto w-full max-w-[1440px] pb-20 px-1 relative">
- {/* ════════════════════════════════════════════════════════════════ */}
- {/* HERO */}
- {/* ════════════════════════════════════════════════════════════════ */}
- <motion.section
- initial={{ opacity: 0 }}
- animate={{ opacity: 1 }}
- transition={{ duration: 0.6 }}
- className="relative mb-10 rounded-3xl p-6 sm:p-8 lg:p-10 border border-border/60 bg-card shadow-sm"
- >
- <div className="absolute -inset-16 pointer-events-none">
- <motion.div animate={{ x: [0, 30, 0], y: [0, -20, 0] }} transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }} className="absolute top-0 -left-16 w-[600px] h-[600px] bg-primary/8 rounded-full blur-[180px]" />
- <motion.div animate={{ x: [0, -20, 0], y: [0, 30, 0] }} transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }} className="absolute bottom-0 -right-16 w-[500px] h-[500px] bg-info/6 rounded-full blur-[160px]" />
- <motion.div animate={{ scale: [1, 1.15, 1], opacity: [0.35, 0.55, 0.35] }} transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }} className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-primary/5 rounded-full blur-[200px]" />
- <div className="absolute inset-16 opacity-[0.02]" style={{ backgroundImage: "radial-gradient(hsl(var(--foreground)) 1px, transparent 1px)", backgroundSize: "24px 24px" }} />
- </div>
+ <div className="mx-auto w-full max-w-[1440px] pb-20 space-y-5">
+  {/* ═══════ HEADER ═══════ */}
+  <PageHeader
+    eyebrow={
+      <>
+        <span className="h-1.5 w-1.5 rounded-full bg-success animate-pulse" />
+        <span className="text-[10px] font-bold uppercase tracking-[0.18em] text-muted-foreground/60">
+          {activeSubs.length} {activeSubs.length === 1 ? "assinatura ativa" : "assinaturas ativas"}
+        </span>
+      </>
+    }
+    title="Assinaturas"
+    subtitle="Receita recorrente, planos e gestão de assinantes."
+    actions={
+      <Dialog open={showCreate} onOpenChange={setShowCreate}>
+        <DialogTrigger asChild>
+          <button className="inline-flex h-9 items-center gap-1.5 rounded-lg bg-primary px-4 text-[12px] font-bold text-primary-foreground hover:bg-primary/90 transition-colors">
+            <Plus className="h-3.5 w-3.5" /> Novo plano
+          </button>
+        </DialogTrigger>
+        <DialogContent className="max-w-md rounded-2xl border border-border/40 bg-card/95 backdrop-blur-xl p-0 overflow-hidden">
+          <div className="px-6 pt-6 pb-4 border-b border-border/20">
+            <DialogHeader>
+              <DialogTitle className="font-display text-lg flex items-center gap-2.5">
+                <div className="h-10 w-10 rounded-xl bg-primary/10 flex items-center justify-center ring-1 ring-primary/15">
+                  <Zap className="h-5 w-5 text-primary" />
+                </div>
+                Criar Plano de Assinatura
+              </DialogTitle>
+            </DialogHeader>
+          </div>
+          <div className="p-6 space-y-4">
+            <div><Label className="text-[10px] text-muted-foreground/60 uppercase tracking-wider font-bold">Nome do Plano</Label><Input value={fName} onChange={e => setFName(e.target.value)} placeholder="Ex: Plano Premium" className="mt-1.5 rounded-xl h-11" /></div>
+            <div><Label className="text-[10px] text-muted-foreground/60 uppercase tracking-wider font-bold">Descrição (opcional)</Label><Input value={fDesc} onChange={e => setFDesc(e.target.value)} placeholder="Acesso completo ao curso..." className="mt-1.5 rounded-xl h-11" /></div>
+            <div className="grid grid-cols-2 gap-3">
+              <div><Label className="text-[10px] text-muted-foreground/60 uppercase tracking-wider font-bold">Preço (R$)</Label><Input value={fPrice} onChange={e => setFPrice(e.target.value)} placeholder="49,90" className="mt-1.5 rounded-xl h-11" /></div>
+              <div>
+                <Label className="text-[10px] text-muted-foreground/60 uppercase tracking-wider font-bold">Intervalo</Label>
+                <Select value={fInterval} onValueChange={setFInterval}>
+                  <SelectTrigger className="mt-1.5 rounded-xl h-11"><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="daily">Diário</SelectItem>
+                    <SelectItem value="weekly">Semanal</SelectItem>
+                    <SelectItem value="monthly">Mensal</SelectItem>
+                    <SelectItem value="yearly">Anual</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <div><Label className="text-[10px] text-muted-foreground/60 uppercase tracking-wider font-bold">Dias de trial grátis</Label><Input type="number" value={fTrial} onChange={e => setFTrial(e.target.value)} min={0} max={365} className="mt-1.5 rounded-xl h-11" /></div>
+            {products && products.length > 0 && (
+              <div>
+                <Label className="text-[10px] text-muted-foreground/60 uppercase tracking-wider font-bold">Vincular a produto (opcional)</Label>
+                <Select value={fProduct} onValueChange={setFProduct}>
+                  <SelectTrigger className="mt-1.5 rounded-xl h-11"><SelectValue placeholder="Nenhum" /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="none">Nenhum</SelectItem>
+                    {products.map(p => <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>)}
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
+            <Button onClick={handleCreate} className="w-full rounded-xl font-display font-bold h-11 shadow-lg shadow-primary/20">Criar Plano</Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+    }
+  />
 
- <div className="relative z-10">
- {/* Top bar */}
- <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between mb-10">
- <div className="flex items-center gap-3">
- <div className="h-9 w-9 rounded-xl bg-primary/10 border border-primary/15 flex items-center justify-center">
- <RefreshCw className="h-4.5 w-4.5 text-primary" />
- </div>
- <span className="text-[12px] font-heading uppercase tracking-[0.15em] text-foreground/80">Assinaturas</span>
- <div className="inline-flex items-center gap-2 rounded-full border border-success/15 bg-success/5 px-3 py-1.5 backdrop-blur-sm">
- <span className="relative flex h-2 w-2">
- <span className="absolute h-full w-full animate-ping rounded-full bg-success opacity-30" />
- <span className="relative h-2 w-2 rounded-full bg-success" />
- </span>
- <span className="text-[8px] font-heading uppercase tracking-[0.25em] text-success">{activeSubs.length} Ativo{activeSubs.length !== 1 ? "s" : ""}</span>
- </div>
- </div>
- <Dialog open={showCreate} onOpenChange={setShowCreate}>
- <DialogTrigger asChild>
- <button className="h-8 px-4 rounded-full text-[10px] font-heading flex items-center gap-1.5 gradient-primary text-primary-foreground shadow-lg shadow-primary/20 hover:shadow-xl hover:shadow-primary/25 active:scale-[0.97] transition-all duration-300">
- <Plus className="h-3.5 w-3.5" /> Novo Plano
- </button>
- </DialogTrigger>
- <DialogContent className="max-w-md rounded-2xl border border-border/40 bg-card/95 backdrop-blur-xl p-0 overflow-hidden">
- <div className="px-6 pt-6 pb-4 border-b border-border/20">
- <DialogHeader>
- <DialogTitle className="font-display text-lg flex items-center gap-2.5">
- <div className="h-10 w-10 rounded-xl bg-primary/10 flex items-center justify-center ring-1 ring-primary/15">
- <Zap className="h-5 w-5 text-primary" />
- </div>
- Criar Plano de Assinatura
- </DialogTitle>
- </DialogHeader>
- </div>
- <div className="p-6 space-y-4">
- <div><Label className="text-[10px] text-muted-foreground/60 uppercase tracking-wider font-bold">Nome do Plano</Label><Input value={fName} onChange={e => setFName(e.target.value)} placeholder="Ex: Plano Premium" className="mt-1.5 rounded-xl h-11" /></div>
- <div><Label className="text-[10px] text-muted-foreground/60 uppercase tracking-wider font-bold">Descrição (opcional)</Label><Input value={fDesc} onChange={e => setFDesc(e.target.value)} placeholder="Acesso completo ao curso..." className="mt-1.5 rounded-xl h-11" /></div>
- <div className="grid grid-cols-2 gap-3">
- <div><Label className="text-[10px] text-muted-foreground/60 uppercase tracking-wider font-bold">Preço (R$)</Label><Input value={fPrice} onChange={e => setFPrice(e.target.value)} placeholder="49,90" className="mt-1.5 rounded-xl h-11" /></div>
- <div>
- <Label className="text-[10px] text-muted-foreground/60 uppercase tracking-wider font-bold">Intervalo</Label>
- <Select value={fInterval} onValueChange={setFInterval}>
- <SelectTrigger className="mt-1.5 rounded-xl h-11"><SelectValue /></SelectTrigger>
- <SelectContent>
- <SelectItem value="daily">Diário</SelectItem>
- <SelectItem value="weekly">Semanal</SelectItem>
- <SelectItem value="monthly">Mensal</SelectItem>
- <SelectItem value="yearly">Anual</SelectItem>
- </SelectContent>
- </Select>
- </div>
- </div>
- <div><Label className="text-[10px] text-muted-foreground/60 uppercase tracking-wider font-bold">Dias de trial grátis</Label><Input type="number" value={fTrial} onChange={e => setFTrial(e.target.value)} min={0} max={365} className="mt-1.5 rounded-xl h-11" /></div>
- {products && products.length > 0 && (
- <div>
- <Label className="text-[10px] text-muted-foreground/60 uppercase tracking-wider font-bold">Vincular a produto (opcional)</Label>
- <Select value={fProduct} onValueChange={setFProduct}>
- <SelectTrigger className="mt-1.5 rounded-xl h-11"><SelectValue placeholder="Nenhum" /></SelectTrigger>
- <SelectContent>
- <SelectItem value="none">Nenhum</SelectItem>
- {products.map(p => <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>)}
- </SelectContent>
- </Select>
- </div>
- )}
- <Button onClick={handleCreate} className="w-full rounded-xl font-display font-bold h-11 shadow-lg shadow-primary/20">Criar Plano</Button>
- </div>
- </DialogContent>
- </Dialog>
- </div>
-
- {/* Main stats */}
- <motion.div initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7, delay: 0.15 }} className="mb-8">
- <p className="text-[10px] font-heading uppercase tracking-[0.2em] text-muted-foreground/40 mb-3">Receita Recorrente Mensal</p>
- <div className="flex items-end gap-4 mb-4">
- <span className="text-5xl sm:text-6xl lg:text-7xl font-heading tabular-nums text-foreground leading-[0.85] [text-shadow:0_0_80px_hsl(var(--primary)/0.2)]">
- {fmt(mrr)}
- </span>
- <span className="text-lg font-heading text-muted-foreground/30 mb-1">/ mês</span>
- </div>
- <div className="flex flex-wrap items-center gap-2 mt-4">
- <span className="inline-flex items-center gap-1.5 text-[11px] text-muted-foreground/35 font-display border border-border/60 bg-card shadow-sm rounded-full px-3 py-1.5">
- <Zap className="h-3 w-3 text-primary" /> {plans.filter(p => p.is_active).length} planos ativos
- </span>
- <span className="inline-flex items-center gap-1.5 text-[11px] text-muted-foreground/35 font-display border border-border/60 bg-card shadow-sm rounded-full px-3 py-1.5">
- <Users className="h-3 w-3 text-success" /> {activeSubs.length} assinantes
- </span>
- <span className="inline-flex items-center gap-1.5 text-[11px] text-muted-foreground/35 font-display border border-border/60 bg-card shadow-sm rounded-full px-3 py-1.5">
- <TrendingUp className="h-3 w-3" /> {subs.length} total
- </span>
- </div>
- </motion.div>
-
- {/* KPI strip */}
- <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
- {[
- { label: "Planos Ativos", value: String(plans.filter(p => p.is_active).length), color: "primary", icon: Zap },
- { label: "Assinantes Ativos", value: String(activeSubs.length), color: "success", icon: Users },
- { label: "MRR", value: fmt(mrr), color: "info", icon: DollarSign },
- { label: "Total Assinaturas", value: String(subs.length), color: "warning", icon: TrendingUp },
- ].map((item, idx) => (
- <motion.div key={item.label} initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4, delay: 0.25 + idx * 0.08 }} className="group rounded-2xl border border-border/60 bg-card shadow-sm p-4 overflow-hidden relative">
- <div className={cn("absolute -top-16 -right-16 w-32 h-32 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-700 blur-[40px] pointer-events-none", `bg-${item.color}/10`)} />
- <div className="relative z-10 flex items-start justify-between">
- <div>
- <p className="text-[9px] font-heading uppercase tracking-[0.2em] text-muted-foreground/30 mb-2">{item.label}</p>
- <p className={cn("text-xl font-heading tabular-nums tracking-tight leading-none", item.color === "primary" ? "text-foreground" : `text-${item.color}`)}>{item.value}</p>
- </div>
- <div className={cn("h-9 w-9 rounded-xl flex items-center justify-center border transition-all duration-300 group-hover:scale-110", `bg-${item.color}/8 border-${item.color}/10 text-${item.color}/50`)}>
- <item.icon className="h-4 w-4" />
- </div>
- </div>
- </motion.div>
- ))}
- </div>
- </div>
- </motion.section>
+  {/* ═══════ KPI RIBBON ═══════ */}
+  <KpiRibbon
+    cols={4}
+    items={[
+      { label: "Receita recorrente (MRR)", value: fmt(mrr), sub: `Projeção mensal · ${activeSubs.length} ${activeSubs.length === 1 ? "assinante ativo" : "assinantes ativos"}`, tone: "success", footer: "MRR consolidado" },
+      { label: "Planos ativos", value: String(plans.filter(p => p.is_active).length), sub: `${plans.length} ${plans.length === 1 ? "plano criado" : "planos criados"} no total`, tone: "primary", progress: plans.length > 0 ? (plans.filter(p => p.is_active).length / plans.length) * 100 : 0 },
+      { label: "Assinantes ativos", value: String(activeSubs.length), sub: `${subs.filter(s => s.status === "trialing").length} em trial · ${subs.filter(s => s.status === "active").length} pagantes`, tone: "info", footer: "ativos + trial" },
+      { label: "Total de assinaturas", value: String(subs.length), sub: `${subs.filter(s => s.status === "canceled").length} canceladas · ${subs.filter(s => s.status === "past_due").length} atrasadas`, tone: subs.filter(s => s.status === "past_due").length > 0 ? "warning" : "neutral", footer: "histórico" },
+    ]}
+  />
 
  {/* ─── Tab Navigation ─── */}
  <div className="flex items-center gap-1 p-1 rounded-2xl border border-border/60 bg-card shadow-sm w-fit mb-6">

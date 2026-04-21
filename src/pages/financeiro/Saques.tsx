@@ -15,6 +15,7 @@ import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { toast } from "sonner";
 import type { Tables } from "@/integrations/supabase/types";
+import { KpiRibbon, PageHeader } from "@/components/KpiRibbon";
 import { cn } from "@/lib/utils";
 import { motion, AnimatePresence } from "framer-motion";
 import { AreaChart, Area, ResponsiveContainer, Tooltip as ReTooltip, XAxis, YAxis, CartesianGrid } from "recharts";
@@ -179,228 +180,161 @@ export default function Saques() {
 
  /* ═══════════ RENDER ═══════════ */
  return (
- <div className="mx-auto w-full max-w-[1440px] pb-20 px-1 relative">
- {/* ════════════════════════════════════════════════════════════════ */}
- {/* HERO */}
- {/* ════════════════════════════════════════════════════════════════ */}
- <motion.section
- initial={{ opacity: 0 }}
- animate={{ opacity: 1 }}
- transition={{ duration: 0.6 }}
- className="relative mb-10 rounded-3xl p-6 sm:p-8 lg:p-10 border border-border/60 bg-card shadow-sm"
- >
- <div className="absolute -inset-16 pointer-events-none">
- <motion.div animate={{ x: [0, 30, 0], y: [0, -20, 0] }} transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }} className="absolute top-0 -left-16 w-[600px] h-[600px] bg-primary/8 rounded-full blur-[180px]" />
- <motion.div animate={{ x: [0, -20, 0], y: [0, 30, 0] }} transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }} className="absolute bottom-0 -right-16 w-[500px] h-[500px] bg-info/6 rounded-full blur-[160px]" />
- <motion.div animate={{ scale: [1, 1.15, 1], opacity: [0.35, 0.55, 0.35] }} transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }} className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-primary/5 rounded-full blur-[200px]" />
- <motion.div animate={{ opacity: [0.4, 0.65, 0.4] }} transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }} className="absolute -bottom-20 left-[10%] right-[10%] h-[200px] bg-primary/6 rounded-full blur-[120px]" />
- <div className="absolute inset-16 opacity-[0.02]" style={{ backgroundImage: "radial-gradient(hsl(var(--foreground)) 1px, transparent 1px)", backgroundSize: "24px 24px" }} />
- </div>
+ <div className="mx-auto w-full max-w-[1440px] pb-20 space-y-5">
 
- <div className="relative z-10">
- {/* Address warning */}
- {!hasAddress && (
- <motion.div
- initial={{ opacity: 0, y: -8 }}
- animate={{ opacity: 1, y: 0 }}
- className="mb-6 flex items-center gap-3 p-4 rounded-2xl bg-warning/10 ring-1 ring-warning/20 cursor-pointer hover:bg-warning/15 transition-all"
- onClick={() => navigate("/perfil")}
- >
- <div className="h-10 w-10 rounded-xl bg-warning/15 flex items-center justify-center shrink-0">
- <MapPin className="h-5 w-5 text-warning" />
- </div>
- <div className="flex-1 min-w-0">
- <p className="text-[12px] font-display font-bold text-warning">Endereço não cadastrado</p>
- <p className="text-[10px] text-warning/60">Preencha seu endereço no Perfil para realizar saques normalmente.</p>
- </div>
- <AlertTriangle className="h-5 w-5 text-warning/60 shrink-0" />
- </motion.div>
- )}
- {/* Top bar */}
- <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between mb-10">
- <div className="flex items-center gap-3">
- <div className="h-9 w-9 rounded-xl bg-primary/10 border border-primary/15 flex items-center justify-center">
- <Wallet className="h-4.5 w-4.5 text-primary" />
- </div>
- <span className="text-[12px] font-heading uppercase tracking-[0.15em] text-foreground/80">Saques PIX</span>
- {m.pending.length > 0 && (
- <div className="inline-flex items-center gap-2 rounded-full border border-warning/15 bg-warning/5 px-3 py-1.5 shadow-[0_0_16px_rgba(234,179,8,0.12)] backdrop-blur-sm">
- <span className="relative flex h-2 w-2">
- <span className="absolute h-full w-full animate-ping rounded-full bg-warning opacity-30" />
- <span className="relative h-2 w-2 rounded-full bg-warning shadow-[0_0_12px_rgba(234,179,8,0.8)]" />
- </span>
- <span className="text-[8px] font-heading uppercase tracking-[0.25em] text-warning">{m.pending.length} Pendente{m.pending.length > 1 ? "s" : ""}</span>
- </div>
- )}
- </div>
- <div className="flex flex-wrap items-center gap-1.5">
- <div className="inline-flex items-center rounded-full border border-border/60 bg-card shadow-sm p-0.5">
- {PERIODS.map((opt) => (
- <button
- key={opt.label}
- onClick={() => setSelectedPeriod(opt)}
- className={cn(
- "rounded-full px-3.5 py-1.5 text-[10px] font-heading transition-all duration-400 active:scale-[0.97]",
- selectedPeriod.label === opt.label
- ? "bg-primary text-primary-foreground shadow-[0_2px_16px_rgba(16,185,129,0.3)]"
- : "text-muted-foreground/35 hover:text-foreground/70"
- )}
- >
- {opt.label}
- </button>
- ))}
- </div>
- <span className="w-px h-5 bg-border/8 mx-1 hidden sm:block" />
- <button onClick={toggleHidden} className={cn("h-8 w-8 rounded-full transition-all active:scale-[0.97] border border-transparent hover:border-border/10", hidden ? "text-primary bg-primary/8" : "text-muted-foreground/25 hover:text-foreground")} title={hidden ? "Mostrar" : "Ocultar"}>
- {hidden ? <EyeOff className="mx-auto h-3.5 w-3.5" /> : <Eye className="mx-auto h-3.5 w-3.5" />}
- </button>
- {!hasAddress ? (
- <button
- onClick={() => {
- toast.info("Preencha seu endereço primeiro para realizar saques");
- navigate("/perfil");
- }}
- className="h-8 px-4 rounded-full text-[10px] font-heading flex items-center gap-1.5 bg-warning text-warning-foreground shadow-lg shadow-warning/20 hover:shadow-xl active:scale-[0.97] transition-all duration-300"
- >
- <MapPin className="h-3.5 w-3.5" /> Preencher Endereço
- </button>
- ) : (
- <Dialog open={open} onOpenChange={setOpen}>
- <DialogTrigger asChild>
- <button className="h-8 px-4 rounded-full text-[10px] font-heading flex items-center gap-1.5 gradient-primary text-primary-foreground shadow-lg shadow-primary/20 hover:shadow-xl hover:shadow-primary/25 active:scale-[0.97] transition-all duration-300">
- <Plus className="h-3.5 w-3.5" /> Novo Saque
- </button>
- </DialogTrigger>
- <DialogContent className="max-w-md rounded-2xl border border-border/30 bg-card/95 backdrop-blur-xl p-0 overflow-hidden shadow-2xl">
- <div className="px-6 pt-6 pb-4 border-b border-border/15">
- <DialogHeader>
- <DialogTitle className="font-display font-black text-lg tracking-[-0.03em] flex items-center gap-2.5">
- <div className="h-10 w-10 rounded-xl bg-primary/10 ring-1 ring-primary/15 flex items-center justify-center">
- <ArrowDownToLine className="h-4 w-4 text-primary" />
- </div>
- Solicitar Saque
- </DialogTitle>
- </DialogHeader>
- </div>
- <form onSubmit={handleSubmit} className="space-y-4 p-6">
- <div className="relative rounded-2xl bg-card/50 backdrop-blur-xl border border-border/20 p-4 overflow-hidden hover:border-border/30 transition-all duration-300">
- <div className="absolute left-0 top-0 bottom-0 w-[3px] rounded-full bg-primary" />
- <div className="pl-1.5">
- <Label className="text-[9px] font-display font-bold text-muted-foreground/40 uppercase tracking-[0.18em]">Valor do saque (R$)</Label>
- <Input type="number" step="0.01" min="1" value={amount} onChange={(e) => setAmount(e.target.value)} placeholder="0,00" required className="mt-2 h-14 text-xl font-display font-black rounded-xl bg-muted/5 border-border/15 focus:ring-2 focus:ring-primary/10" />
- <div className="flex items-center justify-between mt-2.5">
- <p className="text-[10px] font-display font-semibold text-muted-foreground/30">Taxa fixa de saque</p>
- <p className="text-[11px] font-display font-bold text-warning tabular-nums">- R$ 5,00</p>
- </div>
- {amount && parseFloat(amount) > 5 && (
- <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} className="mt-3 p-4 rounded-xl bg-primary/5 border border-primary/10 overflow-hidden">
- <div className="flex items-center justify-between">
- <div className="flex items-center gap-2">
- <div className="h-6 w-6 rounded-lg bg-primary/10 ring-1 ring-primary/15 flex items-center justify-center"><Zap className="h-3 w-3 text-primary" /></div>
- <span className="text-[11px] text-muted-foreground/50 font-display font-semibold">Você receberá</span>
- </div>
- <span className="text-lg font-display font-black text-primary tabular-nums">{fmt(parseFloat(amount) - 5)}</span>
- </div>
- </motion.div>
- )}
- </div>
- </div>
- <div className="relative rounded-2xl bg-card/50 backdrop-blur-xl border border-border/20 p-4 overflow-hidden hover:border-border/30 transition-all duration-300">
- <div className="absolute left-0 top-0 bottom-0 w-[3px] rounded-full bg-success" />
- <div className="pl-1.5">
- <Label className="text-[9px] font-display font-bold text-muted-foreground/40 uppercase tracking-[0.18em]">Chave PIX</Label>
- {pixKeys.length > 0 ? (
- <div className="mt-2.5 space-y-1.5">
- {pixKeys.map((pk) => {
- const isSelected = (selectedPixKeyId || pixKeys[0]?.id) === pk.id;
- return (
- <button key={pk.id} type="button" onClick={() => setSelectedPixKeyId(pk.id)} className={cn(
- "w-full flex items-center gap-3 px-3.5 py-3 rounded-xl border transition-all duration-300 text-left",
- isSelected ? "border-primary/20 bg-primary/5 ring-1 ring-primary/10" : "border-border/15 bg-muted/5 hover:border-border/30"
- )}>
- <div className={cn("h-8 w-8 rounded-lg ring-1 flex items-center justify-center shrink-0", isSelected ? "bg-primary/10 ring-primary/15" : "bg-muted/10 ring-border/15")}>
- <Key className={cn("h-3.5 w-3.5", isSelected ? "text-primary" : "text-muted-foreground/30")} />
- </div>
- <div className="flex-1 min-w-0">
- <p className={cn("text-[10px] font-display font-bold", isSelected ? "text-primary" : "text-muted-foreground/40")}>{pixKeyTypeLabels[pk.key_type]}</p>
- <p className={cn("font-mono text-[12px] font-bold truncate", isSelected ? "text-foreground" : "text-foreground/50")}>{pk.key_value}</p>
- </div>
- <div className={cn("h-5 w-5 rounded-full border-2 flex items-center justify-center shrink-0", isSelected ? "border-primary bg-primary" : "border-border/30")}>
- {isSelected && <CheckCircle2 className="h-3 w-3 text-primary-foreground" />}
- </div>
- </button>
- );
- })}
- </div>
- ) : (
- <div className="mt-2.5 p-3.5 rounded-xl border border-destructive/10 bg-destructive/5">
- <p className="text-[11px] text-destructive font-display font-bold flex items-center gap-2"><XCircle className="h-3.5 w-3.5" /> Cadastre uma chave PIX em Dados Bancários</p>
- </div>
- )}
- </div>
- </div>
- <button type="submit" disabled={pixKeys.length === 0} className="w-full h-11 rounded-xl text-[12px] font-display font-bold flex items-center justify-center gap-2 gradient-primary text-primary-foreground shadow-lg shadow-primary/20 hover:shadow-xl active:scale-[0.985] transition-all duration-300 disabled:opacity-40 disabled:cursor-not-allowed disabled:shadow-none">
- <ArrowDownToLine className="h-4 w-4" /> Solicitar Saque
- </button>
- </form>
- </DialogContent>
- </Dialog>
- )}
- </div>
- </div>
+  {/* Address warning */}
+  {!hasAddress && (
+    <div onClick={() => navigate("/perfil")} className="flex items-center gap-3 p-4 rounded-2xl bg-warning/10 ring-1 ring-warning/20 cursor-pointer hover:bg-warning/15 transition-all">
+      <div className="h-10 w-10 rounded-xl bg-warning/15 flex items-center justify-center shrink-0">
+        <MapPin className="h-5 w-5 text-warning" />
+      </div>
+      <div className="flex-1 min-w-0">
+        <p className="text-[12px] font-display font-bold text-warning">Endereço não cadastrado</p>
+        <p className="text-[10px] text-warning/60">Preencha seu endereço no Perfil para realizar saques normalmente.</p>
+      </div>
+      <AlertTriangle className="h-5 w-5 text-warning/60 shrink-0" />
+    </div>
+  )}
 
- {/* MAIN FOCAL — Saldo Disponível */}
- <motion.div initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7, delay: 0.1, ease: [0.16, 1, 0.3, 1] }} className="mb-8">
- <p className="text-[10px] font-heading uppercase tracking-[0.2em] text-muted-foreground/40 mb-3">Saldo Disponível para Saque</p>
- <div className="flex items-end gap-4 mb-4">
- <span className={cn("text-5xl sm:text-6xl lg:text-7xl font-heading tabular-nums leading-[0.85] [text-shadow:0_0_80px_hsl(var(--primary)/0.2)]", availableBalance > 0 ? "text-primary" : "text-muted-foreground/40")}>
- {hidden ? "R$ •••••••" : fmt(availableBalance)}
- </span>
- </div>
- <div className="flex flex-wrap items-center gap-2 mt-4">
- <span className="inline-flex items-center gap-1.5 text-[11px] text-muted-foreground/35 font-display border border-border/60 bg-card shadow-sm rounded-full px-3 py-1.5">
- <Shield className="h-3 w-3 text-primary/50" /> Atualizado em tempo real
- </span>
- <span className="inline-flex items-center gap-1.5 text-[11px] text-muted-foreground/35 font-display border border-border/60 bg-card shadow-sm rounded-full px-3 py-1.5">
- <CheckCircle2 className="h-3 w-3 text-success" /> {m.approved.length} aprovados · {hidden ? HIDE : fmtCompact(m.totalApproved)} sacado
- </span>
- <span className="inline-flex items-center gap-1.5 text-[11px] text-muted-foreground/35 font-display border border-border/60 bg-card shadow-sm rounded-full px-3 py-1.5">
- <Banknote className="h-3 w-3" /> solicitado {hidden ? HIDE : fmtCompact(m.totalRequested)}
- </span>
- {m.pending.length > 0 && (
- <span className="inline-flex items-center gap-2 text-[11px] text-muted-foreground/35 font-display border border-border/60 bg-card shadow-sm rounded-full px-3 py-1.5">
- <span className="relative flex h-1.5 w-1.5"><span className="absolute h-full w-full animate-ping rounded-full bg-warning opacity-40" /><span className="relative h-1.5 w-1.5 rounded-full bg-warning" /></span>
- {m.pending.length} pendente{m.pending.length > 1 ? "s" : ""} · {hidden ? HIDE : fmtCompact(m.totalPending)}
- </span>
- )}
- </div>
- </motion.div>
+  {/* ═══════ HEADER ═══════ */}
+  <PageHeader
+    eyebrow={
+      <>
+        <span className={cn("h-1.5 w-1.5 rounded-full", m.pending.length > 0 ? "bg-warning animate-pulse" : "bg-success animate-pulse")} />
+        <span className="text-[10px] font-bold uppercase tracking-[0.18em] text-muted-foreground/60">
+          {m.pending.length > 0 ? `${m.pending.length} ${m.pending.length === 1 ? "saque pendente" : "saques pendentes"}` : "Sem saques pendentes"}
+        </span>
+      </>
+    }
+    title="Saques PIX"
+    subtitle="Solicite saques, acompanhe aprovação e taxas em tempo real."
+    actions={
+      <>
+        <button onClick={toggleHidden} className={cn("inline-flex h-9 w-9 items-center justify-center rounded-lg border transition-colors", hidden ? "border-foreground/30 bg-foreground/5 text-foreground" : "border-border/60 bg-card text-muted-foreground hover:text-foreground")}>
+          {hidden ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
+        </button>
+        {!hasAddress ? (
+          <button onClick={() => { toast.info("Preencha seu endereço primeiro para realizar saques"); navigate("/perfil"); }} className="inline-flex h-9 items-center gap-1.5 rounded-lg bg-warning px-4 text-[12px] font-bold text-warning-foreground hover:opacity-90 transition-opacity">
+            <MapPin className="h-3.5 w-3.5" /> Preencher endereço
+          </button>
+        ) : (
+          <Dialog open={open} onOpenChange={setOpen}>
+            <DialogTrigger asChild>
+              <button className="inline-flex h-9 items-center gap-1.5 rounded-lg bg-primary px-4 text-[12px] font-bold text-primary-foreground hover:bg-primary/90 transition-colors">
+                <Plus className="h-3.5 w-3.5" /> Novo saque
+              </button>
+            </DialogTrigger>
+            <DialogContent className="max-w-md rounded-2xl border border-border/30 bg-card/95 backdrop-blur-xl p-0 overflow-hidden shadow-2xl">
+              <div className="px-6 pt-6 pb-4 border-b border-border/15">
+                <DialogHeader>
+                  <DialogTitle className="font-display font-black text-lg tracking-[-0.03em] flex items-center gap-2.5">
+                    <div className="h-10 w-10 rounded-xl bg-primary/10 ring-1 ring-primary/15 flex items-center justify-center">
+                      <ArrowDownToLine className="h-4 w-4 text-primary" />
+                    </div>
+                    Solicitar Saque
+                  </DialogTitle>
+                </DialogHeader>
+              </div>
+              <form onSubmit={handleSubmit} className="space-y-4 p-6">
+                <div className="relative rounded-2xl bg-card/50 backdrop-blur-xl border border-border/20 p-4 overflow-hidden hover:border-border/30 transition-all duration-300">
+                  <div className="absolute left-0 top-0 bottom-0 w-[3px] rounded-full bg-primary" />
+                  <div className="pl-1.5">
+                    <Label className="text-[9px] font-display font-bold text-muted-foreground/40 uppercase tracking-[0.18em]">Valor do saque (R$)</Label>
+                    <Input type="number" step="0.01" min="1" value={amount} onChange={(e) => setAmount(e.target.value)} placeholder="0,00" required className="mt-2 h-14 text-xl font-display font-black rounded-xl bg-muted/5 border-border/15 focus:ring-2 focus:ring-primary/10" />
+                    <div className="flex items-center justify-between mt-2.5">
+                      <p className="text-[10px] font-display font-semibold text-muted-foreground/30">Taxa fixa de saque</p>
+                      <p className="text-[11px] font-display font-bold text-warning tabular-nums">- R$ 5,00</p>
+                    </div>
+                    {amount && parseFloat(amount) > 5 && (
+                      <div className="mt-3 p-4 rounded-xl bg-primary/5 border border-primary/10 overflow-hidden">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-2">
+                            <div className="h-6 w-6 rounded-lg bg-primary/10 ring-1 ring-primary/15 flex items-center justify-center"><Zap className="h-3 w-3 text-primary" /></div>
+                            <span className="text-[11px] text-muted-foreground/50 font-display font-semibold">Você receberá</span>
+                          </div>
+                          <span className="text-lg font-display font-black text-primary tabular-nums">{fmt(parseFloat(amount) - 5)}</span>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+                <div className="relative rounded-2xl bg-card/50 backdrop-blur-xl border border-border/20 p-4 overflow-hidden hover:border-border/30 transition-all duration-300">
+                  <div className="absolute left-0 top-0 bottom-0 w-[3px] rounded-full bg-success" />
+                  <div className="pl-1.5">
+                    <Label className="text-[9px] font-display font-bold text-muted-foreground/40 uppercase tracking-[0.18em]">Chave PIX</Label>
+                    {pixKeys.length > 0 ? (
+                      <div className="mt-2.5 space-y-1.5">
+                        {pixKeys.map((pk) => {
+                          const isSelected = (selectedPixKeyId || pixKeys[0]?.id) === pk.id;
+                          return (
+                            <button key={pk.id} type="button" onClick={() => setSelectedPixKeyId(pk.id)} className={cn(
+                              "w-full flex items-center gap-3 px-3.5 py-3 rounded-xl border transition-all duration-300 text-left",
+                              isSelected ? "border-primary/20 bg-primary/5 ring-1 ring-primary/10" : "border-border/15 bg-muted/5 hover:border-border/30"
+                            )}>
+                              <div className={cn("h-8 w-8 rounded-lg ring-1 flex items-center justify-center shrink-0", isSelected ? "bg-primary/10 ring-primary/15" : "bg-muted/10 ring-border/15")}>
+                                <Key className={cn("h-3.5 w-3.5", isSelected ? "text-primary" : "text-muted-foreground/30")} />
+                              </div>
+                              <div className="flex-1 min-w-0">
+                                <p className={cn("text-[10px] font-display font-bold", isSelected ? "text-primary" : "text-muted-foreground/40")}>{pixKeyTypeLabels[pk.key_type]}</p>
+                                <p className={cn("font-mono text-[12px] font-bold truncate", isSelected ? "text-foreground" : "text-foreground/50")}>{pk.key_value}</p>
+                              </div>
+                              <div className={cn("h-5 w-5 rounded-full border-2 flex items-center justify-center shrink-0", isSelected ? "border-primary bg-primary" : "border-border/30")}>
+                                {isSelected && <CheckCircle2 className="h-3 w-3 text-primary-foreground" />}
+                              </div>
+                            </button>
+                          );
+                        })}
+                      </div>
+                    ) : (
+                      <div className="mt-2.5 p-3.5 rounded-xl border border-destructive/10 bg-destructive/5">
+                        <p className="text-[11px] text-destructive font-display font-bold flex items-center gap-2"><XCircle className="h-3.5 w-3.5" /> Cadastre uma chave PIX em Dados Bancários</p>
+                      </div>
+                    )}
+                  </div>
+                </div>
+                <button type="submit" disabled={pixKeys.length === 0} className="w-full h-11 rounded-xl text-[12px] font-display font-bold flex items-center justify-center gap-2 gradient-primary text-primary-foreground shadow-lg shadow-primary/20 hover:shadow-xl active:scale-[0.985] transition-all duration-300 disabled:opacity-40 disabled:cursor-not-allowed disabled:shadow-none">
+                  <ArrowDownToLine className="h-4 w-4" /> Solicitar Saque
+                </button>
+              </form>
+            </DialogContent>
+          </Dialog>
+        )}
+      </>
+    }
+  />
 
- {/* KPI Strip */}
- <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
- {[
- { label: "Total Sacado", value: hidden ? HIDE : fmtCompact(m.totalApproved), color: "primary", icon: ArrowDownToLine, delta: m.prevTotalApproved > 0 ? m.totalApproved - m.prevTotalApproved : undefined },
- { label: "Taxa de Aprovação", value: hidden ? HIDE : `${m.approvalRate.toFixed(1)}%`, color: "success", icon: Target },
- { label: "Ticket Médio", value: hidden ? HIDE : fmt(m.avgAmount), color: "primary", icon: Receipt },
- { label: "Total em Taxas", value: hidden ? HIDE : fmtCompact(m.totalFees), color: "warning", icon: Percent },
- ].map((item, idx) => (
- <motion.div key={item.label} initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4, delay: 0.25 + idx * 0.08 }} className="group rounded-2xl border border-border/60 bg-card shadow-sm p-4 overflow-hidden relative">
- <div className={cn("absolute -top-16 -right-16 w-32 h-32 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-700 blur-[40px] pointer-events-none", `bg-${item.color}/10`)} />
- <div className="relative z-10 flex items-start justify-between">
- <div>
- <p className="text-[9px] font-heading uppercase tracking-[0.2em] text-muted-foreground/30 mb-2">{item.label}</p>
- <p className={cn("text-xl font-heading tabular-nums tracking-tight leading-none", item.color === "primary" ? "text-foreground" : `text-${item.color}`)}>{item.value}</p>
- {'delta' in item && item.delta !== undefined && <p className="mt-1.5 text-[10px] text-muted-foreground/25 font-mono">{item.delta >= 0 ? "+" : ""}{fmtCompact(item.delta)}</p>}
- </div>
- <div className={cn("h-9 w-9 rounded-xl flex items-center justify-center border transition-all duration-300 group-hover:scale-110", `bg-${item.color}/8 border-${item.color}/10 text-${item.color}/50`)}>
- <item.icon className="h-4 w-4" />
- </div>
- </div>
- </motion.div>
- ))}
- </div>
- </div>
- </motion.section>
+  {/* ═══════ PERIOD BAR ═══════ */}
+  <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+    <div className="inline-flex items-center rounded-lg border border-border/60 bg-card p-0.5 w-fit">
+      {PERIODS.map((opt) => (
+        <button
+          key={opt.label}
+          onClick={() => setSelectedPeriod(opt)}
+          className={cn("rounded-md px-3 py-1.5 text-[12px] font-bold transition-colors",
+            selectedPeriod.label === opt.label ? "bg-foreground text-background" : "text-muted-foreground hover:text-foreground"
+          )}
+        >
+          {opt.label}
+        </button>
+      ))}
+    </div>
+    <span className="text-[11.5px] font-semibold text-muted-foreground tabular-nums">
+      Saldo disponível: <strong className={cn("font-heading", availableBalance > 0 ? "text-success" : "text-foreground/50")}>{hidden ? HIDE : fmt(availableBalance)}</strong>
+    </span>
+  </div>
+
+  {/* ═══════ KPI RIBBON ═══════ */}
+  <KpiRibbon
+    items={[
+      { label: "Saldo disponível", value: hidden ? HIDE : fmtCompact(availableBalance), sub: "Pronto para saque · Atualizado em tempo real", tone: availableBalance > 0 ? "success" : "muted", footer: "tempo real" },
+      { label: "Total sacado", value: hidden ? HIDE : fmtCompact(m.totalApproved), sub: `${m.approved.length} ${m.approved.length === 1 ? "saque aprovado" : "saques aprovados"}`, tone: "primary", delta: { cur: m.totalApproved, prev: m.prevTotalApproved } },
+      { label: "Taxa de aprovação", value: hidden ? HIDE : `${m.approvalRate.toFixed(1)}%`, sub: `${m.approved.length} aprovados de ${m.current.length} solicitações`, tone: m.approvalRate >= 80 ? "success" : "warning", progress: m.approvalRate },
+      { label: "Pendentes", value: hidden ? HIDE : String(m.pending.length), sub: m.pending.length > 0 ? `${fmtCompact(m.totalPending)} aguardando aprovação` : "Nenhum saque na fila", tone: m.pending.length > 0 ? "warning" : "muted", footer: "em análise" },
+      { label: "Ticket médio", value: hidden ? HIDE : fmtCompact(m.avgAmount), sub: m.avgAmount > 0 ? "Valor médio por saque aprovado" : "Sem dados no período", tone: "neutral", footer: selectedPeriod.label },
+      { label: "Total em taxas", value: hidden ? HIDE : fmtCompact(m.totalFees), sub: `R$ 5,00 por operação · ${m.current.length} ${m.current.length === 1 ? "operação" : "operações"}`, tone: "warning", footer: "fee fixa PIX" },
+    ]}
+  />
+
 
  {/* ════════════════════════════════════════════════════════════════ */}
  {/* CHART */}
