@@ -820,41 +820,41 @@ export default function Vendas() {
  : "Personalizado"
  : selectedPeriod.label;
 
- const healthItems = [
- { label: "Reembolso", value: m.refundRate, threshold: 5, icon: RefreshCw },
- { label: "Chargeback", value: m.chargebackRate, threshold: 1, icon: Shield },
- { label: "Falhas", value: m.failedRate, threshold: 10, icon: AlertTriangle },
- ];
+  const healthItems = [
+  { label: "Reembolso", value: m.refundRate, threshold: 5 },
+  { label: "Chargeback", value: m.chargebackRate, threshold: 1 },
+  { label: "Falhas", value: m.failedRate, threshold: 10 },
+  ];
 
-  const approvalRate = dateFiltered.length > 0 ? (m.approved.length / dateFiltered.length) * 100 : 0;
-  const refundedAmount = m.refunded.reduce((acc, tx) => acc + Number(tx.amount), 0);
-  const chargebackAmount = m.chargebacks.reduce((acc, tx) => acc + Number(tx.amount), 0);
-  const heroStats = [
-    {
-      label: "Aprovação",
-      value: `${approvalRate.toFixed(1)}%`,
-      meta: `${m.approved.length} aprovadas`,
-      tone: approvalRate >= 60 ? "success" : "warning",
-    },
-    {
-      label: "Ticket médio",
-      value: hidden ? HIDE : fmtCompact(m.avgTicket),
-      meta: "por venda aprovada",
-      tone: "neutral",
-    },
-    {
-      label: "Pico de hora",
-      value: peakHour !== null ? `${peakHour.toString().padStart(2, "0")}h` : "—",
-      meta: `${rawPeakSales} venda${rawPeakSales === 1 ? "" : "s"}`,
-      tone: "info",
-    },
-    {
-      label: "Clientes únicos",
-      value: hidden ? HIDE : m.uniqueCustomers.toString(),
-      meta: "base convertida",
-      tone: "primary",
-    },
-  ] as const;
+   const approvalRate = dateFiltered.length > 0 ? (m.approved.length / dateFiltered.length) * 100 : 0;
+   const refundedAmount = m.refunded.reduce((acc, tx) => acc + Number(tx.amount), 0);
+   const chargebackAmount = m.chargebacks.reduce((acc, tx) => acc + Number(tx.amount), 0);
+   const heroStats = [
+     {
+       label: "Aprovação",
+       value: `${approvalRate.toFixed(1)}%`,
+       meta: `${m.approved.length} aprovadas`,
+       tone: approvalRate >= 60 ? "text-success" : "text-warning",
+     },
+     {
+       label: "Ticket",
+       value: hidden ? HIDE : fmtCompact(m.avgTicket),
+       meta: "médio",
+       tone: "text-foreground",
+     },
+     {
+       label: "Pico",
+       value: peakHour !== null ? `${peakHour.toString().padStart(2, "0")}h` : "—",
+       meta: `${rawPeakSales} venda${rawPeakSales === 1 ? "" : "s"}`,
+       tone: "text-info",
+     },
+     {
+       label: "Clientes",
+       value: hidden ? HIDE : m.uniqueCustomers.toString(),
+       meta: "únicos",
+       tone: "text-primary",
+     },
+   ] as const;
 
       /* ═══════════ RENDER ═══════════ */
       return (
