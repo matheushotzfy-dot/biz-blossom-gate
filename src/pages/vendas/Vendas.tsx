@@ -32,6 +32,7 @@ import { format, subDays, formatDistanceToNow } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import type { DateRange } from "react-day-picker";
 import { AreaChart, Area, ResponsiveContainer, Tooltip as ReTooltip, XAxis, YAxis, ComposedChart, Bar, CartesianGrid } from "recharts";
+import { KpiRibbon, PageHeader } from "@/components/KpiRibbon";
 
 /* ─────────────────────── Helpers ─────────────────────── */
 function PixLogoMark({ className, variant = "teal" }: { className?: string; variant?: "teal" | "white" }) {
@@ -826,309 +827,271 @@ export default function Vendas() {
   const chargebackAmount = m.chargebacks.reduce((acc, tx) => acc + Number(tx.amount), 0);
 
       /* ═══════════ RENDER ═══════════ */
-     return (
-       <div className="mx-auto w-full max-w-[1440px] pb-20 space-y-5">
+      return (
+        <div className="mx-auto w-full max-w-[1440px] space-y-5 pb-20">
+          <PageHeader
+            eyebrow={
+              <>
+                <span className="h-1.5 w-1.5 rounded-full bg-success animate-pulse" />
+                <span className="text-[10px] font-bold uppercase tracking-[0.18em] text-muted-foreground/60">
+                  {lastSaleText ? `Última venda ${lastSaleText}` : "Sem vendas recentes"}
+                </span>
+                <span className="hidden h-1 w-1 rounded-full bg-border sm:inline-block" />
+                <span className="hidden text-[10px] font-bold uppercase tracking-[0.18em] text-muted-foreground/50 sm:inline-block">
+                  domínio {dominantMethod.label}
+                </span>
+              </>
+            }
+            title="Minhas Vendas"
+            subtitle="Leitura operacional de receita, performance e transações com visual mais executivo e alta densidade informacional."
+            actions={
+              <>
+                <button onClick={() => window.location.reload()} className="inline-flex h-9 items-center gap-1.5 rounded-lg border border-border/60 bg-card px-3 text-[12px] font-semibold text-muted-foreground hover:border-border hover:text-foreground">
+                  <RefreshCw className="h-3.5 w-3.5" /> Atualizar
+                </button>
+                <button onClick={toggleHidden} className={cn("inline-flex h-9 items-center gap-1.5 rounded-lg border px-3 text-[12px] font-semibold", hidden ? "border-foreground/20 bg-foreground/[0.04] text-foreground" : "border-border/60 bg-card text-muted-foreground hover:text-foreground") }>
+                  {hidden ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />} {hidden ? "Oculto" : "Visível"}
+                </button>
+                <button onClick={() => setShowExportDialog(true)} className="inline-flex h-9 items-center gap-1.5 rounded-lg bg-primary px-4 text-[12px] font-bold text-primary-foreground hover:bg-primary/90">
+                  <Download className="h-3.5 w-3.5" /> Exportar
+                </button>
+              </>
+            }
+          />
 
-         {/* ═══════ HEADER ═══════ */}
-         <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between border-b border-border/40 pb-5">
-           <div>
-             <div className="flex items-center gap-2 mb-1.5">
-               <span className="h-1.5 w-1.5 rounded-full bg-success animate-pulse" />
-               <span className="text-[10px] font-bold uppercase tracking-[0.18em] text-muted-foreground/60">{lastSaleText ? `Última venda ${lastSaleText}` : "Sem vendas recentes"}</span>
-             </div>
-             <h1 className="text-[28px] sm:text-[32px] font-heading font-black tracking-[-0.04em] text-foreground leading-none">Minhas Vendas</h1>
-             <p className="mt-2 text-[12.5px] text-muted-foreground/70 font-medium">Análise consolidada de receita, conversão e transações.</p>
-           </div>
-           <div className="flex items-center gap-2">
-             <button onClick={() => window.location.reload()} className="inline-flex h-9 items-center gap-1.5 rounded-lg border border-border/60 bg-card px-3 text-[12px] font-semibold text-muted-foreground hover:text-foreground hover:border-border transition-colors">
-               <RefreshCw className="h-3.5 w-3.5" /> Atualizar
-             </button>
-             <button onClick={() => setShowExportDialog(true)} className="inline-flex h-9 items-center gap-1.5 rounded-lg bg-primary px-4 text-[12px] font-bold text-primary-foreground hover:bg-primary/90 transition-colors">
-               <Download className="h-3.5 w-3.5" /> Exportar
-             </button>
-           </div>
-         </div>
+          <section className="overflow-hidden rounded-2xl border border-border/60 bg-card">
+            <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1.2fr)_420px]">
+              <div className="border-b border-border/50 lg:border-b-0 lg:border-r lg:border-border/50">
+                <div className="border-b border-border/50 px-5 py-4 sm:px-6">
+                  <div className="flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
+                    <div className="min-w-0">
+                      <div className="flex flex-wrap items-center gap-2">
+                        <span className="rounded-md border border-success/20 bg-success/10 px-2 py-1 text-[9px] font-bold uppercase tracking-[0.18em] text-success">
+                          Receita líquida
+                        </span>
+                        <span className="rounded-md border border-border/60 bg-card-inset/60 px-2 py-1 text-[9px] font-bold uppercase tracking-[0.16em] text-muted-foreground/70">
+                          {periodLabel}
+                        </span>
+                      </div>
+                      <div className="mt-4 flex flex-wrap items-end gap-x-4 gap-y-2">
+                        <p className="text-[42px] font-heading font-black leading-none tracking-[-0.05em] text-foreground sm:text-[54px]">
+                          <span className="text-success">{hidden ? HIDE : fmt(m.totalNet)}</span>
+                        </p>
+                        <div className="pb-1">
+                          <DeltaBadge cur={m.totalNet} prev={p.totalNet} />
+                        </div>
+                      </div>
+                      <p className="mt-3 max-w-[60ch] text-[12px] font-medium leading-relaxed text-muted-foreground/72">
+                        {hidden ? "Visão protegida ativada para valores sensíveis." : `Bruto ${fmtCompact(m.totalGross)} com ${fmtCompact(m.totalFees)} em taxas. ${m.uniqueCustomers} clientes únicos no período com ${approvalRate.toFixed(1)}% de aprovação.`}
+                      </p>
+                    </div>
 
-         {/* ═══════ PERIOD BAR ═══════ */}
-         <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
-           <div className="flex flex-wrap items-center gap-2">
-             <div className="inline-flex items-center rounded-lg border border-border/60 bg-card p-0.5">
-               {PERIODS.map((opt) => (
-                 <button key={opt.label} onClick={() => { setSelectedPeriod(opt); setIsCustom(false); setCustomRange(undefined); }}
-                   className={cn("rounded-md px-3 py-1.5 text-[12px] font-bold transition-colors",
-                     !isCustom && selectedPeriod.label === opt.label ? "bg-foreground text-background" : "text-muted-foreground hover:text-foreground"
-                   )}>
-                   {opt.label}
-                 </button>
-               ))}
-             </div>
-             <Popover open={datePickerOpen} onOpenChange={setDatePickerOpen}>
-               <PopoverTrigger asChild>
-                 <button className={cn("inline-flex h-8 items-center gap-1.5 rounded-lg border px-3 text-[12px] font-bold transition-colors",
-                   isCustom ? "border-foreground/40 bg-foreground/5 text-foreground" : "border-border/60 bg-card text-muted-foreground hover:text-foreground"
-                 )}>
-                   <CalendarDays className="h-3.5 w-3.5" />
-                   {isCustom && customRange?.from ? customRange.to ? `${format(customRange.from, "dd/MM")} – ${format(customRange.to, "dd/MM")}` : format(customRange.from, "dd/MM/yyyy") : "Personalizado"}
-                 </button>
-               </PopoverTrigger>
-               <PopoverContent align="start" className="w-auto overflow-hidden rounded-xl border border-border bg-popover p-0">
-                 <Calendar mode="range" selected={customRange} onSelect={(range) => { setCustomRange(range); setIsCustom(true); if (range?.from && range?.to) setTimeout(() => setDatePickerOpen(false), 300); }} numberOfMonths={1} locale={ptBR} disabled={(date) => date > new Date()} className="p-3 pointer-events-auto" classNames={{ day_selected: "bg-primary text-primary-foreground", day_range_middle: "bg-primary/10 text-foreground", day_range_end: "bg-primary text-primary-foreground" }} />
-               </PopoverContent>
-             </Popover>
-           </div>
-           <div className="flex items-center gap-3">
-             <span className="text-[11.5px] font-semibold text-muted-foreground tabular-nums">{m.uniqueCustomers} clientes · {approvalRate.toFixed(1)}% aprovação · {periodLabel}</span>
-             <button onClick={toggleHidden} className={cn("flex h-8 w-8 items-center justify-center rounded-lg border transition-colors", hidden ? "border-foreground/30 bg-foreground/5 text-foreground" : "border-border/60 bg-card text-muted-foreground hover:text-foreground")}>
-               {hidden ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
-             </button>
-           </div>
-         </div>
-
-          {/* ═══════ HERO: Revenue + Chart unified ═══════ */}
-          <div className="rounded-2xl border border-border/60 bg-card overflow-hidden">
-            <div className="grid grid-cols-1 lg:grid-cols-[360px_1fr]">
-              {/* Left: KPIs stacked — connected via shared accent rail */}
-              <div className="relative border-b lg:border-b-0 lg:border-r border-border/60 p-6 flex flex-col justify-between">
-                <div className="absolute left-0 top-6 bottom-6 w-[2px] rounded-r-full bg-gradient-to-b from-success via-success/50 to-transparent" />
-                <div className="pl-3">
-                  <div className="flex items-center gap-2">
-                    <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-muted-foreground/60">Receita líquida</p>
-                    <span className="text-[9.5px] font-bold uppercase tracking-wider text-success/90 bg-success/10 border border-success/20 rounded px-1.5 py-[1px]">{periodLabel}</span>
-                  </div>
-                  <p className="mt-3 text-[44px] lg:text-[50px] font-heading font-black tracking-[-0.045em] text-success tabular-nums leading-[0.95]">
-                    {hidden ? HIDE : fmt(m.totalNet)}
-                  </p>
-                  <div className="mt-3 flex items-center gap-2 flex-wrap">
-                    <DeltaBadge cur={m.totalNet} prev={p.totalNet} />
-                    <span className="text-[11px] text-muted-foreground/60">vs anterior {hidden ? "" : `· ${fmtCompact(p.totalNet)}`}</span>
-                  </div>
-                </div>
-
-                <div className="mt-8 grid grid-cols-3 gap-4 pt-5 border-t border-border/50 pl-3">
-                  <div>
-                    <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground/60">Vendas</p>
-                    <p className="mt-1 text-[18px] font-heading font-black text-foreground tabular-nums">{hidden ? HIDE : m.approved.length}</p>
-                    <p className="text-[10px] text-muted-foreground/60 mt-0.5">{approvalRate.toFixed(1)}% aprov.</p>
-                  </div>
-                  <div>
-                    <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground/60">Ticket</p>
-                    <p className="mt-1 text-[18px] font-heading font-black text-foreground tabular-nums">{hidden ? HIDE : fmtCompact(m.avgTicket)}</p>
-                    <p className="text-[10px] text-muted-foreground/60 mt-0.5">por venda</p>
-                  </div>
-                  <div>
-                    <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground/60">Bruto</p>
-                    <p className="mt-1 text-[18px] font-heading font-black text-foreground tabular-nums">{hidden ? HIDE : fmtCompact(m.totalGross)}</p>
-                    <p className="text-[10px] text-muted-foreground/60 mt-0.5">−{hidden ? HIDE : fmtCompact(m.totalFees)} taxas</p>
+                    <div className="grid min-w-[220px] grid-cols-2 gap-px overflow-hidden rounded-xl border border-border/60 bg-border/50 self-stretch xl:w-[280px]">
+                      <div className="bg-card px-4 py-3">
+                        <p className="text-[9px] font-bold uppercase tracking-[0.16em] text-muted-foreground/55">Aprovadas</p>
+                        <p className="mt-2 text-[22px] font-heading font-black tabular-nums text-foreground">{hidden ? HIDE : m.approved.length}</p>
+                        <p className="mt-1 text-[10px] text-muted-foreground/60">{approvalRate.toFixed(1)}% do total</p>
+                      </div>
+                      <div className="bg-card px-4 py-3">
+                        <p className="text-[9px] font-bold uppercase tracking-[0.16em] text-muted-foreground/55">Ticket médio</p>
+                        <p className="mt-2 text-[22px] font-heading font-black tabular-nums text-foreground">{hidden ? HIDE : fmtCompact(m.avgTicket)}</p>
+                        <p className="mt-1 text-[10px] text-muted-foreground/60">por venda aprovada</p>
+                      </div>
+                      <div className="bg-card px-4 py-3">
+                        <p className="text-[9px] font-bold uppercase tracking-[0.16em] text-muted-foreground/55">Pico de hora</p>
+                        <p className="mt-2 text-[22px] font-heading font-black tabular-nums text-foreground">{peakHour !== null ? `${peakHour.toString().padStart(2, "0")}h` : "—"}</p>
+                        <p className="mt-1 text-[10px] text-muted-foreground/60">{rawPeakSales} venda{rawPeakSales === 1 ? "" : "s"}</p>
+                      </div>
+                      <div className="bg-card px-4 py-3">
+                        <p className="text-[9px] font-bold uppercase tracking-[0.16em] text-muted-foreground/55">Total filtrado</p>
+                        <p className="mt-2 text-[22px] font-heading font-black tabular-nums text-success">{hidden ? HIDE : fmtCompact(filteredNetTotal)}</p>
+                        <p className="mt-1 text-[10px] text-muted-foreground/60">resultado da listagem</p>
+                      </div>
+                    </div>
                   </div>
                 </div>
-              </div>
 
-              {/* Right: Chart dominant */}
-              <div className="p-5 lg:p-6">
-                <div className="flex items-center justify-between mb-4 flex-wrap gap-2">
-                  <div className="flex items-center gap-4">
-                    <p className="text-[13px] font-heading font-bold text-foreground">Evolução da receita</p>
-                    <div className="flex items-center gap-3 text-[10.5px] text-muted-foreground font-semibold">
+                <div className="p-5 sm:p-6">
+                  <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+                    <div>
+                      <p className="text-[13px] font-heading font-bold text-foreground">Evolução da receita</p>
+                      <p className="mt-1 text-[11px] font-medium text-muted-foreground/65">Comparativo do período atual com a janela imediatamente anterior.</p>
+                    </div>
+                    <div className="flex items-center gap-4 text-[10.5px] font-semibold text-muted-foreground/70">
                       <span className="flex items-center gap-1.5"><span className="h-2 w-2 rounded-sm bg-success" />Atual</span>
                       <span className="flex items-center gap-1.5"><span className="inline-block h-0 w-3 border-t border-dashed border-muted-foreground/60" />Anterior</span>
+                      <span className="tabular-nums">{metrics.chartData.length} {metrics.chartData.length === 1 ? "dia" : "dias"}</span>
                     </div>
                   </div>
-                  <div className="flex items-center gap-2 text-[10.5px]">
-                    <span className="text-muted-foreground/60 font-semibold">{metrics.chartData.length} {metrics.chartData.length === 1 ? "dia" : "dias"}</span>
-                    {metrics.chartData.length > 0 && (
-                      <span className="text-foreground/70 font-bold tabular-nums">
-                        · pico {hidden ? HIDE : fmtCompact(Math.max(...metrics.chartData.map(d => d.value)))}
-                      </span>
-                    )}
+                  <RevenueChart data={metrics.chartData} hidden={hidden} />
+                </div>
+              </div>
+
+              <aside className="flex flex-col">
+                <div className="border-b border-border/50 p-5 sm:p-6">
+                  <div className="mb-3 flex items-center justify-between gap-3">
+                    <div>
+                      <p className="text-[12px] font-heading font-bold text-foreground">Controle de janela</p>
+                      <p className="mt-1 text-[10.5px] font-medium text-muted-foreground/62">Ajuste o período e leia a saúde da operação.</p>
+                    </div>
+                    <span className="rounded-md border border-border/60 bg-card-inset/70 px-2 py-1 text-[9px] font-bold uppercase tracking-[0.16em] text-muted-foreground/65">
+                      {periodLabel}
+                    </span>
+                  </div>
+
+                  <div className="flex flex-wrap items-center gap-2">
+                    <div className="inline-flex flex-wrap items-center rounded-lg border border-border/60 bg-card-inset/50 p-1">
+                      {PERIODS.map((opt) => (
+                        <button
+                          key={opt.label}
+                          onClick={() => { setSelectedPeriod(opt); setIsCustom(false); setCustomRange(undefined); }}
+                          className={cn(
+                            "rounded-md px-3 py-1.5 text-[11px] font-bold transition-colors",
+                            !isCustom && selectedPeriod.label === opt.label ? "bg-foreground text-background" : "text-muted-foreground hover:text-foreground",
+                          )}
+                        >
+                          {opt.label}
+                        </button>
+                      ))}
+                    </div>
+
+                    <Popover open={datePickerOpen} onOpenChange={setDatePickerOpen}>
+                      <PopoverTrigger asChild>
+                        <button className={cn("inline-flex h-9 items-center gap-1.5 rounded-lg border px-3 text-[11px] font-bold", isCustom ? "border-foreground/25 bg-foreground/[0.04] text-foreground" : "border-border/60 bg-card text-muted-foreground hover:text-foreground") }>
+                          <CalendarDays className="h-3.5 w-3.5" />
+                          {isCustom && customRange?.from ? customRange.to ? `${format(customRange.from, "dd/MM")} – ${format(customRange.to, "dd/MM")}` : format(customRange.from, "dd/MM/yyyy") : "Personalizado"}
+                        </button>
+                      </PopoverTrigger>
+                      <PopoverContent align="start" className="w-auto overflow-hidden rounded-xl border border-border bg-popover p-0">
+                        <Calendar mode="range" selected={customRange} onSelect={(range) => { setCustomRange(range); setIsCustom(true); if (range?.from && range?.to) setTimeout(() => setDatePickerOpen(false), 300); }} numberOfMonths={1} locale={ptBR} disabled={(date) => date > new Date()} className="pointer-events-auto p-3" classNames={{ day_selected: "bg-primary text-primary-foreground", day_range_middle: "bg-primary/10 text-foreground", day_range_end: "bg-primary text-primary-foreground" }} />
+                      </PopoverContent>
+                    </Popover>
                   </div>
                 </div>
-                <RevenueChart data={metrics.chartData} hidden={hidden} />
-              </div>
-            </div>
-          </div>
 
-          {/* ═══════ KPI RIBBON — premium, dense and refined ═══════ */}
-          <div className="overflow-hidden rounded-2xl border border-border/60 bg-card shadow-[0_1px_0_hsl(var(--border)/0.4)]">
-            <div className="grid grid-cols-2 gap-px bg-border/50 md:grid-cols-4 xl:grid-cols-8">
-              {([
-                {
-                  label: "Vendas aprovadas",
-                  value: hidden ? HIDE : m.approved.length.toString(),
-                  sub: `${dateFiltered.length} tentativas · ${approvalRate.toFixed(1)}% aprovação`,
-                  tone: "neutral" as const,
-                  progress: approvalRate,
-                },
-                {
-                  label: "Receita líquida",
-                  value: hidden ? HIDE : fmtCompact(m.totalNet),
-                  sub: hidden ? "valores ocultos" : `Bruto ${fmtCompact(m.totalGross)} · Taxas ${fmtCompact(m.totalFees)}`,
-                  tone: "success" as const,
-                  delta: { cur: m.totalNet, prev: p.totalNet },
-                },
-                {
-                  label: "Ticket médio",
-                  value: hidden ? HIDE : fmtCompact(m.avgTicket),
-                  sub: `${m.uniqueCustomers} ${m.uniqueCustomers === 1 ? "cliente único" : "clientes únicos"}`,
-                  tone: "neutral" as const,
-                },
-                {
-                  label: "Receita em PIX",
-                  value: hidden ? HIDE : fmtCompact(m.pixRev),
-                  sub: `${m.pixCount} ${m.pixCount === 1 ? "venda aprovada" : "vendas aprovadas"}`,
-                  tone: "success" as const,
-                  progress: m.totalNet > 0 ? (m.pixRev / m.totalNet) * 100 : 0,
-                  tag: "PIX",
-                },
-                {
-                  label: "Receita em cartão",
-                  value: hidden ? HIDE : fmtCompact(m.cardRev),
-                  sub: `${m.cardCount} ${m.cardCount === 1 ? "venda aprovada" : "vendas aprovadas"}`,
-                  tone: "info" as const,
-                  progress: m.totalNet > 0 ? (m.cardRev / m.totalNet) * 100 : 0,
-                  tag: "Cartão",
-                },
-                {
-                  label: "Reembolsado",
-                  value: hidden ? HIDE : fmtCompact(refundedAmount),
-                  sub: `${m.refunded.length} reembolsos · ${m.refundRate.toFixed(2)}%`,
-                  tone: m.refundRate > 5 ? ("destructive" as const) : ("info" as const),
-                },
-                {
-                  label: "Chargebacks",
-                  value: hidden ? HIDE : fmtCompact(chargebackAmount),
-                  sub: `${m.chargebacks.length} disputas · ${m.chargebackRate.toFixed(2)}%`,
-                  tone: m.chargebacks.length > 0 ? ("destructive" as const) : ("muted" as const),
-                },
-                {
-                  label: "MedPix",
-                  value: dateFiltered.filter(t => t.payment_method === "pix" && (t.status === "refunded" || t.status === "chargeback")).length.toString(),
-                  sub: "PIX contestados ou reembolsados",
-                  tone: "warning" as const,
-                },
-              ] as const).map((kpi) => {
-                const tones = {
-                  success: {
-                    panel: "bg-gradient-to-b from-success/[0.05] via-card to-card hover:from-success/[0.08]",
-                    line: "bg-success/70",
-                    dot: "bg-success",
-                    value: "text-success",
-                    track: "bg-success/10",
-                    fill: "bg-success",
-                    tag: "border-success/20 bg-success/10 text-success",
-                  },
-                  info: {
-                    panel: "bg-gradient-to-b from-info/[0.05] via-card to-card hover:from-info/[0.08]",
-                    line: "bg-info/70",
-                    dot: "bg-info",
-                    value: "text-info",
-                    track: "bg-info/10",
-                    fill: "bg-info",
-                    tag: "border-info/20 bg-info/10 text-info",
-                  },
-                  warning: {
-                    panel: "bg-gradient-to-b from-warning/[0.05] via-card to-card hover:from-warning/[0.08]",
-                    line: "bg-warning/70",
-                    dot: "bg-warning",
-                    value: "text-warning",
-                    track: "bg-warning/10",
-                    fill: "bg-warning",
-                    tag: "border-warning/20 bg-warning/10 text-warning",
-                  },
-                  destructive: {
-                    panel: "bg-gradient-to-b from-destructive/[0.05] via-card to-card hover:from-destructive/[0.08]",
-                    line: "bg-destructive/70",
-                    dot: "bg-destructive",
-                    value: "text-destructive",
-                    track: "bg-destructive/10",
-                    fill: "bg-destructive",
-                    tag: "border-destructive/20 bg-destructive/10 text-destructive",
-                  },
-                  neutral: {
-                    panel: "bg-gradient-to-b from-foreground/[0.03] via-card to-card hover:from-foreground/[0.05]",
-                    line: "bg-foreground/30",
-                    dot: "bg-foreground/60",
-                    value: "text-foreground",
-                    track: "bg-foreground/10",
-                    fill: "bg-foreground/70",
-                    tag: "border-border/60 bg-foreground/[0.04] text-foreground/80",
-                  },
-                  muted: {
-                    panel: "bg-gradient-to-b from-muted/20 via-card to-card hover:from-muted/30",
-                    line: "bg-border",
-                    dot: "bg-muted-foreground/50",
-                    value: "text-foreground/70",
-                    track: "bg-muted/40",
-                    fill: "bg-muted-foreground/40",
-                    tag: "border-border/50 bg-muted/30 text-muted-foreground",
-                  },
-                }[kpi.tone];
-
-                return (
-                  <div
-                    key={kpi.label}
-                    className={cn(
-                      "group relative min-h-[136px] bg-card px-4 py-4 transition-colors duration-200 hover:bg-card-inset/20",
-                      tones.panel,
-                    )}
-                  >
-                    <span className={cn("absolute inset-x-0 top-0 h-px", tones.line)} />
-
-                    <div className="relative flex h-full flex-col">
-                      <div className="flex items-start justify-between gap-2">
-                        <div className="min-w-0">
-                          <div className="flex items-center gap-2">
-                            <span className={cn("h-1.5 w-1.5 rounded-full shrink-0", tones.dot)} />
-                            <p className="truncate text-[9px] font-heading font-bold uppercase tracking-[0.16em] text-muted-foreground/70">
-                              {kpi.label}
-                            </p>
-                          </div>
-                        </div>
-
-                        <div className="flex items-center gap-1.5">
-                          {"tag" in kpi && kpi.tag && (
-                            <span className={cn("rounded-md border px-1.5 py-0.5 text-[8.5px] font-bold uppercase tracking-wider", tones.tag)}>
-                              {kpi.tag}
-                            </span>
-                          )}
-                          {"delta" in kpi && kpi.delta && <DeltaBadge cur={kpi.delta.cur} prev={kpi.delta.prev} />}
-                        </div>
-                      </div>
-
-                      <div className="mt-4">
-                        <p className={cn("text-[22px] font-heading font-black tabular-nums leading-none tracking-[-0.03em] sm:text-[24px]", tones.value)}>
-                          {kpi.value}
-                        </p>
-                        <p className="mt-2 min-h-[28px] text-[10px] font-medium leading-[1.35] text-muted-foreground/62 break-words">
-                          {kpi.sub}
-                        </p>
-                      </div>
-
-                      <div className="mt-auto pt-4">
-                        {"progress" in kpi && typeof kpi.progress === "number" ? (
-                          <div className="space-y-1.5">
-                            <div className={cn("h-[3px] overflow-hidden rounded-full", tones.track)}>
-                              <div
-                                className={cn("h-full rounded-full transition-all duration-500", tones.fill)}
-                                style={{ width: `${Math.min(Math.max(kpi.progress, 0), 100)}%` }}
-                              />
-                            </div>
-                            <div className="flex items-center justify-between text-[9px] font-semibold tabular-nums text-muted-foreground/58">
-                              <span>participação</span>
-                              <span>{Math.min(Math.max(kpi.progress, 0), 100).toFixed(0)}%</span>
-                            </div>
-                          </div>
-                        ) : (
-                          <div className="h-[20px] border-t border-border/40 pt-2 text-[9px] font-semibold uppercase tracking-[0.12em] text-muted-foreground/45">
-                            {periodLabel}
-                          </div>
-                        )}
-                      </div>
+                <div className="border-b border-border/50 p-5 sm:p-6">
+                  <div className="grid grid-cols-2 gap-px overflow-hidden rounded-xl border border-border/60 bg-border/50">
+                    <div className="bg-card px-4 py-3.5">
+                      <p className="text-[9px] font-bold uppercase tracking-[0.16em] text-muted-foreground/55">Método líder</p>
+                      <p className="mt-2 text-[18px] font-heading font-black text-foreground">{dominantMethod.label}</p>
+                      <p className="mt-1 text-[10px] text-muted-foreground/60">{hidden ? HIDE : fmtCompact(dominantMethod.value)}</p>
+                    </div>
+                    <div className="bg-card px-4 py-3.5">
+                      <p className="text-[9px] font-bold uppercase tracking-[0.16em] text-muted-foreground/55">Clientes únicos</p>
+                      <p className="mt-2 text-[18px] font-heading font-black tabular-nums text-foreground">{hidden ? HIDE : m.uniqueCustomers}</p>
+                      <p className="mt-1 text-[10px] text-muted-foreground/60">base convertida</p>
+                    </div>
+                    <div className="bg-card px-4 py-3.5">
+                      <p className="text-[9px] font-bold uppercase tracking-[0.16em] text-muted-foreground/55">Bruto</p>
+                      <p className="mt-2 text-[18px] font-heading font-black tabular-nums text-foreground">{hidden ? HIDE : fmtCompact(m.totalGross)}</p>
+                      <p className="mt-1 text-[10px] text-muted-foreground/60">entrada capturada</p>
+                    </div>
+                    <div className="bg-card px-4 py-3.5">
+                      <p className="text-[9px] font-bold uppercase tracking-[0.16em] text-muted-foreground/55">Taxas</p>
+                      <p className="mt-2 text-[18px] font-heading font-black tabular-nums text-warning">{hidden ? HIDE : fmtCompact(m.totalFees)}</p>
+                      <p className="mt-1 text-[10px] text-muted-foreground/60">custo operacional</p>
                     </div>
                   </div>
-                );
-              })}
+                </div>
+
+                <div className="p-5 sm:p-6">
+                  <div className="mb-3 flex items-center justify-between gap-3">
+                    <div>
+                      <p className="text-[12px] font-heading font-bold text-foreground">Saúde operacional</p>
+                      <p className="mt-1 text-[10.5px] font-medium text-muted-foreground/62">Riscos e estabilidade de conversão na mesma leitura.</p>
+                    </div>
+                    <span className="text-[10.5px] font-semibold text-muted-foreground/68 tabular-nums">{filtered.length} transações lidas</span>
+                  </div>
+
+                  <div className="space-y-2.5">
+                    {healthItems.map((item) => {
+                      const critical = item.value >= item.threshold;
+                      return (
+                        <div key={item.label} className="rounded-xl border border-border/60 bg-card-inset/35 px-4 py-3">
+                          <div className="flex items-center justify-between gap-3">
+                            <div className="min-w-0">
+                              <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-muted-foreground/55">{item.label}</p>
+                              <p className="mt-1 text-[17px] font-heading font-black tabular-nums text-foreground">{item.value.toFixed(2)}%</p>
+                            </div>
+                            <span className={cn("rounded-md border px-2 py-1 text-[9px] font-bold uppercase tracking-[0.14em]", critical ? "border-destructive/20 bg-destructive/10 text-destructive" : "border-success/20 bg-success/10 text-success")}>
+                              {critical ? "atenção" : "estável"}
+                            </span>
+                          </div>
+                          <div className="mt-3 h-[3px] overflow-hidden rounded-full bg-muted/50">
+                            <div className={cn("h-full rounded-full", critical ? "bg-destructive" : "bg-success")} style={{ width: `${Math.min(item.value * 8, 100)}%` }} />
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              </aside>
             </div>
-          </div>
+          </section>
+
+          <KpiRibbon
+            cols={8}
+            items={[
+              {
+                label: "Vendas aprovadas",
+                value: hidden ? HIDE : m.approved.length.toString(),
+                sub: `${dateFiltered.length} tentativas · ${approvalRate.toFixed(1)}% aprovação`,
+                tone: "neutral",
+                progress: approvalRate,
+              },
+              {
+                label: "Receita líquida",
+                value: hidden ? HIDE : fmtCompact(m.totalNet),
+                sub: hidden ? "valores ocultos" : `Bruto ${fmtCompact(m.totalGross)} · Taxas ${fmtCompact(m.totalFees)}`,
+                tone: "success",
+                delta: { cur: m.totalNet, prev: p.totalNet },
+              },
+              {
+                label: "Ticket médio",
+                value: hidden ? HIDE : fmtCompact(m.avgTicket),
+                sub: `${m.uniqueCustomers} ${m.uniqueCustomers === 1 ? "cliente único" : "clientes únicos"}`,
+                tone: "neutral",
+                footer: periodLabel,
+              },
+              {
+                label: "Receita em PIX",
+                value: hidden ? HIDE : fmtCompact(m.pixRev),
+                sub: `${m.pixCount} ${m.pixCount === 1 ? "venda aprovada" : "vendas aprovadas"}`,
+                tone: "success",
+                progress: m.totalNet > 0 ? (m.pixRev / m.totalNet) * 100 : 0,
+                tag: "PIX",
+              },
+              {
+                label: "Receita em cartão",
+                value: hidden ? HIDE : fmtCompact(m.cardRev),
+                sub: `${m.cardCount} ${m.cardCount === 1 ? "venda aprovada" : "vendas aprovadas"}`,
+                tone: "info",
+                progress: m.totalNet > 0 ? (m.cardRev / m.totalNet) * 100 : 0,
+                tag: "Cartão",
+              },
+              {
+                label: "Reembolsado",
+                value: hidden ? HIDE : fmtCompact(refundedAmount),
+                sub: `${m.refunded.length} reembolsos · ${m.refundRate.toFixed(2)}%`,
+                tone: m.refundRate > 5 ? "destructive" : "info",
+                footer: periodLabel,
+              },
+              {
+                label: "Chargebacks",
+                value: hidden ? HIDE : fmtCompact(chargebackAmount),
+                sub: `${m.chargebacks.length} disputas · ${m.chargebackRate.toFixed(2)}%`,
+                tone: m.chargebacks.length > 0 ? "destructive" : "muted",
+                footer: periodLabel,
+              },
+              {
+                label: "MedPix",
+                value: dateFiltered.filter(t => t.payment_method === "pix" && (t.status === "refunded" || t.status === "chargeback")).length.toString(),
+                sub: "PIX contestados ou reembolsados",
+                tone: "warning",
+                footer: periodLabel,
+              },
+            ]}
+          />
 
          {/* ═══════ TRANSACTIONS — DOMINANT WORKSPACE ═══════ */}
          <div className="overflow-hidden rounded-2xl border border-border/60 bg-card shadow-[0_1px_0_hsl(var(--border)/0.4)]">
