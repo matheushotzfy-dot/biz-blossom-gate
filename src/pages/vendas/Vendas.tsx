@@ -858,7 +858,7 @@ export default function Vendas() {
 
       /* ═══════════ RENDER ═══════════ */
       return (
-        <div className="mx-auto w-full max-w-[1440px] space-y-5 pb-20">
+        <div className="mx-auto w-full max-w-[1440px] space-y-4 pb-20">
           <PageHeader
             eyebrow={
               <>
@@ -892,7 +892,7 @@ export default function Vendas() {
           <section className="overflow-hidden rounded-2xl border border-border/60 bg-card">
             <div className="border-b border-border/50 px-5 py-4 sm:px-6">
               <div className="flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
-                <div className="min-w-0 flex-1">
+                <div className="min-w-0 flex-1 xl:max-w-[760px]">
                   <div className="flex flex-wrap items-center gap-2">
                     <span className="rounded-md border border-border/60 bg-card-inset/50 px-2 py-1 text-[9px] font-bold uppercase tracking-[0.16em] text-muted-foreground/70">
                       {periodLabel}
@@ -911,7 +911,7 @@ export default function Vendas() {
                     </div>
                   </div>
 
-                  <div className="mt-5 grid grid-cols-2 gap-x-5 gap-y-3 border-t border-border/40 pt-4 md:grid-cols-4">
+                  <div className="mt-4 grid grid-cols-2 gap-x-4 gap-y-3 border-t border-border/40 pt-3 md:grid-cols-4">
                     {heroStats.map((item) => (
                       <div key={item.label} className="min-w-0">
                         <p className="text-[9px] font-bold uppercase tracking-[0.16em] text-muted-foreground/52">{item.label}</p>
@@ -922,7 +922,7 @@ export default function Vendas() {
                   </div>
                 </div>
 
-                <div className="flex flex-wrap items-center gap-2 xl:max-w-[420px] xl:justify-end">
+                <div className="flex flex-wrap items-center gap-2 xl:max-w-[380px] xl:justify-end">
                   <div className="inline-flex flex-wrap items-center rounded-lg border border-border/60 bg-card-inset/50 p-1">
                     {PERIODS.map((opt) => (
                       <button
@@ -953,8 +953,8 @@ export default function Vendas() {
               </div>
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_320px]">
-              <div className="border-b border-border/50 p-5 sm:p-6 lg:border-b-0 lg:border-r lg:border-border/50">
+            <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1.18fr)_300px]">
+              <div className="border-b border-border/50 p-5 sm:p-5 lg:border-b-0 lg:border-r lg:border-border/50">
                 <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
                   <div>
                     <p className="text-[12px] font-heading font-bold text-foreground">Receita</p>
@@ -969,8 +969,8 @@ export default function Vendas() {
                 <RevenueChart data={metrics.chartData} hidden={hidden} />
               </div>
 
-              <aside className="p-5 sm:p-6">
-                <div className="space-y-6">
+               <aside className="p-5 sm:p-5">
+                <div className="space-y-5">
                   <div>
                     <div className="mb-3 flex items-center justify-between gap-3">
                       <p className="text-[12px] font-heading font-bold text-foreground">Mix</p>
@@ -1087,7 +1087,7 @@ export default function Vendas() {
           />
 
          {/* ═══════ TRANSACTIONS — DOMINANT WORKSPACE ═══════ */}
-         <div className="overflow-hidden rounded-2xl border border-border/60 bg-card shadow-[0_1px_0_hsl(var(--border)/0.4)]">
+          <div className="overflow-hidden rounded-2xl border border-border/60 bg-card">
            {/* Top contextual ribbon — turns the table into a workspace, not a list */}
            <div className="flex items-center justify-between gap-4 border-b border-border/50 px-5 py-3 bg-gradient-to-r from-card to-card-inset/30">
              <div className="flex items-center gap-3">
