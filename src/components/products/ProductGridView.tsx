@@ -146,14 +146,6 @@ export function ProductGridView({ products, copiedId, toolbar, ...handlers }: Pr
                       "mt-2 line-clamp-2 text-[12px] leading-snug",
                       product.description ? "text-muted-foreground/70" : "italic text-muted-foreground/40",
                     )}>
-                    {product.name}
-                    </p>
-                    <p className={cn("sr-only")}>{product.description || "Sem descrição"}</p>
-                    <p className={cn("hidden")}>{product.description || "Sem descrição"}</p>
-                    <p className={cn(
-                      "-mt-4 line-clamp-2 text-[12px] leading-snug",
-                      product.description ? "text-muted-foreground/70" : "italic text-muted-foreground/40",
-                    )}>
                       {product.description || "Sem descrição"}
                   </p>
                 </div>
