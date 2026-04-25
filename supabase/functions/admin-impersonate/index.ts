@@ -132,8 +132,8 @@ Deno.serve(async (req) => {
     return new Response(
       JSON.stringify({
         success: true,
-        access_token: linkData.properties?.access_token,
-        refresh_token: linkData.properties?.refresh_token,
+        access_token: (linkData.properties as any)?.access_token,
+        refresh_token: (linkData.properties as any)?.refresh_token,
       }),
       { headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );

@@ -293,8 +293,7 @@ export default function PublicCheckout() {
 
  if (cancelled) return;
  if (!prod) { setLoading(false); return; }
- const { data: themeData } = await supabase.from("products").select("checkout_theme").eq("id", prod.id).maybeSingle();
- const productWithTheme = { ...prod, checkout_theme: (themeData as any)?.checkout_theme || "gray" };
+  const productWithTheme = { ...prod, checkout_theme: (prod as any).checkout_theme || "gray" };
  if (cancelled) return;
  setProduct(productWithTheme as unknown as Product);
 
