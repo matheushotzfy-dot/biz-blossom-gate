@@ -39,15 +39,15 @@ export default function Marketplace() {
  const [affiliating, setAffiliating] = useState<string | null>(null);
 
  useEffect(() => {
- supabase
- .from("products")
- .select("id, name, description, price, image_url, affiliate_commission, affiliate_enabled, display_name, delivery_type")
- .eq("status", "active")
- .eq("affiliate_enabled", true)
- .then(({ data }) => {
- if (data) setProducts(data as unknown as MarketplaceProduct[]);
- setLoading(false);
- });
+  supabase
+  .from("products_public")
+  .select("id, name, description, price, image_url, affiliate_commission, affiliate_enabled, display_name, delivery_type")
+  .eq("status", "active")
+  .eq("affiliate_enabled", true)
+  .then(({ data }) => {
+  if (data) setProducts(data as unknown as MarketplaceProduct[]);
+  setLoading(false);
+  });
  }, []);
 
  const filtered = useMemo(() => {
@@ -74,11 +74,11 @@ export default function Marketplace() {
  try {
  const { data: existing } = await supabase.from("affiliate_links").select("id").eq("product_id", product.id).eq("affiliate_user_id", user.id).maybeSingle();
  if (existing) { toast.info("Você já possui um link de afiliado para este produto!"); setAffiliating(null); return; }
- const { data: productData } = await supabase.from("products").select("user_id").eq("id", product.id).maybeSingle();
- if (!productData) { toast.error("Produto não encontrado."); setAffiliating(null); return; }
- if (productData.user_id === user.id) { toast.error("Você não pode se afiliar ao seu próprio produto."); setAffiliating(null); return; }
- const slug = `aff-${crypto.randomUUID().slice(0, 10)}`;
- const { error } = await supabase.from("affiliate_links").insert({ product_id: product.id, affiliate_user_id: user.id, owner_user_id: productData.user_id, slug, commission_pct: product.affiliate_commission });
+  const { data: ownerId } = await supabase.rpc("get_affiliate_product_owner", { _product_id: product.id });
+  if (!ownerId) { toast.error("Produto não encontrado."); setAffiliating(null); return; }
+  if (ownerId === user.id) { toast.error("Você não pode se afiliar ao seu próprio produto."); setAffiliating(null); return; }
+  const slug = `aff-${crypto.randomUUID().slice(0, 10)}`;
+  const { error } = await supabase.from("affiliate_links").insert({ product_id: product.id, affiliate_user_id: user.id, owner_user_id: ownerId, slug, commission_pct: product.affiliate_commission });
  if (error) { toast.error("Erro ao criar link de afiliado."); } else {
  const url = `${window.location.origin}/pay/${slug}`;
  await navigator.clipboard.writeText(url);

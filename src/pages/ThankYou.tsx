@@ -44,28 +44,28 @@ export default function ThankYou() {
  if (data) {
  let productName = "Produto";
  if (data.product_id) {
- const { data: prod } = await supabase
- .from("products")
- .select("name")
- .eq("id", data.product_id)
- .single();
- if (prod) productName = prod.name;
+  const { data: prod } = await supabase
+  .from("products_public")
+  .select("name")
+  .eq("id", data.product_id)
+  .maybeSingle();
+  if (prod) productName = prod.name;
 
- const { data: bumps } = await supabase
- .from("order_bumps")
- .select("bump_product_id")
- .eq("product_id", data.product_id)
- .eq("is_active", true)
- .limit(3);
- if (bumps && bumps.length > 0) {
- const bumpIds = bumps.map(b => b.bump_product_id);
- const { data: bumpProducts } = await supabase
- .from("products")
- .select("id, name, price, image_url, checkout_url")
- .in("id", bumpIds)
- .eq("status", "approved");
- if (bumpProducts) setUpsells(bumpProducts);
- }
+  const { data: bumps } = await supabase
+  .from("order_bumps")
+  .select("bump_product_id")
+  .eq("product_id", data.product_id)
+  .eq("is_active", true)
+  .limit(3);
+  if (bumps && bumps.length > 0) {
+  const bumpIds = bumps.map(b => b.bump_product_id);
+  const { data: bumpProducts } = await supabase
+  .from("products_public")
+  .select("id, name, price, image_url, checkout_url")
+  .in("id", bumpIds)
+  .eq("status", "active");
+  if (bumpProducts) setUpsells(bumpProducts);
+  }
  }
  setTx({
  product_name: productName,

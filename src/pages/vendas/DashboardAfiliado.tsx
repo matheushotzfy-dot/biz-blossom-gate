@@ -44,7 +44,7 @@ export default function DashboardAfiliado() {
  // Fetch product names
  const productIds = [...new Set(myLinks.map(l => l.product_id))];
  if (productIds.length) {
- const { data: prods } = await supabase.from("products").select("id, name").in("id", productIds);
+ const { data: prods } = await supabase.from("products_public").select("id, name").in("id", productIds);
  if (prods) {
  const map: Record<string, string> = {};
  prods.forEach(p => { map[p.id] = p.name; });
