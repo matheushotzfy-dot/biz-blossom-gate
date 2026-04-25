@@ -581,25 +581,25 @@ export default function LandingPage() {
  subtitle="Cada detalhe pensado para infoprodutores que querem performance real."
  />
  <div className="grid md:grid-cols-3 gap-6">
- {[
- { icon: Zap, title: "Checkout que converte", desc: "Timer de escassez, order bumps, social proof e recuperação automática. Cada segundo do checkout foi otimizado para maximizar sua taxa de aprovação.", tone: "primary" },
- { icon: Lock, title: "Segurança nível bancário", desc: "Antifraude com velocity checks, blacklist global, tokenização PCI-DSS e monitoramento 24/7. Seu dinheiro protegido.", tone: "success" },
- { icon: LineChart, title: "Dados em tempo real", desc: "Dashboard com métricas ao vivo, gráficos de conversão por método de pagamento, churn rate e funil completo. Decisões baseadas em dados.", tone: "info" },
- ].map((item, i) => (
- <motion.div key={i}
- initial={{ opacity: 0, y: 24 }}
- whileInView={{ opacity: 1, y: 0 }}
- viewport={{ once: true }}
- transition={{ duration: 0.6, delay: i * 0.1 }}
- className="rounded-3xl bg-card/40 backdrop-blur-xl border border-border/10 p-6 md:p-8 hover:border-primary/15 hover:shadow-xl transition-all duration-500 group"
- >
- <div className={`h-12 w-12 rounded-2xl bg-${item.tone}/8 flex items-center justify-center mb-5 group-hover:scale-110 transition-transform`}>
- <item.icon className={`h-5 w-5 text-${item.tone}`} />
- </div>
- <h3 className="text-lg font-display font-bold text-foreground mb-3">{item.title}</h3>
- <p className="text-sm text-muted-foreground/50 leading-relaxed font-display">{item.desc}</p>
- </motion.div>
- ))}
+        { [
+          { icon: Zap, title: "Checkout que converte", desc: "Timer de escassez, order bumps, social proof e recuperação automática. Cada segundo do checkout foi otimizado para maximizar sua taxa de aprovação.", tone: "primary" },
+          { icon: Lock, title: "Segurança nível bancário", desc: "Antifraude com velocity checks, blacklist global, tokenização PCI-DSS e monitoramento 24/7. Seu dinheiro protegido.", tone: "success" },
+          { icon: LineChart, title: "Dados em tempo real", desc: "Dashboard com métricas ao vivo, gráficos de conversão por método de pagamento, churn rate e funil completo. Decisões baseadas em dados.", tone: "info" },
+        ].map((item, i) => (
+          <motion.div key={i}
+            initial={{ opacity: 0, y: 32 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.8, delay: i * 0.1, ease: [0.16, 1, 0.3, 1] }}
+            className="group relative rounded-[32px] bg-card/40 backdrop-blur-2xl border border-border/10 p-8 md:p-10 hover:border-primary/20 hover:shadow-2xl transition-all duration-700 ease-[cubic-bezier(0.16,1,0.3,1)]"
+          >
+            <div className={`h-14 w-14 rounded-2xl bg-${item.tone}/10 flex items-center justify-center mb-6 group-hover:scale-110 group-hover:rotate-3 transition-transform duration-500 shadow-inner`}>
+              <item.icon className={`h-6 w-6 text-${item.tone}`} />
+            </div>
+            <h3 className="text-xl font-display font-black text-foreground mb-4 leading-tight">{item.title}</h3>
+            <p className="text-[15px] text-muted-foreground/50 leading-relaxed font-display font-medium">{item.desc}</p>
+          </motion.div>
+        ))}
  </div>
  </Section>
 
