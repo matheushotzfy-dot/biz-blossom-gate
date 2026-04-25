@@ -6,12 +6,12 @@ import { useState, useEffect, useMemo, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence, useScroll, useTransform, useInView } from "framer-motion";
 import {
- Rocket, ArrowRight, Shield, Zap, BarChart2, CreditCard, Users,
- CheckCircle2, Star, TrendingUp, Globe, Lock, ChevronRight,
- Play, Sparkles, Award, Crown, Activity, QrCode, Wallet,
- Smartphone, LineChart, Target, Gem, Eye, Timer, Heart,
- Gift, BadgeCheck, ArrowUpRight, ChevronDown, Fingerprint,
- BookOpen, Layers, Radio, Code2, RefreshCw, CircleDollarSign,
+  Rocket, ArrowRight, Shield, Zap, BarChart2, CreditCard, Users,
+  CheckCircle2, Star, TrendingUp, Globe, Lock, ChevronRight,
+  Play, Sparkles, Award, Crown, Activity, QrCode, Wallet,
+  Smartphone, LineChart, Target, Gem, Eye, Timer, Heart,
+  Gift, BadgeCheck, ArrowUpRight, ChevronDown, Fingerprint,
+  BookOpen, Layers, Radio, Code2, RefreshCw, CircleDollarSign, Check
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
