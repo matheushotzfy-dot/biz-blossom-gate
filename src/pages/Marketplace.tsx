@@ -199,57 +199,97 @@ export default function Marketplace() {
  ) : (
  <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
  <AnimatePresence mode="popLayout">
- {filtered.map((product, i) => (
- <motion.div key={product.id}
- initial={{ opacity: 0, y: 16, scale: 0.97 }}
- animate={{ opacity: 1, y: 0, scale: 1 }}
- exit={{ opacity: 0, scale: 0.95 }}
- transition={{ duration: 0.35, delay: Math.min(i * 0.05, 0.3), ease: [0.16, 1, 0.3, 1] }}
- layout
- className="group rounded-2xl border border-border/60 bg-card shadow-sm overflow-hidden flex flex-col hover:ring-1 hover:ring-primary/15 hover:shadow-xl hover:shadow-primary/5 transition-all duration-500"
- >
- {/* Image */}
- <div className="relative aspect-video bg-gradient-to-br from-muted/20 to-muted/5 overflow-hidden">
- {product.image_url ? (
- <img src={product.image_url} alt={product.name} loading="lazy"
- className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-[1.05] ease-[cubic-bezier(0.16,1,0.3,1)]" />
- ) : (
- <div className="flex h-full items-center justify-center"><ShoppingCart className="h-10 w-10 text-muted-foreground/15" /></div>
- )}
- <div className="absolute inset-0 bg-gradient-to-t from-card via-card/20 to-transparent opacity-80" />
- <div className="absolute top-3 right-3">
- <span className="rounded-xl bg-success/90 backdrop-blur-sm px-3 py-1.5 text-[11px] font-black text-success-foreground shadow-lg">
- {product.affiliate_commission}% comissão
- </span>
- </div>
- </div>
+          {filtered.map((product, i) => (
+            <motion.div key={product.id}
+              initial={{ opacity: 0, y: 16, scale: 0.97 }}
+              whileInView={{ opacity: 1, y: 0, scale: 1 }}
+              viewport={{ once: true, margin: "-40px" }}
+              whileHover={{ y: -8, transition: { duration: 0.4, ease: [0.16, 1, 0.3, 1] } }}
+              transition={{ duration: 0.5, delay: Math.min(i * 0.04, 0.3), ease: [0.16, 1, 0.3, 1] }}
+              layout
+              className="group relative flex flex-col overflow-hidden rounded-[24px] border border-border/40 bg-card/60 backdrop-blur-sm transition-all duration-500 hover:border-primary/30 hover:shadow-[0_20px_40px_-12px_rgba(0,0,0,0.12)]"
+            >
+              {/* Image Section */}
+              <div className="relative aspect-[16/10] overflow-hidden">
+                {product.image_url ? (
+                  <img 
+                    src={product.image_url} 
+                    alt={product.name} 
+                    loading="lazy"
+                    className="h-full w-full object-cover transition-transform duration-1000 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:scale-110" 
+                  />
+                ) : (
+                  <div className="flex h-full items-center justify-center bg-gradient-to-br from-muted/20 to-muted/5">
+                    <ShoppingCart className="h-10 w-10 text-muted-foreground/10" />
+                  </div>
+                )}
+                
+                {/* Gradient Overlays */}
+                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-60 transition-opacity duration-500 group-hover:opacity-40" />
+                <div className="absolute inset-0 ring-1 ring-inset ring-white/10" />
+                
+                {/* Commission Badge */}
+                <div className="absolute top-4 right-4 translate-y-0 opacity-100 transition-all duration-500 group-hover:-translate-y-1">
+                  <div className="flex items-center gap-1.5 rounded-full bg-success/90 backdrop-blur-md px-3 py-1.5 text-[10px] font-black uppercase tracking-wider text-success-foreground shadow-lg shadow-success/20">
+                    <Percent className="h-3 w-3" />
+                    {product.affiliate_commission}% Comissão
+                  </div>
+                </div>
 
- {/* Content */}
- <div className="flex flex-col flex-1 p-5">
- <h3 className="text-[15px] font-display font-black text-foreground line-clamp-2 mb-1 tracking-[-0.02em]">{product.name}</h3>
- {product.display_name && <p className="text-[11px] text-muted-foreground/50 mb-2 font-medium">por {product.display_name}</p>}
- {product.description && <p className="text-[11px] text-muted-foreground/40 line-clamp-2 mb-4 leading-relaxed">{product.description}</p>}
+                {/* Bottom Overlay Info */}
+                <div className="absolute inset-x-0 bottom-0 p-5 transform translate-y-2 opacity-0 transition-all duration-500 group-hover:translate-y-0 group-hover:opacity-100">
+                   <div className="flex items-center gap-2 text-[10px] font-bold text-white/70 uppercase tracking-widest">
+                     <Users className="h-3 w-3" />
+                     {product.display_name || "Vendedor verificado"}
+                   </div>
+                </div>
+              </div>
 
- <div className="mt-auto">
- <div className="flex items-end justify-between mb-4 pb-4 border-b border-border/10">
- <div>
- <p className="text-[9px] text-muted-foreground/40 font-bold uppercase tracking-wider">Preço</p>
- <p className="text-lg font-display font-black text-foreground tabular-nums tracking-tight">{fmt(product.price)}</p>
- </div>
- <div className="text-right">
- <p className="text-[9px] text-muted-foreground/40 font-bold uppercase tracking-wider">Você ganha</p>
- <p className="text-lg font-display font-black text-success tabular-nums tracking-tight">{fmt((product.price * product.affiliate_commission) / 100)}</p>
- </div>
- </div>
- <Button onClick={() => handleAffiliate(product)} disabled={affiliating === product.id}
- className="w-full gap-2 rounded-xl h-11 text-sm font-display font-bold shadow-lg shadow-primary/20 transition-all duration-300">
- {affiliating === product.id ? <div className="h-4 w-4 border-2 border-primary-foreground border-t-transparent rounded-full animate-spin" /> : <Link2 className="h-4 w-4" />}
- {affiliating === product.id ? "Criando link..." : "Afiliar-se"}
- </Button>
- </div>
- </div>
- </motion.div>
- ))}
+              {/* Content Section */}
+              <div className="flex flex-1 flex-col p-6">
+                <div className="mb-4">
+                  <h3 className="line-clamp-1 font-display text-[17px] font-black tracking-[-0.03em] text-foreground transition-colors group-hover:text-primary">
+                    {product.name}
+                  </h3>
+                  <p className="mt-1.5 line-clamp-2 text-[12px] leading-relaxed text-muted-foreground/60 font-medium">
+                    {product.description || "Sem descrição disponível para este produto."}
+                  </p>
+                </div>
+
+                <div className="mt-auto pt-5 border-t border-border/10">
+                  <div className="flex items-center justify-between mb-5">
+                    <div className="space-y-0.5">
+                      <p className="text-[9px] font-black uppercase tracking-[0.15em] text-muted-foreground/40">Preço Sugerido</p>
+                      <p className="font-display text-xl font-black text-foreground tabular-nums tracking-tight">
+                        {fmt(product.price)}
+                      </p>
+                    </div>
+                    <div className="text-right space-y-0.5">
+                      <p className="text-[9px] font-black uppercase tracking-[0.15em] text-success/60">Seu ganho</p>
+                      <p className="font-display text-xl font-black text-success tabular-nums tracking-tight">
+                        {fmt((product.price * product.affiliate_commission) / 100)}
+                      </p>
+                    </div>
+                  </div>
+                  
+                  <Button 
+                    onClick={() => handleAffiliate(product)} 
+                    disabled={affiliating === product.id}
+                    className="w-full h-12 gap-2.5 rounded-2xl font-display font-black text-[13px] uppercase tracking-wider shadow-xl shadow-primary/20 transition-all duration-500 hover:shadow-primary/40 active:scale-[0.98]"
+                  >
+                    {affiliating === product.id ? (
+                      <div className="h-4 w-4 border-2 border-primary-foreground border-t-transparent rounded-full animate-spin" />
+                    ) : (
+                      <>
+                        <Link2 className="h-4 w-4" />
+                        <span>Promover Produto</span>
+                      </>
+                    )}
+                  </Button>
+                </div>
+              </div>
+            </motion.div>
+          ))}
  </AnimatePresence>
  </div>
  )}

@@ -6,12 +6,12 @@ import { useState, useEffect, useMemo, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence, useScroll, useTransform, useInView } from "framer-motion";
 import {
- Rocket, ArrowRight, Shield, Zap, BarChart2, CreditCard, Users,
- CheckCircle2, Star, TrendingUp, Globe, Lock, ChevronRight,
- Play, Sparkles, Award, Crown, Activity, QrCode, Wallet,
- Smartphone, LineChart, Target, Gem, Eye, Timer, Heart,
- Gift, BadgeCheck, ArrowUpRight, ChevronDown, Fingerprint,
- BookOpen, Layers, Radio, Code2, RefreshCw, CircleDollarSign,
+  Rocket, ArrowRight, Shield, Zap, BarChart2, CreditCard, Users,
+  CheckCircle2, Star, TrendingUp, Globe, Lock, ChevronRight,
+  Play, Sparkles, Award, Crown, Activity, QrCode, Wallet,
+  Smartphone, LineChart, Target, Gem, Eye, Timer, Heart,
+  Gift, BadgeCheck, ArrowUpRight, ChevronDown, Fingerprint,
+  BookOpen, Layers, Radio, Code2, RefreshCw, CircleDollarSign, Check
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -91,95 +91,115 @@ function SectionHeader({ badge, title, subtitle, center = true }: { badge: strin
 
 /* ─── Feature Bento Card ─── */
 function BentoCard({ icon: Icon, title, desc, tone, delay, large }: {
- icon: React.ElementType; title: string; desc: string; tone: string; delay: number; large?: boolean;
+  icon: React.ElementType; title: string; desc: string; tone: string; delay: number; large?: boolean;
 }) {
- const colors: Record<string, { bg: string; icon: string; border: string; glow: string }> = {
- primary: { bg: "bg-primary/8", icon: "text-primary", border: "border-l-primary/30", glow: "group-hover:shadow-primary/10" },
- info: { bg: "bg-info/8", icon: "text-info", border: "border-l-info/30", glow: "group-hover:shadow-info/10" },
- warning: { bg: "bg-warning/8", icon: "text-warning", border: "border-l-warning/30", glow: "group-hover:shadow-warning/10" },
- success: { bg: "bg-success/8", icon: "text-success", border: "border-l-success/30", glow: "group-hover:shadow-success/10" },
- };
- const t = colors[tone] || colors.primary;
- return (
- <motion.div
- initial={{ opacity: 0, y: 24 }}
- whileInView={{ opacity: 1, y: 0 }}
- viewport={{ once: true, margin: "-60px" }}
- transition={{ duration: 0.6, delay: delay * 0.08, ease: [0.16, 1, 0.3, 1] }}
- whileHover={{ y: -4, scale: 1.01 }}
- className={cn(
- "group relative p-6 md:p-8 rounded-3xl border-l-[3px] cursor-default",
- "bg-card/40 backdrop-blur-xl border border-border/10",
- "hover:bg-card/60 hover:border-border/20 transition-all duration-500",
- t.border, t.glow, "hover:shadow-2xl",
- large && "md:col-span-2"
- )}
- >
- <div className="absolute inset-0 rounded-3xl bg-gradient-to-br from-primary/[0.02] via-transparent to-info/[0.01] opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
- <div className="relative z-[1]">
- <div className={cn("h-12 w-12 rounded-2xl flex items-center justify-center mb-5", t.bg)}>
- <Icon className={cn("h-5 w-5", t.icon)} />
- </div>
- <h3 className="text-lg font-display font-bold text-foreground tracking-[-0.02em] mb-2">{title}</h3>
- <p className="text-sm text-muted-foreground/60 leading-relaxed font-display">{desc}</p>
- </div>
- </motion.div>
- );
+  const colors: Record<string, { bg: string; icon: string; border: string; glow: string; text: string }> = {
+    primary: { bg: "bg-primary/10", icon: "text-primary", border: "border-primary/20", glow: "shadow-primary/5", text: "text-primary" },
+    info: { bg: "bg-info/10", icon: "text-info", border: "border-info/20", glow: "shadow-info/5", text: "text-info" },
+    warning: { bg: "bg-warning/10", icon: "text-warning", border: "border-warning/20", glow: "shadow-warning/5", text: "text-warning" },
+    success: { bg: "bg-success/10", icon: "text-success", border: "border-success/20", glow: "shadow-success/5", text: "text-success" },
+  };
+  const t = colors[tone] || colors.primary;
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 32 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, margin: "-60px" }}
+      transition={{ duration: 0.8, delay: delay * 0.1, ease: [0.16, 1, 0.3, 1] }}
+      whileHover={{ y: -8, scale: 1.01 }}
+      className={cn(
+        "group relative p-8 md:p-10 rounded-[32px] overflow-hidden",
+        "bg-card/40 backdrop-blur-2xl border border-border/10",
+        "transition-all duration-700 ease-[cubic-bezier(0.16,1,0.3,1)]",
+        "hover:border-primary/20 hover:shadow-[0_32px_64px_-16px_rgba(0,0,0,0.15)]",
+        large && "md:col-span-2"
+      )}
+    >
+      <div className="absolute inset-0 bg-gradient-to-br from-white/[0.03] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
+      <div className="absolute -right-12 -top-12 h-40 w-40 rounded-full bg-primary/5 blur-[80px] opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
+      
+      <div className="relative z-[1]">
+        <div className={cn("h-16 w-16 rounded-[22px] flex items-center justify-center mb-8 shadow-inner transition-transform duration-500 group-hover:scale-110 group-hover:rotate-3", t.bg)}>
+          <Icon className={cn("h-7 w-7", t.icon)} />
+        </div>
+        <h3 className="text-xl md:text-2xl font-display font-black text-foreground tracking-[-0.03em] mb-3 leading-tight">
+          {title}
+        </h3>
+        <p className="text-[15px] md:text-base text-muted-foreground/50 leading-relaxed font-display font-medium">
+          {desc}
+        </p>
+      </div>
+
+      <div className="absolute bottom-6 right-8 opacity-0 group-hover:opacity-100 translate-x-4 group-hover:translate-x-0 transition-all duration-500">
+        <div className={cn("h-8 w-8 rounded-full flex items-center justify-center border", t.border)}>
+           <ArrowUpRight className={cn("h-4 w-4", t.icon)} />
+        </div>
+      </div>
+    </motion.div>
+  );
 }
 
 /* ─── Pricing Card ─── */
 function PricingCard({ name, price, desc, features, popular, delay }: {
- name: string; price: string; desc: string; features: string[]; popular?: boolean; delay: number;
+  name: string; price: string; desc: string; features: string[]; popular?: boolean; delay: number;
 }) {
- const navigate = useNavigate();
- return (
- <motion.div
- initial={{ opacity: 0, y: 32 }}
- whileInView={{ opacity: 1, y: 0 }}
- viewport={{ once: true }}
- transition={{ duration: 0.6, delay: delay * 0.1 }}
- whileHover={{ y: -6, scale: 1.02 }}
- className={cn(
- "relative rounded-3xl p-8 transition-all duration-500",
- popular
- ? "bg-gradient-to-br from-primary/15 via-card/80 to-info/10 border-2 border-primary/30 shadow-2xl shadow-primary/10"
- : "bg-card/40 backdrop-blur-xl border border-border/15 hover:border-primary/15 hover:shadow-xl"
- )}
- >
- {popular && (
- <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 px-4 py-1 rounded-full gradient-primary text-primary-foreground text-[10px] font-bold uppercase tracking-[0.15em] font-display shadow-lg shadow-primary/25">
- Mais Popular
- </div>
- )}
- <div className="mb-6">
- <h3 className="text-lg font-display font-bold text-foreground">{name}</h3>
- <p className="text-xs text-muted-foreground/60 mt-1 font-display">{desc}</p>
- </div>
- <div className="mb-6">
- <span className="text-4xl font-display font-black text-foreground tracking-[-0.04em]">{price}</span>
- <span className="text-sm text-muted-foreground/40 font-display ml-1">por venda</span>
- </div>
- <ul className="space-y-3 mb-8">
- {features.map((f, i) => (
- <li key={i} className="flex items-start gap-3">
- <CheckCircle2 className="h-4 w-4 text-primary shrink-0 mt-0.5" />
- <span className="text-sm text-muted-foreground/70 font-display">{f}</span>
- </li>
- ))}
- </ul>
- <Button
- onClick={() => navigate("/auth")}
- className={cn(
- "w-full h-12 rounded-xl font-display font-bold text-sm transition-all duration-300",
- popular
- ? "gradient-primary text-primary-foreground shadow-lg shadow-primary/25 hover:shadow-xl hover:shadow-primary/35"
- : "bg-card border border-border/20 text-foreground hover:bg-primary/10 hover:border-primary/20"
- )}
- >
- Começar agora <ArrowRight className="h-4 w-4 ml-2" />
- </Button>
- </motion.div>
- );
+  const navigate = useNavigate();
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 40 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true }}
+      transition={{ duration: 0.8, delay: delay * 0.12, ease: [0.16, 1, 0.3, 1] }}
+      whileHover={{ y: -12, scale: 1.02 }}
+      className={cn(
+        "relative rounded-[40px] p-10 transition-all duration-700 ease-[cubic-bezier(0.16,1,0.3,1)]",
+        popular
+          ? "bg-card/60 backdrop-blur-3xl border-2 border-primary/20 shadow-[0_40px_80px_-20px_rgba(var(--primary),0.15)] ring-1 ring-primary/10"
+          : "bg-card/40 backdrop-blur-2xl border border-border/10 hover:border-primary/20 hover:shadow-2xl"
+      )}
+    >
+      {popular && (
+        <div className="absolute -top-4 left-1/2 -translate-x-1/2 px-6 py-2 rounded-full gradient-primary text-primary-foreground text-[10px] font-black uppercase tracking-[0.2em] font-display shadow-xl shadow-primary/25">
+          Escolha Recomendada
+        </div>
+      )}
+      
+      <div className="mb-8">
+        <h3 className="text-2xl font-display font-black text-foreground tracking-tight">{name}</h3>
+        <p className="text-[13px] text-muted-foreground/40 mt-1.5 font-display font-semibold uppercase tracking-wider">{desc}</p>
+      </div>
+
+      <div className="mb-10 flex items-baseline gap-1">
+        <span className="text-5xl md:text-6xl font-display font-black text-foreground tracking-[-0.05em]">{price}</span>
+        <span className="text-sm text-muted-foreground/30 font-display font-bold">/venda</span>
+      </div>
+
+      <div className="h-px w-full bg-gradient-to-r from-transparent via-border/10 to-transparent mb-10" />
+
+      <ul className="space-y-4 mb-10">
+        {features.map((f, i) => (
+          <li key={i} className="flex items-start gap-4">
+            <div className="h-5 w-5 rounded-full bg-primary/10 flex items-center justify-center shrink-0 mt-0.5">
+              <Check className="h-3 w-3 text-primary" strokeWidth={3} />
+            </div>
+            <span className="text-[15px] text-muted-foreground/60 font-display font-medium leading-tight">{f}</span>
+          </li>
+        ))}
+      </ul>
+
+      <Button
+        onClick={() => navigate("/auth")}
+        className={cn(
+          "w-full h-14 rounded-2xl font-display font-black text-[13px] uppercase tracking-widest transition-all duration-500",
+          popular
+            ? "gradient-primary text-primary-foreground shadow-2xl shadow-primary/30 hover:shadow-primary/50 hover:scale-[1.02]"
+            : "bg-card/80 border border-border/20 text-foreground hover:bg-primary hover:text-primary-foreground hover:border-primary"
+        )}
+      >
+        Começar Agora <ArrowRight className="h-4 w-4 ml-2" />
+      </Button>
+    </motion.div>
+  );
 }
 
 
@@ -561,25 +581,25 @@ export default function LandingPage() {
  subtitle="Cada detalhe pensado para infoprodutores que querem performance real."
  />
  <div className="grid md:grid-cols-3 gap-6">
- {[
- { icon: Zap, title: "Checkout que converte", desc: "Timer de escassez, order bumps, social proof e recuperação automática. Cada segundo do checkout foi otimizado para maximizar sua taxa de aprovação.", tone: "primary" },
- { icon: Lock, title: "Segurança nível bancário", desc: "Antifraude com velocity checks, blacklist global, tokenização PCI-DSS e monitoramento 24/7. Seu dinheiro protegido.", tone: "success" },
- { icon: LineChart, title: "Dados em tempo real", desc: "Dashboard com métricas ao vivo, gráficos de conversão por método de pagamento, churn rate e funil completo. Decisões baseadas em dados.", tone: "info" },
- ].map((item, i) => (
- <motion.div key={i}
- initial={{ opacity: 0, y: 24 }}
- whileInView={{ opacity: 1, y: 0 }}
- viewport={{ once: true }}
- transition={{ duration: 0.6, delay: i * 0.1 }}
- className="rounded-3xl bg-card/40 backdrop-blur-xl border border-border/10 p-6 md:p-8 hover:border-primary/15 hover:shadow-xl transition-all duration-500 group"
- >
- <div className={`h-12 w-12 rounded-2xl bg-${item.tone}/8 flex items-center justify-center mb-5 group-hover:scale-110 transition-transform`}>
- <item.icon className={`h-5 w-5 text-${item.tone}`} />
- </div>
- <h3 className="text-lg font-display font-bold text-foreground mb-3">{item.title}</h3>
- <p className="text-sm text-muted-foreground/50 leading-relaxed font-display">{item.desc}</p>
- </motion.div>
- ))}
+        { [
+          { icon: Zap, title: "Checkout que converte", desc: "Timer de escassez, order bumps, social proof e recuperação automática. Cada segundo do checkout foi otimizado para maximizar sua taxa de aprovação.", tone: "primary" },
+          { icon: Lock, title: "Segurança nível bancário", desc: "Antifraude com velocity checks, blacklist global, tokenização PCI-DSS e monitoramento 24/7. Seu dinheiro protegido.", tone: "success" },
+          { icon: LineChart, title: "Dados em tempo real", desc: "Dashboard com métricas ao vivo, gráficos de conversão por método de pagamento, churn rate e funil completo. Decisões baseadas em dados.", tone: "info" },
+        ].map((item, i) => (
+          <motion.div key={i}
+            initial={{ opacity: 0, y: 32 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.8, delay: i * 0.1, ease: [0.16, 1, 0.3, 1] }}
+            className="group relative rounded-[32px] bg-card/40 backdrop-blur-2xl border border-border/10 p-8 md:p-10 hover:border-primary/20 hover:shadow-2xl transition-all duration-700 ease-[cubic-bezier(0.16,1,0.3,1)]"
+          >
+            <div className={`h-14 w-14 rounded-2xl bg-${item.tone}/10 flex items-center justify-center mb-6 group-hover:scale-110 group-hover:rotate-3 transition-transform duration-500 shadow-inner`}>
+              <item.icon className={`h-6 w-6 text-${item.tone}`} />
+            </div>
+            <h3 className="text-xl font-display font-black text-foreground mb-4 leading-tight">{item.title}</h3>
+            <p className="text-[15px] text-muted-foreground/50 leading-relaxed font-display font-medium">{item.desc}</p>
+          </motion.div>
+        ))}
  </div>
  </Section>
 
