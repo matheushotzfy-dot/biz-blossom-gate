@@ -2419,6 +2419,8 @@ export type Database = {
       }
       products_public: {
         Row: {
+          affiliate_commission: number | null
+          affiliate_enabled: boolean | null
           checkout_address_required: boolean | null
           checkout_banner_desktop_url: string | null
           checkout_banner_mobile_url: string | null
@@ -2429,6 +2431,7 @@ export type Database = {
           checkout_guarantee_enabled: boolean | null
           checkout_pix_enabled: boolean | null
           checkout_social_proof: boolean | null
+          checkout_theme: string | null
           checkout_timer_enabled: boolean | null
           checkout_timer_minutes: number | null
           checkout_url: string | null
@@ -2444,6 +2447,8 @@ export type Database = {
           support_email: string | null
         }
         Insert: {
+          affiliate_commission?: number | null
+          affiliate_enabled?: boolean | null
           checkout_address_required?: boolean | null
           checkout_banner_desktop_url?: string | null
           checkout_banner_mobile_url?: string | null
@@ -2454,6 +2459,7 @@ export type Database = {
           checkout_guarantee_enabled?: boolean | null
           checkout_pix_enabled?: boolean | null
           checkout_social_proof?: boolean | null
+          checkout_theme?: string | null
           checkout_timer_enabled?: boolean | null
           checkout_timer_minutes?: number | null
           checkout_url?: string | null
@@ -2469,6 +2475,8 @@ export type Database = {
           support_email?: string | null
         }
         Update: {
+          affiliate_commission?: number | null
+          affiliate_enabled?: boolean | null
           checkout_address_required?: boolean | null
           checkout_banner_desktop_url?: string | null
           checkout_banner_mobile_url?: string | null
@@ -2479,6 +2487,7 @@ export type Database = {
           checkout_guarantee_enabled?: boolean | null
           checkout_pix_enabled?: boolean | null
           checkout_social_proof?: boolean | null
+          checkout_theme?: string | null
           checkout_timer_enabled?: boolean | null
           checkout_timer_minutes?: number | null
           checkout_url?: string | null
@@ -2554,6 +2563,10 @@ export type Database = {
       current_user_has_role: {
         Args: { _role: Database["public"]["Enums"]["app_role"] }
         Returns: boolean
+      }
+      get_affiliate_product_owner: {
+        Args: { _product_id: string }
+        Returns: string
       }
       get_checkout_status: {
         Args: { _transaction_id: string }
