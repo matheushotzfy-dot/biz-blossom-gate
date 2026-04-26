@@ -477,8 +477,8 @@ export default function Dashboard() {
         {/* Toolbar */}
         <div className="relative flex flex-wrap items-center justify-between gap-2 border-b border-border/30 px-6 py-4 lg:px-8">
           <div className="flex items-center gap-2.5">
-            <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-primary/10 ring-1 ring-primary/20 text-primary shadow-inner">
-              <BarChart3 className="h-4 w-4" strokeWidth={2.25} />
+            <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-gradient-to-b from-primary/15 to-primary/5 border border-primary/20 text-primary">
+              <BarChart3 className="h-3.5 w-3.5" strokeWidth={2.5} />
             </div>
             <span className="font-display text-[12px] font-black uppercase tracking-[0.18em] text-foreground">Visão Executiva</span>
             {scaleModeUnlocked && (
