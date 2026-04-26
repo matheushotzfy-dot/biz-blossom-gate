@@ -673,16 +673,16 @@ export default function Dashboard() {
             </div>
             <div className="flex-1 divide-y divide-border/20">
               {[
-                { icon: <PixLogoMark className="h-4 w-4" />, label: "PIX", conv: pixConversion, revenue: pixRevenue, count: `${pixApprovedCount}/${pixTotalCount}`, color: "text-success", ringColor: "ring-success/20", bgColor: "bg-success/10" },
-                { icon: <CreditCard className="h-4 w-4" strokeWidth={2.25} />, label: "Cartão", conv: cardConversion, revenue: cardRevenue, count: `${cardApprovedCount}/${cardTotalCount}`, color: "text-info", ringColor: "ring-info/20", bgColor: "bg-info/10" },
+                { icon: <PixLogoMark className="h-3.5 w-3.5" />, label: "PIX", conv: pixConversion, revenue: pixRevenue, count: `${pixApprovedCount}/${pixTotalCount}`, color: "text-success", borderColor: "border-success/15", bgColor: "bg-gradient-to-b from-success/12 to-success/4" },
+                { icon: <CreditCard className="h-3.5 w-3.5" strokeWidth={2.5} />, label: "Cartão", conv: cardConversion, revenue: cardRevenue, count: `${cardApprovedCount}/${cardTotalCount}`, color: "text-info", borderColor: "border-info/15", bgColor: "bg-gradient-to-b from-info/12 to-info/4" },
               ].map((m) => (
-                <div key={m.label} className="group px-6 py-5 transition-colors hover:bg-muted/5">
+                <div key={m.label} className="group px-6 py-5 transition-colors hover:bg-foreground/[0.015]">
                   <div className="flex items-center justify-between mb-3">
                     <div className="flex items-center gap-2.5">
-                      <div className={cn("flex h-8 w-8 items-center justify-center rounded-xl ring-1 shadow-inner transition-transform group-hover:scale-110", m.bgColor, m.ringColor, m.color)}>
+                      <div className={cn("flex h-7 w-7 items-center justify-center rounded-lg border transition-colors", m.bgColor, m.borderColor, m.color)}>
                         {m.icon}
                       </div>
-                      <span className="font-display text-[12px] text-foreground font-black uppercase tracking-wider">{m.label}</span>
+                      <span className="font-display text-[12px] text-foreground font-bold uppercase tracking-[0.08em]">{m.label}</span>
                     </div>
                     <span className={cn("font-display text-[14px] font-black tabular-nums tracking-tight", m.color)}>{m.conv.toFixed(1)}%</span>
                   </div>
@@ -692,20 +692,20 @@ export default function Dashboard() {
                   <p className="text-[10px] text-muted-foreground/50 mt-2 font-medium">{m.count} aprovadas</p>
                 </div>
               ))}
-              <div className="group px-6 py-5 transition-colors hover:bg-muted/5">
+              <div className="group px-6 py-5 transition-colors hover:bg-foreground/[0.015]">
                 <div className="flex items-center justify-between mb-3">
                   <div className="flex items-center gap-2.5">
-                    <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-warning/10 ring-1 ring-warning/20 text-warning shadow-inner transition-transform group-hover:scale-110">
-                      <DollarSign className="h-4 w-4" strokeWidth={2.25} />
+                    <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-gradient-to-b from-warning/12 to-warning/4 border border-warning/15 text-warning">
+                      <DollarSign className="h-3.5 w-3.5" strokeWidth={2.5} />
                     </div>
-                    <span className="font-display text-[12px] text-foreground font-black uppercase tracking-wider">Saques pendentes</span>
+                    <span className="font-display text-[12px] text-foreground font-bold uppercase tracking-[0.08em]">Saques pendentes</span>
                   </div>
                   <span className="font-display text-[10px] text-muted-foreground/50 tabular-nums font-bold">{withdrawals.filter(w => w.status === "pending").length}</span>
                 </div>
                 <p className="font-display text-[20px] font-black tabular-nums text-warning leading-none tracking-[-0.03em]">
                   {privacy.hidden ? CENSORED : fmt(withdrawalPending)}
                 </p>
-                <Link to="/financeiro/saques" className="text-[10px] text-primary font-display font-black uppercase tracking-wider mt-2 inline-flex items-center gap-1 hover:gap-1.5 transition-all">
+                <Link to="/financeiro/saques" className="text-[10px] text-primary font-display font-bold uppercase tracking-[0.08em] mt-2 inline-flex items-center gap-1 hover:gap-1.5 transition-all">
                   Gerenciar <ChevronRight className="h-3 w-3" strokeWidth={2.5} />
                 </Link>
               </div>
