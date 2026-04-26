@@ -468,18 +468,19 @@ export default function Dashboard() {
       {/* ════════════════════════════════════════════════════════════════ */}
       {/* HERO — ONE DOMINANT METRIC                                       */}
       {/* ════════════════════════════════════════════════════════════════ */}
-      <section className="relative mb-5 rounded-[28px] border border-border/40 bg-card/60 backdrop-blur-sm overflow-hidden shadow-[0_8px_32px_-12px_rgba(0,0,0,0.08)]">
-        {/* Subtle ambient glow */}
-        <div className="pointer-events-none absolute -top-32 -right-32 h-64 w-64 rounded-full bg-primary/5 blur-[100px]" />
-        <div className="pointer-events-none absolute -bottom-32 -left-32 h-64 w-64 rounded-full bg-success/5 blur-[100px]" />
+      <section className="relative mb-5 rounded-[24px] border border-border/50 bg-gradient-to-b from-card via-card to-card/95 overflow-hidden shadow-[0_1px_0_0_hsl(var(--foreground)/0.04)_inset,0_24px_48px_-24px_hsl(var(--foreground)/0.12)]">
+        {/* Premium ambient layers */}
+        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,hsl(var(--primary)/0.06),transparent_55%)]" />
+        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_left,hsl(var(--success)/0.05),transparent_55%)]" />
+        <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-foreground/10 to-transparent" />
 
         {/* Toolbar */}
         <div className="relative flex flex-wrap items-center justify-between gap-2 border-b border-border/30 px-6 py-4 lg:px-8">
           <div className="flex items-center gap-2.5">
-            <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-primary/10 ring-1 ring-primary/20 text-primary shadow-inner">
-              <BarChart3 className="h-4 w-4" strokeWidth={2.25} />
+            <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-gradient-to-b from-primary/15 to-primary/5 border border-primary/20 text-primary">
+              <BarChart3 className="h-3.5 w-3.5" strokeWidth={2.5} />
             </div>
-            <span className="font-display text-[12px] font-black uppercase tracking-[0.18em] text-foreground">Visão Executiva</span>
+            <span className="font-display text-[13px] font-bold tracking-[-0.01em] text-foreground">Visão executiva</span>
             {scaleModeUnlocked && (
               <button onClick={activateScaleMode} className={cn("ml-1 inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[10px] font-black uppercase tracking-wider transition-all",
                 scaleMode ? "border-primary/30 bg-primary/10 text-primary shadow-sm shadow-primary/10" : "border-border/60 bg-background/80 text-muted-foreground hover:text-foreground hover:border-primary/30"
@@ -610,18 +611,19 @@ export default function Dashboard() {
       {/* ════════════════════════════════════════════════════════════════ */}
       {/* DOMINANT CHART AREA                                              */}
       {/* ════════════════════════════════════════════════════════════════ */}
-      <section className="mb-5 rounded-[28px] border border-border/40 bg-card/60 backdrop-blur-sm overflow-hidden shadow-[0_8px_32px_-12px_rgba(0,0,0,0.08)]">
+      <section className="relative mb-5 rounded-[24px] border border-border/50 bg-gradient-to-b from-card via-card to-card/95 overflow-hidden shadow-[0_1px_0_0_hsl(var(--foreground)/0.04)_inset,0_24px_48px_-24px_hsl(var(--foreground)/0.12)]">
+        <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-foreground/10 to-transparent" />
         <div className="grid grid-cols-1 xl:grid-cols-[1fr_300px]">
           {/* Chart */}
           <div className="flex flex-col border-b xl:border-b-0 xl:border-r border-border/30">
             <div className="flex items-center justify-between px-7 py-5 border-b border-border/30">
               <div className="flex items-center gap-3">
-                <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-primary/10 ring-1 ring-primary/20 text-primary shadow-inner">
-                  <TrendingUp className="h-4 w-4" strokeWidth={2.25} />
+                <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-gradient-to-b from-primary/15 to-primary/5 border border-primary/20 text-primary">
+                  <TrendingUp className="h-3.5 w-3.5" strokeWidth={2.5} />
                 </div>
                 <div>
-                  <p className="font-display text-[12px] font-black uppercase tracking-[0.18em] text-foreground">Performance de Receita</p>
-                  <p className="text-[10px] text-muted-foreground/50 mt-0.5 font-medium">
+                  <p className="font-display text-[13px] font-bold tracking-[-0.01em] text-foreground">Performance de receita</p>
+                  <p className="text-[11px] text-muted-foreground/55 mt-0.5 font-medium">
                     {!isCustom && selectedPeriod.days <= 1 ? "Distribuição por hora" : "Distribuição por dia"} · {selectedPeriod.label}
                   </p>
                 </div>
@@ -666,21 +668,21 @@ export default function Dashboard() {
           {/* Payment breakdown rail */}
           <div className="flex flex-col">
             <div className="px-6 py-5 border-b border-border/30">
-              <p className="font-display text-[12px] font-black uppercase tracking-[0.18em] text-foreground">Por método</p>
-              <p className="text-[10px] text-muted-foreground/50 mt-0.5 font-medium">Conversão e receita</p>
+              <p className="font-display text-[13px] font-bold tracking-[-0.01em] text-foreground">Por método</p>
+              <p className="text-[11px] text-muted-foreground/55 mt-0.5 font-medium">Conversão e receita</p>
             </div>
             <div className="flex-1 divide-y divide-border/20">
               {[
-                { icon: <PixLogoMark className="h-4 w-4" />, label: "PIX", conv: pixConversion, revenue: pixRevenue, count: `${pixApprovedCount}/${pixTotalCount}`, color: "text-success", ringColor: "ring-success/20", bgColor: "bg-success/10" },
-                { icon: <CreditCard className="h-4 w-4" strokeWidth={2.25} />, label: "Cartão", conv: cardConversion, revenue: cardRevenue, count: `${cardApprovedCount}/${cardTotalCount}`, color: "text-info", ringColor: "ring-info/20", bgColor: "bg-info/10" },
+                { icon: <PixLogoMark className="h-3.5 w-3.5" />, label: "PIX", conv: pixConversion, revenue: pixRevenue, count: `${pixApprovedCount}/${pixTotalCount}`, color: "text-success", borderColor: "border-success/15", bgColor: "bg-gradient-to-b from-success/12 to-success/4" },
+                { icon: <CreditCard className="h-3.5 w-3.5" strokeWidth={2.5} />, label: "Cartão", conv: cardConversion, revenue: cardRevenue, count: `${cardApprovedCount}/${cardTotalCount}`, color: "text-info", borderColor: "border-info/15", bgColor: "bg-gradient-to-b from-info/12 to-info/4" },
               ].map((m) => (
-                <div key={m.label} className="group px-6 py-5 transition-colors hover:bg-muted/5">
+                <div key={m.label} className="group px-6 py-5 transition-colors hover:bg-foreground/[0.015]">
                   <div className="flex items-center justify-between mb-3">
                     <div className="flex items-center gap-2.5">
-                      <div className={cn("flex h-8 w-8 items-center justify-center rounded-xl ring-1 shadow-inner transition-transform group-hover:scale-110", m.bgColor, m.ringColor, m.color)}>
+                      <div className={cn("flex h-7 w-7 items-center justify-center rounded-lg border transition-colors", m.bgColor, m.borderColor, m.color)}>
                         {m.icon}
                       </div>
-                      <span className="font-display text-[12px] text-foreground font-black uppercase tracking-wider">{m.label}</span>
+                      <span className="font-display text-[12px] text-foreground font-bold uppercase tracking-[0.08em]">{m.label}</span>
                     </div>
                     <span className={cn("font-display text-[14px] font-black tabular-nums tracking-tight", m.color)}>{m.conv.toFixed(1)}%</span>
                   </div>
@@ -690,20 +692,20 @@ export default function Dashboard() {
                   <p className="text-[10px] text-muted-foreground/50 mt-2 font-medium">{m.count} aprovadas</p>
                 </div>
               ))}
-              <div className="group px-6 py-5 transition-colors hover:bg-muted/5">
+              <div className="group px-6 py-5 transition-colors hover:bg-foreground/[0.015]">
                 <div className="flex items-center justify-between mb-3">
                   <div className="flex items-center gap-2.5">
-                    <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-warning/10 ring-1 ring-warning/20 text-warning shadow-inner transition-transform group-hover:scale-110">
-                      <DollarSign className="h-4 w-4" strokeWidth={2.25} />
+                    <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-gradient-to-b from-warning/12 to-warning/4 border border-warning/15 text-warning">
+                      <DollarSign className="h-3.5 w-3.5" strokeWidth={2.5} />
                     </div>
-                    <span className="font-display text-[12px] text-foreground font-black uppercase tracking-wider">Saques pendentes</span>
+                    <span className="font-display text-[12px] text-foreground font-bold uppercase tracking-[0.08em]">Saques pendentes</span>
                   </div>
                   <span className="font-display text-[10px] text-muted-foreground/50 tabular-nums font-bold">{withdrawals.filter(w => w.status === "pending").length}</span>
                 </div>
                 <p className="font-display text-[20px] font-black tabular-nums text-warning leading-none tracking-[-0.03em]">
                   {privacy.hidden ? CENSORED : fmt(withdrawalPending)}
                 </p>
-                <Link to="/financeiro/saques" className="text-[10px] text-primary font-display font-black uppercase tracking-wider mt-2 inline-flex items-center gap-1 hover:gap-1.5 transition-all">
+                <Link to="/financeiro/saques" className="text-[10px] text-primary font-display font-bold uppercase tracking-[0.08em] mt-2 inline-flex items-center gap-1 hover:gap-1.5 transition-all">
                   Gerenciar <ChevronRight className="h-3 w-3" strokeWidth={2.5} />
                 </Link>
               </div>
@@ -717,15 +719,16 @@ export default function Dashboard() {
         {/* ════════════════════════════════════════════════════════════════ */}
         <section className="grid grid-cols-1 gap-5 xl:grid-cols-[1fr_1.4fr] mb-8">
           {/* Quick actions — operational support */}
-          <div className="rounded-[28px] border border-border/40 bg-card/60 backdrop-blur-sm flex flex-col overflow-hidden shadow-[0_8px_32px_-12px_rgba(0,0,0,0.08)]">
+          <div className="relative rounded-[24px] border border-border/50 bg-gradient-to-b from-card via-card to-card/95 flex flex-col overflow-hidden shadow-[0_1px_0_0_hsl(var(--foreground)/0.04)_inset,0_24px_48px_-24px_hsl(var(--foreground)/0.12)]">
+            <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-foreground/10 to-transparent" />
             <div className="flex items-center justify-between border-b border-border/30 px-6 py-5">
               <div className="flex items-center gap-3">
-                <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-primary/10 ring-1 ring-primary/20 text-primary shadow-inner">
-                  <Zap className="h-4 w-4" strokeWidth={2.25} />
+                <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-gradient-to-b from-primary/15 to-primary/5 border border-primary/20 text-primary">
+                  <Zap className="h-3.5 w-3.5" strokeWidth={2.5} />
                 </div>
                 <div>
-                  <p className="font-display text-[12px] font-black uppercase tracking-[0.18em] text-foreground">Ações rápidas</p>
-                  <p className="text-[10px] text-muted-foreground/50 mt-0.5 font-medium">Atalhos operacionais</p>
+                  <p className="font-display text-[13px] font-bold tracking-[-0.01em] text-foreground">Ações rápidas</p>
+                  <p className="text-[11px] text-muted-foreground/55 mt-0.5 font-medium">Atalhos operacionais</p>
                 </div>
               </div>
               <Link to="/perfil" className="font-display text-[10px] text-muted-foreground/60 hover:text-foreground font-black uppercase tracking-wider transition-colors">Tudo</Link>
@@ -747,24 +750,24 @@ export default function Dashboard() {
                 { label: "Webhooks & API", href: "/vendas/webhooks", icon: Webhook, tone: "warning" },
                 { label: "Suporte", href: "/suporte", icon: Sparkles, tone: "primary" },
               ].map((action) => {
-                const toneClasses: Record<string, { bg: string; ring: string; text: string }> = {
-                  primary: { bg: "bg-primary/10", ring: "ring-primary/20", text: "text-primary" },
-                  info: { bg: "bg-info/10", ring: "ring-info/20", text: "text-info" },
-                  success: { bg: "bg-success/10", ring: "ring-success/20", text: "text-success" },
-                  warning: { bg: "bg-warning/10", ring: "ring-warning/20", text: "text-warning" },
+                const toneClasses: Record<string, { bg: string; border: string; text: string }> = {
+                  primary: { bg: "bg-gradient-to-b from-primary/12 to-primary/4", border: "border-primary/15", text: "text-primary" },
+                  info: { bg: "bg-gradient-to-b from-info/12 to-info/4", border: "border-info/15", text: "text-info" },
+                  success: { bg: "bg-gradient-to-b from-success/12 to-success/4", border: "border-success/15", text: "text-success" },
+                  warning: { bg: "bg-gradient-to-b from-warning/12 to-warning/4", border: "border-warning/15", text: "text-warning" },
                 };
                 const t = toneClasses[action.tone] || toneClasses.primary;
                 return (
                   <Link
                     key={action.href}
                     to={action.href}
-                    className="group relative flex items-center gap-3.5 px-6 py-3.5 transition-all hover:bg-muted/[0.03]"
+                    className="group relative flex items-center gap-3.5 px-6 py-3.5 transition-all hover:bg-foreground/[0.015]"
                   >
-                    <div className={cn("flex h-9 w-9 items-center justify-center rounded-xl ring-1 shadow-inner transition-all group-hover:scale-110 group-hover:rotate-3", t.bg, t.ring, t.text)}>
-                      <action.icon className="h-4 w-4" strokeWidth={2.25} />
+                    <div className={cn("flex h-8 w-8 items-center justify-center rounded-lg border transition-all duration-300 group-hover:border-primary/25", t.bg, t.border, t.text)}>
+                      <action.icon className="h-3.5 w-3.5" strokeWidth={2.5} />
                     </div>
-                    <span className="flex-1 font-display text-[13px] font-bold text-foreground tracking-[-0.01em] transition-colors group-hover:text-primary">{action.label}</span>
-                    <ChevronRight className="h-4 w-4 text-muted-foreground/30 transition-all group-hover:text-primary group-hover:translate-x-0.5" strokeWidth={2.25} />
+                    <span className="flex-1 font-display text-[13px] font-semibold text-foreground/90 tracking-[-0.005em] transition-colors group-hover:text-foreground">{action.label}</span>
+                    <ChevronRight className="h-3.5 w-3.5 text-muted-foreground/25 transition-all group-hover:text-foreground/60 group-hover:translate-x-0.5" strokeWidth={2.25} />
                   </Link>
                 );
               })}
@@ -772,15 +775,16 @@ export default function Dashboard() {
           </div>
 
           {/* Activity feed */}
-          <div className="rounded-[28px] border border-border/40 bg-card/60 backdrop-blur-sm flex flex-col overflow-hidden shadow-[0_8px_32px_-12px_rgba(0,0,0,0.08)]">
+          <div className="relative rounded-[24px] border border-border/50 bg-gradient-to-b from-card via-card to-card/95 flex flex-col overflow-hidden shadow-[0_1px_0_0_hsl(var(--foreground)/0.04)_inset,0_24px_48px_-24px_hsl(var(--foreground)/0.12)]">
+            <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-foreground/10 to-transparent" />
             <div className="flex items-center justify-between border-b border-border/30 px-6 py-5">
               <div className="flex items-center gap-3">
-                <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-success/10 ring-1 ring-success/20 text-success shadow-inner">
-                  <Activity className="h-4 w-4" strokeWidth={2.25} />
+                <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-gradient-to-b from-success/15 to-success/5 border border-success/20 text-success">
+                  <Activity className="h-3.5 w-3.5" strokeWidth={2.5} />
                 </div>
                 <div>
-                  <p className="font-display text-[12px] font-black uppercase tracking-[0.18em] text-foreground">Atividade recente</p>
-                  <p className="text-[10px] text-muted-foreground/50 mt-0.5 font-medium">Últimas movimentações</p>
+                  <p className="font-display text-[13px] font-bold tracking-[-0.01em] text-foreground">Atividade recente</p>
+                  <p className="text-[11px] text-muted-foreground/55 mt-0.5 font-medium">Últimas movimentações</p>
                 </div>
               </div>
               <Link to="/financeiro/extrato" className="group inline-flex items-center gap-1.5 rounded-full bg-primary/10 ring-1 ring-primary/20 px-3 py-1.5 font-display text-[10px] font-black uppercase tracking-wider text-primary transition-all hover:bg-primary/15 hover:ring-primary/30">
