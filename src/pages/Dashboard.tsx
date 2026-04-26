@@ -611,7 +611,8 @@ export default function Dashboard() {
       {/* ════════════════════════════════════════════════════════════════ */}
       {/* DOMINANT CHART AREA                                              */}
       {/* ════════════════════════════════════════════════════════════════ */}
-      <section className="mb-5 rounded-[28px] border border-border/40 bg-card/60 backdrop-blur-sm overflow-hidden shadow-[0_8px_32px_-12px_rgba(0,0,0,0.08)]">
+      <section className="relative mb-5 rounded-[24px] border border-border/50 bg-gradient-to-b from-card via-card to-card/95 overflow-hidden shadow-[0_1px_0_0_hsl(var(--foreground)/0.04)_inset,0_24px_48px_-24px_hsl(var(--foreground)/0.12)]">
+        <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-foreground/10 to-transparent" />
         <div className="grid grid-cols-1 xl:grid-cols-[1fr_300px]">
           {/* Chart */}
           <div className="flex flex-col border-b xl:border-b-0 xl:border-r border-border/30">
