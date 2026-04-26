@@ -783,8 +783,8 @@ export default function Dashboard() {
                   <Activity className="h-3.5 w-3.5" strokeWidth={2.5} />
                 </div>
                 <div>
-                  <p className="font-display text-[12px] font-black uppercase tracking-[0.18em] text-foreground">Atividade recente</p>
-                  <p className="text-[10px] text-muted-foreground/50 mt-0.5 font-medium">Últimas movimentações</p>
+                  <p className="font-display text-[13px] font-bold tracking-[-0.01em] text-foreground">Atividade recente</p>
+                  <p className="text-[11px] text-muted-foreground/55 mt-0.5 font-medium">Últimas movimentações</p>
                 </div>
               </div>
               <Link to="/financeiro/extrato" className="group inline-flex items-center gap-1.5 rounded-full bg-primary/10 ring-1 ring-primary/20 px-3 py-1.5 font-display text-[10px] font-black uppercase tracking-wider text-primary transition-all hover:bg-primary/15 hover:ring-primary/30">
