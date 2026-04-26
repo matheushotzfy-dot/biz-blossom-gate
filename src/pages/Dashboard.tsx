@@ -468,10 +468,11 @@ export default function Dashboard() {
       {/* ════════════════════════════════════════════════════════════════ */}
       {/* HERO — ONE DOMINANT METRIC                                       */}
       {/* ════════════════════════════════════════════════════════════════ */}
-      <section className="relative mb-5 rounded-[28px] border border-border/40 bg-card/60 backdrop-blur-sm overflow-hidden shadow-[0_8px_32px_-12px_rgba(0,0,0,0.08)]">
-        {/* Subtle ambient glow */}
-        <div className="pointer-events-none absolute -top-32 -right-32 h-64 w-64 rounded-full bg-primary/5 blur-[100px]" />
-        <div className="pointer-events-none absolute -bottom-32 -left-32 h-64 w-64 rounded-full bg-success/5 blur-[100px]" />
+      <section className="relative mb-5 rounded-[24px] border border-border/50 bg-gradient-to-b from-card via-card to-card/95 overflow-hidden shadow-[0_1px_0_0_hsl(var(--foreground)/0.04)_inset,0_24px_48px_-24px_hsl(var(--foreground)/0.12)]">
+        {/* Premium ambient layers */}
+        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,hsl(var(--primary)/0.06),transparent_55%)]" />
+        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_left,hsl(var(--success)/0.05),transparent_55%)]" />
+        <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-foreground/10 to-transparent" />
 
         {/* Toolbar */}
         <div className="relative flex flex-wrap items-center justify-between gap-2 border-b border-border/30 px-6 py-4 lg:px-8">
