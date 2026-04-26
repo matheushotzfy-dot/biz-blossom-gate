@@ -772,11 +772,19 @@ export default function Dashboard() {
           </div>
 
           {/* Activity feed */}
-          <div className="rounded-2xl border border-border bg-card flex flex-col overflow-hidden">
-            <div className="flex items-center justify-between border-b border-border/60 px-5 py-3.5">
-              <p className="text-[11px] font-heading font-bold uppercase tracking-[0.14em] text-foreground">Atividade recente</p>
-              <Link to="/financeiro/extrato" className="inline-flex items-center gap-1 text-[11px] font-semibold text-primary transition-colors hover:text-primary/80">
-                Ver tudo <ChevronRight className="h-3 w-3" />
+          <div className="rounded-[28px] border border-border/40 bg-card/60 backdrop-blur-sm flex flex-col overflow-hidden shadow-[0_8px_32px_-12px_rgba(0,0,0,0.08)]">
+            <div className="flex items-center justify-between border-b border-border/30 px-6 py-5">
+              <div className="flex items-center gap-3">
+                <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-success/10 ring-1 ring-success/20 text-success shadow-inner">
+                  <Activity className="h-4 w-4" strokeWidth={2.25} />
+                </div>
+                <div>
+                  <p className="font-display text-[12px] font-black uppercase tracking-[0.18em] text-foreground">Atividade recente</p>
+                  <p className="text-[10px] text-muted-foreground/50 mt-0.5 font-medium">Últimas movimentações</p>
+                </div>
+              </div>
+              <Link to="/financeiro/extrato" className="group inline-flex items-center gap-1.5 rounded-full bg-primary/10 ring-1 ring-primary/20 px-3 py-1.5 font-display text-[10px] font-black uppercase tracking-wider text-primary transition-all hover:bg-primary/15 hover:ring-primary/30">
+                Ver tudo <ChevronRight className="h-3 w-3 transition-transform group-hover:translate-x-0.5" strokeWidth={2.5} />
               </Link>
             </div>
 
