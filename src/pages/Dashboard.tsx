@@ -750,24 +750,24 @@ export default function Dashboard() {
                 { label: "Webhooks & API", href: "/vendas/webhooks", icon: Webhook, tone: "warning" },
                 { label: "Suporte", href: "/suporte", icon: Sparkles, tone: "primary" },
               ].map((action) => {
-                const toneClasses: Record<string, { bg: string; ring: string; text: string }> = {
-                  primary: { bg: "bg-primary/10", ring: "ring-primary/20", text: "text-primary" },
-                  info: { bg: "bg-info/10", ring: "ring-info/20", text: "text-info" },
-                  success: { bg: "bg-success/10", ring: "ring-success/20", text: "text-success" },
-                  warning: { bg: "bg-warning/10", ring: "ring-warning/20", text: "text-warning" },
+                const toneClasses: Record<string, { bg: string; border: string; text: string }> = {
+                  primary: { bg: "bg-gradient-to-b from-primary/12 to-primary/4", border: "border-primary/15", text: "text-primary" },
+                  info: { bg: "bg-gradient-to-b from-info/12 to-info/4", border: "border-info/15", text: "text-info" },
+                  success: { bg: "bg-gradient-to-b from-success/12 to-success/4", border: "border-success/15", text: "text-success" },
+                  warning: { bg: "bg-gradient-to-b from-warning/12 to-warning/4", border: "border-warning/15", text: "text-warning" },
                 };
                 const t = toneClasses[action.tone] || toneClasses.primary;
                 return (
                   <Link
                     key={action.href}
                     to={action.href}
-                    className="group relative flex items-center gap-3.5 px-6 py-3.5 transition-all hover:bg-muted/[0.03]"
+                    className="group relative flex items-center gap-3.5 px-6 py-3.5 transition-all hover:bg-foreground/[0.015]"
                   >
-                    <div className={cn("flex h-9 w-9 items-center justify-center rounded-xl ring-1 shadow-inner transition-all group-hover:scale-110 group-hover:rotate-3", t.bg, t.ring, t.text)}>
-                      <action.icon className="h-4 w-4" strokeWidth={2.25} />
+                    <div className={cn("flex h-8 w-8 items-center justify-center rounded-lg border transition-all duration-300 group-hover:border-primary/25", t.bg, t.border, t.text)}>
+                      <action.icon className="h-3.5 w-3.5" strokeWidth={2.5} />
                     </div>
-                    <span className="flex-1 font-display text-[13px] font-bold text-foreground tracking-[-0.01em] transition-colors group-hover:text-primary">{action.label}</span>
-                    <ChevronRight className="h-4 w-4 text-muted-foreground/30 transition-all group-hover:text-primary group-hover:translate-x-0.5" strokeWidth={2.25} />
+                    <span className="flex-1 font-display text-[13px] font-semibold text-foreground/90 tracking-[-0.005em] transition-colors group-hover:text-foreground">{action.label}</span>
+                    <ChevronRight className="h-3.5 w-3.5 text-muted-foreground/25 transition-all group-hover:text-foreground/60 group-hover:translate-x-0.5" strokeWidth={2.25} />
                   </Link>
                 );
               })}
