@@ -610,49 +610,54 @@ export default function Dashboard() {
       {/* ════════════════════════════════════════════════════════════════ */}
       {/* DOMINANT CHART AREA                                              */}
       {/* ════════════════════════════════════════════════════════════════ */}
-      <section className="mb-4 rounded-2xl border border-border bg-card overflow-hidden">
-        <div className="grid grid-cols-1 xl:grid-cols-[1fr_280px]">
+      <section className="mb-5 rounded-[28px] border border-border/40 bg-card/60 backdrop-blur-sm overflow-hidden shadow-[0_8px_32px_-12px_rgba(0,0,0,0.08)]">
+        <div className="grid grid-cols-1 xl:grid-cols-[1fr_300px]">
           {/* Chart */}
-          <div className="flex flex-col border-b xl:border-b-0 xl:border-r border-border/60">
-            <div className="flex items-center justify-between px-6 py-4 border-b border-border/60">
-              <div>
-                <p className="text-[11px] font-heading font-bold uppercase tracking-[0.14em] text-foreground">Receita ao longo do tempo</p>
-                <p className="text-[10px] text-muted-foreground/70 mt-0.5">
-                  {!isCustom && selectedPeriod.days <= 1 ? "Por hora" : "Por dia"} · {selectedPeriod.label}
-                </p>
+          <div className="flex flex-col border-b xl:border-b-0 xl:border-r border-border/30">
+            <div className="flex items-center justify-between px-7 py-5 border-b border-border/30">
+              <div className="flex items-center gap-3">
+                <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-primary/10 ring-1 ring-primary/20 text-primary shadow-inner">
+                  <TrendingUp className="h-4 w-4" strokeWidth={2.25} />
+                </div>
+                <div>
+                  <p className="font-display text-[12px] font-black uppercase tracking-[0.18em] text-foreground">Performance de Receita</p>
+                  <p className="text-[10px] text-muted-foreground/50 mt-0.5 font-medium">
+                    {!isCustom && selectedPeriod.days <= 1 ? "Distribuição por hora" : "Distribuição por dia"} · {selectedPeriod.label}
+                  </p>
+                </div>
               </div>
-              <div className="hidden sm:flex items-center gap-1.5 text-[10px] text-muted-foreground">
-                <span className="h-2 w-2 rounded-full bg-primary" />
+              <div className="hidden sm:inline-flex items-center gap-2 rounded-full bg-primary/8 ring-1 ring-primary/15 px-3 py-1.5 text-[10px] font-display font-black uppercase tracking-wider text-primary">
+                <span className="h-1.5 w-1.5 rounded-full bg-primary shadow-[0_0_6px_hsl(var(--primary))]" />
                 Vendas aprovadas
               </div>
             </div>
-            <div className="flex-1 px-3 py-4 min-h-[360px]">
+            <div className="flex-1 px-3 py-5 min-h-[380px]">
               <ResponsiveContainer width="100%" height="100%">
                 <AreaChart data={chartData} margin={{ top: 10, right: 16, left: -12, bottom: 0 }}>
                   <defs>
                     <linearGradient id="dashboardRevenue" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="0%" stopColor="hsl(var(--primary))" stopOpacity={0.22} />
+                      <stop offset="0%" stopColor="hsl(var(--primary))" stopOpacity={0.28} />
                       <stop offset="100%" stopColor="hsl(var(--primary))" stopOpacity={0} />
                     </linearGradient>
                   </defs>
-                  <XAxis dataKey="name" tickLine={false} axisLine={false} dy={8} stroke="hsl(var(--muted-foreground) / 0.5)" fontSize={10} interval={chartData.length > 10 ? Math.ceil(chartData.length / 8) - 1 : 0} />
-                  <YAxis tickLine={false} axisLine={false} width={64} stroke="hsl(var(--muted-foreground) / 0.5)" fontSize={10} tickFormatter={(v) => v >= 1000 ? `R$${(v / 1000).toLocaleString("pt-BR", { minimumFractionDigits: 1, maximumFractionDigits: 1 })}k` : `R$${v.toLocaleString("pt-BR", { minimumFractionDigits: 0 })}`} />
+                  <XAxis dataKey="name" tickLine={false} axisLine={false} dy={8} stroke="hsl(var(--muted-foreground) / 0.4)" fontSize={10} interval={chartData.length > 10 ? Math.ceil(chartData.length / 8) - 1 : 0} />
+                  <YAxis tickLine={false} axisLine={false} width={64} stroke="hsl(var(--muted-foreground) / 0.4)" fontSize={10} tickFormatter={(v) => v >= 1000 ? `R$${(v / 1000).toLocaleString("pt-BR", { minimumFractionDigits: 1, maximumFractionDigits: 1 })}k` : `R$${v.toLocaleString("pt-BR", { minimumFractionDigits: 0 })}`} />
                   <Tooltip
                     cursor={{ stroke: "hsl(var(--primary) / 0.3)", strokeWidth: 1, strokeDasharray: "4 4" }}
                     content={({ active, payload, label }) => {
                       if (!active || !payload?.length) return null;
                       const value = payload[0].value as number;
                       return (
-                        <div className="rounded-lg border border-border bg-card px-3 py-2 shadow-lg">
-                          <p className="text-[9px] font-heading text-muted-foreground/70 uppercase tracking-wider">{label}</p>
-                          <p className="text-[13px] font-heading font-black text-primary tabular-nums mt-0.5">
+                        <div className="rounded-2xl border border-border/40 bg-card/95 backdrop-blur-xl px-4 py-3 shadow-2xl">
+                          <p className="font-display text-[9px] font-black text-muted-foreground/60 uppercase tracking-[0.18em]">{label}</p>
+                          <p className="font-display text-[15px] font-black text-primary tabular-nums mt-1 tracking-tight">
                             R$ {value.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                           </p>
                         </div>
                       );
                     }}
                   />
-                  <Area type="monotone" dataKey="vendas" stroke="hsl(var(--primary))" strokeWidth={2.2} fill="url(#dashboardRevenue)" dot={false} activeDot={{ r: 5, strokeWidth: 2, fill: "hsl(var(--card))", stroke: "hsl(var(--primary))" }} />
+                  <Area type="monotone" dataKey="vendas" stroke="hsl(var(--primary))" strokeWidth={2.5} fill="url(#dashboardRevenue)" dot={false} activeDot={{ r: 6, strokeWidth: 2.5, fill: "hsl(var(--card))", stroke: "hsl(var(--primary))" }} />
                 </AreaChart>
               </ResponsiveContainer>
             </div>
@@ -660,42 +665,46 @@ export default function Dashboard() {
 
           {/* Payment breakdown rail */}
           <div className="flex flex-col">
-            <div className="px-5 py-4 border-b border-border/60">
-              <p className="text-[11px] font-heading font-bold uppercase tracking-[0.14em] text-foreground">Por método</p>
-              <p className="text-[10px] text-muted-foreground/70 mt-0.5">Conversão e receita</p>
+            <div className="px-6 py-5 border-b border-border/30">
+              <p className="font-display text-[12px] font-black uppercase tracking-[0.18em] text-foreground">Por método</p>
+              <p className="text-[10px] text-muted-foreground/50 mt-0.5 font-medium">Conversão e receita</p>
             </div>
-            <div className="flex-1 divide-y divide-border/60">
+            <div className="flex-1 divide-y divide-border/20">
               {[
-                { icon: <PixLogoMark className="h-4 w-4" />, label: "PIX", conv: pixConversion, revenue: pixRevenue, count: `${pixApprovedCount}/${pixTotalCount}`, color: "text-success" },
-                { icon: <CreditCard className="h-4 w-4" />, label: "Cartão", conv: cardConversion, revenue: cardRevenue, count: `${cardApprovedCount}/${cardTotalCount}`, color: "text-info" },
+                { icon: <PixLogoMark className="h-4 w-4" />, label: "PIX", conv: pixConversion, revenue: pixRevenue, count: `${pixApprovedCount}/${pixTotalCount}`, color: "text-success", ringColor: "ring-success/20", bgColor: "bg-success/10" },
+                { icon: <CreditCard className="h-4 w-4" strokeWidth={2.25} />, label: "Cartão", conv: cardConversion, revenue: cardRevenue, count: `${cardApprovedCount}/${cardTotalCount}`, color: "text-info", ringColor: "ring-info/20", bgColor: "bg-info/10" },
               ].map((m) => (
-                <div key={m.label} className="px-5 py-4">
-                  <div className="flex items-center justify-between mb-2">
-                    <div className="flex items-center gap-2">
-                      <span className={m.color}>{m.icon}</span>
-                      <span className="text-[12px] text-foreground font-semibold">{m.label}</span>
+                <div key={m.label} className="group px-6 py-5 transition-colors hover:bg-muted/5">
+                  <div className="flex items-center justify-between mb-3">
+                    <div className="flex items-center gap-2.5">
+                      <div className={cn("flex h-8 w-8 items-center justify-center rounded-xl ring-1 shadow-inner transition-transform group-hover:scale-110", m.bgColor, m.ringColor, m.color)}>
+                        {m.icon}
+                      </div>
+                      <span className="font-display text-[12px] text-foreground font-black uppercase tracking-wider">{m.label}</span>
                     </div>
-                    <span className={cn("text-[13px] font-heading font-black tabular-nums", m.color)}>{m.conv.toFixed(1)}%</span>
+                    <span className={cn("font-display text-[14px] font-black tabular-nums tracking-tight", m.color)}>{m.conv.toFixed(1)}%</span>
                   </div>
-                  <p className="text-[18px] font-heading font-black tabular-nums text-foreground leading-none">
+                  <p className="font-display text-[20px] font-black tabular-nums text-foreground leading-none tracking-[-0.03em]">
                     {privacy.hidden ? CENSORED : fmt(m.revenue)}
                   </p>
-                  <p className="text-[10px] text-muted-foreground/60 mt-1.5">{m.count} aprovadas</p>
+                  <p className="text-[10px] text-muted-foreground/50 mt-2 font-medium">{m.count} aprovadas</p>
                 </div>
               ))}
-              <div className="px-5 py-4">
-                <div className="flex items-center justify-between mb-2">
-                  <div className="flex items-center gap-2">
-                    <DollarSign className="h-4 w-4 text-warning" />
-                    <span className="text-[12px] text-foreground font-semibold">Saques pendentes</span>
+              <div className="group px-6 py-5 transition-colors hover:bg-muted/5">
+                <div className="flex items-center justify-between mb-3">
+                  <div className="flex items-center gap-2.5">
+                    <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-warning/10 ring-1 ring-warning/20 text-warning shadow-inner transition-transform group-hover:scale-110">
+                      <DollarSign className="h-4 w-4" strokeWidth={2.25} />
+                    </div>
+                    <span className="font-display text-[12px] text-foreground font-black uppercase tracking-wider">Saques pendentes</span>
                   </div>
-                  <span className="text-[10px] text-muted-foreground/70 tabular-nums">{withdrawals.filter(w => w.status === "pending").length}</span>
+                  <span className="font-display text-[10px] text-muted-foreground/50 tabular-nums font-bold">{withdrawals.filter(w => w.status === "pending").length}</span>
                 </div>
-                <p className="text-[18px] font-heading font-black tabular-nums text-warning leading-none">
+                <p className="font-display text-[20px] font-black tabular-nums text-warning leading-none tracking-[-0.03em]">
                   {privacy.hidden ? CENSORED : fmt(withdrawalPending)}
                 </p>
-                <Link to="/financeiro/saques" className="text-[10px] text-primary font-semibold mt-1.5 inline-flex items-center gap-0.5 hover:underline">
-                  Gerenciar <ChevronRight className="h-3 w-3" />
+                <Link to="/financeiro/saques" className="text-[10px] text-primary font-display font-black uppercase tracking-wider mt-2 inline-flex items-center gap-1 hover:gap-1.5 transition-all">
+                  Gerenciar <ChevronRight className="h-3 w-3" strokeWidth={2.5} />
                 </Link>
               </div>
             </div>
