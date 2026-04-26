@@ -668,8 +668,8 @@ export default function Dashboard() {
           {/* Payment breakdown rail */}
           <div className="flex flex-col">
             <div className="px-6 py-5 border-b border-border/30">
-              <p className="font-display text-[12px] font-black uppercase tracking-[0.18em] text-foreground">Por método</p>
-              <p className="text-[10px] text-muted-foreground/50 mt-0.5 font-medium">Conversão e receita</p>
+              <p className="font-display text-[13px] font-bold tracking-[-0.01em] text-foreground">Por método</p>
+              <p className="text-[11px] text-muted-foreground/55 mt-0.5 font-medium">Conversão e receita</p>
             </div>
             <div className="flex-1 divide-y divide-border/20">
               {[
