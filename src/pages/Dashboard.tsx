@@ -622,8 +622,8 @@ export default function Dashboard() {
                   <TrendingUp className="h-3.5 w-3.5" strokeWidth={2.5} />
                 </div>
                 <div>
-                  <p className="font-display text-[12px] font-black uppercase tracking-[0.18em] text-foreground">Performance de Receita</p>
-                  <p className="text-[10px] text-muted-foreground/50 mt-0.5 font-medium">
+                  <p className="font-display text-[13px] font-bold tracking-[-0.01em] text-foreground">Performance de receita</p>
+                  <p className="text-[11px] text-muted-foreground/55 mt-0.5 font-medium">
                     {!isCustom && selectedPeriod.days <= 1 ? "Distribuição por hora" : "Distribuição por dia"} · {selectedPeriod.label}
                   </p>
                 </div>
