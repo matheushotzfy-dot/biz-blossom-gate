@@ -715,42 +715,59 @@ export default function Dashboard() {
         {/* ════════════════════════════════════════════════════════════════ */}
         {/* ACTIONS + ACTIVITY                                               */}
         {/* ════════════════════════════════════════════════════════════════ */}
-        <section className="grid grid-cols-1 gap-4 xl:grid-cols-[1fr_1.4fr] mb-8">
+        <section className="grid grid-cols-1 gap-5 xl:grid-cols-[1fr_1.4fr] mb-8">
           {/* Quick actions — operational support */}
-          <div className="rounded-2xl border border-border bg-card flex flex-col overflow-hidden">
-            <div className="flex items-center justify-between border-b border-border/60 px-5 py-3.5">
-              <p className="text-[11px] font-heading font-bold uppercase tracking-[0.14em] text-foreground">Ações rápidas</p>
-              <Link to="/perfil" className="text-[10px] text-muted-foreground hover:text-foreground transition-colors">Tudo</Link>
+          <div className="rounded-[28px] border border-border/40 bg-card/60 backdrop-blur-sm flex flex-col overflow-hidden shadow-[0_8px_32px_-12px_rgba(0,0,0,0.08)]">
+            <div className="flex items-center justify-between border-b border-border/30 px-6 py-5">
+              <div className="flex items-center gap-3">
+                <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-primary/10 ring-1 ring-primary/20 text-primary shadow-inner">
+                  <Zap className="h-4 w-4" strokeWidth={2.25} />
+                </div>
+                <div>
+                  <p className="font-display text-[12px] font-black uppercase tracking-[0.18em] text-foreground">Ações rápidas</p>
+                  <p className="text-[10px] text-muted-foreground/50 mt-0.5 font-medium">Atalhos operacionais</p>
+                </div>
+              </div>
+              <Link to="/perfil" className="font-display text-[10px] text-muted-foreground/60 hover:text-foreground font-black uppercase tracking-wider transition-colors">Tudo</Link>
             </div>
-            <div className="divide-y divide-border/60 max-h-[560px] overflow-y-auto">
+            <div className="divide-y divide-border/20 max-h-[580px] overflow-y-auto">
               {[
-                { label: "Criar produto", href: "/vendas/produtos", icon: Package },
-                { label: "Configurar checkout", href: "/vendas/checkout", icon: CreditCard },
-                { label: "Link de pagamento", href: "/vendas/links", icon: Hash },
-                { label: "Ver vendas", href: "/vendas", icon: BarChart3 },
-                { label: "Extrato financeiro", href: "/financeiro/extrato", icon: FileText },
-                { label: "Solicitar saque", href: "/financeiro/saques", icon: ArrowDownRight },
-                { label: "Dados bancários", href: "/financeiro/dados-bancarios", icon: Banknote },
-                { label: "Identidade & KYC", href: "/financeiro/identidade", icon: ShieldCheck },
-                { label: "Cupons de desconto", href: "/vendas/cupons", icon: Percent },
-                { label: "Área de membros", href: "/vendas/conteudo", icon: GraduationCap },
-                { label: "Programa de afiliados", href: "/vendas/afiliados", icon: Users },
-                { label: "Apps & Integrações", href: "/integracoes", icon: Layers },
-                { label: "Webhooks & API", href: "/vendas/webhooks", icon: Webhook },
-                { label: "Suporte", href: "/suporte", icon: Sparkles },
-              ].map((action) => (
-                <Link
-                  key={action.href}
-                  to={action.href}
-                  className="group flex items-center gap-3 px-5 py-3 transition-colors hover:bg-muted/30"
-                >
-                  <div className="flex h-8 w-8 items-center justify-center rounded-md border border-border/60 bg-background text-muted-foreground group-hover:text-primary group-hover:border-primary/30 transition-colors">
-                    <action.icon className="h-3.5 w-3.5" />
-                  </div>
-                  <span className="flex-1 text-[12.5px] font-semibold text-foreground">{action.label}</span>
-                  <ChevronRight className="h-3.5 w-3.5 text-muted-foreground/40 group-hover:text-foreground transition-colors" />
-                </Link>
-              ))}
+                { label: "Criar produto", href: "/vendas/produtos", icon: Package, tone: "primary" },
+                { label: "Configurar checkout", href: "/vendas/checkout", icon: CreditCard, tone: "info" },
+                { label: "Link de pagamento", href: "/vendas/links", icon: Hash, tone: "primary" },
+                { label: "Ver vendas", href: "/vendas", icon: BarChart3, tone: "success" },
+                { label: "Extrato financeiro", href: "/financeiro/extrato", icon: FileText, tone: "info" },
+                { label: "Solicitar saque", href: "/financeiro/saques", icon: ArrowDownRight, tone: "success" },
+                { label: "Dados bancários", href: "/financeiro/dados-bancarios", icon: Banknote, tone: "warning" },
+                { label: "Identidade & KYC", href: "/financeiro/identidade", icon: ShieldCheck, tone: "success" },
+                { label: "Cupons de desconto", href: "/vendas/cupons", icon: Percent, tone: "primary" },
+                { label: "Área de membros", href: "/vendas/conteudo", icon: GraduationCap, tone: "info" },
+                { label: "Programa de afiliados", href: "/vendas/afiliados", icon: Users, tone: "primary" },
+                { label: "Apps & Integrações", href: "/integracoes", icon: Layers, tone: "info" },
+                { label: "Webhooks & API", href: "/vendas/webhooks", icon: Webhook, tone: "warning" },
+                { label: "Suporte", href: "/suporte", icon: Sparkles, tone: "primary" },
+              ].map((action) => {
+                const toneClasses: Record<string, { bg: string; ring: string; text: string }> = {
+                  primary: { bg: "bg-primary/10", ring: "ring-primary/20", text: "text-primary" },
+                  info: { bg: "bg-info/10", ring: "ring-info/20", text: "text-info" },
+                  success: { bg: "bg-success/10", ring: "ring-success/20", text: "text-success" },
+                  warning: { bg: "bg-warning/10", ring: "ring-warning/20", text: "text-warning" },
+                };
+                const t = toneClasses[action.tone] || toneClasses.primary;
+                return (
+                  <Link
+                    key={action.href}
+                    to={action.href}
+                    className="group relative flex items-center gap-3.5 px-6 py-3.5 transition-all hover:bg-muted/[0.03]"
+                  >
+                    <div className={cn("flex h-9 w-9 items-center justify-center rounded-xl ring-1 shadow-inner transition-all group-hover:scale-110 group-hover:rotate-3", t.bg, t.ring, t.text)}>
+                      <action.icon className="h-4 w-4" strokeWidth={2.25} />
+                    </div>
+                    <span className="flex-1 font-display text-[13px] font-bold text-foreground tracking-[-0.01em] transition-colors group-hover:text-primary">{action.label}</span>
+                    <ChevronRight className="h-4 w-4 text-muted-foreground/30 transition-all group-hover:text-primary group-hover:translate-x-0.5" strokeWidth={2.25} />
+                  </Link>
+                );
+              })}
             </div>
           </div>
 
