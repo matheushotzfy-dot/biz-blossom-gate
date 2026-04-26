@@ -468,19 +468,21 @@ export default function Dashboard() {
       {/* ════════════════════════════════════════════════════════════════ */}
       {/* HERO — ONE DOMINANT METRIC                                       */}
       {/* ════════════════════════════════════════════════════════════════ */}
-      <section className="relative mb-4 rounded-2xl border border-border bg-card overflow-hidden">
-        <div className="absolute top-0 left-0 right-0 h-[2px] bg-primary" />
+      <section className="relative mb-5 rounded-[28px] border border-border/40 bg-card/60 backdrop-blur-sm overflow-hidden shadow-[0_8px_32px_-12px_rgba(0,0,0,0.08)]">
+        {/* Subtle ambient glow */}
+        <div className="pointer-events-none absolute -top-32 -right-32 h-64 w-64 rounded-full bg-primary/5 blur-[100px]" />
+        <div className="pointer-events-none absolute -bottom-32 -left-32 h-64 w-64 rounded-full bg-success/5 blur-[100px]" />
 
         {/* Toolbar */}
-        <div className="flex flex-wrap items-center justify-between gap-2 border-b border-border/60 px-5 py-3 lg:px-7">
-          <div className="flex items-center gap-2">
-            <div className="flex h-7 w-7 items-center justify-center rounded-md bg-primary/10 text-primary">
-              <BarChart3 className="h-3.5 w-3.5" />
+        <div className="relative flex flex-wrap items-center justify-between gap-2 border-b border-border/30 px-6 py-4 lg:px-8">
+          <div className="flex items-center gap-2.5">
+            <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-primary/10 ring-1 ring-primary/20 text-primary shadow-inner">
+              <BarChart3 className="h-4 w-4" strokeWidth={2.25} />
             </div>
-            <span className="text-[11px] font-heading font-bold uppercase tracking-[0.14em] text-foreground">Visão Executiva</span>
+            <span className="font-display text-[12px] font-black uppercase tracking-[0.18em] text-foreground">Visão Executiva</span>
             {scaleModeUnlocked && (
-              <button onClick={activateScaleMode} className={cn("ml-1 inline-flex items-center gap-1 rounded-md border px-2 py-1 text-[10px] font-semibold transition-colors",
-                scaleMode ? "border-primary/30 bg-primary/10 text-primary" : "border-border bg-background text-muted-foreground hover:text-foreground"
+              <button onClick={activateScaleMode} className={cn("ml-1 inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[10px] font-black uppercase tracking-wider transition-all",
+                scaleMode ? "border-primary/30 bg-primary/10 text-primary shadow-sm shadow-primary/10" : "border-border/60 bg-background/80 text-muted-foreground hover:text-foreground hover:border-primary/30"
               )}>
                 <Flame className={cn("h-3 w-3", scaleMode && "animate-pulse")} />
                 Escala
@@ -489,11 +491,11 @@ export default function Dashboard() {
           </div>
 
           <div className="flex flex-wrap items-center gap-1.5">
-            <div className="inline-flex items-center rounded-md border border-border bg-background p-0.5">
+            <div className="inline-flex items-center rounded-xl border border-border/40 bg-background/60 backdrop-blur p-0.5 shadow-inner">
               {PERIOD_PRESETS.map((opt) => (
                 <button key={opt.label} onClick={() => { setSelectedPeriod(opt); setIsCustom(false); setCustomRange(undefined); }}
-                  className={cn("rounded px-2.5 py-1 text-[11px] font-semibold transition-colors",
-                    !isCustom && selectedPeriod.label === opt.label ? "bg-card text-foreground border border-border shadow-sm" : "text-muted-foreground hover:text-foreground"
+                  className={cn("rounded-lg px-3 py-1.5 text-[11px] font-display font-black uppercase tracking-wider transition-all duration-300",
+                    !isCustom && selectedPeriod.label === opt.label ? "bg-card text-foreground shadow-sm ring-1 ring-border/40" : "text-muted-foreground/60 hover:text-foreground"
                   )}>
                   {opt.label}
                 </button>
@@ -501,8 +503,8 @@ export default function Dashboard() {
             </div>
             <Popover open={datePickerOpen} onOpenChange={setDatePickerOpen}>
               <PopoverTrigger asChild>
-                <button className={cn("h-7 rounded-md border px-2.5 text-[10px] font-semibold transition-colors inline-flex items-center gap-1.5",
-                  isCustom ? "border-primary/30 bg-primary/10 text-foreground" : "border-border bg-background text-muted-foreground hover:text-foreground"
+                <button className={cn("h-8 rounded-xl border px-3 text-[10px] font-black uppercase tracking-wider transition-all inline-flex items-center gap-1.5",
+                  isCustom ? "border-primary/30 bg-primary/10 text-foreground shadow-sm shadow-primary/10" : "border-border/40 bg-background/60 text-muted-foreground hover:text-foreground hover:border-primary/30"
                 )}>
                   <CalendarDays className="h-3 w-3" />
                   {isCustom && customRange?.from
@@ -514,78 +516,90 @@ export default function Dashboard() {
                 <Calendar mode="range" selected={customRange} onSelect={(range) => { setCustomRange(range); setIsCustom(true); if (range?.from && range?.to) setTimeout(() => setDatePickerOpen(false), 300); }} numberOfMonths={1} locale={ptBR} disabled={(date) => date > new Date()} className="p-3 pointer-events-auto" classNames={{ day_selected: "bg-primary text-primary-foreground", day_range_middle: "bg-primary/10 text-foreground", day_range_end: "bg-primary text-primary-foreground" }} />
               </PopoverContent>
             </Popover>
-            <button onClick={privacy.toggle} className={cn("h-7 w-7 rounded-md border flex items-center justify-center transition-colors", privacy.hidden ? "border-primary/30 bg-primary/10 text-primary" : "border-border bg-background text-muted-foreground hover:text-foreground")} title={privacy.hidden ? "Mostrar" : "Ocultar"}>
+            <button onClick={privacy.toggle} className={cn("h-8 w-8 rounded-xl border flex items-center justify-center transition-all", privacy.hidden ? "border-primary/30 bg-primary/10 text-primary shadow-sm shadow-primary/10" : "border-border/40 bg-background/60 text-muted-foreground hover:text-foreground hover:border-primary/30")} title={privacy.hidden ? "Mostrar" : "Ocultar"}>
               {privacy.hidden ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
             </button>
           </div>
         </div>
 
         {/* Main metric block */}
-        <div className="grid grid-cols-1 lg:grid-cols-[1.6fr_1fr] gap-0">
-          <div className="px-5 py-7 lg:px-8 lg:py-10 border-b lg:border-b-0 lg:border-r border-border/60">
-            <p className="mb-3 text-[10px] font-heading font-bold uppercase tracking-[0.18em] text-muted-foreground">
-              Receita {isCustom && customRange?.from
-                ? `· ${customRange.to ? `${format(customRange.from, "dd/MM")} – ${format(customRange.to, "dd/MM")}` : format(customRange.from, "dd/MM/yyyy")}`
-                : `· ${selectedPeriod.label}`}
-            </p>
-            <div className="flex items-baseline gap-3 flex-wrap">
-              <span className="inline-flex items-baseline text-[clamp(2.2rem,7vw,68px)] font-heading font-black leading-none tracking-[-0.05em] text-foreground whitespace-nowrap">
+        <div className="relative grid grid-cols-1 lg:grid-cols-[1.6fr_1fr] gap-0">
+          <div className="px-6 py-9 lg:px-10 lg:py-12 border-b lg:border-b-0 lg:border-r border-border/30 relative">
+            <div className="flex items-center gap-2 mb-4">
+              <span className="h-1 w-8 rounded-full bg-gradient-to-r from-primary to-primary/30" />
+              <p className="font-display text-[10px] font-black uppercase tracking-[0.22em] text-muted-foreground/60">
+                Receita {isCustom && customRange?.from
+                  ? `· ${customRange.to ? `${format(customRange.from, "dd/MM")} – ${format(customRange.to, "dd/MM")}` : format(customRange.from, "dd/MM/yyyy")}`
+                  : `· ${selectedPeriod.label}`}
+              </p>
+            </div>
+            <div className="flex items-baseline gap-4 flex-wrap">
+              <span className="inline-flex items-baseline font-display text-[clamp(2.4rem,7.5vw,76px)] font-black leading-none tracking-[-0.055em] text-foreground whitespace-nowrap">
                 {privacy.hidden ? "R$ •••••••" : <AnimatedNumber value={revenue} duration={1000} />}
               </span>
               {approved.length > 0 && (
-                <span className="inline-flex items-center gap-1 text-[12px] font-semibold text-success">
-                  <ArrowUpRight className="h-3.5 w-3.5" />
+                <span className="inline-flex items-center gap-1.5 rounded-full bg-success/10 ring-1 ring-success/20 px-3 py-1 font-display text-[11px] font-black uppercase tracking-wider text-success">
+                  <ArrowUpRight className="h-3.5 w-3.5" strokeWidth={2.5} />
                   {approved.length} venda{approved.length !== 1 ? "s" : ""}
                 </span>
               )}
             </div>
-            <div className="mt-5 flex items-center gap-5 text-[11px]">
-              <div className="flex items-center gap-1.5 text-muted-foreground">
-                <span className="h-1.5 w-1.5 rounded-full bg-success" />
-                <span className="font-semibold text-foreground tabular-nums">{approved.length}</span> aprovadas
+            <div className="mt-7 flex items-center gap-6 text-[11px] flex-wrap">
+              <div className="flex items-center gap-2 text-muted-foreground/60">
+                <span className="h-2 w-2 rounded-full bg-success shadow-[0_0_8px_hsl(var(--success)/0.5)]" />
+                <span className="font-display font-black text-foreground tabular-nums">{approved.length}</span>
+                <span className="font-display font-bold uppercase tracking-wider text-[10px]">aprovadas</span>
               </div>
-              <div className="flex items-center gap-1.5 text-muted-foreground">
-                <span className="h-1.5 w-1.5 rounded-full bg-warning" />
-                <span className="font-semibold text-foreground tabular-nums">{pending.length}</span> pendentes
+              <div className="flex items-center gap-2 text-muted-foreground/60">
+                <span className="h-2 w-2 rounded-full bg-warning shadow-[0_0_8px_hsl(var(--warning)/0.5)]" />
+                <span className="font-display font-black text-foreground tabular-nums">{pending.length}</span>
+                <span className="font-display font-bold uppercase tracking-wider text-[10px]">pendentes</span>
               </div>
-              <div className="flex items-center gap-1.5 text-muted-foreground">
-                <span className="h-1.5 w-1.5 rounded-full bg-destructive" />
-                <span className="font-semibold text-foreground tabular-nums">{chargebacks.length + refunded.length}</span> contestações
+              <div className="flex items-center gap-2 text-muted-foreground/60">
+                <span className="h-2 w-2 rounded-full bg-destructive shadow-[0_0_8px_hsl(var(--destructive)/0.5)]" />
+                <span className="font-display font-black text-foreground tabular-nums">{chargebacks.length + refunded.length}</span>
+                <span className="font-display font-bold uppercase tracking-wider text-[10px]">contestações</span>
               </div>
             </div>
           </div>
 
-          <div className="relative px-5 py-7 lg:px-8 lg:py-10">
-            <span aria-hidden className="absolute left-0 top-6 bottom-6 w-[2px] rounded-full bg-success" />
-            <div className="flex items-center gap-2 mb-3">
-              <span className="h-1.5 w-1.5 rounded-full bg-success animate-pulse" />
-              <p className="text-[10px] font-heading font-bold uppercase tracking-[0.18em] text-muted-foreground">Saldo Disponível</p>
+          <div className="relative px-6 py-9 lg:px-10 lg:py-12">
+            <div aria-hidden className="absolute left-0 top-8 bottom-8 w-[3px] rounded-full bg-gradient-to-b from-success via-success/60 to-transparent" />
+            <div className="flex items-center gap-2 mb-4">
+              <span className="relative flex h-2 w-2">
+                <span className="absolute inline-flex h-full w-full rounded-full bg-success/40 animate-ping" />
+                <span className="relative inline-flex h-2 w-2 rounded-full bg-success" />
+              </span>
+              <p className="font-display text-[10px] font-black uppercase tracking-[0.22em] text-muted-foreground/60">Saldo Disponível</p>
             </div>
-            <p className="text-[clamp(1.6rem,4vw,40px)] font-heading font-black tabular-nums text-success tracking-[-0.04em] leading-none">
+            <p className="font-display text-[clamp(1.8rem,4.5vw,46px)] font-black tabular-nums text-success tracking-[-0.045em] leading-none drop-shadow-[0_2px_12px_hsl(var(--success)/0.2)]">
               {privacy.hidden ? CENSORED : fmt(Math.abs(balance))}
             </p>
-            <Link to="/financeiro/saques" className="mt-5 inline-flex items-center gap-1.5 text-[11px] font-semibold text-success hover:underline">
-              Sacar agora <ChevronRight className="h-3 w-3" />
+            <Link to="/financeiro/saques" className="group mt-6 inline-flex items-center gap-2 rounded-full bg-success/10 ring-1 ring-success/20 px-3.5 py-1.5 font-display text-[11px] font-black uppercase tracking-wider text-success transition-all hover:bg-success/15 hover:ring-success/30">
+              Sacar agora
+              <ChevronRight className="h-3 w-3 transition-transform group-hover:translate-x-0.5" strokeWidth={2.5} />
             </Link>
             {withdrawalPending > 0 && (
-              <p className="mt-3 text-[10px] text-muted-foreground">
-                <span className="font-semibold text-warning tabular-nums">{fmt(withdrawalPending)}</span> em saques pendentes
+              <p className="mt-4 text-[10px] text-muted-foreground/60">
+                <span className="font-display font-black text-warning tabular-nums">{fmt(withdrawalPending)}</span>
+                <span className="ml-1 font-medium">em saques pendentes</span>
               </p>
             )}
           </div>
         </div>
 
         {/* Compact supporting KPI strip */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 border-t border-border/60 divide-x divide-border/60">
+        <div className="relative grid grid-cols-2 lg:grid-cols-4 border-t border-border/30 divide-x divide-border/30">
           {([
-            { label: "Conversão", numValue: conversion, formatter: (v: number) => `${v.toFixed(1)}%`, accent: "text-info" },
-            { label: "Ticket Médio", numValue: approved.length > 0 ? revenue / approved.length : 0, formatter: fmt, accent: "text-foreground" },
-            { label: "Clientes Únicos", numValue: uniqueCustomers, formatter: (v: number) => String(Math.round(v)), accent: "text-foreground" },
-            { label: "Chargeback", numValue: chargebackRate, formatter: (v: number) => `${v.toFixed(2)}%`, accent: chargebackRate > 1 ? "text-destructive" : "text-success" },
+            { label: "Conversão", numValue: conversion, formatter: (v: number) => `${v.toFixed(1)}%`, accent: "text-info", accentBg: "from-info/10" },
+            { label: "Ticket Médio", numValue: approved.length > 0 ? revenue / approved.length : 0, formatter: fmt, accent: "text-foreground", accentBg: "from-foreground/5" },
+            { label: "Clientes Únicos", numValue: uniqueCustomers, formatter: (v: number) => String(Math.round(v)), accent: "text-foreground", accentBg: "from-foreground/5" },
+            { label: "Chargeback", numValue: chargebackRate, formatter: (v: number) => `${v.toFixed(2)}%`, accent: chargebackRate > 1 ? "text-destructive" : "text-success", accentBg: chargebackRate > 1 ? "from-destructive/10" : "from-success/10" },
           ] as const).map((item, i) => (
-            <div key={item.label} className={cn("px-5 py-4 lg:px-7", i >= 2 && "border-t lg:border-t-0 border-border/60")}>
-              <p className="text-[10px] font-heading font-bold uppercase tracking-[0.14em] text-muted-foreground/80 mb-1.5">{item.label}</p>
-              <p className={cn("text-[20px] lg:text-[24px] font-heading font-black tabular-nums leading-none tracking-[-0.03em]", item.accent)}>
+            <div key={item.label} className={cn("group relative px-6 py-5 lg:px-8 transition-colors hover:bg-muted/5", i >= 2 && "border-t lg:border-t-0 border-border/30")}>
+              <div className={cn("absolute inset-x-0 top-0 h-px bg-gradient-to-r to-transparent opacity-0 transition-opacity group-hover:opacity-100", item.accentBg)} />
+              <p className="font-display text-[10px] font-black uppercase tracking-[0.18em] text-muted-foreground/40 mb-2">{item.label}</p>
+              <p className={cn("font-display text-[22px] lg:text-[26px] font-black tabular-nums leading-none tracking-[-0.035em]", item.accent)}>
                 {privacy.hidden ? CENSORED : <AnimatedNumber value={item.numValue} formatter={item.formatter} />}
               </p>
             </div>
