@@ -775,7 +775,8 @@ export default function Dashboard() {
           </div>
 
           {/* Activity feed */}
-          <div className="rounded-[28px] border border-border/40 bg-card/60 backdrop-blur-sm flex flex-col overflow-hidden shadow-[0_8px_32px_-12px_rgba(0,0,0,0.08)]">
+          <div className="relative rounded-[24px] border border-border/50 bg-gradient-to-b from-card via-card to-card/95 flex flex-col overflow-hidden shadow-[0_1px_0_0_hsl(var(--foreground)/0.04)_inset,0_24px_48px_-24px_hsl(var(--foreground)/0.12)]">
+            <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-foreground/10 to-transparent" />
             <div className="flex items-center justify-between border-b border-border/30 px-6 py-5">
               <div className="flex items-center gap-3">
                 <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-success/10 ring-1 ring-success/20 text-success shadow-inner">
