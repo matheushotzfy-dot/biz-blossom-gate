@@ -480,7 +480,7 @@ export default function Dashboard() {
             <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-gradient-to-b from-primary/15 to-primary/5 border border-primary/20 text-primary">
               <BarChart3 className="h-3.5 w-3.5" strokeWidth={2.5} />
             </div>
-            <span className="font-display text-[12px] font-black uppercase tracking-[0.18em] text-foreground">Visão Executiva</span>
+            <span className="font-display text-[13px] font-bold tracking-[-0.01em] text-foreground">Visão executiva</span>
             {scaleModeUnlocked && (
               <button onClick={activateScaleMode} className={cn("ml-1 inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[10px] font-black uppercase tracking-wider transition-all",
                 scaleMode ? "border-primary/30 bg-primary/10 text-primary shadow-sm shadow-primary/10" : "border-border/60 bg-background/80 text-muted-foreground hover:text-foreground hover:border-primary/30"
