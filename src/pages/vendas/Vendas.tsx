@@ -106,6 +106,18 @@ function DeltaBadge({ cur, prev }: { cur: number; prev: number }) {
   );
 }
 
+function Sparkline({ points, color = "hsl(var(--success))" }: { points: number[]; color?: string }) {
+  if (!points || points.length < 2) return <div className="h-7 w-full" />;
+  const data = points.map((v, i) => ({ i, v }));
+  return (
+    <ResponsiveContainer width="100%" height={28}>
+      <LineChart data={data} margin={{ top: 2, right: 0, left: 0, bottom: 2 }}>
+        <Line type="monotone" dataKey="v" stroke={color} strokeWidth={1.5} dot={false} isAnimationActive={false} />
+      </LineChart>
+    </ResponsiveContainer>
+  );
+}
+
 function SortHead({ label, field, sort, onSort, align = "left", className }: { label: string; field: SortField; sort: { field: SortField; dir: SortDir }; onSort: (f: SortField) => void; align?: "left" | "right"; className?: string }) {
   const active = sort.field === field;
   return (
