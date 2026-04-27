@@ -5,7 +5,7 @@ import {
   Search, X, EyeOff, Eye, Phone, Mail, Clock, RefreshCw, Check,
   Download, FileText, ChevronDown, ChevronUp, ArrowUpDown, ArrowUpRight, ArrowDownRight,
   CreditCard, ShoppingCart, MoreHorizontal, CheckSquare, Square, CalendarDays, MessageCircle,
-  TrendingUp, Sparkles, Activity, Zap, Users, Receipt, AlertTriangle, ShieldAlert,
+  AlertTriangle, ShieldAlert,
 } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { TransactionDetailPanel } from "@/components/transactions/TransactionDetailPanel";
