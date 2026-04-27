@@ -817,38 +817,19 @@ export default function Vendas() {
               ))}
             </div>
 
-            {/* Risk strip — reembolsos + chargebacks com mini-barra de severidade */}
-            <div className="grid grid-cols-2 border-t border-border divide-x divide-border bg-muted/10">
-              {riskKpis.map((r, i) => {
+            {/* Risk strip — flat */}
+            <div className="grid grid-cols-2 border-t border-border divide-x divide-border">
+              {riskKpis.map((r) => {
                 const Icon = r.icon;
-                const rate = i === 0 ? m.refundRate : m.chargebackRate;
-                const max = i === 0 ? 10 : 1; // benchmarks: 10% reembolso, 1% chargeback
-                const sev = Math.min(100, (rate / max) * 100);
-                const sevColor = rate === 0
-                  ? "bg-success"
-                  : sev > 70 ? "bg-destructive" : sev > 40 ? "bg-warning" : "bg-success";
                 return (
                   <div key={r.label} className="flex items-center gap-3 px-5 py-3 sm:px-6">
-                    <span className={cn(
-                      "inline-flex h-7 w-7 items-center justify-center rounded-md border",
-                      r.accent.includes("destructive")
-                        ? "border-destructive/30 bg-destructive/10 text-destructive"
-                        : "border-border bg-background text-foreground/60",
-                    )}>
-                      <Icon className="h-3.5 w-3.5" strokeWidth={2.4} />
-                    </span>
+                    <Icon className={cn("h-3.5 w-3.5 shrink-0", r.accent)} strokeWidth={2.4} />
                     <div className="min-w-0 flex-1">
                       <div className="flex items-center gap-2">
-                        <p className="text-[10.5px] font-bold uppercase tracking-[0.2em] text-foreground/60">{r.label}</p>
+                        <p className="text-[10.5px] font-bold uppercase tracking-[0.2em] text-foreground/55">{r.label}</p>
                         <p className={cn("font-numbers text-[14px] font-black tabular-nums leading-none", r.accent)}>{r.value}</p>
                       </div>
                       <p className="truncate text-[11px] text-foreground/55 mt-0.5">{r.sub}</p>
-                    </div>
-                    <div className="hidden sm:flex flex-col items-end gap-1 w-24 shrink-0">
-                      <span className="text-[10px] font-bold tabular-nums text-foreground/50">{rate.toFixed(2)}%</span>
-                      <div className="h-1 w-full rounded-full bg-muted overflow-hidden">
-                        <div className={cn("h-full rounded-full transition-all", sevColor)} style={{ width: `${sev}%` }} />
-                      </div>
                     </div>
                   </div>
                 );
