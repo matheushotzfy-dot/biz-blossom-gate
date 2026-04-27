@@ -437,6 +437,11 @@ export default function Vendas() {
   const [showExportDialog, setShowExportDialog] = useState(false);
   const [sort, setSort] = useState<{ field: SortField; dir: SortDir }>({ field: "date", dir: "desc" });
   const [hidden, setHidden] = useState(() => { try { return localStorage.getItem("privacy_mode") === "true"; } catch { return false; } });
+  const [cmdOpen, setCmdOpen] = useState(false);
+  const [density, setDensity] = useState<"compact" | "comfortable">(() => { try { return (localStorage.getItem("vendas_density") as "compact" | "comfortable") || "comfortable"; } catch { return "comfortable"; } });
+  const toggleDensity = useCallback(() => {
+    setDensity(p => { const n = p === "compact" ? "comfortable" : "compact"; try { localStorage.setItem("vendas_density", n); } catch {} return n; });
+  }, []);
 
   const toggleHidden = useCallback(() => {
     setHidden(p => { const n = !p; try { localStorage.setItem("privacy_mode", String(n)); } catch {} return n; });
