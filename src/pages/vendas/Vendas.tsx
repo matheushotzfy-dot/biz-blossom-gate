@@ -1,12 +1,16 @@
-import { useEffect, useState, useMemo, useCallback } from "react";
+import React, { useEffect, useState, useMemo, useCallback } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { useTransactions, useProducts } from "@/hooks/useQueryData";
 import {
   Search, X, EyeOff, Eye, Phone, Mail, Clock, RefreshCw, Check,
   Download, FileText, ChevronDown, ChevronUp, ArrowUpDown, ArrowUpRight, ArrowDownRight,
   CreditCard, ShoppingCart, MoreHorizontal, CheckSquare, Square, CalendarDays, MessageCircle,
-  AlertTriangle, ShieldAlert,
+  AlertTriangle, ShieldAlert, Command as CommandIcon, Rows3, Rows4, Copy, Filter, Zap,
 } from "lucide-react";
+import {
+  CommandDialog, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList, CommandSeparator, CommandShortcut,
+} from "@/components/ui/command";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { TransactionDetailPanel } from "@/components/transactions/TransactionDetailPanel";
 import type { Tables } from "@/integrations/supabase/types";
@@ -118,6 +122,14 @@ function Sparkline({ points, color = "hsl(var(--success))" }: { points: number[]
   );
 }
 
+function Kbd({ children, className }: { children: React.ReactNode; className?: string }) {
+  return (
+    <kbd className={cn("inline-flex h-[18px] min-w-[18px] items-center justify-center rounded border border-border bg-background px-1 font-mono text-[10px] font-semibold text-muted-foreground shadow-[0_1px_0_hsl(var(--border))]", className)}>
+      {children}
+    </kbd>
+  );
+}
+
 function SortHead({ label, field, sort, onSort, align = "left", className }: { label: string; field: SortField; sort: { field: SortField; dir: SortDir }; onSort: (f: SortField) => void; align?: "left" | "right"; className?: string }) {
   const active = sort.field === field;
   return (
@@ -175,7 +187,7 @@ const METHODS: Record<string, { label: string; icon: any; color: string; bg: str
 };
 
 /* ─── Desktop Row ─── */
-function TxRow({ tx, prods, onClick }: { tx: Tables<"transactions">; prods: Record<string, string>; onClick: () => void }) {
+function TxRow({ tx, prods, onClick, density = "comfortable" }: { tx: Tables<"transactions">; prods: Record<string, string>; onClick: () => void; density?: "compact" | "comfortable" }) {
   const method = METHODS[tx.payment_method || ""] || { label: tx.payment_method || "—", icon: FileText, color: "text-muted-foreground", bg: "bg-muted", border: "border-border" };
   const MethodIcon = method.icon;
   const name = tx.customer_name || "Cliente";
@@ -185,11 +197,13 @@ function TxRow({ tx, prods, onClick }: { tx: Tables<"transactions">; prods: Reco
   const net = Number(tx.net_amount);
   const gross = Number(tx.amount);
 
+  const py = density === "compact" ? "py-2" : "py-3.5";
+  const avatarSize = density === "compact" ? "h-8 w-8" : "h-9 w-9";
   return (
     <tr onClick={onClick} className="group cursor-pointer transition-colors hover:bg-muted/30 border-b border-border/60 last:border-b-0">
-      <td className="pl-4 pr-3 py-3.5 align-middle">
+      <td className={cn("pl-4 pr-3 align-middle", py)}>
         <div className="flex items-center gap-3">
-          <Avatar className="h-9 w-9 shrink-0 rounded-lg">
+          <Avatar className={cn(avatarSize, "shrink-0 rounded-lg")}>
             <AvatarFallback className={cn("text-[11px] font-bold rounded-lg", avatarColor(name))}>{initials(name)}</AvatarFallback>
           </Avatar>
           <div className="min-w-0">
@@ -205,39 +219,40 @@ function TxRow({ tx, prods, onClick }: { tx: Tables<"transactions">; prods: Reco
           </div>
         </div>
       </td>
-      <td className="px-3 py-3.5 align-middle">
+      <td className={cn("px-3 align-middle", py)}>
         <p className="truncate text-[12px] font-medium text-foreground max-w-[180px]">{prodName}</p>
         <p className="text-[11px] text-muted-foreground mt-0.5 tabular-nums">{fmtDate(tx.created_at)} · {fmtTime(tx.created_at)}</p>
       </td>
-      <td className="px-3 py-3.5 align-middle">
+      <td className={cn("px-3 align-middle", py)}>
         <span className={cn("inline-flex items-center gap-1.5 rounded-md px-2 py-1 text-[11px] font-semibold border", st.fg, st.bg, st.border)}>
           <span className={cn("h-1.5 w-1.5 rounded-full", st.dot)} />
           {st.label}
         </span>
       </td>
-      <td className="px-3 py-3.5 align-middle">
+      <td className={cn("px-3 align-middle", py)}>
         <span className={cn("inline-flex items-center gap-1.5 rounded-md px-2 py-1 text-[11px] font-semibold border", method.color, method.bg, method.border)}>
           <MethodIcon className="h-3 w-3" />
           {method.label}
         </span>
       </td>
-      <td className="px-3 py-3.5 align-middle text-right">
+      <td className={cn("px-3 align-middle text-right", py)}>
         <p className="text-[13px] font-semibold text-foreground tabular-nums">{fmt(gross)}</p>
         {fee > 0 && <p className="text-[10px] text-muted-foreground tabular-nums mt-0.5">−{fmt(fee)} taxa</p>}
       </td>
-      <td className="px-4 py-3.5 align-middle text-right">
+      <td className={cn("px-4 align-middle text-right", py)}>
         <p className={cn("text-[14px] font-bold tabular-nums",
           tx.status === "completed" ? "text-success" : tx.status === "pending" ? "text-warning" : "text-foreground/60"
         )}>{fmt(net)}</p>
       </td>
-      <td className="pr-3 py-3.5 align-middle w-12">
+      <td className={cn("pr-3 align-middle w-12", py)}>
         <div className="opacity-0 group-hover:opacity-100 transition-opacity">
           <DropdownMenu>
             <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
               <button className="flex h-7 w-7 items-center justify-center rounded-md hover:bg-muted text-muted-foreground hover:text-foreground transition-colors"><MoreHorizontal className="h-4 w-4" /></button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-44 rounded-lg border-border bg-popover p-1">
+            <DropdownMenuContent align="end" className="w-48 rounded-lg border-border bg-popover p-1">
               <DropdownMenuItem onClick={(e) => { e.stopPropagation(); onClick(); }} className="gap-2 text-[12px] font-medium rounded-md py-1.5"><Eye className="h-3.5 w-3.5" /> Ver detalhes</DropdownMenuItem>
+              <DropdownMenuItem onClick={(e) => { e.stopPropagation(); navigator.clipboard.writeText(tx.id); toast.success("ID copiado"); }} className="gap-2 text-[12px] font-medium rounded-md py-1.5"><Copy className="h-3.5 w-3.5" /> Copiar ID</DropdownMenuItem>
               {tx.customer_phone && <DropdownMenuItem onClick={(e) => { e.stopPropagation(); navigator.clipboard.writeText(tx.customer_phone!); toast.success("Telefone copiado"); }} className="gap-2 text-[12px] font-medium rounded-md py-1.5"><Phone className="h-3.5 w-3.5" /> Copiar telefone</DropdownMenuItem>}
               {tx.customer_email && <DropdownMenuItem onClick={(e) => { e.stopPropagation(); navigator.clipboard.writeText(tx.customer_email!); toast.success("Email copiado"); }} className="gap-2 text-[12px] font-medium rounded-md py-1.5"><Mail className="h-3.5 w-3.5" /> Copiar email</DropdownMenuItem>}
               {tx.status === "completed" && <><DropdownMenuSeparator className="my-1" /><DropdownMenuItem onClick={(e) => { e.stopPropagation(); toast.info("Entre em contato com o suporte."); }} className="gap-2 text-[12px] font-medium text-destructive focus:text-destructive rounded-md py-1.5"><RefreshCw className="h-3.5 w-3.5" /> Reembolsar</DropdownMenuItem></>}
@@ -425,6 +440,11 @@ export default function Vendas() {
   const [showExportDialog, setShowExportDialog] = useState(false);
   const [sort, setSort] = useState<{ field: SortField; dir: SortDir }>({ field: "date", dir: "desc" });
   const [hidden, setHidden] = useState(() => { try { return localStorage.getItem("privacy_mode") === "true"; } catch { return false; } });
+  const [cmdOpen, setCmdOpen] = useState(false);
+  const [density, setDensity] = useState<"compact" | "comfortable">(() => { try { return (localStorage.getItem("vendas_density") as "compact" | "comfortable") || "comfortable"; } catch { return "comfortable"; } });
+  const toggleDensity = useCallback(() => {
+    setDensity(p => { const n = p === "compact" ? "comfortable" : "compact"; try { localStorage.setItem("vendas_density", n); } catch {} return n; });
+  }, []);
 
   const toggleHidden = useCallback(() => {
     setHidden(p => { const n = !p; try { localStorage.setItem("privacy_mode", String(n)); } catch {} return n; });
@@ -590,10 +610,27 @@ export default function Vendas() {
   }, [products, sanitize]);
 
   useEffect(() => {
-    const handler = (e: KeyboardEvent) => { if ((e.metaKey || e.ctrlKey) && e.key === "k") { e.preventDefault(); document.getElementById("vendas-search")?.focus(); } };
+    const handler = (e: KeyboardEvent) => {
+      const target = e.target as HTMLElement | null;
+      const inField = !!target && (target.tagName === "INPUT" || target.tagName === "TEXTAREA" || (target as any).isContentEditable);
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k") { e.preventDefault(); setCmdOpen(o => !o); return; }
+      if (e.key === "/" && !inField) { e.preventDefault(); document.getElementById("vendas-search")?.focus(); return; }
+      if (inField || e.metaKey || e.ctrlKey || e.altKey) return;
+      const k = e.key.toLowerCase();
+      if (k === "e") { e.preventDefault(); setShowExportDialog(true); }
+      else if (k === "r") { e.preventDefault(); window.location.reload(); }
+      else if (k === "p") { e.preventDefault(); toggleHidden(); }
+      else if (k === "d") { e.preventDefault(); toggleDensity(); }
+      else if (e.key === "1") setStatusFilter("all");
+      else if (e.key === "2") setStatusFilter("completed");
+      else if (e.key === "3") setStatusFilter("pending");
+      else if (e.key === "4") setStatusFilter("refunded");
+      else if (e.key === "5") setStatusFilter("chargeback");
+      else if (e.key === "6") setStatusFilter("failed");
+    };
     window.addEventListener("keydown", handler);
     return () => window.removeEventListener("keydown", handler);
-  }, []);
+  }, [toggleHidden, toggleDensity]);
 
   const m = metrics.current;
   const p = metrics.previous;
@@ -661,51 +698,98 @@ export default function Vendas() {
                 </p>
               </div>
 
-              <div className="flex items-center gap-2 shrink-0">
-                {/* period segmented */}
-                <div className="hidden md:inline-flex items-center rounded-lg border border-border bg-background/50 p-0.5">
-                  {PERIODS.map((opt) => (
-                    <button
-                      key={opt.label}
-                      onClick={() => { setSelectedPeriod(opt); setIsCustom(false); setCustomRange(undefined); }}
-                      className={cn(
-                        "rounded-md px-2.5 py-1 text-[11px] font-bold transition-all duration-150",
-                        !isCustom && selectedPeriod.label === opt.label
-                          ? "bg-foreground text-background"
-                          : "text-muted-foreground hover:text-foreground",
-                      )}
-                    >
-                      {opt.label}
-                    </button>
-                  ))}
+              <TooltipProvider delayDuration={250}>
+                <div className="flex items-center gap-1.5 shrink-0">
+                  {/* period segmented */}
+                  <div className="hidden md:inline-flex items-center rounded-lg border border-border bg-background/50 p-0.5">
+                    {PERIODS.map((opt) => (
+                      <button
+                        key={opt.label}
+                        onClick={() => { setSelectedPeriod(opt); setIsCustom(false); setCustomRange(undefined); }}
+                        className={cn(
+                          "rounded-md px-2.5 py-1 text-[11px] font-bold transition-all duration-150",
+                          !isCustom && selectedPeriod.label === opt.label
+                            ? "bg-foreground text-background"
+                            : "text-muted-foreground hover:text-foreground",
+                        )}
+                      >
+                        {opt.label}
+                      </button>
+                    ))}
+                  </div>
+
+                  <Tooltip>
+                    <Popover open={datePickerOpen} onOpenChange={setDatePickerOpen}>
+                      <TooltipTrigger asChild>
+                        <PopoverTrigger asChild>
+                          <button className={cn("inline-flex h-8 w-8 items-center justify-center rounded-lg border transition-colors",
+                            isCustom ? "border-foreground/40 bg-secondary text-foreground" : "border-border bg-background/50 text-muted-foreground hover:text-foreground")}>
+                            <CalendarDays className="h-3.5 w-3.5" />
+                          </button>
+                        </PopoverTrigger>
+                      </TooltipTrigger>
+                      <PopoverContent align="end" className="w-auto overflow-hidden rounded-xl border border-border bg-popover p-0">
+                        <Calendar mode="range" selected={customRange} onSelect={(range) => { setCustomRange(range); setIsCustom(true); if (range?.from && range?.to) setTimeout(() => setDatePickerOpen(false), 300); }} numberOfMonths={1} locale={ptBR} disabled={(date) => date > new Date()} className="pointer-events-auto p-3" />
+                      </PopoverContent>
+                    </Popover>
+                    <TooltipContent side="bottom" className="flex items-center gap-2">Período personalizado</TooltipContent>
+                  </Tooltip>
+
+                  <span className="hidden md:block h-5 w-px bg-border mx-0.5" />
+
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <button onClick={() => setCmdOpen(true)} className="inline-flex h-8 items-center gap-1.5 rounded-lg border border-border bg-background/50 px-2 text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors">
+                        <CommandIcon className="h-3.5 w-3.5" />
+                        <Kbd>⌘K</Kbd>
+                      </button>
+                    </TooltipTrigger>
+                    <TooltipContent side="bottom" className="flex items-center gap-2">Comandos rápidos</TooltipContent>
+                  </Tooltip>
+
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <button onClick={toggleDensity} className={cn("inline-flex h-8 w-8 items-center justify-center rounded-lg border transition-colors",
+                        density === "compact" ? "border-foreground/40 bg-secondary text-foreground" : "border-border bg-background/50 text-muted-foreground hover:text-foreground")}>
+                        {density === "compact" ? <Rows4 className="h-3.5 w-3.5" /> : <Rows3 className="h-3.5 w-3.5" />}
+                      </button>
+                    </TooltipTrigger>
+                    <TooltipContent side="bottom" className="flex items-center gap-2">Densidade <Kbd>D</Kbd></TooltipContent>
+                  </Tooltip>
+
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <button onClick={() => window.location.reload()} className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-border bg-background/50 text-muted-foreground hover:text-foreground transition-colors">
+                        <RefreshCw className="h-3.5 w-3.5" />
+                      </button>
+                    </TooltipTrigger>
+                    <TooltipContent side="bottom" className="flex items-center gap-2">Atualizar <Kbd>R</Kbd></TooltipContent>
+                  </Tooltip>
+
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <button onClick={toggleHidden} className={cn("inline-flex h-8 w-8 items-center justify-center rounded-lg border transition-colors",
+                        hidden ? "border-foreground/40 bg-secondary text-foreground" : "border-border bg-background/50 text-muted-foreground hover:text-foreground")}>
+                        {hidden ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
+                      </button>
+                    </TooltipTrigger>
+                    <TooltipContent side="bottom" className="flex items-center gap-2">{hidden ? "Mostrar valores" : "Ocultar valores"} <Kbd>P</Kbd></TooltipContent>
+                  </Tooltip>
+
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <button
+                        onClick={() => setShowExportDialog(true)}
+                        className="inline-flex h-8 items-center gap-1.5 rounded-lg bg-foreground px-3 text-[11px] font-bold text-background transition-all duration-200 hover:bg-foreground/90"
+                      >
+                        <Download className="h-3.5 w-3.5" strokeWidth={2.5} />
+                        Exportar
+                      </button>
+                    </TooltipTrigger>
+                    <TooltipContent side="bottom" className="flex items-center gap-2">Exportar CSV <Kbd>E</Kbd></TooltipContent>
+                  </Tooltip>
                 </div>
-                <Popover open={datePickerOpen} onOpenChange={setDatePickerOpen}>
-                  <PopoverTrigger asChild>
-                    <button title="Período personalizado" className={cn("inline-flex h-8 w-8 items-center justify-center rounded-lg border transition-colors",
-                      isCustom ? "border-foreground/40 bg-secondary text-foreground" : "border-border bg-background/50 text-muted-foreground hover:text-foreground")}>
-                      <CalendarDays className="h-3.5 w-3.5" />
-                    </button>
-                  </PopoverTrigger>
-                  <PopoverContent align="end" className="w-auto overflow-hidden rounded-xl border border-border bg-popover p-0">
-                    <Calendar mode="range" selected={customRange} onSelect={(range) => { setCustomRange(range); setIsCustom(true); if (range?.from && range?.to) setTimeout(() => setDatePickerOpen(false), 300); }} numberOfMonths={1} locale={ptBR} disabled={(date) => date > new Date()} className="pointer-events-auto p-3" />
-                  </PopoverContent>
-                </Popover>
-                <span className="hidden md:block h-5 w-px bg-border" />
-                <button onClick={() => window.location.reload()} title="Atualizar" className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-border bg-background/50 text-muted-foreground hover:text-foreground transition-colors">
-                  <RefreshCw className="h-3.5 w-3.5" />
-                </button>
-                <button onClick={toggleHidden} title={hidden ? "Mostrar valores" : "Ocultar valores"} className={cn("inline-flex h-8 w-8 items-center justify-center rounded-lg border transition-colors",
-                  hidden ? "border-foreground/40 bg-secondary text-foreground" : "border-border bg-background/50 text-muted-foreground hover:text-foreground")}>
-                  {hidden ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
-                </button>
-                <button
-                  onClick={() => setShowExportDialog(true)}
-                  className="inline-flex h-8 items-center gap-1.5 rounded-lg bg-foreground px-3 text-[11px] font-bold text-background transition-all duration-200 hover:bg-foreground/90"
-                >
-                  <Download className="h-3.5 w-3.5" strokeWidth={2.5} />
-                  Exportar
-                </button>
-              </div>
+              </TooltipProvider>
             </div>
 
             {/* KPI ribbon — divisões verticais sutis em vez de 6 cards iguais */}
@@ -823,11 +907,15 @@ export default function Vendas() {
             <p className="text-[13px] font-bold text-foreground leading-tight">Transações</p>
             <p className="text-[11px] text-muted-foreground mt-0.5">{sortedFiltered.length} {sortedFiltered.length === 1 ? "resultado" : "resultados"} · líquido <span className="font-bold text-foreground tabular-nums">{hidden ? HIDE : fmt(filteredNetTotal)}</span></p>
           </div>
-          <div className="relative w-full sm:w-[300px]">
+          <div className="relative w-full sm:w-[320px]">
             <Search className="absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
             <input id="vendas-search" value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Buscar nome, email, telefone, ID…"
-              className="h-8 w-full rounded-lg border border-border bg-background pl-8 pr-8 text-[12px] text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-foreground/40 transition-colors" />
-            {search && <button onClick={() => setSearch("")} className="absolute right-2.5 top-1/2 -translate-y-1/2"><X className="h-3.5 w-3.5 text-muted-foreground hover:text-foreground" /></button>}
+              className="h-8 w-full rounded-lg border border-border bg-background pl-8 pr-16 text-[12px] text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-foreground/40 transition-colors" />
+            {search ? (
+              <button onClick={() => setSearch("")} className="absolute right-2.5 top-1/2 -translate-y-1/2"><X className="h-3.5 w-3.5 text-muted-foreground hover:text-foreground" /></button>
+            ) : (
+              <Kbd className="absolute right-2.5 top-1/2 -translate-y-1/2">/</Kbd>
+            )}
           </div>
         </div>
 
@@ -887,7 +975,7 @@ export default function Vendas() {
                         </div>
                       </td></tr>
                     ) : visibleItems.map((tx) => (
-                      <TxRow key={tx.id} tx={tx} prods={products} onClick={() => setSelectedTx(tx)} />
+                      <TxRow key={tx.id} tx={tx} prods={products} onClick={() => setSelectedTx(tx)} density={density} />
                     ))}
                   </tbody>
                 </table>
@@ -942,6 +1030,64 @@ export default function Vendas() {
 
       {selectedTx && <TransactionDetailPanel tx={selectedTx} products={products} onClose={() => setSelectedTx(null)} onRefund={async () => toast.info("Entre em contato com o suporte.")} />}
       <ExportDialog open={showExportDialog} onOpenChange={setShowExportDialog} transactions={dateFiltered} products={products} onExport={handleExportCSV} />
+
+      {/* ─── Command Palette ─── */}
+      <CommandDialog open={cmdOpen} onOpenChange={setCmdOpen}>
+        <CommandInput placeholder="Buscar comandos, clientes, ações…" />
+        <CommandList>
+          <CommandEmpty>Nenhum resultado.</CommandEmpty>
+          <CommandGroup heading="Ações">
+            <CommandItem onSelect={() => { setShowExportDialog(true); setCmdOpen(false); }}>
+              <Download className="h-4 w-4" /> Exportar CSV <CommandShortcut>E</CommandShortcut>
+            </CommandItem>
+            <CommandItem onSelect={() => { window.location.reload(); }}>
+              <RefreshCw className="h-4 w-4" /> Atualizar dados <CommandShortcut>R</CommandShortcut>
+            </CommandItem>
+            <CommandItem onSelect={() => { toggleHidden(); setCmdOpen(false); }}>
+              {hidden ? <Eye className="h-4 w-4" /> : <EyeOff className="h-4 w-4" />} {hidden ? "Mostrar valores" : "Ocultar valores"} <CommandShortcut>P</CommandShortcut>
+            </CommandItem>
+            <CommandItem onSelect={() => { toggleDensity(); setCmdOpen(false); }}>
+              {density === "compact" ? <Rows3 className="h-4 w-4" /> : <Rows4 className="h-4 w-4" />} Alternar densidade <CommandShortcut>D</CommandShortcut>
+            </CommandItem>
+            <CommandItem onSelect={() => { document.getElementById("vendas-search")?.focus(); setCmdOpen(false); }}>
+              <Search className="h-4 w-4" /> Focar busca <CommandShortcut>/</CommandShortcut>
+            </CommandItem>
+          </CommandGroup>
+          <CommandSeparator />
+          <CommandGroup heading="Filtrar status">
+            {statusTabs.map((tab, i) => (
+              <CommandItem key={tab.value} onSelect={() => { setStatusFilter(tab.value); setCmdOpen(false); }}>
+                {tab.dot ? <span className={cn("h-2 w-2 rounded-full", tab.dot)} /> : <Filter className="h-4 w-4" />} {tab.label}
+                <span className="ml-auto text-[10px] tabular-nums text-muted-foreground">{tab.count}</span>
+                <CommandShortcut>{i + 1}</CommandShortcut>
+              </CommandItem>
+            ))}
+          </CommandGroup>
+          <CommandSeparator />
+          <CommandGroup heading="Período">
+            {PERIODS.map(opt => (
+              <CommandItem key={opt.label} onSelect={() => { setSelectedPeriod(opt); setIsCustom(false); setCustomRange(undefined); setCmdOpen(false); }}>
+                <CalendarDays className="h-4 w-4" /> {opt.label}
+                {!isCustom && selectedPeriod.label === opt.label && <Check className="ml-auto h-3.5 w-3.5 text-success" />}
+              </CommandItem>
+            ))}
+          </CommandGroup>
+          {sortedFiltered.length > 0 && (
+            <>
+              <CommandSeparator />
+              <CommandGroup heading="Transações recentes">
+                {sortedFiltered.slice(0, 6).map(tx => (
+                  <CommandItem key={tx.id} onSelect={() => { setSelectedTx(tx); setCmdOpen(false); }}>
+                    <Zap className="h-4 w-4 text-muted-foreground" />
+                    <span className="truncate">{tx.customer_name || "Cliente"}</span>
+                    <span className="ml-auto text-[11px] font-bold tabular-nums text-foreground">{fmt(Number(tx.net_amount))}</span>
+                  </CommandItem>
+                ))}
+              </CommandGroup>
+            </>
+          )}
+        </CommandList>
+      </CommandDialog>
     </div>
   );
 }
