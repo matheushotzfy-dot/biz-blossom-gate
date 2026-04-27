@@ -468,16 +468,10 @@ export default function Dashboard() {
       {/* ════════════════════════════════════════════════════════════════ */}
       {/* HERO — ONE DOMINANT METRIC                                       */}
       {/* ════════════════════════════════════════════════════════════════ */}
-      <section className="relative mb-5 rounded-[24px] border border-border/50 bg-gradient-to-b from-card via-card to-card/95 overflow-hidden shadow-[0_1px_0_0_hsl(var(--foreground)/0.04)_inset,0_24px_48px_-24px_hsl(var(--foreground)/0.12)]">
-        {/* Premium ambient layers */}
-        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,hsl(var(--primary)/0.09),transparent_55%)]" />
-        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_left,hsl(var(--success)/0.07),transparent_55%)]" />
-        <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-foreground/15 to-transparent" />
-        {/* Layered grid + dots texture for richer depth */}
-        <div className="pointer-events-none absolute inset-0 opacity-[0.035] [background-image:linear-gradient(hsl(var(--foreground))_1px,transparent_1px),linear-gradient(90deg,hsl(var(--foreground))_1px,transparent_1px)] [background-size:32px_32px] [mask-image:radial-gradient(ellipse_at_center,black_40%,transparent_85%)]" />
-        <div className="pointer-events-none absolute inset-0 opacity-[0.05] [background-image:radial-gradient(hsl(var(--foreground))_0.8px,transparent_0.8px)] [background-size:18px_18px] [mask-image:radial-gradient(ellipse_at_top_right,black_10%,transparent_70%)]" />
-        {/* Diagonal sheen */}
-        <div className="pointer-events-none absolute -top-1/2 -right-1/4 h-[200%] w-[60%] rotate-12 bg-gradient-to-b from-foreground/[0.025] via-transparent to-transparent" />
+      <section className="relative mb-5 rounded-[24px] border border-border/60 bg-card overflow-hidden">
+        <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-foreground/10" />
+        <div className="pointer-events-none absolute inset-x-0 bottom-0 h-px bg-background/70" />
+        <div className="pointer-events-none absolute left-0 top-0 h-full w-[3px] bg-primary" />
         {/* Corner brackets — premium frame detail */}
         <div className="pointer-events-none absolute top-3 left-3 h-3 w-3 border-l border-t border-foreground/20 rounded-tl-md" />
         <div className="pointer-events-none absolute top-3 right-3 h-3 w-3 border-r border-t border-foreground/20 rounded-tr-md" />
@@ -551,7 +545,7 @@ export default function Dashboard() {
               </p>
             </div>
             <div className="flex items-baseline gap-4 flex-wrap">
-              <span className="inline-flex items-baseline font-display text-[clamp(2.4rem,7.5vw,76px)] font-black leading-none tracking-[-0.055em] whitespace-nowrap bg-gradient-to-b from-foreground via-foreground to-foreground/75 bg-clip-text text-transparent drop-shadow-[0_2px_24px_hsl(var(--primary)/0.12)]">
+              <span className="inline-flex items-baseline font-display text-[clamp(2.4rem,7.5vw,76px)] font-black leading-none tracking-[-0.045em] whitespace-nowrap text-foreground">
                 {privacy.hidden ? "R$ •••••••" : <AnimatedNumber value={revenue} duration={1000} />}
               </span>
               {approved.length > 0 && (
@@ -599,9 +593,7 @@ export default function Dashboard() {
           </div>
 
           <div className="relative px-6 py-9 lg:px-10 lg:py-12 overflow-hidden">
-            {/* Glow accent */}
-            <div className="pointer-events-none absolute -top-16 -right-16 h-40 w-40 rounded-full bg-success/8 blur-[60px]" />
-            <div aria-hidden className="absolute left-0 top-8 bottom-8 w-[3px] rounded-full bg-gradient-to-b from-success via-success/60 to-transparent" />
+            <div aria-hidden className="absolute left-0 top-8 bottom-8 w-[3px] rounded-full bg-success" />
             <div className="flex items-center gap-2 mb-4">
               <span className="relative flex h-2 w-2">
                 <span className="absolute inline-flex h-full w-full rounded-full bg-success/40 animate-ping" />
@@ -609,7 +601,7 @@ export default function Dashboard() {
               </span>
               <p className="font-display text-[10px] font-black uppercase tracking-[0.22em] text-muted-foreground/60">Saldo Disponível</p>
             </div>
-            <p className="font-display text-[clamp(1.8rem,4.5vw,46px)] font-black tabular-nums text-success tracking-[-0.045em] leading-none drop-shadow-[0_2px_12px_hsl(var(--success)/0.2)]">
+            <p className="font-display text-[clamp(1.8rem,4.5vw,46px)] font-black tabular-nums text-success tracking-[-0.035em] leading-none">
               {privacy.hidden ? CENSORED : fmt(Math.abs(balance))}
             </p>
 
@@ -655,17 +647,15 @@ export default function Dashboard() {
       {/* ════════════════════════════════════════════════════════════════ */}
       {/* DOMINANT CHART AREA                                              */}
       {/* ════════════════════════════════════════════════════════════════ */}
-      <section className="relative mb-5 rounded-[24px] border border-border/50 bg-gradient-to-b from-card via-card to-card/95 overflow-hidden shadow-[0_1px_0_0_hsl(var(--foreground)/0.04)_inset,0_24px_48px_-24px_hsl(var(--foreground)/0.12)]">
-        <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-foreground/15 to-transparent" />
-        <div className="pointer-events-none absolute inset-0 opacity-[0.03] [background-image:linear-gradient(hsl(var(--foreground))_1px,transparent_1px),linear-gradient(90deg,hsl(var(--foreground))_1px,transparent_1px)] [background-size:32px_32px] [mask-image:radial-gradient(ellipse_at_center,black_50%,transparent_90%)]" />
-        <div className="pointer-events-none absolute inset-0 opacity-[0.04] [background-image:radial-gradient(hsl(var(--foreground))_0.7px,transparent_0.7px)] [background-size:16px_16px] [mask-image:radial-gradient(ellipse_at_top_left,black_15%,transparent_75%)]" />
-        <div className="pointer-events-none absolute -top-20 -right-20 h-72 w-72 rounded-full bg-primary/5 blur-[80px]" />
+      <section className="relative mb-5 rounded-[24px] border border-border/60 bg-card overflow-hidden">
+        <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-foreground/10" />
+        <div className="pointer-events-none absolute inset-x-0 bottom-0 h-px bg-background/70" />
         <div className="grid grid-cols-1 xl:grid-cols-[1fr_300px]">
           {/* Chart */}
           <div className="flex flex-col border-b xl:border-b-0 xl:border-r border-border/30">
             <div className="flex items-center justify-between px-7 py-5 border-b border-border/30">
               <div className="flex items-center gap-3">
-                <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-gradient-to-b from-primary/15 to-primary/5 border border-primary/20 text-primary">
+                  <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-primary/10 border border-primary/20 text-primary">
                   <TrendingUp className="h-3.5 w-3.5" strokeWidth={2.5} />
                 </div>
                 <div>
@@ -726,7 +716,7 @@ export default function Dashboard() {
                 <div key={m.label} className="group px-6 py-5 transition-colors hover:bg-foreground/[0.015]">
                   <div className="flex items-center justify-between mb-3">
                     <div className="flex items-center gap-2.5">
-                      <div className={cn("flex h-7 w-7 items-center justify-center rounded-lg border transition-colors", m.bgColor, m.borderColor, m.color)}>
+                    <div className={cn("flex h-7 w-7 items-center justify-center rounded-lg border transition-colors", m.bgColor, m.borderColor, m.color)}>
                         {m.icon}
                       </div>
                       <span className="font-display text-[12px] text-foreground font-bold uppercase tracking-[0.08em]">{m.label}</span>
@@ -766,12 +756,9 @@ export default function Dashboard() {
         {/* ════════════════════════════════════════════════════════════════ */}
         <section className="grid grid-cols-1 gap-5 xl:grid-cols-[1fr_1.4fr] mb-8">
           {/* Quick actions — operational support */}
-          <div className="relative rounded-[24px] border border-border/50 bg-gradient-to-b from-card via-card to-card/95 flex flex-col overflow-hidden shadow-[0_1px_0_0_hsl(var(--foreground)/0.04)_inset,0_24px_48px_-24px_hsl(var(--foreground)/0.12)]">
-            <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-foreground/15 to-transparent" />
-            <div className="pointer-events-none absolute inset-0 opacity-[0.028] [background-image:linear-gradient(hsl(var(--foreground))_1px,transparent_1px),linear-gradient(90deg,hsl(var(--foreground))_1px,transparent_1px)] [background-size:28px_28px] [mask-image:radial-gradient(ellipse_at_center,black_45%,transparent_88%)]" />
-            <div className="pointer-events-none absolute inset-0 opacity-[0.04] [background-image:radial-gradient(hsl(var(--foreground))_0.7px,transparent_0.7px)] [background-size:14px_14px] [mask-image:radial-gradient(ellipse_at_top,black_10%,transparent_70%)]" />
-            <div className="pointer-events-none absolute -top-12 -right-12 h-32 w-32 rounded-full bg-primary/[0.06] blur-[50px]" />
-            <div className="pointer-events-none absolute -bottom-16 -left-16 h-40 w-40 rounded-full bg-success/[0.04] blur-[60px]" />
+          <div className="relative rounded-[24px] border border-border/60 bg-card flex flex-col overflow-hidden">
+            <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-foreground/10" />
+            <div className="pointer-events-none absolute left-0 top-0 h-full w-[3px] bg-primary" />
             <div className="flex items-center justify-between border-b border-border/30 px-6 py-5">
               <div className="flex items-center gap-3">
                 <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-gradient-to-b from-primary/15 to-primary/5 border border-primary/20 text-primary">
@@ -826,12 +813,9 @@ export default function Dashboard() {
           </div>
 
           {/* Activity feed */}
-          <div className="relative rounded-[24px] border border-border/50 bg-gradient-to-b from-card via-card to-card/95 flex flex-col overflow-hidden shadow-[0_1px_0_0_hsl(var(--foreground)/0.04)_inset,0_24px_48px_-24px_hsl(var(--foreground)/0.12)]">
-            <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-foreground/15 to-transparent" />
-            <div className="pointer-events-none absolute inset-0 opacity-[0.028] [background-image:linear-gradient(hsl(var(--foreground))_1px,transparent_1px),linear-gradient(90deg,hsl(var(--foreground))_1px,transparent_1px)] [background-size:28px_28px] [mask-image:radial-gradient(ellipse_at_center,black_45%,transparent_88%)]" />
-            <div className="pointer-events-none absolute inset-0 opacity-[0.04] [background-image:radial-gradient(hsl(var(--foreground))_0.7px,transparent_0.7px)] [background-size:14px_14px] [mask-image:radial-gradient(ellipse_at_top,black_10%,transparent_70%)]" />
-            <div className="pointer-events-none absolute -top-12 -left-12 h-32 w-32 rounded-full bg-success/[0.06] blur-[50px]" />
-            <div className="pointer-events-none absolute -bottom-16 -right-16 h-40 w-40 rounded-full bg-primary/[0.04] blur-[60px]" />
+          <div className="relative rounded-[24px] border border-border/60 bg-card flex flex-col overflow-hidden">
+            <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-foreground/10" />
+            <div className="pointer-events-none absolute left-0 top-0 h-full w-[3px] bg-success" />
             <div className="flex items-center justify-between border-b border-border/30 px-6 py-5">
               <div className="flex items-center gap-3">
                 <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-gradient-to-b from-success/15 to-success/5 border border-success/20 text-success">
