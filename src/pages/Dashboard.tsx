@@ -543,7 +543,7 @@ export default function Dashboard() {
               </p>
             </div>
             <div className="flex items-baseline gap-4 flex-wrap">
-              <span className="inline-flex items-baseline font-display text-[clamp(2.4rem,7.5vw,76px)] font-black leading-none tracking-[-0.04em] whitespace-nowrap text-foreground [text-shadow:0_1px_0_hsl(var(--background)/0.7)]">
+              <span className="inline-flex items-baseline font-display text-[clamp(2.4rem,7.5vw,76px)] font-black leading-none tracking-[-0.04em] whitespace-nowrap text-foreground">
                 {privacy.hidden ? "R$ •••••••" : <AnimatedNumber value={revenue} duration={1000} />}
               </span>
               {approved.length > 0 && (
@@ -645,15 +645,14 @@ export default function Dashboard() {
       {/* ════════════════════════════════════════════════════════════════ */}
       {/* DOMINANT CHART AREA                                              */}
       {/* ════════════════════════════════════════════════════════════════ */}
-      <section className="relative mb-5 rounded-[24px] border border-border/60 bg-card overflow-hidden">
-        <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-foreground/10" />
+      <section className="dashboard-panel dashboard-panel-primary relative mb-5 rounded-[24px]">
         <div className="pointer-events-none absolute inset-x-0 bottom-0 h-px bg-background/70" />
         <div className="grid grid-cols-1 xl:grid-cols-[1fr_300px]">
           {/* Chart */}
           <div className="flex flex-col border-b xl:border-b-0 xl:border-r border-border/30">
             <div className="flex items-center justify-between px-7 py-5 border-b border-border/30">
               <div className="flex items-center gap-3">
-                  <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-primary/10 border border-primary/20 text-primary">
+                  <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-primary/10 border border-primary/25 text-primary">
                   <TrendingUp className="h-3.5 w-3.5" strokeWidth={2.5} />
                 </div>
                 <div>
@@ -664,7 +663,7 @@ export default function Dashboard() {
                 </div>
               </div>
               <div className="hidden sm:inline-flex items-center gap-2 rounded-full bg-primary/8 ring-1 ring-primary/15 px-3 py-1.5 text-[10px] font-display font-black uppercase tracking-wider text-primary">
-                <span className="h-1.5 w-1.5 rounded-full bg-primary shadow-[0_0_6px_hsl(var(--primary))]" />
+                <span className="h-1.5 w-1.5 rounded-full bg-primary" />
                 Vendas aprovadas
               </div>
             </div>
