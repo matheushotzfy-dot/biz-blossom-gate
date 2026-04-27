@@ -792,37 +792,86 @@ export default function Vendas() {
               </TooltipProvider>
             </div>
 
-            {/* KPI ribbon — divisões verticais sutis em vez de 6 cards iguais */}
+            {/* KPI ribbon — premium 4-up com barra de acento vertical e tipografia 4K */}
             <div className="grid grid-cols-2 divide-y divide-border sm:grid-cols-4 sm:divide-y-0 sm:divide-x">
-              {heroKpis.map((k, idx) => (
-                <div key={k.label} className={cn("px-5 py-4 sm:px-6 sm:py-5", idx === 1 && "border-l border-border sm:border-l-0")}>
-                  <div className="flex items-center justify-between gap-2">
-                    <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground">{k.label}</p>
-                    {k.delta && <DeltaBadge cur={k.delta.cur} prev={k.delta.prev} />}
-                  </div>
-                  <p className={cn("mt-2 font-numbers text-[28px] font-black leading-none tracking-[-0.045em] tabular-nums [font-feature-settings:'ss01','tnum','cv11']", k.accent)}>
-                    {k.value}
-                  </p>
-                  <div className="mt-2 flex items-end justify-between gap-2">
-                    <p className="truncate text-[11px] font-semibold text-muted-foreground">{k.sub}</p>
-                    <div className="w-16 shrink-0 opacity-80">
-                      <Sparkline points={k.spark} color={k.sparkColor} />
+              {heroKpis.map((k, idx) => {
+                const accentBar =
+                  k.accent.includes("success") ? "bg-success" :
+                  k.accent.includes("warning") ? "bg-warning" :
+                  k.accent.includes("destructive") ? "bg-destructive" :
+                  k.accent.includes("info") ? "bg-info" :
+                  "bg-foreground/70";
+                return (
+                  <div
+                    key={k.label}
+                    className={cn(
+                      "group relative px-5 py-5 sm:px-6 sm:py-6 transition-colors hover:bg-muted/20",
+                      idx === 1 && "border-l border-border sm:border-l-0",
+                    )}
+                  >
+                    {/* barra de acento vertical */}
+                    <span className={cn("absolute left-0 top-5 bottom-5 w-[2px] rounded-full opacity-80", accentBar)} />
+
+                    <div className="flex items-center justify-between gap-2">
+                      <p className="text-[10px] font-bold uppercase tracking-[0.22em] text-foreground/60">
+                        {k.label}
+                      </p>
+                      {k.delta && <DeltaBadge cur={k.delta.cur} prev={k.delta.prev} />}
+                    </div>
+
+                    <p
+                      className={cn(
+                        "mt-2.5 font-numbers text-[32px] sm:text-[34px] font-black leading-[0.95] tracking-[-0.05em] tabular-nums [font-feature-settings:'ss01','tnum','cv11'] antialiased subpixel-antialiased [text-rendering:geometricPrecision]",
+                        k.accent,
+                      )}
+                    >
+                      {k.value}
+                    </p>
+
+                    <div className="mt-3 flex items-end justify-between gap-3">
+                      <p className="truncate text-[11.5px] font-semibold text-foreground/70">{k.sub}</p>
+                      <div className="w-20 shrink-0">
+                        <Sparkline points={k.spark} color={k.sparkColor} />
+                      </div>
                     </div>
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
 
-            {/* Risk strip — reembolsos + chargebacks compactos */}
-            <div className="grid grid-cols-2 border-t border-border divide-x divide-border">
-              {riskKpis.map(r => {
+            {/* Risk strip — reembolsos + chargebacks com mini-barra de severidade */}
+            <div className="grid grid-cols-2 border-t border-border divide-x divide-border bg-muted/10">
+              {riskKpis.map((r, i) => {
                 const Icon = r.icon;
+                const rate = i === 0 ? m.refundRate : m.chargebackRate;
+                const max = i === 0 ? 10 : 1; // benchmarks: 10% reembolso, 1% chargeback
+                const sev = Math.min(100, (rate / max) * 100);
+                const sevColor = rate === 0
+                  ? "bg-success"
+                  : sev > 70 ? "bg-destructive" : sev > 40 ? "bg-warning" : "bg-success";
                 return (
-                  <div key={r.label} className="flex items-center gap-3 px-5 py-2.5 sm:px-6">
-                    <Icon className={cn("h-3.5 w-3.5 shrink-0", r.accent)} strokeWidth={2.2} />
-                    <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-muted-foreground">{r.label}</p>
-                    <p className={cn("font-numbers text-[14px] font-black tabular-nums", r.accent)}>{r.value}</p>
-                    <p className="truncate text-[11px] text-muted-foreground">· {r.sub}</p>
+                  <div key={r.label} className="flex items-center gap-3 px-5 py-3 sm:px-6">
+                    <span className={cn(
+                      "inline-flex h-7 w-7 items-center justify-center rounded-md border",
+                      r.accent.includes("destructive")
+                        ? "border-destructive/30 bg-destructive/10 text-destructive"
+                        : "border-border bg-background text-foreground/60",
+                    )}>
+                      <Icon className="h-3.5 w-3.5" strokeWidth={2.4} />
+                    </span>
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center gap-2">
+                        <p className="text-[10.5px] font-bold uppercase tracking-[0.2em] text-foreground/60">{r.label}</p>
+                        <p className={cn("font-numbers text-[14px] font-black tabular-nums leading-none", r.accent)}>{r.value}</p>
+                      </div>
+                      <p className="truncate text-[11px] text-foreground/55 mt-0.5">{r.sub}</p>
+                    </div>
+                    <div className="hidden sm:flex flex-col items-end gap-1 w-24 shrink-0">
+                      <span className="text-[10px] font-bold tabular-nums text-foreground/50">{rate.toFixed(2)}%</span>
+                      <div className="h-1 w-full rounded-full bg-muted overflow-hidden">
+                        <div className={cn("h-full rounded-full transition-all", sevColor)} style={{ width: `${sev}%` }} />
+                      </div>
+                    </div>
                   </div>
                 );
               })}
