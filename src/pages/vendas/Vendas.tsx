@@ -187,7 +187,7 @@ const METHODS: Record<string, { label: string; icon: any; color: string; bg: str
 };
 
 /* ─── Desktop Row ─── */
-function TxRow({ tx, prods, onClick }: { tx: Tables<"transactions">; prods: Record<string, string>; onClick: () => void }) {
+function TxRow({ tx, prods, onClick, density = "comfortable" }: { tx: Tables<"transactions">; prods: Record<string, string>; onClick: () => void; density?: "compact" | "comfortable" }) {
   const method = METHODS[tx.payment_method || ""] || { label: tx.payment_method || "—", icon: FileText, color: "text-muted-foreground", bg: "bg-muted", border: "border-border" };
   const MethodIcon = method.icon;
   const name = tx.customer_name || "Cliente";
