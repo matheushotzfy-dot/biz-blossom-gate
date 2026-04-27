@@ -5,8 +5,12 @@ import {
   Search, X, EyeOff, Eye, Phone, Mail, Clock, RefreshCw, Check,
   Download, FileText, ChevronDown, ChevronUp, ArrowUpDown, ArrowUpRight, ArrowDownRight,
   CreditCard, ShoppingCart, MoreHorizontal, CheckSquare, Square, CalendarDays, MessageCircle,
-  AlertTriangle, ShieldAlert,
+  AlertTriangle, ShieldAlert, Command as CommandIcon, Rows3, Rows4, Copy, Filter, Zap,
 } from "lucide-react";
+import {
+  CommandDialog, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList, CommandSeparator, CommandShortcut,
+} from "@/components/ui/command";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { TransactionDetailPanel } from "@/components/transactions/TransactionDetailPanel";
 import type { Tables } from "@/integrations/supabase/types";
