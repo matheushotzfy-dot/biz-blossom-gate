@@ -631,74 +631,79 @@ export default function Vendas() {
 
   /* ═══════════ RENDER ═══════════ */
   return (
-    <div className="mx-auto w-full max-w-[1440px] space-y-5 pb-20">
+    <div className="mx-auto -mt-2 w-full max-w-[1440px] pb-24 md:-mt-3 md:pb-10">
 
-      {/* ─────────── HERO HEADER ─────────── */}
-      <header className="relative overflow-hidden rounded-2xl border border-border bg-card">
-        {/* subtle gradient accent — no blur, no glow */}
-        <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-success/40 to-transparent" />
-        <div className="absolute right-0 top-0 bottom-0 w-1/2 opacity-[0.04] pointer-events-none" style={{ backgroundImage: "radial-gradient(circle at 80% 50%, hsl(var(--success)) 0, transparent 60%)" }} />
-        <div className="relative flex flex-col gap-4 p-5 sm:p-6 sm:flex-row sm:items-end sm:justify-between">
-          <div className="min-w-0 flex-1">
-            <div className="flex items-center gap-2 mb-3">
-              <span className="inline-flex items-center gap-1.5 rounded-full border border-success/30 bg-success/10 px-2 py-0.5">
-                <span className="relative flex h-1.5 w-1.5">
-                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-success opacity-60" />
-                  <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-success" />
-                </span>
-                <span className="text-[10px] font-bold uppercase tracking-[0.14em] text-success">AO VIVO</span>
-              </span>
-              <span className="text-[11px] font-medium text-muted-foreground">
-                {lastSaleText ? `última venda ${lastSaleText}` : "aguardando primeira venda do período"}
+      {/* ─────────── PAGE HEADER (padrão "Meus Produtos") ─────────── */}
+      <div className="flex flex-col gap-6 px-5 pt-1 sm:px-7 md:pt-1">
+        <div className="flex flex-wrap items-center justify-between gap-4">
+          <div className="space-y-2">
+            <div className="inline-flex items-center gap-2 rounded-full border border-border/60 bg-card px-3 py-1 text-[10px] font-bold uppercase tracking-[0.16em] text-muted-foreground/60">
+              <Activity className="h-3.5 w-3.5 text-success" /> Performance em tempo real
+            </div>
+            <div className="flex items-baseline gap-3">
+              <h1 className="font-display text-[26px] font-extrabold leading-none tracking-tight text-foreground sm:text-[30px]">
+                Minhas vendas
+              </h1>
+              <span className="text-[13px] tabular-nums text-muted-foreground/60">
+                {dateFiltered.length}
               </span>
             </div>
-            <h1 className="text-[32px] sm:text-[38px] font-bold tracking-[-0.035em] text-foreground leading-[1.05]">
-              Minhas Vendas
-            </h1>
-            <div className="mt-3 flex flex-wrap items-baseline gap-x-4 gap-y-1">
-              <div className="flex items-baseline gap-1.5">
-                <span className="text-[11px] font-bold uppercase tracking-[0.14em] text-muted-foreground">Receita</span>
-                <span className={cn("text-[24px] sm:text-[28px] font-bold tabular-nums tracking-[-0.03em] leading-none", "text-success")}>{hidden ? HIDE : fmtCompact(m.totalNet)}</span>
-                <DeltaBadge cur={m.totalNet} prev={p.totalNet} />
-              </div>
-              <div className="h-5 w-px bg-border hidden sm:block" />
-              <div className="flex items-baseline gap-1.5">
-                <span className="text-[11px] font-bold uppercase tracking-[0.14em] text-muted-foreground">Vendas</span>
-                <span className="text-[18px] font-bold tabular-nums tracking-[-0.02em] text-foreground leading-none">{m.approved.length.toLocaleString("pt-BR")}</span>
-              </div>
-              <div className="h-5 w-px bg-border hidden sm:block" />
-              <div className="flex items-baseline gap-1.5">
-                <span className="text-[11px] font-bold uppercase tracking-[0.14em] text-muted-foreground">Ticket</span>
-                <span className="text-[18px] font-bold tabular-nums tracking-[-0.02em] text-foreground leading-none">{hidden ? HIDE : fmtCompact(m.avgTicket)}</span>
-              </div>
-            </div>
+            <p className="text-[12px] text-muted-foreground/65">
+              {lastSaleText ? `Última venda ${lastSaleText} · acompanhe receita e cada transação.` : "Receita, conversão e cada transação em um só lugar."}
+            </p>
           </div>
           <div className="flex items-center gap-1.5 shrink-0">
-            <button onClick={() => window.location.reload()} title="Atualizar" className="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-border bg-background text-muted-foreground hover:text-foreground hover:border-foreground/30 transition-colors">
+            <button onClick={() => window.location.reload()} title="Atualizar" className="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-border/60 bg-card text-muted-foreground transition-all duration-200 hover:text-foreground hover:border-border">
               <RefreshCw className="h-3.5 w-3.5" />
             </button>
-            <button onClick={toggleHidden} title={hidden ? "Mostrar valores" : "Ocultar valores"} className={cn("inline-flex h-9 w-9 items-center justify-center rounded-lg border transition-colors",
-              hidden ? "border-foreground/30 bg-muted text-foreground" : "border-border bg-background text-muted-foreground hover:text-foreground hover:border-foreground/30")}>
+            <button onClick={toggleHidden} title={hidden ? "Mostrar valores" : "Ocultar valores"} className={cn("inline-flex h-9 w-9 items-center justify-center rounded-lg border transition-all duration-200",
+              hidden ? "border-foreground/30 bg-secondary text-foreground" : "border-border/60 bg-card text-muted-foreground hover:text-foreground hover:border-border")}>
               {hidden ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
             </button>
-            <button onClick={() => setShowExportDialog(true)} className="inline-flex h-9 items-center gap-1.5 rounded-lg bg-foreground px-4 text-[12px] font-bold text-background hover:bg-foreground/90 transition-colors">
-              <Download className="h-3.5 w-3.5" /> Exportar
+            <button
+              onClick={() => setShowExportDialog(true)}
+              className="inline-flex h-9 items-center gap-2 rounded-lg bg-primary px-4 text-xs font-semibold text-primary-foreground transition-all duration-200 hover:bg-primary/90 hover:-translate-y-px"
+            >
+              <Download className="h-3.5 w-3.5" strokeWidth={2.5} />
+              Exportar
             </button>
           </div>
         </div>
 
-        {/* PERIOD BAR — embedded into hero footer */}
-        <div className="relative flex flex-wrap items-center justify-between gap-3 border-t border-border bg-background/50 px-5 sm:px-6 py-2.5">
+        {/* Stat cards — padrão Meus Produtos (label / número grande / side-text) */}
+        <div className="grid grid-cols-2 gap-3 md:grid-cols-3 xl:grid-cols-6">
+          {kpis.map((k) => {
+            const Icon = k.icon;
+            return (
+              <div key={k.label} className="rounded-xl border border-border/60 bg-card px-4 py-3">
+                <div className="flex items-center justify-between gap-2">
+                  <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-muted-foreground/55">{k.label}</p>
+                  {k.delta ? <DeltaBadge cur={k.delta.cur} prev={k.delta.prev} /> : <Icon className={cn("h-3.5 w-3.5", k.accent)} strokeWidth={2.2} />}
+                </div>
+                <div className="mt-2 flex items-end justify-between gap-3">
+                  <span className={cn("font-numbers text-[26px] font-black tracking-[-0.05em] tabular-nums leading-none", k.accent)}>{k.value}</span>
+                </div>
+                {k.sub && <p className="mt-2 truncate text-[11px] font-semibold text-muted-foreground/70">{k.sub}</p>}
+                <div className="mt-2 -mx-1">
+                  <Sparkline points={k.spark} color={k.sparkColor} />
+                </div>
+              </div>
+            );
+          })}
+        </div>
+
+        {/* Period bar — sutil, integrada */}
+        <div className="flex flex-col gap-3 border-b border-border/40 pb-3 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex items-center gap-2 flex-wrap">
-            <span className="text-[10px] font-bold uppercase tracking-[0.14em] text-muted-foreground">Período</span>
-            <div className="inline-flex items-center rounded-lg border border-border bg-card p-0.5">
+            <span className="text-[10px] font-bold uppercase tracking-[0.16em] text-muted-foreground/55">Período</span>
+            <div className="inline-flex items-center rounded-lg border border-border/60 bg-secondary/50 p-0.5">
               {PERIODS.map((opt) => (
                 <button
                   key={opt.label}
                   onClick={() => { setSelectedPeriod(opt); setIsCustom(false); setCustomRange(undefined); }}
                   className={cn(
-                    "rounded-md px-2.5 py-1 text-[11.5px] font-bold transition-colors",
-                    !isCustom && selectedPeriod.label === opt.label ? "bg-foreground text-background" : "text-muted-foreground hover:text-foreground",
+                    "rounded-md px-2.5 py-1 text-[11.5px] font-semibold transition-all duration-150",
+                    !isCustom && selectedPeriod.label === opt.label ? "bg-secondary text-foreground" : "text-muted-foreground hover:text-foreground",
                   )}
                 >
                   {opt.label}
@@ -707,8 +712,8 @@ export default function Vendas() {
             </div>
             <Popover open={datePickerOpen} onOpenChange={setDatePickerOpen}>
               <PopoverTrigger asChild>
-                <button className={cn("inline-flex h-7 items-center gap-1.5 rounded-md border px-2.5 text-[11.5px] font-bold transition-colors",
-                  isCustom ? "border-foreground/30 bg-muted text-foreground" : "border-border bg-card text-muted-foreground hover:text-foreground")}>
+                <button className={cn("inline-flex h-7 items-center gap-1.5 rounded-md border px-2.5 text-[11.5px] font-semibold transition-all duration-150",
+                  isCustom ? "border-border bg-secondary text-foreground" : "border-border/60 bg-secondary/50 text-muted-foreground hover:text-foreground")}>
                   <CalendarDays className="h-3.5 w-3.5" />
                   {isCustom && customRange?.from ? customRange.to ? `${format(customRange.from, "dd/MM")} – ${format(customRange.to, "dd/MM")}` : format(customRange.from, "dd/MM/yyyy") : "Personalizado"}
                 </button>
@@ -718,36 +723,16 @@ export default function Vendas() {
               </PopoverContent>
             </Popover>
           </div>
-          <div className="flex items-center gap-3 text-[11px] text-muted-foreground">
+          <div className="flex items-center gap-3 text-[11px] text-muted-foreground/70">
             <span><span className="font-bold text-foreground tabular-nums">{dateFiltered.length}</span> transações</span>
             <span className="h-3 w-px bg-border" />
             <span>período anterior <span className="font-bold text-foreground tabular-nums">{previousPeriodFiltered.length}</span></span>
           </div>
         </div>
-      </header>
+      </div>
 
-      {/* ─────────── KPI GRID — premium cards with sparklines ─────────── */}
-      <section className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-3">
-        {kpis.map((k) => {
-          const Icon = k.icon;
-          return (
-            <div key={k.label} className="group relative overflow-hidden rounded-xl border border-border bg-card p-4 transition-colors hover:border-foreground/20">
-              <div className="flex items-center justify-between gap-2 mb-3">
-                <span className={cn("inline-flex h-7 w-7 items-center justify-center rounded-md", k.iconClass)}>
-                  <Icon className="h-3.5 w-3.5" strokeWidth={2.2} />
-                </span>
-                {k.delta && <DeltaBadge cur={k.delta.cur} prev={k.delta.prev} />}
-              </div>
-              <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-muted-foreground">{k.label}</p>
-              <p className={cn("mt-1.5 text-[22px] font-bold tabular-nums leading-none tracking-[-0.03em]", k.accent)}>{k.value}</p>
-              {k.sub && <p className="mt-1.5 text-[10.5px] text-muted-foreground leading-tight truncate">{k.sub}</p>}
-              <div className="mt-2.5 -mx-1">
-                <Sparkline points={k.spark} color={k.sparkColor} />
-              </div>
-            </div>
-          );
-        })}
-      </section>
+      {/* ─────────── WORKSPACE ─────────── */}
+      <div className="space-y-4 px-5 pt-4 sm:px-7">
 
       {/* ─────────── CHART + MIX ─────────── */}
       <section className="grid grid-cols-1 lg:grid-cols-3 gap-4">
@@ -919,6 +904,7 @@ export default function Vendas() {
           )}
         </div>
       </section>
+      </div>
 
       {selectedTx && <TransactionDetailPanel tx={selectedTx} products={products} onClose={() => setSelectedTx(null)} onRefund={async () => toast.info("Entre em contato com o suporte.")} />}
       <ExportDialog open={showExportDialog} onOpenChange={setShowExportDialog} transactions={dateFiltered} products={products} onExport={handleExportCSV} />
