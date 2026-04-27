@@ -197,11 +197,13 @@ function TxRow({ tx, prods, onClick, density = "comfortable" }: { tx: Tables<"tr
   const net = Number(tx.net_amount);
   const gross = Number(tx.amount);
 
+  const py = density === "compact" ? "py-2" : "py-3.5";
+  const avatarSize = density === "compact" ? "h-8 w-8" : "h-9 w-9";
   return (
     <tr onClick={onClick} className="group cursor-pointer transition-colors hover:bg-muted/30 border-b border-border/60 last:border-b-0">
-      <td className="pl-4 pr-3 py-3.5 align-middle">
+      <td className={cn("pl-4 pr-3 align-middle", py)}>
         <div className="flex items-center gap-3">
-          <Avatar className="h-9 w-9 shrink-0 rounded-lg">
+          <Avatar className={cn(avatarSize, "shrink-0 rounded-lg")}>
             <AvatarFallback className={cn("text-[11px] font-bold rounded-lg", avatarColor(name))}>{initials(name)}</AvatarFallback>
           </Avatar>
           <div className="min-w-0">
@@ -217,39 +219,40 @@ function TxRow({ tx, prods, onClick, density = "comfortable" }: { tx: Tables<"tr
           </div>
         </div>
       </td>
-      <td className="px-3 py-3.5 align-middle">
+      <td className={cn("px-3 align-middle", py)}>
         <p className="truncate text-[12px] font-medium text-foreground max-w-[180px]">{prodName}</p>
         <p className="text-[11px] text-muted-foreground mt-0.5 tabular-nums">{fmtDate(tx.created_at)} · {fmtTime(tx.created_at)}</p>
       </td>
-      <td className="px-3 py-3.5 align-middle">
+      <td className={cn("px-3 align-middle", py)}>
         <span className={cn("inline-flex items-center gap-1.5 rounded-md px-2 py-1 text-[11px] font-semibold border", st.fg, st.bg, st.border)}>
           <span className={cn("h-1.5 w-1.5 rounded-full", st.dot)} />
           {st.label}
         </span>
       </td>
-      <td className="px-3 py-3.5 align-middle">
+      <td className={cn("px-3 align-middle", py)}>
         <span className={cn("inline-flex items-center gap-1.5 rounded-md px-2 py-1 text-[11px] font-semibold border", method.color, method.bg, method.border)}>
           <MethodIcon className="h-3 w-3" />
           {method.label}
         </span>
       </td>
-      <td className="px-3 py-3.5 align-middle text-right">
+      <td className={cn("px-3 align-middle text-right", py)}>
         <p className="text-[13px] font-semibold text-foreground tabular-nums">{fmt(gross)}</p>
         {fee > 0 && <p className="text-[10px] text-muted-foreground tabular-nums mt-0.5">−{fmt(fee)} taxa</p>}
       </td>
-      <td className="px-4 py-3.5 align-middle text-right">
+      <td className={cn("px-4 align-middle text-right", py)}>
         <p className={cn("text-[14px] font-bold tabular-nums",
           tx.status === "completed" ? "text-success" : tx.status === "pending" ? "text-warning" : "text-foreground/60"
         )}>{fmt(net)}</p>
       </td>
-      <td className="pr-3 py-3.5 align-middle w-12">
+      <td className={cn("pr-3 align-middle w-12", py)}>
         <div className="opacity-0 group-hover:opacity-100 transition-opacity">
           <DropdownMenu>
             <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
               <button className="flex h-7 w-7 items-center justify-center rounded-md hover:bg-muted text-muted-foreground hover:text-foreground transition-colors"><MoreHorizontal className="h-4 w-4" /></button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-44 rounded-lg border-border bg-popover p-1">
+            <DropdownMenuContent align="end" className="w-48 rounded-lg border-border bg-popover p-1">
               <DropdownMenuItem onClick={(e) => { e.stopPropagation(); onClick(); }} className="gap-2 text-[12px] font-medium rounded-md py-1.5"><Eye className="h-3.5 w-3.5" /> Ver detalhes</DropdownMenuItem>
+              <DropdownMenuItem onClick={(e) => { e.stopPropagation(); navigator.clipboard.writeText(tx.id); toast.success("ID copiado"); }} className="gap-2 text-[12px] font-medium rounded-md py-1.5"><Copy className="h-3.5 w-3.5" /> Copiar ID</DropdownMenuItem>
               {tx.customer_phone && <DropdownMenuItem onClick={(e) => { e.stopPropagation(); navigator.clipboard.writeText(tx.customer_phone!); toast.success("Telefone copiado"); }} className="gap-2 text-[12px] font-medium rounded-md py-1.5"><Phone className="h-3.5 w-3.5" /> Copiar telefone</DropdownMenuItem>}
               {tx.customer_email && <DropdownMenuItem onClick={(e) => { e.stopPropagation(); navigator.clipboard.writeText(tx.customer_email!); toast.success("Email copiado"); }} className="gap-2 text-[12px] font-medium rounded-md py-1.5"><Mail className="h-3.5 w-3.5" /> Copiar email</DropdownMenuItem>}
               {tx.status === "completed" && <><DropdownMenuSeparator className="my-1" /><DropdownMenuItem onClick={(e) => { e.stopPropagation(); toast.info("Entre em contato com o suporte."); }} className="gap-2 text-[12px] font-medium text-destructive focus:text-destructive rounded-md py-1.5"><RefreshCw className="h-3.5 w-3.5" /> Reembolsar</DropdownMenuItem></>}
