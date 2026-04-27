@@ -122,6 +122,14 @@ function Sparkline({ points, color = "hsl(var(--success))" }: { points: number[]
   );
 }
 
+function Kbd({ children, className }: { children: React.ReactNode; className?: string }) {
+  return (
+    <kbd className={cn("inline-flex h-[18px] min-w-[18px] items-center justify-center rounded border border-border bg-background px-1 font-mono text-[10px] font-semibold text-muted-foreground shadow-[0_1px_0_hsl(var(--border))]", className)}>
+      {children}
+    </kbd>
+  );
+}
+
 function SortHead({ label, field, sort, onSort, align = "left", className }: { label: string; field: SortField; sort: { field: SortField; dir: SortDir }; onSort: (f: SortField) => void; align?: "left" | "right"; className?: string }) {
   const active = sort.field === field;
   return (
