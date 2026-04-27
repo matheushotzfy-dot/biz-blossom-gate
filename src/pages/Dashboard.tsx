@@ -775,10 +775,10 @@ export default function Dashboard() {
                 { label: "Suporte", href: "/suporte", icon: Sparkles, tone: "primary" },
               ].map((action) => {
                 const toneClasses: Record<string, { bg: string; border: string; text: string }> = {
-                  primary: { bg: "bg-gradient-to-b from-primary/12 to-primary/4", border: "border-primary/15", text: "text-primary" },
-                  info: { bg: "bg-gradient-to-b from-info/12 to-info/4", border: "border-info/15", text: "text-info" },
-                  success: { bg: "bg-gradient-to-b from-success/12 to-success/4", border: "border-success/15", text: "text-success" },
-                  warning: { bg: "bg-gradient-to-b from-warning/12 to-warning/4", border: "border-warning/15", text: "text-warning" },
+                  primary: { bg: "bg-primary/10", border: "border-primary/20", text: "text-primary" },
+                  info: { bg: "bg-info/10", border: "border-info/20", text: "text-info" },
+                  success: { bg: "bg-success/10", border: "border-success/20", text: "text-success" },
+                  warning: { bg: "bg-warning/10", border: "border-warning/20", text: "text-warning" },
                 };
                 const t = toneClasses[action.tone] || toneClasses.primary;
                 return (
