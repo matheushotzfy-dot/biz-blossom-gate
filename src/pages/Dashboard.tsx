@@ -551,7 +551,7 @@ export default function Dashboard() {
               </p>
             </div>
             <div className="flex items-baseline gap-4 flex-wrap">
-              <span className="inline-flex items-baseline font-display text-[clamp(2.4rem,7.5vw,76px)] font-black leading-none tracking-[-0.055em] text-foreground whitespace-nowrap">
+              <span className="inline-flex items-baseline font-display text-[clamp(2.4rem,7.5vw,76px)] font-black leading-none tracking-[-0.055em] whitespace-nowrap bg-gradient-to-b from-foreground via-foreground to-foreground/75 bg-clip-text text-transparent drop-shadow-[0_2px_24px_hsl(var(--primary)/0.12)]">
                 {privacy.hidden ? "R$ •••••••" : <AnimatedNumber value={revenue} duration={1000} />}
               </span>
               {approved.length > 0 && (
