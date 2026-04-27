@@ -209,13 +209,14 @@ export interface PageHeaderProps {
 
 export function PageHeader({ eyebrow, title, subtitle, actions, className }: PageHeaderProps) {
   return (
-    <div className={cn("flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between border-b border-border/40 pb-5", className)}>
+    <div className={cn("relative flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between border-b border-border/50 pb-5", className)}>
+      <span aria-hidden className="absolute inset-x-0 -bottom-px h-px bg-gradient-to-r from-transparent via-border to-transparent" />
       <div>
         {eyebrow && (
           <div className="flex items-center gap-2 mb-1.5">{eyebrow}</div>
         )}
-        <h1 className="text-[28px] sm:text-[32px] font-heading font-black tracking-[-0.04em] text-foreground leading-none">{title}</h1>
-        {subtitle && <p className="mt-2 text-[12.5px] text-muted-foreground/70 font-medium">{subtitle}</p>}
+        <h1 className="text-[28px] sm:text-[34px] font-heading font-black tracking-[-0.045em] text-foreground leading-none">{title}</h1>
+        {subtitle && <p className="mt-2 max-w-[680px] text-[12.5px] text-muted-foreground/75 font-medium leading-[1.55]">{subtitle}</p>}
       </div>
       {actions && <div className="flex items-center gap-2">{actions}</div>}
     </div>
