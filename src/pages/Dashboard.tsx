@@ -470,13 +470,19 @@ export default function Dashboard() {
       {/* ════════════════════════════════════════════════════════════════ */}
       <section className="relative mb-5 rounded-[24px] border border-border/50 bg-gradient-to-b from-card via-card to-card/95 overflow-hidden shadow-[0_1px_0_0_hsl(var(--foreground)/0.04)_inset,0_24px_48px_-24px_hsl(var(--foreground)/0.12)]">
         {/* Premium ambient layers */}
-        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,hsl(var(--primary)/0.06),transparent_55%)]" />
-        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_left,hsl(var(--success)/0.05),transparent_55%)]" />
-        <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-foreground/10 to-transparent" />
-        {/* Subtle grid texture for depth */}
-        <div className="pointer-events-none absolute inset-0 opacity-[0.025] [background-image:linear-gradient(hsl(var(--foreground))_1px,transparent_1px),linear-gradient(90deg,hsl(var(--foreground))_1px,transparent_1px)] [background-size:32px_32px]" />
+        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,hsl(var(--primary)/0.09),transparent_55%)]" />
+        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_left,hsl(var(--success)/0.07),transparent_55%)]" />
+        <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-foreground/15 to-transparent" />
+        {/* Layered grid + dots texture for richer depth */}
+        <div className="pointer-events-none absolute inset-0 opacity-[0.035] [background-image:linear-gradient(hsl(var(--foreground))_1px,transparent_1px),linear-gradient(90deg,hsl(var(--foreground))_1px,transparent_1px)] [background-size:32px_32px] [mask-image:radial-gradient(ellipse_at_center,black_40%,transparent_85%)]" />
+        <div className="pointer-events-none absolute inset-0 opacity-[0.05] [background-image:radial-gradient(hsl(var(--foreground))_0.8px,transparent_0.8px)] [background-size:18px_18px] [mask-image:radial-gradient(ellipse_at_top_right,black_10%,transparent_70%)]" />
         {/* Diagonal sheen */}
-        <div className="pointer-events-none absolute -top-1/2 -right-1/4 h-[200%] w-[60%] rotate-12 bg-gradient-to-b from-foreground/[0.015] via-transparent to-transparent" />
+        <div className="pointer-events-none absolute -top-1/2 -right-1/4 h-[200%] w-[60%] rotate-12 bg-gradient-to-b from-foreground/[0.025] via-transparent to-transparent" />
+        {/* Corner brackets — premium frame detail */}
+        <div className="pointer-events-none absolute top-3 left-3 h-3 w-3 border-l border-t border-foreground/20 rounded-tl-md" />
+        <div className="pointer-events-none absolute top-3 right-3 h-3 w-3 border-r border-t border-foreground/20 rounded-tr-md" />
+        <div className="pointer-events-none absolute bottom-3 left-3 h-3 w-3 border-l border-b border-foreground/20 rounded-bl-md" />
+        <div className="pointer-events-none absolute bottom-3 right-3 h-3 w-3 border-r border-b border-foreground/20 rounded-br-md" />
 
         {/* Toolbar */}
         <div className="relative flex flex-wrap items-center justify-between gap-2 border-b border-border/30 px-6 py-4 lg:px-8">
