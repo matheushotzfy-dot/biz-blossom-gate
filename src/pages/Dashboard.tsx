@@ -530,6 +530,12 @@ export default function Dashboard() {
         {/* Main metric block */}
         <div className="relative grid grid-cols-1 lg:grid-cols-[1.6fr_1fr] gap-0">
           <div className="px-6 py-9 lg:px-10 lg:py-12 border-b lg:border-b-0 lg:border-r border-border/30 relative">
+            {/* Decorative corner mark */}
+            <div className="pointer-events-none absolute top-5 right-5 hidden lg:flex items-center gap-1 opacity-40">
+              <span className="h-px w-3 bg-foreground/30" />
+              <span className="h-1 w-1 rounded-full bg-primary/60" />
+              <span className="h-px w-3 bg-foreground/30" />
+            </div>
             <div className="flex items-center gap-2 mb-4">
               <span className="h-1 w-8 rounded-full bg-gradient-to-r from-primary to-primary/30" />
               <p className="font-display text-[10px] font-black uppercase tracking-[0.22em] text-muted-foreground/60">
@@ -549,6 +555,24 @@ export default function Dashboard() {
                 </span>
               )}
             </div>
+
+            {/* Inline sparkline */}
+            {chartData.length > 1 && !privacy.hidden && (
+              <div className="mt-5 -mx-1 h-8 opacity-60">
+                <ResponsiveContainer width="100%" height="100%">
+                  <AreaChart data={chartData} margin={{ top: 2, right: 0, left: 0, bottom: 0 }}>
+                    <defs>
+                      <linearGradient id="heroSparkline" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0%" stopColor="hsl(var(--primary))" stopOpacity={0.45} />
+                        <stop offset="100%" stopColor="hsl(var(--primary))" stopOpacity={0} />
+                      </linearGradient>
+                    </defs>
+                    <Area type="monotone" dataKey="vendas" stroke="hsl(var(--primary))" strokeWidth={1.5} fill="url(#heroSparkline)" dot={false} isAnimationActive={false} />
+                  </AreaChart>
+                </ResponsiveContainer>
+              </div>
+            )}
+
             <div className="mt-7 flex items-center gap-6 text-[11px] flex-wrap">
               <div className="flex items-center gap-2 text-muted-foreground/60">
                 <span className="h-2 w-2 rounded-full bg-success shadow-[0_0_8px_hsl(var(--success)/0.5)]" />
@@ -568,7 +592,9 @@ export default function Dashboard() {
             </div>
           </div>
 
-          <div className="relative px-6 py-9 lg:px-10 lg:py-12">
+          <div className="relative px-6 py-9 lg:px-10 lg:py-12 overflow-hidden">
+            {/* Glow accent */}
+            <div className="pointer-events-none absolute -top-16 -right-16 h-40 w-40 rounded-full bg-success/8 blur-[60px]" />
             <div aria-hidden className="absolute left-0 top-8 bottom-8 w-[3px] rounded-full bg-gradient-to-b from-success via-success/60 to-transparent" />
             <div className="flex items-center gap-2 mb-4">
               <span className="relative flex h-2 w-2">
@@ -580,7 +606,15 @@ export default function Dashboard() {
             <p className="font-display text-[clamp(1.8rem,4.5vw,46px)] font-black tabular-nums text-success tracking-[-0.045em] leading-none drop-shadow-[0_2px_12px_hsl(var(--success)/0.2)]">
               {privacy.hidden ? CENSORED : fmt(Math.abs(balance))}
             </p>
-            <Link to="/financeiro/saques" className="group mt-6 inline-flex items-center gap-2 rounded-full bg-success/10 ring-1 ring-success/20 px-3.5 py-1.5 font-display text-[11px] font-black uppercase tracking-wider text-success transition-all hover:bg-success/15 hover:ring-success/30">
+
+            {/* Trust badges */}
+            <div className="mt-3 flex items-center gap-2 text-[9px] font-display font-bold uppercase tracking-[0.14em] text-muted-foreground/50">
+              <span className="inline-flex items-center gap-1"><Lock className="h-2.5 w-2.5" strokeWidth={2.5} /> Criptografado</span>
+              <span className="h-0.5 w-0.5 rounded-full bg-muted-foreground/30" />
+              <span className="inline-flex items-center gap-1"><ShieldCheck className="h-2.5 w-2.5" strokeWidth={2.5} /> Auditado</span>
+            </div>
+
+            <Link to="/financeiro/saques" className="group mt-5 inline-flex items-center gap-2 rounded-full bg-success/10 ring-1 ring-success/20 px-3.5 py-1.5 font-display text-[11px] font-black uppercase tracking-wider text-success transition-all hover:bg-success/15 hover:ring-success/30">
               Sacar agora
               <ChevronRight className="h-3 w-3 transition-transform group-hover:translate-x-0.5" strokeWidth={2.5} />
             </Link>
