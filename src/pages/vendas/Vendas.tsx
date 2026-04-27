@@ -619,16 +619,6 @@ export default function Vendas() {
   const refundedAmount = m.refunded.reduce((acc, tx) => acc + Number(tx.amount), 0);
   const chargebackAmount = m.chargebacks.reduce((acc, tx) => acc + Number(tx.amount), 0);
 
-  /* KPI cards — billion-dollar SaaS feel */
-  const kpis = [
-    { label: "Receita líquida", icon: TrendingUp, value: hidden ? HIDE : fmtCompact(m.totalNet), sub: hidden ? "—" : `Bruto ${fmtCompact(m.totalGross)} · Taxas ${fmtCompact(m.totalFees)}`, accent: "text-success", iconClass: "text-success bg-success/10", spark: metrics.series.net, sparkColor: "hsl(var(--success))", delta: { cur: m.totalNet, prev: p.totalNet } },
-    { label: "Vendas aprovadas", icon: Zap, value: hidden ? HIDE : m.approved.length.toLocaleString("pt-BR"), sub: `${dateFiltered.length} tentativas`, accent: "text-foreground", iconClass: "text-info bg-info/10", spark: metrics.series.count, sparkColor: "hsl(var(--info))", delta: { cur: m.approved.length, prev: p.approved.length } },
-    { label: "Ticket médio", icon: Receipt, value: hidden ? HIDE : fmtCompact(m.avgTicket), sub: `${m.uniqueCustomers} ${m.uniqueCustomers === 1 ? "cliente" : "clientes"} únicos`, accent: "text-foreground", iconClass: "text-foreground bg-muted", spark: metrics.series.ticket, sparkColor: "hsl(var(--foreground))", delta: { cur: m.avgTicket, prev: p.avgTicket } },
-    { label: "Taxa de aprovação", icon: Activity, value: `${approvalRate.toFixed(1)}%`, sub: `${m.pending.length} pendentes em análise`, accent: approvalRate >= 60 ? "text-success" : "text-warning", iconClass: approvalRate >= 60 ? "text-success bg-success/10" : "text-warning bg-warning/10", spark: metrics.series.approval, sparkColor: approvalRate >= 60 ? "hsl(var(--success))" : "hsl(var(--warning))", delta: undefined },
-    { label: "Reembolsos", icon: AlertTriangle, value: hidden ? HIDE : fmtCompact(refundedAmount), sub: `${m.refunded.length} casos · ${m.refundRate.toFixed(1)}%`, accent: m.refundRate > 5 ? "text-destructive" : "text-foreground", iconClass: m.refundRate > 5 ? "text-destructive bg-destructive/10" : "text-muted-foreground bg-muted", spark: metrics.series.refunds, sparkColor: "hsl(var(--destructive))", delta: undefined },
-    { label: "Chargebacks", icon: ShieldAlert, value: hidden ? HIDE : fmtCompact(chargebackAmount), sub: `${m.chargebacks.length} casos · ${m.chargebackRate.toFixed(2)}%`, accent: m.chargebacks.length > 0 ? "text-destructive" : "text-foreground", iconClass: m.chargebacks.length > 0 ? "text-destructive bg-destructive/10" : "text-muted-foreground bg-muted", spark: metrics.series.chargebacks, sparkColor: "hsl(var(--destructive))", delta: undefined },
-  ];
-
   const heroKpis = [
     { label: "Receita líquida", value: hidden ? HIDE : fmtCompact(m.totalNet), sub: hidden ? "—" : `Bruto ${fmtCompact(m.totalGross)}`, accent: "text-success", spark: metrics.series.net, sparkColor: "hsl(var(--success))", delta: { cur: m.totalNet, prev: p.totalNet } },
     { label: "Vendas aprovadas", value: hidden ? HIDE : m.approved.length.toLocaleString("pt-BR"), sub: `${dateFiltered.length} tentativas`, accent: "text-foreground", spark: metrics.series.count, sparkColor: "hsl(var(--info))", delta: { cur: m.approved.length, prev: p.approved.length } },
