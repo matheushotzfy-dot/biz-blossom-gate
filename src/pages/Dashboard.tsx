@@ -468,10 +468,8 @@ export default function Dashboard() {
       {/* ════════════════════════════════════════════════════════════════ */}
       {/* HERO — ONE DOMINANT METRIC                                       */}
       {/* ════════════════════════════════════════════════════════════════ */}
-      <section className="relative mb-5 rounded-[24px] border border-border/60 bg-card overflow-hidden">
-        <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-foreground/10" />
+      <section className="dashboard-panel dashboard-panel-primary relative mb-5 rounded-[24px]">
         <div className="pointer-events-none absolute inset-x-0 bottom-0 h-px bg-background/70" />
-        <div className="pointer-events-none absolute left-0 top-0 h-full w-[3px] bg-primary" />
         {/* Corner brackets — premium frame detail */}
         <div className="pointer-events-none absolute top-3 left-3 h-3 w-3 border-l border-t border-foreground/20 rounded-tl-md" />
         <div className="pointer-events-none absolute top-3 right-3 h-3 w-3 border-r border-t border-foreground/20 rounded-tr-md" />
@@ -496,11 +494,11 @@ export default function Dashboard() {
           </div>
 
           <div className="flex flex-wrap items-center gap-1.5">
-            <div className="inline-flex items-center rounded-xl border border-border/40 bg-background/60 backdrop-blur p-0.5 shadow-inner">
+            <div className="dashboard-toolbar-shell inline-flex items-center rounded-xl p-0.5">
               {PERIOD_PRESETS.map((opt) => (
                 <button key={opt.label} onClick={() => { setSelectedPeriod(opt); setIsCustom(false); setCustomRange(undefined); }}
                   className={cn("rounded-lg px-3 py-1.5 text-[11px] font-display font-black uppercase tracking-wider transition-all duration-300",
-                    !isCustom && selectedPeriod.label === opt.label ? "bg-card text-foreground shadow-sm ring-1 ring-border/40" : "text-muted-foreground/60 hover:text-foreground"
+                    !isCustom && selectedPeriod.label === opt.label ? "dashboard-segment-active text-foreground" : "dashboard-segment-muted hover:text-foreground"
                   )}>
                   {opt.label}
                 </button>
@@ -509,7 +507,7 @@ export default function Dashboard() {
             <Popover open={datePickerOpen} onOpenChange={setDatePickerOpen}>
               <PopoverTrigger asChild>
                 <button className={cn("h-8 rounded-xl border px-3 text-[10px] font-black uppercase tracking-wider transition-all inline-flex items-center gap-1.5",
-                  isCustom ? "border-primary/30 bg-primary/10 text-foreground shadow-sm shadow-primary/10" : "border-border/40 bg-background/60 text-muted-foreground hover:text-foreground hover:border-primary/30"
+                  isCustom ? "border-primary/35 bg-primary/10 text-foreground" : "border-border/45 bg-muted/20 text-muted-foreground hover:text-foreground hover:border-primary/30"
                 )}>
                   <CalendarDays className="h-3 w-3" />
                   {isCustom && customRange?.from
@@ -521,7 +519,7 @@ export default function Dashboard() {
                 <Calendar mode="range" selected={customRange} onSelect={(range) => { setCustomRange(range); setIsCustom(true); if (range?.from && range?.to) setTimeout(() => setDatePickerOpen(false), 300); }} numberOfMonths={1} locale={ptBR} disabled={(date) => date > new Date()} className="p-3 pointer-events-auto" classNames={{ day_selected: "bg-primary text-primary-foreground", day_range_middle: "bg-primary/10 text-foreground", day_range_end: "bg-primary text-primary-foreground" }} />
               </PopoverContent>
             </Popover>
-            <button onClick={privacy.toggle} className={cn("h-8 w-8 rounded-xl border flex items-center justify-center transition-all", privacy.hidden ? "border-primary/30 bg-primary/10 text-primary shadow-sm shadow-primary/10" : "border-border/40 bg-background/60 text-muted-foreground hover:text-foreground hover:border-primary/30")} title={privacy.hidden ? "Mostrar" : "Ocultar"}>
+            <button onClick={privacy.toggle} className={cn("h-8 w-8 rounded-xl border flex items-center justify-center transition-all", privacy.hidden ? "border-primary/35 bg-primary/10 text-primary" : "border-border/45 bg-muted/20 text-muted-foreground hover:text-foreground hover:border-primary/30")} title={privacy.hidden ? "Mostrar" : "Ocultar"}>
               {privacy.hidden ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
             </button>
           </div>
@@ -537,19 +535,19 @@ export default function Dashboard() {
               <span className="h-px w-3 bg-foreground/30" />
             </div>
             <div className="flex items-center gap-2 mb-4">
-              <span className="h-1 w-8 rounded-full bg-gradient-to-r from-primary to-primary/30" />
-              <p className="font-display text-[10px] font-black uppercase tracking-[0.22em] text-muted-foreground/60">
+              <span className="h-1.5 w-1.5 rounded-full bg-primary" />
+              <p className="font-display text-[10px] font-extrabold uppercase tracking-[0.16em] text-muted-foreground/70">
                 Receita {isCustom && customRange?.from
                   ? `· ${customRange.to ? `${format(customRange.from, "dd/MM")} – ${format(customRange.to, "dd/MM")}` : format(customRange.from, "dd/MM/yyyy")}`
                   : `· ${selectedPeriod.label}`}
               </p>
             </div>
             <div className="flex items-baseline gap-4 flex-wrap">
-              <span className="inline-flex items-baseline font-display text-[clamp(2.4rem,7.5vw,76px)] font-black leading-none tracking-[-0.045em] whitespace-nowrap text-foreground">
+              <span className="inline-flex items-baseline font-display text-[clamp(2.4rem,7.5vw,76px)] font-black leading-none tracking-[-0.04em] whitespace-nowrap text-foreground">
                 {privacy.hidden ? "R$ •••••••" : <AnimatedNumber value={revenue} duration={1000} />}
               </span>
               {approved.length > 0 && (
-                <span className="inline-flex items-center gap-1.5 rounded-full bg-success/10 ring-1 ring-success/20 px-3 py-1 font-display text-[11px] font-black uppercase tracking-wider text-success">
+                <span className="inline-flex items-center gap-1.5 rounded-full border border-success/25 bg-success/10 px-3 py-1 font-display text-[11px] font-black uppercase tracking-wider text-success">
                   <ArrowUpRight className="h-3.5 w-3.5" strokeWidth={2.5} />
                   {approved.length} venda{approved.length !== 1 ? "s" : ""}
                 </span>
@@ -599,7 +597,7 @@ export default function Dashboard() {
                 <span className="absolute inline-flex h-full w-full rounded-full bg-success/40 animate-ping" />
                 <span className="relative inline-flex h-2 w-2 rounded-full bg-success" />
               </span>
-              <p className="font-display text-[10px] font-black uppercase tracking-[0.22em] text-muted-foreground/60">Saldo Disponível</p>
+              <p className="font-display text-[10px] font-extrabold uppercase tracking-[0.16em] text-muted-foreground/70">Saldo Disponível</p>
             </div>
             <p className="font-display text-[clamp(1.8rem,4.5vw,46px)] font-black tabular-nums text-success tracking-[-0.035em] leading-none">
               {privacy.hidden ? CENSORED : fmt(Math.abs(balance))}
@@ -647,15 +645,14 @@ export default function Dashboard() {
       {/* ════════════════════════════════════════════════════════════════ */}
       {/* DOMINANT CHART AREA                                              */}
       {/* ════════════════════════════════════════════════════════════════ */}
-      <section className="relative mb-5 rounded-[24px] border border-border/60 bg-card overflow-hidden">
-        <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-foreground/10" />
+      <section className="dashboard-panel dashboard-panel-primary relative mb-5 rounded-[24px]">
         <div className="pointer-events-none absolute inset-x-0 bottom-0 h-px bg-background/70" />
         <div className="grid grid-cols-1 xl:grid-cols-[1fr_300px]">
           {/* Chart */}
           <div className="flex flex-col border-b xl:border-b-0 xl:border-r border-border/30">
             <div className="flex items-center justify-between px-7 py-5 border-b border-border/30">
               <div className="flex items-center gap-3">
-                  <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-primary/10 border border-primary/20 text-primary">
+                  <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-primary/10 border border-primary/25 text-primary">
                   <TrendingUp className="h-3.5 w-3.5" strokeWidth={2.5} />
                 </div>
                 <div>
@@ -666,7 +663,7 @@ export default function Dashboard() {
                 </div>
               </div>
               <div className="hidden sm:inline-flex items-center gap-2 rounded-full bg-primary/8 ring-1 ring-primary/15 px-3 py-1.5 text-[10px] font-display font-black uppercase tracking-wider text-primary">
-                <span className="h-1.5 w-1.5 rounded-full bg-primary shadow-[0_0_6px_hsl(var(--primary))]" />
+                <span className="h-1.5 w-1.5 rounded-full bg-primary" />
                 Vendas aprovadas
               </div>
             </div>
@@ -756,9 +753,7 @@ export default function Dashboard() {
         {/* ════════════════════════════════════════════════════════════════ */}
         <section className="grid grid-cols-1 gap-5 xl:grid-cols-[1fr_1.4fr] mb-8">
           {/* Quick actions — operational support */}
-          <div className="relative rounded-[24px] border border-border/60 bg-card flex flex-col overflow-hidden">
-            <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-foreground/10" />
-            <div className="pointer-events-none absolute left-0 top-0 h-full w-[3px] bg-primary" />
+          <div className="dashboard-panel dashboard-panel-primary relative rounded-[24px] flex flex-col">
             <div className="flex items-center justify-between border-b border-border/30 px-6 py-5">
               <div className="flex items-center gap-3">
                 <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-gradient-to-b from-primary/15 to-primary/5 border border-primary/20 text-primary">
@@ -799,7 +794,7 @@ export default function Dashboard() {
                   <Link
                     key={action.href}
                     to={action.href}
-                    className="group relative flex items-center gap-3.5 px-6 py-3.5 transition-all hover:bg-foreground/[0.015]"
+                    className="group relative flex items-center gap-3.5 px-6 py-3.5 transition-all hover:bg-accent/45"
                   >
                     <div className={cn("flex h-8 w-8 items-center justify-center rounded-lg border transition-all duration-300 group-hover:border-primary/25", t.bg, t.border, t.text)}>
                       <action.icon className="h-3.5 w-3.5" strokeWidth={2.5} />
@@ -813,9 +808,7 @@ export default function Dashboard() {
           </div>
 
           {/* Activity feed */}
-          <div className="relative rounded-[24px] border border-border/60 bg-card flex flex-col overflow-hidden">
-            <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-foreground/10" />
-            <div className="pointer-events-none absolute left-0 top-0 h-full w-[3px] bg-success" />
+          <div className="dashboard-panel dashboard-panel-success relative rounded-[24px] flex flex-col">
             <div className="flex items-center justify-between border-b border-border/30 px-6 py-5">
               <div className="flex items-center gap-3">
                 <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-gradient-to-b from-success/15 to-success/5 border border-success/20 text-success">
