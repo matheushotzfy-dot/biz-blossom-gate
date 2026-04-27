@@ -200,11 +200,11 @@ function TxRow({ tx, prods, onClick, density = "comfortable" }: { tx: Tables<"tr
   const py = density === "compact" ? "py-2" : "py-3.5";
   const avatarSize = density === "compact" ? "h-8 w-8" : "h-9 w-9";
   return (
-    <tr onClick={onClick} className="group cursor-pointer transition-colors hover:bg-muted/30 border-b border-border/60 last:border-b-0">
+    <tr onClick={onClick} className="group cursor-pointer border-b border-border transition-colors hover:bg-muted/20 last:border-b-0">
       <td className={cn("pl-4 pr-3 align-middle", py)}>
         <div className="flex items-center gap-3">
-          <Avatar className={cn(avatarSize, "shrink-0 rounded-lg")}>
-            <AvatarFallback className={cn("text-[11px] font-bold rounded-lg", avatarColor(name))}>{initials(name)}</AvatarFallback>
+          <Avatar className={cn(avatarSize, "shrink-0 rounded-md")}>
+            <AvatarFallback className={cn("rounded-md text-[11px] font-bold", avatarColor(name))}>{initials(name)}</AvatarFallback>
           </Avatar>
           <div className="min-w-0">
             <p className="truncate text-[13px] font-semibold text-foreground leading-tight">{name}</p>
@@ -224,13 +224,13 @@ function TxRow({ tx, prods, onClick, density = "comfortable" }: { tx: Tables<"tr
         <p className="text-[11px] text-muted-foreground mt-0.5 tabular-nums">{fmtDate(tx.created_at)} · {fmtTime(tx.created_at)}</p>
       </td>
       <td className={cn("px-3 align-middle", py)}>
-        <span className={cn("inline-flex items-center gap-1.5 rounded-md px-2 py-1 text-[11px] font-semibold border", st.fg, st.bg, st.border)}>
+        <span className={cn("inline-flex items-center gap-1.5 rounded-sm border px-2 py-1 text-[11px] font-semibold", st.fg, st.bg, st.border)}>
           <span className={cn("h-1.5 w-1.5 rounded-full", st.dot)} />
           {st.label}
         </span>
       </td>
       <td className={cn("px-3 align-middle", py)}>
-        <span className={cn("inline-flex items-center gap-1.5 rounded-md px-2 py-1 text-[11px] font-semibold border", method.color, method.bg, method.border)}>
+        <span className={cn("inline-flex items-center gap-1.5 rounded-sm border px-2 py-1 text-[11px] font-semibold", method.color, method.bg, method.border)}>
           <MethodIcon className="h-3 w-3" />
           {method.label}
         </span>
@@ -248,7 +248,7 @@ function TxRow({ tx, prods, onClick, density = "comfortable" }: { tx: Tables<"tr
         <div className="opacity-0 group-hover:opacity-100 transition-opacity">
           <DropdownMenu>
             <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
-              <button className="flex h-7 w-7 items-center justify-center rounded-md hover:bg-muted text-muted-foreground hover:text-foreground transition-colors"><MoreHorizontal className="h-4 w-4" /></button>
+              <button className="flex h-7 w-7 items-center justify-center rounded-sm text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"><MoreHorizontal className="h-4 w-4" /></button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-48 rounded-lg border-border bg-popover p-1">
               <DropdownMenuItem onClick={(e) => { e.stopPropagation(); onClick(); }} className="gap-2 text-[12px] font-medium rounded-md py-1.5"><Eye className="h-3.5 w-3.5" /> Ver detalhes</DropdownMenuItem>
@@ -274,11 +274,11 @@ function MobileCard({ tx, prods, onClick }: { tx: Tables<"transactions">; prods:
   const net = Number(tx.net_amount);
 
   return (
-    <div className="cursor-pointer rounded-xl border border-border bg-card active:bg-muted/30 transition-colors p-3.5" onClick={onClick}>
+    <div className="cursor-pointer border-b border-border bg-card p-3.5 transition-colors active:bg-muted/30" onClick={onClick}>
       <div className="flex items-start justify-between gap-3">
         <div className="flex items-center gap-3 min-w-0 flex-1">
-          <Avatar className="h-10 w-10 rounded-lg shrink-0">
-            <AvatarFallback className={cn("text-[11px] font-bold rounded-lg", avatarColor(name))}>{initials(name)}</AvatarFallback>
+          <Avatar className="h-10 w-10 shrink-0 rounded-md">
+            <AvatarFallback className={cn("rounded-md text-[11px] font-bold", avatarColor(name))}>{initials(name)}</AvatarFallback>
           </Avatar>
           <div className="min-w-0">
             <p className="truncate text-[13px] font-semibold text-foreground">{name}</p>
@@ -670,182 +670,173 @@ export default function Vendas() {
 
   /* ═══════════ RENDER ═══════════ */
   return (
-    <div className="mx-auto -mt-2 w-full max-w-[1440px] pb-24 md:-mt-3 md:pb-10">
+    <div className="mx-auto w-full max-w-[1480px] pb-24 md:pb-10">
 
-      {/* ─────────── HERO COMANDO ─────────── */}
-      <div className="px-5 pt-1 sm:px-7 antialiased subpixel-antialiased [text-rendering:geometricPrecision]">
-        <div className="relative overflow-hidden rounded-2xl border border-border bg-card">
-          <div className="relative">
-            {/* Top bar: título · período · ações */}
-            <div className="flex flex-wrap items-start justify-between gap-4 border-b border-border px-5 py-4 sm:px-6">
-              <div className="space-y-1.5 min-w-0">
-                <div className="inline-flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.2em] text-foreground/55">
-                  <span className="h-1.5 w-1.5 rounded-full bg-success" />
-                  Tempo real
-                </div>
-                <h1 className="font-display text-[30px] sm:text-[34px] font-extrabold leading-none tracking-[-0.03em] text-foreground antialiased subpixel-antialiased [text-rendering:geometricPrecision]">
-                  Minhas vendas
-                </h1>
-                <p className="text-[12.5px] text-foreground/60">
-                  <span className="font-semibold text-foreground/85">{periodLabel}</span> · {dateFiltered.length} {dateFiltered.length === 1 ? "transação" : "transações"}
-                  {lastSaleText && <> · última {lastSaleText}</>}
-                </p>
+      {/* ─────────── COMANDO LIMPO ─────────── */}
+      <div className="px-5 pt-3 antialiased subpixel-antialiased [text-rendering:geometricPrecision] sm:px-8">
+        <header className="border-b border-border pb-6">
+          <div className="flex flex-col gap-5 xl:flex-row xl:items-start xl:justify-between">
+            <div className="min-w-0">
+              <div className="inline-flex items-center gap-2 text-[9px] font-black uppercase tracking-[0.24em] text-muted-foreground">
+                <span className="h-1.5 w-1.5 rounded-full bg-success" />
+                Live sales ledger
               </div>
-
-              <TooltipProvider delayDuration={250}>
-                <div className="flex items-center gap-1.5 shrink-0">
-                  {/* period segmented */}
-                  <div className="hidden md:inline-flex items-center rounded-lg border border-border bg-background/50 p-0.5">
-                    {PERIODS.map((opt) => (
-                      <button
-                        key={opt.label}
-                        onClick={() => { setSelectedPeriod(opt); setIsCustom(false); setCustomRange(undefined); }}
-                        className={cn(
-                          "rounded-md px-2.5 py-1 text-[11px] font-bold transition-all duration-150",
-                          !isCustom && selectedPeriod.label === opt.label
-                            ? "bg-foreground text-background"
-                            : "text-muted-foreground hover:text-foreground",
-                        )}
-                      >
-                        {opt.label}
-                      </button>
-                    ))}
-                  </div>
-
-                  <Tooltip>
-                    <Popover open={datePickerOpen} onOpenChange={setDatePickerOpen}>
-                      <TooltipTrigger asChild>
-                        <PopoverTrigger asChild>
-                          <button className={cn("inline-flex h-8 w-8 items-center justify-center rounded-lg border transition-colors",
-                            isCustom ? "border-foreground/40 bg-secondary text-foreground" : "border-border bg-background/50 text-muted-foreground hover:text-foreground")}>
-                            <CalendarDays className="h-3.5 w-3.5" />
-                          </button>
-                        </PopoverTrigger>
-                      </TooltipTrigger>
-                      <PopoverContent align="end" className="w-auto overflow-hidden rounded-xl border border-border bg-popover p-0">
-                        <Calendar mode="range" selected={customRange} onSelect={(range) => { setCustomRange(range); setIsCustom(true); if (range?.from && range?.to) setTimeout(() => setDatePickerOpen(false), 300); }} numberOfMonths={1} locale={ptBR} disabled={(date) => date > new Date()} className="pointer-events-auto p-3" />
-                      </PopoverContent>
-                    </Popover>
-                    <TooltipContent side="bottom" className="flex items-center gap-2">Período personalizado</TooltipContent>
-                  </Tooltip>
-
-                  <span className="hidden md:block h-5 w-px bg-border mx-0.5" />
-
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <button onClick={() => setCmdOpen(true)} className="inline-flex h-8 items-center gap-1.5 rounded-lg border border-border bg-background/50 px-2 text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors">
-                        <CommandIcon className="h-3.5 w-3.5" />
-                        <Kbd>⌘K</Kbd>
-                      </button>
-                    </TooltipTrigger>
-                    <TooltipContent side="bottom" className="flex items-center gap-2">Comandos rápidos</TooltipContent>
-                  </Tooltip>
-
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <button onClick={toggleDensity} className={cn("inline-flex h-8 w-8 items-center justify-center rounded-lg border transition-colors",
-                        density === "compact" ? "border-foreground/40 bg-secondary text-foreground" : "border-border bg-background/50 text-muted-foreground hover:text-foreground")}>
-                        {density === "compact" ? <Rows4 className="h-3.5 w-3.5" /> : <Rows3 className="h-3.5 w-3.5" />}
-                      </button>
-                    </TooltipTrigger>
-                    <TooltipContent side="bottom" className="flex items-center gap-2">Densidade <Kbd>D</Kbd></TooltipContent>
-                  </Tooltip>
-
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <button onClick={() => window.location.reload()} className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-border bg-background/50 text-muted-foreground hover:text-foreground transition-colors">
-                        <RefreshCw className="h-3.5 w-3.5" />
-                      </button>
-                    </TooltipTrigger>
-                    <TooltipContent side="bottom" className="flex items-center gap-2">Atualizar <Kbd>R</Kbd></TooltipContent>
-                  </Tooltip>
-
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <button onClick={toggleHidden} className={cn("inline-flex h-8 w-8 items-center justify-center rounded-lg border transition-colors",
-                        hidden ? "border-foreground/40 bg-secondary text-foreground" : "border-border bg-background/50 text-muted-foreground hover:text-foreground")}>
-                        {hidden ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
-                      </button>
-                    </TooltipTrigger>
-                    <TooltipContent side="bottom" className="flex items-center gap-2">{hidden ? "Mostrar valores" : "Ocultar valores"} <Kbd>P</Kbd></TooltipContent>
-                  </Tooltip>
-
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <button
-                        onClick={() => setShowExportDialog(true)}
-                        className="inline-flex h-8 items-center gap-1.5 rounded-lg bg-foreground px-3 text-[11px] font-bold text-background transition-all duration-200 hover:bg-foreground/90"
-                      >
-                        <Download className="h-3.5 w-3.5" strokeWidth={2.5} />
-                        Exportar
-                      </button>
-                    </TooltipTrigger>
-                    <TooltipContent side="bottom" className="flex items-center gap-2">Exportar CSV <Kbd>E</Kbd></TooltipContent>
-                  </Tooltip>
-                </div>
-              </TooltipProvider>
-            </div>
-
-            {/* KPI ribbon — flat, clean, nítido */}
-            <div className="grid grid-cols-2 divide-y divide-border sm:grid-cols-4 sm:divide-y-0 sm:divide-x">
-              {heroKpis.map((k, idx) => (
-                <div
-                  key={k.label}
-                  className={cn(
-                    "px-5 py-5 sm:px-6 sm:py-6",
-                    idx === 1 && "border-l border-border sm:border-l-0",
-                  )}
-                >
-                  <div className="flex items-center justify-between gap-2">
-                    <p className="text-[10px] font-bold uppercase tracking-[0.22em] text-foreground/55">
-                      {k.label}
-                    </p>
-                    {k.delta && <DeltaBadge cur={k.delta.cur} prev={k.delta.prev} />}
-                  </div>
-
-                  <p
-                    className={cn(
-                      "mt-2.5 font-numbers text-[32px] sm:text-[34px] font-black leading-[0.95] tracking-[-0.05em] tabular-nums [font-feature-settings:'ss01','tnum','cv11'] antialiased subpixel-antialiased [text-rendering:geometricPrecision]",
-                      k.accent,
-                    )}
-                  >
-                    {k.value}
+              <h1 className="mt-2 font-display text-[34px] font-black leading-none tracking-[-0.04em] text-foreground sm:text-[44px]">
+                Vendas
+              </h1>
+              <div className="mt-4 flex flex-wrap items-end gap-x-5 gap-y-2">
+                <p className={cn("font-numbers text-[42px] font-black leading-[0.9] tracking-[-0.055em] tabular-nums sm:text-[58px]", hidden ? "text-foreground" : "text-success")}>
+                  {hidden ? HIDE : fmt(m.totalNet)}
+                </p>
+                <div className="pb-1">
+                  <p className="text-[12px] font-bold text-foreground">Receita líquida no período</p>
+                  <p className="mt-1 text-[11.5px] font-medium text-muted-foreground">
+                    <span className="font-bold text-foreground">{periodLabel}</span> · {dateFiltered.length} {dateFiltered.length === 1 ? "transação" : "transações"}
+                    {lastSaleText && <> · última {lastSaleText}</>}
                   </p>
-
-                  <p className="mt-2.5 truncate text-[11.5px] font-semibold text-foreground/65">{k.sub}</p>
                 </div>
-              ))}
+              </div>
             </div>
 
-            {/* Risk strip — flat */}
-            <div className="grid grid-cols-2 border-t border-border divide-x divide-border">
-              {riskKpis.map((r) => {
-                const Icon = r.icon;
-                return (
-                  <div key={r.label} className="flex items-center gap-3 px-5 py-3 sm:px-6">
-                    <Icon className={cn("h-3.5 w-3.5 shrink-0", r.accent)} strokeWidth={2.4} />
-                    <div className="min-w-0 flex-1">
-                      <div className="flex items-center gap-2">
-                        <p className="text-[10.5px] font-bold uppercase tracking-[0.2em] text-foreground/55">{r.label}</p>
-                        <p className={cn("font-numbers text-[14px] font-black tabular-nums leading-none", r.accent)}>{r.value}</p>
-                      </div>
-                      <p className="truncate text-[11px] text-foreground/55 mt-0.5">{r.sub}</p>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
+            <TooltipProvider delayDuration={250}>
+              <div className="flex w-full flex-wrap items-center gap-1.5 xl:w-auto xl:justify-end">
+                <div className="hidden items-center border border-border bg-card p-0.5 md:inline-flex">
+                  {PERIODS.map((opt) => (
+                    <button
+                      key={opt.label}
+                      onClick={() => { setSelectedPeriod(opt); setIsCustom(false); setCustomRange(undefined); }}
+                      className={cn(
+                        "px-2.5 py-1 text-[11px] font-bold transition-colors",
+                        !isCustom && selectedPeriod.label === opt.label
+                          ? "bg-foreground text-background"
+                          : "text-muted-foreground hover:text-foreground",
+                      )}
+                    >
+                      {opt.label}
+                    </button>
+                  ))}
+                </div>
+
+                <Tooltip>
+                  <Popover open={datePickerOpen} onOpenChange={setDatePickerOpen}>
+                    <TooltipTrigger asChild>
+                      <PopoverTrigger asChild>
+                        <button className={cn("inline-flex h-8 w-8 items-center justify-center border transition-colors",
+                          isCustom ? "border-foreground bg-secondary text-foreground" : "border-border bg-card text-muted-foreground hover:text-foreground")}>
+                          <CalendarDays className="h-3.5 w-3.5" />
+                        </button>
+                      </PopoverTrigger>
+                    </TooltipTrigger>
+                    <PopoverContent align="end" className="w-auto overflow-hidden border border-border bg-popover p-0">
+                      <Calendar mode="range" selected={customRange} onSelect={(range) => { setCustomRange(range); setIsCustom(true); if (range?.from && range?.to) setTimeout(() => setDatePickerOpen(false), 300); }} numberOfMonths={1} locale={ptBR} disabled={(date) => date > new Date()} className="pointer-events-auto p-3" />
+                    </PopoverContent>
+                  </Popover>
+                  <TooltipContent side="bottom" className="flex items-center gap-2">Período personalizado</TooltipContent>
+                </Tooltip>
+
+                <span className="hidden h-5 w-px bg-border md:block" />
+
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <button onClick={() => setCmdOpen(true)} className="inline-flex h-8 items-center gap-1.5 border border-border bg-card px-2 text-muted-foreground transition-colors hover:text-foreground">
+                      <CommandIcon className="h-3.5 w-3.5" />
+                      <Kbd>⌘K</Kbd>
+                    </button>
+                  </TooltipTrigger>
+                  <TooltipContent side="bottom" className="flex items-center gap-2">Comandos rápidos</TooltipContent>
+                </Tooltip>
+
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <button onClick={toggleDensity} className={cn("inline-flex h-8 w-8 items-center justify-center border transition-colors",
+                      density === "compact" ? "border-foreground bg-secondary text-foreground" : "border-border bg-card text-muted-foreground hover:text-foreground")}>
+                      {density === "compact" ? <Rows4 className="h-3.5 w-3.5" /> : <Rows3 className="h-3.5 w-3.5" />}
+                    </button>
+                  </TooltipTrigger>
+                  <TooltipContent side="bottom" className="flex items-center gap-2">Densidade <Kbd>D</Kbd></TooltipContent>
+                </Tooltip>
+
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <button onClick={() => window.location.reload()} className="inline-flex h-8 w-8 items-center justify-center border border-border bg-card text-muted-foreground transition-colors hover:text-foreground">
+                      <RefreshCw className="h-3.5 w-3.5" />
+                    </button>
+                  </TooltipTrigger>
+                  <TooltipContent side="bottom" className="flex items-center gap-2">Atualizar <Kbd>R</Kbd></TooltipContent>
+                </Tooltip>
+
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <button onClick={toggleHidden} className={cn("inline-flex h-8 w-8 items-center justify-center border transition-colors",
+                      hidden ? "border-foreground bg-secondary text-foreground" : "border-border bg-card text-muted-foreground hover:text-foreground")}>
+                      {hidden ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
+                    </button>
+                  </TooltipTrigger>
+                  <TooltipContent side="bottom" className="flex items-center gap-2">{hidden ? "Mostrar valores" : "Ocultar valores"} <Kbd>P</Kbd></TooltipContent>
+                </Tooltip>
+
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <button
+                      onClick={() => setShowExportDialog(true)}
+                      className="inline-flex h-8 items-center gap-1.5 bg-foreground px-3 text-[11px] font-black text-background transition-colors hover:bg-foreground/90"
+                    >
+                      <Download className="h-3.5 w-3.5" strokeWidth={2.5} />
+                      Exportar
+                    </button>
+                  </TooltipTrigger>
+                  <TooltipContent side="bottom" className="flex items-center gap-2">Exportar CSV <Kbd>E</Kbd></TooltipContent>
+                </Tooltip>
+              </div>
+            </TooltipProvider>
           </div>
-        </div>
 
-        {/* mobile period bar */}
-        <div className="mt-3 flex items-center gap-1.5 overflow-x-auto no-scrollbar md:hidden">
+          <div className="mt-6 grid grid-cols-2 border-y border-border lg:grid-cols-4 lg:divide-x lg:divide-border">
+            {[
+              { label: "Receita bruta", value: hidden ? HIDE : fmtCompact(m.totalGross), sub: hidden ? "—" : `Taxas ${fmtCompact(m.totalFees)}`, accent: "text-foreground", delta: { cur: m.totalGross, prev: p.totalGross } },
+              heroKpis[1],
+              heroKpis[2],
+              heroKpis[3],
+            ].map((k, idx) => (
+              <div key={k.label} className={cn("min-h-[126px] px-4 py-4 sm:px-5", idx > 1 && "border-t border-border lg:border-t-0", idx === 1 && "border-l border-border lg:border-l-0")}>
+                <div className="flex items-center justify-between gap-2">
+                  <p className="text-[9px] font-black uppercase tracking-[0.22em] text-muted-foreground">{k.label}</p>
+                  {k.delta && <DeltaBadge cur={k.delta.cur} prev={k.delta.prev} />}
+                </div>
+                <p className={cn("mt-3 font-numbers text-[28px] font-black leading-none tracking-[-0.05em] tabular-nums sm:text-[34px]", k.accent)}>
+                  {k.value}
+                </p>
+                <p className="mt-2 truncate text-[11.5px] font-semibold text-muted-foreground">{k.sub}</p>
+              </div>
+            ))}
+          </div>
+
+          <div className="grid grid-cols-1 border-b border-border md:grid-cols-2 md:divide-x md:divide-border">
+            {riskKpis.map((r) => {
+              const Icon = r.icon;
+              return (
+                <div key={r.label} className="flex items-center gap-3 px-4 py-3 sm:px-5">
+                  <Icon className={cn("h-4 w-4 shrink-0", r.accent)} strokeWidth={2.4} />
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center justify-between gap-3">
+                      <p className="text-[9px] font-black uppercase tracking-[0.22em] text-muted-foreground">{r.label}</p>
+                      <p className={cn("font-numbers text-[15px] font-black leading-none tabular-nums", r.accent)}>{r.value}</p>
+                    </div>
+                    <p className="mt-1 truncate text-[11px] font-medium text-muted-foreground">{r.sub}</p>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </header>
+
+        <div className="mt-3 flex items-center gap-1.5 overflow-x-auto md:hidden">
           {PERIODS.map((opt) => (
             <button
               key={opt.label}
               onClick={() => { setSelectedPeriod(opt); setIsCustom(false); setCustomRange(undefined); }}
               className={cn(
-                "shrink-0 rounded-md border px-2.5 py-1 text-[11px] font-bold transition-colors",
+                "shrink-0 border px-2.5 py-1 text-[11px] font-bold transition-colors",
                 !isCustom && selectedPeriod.label === opt.label
                   ? "border-foreground bg-foreground text-background"
                   : "border-border bg-card text-muted-foreground",
@@ -858,182 +849,178 @@ export default function Vendas() {
       </div>
 
       {/* ─────────── WORKSPACE ─────────── */}
-      <div className="space-y-4 px-5 pt-4 sm:px-7">
+      <div className="space-y-5 px-5 pt-5 sm:px-8">
 
-      {/* ─────────── CHART + MIX ─────────── */}
-      <section className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-        {/* Chart */}
-        <div className="lg:col-span-2 rounded-xl border border-border bg-card overflow-hidden">
-          <div className="flex items-center justify-between gap-3 border-b border-border px-4 py-3">
-            <div>
-              <p className="text-[12.5px] font-bold text-foreground leading-tight">Receita líquida · {periodLabel}</p>
-              <p className="text-[11px] text-muted-foreground mt-0.5">Comparativo com período anterior</p>
-            </div>
-            <div className="flex items-center gap-3 text-[10.5px] text-muted-foreground">
-              <span className="flex items-center gap-1.5"><span className="h-2 w-2 rounded-sm bg-success" />Atual</span>
-              <span className="flex items-center gap-1.5"><span className="inline-block h-0 w-3 border-t border-dashed border-muted-foreground" />Anterior</span>
-            </div>
-          </div>
-          <div className="px-2 py-3">
-            <RevenueChart data={metrics.chartData} hidden={hidden} />
-          </div>
-        </div>
-
-        {/* Mix */}
-        <div className="rounded-xl border border-border bg-card overflow-hidden">
-          <div className="border-b border-border px-4 py-3">
-            <p className="text-[12.5px] font-bold text-foreground leading-tight">Mix de pagamento</p>
-            <p className="text-[11px] text-muted-foreground mt-0.5">Distribuição da receita por método</p>
-          </div>
-          <div className="p-4 space-y-3.5">
-            {mixRows.map((item) => (
-              <div key={item.label} className="space-y-1.5">
-                <div className="flex items-center justify-between gap-3 text-[12px]">
-                  <div className="flex items-center gap-2 font-semibold text-foreground">
-                    <span className={cn("h-2 w-2 rounded-full", item.dot)} />
-                    {item.label}
-                  </div>
-                  <div className="text-right">
-                    <p className="font-bold tabular-nums text-foreground">{hidden ? HIDE : fmtCompact(item.value)}</p>
-                    <p className="text-[10.5px] text-muted-foreground tabular-nums">{item.share.toFixed(1)}% · {item.count} {item.count === 1 ? "venda" : "vendas"}</p>
-                  </div>
+        {/* ─────────── INTELIGÊNCIA FINANCEIRA ─────────── */}
+        <section className="border-y border-border bg-card">
+          <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_360px] lg:divide-x lg:divide-border">
+            <div className="min-w-0">
+              <div className="flex items-center justify-between gap-3 border-b border-border px-4 py-3 sm:px-5">
+                <div>
+                  <p className="text-[12.5px] font-black leading-tight text-foreground">Receita líquida · {periodLabel}</p>
+                  <p className="mt-0.5 text-[11px] font-medium text-muted-foreground">Comparativo com período anterior</p>
                 </div>
-                <div className="h-1.5 overflow-hidden rounded-full bg-muted">
-                  <div className={cn("h-full rounded-full transition-all", item.bar)} style={{ width: `${Math.min(item.share, 100)}%` }} />
+                <div className="flex items-center gap-3 text-[10.5px] font-semibold text-muted-foreground">
+                  <span className="flex items-center gap-1.5"><span className="h-2 w-2 bg-success" />Atual</span>
+                  <span className="flex items-center gap-1.5"><span className="inline-block h-0 w-3 border-t border-dashed border-muted-foreground" />Anterior</span>
                 </div>
               </div>
-            ))}
-          </div>
-        </div>
-      </section>
+              <div className="px-2 py-4">
+                <RevenueChart data={metrics.chartData} hidden={hidden} />
+              </div>
+            </div>
 
-      {/* ─────────── TRANSACTIONS ─────────── */}
-      <section className="overflow-hidden rounded-xl border border-border bg-card">
-        {/* Header */}
-        <div className="flex flex-col gap-3 border-b border-border px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
-          <div>
-            <p className="text-[13px] font-bold text-foreground leading-tight">Transações</p>
-            <p className="text-[11px] text-muted-foreground mt-0.5">{sortedFiltered.length} {sortedFiltered.length === 1 ? "resultado" : "resultados"} · líquido <span className="font-bold text-foreground tabular-nums">{hidden ? HIDE : fmt(filteredNetTotal)}</span></p>
+            <aside className="border-t border-border lg:border-t-0">
+              <div className="border-b border-border px-4 py-3 sm:px-5">
+                <p className="text-[12.5px] font-black leading-tight text-foreground">Mix de pagamento</p>
+                <p className="mt-0.5 text-[11px] font-medium text-muted-foreground">Distribuição por método</p>
+              </div>
+              <div className="divide-y divide-border">
+                {mixRows.map((item) => (
+                  <div key={item.label} className="px-4 py-3.5 sm:px-5">
+                    <div className="flex items-center justify-between gap-3 text-[12px]">
+                      <div className="flex items-center gap-2 font-bold text-foreground">
+                        <span className={cn("h-2 w-2", item.dot)} />
+                        {item.label}
+                      </div>
+                      <div className="text-right">
+                        <p className="font-numbers font-black tabular-nums text-foreground">{hidden ? HIDE : fmtCompact(item.value)}</p>
+                        <p className="mt-0.5 text-[10.5px] font-semibold tabular-nums text-muted-foreground">{item.share.toFixed(1)}% · {item.count} {item.count === 1 ? "venda" : "vendas"}</p>
+                      </div>
+                    </div>
+                    <div className="mt-2 h-1.5 bg-muted">
+                      <div className={cn("h-full transition-all", item.bar)} style={{ width: `${Math.min(item.share, 100)}%` }} />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </aside>
           </div>
-          <div className="relative w-full sm:w-[320px]">
-            <Search className="absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
-            <input id="vendas-search" value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Buscar nome, email, telefone, ID…"
-              className="h-8 w-full rounded-lg border border-border bg-background pl-8 pr-16 text-[12px] text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-foreground/40 transition-colors" />
-            {search ? (
-              <button onClick={() => setSearch("")} className="absolute right-2.5 top-1/2 -translate-y-1/2"><X className="h-3.5 w-3.5 text-muted-foreground hover:text-foreground" /></button>
+        </section>
+
+        {/* ─────────── TRANSACTIONS ─────────── */}
+        <section className="overflow-hidden border border-border bg-card">
+          <div className="flex flex-col gap-3 border-b border-border px-4 py-3 sm:flex-row sm:items-center sm:justify-between sm:px-5">
+            <div>
+              <p className="text-[13px] font-black leading-tight text-foreground">Transações</p>
+              <p className="mt-0.5 text-[11px] font-medium text-muted-foreground">{sortedFiltered.length} {sortedFiltered.length === 1 ? "resultado" : "resultados"} · líquido <span className="font-numbers font-black text-foreground tabular-nums">{hidden ? HIDE : fmt(filteredNetTotal)}</span></p>
+            </div>
+            <div className="relative w-full sm:w-[340px]">
+              <Search className="absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
+              <input id="vendas-search" value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Buscar nome, email, telefone, ID…"
+                className="h-8 w-full border border-border bg-background pl-8 pr-16 text-[12px] font-medium text-foreground transition-colors placeholder:text-muted-foreground focus:border-foreground/40 focus:outline-none" />
+              {search ? (
+                <button onClick={() => setSearch("")} className="absolute right-2.5 top-1/2 -translate-y-1/2"><X className="h-3.5 w-3.5 text-muted-foreground hover:text-foreground" /></button>
+              ) : (
+                <Kbd className="absolute right-2.5 top-1/2 -translate-y-1/2">/</Kbd>
+              )}
+            </div>
+          </div>
+
+          <div className="overflow-x-auto border-b border-border">
+            <div className="flex min-w-max items-center">
+              {statusTabs.map((tab) => {
+                const active = statusFilter === tab.value;
+                return (
+                  <button key={tab.value} onClick={() => setStatusFilter(tab.value)}
+                    className={cn("relative flex items-center gap-1.5 whitespace-nowrap px-4 py-2.5 text-[12px] font-bold transition-colors",
+                      active ? "text-foreground" : "text-muted-foreground hover:text-foreground"
+                    )}>
+                    {tab.dot && <span className={cn("h-1.5 w-1.5 rounded-full", tab.dot)} />}
+                    {tab.label}
+                    <span className={cn("ml-0.5 px-1.5 py-0.5 text-[11px] tabular-nums",
+                      active ? "bg-foreground text-background" : "bg-muted text-muted-foreground"
+                    )}>{tab.count}</span>
+                    {active && <span className="absolute bottom-0 left-3 right-3 h-[2px] bg-foreground" />}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          <div className="hidden md:block">
+            {loading ? (
+              <div className="p-16 text-center">
+                <div className="mx-auto mb-3 h-5 w-5 animate-spin rounded-full border-2 border-muted border-t-foreground" />
+                <p className="text-[11px] text-muted-foreground">Carregando…</p>
+              </div>
             ) : (
-              <Kbd className="absolute right-2.5 top-1/2 -translate-y-1/2">/</Kbd>
+              <>
+                <div className="overflow-x-auto">
+                  <table className="w-full min-w-[900px]">
+                    <thead>
+                      <tr className="border-b border-border bg-background">
+                        <SortHead label="Cliente" field="customer" sort={sort} onSort={handleSort} className="pl-4" />
+                        <SortHead label="Produto / Data" field="date" sort={sort} onSort={handleSort} />
+                        <th className="px-3 py-3 text-left text-[10px] font-black uppercase tracking-[0.14em] text-muted-foreground">Status</th>
+                        <th className="px-3 py-3 text-left text-[10px] font-black uppercase tracking-[0.14em] text-muted-foreground">Método</th>
+                        <SortHead label="Bruto / Taxa" field="amount" sort={sort} onSort={handleSort} align="right" />
+                        <SortHead label="Líquido" field="net" sort={sort} onSort={handleSort} align="right" />
+                        <th className="w-12" />
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {visibleItems.length === 0 ? (
+                        <tr><td colSpan={7} className="py-16">
+                          <div className="flex flex-col items-center justify-center gap-2">
+                            <div className="flex h-10 w-10 items-center justify-center border border-border bg-muted">
+                              <ShoppingCart className="h-4 w-4 text-muted-foreground" />
+                            </div>
+                            <p className="text-[13px] font-bold text-foreground">Nenhuma venda encontrada</p>
+                            <p className="text-[11px] text-muted-foreground">Ajuste o período ou refine a pesquisa.</p>
+                          </div>
+                        </td></tr>
+                      ) : visibleItems.map((tx) => (
+                        <TxRow key={tx.id} tx={tx} prods={products} onClick={() => setSelectedTx(tx)} density={density} />
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+                {visibleItems.length > 0 && totalPages > 1 && (
+                  <div className="flex items-center justify-between border-t border-border bg-background px-4 py-3">
+                    <span className="text-[11.5px] font-medium text-muted-foreground tabular-nums">
+                      Página <span className="font-bold text-foreground">{currentPage}</span> de <span className="font-bold text-foreground">{totalPages}</span> · {sortedFiltered.length} transações
+                    </span>
+                    <div className="flex items-center gap-1.5">
+                      <button disabled={currentPage <= 1} onClick={() => setCurrentPage(p => p - 1)} className="inline-flex h-8 items-center gap-1 border border-border bg-card px-3 text-[11.5px] font-semibold text-foreground transition-colors hover:bg-muted disabled:pointer-events-none disabled:opacity-30">
+                        Anterior
+                      </button>
+                      <button disabled={currentPage >= totalPages} onClick={() => setCurrentPage(p => p + 1)} className="inline-flex h-8 items-center gap-1 border border-border bg-card px-3 text-[11.5px] font-semibold text-foreground transition-colors hover:bg-muted disabled:pointer-events-none disabled:opacity-30">
+                        Próxima
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </>
             )}
           </div>
-        </div>
 
-        {/* Status tabs */}
-        <div className="border-b border-border overflow-x-auto no-scrollbar">
-          <div className="flex items-center min-w-max">
-            {statusTabs.map((tab) => {
-              const active = statusFilter === tab.value;
-              return (
-                <button key={tab.value} onClick={() => setStatusFilter(tab.value)}
-                  className={cn("relative px-4 py-2.5 text-[12px] font-semibold whitespace-nowrap transition-colors flex items-center gap-1.5",
-                    active ? "text-foreground" : "text-muted-foreground hover:text-foreground"
-                  )}>
-                  {tab.dot && <span className={cn("h-1.5 w-1.5 rounded-full", tab.dot)} />}
-                  {tab.label}
-                  <span className={cn("ml-0.5 tabular-nums text-[11px] rounded px-1.5 py-0.5",
-                    active ? "bg-foreground text-background" : "bg-muted text-muted-foreground"
-                  )}>{tab.count}</span>
-                  {active && <span className="absolute bottom-0 left-3 right-3 h-[2px] rounded-full bg-foreground" />}
-                </button>
-              );
-            })}
-          </div>
-        </div>
-
-        {/* Desktop table */}
-        <div className="hidden md:block">
-          {loading ? (
-            <div className="p-16 text-center">
-              <div className="mx-auto mb-3 h-5 w-5 animate-spin rounded-full border-2 border-muted border-t-foreground" />
-              <p className="text-[11px] text-muted-foreground">Carregando…</p>
-            </div>
-          ) : (
-            <>
-              <div className="overflow-x-auto">
-                <table className="w-full min-w-[900px]">
-                  <thead>
-                    <tr className="border-b border-border bg-muted/30">
-                      <SortHead label="Cliente" field="customer" sort={sort} onSort={handleSort} className="pl-4" />
-                      <SortHead label="Produto / Data" field="date" sort={sort} onSort={handleSort} />
-                      <th className="px-3 py-3 text-left text-[10px] font-bold uppercase tracking-[0.14em] text-muted-foreground">Status</th>
-                      <th className="px-3 py-3 text-left text-[10px] font-bold uppercase tracking-[0.14em] text-muted-foreground">Método</th>
-                      <SortHead label="Bruto / Taxa" field="amount" sort={sort} onSort={handleSort} align="right" />
-                      <SortHead label="Líquido" field="net" sort={sort} onSort={handleSort} align="right" />
-                      <th className="w-12" />
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {visibleItems.length === 0 ? (
-                      <tr><td colSpan={7} className="py-16">
-                        <div className="flex flex-col items-center justify-center gap-2">
-                          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-muted border border-border">
-                            <ShoppingCart className="h-4 w-4 text-muted-foreground" />
-                          </div>
-                          <p className="text-[13px] font-semibold text-foreground">Nenhuma venda encontrada</p>
-                          <p className="text-[11px] text-muted-foreground">Ajuste o período ou refine a pesquisa.</p>
-                        </div>
-                      </td></tr>
-                    ) : visibleItems.map((tx) => (
-                      <TxRow key={tx.id} tx={tx} prods={products} onClick={() => setSelectedTx(tx)} density={density} />
-                    ))}
-                  </tbody>
-                </table>
+          <div className="divide-y divide-border md:hidden">
+            {loading ? (
+              <div className="p-12 text-center">
+                <div className="mx-auto mb-3 h-5 w-5 animate-spin rounded-full border-2 border-muted border-t-foreground" />
               </div>
-              {visibleItems.length > 0 && totalPages > 1 && (
-                <div className="flex items-center justify-between border-t border-border px-4 py-3 bg-muted/20">
-                  <span className="text-[11.5px] font-medium text-muted-foreground tabular-nums">
-                    Página <span className="font-bold text-foreground">{currentPage}</span> de <span className="font-bold text-foreground">{totalPages}</span> · {sortedFiltered.length} transações
-                  </span>
-                  <div className="flex items-center gap-1.5">
-                    <button disabled={currentPage <= 1} onClick={() => setCurrentPage(p => p - 1)} className="inline-flex h-8 items-center gap-1 rounded-lg border border-border bg-card px-3 text-[11.5px] font-semibold text-foreground hover:bg-muted disabled:opacity-30 disabled:pointer-events-none transition-colors">
-                      Anterior
-                    </button>
-                    <button disabled={currentPage >= totalPages} onClick={() => setCurrentPage(p => p + 1)} className="inline-flex h-8 items-center gap-1 rounded-lg border border-border bg-card px-3 text-[11.5px] font-semibold text-foreground hover:bg-muted disabled:opacity-30 disabled:pointer-events-none transition-colors">
-                      Próxima
-                    </button>
+            ) : visibleItems.length === 0 ? (
+              <div className="flex flex-col items-center justify-center gap-2 py-12">
+                <ShoppingCart className="h-5 w-5 text-muted-foreground" />
+                <p className="text-[12px] font-semibold text-foreground">Nenhuma venda encontrada</p>
+              </div>
+            ) : (
+              <>
+                {visibleItems.map((tx) => (
+                  <MobileCard key={tx.id} tx={tx} prods={products} onClick={() => setSelectedTx(tx)} />
+                ))}
+                {totalPages > 1 && (
+                  <div className="flex items-center justify-between border-t border-border bg-card px-3 py-2.5">
+                    <button disabled={currentPage <= 1} onClick={() => setCurrentPage(p => p - 1)} className="text-[11.5px] font-semibold text-muted-foreground transition-colors hover:text-foreground disabled:opacity-25">← Anterior</button>
+                    <span className="text-[11.5px] font-bold tabular-nums text-foreground">{currentPage} / {totalPages}</span>
+                    <button disabled={currentPage >= totalPages} onClick={() => setCurrentPage(p => p + 1)} className="text-[11.5px] font-semibold text-muted-foreground transition-colors hover:text-foreground disabled:opacity-25">Próxima →</button>
                   </div>
-                </div>
-              )}
-            </>
-          )}
-        </div>
-
-        {/* Mobile cards */}
-        <div className="space-y-2 p-3 md:hidden">
-          {loading ? (
-            <div className="p-12 text-center">
-              <div className="mx-auto mb-3 h-5 w-5 animate-spin rounded-full border-2 border-muted border-t-foreground" />
-            </div>
-          ) : visibleItems.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-12 gap-2">
-              <ShoppingCart className="h-5 w-5 text-muted-foreground" />
-              <p className="text-[12px] font-semibold text-foreground">Nenhuma venda encontrada</p>
-            </div>
-          ) : (
-            <>
-              {visibleItems.map((tx) => (
-                <MobileCard key={tx.id} tx={tx} prods={products} onClick={() => setSelectedTx(tx)} />
-              ))}
-              {totalPages > 1 && (
-                <div className="flex items-center justify-between rounded-lg border border-border bg-card px-3 py-2.5">
-                  <button disabled={currentPage <= 1} onClick={() => setCurrentPage(p => p - 1)} className="text-[11.5px] font-semibold text-muted-foreground hover:text-foreground disabled:opacity-25 transition-colors">← Anterior</button>
-                  <span className="text-[11.5px] font-bold text-foreground tabular-nums">{currentPage} / {totalPages}</span>
-                  <button disabled={currentPage >= totalPages} onClick={() => setCurrentPage(p => p + 1)} className="text-[11.5px] font-semibold text-muted-foreground hover:text-foreground disabled:opacity-25 transition-colors">Próxima →</button>
-                </div>
-              )}
-            </>
-          )}
-        </div>
-      </section>
+                )}
+              </>
+            )}
+          </div>
+        </section>
       </div>
 
       {selectedTx && <TransactionDetailPanel tx={selectedTx} products={products} onClose={() => setSelectedTx(null)} onRefund={async () => toast.info("Entre em contato com o suporte.")} />}
