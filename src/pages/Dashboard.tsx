@@ -429,18 +429,13 @@ export default function Dashboard() {
       {/* ─── SCALE MODE POPUP ─── */}
       {showScalePopup && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
-          <div className="absolute inset-0 bg-background/70 backdrop-blur-xl" onClick={() => setShowScalePopup(false)} />
-          <div className="relative w-full max-w-md rounded-3xl border-2 border-primary/40 bg-card shadow-2xl shadow-primary/20 animate-scale-in overflow-hidden">
-            <div className="absolute inset-0 bg-gradient-to-b from-primary/8 via-transparent to-primary/5 pointer-events-none" />
-            <div className="absolute -top-20 -right-20 h-40 w-40 rounded-full bg-primary/20 blur-[80px]" />
-            <div className="absolute -bottom-20 -left-20 h-40 w-40 rounded-full bg-primary/20 blur-[80px]" />
+          <div className="absolute inset-0 bg-background/80" onClick={() => setShowScalePopup(false)} />
+          <div className="relative w-full max-w-md rounded-3xl border border-primary/30 bg-card animate-scale-in overflow-hidden">
             <button onClick={() => setShowScalePopup(false)} className="absolute top-4 right-4 h-8 w-8 rounded-xl bg-muted/60 flex items-center justify-center hover:bg-muted z-10"><X className="h-4 w-4 text-muted-foreground" /></button>
              <div className="relative p-8 md:p-10 text-center">
               <div className="mx-auto mb-6 relative h-28 w-28 flex items-center justify-center">
-                <div className="absolute inset-0 rounded-full border-2 border-primary/20 animate-ping" style={{ animationDuration: '2.5s' }} />
-                <div className="absolute inset-2 rounded-full border border-primary/15 animate-ping" style={{ animationDuration: '3s', animationDelay: '0.5s' }} />
-                <div className="h-20 w-20 rounded-full bg-gradient-to-br from-primary/25 to-primary/10 flex items-center justify-center ring-4 ring-primary/15 shadow-lg shadow-primary/20">
-                  <Rocket className="h-10 w-10 text-primary drop-shadow-lg" />
+                <div className="h-20 w-20 rounded-full bg-primary/10 flex items-center justify-center ring-1 ring-primary/20">
+                  <Rocket className="h-10 w-10 text-primary" />
                 </div>
               </div>
               <div className="inline-flex items-center gap-2 rounded-full bg-primary/10 border border-primary/25 px-4 py-1.5 mb-4">
@@ -573,17 +568,17 @@ export default function Dashboard() {
 
             <div className="mt-7 flex items-center gap-6 text-[11px] flex-wrap">
               <div className="flex items-center gap-2 text-muted-foreground">
-                <span className="h-2 w-2 rounded-full bg-success shadow-[0_0_8px_hsl(var(--success)/0.5)]" />
+                <span className="h-2 w-2 rounded-full bg-success" />
                 <span className="font-display font-black text-foreground tabular-nums">{approved.length}</span>
                 <span className="font-display font-bold uppercase tracking-wider text-[10px] text-foreground/75">aprovadas</span>
               </div>
               <div className="flex items-center gap-2 text-muted-foreground">
-                <span className="h-2 w-2 rounded-full bg-warning shadow-[0_0_8px_hsl(var(--warning)/0.5)]" />
+                <span className="h-2 w-2 rounded-full bg-warning" />
                 <span className="font-display font-black text-foreground tabular-nums">{pending.length}</span>
                 <span className="font-display font-bold uppercase tracking-wider text-[10px] text-foreground/75">pendentes</span>
               </div>
               <div className="flex items-center gap-2 text-muted-foreground">
-                <span className="h-2 w-2 rounded-full bg-destructive shadow-[0_0_8px_hsl(var(--destructive)/0.5)]" />
+                <span className="h-2 w-2 rounded-full bg-destructive" />
                 <span className="font-display font-black text-foreground tabular-nums">{chargebacks.length + refunded.length}</span>
                 <span className="font-display font-bold uppercase tracking-wider text-[10px] text-foreground/75">contestações</span>
               </div>
@@ -684,7 +679,7 @@ export default function Dashboard() {
                       if (!active || !payload?.length) return null;
                       const value = payload[0].value as number;
                       return (
-                        <div className="rounded-2xl border border-border/40 bg-card/95 backdrop-blur-xl px-4 py-3 shadow-2xl">
+                        <div className="rounded-xl border border-border bg-card px-4 py-3 shadow-lg">
                           <p className="font-display text-[9px] font-black text-muted-foreground/60 uppercase tracking-[0.18em]">{label}</p>
                           <p className="font-display text-[15px] font-black text-primary tabular-nums mt-1 tracking-tight">
                             R$ {value.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
@@ -906,9 +901,7 @@ export default function Dashboard() {
             return (
               <div>
                 {/* Header */}
-                <div className="relative px-7 pt-8 pb-6 overflow-hidden">
-                  <div className="absolute inset-0 bg-gradient-to-br from-primary/[0.06] via-primary/[0.02] to-transparent pointer-events-none" />
-                  <div className="absolute -top-20 -right-20 h-40 w-40 rounded-full bg-primary/10 blur-[80px] pointer-events-none" />
+                <div className="relative px-7 pt-8 pb-6 border-b border-border/40">
                   <div className="relative">
                     <div className="flex items-center gap-2.5 mb-4">
                       <span className={cn("inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-[11px] font-bold border", s.color, s.bg, s.border)}>
