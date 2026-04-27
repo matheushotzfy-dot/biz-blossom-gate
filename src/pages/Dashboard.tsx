@@ -482,7 +482,7 @@ export default function Dashboard() {
             <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-gradient-to-b from-primary/15 to-primary/5 border border-primary/20 text-primary">
               <BarChart3 className="h-3.5 w-3.5" strokeWidth={2.5} />
             </div>
-            <span className="font-display text-[13px] font-bold tracking-[-0.01em] text-foreground">Visão executiva</span>
+            <span className="font-display text-[13px] font-bold tracking-[-0.01em] text-foreground">Dashboard</span>
             {scaleModeUnlocked && (
               <button onClick={activateScaleMode} className={cn("ml-1 inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[10px] font-black uppercase tracking-wider transition-all",
                 scaleMode ? "border-primary/30 bg-primary/10 text-primary shadow-sm shadow-primary/10" : "border-border/60 bg-background/80 text-muted-foreground hover:text-foreground hover:border-primary/30"
@@ -572,20 +572,20 @@ export default function Dashboard() {
             )}
 
             <div className="mt-7 flex items-center gap-6 text-[11px] flex-wrap">
-              <div className="flex items-center gap-2 text-muted-foreground/60">
+              <div className="flex items-center gap-2 text-muted-foreground">
                 <span className="h-2 w-2 rounded-full bg-success shadow-[0_0_8px_hsl(var(--success)/0.5)]" />
                 <span className="font-display font-black text-foreground tabular-nums">{approved.length}</span>
-                <span className="font-display font-bold uppercase tracking-wider text-[10px]">aprovadas</span>
+                <span className="font-display font-bold uppercase tracking-wider text-[10px] text-foreground/75">aprovadas</span>
               </div>
-              <div className="flex items-center gap-2 text-muted-foreground/60">
+              <div className="flex items-center gap-2 text-muted-foreground">
                 <span className="h-2 w-2 rounded-full bg-warning shadow-[0_0_8px_hsl(var(--warning)/0.5)]" />
                 <span className="font-display font-black text-foreground tabular-nums">{pending.length}</span>
-                <span className="font-display font-bold uppercase tracking-wider text-[10px]">pendentes</span>
+                <span className="font-display font-bold uppercase tracking-wider text-[10px] text-foreground/75">pendentes</span>
               </div>
-              <div className="flex items-center gap-2 text-muted-foreground/60">
+              <div className="flex items-center gap-2 text-muted-foreground">
                 <span className="h-2 w-2 rounded-full bg-destructive shadow-[0_0_8px_hsl(var(--destructive)/0.5)]" />
                 <span className="font-display font-black text-foreground tabular-nums">{chargebacks.length + refunded.length}</span>
-                <span className="font-display font-bold uppercase tracking-wider text-[10px]">contestações</span>
+                <span className="font-display font-bold uppercase tracking-wider text-[10px] text-foreground/75">contestações</span>
               </div>
             </div>
           </div>
@@ -633,7 +633,7 @@ export default function Dashboard() {
           ] as const).map((item, i) => (
             <div key={item.label} className={cn("group relative px-6 py-5 lg:px-8 transition-colors hover:bg-muted/5", i >= 2 && "border-t lg:border-t-0 border-border/30")}>
               <div className={cn("absolute inset-x-0 top-0 h-px bg-gradient-to-r to-transparent opacity-0 transition-opacity group-hover:opacity-100", item.accentBg)} />
-              <p className="font-display text-[10px] font-black uppercase tracking-[0.18em] text-muted-foreground/40 mb-2">{item.label}</p>
+              <p className="font-display text-[10px] font-black uppercase tracking-[0.18em] text-foreground/70 mb-2">{item.label}</p>
               <p className={cn("font-display text-[22px] lg:text-[26px] font-black tabular-nums leading-none tracking-[-0.035em]", item.accent)}>
                 {privacy.hidden ? CENSORED : <AnimatedNumber value={item.numValue} formatter={item.formatter} />}
               </p>
