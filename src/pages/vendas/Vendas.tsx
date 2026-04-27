@@ -629,105 +629,154 @@ export default function Vendas() {
     { label: "Chargebacks", icon: ShieldAlert, value: hidden ? HIDE : fmtCompact(chargebackAmount), sub: `${m.chargebacks.length} casos · ${m.chargebackRate.toFixed(2)}%`, accent: m.chargebacks.length > 0 ? "text-destructive" : "text-foreground", iconClass: m.chargebacks.length > 0 ? "text-destructive bg-destructive/10" : "text-muted-foreground bg-muted", spark: metrics.series.chargebacks, sparkColor: "hsl(var(--destructive))", delta: undefined },
   ];
 
+  const heroKpis = [
+    { label: "Receita líquida", value: hidden ? HIDE : fmtCompact(m.totalNet), sub: hidden ? "—" : `Bruto ${fmtCompact(m.totalGross)}`, accent: "text-success", spark: metrics.series.net, sparkColor: "hsl(var(--success))", delta: { cur: m.totalNet, prev: p.totalNet } },
+    { label: "Vendas aprovadas", value: hidden ? HIDE : m.approved.length.toLocaleString("pt-BR"), sub: `${dateFiltered.length} tentativas`, accent: "text-foreground", spark: metrics.series.count, sparkColor: "hsl(var(--info))", delta: { cur: m.approved.length, prev: p.approved.length } },
+    { label: "Ticket médio", value: hidden ? HIDE : fmtCompact(m.avgTicket), sub: `${m.uniqueCustomers} ${m.uniqueCustomers === 1 ? "cliente" : "clientes"}`, accent: "text-foreground", spark: metrics.series.ticket, sparkColor: "hsl(var(--foreground))", delta: { cur: m.avgTicket, prev: p.avgTicket } },
+    { label: "Aprovação", value: `${approvalRate.toFixed(1)}%`, sub: `${m.pending.length} pendentes`, accent: approvalRate >= 60 ? "text-success" : "text-warning", spark: metrics.series.approval, sparkColor: approvalRate >= 60 ? "hsl(var(--success))" : "hsl(var(--warning))", delta: undefined as undefined | { cur: number; prev: number } },
+  ];
+
+  const riskKpis = [
+    { label: "Reembolsos", value: hidden ? HIDE : fmtCompact(refundedAmount), sub: `${m.refunded.length} casos · ${m.refundRate.toFixed(1)}%`, accent: m.refundRate > 5 ? "text-destructive" : "text-muted-foreground", icon: AlertTriangle },
+    { label: "Chargebacks", value: hidden ? HIDE : fmtCompact(chargebackAmount), sub: `${m.chargebacks.length} casos · ${m.chargebackRate.toFixed(2)}%`, accent: m.chargebacks.length > 0 ? "text-destructive" : "text-muted-foreground", icon: ShieldAlert },
+  ];
+
   /* ═══════════ RENDER ═══════════ */
   return (
     <div className="mx-auto -mt-2 w-full max-w-[1440px] pb-24 md:-mt-3 md:pb-10">
 
-      {/* ─────────── PAGE HEADER (padrão "Meus Produtos") ─────────── */}
-      <div className="flex flex-col gap-6 px-5 pt-1 sm:px-7 md:pt-1">
-        <div className="flex flex-wrap items-center justify-between gap-4">
-          <div className="space-y-2">
-            <div className="inline-flex items-center gap-2 rounded-full border border-border/60 bg-card px-3 py-1 text-[10px] font-bold uppercase tracking-[0.16em] text-muted-foreground/60">
-              <Activity className="h-3.5 w-3.5 text-success" /> Performance em tempo real
-            </div>
-            <div className="flex items-baseline gap-3">
-              <h1 className="font-display text-[26px] font-extrabold leading-none tracking-tight text-foreground sm:text-[30px]">
-                Minhas vendas
-              </h1>
-              <span className="text-[13px] tabular-nums text-muted-foreground/60">
-                {dateFiltered.length}
-              </span>
-            </div>
-            <p className="text-[12px] text-muted-foreground/65">
-              {lastSaleText ? `Última venda ${lastSaleText} · acompanhe receita e cada transação.` : "Receita, conversão e cada transação em um só lugar."}
-            </p>
-          </div>
-          <div className="flex items-center gap-1.5 shrink-0">
-            <button onClick={() => window.location.reload()} title="Atualizar" className="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-border/60 bg-card text-muted-foreground transition-all duration-200 hover:text-foreground hover:border-border">
-              <RefreshCw className="h-3.5 w-3.5" />
-            </button>
-            <button onClick={toggleHidden} title={hidden ? "Mostrar valores" : "Ocultar valores"} className={cn("inline-flex h-9 w-9 items-center justify-center rounded-lg border transition-all duration-200",
-              hidden ? "border-foreground/30 bg-secondary text-foreground" : "border-border/60 bg-card text-muted-foreground hover:text-foreground hover:border-border")}>
-              {hidden ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
-            </button>
-            <button
-              onClick={() => setShowExportDialog(true)}
-              className="inline-flex h-9 items-center gap-2 rounded-lg bg-primary px-4 text-xs font-semibold text-primary-foreground transition-all duration-200 hover:bg-primary/90 hover:-translate-y-px"
-            >
-              <Download className="h-3.5 w-3.5" strokeWidth={2.5} />
-              Exportar
-            </button>
-          </div>
-        </div>
+      {/* ─────────── HERO COMANDO ─────────── */}
+      <div className="px-5 pt-1 sm:px-7">
+        <div className="relative overflow-hidden rounded-2xl border border-border bg-card">
+          {/* gradient backdrop */}
+          <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-success/[0.04] via-transparent to-info/[0.04]" />
+          <div className="pointer-events-none absolute -top-20 -right-20 h-64 w-64 rounded-full bg-success/[0.06]" />
 
-        {/* Stat cards — padrão Meus Produtos (label / número grande / side-text) */}
-        <div className="grid grid-cols-2 gap-3 md:grid-cols-3 xl:grid-cols-6">
-          {kpis.map((k) => {
-            const Icon = k.icon;
-            return (
-              <div key={k.label} className="rounded-xl border border-border/60 bg-card px-4 py-3">
-                <div className="flex items-center justify-between gap-2">
-                  <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-muted-foreground/55">{k.label}</p>
-                  {k.delta ? <DeltaBadge cur={k.delta.cur} prev={k.delta.prev} /> : <Icon className={cn("h-3.5 w-3.5", k.accent)} strokeWidth={2.2} />}
+          <div className="relative">
+            {/* Top bar: título · período · ações */}
+            <div className="flex flex-wrap items-start justify-between gap-4 border-b border-border/60 px-5 py-4 sm:px-6">
+              <div className="space-y-2 min-w-0">
+                <div className="inline-flex items-center gap-2 rounded-full border border-border bg-background/60 px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.18em] text-muted-foreground">
+                  <span className="relative flex h-1.5 w-1.5">
+                    <span className="absolute inline-flex h-full w-full rounded-full bg-success opacity-60 animate-ping" />
+                    <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-success" />
+                  </span>
+                  Tempo real
                 </div>
-                <div className="mt-2 flex items-end justify-between gap-3">
-                  <span className={cn("font-numbers text-[26px] font-black tracking-[-0.05em] tabular-nums leading-none", k.accent)}>{k.value}</span>
+                <div className="flex items-baseline gap-3 flex-wrap">
+                  <h1 className="font-display text-[28px] font-extrabold leading-none tracking-tight text-foreground sm:text-[32px]">
+                    Minhas vendas
+                  </h1>
+                  <span className="text-[12px] font-semibold tabular-nums text-muted-foreground">
+                    {periodLabel} · {dateFiltered.length} {dateFiltered.length === 1 ? "transação" : "transações"}
+                  </span>
                 </div>
-                {k.sub && <p className="mt-2 truncate text-[11px] font-semibold text-muted-foreground/70">{k.sub}</p>}
-                <div className="mt-2 -mx-1">
-                  <Sparkline points={k.spark} color={k.sparkColor} />
-                </div>
+                <p className="text-[12px] text-muted-foreground/80">
+                  {lastSaleText ? `Última venda ${lastSaleText}.` : "Acompanhe receita, conversão e cada transação."}
+                </p>
               </div>
-            );
-          })}
-        </div>
 
-        {/* Period bar — sutil, integrada */}
-        <div className="flex flex-col gap-3 border-b border-border/40 pb-3 sm:flex-row sm:items-center sm:justify-between">
-          <div className="flex items-center gap-2 flex-wrap">
-            <span className="text-[10px] font-bold uppercase tracking-[0.16em] text-muted-foreground/55">Período</span>
-            <div className="inline-flex items-center rounded-lg border border-border/60 bg-secondary/50 p-0.5">
-              {PERIODS.map((opt) => (
-                <button
-                  key={opt.label}
-                  onClick={() => { setSelectedPeriod(opt); setIsCustom(false); setCustomRange(undefined); }}
-                  className={cn(
-                    "rounded-md px-2.5 py-1 text-[11.5px] font-semibold transition-all duration-150",
-                    !isCustom && selectedPeriod.label === opt.label ? "bg-secondary text-foreground" : "text-muted-foreground hover:text-foreground",
-                  )}
-                >
-                  {opt.label}
+              <div className="flex items-center gap-2 shrink-0">
+                {/* period segmented */}
+                <div className="hidden md:inline-flex items-center rounded-lg border border-border bg-background/50 p-0.5">
+                  {PERIODS.map((opt) => (
+                    <button
+                      key={opt.label}
+                      onClick={() => { setSelectedPeriod(opt); setIsCustom(false); setCustomRange(undefined); }}
+                      className={cn(
+                        "rounded-md px-2.5 py-1 text-[11px] font-bold transition-all duration-150",
+                        !isCustom && selectedPeriod.label === opt.label
+                          ? "bg-foreground text-background"
+                          : "text-muted-foreground hover:text-foreground",
+                      )}
+                    >
+                      {opt.label}
+                    </button>
+                  ))}
+                </div>
+                <Popover open={datePickerOpen} onOpenChange={setDatePickerOpen}>
+                  <PopoverTrigger asChild>
+                    <button title="Período personalizado" className={cn("inline-flex h-8 w-8 items-center justify-center rounded-lg border transition-colors",
+                      isCustom ? "border-foreground/40 bg-secondary text-foreground" : "border-border bg-background/50 text-muted-foreground hover:text-foreground")}>
+                      <CalendarDays className="h-3.5 w-3.5" />
+                    </button>
+                  </PopoverTrigger>
+                  <PopoverContent align="end" className="w-auto overflow-hidden rounded-xl border border-border bg-popover p-0">
+                    <Calendar mode="range" selected={customRange} onSelect={(range) => { setCustomRange(range); setIsCustom(true); if (range?.from && range?.to) setTimeout(() => setDatePickerOpen(false), 300); }} numberOfMonths={1} locale={ptBR} disabled={(date) => date > new Date()} className="pointer-events-auto p-3" />
+                  </PopoverContent>
+                </Popover>
+                <span className="hidden md:block h-5 w-px bg-border" />
+                <button onClick={() => window.location.reload()} title="Atualizar" className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-border bg-background/50 text-muted-foreground hover:text-foreground transition-colors">
+                  <RefreshCw className="h-3.5 w-3.5" />
                 </button>
+                <button onClick={toggleHidden} title={hidden ? "Mostrar valores" : "Ocultar valores"} className={cn("inline-flex h-8 w-8 items-center justify-center rounded-lg border transition-colors",
+                  hidden ? "border-foreground/40 bg-secondary text-foreground" : "border-border bg-background/50 text-muted-foreground hover:text-foreground")}>
+                  {hidden ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
+                </button>
+                <button
+                  onClick={() => setShowExportDialog(true)}
+                  className="inline-flex h-8 items-center gap-1.5 rounded-lg bg-foreground px-3 text-[11px] font-bold text-background transition-all duration-200 hover:bg-foreground/90"
+                >
+                  <Download className="h-3.5 w-3.5" strokeWidth={2.5} />
+                  Exportar
+                </button>
+              </div>
+            </div>
+
+            {/* KPI ribbon — divisões verticais sutis em vez de 6 cards iguais */}
+            <div className="grid grid-cols-2 divide-y divide-border/60 sm:grid-cols-4 sm:divide-y-0 sm:divide-x">
+              {heroKpis.map((k, idx) => (
+                <div key={k.label} className={cn("px-5 py-4 sm:px-6 sm:py-5", idx === 1 && "border-l border-border/60 sm:border-l-0")}>
+                  <div className="flex items-center justify-between gap-2">
+                    <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-muted-foreground">{k.label}</p>
+                    {k.delta && <DeltaBadge cur={k.delta.cur} prev={k.delta.prev} />}
+                  </div>
+                  <p className={cn("mt-2 font-numbers text-[28px] font-black leading-none tracking-[-0.04em] tabular-nums", k.accent)}>
+                    {k.value}
+                  </p>
+                  <div className="mt-2 flex items-end justify-between gap-2">
+                    <p className="truncate text-[11px] font-semibold text-muted-foreground">{k.sub}</p>
+                    <div className="w-16 shrink-0 opacity-70">
+                      <Sparkline points={k.spark} color={k.sparkColor} />
+                    </div>
+                  </div>
+                </div>
               ))}
             </div>
-            <Popover open={datePickerOpen} onOpenChange={setDatePickerOpen}>
-              <PopoverTrigger asChild>
-                <button className={cn("inline-flex h-7 items-center gap-1.5 rounded-md border px-2.5 text-[11.5px] font-semibold transition-all duration-150",
-                  isCustom ? "border-border bg-secondary text-foreground" : "border-border/60 bg-secondary/50 text-muted-foreground hover:text-foreground")}>
-                  <CalendarDays className="h-3.5 w-3.5" />
-                  {isCustom && customRange?.from ? customRange.to ? `${format(customRange.from, "dd/MM")} – ${format(customRange.to, "dd/MM")}` : format(customRange.from, "dd/MM/yyyy") : "Personalizado"}
-                </button>
-              </PopoverTrigger>
-              <PopoverContent align="end" className="w-auto overflow-hidden rounded-xl border border-border bg-popover p-0">
-                <Calendar mode="range" selected={customRange} onSelect={(range) => { setCustomRange(range); setIsCustom(true); if (range?.from && range?.to) setTimeout(() => setDatePickerOpen(false), 300); }} numberOfMonths={1} locale={ptBR} disabled={(date) => date > new Date()} className="pointer-events-auto p-3" />
-              </PopoverContent>
-            </Popover>
+
+            {/* Risk strip — reembolsos + chargebacks compactos */}
+            <div className="grid grid-cols-2 border-t border-border/60 divide-x divide-border/60">
+              {riskKpis.map(r => {
+                const Icon = r.icon;
+                return (
+                  <div key={r.label} className="flex items-center gap-3 px-5 py-2.5 sm:px-6">
+                    <Icon className={cn("h-3.5 w-3.5 shrink-0", r.accent)} strokeWidth={2.2} />
+                    <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-muted-foreground">{r.label}</p>
+                    <p className={cn("font-numbers text-[14px] font-black tabular-nums", r.accent)}>{r.value}</p>
+                    <p className="truncate text-[11px] text-muted-foreground/80">· {r.sub}</p>
+                  </div>
+                );
+              })}
+            </div>
           </div>
-          <div className="flex items-center gap-3 text-[11px] text-muted-foreground/70">
-            <span><span className="font-bold text-foreground tabular-nums">{dateFiltered.length}</span> transações</span>
-            <span className="h-3 w-px bg-border" />
-            <span>período anterior <span className="font-bold text-foreground tabular-nums">{previousPeriodFiltered.length}</span></span>
-          </div>
+        </div>
+
+        {/* mobile period bar */}
+        <div className="mt-3 flex items-center gap-1.5 overflow-x-auto no-scrollbar md:hidden">
+          {PERIODS.map((opt) => (
+            <button
+              key={opt.label}
+              onClick={() => { setSelectedPeriod(opt); setIsCustom(false); setCustomRange(undefined); }}
+              className={cn(
+                "shrink-0 rounded-md border px-2.5 py-1 text-[11px] font-bold transition-colors",
+                !isCustom && selectedPeriod.label === opt.label
+                  ? "border-foreground bg-foreground text-background"
+                  : "border-border bg-card text-muted-foreground",
+              )}
+            >
+              {opt.label}
+            </button>
+          ))}
         </div>
       </div>
 
