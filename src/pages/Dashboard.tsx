@@ -802,7 +802,7 @@ export default function Dashboard() {
           <div className="dashboard-panel dashboard-panel-success relative rounded-[24px] flex flex-col">
             <div className="flex items-center justify-between border-b border-border/30 px-6 py-5">
               <div className="flex items-center gap-3">
-                <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-gradient-to-b from-success/15 to-success/5 border border-success/20 text-success">
+                <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-success/10 border border-success/20 text-success">
                   <Activity className="h-3.5 w-3.5" strokeWidth={2.5} />
                 </div>
                 <div>
