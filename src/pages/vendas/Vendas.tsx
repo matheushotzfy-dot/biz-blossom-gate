@@ -904,11 +904,15 @@ export default function Vendas() {
             <p className="text-[13px] font-bold text-foreground leading-tight">Transações</p>
             <p className="text-[11px] text-muted-foreground mt-0.5">{sortedFiltered.length} {sortedFiltered.length === 1 ? "resultado" : "resultados"} · líquido <span className="font-bold text-foreground tabular-nums">{hidden ? HIDE : fmt(filteredNetTotal)}</span></p>
           </div>
-          <div className="relative w-full sm:w-[300px]">
+          <div className="relative w-full sm:w-[320px]">
             <Search className="absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
             <input id="vendas-search" value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Buscar nome, email, telefone, ID…"
-              className="h-8 w-full rounded-lg border border-border bg-background pl-8 pr-8 text-[12px] text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-foreground/40 transition-colors" />
-            {search && <button onClick={() => setSearch("")} className="absolute right-2.5 top-1/2 -translate-y-1/2"><X className="h-3.5 w-3.5 text-muted-foreground hover:text-foreground" /></button>}
+              className="h-8 w-full rounded-lg border border-border bg-background pl-8 pr-16 text-[12px] text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-foreground/40 transition-colors" />
+            {search ? (
+              <button onClick={() => setSearch("")} className="absolute right-2.5 top-1/2 -translate-y-1/2"><X className="h-3.5 w-3.5 text-muted-foreground hover:text-foreground" /></button>
+            ) : (
+              <Kbd className="absolute right-2.5 top-1/2 -translate-y-1/2">/</Kbd>
+            )}
           </div>
         </div>
 
