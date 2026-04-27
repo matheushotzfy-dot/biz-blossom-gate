@@ -116,10 +116,10 @@ export function KpiRibbon({ items, cols, className }: KpiRibbonProps) {
   const xl = cols ?? Math.min(Math.max(items.length, 4), 8) as 4 | 5 | 6 | 7 | 8;
   return (
     <div className={cn(
-      "overflow-hidden rounded-2xl border border-border/60 bg-card shadow-[0_1px_0_hsl(var(--border)/0.4)]",
+      "overflow-hidden rounded-2xl border border-border/70 bg-card shadow-[0_1px_0_hsl(var(--border)/0.6),0_8px_24px_-18px_hsl(var(--foreground)/0.25)]",
       className,
     )}>
-      <div className={cn("grid grid-cols-2 gap-px bg-border/50 md:grid-cols-4", COLS_CLS[xl])}>
+      <div className={cn("grid grid-cols-2 gap-px bg-border/60 md:grid-cols-4", COLS_CLS[xl])}>
         {items.map((kpi) => {
           const tones = TONES[kpi.tone ?? "neutral"];
           return (
@@ -130,13 +130,18 @@ export function KpiRibbon({ items, cols, className }: KpiRibbonProps) {
                 tones.panel,
               )}
             >
+              {/* Top accent line */}
               <span className={cn("absolute inset-x-0 top-0 h-px", tones.line)} />
+              {/* Soft corner glow — subtle photographic depth */}
+              <span aria-hidden className={cn("pointer-events-none absolute -top-10 -right-10 h-24 w-24 rounded-full opacity-0 transition-opacity duration-300 group-hover:opacity-100", tones.fill)} style={{ filter: "blur(40px)", opacity: 0.06 }} />
+              {/* Bottom hairline shine */}
+              <span aria-hidden className="pointer-events-none absolute inset-x-3 bottom-0 h-px bg-gradient-to-r from-transparent via-border/60 to-transparent" />
 
               <div className="relative flex h-full flex-col">
                 <div className="flex items-start justify-between gap-2">
                   <div className="min-w-0 flex items-center gap-2">
-                    <span className={cn("h-1.5 w-1.5 rounded-full shrink-0", tones.dot)} />
-                    <p className="truncate text-[9px] font-heading font-bold uppercase tracking-[0.16em] text-muted-foreground/70">
+                    <span className={cn("h-1.5 w-1.5 rounded-full shrink-0 ring-2", tones.dot)} style={{ boxShadow: "0 0 0 3px hsl(var(--card))" }} />
+                    <p className="truncate text-[9px] font-heading font-bold uppercase tracking-[0.18em] text-muted-foreground/75">
                       {kpi.label}
                     </p>
                   </div>
@@ -151,11 +156,11 @@ export function KpiRibbon({ items, cols, className }: KpiRibbonProps) {
                 </div>
 
                 <div className="mt-4">
-                  <p className={cn("text-[22px] font-heading font-black tabular-nums leading-none tracking-[-0.03em] sm:text-[24px]", tones.value)}>
+                  <p className={cn("text-[22px] font-heading font-black tabular-nums leading-none tracking-[-0.035em] sm:text-[25px] transition-transform duration-300 group-hover:-translate-y-px", tones.value)}>
                     {kpi.value}
                   </p>
                   {kpi.sub && (
-                    <p className="mt-2 min-h-[28px] text-[10px] font-medium leading-[1.35] text-muted-foreground/62 break-words">
+                    <p className="mt-2 min-h-[28px] text-[10px] font-medium leading-[1.4] text-muted-foreground/68 break-words">
                       {kpi.sub}
                     </p>
                   )}
@@ -164,19 +169,20 @@ export function KpiRibbon({ items, cols, className }: KpiRibbonProps) {
                 <div className="mt-auto pt-4">
                   {typeof kpi.progress === "number" ? (
                     <div className="space-y-1.5">
-                      <div className={cn("h-[3px] overflow-hidden rounded-full", tones.track)}>
+                      <div className={cn("relative h-[4px] overflow-hidden rounded-full", tones.track)}>
                         <div
                           className={cn("h-full rounded-full transition-all duration-500", tones.fill)}
                           style={{ width: `${Math.min(Math.max(kpi.progress, 0), 100)}%` }}
                         />
+                        <div className="pointer-events-none absolute inset-0 rounded-full bg-gradient-to-r from-foreground/0 via-foreground/[0.06] to-foreground/0" />
                       </div>
-                      <div className="flex items-center justify-between text-[9px] font-semibold tabular-nums text-muted-foreground/58">
-                        <span>participação</span>
+                      <div className="flex items-center justify-between text-[9px] font-semibold tabular-nums text-muted-foreground/65">
+                        <span className="uppercase tracking-[0.12em]">participação</span>
                         <span>{Math.min(Math.max(kpi.progress, 0), 100).toFixed(0)}%</span>
                       </div>
                     </div>
                   ) : kpi.footer ? (
-                    <div className="h-[20px] border-t border-border/40 pt-2 text-[9px] font-semibold uppercase tracking-[0.12em] text-muted-foreground/45">
+                    <div className="h-[20px] border-t border-border/50 pt-2 text-[9px] font-semibold uppercase tracking-[0.14em] text-muted-foreground/55">
                       {kpi.footer}
                     </div>
                   ) : (
