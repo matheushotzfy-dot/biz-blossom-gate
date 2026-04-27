@@ -429,18 +429,13 @@ export default function Dashboard() {
       {/* ─── SCALE MODE POPUP ─── */}
       {showScalePopup && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
-          <div className="absolute inset-0 bg-background/70 backdrop-blur-xl" onClick={() => setShowScalePopup(false)} />
-          <div className="relative w-full max-w-md rounded-3xl border-2 border-primary/40 bg-card shadow-2xl shadow-primary/20 animate-scale-in overflow-hidden">
-            <div className="absolute inset-0 bg-gradient-to-b from-primary/8 via-transparent to-primary/5 pointer-events-none" />
-            <div className="absolute -top-20 -right-20 h-40 w-40 rounded-full bg-primary/20 blur-[80px]" />
-            <div className="absolute -bottom-20 -left-20 h-40 w-40 rounded-full bg-primary/20 blur-[80px]" />
+          <div className="absolute inset-0 bg-background/80" onClick={() => setShowScalePopup(false)} />
+          <div className="relative w-full max-w-md rounded-3xl border border-primary/30 bg-card animate-scale-in overflow-hidden">
             <button onClick={() => setShowScalePopup(false)} className="absolute top-4 right-4 h-8 w-8 rounded-xl bg-muted/60 flex items-center justify-center hover:bg-muted z-10"><X className="h-4 w-4 text-muted-foreground" /></button>
              <div className="relative p-8 md:p-10 text-center">
               <div className="mx-auto mb-6 relative h-28 w-28 flex items-center justify-center">
-                <div className="absolute inset-0 rounded-full border-2 border-primary/20 animate-ping" style={{ animationDuration: '2.5s' }} />
-                <div className="absolute inset-2 rounded-full border border-primary/15 animate-ping" style={{ animationDuration: '3s', animationDelay: '0.5s' }} />
-                <div className="h-20 w-20 rounded-full bg-gradient-to-br from-primary/25 to-primary/10 flex items-center justify-center ring-4 ring-primary/15 shadow-lg shadow-primary/20">
-                  <Rocket className="h-10 w-10 text-primary drop-shadow-lg" />
+                <div className="h-20 w-20 rounded-full bg-primary/10 flex items-center justify-center ring-1 ring-primary/20">
+                  <Rocket className="h-10 w-10 text-primary" />
                 </div>
               </div>
               <div className="inline-flex items-center gap-2 rounded-full bg-primary/10 border border-primary/25 px-4 py-1.5 mb-4">
