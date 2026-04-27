@@ -678,24 +678,53 @@ export default function Vendas() {
           <div className="relative">
             {/* Top bar: título · período · ações */}
             <div className="flex flex-wrap items-start justify-between gap-4 border-b border-border px-5 py-4 sm:px-6">
-              <div className="space-y-2 min-w-0">
-                <div className="inline-flex items-center gap-2 rounded-full border border-border bg-background px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.18em] text-muted-foreground">
-                  <span className="relative flex h-1.5 w-1.5">
-                    <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-success" />
-                  </span>
-                  Tempo real
+              <div className="space-y-2 min-w-0 flex items-start gap-4">
+                {/* Anel de aprovação — indicador premium */}
+                {(() => {
+                  const r = 22; const c = 2 * Math.PI * r;
+                  const pct = Math.max(0, Math.min(100, approvalRate));
+                  const color = pct >= 80 ? "hsl(var(--success))" : pct >= 60 ? "hsl(var(--warning))" : "hsl(var(--destructive))";
+                  return (
+                    <div className="hidden sm:flex shrink-0 relative h-[56px] w-[56px] items-center justify-center" aria-hidden="true">
+                      <svg viewBox="0 0 56 56" className="absolute inset-0 -rotate-90">
+                        <circle cx="28" cy="28" r={r} stroke="hsl(var(--border))" strokeWidth="3.5" fill="none" />
+                        <circle
+                          cx="28" cy="28" r={r}
+                          stroke={color} strokeWidth="3.5" fill="none"
+                          strokeLinecap="round"
+                          strokeDasharray={c}
+                          strokeDashoffset={c - (c * pct) / 100}
+                          style={{ transition: "stroke-dashoffset .6s ease" }}
+                        />
+                      </svg>
+                      <span className="font-numbers text-[11px] font-black tabular-nums text-foreground tracking-[-0.02em]">
+                        {pct.toFixed(0)}%
+                      </span>
+                    </div>
+                  );
+                })()}
+                <div className="space-y-2 min-w-0">
+                  <div className="inline-flex items-center gap-2 rounded-full border border-border bg-background px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.18em] text-foreground/65">
+                    <span className="relative flex h-1.5 w-1.5">
+                      <span className="absolute inline-flex h-full w-full rounded-full bg-success opacity-60 animate-ping" />
+                      <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-success" />
+                    </span>
+                    Tempo real
+                    <span className="mx-1 h-3 w-px bg-border" />
+                    <span className="text-foreground/55">Aprovação <span className="text-foreground font-black tabular-nums">{approvalRate.toFixed(1)}%</span></span>
+                  </div>
+                  <div className="flex items-baseline gap-3 flex-wrap">
+                    <h1 className="font-display text-[30px] font-extrabold leading-none tracking-[-0.025em] text-foreground sm:text-[34px] antialiased subpixel-antialiased [text-rendering:geometricPrecision]">
+                      Minhas vendas
+                    </h1>
+                    <span className="text-[12px] font-semibold tabular-nums text-foreground/60">
+                      {periodLabel} · <span className="text-foreground font-bold">{dateFiltered.length}</span> {dateFiltered.length === 1 ? "transação" : "transações"}
+                    </span>
+                  </div>
+                  <p className="text-[12.5px] text-foreground/65">
+                    {lastSaleText ? <>Última venda <span className="font-semibold text-foreground/85">{lastSaleText}</span>.</> : "Acompanhe receita, conversão e cada transação."}
+                  </p>
                 </div>
-                <div className="flex items-baseline gap-3 flex-wrap">
-                  <h1 className="font-display text-[28px] font-extrabold leading-none tracking-[-0.02em] text-foreground sm:text-[32px]">
-                    Minhas vendas
-                  </h1>
-                  <span className="text-[12px] font-semibold tabular-nums text-muted-foreground">
-                    {periodLabel} · {dateFiltered.length} {dateFiltered.length === 1 ? "transação" : "transações"}
-                  </span>
-                </div>
-                <p className="text-[12.5px] text-muted-foreground">
-                  {lastSaleText ? `Última venda ${lastSaleText}.` : "Acompanhe receita, conversão e cada transação."}
-                </p>
               </div>
 
               <TooltipProvider delayDuration={250}>
