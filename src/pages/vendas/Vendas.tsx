@@ -786,51 +786,35 @@ export default function Vendas() {
               </TooltipProvider>
             </div>
 
-            {/* KPI ribbon — premium 4-up com barra de acento vertical e tipografia 4K */}
+            {/* KPI ribbon — flat, clean, nítido */}
             <div className="grid grid-cols-2 divide-y divide-border sm:grid-cols-4 sm:divide-y-0 sm:divide-x">
-              {heroKpis.map((k, idx) => {
-                const accentBar =
-                  k.accent.includes("success") ? "bg-success" :
-                  k.accent.includes("warning") ? "bg-warning" :
-                  k.accent.includes("destructive") ? "bg-destructive" :
-                  k.accent.includes("info") ? "bg-info" :
-                  "bg-foreground/70";
-                return (
-                  <div
-                    key={k.label}
+              {heroKpis.map((k, idx) => (
+                <div
+                  key={k.label}
+                  className={cn(
+                    "px-5 py-5 sm:px-6 sm:py-6",
+                    idx === 1 && "border-l border-border sm:border-l-0",
+                  )}
+                >
+                  <div className="flex items-center justify-between gap-2">
+                    <p className="text-[10px] font-bold uppercase tracking-[0.22em] text-foreground/55">
+                      {k.label}
+                    </p>
+                    {k.delta && <DeltaBadge cur={k.delta.cur} prev={k.delta.prev} />}
+                  </div>
+
+                  <p
                     className={cn(
-                      "group relative px-5 py-5 sm:px-6 sm:py-6 transition-colors hover:bg-muted/20",
-                      idx === 1 && "border-l border-border sm:border-l-0",
+                      "mt-2.5 font-numbers text-[32px] sm:text-[34px] font-black leading-[0.95] tracking-[-0.05em] tabular-nums [font-feature-settings:'ss01','tnum','cv11'] antialiased subpixel-antialiased [text-rendering:geometricPrecision]",
+                      k.accent,
                     )}
                   >
-                    {/* barra de acento vertical */}
-                    <span className={cn("absolute left-0 top-5 bottom-5 w-[2px] rounded-full opacity-80", accentBar)} />
+                    {k.value}
+                  </p>
 
-                    <div className="flex items-center justify-between gap-2">
-                      <p className="text-[10px] font-bold uppercase tracking-[0.22em] text-foreground/60">
-                        {k.label}
-                      </p>
-                      {k.delta && <DeltaBadge cur={k.delta.cur} prev={k.delta.prev} />}
-                    </div>
-
-                    <p
-                      className={cn(
-                        "mt-2.5 font-numbers text-[32px] sm:text-[34px] font-black leading-[0.95] tracking-[-0.05em] tabular-nums [font-feature-settings:'ss01','tnum','cv11'] antialiased subpixel-antialiased [text-rendering:geometricPrecision]",
-                        k.accent,
-                      )}
-                    >
-                      {k.value}
-                    </p>
-
-                    <div className="mt-3 flex items-end justify-between gap-3">
-                      <p className="truncate text-[11.5px] font-semibold text-foreground/70">{k.sub}</p>
-                      <div className="w-20 shrink-0">
-                        <Sparkline points={k.spark} color={k.sparkColor} />
-                      </div>
-                    </div>
-                  </div>
-                );
-              })}
+                  <p className="mt-2.5 truncate text-[11.5px] font-semibold text-foreground/65">{k.sub}</p>
+                </div>
+              ))}
             </div>
 
             {/* Risk strip — reembolsos + chargebacks com mini-barra de severidade */}
