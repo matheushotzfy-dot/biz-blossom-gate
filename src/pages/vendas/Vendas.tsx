@@ -975,7 +975,7 @@ export default function Vendas() {
                         </div>
                       </td></tr>
                     ) : visibleItems.map((tx) => (
-                      <TxRow key={tx.id} tx={tx} prods={products} onClick={() => setSelectedTx(tx)} />
+                      <TxRow key={tx.id} tx={tx} prods={products} onClick={() => setSelectedTx(tx)} density={density} />
                     ))}
                   </tbody>
                 </table>
