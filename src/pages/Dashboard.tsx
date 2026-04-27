@@ -585,13 +585,9 @@ export default function Dashboard() {
             </div>
           </div>
 
-          <div className="relative px-6 py-9 lg:px-10 lg:py-12 overflow-hidden">
-            <div aria-hidden className="absolute left-0 top-8 bottom-8 w-[3px] rounded-full bg-success" />
+          <div className="relative px-6 py-9 lg:px-10 lg:py-12">
             <div className="flex items-center gap-2 mb-4">
-              <span className="relative flex h-2 w-2">
-                <span className="absolute inline-flex h-full w-full rounded-full bg-success/40 animate-ping" />
-                <span className="relative inline-flex h-2 w-2 rounded-full bg-success" />
-              </span>
+              <span className="h-2 w-2 rounded-full bg-success" />
               <p className="font-display text-[10px] font-extrabold uppercase tracking-[0.16em] text-muted-foreground/70">Saldo Disponível</p>
             </div>
             <p className="font-display text-[clamp(1.8rem,4.5vw,46px)] font-black tabular-nums text-success tracking-[-0.035em] leading-none">
@@ -647,7 +643,7 @@ export default function Dashboard() {
           <div className="flex flex-col border-b xl:border-b-0 xl:border-r border-border/30">
             <div className="flex items-center justify-between px-7 py-5 border-b border-border/30">
               <div className="flex items-center gap-3">
-                  <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-primary/10 border border-primary/25 text-primary">
+                  <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-primary/10 border border-primary/20 text-primary">
                   <TrendingUp className="h-3.5 w-3.5" strokeWidth={2.5} />
                 </div>
                 <div>
@@ -702,8 +698,8 @@ export default function Dashboard() {
             </div>
             <div className="flex-1 divide-y divide-border/20">
               {[
-                { icon: <PixLogoMark className="h-3.5 w-3.5" />, label: "PIX", conv: pixConversion, revenue: pixRevenue, count: `${pixApprovedCount}/${pixTotalCount}`, color: "text-success", borderColor: "border-success/15", bgColor: "bg-gradient-to-b from-success/12 to-success/4" },
-                { icon: <CreditCard className="h-3.5 w-3.5" strokeWidth={2.5} />, label: "Cartão", conv: cardConversion, revenue: cardRevenue, count: `${cardApprovedCount}/${cardTotalCount}`, color: "text-info", borderColor: "border-info/15", bgColor: "bg-gradient-to-b from-info/12 to-info/4" },
+                { icon: <PixLogoMark className="h-3.5 w-3.5" />, label: "PIX", conv: pixConversion, revenue: pixRevenue, count: `${pixApprovedCount}/${pixTotalCount}`, color: "text-success", borderColor: "border-success/20", bgColor: "bg-success/10" },
+                { icon: <CreditCard className="h-3.5 w-3.5" strokeWidth={2.5} />, label: "Cartão", conv: cardConversion, revenue: cardRevenue, count: `${cardApprovedCount}/${cardTotalCount}`, color: "text-info", borderColor: "border-info/20", bgColor: "bg-info/10" },
               ].map((m) => (
                 <div key={m.label} className="group px-6 py-5 transition-colors hover:bg-foreground/[0.015]">
                   <div className="flex items-center justify-between mb-3">
@@ -724,7 +720,7 @@ export default function Dashboard() {
               <div className="group px-6 py-5 transition-colors hover:bg-foreground/[0.015]">
                 <div className="flex items-center justify-between mb-3">
                   <div className="flex items-center gap-2.5">
-                    <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-gradient-to-b from-warning/12 to-warning/4 border border-warning/15 text-warning">
+                    <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-warning/10 border border-warning/20 text-warning">
                       <DollarSign className="h-3.5 w-3.5" strokeWidth={2.5} />
                     </div>
                     <span className="font-display text-[12px] text-foreground font-bold uppercase tracking-[0.08em]">Saques pendentes</span>
@@ -751,7 +747,7 @@ export default function Dashboard() {
           <div className="dashboard-panel dashboard-panel-primary relative rounded-[24px] flex flex-col">
             <div className="flex items-center justify-between border-b border-border/30 px-6 py-5">
               <div className="flex items-center gap-3">
-                <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-gradient-to-b from-primary/15 to-primary/5 border border-primary/20 text-primary">
+                <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-primary/10 border border-primary/20 text-primary">
                   <Zap className="h-3.5 w-3.5" strokeWidth={2.5} />
                 </div>
                 <div>
@@ -779,10 +775,10 @@ export default function Dashboard() {
                 { label: "Suporte", href: "/suporte", icon: Sparkles, tone: "primary" },
               ].map((action) => {
                 const toneClasses: Record<string, { bg: string; border: string; text: string }> = {
-                  primary: { bg: "bg-gradient-to-b from-primary/12 to-primary/4", border: "border-primary/15", text: "text-primary" },
-                  info: { bg: "bg-gradient-to-b from-info/12 to-info/4", border: "border-info/15", text: "text-info" },
-                  success: { bg: "bg-gradient-to-b from-success/12 to-success/4", border: "border-success/15", text: "text-success" },
-                  warning: { bg: "bg-gradient-to-b from-warning/12 to-warning/4", border: "border-warning/15", text: "text-warning" },
+                  primary: { bg: "bg-primary/10", border: "border-primary/20", text: "text-primary" },
+                  info: { bg: "bg-info/10", border: "border-info/20", text: "text-info" },
+                  success: { bg: "bg-success/10", border: "border-success/20", text: "text-success" },
+                  warning: { bg: "bg-warning/10", border: "border-warning/20", text: "text-warning" },
                 };
                 const t = toneClasses[action.tone] || toneClasses.primary;
                 return (
@@ -806,7 +802,7 @@ export default function Dashboard() {
           <div className="dashboard-panel dashboard-panel-success relative rounded-[24px] flex flex-col">
             <div className="flex items-center justify-between border-b border-border/30 px-6 py-5">
               <div className="flex items-center gap-3">
-                <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-gradient-to-b from-success/15 to-success/5 border border-success/20 text-success">
+                <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-success/10 border border-success/20 text-success">
                   <Activity className="h-3.5 w-3.5" strokeWidth={2.5} />
                 </div>
                 <div>
