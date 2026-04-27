@@ -889,139 +889,125 @@ export default function Vendas() {
             }
           />
 
-          <section className="relative overflow-hidden rounded-2xl border border-border/70 bg-card shadow-[0_1px_0_hsl(var(--border)/0.6),0_12px_32px_-22px_hsl(var(--foreground)/0.28)]">
-            <span aria-hidden className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-success/55 to-transparent" />
-            <span aria-hidden className="pointer-events-none absolute -top-24 -left-24 h-64 w-64 rounded-full bg-success/[0.06]" style={{ filter: "blur(70px)" }} />
-            <span aria-hidden className="pointer-events-none absolute -top-32 right-[18%] h-48 w-48 rounded-full bg-primary/[0.05]" style={{ filter: "blur(70px)" }} />
-            <div className="relative border-b border-border/50 px-5 py-4 sm:px-6">
-              <div className="flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
-                <div className="min-w-0 flex-1 xl:max-w-[760px]">
-                  <div className="flex flex-wrap items-center gap-2">
-                    <span className="rounded-md border border-border/60 bg-card-inset/50 px-2 py-1 text-[9px] font-bold uppercase tracking-[0.16em] text-muted-foreground/70">
-                      {periodLabel}
-                    </span>
-                    <span className="text-[10px] font-semibold text-muted-foreground/58">
-                      {metrics.chartData.length} {metrics.chartData.length === 1 ? "dia" : "dias"}
-                    </span>
-                  </div>
+          <section className="overflow-hidden rounded-2xl border border-border/70 bg-card">
+            {/* ── Top bar: período + total ── */}
+            <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border/60 px-5 py-3 bg-card-inset/30">
+              <div className="flex items-center gap-2">
+                <span className="rounded border border-border/60 bg-card px-2 py-0.5 text-[9px] font-bold uppercase tracking-[0.16em] text-foreground/80">{periodLabel}</span>
+                <span className="text-[10px] font-semibold text-muted-foreground/70">{metrics.chartData.length} {metrics.chartData.length === 1 ? "dia" : "dias"}</span>
+                <span className="hidden sm:inline-block text-[10px] font-semibold text-muted-foreground/55">· domínio {dominantMethod.label}</span>
+              </div>
+              <div className="flex items-center gap-1.5">
+                <div className="inline-flex items-center rounded-lg border border-border/60 bg-card p-0.5">
+                  {PERIODS.map((opt) => (
+                    <button
+                      key={opt.label}
+                      onClick={() => { setSelectedPeriod(opt); setIsCustom(false); setCustomRange(undefined); }}
+                      className={cn(
+                        "rounded-md px-2.5 py-1 text-[11px] font-bold transition-colors",
+                        !isCustom && selectedPeriod.label === opt.label ? "bg-foreground text-background" : "text-muted-foreground hover:text-foreground",
+                      )}
+                    >
+                      {opt.label}
+                    </button>
+                  ))}
+                </div>
+                <Popover open={datePickerOpen} onOpenChange={setDatePickerOpen}>
+                  <PopoverTrigger asChild>
+                    <button className={cn("inline-flex h-7 items-center gap-1.5 rounded-lg border px-2.5 text-[11px] font-bold", isCustom ? "border-foreground/25 bg-foreground/[0.04] text-foreground" : "border-border/60 bg-card text-muted-foreground hover:text-foreground") }>
+                      <CalendarDays className="h-3.5 w-3.5" />
+                      {isCustom && customRange?.from ? customRange.to ? `${format(customRange.from, "dd/MM")} – ${format(customRange.to, "dd/MM")}` : format(customRange.from, "dd/MM/yyyy") : "Personalizado"}
+                    </button>
+                  </PopoverTrigger>
+                  <PopoverContent align="end" className="w-auto overflow-hidden rounded-xl border border-border bg-popover p-0">
+                    <Calendar mode="range" selected={customRange} onSelect={(range) => { setCustomRange(range); setIsCustom(true); if (range?.from && range?.to) setTimeout(() => setDatePickerOpen(false), 300); }} numberOfMonths={1} locale={ptBR} disabled={(date) => date > new Date()} className="pointer-events-auto p-3" classNames={{ day_selected: "bg-primary text-primary-foreground", day_range_middle: "bg-primary/10 text-foreground", day_range_end: "bg-primary text-primary-foreground" }} />
+                  </PopoverContent>
+                </Popover>
+              </div>
+            </div>
 
-                  <div className="mt-4 flex flex-wrap items-end gap-x-4 gap-y-3">
-                    <p className="text-[40px] font-heading font-black leading-none tracking-[-0.06em] text-success sm:text-[56px]">
+            {/* ── Main grid: receita + chart | mix | risco ── */}
+            <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)_minmax(0,1fr)]">
+              {/* Receita + chart */}
+              <div className="border-b border-border/60 lg:border-b-0 lg:border-r lg:border-border/60">
+                <div className="px-5 pt-4 pb-3 border-b border-border/40">
+                  <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-muted-foreground/70">Receita líquida</p>
+                  <div className="mt-1.5 flex items-end gap-3 flex-wrap">
+                    <p className="text-[36px] sm:text-[44px] font-heading font-black leading-none tracking-[-0.05em] text-success">
                       {hidden ? HIDE : fmt(m.totalNet)}
                     </p>
-                    <div className="pb-1">
-                      <DeltaBadge cur={m.totalNet} prev={p.totalNet} />
-                    </div>
+                    <div className="pb-1"><DeltaBadge cur={m.totalNet} prev={p.totalNet} /></div>
                   </div>
-
-                  <div className="mt-4 grid grid-cols-2 gap-x-4 gap-y-3 border-t border-border/40 pt-3 md:grid-cols-4">
+                  <div className="mt-3 grid grid-cols-4 gap-3 border-t border-border/40 pt-3">
                     {heroStats.map((item) => (
                       <div key={item.label} className="min-w-0">
-                        <p className="text-[9px] font-bold uppercase tracking-[0.16em] text-muted-foreground/52">{item.label}</p>
-                        <p className={cn("mt-1 text-[18px] font-heading font-black tabular-nums tracking-[-0.03em]", item.tone)}>{item.value}</p>
-                        <p className="mt-0.5 text-[10px] font-medium text-muted-foreground/55">{item.meta}</p>
+                        <p className="text-[9px] font-bold uppercase tracking-[0.14em] text-muted-foreground/60">{item.label}</p>
+                        <p className={cn("mt-0.5 text-[15px] font-heading font-black tabular-nums leading-tight tracking-[-0.025em]", item.tone)}>{item.value}</p>
+                        <p className="text-[10px] font-medium text-muted-foreground/60 leading-tight">{item.meta}</p>
                       </div>
                     ))}
                   </div>
                 </div>
-
-                <div className="flex flex-wrap items-center gap-2 xl:max-w-[380px] xl:justify-end">
-                  <div className="inline-flex flex-wrap items-center rounded-lg border border-border/60 bg-card-inset/50 p-1">
-                    {PERIODS.map((opt) => (
-                      <button
-                        key={opt.label}
-                        onClick={() => { setSelectedPeriod(opt); setIsCustom(false); setCustomRange(undefined); }}
-                        className={cn(
-                          "rounded-md px-3 py-1.5 text-[11px] font-bold transition-colors",
-                          !isCustom && selectedPeriod.label === opt.label ? "bg-foreground text-background" : "text-muted-foreground hover:text-foreground",
-                        )}
-                      >
-                        {opt.label}
-                      </button>
-                    ))}
-                  </div>
-
-                  <Popover open={datePickerOpen} onOpenChange={setDatePickerOpen}>
-                    <PopoverTrigger asChild>
-                      <button className={cn("inline-flex h-9 items-center gap-1.5 rounded-lg border px-3 text-[11px] font-bold", isCustom ? "border-foreground/25 bg-foreground/[0.04] text-foreground" : "border-border/60 bg-card text-muted-foreground hover:text-foreground") }>
-                        <CalendarDays className="h-3.5 w-3.5" />
-                        {isCustom && customRange?.from ? customRange.to ? `${format(customRange.from, "dd/MM")} – ${format(customRange.to, "dd/MM")}` : format(customRange.from, "dd/MM/yyyy") : "Personalizado"}
-                      </button>
-                    </PopoverTrigger>
-                    <PopoverContent align="end" className="w-auto overflow-hidden rounded-xl border border-border bg-popover p-0">
-                      <Calendar mode="range" selected={customRange} onSelect={(range) => { setCustomRange(range); setIsCustom(true); if (range?.from && range?.to) setTimeout(() => setDatePickerOpen(false), 300); }} numberOfMonths={1} locale={ptBR} disabled={(date) => date > new Date()} className="pointer-events-auto p-3" classNames={{ day_selected: "bg-primary text-primary-foreground", day_range_middle: "bg-primary/10 text-foreground", day_range_end: "bg-primary text-primary-foreground" }} />
-                    </PopoverContent>
-                  </Popover>
-                </div>
-              </div>
-            </div>
-
-            <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1.18fr)_300px]">
-              <div className="border-b border-border/50 p-5 sm:p-5 lg:border-b-0 lg:border-r lg:border-border/50">
-                <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
-                  <div>
-                    <p className="text-[12px] font-heading font-bold text-foreground">Receita</p>
-                    <p className="mt-1 text-[10.5px] font-medium text-muted-foreground/60">Atual vs período anterior.</p>
-                  </div>
-                  <div className="flex items-center gap-4 text-[10px] font-semibold text-muted-foreground/65">
-                    <span className="flex items-center gap-1.5"><span className="h-2 w-2 rounded-sm bg-success" />Atual</span>
-                    <span className="flex items-center gap-1.5"><span className="inline-block h-0 w-3 border-t border-dashed border-muted-foreground/60" />Anterior</span>
-                    <span className="tabular-nums">{hidden ? HIDE : fmtCompact(filteredNetTotal)}</span>
-                  </div>
-                </div>
-                <RevenueChart data={metrics.chartData} hidden={hidden} />
-              </div>
-
-               <aside className="p-5 sm:p-5">
-                <div className="space-y-5">
-                  <div>
-                    <div className="mb-3 flex items-center justify-between gap-3">
-                      <p className="text-[12px] font-heading font-bold text-foreground">Mix</p>
-                      <span className="text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground/55">{dominantMethod.label}</span>
+                <div className="px-3 py-3">
+                  <div className="px-2 mb-2 flex items-center justify-between gap-3 text-[10px] font-semibold text-muted-foreground/65">
+                    <p className="text-[11px] font-heading font-bold text-foreground">Atual vs período anterior</p>
+                    <div className="flex items-center gap-3">
+                      <span className="flex items-center gap-1.5"><span className="h-2 w-2 rounded-sm bg-success" />Atual</span>
+                      <span className="flex items-center gap-1.5"><span className="inline-block h-0 w-3 border-t border-dashed border-muted-foreground/60" />Anterior</span>
                     </div>
-                    <div className="space-y-3">
-                      {mixRows.map((item) => (
-                        <div key={item.label} className="space-y-1.5">
-                          <div className="flex items-center justify-between gap-3 text-[11px]">
-                            <div className="flex items-center gap-2 font-semibold text-foreground/78">
-                              <span className={cn("h-1.5 w-1.5 rounded-full", item.color === "success" ? "bg-success" : item.color === "info" ? "bg-info" : "bg-warning")} />
-                              {item.label}
-                            </div>
-                            <div className="text-right">
-                              <p className="font-bold tabular-nums text-foreground">{hidden ? HIDE : fmtCompact(item.value)}</p>
-                              <p className="text-[9.5px] font-medium text-muted-foreground/55">{item.share.toFixed(1)}% · {item.count}</p>
-                            </div>
-                          </div>
-                          <div className="h-[3px] overflow-hidden rounded-full bg-muted/50">
-                            <div className={cn("h-full rounded-full", item.color === "success" ? "bg-success" : item.color === "info" ? "bg-info" : "bg-warning")} style={{ width: `${Math.min(item.share, 100)}%` }} />
-                          </div>
+                  </div>
+                  <RevenueChart data={metrics.chartData} hidden={hidden} />
+                </div>
+              </div>
+
+              {/* Mix de métodos */}
+              <div className="border-b border-border/60 lg:border-b-0 lg:border-r lg:border-border/60 px-5 py-4">
+                <div className="mb-3 flex items-center justify-between gap-3">
+                  <p className="text-[11px] font-heading font-bold text-foreground">Mix de métodos</p>
+                  <span className="text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground/60">{dominantMethod.label}</span>
+                </div>
+                <div className="space-y-2.5">
+                  {mixRows.map((item) => (
+                    <div key={item.label} className="space-y-1">
+                      <div className="flex items-center justify-between gap-3 text-[11px]">
+                        <div className="flex items-center gap-2 font-semibold text-foreground/80">
+                          <span className={cn("h-1.5 w-1.5 rounded-full", item.color === "success" ? "bg-success" : item.color === "info" ? "bg-info" : "bg-warning")} />
+                          {item.label}
                         </div>
-                      ))}
+                        <div className="text-right">
+                          <p className="font-bold tabular-nums text-foreground">{hidden ? HIDE : fmtCompact(item.value)}</p>
+                          <p className="text-[9.5px] font-medium text-muted-foreground/60">{item.share.toFixed(1)}% · {item.count}</p>
+                        </div>
+                      </div>
+                      <div className="h-[3px] overflow-hidden rounded-full bg-muted/50">
+                        <div className={cn("h-full rounded-full", item.color === "success" ? "bg-success" : item.color === "info" ? "bg-info" : "bg-warning")} style={{ width: `${Math.min(item.share, 100)}%` }} />
+                      </div>
                     </div>
-                  </div>
-
-                  <div className="border-t border-border/40 pt-5">
-                    <div className="mb-3 flex items-center justify-between gap-3">
-                      <p className="text-[12px] font-heading font-bold text-foreground">Risco</p>
-                      <span className="text-[10px] font-semibold text-muted-foreground/55">{filtered.length} transações</span>
-                    </div>
-                    <div className="space-y-3">
-                      {healthItems.map((item) => {
-                        const critical = item.value >= item.threshold;
-                        return (
-                          <div key={item.label} className="flex items-center justify-between gap-3 border-b border-border/30 pb-3 last:border-b-0 last:pb-0">
-                            <div>
-                              <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-muted-foreground/52">{item.label}</p>
-                              <p className="mt-1 text-[9.5px] font-medium text-muted-foreground/55">limite {item.threshold}%</p>
-                            </div>
-                            <p className={cn("text-[18px] font-heading font-black tabular-nums tracking-[-0.03em]", critical ? "text-destructive" : "text-foreground")}>{item.value.toFixed(2)}%</p>
-                          </div>
-                        );
-                      })}
-                    </div>
-                  </div>
+                  ))}
                 </div>
-              </aside>
+              </div>
+
+              {/* Risco */}
+              <div className="px-5 py-4">
+                <div className="mb-3 flex items-center justify-between gap-3">
+                  <p className="text-[11px] font-heading font-bold text-foreground">Risco</p>
+                  <span className="text-[10px] font-semibold text-muted-foreground/60">{filtered.length} transações</span>
+                </div>
+                <div className="space-y-2.5">
+                  {healthItems.map((item) => {
+                    const critical = item.value >= item.threshold;
+                    return (
+                      <div key={item.label} className="flex items-center justify-between gap-3 border-b border-border/30 pb-2.5 last:border-b-0 last:pb-0">
+                        <div>
+                          <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-muted-foreground/60">{item.label}</p>
+                          <p className="text-[9.5px] font-medium text-muted-foreground/55">limite {item.threshold}%</p>
+                        </div>
+                        <p className={cn("text-[16px] font-heading font-black tabular-nums tracking-[-0.025em]", critical ? "text-destructive" : "text-foreground")}>{item.value.toFixed(2)}%</p>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
             </div>
           </section>
 
