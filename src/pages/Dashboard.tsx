@@ -679,7 +679,7 @@ export default function Dashboard() {
                       if (!active || !payload?.length) return null;
                       const value = payload[0].value as number;
                       return (
-                        <div className="rounded-2xl border border-border/40 bg-card/95 backdrop-blur-xl px-4 py-3 shadow-2xl">
+                        <div className="rounded-xl border border-border bg-card px-4 py-3 shadow-lg">
                           <p className="font-display text-[9px] font-black text-muted-foreground/60 uppercase tracking-[0.18em]">{label}</p>
                           <p className="font-display text-[15px] font-black text-primary tabular-nums mt-1 tracking-tight">
                             R$ {value.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
