@@ -468,10 +468,8 @@ export default function Dashboard() {
       {/* ════════════════════════════════════════════════════════════════ */}
       {/* HERO — ONE DOMINANT METRIC                                       */}
       {/* ════════════════════════════════════════════════════════════════ */}
-      <section className="relative mb-5 rounded-[24px] border border-border/60 bg-card overflow-hidden">
-        <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-foreground/10" />
+      <section className="dashboard-panel dashboard-panel-primary relative mb-5 rounded-[24px]">
         <div className="pointer-events-none absolute inset-x-0 bottom-0 h-px bg-background/70" />
-        <div className="pointer-events-none absolute left-0 top-0 h-full w-[3px] bg-primary" />
         {/* Corner brackets — premium frame detail */}
         <div className="pointer-events-none absolute top-3 left-3 h-3 w-3 border-l border-t border-foreground/20 rounded-tl-md" />
         <div className="pointer-events-none absolute top-3 right-3 h-3 w-3 border-r border-t border-foreground/20 rounded-tr-md" />
@@ -537,19 +535,19 @@ export default function Dashboard() {
               <span className="h-px w-3 bg-foreground/30" />
             </div>
             <div className="flex items-center gap-2 mb-4">
-              <span className="h-1 w-8 rounded-full bg-gradient-to-r from-primary to-primary/30" />
-              <p className="font-display text-[10px] font-black uppercase tracking-[0.22em] text-muted-foreground/60">
+              <span className="h-1.5 w-1.5 rounded-full bg-primary" />
+              <p className="font-display text-[10px] font-extrabold uppercase tracking-[0.16em] text-muted-foreground/70">
                 Receita {isCustom && customRange?.from
                   ? `· ${customRange.to ? `${format(customRange.from, "dd/MM")} – ${format(customRange.to, "dd/MM")}` : format(customRange.from, "dd/MM/yyyy")}`
                   : `· ${selectedPeriod.label}`}
               </p>
             </div>
             <div className="flex items-baseline gap-4 flex-wrap">
-              <span className="inline-flex items-baseline font-display text-[clamp(2.4rem,7.5vw,76px)] font-black leading-none tracking-[-0.045em] whitespace-nowrap text-foreground">
+              <span className="inline-flex items-baseline font-display text-[clamp(2.4rem,7.5vw,76px)] font-black leading-none tracking-[-0.04em] whitespace-nowrap text-foreground [text-shadow:0_1px_0_hsl(var(--background)/0.7)]">
                 {privacy.hidden ? "R$ •••••••" : <AnimatedNumber value={revenue} duration={1000} />}
               </span>
               {approved.length > 0 && (
-                <span className="inline-flex items-center gap-1.5 rounded-full bg-success/10 ring-1 ring-success/20 px-3 py-1 font-display text-[11px] font-black uppercase tracking-wider text-success">
+                <span className="inline-flex items-center gap-1.5 rounded-full border border-success/25 bg-success/10 px-3 py-1 font-display text-[11px] font-black uppercase tracking-wider text-success">
                   <ArrowUpRight className="h-3.5 w-3.5" strokeWidth={2.5} />
                   {approved.length} venda{approved.length !== 1 ? "s" : ""}
                 </span>
@@ -599,7 +597,7 @@ export default function Dashboard() {
                 <span className="absolute inline-flex h-full w-full rounded-full bg-success/40 animate-ping" />
                 <span className="relative inline-flex h-2 w-2 rounded-full bg-success" />
               </span>
-              <p className="font-display text-[10px] font-black uppercase tracking-[0.22em] text-muted-foreground/60">Saldo Disponível</p>
+              <p className="font-display text-[10px] font-extrabold uppercase tracking-[0.16em] text-muted-foreground/70">Saldo Disponível</p>
             </div>
             <p className="font-display text-[clamp(1.8rem,4.5vw,46px)] font-black tabular-nums text-success tracking-[-0.035em] leading-none">
               {privacy.hidden ? CENSORED : fmt(Math.abs(balance))}
