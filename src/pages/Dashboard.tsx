@@ -827,9 +827,11 @@ export default function Dashboard() {
 
           {/* Activity feed */}
           <div className="relative rounded-[24px] border border-border/50 bg-gradient-to-b from-card via-card to-card/95 flex flex-col overflow-hidden shadow-[0_1px_0_0_hsl(var(--foreground)/0.04)_inset,0_24px_48px_-24px_hsl(var(--foreground)/0.12)]">
-            <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-foreground/10 to-transparent" />
-            <div className="pointer-events-none absolute inset-0 opacity-[0.018] [background-image:linear-gradient(hsl(var(--foreground))_1px,transparent_1px),linear-gradient(90deg,hsl(var(--foreground))_1px,transparent_1px)] [background-size:28px_28px]" />
-            <div className="pointer-events-none absolute -top-12 -left-12 h-32 w-32 rounded-full bg-success/[0.04] blur-[50px]" />
+            <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-foreground/15 to-transparent" />
+            <div className="pointer-events-none absolute inset-0 opacity-[0.028] [background-image:linear-gradient(hsl(var(--foreground))_1px,transparent_1px),linear-gradient(90deg,hsl(var(--foreground))_1px,transparent_1px)] [background-size:28px_28px] [mask-image:radial-gradient(ellipse_at_center,black_45%,transparent_88%)]" />
+            <div className="pointer-events-none absolute inset-0 opacity-[0.04] [background-image:radial-gradient(hsl(var(--foreground))_0.7px,transparent_0.7px)] [background-size:14px_14px] [mask-image:radial-gradient(ellipse_at_top,black_10%,transparent_70%)]" />
+            <div className="pointer-events-none absolute -top-12 -left-12 h-32 w-32 rounded-full bg-success/[0.06] blur-[50px]" />
+            <div className="pointer-events-none absolute -bottom-16 -right-16 h-40 w-40 rounded-full bg-primary/[0.04] blur-[60px]" />
             <div className="flex items-center justify-between border-b border-border/30 px-6 py-5">
               <div className="flex items-center gap-3">
                 <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-gradient-to-b from-success/15 to-success/5 border border-success/20 text-success">
