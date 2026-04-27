@@ -1090,22 +1090,24 @@ export default function Vendas() {
           />
 
          {/* ═══════ TRANSACTIONS — DOMINANT WORKSPACE ═══════ */}
-          <div className="overflow-hidden rounded-2xl border border-border/60 bg-card">
+          <div className="relative overflow-hidden rounded-2xl border border-border/70 bg-card shadow-[0_1px_0_hsl(var(--border)/0.6),0_12px_32px_-22px_hsl(var(--foreground)/0.28)]">
+           <span aria-hidden className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-foreground/15 to-transparent" />
            {/* Top contextual ribbon — turns the table into a workspace, not a list */}
-           <div className="flex items-center justify-between gap-4 border-b border-border/50 px-5 py-3 bg-gradient-to-r from-card to-card-inset/30">
+           <div className="relative flex items-center justify-between gap-4 border-b border-border/50 px-5 py-3.5 bg-gradient-to-r from-card via-card to-card-inset/40">
              <div className="flex items-center gap-3">
-               <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-foreground/[0.04] border border-border/60">
+               <div className="relative flex h-9 w-9 items-center justify-center rounded-xl bg-foreground/[0.04] border border-border/70 shadow-sm">
                  <Receipt className="h-4 w-4 text-foreground" />
+                 <span aria-hidden className="absolute -top-px left-1/2 h-px w-5 -translate-x-1/2 bg-foreground/25" />
                </div>
                <div>
-                 <p className="text-[13.5px] font-heading font-bold text-foreground leading-tight">Transações</p>
-                 <p className="text-[10.5px] text-muted-foreground mt-0.5">{sortedFiltered.length} resultado{sortedFiltered.length !== 1 ? "s" : ""} · ordene clicando nas colunas</p>
+                 <p className="text-[13.5px] font-heading font-bold text-foreground leading-tight tracking-[-0.01em]">Transações</p>
+                 <p className="text-[10.5px] text-muted-foreground/75 mt-0.5 font-medium">{sortedFiltered.length} resultado{sortedFiltered.length !== 1 ? "s" : ""} · ordene clicando nas colunas</p>
                </div>
              </div>
              <div className="flex items-center gap-5">
                <div className="text-right hidden sm:block">
-                 <p className="text-[9.5px] font-bold uppercase tracking-wider text-muted-foreground/60">Total filtrado</p>
-                 <p className="text-[14px] font-heading font-black text-success tabular-nums leading-none mt-0.5">{hidden ? HIDE : fmt(filteredNetTotal)}</p>
+                 <p className="text-[9.5px] font-bold uppercase tracking-[0.16em] text-muted-foreground/65">Total filtrado</p>
+                 <p className="text-[15px] font-heading font-black text-success tabular-nums leading-none mt-1 tracking-[-0.02em]">{hidden ? HIDE : fmt(filteredNetTotal)}</p>
                </div>
              </div>
            </div>
