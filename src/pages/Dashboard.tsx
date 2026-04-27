@@ -753,9 +753,7 @@ export default function Dashboard() {
         {/* ════════════════════════════════════════════════════════════════ */}
         <section className="grid grid-cols-1 gap-5 xl:grid-cols-[1fr_1.4fr] mb-8">
           {/* Quick actions — operational support */}
-          <div className="relative rounded-[24px] border border-border/60 bg-card flex flex-col overflow-hidden">
-            <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-foreground/10" />
-            <div className="pointer-events-none absolute left-0 top-0 h-full w-[3px] bg-primary" />
+          <div className="dashboard-panel dashboard-panel-primary relative rounded-[24px] flex flex-col">
             <div className="flex items-center justify-between border-b border-border/30 px-6 py-5">
               <div className="flex items-center gap-3">
                 <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-gradient-to-b from-primary/15 to-primary/5 border border-primary/20 text-primary">
@@ -796,7 +794,7 @@ export default function Dashboard() {
                   <Link
                     key={action.href}
                     to={action.href}
-                    className="group relative flex items-center gap-3.5 px-6 py-3.5 transition-all hover:bg-foreground/[0.015]"
+                    className="group relative flex items-center gap-3.5 px-6 py-3.5 transition-all hover:bg-accent/45"
                   >
                     <div className={cn("flex h-8 w-8 items-center justify-center rounded-lg border transition-all duration-300 group-hover:border-primary/25", t.bg, t.border, t.text)}>
                       <action.icon className="h-3.5 w-3.5" strokeWidth={2.5} />
@@ -810,9 +808,7 @@ export default function Dashboard() {
           </div>
 
           {/* Activity feed */}
-          <div className="relative rounded-[24px] border border-border/60 bg-card flex flex-col overflow-hidden">
-            <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-foreground/10" />
-            <div className="pointer-events-none absolute left-0 top-0 h-full w-[3px] bg-success" />
+          <div className="dashboard-panel dashboard-panel-success relative rounded-[24px] flex flex-col">
             <div className="flex items-center justify-between border-b border-border/30 px-6 py-5">
               <div className="flex items-center gap-3">
                 <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-gradient-to-b from-success/15 to-success/5 border border-success/20 text-success">
