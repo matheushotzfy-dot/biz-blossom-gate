@@ -889,8 +889,11 @@ export default function Vendas() {
             }
           />
 
-          <section className="overflow-hidden rounded-2xl border border-border/60 bg-card">
-            <div className="border-b border-border/50 px-5 py-4 sm:px-6">
+          <section className="relative overflow-hidden rounded-2xl border border-border/70 bg-card shadow-[0_1px_0_hsl(var(--border)/0.6),0_12px_32px_-22px_hsl(var(--foreground)/0.28)]">
+            <span aria-hidden className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-success/55 to-transparent" />
+            <span aria-hidden className="pointer-events-none absolute -top-24 -left-24 h-64 w-64 rounded-full bg-success/[0.06]" style={{ filter: "blur(70px)" }} />
+            <span aria-hidden className="pointer-events-none absolute -top-32 right-[18%] h-48 w-48 rounded-full bg-primary/[0.05]" style={{ filter: "blur(70px)" }} />
+            <div className="relative border-b border-border/50 px-5 py-4 sm:px-6">
               <div className="flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
                 <div className="min-w-0 flex-1 xl:max-w-[760px]">
                   <div className="flex flex-wrap items-center gap-2">
