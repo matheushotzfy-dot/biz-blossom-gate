@@ -720,7 +720,7 @@ export default function Dashboard() {
               <div className="group px-6 py-5 transition-colors hover:bg-foreground/[0.015]">
                 <div className="flex items-center justify-between mb-3">
                   <div className="flex items-center gap-2.5">
-                    <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-gradient-to-b from-warning/12 to-warning/4 border border-warning/15 text-warning">
+                    <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-warning/10 border border-warning/20 text-warning">
                       <DollarSign className="h-3.5 w-3.5" strokeWidth={2.5} />
                     </div>
                     <span className="font-display text-[12px] text-foreground font-bold uppercase tracking-[0.08em]">Saques pendentes</span>
