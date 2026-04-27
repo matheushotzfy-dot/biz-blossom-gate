@@ -636,32 +636,27 @@ export default function Vendas() {
     <div className="mx-auto -mt-2 w-full max-w-[1440px] pb-24 md:-mt-3 md:pb-10">
 
       {/* ─────────── HERO COMANDO ─────────── */}
-      <div className="px-5 pt-1 sm:px-7">
+      <div className="px-5 pt-1 sm:px-7 antialiased subpixel-antialiased [text-rendering:geometricPrecision]">
         <div className="relative overflow-hidden rounded-2xl border border-border bg-card">
-          {/* gradient backdrop */}
-          <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-success/[0.04] via-transparent to-info/[0.04]" />
-          <div className="pointer-events-none absolute -top-20 -right-20 h-64 w-64 rounded-full bg-success/[0.06]" />
-
           <div className="relative">
             {/* Top bar: título · período · ações */}
-            <div className="flex flex-wrap items-start justify-between gap-4 border-b border-border/60 px-5 py-4 sm:px-6">
+            <div className="flex flex-wrap items-start justify-between gap-4 border-b border-border px-5 py-4 sm:px-6">
               <div className="space-y-2 min-w-0">
-                <div className="inline-flex items-center gap-2 rounded-full border border-border bg-background/60 px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.18em] text-muted-foreground">
+                <div className="inline-flex items-center gap-2 rounded-full border border-border bg-background px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.18em] text-muted-foreground">
                   <span className="relative flex h-1.5 w-1.5">
-                    <span className="absolute inline-flex h-full w-full rounded-full bg-success opacity-60 animate-ping" />
                     <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-success" />
                   </span>
                   Tempo real
                 </div>
                 <div className="flex items-baseline gap-3 flex-wrap">
-                  <h1 className="font-display text-[28px] font-extrabold leading-none tracking-tight text-foreground sm:text-[32px]">
+                  <h1 className="font-display text-[28px] font-extrabold leading-none tracking-[-0.02em] text-foreground sm:text-[32px]">
                     Minhas vendas
                   </h1>
                   <span className="text-[12px] font-semibold tabular-nums text-muted-foreground">
                     {periodLabel} · {dateFiltered.length} {dateFiltered.length === 1 ? "transação" : "transações"}
                   </span>
                 </div>
-                <p className="text-[12px] text-muted-foreground/80">
+                <p className="text-[12.5px] text-muted-foreground">
                   {lastSaleText ? `Última venda ${lastSaleText}.` : "Acompanhe receita, conversão e cada transação."}
                 </p>
               </div>
@@ -714,19 +709,19 @@ export default function Vendas() {
             </div>
 
             {/* KPI ribbon — divisões verticais sutis em vez de 6 cards iguais */}
-            <div className="grid grid-cols-2 divide-y divide-border/60 sm:grid-cols-4 sm:divide-y-0 sm:divide-x">
+            <div className="grid grid-cols-2 divide-y divide-border sm:grid-cols-4 sm:divide-y-0 sm:divide-x">
               {heroKpis.map((k, idx) => (
-                <div key={k.label} className={cn("px-5 py-4 sm:px-6 sm:py-5", idx === 1 && "border-l border-border/60 sm:border-l-0")}>
+                <div key={k.label} className={cn("px-5 py-4 sm:px-6 sm:py-5", idx === 1 && "border-l border-border sm:border-l-0")}>
                   <div className="flex items-center justify-between gap-2">
-                    <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-muted-foreground">{k.label}</p>
+                    <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground">{k.label}</p>
                     {k.delta && <DeltaBadge cur={k.delta.cur} prev={k.delta.prev} />}
                   </div>
-                  <p className={cn("mt-2 font-numbers text-[28px] font-black leading-none tracking-[-0.04em] tabular-nums", k.accent)}>
+                  <p className={cn("mt-2 font-numbers text-[28px] font-black leading-none tracking-[-0.045em] tabular-nums [font-feature-settings:'ss01','tnum','cv11']", k.accent)}>
                     {k.value}
                   </p>
                   <div className="mt-2 flex items-end justify-between gap-2">
                     <p className="truncate text-[11px] font-semibold text-muted-foreground">{k.sub}</p>
-                    <div className="w-16 shrink-0 opacity-70">
+                    <div className="w-16 shrink-0 opacity-80">
                       <Sparkline points={k.spark} color={k.sparkColor} />
                     </div>
                   </div>
@@ -735,15 +730,15 @@ export default function Vendas() {
             </div>
 
             {/* Risk strip — reembolsos + chargebacks compactos */}
-            <div className="grid grid-cols-2 border-t border-border/60 divide-x divide-border/60">
+            <div className="grid grid-cols-2 border-t border-border divide-x divide-border">
               {riskKpis.map(r => {
                 const Icon = r.icon;
                 return (
                   <div key={r.label} className="flex items-center gap-3 px-5 py-2.5 sm:px-6">
                     <Icon className={cn("h-3.5 w-3.5 shrink-0", r.accent)} strokeWidth={2.2} />
-                    <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-muted-foreground">{r.label}</p>
+                    <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-muted-foreground">{r.label}</p>
                     <p className={cn("font-numbers text-[14px] font-black tabular-nums", r.accent)}>{r.value}</p>
-                    <p className="truncate text-[11px] text-muted-foreground/80">· {r.sub}</p>
+                    <p className="truncate text-[11px] text-muted-foreground">· {r.sub}</p>
                   </div>
                 );
               })}
