@@ -585,6 +585,7 @@ export default function Dashboard() {
             </div>
           </div>
 
+          <div className="relative px-6 py-9 lg:px-10 lg:py-12">
             <div className="flex items-center gap-2 mb-4">
               <span className="h-2 w-2 rounded-full bg-success" />
               <p className="font-display text-[10px] font-extrabold uppercase tracking-[0.16em] text-muted-foreground/70">Saldo Disponível</p>
