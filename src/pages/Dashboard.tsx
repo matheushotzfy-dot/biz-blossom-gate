@@ -568,17 +568,17 @@ export default function Dashboard() {
 
             <div className="mt-7 flex items-center gap-6 text-[11px] flex-wrap">
               <div className="flex items-center gap-2 text-muted-foreground">
-                <span className="h-2 w-2 rounded-full bg-success shadow-[0_0_8px_hsl(var(--success)/0.5)]" />
+                <span className="h-2 w-2 rounded-full bg-success" />
                 <span className="font-display font-black text-foreground tabular-nums">{approved.length}</span>
                 <span className="font-display font-bold uppercase tracking-wider text-[10px] text-foreground/75">aprovadas</span>
               </div>
               <div className="flex items-center gap-2 text-muted-foreground">
-                <span className="h-2 w-2 rounded-full bg-warning shadow-[0_0_8px_hsl(var(--warning)/0.5)]" />
+                <span className="h-2 w-2 rounded-full bg-warning" />
                 <span className="font-display font-black text-foreground tabular-nums">{pending.length}</span>
                 <span className="font-display font-bold uppercase tracking-wider text-[10px] text-foreground/75">pendentes</span>
               </div>
               <div className="flex items-center gap-2 text-muted-foreground">
-                <span className="h-2 w-2 rounded-full bg-destructive shadow-[0_0_8px_hsl(var(--destructive)/0.5)]" />
+                <span className="h-2 w-2 rounded-full bg-destructive" />
                 <span className="font-display font-black text-foreground tabular-nums">{chargebacks.length + refunded.length}</span>
                 <span className="font-display font-bold uppercase tracking-wider text-[10px] text-foreground/75">contestações</span>
               </div>
