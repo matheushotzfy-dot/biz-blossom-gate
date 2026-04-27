@@ -502,16 +502,35 @@ export default function Vendas() {
     const current = calc(dateFiltered);
     const previous = calc(previousPeriodFiltered);
 
-    const dailyMap: Record<string, number> = {};
+    const dailyMap: Record<string, { net: number; count: number; ticket: number; pix: number; card: number; boleto: number; refunds: number; chargebacks: number; total: number }> = {};
     const prevDailyMap: Record<string, number> = {};
-    for (const t of current.approved) { const day = fmtDate(t.created_at); dailyMap[day] = (dailyMap[day] || 0) + Number(t.net_amount); }
+    for (const t of current.approved) {
+      const day = fmtDate(t.created_at);
+      const e = dailyMap[day] || (dailyMap[day] = { net: 0, count: 0, ticket: 0, pix: 0, card: 0, boleto: 0, refunds: 0, chargebacks: 0, total: 0 });
+      e.net += Number(t.net_amount); e.count += 1;
+      if (t.payment_method === "pix") e.pix += Number(t.net_amount);
+      else if (t.payment_method === "credit_card" || t.payment_method === "card") e.card += Number(t.net_amount);
+      else if (t.payment_method === "boleto") e.boleto += Number(t.net_amount);
+    }
+    for (const t of dateFiltered) { const day = fmtDate(t.created_at); const e = dailyMap[day] || (dailyMap[day] = { net: 0, count: 0, ticket: 0, pix: 0, card: 0, boleto: 0, refunds: 0, chargebacks: 0, total: 0 }); e.total += 1; if (t.status === "refunded") e.refunds += Number(t.amount); if (t.status === "chargeback") e.chargebacks += Number(t.amount); }
     for (const t of previous.approved) { const day = fmtDate(t.created_at); prevDailyMap[day] = (prevDailyMap[day] || 0) + Number(t.net_amount); }
-    const currentDays = Object.entries(dailyMap).map(([label, value]) => ({ label, value })).reverse();
+    const dayKeys = Object.keys(dailyMap).reverse();
+    const currentDays = dayKeys.map(label => ({ label, value: dailyMap[label].net }));
     const prevDays = Object.values(prevDailyMap);
     const chartData = currentDays.map((d, i) => ({ ...d, previous: prevDays[i] || 0 }));
 
+    // Sparkline series per KPI
+    const series = {
+      net: dayKeys.map(k => dailyMap[k].net),
+      count: dayKeys.map(k => dailyMap[k].count),
+      ticket: dayKeys.map(k => dailyMap[k].count > 0 ? dailyMap[k].net / dailyMap[k].count : 0),
+      approval: dayKeys.map(k => dailyMap[k].total > 0 ? (dailyMap[k].count / dailyMap[k].total) * 100 : 0),
+      refunds: dayKeys.map(k => dailyMap[k].refunds),
+      chargebacks: dayKeys.map(k => dailyMap[k].chargebacks),
+    };
+
     const lastSaleAt = current.approved.length > 0 ? current.approved[0].created_at : null;
-    return { current, previous, chartData, lastSaleAt };
+    return { current, previous, chartData, lastSaleAt, series };
   }, [dateFiltered, previousPeriodFiltered]);
 
   const filtered = useMemo(() => {
