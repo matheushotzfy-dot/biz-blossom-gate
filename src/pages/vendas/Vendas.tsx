@@ -39,7 +39,7 @@ function PixLogoMark({ className }: { className?: string }) {
   );
 }
 
-const fmt = (v: number) => v === 0 ? "R$ 0,00" : `R$ ${v.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}`;
+const fmt = (v: number) => v === 0 ? "R$ 0,00" : `R$ ${v.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 const fmtCompact = (v: number) => {
   if (v >= 1_000_000) return `R$ ${(v / 1_000_000).toFixed(1).replace(".", ",")}M`;
   if (v >= 10_000) return `R$ ${(v / 1_000).toFixed(1).replace(".", ",")}K`;
@@ -665,6 +665,7 @@ export default function Vendas() {
 
   const riskKpis = [
     { label: "Reembolsos", value: hidden ? HIDE : fmtCompact(refundedAmount), sub: `${m.refunded.length} casos · ${m.refundRate.toFixed(1)}%`, accent: m.refundRate > 5 ? "text-destructive" : "text-muted-foreground", icon: AlertTriangle },
+    { label: "MED", value: hidden ? HIDE : fmt(0), sub: `0 casos · 0,00%`, accent: "text-muted-foreground", icon: ShieldAlert },
     { label: "Chargebacks", value: hidden ? HIDE : fmtCompact(chargebackAmount), sub: `${m.chargebacks.length} casos · ${m.chargebackRate.toFixed(2)}%`, accent: m.chargebacks.length > 0 ? "text-destructive" : "text-muted-foreground", icon: ShieldAlert },
   ];
 
@@ -811,7 +812,7 @@ export default function Vendas() {
             ))}
           </div>
 
-          <div className="grid grid-cols-1 border-b border-border md:grid-cols-2 md:divide-x md:divide-border">
+          <div className="grid grid-cols-1 border-b border-border sm:grid-cols-3 sm:divide-x sm:divide-border">
             {riskKpis.map((r) => {
               const Icon = r.icon;
               return (
@@ -851,52 +852,7 @@ export default function Vendas() {
       {/* ─────────── WORKSPACE ─────────── */}
       <div className="space-y-5 px-5 pt-5 sm:px-8">
 
-        {/* ─────────── INTELIGÊNCIA FINANCEIRA ─────────── */}
-        <section className="border-y border-border bg-card">
-          <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_360px] lg:divide-x lg:divide-border">
-            <div className="min-w-0">
-              <div className="flex items-center justify-between gap-3 border-b border-border px-4 py-3 sm:px-5">
-                <div>
-                  <p className="text-[12.5px] font-black leading-tight text-foreground">Receita líquida · {periodLabel}</p>
-                  <p className="mt-0.5 text-[11px] font-medium text-muted-foreground">Comparativo com período anterior</p>
-                </div>
-                <div className="flex items-center gap-3 text-[10.5px] font-semibold text-muted-foreground">
-                  <span className="flex items-center gap-1.5"><span className="h-2 w-2 bg-success" />Atual</span>
-                  <span className="flex items-center gap-1.5"><span className="inline-block h-0 w-3 border-t border-dashed border-muted-foreground" />Anterior</span>
-                </div>
-              </div>
-              <div className="px-2 py-4">
-                <RevenueChart data={metrics.chartData} hidden={hidden} />
-              </div>
-            </div>
-
-            <aside className="border-t border-border lg:border-t-0">
-              <div className="border-b border-border px-4 py-3 sm:px-5">
-                <p className="text-[12.5px] font-black leading-tight text-foreground">Mix de pagamento</p>
-                <p className="mt-0.5 text-[11px] font-medium text-muted-foreground">Distribuição por método</p>
-              </div>
-              <div className="divide-y divide-border">
-                {mixRows.map((item) => (
-                  <div key={item.label} className="px-4 py-3.5 sm:px-5">
-                    <div className="flex items-center justify-between gap-3 text-[12px]">
-                      <div className="flex items-center gap-2 font-bold text-foreground">
-                        <span className={cn("h-2 w-2", item.dot)} />
-                        {item.label}
-                      </div>
-                      <div className="text-right">
-                        <p className="font-numbers font-black tabular-nums text-foreground">{hidden ? HIDE : fmtCompact(item.value)}</p>
-                        <p className="mt-0.5 text-[10.5px] font-semibold tabular-nums text-muted-foreground">{item.share.toFixed(1)}% · {item.count} {item.count === 1 ? "venda" : "vendas"}</p>
-                      </div>
-                    </div>
-                    <div className="mt-2 h-1.5 bg-muted">
-                      <div className={cn("h-full transition-all", item.bar)} style={{ width: `${Math.min(item.share, 100)}%` }} />
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </aside>
-          </div>
-        </section>
+        {/* Chart and payment mix removed — already shown on Dashboard */}
 
         {/* ─────────── TRANSACTIONS ─────────── */}
         <section className="overflow-hidden border border-border bg-card">
