@@ -494,11 +494,11 @@ export default function Dashboard() {
           </div>
 
           <div className="flex flex-wrap items-center gap-1.5">
-            <div className="inline-flex items-center rounded-xl border border-border/40 bg-background/60 backdrop-blur p-0.5 shadow-inner">
+            <div className="dashboard-toolbar-shell inline-flex items-center rounded-xl p-0.5">
               {PERIOD_PRESETS.map((opt) => (
                 <button key={opt.label} onClick={() => { setSelectedPeriod(opt); setIsCustom(false); setCustomRange(undefined); }}
                   className={cn("rounded-lg px-3 py-1.5 text-[11px] font-display font-black uppercase tracking-wider transition-all duration-300",
-                    !isCustom && selectedPeriod.label === opt.label ? "bg-card text-foreground shadow-sm ring-1 ring-border/40" : "text-muted-foreground/60 hover:text-foreground"
+                    !isCustom && selectedPeriod.label === opt.label ? "dashboard-segment-active text-foreground" : "dashboard-segment-muted hover:text-foreground"
                   )}>
                   {opt.label}
                 </button>
@@ -507,7 +507,7 @@ export default function Dashboard() {
             <Popover open={datePickerOpen} onOpenChange={setDatePickerOpen}>
               <PopoverTrigger asChild>
                 <button className={cn("h-8 rounded-xl border px-3 text-[10px] font-black uppercase tracking-wider transition-all inline-flex items-center gap-1.5",
-                  isCustom ? "border-primary/30 bg-primary/10 text-foreground shadow-sm shadow-primary/10" : "border-border/40 bg-background/60 text-muted-foreground hover:text-foreground hover:border-primary/30"
+                  isCustom ? "border-primary/35 bg-primary/10 text-foreground" : "border-border/45 bg-card-inset text-muted-foreground hover:text-foreground hover:border-primary/30"
                 )}>
                   <CalendarDays className="h-3 w-3" />
                   {isCustom && customRange?.from
@@ -519,7 +519,7 @@ export default function Dashboard() {
                 <Calendar mode="range" selected={customRange} onSelect={(range) => { setCustomRange(range); setIsCustom(true); if (range?.from && range?.to) setTimeout(() => setDatePickerOpen(false), 300); }} numberOfMonths={1} locale={ptBR} disabled={(date) => date > new Date()} className="p-3 pointer-events-auto" classNames={{ day_selected: "bg-primary text-primary-foreground", day_range_middle: "bg-primary/10 text-foreground", day_range_end: "bg-primary text-primary-foreground" }} />
               </PopoverContent>
             </Popover>
-            <button onClick={privacy.toggle} className={cn("h-8 w-8 rounded-xl border flex items-center justify-center transition-all", privacy.hidden ? "border-primary/30 bg-primary/10 text-primary shadow-sm shadow-primary/10" : "border-border/40 bg-background/60 text-muted-foreground hover:text-foreground hover:border-primary/30")} title={privacy.hidden ? "Mostrar" : "Ocultar"}>
+            <button onClick={privacy.toggle} className={cn("h-8 w-8 rounded-xl border flex items-center justify-center transition-all", privacy.hidden ? "border-primary/35 bg-primary/10 text-primary" : "border-border/45 bg-card-inset text-muted-foreground hover:text-foreground hover:border-primary/30")} title={privacy.hidden ? "Mostrar" : "Ocultar"}>
               {privacy.hidden ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
             </button>
           </div>
