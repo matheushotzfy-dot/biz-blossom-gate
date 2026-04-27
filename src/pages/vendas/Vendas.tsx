@@ -607,10 +607,27 @@ export default function Vendas() {
   }, [products, sanitize]);
 
   useEffect(() => {
-    const handler = (e: KeyboardEvent) => { if ((e.metaKey || e.ctrlKey) && e.key === "k") { e.preventDefault(); document.getElementById("vendas-search")?.focus(); } };
+    const handler = (e: KeyboardEvent) => {
+      const target = e.target as HTMLElement | null;
+      const inField = !!target && (target.tagName === "INPUT" || target.tagName === "TEXTAREA" || (target as any).isContentEditable);
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k") { e.preventDefault(); setCmdOpen(o => !o); return; }
+      if (e.key === "/" && !inField) { e.preventDefault(); document.getElementById("vendas-search")?.focus(); return; }
+      if (inField || e.metaKey || e.ctrlKey || e.altKey) return;
+      const k = e.key.toLowerCase();
+      if (k === "e") { e.preventDefault(); setShowExportDialog(true); }
+      else if (k === "r") { e.preventDefault(); window.location.reload(); }
+      else if (k === "p") { e.preventDefault(); toggleHidden(); }
+      else if (k === "d") { e.preventDefault(); toggleDensity(); }
+      else if (e.key === "1") setStatusFilter("all");
+      else if (e.key === "2") setStatusFilter("completed");
+      else if (e.key === "3") setStatusFilter("pending");
+      else if (e.key === "4") setStatusFilter("refunded");
+      else if (e.key === "5") setStatusFilter("chargeback");
+      else if (e.key === "6") setStatusFilter("failed");
+    };
     window.addEventListener("keydown", handler);
     return () => window.removeEventListener("keydown", handler);
-  }, []);
+  }, [toggleHidden, toggleDensity]);
 
   const m = metrics.current;
   const p = metrics.previous;
