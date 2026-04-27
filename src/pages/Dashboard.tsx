@@ -698,8 +698,8 @@ export default function Dashboard() {
             </div>
             <div className="flex-1 divide-y divide-border/20">
               {[
-                { icon: <PixLogoMark className="h-3.5 w-3.5" />, label: "PIX", conv: pixConversion, revenue: pixRevenue, count: `${pixApprovedCount}/${pixTotalCount}`, color: "text-success", borderColor: "border-success/15", bgColor: "bg-gradient-to-b from-success/12 to-success/4" },
-                { icon: <CreditCard className="h-3.5 w-3.5" strokeWidth={2.5} />, label: "Cartão", conv: cardConversion, revenue: cardRevenue, count: `${cardApprovedCount}/${cardTotalCount}`, color: "text-info", borderColor: "border-info/15", bgColor: "bg-gradient-to-b from-info/12 to-info/4" },
+                { icon: <PixLogoMark className="h-3.5 w-3.5" />, label: "PIX", conv: pixConversion, revenue: pixRevenue, count: `${pixApprovedCount}/${pixTotalCount}`, color: "text-success", borderColor: "border-success/20", bgColor: "bg-success/10" },
+                { icon: <CreditCard className="h-3.5 w-3.5" strokeWidth={2.5} />, label: "Cartão", conv: cardConversion, revenue: cardRevenue, count: `${cardApprovedCount}/${cardTotalCount}`, color: "text-info", borderColor: "border-info/20", bgColor: "bg-info/10" },
               ].map((m) => (
                 <div key={m.label} className="group px-6 py-5 transition-colors hover:bg-foreground/[0.015]">
                   <div className="flex items-center justify-between mb-3">
