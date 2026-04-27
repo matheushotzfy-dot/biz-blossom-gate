@@ -585,13 +585,8 @@ export default function Dashboard() {
             </div>
           </div>
 
-          <div className="relative px-6 py-9 lg:px-10 lg:py-12 overflow-hidden">
-            <div aria-hidden className="absolute left-0 top-8 bottom-8 w-[3px] rounded-full bg-success" />
             <div className="flex items-center gap-2 mb-4">
-              <span className="relative flex h-2 w-2">
-                <span className="absolute inline-flex h-full w-full rounded-full bg-success/40 animate-ping" />
-                <span className="relative inline-flex h-2 w-2 rounded-full bg-success" />
-              </span>
+              <span className="h-2 w-2 rounded-full bg-success" />
               <p className="font-display text-[10px] font-extrabold uppercase tracking-[0.16em] text-muted-foreground/70">Saldo Disponível</p>
             </div>
             <p className="font-display text-[clamp(1.8rem,4.5vw,46px)] font-black tabular-nums text-success tracking-[-0.035em] leading-none">
