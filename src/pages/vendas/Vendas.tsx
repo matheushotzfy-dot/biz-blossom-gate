@@ -1030,6 +1030,64 @@ export default function Vendas() {
 
       {selectedTx && <TransactionDetailPanel tx={selectedTx} products={products} onClose={() => setSelectedTx(null)} onRefund={async () => toast.info("Entre em contato com o suporte.")} />}
       <ExportDialog open={showExportDialog} onOpenChange={setShowExportDialog} transactions={dateFiltered} products={products} onExport={handleExportCSV} />
+
+      {/* ─── Command Palette ─── */}
+      <CommandDialog open={cmdOpen} onOpenChange={setCmdOpen}>
+        <CommandInput placeholder="Buscar comandos, clientes, ações…" />
+        <CommandList>
+          <CommandEmpty>Nenhum resultado.</CommandEmpty>
+          <CommandGroup heading="Ações">
+            <CommandItem onSelect={() => { setShowExportDialog(true); setCmdOpen(false); }}>
+              <Download className="h-4 w-4" /> Exportar CSV <CommandShortcut>E</CommandShortcut>
+            </CommandItem>
+            <CommandItem onSelect={() => { window.location.reload(); }}>
+              <RefreshCw className="h-4 w-4" /> Atualizar dados <CommandShortcut>R</CommandShortcut>
+            </CommandItem>
+            <CommandItem onSelect={() => { toggleHidden(); setCmdOpen(false); }}>
+              {hidden ? <Eye className="h-4 w-4" /> : <EyeOff className="h-4 w-4" />} {hidden ? "Mostrar valores" : "Ocultar valores"} <CommandShortcut>P</CommandShortcut>
+            </CommandItem>
+            <CommandItem onSelect={() => { toggleDensity(); setCmdOpen(false); }}>
+              {density === "compact" ? <Rows3 className="h-4 w-4" /> : <Rows4 className="h-4 w-4" />} Alternar densidade <CommandShortcut>D</CommandShortcut>
+            </CommandItem>
+            <CommandItem onSelect={() => { document.getElementById("vendas-search")?.focus(); setCmdOpen(false); }}>
+              <Search className="h-4 w-4" /> Focar busca <CommandShortcut>/</CommandShortcut>
+            </CommandItem>
+          </CommandGroup>
+          <CommandSeparator />
+          <CommandGroup heading="Filtrar status">
+            {statusTabs.map((tab, i) => (
+              <CommandItem key={tab.value} onSelect={() => { setStatusFilter(tab.value); setCmdOpen(false); }}>
+                {tab.dot ? <span className={cn("h-2 w-2 rounded-full", tab.dot)} /> : <Filter className="h-4 w-4" />} {tab.label}
+                <span className="ml-auto text-[10px] tabular-nums text-muted-foreground">{tab.count}</span>
+                <CommandShortcut>{i + 1}</CommandShortcut>
+              </CommandItem>
+            ))}
+          </CommandGroup>
+          <CommandSeparator />
+          <CommandGroup heading="Período">
+            {PERIODS.map(opt => (
+              <CommandItem key={opt.label} onSelect={() => { setSelectedPeriod(opt); setIsCustom(false); setCustomRange(undefined); setCmdOpen(false); }}>
+                <CalendarDays className="h-4 w-4" /> {opt.label}
+                {!isCustom && selectedPeriod.label === opt.label && <Check className="ml-auto h-3.5 w-3.5 text-success" />}
+              </CommandItem>
+            ))}
+          </CommandGroup>
+          {sortedFiltered.length > 0 && (
+            <>
+              <CommandSeparator />
+              <CommandGroup heading="Transações recentes">
+                {sortedFiltered.slice(0, 6).map(tx => (
+                  <CommandItem key={tx.id} onSelect={() => { setSelectedTx(tx); setCmdOpen(false); }}>
+                    <Zap className="h-4 w-4 text-muted-foreground" />
+                    <span className="truncate">{tx.customer_name || "Cliente"}</span>
+                    <span className="ml-auto text-[11px] font-bold tabular-nums text-foreground">{fmt(Number(tx.net_amount))}</span>
+                  </CommandItem>
+                ))}
+              </CommandGroup>
+            </>
+          )}
+        </CommandList>
+      </CommandDialog>
     </div>
   );
 }
