@@ -901,9 +901,7 @@ export default function Dashboard() {
             return (
               <div>
                 {/* Header */}
-                <div className="relative px-7 pt-8 pb-6 overflow-hidden">
-                  <div className="absolute inset-0 bg-gradient-to-br from-primary/[0.06] via-primary/[0.02] to-transparent pointer-events-none" />
-                  <div className="absolute -top-20 -right-20 h-40 w-40 rounded-full bg-primary/10 blur-[80px] pointer-events-none" />
+                <div className="relative px-7 pt-8 pb-6 border-b border-border/40">
                   <div className="relative">
                     <div className="flex items-center gap-2.5 mb-4">
                       <span className={cn("inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-[11px] font-bold border", s.color, s.bg, s.border)}>
