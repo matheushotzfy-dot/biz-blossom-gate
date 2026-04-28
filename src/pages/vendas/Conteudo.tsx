@@ -526,6 +526,7 @@ export default function AdminConteudo() {
           </div>
         )}
       </section>
+      </div>
 
       <CourseCreationWizard
         open={wizardOpen}
