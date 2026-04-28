@@ -273,39 +273,57 @@ export default function Saques() {
         </div>
       )}
 
-      {/* ═══════ HEADER ═══════ */}
-      <PageHeader
-        eyebrow={
-          <>
-            <span className={cn("h-1.5 w-1.5 rounded-full", m.pending.length > 0 ? "bg-warning animate-pulse" : "bg-success animate-pulse")} />
-            <span className="text-[10px] font-bold uppercase tracking-[0.18em] text-muted-foreground">
-              {m.pending.length > 0 ? `${m.pending.length} ${m.pending.length === 1 ? "saque pendente" : "saques pendentes"}` : "Sem saques pendentes"}
-            </span>
-          </>
-        }
-        title="Saques PIX"
-        subtitle="Solicite saques, acompanhe aprovação e taxas em tempo real."
-        actions={
-          <>
-            <button onClick={toggleHidden} className={cn("inline-flex h-9 w-9 items-center justify-center rounded-lg border transition-colors", hidden ? "border-foreground/30 bg-foreground/5 text-foreground" : "border-border/60 bg-card text-muted-foreground hover:text-foreground")}>
-              {hidden ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
+      {/* ═══════ HERO ═══════ */}
+      <div className="relative overflow-hidden animate-fade-in">
+        <div
+          className="pointer-events-none absolute -top-24 -left-20 h-[280px] w-[520px] rounded-full opacity-60"
+          style={{ background: "radial-gradient(closest-side, hsl(var(--primary) / 0.10), transparent 70%)" }}
+        />
+        <div className="relative flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
+          <div className="space-y-3">
+            <div className="inline-flex items-center gap-2 rounded-full border border-border/50 bg-card/60 px-2.5 py-1">
+              <span className={cn("h-1.5 w-1.5 rounded-full animate-pulse", m.pending.length > 0 ? "bg-warning" : "bg-success")} />
+              <span className="text-[10px] font-bold uppercase tracking-[0.18em] text-muted-foreground">
+                {m.pending.length > 0 ? `${m.pending.length} ${m.pending.length === 1 ? "saque pendente" : "saques pendentes"}` : "Sem saques pendentes"}
+              </span>
+            </div>
+            <h1 className="font-display text-[40px] sm:text-[52px] font-black leading-[0.95] tracking-[-0.03em] text-foreground">
+              Saques PIX
+            </h1>
+            <p className="text-[13px] text-muted-foreground/80 max-w-xl leading-relaxed">
+              Solicite saques, acompanhe aprovação e taxas em tempo real. Atualização automática a cada 15s.
+            </p>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <button
+              onClick={toggleHidden}
+              className={cn(
+                "inline-flex h-11 w-11 items-center justify-center rounded-xl border transition-colors",
+                hidden ? "border-foreground/30 bg-foreground/5 text-foreground" : "border-border/50 bg-card text-muted-foreground hover:text-foreground"
+              )}
+            >
+              {hidden ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
             </button>
             {!hasAddress ? (
-              <button onClick={() => { toast.info("Preencha seu endereço primeiro para realizar saques"); navigate("/perfil"); }} className="inline-flex h-9 items-center gap-1.5 rounded-lg bg-warning px-4 text-[12px] font-bold text-warning-foreground hover:opacity-90 transition-opacity">
-                <MapPin className="h-3.5 w-3.5" /> Preencher endereço
+              <button
+                onClick={() => { toast.info("Preencha seu endereço primeiro para realizar saques"); navigate("/perfil"); }}
+                className="group inline-flex h-11 items-center gap-2 rounded-xl bg-warning px-5 text-[12px] font-black uppercase tracking-[0.12em] text-warning-foreground transition-all duration-300 hover:-translate-y-0.5 hover:bg-warning/90"
+              >
+                <MapPin className="h-4 w-4" /> Preencher endereço
               </button>
             ) : (
               <Dialog open={open} onOpenChange={setOpen}>
                 <DialogTrigger asChild>
-                  <button className="inline-flex h-9 items-center gap-1.5 rounded-lg bg-primary px-4 text-[12px] font-bold text-primary-foreground hover:bg-primary/90 transition-colors shadow-sm shadow-primary/20">
-                    <Plus className="h-3.5 w-3.5" /> Novo saque
+                  <button className="group inline-flex h-11 items-center gap-2 rounded-xl bg-primary px-5 text-[12px] font-black uppercase tracking-[0.12em] text-primary-foreground transition-all duration-300 hover:-translate-y-0.5 hover:bg-primary/90">
+                    <Plus className="h-4 w-4 transition-transform duration-300 group-hover:rotate-90" /> Novo saque
                   </button>
                 </DialogTrigger>
-                <DialogContent className="max-w-md rounded-2xl border border-border/40 bg-card p-0 overflow-hidden shadow-2xl">
-                  <div className="px-6 pt-6 pb-4 border-b border-border/30">
+                <DialogContent className="max-w-md rounded-2xl border border-border/50 bg-card p-0 overflow-hidden">
+                  <div className="px-6 pt-6 pb-4 border-b border-border/40">
                     <DialogHeader>
                       <DialogTitle className="font-display font-black text-lg tracking-[-0.03em] flex items-center gap-2.5">
-                        <div className="h-10 w-10 rounded-xl bg-primary/10 ring-1 ring-primary/20 flex items-center justify-center">
+                        <div className="h-10 w-10 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center">
                           <ArrowDownToLine className="h-4 w-4 text-primary" />
                         </div>
                         Solicitar Saque
@@ -314,13 +332,13 @@ export default function Saques() {
                   </div>
                   <form onSubmit={handleSubmit} className="space-y-4 p-6">
                     {/* Saldo header */}
-                    <div className="rounded-xl bg-muted/40 border border-border/50 px-4 py-3 flex items-center justify-between">
+                    <div className="rounded-xl bg-secondary/40 border border-border/50 px-4 py-3 flex items-center justify-between">
                       <span className="text-[10px] font-bold uppercase tracking-[0.16em] text-muted-foreground">Saldo disponível</span>
                       <span className="text-[15px] font-display font-black text-success tabular-nums">{fmt(availableBalance)}</span>
                     </div>
 
                     {/* Amount */}
-                    <div className="rounded-xl bg-card border border-border/60 p-4">
+                    <div className="rounded-xl bg-card border border-border/50 p-4">
                       <Label className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.16em]">Valor do saque</Label>
                       <div className="relative mt-2">
                         <span className="absolute left-3 top-1/2 -translate-y-1/2 text-base font-display font-black text-muted-foreground">R$</span>
@@ -348,7 +366,7 @@ export default function Saques() {
                               key={q.label}
                               type="button"
                               onClick={() => setAmount(q.value!.toFixed(2))}
-                              className="px-2.5 h-7 rounded-md text-[10px] font-bold bg-muted/40 hover:bg-muted/60 text-foreground/70 hover:text-foreground border border-border/50 transition-colors"
+                              className="px-2.5 h-7 rounded-md text-[10px] font-bold bg-secondary/40 hover:bg-secondary text-foreground/80 hover:text-foreground border border-border/50 transition-colors"
                             >
                               {q.label}
                             </button>
@@ -374,7 +392,7 @@ export default function Saques() {
                     </div>
 
                     {/* PIX Key */}
-                    <div className="rounded-xl bg-card border border-border/60 p-4">
+                    <div className="rounded-xl bg-card border border-border/50 p-4">
                       <Label className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.16em]">Chave PIX de destino</Label>
                       {pixKeys.length > 0 ? (
                         <div className="mt-2 space-y-1.5">
@@ -383,9 +401,9 @@ export default function Saques() {
                             return (
                               <button key={pk.id} type="button" onClick={() => setSelectedPixKeyId(pk.id)} className={cn(
                                 "w-full flex items-center gap-3 px-3 py-2.5 rounded-lg border transition-all text-left",
-                                isSelected ? "border-primary/40 bg-primary/5 ring-1 ring-primary/20" : "border-border/50 bg-muted/20 hover:border-border"
+                                isSelected ? "border-primary/40 bg-primary/5" : "border-border/50 bg-secondary/30 hover:border-border"
                               )}>
-                                <div className={cn("h-8 w-8 rounded-lg ring-1 flex items-center justify-center shrink-0", isSelected ? "bg-primary/10 ring-primary/30" : "bg-muted/40 ring-border/50")}>
+                                <div className={cn("h-8 w-8 rounded-lg border flex items-center justify-center shrink-0", isSelected ? "bg-primary/10 border-primary/30" : "bg-secondary border-border/50")}>
                                   <Key className={cn("h-3.5 w-3.5", isSelected ? "text-primary" : "text-muted-foreground")} />
                                 </div>
                                 <div className="flex-1 min-w-0">
@@ -409,7 +427,7 @@ export default function Saques() {
                     <button
                       type="submit"
                       disabled={pixKeys.length === 0 || numAmount <= WITHDRAW_FEE || numAmount > availableBalance}
-                      className="w-full h-11 rounded-xl text-[12px] font-display font-bold flex items-center justify-center gap-2 bg-primary text-primary-foreground shadow-sm shadow-primary/30 hover:bg-primary/90 active:scale-[0.985] transition-all disabled:opacity-40 disabled:cursor-not-allowed disabled:shadow-none"
+                      className="w-full h-11 rounded-xl text-[12px] font-display font-black uppercase tracking-[0.12em] flex items-center justify-center gap-2 bg-primary text-primary-foreground hover:bg-primary/90 active:scale-[0.985] transition-all disabled:opacity-40 disabled:cursor-not-allowed"
                     >
                       <ArrowDownToLine className="h-4 w-4" /> Confirmar saque de {fmt(netPreview)}
                     </button>
@@ -422,27 +440,28 @@ export default function Saques() {
                 </DialogContent>
               </Dialog>
             )}
-          </>
-        }
-      />
+          </div>
+        </div>
+      </div>
 
-      {/* ═══════ BALANCE HERO + PIX KEY DESTINATION ═══════ */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-3">
+      {/* ═══════ BALANCE + PIX KEY ═══════ */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-px overflow-hidden rounded-xl border border-border/50 bg-border/40 animate-fade-in stagger-1">
         {/* Available balance */}
-        <div className="lg:col-span-2 relative rounded-2xl border border-border/60 bg-gradient-to-br from-card via-card to-primary/[0.04] overflow-hidden p-5">
-          <div className="absolute -right-12 -top-12 h-48 w-48 rounded-full bg-primary/5 blur-3xl" />
-          <div className="relative flex items-start justify-between gap-6">
+        <div className="lg:col-span-2 bg-card p-5">
+          <div className="flex items-start justify-between gap-6">
             <div className="flex-1 min-w-0">
-              <div className="flex items-center gap-2 mb-2">
-                <Wallet className="h-3.5 w-3.5 text-primary" />
+              <div className="flex items-center gap-2 mb-3">
+                <div className="h-7 w-7 rounded-md bg-primary/10 text-primary flex items-center justify-center">
+                  <Wallet className="h-3.5 w-3.5" strokeWidth={2.25} />
+                </div>
                 <span className="text-[10px] font-bold uppercase tracking-[0.18em] text-muted-foreground">Saldo disponível para saque</span>
               </div>
               <div className="flex items-baseline gap-3">
-                <span className={cn("text-[40px] leading-none font-display font-black tabular-nums tracking-[-0.03em]", availableBalance > 0 ? "text-foreground" : "text-muted-foreground")}>
+                <span className={cn("text-[44px] leading-none font-display font-black tabular-nums tracking-[-0.03em]", availableBalance > 0 ? "text-foreground" : "text-muted-foreground")}>
                   {hidden ? HIDE : fmt(availableBalance)}
                 </span>
               </div>
-              <div className="mt-3 flex flex-wrap items-center gap-x-5 gap-y-1.5 text-[11px]">
+              <div className="mt-4 flex flex-wrap items-center gap-x-5 gap-y-1.5 text-[11px]">
                 <div className="flex items-center gap-1.5">
                   <span className="h-1.5 w-1.5 rounded-full bg-warning" />
                   <span className="text-muted-foreground">Retido:</span>
@@ -464,13 +483,15 @@ export default function Saques() {
         </div>
 
         {/* PIX Key destination card */}
-        <div className="rounded-2xl border border-border/60 bg-card p-5 flex flex-col">
+        <div className="bg-card p-5 flex flex-col">
           <div className="flex items-center justify-between mb-3">
             <div className="flex items-center gap-2">
-              <Key className="h-3.5 w-3.5 text-success" />
+              <div className="h-7 w-7 rounded-md bg-success/10 text-success flex items-center justify-center">
+                <Key className="h-3.5 w-3.5" strokeWidth={2.25} />
+              </div>
               <span className="text-[10px] font-bold uppercase tracking-[0.18em] text-muted-foreground">Chave PIX padrão</span>
             </div>
-            <button onClick={() => navigate("/financeiro/dados-bancarios")} className="text-[10px] font-bold text-primary hover:underline">Gerenciar</button>
+            <button onClick={() => navigate("/financeiro/dados-bancarios")} className="text-[10px] font-black uppercase tracking-[0.12em] text-primary hover:underline">Gerenciar</button>
           </div>
           {primaryPixKey ? (
             <div className="flex-1 flex flex-col justify-between">
@@ -482,13 +503,13 @@ export default function Saques() {
               </div>
               <button
                 onClick={() => { navigator.clipboard.writeText(primaryPixKey.key_value); toast.success("Chave copiada"); }}
-                className="mt-3 inline-flex items-center justify-center gap-1.5 h-8 rounded-lg border border-border/60 bg-muted/30 hover:bg-muted/50 text-[11px] font-bold text-foreground/80 transition-colors"
+                className="mt-3 inline-flex items-center justify-center gap-1.5 h-8 rounded-lg border border-border/50 bg-secondary/40 hover:bg-secondary text-[11px] font-bold text-foreground/80 transition-colors"
               >
                 <Copy className="h-3 w-3" /> Copiar chave
               </button>
             </div>
           ) : (
-            <button onClick={() => navigate("/financeiro/dados-bancarios")} className="flex-1 flex flex-col items-center justify-center gap-2 rounded-xl border border-dashed border-border/60 bg-muted/20 hover:bg-muted/40 transition-colors py-4">
+            <button onClick={() => navigate("/financeiro/dados-bancarios")} className="flex-1 flex flex-col items-center justify-center gap-2 rounded-xl border border-dashed border-border/60 bg-secondary/20 hover:bg-secondary/40 transition-colors py-4">
               <Key className="h-5 w-5 text-muted-foreground" />
               <p className="text-[11px] font-bold text-muted-foreground">Cadastrar chave PIX</p>
             </button>
@@ -497,24 +518,23 @@ export default function Saques() {
       </div>
 
       {/* ═══════ PERIOD BAR ═══════ */}
-      <div className="flex items-center justify-between gap-3">
-        <div className="inline-flex items-center rounded-lg border border-border/60 bg-card p-0.5 w-fit">
+      <div className="flex items-center justify-between gap-3 animate-fade-in stagger-2">
+        <div className="inline-flex items-center gap-0.5 rounded-xl border border-border/50 bg-card/60 p-1">
           {PERIODS.map((opt) => (
             <button
               key={opt.label}
               onClick={() => setSelectedPeriod(opt)}
-              className={cn("rounded-md px-3 py-1.5 text-[12px] font-bold transition-colors",
-                selectedPeriod.label === opt.label ? "bg-foreground text-background" : "text-muted-foreground hover:text-foreground"
+              className={cn(
+                "rounded-lg h-8 px-3 text-[12px] font-bold tracking-tight transition-colors duration-200",
+                selectedPeriod.label === opt.label
+                  ? "bg-secondary text-foreground"
+                  : "text-muted-foreground hover:text-foreground"
               )}
             >
               {opt.label}
             </button>
           ))}
         </div>
-        <span className="hidden md:inline-flex text-[11px] text-muted-foreground items-center gap-1.5">
-          <Sparkles className="h-3 w-3 text-primary" />
-          Atualização em tempo real a cada 15s
-        </span>
       </div>
 
       {/* ═══════ KPI RIBBON ═══════ */}
