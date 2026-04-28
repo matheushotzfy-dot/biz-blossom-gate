@@ -679,14 +679,7 @@ export default function Vendas() {
         <header className="border-b border-border/70 pb-7">
           <div className="flex flex-col gap-5 xl:flex-row xl:items-start xl:justify-between">
             <div className="min-w-0">
-              <div className="inline-flex items-center gap-2 rounded-full border border-success/30 bg-success/10 px-2.5 py-1 text-[9px] font-black uppercase tracking-[0.24em] text-success">
-                <span className="relative flex h-1.5 w-1.5">
-                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-success opacity-70" />
-                  <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-success" />
-                </span>
-                Live sales ledger
-              </div>
-              <h1 className="mt-3 font-display text-[48px] font-black leading-[0.88] tracking-[-0.06em] text-foreground sm:text-[68px]">
+              <h1 className="font-display text-[48px] font-black leading-[0.88] tracking-[-0.06em] text-foreground sm:text-[68px]">
                 Vendas
               </h1>
               <div className="mt-5 flex flex-wrap items-end gap-x-5 gap-y-2">
@@ -759,27 +752,6 @@ export default function Vendas() {
                   </Popover>
                   <TooltipContent side="bottom" className="flex items-center gap-2">Período personalizado</TooltipContent>
                 </Tooltip>
-
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <button onClick={() => setCmdOpen(true)} aria-label="Comandos rápidos" className="inline-flex h-8 items-center gap-1.5 rounded-md border border-border/60 bg-card/70 px-2 text-muted-foreground/90 transition-all duration-200 hover:border-foreground/40 hover:bg-muted/60 hover:text-foreground focus:outline-none focus-visible:ring-2 focus-visible:ring-foreground/20">
-                      <CommandIcon className="h-[15px] w-[15px]" strokeWidth={2.1} />
-                      <Kbd>⌘K</Kbd>
-                    </button>
-                  </TooltipTrigger>
-                  <TooltipContent side="bottom" className="flex items-center gap-2">Comandos rápidos</TooltipContent>
-                </Tooltip>
-
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <button onClick={toggleDensity} aria-label="Densidade" className={cn("inline-flex h-8 w-8 items-center justify-center rounded-md border transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-foreground/20",
-                      density === "compact" ? "border-foreground/80 bg-secondary text-foreground" : "border-border/60 bg-card/70 text-muted-foreground/90 hover:border-foreground/40 hover:bg-muted/60 hover:text-foreground")}>
-                      {density === "compact" ? <Rows4 className="h-[15px] w-[15px]" strokeWidth={2.1} /> : <Rows3 className="h-[15px] w-[15px]" strokeWidth={2.1} />}
-                    </button>
-                  </TooltipTrigger>
-                  <TooltipContent side="bottom" className="flex items-center gap-2">Densidade <Kbd>D</Kbd></TooltipContent>
-                </Tooltip>
-
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <button onClick={() => window.location.reload()} aria-label="Atualizar" className="group inline-flex h-8 w-8 items-center justify-center rounded-md border border-border/60 bg-card/70 text-muted-foreground/90 transition-all duration-200 hover:border-foreground/40 hover:bg-muted/60 hover:text-foreground focus:outline-none focus-visible:ring-2 focus-visible:ring-foreground/20">
@@ -906,11 +878,7 @@ export default function Vendas() {
           <div className="relative border-b border-border/70 px-6 pt-6 pb-5">
             <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
               <div className="min-w-0">
-                <div className="inline-flex items-center gap-2 rounded-full border border-success/30 bg-success/10 px-2.5 py-[3px] text-[9px] font-black uppercase tracking-[0.22em] text-success">
-                  <span className="h-1 w-1 rounded-full bg-success" />
-                  Ledger
-                </div>
-                <h2 className="mt-3 font-display text-[32px] font-black leading-[0.9] tracking-[-0.055em] text-foreground sm:text-[40px]">
+                <h2 className="font-display text-[32px] font-black leading-[0.9] tracking-[-0.055em] text-foreground sm:text-[40px]">
                   Transações
                 </h2>
                 <div className="mt-3 flex flex-wrap items-center gap-x-5 gap-y-1.5">
