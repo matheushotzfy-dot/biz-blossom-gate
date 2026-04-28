@@ -279,50 +279,55 @@ export function ProductGridView({ products, copiedId, toolbar, ...handlers }: Pr
                       </button>
                     )}
 
-                    <div className="mt-auto flex items-center gap-1.5 pt-1">
+                    {/* Action Bar — Premium: primary CTA + icon cluster */}
+                    <div className="mt-auto flex items-stretch gap-1.5 pt-1">
                       <button
                         type="button"
                         onClick={(e) => { e.stopPropagation(); handlers.onEditProduct(product); }}
-                        className="flex h-10 flex-1 items-center justify-center gap-1.5 rounded-lg border border-border/40 bg-card text-[11px] font-black uppercase tracking-wider text-foreground/80 transition-all hover:border-primary/40 hover:text-primary"
+                        className="group/edit flex h-10 flex-1 items-center justify-center gap-2 rounded-lg border border-primary/30 bg-primary/[0.06] text-[11.5px] font-bold tracking-tight text-foreground transition-colors hover:border-primary/50 hover:bg-primary/[0.10] hover:text-primary"
                       >
-                        <Pencil className="h-3.5 w-3.5" strokeWidth={2.25} />
-                        Editar
+                        <Pencil className="h-3.5 w-3.5 text-primary/80 transition-colors group-hover/edit:text-primary" strokeWidth={2.25} />
+                        <span className="font-display">Editar produto</span>
                       </button>
-                      <button
-                        type="button"
-                        onClick={(e) => { e.stopPropagation(); window.location.assign(`/vendas/produtos/${product.id}/checkout-builder`); }}
-                        className="flex h-10 flex-1 items-center justify-center gap-1.5 rounded-lg border border-border/40 bg-card text-[11px] font-black uppercase tracking-wider text-foreground/80 transition-all hover:border-primary/40 hover:text-primary"
-                        title="Abrir checkout builder"
-                      >
-                        <Palette className="h-3.5 w-3.5" strokeWidth={2.25} />
-                        Builder
-                      </button>
-                      <button
-                        type="button"
-                        onClick={(e) => { e.stopPropagation(); handlers.onOpenPixels(product); }}
-                        className="flex h-10 flex-1 items-center justify-center gap-1.5 rounded-lg border border-border/40 bg-card text-[11px] font-black uppercase tracking-wider text-foreground/80 transition-all hover:border-primary/40 hover:text-primary"
-                        title="Configurar pixels e tracking"
-                      >
-                        <Crosshair className="h-3.5 w-3.5" strokeWidth={2.25} />
-                        Pixels
-                      </button>
-                      {product.checkout_url && (
+
+                      <div className="flex items-stretch rounded-lg border border-border/40 bg-card divide-x divide-border/40 overflow-hidden">
                         <button
                           type="button"
-                          onClick={(e) => { e.stopPropagation(); handlers.onOpenCheckout(product); }}
-                          className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-border/40 bg-card text-foreground/60 transition-all hover:border-primary/40 hover:text-primary"
-                          title="Abrir checkout"
+                          onClick={(e) => { e.stopPropagation(); window.location.assign(`/vendas/produtos/${product.id}/checkout-builder`); }}
+                          className="flex h-10 w-10 items-center justify-center text-muted-foreground/70 transition-colors hover:bg-muted/40 hover:text-primary"
+                          title="Checkout builder"
+                          aria-label="Checkout builder"
                         >
-                          <ExternalLink className="h-3.5 w-3.5" strokeWidth={2.25} />
+                          <Palette className="h-3.5 w-3.5" strokeWidth={2} />
                         </button>
-                      )}
-                      <div onClick={(e) => e.stopPropagation()}>
-                        <ProductActionsMenu
-                          copied={isCopied}
-                          product={product}
-                          triggerClassName="h-10 w-10 rounded-lg border border-border/40 bg-card text-foreground/60 hover:border-primary/40 hover:text-primary data-[state=open]:bg-accent transition-all"
-                          {...handlers}
-                        />
+                        <button
+                          type="button"
+                          onClick={(e) => { e.stopPropagation(); handlers.onOpenPixels(product); }}
+                          className="flex h-10 w-10 items-center justify-center text-muted-foreground/70 transition-colors hover:bg-muted/40 hover:text-primary"
+                          title="Pixels & tracking"
+                          aria-label="Pixels & tracking"
+                        >
+                          <Crosshair className="h-3.5 w-3.5" strokeWidth={2} />
+                        </button>
+                        {product.checkout_url && (
+                          <button
+                            type="button"
+                            onClick={(e) => { e.stopPropagation(); handlers.onOpenCheckout(product); }}
+                            className="flex h-10 w-10 items-center justify-center text-muted-foreground/70 transition-colors hover:bg-muted/40 hover:text-primary"
+                            title="Abrir checkout"
+                            aria-label="Abrir checkout"
+                          >
+                            <ExternalLink className="h-3.5 w-3.5" strokeWidth={2} />
+                          </button>
+                        )}
+                        <div onClick={(e) => e.stopPropagation()} className="flex">
+                          <ProductActionsMenu
+                            copied={isCopied}
+                            product={product}
+                            triggerClassName="flex h-10 w-10 items-center justify-center text-muted-foreground/70 hover:bg-muted/40 hover:text-primary data-[state=open]:bg-muted/40 data-[state=open]:text-primary transition-colors border-0 rounded-none bg-transparent"
+                            {...handlers}
+                          />
+                        </div>
                       </div>
                     </div>
                   </>
