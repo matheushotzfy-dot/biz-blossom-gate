@@ -97,7 +97,7 @@ export function ProductGridView({ products, copiedId, toolbar, ...handlers }: Pr
               )}
             >
               {/* Top Image Section */}
-              <div className="relative aspect-[16/10] w-full overflow-hidden border-b border-border/10 bg-card-inset">
+              <div className="relative aspect-[16/10] w-full overflow-hidden bg-card-inset after:pointer-events-none after:absolute after:inset-x-0 after:bottom-[-1px] after:z-[5] after:h-[3px] after:bg-card">
                 {product.image_url ? (
                   <>
                     <img
@@ -109,7 +109,7 @@ export function ProductGridView({ products, copiedId, toolbar, ...handlers }: Pr
                     <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent opacity-60 transition-opacity duration-500 group-hover:opacity-40" />
                     <div className="pointer-events-none absolute inset-0 ring-1 ring-inset ring-white/10" />
                     
-                    <div className="absolute inset-x-0 -bottom-px z-[2] flex items-end justify-between p-4 backdrop-blur-md bg-black/40">
+                    <div className="absolute inset-x-0 bottom-0 z-[2] flex items-end justify-between p-4 backdrop-blur-md bg-black/40">
                       <div>
                         <p className="text-[9px] font-black uppercase tracking-[0.2em] text-white/60">Valor</p>
                         <span className="mt-0.5 block font-display text-2xl font-black leading-none tracking-tight text-white tabular-nums">
