@@ -256,324 +256,368 @@ export default function Saques() {
   ].filter(v => v > WITHDRAW_FEE);
 
   /* ═══════════ RENDER ═══════════ */
+  /* KPI rails for the Vendas-style strip */
+  const kpiRails = [
+    { label: "Saldo disponível", value: hidden ? HIDE : fmtCompact(availableBalance), sub: `Retido ${hidden ? HIDE : fmtCompact(retainedAmount)}`, accent: availableBalance > 0 ? "text-success" : "text-foreground", rail: "bg-success" },
+    { label: "Total sacado", value: hidden ? HIDE : fmtCompact(m.totalApproved), sub: `${m.approved.length} ${m.approved.length === 1 ? "saque aprovado" : "saques aprovados"}`, accent: "text-foreground", rail: "bg-info" },
+    { label: "Taxa de aprovação", value: hidden ? HIDE : `${m.approvalRate.toFixed(1)}%`, sub: `${m.approved.length}/${m.current.length} solicitações`, accent: m.approvalRate >= 80 ? "text-success" : "text-warning", rail: m.approvalRate >= 80 ? "bg-success" : "bg-warning" },
+    { label: "Pendentes", value: hidden ? HIDE : String(m.pending.length), sub: m.pending.length > 0 ? `${fmtCompact(m.totalPending)} aguardando` : "Sem fila", accent: m.pending.length > 0 ? "text-warning" : "text-foreground", rail: m.pending.length > 0 ? "bg-warning" : "bg-foreground/40" },
+  ];
+  const riskRails = [
+    { label: "Ticket médio", value: hidden ? HIDE : fmtCompact(m.avgAmount), count: m.approved.length, sub: m.avgAmount > 0 ? "Por saque aprovado" : "Sem dados", accent: "text-foreground" },
+    { label: "Total em taxas", value: hidden ? HIDE : fmtCompact(m.totalFees), count: m.current.length, sub: `${fmt(WITHDRAW_FEE)}/op`, accent: "text-warning" },
+    { label: "Aprovação média", value: m.avgApprovalHours > 0 ? `${m.avgApprovalHours.toFixed(1)}h` : "—", count: m.approved.length, sub: "tempo até liberação", accent: "text-foreground" },
+  ];
+
   return (
-    <div className="mx-auto w-full max-w-[1440px] pb-20 space-y-5">
+    <div
+      className="mx-auto w-full max-w-[1480px] pb-24 md:pb-10 antialiased [text-rendering:geometricPrecision] [-webkit-font-smoothing:antialiased] [-moz-osx-font-smoothing:grayscale]"
+      style={{ fontFeatureSettings: '"ss01","cv11","tnum","kern"' }}
+    >
 
-      {/* Address warning */}
-      {!hasAddress && (
-        <div onClick={() => navigate("/perfil")} className="flex items-center gap-3 p-4 rounded-2xl bg-warning/10 ring-1 ring-warning/20 cursor-pointer hover:bg-warning/15 transition-all">
-          <div className="h-10 w-10 rounded-xl bg-warning/15 flex items-center justify-center shrink-0">
-            <MapPin className="h-5 w-5 text-warning" />
-          </div>
-          <div className="flex-1 min-w-0">
-            <p className="text-[12px] font-display font-bold text-warning">Endereço não cadastrado</p>
-            <p className="text-[10px] text-warning/70">Preencha seu endereço no Perfil para realizar saques normalmente.</p>
-          </div>
-          <AlertTriangle className="h-5 w-5 text-warning/70 shrink-0" />
-        </div>
-      )}
+      <div className="px-5 pt-4 sm:px-8 sm:pt-6">
 
-      {/* ═══════ HERO ═══════ */}
-      <div className="relative overflow-hidden animate-fade-in">
-        <div
-          className="pointer-events-none absolute -top-24 -left-20 h-[280px] w-[520px] rounded-full opacity-60"
-          style={{ background: "radial-gradient(closest-side, hsl(var(--primary) / 0.10), transparent 70%)" }}
-        />
-        <div className="relative flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
-          <div className="space-y-3">
-            <div className="inline-flex items-center gap-2 rounded-full border border-border/50 bg-card/60 px-2.5 py-1">
-              <span className={cn("h-1.5 w-1.5 rounded-full animate-pulse", m.pending.length > 0 ? "bg-warning" : "bg-success")} />
-              <span className="text-[10px] font-bold uppercase tracking-[0.18em] text-muted-foreground">
-                {m.pending.length > 0 ? `${m.pending.length} ${m.pending.length === 1 ? "saque pendente" : "saques pendentes"}` : "Sem saques pendentes"}
-              </span>
+        {/* Address warning — flat Vendas-like alert */}
+        {!hasAddress && (
+          <div
+            onClick={() => navigate("/perfil")}
+            className="mb-5 flex items-center gap-3 px-4 py-3 rounded-lg border border-warning/30 bg-warning/10 cursor-pointer hover:bg-warning/15 transition-colors"
+          >
+            <div className="h-8 w-8 rounded-md bg-warning/15 border border-warning/25 flex items-center justify-center shrink-0">
+              <MapPin className="h-4 w-4 text-warning" strokeWidth={2.25} />
             </div>
-            <h1 className="font-display text-[40px] sm:text-[52px] font-black leading-[0.95] tracking-[-0.03em] text-foreground">
-              Saques PIX
-            </h1>
-            <p className="text-[13px] text-muted-foreground/80 max-w-xl leading-relaxed">
-              Solicite saques, acompanhe aprovação e taxas em tempo real. Atualização automática a cada 15s.
-            </p>
-          </div>
-
-          <div className="flex items-center gap-2">
-            <button
-              onClick={toggleHidden}
-              className={cn(
-                "inline-flex h-11 w-11 items-center justify-center rounded-xl border transition-colors",
-                hidden ? "border-foreground/30 bg-foreground/5 text-foreground" : "border-border/50 bg-card text-muted-foreground hover:text-foreground"
-              )}
-            >
-              {hidden ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-            </button>
-            {!hasAddress ? (
-              <button
-                onClick={() => { toast.info("Preencha seu endereço primeiro para realizar saques"); navigate("/perfil"); }}
-                className="group inline-flex h-11 items-center gap-2 rounded-xl bg-warning px-5 text-[12px] font-black uppercase tracking-[0.12em] text-warning-foreground transition-all duration-300 hover:-translate-y-0.5 hover:bg-warning/90"
-              >
-                <MapPin className="h-4 w-4" /> Preencher endereço
-              </button>
-            ) : (
-              <Dialog open={open} onOpenChange={setOpen}>
-                <DialogTrigger asChild>
-                  <button className="group inline-flex h-11 items-center gap-2 rounded-xl bg-primary px-5 text-[12px] font-black uppercase tracking-[0.12em] text-primary-foreground transition-all duration-300 hover:-translate-y-0.5 hover:bg-primary/90">
-                    <Plus className="h-4 w-4 transition-transform duration-300 group-hover:rotate-90" /> Novo saque
-                  </button>
-                </DialogTrigger>
-                <DialogContent className="max-w-md rounded-2xl border border-border/50 bg-card p-0 overflow-hidden">
-                  <div className="px-6 pt-6 pb-4 border-b border-border/40">
-                    <DialogHeader>
-                      <DialogTitle className="font-display font-black text-lg tracking-[-0.03em] flex items-center gap-2.5">
-                        <div className="h-10 w-10 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center">
-                          <ArrowDownToLine className="h-4 w-4 text-primary" />
-                        </div>
-                        Solicitar Saque
-                      </DialogTitle>
-                    </DialogHeader>
-                  </div>
-                  <form onSubmit={handleSubmit} className="space-y-4 p-6">
-                    {/* Saldo header */}
-                    <div className="rounded-xl bg-secondary/40 border border-border/50 px-4 py-3 flex items-center justify-between">
-                      <span className="text-[10px] font-bold uppercase tracking-[0.16em] text-muted-foreground">Saldo disponível</span>
-                      <span className="text-[15px] font-display font-black text-success tabular-nums">{fmt(availableBalance)}</span>
-                    </div>
-
-                    {/* Amount */}
-                    <div className="rounded-xl bg-card border border-border/50 p-4">
-                      <Label className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.16em]">Valor do saque</Label>
-                      <div className="relative mt-2">
-                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-base font-display font-black text-muted-foreground">R$</span>
-                        <Input
-                          type="number"
-                          step="0.01"
-                          min="1"
-                          value={amount}
-                          onChange={(e) => setAmount(e.target.value)}
-                          placeholder="0,00"
-                          required
-                          className="h-12 pl-10 text-lg font-display font-black tabular-nums"
-                        />
-                      </div>
-                      {/* Quick amounts */}
-                      {quickAmounts.length > 0 && (
-                        <div className="flex flex-wrap gap-1.5 mt-2.5">
-                          {[
-                            { label: "25%", value: quickAmounts[0] },
-                            { label: "50%", value: quickAmounts[1] },
-                            { label: "75%", value: quickAmounts[2] },
-                            { label: "Máx", value: quickAmounts[3] },
-                          ].filter(q => q.value).map(q => (
-                            <button
-                              key={q.label}
-                              type="button"
-                              onClick={() => setAmount(q.value!.toFixed(2))}
-                              className="px-2.5 h-7 rounded-md text-[10px] font-bold bg-secondary/40 hover:bg-secondary text-foreground/80 hover:text-foreground border border-border/50 transition-colors"
-                            >
-                              {q.label}
-                            </button>
-                          ))}
-                        </div>
-                      )}
-
-                      {/* Breakdown */}
-                      <div className="mt-3 pt-3 border-t border-border/40 space-y-1.5">
-                        <div className="flex items-center justify-between text-[11px]">
-                          <span className="text-muted-foreground">Valor solicitado</span>
-                          <span className="font-display font-bold tabular-nums text-foreground">{fmt(numAmount)}</span>
-                        </div>
-                        <div className="flex items-center justify-between text-[11px]">
-                          <span className="text-muted-foreground">Taxa fixa PIX</span>
-                          <span className="font-display font-bold tabular-nums text-warning">- {fmt(WITHDRAW_FEE)}</span>
-                        </div>
-                        <div className="flex items-center justify-between pt-1.5 border-t border-border/40">
-                          <span className="text-[11px] font-bold text-foreground/80">Você receberá</span>
-                          <span className="text-base font-display font-black tabular-nums text-success">{fmt(netPreview)}</span>
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* PIX Key */}
-                    <div className="rounded-xl bg-card border border-border/50 p-4">
-                      <Label className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.16em]">Chave PIX de destino</Label>
-                      {pixKeys.length > 0 ? (
-                        <div className="mt-2 space-y-1.5">
-                          {pixKeys.map((pk) => {
-                            const isSelected = (selectedPixKeyId || pixKeys[0]?.id) === pk.id;
-                            return (
-                              <button key={pk.id} type="button" onClick={() => setSelectedPixKeyId(pk.id)} className={cn(
-                                "w-full flex items-center gap-3 px-3 py-2.5 rounded-lg border transition-all text-left",
-                                isSelected ? "border-primary/40 bg-primary/5" : "border-border/50 bg-secondary/30 hover:border-border"
-                              )}>
-                                <div className={cn("h-8 w-8 rounded-lg border flex items-center justify-center shrink-0", isSelected ? "bg-primary/10 border-primary/30" : "bg-secondary border-border/50")}>
-                                  <Key className={cn("h-3.5 w-3.5", isSelected ? "text-primary" : "text-muted-foreground")} />
-                                </div>
-                                <div className="flex-1 min-w-0">
-                                  <p className={cn("text-[10px] font-bold uppercase tracking-wider", isSelected ? "text-primary" : "text-muted-foreground")}>{pixKeyTypeLabels[pk.key_type]}</p>
-                                  <p className="font-mono text-[12px] font-bold truncate text-foreground">{pk.key_value}</p>
-                                </div>
-                                <div className={cn("h-4 w-4 rounded-full border-2 flex items-center justify-center shrink-0", isSelected ? "border-primary bg-primary" : "border-border")}>
-                                  {isSelected && <CheckCircle2 className="h-2.5 w-2.5 text-primary-foreground" />}
-                                </div>
-                              </button>
-                            );
-                          })}
-                        </div>
-                      ) : (
-                        <button type="button" onClick={() => navigate("/financeiro/dados-bancarios")} className="mt-2 w-full p-3 rounded-lg border border-destructive/20 bg-destructive/5 text-left hover:bg-destructive/10 transition-colors">
-                          <p className="text-[11px] text-destructive font-display font-bold flex items-center gap-2"><XCircle className="h-3.5 w-3.5" /> Cadastrar chave PIX</p>
-                        </button>
-                      )}
-                    </div>
-
-                    <button
-                      type="submit"
-                      disabled={pixKeys.length === 0 || numAmount <= WITHDRAW_FEE || numAmount > availableBalance}
-                      className="w-full h-11 rounded-xl text-[12px] font-display font-black uppercase tracking-[0.12em] flex items-center justify-center gap-2 bg-primary text-primary-foreground hover:bg-primary/90 active:scale-[0.985] transition-all disabled:opacity-40 disabled:cursor-not-allowed"
-                    >
-                      <ArrowDownToLine className="h-4 w-4" /> Confirmar saque de {fmt(netPreview)}
-                    </button>
-
-                    <div className="flex items-center justify-center gap-1.5 text-[10px] text-muted-foreground">
-                      <Shield className="h-3 w-3" />
-                      Aprovação em até 24h úteis · Verificação automática
-                    </div>
-                  </form>
-                </DialogContent>
-              </Dialog>
-            )}
-          </div>
-        </div>
-      </div>
-
-      {/* ═══════ BALANCE + PIX KEY ═══════ */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-px overflow-hidden rounded-xl border border-border/50 bg-border/40 animate-fade-in stagger-1">
-        {/* Available balance */}
-        <div className="lg:col-span-2 bg-card p-5">
-          <div className="flex items-start justify-between gap-6">
             <div className="flex-1 min-w-0">
-              <div className="flex items-center gap-2 mb-3">
-                <div className="h-7 w-7 rounded-md bg-primary/10 text-primary flex items-center justify-center">
-                  <Wallet className="h-3.5 w-3.5" strokeWidth={2.25} />
-                </div>
-                <span className="text-[10px] font-bold uppercase tracking-[0.18em] text-muted-foreground">Saldo disponível para saque</span>
-              </div>
-              <div className="flex items-baseline gap-3">
-                <span className={cn("text-[44px] leading-none font-display font-black tabular-nums tracking-[-0.03em]", availableBalance > 0 ? "text-foreground" : "text-muted-foreground")}>
+              <p className="text-[12px] font-display font-black text-warning tracking-[-0.01em]">Endereço não cadastrado</p>
+              <p className="text-[10.5px] text-warning/80 font-medium">Preencha seu endereço no Perfil para realizar saques normalmente.</p>
+            </div>
+            <AlertTriangle className="h-4 w-4 text-warning/70 shrink-0" />
+          </div>
+        )}
+
+        {/* ─────────── COMANDO LIMPO (Vendas pattern) ─────────── */}
+        <header className="border-b border-border/70 pb-7">
+          <div className="flex flex-col gap-5 xl:flex-row xl:items-start xl:justify-between">
+            <div className="min-w-0">
+              <h1 className="font-display text-[44px] font-black leading-[0.88] tracking-[-0.06em] text-foreground sm:text-[64px]">
+                Saques
+              </h1>
+              <div className="mt-5 flex flex-wrap items-end gap-x-5 gap-y-2">
+                <p
+                  className={cn(
+                    "font-display text-[54px] font-black leading-[0.84] tracking-[-0.075em] tabular-nums sm:text-[78px]",
+                    hidden ? "text-foreground" : (availableBalance > 0 ? "text-success" : "text-foreground"),
+                  )}
+                  style={{ fontVariantNumeric: "tabular-nums slashed-zero" }}
+                >
                   {hidden ? HIDE : fmt(availableBalance)}
-                </span>
-              </div>
-              <div className="mt-4 flex flex-wrap items-center gap-x-5 gap-y-1.5 text-[11px]">
-                <div className="flex items-center gap-1.5">
-                  <span className="h-1.5 w-1.5 rounded-full bg-warning" />
-                  <span className="text-muted-foreground">Retido:</span>
-                  <span className="font-display font-bold text-foreground tabular-nums">{hidden ? HIDE : fmt(retainedAmount)}</span>
-                </div>
-                <div className="flex items-center gap-1.5">
-                  <span className="h-1.5 w-1.5 rounded-full bg-warning" />
-                  <span className="text-muted-foreground">Pendente saque:</span>
-                  <span className="font-display font-bold text-foreground tabular-nums">{hidden ? HIDE : fmt(m.totalPending)}</span>
-                </div>
-                <div className="flex items-center gap-1.5">
-                  <span className="h-1.5 w-1.5 rounded-full bg-success" />
-                  <span className="text-muted-foreground">Aprovação média:</span>
-                  <span className="font-display font-bold text-foreground tabular-nums">{m.avgApprovalHours > 0 ? `${m.avgApprovalHours.toFixed(1)}h` : "—"}</span>
+                </p>
+                <div className="pb-1.5">
+                  <p className="flex items-center gap-1.5 text-[12px] font-bold tracking-[-0.005em] text-foreground">
+                    <span className="inline-block h-2 w-[3px] rounded-full bg-success" />
+                    Saldo disponível para saque
+                  </p>
+                  <p className="mt-1 text-[11.5px] font-medium text-muted-foreground/85">
+                    <span className="font-bold text-foreground">{m.pending.length > 0 ? `${m.pending.length} ${m.pending.length === 1 ? "saque pendente" : "saques pendentes"}` : "Sem fila"}</span>
+                    <span className="mx-1.5 inline-block h-[3px] w-[3px] -translate-y-[3px] rounded-full bg-muted-foreground/40 align-middle" />
+                    Retido <span className="font-bold text-foreground tabular-nums">{hidden ? HIDE : fmt(retainedAmount)}</span>
+                    <span className="mx-1.5 inline-block h-[3px] w-[3px] -translate-y-[3px] rounded-full bg-muted-foreground/40 align-middle" />
+                    Atualização automática a cada 15s
+                  </p>
                 </div>
               </div>
             </div>
-          </div>
-        </div>
 
-        {/* PIX Key destination card */}
-        <div className="bg-card p-5 flex flex-col">
-          <div className="flex items-center justify-between mb-3">
-            <div className="flex items-center gap-2">
-              <div className="h-7 w-7 rounded-md bg-success/10 text-success flex items-center justify-center">
+            <div className="flex w-full flex-wrap items-center gap-1 xl:w-auto xl:justify-end">
+              {/* Period segment-control — Vendas style */}
+              <div className="hidden items-center rounded-lg border border-border/60 bg-card p-[3px] md:inline-flex">
+                {PERIODS.map((opt) => {
+                  const active = selectedPeriod.label === opt.label;
+                  return (
+                    <button
+                      key={opt.label}
+                      onClick={() => setSelectedPeriod(opt)}
+                      className={cn(
+                        "relative rounded-[6px] px-2.5 py-[5px] text-[11px] font-bold tracking-[-0.005em] transition-all duration-200",
+                        active
+                          ? "bg-success/15 text-success ring-1 ring-success/30"
+                          : "text-muted-foreground/90 hover:text-foreground",
+                      )}
+                    >
+                      {opt.label}
+                    </button>
+                  );
+                })}
+              </div>
+
+              <span className="hidden h-5 w-px bg-border/60 md:mx-1 md:block" />
+
+              {/* Privacy toggle — Vendas circular button */}
+              <button
+                onClick={toggleHidden}
+                aria-label={hidden ? "Mostrar valores" : "Ocultar valores"}
+                className={cn(
+                  "inline-flex h-8 w-8 items-center justify-center rounded-md border transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-foreground/20",
+                  hidden
+                    ? "border-foreground/80 bg-secondary text-foreground"
+                    : "border-border/60 bg-card/70 text-muted-foreground/90 hover:border-foreground/40 hover:bg-muted/60 hover:text-foreground"
+                )}
+              >
+                {hidden ? <EyeOff className="h-[15px] w-[15px]" strokeWidth={2.1} /> : <Eye className="h-[15px] w-[15px]" strokeWidth={2.1} />}
+              </button>
+
+              <span className="hidden h-5 w-px bg-border/60 md:mx-1 md:block" />
+
+              {/* CTA — flat success/primary */}
+              {!hasAddress ? (
+                <button
+                  onClick={() => { toast.info("Preencha seu endereço primeiro para realizar saques"); navigate("/perfil"); }}
+                  className="inline-flex h-8 items-center gap-1.5 rounded-lg bg-warning px-3.5 text-[11px] font-black tracking-[-0.005em] text-warning-foreground ring-1 ring-warning/40 transition-all duration-200 hover:bg-warning/90 hover:ring-warning/60 focus:outline-none focus-visible:ring-2 focus-visible:ring-warning/50"
+                >
+                  <MapPin className="h-[14px] w-[14px]" strokeWidth={2.6} />
+                  Preencher endereço
+                </button>
+              ) : (
+                <Dialog open={open} onOpenChange={setOpen}>
+                  <DialogTrigger asChild>
+                    <button className="inline-flex h-8 items-center gap-1.5 rounded-lg bg-success px-3.5 text-[11px] font-black tracking-[-0.005em] text-success-foreground ring-1 ring-success/40 transition-all duration-200 hover:bg-success/90 hover:ring-success/60 focus:outline-none focus-visible:ring-2 focus-visible:ring-success/50">
+                      <Plus className="h-[14px] w-[14px]" strokeWidth={2.6} />
+                      Novo saque
+                    </button>
+                  </DialogTrigger>
+                  <DialogContent className="max-w-md rounded-2xl border border-border/50 bg-card p-0 overflow-hidden">
+                    <div className="px-6 pt-6 pb-4 border-b border-border/40">
+                      <DialogHeader>
+                        <DialogTitle className="font-display font-black text-lg tracking-[-0.03em] flex items-center gap-2.5">
+                          <div className="h-10 w-10 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center">
+                            <ArrowDownToLine className="h-4 w-4 text-primary" />
+                          </div>
+                          Solicitar Saque
+                        </DialogTitle>
+                      </DialogHeader>
+                    </div>
+                    <form onSubmit={handleSubmit} className="space-y-4 p-6">
+                      {/* Saldo header */}
+                      <div className="rounded-xl bg-secondary/40 border border-border/50 px-4 py-3 flex items-center justify-between">
+                        <span className="text-[10px] font-bold uppercase tracking-[0.16em] text-muted-foreground">Saldo disponível</span>
+                        <span className="text-[15px] font-display font-black text-success tabular-nums">{fmt(availableBalance)}</span>
+                      </div>
+
+                      {/* Amount */}
+                      <div className="rounded-xl bg-card border border-border/50 p-4">
+                        <Label className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.16em]">Valor do saque</Label>
+                        <div className="relative mt-2">
+                          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-base font-display font-black text-muted-foreground">R$</span>
+                          <Input
+                            type="number"
+                            step="0.01"
+                            min="1"
+                            value={amount}
+                            onChange={(e) => setAmount(e.target.value)}
+                            placeholder="0,00"
+                            required
+                            className="h-12 pl-10 text-lg font-display font-black tabular-nums"
+                          />
+                        </div>
+                        {/* Quick amounts */}
+                        {quickAmounts.length > 0 && (
+                          <div className="flex flex-wrap gap-1.5 mt-2.5">
+                            {[
+                              { label: "25%", value: quickAmounts[0] },
+                              { label: "50%", value: quickAmounts[1] },
+                              { label: "75%", value: quickAmounts[2] },
+                              { label: "Máx", value: quickAmounts[3] },
+                            ].filter(q => q.value).map(q => (
+                              <button
+                                key={q.label}
+                                type="button"
+                                onClick={() => setAmount(q.value!.toFixed(2))}
+                                className="px-2.5 h-7 rounded-md text-[10px] font-bold bg-secondary/40 hover:bg-secondary text-foreground/80 hover:text-foreground border border-border/50 transition-colors"
+                              >
+                                {q.label}
+                              </button>
+                            ))}
+                          </div>
+                        )}
+
+                        {/* Breakdown */}
+                        <div className="mt-3 pt-3 border-t border-border/40 space-y-1.5">
+                          <div className="flex items-center justify-between text-[11px]">
+                            <span className="text-muted-foreground">Valor solicitado</span>
+                            <span className="font-display font-bold tabular-nums text-foreground">{fmt(numAmount)}</span>
+                          </div>
+                          <div className="flex items-center justify-between text-[11px]">
+                            <span className="text-muted-foreground">Taxa fixa PIX</span>
+                            <span className="font-display font-bold tabular-nums text-warning">- {fmt(WITHDRAW_FEE)}</span>
+                          </div>
+                          <div className="flex items-center justify-between pt-1.5 border-t border-border/40">
+                            <span className="text-[11px] font-bold text-foreground/80">Você receberá</span>
+                            <span className="text-base font-display font-black tabular-nums text-success">{fmt(netPreview)}</span>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* PIX Key */}
+                      <div className="rounded-xl bg-card border border-border/50 p-4">
+                        <Label className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.16em]">Chave PIX de destino</Label>
+                        {pixKeys.length > 0 ? (
+                          <div className="mt-2 space-y-1.5">
+                            {pixKeys.map((pk) => {
+                              const isSelected = (selectedPixKeyId || pixKeys[0]?.id) === pk.id;
+                              return (
+                                <button key={pk.id} type="button" onClick={() => setSelectedPixKeyId(pk.id)} className={cn(
+                                  "w-full flex items-center gap-3 px-3 py-2.5 rounded-lg border transition-all text-left",
+                                  isSelected ? "border-primary/40 bg-primary/5" : "border-border/50 bg-secondary/30 hover:border-border"
+                                )}>
+                                  <div className={cn("h-8 w-8 rounded-lg border flex items-center justify-center shrink-0", isSelected ? "bg-primary/10 border-primary/30" : "bg-secondary border-border/50")}>
+                                    <Key className={cn("h-3.5 w-3.5", isSelected ? "text-primary" : "text-muted-foreground")} />
+                                  </div>
+                                  <div className="flex-1 min-w-0">
+                                    <p className={cn("text-[10px] font-bold uppercase tracking-wider", isSelected ? "text-primary" : "text-muted-foreground")}>{pixKeyTypeLabels[pk.key_type]}</p>
+                                    <p className="font-mono text-[12px] font-bold truncate text-foreground">{pk.key_value}</p>
+                                  </div>
+                                  <div className={cn("h-4 w-4 rounded-full border-2 flex items-center justify-center shrink-0", isSelected ? "border-primary bg-primary" : "border-border")}>
+                                    {isSelected && <CheckCircle2 className="h-2.5 w-2.5 text-primary-foreground" />}
+                                  </div>
+                                </button>
+                              );
+                            })}
+                          </div>
+                        ) : (
+                          <button type="button" onClick={() => navigate("/financeiro/dados-bancarios")} className="mt-2 w-full p-3 rounded-lg border border-destructive/20 bg-destructive/5 text-left hover:bg-destructive/10 transition-colors">
+                            <p className="text-[11px] text-destructive font-display font-bold flex items-center gap-2"><XCircle className="h-3.5 w-3.5" /> Cadastrar chave PIX</p>
+                          </button>
+                        )}
+                      </div>
+
+                      <button
+                        type="submit"
+                        disabled={pixKeys.length === 0 || numAmount <= WITHDRAW_FEE || numAmount > availableBalance}
+                        className="w-full h-11 rounded-xl text-[12px] font-display font-black uppercase tracking-[0.12em] flex items-center justify-center gap-2 bg-primary text-primary-foreground hover:bg-primary/90 active:scale-[0.985] transition-all disabled:opacity-40 disabled:cursor-not-allowed"
+                      >
+                        <ArrowDownToLine className="h-4 w-4" /> Confirmar saque de {fmt(netPreview)}
+                      </button>
+
+                      <div className="flex items-center justify-center gap-1.5 text-[10px] text-muted-foreground">
+                        <Shield className="h-3 w-3" />
+                        Aprovação em até 24h úteis · Verificação automática
+                      </div>
+                    </form>
+                  </DialogContent>
+                </Dialog>
+              )}
+            </div>
+          </div>
+
+          {/* ─────────── KPI strip — 4 cols, divisores, rails verticais ─────────── */}
+          <div className="mt-8 grid grid-cols-2 border-y border-border/70 lg:grid-cols-4 lg:divide-x lg:divide-border/70">
+            {kpiRails.map((k, idx) => (
+              <div
+                key={k.label}
+                className={cn(
+                  "group relative min-h-[150px] px-6 py-6 transition-colors duration-200 hover:bg-muted/25",
+                  idx > 1 && "border-t border-border/70 lg:border-t-0",
+                  idx === 1 && "border-l border-border/70 lg:border-l-0",
+                )}
+              >
+                <span className={cn("absolute left-0 top-6 h-8 w-[3px] rounded-r-full", k.rail)} />
+                <div className="flex items-center justify-between gap-2 pl-3">
+                  <p className="text-[10.5px] font-black uppercase tracking-[0.22em] text-muted-foreground">{k.label}</p>
+                </div>
+                <p
+                  className={cn(
+                    "mt-3.5 pl-3 font-display text-[36px] font-black leading-[0.9] tracking-[-0.06em] tabular-nums sm:text-[44px]",
+                    k.accent,
+                  )}
+                  style={{ fontVariantNumeric: "tabular-nums slashed-zero" }}
+                >
+                  {k.value}
+                </p>
+                <p className="mt-3 truncate pl-3 text-[12.5px] font-semibold text-muted-foreground/85">{k.sub}</p>
+              </div>
+            ))}
+          </div>
+
+          {/* Risk strip — 3 cols inline (Vendas pattern) */}
+          <div className="grid grid-cols-1 border-b border-border/70 sm:grid-cols-3 sm:divide-x sm:divide-border/70">
+            {riskRails.map((r) => (
+              <div
+                key={r.label}
+                className="group relative flex flex-col gap-2.5 px-6 py-6 transition-colors duration-200 hover:bg-muted/25"
+              >
+                <div className="flex items-baseline justify-between gap-3">
+                  <p className="font-display text-[19px] font-black tracking-[-0.035em] text-foreground">{r.label}</p>
+                  <p
+                    className={cn("font-display text-[26px] font-black leading-none tabular-nums tracking-[-0.05em]", r.accent)}
+                    style={{ fontVariantNumeric: "tabular-nums slashed-zero" }}
+                  >
+                    {r.value}
+                  </p>
+                </div>
+                <div className="flex items-center gap-2 text-[12.5px] font-semibold text-muted-foreground">
+                  <span className="font-display tabular-nums font-black text-foreground">{r.count}</span>
+                  <span>{r.count === 1 ? "Saque" : "Saques"}</span>
+                  <span className="inline-block h-[3px] w-[3px] rounded-full bg-muted-foreground/50" />
+                  <span className="font-medium">{r.sub}</span>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* Mobile period scroller */}
+          <div className="mt-3 flex items-center gap-1.5 overflow-x-auto md:hidden">
+            {PERIODS.map((opt) => {
+              const active = selectedPeriod.label === opt.label;
+              return (
+                <button
+                  key={opt.label}
+                  onClick={() => setSelectedPeriod(opt)}
+                  className={cn(
+                    "shrink-0 rounded-md border px-2.5 py-1 text-[11px] font-bold tracking-[-0.005em] transition-all",
+                    active
+                      ? "border-success/40 bg-success/15 text-success"
+                      : "border-border/60 bg-card/70 text-muted-foreground hover:text-foreground",
+                  )}
+                >
+                  {opt.label}
+                </button>
+              );
+            })}
+          </div>
+        </header>
+
+        {/* ─────────── PIX Key card (compact, beneath header) ─────────── */}
+        {primaryPixKey && (
+          <div className="mt-5 flex items-center justify-between gap-4 rounded-lg border border-border/70 bg-card px-4 py-3">
+            <div className="flex items-center gap-3 min-w-0">
+              <div className="h-8 w-8 rounded-md bg-success/10 border border-success/20 text-success flex items-center justify-center shrink-0">
                 <Key className="h-3.5 w-3.5" strokeWidth={2.25} />
               </div>
-              <span className="text-[10px] font-bold uppercase tracking-[0.18em] text-muted-foreground">Chave PIX padrão</span>
-            </div>
-            <button onClick={() => navigate("/financeiro/dados-bancarios")} className="text-[10px] font-black uppercase tracking-[0.12em] text-primary hover:underline">Gerenciar</button>
-          </div>
-          {primaryPixKey ? (
-            <div className="flex-1 flex flex-col justify-between">
-              <div>
-                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[9px] font-bold uppercase tracking-wider bg-success/10 text-success border border-success/20">
-                  {pixKeyTypeLabels[primaryPixKey.key_type]}
-                </span>
-                <p className="mt-2 font-mono text-[14px] font-bold text-foreground break-all">{hidden ? "•••••••••••••" : primaryPixKey.key_value}</p>
+              <div className="min-w-0">
+                <p className="text-[10px] font-black uppercase tracking-[0.18em] text-muted-foreground">
+                  Chave PIX padrão · {pixKeyTypeLabels[primaryPixKey.key_type]}
+                </p>
+                <p className="mt-0.5 font-mono text-[12.5px] font-bold text-foreground truncate">
+                  {hidden ? "•••••••••••••" : primaryPixKey.key_value}
+                </p>
               </div>
+            </div>
+            <div className="flex items-center gap-1.5 shrink-0">
               <button
                 onClick={() => { navigator.clipboard.writeText(primaryPixKey.key_value); toast.success("Chave copiada"); }}
-                className="mt-3 inline-flex items-center justify-center gap-1.5 h-8 rounded-lg border border-border/50 bg-secondary/40 hover:bg-secondary text-[11px] font-bold text-foreground/80 transition-colors"
+                className="inline-flex h-8 w-8 items-center justify-center rounded-md border border-border/60 bg-card/70 text-muted-foreground hover:border-foreground/40 hover:text-foreground transition-colors"
+                aria-label="Copiar chave"
               >
-                <Copy className="h-3 w-3" /> Copiar chave
+                <Copy className="h-[14px] w-[14px]" />
+              </button>
+              <button
+                onClick={() => navigate("/financeiro/dados-bancarios")}
+                className="inline-flex h-8 items-center gap-1 rounded-md border border-border/60 bg-card/70 px-2.5 text-[11px] font-black uppercase tracking-[0.12em] text-muted-foreground hover:border-foreground/40 hover:text-foreground transition-colors"
+              >
+                Gerenciar
               </button>
             </div>
-          ) : (
-            <button onClick={() => navigate("/financeiro/dados-bancarios")} className="flex-1 flex flex-col items-center justify-center gap-2 rounded-xl border border-dashed border-border/60 bg-secondary/20 hover:bg-secondary/40 transition-colors py-4">
-              <Key className="h-5 w-5 text-muted-foreground" />
-              <p className="text-[11px] font-bold text-muted-foreground">Cadastrar chave PIX</p>
-            </button>
-          )}
-        </div>
-      </div>
-
-      {/* ═══════ PERIOD BAR ═══════ */}
-      <div className="flex items-center justify-between gap-3 animate-fade-in stagger-2">
-        <div className="inline-flex items-center gap-0.5 rounded-xl border border-border/50 bg-card/60 p-1">
-          {PERIODS.map((opt) => (
-            <button
-              key={opt.label}
-              onClick={() => setSelectedPeriod(opt)}
-              className={cn(
-                "rounded-lg h-8 px-3 text-[12px] font-bold tracking-tight transition-colors duration-200",
-                selectedPeriod.label === opt.label
-                  ? "bg-secondary text-foreground"
-                  : "text-muted-foreground hover:text-foreground"
-              )}
-            >
-              {opt.label}
-            </button>
-          ))}
-        </div>
-      </div>
-
-      {/* ═══════ KPI GRID — 1px divider ═══════ */}
-      <div key={`saques-kpis-${selectedPeriod.label}`} className="grid grid-cols-2 gap-px overflow-hidden rounded-xl border border-border/50 bg-border/40 lg:grid-cols-5 animate-fade-in stagger-2">
-        <Kpi
-          label="Total sacado"
-          value={hidden ? HIDE : fmtCompact(m.totalApproved)}
-          sub={`${m.approved.length} ${m.approved.length === 1 ? "saque aprovado" : "saques aprovados"}`}
-          icon={DollarSign}
-          tone="success"
-        />
-        <Kpi
-          label="Taxa de aprovação"
-          value={hidden ? HIDE : `${m.approvalRate.toFixed(1)}%`}
-          sub={`${m.approved.length}/${m.current.length} solicitações`}
-          icon={Percent}
-          tone={m.approvalRate >= 80 ? "success" : "warning"}
-        />
-        <Kpi
-          label="Pendentes"
-          value={hidden ? HIDE : String(m.pending.length)}
-          sub={m.pending.length > 0 ? `${fmtCompact(m.totalPending)} aguardando` : "Sem fila"}
-          icon={Clock}
-          tone={m.pending.length > 0 ? "warning" : "neutral"}
-        />
-        <Kpi
-          label="Ticket médio"
-          value={hidden ? HIDE : fmtCompact(m.avgAmount)}
-          sub={m.avgAmount > 0 ? "Por saque aprovado" : "Sem dados"}
-          icon={TrendingUp}
-          tone="info"
-        />
-        <Kpi
-          label="Total em taxas"
-          value={hidden ? HIDE : fmtCompact(m.totalFees)}
-          sub={`${fmt(WITHDRAW_FEE)}/op · ${m.current.length} ${m.current.length === 1 ? "op" : "ops"}`}
-          icon={Receipt}
-          tone="warning"
-        />
+          </div>
+        )}
       </div>
       {/* ════════════════════════════════════════════════════════════════ */}
       {/* CHART */}
