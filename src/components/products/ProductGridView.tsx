@@ -294,10 +294,10 @@ export function ProductGridView({ products, copiedId, toolbar, ...handlers }: Pr
                       <button
                         type="button"
                         onClick={(e) => { e.stopPropagation(); handlers.onOpenPixels(product); }}
-                        className="flex h-11 flex-1 items-center justify-center gap-2 rounded-xl border border-warning/30 bg-warning/[0.06] text-[12px] font-black uppercase tracking-wider text-warning transition-all hover:border-warning/60 hover:bg-warning/[0.12] hover:-translate-y-px"
+                        className="flex h-11 flex-1 items-center justify-center gap-2 rounded-xl border border-border/40 bg-card shadow-sm text-[12px] font-black uppercase tracking-wider text-foreground/80 transition-all hover:border-primary/40 hover:text-primary hover:shadow-md"
                         title="Configurar pixels e tracking"
                       >
-                        <Crosshair className="h-4 w-4" strokeWidth={2.5} />
+                        <Crosshair className="h-4 w-4" strokeWidth={2.25} />
                         Pixels
                       </button>
                       {product.checkout_url && (
