@@ -879,6 +879,7 @@ export default function Saques() {
           </div>
         )}
       </AnimatePresence>
+      </div>
     </div>
   );
 }
