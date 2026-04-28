@@ -811,38 +811,58 @@ export default function Vendas() {
             </TooltipProvider>
           </div>
 
-          <div className="mt-6 grid grid-cols-2 border-y border-border lg:grid-cols-4 lg:divide-x lg:divide-border">
+          <div className="mt-7 grid grid-cols-2 border-y border-border/70 lg:grid-cols-4 lg:divide-x lg:divide-border/70">
             {[
               { label: "Receita bruta", value: hidden ? HIDE : fmtCompact(m.totalGross), sub: hidden ? "—" : `Taxas ${fmtCompact(m.totalFees)}`, accent: "text-foreground", delta: { cur: m.totalGross, prev: p.totalGross } },
               heroKpis[1],
               heroKpis[2],
               heroKpis[3],
             ].map((k, idx) => (
-              <div key={k.label} className={cn("min-h-[126px] px-4 py-4 sm:px-5", idx > 1 && "border-t border-border lg:border-t-0", idx === 1 && "border-l border-border lg:border-l-0")}>
+              <div
+                key={k.label}
+                className={cn(
+                  "group relative min-h-[130px] px-5 py-5 transition-colors duration-200 hover:bg-muted/25",
+                  idx > 1 && "border-t border-border/70 lg:border-t-0",
+                  idx === 1 && "border-l border-border/70 lg:border-l-0",
+                )}
+              >
                 <div className="flex items-center justify-between gap-2">
-                  <p className="text-[9px] font-black uppercase tracking-[0.22em] text-muted-foreground">{k.label}</p>
+                  <p className="text-[9px] font-black uppercase tracking-[0.24em] text-muted-foreground/85">{k.label}</p>
                   {k.delta && <DeltaBadge cur={k.delta.cur} prev={k.delta.prev} />}
                 </div>
-                <p className={cn("mt-3 font-numbers text-[28px] font-black leading-none tracking-[-0.05em] tabular-nums sm:text-[34px]", k.accent)}>
+                <p
+                  className={cn(
+                    "mt-3 font-numbers text-[28px] font-black leading-[0.95] tracking-[-0.055em] tabular-nums sm:text-[36px]",
+                    k.accent,
+                  )}
+                  style={{ fontVariantNumeric: "tabular-nums slashed-zero" }}
+                >
                   {k.value}
                 </p>
-                <p className="mt-2 truncate text-[11.5px] font-semibold text-muted-foreground">{k.sub}</p>
+                <p className="mt-2.5 truncate text-[11.5px] font-semibold text-muted-foreground/80">{k.sub}</p>
               </div>
             ))}
           </div>
 
-          <div className="grid grid-cols-1 border-b border-border sm:grid-cols-3 sm:divide-x sm:divide-border">
+          <div className="grid grid-cols-1 border-b border-border/70 sm:grid-cols-3 sm:divide-x sm:divide-border/70">
             {riskKpis.map((r) => {
               const Icon = r.icon;
               return (
-                <div key={r.label} className="flex items-center gap-3 px-4 py-3 sm:px-5">
-                  <Icon className={cn("h-4 w-4 shrink-0", r.accent)} strokeWidth={2.4} />
+                <div key={r.label} className="group flex items-center gap-3 px-5 py-3.5 transition-colors duration-200 hover:bg-muted/25">
+                  <div className={cn("flex h-7 w-7 shrink-0 items-center justify-center rounded-md border border-border/60 bg-card/40", r.accent)}>
+                    <Icon className="h-3.5 w-3.5" strokeWidth={2.4} />
+                  </div>
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center justify-between gap-3">
-                      <p className="text-[9px] font-black uppercase tracking-[0.22em] text-muted-foreground">{r.label}</p>
-                      <p className={cn("font-numbers text-[15px] font-black leading-none tabular-nums", r.accent)}>{r.value}</p>
+                      <p className="text-[9px] font-black uppercase tracking-[0.24em] text-muted-foreground/85">{r.label}</p>
+                      <p
+                        className={cn("font-numbers text-[15px] font-black leading-none tabular-nums tracking-[-0.02em]", r.accent)}
+                        style={{ fontVariantNumeric: "tabular-nums slashed-zero" }}
+                      >
+                        {r.value}
+                      </p>
                     </div>
-                    <p className="mt-1 truncate text-[11px] font-medium text-muted-foreground">{r.sub}</p>
+                    <p className="mt-1 truncate text-[11px] font-medium text-muted-foreground/80">{r.sub}</p>
                   </div>
                 </div>
               );
