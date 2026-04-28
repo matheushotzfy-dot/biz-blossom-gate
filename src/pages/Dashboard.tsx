@@ -223,6 +223,10 @@ export default function Dashboard() {
     return transactions.filter((t) => new Date(t.created_at) >= start);
   }, [transactions, selectedPeriod, isCustom, customRange]);
 
+  const animKey = isCustom
+    ? `custom-${customRange?.from?.getTime() ?? 0}-${customRange?.to?.getTime() ?? 0}`
+    : `p-${selectedPeriod.label}`;
+
   // Memoize all derived metrics to avoid recomputing on every render
   const { approved, pending, refunded, chargebacks, revenue, conversion, uniqueCustomers, pixConversion, cardConversion, chargebackRate, pixRevenue, cardRevenue, pixApprovedCount, pixTotalCount, cardApprovedCount, cardTotalCount } = useMemo(() => {
     const _approved = filteredTx.filter((t) => t.status === "completed");
