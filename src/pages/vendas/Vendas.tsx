@@ -918,15 +918,15 @@ export default function Vendas() {
         <section className="overflow-hidden rounded-xl border border-border/70 bg-card shadow-[0_1px_0_hsl(var(--foreground)/0.02),0_1px_2px_hsl(var(--foreground)/0.03)]">
           <div className="flex flex-col gap-3 border-b border-border/70 bg-gradient-to-b from-muted/15 to-transparent px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
             <div className="flex items-center gap-3">
-              <div className="flex h-9 w-9 items-center justify-center rounded-md border border-border/60 bg-background/60">
-                <ShoppingCart className="h-4 w-4 text-foreground/85" strokeWidth={2.1} />
+              <div className="flex h-9 w-9 items-center justify-center rounded-md border border-success/30 bg-success/10">
+                <ShoppingCart className="h-4 w-4 text-success" strokeWidth={2.2} />
               </div>
               <div>
                 <p className="text-[13px] font-black leading-tight tracking-[-0.012em] text-foreground">Transações</p>
                 <p className="mt-0.5 text-[11px] font-medium text-muted-foreground/85">
                   <span className="tabular-nums font-bold text-foreground/85">{sortedFiltered.length}</span> {sortedFiltered.length === 1 ? "resultado" : "resultados"}
-                  <span className="mx-1.5 inline-block h-[3px] w-[3px] -translate-y-[3px] rounded-full bg-muted-foreground/40 align-middle" />
-                  líquido <span className="font-numbers font-black tabular-nums text-foreground" style={{ fontVariantNumeric: "tabular-nums slashed-zero" }}>{hidden ? HIDE : fmt(filteredNetTotal)}</span>
+                  <span className="mx-1.5 inline-block h-[3px] w-[3px] -translate-y-[3px] rounded-full bg-success/60 align-middle" />
+                  líquido <span className="font-numbers font-black tabular-nums text-success" style={{ fontVariantNumeric: "tabular-nums slashed-zero" }}>{hidden ? HIDE : fmt(filteredNetTotal)}</span>
                 </p>
               </div>
             </div>
