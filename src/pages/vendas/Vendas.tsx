@@ -851,7 +851,7 @@ export default function Vendas() {
                 </div>
                 <div className="flex items-center gap-2 text-[12.5px] font-semibold text-muted-foreground">
                   <span className="font-display tabular-nums font-black text-foreground">{r.count}</span>
-                  <span>{r.count === 1 ? "caso" : "casos"}</span>
+                  <span>{r.count === 1 ? "Transação" : "Transações"}</span>
                   <span className="inline-block h-[3px] w-[3px] rounded-full bg-muted-foreground/50" />
                   <span className="tabular-nums font-bold">{r.rate.toFixed(2).replace(".", ",")}%</span>
                 </div>
