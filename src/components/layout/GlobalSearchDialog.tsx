@@ -45,7 +45,7 @@ const PAGES = [
  { label: "Cupons", href: "/vendas/cupons", icon: Ticket, category: "vendas" },
  { label: "Assinaturas", href: "/vendas/assinaturas", icon: Repeat, category: "vendas" },
  { label: "Extrato", href: "/financeiro/extrato", icon: FileText, category: "financeiro" },
- { label: "Saldo Disponível", href: "/financeiro/saques", icon: ArrowDownToLine, category: "financeiro" },
+ { label: "Saldo Disponível:", href: "/financeiro/saques", icon: ArrowDownToLine, category: "financeiro" },
  { label: "Config. Financeiro", href: "/financeiro/config", icon: Building2, category: "financeiro" },
  { label: "Integrações", href: "/integracoes", icon: Puzzle, category: "ferramentas" },
  { label: "Meu Perfil", href: "/perfil", icon: User, category: "conta" },

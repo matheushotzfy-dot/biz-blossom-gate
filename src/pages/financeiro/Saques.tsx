@@ -258,7 +258,6 @@ export default function Saques() {
   /* ═══════════ RENDER ═══════════ */
   /* KPI rails for the Vendas-style strip */
   const kpiRails = [
-    { label: "Saldo disponível", value: hidden ? HIDE : fmtCompact(availableBalance), sub: `Retido ${hidden ? HIDE : fmtCompact(retainedAmount)}`, accent: availableBalance > 0 ? "text-success" : "text-foreground", rail: "bg-success" },
     { label: "Total sacado", value: hidden ? HIDE : fmtCompact(m.totalApproved), sub: `${m.approved.length} ${m.approved.length === 1 ? "saque aprovado" : "saques aprovados"}`, accent: "text-foreground", rail: "bg-info" },
     { label: "Taxa de aprovação", value: hidden ? HIDE : `${m.approvalRate.toFixed(1)}%`, sub: `${m.approved.length}/${m.current.length} solicitações`, accent: m.approvalRate >= 80 ? "text-success" : "text-warning", rail: m.approvalRate >= 80 ? "bg-success" : "bg-warning" },
     { label: "Pendentes", value: hidden ? HIDE : String(m.pending.length), sub: m.pending.length > 0 ? `${fmtCompact(m.totalPending)} aguardando` : "Sem fila", accent: m.pending.length > 0 ? "text-warning" : "text-foreground", rail: m.pending.length > 0 ? "bg-warning" : "bg-foreground/40" },
@@ -298,10 +297,10 @@ export default function Saques() {
         <header className="border-b border-border/70 pb-7">
           <div className="flex flex-col gap-5 xl:flex-row xl:items-start xl:justify-between">
             <div className="min-w-0">
-              <h1 className="font-display text-[44px] font-black leading-[0.88] tracking-[-0.06em] text-foreground sm:text-[64px]">
-                Saldo Disponível
+              <h1 className="text-[13px] font-black uppercase tracking-[0.18em] text-muted-foreground/80">
+                Saldo Disponível:
               </h1>
-              <div className="mt-5 flex flex-wrap items-end gap-x-5 gap-y-2">
+              <div className="mt-4 flex flex-wrap items-end gap-x-6 gap-y-2">
                 <p
                   className={cn(
                     "font-display text-[54px] font-black leading-[0.84] tracking-[-0.075em] tabular-nums sm:text-[78px]",
@@ -312,11 +311,7 @@ export default function Saques() {
                   {hidden ? HIDE : fmt(availableBalance)}
                 </p>
                 <div className="pb-1.5">
-                  <p className="flex items-center gap-1.5 text-[12px] font-bold tracking-[-0.005em] text-foreground">
-                    <span className="inline-block h-2 w-[3px] rounded-full bg-success" />
-                    Saldo disponível para saque
-                  </p>
-                  <p className="mt-1 text-[11.5px] font-medium text-muted-foreground/85">
+                  <p className="text-[11.5px] font-medium text-muted-foreground/85">
                     <span className="font-bold text-foreground">{m.pending.length > 0 ? `${m.pending.length} ${m.pending.length === 1 ? "saque pendente" : "saques pendentes"}` : "Sem fila"}</span>
                     <span className="mx-1.5 inline-block h-[3px] w-[3px] -translate-y-[3px] rounded-full bg-muted-foreground/40 align-middle" />
                     Retido <span className="font-bold text-foreground tabular-nums">{hidden ? HIDE : fmt(retainedAmount)}</span>
@@ -508,15 +503,15 @@ export default function Saques() {
             </div>
           </div>
 
-          {/* ─────────── KPI strip — 4 cols, divisores, rails verticais ─────────── */}
-          <div className="mt-8 grid grid-cols-2 border-y border-border/70 lg:grid-cols-4 lg:divide-x lg:divide-border/70">
+          {/* ─────────── KPI strip — 3 cols, divisores, rails verticais ─────────── */}
+          <div className="mt-8 grid grid-cols-1 border-y border-border/70 sm:grid-cols-2 lg:grid-cols-3 lg:divide-x lg:divide-border/70">
             {kpiRails.map((k, idx) => (
               <div
                 key={k.label}
                 className={cn(
                   "group relative min-h-[150px] px-6 py-6 transition-colors duration-200 hover:bg-muted/25",
-                  idx > 1 && "border-t border-border/70 lg:border-t-0",
-                  idx === 1 && "border-l border-border/70 lg:border-l-0",
+                  idx === 1 && "sm:border-l border-border/70 lg:border-l-0",
+                  idx === 2 && "border-t border-border/70 sm:border-l sm:border-t-0 lg:border-l-0",
                 )}
               >
                 <span className={cn("absolute left-0 top-6 h-8 w-[3px] rounded-r-full", k.rail)} />
