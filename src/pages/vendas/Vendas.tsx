@@ -642,6 +642,9 @@ export default function Vendas() {
         : format(customRange.from, "dd/MM/yyyy")
       : "Personalizado"
     : selectedPeriod.label;
+  const animKey = isCustom
+    ? `custom-${customRange?.from?.getTime() ?? 0}-${customRange?.to?.getTime() ?? 0}`
+    : `p-${selectedPeriod.label}`;
 
   const mixTotal = m.pixRev + m.cardRev + m.boletoRev;
   const mixRows = [
