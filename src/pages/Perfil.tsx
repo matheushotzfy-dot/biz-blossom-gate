@@ -1,25 +1,27 @@
 /**
- * Perfil — Trustworthy account page
+ * Perfil — Billion-Dollar SaaS account page
  * @module Perfil
- * @version 7.0.0 — Operational redesign
+ * @version 8.0.0 — Premium redesign aligned with Minhas Vendas standard
  */
 
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, useMemo } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useProfile } from "@/hooks/useProfile";
 import {
-  User, Camera, Trophy, Wallet, Shield, CheckCircle2,
-  Calendar, BadgeCheck, Fingerprint, Copy, Check, Zap, ArrowUp,
-  Globe, MapPin, Loader2, AlertTriangle, Lock, Star, Target,
+  User, Camera, Trophy, Wallet, Shield, BadgeCheck,
+  Calendar, Fingerprint, Copy, Check, MapPin, Loader2,
+  AlertTriangle, Lock, TrendingUp, Receipt, Activity,
+  Crown, Sparkles,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { PageShell, PageTitle, Panel } from "@/components/PageShell";
+import { FinanceiroHero, FinanceiroKpi, FinanceiroKpiGrid } from "@/components/financeiro/FinanceiroHero";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 
+/* ─────────── Constants & helpers ─────────── */
 const MILESTONES = [
   { label: "Início", value: 0 },
   { label: "10K", value: 10000 },
@@ -41,13 +43,16 @@ function getCurrentMilestone(revenue: number) {
   return { current: MILESTONES[0], next: MILESTONES[1], pct: 0, tier: 0 };
 }
 
-const fmtCurrency = (v: number) => `R$ ${v.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+const fmtCurrency = (v: number) =>
+  `R$ ${v.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 const fmtCompact = (v: number) =>
-  v >= 1000000 ? `R$ ${(v / 1000000).toFixed(1).replace(".", ",")}M`
-  : v >= 1000 ? `R$ ${(v / 1000).toFixed(0)}K`
+  v >= 1_000_000 ? `R$ ${(v / 1_000_000).toFixed(1).replace(".", ",")}M`
+  : v >= 1_000 ? `R$ ${(v / 1_000).toFixed(0)}K`
   : fmtCurrency(v);
 
-/* ─── Copy Button ─── */
+const TIER_LABELS = ["Iniciante", "Prata", "Ouro", "Diamante", "Platina", "Lendário"];
+
+/* ─────────── Subcomponents ─────────── */
 function CopyButton({ text }: { text: string }) {
   const [copied, setCopied] = useState(false);
   return (
@@ -57,26 +62,26 @@ function CopyButton({ text }: { text: string }) {
         setCopied(true);
         setTimeout(() => setCopied(false), 1500);
       }}
-      className="h-6 w-6 rounded-md hover:bg-muted/30 flex items-center justify-center transition-colors"
+      className="h-6 w-6 rounded-md hover:bg-secondary flex items-center justify-center transition-colors shrink-0"
       title="Copiar"
+      type="button"
     >
-      {copied ? <Check className="h-3 w-3 text-success" /> : <Copy className="h-3 w-3 text-muted-foreground/40" />}
+      {copied ? <Check className="h-3 w-3 text-success" /> : <Copy className="h-3 w-3 text-muted-foreground/60" />}
     </button>
   );
 }
 
-/* ─── Info Row — ledger-style ─── */
 function InfoRow({ label, value, copyable, locked, valueClass }: {
   label: string; value: React.ReactNode; copyable?: string; locked?: boolean; valueClass?: string;
 }) {
   return (
-    <div className="flex items-center justify-between py-3 border-b border-border/15 last:border-0">
-      <div className="flex items-center gap-2">
-        {locked && <Lock className="h-3 w-3 text-muted-foreground/40" />}
-        <span className="text-xs text-muted-foreground/70 font-medium">{label}</span>
+    <div className="flex items-center justify-between py-3 border-b border-border/40 last:border-0">
+      <div className="flex items-center gap-2 min-w-0">
+        {locked && <Lock className="h-3 w-3 text-muted-foreground/50 shrink-0" />}
+        <span className="text-[11px] text-muted-foreground font-bold uppercase tracking-[0.12em]">{label}</span>
       </div>
-      <div className="flex items-center gap-1.5">
-        <span className={cn("text-sm font-semibold text-foreground font-numbers", valueClass)}>
+      <div className="flex items-center gap-1.5 min-w-0">
+        <span className={cn("text-sm font-bold text-foreground tabular-nums truncate", valueClass)}>
           {value}
         </span>
         {copyable && <CopyButton text={copyable} />}
@@ -85,31 +90,52 @@ function InfoRow({ label, value, copyable, locked, valueClass }: {
   );
 }
 
-/* ─── Section Header ─── */
-function SectionHeader({ icon: Icon, title, subtitle, action }: {
+function Panel({
+  icon: Icon, title, subtitle, action, children, className,
+}: {
   icon: any; title: string; subtitle?: string; action?: React.ReactNode;
+  children: React.ReactNode; className?: string;
 }) {
   return (
-    <div className="flex items-center justify-between px-5 pt-5 pb-3 border-b border-border/20">
-      <div className="flex items-center gap-2.5">
-        <Icon className="h-4 w-4 text-muted-foreground/70" />
-        <div>
-          <h3 className="text-sm font-display font-bold text-foreground tracking-[-0.02em]">{title}</h3>
-          {subtitle && <p className="text-[11px] text-muted-foreground/50 mt-0.5">{subtitle}</p>}
+    <div className={cn("rounded-xl border border-border/50 bg-card overflow-hidden", className)}>
+      <div className="flex items-center justify-between px-5 pt-5 pb-4 border-b border-border/40">
+        <div className="flex items-center gap-2.5 min-w-0">
+          <div className="h-7 w-7 rounded-md bg-secondary flex items-center justify-center shrink-0">
+            <Icon className="h-3.5 w-3.5 text-muted-foreground" strokeWidth={2.25} />
+          </div>
+          <div className="min-w-0">
+            <h3 className="text-sm font-display font-black text-foreground tracking-[-0.01em]">{title}</h3>
+            {subtitle && <p className="text-[11px] text-muted-foreground/70 mt-0.5 truncate">{subtitle}</p>}
+          </div>
         </div>
+        {action}
       </div>
-      {action}
+      {children}
     </div>
   );
 }
 
+function FieldLabel({ children, locked }: { children: React.ReactNode; locked?: boolean }) {
+  return (
+    <Label className="text-[10px] text-muted-foreground font-bold uppercase tracking-[0.14em] flex items-center gap-1.5">
+      {locked && <Lock className="h-2.5 w-2.5" />}
+      {children}
+    </Label>
+  );
+}
+
+/* ─────────── Page ─────────── */
 export default function Perfil() {
   const { user } = useAuth();
   const { profile, updateProfile } = useProfile();
   const [allTimeRevenue, setAllTimeRevenue] = useState(0);
   const [totalSales, setTotalSales] = useState(0);
+  const [last30Sales, setLast30Sales] = useState(0);
   const [form, setForm] = useState({ full_name: "", email: "", phone: "" });
-  const [addressForm, setAddressForm] = useState({ zip_code: "", street: "", street_number: "", complement: "", neighborhood: "", city: "", state: "" });
+  const [addressForm, setAddressForm] = useState({
+    zip_code: "", street: "", street_number: "", complement: "",
+    neighborhood: "", city: "", state: "",
+  });
   const [savingAddress, setSavingAddress] = useState(false);
   const [loadingCep, setLoadingCep] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -142,18 +168,23 @@ export default function Perfil() {
 
   useEffect(() => {
     if (!user) return;
-    supabase.from("transactions").select("net_amount").eq("user_id", user.id).eq("status", "completed")
+    supabase.from("transactions")
+      .select("net_amount, created_at")
+      .eq("user_id", user.id)
+      .eq("status", "completed")
       .then(({ data }) => {
-        if (data) {
-          setAllTimeRevenue(data.reduce((a, t) => a + Number(t.net_amount), 0));
-          setTotalSales(data.length);
-        }
+        if (!data) return;
+        setAllTimeRevenue(data.reduce((a, t) => a + Number(t.net_amount), 0));
+        setTotalSales(data.length);
+        const cutoff = Date.now() - 30 * 24 * 60 * 60 * 1000;
+        setLast30Sales(data.filter(t => new Date(t.created_at).getTime() >= cutoff).length);
       });
   }, [user]);
 
   const isAddressLocked = !!(profile as any)?.address_locked;
-  const hasAddress = !!(profile as any)?.zip_code && !!(profile as any)?.street && !!(profile as any)?.street_number && !!(profile as any)?.city && !!(profile as any)?.state;
-  const milestone = getCurrentMilestone(allTimeRevenue);
+  const hasAddress = !!(profile as any)?.zip_code && !!(profile as any)?.street
+    && !!(profile as any)?.street_number && !!(profile as any)?.city && !!(profile as any)?.state;
+  const milestone = useMemo(() => getCurrentMilestone(allTimeRevenue), [allTimeRevenue]);
 
   const handleCepLookup = async (cep: string) => {
     const digits = cep.replace(/\D/g, "");
@@ -201,7 +232,11 @@ export default function Perfil() {
     if (!profile?.full_name) updates.full_name = form.full_name;
     if (!profile?.email) updates.email = form.email;
     if (!profile?.phone) updates.phone = form.phone;
-    if (Object.keys(updates).length === 0) { toast.info("Todos os campos estão bloqueados por KYC"); setSaving(false); return; }
+    if (Object.keys(updates).length === 0) {
+      toast.info("Todos os campos estão bloqueados por KYC");
+      setSaving(false);
+      return;
+    }
     const { error } = await supabase.from("profiles").update(updates).eq("user_id", user.id);
     if (error) toast.error("Erro ao salvar");
     else { updateProfile(updates); toast.success("Perfil atualizado!"); }
@@ -225,31 +260,66 @@ export default function Perfil() {
     setUploading(false);
   };
 
-  const statusLabels: Record<string, { label: string; cls: string; icon: any }> = {
-    approved: { label: "Verificada", cls: "text-success bg-success/10", icon: BadgeCheck },
-    pending_review: { label: "Em análise", cls: "text-warning bg-warning/10", icon: Shield },
-    rejected: { label: "Reprovada", cls: "text-destructive bg-destructive/10", icon: Shield },
-    blocked: { label: "Bloqueada", cls: "text-destructive bg-destructive/10", icon: Shield },
+  const statusMap: Record<string, { label: string; tone: "success" | "warning" | "destructive" | "info" }> = {
+    approved: { label: "Verificada", tone: "success" },
+    pending_review: { label: "Em análise", tone: "warning" },
+    rejected: { label: "Reprovada", tone: "destructive" },
+    blocked: { label: "Bloqueada", tone: "destructive" },
   };
-  const accStatus = statusLabels[profile?.account_status || "pending_review"] || statusLabels.pending_review;
-  const StatusIcon = accStatus.icon;
+  const accStatus = statusMap[profile?.account_status || "pending_review"] || statusMap.pending_review;
 
   const memberDays = profile?.created_at
     ? Math.floor((Date.now() - new Date(profile.created_at).getTime()) / (1000 * 60 * 60 * 24))
     : 0;
 
-  const tierLabel = milestone.tier === 0 ? "Iniciante" : milestone.tier === 1 ? "Prata" : milestone.tier === 2 ? "Ouro" : milestone.tier === 3 ? "Diamante" : milestone.tier === 4 ? "Platina" : "Lendário";
+  const tierLabel = TIER_LABELS[milestone.tier] || "Iniciante";
+
+  const initials = (profile?.full_name || "U").trim().split(/\s+/).slice(0, 2).map(w => w[0]).join("").toUpperCase();
 
   return (
-    <PageShell>
-      <PageTitle
-        icon={<User className="h-6 w-6" />}
-        title="Meu Perfil"
-        subtitle="Dados cadastrais, limites operacionais e detalhes da conta"
+    <div className="container mx-auto max-w-[1400px] px-4 sm:px-6 lg:px-8 py-6 space-y-6">
+      {/* HERO */}
+      <FinanceiroHero
+        eyebrow="MEU PERFIL"
+        title="Identidade & Conta"
+        subtitle="Dados cadastrais, limites operacionais, progresso de faturamento e endereço fiscal."
+        status={{ tone: accStatus.tone === "destructive" ? "destructive" : accStatus.tone, label: `Conta ${accStatus.label}`, pulse: accStatus.tone === "warning" }}
       />
 
-      {/* ═══ ACCOUNT HEADER — sober identification card ═══ */}
-      <Panel>
+      {/* KPI GRID */}
+      <FinanceiroKpiGrid cols={4}>
+        <FinanceiroKpi
+          label="Receita líquida"
+          value={fmtCompact(allTimeRevenue)}
+          sub={`Tier ${tierLabel}`}
+          icon={TrendingUp}
+          tone="success"
+        />
+        <FinanceiroKpi
+          label="Vendas aprovadas"
+          value={totalSales.toLocaleString("pt-BR")}
+          sub={`${last30Sales} nos últimos 30D`}
+          icon={Receipt}
+          tone="info"
+        />
+        <FinanceiroKpi
+          label="Membro há"
+          value={`${memberDays}d`}
+          sub={profile?.created_at ? new Date(profile.created_at).toLocaleDateString("pt-BR") : "—"}
+          icon={Calendar}
+          tone="neutral"
+        />
+        <FinanceiroKpi
+          label="Próxima meta"
+          value={milestone.next.label}
+          sub={`${milestone.pct.toFixed(0)}% concluído`}
+          icon={Trophy}
+          tone="primary"
+        />
+      </FinanceiroKpiGrid>
+
+      {/* IDENTITY CARD */}
+      <div className="rounded-xl border border-border/50 bg-card overflow-hidden animate-fade-in stagger-2">
         <div className="p-5 md:p-6 flex flex-col md:flex-row md:items-center gap-5">
           {/* Avatar */}
           <div className="relative shrink-0">
@@ -261,23 +331,23 @@ export default function Perfil() {
               onChange={(e) => e.target.files?.[0] && handleAvatarUpload(e.target.files[0])}
             />
             <div
-              className="relative h-[80px] w-[80px] rounded-xl overflow-hidden cursor-pointer ring-1 ring-border/40 hover:ring-primary/40 transition-all duration-200 group"
+              className="relative h-[88px] w-[88px] rounded-xl overflow-hidden cursor-pointer border border-border/60 hover:border-primary/60 transition-colors group bg-secondary"
               onClick={() => fileRef.current?.click()}
             >
               {profile?.avatar_url ? (
                 <img src={profile.avatar_url} alt="Avatar" className="w-full h-full object-cover" />
               ) : (
-                <div className="w-full h-full bg-muted/30 flex items-center justify-center">
-                  <span className="text-2xl font-display font-bold text-muted-foreground/60">
-                    {(profile?.full_name || "U").charAt(0).toUpperCase()}
+                <div className="w-full h-full flex items-center justify-center">
+                  <span className="text-2xl font-display font-black text-muted-foreground/70 tracking-tight">
+                    {initials}
                   </span>
                 </div>
               )}
-              <div className="absolute inset-0 bg-background/70 backdrop-blur-[2px] flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+              <div className="absolute inset-0 bg-background/80 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
                 <Camera className="h-4 w-4 text-foreground" />
               </div>
               {uploading && (
-                <div className="absolute inset-0 flex items-center justify-center bg-background/70">
+                <div className="absolute inset-0 flex items-center justify-center bg-background/80">
                   <Loader2 className="h-5 w-5 text-primary animate-spin" />
                 </div>
               )}
@@ -286,66 +356,68 @@ export default function Perfil() {
 
           {/* Identity */}
           <div className="flex-1 min-w-0">
-            <div className="flex items-center gap-2.5 flex-wrap mb-1">
-              <h2 className="text-xl md:text-2xl font-display font-black text-foreground tracking-[-0.02em] leading-tight">
+            <div className="flex items-center gap-2.5 flex-wrap mb-1.5">
+              <h2 className="text-2xl md:text-[28px] font-display font-black text-foreground tracking-[-0.025em] leading-tight truncate">
                 {profile?.full_name || "Usuário"}
               </h2>
               <span className={cn(
-                "inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md text-[10px] font-bold",
-                accStatus.cls
+                "inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md text-[10px] font-bold border",
+                accStatus.tone === "success" && "text-success bg-success/10 border-success/20",
+                accStatus.tone === "warning" && "text-warning bg-warning/10 border-warning/20",
+                accStatus.tone === "destructive" && "text-destructive bg-destructive/10 border-destructive/20",
               )}>
-                <StatusIcon className="h-3 w-3" />
+                <BadgeCheck className="h-3 w-3" />
                 {accStatus.label}
               </span>
             </div>
-            <p className="text-xs text-muted-foreground/60 font-numbers truncate">
-              {profile?.email || ""}
+            <p className="text-xs text-muted-foreground tabular-nums truncate mb-2.5">
+              {profile?.email || "—"}
             </p>
-            <div className="flex items-center gap-4 mt-2 flex-wrap">
-              <span className="flex items-center gap-1.5 text-[11px] text-muted-foreground/60">
-                <Calendar className="h-3 w-3" /> Membro há {memberDays} dias
-              </span>
-              <span className="flex items-center gap-1.5 text-[11px] text-muted-foreground/60">
+            <div className="flex items-center gap-1.5 flex-wrap">
+              <span className="inline-flex items-center gap-1.5 px-2 py-1 rounded-md bg-secondary border border-border/40 text-[10px] font-bold text-muted-foreground uppercase tracking-[0.1em]">
                 <Fingerprint className="h-3 w-3" />
                 {profile?.seller_type === "empresa" ? "Pessoa Jurídica" : "Pessoa Física"}
               </span>
               {profile?.document_number && (
-                <span className="flex items-center gap-1.5 text-[11px] text-muted-foreground/60 font-numbers">
+                <span className="inline-flex items-center gap-1.5 px-2 py-1 rounded-md bg-secondary border border-border/40 text-[10px] font-bold text-muted-foreground tabular-nums">
                   <Shield className="h-3 w-3" /> ***{profile.document_number.slice(-4)}
+                </span>
+              )}
+              {profile?.nickname && (
+                <span className="inline-flex items-center gap-1.5 px-2 py-1 rounded-md bg-secondary border border-border/40 text-[10px] font-bold text-muted-foreground">
+                  <User className="h-3 w-3" /> @{profile.nickname}
+                </span>
+              )}
+              {milestone.tier >= 3 && (
+                <span className="inline-flex items-center gap-1.5 px-2 py-1 rounded-md bg-primary/10 border border-primary/20 text-[10px] font-bold text-primary uppercase tracking-[0.1em]">
+                  <Crown className="h-3 w-3" /> {tierLabel}
                 </span>
               )}
             </div>
           </div>
 
           {/* Revenue summary */}
-          <div className="md:text-right md:pl-6 md:border-l border-border/20 md:min-w-[200px]">
-            <p className="text-[10px] uppercase tracking-[0.14em] font-bold text-muted-foreground/60 mb-1">
+          <div className="md:text-right md:pl-6 md:border-l border-border/40 md:min-w-[220px]">
+            <p className="text-[10px] uppercase tracking-[0.16em] font-bold text-muted-foreground mb-1.5">
               Receita líquida total
             </p>
-            <p className="text-2xl md:text-3xl font-display font-black text-foreground font-numbers tracking-tight">
+            <p className="text-[28px] md:text-[32px] font-display font-black text-foreground tabular-nums tracking-[-0.025em] leading-none">
               {fmtCurrency(allTimeRevenue)}
             </p>
-            <p className="text-[11px] text-muted-foreground/50 mt-1">
-              {totalSales} vendas aprovadas · Tier {tierLabel}
+            <p className="text-[11px] text-muted-foreground/80 mt-2 font-medium">
+              {totalSales} vendas · Tier <span className="text-foreground font-bold">{tierLabel}</span>
             </p>
           </div>
         </div>
-      </Panel>
+      </div>
 
-      {/* ═══ Content Grid — 2 columns ═══ */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
+      {/* GRID: Dados / Detalhes / Limites / Progresso */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-5 animate-fade-in stagger-3">
         {/* DADOS PESSOAIS */}
-        <Panel>
-          <SectionHeader
-            icon={User}
-            title="Dados pessoais"
-            subtitle="Informações verificadas pelo KYC"
-          />
+        <Panel icon={User} title="Dados pessoais" subtitle="Informações verificadas pelo KYC">
           <form onSubmit={handleSave} className="p-5 space-y-4">
             <div>
-              <Label className="text-[10px] text-muted-foreground/60 uppercase tracking-[0.12em] font-bold flex items-center gap-1.5">
-                {profile?.full_name && <Lock className="h-2.5 w-2.5" />} Nome completo
-              </Label>
+              <FieldLabel locked={!!profile?.full_name}>Nome completo</FieldLabel>
               <Input
                 value={form.full_name}
                 onChange={(e) => setForm({ ...form, full_name: e.target.value })}
@@ -354,9 +426,7 @@ export default function Perfil() {
               />
             </div>
             <div>
-              <Label className="text-[10px] text-muted-foreground/60 uppercase tracking-[0.12em] font-bold flex items-center gap-1.5">
-                {profile?.email && <Lock className="h-2.5 w-2.5" />} E-mail
-              </Label>
+              <FieldLabel locked={!!profile?.email}>E-mail</FieldLabel>
               <Input
                 value={form.email}
                 onChange={(e) => setForm({ ...form, email: e.target.value })}
@@ -366,9 +436,7 @@ export default function Perfil() {
               />
             </div>
             <div>
-              <Label className="text-[10px] text-muted-foreground/60 uppercase tracking-[0.12em] font-bold flex items-center gap-1.5">
-                {profile?.phone && <Lock className="h-2.5 w-2.5" />} Telefone
-              </Label>
+              <FieldLabel locked={!!profile?.phone}>Telefone</FieldLabel>
               <Input
                 value={form.phone}
                 onChange={(e) => setForm({ ...form, phone: e.target.value })}
@@ -379,7 +447,7 @@ export default function Perfil() {
             </div>
             <Button
               type="submit"
-              className="w-full h-10 rounded-lg text-sm font-bold shadow-md shadow-primary/15"
+              className="w-full h-10 rounded-lg text-sm font-bold"
               disabled={saving}
             >
               {saving ? <><Loader2 className="h-4 w-4 mr-2 animate-spin" /> Salvando...</> : "Salvar alterações"}
@@ -388,12 +456,7 @@ export default function Perfil() {
         </Panel>
 
         {/* DETALHES DA CONTA */}
-        <Panel>
-          <SectionHeader
-            icon={Shield}
-            title="Detalhes da conta"
-            subtitle="Identificação e segurança"
-          />
+        <Panel icon={Shield} title="Detalhes da conta" subtitle="Identificação e segurança">
           <div className="px-5 pb-5">
             <InfoRow
               label="Tipo de conta"
@@ -401,11 +464,11 @@ export default function Perfil() {
             />
             <InfoRow
               label="Documento"
-              value={profile?.document_number ? `***${profile.document_number.slice(-4)}` : <span className="text-muted-foreground/40">Não informado</span>}
+              value={profile?.document_number ? `***${profile.document_number.slice(-4)}` : <span className="text-muted-foreground/50 font-medium">Não informado</span>}
             />
             <InfoRow
               label="Chave PIX"
-              value={profile?.pix_key ? `***${profile.pix_key.slice(-4)}` : <span className="text-muted-foreground/40">Não cadastrada</span>}
+              value={profile?.pix_key ? `***${profile.pix_key.slice(-4)}` : <span className="text-muted-foreground/50 font-medium">Não cadastrada</span>}
             />
             <InfoRow
               label="Membro desde"
@@ -413,7 +476,7 @@ export default function Perfil() {
             />
             <InfoRow
               label="Nickname"
-              value={profile?.nickname || <span className="text-muted-foreground/40">Não definido</span>}
+              value={profile?.nickname || <span className="text-muted-foreground/50 font-medium">Não definido</span>}
             />
             {user?.id && (
               <InfoRow
@@ -426,12 +489,7 @@ export default function Perfil() {
         </Panel>
 
         {/* LIMITES OPERACIONAIS */}
-        <Panel>
-          <SectionHeader
-            icon={Wallet}
-            title="Limites operacionais"
-            subtitle="Parâmetros vigentes da sua conta"
-          />
+        <Panel icon={Wallet} title="Limites operacionais" subtitle="Parâmetros vigentes da sua conta">
           <div className="px-5 pb-5">
             {[
               { label: "Limite diário PIX", value: "Ilimitado", success: true },
@@ -451,40 +509,46 @@ export default function Perfil() {
         </Panel>
 
         {/* PROGRESSO DE FATURAMENTO */}
-        <Panel>
-          <SectionHeader
-            icon={Trophy}
-            title="Progresso de faturamento"
-            subtitle={`Próxima meta: ${milestone.next.label}`}
-          />
+        <Panel
+          icon={Trophy}
+          title="Progresso de faturamento"
+          subtitle={`Próxima meta: ${milestone.next.label}`}
+          action={
+            <span className="inline-flex items-center gap-1.5 px-2 py-1 rounded-md bg-primary/10 border border-primary/20 text-[10px] font-bold text-primary uppercase tracking-[0.1em]">
+              <Sparkles className="h-3 w-3" /> {tierLabel}
+            </span>
+          }
+        >
           <div className="p-5">
-            <div className="grid grid-cols-3 gap-3 mb-4">
-              <div>
-                <p className="text-[10px] uppercase tracking-[0.12em] font-bold text-muted-foreground/60 mb-1">Total</p>
-                <p className="text-base font-display font-black text-foreground font-numbers tracking-tight">
+            <div className="grid grid-cols-3 gap-px bg-border/40 rounded-lg overflow-hidden border border-border/40 mb-5">
+              <div className="bg-card px-4 py-3">
+                <p className="text-[10px] uppercase tracking-[0.14em] font-bold text-muted-foreground mb-1">Total</p>
+                <p className="text-base font-display font-black text-foreground tabular-nums tracking-tight">
                   {fmtCompact(allTimeRevenue)}
                 </p>
               </div>
-              <div>
-                <p className="text-[10px] uppercase tracking-[0.12em] font-bold text-muted-foreground/60 mb-1">Meta</p>
-                <p className="text-base font-display font-black text-primary font-numbers tracking-tight">
+              <div className="bg-card px-4 py-3">
+                <p className="text-[10px] uppercase tracking-[0.14em] font-bold text-muted-foreground mb-1">Meta</p>
+                <p className="text-base font-display font-black text-primary tabular-nums tracking-tight">
                   {milestone.next.label}
                 </p>
               </div>
-              <div>
-                <p className="text-[10px] uppercase tracking-[0.12em] font-bold text-muted-foreground/60 mb-1">Falta</p>
-                <p className="text-base font-display font-black text-foreground/60 font-numbers tracking-tight">
+              <div className="bg-card px-4 py-3">
+                <p className="text-[10px] uppercase tracking-[0.14em] font-bold text-muted-foreground mb-1">Falta</p>
+                <p className="text-base font-display font-black text-foreground/70 tabular-nums tracking-tight">
                   {fmtCompact(Math.max(0, milestone.next.value - allTimeRevenue))}
                 </p>
               </div>
             </div>
 
-            <div className="mb-3">
-              <div className="flex items-center justify-between mb-1.5">
-                <span className="text-xs font-bold text-foreground font-numbers">{milestone.pct.toFixed(0)}%</span>
-                <span className="text-[10px] text-muted-foreground/50 font-numbers">{milestone.next.label}</span>
+            <div className="mb-4">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-xs font-bold text-foreground tabular-nums">{milestone.pct.toFixed(0)}%</span>
+                <span className="text-[10px] text-muted-foreground tabular-nums font-bold uppercase tracking-[0.12em]">
+                  até {milestone.next.label}
+                </span>
               </div>
-              <div className="h-2 rounded-full bg-muted/25 overflow-hidden">
+              <div className="h-2 rounded-full bg-secondary overflow-hidden border border-border/40">
                 <div
                   className="h-full rounded-full bg-primary transition-[width] duration-700 ease-[cubic-bezier(0.16,1,0.3,1)]"
                   style={{ width: `${Math.max(milestone.pct, 2)}%` }}
@@ -492,18 +556,18 @@ export default function Perfil() {
               </div>
             </div>
 
-            <div className="flex items-center justify-between mt-4 pt-4 border-t border-border/20">
+            <div className="flex items-center justify-between pt-4 border-t border-border/40">
               {MILESTONES.slice(1).map((m) => {
                 const unlocked = allTimeRevenue >= m.value;
                 return (
-                  <div key={m.label} className="flex flex-col items-center gap-1">
+                  <div key={m.label} className="flex flex-col items-center gap-1.5">
                     <div className={cn(
-                      "h-2 w-2 rounded-full transition-colors",
-                      unlocked ? "bg-primary" : "bg-muted/30"
+                      "h-2.5 w-2.5 rounded-full transition-colors border",
+                      unlocked ? "bg-primary border-primary" : "bg-secondary border-border/60"
                     )} />
                     <span className={cn(
-                      "text-[10px] font-bold font-numbers",
-                      unlocked ? "text-primary" : "text-muted-foreground/40"
+                      "text-[10px] font-bold tabular-nums",
+                      unlocked ? "text-primary" : "text-muted-foreground/50"
                     )}>
                       {m.label}
                     </span>
@@ -515,24 +579,27 @@ export default function Perfil() {
         </Panel>
       </div>
 
-      {/* ═══ ENDEREÇO ═══ */}
-      <Panel>
-        <SectionHeader
-          icon={MapPin}
-          title="Endereço do vendedor"
-          subtitle={isAddressLocked ? "Bloqueado — contate seu gerente para alterações" : "Obrigatório para realizar saques"}
-          action={isAddressLocked ? (
-            <span className="inline-flex items-center gap-1.5 px-2 py-1 rounded-md text-[10px] font-bold bg-success/10 text-success">
-              <Lock className="h-3 w-3" /> Bloqueado
-            </span>
-          ) : null}
-        />
-
+      {/* ENDEREÇO */}
+      <Panel
+        icon={MapPin}
+        title="Endereço do vendedor"
+        subtitle={isAddressLocked ? "Bloqueado — contate seu gerente para alterações" : "Obrigatório para realizar saques"}
+        action={isAddressLocked ? (
+          <span className="inline-flex items-center gap-1.5 px-2 py-1 rounded-md text-[10px] font-bold bg-success/10 border border-success/20 text-success uppercase tracking-[0.1em]">
+            <Lock className="h-3 w-3" /> Bloqueado
+          </span>
+        ) : (
+          <span className="inline-flex items-center gap-1.5 px-2 py-1 rounded-md text-[10px] font-bold bg-warning/10 border border-warning/20 text-warning uppercase tracking-[0.1em]">
+            <Activity className="h-3 w-3" /> Editável
+          </span>
+        )}
+        className="animate-fade-in stagger-4"
+      >
         <div className="p-5">
           {!hasAddress && !isAddressLocked && (
-            <div className="flex items-start gap-2.5 p-3 rounded-lg bg-warning/8 border border-warning/15 mb-4">
+            <div className="flex items-start gap-2.5 p-3 rounded-lg bg-warning/10 border border-warning/20 mb-5">
               <AlertTriangle className="h-4 w-4 text-warning shrink-0 mt-0.5" />
-              <p className="text-xs text-warning/90 font-medium">
+              <p className="text-xs text-warning font-bold">
                 Preencha seu endereço para realizar saques na plataforma.
               </p>
             </div>
@@ -541,9 +608,7 @@ export default function Perfil() {
           <form onSubmit={handleSaveAddress} className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
               <div>
-                <Label className="text-[10px] text-muted-foreground/60 uppercase tracking-[0.12em] font-bold flex items-center gap-1.5">
-                  {isAddressLocked && <Lock className="h-2.5 w-2.5" />} CEP
-                </Label>
+                <FieldLabel locked={isAddressLocked}>CEP</FieldLabel>
                 <div className="relative">
                   <Input
                     value={addressForm.zip_code}
@@ -553,7 +618,7 @@ export default function Perfil() {
                       setAddressForm(prev => ({ ...prev, zip_code: formatted }));
                       if (v.length === 8) handleCepLookup(v);
                     }}
-                    className="mt-1.5 h-10 rounded-lg"
+                    className="mt-1.5 h-10 rounded-lg tabular-nums"
                     placeholder="00000-000"
                     disabled={isAddressLocked}
                     inputMode="numeric"
@@ -562,9 +627,7 @@ export default function Perfil() {
                 </div>
               </div>
               <div className="md:col-span-2">
-                <Label className="text-[10px] text-muted-foreground/60 uppercase tracking-[0.12em] font-bold flex items-center gap-1.5">
-                  {isAddressLocked && <Lock className="h-2.5 w-2.5" />} Rua / Avenida
-                </Label>
+                <FieldLabel locked={isAddressLocked}>Rua / Avenida</FieldLabel>
                 <Input
                   value={addressForm.street}
                   onChange={(e) => setAddressForm(prev => ({ ...prev, street: e.target.value }))}
@@ -577,21 +640,17 @@ export default function Perfil() {
 
             <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
               <div>
-                <Label className="text-[10px] text-muted-foreground/60 uppercase tracking-[0.12em] font-bold flex items-center gap-1.5">
-                  {isAddressLocked && <Lock className="h-2.5 w-2.5" />} Número
-                </Label>
+                <FieldLabel locked={isAddressLocked}>Número</FieldLabel>
                 <Input
                   value={addressForm.street_number}
                   onChange={(e) => setAddressForm(prev => ({ ...prev, street_number: e.target.value }))}
-                  className="mt-1.5 h-10 rounded-lg"
+                  className="mt-1.5 h-10 rounded-lg tabular-nums"
                   placeholder="123"
                   disabled={isAddressLocked}
                 />
               </div>
               <div>
-                <Label className="text-[10px] text-muted-foreground/60 uppercase tracking-[0.12em] font-bold">
-                  Complemento
-                </Label>
+                <FieldLabel>Complemento</FieldLabel>
                 <Input
                   value={addressForm.complement}
                   onChange={(e) => setAddressForm(prev => ({ ...prev, complement: e.target.value }))}
@@ -601,9 +660,7 @@ export default function Perfil() {
                 />
               </div>
               <div>
-                <Label className="text-[10px] text-muted-foreground/60 uppercase tracking-[0.12em] font-bold flex items-center gap-1.5">
-                  {isAddressLocked && <Lock className="h-2.5 w-2.5" />} Bairro
-                </Label>
+                <FieldLabel locked={isAddressLocked}>Bairro</FieldLabel>
                 <Input
                   value={addressForm.neighborhood}
                   onChange={(e) => setAddressForm(prev => ({ ...prev, neighborhood: e.target.value }))}
@@ -613,13 +670,11 @@ export default function Perfil() {
                 />
               </div>
               <div>
-                <Label className="text-[10px] text-muted-foreground/60 uppercase tracking-[0.12em] font-bold flex items-center gap-1.5">
-                  {isAddressLocked && <Lock className="h-2.5 w-2.5" />} Estado
-                </Label>
+                <FieldLabel locked={isAddressLocked}>Estado</FieldLabel>
                 <Input
                   value={addressForm.state}
                   onChange={(e) => setAddressForm(prev => ({ ...prev, state: e.target.value.toUpperCase().slice(0, 2) }))}
-                  className="mt-1.5 h-10 rounded-lg"
+                  className="mt-1.5 h-10 rounded-lg uppercase tabular-nums"
                   placeholder="SP"
                   disabled={isAddressLocked}
                 />
@@ -627,9 +682,7 @@ export default function Perfil() {
             </div>
 
             <div>
-              <Label className="text-[10px] text-muted-foreground/60 uppercase tracking-[0.12em] font-bold flex items-center gap-1.5">
-                {isAddressLocked && <Lock className="h-2.5 w-2.5" />} Cidade
-              </Label>
+              <FieldLabel locked={isAddressLocked}>Cidade</FieldLabel>
               <Input
                 value={addressForm.city}
                 onChange={(e) => setAddressForm(prev => ({ ...prev, city: e.target.value }))}
@@ -643,7 +696,7 @@ export default function Perfil() {
               <>
                 <Button
                   type="submit"
-                  className="w-full h-10 rounded-lg text-sm font-bold shadow-md shadow-primary/15"
+                  className="w-full h-10 rounded-lg text-sm font-bold"
                   disabled={savingAddress}
                 >
                   {savingAddress ? (
@@ -652,14 +705,14 @@ export default function Perfil() {
                     <><MapPin className="h-4 w-4 mr-2" /> Salvar endereço</>
                   )}
                 </Button>
-                <p className="text-[10px] text-center text-muted-foreground/50">
-                  Após salvar, o endereço será <span className="font-bold text-warning/80">bloqueado</span>. Para alterar, contate seu gerente.
+                <p className="text-[10px] text-center text-muted-foreground/70 font-medium">
+                  Após salvar, o endereço será <span className="font-bold text-warning">bloqueado</span>. Para alterar, contate seu gerente.
                 </p>
               </>
             )}
           </form>
         </div>
       </Panel>
-    </PageShell>
+    </div>
   );
 }
