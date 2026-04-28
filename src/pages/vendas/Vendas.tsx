@@ -801,9 +801,12 @@ export default function Vendas() {
               { ...heroKpis[3], rail: approvalRate >= 60 ? "bg-success" : "bg-warning" },
             ].map((k, idx) => (
               <div
-                key={k.label}
+                key={`${k.label}-${animKey}`}
                 className={cn(
-                  "group relative min-h-[150px] px-6 py-6 transition-colors duration-200 hover:bg-muted/25",
+                  "vendas-rise group relative min-h-[150px] px-6 py-6 transition-colors duration-200 hover:bg-muted/25",
+                  idx === 1 && "vendas-rise-d1",
+                  idx === 2 && "vendas-rise-d2",
+                  idx === 3 && "vendas-rise-d3",
                   idx > 1 && "border-t border-border/70 lg:border-t-0",
                   idx === 1 && "border-l border-border/70 lg:border-l-0",
                 )}
@@ -811,7 +814,6 @@ export default function Vendas() {
                 <span className={cn("absolute left-0 top-6 h-8 w-[3px] rounded-r-full", k.rail)} />
                 <div className="flex items-center justify-between gap-2 pl-3">
                   <p className="text-[10.5px] font-black uppercase tracking-[0.22em] text-muted-foreground">{k.label}</p>
-                  {k.delta && <DeltaBadge cur={k.delta.cur} prev={k.delta.prev} />}
                 </div>
                 <p
                   className={cn(
@@ -828,10 +830,15 @@ export default function Vendas() {
           </div>
 
           <div className="grid grid-cols-1 border-b border-border/70 sm:grid-cols-3 sm:divide-x sm:divide-border/70">
-            {riskKpis.map((r) => (
+            {riskKpis.map((r, idx) => (
               <div
-                key={r.label}
-                className="group relative flex flex-col gap-2.5 px-6 py-6 transition-colors duration-200 hover:bg-muted/25"
+                key={`${r.label}-${animKey}`}
+                className={cn(
+                  "vendas-rise group relative flex flex-col gap-2.5 px-6 py-6 transition-colors duration-200 hover:bg-muted/25",
+                  idx === 0 && "vendas-rise-d3",
+                  idx === 1 && "vendas-rise-d4",
+                  idx === 2 && "vendas-rise-d5",
+                )}
               >
                 <div className="flex items-baseline justify-between gap-3">
                   <p className="font-display text-[19px] font-black tracking-[-0.035em] text-foreground">{r.label}</p>
