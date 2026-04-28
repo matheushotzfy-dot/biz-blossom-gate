@@ -237,162 +237,209 @@ export default function AdminConteudo() {
 
   const emptyFiltered = search.trim().length > 0 || filter !== "all";
 
+  const tabIcon: Record<typeof filter, JSX.Element> = {
+    all: <Layers className="h-3 w-3" strokeWidth={2.5} />,
+    published: <CheckCircle2 className="h-3 w-3" strokeWidth={2.5} />,
+    draft: <FileEdit className="h-3 w-3" strokeWidth={2.5} />,
+  };
+
+  const tabAccent: Record<typeof filter, string> = {
+    all: "text-foreground",
+    published: "text-success",
+    draft: "text-muted-foreground",
+  };
+
   return (
-    <div className="mx-auto w-full max-w-[1480px] space-y-5 px-4 pb-24 pt-3 sm:px-6 lg:px-8">
-      <section className="grid gap-4 xl:grid-cols-[minmax(0,1.3fr)_360px]">
-        <div className="overflow-hidden rounded-2xl border border-border/70 bg-card">
-          <div className="border-b border-border/60 px-5 py-4 sm:px-6">
-            <div className="flex flex-wrap items-start justify-between gap-4">
-              <div className="space-y-3">
-                <div className="inline-flex items-center gap-2 rounded-full border border-primary/15 bg-primary/10 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.16em] text-primary">
-                  <Sparkles className="h-3 w-3" /> área de membros
-                </div>
-                <div>
-                  <h1 className="font-display text-2xl font-black tracking-tight text-foreground sm:text-[2rem]">
-                    Conteúdo com cara de produto grande.
-                  </h1>
-                  <p className="mt-1 text-sm text-muted-foreground">
-                    Builder, catálogo, acesso e operação numa leitura mais limpa e direta.
-                  </p>
-                </div>
-              </div>
+    <div className="mx-auto -mt-2 w-full max-w-[1440px] pb-24 md:-mt-3 md:pb-10">
+      {/* ── Hero header ── */}
+      <div className="relative flex flex-col gap-7 px-5 pt-1 sm:px-7 md:pt-1">
+        {/* Subtle radial accent behind title */}
+        <div
+          aria-hidden
+          className="pointer-events-none absolute -top-12 left-0 h-48 w-[520px] -z-[1] opacity-60 blur-3xl"
+          style={{
+            background:
+              "radial-gradient(60% 60% at 20% 50%, hsl(var(--primary) / 0.10), transparent 70%)",
+          }}
+        />
 
-              <Button onClick={openNew} className="h-10 gap-2 rounded-xl px-4 text-xs font-semibold">
-                <Plus className="h-3.5 w-3.5" /> Nova área
-              </Button>
-            </div>
+        <div className="flex flex-wrap items-end justify-between gap-4 animate-fade-in">
+          <div>
+            <h1 className="font-display text-[40px] font-black leading-[0.9] tracking-[-0.055em] text-foreground sm:text-[52px]">
+              Área de membros
+            </h1>
+            <p className="mt-2 text-[13px] font-medium text-muted-foreground/80">
+              Builder, catálogo e operação do seu conteúdo num só lugar.
+            </p>
           </div>
+          <button
+            onClick={openNew}
+            className="group inline-flex h-11 items-center gap-2 rounded-xl bg-primary px-5 text-[13px] font-black uppercase tracking-wider text-primary-foreground transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] hover:bg-primary/90 hover:-translate-y-0.5 hover:shadow-[0_10px_30px_-10px_hsl(var(--primary)/0.5)]"
+          >
+            <Plus className="h-4 w-4 transition-transform duration-300 group-hover:rotate-90" strokeWidth={2.75} />
+            Nova área
+          </button>
+        </div>
 
-          <div className="grid gap-px bg-border/70 sm:grid-cols-2 xl:grid-cols-4">
-            {metricCards.map((item) => {
-              const Icon = item.icon;
-              return (
-                <div key={item.label} className="bg-card px-5 py-4">
-                  <div className="flex items-center gap-2 text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">
-                    <Icon className="h-3.5 w-3.5" />
-                    {item.label}
-                  </div>
-                  <div className="mt-2 font-numbers text-xl font-black tracking-tight text-foreground">{item.value}</div>
-                  <p className="mt-0.5 text-[11px] text-muted-foreground">{item.meta}</p>
+        {/* KPIs */}
+        <div className="grid grid-cols-2 gap-px overflow-hidden rounded-xl border border-border/50 bg-border/40 sm:grid-cols-4 animate-fade-in stagger-1">
+          {metricCards.map((item) => {
+            const Icon = item.icon;
+            return (
+              <div key={item.label} className="bg-card px-5 py-4">
+                <div className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-[0.18em] text-muted-foreground/60">
+                  <Icon className="h-3 w-3" strokeWidth={2.5} />
+                  {item.label}
                 </div>
+                <div className="mt-2 font-display text-[22px] font-black leading-none tracking-tight text-foreground tabular-nums">
+                  {item.value}
+                </div>
+                <p className="mt-1.5 text-[11px] font-medium text-muted-foreground/60">{item.meta}</p>
+              </div>
+            );
+          })}
+        </div>
+
+        {/* Tabs + Search row */}
+        <div className="flex flex-col gap-3 pb-1 animate-fade-in stagger-2 sm:flex-row sm:items-center sm:justify-between">
+          <div className="inline-flex w-fit items-center gap-0.5 rounded-xl border border-border/50 bg-card/60 p-1 overflow-x-auto">
+            {tabs.map((tab) => {
+              const active = filter === tab.value;
+              return (
+                <button
+                  key={tab.value}
+                  onClick={() => setFilter(tab.value)}
+                  className={cn(
+                    "group/tab relative inline-flex shrink-0 items-center gap-2 rounded-lg h-8 px-3 text-[12px] font-bold tracking-tight transition-colors duration-200",
+                    active
+                      ? "bg-secondary text-foreground"
+                      : "text-muted-foreground/80 hover:text-foreground"
+                  )}
+                >
+                  <span className={cn(
+                    "flex h-4 w-4 items-center justify-center transition-colors",
+                    active ? tabAccent[tab.value] : "text-muted-foreground/50 group-hover/tab:text-foreground/70"
+                  )}>
+                    {tabIcon[tab.value]}
+                  </span>
+                  <span className="font-display">{tab.label === "published" ? "Live" : tab.label === "draft" ? "Rascunhos" : tab.label}</span>
+                  {tab.count > 0 && (
+                    <span className={cn(
+                      "inline-flex h-[18px] min-w-[20px] items-center justify-center rounded-md px-1.5 text-[10px] font-black tabular-nums tracking-tight border transition-colors",
+                      active
+                        ? "bg-background/80 text-foreground border-border/40"
+                        : "bg-muted/30 text-muted-foreground/60 border-transparent"
+                    )}>
+                      {tab.count}
+                    </span>
+                  )}
+                </button>
               );
             })}
           </div>
-        </div>
 
-        <aside className="overflow-hidden rounded-2xl border border-border/70 bg-card">
-          <div className="border-b border-border/60 px-5 py-4">
-            <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">foco atual</p>
-            <div className="mt-2 flex items-start justify-between gap-3">
-              <div>
-                <h2 className="text-lg font-bold text-foreground">{highlightCourse?.title || "Nenhuma área criada"}</h2>
-                <p className="mt-1 text-[12px] text-muted-foreground">
-                  {highlightCourse?.description || "Crie uma nova estrutura e comece pelo catálogo do aluno."}
+          <div className="flex items-center gap-2">
+            <div className="relative group">
+              <Search className="absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground/50 transition-colors group-focus-within:text-primary" />
+              <input
+                value={search}
+                onChange={(event) => setSearch(event.target.value)}
+                placeholder="Buscar área..."
+                className="h-9 w-full rounded-lg border border-border/60 bg-secondary/40 pl-9 pr-8 text-xs font-medium text-foreground placeholder:text-muted-foreground/60 transition-all focus:border-primary/50 focus:bg-card focus:outline-none focus:ring-2 focus:ring-primary/15 sm:w-72"
+              />
+              {search && (
+                <button onClick={() => setSearch("")} className="absolute right-2.5 top-1/2 -translate-y-1/2 rounded p-0.5 text-muted-foreground/50 transition-colors hover:bg-secondary hover:text-foreground">
+                  <X className="h-3 w-3" />
+                </button>
+              )}
+            </div>
+
+            <div className="flex items-center gap-0.5 rounded-lg border border-border/50 bg-card/60 p-1 self-start">
+              <button
+                onClick={() => setViewMode("grid")}
+                className={cn(
+                  "flex h-7 w-7 items-center justify-center rounded-md transition-colors",
+                  viewMode === "grid" ? "bg-secondary text-foreground" : "text-muted-foreground/70 hover:text-foreground"
+                )}
+                title="Grade"
+              >
+                <Grid3X3 className="h-3.5 w-3.5" strokeWidth={2.25} />
+              </button>
+              <button
+                onClick={() => setViewMode("list")}
+                className={cn(
+                  "flex h-7 w-7 items-center justify-center rounded-md transition-colors",
+                  viewMode === "list" ? "bg-secondary text-foreground" : "text-muted-foreground/70 hover:text-foreground"
+                )}
+                title="Lista"
+              >
+                <List className="h-3.5 w-3.5" strokeWidth={2.25} />
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* ── Highlight strip (foco atual) ── */}
+      {highlightCourse && (
+        <div className="mx-5 mt-5 sm:mx-7 animate-fade-in stagger-2">
+          <div className="flex flex-col gap-4 rounded-xl border border-border/50 bg-card p-4 sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex items-start gap-3 min-w-0">
+              <div className={cn(
+                "flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border",
+                highlightCourse.is_published
+                  ? "border-success/30 bg-success/[0.06] text-success"
+                  : "border-border/50 bg-muted/[0.06] text-muted-foreground"
+              )}>
+                <GraduationCap className="h-4 w-4" strokeWidth={2.25} />
+              </div>
+              <div className="min-w-0">
+                <div className="flex items-center gap-2">
+                  <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-muted-foreground/60">Foco atual</p>
+                  <span className={cn(
+                    "inline-flex h-[18px] items-center rounded-md border px-1.5 text-[9.5px] font-black uppercase tracking-[0.14em]",
+                    highlightCourse.is_published
+                      ? "border-success/30 bg-success/[0.08] text-success"
+                      : "border-border/40 bg-muted/[0.06] text-muted-foreground"
+                  )}>
+                    {highlightCourse.is_published ? "Live" : "Draft"}
+                  </span>
+                </div>
+                <h2 className="mt-1 truncate font-display text-[16px] font-bold tracking-tight text-foreground">
+                  {highlightCourse.title}
+                </h2>
+                <p className="mt-0.5 truncate text-[11.5px] text-muted-foreground/70">
+                  {highlightProduct?.name ? `${highlightProduct.name} · ` : ""}
+                  {highlightStats.lessons} aulas em {highlightStats.modules} módulos · {highlightStudents} alunos · {formatContentCurrency(highlightRevenue)}
                 </p>
               </div>
-              <div className="rounded-xl border border-border/70 bg-card-inset px-3 py-2 text-right">
-                <div className="text-[10px] uppercase tracking-[0.16em] text-muted-foreground">status</div>
-                <div className={cn("mt-1 text-xs font-bold uppercase tracking-[0.14em]", highlightCourse?.is_published ? "text-success" : "text-muted-foreground")}>{highlightCourse?.is_published ? "Live" : "Draft"}</div>
-              </div>
-            </div>
-          </div>
-
-          <div className="space-y-3 px-5 py-4">
-            <div className="grid grid-cols-2 gap-3 text-sm">
-              <div className="rounded-xl border border-border/70 bg-card-inset px-3 py-3">
-                <div className="text-[10px] uppercase tracking-[0.16em] text-muted-foreground">conteúdo</div>
-                <div className="mt-1 font-numbers text-lg font-black text-foreground">{highlightStats.lessons}</div>
-                <div className="text-[11px] text-muted-foreground">{highlightStats.modules} módulos</div>
-              </div>
-              <div className="rounded-xl border border-border/70 bg-card-inset px-3 py-3">
-                <div className="text-[10px] uppercase tracking-[0.16em] text-muted-foreground">alunos</div>
-                <div className="mt-1 font-numbers text-lg font-black text-foreground">{highlightStudents}</div>
-                <div className="text-[11px] text-muted-foreground">ativos agora</div>
-              </div>
             </div>
 
-            <div className="rounded-xl border border-border/70 bg-card-inset px-3 py-3">
-              <div className="flex items-center justify-between gap-3">
-                <div>
-                  <div className="text-[10px] uppercase tracking-[0.16em] text-muted-foreground">produto vinculado</div>
-                  <div className="mt-1 text-sm font-semibold text-foreground">{highlightProduct?.name || "Nenhum conectado"}</div>
-                </div>
-                <div className="text-right">
-                  <div className="text-[10px] uppercase tracking-[0.16em] text-muted-foreground">receita</div>
-                  <div className="mt-1 font-numbers text-sm font-black text-success">{formatContentCurrency(highlightRevenue)}</div>
-                </div>
-              </div>
-            </div>
-
-            <div className="grid grid-cols-2 gap-2">
-              <Button variant="secondary" onClick={highlightCourse ? () => navigate(`/vendas/conteudo/${highlightCourse.id}/builder`) : openNew} className="h-9 rounded-xl text-xs font-semibold">
-                Builder
-              </Button>
-              <Button variant="outline" onClick={highlightCourse?.is_published ? () => window.open(getCourseLink(highlightCourse.id), "_blank") : openNew} className="h-9 rounded-xl text-xs font-semibold">
-                Ver área
-              </Button>
-            </div>
-          </div>
-        </aside>
-      </section>
-
-      <section className="overflow-hidden rounded-2xl border border-border/70 bg-card">
-        <div className="border-b border-border/60 px-4 py-3 sm:px-5">
-          <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
-            <div className="flex flex-wrap items-center gap-1 rounded-xl border border-border/70 bg-card-inset p-1">
-              {tabs.map((tab) => {
-                const active = filter === tab.value;
-                return (
-                  <button
-                    key={tab.value}
-                    onClick={() => setFilter(tab.value)}
-                    className={cn(
-                      "rounded-lg px-3 py-1.5 text-[11px] font-semibold transition-colors",
-                      active ? "bg-card text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground",
-                    )}
-                  >
-                    {tab.label}
-                    <span className={cn("ml-1 font-numbers text-[10px]", active ? "text-primary" : "text-muted-foreground/70")}>{tab.count}</span>
-                  </button>
-                );
-              })}
-            </div>
-
-            <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
-              <div className="relative min-w-0 sm:w-72">
-                <Search className="pointer-events-none absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground/60" />
-                <input
-                  value={search}
-                  onChange={(event) => setSearch(event.target.value)}
-                  placeholder="Buscar área, categoria ou descrição"
-                  className="h-9 w-full rounded-xl border border-border/70 bg-card-inset pl-9 pr-9 text-xs text-foreground placeholder:text-muted-foreground focus:border-primary/30 focus:outline-none focus:ring-2 focus:ring-primary/15"
-                />
-                {search ? (
-                  <button onClick={() => setSearch("")} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground">
-                    <X className="h-3.5 w-3.5" />
-                  </button>
-                ) : null}
-              </div>
-
-              <div className="flex items-center gap-1 rounded-xl border border-border/70 bg-card-inset p-1 self-start">
+            <div className="flex items-center gap-1.5">
+              <button
+                onClick={() => navigate(`/vendas/conteudo/${highlightCourse.id}/builder`)}
+                className="inline-flex h-9 items-center gap-1.5 rounded-lg border border-primary/30 bg-primary/[0.06] px-3 text-[11.5px] font-bold tracking-tight text-foreground transition-colors hover:border-primary/50 hover:bg-primary/[0.10] hover:text-primary"
+              >
+                <Settings2 className="h-3.5 w-3.5 text-primary/80" strokeWidth={2.25} />
+                <span className="font-display">Builder</span>
+              </button>
+              {highlightCourse.is_published && (
                 <button
-                  onClick={() => setViewMode("grid")}
-                  className={cn("flex h-8 w-8 items-center justify-center rounded-lg transition-colors", viewMode === "grid" ? "bg-card text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground")}
-                  title="Grade"
+                  onClick={() => window.open(getCourseLink(highlightCourse.id), "_blank")}
+                  className="inline-flex h-9 items-center gap-1.5 rounded-lg border border-border/50 bg-card px-3 text-[11.5px] font-bold tracking-tight text-muted-foreground/80 transition-colors hover:border-border hover:text-foreground"
                 >
-                  <Grid3X3 className="h-3.5 w-3.5" />
+                  <ExternalLink className="h-3.5 w-3.5" strokeWidth={2.25} />
+                  <span className="font-display">Ver área</span>
                 </button>
-                <button
-                  onClick={() => setViewMode("list")}
-                  className={cn("flex h-8 w-8 items-center justify-center rounded-lg transition-colors", viewMode === "list" ? "bg-card text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground")}
-                  title="Lista"
-                >
-                  <List className="h-3.5 w-3.5" />
-                </button>
-              </div>
+              )}
             </div>
           </div>
         </div>
+      )}
+
+      {/* ── Workspace ── */}
+      <div className="px-5 pt-5 sm:px-7">
+        <section className="overflow-hidden rounded-2xl border border-border/50 bg-card animate-fade-in stagger-3">
 
         {isLoading ? (
           <div className="flex min-h-[360px] items-center justify-center">
