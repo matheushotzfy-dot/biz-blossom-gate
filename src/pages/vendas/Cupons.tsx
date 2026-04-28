@@ -11,6 +11,7 @@ import { useProducts, useCoupons } from "@/hooks/useQueryData";
 import {
   Ticket, Search, Plus, Trash2, Percent, TrendingDown, Calendar,
   Zap, Copy, Tag, Sparkles, Power, Infinity as InfinityIcon, AlertCircle,
+  Layers, CheckCircle2, PauseCircle, XCircle, DollarSign, MousePointerClick, X,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
