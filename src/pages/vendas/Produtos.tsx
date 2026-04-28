@@ -182,8 +182,8 @@ export default function Produtos() {
         </div>
 
         {/* Tabs + Search row */}
-        <div className="flex flex-col gap-3 border-b border-border/40 pb-3 animate-fade-in stagger-2 sm:flex-row sm:items-center sm:justify-between">
-          <div className="flex items-center gap-1 overflow-x-auto">
+        <div className="flex flex-col gap-3 pb-1 animate-fade-in stagger-2 sm:flex-row sm:items-center sm:justify-between">
+          <div className="inline-flex w-fit items-center gap-0.5 rounded-xl border border-border/50 bg-card/60 p-1 overflow-x-auto">
             {tabs.map((item) => {
               const active = tab === item.value;
               return (
@@ -191,26 +191,28 @@ export default function Produtos() {
                   key={item.value}
                   onClick={() => setTab(item.value)}
                   className={cn(
-                    "relative inline-flex shrink-0 items-center gap-1.5 rounded-lg px-3 py-1.5 text-[12px] font-bold transition-all duration-200",
+                    "group/tab relative inline-flex shrink-0 items-center gap-2 rounded-lg h-8 px-3 text-[12px] font-bold tracking-tight transition-colors duration-200",
                     active
                       ? "bg-secondary text-foreground"
-                      : "text-muted-foreground hover:bg-secondary/50 hover:text-foreground"
+                      : "text-muted-foreground/80 hover:text-foreground"
                   )}
                 >
-                  <span className={cn("transition-colors", active ? tabAccent[item.value] : "text-muted-foreground/60")}>
+                  <span className={cn(
+                    "flex h-4 w-4 items-center justify-center transition-colors",
+                    active ? tabAccent[item.value] : "text-muted-foreground/50 group-hover/tab:text-foreground/70"
+                  )}>
                     {tabIcon[item.value]}
                   </span>
-                  {item.label}
+                  <span className="font-display">{item.label}</span>
                   {item.count > 0 && (
                     <span className={cn(
-                      "ml-0.5 rounded-md px-1.5 py-px text-[10px] font-black tabular-nums",
-                      active ? "bg-background/60 text-foreground" : "text-muted-foreground/50"
+                      "inline-flex h-[18px] min-w-[20px] items-center justify-center rounded-md px-1.5 text-[10px] font-black tabular-nums tracking-tight border transition-colors",
+                      active
+                        ? "bg-background/80 text-foreground border-border/40"
+                        : "bg-muted/30 text-muted-foreground/60 border-transparent"
                     )}>
                       {item.count}
                     </span>
-                  )}
-                  {active && (
-                    <span className="absolute -bottom-[13px] left-2 right-2 h-[2px] rounded-full bg-primary" />
                   )}
                 </button>
               );
