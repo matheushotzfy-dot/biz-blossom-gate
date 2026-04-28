@@ -843,20 +843,21 @@ export default function Saques() {
       </section>
 
       {/* Security Footer */}
-      <div className="rounded-2xl border border-border/60 bg-card p-4">
+      <div className="rounded-xl border border-border/70 bg-card p-4">
         <div className="flex items-center gap-3">
-          <div className="h-8 w-8 rounded-lg bg-success/10 ring-1 ring-success/20 flex items-center justify-center shrink-0">
+          <div className="h-8 w-8 rounded-md bg-success/10 border border-success/20 flex items-center justify-center shrink-0">
             <Shield className="h-4 w-4 text-success" />
           </div>
           <div className="flex-1">
-            <p className="text-[11px] font-display font-bold text-foreground">Ambiente seguro · Verificação automática anti-fraude</p>
-            <p className="text-[10px] text-muted-foreground">Saques processados via PIX com verificação de saldo em tempo real. Taxa fixa de {fmt(WITHDRAW_FEE)} por operação. Aprovação em até 24h úteis.</p>
+            <p className="text-[11px] font-display font-black text-foreground tracking-[-0.01em]">Ambiente seguro · Verificação automática anti-fraude</p>
+            <p className="text-[10.5px] text-muted-foreground/85 font-medium">Saques processados via PIX com verificação de saldo em tempo real. Taxa fixa de {fmt(WITHDRAW_FEE)} por operação. Aprovação em até 24h úteis.</p>
           </div>
-          <div className="hidden md:flex items-center gap-1.5 text-[10px] font-bold text-success">
+          <div className="hidden md:flex items-center gap-1.5 text-[10px] font-black text-success uppercase tracking-[0.16em]">
             <span className="h-1.5 w-1.5 rounded-full bg-success animate-pulse" />
             ATIVO
           </div>
         </div>
+      </div>
       </div>
 
       {/* Approved Popup */}
