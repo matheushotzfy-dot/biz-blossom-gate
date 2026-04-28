@@ -16,7 +16,7 @@ import AuthCallback from "./pages/AuthCallback";
 import Dashboard from "./pages/Dashboard";
 import PerfilHub from "./pages/PerfilHub";
 import PremiacoesHub from "./pages/PremiacoesHub";
-import Extrato from "./pages/financeiro/Extrato";
+// Extrato removido — consolidado em /vendas
 import SaquesHub from "./pages/financeiro/SaquesHub";
 import ConfigFinanceiro from "./pages/financeiro/ConfigFinanceiro";
 import Vendas from "./pages/vendas/Vendas";
