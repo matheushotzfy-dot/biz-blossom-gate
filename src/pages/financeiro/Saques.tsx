@@ -258,7 +258,6 @@ export default function Saques() {
   /* ═══════════ RENDER ═══════════ */
   /* KPI rails for the Vendas-style strip */
   const kpiRails = [
-    { label: "Saldo disponível", value: hidden ? HIDE : fmtCompact(availableBalance), sub: `Retido ${hidden ? HIDE : fmtCompact(retainedAmount)}`, accent: availableBalance > 0 ? "text-success" : "text-foreground", rail: "bg-success" },
     { label: "Total sacado", value: hidden ? HIDE : fmtCompact(m.totalApproved), sub: `${m.approved.length} ${m.approved.length === 1 ? "saque aprovado" : "saques aprovados"}`, accent: "text-foreground", rail: "bg-info" },
     { label: "Taxa de aprovação", value: hidden ? HIDE : `${m.approvalRate.toFixed(1)}%`, sub: `${m.approved.length}/${m.current.length} solicitações`, accent: m.approvalRate >= 80 ? "text-success" : "text-warning", rail: m.approvalRate >= 80 ? "bg-success" : "bg-warning" },
     { label: "Pendentes", value: hidden ? HIDE : String(m.pending.length), sub: m.pending.length > 0 ? `${fmtCompact(m.totalPending)} aguardando` : "Sem fila", accent: m.pending.length > 0 ? "text-warning" : "text-foreground", rail: m.pending.length > 0 ? "bg-warning" : "bg-foreground/40" },
