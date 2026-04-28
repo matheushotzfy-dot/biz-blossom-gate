@@ -96,16 +96,15 @@ export default function AdminProductsTab({ products, profiles, transactions, fmt
  }, [selectedProduct]);
 
  const VALID_STATUS_TRANSITIONS: Record<string, string[]> = {
- pending_review: ["active", "rejected"],
- active: ["blocked", "rejected", "pending_review"],
- blocked: ["active", "rejected"],
- rejected: ["active", "pending_review"],
+ draft: ["active", "pending_review", "inactive"],
+ pending_review: ["active", "inactive"],
+ active: ["pending_review", "inactive"],
+ inactive: ["active", "pending_review"],
  };
 
  const handleProductStatus = async (productId: string, status: string, userId: string, reason?: string) => {
- // Validate status transition
  const product = products.find(p => p.id === productId);
- const currentStatus = product?.status || "pending_review";
+ const currentStatus = product?.status || "active";
  const allowed = VALID_STATUS_TRANSITIONS[currentStatus];
  if (allowed && !allowed.includes(status)) {
  toast.error(`Não é possível mudar de "${currentStatus}" para "${status}"`);
@@ -113,10 +112,12 @@ export default function AdminProductsTab({ products, profiles, transactions, fmt
  }
 
  const updateData: any = { status };
- if (reason) updateData.rejection_reason = reason.replace(/[<>]/g, "").trim().slice(0, 1000);
+ // Reaprovações limpam o motivo anterior; revisões/inativações registram o motivo informado.
+ if (status === "active") updateData.rejection_reason = null;
+ else if (reason) updateData.rejection_reason = reason.replace(/[<>]/g, "").trim().slice(0, 1000);
  const { error } = await supabase.from("products").update(updateData).eq("id", productId);
  if (error) { toast.error("Erro ao atualizar produto"); return; }
- const labels: Record<string, string> = { active: "aprovado", blocked: "suspenso", rejected: "recusado", pending_review: "em revisão" };
+ const labels: Record<string, string> = { active: "reaprovado", inactive: "inativado", pending_review: "marcado para revisão" };
  toast.success(`Produto ${labels[status] || status}!`);
  await logAdminAction(`product_${status}`, "product", productId, { status, user_id: userId, reason });
  onReload();
@@ -131,7 +132,7 @@ export default function AdminProductsTab({ products, profiles, transactions, fmt
  const confirmReject = async () => {
  if (!rejectTarget) return;
  if (!rejectReason.trim()) { toast.error("Motivo obrigatório"); return; }
- await handleProductStatus(rejectTarget.id, "rejected", rejectTarget.user_id, rejectReason.trim());
+ await handleProductStatus(rejectTarget.id, "pending_review", rejectTarget.user_id, rejectReason.trim());
  setRejectOpen(false);
  setRejectTarget(null);
  };
@@ -145,7 +146,7 @@ export default function AdminProductsTab({ products, profiles, transactions, fmt
  const confirmSuspend = async () => {
  if (!suspendTarget) return;
  if (!suspendReason.trim()) { toast.error("Motivo obrigatório"); return; }
- await handleProductStatus(suspendTarget.id, "blocked", suspendTarget.user_id, suspendReason.trim());
+ await handleProductStatus(suspendTarget.id, "inactive", suspendTarget.user_id, suspendReason.trim());
  setSuspendOpen(false);
  setSuspendTarget(null);
  };
@@ -166,8 +167,8 @@ export default function AdminProductsTab({ products, profiles, transactions, fmt
 
  const pendingReview = useMemo(() => products.filter(p => p.status === "pending_review"), [products]);
  const activeCount = products.filter(p => p.status === "active").length;
- const blockedCount = products.filter(p => p.status === "blocked").length;
- const rejectedCount = products.filter(p => p.status === "rejected").length;
+  const blockedCount = products.filter(p => p.status === "inactive").length;
+  const rejectedCount = 0;
 
  return (
  <div className="space-y-5 animate-fade-in">
@@ -247,12 +248,12 @@ export default function AdminProductsTab({ products, profiles, transactions, fmt
  <Select value={statusFilter} onValueChange={setStatusFilter}>
  <SelectTrigger className="w-[160px] h-10 text-xs rounded-xl"><SelectValue placeholder="Status" /></SelectTrigger>
  <SelectContent>
- <SelectItem value="all">Todos status</SelectItem>
- <SelectItem value="pending_review">Em Revisão</SelectItem>
- <SelectItem value="active">Ativos</SelectItem>
- <SelectItem value="blocked">Suspensos</SelectItem>
- <SelectItem value="rejected">Recusados</SelectItem>
- </SelectContent>
+  <SelectItem value="all">Todos status</SelectItem>
+  <SelectItem value="draft">Rascunho</SelectItem>
+  <SelectItem value="active">Ativos</SelectItem>
+  <SelectItem value="pending_review">Em Revisão</SelectItem>
+  <SelectItem value="inactive">Inativos</SelectItem>
+  </SelectContent>
  </Select>
  </div>
 
@@ -326,16 +327,16 @@ export default function AdminProductsTab({ products, profiles, transactions, fmt
  <CheckCircle2 className="h-3.5 w-3.5" /> Aprovar
  </DropdownMenuItem>
  )}
- {p.status === "active" && (
- <DropdownMenuItem className="gap-2 text-destructive" onClick={() => openSuspend(p)}>
- <Ban className="h-3.5 w-3.5" /> Suspender Checkout
- </DropdownMenuItem>
- )}
- {p.status !== "rejected" && (
- <DropdownMenuItem className="gap-2 text-warning" onClick={() => openReject(p)}>
- <ShieldAlert className="h-3.5 w-3.5" /> Reprovar
- </DropdownMenuItem>
- )}
+  {p.status === "active" && (
+  <DropdownMenuItem className="gap-2 text-warning" onClick={() => openReject(p)}>
+  <ShieldAlert className="h-3.5 w-3.5" /> Marcar Em Revisão
+  </DropdownMenuItem>
+  )}
+  {p.status !== "inactive" && (
+  <DropdownMenuItem className="gap-2 text-destructive" onClick={() => openSuspend(p)}>
+  <Ban className="h-3.5 w-3.5" /> Inativar Produto
+  </DropdownMenuItem>
+  )}
  </DropdownMenuContent>
  </DropdownMenu>
  </td>

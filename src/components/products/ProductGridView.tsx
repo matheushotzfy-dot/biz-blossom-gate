@@ -1,6 +1,6 @@
-import { Copy, ExternalLink, Link2, Palette, Pencil, Settings2, Sparkles, Check, BookOpen, ArrowUpRight } from "lucide-react";
+import { Copy, ExternalLink, Link2, Palette, Pencil, Settings2, Sparkles, Check, BookOpen, ArrowUpRight, AlertTriangle, Trash2, FileEdit, Info } from "lucide-react";
 import { ProductActionsMenu, type ProductMenuHandlers } from "./ProductActionsMenu";
-import { DELIVERY_LABELS, formatCurrency, type Product, getCheckoutLink } from "./productPresentation";
+import { DELIVERY_LABELS, formatCurrency, type Product, getCheckoutLink, getEffectiveStatus, getProductRequirements } from "./productPresentation";
 import { cn } from "@/lib/utils";
 
 type ProductGridViewProps = ProductMenuHandlers & {
@@ -18,15 +18,21 @@ const STATUS_META: Record<string, { label: string; dot: string; text: string; su
   },
   inactive: {
     label: "Inativo",
-    dot: "bg-muted-foreground/50",
-    text: "text-muted-foreground",
-    surface: "bg-muted/40 border-border/60",
+    dot: "bg-destructive",
+    text: "text-destructive",
+    surface: "bg-destructive/[0.08] border-destructive/20",
   },
   pending_review: {
     label: "Em revisão",
     dot: "bg-warning",
     text: "text-warning",
     surface: "bg-warning/[0.08] border-warning/20",
+  },
+  draft: {
+    label: "Rascunho",
+    dot: "bg-muted-foreground/60",
+    text: "text-muted-foreground",
+    surface: "bg-muted/40 border-border/60",
   },
 };
 
@@ -64,7 +70,13 @@ export function ProductGridView({ products, copiedId, toolbar, ...handlers }: Pr
 
       <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
         {products.map((product) => {
-          const status = STATUS_META[product.status] || STATUS_META.inactive;
+          const effectiveStatus = getEffectiveStatus(product);
+          const status = STATUS_META[effectiveStatus] || STATUS_META.inactive;
+          const isDraft = effectiveStatus === "draft";
+          const isInactive = effectiveStatus === "inactive";
+          const isPending = effectiveStatus === "pending_review";
+          const requirements = isDraft ? getProductRequirements(product) : [];
+          const missingCount = requirements.filter((r) => !r.done).length;
           const initial = product.name.charAt(0).toUpperCase();
           const deliveryLabel = DELIVERY_LABELS[product.delivery_type] || product.delivery_type;
           const isCopied = copiedId === product.id;
@@ -79,6 +91,9 @@ export function ProductGridView({ products, copiedId, toolbar, ...handlers }: Pr
                 "group relative flex flex-col overflow-hidden rounded-[24px] border border-border/40 bg-card/60 backdrop-blur-sm",
                 "transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)]",
                 "hover:border-primary/30 hover:shadow-[0_20px_40px_-12px_rgba(0,0,0,0.12)] hover:-translate-y-1",
+                isInactive && "border-destructive/30",
+                isPending && "border-warning/30",
+                isDraft && "border-dashed border-border/60",
               )}
             >
               {/* Top Image Section */}
@@ -131,6 +146,33 @@ export function ProductGridView({ products, copiedId, toolbar, ...handlers }: Pr
 
               {/* Bottom Content Section */}
               <div className="flex flex-1 flex-col gap-4 p-5">
+                {/* Status banner: shows admin reason or draft pendencies */}
+                {(isInactive || isPending) && product.rejection_reason && (
+                  <div className={cn(
+                    "flex items-start gap-2.5 rounded-xl border px-3 py-2.5",
+                    isInactive ? "border-destructive/30 bg-destructive/[0.06]" : "border-warning/30 bg-warning/[0.06]"
+                  )}>
+                    <AlertTriangle className={cn("h-4 w-4 shrink-0 mt-0.5", isInactive ? "text-destructive" : "text-warning")} strokeWidth={2.25} />
+                    <div className="min-w-0">
+                      <p className={cn("text-[10px] font-black uppercase tracking-wider", isInactive ? "text-destructive" : "text-warning")}>
+                        {isInactive ? "Produto inativado pela equipe" : "Em revisão pela equipe"}
+                      </p>
+                      <p className="mt-0.5 text-[11.5px] leading-snug text-foreground/85">{product.rejection_reason}</p>
+                    </div>
+                  </div>
+                )}
+                {(isInactive || isPending) && !product.rejection_reason && (
+                  <div className={cn(
+                    "flex items-center gap-2 rounded-xl border px-3 py-2",
+                    isInactive ? "border-destructive/30 bg-destructive/[0.06]" : "border-warning/30 bg-warning/[0.06]"
+                  )}>
+                    <Info className={cn("h-3.5 w-3.5 shrink-0", isInactive ? "text-destructive" : "text-warning")} />
+                    <p className="text-[11.5px] text-foreground/85">
+                      {isInactive ? "Produto inativado pela equipe." : "Em análise pela equipe."}
+                    </p>
+                  </div>
+                )}
+
                 <div className="min-w-0">
                     <div className="flex items-start justify-between gap-3">
                       <div className="min-w-0">
@@ -152,101 +194,153 @@ export function ProductGridView({ products, copiedId, toolbar, ...handlers }: Pr
                     </div>
                 </div>
 
-                {/* Quick Info Grid */}
-                <div className="grid grid-cols-2 gap-2">
-                  <div className="rounded-xl border border-border/20 bg-muted/5 p-3 transition-colors group-hover:bg-muted/10">
-                    <p className="text-[9px] font-black uppercase tracking-widest text-muted-foreground/30">Checkout</p>
-                    <div className="mt-1 flex items-center gap-1.5">
-                       <Check className={cn("h-3 w-3", product.checkout_url ? "text-success" : "text-muted-foreground/30")} />
-                       <p className="text-[12px] font-bold text-foreground/80">{product.checkout_url ? "Publicado" : "Pendente"}</p>
+                {/* DRAFT mode: pendency checklist + giant delete button */}
+                {isDraft ? (
+                  <>
+                    <div className="rounded-xl border border-dashed border-border/50 bg-muted/10 p-3.5">
+                      <div className="mb-2.5 flex items-center justify-between">
+                        <p className="inline-flex items-center gap-1.5 text-[10px] font-black uppercase tracking-wider text-muted-foreground">
+                          <FileEdit className="h-3 w-3" /> Falta terminar
+                        </p>
+                        <span className="rounded-md bg-muted/40 px-1.5 py-0.5 text-[10px] font-black tabular-nums text-foreground/70">
+                          {missingCount} {missingCount === 1 ? "item" : "itens"}
+                        </span>
+                      </div>
+                      <ul className="space-y-1.5">
+                        {requirements.map((r) => (
+                          <li key={r.key} className="flex items-center gap-2 text-[11.5px]">
+                            {r.done ? (
+                              <Check className="h-3.5 w-3.5 shrink-0 text-success" strokeWidth={3} />
+                            ) : (
+                              <span className="h-3.5 w-3.5 shrink-0 rounded-full border border-dashed border-muted-foreground/40" />
+                            )}
+                            <span className={cn(r.done ? "text-muted-foreground/60 line-through" : "text-foreground/85 font-medium")}>
+                              {r.label}
+                            </span>
+                          </li>
+                        ))}
+                      </ul>
                     </div>
-                  </div>
-                  <div className="rounded-xl border border-border/20 bg-muted/5 p-3 transition-colors group-hover:bg-muted/10">
-                    <p className="text-[9px] font-black uppercase tracking-widest text-muted-foreground/30">Layout</p>
-                    <div className="mt-1 flex items-center gap-1.5">
-                       <Palette className="h-3 w-3 text-primary/60" />
-                       <p className="text-[12px] font-bold text-foreground/80">{themeLabel}</p>
-                    </div>
-                  </div>
-                </div>
 
-                {/* Checkout Link Copy */}
-                {linkPreview && (
-                  <button
-                    type="button"
-                    onClick={(e) => { e.stopPropagation(); handlers.onCopyLink(product); }}
-                    className="group/link flex items-center gap-2.5 rounded-xl border border-dashed border-border/40 bg-muted/5 px-3 py-2.5 text-left transition-all hover:border-primary/40 hover:bg-primary/[0.02]"
-                  >
-                    <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-lg bg-primary/10 transition-transform group-hover/link:scale-110">
-                      <Link2 className="h-3.5 w-3.5 text-primary" strokeWidth={2.5} />
+                    <div className="mt-1 grid grid-cols-[1fr_auto] gap-2">
+                      <button
+                        type="button"
+                        onClick={(e) => { e.stopPropagation(); handlers.onEditProduct(product); }}
+                        className="flex h-12 items-center justify-center gap-2 rounded-xl bg-primary text-[12.5px] font-black uppercase tracking-wider text-primary-foreground transition-all hover:bg-primary/90 hover:-translate-y-px"
+                      >
+                        <Pencil className="h-4 w-4" strokeWidth={2.5} />
+                        Continuar
+                      </button>
+                      <button
+                        type="button"
+                        onClick={(e) => { e.stopPropagation(); handlers.onDeleteProduct(product); }}
+                        className="flex h-12 items-center justify-center gap-2 rounded-xl border border-destructive/40 bg-destructive/[0.06] px-4 text-[12px] font-black uppercase tracking-wider text-destructive transition-all hover:bg-destructive hover:text-destructive-foreground"
+                        title="Excluir rascunho"
+                      >
+                        <Trash2 className="h-4 w-4" strokeWidth={2.5} />
+                        Excluir
+                      </button>
                     </div>
-                    <span className="flex-1 truncate font-display text-[11px] font-bold text-muted-foreground/70">{linkPreview}</span>
-                    {isCopied ? (
-                      <Check className="h-4 w-4 shrink-0 text-success" strokeWidth={3} />
-                    ) : (
-                      <Copy className="h-4 w-4 shrink-0 text-muted-foreground/20 transition-colors group-hover/link:text-primary" strokeWidth={2.25} />
+                  </>
+                ) : (
+                  <>
+                    {/* Quick Info Grid */}
+                    <div className="grid grid-cols-2 gap-2">
+                      <div className="rounded-xl border border-border/20 bg-muted/5 p-3 transition-colors group-hover:bg-muted/10">
+                        <p className="text-[9px] font-black uppercase tracking-widest text-muted-foreground/30">Checkout</p>
+                        <div className="mt-1 flex items-center gap-1.5">
+                           <Check className={cn("h-3 w-3", product.checkout_url ? "text-success" : "text-muted-foreground/30")} />
+                           <p className="text-[12px] font-bold text-foreground/80">{product.checkout_url ? "Publicado" : "Pendente"}</p>
+                        </div>
+                      </div>
+                      <div className="rounded-xl border border-border/20 bg-muted/5 p-3 transition-colors group-hover:bg-muted/10">
+                        <p className="text-[9px] font-black uppercase tracking-widest text-muted-foreground/30">Layout</p>
+                        <div className="mt-1 flex items-center gap-1.5">
+                           <Palette className="h-3 w-3 text-primary/60" />
+                           <p className="text-[12px] font-bold text-foreground/80">{themeLabel}</p>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Checkout Link Copy */}
+                    {linkPreview && (
+                      <button
+                        type="button"
+                        onClick={(e) => { e.stopPropagation(); handlers.onCopyLink(product); }}
+                        className="group/link flex items-center gap-2.5 rounded-xl border border-dashed border-border/40 bg-muted/5 px-3 py-2.5 text-left transition-all hover:border-primary/40 hover:bg-primary/[0.02]"
+                      >
+                        <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-lg bg-primary/10 transition-transform group-hover/link:scale-110">
+                          <Link2 className="h-3.5 w-3.5 text-primary" strokeWidth={2.5} />
+                        </div>
+                        <span className="flex-1 truncate font-display text-[11px] font-bold text-muted-foreground/70">{linkPreview}</span>
+                        {isCopied ? (
+                          <Check className="h-4 w-4 shrink-0 text-success" strokeWidth={3} />
+                        ) : (
+                          <Copy className="h-4 w-4 shrink-0 text-muted-foreground/20 transition-colors group-hover/link:text-primary" strokeWidth={2.25} />
+                        )}
+                      </button>
                     )}
-                  </button>
-                )}
 
-                {/* Actions Row */}
-                <div className="mt-1 flex items-center gap-2">
-                  <button
-                    type="button"
-                    onClick={(e) => { e.stopPropagation(); handlers.onEditProduct(product); }}
-                    className="flex h-11 flex-1 items-center justify-center gap-2 rounded-xl border border-border/40 bg-card shadow-sm text-[12px] font-black uppercase tracking-wider text-foreground/80 transition-all hover:border-primary/40 hover:text-primary hover:shadow-md"
-                  >
-                    <Pencil className="h-4 w-4" strokeWidth={2.25} />
-                    Editar
-                  </button>
-                  <button
-                    type="button"
-                    onClick={(e) => { e.stopPropagation(); handlers.onOpenPixels(product); }}
-                    className="flex h-11 flex-1 items-center justify-center gap-2 rounded-xl border border-border/40 bg-card shadow-sm text-[12px] font-black uppercase tracking-wider text-foreground/80 transition-all hover:border-primary/40 hover:text-primary hover:shadow-md"
-                  >
-                    <Settings2 className="h-4 w-4" strokeWidth={2.25} />
-                    Ajustes
-                  </button>
-                  {product.checkout_url && (
-                    <button
-                      type="button"
-                      onClick={(e) => { e.stopPropagation(); handlers.onOpenCheckout(product); }}
-                      className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-border/40 bg-card shadow-sm text-foreground/60 transition-all hover:border-primary/40 hover:text-primary hover:shadow-md"
-                      title="Abrir checkout"
-                    >
-                      <ExternalLink className="h-4 w-4" strokeWidth={2.25} />
-                    </button>
-                  )}
-                  <div onClick={(e) => e.stopPropagation()}>
-                    <ProductActionsMenu
-                      copied={isCopied}
-                      product={product}
-                      triggerClassName="h-11 w-11 rounded-xl border border-border/40 bg-card shadow-sm text-foreground/60 hover:border-primary/40 hover:text-primary data-[state=open]:bg-accent transition-all hover:shadow-md"
-                      {...handlers}
-                    />
-                  </div>
-                </div>
-
-                {/* Footer Labels */}
-                <div className="flex items-center justify-between border-t border-border/10 pt-4 text-[10px] font-black uppercase tracking-[0.1em] text-muted-foreground/40">
-                  <button
-                    type="button"
-                    onClick={(e) => { e.stopPropagation(); handlers.onOpenMembers(product); }}
-                    className="inline-flex items-center gap-2 transition-colors hover:text-primary"
-                  >
-                    <div className="h-5 w-5 rounded-md bg-muted/10 flex items-center justify-center">
-                      <BookOpen className="h-3 w-3" />
+                    {/* Actions Row */}
+                    <div className="mt-1 flex items-center gap-2">
+                      <button
+                        type="button"
+                        onClick={(e) => { e.stopPropagation(); handlers.onEditProduct(product); }}
+                        className="flex h-11 flex-1 items-center justify-center gap-2 rounded-xl border border-border/40 bg-card shadow-sm text-[12px] font-black uppercase tracking-wider text-foreground/80 transition-all hover:border-primary/40 hover:text-primary hover:shadow-md"
+                      >
+                        <Pencil className="h-4 w-4" strokeWidth={2.25} />
+                        Editar
+                      </button>
+                      <button
+                        type="button"
+                        onClick={(e) => { e.stopPropagation(); handlers.onOpenPixels(product); }}
+                        className="flex h-11 flex-1 items-center justify-center gap-2 rounded-xl border border-border/40 bg-card shadow-sm text-[12px] font-black uppercase tracking-wider text-foreground/80 transition-all hover:border-primary/40 hover:text-primary hover:shadow-md"
+                      >
+                        <Settings2 className="h-4 w-4" strokeWidth={2.25} />
+                        Ajustes
+                      </button>
+                      {product.checkout_url && (
+                        <button
+                          type="button"
+                          onClick={(e) => { e.stopPropagation(); handlers.onOpenCheckout(product); }}
+                          className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-border/40 bg-card shadow-sm text-foreground/60 transition-all hover:border-primary/40 hover:text-primary hover:shadow-md"
+                          title="Abrir checkout"
+                        >
+                          <ExternalLink className="h-4 w-4" strokeWidth={2.25} />
+                        </button>
+                      )}
+                      <div onClick={(e) => e.stopPropagation()}>
+                        <ProductActionsMenu
+                          copied={isCopied}
+                          product={product}
+                          triggerClassName="h-11 w-11 rounded-xl border border-border/40 bg-card shadow-sm text-foreground/60 hover:border-primary/40 hover:text-primary data-[state=open]:bg-accent transition-all hover:shadow-md"
+                          {...handlers}
+                        />
+                      </div>
                     </div>
-                    Membros
-                  </button>
-                  <button
-                    type="button"
-                    onClick={(e) => { e.stopPropagation(); handlers.onEditProduct(product); }}
-                    className="inline-flex items-center gap-2 transition-colors hover:text-primary"
-                  >
-                    Construtor <ArrowUpRight className="h-3 w-3" />
-                  </button>
-                </div>
+
+                    {/* Footer Labels */}
+                    <div className="flex items-center justify-between border-t border-border/10 pt-4 text-[10px] font-black uppercase tracking-[0.1em] text-muted-foreground/40">
+                      <button
+                        type="button"
+                        onClick={(e) => { e.stopPropagation(); handlers.onOpenMembers(product); }}
+                        className="inline-flex items-center gap-2 transition-colors hover:text-primary"
+                      >
+                        <div className="h-5 w-5 rounded-md bg-muted/10 flex items-center justify-center">
+                          <BookOpen className="h-3 w-3" />
+                        </div>
+                        Membros
+                      </button>
+                      <button
+                        type="button"
+                        onClick={(e) => { e.stopPropagation(); handlers.onEditProduct(product); }}
+                        className="inline-flex items-center gap-2 transition-colors hover:text-primary"
+                      >
+                        Construtor <ArrowUpRight className="h-3 w-3" />
+                      </button>
+                    </div>
+                  </>
+                )}
               </div>
             </article>
           );

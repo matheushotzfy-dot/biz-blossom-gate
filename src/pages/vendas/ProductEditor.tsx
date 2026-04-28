@@ -304,7 +304,7 @@ export default function ProductEditor() {
  if (isNew && !createdProductId) {
  const slug = crypto.randomUUID().slice(0, 8);
  const checkoutUrl = `${window.location.origin}/pay/${slug}`;
- const { data: newProduct, error } = await supabase.from("products").insert({ ...productData, user_id: user.id, checkout_url: checkoutUrl } as any).select("*").single();
+ const { data: newProduct, error } = await supabase.from("products").insert({ ...productData, status: "draft", user_id: user.id, checkout_url: checkoutUrl } as any).select("*").single();
  if (error || !newProduct) { toast.error("Erro ao criar produto"); return; }
 
  if (deliveryType === "digital") {
@@ -323,9 +323,19 @@ export default function ProductEditor() {
  invalidateAll(["products", "courses"]);
  setActiveTab("configuracoes");
  window.history.replaceState(null, "", `/vendas/produtos/${newProduct.id}/editar`);
- } else {
- const { error } = await supabase.from("products").update(productData).eq("id", effectiveProductId!).eq("user_id", user.id);
- if (error) { toast.error("Erro ao salvar"); return; }
+  } else {
+  // Auto-promove de 'draft' para 'active' quando todos os campos essenciais foram preenchidos.
+  // Não toca em status definidos pelo admin (pending_review/inactive).
+  const updatePayload: any = { ...productData };
+  const currentStatus = (product as any)?.status;
+  const hasAllEssentials = name.trim().length > 1 && priceNum >= 1 && (description.trim().length >= 10) && !!imageUrl;
+  if (currentStatus === "draft" && hasAllEssentials) {
+    updatePayload.status = "active";
+  } else {
+    delete updatePayload.status; // preserva status do admin
+  }
+  const { error } = await supabase.from("products").update(updatePayload).eq("id", effectiveProductId!).eq("user_id", user.id);
+  if (error) { toast.error("Erro ao salvar"); return; }
 
  if (deliveryType === "digital") {
  const { data: existingCourse } = await supabase.from("courses").select("id").eq("product_id", effectiveProductId!).eq("user_id", user.id).limit(1).maybeSingle();

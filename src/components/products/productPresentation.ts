@@ -26,3 +26,46 @@ export const formatCompactDate = (value: string) =>
 
 export const getCheckoutLink = (checkoutUrl: string) =>
   `${window.location.origin}/pay/${checkoutUrl.split("/").pop()!}`;
+
+/* ───────────────────────── Draft / completion helpers ───────────────────────── */
+
+export type ProductRequirement = {
+  key: string;
+  label: string;
+  done: boolean;
+};
+
+/** Determines which mandatory fields are still missing on a product. */
+export function getProductRequirements(product: Product): ProductRequirement[] {
+  const hasName =
+    !!product.name &&
+    product.name.trim().length > 1 &&
+    product.name.trim().toLowerCase() !== "novo produto";
+  const hasPrice = Number(product.price) >= 1;
+  const hasDescription = !!product.description && product.description.trim().length >= 10;
+  const hasImage = !!product.image_url;
+  const hasCheckout = !!product.checkout_url;
+
+  return [
+    { key: "name", label: "Nome do produto", done: hasName },
+    { key: "price", label: "Preço de venda (mínimo R$ 1,00)", done: hasPrice },
+    { key: "description", label: "Descrição (mín. 10 caracteres)", done: hasDescription },
+    { key: "image", label: "Imagem de capa", done: hasImage },
+    { key: "checkout", label: "Link de checkout", done: hasCheckout },
+  ];
+}
+
+/** True if the product is missing essential information (treated as draft). */
+export function isProductDraft(product: Product): boolean {
+  if (product.status === "draft") return true;
+  // Auto-classify as draft when admin hasn't touched it yet but core info is missing.
+  if (product.status !== "active") return false;
+  const reqs = getProductRequirements(product);
+  return reqs.some((r) => !r.done);
+}
+
+/** Returns the effective status considering auto-draft detection. */
+export function getEffectiveStatus(product: Product): "draft" | "active" | "pending_review" | "inactive" {
+  if (isProductDraft(product)) return "draft";
+  return (product.status as any) || "active";
+}
