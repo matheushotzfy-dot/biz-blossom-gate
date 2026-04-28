@@ -937,7 +937,7 @@ export default function Vendas() {
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 placeholder="Buscar nome, email, telefone, ID…"
-                className="h-9 w-full rounded-lg border border-border/70 bg-background pl-9 pr-16 text-[12px] font-medium text-foreground transition-all duration-200 placeholder:text-muted-foreground/65 hover:border-foreground/30 focus:border-foreground/50 focus:outline-none focus:ring-2 focus:ring-foreground/10"
+                className="h-9 w-full rounded-lg border border-border/70 bg-background pl-9 pr-16 text-[12px] font-medium text-foreground transition-all duration-200 placeholder:text-muted-foreground/65 hover:border-success/40 focus:border-success/60 focus:outline-none focus:ring-2 focus:ring-success/15"
               />
               {search ? (
                 <button onClick={() => setSearch("")} aria-label="Limpar busca" className="absolute right-2.5 top-1/2 -translate-y-1/2 rounded p-0.5 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"><X className="h-3.5 w-3.5" /></button>
