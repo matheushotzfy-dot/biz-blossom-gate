@@ -471,6 +471,9 @@ export default function Extrato() {
         : format(customRange.from, "dd/MM/yyyy")
       : "Personalizado"
     : selectedPeriod.label;
+  const animKey = isCustom
+    ? `custom-${customRange?.from?.getTime() ?? 0}-${customRange?.to?.getTime() ?? 0}`
+    : `p-${selectedPeriod.label}`;
 
   const approvalRate = dateFiltered.length > 0 ? (m.approved.length / dateFiltered.length) * 100 : 0;
   const refundRate = m.approved.length > 0 ? (m.refunded.length / m.approved.length) * 100 : 0;
@@ -514,8 +517,9 @@ export default function Extrato() {
               </h1>
               <div className="mt-4 flex flex-wrap items-end gap-x-5 gap-y-2">
                 <p
+                  key={`hero-ext-${animKey}`}
                   className={cn(
-                    "font-numbers text-[42px] font-black leading-[0.88] tracking-[-0.06em] tabular-nums sm:text-[60px]",
+                    "vendas-rise font-numbers text-[42px] font-black leading-[0.88] tracking-[-0.06em] tabular-nums sm:text-[60px]",
                     hidden ? "text-foreground" : "text-success",
                   )}
                   style={{ fontVariantNumeric: "tabular-nums slashed-zero" }}
@@ -626,9 +630,12 @@ export default function Extrato() {
           <div className="mt-7 grid grid-cols-2 border-y border-border/70 lg:grid-cols-4 lg:divide-x lg:divide-border/70">
             {heroKpis.map((k, idx) => (
               <div
-                key={k.label}
+                key={`${k.label}-${animKey}`}
                 className={cn(
-                  "group relative min-h-[130px] px-5 py-5 transition-colors duration-200 hover:bg-muted/25",
+                  "vendas-rise group relative min-h-[130px] px-5 py-5 transition-colors duration-200 hover:bg-muted/25",
+                  idx === 1 && "vendas-rise-d1",
+                  idx === 2 && "vendas-rise-d2",
+                  idx === 3 && "vendas-rise-d3",
                   idx > 1 && "border-t border-border/70 lg:border-t-0",
                   idx === 1 && "border-l border-border/70 lg:border-l-0",
                 )}
