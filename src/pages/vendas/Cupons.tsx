@@ -141,17 +141,56 @@ export default function Cupons() {
 
   const previewValue = form.discount_value ? Number(form.discount_value) : 0;
 
+  const tabAccent: Record<StatusFilter, string> = {
+    all: "text-foreground",
+    active: "text-success",
+    inactive: "text-muted-foreground",
+    expired: "text-destructive",
+  };
+  const tabIcon: Record<StatusFilter, JSX.Element> = {
+    all: <Layers className="h-3 w-3" strokeWidth={2.5} />,
+    active: <CheckCircle2 className="h-3 w-3" strokeWidth={2.5} />,
+    inactive: <PauseCircle className="h-3 w-3" strokeWidth={2.5} />,
+    expired: <XCircle className="h-3 w-3" strokeWidth={2.5} />,
+  };
+  const filterTabs: { id: StatusFilter; label: string; count: number }[] = [
+    { id: "all", label: "Todos", count: coupons.length },
+    { id: "active", label: "Ativos", count: activeCoupons.length },
+    { id: "inactive", label: "Pausados", count: coupons.filter(c => !c.is_active).length },
+    { id: "expired", label: "Expirados", count: coupons.filter(c => isExpired(c) || isExhausted(c)).length },
+  ];
+
   return (
-    <PageShell>
-      {/* ─── Header ─── */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <PageTitle icon={<Tag className="h-6 w-6" />} title="Cupons" subtitle="Crie e gerencie estratégias de desconto comercial" />
-        <Dialog open={openCreate} onOpenChange={setOpenCreate}>
-          <DialogTrigger asChild>
-            <Button className="gap-2 rounded-xl text-sm font-display font-bold h-10 px-5 shadow-lg shadow-primary/20">
-              <Plus className="h-4 w-4" /> Novo Cupom
-            </Button>
-          </DialogTrigger>
+    <div className="mx-auto -mt-2 w-full max-w-[1440px] pb-24 md:-mt-3 md:pb-10">
+      {/* ── Hero header ── */}
+      <div className="relative flex flex-col gap-7 px-5 pt-1 sm:px-7 md:pt-1">
+        {/* Subtle radial accent behind title */}
+        <div
+          aria-hidden
+          className="pointer-events-none absolute -top-12 left-0 h-48 w-[520px] -z-[1] opacity-60 blur-3xl"
+          style={{
+            background:
+              "radial-gradient(60% 60% at 20% 50%, hsl(var(--primary) / 0.10), transparent 70%)",
+          }}
+        />
+
+        <div className="flex flex-wrap items-end justify-between gap-4 animate-fade-in">
+          <div>
+            <h1 className="font-display text-[40px] font-black leading-[0.9] tracking-[-0.055em] text-foreground sm:text-[52px]">
+              Cupons
+            </h1>
+            <p className="mt-2 text-[13px] font-medium text-muted-foreground/80">
+              Crie e gerencie estratégias de desconto para seus checkouts.
+            </p>
+          </div>
+
+          <Dialog open={openCreate} onOpenChange={setOpenCreate}>
+            <DialogTrigger asChild>
+              <button className="group inline-flex h-11 items-center gap-2 rounded-xl bg-primary px-5 text-[13px] font-black uppercase tracking-wider text-primary-foreground transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] hover:bg-primary/90 hover:-translate-y-0.5 hover:shadow-[0_10px_30px_-10px_hsl(var(--primary)/0.5)]">
+                <Plus className="h-4 w-4 transition-transform duration-300 group-hover:rotate-90" strokeWidth={2.75} />
+                Novo cupom
+              </button>
+            </DialogTrigger>
           <DialogContent className="max-w-lg rounded-2xl border border-border/40 bg-card/95 backdrop-blur-xl p-0 overflow-hidden">
             <div className="px-6 pt-6 pb-4 border-b border-border/20">
               <DialogHeader>
