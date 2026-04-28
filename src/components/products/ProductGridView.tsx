@@ -132,7 +132,7 @@ export function ProductGridView({ products, copiedId, toolbar, ...handlers }: Pr
                 )}
 
                 {/* Status Badge */}
-                <div className="absolute right-4 top-4">
+                <div className="absolute right-4 top-4 z-10">
                   <span className={cn(
                     "inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-[10px] font-black uppercase tracking-wider shadow-lg backdrop-blur-md",
                     status.surface.replace("bg-", "bg-").replace("/20", "/80"),
@@ -142,40 +142,29 @@ export function ProductGridView({ products, copiedId, toolbar, ...handlers }: Pr
                     {status.label}
                   </span>
                 </div>
+
+                {/* Status banner: overlay no topo da imagem para não desalinhar cards */}
+                {(isInactive || isPending) && (
+                  <div className={cn(
+                    "absolute inset-x-0 top-0 z-10 flex items-center gap-2 border-b px-4 py-2 backdrop-blur-md",
+                    isInactive ? "border-destructive/30 bg-destructive/85" : "border-warning/30 bg-warning/85"
+                  )}>
+                    <span className="relative flex h-1.5 w-1.5">
+                      <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-white opacity-70" />
+                      <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-white" />
+                    </span>
+                    <p className="text-[10.5px] font-black uppercase tracking-[0.12em] text-white truncate">
+                      {isInactive ? "Inativado pela equipe" : "Em análise pela equipe"}
+                      {product.rejection_reason && (
+                        <span className="ml-2 font-bold normal-case tracking-normal text-white/90">— {product.rejection_reason}</span>
+                      )}
+                    </p>
+                  </div>
+                )}
               </div>
 
               {/* Bottom Content Section */}
               <div className="flex flex-1 flex-col gap-4 p-5">
-                {/* Status banner: shows admin reason or draft pendencies */}
-                {(isInactive || isPending) && product.rejection_reason && (
-                  <div className={cn(
-                    "flex items-start gap-2.5 rounded-xl border px-3 py-2.5",
-                    isInactive ? "border-destructive/30 bg-destructive/[0.06]" : "border-warning/30 bg-warning/[0.06]"
-                  )}>
-                    <AlertTriangle className={cn("h-4 w-4 shrink-0 mt-0.5", isInactive ? "text-destructive" : "text-warning")} strokeWidth={2.25} />
-                    <div className="min-w-0">
-                      <p className={cn("text-[10px] font-black uppercase tracking-wider", isInactive ? "text-destructive" : "text-warning")}>
-                        {isInactive ? "Produto inativado pela equipe" : "Em revisão pela equipe"}
-                      </p>
-                      <p className="mt-0.5 text-[11.5px] leading-snug text-foreground/85">{product.rejection_reason}</p>
-                    </div>
-                  </div>
-                )}
-                {(isInactive || isPending) && !product.rejection_reason && (
-                  <div className={cn(
-                    "flex items-center gap-2 rounded-xl border px-3 py-2",
-                    isInactive ? "border-destructive/30 bg-destructive/[0.06]" : "border-warning/30 bg-warning/[0.06]"
-                  )}>
-                    <span className={cn("relative flex h-1.5 w-1.5", isInactive ? "text-destructive" : "text-warning")}>
-                      <span className={cn("absolute inline-flex h-full w-full animate-ping rounded-full opacity-60", isInactive ? "bg-destructive" : "bg-warning")} />
-                      <span className={cn("relative inline-flex h-1.5 w-1.5 rounded-full", isInactive ? "bg-destructive" : "bg-warning")} />
-                    </span>
-                    <p className={cn("text-[10.5px] font-black uppercase tracking-[0.12em]", isInactive ? "text-destructive" : "text-warning")}>
-                      {isInactive ? "Inativado pela equipe" : "Em análise pela equipe"}
-                    </p>
-                  </div>
-                )}
-
                 <div className="min-w-0">
                     <div className="flex items-start justify-between gap-3">
                       <div className="min-w-0">
