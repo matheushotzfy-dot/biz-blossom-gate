@@ -537,16 +537,42 @@ export default function Saques() {
         </div>
       </div>
 
-      {/* ═══════ KPI RIBBON ═══════ */}
-      <div key={`saques-kpis-${selectedPeriod.label}`} className="vendas-rise">
-        <KpiRibbon
-          items={[
-            { label: "Total sacado", value: hidden ? HIDE : fmtCompact(m.totalApproved), sub: `${m.approved.length} ${m.approved.length === 1 ? "saque aprovado" : "saques aprovados"}`, tone: "primary", delta: { cur: m.totalApproved, prev: m.prevTotalApproved } },
-            { label: "Taxa de aprovação", value: hidden ? HIDE : `${m.approvalRate.toFixed(1)}%`, sub: `${m.approved.length}/${m.current.length} solicitações`, tone: m.approvalRate >= 80 ? "success" : "warning", progress: m.approvalRate },
-            { label: "Pendentes", value: hidden ? HIDE : String(m.pending.length), sub: m.pending.length > 0 ? `${fmtCompact(m.totalPending)} aguardando` : "Sem fila", tone: m.pending.length > 0 ? "warning" : "muted", footer: "em análise" },
-            { label: "Ticket médio", value: hidden ? HIDE : fmtCompact(m.avgAmount), sub: m.avgAmount > 0 ? "Por saque aprovado" : "Sem dados", tone: "neutral", footer: selectedPeriod.label },
-            { label: "Total em taxas", value: hidden ? HIDE : fmtCompact(m.totalFees), sub: `${fmt(WITHDRAW_FEE)}/operação · ${m.current.length} ${m.current.length === 1 ? "op" : "ops"}`, tone: "warning", footer: "fee fixa PIX" },
-          ]}
+      {/* ═══════ KPI GRID — 1px divider ═══════ */}
+      <div key={`saques-kpis-${selectedPeriod.label}`} className="grid grid-cols-2 gap-px overflow-hidden rounded-xl border border-border/50 bg-border/40 lg:grid-cols-5 animate-fade-in stagger-2">
+        <Kpi
+          label="Total sacado"
+          value={hidden ? HIDE : fmtCompact(m.totalApproved)}
+          sub={`${m.approved.length} ${m.approved.length === 1 ? "saque aprovado" : "saques aprovados"}`}
+          icon={DollarSign}
+          tone="success"
+        />
+        <Kpi
+          label="Taxa de aprovação"
+          value={hidden ? HIDE : `${m.approvalRate.toFixed(1)}%`}
+          sub={`${m.approved.length}/${m.current.length} solicitações`}
+          icon={Percent}
+          tone={m.approvalRate >= 80 ? "success" : "warning"}
+        />
+        <Kpi
+          label="Pendentes"
+          value={hidden ? HIDE : String(m.pending.length)}
+          sub={m.pending.length > 0 ? `${fmtCompact(m.totalPending)} aguardando` : "Sem fila"}
+          icon={Clock}
+          tone={m.pending.length > 0 ? "warning" : "neutral"}
+        />
+        <Kpi
+          label="Ticket médio"
+          value={hidden ? HIDE : fmtCompact(m.avgAmount)}
+          sub={m.avgAmount > 0 ? "Por saque aprovado" : "Sem dados"}
+          icon={TrendingUp}
+          tone="info"
+        />
+        <Kpi
+          label="Total em taxas"
+          value={hidden ? HIDE : fmtCompact(m.totalFees)}
+          sub={`${fmt(WITHDRAW_FEE)}/op · ${m.current.length} ${m.current.length === 1 ? "op" : "ops"}`}
+          icon={Receipt}
+          tone="warning"
         />
       </div>
       {/* ════════════════════════════════════════════════════════════════ */}
