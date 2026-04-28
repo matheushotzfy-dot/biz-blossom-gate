@@ -1,16 +1,18 @@
 /**
- * Premiações — Premium milestone ledger
+ * Premiações — Billion-Dollar SaaS milestone ledger
  * @module Premiacoes
- * @version 9.0.0
+ * @version 10.0.0 — Premium redesign aligned with Minhas Vendas standard
  */
 
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, useMemo } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import {
   Trophy, Lock, CheckCircle2, Gift, Crown, Award, Target, ChevronRight,
+  TrendingUp, Sparkles, Flag,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { FinanceiroHero, FinanceiroKpi, FinanceiroKpiGrid } from "@/components/financeiro/FinanceiroHero";
 
 import braceletCard from "@/assets/awards/bracelet-card-10k.png";
 import plaque100k from "@/assets/awards/plaque-100k.png";
@@ -21,19 +23,19 @@ import plaque5m from "@/assets/awards/plaque-5m.png";
 import plaque10m from "@/assets/awards/plaque-10m.png";
 
 const AWARDS = [
-  { id: "10k", value: 10000, label: "R$ 10K", tier: "Iniciante", title: "Kit Exclusivo HOTZFY", description: "Pulseira de couro premium + Cartão Black exclusivo HOTZFY.", image: braceletCard, rewards: ["Pulseira Premium", "Cartão Black"] },
-  { id: "100k", value: 100000, label: "R$ 100K", tier: "Bronze", title: "Plaquinha Bronze", description: "Plaquinha em mármore negro com detalhes dourados.", image: plaque100k, rewards: ["Plaquinha Bronze"] },
-  { id: "250k", value: 250000, label: "R$ 250K", tier: "Prata", title: "Plaquinha Prata", description: "Acabamento prata platinado.", image: plaque250k, rewards: ["Plaquinha Prata"] },
-  { id: "500k", value: 500000, label: "R$ 500K", tier: "Ouro", title: "Plaquinha Ouro", description: "Banhada a ouro com detalhes em esmeralda.", image: plaque500k, rewards: ["Plaquinha Ouro 24K"] },
-  { id: "1m", value: 1000000, label: "R$ 1M", tier: "Diamante", title: "Plaquinha Diamante", description: "Cravejada em diamante. 1 Milhão.", image: plaque1m, rewards: ["Plaquinha Diamante"] },
-  { id: "5m", value: 5000000, label: "R$ 5M", tier: "Elite", title: "Plaquinha Elite", description: "Rose Gold com diamantes negros.", image: plaque5m, rewards: ["Plaquinha Elite"] },
-  { id: "10m", value: 10000000, label: "R$ 10M", tier: "Lenda", title: "Plaquinha Lenda", description: "Gemas preciosas multicoloridas.", image: plaque10m, rewards: ["Plaquinha Lenda"] },
+  { id: "10k",  value: 10_000,     label: "R$ 10K",  tier: "Iniciante", title: "Kit Exclusivo HOTZFY", description: "Pulseira de couro premium + Cartão Black exclusivo HOTZFY.", image: braceletCard, rewards: ["Pulseira Premium", "Cartão Black"] },
+  { id: "100k", value: 100_000,    label: "R$ 100K", tier: "Bronze",    title: "Plaquinha Bronze",    description: "Plaquinha em mármore negro com detalhes dourados.",          image: plaque100k,   rewards: ["Plaquinha Bronze"] },
+  { id: "250k", value: 250_000,    label: "R$ 250K", tier: "Prata",     title: "Plaquinha Prata",     description: "Acabamento prata platinado.",                                  image: plaque250k,   rewards: ["Plaquinha Prata"] },
+  { id: "500k", value: 500_000,    label: "R$ 500K", tier: "Ouro",      title: "Plaquinha Ouro",      description: "Banhada a ouro com detalhes em esmeralda.",                    image: plaque500k,   rewards: ["Plaquinha Ouro 24K"] },
+  { id: "1m",   value: 1_000_000,  label: "R$ 1M",   tier: "Diamante",  title: "Plaquinha Diamante",  description: "Cravejada em diamante. 1 Milhão.",                             image: plaque1m,     rewards: ["Plaquinha Diamante"] },
+  { id: "5m",   value: 5_000_000,  label: "R$ 5M",   tier: "Elite",     title: "Plaquinha Elite",     description: "Rose Gold com diamantes negros.",                              image: plaque5m,     rewards: ["Plaquinha Elite"] },
+  { id: "10m",  value: 10_000_000, label: "R$ 10M",  tier: "Lenda",     title: "Plaquinha Lenda",     description: "Gemas preciosas multicoloridas.",                              image: plaque10m,    rewards: ["Plaquinha Lenda"] },
 ];
 
 const fmtC = (v: number) =>
-  v >= 1000000 ? `R$ ${(v / 1000000).toFixed(v % 1000000 === 0 ? 0 : 1).replace(".", ",")}M`
-    : v >= 1000 ? `R$ ${(v / 1000).toFixed(0)}K`
-    : `R$ ${v.toLocaleString("pt-BR")}`;
+  v >= 1_000_000 ? `R$ ${(v / 1_000_000).toFixed(v % 1_000_000 === 0 ? 0 : 1).replace(".", ",")}M`
+  : v >= 1_000   ? `R$ ${(v / 1_000).toFixed(0)}K`
+  : `R$ ${v.toLocaleString("pt-BR")}`;
 
 const fmtFull = (v: number) =>
   new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL", maximumFractionDigits: 0 }).format(v);
@@ -67,111 +69,189 @@ export default function Premiacoes() {
       .then(({ data }) => { if (data) setRevenue(data.reduce((s, t) => s + Number(t.net_amount), 0)); });
   }, [user?.id]);
 
-  const currentIdx = AWARDS.findIndex((a) => revenue < a.value);
-  const unlockedCount = AWARDS.filter((a) => revenue >= a.value).length;
-  const nextAward = currentIdx >= 0 ? AWARDS[currentIdx] : null;
-  const currentTier = unlockedCount > 0 ? AWARDS[unlockedCount - 1] : null;
-  const overallProgress = (unlockedCount / AWARDS.length) * 100;
-  const nextProgress = nextAward ? Math.min((revenue / nextAward.value) * 100, 100) : 100;
-  const remaining = nextAward ? nextAward.value - revenue : 0;
+  const { currentIdx, unlockedCount, nextAward, currentTier, overallProgress, nextProgress, remaining } = useMemo(() => {
+    const currentIdx = AWARDS.findIndex((a) => revenue < a.value);
+    const unlockedCount = AWARDS.filter((a) => revenue >= a.value).length;
+    const nextAward = currentIdx >= 0 ? AWARDS[currentIdx] : null;
+    const currentTier = unlockedCount > 0 ? AWARDS[unlockedCount - 1] : null;
+    const overallProgress = (unlockedCount / AWARDS.length) * 100;
+    const nextProgress = nextAward ? Math.min((revenue / nextAward.value) * 100, 100) : 100;
+    const remaining = nextAward ? nextAward.value - revenue : 0;
+    return { currentIdx, unlockedCount, nextAward, currentTier, overallProgress, nextProgress, remaining };
+  }, [revenue]);
 
   return (
-    <div className="mx-auto w-full max-w-[1180px] pb-20 px-4 md:px-6 pt-2">
+    <div className="container mx-auto max-w-[1400px] px-4 sm:px-6 lg:px-8 py-6 space-y-6">
+      {/* HERO */}
+      <FinanceiroHero
+        eyebrow="PREMIAÇÕES"
+        title="Trilha de Conquistas"
+        subtitle="Recompensas físicas exclusivas desbloqueadas pelo seu faturamento líquido — do Kit HOTZFY à Plaquinha Lenda."
+        status={
+          nextAward
+            ? { tone: "info", label: `Próximo: ${nextAward.tier} · ${fmtC(nextAward.value)}`, pulse: true }
+            : { tone: "success", label: "Tier máximo atingido — Lenda", pulse: false }
+        }
+      />
 
-      {/* ═══ Header ═══ */}
-      <div className="flex items-center gap-3.5 mb-6">
-        <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-primary/10 border border-border">
-          <Trophy className="h-5 w-5 text-primary" strokeWidth={1.8} />
-        </div>
-        <div>
-          <h1 className="font-display text-xl font-extrabold tracking-tight text-foreground sm:text-[22px]">
-            Premiações
-          </h1>
-          <p className="text-xs text-muted-foreground mt-0.5">
-            Conquistas desbloqueadas pelo seu faturamento líquido
-          </p>
-        </div>
-      </div>
+      {/* KPI GRID */}
+      <FinanceiroKpiGrid cols={4}>
+        <FinanceiroKpi
+          label="Faturamento líquido"
+          value={fmtC(revenue)}
+          sub={fmtFull(revenue)}
+          icon={TrendingUp}
+          tone="success"
+        />
+        <FinanceiroKpi
+          label="Conquistas"
+          value={`${unlockedCount}/${AWARDS.length}`}
+          sub={`${overallProgress.toFixed(0)}% da trilha`}
+          icon={Trophy}
+          tone="primary"
+        />
+        <FinanceiroKpi
+          label="Tier atual"
+          value={currentTier?.tier || "—"}
+          sub={currentTier ? currentTier.title : "Sem tier desbloqueado"}
+          icon={Award}
+          tone="info"
+        />
+        <FinanceiroKpi
+          label={nextAward ? "Falta para próximo" : "Status"}
+          value={nextAward ? fmtC(remaining) : "Lenda"}
+          sub={nextAward ? `${nextProgress.toFixed(1)}% concluído` : "Hall of Fame HOTZFY"}
+          icon={nextAward ? Target : Crown}
+          tone={nextAward ? "warning" : "success"}
+        />
+      </FinanceiroKpiGrid>
 
-      {/* ═══ Status Panel ═══ */}
-      <div className="rounded-xl border border-border bg-card overflow-hidden">
-        <div className="grid grid-cols-1 lg:grid-cols-[1.4fr_1fr] divide-y lg:divide-y-0 lg:divide-x divide-border">
+      {/* HERO STATUS PANEL */}
+      <div className="rounded-xl border border-border/50 bg-card overflow-hidden animate-fade-in stagger-2">
+        <div className="grid grid-cols-1 lg:grid-cols-[1.5fr_1fr] divide-y lg:divide-y-0 lg:divide-x divide-border/50">
           {/* Revenue + tier */}
           <div className="p-6">
-            <div className="flex items-start justify-between gap-4">
+            <div className="flex items-start justify-between gap-4 mb-5">
               <div className="min-w-0">
-                <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">Faturamento líquido</p>
-                <h2 className="font-display text-3xl sm:text-4xl font-black tracking-tight text-foreground tabular-nums leading-none mt-2">
+                <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.16em] mb-2">
+                  Faturamento líquido total
+                </p>
+                <h2 className="font-display text-[36px] sm:text-[44px] font-black tracking-[-0.03em] text-foreground tabular-nums leading-none">
                   <AnimNum value={revenue} />
                 </h2>
               </div>
               {currentTier && (
-                <div className="inline-flex items-center gap-1.5 rounded-full border border-success/15 bg-success/8 px-3 py-1.5 text-[11px] font-bold text-success shrink-0">
-                  <Award className="h-3.5 w-3.5" />
-                  Tier atual: {currentTier.tier}
-                </div>
+                <span className="inline-flex items-center gap-1.5 rounded-md border border-success/20 bg-success/10 px-2.5 py-1 text-[10px] font-bold text-success uppercase tracking-[0.12em] shrink-0">
+                  <Crown className="h-3 w-3" />
+                  Tier {currentTier.tier}
+                </span>
               )}
             </div>
 
             {/* Overall progression */}
-            <div className="mt-6">
+            <div>
               <div className="flex items-center justify-between mb-2">
-                <span className="text-[11px] font-semibold text-foreground">Progressão geral</span>
-                <span className="text-[11px] font-bold text-foreground tabular-nums">
-                  {unlockedCount} <span className="text-muted-foreground font-medium">de {AWARDS.length}</span>
+                <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.12em]">
+                  Progressão geral
+                </span>
+                <span className="text-xs font-bold text-foreground tabular-nums">
+                  {unlockedCount} <span className="text-muted-foreground/70 font-medium">de {AWARDS.length}</span>
                 </span>
               </div>
-              <div className="h-1.5 rounded-full bg-muted overflow-hidden">
-                <div className="h-full rounded-full bg-primary transition-all duration-700" style={{ width: `${overallProgress}%` }} />
+              <div className="h-2 rounded-full bg-secondary border border-border/40 overflow-hidden">
+                <div
+                  className="h-full rounded-full bg-primary transition-[width] duration-700 ease-[cubic-bezier(0.16,1,0.3,1)]"
+                  style={{ width: `${Math.max(overallProgress, 2)}%` }}
+                />
+              </div>
+
+              {/* Milestone bullets */}
+              <div className="flex items-center justify-between mt-4">
+                {AWARDS.map((a) => {
+                  const done = revenue >= a.value;
+                  return (
+                    <div key={a.id} className="flex flex-col items-center gap-1.5">
+                      <div className={cn(
+                        "h-2.5 w-2.5 rounded-full border transition-colors",
+                        done ? "bg-primary border-primary" : "bg-secondary border-border/60"
+                      )} />
+                      <span className={cn(
+                        "text-[9px] font-bold tabular-nums",
+                        done ? "text-primary" : "text-muted-foreground/50"
+                      )}>{a.label}</span>
+                    </div>
+                  );
+                })}
               </div>
             </div>
           </div>
 
           {/* Next milestone */}
-          <div className="p-6 bg-secondary/30">
+          <div className="p-6 bg-secondary/40">
             {nextAward ? (
               <>
                 <div className="flex items-center gap-2 mb-3">
-                  <Target className="h-3.5 w-3.5 text-primary" />
-                  <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">Próximo marco</p>
+                  <div className="h-7 w-7 rounded-md bg-primary/10 border border-primary/20 flex items-center justify-center">
+                    <Target className="h-3.5 w-3.5 text-primary" strokeWidth={2.25} />
+                  </div>
+                  <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.16em]">
+                    Próximo marco
+                  </span>
                 </div>
-                <p className="text-base font-bold text-foreground">{nextAward.title}</p>
-                <p className="text-[11px] text-muted-foreground mt-0.5">
-                  {nextAward.tier} · meta de {fmtC(nextAward.value)}
+                <p className="font-display text-lg font-black text-foreground tracking-[-0.01em]">{nextAward.title}</p>
+                <p className="text-[11px] text-muted-foreground/80 mt-0.5 font-medium">
+                  {nextAward.tier} · meta {fmtC(nextAward.value)}
                 </p>
 
-                <div className="mt-4">
-                  <div className="flex items-center justify-between mb-1.5">
-                    <span className="text-[11px] text-muted-foreground tabular-nums">{fmtC(revenue)}</span>
-                    <span className="text-[11px] font-bold text-foreground tabular-nums">{nextProgress.toFixed(1)}%</span>
+                <div className="mt-5">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-[11px] text-muted-foreground tabular-nums font-bold">{fmtC(revenue)}</span>
+                    <span className="text-xs font-black text-foreground tabular-nums">{nextProgress.toFixed(1)}%</span>
                   </div>
-                  <div className="h-1.5 rounded-full bg-muted overflow-hidden">
-                    <div className="h-full rounded-full bg-primary transition-all duration-700" style={{ width: `${nextProgress}%` }} />
+                  <div className="h-2 rounded-full bg-card border border-border/40 overflow-hidden">
+                    <div
+                      className="h-full rounded-full bg-primary transition-[width] duration-700 ease-[cubic-bezier(0.16,1,0.3,1)]"
+                      style={{ width: `${Math.max(nextProgress, 2)}%` }}
+                    />
                   </div>
-                  <p className="text-[11px] text-muted-foreground mt-2">
-                    Faltam <span className="font-bold text-foreground tabular-nums">{fmtFull(remaining)}</span>
+                  <p className="text-[11px] text-muted-foreground mt-3 font-medium">
+                    Faltam <span className="font-black text-foreground tabular-nums">{fmtFull(remaining)}</span>
                   </p>
                 </div>
               </>
             ) : (
               <div className="h-full flex flex-col items-start justify-center">
-                <Crown className="h-6 w-6 text-primary mb-2" />
-                <p className="text-base font-bold text-foreground">Todas as conquistas desbloqueadas</p>
-                <p className="text-[11px] text-muted-foreground mt-1">Você atingiu o tier máximo — Lenda HOTZFY.</p>
+                <div className="h-10 w-10 rounded-md bg-primary/10 border border-primary/20 flex items-center justify-center mb-3">
+                  <Crown className="h-5 w-5 text-primary" />
+                </div>
+                <p className="font-display text-lg font-black text-foreground tracking-[-0.01em]">Hall of Fame</p>
+                <p className="text-[11px] text-muted-foreground/80 mt-1 font-medium">
+                  Você atingiu o tier máximo — <span className="text-primary font-bold">Lenda HOTZFY</span>.
+                </p>
               </div>
             )}
           </div>
         </div>
       </div>
 
-      {/* ═══ Milestone Ledger ═══ */}
-      <div className="mt-6">
-        <div className="flex items-center justify-between mb-3 px-1">
-          <h3 className="text-sm font-bold text-foreground">Trilha de conquistas</h3>
-          <span className="text-[11px] text-muted-foreground">{AWARDS.length} marcos</span>
+      {/* MILESTONE LEDGER */}
+      <div className="rounded-xl border border-border/50 bg-card overflow-hidden animate-fade-in stagger-3">
+        <div className="flex items-center justify-between px-5 pt-5 pb-4 border-b border-border/40">
+          <div className="flex items-center gap-2.5 min-w-0">
+            <div className="h-7 w-7 rounded-md bg-secondary flex items-center justify-center shrink-0">
+              <Flag className="h-3.5 w-3.5 text-muted-foreground" strokeWidth={2.25} />
+            </div>
+            <div className="min-w-0">
+              <h3 className="text-sm font-display font-black text-foreground tracking-[-0.01em]">Trilha de conquistas</h3>
+              <p className="text-[11px] text-muted-foreground/70 mt-0.5">{AWARDS.length} marcos · clique para detalhes</p>
+            </div>
+          </div>
+          <span className="inline-flex items-center gap-1.5 px-2 py-1 rounded-md bg-secondary border border-border/40 text-[10px] font-bold text-muted-foreground uppercase tracking-[0.1em]">
+            <Sparkles className="h-3 w-3" /> {unlockedCount}/{AWARDS.length} desbloqueados
+          </span>
         </div>
 
-        <div className="rounded-xl border border-border bg-card overflow-hidden divide-y divide-border">
+        <div className="divide-y divide-border/40">
           {AWARDS.map((award, idx) => {
             const done = revenue >= award.value;
             const isCurrent = idx === currentIdx;
@@ -185,82 +265,93 @@ export default function Premiacoes() {
                   onClick={() => setSelected(isOpen ? null : award.id)}
                   className={cn(
                     "w-full flex items-center gap-4 px-4 sm:px-5 py-3.5 text-left transition-colors",
-                    "hover:bg-accent/30",
-                    isOpen && "bg-accent/20",
-                    isCurrent && !isOpen && "bg-primary/[0.02]"
+                    "hover:bg-secondary/60",
+                    isOpen && "bg-secondary/50",
+                    isCurrent && !isOpen && "bg-primary/[0.04]"
                   )}
                 >
                   {/* Index */}
                   <div className={cn(
-                    "h-7 w-7 shrink-0 rounded-md flex items-center justify-center text-[11px] font-bold tabular-nums border",
-                    done ? "bg-success/10 border-success/20 text-success"
-                      : isCurrent ? "bg-primary/10 border-primary/20 text-primary"
-                      : "bg-muted border-border text-muted-foreground/60"
+                    "h-8 w-8 shrink-0 rounded-md flex items-center justify-center text-[11px] font-black tabular-nums border",
+                    done       ? "bg-success/10 border-success/20 text-success"
+                    : isCurrent ? "bg-primary/10 border-primary/20 text-primary"
+                                : "bg-secondary border-border/60 text-muted-foreground/60"
                   )}>
                     {done ? <CheckCircle2 className="h-3.5 w-3.5" /> : String(idx + 1).padStart(2, "0")}
                   </div>
 
                   {/* Image thumb */}
                   <div className={cn(
-                    "h-11 w-11 rounded-lg shrink-0 overflow-hidden flex items-center justify-center border border-border/60",
-                    done ? "bg-secondary" : "bg-muted/40"
+                    "h-12 w-12 rounded-lg shrink-0 overflow-hidden flex items-center justify-center border",
+                    done ? "bg-secondary border-border/60" : "bg-secondary/60 border-border/40"
                   )}>
                     <img
                       src={award.image}
                       alt={award.title}
-                      className={cn("h-9 w-9 object-contain", !done && "grayscale opacity-30")}
+                      className={cn("h-10 w-10 object-contain", !done && "grayscale opacity-30")}
                     />
                   </div>
 
                   {/* Title block */}
                   <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-2 flex-wrap">
                       <h4 className={cn(
-                        "text-sm font-bold truncate",
-                        done ? "text-foreground" : isCurrent ? "text-foreground" : "text-muted-foreground/70"
+                        "text-sm font-bold truncate font-display tracking-[-0.01em]",
+                        done       ? "text-foreground"
+                        : isCurrent ? "text-foreground"
+                                    : "text-muted-foreground/70"
                       )}>
                         {award.title}
                       </h4>
                       {isCurrent && (
-                        <span className="text-[9px] font-bold text-primary bg-primary/10 px-1.5 py-0.5 rounded uppercase tracking-wider shrink-0">
-                          Em curso
+                        <span className="inline-flex items-center gap-1 text-[9px] font-black text-primary bg-primary/10 border border-primary/20 px-1.5 py-0.5 rounded uppercase tracking-[0.12em] shrink-0">
+                          <Target className="h-2.5 w-2.5" /> Em curso
+                        </span>
+                      )}
+                      {done && (
+                        <span className="inline-flex items-center gap-1 text-[9px] font-black text-success bg-success/10 border border-success/20 px-1.5 py-0.5 rounded uppercase tracking-[0.12em] shrink-0">
+                          Desbloqueado
                         </span>
                       )}
                     </div>
-                    <p className="text-[11px] text-muted-foreground mt-0.5">
-                      {award.tier} · meta {fmtC(award.value)}
+                    <p className="text-[11px] text-muted-foreground mt-0.5 font-medium">
+                      Tier <span className="text-foreground/80 font-bold">{award.tier}</span> · meta <span className="tabular-nums font-bold text-foreground/80">{fmtC(award.value)}</span>
                     </p>
                   </div>
 
                   {/* Progress (desktop) */}
-                  <div className="hidden md:flex items-center gap-3 shrink-0 w-44">
-                    <div className="flex-1 h-1 rounded-full bg-muted overflow-hidden">
+                  <div className="hidden md:flex items-center gap-3 shrink-0 w-48">
+                    <div className="flex-1 h-1.5 rounded-full bg-secondary border border-border/40 overflow-hidden">
                       <div className={cn(
-                        "h-full transition-all duration-500",
-                        done ? "bg-success" : isCurrent ? "bg-primary" : "bg-muted-foreground/20"
-                      )} style={{ width: `${progress}%` }} />
+                        "h-full transition-[width] duration-500 ease-[cubic-bezier(0.16,1,0.3,1)]",
+                        done       ? "bg-success"
+                        : isCurrent ? "bg-primary"
+                                    : "bg-muted-foreground/25"
+                      )} style={{ width: `${Math.max(progress, 2)}%` }} />
                     </div>
                     <span className={cn(
-                      "text-[11px] font-bold tabular-nums w-10 text-right",
-                      done ? "text-success" : isCurrent ? "text-foreground" : "text-muted-foreground/50"
+                      "text-[11px] font-black tabular-nums w-10 text-right",
+                      done       ? "text-success"
+                      : isCurrent ? "text-foreground"
+                                  : "text-muted-foreground/50"
                     )}>
                       {progress.toFixed(0)}%
                     </span>
                   </div>
 
                   <ChevronRight className={cn(
-                    "h-4 w-4 text-muted-foreground/40 transition-transform shrink-0",
+                    "h-4 w-4 text-muted-foreground/50 transition-transform shrink-0",
                     isOpen && "rotate-90"
                   )} />
                 </button>
 
                 {/* Expanded detail */}
                 {isOpen && (
-                  <div className="px-4 sm:px-5 pb-5 pt-1 bg-secondary/20 border-t border-border">
-                    <div className="flex flex-col md:flex-row gap-5 pt-4">
+                  <div className="px-4 sm:px-5 pb-5 pt-4 bg-secondary/30 border-t border-border/40">
+                    <div className="flex flex-col md:flex-row gap-5">
                       <div className={cn(
-                        "relative w-full md:w-48 h-40 rounded-lg overflow-hidden flex items-center justify-center shrink-0 border border-border",
-                        done ? "bg-card" : "bg-muted/30"
+                        "relative w-full md:w-52 h-44 rounded-lg overflow-hidden flex items-center justify-center shrink-0 border border-border/60",
+                        done ? "bg-card" : "bg-secondary/60"
                       )}>
                         <img
                           src={award.image}
@@ -268,39 +359,53 @@ export default function Premiacoes() {
                           className={cn("h-32 w-32 object-contain", !done && "grayscale opacity-25")}
                         />
                         {!done && (
-                          <div className="absolute top-2 right-2 h-6 w-6 rounded-md bg-background/80 backdrop-blur-sm border border-border flex items-center justify-center">
-                            <Lock className="h-3 w-3 text-muted-foreground" />
+                          <div className="absolute top-2 right-2 h-7 w-7 rounded-md bg-card border border-border/60 flex items-center justify-center">
+                            <Lock className="h-3.5 w-3.5 text-muted-foreground" />
+                          </div>
+                        )}
+                        {done && (
+                          <div className="absolute top-2 right-2 h-7 w-7 rounded-md bg-success/10 border border-success/20 flex items-center justify-center">
+                            <CheckCircle2 className="h-3.5 w-3.5 text-success" />
                           </div>
                         )}
                       </div>
 
-                      <div className="flex-1 space-y-3">
-                        <p className="text-sm leading-relaxed text-foreground/80">
+                      <div className="flex-1 space-y-4">
+                        <p className="text-sm leading-relaxed text-foreground/85">
                           {award.description}
                         </p>
 
                         <div className="flex flex-wrap gap-2">
                           {award.rewards.map(r => (
-                            <span key={r} className="inline-flex items-center gap-1.5 text-[11px] font-semibold px-2.5 py-1 rounded-md bg-card border border-border text-foreground">
+                            <span key={r} className="inline-flex items-center gap-1.5 text-[11px] font-bold px-2.5 py-1 rounded-md bg-card border border-border/60 text-foreground">
                               <Gift className="h-3 w-3 text-primary" /> {r}
                             </span>
                           ))}
                         </div>
 
                         {!done && (
-                          <div className="grid grid-cols-3 gap-3 pt-2 border-t border-border">
-                            <div>
-                              <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">Atual</p>
-                              <p className="text-sm font-bold text-foreground tabular-nums mt-0.5">{fmtC(revenue)}</p>
+                          <div className="grid grid-cols-3 gap-px bg-border/40 rounded-lg overflow-hidden border border-border/40">
+                            <div className="bg-card px-3 py-2.5">
+                              <p className="text-[9px] font-bold text-muted-foreground uppercase tracking-[0.12em]">Atual</p>
+                              <p className="text-sm font-display font-black text-foreground tabular-nums mt-0.5">{fmtC(revenue)}</p>
                             </div>
-                            <div>
-                              <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">Meta</p>
-                              <p className="text-sm font-bold text-foreground tabular-nums mt-0.5">{fmtC(award.value)}</p>
+                            <div className="bg-card px-3 py-2.5">
+                              <p className="text-[9px] font-bold text-muted-foreground uppercase tracking-[0.12em]">Meta</p>
+                              <p className="text-sm font-display font-black text-foreground tabular-nums mt-0.5">{fmtC(award.value)}</p>
                             </div>
-                            <div>
-                              <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">Faltam</p>
-                              <p className="text-sm font-bold text-primary tabular-nums mt-0.5">{fmtC(award.value - revenue)}</p>
+                            <div className="bg-card px-3 py-2.5">
+                              <p className="text-[9px] font-bold text-muted-foreground uppercase tracking-[0.12em]">Faltam</p>
+                              <p className="text-sm font-display font-black text-primary tabular-nums mt-0.5">{fmtC(award.value - revenue)}</p>
                             </div>
+                          </div>
+                        )}
+
+                        {done && (
+                          <div className="flex items-center gap-2 px-3 py-2.5 rounded-lg bg-success/10 border border-success/20">
+                            <CheckCircle2 className="h-4 w-4 text-success shrink-0" />
+                            <p className="text-xs font-bold text-success">
+                              Conquista desbloqueada — entre em contato com seu gerente para resgate.
+                            </p>
                           </div>
                         )}
                       </div>
