@@ -526,7 +526,7 @@ export default function Dashboard() {
 
         {/* Main metric block */}
         <div className="relative grid grid-cols-1 lg:grid-cols-[1.6fr_1fr] gap-0">
-          <div className="px-6 py-9 lg:px-10 lg:py-12 border-b lg:border-b-0 lg:border-r border-border/30 relative">
+          <div key={`hero-rev-${animKey}`} className="vendas-rise px-6 py-9 lg:px-10 lg:py-12 border-b lg:border-b-0 lg:border-r border-border/30 relative">
             {/* Decorative corner mark */}
             <div className="pointer-events-none absolute top-5 right-5 hidden lg:flex items-center gap-1 opacity-40">
               <span className="h-px w-3 bg-foreground/30" />
@@ -589,7 +589,7 @@ export default function Dashboard() {
             </div>
           </div>
 
-          <div className="relative px-6 py-9 lg:px-10 lg:py-12">
+          <div key={`hero-bal-${animKey}`} className="vendas-rise vendas-rise-d1 relative px-6 py-9 lg:px-10 lg:py-12">
             <div className="flex items-center gap-2 mb-4">
               <span className="h-2 w-2 rounded-full bg-success" />
               <p className="font-display text-[10px] font-extrabold uppercase tracking-[0.16em] text-muted-foreground/70">Saldo Disponível</p>
@@ -626,7 +626,12 @@ export default function Dashboard() {
             { label: "Clientes Únicos", numValue: uniqueCustomers, formatter: (v: number) => String(Math.round(v)), accent: "text-foreground", accentBg: "from-foreground/5" },
             { label: "Chargeback", numValue: chargebackRate, formatter: (v: number) => `${v.toFixed(2)}%`, accent: chargebackRate > 1 ? "text-destructive" : "text-success", accentBg: chargebackRate > 1 ? "from-destructive/10" : "from-success/10" },
           ] as const).map((item, i) => (
-            <div key={item.label} className={cn("group relative px-6 py-5 lg:px-8 transition-colors hover:bg-muted/5", i >= 2 && "border-t lg:border-t-0 border-border/30")}>
+            <div key={`${item.label}-${animKey}`} className={cn("vendas-rise group relative px-6 py-5 lg:px-8 transition-colors hover:bg-muted/5",
+              i === 0 && "vendas-rise-d2",
+              i === 1 && "vendas-rise-d3",
+              i === 2 && "vendas-rise-d4",
+              i === 3 && "vendas-rise-d5",
+              i >= 2 && "border-t lg:border-t-0 border-border/30")}>
               <div className={cn("absolute inset-x-0 top-0 h-px bg-gradient-to-r to-transparent opacity-0 transition-opacity group-hover:opacity-100", item.accentBg)} />
               <p className="font-display text-[10px] font-black uppercase tracking-[0.18em] text-foreground/70 mb-2">{item.label}</p>
               <p className={cn("font-display text-[22px] lg:text-[26px] font-black tabular-nums leading-none tracking-[-0.035em]", item.accent)}>
