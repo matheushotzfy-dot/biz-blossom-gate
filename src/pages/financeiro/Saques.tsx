@@ -614,16 +614,15 @@ export default function Saques() {
       {/* ════════════════════════════════════════════════════════════════ */}
       {/* TRANSACTIONS TABLE */}
       {/* ════════════════════════════════════════════════════════════════ */}
-      <section className="rounded-2xl border border-border/60 bg-card overflow-hidden">
-        <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between px-5 py-4 border-b border-border/60">
+      <section className="rounded-xl border border-border/50 bg-card overflow-hidden animate-fade-in stagger-3">
+        <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between px-5 py-4 border-b border-border/50">
           <div className="flex items-center gap-2.5">
-            <Filter className="h-3.5 w-3.5 text-muted-foreground" />
-            <h2 className="text-[13px] font-display font-bold text-foreground tracking-[-0.01em]">Histórico de saques</h2>
-            <span className="text-[10px] font-bold text-muted-foreground bg-muted/40 px-1.5 py-0.5 rounded">{filtered.length}</span>
+            <h2 className="text-[14px] font-display font-black text-foreground tracking-[-0.01em]">Histórico de saques</h2>
+            <span className="text-[10px] font-black tabular-nums text-muted-foreground bg-secondary/60 px-1.5 py-0.5 rounded">{filtered.length}</span>
           </div>
 
-          {/* Status tabs */}
-          <div className="flex gap-1 overflow-x-auto scrollbar-none">
+          {/* Status segment-control */}
+          <div className="inline-flex items-center gap-0.5 rounded-xl border border-border/50 bg-card/60 p-1 overflow-x-auto scrollbar-none">
             {statusTabs.map((tab) => {
               const isActive = statusFilter === tab.value;
               const dotColors: Record<string, string> = { all: "bg-primary", approved: "bg-success", pending: "bg-warning", rejected: "bg-destructive" };
@@ -632,30 +631,33 @@ export default function Saques() {
                   key={tab.value}
                   onClick={() => setStatusFilter(tab.value)}
                   className={cn(
-                    "shrink-0 inline-flex items-center gap-1.5 px-3 h-8 rounded-lg text-[11px] font-bold transition-all",
+                    "shrink-0 inline-flex items-center gap-1.5 rounded-lg h-8 px-3 text-[12px] font-bold tracking-tight transition-colors duration-200",
                     isActive
-                      ? "bg-foreground text-background"
-                      : "text-muted-foreground hover:text-foreground hover:bg-muted/30"
+                      ? "bg-secondary text-foreground"
+                      : "text-muted-foreground hover:text-foreground"
                   )}
                 >
-                  <span className={cn("h-1.5 w-1.5 rounded-full", isActive ? "bg-background" : dotColors[tab.value])} />
+                  <span className={cn("h-1.5 w-1.5 rounded-full", dotColors[tab.value])} />
                   {tab.label}
-                  <span className={cn("text-[9.5px] tabular-nums", isActive ? "opacity-70" : "opacity-60")}>{tab.count}</span>
+                  <span className={cn(
+                    "text-[10px] font-black tabular-nums px-1.5 py-0.5 rounded-md transition-colors",
+                    isActive ? "bg-card text-foreground" : "bg-secondary/60 text-muted-foreground"
+                  )}>{tab.count}</span>
                 </button>
               );
             })}
           </div>
 
           <div className="relative w-full lg:w-64">
-            <Search className="absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
+            <Search className="absolute left-3.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground/60" />
             <input
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Buscar por ID ou valor…"
-              className="h-9 w-full rounded-lg border border-border/60 bg-background pl-9 pr-9 text-[12px] text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/40 transition-all"
+              className="h-9 w-full rounded-xl border border-border/50 bg-secondary/40 pl-10 pr-9 text-[12px] font-mono text-foreground placeholder:text-muted-foreground/60 focus:outline-none focus:ring-1 focus:ring-primary/40 focus:border-primary/40 transition-all"
             />
             {search && (
-              <button onClick={() => setSearch("")} className="absolute right-3 top-1/2 -translate-y-1/2"><X className="h-3.5 w-3.5 text-muted-foreground" /></button>
+              <button onClick={() => setSearch("")} className="absolute right-3 top-1/2 -translate-y-1/2"><X className="h-3.5 w-3.5 text-muted-foreground/70" /></button>
             )}
           </div>
         </div>
