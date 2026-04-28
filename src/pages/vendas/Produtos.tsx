@@ -1,12 +1,18 @@
 import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
+  CheckCircle2,
+  Clock,
+  FileEdit,
+  Layers,
   Loader2,
   Package,
   Plus,
   Search,
-  X,
+  Sparkles,
   Trash2,
+  X,
+  XCircle,
 } from "lucide-react";
 import { toast } from "sonner";
 
