@@ -147,7 +147,6 @@ const COLOR_PRESETS = [
   { id: "slate", name: "Grafite", from: "71 85 105", to: "30 41 59" },
 ] as const;
 
-import { Trophy } from "lucide-react";
 
 const STEPS = [
   { id: "template", label: "Template", icon: Wand2 },
