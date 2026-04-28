@@ -169,18 +169,9 @@ export default function Produtos() {
         />
 
         <div className="flex flex-wrap items-end justify-between gap-4 animate-fade-in">
-          <div className="flex flex-col gap-2">
-            <span className="inline-flex w-fit items-center gap-1.5 rounded-full border border-border/50 bg-secondary/40 px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.18em] text-muted-foreground/80">
-              <Sparkles className="h-3 w-3 text-primary" strokeWidth={2.5} />
-              Catálogo
-            </span>
-            <h1 className="font-display text-[40px] font-black leading-[0.9] tracking-[-0.055em] text-foreground sm:text-[52px]">
-              Meus produtos
-            </h1>
-            <p className="max-w-[520px] text-[13px] leading-relaxed text-muted-foreground">
-              Gerencie ofertas, links de checkout e a saúde de cada produto da sua operação.
-            </p>
-          </div>
+          <h1 className="font-display text-[40px] font-black leading-[0.9] tracking-[-0.055em] text-foreground sm:text-[52px]">
+            Meus produtos
+          </h1>
           <button
             onClick={() => navigate("/vendas/produtos/novo/editar")}
             className="group inline-flex h-11 items-center gap-2 rounded-xl bg-primary px-5 text-[13px] font-black uppercase tracking-wider text-primary-foreground transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] hover:bg-primary/90 hover:-translate-y-0.5 hover:shadow-[0_10px_30px_-10px_hsl(var(--primary)/0.5)]"
@@ -188,29 +179,6 @@ export default function Produtos() {
             <Plus className="h-4 w-4 transition-transform duration-300 group-hover:rotate-90" strokeWidth={2.75} />
             Novo produto
           </button>
-        </div>
-
-        {/* KPI ribbon — minimalista, tabular */}
-        <div className="grid grid-cols-2 gap-2 animate-fade-in stagger-1 sm:grid-cols-4">
-          {[
-            { label: "Total", value: products.length, accent: "text-foreground", dot: "bg-foreground/40" },
-            { label: "Ativos", value: counts.active, accent: "text-success", dot: "bg-success" },
-            { label: "Rascunhos", value: counts.draft, accent: "text-muted-foreground", dot: "bg-muted-foreground/50" },
-            { label: "Em revisão", value: counts.pending_review, accent: "text-warning", dot: "bg-warning" },
-          ].map((kpi) => (
-            <div
-              key={kpi.label}
-              className="group relative overflow-hidden rounded-xl border border-border/40 bg-card/60 px-4 py-3 transition-all duration-300 hover:border-border hover:bg-card"
-            >
-              <div className="flex items-center gap-2">
-                <span className={cn("h-1.5 w-1.5 rounded-full", kpi.dot)} />
-                <p className="text-[10px] font-black uppercase tracking-[0.15em] text-muted-foreground/70">{kpi.label}</p>
-              </div>
-              <p className={cn("mt-1.5 font-display text-2xl font-black tabular-nums tracking-tight", kpi.accent)}>
-                {kpi.value}
-              </p>
-            </div>
-          ))}
         </div>
 
         {/* Tabs + Search row */}
