@@ -731,7 +731,7 @@ export default function Vendas() {
                         className={cn(
                           "relative rounded-[6px] px-2.5 py-[5px] text-[11px] font-bold tracking-[-0.005em] transition-all duration-200",
                           active
-                            ? "bg-foreground text-background"
+                            ? "bg-success/15 text-success ring-1 ring-success/30"
                             : "text-muted-foreground/90 hover:text-foreground",
                         )}
                       >
