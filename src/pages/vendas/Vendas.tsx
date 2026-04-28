@@ -805,7 +805,7 @@ export default function Vendas() {
                   <TooltipTrigger asChild>
                     <button
                       onClick={() => setShowExportDialog(true)}
-                      className="inline-flex h-8 items-center gap-1.5 rounded-md bg-foreground px-3.5 text-[11px] font-black tracking-[-0.005em] text-background ring-1 ring-foreground/10 transition-all duration-200 hover:bg-foreground/92 hover:ring-foreground/20 focus:outline-none focus-visible:ring-2 focus-visible:ring-foreground/30"
+                      className="inline-flex h-8 items-center gap-1.5 rounded-lg bg-success px-3.5 text-[11px] font-black tracking-[-0.005em] text-success-foreground ring-1 ring-success/40 transition-all duration-200 hover:bg-success/90 hover:ring-success/60 focus:outline-none focus-visible:ring-2 focus-visible:ring-success/50"
                     >
                       <Download className="h-[14px] w-[14px]" strokeWidth={2.6} />
                       Exportar
