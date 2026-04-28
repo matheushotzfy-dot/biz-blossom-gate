@@ -575,6 +575,7 @@ export default function Cupons() {
           </div>
         )}
       </Panel>
-    </PageShell>
+      </div>
+    </div>
   );
 }
