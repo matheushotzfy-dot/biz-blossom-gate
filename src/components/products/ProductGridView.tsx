@@ -131,31 +131,32 @@ export function ProductGridView({ products, copiedId, toolbar, ...handlers }: Pr
                   </div>
                 )}
 
-                {/* Status chip premium — canto superior direito (substitui badge quando em revisão/inativo) */}
-                <div className="absolute right-4 top-4 z-10">
-                  {(isInactive || isPending) ? (
-                    <span className={cn(
-                      "inline-flex items-center gap-2 rounded-full border bg-background/95 py-1.5 pl-2 pr-3 font-display text-[10px] font-black uppercase leading-none tracking-[0.14em]",
-                      isInactive
-                        ? "border-destructive/40 text-destructive"
-                        : "border-warning/40 text-warning"
-                    )}>
-                      <span className={cn(
-                        "relative flex h-4 w-4 items-center justify-center rounded-full",
-                        isInactive ? "bg-destructive/15" : "bg-warning/15"
-                      )}>
-                        <span className={cn(
-                          "absolute inline-flex h-2 w-2 animate-ping rounded-full opacity-60",
-                          isInactive ? "bg-destructive" : "bg-warning"
-                        )} />
-                        <span className={cn(
-                          "relative inline-flex h-1.5 w-1.5 rounded-full",
-                          isInactive ? "bg-destructive" : "bg-warning"
-                        )} />
+                {/* Faixa de revisão/inativo — overlay no topo da foto, não desalinha cards */}
+                {(isInactive || isPending) && (
+                  <div className={cn(
+                    "absolute inset-x-0 top-0 z-10 flex items-center justify-between gap-3 border-b px-4 py-2",
+                    isInactive
+                      ? "border-destructive/30 bg-destructive/95"
+                      : "border-warning/30 bg-warning/95"
+                  )}>
+                    <span className="flex items-center gap-2 min-w-0">
+                      <span className="relative flex h-1.5 w-1.5 shrink-0">
+                        <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-white opacity-70" />
+                        <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-white" />
                       </span>
-                      {isInactive ? "Inativado" : "Em análise"}
+                      <span className={cn(
+                        "truncate font-display text-[10.5px] font-bold uppercase tracking-[0.18em]",
+                        isInactive ? "text-destructive-foreground" : "text-warning-foreground"
+                      )}>
+                        {isInactive ? "Inativado pela equipe" : "Em análise pela equipe"}
+                      </span>
                     </span>
-                  ) : (
+                  </div>
+                )}
+
+                {/* Status Badge — só quando não está em revisão/inativo */}
+                {!(isInactive || isPending) && (
+                  <div className="absolute right-4 top-4 z-10">
                     <span className={cn(
                       "inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-[10px] font-black uppercase tracking-wider",
                       status.surface,
@@ -164,8 +165,8 @@ export function ProductGridView({ products, copiedId, toolbar, ...handlers }: Pr
                       <span className={cn("h-1.5 w-1.5 rounded-full animate-pulse", status.dot)} />
                       {status.label}
                     </span>
-                  )}
-                </div>
+                  </div>
+                )}
               </div>
 
               {/* Bottom Content Section */}
