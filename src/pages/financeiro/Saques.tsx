@@ -67,6 +67,37 @@ function maskPix(value: string, type: string) {
   return value.length > 12 ? `${value.slice(0, 6)}•••${value.slice(-4)}` : value;
 }
 
+type KpiTone = "success" | "info" | "warning" | "neutral" | "destructive";
+function Kpi({ label, value, sub, icon: Icon, tone = "neutral" }: {
+  label: string; value: string; sub?: string; icon: LucideIcon; tone?: KpiTone;
+}) {
+  const toneCls: Record<KpiTone, string> = {
+    success: "text-success", info: "text-info", warning: "text-warning",
+    neutral: "text-foreground", destructive: "text-destructive",
+  };
+  const iconBg: Record<KpiTone, string> = {
+    success: "bg-success/10 text-success",
+    info: "bg-info/10 text-info",
+    warning: "bg-warning/10 text-warning",
+    neutral: "bg-secondary text-muted-foreground",
+    destructive: "bg-destructive/10 text-destructive",
+  };
+  return (
+    <div className="bg-card px-5 py-4 flex flex-col gap-2.5">
+      <div className="flex items-center justify-between">
+        <span className="text-[10px] font-bold uppercase tracking-[0.18em] text-muted-foreground/70">{label}</span>
+        <div className={cn("h-7 w-7 rounded-md flex items-center justify-center", iconBg[tone])}>
+          <Icon className="h-3.5 w-3.5" strokeWidth={2.25} />
+        </div>
+      </div>
+      <div className={cn("font-display text-[24px] font-black leading-none tabular-nums tracking-tight", toneCls[tone])}>
+        {value}
+      </div>
+      {sub && <div className="text-[11px] text-muted-foreground/70 font-medium truncate">{sub}</div>}
+    </div>
+  );
+}
+
 /* ═══════════════════════════════════════════════════════════════════════ */
 /* MAIN PAGE */
 /* ═══════════════════════════════════════════════════════════════════════ */
