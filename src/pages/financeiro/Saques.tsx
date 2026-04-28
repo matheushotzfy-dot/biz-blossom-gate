@@ -298,10 +298,10 @@ export default function Saques() {
         <header className="border-b border-border/70 pb-7">
           <div className="flex flex-col gap-5 xl:flex-row xl:items-start xl:justify-between">
             <div className="min-w-0">
-              <h1 className="font-display text-[44px] font-black leading-[0.88] tracking-[-0.06em] text-foreground sm:text-[64px]">
-                Saldo Disponível
+              <h1 className="text-[13px] font-black uppercase tracking-[0.18em] text-muted-foreground/80">
+                Saldo Disponível:
               </h1>
-              <div className="mt-5 flex flex-wrap items-end gap-x-5 gap-y-2">
+              <div className="mt-4 flex flex-wrap items-end gap-x-6 gap-y-2">
                 <p
                   className={cn(
                     "font-display text-[54px] font-black leading-[0.84] tracking-[-0.075em] tabular-nums sm:text-[78px]",
@@ -312,11 +312,7 @@ export default function Saques() {
                   {hidden ? HIDE : fmt(availableBalance)}
                 </p>
                 <div className="pb-1.5">
-                  <p className="flex items-center gap-1.5 text-[12px] font-bold tracking-[-0.005em] text-foreground">
-                    <span className="inline-block h-2 w-[3px] rounded-full bg-success" />
-                    Saldo disponível para saque
-                  </p>
-                  <p className="mt-1 text-[11.5px] font-medium text-muted-foreground/85">
+                  <p className="text-[11.5px] font-medium text-muted-foreground/85">
                     <span className="font-bold text-foreground">{m.pending.length > 0 ? `${m.pending.length} ${m.pending.length === 1 ? "saque pendente" : "saques pendentes"}` : "Sem fila"}</span>
                     <span className="mx-1.5 inline-block h-[3px] w-[3px] -translate-y-[3px] rounded-full bg-muted-foreground/40 align-middle" />
                     Retido <span className="font-bold text-foreground tabular-nums">{hidden ? HIDE : fmt(retainedAmount)}</span>
