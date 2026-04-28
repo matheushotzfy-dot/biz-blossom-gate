@@ -789,7 +789,7 @@ export default function Vendas() {
             </TooltipProvider>
           </div>
 
-          <div className="mt-7 grid grid-cols-2 border-y border-border/70 lg:grid-cols-4 lg:divide-x lg:divide-border/70">
+          <div className="mt-8 grid grid-cols-2 border-y border-border/70 lg:grid-cols-4 lg:divide-x lg:divide-border/70">
             {[
               { label: "Receita bruta", value: hidden ? HIDE : fmtCompact(m.totalGross), sub: undefined, accent: "text-foreground", delta: { cur: m.totalGross, prev: p.totalGross }, rail: "bg-success" },
               { ...heroKpis[1], rail: "bg-info" },
@@ -799,26 +799,26 @@ export default function Vendas() {
               <div
                 key={k.label}
                 className={cn(
-                  "group relative min-h-[130px] px-5 py-5 transition-colors duration-200 hover:bg-muted/25",
+                  "group relative min-h-[150px] px-6 py-6 transition-colors duration-200 hover:bg-muted/25",
                   idx > 1 && "border-t border-border/70 lg:border-t-0",
                   idx === 1 && "border-l border-border/70 lg:border-l-0",
                 )}
               >
-                <span className={cn("absolute left-0 top-5 h-7 w-[2px] rounded-r-full", k.rail)} />
-                <div className="flex items-center justify-between gap-2 pl-2">
-                  <p className="text-[9px] font-black uppercase tracking-[0.24em] text-muted-foreground/85">{k.label}</p>
+                <span className={cn("absolute left-0 top-6 h-8 w-[3px] rounded-r-full", k.rail)} />
+                <div className="flex items-center justify-between gap-2 pl-3">
+                  <p className="text-[10.5px] font-black uppercase tracking-[0.22em] text-muted-foreground">{k.label}</p>
                   {k.delta && <DeltaBadge cur={k.delta.cur} prev={k.delta.prev} />}
                 </div>
                 <p
                   className={cn(
-                    "mt-3 pl-2 font-numbers text-[28px] font-black leading-[0.95] tracking-[-0.055em] tabular-nums sm:text-[36px]",
+                    "mt-3.5 pl-3 font-display text-[36px] font-black leading-[0.9] tracking-[-0.06em] tabular-nums sm:text-[44px]",
                     k.accent,
                   )}
                   style={{ fontVariantNumeric: "tabular-nums slashed-zero" }}
                 >
                   {k.value}
                 </p>
-                <p className="mt-2.5 truncate pl-2 text-[11.5px] font-semibold text-muted-foreground/80">{k.sub}</p>
+                <p className="mt-3 truncate pl-3 text-[12.5px] font-semibold text-muted-foreground/85">{k.sub}</p>
               </div>
             ))}
           </div>
@@ -827,22 +827,22 @@ export default function Vendas() {
             {riskKpis.map((r) => (
               <div
                 key={r.label}
-                className="group relative flex flex-col gap-2 px-6 py-5 transition-colors duration-200 hover:bg-muted/25"
+                className="group relative flex flex-col gap-2.5 px-6 py-6 transition-colors duration-200 hover:bg-muted/25"
               >
                 <div className="flex items-baseline justify-between gap-3">
-                  <p className="font-display text-[15px] font-black tracking-[-0.02em] text-foreground">{r.label}</p>
+                  <p className="font-display text-[19px] font-black tracking-[-0.035em] text-foreground">{r.label}</p>
                   <p
-                    className={cn("font-numbers text-[20px] font-black leading-none tabular-nums tracking-[-0.035em]", r.accent)}
+                    className={cn("font-display text-[26px] font-black leading-none tabular-nums tracking-[-0.05em]", r.accent)}
                     style={{ fontVariantNumeric: "tabular-nums slashed-zero" }}
                   >
                     {r.value}
                   </p>
                 </div>
-                <div className="flex items-center gap-1.5 text-[12px] font-semibold text-muted-foreground/85">
-                  <span className="tabular-nums font-bold text-foreground/85">{r.count}</span>
+                <div className="flex items-center gap-2 text-[12.5px] font-semibold text-muted-foreground">
+                  <span className="font-display tabular-nums font-black text-foreground">{r.count}</span>
                   <span>{r.count === 1 ? "caso" : "casos"}</span>
-                  <span className="inline-block h-[3px] w-[3px] rounded-full bg-muted-foreground/40" />
-                  <span className="tabular-nums">{r.rate.toFixed(2).replace(".", ",")}%</span>
+                  <span className="inline-block h-[3px] w-[3px] rounded-full bg-muted-foreground/50" />
+                  <span className="tabular-nums font-bold">{r.rate.toFixed(2).replace(".", ",")}%</span>
                 </div>
               </div>
             ))}
