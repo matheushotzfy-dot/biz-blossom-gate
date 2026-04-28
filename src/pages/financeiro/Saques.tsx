@@ -6,16 +6,16 @@ import { useProfile } from "@/hooks/useProfile";
 import { useWithdrawals, usePixKeys, useInvalidateAll } from "@/hooks/useQueryData";
 import {
   ArrowDownToLine, Plus, Key, CheckCircle2, XCircle,
-  Rocket, PartyPopper, X, Wallet, Shield, Zap,
-  Eye, EyeOff, Search, MapPin, AlertTriangle, Copy, Filter,
-  TrendingUp, Clock3, Sparkles,
+  Rocket, PartyPopper, X, Wallet, Shield,
+  Eye, EyeOff, Search, MapPin, AlertTriangle, Copy,
+  TrendingUp, Clock3, DollarSign, Percent, Clock, Receipt,
+  type LucideIcon,
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { toast } from "sonner";
 import type { Tables } from "@/integrations/supabase/types";
-import { KpiRibbon, PageHeader } from "@/components/KpiRibbon";
 import { cn } from "@/lib/utils";
 import { motion, AnimatePresence } from "framer-motion";
 import { AreaChart, Area, ResponsiveContainer, Tooltip as ReTooltip, XAxis, YAxis, CartesianGrid } from "recharts";
