@@ -662,9 +662,9 @@ export default function Vendas() {
   ];
 
   const riskKpis = [
-    { label: "Reembolsos", value: hidden ? HIDE : fmtCompact(refundedAmount), sub: `${m.refunded.length} casos · ${m.refundRate.toFixed(1)}%`, accent: m.refundRate > 5 ? "text-destructive" : "text-muted-foreground", icon: AlertTriangle },
-    { label: "MED", value: hidden ? HIDE : fmt(0), sub: `0 casos · 0,00%`, accent: "text-muted-foreground", icon: ShieldAlert },
-    { label: "Chargebacks", value: hidden ? HIDE : fmtCompact(chargebackAmount), sub: `${m.chargebacks.length} casos · ${m.chargebackRate.toFixed(2)}%`, accent: m.chargebacks.length > 0 ? "text-destructive" : "text-muted-foreground", icon: ShieldAlert },
+    { label: "Reembolsos", value: hidden ? HIDE : fmtCompact(refundedAmount), count: m.refunded.length, rate: m.refundRate, accent: m.refundRate > 5 ? "text-destructive" : "text-foreground", tone: "info" as const, icon: AlertTriangle },
+    { label: "MED", value: hidden ? HIDE : fmt(0), count: 0, rate: 0, accent: "text-foreground", tone: "warning" as const, icon: ShieldAlert },
+    { label: "Chargebacks", value: hidden ? HIDE : fmtCompact(chargebackAmount), count: m.chargebacks.length, rate: m.chargebackRate, accent: m.chargebacks.length > 0 ? "text-destructive" : "text-foreground", tone: "destructive" as const, icon: ShieldAlert },
   ];
 
   /* ═══════════ RENDER ═══════════ */
@@ -717,31 +717,36 @@ export default function Vendas() {
             </div>
 
             <TooltipProvider delayDuration={250}>
-              <div className="flex w-full flex-wrap items-center gap-1.5 xl:w-auto xl:justify-end">
-                <div className="hidden items-center rounded-md border border-border/70 bg-card/60 p-0.5 shadow-[inset_0_1px_0_hsl(var(--foreground)/0.02)] backdrop-blur-sm md:inline-flex">
-                  {PERIODS.map((opt) => (
-                    <button
-                      key={opt.label}
-                      onClick={() => { setSelectedPeriod(opt); setIsCustom(false); setCustomRange(undefined); }}
-                      className={cn(
-                        "rounded-[5px] px-2.5 py-1 text-[11px] font-bold tracking-[-0.005em] transition-all duration-200",
-                        !isCustom && selectedPeriod.label === opt.label
-                          ? "bg-foreground text-background shadow-[0_1px_2px_hsl(var(--foreground)/0.18)]"
-                          : "text-muted-foreground hover:bg-muted/60 hover:text-foreground",
-                      )}
-                    >
-                      {opt.label}
-                    </button>
-                  ))}
+              <div className="flex w-full flex-wrap items-center gap-1 xl:w-auto xl:justify-end">
+                <div className="hidden items-center rounded-lg border border-border/60 bg-card/70 p-[3px] backdrop-blur-sm md:inline-flex">
+                  {PERIODS.map((opt) => {
+                    const active = !isCustom && selectedPeriod.label === opt.label;
+                    return (
+                      <button
+                        key={opt.label}
+                        onClick={() => { setSelectedPeriod(opt); setIsCustom(false); setCustomRange(undefined); }}
+                        className={cn(
+                          "relative rounded-[6px] px-2.5 py-[5px] text-[11px] font-bold tracking-[-0.005em] transition-all duration-200",
+                          active
+                            ? "bg-foreground text-background"
+                            : "text-muted-foreground/90 hover:text-foreground",
+                        )}
+                      >
+                        {opt.label}
+                      </button>
+                    );
+                  })}
                 </div>
+
+                <span className="hidden h-5 w-px bg-border/60 md:mx-1 md:block" />
 
                 <Tooltip>
                   <Popover open={datePickerOpen} onOpenChange={setDatePickerOpen}>
                     <TooltipTrigger asChild>
                       <PopoverTrigger asChild>
-                        <button className={cn("inline-flex h-8 w-8 items-center justify-center rounded-md border transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-foreground/20",
-                          isCustom ? "border-foreground bg-secondary text-foreground" : "border-border/70 bg-card/60 text-muted-foreground hover:border-border hover:bg-muted/60 hover:text-foreground")}>
-                          <CalendarDays className="h-3.5 w-3.5" />
+                        <button aria-label="Período personalizado" className={cn("inline-flex h-8 w-8 items-center justify-center rounded-md border transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-foreground/20",
+                          isCustom ? "border-foreground/80 bg-secondary text-foreground" : "border-border/60 bg-card/70 text-muted-foreground/90 hover:border-foreground/40 hover:bg-muted/60 hover:text-foreground")}>
+                          <CalendarDays className="h-[15px] w-[15px]" strokeWidth={2.1} />
                         </button>
                       </PopoverTrigger>
                     </TooltipTrigger>
@@ -752,12 +757,10 @@ export default function Vendas() {
                   <TooltipContent side="bottom" className="flex items-center gap-2">Período personalizado</TooltipContent>
                 </Tooltip>
 
-                <span className="hidden h-5 w-px bg-border/70 md:block" />
-
                 <Tooltip>
                   <TooltipTrigger asChild>
-                    <button onClick={() => setCmdOpen(true)} className="inline-flex h-8 items-center gap-1.5 rounded-md border border-border/70 bg-card/60 px-2 text-muted-foreground transition-all duration-200 hover:border-border hover:bg-muted/60 hover:text-foreground focus:outline-none focus-visible:ring-2 focus-visible:ring-foreground/20">
-                      <CommandIcon className="h-3.5 w-3.5" />
+                    <button onClick={() => setCmdOpen(true)} aria-label="Comandos rápidos" className="inline-flex h-8 items-center gap-1.5 rounded-md border border-border/60 bg-card/70 px-2 text-muted-foreground/90 transition-all duration-200 hover:border-foreground/40 hover:bg-muted/60 hover:text-foreground focus:outline-none focus-visible:ring-2 focus-visible:ring-foreground/20">
+                      <CommandIcon className="h-[15px] w-[15px]" strokeWidth={2.1} />
                       <Kbd>⌘K</Kbd>
                     </button>
                   </TooltipTrigger>
@@ -766,9 +769,9 @@ export default function Vendas() {
 
                 <Tooltip>
                   <TooltipTrigger asChild>
-                    <button onClick={toggleDensity} className={cn("inline-flex h-8 w-8 items-center justify-center rounded-md border transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-foreground/20",
-                      density === "compact" ? "border-foreground bg-secondary text-foreground" : "border-border/70 bg-card/60 text-muted-foreground hover:border-border hover:bg-muted/60 hover:text-foreground")}>
-                      {density === "compact" ? <Rows4 className="h-3.5 w-3.5" /> : <Rows3 className="h-3.5 w-3.5" />}
+                    <button onClick={toggleDensity} aria-label="Densidade" className={cn("inline-flex h-8 w-8 items-center justify-center rounded-md border transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-foreground/20",
+                      density === "compact" ? "border-foreground/80 bg-secondary text-foreground" : "border-border/60 bg-card/70 text-muted-foreground/90 hover:border-foreground/40 hover:bg-muted/60 hover:text-foreground")}>
+                      {density === "compact" ? <Rows4 className="h-[15px] w-[15px]" strokeWidth={2.1} /> : <Rows3 className="h-[15px] w-[15px]" strokeWidth={2.1} />}
                     </button>
                   </TooltipTrigger>
                   <TooltipContent side="bottom" className="flex items-center gap-2">Densidade <Kbd>D</Kbd></TooltipContent>
@@ -776,8 +779,8 @@ export default function Vendas() {
 
                 <Tooltip>
                   <TooltipTrigger asChild>
-                    <button onClick={() => window.location.reload()} className="inline-flex h-8 w-8 items-center justify-center rounded-md border border-border/70 bg-card/60 text-muted-foreground transition-all duration-200 hover:border-border hover:bg-muted/60 hover:text-foreground focus:outline-none focus-visible:ring-2 focus-visible:ring-foreground/20">
-                      <RefreshCw className="h-3.5 w-3.5" />
+                    <button onClick={() => window.location.reload()} aria-label="Atualizar" className="group inline-flex h-8 w-8 items-center justify-center rounded-md border border-border/60 bg-card/70 text-muted-foreground/90 transition-all duration-200 hover:border-foreground/40 hover:bg-muted/60 hover:text-foreground focus:outline-none focus-visible:ring-2 focus-visible:ring-foreground/20">
+                      <RefreshCw className="h-[15px] w-[15px] transition-transform duration-500 group-hover:rotate-180" strokeWidth={2.1} />
                     </button>
                   </TooltipTrigger>
                   <TooltipContent side="bottom" className="flex items-center gap-2">Atualizar <Kbd>R</Kbd></TooltipContent>
@@ -785,21 +788,23 @@ export default function Vendas() {
 
                 <Tooltip>
                   <TooltipTrigger asChild>
-                    <button onClick={toggleHidden} className={cn("inline-flex h-8 w-8 items-center justify-center rounded-md border transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-foreground/20",
-                      hidden ? "border-foreground bg-secondary text-foreground" : "border-border/70 bg-card/60 text-muted-foreground hover:border-border hover:bg-muted/60 hover:text-foreground")}>
-                      {hidden ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
+                    <button onClick={toggleHidden} aria-label={hidden ? "Mostrar valores" : "Ocultar valores"} className={cn("inline-flex h-8 w-8 items-center justify-center rounded-md border transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-foreground/20",
+                      hidden ? "border-foreground/80 bg-secondary text-foreground" : "border-border/60 bg-card/70 text-muted-foreground/90 hover:border-foreground/40 hover:bg-muted/60 hover:text-foreground")}>
+                      {hidden ? <EyeOff className="h-[15px] w-[15px]" strokeWidth={2.1} /> : <Eye className="h-[15px] w-[15px]" strokeWidth={2.1} />}
                     </button>
                   </TooltipTrigger>
                   <TooltipContent side="bottom" className="flex items-center gap-2">{hidden ? "Mostrar valores" : "Ocultar valores"} <Kbd>P</Kbd></TooltipContent>
                 </Tooltip>
 
+                <span className="hidden h-5 w-px bg-border/60 md:mx-1 md:block" />
+
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <button
                       onClick={() => setShowExportDialog(true)}
-                      className="inline-flex h-8 items-center gap-1.5 rounded-md bg-foreground px-3 text-[11px] font-black tracking-[-0.005em] text-background shadow-[0_1px_2px_hsl(var(--foreground)/0.25),inset_0_1px_0_hsl(var(--background)/0.18)] transition-all duration-200 hover:bg-foreground/90 hover:shadow-[0_2px_6px_hsl(var(--foreground)/0.28),inset_0_1px_0_hsl(var(--background)/0.18)] focus:outline-none focus-visible:ring-2 focus-visible:ring-foreground/30"
+                      className="inline-flex h-8 items-center gap-1.5 rounded-md bg-foreground px-3.5 text-[11px] font-black tracking-[-0.005em] text-background ring-1 ring-foreground/10 transition-all duration-200 hover:bg-foreground/92 hover:ring-foreground/20 focus:outline-none focus-visible:ring-2 focus-visible:ring-foreground/30"
                     >
-                      <Download className="h-3.5 w-3.5" strokeWidth={2.5} />
+                      <Download className="h-[14px] w-[14px]" strokeWidth={2.6} />
                       Exportar
                     </button>
                   </TooltipTrigger>
@@ -845,22 +850,36 @@ export default function Vendas() {
           <div className="grid grid-cols-1 border-b border-border/70 sm:grid-cols-3 sm:divide-x sm:divide-border/70">
             {riskKpis.map((r) => {
               const Icon = r.icon;
+              const toneChip =
+                r.tone === "info"
+                  ? "border-info/30 bg-info/10 text-info"
+                  : r.tone === "warning"
+                    ? "border-warning/30 bg-warning/10 text-warning"
+                    : "border-destructive/30 bg-destructive/10 text-destructive";
               return (
-                <div key={r.label} className="group flex items-center gap-3 px-5 py-3.5 transition-colors duration-200 hover:bg-muted/25">
-                  <div className={cn("flex h-7 w-7 shrink-0 items-center justify-center rounded-md border border-border/60 bg-card/40", r.accent)}>
-                    <Icon className="h-3.5 w-3.5" strokeWidth={2.4} />
+                <div
+                  key={r.label}
+                  className="group relative flex items-center gap-3 px-5 py-3.5 transition-colors duration-200 hover:bg-muted/25"
+                >
+                  <div className={cn("flex h-8 w-8 shrink-0 items-center justify-center rounded-md border", toneChip)}>
+                    <Icon className="h-[15px] w-[15px]" strokeWidth={2.3} />
                   </div>
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center justify-between gap-3">
                       <p className="text-[9px] font-black uppercase tracking-[0.24em] text-muted-foreground/85">{r.label}</p>
                       <p
-                        className={cn("font-numbers text-[15px] font-black leading-none tabular-nums tracking-[-0.02em]", r.accent)}
+                        className={cn("font-numbers text-[15px] font-black leading-none tabular-nums tracking-[-0.025em]", r.accent)}
                         style={{ fontVariantNumeric: "tabular-nums slashed-zero" }}
                       >
                         {r.value}
                       </p>
                     </div>
-                    <p className="mt-1 truncate text-[11px] font-medium text-muted-foreground/80">{r.sub}</p>
+                    <div className="mt-1.5 flex items-center gap-1.5 text-[11px] font-medium text-muted-foreground/80">
+                      <span className="tabular-nums font-semibold text-foreground/75">{r.count}</span>
+                      <span>{r.count === 1 ? "caso" : "casos"}</span>
+                      <span className="inline-block h-[3px] w-[3px] rounded-full bg-muted-foreground/40" />
+                      <span className="tabular-nums">{r.rate.toFixed(2).replace(".", ",")}%</span>
+                    </div>
                   </div>
                 </div>
               );
@@ -892,27 +911,32 @@ export default function Vendas() {
         {/* Chart and payment mix removed — already shown on Dashboard */}
 
         {/* ─────────── TRANSACTIONS ─────────── */}
-        <section className="overflow-hidden rounded-lg border border-border/70 bg-card shadow-[0_1px_0_hsl(var(--foreground)/0.02),0_1px_2px_hsl(var(--foreground)/0.03)]">
-          <div className="flex flex-col gap-3 border-b border-border/70 px-5 py-3.5 sm:flex-row sm:items-center sm:justify-between">
-            <div>
-              <p className="text-[13px] font-black leading-tight tracking-[-0.01em] text-foreground">Transações</p>
-              <p className="mt-0.5 text-[11px] font-medium text-muted-foreground/85">
-                {sortedFiltered.length} {sortedFiltered.length === 1 ? "resultado" : "resultados"}
-                <span className="mx-1.5 inline-block h-[3px] w-[3px] -translate-y-[3px] rounded-full bg-muted-foreground/40 align-middle" />
-                líquido <span className="font-numbers font-black tabular-nums text-foreground">{hidden ? HIDE : fmt(filteredNetTotal)}</span>
-              </p>
+        <section className="overflow-hidden rounded-xl border border-border/70 bg-card shadow-[0_1px_0_hsl(var(--foreground)/0.02),0_1px_2px_hsl(var(--foreground)/0.03)]">
+          <div className="flex flex-col gap-3 border-b border-border/70 bg-gradient-to-b from-muted/15 to-transparent px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex items-center gap-3">
+              <div className="flex h-9 w-9 items-center justify-center rounded-md border border-border/60 bg-background/60">
+                <ShoppingCart className="h-4 w-4 text-foreground/85" strokeWidth={2.1} />
+              </div>
+              <div>
+                <p className="text-[13px] font-black leading-tight tracking-[-0.012em] text-foreground">Transações</p>
+                <p className="mt-0.5 text-[11px] font-medium text-muted-foreground/85">
+                  <span className="tabular-nums font-bold text-foreground/85">{sortedFiltered.length}</span> {sortedFiltered.length === 1 ? "resultado" : "resultados"}
+                  <span className="mx-1.5 inline-block h-[3px] w-[3px] -translate-y-[3px] rounded-full bg-muted-foreground/40 align-middle" />
+                  líquido <span className="font-numbers font-black tabular-nums text-foreground" style={{ fontVariantNumeric: "tabular-nums slashed-zero" }}>{hidden ? HIDE : fmt(filteredNetTotal)}</span>
+                </p>
+              </div>
             </div>
-            <div className="relative w-full sm:w-[340px]">
-              <Search className="absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground/70" />
+            <div className="relative w-full sm:w-[360px]">
+              <Search className="pointer-events-none absolute left-3 top-1/2 h-[14px] w-[14px] -translate-y-1/2 text-muted-foreground/70" strokeWidth={2.2} />
               <input
                 id="vendas-search"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 placeholder="Buscar nome, email, telefone, ID…"
-                className="h-8 w-full rounded-md border border-border/70 bg-background pl-8 pr-16 text-[12px] font-medium text-foreground transition-all duration-200 placeholder:text-muted-foreground/70 hover:border-border focus:border-foreground/50 focus:outline-none focus:ring-2 focus:ring-foreground/10"
+                className="h-9 w-full rounded-lg border border-border/70 bg-background pl-9 pr-16 text-[12px] font-medium text-foreground transition-all duration-200 placeholder:text-muted-foreground/65 hover:border-foreground/30 focus:border-foreground/50 focus:outline-none focus:ring-2 focus:ring-foreground/10"
               />
               {search ? (
-                <button onClick={() => setSearch("")} className="absolute right-2.5 top-1/2 -translate-y-1/2"><X className="h-3.5 w-3.5 text-muted-foreground hover:text-foreground" /></button>
+                <button onClick={() => setSearch("")} aria-label="Limpar busca" className="absolute right-2.5 top-1/2 -translate-y-1/2 rounded p-0.5 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"><X className="h-3.5 w-3.5" /></button>
               ) : (
                 <Kbd className="absolute right-2.5 top-1/2 -translate-y-1/2">/</Kbd>
               )}
@@ -920,7 +944,7 @@ export default function Vendas() {
           </div>
 
           <div className="overflow-x-auto border-b border-border/70 bg-muted/10">
-            <div className="flex min-w-max items-center">
+            <div className="flex min-w-max items-center gap-0.5 px-2">
               {statusTabs.map((tab) => {
                 const active = statusFilter === tab.value;
                 return (
@@ -928,21 +952,26 @@ export default function Vendas() {
                     key={tab.value}
                     onClick={() => setStatusFilter(tab.value)}
                     className={cn(
-                      "relative flex items-center gap-1.5 whitespace-nowrap px-4 py-2.5 text-[12px] font-bold tracking-[-0.005em] transition-colors duration-150",
-                      active ? "text-foreground" : "text-muted-foreground hover:text-foreground",
+                      "relative flex items-center gap-1.5 whitespace-nowrap rounded-t-md px-3.5 py-2.5 text-[12px] font-bold tracking-[-0.005em] transition-colors duration-150",
+                      active ? "text-foreground" : "text-muted-foreground/85 hover:bg-muted/40 hover:text-foreground",
                     )}
                   >
-                    {tab.dot && <span className={cn("h-1.5 w-1.5 rounded-full ring-2 ring-background", tab.dot)} />}
+                    {tab.dot && (
+                      <span className="relative flex h-1.5 w-1.5">
+                        {active && <span className={cn("absolute inline-flex h-full w-full animate-ping rounded-full opacity-60", tab.dot)} />}
+                        <span className={cn("relative inline-flex h-1.5 w-1.5 rounded-full", tab.dot)} />
+                      </span>
+                    )}
                     {tab.label}
                     <span
                       className={cn(
-                        "ml-0.5 rounded-full px-1.5 py-0.5 text-[10.5px] font-black tabular-nums leading-none",
+                        "ml-0.5 rounded-full px-1.5 py-[2px] text-[10px] font-black tabular-nums leading-none",
                         active ? "bg-foreground text-background" : "bg-muted/70 text-muted-foreground",
                       )}
                     >
                       {tab.count}
                     </span>
-                    {active && <span className="absolute -bottom-px left-3 right-3 h-[2px] rounded-full bg-foreground" />}
+                    {active && <span className="absolute -bottom-px left-2 right-2 h-[2px] rounded-full bg-foreground" />}
                   </button>
                 );
               })}
@@ -960,11 +989,11 @@ export default function Vendas() {
                 <div className="overflow-x-auto">
                   <table className="w-full min-w-[900px]">
                     <thead>
-                      <tr className="border-b border-border bg-background">
-                        <SortHead label="Cliente" field="customer" sort={sort} onSort={handleSort} className="pl-4" />
+                      <tr className="border-b border-border/70 bg-muted/15">
+                        <SortHead label="Cliente" field="customer" sort={sort} onSort={handleSort} className="pl-5" />
                         <SortHead label="Produto / Data" field="date" sort={sort} onSort={handleSort} />
-                        <th className="px-3 py-3 text-left text-[10px] font-black uppercase tracking-[0.14em] text-muted-foreground">Status</th>
-                        <th className="px-3 py-3 text-left text-[10px] font-black uppercase tracking-[0.14em] text-muted-foreground">Método</th>
+                        <th className="px-3 py-3 text-left text-[10px] font-black uppercase tracking-[0.16em] text-muted-foreground/90">Status</th>
+                        <th className="px-3 py-3 text-left text-[10px] font-black uppercase tracking-[0.16em] text-muted-foreground/90">Método</th>
                         <SortHead label="Bruto / Taxa" field="amount" sort={sort} onSort={handleSort} align="right" />
                         <SortHead label="Líquido" field="net" sort={sort} onSort={handleSort} align="right" />
                         <th className="w-12" />
