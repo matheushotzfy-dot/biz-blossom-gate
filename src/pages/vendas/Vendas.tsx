@@ -850,22 +850,36 @@ export default function Vendas() {
           <div className="grid grid-cols-1 border-b border-border/70 sm:grid-cols-3 sm:divide-x sm:divide-border/70">
             {riskKpis.map((r) => {
               const Icon = r.icon;
+              const toneChip =
+                r.tone === "info"
+                  ? "border-info/30 bg-info/10 text-info"
+                  : r.tone === "warning"
+                    ? "border-warning/30 bg-warning/10 text-warning"
+                    : "border-destructive/30 bg-destructive/10 text-destructive";
               return (
-                <div key={r.label} className="group flex items-center gap-3 px-5 py-3.5 transition-colors duration-200 hover:bg-muted/25">
-                  <div className={cn("flex h-7 w-7 shrink-0 items-center justify-center rounded-md border border-border/60 bg-card/40", r.accent)}>
-                    <Icon className="h-3.5 w-3.5" strokeWidth={2.4} />
+                <div
+                  key={r.label}
+                  className="group relative flex items-center gap-3 px-5 py-3.5 transition-colors duration-200 hover:bg-muted/25"
+                >
+                  <div className={cn("flex h-8 w-8 shrink-0 items-center justify-center rounded-md border", toneChip)}>
+                    <Icon className="h-[15px] w-[15px]" strokeWidth={2.3} />
                   </div>
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center justify-between gap-3">
                       <p className="text-[9px] font-black uppercase tracking-[0.24em] text-muted-foreground/85">{r.label}</p>
                       <p
-                        className={cn("font-numbers text-[15px] font-black leading-none tabular-nums tracking-[-0.02em]", r.accent)}
+                        className={cn("font-numbers text-[15px] font-black leading-none tabular-nums tracking-[-0.025em]", r.accent)}
                         style={{ fontVariantNumeric: "tabular-nums slashed-zero" }}
                       >
                         {r.value}
                       </p>
                     </div>
-                    <p className="mt-1 truncate text-[11px] font-medium text-muted-foreground/80">{r.sub}</p>
+                    <div className="mt-1.5 flex items-center gap-1.5 text-[11px] font-medium text-muted-foreground/80">
+                      <span className="tabular-nums font-semibold text-foreground/75">{r.count}</span>
+                      <span>{r.count === 1 ? "caso" : "casos"}</span>
+                      <span className="inline-block h-[3px] w-[3px] rounded-full bg-muted-foreground/40" />
+                      <span className="tabular-nums">{r.rate.toFixed(2).replace(".", ",")}%</span>
+                    </div>
                   </div>
                 </div>
               );
