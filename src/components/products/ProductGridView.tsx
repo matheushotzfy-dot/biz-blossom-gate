@@ -1,4 +1,4 @@
-import { Copy, ExternalLink, Link2, Palette, Pencil, Settings2, Sparkles, Check, BookOpen, ArrowUpRight, AlertTriangle, Trash2, FileEdit, Info } from "lucide-react";
+import { Copy, Crosshair, ExternalLink, Link2, Palette, Pencil, Settings2, Sparkles, Check, BookOpen, ArrowUpRight, AlertTriangle, Trash2, FileEdit, Info } from "lucide-react";
 import { ProductActionsMenu, type ProductMenuHandlers } from "./ProductActionsMenu";
 import { DELIVERY_LABELS, formatCurrency, type Product, getCheckoutLink, getEffectiveStatus, getProductRequirements } from "./productPresentation";
 import { cn } from "@/lib/utils";
@@ -290,6 +290,15 @@ export function ProductGridView({ products, copiedId, toolbar, ...handlers }: Pr
                       >
                         <Pencil className="h-4 w-4" strokeWidth={2.25} />
                         Editar
+                      </button>
+                      <button
+                        type="button"
+                        onClick={(e) => { e.stopPropagation(); handlers.onOpenPixels(product); }}
+                        className="flex h-11 flex-1 items-center justify-center gap-2 rounded-xl border border-warning/30 bg-warning/[0.06] text-[12px] font-black uppercase tracking-wider text-warning transition-all hover:border-warning/60 hover:bg-warning/[0.12] hover:-translate-y-px"
+                        title="Configurar pixels e tracking"
+                      >
+                        <Crosshair className="h-4 w-4" strokeWidth={2.5} />
+                        Pixels
                       </button>
                       {product.checkout_url && (
                         <button
