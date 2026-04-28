@@ -3,20 +3,20 @@ import { useAuth } from "@/hooks/useAuth";
 import { useTransactions } from "@/hooks/useQueryData";
 import {
   Banknote, Clock, Calculator, Shield,
-  CheckCircle2, Percent, ArrowRight, Info,
+  CheckCircle2, Percent, ArrowRight, Info, Wallet, TrendingUp,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
 import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { PageShell, PageTitle, Panel } from "@/components/PageShell";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
+import { FinanceiroHero, FinanceiroKpi, FinanceiroKpiGrid } from "@/components/financeiro/FinanceiroHero";
 
 const fmt = (v: number) => `R$ ${v.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 
 export default function Antecipacao() {
-  const { user } = useAuth();
+  useAuth();
   const { data: transactions } = useTransactions();
   const [antecipationDays, setAntecipationDays] = useState(15);
 
@@ -50,12 +50,7 @@ export default function Antecipacao() {
         count += 1;
       }
     });
-    return {
-      totalOriginal,
-      totalFee,
-      totalNet: totalOriginal - totalFee,
-      count,
-    };
+    return { totalOriginal, totalFee, totalNet: totalOriginal - totalFee, count };
   }, [stats.eligible, antecipationDays]);
 
   const feePercent = antecipationCalc.totalOriginal > 0
@@ -75,85 +70,78 @@ export default function Antecipacao() {
   }, [stats.eligible, antecipationDays]);
 
   return (
-    <PageShell>
-      <PageTitle
-        icon={<Banknote className="h-6 w-6" />}
+    <div className="mx-auto w-full max-w-[1440px] pb-20 space-y-6">
+      <FinanceiroHero
         title="Antecipação de Recebíveis"
-        subtitle="Simule e antecipe valores retidos com taxa proporcional"
+        subtitle="Simule e antecipe valores retidos com taxa proporcional. Quanto menor o tempo, menor a taxa."
+        status={{
+          tone: stats.eligibleCount > 0 ? "info" : "neutral",
+          label: `${stats.eligibleCount} ${stats.eligibleCount === 1 ? "transação retida" : "transações retidas"}`,
+          pulse: stats.eligibleCount > 0,
+        }}
+        actions={
+          <div className="hidden sm:inline-flex items-center gap-1.5 rounded-xl border border-border/50 bg-card/60 px-3 h-11 text-[11px] font-black uppercase tracking-[0.12em] text-muted-foreground">
+            <Percent className="h-3.5 w-3.5 text-info" /> 2,5% / 15 dias
+          </div>
+        }
       />
 
-      {/* ─── SUMMARY LEDGER ─── */}
-      <Panel>
-        <div className="grid grid-cols-2 lg:grid-cols-4 divide-y lg:divide-y-0 lg:divide-x divide-border/30">
-          <div className="p-5">
-            <p className="text-[10px] uppercase tracking-[0.14em] font-bold text-muted-foreground/60 mb-2">
-              Saldo retido
-            </p>
-            <p className="text-2xl font-display font-black text-foreground font-numbers tracking-tight">
-              {fmt(stats.retainedTotal)}
-            </p>
-            <p className="text-[11px] text-muted-foreground/50 mt-1">
-              {stats.eligibleCount} transações
-            </p>
-          </div>
-          <div className="p-5">
-            <p className="text-[10px] uppercase tracking-[0.14em] font-bold text-muted-foreground/60 mb-2">
-              No período ({antecipationDays}d)
-            </p>
-            <p className="text-2xl font-display font-black text-foreground font-numbers tracking-tight">
-              {fmt(antecipationCalc.totalOriginal)}
-            </p>
-            <p className="text-[11px] text-muted-foreground/50 mt-1">
-              {antecipationCalc.count} elegíveis
-            </p>
-          </div>
-          <div className="p-5">
-            <p className="text-[10px] uppercase tracking-[0.14em] font-bold text-muted-foreground/60 mb-2">
-              Taxa total
-            </p>
-            <p className="text-2xl font-display font-black text-warning font-numbers tracking-tight">
-              −{fmt(antecipationCalc.totalFee)}
-            </p>
-            <p className="text-[11px] text-muted-foreground/50 mt-1">
-              {feePercent.toFixed(2)}% efetivo
-            </p>
-          </div>
-          <div className="p-5 bg-success/[0.03]">
-            <p className="text-[10px] uppercase tracking-[0.14em] font-bold text-success/70 mb-2">
-              Você recebe
-            </p>
-            <p className="text-2xl font-display font-black text-success font-numbers tracking-tight">
-              {fmt(antecipationCalc.totalNet)}
-            </p>
-            <p className="text-[11px] text-success/60 mt-1">
-              Crédito imediato no saldo
-            </p>
-          </div>
-        </div>
-      </Panel>
+      {/* KPI Grid */}
+      <FinanceiroKpiGrid cols={4}>
+        <FinanceiroKpi
+          label="Saldo retido"
+          value={fmt(stats.retainedTotal)}
+          sub={`${stats.eligibleCount} ${stats.eligibleCount === 1 ? "transação" : "transações"}`}
+          icon={Wallet}
+          tone="warning"
+        />
+        <FinanceiroKpi
+          label={`No período (${antecipationDays}d)`}
+          value={fmt(antecipationCalc.totalOriginal)}
+          sub={`${antecipationCalc.count} elegíveis para antecipação`}
+          icon={TrendingUp}
+          tone="info"
+        />
+        <FinanceiroKpi
+          label="Taxa total"
+          value={`− ${fmt(antecipationCalc.totalFee)}`}
+          sub={`${feePercent.toFixed(2)}% efetivo`}
+          icon={Percent}
+          tone="warning"
+        />
+        <FinanceiroKpi
+          label="Você recebe"
+          value={fmt(antecipationCalc.totalNet)}
+          sub="Crédito imediato no saldo"
+          icon={Banknote}
+          tone="success"
+        />
+      </FinanceiroKpiGrid>
 
-      {/* ─── SIMULATOR ─── */}
-      <Panel>
-        <div className="flex items-center justify-between px-5 pt-5 pb-3 border-b border-border/20">
+      {/* SIMULATOR */}
+      <section className="rounded-xl border border-border/50 bg-card overflow-hidden animate-fade-in stagger-2">
+        <div className="flex items-center justify-between px-5 py-3.5 border-b border-border/50">
           <div className="flex items-center gap-2.5">
-            <Calculator className="h-4 w-4 text-muted-foreground/70" />
-            <h3 className="text-sm font-display font-bold text-foreground tracking-[-0.02em]">
+            <div className="h-7 w-7 rounded-md bg-primary/10 text-primary flex items-center justify-center">
+              <Calculator className="h-3.5 w-3.5" strokeWidth={2.25} />
+            </div>
+            <h2 className="text-[14px] font-display font-black text-foreground tracking-[-0.01em]">
               Simulador de antecipação
-            </h3>
+            </h2>
           </div>
-          <span className="text-[11px] text-muted-foreground/50 font-numbers">
+          <span className="text-[11px] text-muted-foreground/70 font-mono tabular-nums">
             Taxa base: 2,5% / 15 dias (pro-rata)
           </span>
         </div>
 
-        <div className="grid lg:grid-cols-5 gap-0 divide-y lg:divide-y-0 lg:divide-x divide-border/20">
-          {/* Slider — operational control */}
-          <div className="p-5 lg:col-span-3 space-y-5">
+        <div className="grid grid-cols-1 lg:grid-cols-5 gap-px bg-border/40">
+          {/* Slider */}
+          <div className="lg:col-span-3 bg-card p-5 space-y-5">
             <div>
               <div className="flex items-center justify-between mb-3">
-                <Label className="text-[11px] uppercase tracking-[0.12em] font-bold text-muted-foreground/70">
+                <span className="text-[10px] font-black uppercase tracking-[0.14em] text-muted-foreground">
                   Período de antecipação
-                </Label>
+                </span>
                 <div className="flex items-center gap-2">
                   <Input
                     type="number"
@@ -165,9 +153,9 @@ export default function Antecipacao() {
                       const v = Math.max(5, Math.min(90, Number(e.target.value) || 5));
                       setAntecipationDays(v);
                     }}
-                    className="h-8 w-20 text-sm font-numbers font-bold text-right"
+                    className="h-8 w-20 text-sm font-mono font-black text-right tabular-nums"
                   />
-                  <span className="text-xs text-muted-foreground/60">dias</span>
+                  <span className="text-[11px] text-muted-foreground/70 font-medium">dias</span>
                 </div>
               </div>
               <Slider
@@ -177,25 +165,24 @@ export default function Antecipacao() {
                 max={90}
                 step={5}
               />
-              <div className="flex justify-between mt-2 text-[10px] text-muted-foreground/40 font-numbers">
+              <div className="flex justify-between mt-2 text-[10px] text-muted-foreground/60 font-mono tabular-nums">
                 <span>5d</span><span>30d</span><span>60d</span><span>90d</span>
               </div>
             </div>
 
-            {/* Quick presets */}
-            <div className="flex items-center gap-2 flex-wrap">
-              <span className="text-[10px] uppercase tracking-[0.12em] font-bold text-muted-foreground/60 mr-1">
-                Atalhos:
+            <div className="flex items-center gap-1.5 flex-wrap">
+              <span className="text-[10px] font-black uppercase tracking-[0.14em] text-muted-foreground/70 mr-1">
+                Atalhos
               </span>
               {[7, 15, 30, 60, 90].map(d => (
                 <button
                   key={d}
                   onClick={() => setAntecipationDays(d)}
                   className={cn(
-                    "h-7 px-2.5 text-xs font-semibold rounded-md border transition-all",
+                    "h-7 px-2.5 text-[11px] font-bold rounded-md border transition-all duration-200",
                     antecipationDays === d
-                      ? "border-primary/40 bg-primary/[0.08] text-primary"
-                      : "border-border/30 text-muted-foreground/70 hover:border-border/60 hover:bg-muted/20"
+                      ? "border-primary/40 bg-primary/10 text-primary"
+                      : "border-border/50 bg-secondary/40 text-muted-foreground hover:text-foreground hover:bg-secondary"
                   )}
                 >
                   {d}d
@@ -203,65 +190,41 @@ export default function Antecipacao() {
               ))}
             </div>
 
-            {/* Coverage indicator */}
-            <div className="rounded-lg border border-border/25 bg-muted/[0.04] p-4">
+            <div className="rounded-xl border border-border/50 bg-secondary/30 p-4">
               <div className="flex items-center justify-between mb-2">
-                <span className="text-[11px] text-muted-foreground/70 font-medium">
-                  Cobertura do período
-                </span>
-                <span className="text-xs font-numbers font-bold text-foreground">
+                <span className="text-[11px] text-muted-foreground/80 font-medium">Cobertura do período</span>
+                <span className="text-[12px] font-mono font-black text-foreground tabular-nums">
                   {antecipationCalc.count} / {stats.eligibleCount}
                 </span>
               </div>
-              <div className="h-1.5 rounded-full bg-muted/25 overflow-hidden">
+              <div className="h-1.5 rounded-full bg-secondary overflow-hidden">
                 <div
-                  className="h-full rounded-full bg-primary transition-[width] duration-500 ease-[cubic-bezier(0.16,1,0.3,1)]"
-                  style={{
-                    width: `${stats.eligibleCount > 0 ? Math.min((antecipationCalc.count / stats.eligibleCount) * 100, 100) : 0}%`,
-                  }}
+                  className="h-full rounded-full bg-primary transition-[width] duration-500"
+                  style={{ width: `${stats.eligibleCount > 0 ? Math.min((antecipationCalc.count / stats.eligibleCount) * 100, 100) : 0}%` }}
                 />
               </div>
-              <p className="text-[10px] text-muted-foreground/50 mt-2">
+              <p className="text-[11px] text-muted-foreground/70 mt-2 font-medium">
                 Transações com vencimento até {antecipationDays} dias serão antecipadas.
               </p>
             </div>
           </div>
 
-          {/* Result — financial breakdown */}
-          <div className="p-5 lg:col-span-2 bg-muted/[0.02]">
-            <p className="text-[10px] uppercase tracking-[0.14em] font-bold text-muted-foreground/60 mb-4">
+          {/* Result */}
+          <div className="lg:col-span-2 bg-card p-5">
+            <p className="text-[10px] font-black uppercase tracking-[0.18em] text-muted-foreground mb-4">
               Resumo da operação
             </p>
 
-            <dl className="space-y-2.5 text-sm">
-              <div className="flex items-baseline justify-between">
-                <dt className="text-muted-foreground/70 text-xs">Transações</dt>
-                <dd className="font-numbers font-bold text-foreground">
-                  {antecipationCalc.count}
-                </dd>
-              </div>
-              <div className="flex items-baseline justify-between">
-                <dt className="text-muted-foreground/70 text-xs">Valor bruto retido</dt>
-                <dd className="font-numbers font-bold text-foreground">
-                  {fmt(antecipationCalc.totalOriginal)}
-                </dd>
-              </div>
-              <div className="flex items-baseline justify-between">
-                <dt className="text-muted-foreground/70 text-xs">
-                  Taxa ({feePercent.toFixed(2)}%)
-                </dt>
-                <dd className="font-numbers font-bold text-warning">
-                  −{fmt(antecipationCalc.totalFee)}
-                </dd>
-              </div>
+            <dl className="space-y-2.5 text-[12px]">
+              <Row label="Transações" value={String(antecipationCalc.count)} />
+              <Row label="Valor bruto retido" value={fmt(antecipationCalc.totalOriginal)} />
+              <Row label={`Taxa (${feePercent.toFixed(2)}%)`} value={`− ${fmt(antecipationCalc.totalFee)}`} negative />
             </dl>
 
-            <div className="mt-4 pt-4 border-t border-border/30">
+            <div className="mt-4 pt-4 border-t border-border/50">
               <div className="flex items-baseline justify-between mb-3">
-                <span className="text-xs uppercase tracking-wider font-bold text-success/80">
-                  Líquido a receber
-                </span>
-                <span className="text-xl font-display font-black text-success font-numbers tracking-tight">
+                <span className="text-[10px] font-black uppercase tracking-[0.14em] text-success">Líquido a receber</span>
+                <span className="text-[22px] font-display font-black text-success tabular-nums tracking-tight">
                   {fmt(antecipationCalc.totalNet)}
                 </span>
               </div>
@@ -269,112 +232,115 @@ export default function Antecipacao() {
               <Button
                 disabled={antecipationCalc.count === 0}
                 onClick={() => toast.info("Funcionalidade de antecipação será ativada em breve junto à adquirente.")}
-                className="w-full gap-2 rounded-lg font-bold h-10 shadow-md shadow-primary/15"
+                className="w-full gap-2 rounded-xl font-display font-black uppercase tracking-[0.12em] text-[12px] h-11"
               >
                 <Banknote className="h-4 w-4" /> Solicitar antecipação
                 <ArrowRight className="h-3.5 w-3.5" />
               </Button>
-              <p className="text-[10px] text-muted-foreground/50 mt-2 text-center flex items-center justify-center gap-1">
+              <p className="text-[10px] text-muted-foreground/70 mt-2 text-center flex items-center justify-center gap-1 font-medium">
                 <Info className="h-3 w-3" />
                 Crédito em até 1 dia útil após aprovação
               </p>
             </div>
           </div>
         </div>
-      </Panel>
+      </section>
 
-      {/* ─── ELIGIBLE TRANSACTIONS TABLE ─── */}
+      {/* ELIGIBLE TABLE */}
       {enrichedEligible.length > 0 && (
-        <Panel>
-          <div className="flex items-center justify-between px-5 pt-5 pb-3 border-b border-border/20">
+        <section className="rounded-xl border border-border/50 bg-card overflow-hidden animate-fade-in stagger-3">
+          <div className="flex items-center justify-between px-5 py-3.5 border-b border-border/50">
             <div className="flex items-center gap-2.5">
-              <Clock className="h-4 w-4 text-muted-foreground/70" />
-              <h3 className="text-sm font-display font-bold text-foreground tracking-[-0.02em]">
+              <div className="h-7 w-7 rounded-md bg-info/10 text-info flex items-center justify-center">
+                <Clock className="h-3.5 w-3.5" strokeWidth={2.25} />
+              </div>
+              <h2 className="text-[14px] font-display font-black text-foreground tracking-[-0.01em]">
                 Transações retidas
-              </h3>
-              <span className="text-[11px] text-muted-foreground/50 font-numbers ml-1">
-                · {stats.eligibleCount} retidas · {fmt(stats.retainedTotal)}
+              </h2>
+              <span className="text-[10px] font-black tabular-nums text-muted-foreground bg-secondary/60 px-1.5 py-0.5 rounded">
+                {stats.eligibleCount}
               </span>
             </div>
+            <span className="text-[11px] text-muted-foreground/70 font-mono tabular-nums">
+              Total retido: <span className="text-foreground font-black">{fmt(stats.retainedTotal)}</span>
+            </span>
           </div>
 
-          <div className="max-h-[480px] overflow-y-auto scrollbar-thin">
+          <div className="max-h-[480px] overflow-y-auto">
             <Table>
-              <TableHeader className="sticky top-0 bg-card/95 backdrop-blur z-10">
-                <TableRow className="border-border/20 hover:bg-transparent">
-                  <TableHead className="w-[100px]">Vencimento</TableHead>
-                  <TableHead className="w-[120px]">Status</TableHead>
-                  <TableHead className="text-right">Valor retido</TableHead>
-                  <TableHead className="text-right">Taxa</TableHead>
-                  <TableHead className="text-right">Líquido</TableHead>
+              <TableHeader className="sticky top-0 bg-secondary/40 z-10">
+                <TableRow className="border-border/50 hover:bg-transparent">
+                  <TableHead className="w-[100px] text-[10px] font-display font-black uppercase tracking-[0.15em] text-muted-foreground">Vencimento</TableHead>
+                  <TableHead className="w-[140px] text-[10px] font-display font-black uppercase tracking-[0.15em] text-muted-foreground">Status</TableHead>
+                  <TableHead className="text-right text-[10px] font-display font-black uppercase tracking-[0.15em] text-muted-foreground">Valor retido</TableHead>
+                  <TableHead className="text-right text-[10px] font-display font-black uppercase tracking-[0.15em] text-muted-foreground">Taxa</TableHead>
+                  <TableHead className="text-right text-[10px] font-display font-black uppercase tracking-[0.15em] text-muted-foreground">Líquido</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {enrichedEligible.slice(0, 50).map((tx: any) => (
-                  <TableRow key={tx.id} className="border-border/15">
-                    <TableCell className="font-numbers text-xs text-muted-foreground/80">
-                      {tx.daysLeft}d
-                    </TableCell>
+                  <TableRow key={tx.id} className="border-border/30 hover:bg-secondary/30 transition-colors">
+                    <TableCell className="font-mono text-[12px] font-bold text-foreground tabular-nums">{tx.daysLeft}d</TableCell>
                     <TableCell>
                       {tx.inWindow ? (
-                        <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md text-[10px] font-bold bg-primary/10 text-primary">
+                        <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md text-[10px] font-black uppercase tracking-[0.12em] bg-primary/10 text-primary border border-primary/20">
                           <CheckCircle2 className="h-3 w-3" /> Elegível
                         </span>
                       ) : (
-                        <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md text-[10px] font-bold bg-muted/20 text-muted-foreground/60">
-                          Fora do período
+                        <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md text-[10px] font-black uppercase tracking-[0.12em] bg-muted/10 text-muted-foreground border border-border/40">
+                          Fora
                         </span>
                       )}
                     </TableCell>
-                    <TableCell className="text-right font-numbers font-bold text-foreground text-sm">
-                      {fmt(tx.retained_amount)}
-                    </TableCell>
-                    <TableCell className="text-right font-numbers text-warning text-sm">
-                      {tx.inWindow ? `−${fmt(tx.fee)}` : "—"}
-                    </TableCell>
-                    <TableCell className="text-right font-numbers font-bold text-success text-sm">
-                      {tx.inWindow ? fmt(tx.net) : "—"}
-                    </TableCell>
+                    <TableCell className="text-right font-mono font-black text-foreground text-[13px] tabular-nums">{fmt(tx.retained_amount)}</TableCell>
+                    <TableCell className="text-right font-mono text-warning text-[12px] tabular-nums">{tx.inWindow ? `− ${fmt(tx.fee)}` : "—"}</TableCell>
+                    <TableCell className="text-right font-mono font-black text-success text-[13px] tabular-nums">{tx.inWindow ? fmt(tx.net) : "—"}</TableCell>
                   </TableRow>
                 ))}
               </TableBody>
             </Table>
           </div>
-        </Panel>
+        </section>
       )}
 
-      {/* ─── HOW IT WORKS — minimal info ─── */}
-      <Panel>
-        <div className="flex items-center gap-2.5 px-5 pt-5 pb-3 border-b border-border/20">
-          <Shield className="h-4 w-4 text-muted-foreground/70" />
-          <h3 className="text-sm font-display font-bold text-foreground tracking-[-0.02em]">
-            Como funciona
-          </h3>
+      {/* HOW IT WORKS */}
+      <section className="rounded-xl border border-border/50 bg-card overflow-hidden animate-fade-in stagger-3">
+        <div className="flex items-center gap-2.5 px-5 py-3.5 border-b border-border/50">
+          <div className="h-7 w-7 rounded-md bg-success/10 text-success flex items-center justify-center">
+            <Shield className="h-3.5 w-3.5" strokeWidth={2.25} />
+          </div>
+          <h2 className="text-[14px] font-display font-black text-foreground tracking-[-0.01em]">Como funciona</h2>
         </div>
-        <div className="grid sm:grid-cols-3 divide-y sm:divide-y-0 sm:divide-x divide-border/20">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-px bg-border/40">
           {[
-            { icon: Clock, title: "Retenção", desc: "Transações aprovadas têm período de retenção definido pela adquirente." },
-            { icon: Percent, title: "Taxa pro-rata", desc: "2,5% a cada 15 dias restantes — quanto menor o tempo, menor a taxa." },
-            { icon: CheckCircle2, title: "Crédito", desc: "Valor líquido creditado no saldo disponível em até 1 dia útil." },
-          ].map((item) => (
-            <div key={item.title} className="p-5">
-              <div className="flex items-center gap-2 mb-2">
-                <item.icon className="h-3.5 w-3.5 text-muted-foreground/60" />
-                <h4 className="text-xs font-bold text-foreground uppercase tracking-wider">
-                  {item.title}
-                </h4>
+            { icon: Clock, title: "Retenção", desc: "Transações aprovadas têm período de retenção definido pela adquirente.", tone: "info" as const },
+            { icon: Percent, title: "Taxa pro-rata", desc: "2,5% a cada 15 dias restantes — quanto menor o tempo, menor a taxa.", tone: "warning" as const },
+            { icon: CheckCircle2, title: "Crédito", desc: "Valor líquido creditado no saldo disponível em até 1 dia útil.", tone: "success" as const },
+          ].map((item) => {
+            const tone = { info: "bg-info/10 text-info", warning: "bg-warning/10 text-warning", success: "bg-success/10 text-success" }[item.tone];
+            return (
+              <div key={item.title} className="bg-card p-5">
+                <div className="flex items-center gap-2 mb-2">
+                  <div className={cn("h-7 w-7 rounded-md flex items-center justify-center", tone)}>
+                    <item.icon className="h-3.5 w-3.5" strokeWidth={2.25} />
+                  </div>
+                  <h3 className="text-[12px] font-display font-black text-foreground uppercase tracking-[0.12em]">{item.title}</h3>
+                </div>
+                <p className="text-[12px] text-muted-foreground/80 leading-relaxed font-medium">{item.desc}</p>
               </div>
-              <p className="text-[12px] text-muted-foreground/70 leading-relaxed">
-                {item.desc}
-              </p>
-            </div>
-          ))}
+            );
+          })}
         </div>
-      </Panel>
-    </PageShell>
+      </section>
+    </div>
   );
 }
 
-function Label({ children, className }: { children: React.ReactNode; className?: string }) {
-  return <span className={className}>{children}</span>;
+function Row({ label, value, negative }: { label: string; value: string; negative?: boolean }) {
+  return (
+    <div className="flex items-baseline justify-between">
+      <dt className="text-muted-foreground/80">{label}</dt>
+      <dd className={cn("font-mono font-black tabular-nums", negative ? "text-warning" : "text-foreground")}>{value}</dd>
+    </div>
+  );
 }
