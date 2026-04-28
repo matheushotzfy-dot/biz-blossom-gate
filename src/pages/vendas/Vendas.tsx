@@ -721,7 +721,7 @@ export default function Vendas() {
 
             <TooltipProvider delayDuration={250}>
               <div className="flex w-full flex-wrap items-center gap-1 xl:w-auto xl:justify-end">
-                <div className="hidden items-center rounded-lg border border-border/60 bg-card/70 p-[3px] backdrop-blur-sm md:inline-flex">
+                <div className="hidden items-center rounded-lg border border-border/60 bg-card p-[3px] md:inline-flex">
                   {PERIODS.map((opt) => {
                     const active = !isCustom && selectedPeriod.label === opt.label;
                     return (
