@@ -96,16 +96,15 @@ export default function AdminProductsTab({ products, profiles, transactions, fmt
  }, [selectedProduct]);
 
  const VALID_STATUS_TRANSITIONS: Record<string, string[]> = {
- pending_review: ["active", "rejected"],
- active: ["blocked", "rejected", "pending_review"],
- blocked: ["active", "rejected"],
- rejected: ["active", "pending_review"],
+ draft: ["active", "pending_review", "inactive"],
+ pending_review: ["active", "inactive"],
+ active: ["pending_review", "inactive"],
+ inactive: ["active", "pending_review"],
  };
 
  const handleProductStatus = async (productId: string, status: string, userId: string, reason?: string) => {
- // Validate status transition
  const product = products.find(p => p.id === productId);
- const currentStatus = product?.status || "pending_review";
+ const currentStatus = product?.status || "active";
  const allowed = VALID_STATUS_TRANSITIONS[currentStatus];
  if (allowed && !allowed.includes(status)) {
  toast.error(`Não é possível mudar de "${currentStatus}" para "${status}"`);
@@ -113,10 +112,12 @@ export default function AdminProductsTab({ products, profiles, transactions, fmt
  }
 
  const updateData: any = { status };
- if (reason) updateData.rejection_reason = reason.replace(/[<>]/g, "").trim().slice(0, 1000);
+ // Reaprovações limpam o motivo anterior; revisões/inativações registram o motivo informado.
+ if (status === "active") updateData.rejection_reason = null;
+ else if (reason) updateData.rejection_reason = reason.replace(/[<>]/g, "").trim().slice(0, 1000);
  const { error } = await supabase.from("products").update(updateData).eq("id", productId);
  if (error) { toast.error("Erro ao atualizar produto"); return; }
- const labels: Record<string, string> = { active: "aprovado", blocked: "suspenso", rejected: "recusado", pending_review: "em revisão" };
+ const labels: Record<string, string> = { active: "reaprovado", inactive: "inativado", pending_review: "marcado para revisão" };
  toast.success(`Produto ${labels[status] || status}!`);
  await logAdminAction(`product_${status}`, "product", productId, { status, user_id: userId, reason });
  onReload();
