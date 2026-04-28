@@ -19,8 +19,7 @@ import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { toast } from "sonner";
-import { PageShell, PageTitle, EmptyState, Panel } from "@/components/PageShell";
-import { KpiRibbon } from "@/components/KpiRibbon";
+import { EmptyState, Panel } from "@/components/PageShell";
 import { cn } from "@/lib/utils";
 import type { Tables } from "@/integrations/supabase/types";
 
