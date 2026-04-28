@@ -1,6 +1,6 @@
-import { Copy, ExternalLink, Link2, Palette, Pencil, Settings2, Sparkles, Check, BookOpen, ArrowUpRight } from "lucide-react";
+import { Copy, ExternalLink, Link2, Palette, Pencil, Settings2, Sparkles, Check, BookOpen, ArrowUpRight, AlertTriangle, Trash2, FileEdit, Info } from "lucide-react";
 import { ProductActionsMenu, type ProductMenuHandlers } from "./ProductActionsMenu";
-import { DELIVERY_LABELS, formatCurrency, type Product, getCheckoutLink } from "./productPresentation";
+import { DELIVERY_LABELS, formatCurrency, type Product, getCheckoutLink, getEffectiveStatus, getProductRequirements } from "./productPresentation";
 import { cn } from "@/lib/utils";
 
 type ProductGridViewProps = ProductMenuHandlers & {
@@ -18,15 +18,21 @@ const STATUS_META: Record<string, { label: string; dot: string; text: string; su
   },
   inactive: {
     label: "Inativo",
-    dot: "bg-muted-foreground/50",
-    text: "text-muted-foreground",
-    surface: "bg-muted/40 border-border/60",
+    dot: "bg-destructive",
+    text: "text-destructive",
+    surface: "bg-destructive/[0.08] border-destructive/20",
   },
   pending_review: {
     label: "Em revisão",
     dot: "bg-warning",
     text: "text-warning",
     surface: "bg-warning/[0.08] border-warning/20",
+  },
+  draft: {
+    label: "Rascunho",
+    dot: "bg-muted-foreground/60",
+    text: "text-muted-foreground",
+    surface: "bg-muted/40 border-border/60",
   },
 };
 
