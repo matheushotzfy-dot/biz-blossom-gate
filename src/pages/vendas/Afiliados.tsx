@@ -53,7 +53,7 @@ function StatusPill({ status }: { status: string }) {
   );
 }
 
-/* ─── KPI Cell — flat operational ─── */
+/* ─── KPI Cell — Billion-Dollar SaaS ─── */
 function Kpi({ label, value, sub, icon: Icon, tone = "default" }: {
   label: string; value: string; sub?: string; icon: any;
   tone?: "default" | "success" | "warning" | "info" | "primary";
@@ -66,13 +66,13 @@ function Kpi({ label, value, sub, icon: Icon, tone = "default" }: {
     primary: "text-primary",
   }[tone];
   return (
-    <div className="rounded-xl border border-border/60 bg-card p-4">
-      <div className="flex items-center justify-between mb-2">
-        <span className="text-[10px] font-bold uppercase tracking-[0.12em] text-muted-foreground/60">{label}</span>
-        <Icon className="h-3.5 w-3.5 text-muted-foreground/40" />
+    <div className="bg-card px-5 py-4">
+      <div className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-[0.18em] text-muted-foreground/60">
+        <Icon className="h-3 w-3" strokeWidth={2.5} />
+        {label}
       </div>
-      <p className={cn("text-[22px] font-heading font-bold tabular-nums leading-none", toneCls)}>{value}</p>
-      {sub && <p className="text-[10px] text-muted-foreground/50 mt-1.5 tabular-nums">{sub}</p>}
+      <p className={cn("mt-2 font-display text-[22px] font-black leading-none tracking-tight tabular-nums", toneCls)}>{value}</p>
+      {sub && <p className="mt-1.5 text-[11px] font-medium text-muted-foreground/60 tabular-nums">{sub}</p>}
     </div>
   );
 }
