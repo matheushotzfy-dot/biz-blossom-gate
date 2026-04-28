@@ -200,18 +200,18 @@ function TxRow({ tx, prods, onClick, density = "comfortable" }: { tx: Tables<"tr
   const py = density === "compact" ? "py-2" : "py-3.5";
   const avatarSize = density === "compact" ? "h-8 w-8" : "h-9 w-9";
   return (
-    <tr onClick={onClick} className="group cursor-pointer border-b border-border transition-colors hover:bg-muted/20 last:border-b-0">
-      <td className={cn("pl-4 pr-3 align-middle", py)}>
+    <tr onClick={onClick} className="group cursor-pointer border-b border-border/60 transition-colors duration-150 hover:bg-muted/30 last:border-b-0">
+      <td className={cn("pl-5 pr-3 align-middle", py)}>
         <div className="flex items-center gap-3">
-          <Avatar className={cn(avatarSize, "shrink-0 rounded-md")}>
-            <AvatarFallback className={cn("rounded-md text-[11px] font-bold", avatarColor(name))}>{initials(name)}</AvatarFallback>
+          <Avatar className={cn(avatarSize, "shrink-0 rounded-md ring-1 ring-border/40")}>
+            <AvatarFallback className={cn("rounded-md text-[11px] font-black tracking-[-0.01em]", avatarColor(name))}>{initials(name)}</AvatarFallback>
           </Avatar>
           <div className="min-w-0">
-            <p className="truncate text-[13px] font-semibold text-foreground leading-tight">{name}</p>
+            <p className="truncate text-[13px] font-bold tracking-[-0.01em] text-foreground leading-tight">{name}</p>
             <div className="flex items-center gap-1.5 mt-0.5">
-              {tx.customer_email && <p className="truncate text-[11px] text-muted-foreground max-w-[180px]">{tx.customer_email}</p>}
+              {tx.customer_email && <p className="truncate text-[11px] text-muted-foreground/85 max-w-[180px]">{tx.customer_email}</p>}
               {tx.customer_phone && (
-                <a href={`https://wa.me/55${tx.customer_phone.replace(/\D/g, "")}`} target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()} className="text-success hover:text-success/80">
+                <a href={`https://wa.me/55${tx.customer_phone.replace(/\D/g, "")}`} target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()} className="text-success transition-colors hover:text-success/80">
                   <MessageCircle className="h-3 w-3" />
                 </a>
               )}
@@ -220,29 +220,29 @@ function TxRow({ tx, prods, onClick, density = "comfortable" }: { tx: Tables<"tr
         </div>
       </td>
       <td className={cn("px-3 align-middle", py)}>
-        <p className="truncate text-[12px] font-medium text-foreground max-w-[180px]">{prodName}</p>
-        <p className="text-[11px] text-muted-foreground mt-0.5 tabular-nums">{fmtDate(tx.created_at)} · {fmtTime(tx.created_at)}</p>
+        <p className="truncate text-[12px] font-semibold text-foreground/95 max-w-[180px]">{prodName}</p>
+        <p className="text-[11px] text-muted-foreground/80 mt-0.5 tabular-nums">{fmtDate(tx.created_at)} · {fmtTime(tx.created_at)}</p>
       </td>
       <td className={cn("px-3 align-middle", py)}>
-        <span className={cn("inline-flex items-center gap-1.5 rounded-sm border px-2 py-1 text-[11px] font-semibold", st.fg, st.bg, st.border)}>
+        <span className={cn("inline-flex items-center gap-1.5 rounded-full border px-2 py-0.5 text-[11px] font-bold tracking-[-0.005em]", st.fg, st.bg, st.border)}>
           <span className={cn("h-1.5 w-1.5 rounded-full", st.dot)} />
           {st.label}
         </span>
       </td>
       <td className={cn("px-3 align-middle", py)}>
-        <span className={cn("inline-flex items-center gap-1.5 rounded-sm border px-2 py-1 text-[11px] font-semibold", method.color, method.bg, method.border)}>
+        <span className={cn("inline-flex items-center gap-1.5 rounded-full border px-2 py-0.5 text-[11px] font-bold tracking-[-0.005em]", method.color, method.bg, method.border)}>
           <MethodIcon className="h-3 w-3" />
           {method.label}
         </span>
       </td>
       <td className={cn("px-3 align-middle text-right", py)}>
-        <p className="text-[13px] font-semibold text-foreground tabular-nums">{fmt(gross)}</p>
-        {fee > 0 && <p className="text-[10px] text-muted-foreground tabular-nums mt-0.5">−{fmt(fee)} taxa</p>}
+        <p className="text-[13px] font-bold text-foreground tabular-nums tracking-[-0.01em]" style={{ fontVariantNumeric: "tabular-nums slashed-zero" }}>{fmt(gross)}</p>
+        {fee > 0 && <p className="text-[10px] text-muted-foreground/80 tabular-nums mt-0.5">−{fmt(fee)} taxa</p>}
       </td>
       <td className={cn("px-4 align-middle text-right", py)}>
-        <p className={cn("text-[14px] font-bold tabular-nums",
+        <p className={cn("text-[14px] font-black tabular-nums tracking-[-0.015em]",
           tx.status === "completed" ? "text-success" : tx.status === "pending" ? "text-warning" : "text-foreground/60"
-        )}>{fmt(net)}</p>
+        )} style={{ fontVariantNumeric: "tabular-nums slashed-zero" }}>{fmt(net)}</p>
       </td>
       <td className={cn("pr-3 align-middle w-12", py)}>
         <div className="opacity-0 group-hover:opacity-100 transition-opacity">
@@ -671,29 +671,48 @@ export default function Vendas() {
 
   /* ═══════════ RENDER ═══════════ */
   return (
-    <div className="mx-auto w-full max-w-[1480px] pb-24 md:pb-10">
+    <div
+      className="mx-auto w-full max-w-[1480px] pb-24 md:pb-10 antialiased [text-rendering:geometricPrecision] [-webkit-font-smoothing:antialiased] [-moz-osx-font-smoothing:grayscale]"
+      style={{ fontFeatureSettings: '"ss01","cv11","tnum","kern"' }}
+    >
 
       {/* ─────────── COMANDO LIMPO ─────────── */}
-      <div className="px-5 pt-3 antialiased subpixel-antialiased [text-rendering:geometricPrecision] sm:px-8">
-        <header className="border-b border-border pb-6">
+      <div className="px-5 pt-4 sm:px-8 sm:pt-6">
+        <header className="border-b border-border/70 pb-7">
           <div className="flex flex-col gap-5 xl:flex-row xl:items-start xl:justify-between">
             <div className="min-w-0">
-              <div className="inline-flex items-center gap-2 text-[9px] font-black uppercase tracking-[0.24em] text-muted-foreground">
-                <span className="h-1.5 w-1.5 rounded-full bg-success" />
+              <div className="inline-flex items-center gap-2 text-[9px] font-black uppercase tracking-[0.26em] text-muted-foreground/80">
+                <span className="relative flex h-1.5 w-1.5">
+                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-success/60 opacity-60" />
+                  <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-success" />
+                </span>
                 Live sales ledger
               </div>
-              <h1 className="mt-2 font-display text-[34px] font-black leading-none tracking-[-0.04em] text-foreground sm:text-[44px]">
+              <h1 className="mt-2.5 font-display text-[34px] font-black leading-[0.95] tracking-[-0.045em] text-foreground sm:text-[46px]">
                 Vendas
               </h1>
               <div className="mt-4 flex flex-wrap items-end gap-x-5 gap-y-2">
-                <p className={cn("font-numbers text-[42px] font-black leading-[0.9] tracking-[-0.055em] tabular-nums sm:text-[58px]", hidden ? "text-foreground" : "text-success")}>
+                <p
+                  className={cn(
+                    "font-numbers text-[42px] font-black leading-[0.88] tracking-[-0.06em] tabular-nums sm:text-[60px]",
+                    hidden ? "text-foreground" : "text-success",
+                  )}
+                  style={{ fontVariantNumeric: "tabular-nums slashed-zero" }}
+                >
                   {hidden ? HIDE : fmt(m.totalNet)}
                 </p>
-                <div className="pb-1">
-                  <p className="text-[12px] font-bold text-foreground">Receita líquida no período</p>
-                  <p className="mt-1 text-[11.5px] font-medium text-muted-foreground">
-                    <span className="font-bold text-foreground">{periodLabel}</span> · {dateFiltered.length} {dateFiltered.length === 1 ? "transação" : "transações"}
-                    {lastSaleText && <> · última {lastSaleText}</>}
+                <div className="pb-1.5">
+                  <p className="text-[12px] font-bold tracking-[-0.005em] text-foreground">Receita líquida no período</p>
+                  <p className="mt-1 text-[11.5px] font-medium text-muted-foreground/85">
+                    <span className="font-bold text-foreground">{periodLabel}</span>
+                    <span className="mx-1.5 inline-block h-[3px] w-[3px] -translate-y-[3px] rounded-full bg-muted-foreground/40 align-middle" />
+                    {dateFiltered.length} {dateFiltered.length === 1 ? "transação" : "transações"}
+                    {lastSaleText && (
+                      <>
+                        <span className="mx-1.5 inline-block h-[3px] w-[3px] -translate-y-[3px] rounded-full bg-muted-foreground/40 align-middle" />
+                        última {lastSaleText}
+                      </>
+                    )}
                   </p>
                 </div>
               </div>
@@ -701,16 +720,16 @@ export default function Vendas() {
 
             <TooltipProvider delayDuration={250}>
               <div className="flex w-full flex-wrap items-center gap-1.5 xl:w-auto xl:justify-end">
-                <div className="hidden items-center border border-border bg-card p-0.5 md:inline-flex">
+                <div className="hidden items-center rounded-md border border-border/70 bg-card/60 p-0.5 shadow-[inset_0_1px_0_hsl(var(--foreground)/0.02)] backdrop-blur-sm md:inline-flex">
                   {PERIODS.map((opt) => (
                     <button
                       key={opt.label}
                       onClick={() => { setSelectedPeriod(opt); setIsCustom(false); setCustomRange(undefined); }}
                       className={cn(
-                        "px-2.5 py-1 text-[11px] font-bold transition-colors",
+                        "rounded-[5px] px-2.5 py-1 text-[11px] font-bold tracking-[-0.005em] transition-all duration-200",
                         !isCustom && selectedPeriod.label === opt.label
-                          ? "bg-foreground text-background"
-                          : "text-muted-foreground hover:text-foreground",
+                          ? "bg-foreground text-background shadow-[0_1px_2px_hsl(var(--foreground)/0.18)]"
+                          : "text-muted-foreground hover:bg-muted/60 hover:text-foreground",
                       )}
                     >
                       {opt.label}
@@ -722,24 +741,24 @@ export default function Vendas() {
                   <Popover open={datePickerOpen} onOpenChange={setDatePickerOpen}>
                     <TooltipTrigger asChild>
                       <PopoverTrigger asChild>
-                        <button className={cn("inline-flex h-8 w-8 items-center justify-center border transition-colors",
-                          isCustom ? "border-foreground bg-secondary text-foreground" : "border-border bg-card text-muted-foreground hover:text-foreground")}>
+                        <button className={cn("inline-flex h-8 w-8 items-center justify-center rounded-md border transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-foreground/20",
+                          isCustom ? "border-foreground bg-secondary text-foreground" : "border-border/70 bg-card/60 text-muted-foreground hover:border-border hover:bg-muted/60 hover:text-foreground")}>
                           <CalendarDays className="h-3.5 w-3.5" />
                         </button>
                       </PopoverTrigger>
                     </TooltipTrigger>
-                    <PopoverContent align="end" className="w-auto overflow-hidden border border-border bg-popover p-0">
+                    <PopoverContent align="end" className="w-auto overflow-hidden rounded-lg border border-border bg-popover p-0 shadow-lg">
                       <Calendar mode="range" selected={customRange} onSelect={(range) => { setCustomRange(range); setIsCustom(true); if (range?.from && range?.to) setTimeout(() => setDatePickerOpen(false), 300); }} numberOfMonths={1} locale={ptBR} disabled={(date) => date > new Date()} className="pointer-events-auto p-3" />
                     </PopoverContent>
                   </Popover>
                   <TooltipContent side="bottom" className="flex items-center gap-2">Período personalizado</TooltipContent>
                 </Tooltip>
 
-                <span className="hidden h-5 w-px bg-border md:block" />
+                <span className="hidden h-5 w-px bg-border/70 md:block" />
 
                 <Tooltip>
                   <TooltipTrigger asChild>
-                    <button onClick={() => setCmdOpen(true)} className="inline-flex h-8 items-center gap-1.5 border border-border bg-card px-2 text-muted-foreground transition-colors hover:text-foreground">
+                    <button onClick={() => setCmdOpen(true)} className="inline-flex h-8 items-center gap-1.5 rounded-md border border-border/70 bg-card/60 px-2 text-muted-foreground transition-all duration-200 hover:border-border hover:bg-muted/60 hover:text-foreground focus:outline-none focus-visible:ring-2 focus-visible:ring-foreground/20">
                       <CommandIcon className="h-3.5 w-3.5" />
                       <Kbd>⌘K</Kbd>
                     </button>
@@ -749,8 +768,8 @@ export default function Vendas() {
 
                 <Tooltip>
                   <TooltipTrigger asChild>
-                    <button onClick={toggleDensity} className={cn("inline-flex h-8 w-8 items-center justify-center border transition-colors",
-                      density === "compact" ? "border-foreground bg-secondary text-foreground" : "border-border bg-card text-muted-foreground hover:text-foreground")}>
+                    <button onClick={toggleDensity} className={cn("inline-flex h-8 w-8 items-center justify-center rounded-md border transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-foreground/20",
+                      density === "compact" ? "border-foreground bg-secondary text-foreground" : "border-border/70 bg-card/60 text-muted-foreground hover:border-border hover:bg-muted/60 hover:text-foreground")}>
                       {density === "compact" ? <Rows4 className="h-3.5 w-3.5" /> : <Rows3 className="h-3.5 w-3.5" />}
                     </button>
                   </TooltipTrigger>
@@ -759,7 +778,7 @@ export default function Vendas() {
 
                 <Tooltip>
                   <TooltipTrigger asChild>
-                    <button onClick={() => window.location.reload()} className="inline-flex h-8 w-8 items-center justify-center border border-border bg-card text-muted-foreground transition-colors hover:text-foreground">
+                    <button onClick={() => window.location.reload()} className="inline-flex h-8 w-8 items-center justify-center rounded-md border border-border/70 bg-card/60 text-muted-foreground transition-all duration-200 hover:border-border hover:bg-muted/60 hover:text-foreground focus:outline-none focus-visible:ring-2 focus-visible:ring-foreground/20">
                       <RefreshCw className="h-3.5 w-3.5" />
                     </button>
                   </TooltipTrigger>
@@ -768,8 +787,8 @@ export default function Vendas() {
 
                 <Tooltip>
                   <TooltipTrigger asChild>
-                    <button onClick={toggleHidden} className={cn("inline-flex h-8 w-8 items-center justify-center border transition-colors",
-                      hidden ? "border-foreground bg-secondary text-foreground" : "border-border bg-card text-muted-foreground hover:text-foreground")}>
+                    <button onClick={toggleHidden} className={cn("inline-flex h-8 w-8 items-center justify-center rounded-md border transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-foreground/20",
+                      hidden ? "border-foreground bg-secondary text-foreground" : "border-border/70 bg-card/60 text-muted-foreground hover:border-border hover:bg-muted/60 hover:text-foreground")}>
                       {hidden ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
                     </button>
                   </TooltipTrigger>
@@ -780,7 +799,7 @@ export default function Vendas() {
                   <TooltipTrigger asChild>
                     <button
                       onClick={() => setShowExportDialog(true)}
-                      className="inline-flex h-8 items-center gap-1.5 bg-foreground px-3 text-[11px] font-black text-background transition-colors hover:bg-foreground/90"
+                      className="inline-flex h-8 items-center gap-1.5 rounded-md bg-foreground px-3 text-[11px] font-black tracking-[-0.005em] text-background shadow-[0_1px_2px_hsl(var(--foreground)/0.25),inset_0_1px_0_hsl(var(--background)/0.18)] transition-all duration-200 hover:bg-foreground/90 hover:shadow-[0_2px_6px_hsl(var(--foreground)/0.28),inset_0_1px_0_hsl(var(--background)/0.18)] focus:outline-none focus-visible:ring-2 focus-visible:ring-foreground/30"
                     >
                       <Download className="h-3.5 w-3.5" strokeWidth={2.5} />
                       Exportar
@@ -792,38 +811,58 @@ export default function Vendas() {
             </TooltipProvider>
           </div>
 
-          <div className="mt-6 grid grid-cols-2 border-y border-border lg:grid-cols-4 lg:divide-x lg:divide-border">
+          <div className="mt-7 grid grid-cols-2 border-y border-border/70 lg:grid-cols-4 lg:divide-x lg:divide-border/70">
             {[
               { label: "Receita bruta", value: hidden ? HIDE : fmtCompact(m.totalGross), sub: hidden ? "—" : `Taxas ${fmtCompact(m.totalFees)}`, accent: "text-foreground", delta: { cur: m.totalGross, prev: p.totalGross } },
               heroKpis[1],
               heroKpis[2],
               heroKpis[3],
             ].map((k, idx) => (
-              <div key={k.label} className={cn("min-h-[126px] px-4 py-4 sm:px-5", idx > 1 && "border-t border-border lg:border-t-0", idx === 1 && "border-l border-border lg:border-l-0")}>
+              <div
+                key={k.label}
+                className={cn(
+                  "group relative min-h-[130px] px-5 py-5 transition-colors duration-200 hover:bg-muted/25",
+                  idx > 1 && "border-t border-border/70 lg:border-t-0",
+                  idx === 1 && "border-l border-border/70 lg:border-l-0",
+                )}
+              >
                 <div className="flex items-center justify-between gap-2">
-                  <p className="text-[9px] font-black uppercase tracking-[0.22em] text-muted-foreground">{k.label}</p>
+                  <p className="text-[9px] font-black uppercase tracking-[0.24em] text-muted-foreground/85">{k.label}</p>
                   {k.delta && <DeltaBadge cur={k.delta.cur} prev={k.delta.prev} />}
                 </div>
-                <p className={cn("mt-3 font-numbers text-[28px] font-black leading-none tracking-[-0.05em] tabular-nums sm:text-[34px]", k.accent)}>
+                <p
+                  className={cn(
+                    "mt-3 font-numbers text-[28px] font-black leading-[0.95] tracking-[-0.055em] tabular-nums sm:text-[36px]",
+                    k.accent,
+                  )}
+                  style={{ fontVariantNumeric: "tabular-nums slashed-zero" }}
+                >
                   {k.value}
                 </p>
-                <p className="mt-2 truncate text-[11.5px] font-semibold text-muted-foreground">{k.sub}</p>
+                <p className="mt-2.5 truncate text-[11.5px] font-semibold text-muted-foreground/80">{k.sub}</p>
               </div>
             ))}
           </div>
 
-          <div className="grid grid-cols-1 border-b border-border sm:grid-cols-3 sm:divide-x sm:divide-border">
+          <div className="grid grid-cols-1 border-b border-border/70 sm:grid-cols-3 sm:divide-x sm:divide-border/70">
             {riskKpis.map((r) => {
               const Icon = r.icon;
               return (
-                <div key={r.label} className="flex items-center gap-3 px-4 py-3 sm:px-5">
-                  <Icon className={cn("h-4 w-4 shrink-0", r.accent)} strokeWidth={2.4} />
+                <div key={r.label} className="group flex items-center gap-3 px-5 py-3.5 transition-colors duration-200 hover:bg-muted/25">
+                  <div className={cn("flex h-7 w-7 shrink-0 items-center justify-center rounded-md border border-border/60 bg-card/40", r.accent)}>
+                    <Icon className="h-3.5 w-3.5" strokeWidth={2.4} />
+                  </div>
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center justify-between gap-3">
-                      <p className="text-[9px] font-black uppercase tracking-[0.22em] text-muted-foreground">{r.label}</p>
-                      <p className={cn("font-numbers text-[15px] font-black leading-none tabular-nums", r.accent)}>{r.value}</p>
+                      <p className="text-[9px] font-black uppercase tracking-[0.24em] text-muted-foreground/85">{r.label}</p>
+                      <p
+                        className={cn("font-numbers text-[15px] font-black leading-none tabular-nums tracking-[-0.02em]", r.accent)}
+                        style={{ fontVariantNumeric: "tabular-nums slashed-zero" }}
+                      >
+                        {r.value}
+                      </p>
                     </div>
-                    <p className="mt-1 truncate text-[11px] font-medium text-muted-foreground">{r.sub}</p>
+                    <p className="mt-1 truncate text-[11px] font-medium text-muted-foreground/80">{r.sub}</p>
                   </div>
                 </div>
               );
@@ -837,10 +876,10 @@ export default function Vendas() {
               key={opt.label}
               onClick={() => { setSelectedPeriod(opt); setIsCustom(false); setCustomRange(undefined); }}
               className={cn(
-                "shrink-0 border px-2.5 py-1 text-[11px] font-bold transition-colors",
+                "shrink-0 rounded-md border px-2.5 py-1 text-[11px] font-bold tracking-[-0.005em] transition-all",
                 !isCustom && selectedPeriod.label === opt.label
-                  ? "border-foreground bg-foreground text-background"
-                  : "border-border bg-card text-muted-foreground",
+                  ? "border-foreground bg-foreground text-background shadow-[0_1px_2px_hsl(var(--foreground)/0.18)]"
+                  : "border-border/70 bg-card/60 text-muted-foreground",
               )}
             >
               {opt.label}
@@ -850,21 +889,30 @@ export default function Vendas() {
       </div>
 
       {/* ─────────── WORKSPACE ─────────── */}
-      <div className="space-y-5 px-5 pt-5 sm:px-8">
+      <div className="space-y-5 px-5 pt-6 sm:px-8">
 
         {/* Chart and payment mix removed — already shown on Dashboard */}
 
         {/* ─────────── TRANSACTIONS ─────────── */}
-        <section className="overflow-hidden border border-border bg-card">
-          <div className="flex flex-col gap-3 border-b border-border px-4 py-3 sm:flex-row sm:items-center sm:justify-between sm:px-5">
+        <section className="overflow-hidden rounded-lg border border-border/70 bg-card shadow-[0_1px_0_hsl(var(--foreground)/0.02),0_1px_2px_hsl(var(--foreground)/0.03)]">
+          <div className="flex flex-col gap-3 border-b border-border/70 px-5 py-3.5 sm:flex-row sm:items-center sm:justify-between">
             <div>
-              <p className="text-[13px] font-black leading-tight text-foreground">Transações</p>
-              <p className="mt-0.5 text-[11px] font-medium text-muted-foreground">{sortedFiltered.length} {sortedFiltered.length === 1 ? "resultado" : "resultados"} · líquido <span className="font-numbers font-black text-foreground tabular-nums">{hidden ? HIDE : fmt(filteredNetTotal)}</span></p>
+              <p className="text-[13px] font-black leading-tight tracking-[-0.01em] text-foreground">Transações</p>
+              <p className="mt-0.5 text-[11px] font-medium text-muted-foreground/85">
+                {sortedFiltered.length} {sortedFiltered.length === 1 ? "resultado" : "resultados"}
+                <span className="mx-1.5 inline-block h-[3px] w-[3px] -translate-y-[3px] rounded-full bg-muted-foreground/40 align-middle" />
+                líquido <span className="font-numbers font-black tabular-nums text-foreground">{hidden ? HIDE : fmt(filteredNetTotal)}</span>
+              </p>
             </div>
             <div className="relative w-full sm:w-[340px]">
-              <Search className="absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
-              <input id="vendas-search" value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Buscar nome, email, telefone, ID…"
-                className="h-8 w-full border border-border bg-background pl-8 pr-16 text-[12px] font-medium text-foreground transition-colors placeholder:text-muted-foreground focus:border-foreground/40 focus:outline-none" />
+              <Search className="absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground/70" />
+              <input
+                id="vendas-search"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                placeholder="Buscar nome, email, telefone, ID…"
+                className="h-8 w-full rounded-md border border-border/70 bg-background pl-8 pr-16 text-[12px] font-medium text-foreground transition-all duration-200 placeholder:text-muted-foreground/70 hover:border-border focus:border-foreground/50 focus:outline-none focus:ring-2 focus:ring-foreground/10"
+              />
               {search ? (
                 <button onClick={() => setSearch("")} className="absolute right-2.5 top-1/2 -translate-y-1/2"><X className="h-3.5 w-3.5 text-muted-foreground hover:text-foreground" /></button>
               ) : (
@@ -873,21 +921,30 @@ export default function Vendas() {
             </div>
           </div>
 
-          <div className="overflow-x-auto border-b border-border">
+          <div className="overflow-x-auto border-b border-border/70 bg-muted/10">
             <div className="flex min-w-max items-center">
               {statusTabs.map((tab) => {
                 const active = statusFilter === tab.value;
                 return (
-                  <button key={tab.value} onClick={() => setStatusFilter(tab.value)}
-                    className={cn("relative flex items-center gap-1.5 whitespace-nowrap px-4 py-2.5 text-[12px] font-bold transition-colors",
-                      active ? "text-foreground" : "text-muted-foreground hover:text-foreground"
-                    )}>
-                    {tab.dot && <span className={cn("h-1.5 w-1.5 rounded-full", tab.dot)} />}
+                  <button
+                    key={tab.value}
+                    onClick={() => setStatusFilter(tab.value)}
+                    className={cn(
+                      "relative flex items-center gap-1.5 whitespace-nowrap px-4 py-2.5 text-[12px] font-bold tracking-[-0.005em] transition-colors duration-150",
+                      active ? "text-foreground" : "text-muted-foreground hover:text-foreground",
+                    )}
+                  >
+                    {tab.dot && <span className={cn("h-1.5 w-1.5 rounded-full ring-2 ring-background", tab.dot)} />}
                     {tab.label}
-                    <span className={cn("ml-0.5 px-1.5 py-0.5 text-[11px] tabular-nums",
-                      active ? "bg-foreground text-background" : "bg-muted text-muted-foreground"
-                    )}>{tab.count}</span>
-                    {active && <span className="absolute bottom-0 left-3 right-3 h-[2px] bg-foreground" />}
+                    <span
+                      className={cn(
+                        "ml-0.5 rounded-full px-1.5 py-0.5 text-[10.5px] font-black tabular-nums leading-none",
+                        active ? "bg-foreground text-background" : "bg-muted/70 text-muted-foreground",
+                      )}
+                    >
+                      {tab.count}
+                    </span>
+                    {active && <span className="absolute -bottom-px left-3 right-3 h-[2px] rounded-full bg-foreground" />}
                   </button>
                 );
               })}
