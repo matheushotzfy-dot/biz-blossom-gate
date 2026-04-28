@@ -43,7 +43,7 @@ import AdminDashboard from "./pages/admin/AdminDashboard";
 import AdminAuditoria from "./pages/admin/AdminAuditoria";
 import AdminConfiguracoes from "./pages/admin/AdminConfiguracoes";
 import PublicCheckout from "./pages/PublicCheckout";
-import NotFound from "./pages/NotFound";
+// NotFound removido — todas as rotas inválidas redirecionam para /dashboard
 import ManagerLogin from "./pages/manager/ManagerLogin";
 import ManagerDashboard from "./pages/manager/ManagerDashboard";
 import TermosDeUso from "./pages/TermosDeUso";
