@@ -31,7 +31,6 @@ const moreGroups = [
  {
  label: "Financeiro",
  items: [
- { title: "Extrato", url: "/financeiro/extrato", icon: FileText },
  { title: "Config", url: "/financeiro/config", icon: Building2 },
  ],
  },

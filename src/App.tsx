@@ -16,7 +16,7 @@ import AuthCallback from "./pages/AuthCallback";
 import Dashboard from "./pages/Dashboard";
 import PerfilHub from "./pages/PerfilHub";
 import PremiacoesHub from "./pages/PremiacoesHub";
-import Extrato from "./pages/financeiro/Extrato";
+// Extrato removido — consolidado em /vendas
 import SaquesHub from "./pages/financeiro/SaquesHub";
 import ConfigFinanceiro from "./pages/financeiro/ConfigFinanceiro";
 import Vendas from "./pages/vendas/Vendas";
@@ -43,7 +43,7 @@ import AdminDashboard from "./pages/admin/AdminDashboard";
 import AdminAuditoria from "./pages/admin/AdminAuditoria";
 import AdminConfiguracoes from "./pages/admin/AdminConfiguracoes";
 import PublicCheckout from "./pages/PublicCheckout";
-import NotFound from "./pages/NotFound";
+// NotFound removido — todas as rotas inválidas redirecionam para /dashboard
 import ManagerLogin from "./pages/manager/ManagerLogin";
 import ManagerDashboard from "./pages/manager/ManagerDashboard";
 import TermosDeUso from "./pages/TermosDeUso";
@@ -121,7 +121,7 @@ const App = () => (
                 <Route path="/premiacoes" element={<PremiacoesHub />} />
                 <Route path="/gamificacao" element={<Gamificacao />} />
                 <Route path="/suporte" element={<Suporte />} />
-                <Route path="/financeiro/extrato" element={<Extrato />} />
+                <Route path="/financeiro/extrato" element={<Navigate to="/vendas" replace />} />
                 <Route path="/financeiro/saques" element={<SaquesHub />} />
                 <Route path="/financeiro/config" element={<ConfigFinanceiro />} />
                 <Route path="/vendas" element={<Vendas />} />
@@ -140,7 +140,7 @@ const App = () => (
                 <Route path="/membros" element={<MemberArea />} />
                 <Route path="/membros/curso/:courseId" element={<CoursePage />} />
               </Route>
-              <Route path="*" element={<NotFound />} />
+              <Route path="*" element={<Navigate to="/dashboard" replace />} />
             </Routes>
           </BrowserRouter>
         </TooltipProvider>
