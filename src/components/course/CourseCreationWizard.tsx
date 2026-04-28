@@ -3,12 +3,8 @@ import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import {
-  ArrowLeft,
-  ArrowRight,
-  Check,
   ChevronLeft,
   ChevronRight,
-  Eye,
   GripVertical,
   Image as ImageIcon,
   Layers,
@@ -16,7 +12,6 @@ import {
   Plus,
   Rocket,
   Trash2,
-  Upload,
   X,
 } from "lucide-react";
 import { toast } from "sonner";
