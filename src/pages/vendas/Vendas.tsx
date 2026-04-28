@@ -876,10 +876,10 @@ export default function Vendas() {
               key={opt.label}
               onClick={() => { setSelectedPeriod(opt); setIsCustom(false); setCustomRange(undefined); }}
               className={cn(
-                "shrink-0 border px-2.5 py-1 text-[11px] font-bold transition-colors",
+                "shrink-0 rounded-md border px-2.5 py-1 text-[11px] font-bold tracking-[-0.005em] transition-all",
                 !isCustom && selectedPeriod.label === opt.label
-                  ? "border-foreground bg-foreground text-background"
-                  : "border-border bg-card text-muted-foreground",
+                  ? "border-foreground bg-foreground text-background shadow-[0_1px_2px_hsl(var(--foreground)/0.18)]"
+                  : "border-border/70 bg-card/60 text-muted-foreground",
               )}
             >
               {opt.label}
@@ -889,21 +889,30 @@ export default function Vendas() {
       </div>
 
       {/* ─────────── WORKSPACE ─────────── */}
-      <div className="space-y-5 px-5 pt-5 sm:px-8">
+      <div className="space-y-5 px-5 pt-6 sm:px-8">
 
         {/* Chart and payment mix removed — already shown on Dashboard */}
 
         {/* ─────────── TRANSACTIONS ─────────── */}
-        <section className="overflow-hidden border border-border bg-card">
-          <div className="flex flex-col gap-3 border-b border-border px-4 py-3 sm:flex-row sm:items-center sm:justify-between sm:px-5">
+        <section className="overflow-hidden rounded-lg border border-border/70 bg-card shadow-[0_1px_0_hsl(var(--foreground)/0.02),0_1px_2px_hsl(var(--foreground)/0.03)]">
+          <div className="flex flex-col gap-3 border-b border-border/70 px-5 py-3.5 sm:flex-row sm:items-center sm:justify-between">
             <div>
-              <p className="text-[13px] font-black leading-tight text-foreground">Transações</p>
-              <p className="mt-0.5 text-[11px] font-medium text-muted-foreground">{sortedFiltered.length} {sortedFiltered.length === 1 ? "resultado" : "resultados"} · líquido <span className="font-numbers font-black text-foreground tabular-nums">{hidden ? HIDE : fmt(filteredNetTotal)}</span></p>
+              <p className="text-[13px] font-black leading-tight tracking-[-0.01em] text-foreground">Transações</p>
+              <p className="mt-0.5 text-[11px] font-medium text-muted-foreground/85">
+                {sortedFiltered.length} {sortedFiltered.length === 1 ? "resultado" : "resultados"}
+                <span className="mx-1.5 inline-block h-[3px] w-[3px] -translate-y-[3px] rounded-full bg-muted-foreground/40 align-middle" />
+                líquido <span className="font-numbers font-black tabular-nums text-foreground">{hidden ? HIDE : fmt(filteredNetTotal)}</span>
+              </p>
             </div>
             <div className="relative w-full sm:w-[340px]">
-              <Search className="absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
-              <input id="vendas-search" value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Buscar nome, email, telefone, ID…"
-                className="h-8 w-full border border-border bg-background pl-8 pr-16 text-[12px] font-medium text-foreground transition-colors placeholder:text-muted-foreground focus:border-foreground/40 focus:outline-none" />
+              <Search className="absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground/70" />
+              <input
+                id="vendas-search"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                placeholder="Buscar nome, email, telefone, ID…"
+                className="h-8 w-full rounded-md border border-border/70 bg-background pl-8 pr-16 text-[12px] font-medium text-foreground transition-all duration-200 placeholder:text-muted-foreground/70 hover:border-border focus:border-foreground/50 focus:outline-none focus:ring-2 focus:ring-foreground/10"
+              />
               {search ? (
                 <button onClick={() => setSearch("")} className="absolute right-2.5 top-1/2 -translate-y-1/2"><X className="h-3.5 w-3.5 text-muted-foreground hover:text-foreground" /></button>
               ) : (
@@ -912,21 +921,30 @@ export default function Vendas() {
             </div>
           </div>
 
-          <div className="overflow-x-auto border-b border-border">
+          <div className="overflow-x-auto border-b border-border/70 bg-muted/10">
             <div className="flex min-w-max items-center">
               {statusTabs.map((tab) => {
                 const active = statusFilter === tab.value;
                 return (
-                  <button key={tab.value} onClick={() => setStatusFilter(tab.value)}
-                    className={cn("relative flex items-center gap-1.5 whitespace-nowrap px-4 py-2.5 text-[12px] font-bold transition-colors",
-                      active ? "text-foreground" : "text-muted-foreground hover:text-foreground"
-                    )}>
-                    {tab.dot && <span className={cn("h-1.5 w-1.5 rounded-full", tab.dot)} />}
+                  <button
+                    key={tab.value}
+                    onClick={() => setStatusFilter(tab.value)}
+                    className={cn(
+                      "relative flex items-center gap-1.5 whitespace-nowrap px-4 py-2.5 text-[12px] font-bold tracking-[-0.005em] transition-colors duration-150",
+                      active ? "text-foreground" : "text-muted-foreground hover:text-foreground",
+                    )}
+                  >
+                    {tab.dot && <span className={cn("h-1.5 w-1.5 rounded-full ring-2 ring-background", tab.dot)} />}
                     {tab.label}
-                    <span className={cn("ml-0.5 px-1.5 py-0.5 text-[11px] tabular-nums",
-                      active ? "bg-foreground text-background" : "bg-muted text-muted-foreground"
-                    )}>{tab.count}</span>
-                    {active && <span className="absolute bottom-0 left-3 right-3 h-[2px] bg-foreground" />}
+                    <span
+                      className={cn(
+                        "ml-0.5 rounded-full px-1.5 py-0.5 text-[10.5px] font-black tabular-nums leading-none",
+                        active ? "bg-foreground text-background" : "bg-muted/70 text-muted-foreground",
+                      )}
+                    >
+                      {tab.count}
+                    </span>
+                    {active && <span className="absolute -bottom-px left-3 right-3 h-[2px] rounded-full bg-foreground" />}
                   </button>
                 );
               })}
