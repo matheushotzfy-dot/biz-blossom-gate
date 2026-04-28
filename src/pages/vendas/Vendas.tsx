@@ -813,7 +813,7 @@ export default function Vendas() {
 
           <div className="mt-7 grid grid-cols-2 border-y border-border/70 lg:grid-cols-4 lg:divide-x lg:divide-border/70">
             {[
-              { label: "Receita bruta", value: hidden ? HIDE : fmtCompact(m.totalGross), sub: hidden ? "—" : `Taxas ${fmtCompact(m.totalFees)}`, accent: "text-foreground", delta: { cur: m.totalGross, prev: p.totalGross } },
+              { label: "Receita bruta", value: hidden ? HIDE : fmtCompact(m.totalGross), sub: undefined, accent: "text-foreground", delta: { cur: m.totalGross, prev: p.totalGross } },
               heroKpis[1],
               heroKpis[2],
               heroKpis[3],
