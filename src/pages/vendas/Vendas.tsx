@@ -687,8 +687,9 @@ export default function Vendas() {
               </h1>
               <div className="mt-5 flex flex-wrap items-end gap-x-5 gap-y-2">
                 <p
+                  key={`hero-${animKey}`}
                   className={cn(
-                    "font-display text-[58px] font-black leading-[0.84] tracking-[-0.075em] tabular-nums sm:text-[84px]",
+                    "vendas-rise font-display text-[58px] font-black leading-[0.84] tracking-[-0.075em] tabular-nums sm:text-[84px]",
                     hidden ? "text-foreground" : "text-success",
                   )}
                   style={{ fontVariantNumeric: "tabular-nums slashed-zero" }}
