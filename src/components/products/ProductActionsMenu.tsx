@@ -1,4 +1,5 @@
 import {
+  ArrowUpRight,
   CheckCircle2,
   Copy,
   Crosshair,
@@ -16,7 +17,6 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { cn } from "@/lib/utils";
@@ -42,17 +42,9 @@ type ProductActionsMenuProps = ProductMenuHandlers & {
 type ActionItem = {
   icon: LucideIcon;
   label: string;
-  hint?: string;
+  hint: string;
   action: () => void;
-  tone: "primary" | "info" | "success" | "warning" | "neutral";
-};
-
-const TONE_STYLES: Record<ActionItem["tone"], { wrap: string; icon: string }> = {
-  primary: { wrap: "border-primary/25 bg-primary/[0.08]", icon: "text-primary" },
-  info: { wrap: "border-sky-500/25 bg-sky-500/[0.08]", icon: "text-sky-400" },
-  success: { wrap: "border-success/25 bg-success/[0.08]", icon: "text-success" },
-  warning: { wrap: "border-warning/25 bg-warning/[0.08]", icon: "text-warning" },
-  neutral: { wrap: "border-border/60 bg-secondary", icon: "text-foreground/70" },
+  shortcut?: string;
 };
 
 export function ProductActionsMenu({
@@ -68,22 +60,21 @@ export function ProductActionsMenu({
   onOpenPixels,
 }: ProductActionsMenuProps) {
   const items: ActionItem[] = [
-    { icon: Pencil, label: "Editar produto", hint: "Detalhes & oferta", action: () => onEditProduct(product), tone: "primary" },
-    { icon: Palette, label: "Checkout builder", hint: "Layout & temas", action: () => window.location.assign(`/vendas/produtos/${product.id}/checkout-builder`), tone: "info" },
+    { icon: Pencil, label: "Editar produto", hint: "Detalhes, oferta e preço", action: () => onEditProduct(product) },
+    { icon: Palette, label: "Checkout builder", hint: "Layout, cores e temas", action: () => window.location.assign(`/vendas/produtos/${product.id}/checkout-builder`) },
     ...(product.checkout_url
       ? [
           {
             icon: copied ? CheckCircle2 : Copy,
-            label: copied ? "Link copiado!" : "Copiar link",
-            hint: copied ? "Pronto para compartilhar" : "Checkout público",
+            label: copied ? "Link copiado" : "Copiar link do checkout",
+            hint: copied ? "Pronto para compartilhar" : "URL pública do produto",
             action: () => onCopyLink(product),
-            tone: (copied ? "success" : "neutral") as ActionItem["tone"],
           },
-          { icon: ExternalLink, label: "Abrir checkout", hint: "Visualizar como cliente", action: () => onOpenCheckout(product), tone: "neutral" as ActionItem["tone"] },
+          { icon: ExternalLink, label: "Abrir checkout", hint: "Visualizar como cliente", action: () => onOpenCheckout(product) },
         ]
       : []),
-    { icon: Crosshair, label: "Pixels & tracking", hint: "Meta, Google, TikTok…", action: () => onOpenPixels(product), tone: "warning" },
-    { icon: Star, label: "Área de membros", hint: "Conteúdo & alunos", action: () => onOpenMembers(product), tone: "info" },
+    { icon: Crosshair, label: "Pixels & tracking", hint: "Meta, Google, TikTok, Kwai", action: () => onOpenPixels(product) },
+    { icon: Star, label: "Área de membros", hint: "Conteúdo e alunos", action: () => onOpenMembers(product) },
   ];
 
   const labeledTrigger = Boolean(triggerLabel);
@@ -110,70 +101,61 @@ export function ProductActionsMenu({
         side="top"
         sideOffset={10}
         collisionPadding={16}
-        className="w-[288px] overflow-hidden rounded-2xl border border-border bg-card p-0 shadow-none"
+        className="w-[300px] overflow-hidden rounded-2xl border border-border bg-card p-0 shadow-none animate-scale-in"
       >
-        {/* Product header */}
-        <div className="relative overflow-hidden border-b border-border/60 bg-gradient-to-br from-secondary/60 via-card to-card px-4 pb-3.5 pt-4">
-          <div
-            aria-hidden
-            className="pointer-events-none absolute -right-8 -top-8 h-24 w-24 rounded-full opacity-50"
-            style={{
-              background: "radial-gradient(50% 50% at 50% 50%, hsl(var(--primary) / 0.18), transparent 70%)",
-            }}
-          />
-          <div className="flex items-center gap-2.5">
-            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-border/60 bg-card">
-              {product.image_url ? (
-                <img src={product.image_url} alt="" className="h-full w-full rounded-[10px] object-cover" />
-              ) : (
-                <Sparkles className="h-4 w-4 text-primary" strokeWidth={2.25} />
-              )}
-            </div>
-            <div className="min-w-0 flex-1">
-              <p className="truncate font-display text-[13.5px] font-black tracking-tight text-foreground">
-                {product.name || "Produto sem nome"}
-              </p>
-              <p className="mt-0.5 text-[9.5px] font-black uppercase tracking-[0.18em] text-muted-foreground/70">
+        {/* Header */}
+        <div className="flex items-center gap-3 border-b border-border/60 px-4 py-3.5">
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-xl border border-border/60 bg-secondary/60">
+            {product.image_url ? (
+              <img src={product.image_url} alt="" className="h-full w-full object-cover" />
+            ) : (
+              <Sparkles className="h-4 w-4 text-primary" strokeWidth={2.25} />
+            )}
+          </div>
+          <div className="min-w-0 flex-1">
+            <p className="truncate font-display text-[13.5px] font-black tracking-tight text-foreground">
+              {product.name || "Produto sem nome"}
+            </p>
+            <div className="mt-0.5 flex items-center gap-1.5">
+              <span className="h-1 w-1 rounded-full bg-primary" />
+              <p className="text-[9.5px] font-black uppercase tracking-[0.2em] text-muted-foreground/70">
                 Ações rápidas
               </p>
             </div>
           </div>
         </div>
 
-        {/* Action items */}
-        <div className="space-y-0.5 p-1.5">
-          {items.map((item) => {
-            const tone = TONE_STYLES[item.tone];
-            return (
-              <DropdownMenuItem
-                key={item.label}
-                onClick={item.action}
-                className="group/item cursor-pointer gap-3 rounded-xl px-2.5 py-2 transition-all focus:bg-accent/60 data-[highlighted]:bg-accent/60"
-              >
-                <div className={cn("flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border transition-transform group-hover/item:scale-105", tone.wrap)}>
-                  <item.icon className={cn("h-4 w-4", tone.icon)} strokeWidth={2.1} />
-                </div>
-                <div className="min-w-0 flex-1">
-                  <p className="font-display text-[12.5px] font-bold tracking-tight text-foreground">{item.label}</p>
-                  {item.hint && (
-                    <p className="mt-0.5 truncate text-[10.5px] font-medium text-muted-foreground/70">{item.hint}</p>
-                  )}
-                </div>
-              </DropdownMenuItem>
-            );
-          })}
+        {/* Action items — clean list, hover indicator */}
+        <div className="p-1">
+          {items.map((item) => (
+            <DropdownMenuItem
+              key={item.label}
+              onClick={item.action}
+              className="group/item relative cursor-pointer gap-3 rounded-xl px-3 py-2.5 transition-all focus:bg-accent/50 data-[highlighted]:bg-accent/50"
+            >
+              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-border/50 bg-secondary/40 text-foreground/70 transition-all group-hover/item:border-primary/40 group-hover/item:bg-primary/[0.06] group-hover/item:text-primary">
+                <item.icon className="h-3.5 w-3.5" strokeWidth={2} />
+              </div>
+              <div className="min-w-0 flex-1">
+                <p className="font-display text-[12.5px] font-bold tracking-tight text-foreground">{item.label}</p>
+                <p className="mt-0.5 truncate text-[10.5px] font-medium text-muted-foreground/65">{item.hint}</p>
+              </div>
+              <ArrowUpRight
+                className="h-3.5 w-3.5 shrink-0 -translate-x-1 text-muted-foreground/0 transition-all group-hover/item:translate-x-0 group-hover/item:text-primary"
+                strokeWidth={2.25}
+              />
+            </DropdownMenuItem>
+          ))}
         </div>
 
-        <DropdownMenuSeparator className="mx-3 my-0 bg-border/60" />
-
-        {/* Delete action */}
-        <div className="p-1.5">
+        {/* Delete — segregated zone */}
+        <div className="border-t border-border/60 bg-muted/[0.15] p-1">
           <DropdownMenuItem
             onClick={() => onDeleteProduct(product)}
-            className="group/del cursor-pointer gap-3 rounded-xl px-2.5 py-2 transition-all focus:bg-destructive/10 data-[highlighted]:bg-destructive/10"
+            className="group/del cursor-pointer gap-3 rounded-xl px-3 py-2.5 transition-all focus:bg-destructive/10 data-[highlighted]:bg-destructive/10"
           >
-            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-destructive/30 bg-destructive/[0.08] transition-transform group-hover/del:scale-105">
-              <Trash2 className="h-4 w-4 text-destructive" strokeWidth={2.1} />
+            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-destructive/30 bg-destructive/[0.08] text-destructive transition-all group-hover/del:border-destructive/60 group-hover/del:bg-destructive/[0.14]">
+              <Trash2 className="h-3.5 w-3.5" strokeWidth={2} />
             </div>
             <div className="min-w-0 flex-1">
               <p className="font-display text-[12.5px] font-bold tracking-tight text-destructive">Excluir produto</p>
