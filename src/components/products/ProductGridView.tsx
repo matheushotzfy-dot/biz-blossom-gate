@@ -166,9 +166,12 @@ export function ProductGridView({ products, copiedId, toolbar, ...handlers }: Pr
                     "flex items-center gap-2 rounded-xl border px-3 py-2",
                     isInactive ? "border-destructive/30 bg-destructive/[0.06]" : "border-warning/30 bg-warning/[0.06]"
                   )}>
-                    <Info className={cn("h-3.5 w-3.5 shrink-0", isInactive ? "text-destructive" : "text-warning")} />
-                    <p className="text-[11.5px] text-foreground/85">
-                      {isInactive ? "Produto inativado pela equipe." : "Em análise pela equipe."}
+                    <span className={cn("relative flex h-1.5 w-1.5", isInactive ? "text-destructive" : "text-warning")}>
+                      <span className={cn("absolute inline-flex h-full w-full animate-ping rounded-full opacity-60", isInactive ? "bg-destructive" : "bg-warning")} />
+                      <span className={cn("relative inline-flex h-1.5 w-1.5 rounded-full", isInactive ? "bg-destructive" : "bg-warning")} />
+                    </span>
+                    <p className={cn("text-[10.5px] font-black uppercase tracking-[0.12em]", isInactive ? "text-destructive" : "text-warning")}>
+                      {isInactive ? "Inativado pela equipe" : "Em análise pela equipe"}
                     </p>
                   </div>
                 )}
@@ -281,7 +284,7 @@ export function ProductGridView({ products, copiedId, toolbar, ...handlers }: Pr
                       </button>
                     )}
 
-                    <div className="mt-1 flex items-center gap-1.5">
+                    <div className="mt-auto flex items-center gap-1.5 pt-1">
                       <button
                         type="button"
                         onClick={(e) => { e.stopPropagation(); handlers.onEditProduct(product); }}
