@@ -686,13 +686,13 @@ export default function Vendas() {
                 </span>
                 Live sales ledger
               </div>
-              <h1 className="mt-3 font-display text-[40px] font-black leading-[0.92] tracking-[-0.05em] text-foreground sm:text-[56px]">
+              <h1 className="mt-3 font-display text-[48px] font-black leading-[0.88] tracking-[-0.06em] text-foreground sm:text-[68px]">
                 Vendas
               </h1>
-              <div className="mt-4 flex flex-wrap items-end gap-x-5 gap-y-2">
+              <div className="mt-5 flex flex-wrap items-end gap-x-5 gap-y-2">
                 <p
                   className={cn(
-                    "font-numbers text-[52px] font-black leading-[0.86] tracking-[-0.065em] tabular-nums sm:text-[72px]",
+                    "font-display text-[58px] font-black leading-[0.84] tracking-[-0.075em] tabular-nums sm:text-[84px]",
                     hidden ? "text-foreground" : "text-success",
                   )}
                   style={{ fontVariantNumeric: "tabular-nums slashed-zero" }}
