@@ -281,11 +281,11 @@ export function ProductGridView({ products, copiedId, toolbar, ...handlers }: Pr
                       </button>
                     )}
 
-                    <div className="mt-1 grid grid-cols-3 gap-2">
+                    <div className="mt-1 flex items-center gap-1.5">
                       <button
                         type="button"
                         onClick={(e) => { e.stopPropagation(); handlers.onEditProduct(product); }}
-                        className="flex h-11 items-center justify-center gap-1.5 rounded-xl border border-border/40 bg-card shadow-sm text-[11.5px] font-black uppercase tracking-wider text-foreground/80 transition-all hover:border-primary/40 hover:text-primary hover:shadow-md"
+                        className="flex h-10 flex-1 items-center justify-center gap-1.5 rounded-lg border border-border/40 bg-card text-[11px] font-black uppercase tracking-wider text-foreground/80 transition-all hover:border-primary/40 hover:text-primary"
                       >
                         <Pencil className="h-3.5 w-3.5" strokeWidth={2.25} />
                         Editar
@@ -293,7 +293,7 @@ export function ProductGridView({ products, copiedId, toolbar, ...handlers }: Pr
                       <button
                         type="button"
                         onClick={(e) => { e.stopPropagation(); window.location.assign(`/vendas/produtos/${product.id}/checkout-builder`); }}
-                        className="flex h-11 items-center justify-center gap-1.5 rounded-xl border border-border/40 bg-card shadow-sm text-[11.5px] font-black uppercase tracking-wider text-foreground/80 transition-all hover:border-primary/40 hover:text-primary hover:shadow-md"
+                        className="flex h-10 flex-1 items-center justify-center gap-1.5 rounded-lg border border-border/40 bg-card text-[11px] font-black uppercase tracking-wider text-foreground/80 transition-all hover:border-primary/40 hover:text-primary"
                         title="Abrir checkout builder"
                       >
                         <Palette className="h-3.5 w-3.5" strokeWidth={2.25} />
@@ -302,54 +302,30 @@ export function ProductGridView({ products, copiedId, toolbar, ...handlers }: Pr
                       <button
                         type="button"
                         onClick={(e) => { e.stopPropagation(); handlers.onOpenPixels(product); }}
-                        className="flex h-11 items-center justify-center gap-1.5 rounded-xl border border-border/40 bg-card shadow-sm text-[11.5px] font-black uppercase tracking-wider text-foreground/80 transition-all hover:border-primary/40 hover:text-primary hover:shadow-md"
+                        className="flex h-10 flex-1 items-center justify-center gap-1.5 rounded-lg border border-border/40 bg-card text-[11px] font-black uppercase tracking-wider text-foreground/80 transition-all hover:border-primary/40 hover:text-primary"
                         title="Configurar pixels e tracking"
                       >
                         <Crosshair className="h-3.5 w-3.5" strokeWidth={2.25} />
                         Pixels
                       </button>
-                    </div>
-
-                    <div className="flex items-center gap-2">
                       {product.checkout_url && (
                         <button
                           type="button"
                           onClick={(e) => { e.stopPropagation(); handlers.onOpenCheckout(product); }}
-                          className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-border/40 bg-card shadow-sm text-foreground/60 transition-all hover:border-primary/40 hover:text-primary hover:shadow-md"
+                          className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-border/40 bg-card text-foreground/60 transition-all hover:border-primary/40 hover:text-primary"
                           title="Abrir checkout"
                         >
-                          <ExternalLink className="h-4 w-4" strokeWidth={2.25} />
+                          <ExternalLink className="h-3.5 w-3.5" strokeWidth={2.25} />
                         </button>
                       )}
                       <div onClick={(e) => e.stopPropagation()}>
                         <ProductActionsMenu
                           copied={isCopied}
                           product={product}
-                          triggerClassName="h-11 w-11 rounded-xl border border-border/40 bg-card shadow-sm text-foreground/60 hover:border-primary/40 hover:text-primary data-[state=open]:bg-accent transition-all hover:shadow-md"
+                          triggerClassName="h-10 w-10 rounded-lg border border-border/40 bg-card text-foreground/60 hover:border-primary/40 hover:text-primary data-[state=open]:bg-accent transition-all"
                           {...handlers}
                         />
                       </div>
-                    </div>
-
-                    {/* Footer Labels */}
-                    <div className="flex items-center justify-between border-t border-border/10 pt-4 text-[10px] font-black uppercase tracking-[0.1em] text-muted-foreground/40">
-                      <button
-                        type="button"
-                        onClick={(e) => { e.stopPropagation(); handlers.onOpenMembers(product); }}
-                        className="inline-flex items-center gap-2 transition-colors hover:text-primary"
-                      >
-                        <div className="h-5 w-5 rounded-md bg-muted/10 flex items-center justify-center">
-                          <BookOpen className="h-3 w-3" />
-                        </div>
-                        Membros
-                      </button>
-                      <button
-                        type="button"
-                        onClick={(e) => { e.stopPropagation(); handlers.onEditProduct(product); }}
-                        className="inline-flex items-center gap-2 transition-colors hover:text-primary"
-                      >
-                        Construtor <ArrowUpRight className="h-3 w-3" />
-                      </button>
                     </div>
                   </>
                 )}
