@@ -717,31 +717,36 @@ export default function Vendas() {
             </div>
 
             <TooltipProvider delayDuration={250}>
-              <div className="flex w-full flex-wrap items-center gap-1.5 xl:w-auto xl:justify-end">
-                <div className="hidden items-center rounded-md border border-border/70 bg-card/60 p-0.5 shadow-[inset_0_1px_0_hsl(var(--foreground)/0.02)] backdrop-blur-sm md:inline-flex">
-                  {PERIODS.map((opt) => (
-                    <button
-                      key={opt.label}
-                      onClick={() => { setSelectedPeriod(opt); setIsCustom(false); setCustomRange(undefined); }}
-                      className={cn(
-                        "rounded-[5px] px-2.5 py-1 text-[11px] font-bold tracking-[-0.005em] transition-all duration-200",
-                        !isCustom && selectedPeriod.label === opt.label
-                          ? "bg-foreground text-background shadow-[0_1px_2px_hsl(var(--foreground)/0.18)]"
-                          : "text-muted-foreground hover:bg-muted/60 hover:text-foreground",
-                      )}
-                    >
-                      {opt.label}
-                    </button>
-                  ))}
+              <div className="flex w-full flex-wrap items-center gap-1 xl:w-auto xl:justify-end">
+                <div className="hidden items-center rounded-lg border border-border/60 bg-card/70 p-[3px] backdrop-blur-sm md:inline-flex">
+                  {PERIODS.map((opt) => {
+                    const active = !isCustom && selectedPeriod.label === opt.label;
+                    return (
+                      <button
+                        key={opt.label}
+                        onClick={() => { setSelectedPeriod(opt); setIsCustom(false); setCustomRange(undefined); }}
+                        className={cn(
+                          "relative rounded-[6px] px-2.5 py-[5px] text-[11px] font-bold tracking-[-0.005em] transition-all duration-200",
+                          active
+                            ? "bg-foreground text-background"
+                            : "text-muted-foreground/90 hover:text-foreground",
+                        )}
+                      >
+                        {opt.label}
+                      </button>
+                    );
+                  })}
                 </div>
+
+                <span className="hidden h-5 w-px bg-border/60 md:mx-1 md:block" />
 
                 <Tooltip>
                   <Popover open={datePickerOpen} onOpenChange={setDatePickerOpen}>
                     <TooltipTrigger asChild>
                       <PopoverTrigger asChild>
-                        <button className={cn("inline-flex h-8 w-8 items-center justify-center rounded-md border transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-foreground/20",
-                          isCustom ? "border-foreground bg-secondary text-foreground" : "border-border/70 bg-card/60 text-muted-foreground hover:border-border hover:bg-muted/60 hover:text-foreground")}>
-                          <CalendarDays className="h-3.5 w-3.5" />
+                        <button aria-label="Período personalizado" className={cn("inline-flex h-8 w-8 items-center justify-center rounded-md border transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-foreground/20",
+                          isCustom ? "border-foreground/80 bg-secondary text-foreground" : "border-border/60 bg-card/70 text-muted-foreground/90 hover:border-foreground/40 hover:bg-muted/60 hover:text-foreground")}>
+                          <CalendarDays className="h-[15px] w-[15px]" strokeWidth={2.1} />
                         </button>
                       </PopoverTrigger>
                     </TooltipTrigger>
@@ -752,12 +757,10 @@ export default function Vendas() {
                   <TooltipContent side="bottom" className="flex items-center gap-2">Período personalizado</TooltipContent>
                 </Tooltip>
 
-                <span className="hidden h-5 w-px bg-border/70 md:block" />
-
                 <Tooltip>
                   <TooltipTrigger asChild>
-                    <button onClick={() => setCmdOpen(true)} className="inline-flex h-8 items-center gap-1.5 rounded-md border border-border/70 bg-card/60 px-2 text-muted-foreground transition-all duration-200 hover:border-border hover:bg-muted/60 hover:text-foreground focus:outline-none focus-visible:ring-2 focus-visible:ring-foreground/20">
-                      <CommandIcon className="h-3.5 w-3.5" />
+                    <button onClick={() => setCmdOpen(true)} aria-label="Comandos rápidos" className="inline-flex h-8 items-center gap-1.5 rounded-md border border-border/60 bg-card/70 px-2 text-muted-foreground/90 transition-all duration-200 hover:border-foreground/40 hover:bg-muted/60 hover:text-foreground focus:outline-none focus-visible:ring-2 focus-visible:ring-foreground/20">
+                      <CommandIcon className="h-[15px] w-[15px]" strokeWidth={2.1} />
                       <Kbd>⌘K</Kbd>
                     </button>
                   </TooltipTrigger>
@@ -766,9 +769,9 @@ export default function Vendas() {
 
                 <Tooltip>
                   <TooltipTrigger asChild>
-                    <button onClick={toggleDensity} className={cn("inline-flex h-8 w-8 items-center justify-center rounded-md border transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-foreground/20",
-                      density === "compact" ? "border-foreground bg-secondary text-foreground" : "border-border/70 bg-card/60 text-muted-foreground hover:border-border hover:bg-muted/60 hover:text-foreground")}>
-                      {density === "compact" ? <Rows4 className="h-3.5 w-3.5" /> : <Rows3 className="h-3.5 w-3.5" />}
+                    <button onClick={toggleDensity} aria-label="Densidade" className={cn("inline-flex h-8 w-8 items-center justify-center rounded-md border transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-foreground/20",
+                      density === "compact" ? "border-foreground/80 bg-secondary text-foreground" : "border-border/60 bg-card/70 text-muted-foreground/90 hover:border-foreground/40 hover:bg-muted/60 hover:text-foreground")}>
+                      {density === "compact" ? <Rows4 className="h-[15px] w-[15px]" strokeWidth={2.1} /> : <Rows3 className="h-[15px] w-[15px]" strokeWidth={2.1} />}
                     </button>
                   </TooltipTrigger>
                   <TooltipContent side="bottom" className="flex items-center gap-2">Densidade <Kbd>D</Kbd></TooltipContent>
@@ -776,8 +779,8 @@ export default function Vendas() {
 
                 <Tooltip>
                   <TooltipTrigger asChild>
-                    <button onClick={() => window.location.reload()} className="inline-flex h-8 w-8 items-center justify-center rounded-md border border-border/70 bg-card/60 text-muted-foreground transition-all duration-200 hover:border-border hover:bg-muted/60 hover:text-foreground focus:outline-none focus-visible:ring-2 focus-visible:ring-foreground/20">
-                      <RefreshCw className="h-3.5 w-3.5" />
+                    <button onClick={() => window.location.reload()} aria-label="Atualizar" className="group inline-flex h-8 w-8 items-center justify-center rounded-md border border-border/60 bg-card/70 text-muted-foreground/90 transition-all duration-200 hover:border-foreground/40 hover:bg-muted/60 hover:text-foreground focus:outline-none focus-visible:ring-2 focus-visible:ring-foreground/20">
+                      <RefreshCw className="h-[15px] w-[15px] transition-transform duration-500 group-hover:rotate-180" strokeWidth={2.1} />
                     </button>
                   </TooltipTrigger>
                   <TooltipContent side="bottom" className="flex items-center gap-2">Atualizar <Kbd>R</Kbd></TooltipContent>
@@ -785,21 +788,23 @@ export default function Vendas() {
 
                 <Tooltip>
                   <TooltipTrigger asChild>
-                    <button onClick={toggleHidden} className={cn("inline-flex h-8 w-8 items-center justify-center rounded-md border transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-foreground/20",
-                      hidden ? "border-foreground bg-secondary text-foreground" : "border-border/70 bg-card/60 text-muted-foreground hover:border-border hover:bg-muted/60 hover:text-foreground")}>
-                      {hidden ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
+                    <button onClick={toggleHidden} aria-label={hidden ? "Mostrar valores" : "Ocultar valores"} className={cn("inline-flex h-8 w-8 items-center justify-center rounded-md border transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-foreground/20",
+                      hidden ? "border-foreground/80 bg-secondary text-foreground" : "border-border/60 bg-card/70 text-muted-foreground/90 hover:border-foreground/40 hover:bg-muted/60 hover:text-foreground")}>
+                      {hidden ? <EyeOff className="h-[15px] w-[15px]" strokeWidth={2.1} /> : <Eye className="h-[15px] w-[15px]" strokeWidth={2.1} />}
                     </button>
                   </TooltipTrigger>
                   <TooltipContent side="bottom" className="flex items-center gap-2">{hidden ? "Mostrar valores" : "Ocultar valores"} <Kbd>P</Kbd></TooltipContent>
                 </Tooltip>
 
+                <span className="hidden h-5 w-px bg-border/60 md:mx-1 md:block" />
+
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <button
                       onClick={() => setShowExportDialog(true)}
-                      className="inline-flex h-8 items-center gap-1.5 rounded-md bg-foreground px-3 text-[11px] font-black tracking-[-0.005em] text-background shadow-[0_1px_2px_hsl(var(--foreground)/0.25),inset_0_1px_0_hsl(var(--background)/0.18)] transition-all duration-200 hover:bg-foreground/90 hover:shadow-[0_2px_6px_hsl(var(--foreground)/0.28),inset_0_1px_0_hsl(var(--background)/0.18)] focus:outline-none focus-visible:ring-2 focus-visible:ring-foreground/30"
+                      className="inline-flex h-8 items-center gap-1.5 rounded-md bg-foreground px-3.5 text-[11px] font-black tracking-[-0.005em] text-background ring-1 ring-foreground/10 transition-all duration-200 hover:bg-foreground/92 hover:ring-foreground/20 focus:outline-none focus-visible:ring-2 focus-visible:ring-foreground/30"
                     >
-                      <Download className="h-3.5 w-3.5" strokeWidth={2.5} />
+                      <Download className="h-[14px] w-[14px]" strokeWidth={2.6} />
                       Exportar
                     </button>
                   </TooltipTrigger>
