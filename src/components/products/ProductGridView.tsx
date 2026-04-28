@@ -293,7 +293,7 @@ export function ProductGridView({ products, copiedId, toolbar, ...handlers }: Pr
                       </button>
                       <button
                         type="button"
-                        onClick={(e) => { e.stopPropagation(); handlers.onOpenPixels(product); }}
+                        onClick={(e) => { e.stopPropagation(); handlers.onEditProduct(product); }}
                         className="flex h-11 flex-1 items-center justify-center gap-2 rounded-xl border border-border/40 bg-card shadow-sm text-[12px] font-black uppercase tracking-wider text-foreground/80 transition-all hover:border-primary/40 hover:text-primary hover:shadow-md"
                       >
                         <Settings2 className="h-4 w-4" strokeWidth={2.25} />
