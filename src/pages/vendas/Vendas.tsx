@@ -679,14 +679,7 @@ export default function Vendas() {
         <header className="border-b border-border/70 pb-7">
           <div className="flex flex-col gap-5 xl:flex-row xl:items-start xl:justify-between">
             <div className="min-w-0">
-              <div className="inline-flex items-center gap-2 rounded-full border border-success/30 bg-success/10 px-2.5 py-1 text-[9px] font-black uppercase tracking-[0.24em] text-success">
-                <span className="relative flex h-1.5 w-1.5">
-                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-success opacity-70" />
-                  <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-success" />
-                </span>
-                Live sales ledger
-              </div>
-              <h1 className="mt-3 font-display text-[48px] font-black leading-[0.88] tracking-[-0.06em] text-foreground sm:text-[68px]">
+              <h1 className="font-display text-[48px] font-black leading-[0.88] tracking-[-0.06em] text-foreground sm:text-[68px]">
                 Vendas
               </h1>
               <div className="mt-5 flex flex-wrap items-end gap-x-5 gap-y-2">
@@ -906,11 +899,7 @@ export default function Vendas() {
           <div className="relative border-b border-border/70 px-6 pt-6 pb-5">
             <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
               <div className="min-w-0">
-                <div className="inline-flex items-center gap-2 rounded-full border border-success/30 bg-success/10 px-2.5 py-[3px] text-[9px] font-black uppercase tracking-[0.22em] text-success">
-                  <span className="h-1 w-1 rounded-full bg-success" />
-                  Ledger
-                </div>
-                <h2 className="mt-3 font-display text-[32px] font-black leading-[0.9] tracking-[-0.055em] text-foreground sm:text-[40px]">
+                <h2 className="font-display text-[32px] font-black leading-[0.9] tracking-[-0.055em] text-foreground sm:text-[40px]">
                   Transações
                 </h2>
                 <div className="mt-3 flex flex-wrap items-center gap-x-5 gap-y-1.5">
