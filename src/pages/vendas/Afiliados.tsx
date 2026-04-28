@@ -53,7 +53,7 @@ function StatusPill({ status }: { status: string }) {
   );
 }
 
-/* ─── KPI Cell — flat operational ─── */
+/* ─── KPI Cell — Billion-Dollar SaaS ─── */
 function Kpi({ label, value, sub, icon: Icon, tone = "default" }: {
   label: string; value: string; sub?: string; icon: any;
   tone?: "default" | "success" | "warning" | "info" | "primary";
@@ -66,13 +66,13 @@ function Kpi({ label, value, sub, icon: Icon, tone = "default" }: {
     primary: "text-primary",
   }[tone];
   return (
-    <div className="rounded-xl border border-border/60 bg-card p-4">
-      <div className="flex items-center justify-between mb-2">
-        <span className="text-[10px] font-bold uppercase tracking-[0.12em] text-muted-foreground/60">{label}</span>
-        <Icon className="h-3.5 w-3.5 text-muted-foreground/40" />
+    <div className="bg-card px-5 py-4">
+      <div className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-[0.18em] text-muted-foreground/60">
+        <Icon className="h-3 w-3" strokeWidth={2.5} />
+        {label}
       </div>
-      <p className={cn("text-[22px] font-heading font-bold tabular-nums leading-none", toneCls)}>{value}</p>
-      {sub && <p className="text-[10px] text-muted-foreground/50 mt-1.5 tabular-nums">{sub}</p>}
+      <p className={cn("mt-2 font-display text-[22px] font-black leading-none tracking-tight tabular-nums", toneCls)}>{value}</p>
+      {sub && <p className="mt-1.5 text-[11px] font-medium text-muted-foreground/60 tabular-nums">{sub}</p>}
     </div>
   );
 }
@@ -162,26 +162,35 @@ export default function Afiliados() {
   };
 
   return (
-    <div className="mx-auto w-full max-w-[1440px] pb-20 px-1">
-      {/* ─── Header ─── */}
-      <header className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 mb-6 pb-5 border-b border-border/40">
-        <div className="flex items-start gap-3">
-          <div className="h-10 w-10 rounded-xl bg-primary/10 border border-primary/15 flex items-center justify-center shrink-0">
-            <Users className="h-5 w-5 text-primary" />
-          </div>
+    <div className="mx-auto -mt-2 w-full max-w-[1440px] pb-24 md:-mt-3 md:pb-10">
+      {/* ── Hero header ── */}
+      <div className="relative flex flex-col gap-7 px-5 pt-1 sm:px-7 md:pt-1">
+        {/* Subtle radial accent behind title */}
+        <div
+          aria-hidden
+          className="pointer-events-none absolute -top-12 left-0 h-48 w-[520px] -z-[1] opacity-60 blur-3xl"
+          style={{
+            background:
+              "radial-gradient(60% 60% at 20% 50%, hsl(var(--primary) / 0.10), transparent 70%)",
+          }}
+        />
+
+        <div className="flex flex-wrap items-end justify-between gap-4 animate-fade-in">
           <div>
-            <h1 className="text-[22px] font-heading font-bold text-foreground leading-tight">Afiliados</h1>
-            <p className="text-[12px] text-muted-foreground mt-0.5">
-              Gerencie programas, links e comissões em um só painel.
+            <h1 className="font-display text-[40px] font-black leading-[0.9] tracking-[-0.055em] text-foreground sm:text-[52px]">
+              Afiliados
+            </h1>
+            <p className="mt-2 text-[13px] font-medium text-muted-foreground/80">
+              Programas, links e comissões em um único painel operacional.
             </p>
           </div>
-        </div>
-        <div className="flex items-center gap-2">
+
           <Dialog open={openCreate} onOpenChange={setOpenCreate}>
             <DialogTrigger asChild>
-              <Button size="sm" className="gap-1.5 rounded-lg h-9 font-semibold">
-                <Plus className="h-3.5 w-3.5" /> Novo Link
-              </Button>
+              <button className="group inline-flex h-11 items-center gap-2 rounded-xl bg-primary px-5 text-[13px] font-black uppercase tracking-wider text-primary-foreground transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] hover:bg-primary/90 hover:-translate-y-0.5 hover:shadow-[0_10px_30px_-10px_hsl(var(--primary)/0.5)]">
+                <Plus className="h-4 w-4 transition-transform duration-300 group-hover:rotate-90" strokeWidth={2.75} />
+                Novo link
+              </button>
             </DialogTrigger>
             <DialogContent className="max-w-md rounded-2xl p-0 overflow-hidden">
               <div className="px-6 pt-6 pb-4 border-b border-border/30">
@@ -244,70 +253,85 @@ export default function Afiliados() {
             </DialogContent>
           </Dialog>
         </div>
-      </header>
 
-      {/* ─── Global KPIs ─── */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-6">
-        <Kpi
-          label="Comissões Ganhas"
-          value={fmt(totalCommissionEarned)}
-          sub={`${mySales.filter(s => s.status === "approved").length} venda(s) paga(s)`}
-          icon={DollarSign}
-          tone="success"
-        />
-        <Kpi
-          label="A Receber"
-          value={fmt(totalCommissionPending)}
-          sub={`${mySales.filter(s => s.status === "pending").length} pendente(s)`}
-          icon={Clock}
-          tone="warning"
-        />
-        <Kpi
-          label="Cliques · Conversão"
-          value={String(totalClicks)}
-          sub={`${conversionRate.toFixed(2)}% conversão`}
-          icon={MousePointerClick}
-          tone="info"
-        />
-        <Kpi
-          label="Links Ativos"
-          value={String(myLinks.filter(l => l.is_active).length)}
-          sub={`${myLinks.length} total`}
-          icon={Link2}
-          tone="primary"
-        />
+        {/* ─── Global KPIs ─── */}
+        <div className="grid grid-cols-2 gap-px overflow-hidden rounded-xl border border-border/50 bg-border/40 lg:grid-cols-4 animate-fade-in stagger-1">
+          <Kpi
+            label="Comissões Ganhas"
+            value={fmt(totalCommissionEarned)}
+            sub={`${mySales.filter(s => s.status === "approved").length} venda(s) paga(s)`}
+            icon={DollarSign}
+            tone="success"
+          />
+          <Kpi
+            label="A Receber"
+            value={fmt(totalCommissionPending)}
+            sub={`${mySales.filter(s => s.status === "pending").length} pendente(s)`}
+            icon={Clock}
+            tone="warning"
+          />
+          <Kpi
+            label="Cliques · Conversão"
+            value={String(totalClicks)}
+            sub={`${conversionRate.toFixed(2)}% conversão`}
+            icon={MousePointerClick}
+            tone="info"
+          />
+          <Kpi
+            label="Links Ativos"
+            value={String(myLinks.filter(l => l.is_active).length)}
+            sub={`${myLinks.length} total`}
+            icon={Link2}
+            tone="primary"
+          />
+        </div>
+
+        {/* ─── Segment-control Tabs ─── */}
+        <div className="inline-flex w-fit items-center gap-0.5 rounded-xl border border-border/50 bg-card/60 p-1 overflow-x-auto animate-fade-in stagger-2">
+          {TABS.map(t => {
+            const isActive = tab === t.id;
+            const count = t.id === "my-products" ? affiliateProducts.length
+              : t.id === "affiliate-of" ? myLinks.length
+              : marketProducts.length;
+            const accent = t.id === "my-products" ? "text-primary"
+              : t.id === "affiliate-of" ? "text-success"
+              : "text-info";
+            return (
+              <button
+                key={t.id}
+                onClick={() => { setTab(t.id); window.scrollTo({ top: 0, behavior: "instant" }); }}
+                className={cn(
+                  "group/tab relative inline-flex shrink-0 items-center gap-2 rounded-lg h-8 px-3 text-[12px] font-bold tracking-tight transition-colors duration-200",
+                  isActive
+                    ? "bg-secondary text-foreground"
+                    : "text-muted-foreground/80 hover:text-foreground"
+                )}
+              >
+                <span className={cn(
+                  "flex h-4 w-4 items-center justify-center transition-colors",
+                  isActive ? accent : "text-muted-foreground/50 group-hover/tab:text-foreground/70"
+                )}>
+                  <t.icon className="h-3 w-3" strokeWidth={2.5} />
+                </span>
+                <span className="font-display">{t.label}</span>
+                {count > 0 && (
+                  <span className={cn(
+                    "inline-flex h-[18px] min-w-[20px] items-center justify-center rounded-md px-1.5 text-[10px] font-black tabular-nums tracking-tight border transition-colors",
+                    isActive
+                      ? "bg-background/80 text-foreground border-border/40"
+                      : "bg-muted/30 text-muted-foreground/60 border-transparent"
+                  )}>
+                    {count}
+                  </span>
+                )}
+              </button>
+            );
+          })}
+        </div>
       </div>
 
-      {/* ─── Tabs ─── */}
-      <div className="flex items-center gap-0 border-b border-border/40 mb-6">
-        {TABS.map(t => {
-          const isActive = tab === t.id;
-          const count = t.id === "my-products" ? affiliateProducts.length
-            : t.id === "affiliate-of" ? myLinks.length
-            : marketProducts.length;
-          return (
-            <button
-              key={t.id}
-              onClick={() => { setTab(t.id); window.scrollTo({ top: 0, behavior: "instant" }); }}
-              className={cn(
-                "relative flex items-center gap-2 px-4 py-3 text-[12px] font-semibold transition-colors -mb-px border-b-2",
-                isActive
-                  ? "text-foreground border-primary"
-                  : "text-muted-foreground/70 border-transparent hover:text-foreground"
-              )}
-            >
-              <t.icon className="h-3.5 w-3.5" />
-              <span>{t.label}</span>
-              <span className={cn(
-                "text-[10px] font-bold px-1.5 py-0.5 rounded tabular-nums",
-                isActive ? "bg-primary/10 text-primary" : "bg-muted/40 text-muted-foreground"
-              )}>
-                {count}
-              </span>
-            </button>
-          );
-        })}
-      </div>
+      {/* ── Workspace ── */}
+      <div className="px-5 pt-6 sm:px-7">
 
       {/* ═══ MY PRODUCTS TAB ═══ */}
       {tab === "my-products" && (
@@ -612,6 +636,7 @@ export default function Afiliados() {
         <p className="text-[11px] text-muted-foreground leading-snug">
           Comissões creditadas automaticamente após confirmação do pagamento. Split processado no servidor com transparência total.
         </p>
+      </div>
       </div>
     </div>
   );
