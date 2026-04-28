@@ -662,9 +662,9 @@ export default function Vendas() {
   ];
 
   const riskKpis = [
-    { label: "Reembolsos", value: hidden ? HIDE : fmtCompact(refundedAmount), sub: `${m.refunded.length} casos · ${m.refundRate.toFixed(1)}%`, accent: m.refundRate > 5 ? "text-destructive" : "text-muted-foreground", icon: AlertTriangle },
-    { label: "MED", value: hidden ? HIDE : fmt(0), sub: `0 casos · 0,00%`, accent: "text-muted-foreground", icon: ShieldAlert },
-    { label: "Chargebacks", value: hidden ? HIDE : fmtCompact(chargebackAmount), sub: `${m.chargebacks.length} casos · ${m.chargebackRate.toFixed(2)}%`, accent: m.chargebacks.length > 0 ? "text-destructive" : "text-muted-foreground", icon: ShieldAlert },
+    { label: "Reembolsos", value: hidden ? HIDE : fmtCompact(refundedAmount), count: m.refunded.length, rate: m.refundRate, accent: m.refundRate > 5 ? "text-destructive" : "text-foreground", tone: "info" as const, icon: AlertTriangle },
+    { label: "MED", value: hidden ? HIDE : fmt(0), count: 0, rate: 0, accent: "text-foreground", tone: "warning" as const, icon: ShieldAlert },
+    { label: "Chargebacks", value: hidden ? HIDE : fmtCompact(chargebackAmount), count: m.chargebacks.length, rate: m.chargebackRate, accent: m.chargebacks.length > 0 ? "text-destructive" : "text-foreground", tone: "destructive" as const, icon: ShieldAlert },
   ];
 
   /* ═══════════ RENDER ═══════════ */
