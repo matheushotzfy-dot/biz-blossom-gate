@@ -588,7 +588,6 @@ export default function Vendas() {
       { label: "Pendentes", value: "pending" as StatusFilter, count: c.pending, dot: "bg-warning" },
       { label: "Reembolsos", value: "refunded" as StatusFilter, count: c.refunded, dot: "bg-info" },
       { label: "Chargebacks", value: "chargeback" as StatusFilter, count: c.chargeback, dot: "bg-destructive" },
-      { label: "Falhas", value: "failed" as StatusFilter, count: c.failed, dot: "bg-destructive" },
     ];
   }, [dateFiltered]);
 
@@ -626,7 +625,6 @@ export default function Vendas() {
       else if (e.key === "3") setStatusFilter("pending");
       else if (e.key === "4") setStatusFilter("refunded");
       else if (e.key === "5") setStatusFilter("chargeback");
-      else if (e.key === "6") setStatusFilter("failed");
     };
     window.addEventListener("keydown", handler);
     return () => window.removeEventListener("keydown", handler);
