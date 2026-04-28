@@ -5,43 +5,28 @@ import { useAuth } from "@/hooks/useAuth";
 import {
   ArrowLeft,
   ArrowRight,
-  BookOpen,
   Check,
-  CheckCircle2,
-  ChevronDown,
-  Clock,
-  GraduationCap,
+  ChevronLeft,
+  ChevronRight,
+  Eye,
   GripVertical,
   Image as ImageIcon,
   Layers,
   Loader2,
-  Monitor,
-  Package,
-  Palette,
   Plus,
   Rocket,
-  Smartphone,
-  Sparkles,
   Trash2,
-  Trophy,
   Upload,
-  Wand2,
   X,
-  Zap,
 } from "lucide-react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { cn } from "@/lib/utils";
-import {
-  MemberExperiencePreview,
-  type PreviewModule,
-} from "@/components/course/MemberExperiencePreview";
 
 interface Product {
   id: string;
@@ -84,124 +69,96 @@ const COURSE_CATEGORIES = [
   { value: "desenvolvimento-pessoal", label: "Desenvolvimento Pessoal" },
   { value: "produtividade", label: "Produtividade" },
   { value: "idiomas", label: "Idiomas" },
-  { value: "direito", label: "Direito" },
-  { value: "culinaria", label: "Culinária" },
   { value: "fitness", label: "Fitness" },
-  { value: "musica", label: "Música" },
-  { value: "fotografia", label: "Fotografia & Vídeo" },
   { value: "ecommerce", label: "E-commerce" },
   { value: "programacao", label: "Programação" },
   { value: "geral", label: "Outros" },
 ] as const;
 
-// Pre-built course templates — gives a 1-click smart start
-const COURSE_TEMPLATES = [
-  {
-    id: "signature",
-    name: "Curso Signature",
-    description: "Estrutura clássica de transformação completa",
-    icon: GraduationCap,
-    accent: "primary" as const,
-    modules: ["Boas-vindas", "Fundamentos", "Implementação", "Avançado", "Bônus"],
-  },
-  {
-    id: "express",
-    name: "Mini Curso Express",
-    description: "Conteúdo rápido, foco em resultado em 7 dias",
-    icon: Zap,
-    accent: "warning" as const,
-    modules: ["Comece aqui", "O método", "Aplicação prática", "Próximos passos"],
-  },
-  {
-    id: "mentoria",
-    name: "Mentoria / Comunidade",
-    description: "Aulas + encontros + materiais de apoio",
-    icon: Sparkles,
-    accent: "info" as const,
-    modules: ["Onboarding", "Trilha principal", "Lives gravadas", "Materiais extras", "Comunidade"],
-  },
-  {
-    id: "blank",
-    name: "Em branco",
-    description: "Começar do zero, eu monto na mão",
-    icon: Wand2,
-    accent: "muted" as const,
-    modules: [],
-  },
+const STARTER_TEMPLATES = [
+  { name: "Signature", modules: ["Boas-vindas", "Fundamentos", "Implementação", "Avançado", "Bônus"] },
+  { name: "Express", modules: ["Comece aqui", "O método", "Aplicação", "Próximos passos"] },
+  { name: "Mentoria", modules: ["Onboarding", "Trilha principal", "Lives gravadas", "Comunidade"] },
 ] as const;
-
-const STARTER_MODULES = [
-  { title: "Boas-vindas", subtitle: "Primeira impressão e acesso imediato", icon: Sparkles },
-  { title: "Fundamentos", subtitle: "Base para preparar o aluno", icon: BookOpen },
-  { title: "Implementação", subtitle: "Parte prática e aplicação", icon: Rocket },
-  { title: "Bônus", subtitle: "Materiais extras e retenção", icon: Trophy },
-] as const;
-
-// Color presets — gives instant visual identity even before uploading a banner
-const COLOR_PRESETS = [
-  { id: "emerald", name: "Esmeralda", from: "16 185 129", to: "5 150 105" },
-  { id: "violet", name: "Violeta", from: "139 92 246", to: "109 40 217" },
-  { id: "blue", name: "Oceano", from: "59 130 246", to: "29 78 216" },
-  { id: "rose", name: "Rosé", from: "244 63 94", to: "190 18 60" },
-  { id: "amber", name: "Âmbar", from: "245 158 11", to: "180 83 9" },
-  { id: "slate", name: "Grafite", from: "71 85 105", to: "30 41 59" },
-] as const;
-
-
-const STEPS = [
-  { id: "template", label: "Template", icon: Wand2 },
-  { id: "identity", label: "Identidade", icon: GraduationCap },
-  { id: "visual", label: "Capa", icon: ImageIcon },
-  { id: "structure", label: "Estrutura", icon: Layers },
-] as const;
-
-type StepId = typeof STEPS[number]["id"];
 
 const formatCurrency = (value: number) =>
   `R$ ${value.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}`;
 
-function buildModuleLessons(title: string, count = 3) {
-  const clean = title.trim() || "Módulo";
-  return Array.from({ length: Math.max(count, 1) }, (_, i) => ({
-    id: `${clean}-${i}`.toLowerCase().replace(/\s+/g, "-"),
-    title: i === 0 ? `Introdução a ${clean}` : i === 1 ? `${clean} na prática` : `${clean} • Aula ${i + 1}`,
-    video_url: i === 0 ? "configured" : null,
-    duration_minutes: 8 + i * 3,
-    is_free: i === 0,
-    completed: i === 0,
-  }));
+interface ModuleDraft {
+  id: string;
+  title: string;
+  description: string;
+  beats: string[];
 }
 
-function buildPreviewModules(titles: string[], banner: string, seed = "Curso") {
-  const source = titles.length > 0 ? titles : ["Boas-vindas", `${seed} na prática`, "Aprofundamento"];
-  return source.map((title, i): PreviewModule => ({
-    id: `preview-${i}`,
-    title,
-    banner_url: banner || undefined,
-    lessonCount: 3,
-    lessons: buildModuleLessons(title),
-  }));
+function buildModule(title: string): ModuleDraft {
+  const clean = title.trim() || "Novo módulo";
+  return {
+    id: `mod-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+    title: clean,
+    description: "",
+    beats: [`Introdução a ${clean}`, `${clean} na prática`, `${clean} • Aprofundamento`],
+  };
 }
 
-// Build a CSS gradient banner from a preset (used when there's no thumbnail)
-function gradientFromPreset(preset: typeof COLOR_PRESETS[number]) {
-  return `linear-gradient(135deg, rgb(${preset.from}) 0%, rgb(${preset.to}) 100%)`;
-}
-
-function ThumbnailUpload({
-  value,
-  onChange,
-  presetId,
-  onPresetChange,
-}: {
-  value: string;
-  onChange: (v: string) => void;
-  presetId: string;
-  onPresetChange: (id: string) => void;
-}) {
-  const inputRef = useRef<HTMLInputElement>(null);
+export default function CourseCreationWizard({ open, onOpenChange, products, editCourse, onSaved }: WizardProps) {
+  const { user } = useAuth();
+  const navigate = useNavigate();
+  const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
-  const activePreset = COLOR_PRESETS.find((p) => p.id === presetId) ?? COLOR_PRESETS[0];
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const stripRef = useRef<HTMLDivElement>(null);
+  const [activeFrame, setActiveFrame] = useState(0);
+  const [draggedIdx, setDraggedIdx] = useState<number | null>(null);
+
+  const [form, setForm] = useState({
+    title: "",
+    description: "",
+    category: "geral",
+    product_id: "",
+    thumbnail_url: "",
+  });
+  const [modules, setModules] = useState<ModuleDraft[]>([]);
+
+  useEffect(() => {
+    if (!open) return;
+    setActiveFrame(0);
+    setForm({
+      title: editCourse?.title || "",
+      description: editCourse?.description || "",
+      category: editCourse?.category || "geral",
+      product_id: editCourse?.product_id || "",
+      thumbnail_url: editCourse?.thumbnail_url || "",
+    });
+    setModules(
+      editCourse?.modules?.map((m, i) => ({
+        id: m.id ?? `mod-${i}`,
+        title: m.title,
+        description: "",
+        beats: Array.from({ length: m.lessonsCount ?? 3 }, (_, j) =>
+          j === 0 ? `Introdução a ${m.title}` : `${m.title} • Aula ${j + 1}`
+        ),
+      })) ?? []
+    );
+  }, [open, editCourse]);
+
+  const linkedProduct = products.find((p) => p.id === form.product_id) ?? null;
+
+  const totalBeats = useMemo(() => modules.reduce((acc, m) => acc + m.beats.length, 0), [modules]);
+  const totalRuntimeMin = totalBeats * 11;
+  const runtimeHours = Math.floor(totalRuntimeMin / 60);
+  const runtimeMins = totalRuntimeMin % 60;
+
+  // Total frames = cover + modules + add-frame
+  const totalFrames = 1 + modules.length + 1;
+
+  const scrollToFrame = (idx: number) => {
+    const target = stripRef.current?.children[idx] as HTMLElement | undefined;
+    if (target) {
+      target.scrollIntoView({ behavior: "smooth", block: "nearest", inline: "start" });
+      setActiveFrame(idx);
+    }
+  };
 
   const handleFile = async (file: File) => {
     const allowed = ["image/jpeg", "image/png", "image/webp", "image/gif"];
@@ -213,7 +170,6 @@ function ThumbnailUpload({
       toast.error("Máximo 5MB.");
       return;
     }
-
     setUploading(true);
     try {
       const ext = file.name.split(".").pop();
@@ -221,7 +177,7 @@ function ThumbnailUpload({
       const { error } = await supabase.storage.from("product-images").upload(path, file);
       if (error) throw error;
       const { data } = supabase.storage.from("product-images").getPublicUrl(path);
-      onChange(data.publicUrl);
+      setForm((c) => ({ ...c, thumbnail_url: data.publicUrl }));
       toast.success("Capa aplicada");
     } catch {
       toast.error("Erro no upload.");
@@ -230,191 +186,48 @@ function ThumbnailUpload({
     }
   };
 
-  return (
-    <div className="space-y-4">
-      {/* Visual stage */}
-      <div
-        onClick={() => !value && inputRef.current?.click()}
-        onDragOver={(e) => e.preventDefault()}
-        onDrop={(e) => {
-          e.preventDefault();
-          const f = e.dataTransfer.files[0];
-          if (f) handleFile(f);
-        }}
-        className={cn(
-          "group relative overflow-hidden rounded-2xl border border-border transition-all duration-200",
-          value ? "aspect-video" : "flex aspect-video flex-col items-center justify-center cursor-pointer hover:border-primary/40"
-        )}
-        style={!value ? { background: gradientFromPreset(activePreset) } : undefined}
-      >
-        {value ? (
-          <>
-            <img src={value} alt="Capa do curso" className="h-full w-full object-cover" />
-            <div className="absolute inset-0 bg-gradient-to-t from-background/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-            <div className="absolute right-3 top-3 flex items-center gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity">
-              <button
-                type="button"
-                onClick={(e) => { e.stopPropagation(); inputRef.current?.click(); }}
-                className="flex h-9 items-center gap-1.5 rounded-lg border border-border bg-card px-3 text-[11px] font-bold text-foreground hover:border-primary/40"
-              >
-                <Upload className="h-3 w-3" /> Trocar
-              </button>
-              <button
-                type="button"
-                onClick={(e) => { e.stopPropagation(); onChange(""); }}
-                className="flex h-9 w-9 items-center justify-center rounded-lg border border-border bg-card text-destructive hover:border-destructive/40"
-              >
-                <X className="h-3.5 w-3.5" />
-              </button>
-            </div>
-          </>
-        ) : (
-          <>
-            {/* Decorative pattern */}
-            <div className="absolute inset-0 opacity-30" style={{
-              backgroundImage: "radial-gradient(circle at 20% 30%, rgba(255,255,255,0.25), transparent 40%), radial-gradient(circle at 80% 70%, rgba(255,255,255,0.18), transparent 45%)"
-            }} />
-            <div className="relative flex h-14 w-14 items-center justify-center rounded-2xl border border-white/30 bg-white/15 text-white backdrop-blur-sm">
-              {uploading ? <Loader2 className="h-5 w-5 animate-spin" /> : <Upload className="h-5 w-5" />}
-            </div>
-            <p className="relative mt-3 text-base font-bold text-white drop-shadow">Arraste sua capa aqui</p>
-            <p className="relative mt-1 text-xs text-white/80">ou clique para escolher · PNG, JPG, WEBP · 16:9</p>
-            <div className="relative mt-4 flex items-center gap-1.5 rounded-full bg-white/15 backdrop-blur-sm px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-white border border-white/20">
-              <Palette className="h-3 w-3" /> Usando paleta {activePreset.name}
-            </div>
-          </>
-        )}
-      </div>
-
-      {/* Color preset row */}
-      <div className="space-y-2">
-        <div className="flex items-center justify-between">
-          <Label className="text-[10px] font-bold uppercase tracking-[0.16em] text-muted-foreground flex items-center gap-1.5">
-            <Palette className="h-3 w-3" /> Paleta de fundo {!value && <span className="text-primary">(ativa no preview)</span>}
-          </Label>
-        </div>
-        <div className="grid grid-cols-6 gap-2">
-          {COLOR_PRESETS.map((p) => (
-            <button
-              key={p.id}
-              type="button"
-              onClick={() => onPresetChange(p.id)}
-              className={cn(
-                "group/swatch relative aspect-square rounded-xl border-2 transition-all overflow-hidden",
-                presetId === p.id ? "border-foreground scale-105" : "border-border hover:border-foreground/40"
-              )}
-              style={{ background: gradientFromPreset(p) }}
-              title={p.name}
-            >
-              {presetId === p.id && (
-                <div className="absolute inset-0 flex items-center justify-center bg-black/20">
-                  <Check className="h-4 w-4 text-white drop-shadow" strokeWidth={3} />
-                </div>
-              )}
-            </button>
-          ))}
-        </div>
-      </div>
-
-      <input
-        ref={inputRef}
-        type="file"
-        accept="image/jpeg,image/png,image/webp,image/gif"
-        className="hidden"
-        onChange={(e) => {
-          const f = e.target.files?.[0];
-          if (f) handleFile(f);
-        }}
-      />
-    </div>
-  );
-}
-
-export default function CourseCreationWizard({ open, onOpenChange, products, editCourse, onSaved }: WizardProps) {
-  const { user } = useAuth();
-  const navigate = useNavigate();
-  const [saving, setSaving] = useState(false);
-  const [viewMode, setViewMode] = useState<"desktop" | "mobile">("desktop");
-  const [newModuleName, setNewModuleName] = useState("");
-  const [wizardModules, setWizardModules] = useState<string[]>([]);
-  const [colorPreset, setColorPreset] = useState<string>("emerald");
-  const [activeStep, setActiveStep] = useState<StepId>(editCourse ? "identity" : "template");
-  const [selectedTemplate, setSelectedTemplate] = useState<string | null>(null);
-  const [draggedIdx, setDraggedIdx] = useState<number | null>(null);
-  const [previewCollapsed, setPreviewCollapsed] = useState(false);
-  const [form, setForm] = useState({
-    title: "",
-    description: "",
-    category: "geral",
-    product_id: "",
-    thumbnail_url: "",
-  });
-
-  useEffect(() => {
-    if (!open) return;
-    setViewMode("desktop");
-    setNewModuleName("");
-    setColorPreset("emerald");
-    setSelectedTemplate(null);
-    setActiveStep(editCourse ? "identity" : "template");
-    setForm({
-      title: editCourse?.title || "",
-      description: editCourse?.description || "",
-      category: editCourse?.category || "geral",
-      product_id: editCourse?.product_id || "",
-      thumbnail_url: editCourse?.thumbnail_url || "",
-    });
-    setWizardModules(editCourse?.modules?.map((m) => m.title) ?? []);
-  }, [open, editCourse]);
-
-  const linkedProduct = products.find((p) => p.id === form.product_id) ?? null;
-  const activePreset = COLOR_PRESETS.find((p) => p.id === colorPreset) ?? COLOR_PRESETS[0];
-
-  const previewModules = useMemo(() => {
-    if (editCourse?.modules?.length) {
-      return editCourse.modules.map((m, i): PreviewModule => ({
-        id: m.id ?? `mod-${i}`,
-        title: m.title,
-        banner_url: m.banner_url ?? form.thumbnail_url,
-        lessonCount: m.lessonsCount ?? 3,
-        lessons: buildModuleLessons(m.title, Math.max(m.lessonsCount ?? 3, 1)),
-      }));
-    }
-    return buildPreviewModules(wizardModules, form.thumbnail_url, form.title || "Curso");
-  }, [editCourse?.modules, form.thumbnail_url, form.title, wizardModules]);
-
-  // Live stats — evolves as user fills the wizard
-  const stats = useMemo(() => {
-    const moduleCount = editCourse?.modules?.length ?? wizardModules.length;
-    const totalLessons = previewModules.reduce((acc, m) => acc + (m.lessons?.length ?? 0), 0);
-    const totalMinutes = previewModules.reduce(
-      (acc, m) => acc + (m.lessons?.reduce((a, l) => a + (l.duration_minutes ?? 0), 0) ?? 0),
-      0
-    );
-    return {
-      modules: moduleCount,
-      lessons: totalLessons,
-      hours: Math.floor(totalMinutes / 60),
-      minutes: totalMinutes % 60,
-    };
-  }, [previewModules, wizardModules, editCourse?.modules]);
-
   const addModule = (title: string) => {
     const clean = title.trim();
     if (!clean) return;
-    setWizardModules((cur) => {
-      if (cur.some((m) => m.toLowerCase() === clean.toLowerCase())) {
-        toast.info("Esse módulo já existe");
-        return cur;
-      }
-      return [...cur, clean];
+    if (modules.some((m) => m.title.toLowerCase() === clean.toLowerCase())) {
+      toast.info("Esse módulo já existe");
+      return;
+    }
+    setModules((cur) => {
+      const next = [...cur, buildModule(clean)];
+      // Auto-scroll to new frame after render
+      setTimeout(() => scrollToFrame(next.length), 100);
+      return next;
     });
-    setNewModuleName("");
+  };
+
+  const updateModule = (id: string, patch: Partial<ModuleDraft>) => {
+    setModules((cur) => cur.map((m) => (m.id === id ? { ...m, ...patch } : m)));
+  };
+
+  const removeModule = (id: string) => {
+    setModules((cur) => cur.filter((m) => m.id !== id));
+  };
+
+  const addBeat = (moduleId: string) => {
+    setModules((cur) => cur.map((m) => (m.id === moduleId ? { ...m, beats: [...m.beats, "Nova aula"] } : m)));
+  };
+
+  const updateBeat = (moduleId: string, idx: number, value: string) => {
+    setModules((cur) => cur.map((m) =>
+      m.id === moduleId ? { ...m, beats: m.beats.map((b, i) => (i === idx ? value : b)) } : m
+    ));
+  };
+
+  const removeBeat = (moduleId: string, idx: number) => {
+    setModules((cur) => cur.map((m) =>
+      m.id === moduleId ? { ...m, beats: m.beats.filter((_, i) => i !== idx) } : m
+    ));
   };
 
   const moveModule = (from: number, to: number) => {
     if (from === to) return;
-    setWizardModules((cur) => {
+    setModules((cur) => {
       const next = [...cur];
       const [item] = next.splice(from, 1);
       next.splice(to, 0, item);
@@ -422,20 +235,16 @@ export default function CourseCreationWizard({ open, onOpenChange, products, edi
     });
   };
 
-  const applyTemplate = (template: typeof COURSE_TEMPLATES[number]) => {
-    setSelectedTemplate(template.id);
-    setWizardModules([...template.modules]);
-    if (template.modules.length > 0) {
-      toast.success(`Template "${template.name}" aplicado · ${template.modules.length} módulos`);
-    }
-    // Auto-advance to next step
-    setTimeout(() => setActiveStep("identity"), 300);
+  const applyTemplate = (tpl: typeof STARTER_TEMPLATES[number]) => {
+    setModules(tpl.modules.map((title) => buildModule(title)));
+    toast.success(`Template "${tpl.name}" aplicado · ${tpl.modules.length} módulos`);
+    setTimeout(() => scrollToFrame(1), 200);
   };
 
   const saveCourse = async () => {
     if (!user || !form.title.trim()) {
       toast.error("Adicione um nome para o curso");
-      setActiveStep("identity");
+      scrollToFrame(0);
       return;
     }
     setSaving(true);
@@ -467,14 +276,14 @@ export default function CourseCreationWizard({ open, onOpenChange, products, edi
       const { data, error } = await supabase.from("courses").insert(payload).select().single();
       if (error || !data) throw error ?? new Error("Falha ao criar.");
 
-      if (wizardModules.length > 0) {
+      if (modules.length > 0) {
         const { error: modErr } = await supabase.from("modules").insert(
-          wizardModules.map((title, i) => ({ course_id: data.id, title, sort_order: i }))
+          modules.map((m, i) => ({ course_id: data.id, title: m.title, sort_order: i }))
         );
         if (modErr) throw modErr;
       }
 
-      toast.success("🎉 Curso criado com sucesso!");
+      toast.success("🎬 Curso publicado em sequência!");
       onOpenChange(false);
       onSaved();
       navigate(`/vendas/conteudo/${data.id}/builder`);
@@ -485,604 +294,524 @@ export default function CourseCreationWizard({ open, onOpenChange, products, edi
     }
   };
 
-  const previewTitle = form.title.trim() || "Sua área premium";
-
-  // Per-step completion checks for inline validation chips
-  const checks = useMemo(() => ({
-    template: selectedTemplate !== null || (editCourse?.modules?.length ?? 0) > 0,
-    identity: Boolean(form.title.trim()),
-    visual: Boolean(form.thumbnail_url) || colorPreset !== "emerald",
-    structure: (editCourse?.modules?.length ?? wizardModules.length) > 0,
-  }), [selectedTemplate, form.title, form.thumbnail_url, colorPreset, wizardModules, editCourse?.modules]);
-
-  const completion = useMemo(() => {
-    const items = [
-      Boolean(form.title.trim()),
-      Boolean(form.description.trim()),
-      Boolean(form.thumbnail_url) || colorPreset !== "emerald",
-      Boolean(form.product_id),
-      (editCourse?.modules?.length ?? wizardModules.length) > 0,
-    ];
-    const done = items.filter(Boolean).length;
-    return { done, total: items.length, pct: Math.round((done / items.length) * 100) };
-  }, [form, wizardModules, editCourse?.modules, colorPreset]);
-
-  const visibleSteps = editCourse ? STEPS.filter((s) => s.id !== "template") : STEPS;
-  const stepIndex = visibleSteps.findIndex((s) => s.id === activeStep);
-  const isLastStep = stepIndex === visibleSteps.length - 1;
-  const isFirstStep = stepIndex === 0;
-
-  const goNext = () => {
-    if (isLastStep) {
-      saveCourse();
-      return;
-    }
-    setActiveStep(visibleSteps[stepIndex + 1].id);
-  };
-
-  const goPrev = () => {
-    if (isFirstStep) return;
-    setActiveStep(visibleSteps[stepIndex - 1].id);
+  const navigateFrame = (dir: "prev" | "next") => {
+    const next = dir === "next" ? Math.min(activeFrame + 1, totalFrames - 1) : Math.max(activeFrame - 1, 0);
+    scrollToFrame(next);
   };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="flex h-[94vh] max-h-[94vh] max-w-[1440px] flex-col gap-0 overflow-hidden rounded-[1.5rem] border border-border bg-card p-0">
-        {/* Header */}
-        <div className="flex items-center justify-between gap-4 border-b border-border bg-card px-6 py-4">
-          <div className="flex min-w-0 items-center gap-3">
-            <div
-              className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl text-white"
-              style={{ background: gradientFromPreset(activePreset) }}
-            >
-              <GraduationCap className="h-5 w-5" />
-            </div>
-            <div className="min-w-0">
-              <div className="flex items-center gap-2">
-                <h2 className="text-base font-bold tracking-tight text-foreground">
-                  {editCourse ? "Editar área de membros" : "Criar nova área de membros"}
-                </h2>
-                {completion.pct === 100 && (
-                  <span className="hidden sm:flex items-center gap-1 rounded-full border border-success/30 bg-success/10 px-2 py-0.5 text-[10px] font-bold text-success animate-fade-in">
-                    <CheckCircle2 className="h-3 w-3" /> Pronto pra publicar
-                  </span>
-                )}
+      <DialogContent className="flex h-[100dvh] max-h-[100dvh] w-[100vw] max-w-[100vw] flex-col gap-0 overflow-hidden border-0 bg-background p-0 rounded-none">
+        {/* DIRECTOR'S BRIEF — Header */}
+        <header className="shrink-0 border-b border-border bg-background px-6 lg:px-12 pt-6 pb-5">
+          <div className="mx-auto max-w-[1600px] flex items-end justify-between gap-6">
+            <div className="min-w-0 flex-1 space-y-2.5">
+              <div className="flex items-center gap-3">
+                <span className="px-2 py-1 text-[10px] font-bold tracking-widest uppercase border border-primary text-primary">
+                  {editCourse ? "Em edição" : "Production phase"}
+                </span>
+                <span className="text-muted-foreground text-xs tabular-nums hidden sm:inline">
+                  ID · {editCourse?.id?.slice(0, 8) ?? "NEW-DRAFT"}
+                </span>
+                <button
+                  type="button"
+                  onClick={() => onOpenChange(false)}
+                  className="ml-auto lg:hidden flex h-8 w-8 items-center justify-center rounded-md border border-border text-muted-foreground"
+                >
+                  <X className="h-4 w-4" />
+                </button>
               </div>
-              <p className="mt-0.5 text-[11px] text-muted-foreground truncate">
-                {previewTitle} · {stats.modules} módulos · {stats.lessons} aulas
+              <input
+                type="text"
+                value={form.title}
+                onChange={(e) => setForm((c) => ({ ...c, title: e.target.value.slice(0, 80) }))}
+                placeholder="Untitled Course"
+                className="block w-full bg-transparent text-3xl lg:text-5xl font-bold text-foreground tracking-tight focus:outline-none placeholder:text-border"
+              />
+              <div className="flex flex-wrap items-center gap-x-8 gap-y-2 text-sm pt-1">
+                <div className="flex flex-col">
+                  <span className="text-muted-foreground uppercase text-[10px] tracking-widest font-bold mb-0.5">Categoria</span>
+                  <Select value={form.category} onValueChange={(v) => setForm((c) => ({ ...c, category: v }))}>
+                    <SelectTrigger className="bg-transparent border-none p-0 h-auto text-foreground font-semibold focus:ring-0 hover:text-primary transition-colors w-auto gap-2">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {COURSE_CATEGORIES.map((c) => (
+                        <SelectItem key={c.value} value={c.value}>{c.label}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="flex flex-col">
+                  <span className="text-muted-foreground uppercase text-[10px] tracking-widest font-bold mb-0.5">Produto vinculado</span>
+                  <Select value={form.product_id || "none"} onValueChange={(v) => setForm((c) => ({ ...c, product_id: v === "none" ? "" : v }))}>
+                    <SelectTrigger className="bg-transparent border-none p-0 h-auto text-primary font-semibold focus:ring-0 hover:opacity-80 w-auto gap-2">
+                      <SelectValue placeholder="Sem vínculo" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="none">Sem vínculo</SelectItem>
+                      {products.map((p) => (
+                        <SelectItem key={p.id} value={p.id}>{p.name} — {formatCurrency(p.price)}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="hidden md:flex flex-col">
+                  <span className="text-muted-foreground uppercase text-[10px] tracking-widest font-bold mb-0.5">Runtime estimado</span>
+                  <span className="text-foreground font-semibold tabular-nums">
+                    {runtimeHours}h {runtimeMins.toString().padStart(2, "0")}m · {totalBeats} beats
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            <div className="hidden lg:flex flex-col items-end gap-3 shrink-0">
+              <Button
+                onClick={saveCourse}
+                disabled={saving || !form.title.trim()}
+                className="px-7 h-11 rounded-none bg-primary text-primary-foreground font-bold text-xs tracking-[0.2em] uppercase hover:bg-primary/90"
+              >
+                {saving ? <Loader2 className="h-3.5 w-3.5 mr-2 animate-spin" /> : <Rocket className="h-3.5 w-3.5 mr-2" />}
+                {editCourse ? "Salvar alterações" : "Publicar sequência"}
+              </Button>
+              <p className="max-w-xs text-right text-[11px] text-muted-foreground leading-relaxed">
+                {form.description || "Adicione uma promessa no Frame Cover pra dar contexto à sequência."}
               </p>
             </div>
           </div>
+        </header>
 
-          <div className="flex items-center gap-3">
-            {/* Compact circular progress */}
-            <div className="hidden md:flex items-center gap-2.5 rounded-xl border border-border bg-background px-3 py-1.5">
-              <div className="relative h-8 w-8">
-                <svg className="h-8 w-8 -rotate-90" viewBox="0 0 32 32">
-                  <circle cx="16" cy="16" r="13" fill="none" stroke="hsl(var(--muted))" strokeWidth="3" />
-                  <circle
-                    cx="16" cy="16" r="13" fill="none"
-                    stroke="hsl(var(--primary))" strokeWidth="3" strokeLinecap="round"
-                    strokeDasharray={`${(completion.pct / 100) * 81.68} 81.68`}
-                    className="transition-all duration-500"
-                  />
-                </svg>
-                <span className="absolute inset-0 flex items-center justify-center text-[9px] font-bold text-foreground tabular-nums">
-                  {completion.pct}
-                </span>
-              </div>
-              <div className="leading-tight">
-                <p className="text-[9px] font-bold uppercase tracking-wider text-muted-foreground">Setup</p>
-                <p className="text-[11px] font-bold text-foreground tabular-nums">{completion.done}/{completion.total}</p>
-              </div>
-            </div>
+        {/* STORYBOARD STRIP — Horizontal scrolling frames */}
+        <div className="relative flex-1 min-h-0 bg-card-inset overflow-hidden">
+          {/* Frame nav arrows */}
+          <button
+            type="button"
+            onClick={() => navigateFrame("prev")}
+            disabled={activeFrame === 0}
+            className="hidden lg:flex absolute left-4 top-1/2 -translate-y-1/2 z-20 h-12 w-12 items-center justify-center border border-border bg-background text-foreground hover:border-primary disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+          >
+            <ChevronLeft className="h-5 w-5" />
+          </button>
+          <button
+            type="button"
+            onClick={() => navigateFrame("next")}
+            disabled={activeFrame >= totalFrames - 1}
+            className="hidden lg:flex absolute right-4 top-1/2 -translate-y-1/2 z-20 h-12 w-12 items-center justify-center border border-border bg-background text-foreground hover:border-primary disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+          >
+            <ChevronRight className="h-5 w-5" />
+          </button>
 
-            <button
-              type="button"
-              onClick={() => onOpenChange(false)}
-              className="flex h-9 w-9 items-center justify-center rounded-lg border border-border bg-background text-muted-foreground hover:border-foreground/30 hover:text-foreground transition-colors"
-            >
-              <X className="h-4 w-4" />
-            </button>
-          </div>
-        </div>
-
-        {/* Step tabs */}
-        <div className="flex items-center gap-1 border-b border-border bg-card px-6 py-2 overflow-x-auto">
-          {visibleSteps.map((step, i) => {
-            const Icon = step.icon;
-            const isActive = step.id === activeStep;
-            const isComplete = checks[step.id as keyof typeof checks];
-            return (
-              <button
-                key={step.id}
-                type="button"
-                onClick={() => setActiveStep(step.id)}
-                className={cn(
-                  "flex items-center gap-2 rounded-lg px-3 py-2 text-xs font-bold transition-all whitespace-nowrap",
-                  isActive
-                    ? "bg-primary/10 text-primary"
-                    : "text-muted-foreground hover:bg-muted hover:text-foreground"
-                )}
+          <div
+            ref={stripRef}
+            className="flex h-full gap-6 overflow-x-auto overflow-y-hidden px-6 lg:px-16 py-8 snap-x snap-mandatory scroll-smooth"
+            style={{ scrollbarWidth: "thin" }}
+          >
+            {/* === FRAME 00: COVER ART === */}
+            <FrameWrapper index={0} label="Frame 00 · Cover Art" subLabel="Identidade visual" width="w-[340px] lg:w-[420px]" isActive={activeFrame === 0}>
+              <div
+                className="aspect-[4/5] bg-card border border-border overflow-hidden relative group cursor-pointer"
+                onClick={() => fileInputRef.current?.click()}
+                onDragOver={(e) => e.preventDefault()}
+                onDrop={(e) => {
+                  e.preventDefault();
+                  const f = e.dataTransfer.files[0];
+                  if (f) handleFile(f);
+                }}
               >
-                <span className={cn(
-                  "flex h-5 w-5 items-center justify-center rounded-md text-[10px]",
-                  isActive ? "bg-primary text-primary-foreground" : isComplete ? "bg-success/15 text-success" : "bg-muted text-muted-foreground"
-                )}>
-                  {isComplete && !isActive ? <Check className="h-3 w-3" strokeWidth={3} /> : i + 1}
-                </span>
-                <Icon className="h-3.5 w-3.5" />
-                <span>{step.label}</span>
-              </button>
-            );
-          })}
-        </div>
-
-        {/* Body — left form, right preview */}
-        <div className={cn(
-          "grid min-h-0 flex-1",
-          previewCollapsed ? "lg:grid-cols-1" : "lg:grid-cols-[480px_minmax(0,1fr)]"
-        )}>
-          {/* LEFT: Step content */}
-          <div className="flex min-h-0 flex-col border-r border-border bg-background">
-            <div className="min-h-0 flex-1 overflow-y-auto px-6 py-6">
-
-              {/* STEP: Template */}
-              {activeStep === "template" && (
-                <div className="space-y-5 animate-fade-in">
-                  <div>
-                    <h3 className="text-sm font-bold text-foreground">Comece com um template</h3>
-                    <p className="mt-1 text-xs text-muted-foreground">Estruturas testadas em centenas de cursos. Você customiza tudo depois.</p>
+                {form.thumbnail_url ? (
+                  <>
+                    <img src={form.thumbnail_url} alt="Cover" className="w-full h-full object-cover" />
+                    <div className="absolute inset-0 flex flex-col justify-end p-6 bg-gradient-to-t from-background/95 via-background/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity">
+                      <button
+                        type="button"
+                        onClick={(e) => { e.stopPropagation(); fileInputRef.current?.click(); }}
+                        className="w-full py-3 border border-border bg-card text-xs font-bold tracking-widest uppercase hover:bg-primary hover:text-primary-foreground hover:border-primary transition-all"
+                      >
+                        Trocar visual
+                      </button>
+                      <button
+                        type="button"
+                        onClick={(e) => { e.stopPropagation(); setForm((c) => ({ ...c, thumbnail_url: "" })); }}
+                        className="w-full mt-2 py-2 text-[10px] font-bold tracking-widest uppercase text-destructive hover:bg-destructive/10 transition-colors"
+                      >
+                        Remover capa
+                      </button>
+                    </div>
+                  </>
+                ) : (
+                  <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 p-8 text-center">
+                    <div className="h-14 w-14 border border-border flex items-center justify-center">
+                      {uploading ? <Loader2 className="h-5 w-5 animate-spin text-primary" /> : <ImageIcon className="h-5 w-5 text-muted-foreground" />}
+                    </div>
+                    <p className="text-sm font-bold text-foreground">Compose your cover</p>
+                    <p className="text-[11px] text-muted-foreground leading-relaxed">
+                      Clique ou arraste uma imagem<br/>16:9 ou 4:5 · até 5MB
+                    </p>
+                    <div className="mt-3 px-3 py-1 border border-border text-[10px] font-bold tracking-widest uppercase text-muted-foreground">
+                      Drop here
+                    </div>
                   </div>
-                  <div className="space-y-2.5">
-                    {COURSE_TEMPLATES.map((tpl) => {
-                      const Icon = tpl.icon;
-                      const isSelected = selectedTemplate === tpl.id;
-                      return (
-                        <button
-                          key={tpl.id}
-                          type="button"
-                          onClick={() => applyTemplate(tpl)}
-                          className={cn(
-                            "group w-full rounded-xl border p-4 text-left transition-all duration-200",
-                            isSelected
-                              ? "border-primary bg-primary/5"
-                              : "border-border bg-card hover:border-primary/40 hover:bg-card-inset"
-                          )}
-                        >
-                          <div className="flex items-start gap-3">
-                            <div className={cn(
-                              "flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border transition-all",
-                              isSelected
-                                ? "border-primary/30 bg-primary text-primary-foreground"
-                                : "border-border bg-background text-foreground group-hover:border-primary/30"
-                            )}>
-                              <Icon className="h-4.5 w-4.5" />
-                            </div>
-                            <div className="min-w-0 flex-1">
-                              <div className="flex items-center justify-between gap-2">
-                                <p className="text-sm font-bold text-foreground">{tpl.name}</p>
-                                {isSelected && <CheckCircle2 className="h-4 w-4 text-primary shrink-0" />}
-                              </div>
-                              <p className="mt-0.5 text-[11px] text-muted-foreground">{tpl.description}</p>
-                              {tpl.modules.length > 0 && (
-                                <div className="mt-2.5 flex flex-wrap gap-1">
-                                  {tpl.modules.map((m) => (
-                                    <span key={m} className="rounded-md bg-muted px-2 py-0.5 text-[10px] font-semibold text-muted-foreground">
-                                      {m}
-                                    </span>
-                                  ))}
-                                </div>
-                              )}
-                            </div>
-                          </div>
-                        </button>
-                      );
-                    })}
-                  </div>
+                )}
+              </div>
+
+              {/* Promise / Description below cover */}
+              <div className="mt-6 space-y-2">
+                <label className="text-[10px] font-bold tracking-[0.2em] text-muted-foreground uppercase italic">Promessa do curso</label>
+                <Textarea
+                  value={form.description}
+                  onChange={(e) => setForm((c) => ({ ...c, description: e.target.value.slice(0, 280) }))}
+                  placeholder="Em uma frase, o que o aluno vai conquistar?"
+                  className="min-h-[100px] rounded-none border-border bg-card text-sm font-medium resize-none focus-visible:border-primary"
+                />
+                <div className="flex items-center justify-between text-[10px] text-muted-foreground">
+                  <span>Aparece no header da área de membros</span>
+                  <span className="tabular-nums">{form.description.length}/280</span>
                 </div>
-              )}
+              </div>
 
-              {/* STEP: Identity */}
-              {activeStep === "identity" && (
-                <div className="space-y-5 animate-fade-in">
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/jpeg,image/png,image/webp,image/gif"
+                className="hidden"
+                onChange={(e) => {
+                  const f = e.target.files?.[0];
+                  if (f) handleFile(f);
+                }}
+              />
+            </FrameWrapper>
+
+            {/* === Empty state — show templates if no modules === */}
+            {modules.length === 0 && !editCourse && (
+              <FrameWrapper index={1} label="Frame 01 · Comece com um template" subLabel="Ou crie do zero" width="w-[340px] lg:w-[480px]" isActive={activeFrame === 1}>
+                <div className="border border-border bg-card p-6 space-y-4">
                   <div>
-                    <h3 className="text-sm font-bold text-foreground">Identidade do curso</h3>
-                    <p className="mt-1 text-xs text-muted-foreground">Como o aluno vai reconhecer e desejar a sua área.</p>
+                    <h3 className="text-sm font-bold text-foreground">Comece em 1 clique</h3>
+                    <p className="mt-1 text-xs text-muted-foreground">Estruturas validadas. Você customiza tudo depois.</p>
                   </div>
-
-                  <div className="space-y-4">
-                    <div className="space-y-2">
-                      <Label className="flex items-center justify-between text-[11px] font-bold uppercase tracking-[0.16em] text-foreground">
-                        <span>Nome do curso *</span>
-                        <span className="text-[10px] font-medium normal-case tracking-normal text-muted-foreground tabular-nums">
-                          {form.title.length}/60
-                        </span>
-                      </Label>
-                      <Input
-                        value={form.title}
-                        onChange={(e) => setForm((c) => ({ ...c, title: e.target.value.slice(0, 60) }))}
-                        placeholder="Ex: Escala de Vendas com Conteúdo"
-                        className="h-12 rounded-xl border-border bg-background text-base font-bold focus-visible:border-primary"
-                        autoFocus
-                      />
-                    </div>
-
-                    <div className="grid grid-cols-2 gap-3">
-                      <div className="space-y-2">
-                        <Label className="text-[11px] font-bold uppercase tracking-[0.14em] text-muted-foreground">Categoria</Label>
-                        <Select value={form.category} onValueChange={(v) => setForm((c) => ({ ...c, category: v }))}>
-                          <SelectTrigger className="h-11 rounded-xl border-border bg-background text-sm font-semibold">
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent className="max-h-[300px]">
-                            {COURSE_CATEGORIES.map((cat) => (
-                              <SelectItem key={cat.value} value={cat.value}>{cat.label}</SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </div>
-
-                      <div className="space-y-2">
-                        <Label className="text-[11px] font-bold uppercase tracking-[0.14em] text-muted-foreground flex items-center gap-1.5">
-                          <Package className="h-3 w-3" /> Produto
-                        </Label>
-                        <Select value={form.product_id || "none"} onValueChange={(v) => setForm((c) => ({ ...c, product_id: v === "none" ? "" : v }))}>
-                          <SelectTrigger className="h-11 rounded-xl border-border bg-background text-sm font-semibold">
-                            <SelectValue placeholder="Nenhum" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="none">Sem vínculo</SelectItem>
-                            {products.map((p) => (
-                              <SelectItem key={p.id} value={p.id}>
-                                {p.name} — {formatCurrency(p.price)}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </div>
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label className="flex items-center justify-between text-[11px] font-bold uppercase tracking-[0.14em] text-muted-foreground">
-                        <span>Promessa / descrição</span>
-                        <span className="text-[10px] font-medium normal-case tracking-normal tabular-nums">
-                          {form.description.length}/280
-                        </span>
-                      </Label>
-                      <Textarea
-                        value={form.description}
-                        onChange={(e) => setForm((c) => ({ ...c, description: e.target.value.slice(0, 280) }))}
-                        placeholder="Em uma frase, o que o aluno vai conquistar com esse curso?"
-                        className="min-h-[110px] rounded-xl border-border bg-background text-sm font-medium resize-none"
-                      />
-                      {/* Quick suggestions */}
-                      <div className="flex flex-wrap gap-1.5 pt-1">
-                        {[
-                          "Domine do zero ao avançado",
-                          "Resultados em 30 dias",
-                          "Método validado por +1000 alunos",
-                        ].map((sug) => (
-                          <button
-                            key={sug}
-                            type="button"
-                            onClick={() => setForm((c) => ({ ...c, description: sug }))}
-                            className="rounded-md border border-border bg-card px-2 py-1 text-[10px] font-semibold text-muted-foreground hover:border-primary/40 hover:text-foreground transition-colors"
-                          >
-                            + {sug}
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              {/* STEP: Visual */}
-              {activeStep === "visual" && (
-                <div className="space-y-5 animate-fade-in">
-                  <div>
-                    <h3 className="text-sm font-bold text-foreground">Capa & paleta</h3>
-                    <p className="mt-1 text-xs text-muted-foreground">A primeira coisa que o aluno vê. Quanto mais marca, maior a percepção de valor.</p>
-                  </div>
-                  <ThumbnailUpload
-                    value={form.thumbnail_url}
-                    onChange={(v) => setForm((c) => ({ ...c, thumbnail_url: v }))}
-                    presetId={colorPreset}
-                    onPresetChange={setColorPreset}
-                  />
-                </div>
-              )}
-
-              {/* STEP: Structure */}
-              {activeStep === "structure" && (
-                <div className="space-y-5 animate-fade-in">
-                  <div className="flex items-start justify-between gap-3">
-                    <div>
-                      <h3 className="text-sm font-bold text-foreground">Estrutura de módulos</h3>
-                      <p className="mt-1 text-xs text-muted-foreground">A trilha que o aluno vai percorrer. Arraste pra reordenar.</p>
-                    </div>
-                    {wizardModules.length > 0 && (
-                      <span className="rounded-md border border-primary/30 bg-primary/10 px-2 py-1 text-[10px] font-bold text-primary tabular-nums">
-                        {wizardModules.length} módulos
-                      </span>
-                    )}
-                  </div>
-
-                  {editCourse ? (
-                    <div className="space-y-2">
-                      {(editCourse.modules ?? []).length > 0 ? (
-                        (editCourse.modules ?? []).map((m, i) => (
-                          <div key={`${m.title}-${i}`} className="flex items-center gap-3 rounded-xl border border-border bg-card px-3.5 py-3">
-                            <span className="flex h-8 w-8 items-center justify-center rounded-lg border border-primary/20 bg-primary/10 text-xs font-bold text-primary tabular-nums">
-                              {String(i + 1).padStart(2, "0")}
-                            </span>
-                            <div className="min-w-0 flex-1">
-                              <p className="truncate text-sm font-bold text-foreground">{m.title}</p>
-                              <p className="mt-0.5 text-[11px] text-muted-foreground">{m.lessonsCount ?? 0} aulas</p>
-                            </div>
-                          </div>
-                        ))
-                      ) : (
-                        <div className="rounded-xl border border-dashed border-border bg-card-inset px-4 py-6 text-center">
-                          <Layers className="mx-auto h-6 w-6 text-muted-foreground/60" />
-                          <p className="mt-2 text-xs font-semibold text-muted-foreground">Nenhum módulo ainda</p>
-                          <p className="mt-1 text-[10px] text-muted-foreground">Crie no studio após salvar.</p>
+                  <div className="space-y-2">
+                    {STARTER_TEMPLATES.map((tpl) => (
+                      <button
+                        key={tpl.name}
+                        type="button"
+                        onClick={() => applyTemplate(tpl)}
+                        className="w-full p-4 border border-border bg-background hover:border-primary hover:bg-primary/5 transition-all text-left group"
+                      >
+                        <div className="flex items-center justify-between mb-2">
+                          <p className="text-sm font-bold text-foreground">{tpl.name}</p>
+                          <span className="text-[10px] font-bold tracking-widest text-muted-foreground group-hover:text-primary uppercase">
+                            {tpl.modules.length} frames →
+                          </span>
                         </div>
-                      )}
-                    </div>
-                  ) : (
-                    <>
-                      {/* Quick add input */}
-                      <div className="flex gap-2">
-                        <Input
-                          value={newModuleName}
-                          onChange={(e) => setNewModuleName(e.target.value)}
-                          onKeyDown={(e) => { if (e.key === "Enter") addModule(newModuleName); }}
-                          placeholder="Digite o nome do módulo..."
-                          className="h-11 flex-1 rounded-xl border-border bg-background text-sm font-semibold"
-                        />
-                        <Button
-                          onClick={() => addModule(newModuleName)}
-                          disabled={!newModuleName.trim()}
-                          className="h-11 rounded-xl px-4 font-bold"
-                        >
-                          <Plus className="h-4 w-4 mr-1" /> Add
-                        </Button>
-                      </div>
-
-                      {/* Quick suggestions */}
-                      <div>
-                        <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-muted-foreground mb-2">Sugestões rápidas</p>
-                        <div className="grid grid-cols-2 gap-2">
-                          {STARTER_MODULES.map((item) => {
-                            const Icon = item.icon;
-                            const already = wizardModules.some((m) => m.toLowerCase() === item.title.toLowerCase());
-                            return (
-                              <button
-                                key={item.title}
-                                type="button"
-                                disabled={already}
-                                onClick={() => addModule(item.title)}
-                                className={cn(
-                                  "group flex items-center gap-2.5 rounded-xl border px-3 py-2.5 text-left transition-all",
-                                  already
-                                    ? "border-success/30 bg-success/5 cursor-not-allowed opacity-60"
-                                    : "border-border bg-card hover:border-primary/40 hover:bg-card-inset"
-                                )}
-                              >
-                                <div className={cn(
-                                  "flex h-7 w-7 shrink-0 items-center justify-center rounded-lg",
-                                  already ? "bg-success/15 text-success" : "bg-primary/10 text-primary"
-                                )}>
-                                  {already ? <Check className="h-3.5 w-3.5" strokeWidth={3} /> : <Icon className="h-3.5 w-3.5" />}
-                                </div>
-                                <div className="min-w-0">
-                                  <p className="text-xs font-bold text-foreground truncate">{item.title}</p>
-                                </div>
-                              </button>
-                            );
-                          })}
-                        </div>
-                      </div>
-
-                      {/* Active modules — draggable */}
-                      {wizardModules.length > 0 && (
-                        <div className="space-y-1.5">
-                          <div className="flex items-center justify-between">
-                            <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-muted-foreground">Sua trilha</p>
-                            <button
-                              type="button"
-                              onClick={() => setWizardModules([])}
-                              className="text-[10px] font-semibold text-muted-foreground hover:text-destructive transition-colors"
-                            >
-                              Limpar tudo
-                            </button>
-                          </div>
-                          {wizardModules.map((m, i) => (
-                            <div
-                              key={m}
-                              draggable
-                              onDragStart={() => setDraggedIdx(i)}
-                              onDragOver={(e) => e.preventDefault()}
-                              onDrop={(e) => {
-                                e.preventDefault();
-                                if (draggedIdx !== null) moveModule(draggedIdx, i);
-                                setDraggedIdx(null);
-                              }}
-                              onDragEnd={() => setDraggedIdx(null)}
-                              className={cn(
-                                "group flex items-center gap-2.5 rounded-xl border px-3 py-2.5 transition-all cursor-move",
-                                draggedIdx === i
-                                  ? "border-primary bg-primary/10 opacity-50"
-                                  : "border-border bg-card hover:border-primary/30"
-                              )}
-                            >
-                              <GripVertical className="h-4 w-4 text-muted-foreground/40 group-hover:text-muted-foreground transition-colors" />
-                              <span className="flex h-7 w-7 items-center justify-center rounded-lg border border-primary/20 bg-primary/10 text-[10px] font-bold text-primary tabular-nums">
-                                {String(i + 1).padStart(2, "0")}
-                              </span>
-                              <span className="flex-1 truncate text-sm font-bold text-foreground">{m}</span>
-                              <span className="text-[10px] font-semibold text-muted-foreground tabular-nums">3 aulas</span>
-                              <button
-                                type="button"
-                                onClick={() => setWizardModules((cur) => cur.filter((x) => x !== m))}
-                                className="flex h-7 w-7 items-center justify-center rounded-lg text-muted-foreground hover:bg-destructive/10 hover:text-destructive transition-colors"
-                              >
-                                <Trash2 className="h-3.5 w-3.5" />
-                              </button>
-                            </div>
+                        <div className="flex flex-wrap gap-1">
+                          {tpl.modules.map((m) => (
+                            <span key={m} className="bg-muted px-1.5 py-0.5 text-[10px] font-semibold text-muted-foreground">{m}</span>
                           ))}
                         </div>
-                      )}
-
-                      {wizardModules.length === 0 && (
-                        <div className="rounded-xl border border-dashed border-border bg-card-inset px-4 py-8 text-center">
-                          <Layers className="mx-auto h-7 w-7 text-muted-foreground/40" />
-                          <p className="mt-2 text-xs font-bold text-foreground">Nenhum módulo adicionado</p>
-                          <p className="mt-1 text-[11px] text-muted-foreground">Use as sugestões ou digite o seu acima.</p>
-                        </div>
-                      )}
-                    </>
-                  )}
-                </div>
-              )}
-            </div>
-
-            {/* Footer with step navigation */}
-            <div className="border-t border-border bg-card px-6 py-3">
-              <div className="flex items-center justify-between gap-3">
-                <Button
-                  variant="outline"
-                  onClick={goPrev}
-                  disabled={isFirstStep}
-                  className="h-10 rounded-xl px-3 font-semibold"
-                >
-                  <ArrowLeft className="h-3.5 w-3.5 mr-1.5" /> Voltar
-                </Button>
-
-                <div className="flex items-center gap-1">
-                  {visibleSteps.map((s) => (
-                    <span
-                      key={s.id}
-                      className={cn(
-                        "h-1.5 rounded-full transition-all",
-                        s.id === activeStep ? "w-6 bg-primary" : checks[s.id as keyof typeof checks] ? "w-1.5 bg-success" : "w-1.5 bg-border"
-                      )}
-                    />
-                  ))}
-                </div>
-
-                <Button
-                  onClick={goNext}
-                  disabled={saving || (isLastStep && !form.title.trim())}
-                  className="h-10 rounded-xl px-4 font-bold"
-                  style={isLastStep ? { background: gradientFromPreset(activePreset) } : undefined}
-                >
-                  {saving ? <Loader2 className="h-3.5 w-3.5 mr-1.5 animate-spin" /> : isLastStep ? <Rocket className="h-3.5 w-3.5 mr-1.5" /> : null}
-                  {isLastStep ? (editCourse ? "Salvar alterações" : "Criar curso") : "Próximo"}
-                  {!isLastStep && <ArrowRight className="h-3.5 w-3.5 ml-1.5" />}
-                </Button>
-              </div>
-            </div>
-          </div>
-
-          {/* RIGHT: Preview */}
-          {!previewCollapsed && (
-            <div className="hidden lg:flex min-h-0 flex-col bg-card-inset">
-              {/* Toolbar */}
-              <div className="sticky top-0 z-10 flex items-center justify-between gap-3 border-b border-border bg-card-inset/95 backdrop-blur-md px-6 py-3">
-                <div className="flex min-w-0 items-center gap-2.5">
-                  <span className="flex items-center gap-1.5 rounded-md border border-success/30 bg-success/10 px-2 py-1 text-[10px] font-bold uppercase tracking-wider text-success">
-                    <span className="h-1.5 w-1.5 rounded-full bg-success animate-pulse" />
-                    Live
-                  </span>
-                  {/* Live stats */}
-                  <div className="hidden xl:flex items-center gap-2 text-[11px] text-muted-foreground">
-                    <span className="flex items-center gap-1 rounded-md bg-card px-2 py-1 border border-border">
-                      <Layers className="h-3 w-3" />
-                      <span className="font-bold tabular-nums text-foreground">{stats.modules}</span> módulos
-                    </span>
-                    <span className="flex items-center gap-1 rounded-md bg-card px-2 py-1 border border-border">
-                      <BookOpen className="h-3 w-3" />
-                      <span className="font-bold tabular-nums text-foreground">{stats.lessons}</span> aulas
-                    </span>
-                    <span className="flex items-center gap-1 rounded-md bg-card px-2 py-1 border border-border">
-                      <Clock className="h-3 w-3" />
-                      <span className="font-bold tabular-nums text-foreground">{stats.hours}h{stats.minutes > 0 && `${stats.minutes}m`}</span>
-                    </span>
-                  </div>
-                </div>
-
-                <div className="flex items-center gap-1.5">
-                  <div className="flex items-center gap-0.5 rounded-lg border border-border bg-card p-0.5">
-                    {([
-                      { id: "desktop" as const, icon: Monitor },
-                      { id: "mobile" as const, icon: Smartphone },
-                    ]).map((item) => (
-                      <button
-                        key={item.id}
-                        type="button"
-                        onClick={() => setViewMode(item.id)}
-                        className={cn(
-                          "flex h-7 w-7 items-center justify-center rounded-md text-xs transition-all",
-                          viewMode === item.id ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground"
-                        )}
-                      >
-                        <item.icon className="h-3.5 w-3.5" />
                       </button>
                     ))}
                   </div>
-                  <button
-                    type="button"
-                    onClick={() => setPreviewCollapsed(true)}
-                    className="flex h-8 w-8 items-center justify-center rounded-lg border border-border bg-card text-muted-foreground hover:text-foreground transition-colors"
-                    title="Esconder preview"
-                  >
-                    <ChevronDown className="h-3.5 w-3.5 -rotate-90" />
-                  </button>
-                </div>
-              </div>
 
-              {/* Preview canvas */}
-              <div className="flex-1 overflow-y-auto px-8 py-6">
-                <div
-                  className="relative overflow-hidden rounded-2xl border border-border bg-background p-5 sm:p-6"
-                  style={{
-                    backgroundImage: `radial-gradient(circle at 30% 0%, rgb(${activePreset.from} / 0.08), transparent 55%), radial-gradient(circle at 80% 100%, rgb(${activePreset.to} / 0.06), transparent 60%)`,
-                  }}
-                >
-                  <MemberExperiencePreview
-                    className="mx-auto"
-                    course={{
-                      title: previewTitle,
-                      description: form.description,
-                      category: form.category,
-                      thumbnail_url: form.thumbnail_url || `data:image/svg+xml;utf8,${encodeURIComponent(`<svg xmlns='http://www.w3.org/2000/svg' width='800' height='450'><defs><linearGradient id='g' x1='0' y1='0' x2='1' y2='1'><stop offset='0%' stop-color='rgb(${activePreset.from})'/><stop offset='100%' stop-color='rgb(${activePreset.to})'/></linearGradient></defs><rect width='800' height='450' fill='url(%23g)'/></svg>`)}`,
-                      productName: linkedProduct?.name,
-                      is_published: false,
-                    }}
-                    modules={previewModules}
-                    viewMode={viewMode}
-                  />
+                  <div className="pt-4 border-t border-border">
+                    <button
+                      type="button"
+                      onClick={() => addModule("Módulo 1")}
+                      className="w-full py-3 border border-dashed border-border text-[11px] font-bold tracking-widest uppercase text-muted-foreground hover:text-primary hover:border-primary transition-all"
+                    >
+                      + Compor do zero
+                    </button>
+                  </div>
                 </div>
+              </FrameWrapper>
+            )}
+
+            {/* === MODULE FRAMES === */}
+            {modules.map((mod, i) => {
+              const frameIdx = i + 1;
+              return (
+                <FrameWrapper
+                  key={mod.id}
+                  index={frameIdx}
+                  label={`Frame ${String(i + 1).padStart(2, "0")} · ${mod.title || "Sem título"}`}
+                  subLabel={`${mod.beats.length} beats`}
+                  width="w-[340px] lg:w-[580px]"
+                  isActive={activeFrame === frameIdx}
+                  draggable
+                  onDragStart={() => setDraggedIdx(i)}
+                  onDragOver={(e) => e.preventDefault()}
+                  onDrop={(e) => {
+                    e.preventDefault();
+                    if (draggedIdx !== null) moveModule(draggedIdx, i);
+                    setDraggedIdx(null);
+                  }}
+                  onDragEnd={() => setDraggedIdx(null)}
+                  isDragging={draggedIdx === i}
+                >
+                  <div className="border border-border bg-card p-5 lg:p-7 min-h-[480px] flex flex-col">
+                    <div className="mb-6 space-y-3">
+                      <div className="flex items-center gap-2">
+                        <GripVertical className="h-4 w-4 text-muted-foreground/40 cursor-move" />
+                        <input
+                          type="text"
+                          value={mod.title}
+                          onChange={(e) => updateModule(mod.id, { title: e.target.value })}
+                          placeholder="Nome do módulo"
+                          className="flex-1 text-xl lg:text-2xl font-bold text-foreground bg-transparent border-none p-0 focus:outline-none placeholder:text-border"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => {
+                            removeModule(mod.id);
+                            scrollToFrame(Math.max(0, frameIdx - 1));
+                          }}
+                          className="h-8 w-8 flex items-center justify-center text-muted-foreground hover:text-destructive transition-colors"
+                          title="Remover módulo"
+                        >
+                          <Trash2 className="h-3.5 w-3.5" />
+                        </button>
+                      </div>
+                      <textarea
+                        value={mod.description}
+                        onChange={(e) => updateModule(mod.id, { description: e.target.value })}
+                        placeholder="Descreva o objetivo temático deste módulo..."
+                        className="w-full bg-transparent border-none p-0 text-muted-foreground text-sm leading-relaxed resize-none h-16 focus:outline-none"
+                      />
+                    </div>
+
+                    <div className="space-y-2 flex-1">
+                      <div className="flex items-center justify-between mb-1">
+                        <label className="text-[10px] font-bold tracking-[0.2em] text-muted-foreground uppercase italic">Beats da sequência</label>
+                        <span className="text-[10px] font-bold text-muted-foreground tabular-nums">{mod.beats.length} aulas</span>
+                      </div>
+                      {mod.beats.map((beat, idx) => (
+                        <div
+                          key={idx}
+                          className="group flex items-center gap-3 p-3 border border-border bg-background hover:border-primary/40 transition-colors"
+                        >
+                          <span className="text-[10px] font-bold text-muted-foreground tabular-nums shrink-0">
+                            {String(i + 1)}.{idx + 1}
+                          </span>
+                          <input
+                            type="text"
+                            value={beat}
+                            onChange={(e) => updateBeat(mod.id, idx, e.target.value)}
+                            className="flex-1 bg-transparent border-none p-0 text-sm font-medium text-foreground focus:outline-none"
+                          />
+                          <span className="text-[10px] text-muted-foreground font-mono shrink-0 hidden sm:inline">VIDEO / 11:00</span>
+                          <button
+                            type="button"
+                            onClick={() => removeBeat(mod.id, idx)}
+                            className="opacity-0 group-hover:opacity-100 h-6 w-6 flex items-center justify-center text-muted-foreground hover:text-destructive transition-all"
+                          >
+                            <X className="h-3 w-3" />
+                          </button>
+                        </div>
+                      ))}
+                      <button
+                        type="button"
+                        onClick={() => addBeat(mod.id)}
+                        className="w-full py-2.5 border border-dashed border-border text-muted-foreground text-[10px] font-bold tracking-widest uppercase hover:text-primary hover:border-primary transition-all"
+                      >
+                        + Insert New Beat
+                      </button>
+                    </div>
+                  </div>
+                </FrameWrapper>
+              );
+            })}
+
+            {/* === ADD FRAME === */}
+            {(modules.length > 0 || editCourse) && (
+              <FrameWrapper
+                index={modules.length + 1}
+                label="Frame final"
+                subLabel="Adicionar módulo"
+                width="w-[280px] lg:w-[360px]"
+                isActive={activeFrame === modules.length + 1}
+              >
+                <AddFrameInline onAdd={addModule} />
+              </FrameWrapper>
+            )}
+          </div>
+        </div>
+
+        {/* CONSOLE FOOTER — Floating bottom bar */}
+        <footer className="shrink-0 border-t border-border bg-background">
+          <div className="mx-auto max-w-[1600px] px-6 lg:px-12 py-3 flex items-center justify-between gap-4">
+            {/* Frame indicator */}
+            <div className="flex items-center gap-3">
+              <div className="flex items-center gap-1.5">
+                <div className="size-2 bg-success rounded-full animate-pulse" />
+                <span className="text-[10px] font-bold tracking-widest uppercase text-muted-foreground hidden sm:inline">Auto-save</span>
+              </div>
+              <div className="h-4 w-px bg-border hidden sm:block" />
+              <div className="flex items-center gap-1.5">
+                {Array.from({ length: totalFrames }).map((_, i) => (
+                  <button
+                    key={i}
+                    type="button"
+                    onClick={() => scrollToFrame(i)}
+                    className={cn(
+                      "h-1.5 transition-all",
+                      i === activeFrame ? "w-6 bg-primary" : "w-1.5 bg-border hover:bg-muted-foreground/40"
+                    )}
+                  />
+                ))}
               </div>
             </div>
-          )}
 
-          {previewCollapsed && (
-            <div className="hidden lg:flex absolute right-4 top-24 z-20">
+            {/* Center stats */}
+            <div className="hidden md:flex items-center gap-6 text-[10px] font-bold tracking-widest uppercase text-muted-foreground">
+              <span>
+                <span className="text-foreground tabular-nums">{modules.length}</span> Frames
+              </span>
+              <span>
+                <span className="text-foreground tabular-nums">{totalBeats}</span> Beats
+              </span>
+              <span>
+                <span className="text-foreground tabular-nums">{runtimeHours}h{runtimeMins.toString().padStart(2, "0")}</span> Runtime
+              </span>
+              {linkedProduct && (
+                <span className="hidden xl:inline">
+                  Linked → <span className="text-primary normal-case tracking-normal">{linkedProduct.name}</span>
+                </span>
+              )}
+            </div>
+
+            {/* Right actions */}
+            <div className="flex items-center gap-2">
               <button
                 type="button"
-                onClick={() => setPreviewCollapsed(false)}
-                className="flex items-center gap-1.5 rounded-lg border border-border bg-card px-3 py-2 text-xs font-bold text-foreground hover:border-primary/40 transition-colors shadow-sm"
+                onClick={() => onOpenChange(false)}
+                className="hidden lg:flex h-9 px-3 items-center text-[11px] font-bold tracking-widest uppercase text-muted-foreground hover:text-foreground transition-colors"
               >
-                <Monitor className="h-3.5 w-3.5" /> Mostrar preview
+                Discard
               </button>
+              <Button
+                onClick={saveCourse}
+                disabled={saving || !form.title.trim()}
+                className="lg:hidden h-9 px-4 rounded-none bg-primary text-primary-foreground font-bold text-[11px] tracking-widest uppercase"
+              >
+                {saving ? <Loader2 className="h-3 w-3 mr-1.5 animate-spin" /> : <Rocket className="h-3 w-3 mr-1.5" />}
+                {editCourse ? "Salvar" : "Publicar"}
+              </Button>
             </div>
-          )}
-        </div>
+          </div>
+        </footer>
       </DialogContent>
     </Dialog>
+  );
+}
+
+// ============================================================
+// FrameWrapper — each frame in the storyboard strip
+// ============================================================
+interface FrameWrapperProps {
+  index: number;
+  label: string;
+  subLabel: string;
+  width: string;
+  isActive: boolean;
+  isDragging?: boolean;
+  draggable?: boolean;
+  onDragStart?: () => void;
+  onDragOver?: (e: React.DragEvent) => void;
+  onDrop?: (e: React.DragEvent) => void;
+  onDragEnd?: () => void;
+  children: React.ReactNode;
+}
+
+function FrameWrapper({
+  index, label, subLabel, width, isActive, isDragging,
+  draggable, onDragStart, onDragOver, onDrop, onDragEnd, children
+}: FrameWrapperProps) {
+  return (
+    <div
+      className={cn("flex-shrink-0 snap-start transition-opacity", width, isDragging && "opacity-50")}
+      draggable={draggable}
+      onDragStart={onDragStart}
+      onDragOver={onDragOver}
+      onDrop={onDrop}
+      onDragEnd={onDragEnd}
+    >
+      <div className="mb-3 flex items-center justify-between">
+        <span className={cn(
+          "text-[10px] font-bold tracking-[0.2em] uppercase italic transition-colors",
+          isActive ? "text-primary" : "text-muted-foreground"
+        )}>
+          {label}
+        </span>
+        <span className="text-[10px] tabular-nums text-muted-foreground">{subLabel}</span>
+      </div>
+      {children}
+    </div>
+  );
+}
+
+// ============================================================
+// AddFrameInline — composer to add a new module frame
+// ============================================================
+function AddFrameInline({ onAdd }: { onAdd: (title: string) => void }) {
+  const [name, setName] = useState("");
+  const [showInput, setShowInput] = useState(false);
+
+  const submit = () => {
+    if (!name.trim()) return;
+    onAdd(name);
+    setName("");
+    setShowInput(false);
+  };
+
+  if (!showInput) {
+    return (
+      <button
+        type="button"
+        onClick={() => setShowInput(true)}
+        className="w-full min-h-[480px] border border-dashed border-border bg-card-inset flex flex-col items-center justify-center p-12 hover:border-primary group transition-all"
+      >
+        <div className="size-14 border border-border flex items-center justify-center mb-5 group-hover:border-primary group-hover:bg-primary/5 transition-all">
+          <Plus className="h-5 w-5 text-muted-foreground group-hover:text-primary transition-colors" />
+        </div>
+        <h3 className="text-foreground font-bold text-[11px] tracking-widest uppercase mb-2">Compose New Scene</h3>
+        <p className="text-center text-xs text-muted-foreground leading-relaxed">
+          Expanda sua narrativa com<br/>um novo módulo instrucional
+        </p>
+      </button>
+    );
+  }
+
+  return (
+    <div className="w-full min-h-[480px] border border-primary bg-card flex flex-col items-center justify-center p-8 gap-4">
+      <Layers className="h-6 w-6 text-primary" />
+      <p className="text-[11px] font-bold tracking-widest uppercase text-foreground text-center">Nome do novo frame</p>
+      <Input
+        autoFocus
+        value={name}
+        onChange={(e) => setName(e.target.value)}
+        onKeyDown={(e) => {
+          if (e.key === "Enter") submit();
+          if (e.key === "Escape") setShowInput(false);
+        }}
+        placeholder="Ex: Implementação"
+        className="rounded-none border-border bg-background text-center font-bold"
+      />
+      <div className="flex gap-2 w-full">
+        <button
+          type="button"
+          onClick={() => setShowInput(false)}
+          className="flex-1 h-10 border border-border text-[10px] font-bold tracking-widest uppercase text-muted-foreground hover:border-foreground hover:text-foreground transition-all"
+        >
+          Cancel
+        </button>
+        <button
+          type="button"
+          onClick={submit}
+          disabled={!name.trim()}
+          className="flex-1 h-10 bg-primary text-primary-foreground text-[10px] font-bold tracking-widest uppercase hover:bg-primary/90 disabled:opacity-40 transition-all"
+        >
+          Insert
+        </button>
+      </div>
+    </div>
   );
 }
