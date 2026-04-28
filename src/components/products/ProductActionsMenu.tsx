@@ -5,7 +5,8 @@ import {
   ExternalLink,
   MoreHorizontal,
   Palette,
-  Settings2,
+  Pencil,
+  Sparkles,
   Star,
   Trash2,
   type LucideIcon,
@@ -41,8 +42,17 @@ type ProductActionsMenuProps = ProductMenuHandlers & {
 type ActionItem = {
   icon: LucideIcon;
   label: string;
+  hint?: string;
   action: () => void;
-  iconColor?: string;
+  tone: "primary" | "info" | "success" | "warning" | "neutral";
+};
+
+const TONE_STYLES: Record<ActionItem["tone"], { wrap: string; icon: string }> = {
+  primary: { wrap: "border-primary/25 bg-primary/[0.08]", icon: "text-primary" },
+  info: { wrap: "border-sky-500/25 bg-sky-500/[0.08]", icon: "text-sky-400" },
+  success: { wrap: "border-success/25 bg-success/[0.08]", icon: "text-success" },
+  warning: { wrap: "border-warning/25 bg-warning/[0.08]", icon: "text-warning" },
+  neutral: { wrap: "border-border/60 bg-secondary", icon: "text-foreground/70" },
 };
 
 export function ProductActionsMenu({
@@ -58,16 +68,22 @@ export function ProductActionsMenu({
   onOpenPixels,
 }: ProductActionsMenuProps) {
   const items: ActionItem[] = [
-    { icon: Settings2, label: "Editar produto", action: () => onEditProduct(product), iconColor: "text-primary" },
-    { icon: Palette, label: "Abrir checkout builder", action: () => window.location.assign(`/vendas/produtos/${product.id}/checkout-builder`), iconColor: "text-primary" },
+    { icon: Pencil, label: "Editar produto", hint: "Detalhes & oferta", action: () => onEditProduct(product), tone: "primary" },
+    { icon: Palette, label: "Checkout builder", hint: "Layout & temas", action: () => window.location.assign(`/vendas/produtos/${product.id}/checkout-builder`), tone: "info" },
     ...(product.checkout_url
       ? [
-          { icon: copied ? CheckCircle2 : Copy, label: copied ? "Link copiado!" : "Copiar link do checkout", action: () => onCopyLink(product), iconColor: "text-primary" },
-          { icon: ExternalLink, label: "Abrir checkout", action: () => onOpenCheckout(product), iconColor: "text-primary" },
+          {
+            icon: copied ? CheckCircle2 : Copy,
+            label: copied ? "Link copiado!" : "Copiar link",
+            hint: copied ? "Pronto para compartilhar" : "Checkout público",
+            action: () => onCopyLink(product),
+            tone: (copied ? "success" : "neutral") as ActionItem["tone"],
+          },
+          { icon: ExternalLink, label: "Abrir checkout", hint: "Visualizar como cliente", action: () => onOpenCheckout(product), tone: "neutral" as ActionItem["tone"] },
         ]
       : []),
-    { icon: Crosshair, label: "Pixels e tracking", action: () => onOpenPixels(product), iconColor: "text-primary" },
-    { icon: Star, label: "Gerir área de membros", action: () => onOpenMembers(product), iconColor: "text-primary" },
+    { icon: Crosshair, label: "Pixels & tracking", hint: "Meta, Google, TikTok…", action: () => onOpenPixels(product), tone: "warning" },
+    { icon: Star, label: "Área de membros", hint: "Conteúdo & alunos", action: () => onOpenMembers(product), tone: "info" },
   ];
 
   const labeledTrigger = Boolean(triggerLabel);
@@ -85,53 +101,86 @@ export function ProductActionsMenu({
             triggerClassName
           )}
         >
-          <MoreHorizontal className={labeledTrigger ? "h-3.5 w-3.5" : "h-4 w-4"} strokeWidth={1.7} />
+          <MoreHorizontal className={labeledTrigger ? "h-3.5 w-3.5" : "h-4 w-4"} strokeWidth={1.8} />
           {triggerLabel && <span>{triggerLabel}</span>}
         </button>
       </DropdownMenuTrigger>
       <DropdownMenuContent
         align="end"
         side="top"
-        sideOffset={8}
+        sideOffset={10}
         collisionPadding={16}
-        className="w-[252px] rounded-xl border border-border bg-card p-1.5 shadow-none"
+        className="w-[288px] overflow-hidden rounded-2xl border border-border bg-card p-0 shadow-none"
       >
-        {/* Product name header */}
-        <div className="px-3 py-2.5">
-          <p className="truncate font-display text-[13px] font-extrabold tracking-tight text-foreground">{product.name}</p>
-          <p className="mt-0.5 text-[10px] font-medium uppercase tracking-[0.16em] text-muted-foreground/55">Ações rápidas</p>
+        {/* Product header */}
+        <div className="relative overflow-hidden border-b border-border/60 bg-gradient-to-br from-secondary/60 via-card to-card px-4 pb-3.5 pt-4">
+          <div
+            aria-hidden
+            className="pointer-events-none absolute -right-8 -top-8 h-24 w-24 rounded-full opacity-50"
+            style={{
+              background: "radial-gradient(50% 50% at 50% 50%, hsl(var(--primary) / 0.18), transparent 70%)",
+            }}
+          />
+          <div className="flex items-center gap-2.5">
+            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-border/60 bg-card">
+              {product.image_url ? (
+                <img src={product.image_url} alt="" className="h-full w-full rounded-[10px] object-cover" />
+              ) : (
+                <Sparkles className="h-4 w-4 text-primary" strokeWidth={2.25} />
+              )}
+            </div>
+            <div className="min-w-0 flex-1">
+              <p className="truncate font-display text-[13.5px] font-black tracking-tight text-foreground">
+                {product.name || "Produto sem nome"}
+              </p>
+              <p className="mt-0.5 text-[9.5px] font-black uppercase tracking-[0.18em] text-muted-foreground/70">
+                Ações rápidas
+              </p>
+            </div>
+          </div>
         </div>
-
-        <DropdownMenuSeparator className="mx-1.5 my-1 bg-sidebar-border" />
 
         {/* Action items */}
-        <div className="space-y-0.5">
-          {items.map((item) => (
-            <DropdownMenuItem
-              key={item.label}
-              onClick={item.action}
-              className="cursor-pointer gap-3 rounded-lg px-3 py-2.5 font-display text-[12.5px] font-semibold tracking-wide text-foreground/75 transition-colors focus:bg-accent focus:text-foreground data-[highlighted]:bg-accent data-[highlighted]:text-foreground"
-            >
-              <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md border border-border/60 bg-secondary">
-                <item.icon className={cn("h-3.5 w-3.5", item.iconColor)} strokeWidth={1.8} />
-              </div>
-              {item.label}
-            </DropdownMenuItem>
-          ))}
+        <div className="space-y-0.5 p-1.5">
+          {items.map((item) => {
+            const tone = TONE_STYLES[item.tone];
+            return (
+              <DropdownMenuItem
+                key={item.label}
+                onClick={item.action}
+                className="group/item cursor-pointer gap-3 rounded-xl px-2.5 py-2 transition-all focus:bg-accent/60 data-[highlighted]:bg-accent/60"
+              >
+                <div className={cn("flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border transition-transform group-hover/item:scale-105", tone.wrap)}>
+                  <item.icon className={cn("h-4 w-4", tone.icon)} strokeWidth={2.1} />
+                </div>
+                <div className="min-w-0 flex-1">
+                  <p className="font-display text-[12.5px] font-bold tracking-tight text-foreground">{item.label}</p>
+                  {item.hint && (
+                    <p className="mt-0.5 truncate text-[10.5px] font-medium text-muted-foreground/70">{item.hint}</p>
+                  )}
+                </div>
+              </DropdownMenuItem>
+            );
+          })}
         </div>
 
-        <DropdownMenuSeparator className="mx-1.5 my-1 bg-sidebar-border" />
+        <DropdownMenuSeparator className="mx-3 my-0 bg-border/60" />
 
         {/* Delete action */}
-        <DropdownMenuItem
-          onClick={() => onDeleteProduct(product)}
-          className="cursor-pointer gap-3 rounded-lg px-3 py-2.5 font-display text-[12.5px] font-semibold tracking-wide text-destructive transition-colors focus:bg-destructive/10 data-[highlighted]:bg-destructive/10"
-        >
-          <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md border border-destructive/20 bg-destructive/10">
-            <Trash2 className="h-3.5 w-3.5 text-destructive" strokeWidth={1.8} />
-          </div>
-          Excluir produto
-        </DropdownMenuItem>
+        <div className="p-1.5">
+          <DropdownMenuItem
+            onClick={() => onDeleteProduct(product)}
+            className="group/del cursor-pointer gap-3 rounded-xl px-2.5 py-2 transition-all focus:bg-destructive/10 data-[highlighted]:bg-destructive/10"
+          >
+            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-destructive/30 bg-destructive/[0.08] transition-transform group-hover/del:scale-105">
+              <Trash2 className="h-4 w-4 text-destructive" strokeWidth={2.1} />
+            </div>
+            <div className="min-w-0 flex-1">
+              <p className="font-display text-[12.5px] font-bold tracking-tight text-destructive">Excluir produto</p>
+              <p className="mt-0.5 text-[10.5px] font-medium text-destructive/60">Ação irreversível</p>
+            </div>
+          </DropdownMenuItem>
+        </div>
       </DropdownMenuContent>
     </DropdownMenu>
   );
