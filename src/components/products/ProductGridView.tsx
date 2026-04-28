@@ -70,7 +70,13 @@ export function ProductGridView({ products, copiedId, toolbar, ...handlers }: Pr
 
       <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
         {products.map((product) => {
-          const status = STATUS_META[product.status] || STATUS_META.inactive;
+          const effectiveStatus = getEffectiveStatus(product);
+          const status = STATUS_META[effectiveStatus] || STATUS_META.inactive;
+          const isDraft = effectiveStatus === "draft";
+          const isInactive = effectiveStatus === "inactive";
+          const isPending = effectiveStatus === "pending_review";
+          const requirements = isDraft ? getProductRequirements(product) : [];
+          const missingCount = requirements.filter((r) => !r.done).length;
           const initial = product.name.charAt(0).toUpperCase();
           const deliveryLabel = DELIVERY_LABELS[product.delivery_type] || product.delivery_type;
           const isCopied = copiedId === product.id;
@@ -85,6 +91,9 @@ export function ProductGridView({ products, copiedId, toolbar, ...handlers }: Pr
                 "group relative flex flex-col overflow-hidden rounded-[24px] border border-border/40 bg-card/60 backdrop-blur-sm",
                 "transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)]",
                 "hover:border-primary/30 hover:shadow-[0_20px_40px_-12px_rgba(0,0,0,0.12)] hover:-translate-y-1",
+                isInactive && "border-destructive/30",
+                isPending && "border-warning/30",
+                isDraft && "border-dashed border-border/60",
               )}
             >
               {/* Top Image Section */}
