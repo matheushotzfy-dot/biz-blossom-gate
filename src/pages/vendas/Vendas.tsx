@@ -625,7 +625,6 @@ export default function Vendas() {
       else if (e.key === "3") setStatusFilter("pending");
       else if (e.key === "4") setStatusFilter("refunded");
       else if (e.key === "5") setStatusFilter("chargeback");
-      else if (e.key === "6") setStatusFilter("failed");
     };
     window.addEventListener("keydown", handler);
     return () => window.removeEventListener("keydown", handler);
