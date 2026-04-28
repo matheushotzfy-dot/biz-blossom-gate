@@ -23,6 +23,7 @@ import {
   Smartphone,
   Sparkles,
   Trash2,
+  Trophy,
   Upload,
   Wand2,
   X,
