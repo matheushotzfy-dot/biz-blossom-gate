@@ -200,18 +200,18 @@ function TxRow({ tx, prods, onClick, density = "comfortable" }: { tx: Tables<"tr
   const py = density === "compact" ? "py-2" : "py-3.5";
   const avatarSize = density === "compact" ? "h-8 w-8" : "h-9 w-9";
   return (
-    <tr onClick={onClick} className="group cursor-pointer border-b border-border transition-colors hover:bg-muted/20 last:border-b-0">
-      <td className={cn("pl-4 pr-3 align-middle", py)}>
+    <tr onClick={onClick} className="group cursor-pointer border-b border-border/60 transition-colors duration-150 hover:bg-muted/30 last:border-b-0">
+      <td className={cn("pl-5 pr-3 align-middle", py)}>
         <div className="flex items-center gap-3">
-          <Avatar className={cn(avatarSize, "shrink-0 rounded-md")}>
-            <AvatarFallback className={cn("rounded-md text-[11px] font-bold", avatarColor(name))}>{initials(name)}</AvatarFallback>
+          <Avatar className={cn(avatarSize, "shrink-0 rounded-md ring-1 ring-border/40")}>
+            <AvatarFallback className={cn("rounded-md text-[11px] font-black tracking-[-0.01em]", avatarColor(name))}>{initials(name)}</AvatarFallback>
           </Avatar>
           <div className="min-w-0">
-            <p className="truncate text-[13px] font-semibold text-foreground leading-tight">{name}</p>
+            <p className="truncate text-[13px] font-bold tracking-[-0.01em] text-foreground leading-tight">{name}</p>
             <div className="flex items-center gap-1.5 mt-0.5">
-              {tx.customer_email && <p className="truncate text-[11px] text-muted-foreground max-w-[180px]">{tx.customer_email}</p>}
+              {tx.customer_email && <p className="truncate text-[11px] text-muted-foreground/85 max-w-[180px]">{tx.customer_email}</p>}
               {tx.customer_phone && (
-                <a href={`https://wa.me/55${tx.customer_phone.replace(/\D/g, "")}`} target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()} className="text-success hover:text-success/80">
+                <a href={`https://wa.me/55${tx.customer_phone.replace(/\D/g, "")}`} target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()} className="text-success transition-colors hover:text-success/80">
                   <MessageCircle className="h-3 w-3" />
                 </a>
               )}
@@ -220,29 +220,29 @@ function TxRow({ tx, prods, onClick, density = "comfortable" }: { tx: Tables<"tr
         </div>
       </td>
       <td className={cn("px-3 align-middle", py)}>
-        <p className="truncate text-[12px] font-medium text-foreground max-w-[180px]">{prodName}</p>
-        <p className="text-[11px] text-muted-foreground mt-0.5 tabular-nums">{fmtDate(tx.created_at)} · {fmtTime(tx.created_at)}</p>
+        <p className="truncate text-[12px] font-semibold text-foreground/95 max-w-[180px]">{prodName}</p>
+        <p className="text-[11px] text-muted-foreground/80 mt-0.5 tabular-nums">{fmtDate(tx.created_at)} · {fmtTime(tx.created_at)}</p>
       </td>
       <td className={cn("px-3 align-middle", py)}>
-        <span className={cn("inline-flex items-center gap-1.5 rounded-sm border px-2 py-1 text-[11px] font-semibold", st.fg, st.bg, st.border)}>
+        <span className={cn("inline-flex items-center gap-1.5 rounded-full border px-2 py-0.5 text-[11px] font-bold tracking-[-0.005em]", st.fg, st.bg, st.border)}>
           <span className={cn("h-1.5 w-1.5 rounded-full", st.dot)} />
           {st.label}
         </span>
       </td>
       <td className={cn("px-3 align-middle", py)}>
-        <span className={cn("inline-flex items-center gap-1.5 rounded-sm border px-2 py-1 text-[11px] font-semibold", method.color, method.bg, method.border)}>
+        <span className={cn("inline-flex items-center gap-1.5 rounded-full border px-2 py-0.5 text-[11px] font-bold tracking-[-0.005em]", method.color, method.bg, method.border)}>
           <MethodIcon className="h-3 w-3" />
           {method.label}
         </span>
       </td>
       <td className={cn("px-3 align-middle text-right", py)}>
-        <p className="text-[13px] font-semibold text-foreground tabular-nums">{fmt(gross)}</p>
-        {fee > 0 && <p className="text-[10px] text-muted-foreground tabular-nums mt-0.5">−{fmt(fee)} taxa</p>}
+        <p className="text-[13px] font-bold text-foreground tabular-nums tracking-[-0.01em]" style={{ fontVariantNumeric: "tabular-nums slashed-zero" }}>{fmt(gross)}</p>
+        {fee > 0 && <p className="text-[10px] text-muted-foreground/80 tabular-nums mt-0.5">−{fmt(fee)} taxa</p>}
       </td>
       <td className={cn("px-4 align-middle text-right", py)}>
-        <p className={cn("text-[14px] font-bold tabular-nums",
+        <p className={cn("text-[14px] font-black tabular-nums tracking-[-0.015em]",
           tx.status === "completed" ? "text-success" : tx.status === "pending" ? "text-warning" : "text-foreground/60"
-        )}>{fmt(net)}</p>
+        )} style={{ fontVariantNumeric: "tabular-nums slashed-zero" }}>{fmt(net)}</p>
       </td>
       <td className={cn("pr-3 align-middle w-12", py)}>
         <div className="opacity-0 group-hover:opacity-100 transition-opacity">
