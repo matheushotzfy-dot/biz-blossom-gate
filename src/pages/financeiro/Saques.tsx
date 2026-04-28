@@ -299,7 +299,7 @@ export default function Saques() {
           <div className="flex flex-col gap-5 xl:flex-row xl:items-start xl:justify-between">
             <div className="min-w-0">
               <h1 className="font-display text-[44px] font-black leading-[0.88] tracking-[-0.06em] text-foreground sm:text-[64px]">
-                Saques
+                Saldo Disponível
               </h1>
               <div className="mt-5 flex flex-wrap items-end gap-x-5 gap-y-2">
                 <p
