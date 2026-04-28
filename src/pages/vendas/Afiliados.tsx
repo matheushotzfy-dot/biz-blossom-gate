@@ -637,6 +637,7 @@ export default function Afiliados() {
           Comissões creditadas automaticamente após confirmação do pagamento. Split processado no servidor com transparência total.
         </p>
       </div>
+      </div>
     </div>
   );
 }
