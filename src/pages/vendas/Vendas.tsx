@@ -819,10 +819,10 @@ export default function Vendas() {
 
           <div className="mt-7 grid grid-cols-2 border-y border-border/70 lg:grid-cols-4 lg:divide-x lg:divide-border/70">
             {[
-              { label: "Receita bruta", value: hidden ? HIDE : fmtCompact(m.totalGross), sub: undefined, accent: "text-foreground", delta: { cur: m.totalGross, prev: p.totalGross } },
-              heroKpis[1],
-              heroKpis[2],
-              heroKpis[3],
+              { label: "Receita bruta", value: hidden ? HIDE : fmtCompact(m.totalGross), sub: undefined, accent: "text-foreground", delta: { cur: m.totalGross, prev: p.totalGross }, rail: "bg-success" },
+              { ...heroKpis[1], rail: "bg-info" },
+              { ...heroKpis[2], rail: "bg-foreground/40" },
+              { ...heroKpis[3], rail: approvalRate >= 60 ? "bg-success" : "bg-warning" },
             ].map((k, idx) => (
               <div
                 key={k.label}
@@ -832,20 +832,21 @@ export default function Vendas() {
                   idx === 1 && "border-l border-border/70 lg:border-l-0",
                 )}
               >
-                <div className="flex items-center justify-between gap-2">
+                <span className={cn("absolute left-0 top-5 h-7 w-[2px] rounded-r-full", k.rail)} />
+                <div className="flex items-center justify-between gap-2 pl-2">
                   <p className="text-[9px] font-black uppercase tracking-[0.24em] text-muted-foreground/85">{k.label}</p>
                   {k.delta && <DeltaBadge cur={k.delta.cur} prev={k.delta.prev} />}
                 </div>
                 <p
                   className={cn(
-                    "mt-3 font-numbers text-[28px] font-black leading-[0.95] tracking-[-0.055em] tabular-nums sm:text-[36px]",
+                    "mt-3 pl-2 font-numbers text-[28px] font-black leading-[0.95] tracking-[-0.055em] tabular-nums sm:text-[36px]",
                     k.accent,
                   )}
                   style={{ fontVariantNumeric: "tabular-nums slashed-zero" }}
                 >
                   {k.value}
                 </p>
-                <p className="mt-2.5 truncate text-[11.5px] font-semibold text-muted-foreground/80">{k.sub}</p>
+                <p className="mt-2.5 truncate pl-2 text-[11.5px] font-semibold text-muted-foreground/80">{k.sub}</p>
               </div>
             ))}
           </div>
