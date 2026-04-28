@@ -679,28 +679,31 @@ export default function Vendas() {
         <header className="border-b border-border/70 pb-7">
           <div className="flex flex-col gap-5 xl:flex-row xl:items-start xl:justify-between">
             <div className="min-w-0">
-              <div className="inline-flex items-center gap-2 text-[9px] font-black uppercase tracking-[0.26em] text-muted-foreground/80">
+              <div className="inline-flex items-center gap-2 rounded-full border border-success/30 bg-success/10 px-2.5 py-1 text-[9px] font-black uppercase tracking-[0.24em] text-success">
                 <span className="relative flex h-1.5 w-1.5">
-                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-success/60 opacity-60" />
+                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-success opacity-70" />
                   <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-success" />
                 </span>
                 Live sales ledger
               </div>
-              <h1 className="mt-2.5 font-display text-[34px] font-black leading-[0.95] tracking-[-0.045em] text-foreground sm:text-[46px]">
+              <h1 className="mt-3 font-display text-[34px] font-black leading-[0.95] tracking-[-0.045em] text-foreground sm:text-[46px]">
                 Vendas
               </h1>
               <div className="mt-4 flex flex-wrap items-end gap-x-5 gap-y-2">
                 <p
                   className={cn(
                     "font-numbers text-[42px] font-black leading-[0.88] tracking-[-0.06em] tabular-nums sm:text-[60px]",
-                    hidden ? "text-foreground" : "text-success",
+                    hidden ? "text-foreground" : "text-success [text-shadow:0_0_40px_hsl(var(--success)/0.25)]",
                   )}
                   style={{ fontVariantNumeric: "tabular-nums slashed-zero" }}
                 >
                   {hidden ? HIDE : fmt(m.totalNet)}
                 </p>
                 <div className="pb-1.5">
-                  <p className="text-[12px] font-bold tracking-[-0.005em] text-foreground">Receita líquida no período</p>
+                  <p className="flex items-center gap-1.5 text-[12px] font-bold tracking-[-0.005em] text-foreground">
+                    <span className="inline-block h-2 w-[3px] rounded-full bg-success" />
+                    Receita líquida no período
+                  </p>
                   <p className="mt-1 text-[11.5px] font-medium text-muted-foreground/85">
                     <span className="font-bold text-foreground">{periodLabel}</span>
                     <span className="mx-1.5 inline-block h-[3px] w-[3px] -translate-y-[3px] rounded-full bg-muted-foreground/40 align-middle" />
@@ -728,7 +731,7 @@ export default function Vendas() {
                         className={cn(
                           "relative rounded-[6px] px-2.5 py-[5px] text-[11px] font-bold tracking-[-0.005em] transition-all duration-200",
                           active
-                            ? "bg-foreground text-background"
+                            ? "bg-success/15 text-success ring-1 ring-success/30"
                             : "text-muted-foreground/90 hover:text-foreground",
                         )}
                       >
@@ -802,7 +805,7 @@ export default function Vendas() {
                   <TooltipTrigger asChild>
                     <button
                       onClick={() => setShowExportDialog(true)}
-                      className="inline-flex h-8 items-center gap-1.5 rounded-md bg-foreground px-3.5 text-[11px] font-black tracking-[-0.005em] text-background ring-1 ring-foreground/10 transition-all duration-200 hover:bg-foreground/92 hover:ring-foreground/20 focus:outline-none focus-visible:ring-2 focus-visible:ring-foreground/30"
+                      className="inline-flex h-8 items-center gap-1.5 rounded-lg bg-success px-3.5 text-[11px] font-black tracking-[-0.005em] text-success-foreground ring-1 ring-success/40 transition-all duration-200 hover:bg-success/90 hover:ring-success/60 focus:outline-none focus-visible:ring-2 focus-visible:ring-success/50"
                     >
                       <Download className="h-[14px] w-[14px]" strokeWidth={2.6} />
                       Exportar
@@ -816,10 +819,10 @@ export default function Vendas() {
 
           <div className="mt-7 grid grid-cols-2 border-y border-border/70 lg:grid-cols-4 lg:divide-x lg:divide-border/70">
             {[
-              { label: "Receita bruta", value: hidden ? HIDE : fmtCompact(m.totalGross), sub: undefined, accent: "text-foreground", delta: { cur: m.totalGross, prev: p.totalGross } },
-              heroKpis[1],
-              heroKpis[2],
-              heroKpis[3],
+              { label: "Receita bruta", value: hidden ? HIDE : fmtCompact(m.totalGross), sub: undefined, accent: "text-foreground", delta: { cur: m.totalGross, prev: p.totalGross }, rail: "bg-success" },
+              { ...heroKpis[1], rail: "bg-info" },
+              { ...heroKpis[2], rail: "bg-foreground/40" },
+              { ...heroKpis[3], rail: approvalRate >= 60 ? "bg-success" : "bg-warning" },
             ].map((k, idx) => (
               <div
                 key={k.label}
@@ -829,20 +832,21 @@ export default function Vendas() {
                   idx === 1 && "border-l border-border/70 lg:border-l-0",
                 )}
               >
-                <div className="flex items-center justify-between gap-2">
+                <span className={cn("absolute left-0 top-5 h-7 w-[2px] rounded-r-full", k.rail)} />
+                <div className="flex items-center justify-between gap-2 pl-2">
                   <p className="text-[9px] font-black uppercase tracking-[0.24em] text-muted-foreground/85">{k.label}</p>
                   {k.delta && <DeltaBadge cur={k.delta.cur} prev={k.delta.prev} />}
                 </div>
                 <p
                   className={cn(
-                    "mt-3 font-numbers text-[28px] font-black leading-[0.95] tracking-[-0.055em] tabular-nums sm:text-[36px]",
+                    "mt-3 pl-2 font-numbers text-[28px] font-black leading-[0.95] tracking-[-0.055em] tabular-nums sm:text-[36px]",
                     k.accent,
                   )}
                   style={{ fontVariantNumeric: "tabular-nums slashed-zero" }}
                 >
                   {k.value}
                 </p>
-                <p className="mt-2.5 truncate text-[11.5px] font-semibold text-muted-foreground/80">{k.sub}</p>
+                <p className="mt-2.5 truncate pl-2 text-[11.5px] font-semibold text-muted-foreground/80">{k.sub}</p>
               </div>
             ))}
           </div>
@@ -914,15 +918,15 @@ export default function Vendas() {
         <section className="overflow-hidden rounded-xl border border-border/70 bg-card shadow-[0_1px_0_hsl(var(--foreground)/0.02),0_1px_2px_hsl(var(--foreground)/0.03)]">
           <div className="flex flex-col gap-3 border-b border-border/70 bg-gradient-to-b from-muted/15 to-transparent px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
             <div className="flex items-center gap-3">
-              <div className="flex h-9 w-9 items-center justify-center rounded-md border border-border/60 bg-background/60">
-                <ShoppingCart className="h-4 w-4 text-foreground/85" strokeWidth={2.1} />
+              <div className="flex h-9 w-9 items-center justify-center rounded-md border border-success/30 bg-success/10">
+                <ShoppingCart className="h-4 w-4 text-success" strokeWidth={2.2} />
               </div>
               <div>
                 <p className="text-[13px] font-black leading-tight tracking-[-0.012em] text-foreground">Transações</p>
                 <p className="mt-0.5 text-[11px] font-medium text-muted-foreground/85">
                   <span className="tabular-nums font-bold text-foreground/85">{sortedFiltered.length}</span> {sortedFiltered.length === 1 ? "resultado" : "resultados"}
-                  <span className="mx-1.5 inline-block h-[3px] w-[3px] -translate-y-[3px] rounded-full bg-muted-foreground/40 align-middle" />
-                  líquido <span className="font-numbers font-black tabular-nums text-foreground" style={{ fontVariantNumeric: "tabular-nums slashed-zero" }}>{hidden ? HIDE : fmt(filteredNetTotal)}</span>
+                  <span className="mx-1.5 inline-block h-[3px] w-[3px] -translate-y-[3px] rounded-full bg-success/60 align-middle" />
+                  líquido <span className="font-numbers font-black tabular-nums text-success" style={{ fontVariantNumeric: "tabular-nums slashed-zero" }}>{hidden ? HIDE : fmt(filteredNetTotal)}</span>
                 </p>
               </div>
             </div>
@@ -933,7 +937,7 @@ export default function Vendas() {
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 placeholder="Buscar nome, email, telefone, ID…"
-                className="h-9 w-full rounded-lg border border-border/70 bg-background pl-9 pr-16 text-[12px] font-medium text-foreground transition-all duration-200 placeholder:text-muted-foreground/65 hover:border-foreground/30 focus:border-foreground/50 focus:outline-none focus:ring-2 focus:ring-foreground/10"
+                className="h-9 w-full rounded-lg border border-border/70 bg-background pl-9 pr-16 text-[12px] font-medium text-foreground transition-all duration-200 placeholder:text-muted-foreground/65 hover:border-success/40 focus:border-success/60 focus:outline-none focus:ring-2 focus:ring-success/15"
               />
               {search ? (
                 <button onClick={() => setSearch("")} aria-label="Limpar busca" className="absolute right-2.5 top-1/2 -translate-y-1/2 rounded p-0.5 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"><X className="h-3.5 w-3.5" /></button>
@@ -965,13 +969,13 @@ export default function Vendas() {
                     {tab.label}
                     <span
                       className={cn(
-                        "ml-0.5 rounded-full px-1.5 py-[2px] text-[10px] font-black tabular-nums leading-none",
-                        active ? "bg-foreground text-background" : "bg-muted/70 text-muted-foreground",
+                        "ml-0.5 rounded-full px-1.5 py-[2px] text-[10px] font-black tabular-nums leading-none transition-colors",
+                        active ? "bg-success text-success-foreground" : "bg-muted/70 text-muted-foreground",
                       )}
                     >
                       {tab.count}
                     </span>
-                    {active && <span className="absolute -bottom-px left-2 right-2 h-[2px] rounded-full bg-foreground" />}
+                    {active && <span className="absolute -bottom-px left-2 right-2 h-[2px] rounded-full bg-success" />}
                   </button>
                 );
               })}
