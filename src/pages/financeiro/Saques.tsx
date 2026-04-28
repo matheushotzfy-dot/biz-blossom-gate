@@ -618,12 +618,13 @@ export default function Saques() {
             </div>
           </div>
         )}
-      </div>
+
+      <div className="px-5 sm:px-8 mt-6 space-y-5">
       {/* ════════════════════════════════════════════════════════════════ */}
       {/* CHART */}
       {/* ════════════════════════════════════════════════════════════════ */}
       {m.chartData.length >= 2 && !hidden && m.totalApproved > 0 && (
-        <div className="rounded-2xl border border-border/60 bg-card overflow-hidden">
+        <div className="rounded-xl border border-border/70 bg-card overflow-hidden">
           <div className="flex items-center justify-between px-5 pt-4 pb-2">
             <div className="flex items-center gap-2">
               <TrendingUp className="h-3.5 w-3.5 text-primary" />
