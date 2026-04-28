@@ -503,15 +503,15 @@ export default function Saques() {
             </div>
           </div>
 
-          {/* ─────────── KPI strip — 4 cols, divisores, rails verticais ─────────── */}
-          <div className="mt-8 grid grid-cols-2 border-y border-border/70 lg:grid-cols-4 lg:divide-x lg:divide-border/70">
+          {/* ─────────── KPI strip — 3 cols, divisores, rails verticais ─────────── */}
+          <div className="mt-8 grid grid-cols-1 border-y border-border/70 sm:grid-cols-2 lg:grid-cols-3 lg:divide-x lg:divide-border/70">
             {kpiRails.map((k, idx) => (
               <div
                 key={k.label}
                 className={cn(
                   "group relative min-h-[150px] px-6 py-6 transition-colors duration-200 hover:bg-muted/25",
-                  idx > 1 && "border-t border-border/70 lg:border-t-0",
-                  idx === 1 && "border-l border-border/70 lg:border-l-0",
+                  idx === 1 && "sm:border-l border-border/70 lg:border-l-0",
+                  idx === 2 && "border-t border-border/70 sm:border-l sm:border-t-0 lg:border-l-0",
                 )}
               >
                 <span className={cn("absolute left-0 top-6 h-8 w-[3px] rounded-r-full", k.rail)} />
