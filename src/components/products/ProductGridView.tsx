@@ -106,10 +106,9 @@ export function ProductGridView({ products, copiedId, toolbar, ...handlers }: Pr
                       loading="lazy"
                       className="h-full w-full object-cover transition-transform duration-1000 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:scale-110"
                     />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent opacity-40 transition-opacity duration-500 group-hover:opacity-20" />
-                    <div className="absolute inset-0 ring-1 ring-inset ring-white/10" />
+                    <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent transition-opacity duration-500 group-hover:opacity-90" />
                     
-                    <div className="absolute inset-x-0 bottom-0 flex items-end justify-between p-4 backdrop-blur-md bg-white/5 border-t border-white/10">
+                    <div className="absolute inset-x-0 bottom-0 flex items-end justify-between p-4">
                       <div>
                         <p className="text-[9px] font-black uppercase tracking-[0.2em] text-white/60">Valor</p>
                         <span className="mt-0.5 block font-display text-2xl font-black leading-none tracking-tight text-white tabular-nums">
