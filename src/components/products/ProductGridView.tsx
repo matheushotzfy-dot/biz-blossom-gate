@@ -281,25 +281,36 @@ export function ProductGridView({ products, copiedId, toolbar, ...handlers }: Pr
                       </button>
                     )}
 
-                    {/* Actions Row */}
-                    <div className="mt-1 flex items-center gap-2">
+                    <div className="mt-1 grid grid-cols-3 gap-2">
                       <button
                         type="button"
                         onClick={(e) => { e.stopPropagation(); handlers.onEditProduct(product); }}
-                        className="flex h-11 flex-1 items-center justify-center gap-2 rounded-xl border border-border/40 bg-card shadow-sm text-[12px] font-black uppercase tracking-wider text-foreground/80 transition-all hover:border-primary/40 hover:text-primary hover:shadow-md"
+                        className="flex h-11 items-center justify-center gap-1.5 rounded-xl border border-border/40 bg-card shadow-sm text-[11.5px] font-black uppercase tracking-wider text-foreground/80 transition-all hover:border-primary/40 hover:text-primary hover:shadow-md"
                       >
-                        <Pencil className="h-4 w-4" strokeWidth={2.25} />
+                        <Pencil className="h-3.5 w-3.5" strokeWidth={2.25} />
                         Editar
                       </button>
                       <button
                         type="button"
+                        onClick={(e) => { e.stopPropagation(); window.location.assign(`/vendas/produtos/${product.id}/checkout-builder`); }}
+                        className="flex h-11 items-center justify-center gap-1.5 rounded-xl border border-border/40 bg-card shadow-sm text-[11.5px] font-black uppercase tracking-wider text-foreground/80 transition-all hover:border-primary/40 hover:text-primary hover:shadow-md"
+                        title="Abrir checkout builder"
+                      >
+                        <Palette className="h-3.5 w-3.5" strokeWidth={2.25} />
+                        Builder
+                      </button>
+                      <button
+                        type="button"
                         onClick={(e) => { e.stopPropagation(); handlers.onOpenPixels(product); }}
-                        className="flex h-11 flex-1 items-center justify-center gap-2 rounded-xl border border-border/40 bg-card shadow-sm text-[12px] font-black uppercase tracking-wider text-foreground/80 transition-all hover:border-primary/40 hover:text-primary hover:shadow-md"
+                        className="flex h-11 items-center justify-center gap-1.5 rounded-xl border border-border/40 bg-card shadow-sm text-[11.5px] font-black uppercase tracking-wider text-foreground/80 transition-all hover:border-primary/40 hover:text-primary hover:shadow-md"
                         title="Configurar pixels e tracking"
                       >
-                        <Crosshair className="h-4 w-4" strokeWidth={2.25} />
+                        <Crosshair className="h-3.5 w-3.5" strokeWidth={2.25} />
                         Pixels
                       </button>
+                    </div>
+
+                    <div className="flex items-center gap-2">
                       {product.checkout_url && (
                         <button
                           type="button"
