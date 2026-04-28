@@ -969,13 +969,13 @@ export default function Vendas() {
                     {tab.label}
                     <span
                       className={cn(
-                        "ml-0.5 rounded-full px-1.5 py-[2px] text-[10px] font-black tabular-nums leading-none",
-                        active ? "bg-foreground text-background" : "bg-muted/70 text-muted-foreground",
+                        "ml-0.5 rounded-full px-1.5 py-[2px] text-[10px] font-black tabular-nums leading-none transition-colors",
+                        active ? "bg-success text-success-foreground" : "bg-muted/70 text-muted-foreground",
                       )}
                     >
                       {tab.count}
                     </span>
-                    {active && <span className="absolute -bottom-px left-2 right-2 h-[2px] rounded-full bg-foreground" />}
+                    {active && <span className="absolute -bottom-px left-2 right-2 h-[2px] rounded-full bg-success" />}
                   </button>
                 );
               })}
