@@ -6,16 +6,14 @@ import {
   Plus,
   Search,
   X,
-  Sparkles,
-  ArrowUpRight,
-  LayoutGrid,
+  Trash2,
 } from "lucide-react";
 import { toast } from "sonner";
 
 import PixelSettingsDialog from "@/components/PixelSettingsDialog";
 import { ProductGridView } from "@/components/products/ProductGridView";
 import type { Product } from "@/components/products/productPresentation";
-import { getCheckoutLink } from "@/components/products/productPresentation";
+import { getCheckoutLink, getEffectiveStatus } from "@/components/products/productPresentation";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -31,7 +29,7 @@ import { useProducts } from "@/hooks/useQueryData";
 import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
 
-type FilterTab = "all" | "active" | "inactive" | "pending_review";
+type FilterTab = "all" | "active" | "draft" | "pending_review" | "inactive";
 
 export default function Produtos() {
   const { user } = useAuth();
@@ -44,24 +42,44 @@ export default function Produtos() {
   const [tab, setTab] = useState<FilterTab>("all");
   const [deleteTarget, setDeleteTarget] = useState<string | null>(null);
   const [deleting, setDeleting] = useState(false);
+  const [clearDraftsOpen, setClearDraftsOpen] = useState(false);
+  const [clearingDrafts, setClearingDrafts] = useState(false);
+
+  // Pre-compute effective status for every product (handles auto-draft).
+  const productsWithStatus = useMemo(
+    () => products.map((p) => ({ product: p, eff: getEffectiveStatus(p) })),
+    [products]
+  );
 
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase();
-    return products.filter((product) => {
-      if (tab !== "all" && product.status !== tab) return false;
-      return !q || product.name.toLowerCase().includes(q) || product.description?.toLowerCase().includes(q);
-    });
-  }, [products, search, tab]);
+    return productsWithStatus
+      .filter(({ product, eff }) => {
+        if (tab !== "all" && eff !== tab) return false;
+        return !q || product.name.toLowerCase().includes(q) || product.description?.toLowerCase().includes(q);
+      })
+      .map(({ product }) => product);
+  }, [productsWithStatus, search, tab]);
 
-  const activeCount = products.filter((p) => p.status === "active").length;
-  const inactiveCount = products.filter((p) => p.status === "inactive").length;
-  const pendingCount = products.filter((p) => p.status === "pending_review").length;
+  const counts = useMemo(() => {
+    const c = { active: 0, draft: 0, pending_review: 0, inactive: 0 };
+    for (const { eff } of productsWithStatus) {
+      if (eff in c) (c as any)[eff]++;
+    }
+    return c;
+  }, [productsWithStatus]);
+
+  const draftIds = useMemo(
+    () => productsWithStatus.filter((p) => p.eff === "draft").map((p) => p.product.id),
+    [productsWithStatus]
+  );
 
   const tabs = [
     { label: "Todos", value: "all" as const, count: products.length },
-    { label: "Ativos", value: "active" as const, count: activeCount },
-    { label: "Em revisão", value: "pending_review" as const, count: pendingCount },
-    { label: "Inativos", value: "inactive" as const, count: inactiveCount },
+    { label: "Ativos", value: "active" as const, count: counts.active },
+    { label: "Rascunhos", value: "draft" as const, count: counts.draft },
+    { label: "Em revisão", value: "pending_review" as const, count: counts.pending_review },
+    { label: "Inativos", value: "inactive" as const, count: counts.inactive },
   ];
 
   const handleEditProduct = (product: Product) => navigate(`/vendas/produtos/${product.id}/editar`);
@@ -92,6 +110,17 @@ export default function Produtos() {
     await loadProducts();
   };
 
+  const confirmClearDrafts = async () => {
+    if (!user || draftIds.length === 0) return;
+    setClearingDrafts(true);
+    const { error } = await supabase.from("products").delete().in("id", draftIds).eq("user_id", user.id);
+    setClearingDrafts(false);
+    setClearDraftsOpen(false);
+    if (error) { toast.error("Erro ao limpar rascunhos"); return; }
+    toast.success(`${draftIds.length} rascunho(s) removido(s)`);
+    await loadProducts();
+  };
+
   const menuHandlers = {
     onCopyLink: handleCopyLink,
     onDeleteProduct: (product: Product) => setDeleteTarget(product.id),
@@ -100,6 +129,8 @@ export default function Produtos() {
     onOpenMembers: handleOpenMembers,
     onOpenPixels: (product: Product) => setPixelProduct(product),
   };
+
+  const showClearDraftsBtn = tab === "draft" && draftIds.length > 0;
 
   return (
     <div className="mx-auto -mt-2 w-full max-w-[1440px] pb-24 md:-mt-3 md:pb-10">
@@ -122,7 +153,7 @@ export default function Produtos() {
 
         {/* Tabs + Search row, integrated with list */}
         <div className="flex flex-col gap-3 border-b border-border/40 pb-3 sm:flex-row sm:items-center sm:justify-between">
-          <div className="flex items-center gap-0.5">
+          <div className="flex items-center gap-0.5 overflow-x-auto">
             {tabs.map((item) => {
               const active = tab === item.value;
               return (
@@ -130,7 +161,7 @@ export default function Produtos() {
                   key={item.value}
                   onClick={() => setTab(item.value)}
                   className={cn(
-                    "relative rounded-md px-3 py-1.5 text-[12px] font-semibold transition-all duration-150",
+                    "relative shrink-0 rounded-md px-3 py-1.5 text-[12px] font-semibold transition-all duration-150",
                     active
                       ? "bg-secondary text-foreground"
                       : "text-muted-foreground hover:text-foreground"
@@ -150,19 +181,30 @@ export default function Produtos() {
             })}
           </div>
 
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground/40" />
-            <input
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              placeholder="Buscar produto..."
-              className="h-8 w-full rounded-lg border border-border bg-secondary/50 pl-8 pr-8 text-xs text-foreground placeholder:text-muted-foreground focus:border-primary/40 focus:outline-none focus:ring-1 focus:ring-primary/20 sm:w-64"
-            />
-            {search && (
-              <button onClick={() => setSearch("")} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-muted-foreground/40 hover:text-foreground transition-colors">
-                <X className="h-3 w-3" />
+          <div className="flex items-center gap-2">
+            {showClearDraftsBtn && (
+              <button
+                onClick={() => setClearDraftsOpen(true)}
+                className="inline-flex h-8 items-center gap-1.5 rounded-lg border border-destructive/40 bg-destructive/[0.06] px-3 text-[11.5px] font-bold text-destructive transition-all hover:bg-destructive hover:text-destructive-foreground"
+              >
+                <Trash2 className="h-3.5 w-3.5" strokeWidth={2.5} />
+                Limpar rascunhos ({draftIds.length})
               </button>
             )}
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground/40" />
+              <input
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                placeholder="Buscar produto..."
+                className="h-8 w-full rounded-lg border border-border bg-secondary/50 pl-8 pr-8 text-xs text-foreground placeholder:text-muted-foreground focus:border-primary/40 focus:outline-none focus:ring-1 focus:ring-primary/20 sm:w-64"
+              />
+              {search && (
+                <button onClick={() => setSearch("")} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-muted-foreground/40 hover:text-foreground transition-colors">
+                  <X className="h-3 w-3" />
+                </button>
+              )}
+            </div>
           </div>
         </div>
       </div>
@@ -203,6 +245,8 @@ export default function Produtos() {
       {pixelProduct && (
         <PixelSettingsDialog product={pixelProduct} open={!!pixelProduct} onOpenChange={(open) => { if (!open) setPixelProduct(null); }} />
       )}
+
+      {/* Delete single product */}
       <AlertDialog open={!!deleteTarget} onOpenChange={(open) => { if (!open) setDeleteTarget(null); }}>
         <AlertDialogContent className="max-w-sm rounded-xl">
           <AlertDialogHeader>
@@ -214,6 +258,25 @@ export default function Produtos() {
             <AlertDialogAction onClick={confirmDelete} disabled={deleting} className="h-9 gap-1.5 rounded-lg bg-destructive text-[13px] text-destructive-foreground hover:bg-destructive/90">
               {deleting && <Loader2 className="h-3.5 w-3.5 animate-spin" />}
               {deleting ? "Excluindo…" : "Excluir"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Clear all drafts */}
+      <AlertDialog open={clearDraftsOpen} onOpenChange={setClearDraftsOpen}>
+        <AlertDialogContent className="max-w-sm rounded-xl">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="text-base font-semibold">Limpar todos os rascunhos</AlertDialogTitle>
+            <AlertDialogDescription className="text-[13px] text-muted-foreground">
+              Você está prestes a excluir <span className="font-bold text-destructive">{draftIds.length} rascunho(s)</span> que ainda não foram finalizados. Esta ação não pode ser desfeita.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={clearingDrafts} className="h-9 rounded-lg text-[13px]">Cancelar</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmClearDrafts} disabled={clearingDrafts} className="h-9 gap-1.5 rounded-lg bg-destructive text-[13px] text-destructive-foreground hover:bg-destructive/90">
+              {clearingDrafts && <Loader2 className="h-3.5 w-3.5 animate-spin" />}
+              {clearingDrafts ? "Limpando…" : `Excluir ${draftIds.length}`}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
