@@ -588,7 +588,6 @@ export default function Vendas() {
       { label: "Pendentes", value: "pending" as StatusFilter, count: c.pending, dot: "bg-warning" },
       { label: "Reembolsos", value: "refunded" as StatusFilter, count: c.refunded, dot: "bg-info" },
       { label: "Chargebacks", value: "chargeback" as StatusFilter, count: c.chargeback, dot: "bg-destructive" },
-      { label: "Falhas", value: "failed" as StatusFilter, count: c.failed, dot: "bg-destructive" },
     ];
   }, [dateFiltered]);
 
