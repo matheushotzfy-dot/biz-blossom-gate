@@ -752,27 +752,6 @@ export default function Vendas() {
                   </Popover>
                   <TooltipContent side="bottom" className="flex items-center gap-2">Período personalizado</TooltipContent>
                 </Tooltip>
-
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <button onClick={() => setCmdOpen(true)} aria-label="Comandos rápidos" className="inline-flex h-8 items-center gap-1.5 rounded-md border border-border/60 bg-card/70 px-2 text-muted-foreground/90 transition-all duration-200 hover:border-foreground/40 hover:bg-muted/60 hover:text-foreground focus:outline-none focus-visible:ring-2 focus-visible:ring-foreground/20">
-                      <CommandIcon className="h-[15px] w-[15px]" strokeWidth={2.1} />
-                      <Kbd>⌘K</Kbd>
-                    </button>
-                  </TooltipTrigger>
-                  <TooltipContent side="bottom" className="flex items-center gap-2">Comandos rápidos</TooltipContent>
-                </Tooltip>
-
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <button onClick={toggleDensity} aria-label="Densidade" className={cn("inline-flex h-8 w-8 items-center justify-center rounded-md border transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-foreground/20",
-                      density === "compact" ? "border-foreground/80 bg-secondary text-foreground" : "border-border/60 bg-card/70 text-muted-foreground/90 hover:border-foreground/40 hover:bg-muted/60 hover:text-foreground")}>
-                      {density === "compact" ? <Rows4 className="h-[15px] w-[15px]" strokeWidth={2.1} /> : <Rows3 className="h-[15px] w-[15px]" strokeWidth={2.1} />}
-                    </button>
-                  </TooltipTrigger>
-                  <TooltipContent side="bottom" className="flex items-center gap-2">Densidade <Kbd>D</Kbd></TooltipContent>
-                </Tooltip>
-
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <button onClick={() => window.location.reload()} aria-label="Atualizar" className="group inline-flex h-8 w-8 items-center justify-center rounded-md border border-border/60 bg-card/70 text-muted-foreground/90 transition-all duration-200 hover:border-foreground/40 hover:bg-muted/60 hover:text-foreground focus:outline-none focus-visible:ring-2 focus-visible:ring-foreground/20">
