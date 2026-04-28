@@ -856,6 +856,27 @@ input[type="number"]::-webkit-inner-spin-button {
   }
 }
 
+/* ─── Page-level rise-in (applied on route change) ─── */
+@keyframes pageRise {
+  0%   { opacity: 0; transform: translateY(10px); filter: blur(1.5px); }
+  60%  { opacity: 1; filter: blur(0); }
+  100% { opacity: 1; transform: translateY(0); filter: blur(0); }
+}
+.page-rise > * {
+  animation: pageRise 540ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  will-change: transform, opacity;
+}
+.page-rise > *:nth-child(1) { animation-delay: 0ms; }
+.page-rise > *:nth-child(2) { animation-delay: 70ms; }
+.page-rise > *:nth-child(3) { animation-delay: 130ms; }
+.page-rise > *:nth-child(4) { animation-delay: 180ms; }
+.page-rise > *:nth-child(5) { animation-delay: 220ms; }
+.page-rise > *:nth-child(6) { animation-delay: 250ms; }
+.page-rise > *:nth-child(n+7) { animation-delay: 280ms; }
+@media (prefers-reduced-motion: reduce) {
+  .page-rise > * { animation: none !important; }
+}
+
 /* ─── Premium scrollbar ─── */
 ::-webkit-scrollbar { width: 5px; height: 5px; }
 ::-webkit-scrollbar-track { background: transparent; }
