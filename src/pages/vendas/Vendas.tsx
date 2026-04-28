@@ -671,29 +671,48 @@ export default function Vendas() {
 
   /* ═══════════ RENDER ═══════════ */
   return (
-    <div className="mx-auto w-full max-w-[1480px] pb-24 md:pb-10">
+    <div
+      className="mx-auto w-full max-w-[1480px] pb-24 md:pb-10 antialiased [text-rendering:geometricPrecision] [-webkit-font-smoothing:antialiased] [-moz-osx-font-smoothing:grayscale]"
+      style={{ fontFeatureSettings: '"ss01","cv11","tnum","kern"' }}
+    >
 
       {/* ─────────── COMANDO LIMPO ─────────── */}
-      <div className="px-5 pt-3 antialiased subpixel-antialiased [text-rendering:geometricPrecision] sm:px-8">
-        <header className="border-b border-border pb-6">
+      <div className="px-5 pt-4 sm:px-8 sm:pt-6">
+        <header className="border-b border-border/70 pb-7">
           <div className="flex flex-col gap-5 xl:flex-row xl:items-start xl:justify-between">
             <div className="min-w-0">
-              <div className="inline-flex items-center gap-2 text-[9px] font-black uppercase tracking-[0.24em] text-muted-foreground">
-                <span className="h-1.5 w-1.5 rounded-full bg-success" />
+              <div className="inline-flex items-center gap-2 text-[9px] font-black uppercase tracking-[0.26em] text-muted-foreground/80">
+                <span className="relative flex h-1.5 w-1.5">
+                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-success/60 opacity-60" />
+                  <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-success" />
+                </span>
                 Live sales ledger
               </div>
-              <h1 className="mt-2 font-display text-[34px] font-black leading-none tracking-[-0.04em] text-foreground sm:text-[44px]">
+              <h1 className="mt-2.5 font-display text-[34px] font-black leading-[0.95] tracking-[-0.045em] text-foreground sm:text-[46px]">
                 Vendas
               </h1>
               <div className="mt-4 flex flex-wrap items-end gap-x-5 gap-y-2">
-                <p className={cn("font-numbers text-[42px] font-black leading-[0.9] tracking-[-0.055em] tabular-nums sm:text-[58px]", hidden ? "text-foreground" : "text-success")}>
+                <p
+                  className={cn(
+                    "font-numbers text-[42px] font-black leading-[0.88] tracking-[-0.06em] tabular-nums sm:text-[60px]",
+                    hidden ? "text-foreground" : "text-success",
+                  )}
+                  style={{ fontVariantNumeric: "tabular-nums slashed-zero" }}
+                >
                   {hidden ? HIDE : fmt(m.totalNet)}
                 </p>
-                <div className="pb-1">
-                  <p className="text-[12px] font-bold text-foreground">Receita líquida no período</p>
-                  <p className="mt-1 text-[11.5px] font-medium text-muted-foreground">
-                    <span className="font-bold text-foreground">{periodLabel}</span> · {dateFiltered.length} {dateFiltered.length === 1 ? "transação" : "transações"}
-                    {lastSaleText && <> · última {lastSaleText}</>}
+                <div className="pb-1.5">
+                  <p className="text-[12px] font-bold tracking-[-0.005em] text-foreground">Receita líquida no período</p>
+                  <p className="mt-1 text-[11.5px] font-medium text-muted-foreground/85">
+                    <span className="font-bold text-foreground">{periodLabel}</span>
+                    <span className="mx-1.5 inline-block h-[3px] w-[3px] -translate-y-[3px] rounded-full bg-muted-foreground/40 align-middle" />
+                    {dateFiltered.length} {dateFiltered.length === 1 ? "transação" : "transações"}
+                    {lastSaleText && (
+                      <>
+                        <span className="mx-1.5 inline-block h-[3px] w-[3px] -translate-y-[3px] rounded-full bg-muted-foreground/40 align-middle" />
+                        última {lastSaleText}
+                      </>
+                    )}
                   </p>
                 </div>
               </div>
