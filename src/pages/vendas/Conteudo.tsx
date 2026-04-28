@@ -2,7 +2,10 @@ import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   BookOpen,
+  CheckCircle2,
   DollarSign,
+  ExternalLink,
+  FileEdit,
   GraduationCap,
   Grid3X3,
   Layers,
@@ -10,7 +13,7 @@ import {
   Loader2,
   Plus,
   Search,
-  Sparkles,
+  Settings2,
   Users,
   X,
 } from "lucide-react";
