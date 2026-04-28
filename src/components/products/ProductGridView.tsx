@@ -281,7 +281,7 @@ export function ProductGridView({ products, copiedId, toolbar, ...handlers }: Pr
                       </button>
                     )}
 
-                    <div className="mt-1 flex items-center gap-1.5">
+                    <div className="mt-auto flex items-center gap-1.5 pt-1">
                       <button
                         type="button"
                         onClick={(e) => { e.stopPropagation(); handlers.onEditProduct(product); }}
