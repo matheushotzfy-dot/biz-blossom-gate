@@ -1,0 +1,122 @@
+import { ReactNode } from "react";
+import { cn } from "@/lib/utils";
+import type { LucideIcon } from "lucide-react";
+
+/**
+ * Premium hero header used across all Financeiro hub pages.
+ * Billion-Dollar SaaS standard: 52px display, radial accent, status chip, action slot.
+ */
+export function FinanceiroHero({
+  eyebrow,
+  title,
+  subtitle,
+  status,
+  actions,
+}: {
+  eyebrow?: string;
+  title: string;
+  subtitle?: string;
+  status?: { tone: "success" | "warning" | "info" | "neutral" | "destructive"; label: string; pulse?: boolean };
+  actions?: ReactNode;
+}) {
+  const dotCls: Record<string, string> = {
+    success: "bg-success",
+    warning: "bg-warning",
+    info: "bg-info",
+    neutral: "bg-muted-foreground",
+    destructive: "bg-destructive",
+  };
+  return (
+    <div className="relative overflow-hidden animate-fade-in">
+      <div
+        className="pointer-events-none absolute -top-24 -left-20 h-[280px] w-[520px] rounded-full opacity-60"
+        style={{ background: "radial-gradient(closest-side, hsl(var(--primary) / 0.10), transparent 70%)" }}
+      />
+      <div className="relative flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
+        <div className="space-y-3 min-w-0">
+          {(status || eyebrow) && (
+            <div className="inline-flex items-center gap-2 rounded-full border border-border/50 bg-card/60 px-2.5 py-1">
+              {status && (
+                <span className={cn("h-1.5 w-1.5 rounded-full", dotCls[status.tone], status.pulse && "animate-pulse")} />
+              )}
+              <span className="text-[10px] font-bold uppercase tracking-[0.18em] text-muted-foreground">
+                {status?.label || eyebrow}
+              </span>
+            </div>
+          )}
+          <h1 className="font-display text-[40px] sm:text-[52px] font-black leading-[0.95] tracking-[-0.03em] text-foreground">
+            {title}
+          </h1>
+          {subtitle && (
+            <p className="text-[13px] text-muted-foreground/80 max-w-xl leading-relaxed">{subtitle}</p>
+          )}
+        </div>
+        {actions && <div className="flex items-center gap-2 shrink-0">{actions}</div>}
+      </div>
+    </div>
+  );
+}
+
+/**
+ * KPI card used inside a 1px-divider grid (parent: `bg-border/40 gap-px`).
+ */
+export type KpiTone = "success" | "info" | "warning" | "neutral" | "destructive" | "primary";
+
+export function FinanceiroKpi({
+  label,
+  value,
+  sub,
+  icon: Icon,
+  tone = "neutral",
+}: {
+  label: string;
+  value: string;
+  sub?: string;
+  icon: LucideIcon;
+  tone?: KpiTone;
+}) {
+  const toneCls: Record<KpiTone, string> = {
+    success: "text-success",
+    info: "text-info",
+    warning: "text-warning",
+    neutral: "text-foreground",
+    destructive: "text-destructive",
+    primary: "text-primary",
+  };
+  const iconBg: Record<KpiTone, string> = {
+    success: "bg-success/10 text-success",
+    info: "bg-info/10 text-info",
+    warning: "bg-warning/10 text-warning",
+    neutral: "bg-secondary text-muted-foreground",
+    destructive: "bg-destructive/10 text-destructive",
+    primary: "bg-primary/10 text-primary",
+  };
+  return (
+    <div className="bg-card px-5 py-4 flex flex-col gap-2.5">
+      <div className="flex items-center justify-between">
+        <span className="text-[10px] font-bold uppercase tracking-[0.18em] text-muted-foreground/70">{label}</span>
+        <div className={cn("h-7 w-7 rounded-md flex items-center justify-center", iconBg[tone])}>
+          <Icon className="h-3.5 w-3.5" strokeWidth={2.25} />
+        </div>
+      </div>
+      <div className={cn("font-display text-[24px] font-black leading-none tabular-nums tracking-tight", toneCls[tone])}>
+        {value}
+      </div>
+      {sub && <div className="text-[11px] text-muted-foreground/70 font-medium truncate">{sub}</div>}
+    </div>
+  );
+}
+
+export function FinanceiroKpiGrid({ children, cols = 4 }: { children: ReactNode; cols?: 2 | 3 | 4 | 5 }) {
+  const colCls: Record<number, string> = {
+    2: "grid-cols-2",
+    3: "grid-cols-2 lg:grid-cols-3",
+    4: "grid-cols-2 lg:grid-cols-4",
+    5: "grid-cols-2 lg:grid-cols-5",
+  };
+  return (
+    <div className={cn("grid gap-px overflow-hidden rounded-xl border border-border/50 bg-border/40 animate-fade-in stagger-1", colCls[cols])}>
+      {children}
+    </div>
+  );
+}
