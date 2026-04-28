@@ -106,53 +106,18 @@ export default function Produtos() {
       {/* ── Page header ── */}
       <div className="flex flex-col gap-6 px-5 pt-1 sm:px-7 md:pt-1">
         <div className="flex flex-wrap items-center justify-between gap-4">
-          <div className="space-y-2">
-            <div className="inline-flex items-center gap-2 rounded-full border border-border/60 bg-card px-3 py-1 text-[10px] font-bold uppercase tracking-[0.16em] text-muted-foreground/60">
-              <LayoutGrid className="h-3.5 w-3.5 text-primary" /> Catálogo operacional
-            </div>
-            <div className="flex items-baseline gap-3">
-              <h1 className="font-display text-[26px] font-extrabold leading-none tracking-tight text-foreground sm:text-[30px]">
-                Meus produtos
-              </h1>
-              <span className="text-[13px] tabular-nums text-muted-foreground/60">
-                {products.length}
-              </span>
-            </div>
-            <p className="text-[12px] text-muted-foreground/65">Menos ruído, mais leitura de status, preço e ações.</p>
+          <div>
+            <h1 className="font-display text-[40px] font-black leading-[0.9] tracking-[-0.055em] text-foreground sm:text-[52px]">
+              Meus produtos
+            </h1>
           </div>
           <button
             onClick={() => navigate("/vendas/produtos/novo/editar")}
-            className="inline-flex h-9 items-center gap-2 rounded-lg bg-primary px-4 text-xs font-semibold text-primary-foreground transition-all duration-200 hover:bg-primary/90 hover:-translate-y-px"
+            className="inline-flex h-10 items-center gap-2 rounded-lg bg-primary px-4 text-[13px] font-bold text-primary-foreground transition-all duration-200 hover:bg-primary/90 hover:-translate-y-px"
           >
-            <Plus className="h-3.5 w-3.5" strokeWidth={2.5} />
+            <Plus className="h-4 w-4" strokeWidth={2.5} />
             Novo produto
           </button>
-        </div>
-
-        <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
-          <div className="rounded-xl border border-border/60 bg-card px-4 py-3">
-            <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-muted-foreground/55">Ativos</p>
-            <div className="mt-2 flex items-end justify-between gap-3">
-              <span className="font-numbers text-[28px] font-black tracking-[-0.05em] text-foreground tabular-nums">{activeCount}</span>
-              <span className="text-[11px] font-semibold text-success">prontos para vender</span>
-            </div>
-          </div>
-          <div className="rounded-xl border border-border/60 bg-card px-4 py-3">
-            <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-muted-foreground/55">Em revisão</p>
-            <div className="mt-2 flex items-end justify-between gap-3">
-              <span className="font-numbers text-[28px] font-black tracking-[-0.05em] text-foreground tabular-nums">{pendingCount}</span>
-              <span className="text-[11px] font-semibold text-warning">aguardando liberação</span>
-            </div>
-          </div>
-          <div className="rounded-xl border border-border/60 bg-card px-4 py-3">
-            <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-muted-foreground/55">Ação rápida</p>
-            <button
-              onClick={() => navigate("/vendas/produtos/novo/editar")}
-              className="mt-2 inline-flex items-center gap-2 text-[12px] font-semibold text-foreground hover:text-primary"
-            >
-              <Sparkles className="h-3.5 w-3.5 text-primary" /> criar novo produto <ArrowUpRight className="h-3.5 w-3.5" />
-            </button>
-          </div>
         </div>
 
         {/* Tabs + Search row, integrated with list */}
