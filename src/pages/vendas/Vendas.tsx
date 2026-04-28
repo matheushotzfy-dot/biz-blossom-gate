@@ -720,16 +720,16 @@ export default function Vendas() {
 
             <TooltipProvider delayDuration={250}>
               <div className="flex w-full flex-wrap items-center gap-1.5 xl:w-auto xl:justify-end">
-                <div className="hidden items-center border border-border bg-card p-0.5 md:inline-flex">
+                <div className="hidden items-center rounded-md border border-border/70 bg-card/60 p-0.5 shadow-[inset_0_1px_0_hsl(var(--foreground)/0.02)] backdrop-blur-sm md:inline-flex">
                   {PERIODS.map((opt) => (
                     <button
                       key={opt.label}
                       onClick={() => { setSelectedPeriod(opt); setIsCustom(false); setCustomRange(undefined); }}
                       className={cn(
-                        "px-2.5 py-1 text-[11px] font-bold transition-colors",
+                        "rounded-[5px] px-2.5 py-1 text-[11px] font-bold tracking-[-0.005em] transition-all duration-200",
                         !isCustom && selectedPeriod.label === opt.label
-                          ? "bg-foreground text-background"
-                          : "text-muted-foreground hover:text-foreground",
+                          ? "bg-foreground text-background shadow-[0_1px_2px_hsl(var(--foreground)/0.18)]"
+                          : "text-muted-foreground hover:bg-muted/60 hover:text-foreground",
                       )}
                     >
                       {opt.label}
@@ -741,24 +741,24 @@ export default function Vendas() {
                   <Popover open={datePickerOpen} onOpenChange={setDatePickerOpen}>
                     <TooltipTrigger asChild>
                       <PopoverTrigger asChild>
-                        <button className={cn("inline-flex h-8 w-8 items-center justify-center border transition-colors",
-                          isCustom ? "border-foreground bg-secondary text-foreground" : "border-border bg-card text-muted-foreground hover:text-foreground")}>
+                        <button className={cn("inline-flex h-8 w-8 items-center justify-center rounded-md border transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-foreground/20",
+                          isCustom ? "border-foreground bg-secondary text-foreground" : "border-border/70 bg-card/60 text-muted-foreground hover:border-border hover:bg-muted/60 hover:text-foreground")}>
                           <CalendarDays className="h-3.5 w-3.5" />
                         </button>
                       </PopoverTrigger>
                     </TooltipTrigger>
-                    <PopoverContent align="end" className="w-auto overflow-hidden border border-border bg-popover p-0">
+                    <PopoverContent align="end" className="w-auto overflow-hidden rounded-lg border border-border bg-popover p-0 shadow-lg">
                       <Calendar mode="range" selected={customRange} onSelect={(range) => { setCustomRange(range); setIsCustom(true); if (range?.from && range?.to) setTimeout(() => setDatePickerOpen(false), 300); }} numberOfMonths={1} locale={ptBR} disabled={(date) => date > new Date()} className="pointer-events-auto p-3" />
                     </PopoverContent>
                   </Popover>
                   <TooltipContent side="bottom" className="flex items-center gap-2">Período personalizado</TooltipContent>
                 </Tooltip>
 
-                <span className="hidden h-5 w-px bg-border md:block" />
+                <span className="hidden h-5 w-px bg-border/70 md:block" />
 
                 <Tooltip>
                   <TooltipTrigger asChild>
-                    <button onClick={() => setCmdOpen(true)} className="inline-flex h-8 items-center gap-1.5 border border-border bg-card px-2 text-muted-foreground transition-colors hover:text-foreground">
+                    <button onClick={() => setCmdOpen(true)} className="inline-flex h-8 items-center gap-1.5 rounded-md border border-border/70 bg-card/60 px-2 text-muted-foreground transition-all duration-200 hover:border-border hover:bg-muted/60 hover:text-foreground focus:outline-none focus-visible:ring-2 focus-visible:ring-foreground/20">
                       <CommandIcon className="h-3.5 w-3.5" />
                       <Kbd>⌘K</Kbd>
                     </button>
@@ -768,8 +768,8 @@ export default function Vendas() {
 
                 <Tooltip>
                   <TooltipTrigger asChild>
-                    <button onClick={toggleDensity} className={cn("inline-flex h-8 w-8 items-center justify-center border transition-colors",
-                      density === "compact" ? "border-foreground bg-secondary text-foreground" : "border-border bg-card text-muted-foreground hover:text-foreground")}>
+                    <button onClick={toggleDensity} className={cn("inline-flex h-8 w-8 items-center justify-center rounded-md border transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-foreground/20",
+                      density === "compact" ? "border-foreground bg-secondary text-foreground" : "border-border/70 bg-card/60 text-muted-foreground hover:border-border hover:bg-muted/60 hover:text-foreground")}>
                       {density === "compact" ? <Rows4 className="h-3.5 w-3.5" /> : <Rows3 className="h-3.5 w-3.5" />}
                     </button>
                   </TooltipTrigger>
@@ -778,7 +778,7 @@ export default function Vendas() {
 
                 <Tooltip>
                   <TooltipTrigger asChild>
-                    <button onClick={() => window.location.reload()} className="inline-flex h-8 w-8 items-center justify-center border border-border bg-card text-muted-foreground transition-colors hover:text-foreground">
+                    <button onClick={() => window.location.reload()} className="inline-flex h-8 w-8 items-center justify-center rounded-md border border-border/70 bg-card/60 text-muted-foreground transition-all duration-200 hover:border-border hover:bg-muted/60 hover:text-foreground focus:outline-none focus-visible:ring-2 focus-visible:ring-foreground/20">
                       <RefreshCw className="h-3.5 w-3.5" />
                     </button>
                   </TooltipTrigger>
@@ -787,8 +787,8 @@ export default function Vendas() {
 
                 <Tooltip>
                   <TooltipTrigger asChild>
-                    <button onClick={toggleHidden} className={cn("inline-flex h-8 w-8 items-center justify-center border transition-colors",
-                      hidden ? "border-foreground bg-secondary text-foreground" : "border-border bg-card text-muted-foreground hover:text-foreground")}>
+                    <button onClick={toggleHidden} className={cn("inline-flex h-8 w-8 items-center justify-center rounded-md border transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-foreground/20",
+                      hidden ? "border-foreground bg-secondary text-foreground" : "border-border/70 bg-card/60 text-muted-foreground hover:border-border hover:bg-muted/60 hover:text-foreground")}>
                       {hidden ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
                     </button>
                   </TooltipTrigger>
@@ -799,7 +799,7 @@ export default function Vendas() {
                   <TooltipTrigger asChild>
                     <button
                       onClick={() => setShowExportDialog(true)}
-                      className="inline-flex h-8 items-center gap-1.5 bg-foreground px-3 text-[11px] font-black text-background transition-colors hover:bg-foreground/90"
+                      className="inline-flex h-8 items-center gap-1.5 rounded-md bg-foreground px-3 text-[11px] font-black tracking-[-0.005em] text-background shadow-[0_1px_2px_hsl(var(--foreground)/0.25),inset_0_1px_0_hsl(var(--background)/0.18)] transition-all duration-200 hover:bg-foreground/90 hover:shadow-[0_2px_6px_hsl(var(--foreground)/0.28),inset_0_1px_0_hsl(var(--background)/0.18)] focus:outline-none focus-visible:ring-2 focus-visible:ring-foreground/30"
                     >
                       <Download className="h-3.5 w-3.5" strokeWidth={2.5} />
                       Exportar
