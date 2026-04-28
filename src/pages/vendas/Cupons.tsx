@@ -11,6 +11,7 @@ import { useProducts, useCoupons } from "@/hooks/useQueryData";
 import {
   Ticket, Search, Plus, Trash2, Percent, TrendingDown, Calendar,
   Zap, Copy, Tag, Sparkles, Power, Infinity as InfinityIcon, AlertCircle,
+  Layers, CheckCircle2, PauseCircle, XCircle, DollarSign, MousePointerClick, X,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -19,8 +20,7 @@ import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { toast } from "sonner";
-import { PageShell, PageTitle, EmptyState, Panel } from "@/components/PageShell";
-import { KpiRibbon } from "@/components/KpiRibbon";
+import { EmptyState, Panel } from "@/components/PageShell";
 import { cn } from "@/lib/utils";
 import type { Tables } from "@/integrations/supabase/types";
 
@@ -141,17 +141,56 @@ export default function Cupons() {
 
   const previewValue = form.discount_value ? Number(form.discount_value) : 0;
 
+  const tabAccent: Record<StatusFilter, string> = {
+    all: "text-foreground",
+    active: "text-success",
+    inactive: "text-muted-foreground",
+    expired: "text-destructive",
+  };
+  const tabIcon: Record<StatusFilter, JSX.Element> = {
+    all: <Layers className="h-3 w-3" strokeWidth={2.5} />,
+    active: <CheckCircle2 className="h-3 w-3" strokeWidth={2.5} />,
+    inactive: <PauseCircle className="h-3 w-3" strokeWidth={2.5} />,
+    expired: <XCircle className="h-3 w-3" strokeWidth={2.5} />,
+  };
+  const filterTabs: { id: StatusFilter; label: string; count: number }[] = [
+    { id: "all", label: "Todos", count: coupons.length },
+    { id: "active", label: "Ativos", count: activeCoupons.length },
+    { id: "inactive", label: "Pausados", count: coupons.filter(c => !c.is_active).length },
+    { id: "expired", label: "Expirados", count: coupons.filter(c => isExpired(c) || isExhausted(c)).length },
+  ];
+
   return (
-    <PageShell>
-      {/* ─── Header ─── */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <PageTitle icon={<Tag className="h-6 w-6" />} title="Cupons" subtitle="Crie e gerencie estratégias de desconto comercial" />
-        <Dialog open={openCreate} onOpenChange={setOpenCreate}>
-          <DialogTrigger asChild>
-            <Button className="gap-2 rounded-xl text-sm font-display font-bold h-10 px-5 shadow-lg shadow-primary/20">
-              <Plus className="h-4 w-4" /> Novo Cupom
-            </Button>
-          </DialogTrigger>
+    <div className="mx-auto -mt-2 w-full max-w-[1440px] pb-24 md:-mt-3 md:pb-10">
+      {/* ── Hero header ── */}
+      <div className="relative flex flex-col gap-7 px-5 pt-1 sm:px-7 md:pt-1">
+        {/* Subtle radial accent behind title */}
+        <div
+          aria-hidden
+          className="pointer-events-none absolute -top-12 left-0 h-48 w-[520px] -z-[1] opacity-60 blur-3xl"
+          style={{
+            background:
+              "radial-gradient(60% 60% at 20% 50%, hsl(var(--primary) / 0.10), transparent 70%)",
+          }}
+        />
+
+        <div className="flex flex-wrap items-end justify-between gap-4 animate-fade-in">
+          <div>
+            <h1 className="font-display text-[40px] font-black leading-[0.9] tracking-[-0.055em] text-foreground sm:text-[52px]">
+              Cupons
+            </h1>
+            <p className="mt-2 text-[13px] font-medium text-muted-foreground/80">
+              Crie e gerencie estratégias de desconto para seus checkouts.
+            </p>
+          </div>
+
+          <Dialog open={openCreate} onOpenChange={setOpenCreate}>
+            <DialogTrigger asChild>
+              <button className="group inline-flex h-11 items-center gap-2 rounded-xl bg-primary px-5 text-[13px] font-black uppercase tracking-wider text-primary-foreground transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] hover:bg-primary/90 hover:-translate-y-0.5 hover:shadow-[0_10px_30px_-10px_hsl(var(--primary)/0.5)]">
+                <Plus className="h-4 w-4 transition-transform duration-300 group-hover:rotate-90" strokeWidth={2.75} />
+                Novo cupom
+              </button>
+            </DialogTrigger>
           <DialogContent className="max-w-lg rounded-2xl border border-border/40 bg-card/95 backdrop-blur-xl p-0 overflow-hidden">
             <div className="px-6 pt-6 pb-4 border-b border-border/20">
               <DialogHeader>
@@ -293,59 +332,94 @@ export default function Cupons() {
         </Dialog>
       </div>
 
-      {/* ─── KPIs ─── */}
-      <KpiRibbon
-        cols={4}
-        items={[
-          { label: "Total de cupons", value: String(coupons.length), sub: `${coupons.length} ${coupons.length === 1 ? "cupom criado" : "cupons criados"} no total`, tone: "neutral", footer: "todos status" },
-          { label: "Cupons ativos", value: String(activeCoupons.length), sub: `${activeCoupons.length} prontos para uso · ${coupons.filter(c => !c.is_active).length} pausados`, tone: "success", progress: coupons.length > 0 ? (activeCoupons.length / coupons.length) * 100 : 0 },
-          { label: "Utilizações totais", value: String(totalUses), sub: `${totalUses} ${totalUses === 1 ? "vez resgatado" : "vezes resgatados"} no checkout`, tone: "info", footer: "soma de usos" },
-          { label: "Desconto concedido", value: fmt(totalDiscount), sub: totalDiscount > 0 ? "valor total já aplicado em vendas" : "nenhum desconto aplicado ainda", tone: totalDiscount > 0 ? "warning" : "muted", footer: "histórico" },
-        ]}
-      />
+        {/* ── KPIs ── */}
+        <div className="grid grid-cols-2 gap-px overflow-hidden rounded-xl border border-border/50 bg-border/40 lg:grid-cols-4 animate-fade-in stagger-1">
+          {[
+            { label: "Total de cupons", value: String(coupons.length), sub: `${coupons.length} ${coupons.length === 1 ? "cupom" : "cupons"} criados`, icon: Ticket, tone: "default" as const },
+            { label: "Cupons ativos", value: String(activeCoupons.length), sub: `${coupons.filter(c => !c.is_active).length} pausados`, icon: Zap, tone: "success" as const },
+            { label: "Utilizações", value: String(totalUses), sub: totalUses === 1 ? "1 resgate no checkout" : `${totalUses} resgates no checkout`, icon: MousePointerClick, tone: "info" as const },
+            { label: "Desconto concedido", value: fmt(totalDiscount), sub: totalDiscount > 0 ? "valor aplicado" : "nenhum aplicado", icon: TrendingDown, tone: totalDiscount > 0 ? "warning" as const : "default" as const },
+          ].map((k) => {
+            const Icon = k.icon;
+            const toneCls = {
+              default: "text-foreground",
+              success: "text-success",
+              warning: "text-warning",
+              info: "text-info",
+            }[k.tone];
+            return (
+              <div key={k.label} className="bg-card px-5 py-4">
+                <div className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-[0.18em] text-muted-foreground/60">
+                  <Icon className="h-3 w-3" strokeWidth={2.5} />
+                  {k.label}
+                </div>
+                <p className={cn("mt-2 font-display text-[22px] font-black leading-none tracking-tight tabular-nums", toneCls)}>
+                  {k.value}
+                </p>
+                <p className="mt-1.5 text-[11px] font-medium text-muted-foreground/60 tabular-nums">{k.sub}</p>
+              </div>
+            );
+          })}
+        </div>
 
-      {/* ─── Coupon Table ─── */}
-      <Panel className="p-0 overflow-hidden">
-        {/* Toolbar */}
-        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3 px-4 py-3 border-b border-border/30 bg-muted/5">
-          <div className="flex items-center gap-0.5 p-0.5 rounded-lg bg-muted/15 border border-border/30 w-fit">
-            {([
-              { id: "all", label: "Todos", count: coupons.length },
-              { id: "active", label: "Ativos", count: activeCoupons.length },
-              { id: "inactive", label: "Pausados", count: coupons.filter(c => !c.is_active).length },
-              { id: "expired", label: "Expirados", count: coupons.filter(c => isExpired(c) || isExhausted(c)).length },
-            ] as { id: StatusFilter; label: string; count: number }[]).map(t => {
-              const isActive = statusFilter === t.id;
+        {/* ── Tabs + Search row ── */}
+        <div className="flex flex-col gap-3 pb-1 animate-fade-in stagger-2 sm:flex-row sm:items-center sm:justify-between">
+          <div className="inline-flex w-fit items-center gap-0.5 rounded-xl border border-border/50 bg-card/60 p-1 overflow-x-auto">
+            {filterTabs.map((t) => {
+              const active = statusFilter === t.id;
               return (
                 <button
                   key={t.id}
                   onClick={() => setStatusFilter(t.id)}
                   className={cn(
-                    "flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-[11px] font-display font-bold transition-colors",
-                    isActive ? "bg-card text-foreground border border-border/40 shadow-sm"
-                             : "text-muted-foreground/50 hover:text-muted-foreground/80"
+                    "group/tab relative inline-flex shrink-0 items-center gap-2 rounded-lg h-8 px-3 text-[12px] font-bold tracking-tight transition-colors duration-200",
+                    active
+                      ? "bg-secondary text-foreground"
+                      : "text-muted-foreground/80 hover:text-foreground"
                   )}
                 >
-                  <span>{t.label}</span>
                   <span className={cn(
-                    "text-[9.5px] font-black px-1 rounded tabular-nums",
-                    isActive ? "bg-primary/10 text-primary" : "bg-muted/20 text-muted-foreground/40"
-                  )}>{t.count}</span>
+                    "flex h-4 w-4 items-center justify-center transition-colors",
+                    active ? tabAccent[t.id] : "text-muted-foreground/50 group-hover/tab:text-foreground/70"
+                  )}>
+                    {tabIcon[t.id]}
+                  </span>
+                  <span className="font-display">{t.label}</span>
+                  {t.count > 0 && (
+                    <span className={cn(
+                      "inline-flex h-[18px] min-w-[20px] items-center justify-center rounded-md px-1.5 text-[10px] font-black tabular-nums tracking-tight border transition-colors",
+                      active
+                        ? "bg-background/80 text-foreground border-border/40"
+                        : "bg-muted/30 text-muted-foreground/60 border-transparent"
+                    )}>
+                      {t.count}
+                    </span>
+                  )}
                 </button>
               );
             })}
           </div>
 
-          <div className="relative">
-            <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground/40" />
-            <Input
+          <div className="relative group">
+            <Search className="absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground/50 transition-colors group-focus-within:text-primary" />
+            <input
               value={search}
-              onChange={e => setSearch(e.target.value)}
+              onChange={(e) => setSearch(e.target.value)}
               placeholder="Buscar código..."
-              className="h-8 pl-8 pr-3 text-[11.5px] rounded-md w-full lg:w-64 bg-card/50 border-border/40 font-mono"
+              className="h-9 w-full rounded-lg border border-border/60 bg-secondary/40 pl-9 pr-8 text-xs font-mono font-medium text-foreground placeholder:text-muted-foreground/60 placeholder:font-sans transition-all focus:border-primary/50 focus:bg-card focus:outline-none focus:ring-2 focus:ring-primary/15 sm:w-72"
             />
+            {search && (
+              <button onClick={() => setSearch("")} className="absolute right-2.5 top-1/2 -translate-y-1/2 rounded p-0.5 text-muted-foreground/50 transition-colors hover:bg-secondary hover:text-foreground">
+                <X className="h-3 w-3" />
+              </button>
+            )}
           </div>
         </div>
+      </div>
+
+      {/* ── Workspace ── */}
+      <div className="px-5 pt-6 sm:px-7">
+        <Panel className="p-0 overflow-hidden">
 
         {/* Column headers */}
         {filtered.length > 0 && (
@@ -501,6 +575,7 @@ export default function Cupons() {
           </div>
         )}
       </Panel>
-    </PageShell>
+      </div>
+    </div>
   );
 }
