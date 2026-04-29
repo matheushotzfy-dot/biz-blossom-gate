@@ -592,7 +592,7 @@ export default function Dashboard() {
           <div key={`hero-bal-${animKey}`} className="vendas-rise vendas-rise-d1 relative px-6 py-9 lg:px-10 lg:py-12">
             <div className="flex items-center gap-2 mb-4">
               <span className="h-2 w-2 rounded-full bg-success" />
-              <p className="font-display text-[10px] font-extrabold uppercase tracking-[0.16em] text-muted-foreground/70">Saldo Disponível</p>
+              <p className="font-display text-[10px] font-extrabold uppercase tracking-[0.16em] text-muted-foreground/70">Financeiro</p>
             </div>
             <p className="font-display text-[clamp(1.8rem,4.5vw,46px)] font-black tabular-nums text-success tracking-[-0.035em] leading-none">
               {privacy.hidden ? CENSORED : fmt(Math.abs(balance))}
