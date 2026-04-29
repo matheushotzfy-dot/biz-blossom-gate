@@ -298,7 +298,7 @@ export default function Saques() {
           <div className="flex flex-col gap-5 xl:flex-row xl:items-start xl:justify-between">
             <div className="min-w-0">
               <h1 className="text-[13px] font-black uppercase tracking-[0.18em] text-muted-foreground/80">
-                Saldo Disponível:
+                Financeiro
               </h1>
               <div className="mt-4 flex flex-wrap items-end gap-x-6 gap-y-2">
                 <p

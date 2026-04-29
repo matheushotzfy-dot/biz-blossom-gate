@@ -13,7 +13,7 @@ const tabs = [
  { label: "Home", icon: LayoutDashboard, path: "/dashboard" },
  { label: "Vendas", icon: ShoppingCart, path: "/vendas" },
  { label: "Produtos", icon: Package, path: "/vendas/produtos" },
- { label: "Saldo Disponível:", icon: Wallet, path: "/financeiro/saques" },
+ { label: "Financeiro", icon: Wallet, path: "/financeiro/saques" },
  { label: "Mais", icon: MoreHorizontal, path: "__more__" },
 ];
 
