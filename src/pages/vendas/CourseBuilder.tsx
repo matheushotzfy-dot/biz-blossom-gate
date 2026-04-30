@@ -740,12 +740,12 @@ export default function CourseBuilder() {
    isActive ? "text-primary-foreground" : "text-foreground"
  )}>{lesson.title}</p>
  <div className="flex items-center gap-1.5 mt-0.5">
-   {lesson.is_free && (
-     <span className={cn(
-       "text-[8px] px-1 py-0.5 rounded font-display font-bold uppercase tracking-wider",
-       isActive ? "bg-primary-foreground/20 text-primary-foreground" : "bg-success/15 text-success"
-     )}>FREE</span>
-   )}
+    {lesson.is_free && (
+      <span className={cn(
+        "text-[8px] px-1 py-0.5 font-display font-black uppercase tracking-[0.14em]",
+        isActive ? "bg-primary-foreground/20 text-primary-foreground" : "bg-success text-success-foreground"
+      )}>FREE</span>
+    )}
    <span className={cn(
      "text-[9.5px] font-display font-semibold flex items-center gap-1",
      isActive ? "text-primary-foreground/80" : hasVideo ? "text-success" : "text-warning"
