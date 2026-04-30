@@ -471,8 +471,14 @@ export default function MemberCourse() {
  initial={{ opacity: 0, y: 10 }}
  animate={{ opacity: 1, y: 0 }}
  transition={{ delay: 0.8 }}
- className="flex items-center justify-center gap-3"
+ className="flex flex-wrap items-center justify-center gap-3"
  >
+ {certificate && (
+ <Link to={`/certificado/${certificate.code}`} target="_blank"
+ className="px-6 py-3 rounded-xl bg-success text-success-foreground text-sm font-display font-bold hover:bg-success/90 transition-all active:scale-[0.97] shadow-lg flex items-center gap-2">
+ <Award className="h-4 w-4" /> Ver certificado
+ </Link>
+ )}
  <Link to="/membros-area"
  className="px-6 py-3 rounded-xl bg-foreground text-background text-sm font-display font-bold hover:bg-foreground/90 transition-all active:scale-[0.97] shadow-lg">
  Voltar aos cursos
