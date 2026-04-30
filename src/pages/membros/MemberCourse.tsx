@@ -201,6 +201,8 @@ export default function MemberCourse() {
  if (newCompleted >= allLessons.length) {
  setShowCelebration(true);
  setTimeout(() => setShowCelebration(false), 5000);
+ // Certificate is auto-issued by DB trigger; fetch it
+ setTimeout(() => refreshCertificate(), 1200);
  } else {
  toast.success("Aula concluída! 🎉");
  const idx = allLessons.findIndex(l => l.id === lessonId);
