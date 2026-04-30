@@ -931,7 +931,7 @@ export default function CourseBuilder() {
  {/* ─── VIDEO TAB ─── */}
  {activeEditorTab === "video" && (
  <>
- <div className="rounded-2xl bg-card/60 border border-border/20 overflow-hidden shadow-md ring-1 ring-border/5">
+ <div className="rounded-none bg-card border border-border overflow-hidden">
  {uploadingVideo ? (
  <div className="aspect-video flex flex-col items-center justify-center gap-5 p-8 bg-gradient-to-b from-primary/[0.02] to-transparent">
  <div className="h-20 w-20 rounded-2xl bg-primary/8 border border-primary/10 flex items-center justify-center shadow-lg shadow-primary/5">
