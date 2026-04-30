@@ -628,8 +628,8 @@ export default function CourseBuilder() {
  <div
    key={mod.id}
    className={cn(
-     "rounded-lg overflow-hidden border transition-colors",
-     containsActive ? "border-primary/30 bg-primary/[0.03]" : "border-border bg-secondary/40 hover:border-border"
+     "overflow-hidden border transition-colors",
+     containsActive ? "border-primary bg-primary/[0.04]" : "border-border bg-card-elevated hover:border-foreground/30"
    )}
  >
  {/* Module Header */}
