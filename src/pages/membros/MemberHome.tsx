@@ -85,6 +85,7 @@ export default function MemberHome() {
         totalLessons: allLessons.length,
         completedLessons: completed.length,
         lastLesson,
+        lastActivityAt: lastTime,
         modules,
       };
     });
@@ -122,7 +123,9 @@ export default function MemberHome() {
     { label: "Concluídos", value: "completed" as const, count: completedCount },
     { label: "Não iniciados", value: "not_started" as const, count: notStartedCount },
   ];
-  const continueWatching = courses.filter((course) => course.completedLessons > 0 && course.completedLessons < course.totalLessons);
+  const continueWatching = courses
+    .filter((course) => course.completedLessons > 0 && course.completedLessons < course.totalLessons)
+    .sort((a, b) => (b.lastActivityAt || 0) - (a.lastActivityAt || 0));
   const freshCourses = courses.filter((course) => getCourseStatus(course) === "not_started");
   const completedCourses = courses.filter((course) => getCourseStatus(course) === "completed");
   const featuredCourse = continueWatching[0] || courses[0] || null;
