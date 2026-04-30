@@ -645,9 +645,9 @@ export default function CourseBuilder() {
    <ChevronRight className="h-3.5 w-3.5 text-muted-foreground" strokeWidth={2.2} />
  </motion.div>
  <div className={cn(
-   "h-7 w-7 rounded-md flex items-center justify-center shrink-0 text-[10px] font-display font-black border transition-colors tabular-nums",
+   "h-7 w-7 flex items-center justify-center shrink-0 text-[10px] font-display font-black border tabular-nums transition-colors",
    containsActive ? "bg-primary text-primary-foreground border-primary"
-   : isExpanded ? "bg-primary/10 text-primary border-primary/20"
+   : isExpanded ? "bg-primary/[0.10] text-primary border-primary/40"
    : "bg-card text-muted-foreground border-border"
  )}>
    {String(idx + 1).padStart(2, "0")}
