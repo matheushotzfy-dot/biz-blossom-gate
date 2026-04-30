@@ -653,10 +653,30 @@ export default function MemberCourse() {
  <ExternalLink className="h-3.5 w-3.5 text-muted-foreground/15 group-hover:text-primary/40 transition-colors shrink-0" />
  </a>
  ))}
- </div>
+  </div>
  </div>
  )}
  </div>
+
+ {/* Certificate banner */}
+ {certificate && (
+ <Link to={`/certificado/${certificate.code}`} target="_blank"
+ className="block rounded-xl bg-gradient-to-br from-success/10 to-success/5 border border-success/20 p-5 hover:border-success/40 transition-all group">
+ <div className="flex items-center gap-4">
+ <div className="h-12 w-12 rounded-xl bg-success/15 flex items-center justify-center shrink-0">
+ <Award className="h-6 w-6 text-success" />
+ </div>
+ <div className="flex-1 min-w-0">
+ <p className="text-sm font-display font-black text-foreground tracking-tight">Certificado disponível</p>
+ <p className="text-xs text-muted-foreground/70 font-display mt-0.5">Código <span className="font-mono text-success">{certificate.code}</span> · Clique para visualizar e imprimir</p>
+ </div>
+ <ExternalLink className="h-4 w-4 text-success/60 group-hover:text-success transition-colors shrink-0" />
+ </div>
+ </Link>
+ )}
+
+ {/* Lesson Q&A */}
+ {user && <LessonComments lessonId={activeLesson.id} currentUserId={user.id} />}
  </motion.div>
  ) : (
  <div className="aspect-video max-h-[480px] rounded-xl bg-card/30 border border-border/10 flex items-center justify-center">
