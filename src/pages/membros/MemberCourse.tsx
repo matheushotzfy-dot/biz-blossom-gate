@@ -18,6 +18,7 @@ import {
 import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
+import { LessonComments } from "@/components/member/LessonComments";
 
 type Course = { id: string; title: string; description: string | null; thumbnail_url: string | null };
 type Module = { id: string; title: string; description: string | null; banner_url: string | null; sort_order: number; lessons: Lesson[] };
@@ -71,6 +72,7 @@ export default function MemberCourse() {
  const [theaterMode, setTheaterMode] = useState(false);
  const [attachments, setAttachments] = useState<Attachment[]>([]);
  const [showCelebration, setShowCelebration] = useState(false);
+ const [certificate, setCertificate] = useState<{ code: string } | null>(null);
 
  useEffect(() => { if (courseId && user) loadCourse(); }, [courseId, user]);
 
@@ -139,6 +141,15 @@ export default function MemberCourse() {
  loadAttachments(enrichedModules[0].lessons[0].id);
  }
  setLoading(false);
+ // Fetch certificate if exists
+ const { data: certData } = await supabase.from("certificates").select("code").eq("user_id", user.id).eq("course_id", courseId).maybeSingle();
+ if (certData) setCertificate(certData as { code: string });
+ };
+
+ const refreshCertificate = async () => {
+ if (!user || !courseId) return;
+ const { data } = await supabase.from("certificates").select("code").eq("user_id", user.id).eq("course_id", courseId).maybeSingle();
+ if (data) setCertificate(data as { code: string });
  };
 
  const loadAttachments = async (lessonId: string) => {
@@ -158,6 +169,22 @@ export default function MemberCourse() {
  setExpandedModules(prev => new Set([...prev, lesson.module_id]));
  loadAttachments(lesson.id);
  window.scrollTo({ top: 0, behavior: "smooth" });
+ // Track lesson view (updates progress.updated_at → powers "Continue watching")
+ if (user && !progress.get(lesson.id)?.completed) {
+ supabase.from("user_progress").upsert(
+ { user_id: user.id, lesson_id: lesson.id, completed: false, progress_seconds: 1 },
+ { onConflict: "user_id,lesson_id" }
+ ).then(({ error }) => {
+ if (!error) {
+ setProgress(prev => {
+ const next = new Map(prev);
+ const existing = next.get(lesson.id);
+ if (!existing) next.set(lesson.id, { lesson_id: lesson.id, completed: false, progress_seconds: 1 });
+ return next;
+ });
+ }
+ });
+ }
  };
 
  const markComplete = async (lessonId: string) => {
@@ -174,6 +201,8 @@ export default function MemberCourse() {
  if (newCompleted >= allLessons.length) {
  setShowCelebration(true);
  setTimeout(() => setShowCelebration(false), 5000);
+ // Certificate is auto-issued by DB trigger; fetch it
+ setTimeout(() => refreshCertificate(), 1200);
  } else {
  toast.success("Aula concluída! 🎉");
  const idx = allLessons.findIndex(l => l.id === lessonId);
@@ -442,8 +471,14 @@ export default function MemberCourse() {
  initial={{ opacity: 0, y: 10 }}
  animate={{ opacity: 1, y: 0 }}
  transition={{ delay: 0.8 }}
- className="flex items-center justify-center gap-3"
+ className="flex flex-wrap items-center justify-center gap-3"
  >
+ {certificate && (
+ <Link to={`/certificado/${certificate.code}`} target="_blank"
+ className="px-6 py-3 rounded-xl bg-success text-success-foreground text-sm font-display font-bold hover:bg-success/90 transition-all active:scale-[0.97] shadow-lg flex items-center gap-2">
+ <Award className="h-4 w-4" /> Ver certificado
+ </Link>
+ )}
  <Link to="/membros-area"
  className="px-6 py-3 rounded-xl bg-foreground text-background text-sm font-display font-bold hover:bg-foreground/90 transition-all active:scale-[0.97] shadow-lg">
  Voltar aos cursos
@@ -618,10 +653,30 @@ export default function MemberCourse() {
  <ExternalLink className="h-3.5 w-3.5 text-muted-foreground/15 group-hover:text-primary/40 transition-colors shrink-0" />
  </a>
  ))}
- </div>
+  </div>
  </div>
  )}
  </div>
+
+ {/* Certificate banner */}
+ {certificate && (
+ <Link to={`/certificado/${certificate.code}`} target="_blank"
+ className="block rounded-xl bg-gradient-to-br from-success/10 to-success/5 border border-success/20 p-5 hover:border-success/40 transition-all group">
+ <div className="flex items-center gap-4">
+ <div className="h-12 w-12 rounded-xl bg-success/15 flex items-center justify-center shrink-0">
+ <Award className="h-6 w-6 text-success" />
+ </div>
+ <div className="flex-1 min-w-0">
+ <p className="text-sm font-display font-black text-foreground tracking-tight">Certificado disponível</p>
+ <p className="text-xs text-muted-foreground/70 font-display mt-0.5">Código <span className="font-mono text-success">{certificate.code}</span> · Clique para visualizar e imprimir</p>
+ </div>
+ <ExternalLink className="h-4 w-4 text-success/60 group-hover:text-success transition-colors shrink-0" />
+ </div>
+ </Link>
+ )}
+
+ {/* Lesson Q&A */}
+ {user && <LessonComments lessonId={activeLesson.id} currentUserId={user.id} />}
  </motion.div>
  ) : (
  <div className="aspect-video max-h-[480px] rounded-xl bg-card/30 border border-border/10 flex items-center justify-center">

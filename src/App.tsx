@@ -50,6 +50,7 @@ import TermosDeUso from "./pages/TermosDeUso";
 import PoliticaDePrivacidade from "./pages/PoliticaDePrivacidade";
 import ThankYou from "./pages/ThankYou";
 import StatusPage from "./pages/StatusPage";
+import Certificado from "./pages/Certificado";
 
 import MemberAuth from "./pages/membros/MemberAuth";
 import MemberLayout from "./pages/membros/MemberLayout";
@@ -87,6 +88,7 @@ const App = () => (
               <Route path="/termos-de-uso" element={<TermosDeUso />} />
               <Route path="/politica-de-privacidade" element={<PoliticaDePrivacidade />} />
               <Route path="/status" element={<StatusPage />} />
+              <Route path="/certificado/:code" element={<Certificado />} />
               <Route path="/financeiro/identidade" element={<Navigate to="/perfil?tab=identidade" replace />} />
               <Route path="/" element={<Index />} />
 
