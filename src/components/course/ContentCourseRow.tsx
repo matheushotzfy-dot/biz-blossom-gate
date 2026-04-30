@@ -63,16 +63,19 @@ export function ContentCourseRow({
       className="group grid cursor-pointer grid-cols-1 gap-4 border-b border-border/70 px-4 py-3.5 transition-colors hover:bg-accent/35 md:grid-cols-[minmax(0,2.5fr)_minmax(0,1.05fr)_96px_96px_132px_112px] md:items-center"
     >
       <div className="flex min-w-0 items-center gap-3">
-        <div className="relative h-12 w-[84px] shrink-0 overflow-hidden rounded-lg border border-border/70 bg-card-inset ring-1 ring-border/40 ring-inset">
+        <div className="relative h-12 w-[84px] shrink-0 overflow-hidden border border-border bg-card-inset">
           {course.thumbnail_url ? (
             <img src={course.thumbnail_url} alt={course.title} className="h-full w-full object-cover" loading="lazy" />
           ) : (
-            <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-primary/10 to-secondary">
-              <span className="font-display text-base font-black text-primary/70">{initial}</span>
+            <div className="flex h-full w-full items-center justify-center bg-card-elevated">
+              <span className="font-display text-base font-black text-primary">{initial}</span>
             </div>
           )}
-          <div className="absolute left-1.5 top-1.5 inline-flex items-center gap-1 rounded-full border border-border/80 bg-card/90 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-[0.12em] text-foreground/70 backdrop-blur">
-            <span className={cn("h-1.5 w-1.5 rounded-full", isLive ? "bg-success" : "bg-muted-foreground/50")} />
+          <div className={cn(
+            "absolute left-1.5 top-1.5 inline-flex items-center gap-1 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-[0.14em]",
+            isLive ? "bg-success text-success-foreground" : "bg-card border border-border text-muted-foreground",
+          )}>
+            <span className={cn("h-1 w-1", isLive ? "bg-success-foreground" : "bg-muted-foreground")} />
             {isLive ? "Live" : "Draft"}
           </div>
         </div>
@@ -81,7 +84,7 @@ export function ContentCourseRow({
           <div className="flex items-center gap-2">
             <h3 className="truncate text-[13px] font-bold text-foreground">{course.title}</h3>
             {course.category ? (
-              <span className="hidden rounded-full border border-border/70 bg-card px-2 py-0.5 text-[9px] font-semibold uppercase tracking-[0.14em] text-muted-foreground md:inline-flex">
+              <span className="hidden border border-border bg-card-elevated px-2 py-0.5 text-[9px] font-bold uppercase tracking-[0.14em] text-muted-foreground md:inline-flex">
                 {course.category}
               </span>
             ) : null}
@@ -104,12 +107,12 @@ export function ContentCourseRow({
 
       <div className="min-w-0">
         {productName ? (
-          <span className="inline-flex max-w-full items-center gap-1.5 rounded-md border border-primary/15 bg-primary/10 px-2.5 py-1 text-[11px] font-semibold text-primary">
+          <span className="inline-flex max-w-full items-center gap-1.5 border border-primary bg-primary/10 px-2 py-1 text-[11px] font-bold text-primary">
             <LinkIcon className="h-3 w-3 shrink-0" />
             <span className="truncate">{productName}</span>
           </span>
         ) : (
-          <span className="inline-flex items-center gap-1.5 rounded-md border border-dashed border-border px-2.5 py-1 text-[11px] font-medium text-muted-foreground">
+          <span className="inline-flex items-center gap-1.5 border border-dashed border-border px-2 py-1 text-[11px] font-bold uppercase tracking-[0.1em] text-muted-foreground">
             <Lock className="h-3 w-3" />
             Sem produto
           </span>
@@ -140,8 +143,8 @@ export function ContentCourseRow({
             size="icon"
             onClick={onCopyLink}
             className={cn(
-              "h-8 w-8 rounded-lg border border-border/70 bg-card text-muted-foreground",
-              copied ? "border-success/30 bg-success/10 text-success" : "hover:bg-accent hover:text-foreground",
+              "h-8 w-8 rounded-none border border-border bg-card text-muted-foreground",
+              copied ? "border-success bg-success text-success-foreground" : "hover:border-primary hover:text-primary",
             )}
           >
             {copied ? <CheckCircle2 className="h-3.5 w-3.5" /> : <Copy className="h-3.5 w-3.5" />}
@@ -150,7 +153,7 @@ export function ContentCourseRow({
 
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="ghost" size="icon" className="h-8 w-8 rounded-lg border border-border/70 bg-card text-muted-foreground hover:bg-accent hover:text-foreground">
+            <Button variant="ghost" size="icon" className="h-8 w-8 rounded-none border border-border bg-card text-muted-foreground hover:border-primary hover:text-primary">
               <MoreHorizontal className="h-3.5 w-3.5" />
             </Button>
           </DropdownMenuTrigger>
