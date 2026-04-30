@@ -7,7 +7,7 @@ import { useEffect, useState } from "react";
 import { Outlet, useNavigate, Link, useLocation } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import type { User } from "@supabase/supabase-js";
-import { LogOut, Menu, X, Flame } from "lucide-react";
+import { LogOut } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
 
@@ -17,7 +17,6 @@ export default function MemberLayout() {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [scrolled, setScrolled] = useState(false);
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
   const [stats, setStats] = useState<{ xp: number; streak: number }>({ xp: 0, streak: 0 });
 
@@ -65,7 +64,7 @@ export default function MemberLayout() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  useEffect(() => { setMobileMenuOpen(false); setProfileOpen(false); }, [location.pathname]);
+  useEffect(() => { setProfileOpen(false); }, [location.pathname]);
 
   useEffect(() => {
     if (!profileOpen) return;
