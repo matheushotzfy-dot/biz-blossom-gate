@@ -91,13 +91,8 @@ export default function MemberLayout() {
   );
 
   const isCourse = location.pathname.includes("/curso/");
-  const isHome = location.pathname === "/membros-area";
   const initial = user?.email?.charAt(0).toUpperCase() || "U";
   const displayName = user?.email?.split("@")[0] || "Membro";
-
-  const navItems = [
-    { to: "/membros-area", label: "Home", active: isHome },
-  ];
 
   return (
     <div className="min-h-dvh bg-[#050505] text-zinc-100 font-display antialiased selection:bg-emerald-500/30">
