@@ -110,48 +110,18 @@ export default function MemberLayout() {
           : "bg-gradient-to-b from-[#050505]/80 to-transparent"
       )}>
         <div className="px-6 lg:px-12 h-16 flex items-center justify-between gap-4">
-          {/* Logo */}
-          <Link to="/membros-area" className="flex items-center gap-3 shrink-0 group">
-            <div className="h-7 w-7 rounded-sm bg-gradient-to-br from-emerald-400 to-emerald-600 flex items-center justify-center font-black text-[#050505] text-sm tracking-tighter">
+          {/* Logo — Cakto Members style */}
+          <Link to="/membros-area" className="flex items-center gap-2.5 shrink-0 group">
+            <div className="h-8 w-8 rounded-md bg-gradient-to-br from-emerald-400 to-emerald-600 flex items-center justify-center font-black text-[#050505] text-base tracking-tighter">
               H
             </div>
-            <span className="hidden sm:block font-display font-semibold tracking-[-0.02em] text-zinc-100 text-[15px]">
-              Membros
+            <span className="font-display font-bold tracking-[-0.015em] text-zinc-100 text-[15px]">
+              Hotzfy Members
             </span>
           </Link>
 
-          {/* Center nav */}
-          <div className="hidden md:flex items-center gap-8 absolute left-1/2 -translate-x-1/2">
-            {navItems.map(item => (
-              <Link
-                key={item.to}
-                to={item.to}
-                className={cn(
-                  "text-sm font-medium tracking-tight transition-colors",
-                  item.active ? "text-white" : "text-zinc-500 hover:text-zinc-200"
-                )}
-              >
-                {item.label}
-              </Link>
-            ))}
-          </div>
-
-          {/* Right: stats + avatar */}
-          <div className="flex items-center gap-4">
-            {/* Stats inline (desktop) */}
-            <div className="hidden lg:flex items-center gap-5 text-[10px] font-bold tracking-[0.18em] uppercase">
-              <div className="flex flex-col items-end leading-tight">
-                <span className="text-emerald-400 tabular-nums">{stats.xp.toLocaleString("pt-BR")} XP</span>
-                <span className="text-zinc-600 mt-0.5">Total ganho</span>
-              </div>
-              {stats.streak > 0 && (
-                <div className="flex items-center gap-1.5 px-2 py-1 rounded-sm bg-orange-500/10 border border-orange-500/20">
-                  <Flame className="h-3 w-3 text-orange-400" />
-                  <span className="text-orange-400 tabular-nums">{stats.streak}d</span>
-                </div>
-              )}
-            </div>
-
+          {/* Right: avatar only */}
+          <div className="flex items-center gap-3">
             {/* Profile */}
             <div className="relative">
               <button
