@@ -231,35 +231,29 @@ export default function MemberCourse() {
  const isComplete = overallPct === 100 && totalLessons > 0;
  const activeModule = activeLesson ? modules.find(m => m.lessons.some(l => l.id === activeLesson.id)) : null;
 
- if (loading) return (
- <div className="min-h-[80vh] flex items-center justify-center">
- <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} className="flex flex-col items-center gap-5">
- <div className="relative">
- <div className="h-16 w-16 rounded-2xl bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center border border-primary/10 shadow-2xl shadow-primary/10">
- <GraduationCap className="h-7 w-7 text-primary/60" />
- </div>
- <div className="absolute inset-0 rounded-2xl border-2 border-primary/30 border-t-primary animate-spin" />
- </div>
- <p className="text-muted-foreground text-sm font-display font-bold tracking-tight">Carregando curso...</p>
- </motion.div>
- </div>
- );
+  if (loading) return (
+    <div className="min-h-dvh flex items-center justify-center bg-[#050505]">
+      <div className="h-1 w-32 bg-white/5 overflow-hidden">
+        <motion.div className="h-full w-full bg-emerald-500" animate={{ x: ["-100%", "100%"] }} transition={{ duration: 1.2, repeat: Infinity, ease: "easeInOut" }} />
+      </div>
+    </div>
+  );
 
- if (!course) return (
- <div className="min-h-[80vh] flex flex-col items-center justify-center gap-5">
- <div className="h-20 w-20 rounded-[2rem] bg-card border border-border/30 flex items-center justify-center shadow-xl">
- <GraduationCap className="h-10 w-10 text-muted-foreground/10" />
- </div>
- <h1 className="text-xl font-display font-black text-foreground tracking-tight">Curso não encontrado</h1>
- <Link to="/membros-area" className="text-primary text-sm hover:underline font-display font-bold underline-offset-4">← Voltar ao início</Link>
- </div>
- );
+  if (!course) return (
+    <div className="min-h-dvh flex flex-col items-center justify-center gap-5 bg-[#050505] text-zinc-100">
+      <div className="h-16 w-16 rounded-sm bg-zinc-900 border border-white/10 flex items-center justify-center">
+        <GraduationCap className="h-7 w-7 text-zinc-700" />
+      </div>
+      <h1 className="font-display text-2xl font-semibold text-zinc-100 tracking-tight">Curso não encontrado</h1>
+      <Link to="/membros-area" className="text-[10px] uppercase tracking-[0.2em] text-zinc-500 hover:text-emerald-400 font-bold transition-colors">← Voltar ao início</Link>
+    </div>
+  );
 
- const sidebarWidth = theaterMode ? "lg:w-0 lg:opacity-0 lg:pointer-events-none" : "w-[340px] xl:w-[380px]";
+  const sidebarWidth = theaterMode ? "lg:w-0 lg:opacity-0 lg:pointer-events-none" : "w-[360px] xl:w-[400px]";
 
- /* ─── Sidebar Component ─── */
- const CourseSidebar = () => (
- <div className="p-3 space-y-2">
+  /* ─── Sidebar Component — Cakto style: numbered, dense, dark ─── */
+  const CourseSidebar = () => (
+    <div className="p-4 space-y-3">
  {/* Progress */}
  <div className="p-3.5 rounded-xl bg-card/40 border border-border/10 relative overflow-hidden">
  <div className="flex items-center justify-between mb-3">
