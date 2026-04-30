@@ -897,7 +897,7 @@ export default function CourseBuilder() {
  </motion.div>
 
  {/* ── Editor Tabs ── */}
- <div className="flex items-center gap-1 p-1.5 rounded-xl bg-card/50 backdrop-blur-xl border border-border/20 w-fit shadow-sm">
+ <div className="flex items-center gap-0 border border-border bg-card w-fit">
  {editorTabs.map(tab => {
  const isActive = activeEditorTab === tab.id;
  return (
@@ -905,19 +905,14 @@ export default function CourseBuilder() {
  key={tab.id}
  onClick={() => setActiveEditorTab(tab.id)}
  className={cn(
- "relative flex items-center gap-2 px-4 py-2.5 rounded-lg text-xs font-display font-bold transition-all duration-300 active:scale-[0.985]",
- isActive ? "text-foreground" : "text-muted-foreground/30 hover:text-muted-foreground/50"
+ "relative flex items-center gap-2 px-4 h-10 text-[10px] font-display font-black uppercase tracking-[0.16em] transition-colors duration-150 border-r border-border last:border-r-0",
+ isActive
+   ? "bg-primary text-primary-foreground"
+   : "text-muted-foreground hover:text-foreground hover:bg-card-elevated"
  )}
  >
- {isActive && (
- <motion.div
- layoutId="editor-tab-active"
- className="absolute inset-0 rounded-lg bg-card border border-border/25 shadow-sm"
- transition={{ type: "spring", bounce: 0.12, duration: 0.4 }}
- />
- )}
- <tab.icon className="h-3.5 w-3.5 relative z-10" />
- <span className="relative z-10">{tab.label}</span>
+ <tab.icon className="h-3.5 w-3.5" />
+ <span>{tab.label}</span>
  </button>
  );
  })}
