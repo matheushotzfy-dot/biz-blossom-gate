@@ -454,69 +454,83 @@ export default function CourseBuilder() {
 
  return (
  <div className="fixed inset-0 z-[70] bg-background flex flex-col overflow-hidden">
- {/* ═══ Premium Top Bar ═══ */}
- <header className="h-14 border-b border-border/20 bg-card/80 backdrop-blur-2xl flex items-center justify-between px-3 sm:px-5 shrink-0 z-50 relative overflow-hidden shadow-sm">
- {/* Subtle mesh gradient */}
- <div className="absolute inset-0 bg-gradient-to-r from-primary/[0.03] via-transparent to-info/[0.03] pointer-events-none" />
- <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-primary/10 to-transparent" />
+ {/* ═══ Cakto Top Bar — sharp, solid, no blur ═══ */}
+ <header className="h-14 border-b border-border bg-card flex items-center justify-between px-3 sm:px-5 shrink-0 z-50 relative">
 
- <div className="relative flex items-center gap-2.5 sm:gap-3.5 min-w-0">
+ <div className="relative flex items-center gap-3 min-w-0">
  <button
  onClick={() => navigate("/vendas/conteudo")}
- className="h-9 w-9 rounded-xl bg-muted/10 border border-border/20 flex items-center justify-center hover:bg-muted/20 hover:border-border/30 transition-all duration-300 active:scale-[0.985] shrink-0 group"
+ className="h-9 w-9 border border-border bg-card flex items-center justify-center hover:bg-card-elevated transition-colors duration-150 shrink-0"
  >
- <ArrowLeft className="h-4 w-4 text-muted-foreground/50 group-hover:text-foreground transition-colors" />
+ <ArrowLeft className="h-4 w-4 text-muted-foreground" />
  </button>
 
- <div className="hidden sm:flex items-center gap-3">
- <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-primary via-primary to-primary/60 flex items-center justify-center shadow-lg shadow-primary/15 shrink-0 ring-1 ring-primary/20">
- <GraduationCap className="h-5 w-5 text-primary-foreground" />
+ {/* Hotzfy 'H' brand chip */}
+ <div className="hidden sm:flex h-9 w-9 items-center justify-center border border-primary bg-primary text-primary-foreground font-display font-black text-[14px] tracking-tight shrink-0">
+ H
  </div>
- <div className="min-w-0">
- <h1 className="text-sm font-display font-black text-foreground leading-none truncate max-w-[200px] lg:max-w-[320px] tracking-[-0.02em]">{course.title}</h1>
- <div className="flex items-center gap-3 mt-1.5">
- <span className="text-[10px] font-display font-semibold text-muted-foreground/50">{modules.length} mód · {totalLessons} aulas</span>
+
+ <div className="hidden sm:flex flex-col min-w-0">
+ <div className="flex items-center gap-2">
+ <span className="text-[9px] font-black uppercase tracking-[0.20em] text-muted-foreground/60">Curso</span>
+ {course.is_published ? (
+ <span className="inline-flex h-[16px] items-center gap-1 border border-success bg-success px-1.5 text-[9px] font-black uppercase tracking-[0.16em] text-success-foreground">
+ <span className="h-1 w-1 bg-success-foreground" /> Live
+ </span>
+ ) : (
+ <span className="inline-flex h-[16px] items-center border border-border bg-muted px-1.5 text-[9px] font-black uppercase tracking-[0.16em] text-muted-foreground">
+ Draft
+ </span>
+ )}
+ </div>
+ <div className="flex items-center gap-3 mt-0.5">
+ <h1 className="font-display font-black text-foreground leading-none truncate max-w-[220px] lg:max-w-[340px] tracking-[-0.02em] text-[14px]">
+ {course.title}
+ </h1>
+ <span className="text-[10px] font-bold uppercase tracking-[0.14em] text-muted-foreground/60 tabular-nums">
+ {modules.length} mód · {totalLessons} aulas
+ </span>
  {studentCount > 0 && (
- <span className="text-[10px] font-display font-bold text-primary/60 flex items-center gap-1 bg-primary/5 px-1.5 py-0.5 rounded-md">
+ <span className="text-[10px] font-bold uppercase tracking-[0.14em] text-primary flex items-center gap-1 tabular-nums">
  <Users className="h-2.5 w-2.5" /> {studentCount}
  </span>
  )}
  {totalLessons > 0 && (
  <div className="flex items-center gap-1.5">
- <div className="h-1.5 w-16 rounded-full bg-muted/15 overflow-hidden">
+ <div className="h-[3px] w-16 bg-muted overflow-hidden">
  <motion.div
- className="h-full rounded-full bg-gradient-to-r from-primary to-primary/60"
+ className="h-full bg-primary"
  animate={{ width: `${progressPct}%` }}
- transition={{ duration: 0.8, ease }}
+ transition={{ duration: 0.6, ease }}
  />
  </div>
- <span className="text-[10px] font-display font-black text-primary/60 tabular-nums">{progressPct}%</span>
+ <span className="text-[10px] font-black tabular-nums text-primary">{progressPct}%</span>
  </div>
  )}
- </div>
  </div>
  </div>
  {/* Mobile title */}
  <div className="sm:hidden min-w-0">
  <h1 className="text-xs font-display font-black text-foreground truncate max-w-[140px]">{course.title}</h1>
- <span className="text-[10px] font-display text-muted-foreground/40">{totalLessons} aulas</span>
+ <span className="text-[10px] font-bold uppercase tracking-[0.14em] text-muted-foreground/60">{totalLessons} aulas</span>
  </div>
  </div>
 
- <div className="relative flex items-center gap-1.5 sm:gap-2.5">
+ <div className="relative flex items-center gap-1.5">
  {/* Save status */}
  <AnimatePresence mode="wait">
- <motion.div key={saveStatus} initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.9 }} className="hidden sm:flex items-center gap-1.5 mr-1">
- {saveStatus === "saving" && <><Loader2 className="h-3 w-3 animate-spin text-muted-foreground/40" /><span className="text-[10px] text-muted-foreground/40 font-display font-bold">Salvando</span></>}
- {saveStatus === "saved" && <><CheckCircle2 className="h-3 w-3 text-success/60" /><span className="text-[10px] text-success/60 font-display font-bold">Salvo</span></>}
- {saveStatus === "error" && <><AlertCircle className="h-3 w-3 text-destructive/60" /><span className="text-[10px] text-destructive/60 font-display font-bold">Erro</span></>}
+ <motion.div key={saveStatus} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="hidden sm:flex items-center gap-1.5 mr-2 h-9 px-2.5 border border-border bg-card-elevated">
+ {saveStatus === "idle" && <span className="text-[10px] text-muted-foreground/40 font-black uppercase tracking-[0.16em]">—</span>}
+ {saveStatus === "saving" && <><Loader2 className="h-3 w-3 animate-spin text-muted-foreground" /><span className="text-[10px] text-muted-foreground font-black uppercase tracking-[0.16em]">Salvando</span></>}
+ {saveStatus === "saved" && <><CheckCircle2 className="h-3 w-3 text-success" /><span className="text-[10px] text-success font-black uppercase tracking-[0.16em]">Salvo</span></>}
+ {saveStatus === "error" && <><AlertCircle className="h-3 w-3 text-destructive" /><span className="text-[10px] text-destructive font-black uppercase tracking-[0.16em]">Erro</span></>}
  </motion.div>
  </AnimatePresence>
 
  {/* Analytics */}
  <button
  onClick={() => navigate(`/vendas/conteudo/${courseId}/analytics`)}
- className="hidden sm:flex h-9 w-9 rounded-xl bg-muted/10 border border-border/20 items-center justify-center hover:bg-primary/10 hover:border-primary/30 transition-all active:scale-[0.985] text-muted-foreground/40 hover:text-primary"
+ className="hidden sm:flex h-9 w-9 border border-border bg-card items-center justify-center hover:bg-card-elevated hover:text-primary transition-colors text-muted-foreground"
  title="Analytics do curso"
  >
  <Activity className="h-3.5 w-3.5" />
@@ -525,7 +539,7 @@ export default function CourseBuilder() {
  {/* Course Settings */}
  <button
  onClick={openCourseSettings}
- className="hidden sm:flex h-9 w-9 rounded-xl bg-muted/10 border border-border/20 items-center justify-center hover:bg-muted/20 hover:border-border/30 transition-all active:scale-[0.985] text-muted-foreground/40 hover:text-foreground/60"
+ className="hidden sm:flex h-9 w-9 border border-border bg-card items-center justify-center hover:bg-card-elevated hover:text-foreground transition-colors text-muted-foreground"
  title="Configurações do curso"
  >
  <Settings className="h-3.5 w-3.5" />
@@ -535,7 +549,7 @@ export default function CourseBuilder() {
  {course.is_published && (
  <button
  onClick={() => window.open(`/membros-area/curso/${courseId}`, "_blank")}
- className="hidden sm:flex h-9 px-3.5 rounded-xl bg-info/8 border border-info/15 text-xs font-display font-bold text-info/70 items-center gap-1.5 hover:bg-info/15 transition-all active:scale-[0.985]"
+ className="hidden sm:flex h-9 px-3 border border-border bg-card text-[10px] font-black uppercase tracking-[0.16em] text-muted-foreground items-center gap-1.5 hover:border-foreground/40 hover:text-foreground transition-colors"
  >
  <Eye className="h-3.5 w-3.5" /> Preview
  </button>
@@ -544,16 +558,16 @@ export default function CourseBuilder() {
  <button
  onClick={togglePublish}
  className={cn(
- "h-9 px-3.5 sm:px-4 rounded-xl text-xs font-display font-bold flex items-center gap-1.5 transition-all duration-300 active:scale-[0.985] border shadow-sm",
+ "h-9 px-4 text-[10px] font-black uppercase tracking-[0.16em] flex items-center gap-1.5 transition-colors duration-150 border",
  course.is_published
- ? "bg-success/10 text-success border-success/20 hover:bg-success/15 shadow-success/5"
- : "bg-muted/10 border-border/20 text-muted-foreground/50 hover:text-foreground/70 hover:border-border/30 hover:bg-muted/20"
+ ? "bg-success text-success-foreground border-success hover:bg-success/90"
+ : "bg-primary text-primary-foreground border-primary hover:bg-primary/90"
  )}
  >
  {course.is_published ? (
- <><span className="h-2 w-2 rounded-full bg-success animate-pulse shadow-[0_0_8px_hsl(var(--success)/0.4)]" /> <span className="hidden sm:inline">Publicado</span><span className="sm:hidden">Live</span></>
+ <><span className="h-1.5 w-1.5 bg-success-foreground" /> <span className="hidden sm:inline">Publicado</span><span className="sm:hidden">Live</span></>
  ) : (
- <><EyeOff className="h-3.5 w-3.5" /> <span className="hidden sm:inline">Rascunho</span></>
+ <><Globe className="h-3.5 w-3.5" /> <span className="hidden sm:inline">Publicar</span></>
  )}
  </button>
  </div>
