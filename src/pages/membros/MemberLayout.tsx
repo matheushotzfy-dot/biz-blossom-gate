@@ -168,48 +168,8 @@ export default function MemberLayout() {
               </AnimatePresence>
             </div>
 
-            {/* Mobile menu */}
-            <button
-              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="h-9 w-9 rounded-full bg-zinc-900 border border-white/10 flex items-center justify-center md:hidden"
-            >
-              {mobileMenuOpen ? <X className="h-4 w-4" /> : <Menu className="h-4 w-4" />}
-            </button>
           </div>
         </div>
-
-        <AnimatePresence>
-          {mobileMenuOpen && (
-            <motion.div
-              initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: 1, height: "auto" }}
-              exit={{ opacity: 0, height: 0 }}
-              transition={{ duration: 0.22, ease: [0.16, 1, 0.3, 1] }}
-              className="md:hidden bg-[#0c0c0c] border-t border-white/5 overflow-hidden"
-            >
-              <div className="px-6 py-4 space-y-1">
-                {navItems.map(item => (
-                  <Link
-                    key={item.to}
-                    to={item.to}
-                    className={cn(
-                      "block py-3 text-sm font-medium",
-                      item.active ? "text-white" : "text-zinc-500"
-                    )}
-                  >
-                    {item.label}
-                  </Link>
-                ))}
-                <div className="pt-3 border-t border-white/5 flex items-center justify-between">
-                  <div className="flex items-center gap-4 text-[10px] font-bold uppercase tracking-[0.18em]">
-                    <span className="text-emerald-400 tabular-nums">{stats.xp.toLocaleString("pt-BR")} XP</span>
-                    {stats.streak > 0 && <span className="text-orange-400 tabular-nums">{stats.streak}d streak</span>}
-                  </div>
-                </div>
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
       </nav>
 
       <main className={cn(isCourse ? "pt-0" : "")}>
