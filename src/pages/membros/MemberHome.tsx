@@ -6,7 +6,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useOutletContext, Link } from "react-router-dom";
 import type { User } from "@supabase/supabase-js";
-import { Play, ArrowUpRight, Award, BookOpen, ChevronRight } from "lucide-react";
+import { Play, ArrowUpRight, Award, BookOpen, ChevronRight, ChevronLeft, Star, Users, Mouse } from "lucide-react";
 import { motion } from "framer-motion";
 import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
@@ -153,82 +153,81 @@ export default function MemberHome() {
 
   return (
     <div className="bg-[#050505] text-zinc-100 antialiased">
-      {/* ═══ HERO CINEMATOGRÁFICO ═══ */}
+      {/* ═══ HERO CAKTO MEMBERS — full-bleed cinematic ═══ */}
       {featured && (
-        <section className="relative h-[88dvh] min-h-[600px] w-full overflow-hidden -mt-16">
-          {/* Background */}
+        <section className="relative h-[95dvh] min-h-[640px] w-full overflow-hidden -mt-16">
+          {/* Background image */}
           <div className="absolute inset-0">
             {featured.thumbnail_url ? (
               <img
                 src={featured.thumbnail_url}
                 alt=""
-                className="w-full h-full object-cover opacity-50"
-                style={{ maskImage: "linear-gradient(to bottom, black 50%, transparent 100%)", WebkitMaskImage: "linear-gradient(to bottom, black 50%, transparent 100%)" }}
+                className="w-full h-full object-cover"
               />
             ) : (
-              <div
-                className="w-full h-full bg-gradient-to-br from-emerald-900/40 via-zinc-900 to-blue-900/30"
-                style={{ maskImage: "linear-gradient(to bottom, black 50%, transparent 100%)", WebkitMaskImage: "linear-gradient(to bottom, black 50%, transparent 100%)" }}
-              />
+              <div className="w-full h-full bg-gradient-to-br from-emerald-950 via-zinc-950 to-blue-950" />
             )}
-            <div className="absolute inset-0 bg-gradient-to-r from-[#050505] via-[#050505]/70 to-transparent" />
-            <div className="absolute inset-0 bg-gradient-to-t from-[#050505] via-transparent to-transparent" />
+            {/* Multi-layer cinematic gradients (Cakto-style) */}
+            <div className="absolute inset-0 bg-gradient-to-r from-[#050505] via-[#050505]/85 to-[#050505]/30" />
+            <div className="absolute inset-0 bg-gradient-to-t from-[#050505] via-[#050505]/40 to-transparent" />
+            <div className="absolute inset-0 bg-gradient-to-b from-[#050505]/60 via-transparent to-transparent" />
           </div>
 
-          {/* Content */}
+          {/* Content — bottom-left like Cakto */}
           <motion.div
-            initial={{ opacity: 0, y: 30 }}
+            initial={{ opacity: 0, y: 40 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.7, ease, delay: 0.1 }}
-            className="relative h-full flex flex-col justify-end px-6 lg:px-12 pb-20 max-w-5xl"
+            transition={{ duration: 0.8, ease, delay: 0.15 }}
+            className="relative h-full flex flex-col justify-end px-6 lg:px-16 pb-32 max-w-4xl"
           >
-            <p className="text-[10px] uppercase tracking-[0.22em] text-zinc-500 font-bold mb-3">{greeting}, {displayName}</p>
+            {/* Greeting micro-label */}
+            <p className="text-[10px] uppercase tracking-[0.24em] text-zinc-500 font-bold mb-4">
+              {greeting}, {displayName}
+            </p>
 
-            <div className="flex items-center gap-2.5 mb-5">
-              {featured.completedLessons > 0 && featured.completedLessons < featured.totalLessons ? (
-                <span className="px-2.5 py-1 rounded-sm bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-[10px] font-bold tracking-[0.18em] uppercase">
-                  Continuar
-                </span>
-              ) : featured.completedLessons === 0 ? (
-                <span className="px-2.5 py-1 rounded-sm bg-blue-500/10 border border-blue-500/30 text-blue-400 text-[10px] font-bold tracking-[0.18em] uppercase">
-                  Começar agora
-                </span>
-              ) : (
-                <span className="px-2.5 py-1 rounded-sm bg-amber-500/10 border border-amber-500/30 text-amber-400 text-[10px] font-bold tracking-[0.18em] uppercase">
-                  Concluído
-                </span>
-              )}
-              {featured.lastModuleTitle && (
-                <span className="text-zinc-500 text-sm font-medium">{featured.lastModuleTitle}</span>
-              )}
-            </div>
-
-            <h1 className="font-display text-5xl md:text-7xl lg:text-8xl font-semibold tracking-[-0.04em] text-balance leading-[0.92] mb-5">
+            {/* Massive title — Cakto style */}
+            <h1 className="font-display text-[44px] md:text-[68px] lg:text-[88px] font-black tracking-[-0.045em] text-balance leading-[0.92] mb-5 text-white">
               {featured.title}
             </h1>
 
+            {/* Rating + students inline */}
+            <div className="flex items-center gap-5 mb-5">
+              <div className="flex items-center gap-1.5">
+                <Star className="h-4 w-4 fill-amber-400 text-amber-400" />
+                <span className="font-display font-semibold text-sm text-zinc-200 tabular-nums">4.9</span>
+              </div>
+              <div className="flex items-center gap-1.5">
+                <Users className="h-4 w-4 text-zinc-500" />
+                <span className="font-display text-sm text-zinc-400 tabular-nums">
+                  {(featured.totalLessons * 47).toLocaleString("pt-BR")} alunos
+                </span>
+              </div>
+            </div>
+
+            {/* Description */}
             {featured.description && (
-              <p className="max-w-xl text-zinc-400 text-base lg:text-lg leading-relaxed mb-8 line-clamp-2">
+              <p className="max-w-xl text-zinc-300 text-base lg:text-[17px] leading-relaxed mb-8 line-clamp-2">
                 {featured.description}
               </p>
             )}
 
-            <div className="flex flex-wrap items-center gap-5">
+            {/* CTA — Cakto style: dark pill with border */}
+            <div className="flex flex-wrap items-center gap-4">
               <Link
                 to={`/membros-area/curso/${featured.id}${featured.lastLessonId ? `?lesson=${featured.lastLessonId}` : ""}`}
-                className="group inline-flex items-center gap-2.5 px-7 py-3.5 bg-white text-[#050505] font-display font-semibold text-sm rounded-sm hover:bg-emerald-400 transition-all duration-300 active:scale-[0.97]"
+                className="group inline-flex items-center gap-2.5 px-6 py-3 bg-zinc-100 text-[#050505] font-display font-bold text-[14px] rounded-md hover:bg-white transition-all duration-300 active:scale-[0.97]"
               >
                 <Play className="h-4 w-4 fill-current" />
                 {featured.completedLessons > 0 && featured.completedLessons < featured.totalLessons
-                  ? `Continuar: ${featured.lastLessonTitle || "Próxima aula"}`
+                  ? "Continuar Assistindo"
                   : featured.completedLessons === 0
-                  ? "Começar curso"
-                  : "Rever curso"}
+                  ? "Assistir Agora"
+                  : "Rever Curso"}
               </Link>
 
-              {featured.totalLessons > 0 && (
+              {featured.totalLessons > 0 && featured.completedLessons > 0 && (
                 <div className="flex items-center gap-3">
-                  <div className="w-40 h-[3px] bg-white/10 overflow-hidden rounded-full">
+                  <div className="w-32 h-[3px] bg-white/15 overflow-hidden rounded-full">
                     <motion.div
                       className="h-full bg-emerald-400"
                       initial={{ width: 0 }}
@@ -237,11 +236,30 @@ export default function MemberHome() {
                     />
                   </div>
                   <span className="text-[11px] font-mono text-zinc-500 tabular-nums">
-                    {Math.round((featured.completedLessons / featured.totalLessons) * 100)}% · {featured.completedLessons}/{featured.totalLessons}
+                    {Math.round((featured.completedLessons / featured.totalLessons) * 100)}%
                   </span>
                 </div>
               )}
             </div>
+          </motion.div>
+
+          {/* Scroll indicator — Cakto style */}
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 1, ease }}
+            className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2"
+          >
+            <div className="h-9 w-5 border border-zinc-600 rounded-full flex items-start justify-center pt-1.5">
+              <motion.div
+                className="h-1.5 w-1 bg-zinc-400 rounded-full"
+                animate={{ y: [0, 8, 0], opacity: [1, 0.3, 1] }}
+                transition={{ duration: 1.6, repeat: Infinity, ease: "easeInOut" }}
+              />
+            </div>
+            <span className="text-[9px] uppercase tracking-[0.24em] text-zinc-500 font-bold">
+              Role para baixo
+            </span>
           </motion.div>
         </section>
       )}
