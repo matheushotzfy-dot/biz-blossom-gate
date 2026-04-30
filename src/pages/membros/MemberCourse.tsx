@@ -391,8 +391,8 @@ export default function MemberCourse() {
     </div>
   );
 
- return (
- <div className="flex flex-col lg:flex-row h-[calc(100vh-64px)]">
+  return (
+    <div className="flex flex-col lg:flex-row min-h-[calc(100dvh-64px)] bg-[#050505] text-zinc-100 -mt-16 pt-16">
  {/* ═══ Celebration Modal ═══ */}
  <AnimatePresence>
  {showCelebration && (
