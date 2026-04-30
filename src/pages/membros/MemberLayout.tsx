@@ -7,7 +7,7 @@ import { useEffect, useState } from "react";
 import { Outlet, useNavigate, Link, useLocation } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import type { User } from "@supabase/supabase-js";
-import { LogOut, Menu, X, Flame } from "lucide-react";
+import { LogOut } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
 
@@ -17,7 +17,6 @@ export default function MemberLayout() {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [scrolled, setScrolled] = useState(false);
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
   const [stats, setStats] = useState<{ xp: number; streak: number }>({ xp: 0, streak: 0 });
 
@@ -65,7 +64,7 @@ export default function MemberLayout() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  useEffect(() => { setMobileMenuOpen(false); setProfileOpen(false); }, [location.pathname]);
+  useEffect(() => { setProfileOpen(false); }, [location.pathname]);
 
   useEffect(() => {
     if (!profileOpen) return;
@@ -92,13 +91,8 @@ export default function MemberLayout() {
   );
 
   const isCourse = location.pathname.includes("/curso/");
-  const isHome = location.pathname === "/membros-area";
   const initial = user?.email?.charAt(0).toUpperCase() || "U";
   const displayName = user?.email?.split("@")[0] || "Membro";
-
-  const navItems = [
-    { to: "/membros-area", label: "Home", active: isHome },
-  ];
 
   return (
     <div className="min-h-dvh bg-[#050505] text-zinc-100 font-display antialiased selection:bg-emerald-500/30">
@@ -110,48 +104,18 @@ export default function MemberLayout() {
           : "bg-gradient-to-b from-[#050505]/80 to-transparent"
       )}>
         <div className="px-6 lg:px-12 h-16 flex items-center justify-between gap-4">
-          {/* Logo */}
-          <Link to="/membros-area" className="flex items-center gap-3 shrink-0 group">
-            <div className="h-7 w-7 rounded-sm bg-gradient-to-br from-emerald-400 to-emerald-600 flex items-center justify-center font-black text-[#050505] text-sm tracking-tighter">
+          {/* Logo — Cakto Members style */}
+          <Link to="/membros-area" className="flex items-center gap-2.5 shrink-0 group">
+            <div className="h-8 w-8 rounded-md bg-gradient-to-br from-emerald-400 to-emerald-600 flex items-center justify-center font-black text-[#050505] text-base tracking-tighter">
               H
             </div>
-            <span className="hidden sm:block font-display font-semibold tracking-[-0.02em] text-zinc-100 text-[15px]">
-              Membros
+            <span className="font-display font-bold tracking-[-0.015em] text-zinc-100 text-[15px]">
+              Hotzfy Members
             </span>
           </Link>
 
-          {/* Center nav */}
-          <div className="hidden md:flex items-center gap-8 absolute left-1/2 -translate-x-1/2">
-            {navItems.map(item => (
-              <Link
-                key={item.to}
-                to={item.to}
-                className={cn(
-                  "text-sm font-medium tracking-tight transition-colors",
-                  item.active ? "text-white" : "text-zinc-500 hover:text-zinc-200"
-                )}
-              >
-                {item.label}
-              </Link>
-            ))}
-          </div>
-
-          {/* Right: stats + avatar */}
-          <div className="flex items-center gap-4">
-            {/* Stats inline (desktop) */}
-            <div className="hidden lg:flex items-center gap-5 text-[10px] font-bold tracking-[0.18em] uppercase">
-              <div className="flex flex-col items-end leading-tight">
-                <span className="text-emerald-400 tabular-nums">{stats.xp.toLocaleString("pt-BR")} XP</span>
-                <span className="text-zinc-600 mt-0.5">Total ganho</span>
-              </div>
-              {stats.streak > 0 && (
-                <div className="flex items-center gap-1.5 px-2 py-1 rounded-sm bg-orange-500/10 border border-orange-500/20">
-                  <Flame className="h-3 w-3 text-orange-400" />
-                  <span className="text-orange-400 tabular-nums">{stats.streak}d</span>
-                </div>
-              )}
-            </div>
-
+          {/* Right: avatar only */}
+          <div className="flex items-center gap-3">
             {/* Profile */}
             <div className="relative">
               <button
@@ -198,48 +162,8 @@ export default function MemberLayout() {
               </AnimatePresence>
             </div>
 
-            {/* Mobile menu */}
-            <button
-              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="h-9 w-9 rounded-full bg-zinc-900 border border-white/10 flex items-center justify-center md:hidden"
-            >
-              {mobileMenuOpen ? <X className="h-4 w-4" /> : <Menu className="h-4 w-4" />}
-            </button>
           </div>
         </div>
-
-        <AnimatePresence>
-          {mobileMenuOpen && (
-            <motion.div
-              initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: 1, height: "auto" }}
-              exit={{ opacity: 0, height: 0 }}
-              transition={{ duration: 0.22, ease: [0.16, 1, 0.3, 1] }}
-              className="md:hidden bg-[#0c0c0c] border-t border-white/5 overflow-hidden"
-            >
-              <div className="px-6 py-4 space-y-1">
-                {navItems.map(item => (
-                  <Link
-                    key={item.to}
-                    to={item.to}
-                    className={cn(
-                      "block py-3 text-sm font-medium",
-                      item.active ? "text-white" : "text-zinc-500"
-                    )}
-                  >
-                    {item.label}
-                  </Link>
-                ))}
-                <div className="pt-3 border-t border-white/5 flex items-center justify-between">
-                  <div className="flex items-center gap-4 text-[10px] font-bold uppercase tracking-[0.18em]">
-                    <span className="text-emerald-400 tabular-nums">{stats.xp.toLocaleString("pt-BR")} XP</span>
-                    {stats.streak > 0 && <span className="text-orange-400 tabular-nums">{stats.streak}d streak</span>}
-                  </div>
-                </div>
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
       </nav>
 
       <main className={cn(isCourse ? "pt-0" : "")}>
