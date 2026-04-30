@@ -311,7 +311,7 @@ export default function CourseCreationWizard({ open, onOpenChange, products, edi
                 <button
                   type="button"
                   onClick={() => onOpenChange(false)}
-                  className="ml-auto lg:hidden flex h-8 w-8 items-center justify-center rounded-md border border-border text-muted-foreground"
+                  className="ml-auto lg:hidden flex h-8 w-8 items-center justify-center border border-border text-muted-foreground hover:border-primary hover:text-primary transition-colors"
                 >
                   <X className="h-4 w-4" />
                 </button>
@@ -636,7 +636,7 @@ export default function CourseCreationWizard({ open, onOpenChange, products, edi
             {/* Frame indicator */}
             <div className="flex items-center gap-3">
               <div className="flex items-center gap-1.5">
-                <div className="size-2 bg-success rounded-full animate-pulse" />
+                <div className="size-1.5 bg-success animate-pulse" />
                 <span className="text-[10px] font-bold tracking-widest uppercase text-muted-foreground hidden sm:inline">Auto-save</span>
               </div>
               <div className="h-4 w-px bg-border hidden sm:block" />
@@ -647,8 +647,8 @@ export default function CourseCreationWizard({ open, onOpenChange, products, edi
                     type="button"
                     onClick={() => scrollToFrame(i)}
                     className={cn(
-                      "h-1.5 transition-all",
-                      i === activeFrame ? "w-6 bg-primary" : "w-1.5 bg-border hover:bg-muted-foreground/40"
+                      "h-[3px] transition-all duration-300",
+                      i === activeFrame ? "w-8 bg-primary" : "w-2 bg-border hover:bg-muted-foreground/60"
                     )}
                   />
                 ))}
@@ -788,7 +788,7 @@ function AddFrameInline({ onAdd }: { onAdd: (title: string) => void }) {
           if (e.key === "Escape") setShowInput(false);
         }}
         placeholder="Ex: Implementação"
-        className="rounded-none border-border bg-background text-center font-bold"
+        className="rounded-none border-border bg-background text-center font-bold focus-visible:border-primary"
       />
       <div className="flex gap-2 w-full">
         <button
