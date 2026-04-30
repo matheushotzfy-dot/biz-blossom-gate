@@ -255,7 +255,7 @@ export default function MemberCourse() {
  </div>
  );
 
- const sidebarWidth = theaterMode ? "w-[280px]" : "w-[320px] xl:w-[360px]";
+ const sidebarWidth = theaterMode ? "lg:w-0 lg:opacity-0 lg:pointer-events-none" : "w-[340px] xl:w-[380px]";
 
  /* ─── Sidebar Component ─── */
  const CourseSidebar = () => (
