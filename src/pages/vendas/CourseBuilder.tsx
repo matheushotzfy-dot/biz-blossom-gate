@@ -716,23 +716,23 @@ export default function CourseBuilder() {
  <Reorder.Item
  key={lesson.id} value={lesson}
   className={cn(
-  "relative flex items-center gap-2 pl-2.5 pr-1.5 py-2 rounded-md cursor-pointer group/lesson transition-colors duration-150",
+  "relative flex items-center gap-2 pl-2.5 pr-1.5 py-2 cursor-pointer group/lesson transition-colors duration-150",
   isActive
   ? "bg-primary text-primary-foreground"
-  : "hover:bg-accent"
+  : "hover:bg-card-elevated"
   )}
   onClick={() => selectLesson(lesson)}
  >
  <GripVertical className={cn("h-3 w-3 opacity-0 group-hover/lesson:opacity-100 cursor-grab shrink-0 transition-opacity", isActive ? "text-primary-foreground/60" : "text-muted-foreground/50")} />
  <div className={cn(
-   "h-5 w-5 rounded flex items-center justify-center shrink-0 text-[9px] font-display font-black tabular-nums border transition-colors",
+   "h-5 w-5 flex items-center justify-center shrink-0 text-[9px] font-display font-black tabular-nums border transition-colors",
    isActive
      ? hasVideo ? "bg-primary-foreground/20 text-primary-foreground border-primary-foreground/30" : "bg-primary-foreground/10 text-primary-foreground border-primary-foreground/20"
      : hasVideo
-       ? "bg-success/15 text-success border-success/25"
-       : "bg-muted text-muted-foreground border-border"
+       ? "bg-success text-success-foreground border-success"
+       : "bg-card text-muted-foreground border-border"
  )}>
-   {hasVideo ? <CheckCircle2 className="h-2.5 w-2.5" strokeWidth={2.5} /> : li + 1}
+   {hasVideo ? <CheckCircle2 className="h-2.5 w-2.5" strokeWidth={2.75} /> : li + 1}
  </div>
  <div className="flex-1 min-w-0">
  <p className={cn(
