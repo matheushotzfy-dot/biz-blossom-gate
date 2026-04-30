@@ -19,6 +19,8 @@ import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { LessonComments } from "@/components/member/LessonComments";
+import { LessonQuiz } from "@/components/member/LessonQuiz";
+import { LessonNotes } from "@/components/member/LessonNotes";
 
 type Course = { id: string; title: string; description: string | null; thumbnail_url: string | null };
 type Module = { id: string; title: string; description: string | null; banner_url: string | null; sort_order: number; lessons: Lesson[] };
@@ -674,6 +676,12 @@ export default function MemberCourse() {
  </div>
  </Link>
  )}
+
+       {/* Quiz */}
+ {user && <LessonQuiz lessonId={activeLesson.id} userId={user.id} />}
+
+ {/* Personal Notes */}
+ {user && <LessonNotes lessonId={activeLesson.id} userId={user.id} />}
 
  {/* Lesson Q&A */}
  {user && <LessonComments lessonId={activeLesson.id} currentUserId={user.id} />}

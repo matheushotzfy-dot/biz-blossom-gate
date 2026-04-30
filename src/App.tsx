@@ -56,6 +56,7 @@ import MemberAuth from "./pages/membros/MemberAuth";
 import MemberLayout from "./pages/membros/MemberLayout";
 import MemberHome from "./pages/membros/MemberHome";
 import MemberCourse from "./pages/membros/MemberCourse";
+import CourseAnalytics from "./pages/membros/CourseAnalytics";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -106,6 +107,7 @@ const App = () => (
               <Route path="/gerentes" element={<ManagerLogin />} />
               <Route path="/gerentes/dashboard" element={<RequireManager><ManagerDashboard /></RequireManager>} />
 
+              <Route path="/vendas/conteudo/:courseId/analytics" element={<RequireAuth><CourseAnalytics /></RequireAuth>} />
               <Route path="/vendas/conteudo/:courseId/builder" element={<RequireAuth><CourseBuilder /></RequireAuth>} />
               <Route path="/vendas/produtos/:productId/editar" element={<RequireAuth><ProductEditor /></RequireAuth>} />
               <Route path="/vendas/produtos/:productId/checkout-builder" element={<RequireAuth><CheckoutBuilder /></RequireAuth>} />
