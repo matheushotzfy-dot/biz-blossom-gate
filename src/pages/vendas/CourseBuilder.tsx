@@ -844,7 +844,7 @@ export default function CourseBuilder() {
  animate={{ opacity: 1, x: 0 }}
  exit={{ opacity: 0, x: -10 }}
  onClick={() => setSidebarCollapsed(false)}
- className="absolute left-3 top-3 z-40 h-9 w-9 rounded-xl bg-card/90 backdrop-blur-xl border border-border/20 flex items-center justify-center hover:bg-muted/15 hover:border-border/30 transition-all shadow-lg shadow-foreground/[0.03] active:scale-[0.985]"
+ className="absolute left-3 top-3 z-40 h-9 w-9 bg-card border border-border flex items-center justify-center hover:bg-card-elevated hover:border-foreground/40 transition-colors"
  >
  <PanelLeft className="h-4 w-4 text-muted-foreground/40" />
  </motion.button>
