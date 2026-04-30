@@ -857,23 +857,23 @@ export default function CourseBuilder() {
  <div className="w-full max-w-3xl mx-auto px-4 sm:px-8 lg:px-10 py-6 sm:py-8 space-y-6">
 
  {/* Lesson Header */}
- <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4, ease }}>
- <div className="flex items-center gap-2.5 mb-3">
- <div className="h-7 w-7 rounded-lg bg-primary/8 ring-1 ring-primary/15 flex items-center justify-center">
- <Hash className="h-3 w-3 text-primary/50" />
+ <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3, ease }}>
+ <div className="flex items-center gap-2.5 mb-4">
+ <div className="h-7 w-7 border border-primary bg-primary/[0.08] flex items-center justify-center">
+ <Hash className="h-3 w-3 text-primary" strokeWidth={2.5} />
  </div>
- <span className="text-[10px] font-display font-bold uppercase tracking-[0.15em] text-primary/40">
+ <span className="text-[10px] font-display font-black uppercase tracking-[0.18em] text-muted-foreground/70 truncate">
  {modules.find(m => m.lessons.some(l => l.id === selectedLesson.id))?.title}
  </span>
  {/* Lesson status badges */}
- <div className="flex items-center gap-1.5 ml-auto">
+ <div className="flex items-center gap-1.5 ml-auto shrink-0">
  {lessonVideoUrl && (
- <span className="inline-flex items-center gap-1 text-[9px] font-display font-bold text-success/60 bg-success/5 px-2 py-0.5 rounded-md ring-1 ring-success/10">
+ <span className="inline-flex items-center gap-1 text-[9px] font-display font-black text-success-foreground bg-success border border-success px-2 py-0.5 uppercase tracking-[0.14em]">
  <CheckCircle2 className="h-2.5 w-2.5" /> Vídeo
  </span>
  )}
  {lessonIsFree && (
- <span className="text-[9px] font-display font-bold text-info/60 bg-info/5 px-2 py-0.5 rounded-md ring-1 ring-info/10">Gratuita</span>
+ <span className="text-[9px] font-display font-black text-info-foreground bg-info border border-info px-2 py-0.5 uppercase tracking-[0.14em]">Gratuita</span>
  )}
  </div>
  </div>
@@ -883,13 +883,13 @@ export default function CourseBuilder() {
  onChange={e => setLessonTitle(e.target.value)}
  onBlur={() => { setEditingLessonTitle(false); if (lessonTitle.trim() && lessonTitle !== selectedLesson.title) autoSave("title", lessonTitle.trim()); }}
  onKeyDown={e => { if (e.key === "Enter") (e.target as HTMLInputElement).blur(); }}
- className="w-full bg-transparent text-2xl sm:text-3xl font-display font-black tracking-[-0.03em] text-foreground focus:outline-none border-b-2 border-primary/20 pb-1.5"
+ className="w-full bg-transparent text-[32px] sm:text-[44px] font-display font-black tracking-[-0.04em] leading-[0.95] text-foreground focus:outline-none border-b-2 border-primary pb-1.5"
  autoFocus
  />
  ) : (
  <h2
  onClick={() => { setEditingLessonTitle(true); setTimeout(() => titleInputRef.current?.focus(), 50); }}
- className="text-2xl sm:text-3xl font-display font-black tracking-[-0.03em] text-foreground cursor-text hover:text-foreground/70 transition-colors leading-tight"
+ className="text-[32px] sm:text-[44px] font-display font-black tracking-[-0.04em] leading-[0.95] text-foreground cursor-text hover:text-foreground/80 transition-colors"
  >
  {lessonTitle || "Sem título"}
  </h2>
