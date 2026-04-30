@@ -141,6 +141,15 @@ export default function MemberCourse() {
  loadAttachments(enrichedModules[0].lessons[0].id);
  }
  setLoading(false);
+ // Fetch certificate if exists
+ const { data: certData } = await supabase.from("certificates").select("code").eq("user_id", user.id).eq("course_id", courseId).maybeSingle();
+ if (certData) setCertificate(certData as { code: string });
+ };
+
+ const refreshCertificate = async () => {
+ if (!user || !courseId) return;
+ const { data } = await supabase.from("certificates").select("code").eq("user_id", user.id).eq("course_id", courseId).maybeSingle();
+ if (data) setCertificate(data as { code: string });
  };
 
  const loadAttachments = async (lessonId: string) => {
@@ -160,6 +169,22 @@ export default function MemberCourse() {
  setExpandedModules(prev => new Set([...prev, lesson.module_id]));
  loadAttachments(lesson.id);
  window.scrollTo({ top: 0, behavior: "smooth" });
+ // Track lesson view (updates progress.updated_at → powers "Continue watching")
+ if (user && !progress.get(lesson.id)?.completed) {
+ supabase.from("user_progress").upsert(
+ { user_id: user.id, lesson_id: lesson.id, completed: false, progress_seconds: 1 },
+ { onConflict: "user_id,lesson_id" }
+ ).then(({ error }) => {
+ if (!error) {
+ setProgress(prev => {
+ const next = new Map(prev);
+ const existing = next.get(lesson.id);
+ if (!existing) next.set(lesson.id, { lesson_id: lesson.id, completed: false, progress_seconds: 1 });
+ return next;
+ });
+ }
+ });
+ }
  };
 
  const markComplete = async (lessonId: string) => {
