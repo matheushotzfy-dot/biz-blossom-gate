@@ -255,7 +255,7 @@ export default function MemberCourse() {
  </div>
  );
 
- const sidebarWidth = theaterMode ? "w-[280px]" : "w-[320px] xl:w-[360px]";
+ const sidebarWidth = theaterMode ? "lg:w-0 lg:opacity-0 lg:pointer-events-none" : "w-[340px] xl:w-[380px]";
 
  /* ─── Sidebar Component ─── */
  const CourseSidebar = () => (
@@ -495,209 +495,213 @@ export default function MemberCourse() {
  )}
  </AnimatePresence>
 
- {/* ═══ Main Content ═══ */}
- <div className="flex-1 overflow-y-auto bg-background">
- {/* Top bar */}
- <div className="sticky top-0 z-10 bg-background/80 backdrop-blur-2xl border-b border-border/10 px-4 sm:px-6 py-2.5">
- <div className="flex items-center justify-between max-w-5xl mx-auto">
- <div className="flex items-center gap-3 min-w-0">
- <Link to="/membros-area" className="h-8 w-8 rounded-lg bg-foreground/[0.04] hover:bg-foreground/[0.08] flex items-center justify-center transition-all shrink-0 group">
- <ChevronLeft className="h-4 w-4 text-muted-foreground/40 group-hover:text-foreground transition-colors" />
- </Link>
- <div className="min-w-0">
- <div className="flex items-center gap-2">
- <h1 className="text-sm font-display font-black text-foreground truncate tracking-[-0.02em]">{course.title}</h1>
- {isComplete && (
- <div className="h-4 w-4 rounded-sm bg-success/15 flex items-center justify-center">
- <Award className="h-2.5 w-2.5 text-success" />
- </div>
- )}
- </div>
- <div className="flex items-center gap-2 mt-0.5">
- <div className="h-1 rounded-full bg-foreground/5 overflow-hidden w-16 sm:w-24">
- <div className={cn("h-full rounded-full transition-all", isComplete ? "bg-success" : "bg-primary")} style={{ width: `${overallPct}%` }} />
- </div>
- <span className="text-[10px] text-muted-foreground/40 font-display font-bold tabular-nums">{completedLessons}/{totalLessons} · {overallPct}%</span>
- </div>
- </div>
- </div>
- <div className="flex items-center gap-1">
- <button onClick={() => navigateLesson(-1)} disabled={currentIdx <= 0}
- className="h-8 w-8 rounded-lg bg-foreground/[0.04] hover:bg-foreground/[0.08] flex items-center justify-center transition-all disabled:opacity-15 active:scale-95"
- title="Aula anterior (←)">
- <ArrowLeft className="h-3.5 w-3.5 text-muted-foreground/40" />
- </button>
- <button onClick={() => navigateLesson(1)} disabled={currentIdx >= totalLessons - 1}
- className="h-8 w-8 rounded-lg bg-foreground/[0.04] hover:bg-foreground/[0.08] flex items-center justify-center transition-all disabled:opacity-15 active:scale-95"
- title="Próxima aula (→)">
- <ArrowRight className="h-3.5 w-3.5 text-muted-foreground/40" />
- </button>
- <button onClick={() => setTheaterMode(!theaterMode)}
- className="hidden lg:flex h-8 w-8 rounded-lg bg-foreground/[0.04] hover:bg-foreground/[0.08] items-center justify-center transition-all active:scale-95"
- title={theaterMode ? "Modo normal (T)" : "Modo teatro (T)"}>
- {theaterMode ? <Minimize2 className="h-3.5 w-3.5 text-muted-foreground/40" /> : <Maximize2 className="h-3.5 w-3.5 text-muted-foreground/40" />}
- </button>
- <button onClick={() => setSidebarOpen(!sidebarOpen)}
- className="h-8 w-8 rounded-lg bg-foreground/[0.04] hover:bg-foreground/[0.08] flex items-center justify-center transition-all lg:hidden active:scale-95">
- <List className="h-3.5 w-3.5 text-muted-foreground/40" />
- </button>
- </div>
- </div>
- </div>
+      {/* ═══ Main Content — Cinematic ═══ */}
+      <div className="flex-1 overflow-y-auto bg-background relative">
+        {/* Floating top bar */}
+        <div className="sticky top-0 z-20 bg-background/70 backdrop-blur-2xl border-b border-border/10 px-4 sm:px-8 py-3">
+          <div className="flex items-center justify-between gap-4">
+            <div className="flex items-center gap-3 min-w-0 flex-1">
+              <Link to="/membros-area" className="h-9 w-9 rounded-full bg-foreground/[0.04] hover:bg-foreground/[0.08] flex items-center justify-center transition-all shrink-0 group">
+                <ChevronLeft className="h-4 w-4 text-muted-foreground/50 group-hover:text-foreground transition-colors" />
+              </Link>
+              <div className="min-w-0">
+                <p className="text-[9px] font-display font-bold text-muted-foreground/40 uppercase tracking-[0.18em]">Curso</p>
+                <div className="flex items-center gap-2 mt-0.5">
+                  <h1 className="text-[13px] font-display font-black text-foreground truncate tracking-[-0.02em]">{course.title}</h1>
+                  {isComplete && (
+                    <div className="h-4 w-4 rounded-full bg-success/15 flex items-center justify-center shrink-0">
+                      <Award className="h-2.5 w-2.5 text-success" />
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
 
- {/* Lesson content */}
- <div className={cn("p-4 sm:p-6 lg:p-8 space-y-5 mx-auto", theaterMode ? "max-w-6xl" : "max-w-5xl")}>
- {activeLesson ? (
- <motion.div
- key={activeLesson.id}
- initial={{ opacity: 0, y: 10 }}
- animate={{ opacity: 1, y: 0 }}
- transition={{ duration: 0.3, ease }}
- className="space-y-5"
- >
- {/* Video / Content */}
- {hasVideo ? (
- <div className={cn(
- "rounded-xl overflow-hidden shadow-2xl shadow-background/50 ring-1 ring-foreground/5 relative",
- theaterMode ? "aspect-video" : "aspect-video max-h-[520px]"
- )}>
- <VideoPlayer url={activeLesson.video_url!} />
- </div>
- ) : (
- <div className="aspect-video max-h-[400px] rounded-xl overflow-hidden bg-gradient-to-br from-card via-card to-background border border-border/10 flex flex-col items-center justify-center text-center p-8">
- <div className="h-16 w-16 rounded-xl bg-primary/8 flex items-center justify-center mb-4">
- <FileText className="h-8 w-8 text-primary/20" />
- </div>
- <h3 className="text-lg font-display font-black text-foreground tracking-tight">{activeLesson.title}</h3>
- <p className="text-sm text-muted-foreground/40 mt-1 font-display">Conteúdo em texto — leia abaixo</p>
- </div>
- )}
+            <div className="hidden sm:flex items-center gap-3 shrink-0">
+              <div className="flex items-center gap-2">
+                <div className="h-1 rounded-full bg-foreground/8 overflow-hidden w-24 lg:w-32">
+                  <div className={cn("h-full rounded-full transition-all duration-700", isComplete ? "bg-success" : "bg-primary")} style={{ width: `${overallPct}%` }} />
+                </div>
+                <span className="text-[10px] text-muted-foreground/55 font-display font-bold tabular-nums">{overallPct}%</span>
+              </div>
+            </div>
 
- {/* Lesson details */}
- <div className="rounded-xl bg-card/40 border border-border/10 overflow-hidden">
- <div className="p-5 sm:p-6">
- <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
- <div className="flex-1 min-w-0">
- {activeModule && (
- <p className="text-[10px] text-muted-foreground/40 font-display font-bold uppercase tracking-wider mb-2 flex items-center gap-1.5">
- <Layers className="h-3 w-3 text-primary/30" />
- {activeModule.title}
- <span className="text-muted-foreground/10">·</span>
- <span className="tabular-nums">Aula {currentIdx + 1}/{totalLessons}</span>
- </p>
- )}
- <h2 className="text-lg sm:text-xl font-display font-black text-foreground tracking-[-0.02em] leading-tight">{activeLesson.title}</h2>
- <div className="flex items-center gap-2.5 mt-2 text-xs text-muted-foreground/40 font-display flex-wrap">
- {hasVideo ? <span className="flex items-center gap-1 bg-primary/5 px-2 py-0.5 rounded-md"><Video className="h-3 w-3 text-primary/50" /> Vídeo</span>
- : <span className="flex items-center gap-1 bg-primary/5 px-2 py-0.5 rounded-md"><FileText className="h-3 w-3 text-primary/50" /> Conteúdo</span>}
- {activeLesson.duration_minutes > 0 && (
- <span className="flex items-center gap-1 tabular-nums"><Clock className="h-3 w-3" /> {activeLesson.duration_minutes} min</span>
- )}
- {attachments.length > 0 && (
- <span className="flex items-center gap-1"><Paperclip className="h-3 w-3" /> {attachments.length} anexo{attachments.length > 1 ? "s" : ""}</span>
- )}
- </div>
- </div>
+            <div className="flex items-center gap-1 shrink-0">
+              <button onClick={() => navigateLesson(-1)} disabled={currentIdx <= 0}
+                className="h-9 w-9 rounded-full bg-foreground/[0.04] hover:bg-foreground/[0.08] flex items-center justify-center transition-all disabled:opacity-15 active:scale-95"
+                title="Aula anterior (←)">
+                <ArrowLeft className="h-4 w-4 text-muted-foreground/50" />
+              </button>
+              <button onClick={() => navigateLesson(1)} disabled={currentIdx >= totalLessons - 1}
+                className="h-9 w-9 rounded-full bg-foreground/[0.04] hover:bg-foreground/[0.08] flex items-center justify-center transition-all disabled:opacity-15 active:scale-95"
+                title="Próxima aula (→)">
+                <ArrowRight className="h-4 w-4 text-muted-foreground/50" />
+              </button>
+              <button onClick={() => setTheaterMode(!theaterMode)}
+                className="hidden lg:flex h-9 w-9 rounded-full bg-foreground/[0.04] hover:bg-foreground/[0.08] items-center justify-center transition-all active:scale-95"
+                title={theaterMode ? "Modo normal (T)" : "Modo teatro (T)"}>
+                {theaterMode ? <Minimize2 className="h-4 w-4 text-muted-foreground/50" /> : <Maximize2 className="h-4 w-4 text-muted-foreground/50" />}
+              </button>
+              <button onClick={() => setSidebarOpen(!sidebarOpen)}
+                className="h-9 w-9 rounded-full bg-foreground/[0.04] hover:bg-foreground/[0.08] flex items-center justify-center transition-all lg:hidden active:scale-95">
+                <List className="h-4 w-4 text-muted-foreground/50" />
+              </button>
+            </div>
+          </div>
+        </div>
 
- <div className="flex items-center gap-2 shrink-0">
- <button onClick={() => markComplete(activeLesson.id)}
- disabled={progress.get(activeLesson.id)?.completed}
- className={cn(
- "flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-display font-bold transition-all active:scale-[0.97]",
- progress.get(activeLesson.id)?.completed
- ? "bg-success/10 text-success border border-success/15"
- : "bg-foreground text-background hover:bg-foreground/90 shadow-lg"
- )}>
- <CheckCircle2 className="h-4 w-4" />
- {progress.get(activeLesson.id)?.completed ? "Concluída ✓" : "Concluir"}
- </button>
- {currentIdx < totalLessons - 1 && (
- <button onClick={() => navigateLesson(1)}
- className="flex items-center gap-1.5 px-4 py-2.5 rounded-xl text-sm font-display font-bold bg-foreground/5 text-foreground/50 hover:bg-foreground/8 hover:text-foreground transition-all active:scale-[0.97]">
- Próxima <ArrowRight className="h-3.5 w-3.5" />
- </button>
- )}
- </div>
- </div>
- </div>
+        {/* Video Stage — full bleed cinematic */}
+        {activeLesson && (
+          <motion.div
+            key={`stage-${activeLesson.id}`}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.4, ease }}
+            className="relative w-full bg-black"
+          >
+            <div className={cn("mx-auto", theaterMode ? "max-w-[1600px]" : "max-w-[1200px]")}>
+              {hasVideo ? (
+                <div className="aspect-video w-full bg-black relative">
+                  <VideoPlayer url={activeLesson.video_url!} />
+                </div>
+              ) : (
+                <div className="aspect-video w-full bg-gradient-to-br from-card via-background to-black flex flex-col items-center justify-center text-center p-8">
+                  <div className="h-20 w-20 rounded-2xl bg-primary/8 flex items-center justify-center mb-5 border border-primary/10">
+                    <FileText className="h-9 w-9 text-primary/40" />
+                  </div>
+                  <h3 className="text-2xl font-display font-black text-foreground tracking-[-0.02em]">{activeLesson.title}</h3>
+                  <p className="text-sm text-muted-foreground/50 mt-2 font-display">Conteúdo em texto — leia abaixo</p>
+                </div>
+              )}
+            </div>
+            {/* fade-out gradient bottom */}
+            <div className="absolute inset-x-0 -bottom-px h-24 bg-gradient-to-b from-transparent to-background pointer-events-none" />
+          </motion.div>
+        )}
 
- {activeLesson.description && (
- <div className="border-t border-border/8 p-5 sm:p-6">
- <h4 className="text-[10px] font-display font-bold text-muted-foreground/40 uppercase tracking-wider mb-3 flex items-center gap-1.5">
- <FileText className="h-3 w-3" /> Sobre esta aula
- </h4>
- <div className="text-sm text-foreground/60 leading-relaxed whitespace-pre-wrap font-display">{activeLesson.description}</div>
- </div>
- )}
+        {/* Lesson detail strip */}
+        <div className={cn("mx-auto px-4 sm:px-8 lg:px-12 pb-12 pt-8", theaterMode ? "max-w-[1200px]" : "max-w-[1100px]")}>
+          {activeLesson ? (
+            <motion.div
+              key={`meta-${activeLesson.id}`}
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.4, ease, delay: 0.1 }}
+              className="space-y-6"
+            >
+              {/* Title block */}
+              <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-5 pb-6 border-b border-border/10">
+                <div className="min-w-0 flex-1">
+                  {activeModule && (
+                    <p className="text-[10px] text-primary/70 font-display font-bold uppercase tracking-[0.2em] mb-3 flex items-center gap-2">
+                      <span className="inline-block h-px w-6 bg-primary/30" />
+                      {activeModule.title}
+                      <span className="text-muted-foreground/30">·</span>
+                      <span className="tabular-nums text-muted-foreground/60">Aula {currentIdx + 1} de {totalLessons}</span>
+                    </p>
+                  )}
+                  <h2 className="text-3xl sm:text-4xl lg:text-[44px] font-display font-black text-foreground tracking-[-0.035em] leading-[1.05]">{activeLesson.title}</h2>
+                  <div className="flex items-center gap-3 mt-4 text-xs text-muted-foreground/55 font-display flex-wrap">
+                    {hasVideo
+                      ? <span className="flex items-center gap-1.5"><Video className="h-3.5 w-3.5 text-primary/60" /> Vídeo HD</span>
+                      : <span className="flex items-center gap-1.5"><FileText className="h-3.5 w-3.5 text-primary/60" /> Conteúdo</span>}
+                    {activeLesson.duration_minutes > 0 && (
+                      <><span className="text-border/40">·</span><span className="flex items-center gap-1.5 tabular-nums"><Clock className="h-3.5 w-3.5" /> {activeLesson.duration_minutes} min</span></>
+                    )}
+                    {attachments.length > 0 && (
+                      <><span className="text-border/40">·</span><span className="flex items-center gap-1.5"><Paperclip className="h-3.5 w-3.5" /> {attachments.length} anexo{attachments.length > 1 ? "s" : ""}</span></>
+                    )}
+                  </div>
+                </div>
 
- {/* Attachments */}
- {attachments.length > 0 && (
- <div className="border-t border-border/8 p-5 sm:p-6">
- <h4 className="text-[10px] font-display font-bold text-muted-foreground/40 uppercase tracking-wider mb-3 flex items-center gap-1.5">
- <Paperclip className="h-3 w-3" /> Materiais de apoio
- </h4>
- <div className="grid gap-2">
- {attachments.map(att => (
- <a
- key={att.id}
- href={att.file_url}
- target="_blank"
- rel="noopener noreferrer"
- className="group flex items-center gap-3 p-3 rounded-xl bg-card/30 border border-border/10 hover:border-primary/15 hover:bg-primary/5 transition-all active:scale-[0.99]"
- >
- <div className="h-9 w-9 rounded-lg bg-primary/8 flex items-center justify-center shrink-0 group-hover:bg-primary/15 transition-colors">
- <Download className="h-4 w-4 text-primary/50 group-hover:text-primary transition-colors" />
- </div>
- <div className="flex-1 min-w-0">
- <p className="text-xs font-display font-bold text-foreground/70 truncate group-hover:text-foreground transition-colors">{att.file_name}</p>
- <p className="text-[10px] text-muted-foreground/30 font-display">{formatFileSize(att.file_size)} · {att.file_type}</p>
- </div>
- <ExternalLink className="h-3.5 w-3.5 text-muted-foreground/15 group-hover:text-primary/40 transition-colors shrink-0" />
- </a>
- ))}
-  </div>
- </div>
- )}
- </div>
+                <div className="flex items-center gap-2 shrink-0">
+                  <button onClick={() => markComplete(activeLesson.id)}
+                    disabled={progress.get(activeLesson.id)?.completed}
+                    className={cn(
+                      "flex items-center gap-2 px-6 h-12 rounded-full text-[13px] font-display font-bold transition-all active:scale-[0.97]",
+                      progress.get(activeLesson.id)?.completed
+                        ? "bg-success/12 text-success border border-success/20"
+                        : "bg-foreground text-background hover:bg-foreground/90"
+                    )}>
+                    <CheckCircle2 className="h-4 w-4" />
+                    {progress.get(activeLesson.id)?.completed ? "Concluída" : "Marcar como concluída"}
+                  </button>
+                  {currentIdx < totalLessons - 1 && (
+                    <button onClick={() => navigateLesson(1)}
+                      className="flex items-center gap-1.5 px-5 h-12 rounded-full text-[13px] font-display font-bold bg-foreground/5 text-foreground/70 hover:bg-foreground/10 hover:text-foreground transition-all active:scale-[0.97]">
+                      Próxima <ArrowRight className="h-4 w-4" />
+                    </button>
+                  )}
+                </div>
+              </div>
 
- {/* Certificate banner */}
- {certificate && (
- <Link to={`/certificado/${certificate.code}`} target="_blank"
- className="block rounded-xl bg-gradient-to-br from-success/10 to-success/5 border border-success/20 p-5 hover:border-success/40 transition-all group">
- <div className="flex items-center gap-4">
- <div className="h-12 w-12 rounded-xl bg-success/15 flex items-center justify-center shrink-0">
- <Award className="h-6 w-6 text-success" />
- </div>
- <div className="flex-1 min-w-0">
- <p className="text-sm font-display font-black text-foreground tracking-tight">Certificado disponível</p>
- <p className="text-xs text-muted-foreground/70 font-display mt-0.5">Código <span className="font-mono text-success">{certificate.code}</span> · Clique para visualizar e imprimir</p>
- </div>
- <ExternalLink className="h-4 w-4 text-success/60 group-hover:text-success transition-colors shrink-0" />
- </div>
- </Link>
- )}
+              {/* Description */}
+              {activeLesson.description && (
+                <div className="prose prose-invert max-w-none">
+                  <p className="text-[15px] text-foreground/75 leading-[1.75] whitespace-pre-wrap font-display">{activeLesson.description}</p>
+                </div>
+              )}
 
-       {/* Quiz */}
- {user && <LessonQuiz lessonId={activeLesson.id} userId={user.id} />}
+              {/* Attachments */}
+              {attachments.length > 0 && (
+                <div className="pt-2">
+                  <h4 className="text-[10px] font-display font-bold text-muted-foreground/50 uppercase tracking-[0.18em] mb-3 flex items-center gap-2">
+                    <Paperclip className="h-3 w-3" /> Materiais de apoio
+                  </h4>
+                  <div className="grid sm:grid-cols-2 gap-2">
+                    {attachments.map(att => (
+                      <a key={att.id} href={att.file_url} target="_blank" rel="noopener noreferrer"
+                        className="group flex items-center gap-3 p-3.5 rounded-xl bg-card/40 border border-border/10 hover:border-primary/25 hover:bg-primary/5 transition-all active:scale-[0.99]">
+                        <div className="h-10 w-10 rounded-lg bg-primary/8 flex items-center justify-center shrink-0 group-hover:bg-primary/15 transition-colors">
+                          <Download className="h-4 w-4 text-primary/60 group-hover:text-primary transition-colors" />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-[12px] font-display font-bold text-foreground/80 truncate group-hover:text-foreground transition-colors">{att.file_name}</p>
+                          <p className="text-[10px] text-muted-foreground/40 font-display tabular-nums">{formatFileSize(att.file_size)}</p>
+                        </div>
+                        <ExternalLink className="h-3.5 w-3.5 text-muted-foreground/25 group-hover:text-primary/60 transition-colors shrink-0" />
+                      </a>
+                    ))}
+                  </div>
+                </div>
+              )}
 
- {/* Personal Notes */}
- {user && <LessonNotes lessonId={activeLesson.id} userId={user.id} />}
+              {/* Certificate banner */}
+              {certificate && (
+                <Link to={`/certificado/${certificate.code}`} target="_blank"
+                  className="block rounded-2xl bg-gradient-to-br from-success/12 to-success/4 border border-success/20 p-5 hover:border-success/40 transition-all group">
+                  <div className="flex items-center gap-4">
+                    <div className="h-14 w-14 rounded-2xl bg-success/15 flex items-center justify-center shrink-0">
+                      <Award className="h-7 w-7 text-success" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-[15px] font-display font-black text-foreground tracking-[-0.01em]">Seu certificado está pronto</p>
+                      <p className="text-xs text-muted-foreground/70 font-display mt-1">Código <span className="font-mono text-success">{certificate.code}</span> · Toque para abrir e imprimir</p>
+                    </div>
+                    <ExternalLink className="h-4 w-4 text-success/60 group-hover:text-success transition-colors shrink-0" />
+                  </div>
+                </Link>
+              )}
 
- {/* Lesson Q&A */}
- {user && <LessonComments lessonId={activeLesson.id} currentUserId={user.id} />}
- </motion.div>
- ) : (
- <div className="aspect-video max-h-[480px] rounded-xl bg-card/30 border border-border/10 flex items-center justify-center">
- <div className="text-center">
- <div className="h-16 w-16 rounded-xl bg-foreground/[0.03] flex items-center justify-center mx-auto mb-4">
- <BookOpen className="h-8 w-8 text-muted-foreground/10" />
- </div>
- <p className="text-muted-foreground/50 font-display font-bold text-sm">Selecione uma aula para começar</p>
- </div>
- </div>
- )}
- </div>
- </div>
+              {/* Quiz / Notes / Comments */}
+              <div className="space-y-5 pt-4">
+                {user && <LessonQuiz lessonId={activeLesson.id} userId={user.id} />}
+                {user && <LessonNotes lessonId={activeLesson.id} userId={user.id} />}
+                {user && <LessonComments lessonId={activeLesson.id} currentUserId={user.id} />}
+              </div>
+            </motion.div>
+          ) : (
+            <div className="aspect-video max-h-[480px] rounded-2xl bg-card/30 border border-border/10 flex items-center justify-center">
+              <div className="text-center">
+                <div className="h-16 w-16 rounded-2xl bg-foreground/[0.03] flex items-center justify-center mx-auto mb-4">
+                  <BookOpen className="h-8 w-8 text-muted-foreground/15" />
+                </div>
+                <p className="text-muted-foreground/50 font-display font-bold text-sm">Selecione uma aula para começar</p>
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
 
  {/* ═══ Desktop Sidebar ═══ */}
  <aside className={cn(
