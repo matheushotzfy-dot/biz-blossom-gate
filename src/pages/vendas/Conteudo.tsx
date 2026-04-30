@@ -251,50 +251,44 @@ export default function AdminConteudo() {
 
   return (
     <div className="mx-auto -mt-2 w-full max-w-[1440px] pb-24 md:-mt-3 md:pb-10">
-      {/* ── Hero header ── */}
-      <div className="relative flex flex-col gap-7 px-5 pt-1 sm:px-7 md:pt-1">
-        {/* Subtle radial accent behind title */}
-        <div
-          aria-hidden
-          className="pointer-events-none absolute -top-12 left-0 h-48 w-[520px] -z-[1] opacity-60 blur-3xl"
-          style={{
-            background:
-              "radial-gradient(60% 60% at 20% 50%, hsl(var(--primary) / 0.10), transparent 70%)",
-          }}
-        />
-
+      {/* ── Hero header (Cakto Cinematic Noir) ── */}
+      <div className="relative flex flex-col gap-8 px-5 pt-2 sm:px-7 md:pt-3">
         <div className="flex flex-wrap items-end justify-between gap-4 animate-fade-in">
-          <div>
-            <h1 className="font-display text-[40px] font-black leading-[0.9] tracking-[-0.055em] text-foreground sm:text-[52px]">
-              Área de membros
+          <div className="min-w-0">
+            <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.22em] text-muted-foreground/70">
+              <span className="inline-flex h-5 w-5 items-center justify-center border border-primary/40 bg-primary/[0.08] text-[10px] font-black text-primary">H</span>
+              Hotzfy Members
+            </div>
+            <h1 className="mt-3 font-display text-[44px] font-black leading-[0.88] tracking-[-0.055em] text-foreground sm:text-[64px]">
+              Conteúdo
             </h1>
-            <p className="mt-2 text-[13px] font-medium text-muted-foreground/80">
-              Builder, catálogo e operação do seu conteúdo num só lugar.
+            <p className="mt-2 text-[13px] font-medium text-muted-foreground/70">
+              Crie cursos, organize módulos e libere acesso ao seu aluno.
             </p>
           </div>
           <button
             onClick={openNew}
-            className="group inline-flex h-11 items-center gap-2 rounded-xl bg-primary px-5 text-[13px] font-black uppercase tracking-wider text-primary-foreground transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] hover:bg-primary/90 hover:-translate-y-0.5 hover:shadow-[0_10px_30px_-10px_hsl(var(--primary)/0.5)]"
+            className="group inline-flex h-11 items-center gap-2 border border-primary bg-primary px-5 text-[12px] font-black uppercase tracking-[0.16em] text-primary-foreground transition-colors duration-200 hover:bg-primary/90"
           >
-            <Plus className="h-4 w-4 transition-transform duration-300 group-hover:rotate-90" strokeWidth={2.75} />
-            Nova área
+            <Plus className="h-4 w-4" strokeWidth={3} />
+            Novo curso
           </button>
         </div>
 
-        {/* KPIs */}
-        <div className="grid grid-cols-2 gap-px overflow-hidden rounded-xl border border-border/50 bg-border/40 sm:grid-cols-4 animate-fade-in stagger-1">
+        {/* KPIs — sharp grid, no blur, no rounded */}
+        <div className="grid grid-cols-2 gap-px overflow-hidden border border-border bg-border sm:grid-cols-4 animate-fade-in stagger-1">
           {metricCards.map((item) => {
             const Icon = item.icon;
             return (
-              <div key={item.label} className="bg-card px-5 py-4">
-                <div className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-[0.18em] text-muted-foreground/60">
-                  <Icon className="h-3 w-3" strokeWidth={2.5} />
+              <div key={item.label} className="bg-card px-5 py-5">
+                <div className="flex items-center gap-1.5 text-[10px] font-black uppercase tracking-[0.20em] text-muted-foreground/60">
+                  <Icon className="h-3 w-3" strokeWidth={2.75} />
                   {item.label}
                 </div>
-                <div className="mt-2 font-display text-[22px] font-black leading-none tracking-tight text-foreground tabular-nums">
+                <div className="mt-3 font-display text-[28px] font-black leading-none tracking-[-0.03em] text-foreground tabular-nums">
                   {item.value}
                 </div>
-                <p className="mt-1.5 text-[11px] font-medium text-muted-foreground/60">{item.meta}</p>
+                <p className="mt-2 text-[10.5px] font-bold uppercase tracking-[0.14em] text-muted-foreground/50">{item.meta}</p>
               </div>
             );
           })}
