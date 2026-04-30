@@ -18,6 +18,7 @@ import {
 import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
+import { LessonComments } from "@/components/member/LessonComments";
 
 type Course = { id: string; title: string; description: string | null; thumbnail_url: string | null };
 type Module = { id: string; title: string; description: string | null; banner_url: string | null; sort_order: number; lessons: Lesson[] };
@@ -71,6 +72,7 @@ export default function MemberCourse() {
  const [theaterMode, setTheaterMode] = useState(false);
  const [attachments, setAttachments] = useState<Attachment[]>([]);
  const [showCelebration, setShowCelebration] = useState(false);
+ const [certificate, setCertificate] = useState<{ code: string } | null>(null);
 
  useEffect(() => { if (courseId && user) loadCourse(); }, [courseId, user]);
 
