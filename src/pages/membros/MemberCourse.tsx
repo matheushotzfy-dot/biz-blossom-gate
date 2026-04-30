@@ -254,168 +254,142 @@ export default function MemberCourse() {
   /* ─── Sidebar Component — Cakto style: numbered, dense, dark ─── */
   const CourseSidebar = () => (
     <div className="p-4 space-y-3">
- {/* Progress */}
- <div className="p-3.5 rounded-xl bg-card/40 border border-border/10 relative overflow-hidden">
- <div className="flex items-center justify-between mb-3">
- <div className="flex items-center gap-2">
- <div className={cn("h-7 w-7 rounded-lg flex items-center justify-center", isComplete ? "bg-success/10" : "bg-primary/10")}>
- {isComplete ? <Trophy className="h-3.5 w-3.5 text-success" /> : <Flame className="h-3.5 w-3.5 text-primary" />}
- </div>
- <span className="text-[11px] font-display font-bold text-foreground/60">Progresso</span>
- </div>
- <span className={cn("text-base font-display font-black tabular-nums", isComplete ? "text-success" : "text-primary")}>{overallPct}%</span>
- </div>
- <div className="h-1.5 rounded-full bg-foreground/5 overflow-hidden">
- <motion.div
- initial={{ width: 0 }}
- animate={{ width: `${overallPct}%` }}
- transition={{ duration: 1, delay: 0.3, ease }}
- className={cn("h-full rounded-full", isComplete ? "bg-success" : "bg-primary")}
- />
- </div>
- <p className="text-[10px] text-muted-foreground/30 mt-2 font-display tabular-nums">{completedLessons}/{totalLessons} aulas concluídas</p>
- {isComplete && (
- <motion.div initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }}
- className="flex items-center gap-2 mt-3 p-2.5 rounded-lg bg-success/8 border border-success/12">
- <Trophy className="h-4 w-4 text-success" />
- <div>
- <span className="text-[11px] font-display font-bold text-success block">Parabéns! 🎉</span>
- <span className="text-[9px] text-success/50 font-display">Curso concluído</span>
- </div>
- </motion.div>
- )}
- </div>
+      {/* Progress — Cakto minimal */}
+      <div className="p-4 bg-zinc-900/40 border border-white/5">
+        <div className="flex items-center justify-between mb-3">
+          <span className="text-[10px] uppercase tracking-[0.22em] text-zinc-500 font-bold">Progresso do curso</span>
+          <span className={cn("font-display text-base font-bold tabular-nums", isComplete ? "text-emerald-400" : "text-zinc-100")}>{overallPct}%</span>
+        </div>
+        <div className="h-[3px] bg-white/8 overflow-hidden rounded-full">
+          <motion.div initial={{ width: 0 }} animate={{ width: `${overallPct}%` }} transition={{ duration: 1, delay: 0.2, ease }} className={cn("h-full rounded-full", isComplete ? "bg-emerald-400" : "bg-emerald-500")} />
+        </div>
+        <p className="text-[10px] text-zinc-600 mt-2.5 font-mono tabular-nums">{completedLessons}/{totalLessons} aulas concluídas</p>
+        {isComplete && (
+          <motion.div initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} className="flex items-center gap-2 mt-3 pt-3 border-t border-emerald-500/20">
+            <Trophy className="h-3.5 w-3.5 text-emerald-400" />
+            <span className="text-[10px] font-bold text-emerald-400 uppercase tracking-[0.18em]">Curso concluído</span>
+          </motion.div>
+        )}
+      </div>
 
- {/* Keyboard shortcuts hint */}
- <div className="px-3 py-2 rounded-lg bg-muted/5 border border-border/5">
- <div className="flex items-center gap-1.5 text-[9px] text-muted-foreground/25 font-display">
- <Keyboard className="h-3 w-3" />
- <span>← → navegar</span>
- <span className="text-border/20">·</span>
- <span>C concluir</span>
- <span className="text-border/20">·</span>
- <span>T teatro</span>
- </div>
- </div>
+      {/* Keyboard shortcuts hint */}
+      <div className="px-3 py-2 flex items-center gap-2 text-[9px] text-zinc-600 font-mono tracking-wider">
+        <Keyboard className="h-3 w-3" />
+        <span>← → NAVEGAR</span>
+        <span className="text-zinc-800">·</span>
+        <span>C CONCLUIR</span>
+        <span className="text-zinc-800">·</span>
+        <span>T TEATRO</span>
+      </div>
 
- {/* Modules */}
- <div className="space-y-1.5">
- {modules.map((mod, modIdx) => {
- const modCompleted = mod.lessons.filter(l => progress.get(l.id)?.completed).length;
- const modPct = mod.lessons.length > 0 ? Math.round((modCompleted / mod.lessons.length) * 100) : 0;
- const isModComplete = modPct === 100 && mod.lessons.length > 0;
+      {/* Modules — Cakto numbered list */}
+      <div className="space-y-2">
+        {modules.map((mod, modIdx) => {
+          const modCompleted = mod.lessons.filter(l => progress.get(l.id)?.completed).length;
+          const modPct = mod.lessons.length > 0 ? Math.round((modCompleted / mod.lessons.length) * 100) : 0;
+          const isModComplete = modPct === 100 && mod.lessons.length > 0;
+          const isExpanded = expandedModules.has(mod.id);
 
- return (
- <div key={mod.id} className="rounded-xl overflow-hidden bg-card/20 border border-border/8 hover:border-border/15 transition-all duration-300">
- <button onClick={() => toggleModule(mod.id)} className="w-full text-left transition-colors hover:bg-card/20">
- {mod.banner_url ? (
- <div className="aspect-[3.5/1] overflow-hidden relative">
- <img src={mod.banner_url} alt="" className="w-full h-full object-cover" />
- <div className="absolute inset-0 bg-gradient-to-t from-background/90 via-background/30 to-transparent" />
- <div className="absolute bottom-2.5 left-3 right-3 flex items-end justify-between">
- <div>
- <p className="text-foreground text-[11px] font-display font-bold line-clamp-1">{mod.title}</p>
- <p className="text-foreground/40 text-[9px] font-display tabular-nums mt-0.5">{mod.lessons.length} aulas · {modPct}%</p>
- </div>
- <motion.div animate={{ rotate: expandedModules.has(mod.id) ? 180 : 0 }} transition={{ duration: 0.2 }}>
- <ChevronDown className="h-3 w-3 text-foreground/30" />
- </motion.div>
- </div>
- </div>
- ) : (
- <div className="flex items-center justify-between p-3 relative">
- {isModComplete && <div className="absolute left-0 top-0 bottom-0 w-[2px] bg-success" />}
- <div className="flex items-center gap-2.5 min-w-0">
- <div className={cn(
- "h-8 w-8 rounded-lg flex items-center justify-center text-[10px] font-display font-black shrink-0",
- isModComplete ? "bg-success/10 text-success" : "bg-card/60 text-muted-foreground/30"
- )}>
- {isModComplete ? <Check className="h-3.5 w-3.5" /> : modIdx + 1}
- </div>
- <div className="min-w-0">
- <p className="text-[11px] font-display font-bold text-foreground/80 line-clamp-1">{mod.title}</p>
- <p className="text-[9px] text-muted-foreground/30 font-display tabular-nums mt-0.5">{modCompleted}/{mod.lessons.length}</p>
- </div>
- </div>
- <motion.div animate={{ rotate: expandedModules.has(mod.id) ? 180 : 0 }} transition={{ duration: 0.2 }}>
- <ChevronDown className="h-3 w-3 text-muted-foreground/20 shrink-0" />
- </motion.div>
- </div>
- )}
- {mod.lessons.length > 0 && (
- <div className="h-[2px] bg-foreground/[0.03]">
- <div className={cn("h-full transition-all rounded-full", isModComplete ? "bg-success" : "bg-primary")} style={{ width: `${modPct}%` }} />
- </div>
- )}
- </button>
+          return (
+            <div key={mod.id} className="bg-zinc-900/30 border border-white/5 hover:border-white/10 transition-colors">
+              <button onClick={() => toggleModule(mod.id)} className="w-full text-left">
+                <div className="flex items-center gap-3 p-3.5">
+                  <div className={cn(
+                    "h-10 w-10 flex items-center justify-center font-display font-black text-sm tabular-nums shrink-0 border",
+                    isModComplete
+                      ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/30"
+                      : "bg-zinc-950 text-zinc-500 border-white/10"
+                  )}>
+                    {isModComplete ? <Check className="h-4 w-4" /> : String(modIdx + 1).padStart(2, "0")}
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <p className="text-[10px] uppercase tracking-[0.18em] text-zinc-600 font-bold mb-1">Módulo {modIdx + 1}</p>
+                    <p className="font-display text-[13px] font-semibold text-zinc-200 line-clamp-1 tracking-tight">{mod.title}</p>
+                    <p className="text-[10px] text-zinc-600 font-mono tabular-nums mt-1">{modCompleted}/{mod.lessons.length} aulas · {modPct}%</p>
+                  </div>
+                  <motion.div animate={{ rotate: isExpanded ? 180 : 0 }} transition={{ duration: 0.25, ease }} className="shrink-0">
+                    <ChevronDown className="h-4 w-4 text-zinc-600" />
+                  </motion.div>
+                </div>
+                {mod.lessons.length > 0 && (
+                  <div className="h-[2px] bg-white/5 mx-3.5 mb-px">
+                    <div className={cn("h-full transition-all", isModComplete ? "bg-emerald-400" : "bg-emerald-500/60")} style={{ width: `${modPct}%` }} />
+                  </div>
+                )}
+              </button>
 
- <AnimatePresence>
- {expandedModules.has(mod.id) && (
- <motion.div
- initial={{ height: 0, opacity: 0 }}
- animate={{ height: "auto", opacity: 1 }}
- exit={{ height: 0, opacity: 0 }}
- transition={{ duration: 0.25, ease }}
- className="overflow-hidden"
- >
- <div className="border-t border-border/5 py-1 px-1">
- {mod.lessons.map((lesson, lIdx) => {
- const isActive = activeLesson?.id === lesson.id;
- const isCompleted = progress.get(lesson.id)?.completed;
- const isVideo = lesson.video_url && lesson.video_url.trim().length > 0;
- return (
- <button key={lesson.id} onClick={() => selectLesson(lesson)}
- className={cn(
- "w-full flex items-center gap-2.5 px-3 py-2.5 text-left transition-all duration-200 rounded-lg relative",
- isActive ? "bg-primary/8" : "hover:bg-foreground/[0.02]"
- )}>
- {isActive && (
- <motion.div layoutId="member-lesson-active" className="absolute left-0 top-1.5 bottom-1.5 w-[2px] rounded-full bg-primary" transition={{ type: "spring", bounce: 0.15, duration: 0.4 }} />
- )}
- <div className="shrink-0">
- {isCompleted ? (
- <div className="h-6 w-6 rounded-md bg-success/10 flex items-center justify-center">
- <CheckCircle2 className="h-3 w-3 text-success" />
- </div>
- ) : isActive ? (
- <div className="h-6 w-6 rounded-md bg-primary flex items-center justify-center shadow-md shadow-primary/25">
- <Play className="h-2.5 w-2.5 text-primary-foreground ml-[1px] fill-current" />
- </div>
- ) : (
- <span className="h-6 w-6 rounded-md bg-foreground/[0.03] flex items-center justify-center text-[9px] text-muted-foreground/20 font-display font-black">{lIdx + 1}</span>
- )}
- </div>
- <div className="flex-1 min-w-0">
- <p className={cn(
- "text-[11px] truncate font-display",
- isCompleted ? "text-muted-foreground/40 line-through" : isActive ? "text-foreground font-bold" : "text-foreground/50 font-semibold"
- )}>
- {lesson.title}
- </p>
- <div className="flex items-center gap-1.5 mt-0.5">
- {lesson.duration_minutes > 0 && (
- <span className="text-[9px] text-muted-foreground/20 flex items-center gap-0.5 font-display tabular-nums"><Clock className="h-2 w-2" /> {lesson.duration_minutes}min</span>
- )}
- {isVideo ? (
- <span className="text-[9px] text-muted-foreground/15 flex items-center gap-0.5 font-display"><Video className="h-2 w-2" /> Vídeo</span>
- ) : (
- <span className="text-[9px] text-muted-foreground/15 flex items-center gap-0.5 font-display"><FileText className="h-2 w-2" /> Texto</span>
- )}
- </div>
- </div>
- </button>
- );
- })}
- </div>
- </motion.div>
- )}
- </AnimatePresence>
- </div>
- );
- })}
- </div>
- </div>
- );
+              <AnimatePresence>
+                {isExpanded && (
+                  <motion.div
+                    initial={{ height: 0, opacity: 0 }}
+                    animate={{ height: "auto", opacity: 1 }}
+                    exit={{ height: 0, opacity: 0 }}
+                    transition={{ duration: 0.25, ease }}
+                    className="overflow-hidden"
+                  >
+                    <div className="border-t border-white/5">
+                      {mod.lessons.map((lesson, lIdx) => {
+                        const isActive = activeLesson?.id === lesson.id;
+                        const isCompleted = progress.get(lesson.id)?.completed;
+                        const isVideo = lesson.video_url && lesson.video_url.trim().length > 0;
+                        return (
+                          <button key={lesson.id} onClick={() => selectLesson(lesson)}
+                            className={cn(
+                              "w-full flex items-center gap-3 px-3.5 py-3 text-left transition-all duration-200 relative border-b border-white/[0.03] last:border-b-0",
+                              isActive ? "bg-emerald-500/[0.06]" : "hover:bg-white/[0.02]"
+                            )}>
+                            {isActive && (
+                              <motion.div layoutId="member-lesson-active" className="absolute left-0 top-0 bottom-0 w-[2px] bg-emerald-400" transition={{ type: "spring", bounce: 0.15, duration: 0.4 }} />
+                            )}
+                            <div className="shrink-0">
+                              {isCompleted ? (
+                                <div className="h-7 w-7 bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center">
+                                  <Check className="h-3.5 w-3.5 text-emerald-400" />
+                                </div>
+                              ) : isActive ? (
+                                <div className="h-7 w-7 bg-emerald-400 flex items-center justify-center">
+                                  <Play className="h-3 w-3 text-[#050505] ml-[1px] fill-current" />
+                                </div>
+                              ) : (
+                                <div className="h-7 w-7 bg-zinc-950 border border-white/10 flex items-center justify-center text-[10px] font-display font-black text-zinc-600 tabular-nums">
+                                  {String(lIdx + 1).padStart(2, "0")}
+                                </div>
+                              )}
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <p className={cn(
+                                "text-[12px] truncate font-display tracking-tight",
+                                isCompleted ? "text-zinc-600 line-through" : isActive ? "text-zinc-100 font-semibold" : "text-zinc-400 font-medium"
+                              )}>
+                                {lesson.title}
+                              </p>
+                              <div className="flex items-center gap-2 mt-1">
+                                {isVideo ? (
+                                  <span className="text-[9px] text-zinc-600 flex items-center gap-1 font-mono uppercase tracking-wider"><Video className="h-2.5 w-2.5" /> Vídeo</span>
+                                ) : (
+                                  <span className="text-[9px] text-zinc-600 flex items-center gap-1 font-mono uppercase tracking-wider"><FileText className="h-2.5 w-2.5" /> Texto</span>
+                                )}
+                                {lesson.duration_minutes > 0 && (
+                                  <>
+                                    <span className="text-zinc-800">·</span>
+                                    <span className="text-[9px] text-zinc-600 flex items-center gap-1 font-mono tabular-nums"><Clock className="h-2.5 w-2.5" /> {lesson.duration_minutes}min</span>
+                                  </>
+                                )}
+                              </div>
+                            </div>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
 
  return (
  <div className="flex flex-col lg:flex-row h-[calc(100vh-64px)]">
