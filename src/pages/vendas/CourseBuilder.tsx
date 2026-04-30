@@ -808,27 +808,27 @@ export default function CourseBuilder() {
 
  {/* New Module */}
  {showNewModule ? (
- <motion.div initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} className="rounded-lg bg-primary/5 border border-primary/30 p-3 space-y-2.5">
-   <div className="text-[10px] font-bold uppercase tracking-wider text-primary/80">Novo módulo</div>
+ <motion.div initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} className="bg-card border border-primary p-3 space-y-2.5">
+   <div className="text-[10px] font-black uppercase tracking-[0.18em] text-primary">Novo módulo</div>
  <input
  autoFocus value={newModuleTitle}
  onChange={e => setNewModuleTitle(e.target.value)}
  onKeyDown={e => { if (e.key === "Enter") createModule(); if (e.key === "Escape") setShowNewModule(false); }}
  placeholder="Ex: Introdução ao curso"
- className="w-full bg-card border border-border rounded-md px-2.5 py-1.5 text-[13px] font-display font-semibold text-foreground placeholder:text-muted-foreground/60 focus:outline-none focus:border-primary/40"
+ className="w-full bg-card-elevated border border-border px-2.5 py-2 text-[13px] font-display font-semibold text-foreground placeholder:text-muted-foreground/60 focus:outline-none focus:border-primary"
  />
  <div className="flex gap-1.5">
- <button onClick={createModule} className="flex-1 h-8 rounded-md bg-primary text-primary-foreground text-[11px] font-display font-bold hover:bg-primary/90 transition-colors active:scale-[0.985]">Criar módulo</button>
- <button onClick={() => { setShowNewModule(false); setNewModuleTitle(""); }} className="h-8 px-3 rounded-md bg-secondary text-muted-foreground text-[11px] font-display font-bold hover:bg-accent transition-colors">Cancelar</button>
+ <button onClick={createModule} className="flex-1 h-9 bg-primary text-primary-foreground text-[10px] font-display font-black uppercase tracking-[0.14em] hover:bg-primary/90 transition-colors">Criar módulo</button>
+ <button onClick={() => { setShowNewModule(false); setNewModuleTitle(""); }} className="h-9 px-3 bg-card-elevated border border-border text-muted-foreground text-[10px] font-display font-black uppercase tracking-[0.14em] hover:text-foreground transition-colors">Cancelar</button>
  </div>
  </motion.div>
  ) : (
  <button
  onClick={() => setShowNewModule(true)}
- className="w-full rounded-lg border border-dashed border-border py-3 flex items-center justify-center gap-2 text-muted-foreground hover:text-primary hover:border-primary/30 hover:bg-primary/5 transition-colors active:scale-[0.99]"
+ className="w-full border border-dashed border-border py-3 flex items-center justify-center gap-2 text-muted-foreground hover:text-primary hover:border-primary hover:bg-primary/[0.06] transition-colors"
  >
  <Plus className="h-3.5 w-3.5" strokeWidth={2.5} />
- <span className="text-[11.5px] font-display font-bold">Novo módulo</span>
+ <span className="text-[10.5px] font-display font-black uppercase tracking-[0.14em]">Novo módulo</span>
  </button>
  )}
  </div>
