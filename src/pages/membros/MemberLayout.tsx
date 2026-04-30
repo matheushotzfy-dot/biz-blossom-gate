@@ -1,214 +1,250 @@
+/**
+ * MemberLayout — Cinematic Noir
+ * Minimal floating top nav, transparent over hero, solid on scroll.
+ * No sidebar. No chrome. The content is the experience.
+ */
 import { useEffect, useState } from "react";
 import { Outlet, useNavigate, Link, useLocation } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import type { User } from "@supabase/supabase-js";
-import { LogOut, Home, Menu, X, GraduationCap, Search, Bell, ChevronRight, Bookmark, Settings, User as UserIcon } from "lucide-react";
+import { LogOut, Menu, X, Flame } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
 
 export default function MemberLayout() {
- const navigate = useNavigate();
- const location = useLocation();
- const [user, setUser] = useState<User | null>(null);
- const [loading, setLoading] = useState(true);
- const [scrolled, setScrolled] = useState(false);
- const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
- const [profileOpen, setProfileOpen] = useState(false);
+  const navigate = useNavigate();
+  const location = useLocation();
+  const [user, setUser] = useState<User | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [scrolled, setScrolled] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [profileOpen, setProfileOpen] = useState(false);
+  const [stats, setStats] = useState<{ xp: number; streak: number }>({ xp: 0, streak: 0 });
 
- useEffect(() => {
- supabase.auth.getSession().then(({ data: { session } }) => {
- if (!session) { navigate("/membros-area/login", { replace: true }); return; }
- setUser(session.user);
- setLoading(false);
- });
- const { data: { subscription } } = supabase.auth.onAuthStateChange((_e, session) => {
- if (!session) { navigate("/membros-area/login", { replace: true }); return; }
- setUser(session.user);
- setLoading(false);
- });
- return () => subscription.unsubscribe();
- }, [navigate]);
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (!session) { navigate("/membros-area/login", { replace: true }); return; }
+      setUser(session.user);
+      setLoading(false);
+    });
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_e, session) => {
+      if (!session) { navigate("/membros-area/login", { replace: true }); return; }
+      setUser(session.user);
+      setLoading(false);
+    });
+    return () => subscription.unsubscribe();
+  }, [navigate]);
 
- useEffect(() => {
- const handleScroll = () => setScrolled(window.scrollY > 10);
- window.addEventListener("scroll", handleScroll);
- return () => window.removeEventListener("scroll", handleScroll);
- }, []);
+  // Lightweight stats (XP = lessons completed * 50, streak = consecutive days with progress)
+  useEffect(() => {
+    if (!user) return;
+    (async () => {
+      const { data } = await supabase
+        .from("user_progress")
+        .select("completed, updated_at")
+        .eq("user_id", user.id)
+        .order("updated_at", { ascending: false })
+        .limit(200);
+      if (!data) return;
+      const completed = data.filter(d => d.completed).length;
+      const days = new Set(data.map(d => new Date(d.updated_at).toDateString()));
+      let streak = 0;
+      const today = new Date();
+      for (let i = 0; i < 60; i++) {
+        const d = new Date(today); d.setDate(today.getDate() - i);
+        if (days.has(d.toDateString())) streak++;
+        else if (i > 0) break;
+      }
+      setStats({ xp: completed * 50, streak });
+    })();
+  }, [user]);
 
- useEffect(() => { setMobileMenuOpen(false); setProfileOpen(false); }, [location.pathname]);
+  useEffect(() => {
+    const handleScroll = () => setScrolled(window.scrollY > 20);
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
 
- // Close profile dropdown on outside click
- useEffect(() => {
- if (!profileOpen) return;
- const handler = () => setProfileOpen(false);
- document.addEventListener("click", handler);
- return () => document.removeEventListener("click", handler);
- }, [profileOpen]);
+  useEffect(() => { setMobileMenuOpen(false); setProfileOpen(false); }, [location.pathname]);
 
- const handleLogout = async () => {
- await supabase.auth.signOut();
- navigate("/membros-area/login");
- };
+  useEffect(() => {
+    if (!profileOpen) return;
+    const handler = () => setProfileOpen(false);
+    document.addEventListener("click", handler);
+    return () => document.removeEventListener("click", handler);
+  }, [profileOpen]);
 
- if (loading) return (
- <div className="min-h-screen bg-background flex items-center justify-center">
- <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} className="flex flex-col items-center gap-4">
- <div className="relative">
- <div className="h-16 w-16 rounded-2xl bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center border border-primary/10 shadow-2xl shadow-primary/10">
- <GraduationCap className="h-7 w-7 text-primary/60" />
- </div>
- <div className="absolute inset-0 rounded-2xl border-2 border-primary/30 border-t-primary animate-spin" />
- </div>
- <p className="text-muted-foreground text-sm font-display font-bold tracking-tight">Carregando...</p>
- </motion.div>
- </div>
- );
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+    navigate("/membros-area/login");
+  };
 
- const isHome = location.pathname === "/membros-area";
- const isCourse = location.pathname.includes("/curso/");
- const initial = user?.email?.charAt(0).toUpperCase() || "U";
- const displayName = user?.email?.split("@")[0] || "Membro";
+  if (loading) return (
+    <div className="min-h-dvh bg-[#050505] flex items-center justify-center">
+      <div className="h-1 w-32 bg-white/5 overflow-hidden">
+        <motion.div
+          className="h-full w-full bg-emerald-500"
+          animate={{ x: ["-100%", "100%"] }}
+          transition={{ duration: 1.2, repeat: Infinity, ease: "easeInOut" }}
+        />
+      </div>
+    </div>
+  );
 
- return (
- <div className="min-h-screen bg-background text-foreground">
- {/* ═══ Premium Glass Nav ═══ */}
- <nav className={cn(
- "fixed top-0 left-0 right-0 z-50 transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)]",
- scrolled
- ? "bg-background/90 backdrop-blur-2xl border-b border-border/30 shadow-[0_4px_30px_hsl(var(--background)/0.5)]"
- : "bg-gradient-to-b from-background/95 via-background/60 to-transparent",
- isCourse && "bg-background/95 backdrop-blur-2xl border-b border-border/20"
- )}>
- <div className="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8">
- <div className="h-16 flex items-center justify-between gap-4">
- {/* Logo */}
- <Link to="/membros-area" className="flex items-center gap-2.5 group shrink-0">
- <div className="h-9 w-9 rounded-xl bg-gradient-to-br from-primary via-primary to-primary/60 flex items-center justify-center shadow-lg shadow-primary/20 group-hover:shadow-primary/30 group-hover:scale-105 transition-all duration-300 border border-primary/20">
- <GraduationCap className="h-4.5 w-4.5 text-primary-foreground" />
- </div>
- <span className="hidden sm:block text-sm font-display font-black tracking-[-0.03em] text-foreground">
- Membros
- </span>
- </Link>
+  const isCourse = location.pathname.includes("/curso/");
+  const isHome = location.pathname === "/membros-area";
+  const initial = user?.email?.charAt(0).toUpperCase() || "U";
+  const displayName = user?.email?.split("@")[0] || "Membro";
 
- {/* Desktop nav links */}
- <div className="hidden md:flex items-center gap-1">
- <NavItem to="/membros-area" active={isHome} icon={<Home className="h-4 w-4" />} label="Início" />
- </div>
+  const navItems = [
+    { to: "/membros-area", label: "Home", active: isHome },
+  ];
 
- {/* Spacer */}
- <div className="flex-1" />
+  return (
+    <div className="min-h-dvh bg-[#050505] text-zinc-100 font-display antialiased selection:bg-emerald-500/30">
+      {/* Floating cinematic nav */}
+      <nav className={cn(
+        "fixed top-0 left-0 right-0 z-50 transition-all duration-500",
+        scrolled || isCourse
+          ? "bg-[#050505]/85 backdrop-blur-xl border-b border-white/5"
+          : "bg-gradient-to-b from-[#050505]/80 to-transparent"
+      )}>
+        <div className="px-6 lg:px-12 h-16 flex items-center justify-between gap-4">
+          {/* Logo */}
+          <Link to="/membros-area" className="flex items-center gap-3 shrink-0 group">
+            <div className="h-7 w-7 rounded-sm bg-gradient-to-br from-emerald-400 to-emerald-600 flex items-center justify-center font-black text-[#050505] text-sm tracking-tighter">
+              H
+            </div>
+            <span className="hidden sm:block font-display font-semibold tracking-[-0.02em] text-zinc-100 text-[15px]">
+              Membros
+            </span>
+          </Link>
 
- {/* Right side actions */}
- <div className="flex items-center gap-2">
- {/* Profile dropdown */}
- <div className="relative">
- <button
- onClick={(e) => { e.stopPropagation(); setProfileOpen(!profileOpen); }}
- className={cn(
- "flex items-center gap-2.5 h-9 pl-1 pr-3 rounded-full transition-all duration-300 border",
- profileOpen
- ? "bg-card border-border/40"
- : "bg-card/40 border-border/15 hover:bg-card/60 hover:border-border/30"
- )}
- >
- <div className="h-7 w-7 rounded-full bg-gradient-to-br from-primary via-primary to-primary/50 flex items-center justify-center text-[11px] font-display font-black text-primary-foreground shadow-sm">
- {initial}
- </div>
- <span className="hidden sm:block text-xs text-foreground/70 font-display font-semibold max-w-[120px] truncate">
- {displayName}
- </span>
- </button>
+          {/* Center nav */}
+          <div className="hidden md:flex items-center gap-8 absolute left-1/2 -translate-x-1/2">
+            {navItems.map(item => (
+              <Link
+                key={item.to}
+                to={item.to}
+                className={cn(
+                  "text-sm font-medium tracking-tight transition-colors",
+                  item.active ? "text-white" : "text-zinc-500 hover:text-zinc-200"
+                )}
+              >
+                {item.label}
+              </Link>
+            ))}
+          </div>
 
- <AnimatePresence>
- {profileOpen && (
- <motion.div
- initial={{ opacity: 0, y: 6, scale: 0.97 }}
- animate={{ opacity: 1, y: 0, scale: 1 }}
- exit={{ opacity: 0, y: 6, scale: 0.97 }}
- transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
- onClick={(e) => e.stopPropagation()}
- className="absolute right-0 top-[calc(100%+8px)] w-64 rounded-2xl bg-card/95 backdrop-blur-2xl border border-border/30 shadow-2xl shadow-background/50 overflow-hidden"
- >
- {/* User info */}
- <div className="p-4 border-b border-border/15">
- <div className="flex items-center gap-3">
- <div className="h-11 w-11 rounded-xl bg-gradient-to-br from-primary via-primary to-primary/50 flex items-center justify-center text-base font-display font-black text-primary-foreground shadow-md">
- {initial}
- </div>
- <div className="min-w-0">
- <p className="text-sm font-display font-bold text-foreground truncate">{displayName}</p>
- <p className="text-xs text-muted-foreground/60 truncate font-display">{user?.email}</p>
- </div>
- </div>
- </div>
- {/* Actions */}
- <div className="p-2">
- <button onClick={handleLogout} className="flex items-center gap-3 w-full px-3 py-2.5 rounded-xl hover:bg-destructive/5 transition-all text-left group">
- <LogOut className="h-4 w-4 text-destructive/50 group-hover:text-destructive transition-colors" />
- <span className="text-sm font-display font-semibold text-destructive/60 group-hover:text-destructive transition-colors">Sair da conta</span>
- </button>
- </div>
- </motion.div>
- )}
- </AnimatePresence>
- </div>
+          {/* Right: stats + avatar */}
+          <div className="flex items-center gap-4">
+            {/* Stats inline (desktop) */}
+            <div className="hidden lg:flex items-center gap-5 text-[10px] font-bold tracking-[0.18em] uppercase">
+              <div className="flex flex-col items-end leading-tight">
+                <span className="text-emerald-400 tabular-nums">{stats.xp.toLocaleString("pt-BR")} XP</span>
+                <span className="text-zinc-600 mt-0.5">Total ganho</span>
+              </div>
+              {stats.streak > 0 && (
+                <div className="flex items-center gap-1.5 px-2 py-1 rounded-sm bg-orange-500/10 border border-orange-500/20">
+                  <Flame className="h-3 w-3 text-orange-400" />
+                  <span className="text-orange-400 tabular-nums">{stats.streak}d</span>
+                </div>
+              )}
+            </div>
 
- {/* Mobile menu toggle */}
- <button onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
- className="h-9 w-9 rounded-xl bg-card/40 backdrop-blur-xl hover:bg-card/60 flex items-center justify-center transition-all md:hidden border border-border/15">
- {mobileMenuOpen ? <X className="h-4 w-4 text-foreground" /> : <Menu className="h-4 w-4 text-foreground" />}
- </button>
- </div>
- </div>
- </div>
+            {/* Profile */}
+            <div className="relative">
+              <button
+                onClick={(e) => { e.stopPropagation(); setProfileOpen(!profileOpen); }}
+                className="h-9 w-9 rounded-full bg-zinc-900 border border-white/10 hover:border-emerald-500/40 flex items-center justify-center font-display text-sm font-semibold text-zinc-200 transition-colors"
+              >
+                {initial}
+              </button>
 
- {/* Mobile dropdown */}
- <AnimatePresence>
- {mobileMenuOpen && (
- <motion.div
- initial={{ opacity: 0, height: 0 }}
- animate={{ opacity: 1, height: "auto" }}
- exit={{ opacity: 0, height: 0 }}
- transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
- className="md:hidden bg-card/95 backdrop-blur-2xl border-t border-border/15 overflow-hidden"
- >
- <div className="max-w-[1440px] mx-auto px-4 py-3 space-y-1">
- <Link to="/membros-area" className={cn(
- "flex items-center gap-3 px-4 py-3 rounded-xl transition-all active:scale-[0.98]",
- isHome ? "bg-primary/10 text-primary" : "text-foreground/70 hover:bg-muted/10"
- )}>
- <Home className="h-5 w-5" />
- <span className="text-sm font-display font-bold">Início</span>
- </Link>
- <button onClick={handleLogout} className="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-destructive/5 transition-all w-full text-left">
- <LogOut className="h-5 w-5 text-destructive/50" />
- <span className="text-sm font-display font-bold text-destructive/60">Sair</span>
- </button>
- </div>
- </motion.div>
- )}
- </AnimatePresence>
- </nav>
+              <AnimatePresence>
+                {profileOpen && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 6, scale: 0.97 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    exit={{ opacity: 0, y: 6, scale: 0.97 }}
+                    transition={{ duration: 0.18, ease: [0.16, 1, 0.3, 1] }}
+                    onClick={(e) => e.stopPropagation()}
+                    className="absolute right-0 top-[calc(100%+10px)] w-72 rounded-sm bg-[#0c0c0c] border border-white/10 overflow-hidden"
+                  >
+                    <div className="p-5 border-b border-white/5">
+                      <p className="text-[10px] uppercase tracking-[0.18em] text-zinc-500 font-bold mb-1">Conectado como</p>
+                      <p className="font-display font-semibold text-zinc-100 truncate">{displayName}</p>
+                      <p className="text-xs text-zinc-500 truncate mt-0.5">{user?.email}</p>
+                    </div>
+                    <div className="p-3 grid grid-cols-2 gap-3 border-b border-white/5">
+                      <div>
+                        <p className="text-[9px] uppercase tracking-[0.18em] text-zinc-600 font-bold">XP</p>
+                        <p className="font-mono text-emerald-400 tabular-nums text-sm mt-1">{stats.xp.toLocaleString("pt-BR")}</p>
+                      </div>
+                      <div>
+                        <p className="text-[9px] uppercase tracking-[0.18em] text-zinc-600 font-bold">Streak</p>
+                        <p className="font-mono text-orange-400 tabular-nums text-sm mt-1">{stats.streak}d</p>
+                      </div>
+                    </div>
+                    <button
+                      onClick={handleLogout}
+                      className="flex items-center gap-3 w-full px-5 py-3 hover:bg-white/5 transition-colors text-left"
+                    >
+                      <LogOut className="h-4 w-4 text-zinc-500" />
+                      <span className="text-sm font-medium text-zinc-300">Sair</span>
+                    </button>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
 
- {/* Content */}
- <main className="pt-16 min-h-screen">
- <Outlet context={{ user }} />
- </main>
- </div>
- );
-}
+            {/* Mobile menu */}
+            <button
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              className="h-9 w-9 rounded-full bg-zinc-900 border border-white/10 flex items-center justify-center md:hidden"
+            >
+              {mobileMenuOpen ? <X className="h-4 w-4" /> : <Menu className="h-4 w-4" />}
+            </button>
+          </div>
+        </div>
 
-/* ─── Nav Item ─── */
-function NavItem({ to, active, icon, label }: { to: string; active: boolean; icon: React.ReactNode; label: string }) {
- return (
- <Link to={to} className={cn(
- "flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-display font-bold transition-all duration-300",
- active
- ? "bg-primary/10 text-primary border border-primary/12"
- : "text-muted-foreground hover:text-foreground hover:bg-card/40"
- )}>
- {icon} {label}
- </Link>
- );
+        <AnimatePresence>
+          {mobileMenuOpen && (
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: "auto" }}
+              exit={{ opacity: 0, height: 0 }}
+              transition={{ duration: 0.22, ease: [0.16, 1, 0.3, 1] }}
+              className="md:hidden bg-[#0c0c0c] border-t border-white/5 overflow-hidden"
+            >
+              <div className="px-6 py-4 space-y-1">
+                {navItems.map(item => (
+                  <Link
+                    key={item.to}
+                    to={item.to}
+                    className={cn(
+                      "block py-3 text-sm font-medium",
+                      item.active ? "text-white" : "text-zinc-500"
+                    )}
+                  >
+                    {item.label}
+                  </Link>
+                ))}
+                <div className="pt-3 border-t border-white/5 flex items-center justify-between">
+                  <div className="flex items-center gap-4 text-[10px] font-bold uppercase tracking-[0.18em]">
+                    <span className="text-emerald-400 tabular-nums">{stats.xp.toLocaleString("pt-BR")} XP</span>
+                    {stats.streak > 0 && <span className="text-orange-400 tabular-nums">{stats.streak}d streak</span>}
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </nav>
+
+      <main className={cn(isCourse ? "pt-0" : "")}>
+        <Outlet context={{ user }} />
+      </main>
+    </div>
+  );
 }
