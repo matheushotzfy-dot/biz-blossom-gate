@@ -644,53 +644,59 @@ export default function MemberCourse() {
         </div>
       </div>
 
- {/* ═══ Desktop Sidebar ═══ */}
- <aside className={cn(
- "hidden lg:block shrink-0 border-l border-border/10 bg-card/5 overflow-y-auto transition-all duration-500",
- sidebarWidth
- )}>
- <div className="sticky top-0 z-10 bg-background/80 backdrop-blur-2xl border-b border-border/10 p-3 flex items-center justify-between">
- <div className="flex items-center gap-2">
- <div className="h-7 w-7 rounded-lg bg-primary/8 flex items-center justify-center">
- <Layers className="h-3.5 w-3.5 text-primary/40" />
- </div>
- <h3 className="text-[11px] font-display font-black text-foreground/60 tracking-tight">Conteúdo</h3>
- </div>
- <span className="text-[9px] font-display font-bold text-muted-foreground/30 bg-foreground/[0.03] px-2 py-0.5 rounded-md tabular-nums">{totalLessons} aulas</span>
- </div>
- <CourseSidebar />
- </aside>
+      {/* ═══ Desktop Sidebar — Cakto noir, right side ═══ */}
+      <aside className={cn(
+        "hidden lg:block shrink-0 border-l border-white/5 bg-[#0a0a0a] overflow-y-auto transition-all duration-500",
+        sidebarWidth
+      )}>
+        <div className="sticky top-0 z-10 bg-[#0a0a0a]/95 backdrop-blur-xl border-b border-white/5 px-4 py-3.5 flex items-center justify-between">
+          <div className="flex items-center gap-2.5">
+            <div className="h-7 w-7 bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center">
+              <Layers className="h-3.5 w-3.5 text-emerald-400" />
+            </div>
+            <div>
+              <p className="text-[9px] uppercase tracking-[0.22em] text-zinc-600 font-bold">Conteúdo do curso</p>
+              <h3 className="font-display text-[12px] font-bold text-zinc-200 tracking-tight">{modules.length} módulos</h3>
+            </div>
+          </div>
+          <span className="text-[10px] font-mono font-bold text-zinc-500 tabular-nums">{totalLessons} aulas</span>
+        </div>
+        <CourseSidebar />
+      </aside>
 
- {/* ═══ Mobile Sidebar Overlay ═══ */}
- <AnimatePresence>
- {sidebarOpen && (
- <>
- <motion.div
- initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
- className="fixed inset-0 bg-background/60 backdrop-blur-sm z-40 lg:hidden"
- onClick={() => setSidebarOpen(false)}
- />
- <motion.div
- initial={{ x: "100%" }} animate={{ x: 0 }} exit={{ x: "100%" }}
- transition={{ duration: 0.3, ease }}
- className="fixed top-0 right-0 bottom-0 w-[85vw] max-w-[380px] bg-background/95 backdrop-blur-2xl border-l border-border/10 z-50 lg:hidden overflow-y-auto shadow-2xl"
- >
- <div className="sticky top-0 z-10 bg-background/90 backdrop-blur-2xl border-b border-border/10 p-3.5 flex items-center justify-between">
- <div className="flex items-center gap-2">
- <div className="h-7 w-7 rounded-lg bg-primary/8 flex items-center justify-center">
- <Layers className="h-3.5 w-3.5 text-primary/40" />
- </div>
- <h3 className="text-sm font-display font-black text-foreground/70 tracking-tight">Conteúdo</h3>
- </div>
- <button onClick={() => setSidebarOpen(false)} className="h-8 w-8 rounded-lg bg-foreground/[0.04] hover:bg-foreground/[0.08] flex items-center justify-center transition-colors">
- <X className="h-4 w-4 text-muted-foreground/40" />
- </button>
- </div>
- <CourseSidebar />
- </motion.div>
- </>
- )}
- </AnimatePresence>
- </div>
- );
+      {/* ═══ Mobile Sidebar Overlay ═══ */}
+      <AnimatePresence>
+        {sidebarOpen && (
+          <>
+            <motion.div
+              initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+              className="fixed inset-0 bg-[#050505]/80 z-40 lg:hidden"
+              onClick={() => setSidebarOpen(false)}
+            />
+            <motion.div
+              initial={{ x: "100%" }} animate={{ x: 0 }} exit={{ x: "100%" }}
+              transition={{ duration: 0.3, ease }}
+              className="fixed top-0 right-0 bottom-0 w-[88vw] max-w-[400px] bg-[#0a0a0a] border-l border-white/10 z-50 lg:hidden overflow-y-auto"
+            >
+              <div className="sticky top-0 z-10 bg-[#0a0a0a]/95 backdrop-blur-xl border-b border-white/5 px-4 py-3.5 flex items-center justify-between">
+                <div className="flex items-center gap-2.5">
+                  <div className="h-7 w-7 bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center">
+                    <Layers className="h-3.5 w-3.5 text-emerald-400" />
+                  </div>
+                  <div>
+                    <p className="text-[9px] uppercase tracking-[0.22em] text-zinc-600 font-bold">Conteúdo</p>
+                    <h3 className="font-display text-[12px] font-bold text-zinc-200 tracking-tight">{totalLessons} aulas</h3>
+                  </div>
+                </div>
+                <button onClick={() => setSidebarOpen(false)} className="h-8 w-8 bg-white/[0.04] hover:bg-white/[0.08] flex items-center justify-center transition-colors rounded-sm">
+                  <X className="h-4 w-4 text-zinc-400" />
+                </button>
+              </div>
+              <CourseSidebar />
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
+    </div>
+  );
 }
