@@ -17,6 +17,7 @@ export type CourseWithProgress = {
   totalLessons: number;
   completedLessons: number;
   lastLesson: string | null;
+  lastActivityAt?: number;
   modules: ModuleInfo[];
 };
 
