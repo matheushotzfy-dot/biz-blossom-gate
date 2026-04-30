@@ -793,10 +793,10 @@ export default function CourseBuilder() {
 
  <button
  onClick={() => createLesson(mod.id)}
- className="w-full mt-1 flex items-center gap-2 px-2.5 py-2 rounded-md text-muted-foreground hover:text-primary hover:bg-primary/5 border border-dashed border-border hover:border-primary/30 transition-colors active:scale-[0.99]"
+ className="w-full mt-1 flex items-center gap-2 px-2.5 py-2 text-muted-foreground hover:text-primary hover:bg-primary/[0.06] border border-dashed border-border hover:border-primary transition-colors"
  >
  <Plus className="h-3 w-3" strokeWidth={2.5} />
- <span className="text-[11px] font-display font-bold">Adicionar aula</span>
+ <span className="text-[10px] font-display font-black uppercase tracking-[0.14em]">Adicionar aula</span>
  </button>
  </div>
  </motion.div>
