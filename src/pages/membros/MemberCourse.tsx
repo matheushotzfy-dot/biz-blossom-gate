@@ -393,191 +393,162 @@ export default function MemberCourse() {
 
   return (
     <div className="flex flex-col lg:flex-row min-h-[calc(100dvh-64px)] bg-[#050505] text-zinc-100">
- {/* ═══ Celebration Modal ═══ */}
- <AnimatePresence>
- {showCelebration && (
- <motion.div
- initial={{ opacity: 0 }}
- animate={{ opacity: 1 }}
- exit={{ opacity: 0 }}
- className="fixed inset-0 z-[100] flex items-center justify-center bg-background/80 backdrop-blur-2xl"
- onClick={() => setShowCelebration(false)}
- >
- <motion.div
- initial={{ scale: 0.8, opacity: 0, y: 20 }}
- animate={{ scale: 1, opacity: 1, y: 0 }}
- exit={{ scale: 0.9, opacity: 0 }}
- transition={{ duration: 0.5, ease }}
- className="text-center p-10 max-w-md"
- onClick={e => e.stopPropagation()}
- >
- <motion.div
- initial={{ scale: 0 }}
- animate={{ scale: 1 }}
- transition={{ delay: 0.2, type: "spring", bounce: 0.4 }}
- className="mx-auto mb-6"
- >
- <div className="h-24 w-24 rounded-3xl bg-gradient-to-br from-success/20 to-success/5 flex items-center justify-center mx-auto border border-success/20 shadow-2xl shadow-success/20">
- <Trophy className="h-12 w-12 text-success" />
- </div>
- </motion.div>
- <motion.h2
- initial={{ opacity: 0, y: 10 }}
- animate={{ opacity: 1, y: 0 }}
- transition={{ delay: 0.4 }}
- className="text-3xl font-display font-black text-foreground tracking-[-0.03em] mb-3"
- >
- Curso Concluído! 🎉
- </motion.h2>
- <motion.p
- initial={{ opacity: 0 }}
- animate={{ opacity: 1 }}
- transition={{ delay: 0.6 }}
- className="text-sm text-muted-foreground/60 font-display mb-6"
- >
- Parabéns! Você completou todas as {totalLessons} aulas de <strong className="text-foreground">{course.title}</strong>
- </motion.p>
- <motion.div
- initial={{ opacity: 0, y: 10 }}
- animate={{ opacity: 1, y: 0 }}
- transition={{ delay: 0.8 }}
- className="flex flex-wrap items-center justify-center gap-3"
- >
- {certificate && (
- <Link to={`/certificado/${certificate.code}`} target="_blank"
- className="px-6 py-3 rounded-xl bg-success text-success-foreground text-sm font-display font-bold hover:bg-success/90 transition-all active:scale-[0.97] shadow-lg flex items-center gap-2">
- <Award className="h-4 w-4" /> Ver certificado
- </Link>
- )}
- <Link to="/membros-area"
- className="px-6 py-3 rounded-xl bg-foreground text-background text-sm font-display font-bold hover:bg-foreground/90 transition-all active:scale-[0.97] shadow-lg">
- Voltar aos cursos
- </Link>
- <button onClick={() => setShowCelebration(false)}
- className="px-6 py-3 rounded-xl bg-foreground/5 text-foreground/60 text-sm font-display font-bold hover:bg-foreground/10 transition-all active:scale-[0.97]">
- Continuar aqui
- </button>
- </motion.div>
- </motion.div>
- </motion.div>
- )}
- </AnimatePresence>
+      {/* ═══ Celebration Modal — Cakto noir ═══ */}
+      <AnimatePresence>
+        {showCelebration && (
+          <motion.div
+            initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[100] flex items-center justify-center bg-[#050505]/95"
+            onClick={() => setShowCelebration(false)}
+          >
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0, y: 20 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              exit={{ scale: 0.95, opacity: 0 }}
+              transition={{ duration: 0.5, ease }}
+              className="text-center p-10 max-w-md"
+              onClick={e => e.stopPropagation()}
+            >
+              <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ delay: 0.2, type: "spring", bounce: 0.4 }} className="mx-auto mb-8">
+                <div className="h-20 w-20 bg-emerald-500/10 border border-emerald-500/40 flex items-center justify-center mx-auto">
+                  <Trophy className="h-10 w-10 text-emerald-400" />
+                </div>
+              </motion.div>
+              <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.3 }} className="text-[10px] uppercase tracking-[0.24em] text-emerald-400 font-bold mb-3">
+                Curso Concluído
+              </motion.p>
+              <motion.h2 initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }}
+                className="font-display text-4xl lg:text-5xl font-black text-zinc-100 tracking-[-0.04em] leading-[0.95] mb-4">
+                Parabéns!
+              </motion.h2>
+              <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.6 }}
+                className="text-sm text-zinc-400 leading-relaxed mb-8">
+                Você completou todas as {totalLessons} aulas de <strong className="text-zinc-100">{course.title}</strong>
+              </motion.p>
+              <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.8 }}
+                className="flex flex-wrap items-center justify-center gap-3">
+                {certificate && (
+                  <Link to={`/certificado/${certificate.code}`} target="_blank"
+                    className="px-6 py-3 bg-emerald-400 text-[#050505] text-[13px] font-display font-bold hover:bg-emerald-300 transition-all active:scale-[0.97] flex items-center gap-2 rounded-md">
+                    <Award className="h-4 w-4" /> Ver certificado
+                  </Link>
+                )}
+                <Link to="/membros-area"
+                  className="px-6 py-3 bg-zinc-100 text-[#050505] text-[13px] font-display font-bold hover:bg-white transition-all active:scale-[0.97] rounded-md">
+                  Voltar aos cursos
+                </Link>
+                <button onClick={() => setShowCelebration(false)}
+                  className="px-6 py-3 bg-transparent border border-white/15 text-zinc-400 text-[13px] font-display font-bold hover:border-white/30 hover:text-zinc-100 transition-all active:scale-[0.97] rounded-md">
+                  Continuar aqui
+                </button>
+              </motion.div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
-      {/* ═══ Main Content — Cinematic ═══ */}
-      <div className="flex-1 overflow-y-auto bg-background relative">
-        {/* Floating top bar */}
-        <div className="sticky top-0 z-20 bg-background/70 backdrop-blur-2xl border-b border-border/10 px-4 sm:px-8 py-3">
+      {/* ═══ Main Content — Cakto cinematic ═══ */}
+      <div className="flex-1 overflow-y-auto bg-[#050505] relative">
+        {/* Top bar — minimal noir */}
+        <div className="sticky top-0 z-20 bg-[#050505]/85 backdrop-blur-xl border-b border-white/5 px-4 sm:px-8 py-3.5">
           <div className="flex items-center justify-between gap-4">
             <div className="flex items-center gap-3 min-w-0 flex-1">
-              <Link to="/membros-area" className="h-9 w-9 rounded-full bg-foreground/[0.04] hover:bg-foreground/[0.08] flex items-center justify-center transition-all shrink-0 group">
-                <ChevronLeft className="h-4 w-4 text-muted-foreground/50 group-hover:text-foreground transition-colors" />
+              <Link to="/membros-area" className="h-9 w-9 bg-white/[0.04] hover:bg-white/[0.08] flex items-center justify-center transition-all shrink-0 rounded-sm">
+                <ChevronLeft className="h-4 w-4 text-zinc-400" />
               </Link>
               <div className="min-w-0">
-                <p className="text-[9px] font-display font-bold text-muted-foreground/40 uppercase tracking-[0.18em]">Curso</p>
+                <p className="text-[9px] font-bold text-zinc-600 uppercase tracking-[0.22em]">Curso</p>
                 <div className="flex items-center gap-2 mt-0.5">
-                  <h1 className="text-[13px] font-display font-black text-foreground truncate tracking-[-0.02em]">{course.title}</h1>
+                  <h1 className="font-display text-[13px] font-bold text-zinc-100 truncate tracking-tight">{course.title}</h1>
                   {isComplete && (
-                    <div className="h-4 w-4 rounded-full bg-success/15 flex items-center justify-center shrink-0">
-                      <Award className="h-2.5 w-2.5 text-success" />
+                    <div className="h-4 w-4 bg-emerald-500/15 border border-emerald-500/40 flex items-center justify-center shrink-0">
+                      <Award className="h-2.5 w-2.5 text-emerald-400" />
                     </div>
                   )}
                 </div>
               </div>
             </div>
 
-            <div className="hidden sm:flex items-center gap-3 shrink-0">
-              <div className="flex items-center gap-2">
-                <div className="h-1 rounded-full bg-foreground/8 overflow-hidden w-24 lg:w-32">
-                  <div className={cn("h-full rounded-full transition-all duration-700", isComplete ? "bg-success" : "bg-primary")} style={{ width: `${overallPct}%` }} />
-                </div>
-                <span className="text-[10px] text-muted-foreground/55 font-display font-bold tabular-nums">{overallPct}%</span>
+            <div className="hidden sm:flex items-center gap-2 shrink-0">
+              <div className="h-[3px] bg-white/8 overflow-hidden w-24 lg:w-32 rounded-full">
+                <div className={cn("h-full rounded-full transition-all duration-700", isComplete ? "bg-emerald-400" : "bg-emerald-500")} style={{ width: `${overallPct}%` }} />
               </div>
+              <span className="text-[10px] text-zinc-500 font-mono font-bold tabular-nums">{overallPct}%</span>
             </div>
 
             <div className="flex items-center gap-1 shrink-0">
               <button onClick={() => navigateLesson(-1)} disabled={currentIdx <= 0}
-                className="h-9 w-9 rounded-full bg-foreground/[0.04] hover:bg-foreground/[0.08] flex items-center justify-center transition-all disabled:opacity-15 active:scale-95"
+                className="h-9 w-9 bg-white/[0.04] hover:bg-white/[0.08] flex items-center justify-center transition-all disabled:opacity-20 active:scale-95 rounded-sm"
                 title="Aula anterior (←)">
-                <ArrowLeft className="h-4 w-4 text-muted-foreground/50" />
+                <ArrowLeft className="h-4 w-4 text-zinc-400" />
               </button>
               <button onClick={() => navigateLesson(1)} disabled={currentIdx >= totalLessons - 1}
-                className="h-9 w-9 rounded-full bg-foreground/[0.04] hover:bg-foreground/[0.08] flex items-center justify-center transition-all disabled:opacity-15 active:scale-95"
+                className="h-9 w-9 bg-white/[0.04] hover:bg-white/[0.08] flex items-center justify-center transition-all disabled:opacity-20 active:scale-95 rounded-sm"
                 title="Próxima aula (→)">
-                <ArrowRight className="h-4 w-4 text-muted-foreground/50" />
+                <ArrowRight className="h-4 w-4 text-zinc-400" />
               </button>
               <button onClick={() => setTheaterMode(!theaterMode)}
-                className="hidden lg:flex h-9 w-9 rounded-full bg-foreground/[0.04] hover:bg-foreground/[0.08] items-center justify-center transition-all active:scale-95"
+                className="hidden lg:flex h-9 w-9 bg-white/[0.04] hover:bg-white/[0.08] items-center justify-center transition-all active:scale-95 rounded-sm"
                 title={theaterMode ? "Modo normal (T)" : "Modo teatro (T)"}>
-                {theaterMode ? <Minimize2 className="h-4 w-4 text-muted-foreground/50" /> : <Maximize2 className="h-4 w-4 text-muted-foreground/50" />}
+                {theaterMode ? <Minimize2 className="h-4 w-4 text-zinc-400" /> : <Maximize2 className="h-4 w-4 text-zinc-400" />}
               </button>
               <button onClick={() => setSidebarOpen(!sidebarOpen)}
-                className="h-9 w-9 rounded-full bg-foreground/[0.04] hover:bg-foreground/[0.08] flex items-center justify-center transition-all lg:hidden active:scale-95">
-                <List className="h-4 w-4 text-muted-foreground/50" />
+                className="h-9 w-9 bg-white/[0.04] hover:bg-white/[0.08] flex items-center justify-center transition-all lg:hidden active:scale-95 rounded-sm">
+                <List className="h-4 w-4 text-zinc-400" />
               </button>
             </div>
           </div>
         </div>
 
-        {/* Video Stage — full bleed cinematic */}
+        {/* Video Stage — full bleed */}
         {activeLesson && (
-          <motion.div
-            key={`stage-${activeLesson.id}`}
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.4, ease }}
-            className="relative w-full bg-black"
-          >
-            <div className={cn("mx-auto", theaterMode ? "max-w-[1600px]" : "max-w-[1200px]")}>
+          <motion.div key={`stage-${activeLesson.id}`} initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.4, ease }}
+            className="relative w-full bg-black">
+            <div className={cn("mx-auto", theaterMode ? "max-w-none" : "max-w-[1280px]")}>
               {hasVideo ? (
                 <div className="aspect-video w-full bg-black relative">
                   <VideoPlayer url={activeLesson.video_url!} />
                 </div>
               ) : (
-                <div className="aspect-video w-full bg-gradient-to-br from-card via-background to-black flex flex-col items-center justify-center text-center p-8">
-                  <div className="h-20 w-20 rounded-2xl bg-primary/8 flex items-center justify-center mb-5 border border-primary/10">
-                    <FileText className="h-9 w-9 text-primary/40" />
+                <div className="aspect-video w-full bg-gradient-to-br from-zinc-900 via-[#050505] to-black flex flex-col items-center justify-center text-center p-8 border-y border-white/5">
+                  <div className="h-16 w-16 bg-emerald-500/8 border border-emerald-500/20 flex items-center justify-center mb-5">
+                    <FileText className="h-7 w-7 text-emerald-400/60" />
                   </div>
-                  <h3 className="text-2xl font-display font-black text-foreground tracking-[-0.02em]">{activeLesson.title}</h3>
-                  <p className="text-sm text-muted-foreground/50 mt-2 font-display">Conteúdo em texto — leia abaixo</p>
+                  <h3 className="font-display text-2xl font-black text-zinc-100 tracking-[-0.02em]">{activeLesson.title}</h3>
+                  <p className="text-xs uppercase tracking-[0.18em] text-zinc-600 font-bold mt-3">Conteúdo em texto — leia abaixo</p>
                 </div>
               )}
             </div>
-            {/* fade-out gradient bottom */}
-            <div className="absolute inset-x-0 -bottom-px h-24 bg-gradient-to-b from-transparent to-background pointer-events-none" />
           </motion.div>
         )}
 
         {/* Lesson detail strip */}
-        <div className={cn("mx-auto px-4 sm:px-8 lg:px-12 pb-12 pt-8", theaterMode ? "max-w-[1200px]" : "max-w-[1100px]")}>
+        <div className={cn("mx-auto px-4 sm:px-8 lg:px-12 pb-20 pt-10", theaterMode ? "max-w-[1280px]" : "max-w-[1100px]")}>
           {activeLesson ? (
-            <motion.div
-              key={`meta-${activeLesson.id}`}
-              initial={{ opacity: 0, y: 12 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.4, ease, delay: 0.1 }}
-              className="space-y-6"
-            >
+            <motion.div key={`meta-${activeLesson.id}`} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.4, ease, delay: 0.1 }} className="space-y-8">
+
               {/* Title block */}
-              <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-5 pb-6 border-b border-border/10">
+              <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-6 pb-8 border-b border-white/5">
                 <div className="min-w-0 flex-1">
                   {activeModule && (
-                    <p className="text-[10px] text-primary/70 font-display font-bold uppercase tracking-[0.2em] mb-3 flex items-center gap-2">
-                      <span className="inline-block h-px w-6 bg-primary/30" />
+                    <p className="text-[10px] text-emerald-400 font-bold uppercase tracking-[0.22em] mb-4 flex items-center gap-2.5">
+                      <span className="inline-block h-px w-6 bg-emerald-500/40" />
                       {activeModule.title}
-                      <span className="text-muted-foreground/30">·</span>
-                      <span className="tabular-nums text-muted-foreground/60">Aula {currentIdx + 1} de {totalLessons}</span>
+                      <span className="text-zinc-700">·</span>
+                      <span className="tabular-nums text-zinc-500 font-mono">Aula {String(currentIdx + 1).padStart(2, "0")} / {String(totalLessons).padStart(2, "0")}</span>
                     </p>
                   )}
-                  <h2 className="text-3xl sm:text-4xl lg:text-[44px] font-display font-black text-foreground tracking-[-0.035em] leading-[1.05]">{activeLesson.title}</h2>
-                  <div className="flex items-center gap-3 mt-4 text-xs text-muted-foreground/55 font-display flex-wrap">
+                  <h2 className="font-display text-3xl sm:text-4xl lg:text-[52px] font-black text-zinc-100 tracking-[-0.04em] leading-[1.02]">{activeLesson.title}</h2>
+                  <div className="flex items-center gap-3 mt-5 text-xs text-zinc-500 font-mono uppercase tracking-wider flex-wrap">
                     {hasVideo
-                      ? <span className="flex items-center gap-1.5"><Video className="h-3.5 w-3.5 text-primary/60" /> Vídeo HD</span>
-                      : <span className="flex items-center gap-1.5"><FileText className="h-3.5 w-3.5 text-primary/60" /> Conteúdo</span>}
+                      ? <span className="flex items-center gap-1.5"><Video className="h-3.5 w-3.5 text-emerald-400/70" /> Vídeo HD</span>
+                      : <span className="flex items-center gap-1.5"><FileText className="h-3.5 w-3.5 text-emerald-400/70" /> Conteúdo</span>}
                     {activeLesson.duration_minutes > 0 && (
-                      <><span className="text-border/40">·</span><span className="flex items-center gap-1.5 tabular-nums"><Clock className="h-3.5 w-3.5" /> {activeLesson.duration_minutes} min</span></>
+                      <><span className="text-zinc-800">·</span><span className="flex items-center gap-1.5 tabular-nums"><Clock className="h-3.5 w-3.5" /> {activeLesson.duration_minutes} min</span></>
                     )}
                     {attachments.length > 0 && (
-                      <><span className="text-border/40">·</span><span className="flex items-center gap-1.5"><Paperclip className="h-3.5 w-3.5" /> {attachments.length} anexo{attachments.length > 1 ? "s" : ""}</span></>
+                      <><span className="text-zinc-800">·</span><span className="flex items-center gap-1.5"><Paperclip className="h-3.5 w-3.5" /> {attachments.length} anexo{attachments.length > 1 ? "s" : ""}</span></>
                     )}
                   </div>
                 </div>
@@ -586,17 +557,17 @@ export default function MemberCourse() {
                   <button onClick={() => markComplete(activeLesson.id)}
                     disabled={progress.get(activeLesson.id)?.completed}
                     className={cn(
-                      "flex items-center gap-2 px-6 h-12 rounded-full text-[13px] font-display font-bold transition-all active:scale-[0.97]",
+                      "flex items-center gap-2 px-5 h-11 rounded-md text-[13px] font-display font-bold transition-all active:scale-[0.97]",
                       progress.get(activeLesson.id)?.completed
-                        ? "bg-success/12 text-success border border-success/20"
-                        : "bg-foreground text-background hover:bg-foreground/90"
+                        ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/30"
+                        : "bg-zinc-100 text-[#050505] hover:bg-white"
                     )}>
                     <CheckCircle2 className="h-4 w-4" />
                     {progress.get(activeLesson.id)?.completed ? "Concluída" : "Marcar como concluída"}
                   </button>
                   {currentIdx < totalLessons - 1 && (
                     <button onClick={() => navigateLesson(1)}
-                      className="flex items-center gap-1.5 px-5 h-12 rounded-full text-[13px] font-display font-bold bg-foreground/5 text-foreground/70 hover:bg-foreground/10 hover:text-foreground transition-all active:scale-[0.97]">
+                      className="flex items-center gap-1.5 px-5 h-11 rounded-md text-[13px] font-display font-bold bg-white/[0.04] text-zinc-300 hover:bg-white/[0.08] hover:text-zinc-100 transition-all active:scale-[0.97]">
                       Próxima <ArrowRight className="h-4 w-4" />
                     </button>
                   )}
@@ -605,29 +576,30 @@ export default function MemberCourse() {
 
               {/* Description */}
               {activeLesson.description && (
-                <div className="prose prose-invert max-w-none">
-                  <p className="text-[15px] text-foreground/75 leading-[1.75] whitespace-pre-wrap font-display">{activeLesson.description}</p>
+                <div>
+                  <p className="text-[10px] uppercase tracking-[0.22em] text-zinc-600 font-bold mb-3">Sobre esta aula</p>
+                  <p className="text-[15px] text-zinc-300 leading-[1.75] whitespace-pre-wrap">{activeLesson.description}</p>
                 </div>
               )}
 
               {/* Attachments */}
               {attachments.length > 0 && (
-                <div className="pt-2">
-                  <h4 className="text-[10px] font-display font-bold text-muted-foreground/50 uppercase tracking-[0.18em] mb-3 flex items-center gap-2">
+                <div>
+                  <h4 className="text-[10px] font-bold text-zinc-600 uppercase tracking-[0.22em] mb-3 flex items-center gap-2">
                     <Paperclip className="h-3 w-3" /> Materiais de apoio
                   </h4>
                   <div className="grid sm:grid-cols-2 gap-2">
                     {attachments.map(att => (
                       <a key={att.id} href={att.file_url} target="_blank" rel="noopener noreferrer"
-                        className="group flex items-center gap-3 p-3.5 rounded-xl bg-card/40 border border-border/10 hover:border-primary/25 hover:bg-primary/5 transition-all active:scale-[0.99]">
-                        <div className="h-10 w-10 rounded-lg bg-primary/8 flex items-center justify-center shrink-0 group-hover:bg-primary/15 transition-colors">
-                          <Download className="h-4 w-4 text-primary/60 group-hover:text-primary transition-colors" />
+                        className="group flex items-center gap-3 p-3.5 bg-zinc-900/40 border border-white/5 hover:border-emerald-500/30 hover:bg-zinc-900/70 transition-all active:scale-[0.99]">
+                        <div className="h-10 w-10 bg-emerald-500/8 border border-emerald-500/20 flex items-center justify-center shrink-0 group-hover:bg-emerald-500/15 transition-colors">
+                          <Download className="h-4 w-4 text-emerald-400" />
                         </div>
                         <div className="flex-1 min-w-0">
-                          <p className="text-[12px] font-display font-bold text-foreground/80 truncate group-hover:text-foreground transition-colors">{att.file_name}</p>
-                          <p className="text-[10px] text-muted-foreground/40 font-display tabular-nums">{formatFileSize(att.file_size)}</p>
+                          <p className="text-[12px] font-display font-bold text-zinc-200 truncate group-hover:text-zinc-100 transition-colors">{att.file_name}</p>
+                          <p className="text-[10px] text-zinc-600 font-mono tabular-nums mt-0.5">{formatFileSize(att.file_size)}</p>
                         </div>
-                        <ExternalLink className="h-3.5 w-3.5 text-muted-foreground/25 group-hover:text-primary/60 transition-colors shrink-0" />
+                        <ExternalLink className="h-3.5 w-3.5 text-zinc-700 group-hover:text-emerald-400 transition-colors shrink-0" />
                       </a>
                     ))}
                   </div>
@@ -637,16 +609,17 @@ export default function MemberCourse() {
               {/* Certificate banner */}
               {certificate && (
                 <Link to={`/certificado/${certificate.code}`} target="_blank"
-                  className="block rounded-2xl bg-gradient-to-br from-success/12 to-success/4 border border-success/20 p-5 hover:border-success/40 transition-all group">
+                  className="block bg-gradient-to-br from-emerald-500/10 to-emerald-500/[0.02] border border-emerald-500/25 p-5 hover:border-emerald-500/50 transition-all group">
                   <div className="flex items-center gap-4">
-                    <div className="h-14 w-14 rounded-2xl bg-success/15 flex items-center justify-center shrink-0">
-                      <Award className="h-7 w-7 text-success" />
+                    <div className="h-14 w-14 bg-emerald-500/15 border border-emerald-500/40 flex items-center justify-center shrink-0">
+                      <Award className="h-7 w-7 text-emerald-400" />
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-[15px] font-display font-black text-foreground tracking-[-0.01em]">Seu certificado está pronto</p>
-                      <p className="text-xs text-muted-foreground/70 font-display mt-1">Código <span className="font-mono text-success">{certificate.code}</span> · Toque para abrir e imprimir</p>
+                      <p className="text-[10px] uppercase tracking-[0.22em] text-emerald-400 font-bold mb-1.5">Certificado emitido</p>
+                      <p className="font-display text-[15px] font-black text-zinc-100 tracking-tight">Seu certificado está pronto</p>
+                      <p className="text-xs text-zinc-500 font-mono mt-1">ID · <span className="text-emerald-400">{certificate.code}</span></p>
                     </div>
-                    <ExternalLink className="h-4 w-4 text-success/60 group-hover:text-success transition-colors shrink-0" />
+                    <ExternalLink className="h-4 w-4 text-emerald-400/60 group-hover:text-emerald-400 transition-colors shrink-0" />
                   </div>
                 </Link>
               )}
@@ -659,12 +632,12 @@ export default function MemberCourse() {
               </div>
             </motion.div>
           ) : (
-            <div className="aspect-video max-h-[480px] rounded-2xl bg-card/30 border border-border/10 flex items-center justify-center">
+            <div className="aspect-video max-h-[480px] bg-zinc-900/30 border border-white/5 flex items-center justify-center">
               <div className="text-center">
-                <div className="h-16 w-16 rounded-2xl bg-foreground/[0.03] flex items-center justify-center mx-auto mb-4">
-                  <BookOpen className="h-8 w-8 text-muted-foreground/15" />
+                <div className="h-14 w-14 bg-zinc-900 border border-white/10 flex items-center justify-center mx-auto mb-4">
+                  <BookOpen className="h-6 w-6 text-zinc-700" />
                 </div>
-                <p className="text-muted-foreground/50 font-display font-bold text-sm">Selecione uma aula para começar</p>
+                <p className="text-[10px] uppercase tracking-[0.22em] text-zinc-500 font-bold">Selecione uma aula para começar</p>
               </div>
             </div>
           )}
