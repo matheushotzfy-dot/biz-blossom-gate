@@ -373,53 +373,53 @@ export default function AdminConteudo() {
 
       {/* ── Highlight strip (foco atual) ── */}
       {highlightCourse && (
-        <div className="mx-5 mt-5 sm:mx-7 animate-fade-in stagger-2">
-          <div className="flex flex-col gap-4 rounded-xl border border-border/50 bg-card p-4 sm:flex-row sm:items-center sm:justify-between">
-            <div className="flex items-start gap-3 min-w-0">
+        <div className="mx-5 mt-6 sm:mx-7 animate-fade-in stagger-2">
+          <div className="flex flex-col gap-4 border border-border bg-card p-5 sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex items-start gap-4 min-w-0">
               <div className={cn(
-                "flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border",
+                "flex h-12 w-12 shrink-0 items-center justify-center border",
                 highlightCourse.is_published
-                  ? "border-success/30 bg-success/[0.06] text-success"
-                  : "border-border/50 bg-muted/[0.06] text-muted-foreground"
+                  ? "border-success/40 bg-success/[0.10] text-success"
+                  : "border-border bg-card-elevated text-muted-foreground"
               )}>
-                <GraduationCap className="h-4 w-4" strokeWidth={2.25} />
+                <GraduationCap className="h-5 w-5" strokeWidth={2.25} />
               </div>
               <div className="min-w-0">
                 <div className="flex items-center gap-2">
-                  <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-muted-foreground/60">Foco atual</p>
+                  <p className="text-[10px] font-black uppercase tracking-[0.20em] text-muted-foreground/60">Foco atual</p>
                   <span className={cn(
-                    "inline-flex h-[18px] items-center rounded-md border px-1.5 text-[9.5px] font-black uppercase tracking-[0.14em]",
+                    "inline-flex h-[18px] items-center border px-1.5 text-[9.5px] font-black uppercase tracking-[0.16em]",
                     highlightCourse.is_published
-                      ? "border-success/30 bg-success/[0.08] text-success"
-                      : "border-border/40 bg-muted/[0.06] text-muted-foreground"
+                      ? "border-success bg-success text-success-foreground"
+                      : "border-border bg-muted text-muted-foreground"
                   )}>
                     {highlightCourse.is_published ? "Live" : "Draft"}
                   </span>
                 </div>
-                <h2 className="mt-1 truncate font-display text-[16px] font-bold tracking-tight text-foreground">
+                <h2 className="mt-1.5 truncate font-display text-[20px] font-black tracking-[-0.025em] text-foreground">
                   {highlightCourse.title}
                 </h2>
-                <p className="mt-0.5 truncate text-[11.5px] text-muted-foreground/70">
+                <p className="mt-1 truncate text-[11.5px] font-medium text-muted-foreground/70">
                   {highlightProduct?.name ? `${highlightProduct.name} · ` : ""}
-                  {highlightStats.lessons} aulas em {highlightStats.modules} módulos · {highlightStudents} alunos · {formatContentCurrency(highlightRevenue)}
+                  {highlightStats.lessons} aulas em {highlightStats.modules} módulos · {highlightStudents} alunos · <span className="text-success font-bold tabular-nums">{formatContentCurrency(highlightRevenue)}</span>
                 </p>
               </div>
             </div>
 
-            <div className="flex items-center gap-1.5">
+            <div className="flex items-center gap-2">
               <button
                 onClick={() => navigate(`/vendas/conteudo/${highlightCourse.id}/builder`)}
-                className="inline-flex h-9 items-center gap-1.5 rounded-lg border border-primary/30 bg-primary/[0.06] px-3 text-[11.5px] font-bold tracking-tight text-foreground transition-colors hover:border-primary/50 hover:bg-primary/[0.10] hover:text-primary"
+                className="inline-flex h-9 items-center gap-1.5 border border-primary bg-primary px-4 text-[11px] font-black uppercase tracking-[0.14em] text-primary-foreground transition-colors hover:bg-primary/90"
               >
-                <Settings2 className="h-3.5 w-3.5 text-primary/80" strokeWidth={2.25} />
+                <Settings2 className="h-3.5 w-3.5" strokeWidth={2.5} />
                 <span className="font-display">Builder</span>
               </button>
               {highlightCourse.is_published && (
                 <button
                   onClick={() => window.open(getCourseLink(highlightCourse.id), "_blank")}
-                  className="inline-flex h-9 items-center gap-1.5 rounded-lg border border-border/50 bg-card px-3 text-[11.5px] font-bold tracking-tight text-muted-foreground/80 transition-colors hover:border-border hover:text-foreground"
+                  className="inline-flex h-9 items-center gap-1.5 border border-border bg-card px-4 text-[11px] font-black uppercase tracking-[0.14em] text-muted-foreground transition-colors hover:border-foreground/40 hover:text-foreground"
                 >
-                  <ExternalLink className="h-3.5 w-3.5" strokeWidth={2.25} />
+                  <ExternalLink className="h-3.5 w-3.5" strokeWidth={2.5} />
                   <span className="font-display">Ver área</span>
                 </button>
               )}
@@ -429,8 +429,8 @@ export default function AdminConteudo() {
       )}
 
       {/* ── Workspace ── */}
-      <div className="px-5 pt-5 sm:px-7">
-        <section className="overflow-hidden rounded-2xl border border-border/50 bg-card animate-fade-in stagger-3">
+      <div className="px-5 pt-6 sm:px-7">
+        <section className="overflow-hidden border border-border bg-card animate-fade-in stagger-3">
 
         {isLoading ? (
           <div className="flex min-h-[360px] items-center justify-center">
