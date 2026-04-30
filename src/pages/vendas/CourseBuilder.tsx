@@ -586,14 +586,14 @@ export default function CourseBuilder() {
  className="bg-card border-r border-border flex flex-col overflow-hidden shrink-0"
  >
  {/* ── Sidebar header ── */}
- <div className="px-4 py-3.5 border-b border-border flex items-center justify-between shrink-0">
+ <div className="px-4 py-3 border-b border-border flex items-center justify-between shrink-0 bg-card-elevated">
    <div className="flex items-center gap-2.5 min-w-0">
-     <div className="h-9 w-9 rounded-lg bg-primary/10 border border-primary/20 flex items-center justify-center shrink-0">
-       <Layers className="h-4 w-4 text-primary" strokeWidth={1.8} />
+     <div className="h-8 w-8 border border-primary bg-primary/[0.10] flex items-center justify-center shrink-0">
+       <Layers className="h-3.5 w-3.5 text-primary" strokeWidth={2.25} />
      </div>
      <div className="min-w-0">
-       <span className="text-[13px] font-display font-bold text-foreground block leading-tight">Currículo</span>
-       <span className="text-[10px] text-muted-foreground font-medium tabular-nums">
+       <span className="text-[11px] font-display font-black uppercase tracking-[0.16em] text-foreground block leading-tight">Currículo</span>
+       <span className="text-[9.5px] text-muted-foreground/70 font-bold uppercase tracking-[0.12em] tabular-nums">
          {modules.length} mód · {totalLessons} aulas · {Math.round(totalLessons > 0 ? (modules.flatMap(m => m.lessons).filter(l => l.video_url).length / totalLessons) * 100 : 0)}% prontas
        </span>
      </div>
@@ -601,14 +601,14 @@ export default function CourseBuilder() {
    <div className="flex items-center gap-1 shrink-0">
      <button
        onClick={() => setShowNewModule(true)}
-       className="h-7 w-7 rounded-md flex items-center justify-center bg-primary/10 hover:bg-primary/20 border border-primary/20 text-primary transition-colors active:scale-95"
+       className="h-7 w-7 flex items-center justify-center bg-primary border border-primary text-primary-foreground hover:bg-primary/90 transition-colors"
        title="Novo módulo"
      >
-       <Plus className="h-3.5 w-3.5" strokeWidth={2.2} />
+       <Plus className="h-3.5 w-3.5" strokeWidth={2.5} />
      </button>
      <button
        onClick={() => setSidebarCollapsed(true)}
-       className="h-7 w-7 rounded-md flex items-center justify-center hover:bg-accent transition-colors text-muted-foreground hover:text-foreground"
+       className="h-7 w-7 flex items-center justify-center border border-border bg-card hover:bg-card-elevated transition-colors text-muted-foreground hover:text-foreground"
        title="Recolher"
      >
        <PanelLeftClose className="h-3.5 w-3.5" />
