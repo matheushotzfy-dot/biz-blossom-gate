@@ -513,6 +513,15 @@ export default function CourseBuilder() {
  </motion.div>
  </AnimatePresence>
 
+ {/* Analytics */}
+ <button
+ onClick={() => navigate(`/vendas/conteudo/${courseId}/analytics`)}
+ className="hidden sm:flex h-9 w-9 rounded-xl bg-muted/10 border border-border/20 items-center justify-center hover:bg-primary/10 hover:border-primary/30 transition-all active:scale-[0.985] text-muted-foreground/40 hover:text-primary"
+ title="Analytics do curso"
+ >
+ <Activity className="h-3.5 w-3.5" />
+ </button>
+
  {/* Course Settings */}
  <button
  onClick={openCourseSettings}
