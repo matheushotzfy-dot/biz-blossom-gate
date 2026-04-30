@@ -296,7 +296,7 @@ export default function AdminConteudo() {
 
         {/* Tabs + Search row */}
         <div className="flex flex-col gap-3 pb-1 animate-fade-in stagger-2 sm:flex-row sm:items-center sm:justify-between">
-          <div className="inline-flex w-fit items-center gap-0.5 rounded-xl border border-border/50 bg-card/60 p-1 overflow-x-auto">
+          <div className="inline-flex w-fit items-center gap-0 border border-border bg-card overflow-x-auto">
             {tabs.map((tab) => {
               const active = filter === tab.value;
               return (
@@ -304,25 +304,22 @@ export default function AdminConteudo() {
                   key={tab.value}
                   onClick={() => setFilter(tab.value)}
                   className={cn(
-                    "group/tab relative inline-flex shrink-0 items-center gap-2 rounded-lg h-8 px-3 text-[12px] font-bold tracking-tight transition-colors duration-200",
+                    "group/tab relative inline-flex shrink-0 items-center gap-2 h-9 px-4 text-[11px] font-black uppercase tracking-[0.14em] border-r border-border transition-colors duration-150 last:border-r-0",
                     active
-                      ? "bg-secondary text-foreground"
-                      : "text-muted-foreground/80 hover:text-foreground"
+                      ? "bg-primary text-primary-foreground"
+                      : "text-muted-foreground/70 hover:text-foreground hover:bg-card-elevated"
                   )}
                 >
-                  <span className={cn(
-                    "flex h-4 w-4 items-center justify-center transition-colors",
-                    active ? tabAccent[tab.value] : "text-muted-foreground/50 group-hover/tab:text-foreground/70"
-                  )}>
+                  <span className="flex h-3.5 w-3.5 items-center justify-center">
                     {tabIcon[tab.value]}
                   </span>
                   <span className="font-display">{tab.label === "published" ? "Live" : tab.label === "draft" ? "Rascunhos" : tab.label}</span>
                   {tab.count > 0 && (
                     <span className={cn(
-                      "inline-flex h-[18px] min-w-[20px] items-center justify-center rounded-md px-1.5 text-[10px] font-black tabular-nums tracking-tight border transition-colors",
+                      "inline-flex h-[18px] min-w-[20px] items-center justify-center px-1.5 text-[10px] font-black tabular-nums tracking-tight border",
                       active
-                        ? "bg-background/80 text-foreground border-border/40"
-                        : "bg-muted/30 text-muted-foreground/60 border-transparent"
+                        ? "bg-primary-foreground/15 text-primary-foreground border-primary-foreground/20"
+                        : "bg-muted/30 text-muted-foreground/60 border-border/60"
                     )}>
                       {tab.count}
                     </span>
@@ -338,22 +335,22 @@ export default function AdminConteudo() {
               <input
                 value={search}
                 onChange={(event) => setSearch(event.target.value)}
-                placeholder="Buscar área..."
-                className="h-9 w-full rounded-lg border border-border/60 bg-secondary/40 pl-9 pr-8 text-xs font-medium text-foreground placeholder:text-muted-foreground/60 transition-all focus:border-primary/50 focus:bg-card focus:outline-none focus:ring-2 focus:ring-primary/15 sm:w-72"
+                placeholder="Buscar curso..."
+                className="h-9 w-full border border-border bg-card pl-9 pr-8 text-xs font-medium text-foreground placeholder:text-muted-foreground/60 transition-colors focus:border-primary focus:outline-none sm:w-72"
               />
               {search && (
-                <button onClick={() => setSearch("")} className="absolute right-2.5 top-1/2 -translate-y-1/2 rounded p-0.5 text-muted-foreground/50 transition-colors hover:bg-secondary hover:text-foreground">
+                <button onClick={() => setSearch("")} className="absolute right-2.5 top-1/2 -translate-y-1/2 p-0.5 text-muted-foreground/50 transition-colors hover:bg-secondary hover:text-foreground">
                   <X className="h-3 w-3" />
                 </button>
               )}
             </div>
 
-            <div className="flex items-center gap-0.5 rounded-lg border border-border/50 bg-card/60 p-1 self-start">
+            <div className="flex items-center gap-0 border border-border bg-card self-start">
               <button
                 onClick={() => setViewMode("grid")}
                 className={cn(
-                  "flex h-7 w-7 items-center justify-center rounded-md transition-colors",
-                  viewMode === "grid" ? "bg-secondary text-foreground" : "text-muted-foreground/70 hover:text-foreground"
+                  "flex h-9 w-9 items-center justify-center border-r border-border transition-colors",
+                  viewMode === "grid" ? "bg-primary text-primary-foreground" : "text-muted-foreground/70 hover:text-foreground hover:bg-card-elevated"
                 )}
                 title="Grade"
               >
@@ -362,8 +359,8 @@ export default function AdminConteudo() {
               <button
                 onClick={() => setViewMode("list")}
                 className={cn(
-                  "flex h-7 w-7 items-center justify-center rounded-md transition-colors",
-                  viewMode === "list" ? "bg-secondary text-foreground" : "text-muted-foreground/70 hover:text-foreground"
+                  "flex h-9 w-9 items-center justify-center transition-colors",
+                  viewMode === "list" ? "bg-primary text-primary-foreground" : "text-muted-foreground/70 hover:text-foreground hover:bg-card-elevated"
                 )}
                 title="Lista"
               >
