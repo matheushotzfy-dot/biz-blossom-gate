@@ -68,35 +68,35 @@ input[type="number"]::-webkit-inner-spin-button {
   }
 
   .dark {
-    --background: 220 10% 5%;
-    --foreground: 0 0% 95%;
-    --card: 220 8% 9%;
-    --card-foreground: 0 0% 95%;
-    --card-elevated: 220 8% 11%;
-    --card-inset: 220 10% 7%;
-    --popover: 220 10% 5%;
-    --popover-foreground: 0 0% 95%;
+    --background: 220 25% 5%;
+    --foreground: 210 20% 95%;
+    --card: 222 25% 8%;
+    --card-foreground: 210 20% 95%;
+    --card-elevated: 222 22% 11%;
+    --card-inset: 222 28% 6%;
+    --popover: 222 25% 7%;
+    --popover-foreground: 210 20% 95%;
     --primary: 160 84% 39%;
     --primary-foreground: 0 0% 2%;
-    --secondary: 220 6% 13%;
-    --secondary-foreground: 0 0% 93%;
-    --muted: 220 6% 13%;
-    --muted-foreground: 220 6% 46%;
-    --accent: 220 6% 14%;
-    --accent-foreground: 0 0% 93%;
+    --secondary: 222 18% 13%;
+    --secondary-foreground: 210 15% 93%;
+    --muted: 222 18% 13%;
+    --muted-foreground: 220 12% 48%;
+    --accent: 222 18% 14%;
+    --accent-foreground: 210 15% 93%;
     --destructive: 0 74% 52%;
     --destructive-foreground: 0 0% 100%;
-    --border: 220 6% 16%;
-    --input: 220 6% 13%;
+    --border: 222 16% 15%;
+    --input: 222 18% 12%;
     --ring: 160 84% 39%;
 
-    --sidebar-background: 220 10% 4%;
-    --sidebar-foreground: 220 6% 50%;
+    --sidebar-background: 224 30% 4%;
+    --sidebar-foreground: 220 12% 50%;
     --sidebar-primary: 160 84% 39%;
     --sidebar-primary-foreground: 0 0% 2%;
-    --sidebar-accent: 220 8% 9%;
-    --sidebar-accent-foreground: 0 0% 93%;
-    --sidebar-border: 220 6% 12%;
+    --sidebar-accent: 222 25% 9%;
+    --sidebar-accent-foreground: 210 15% 93%;
+    --sidebar-border: 222 18% 11%;
     --sidebar-ring: 160 84% 39%;
 
     --success: 158 64% 42%;
@@ -106,7 +106,7 @@ input[type="number"]::-webkit-inner-spin-button {
     --info: 206 82% 62%;
     --info-foreground: 0 0% 100%;
 
-    --tooltip-bg: rgba(10, 12, 18, 0.98);
+    --tooltip-bg: rgba(8, 12, 24, 0.98);
     --tooltip-border: rgba(0, 200, 120, 0.08);
     --tooltip-text: #a1a1aa;
     --card-shadow: none;
