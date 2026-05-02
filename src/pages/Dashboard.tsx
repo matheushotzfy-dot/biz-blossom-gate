@@ -50,31 +50,8 @@ import type { DateRange } from "react-day-picker";
 
 
 /* ─────────────────────── Animated Number ─────────────────────── */
-function AnimatedNumber({ value, formatter = fmt, duration = 800 }: { value: number; formatter?: (v: number) => string; duration?: number }) {
-  const [display, setDisplay] = useState(value);
-  const prevRef = useRef(value);
-  useEffect(() => {
-    const from = prevRef.current;
-    const to = value;
-    prevRef.current = value;
-    if (from === to) { setDisplay(to); return; }
-    const start = performance.now();
-    const tick = (now: number) => {
-      const elapsed = now - start;
-      const progress = Math.min(elapsed / duration, 1);
-      const eased = 1 - Math.pow(1 - progress, 3);
-      setDisplay(from + (to - from) * eased);
-      if (progress < 1) requestAnimationFrame(tick);
-    };
-    requestAnimationFrame(tick);
-  }, [value, duration]);
-  return (
-    <span className="relative inline-grid w-max whitespace-nowrap">
-      <span className="invisible col-start-1 row-start-1 whitespace-nowrap">{formatter(value)}</span>
-      <span className="col-start-1 row-start-1 whitespace-nowrap">{formatter(display)}</span>
-    </span>
-  );
-}
+
+
 
 const PERIOD_PRESETS = [
   { label: "Hoje", days: 0 },
