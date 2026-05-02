@@ -5,12 +5,10 @@ import { useProfile } from "@/hooks/useProfile";
 import { useTransactions, useWithdrawals, useProducts as useProductsQuery } from "@/hooks/useQueryData";
 import {
   Activity,
-  AlertTriangle,
   ArrowDownRight,
   ArrowUpRight,
   BarChart3,
   CalendarDays,
-  ChevronDown,
   ChevronRight,
   Clock3,
   CreditCard,
@@ -25,12 +23,9 @@ import {
   Mail,
   Package,
   Phone,
-  RefreshCw,
   Rocket,
   ShieldCheck,
-  ShoppingCart,
   Sparkles,
-  Target,
   TrendingUp,
   Users,
   Wallet,
@@ -40,10 +35,7 @@ import {
   FileText,
   Webhook,
   User,
-  BookOpen,
   Banknote,
-  Crown,
-  Check,
 } from "lucide-react";
 import { Area, AreaChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import type { Tables } from "@/integrations/supabase/types";
