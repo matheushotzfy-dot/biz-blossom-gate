@@ -86,7 +86,7 @@ const PERIOD_PRESETS = [
 
 type PeriodPreset = (typeof PERIOD_PRESETS)[number];
 
-const STAGGER_CLASSES = ["", "stagger-1", "stagger-2", "stagger-3", "stagger-4", "stagger-5", "stagger-6"];
+
 
 const CENSORED = "••••••";
 
