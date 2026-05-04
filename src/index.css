@@ -68,35 +68,35 @@ input[type="number"]::-webkit-inner-spin-button {
   }
 
   .dark {
-    --background: 220 25% 5%;
-    --foreground: 210 20% 95%;
-    --card: 222 25% 8%;
-    --card-foreground: 210 20% 95%;
-    --card-elevated: 222 22% 11%;
-    --card-inset: 222 28% 6%;
-    --popover: 222 25% 7%;
-    --popover-foreground: 210 20% 95%;
+    --background: 224 45% 4%;
+    --foreground: 210 20% 98%;
+    --card: 224 35% 7%;
+    --card-foreground: 210 20% 98%;
+    --card-elevated: 224 35% 10%;
+    --card-inset: 224 45% 3%;
+    --popover: 224 35% 7%;
+    --popover-foreground: 210 20% 98%;
     --primary: 160 84% 39%;
-    --primary-foreground: 0 0% 2%;
-    --secondary: 222 18% 13%;
-    --secondary-foreground: 210 15% 93%;
-    --muted: 222 18% 13%;
-    --muted-foreground: 220 12% 48%;
-    --accent: 222 18% 14%;
-    --accent-foreground: 210 15% 93%;
-    --destructive: 0 74% 52%;
+    --primary-foreground: 0 0% 0%;
+    --secondary: 224 25% 12%;
+    --secondary-foreground: 210 15% 98%;
+    --muted: 224 25% 12%;
+    --muted-foreground: 220 12% 65%;
+    --accent: 224 25% 15%;
+    --accent-foreground: 210 15% 98%;
+    --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 100%;
-    --border: 222 16% 15%;
-    --input: 222 18% 12%;
+    --border: 224 25% 18%;
+    --input: 224 25% 14%;
     --ring: 160 84% 39%;
 
-    --sidebar-background: 224 30% 4%;
-    --sidebar-foreground: 220 12% 50%;
+    --sidebar-background: 224 45% 3%;
+    --sidebar-foreground: 220 12% 70%;
     --sidebar-primary: 160 84% 39%;
-    --sidebar-primary-foreground: 0 0% 2%;
-    --sidebar-accent: 222 25% 9%;
-    --sidebar-accent-foreground: 210 15% 93%;
-    --sidebar-border: 222 18% 11%;
+    --sidebar-primary-foreground: 0 0% 0%;
+    --sidebar-accent: 224 35% 8%;
+    --sidebar-accent-foreground: 210 15% 98%;
+    --sidebar-border: 224 25% 12%;
     --sidebar-ring: 160 84% 39%;
 
     --success: 158 64% 42%;
@@ -123,15 +123,15 @@ input[type="number"]::-webkit-inner-spin-button {
     scroll-behavior: smooth;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
   }
 
   body {
-    @apply bg-background text-foreground antialiased;
-    font-family: 'Plus Jakarta Sans', 'Inter', system-ui, sans-serif;
+    @apply bg-background text-foreground;
+    font-family: 'Inter', system-ui, sans-serif;
     height: 100%;
     overflow: hidden;
     overscroll-behavior: none;
-    text-rendering: optimizeLegibility;
     letter-spacing: -0.01em;
     font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
     background-color: hsl(var(--background));
