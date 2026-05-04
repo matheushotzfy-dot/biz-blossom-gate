@@ -485,41 +485,38 @@ export default function Dashboard() {
       <section className="grid grid-cols-2 lg:grid-cols-4 gap-3">
         {([
           {
-            label: "Saldo Disponível",
-            sublabel: "Saldo disponível",
-            value: privacy.hidden ? CENSORED : fmt(Math.max(balance, 0)),
-            icon: <Wallet className="h-5 w-5" />,
+            label: "Total Faturado",
+            sublabel: "Volume total histórico",
+            value: privacy.hidden ? CENSORED : fmt(transactions.filter(t => t.status === "completed").reduce((a, t) => a + Number(t.net_amount), 0)),
+            icon: <TrendingUp className="h-5 w-5 text-primary" />,
             accent: "border-l-primary",
           },
           {
-            label: "Recebido",
-            sublabel: `Depósitos · ${isCustom && customRange?.from ? "Período" : selectedPeriod.label}`,
-            value: privacy.hidden ? CENSORED : fmt(revenue),
-            icon: <DollarSign className="h-5 w-5 text-primary" />,
+            label: "Saldo Disponível",
+            sublabel: "Disponível para saque",
+            value: privacy.hidden ? CENSORED : fmt(Math.max(balance, 0)),
+            icon: <Wallet className="h-5 w-5 text-success" />,
             accent: "border-l-success",
           },
           {
-            label: "Bloqueio Cautelar",
-            sublabel: "MEDs em disputa",
-            value: privacy.hidden ? CENSORED : fmt(
-              transactions.filter(t => t.status === "chargeback").reduce((a, t) => a + Number(t.amount), 0)
-            ),
-            icon: <Lock className="h-5 w-5 text-warning" />,
+            label: "Saldo Pendente",
+            sublabel: "Aguardando liberação",
+            value: privacy.hidden ? CENSORED : fmt(transactions.filter(t => t.status === "completed" && !t.retention_released).reduce((a, t) => a + Number(t.retained_amount), 0)),
+            icon: <Clock3 className="h-5 w-5 text-warning" />,
             accent: "border-l-warning",
           },
           {
-            label: "Faturamento Total",
-            sublabel: "Valor total de vendas",
-            value: privacy.hidden ? CENSORED : fmt(
-              transactions.filter(t => t.status === "completed").reduce((a, t) => a + Number(t.amount), 0)
-            ),
-            icon: <TrendingUp className="h-5 w-5 text-info" />,
+            label: "Vendas Realizadas",
+            sublabel: "Quantidade total",
+            value: privacy.hidden ? CENSORED : transactions.filter(t => t.status === "completed").length.toString(),
+            icon: <Zap className="h-5 w-5 text-info" />,
             accent: "border-l-info",
+            isRawValue: true
           },
         ]).map((card) => (
           <div key={card.label} className={cn("relative overflow-hidden rounded-xl border border-border/50 bg-card p-4 md:p-5 border-l-[3px] transition-all hover:border-border/70", card.accent)}>
             <div className="flex items-start justify-between mb-3">
-              <p className="text-[11px] md:text-[12px] font-display font-bold text-primary/80 uppercase tracking-[0.06em]">{card.label}</p>
+              <p className="text-[11px] md:text-[12px] font-display font-bold text-muted-foreground/70 uppercase tracking-[0.06em]">{card.label}</p>
               <div className="h-9 w-9 rounded-lg bg-card-elevated border border-border/30 flex items-center justify-center">
                 {card.icon}
               </div>
