@@ -343,7 +343,7 @@ export function AppSidebar() {
               <h1 className="text-[20px] leading-none font-display font-black tracking-tight text-sidebar-accent-foreground">
                 HOTZFY
               </h1>
-              <Sparkles className="h-3 w-3 text-sidebar-primary" strokeWidth={2.5} fill="hsl(var(--sidebar-primary))" />
+              <Crown className="h-3 w-3 text-sidebar-primary" strokeWidth={2.5} fill="hsl(var(--sidebar-primary))" />
             </div>
             <p className="mt-1.5 inline-flex items-center gap-1.5 text-[10.5px] font-semibold text-sidebar-foreground/55">
               <span className="relative flex h-1.5 w-1.5">
