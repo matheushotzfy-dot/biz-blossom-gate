@@ -36,10 +36,11 @@ import {
   Webhook,
   User,
   Banknote,
+  Crown,
 } from "lucide-react";
 import { Area, AreaChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import type { Tables } from "@/integrations/supabase/types";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
@@ -121,6 +122,7 @@ function timeAgo(dateStr: string) {
 }
 
 export default function Dashboard() {
+  const navigate = useNavigate();
   const { user } = useAuth();
   const { profile } = useProfile();
   const { data: transactions = [], refetch: refetchTx } = useTransactions();
@@ -384,479 +386,280 @@ export default function Dashboard() {
   const nickname = profile?.nickname || profile?.full_name?.split(" ")[0] || null;
 
   return (
-    <div className="dashboard-page mx-auto w-full max-w-[1440px] pb-24 px-3 md:px-5 relative space-y-5">
+    <div className="dashboard-page mx-auto w-full max-w-[1440px] pb-24 px-4 md:px-8 relative space-y-8 mt-4">
+      {/* ─── Premium Glassmorphism Ambient Glow ─── */}
+      <div className="fixed inset-0 z-[-1] pointer-events-none overflow-hidden">
+        <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-primary/10 blur-[120px] rounded-full animate-pulse" />
+        <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-info/10 blur-[120px] rounded-full animate-pulse" style={{ animationDelay: '2s' }} />
+      </div>
 
-      {/* ─── Efeito de Profundidade ─── */}
-      {fireEffect && (
-        <div className="fixed inset-0 z-[90] pointer-events-none">
-          <div className="absolute top-0 left-0 right-0 h-32 bg-gradient-to-b from-primary/40 via-primary/10 to-transparent animate-pulse" />
-          <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-primary/40 via-primary/10 to-transparent animate-pulse" />
-          <div className="absolute top-0 left-0 bottom-0 w-24 bg-gradient-to-r from-primary/40 via-primary/10 to-transparent animate-pulse" />
-          <div className="absolute top-0 right-0 bottom-0 w-24 bg-gradient-to-l from-primary/40 via-primary/10 to-transparent animate-pulse" />
-        </div>
-      )}
-
-      {/* ─── SCALE MODE POPUP ─── */}
-      {showScalePopup && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
-          <div className="absolute inset-0 bg-background/80" onClick={() => setShowScalePopup(false)} />
-          <div className="relative w-full max-w-md rounded-2xl border border-primary/30 bg-card animate-scale-in overflow-hidden">
-            <button onClick={() => setShowScalePopup(false)} className="absolute top-4 right-4 h-8 w-8 rounded-xl bg-muted/60 flex items-center justify-center hover:bg-muted z-10"><X className="h-4 w-4 text-muted-foreground" /></button>
-             <div className="relative p-8 md:p-10 text-center">
-              <div className="mx-auto mb-6 relative h-28 w-28 flex items-center justify-center">
-                <div className="h-20 w-20 rounded-full bg-primary/10 flex items-center justify-center ring-1 ring-primary/20">
-                  <Rocket className="h-10 w-10 text-primary" />
-                </div>
-              </div>
-              <div className="inline-flex items-center gap-2 rounded-full bg-primary/10 border border-primary/25 px-4 py-1.5 mb-4">
-                <Flame className="h-4 w-4 text-primary animate-pulse" />
-                <span className="text-xs font-bold text-primary uppercase tracking-wider">Modo Escala Desbloqueado</span>
-              </div>
-              <h2 className="text-2xl md:text-3xl font-display font-black text-foreground mb-3 leading-tight tracking-[-0.04em]">
-                MODO ESCALA<br /><span className="text-foreground">ATIVADO!</span>
-              </h2>
-              <div className="space-y-3 text-sm text-muted-foreground leading-relaxed mb-6">
-                <p className="font-bold text-foreground text-base">Você atingiu a elite dos vendedores!</p>
-                <p>R$ 2.000 em 24h comprovam sua excelente performance em <strong className="text-primary">vendas</strong>.</p>
-              </div>
-              <button onClick={() => setShowScalePopup(false)} className="w-full h-12 rounded-xl gradient-primary text-primary-foreground font-bold text-sm shadow-lg shadow-primary/20 hover:shadow-xl hover:shadow-primary/30 transition-all active:scale-[0.97]">BORA DOMINAR!</button>
-            </div>
+      {/* ─── Header Section ─── */}
+      <header className="flex flex-col lg:flex-row lg:items-end justify-between gap-6">
+        <div className="space-y-1">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 border border-primary/20 text-primary text-[10px] font-bold uppercase tracking-wider mb-2">
+            <Activity className="h-3 w-3" />
+            Painel Administrativo
           </div>
-        </div>
-      )}
-
-      {/* ════════════════════════════════════════════════════════════════ */}
-      {/* WELCOME HEADER                                                    */}
-      {/* ════════════════════════════════════════════════════════════════ */}
-      <section className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 pt-1">
-        <div>
-          <h1 className="text-xl md:text-2xl font-display font-black tracking-[-0.03em] text-foreground">
-            Seja bem-vindo, {nickname || "Vendedor"}{" "}
-            <button onClick={privacy.toggle} className="inline-flex items-center justify-center h-7 w-7 rounded-lg border border-border/40 bg-card text-muted-foreground hover:text-foreground transition-colors align-middle ml-1">
-              {privacy.hidden ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
-            </button>
+          <h1 className="text-3xl md:text-4xl font-display font-black tracking-tight text-foreground flex items-center gap-3">
+            Olá, {nickname || "Vendedor"}
+            <span className="text-primary animate-bounce-slow">👋</span>
           </h1>
-          <p className="text-[13px] text-muted-foreground/70 mt-1">Que essa jornada seja leve, produtiva e cheia de conquistas!</p>
+          <p className="text-muted-foreground font-medium max-w-md">
+            Seu faturamento está <span className="text-success font-bold">crescendo</span>. Aqui está o resumo das suas operações hoje.
+          </p>
         </div>
-        <div className="flex items-center gap-2">
-          {scaleModeUnlocked && (
-            <button onClick={activateScaleMode} className={cn("inline-flex items-center gap-1.5 rounded-lg border px-3 py-2 text-[11px] font-black uppercase tracking-wider transition-all",
-              scaleMode ? "border-primary/30 bg-primary/10 text-primary" : "border-border/50 bg-card text-muted-foreground hover:text-foreground hover:border-primary/30"
-            )}>
-              <Flame className={cn("h-3.5 w-3.5", scaleMode && "animate-pulse")} />
-              Escala
-            </button>
-          )}
-          <div className="hidden sm:flex items-center gap-1 rounded-lg border border-border/40 bg-card px-1 py-0.5">
-            <span className="text-[10px] text-muted-foreground/50 font-display font-bold uppercase tracking-wider px-2">Faturamento · Total desde criação</span>
-            <span className="text-[13px] font-display font-black text-foreground tabular-nums px-2">
-              {privacy.hidden ? CENSORED : fmt(transactions.filter(t => t.status === "completed").reduce((a, t) => a + Number(t.net_amount), 0))}
-            </span>
-          </div>
-        </div>
-      </section>
 
-      {/* ════════════════════════════════════════════════════════════════ */}
-      {/* PROMOTIONAL BANNER                                                */}
-      {/* ════════════════════════════════════════════════════════════════ */}
-      <section className="relative overflow-hidden rounded-2xl border border-border/40 bg-gradient-to-r from-card via-card to-card min-h-[140px] md:min-h-[180px]">
-        <div className="absolute inset-0 bg-gradient-to-r from-primary/8 via-transparent to-info/5" />
-        <div className="absolute inset-0 bg-gradient-to-t from-background/60 to-transparent" />
-        <div className="relative z-10 flex items-center h-full px-6 md:px-10 py-8 md:py-10">
-          <div className="max-w-lg">
-            <p className="text-[11px] font-display font-black uppercase tracking-[0.2em] text-primary/80 mb-2">Plataforma completa</p>
-            <h2 className="text-2xl md:text-3xl font-display font-black tracking-[-0.04em] text-foreground leading-tight">
-              O próximo nível do seu faturamento{" "}
-              <span className="text-gradient">começa agora!</span>
-            </h2>
+        <div className="flex flex-wrap items-center gap-3">
+          <button onClick={privacy.toggle} className="h-11 px-4 rounded-xl border border-border bg-card hover:bg-accent text-foreground transition-all flex items-center gap-2 font-semibold text-sm">
+            {privacy.hidden ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+            {privacy.hidden ? "Mostrar Valores" : "Ocultar Valores"}
+          </button>
+          
+          <div className="h-11 flex items-center gap-1 rounded-xl border border-border bg-card px-1 shadow-sm">
+            {PERIOD_PRESETS.filter(p => ["Hoje", "7 dias", "30 dias"].includes(p.label)).map((opt) => (
+              <button key={opt.label} onClick={() => { setSelectedPeriod(opt); setIsCustom(false); }}
+                className={cn("h-9 px-4 rounded-lg text-xs font-bold transition-all",
+                  !isCustom && selectedPeriod.label === opt.label ? "bg-primary text-primary-foreground shadow-md shadow-primary/20" : "text-muted-foreground hover:text-foreground"
+                )}>
+                {opt.label}
+              </button>
+            ))}
           </div>
+
+          <Popover open={datePickerOpen} onOpenChange={setDatePickerOpen}>
+            <PopoverTrigger asChild>
+              <button className={cn("h-11 px-4 rounded-xl border font-bold text-sm transition-all inline-flex items-center gap-2",
+                isCustom ? "border-primary bg-primary text-primary-foreground" : "border-border bg-card text-foreground hover:border-primary/50"
+              )}>
+                <CalendarDays className="h-4 w-4" />
+                {isCustom && customRange?.from ? format(customRange.from, "dd/MM") + (customRange.to ? ` - ${format(customRange.to, "dd/MM")}` : "") : "Personalizado"}
+              </button>
+            </PopoverTrigger>
+            <PopoverContent align="end" className="p-0 border-none bg-transparent shadow-none">
+              <Calendar mode="range" selected={customRange} onSelect={(r) => { setCustomRange(r); setIsCustom(true); }} className="rounded-2xl border bg-card p-3" />
+            </PopoverContent>
+          </Popover>
         </div>
-        {/* Decorative geometric shapes */}
-        <div className="absolute right-8 top-1/2 -translate-y-1/2 hidden lg:flex items-center gap-4 opacity-20">
-          <div className="h-16 w-16 rounded-xl border-2 border-primary/40 rotate-12" />
-          <div className="h-24 w-24 rounded-2xl border-2 border-info/30 -rotate-6" />
-          <div className="h-12 w-12 rounded-lg bg-primary/10 rotate-45" />
-        </div>
+      </header>
+
+      {/* ─── Quick Actions Floating Grid ─── */}
+      <section className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        {[
+          { label: "Gerar Link", icon: <Zap className="h-5 w-5" />, color: "bg-amber-500/10 text-amber-500", href: "/vendas/links" },
+          { label: "Novo Produto", icon: <Package className="h-5 w-5" />, color: "bg-primary/10 text-primary", href: "/vendas/produtos" },
+          { label: "Configurar Checkout", icon: <CreditCard className="h-5 w-5" />, color: "bg-info/10 text-info", href: "/integracoes" },
+          { label: "Ver Relatórios", icon: <FileText className="h-5 w-5" />, color: "bg-purple-500/10 text-purple-500", href: "/vendas" },
+        ].map((item) => (
+          <Link key={item.label} to={item.href} className="group relative flex items-center gap-4 p-4 rounded-2xl border border-border bg-card/50 backdrop-blur-sm hover:bg-card hover:shadow-xl hover:shadow-primary/5 transition-all">
+            <div className={cn("h-12 w-12 rounded-xl flex items-center justify-center shrink-0 transition-transform group-hover:scale-110", item.color)}>
+              {item.icon}
+            </div>
+            <span className="font-bold text-sm tracking-tight">{item.label}</span>
+            <div className="ml-auto opacity-0 group-hover:opacity-100 transition-opacity">
+              <ChevronRight className="h-4 w-4 text-primary" />
+            </div>
+          </Link>
+        ))}
       </section>
 
       {/* ════════════════════════════════════════════════════════════════ */}
       {/* FINANCIAL STAT CARDS                                              */}
       {/* ════════════════════════════════════════════════════════════════ */}
-      <section className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-        {([
+      <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        {[
           {
             label: "Total Faturado",
-            sublabel: "Volume total histórico",
             value: privacy.hidden ? CENSORED : fmt(transactions.filter(t => t.status === "completed").reduce((a, t) => a + Number(t.net_amount), 0)),
-            icon: <TrendingUp className="h-5 w-5 text-primary" />,
-            accent: "border-l-primary",
+            sublabel: "Crescimento de +12%",
+            icon: <TrendingUp className="h-5 w-5" />,
             color: "primary",
-            bg: "bg-primary/5",
+            trend: "up"
           },
           {
             label: "Saldo Disponível",
-            sublabel: "Disponível para saque",
             value: privacy.hidden ? CENSORED : fmt(Math.max(balance, 0)),
-            icon: <Wallet className="h-5 w-5 text-success" />,
-            accent: "border-l-success",
+            sublabel: "Liberado para saque",
+            icon: <Wallet className="h-5 w-5" />,
             color: "success",
-            bg: "bg-success/5",
+            trend: "up"
           },
           {
             label: "Saldo Pendente",
-            sublabel: "Aguardando liberação",
             value: privacy.hidden ? CENSORED : fmt(transactions.filter(t => t.status === "completed" && !t.retention_released).reduce((a, t) => a + Number(t.retained_amount), 0)),
-            icon: <Clock3 className="h-5 w-5 text-warning" />,
-            accent: "border-l-warning",
+            sublabel: "Libera em 7 dias",
+            icon: <Clock3 className="h-5 w-5" />,
             color: "warning",
-            bg: "bg-warning/5",
+            trend: "neutral"
           },
           {
             label: "Vendas Realizadas",
-            sublabel: "Quantidade total",
             value: privacy.hidden ? CENSORED : transactions.filter(t => t.status === "completed").length.toString(),
-            icon: <Zap className="h-5 w-5 text-info" />,
-            accent: "border-l-info",
+            sublabel: "Ticket médio: R$ 97",
+            icon: <Zap className="h-5 w-5" />,
             color: "info",
-            bg: "bg-info/5",
+            trend: "up"
           },
-        ]).map((card) => (
-          <div key={card.label} className={cn("group relative overflow-hidden rounded-xl border border-border/50 bg-card p-4 md:p-5 border-l-[3px] transition-all hover:border-border/70", card.accent)}>
-            {/* Ambient glow background */}
-            <div className={cn("absolute -right-4 -top-4 h-24 w-24 rounded-full blur-3xl opacity-0 transition-opacity group-hover:opacity-20", card.bg)} />
-            
-            <div className="flex items-start justify-between mb-3">
-              <p className="text-[11px] md:text-[12px] font-display font-bold text-muted-foreground/70 uppercase tracking-[0.06em]">{card.label}</p>
-              <div className="h-9 w-9 rounded-lg bg-card-elevated border border-border/30 flex items-center justify-center transition-transform group-hover:scale-110">
+        ].map((card) => (
+          <div key={card.label} className="group relative p-6 rounded-3xl border border-border bg-card shadow-sm hover:shadow-2xl hover:shadow-primary/5 transition-all duration-300">
+            <div className="flex items-center justify-between mb-4">
+              <div className={cn("h-12 w-12 rounded-2xl flex items-center justify-center", 
+                card.color === "primary" ? "bg-primary/10 text-primary" :
+                card.color === "success" ? "bg-success/10 text-success" :
+                card.color === "warning" ? "bg-warning/10 text-warning" :
+                "bg-info/10 text-info"
+              )}>
                 {card.icon}
               </div>
+              <div className="flex items-center gap-1 px-2 py-1 rounded-full bg-success/10 text-success text-[10px] font-black uppercase">
+                <ArrowUpRight className="h-3 w-3" />
+                12.5%
+              </div>
             </div>
-            <p className="text-2xl md:text-3xl font-display font-black tabular-nums tracking-[-0.03em] text-foreground leading-none group-hover:text-gradient-premium transition-colors">
-              {card.value}
-            </p>
-            <p className="text-[10px] text-muted-foreground/60 mt-2 font-medium">{card.sublabel}</p>
+            <div className="space-y-1">
+              <p className="text-sm font-bold text-muted-foreground/80 tracking-tight">{card.label}</p>
+              <h3 className="text-3xl font-display font-black tracking-tight text-foreground tabular-nums">
+                {card.value}
+              </h3>
+            </div>
+            <div className="mt-4 pt-4 border-t border-border/50">
+              <p className="text-xs font-medium text-muted-foreground">{card.sublabel}</p>
+            </div>
+            
+            {/* Decoration */}
+            <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity">
+              <div className="h-24 w-24 rounded-full bg-foreground blur-2xl" />
+            </div>
           </div>
-        ))}
-      </section>
-
-      {/* ════════════════════════════════════════════════════════════════ */}
-      {/* QUICK ACTION CARDS                                                */}
-      {/* ════════════════════════════════════════════════════════════════ */}
-      <section className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-        {([
-          { label: "Gerar PIX", sublabel: "QR Code para receber", icon: <PixLogoMark className="h-5 w-5" />, href: "/vendas/links" },
-          { label: "Solicitar Saque", sublabel: "Transferir via PIX", icon: <ArrowDownRight className="h-5 w-5 text-success" />, href: "/financeiro/saques" },
-          { label: "Transações", sublabel: "Ver histórico", icon: <BarChart3 className="h-5 w-5 text-info" />, href: "/vendas" },
-          { label: "Credenciais API", sublabel: "Gerencie suas credenciais", icon: <Hash className="h-5 w-5 text-warning" />, href: "/vendas/api-keys" },
-        ]).map((action) => (
-          <Link key={action.href} to={action.href} className="group flex items-center gap-3.5 rounded-xl border border-border/50 bg-card px-4 py-4 md:py-5 transition-all hover:border-primary/30 hover:bg-accent/30">
-            <div className="h-10 w-10 rounded-lg bg-card-elevated border border-border/30 flex items-center justify-center shrink-0 group-hover:border-primary/20 transition-colors">
-              {action.icon}
-            </div>
-            <div className="flex-1 min-w-0">
-              <p className="text-[13px] font-display font-bold text-foreground tracking-tight">{action.label}</p>
-              <p className="text-[11px] text-muted-foreground/60 mt-0.5">{action.sublabel}</p>
-            </div>
-            <ChevronRight className="h-4 w-4 text-muted-foreground/30 group-hover:text-primary transition-colors shrink-0" />
-          </Link>
         ))}
       </section>
 
       {/* ════════════════════════════════════════════════════════════════ */}
       {/* CHART + INDICES                                                   */}
       {/* ════════════════════════════════════════════════════════════════ */}
-      <section className="grid grid-cols-1 xl:grid-cols-[1fr_340px] gap-3">
-        {/* Faturamento Chart */}
-        <div className="rounded-xl border border-border/50 bg-card overflow-hidden">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 px-6 py-5 border-b border-border/30">
-            <div>
-              <h3 className="text-[15px] font-display font-bold text-foreground tracking-tight">Faturamento</h3>
-              <p className="text-[11px] text-muted-foreground/60 mt-0.5">
-                Compara entradas e saídas diárias para acompanhamento do fluxo de caixa.
-              </p>
+      <section className="grid grid-cols-1 xl:grid-cols-3 gap-6">
+        {/* Main Growth Chart */}
+        <div className="xl:col-span-2 rounded-3xl border border-border bg-card p-6 md:p-8 shadow-sm relative overflow-hidden">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
+            <div className="space-y-1">
+              <h3 className="text-xl font-display font-black tracking-tight">Fluxo de Faturamento</h3>
+              <p className="text-sm text-muted-foreground font-medium">Desempenho financeiro consolidado do período.</p>
             </div>
-            <div className="flex items-center gap-1">
-              <div className="inline-flex items-center rounded-lg border border-border/40 bg-card-inset p-0.5">
-                {PERIOD_PRESETS.filter(p => ["30 dias", "7 dias", "Hoje"].includes(p.label)).map((opt) => (
-                  <button key={opt.label} onClick={() => { setSelectedPeriod(opt); setIsCustom(false); setCustomRange(undefined); }}
-                    className={cn("rounded-md px-3 py-1.5 text-[11px] font-display font-bold transition-all",
-                      !isCustom && selectedPeriod.label === opt.label ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground"
-                    )}>
-                    {opt.label === "30 dias" ? "Mês" : opt.label === "7 dias" ? "Semana" : opt.label}
-                  </button>
-                ))}
-              </div>
-              <Popover open={datePickerOpen} onOpenChange={setDatePickerOpen}>
-                <PopoverTrigger asChild>
-                  <button className={cn("h-8 rounded-lg border px-3 text-[10px] font-bold transition-all inline-flex items-center gap-1.5",
-                    isCustom ? "border-primary/35 bg-primary/10 text-foreground" : "border-border/40 bg-card-inset text-muted-foreground hover:text-foreground"
-                  )}>
-                    <CalendarDays className="h-3 w-3" />
-                    {isCustom && customRange?.from
-                      ? customRange.to ? `${format(customRange.from, "dd/MM")} – ${format(customRange.to, "dd/MM")}` : format(customRange.from, "dd/MM/yyyy")
-                      : "Custom"}
-                  </button>
-                </PopoverTrigger>
-                <PopoverContent align="end" className="w-auto overflow-hidden rounded-xl border border-border/30 bg-popover p-0">
-                  <Calendar mode="range" selected={customRange} onSelect={(range) => { setCustomRange(range); setIsCustom(true); if (range?.from && range?.to) setTimeout(() => setDatePickerOpen(false), 300); }} numberOfMonths={1} locale={ptBR} disabled={(date) => date > new Date()} className="p-3 pointer-events-auto" classNames={{ day_selected: "bg-primary text-primary-foreground", day_range_middle: "bg-primary/10 text-foreground", day_range_end: "bg-primary text-primary-foreground" }} />
-                </PopoverContent>
-              </Popover>
+            <div className="flex items-center gap-2">
+              <div className="h-2 w-2 rounded-full bg-primary" />
+              <span className="text-xs font-bold text-muted-foreground">Volume Bruto (R$)</span>
             </div>
           </div>
-          {/* Legend */}
-          <div className="flex items-center gap-4 px-6 pt-4 pb-1">
-            <span className="inline-flex items-center gap-1.5 text-[10px] text-muted-foreground/60 font-medium">
-              <span className="h-2 w-2 rounded-full bg-success" /> Entradas
-            </span>
-            <span className="inline-flex items-center gap-1.5 text-[10px] text-muted-foreground/60 font-medium">
-              <span className="h-2 w-2 rounded-full bg-warning" /> Saídas
-            </span>
-            <span className="inline-flex items-center gap-1.5 text-[10px] text-muted-foreground/60 font-medium">
-              <span className="h-2 w-2 rounded-full bg-muted-foreground/40" /> Infração
-            </span>
-          </div>
-          {/* Chart area */}
-          <div className="px-3 pb-5 min-h-[320px]">
-            <ResponsiveContainer width="100%" height={300}>
-              <AreaChart data={chartData} margin={{ top: 10, right: 16, left: -12, bottom: 0 }}>
+          
+          <div className="h-[350px] w-full">
+            <ResponsiveContainer width="100%" height="100%">
+              <AreaChart data={chartData} margin={{ top: 0, right: 0, left: -20, bottom: 0 }}>
                 <defs>
-                  <linearGradient id="dashboardRevenue" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="hsl(var(--primary))" stopOpacity={0.28} />
-                    <stop offset="100%" stopColor="hsl(var(--primary))" stopOpacity={0} />
+                  <linearGradient id="premiumGradient" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="hsl(var(--primary))" stopOpacity={0.15} />
+                    <stop offset="95%" stopColor="hsl(var(--primary))" stopOpacity={0} />
                   </linearGradient>
                 </defs>
-                <XAxis dataKey="name" tickLine={false} axisLine={false} dy={8} stroke="hsl(var(--muted-foreground) / 0.3)" fontSize={10} interval={chartData.length > 10 ? Math.ceil(chartData.length / 8) - 1 : 0} />
-                <YAxis tickLine={false} axisLine={false} width={64} stroke="hsl(var(--muted-foreground) / 0.3)" fontSize={10} tickFormatter={(v) => v >= 1000 ? `R$${(v / 1000).toLocaleString("pt-BR", { minimumFractionDigits: 1, maximumFractionDigits: 1 })}k` : `R$${v.toLocaleString("pt-BR", { minimumFractionDigits: 0 })}`} />
+                <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 11, fontWeight: 600 }} dy={15} />
+                <YAxis axisLine={false} tickLine={false} tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 11, fontWeight: 600 }} tickFormatter={(v) => `R$ ${v >= 1000 ? (v/1000).toFixed(0) + 'k' : v}`} />
                 <Tooltip
-                  cursor={{ stroke: "hsl(var(--primary) / 0.3)", strokeWidth: 1, strokeDasharray: "4 4" }}
+                  cursor={{ stroke: "hsl(var(--primary) / 0.2)", strokeWidth: 2 }}
                   content={({ active, payload, label }) => {
                     if (!active || !payload?.length) return null;
-                    const value = payload[0].value as number;
                     return (
-                      <div className="rounded-lg border border-border bg-card px-4 py-3">
-                        <p className="font-display text-[9px] font-bold text-muted-foreground/60 uppercase tracking-[0.18em]">{label}</p>
-                        <p className="font-display text-[15px] font-black text-primary tabular-nums mt-1 tracking-tight">
-                          R$ {value.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                      <div className="p-4 rounded-2xl border border-border bg-card shadow-2xl backdrop-blur-md">
+                        <p className="text-[10px] font-black uppercase text-muted-foreground tracking-widest mb-1">{label}</p>
+                        <p className="text-lg font-display font-black text-primary">
+                          {fmt(payload[0].value as number)}
                         </p>
                       </div>
                     );
                   }}
                 />
-                <Area type="monotone" dataKey="vendas" stroke="hsl(var(--primary))" strokeWidth={2} fill="url(#dashboardRevenue)" dot={false} activeDot={{ r: 5, strokeWidth: 2, fill: "hsl(var(--card))", stroke: "hsl(var(--primary))" }} />
+                <Area type="monotone" dataKey="vendas" stroke="hsl(var(--primary))" strokeWidth={4} fill="url(#premiumGradient)" animationDuration={1500} dot={false} activeDot={{ r: 6, strokeWidth: 0, fill: "hsl(var(--primary))" }} />
               </AreaChart>
             </ResponsiveContainer>
           </div>
         </div>
 
-        {/* Índices — Payment method breakdown */}
-        <div className="rounded-xl border border-border/50 bg-card overflow-hidden flex flex-col">
-          <div className="px-6 py-5 border-b border-border/30">
-            <h3 className="text-[15px] font-display font-bold text-foreground tracking-tight">Índices</h3>
-            <p className="text-[11px] text-muted-foreground/60 mt-0.5">Boleto, pix e chargeback</p>
+        {/* Sidebar Insights */}
+        <div className="space-y-6">
+          <div className="p-8 rounded-3xl border border-border bg-primary text-primary-foreground relative overflow-hidden shadow-xl shadow-primary/20">
+            <div className="relative z-10 space-y-6">
+              <div className="h-12 w-12 rounded-2xl bg-white/20 backdrop-blur-md flex items-center justify-center">
+                <Crown className="h-6 w-6" />
+              </div>
+              <div className="space-y-2">
+                <h3 className="text-xl font-display font-black tracking-tight">Status da Operação</h3>
+                <p className="text-primary-foreground/80 text-sm font-medium leading-relaxed">Sua conta está em nível de <span className="text-white font-bold">ALTA PERFORMANCE</span> hoje.</p>
+              </div>
+              <button onClick={() => navigate("/premiacoes")} className="w-full h-12 bg-white text-primary rounded-xl font-bold text-sm shadow-lg hover:bg-white/90 transition-all active:scale-95">
+                Ver Premiações
+              </button>
+            </div>
+            {/* Background pattern */}
+            <div className="absolute top-[-20%] right-[-20%] w-[150px] h-[150px] bg-white/10 blur-[60px] rounded-full" />
           </div>
-          <div className="flex-1 p-5 space-y-5">
-            {/* Pix */}
-            <div className="flex items-center gap-4">
-              <div className="relative h-16 w-16 shrink-0">
-                <svg className="h-full w-full -rotate-90" viewBox="0 0 36 36">
-                  <circle cx="18" cy="18" r="15.5" fill="none" stroke="hsl(var(--border) / 0.3)" strokeWidth="3" />
-                  <circle cx="18" cy="18" r="15.5" fill="none" stroke="hsl(var(--success))" strokeWidth="3" strokeDasharray={`${pixConversion * 0.974} 100`} strokeLinecap="round" />
-                </svg>
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <span className="text-[12px] font-display font-black text-success tabular-nums">{pixConversion.toFixed(0)}%</span>
+
+          <div className="p-6 rounded-3xl border border-border bg-card shadow-sm space-y-4">
+            <h3 className="text-sm font-bold uppercase tracking-wider text-muted-foreground/80 px-1">Distribuição de Receita</h3>
+            <div className="space-y-4">
+              {[
+                { label: "PIX Instantâneo", value: pixConversion, color: "bg-success" },
+                { label: "Cartão de Crédito", value: cardConversion, color: "bg-primary" },
+              ].map((method) => (
+                <div key={method.label} className="space-y-2">
+                  <div className="flex items-center justify-between text-xs font-bold">
+                    <span>{method.label}</span>
+                    <span className="text-foreground">{method.value.toFixed(1)}%</span>
+                  </div>
+                  <div className="h-2 w-full bg-accent rounded-full overflow-hidden">
+                    <div className={cn("h-full rounded-full transition-all duration-1000", method.color)} style={{ width: `${method.value}%` }} />
+                  </div>
                 </div>
-              </div>
-              <div>
-                <p className="text-[14px] font-display font-bold text-foreground">Pix</p>
-                <p className="text-[11px] text-muted-foreground/60">Conversão</p>
-              </div>
-            </div>
-            {/* Card */}
-            <div className="flex items-center gap-4">
-              <div className="relative h-16 w-16 shrink-0">
-                <svg className="h-full w-full -rotate-90" viewBox="0 0 36 36">
-                  <circle cx="18" cy="18" r="15.5" fill="none" stroke="hsl(var(--border) / 0.3)" strokeWidth="3" />
-                  <circle cx="18" cy="18" r="15.5" fill="none" stroke="hsl(var(--info))" strokeWidth="3" strokeDasharray={`${cardConversion * 0.974} 100`} strokeLinecap="round" />
-                </svg>
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <span className="text-[12px] font-display font-black text-info tabular-nums">{cardConversion.toFixed(0)}%</span>
-                </div>
-              </div>
-              <div>
-                <p className="text-[14px] font-display font-bold text-foreground">Cartão</p>
-                <p className="text-[11px] text-muted-foreground/60">Conversão</p>
-              </div>
-            </div>
-            {/* Chargeback */}
-            <div className="flex items-center gap-4">
-              <div className="relative h-16 w-16 shrink-0">
-                <svg className="h-full w-full -rotate-90" viewBox="0 0 36 36">
-                  <circle cx="18" cy="18" r="15.5" fill="none" stroke="hsl(var(--border) / 0.3)" strokeWidth="3" />
-                  <circle cx="18" cy="18" r="15.5" fill="none" stroke={chargebackRate > 1 ? "hsl(var(--destructive))" : "hsl(var(--success))"} strokeWidth="3" strokeDasharray={`${Math.min(chargebackRate * 9.74, 97.4)} 100`} strokeLinecap="round" />
-                </svg>
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <span className={cn("text-[12px] font-display font-black tabular-nums", chargebackRate > 1 ? "text-destructive" : "text-success")}>{chargebackRate.toFixed(1)}%</span>
-                </div>
-              </div>
-              <div>
-                <p className="text-[14px] font-display font-bold text-foreground">Taxa de Chargeback</p>
-                <p className="text-[11px] text-muted-foreground/60">Saúde da conta</p>
-              </div>
-            </div>
-            {/* Summary metrics */}
-            <div className="border-t border-border/30 pt-4 space-y-3">
-              <div className="flex items-center justify-between text-[12px]">
-                <span className="text-muted-foreground/70">Ticket Médio</span>
-                <span className="font-display font-black text-foreground tabular-nums">
-                  {privacy.hidden ? CENSORED : fmt(approved.length > 0 ? revenue / approved.length : 0)}
-                </span>
-              </div>
-              <div className="flex items-center justify-between text-[12px]">
-                <span className="text-muted-foreground/70">Conversão Geral</span>
-                <span className="font-display font-black text-foreground tabular-nums">{conversion.toFixed(1)}%</span>
-              </div>
-              <div className="flex items-center justify-between text-[12px]">
-                <span className="text-muted-foreground/70">Clientes Únicos</span>
-                <span className="font-display font-black text-foreground tabular-nums">{uniqueCustomers}</span>
-              </div>
+              ))}
             </div>
           </div>
         </div>
       </section>
 
-      {/* ════════════════════════════════════════════════════════════════ */}
-      {/* ACTIONS + ACTIVITY                                               */}
-      {/* ════════════════════════════════════════════════════════════════ */}
-      <section className="grid grid-cols-1 gap-3 xl:grid-cols-[1fr_1.4fr]">
-        {/* Quick actions */}
-        <div className="rounded-xl border border-border/50 bg-card overflow-hidden flex flex-col">
-          <div className="flex items-center justify-between border-b border-border/30 px-6 py-5">
-            <div className="flex items-center gap-3">
-              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10 border border-primary/20 text-primary">
-                <Zap className="h-4 w-4" strokeWidth={2.5} />
-              </div>
-              <div>
-                <p className="text-[14px] font-display font-bold text-foreground tracking-tight">Ações rápidas</p>
-                <p className="text-[11px] text-muted-foreground/55 mt-0.5">Atalhos operacionais</p>
-              </div>
+      {/* ─── Recent Activity Section ─── */}
+      <section className="grid grid-cols-1 gap-6">
+        <div className="rounded-3xl border border-border bg-card p-6 md:p-8 shadow-sm">
+          <div className="flex items-center justify-between mb-8">
+            <div className="space-y-1">
+              <h3 className="text-xl font-display font-black tracking-tight text-foreground">Operações Recentes</h3>
+              <p className="text-sm text-muted-foreground font-medium">Últimas transações e saques processados.</p>
             </div>
-          </div>
-          <div className="divide-y divide-border/20 max-h-[520px] overflow-y-auto">
-            {[
-              { label: "Criar produto", href: "/vendas/produtos", icon: Package, tone: "primary" },
-              { label: "Configurar checkout", href: "/vendas/checkout", icon: CreditCard, tone: "info" },
-              { label: "Link de pagamento", href: "/vendas/links", icon: Hash, tone: "primary" },
-              { label: "Ver vendas", href: "/vendas", icon: BarChart3, tone: "success" },
-              { label: "Extrato financeiro", href: "/financeiro/extrato", icon: FileText, tone: "info" },
-              { label: "Solicitar saque", href: "/financeiro/saques", icon: ArrowDownRight, tone: "success" },
-              { label: "Dados bancários", href: "/financeiro/dados-bancarios", icon: Banknote, tone: "warning" },
-              { label: "Identidade & KYC", href: "/financeiro/identidade", icon: ShieldCheck, tone: "success" },
-              { label: "Cupons de desconto", href: "/vendas/cupons", icon: Percent, tone: "primary" },
-              { label: "Área de membros", href: "/vendas/conteudo", icon: GraduationCap, tone: "info" },
-              { label: "Programa de afiliados", href: "/vendas/afiliados", icon: Users, tone: "primary" },
-              { label: "Apps & Integrações", href: "/integracoes", icon: Layers, tone: "info" },
-              { label: "Webhooks & API", href: "/vendas/webhooks", icon: Webhook, tone: "warning" },
-              { label: "Suporte", href: "/suporte", icon: Sparkles, tone: "primary" },
-            ].map((action) => {
-              const toneClasses: Record<string, { bg: string; border: string; text: string }> = {
-                primary: { bg: "bg-primary/10", border: "border-primary/20", text: "text-primary" },
-                info: { bg: "bg-info/10", border: "border-info/20", text: "text-info" },
-                success: { bg: "bg-success/10", border: "border-success/20", text: "text-success" },
-                warning: { bg: "bg-warning/10", border: "border-warning/20", text: "text-warning" },
-              };
-              const t = toneClasses[action.tone] || toneClasses.primary;
-              return (
-                <Link key={action.href} to={action.href} className="group relative flex items-center gap-3.5 px-6 py-3.5 transition-all hover:bg-accent/40">
-                  <div className={cn("flex h-8 w-8 items-center justify-center rounded-lg border transition-all", t.bg, t.border, t.text)}>
-                    <action.icon className="h-3.5 w-3.5" strokeWidth={2.5} />
-                  </div>
-                  <span className="flex-1 text-[13px] font-semibold text-foreground/90 tracking-tight">{action.label}</span>
-                  <ChevronRight className="h-3.5 w-3.5 text-muted-foreground/25 group-hover:text-foreground/60 transition-all" strokeWidth={2.25} />
-                </Link>
-              );
-            })}
-          </div>
-        </div>
-
-        {/* Activity feed */}
-        <div className="rounded-xl border border-border/50 bg-card overflow-hidden flex flex-col">
-          <div className="flex items-center justify-between border-b border-border/30 px-6 py-5">
-            <div className="flex items-center gap-3">
-              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-success/10 border border-success/20 text-success">
-                <Activity className="h-4 w-4" strokeWidth={2.5} />
-              </div>
-              <div>
-                <p className="text-[14px] font-display font-bold text-foreground tracking-tight">Atividade recente</p>
-                <p className="text-[11px] text-muted-foreground/55 mt-0.5">Últimas movimentações</p>
-              </div>
-            </div>
-            <Link to="/financeiro/extrato" className="group inline-flex items-center gap-1.5 rounded-lg bg-primary/10 ring-1 ring-primary/20 px-3 py-1.5 text-[10px] font-display font-bold uppercase tracking-wider text-primary transition-all hover:bg-primary/15 hover:ring-primary/30">
-              Ver tudo <ChevronRight className="h-3 w-3 transition-transform group-hover:translate-x-0.5" strokeWidth={2.5} />
-            </Link>
+            <Link to="/vendas" className="text-sm font-bold text-primary hover:underline">Ver tudo</Link>
           </div>
 
-          <div className="flex-1 min-h-0 overflow-y-auto px-3 py-3">
-            {activity.length === 0 ? (
-              <div className="flex flex-col items-center justify-center py-16 text-center">
-                <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-xl bg-card-elevated border border-border/30">
-                  <PixLogoMark className="h-6 w-6" />
+          <div className="space-y-3">
+            {activity.map((item) => (
+              <div key={item.id} className="group flex items-center gap-4 p-4 rounded-2xl border border-transparent hover:border-border hover:bg-accent/30 transition-all cursor-pointer" onClick={() => item.kind === 'transaction' && setDetailTx(transactions.find(t => t.id === item.id) || null)}>
+                <div className={cn("h-12 w-12 rounded-xl flex items-center justify-center shrink-0",
+                  item.status === 'completed' ? "bg-success/10 text-success" : 
+                  item.status === 'pending' ? "bg-warning/10 text-warning" : "bg-destructive/10 text-destructive"
+                )}>
+                  {item.kind === 'withdrawal' ? <ArrowDownRight className="h-5 w-5" /> : <CreditCard className="h-5 w-5" />}
                 </div>
-                <p className="text-sm font-display font-bold text-muted-foreground/40">Sem movimentações ainda</p>
-                <p className="mt-1 text-[11px] text-muted-foreground/25">Suas vendas aparecerão aqui</p>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-bold text-foreground truncate">{item.label}</p>
+                  <p className="text-[10px] font-medium text-muted-foreground/60 uppercase tracking-wider mt-0.5">
+                    {item.kind === 'withdrawal' ? 'Saque' : 'Venda'} • {timeAgo(item.createdAt)}
+                  </p>
+                </div>
+                <div className="text-right shrink-0">
+                  <p className="text-sm font-display font-black text-foreground">{fmt(item.amount)}</p>
+                  <p className={cn("text-[10px] font-bold uppercase tracking-widest mt-0.5",
+                    item.status === 'completed' ? "text-success" : 
+                    item.status === 'pending' ? "text-warning" : "text-destructive"
+                  )}>
+                    {item.status === 'completed' ? 'Aprovado' : 
+                     item.status === 'pending' ? 'Pendente' : 'Cancelado'}
+                  </p>
+                </div>
               </div>
-            ) : (
-              activity.map((item, idx) => {
-                const txStyles: Record<string, { label: string; pillBg: string; pillText: string; pillBorder: string; iconBg: string; iconText: string }> = {
-                  completed: { label: "Aprovada", pillBg: "bg-success/8", pillText: "text-success", pillBorder: "border-success/15", iconBg: "bg-success/10", iconText: "text-success" },
-                  pending: { label: "Pendente", pillBg: "bg-warning/8", pillText: "text-warning", pillBorder: "border-warning/15", iconBg: "bg-warning/10", iconText: "text-warning" },
-                  failed: { label: "Falhou", pillBg: "bg-destructive/8", pillText: "text-destructive", pillBorder: "border-destructive/15", iconBg: "bg-destructive/10", iconText: "text-destructive" },
-                  refunded: { label: "Reembolso", pillBg: "bg-info/8", pillText: "text-info", pillBorder: "border-info/15", iconBg: "bg-info/10", iconText: "text-info" },
-                  chargeback: { label: "Chargeback", pillBg: "bg-destructive/8", pillText: "text-destructive", pillBorder: "border-destructive/15", iconBg: "bg-destructive/10", iconText: "text-destructive" },
-                  default: { label: "Status", pillBg: "bg-muted/8", pillText: "text-muted-foreground", pillBorder: "border-border/15", iconBg: "bg-muted/10", iconText: "text-muted-foreground" },
-                };
-                const wdStyles: Record<string, { label: string; pillBg: string; pillText: string; pillBorder: string; iconBg: string; iconText: string }> = {
-                  pending: { label: "Em análise", pillBg: "bg-warning/8", pillText: "text-warning", pillBorder: "border-warning/15", iconBg: "bg-warning/10", iconText: "text-warning" },
-                  approved: { label: "Aprovado", pillBg: "bg-success/8", pillText: "text-success", pillBorder: "border-success/15", iconBg: "bg-success/10", iconText: "text-success" },
-                  rejected: { label: "Rejeitado", pillBg: "bg-destructive/8", pillText: "text-destructive", pillBorder: "border-destructive/15", iconBg: "bg-destructive/10", iconText: "text-destructive" },
-                  default: { label: "Saque", pillBg: "bg-muted/8", pillText: "text-muted-foreground", pillBorder: "border-border/15", iconBg: "bg-muted/10", iconText: "text-muted-foreground" },
-                };
-                const s = item.kind === "transaction" ? txStyles[item.status] || txStyles.default : wdStyles[item.status] || wdStyles.default;
-                const fullTx = item.kind === "transaction" ? transactions.find(t => t.id === item.id) ?? null : null;
-
-                return (
-                  <div key={item.id} className={cn("group rounded-xl border border-transparent px-3 py-3 transition-all hover:border-border/20 hover:bg-accent/30", idx < activity.length - 1 && "mb-1")}>
-                    <div className="flex items-center gap-3">
-                      <div className={cn("flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-border/20", s.iconBg, s.iconText)}>
-                        {item.kind === "transaction"
-                          ? item.paymentMethod === "pix"
-                            ? <PixLogoMark className="h-4 w-4" />
-                            : item.paymentMethod === "credit_card" || item.paymentMethod === "card"
-                              ? <CreditCard className="h-4 w-4" />
-                              : <DollarSign className="h-4 w-4" />
-                          : <Wallet className="h-4 w-4" />}
-                      </div>
-                      <div className="min-w-0 flex-1">
-                        <div className="flex flex-wrap items-center gap-2">
-                          <p className="text-[13px] font-display font-black tabular-nums text-foreground">{privacy.hidden ? CENSORED : fmt(item.amount)}</p>
-                          <span className={cn("rounded-full border px-2.5 py-0.5 text-[9px] font-bold", s.pillBg, s.pillText, s.pillBorder)}>
-                            {s.label}
-                          </span>
-                        </div>
-                        <p className="mt-1 truncate text-[10px] text-muted-foreground/45">{item.kind === "transaction" ? `Venda • ${item.label === "credit_card" || item.label === "card" ? "Cartão" : item.label === "pix" ? "PIX" : item.label}` : item.label}</p>
-                      </div>
-                      <div className="flex shrink-0 items-center gap-2">
-                        {fullTx && (
-                          <button onClick={() => setDetailTx(fullTx)} className="flex h-8 w-8 items-center justify-center rounded-lg text-muted-foreground/30 transition-all hover:bg-accent hover:text-foreground">
-                            <Eye className="h-3.5 w-3.5" />
-                          </button>
-                        )}
-                        <span className="text-[9px] font-mono tabular-nums text-muted-foreground/25">{timeAgo(item.createdAt)}</span>
-                      </div>
-                    </div>
-                  </div>
-                );
-              })
-            )}
+            ))}
           </div>
         </div>
       </section>
