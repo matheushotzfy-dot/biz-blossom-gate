@@ -130,11 +130,11 @@ input[type="number"]::-webkit-inner-spin-button {
     transition-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
   }
 
-  /* Gentle press feel — barely perceptible */
+  /* Ultra-smooth press feel */
   button:active:not(:disabled),
   [role="button"]:active {
-    transform: scale(0.985);
-    transition-duration: 100ms;
+    transform: scale(0.965);
+    transition-duration: 80ms;
   }
 
   /* Links should NOT scale on press */
@@ -366,6 +366,12 @@ input[type="number"]::-webkit-inner-spin-button {
   .text-gradient {
     @apply bg-clip-text text-transparent;
     background-image: linear-gradient(135deg, hsl(var(--primary)), hsl(var(--info)));
+    animation: text-pulse 4s ease-in-out infinite;
+  }
+
+  @keyframes text-pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.85; }
   }
 
   .font-display {
