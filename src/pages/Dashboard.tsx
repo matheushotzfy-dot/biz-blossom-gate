@@ -416,10 +416,10 @@ export default function Dashboard() {
   const safeBalance = Math.max(balance, 0);
 
   const financialCards = [
-    { label: "Faturamento", value: privacy.hidden ? CENSORED : fmt(totalRevenue), sub: "Volume total", icon: TrendingUp, tone: "text-success", accent: "border-t-success" },
-    { label: "Disponível", value: privacy.hidden ? CENSORED : fmt(safeBalance), sub: "Liberado para saque", icon: Wallet, tone: "text-primary", accent: "border-t-primary" },
-    { label: "Pendente", value: privacy.hidden ? CENSORED : fmt(retainedBalance), sub: "Aguardando liberação", icon: Clock3, tone: "text-warning", accent: "border-t-warning" },
-    { label: "Vendas", value: privacy.hidden ? CENSORED : approvedSalesCount.toString(), sub: "Aprovadas", icon: Zap, tone: "text-info", accent: "border-t-info" },
+    { label: "Faturamento", value: privacy.hidden ? CENSORED : fmt(totalRevenue), sub: "Volume total", icon: TrendingUp, tone: "text-success", accent: "border-t-success", iconBorder: "border-success/30" },
+    { label: "Disponível", value: privacy.hidden ? CENSORED : fmt(safeBalance), sub: "Liberado para saque", icon: Wallet, tone: "text-primary", accent: "border-t-primary", iconBorder: "border-primary/30" },
+    { label: "Pendente", value: privacy.hidden ? CENSORED : fmt(retainedBalance), sub: "Aguardando liberação", icon: Clock3, tone: "text-warning", accent: "border-t-warning", iconBorder: "border-warning/30" },
+    { label: "Vendas", value: privacy.hidden ? CENSORED : approvedSalesCount.toString(), sub: "Aprovadas", icon: Zap, tone: "text-info", accent: "border-t-info", iconBorder: "border-info/30" },
   ];
 
   const quickActions = [
@@ -547,7 +547,7 @@ export default function Dashboard() {
                 <div key={card.label} className={cn("min-h-[118px] border-r border-border/60 border-t-2 bg-background/35 px-4 py-4 last:border-r-0 md:px-5", card.accent)}>
                   <div className="mb-5 flex items-center justify-between gap-3">
                     <span className="text-[10px] font-black uppercase tracking-[0.18em] text-muted-foreground/70">{card.label}</span>
-                    <div className={cn("flex h-8 w-8 items-center justify-center rounded-lg border bg-card", card.tone, card.accent.replace("border-t", "border"))}>
+                    <div className={cn("flex h-8 w-8 items-center justify-center rounded-lg border bg-card", card.tone, card.iconBorder)}>
                       <card.icon className="h-4 w-4" />
                     </div>
                   </div>
