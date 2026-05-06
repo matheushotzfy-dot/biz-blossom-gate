@@ -442,39 +442,38 @@ export default function Dashboard() {
   ];
 
   return (
-    <div className="dashboard-page mx-auto w-full max-w-[1440px] pb-24 px-2 md:px-5 relative pt-1">
+    <div className="dashboard-page mx-auto w-full max-w-[1440px] pb-24 px-1 md:px-0 relative pt-1">
 
-      <section className="mb-4 overflow-hidden rounded-2xl border border-border/60 bg-card">
-        <div className="grid xl:grid-cols-[minmax(0,1fr)_360px]">
-          <div className="min-w-0 border-b border-border/60 xl:border-b-0 xl:border-r">
-            <div className="flex flex-col gap-5 border-b border-border/60 px-5 py-6 md:flex-row md:items-center md:justify-between md:px-8">
-              <div className="min-w-0">
+      <section className="mb-6 overflow-hidden rounded-[2rem] border border-border/40 bg-card/40 backdrop-blur-sm shadow-xl shadow-black/5">
+        <div className="grid xl:grid-cols-[minmax(0,1fr)_340px]">
+          <div className="min-w-0 border-b border-border/40 xl:border-b-0 xl:border-r">
+            <div className="flex flex-col gap-6 px-6 py-8 md:flex-row md:items-center md:justify-between md:px-10">
+              <div className="min-w-0 space-y-1">
                 <div className="flex items-center gap-3">
-                  <div className="relative">
-                    <div className="h-3 w-3 rounded-full bg-success" />
-                    <div className="absolute inset-0 animate-ping h-3 w-3 rounded-full bg-success opacity-40" />
+                  <div className="relative flex h-3 w-3 items-center justify-center">
+                    <div className="h-full w-full rounded-full bg-success/80" />
+                    <div className="absolute inset-0 animate-ping rounded-full bg-success/40" />
                   </div>
-                  <h1 className="truncate text-[28px] md:text-[36px] font-display font-black text-foreground leading-none tracking-[-0.04em]">
-                    Olá, {nickname || "Vendedor"}
+                  <h1 className="text-[28px] md:text-[32px] font-display font-black text-foreground leading-none tracking-tight">
+                    Bom dia, <span className="text-primary">{nickname || "Vendedor"}</span>
                   </h1>
                 </div>
-                <div className="mt-1.5 flex items-center gap-2 text-[11px] font-black uppercase tracking-[0.2em] text-muted-foreground/60">
-                  <Activity className="h-3.5 w-3.5" strokeWidth={3} />
-                  Sua central operacional
-                </div>
+                <p className="text-[12px] font-bold uppercase tracking-[0.15em] text-muted-foreground/50">
+                  Visão geral da sua operação hoje
+                </p>
               </div>
 
               <div className="flex flex-wrap items-center gap-2">
-                <div className="flex items-center rounded-xl border border-border/60 bg-background/75 p-1">
+                <div className="flex items-center rounded-2xl border border-border/40 bg-background/50 p-1.5 shadow-inner">
                   {PERIOD_PRESETS.filter(p => ["Hoje", "7 dias", "30 dias"].includes(p.label)).map((opt) => (
                     <button
                       key={opt.label}
                       onClick={() => { setSelectedPeriod(opt); setIsCustom(false); setCustomRange(undefined); }}
                       className={cn(
-                        "rounded-lg px-3.5 py-2 text-[11px] font-black leading-none transition-colors",
+                        "rounded-xl px-4 py-2.5 text-[11px] font-black leading-none transition-all duration-200",
                         !isCustom && selectedPeriod.label === opt.label
-                          ? "bg-primary text-primary-foreground"
-                          : "text-muted-foreground hover:bg-accent hover:text-foreground"
+                          ? "bg-primary text-primary-foreground shadow-lg shadow-primary/20"
+                          : "text-muted-foreground/60 hover:text-foreground hover:bg-accent/40"
                       )}
                     >
                       {opt.label}
@@ -484,48 +483,55 @@ export default function Dashboard() {
                 <Popover open={datePickerOpen} onOpenChange={setDatePickerOpen}>
                   <PopoverTrigger asChild>
                     <button className={cn(
-                      "inline-flex h-9 items-center gap-2 rounded-xl border px-3 text-[11px] font-black leading-none transition-colors",
-                      isCustom ? "border-primary/60 bg-primary/10 text-primary" : "border-border/60 bg-background/75 text-muted-foreground hover:bg-accent hover:text-foreground"
+                      "inline-flex h-[46px] items-center gap-2.5 rounded-2xl border px-4 text-[11px] font-black leading-none transition-all",
+                      isCustom ? "border-primary/50 bg-primary/5 text-primary" : "border-border/40 bg-background/50 text-muted-foreground/70 hover:bg-accent/40 hover:text-foreground shadow-inner"
                     )}>
-                      <CalendarDays className="h-3.5 w-3.5" />
+                      <CalendarDays className="h-4 w-4" />
                       {isCustom && customRange?.from
                         ? customRange.to ? `${format(customRange.from, "dd/MM")} – ${format(customRange.to, "dd/MM")}` : format(customRange.from, "dd/MM/yyyy")
-                        : "Custom"}
+                        : "Personalizado"}
                     </button>
                   </PopoverTrigger>
-                  <PopoverContent align="end" className="w-auto overflow-hidden rounded-2xl border border-border/60 bg-popover p-0">
-                    <Calendar mode="range" selected={customRange} onSelect={(range) => { setCustomRange(range); setIsCustom(true); if (range?.from && range?.to) setTimeout(() => setDatePickerOpen(false), 300); }} numberOfMonths={1} locale={ptBR} disabled={(date) => date > new Date()} className="p-3 pointer-events-auto" classNames={{ day_selected: "bg-primary text-primary-foreground", day_range_middle: "bg-primary/10 text-foreground", day_range_end: "bg-primary text-primary-foreground" }} />
+                  <PopoverContent align="end" className="w-auto overflow-hidden rounded-3xl border border-border/40 bg-popover/95 backdrop-blur-xl p-0 shadow-2xl">
+                    <Calendar mode="range" selected={customRange} onSelect={(range) => { setCustomRange(range); setIsCustom(true); if (range?.from && range?.to) setTimeout(() => setDatePickerOpen(false), 300); }} numberOfMonths={1} locale={ptBR} disabled={(date) => date > new Date()} className="p-4" classNames={{ day_selected: "bg-primary text-primary-foreground hover:bg-primary hover:text-primary-foreground", day_range_middle: "bg-primary/5 text-foreground hover:bg-primary/10", day_range_end: "bg-primary text-primary-foreground hover:bg-primary hover:text-primary-foreground" }} />
                   </PopoverContent>
                 </Popover>
               </div>
             </div>
 
-            <div className="grid gap-0 md:grid-cols-[minmax(0,1fr)_220px]">
-              <div className="px-5 py-6 md:px-8 md:py-8">
-                <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
+            <div className="grid gap-0 border-t border-border/40 md:grid-cols-[minmax(0,1fr)_260px]">
+              <div className="px-6 py-10 md:px-10 md:py-12">
+                <div className="flex flex-col gap-8 lg:flex-row lg:items-end lg:justify-between">
                   <div className="min-w-0">
-                    <div className="mb-4 inline-flex items-center gap-2.5 rounded-full border border-primary/20 bg-primary/5 px-4 py-2 ring-1 ring-primary/10">
+                    <div className="mb-5 inline-flex items-center gap-3 rounded-[1rem] border border-primary/20 bg-primary/5 px-4 py-2.5 ring-1 ring-primary/5">
                       <Wallet className="h-4 w-4 text-primary" />
-                      <span className="text-[11px] font-black uppercase tracking-[0.2em] text-primary/80">Saldo disponível</span>
+                      <span className="text-[11px] font-black uppercase tracking-[0.18em] text-primary/70">Saldo disponível p/ saque</span>
                     </div>
-                    <div className="flex items-baseline gap-3">
-                      <p className="text-[44px] md:text-[68px] font-display font-black tracking-[-0.05em] text-foreground leading-[0.85] tabular-nums">
+                    <div className="flex items-baseline gap-4">
+                      <p className="text-[48px] md:text-[72px] font-display font-black tracking-[-0.05em] text-foreground leading-[0.8] tabular-nums">
                         {privacy.hidden ? CENSORED : fmt(safeBalance)}
                       </p>
                     </div>
-                    <div className="mt-5 flex flex-wrap items-center gap-2.5 text-[11px] font-black uppercase tracking-wider">
-                      <span className="rounded-lg border border-success/30 bg-success/10 px-3 py-1.5 text-success">Operação Online</span>
-                      <span className="rounded-lg border border-border/60 bg-background/75 px-3 py-1.5 text-muted-foreground">Período: {isCustom ? "Custom" : selectedPeriod.label}</span>
-                      <span className="rounded-lg border border-border/60 bg-background/75 px-3 py-1.5 text-muted-foreground">Receita: {periodRevenueLabel}</span>
+                    <div className="mt-8 flex flex-wrap items-center gap-3">
+                      <div className="flex items-center gap-2 rounded-xl border border-success/30 bg-success/5 px-4 py-2 text-[11px] font-black uppercase tracking-wider text-success">
+                        <span className="h-1.5 w-1.5 rounded-full bg-success animate-pulse" />
+                        Online
+                      </div>
+                      <div className="rounded-xl border border-border/40 bg-background/40 px-4 py-2 text-[11px] font-black uppercase tracking-wider text-muted-foreground/60 shadow-inner">
+                        Período: {isCustom ? "Customizado" : selectedPeriod.label}
+                      </div>
+                      <div className="rounded-xl border border-border/40 bg-background/40 px-4 py-2 text-[11px] font-black uppercase tracking-wider text-muted-foreground/60 shadow-inner">
+                        Rec. Período: {periodRevenueLabel}
+                      </div>
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-2 gap-2 sm:flex sm:items-center">
-                    <Link to="/financeiro/saques" className="inline-flex h-12 min-w-[128px] items-center justify-center gap-2.5 whitespace-nowrap rounded-2xl bg-primary px-6 text-[13px] font-black text-primary-foreground shadow-lg shadow-primary/20 hover:scale-[1.02] active:scale-[0.98]">
-                      <ArrowDownRight className="h-5 w-5" />
+                  <div className="grid grid-cols-2 gap-3 sm:flex sm:items-center">
+                    <Link to="/financeiro/saques" className="inline-flex h-[52px] min-w-[140px] items-center justify-center gap-3 rounded-2xl bg-primary px-8 text-[14px] font-black text-primary-foreground shadow-xl shadow-primary/25 hover:scale-[1.03] active:scale-[0.97] transition-all">
+                      <ArrowDownRight className="h-5 w-5" strokeWidth={3} />
                       Sacar
                     </Link>
-                    <Link to="/vendas/links" className="inline-flex h-12 min-w-[128px] items-center justify-center gap-2.5 whitespace-nowrap rounded-2xl border-2 border-border/60 bg-background/75 px-6 text-[13px] font-black text-foreground hover:bg-accent hover:border-primary/30 transition-all">
+                    <Link to="/vendas/links" className="inline-flex h-[52px] min-w-[140px] items-center justify-center gap-3 rounded-2xl border-2 border-border/40 bg-background/60 px-8 text-[14px] font-black text-foreground hover:bg-accent/40 hover:border-primary/30 transition-all hover:scale-[1.03] active:scale-[0.97]">
                       <PixLogoMark className="h-5 w-5 text-success" />
                       Link PIX
                     </Link>
@@ -533,64 +539,77 @@ export default function Dashboard() {
                 </div>
               </div>
 
-              <div className="grid grid-cols-3 border-t border-border/60 md:grid-cols-1 md:border-l md:border-t-0">
+              <div className="grid grid-cols-3 border-t border-border/40 bg-secondary/10 md:grid-cols-1 md:border-l md:border-t-0 md:divide-y md:divide-border/40">
                 {summaryStats.map((item) => (
-                  <div key={item.label} className="border-r border-border/60 px-4 py-3 last:border-r-0 md:border-b md:border-r-0 md:last:border-b-0">
-                    <p className="text-[10px] font-black uppercase tracking-[0.16em] text-muted-foreground/70">{item.label}</p>
-                    <p className="mt-1 text-[17px] font-display font-black text-foreground tabular-nums leading-none">{item.value}</p>
+                  <div key={item.label} className="flex flex-col justify-center border-r border-border/40 px-6 py-6 last:border-r-0 md:border-r-0">
+                    <p className="text-[10px] font-black uppercase tracking-[0.18em] text-muted-foreground/50">{item.label}</p>
+                    <p className="mt-2 text-[20px] font-display font-black text-foreground tabular-nums leading-none tracking-tight">{item.value}</p>
                   </div>
                 ))}
               </div>
             </div>
 
-            <div className="grid grid-cols-2 border-t border-border/60 lg:grid-cols-4">
+            <div className="grid grid-cols-2 border-t border-border/40 lg:grid-cols-4 divide-x divide-border/40">
               {financialCards.map((card) => (
-                <div key={card.label} className={cn("min-h-[128px] border-r border-border/60 border-t-2 bg-background/35 px-5 py-5 last:border-r-0 md:px-6 transition-all hover:bg-background/50", card.accent)}>
-                  <div className="mb-4 flex items-center justify-between gap-3">
-                    <span className="text-[11px] font-black uppercase tracking-[0.2em] text-muted-foreground/60">{card.label}</span>
-                    <div className={cn("flex h-9 w-9 items-center justify-center rounded-xl border-2 bg-card", card.tone, card.iconBorder)}>
-                      <card.icon className="h-4.5 w-4.5" strokeWidth={2.5} />
+                <div key={card.label} className={cn("group/card relative min-h-[140px] px-6 py-7 transition-all duration-300 hover:bg-background/80")}>
+                  <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-current to-transparent opacity-10 group-hover/card:opacity-30 transition-opacity" />
+                  <div className="mb-5 flex items-center justify-between gap-3">
+                    <span className="text-[11px] font-black uppercase tracking-[0.2em] text-muted-foreground/40 group-hover/card:text-muted-foreground/60 transition-colors">{card.label}</span>
+                    <div className={cn("flex h-10 w-10 items-center justify-center rounded-xl border border-border/40 bg-card shadow-sm transition-transform group-hover/card:scale-110", card.tone)}>
+                      <card.icon className="h-5 w-5" strokeWidth={2.5} />
                     </div>
                   </div>
-                  <p className="text-[26px] md:text-[32px] font-display font-black tracking-[-0.03em] text-foreground leading-none tabular-nums">{card.value}</p>
-                  <p className="mt-2 text-[11px] font-bold uppercase tracking-wider text-muted-foreground/40">{card.sub}</p>
+                  <p className="text-[32px] md:text-[36px] font-display font-black tracking-[-0.04em] text-foreground leading-none tabular-nums">{card.value}</p>
+                  <p className="mt-3 text-[11px] font-bold uppercase tracking-[0.15em] text-muted-foreground/40">{card.sub}</p>
                 </div>
               ))}
             </div>
           </div>
 
-          <aside className="bg-background/35 p-4 md:p-5">
-            <div className="mb-4 flex items-center justify-between">
+          <aside className="bg-secondary/5 p-6 md:p-8">
+            <div className="mb-6 flex items-center justify-between">
               <div>
-                <p className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/70">Pulso da operação</p>
-                <h2 className="mt-1 text-[18px] font-display font-black text-foreground leading-none">Tempo real</h2>
+                <p className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/40">Sincronização</p>
+                <h2 className="mt-1 text-[20px] font-display font-black text-foreground leading-none tracking-tight">Tempo Real</h2>
               </div>
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-success/25 bg-success/10 text-success">
-                <Activity className="h-4.5 w-4.5" />
+              <div className="flex h-12 w-12 items-center justify-center rounded-[1.25rem] border border-success/30 bg-success/5 text-success shadow-sm">
+                <Activity className="h-5 w-5 animate-pulse" />
               </div>
             </div>
 
-            <div className="space-y-2.5">
+            <div className="space-y-4">
               {conversionItems.map((kpi) => {
                 const textTone = kpi.tone === "success" ? "text-success" : kpi.tone === "info" ? "text-info" : "text-destructive";
-                const pct = kpi.label === "Chargeback" ? Math.min(kpi.pct * 9.42, 94.2) : kpi.pct * 0.942;
+                const pctValue = kpi.pct;
+                // Full circle is 2 * PI * r = 2 * 3.14159 * 15 = 94.24
+                const circumference = 94.24;
+                const offset = circumference - (pctValue / 100) * circumference;
+                
                 return (
-                  <div key={kpi.label} className="rounded-xl border border-border/60 bg-card p-3.5">
-                    <div className="flex items-center gap-3">
-                      <div className="relative h-11 w-11 shrink-0">
+                  <div key={kpi.label} className="group/kpi relative overflow-hidden rounded-2xl border border-border/40 bg-card p-4 transition-all hover:border-primary/20 hover:shadow-lg hover:shadow-black/5">
+                    <div className="flex items-center gap-4">
+                      <div className="relative h-12 w-12 shrink-0">
                         <svg className="h-full w-full -rotate-90" viewBox="0 0 36 36">
-                          <circle cx="18" cy="18" r="15" fill="none" stroke="hsl(var(--border))" strokeWidth="2.5" />
-                          <circle cx="18" cy="18" r="15" fill="none" stroke={kpi.stroke} strokeWidth="2.5" strokeDasharray={`${pct} 100`} strokeLinecap="round" />
+                          <circle cx="18" cy="18" r="15" fill="none" stroke="hsl(var(--muted)/0.3)" strokeWidth="3" />
+                          <circle 
+                            cx="18" cy="18" r="15" fill="none" 
+                            stroke={kpi.stroke} 
+                            strokeWidth="3" 
+                            strokeDasharray={circumference} 
+                            strokeDashoffset={offset}
+                            strokeLinecap="round"
+                            className="transition-all duration-1000 ease-out"
+                          />
                         </svg>
                         <div className="absolute inset-0 flex items-center justify-center">
-                          <span className={cn("text-[9px] font-black tabular-nums leading-none", textTone)}>
-                            {kpi.label === "Chargeback" ? `${kpi.pct.toFixed(1)}%` : `${kpi.pct.toFixed(0)}%`}
+                          <span className={cn("text-[10px] font-black tabular-nums leading-none", textTone)}>
+                            {kpi.pct.toFixed(0)}%
                           </span>
                         </div>
                       </div>
                       <div className="min-w-0 flex-1">
-                        <p className="text-[12px] font-black text-foreground leading-none">{kpi.label}</p>
-                        <p className="mt-1 text-[10px] font-semibold text-muted-foreground/65 leading-none">{kpi.detail}</p>
+                        <p className="text-[13px] font-black text-foreground leading-tight">{kpi.label}</p>
+                        <p className="mt-1 text-[10px] font-bold uppercase tracking-wider text-muted-foreground/40 leading-none">{kpi.detail}</p>
                       </div>
                     </div>
                   </div>
@@ -601,33 +620,33 @@ export default function Dashboard() {
         </div>
       </section>
 
-      <div className="mb-4 grid grid-cols-2 gap-2.5 lg:grid-cols-4">
+      <div className="mb-6 grid grid-cols-2 gap-3 lg:grid-cols-4">
         {quickActions.map((a) => (
-          <Link key={a.href} to={a.href} className="group flex min-h-[72px] items-center gap-3 rounded-2xl border border-border/60 bg-card px-4 py-3.5 hover:bg-accent/40">
-            <div className={cn("flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border", a.bg, a.tone)}>
-              <a.icon className="h-4.5 w-4.5" />
+          <Link key={a.href} to={a.href} className="group flex min-h-[80px] items-center gap-4 rounded-3xl border border-border/40 bg-card/50 px-5 py-4 transition-all hover:bg-accent/40 hover:border-primary/20 hover:shadow-lg hover:shadow-black/5">
+            <div className={cn("flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border transition-transform group-hover:scale-110", a.bg, a.tone)}>
+              <a.icon className="h-5 w-5" strokeWidth={2.5} />
             </div>
             <div className="min-w-0 flex-1">
-              <p className="truncate text-[13px] font-black text-foreground leading-none">{a.label}</p>
-              <p className="mt-1 text-[10px] font-semibold text-muted-foreground/65 leading-none">{a.desc}</p>
+              <p className="truncate text-[14px] font-black text-foreground leading-tight">{a.label}</p>
+              <p className="mt-1 text-[10px] font-bold uppercase tracking-wider text-muted-foreground/40 leading-none">{a.desc}</p>
             </div>
-            <ChevronRight className="h-4 w-4 shrink-0 text-muted-foreground/45 group-hover:text-foreground" />
+            <ChevronRight className="h-4 w-4 shrink-0 text-muted-foreground/30 transition-transform group-hover:translate-x-0.5" />
           </Link>
         ))}
       </div>
 
-      <div className="mb-4 grid grid-cols-1 gap-4 xl:grid-cols-[minmax(0,1fr)_340px]">
-        <div className="overflow-hidden rounded-2xl border border-border/60 bg-card">
-          <div className="flex items-center justify-between border-b border-border/60 px-5 py-4">
-            <div>
-              <h3 className="text-[14px] font-black text-foreground leading-none">Faturamento</h3>
-              <p className="mt-1 text-[10px] font-bold uppercase tracking-[0.16em] text-muted-foreground/65">Evolução por horário</p>
+      <div className="mb-6 grid grid-cols-1 gap-6 xl:grid-cols-[minmax(0,1fr)_340px]">
+        <div className="overflow-hidden rounded-[2rem] border border-border/40 bg-card/40 backdrop-blur-sm shadow-xl shadow-black/5">
+          <div className="flex items-center justify-between border-b border-border/40 px-6 py-6 md:px-8">
+            <div className="space-y-1">
+              <h3 className="text-[16px] font-black text-foreground leading-none tracking-tight">Faturamento</h3>
+              <p className="text-[10px] font-bold uppercase tracking-[0.15em] text-muted-foreground/40">Performance por período</p>
             </div>
-            <div className="rounded-full border border-success/25 bg-success/10 px-3 py-1.5 text-[10px] font-black text-success">
+            <div className="rounded-xl border border-success/30 bg-success/5 px-4 py-2 text-[11px] font-black text-success tabular-nums">
               {periodRevenueLabel}
             </div>
           </div>
-          <div className="relative px-2 pb-4 pt-3">
+          <div className="relative px-2 pb-6 pt-4">
             <ResponsiveContainer width="100%" height={284}>
               <AreaChart data={chartData} margin={{ top: 10, right: 18, left: -8, bottom: 0 }}>
                 <defs>

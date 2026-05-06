@@ -118,34 +118,36 @@ function DashboardLayoutInner() {
   <SidebarInset className="ambient-backdrop relative min-w-0 bg-background flex flex-col h-full min-h-0 overflow-hidden">
    {/* Ambient light is handled by .ambient-backdrop CSS — no extra blobs needed */}
 
-          <header className="relative z-30 h-16 flex items-center border-b-2 border-border/60 bg-background/95 backdrop-blur-sm px-4 lg:px-6 sticky top-0 md:flex shadow-sm">
-            <SidebarTrigger className="h-8 w-8 rounded-md hover:bg-muted/60 transition-colors flex items-center justify-center text-muted-foreground/70 hover:text-foreground md:flex">
-              <Menu className="h-[15px] w-[15px]" strokeWidth={1.85} />
+          <header className="relative z-30 h-16 flex items-center border-b border-border/40 bg-background/80 backdrop-blur-xl px-4 lg:px-6 sticky top-0 md:flex transition-all duration-300">
+            <SidebarTrigger className="h-9 w-9 rounded-xl hover:bg-muted/60 transition-all flex items-center justify-center text-muted-foreground/70 hover:text-foreground md:flex">
+              <Menu className="h-4 w-4" strokeWidth={2} />
             </SidebarTrigger>
 
             <button
               onClick={() => setSearchOpen(true)}
-              className="ml-1 h-8 px-2.5 rounded-md hover:bg-muted/60 transition-colors flex items-center gap-2 text-muted-foreground/70 hover:text-foreground"
+              className="ml-2 h-9 px-3 rounded-xl hover:bg-muted/60 transition-all flex items-center gap-2.5 text-muted-foreground/70 hover:text-foreground group"
             >
-              <Search className="h-[14px] w-[14px]" strokeWidth={1.85} />
-              <span className="text-[12px] font-medium hidden lg:inline">Buscar</span>
-              <kbd className="hidden lg:inline-flex h-4 items-center gap-0.5 rounded border border-border/60 bg-muted/40 px-1 text-[9px] font-medium text-muted-foreground/60">⌘K</kbd>
+              <Search className="h-[15px] w-[15px] transition-transform group-hover:scale-110" strokeWidth={2} />
+              <span className="text-[13px] font-semibold hidden lg:inline tracking-tight">Buscar</span>
+              <kbd className="hidden lg:inline-flex h-5 items-center gap-1 rounded-md border border-border/40 bg-muted/30 px-1.5 text-[10px] font-bold text-muted-foreground/50">⌘K</kbd>
             </button>
 
             <div className="flex-1 flex justify-center">
-              <div className="flex items-center gap-3 px-5 h-10 rounded-2xl bg-card border-2 border-border/80 transition-all hover:bg-accent/40 hover:border-primary/30">
-                <div className="flex items-center gap-2">
-                  <Wallet className="h-3.5 w-3.5 text-primary" />
-                  <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/60">Saldo</span>
+              <div className="group/balance relative flex items-center gap-3.5 px-5 h-[42px] rounded-[1.25rem] bg-secondary/30 border border-border/40 transition-all hover:bg-secondary/50 hover:border-primary/20 hover:shadow-[0_0_20px_-5px_rgba(var(--primary),0.1)]">
+                <div className="flex items-center gap-2.5">
+                  <div className="flex h-6 w-6 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                    <Wallet className="h-3.5 w-3.5" strokeWidth={2.5} />
+                  </div>
+                  <span className="text-[11px] font-black uppercase tracking-[0.15em] text-muted-foreground/40 group-hover/balance:text-muted-foreground/60 transition-colors">Saldo</span>
                 </div>
-                <span className="text-sm font-display font-black text-foreground tabular-nums">
+                <span className="text-[15px] font-display font-black text-foreground tabular-nums tracking-[-0.02em]">
                   {privacyHidden ? "••••••" : formatBRL(Math.max(balance, 0))}
                 </span>
                 <button 
                   onClick={togglePrivacy}
-                  className="ml-1 h-6 w-6 rounded-md flex items-center justify-center hover:bg-background/50 text-muted-foreground/40 hover:text-foreground transition-colors"
+                  className="ml-0.5 h-7 w-7 rounded-lg flex items-center justify-center hover:bg-background/80 text-muted-foreground/30 hover:text-foreground transition-all active:scale-90"
                 >
-                  {privacyHidden ? <EyeOff className="h-3 w-3" /> : <Eye className="h-3 w-3" />}
+                  {privacyHidden ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
                 </button>
               </div>
             </div>
