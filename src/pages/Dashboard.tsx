@@ -641,7 +641,47 @@ export default function Dashboard() {
         </div>
       </section>
 
-      <Dialog open={!!detailTx} onOpenChange={(open) => !open && setDetailTx(null)}>
+      {/* ═══════════════════════════════════════════════════════ */}
+      {/* ACTIVITY FEED                                          */}
+      {/* ═══════════════════════════════════════════════════════ */}
+      <section className="rounded-xl border border-border/50 bg-card overflow-hidden">
+        <div className="flex items-center justify-between border-b border-border/30 px-6 py-5">
+          <div>
+            <h3 className="text-[15px] font-display font-bold text-foreground tracking-tight">Atividade Recente</h3>
+            <p className="text-[11px] text-muted-foreground/50 mt-0.5">Últimas transações e saques</p>
+          </div>
+          <Link to="/vendas" className="text-[12px] font-bold text-primary hover:underline">Ver tudo</Link>
+        </div>
+        <div className="divide-y divide-border/20">
+          {activity.map((item) => (
+            <div key={item.id} className="flex items-center gap-3.5 px-6 py-3.5 hover:bg-accent/30 transition-all cursor-pointer" onClick={() => item.kind === 'transaction' && setDetailTx(transactions.find(t => t.id === item.id) || null)}>
+              <div className={cn("h-9 w-9 rounded-lg flex items-center justify-center shrink-0",
+                item.status === 'completed' ? "bg-success/10 text-success" : 
+                item.status === 'pending' ? "bg-warning/10 text-warning" : "bg-destructive/10 text-destructive"
+              )}>
+                {item.kind === 'withdrawal' ? <ArrowDownRight className="h-4 w-4" /> : <CreditCard className="h-4 w-4" />}
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-[13px] font-bold text-foreground truncate">{item.label}</p>
+                <p className="text-[10px] font-medium text-muted-foreground/40 uppercase tracking-wider mt-0.5">
+                  {item.kind === 'withdrawal' ? 'Saque' : 'Venda'} • {timeAgo(item.createdAt)}
+                </p>
+              </div>
+              <div className="text-right shrink-0">
+                <p className="text-[13px] font-display font-black text-foreground tabular-nums">{fmt(item.amount)}</p>
+                <p className={cn("text-[9px] font-bold uppercase tracking-widest mt-0.5",
+                  item.status === 'completed' ? "text-success" : 
+                  item.status === 'pending' ? "text-warning" : "text-destructive"
+                )}>
+                  {item.status === 'completed' ? 'Aprovado' : 
+                   item.status === 'pending' ? 'Pendente' : 'Cancelado'}
+                </p>
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
+
         <DialogContent className="sm:max-w-[460px] border-border/20 bg-card p-0 gap-0 overflow-hidden rounded-xl">
           {detailTx && (() => {
             const statusMap: Record<string, { label: string; color: string; bg: string; border: string; dot: string }> = {
