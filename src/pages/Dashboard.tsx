@@ -566,38 +566,50 @@ export default function Dashboard() {
             </div>
           </div>
 
-          <aside className="bg-background/35 p-4 md:p-5">
-            <div className="mb-4 flex items-center justify-between">
+          <aside className="bg-secondary/5 p-6 md:p-8">
+            <div className="mb-6 flex items-center justify-between">
               <div>
-                <p className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/70">Pulso da operação</p>
-                <h2 className="mt-1 text-[18px] font-display font-black text-foreground leading-none">Tempo real</h2>
+                <p className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/40">Sincronização</p>
+                <h2 className="mt-1 text-[20px] font-display font-black text-foreground leading-none tracking-tight">Tempo Real</h2>
               </div>
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-success/25 bg-success/10 text-success">
-                <Activity className="h-4.5 w-4.5" />
+              <div className="flex h-12 w-12 items-center justify-center rounded-[1.25rem] border border-success/30 bg-success/5 text-success shadow-sm">
+                <Activity className="h-5 w-5 animate-pulse" />
               </div>
             </div>
 
-            <div className="space-y-2.5">
+            <div className="space-y-4">
               {conversionItems.map((kpi) => {
                 const textTone = kpi.tone === "success" ? "text-success" : kpi.tone === "info" ? "text-info" : "text-destructive";
-                const pct = kpi.label === "Chargeback" ? Math.min(kpi.pct * 9.42, 94.2) : kpi.pct * 0.942;
+                const pctValue = kpi.pct;
+                // Full circle is 2 * PI * r = 2 * 3.14159 * 15 = 94.24
+                const circumference = 94.24;
+                const offset = circumference - (pctValue / 100) * circumference;
+                
                 return (
-                  <div key={kpi.label} className="rounded-xl border border-border/60 bg-card p-3.5">
-                    <div className="flex items-center gap-3">
-                      <div className="relative h-11 w-11 shrink-0">
+                  <div key={kpi.label} className="group/kpi relative overflow-hidden rounded-2xl border border-border/40 bg-card p-4 transition-all hover:border-primary/20 hover:shadow-lg hover:shadow-black/5">
+                    <div className="flex items-center gap-4">
+                      <div className="relative h-12 w-12 shrink-0">
                         <svg className="h-full w-full -rotate-90" viewBox="0 0 36 36">
-                          <circle cx="18" cy="18" r="15" fill="none" stroke="hsl(var(--border))" strokeWidth="2.5" />
-                          <circle cx="18" cy="18" r="15" fill="none" stroke={kpi.stroke} strokeWidth="2.5" strokeDasharray={`${pct} 100`} strokeLinecap="round" />
+                          <circle cx="18" cy="18" r="15" fill="none" stroke="hsl(var(--muted)/0.3)" strokeWidth="3" />
+                          <circle 
+                            cx="18" cy="18" r="15" fill="none" 
+                            stroke={kpi.stroke} 
+                            strokeWidth="3" 
+                            strokeDasharray={circumference} 
+                            strokeDashoffset={offset}
+                            strokeLinecap="round"
+                            className="transition-all duration-1000 ease-out"
+                          />
                         </svg>
                         <div className="absolute inset-0 flex items-center justify-center">
-                          <span className={cn("text-[9px] font-black tabular-nums leading-none", textTone)}>
-                            {kpi.label === "Chargeback" ? `${kpi.pct.toFixed(1)}%` : `${kpi.pct.toFixed(0)}%`}
+                          <span className={cn("text-[10px] font-black tabular-nums leading-none", textTone)}>
+                            {kpi.pct.toFixed(0)}%
                           </span>
                         </div>
                       </div>
                       <div className="min-w-0 flex-1">
-                        <p className="text-[12px] font-black text-foreground leading-none">{kpi.label}</p>
-                        <p className="mt-1 text-[10px] font-semibold text-muted-foreground/65 leading-none">{kpi.detail}</p>
+                        <p className="text-[13px] font-black text-foreground leading-tight">{kpi.label}</p>
+                        <p className="mt-1 text-[10px] font-bold uppercase tracking-wider text-muted-foreground/40 leading-none">{kpi.detail}</p>
                       </div>
                     </div>
                   </div>
