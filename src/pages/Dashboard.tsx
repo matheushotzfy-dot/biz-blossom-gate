@@ -16,13 +16,12 @@ import {
   Zap,
   TrendingUp,
   ShieldCheck,
-  X as XIcon,
-  CheckCircle2,
   Mail,
   Phone,
   User,
+  ArrowUpRight,
 } from "lucide-react";
-import { Area, AreaChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
+import { Area, AreaChart, ResponsiveContainer, Tooltip, XAxis, YAxis, CartesianGrid } from "recharts";
 import type { Tables } from "@/integrations/supabase/types";
 import { Link, useNavigate } from "react-router-dom";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
@@ -36,8 +35,8 @@ import type { DateRange } from "react-day-picker";
 
 const PERIOD_PRESETS = [
   { label: "Hoje", days: 0 },
-  { label: "Ontem", days: 1 },
   { label: "7 dias", days: 7 },
+  { label: "15 dias", days: 15 },
   { label: "30 dias", days: 30 },
 ] as const;
 
@@ -101,6 +100,7 @@ export default function Dashboard() {
   const { profile } = useProfile();
   const { data: transactions = [] } = useTransactions();
   const { data: withdrawals = [] } = useWithdrawals(10);
+  const { data: productsData } = useProductsQuery();
   const [selectedPeriod, setSelectedPeriod] = useState<PeriodPreset>(PERIOD_PRESETS[0]);
   const [customRange, setCustomRange] = useState<DateRange | undefined>();
   const [isCustom, setIsCustom] = useState(false);
@@ -133,7 +133,7 @@ export default function Dashboard() {
     return transactions.filter((t) => new Date(t.created_at) >= start);
   }, [transactions, selectedPeriod, isCustom, customRange]);
 
-  const { approved, revenue, conversion, uniqueCustomers, pixConversion, cardConversion, chargebackRate, pixApprovedCount, pixTotalCount, cardApprovedCount, cardTotalCount, chargebacks } = useMemo(() => {
+  const { approved, revenue, conversion, uniqueCustomers, pixConversion, cardConversion, chargebackRate, pixApprovedCount, pixTotalCount, cardApprovedCount, cardTotalCount } = useMemo(() => {
     const _approved = filteredTx.filter((t) => t.status === "completed");
     const _revenue = _approved.reduce((acc, t) => acc + Number(t.net_amount), 0);
     const _conversion = filteredTx.length > 0 ? (_approved.length / filteredTx.length) * 100 : 0;
@@ -159,7 +159,6 @@ export default function Dashboard() {
       chargebackRate: _chargebackRate,
       pixApprovedCount: pixApproved.length, pixTotalCount: pixTx.length,
       cardApprovedCount: cardApproved.length, cardTotalCount: cardTx.length,
-      chargebacks: filteredTx.filter(t => t.status === "chargeback"),
     };
   }, [filteredTx]);
 
@@ -188,82 +187,255 @@ export default function Dashboard() {
     });
   }, [transactions, selectedPeriod.days]);
 
+  const activity = useMemo(() => {
+    const tx = transactions.slice(0, 10).map((t) => ({
+      id: t.id,
+      kind: "transaction" as const,
+      createdAt: t.created_at,
+      amount: Number(t.amount),
+      status: t.status,
+      label: t.payment_method || "Venda",
+    }));
+    return tx.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+  }, [transactions]);
+
   const nickname = profile?.nickname || profile?.full_name?.split(" ")[0] || "Vendedor";
-  const statusBg = (s: string) => s === 'completed' ? 'bg-emerald-500/10' : 'bg-amber-500/10';
-  const statusColor = (s: string) => s === 'completed' ? 'text-emerald-500' : 'text-amber-500';
+  const statusLabel = (s: string) => s === 'completed' ? 'Aprovado' : s === 'pending' ? 'Pendente' : s === 'refunded' ? 'Reembolso' : 'Chargeback';
+  const statusBg = (s: string) => s === 'completed' ? 'bg-success/10' : s === 'pending' ? 'bg-warning/10' : 'bg-destructive/10';
+  const statusColor = (s: string) => s === 'completed' ? 'text-success' : s === 'pending' ? 'text-warning' : 'text-destructive';
+
+  const financialCards = [
+    { label: "Faturamento", value: privacy.hidden ? CENSORED : fmt(revenue), icon: TrendingUp, color: "text-success", sub: "Bruto no período" },
+    { label: "Vendas", value: approved.length, icon: Zap, color: "text-primary", sub: "Transações concluídas" },
+    { label: "Ticket Médio", value: privacy.hidden ? CENSORED : fmt(approved.length > 0 ? revenue / approved.length : 0), icon: BarChart3, color: "text-info", sub: "Média por venda" },
+    { label: "Clientes", value: uniqueCustomers, icon: User, color: "text-warning", sub: "Compradores únicos" },
+  ];
 
   return (
-    <div className="p-4 md:p-8 space-y-8 max-w-7xl mx-auto">
+    <div className="p-4 md:p-8 space-y-8 max-w-[1600px] mx-auto animate-in fade-in duration-500">
       {/* Header */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-        <div>
-          <h1 className="text-3xl font-black text-foreground">Bom dia, {nickname}</h1>
-          <p className="text-muted-foreground font-medium">Sua central de operações</p>
+      <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6">
+        <div className="space-y-1">
+          <div className="flex items-center gap-3">
+             <div className="h-3 w-3 rounded-full bg-success animate-pulse" />
+             <h1 className="text-3xl font-black tracking-tight text-foreground">Bom dia, {nickname}</h1>
+          </div>
+          <p className="text-muted-foreground font-medium text-sm flex items-center gap-2">
+            <Activity className="h-4 w-4" />
+            Sua operação está saudável e em pleno funcionamento.
+          </p>
         </div>
-        <div className="flex gap-2">
+        
+        <div className="flex flex-wrap items-center gap-3">
+          <div className="flex items-center bg-muted/30 p-1 rounded-2xl border border-border/50">
             {PERIOD_PRESETS.map(p => (
-                <button 
-                  key={p.label}
-                  onClick={() => setSelectedPeriod(p)}
-                  className={cn("px-4 py-2 rounded-xl text-sm font-semibold transition", selectedPeriod.label === p.label ? "bg-primary text-white" : "bg-card border border-border")}
-                >
-                    {p.label}
-                </button>
+              <button 
+                key={p.label}
+                onClick={() => { setSelectedPeriod(p); setIsCustom(false); }}
+                className={cn(
+                  "px-5 py-2.5 rounded-xl text-xs font-black uppercase tracking-wider transition-all",
+                  !isCustom && selectedPeriod.label === p.label ? "bg-card text-foreground shadow-sm ring-1 ring-border" : "text-muted-foreground hover:text-foreground"
+                )}
+              >
+                {p.label}
+              </button>
             ))}
+          </div>
+          
+          <Popover open={datePickerOpen} onOpenChange={setDatePickerOpen}>
+            <PopoverTrigger asChild>
+              <button className={cn(
+                "h-11 px-5 rounded-2xl border flex items-center gap-2 text-xs font-black uppercase tracking-wider transition-all",
+                isCustom ? "border-primary bg-primary/5 text-primary" : "border-border bg-card text-muted-foreground"
+              )}>
+                <CalendarDays className="h-4 w-4" />
+                {isCustom && customRange?.from ? format(customRange.from, "dd/MM") + " - " + (customRange.to ? format(customRange.to, "dd/MM") : "") : "Personalizado"}
+              </button>
+            </PopoverTrigger>
+            <PopoverContent align="end" className="p-0 border-border/50 rounded-3xl overflow-hidden shadow-2xl">
+              <Calendar 
+                mode="range" 
+                selected={customRange} 
+                onSelect={(r) => { setCustomRange(r); setIsCustom(true); }}
+                locale={ptBR}
+              />
+            </PopoverContent>
+          </Popover>
         </div>
       </div>
 
-      {/* Hero Financials */}
-      <div className="grid md:grid-cols-4 gap-4">
-        <Card className="col-span-2 border-primary/20 bg-primary/5">
-          <CardHeader className="pb-2"><CardDescription>Saldo Disponível</CardDescription></CardHeader>
-          <CardContent><p className="text-5xl font-black">{privacy.hidden ? CENSORED : fmt(balance)}</p></CardContent>
+      {/* Hero Financial Row */}
+      <div className="grid lg:grid-cols-4 gap-6">
+        <Card className="lg:col-span-2 relative overflow-hidden group border-primary/20 bg-primary/[0.02]">
+          <div className="absolute top-0 right-0 p-8 opacity-[0.03] transition-opacity group-hover:opacity-[0.06]">
+            <Wallet className="h-32 w-32 -rotate-12" />
+          </div>
+          <CardHeader className="pb-2">
+             <div className="flex items-center gap-2 text-primary font-black uppercase tracking-[0.2em] text-[10px]">
+                <ShieldCheck className="h-3 w-3" />
+                Saldo Seguro Disponível
+             </div>
+          </CardHeader>
+          <CardContent className="pt-2">
+            <div className="flex items-baseline gap-4">
+              <p className="text-[56px] font-black tracking-tighter leading-none">{privacy.hidden ? CENSORED : fmt(balance)}</p>
+              <span className="text-muted-foreground font-bold text-sm">BRL</span>
+            </div>
+            <div className="mt-8 flex gap-3">
+               <Link to="/financeiro/saques" className="bg-primary text-white px-8 h-12 rounded-2xl font-black text-sm flex items-center gap-2 shadow-lg shadow-primary/20 hover:scale-[1.02] active:scale-[0.98] transition-all">
+                  <ArrowDownRight className="h-5 w-5" />
+                  Solicitar Saque
+               </Link>
+               <Link to="/vendas/links" className="bg-card border border-border px-8 h-12 rounded-2xl font-black text-sm flex items-center gap-2 hover:bg-accent transition-all">
+                  <Zap className="h-5 w-5 text-success" />
+                  Link PIX
+               </Link>
+            </div>
+          </CardContent>
         </Card>
-        <Card>
-            <CardHeader className="pb-2"><CardDescription>Faturamento</CardDescription></CardHeader>
-            <CardContent><p className="text-2xl font-bold">{privacy.hidden ? CENSORED : fmt(revenue)}</p></CardContent>
-        </Card>
-        <Card>
-            <CardHeader className="pb-2"><CardDescription>Conversão</CardDescription></CardHeader>
-            <CardContent><p className="text-2xl font-bold">{conversion.toFixed(1)}%</p></CardContent>
-        </Card>
+
+        <div className="grid grid-cols-1 gap-6 lg:col-span-2">
+           <div className="grid grid-cols-2 gap-6">
+              {financialCards.map((card) => (
+                <Card key={card.label} className="border-border/40 hover:border-border transition-colors">
+                  <CardHeader className="p-5 pb-2">
+                    <div className="flex justify-between items-start">
+                       <span className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/60">{card.label}</span>
+                       <card.icon className={cn("h-4 w-4 opacity-40", card.color)} />
+                    </div>
+                  </CardHeader>
+                  <CardContent className="p-5 pt-0">
+                    <p className="text-2xl font-black tracking-tight">{card.value}</p>
+                    <p className="text-[10px] font-bold text-muted-foreground/40 mt-1">{card.sub}</p>
+                  </CardContent>
+                </Card>
+              ))}
+           </div>
+        </div>
       </div>
 
-      {/* Main Charts & Activity */}
+      {/* Main Operations Grid */}
       <div className="grid lg:grid-cols-3 gap-8">
-        <Card className="lg:col-span-2">
-            <CardHeader><CardTitle>Evolução de Vendas</CardTitle></CardHeader>
-            <CardContent className="h-[300px]">
-                <ResponsiveContainer width="100%" height="100%">
-                    <AreaChart data={chartData}>
-                        <XAxis dataKey="name" fontSize={12} />
-                        <YAxis fontSize={12} />
-                        <Tooltip />
-                        <Area dataKey="vendas" fill="hsl(var(--primary))" stroke="hsl(var(--primary))" />
-                    </AreaChart>
-                </ResponsiveContainer>
-            </CardContent>
+        <Card className="lg:col-span-2 border-border/40 overflow-hidden">
+          <CardHeader className="flex flex-row items-center justify-between border-b border-border/40 px-8 py-6">
+            <div>
+              <CardTitle className="text-xl font-black">Fluxo de Vendas</CardTitle>
+              <CardDescription className="text-xs font-bold uppercase tracking-wider">Desempenho financeiro no tempo</CardDescription>
+            </div>
+            <div className="flex items-center gap-4 text-xs font-bold">
+               <div className="flex items-center gap-2">
+                  <div className="h-2 w-2 rounded-full bg-primary" />
+                  <span>Aprovadas</span>
+               </div>
+               <div className="text-success font-black">{fmt(revenue)}</div>
+            </div>
+          </CardHeader>
+          <CardContent className="p-0">
+            <div className="h-[360px] w-full pt-8 pb-4 pr-8 pl-4">
+              <ResponsiveContainer width="100%" height="100%">
+                <AreaChart data={chartData} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
+                  <defs>
+                    <linearGradient id="colorVendas" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="hsl(var(--primary))" stopOpacity={0.15}/>
+                      <stop offset="95%" stopColor="hsl(var(--primary))" stopOpacity={0}/>
+                    </linearGradient>
+                  </defs>
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="hsl(var(--border)/0.3)" />
+                  <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{fill: 'hsl(var(--muted-foreground)/0.5)', fontSize: 10, fontWeight: 700}} dy={10} />
+                  <YAxis axisLine={false} tickLine={false} tick={{fill: 'hsl(var(--muted-foreground)/0.5)', fontSize: 10, fontWeight: 700}} tickFormatter={(v) => `R$${v}`} />
+                  <Tooltip 
+                    contentStyle={{ borderRadius: '16px', border: '1px solid hsl(var(--border)/0.5)', backgroundColor: 'hsl(var(--card))', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)' }}
+                    itemStyle={{ fontSize: '12px', fontWeight: 900, color: 'hsl(var(--primary))' }}
+                  />
+                  <Area type="monotone" dataKey="vendas" stroke="hsl(var(--primary))" strokeWidth={3} fillOpacity={1} fill="url(#colorVendas)" />
+                </AreaChart>
+              </ResponsiveContainer>
+            </div>
+          </CardContent>
         </Card>
 
-        <Card>
-            <CardHeader><CardTitle>Qualidade</CardTitle></CardHeader>
-            <CardContent className="space-y-4">
-                <div className="flex justify-between items-center">
-                    <span>Score de Risco</span>
-                    <span className="font-bold text-success">{Math.max(0, 100 - chargebackRate * 12).toFixed(0)}</span>
-                </div>
-                <div className="flex justify-between items-center">
-                    <span>PIX Conversão</span>
-                    <span className="font-bold">{pixConversion.toFixed(0)}%</span>
-                </div>
-                <div className="flex justify-between items-center">
-                    <span>Cartão Conversão</span>
-                    <span className="font-bold">{cardConversion.toFixed(0)}%</span>
-                </div>
-            </CardContent>
+        <Card className="border-border/40 overflow-hidden bg-secondary/10">
+          <CardHeader className="border-b border-border/40 px-8 py-6">
+            <CardTitle className="text-xl font-black">Saúde da Operação</CardTitle>
+            <CardDescription className="text-xs font-bold uppercase tracking-wider">KPIs críticos de performance</CardDescription>
+          </CardHeader>
+          <CardContent className="px-8 py-8 space-y-8">
+            <div className="space-y-3">
+              <div className="flex justify-between items-end">
+                <span className="text-[10px] font-black uppercase tracking-[0.15em] text-muted-foreground/60">Taxa de Conversão</span>
+                <span className="text-2xl font-black text-primary">{conversion.toFixed(1)}%</span>
+              </div>
+              <div className="h-2 w-full bg-muted rounded-full overflow-hidden">
+                <div className="h-full bg-primary rounded-full" style={{ width: `${conversion}%` }} />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-6">
+              <div className="space-y-2">
+                 <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/40">Conversão PIX</p>
+                 <p className="text-xl font-black">{pixConversion.toFixed(0)}%</p>
+              </div>
+              <div className="space-y-2 text-right">
+                 <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/40">Conversão Card</p>
+                 <p className="text-xl font-black">{cardConversion.toFixed(0)}%</p>
+              </div>
+            </div>
+
+            <div className="pt-6 border-t border-border/40">
+               <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                     <div className="h-10 w-10 rounded-xl bg-success/10 border border-success/20 flex items-center justify-center">
+                        <ShieldCheck className="h-5 w-5 text-success" />
+                     </div>
+                     <div>
+                        <p className="text-xs font-black">Risco & Fraude</p>
+                        <p className="text-[10px] font-bold text-muted-foreground">Monitoramento ativo</p>
+                     </div>
+                  </div>
+                  <div className="text-right">
+                     <p className="text-sm font-black text-success">Excelente</p>
+                     <p className="text-[10px] font-bold text-muted-foreground">Score: {Math.max(0, 100 - chargebackRate * 12).toFixed(0)}</p>
+                  </div>
+               </div>
+            </div>
+          </CardContent>
         </Card>
       </div>
-      
+
+      {/* Recent Activity */}
+      <Card className="border-border/40 overflow-hidden">
+        <CardHeader className="flex flex-row items-center justify-between border-b border-border/40 px-8 py-6">
+          <div>
+            <CardTitle className="text-xl font-black">Últimas Transações</CardTitle>
+            <CardDescription className="text-xs font-bold uppercase tracking-wider">Acompanhamento em tempo real</CardDescription>
+          </div>
+          <Link to="/vendas" className="text-xs font-black text-primary hover:underline underline-offset-4 flex items-center gap-1">
+             Ver Histórico Completo
+             <ChevronRight className="h-3 w-3" />
+          </Link>
+        </CardHeader>
+        <CardContent className="p-0">
+          <div className="divide-y divide-border/30">
+            {activity.map((item) => (
+              <div key={item.id} className="group flex items-center justify-between px-8 py-4 hover:bg-muted/30 transition-all cursor-pointer">
+                <div className="flex items-center gap-4">
+                  <div className={cn("h-11 w-11 rounded-2xl flex items-center justify-center transition-transform group-hover:scale-110", statusBg(item.status))}>
+                    <CreditCard className={cn("h-5 w-5", statusColor(item.status))} />
+                  </div>
+                  <div>
+                    <p className="text-sm font-black">{item.label === "pix" ? "Pagamento via PIX" : item.label === "credit_card" ? "Pagamento via Cartão" : "Transação"}</p>
+                    <p className="text-[10px] font-bold text-muted-foreground/50 uppercase tracking-widest">{timeAgo(item.createdAt)}</p>
+                  </div>
+                </div>
+                <div className="text-right">
+                  <p className="text-sm font-black">{fmt(item.amount)}</p>
+                  <p className={cn("text-[10px] font-black uppercase tracking-widest", statusColor(item.status))}>{statusLabel(item.status)}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 }
