@@ -199,6 +199,8 @@ export default function Dashboard() {
     return tx.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
   }, [transactions]);
 
+  const hour = new Date().getHours();
+  const greeting = hour < 12 ? "Bom dia" : hour < 18 ? "Boa tarde" : "Boa noite";
   const nickname = profile?.nickname || profile?.full_name?.split(" ")[0] || "Vendedor";
   const statusLabel = (s: string) => s === 'completed' ? 'Aprovado' : s === 'pending' ? 'Pendente' : s === 'refunded' ? 'Reembolso' : 'Chargeback';
   const statusBg = (s: string) => s === 'completed' ? 'bg-success/10' : s === 'pending' ? 'bg-warning/10' : 'bg-destructive/10';
@@ -218,7 +220,7 @@ export default function Dashboard() {
         <div className="space-y-1">
           <div className="flex items-center gap-3">
              <div className="h-3 w-3 rounded-full bg-success animate-pulse" />
-             <h1 className="text-3xl font-black tracking-tight text-foreground">Bom dia, {nickname}</h1>
+             <h1 className="text-3xl font-black tracking-tight text-foreground">{greeting}, {nickname}</h1>
           </div>
           <p className="text-muted-foreground font-medium text-sm flex items-center gap-2">
             <Activity className="h-4 w-4" />
