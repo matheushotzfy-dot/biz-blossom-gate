@@ -49,7 +49,7 @@ import { cn } from "@/lib/utils";
 import type { DateRange } from "react-day-picker";
 
 
-/* ─────────────────────── Animated Number ─────────────────────── */
+/* ─────────────────────── Componentes de Interface ─────────────────────── */
 
 
 
@@ -386,7 +386,7 @@ export default function Dashboard() {
   return (
     <div className="dashboard-page mx-auto w-full max-w-[1440px] pb-24 px-3 md:px-5 relative space-y-5">
 
-      {/* ─── GREEN FIRE BORDER EFFECT ─── */}
+      {/* ─── Efeito de Profundidade ─── */}
       {fireEffect && (
         <div className="fixed inset-0 z-[90] pointer-events-none">
           <div className="absolute top-0 left-0 right-0 h-32 bg-gradient-to-b from-primary/40 via-primary/10 to-transparent animate-pulse" />
@@ -413,11 +413,11 @@ export default function Dashboard() {
                 <span className="text-xs font-bold text-primary uppercase tracking-wider">Modo Escala Desbloqueado</span>
               </div>
               <h2 className="text-2xl md:text-3xl font-display font-black text-foreground mb-3 leading-tight tracking-[-0.04em]">
-                MODO ESCALA<br /><span className="text-gradient">ATIVADO! 🔥</span>
+                MODO ESCALA<br /><span className="text-foreground">ATIVADO!</span>
               </h2>
               <div className="space-y-3 text-sm text-muted-foreground leading-relaxed mb-6">
                 <p className="font-bold text-foreground text-base">Você atingiu a elite dos vendedores!</p>
-                <p>R$ 2.000 em 24h comprovam: você tem <strong className="text-primary">mentalidade de escala</strong>.</p>
+                <p>R$ 2.000 em 24h comprovam sua excelente performance em <strong className="text-primary">vendas</strong>.</p>
               </div>
               <button onClick={() => setShowScalePopup(false)} className="w-full h-12 rounded-xl gradient-primary text-primary-foreground font-bold text-sm shadow-lg shadow-primary/20 hover:shadow-xl hover:shadow-primary/30 transition-all active:scale-[0.97]">BORA DOMINAR!</button>
             </div>
