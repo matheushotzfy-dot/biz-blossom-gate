@@ -714,17 +714,20 @@ export default function Vendas() {
   /* ═══════════ RENDER ═══════════ */
   return (
     <div
-      className="mx-auto w-full max-w-[1480px] pb-24 md:pb-10 antialiased [text-rendering:geometricPrecision] [-webkit-font-smoothing:antialiased] [-moz-osx-font-smoothing:grayscale]"
+      className="relative mx-auto w-full max-w-[1480px] pb-24 md:pb-10 antialiased [text-rendering:geometricPrecision]"
       style={{ fontFeatureSettings: '"ss01","cv11","tnum","kern"' }}
     >
+      {/* Decorative background elements */}
+      <div className="pointer-events-none absolute -top-24 left-1/2 h-[500px] w-full -translate-x-1/2 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-primary/5 via-transparent to-transparent opacity-50" />
+      <div className="pointer-events-none absolute left-0 top-0 h-full w-full bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-[0.03] mix-blend-overlay" />
 
       {/* ─────────── COMANDO LIMPO ─────────── */}
-      <div className="px-5 pt-4 sm:px-8 sm:pt-6">
-        <header className="vendas-header-glow border-b border-border/70 pb-7">
+      <div className="relative z-10 px-5 pt-4 sm:px-8 sm:pt-6">
+        <header className="border-b border-border/40 pb-7">
           <div className="flex flex-col gap-5 xl:flex-row xl:items-start xl:justify-between">
             <div className="min-w-0">
               <h1 className="font-display text-[48px] font-black leading-[0.88] tracking-[-0.06em] text-foreground sm:text-[68px]">
-                Minhas <span className="text-gradient-success">Vendas</span>
+                Gestão de <span className="text-gradient-premium">Vendas</span>
               </h1>
               <div className="mt-5 flex flex-wrap items-end gap-x-5 gap-y-2">
                 <p
