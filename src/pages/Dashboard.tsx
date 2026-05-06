@@ -620,28 +620,32 @@ export default function Dashboard() {
         </div>
       </section>
 
-      <div className="mb-4 grid grid-cols-2 gap-2.5 lg:grid-cols-4">
+      <div className="mb-6 grid grid-cols-2 gap-3 lg:grid-cols-4">
         {quickActions.map((a) => (
-          <Link key={a.href} to={a.href} className="group flex min-h-[72px] items-center gap-3 rounded-2xl border border-border/60 bg-card px-4 py-3.5 hover:bg-accent/40">
-            <div className={cn("flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border", a.bg, a.tone)}>
-              <a.icon className="h-4.5 w-4.5" />
+          <Link key={a.href} to={a.href} className="group flex min-h-[80px] items-center gap-4 rounded-3xl border border-border/40 bg-card/50 px-5 py-4 transition-all hover:bg-accent/40 hover:border-primary/20 hover:shadow-lg hover:shadow-black/5">
+            <div className={cn("flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border transition-transform group-hover:scale-110", a.bg, a.tone)}>
+              <a.icon className="h-5 w-5" strokeWidth={2.5} />
             </div>
             <div className="min-w-0 flex-1">
-              <p className="truncate text-[13px] font-black text-foreground leading-none">{a.label}</p>
-              <p className="mt-1 text-[10px] font-semibold text-muted-foreground/65 leading-none">{a.desc}</p>
+              <p className="truncate text-[14px] font-black text-foreground leading-tight">{a.label}</p>
+              <p className="mt-1 text-[10px] font-bold uppercase tracking-wider text-muted-foreground/40 leading-none">{a.desc}</p>
             </div>
-            <ChevronRight className="h-4 w-4 shrink-0 text-muted-foreground/45 group-hover:text-foreground" />
+            <ChevronRight className="h-4 w-4 shrink-0 text-muted-foreground/30 transition-transform group-hover:translate-x-0.5" />
           </Link>
         ))}
       </div>
 
-      <div className="mb-4 grid grid-cols-1 gap-4 xl:grid-cols-[minmax(0,1fr)_340px]">
-        <div className="overflow-hidden rounded-2xl border border-border/60 bg-card">
-          <div className="flex items-center justify-between border-b border-border/60 px-5 py-4">
-            <div>
-              <h3 className="text-[14px] font-black text-foreground leading-none">Faturamento</h3>
-              <p className="mt-1 text-[10px] font-bold uppercase tracking-[0.16em] text-muted-foreground/65">Evolução por horário</p>
+      <div className="mb-6 grid grid-cols-1 gap-6 xl:grid-cols-[minmax(0,1fr)_340px]">
+        <div className="overflow-hidden rounded-[2rem] border border-border/40 bg-card/40 backdrop-blur-sm shadow-xl shadow-black/5">
+          <div className="flex items-center justify-between border-b border-border/40 px-6 py-6 md:px-8">
+            <div className="space-y-1">
+              <h3 className="text-[16px] font-black text-foreground leading-none tracking-tight">Faturamento</h3>
+              <p className="text-[10px] font-bold uppercase tracking-[0.15em] text-muted-foreground/40">Performance por período</p>
             </div>
+            <div className="rounded-xl border border-success/30 bg-success/5 px-4 py-2 text-[11px] font-black text-success tabular-nums">
+              {periodRevenueLabel}
+            </div>
+          </div>
             <div className="rounded-full border border-success/25 bg-success/10 px-3 py-1.5 text-[10px] font-black text-success">
               {periodRevenueLabel}
             </div>
