@@ -689,139 +689,44 @@ export default function Dashboard() {
         </div>
       </section>
 
-      {/* ════════════════════════════════════════════════════════════════ */}
-      {/* ACTIONS + ACTIVITY                                               */}
-      {/* ════════════════════════════════════════════════════════════════ */}
-      <section className="grid grid-cols-1 gap-3 xl:grid-cols-[1fr_1.4fr]">
-        {/* Quick actions */}
-        <div className="rounded-xl border border-border/50 bg-card overflow-hidden flex flex-col">
-          <div className="flex items-center justify-between border-b border-border/30 px-6 py-5">
-            <div className="flex items-center gap-3">
-              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10 border border-primary/20 text-primary">
-                <Zap className="h-4 w-4" strokeWidth={2.5} />
-              </div>
-              <div>
-                <p className="text-[14px] font-display font-bold text-foreground tracking-tight">Ações rápidas</p>
-                <p className="text-[11px] text-muted-foreground/55 mt-0.5">Atalhos operacionais</p>
-              </div>
+      {/* ─── Recent Activity Section ─── */}
+      <section className="grid grid-cols-1 gap-6">
+        <div className="rounded-3xl border border-border bg-card p-6 md:p-8 shadow-sm">
+          <div className="flex items-center justify-between mb-8">
+            <div className="space-y-1">
+              <h3 className="text-xl font-display font-black tracking-tight text-foreground">Operações Recentes</h3>
+              <p className="text-sm text-muted-foreground font-medium">Últimas transações e saques processados.</p>
             </div>
-          </div>
-          <div className="divide-y divide-border/20 max-h-[520px] overflow-y-auto">
-            {[
-              { label: "Criar produto", href: "/vendas/produtos", icon: Package, tone: "primary" },
-              { label: "Configurar checkout", href: "/vendas/checkout", icon: CreditCard, tone: "info" },
-              { label: "Link de pagamento", href: "/vendas/links", icon: Hash, tone: "primary" },
-              { label: "Ver vendas", href: "/vendas", icon: BarChart3, tone: "success" },
-              { label: "Extrato financeiro", href: "/financeiro/extrato", icon: FileText, tone: "info" },
-              { label: "Solicitar saque", href: "/financeiro/saques", icon: ArrowDownRight, tone: "success" },
-              { label: "Dados bancários", href: "/financeiro/dados-bancarios", icon: Banknote, tone: "warning" },
-              { label: "Identidade & KYC", href: "/financeiro/identidade", icon: ShieldCheck, tone: "success" },
-              { label: "Cupons de desconto", href: "/vendas/cupons", icon: Percent, tone: "primary" },
-              { label: "Área de membros", href: "/vendas/conteudo", icon: GraduationCap, tone: "info" },
-              { label: "Programa de afiliados", href: "/vendas/afiliados", icon: Users, tone: "primary" },
-              { label: "Apps & Integrações", href: "/integracoes", icon: Layers, tone: "info" },
-              { label: "Webhooks & API", href: "/vendas/webhooks", icon: Webhook, tone: "warning" },
-              { label: "Suporte", href: "/suporte", icon: Sparkles, tone: "primary" },
-            ].map((action) => {
-              const toneClasses: Record<string, { bg: string; border: string; text: string }> = {
-                primary: { bg: "bg-primary/10", border: "border-primary/20", text: "text-primary" },
-                info: { bg: "bg-info/10", border: "border-info/20", text: "text-info" },
-                success: { bg: "bg-success/10", border: "border-success/20", text: "text-success" },
-                warning: { bg: "bg-warning/10", border: "border-warning/20", text: "text-warning" },
-              };
-              const t = toneClasses[action.tone] || toneClasses.primary;
-              return (
-                <Link key={action.href} to={action.href} className="group relative flex items-center gap-3.5 px-6 py-3.5 transition-all hover:bg-accent/40">
-                  <div className={cn("flex h-8 w-8 items-center justify-center rounded-lg border transition-all", t.bg, t.border, t.text)}>
-                    <action.icon className="h-3.5 w-3.5" strokeWidth={2.5} />
-                  </div>
-                  <span className="flex-1 text-[13px] font-semibold text-foreground/90 tracking-tight">{action.label}</span>
-                  <ChevronRight className="h-3.5 w-3.5 text-muted-foreground/25 group-hover:text-foreground/60 transition-all" strokeWidth={2.25} />
-                </Link>
-              );
-            })}
-          </div>
-        </div>
-
-        {/* Activity feed */}
-        <div className="rounded-xl border border-border/50 bg-card overflow-hidden flex flex-col">
-          <div className="flex items-center justify-between border-b border-border/30 px-6 py-5">
-            <div className="flex items-center gap-3">
-              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-success/10 border border-success/20 text-success">
-                <Activity className="h-4 w-4" strokeWidth={2.5} />
-              </div>
-              <div>
-                <p className="text-[14px] font-display font-bold text-foreground tracking-tight">Atividade recente</p>
-                <p className="text-[11px] text-muted-foreground/55 mt-0.5">Últimas movimentações</p>
-              </div>
-            </div>
-            <Link to="/financeiro/extrato" className="group inline-flex items-center gap-1.5 rounded-lg bg-primary/10 ring-1 ring-primary/20 px-3 py-1.5 text-[10px] font-display font-bold uppercase tracking-wider text-primary transition-all hover:bg-primary/15 hover:ring-primary/30">
-              Ver tudo <ChevronRight className="h-3 w-3 transition-transform group-hover:translate-x-0.5" strokeWidth={2.5} />
-            </Link>
+            <Link to="/vendas" className="text-sm font-bold text-primary hover:underline">Ver tudo</Link>
           </div>
 
-          <div className="flex-1 min-h-0 overflow-y-auto px-3 py-3">
-            {activity.length === 0 ? (
-              <div className="flex flex-col items-center justify-center py-16 text-center">
-                <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-xl bg-card-elevated border border-border/30">
-                  <PixLogoMark className="h-6 w-6" />
+          <div className="space-y-3">
+            {activity.map((item) => (
+              <div key={item.id} className="group flex items-center gap-4 p-4 rounded-2xl border border-transparent hover:border-border hover:bg-accent/30 transition-all cursor-pointer" onClick={() => item.kind === 'transaction' && setDetailTx(transactions.find(t => t.id === item.id) || null)}>
+                <div className={cn("h-12 w-12 rounded-xl flex items-center justify-center shrink-0",
+                  item.status === 'completed' ? "bg-success/10 text-success" : 
+                  item.status === 'pending' ? "bg-warning/10 text-warning" : "bg-destructive/10 text-destructive"
+                )}>
+                  {item.kind === 'withdrawal' ? <ArrowDownRight className="h-5 w-5" /> : <CreditCard className="h-5 w-5" />}
                 </div>
-                <p className="text-sm font-display font-bold text-muted-foreground/40">Sem movimentações ainda</p>
-                <p className="mt-1 text-[11px] text-muted-foreground/25">Suas vendas aparecerão aqui</p>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-bold text-foreground truncate">{item.label}</p>
+                  <p className="text-[10px] font-medium text-muted-foreground/60 uppercase tracking-wider mt-0.5">
+                    {item.kind === 'withdrawal' ? 'Saque' : 'Venda'} • {timeAgo(item.createdAt)}
+                  </p>
+                </div>
+                <div className="text-right shrink-0">
+                  <p className="text-sm font-display font-black text-foreground">{fmt(item.amount)}</p>
+                  <p className={cn("text-[10px] font-bold uppercase tracking-widest mt-0.5",
+                    item.status === 'completed' ? "text-success" : 
+                    item.status === 'pending' ? "text-warning" : "text-destructive"
+                  )}>
+                    {item.status === 'completed' ? 'Aprovado' : 
+                     item.status === 'pending' ? 'Pendente' : 'Cancelado'}
+                  </p>
+                </div>
               </div>
-            ) : (
-              activity.map((item, idx) => {
-                const txStyles: Record<string, { label: string; pillBg: string; pillText: string; pillBorder: string; iconBg: string; iconText: string }> = {
-                  completed: { label: "Aprovada", pillBg: "bg-success/8", pillText: "text-success", pillBorder: "border-success/15", iconBg: "bg-success/10", iconText: "text-success" },
-                  pending: { label: "Pendente", pillBg: "bg-warning/8", pillText: "text-warning", pillBorder: "border-warning/15", iconBg: "bg-warning/10", iconText: "text-warning" },
-                  failed: { label: "Falhou", pillBg: "bg-destructive/8", pillText: "text-destructive", pillBorder: "border-destructive/15", iconBg: "bg-destructive/10", iconText: "text-destructive" },
-                  refunded: { label: "Reembolso", pillBg: "bg-info/8", pillText: "text-info", pillBorder: "border-info/15", iconBg: "bg-info/10", iconText: "text-info" },
-                  chargeback: { label: "Chargeback", pillBg: "bg-destructive/8", pillText: "text-destructive", pillBorder: "border-destructive/15", iconBg: "bg-destructive/10", iconText: "text-destructive" },
-                  default: { label: "Status", pillBg: "bg-muted/8", pillText: "text-muted-foreground", pillBorder: "border-border/15", iconBg: "bg-muted/10", iconText: "text-muted-foreground" },
-                };
-                const wdStyles: Record<string, { label: string; pillBg: string; pillText: string; pillBorder: string; iconBg: string; iconText: string }> = {
-                  pending: { label: "Em análise", pillBg: "bg-warning/8", pillText: "text-warning", pillBorder: "border-warning/15", iconBg: "bg-warning/10", iconText: "text-warning" },
-                  approved: { label: "Aprovado", pillBg: "bg-success/8", pillText: "text-success", pillBorder: "border-success/15", iconBg: "bg-success/10", iconText: "text-success" },
-                  rejected: { label: "Rejeitado", pillBg: "bg-destructive/8", pillText: "text-destructive", pillBorder: "border-destructive/15", iconBg: "bg-destructive/10", iconText: "text-destructive" },
-                  default: { label: "Saque", pillBg: "bg-muted/8", pillText: "text-muted-foreground", pillBorder: "border-border/15", iconBg: "bg-muted/10", iconText: "text-muted-foreground" },
-                };
-                const s = item.kind === "transaction" ? txStyles[item.status] || txStyles.default : wdStyles[item.status] || wdStyles.default;
-                const fullTx = item.kind === "transaction" ? transactions.find(t => t.id === item.id) ?? null : null;
-
-                return (
-                  <div key={item.id} className={cn("group rounded-xl border border-transparent px-3 py-3 transition-all hover:border-border/20 hover:bg-accent/30", idx < activity.length - 1 && "mb-1")}>
-                    <div className="flex items-center gap-3">
-                      <div className={cn("flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-border/20", s.iconBg, s.iconText)}>
-                        {item.kind === "transaction"
-                          ? item.paymentMethod === "pix"
-                            ? <PixLogoMark className="h-4 w-4" />
-                            : item.paymentMethod === "credit_card" || item.paymentMethod === "card"
-                              ? <CreditCard className="h-4 w-4" />
-                              : <DollarSign className="h-4 w-4" />
-                          : <Wallet className="h-4 w-4" />}
-                      </div>
-                      <div className="min-w-0 flex-1">
-                        <div className="flex flex-wrap items-center gap-2">
-                          <p className="text-[13px] font-display font-black tabular-nums text-foreground">{privacy.hidden ? CENSORED : fmt(item.amount)}</p>
-                          <span className={cn("rounded-full border px-2.5 py-0.5 text-[9px] font-bold", s.pillBg, s.pillText, s.pillBorder)}>
-                            {s.label}
-                          </span>
-                        </div>
-                        <p className="mt-1 truncate text-[10px] text-muted-foreground/45">{item.kind === "transaction" ? `Venda • ${item.label === "credit_card" || item.label === "card" ? "Cartão" : item.label === "pix" ? "PIX" : item.label}` : item.label}</p>
-                      </div>
-                      <div className="flex shrink-0 items-center gap-2">
-                        {fullTx && (
-                          <button onClick={() => setDetailTx(fullTx)} className="flex h-8 w-8 items-center justify-center rounded-lg text-muted-foreground/30 transition-all hover:bg-accent hover:text-foreground">
-                            <Eye className="h-3.5 w-3.5" />
-                          </button>
-                        )}
-                        <span className="text-[9px] font-mono tabular-nums text-muted-foreground/25">{timeAgo(item.createdAt)}</span>
-                      </div>
-                    </div>
-                  </div>
-                );
-              })
-            )}
+            ))}
           </div>
         </div>
       </section>
