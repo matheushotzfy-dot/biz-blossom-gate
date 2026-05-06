@@ -330,11 +330,11 @@ export function AppSidebar() {
   const userName = user?.email?.split("@")[0] ?? "Vendedor";
 
   return (
-    <Sidebar collapsible="icon" className="border-r border-sidebar-border/70 bg-sidebar">
+    <Sidebar collapsible="icon" className="border-r-2 border-sidebar-border/80 bg-sidebar">
       <SidebarHeader className="relative border-b border-sidebar-border/70 px-5 pb-6 pt-6">
         {/* Brand */}
         <div className={cn("flex items-center gap-3", collapsed && "justify-center")}>
-          <div className="group/logo relative h-11 w-11 shrink-0 overflow-hidden rounded-xl border border-sidebar-border/70 bg-sidebar-accent transition-colors hover:border-sidebar-primary/50">
+          <div className="group/logo relative h-12 w-12 shrink-0 overflow-hidden rounded-2xl border-2 border-sidebar-border/80 bg-sidebar-accent transition-all hover:border-sidebar-primary/50 hover:scale-[1.05]">
             <img src={hotzfyLogo} alt="HOTZFY" className="h-full w-full object-contain p-1.5" />
             <div className="pointer-events-none absolute inset-0 rounded-xl ring-1 ring-inset ring-white/5" />
           </div>

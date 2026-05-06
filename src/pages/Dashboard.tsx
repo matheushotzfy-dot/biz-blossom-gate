@@ -447,22 +447,21 @@ export default function Dashboard() {
       <section className="mb-4 overflow-hidden rounded-2xl border border-border/60 bg-card">
         <div className="grid xl:grid-cols-[minmax(0,1fr)_360px]">
           <div className="min-w-0 border-b border-border/60 xl:border-b-0 xl:border-r">
-            <div className="flex flex-col gap-4 border-b border-border/60 px-4 py-4 md:flex-row md:items-center md:justify-between md:px-6">
+            <div className="flex flex-col gap-5 border-b border-border/60 px-5 py-6 md:flex-row md:items-center md:justify-between md:px-8">
               <div className="min-w-0">
-                <div className="flex items-center gap-2.5">
-                  <span className="h-2.5 w-2.5 rounded-full bg-success" />
-                  <h1 className="truncate text-[24px] md:text-[30px] font-display font-black text-foreground leading-none">
-                    {nickname || "Vendedor"}
+                <div className="flex items-center gap-3">
+                  <div className="relative">
+                    <div className="h-3 w-3 rounded-full bg-success" />
+                    <div className="absolute inset-0 animate-ping h-3 w-3 rounded-full bg-success opacity-40" />
+                  </div>
+                  <h1 className="truncate text-[28px] md:text-[36px] font-display font-black text-foreground leading-none tracking-[-0.04em]">
+                    Olá, {nickname || "Vendedor"}
                   </h1>
-                  <button
-                    onClick={privacy.toggle}
-                    className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-border/60 bg-background/75 text-muted-foreground hover:bg-accent hover:text-foreground"
-                    aria-label="Alternar privacidade"
-                  >
-                    {privacy.hidden ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
-                  </button>
                 </div>
-                <p className="mt-1 text-[12px] font-semibold uppercase tracking-[0.18em] text-muted-foreground/70">Central financeira</p>
+                <div className="mt-1.5 flex items-center gap-2 text-[11px] font-black uppercase tracking-[0.2em] text-muted-foreground/60">
+                  <Activity className="h-3.5 w-3.5" strokeWidth={3} />
+                  Sua central operacional
+                </div>
               </div>
 
               <div className="flex flex-wrap items-center gap-2">
@@ -502,30 +501,32 @@ export default function Dashboard() {
             </div>
 
             <div className="grid gap-0 md:grid-cols-[minmax(0,1fr)_220px]">
-              <div className="px-4 py-5 md:px-6 md:py-6">
-                <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+              <div className="px-5 py-6 md:px-8 md:py-8">
+                <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
                   <div className="min-w-0">
-                    <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-border/60 bg-background/75 px-3 py-1.5">
-                      <Wallet className="h-3.5 w-3.5 text-primary" />
-                      <span className="text-[10px] font-black uppercase tracking-[0.18em] text-muted-foreground">Saldo disponível</span>
+                    <div className="mb-4 inline-flex items-center gap-2.5 rounded-full border border-primary/20 bg-primary/5 px-4 py-2 ring-1 ring-primary/10">
+                      <Wallet className="h-4 w-4 text-primary" />
+                      <span className="text-[11px] font-black uppercase tracking-[0.2em] text-primary/80">Saldo disponível</span>
                     </div>
-                    <p className="text-[38px] md:text-[52px] font-display font-black tracking-normal text-foreground leading-[0.95] tabular-nums">
-                      {privacy.hidden ? CENSORED : fmt(safeBalance)}
-                    </p>
-                    <div className="mt-3 flex flex-wrap items-center gap-2 text-[11px] font-bold text-muted-foreground">
-                      <span className="rounded-full border border-success/30 bg-success/10 px-2.5 py-1 text-success">Operação ativa</span>
-                      <span className="rounded-full border border-border/60 bg-background/75 px-2.5 py-1">Período: {isCustom ? "Custom" : selectedPeriod.label}</span>
-                      <span className="rounded-full border border-border/60 bg-background/75 px-2.5 py-1">Receita: {periodRevenueLabel}</span>
+                    <div className="flex items-baseline gap-3">
+                      <p className="text-[44px] md:text-[68px] font-display font-black tracking-[-0.05em] text-foreground leading-[0.85] tabular-nums">
+                        {privacy.hidden ? CENSORED : fmt(safeBalance)}
+                      </p>
+                    </div>
+                    <div className="mt-5 flex flex-wrap items-center gap-2.5 text-[11px] font-black uppercase tracking-wider">
+                      <span className="rounded-lg border border-success/30 bg-success/10 px-3 py-1.5 text-success">Operação Online</span>
+                      <span className="rounded-lg border border-border/60 bg-background/75 px-3 py-1.5 text-muted-foreground">Período: {isCustom ? "Custom" : selectedPeriod.label}</span>
+                      <span className="rounded-lg border border-border/60 bg-background/75 px-3 py-1.5 text-muted-foreground">Receita: {periodRevenueLabel}</span>
                     </div>
                   </div>
 
                   <div className="grid grid-cols-2 gap-2 sm:flex sm:items-center">
-                    <Link to="/financeiro/saques" className="inline-flex h-10 min-w-[112px] items-center justify-center gap-2 whitespace-nowrap rounded-xl bg-primary px-4 text-[12px] font-black text-primary-foreground">
-                      <ArrowDownRight className="h-4 w-4" />
+                    <Link to="/financeiro/saques" className="inline-flex h-12 min-w-[128px] items-center justify-center gap-2.5 whitespace-nowrap rounded-2xl bg-primary px-6 text-[13px] font-black text-primary-foreground shadow-lg shadow-primary/20 hover:scale-[1.02] active:scale-[0.98]">
+                      <ArrowDownRight className="h-5 w-5" />
                       Sacar
                     </Link>
-                    <Link to="/vendas/links" className="inline-flex h-10 min-w-[112px] items-center justify-center gap-2 whitespace-nowrap rounded-xl border border-border/60 bg-background/75 px-4 text-[12px] font-black text-foreground hover:bg-accent">
-                      <PixLogoMark className="h-4 w-4 text-success" />
+                    <Link to="/vendas/links" className="inline-flex h-12 min-w-[128px] items-center justify-center gap-2.5 whitespace-nowrap rounded-2xl border-2 border-border/60 bg-background/75 px-6 text-[13px] font-black text-foreground hover:bg-accent hover:border-primary/30 transition-all">
+                      <PixLogoMark className="h-5 w-5 text-success" />
                       Link PIX
                     </Link>
                   </div>
@@ -544,15 +545,15 @@ export default function Dashboard() {
 
             <div className="grid grid-cols-2 border-t border-border/60 lg:grid-cols-4">
               {financialCards.map((card) => (
-                <div key={card.label} className={cn("min-h-[118px] border-r border-border/60 border-t-2 bg-background/35 px-4 py-4 last:border-r-0 md:px-5", card.accent)}>
-                  <div className="mb-5 flex items-center justify-between gap-3">
-                    <span className="text-[10px] font-black uppercase tracking-[0.18em] text-muted-foreground/70">{card.label}</span>
-                    <div className={cn("flex h-8 w-8 items-center justify-center rounded-lg border bg-card", card.tone, card.iconBorder)}>
-                      <card.icon className="h-4 w-4" />
+                <div key={card.label} className={cn("min-h-[128px] border-r border-border/60 border-t-2 bg-background/35 px-5 py-5 last:border-r-0 md:px-6 transition-all hover:bg-background/50", card.accent)}>
+                  <div className="mb-4 flex items-center justify-between gap-3">
+                    <span className="text-[11px] font-black uppercase tracking-[0.2em] text-muted-foreground/60">{card.label}</span>
+                    <div className={cn("flex h-9 w-9 items-center justify-center rounded-xl border-2 bg-card", card.tone, card.iconBorder)}>
+                      <card.icon className="h-4.5 w-4.5" strokeWidth={2.5} />
                     </div>
                   </div>
-                  <p className="text-[24px] md:text-[28px] font-display font-black tracking-normal text-foreground leading-none tabular-nums">{card.value}</p>
-                  <p className="mt-2 text-[11px] font-semibold text-muted-foreground/65">{card.sub}</p>
+                  <p className="text-[26px] md:text-[32px] font-display font-black tracking-[-0.03em] text-foreground leading-none tabular-nums">{card.value}</p>
+                  <p className="mt-2 text-[11px] font-bold uppercase tracking-wider text-muted-foreground/40">{card.sub}</p>
                 </div>
               ))}
             </div>
