@@ -284,13 +284,13 @@ export function AppSidebar() {
       label: "COMANDO",
       items: [
         { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard, badge: "Live", exact: true },
-        { title: "Minhas Vendas", url: "/vendas", icon: BarChart3, exact: true },
+        { title: "Vendas", url: "/vendas", icon: BarChart3, exact: true },
       ],
     },
     {
       label: "INFOPRODUTOS",
       items: [
-        { title: "Meus Produtos", url: "/vendas/produtos", icon: Package, count: counts.products },
+        { title: "Produtos", url: "/vendas/produtos", icon: Package, count: counts.products },
         { title: "Área De Membros", url: "/vendas/conteudo", icon: Layers, count: counts.courses },
         { title: "Afiliados", url: "/vendas/afiliados", icon: Users },
         { title: "Cupons", url: "/vendas/cupons", icon: Ticket, count: counts.coupons },
