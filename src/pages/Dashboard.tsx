@@ -447,7 +447,7 @@ export default function Dashboard() {
                 </button>
               ))}
             </div>
-            <div className="flex items-center gap-3 w-full sm:w-auto">
+            <div className="flex items-center gap-3 w-full sm:w-auto hidden md:flex">
               <button onClick={privacy.toggle} className="flex-1 sm:flex-none h-12 px-6 rounded-2xl border border-border/60 bg-card/60 hover:bg-accent text-foreground transition-all flex items-center justify-center gap-3 font-black text-[11px] uppercase tracking-widest shadow-lg">
                 {privacy.hidden ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                 Privacidade
