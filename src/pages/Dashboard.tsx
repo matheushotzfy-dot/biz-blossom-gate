@@ -136,6 +136,23 @@ export default function Dashboard() {
   const [scaleMode, setScaleMode] = useState(false);
   const [scaleModeUnlocked, setScaleModeUnlocked] = useState(false);
   const privacy = usePrivacyMode();
+  
+  // Update privacy mode when localStorage changes (from the header toggle)
+  useEffect(() => {
+    const checkPrivacy = () => {
+      const isHidden = localStorage.getItem("privacy_mode") === "true";
+      if (privacy.hidden !== isHidden) {
+        privacy.toggle();
+      }
+    };
+    window.addEventListener('storage', checkPrivacy);
+    // Also check on a short interval since we don't always get storage events on the same tab
+    const interval = setInterval(checkPrivacy, 1000);
+    return () => {
+      window.removeEventListener('storage', checkPrivacy);
+      clearInterval(interval);
+    };
+  }, [privacy.hidden, privacy.toggle]);
   const [showScalePopup, setShowScalePopup] = useState(false);
   const [fireEffect, setFireEffect] = useState(false);
   const [detailTx, setDetailTx] = useState<Tables<"transactions"> | null>(null);
