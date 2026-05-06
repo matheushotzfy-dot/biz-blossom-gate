@@ -727,7 +727,7 @@ export default function Vendas() {
           <div className="flex flex-col gap-5 xl:flex-row xl:items-start xl:justify-between">
             <div className="min-w-0">
               <h1 className="font-display text-[48px] font-black leading-[0.88] tracking-[-0.06em] text-foreground sm:text-[68px]">
-                Gestão de <span className="text-gradient-premium">Vendas</span>
+                Minhas <span className="text-gradient-success">Vendas</span>
               </h1>
               <div className="mt-5 flex flex-wrap items-end gap-x-5 gap-y-2">
                 <p
@@ -964,7 +964,7 @@ export default function Vendas() {
             <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
               <div className="min-w-0">
                 <h2 className="font-display text-[28px] font-black leading-tight tracking-tight text-foreground sm:text-[34px]">
-                  Fluxo de <span className="text-gradient-premium">Caixa</span>
+                  Extrato de Vendas
                 </h2>
                 <div className="mt-3 flex flex-wrap items-center gap-x-5 gap-y-1.5">
                   <span className="text-[12px] font-semibold text-muted-foreground/85">
@@ -996,43 +996,34 @@ export default function Vendas() {
           </div>
 
           {/* TABS */}
-          <div className="overflow-x-auto border-b border-border/70 bg-background">
-            <div className="flex min-w-max items-stretch">
+          <div className="overflow-x-auto border-b border-border/70 bg-background/30">
+            <div className="flex min-w-max items-stretch px-4">
               {statusTabs.map((tab) => {
                 const active = statusFilter === tab.value;
                 return (
                   <button
                     key={tab.value}
-                    onClick={() => setStatusFilter(tab.value)}
+                    onClick={() => setStatusFilter(tab.value as StatusFilter)}
                     className={cn(
-                      "group relative flex items-center gap-2 whitespace-nowrap px-5 py-3.5 text-[12.5px] font-bold tracking-[-0.01em] transition-colors duration-150",
-                      active
-                        ? "text-foreground vendas-tab-active"
-                        : "text-muted-foreground/80 hover:bg-muted/30 hover:text-foreground",
+                      "group relative flex items-center gap-2.5 whitespace-nowrap px-5 py-4 text-[12.5px] font-bold tracking-tight transition-all duration-200",
+                      active ? "text-foreground" : "text-muted-foreground/70 hover:text-foreground hover:bg-muted/30",
                     )}
                   >
                     {tab.dot ? (
-                      <span className="relative flex h-1.5 w-1.5">
-                        {active && <span className={cn("absolute inline-flex h-full w-full animate-ping rounded-full opacity-70", tab.dot)} />}
-                        <span className={cn("relative inline-flex h-1.5 w-1.5 rounded-full", tab.dot)} />
-                      </span>
+                      <span className={cn("h-1.5 w-1.5 rounded-full transition-all duration-300 group-hover:scale-125", tab.dot, active ? "opacity-100 ring-2 ring-primary/20" : "opacity-40")} />
                     ) : (
                       <span className={cn("h-1.5 w-1.5 rounded-full", active ? "bg-foreground" : "bg-muted-foreground/40")} />
                     )}
                     <span>{tab.label}</span>
                     <span
                       className={cn(
-                        "ml-0.5 inline-flex h-[18px] min-w-[22px] items-center justify-center rounded-md px-1.5 text-[10.5px] font-black tabular-nums leading-none transition-colors",
-                        active
-                          ? "bg-primary text-primary-foreground"
-                          : "bg-muted/60 text-muted-foreground/85 group-hover:bg-muted",
+                        "ml-0.5 inline-flex h-[18px] min-w-[22px] items-center justify-center rounded-md px-1.5 text-[10.5px] font-black tabular-nums transition-all duration-200",
+                        active ? "bg-primary text-primary-foreground" : "bg-muted/60 text-muted-foreground/80 group-hover:bg-muted"
                       )}
                     >
                       {tab.count}
                     </span>
-                    {active && (
-                      <span className="absolute inset-x-0 -bottom-px h-[2.5px] bg-primary" />
-                    )}
+                    {active && <span className="absolute inset-x-0 bottom-0 h-0.5 bg-primary" />}
                   </button>
                 );
               })}
