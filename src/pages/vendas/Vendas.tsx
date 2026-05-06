@@ -964,7 +964,7 @@ export default function Vendas() {
             <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
               <div className="min-w-0">
                 <h2 className="font-display text-[28px] font-black leading-tight tracking-tight text-foreground sm:text-[34px]">
-                  Fluxo de <span className="text-gradient-premium">Caixa</span>
+                  Extrato de Vendas
                 </h2>
                 <div className="mt-3 flex flex-wrap items-center gap-x-5 gap-y-1.5">
                   <span className="text-[12px] font-semibold text-muted-foreground/85">
