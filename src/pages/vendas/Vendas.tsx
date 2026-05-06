@@ -94,16 +94,24 @@ const STATUS: Record<string, { label: string; fg: string; dot: string; bg: strin
 };
 
 /* ─────────────────────── Micro Components ─────────────────────── */
-function DeltaBadge({ cur, prev }: { cur: number; prev: number }) {
+function DeltaBadge({ cur, prev, positive = true }: { cur: number; prev: number; positive?: boolean }) {
   if (prev === 0 && cur === 0) return null;
   if (prev === 0) {
-    return <span className="text-[10px] font-bold text-success bg-success/10 border border-success/25 px-1.5 py-0.5 rounded">novo</span>;
+    return (
+      <span className="inline-flex items-center rounded-full bg-success/15 px-1.5 py-0.5 text-[10px] font-bold text-success ring-1 ring-inset ring-success/30">
+        novo
+      </span>
+    );
   }
   const pct = ((cur - prev) / prev) * 100;
   const up = pct >= 0;
+  const isGood = positive ? up : !up;
+
   return (
-    <span className={cn("inline-flex items-center gap-0.5 text-[10px] font-bold tabular-nums px-1.5 py-0.5 rounded border",
-      up ? "text-success bg-success/10 border-success/25" : "text-destructive bg-destructive/10 border-destructive/25")}>
+    <span className={cn(
+      "inline-flex items-center gap-0.5 rounded-full px-1.5 py-0.5 text-[10px] font-bold tabular-nums ring-1 ring-inset",
+      isGood ? "bg-success/15 text-success ring-success/30" : "bg-destructive/15 text-destructive ring-destructive/30"
+    )}>
       {up ? <ArrowUpRight className="h-2.5 w-2.5" /> : <ArrowDownRight className="h-2.5 w-2.5" />}
       {Math.abs(pct).toFixed(1)}%
     </span>
@@ -119,6 +127,39 @@ function Sparkline({ points, color = "hsl(var(--success))" }: { points: number[]
         <Line type="monotone" dataKey="v" stroke={color} strokeWidth={1.5} dot={false} isAnimationActive={false} />
       </LineChart>
     </ResponsiveContainer>
+  );
+}
+
+function MetricCard({
+  title, value, prevValue, icon: Icon, color, hidden, sparklineData, format = "currency", positive = true
+}: {
+  title: string; value: number; prevValue: number; icon: any; color: string; hidden: boolean; sparklineData?: number[]; format?: "currency" | "number" | "percent"; positive?: boolean
+}) {
+  const displayValue = hidden ? HIDE : (format === "currency" ? fmtCompact(value) : format === "percent" ? `${value.toFixed(1)}%` : value.toLocaleString("pt-BR"));
+  
+  return (
+    <div className="group relative overflow-hidden rounded-2xl border border-border/50 bg-card/40 p-5 backdrop-blur-xl transition-all duration-300 hover:border-primary/30 hover:shadow-2xl hover:shadow-primary/5">
+      <div className="absolute -right-4 -top-4 h-24 w-24 rounded-full bg-primary/5 blur-2xl transition-all group-hover:bg-primary/10" />
+      
+      <div className="flex items-start justify-between">
+        <div className="space-y-1">
+          <p className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground/80">{title}</p>
+          <h3 className={cn("text-2xl font-black tracking-tight font-display", color)}>{displayValue}</h3>
+        </div>
+        <div className={cn("flex h-10 w-10 items-center justify-center rounded-xl ring-1 ring-inset", color.replace("text-", "bg-") + "/10", color.replace("text-", "ring-") + "/20")}>
+          <Icon className="h-5 w-5" />
+        </div>
+      </div>
+      
+      <div className="mt-4 flex items-end justify-between gap-4">
+        <DeltaBadge cur={value} prev={prevValue} positive={positive} />
+        {sparklineData && !hidden && (
+          <div className="h-8 w-24 shrink-0 overflow-hidden rounded-md opacity-60 transition-opacity group-hover:opacity-100">
+            <Sparkline points={sparklineData} color={`hsl(var(--${color.split("-")[1]}))`} />
+          </div>
+        )}
+      </div>
+    </div>
   );
 }
 
@@ -200,7 +241,7 @@ function TxRow({ tx, prods, onClick, density = "comfortable" }: { tx: Tables<"tr
   const py = density === "compact" ? "py-2" : "py-3.5";
   const avatarSize = density === "compact" ? "h-8 w-8" : "h-9 w-9";
   return (
-    <tr onClick={onClick} className="group cursor-pointer border-b border-border/60 transition-colors duration-150 vendas-row-hover last:border-b-0">
+    <tr onClick={onClick} className="group cursor-pointer border-b border-border/40 transition-all duration-200 hover:bg-muted/30 hover:shadow-[inset_4px_0_0_0_hsl(var(--primary))] last:border-b-0">
       <td className={cn("pl-5 pr-3 align-middle", py)}>
         <div className="flex items-center gap-3">
           <Avatar className={cn(avatarSize, "shrink-0 rounded-md ring-1 ring-border/40")}>
@@ -673,17 +714,20 @@ export default function Vendas() {
   /* ═══════════ RENDER ═══════════ */
   return (
     <div
-      className="mx-auto w-full max-w-[1480px] pb-24 md:pb-10 antialiased [text-rendering:geometricPrecision] [-webkit-font-smoothing:antialiased] [-moz-osx-font-smoothing:grayscale]"
+      className="relative mx-auto w-full max-w-[1480px] pb-24 md:pb-10 antialiased [text-rendering:geometricPrecision]"
       style={{ fontFeatureSettings: '"ss01","cv11","tnum","kern"' }}
     >
+      {/* Decorative background elements */}
+      <div className="pointer-events-none absolute -top-24 left-1/2 h-[500px] w-full -translate-x-1/2 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-primary/5 via-transparent to-transparent opacity-50" />
+      <div className="pointer-events-none absolute left-0 top-0 h-full w-full bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-[0.03] mix-blend-overlay" />
 
       {/* ─────────── COMANDO LIMPO ─────────── */}
-      <div className="px-5 pt-4 sm:px-8 sm:pt-6">
-        <header className="vendas-header-glow border-b border-border/70 pb-7">
+      <div className="relative z-10 px-5 pt-4 sm:px-8 sm:pt-6">
+        <header className="border-b border-border/40 pb-7">
           <div className="flex flex-col gap-5 xl:flex-row xl:items-start xl:justify-between">
             <div className="min-w-0">
               <h1 className="font-display text-[48px] font-black leading-[0.88] tracking-[-0.06em] text-foreground sm:text-[68px]">
-                Minhas <span className="text-gradient-success">Vendas</span>
+                Gestão de <span className="text-gradient-premium">Vendas</span>
               </h1>
               <div className="mt-5 flex flex-wrap items-end gap-x-5 gap-y-2">
                 <p
@@ -793,73 +837,97 @@ export default function Vendas() {
             </TooltipProvider>
           </div>
 
-          <div className="mt-8 grid grid-cols-2 border-y border-border/70 lg:grid-cols-4 lg:divide-x lg:divide-border/70">
-            {[
-              { label: "Receita bruta", value: hidden ? HIDE : fmtCompact(m.totalGross), sub: undefined, accent: "text-foreground", delta: { cur: m.totalGross, prev: p.totalGross }, rail: "bg-success" },
-              { ...heroKpis[1], rail: "bg-info" },
-              { ...heroKpis[2], rail: "bg-foreground/40" },
-              { ...heroKpis[3], rail: approvalRate >= 60 ? "bg-success" : "bg-warning" },
-            ].map((k, idx) => (
-              <div
-                key={`${k.label}-${animKey}`}
-                className={cn(
-                  "vendas-rise premium-card-vendas group relative min-h-[140px] px-6 py-6 rounded-xl border border-border/60 shadow-sm",
-                  idx === 1 && "vendas-rise-d1",
-                  idx === 2 && "vendas-rise-d2",
-                  idx === 3 && "vendas-rise-d3",
-                  idx > 1 && "border-t border-border/70 lg:border-t-0",
-                  idx === 1 && "border-l border-border/70 lg:border-l-0",
-                )}
-              >
-                <span className={cn("absolute left-0 top-6 h-8 w-[3px] rounded-r-full opacity-0 group-hover:opacity-100 transition-opacity", k.rail)} />
-                <div className="flex items-center justify-between gap-2 pl-2">
-                  <p className="text-[10.5px] font-black uppercase tracking-[0.22em] text-muted-foreground/60">{k.label}</p>
-                </div>
-                <p
-                  className={cn(
-                    "mt-3 pl-2 font-display text-[34px] font-black leading-[0.9] tracking-[-0.06em] tabular-nums sm:text-[40px]",
-                    k.accent,
-                  )}
-                  style={{ fontVariantNumeric: "tabular-nums slashed-zero" }}
-                >
-                  {k.value}
-                </p>
-                <div className="mt-4 flex items-center gap-2 pl-2">
-                  <p className="truncate text-[11.5px] font-bold text-muted-foreground/85">{k.sub}</p>
-                  {k.delta && <DeltaBadge cur={k.delta.cur} prev={k.delta.prev} />}
-                </div>
-              </div>
-            ))}
+          <div className="mt-10 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            <MetricCard
+              title="Receita Líquida"
+              value={m.totalNet}
+              prevValue={p.totalNet}
+              icon={Zap}
+              color="text-success"
+              hidden={hidden}
+              sparklineData={metrics.series.net}
+            />
+            <MetricCard
+              title="Vendas Aprovadas"
+              value={m.approved.length}
+              prevValue={p.approved.length}
+              icon={CheckSquare}
+              color="text-primary"
+              hidden={hidden}
+              sparklineData={metrics.series.count}
+              format="number"
+            />
+            <MetricCard
+              title="Ticket Médio"
+              value={m.avgTicket}
+              prevValue={p.avgTicket}
+              icon={ShoppingCart}
+              color="text-foreground"
+              hidden={hidden}
+              sparklineData={metrics.series.ticket}
+            />
+            <MetricCard
+              title="Taxa de Aprovação"
+              value={approvalRate}
+              prevValue={p.approved.length > 0 ? (p.approved.length / (previousPeriodFiltered.length || 1)) * 100 : 0}
+              icon={ChevronUp}
+              color={approvalRate >= 60 ? "text-success" : "text-warning"}
+              hidden={false}
+              sparklineData={metrics.series.approval}
+              format="percent"
+            />
           </div>
 
-          <div className="grid grid-cols-1 border-b border-border/70 sm:grid-cols-3 sm:divide-x sm:divide-border/70">
-            {riskKpis.map((r, idx) => (
-              <div
-                key={`${r.label}-${animKey}`}
-                className={cn(
-                  "vendas-rise premium-card-vendas group relative flex flex-col gap-2.5 px-6 py-6 rounded-xl border-border/60",
-                  idx === 0 && "vendas-rise-d3",
-                  idx === 1 && "vendas-rise-d4",
-                  idx === 2 && "vendas-rise-d5",
-                )}
-              >
-                <div className="flex items-baseline justify-between gap-3">
-                  <p className="font-display text-[19px] font-black tracking-[-0.035em] text-foreground">{r.label}</p>
-                  <p
-                    className={cn("font-display text-[26px] font-black leading-none tabular-nums tracking-[-0.05em]", r.accent)}
-                    style={{ fontVariantNumeric: "tabular-nums slashed-zero" }}
-                  >
-                    {r.value}
-                  </p>
+          <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-3">
+            <div className="group relative overflow-hidden rounded-2xl border border-border/50 bg-card/40 p-5 backdrop-blur-xl transition-all duration-300 hover:border-destructive/30">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground/80">Reembolsos</p>
+                  <h4 className="mt-1 text-xl font-black tracking-tight text-foreground">{hidden ? HIDE : fmtCompact(refundedAmount)}</h4>
                 </div>
-                <div className="flex items-center gap-2 text-[12.5px] font-semibold text-muted-foreground">
-                  <span className="font-display tabular-nums font-black text-foreground">{r.count}</span>
-                  <span>{r.count === 1 ? "Transação" : "Transações"}</span>
-                  <span className="inline-block h-[3px] w-[3px] rounded-full bg-muted-foreground/50" />
-                  <span className="tabular-nums font-bold">{r.rate.toFixed(2).replace(".", ",")}%</span>
+                <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-destructive/10 ring-1 ring-destructive/20">
+                  <RefreshCw className="h-4 w-4 text-destructive" />
                 </div>
               </div>
-            ))}
+              <div className="mt-3 flex items-center gap-2">
+                <span className="text-[12px] font-bold text-foreground">{m.refunded.length} vendas</span>
+                <span className="h-1 w-1 rounded-full bg-muted-foreground/30" />
+                <span className="text-[12px] font-bold text-destructive">{m.refundRate.toFixed(2)}% taxa</span>
+              </div>
+            </div>
+
+            <div className="group relative overflow-hidden rounded-2xl border border-border/50 bg-card/40 p-5 backdrop-blur-xl transition-all duration-300">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground/80">Chargebacks</p>
+                  <h4 className="mt-1 text-xl font-black tracking-tight text-foreground">{hidden ? HIDE : fmtCompact(chargebackAmount)}</h4>
+                </div>
+                <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-destructive/10 ring-1 ring-destructive/20">
+                  <ShieldAlert className="h-4 w-4 text-destructive" />
+                </div>
+              </div>
+              <div className="mt-3 flex items-center gap-2">
+                <span className="text-[12px] font-bold text-foreground">{m.chargebacks.length} alertas</span>
+                <span className="h-1 w-1 rounded-full bg-muted-foreground/30" />
+                <span className="text-[12px] font-bold text-destructive">{m.chargebackRate.toFixed(2)}% taxa</span>
+              </div>
+            </div>
+
+            <div className="group relative overflow-hidden rounded-2xl border border-border/50 bg-card/40 p-5 backdrop-blur-xl transition-all duration-300">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground/80">Clientes Únicos</p>
+                  <h4 className="mt-1 text-xl font-black tracking-tight text-foreground">{m.uniqueCustomers}</h4>
+                </div>
+                <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-info/10 ring-1 ring-info/20">
+                  <MessageCircle className="h-4 w-4 text-info" />
+                </div>
+              </div>
+              <div className="mt-3 flex items-center gap-2">
+                <span className="text-[12px] font-bold text-foreground">{(m.approved.length / (m.uniqueCustomers || 1)).toFixed(1)}</span>
+                <span className="text-[12px] font-medium text-muted-foreground">compras por cliente</span>
+              </div>
+            </div>
           </div>
         </header>
 
@@ -887,13 +955,16 @@ export default function Vendas() {
         {/* Chart and payment mix removed — already shown on Dashboard */}
 
         {/* ─────────── TRANSACTIONS ─────────── */}
-        <section className="overflow-hidden rounded-2xl border border-border/70 bg-card">
+        <section className="group relative overflow-hidden rounded-3xl border border-border/50 bg-card/60 shadow-2xl shadow-primary/5 backdrop-blur-xl">
+          <div className="absolute -left-20 -top-20 h-64 w-64 rounded-full bg-primary/5 blur-[100px]" />
+          <div className="absolute -right-20 -bottom-20 h-64 w-64 rounded-full bg-success/5 blur-[100px]" />
+          
           {/* HEADER */}
-          <div className="relative border-b border-border/70 px-6 pt-6 pb-5">
-            <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
+          <div className="relative border-b border-border/40 px-6 pt-8 pb-6">
+            <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
               <div className="min-w-0">
-                <h2 className="font-display text-[32px] font-black leading-[0.9] tracking-[-0.055em] text-foreground sm:text-[38px]">
-                  Extrato de Vendas
+                <h2 className="font-display text-[28px] font-black leading-tight tracking-tight text-foreground sm:text-[34px]">
+                  Fluxo de <span className="text-gradient-premium">Caixa</span>
                 </h2>
                 <div className="mt-3 flex flex-wrap items-center gap-x-5 gap-y-1.5">
                   <span className="text-[12px] font-semibold text-muted-foreground/85">
