@@ -683,7 +683,7 @@ export default function Vendas() {
           <div className="flex flex-col gap-5 xl:flex-row xl:items-start xl:justify-between">
             <div className="min-w-0">
               <h1 className="font-display text-[48px] font-black leading-[0.88] tracking-[-0.06em] text-foreground sm:text-[68px]">
-                Vendas
+                Minhas Vendas
               </h1>
               <div className="mt-5 flex flex-wrap items-end gap-x-5 gap-y-2">
                 <p
@@ -781,10 +781,10 @@ export default function Vendas() {
                   <TooltipTrigger asChild>
                     <button
                       onClick={() => setShowExportDialog(true)}
-                      className="inline-flex h-8 items-center gap-1.5 rounded-lg bg-success px-3.5 text-[11px] font-black tracking-[-0.005em] text-success-foreground ring-1 ring-success/40 transition-all duration-200 hover:bg-success/90 hover:ring-success/60 focus:outline-none focus-visible:ring-2 focus-visible:ring-success/50"
+                      className="inline-flex h-8 items-center gap-1.5 rounded-lg bg-primary px-3.5 text-[11px] font-black tracking-[-0.005em] text-primary-foreground transition-all duration-200 hover:bg-primary/90 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/50"
                     >
                       <Download className="h-[14px] w-[14px]" strokeWidth={2.6} />
-                      Exportar
+                      Exportar Relatório
                     </button>
                   </TooltipTrigger>
                   <TooltipContent side="bottom" className="flex items-center gap-2">Exportar CSV <Kbd>E</Kbd></TooltipContent>
@@ -889,8 +889,8 @@ export default function Vendas() {
           <div className="relative border-b border-border/70 px-6 pt-6 pb-5">
             <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
               <div className="min-w-0">
-                <h2 className="font-display text-[32px] font-black leading-[0.9] tracking-[-0.055em] text-foreground sm:text-[40px]">
-                  Transações
+                <h2 className="font-display text-[32px] font-black leading-[0.9] tracking-[-0.055em] text-foreground sm:text-[38px]">
+                  Extrato de Vendas
                 </h2>
                 <div className="mt-3 flex flex-wrap items-center gap-x-5 gap-y-1.5">
                   <span className="text-[12px] font-semibold text-muted-foreground/85">
@@ -910,7 +910,7 @@ export default function Vendas() {
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
                   placeholder="Buscar nome, email, telefone, ID…"
-                  className="h-11 w-full rounded-xl border border-border bg-background pl-10 pr-16 text-[13px] font-medium text-foreground transition-colors duration-150 placeholder:text-muted-foreground/65 hover:border-success/50 focus:border-success focus:outline-none"
+                  className="h-11 w-full rounded-xl border border-border bg-background pl-10 pr-16 text-[13px] font-medium text-foreground transition-all duration-200 placeholder:text-muted-foreground/65 focus:border-primary focus:ring-4 focus:ring-primary/10 focus:outline-none"
                 />
                 {search ? (
                   <button onClick={() => setSearch("")} aria-label="Limpar busca" className="absolute right-3 top-1/2 -translate-y-1/2 rounded-md p-1 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"><X className="h-3.5 w-3.5" /></button>
@@ -950,14 +950,14 @@ export default function Vendas() {
                       className={cn(
                         "ml-0.5 inline-flex h-[18px] min-w-[22px] items-center justify-center rounded-md px-1.5 text-[10.5px] font-black tabular-nums leading-none transition-colors",
                         active
-                          ? "bg-success text-success-foreground"
+                          ? "bg-primary text-primary-foreground"
                           : "bg-muted/60 text-muted-foreground/85 group-hover:bg-muted",
                       )}
                     >
                       {tab.count}
                     </span>
                     {active && (
-                      <span className="absolute inset-x-0 -bottom-px h-[2px] bg-success" />
+                      <span className="absolute inset-x-0 -bottom-px h-[2.5px] bg-primary" />
                     )}
                   </button>
                 );
