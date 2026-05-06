@@ -36,10 +36,11 @@ import {
   Webhook,
   User,
   Banknote,
+  Crown,
 } from "lucide-react";
 import { Area, AreaChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import type { Tables } from "@/integrations/supabase/types";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
@@ -121,6 +122,7 @@ function timeAgo(dateStr: string) {
 }
 
 export default function Dashboard() {
+  const navigate = useNavigate();
   const { user } = useAuth();
   const { profile } = useProfile();
   const { data: transactions = [], refetch: refetchTx } = useTransactions();
