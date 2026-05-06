@@ -403,285 +403,282 @@ export default function Dashboard() {
   const nickname = profile?.nickname || profile?.full_name?.split(" ")[0] || null;
 
   return (
-    <div className="dashboard-page mx-auto w-full max-w-[1536px] pb-24 px-4 md:px-10 relative space-y-10 mt-6">
-      {/* ─── Immersive Background Glows ─── */}
-      <div className="fixed inset-0 z-[-1] pointer-events-none overflow-hidden">
-        <div className="absolute top-[-25%] left-[-15%] w-[60%] h-[60%] bg-primary/5 blur-[180px] rounded-full animate-pulse" />
-        <div className="absolute bottom-[-25%] right-[-15%] w-[60%] h-[60%] bg-info/5 blur-[180px] rounded-full animate-pulse" style={{ animationDelay: '4s' }} />
-      </div>
+    <div className="dashboard-page mx-auto w-full max-w-[1440px] pb-24 px-3 md:px-6 relative space-y-5 pt-2">
 
-      {/* ─── Master Hero Section ─── */}
-      <section className="relative p-10 md:p-14 rounded-[3.5rem] border border-border/40 bg-card/40 backdrop-blur-md overflow-hidden shadow-[0_0_80px_-20px_rgba(0,0,0,0.3)]">
-        <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-info/5" />
-        <div className="absolute top-0 right-0 p-12 opacity-[0.04] pointer-events-none select-none">
-          <Rocket className="h-80 w-80 text-primary rotate-12" />
+      {/* ═══════════════════════════════════════════════════════ */}
+      {/* TOP BAR — Greeting + Period selector                    */}
+      {/* ═══════════════════════════════════════════════════════ */}
+      <section className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+        <div>
+          <h1 className="text-xl md:text-2xl font-display font-black tracking-tight text-foreground">
+            Olá, {nickname || "Vendedor"}
+            <button onClick={privacy.toggle} className="inline-flex items-center justify-center h-7 w-7 rounded-lg border border-border/40 bg-card text-muted-foreground hover:text-foreground transition-colors align-middle ml-2">
+              {privacy.hidden ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
+            </button>
+          </h1>
+          <p className="text-[13px] text-muted-foreground/60 mt-0.5">Painel de controle da sua operação.</p>
         </div>
-        
-        <div className="relative z-10 flex flex-col lg:flex-row justify-between items-start lg:items-center gap-10">
-          <div className="space-y-6">
-            <div className="inline-flex items-center gap-2.5 px-5 py-2 rounded-full bg-primary/10 border border-primary/25 text-primary text-[10px] font-black uppercase tracking-[0.25em]">
-              <div className="h-1.5 w-1.5 rounded-full bg-primary animate-ping" />
-              Hotzfy Elite Operating System
-            </div>
-            <div className="space-y-2">
-              <h1 className="text-5xl md:text-7xl font-display font-black tracking-tighter text-foreground leading-[0.9]">
-                Seja bem-vindo, <br />
-                <span className="text-gradient-premium">{nickname || "Vendedor"}</span>
-              </h1>
-            </div>
-            <p className="text-muted-foreground/80 font-medium text-xl max-w-xl leading-relaxed">
-              Sua operação processou <span className="text-foreground font-bold">{transactions.filter(t => t.status === "completed").length} vendas</span> com uma taxa de aprovação excelente.
-            </p>
-          </div>
-
-          <div className="flex flex-col sm:flex-row lg:flex-col items-end gap-4 w-full lg:w-auto">
-            <div className="flex items-center gap-2 p-1.5 rounded-[1.25rem] bg-background/50 border border-border/50 backdrop-blur-sm shadow-inner">
-              {PERIOD_PRESETS.filter(p => ["Hoje", "7 dias", "30 dias"].includes(p.label)).map((opt) => (
-                <button key={opt.label} onClick={() => { setSelectedPeriod(opt); setIsCustom(false); }}
-                  className={cn("h-11 px-8 rounded-xl text-[11px] font-black uppercase tracking-widest transition-all duration-500",
-                    !isCustom && selectedPeriod.label === opt.label 
-                      ? "bg-card text-foreground shadow-[0_8px_20px_-6px_rgba(0,0,0,0.5)] ring-1 ring-border/50 translate-y-[-1px]" 
-                      : "text-muted-foreground/60 hover:text-foreground hover:bg-white/5"
-                  )}>
-                  {opt.label}
-                </button>
-              ))}
-            </div>
-            <div className="flex items-center gap-3 w-full sm:w-auto hidden md:flex">
-              <button onClick={privacy.toggle} className="flex-1 sm:flex-none h-12 px-6 rounded-2xl border border-border/60 bg-card/60 hover:bg-accent text-foreground transition-all flex items-center justify-center gap-3 font-black text-[11px] uppercase tracking-widest shadow-lg">
-                {privacy.hidden ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                Privacidade
+        <div className="flex items-center gap-2">
+          <div className="flex items-center rounded-lg border border-border/40 bg-card p-0.5">
+            {PERIOD_PRESETS.filter(p => ["Hoje", "7 dias", "30 dias"].includes(p.label)).map((opt) => (
+              <button key={opt.label} onClick={() => { setSelectedPeriod(opt); setIsCustom(false); setCustomRange(undefined); }}
+                className={cn("rounded-md px-3 py-1.5 text-[11px] font-display font-bold transition-all",
+                  !isCustom && selectedPeriod.label === opt.label ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground"
+                )}>
+                {opt.label}
               </button>
-              <button onClick={() => setDatePickerOpen(true)} className="flex-1 sm:flex-none h-12 px-6 rounded-2xl border border-primary/30 bg-primary/10 hover:bg-primary/20 text-primary transition-all flex items-center justify-center gap-3 font-black text-[11px] uppercase tracking-widest shadow-lg">
-                <CalendarDays className="h-4 w-4" />
-                Filtrar
-              </button>
-            </div>
+            ))}
           </div>
+          <Popover open={datePickerOpen} onOpenChange={setDatePickerOpen}>
+            <PopoverTrigger asChild>
+              <button className={cn("h-8 rounded-lg border px-3 text-[11px] font-bold transition-all inline-flex items-center gap-1.5",
+                isCustom ? "border-primary/35 bg-primary/10 text-foreground" : "border-border/40 bg-card text-muted-foreground hover:text-foreground"
+              )}>
+                <CalendarDays className="h-3 w-3" />
+                {isCustom && customRange?.from
+                  ? customRange.to ? `${format(customRange.from, "dd/MM")} – ${format(customRange.to, "dd/MM")}` : format(customRange.from, "dd/MM/yyyy")
+                  : "Custom"}
+              </button>
+            </PopoverTrigger>
+            <PopoverContent align="end" className="w-auto overflow-hidden rounded-xl border border-border/30 bg-popover p-0">
+              <Calendar mode="range" selected={customRange} onSelect={(range) => { setCustomRange(range); setIsCustom(true); if (range?.from && range?.to) setTimeout(() => setDatePickerOpen(false), 300); }} numberOfMonths={1} locale={ptBR} disabled={(date) => date > new Date()} className="p-3 pointer-events-auto" classNames={{ day_selected: "bg-primary text-primary-foreground", day_range_middle: "bg-primary/10 text-foreground", day_range_end: "bg-primary text-primary-foreground" }} />
+            </PopoverContent>
+          </Popover>
         </div>
       </section>
 
-      {/* ─── Ultra-Premium Action Grid ─── */}
-      <section className="grid grid-cols-2 md:grid-cols-4 gap-6">
-        {[
-          { label: "Gerar Checkout", icon: <Zap className="h-6 w-6" />, color: "bg-amber-500/10 text-amber-500", href: "/vendas/links" },
-          { label: "Novo Produto", icon: <Package className="h-6 w-6" />, color: "bg-primary/10 text-primary", href: "/vendas/produtos" },
-          { label: "Configurar API", icon: <CreditCard className="h-6 w-6" />, color: "bg-info/10 text-info", href: "/integracoes" },
-          { label: "Inteligência", icon: <FileText className="h-6 w-6" />, color: "bg-purple-500/10 text-purple-500", href: "/vendas" },
-        ].map((item) => (
-          <Link key={item.label} to={item.href} className="group relative flex flex-col items-start gap-6 p-10 rounded-[2.5rem] border border-border/40 bg-card/60 backdrop-blur-sm hover:bg-card hover:shadow-[0_20px_40px_-10px_rgba(0,0,0,0.3)] hover:scale-[1.02] transition-all duration-500 overflow-hidden">
-            <div className={cn("h-14 w-14 rounded-2xl flex items-center justify-center shrink-0 transition-all duration-500 group-hover:scale-110 group-hover:shadow-2xl", item.color)}>
-              {item.icon}
+      {/* ═══════════════════════════════════════════════════════ */}
+      {/* FINANCIAL STAT CARDS — Always visible, compact          */}
+      {/* ═══════════════════════════════════════════════════════ */}
+      <section className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+        {([
+          {
+            label: "Total Faturado",
+            sublabel: "Volume total histórico",
+            value: privacy.hidden ? CENSORED : fmt(transactions.filter(t => t.status === "completed").reduce((a, t) => a + Number(t.net_amount), 0)),
+            icon: <TrendingUp className="h-5 w-5 text-primary" />,
+            accent: "border-l-primary",
+          },
+          {
+            label: "Saldo Disponível",
+            sublabel: "Liberado para saque",
+            value: privacy.hidden ? CENSORED : fmt(Math.max(balance, 0)),
+            icon: <Wallet className="h-5 w-5 text-success" />,
+            accent: "border-l-success",
+          },
+          {
+            label: "Saldo Pendente",
+            sublabel: "Aguardando liberação",
+            value: privacy.hidden ? CENSORED : fmt(transactions.filter(t => t.status === "completed" && !t.retention_released).reduce((a, t) => a + Number(t.retained_amount), 0)),
+            icon: <Clock3 className="h-5 w-5 text-warning" />,
+            accent: "border-l-warning",
+          },
+          {
+            label: "Vendas Realizadas",
+            sublabel: "Quantidade total",
+            value: privacy.hidden ? CENSORED : transactions.filter(t => t.status === "completed").length.toString(),
+            icon: <Zap className="h-5 w-5 text-info" />,
+            accent: "border-l-info",
+          },
+        ]).map((card) => (
+          <div key={card.label} className={cn("group relative overflow-hidden rounded-xl border border-border/50 bg-card p-4 md:p-5 border-l-[3px] transition-all hover:border-border/70", card.accent)}>
+            <div className="flex items-start justify-between mb-3">
+              <p className="text-[11px] md:text-[12px] font-display font-bold text-muted-foreground/70 uppercase tracking-[0.06em]">{card.label}</p>
+              <div className="h-9 w-9 rounded-lg bg-card-elevated border border-border/30 flex items-center justify-center">
+                {card.icon}
+              </div>
             </div>
-            <div className="space-y-1">
-              <span className="font-black text-lg tracking-tighter block">{item.label}</span>
-              <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/40">Operação rápida</span>
-            </div>
-            <div className="absolute top-6 right-6 opacity-0 group-hover:opacity-100 transition-all duration-500 translate-x-4 group-hover:translate-x-0">
-              <ChevronRight className="h-5 w-5 text-primary" strokeWidth={3} />
-            </div>
-          </Link>
+            <p className="text-2xl md:text-3xl font-display font-black tabular-nums tracking-[-0.03em] text-foreground leading-none">
+              {card.value}
+            </p>
+            <p className="text-[10px] text-muted-foreground/50 mt-2 font-medium">{card.sublabel}</p>
+          </div>
         ))}
       </section>
 
-      {/* ════════════════════════════════════════════════════════════════ */}
-      {/* FINANCIAL STAT CARDS                                              */}
-      {/* ════════════════════════════════════════════════════════════════ */}
-      <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-        {[
-          {
-            label: "Volume de Vendas",
-            value: privacy.hidden ? CENSORED : fmt(transactions.filter(t => t.status === "completed").reduce((a, t) => a + Number(t.net_amount), 0)),
-            sublabel: "Faturamento bruto total",
-            icon: <TrendingUp className="h-6 w-6" />,
-            color: "primary",
-          },
-          {
-            label: "Disponível",
-            value: privacy.hidden ? CENSORED : fmt(Math.max(balance, 0)),
-            sublabel: "Liberado para transferência",
-            icon: <Wallet className="h-6 w-6" />,
-            color: "success",
-          },
-          {
-            label: "Pendente",
-            value: privacy.hidden ? CENSORED : fmt(transactions.filter(t => t.status === "completed" && !t.retention_released).reduce((a, t) => a + Number(t.retained_amount), 0)),
-            sublabel: "Liberação programada",
-            icon: <Clock3 className="h-6 w-6" />,
-            color: "warning",
-          },
-          {
-            label: "Conversões",
-            value: privacy.hidden ? CENSORED : transactions.filter(t => t.status === "completed").length.toString(),
-            sublabel: "Vendas confirmadas",
-            icon: <Zap className="h-6 w-6" />,
-            color: "info",
-          },
-        ].map((card) => (
-          <div key={card.label} className="group relative p-10 rounded-[3rem] border border-border/40 bg-card transition-all duration-700 hover:border-primary/40 hover:shadow-[0_40px_80px_-20px_rgba(0,0,0,0.4)] overflow-hidden">
-            <div className="relative z-10 space-y-8">
-              <div className="flex items-center justify-between">
-                <div className={cn("h-16 w-16 rounded-[1.5rem] flex items-center justify-center transition-all duration-700 group-hover:scale-110 group-hover:rotate-6 shadow-2xl", 
-                  card.color === "primary" ? "bg-primary text-primary-foreground shadow-primary/20" :
-                  card.color === "success" ? "bg-success text-success-foreground shadow-success/20" :
-                  card.color === "warning" ? "bg-warning text-warning-foreground shadow-warning/20" :
-                  "bg-info text-info-foreground shadow-info/20"
-                )}>
-                  {card.icon}
-                </div>
-                <div className="h-1 w-12 rounded-full bg-muted/20 overflow-hidden">
-                  <div className={cn("h-full w-2/3 rounded-full animate-pulse", 
-                    card.color === "primary" ? "bg-primary" : "bg-foreground"
-                  )} />
-                </div>
-              </div>
-              <div className="space-y-3">
-                <p className="text-[11px] font-black uppercase tracking-[0.3em] text-muted-foreground/40">{card.label}</p>
-                <h3 className="text-4xl font-display font-black tracking-tighter text-foreground tabular-nums leading-none">
-                  {card.value}
-                </h3>
-              </div>
-              <p className="text-[12px] font-bold text-muted-foreground/30 flex items-center gap-2">
-                <div className="h-1.5 w-1.5 rounded-full bg-success" />
-                {card.sublabel}
-              </p>
+      {/* ═══════════════════════════════════════════════════════ */}
+      {/* QUICK ACTIONS — Compact row                            */}
+      {/* ═══════════════════════════════════════════════════════ */}
+      <section className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+        {([
+          { label: "Gerar PIX", sublabel: "QR Code para receber", icon: <PixLogoMark className="h-5 w-5" />, href: "/vendas/links" },
+          { label: "Solicitar Saque", sublabel: "Transferir via PIX", icon: <ArrowDownRight className="h-5 w-5 text-success" />, href: "/financeiro/saques" },
+          { label: "Transações", sublabel: "Ver histórico", icon: <BarChart3 className="h-5 w-5 text-info" />, href: "/vendas" },
+          { label: "Credenciais API", sublabel: "Gerencie suas credenciais", icon: <Hash className="h-5 w-5 text-warning" />, href: "/vendas/api-keys" },
+        ]).map((action) => (
+          <Link key={action.href} to={action.href} className="group flex items-center gap-3.5 rounded-xl border border-border/50 bg-card px-4 py-4 transition-all hover:border-primary/30 hover:bg-accent/30">
+            <div className="h-10 w-10 rounded-lg bg-card-elevated border border-border/30 flex items-center justify-center shrink-0 group-hover:border-primary/20 transition-colors">
+              {action.icon}
             </div>
-            
-            {/* Multi-layered decorations */}
-            <div className="absolute -bottom-12 -right-12 h-48 w-48 bg-foreground/5 blur-[80px] rounded-full transition-all duration-700 group-hover:bg-primary/5 group-hover:scale-150" />
-            <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-primary/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-          </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-[13px] font-display font-bold text-foreground tracking-tight">{action.label}</p>
+              <p className="text-[11px] text-muted-foreground/50 mt-0.5">{action.sublabel}</p>
+            </div>
+            <ChevronRight className="h-4 w-4 text-muted-foreground/30 group-hover:text-primary transition-colors shrink-0" />
+          </Link>
         ))}
       </section>
 
       {/* ════════════════════════════════════════════════════════════════ */}
       {/* CHART + INDICES                                                   */}
       {/* ════════════════════════════════════════════════════════════════ */}
-      <section className="grid grid-cols-1 xl:grid-cols-3 gap-6">
-        {/* Main Growth Chart */}
-        <div className="xl:col-span-2 rounded-3xl border border-border bg-card p-6 md:p-8 shadow-sm relative overflow-hidden">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
-            <div className="space-y-1">
-              <h3 className="text-xl font-display font-black tracking-tight">Fluxo de Faturamento</h3>
-              <p className="text-sm text-muted-foreground font-medium">Desempenho financeiro consolidado do período.</p>
+      <section className="grid grid-cols-1 xl:grid-cols-[1fr_340px] gap-3">
+        {/* Faturamento Chart */}
+        <div className="rounded-xl border border-border/50 bg-card overflow-hidden">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 px-6 py-5 border-b border-border/30">
+            <div>
+              <h3 className="text-[15px] font-display font-bold text-foreground tracking-tight">Faturamento</h3>
+              <p className="text-[11px] text-muted-foreground/50 mt-0.5">Evolução do período selecionado</p>
             </div>
-            <div className="flex items-center gap-2">
-              <div className="h-2 w-2 rounded-full bg-primary" />
-              <span className="text-xs font-bold text-muted-foreground">Volume Bruto (R$)</span>
+            <div className="flex items-center gap-3">
+              <span className="inline-flex items-center gap-1.5 text-[10px] text-muted-foreground/50 font-medium">
+                <span className="h-2 w-2 rounded-full bg-primary" /> Receita
+              </span>
             </div>
           </div>
-          
-          <div className="h-[350px] w-full">
-            <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={chartData} margin={{ top: 0, right: 0, left: -20, bottom: 0 }}>
+          <div className="px-3 pb-5 min-h-[300px]">
+            <ResponsiveContainer width="100%" height={280}>
+              <AreaChart data={chartData} margin={{ top: 10, right: 16, left: -12, bottom: 0 }}>
                 <defs>
-                  <linearGradient id="premiumGradient" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="hsl(var(--primary))" stopOpacity={0.15} />
-                    <stop offset="95%" stopColor="hsl(var(--primary))" stopOpacity={0} />
+                  <linearGradient id="dashboardRevenue" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor="hsl(var(--primary))" stopOpacity={0.2} />
+                    <stop offset="100%" stopColor="hsl(var(--primary))" stopOpacity={0} />
                   </linearGradient>
                 </defs>
-                <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 11, fontWeight: 600 }} dy={15} />
-                <YAxis axisLine={false} tickLine={false} tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 11, fontWeight: 600 }} tickFormatter={(v) => `R$ ${v >= 1000 ? (v/1000).toFixed(0) + 'k' : v}`} />
+                <XAxis dataKey="name" tickLine={false} axisLine={false} dy={8} stroke="hsl(var(--muted-foreground) / 0.3)" fontSize={10} interval={chartData.length > 10 ? Math.ceil(chartData.length / 8) - 1 : 0} />
+                <YAxis tickLine={false} axisLine={false} width={64} stroke="hsl(var(--muted-foreground) / 0.3)" fontSize={10} tickFormatter={(v) => v >= 1000 ? `R$${(v / 1000).toLocaleString("pt-BR", { minimumFractionDigits: 1, maximumFractionDigits: 1 })}k` : `R$${v}`} />
                 <Tooltip
-                  cursor={{ stroke: "hsl(var(--primary) / 0.2)", strokeWidth: 2 }}
+                  cursor={{ stroke: "hsl(var(--primary) / 0.3)", strokeWidth: 1, strokeDasharray: "4 4" }}
                   content={({ active, payload, label }) => {
                     if (!active || !payload?.length) return null;
                     return (
-                      <div className="p-4 rounded-2xl border border-border bg-card shadow-2xl backdrop-blur-md">
-                        <p className="text-[10px] font-black uppercase text-muted-foreground tracking-widest mb-1">{label}</p>
-                        <p className="text-lg font-display font-black text-primary">
+                      <div className="rounded-lg border border-border bg-card px-4 py-3">
+                        <p className="font-display text-[9px] font-bold text-muted-foreground/50 uppercase tracking-[0.18em]">{label}</p>
+                        <p className="font-display text-[15px] font-black text-primary tabular-nums mt-1 tracking-tight">
                           {fmt(payload[0].value as number)}
                         </p>
                       </div>
                     );
                   }}
                 />
-                <Area type="monotone" dataKey="vendas" stroke="hsl(var(--primary))" strokeWidth={4} fill="url(#premiumGradient)" animationDuration={1500} dot={false} activeDot={{ r: 6, strokeWidth: 0, fill: "hsl(var(--primary))" }} />
+                <Area type="monotone" dataKey="vendas" stroke="hsl(var(--primary))" strokeWidth={2} fill="url(#dashboardRevenue)" dot={false} activeDot={{ r: 5, strokeWidth: 2, fill: "hsl(var(--card))", stroke: "hsl(var(--primary))" }} />
               </AreaChart>
             </ResponsiveContainer>
           </div>
         </div>
 
-        {/* Sidebar Insights */}
-        <div className="space-y-6">
-          <div className="p-8 rounded-3xl border border-border bg-primary text-primary-foreground relative overflow-hidden shadow-xl shadow-primary/20">
-            <div className="relative z-10 space-y-6">
-              <div className="h-12 w-12 rounded-2xl bg-white/20 backdrop-blur-md flex items-center justify-center">
-                <Crown className="h-6 w-6" />
-              </div>
-              <div className="space-y-2">
-                <h3 className="text-xl font-display font-black tracking-tight">Status da Operação</h3>
-                <p className="text-primary-foreground/80 text-sm font-medium leading-relaxed">Sua conta está em nível de <span className="text-white font-bold">ALTA PERFORMANCE</span> hoje.</p>
-              </div>
-              <button onClick={() => navigate("/premiacoes")} className="w-full h-12 bg-white text-primary rounded-xl font-bold text-sm shadow-lg hover:bg-white/90 transition-all active:scale-95">
-                Ver Premiações
-              </button>
-            </div>
-            {/* Background pattern */}
-            <div className="absolute top-[-20%] right-[-20%] w-[150px] h-[150px] bg-white/10 blur-[60px] rounded-full" />
+        {/* Right sidebar — KPIs */}
+        <div className="rounded-xl border border-border/50 bg-card overflow-hidden flex flex-col">
+          <div className="px-6 py-5 border-b border-border/30">
+            <h3 className="text-[15px] font-display font-bold text-foreground tracking-tight">Índices</h3>
+            <p className="text-[11px] text-muted-foreground/50 mt-0.5">Métricas de conversão</p>
           </div>
-
-          <div className="p-6 rounded-3xl border border-border bg-card shadow-sm space-y-4">
-            <h3 className="text-sm font-bold uppercase tracking-wider text-muted-foreground/80 px-1">Distribuição de Receita</h3>
-            <div className="space-y-4">
-              {[
-                { label: "PIX Instantâneo", value: pixConversion, color: "bg-success" },
-                { label: "Cartão de Crédito", value: cardConversion, color: "bg-primary" },
-              ].map((method) => (
-                <div key={method.label} className="space-y-2">
-                  <div className="flex items-center justify-between text-xs font-bold">
-                    <span>{method.label}</span>
-                    <span className="text-foreground">{method.value.toFixed(1)}%</span>
-                  </div>
-                  <div className="h-2 w-full bg-accent rounded-full overflow-hidden">
-                    <div className={cn("h-full rounded-full transition-all duration-1000", method.color)} style={{ width: `${method.value}%` }} />
-                  </div>
+          <div className="flex-1 p-5 space-y-5">
+            {/* Pix */}
+            <div className="flex items-center gap-4">
+              <div className="relative h-14 w-14 shrink-0">
+                <svg className="h-full w-full -rotate-90" viewBox="0 0 36 36">
+                  <circle cx="18" cy="18" r="15.5" fill="none" stroke="hsl(var(--border) / 0.3)" strokeWidth="3" />
+                  <circle cx="18" cy="18" r="15.5" fill="none" stroke="hsl(var(--success))" strokeWidth="3" strokeDasharray={`${pixConversion * 0.974} 100`} strokeLinecap="round" />
+                </svg>
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <span className="text-[11px] font-display font-black text-success tabular-nums">{pixConversion.toFixed(0)}%</span>
                 </div>
-              ))}
+              </div>
+              <div>
+                <p className="text-[13px] font-display font-bold text-foreground">Pix</p>
+                <p className="text-[11px] text-muted-foreground/50">Conversão</p>
+              </div>
+            </div>
+            {/* Card */}
+            <div className="flex items-center gap-4">
+              <div className="relative h-14 w-14 shrink-0">
+                <svg className="h-full w-full -rotate-90" viewBox="0 0 36 36">
+                  <circle cx="18" cy="18" r="15.5" fill="none" stroke="hsl(var(--border) / 0.3)" strokeWidth="3" />
+                  <circle cx="18" cy="18" r="15.5" fill="none" stroke="hsl(var(--info))" strokeWidth="3" strokeDasharray={`${cardConversion * 0.974} 100`} strokeLinecap="round" />
+                </svg>
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <span className="text-[11px] font-display font-black text-info tabular-nums">{cardConversion.toFixed(0)}%</span>
+                </div>
+              </div>
+              <div>
+                <p className="text-[13px] font-display font-bold text-foreground">Cartão</p>
+                <p className="text-[11px] text-muted-foreground/50">Conversão</p>
+              </div>
+            </div>
+            {/* Chargeback */}
+            <div className="flex items-center gap-4">
+              <div className="relative h-14 w-14 shrink-0">
+                <svg className="h-full w-full -rotate-90" viewBox="0 0 36 36">
+                  <circle cx="18" cy="18" r="15.5" fill="none" stroke="hsl(var(--border) / 0.3)" strokeWidth="3" />
+                  <circle cx="18" cy="18" r="15.5" fill="none" stroke={chargebackRate > 1 ? "hsl(var(--destructive))" : "hsl(var(--success))"} strokeWidth="3" strokeDasharray={`${Math.min(chargebackRate * 9.74, 97.4)} 100`} strokeLinecap="round" />
+                </svg>
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <span className={cn("text-[11px] font-display font-black tabular-nums", chargebackRate > 1 ? "text-destructive" : "text-success")}>{chargebackRate.toFixed(1)}%</span>
+                </div>
+              </div>
+              <div>
+                <p className="text-[13px] font-display font-bold text-foreground">Chargeback</p>
+                <p className="text-[11px] text-muted-foreground/50">Saúde da conta</p>
+              </div>
+            </div>
+            {/* Summary */}
+            <div className="border-t border-border/30 pt-4 space-y-2.5">
+              <div className="flex items-center justify-between text-[12px]">
+                <span className="text-muted-foreground/60">Ticket Médio</span>
+                <span className="font-display font-black text-foreground tabular-nums">{privacy.hidden ? CENSORED : fmt(approved.length > 0 ? revenue / approved.length : 0)}</span>
+              </div>
+              <div className="flex items-center justify-between text-[12px]">
+                <span className="text-muted-foreground/60">Conversão Geral</span>
+                <span className="font-display font-black text-foreground tabular-nums">{conversion.toFixed(1)}%</span>
+              </div>
+              <div className="flex items-center justify-between text-[12px]">
+                <span className="text-muted-foreground/60">Clientes Únicos</span>
+                <span className="font-display font-black text-foreground tabular-nums">{uniqueCustomers}</span>
+              </div>
             </div>
           </div>
         </div>
       </section>
 
-      {/* ─── Recent Activity Section ─── */}
-      <section className="grid grid-cols-1 gap-6">
-        <div className="rounded-3xl border border-border bg-card p-6 md:p-8 shadow-sm">
-          <div className="flex items-center justify-between mb-8">
-            <div className="space-y-1">
-              <h3 className="text-xl font-display font-black tracking-tight text-foreground">Operações Recentes</h3>
-              <p className="text-sm text-muted-foreground font-medium">Últimas transações e saques processados.</p>
-            </div>
-            <Link to="/vendas" className="text-sm font-bold text-primary hover:underline">Ver tudo</Link>
+      {/* ═══════════════════════════════════════════════════════ */}
+      {/* ACTIVITY FEED                                          */}
+      {/* ═══════════════════════════════════════════════════════ */}
+      <section className="rounded-xl border border-border/50 bg-card overflow-hidden">
+        <div className="flex items-center justify-between border-b border-border/30 px-6 py-5">
+          <div>
+            <h3 className="text-[15px] font-display font-bold text-foreground tracking-tight">Atividade Recente</h3>
+            <p className="text-[11px] text-muted-foreground/50 mt-0.5">Últimas transações e saques</p>
           </div>
-
-          <div className="space-y-3">
-            {activity.map((item) => (
-              <div key={item.id} className="group flex items-center gap-4 p-4 rounded-2xl border border-transparent hover:border-border hover:bg-accent/30 transition-all cursor-pointer" onClick={() => item.kind === 'transaction' && setDetailTx(transactions.find(t => t.id === item.id) || null)}>
-                <div className={cn("h-12 w-12 rounded-xl flex items-center justify-center shrink-0",
-                  item.status === 'completed' ? "bg-success/10 text-success" : 
-                  item.status === 'pending' ? "bg-warning/10 text-warning" : "bg-destructive/10 text-destructive"
-                )}>
-                  {item.kind === 'withdrawal' ? <ArrowDownRight className="h-5 w-5" /> : <CreditCard className="h-5 w-5" />}
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-bold text-foreground truncate">{item.label}</p>
-                  <p className="text-[10px] font-medium text-muted-foreground/60 uppercase tracking-wider mt-0.5">
-                    {item.kind === 'withdrawal' ? 'Saque' : 'Venda'} • {timeAgo(item.createdAt)}
-                  </p>
-                </div>
-                <div className="text-right shrink-0">
-                  <p className="text-sm font-display font-black text-foreground">{fmt(item.amount)}</p>
-                  <p className={cn("text-[10px] font-bold uppercase tracking-widest mt-0.5",
-                    item.status === 'completed' ? "text-success" : 
-                    item.status === 'pending' ? "text-warning" : "text-destructive"
-                  )}>
-                    {item.status === 'completed' ? 'Aprovado' : 
-                     item.status === 'pending' ? 'Pendente' : 'Cancelado'}
-                  </p>
-                </div>
+          <Link to="/vendas" className="text-[12px] font-bold text-primary hover:underline">Ver tudo</Link>
+        </div>
+        <div className="divide-y divide-border/20">
+          {activity.map((item) => (
+            <div key={item.id} className="flex items-center gap-3.5 px-6 py-3.5 hover:bg-accent/30 transition-all cursor-pointer" onClick={() => item.kind === 'transaction' && setDetailTx(transactions.find(t => t.id === item.id) || null)}>
+              <div className={cn("h-9 w-9 rounded-lg flex items-center justify-center shrink-0",
+                item.status === 'completed' ? "bg-success/10 text-success" : 
+                item.status === 'pending' ? "bg-warning/10 text-warning" : "bg-destructive/10 text-destructive"
+              )}>
+                {item.kind === 'withdrawal' ? <ArrowDownRight className="h-4 w-4" /> : <CreditCard className="h-4 w-4" />}
               </div>
-            ))}
-          </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-[13px] font-bold text-foreground truncate">{item.label}</p>
+                <p className="text-[10px] font-medium text-muted-foreground/40 uppercase tracking-wider mt-0.5">
+                  {item.kind === 'withdrawal' ? 'Saque' : 'Venda'} • {timeAgo(item.createdAt)}
+                </p>
+              </div>
+              <div className="text-right shrink-0">
+                <p className="text-[13px] font-display font-black text-foreground tabular-nums">{fmt(item.amount)}</p>
+                <p className={cn("text-[9px] font-bold uppercase tracking-widest mt-0.5",
+                  item.status === 'completed' ? "text-success" : 
+                  item.status === 'pending' ? "text-warning" : "text-destructive"
+                )}>
+                  {item.status === 'completed' ? 'Aprovado' : 
+                   item.status === 'pending' ? 'Pendente' : 'Cancelado'}
+                </p>
+              </div>
+            </div>
+          ))}
         </div>
       </section>
 
