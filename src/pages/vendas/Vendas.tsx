@@ -683,7 +683,7 @@ export default function Vendas() {
           <div className="flex flex-col gap-5 xl:flex-row xl:items-start xl:justify-between">
             <div className="min-w-0">
               <h1 className="font-display text-[48px] font-black leading-[0.88] tracking-[-0.06em] text-foreground sm:text-[68px]">
-                Minhas Vendas
+                Vendas
               </h1>
               <div className="mt-5 flex flex-wrap items-end gap-x-5 gap-y-2">
                 <p
@@ -784,7 +784,7 @@ export default function Vendas() {
                       className="inline-flex h-8 items-center gap-1.5 rounded-lg bg-primary px-3.5 text-[11px] font-black tracking-[-0.005em] text-primary-foreground transition-all duration-200 hover:bg-primary/90 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/50"
                     >
                       <Download className="h-[14px] w-[14px]" strokeWidth={2.6} />
-                      Exportar Relatório
+                      Exportar
                     </button>
                   </TooltipTrigger>
                   <TooltipContent side="bottom" className="flex items-center gap-2">Exportar CSV <Kbd>E</Kbd></TooltipContent>
@@ -803,7 +803,7 @@ export default function Vendas() {
               <div
                 key={`${k.label}-${animKey}`}
                 className={cn(
-                  "vendas-rise group relative min-h-[150px] px-6 py-6 transition-colors duration-200 hover:bg-muted/25",
+                  "vendas-rise group relative min-h-[140px] px-6 py-6 transition-colors duration-200 hover:bg-muted/25 rounded-xl border border-transparent hover:border-border/40",
                   idx === 1 && "vendas-rise-d1",
                   idx === 2 && "vendas-rise-d2",
                   idx === 3 && "vendas-rise-d3",
@@ -811,20 +811,23 @@ export default function Vendas() {
                   idx === 1 && "border-l border-border/70 lg:border-l-0",
                 )}
               >
-                <span className={cn("absolute left-0 top-6 h-8 w-[3px] rounded-r-full", k.rail)} />
-                <div className="flex items-center justify-between gap-2 pl-3">
-                  <p className="text-[10.5px] font-black uppercase tracking-[0.22em] text-muted-foreground">{k.label}</p>
+                <span className={cn("absolute left-0 top-6 h-8 w-[3px] rounded-r-full opacity-0 group-hover:opacity-100 transition-opacity", k.rail)} />
+                <div className="flex items-center justify-between gap-2 pl-2">
+                  <p className="text-[10.5px] font-black uppercase tracking-[0.22em] text-muted-foreground/60">{k.label}</p>
                 </div>
                 <p
                   className={cn(
-                    "mt-3.5 pl-3 font-display text-[36px] font-black leading-[0.9] tracking-[-0.06em] tabular-nums sm:text-[44px]",
+                    "mt-3 pl-2 font-display text-[34px] font-black leading-[0.9] tracking-[-0.06em] tabular-nums sm:text-[40px]",
                     k.accent,
                   )}
                   style={{ fontVariantNumeric: "tabular-nums slashed-zero" }}
                 >
                   {k.value}
                 </p>
-                <p className="mt-3 truncate pl-3 text-[12.5px] font-semibold text-muted-foreground/85">{k.sub}</p>
+                <div className="mt-4 flex items-center gap-2 pl-2">
+                  <p className="truncate text-[11.5px] font-bold text-muted-foreground/85">{k.sub}</p>
+                  {k.delta && <DeltaBadge cur={k.delta.cur} prev={k.delta.prev} />}
+                </div>
               </div>
             ))}
           </div>
