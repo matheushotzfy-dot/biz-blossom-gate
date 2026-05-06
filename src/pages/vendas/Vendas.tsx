@@ -200,7 +200,7 @@ function TxRow({ tx, prods, onClick, density = "comfortable" }: { tx: Tables<"tr
   const py = density === "compact" ? "py-2" : "py-3.5";
   const avatarSize = density === "compact" ? "h-8 w-8" : "h-9 w-9";
   return (
-    <tr onClick={onClick} className="group cursor-pointer border-b border-border/60 transition-colors duration-150 hover:bg-muted/30 last:border-b-0">
+    <tr onClick={onClick} className="group cursor-pointer border-b border-border/60 transition-colors duration-150 vendas-row-hover last:border-b-0">
       <td className={cn("pl-5 pr-3 align-middle", py)}>
         <div className="flex items-center gap-3">
           <Avatar className={cn(avatarSize, "shrink-0 rounded-md ring-1 ring-border/40")}>
@@ -679,11 +679,11 @@ export default function Vendas() {
 
       {/* ─────────── COMANDO LIMPO ─────────── */}
       <div className="px-5 pt-4 sm:px-8 sm:pt-6">
-        <header className="border-b border-border/70 pb-7">
+        <header className="vendas-header-glow border-b border-border/70 pb-7">
           <div className="flex flex-col gap-5 xl:flex-row xl:items-start xl:justify-between">
             <div className="min-w-0">
               <h1 className="font-display text-[48px] font-black leading-[0.88] tracking-[-0.06em] text-foreground sm:text-[68px]">
-                Vendas
+                Minhas <span className="text-gradient-success">Vendas</span>
               </h1>
               <div className="mt-5 flex flex-wrap items-end gap-x-5 gap-y-2">
                 <p
@@ -803,7 +803,7 @@ export default function Vendas() {
               <div
                 key={`${k.label}-${animKey}`}
                 className={cn(
-                  "vendas-rise group relative min-h-[140px] px-6 py-6 transition-colors duration-200 hover:bg-muted/25 rounded-xl border border-transparent hover:border-border/40",
+                  "vendas-rise premium-card-vendas group relative min-h-[140px] px-6 py-6 rounded-xl border border-border/60 shadow-sm",
                   idx === 1 && "vendas-rise-d1",
                   idx === 2 && "vendas-rise-d2",
                   idx === 3 && "vendas-rise-d3",
@@ -837,7 +837,7 @@ export default function Vendas() {
               <div
                 key={`${r.label}-${animKey}`}
                 className={cn(
-                  "vendas-rise group relative flex flex-col gap-2.5 px-6 py-6 transition-colors duration-200 hover:bg-muted/25",
+                  "vendas-rise premium-card-vendas group relative flex flex-col gap-2.5 px-6 py-6 rounded-xl border-border/60",
                   idx === 0 && "vendas-rise-d3",
                   idx === 1 && "vendas-rise-d4",
                   idx === 2 && "vendas-rise-d5",
@@ -936,7 +936,7 @@ export default function Vendas() {
                     className={cn(
                       "group relative flex items-center gap-2 whitespace-nowrap px-5 py-3.5 text-[12.5px] font-bold tracking-[-0.01em] transition-colors duration-150",
                       active
-                        ? "text-foreground"
+                        ? "text-foreground vendas-tab-active"
                         : "text-muted-foreground/80 hover:bg-muted/30 hover:text-foreground",
                     )}
                   >
