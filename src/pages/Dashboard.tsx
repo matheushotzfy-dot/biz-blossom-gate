@@ -520,11 +520,11 @@ export default function Dashboard() {
                   </div>
 
                   <div className="grid grid-cols-2 gap-2 sm:flex sm:items-center">
-                    <Link to="/financeiro/saques" className="inline-flex h-10 items-center justify-center gap-2 rounded-xl bg-primary px-4 text-[12px] font-black text-primary-foreground">
+                    <Link to="/financeiro/saques" className="inline-flex h-10 min-w-[112px] items-center justify-center gap-2 whitespace-nowrap rounded-xl bg-primary px-4 text-[12px] font-black text-primary-foreground">
                       <ArrowDownRight className="h-4 w-4" />
                       Sacar
                     </Link>
-                    <Link to="/vendas/links" className="inline-flex h-10 items-center justify-center gap-2 rounded-xl border border-border/60 bg-background/75 px-4 text-[12px] font-black text-foreground hover:bg-accent">
+                    <Link to="/vendas/links" className="inline-flex h-10 min-w-[112px] items-center justify-center gap-2 whitespace-nowrap rounded-xl border border-border/60 bg-background/75 px-4 text-[12px] font-black text-foreground hover:bg-accent">
                       <PixLogoMark className="h-4 w-4 text-success" />
                       Link PIX
                     </Link>
