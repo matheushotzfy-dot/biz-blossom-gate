@@ -490,6 +490,8 @@ export default function Dashboard() {
             value: privacy.hidden ? CENSORED : fmt(transactions.filter(t => t.status === "completed").reduce((a, t) => a + Number(t.net_amount), 0)),
             icon: <TrendingUp className="h-5 w-5 text-primary" />,
             accent: "border-l-primary",
+            color: "primary",
+            bg: "bg-primary/5",
           },
           {
             label: "Saldo Disponível",
@@ -497,6 +499,8 @@ export default function Dashboard() {
             value: privacy.hidden ? CENSORED : fmt(Math.max(balance, 0)),
             icon: <Wallet className="h-5 w-5 text-success" />,
             accent: "border-l-success",
+            color: "success",
+            bg: "bg-success/5",
           },
           {
             label: "Saldo Pendente",
@@ -504,6 +508,8 @@ export default function Dashboard() {
             value: privacy.hidden ? CENSORED : fmt(transactions.filter(t => t.status === "completed" && !t.retention_released).reduce((a, t) => a + Number(t.retained_amount), 0)),
             icon: <Clock3 className="h-5 w-5 text-warning" />,
             accent: "border-l-warning",
+            color: "warning",
+            bg: "bg-warning/5",
           },
           {
             label: "Vendas Realizadas",
@@ -511,17 +517,21 @@ export default function Dashboard() {
             value: privacy.hidden ? CENSORED : transactions.filter(t => t.status === "completed").length.toString(),
             icon: <Zap className="h-5 w-5 text-info" />,
             accent: "border-l-info",
-            isRawValue: true
+            color: "info",
+            bg: "bg-info/5",
           },
         ]).map((card) => (
-          <div key={card.label} className={cn("relative overflow-hidden rounded-xl border border-border/50 bg-card p-4 md:p-5 border-l-[3px] transition-all hover:border-border/70", card.accent)}>
+          <div key={card.label} className={cn("group relative overflow-hidden rounded-xl border border-border/50 bg-card p-4 md:p-5 border-l-[3px] transition-all hover:border-border/70", card.accent)}>
+            {/* Ambient glow background */}
+            <div className={cn("absolute -right-4 -top-4 h-24 w-24 rounded-full blur-3xl opacity-0 transition-opacity group-hover:opacity-20", card.bg)} />
+            
             <div className="flex items-start justify-between mb-3">
               <p className="text-[11px] md:text-[12px] font-display font-bold text-muted-foreground/70 uppercase tracking-[0.06em]">{card.label}</p>
-              <div className="h-9 w-9 rounded-lg bg-card-elevated border border-border/30 flex items-center justify-center">
+              <div className="h-9 w-9 rounded-lg bg-card-elevated border border-border/30 flex items-center justify-center transition-transform group-hover:scale-110">
                 {card.icon}
               </div>
             </div>
-            <p className="text-2xl md:text-3xl font-display font-black tabular-nums tracking-[-0.03em] text-foreground leading-none">
+            <p className="text-2xl md:text-3xl font-display font-black tabular-nums tracking-[-0.03em] text-foreground leading-none group-hover:text-gradient-premium transition-colors">
               {card.value}
             </p>
             <p className="text-[10px] text-muted-foreground/60 mt-2 font-medium">{card.sublabel}</p>

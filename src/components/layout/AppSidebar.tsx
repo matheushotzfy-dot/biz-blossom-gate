@@ -112,11 +112,12 @@ function RevenueCard({ collapsed, revenue, milestone, onOpenRewards }: RevenueCa
     <button
       type="button"
       onClick={onOpenRewards}
-      className="group/rev relative mt-5 block w-full overflow-hidden rounded-2xl border border-sidebar-border/40 bg-card-elevated/50 p-4 text-left transition-all duration-200 hover:border-sidebar-primary/40 hover:bg-card-elevated"
+      className="group/rev relative mt-5 block w-full overflow-hidden rounded-2xl border border-sidebar-border/40 bg-card-elevated/50 p-4 text-left transition-all duration-200 hover:border-sidebar-primary/40 hover:bg-card-elevated shadow-sm hover:shadow-primary/5"
     >
       <div className="flex items-center gap-3">
-        <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-sidebar-primary/25 bg-sidebar-primary/10">
-          <Zap className="h-[18px] w-[18px] text-sidebar-primary" strokeWidth={2.5} fill="hsl(var(--sidebar-primary))" />
+        <div className="relative flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-sidebar-primary/25 bg-sidebar-primary/10 transition-transform group-hover/rev:scale-110">
+          <Zap className="h-[18px] w-[18px] text-sidebar-primary animate-pulse" strokeWidth={2.5} fill="hsl(var(--sidebar-primary))" />
+          <div className="absolute inset-0 rounded-xl bg-primary/20 blur-xl opacity-0 group-hover/rev:opacity-100 transition-opacity" />
         </div>
         <div className="min-w-0 flex-1">
           <p className="text-[10px] font-bold uppercase tracking-[0.15em] text-muted-foreground/60">
@@ -340,8 +341,8 @@ export function AppSidebar() {
       <SidebarHeader className="relative border-b border-sidebar-border/60 px-4 pb-4 pt-4">
         {/* Brand */}
         <div className={cn("flex items-center gap-3", collapsed && "justify-center")}>
-          <div className="relative h-11 w-11 shrink-0 overflow-hidden rounded-xl border border-border/40 bg-card-elevated">
-            <img src={hotzfyLogo} alt="HOTZFY" className="h-full w-full object-contain p-1.5" />
+          <div className="group/logo relative h-11 w-11 shrink-0 overflow-hidden rounded-xl border border-border/40 bg-card-elevated transition-all hover:border-primary/50 hover:shadow-lg hover:shadow-primary/10">
+            <img src={hotzfyLogo} alt="HOTZFY" className="h-full w-full object-contain p-1.5 transition-transform group-hover/logo:scale-110" />
             <div className="pointer-events-none absolute inset-0 rounded-xl ring-1 ring-inset ring-white/5" />
           </div>
           <div className="min-w-0 group-data-[collapsible=icon]:hidden">
