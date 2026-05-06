@@ -112,40 +112,42 @@ function RevenueCard({ collapsed, revenue, milestone, onOpenRewards }: RevenueCa
     <button
       type="button"
       onClick={onOpenRewards}
-      className="group/rev relative mt-5 block w-full overflow-hidden rounded-2xl border border-sidebar-border/40 bg-card-elevated/50 p-4 text-left transition-all duration-200 hover:border-sidebar-primary/40 hover:bg-card-elevated shadow-sm hover:shadow-primary/5"
+      className="group/rev relative mt-6 block w-full overflow-hidden rounded-2xl border border-border/50 bg-card p-5 text-left transition-all duration-300 hover:border-primary/40 hover:shadow-2xl hover:shadow-primary/5"
     >
-      <div className="flex items-center gap-3">
-        <div className="relative flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-sidebar-primary/25 bg-sidebar-primary/10 transition-transform group-hover/rev:scale-110">
-          <Zap className="h-[18px] w-[18px] text-sidebar-primary animate-pulse" strokeWidth={2.5} fill="hsl(var(--sidebar-primary))" />
-          <div className="absolute inset-0 rounded-xl bg-primary/20 blur-xl opacity-0 group-hover/rev:opacity-100 transition-opacity" />
+      <div className="flex items-center gap-4">
+        <div className="relative flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-primary/10 transition-transform group-hover/rev:scale-110">
+          <Zap className="h-6 w-6 text-primary" strokeWidth={2.5} fill="currentColor" />
         </div>
         <div className="min-w-0 flex-1">
-          <p className="text-[10px] font-bold uppercase tracking-[0.15em] text-muted-foreground/60">
-            Faturamento total
+          <p className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/50">
+            Volume Total
           </p>
-          <p className="mt-0.5 font-display text-[22px] font-black leading-none tracking-tight text-foreground tabular-nums">
+          <p className="mt-1 font-display text-2xl font-black leading-none tracking-tight text-foreground tabular-nums">
             {formatRevenue(revenue)}
           </p>
         </div>
       </div>
 
-      <div className="mt-4 flex items-center justify-between text-[10px] font-bold tracking-tight uppercase">
-        <span className="text-primary/80">{milestone.current.label}</span>
-        <span className="text-muted-foreground/40">Meta: {milestone.next.label}</span>
+      <div className="mt-6 flex items-center justify-between text-[10px] font-black tracking-widest uppercase text-muted-foreground/40">
+        <span>{milestone.current.label}</span>
+        <span>Meta: {milestone.next.label}</span>
       </div>
 
-      <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-sidebar-border/30">
+      <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-muted/30">
         <div
-          className="h-full rounded-full bg-primary transition-[width] duration-700 ease-out"
+          className="h-full rounded-full bg-primary transition-[width] duration-1000 ease-in-out"
           style={{ width: `${pct}%` }}
         />
       </div>
 
-      <div className="mt-3 flex items-center justify-between">
-        <span className="text-[13px] font-black tabular-nums text-primary">{pct}%</span>
-        <span className="inline-flex items-center gap-0.5 text-[10px] font-bold uppercase tracking-wider text-primary/70 transition-colors group-hover/rev:text-primary">
+      <div className="mt-4 flex items-center justify-between">
+        <div className="flex items-center gap-1.5">
+          <span className="text-sm font-black text-primary tabular-nums">{pct}%</span>
+          <span className="text-[10px] font-bold text-muted-foreground/40">Concluído</span>
+        </div>
+        <span className="inline-flex items-center gap-1 text-[10px] font-black uppercase tracking-widest text-primary/70 group-hover/rev:text-primary transition-colors">
           Premiações
-          <ChevronRight className="h-3 w-3 transition-transform group-hover/rev:translate-x-0.5" strokeWidth={3} />
+          <ChevronRight className="h-3 w-3" strokeWidth={3} />
         </span>
       </div>
     </button>
@@ -176,27 +178,19 @@ function SidebarSectionNav({ section, pathname, isFirst }: SidebarSectionNavProp
                     end={item.exact}
                     activeClassName=""
                     className={cn(
-                      "group/nav relative flex h-[50px] w-full items-center gap-3 rounded-xl pl-2 pr-3.5 text-[13.5px] font-bold transition-all duration-200 group-data-[collapsible=icon]:h-12 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0",
-                      isActive
-                        ? "bg-primary/10 text-primary"
-                        : "text-muted-foreground/60 hover:bg-card-elevated/60 hover:text-foreground",
-                    )}
-                  >
-                    {/* Active indicator bar */}
-                    {isActive && (
-                      <span className="absolute left-0 top-1/2 h-7 w-[3px] -translate-y-1/2 rounded-r-full bg-sidebar-primary group-data-[collapsible=icon]:hidden" />
-                    )}
-                    <span className={cn(
-                      "flex h-8.5 w-8.5 shrink-0 items-center justify-center rounded-lg transition-all duration-200",
+                      "group/nav relative flex h-[46px] w-full items-center gap-3 rounded-xl px-3 text-[13px] font-bold transition-all duration-200 group-data-[collapsible=icon]:h-12 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0",
                       isActive
                         ? "bg-primary text-primary-foreground shadow-lg shadow-primary/20"
-                        : "bg-card-elevated border border-border/30 text-muted-foreground/50 group-hover/nav:border-border/60 group-hover/nav:text-foreground",
-                    )}>
-                      <item.icon
-                        className="h-[18px] w-[18px]"
-                        strokeWidth={isActive ? 2.4 : 2}
-                      />
-                    </span>
+                        : "text-muted-foreground/50 hover:bg-muted/50 hover:text-foreground",
+                    )}
+                  >
+                    <item.icon
+                      className={cn(
+                        "h-5 w-5 transition-transform duration-300 group-hover/nav:scale-110",
+                        isActive ? "text-primary-foreground" : "text-muted-foreground/40 group-hover/nav:text-foreground"
+                      )}
+                      strokeWidth={isActive ? 2.5 : 2}
+                    />
                     <span className="truncate group-data-[collapsible=icon]:hidden">
                       {item.title}
                     </span>
@@ -337,8 +331,8 @@ export function AppSidebar() {
   const userName = user?.email?.split("@")[0] ?? "Vendedor";
 
   return (
-    <Sidebar collapsible="icon" className="border-r border-sidebar-border bg-sidebar">
-      <SidebarHeader className="relative border-b border-sidebar-border/60 px-4 pb-4 pt-4">
+    <Sidebar collapsible="icon" className="border-r border-border/50 bg-background/50 backdrop-blur-xl">
+      <SidebarHeader className="relative border-b border-border/50 px-5 pb-6 pt-6">
         {/* Brand */}
         <div className={cn("flex items-center gap-3", collapsed && "justify-center")}>
           <div className="group/logo relative h-11 w-11 shrink-0 overflow-hidden rounded-xl border border-border/40 bg-card-elevated transition-all hover:border-primary/50 hover:shadow-lg hover:shadow-primary/10">

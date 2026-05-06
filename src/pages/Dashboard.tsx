@@ -465,70 +465,64 @@ export default function Dashboard() {
       {/* ════════════════════════════════════════════════════════════════ */}
       {/* FINANCIAL STAT CARDS                                              */}
       {/* ════════════════════════════════════════════════════════════════ */}
-      <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+      <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         {[
           {
             label: "Total Faturado",
             value: privacy.hidden ? CENSORED : fmt(transactions.filter(t => t.status === "completed").reduce((a, t) => a + Number(t.net_amount), 0)),
-            sublabel: "Crescimento de +12%",
+            sublabel: "Faturamento histórico",
             icon: <TrendingUp className="h-5 w-5" />,
             color: "primary",
-            trend: "up"
           },
           {
             label: "Saldo Disponível",
             value: privacy.hidden ? CENSORED : fmt(Math.max(balance, 0)),
-            sublabel: "Liberado para saque",
+            sublabel: "Pronto para saque",
             icon: <Wallet className="h-5 w-5" />,
             color: "success",
-            trend: "up"
           },
           {
             label: "Saldo Pendente",
             value: privacy.hidden ? CENSORED : fmt(transactions.filter(t => t.status === "completed" && !t.retention_released).reduce((a, t) => a + Number(t.retained_amount), 0)),
-            sublabel: "Libera em 7 dias",
+            sublabel: "Lançamentos futuros",
             icon: <Clock3 className="h-5 w-5" />,
             color: "warning",
-            trend: "neutral"
           },
           {
             label: "Vendas Realizadas",
             value: privacy.hidden ? CENSORED : transactions.filter(t => t.status === "completed").length.toString(),
-            sublabel: "Ticket médio: R$ 97",
+            sublabel: "Total de conversões",
             icon: <Zap className="h-5 w-5" />,
             color: "info",
-            trend: "up"
           },
         ].map((card) => (
-          <div key={card.label} className="group relative p-6 rounded-3xl border border-border bg-card shadow-sm hover:shadow-2xl hover:shadow-primary/5 transition-all duration-300">
-            <div className="flex items-center justify-between mb-4">
-              <div className={cn("h-12 w-12 rounded-2xl flex items-center justify-center", 
-                card.color === "primary" ? "bg-primary/10 text-primary" :
-                card.color === "success" ? "bg-success/10 text-success" :
-                card.color === "warning" ? "bg-warning/10 text-warning" :
-                "bg-info/10 text-info"
-              )}>
-                {card.icon}
+          <div key={card.label} className="group relative p-8 rounded-[2rem] border border-border/50 bg-card transition-all duration-500 hover:border-primary/30 hover:shadow-2xl hover:shadow-primary/5 overflow-hidden">
+            <div className="relative z-10">
+              <div className="flex items-center justify-between mb-6">
+                <div className={cn("h-14 w-14 rounded-2xl flex items-center justify-center transition-transform duration-500 group-hover:scale-110 group-hover:rotate-3", 
+                  card.color === "primary" ? "bg-primary/10 text-primary" :
+                  card.color === "success" ? "bg-success/10 text-success" :
+                  card.color === "warning" ? "bg-warning/10 text-warning" :
+                  "bg-info/10 text-info"
+                )}>
+                  {card.icon}
+                </div>
+                <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-success/10 text-success text-[10px] font-black uppercase tracking-wider">
+                  <ArrowUpRight className="h-3 w-3" />
+                  Ativo
+                </div>
               </div>
-              <div className="flex items-center gap-1 px-2 py-1 rounded-full bg-success/10 text-success text-[10px] font-black uppercase">
-                <ArrowUpRight className="h-3 w-3" />
-                12.5%
+              <div className="space-y-1">
+                <p className="text-xs font-black uppercase tracking-[0.2em] text-muted-foreground/50">{card.label}</p>
+                <h3 className="text-3xl font-display font-black tracking-tighter text-foreground tabular-nums leading-none">
+                  {card.value}
+                </h3>
               </div>
-            </div>
-            <div className="space-y-1">
-              <p className="text-sm font-bold text-muted-foreground/80 tracking-tight">{card.label}</p>
-              <h3 className="text-3xl font-display font-black tracking-tight text-foreground tabular-nums">
-                {card.value}
-              </h3>
-            </div>
-            <div className="mt-4 pt-4 border-t border-border/50">
-              <p className="text-xs font-medium text-muted-foreground">{card.sublabel}</p>
+              <p className="mt-4 text-[11px] font-bold text-muted-foreground/40">{card.sublabel}</p>
             </div>
             
             {/* Decoration */}
-            <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity">
-              <div className="h-24 w-24 rounded-full bg-foreground blur-2xl" />
-            </div>
+            <div className="absolute -bottom-8 -right-8 h-32 w-32 bg-foreground/5 blur-3xl rounded-full transition-all duration-500 group-hover:bg-primary/10 group-hover:scale-150" />
           </div>
         ))}
       </section>
