@@ -111,43 +111,43 @@ function RevenueCard({ collapsed, revenue, milestone, onOpenRewards }: RevenueCa
     <button
       type="button"
       onClick={onOpenRewards}
-      className="group/rev relative mt-6 block w-full overflow-hidden rounded-2xl border border-sidebar-border/70 border-t-2 border-t-sidebar-primary bg-sidebar-accent/35 p-5 text-left transition-colors duration-200 hover:bg-sidebar-accent/55"
+      className="group/rev relative mt-6 block w-full overflow-hidden rounded-[1.5rem] border border-sidebar-border/50 bg-sidebar-accent/30 p-5 text-left transition-all duration-300 hover:bg-sidebar-accent/50 hover:border-sidebar-primary/20 hover:shadow-lg hover:shadow-black/5"
     >
       <div className="flex items-center gap-4">
-        <div className="relative flex h-12 w-12 shrink-0 items-center justify-center rounded-xl border border-sidebar-primary/25 bg-sidebar-primary/10">
-          <Zap className="h-6 w-6 text-primary" strokeWidth={2.5} fill="currentColor" />
+        <div className="relative flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary transition-transform group-hover/rev:scale-110">
+          <Zap className="h-5 w-5" strokeWidth={2.5} fill="currentColor" />
         </div>
         <div className="min-w-0 flex-1">
-          <p className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/50">
+          <p className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/40 leading-none">
             Volume Total
           </p>
-          <p className="mt-1 font-display text-2xl font-black leading-none tracking-tight text-foreground tabular-nums">
+          <p className="mt-2 font-display text-2xl font-black leading-none tracking-[-0.03em] text-foreground tabular-nums">
             {formatRevenue(revenue)}
           </p>
         </div>
       </div>
 
-      <div className="mt-6 flex items-center justify-between text-[10px] font-black tracking-widest uppercase text-muted-foreground/40">
+      <div className="mt-6 flex items-center justify-between text-[9px] font-black tracking-[0.2em] uppercase text-muted-foreground/30">
         <span>{milestone.current.label}</span>
         <span>Meta: {milestone.next.label}</span>
       </div>
 
-      <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-sidebar-border/60">
+      <div className="mt-2.5 h-1.5 overflow-hidden rounded-full bg-sidebar-border/40">
         <div
-          className="h-full rounded-full bg-sidebar-primary transition-[width] duration-700 ease-out"
+          className="h-full rounded-full bg-primary transition-[width] duration-1000 ease-out shadow-[0_0_8px_rgba(var(--primary),0.5)]"
           style={{ width: `${pct}%` }}
         />
       </div>
 
       <div className="mt-4 flex items-center justify-between">
-        <div className="flex items-center gap-1.5">
-          <span className="text-sm font-black text-primary tabular-nums">{pct}%</span>
-          <span className="text-[10px] font-bold text-muted-foreground/40">Concluído</span>
+        <div className="flex items-center gap-2">
+          <span className="text-[14px] font-black text-primary tabular-nums tracking-tight">{pct}%</span>
+          <span className="text-[9px] font-black uppercase tracking-wider text-muted-foreground/30">Concluído</span>
         </div>
-        <span className="inline-flex items-center gap-1 text-[10px] font-black uppercase tracking-widest text-primary/70 group-hover/rev:text-primary transition-colors">
-          Premiações
-          <ChevronRight className="h-3 w-3" strokeWidth={3} />
-        </span>
+        <div className="inline-flex items-center gap-1 text-[10px] font-black uppercase tracking-widest text-primary/60 group-hover/rev:text-primary transition-colors">
+          Rewards
+          <ChevronRight className="h-3 w-3 transition-transform group-hover/rev:translate-x-0.5" strokeWidth={3} />
+        </div>
       </div>
     </button>
   );
