@@ -130,6 +130,39 @@ function Sparkline({ points, color = "hsl(var(--success))" }: { points: number[]
   );
 }
 
+function MetricCard({
+  title, value, prevValue, icon: Icon, color, hidden, sparklineData, format = "currency", positive = true
+}: {
+  title: string; value: number; prevValue: number; icon: any; color: string; hidden: boolean; sparklineData?: number[]; format?: "currency" | "number" | "percent"; positive?: boolean
+}) {
+  const displayValue = hidden ? HIDE : (format === "currency" ? fmtCompact(value) : format === "percent" ? `${value.toFixed(1)}%` : value.toLocaleString("pt-BR"));
+  
+  return (
+    <div className="group relative overflow-hidden rounded-2xl border border-border/50 bg-card/40 p-5 backdrop-blur-xl transition-all duration-300 hover:border-primary/30 hover:shadow-2xl hover:shadow-primary/5">
+      <div className="absolute -right-4 -top-4 h-24 w-24 rounded-full bg-primary/5 blur-2xl transition-all group-hover:bg-primary/10" />
+      
+      <div className="flex items-start justify-between">
+        <div className="space-y-1">
+          <p className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground/80">{title}</p>
+          <h3 className={cn("text-2xl font-black tracking-tight font-display", color)}>{displayValue}</h3>
+        </div>
+        <div className={cn("flex h-10 w-10 items-center justify-center rounded-xl ring-1 ring-inset", color.replace("text-", "bg-") + "/10", color.replace("text-", "ring-") + "/20")}>
+          <Icon className="h-5 w-5" />
+        </div>
+      </div>
+      
+      <div className="mt-4 flex items-end justify-between gap-4">
+        <DeltaBadge cur={value} prev={prevValue} positive={positive} />
+        {sparklineData && !hidden && (
+          <div className="h-8 w-24 shrink-0 overflow-hidden rounded-md opacity-60 transition-opacity group-hover:opacity-100">
+            <Sparkline points={sparklineData} color={`hsl(var(--${color.split("-")[1]}))`} />
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
 function Kbd({ children, className }: { children: React.ReactNode; className?: string }) {
   return (
     <kbd className={cn("inline-flex h-[18px] min-w-[18px] items-center justify-center rounded border border-border bg-background px-1 font-mono text-[10px] font-semibold text-muted-foreground shadow-[0_1px_0_hsl(var(--border))]", className)}>
