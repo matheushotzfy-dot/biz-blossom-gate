@@ -522,130 +522,121 @@ export default function Dashboard() {
       {/* ════════════════════════════════════════════════════════════════ */}
       {/* CHART + INDICES                                                   */}
       {/* ════════════════════════════════════════════════════════════════ */}
-      <section className="grid grid-cols-1 xl:grid-cols-3 gap-6">
-        {/* Main Growth Chart */}
-        <div className="xl:col-span-2 rounded-3xl border border-border bg-card p-6 md:p-8 shadow-sm relative overflow-hidden">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
-            <div className="space-y-1">
-              <h3 className="text-xl font-display font-black tracking-tight">Fluxo de Faturamento</h3>
-              <p className="text-sm text-muted-foreground font-medium">Desempenho financeiro consolidado do período.</p>
+      <section className="grid grid-cols-1 xl:grid-cols-[1fr_340px] gap-3">
+        {/* Faturamento Chart */}
+        <div className="rounded-xl border border-border/50 bg-card overflow-hidden">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 px-6 py-5 border-b border-border/30">
+            <div>
+              <h3 className="text-[15px] font-display font-bold text-foreground tracking-tight">Faturamento</h3>
+              <p className="text-[11px] text-muted-foreground/50 mt-0.5">Evolução do período selecionado</p>
             </div>
-            <div className="flex items-center gap-2">
-              <div className="h-2 w-2 rounded-full bg-primary" />
-              <span className="text-xs font-bold text-muted-foreground">Volume Bruto (R$)</span>
+            <div className="flex items-center gap-3">
+              <span className="inline-flex items-center gap-1.5 text-[10px] text-muted-foreground/50 font-medium">
+                <span className="h-2 w-2 rounded-full bg-primary" /> Receita
+              </span>
             </div>
           </div>
-          
-          <div className="h-[350px] w-full">
-            <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={chartData} margin={{ top: 0, right: 0, left: -20, bottom: 0 }}>
+          <div className="px-3 pb-5 min-h-[300px]">
+            <ResponsiveContainer width="100%" height={280}>
+              <AreaChart data={chartData} margin={{ top: 10, right: 16, left: -12, bottom: 0 }}>
                 <defs>
-                  <linearGradient id="premiumGradient" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="hsl(var(--primary))" stopOpacity={0.15} />
-                    <stop offset="95%" stopColor="hsl(var(--primary))" stopOpacity={0} />
+                  <linearGradient id="dashboardRevenue" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor="hsl(var(--primary))" stopOpacity={0.2} />
+                    <stop offset="100%" stopColor="hsl(var(--primary))" stopOpacity={0} />
                   </linearGradient>
                 </defs>
-                <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 11, fontWeight: 600 }} dy={15} />
-                <YAxis axisLine={false} tickLine={false} tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 11, fontWeight: 600 }} tickFormatter={(v) => `R$ ${v >= 1000 ? (v/1000).toFixed(0) + 'k' : v}`} />
+                <XAxis dataKey="name" tickLine={false} axisLine={false} dy={8} stroke="hsl(var(--muted-foreground) / 0.3)" fontSize={10} interval={chartData.length > 10 ? Math.ceil(chartData.length / 8) - 1 : 0} />
+                <YAxis tickLine={false} axisLine={false} width={64} stroke="hsl(var(--muted-foreground) / 0.3)" fontSize={10} tickFormatter={(v) => v >= 1000 ? `R$${(v / 1000).toLocaleString("pt-BR", { minimumFractionDigits: 1, maximumFractionDigits: 1 })}k` : `R$${v}`} />
                 <Tooltip
-                  cursor={{ stroke: "hsl(var(--primary) / 0.2)", strokeWidth: 2 }}
+                  cursor={{ stroke: "hsl(var(--primary) / 0.3)", strokeWidth: 1, strokeDasharray: "4 4" }}
                   content={({ active, payload, label }) => {
                     if (!active || !payload?.length) return null;
                     return (
-                      <div className="p-4 rounded-2xl border border-border bg-card shadow-2xl backdrop-blur-md">
-                        <p className="text-[10px] font-black uppercase text-muted-foreground tracking-widest mb-1">{label}</p>
-                        <p className="text-lg font-display font-black text-primary">
+                      <div className="rounded-lg border border-border bg-card px-4 py-3">
+                        <p className="font-display text-[9px] font-bold text-muted-foreground/50 uppercase tracking-[0.18em]">{label}</p>
+                        <p className="font-display text-[15px] font-black text-primary tabular-nums mt-1 tracking-tight">
                           {fmt(payload[0].value as number)}
                         </p>
                       </div>
                     );
                   }}
                 />
-                <Area type="monotone" dataKey="vendas" stroke="hsl(var(--primary))" strokeWidth={4} fill="url(#premiumGradient)" animationDuration={1500} dot={false} activeDot={{ r: 6, strokeWidth: 0, fill: "hsl(var(--primary))" }} />
+                <Area type="monotone" dataKey="vendas" stroke="hsl(var(--primary))" strokeWidth={2} fill="url(#dashboardRevenue)" dot={false} activeDot={{ r: 5, strokeWidth: 2, fill: "hsl(var(--card))", stroke: "hsl(var(--primary))" }} />
               </AreaChart>
             </ResponsiveContainer>
           </div>
         </div>
 
-        {/* Sidebar Insights */}
-        <div className="space-y-6">
-          <div className="p-8 rounded-3xl border border-border bg-primary text-primary-foreground relative overflow-hidden shadow-xl shadow-primary/20">
-            <div className="relative z-10 space-y-6">
-              <div className="h-12 w-12 rounded-2xl bg-white/20 backdrop-blur-md flex items-center justify-center">
-                <Crown className="h-6 w-6" />
-              </div>
-              <div className="space-y-2">
-                <h3 className="text-xl font-display font-black tracking-tight">Status da Operação</h3>
-                <p className="text-primary-foreground/80 text-sm font-medium leading-relaxed">Sua conta está em nível de <span className="text-white font-bold">ALTA PERFORMANCE</span> hoje.</p>
-              </div>
-              <button onClick={() => navigate("/premiacoes")} className="w-full h-12 bg-white text-primary rounded-xl font-bold text-sm shadow-lg hover:bg-white/90 transition-all active:scale-95">
-                Ver Premiações
-              </button>
-            </div>
-            {/* Background pattern */}
-            <div className="absolute top-[-20%] right-[-20%] w-[150px] h-[150px] bg-white/10 blur-[60px] rounded-full" />
+        {/* Right sidebar — KPIs */}
+        <div className="rounded-xl border border-border/50 bg-card overflow-hidden flex flex-col">
+          <div className="px-6 py-5 border-b border-border/30">
+            <h3 className="text-[15px] font-display font-bold text-foreground tracking-tight">Índices</h3>
+            <p className="text-[11px] text-muted-foreground/50 mt-0.5">Métricas de conversão</p>
           </div>
-
-          <div className="p-6 rounded-3xl border border-border bg-card shadow-sm space-y-4">
-            <h3 className="text-sm font-bold uppercase tracking-wider text-muted-foreground/80 px-1">Distribuição de Receita</h3>
-            <div className="space-y-4">
-              {[
-                { label: "PIX Instantâneo", value: pixConversion, color: "bg-success" },
-                { label: "Cartão de Crédito", value: cardConversion, color: "bg-primary" },
-              ].map((method) => (
-                <div key={method.label} className="space-y-2">
-                  <div className="flex items-center justify-between text-xs font-bold">
-                    <span>{method.label}</span>
-                    <span className="text-foreground">{method.value.toFixed(1)}%</span>
-                  </div>
-                  <div className="h-2 w-full bg-accent rounded-full overflow-hidden">
-                    <div className={cn("h-full rounded-full transition-all duration-1000", method.color)} style={{ width: `${method.value}%` }} />
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* ─── Recent Activity Section ─── */}
-      <section className="grid grid-cols-1 gap-6">
-        <div className="rounded-3xl border border-border bg-card p-6 md:p-8 shadow-sm">
-          <div className="flex items-center justify-between mb-8">
-            <div className="space-y-1">
-              <h3 className="text-xl font-display font-black tracking-tight text-foreground">Operações Recentes</h3>
-              <p className="text-sm text-muted-foreground font-medium">Últimas transações e saques processados.</p>
-            </div>
-            <Link to="/vendas" className="text-sm font-bold text-primary hover:underline">Ver tudo</Link>
-          </div>
-
-          <div className="space-y-3">
-            {activity.map((item) => (
-              <div key={item.id} className="group flex items-center gap-4 p-4 rounded-2xl border border-transparent hover:border-border hover:bg-accent/30 transition-all cursor-pointer" onClick={() => item.kind === 'transaction' && setDetailTx(transactions.find(t => t.id === item.id) || null)}>
-                <div className={cn("h-12 w-12 rounded-xl flex items-center justify-center shrink-0",
-                  item.status === 'completed' ? "bg-success/10 text-success" : 
-                  item.status === 'pending' ? "bg-warning/10 text-warning" : "bg-destructive/10 text-destructive"
-                )}>
-                  {item.kind === 'withdrawal' ? <ArrowDownRight className="h-5 w-5" /> : <CreditCard className="h-5 w-5" />}
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-bold text-foreground truncate">{item.label}</p>
-                  <p className="text-[10px] font-medium text-muted-foreground/60 uppercase tracking-wider mt-0.5">
-                    {item.kind === 'withdrawal' ? 'Saque' : 'Venda'} • {timeAgo(item.createdAt)}
-                  </p>
-                </div>
-                <div className="text-right shrink-0">
-                  <p className="text-sm font-display font-black text-foreground">{fmt(item.amount)}</p>
-                  <p className={cn("text-[10px] font-bold uppercase tracking-widest mt-0.5",
-                    item.status === 'completed' ? "text-success" : 
-                    item.status === 'pending' ? "text-warning" : "text-destructive"
-                  )}>
-                    {item.status === 'completed' ? 'Aprovado' : 
-                     item.status === 'pending' ? 'Pendente' : 'Cancelado'}
-                  </p>
+          <div className="flex-1 p-5 space-y-5">
+            {/* Pix */}
+            <div className="flex items-center gap-4">
+              <div className="relative h-14 w-14 shrink-0">
+                <svg className="h-full w-full -rotate-90" viewBox="0 0 36 36">
+                  <circle cx="18" cy="18" r="15.5" fill="none" stroke="hsl(var(--border) / 0.3)" strokeWidth="3" />
+                  <circle cx="18" cy="18" r="15.5" fill="none" stroke="hsl(var(--success))" strokeWidth="3" strokeDasharray={`${pixConversion * 0.974} 100`} strokeLinecap="round" />
+                </svg>
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <span className="text-[11px] font-display font-black text-success tabular-nums">{pixConversion.toFixed(0)}%</span>
                 </div>
               </div>
-            ))}
+              <div>
+                <p className="text-[13px] font-display font-bold text-foreground">Pix</p>
+                <p className="text-[11px] text-muted-foreground/50">Conversão</p>
+              </div>
+            </div>
+            {/* Card */}
+            <div className="flex items-center gap-4">
+              <div className="relative h-14 w-14 shrink-0">
+                <svg className="h-full w-full -rotate-90" viewBox="0 0 36 36">
+                  <circle cx="18" cy="18" r="15.5" fill="none" stroke="hsl(var(--border) / 0.3)" strokeWidth="3" />
+                  <circle cx="18" cy="18" r="15.5" fill="none" stroke="hsl(var(--info))" strokeWidth="3" strokeDasharray={`${cardConversion * 0.974} 100`} strokeLinecap="round" />
+                </svg>
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <span className="text-[11px] font-display font-black text-info tabular-nums">{cardConversion.toFixed(0)}%</span>
+                </div>
+              </div>
+              <div>
+                <p className="text-[13px] font-display font-bold text-foreground">Cartão</p>
+                <p className="text-[11px] text-muted-foreground/50">Conversão</p>
+              </div>
+            </div>
+            {/* Chargeback */}
+            <div className="flex items-center gap-4">
+              <div className="relative h-14 w-14 shrink-0">
+                <svg className="h-full w-full -rotate-90" viewBox="0 0 36 36">
+                  <circle cx="18" cy="18" r="15.5" fill="none" stroke="hsl(var(--border) / 0.3)" strokeWidth="3" />
+                  <circle cx="18" cy="18" r="15.5" fill="none" stroke={chargebackRate > 1 ? "hsl(var(--destructive))" : "hsl(var(--success))"} strokeWidth="3" strokeDasharray={`${Math.min(chargebackRate * 9.74, 97.4)} 100`} strokeLinecap="round" />
+                </svg>
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <span className={cn("text-[11px] font-display font-black tabular-nums", chargebackRate > 1 ? "text-destructive" : "text-success")}>{chargebackRate.toFixed(1)}%</span>
+                </div>
+              </div>
+              <div>
+                <p className="text-[13px] font-display font-bold text-foreground">Chargeback</p>
+                <p className="text-[11px] text-muted-foreground/50">Saúde da conta</p>
+              </div>
+            </div>
+            {/* Summary */}
+            <div className="border-t border-border/30 pt-4 space-y-2.5">
+              <div className="flex items-center justify-between text-[12px]">
+                <span className="text-muted-foreground/60">Ticket Médio</span>
+                <span className="font-display font-black text-foreground tabular-nums">{privacy.hidden ? CENSORED : fmt(approved.length > 0 ? revenue / approved.length : 0)}</span>
+              </div>
+              <div className="flex items-center justify-between text-[12px]">
+                <span className="text-muted-foreground/60">Conversão Geral</span>
+                <span className="font-display font-black text-foreground tabular-nums">{conversion.toFixed(1)}%</span>
+              </div>
+              <div className="flex items-center justify-between text-[12px]">
+                <span className="text-muted-foreground/60">Clientes Únicos</span>
+                <span className="font-display font-black text-foreground tabular-nums">{uniqueCustomers}</span>
+              </div>
+            </div>
           </div>
         </div>
       </section>
