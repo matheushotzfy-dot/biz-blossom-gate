@@ -1,4 +1,5 @@
 import { SidebarInset, SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
+import { supabase } from "@/integrations/supabase/client";
 import { AppSidebar } from "./AppSidebar";
 import { MobileBottomNav } from "./MobileBottomNav";
 import { MobileRevenueBar } from "./MobileRevenueBar";
