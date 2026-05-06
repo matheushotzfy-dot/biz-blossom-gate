@@ -37,7 +37,6 @@ import {
   User,
   Banknote,
   Crown,
-  Rocket,
 } from "lucide-react";
 import { Area, AreaChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import type { Tables } from "@/integrations/supabase/types";
@@ -387,48 +386,60 @@ export default function Dashboard() {
   const nickname = profile?.nickname || profile?.full_name?.split(" ")[0] || null;
 
   return (
-    <div className="dashboard-page mx-auto w-full max-w-[1440px] pb-24 px-4 md:px-8 relative space-y-8 mt-4">
-      {/* ─── Premium Glassmorphism Ambient Glow ─── */}
+    <div className="dashboard-page mx-auto w-full max-w-[1536px] pb-24 px-4 md:px-10 relative space-y-10 mt-6">
+      {/* ─── Immersive Background Glows ─── */}
       <div className="fixed inset-0 z-[-1] pointer-events-none overflow-hidden">
-        <div className="absolute top-[-20%] left-[-10%] w-[50%] h-[50%] bg-primary/5 blur-[160px] rounded-full animate-pulse" />
-        <div className="absolute bottom-[-20%] right-[-10%] w-[50%] h-[50%] bg-info/5 blur-[160px] rounded-full animate-pulse" style={{ animationDelay: '3s' }} />
+        <div className="absolute top-[-25%] left-[-15%] w-[60%] h-[60%] bg-primary/5 blur-[180px] rounded-full animate-pulse" />
+        <div className="absolute bottom-[-25%] right-[-15%] w-[60%] h-[60%] bg-info/5 blur-[180px] rounded-full animate-pulse" style={{ animationDelay: '4s' }} />
       </div>
 
-      {/* ─── Hero Section with Enhanced Stats ─── */}
-      <section className="relative p-8 md:p-10 rounded-[2.5rem] border border-border/50 bg-card overflow-hidden shadow-2xl shadow-primary/5">
-        <div className="absolute top-0 right-0 p-10 opacity-[0.03] pointer-events-none">
-          <Sparkles className="h-64 w-64 text-primary" />
+      {/* ─── Master Hero Section ─── */}
+      <section className="relative p-10 md:p-14 rounded-[3.5rem] border border-border/40 bg-card/40 backdrop-blur-md overflow-hidden shadow-[0_0_80px_-20px_rgba(0,0,0,0.3)]">
+        <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-info/5" />
+        <div className="absolute top-0 right-0 p-12 opacity-[0.04] pointer-events-none select-none">
+          <Rocket className="h-80 w-80 text-primary rotate-12" />
         </div>
         
-        <div className="relative z-10 flex flex-col md:flex-row justify-between items-start md:items-center gap-8">
-          <div className="space-y-4">
-            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-primary/10 border border-primary/20 text-primary text-[11px] font-black uppercase tracking-[0.2em]">
-              <Crown className="h-4 w-4" />
-              Sua conta está em alta performance
+        <div className="relative z-10 flex flex-col lg:flex-row justify-between items-start lg:items-center gap-10">
+          <div className="space-y-6">
+            <div className="inline-flex items-center gap-2.5 px-5 py-2 rounded-full bg-primary/10 border border-primary/25 text-primary text-[10px] font-black uppercase tracking-[0.25em]">
+              <div className="h-1.5 w-1.5 rounded-full bg-primary animate-ping" />
+              Hotzfy Elite Operating System
             </div>
-            <h1 className="text-4xl md:text-5xl font-display font-black tracking-tighter text-foreground">
-              Olá, {nickname || "Vendedor"} <span className="text-primary animate-pulse">.</span>
-            </h1>
-            <p className="text-muted-foreground font-medium text-lg max-w-lg leading-relaxed">
-              Você teve um crescimento de <span className="text-success font-bold">+12.5%</span> no faturamento em relação ao período anterior.
+            <div className="space-y-2">
+              <h1 className="text-5xl md:text-7xl font-display font-black tracking-tighter text-foreground leading-[0.9]">
+                Seja bem-vindo, <br />
+                <span className="text-gradient-premium">{nickname || "Vendedor"}</span>
+              </h1>
+            </div>
+            <p className="text-muted-foreground/80 font-medium text-xl max-w-xl leading-relaxed">
+              Sua operação processou <span className="text-foreground font-bold">{transactions.filter(t => t.status === "completed").length} vendas</span> com uma taxa de aprovação excelente.
             </p>
           </div>
 
-          <div className="flex flex-col items-end gap-3">
-            <div className="flex items-center gap-2 p-1 rounded-2xl bg-muted/30 border border-border/50">
+          <div className="flex flex-col sm:flex-row lg:flex-col items-end gap-4 w-full lg:w-auto">
+            <div className="flex items-center gap-2 p-1.5 rounded-[1.25rem] bg-background/50 border border-border/50 backdrop-blur-sm shadow-inner">
               {PERIOD_PRESETS.filter(p => ["Hoje", "7 dias", "30 dias"].includes(p.label)).map((opt) => (
                 <button key={opt.label} onClick={() => { setSelectedPeriod(opt); setIsCustom(false); }}
-                  className={cn("h-10 px-6 rounded-xl text-xs font-black uppercase tracking-widest transition-all",
-                    !isCustom && selectedPeriod.label === opt.label ? "bg-card text-foreground shadow-xl ring-1 ring-border/50" : "text-muted-foreground hover:text-foreground"
+                  className={cn("h-11 px-8 rounded-xl text-[11px] font-black uppercase tracking-widest transition-all duration-500",
+                    !isCustom && selectedPeriod.label === opt.label 
+                      ? "bg-card text-foreground shadow-[0_8px_20px_-6px_rgba(0,0,0,0.5)] ring-1 ring-border/50 translate-y-[-1px]" 
+                      : "text-muted-foreground/60 hover:text-foreground hover:bg-white/5"
                   )}>
                   {opt.label}
                 </button>
               ))}
             </div>
-            <button onClick={privacy.toggle} className="h-10 px-5 rounded-xl border border-border bg-card hover:bg-accent text-foreground transition-all flex items-center gap-2 font-bold text-xs uppercase tracking-widest">
-              {privacy.hidden ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-              Privacidade
-            </button>
+            <div className="flex items-center gap-3 w-full sm:w-auto">
+              <button onClick={privacy.toggle} className="flex-1 sm:flex-none h-12 px-6 rounded-2xl border border-border/60 bg-card/60 hover:bg-accent text-foreground transition-all flex items-center justify-center gap-3 font-black text-[11px] uppercase tracking-widest shadow-lg">
+                {privacy.hidden ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                Privacidade
+              </button>
+              <button onClick={() => setDatePickerOpen(true)} className="flex-1 sm:flex-none h-12 px-6 rounded-2xl border border-primary/30 bg-primary/10 hover:bg-primary/20 text-primary transition-all flex items-center justify-center gap-3 font-black text-[11px] uppercase tracking-widest shadow-lg">
+                <CalendarDays className="h-4 w-4" />
+                Filtrar
+              </button>
+            </div>
           </div>
         </div>
       </section>
