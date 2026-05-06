@@ -534,95 +534,91 @@ export default function Dashboard() {
       {/* ════════════════════════════════════════════════════════════════ */}
       {/* CHART + INDICES                                                   */}
       {/* ════════════════════════════════════════════════════════════════ */}
-      <section className="grid grid-cols-1 xl:grid-cols-[1fr_340px] gap-3">
-        {/* Faturamento Chart */}
-        <div className="rounded-xl border border-border/50 bg-card overflow-hidden">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 px-6 py-5 border-b border-border/30">
-            <div>
-              <h3 className="text-[15px] font-display font-bold text-foreground tracking-tight">Faturamento</h3>
-              <p className="text-[11px] text-muted-foreground/60 mt-0.5">
-                Compara entradas e saídas diárias para acompanhamento do fluxo de caixa.
-              </p>
+      <section className="grid grid-cols-1 xl:grid-cols-3 gap-6">
+        {/* Main Growth Chart */}
+        <div className="xl:col-span-2 rounded-3xl border border-border bg-card p-6 md:p-8 shadow-sm relative overflow-hidden">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
+            <div className="space-y-1">
+              <h3 className="text-xl font-display font-black tracking-tight">Fluxo de Faturamento</h3>
+              <p className="text-sm text-muted-foreground font-medium">Desempenho financeiro consolidado do período.</p>
             </div>
-            <div className="flex items-center gap-1">
-              <div className="inline-flex items-center rounded-lg border border-border/40 bg-card-inset p-0.5">
-                {PERIOD_PRESETS.filter(p => ["30 dias", "7 dias", "Hoje"].includes(p.label)).map((opt) => (
-                  <button key={opt.label} onClick={() => { setSelectedPeriod(opt); setIsCustom(false); setCustomRange(undefined); }}
-                    className={cn("rounded-md px-3 py-1.5 text-[11px] font-display font-bold transition-all",
-                      !isCustom && selectedPeriod.label === opt.label ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground"
-                    )}>
-                    {opt.label === "30 dias" ? "Mês" : opt.label === "7 dias" ? "Semana" : opt.label}
-                  </button>
-                ))}
-              </div>
-              <Popover open={datePickerOpen} onOpenChange={setDatePickerOpen}>
-                <PopoverTrigger asChild>
-                  <button className={cn("h-8 rounded-lg border px-3 text-[10px] font-bold transition-all inline-flex items-center gap-1.5",
-                    isCustom ? "border-primary/35 bg-primary/10 text-foreground" : "border-border/40 bg-card-inset text-muted-foreground hover:text-foreground"
-                  )}>
-                    <CalendarDays className="h-3 w-3" />
-                    {isCustom && customRange?.from
-                      ? customRange.to ? `${format(customRange.from, "dd/MM")} – ${format(customRange.to, "dd/MM")}` : format(customRange.from, "dd/MM/yyyy")
-                      : "Custom"}
-                  </button>
-                </PopoverTrigger>
-                <PopoverContent align="end" className="w-auto overflow-hidden rounded-xl border border-border/30 bg-popover p-0">
-                  <Calendar mode="range" selected={customRange} onSelect={(range) => { setCustomRange(range); setIsCustom(true); if (range?.from && range?.to) setTimeout(() => setDatePickerOpen(false), 300); }} numberOfMonths={1} locale={ptBR} disabled={(date) => date > new Date()} className="p-3 pointer-events-auto" classNames={{ day_selected: "bg-primary text-primary-foreground", day_range_middle: "bg-primary/10 text-foreground", day_range_end: "bg-primary text-primary-foreground" }} />
-                </PopoverContent>
-              </Popover>
+            <div className="flex items-center gap-2">
+              <div className="h-2 w-2 rounded-full bg-primary" />
+              <span className="text-xs font-bold text-muted-foreground">Volume Bruto (R$)</span>
             </div>
           </div>
-          {/* Legend */}
-          <div className="flex items-center gap-4 px-6 pt-4 pb-1">
-            <span className="inline-flex items-center gap-1.5 text-[10px] text-muted-foreground/60 font-medium">
-              <span className="h-2 w-2 rounded-full bg-success" /> Entradas
-            </span>
-            <span className="inline-flex items-center gap-1.5 text-[10px] text-muted-foreground/60 font-medium">
-              <span className="h-2 w-2 rounded-full bg-warning" /> Saídas
-            </span>
-            <span className="inline-flex items-center gap-1.5 text-[10px] text-muted-foreground/60 font-medium">
-              <span className="h-2 w-2 rounded-full bg-muted-foreground/40" /> Infração
-            </span>
-          </div>
-          {/* Chart area */}
-          <div className="px-3 pb-5 min-h-[320px]">
-            <ResponsiveContainer width="100%" height={300}>
-              <AreaChart data={chartData} margin={{ top: 10, right: 16, left: -12, bottom: 0 }}>
+          
+          <div className="h-[350px] w-full">
+            <ResponsiveContainer width="100%" height="100%">
+              <AreaChart data={chartData} margin={{ top: 0, right: 0, left: -20, bottom: 0 }}>
                 <defs>
-                  <linearGradient id="dashboardRevenue" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="hsl(var(--primary))" stopOpacity={0.28} />
-                    <stop offset="100%" stopColor="hsl(var(--primary))" stopOpacity={0} />
+                  <linearGradient id="premiumGradient" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="hsl(var(--primary))" stopOpacity={0.15} />
+                    <stop offset="95%" stopColor="hsl(var(--primary))" stopOpacity={0} />
                   </linearGradient>
                 </defs>
-                <XAxis dataKey="name" tickLine={false} axisLine={false} dy={8} stroke="hsl(var(--muted-foreground) / 0.3)" fontSize={10} interval={chartData.length > 10 ? Math.ceil(chartData.length / 8) - 1 : 0} />
-                <YAxis tickLine={false} axisLine={false} width={64} stroke="hsl(var(--muted-foreground) / 0.3)" fontSize={10} tickFormatter={(v) => v >= 1000 ? `R$${(v / 1000).toLocaleString("pt-BR", { minimumFractionDigits: 1, maximumFractionDigits: 1 })}k` : `R$${v.toLocaleString("pt-BR", { minimumFractionDigits: 0 })}`} />
+                <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 11, fontWeight: 600 }} dy={15} />
+                <YAxis axisLine={false} tickLine={false} tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 11, fontWeight: 600 }} tickFormatter={(v) => `R$ ${v >= 1000 ? (v/1000).toFixed(0) + 'k' : v}`} />
                 <Tooltip
-                  cursor={{ stroke: "hsl(var(--primary) / 0.3)", strokeWidth: 1, strokeDasharray: "4 4" }}
+                  cursor={{ stroke: "hsl(var(--primary) / 0.2)", strokeWidth: 2 }}
                   content={({ active, payload, label }) => {
                     if (!active || !payload?.length) return null;
-                    const value = payload[0].value as number;
                     return (
-                      <div className="rounded-lg border border-border bg-card px-4 py-3">
-                        <p className="font-display text-[9px] font-bold text-muted-foreground/60 uppercase tracking-[0.18em]">{label}</p>
-                        <p className="font-display text-[15px] font-black text-primary tabular-nums mt-1 tracking-tight">
-                          R$ {value.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                      <div className="p-4 rounded-2xl border border-border bg-card shadow-2xl backdrop-blur-md">
+                        <p className="text-[10px] font-black uppercase text-muted-foreground tracking-widest mb-1">{label}</p>
+                        <p className="text-lg font-display font-black text-primary">
+                          {fmt(payload[0].value as number)}
                         </p>
                       </div>
                     );
                   }}
                 />
-                <Area type="monotone" dataKey="vendas" stroke="hsl(var(--primary))" strokeWidth={2} fill="url(#dashboardRevenue)" dot={false} activeDot={{ r: 5, strokeWidth: 2, fill: "hsl(var(--card))", stroke: "hsl(var(--primary))" }} />
+                <Area type="monotone" dataKey="vendas" stroke="hsl(var(--primary))" strokeWidth={4} fill="url(#premiumGradient)" animationDuration={1500} dot={false} activeDot={{ r: 6, strokeWidth: 0, fill: "hsl(var(--primary))" }} />
               </AreaChart>
             </ResponsiveContainer>
           </div>
         </div>
 
-        {/* Índices — Payment method breakdown */}
-        <div className="rounded-xl border border-border/50 bg-card overflow-hidden flex flex-col">
-          <div className="px-6 py-5 border-b border-border/30">
-            <h3 className="text-[15px] font-display font-bold text-foreground tracking-tight">Índices</h3>
-            <p className="text-[11px] text-muted-foreground/60 mt-0.5">Boleto, pix e chargeback</p>
+        {/* Sidebar Insights */}
+        <div className="space-y-6">
+          <div className="p-8 rounded-3xl border border-border bg-primary text-primary-foreground relative overflow-hidden shadow-xl shadow-primary/20">
+            <div className="relative z-10 space-y-6">
+              <div className="h-12 w-12 rounded-2xl bg-white/20 backdrop-blur-md flex items-center justify-center">
+                <Crown className="h-6 w-6" />
+              </div>
+              <div className="space-y-2">
+                <h3 className="text-xl font-display font-black tracking-tight">Status da Operação</h3>
+                <p className="text-primary-foreground/80 text-sm font-medium leading-relaxed">Sua conta está em nível de <span className="text-white font-bold">ALTA PERFORMANCE</span> hoje.</p>
+              </div>
+              <button onClick={() => navigate("/premiacoes")} className="w-full h-12 bg-white text-primary rounded-xl font-bold text-sm shadow-lg hover:bg-white/90 transition-all active:scale-95">
+                Ver Premiações
+              </button>
+            </div>
+            {/* Background pattern */}
+            <div className="absolute top-[-20%] right-[-20%] w-[150px] h-[150px] bg-white/10 blur-[60px] rounded-full" />
           </div>
+
+          <div className="p-6 rounded-3xl border border-border bg-card shadow-sm space-y-4">
+            <h3 className="text-sm font-bold uppercase tracking-wider text-muted-foreground/80 px-1">Distribuição de Receita</h3>
+            <div className="space-y-4">
+              {[
+                { label: "PIX Instantâneo", value: pixConversion, color: "bg-success" },
+                { label: "Cartão de Crédito", value: cardConversion, color: "bg-primary" },
+              ].map((method) => (
+                <div key={method.label} className="space-y-2">
+                  <div className="flex items-center justify-between text-xs font-bold">
+                    <span>{method.label}</span>
+                    <span className="text-foreground">{method.value.toFixed(1)}%</span>
+                  </div>
+                  <div className="h-2 w-full bg-accent rounded-full overflow-hidden">
+                    <div className={cn("h-full rounded-full transition-all duration-1000", method.color)} style={{ width: `${method.value}%` }} />
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
           <div className="flex-1 p-5 space-y-5">
             {/* Pix */}
             <div className="flex items-center gap-4">
