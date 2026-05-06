@@ -403,188 +403,281 @@ export default function Dashboard() {
   const nickname = profile?.nickname || profile?.full_name?.split(" ")[0] || null;
 
   const statusLabel = (s: string) => s === 'completed' ? 'Aprovado' : s === 'pending' ? 'Pendente' : s === 'refunded' ? 'Reembolso' : s === 'chargeback' ? 'Chargeback' : 'Falhou';
-  const statusColor = (s: string) => s === 'completed' ? 'text-emerald-400' : s === 'pending' ? 'text-amber-400' : 'text-red-400';
-  const statusBg = (s: string) => s === 'completed' ? 'bg-emerald-500/10' : s === 'pending' ? 'bg-amber-500/10' : 'bg-red-500/10';
+  const statusColor = (s: string) => s === 'completed' ? 'text-success' : s === 'pending' ? 'text-warning' : 'text-destructive';
+  const statusBg = (s: string) => s === 'completed' ? 'bg-success/10 border-success/20' : s === 'pending' ? 'bg-warning/10 border-warning/20' : 'bg-destructive/10 border-destructive/20';
+
+  const completedTx = transactions.filter(t => t.status === "completed");
+  const totalRevenue = completedTx.reduce((a, t) => a + Number(t.net_amount), 0);
+  const retainedBalance = completedTx
+    .filter(t => !t.retention_released)
+    .reduce((a, t) => a + Number(t.retained_amount), 0);
+  const approvedSalesCount = completedTx.length;
+  const periodRevenueLabel = privacy.hidden ? CENSORED : fmt(revenue);
+  const safeBalance = Math.max(balance, 0);
+
+  const financialCards = [
+    { label: "Faturamento", value: privacy.hidden ? CENSORED : fmt(totalRevenue), sub: "Volume total", icon: TrendingUp, tone: "text-success", accent: "border-t-success", iconBorder: "border-success/30" },
+    { label: "Disponível", value: privacy.hidden ? CENSORED : fmt(safeBalance), sub: "Liberado para saque", icon: Wallet, tone: "text-primary", accent: "border-t-primary", iconBorder: "border-primary/30" },
+    { label: "Pendente", value: privacy.hidden ? CENSORED : fmt(retainedBalance), sub: "Aguardando liberação", icon: Clock3, tone: "text-warning", accent: "border-t-warning", iconBorder: "border-warning/30" },
+    { label: "Vendas", value: privacy.hidden ? CENSORED : approvedSalesCount.toString(), sub: "Aprovadas", icon: Zap, tone: "text-info", accent: "border-t-info", iconBorder: "border-info/30" },
+  ];
+
+  const quickActions = [
+    { label: "Gerar PIX", desc: "Receber agora", icon: PixLogoMark, href: "/vendas/links", tone: "text-success", bg: "bg-success/10 border-success/20" },
+    { label: "Sacar", desc: "Transferir saldo", icon: ArrowDownRight, href: "/financeiro/saques", tone: "text-primary", bg: "bg-primary/10 border-primary/20" },
+    { label: "Transações", desc: "Histórico completo", icon: BarChart3, href: "/vendas", tone: "text-info", bg: "bg-info/10 border-info/20" },
+    { label: "API Keys", desc: "Credenciais", icon: Hash, href: "/vendas/api-keys", tone: "text-muted-foreground", bg: "bg-muted/40 border-border/60" },
+  ];
+
+  const conversionItems = [
+    { label: "PIX", pct: pixConversion, detail: `${pixApprovedCount}/${pixTotalCount}`, tone: "success", stroke: "hsl(var(--success))" },
+    { label: "Cartão", pct: cardConversion, detail: `${cardApprovedCount}/${cardTotalCount}`, tone: "info", stroke: "hsl(var(--info))" },
+    { label: "Chargeback", pct: chargebackRate, detail: `${chargebacks.length} ocorrências`, tone: chargebackRate > 1 ? "destructive" : "success", stroke: chargebackRate > 1 ? "hsl(var(--destructive))" : "hsl(var(--success))" },
+  ] as const;
+
+  const summaryStats = [
+    { label: "Ticket médio", value: privacy.hidden ? CENSORED : fmt(approved.length > 0 ? revenue / approved.length : 0) },
+    { label: "Conversão", value: `${conversion.toFixed(1)}%` },
+    { label: "Clientes", value: uniqueCustomers.toString() },
+  ];
 
   return (
-    <div className="dashboard-page mx-auto w-full max-w-[1440px] pb-24 px-3 md:px-6 relative pt-2">
+    <div className="dashboard-page mx-auto w-full max-w-[1440px] pb-24 px-2 md:px-5 relative pt-1">
 
-      {/* ── Header ── */}
-      <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 mb-6">
-        <div className="space-y-1">
-          <div className="flex items-center gap-2.5">
-            <h1 className="text-[22px] md:text-[26px] font-display font-black tracking-[-0.02em] text-foreground leading-none">
-              {nickname || "Vendedor"}
-            </h1>
-            <button onClick={privacy.toggle} className="inline-flex items-center justify-center h-7 w-7 rounded-md border border-border/30 text-muted-foreground/60 hover:text-foreground hover:border-border/60 transition-colors">
-              {privacy.hidden ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
-            </button>
+      <section className="mb-4 overflow-hidden rounded-2xl border border-border/60 bg-card">
+        <div className="grid xl:grid-cols-[minmax(0,1fr)_360px]">
+          <div className="min-w-0 border-b border-border/60 xl:border-b-0 xl:border-r">
+            <div className="flex flex-col gap-4 border-b border-border/60 px-4 py-4 md:flex-row md:items-center md:justify-between md:px-6">
+              <div className="min-w-0">
+                <div className="flex items-center gap-2.5">
+                  <span className="h-2.5 w-2.5 rounded-full bg-success" />
+                  <h1 className="truncate text-[24px] md:text-[30px] font-display font-black text-foreground leading-none">
+                    {nickname || "Vendedor"}
+                  </h1>
+                  <button
+                    onClick={privacy.toggle}
+                    className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-border/60 bg-background/75 text-muted-foreground hover:bg-accent hover:text-foreground"
+                    aria-label="Alternar privacidade"
+                  >
+                    {privacy.hidden ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
+                  </button>
+                </div>
+                <p className="mt-1 text-[12px] font-semibold uppercase tracking-[0.18em] text-muted-foreground/70">Central financeira</p>
+              </div>
+
+              <div className="flex flex-wrap items-center gap-2">
+                <div className="flex items-center rounded-xl border border-border/60 bg-background/75 p-1">
+                  {PERIOD_PRESETS.filter(p => ["Hoje", "7 dias", "30 dias"].includes(p.label)).map((opt) => (
+                    <button
+                      key={opt.label}
+                      onClick={() => { setSelectedPeriod(opt); setIsCustom(false); setCustomRange(undefined); }}
+                      className={cn(
+                        "rounded-lg px-3.5 py-2 text-[11px] font-black leading-none transition-colors",
+                        !isCustom && selectedPeriod.label === opt.label
+                          ? "bg-primary text-primary-foreground"
+                          : "text-muted-foreground hover:bg-accent hover:text-foreground"
+                      )}
+                    >
+                      {opt.label}
+                    </button>
+                  ))}
+                </div>
+                <Popover open={datePickerOpen} onOpenChange={setDatePickerOpen}>
+                  <PopoverTrigger asChild>
+                    <button className={cn(
+                      "inline-flex h-9 items-center gap-2 rounded-xl border px-3 text-[11px] font-black leading-none transition-colors",
+                      isCustom ? "border-primary/60 bg-primary/10 text-primary" : "border-border/60 bg-background/75 text-muted-foreground hover:bg-accent hover:text-foreground"
+                    )}>
+                      <CalendarDays className="h-3.5 w-3.5" />
+                      {isCustom && customRange?.from
+                        ? customRange.to ? `${format(customRange.from, "dd/MM")} – ${format(customRange.to, "dd/MM")}` : format(customRange.from, "dd/MM/yyyy")
+                        : "Custom"}
+                    </button>
+                  </PopoverTrigger>
+                  <PopoverContent align="end" className="w-auto overflow-hidden rounded-2xl border border-border/60 bg-popover p-0">
+                    <Calendar mode="range" selected={customRange} onSelect={(range) => { setCustomRange(range); setIsCustom(true); if (range?.from && range?.to) setTimeout(() => setDatePickerOpen(false), 300); }} numberOfMonths={1} locale={ptBR} disabled={(date) => date > new Date()} className="p-3 pointer-events-auto" classNames={{ day_selected: "bg-primary text-primary-foreground", day_range_middle: "bg-primary/10 text-foreground", day_range_end: "bg-primary text-primary-foreground" }} />
+                  </PopoverContent>
+                </Popover>
+              </div>
+            </div>
+
+            <div className="grid gap-0 md:grid-cols-[minmax(0,1fr)_220px]">
+              <div className="px-4 py-5 md:px-6 md:py-6">
+                <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+                  <div className="min-w-0">
+                    <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-border/60 bg-background/75 px-3 py-1.5">
+                      <Wallet className="h-3.5 w-3.5 text-primary" />
+                      <span className="text-[10px] font-black uppercase tracking-[0.18em] text-muted-foreground">Saldo disponível</span>
+                    </div>
+                    <p className="text-[38px] md:text-[52px] font-display font-black tracking-normal text-foreground leading-[0.95] tabular-nums">
+                      {privacy.hidden ? CENSORED : fmt(safeBalance)}
+                    </p>
+                    <div className="mt-3 flex flex-wrap items-center gap-2 text-[11px] font-bold text-muted-foreground">
+                      <span className="rounded-full border border-success/30 bg-success/10 px-2.5 py-1 text-success">Operação ativa</span>
+                      <span className="rounded-full border border-border/60 bg-background/75 px-2.5 py-1">Período: {isCustom ? "Custom" : selectedPeriod.label}</span>
+                      <span className="rounded-full border border-border/60 bg-background/75 px-2.5 py-1">Receita: {periodRevenueLabel}</span>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-2 sm:flex sm:items-center">
+                    <Link to="/financeiro/saques" className="inline-flex h-10 min-w-[112px] items-center justify-center gap-2 whitespace-nowrap rounded-xl bg-primary px-4 text-[12px] font-black text-primary-foreground">
+                      <ArrowDownRight className="h-4 w-4" />
+                      Sacar
+                    </Link>
+                    <Link to="/vendas/links" className="inline-flex h-10 min-w-[112px] items-center justify-center gap-2 whitespace-nowrap rounded-xl border border-border/60 bg-background/75 px-4 text-[12px] font-black text-foreground hover:bg-accent">
+                      <PixLogoMark className="h-4 w-4 text-success" />
+                      Link PIX
+                    </Link>
+                  </div>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-3 border-t border-border/60 md:grid-cols-1 md:border-l md:border-t-0">
+                {summaryStats.map((item) => (
+                  <div key={item.label} className="border-r border-border/60 px-4 py-3 last:border-r-0 md:border-b md:border-r-0 md:last:border-b-0">
+                    <p className="text-[10px] font-black uppercase tracking-[0.16em] text-muted-foreground/70">{item.label}</p>
+                    <p className="mt-1 text-[17px] font-display font-black text-foreground tabular-nums leading-none">{item.value}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 border-t border-border/60 lg:grid-cols-4">
+              {financialCards.map((card) => (
+                <div key={card.label} className={cn("min-h-[118px] border-r border-border/60 border-t-2 bg-background/35 px-4 py-4 last:border-r-0 md:px-5", card.accent)}>
+                  <div className="mb-5 flex items-center justify-between gap-3">
+                    <span className="text-[10px] font-black uppercase tracking-[0.18em] text-muted-foreground/70">{card.label}</span>
+                    <div className={cn("flex h-8 w-8 items-center justify-center rounded-lg border bg-card", card.tone, card.iconBorder)}>
+                      <card.icon className="h-4 w-4" />
+                    </div>
+                  </div>
+                  <p className="text-[24px] md:text-[28px] font-display font-black tracking-normal text-foreground leading-none tabular-nums">{card.value}</p>
+                  <p className="mt-2 text-[11px] font-semibold text-muted-foreground/65">{card.sub}</p>
+                </div>
+              ))}
+            </div>
           </div>
-          <p className="text-[12px] text-muted-foreground/40 font-medium leading-none">Visão geral da sua operação</p>
+
+          <aside className="bg-background/35 p-4 md:p-5">
+            <div className="mb-4 flex items-center justify-between">
+              <div>
+                <p className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/70">Pulso da operação</p>
+                <h2 className="mt-1 text-[18px] font-display font-black text-foreground leading-none">Tempo real</h2>
+              </div>
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-success/25 bg-success/10 text-success">
+                <Activity className="h-4.5 w-4.5" />
+              </div>
+            </div>
+
+            <div className="space-y-2.5">
+              {conversionItems.map((kpi) => {
+                const textTone = kpi.tone === "success" ? "text-success" : kpi.tone === "info" ? "text-info" : "text-destructive";
+                const pct = kpi.label === "Chargeback" ? Math.min(kpi.pct * 9.42, 94.2) : kpi.pct * 0.942;
+                return (
+                  <div key={kpi.label} className="rounded-xl border border-border/60 bg-card p-3.5">
+                    <div className="flex items-center gap-3">
+                      <div className="relative h-11 w-11 shrink-0">
+                        <svg className="h-full w-full -rotate-90" viewBox="0 0 36 36">
+                          <circle cx="18" cy="18" r="15" fill="none" stroke="hsl(var(--border))" strokeWidth="2.5" />
+                          <circle cx="18" cy="18" r="15" fill="none" stroke={kpi.stroke} strokeWidth="2.5" strokeDasharray={`${pct} 100`} strokeLinecap="round" />
+                        </svg>
+                        <div className="absolute inset-0 flex items-center justify-center">
+                          <span className={cn("text-[9px] font-black tabular-nums leading-none", textTone)}>
+                            {kpi.label === "Chargeback" ? `${kpi.pct.toFixed(1)}%` : `${kpi.pct.toFixed(0)}%`}
+                          </span>
+                        </div>
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <p className="text-[12px] font-black text-foreground leading-none">{kpi.label}</p>
+                        <p className="mt-1 text-[10px] font-semibold text-muted-foreground/65 leading-none">{kpi.detail}</p>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </aside>
         </div>
-        <div className="flex items-center gap-1.5">
-          <div className="flex items-center rounded-md border border-border/30 bg-card/50 p-[3px]">
-            {PERIOD_PRESETS.filter(p => ["Hoje", "7 dias", "30 dias"].includes(p.label)).map((opt) => (
-              <button key={opt.label} onClick={() => { setSelectedPeriod(opt); setIsCustom(false); setCustomRange(undefined); }}
-                className={cn("rounded-[5px] px-3.5 py-[6px] text-[11px] font-display font-bold transition-all leading-none",
-                  !isCustom && selectedPeriod.label === opt.label
-                    ? "bg-emerald-500/15 text-emerald-400 border border-emerald-500/20"
-                    : "text-muted-foreground/50 hover:text-foreground border border-transparent"
-                )}>
-                {opt.label}
-              </button>
-            ))}
-          </div>
-          <Popover open={datePickerOpen} onOpenChange={setDatePickerOpen}>
-            <PopoverTrigger asChild>
-              <button className={cn("h-[30px] rounded-md border px-3 text-[11px] font-bold transition-all inline-flex items-center gap-1.5 leading-none",
-                isCustom ? "border-emerald-500/25 bg-emerald-500/8 text-emerald-400" : "border-border/30 bg-card/50 text-muted-foreground/50 hover:text-foreground"
-              )}>
-                <CalendarDays className="h-3 w-3" />
-                {isCustom && customRange?.from
-                  ? customRange.to ? `${format(customRange.from, "dd/MM")} – ${format(customRange.to, "dd/MM")}` : format(customRange.from, "dd/MM/yyyy")
-                  : "Custom"}
-              </button>
-            </PopoverTrigger>
-            <PopoverContent align="end" className="w-auto overflow-hidden rounded-xl border border-border/30 bg-popover p-0">
-              <Calendar mode="range" selected={customRange} onSelect={(range) => { setCustomRange(range); setIsCustom(true); if (range?.from && range?.to) setTimeout(() => setDatePickerOpen(false), 300); }} numberOfMonths={1} locale={ptBR} disabled={(date) => date > new Date()} className="p-3 pointer-events-auto" classNames={{ day_selected: "bg-primary text-primary-foreground", day_range_middle: "bg-primary/10 text-foreground", day_range_end: "bg-primary text-primary-foreground" }} />
-            </PopoverContent>
-          </Popover>
-        </div>
-      </div>
+      </section>
 
-      {/* ── Balance Strip ── */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-[1px] rounded-xl overflow-hidden border border-border/30 bg-border/20 mb-5">
-        {([
-          { label: "Faturamento", value: privacy.hidden ? CENSORED : fmt(transactions.filter(t => t.status === "completed").reduce((a, t) => a + Number(t.net_amount), 0)), sub: "Volume total", icon: <TrendingUp className="h-4 w-4" />, color: "text-emerald-400" },
-          { label: "Disponível", value: privacy.hidden ? CENSORED : fmt(Math.max(balance, 0)), sub: "Liberado para saque", icon: <Wallet className="h-4 w-4" />, color: "text-emerald-400" },
-          { label: "Pendente", value: privacy.hidden ? CENSORED : fmt(transactions.filter(t => t.status === "completed" && !t.retention_released).reduce((a, t) => a + Number(t.retained_amount), 0)), sub: "Aguardando liberação", icon: <Clock3 className="h-4 w-4" />, color: "text-amber-400" },
-          { label: "Vendas", value: privacy.hidden ? CENSORED : transactions.filter(t => t.status === "completed").length.toString(), sub: "Transações aprovadas", icon: <Zap className="h-4 w-4" />, color: "text-blue-400" },
-        ]).map((c) => (
-          <div key={c.label} className="bg-card px-5 py-5 flex flex-col justify-between min-h-[110px]">
-            <div className="flex items-center justify-between mb-3">
-              <span className="text-[10px] font-display font-bold text-muted-foreground/40 uppercase tracking-[0.1em] leading-none">{c.label}</span>
-              <span className={cn("opacity-40", c.color)}>{c.icon}</span>
+      <div className="mb-4 grid grid-cols-2 gap-2.5 lg:grid-cols-4">
+        {quickActions.map((a) => (
+          <Link key={a.href} to={a.href} className="group flex min-h-[72px] items-center gap-3 rounded-2xl border border-border/60 bg-card px-4 py-3.5 hover:bg-accent/40">
+            <div className={cn("flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border", a.bg, a.tone)}>
+              <a.icon className="h-4.5 w-4.5" />
             </div>
-            <div>
-              <p className="text-[22px] md:text-[26px] font-display font-black tabular-nums tracking-[-0.03em] text-foreground leading-none">{c.value}</p>
-              <p className="text-[10px] text-muted-foreground/30 mt-1.5 leading-none font-medium">{c.sub}</p>
+            <div className="min-w-0 flex-1">
+              <p className="truncate text-[13px] font-black text-foreground leading-none">{a.label}</p>
+              <p className="mt-1 text-[10px] font-semibold text-muted-foreground/65 leading-none">{a.desc}</p>
             </div>
-          </div>
-        ))}
-      </div>
-
-      {/* ── Quick Actions ── */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 mb-5">
-        {([
-          { label: "Gerar PIX", desc: "Receber pagamento", icon: <PixLogoMark className="h-4.5 w-4.5" />, href: "/vendas/links" },
-          { label: "Solicitar Saque", desc: "Transferir saldo", icon: <ArrowDownRight className="h-4.5 w-4.5" />, href: "/financeiro/saques" },
-          { label: "Transações", desc: "Histórico completo", icon: <BarChart3 className="h-4.5 w-4.5" />, href: "/vendas" },
-          { label: "API Keys", desc: "Suas credenciais", icon: <Hash className="h-4.5 w-4.5" />, href: "/vendas/api-keys" },
-        ]).map((a) => (
-          <Link key={a.href} to={a.href} className="group flex items-center gap-3 rounded-lg border border-border/20 bg-card/60 hover:bg-card hover:border-border/40 px-4 py-3.5 transition-all">
-            <div className="h-9 w-9 rounded-md bg-emerald-500/8 border border-emerald-500/10 flex items-center justify-center shrink-0 text-emerald-400/70 group-hover:text-emerald-400 group-hover:border-emerald-500/20 transition-colors">
-              {a.icon}
-            </div>
-            <div className="flex-1 min-w-0">
-              <p className="text-[12px] font-display font-bold text-foreground leading-none">{a.label}</p>
-              <p className="text-[10px] text-muted-foreground/30 mt-1 leading-none">{a.desc}</p>
-            </div>
-            <ChevronRight className="h-3.5 w-3.5 text-muted-foreground/15 group-hover:text-muted-foreground/40 transition-colors shrink-0" />
+            <ChevronRight className="h-4 w-4 shrink-0 text-muted-foreground/45 group-hover:text-foreground" />
           </Link>
         ))}
       </div>
 
-      {/* ── Chart + KPIs ── */}
-      <div className="grid grid-cols-1 xl:grid-cols-[1fr_320px] gap-2.5 mb-5">
-        {/* Chart */}
-        <div className="rounded-xl border border-border/30 bg-card overflow-hidden">
-          <div className="flex items-center justify-between px-5 py-4 border-b border-border/15">
+      <div className="mb-4 grid grid-cols-1 gap-4 xl:grid-cols-[minmax(0,1fr)_340px]">
+        <div className="overflow-hidden rounded-2xl border border-border/60 bg-card">
+          <div className="flex items-center justify-between border-b border-border/60 px-5 py-4">
             <div>
-              <h3 className="text-[13px] font-display font-bold text-foreground leading-none">Faturamento</h3>
-              <p className="text-[10px] text-muted-foreground/30 mt-1 leading-none">Evolução no período</p>
+              <h3 className="text-[14px] font-black text-foreground leading-none">Faturamento</h3>
+              <p className="mt-1 text-[10px] font-bold uppercase tracking-[0.16em] text-muted-foreground/65">Evolução por horário</p>
             </div>
-            <span className="inline-flex items-center gap-1.5 text-[9px] text-muted-foreground/30 font-medium">
-              <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" /> Receita
-            </span>
+            <div className="rounded-full border border-success/25 bg-success/10 px-3 py-1.5 text-[10px] font-black text-success">
+              {periodRevenueLabel}
+            </div>
           </div>
-          <div className="px-2 pb-4 pt-2">
-            <ResponsiveContainer width="100%" height={260}>
-              <AreaChart data={chartData} margin={{ top: 8, right: 12, left: -16, bottom: 0 }}>
+          <div className="relative px-2 pb-4 pt-3">
+            <ResponsiveContainer width="100%" height={284}>
+              <AreaChart data={chartData} margin={{ top: 10, right: 18, left: -8, bottom: 0 }}>
                 <defs>
                   <linearGradient id="dashboardRevenue" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="hsl(160 60% 45%)" stopOpacity={0.15} />
-                    <stop offset="100%" stopColor="hsl(160 60% 45%)" stopOpacity={0} />
+                    <stop offset="0%" stopColor="hsl(var(--success))" stopOpacity={0.22} />
+                    <stop offset="100%" stopColor="hsl(var(--success))" stopOpacity={0} />
                   </linearGradient>
                 </defs>
-                <XAxis dataKey="name" tickLine={false} axisLine={false} dy={8} stroke="hsl(var(--muted-foreground) / 0.15)" fontSize={9} interval={chartData.length > 10 ? Math.ceil(chartData.length / 8) - 1 : 0} />
-                <YAxis tickLine={false} axisLine={false} width={56} stroke="hsl(var(--muted-foreground) / 0.15)" fontSize={9} tickFormatter={(v) => v >= 1000 ? `R$${(v / 1000).toLocaleString("pt-BR", { minimumFractionDigits: 1, maximumFractionDigits: 1 })}k` : `R$${v}`} />
+                <XAxis dataKey="name" tickLine={false} axisLine={false} dy={8} stroke="hsl(var(--muted-foreground) / 0.35)" fontSize={10} interval={chartData.length > 10 ? Math.ceil(chartData.length / 8) - 1 : 0} />
+                <YAxis tickLine={false} axisLine={false} width={60} stroke="hsl(var(--muted-foreground) / 0.35)" fontSize={10} tickFormatter={(v) => v >= 1000 ? `R$${(v / 1000).toLocaleString("pt-BR", { minimumFractionDigits: 1, maximumFractionDigits: 1 })}k` : `R$${v}`} />
                 <Tooltip
-                  cursor={{ stroke: "hsl(160 60% 45% / 0.2)", strokeWidth: 1, strokeDasharray: "4 4" }}
+                  cursor={{ stroke: "hsl(var(--success) / 0.35)", strokeWidth: 1, strokeDasharray: "4 4" }}
                   content={({ active, payload, label }) => {
                     if (!active || !payload?.length) return null;
                     return (
-                      <div className="rounded-lg border border-border/30 bg-card px-3.5 py-2.5">
-                        <p className="font-display text-[8px] font-bold text-muted-foreground/30 uppercase tracking-[0.2em] leading-none">{label}</p>
-                        <p className="font-display text-[14px] font-black text-emerald-400 tabular-nums mt-1.5 tracking-tight leading-none">
+                      <div className="rounded-xl border border-border/60 bg-card px-3.5 py-2.5">
+                        <p className="text-[9px] font-black uppercase tracking-[0.2em] text-muted-foreground">{label}</p>
+                        <p className="mt-1.5 text-[15px] font-black text-success tabular-nums leading-none">
                           {fmt(payload[0].value as number)}
                         </p>
                       </div>
                     );
                   }}
                 />
-                <Area type="monotone" dataKey="vendas" stroke="hsl(160 60% 45%)" strokeWidth={1.5} fill="url(#dashboardRevenue)" dot={false} activeDot={{ r: 4, strokeWidth: 2, fill: "hsl(var(--card))", stroke: "hsl(160 60% 45%)" }} />
+                <Area type="monotone" dataKey="vendas" stroke="hsl(var(--success))" strokeWidth={2} fill="url(#dashboardRevenue)" dot={false} activeDot={{ r: 4, strokeWidth: 2, fill: "hsl(var(--card))", stroke: "hsl(var(--success))" }} />
               </AreaChart>
             </ResponsiveContainer>
           </div>
         </div>
 
-        {/* KPIs Panel */}
-        <div className="rounded-xl border border-border/30 bg-card overflow-hidden flex flex-col">
-          <div className="px-5 py-4 border-b border-border/15">
-            <h3 className="text-[13px] font-display font-bold text-foreground leading-none">Índices</h3>
-            <p className="text-[10px] text-muted-foreground/30 mt-1 leading-none">Métricas de conversão</p>
+        <div className="overflow-hidden rounded-2xl border border-border/60 bg-card">
+          <div className="border-b border-border/60 px-5 py-4">
+            <h3 className="text-[14px] font-black text-foreground leading-none">Qualidade</h3>
+            <p className="mt-1 text-[10px] font-bold uppercase tracking-[0.16em] text-muted-foreground/65">Risco e performance</p>
           </div>
-          <div className="flex-1 p-5 space-y-4">
-            {/* Conversion rings */}
-            {([
-              { label: "PIX", pct: pixConversion, color: "emerald", detail: `${pixApprovedCount}/${pixTotalCount}` },
-              { label: "Cartão", pct: cardConversion, color: "blue", detail: `${cardApprovedCount}/${cardTotalCount}` },
-              { label: "Chargeback", pct: chargebackRate, color: chargebackRate > 1 ? "red" : "emerald", detail: `${chargebacks.length} ocorrências` },
-            ] as const).map((kpi) => {
-              const strokeColor = kpi.color === "emerald" ? "hsl(160 60% 45%)" : kpi.color === "blue" ? "hsl(210 70% 55%)" : "hsl(0 65% 55%)";
-              const textClass = kpi.color === "emerald" ? "text-emerald-400" : kpi.color === "blue" ? "text-blue-400" : "text-red-400";
-              return (
-                <div key={kpi.label} className="flex items-center gap-3.5">
-                  <div className="relative h-11 w-11 shrink-0">
-                    <svg className="h-full w-full -rotate-90" viewBox="0 0 36 36">
-                      <circle cx="18" cy="18" r="15" fill="none" stroke="hsl(var(--border) / 0.15)" strokeWidth="2.5" />
-                      <circle cx="18" cy="18" r="15" fill="none" stroke={strokeColor} strokeWidth="2.5" strokeDasharray={`${(kpi.label === "Chargeback" ? Math.min(kpi.pct * 9.42, 94.2) : kpi.pct * 0.942)} 100`} strokeLinecap="round" />
-                    </svg>
-                    <div className="absolute inset-0 flex items-center justify-center">
-                      <span className={cn("text-[9px] font-display font-black tabular-nums leading-none", textClass)}>
-                        {kpi.label === "Chargeback" ? `${kpi.pct.toFixed(1)}%` : `${kpi.pct.toFixed(0)}%`}
-                      </span>
-                    </div>
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-[12px] font-display font-bold text-foreground leading-none">{kpi.label}</p>
-                    <p className="text-[10px] text-muted-foreground/30 mt-1 leading-none">{kpi.detail}</p>
-                  </div>
-                </div>
-              );
-            })}
-
-            {/* Summary stats */}
-            <div className="border-t border-border/15 pt-3.5 space-y-2">
-              {([
-                { label: "Ticket Médio", value: privacy.hidden ? CENSORED : fmt(approved.length > 0 ? revenue / approved.length : 0) },
-                { label: "Conversão Geral", value: `${conversion.toFixed(1)}%` },
-                { label: "Clientes Únicos", value: uniqueCustomers.toString() },
-              ]).map((s) => (
-                <div key={s.label} className="flex items-center justify-between">
-                  <span className="text-[11px] text-muted-foreground/35">{s.label}</span>
-                  <span className="text-[11px] font-display font-black text-foreground tabular-nums">{s.value}</span>
+          <div className="p-5">
+            <div className="mb-4 rounded-2xl border border-border/60 bg-background/50 p-4">
+              <div className="mb-3 flex items-center justify-between">
+                <span className="text-[10px] font-black uppercase tracking-[0.18em] text-muted-foreground/70">Score</span>
+                <ShieldCheck className="h-4 w-4 text-success" />
+              </div>
+              <p className="text-[30px] font-display font-black text-foreground leading-none tabular-nums">{Math.max(0, 100 - chargebackRate * 12).toFixed(0)}</p>
+              <div className="mt-3 h-2 overflow-hidden rounded-full bg-muted">
+                <div className="h-full rounded-full bg-success" style={{ width: `${Math.max(8, Math.min(100, 100 - chargebackRate * 12))}%` }} />
+              </div>
+            </div>
+            <div className="space-y-3">
+              {summaryStats.map((s) => (
+                <div key={s.label} className="flex items-center justify-between border-b border-border/50 pb-3 last:border-b-0 last:pb-0">
+                  <span className="text-[12px] font-semibold text-muted-foreground">{s.label}</span>
+                  <span className="text-[12px] font-black text-foreground tabular-nums">{s.value}</span>
                 </div>
               ))}
             </div>
@@ -592,36 +685,37 @@ export default function Dashboard() {
         </div>
       </div>
 
-      {/* ── Activity ── */}
-      <div className="rounded-xl border border-border/30 bg-card overflow-hidden">
-        <div className="flex items-center justify-between border-b border-border/15 px-5 py-4">
+      <div className="overflow-hidden rounded-2xl border border-border/60 bg-card">
+        <div className="flex items-center justify-between border-b border-border/60 px-5 py-4">
           <div>
-            <h3 className="text-[13px] font-display font-bold text-foreground leading-none">Atividade Recente</h3>
-            <p className="text-[10px] text-muted-foreground/30 mt-1 leading-none">Últimas movimentações</p>
+            <h3 className="text-[14px] font-black text-foreground leading-none">Atividade recente</h3>
+            <p className="mt-1 text-[10px] font-bold uppercase tracking-[0.16em] text-muted-foreground/65">Últimas movimentações</p>
           </div>
-          <Link to="/vendas" className="text-[11px] font-bold text-emerald-400/70 hover:text-emerald-400 transition-colors">Ver tudo</Link>
+          <Link to="/vendas" className="text-[11px] font-black text-primary hover:text-foreground transition-colors">Ver tudo</Link>
         </div>
         {activity.length === 0 ? (
-          <div className="px-5 py-12 text-center">
-            <Activity className="h-5 w-5 text-muted-foreground/15 mx-auto mb-2" />
-            <p className="text-[11px] text-muted-foreground/25">Nenhuma atividade encontrada</p>
+          <div className="grid min-h-[132px] place-items-center px-5 py-10 text-center">
+            <div>
+              <Activity className="mx-auto mb-3 h-6 w-6 text-muted-foreground/45" />
+              <p className="text-[12px] font-semibold text-muted-foreground">Nenhuma atividade encontrada</p>
+            </div>
           </div>
         ) : (
-          <div className="divide-y divide-border/10">
+          <div className="divide-y divide-border/50">
             {activity.map((item) => (
-              <div key={item.id} className="flex items-center gap-3 px-5 py-3 hover:bg-accent/20 transition-all cursor-pointer" onClick={() => item.kind === 'transaction' && setDetailTx(transactions.find(t => t.id === item.id) || null)}>
-                <div className={cn("h-8 w-8 rounded-md flex items-center justify-center shrink-0", statusBg(item.status))}>
-                  {item.kind === 'withdrawal' ? <ArrowDownRight className={cn("h-3.5 w-3.5", statusColor(item.status))} /> : <CreditCard className={cn("h-3.5 w-3.5", statusColor(item.status))} />}
+              <div key={item.id} className="flex cursor-pointer items-center gap-3 px-5 py-3.5 hover:bg-accent/35" onClick={() => item.kind === 'transaction' && setDetailTx(transactions.find(t => t.id === item.id) || null)}>
+                <div className={cn("flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border", statusBg(item.status))}>
+                  {item.kind === 'withdrawal' ? <ArrowDownRight className={cn("h-4 w-4", statusColor(item.status))} /> : <CreditCard className={cn("h-4 w-4", statusColor(item.status))} />}
                 </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-[12px] font-semibold text-foreground truncate leading-none">{item.label === 'pix' ? 'PIX' : item.label === 'credit_card' ? 'Cartão de Crédito' : item.label}</p>
-                  <p className="text-[9px] text-muted-foreground/25 uppercase tracking-wider mt-1 leading-none">
+                <div className="min-w-0 flex-1">
+                  <p className="truncate text-[13px] font-black text-foreground leading-none">{item.label === 'pix' ? 'PIX' : item.label === 'credit_card' ? 'Cartão de Crédito' : item.label}</p>
+                  <p className="mt-1 text-[10px] font-bold uppercase tracking-[0.16em] text-muted-foreground/60">
                     {item.kind === 'withdrawal' ? 'Saque' : 'Venda'} · {timeAgo(item.createdAt)}
                   </p>
                 </div>
-                <div className="text-right shrink-0">
-                  <p className="text-[12px] font-display font-black text-foreground tabular-nums leading-none">{privacy.hidden ? CENSORED : fmt(item.amount)}</p>
-                  <p className={cn("text-[8px] font-bold uppercase tracking-[0.1em] mt-1 leading-none", statusColor(item.status))}>
+                <div className="shrink-0 text-right">
+                  <p className="text-[13px] font-display font-black text-foreground tabular-nums leading-none">{privacy.hidden ? CENSORED : fmt(item.amount)}</p>
+                  <p className={cn("mt-1 text-[9px] font-black uppercase tracking-[0.12em] leading-none", statusColor(item.status))}>
                     {statusLabel(item.status)}
                   </p>
                 </div>

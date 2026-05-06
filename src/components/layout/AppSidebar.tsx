@@ -18,7 +18,6 @@ import {
   Ticket,
   Zap,
   ChevronRight,
-  Sparkles,
   TrendingUp,
   Activity,
   Crown,
@@ -112,10 +111,10 @@ function RevenueCard({ collapsed, revenue, milestone, onOpenRewards }: RevenueCa
     <button
       type="button"
       onClick={onOpenRewards}
-      className="group/rev relative mt-6 block w-full overflow-hidden rounded-2xl border border-border/50 bg-card p-5 text-left transition-all duration-300 hover:border-primary/40 hover:shadow-2xl hover:shadow-primary/5"
+      className="group/rev relative mt-6 block w-full overflow-hidden rounded-2xl border border-sidebar-border/70 border-t-2 border-t-sidebar-primary bg-sidebar-accent/35 p-5 text-left transition-colors duration-200 hover:bg-sidebar-accent/55"
     >
       <div className="flex items-center gap-4">
-        <div className="relative flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-primary/10 transition-transform group-hover/rev:scale-110">
+        <div className="relative flex h-12 w-12 shrink-0 items-center justify-center rounded-xl border border-sidebar-primary/25 bg-sidebar-primary/10">
           <Zap className="h-6 w-6 text-primary" strokeWidth={2.5} fill="currentColor" />
         </div>
         <div className="min-w-0 flex-1">
@@ -133,9 +132,9 @@ function RevenueCard({ collapsed, revenue, milestone, onOpenRewards }: RevenueCa
         <span>Meta: {milestone.next.label}</span>
       </div>
 
-      <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-muted/30">
+      <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-sidebar-border/60">
         <div
-          className="h-full rounded-full bg-primary transition-[width] duration-1000 ease-in-out"
+          className="h-full rounded-full bg-sidebar-primary transition-[width] duration-700 ease-out"
           style={{ width: `${pct}%` }}
         />
       </div>
@@ -178,15 +177,15 @@ function SidebarSectionNav({ section, pathname, isFirst }: SidebarSectionNavProp
                     end={item.exact}
                     activeClassName=""
                     className={cn(
-                      "group/nav relative flex h-[46px] w-full items-center gap-3 rounded-xl px-3 text-[13px] font-bold transition-all duration-200 group-data-[collapsible=icon]:h-12 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0",
+                      "group/nav relative flex h-[46px] w-full items-center gap-3 rounded-xl border px-3 text-[13px] font-bold transition-colors duration-200 group-data-[collapsible=icon]:h-12 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0",
                       isActive
-                        ? "bg-primary text-primary-foreground shadow-lg shadow-primary/20"
-                        : "text-muted-foreground/50 hover:bg-muted/50 hover:text-foreground",
+                        ? "border-sidebar-primary/35 bg-sidebar-primary text-sidebar-primary-foreground"
+                        : "border-transparent text-sidebar-foreground/62 hover:border-sidebar-border/70 hover:bg-sidebar-accent/55 hover:text-sidebar-accent-foreground",
                     )}
                   >
                     <item.icon
                       className={cn(
-                        "h-5 w-5 transition-transform duration-300 group-hover/nav:scale-110",
+                        "h-5 w-5 transition-colors duration-200",
                         isActive ? "text-primary-foreground" : "text-muted-foreground/40 group-hover/nav:text-foreground"
                       )}
                       strokeWidth={isActive ? 2.5 : 2}
@@ -331,12 +330,12 @@ export function AppSidebar() {
   const userName = user?.email?.split("@")[0] ?? "Vendedor";
 
   return (
-    <Sidebar collapsible="icon" className="border-r border-border/50 bg-background/50 backdrop-blur-xl">
-      <SidebarHeader className="relative border-b border-border/50 px-5 pb-6 pt-6">
+    <Sidebar collapsible="icon" className="border-r border-sidebar-border/70 bg-sidebar">
+      <SidebarHeader className="relative border-b border-sidebar-border/70 px-5 pb-6 pt-6">
         {/* Brand */}
         <div className={cn("flex items-center gap-3", collapsed && "justify-center")}>
-          <div className="group/logo relative h-11 w-11 shrink-0 overflow-hidden rounded-xl border border-border/40 bg-card-elevated transition-all hover:border-primary/50 hover:shadow-lg hover:shadow-primary/10">
-            <img src={hotzfyLogo} alt="HOTZFY" className="h-full w-full object-contain p-1.5 transition-transform group-hover/logo:scale-110" />
+          <div className="group/logo relative h-11 w-11 shrink-0 overflow-hidden rounded-xl border border-sidebar-border/70 bg-sidebar-accent transition-colors hover:border-sidebar-primary/50">
+            <img src={hotzfyLogo} alt="HOTZFY" className="h-full w-full object-contain p-1.5" />
             <div className="pointer-events-none absolute inset-0 rounded-xl ring-1 ring-inset ring-white/5" />
           </div>
           <div className="min-w-0 group-data-[collapsible=icon]:hidden">
@@ -344,7 +343,7 @@ export function AppSidebar() {
               <h1 className="text-[20px] leading-none font-display font-black tracking-tight text-sidebar-accent-foreground">
                 HOTZFY
               </h1>
-              <Sparkles className="h-3 w-3 text-sidebar-primary" strokeWidth={2.5} fill="hsl(var(--sidebar-primary))" />
+              <Crown className="h-3 w-3 text-sidebar-primary" strokeWidth={2.5} fill="hsl(var(--sidebar-primary))" />
             </div>
             <p className="mt-1.5 inline-flex items-center gap-1.5 text-[10.5px] font-semibold text-sidebar-foreground/55">
               <span className="relative flex h-1.5 w-1.5">
@@ -379,9 +378,9 @@ export function AppSidebar() {
         <button
           type="button"
           onClick={() => window.open("https://wa.me/5511999999999?text=Preciso%20de%20suporte%20para%20escalar!", "_blank")}
-          className="group/sup relative flex w-full items-center gap-3 overflow-hidden rounded-xl border border-border/40 bg-card-elevated/40 px-3 py-3 text-left transition-all duration-200 hover:border-primary/30 hover:bg-card-elevated/60 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0"
+          className="group/sup relative flex w-full items-center gap-3 overflow-hidden rounded-xl border border-sidebar-border/70 bg-sidebar-accent/45 px-3 py-3 text-left transition-colors duration-200 hover:border-sidebar-primary/30 hover:bg-sidebar-accent/70 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0"
         >
-          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-border/30 bg-card-elevated text-primary">
+          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-sidebar-primary/25 bg-sidebar-primary/10 text-sidebar-primary">
             <Headphones className="h-4 w-4" strokeWidth={2.5} />
           </div>
           <div className="min-w-0 flex-1 group-data-[collapsible=icon]:hidden">
