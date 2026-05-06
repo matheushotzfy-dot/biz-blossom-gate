@@ -389,58 +389,48 @@ export default function Dashboard() {
     <div className="dashboard-page mx-auto w-full max-w-[1440px] pb-24 px-4 md:px-8 relative space-y-8 mt-4">
       {/* ─── Premium Glassmorphism Ambient Glow ─── */}
       <div className="fixed inset-0 z-[-1] pointer-events-none overflow-hidden">
-        <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-primary/10 blur-[120px] rounded-full animate-pulse" />
-        <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-info/10 blur-[120px] rounded-full animate-pulse" style={{ animationDelay: '2s' }} />
+        <div className="absolute top-[-20%] left-[-10%] w-[50%] h-[50%] bg-primary/5 blur-[160px] rounded-full animate-pulse" />
+        <div className="absolute bottom-[-20%] right-[-10%] w-[50%] h-[50%] bg-info/5 blur-[160px] rounded-full animate-pulse" style={{ animationDelay: '3s' }} />
       </div>
 
-      {/* ─── Header Section ─── */}
-      <header className="flex flex-col lg:flex-row lg:items-end justify-between gap-6">
-        <div className="space-y-1">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 border border-primary/20 text-primary text-[10px] font-bold uppercase tracking-wider mb-2">
-            <Activity className="h-3 w-3" />
-            Painel Administrativo
-          </div>
-          <h1 className="text-3xl md:text-4xl font-display font-black tracking-tight text-foreground flex items-center gap-3">
-            Olá, {nickname || "Vendedor"}
-            <span className="text-primary animate-bounce-slow">👋</span>
-          </h1>
-          <p className="text-muted-foreground font-medium max-w-md">
-            Seu faturamento está <span className="text-success font-bold">crescendo</span>. Aqui está o resumo das suas operações hoje.
-          </p>
+      {/* ─── Hero Section with Enhanced Stats ─── */}
+      <section className="relative p-8 md:p-10 rounded-[2.5rem] border border-border/50 bg-card overflow-hidden shadow-2xl shadow-primary/5">
+        <div className="absolute top-0 right-0 p-10 opacity-[0.03] pointer-events-none">
+          <Sparkles className="h-64 w-64 text-primary" />
         </div>
-
-        <div className="flex flex-wrap items-center gap-3">
-          <button onClick={privacy.toggle} className="h-11 px-4 rounded-xl border border-border bg-card hover:bg-accent text-foreground transition-all flex items-center gap-2 font-semibold text-sm">
-            {privacy.hidden ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-            {privacy.hidden ? "Mostrar Valores" : "Ocultar Valores"}
-          </button>
-          
-          <div className="h-11 flex items-center gap-1 rounded-xl border border-border bg-card px-1 shadow-sm">
-            {PERIOD_PRESETS.filter(p => ["Hoje", "7 dias", "30 dias"].includes(p.label)).map((opt) => (
-              <button key={opt.label} onClick={() => { setSelectedPeriod(opt); setIsCustom(false); }}
-                className={cn("h-9 px-4 rounded-lg text-xs font-bold transition-all",
-                  !isCustom && selectedPeriod.label === opt.label ? "bg-primary text-primary-foreground shadow-md shadow-primary/20" : "text-muted-foreground hover:text-foreground"
-                )}>
-                {opt.label}
-              </button>
-            ))}
+        
+        <div className="relative z-10 flex flex-col md:flex-row justify-between items-start md:items-center gap-8">
+          <div className="space-y-4">
+            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-primary/10 border border-primary/20 text-primary text-[11px] font-black uppercase tracking-[0.2em]">
+              <Crown className="h-4 w-4" />
+              Sua conta está em alta performance
+            </div>
+            <h1 className="text-4xl md:text-5xl font-display font-black tracking-tighter text-foreground">
+              Olá, {nickname || "Vendedor"} <span className="text-primary animate-pulse">.</span>
+            </h1>
+            <p className="text-muted-foreground font-medium text-lg max-w-lg leading-relaxed">
+              Você teve um crescimento de <span className="text-success font-bold">+12.5%</span> no faturamento em relação ao período anterior.
+            </p>
           </div>
 
-          <Popover open={datePickerOpen} onOpenChange={setDatePickerOpen}>
-            <PopoverTrigger asChild>
-              <button className={cn("h-11 px-4 rounded-xl border font-bold text-sm transition-all inline-flex items-center gap-2",
-                isCustom ? "border-primary bg-primary text-primary-foreground" : "border-border bg-card text-foreground hover:border-primary/50"
-              )}>
-                <CalendarDays className="h-4 w-4" />
-                {isCustom && customRange?.from ? format(customRange.from, "dd/MM") + (customRange.to ? ` - ${format(customRange.to, "dd/MM")}` : "") : "Personalizado"}
-              </button>
-            </PopoverTrigger>
-            <PopoverContent align="end" className="p-0 border-none bg-transparent shadow-none">
-              <Calendar mode="range" selected={customRange} onSelect={(r) => { setCustomRange(r); setIsCustom(true); }} className="rounded-2xl border bg-card p-3" />
-            </PopoverContent>
-          </Popover>
+          <div className="flex flex-col items-end gap-3">
+            <div className="flex items-center gap-2 p-1 rounded-2xl bg-muted/30 border border-border/50">
+              {PERIOD_PRESETS.filter(p => ["Hoje", "7 dias", "30 dias"].includes(p.label)).map((opt) => (
+                <button key={opt.label} onClick={() => { setSelectedPeriod(opt); setIsCustom(false); }}
+                  className={cn("h-10 px-6 rounded-xl text-xs font-black uppercase tracking-widest transition-all",
+                    !isCustom && selectedPeriod.label === opt.label ? "bg-card text-foreground shadow-xl ring-1 ring-border/50" : "text-muted-foreground hover:text-foreground"
+                  )}>
+                  {opt.label}
+                </button>
+              ))}
+            </div>
+            <button onClick={privacy.toggle} className="h-10 px-5 rounded-xl border border-border bg-card hover:bg-accent text-foreground transition-all flex items-center gap-2 font-bold text-xs uppercase tracking-widest">
+              {privacy.hidden ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+              Privacidade
+            </button>
+          </div>
         </div>
-      </header>
+      </section>
 
       {/* ─── Quick Actions Floating Grid ─── */}
       <section className="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -465,70 +455,64 @@ export default function Dashboard() {
       {/* ════════════════════════════════════════════════════════════════ */}
       {/* FINANCIAL STAT CARDS                                              */}
       {/* ════════════════════════════════════════════════════════════════ */}
-      <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+      <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         {[
           {
             label: "Total Faturado",
             value: privacy.hidden ? CENSORED : fmt(transactions.filter(t => t.status === "completed").reduce((a, t) => a + Number(t.net_amount), 0)),
-            sublabel: "Crescimento de +12%",
+            sublabel: "Faturamento histórico",
             icon: <TrendingUp className="h-5 w-5" />,
             color: "primary",
-            trend: "up"
           },
           {
             label: "Saldo Disponível",
             value: privacy.hidden ? CENSORED : fmt(Math.max(balance, 0)),
-            sublabel: "Liberado para saque",
+            sublabel: "Pronto para saque",
             icon: <Wallet className="h-5 w-5" />,
             color: "success",
-            trend: "up"
           },
           {
             label: "Saldo Pendente",
             value: privacy.hidden ? CENSORED : fmt(transactions.filter(t => t.status === "completed" && !t.retention_released).reduce((a, t) => a + Number(t.retained_amount), 0)),
-            sublabel: "Libera em 7 dias",
+            sublabel: "Lançamentos futuros",
             icon: <Clock3 className="h-5 w-5" />,
             color: "warning",
-            trend: "neutral"
           },
           {
             label: "Vendas Realizadas",
             value: privacy.hidden ? CENSORED : transactions.filter(t => t.status === "completed").length.toString(),
-            sublabel: "Ticket médio: R$ 97",
+            sublabel: "Total de conversões",
             icon: <Zap className="h-5 w-5" />,
             color: "info",
-            trend: "up"
           },
         ].map((card) => (
-          <div key={card.label} className="group relative p-6 rounded-3xl border border-border bg-card shadow-sm hover:shadow-2xl hover:shadow-primary/5 transition-all duration-300">
-            <div className="flex items-center justify-between mb-4">
-              <div className={cn("h-12 w-12 rounded-2xl flex items-center justify-center", 
-                card.color === "primary" ? "bg-primary/10 text-primary" :
-                card.color === "success" ? "bg-success/10 text-success" :
-                card.color === "warning" ? "bg-warning/10 text-warning" :
-                "bg-info/10 text-info"
-              )}>
-                {card.icon}
+          <div key={card.label} className="group relative p-8 rounded-[2rem] border border-border/50 bg-card transition-all duration-500 hover:border-primary/30 hover:shadow-2xl hover:shadow-primary/5 overflow-hidden">
+            <div className="relative z-10">
+              <div className="flex items-center justify-between mb-6">
+                <div className={cn("h-14 w-14 rounded-2xl flex items-center justify-center transition-transform duration-500 group-hover:scale-110 group-hover:rotate-3", 
+                  card.color === "primary" ? "bg-primary/10 text-primary" :
+                  card.color === "success" ? "bg-success/10 text-success" :
+                  card.color === "warning" ? "bg-warning/10 text-warning" :
+                  "bg-info/10 text-info"
+                )}>
+                  {card.icon}
+                </div>
+                <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-success/10 text-success text-[10px] font-black uppercase tracking-wider">
+                  <ArrowUpRight className="h-3 w-3" />
+                  Ativo
+                </div>
               </div>
-              <div className="flex items-center gap-1 px-2 py-1 rounded-full bg-success/10 text-success text-[10px] font-black uppercase">
-                <ArrowUpRight className="h-3 w-3" />
-                12.5%
+              <div className="space-y-1">
+                <p className="text-xs font-black uppercase tracking-[0.2em] text-muted-foreground/50">{card.label}</p>
+                <h3 className="text-3xl font-display font-black tracking-tighter text-foreground tabular-nums leading-none">
+                  {card.value}
+                </h3>
               </div>
-            </div>
-            <div className="space-y-1">
-              <p className="text-sm font-bold text-muted-foreground/80 tracking-tight">{card.label}</p>
-              <h3 className="text-3xl font-display font-black tracking-tight text-foreground tabular-nums">
-                {card.value}
-              </h3>
-            </div>
-            <div className="mt-4 pt-4 border-t border-border/50">
-              <p className="text-xs font-medium text-muted-foreground">{card.sublabel}</p>
+              <p className="mt-4 text-[11px] font-bold text-muted-foreground/40">{card.sublabel}</p>
             </div>
             
             {/* Decoration */}
-            <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity">
-              <div className="h-24 w-24 rounded-full bg-foreground blur-2xl" />
-            </div>
+            <div className="absolute -bottom-8 -right-8 h-32 w-32 bg-foreground/5 blur-3xl rounded-full transition-all duration-500 group-hover:bg-primary/10 group-hover:scale-150" />
           </div>
         ))}
       </section>
