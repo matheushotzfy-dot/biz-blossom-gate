@@ -94,16 +94,24 @@ const STATUS: Record<string, { label: string; fg: string; dot: string; bg: strin
 };
 
 /* ─────────────────────── Micro Components ─────────────────────── */
-function DeltaBadge({ cur, prev }: { cur: number; prev: number }) {
+function DeltaBadge({ cur, prev, positive = true }: { cur: number; prev: number; positive?: boolean }) {
   if (prev === 0 && cur === 0) return null;
   if (prev === 0) {
-    return <span className="text-[10px] font-bold text-success bg-success/10 border border-success/25 px-1.5 py-0.5 rounded">novo</span>;
+    return (
+      <span className="inline-flex items-center rounded-full bg-success/15 px-1.5 py-0.5 text-[10px] font-bold text-success ring-1 ring-inset ring-success/30">
+        novo
+      </span>
+    );
   }
   const pct = ((cur - prev) / prev) * 100;
   const up = pct >= 0;
+  const isGood = positive ? up : !up;
+
   return (
-    <span className={cn("inline-flex items-center gap-0.5 text-[10px] font-bold tabular-nums px-1.5 py-0.5 rounded border",
-      up ? "text-success bg-success/10 border-success/25" : "text-destructive bg-destructive/10 border-destructive/25")}>
+    <span className={cn(
+      "inline-flex items-center gap-0.5 rounded-full px-1.5 py-0.5 text-[10px] font-bold tabular-nums ring-1 ring-inset",
+      isGood ? "bg-success/15 text-success ring-success/30" : "bg-destructive/15 text-destructive ring-destructive/30"
+    )}>
       {up ? <ArrowUpRight className="h-2.5 w-2.5" /> : <ArrowDownRight className="h-2.5 w-2.5" />}
       {Math.abs(pct).toFixed(1)}%
     </span>
