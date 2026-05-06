@@ -18,7 +18,6 @@ import {
   Ticket,
   Zap,
   ChevronRight,
-  Sparkles,
   TrendingUp,
   Activity,
   Crown,
@@ -112,10 +111,10 @@ function RevenueCard({ collapsed, revenue, milestone, onOpenRewards }: RevenueCa
     <button
       type="button"
       onClick={onOpenRewards}
-      className="group/rev relative mt-6 block w-full overflow-hidden rounded-2xl border border-border/50 bg-card p-5 text-left transition-all duration-300 hover:border-primary/40 hover:shadow-2xl hover:shadow-primary/5"
+      className="group/rev relative mt-6 block w-full overflow-hidden rounded-2xl border border-sidebar-border/70 border-t-2 border-t-sidebar-primary bg-sidebar-accent/35 p-5 text-left transition-colors duration-200 hover:bg-sidebar-accent/55"
     >
       <div className="flex items-center gap-4">
-        <div className="relative flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-primary/10 transition-transform group-hover/rev:scale-110">
+        <div className="relative flex h-12 w-12 shrink-0 items-center justify-center rounded-xl border border-sidebar-primary/25 bg-sidebar-primary/10">
           <Zap className="h-6 w-6 text-primary" strokeWidth={2.5} fill="currentColor" />
         </div>
         <div className="min-w-0 flex-1">
@@ -133,9 +132,9 @@ function RevenueCard({ collapsed, revenue, milestone, onOpenRewards }: RevenueCa
         <span>Meta: {milestone.next.label}</span>
       </div>
 
-      <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-muted/30">
+      <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-sidebar-border/60">
         <div
-          className="h-full rounded-full bg-primary transition-[width] duration-1000 ease-in-out"
+          className="h-full rounded-full bg-sidebar-primary transition-[width] duration-700 ease-out"
           style={{ width: `${pct}%` }}
         />
       </div>
