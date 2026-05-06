@@ -330,12 +330,12 @@ export function AppSidebar() {
   const userName = user?.email?.split("@")[0] ?? "Vendedor";
 
   return (
-    <Sidebar collapsible="icon" className="border-r border-border/50 bg-background/50 backdrop-blur-xl">
-      <SidebarHeader className="relative border-b border-border/50 px-5 pb-6 pt-6">
+    <Sidebar collapsible="icon" className="border-r border-sidebar-border/70 bg-sidebar">
+      <SidebarHeader className="relative border-b border-sidebar-border/70 px-5 pb-6 pt-6">
         {/* Brand */}
         <div className={cn("flex items-center gap-3", collapsed && "justify-center")}>
-          <div className="group/logo relative h-11 w-11 shrink-0 overflow-hidden rounded-xl border border-border/40 bg-card-elevated transition-all hover:border-primary/50 hover:shadow-lg hover:shadow-primary/10">
-            <img src={hotzfyLogo} alt="HOTZFY" className="h-full w-full object-contain p-1.5 transition-transform group-hover/logo:scale-110" />
+          <div className="group/logo relative h-11 w-11 shrink-0 overflow-hidden rounded-xl border border-sidebar-border/70 bg-sidebar-accent transition-colors hover:border-sidebar-primary/50">
+            <img src={hotzfyLogo} alt="HOTZFY" className="h-full w-full object-contain p-1.5" />
             <div className="pointer-events-none absolute inset-0 rounded-xl ring-1 ring-inset ring-white/5" />
           </div>
           <div className="min-w-0 group-data-[collapsible=icon]:hidden">
@@ -378,9 +378,9 @@ export function AppSidebar() {
         <button
           type="button"
           onClick={() => window.open("https://wa.me/5511999999999?text=Preciso%20de%20suporte%20para%20escalar!", "_blank")}
-          className="group/sup relative flex w-full items-center gap-3 overflow-hidden rounded-xl border border-border/40 bg-card-elevated/40 px-3 py-3 text-left transition-all duration-200 hover:border-primary/30 hover:bg-card-elevated/60 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0"
+          className="group/sup relative flex w-full items-center gap-3 overflow-hidden rounded-xl border border-sidebar-border/70 bg-sidebar-accent/45 px-3 py-3 text-left transition-colors duration-200 hover:border-sidebar-primary/30 hover:bg-sidebar-accent/70 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0"
         >
-          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-border/30 bg-card-elevated text-primary">
+          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-sidebar-primary/25 bg-sidebar-primary/10 text-sidebar-primary">
             <Headphones className="h-4 w-4" strokeWidth={2.5} />
           </div>
           <div className="min-w-0 flex-1 group-data-[collapsible=icon]:hidden">
