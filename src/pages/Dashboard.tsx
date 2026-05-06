@@ -402,28 +402,34 @@ export default function Dashboard() {
 
   const nickname = profile?.nickname || profile?.full_name?.split(" ")[0] || null;
 
-  return (
-    <div className="dashboard-page mx-auto w-full max-w-[1440px] pb-24 px-3 md:px-6 relative space-y-5 pt-2">
+  const statusLabel = (s: string) => s === 'completed' ? 'Aprovado' : s === 'pending' ? 'Pendente' : s === 'refunded' ? 'Reembolso' : s === 'chargeback' ? 'Chargeback' : 'Falhou';
+  const statusColor = (s: string) => s === 'completed' ? 'text-emerald-400' : s === 'pending' ? 'text-amber-400' : 'text-red-400';
+  const statusBg = (s: string) => s === 'completed' ? 'bg-emerald-500/10' : s === 'pending' ? 'bg-amber-500/10' : 'bg-red-500/10';
 
-      {/* ═══════════════════════════════════════════════════════ */}
-      {/* TOP BAR — Greeting + Period selector                    */}
-      {/* ═══════════════════════════════════════════════════════ */}
-      <section className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-        <div>
-          <h1 className="text-xl md:text-2xl font-display font-black tracking-tight text-foreground">
-            Olá, {nickname || "Vendedor"}
-            <button onClick={privacy.toggle} className="inline-flex items-center justify-center h-7 w-7 rounded-lg border border-border/40 bg-card text-muted-foreground hover:text-foreground transition-colors align-middle ml-2">
+  return (
+    <div className="dashboard-page mx-auto w-full max-w-[1440px] pb-24 px-3 md:px-6 relative pt-2">
+
+      {/* ── Header ── */}
+      <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 mb-6">
+        <div className="space-y-1">
+          <div className="flex items-center gap-2.5">
+            <h1 className="text-[22px] md:text-[26px] font-display font-black tracking-[-0.02em] text-foreground leading-none">
+              {nickname || "Vendedor"}
+            </h1>
+            <button onClick={privacy.toggle} className="inline-flex items-center justify-center h-7 w-7 rounded-md border border-border/30 text-muted-foreground/60 hover:text-foreground hover:border-border/60 transition-colors">
               {privacy.hidden ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
             </button>
-          </h1>
-          <p className="text-[13px] text-muted-foreground/60 mt-0.5">Painel de controle da sua operação.</p>
+          </div>
+          <p className="text-[12px] text-muted-foreground/40 font-medium leading-none">Visão geral da sua operação</p>
         </div>
-        <div className="flex items-center gap-2">
-          <div className="flex items-center rounded-lg border border-border/40 bg-card p-0.5">
+        <div className="flex items-center gap-1.5">
+          <div className="flex items-center rounded-md border border-border/30 bg-card/50 p-[3px]">
             {PERIOD_PRESETS.filter(p => ["Hoje", "7 dias", "30 dias"].includes(p.label)).map((opt) => (
               <button key={opt.label} onClick={() => { setSelectedPeriod(opt); setIsCustom(false); setCustomRange(undefined); }}
-                className={cn("rounded-md px-3 py-1.5 text-[11px] font-display font-bold transition-all",
-                  !isCustom && selectedPeriod.label === opt.label ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground"
+                className={cn("rounded-[5px] px-3.5 py-[6px] text-[11px] font-display font-bold transition-all leading-none",
+                  !isCustom && selectedPeriod.label === opt.label
+                    ? "bg-emerald-500/15 text-emerald-400 border border-emerald-500/20"
+                    : "text-muted-foreground/50 hover:text-foreground border border-transparent"
                 )}>
                 {opt.label}
               </button>
@@ -431,8 +437,8 @@ export default function Dashboard() {
           </div>
           <Popover open={datePickerOpen} onOpenChange={setDatePickerOpen}>
             <PopoverTrigger asChild>
-              <button className={cn("h-8 rounded-lg border px-3 text-[11px] font-bold transition-all inline-flex items-center gap-1.5",
-                isCustom ? "border-primary/35 bg-primary/10 text-foreground" : "border-border/40 bg-card text-muted-foreground hover:text-foreground"
+              <button className={cn("h-[30px] rounded-md border px-3 text-[11px] font-bold transition-all inline-flex items-center gap-1.5 leading-none",
+                isCustom ? "border-emerald-500/25 bg-emerald-500/8 text-emerald-400" : "border-border/30 bg-card/50 text-muted-foreground/50 hover:text-foreground"
               )}>
                 <CalendarDays className="h-3 w-3" />
                 {isCustom && customRange?.from
@@ -445,314 +451,258 @@ export default function Dashboard() {
             </PopoverContent>
           </Popover>
         </div>
-      </section>
+      </div>
 
-      {/* ═══════════════════════════════════════════════════════ */}
-      {/* FINANCIAL STAT CARDS — Always visible, compact          */}
-      {/* ═══════════════════════════════════════════════════════ */}
-      <section className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+      {/* ── Balance Strip ── */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-[1px] rounded-xl overflow-hidden border border-border/30 bg-border/20 mb-5">
         {([
-          {
-            label: "Total Faturado",
-            sublabel: "Volume total histórico",
-            value: privacy.hidden ? CENSORED : fmt(transactions.filter(t => t.status === "completed").reduce((a, t) => a + Number(t.net_amount), 0)),
-            icon: <TrendingUp className="h-5 w-5 text-primary" />,
-            accent: "border-l-primary",
-          },
-          {
-            label: "Saldo Disponível",
-            sublabel: "Liberado para saque",
-            value: privacy.hidden ? CENSORED : fmt(Math.max(balance, 0)),
-            icon: <Wallet className="h-5 w-5 text-success" />,
-            accent: "border-l-success",
-          },
-          {
-            label: "Saldo Pendente",
-            sublabel: "Aguardando liberação",
-            value: privacy.hidden ? CENSORED : fmt(transactions.filter(t => t.status === "completed" && !t.retention_released).reduce((a, t) => a + Number(t.retained_amount), 0)),
-            icon: <Clock3 className="h-5 w-5 text-warning" />,
-            accent: "border-l-warning",
-          },
-          {
-            label: "Vendas Realizadas",
-            sublabel: "Quantidade total",
-            value: privacy.hidden ? CENSORED : transactions.filter(t => t.status === "completed").length.toString(),
-            icon: <Zap className="h-5 w-5 text-info" />,
-            accent: "border-l-info",
-          },
-        ]).map((card) => (
-          <div key={card.label} className={cn("group relative overflow-hidden rounded-xl border border-border/50 bg-card p-4 md:p-5 border-l-[3px] transition-all hover:border-border/70", card.accent)}>
-            <div className="flex items-start justify-between mb-3">
-              <p className="text-[11px] md:text-[12px] font-display font-bold text-muted-foreground/70 uppercase tracking-[0.06em]">{card.label}</p>
-              <div className="h-9 w-9 rounded-lg bg-card-elevated border border-border/30 flex items-center justify-center">
-                {card.icon}
-              </div>
+          { label: "Faturamento", value: privacy.hidden ? CENSORED : fmt(transactions.filter(t => t.status === "completed").reduce((a, t) => a + Number(t.net_amount), 0)), sub: "Volume total", icon: <TrendingUp className="h-4 w-4" />, color: "text-emerald-400" },
+          { label: "Disponível", value: privacy.hidden ? CENSORED : fmt(Math.max(balance, 0)), sub: "Liberado para saque", icon: <Wallet className="h-4 w-4" />, color: "text-emerald-400" },
+          { label: "Pendente", value: privacy.hidden ? CENSORED : fmt(transactions.filter(t => t.status === "completed" && !t.retention_released).reduce((a, t) => a + Number(t.retained_amount), 0)), sub: "Aguardando liberação", icon: <Clock3 className="h-4 w-4" />, color: "text-amber-400" },
+          { label: "Vendas", value: privacy.hidden ? CENSORED : transactions.filter(t => t.status === "completed").length.toString(), sub: "Transações aprovadas", icon: <Zap className="h-4 w-4" />, color: "text-blue-400" },
+        ]).map((c) => (
+          <div key={c.label} className="bg-card px-5 py-5 flex flex-col justify-between min-h-[110px]">
+            <div className="flex items-center justify-between mb-3">
+              <span className="text-[10px] font-display font-bold text-muted-foreground/40 uppercase tracking-[0.1em] leading-none">{c.label}</span>
+              <span className={cn("opacity-40", c.color)}>{c.icon}</span>
             </div>
-            <p className="text-2xl md:text-3xl font-display font-black tabular-nums tracking-[-0.03em] text-foreground leading-none">
-              {card.value}
-            </p>
-            <p className="text-[10px] text-muted-foreground/50 mt-2 font-medium">{card.sublabel}</p>
+            <div>
+              <p className="text-[22px] md:text-[26px] font-display font-black tabular-nums tracking-[-0.03em] text-foreground leading-none">{c.value}</p>
+              <p className="text-[10px] text-muted-foreground/30 mt-1.5 leading-none font-medium">{c.sub}</p>
+            </div>
           </div>
         ))}
-      </section>
+      </div>
 
-      {/* ═══════════════════════════════════════════════════════ */}
-      {/* QUICK ACTIONS — Compact row                            */}
-      {/* ═══════════════════════════════════════════════════════ */}
-      <section className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+      {/* ── Quick Actions ── */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 mb-5">
         {([
-          { label: "Gerar PIX", sublabel: "QR Code para receber", icon: <PixLogoMark className="h-5 w-5" />, href: "/vendas/links" },
-          { label: "Solicitar Saque", sublabel: "Transferir via PIX", icon: <ArrowDownRight className="h-5 w-5 text-success" />, href: "/financeiro/saques" },
-          { label: "Transações", sublabel: "Ver histórico", icon: <BarChart3 className="h-5 w-5 text-info" />, href: "/vendas" },
-          { label: "Credenciais API", sublabel: "Gerencie suas credenciais", icon: <Hash className="h-5 w-5 text-warning" />, href: "/vendas/api-keys" },
-        ]).map((action) => (
-          <Link key={action.href} to={action.href} className="group flex items-center gap-3.5 rounded-xl border border-border/50 bg-card px-4 py-4 transition-all hover:border-primary/30 hover:bg-accent/30">
-            <div className="h-10 w-10 rounded-lg bg-card-elevated border border-border/30 flex items-center justify-center shrink-0 group-hover:border-primary/20 transition-colors">
-              {action.icon}
+          { label: "Gerar PIX", desc: "Receber pagamento", icon: <PixLogoMark className="h-4.5 w-4.5" />, href: "/vendas/links" },
+          { label: "Solicitar Saque", desc: "Transferir saldo", icon: <ArrowDownRight className="h-4.5 w-4.5" />, href: "/financeiro/saques" },
+          { label: "Transações", desc: "Histórico completo", icon: <BarChart3 className="h-4.5 w-4.5" />, href: "/vendas" },
+          { label: "API Keys", desc: "Suas credenciais", icon: <Hash className="h-4.5 w-4.5" />, href: "/vendas/api-keys" },
+        ]).map((a) => (
+          <Link key={a.href} to={a.href} className="group flex items-center gap-3 rounded-lg border border-border/20 bg-card/60 hover:bg-card hover:border-border/40 px-4 py-3.5 transition-all">
+            <div className="h-9 w-9 rounded-md bg-emerald-500/8 border border-emerald-500/10 flex items-center justify-center shrink-0 text-emerald-400/70 group-hover:text-emerald-400 group-hover:border-emerald-500/20 transition-colors">
+              {a.icon}
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-[13px] font-display font-bold text-foreground tracking-tight">{action.label}</p>
-              <p className="text-[11px] text-muted-foreground/50 mt-0.5">{action.sublabel}</p>
+              <p className="text-[12px] font-display font-bold text-foreground leading-none">{a.label}</p>
+              <p className="text-[10px] text-muted-foreground/30 mt-1 leading-none">{a.desc}</p>
             </div>
-            <ChevronRight className="h-4 w-4 text-muted-foreground/30 group-hover:text-primary transition-colors shrink-0" />
+            <ChevronRight className="h-3.5 w-3.5 text-muted-foreground/15 group-hover:text-muted-foreground/40 transition-colors shrink-0" />
           </Link>
         ))}
-      </section>
+      </div>
 
-      {/* ════════════════════════════════════════════════════════════════ */}
-      {/* CHART + INDICES                                                   */}
-      {/* ════════════════════════════════════════════════════════════════ */}
-      <section className="grid grid-cols-1 xl:grid-cols-[1fr_340px] gap-3">
-        {/* Faturamento Chart */}
-        <div className="rounded-xl border border-border/50 bg-card overflow-hidden">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 px-6 py-5 border-b border-border/30">
+      {/* ── Chart + KPIs ── */}
+      <div className="grid grid-cols-1 xl:grid-cols-[1fr_320px] gap-2.5 mb-5">
+        {/* Chart */}
+        <div className="rounded-xl border border-border/30 bg-card overflow-hidden">
+          <div className="flex items-center justify-between px-5 py-4 border-b border-border/15">
             <div>
-              <h3 className="text-[15px] font-display font-bold text-foreground tracking-tight">Faturamento</h3>
-              <p className="text-[11px] text-muted-foreground/50 mt-0.5">Evolução do período selecionado</p>
+              <h3 className="text-[13px] font-display font-bold text-foreground leading-none">Faturamento</h3>
+              <p className="text-[10px] text-muted-foreground/30 mt-1 leading-none">Evolução no período</p>
             </div>
-            <div className="flex items-center gap-3">
-              <span className="inline-flex items-center gap-1.5 text-[10px] text-muted-foreground/50 font-medium">
-                <span className="h-2 w-2 rounded-full bg-primary" /> Receita
-              </span>
-            </div>
+            <span className="inline-flex items-center gap-1.5 text-[9px] text-muted-foreground/30 font-medium">
+              <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" /> Receita
+            </span>
           </div>
-          <div className="px-3 pb-5 min-h-[300px]">
-            <ResponsiveContainer width="100%" height={280}>
-              <AreaChart data={chartData} margin={{ top: 10, right: 16, left: -12, bottom: 0 }}>
+          <div className="px-2 pb-4 pt-2">
+            <ResponsiveContainer width="100%" height={260}>
+              <AreaChart data={chartData} margin={{ top: 8, right: 12, left: -16, bottom: 0 }}>
                 <defs>
                   <linearGradient id="dashboardRevenue" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="hsl(var(--primary))" stopOpacity={0.2} />
-                    <stop offset="100%" stopColor="hsl(var(--primary))" stopOpacity={0} />
+                    <stop offset="0%" stopColor="hsl(160 60% 45%)" stopOpacity={0.15} />
+                    <stop offset="100%" stopColor="hsl(160 60% 45%)" stopOpacity={0} />
                   </linearGradient>
                 </defs>
-                <XAxis dataKey="name" tickLine={false} axisLine={false} dy={8} stroke="hsl(var(--muted-foreground) / 0.3)" fontSize={10} interval={chartData.length > 10 ? Math.ceil(chartData.length / 8) - 1 : 0} />
-                <YAxis tickLine={false} axisLine={false} width={64} stroke="hsl(var(--muted-foreground) / 0.3)" fontSize={10} tickFormatter={(v) => v >= 1000 ? `R$${(v / 1000).toLocaleString("pt-BR", { minimumFractionDigits: 1, maximumFractionDigits: 1 })}k` : `R$${v}`} />
+                <XAxis dataKey="name" tickLine={false} axisLine={false} dy={8} stroke="hsl(var(--muted-foreground) / 0.15)" fontSize={9} interval={chartData.length > 10 ? Math.ceil(chartData.length / 8) - 1 : 0} />
+                <YAxis tickLine={false} axisLine={false} width={56} stroke="hsl(var(--muted-foreground) / 0.15)" fontSize={9} tickFormatter={(v) => v >= 1000 ? `R$${(v / 1000).toLocaleString("pt-BR", { minimumFractionDigits: 1, maximumFractionDigits: 1 })}k` : `R$${v}`} />
                 <Tooltip
-                  cursor={{ stroke: "hsl(var(--primary) / 0.3)", strokeWidth: 1, strokeDasharray: "4 4" }}
+                  cursor={{ stroke: "hsl(160 60% 45% / 0.2)", strokeWidth: 1, strokeDasharray: "4 4" }}
                   content={({ active, payload, label }) => {
                     if (!active || !payload?.length) return null;
                     return (
-                      <div className="rounded-lg border border-border bg-card px-4 py-3">
-                        <p className="font-display text-[9px] font-bold text-muted-foreground/50 uppercase tracking-[0.18em]">{label}</p>
-                        <p className="font-display text-[15px] font-black text-primary tabular-nums mt-1 tracking-tight">
+                      <div className="rounded-lg border border-border/30 bg-card px-3.5 py-2.5">
+                        <p className="font-display text-[8px] font-bold text-muted-foreground/30 uppercase tracking-[0.2em] leading-none">{label}</p>
+                        <p className="font-display text-[14px] font-black text-emerald-400 tabular-nums mt-1.5 tracking-tight leading-none">
                           {fmt(payload[0].value as number)}
                         </p>
                       </div>
                     );
                   }}
                 />
-                <Area type="monotone" dataKey="vendas" stroke="hsl(var(--primary))" strokeWidth={2} fill="url(#dashboardRevenue)" dot={false} activeDot={{ r: 5, strokeWidth: 2, fill: "hsl(var(--card))", stroke: "hsl(var(--primary))" }} />
+                <Area type="monotone" dataKey="vendas" stroke="hsl(160 60% 45%)" strokeWidth={1.5} fill="url(#dashboardRevenue)" dot={false} activeDot={{ r: 4, strokeWidth: 2, fill: "hsl(var(--card))", stroke: "hsl(160 60% 45%)" }} />
               </AreaChart>
             </ResponsiveContainer>
           </div>
         </div>
 
-        {/* Right sidebar — KPIs */}
-        <div className="rounded-xl border border-border/50 bg-card overflow-hidden flex flex-col">
-          <div className="px-6 py-5 border-b border-border/30">
-            <h3 className="text-[15px] font-display font-bold text-foreground tracking-tight">Índices</h3>
-            <p className="text-[11px] text-muted-foreground/50 mt-0.5">Métricas de conversão</p>
+        {/* KPIs Panel */}
+        <div className="rounded-xl border border-border/30 bg-card overflow-hidden flex flex-col">
+          <div className="px-5 py-4 border-b border-border/15">
+            <h3 className="text-[13px] font-display font-bold text-foreground leading-none">Índices</h3>
+            <p className="text-[10px] text-muted-foreground/30 mt-1 leading-none">Métricas de conversão</p>
           </div>
-          <div className="flex-1 p-5 space-y-5">
-            {/* Pix */}
-            <div className="flex items-center gap-4">
-              <div className="relative h-14 w-14 shrink-0">
-                <svg className="h-full w-full -rotate-90" viewBox="0 0 36 36">
-                  <circle cx="18" cy="18" r="15.5" fill="none" stroke="hsl(var(--border) / 0.3)" strokeWidth="3" />
-                  <circle cx="18" cy="18" r="15.5" fill="none" stroke="hsl(var(--success))" strokeWidth="3" strokeDasharray={`${pixConversion * 0.974} 100`} strokeLinecap="round" />
-                </svg>
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <span className="text-[11px] font-display font-black text-success tabular-nums">{pixConversion.toFixed(0)}%</span>
+          <div className="flex-1 p-5 space-y-4">
+            {/* Conversion rings */}
+            {([
+              { label: "PIX", pct: pixConversion, color: "emerald", detail: `${pixApprovedCount}/${pixTotalCount}` },
+              { label: "Cartão", pct: cardConversion, color: "blue", detail: `${cardApprovedCount}/${cardTotalCount}` },
+              { label: "Chargeback", pct: chargebackRate, color: chargebackRate > 1 ? "red" : "emerald", detail: `${chargebacks.length} ocorrências` },
+            ] as const).map((kpi) => {
+              const strokeColor = kpi.color === "emerald" ? "hsl(160 60% 45%)" : kpi.color === "blue" ? "hsl(210 70% 55%)" : "hsl(0 65% 55%)";
+              const textClass = kpi.color === "emerald" ? "text-emerald-400" : kpi.color === "blue" ? "text-blue-400" : "text-red-400";
+              return (
+                <div key={kpi.label} className="flex items-center gap-3.5">
+                  <div className="relative h-11 w-11 shrink-0">
+                    <svg className="h-full w-full -rotate-90" viewBox="0 0 36 36">
+                      <circle cx="18" cy="18" r="15" fill="none" stroke="hsl(var(--border) / 0.15)" strokeWidth="2.5" />
+                      <circle cx="18" cy="18" r="15" fill="none" stroke={strokeColor} strokeWidth="2.5" strokeDasharray={`${(kpi.label === "Chargeback" ? Math.min(kpi.pct * 9.42, 94.2) : kpi.pct * 0.942)} 100`} strokeLinecap="round" />
+                    </svg>
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <span className={cn("text-[9px] font-display font-black tabular-nums leading-none", textClass)}>
+                        {kpi.label === "Chargeback" ? `${kpi.pct.toFixed(1)}%` : `${kpi.pct.toFixed(0)}%`}
+                      </span>
+                    </div>
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-[12px] font-display font-bold text-foreground leading-none">{kpi.label}</p>
+                    <p className="text-[10px] text-muted-foreground/30 mt-1 leading-none">{kpi.detail}</p>
+                  </div>
                 </div>
-              </div>
-              <div>
-                <p className="text-[13px] font-display font-bold text-foreground">Pix</p>
-                <p className="text-[11px] text-muted-foreground/50">Conversão</p>
-              </div>
-            </div>
-            {/* Card */}
-            <div className="flex items-center gap-4">
-              <div className="relative h-14 w-14 shrink-0">
-                <svg className="h-full w-full -rotate-90" viewBox="0 0 36 36">
-                  <circle cx="18" cy="18" r="15.5" fill="none" stroke="hsl(var(--border) / 0.3)" strokeWidth="3" />
-                  <circle cx="18" cy="18" r="15.5" fill="none" stroke="hsl(var(--info))" strokeWidth="3" strokeDasharray={`${cardConversion * 0.974} 100`} strokeLinecap="round" />
-                </svg>
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <span className="text-[11px] font-display font-black text-info tabular-nums">{cardConversion.toFixed(0)}%</span>
+              );
+            })}
+
+            {/* Summary stats */}
+            <div className="border-t border-border/15 pt-3.5 space-y-2">
+              {([
+                { label: "Ticket Médio", value: privacy.hidden ? CENSORED : fmt(approved.length > 0 ? revenue / approved.length : 0) },
+                { label: "Conversão Geral", value: `${conversion.toFixed(1)}%` },
+                { label: "Clientes Únicos", value: uniqueCustomers.toString() },
+              ]).map((s) => (
+                <div key={s.label} className="flex items-center justify-between">
+                  <span className="text-[11px] text-muted-foreground/35">{s.label}</span>
+                  <span className="text-[11px] font-display font-black text-foreground tabular-nums">{s.value}</span>
                 </div>
-              </div>
-              <div>
-                <p className="text-[13px] font-display font-bold text-foreground">Cartão</p>
-                <p className="text-[11px] text-muted-foreground/50">Conversão</p>
-              </div>
-            </div>
-            {/* Chargeback */}
-            <div className="flex items-center gap-4">
-              <div className="relative h-14 w-14 shrink-0">
-                <svg className="h-full w-full -rotate-90" viewBox="0 0 36 36">
-                  <circle cx="18" cy="18" r="15.5" fill="none" stroke="hsl(var(--border) / 0.3)" strokeWidth="3" />
-                  <circle cx="18" cy="18" r="15.5" fill="none" stroke={chargebackRate > 1 ? "hsl(var(--destructive))" : "hsl(var(--success))"} strokeWidth="3" strokeDasharray={`${Math.min(chargebackRate * 9.74, 97.4)} 100`} strokeLinecap="round" />
-                </svg>
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <span className={cn("text-[11px] font-display font-black tabular-nums", chargebackRate > 1 ? "text-destructive" : "text-success")}>{chargebackRate.toFixed(1)}%</span>
-                </div>
-              </div>
-              <div>
-                <p className="text-[13px] font-display font-bold text-foreground">Chargeback</p>
-                <p className="text-[11px] text-muted-foreground/50">Saúde da conta</p>
-              </div>
-            </div>
-            {/* Summary */}
-            <div className="border-t border-border/30 pt-4 space-y-2.5">
-              <div className="flex items-center justify-between text-[12px]">
-                <span className="text-muted-foreground/60">Ticket Médio</span>
-                <span className="font-display font-black text-foreground tabular-nums">{privacy.hidden ? CENSORED : fmt(approved.length > 0 ? revenue / approved.length : 0)}</span>
-              </div>
-              <div className="flex items-center justify-between text-[12px]">
-                <span className="text-muted-foreground/60">Conversão Geral</span>
-                <span className="font-display font-black text-foreground tabular-nums">{conversion.toFixed(1)}%</span>
-              </div>
-              <div className="flex items-center justify-between text-[12px]">
-                <span className="text-muted-foreground/60">Clientes Únicos</span>
-                <span className="font-display font-black text-foreground tabular-nums">{uniqueCustomers}</span>
-              </div>
+              ))}
             </div>
           </div>
         </div>
-      </section>
+      </div>
 
-      {/* ═══════════════════════════════════════════════════════ */}
-      {/* ACTIVITY FEED                                          */}
-      {/* ═══════════════════════════════════════════════════════ */}
-      <section className="rounded-xl border border-border/50 bg-card overflow-hidden">
-        <div className="flex items-center justify-between border-b border-border/30 px-6 py-5">
+      {/* ── Activity ── */}
+      <div className="rounded-xl border border-border/30 bg-card overflow-hidden">
+        <div className="flex items-center justify-between border-b border-border/15 px-5 py-4">
           <div>
-            <h3 className="text-[15px] font-display font-bold text-foreground tracking-tight">Atividade Recente</h3>
-            <p className="text-[11px] text-muted-foreground/50 mt-0.5">Últimas transações e saques</p>
+            <h3 className="text-[13px] font-display font-bold text-foreground leading-none">Atividade Recente</h3>
+            <p className="text-[10px] text-muted-foreground/30 mt-1 leading-none">Últimas movimentações</p>
           </div>
-          <Link to="/vendas" className="text-[12px] font-bold text-primary hover:underline">Ver tudo</Link>
+          <Link to="/vendas" className="text-[11px] font-bold text-emerald-400/70 hover:text-emerald-400 transition-colors">Ver tudo</Link>
         </div>
-        <div className="divide-y divide-border/20">
-          {activity.map((item) => (
-            <div key={item.id} className="flex items-center gap-3.5 px-6 py-3.5 hover:bg-accent/30 transition-all cursor-pointer" onClick={() => item.kind === 'transaction' && setDetailTx(transactions.find(t => t.id === item.id) || null)}>
-              <div className={cn("h-9 w-9 rounded-lg flex items-center justify-center shrink-0",
-                item.status === 'completed' ? "bg-success/10 text-success" : 
-                item.status === 'pending' ? "bg-warning/10 text-warning" : "bg-destructive/10 text-destructive"
-              )}>
-                {item.kind === 'withdrawal' ? <ArrowDownRight className="h-4 w-4" /> : <CreditCard className="h-4 w-4" />}
+        {activity.length === 0 ? (
+          <div className="px-5 py-12 text-center">
+            <Activity className="h-5 w-5 text-muted-foreground/15 mx-auto mb-2" />
+            <p className="text-[11px] text-muted-foreground/25">Nenhuma atividade encontrada</p>
+          </div>
+        ) : (
+          <div className="divide-y divide-border/10">
+            {activity.map((item) => (
+              <div key={item.id} className="flex items-center gap-3 px-5 py-3 hover:bg-accent/20 transition-all cursor-pointer" onClick={() => item.kind === 'transaction' && setDetailTx(transactions.find(t => t.id === item.id) || null)}>
+                <div className={cn("h-8 w-8 rounded-md flex items-center justify-center shrink-0", statusBg(item.status))}>
+                  {item.kind === 'withdrawal' ? <ArrowDownRight className={cn("h-3.5 w-3.5", statusColor(item.status))} /> : <CreditCard className={cn("h-3.5 w-3.5", statusColor(item.status))} />}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-[12px] font-semibold text-foreground truncate leading-none">{item.label === 'pix' ? 'PIX' : item.label === 'credit_card' ? 'Cartão de Crédito' : item.label}</p>
+                  <p className="text-[9px] text-muted-foreground/25 uppercase tracking-wider mt-1 leading-none">
+                    {item.kind === 'withdrawal' ? 'Saque' : 'Venda'} · {timeAgo(item.createdAt)}
+                  </p>
+                </div>
+                <div className="text-right shrink-0">
+                  <p className="text-[12px] font-display font-black text-foreground tabular-nums leading-none">{privacy.hidden ? CENSORED : fmt(item.amount)}</p>
+                  <p className={cn("text-[8px] font-bold uppercase tracking-[0.1em] mt-1 leading-none", statusColor(item.status))}>
+                    {statusLabel(item.status)}
+                  </p>
+                </div>
               </div>
-              <div className="flex-1 min-w-0">
-                <p className="text-[13px] font-bold text-foreground truncate">{item.label}</p>
-                <p className="text-[10px] font-medium text-muted-foreground/40 uppercase tracking-wider mt-0.5">
-                  {item.kind === 'withdrawal' ? 'Saque' : 'Venda'} • {timeAgo(item.createdAt)}
-                </p>
-              </div>
-              <div className="text-right shrink-0">
-                <p className="text-[13px] font-display font-black text-foreground tabular-nums">{fmt(item.amount)}</p>
-                <p className={cn("text-[9px] font-bold uppercase tracking-widest mt-0.5",
-                  item.status === 'completed' ? "text-success" : 
-                  item.status === 'pending' ? "text-warning" : "text-destructive"
-                )}>
-                  {item.status === 'completed' ? 'Aprovado' : 
-                   item.status === 'pending' ? 'Pendente' : 'Cancelado'}
-                </p>
-              </div>
-            </div>
-          ))}
-        </div>
-      </section>
+            ))}
+          </div>
+        )}
+      </div>
 
+      {/* ── Transaction Detail Dialog ── */}
       <Dialog open={!!detailTx} onOpenChange={(open) => !open && setDetailTx(null)}>
-        <DialogContent className="sm:max-w-[460px] border-border/20 bg-card p-0 gap-0 overflow-hidden rounded-xl">
+        <DialogContent className="sm:max-w-[440px] border-border/20 bg-card p-0 gap-0 overflow-hidden rounded-xl">
           {detailTx && (() => {
-            const statusMap: Record<string, { label: string; color: string; bg: string; border: string; dot: string }> = {
-              completed: { label: "Aprovada", color: "text-success", bg: "bg-success/10", border: "border-success/20", dot: "bg-success" },
-              pending: { label: "Pendente", color: "text-warning", bg: "bg-warning/10", border: "border-warning/20", dot: "bg-warning" },
-              failed: { label: "Falhou", color: "text-destructive", bg: "bg-destructive/10", border: "border-destructive/20", dot: "bg-destructive" },
-              refunded: { label: "Reembolso", color: "text-info", bg: "bg-info/10", border: "border-info/20", dot: "bg-info" },
-              chargeback: { label: "Chargeback", color: "text-destructive", bg: "bg-destructive/10", border: "border-destructive/20", dot: "bg-destructive" },
+            const sMap: Record<string, { label: string; color: string; bg: string; border: string; dot: string }> = {
+              completed: { label: "Aprovada", color: "text-emerald-400", bg: "bg-emerald-500/10", border: "border-emerald-500/15", dot: "bg-emerald-400" },
+              pending: { label: "Pendente", color: "text-amber-400", bg: "bg-amber-500/10", border: "border-amber-500/15", dot: "bg-amber-400" },
+              failed: { label: "Falhou", color: "text-red-400", bg: "bg-red-500/10", border: "border-red-500/15", dot: "bg-red-400" },
+              refunded: { label: "Reembolso", color: "text-blue-400", bg: "bg-blue-500/10", border: "border-blue-500/15", dot: "bg-blue-400" },
+              chargeback: { label: "Chargeback", color: "text-red-400", bg: "bg-red-500/10", border: "border-red-500/15", dot: "bg-red-400" },
             };
-            const s = statusMap[detailTx.status] || { label: detailTx.status, color: "text-foreground", bg: "bg-muted/10", border: "border-border/20", dot: "bg-muted-foreground" };
+            const s = sMap[detailTx.status] || { label: detailTx.status, color: "text-foreground", bg: "bg-muted/10", border: "border-border/20", dot: "bg-muted-foreground" };
             const productName = productsData?.find(p => p.id === detailTx.product_id)?.name;
 
             return (
               <div>
-                <div className="relative px-7 pt-8 pb-6 border-b border-border/40">
-                  <div className="flex items-center gap-2.5 mb-4">
-                    <span className={cn("inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-[11px] font-bold border", s.color, s.bg, s.border)}>
+                <div className="px-6 pt-7 pb-5 border-b border-border/15">
+                  <div className="flex items-center gap-2 mb-4">
+                    <span className={cn("inline-flex items-center gap-1.5 rounded-full px-2.5 py-[5px] text-[10px] font-bold border leading-none", s.color, s.bg, s.border)}>
                       <span className={cn("h-1.5 w-1.5 rounded-full", s.dot)} />
                       {s.label}
                     </span>
                     {detailTx.payment_method && (
-                      <span className="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[10px] font-semibold text-muted-foreground border border-border/20 bg-muted/5">
-                        <CreditCard className="h-3 w-3" />
+                      <span className="inline-flex items-center gap-1 rounded-full px-2.5 py-[5px] text-[9px] font-semibold text-muted-foreground/50 border border-border/15 leading-none">
+                        <CreditCard className="h-2.5 w-2.5" />
                         {detailTx.payment_method === "credit_card" ? "Cartão" : detailTx.payment_method === "pix" ? "PIX" : detailTx.payment_method}
                       </span>
                     )}
                   </div>
-                  <p className="text-4xl font-display font-black text-foreground tabular-nums tracking-tight leading-none">{fmt(Number(detailTx.amount))}</p>
-                  {productName && <p className="text-[13px] text-muted-foreground/70 mt-2">{productName}</p>}
+                  <p className="text-[32px] font-display font-black text-foreground tabular-nums tracking-[-0.03em] leading-none">{fmt(Number(detailTx.amount))}</p>
+                  {productName && <p className="text-[12px] text-muted-foreground/40 mt-2 leading-none">{productName}</p>}
                 </div>
-                <div className="px-7 py-5 space-y-3.5">
+                <div className="px-6 py-4 space-y-3">
                   {[
                     { show: !!detailTx.customer_name, icon: User, label: "Cliente", value: detailTx.customer_name },
                     { show: !!detailTx.customer_email, icon: Mail, label: "Email", value: detailTx.customer_email },
                     { show: !!detailTx.customer_phone, icon: Phone, label: "Telefone", value: detailTx.customer_phone },
                   ].filter(f => f.show).map((field, i) => (
-                    <div key={i} className="flex items-center gap-3.5 group">
-                      <div className="h-10 w-10 rounded-lg bg-primary/8 border border-primary/10 flex items-center justify-center shrink-0">
-                        <field.icon className="h-4 w-4 text-primary/70" />
+                    <div key={i} className="flex items-center gap-3">
+                      <div className="h-8 w-8 rounded-md bg-emerald-500/5 border border-emerald-500/8 flex items-center justify-center shrink-0">
+                        <field.icon className="h-3.5 w-3.5 text-emerald-400/50" />
                       </div>
                       <div className="flex-1 min-w-0">
-                        <p className="text-[9px] font-display uppercase tracking-[0.18em] text-muted-foreground/40">{field.label}</p>
-                        <p className="text-[13px] font-semibold text-foreground truncate mt-0.5">{field.value}</p>
+                        <p className="text-[8px] font-display uppercase tracking-[0.18em] text-muted-foreground/25 leading-none">{field.label}</p>
+                        <p className="text-[12px] font-semibold text-foreground truncate mt-1 leading-none">{field.value}</p>
                       </div>
                     </div>
                   ))}
                 </div>
-                <div className="h-px bg-gradient-to-r from-transparent via-border/40 to-transparent" />
-                <div className="px-7 py-5">
-                  <div className="rounded-lg border border-border/15 bg-card-elevated p-4 space-y-3">
-                    <div className="flex justify-between items-center text-[12px]">
-                      <span className="text-muted-foreground/70">Valor bruto</span>
+                <div className="mx-6 h-px bg-border/10" />
+                <div className="px-6 py-4">
+                  <div className="rounded-lg border border-border/10 bg-card-elevated/50 p-3.5 space-y-2.5">
+                    <div className="flex justify-between items-center text-[11px]">
+                      <span className="text-muted-foreground/40">Valor bruto</span>
                       <span className="font-semibold text-foreground tabular-nums">{fmt(Number(detailTx.amount))}</span>
                     </div>
-                    <div className="flex justify-between items-center text-[12px]">
-                      <span className="text-muted-foreground/70">Taxas da plataforma</span>
-                      <span className="font-semibold text-destructive/80 tabular-nums">- {fmt(Number(detailTx.fee_amount))}</span>
+                    <div className="flex justify-between items-center text-[11px]">
+                      <span className="text-muted-foreground/40">Taxas</span>
+                      <span className="font-semibold text-red-400/70 tabular-nums">- {fmt(Number(detailTx.fee_amount))}</span>
                     </div>
-                    <div className="border-t border-border/10 pt-3 flex justify-between items-center">
-                      <span className="text-[13px] font-bold text-foreground">Valor líquido</span>
-                      <span className="font-black text-primary tabular-nums text-[18px] font-display tracking-tight">{fmt(Number(detailTx.net_amount))}</span>
+                    <div className="border-t border-border/8 pt-2.5 flex justify-between items-center">
+                      <span className="text-[12px] font-bold text-foreground">Líquido</span>
+                      <span className="font-black text-emerald-400 tabular-nums text-[16px] font-display tracking-tight">{fmt(Number(detailTx.net_amount))}</span>
                     </div>
                   </div>
                 </div>
-                <div className="px-7 pb-6 flex items-center justify-between">
-                  <span className="inline-flex items-center gap-1.5 text-[11px] text-muted-foreground/50">
+                <div className="px-6 pb-5 flex items-center justify-between">
+                  <span className="inline-flex items-center gap-1.5 text-[10px] text-muted-foreground/25">
                     <Clock3 className="h-3 w-3" />
                     {new Date(detailTx.created_at).toLocaleString("pt-BR", { timeZone: "America/Sao_Paulo" })}
                   </span>
-                  <p className="text-[9px] text-muted-foreground/25 font-mono truncate max-w-[180px]">ID: {detailTx.id}</p>
+                  <p className="text-[8px] text-muted-foreground/15 font-mono truncate max-w-[160px]">ID: {detailTx.id}</p>
                 </div>
               </div>
             );
