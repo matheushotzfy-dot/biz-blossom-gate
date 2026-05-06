@@ -1,4 +1,5 @@
 import { SidebarInset, SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
+import { supabase } from "@/integrations/supabase/client";
 import { AppSidebar } from "./AppSidebar";
 import { MobileBottomNav } from "./MobileBottomNav";
 import { MobileRevenueBar } from "./MobileRevenueBar";
@@ -6,12 +7,12 @@ import { GlobalSearchDialog } from "./GlobalSearchDialog";
 import { NotificationPanel, useNotificationCount } from "@/components/NotificationPanel";
 import { KycOnboardingPopup } from "@/components/KycOnboardingPopup";
 import { Outlet, useNavigate } from "react-router-dom";
-import { Menu, Bell, Sun, Moon, Search, AlertTriangle, ArrowRight, X as XIcon, CheckCircle2 } from "lucide-react";
+import { Menu, Bell, Sun, Moon, Search, AlertTriangle, ArrowRight, X as XIcon, CheckCircle2, Wallet, Eye, EyeOff } from "lucide-react";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { useAuth } from "@/hooks/useAuth";
 import { useTheme } from "@/hooks/useTheme";
 import { ProfileProvider, useProfile } from "@/hooks/useProfile";
-import { usePrefetchDashboardData } from "@/hooks/useQueryData";
+import { usePrefetchDashboardData, useTransactions, useWithdrawals } from "@/hooks/useQueryData";
 import { useEffect, useRef, useState } from "react";
 import { useLocation } from "react-router-dom";
 
@@ -26,11 +27,60 @@ function DashboardLayoutInner() {
  const [showApproved, setShowApproved] = useState(false);
  const [searchOpen, setSearchOpen] = useState(false);
  const [notifOpen, setNotifOpen] = useState(false);
- const unreadCount = useNotificationCount();
+  const unreadCount = useNotificationCount();
+  const { data: transactions = [] } = useTransactions();
+  const { data: withdrawals = [] } = useWithdrawals();
+  const [balanceAdjustments, setBalanceAdjustments] = useState(0);
+  const [privacyHidden, setPrivacyHidden] = useState(() => {
+    try { return localStorage.getItem("privacy_mode") === "true"; } catch { return false; }
+  });
+
+  const togglePrivacy = () => {
+    setPrivacyHidden(prev => {
+      const next = !prev;
+      try { localStorage.setItem("privacy_mode", String(next)); } catch {}
+      return next;
+    });
+  };
+
+  useEffect(() => {
+    if (!user?.id) return;
+    supabase.from("balance_adjustments").select("amount, type").eq("user_id", user.id)
+      .then(({ data }) => {
+        if (data) {
+          const adj = data.reduce((acc, a) => acc + (a.type === "credit" ? Number(a.amount) : -Number(a.amount)), 0);
+          setBalanceAdjustments(adj);
+        }
+      });
+  }, [user?.id]);
+
+  const balance = transactions
+    .filter(t => t.status === "completed")
+    .reduce((acc, t) => acc + Number(t.net_amount), 0) + 
+    balanceAdjustments - 
+    withdrawals
+      .filter(w => w.status === "approved" || w.status === "pending")
+      .reduce((acc, w) => acc + Number(w.amount), 0) -
+    transactions
+      .filter(t => t.status === "completed" && !t.retention_released && Number(t.retained_amount) > 0)
+      .reduce((acc, t) => acc + Number(t.retained_amount), 0);
+
+  const formatBRL = (v: number) => 
+    v.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
 
  useEffect(() => {
  scrollRef.current?.scrollTo({ top: 0, left: 0 });
- }, [pathname]);
+  }, [pathname]);
+
+  // Sync privacy mode with dashboard
+  useEffect(() => {
+    const handleStorage = () => {
+      const isHidden = localStorage.getItem("privacy_mode") === "true";
+      setPrivacyHidden(isHidden);
+    };
+    window.addEventListener('storage', handleStorage);
+    return () => window.removeEventListener('storage', handleStorage);
+  }, []);
 
  useEffect(() => {
  if (!user?.id || !profile?.account_status || !profile?.updated_at) return;
@@ -68,8 +118,8 @@ function DashboardLayoutInner() {
   <SidebarInset className="ambient-backdrop relative min-w-0 bg-background flex flex-col h-full min-h-0 overflow-hidden">
    {/* Ambient light is handled by .ambient-backdrop CSS — no extra blobs needed */}
 
-          <header className="relative z-20 hidden h-12 md:flex items-center border-b border-border/50 bg-background px-3 lg:px-5 sticky top-0">
-            <SidebarTrigger className="h-8 w-8 rounded-md hover:bg-muted/60 transition-colors flex items-center justify-center text-muted-foreground/70 hover:text-foreground">
+          <header className="relative z-20 h-14 flex items-center border-b border-border/50 bg-background/80 backdrop-blur-md px-3 lg:px-5 sticky top-0 md:flex">
+            <SidebarTrigger className="h-8 w-8 rounded-md hover:bg-muted/60 transition-colors flex items-center justify-center text-muted-foreground/70 hover:text-foreground md:flex">
               <Menu className="h-[15px] w-[15px]" strokeWidth={1.85} />
             </SidebarTrigger>
 
@@ -82,7 +132,23 @@ function DashboardLayoutInner() {
               <kbd className="hidden lg:inline-flex h-4 items-center gap-0.5 rounded border border-border/60 bg-muted/40 px-1 text-[9px] font-medium text-muted-foreground/60">⌘K</kbd>
             </button>
 
-            <div className="flex-1" />
+            <div className="flex-1 flex justify-center">
+              <div className="flex items-center gap-3 px-4 h-9 rounded-full bg-muted/30 border border-border/40 transition-all hover:bg-muted/50">
+                <div className="flex items-center gap-2">
+                  <Wallet className="h-3.5 w-3.5 text-primary" />
+                  <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/60">Saldo</span>
+                </div>
+                <span className="text-sm font-display font-black text-foreground tabular-nums">
+                  {privacyHidden ? "••••••" : formatBRL(Math.max(balance, 0))}
+                </span>
+                <button 
+                  onClick={togglePrivacy}
+                  className="ml-1 h-6 w-6 rounded-md flex items-center justify-center hover:bg-background/50 text-muted-foreground/40 hover:text-foreground transition-colors"
+                >
+                  {privacyHidden ? <EyeOff className="h-3 w-3" /> : <Eye className="h-3 w-3" />}
+                </button>
+              </div>
+            </div>
 
             <div className="flex items-center gap-0.5">
               <button
