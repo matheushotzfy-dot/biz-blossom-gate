@@ -37,6 +37,7 @@ import {
   User,
   Banknote,
   Crown,
+  Rocket,
 } from "lucide-react";
 import { Area, AreaChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import type { Tables } from "@/integrations/supabase/types";
@@ -432,21 +433,24 @@ export default function Dashboard() {
         </div>
       </section>
 
-      {/* ─── Quick Actions Floating Grid ─── */}
-      <section className="grid grid-cols-2 md:grid-cols-4 gap-4">
+      {/* ─── Ultra-Premium Action Grid ─── */}
+      <section className="grid grid-cols-2 md:grid-cols-4 gap-6">
         {[
-          { label: "Gerar Link", icon: <Zap className="h-5 w-5" />, color: "bg-amber-500/10 text-amber-500", href: "/vendas/links" },
-          { label: "Novo Produto", icon: <Package className="h-5 w-5" />, color: "bg-primary/10 text-primary", href: "/vendas/produtos" },
-          { label: "Configurar Checkout", icon: <CreditCard className="h-5 w-5" />, color: "bg-info/10 text-info", href: "/integracoes" },
-          { label: "Ver Relatórios", icon: <FileText className="h-5 w-5" />, color: "bg-purple-500/10 text-purple-500", href: "/vendas" },
+          { label: "Gerar Checkout", icon: <Zap className="h-6 w-6" />, color: "bg-amber-500/10 text-amber-500", href: "/vendas/links" },
+          { label: "Novo Produto", icon: <Package className="h-6 w-6" />, color: "bg-primary/10 text-primary", href: "/vendas/produtos" },
+          { label: "Configurar API", icon: <CreditCard className="h-6 w-6" />, color: "bg-info/10 text-info", href: "/integracoes" },
+          { label: "Inteligência", icon: <FileText className="h-6 w-6" />, color: "bg-purple-500/10 text-purple-500", href: "/vendas" },
         ].map((item) => (
-          <Link key={item.label} to={item.href} className="group relative flex items-center gap-4 p-4 rounded-2xl border border-border bg-card/50 backdrop-blur-sm hover:bg-card hover:shadow-xl hover:shadow-primary/5 transition-all">
-            <div className={cn("h-12 w-12 rounded-xl flex items-center justify-center shrink-0 transition-transform group-hover:scale-110", item.color)}>
+          <Link key={item.label} to={item.href} className="group relative flex flex-col items-start gap-6 p-10 rounded-[2.5rem] border border-border/40 bg-card/60 backdrop-blur-sm hover:bg-card hover:shadow-[0_20px_40px_-10px_rgba(0,0,0,0.3)] hover:scale-[1.02] transition-all duration-500 overflow-hidden">
+            <div className={cn("h-14 w-14 rounded-2xl flex items-center justify-center shrink-0 transition-all duration-500 group-hover:scale-110 group-hover:shadow-2xl", item.color)}>
               {item.icon}
             </div>
-            <span className="font-bold text-sm tracking-tight">{item.label}</span>
-            <div className="ml-auto opacity-0 group-hover:opacity-100 transition-opacity">
-              <ChevronRight className="h-4 w-4 text-primary" />
+            <div className="space-y-1">
+              <span className="font-black text-lg tracking-tighter block">{item.label}</span>
+              <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/40">Operação rápida</span>
+            </div>
+            <div className="absolute top-6 right-6 opacity-0 group-hover:opacity-100 transition-all duration-500 translate-x-4 group-hover:translate-x-0">
+              <ChevronRight className="h-5 w-5 text-primary" strokeWidth={3} />
             </div>
           </Link>
         ))}
@@ -455,64 +459,69 @@ export default function Dashboard() {
       {/* ════════════════════════════════════════════════════════════════ */}
       {/* FINANCIAL STAT CARDS                                              */}
       {/* ════════════════════════════════════════════════════════════════ */}
-      <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
         {[
           {
-            label: "Total Faturado",
+            label: "Volume de Vendas",
             value: privacy.hidden ? CENSORED : fmt(transactions.filter(t => t.status === "completed").reduce((a, t) => a + Number(t.net_amount), 0)),
-            sublabel: "Faturamento histórico",
-            icon: <TrendingUp className="h-5 w-5" />,
+            sublabel: "Faturamento bruto total",
+            icon: <TrendingUp className="h-6 w-6" />,
             color: "primary",
           },
           {
-            label: "Saldo Disponível",
+            label: "Disponível",
             value: privacy.hidden ? CENSORED : fmt(Math.max(balance, 0)),
-            sublabel: "Pronto para saque",
-            icon: <Wallet className="h-5 w-5" />,
+            sublabel: "Liberado para transferência",
+            icon: <Wallet className="h-6 w-6" />,
             color: "success",
           },
           {
-            label: "Saldo Pendente",
+            label: "Pendente",
             value: privacy.hidden ? CENSORED : fmt(transactions.filter(t => t.status === "completed" && !t.retention_released).reduce((a, t) => a + Number(t.retained_amount), 0)),
-            sublabel: "Lançamentos futuros",
-            icon: <Clock3 className="h-5 w-5" />,
+            sublabel: "Liberação programada",
+            icon: <Clock3 className="h-6 w-6" />,
             color: "warning",
           },
           {
-            label: "Vendas Realizadas",
+            label: "Conversões",
             value: privacy.hidden ? CENSORED : transactions.filter(t => t.status === "completed").length.toString(),
-            sublabel: "Total de conversões",
-            icon: <Zap className="h-5 w-5" />,
+            sublabel: "Vendas confirmadas",
+            icon: <Zap className="h-6 w-6" />,
             color: "info",
           },
         ].map((card) => (
-          <div key={card.label} className="group relative p-8 rounded-[2rem] border border-border/50 bg-card transition-all duration-500 hover:border-primary/30 hover:shadow-2xl hover:shadow-primary/5 overflow-hidden">
-            <div className="relative z-10">
-              <div className="flex items-center justify-between mb-6">
-                <div className={cn("h-14 w-14 rounded-2xl flex items-center justify-center transition-transform duration-500 group-hover:scale-110 group-hover:rotate-3", 
-                  card.color === "primary" ? "bg-primary/10 text-primary" :
-                  card.color === "success" ? "bg-success/10 text-success" :
-                  card.color === "warning" ? "bg-warning/10 text-warning" :
-                  "bg-info/10 text-info"
+          <div key={card.label} className="group relative p-10 rounded-[3rem] border border-border/40 bg-card transition-all duration-700 hover:border-primary/40 hover:shadow-[0_40px_80px_-20px_rgba(0,0,0,0.4)] overflow-hidden">
+            <div className="relative z-10 space-y-8">
+              <div className="flex items-center justify-between">
+                <div className={cn("h-16 w-16 rounded-[1.5rem] flex items-center justify-center transition-all duration-700 group-hover:scale-110 group-hover:rotate-6 shadow-2xl", 
+                  card.color === "primary" ? "bg-primary text-primary-foreground shadow-primary/20" :
+                  card.color === "success" ? "bg-success text-success-foreground shadow-success/20" :
+                  card.color === "warning" ? "bg-warning text-warning-foreground shadow-warning/20" :
+                  "bg-info text-info-foreground shadow-info/20"
                 )}>
                   {card.icon}
                 </div>
-                <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-success/10 text-success text-[10px] font-black uppercase tracking-wider">
-                  <ArrowUpRight className="h-3 w-3" />
-                  Ativo
+                <div className="h-1 w-12 rounded-full bg-muted/20 overflow-hidden">
+                  <div className={cn("h-full w-2/3 rounded-full animate-pulse", 
+                    card.color === "primary" ? "bg-primary" : "bg-foreground"
+                  )} />
                 </div>
               </div>
-              <div className="space-y-1">
-                <p className="text-xs font-black uppercase tracking-[0.2em] text-muted-foreground/50">{card.label}</p>
-                <h3 className="text-3xl font-display font-black tracking-tighter text-foreground tabular-nums leading-none">
+              <div className="space-y-3">
+                <p className="text-[11px] font-black uppercase tracking-[0.3em] text-muted-foreground/40">{card.label}</p>
+                <h3 className="text-4xl font-display font-black tracking-tighter text-foreground tabular-nums leading-none">
                   {card.value}
                 </h3>
               </div>
-              <p className="mt-4 text-[11px] font-bold text-muted-foreground/40">{card.sublabel}</p>
+              <p className="text-[12px] font-bold text-muted-foreground/30 flex items-center gap-2">
+                <div className="h-1.5 w-1.5 rounded-full bg-success" />
+                {card.sublabel}
+              </p>
             </div>
             
-            {/* Decoration */}
-            <div className="absolute -bottom-8 -right-8 h-32 w-32 bg-foreground/5 blur-3xl rounded-full transition-all duration-500 group-hover:bg-primary/10 group-hover:scale-150" />
+            {/* Multi-layered decorations */}
+            <div className="absolute -bottom-12 -right-12 h-48 w-48 bg-foreground/5 blur-[80px] rounded-full transition-all duration-700 group-hover:bg-primary/5 group-hover:scale-150" />
+            <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-primary/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
           </div>
         ))}
       </section>
