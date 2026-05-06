@@ -682,6 +682,7 @@ export default function Dashboard() {
         </div>
       </section>
 
+      <Dialog open={!!detailTx} onOpenChange={(open) => !open && setDetailTx(null)}>
         <DialogContent className="sm:max-w-[460px] border-border/20 bg-card p-0 gap-0 overflow-hidden rounded-xl">
           {detailTx && (() => {
             const statusMap: Record<string, { label: string; color: string; bg: string; border: string; dot: string }> = {
