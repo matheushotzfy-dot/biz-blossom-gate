@@ -241,7 +241,7 @@ function TxRow({ tx, prods, onClick, density = "comfortable" }: { tx: Tables<"tr
   const py = density === "compact" ? "py-2" : "py-3.5";
   const avatarSize = density === "compact" ? "h-8 w-8" : "h-9 w-9";
   return (
-    <tr onClick={onClick} className="group cursor-pointer border-b border-border/60 transition-colors duration-150 vendas-row-hover last:border-b-0">
+    <tr onClick={onClick} className="group cursor-pointer border-b border-border/40 transition-all duration-200 hover:bg-muted/30 hover:shadow-[inset_4px_0_0_0_hsl(var(--primary))] last:border-b-0">
       <td className={cn("pl-5 pr-3 align-middle", py)}>
         <div className="flex items-center gap-3">
           <Avatar className={cn(avatarSize, "shrink-0 rounded-md ring-1 ring-border/40")}>
