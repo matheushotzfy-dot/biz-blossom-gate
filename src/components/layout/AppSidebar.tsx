@@ -177,15 +177,15 @@ function SidebarSectionNav({ section, pathname, isFirst }: SidebarSectionNavProp
                     end={item.exact}
                     activeClassName=""
                     className={cn(
-                      "group/nav relative flex h-[46px] w-full items-center gap-3 rounded-xl px-3 text-[13px] font-bold transition-all duration-200 group-data-[collapsible=icon]:h-12 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0",
+                      "group/nav relative flex h-[46px] w-full items-center gap-3 rounded-xl border px-3 text-[13px] font-bold transition-colors duration-200 group-data-[collapsible=icon]:h-12 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0",
                       isActive
-                        ? "bg-primary text-primary-foreground shadow-lg shadow-primary/20"
-                        : "text-muted-foreground/50 hover:bg-muted/50 hover:text-foreground",
+                        ? "border-sidebar-primary/35 bg-sidebar-primary text-sidebar-primary-foreground"
+                        : "border-transparent text-sidebar-foreground/62 hover:border-sidebar-border/70 hover:bg-sidebar-accent/55 hover:text-sidebar-accent-foreground",
                     )}
                   >
                     <item.icon
                       className={cn(
-                        "h-5 w-5 transition-transform duration-300 group-hover/nav:scale-110",
+                        "h-5 w-5 transition-colors duration-200",
                         isActive ? "text-primary-foreground" : "text-muted-foreground/40 group-hover/nav:text-foreground"
                       )}
                       strokeWidth={isActive ? 2.5 : 2}
