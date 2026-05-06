@@ -955,13 +955,16 @@ export default function Vendas() {
         {/* Chart and payment mix removed — already shown on Dashboard */}
 
         {/* ─────────── TRANSACTIONS ─────────── */}
-        <section className="overflow-hidden rounded-2xl border border-border/70 bg-card">
+        <section className="group relative overflow-hidden rounded-3xl border border-border/50 bg-card/60 shadow-2xl shadow-primary/5 backdrop-blur-xl">
+          <div className="absolute -left-20 -top-20 h-64 w-64 rounded-full bg-primary/5 blur-[100px]" />
+          <div className="absolute -right-20 -bottom-20 h-64 w-64 rounded-full bg-success/5 blur-[100px]" />
+          
           {/* HEADER */}
-          <div className="relative border-b border-border/70 px-6 pt-6 pb-5">
-            <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
+          <div className="relative border-b border-border/40 px-6 pt-8 pb-6">
+            <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
               <div className="min-w-0">
-                <h2 className="font-display text-[32px] font-black leading-[0.9] tracking-[-0.055em] text-foreground sm:text-[38px]">
-                  Extrato de Vendas
+                <h2 className="font-display text-[28px] font-black leading-tight tracking-tight text-foreground sm:text-[34px]">
+                  Fluxo de <span className="text-gradient-premium">Caixa</span>
                 </h2>
                 <div className="mt-3 flex flex-wrap items-center gap-x-5 gap-y-1.5">
                   <span className="text-[12px] font-semibold text-muted-foreground/85">
