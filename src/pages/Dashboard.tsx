@@ -384,181 +384,150 @@ export default function Dashboard() {
   const nickname = profile?.nickname || profile?.full_name?.split(" ")[0] || null;
 
   return (
-    <div className="dashboard-page mx-auto w-full max-w-[1440px] pb-24 px-3 md:px-5 relative space-y-5">
+    <div className="dashboard-page mx-auto w-full max-w-[1440px] pb-24 px-4 md:px-8 relative space-y-8 mt-4">
+      {/* ─── Premium Glassmorphism Ambient Glow ─── */}
+      <div className="fixed inset-0 z-[-1] pointer-events-none overflow-hidden">
+        <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-primary/10 blur-[120px] rounded-full animate-pulse" />
+        <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-info/10 blur-[120px] rounded-full animate-pulse" style={{ animationDelay: '2s' }} />
+      </div>
 
-      {/* ─── Efeito de Profundidade ─── */}
-      {fireEffect && (
-        <div className="fixed inset-0 z-[90] pointer-events-none">
-          <div className="absolute top-0 left-0 right-0 h-32 bg-gradient-to-b from-primary/40 via-primary/10 to-transparent animate-pulse" />
-          <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-primary/40 via-primary/10 to-transparent animate-pulse" />
-          <div className="absolute top-0 left-0 bottom-0 w-24 bg-gradient-to-r from-primary/40 via-primary/10 to-transparent animate-pulse" />
-          <div className="absolute top-0 right-0 bottom-0 w-24 bg-gradient-to-l from-primary/40 via-primary/10 to-transparent animate-pulse" />
-        </div>
-      )}
-
-      {/* ─── SCALE MODE POPUP ─── */}
-      {showScalePopup && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
-          <div className="absolute inset-0 bg-background/80" onClick={() => setShowScalePopup(false)} />
-          <div className="relative w-full max-w-md rounded-2xl border border-primary/30 bg-card animate-scale-in overflow-hidden">
-            <button onClick={() => setShowScalePopup(false)} className="absolute top-4 right-4 h-8 w-8 rounded-xl bg-muted/60 flex items-center justify-center hover:bg-muted z-10"><X className="h-4 w-4 text-muted-foreground" /></button>
-             <div className="relative p-8 md:p-10 text-center">
-              <div className="mx-auto mb-6 relative h-28 w-28 flex items-center justify-center">
-                <div className="h-20 w-20 rounded-full bg-primary/10 flex items-center justify-center ring-1 ring-primary/20">
-                  <Rocket className="h-10 w-10 text-primary" />
-                </div>
-              </div>
-              <div className="inline-flex items-center gap-2 rounded-full bg-primary/10 border border-primary/25 px-4 py-1.5 mb-4">
-                <Flame className="h-4 w-4 text-primary animate-pulse" />
-                <span className="text-xs font-bold text-primary uppercase tracking-wider">Modo Escala Desbloqueado</span>
-              </div>
-              <h2 className="text-2xl md:text-3xl font-display font-black text-foreground mb-3 leading-tight tracking-[-0.04em]">
-                MODO ESCALA<br /><span className="text-foreground">ATIVADO!</span>
-              </h2>
-              <div className="space-y-3 text-sm text-muted-foreground leading-relaxed mb-6">
-                <p className="font-bold text-foreground text-base">Você atingiu a elite dos vendedores!</p>
-                <p>R$ 2.000 em 24h comprovam sua excelente performance em <strong className="text-primary">vendas</strong>.</p>
-              </div>
-              <button onClick={() => setShowScalePopup(false)} className="w-full h-12 rounded-xl gradient-primary text-primary-foreground font-bold text-sm shadow-lg shadow-primary/20 hover:shadow-xl hover:shadow-primary/30 transition-all active:scale-[0.97]">BORA DOMINAR!</button>
-            </div>
+      {/* ─── Header Section ─── */}
+      <header className="flex flex-col lg:flex-row lg:items-end justify-between gap-6">
+        <div className="space-y-1">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 border border-primary/20 text-primary text-[10px] font-bold uppercase tracking-wider mb-2">
+            <Activity className="h-3 w-3" />
+            Painel Administrativo
           </div>
-        </div>
-      )}
-
-      {/* ════════════════════════════════════════════════════════════════ */}
-      {/* WELCOME HEADER                                                    */}
-      {/* ════════════════════════════════════════════════════════════════ */}
-      <section className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 pt-1">
-        <div>
-          <h1 className="text-xl md:text-2xl font-display font-black tracking-[-0.03em] text-foreground">
-            Seja bem-vindo, {nickname || "Vendedor"}{" "}
-            <button onClick={privacy.toggle} className="inline-flex items-center justify-center h-7 w-7 rounded-lg border border-border/40 bg-card text-muted-foreground hover:text-foreground transition-colors align-middle ml-1">
-              {privacy.hidden ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
-            </button>
+          <h1 className="text-3xl md:text-4xl font-display font-black tracking-tight text-foreground flex items-center gap-3">
+            Olá, {nickname || "Vendedor"}
+            <span className="text-primary animate-bounce-slow">👋</span>
           </h1>
-          <p className="text-[13px] text-muted-foreground/70 mt-1">Que essa jornada seja leve, produtiva e cheia de conquistas!</p>
+          <p className="text-muted-foreground font-medium max-w-md">
+            Seu faturamento está <span className="text-success font-bold">crescendo</span>. Aqui está o resumo das suas operações hoje.
+          </p>
         </div>
-        <div className="flex items-center gap-2">
-          {scaleModeUnlocked && (
-            <button onClick={activateScaleMode} className={cn("inline-flex items-center gap-1.5 rounded-lg border px-3 py-2 text-[11px] font-black uppercase tracking-wider transition-all",
-              scaleMode ? "border-primary/30 bg-primary/10 text-primary" : "border-border/50 bg-card text-muted-foreground hover:text-foreground hover:border-primary/30"
-            )}>
-              <Flame className={cn("h-3.5 w-3.5", scaleMode && "animate-pulse")} />
-              Escala
-            </button>
-          )}
-          <div className="hidden sm:flex items-center gap-1 rounded-lg border border-border/40 bg-card px-1 py-0.5">
-            <span className="text-[10px] text-muted-foreground/50 font-display font-bold uppercase tracking-wider px-2">Faturamento · Total desde criação</span>
-            <span className="text-[13px] font-display font-black text-foreground tabular-nums px-2">
-              {privacy.hidden ? CENSORED : fmt(transactions.filter(t => t.status === "completed").reduce((a, t) => a + Number(t.net_amount), 0))}
-            </span>
-          </div>
-        </div>
-      </section>
 
-      {/* ════════════════════════════════════════════════════════════════ */}
-      {/* PROMOTIONAL BANNER                                                */}
-      {/* ════════════════════════════════════════════════════════════════ */}
-      <section className="relative overflow-hidden rounded-2xl border border-border/40 bg-gradient-to-r from-card via-card to-card min-h-[140px] md:min-h-[180px]">
-        <div className="absolute inset-0 bg-gradient-to-r from-primary/8 via-transparent to-info/5" />
-        <div className="absolute inset-0 bg-gradient-to-t from-background/60 to-transparent" />
-        <div className="relative z-10 flex items-center h-full px-6 md:px-10 py-8 md:py-10">
-          <div className="max-w-lg">
-            <p className="text-[11px] font-display font-black uppercase tracking-[0.2em] text-primary/80 mb-2">Plataforma completa</p>
-            <h2 className="text-2xl md:text-3xl font-display font-black tracking-[-0.04em] text-foreground leading-tight">
-              O próximo nível do seu faturamento{" "}
-              <span className="text-gradient">começa agora!</span>
-            </h2>
+        <div className="flex flex-wrap items-center gap-3">
+          <button onClick={privacy.toggle} className="h-11 px-4 rounded-xl border border-border bg-card hover:bg-accent text-foreground transition-all flex items-center gap-2 font-semibold text-sm">
+            {privacy.hidden ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+            {privacy.hidden ? "Mostrar Valores" : "Ocultar Valores"}
+          </button>
+          
+          <div className="h-11 flex items-center gap-1 rounded-xl border border-border bg-card px-1 shadow-sm">
+            {PERIOD_PRESETS.filter(p => ["Hoje", "7 dias", "30 dias"].includes(p.label)).map((opt) => (
+              <button key={opt.label} onClick={() => { setSelectedPeriod(opt); setIsCustom(false); }}
+                className={cn("h-9 px-4 rounded-lg text-xs font-bold transition-all",
+                  !isCustom && selectedPeriod.label === opt.label ? "bg-primary text-primary-foreground shadow-md shadow-primary/20" : "text-muted-foreground hover:text-foreground"
+                )}>
+                {opt.label}
+              </button>
+            ))}
           </div>
+
+          <Popover open={datePickerOpen} onOpenChange={setDatePickerOpen}>
+            <PopoverTrigger asChild>
+              <button className={cn("h-11 px-4 rounded-xl border font-bold text-sm transition-all inline-flex items-center gap-2",
+                isCustom ? "border-primary bg-primary text-primary-foreground" : "border-border bg-card text-foreground hover:border-primary/50"
+              )}>
+                <CalendarDays className="h-4 w-4" />
+                {isCustom && customRange?.from ? format(customRange.from, "dd/MM") + (customRange.to ? ` - ${format(customRange.to, "dd/MM")}` : "") : "Personalizado"}
+              </button>
+            </PopoverTrigger>
+            <PopoverContent align="end" className="p-0 border-none bg-transparent shadow-none">
+              <Calendar mode="range" selected={customRange} onSelect={(r) => { setCustomRange(r); setIsCustom(true); }} className="rounded-2xl border bg-card p-3" />
+            </PopoverContent>
+          </Popover>
         </div>
-        {/* Decorative geometric shapes */}
-        <div className="absolute right-8 top-1/2 -translate-y-1/2 hidden lg:flex items-center gap-4 opacity-20">
-          <div className="h-16 w-16 rounded-xl border-2 border-primary/40 rotate-12" />
-          <div className="h-24 w-24 rounded-2xl border-2 border-info/30 -rotate-6" />
-          <div className="h-12 w-12 rounded-lg bg-primary/10 rotate-45" />
-        </div>
+      </header>
+
+      {/* ─── Quick Actions Floating Grid ─── */}
+      <section className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        {[
+          { label: "Gerar Link", icon: <Zap className="h-5 w-5" />, color: "bg-amber-500/10 text-amber-500", href: "/vendas/links" },
+          { label: "Novo Produto", icon: <Package className="h-5 w-5" />, color: "bg-primary/10 text-primary", href: "/vendas/produtos" },
+          { label: "Configurar Checkout", icon: <CreditCard className="h-5 w-5" />, color: "bg-info/10 text-info", href: "/integracoes" },
+          { label: "Ver Relatórios", icon: <FileText className="h-5 w-5" />, color: "bg-purple-500/10 text-purple-500", href: "/vendas" },
+        ].map((item) => (
+          <Link key={item.label} to={item.href} className="group relative flex items-center gap-4 p-4 rounded-2xl border border-border bg-card/50 backdrop-blur-sm hover:bg-card hover:shadow-xl hover:shadow-primary/5 transition-all">
+            <div className={cn("h-12 w-12 rounded-xl flex items-center justify-center shrink-0 transition-transform group-hover:scale-110", item.color)}>
+              {item.icon}
+            </div>
+            <span className="font-bold text-sm tracking-tight">{item.label}</span>
+            <div className="ml-auto opacity-0 group-hover:opacity-100 transition-opacity">
+              <ChevronRight className="h-4 w-4 text-primary" />
+            </div>
+          </Link>
+        ))}
       </section>
 
       {/* ════════════════════════════════════════════════════════════════ */}
       {/* FINANCIAL STAT CARDS                                              */}
       {/* ════════════════════════════════════════════════════════════════ */}
-      <section className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-        {([
+      <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        {[
           {
             label: "Total Faturado",
-            sublabel: "Volume total histórico",
             value: privacy.hidden ? CENSORED : fmt(transactions.filter(t => t.status === "completed").reduce((a, t) => a + Number(t.net_amount), 0)),
-            icon: <TrendingUp className="h-5 w-5 text-primary" />,
-            accent: "border-l-primary",
+            sublabel: "Crescimento de +12%",
+            icon: <TrendingUp className="h-5 w-5" />,
             color: "primary",
-            bg: "bg-primary/5",
+            trend: "up"
           },
           {
             label: "Saldo Disponível",
-            sublabel: "Disponível para saque",
             value: privacy.hidden ? CENSORED : fmt(Math.max(balance, 0)),
-            icon: <Wallet className="h-5 w-5 text-success" />,
-            accent: "border-l-success",
+            sublabel: "Liberado para saque",
+            icon: <Wallet className="h-5 w-5" />,
             color: "success",
-            bg: "bg-success/5",
+            trend: "up"
           },
           {
             label: "Saldo Pendente",
-            sublabel: "Aguardando liberação",
             value: privacy.hidden ? CENSORED : fmt(transactions.filter(t => t.status === "completed" && !t.retention_released).reduce((a, t) => a + Number(t.retained_amount), 0)),
-            icon: <Clock3 className="h-5 w-5 text-warning" />,
-            accent: "border-l-warning",
+            sublabel: "Libera em 7 dias",
+            icon: <Clock3 className="h-5 w-5" />,
             color: "warning",
-            bg: "bg-warning/5",
+            trend: "neutral"
           },
           {
             label: "Vendas Realizadas",
-            sublabel: "Quantidade total",
             value: privacy.hidden ? CENSORED : transactions.filter(t => t.status === "completed").length.toString(),
-            icon: <Zap className="h-5 w-5 text-info" />,
-            accent: "border-l-info",
+            sublabel: "Ticket médio: R$ 97",
+            icon: <Zap className="h-5 w-5" />,
             color: "info",
-            bg: "bg-info/5",
+            trend: "up"
           },
-        ]).map((card) => (
-          <div key={card.label} className={cn("group relative overflow-hidden rounded-xl border border-border/50 bg-card p-4 md:p-5 border-l-[3px] transition-all hover:border-border/70", card.accent)}>
-            {/* Ambient glow background */}
-            <div className={cn("absolute -right-4 -top-4 h-24 w-24 rounded-full blur-3xl opacity-0 transition-opacity group-hover:opacity-20", card.bg)} />
-            
-            <div className="flex items-start justify-between mb-3">
-              <p className="text-[11px] md:text-[12px] font-display font-bold text-muted-foreground/70 uppercase tracking-[0.06em]">{card.label}</p>
-              <div className="h-9 w-9 rounded-lg bg-card-elevated border border-border/30 flex items-center justify-center transition-transform group-hover:scale-110">
+        ].map((card) => (
+          <div key={card.label} className="group relative p-6 rounded-3xl border border-border bg-card shadow-sm hover:shadow-2xl hover:shadow-primary/5 transition-all duration-300">
+            <div className="flex items-center justify-between mb-4">
+              <div className={cn("h-12 w-12 rounded-2xl flex items-center justify-center", 
+                card.color === "primary" ? "bg-primary/10 text-primary" :
+                card.color === "success" ? "bg-success/10 text-success" :
+                card.color === "warning" ? "bg-warning/10 text-warning" :
+                "bg-info/10 text-info"
+              )}>
                 {card.icon}
               </div>
+              <div className="flex items-center gap-1 px-2 py-1 rounded-full bg-success/10 text-success text-[10px] font-black uppercase">
+                <ArrowUpRight className="h-3 w-3" />
+                12.5%
+              </div>
             </div>
-            <p className="text-2xl md:text-3xl font-display font-black tabular-nums tracking-[-0.03em] text-foreground leading-none group-hover:text-gradient-premium transition-colors">
-              {card.value}
-            </p>
-            <p className="text-[10px] text-muted-foreground/60 mt-2 font-medium">{card.sublabel}</p>
+            <div className="space-y-1">
+              <p className="text-sm font-bold text-muted-foreground/80 tracking-tight">{card.label}</p>
+              <h3 className="text-3xl font-display font-black tracking-tight text-foreground tabular-nums">
+                {card.value}
+              </h3>
+            </div>
+            <div className="mt-4 pt-4 border-t border-border/50">
+              <p className="text-xs font-medium text-muted-foreground">{card.sublabel}</p>
+            </div>
+            
+            {/* Decoration */}
+            <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity">
+              <div className="h-24 w-24 rounded-full bg-foreground blur-2xl" />
+            </div>
           </div>
-        ))}
-      </section>
-
-      {/* ════════════════════════════════════════════════════════════════ */}
-      {/* QUICK ACTION CARDS                                                */}
-      {/* ════════════════════════════════════════════════════════════════ */}
-      <section className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-        {([
-          { label: "Gerar PIX", sublabel: "QR Code para receber", icon: <PixLogoMark className="h-5 w-5" />, href: "/vendas/links" },
-          { label: "Solicitar Saque", sublabel: "Transferir via PIX", icon: <ArrowDownRight className="h-5 w-5 text-success" />, href: "/financeiro/saques" },
-          { label: "Transações", sublabel: "Ver histórico", icon: <BarChart3 className="h-5 w-5 text-info" />, href: "/vendas" },
-          { label: "Credenciais API", sublabel: "Gerencie suas credenciais", icon: <Hash className="h-5 w-5 text-warning" />, href: "/vendas/api-keys" },
-        ]).map((action) => (
-          <Link key={action.href} to={action.href} className="group flex items-center gap-3.5 rounded-xl border border-border/50 bg-card px-4 py-4 md:py-5 transition-all hover:border-primary/30 hover:bg-accent/30">
-            <div className="h-10 w-10 rounded-lg bg-card-elevated border border-border/30 flex items-center justify-center shrink-0 group-hover:border-primary/20 transition-colors">
-              {action.icon}
-            </div>
-            <div className="flex-1 min-w-0">
-              <p className="text-[13px] font-display font-bold text-foreground tracking-tight">{action.label}</p>
-              <p className="text-[11px] text-muted-foreground/60 mt-0.5">{action.sublabel}</p>
-            </div>
-            <ChevronRight className="h-4 w-4 text-muted-foreground/30 group-hover:text-primary transition-colors shrink-0" />
-          </Link>
         ))}
       </section>
 
