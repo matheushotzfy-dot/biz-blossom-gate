@@ -118,7 +118,7 @@ function DashboardLayoutInner() {
   <SidebarInset className="ambient-backdrop relative min-w-0 bg-background flex flex-col h-full min-h-0 overflow-hidden">
    {/* Ambient light is handled by .ambient-backdrop CSS — no extra blobs needed */}
 
-          <header className="relative z-20 h-14 flex items-center border-b border-border/60 bg-background px-3 lg:px-5 sticky top-0 md:flex">
+          <header className="relative z-30 h-16 flex items-center border-b-2 border-border/60 bg-background/95 backdrop-blur-sm px-4 lg:px-6 sticky top-0 md:flex shadow-sm">
             <SidebarTrigger className="h-8 w-8 rounded-md hover:bg-muted/60 transition-colors flex items-center justify-center text-muted-foreground/70 hover:text-foreground md:flex">
               <Menu className="h-[15px] w-[15px]" strokeWidth={1.85} />
             </SidebarTrigger>
@@ -133,7 +133,7 @@ function DashboardLayoutInner() {
             </button>
 
             <div className="flex-1 flex justify-center">
-              <div className="flex items-center gap-3 px-4 h-9 rounded-full bg-card border border-border/60 transition-colors hover:bg-accent/40">
+              <div className="flex items-center gap-3 px-5 h-10 rounded-2xl bg-card border-2 border-border/80 transition-all hover:bg-accent/40 hover:border-primary/30">
                 <div className="flex items-center gap-2">
                   <Wallet className="h-3.5 w-3.5 text-primary" />
                   <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/60">Saldo</span>
