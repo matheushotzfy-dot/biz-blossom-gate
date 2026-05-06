@@ -515,18 +515,18 @@ export default function Dashboard() {
                     <div className="mt-3 flex flex-wrap items-center gap-2 text-[11px] font-bold text-muted-foreground">
                       <span className="rounded-full border border-success/30 bg-success/10 px-2.5 py-1 text-success">Operação ativa</span>
                       <span className="rounded-full border border-border/60 bg-background/75 px-2.5 py-1">Período: {isCustom ? "Custom" : selectedPeriod.label}</span>
-                      <span className="rounded-full border border-border/60 bg-background/75 px-2.5 py-1">Hoje: {periodRevenueLabel}</span>
+                      <span className="rounded-full border border-border/60 bg-background/75 px-2.5 py-1">Receita: {periodRevenueLabel}</span>
                     </div>
                   </div>
 
                   <div className="grid grid-cols-2 gap-2 sm:flex sm:items-center">
                     <Link to="/financeiro/saques" className="inline-flex h-10 items-center justify-center gap-2 rounded-xl bg-primary px-4 text-[12px] font-black text-primary-foreground">
                       <ArrowDownRight className="h-4 w-4" />
-                      Sacar
+                      Solicitar saque
                     </Link>
                     <Link to="/vendas/links" className="inline-flex h-10 items-center justify-center gap-2 rounded-xl border border-border/60 bg-background/75 px-4 text-[12px] font-black text-foreground hover:bg-accent">
                       <PixLogoMark className="h-4 w-4 text-success" />
-                      Criar link
+                      Link de pagamento
                     </Link>
                   </div>
                 </div>
@@ -536,7 +536,7 @@ export default function Dashboard() {
                 {summaryStats.map((item) => (
                   <div key={item.label} className="border-r border-border/60 px-4 py-3 last:border-r-0 md:border-b md:border-r-0 md:last:border-b-0">
                     <p className="text-[10px] font-black uppercase tracking-[0.16em] text-muted-foreground/70">{item.label}</p>
-                    <p className="mt-1 text-[18px] font-display font-black text-foreground tabular-nums leading-none">{item.value}</p>
+                    <p className="mt-1 text-[17px] font-display font-black text-foreground tabular-nums leading-none">{item.value}</p>
                   </div>
                 ))}
               </div>
@@ -562,7 +562,7 @@ export default function Dashboard() {
             <div className="mb-4 flex items-center justify-between">
               <div>
                 <p className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/70">Pulso da operação</p>
-                <h2 className="mt-1 text-[18px] font-display font-black text-foreground leading-none">Agora</h2>
+                <h2 className="mt-1 text-[18px] font-display font-black text-foreground leading-none">Tempo real</h2>
               </div>
               <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-success/25 bg-success/10 text-success">
                 <Activity className="h-4.5 w-4.5" />
@@ -620,7 +620,7 @@ export default function Dashboard() {
           <div className="flex items-center justify-between border-b border-border/60 px-5 py-4">
             <div>
               <h3 className="text-[14px] font-black text-foreground leading-none">Faturamento</h3>
-              <p className="mt-1 text-[10px] font-bold uppercase tracking-[0.16em] text-muted-foreground/65">Evolução no período</p>
+              <p className="mt-1 text-[10px] font-bold uppercase tracking-[0.16em] text-muted-foreground/65">Evolução por horário</p>
             </div>
             <div className="rounded-full border border-success/25 bg-success/10 px-3 py-1.5 text-[10px] font-black text-success">
               {periodRevenueLabel}
