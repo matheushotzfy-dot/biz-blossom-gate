@@ -834,73 +834,97 @@ export default function Vendas() {
             </TooltipProvider>
           </div>
 
-          <div className="mt-8 grid grid-cols-2 border-y border-border/70 lg:grid-cols-4 lg:divide-x lg:divide-border/70">
-            {[
-              { label: "Receita bruta", value: hidden ? HIDE : fmtCompact(m.totalGross), sub: undefined, accent: "text-foreground", delta: { cur: m.totalGross, prev: p.totalGross }, rail: "bg-success" },
-              { ...heroKpis[1], rail: "bg-info" },
-              { ...heroKpis[2], rail: "bg-foreground/40" },
-              { ...heroKpis[3], rail: approvalRate >= 60 ? "bg-success" : "bg-warning" },
-            ].map((k, idx) => (
-              <div
-                key={`${k.label}-${animKey}`}
-                className={cn(
-                  "vendas-rise premium-card-vendas group relative min-h-[140px] px-6 py-6 rounded-xl border border-border/60 shadow-sm",
-                  idx === 1 && "vendas-rise-d1",
-                  idx === 2 && "vendas-rise-d2",
-                  idx === 3 && "vendas-rise-d3",
-                  idx > 1 && "border-t border-border/70 lg:border-t-0",
-                  idx === 1 && "border-l border-border/70 lg:border-l-0",
-                )}
-              >
-                <span className={cn("absolute left-0 top-6 h-8 w-[3px] rounded-r-full opacity-0 group-hover:opacity-100 transition-opacity", k.rail)} />
-                <div className="flex items-center justify-between gap-2 pl-2">
-                  <p className="text-[10.5px] font-black uppercase tracking-[0.22em] text-muted-foreground/60">{k.label}</p>
-                </div>
-                <p
-                  className={cn(
-                    "mt-3 pl-2 font-display text-[34px] font-black leading-[0.9] tracking-[-0.06em] tabular-nums sm:text-[40px]",
-                    k.accent,
-                  )}
-                  style={{ fontVariantNumeric: "tabular-nums slashed-zero" }}
-                >
-                  {k.value}
-                </p>
-                <div className="mt-4 flex items-center gap-2 pl-2">
-                  <p className="truncate text-[11.5px] font-bold text-muted-foreground/85">{k.sub}</p>
-                  {k.delta && <DeltaBadge cur={k.delta.cur} prev={k.delta.prev} />}
-                </div>
-              </div>
-            ))}
+          <div className="mt-10 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            <MetricCard
+              title="Receita Líquida"
+              value={m.totalNet}
+              prevValue={p.totalNet}
+              icon={Zap}
+              color="text-success"
+              hidden={hidden}
+              sparklineData={metrics.series.net}
+            />
+            <MetricCard
+              title="Vendas Aprovadas"
+              value={m.approved.length}
+              prevValue={p.approved.length}
+              icon={CheckSquare}
+              color="text-primary"
+              hidden={hidden}
+              sparklineData={metrics.series.count}
+              format="number"
+            />
+            <MetricCard
+              title="Ticket Médio"
+              value={m.avgTicket}
+              prevValue={p.avgTicket}
+              icon={ShoppingCart}
+              color="text-foreground"
+              hidden={hidden}
+              sparklineData={metrics.series.ticket}
+            />
+            <MetricCard
+              title="Taxa de Aprovação"
+              value={approvalRate}
+              prevValue={p.approved.length > 0 ? (p.approved.length / (previousPeriodFiltered.length || 1)) * 100 : 0}
+              icon={ChevronUp}
+              color={approvalRate >= 60 ? "text-success" : "text-warning"}
+              hidden={false}
+              sparklineData={metrics.series.approval}
+              format="percent"
+            />
           </div>
 
-          <div className="grid grid-cols-1 border-b border-border/70 sm:grid-cols-3 sm:divide-x sm:divide-border/70">
-            {riskKpis.map((r, idx) => (
-              <div
-                key={`${r.label}-${animKey}`}
-                className={cn(
-                  "vendas-rise premium-card-vendas group relative flex flex-col gap-2.5 px-6 py-6 rounded-xl border-border/60",
-                  idx === 0 && "vendas-rise-d3",
-                  idx === 1 && "vendas-rise-d4",
-                  idx === 2 && "vendas-rise-d5",
-                )}
-              >
-                <div className="flex items-baseline justify-between gap-3">
-                  <p className="font-display text-[19px] font-black tracking-[-0.035em] text-foreground">{r.label}</p>
-                  <p
-                    className={cn("font-display text-[26px] font-black leading-none tabular-nums tracking-[-0.05em]", r.accent)}
-                    style={{ fontVariantNumeric: "tabular-nums slashed-zero" }}
-                  >
-                    {r.value}
-                  </p>
+          <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-3">
+            <div className="group relative overflow-hidden rounded-2xl border border-border/50 bg-card/40 p-5 backdrop-blur-xl transition-all duration-300 hover:border-destructive/30">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground/80">Reembolsos</p>
+                  <h4 className="mt-1 text-xl font-black tracking-tight text-foreground">{hidden ? HIDE : fmtCompact(refundedAmount)}</h4>
                 </div>
-                <div className="flex items-center gap-2 text-[12.5px] font-semibold text-muted-foreground">
-                  <span className="font-display tabular-nums font-black text-foreground">{r.count}</span>
-                  <span>{r.count === 1 ? "Transação" : "Transações"}</span>
-                  <span className="inline-block h-[3px] w-[3px] rounded-full bg-muted-foreground/50" />
-                  <span className="tabular-nums font-bold">{r.rate.toFixed(2).replace(".", ",")}%</span>
+                <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-destructive/10 ring-1 ring-destructive/20">
+                  <RefreshCw className="h-4 w-4 text-destructive" />
                 </div>
               </div>
-            ))}
+              <div className="mt-3 flex items-center gap-2">
+                <span className="text-[12px] font-bold text-foreground">{m.refunded.length} vendas</span>
+                <span className="h-1 w-1 rounded-full bg-muted-foreground/30" />
+                <span className="text-[12px] font-bold text-destructive">{m.refundRate.toFixed(2)}% taxa</span>
+              </div>
+            </div>
+
+            <div className="group relative overflow-hidden rounded-2xl border border-border/50 bg-card/40 p-5 backdrop-blur-xl transition-all duration-300">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground/80">Chargebacks</p>
+                  <h4 className="mt-1 text-xl font-black tracking-tight text-foreground">{hidden ? HIDE : fmtCompact(chargebackAmount)}</h4>
+                </div>
+                <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-destructive/10 ring-1 ring-destructive/20">
+                  <ShieldAlert className="h-4 w-4 text-destructive" />
+                </div>
+              </div>
+              <div className="mt-3 flex items-center gap-2">
+                <span className="text-[12px] font-bold text-foreground">{m.chargebacks.length} alertas</span>
+                <span className="h-1 w-1 rounded-full bg-muted-foreground/30" />
+                <span className="text-[12px] font-bold text-destructive">{m.chargebackRate.toFixed(2)}% taxa</span>
+              </div>
+            </div>
+
+            <div className="group relative overflow-hidden rounded-2xl border border-border/50 bg-card/40 p-5 backdrop-blur-xl transition-all duration-300">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground/80">Clientes Únicos</p>
+                  <h4 className="mt-1 text-xl font-black tracking-tight text-foreground">{m.uniqueCustomers}</h4>
+                </div>
+                <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-info/10 ring-1 ring-info/20">
+                  <MessageCircle className="h-4 w-4 text-info" />
+                </div>
+              </div>
+              <div className="mt-3 flex items-center gap-2">
+                <span className="text-[12px] font-bold text-foreground">{(m.approved.length / (m.uniqueCustomers || 1)).toFixed(1)}</span>
+                <span className="text-[12px] font-medium text-muted-foreground">compras por cliente</span>
+              </div>
+            </div>
           </div>
         </header>
 
