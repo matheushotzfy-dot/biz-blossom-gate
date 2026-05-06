@@ -646,11 +646,7 @@ export default function Dashboard() {
               {periodRevenueLabel}
             </div>
           </div>
-            <div className="rounded-full border border-success/25 bg-success/10 px-3 py-1.5 text-[10px] font-black text-success">
-              {periodRevenueLabel}
-            </div>
-          </div>
-          <div className="relative px-2 pb-4 pt-3">
+          <div className="relative px-2 pb-6 pt-4">
             <ResponsiveContainer width="100%" height={284}>
               <AreaChart data={chartData} margin={{ top: 10, right: 18, left: -8, bottom: 0 }}>
                 <defs>
