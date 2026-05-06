@@ -70,7 +70,17 @@ function DashboardLayoutInner() {
 
  useEffect(() => {
  scrollRef.current?.scrollTo({ top: 0, left: 0 });
- }, [pathname]);
+  }, [pathname]);
+
+  // Sync privacy mode with dashboard
+  useEffect(() => {
+    const handleStorage = () => {
+      const isHidden = localStorage.getItem("privacy_mode") === "true";
+      setPrivacyHidden(isHidden);
+    };
+    window.addEventListener('storage', handleStorage);
+    return () => window.removeEventListener('storage', handleStorage);
+  }, []);
 
  useEffect(() => {
  if (!user?.id || !profile?.account_status || !profile?.updated_at) return;
