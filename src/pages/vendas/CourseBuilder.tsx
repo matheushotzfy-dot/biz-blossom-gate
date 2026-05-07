@@ -1352,17 +1352,17 @@ export default function CourseBuilder() {
  </AlertDialogContent>
  </AlertDialog>
 
- {/* ═══ Course Settings Sheet ═══ */}
- <Sheet open={courseSettingsOpen} onOpenChange={setCourseSettingsOpen}>
- <SheetContent className="w-full sm:max-w-lg overflow-y-auto">
- <SheetHeader className="mb-6">
- <SheetTitle className="font-display font-black text-xl tracking-tight flex items-center gap-3">
- <div className="h-10 w-10 border border-primary bg-primary/10 flex items-center justify-center">
- <Settings className="h-5 w-5 text-primary" />
- </div>
- Configurações do Curso
- </SheetTitle>
- </SheetHeader>
+  {/* ═══ Course Settings Sheet ═══ */}
+  <Sheet open={courseSettingsOpen} onOpenChange={setCourseSettingsOpen}>
+  <SheetContent className="w-full sm:max-w-lg overflow-y-auto bg-[#050505] border-white/[0.05] text-white">
+  <SheetHeader className="mb-8">
+  <SheetTitle className="font-display font-black text-2xl tracking-tight flex items-center gap-4">
+  <div className="h-12 w-12 rounded-2xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center">
+  <Settings className="h-6 w-6 text-blue-400" />
+  </div>
+  Ajustes da Área
+  </SheetTitle>
+  </SheetHeader>
 
  <div className="space-y-6">
  {/* Thumbnail */}
