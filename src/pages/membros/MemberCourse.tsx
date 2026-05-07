@@ -295,27 +295,27 @@ export default function MemberCourse() {
 
           return (
             <div key={mod.id} className={cn(
-              "rounded-lg overflow-hidden border transition-colors",
-              containsActive ? "border-emerald-500/30 bg-emerald-500/[0.03]" : "border-white/[0.06] bg-zinc-900/30 hover:border-white/10"
+              "rounded-xl overflow-hidden border transition-all duration-500",
+              containsActive ? "border-white/20 bg-white/[0.05]" : "border-white/[0.03] bg-zinc-900/20 hover:bg-white/[0.02]"
             )}>
               <button onClick={() => toggleModule(mod.id)} className="w-full text-left">
-                <div className="flex items-center gap-3 p-3.5">
+                <div className="flex items-center gap-4 p-4">
                   <div className={cn(
-                    "h-9 w-9 rounded-lg flex items-center justify-center font-display font-black text-sm tabular-nums shrink-0 border",
+                    "h-10 w-10 rounded-lg flex items-center justify-center font-display font-black text-sm tabular-nums shrink-0 border transition-all duration-500",
                     isModComplete
-                      ? "bg-emerald-500/15 text-emerald-400 border-emerald-500/30"
+                      ? "bg-emerald-500 text-black border-emerald-500"
                       : containsActive
-                      ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20"
-                      : "bg-zinc-900 text-zinc-500 border-white/10"
+                      ? "bg-white text-black border-white"
+                      : "bg-zinc-800/50 text-zinc-500 border-white/5"
                   )}>
-                    {isModComplete ? <Check className="h-4 w-4" /> : String(modIdx + 1).padStart(2, "0")}
+                    {isModComplete ? <Check className="h-5 w-5 stroke-[3]" /> : String(modIdx + 1).padStart(2, "0")}
                   </div>
                   <div className="min-w-0 flex-1">
-                    <p className="font-display text-[13px] font-bold text-zinc-200 line-clamp-1 tracking-tight">{mod.title}</p>
-                    <p className="text-[10px] text-zinc-600 font-mono tabular-nums mt-0.5">{modCompleted}/{mod.lessons.length} · {modPct}%</p>
+                    <p className="font-display text-[14px] font-black text-white line-clamp-1 tracking-tight uppercase">{mod.title}</p>
+                    <p className="text-[10px] text-zinc-500 font-bold tracking-widest uppercase mt-1">{mod.lessons.length} aulas</p>
                   </div>
-                  <motion.div animate={{ rotate: isExpanded ? 180 : 0 }} transition={{ duration: 0.2, ease }} className="shrink-0">
-                    <ChevronDown className="h-4 w-4 text-zinc-600" />
+                  <motion.div animate={{ rotate: isExpanded ? 180 : 0 }} transition={{ duration: 0.3 }} className="shrink-0">
+                    <ChevronDown className={cn("h-5 w-5 transition-colors", containsActive ? "text-white" : "text-zinc-600")} />
                   </motion.div>
                 </div>
                 {mod.lessons.length > 0 && (
