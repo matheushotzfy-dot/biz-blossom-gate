@@ -443,41 +443,39 @@ export default function AdminOverviewTab({ transactions, profiles, products, wit
  </div>
  </GlassPanel>
 
- {/* Realtime Feed */}
- <GlassPanel className="overflow-hidden flex flex-col max-h-[380px]">
- <div className="flex items-center gap-2.5 mb-3">
- <GlassPanelTitle color="red" icon={<Radio className="h-3.5 w-3.5 text-red-400 animate-pulse" />}>Feed Tempo Real</GlassPanelTitle>
- </div>
- <div className="flex-1 overflow-y-auto space-y-1 pr-1">
- {realtimeTx.map(t => (
- <div key={t.id} className="flex items-center gap-2.5 p-2.5 rounded-xl bg-white/[0.02] border border-white/[0.04] hover:bg-white/[0.04] transition-all">
- <div className={cn("h-1.5 w-1.5 rounded-full shrink-0",
- t.status === "completed" || t.status === "approved" ? "bg-emerald-400 shadow-[0_0_4px_rgba(52,211,153,0.6)]" :
- t.status === "pending" ? "bg-amber-400 animate-pulse" : "bg-red-400"
- )} />
- <div className="flex-1 min-w-0">
- <div className="flex items-center justify-between">
- <span className="text-[11px] font-bold text-white/80 truncate">{fmtCurrency(Number(t.amount))}</span>
- <span className={cn("text-[9px] font-bold uppercase", statusColorMap[t.status] || "text-white/20")}>
- {statusLabelMap[t.status] || t.status}
- </span>
- </div>
- <div className="flex items-center gap-1.5 mt-0.5">
- <span className="text-[9px] text-white/20 truncate">{t.customer_name || "Anônimo"}</span>
- <span className="text-[9px] text-white/10">•</span>
- <span className="text-[9px] text-white/20 uppercase">{t.payment_method || "—"}</span>
- <span className="text-[9px] text-white/10">•</span>
- <span className="text-[9px] text-white/20">{new Date(t.created_at).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })}</span>
- </div>
- </div>
- </div>
- ))}
- {realtimeTx.length === 0 && (
- <div className="flex items-center justify-center h-32 text-sm text-white/10">Aguardando transações...</div>
- )}
- </div>
- </GlassPanel>
- </motion.div>
+    {/* Realtime Feed */}
+    <div className="rounded-[2rem] bg-white/[0.02] border border-white/[0.06] p-6 flex flex-col shadow-2xl backdrop-blur-md overflow-hidden max-h-[420px]">
+      <div className="flex items-center gap-3 mb-6">
+        <Radio className="h-4 w-4 text-red-500 animate-pulse" />
+        <h3 className="text-sm font-black text-white/90 uppercase tracking-widest">Live Activity</h3>
+      </div>
+      <div className="flex-1 overflow-y-auto space-y-2 pr-1 scrollbar-none">
+        {realtimeTx.map(t => (
+          <div key={t.id} className="flex items-center gap-3 p-3.5 rounded-2xl bg-white/[0.02] border border-white/[0.04] hover:bg-white/[0.05] hover:border-white/[0.08] transition-all group">
+            <div className={cn("h-1.5 w-1.5 rounded-full shrink-0",
+              t.status === "completed" || t.status === "approved" ? "bg-emerald-400 shadow-[0_0_6px_rgba(52,211,153,0.6)]" :
+              t.status === "pending" ? "bg-amber-400 animate-pulse" : "bg-red-500 shadow-[0_0_6px_rgba(239,68,68,0.6)]"
+            )} />
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center justify-between mb-0.5">
+                <span className="text-[13px] font-black text-white/90" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>{fmtCurrency(Number(t.amount))}</span>
+                <span className={cn("text-[8px] font-black uppercase tracking-widest px-1.5 py-0.5 rounded bg-white/5", statusColorMap[t.status] || "text-white/20")}>
+                  {statusLabelMap[t.status] || t.status}
+                </span>
+              </div>
+              <div className="flex items-center gap-1.5 text-[9px] text-white/20">
+                <span className="truncate max-w-[100px]">{t.customer_name || "Anônimo"}</span>
+                <span>•</span>
+                <span className="uppercase">{t.payment_method || "—"}</span>
+                <span className="ml-auto">{new Date(t.created_at).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })}</span>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  </motion.div>
+
 
  {/* ═══ RISK RADAR ═══ */}
  <motion.div variants={fadeUp}>
