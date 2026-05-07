@@ -219,28 +219,35 @@ export default function MemberCourse() {
  const isComplete = overallPct === 100 && totalLessons > 0;
  const activeModule = activeLesson ? modules.find(m => m.lessons.some(l => l.id === activeLesson.id)) : null;
 
-  if (loading) return (
+   if (loading) return (
     <div className="min-h-dvh flex items-center justify-center bg-[#050505]">
-      <div className="flex flex-col items-center gap-4">
-        <div className="h-12 w-12 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center">
-          <motion.div animate={{ rotate: 360 }} transition={{ duration: 1.5, repeat: Infinity, ease: "linear" }}>
-            <Play className="h-5 w-5 text-emerald-400 fill-current" />
-          </motion.div>
-        </div>
-        <div className="h-1 w-40 bg-white/5 overflow-hidden rounded-full">
-          <motion.div className="h-full w-full bg-emerald-500" animate={{ x: ["-100%", "100%"] }} transition={{ duration: 1, repeat: Infinity, ease: "easeInOut" }} />
+      <div className="flex flex-col items-center gap-6">
+        <motion.div 
+          animate={{ scale: [1, 1.1, 1], opacity: [0.5, 1, 0.5] }} 
+          transition={{ duration: 2, repeat: Infinity }}
+          className="h-16 w-16 rounded-2xl bg-white flex items-center justify-center"
+        >
+          <Play className="h-8 w-8 text-black fill-current ml-1" />
+        </motion.div>
+        <div className="h-1 w-48 bg-white/10 overflow-hidden rounded-full">
+          <motion.div className="h-full w-full bg-white" animate={{ x: ["-100%", "100%"] }} transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }} />
         </div>
       </div>
     </div>
   );
 
   if (!course) return (
-    <div className="min-h-dvh flex flex-col items-center justify-center gap-6 bg-[#050505] text-zinc-100">
-      <div className="h-20 w-20 rounded-2xl bg-zinc-900 border border-white/10 flex items-center justify-center">
-        <GraduationCap className="h-9 w-9 text-zinc-600" />
+    <div className="min-h-dvh flex flex-col items-center justify-center gap-8 bg-[#050505] text-white">
+      <div className="h-24 w-24 rounded-3xl bg-zinc-900 border border-white/5 flex items-center justify-center shadow-2xl">
+        <GraduationCap className="h-10 w-10 text-zinc-700" />
       </div>
-      <h1 className="font-display text-2xl font-black text-zinc-100 tracking-tight">Curso não encontrado</h1>
-      <Link to="/membros-area" className="text-sm text-zinc-500 hover:text-emerald-400 font-bold transition-colors">← Voltar ao início</Link>
+      <div className="text-center space-y-2">
+        <h1 className="font-display text-3xl font-black tracking-tight">Título Indisponível</h1>
+        <p className="text-zinc-500 text-sm max-w-xs mx-auto">Este conteúdo não pôde ser carregado ou você não possui as credenciais necessárias.</p>
+      </div>
+      <Link to="/membros-area" className="px-8 py-3 bg-white text-black font-black text-sm rounded-lg hover:bg-zinc-200 transition-colors uppercase tracking-widest">
+        Voltar ao Início
+      </Link>
     </div>
   );
 
