@@ -257,15 +257,15 @@ export default function MemberCourse() {
   const CourseSidebar = () => (
     <div className="p-4 space-y-3">
       {/* Progress card */}
-      <div className="p-4 bg-zinc-900/50 border border-white/[0.06] rounded-lg">
-        <div className="flex items-center justify-between mb-3">
-          <span className="text-[10px] uppercase tracking-[0.2em] text-zinc-500 font-bold">Progresso</span>
-          <span className={cn("font-display text-lg font-black tabular-nums", isComplete ? "text-emerald-400" : "text-zinc-100")}>{overallPct}%</span>
+      <div className="p-5 bg-white/[0.03] border border-white/[0.05] rounded-xl backdrop-blur-md">
+        <div className="flex items-center justify-between mb-4">
+          <span className="text-[10px] uppercase tracking-[0.25em] text-zinc-500 font-black">Seu Progresso</span>
+          <span className={cn("font-display text-xl font-black tabular-nums", isComplete ? "text-emerald-400" : "text-white")}>{overallPct}%</span>
         </div>
-        <div className="h-1.5 bg-white/8 overflow-hidden rounded-full">
-          <motion.div initial={{ width: 0 }} animate={{ width: `${overallPct}%` }} transition={{ duration: 1, delay: 0.2, ease }} className={cn("h-full rounded-full", isComplete ? "bg-emerald-400" : "bg-emerald-500")} />
+        <div className="h-2 bg-white/5 overflow-hidden rounded-full">
+          <motion.div initial={{ width: 0 }} animate={{ width: `${overallPct}%` }} transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1] }} className={cn("h-full rounded-full", isComplete ? "bg-emerald-400 shadow-[0_0_12px_rgba(52,211,153,0.5)]" : "bg-white")} />
         </div>
-        <p className="text-[11px] text-zinc-600 mt-2.5 font-mono tabular-nums">{completedLessons}/{totalLessons} aulas</p>
+        <p className="text-[11px] text-zinc-500 mt-3 font-bold tracking-tight">{completedLessons} de {totalLessons} aulas concluídas</p>
         {isComplete && (
           <motion.div initial={{ opacity: 0, y: 4 }} animate={{ opacity: 1, y: 0 }} className="flex items-center gap-2 mt-3 pt-3 border-t border-emerald-500/20">
             <Trophy className="h-3.5 w-3.5 text-emerald-400" />
