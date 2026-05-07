@@ -306,7 +306,7 @@ function TxRow({ tx, prods, onClick, density = "comfortable" }: { tx: Tables<"tr
 }
 
 /* ─── Mobile Card ─── */
-function MobileCard({ tx, prods, onClick }: { tx: Tables<"transactions">; prods: Record<string, string>; onClick: () => void }) {
+function MobileCard({ tx, prods, onClick, hidden }: { tx: Tables<"transactions">; prods: Record<string, string>; onClick: () => void; hidden: boolean }) {
   const name = tx.customer_name || "Cliente";
   const st = STATUS[tx.status] || { label: tx.status, fg: "text-muted-foreground", dot: "bg-muted-foreground/50", bg: "bg-muted", border: "border-border" };
   const method = METHODS[tx.payment_method || ""] || { label: tx.payment_method || "—", icon: FileText, color: "text-muted-foreground", bg: "bg-muted", border: "border-border" };
@@ -315,31 +315,38 @@ function MobileCard({ tx, prods, onClick }: { tx: Tables<"transactions">; prods:
   const net = Number(tx.net_amount);
 
   return (
-    <div className="cursor-pointer border-b border-border bg-card p-3.5 transition-colors active:bg-muted/30" onClick={onClick}>
+    <div 
+      className="group relative overflow-hidden bg-card p-4 transition-all active:scale-[0.98] border-b border-border/50" 
+      onClick={onClick}
+    >
       <div className="flex items-start justify-between gap-3">
         <div className="flex items-center gap-3 min-w-0 flex-1">
-          <Avatar className="h-10 w-10 shrink-0 rounded-md">
-            <AvatarFallback className={cn("rounded-md text-[11px] font-bold", avatarColor(name))}>{initials(name)}</AvatarFallback>
-          </Avatar>
+          <div className="relative">
+            <Avatar className="h-11 w-11 shrink-0 rounded-xl ring-1 ring-border/50">
+              <AvatarFallback className={cn("rounded-xl text-[12px] font-black", avatarColor(name))}>{initials(name)}</AvatarFallback>
+            </Avatar>
+            <div className={cn("absolute -bottom-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full border-2 border-card shadow-sm", method.bg, method.color)}>
+              <MethodIcon className="h-2.5 w-2.5" />
+            </div>
+          </div>
           <div className="min-w-0">
-            <p className="truncate text-[13px] font-semibold text-foreground">{name}</p>
-            <p className="truncate text-[11px] text-muted-foreground mt-0.5">{prodName}</p>
+            <p className="truncate text-[14px] font-bold tracking-tight text-foreground">{name}</p>
+            <p className="truncate text-[11px] font-medium text-muted-foreground/80 mt-0.5">{prodName}</p>
           </div>
         </div>
-        <p className={cn("text-[16px] font-bold tabular-nums shrink-0",
-          tx.status === "completed" ? "text-success" : tx.status === "pending" ? "text-warning" : "text-foreground/60"
-        )}>{fmt(net)}</p>
-      </div>
-      <div className="flex items-center justify-between gap-2 mt-3 pt-3 border-t border-border">
-        <div className="flex items-center gap-1.5">
-          <span className={cn("inline-flex items-center gap-1 rounded-md border px-1.5 py-0.5 text-[10px] font-bold", st.fg, st.bg, st.border)}>
-            <span className={cn("h-1.5 w-1.5 rounded-full", st.dot)} />{st.label}
-          </span>
-          <span className={cn("inline-flex items-center gap-1 rounded-md border px-1.5 py-0.5 text-[10px] font-bold", method.color, method.bg, method.border)}>
-            <MethodIcon className="h-2.5 w-2.5" />{method.label}
-          </span>
+        <div className="text-right shrink-0">
+          <p className={cn("text-[15px] font-black tabular-nums tracking-tight",
+            tx.status === "completed" ? "text-success" : tx.status === "pending" ? "text-warning" : "text-foreground/60"
+          )}>{hidden ? HIDE : fmt(net)}</p>
+          <p className="text-[10px] font-bold text-muted-foreground/60 tabular-nums mt-0.5">{fmtTime(tx.created_at)}</p>
         </div>
-        <p className="text-[10px] text-muted-foreground tabular-nums">{fmtDate(tx.created_at)}</p>
+      </div>
+      <div className="flex items-center justify-between gap-2 mt-4">
+        <span className={cn("inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-[10px] font-black uppercase tracking-wider", st.fg, st.bg, st.border)}>
+          <span className={cn("h-1.5 w-1.5 rounded-full", st.dot)} />
+          {st.label}
+        </span>
+        <p className="text-[10px] font-bold text-muted-foreground/80 tracking-tight">{fmtDate(tx.created_at)}</p>
       </div>
     </div>
   );
@@ -1100,7 +1107,7 @@ export default function Vendas() {
             ) : (
               <>
                 {visibleItems.map((tx) => (
-                  <MobileCard key={tx.id} tx={tx} prods={products} onClick={() => setSelectedTx(tx)} />
+                  <MobileCard key={tx.id} tx={tx} prods={products} onClick={() => setSelectedTx(tx)} hidden={hidden} />
                 ))}
                 {totalPages > 1 && (
                   <div className="flex items-center justify-between border-t border-border bg-card px-3 py-2.5">
