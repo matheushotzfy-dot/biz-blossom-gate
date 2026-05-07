@@ -149,13 +149,13 @@ export default function MemberHome() {
 
   if (courses.length === 0) {
     return (
-      <div className="min-h-dvh flex flex-col items-center justify-center px-6 text-center pt-16">
-        <div className="h-20 w-20 rounded-2xl bg-zinc-900 border border-white/10 flex items-center justify-center mb-8">
-          <BookOpen className="h-9 w-9 text-zinc-600" />
+      <div className="min-h-dvh flex flex-col items-center justify-center px-6 text-center bg-[#050505] text-white">
+        <div className="h-24 w-24 rounded-3xl bg-zinc-900 border border-white/5 flex items-center justify-center mb-10 shadow-2xl">
+          <BookOpen className="h-10 w-10 text-zinc-700" />
         </div>
-        <p className="text-[10px] uppercase tracking-[0.2em] text-zinc-500 font-bold mb-3">{greeting}, {displayName}</p>
-        <h2 className="font-display text-4xl font-black tracking-[-0.04em] text-zinc-100 mb-4">Sua biblioteca está vazia</h2>
-        <p className="text-sm text-zinc-500 max-w-sm leading-relaxed">Quando você adquirir um curso, ele aparecerá aqui pronto pra ser assistido.</p>
+        <p className="text-[10px] uppercase tracking-[0.3em] text-zinc-500 font-black mb-4">{greeting}, {displayName}</p>
+        <h2 className="font-display text-4xl md:text-5xl font-black tracking-[-0.05em] text-white mb-6">Sua biblioteca está vazia</h2>
+        <p className="text-zinc-500 max-w-sm leading-relaxed font-medium">Quando você adquirir um conteúdo, ele aparecerá aqui com acesso imediato e experiência premium.</p>
       </div>
     );
   }
