@@ -126,21 +126,20 @@ export default function MemberHome() {
 
   if (loading) {
     return (
-      <div className="min-h-dvh flex items-center justify-center">
-        <div className="flex flex-col items-center gap-4">
-          <div className="h-12 w-12 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center">
-            <motion.div
-              animate={{ rotate: 360 }}
-              transition={{ duration: 1.5, repeat: Infinity, ease: "linear" }}
-            >
-              <Flame className="h-5 w-5 text-emerald-400" />
-            </motion.div>
-          </div>
-          <div className="h-1 w-40 bg-white/5 overflow-hidden rounded-full">
-            <motion.div
-              className="h-full w-full bg-gradient-to-r from-emerald-500 to-emerald-400"
-              animate={{ x: ["-100%", "100%"] }}
-              transition={{ duration: 1, repeat: Infinity, ease: "easeInOut" }}
+      <div className="min-h-dvh flex items-center justify-center bg-[#050505]">
+        <div className="flex flex-col items-center gap-6">
+          <motion.div 
+            animate={{ scale: [1, 1.1, 1], opacity: [0.5, 1, 0.5] }} 
+            transition={{ duration: 2, repeat: Infinity }}
+            className="h-20 w-20 rounded-2xl bg-white flex items-center justify-center shadow-[0_0_50px_rgba(255,255,255,0.1)]"
+          >
+            <Play className="h-10 w-10 text-black fill-current ml-1.5" />
+          </motion.div>
+          <div className="h-1 w-48 bg-white/10 overflow-hidden rounded-full">
+            <motion.div 
+              className="h-full w-full bg-white" 
+              animate={{ x: ["-100%", "100%"] }} 
+              transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }} 
             />
           </div>
         </div>
