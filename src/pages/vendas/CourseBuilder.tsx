@@ -3,7 +3,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import {
- Plus, BookOpen, Layers, PlayCircle, Trash2, GripVertical, X,
+ Plus, BookOpen, Layers, Play, PlayCircle, Trash2, GripVertical, X,
  ChevronRight, Clock, Video, FileText,
  Calendar, Paperclip, ArrowLeft, Eye, EyeOff, Upload,
  Globe, Lock, CheckCircle2, Loader2, AlertCircle, Hash,
@@ -450,359 +450,367 @@ export default function CourseBuilder() {
  { id: "settings" as const, label: "Config", icon: Settings },
  ];
 
- return (
- <div className="fixed inset-0 z-[70] bg-background flex flex-col overflow-hidden">
- {/* ═══ Cakto Top Bar — sharp, solid, no blur ═══ */}
- <header className="h-14 border-b border-border bg-card flex items-center justify-between px-3 sm:px-5 shrink-0 z-50 relative">
+  return (
+    <div className="fixed inset-0 z-[70] bg-[#030303] text-zinc-100 flex flex-col overflow-hidden selection:bg-emerald-500/30 font-sans">
+      {/* ═══ PREMIUM TOP BAR ═══ */}
+      <header className="h-16 border-b border-white/[0.04] bg-[#050505]/80 backdrop-blur-xl flex items-center justify-between px-4 sm:px-6 shrink-0 z-50 relative">
+        <div className="relative flex items-center gap-4 min-w-0">
+          <button
+            onClick={() => navigate("/vendas/conteudo")}
+            className="group h-10 w-10 rounded-xl border border-white/[0.05] bg-white/[0.02] flex items-center justify-center hover:bg-white/[0.05] hover:border-white/[0.1] transition-all duration-300"
+          >
+            <ArrowLeft className="h-4 w-4 text-zinc-400 group-hover:text-white transition-colors" />
+          </button>
 
- <div className="relative flex items-center gap-3 min-w-0">
- <button
- onClick={() => navigate("/vendas/conteudo")}
- className="h-9 w-9 border border-border bg-card flex items-center justify-center hover:bg-card-elevated transition-colors duration-150 shrink-0"
- >
- <ArrowLeft className="h-4 w-4 text-muted-foreground" />
- </button>
+          {/* Brand Logo/Icon */}
+          <div className="hidden sm:flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-emerald-500 to-emerald-600 shadow-[0_0_20px_rgba(16,185,129,0.3)] shrink-0 overflow-hidden relative group">
+            <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-500" />
+            <Sparkles className="h-5 w-5 text-white relative z-10" />
+          </div>
 
- {/* Hotzfy 'H' brand chip */}
- <div className="hidden sm:flex h-9 w-9 items-center justify-center border border-primary bg-primary text-primary-foreground font-display font-black text-[14px] tracking-tight shrink-0">
- H
- </div>
+          <div className="hidden sm:flex flex-col min-w-0">
+            <div className="flex items-center gap-2.5">
+              <span className="text-[10px] font-black uppercase tracking-[0.25em] text-zinc-500/80">Builder</span>
+              {course.is_published ? (
+                <span className="flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-[9px] font-black uppercase tracking-wider text-emerald-400">
+                  <span className="h-1 w-1 rounded-full bg-emerald-400 animate-pulse" /> Live
+                </span>
+              ) : (
+                <span className="px-2 py-0.5 rounded-full bg-zinc-800 border border-white/[0.05] text-[9px] font-black uppercase tracking-wider text-zinc-500">
+                  Rascunho
+                </span>
+              )}
+            </div>
+            <div className="flex items-center gap-3 mt-1">
+              <h1 className="font-display font-black text-white leading-none truncate max-w-[220px] lg:max-w-[400px] tracking-[-0.03em] text-[16px]">
+                {course.title}
+              </h1>
+              <div className="h-1 w-1 rounded-full bg-zinc-700" />
+              <span className="text-[11px] font-bold text-zinc-500 tabular-nums">
+                {modules.length} Módulos · {totalLessons} Aulas
+              </span>
+            </div>
+          </div>
+        </div>
 
- <div className="hidden sm:flex flex-col min-w-0">
- <div className="flex items-center gap-2">
- <span className="text-[9px] font-black uppercase tracking-[0.20em] text-muted-foreground/60">Curso</span>
- {course.is_published ? (
- <span className="inline-flex h-[16px] items-center gap-1 border border-success bg-success px-1.5 text-[9px] font-black uppercase tracking-[0.16em] text-success-foreground">
- <span className="h-1 w-1 bg-success-foreground" /> Live
- </span>
- ) : (
- <span className="inline-flex h-[16px] items-center border border-border bg-muted px-1.5 text-[9px] font-black uppercase tracking-[0.16em] text-muted-foreground">
- Draft
- </span>
- )}
- </div>
- <div className="flex items-center gap-3 mt-0.5">
- <h1 className="font-display font-black text-foreground leading-none truncate max-w-[220px] lg:max-w-[340px] tracking-[-0.02em] text-[14px]">
- {course.title}
- </h1>
- <span className="text-[10px] font-bold uppercase tracking-[0.14em] text-muted-foreground/60 tabular-nums">
- {modules.length} mód · {totalLessons} aulas
- </span>
- {studentCount > 0 && (
- <span className="text-[10px] font-bold uppercase tracking-[0.14em] text-primary flex items-center gap-1 tabular-nums">
- <Users className="h-2.5 w-2.5" /> {studentCount}
- </span>
- )}
- {totalLessons > 0 && (
- <div className="flex items-center gap-1.5">
- <div className="h-[3px] w-16 bg-muted overflow-hidden">
- <motion.div
- className="h-full bg-primary"
- animate={{ width: `${progressPct}%` }}
- transition={{ duration: 0.6, ease }}
- />
- </div>
- <span className="text-[10px] font-black tabular-nums text-primary">{progressPct}%</span>
- </div>
- )}
- </div>
- </div>
- {/* Mobile title */}
- <div className="sm:hidden min-w-0">
- <h1 className="text-xs font-display font-black text-foreground truncate max-w-[140px]">{course.title}</h1>
- <span className="text-[10px] font-bold uppercase tracking-[0.14em] text-muted-foreground/60">{totalLessons} aulas</span>
- </div>
- </div>
+        <div className="flex items-center gap-2">
+          {/* Status Indicators */}
+          <AnimatePresence mode="wait">
+            <motion.div 
+              key={saveStatus} 
+              initial={{ opacity: 0, y: 5 }} 
+              animate={{ opacity: 1, y: 0 }} 
+              exit={{ opacity: 0, y: -5 }} 
+              className="hidden md:flex items-center gap-2 h-9 px-3 rounded-lg border border-white/[0.05] bg-white/[0.02]"
+            >
+              {saveStatus === "idle" && <span className="text-[10px] text-zinc-600 font-bold uppercase tracking-widest">Aguardando</span>}
+              {saveStatus === "saving" && (
+                <div className="flex items-center gap-2">
+                  <Loader2 className="h-3 w-3 animate-spin text-emerald-400" />
+                  <span className="text-[10px] text-zinc-400 font-bold uppercase tracking-widest">Salvando...</span>
+                </div>
+              )}
+              {saveStatus === "saved" && (
+                <div className="flex items-center gap-2">
+                  <CheckCircle2 className="h-3 w-3 text-emerald-400" />
+                  <span className="text-[10px] text-emerald-400 font-bold uppercase tracking-widest">Sincronizado</span>
+                </div>
+              )}
+            </motion.div>
+          </AnimatePresence>
 
- <div className="relative flex items-center gap-1.5">
- {/* Save status */}
- <AnimatePresence mode="wait">
- <motion.div key={saveStatus} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="hidden sm:flex items-center gap-1.5 mr-2 h-9 px-2.5 border border-border bg-card-elevated">
- {saveStatus === "idle" && <span className="text-[10px] text-muted-foreground/40 font-black uppercase tracking-[0.16em]">—</span>}
- {saveStatus === "saving" && <><Loader2 className="h-3 w-3 animate-spin text-muted-foreground" /><span className="text-[10px] text-muted-foreground font-black uppercase tracking-[0.16em]">Salvando</span></>}
- {saveStatus === "saved" && <><CheckCircle2 className="h-3 w-3 text-success" /><span className="text-[10px] text-success font-black uppercase tracking-[0.16em]">Salvo</span></>}
- {saveStatus === "error" && <><AlertCircle className="h-3 w-3 text-destructive" /><span className="text-[10px] text-destructive font-black uppercase tracking-[0.16em]">Erro</span></>}
- </motion.div>
- </AnimatePresence>
+          <div className="h-8 w-px bg-white/[0.05] mx-2 hidden sm:block" />
 
- {/* Analytics */}
- <button
- onClick={() => navigate(`/vendas/conteudo/${courseId}/analytics`)}
- className="hidden sm:flex h-9 w-9 border border-border bg-card items-center justify-center hover:bg-card-elevated hover:text-primary transition-colors text-muted-foreground"
- title="Analytics do curso"
- >
- <Activity className="h-3.5 w-3.5" />
- </button>
+          {/* Action Buttons */}
+          <div className="flex items-center gap-1.5">
+            <button
+              onClick={() => navigate(`/vendas/conteudo/${courseId}/analytics`)}
+              className="group h-10 w-10 rounded-xl border border-white/[0.05] bg-white/[0.02] flex items-center justify-center hover:bg-white/[0.05] hover:border-emerald-500/30 hover:text-emerald-400 transition-all text-zinc-400"
+              title="Estatísticas"
+            >
+              <Activity className="h-4 w-4" />
+            </button>
 
- {/* Course Settings */}
- <button
- onClick={openCourseSettings}
- className="hidden sm:flex h-9 w-9 border border-border bg-card items-center justify-center hover:bg-card-elevated hover:text-foreground transition-colors text-muted-foreground"
- title="Configurações do curso"
- >
- <Settings className="h-3.5 w-3.5" />
- </button>
+            <button
+              onClick={openCourseSettings}
+              className="group h-10 w-10 rounded-xl border border-white/[0.05] bg-white/[0.02] flex items-center justify-center hover:bg-white/[0.05] hover:border-white/[0.1] hover:text-white transition-all text-zinc-400"
+              title="Configurações"
+            >
+              <Settings className="h-4 w-4" />
+            </button>
 
- {/* Preview */}
- {course.is_published && (
- <button
- onClick={() => window.open(`/membros-area/curso/${courseId}`, "_blank")}
- className="hidden sm:flex h-9 px-3 border border-border bg-card text-[10px] font-black uppercase tracking-[0.16em] text-muted-foreground items-center gap-1.5 hover:border-foreground/40 hover:text-foreground transition-colors"
- >
- <Eye className="h-3.5 w-3.5" /> Preview
- </button>
- )}
+            {course.is_published && (
+              <button
+                onClick={() => window.open(`/membros-area/curso/${courseId}`, "_blank")}
+                className="hidden lg:flex h-10 px-5 rounded-xl border border-white/[0.05] bg-white/[0.02] text-[11px] font-black uppercase tracking-widest text-zinc-300 items-center gap-2 hover:bg-white/[0.05] hover:border-white/[0.1] transition-all"
+              >
+                <Eye className="h-4 w-4" /> Visualizar
+              </button>
+            )}
 
- <button
- onClick={togglePublish}
- className={cn(
- "h-9 px-4 text-[10px] font-black uppercase tracking-[0.16em] flex items-center gap-1.5 transition-colors duration-150 border",
- course.is_published
- ? "bg-success text-success-foreground border-success hover:bg-success/90"
- : "bg-primary text-primary-foreground border-primary hover:bg-primary/90"
- )}
- >
- {course.is_published ? (
- <><span className="h-1.5 w-1.5 bg-success-foreground" /> <span className="hidden sm:inline">Publicado</span><span className="sm:hidden">Live</span></>
- ) : (
- <><Globe className="h-3.5 w-3.5" /> <span className="hidden sm:inline">Publicar</span></>
- )}
- </button>
- </div>
- </header>
+            <button
+              onClick={togglePublish}
+              className={cn(
+                "h-10 px-6 rounded-xl text-[11px] font-black uppercase tracking-widest flex items-center gap-2.5 transition-all duration-300 shadow-lg",
+                course.is_published
+                  ? "bg-white text-black hover:bg-zinc-200"
+                  : "bg-emerald-500 text-white hover:bg-emerald-400 shadow-emerald-500/20"
+              )}
+            >
+              {course.is_published ? (
+                <>
+                  <EyeOff className="h-4 w-4" /> 
+                  <span>Pausar</span>
+                </>
+              ) : (
+                <>
+                  <Globe className="h-4 w-4" /> 
+                  <span>Publicar</span>
+                </>
+              )}
+            </button>
+          </div>
+        </div>
+      </header>
 
- {/* ═══ Split Screen ═══ */}
- <div className="flex-1 flex overflow-hidden relative">
- {/* ─── LEFT: Sidebar ─── */}
- <AnimatePresence initial={false}>
- {!sidebarCollapsed && (
- <motion.aside
- initial={{ width: 0, opacity: 0 }}
- animate={{ width: 360, opacity: 1 }}
- exit={{ width: 0, opacity: 0 }}
- transition={{ duration: 0.4, ease }}
- className="bg-card border-r border-border flex flex-col overflow-hidden shrink-0"
- >
- {/* ── Sidebar header ── */}
- <div className="px-4 py-3 border-b border-border flex items-center justify-between shrink-0 bg-card-elevated">
-   <div className="flex items-center gap-2.5 min-w-0">
-     <div className="h-8 w-8 border border-primary bg-primary/[0.10] flex items-center justify-center shrink-0">
-       <Layers className="h-3.5 w-3.5 text-primary" strokeWidth={2.25} />
-     </div>
-     <div className="min-w-0">
-       <span className="text-[11px] font-display font-black uppercase tracking-[0.16em] text-foreground block leading-tight">Currículo</span>
-       <span className="text-[9.5px] text-muted-foreground/70 font-bold uppercase tracking-[0.12em] tabular-nums">
-         {modules.length} mód · {totalLessons} aulas · {Math.round(totalLessons > 0 ? (modules.flatMap(m => m.lessons).filter(l => l.video_url).length / totalLessons) * 100 : 0)}% prontas
-       </span>
-     </div>
-   </div>
-   <div className="flex items-center gap-1 shrink-0">
-     <button
-       onClick={() => setShowNewModule(true)}
-       className="h-7 w-7 flex items-center justify-center bg-primary border border-primary text-primary-foreground hover:bg-primary/90 transition-colors"
-       title="Novo módulo"
-     >
-       <Plus className="h-3.5 w-3.5" strokeWidth={2.5} />
-     </button>
-     <button
-       onClick={() => setSidebarCollapsed(true)}
-       className="h-7 w-7 flex items-center justify-center border border-border bg-card hover:bg-card-elevated transition-colors text-muted-foreground hover:text-foreground"
-       title="Recolher"
-     >
-       <PanelLeftClose className="h-3.5 w-3.5" />
-     </button>
-   </div>
- </div>
+      {/* ═══ MAIN LAYOUT ═══ */}
+      <div className="flex-1 flex overflow-hidden relative bg-[#030303]">
+        {/* Background Gradients */}
+        <div className="absolute top-0 left-0 w-[500px] h-[500px] bg-emerald-500/5 blur-[120px] rounded-full pointer-events-none" />
+        <div className="absolute bottom-0 right-0 w-[500px] h-[500px] bg-blue-500/5 blur-[120px] rounded-full pointer-events-none" />
 
- {/* ── Modules list ── */}
- <div className="flex-1 overflow-y-auto p-2 space-y-1.5" style={{ WebkitOverflowScrolling: "touch" }}>
- {modules.map((mod, idx) => {
- const lessonsWithVideo = mod.lessons.filter(l => l.video_url).length;
- const modPct = mod.lessons.length > 0 ? Math.round((lessonsWithVideo / mod.lessons.length) * 100) : 0;
- const isExpanded = expandedModules.has(mod.id);
- const containsActive = mod.lessons.some(l => l.id === selectedLesson?.id);
+        {/* ─── LEFT: Curriculum Sidebar ─── */}
+        <AnimatePresence initial={false}>
+          {!sidebarCollapsed && (
+            <motion.aside
+              initial={{ width: 0, opacity: 0 }}
+              animate={{ width: 380, opacity: 1 }}
+              exit={{ width: 0, opacity: 0 }}
+              transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+              className="bg-[#050505]/40 backdrop-blur-xl border-r border-white/[0.04] flex flex-col overflow-hidden shrink-0 z-20"
+            >
+              {/* Sidebar Header */}
+              <div className="px-6 py-5 border-b border-white/[0.04] flex items-center justify-between shrink-0">
+                <div className="flex items-center gap-3 min-w-0">
+                  <div className="h-10 w-10 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center shrink-0">
+                    <Layers className="h-5 w-5 text-emerald-400" />
+                  </div>
+                  <div className="min-w-0">
+                    <h2 className="text-[13px] font-display font-black uppercase tracking-widest text-white block leading-tight">Conteúdo</h2>
+                    <span className="text-[10px] text-zinc-500 font-bold uppercase tracking-widest">
+                      {totalLessons} Aulas no total
+                    </span>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => setShowNewModule(true)}
+                    className="h-8 w-8 rounded-lg flex items-center justify-center bg-emerald-500 text-white hover:bg-emerald-400 shadow-lg shadow-emerald-500/10 transition-all"
+                    title="Adicionar Módulo"
+                  >
+                    <Plus className="h-4 w-4" strokeWidth={3} />
+                  </button>
+                  <button
+                    onClick={() => setSidebarCollapsed(true)}
+                    className="h-8 w-8 rounded-lg flex items-center justify-center border border-white/[0.05] bg-white/[0.02] text-zinc-400 hover:text-white hover:bg-white/[0.05] transition-all"
+                  >
+                    <PanelLeftClose className="h-4 w-4" />
+                  </button>
+                </div>
+              </div>
 
- return (
- <div
-   key={mod.id}
-   className={cn(
-     "overflow-hidden border transition-colors",
-     containsActive ? "border-primary bg-primary/[0.04]" : "border-border bg-card-elevated hover:border-foreground/30"
-   )}
- >
- {/* Module Header */}
- <div
- className={cn(
- "flex items-center gap-2 px-2.5 py-2 cursor-pointer group transition-colors relative",
- isExpanded ? "bg-card" : "hover:bg-card/60"
- )}
- onClick={() => toggleExpand(mod.id)}
- >
- {containsActive && <div className="absolute left-0 top-0 bottom-0 w-[2px] bg-primary" />}
- <motion.div animate={{ rotate: isExpanded ? 90 : 0 }} transition={{ duration: 0.18 }} className="shrink-0">
-   <ChevronRight className="h-3.5 w-3.5 text-muted-foreground" strokeWidth={2.2} />
- </motion.div>
- <div className={cn(
-   "h-7 w-7 flex items-center justify-center shrink-0 text-[10px] font-display font-black border tabular-nums transition-colors",
-   containsActive ? "bg-primary text-primary-foreground border-primary"
-   : isExpanded ? "bg-primary/[0.10] text-primary border-primary/40"
-   : "bg-card text-muted-foreground border-border"
- )}>
-   {String(idx + 1).padStart(2, "0")}
- </div>
- <div className="flex-1 min-w-0">
- {editingModuleId === mod.id ? (
- <input
- autoFocus value={editingModuleTitle}
- onChange={e => setEditingModuleTitle(e.target.value)}
- onBlur={() => renameModule(mod.id, editingModuleTitle)}
- onKeyDown={e => { if (e.key === "Enter") renameModule(mod.id, editingModuleTitle); if (e.key === "Escape") setEditingModuleId(null); }}
- onClick={e => e.stopPropagation()}
- className="w-full text-[12.5px] font-display font-bold text-foreground bg-transparent focus:outline-none border-b border-primary/40 pb-0.5"
- />
- ) : (
- <p
- className="text-[12.5px] font-display font-bold text-foreground truncate leading-tight"
- onDoubleClick={e => { e.stopPropagation(); setEditingModuleId(mod.id); setEditingModuleTitle(mod.title); }}
- >{mod.title}</p>
- )}
- <div className="flex items-center gap-2 mt-1">
-   <span className="text-[10px] text-muted-foreground font-medium tabular-nums">
-     {mod.lessons.length} {mod.lessons.length === 1 ? "aula" : "aulas"}
-   </span>
-   {mod.lessons.length > 0 && (
-     <>
-       <span className="text-muted-foreground/40">·</span>
-       <div className="flex items-center gap-1.5 flex-1 min-w-0">
-         <div className="h-[3px] flex-1 max-w-[60px] bg-card-elevated overflow-hidden">
-           <div
-             className={cn("h-full transition-all duration-[280ms]", modPct === 100 ? "bg-success" : "bg-primary")}
-             style={{ width: `${modPct}%` }}
-           />
-         </div>
-         <span className={cn("text-[9px] font-bold tabular-nums", modPct === 100 ? "text-success" : "text-muted-foreground")}>
-           {modPct}%
-         </span>
-       </div>
-     </>
-   )}
- </div>
- </div>
- <button
- onClick={e => { e.stopPropagation(); deleteModule(mod.id); }}
- className="h-7 w-7 flex items-center justify-center opacity-0 group-hover:opacity-100 hover:bg-destructive hover:text-destructive-foreground transition-colors shrink-0"
- title="Excluir módulo"
- >
- <Trash2 className="h-3 w-3 text-destructive" />
- </button>
- </div>
+              {/* Modules list */}
+              <div className="flex-1 overflow-y-auto p-4 space-y-3" style={{ WebkitOverflowScrolling: "touch" }}>
+                {modules.map((mod, idx) => {
+                  const lessonsWithVideo = mod.lessons.filter(l => l.video_url).length;
+                  const modPct = mod.lessons.length > 0 ? Math.round((lessonsWithVideo / mod.lessons.length) * 100) : 0;
+                  const isExpanded = expandedModules.has(mod.id);
+                  const containsActive = mod.lessons.some(l => l.id === selectedLesson?.id);
 
- {/* Lessons */}
- <AnimatePresence initial={false}>
- {isExpanded && (
- <motion.div
- initial={{ height: 0, opacity: 0 }} animate={{ height: "auto", opacity: 1 }}
- exit={{ height: 0, opacity: 0 }} transition={{ duration: 0.22, ease }}
- className="overflow-hidden"
- >
- <div className="border-t border-border px-1.5 py-1.5 bg-card/40">
- <Reorder.Group axis="y" values={mod.lessons} onReorder={newOrder => reorderLessons(mod.id, newOrder)} className="space-y-px">
- {mod.lessons.map((lesson, li) => {
-   const isActive = selectedLesson?.id === lesson.id;
-   const hasVideo = !!lesson.video_url;
-   return (
- <Reorder.Item
- key={lesson.id} value={lesson}
-  className={cn(
-  "relative flex items-center gap-2 pl-2.5 pr-1.5 py-2 cursor-pointer group/lesson transition-colors duration-150",
-  isActive
-  ? "bg-primary text-primary-foreground"
-  : "hover:bg-card-elevated"
-  )}
-  onClick={() => selectLesson(lesson)}
- >
- <GripVertical className={cn("h-3 w-3 opacity-0 group-hover/lesson:opacity-100 cursor-grab shrink-0 transition-opacity", isActive ? "text-primary-foreground/60" : "text-muted-foreground/50")} />
- <div className={cn(
-   "h-5 w-5 flex items-center justify-center shrink-0 text-[9px] font-display font-black tabular-nums border transition-colors",
-   isActive
-     ? hasVideo ? "bg-primary-foreground/20 text-primary-foreground border-primary-foreground/30" : "bg-primary-foreground/10 text-primary-foreground border-primary-foreground/20"
-     : hasVideo
-       ? "bg-success text-success-foreground border-success"
-       : "bg-card text-muted-foreground border-border"
- )}>
-   {hasVideo ? <CheckCircle2 className="h-2.5 w-2.5" strokeWidth={2.75} /> : li + 1}
- </div>
- <div className="flex-1 min-w-0">
- <p className={cn(
-   "text-[12px] truncate font-display font-semibold leading-tight",
-   isActive ? "text-primary-foreground" : "text-foreground"
- )}>{lesson.title}</p>
- <div className="flex items-center gap-1.5 mt-0.5">
-    {lesson.is_free && (
-      <span className={cn(
-        "text-[8px] px-1 py-0.5 font-display font-black uppercase tracking-[0.14em]",
-        isActive ? "bg-primary-foreground/20 text-primary-foreground" : "bg-success text-success-foreground"
-      )}>FREE</span>
-    )}
-   <span className={cn(
-     "text-[9.5px] font-display font-semibold flex items-center gap-1",
-     isActive ? "text-primary-foreground/80" : hasVideo ? "text-success" : "text-warning"
-   )}>
-     <span className={cn("h-1 w-1 rounded-full", isActive ? "bg-primary-foreground/70" : hasVideo ? "bg-success" : "bg-warning")} />
-     {hasVideo ? "Vídeo" : "Pendente"}
-   </span>
-   {lesson.duration_minutes ? (
-     <span className={cn("text-[9.5px] font-display font-semibold tabular-nums", isActive ? "text-primary-foreground/70" : "text-muted-foreground")}>
-       {lesson.duration_minutes}m
-     </span>
-   ) : null}
-   {(lesson.drip_days || 0) > 0 && (
-     <span className={cn("text-[9.5px] font-display font-semibold flex items-center gap-0.5", isActive ? "text-primary-foreground/70" : "text-info")}>
-       <Clock className="h-2 w-2" strokeWidth={2.5} />{lesson.drip_days}d
-     </span>
-   )}
-   {(lessonStats.get(lesson.id) || 0) > 0 && (
-     <span className={cn("text-[9.5px] font-display font-semibold flex items-center gap-0.5", isActive ? "text-primary-foreground/70" : "text-primary")}>
-       <Users className="h-2 w-2" strokeWidth={2.5} />{lessonStats.get(lesson.id)}
-     </span>
-   )}
- </div>
- </div>
- <div className={cn("flex items-center gap-0.5 transition-opacity shrink-0", isActive ? "opacity-100" : "opacity-0 group-hover/lesson:opacity-100")}>
- <button
- onClick={e => { e.stopPropagation(); duplicateLesson(lesson); }}
- className={cn("h-6 w-6 rounded flex items-center justify-center transition-colors", isActive ? "hover:bg-primary-foreground/15 text-primary-foreground/80" : "hover:bg-card text-muted-foreground hover:text-foreground")}
- title="Duplicar aula"
- >
- <CopyPlus className="h-3 w-3" />
- </button>
- <button
- onClick={e => { e.stopPropagation(); deleteLesson(lesson.id); }}
- className={cn("h-6 w-6 rounded flex items-center justify-center transition-colors", isActive ? "hover:bg-primary-foreground/15 text-primary-foreground/80" : "hover:bg-destructive/10 text-destructive")}
- title="Excluir aula"
- >
- <Trash2 className="h-3 w-3" />
- </button>
- </div>
- </Reorder.Item>
- );
- })}
- </Reorder.Group>
+                  return (
+                    <div
+                      key={mod.id}
+                      className={cn(
+                        "group/mod overflow-hidden rounded-2xl border transition-all duration-300",
+                        containsActive 
+                          ? "border-emerald-500/40 bg-emerald-500/[0.03] shadow-[0_4px_20px_rgba(0,0,0,0.2)]" 
+                          : "border-white/[0.03] bg-white/[0.01] hover:border-white/[0.1] hover:bg-white/[0.02]"
+                      )}
+                    >
+                      {/* Module Header */}
+                      <div
+                        className={cn(
+                          "flex items-center gap-3 px-4 py-4 cursor-pointer relative",
+                          isExpanded ? "bg-white/[0.02]" : ""
+                        )}
+                        onClick={() => toggleExpand(mod.id)}
+                      >
+                        {containsActive && <div className="absolute left-0 top-3 bottom-3 w-[3px] rounded-r-full bg-emerald-500" />}
+                        
+                        <motion.div animate={{ rotate: isExpanded ? 90 : 0 }} transition={{ duration: 0.2 }}>
+                          <ChevronRight className="h-4 w-4 text-zinc-600" />
+                        </motion.div>
 
- <button
- onClick={() => createLesson(mod.id)}
- className="w-full mt-1 flex items-center gap-2 px-2.5 py-2 text-muted-foreground hover:text-primary hover:bg-primary/[0.06] border border-dashed border-border hover:border-primary transition-colors"
- >
- <Plus className="h-3 w-3" strokeWidth={2.5} />
- <span className="text-[10px] font-display font-black uppercase tracking-[0.14em]">Adicionar aula</span>
- </button>
- </div>
- </motion.div>
- )}
- </AnimatePresence>
- </div>
- );
- })}
+                        <div className={cn(
+                          "h-8 w-8 rounded-lg flex items-center justify-center shrink-0 text-[11px] font-black border tabular-nums transition-all duration-300",
+                          containsActive 
+                            ? "bg-emerald-500 text-white border-emerald-400 shadow-lg shadow-emerald-500/20"
+                            : isExpanded 
+                            ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/30"
+                            : "bg-zinc-900 text-zinc-600 border-white/[0.05]"
+                        )}>
+                          {idx + 1}
+                        </div>
+
+                        <div className="flex-1 min-w-0">
+                          {editingModuleId === mod.id ? (
+                            <input
+                              autoFocus
+                              value={editingModuleTitle}
+                              onChange={e => setEditingModuleTitle(e.target.value)}
+                              onBlur={() => renameModule(mod.id, editingModuleTitle)}
+                              onKeyDown={e => { 
+                                if (e.key === "Enter") renameModule(mod.id, editingModuleTitle); 
+                                if (e.key === "Escape") setEditingModuleId(null); 
+                              }}
+                              onClick={e => e.stopPropagation()}
+                              className="w-full text-[14px] font-bold text-white bg-transparent focus:outline-none border-b border-emerald-500/50 pb-0.5"
+                            />
+                          ) : (
+                            <p className="text-[14px] font-bold text-zinc-100 truncate tracking-tight group-hover/mod:text-white transition-colors">
+                              {mod.title}
+                            </p>
+                          )}
+                          <div className="flex items-center gap-3 mt-1.5">
+                            <span className="text-[10px] text-zinc-500 font-bold uppercase tracking-widest tabular-nums">
+                              {mod.lessons.length} {mod.lessons.length === 1 ? "aula" : "aulas"}
+                            </span>
+                            {mod.lessons.length > 0 && (
+                              <div className="flex items-center gap-2 flex-1 max-w-[80px]">
+                                <div className="h-1 flex-1 bg-white/[0.03] rounded-full overflow-hidden">
+                                  <motion.div
+                                    className={cn("h-full transition-all duration-500", modPct === 100 ? "bg-emerald-500" : "bg-zinc-700")}
+                                    animate={{ width: `${modPct}%` }}
+                                  />
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+
+                        <div className="flex items-center gap-1 opacity-0 group-hover/mod:opacity-100 transition-opacity">
+                          <button
+                            onClick={e => { e.stopPropagation(); setEditingModuleId(mod.id); setEditingModuleTitle(mod.title); }}
+                            className="h-8 w-8 rounded-lg flex items-center justify-center hover:bg-white/[0.05] text-zinc-500 hover:text-white transition-all"
+                          >
+                            <Settings className="h-3.5 w-3.5" />
+                          </button>
+                          <button
+                            onClick={e => { e.stopPropagation(); deleteModule(mod.id); }}
+                            className="h-8 w-8 rounded-lg flex items-center justify-center hover:bg-red-500/10 text-zinc-500 hover:text-red-400 transition-all"
+                          >
+                            <Trash2 className="h-3.5 w-3.5" />
+                          </button>
+                        </div>
+                      </div>
+
+                      {/* Lessons List */}
+                      <AnimatePresence initial={false}>
+                        {isExpanded && (
+                          <motion.div
+                            initial={{ height: 0, opacity: 0 }}
+                            animate={{ height: "auto", opacity: 1 }}
+                            exit={{ height: 0, opacity: 0 }}
+                            transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
+                          >
+                            <div className="px-2 pb-3 bg-black/20">
+                              <Reorder.Group 
+                                axis="y" 
+                                values={mod.lessons} 
+                                onReorder={newOrder => reorderLessons(mod.id, newOrder)} 
+                                className="space-y-1"
+                              >
+                                {mod.lessons.map((lesson, li) => {
+                                  const isActive = selectedLesson?.id === lesson.id;
+                                  const hasVideo = !!lesson.video_url;
+                                  return (
+                                    <Reorder.Item
+                                      key={lesson.id}
+                                      value={lesson}
+                                      className={cn(
+                                        "group/lesson flex items-center gap-3 px-3 py-3 rounded-xl cursor-pointer transition-all duration-300",
+                                        isActive
+                                          ? "bg-white/[0.08] border border-white/[0.1] shadow-xl"
+                                          : "hover:bg-white/[0.03] border border-transparent"
+                                      )}
+                                      onClick={() => selectLesson(lesson)}
+                                    >
+                                      <GripVertical className="h-3.5 w-3.5 text-zinc-700 group-hover/lesson:text-zinc-500 opacity-0 group-hover/lesson:opacity-100 transition-all shrink-0" />
+                                      
+                                      <div className={cn(
+                                        "h-6 w-6 rounded-lg flex items-center justify-center shrink-0 text-[10px] font-black border transition-all duration-300",
+                                        isActive
+                                          ? "bg-emerald-500 text-white border-emerald-400 shadow-emerald-500/20"
+                                          : hasVideo
+                                          ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20"
+                                          : "bg-zinc-900 text-zinc-600 border-white/[0.03]"
+                                      )}>
+                                        {hasVideo ? <Play className="h-2.5 w-2.5 fill-current" /> : li + 1}
+                                      </div>
+
+                                      <div className="flex-1 min-w-0">
+                                        <p className={cn(
+                                          "text-[13px] font-bold truncate tracking-tight transition-colors",
+                                          isActive ? "text-white" : "text-zinc-400 group-hover/lesson:text-zinc-200"
+                                        )}>
+                                          {lesson.title}
+                                        </p>
+                                        <div className="flex items-center gap-2.5 mt-1">
+                                          {lesson.is_free && (
+                                            <span className="text-[8px] font-black uppercase tracking-widest text-emerald-400 bg-emerald-500/10 px-1.5 py-0.5 rounded">FREE</span>
+                                          )}
+                                          <div className="flex items-center gap-1.5">
+                                            <div className={cn("h-1 w-1 rounded-full", hasVideo ? "bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]" : "bg-zinc-700")} />
+                                            <span className="text-[10px] font-bold text-zinc-600 uppercase tracking-widest">
+                                              {hasVideo ? "Pronta" : "Vazia"}
+                                            </span>
+                                          </div>
+                                        </div>
+                                      </div>
+
+                                      <div className="flex items-center gap-1 opacity-0 group-hover/lesson:opacity-100 transition-all">
+                                        <button
+                                          onClick={e => { e.stopPropagation(); duplicateLesson(lesson); }}
+                                          className="h-7 w-7 rounded-lg flex items-center justify-center hover:bg-white/[0.05] text-zinc-600 hover:text-white transition-all"
+                                        >
+                                          <Copy className="h-3.5 w-3.5" />
+                                        </button>
+                                        <button
+                                          onClick={e => { e.stopPropagation(); deleteLesson(lesson.id); }}
+                                          className="h-7 w-7 rounded-lg flex items-center justify-center hover:bg-red-500/10 text-zinc-600 hover:text-red-400 transition-all"
+                                        >
+                                          <Trash2 className="h-3.5 w-3.5" />
+                                        </button>
+                                      </div>
+                                    </Reorder.Item>
+                                  );
+                                })}
+                              </Reorder.Group>
+
+                              <button
+                                onClick={() => createLesson(mod.id)}
+                                className="w-full mt-2 flex items-center justify-center gap-2 py-3 rounded-xl border border-dashed border-white/[0.05] bg-white/[0.01] text-zinc-500 hover:text-emerald-400 hover:border-emerald-500/30 hover:bg-emerald-500/[0.02] transition-all group/add"
+                              >
+                                <Plus className="h-4 w-4 group-hover/add:scale-110 transition-transform" />
+                                <span className="text-[11px] font-black uppercase tracking-widest">Nova Aula</span>
+                              </button>
+                            </div>
+                          </motion.div>
+                        )}
+                      </AnimatePresence>
+                    </div>
+                  );
+                })}
 
  {/* New Module */}
  {showNewModule ? (
@@ -849,72 +857,68 @@ export default function CourseBuilder() {
  )}
  </AnimatePresence>
 
- {/* ─── RIGHT: Lesson Editor ─── */}
- <main className="flex-1 bg-background overflow-y-auto" style={{ WebkitOverflowScrolling: "touch" }}>
- {selectedLesson ? (
- <div className="w-full max-w-3xl mx-auto px-4 sm:px-8 lg:px-10 py-6 sm:py-8 space-y-6">
+        {/* ─── RIGHT: Lesson Editor ─── */}
+        <main className="flex-1 bg-[#030303] overflow-y-auto z-10" style={{ WebkitOverflowScrolling: "touch" }}>
+          <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-emerald-500/[0.03] blur-[150px] rounded-full pointer-events-none" />
+          
+          {selectedLesson ? (
+            <div className="w-full max-w-4xl mx-auto px-6 sm:px-12 py-10 sm:py-16 space-y-12 relative z-10">
+              {/* Lesson Header */}
+              <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}>
+                <div className="flex items-center gap-3 mb-6">
+                  <div className="px-3 py-1 rounded-full bg-white/[0.03] border border-white/[0.05] flex items-center gap-2">
+                    <span className="text-[10px] font-black uppercase tracking-[0.25em] text-zinc-500">
+                      {modules.find(m => m.lessons.some(l => l.id === selectedLesson.id))?.title}
+                    </span>
+                  </div>
+                  <div className="h-1 w-1 rounded-full bg-zinc-800" />
+                  <span className="text-[10px] font-black uppercase tracking-[0.25em] text-emerald-500/80">Aula Atual</span>
+                </div>
 
- {/* Lesson Header */}
- <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3, ease }}>
- <div className="flex items-center gap-2.5 mb-4">
- <div className="h-7 w-7 border border-primary bg-primary/[0.08] flex items-center justify-center">
- <Hash className="h-3 w-3 text-primary" strokeWidth={2.5} />
- </div>
- <span className="text-[10px] font-display font-black uppercase tracking-[0.18em] text-muted-foreground/70 truncate">
- {modules.find(m => m.lessons.some(l => l.id === selectedLesson.id))?.title}
- </span>
- {/* Lesson status badges */}
- <div className="flex items-center gap-1.5 ml-auto shrink-0">
- {lessonVideoUrl && (
- <span className="inline-flex items-center gap-1 text-[9px] font-display font-black text-success-foreground bg-success border border-success px-2 py-0.5 uppercase tracking-[0.14em]">
- <CheckCircle2 className="h-2.5 w-2.5" /> Vídeo
- </span>
- )}
- {lessonIsFree && (
- <span className="text-[9px] font-display font-black text-info-foreground bg-info border border-info px-2 py-0.5 uppercase tracking-[0.14em]">Gratuita</span>
- )}
- </div>
- </div>
- {editingLessonTitle ? (
- <input
- ref={titleInputRef} value={lessonTitle}
- onChange={e => setLessonTitle(e.target.value)}
- onBlur={() => { setEditingLessonTitle(false); if (lessonTitle.trim() && lessonTitle !== selectedLesson.title) autoSave("title", lessonTitle.trim()); }}
- onKeyDown={e => { if (e.key === "Enter") (e.target as HTMLInputElement).blur(); }}
- className="w-full bg-transparent text-[32px] sm:text-[44px] font-display font-black tracking-[-0.04em] leading-[0.95] text-foreground focus:outline-none border-b-2 border-primary pb-1.5"
- autoFocus
- />
- ) : (
- <h2
- onClick={() => { setEditingLessonTitle(true); setTimeout(() => titleInputRef.current?.focus(), 50); }}
- className="text-[32px] sm:text-[44px] font-display font-black tracking-[-0.04em] leading-[0.95] text-foreground cursor-text hover:text-foreground/80 transition-colors"
- >
- {lessonTitle || "Sem título"}
- </h2>
- )}
- </motion.div>
+                {editingLessonTitle ? (
+                  <input
+                    ref={titleInputRef}
+                    value={lessonTitle}
+                    onChange={e => setLessonTitle(e.target.value)}
+                    onBlur={() => { 
+                      setEditingLessonTitle(false); 
+                      if (lessonTitle.trim() && lessonTitle !== selectedLesson.title) autoSave("title", lessonTitle.trim()); 
+                    }}
+                    onKeyDown={e => { if (e.key === "Enter") (e.target as HTMLInputElement).blur(); }}
+                    className="w-full bg-transparent text-[44px] sm:text-[64px] font-display font-black tracking-[-0.05em] leading-[0.9] text-white focus:outline-none border-b-2 border-emerald-500/50 pb-4 shadow-[0_4px_0_rgba(16,185,129,0.1)]"
+                    autoFocus
+                  />
+                ) : (
+                  <h2
+                    onClick={() => { setEditingLessonTitle(true); setTimeout(() => titleInputRef.current?.focus(), 50); }}
+                    className="text-[44px] sm:text-[64px] font-display font-black tracking-[-0.05em] leading-[0.9] text-white cursor-text hover:text-white/80 transition-all duration-300 drop-shadow-[0_4px_20px_rgba(0,0,0,0.5)]"
+                  >
+                    {lessonTitle || "Sem título"}
+                  </h2>
+                )}
+              </motion.div>
 
- {/* ── Editor Tabs ── */}
- <div className="flex items-center gap-0 border border-border bg-card w-fit">
- {editorTabs.map(tab => {
- const isActive = activeEditorTab === tab.id;
- return (
- <button
- key={tab.id}
- onClick={() => setActiveEditorTab(tab.id)}
- className={cn(
- "relative flex items-center gap-2 px-4 h-10 text-[10px] font-display font-black uppercase tracking-[0.16em] transition-colors duration-150 border-r border-border last:border-r-0",
- isActive
-   ? "bg-primary text-primary-foreground"
-   : "text-muted-foreground hover:text-foreground hover:bg-card-elevated"
- )}
- >
- <tab.icon className="h-3.5 w-3.5" />
- <span>{tab.label}</span>
- </button>
- );
- })}
- </div>
+              {/* ── Editor Tabs ── */}
+              <div className="flex items-center gap-1 p-1 rounded-2xl bg-white/[0.02] border border-white/[0.05] w-fit">
+                {editorTabs.map(tab => {
+                  const isActive = activeEditorTab === tab.id;
+                  return (
+                    <button
+                      key={tab.id}
+                      onClick={() => setActiveEditorTab(tab.id)}
+                      className={cn(
+                        "relative flex items-center gap-2.5 px-6 h-11 rounded-xl text-[11px] font-black uppercase tracking-widest transition-all duration-300",
+                        isActive
+                          ? "bg-white text-black shadow-[0_4px_15px_rgba(255,255,255,0.1)]"
+                          : "text-zinc-500 hover:text-zinc-300 hover:bg-white/[0.03]"
+                      )}
+                    >
+                      <tab.icon className="h-4 w-4" />
+                      <span>{tab.label}</span>
+                    </button>
+                  );
+                })}
+              </div>
 
  {/* ── Tab Content ── */}
  <AnimatePresence mode="wait">
@@ -926,186 +930,170 @@ export default function CourseBuilder() {
  transition={{ duration: 0.2, ease }}
  className="space-y-5"
  >
- {/* ─── VIDEO TAB ─── */}
- {activeEditorTab === "video" && (
- <>
-  <div className="bg-card border border-border overflow-hidden">
-  {uploadingVideo ? (
-  <div className="aspect-video flex flex-col items-center justify-center gap-5 p-8 bg-card-elevated">
-  <div className="h-16 w-16 border border-primary bg-primary/10 flex items-center justify-center">
-  <Loader2 className="h-7 w-7 animate-spin text-primary" />
-  </div>
-  <div className="w-full max-w-xs">
-  <div className="flex justify-between text-[11px] mb-2">
-  <span className="font-display font-bold uppercase tracking-[0.16em] text-foreground">Enviando vídeo</span>
-  <span className="font-display font-black text-primary tabular-nums">{Math.round(videoUploadProgress)}%</span>
-  </div>
-  <div className="h-[3px] bg-card overflow-hidden border border-border">
-  <motion.div className="h-full bg-primary" animate={{ width: `${videoUploadProgress}%` }} transition={{ ease: "easeOut" }} />
-  </div>
-  </div>
-  <p className="text-[10px] text-muted-foreground font-display font-bold uppercase tracking-widest">Não feche esta página</p>
-  </div>
-  ) : lessonVideoUrl ? (
-  <div className="relative">
-  {isDirectVideoUrl(lessonVideoUrl) ? (
-  <video controls className="w-full aspect-video bg-foreground/5" src={lessonVideoUrl} />
-  ) : getVideoEmbed(lessonVideoUrl) ? (
-  <iframe
-  src={getVideoEmbed(lessonVideoUrl)!}
-  className="w-full aspect-video"
-  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-  allowFullScreen
-  />
-  ) : getVideoThumbnail(lessonVideoUrl) ? (
-  <div className="relative aspect-video">
-  <img src={getVideoThumbnail(lessonVideoUrl)!} alt="" className="w-full h-full object-cover" />
-  <div className="absolute inset-0 bg-foreground/40 flex items-center justify-center">
-  <div className="h-16 w-16 border border-border bg-card flex items-center justify-center">
-  <PlayCircle className="h-8 w-8 text-primary" />
-  </div>
-  </div>
-  </div>
-  ) : (
-  <div className="p-5 flex items-center gap-3 bg-card-elevated">
-  <div className="h-11 w-11 border border-primary bg-primary/10 flex items-center justify-center">
-  <Video className="h-4 w-4 text-primary" />
-  </div>
-  <div className="flex-1 min-w-0">
-  <p className="text-xs text-foreground font-display font-bold truncate">{lessonVideoUrl}</p>
-  <p className="text-[10px] text-success font-display font-bold uppercase tracking-widest mt-1 flex items-center gap-1"><CheckCircle2 className="h-2.5 w-2.5" /> Vídeo vinculado</p>
-  </div>
-  </div>
-  )}
-  <button
-  onClick={() => { setLessonVideoUrl(""); autoSave("video_url", null); }}
-  className="absolute top-3 right-3 h-9 w-9 bg-card border border-border flex items-center justify-center hover:border-destructive hover:bg-destructive hover:text-destructive-foreground transition-colors"
-  >
-  <X className="h-3.5 w-3.5" />
-  </button>
-  </div>
-  ) : (
-  <div
-  className="aspect-video flex flex-col items-center justify-center gap-5 cursor-pointer hover:bg-card-elevated transition-colors duration-[220ms] group/upload relative overflow-hidden"
-  onClick={() => videoInputRef.current?.click()}
-  onDragOver={e => e.preventDefault()}
-  onDrop={e => { e.preventDefault(); const f = e.dataTransfer.files[0]; if (f) handleVideoUpload(f); }}
-  >
-  <div className="relative h-16 w-16 border border-dashed border-border flex items-center justify-center group-hover/upload:border-primary group-hover/upload:bg-primary/5 transition-colors">
-  <Upload className="h-7 w-7 text-muted-foreground group-hover/upload:text-primary transition-colors" />
-  </div>
-  <div className="relative text-center">
-  <p className="text-[11px] font-display font-bold uppercase tracking-[0.18em] text-foreground">Arraste ou clique para enviar</p>
-  <p className="text-[10px] text-muted-foreground mt-2 font-display font-bold uppercase tracking-widest">MP4, WebM, OGG · até 500MB</p>
-  </div>
-  <p className="relative text-[10px] text-muted-foreground/60 font-display uppercase tracking-widest font-bold">ou cole um link abaixo</p>
-  </div>
-  )}
-  </div>
-  <input ref={videoInputRef} type="file" accept="video/mp4,video/webm,video/ogg,video/quicktime" className="hidden" onChange={e => { const f = e.target.files?.[0]; if (f) handleVideoUpload(f); }} />
+                {/* ─── VIDEO TAB ─── */}
+                {activeEditorTab === "video" && (
+                  <div className="space-y-6">
+                    <div className="rounded-3xl border border-white/[0.04] bg-white/[0.01] overflow-hidden group/player">
+                      {uploadingVideo ? (
+                        <div className="aspect-video flex flex-col items-center justify-center gap-8 p-12 bg-white/[0.02]">
+                          <div className="relative">
+                            <div className="h-20 w-20 rounded-2xl border border-emerald-500/20 bg-emerald-500/5 flex items-center justify-center">
+                              <Loader2 className="h-8 w-8 animate-spin text-emerald-400" />
+                            </div>
+                            <div className="absolute -inset-2 rounded-2xl border border-emerald-500/20 animate-pulse" />
+                          </div>
+                          <div className="w-full max-w-sm">
+                            <div className="flex justify-between text-[12px] mb-3">
+                              <span className="font-black uppercase tracking-widest text-white">Processando Vídeo</span>
+                              <span className="font-black text-emerald-400 tabular-nums">{Math.round(videoUploadProgress)}%</span>
+                            </div>
+                            <div className="h-1.5 bg-white/[0.03] rounded-full overflow-hidden border border-white/[0.05]">
+                              <motion.div className="h-full bg-emerald-500 shadow-[0_0_15px_rgba(16,185,129,0.5)]" animate={{ width: `${videoUploadProgress}%` }} transition={{ ease: "easeOut" }} />
+                            </div>
+                          </div>
+                          <p className="text-[10px] text-zinc-500 font-bold uppercase tracking-[0.2em]">Otimizando para 4K • Não feche a aba</p>
+                        </div>
+                      ) : lessonVideoUrl ? (
+                        <div className="relative aspect-video bg-black shadow-2xl overflow-hidden group">
+                          {isDirectVideoUrl(lessonVideoUrl) ? (
+                            <video controls className="w-full h-full" src={lessonVideoUrl} />
+                          ) : getVideoEmbed(lessonVideoUrl) ? (
+                            <iframe
+                              src={getVideoEmbed(lessonVideoUrl)!}
+                              className="w-full h-full"
+                              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                              allowFullScreen
+                            />
+                          ) : (
+                            <div className="w-full h-full flex flex-col items-center justify-center bg-white/[0.02] gap-4">
+                              <Video className="h-12 w-12 text-emerald-500/40" />
+                              <p className="text-zinc-500 font-bold text-sm tracking-widest uppercase">Streaming Ativo</p>
+                            </div>
+                          )}
+                          
+                          <button
+                            onClick={() => { setLessonVideoUrl(""); autoSave("video_url", null); }}
+                            className="absolute top-4 right-4 h-11 w-11 rounded-full bg-black/60 backdrop-blur-md border border-white/10 flex items-center justify-center hover:bg-red-500 hover:text-white transition-all opacity-0 group-hover:opacity-100 scale-90 group-hover:scale-100"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </button>
+                        </div>
+                      ) : (
+                        <div
+                          className="aspect-video flex flex-col items-center justify-center gap-6 cursor-pointer hover:bg-white/[0.03] transition-all duration-500 group/upload relative overflow-hidden"
+                          onClick={() => videoInputRef.current?.click()}
+                          onDragOver={e => e.preventDefault()}
+                          onDrop={e => { e.preventDefault(); const f = e.dataTransfer.files[0]; if (f) handleVideoUpload(f); }}
+                        >
+                          <div className="relative">
+                            <div className="h-24 w-24 rounded-3xl border border-dashed border-white/[0.1] flex items-center justify-center group-hover/upload:border-emerald-500/40 group-hover/upload:bg-emerald-500/[0.03] transition-all duration-500">
+                              <Upload className="h-8 w-8 text-zinc-600 group-hover/upload:text-emerald-400 group-hover/upload:scale-110 transition-all duration-500" />
+                            </div>
+                            <div className="absolute -inset-4 rounded-3xl border border-emerald-500/0 group-hover/upload:border-emerald-500/10 transition-all duration-700 animate-[ping_3s_infinite_alternate]" />
+                          </div>
+                          <div className="text-center relative z-10">
+                            <h3 className="text-[14px] font-black uppercase tracking-[0.25em] text-white">Upload de Vídeo</h3>
+                            <p className="text-[11px] text-zinc-500 mt-2 font-bold uppercase tracking-widest">Arraste arquivos 4K (MP4, MKV, MOV) • Máx 500MB</p>
+                          </div>
+                        </div>
+                      )}
+                    </div>
 
-  {/* Video URL Input */}
-  {!uploadingVideo && (
-  <div className="relative group">
-  <Video className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
-  <input
-  value={lessonVideoUrl}
-  onChange={e => { setLessonVideoUrl(e.target.value); debouncedSave("video_url", e.target.value || null); }}
-  placeholder="https://youtu.be/... ou https://vimeo.com/..."
-  className="w-full h-11 pl-11 pr-4 rounded-none bg-card border border-border text-sm font-display text-foreground placeholder:text-muted-foreground/60 focus:outline-none focus:border-primary transition-colors"
-  />
-  </div>
-  )}
- </>
- )}
+                    <div className="relative group">
+                      <div className="absolute inset-y-0 left-5 flex items-center pointer-events-none">
+                        <Globe className="h-4 w-4 text-zinc-600 group-focus-within:text-emerald-400 transition-colors" />
+                      </div>
+                      <input
+                        value={lessonVideoUrl}
+                        onChange={e => { setLessonVideoUrl(e.target.value); debouncedSave("video_url", e.target.value || null); }}
+                        placeholder="Importar via Link (Youtube, Vimeo, Wistia...)"
+                        className="w-full h-14 pl-14 pr-6 rounded-2xl bg-white/[0.02] border border-white/[0.05] text-[14px] font-medium text-white placeholder:text-zinc-600 focus:outline-none focus:border-emerald-500/40 focus:bg-white/[0.04] transition-all"
+                      />
+                    </div>
+                  </div>
+                )}
 
- {/* ─── CONTENT TAB ─── */}
- {activeEditorTab === "content" && (
- <>
- {/* Description */}
-  <div className="bg-card border border-border overflow-hidden">
-  <div className="flex items-center gap-2.5 px-5 py-4 border-b border-border bg-card-elevated">
-  <div className="h-9 w-9 border border-primary bg-primary/10 flex items-center justify-center">
-  <FileText className="h-4 w-4 text-primary" />
-  </div>
-  <div>
-  <span className="text-[11px] font-display font-black uppercase tracking-[0.16em] text-foreground block">Descrição da Aula</span>
-  <span className="text-[10px] text-muted-foreground font-display">Visível para alunos abaixo do player</span>
-  </div>
-  </div>
-  <textarea
-  value={lessonDescription}
-  onChange={e => { setLessonDescription(e.target.value); debouncedSave("description", e.target.value || null); }}
-  placeholder="Descreva o conteúdo desta aula para seus alunos..."
-  rows={8}
-  className="w-full bg-transparent p-5 text-sm text-foreground placeholder:text-muted-foreground/60 leading-relaxed focus:outline-none resize-none font-display"
-  />
-  </div>
+                {/* ─── CONTENT TAB ─── */}
+                {activeEditorTab === "content" && (
+                  <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+                    <div className="lg:col-span-8 space-y-6">
+                      <div className="rounded-3xl border border-white/[0.04] bg-white/[0.01] overflow-hidden">
+                        <div className="flex items-center gap-3 px-6 py-5 border-b border-white/[0.04] bg-white/[0.02]">
+                          <div className="h-10 w-10 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center">
+                            <FileText className="h-5 w-5 text-emerald-400" />
+                          </div>
+                          <div>
+                            <h3 className="text-[12px] font-black uppercase tracking-widest text-white">Resumo da Aula</h3>
+                            <span className="text-[10px] text-zinc-500 font-bold uppercase tracking-widest mt-0.5 block">Explique os pontos chave</span>
+                          </div>
+                        </div>
+                        <textarea
+                          value={lessonDescription}
+                          onChange={e => { setLessonDescription(e.target.value); debouncedSave("description", e.target.value || null); }}
+                          placeholder="Digite aqui as notas da aula, referências e links importantes..."
+                          rows={12}
+                          className="w-full bg-transparent p-8 text-[16px] text-zinc-300 placeholder:text-zinc-700 leading-relaxed focus:outline-none resize-none font-medium"
+                        />
+                      </div>
+                    </div>
 
-  {/* Attachments */}
-  <div className="bg-card border border-border overflow-hidden">
-  <div className="flex items-center justify-between px-5 py-4 border-b border-border bg-card-elevated">
-  <div className="flex items-center gap-2.5">
-  <div className="h-9 w-9 border border-info bg-info/10 flex items-center justify-center">
-  <Paperclip className="h-4 w-4 text-info" />
-  </div>
-  <div>
-  <span className="text-[11px] font-display font-black uppercase tracking-[0.16em] text-foreground block">Materiais de Apoio</span>
-  <span className="text-[10px] text-muted-foreground font-display tabular-nums">{attachments.length} arquivo{attachments.length !== 1 ? "s" : ""}</span>
-  </div>
-  </div>
-  <button
-  onClick={() => attachmentInputRef.current?.click()}
-  disabled={uploadingAttachment}
-  className="h-9 px-4 bg-info text-info-foreground text-[10px] font-display font-bold uppercase tracking-[0.16em] hover:bg-info/90 transition-colors flex items-center gap-1.5 disabled:opacity-50"
-  >
-  {uploadingAttachment ? <Loader2 className="h-3 w-3 animate-spin" /> : <Plus className="h-3 w-3" />}
-  Anexar
-  </button>
-  </div>
-  <input ref={attachmentInputRef} type="file" className="hidden" onChange={e => { const f = e.target.files?.[0]; if (f) handleAttachmentUpload(f); }} />
-
-  <div className="p-3">
-  {attachments.length > 0 ? (
-  <div className="space-y-1">
-  {attachments.map(att => (
-  <div key={att.id} className="flex items-center gap-3 px-3 py-3 border border-transparent hover:border-border hover:bg-card-elevated group transition-colors">
-  <div className="h-10 w-10 border border-border bg-card-elevated flex items-center justify-center shrink-0">
-  <File className="h-4 w-4 text-muted-foreground" />
-  </div>
-  <div className="flex-1 min-w-0">
-  <p className="text-xs font-display font-bold text-foreground truncate">{att.file_name}</p>
-  <p className="text-[10px] text-muted-foreground font-display tabular-nums mt-0.5">{formatFileSize(att.file_size)}</p>
-  </div>
-  <a href={att.file_url} target="_blank" rel="noopener noreferrer" className="h-8 w-8 border border-border bg-card flex items-center justify-center hover:border-primary hover:text-primary transition-colors opacity-0 group-hover:opacity-100">
-  <Download className="h-3.5 w-3.5 text-muted-foreground" />
-  </a>
-  <button onClick={() => deleteAttachment(att)} className="h-8 w-8 border border-border bg-card flex items-center justify-center hover:border-destructive hover:bg-destructive hover:text-destructive-foreground transition-colors opacity-0 group-hover:opacity-100">
-  <Trash2 className="h-3.5 w-3.5 text-muted-foreground" />
-  </button>
-  </div>
-  ))}
-  </div>
-  ) : (
-  <div
-  className="border border-dashed border-border py-10 flex flex-col items-center gap-3 text-muted-foreground hover:text-foreground hover:border-primary transition-colors cursor-pointer"
-  onClick={() => attachmentInputRef.current?.click()}
-  onDragOver={e => e.preventDefault()}
-  onDrop={e => { e.preventDefault(); const f = e.dataTransfer.files[0]; if (f) handleAttachmentUpload(f); }}
-  >
-  <div className="h-12 w-12 border border-border bg-card-elevated flex items-center justify-center">
-  <Upload className="h-5 w-5" />
-  </div>
-  <div className="text-center">
-  <p className="text-[11px] font-display font-bold uppercase tracking-[0.16em]">Arraste ou clique para anexar</p>
-  <p className="text-[10px] mt-1.5 font-display font-bold uppercase tracking-widest">PDF, DOCX, ZIP · até 50MB</p>
-  </div>
-  </div>
-  )}
-  </div>
-  </div>
- </>
- )}
+                    <div className="lg:col-span-4 space-y-6">
+                      <div className="rounded-3xl border border-white/[0.04] bg-white/[0.01] overflow-hidden">
+                        <div className="px-6 py-5 border-b border-white/[0.04] bg-white/[0.02] flex items-center justify-between">
+                          <div className="flex items-center gap-3">
+                            <div className="h-9 w-9 rounded-xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center">
+                              <Paperclip className="h-4 w-4 text-blue-400" />
+                            </div>
+                            <h3 className="text-[12px] font-black uppercase tracking-widest text-white">Materiais</h3>
+                          </div>
+                          <button
+                            onClick={() => attachmentInputRef.current?.click()}
+                            disabled={uploadingAttachment}
+                            className="h-8 w-8 rounded-lg bg-white/[0.05] border border-white/[0.1] text-zinc-400 hover:text-white hover:bg-white/[0.1] transition-all flex items-center justify-center"
+                          >
+                            {uploadingAttachment ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Plus className="h-4 w-4" />}
+                          </button>
+                        </div>
+                        
+                        <div className="p-4">
+                          {attachments.length > 0 ? (
+                            <div className="space-y-2">
+                              {attachments.map(att => (
+                                <div key={att.id} className="group/att flex items-center gap-3 p-3 rounded-2xl border border-white/[0.03] bg-white/[0.01] hover:border-white/[0.1] hover:bg-white/[0.03] transition-all">
+                                  <div className="h-9 w-9 rounded-lg bg-zinc-900 border border-white/[0.05] flex items-center justify-center shrink-0">
+                                    <File className="h-4 w-4 text-zinc-500" />
+                                  </div>
+                                  <div className="flex-1 min-w-0">
+                                    <p className="text-[11px] font-bold text-zinc-200 truncate tracking-tight">{att.file_name}</p>
+                                    <p className="text-[9px] text-zinc-600 font-bold uppercase tracking-widest mt-0.5">{formatFileSize(att.file_size)}</p>
+                                  </div>
+                                  <div className="flex items-center gap-1 opacity-0 group-hover/att:opacity-100 transition-all">
+                                    <a href={att.file_url} target="_blank" rel="noopener noreferrer" className="h-7 w-7 rounded-md bg-white/[0.05] flex items-center justify-center hover:bg-white/[0.1] transition-all">
+                                      <Download className="h-3.5 w-3.5 text-zinc-400" />
+                                    </a>
+                                    <button onClick={() => deleteAttachment(att)} className="h-7 w-7 rounded-md bg-red-500/10 flex items-center justify-center hover:bg-red-500/20 transition-all">
+                                      <Trash2 className="h-3.5 w-3.5 text-red-400/80" />
+                                    </button>
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          ) : (
+                            <div
+                              className="border border-dashed border-white/[0.05] rounded-2xl py-12 flex flex-col items-center gap-4 text-zinc-600 hover:text-zinc-400 hover:border-white/[0.1] hover:bg-white/[0.01] transition-all cursor-pointer"
+                              onClick={() => attachmentInputRef.current?.click()}
+                            >
+                              <div className="h-12 w-12 rounded-2xl bg-zinc-900 border border-white/[0.05] flex items-center justify-center">
+                                <Plus className="h-5 w-5" />
+                              </div>
+                              <p className="text-[10px] font-black uppercase tracking-[0.2em]">Adicionar Anexos</p>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
 
  {/* ─── SETTINGS TAB ─── */}
  {activeEditorTab === "settings" && (
