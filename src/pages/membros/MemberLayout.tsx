@@ -98,19 +98,19 @@ export default function MemberLayout() {
     <div className="min-h-dvh bg-[#050505] text-zinc-100 font-display antialiased selection:bg-emerald-500/30">
       {/* Floating cinematic nav */}
       <nav className={cn(
-        "fixed top-0 left-0 right-0 z-50 transition-all duration-500",
+        "fixed top-0 left-0 right-0 z-50 transition-all duration-700",
         scrolled || isCourse
-          ? "bg-[#050505]/85 backdrop-blur-xl border-b border-white/5"
-          : "bg-gradient-to-b from-[#050505]/80 to-transparent"
+          ? "bg-[#050505]/85 backdrop-blur-2xl border-b border-white/[0.03] py-2"
+          : "bg-gradient-to-b from-black/80 via-black/40 to-transparent py-4"
       )}>
-        <div className="px-6 lg:px-12 h-16 flex items-center justify-between gap-4">
-          {/* Logo — Cakto Members style */}
-          <Link to="/membros-area" className="flex items-center gap-2.5 shrink-0 group">
-            <div className="h-8 w-8 rounded-md bg-gradient-to-br from-emerald-400 to-emerald-600 flex items-center justify-center font-black text-[#050505] text-base tracking-tighter">
+        <div className="px-6 lg:px-16 h-16 flex items-center justify-between gap-4 max-w-[1800px] mx-auto">
+          {/* Logo — Hotzfy Premium */}
+          <Link to="/membros-area" className="flex items-center gap-3 shrink-0 group">
+            <div className="h-10 w-10 rounded-lg bg-white text-[#050505] flex items-center justify-center font-black text-xl tracking-tighter transition-transform group-hover:scale-110">
               H
             </div>
-            <span className="font-display font-bold tracking-[-0.015em] text-zinc-100 text-[15px]">
-              Hotzfy Members
+            <span className="font-display font-black tracking-[-0.04em] text-white text-lg lg:text-xl uppercase">
+              Hotzfy <span className="text-zinc-500 font-medium">Members</span>
             </span>
           </Link>
 
