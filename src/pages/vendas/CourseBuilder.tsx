@@ -73,53 +73,54 @@ const ease = [0.16, 1, 0.3, 1] as const;
 
 // ═══════════════════════════════════════════════════════════════════
 export default function CourseBuilder() {
- const { courseId } = useParams<{ courseId: string }>();
- const navigate = useNavigate();
- const { user } = useAuth();
+  const { courseId } = useParams<{ courseId: string }>();
+  const navigate = useNavigate();
+  const { user } = useAuth();
 
- const [course, setCourse] = useState<Course | null>(null);
- const [modules, setModules] = useState<Module[]>([]);
- const [expandedModules, setExpandedModules] = useState<Set<string>>(new Set());
- const [selectedLesson, setSelectedLesson] = useState<Lesson | null>(null);
- const [saveStatus, setSaveStatus] = useState<SaveStatus>("idle");
- const [loading, setLoading] = useState(true);
+  const [course, setCourse] = useState<Course | null>(null);
+  const [modules, setModules] = useState<Module[]>([]);
+  const [expandedModules, setExpandedModules] = useState<Set<string>>(new Set());
+  const [selectedLesson, setSelectedLesson] = useState<Lesson | null>(null);
+  const [saveStatus, setSaveStatus] = useState<SaveStatus>("idle");
+  const [loading, setLoading] = useState(true);
 
- const [editingLessonTitle, setEditingLessonTitle] = useState(false);
- const [lessonTitle, setLessonTitle] = useState("");
- const [lessonDescription, setLessonDescription] = useState("");
- const [lessonVideoUrl, setLessonVideoUrl] = useState("");
- const [lessonDripDays, setLessonDripDays] = useState(0);
- const [lessonIsFree, setLessonIsFree] = useState(false);
- const [lessonDripEnabled, setLessonDripEnabled] = useState(false);
- const [lessonDuration, setLessonDuration] = useState(0);
+  const [editingLessonTitle, setEditingLessonTitle] = useState(false);
+  const [lessonTitle, setLessonTitle] = useState("");
+  const [lessonDescription, setLessonDescription] = useState("");
+  const [lessonVideoUrl, setLessonVideoUrl] = useState("");
+  const [lessonDripDays, setLessonDripDays] = useState(0);
+  const [lessonIsFree, setLessonIsFree] = useState(false);
+  const [lessonDripEnabled, setLessonDripEnabled] = useState(false);
+  const [lessonDuration, setLessonDuration] = useState(0);
 
- const [attachments, setAttachments] = useState<Attachment[]>([]);
- const [uploadingVideo, setUploadingVideo] = useState(false);
- const [videoUploadProgress, setVideoUploadProgress] = useState(0);
- const [uploadingAttachment, setUploadingAttachment] = useState(false);
+  const [attachments, setAttachments] = useState<Attachment[]>([]);
+  const [uploadingVideo, setUploadingVideo] = useState(false);
+  const [videoUploadProgress, setVideoUploadProgress] = useState(0);
+  const [uploadingAttachment, setUploadingAttachment] = useState(false);
 
- const [newModuleTitle, setNewModuleTitle] = useState("");
- const [showNewModule, setShowNewModule] = useState(false);
- const [editingModuleId, setEditingModuleId] = useState<string | null>(null);
- const [editingModuleTitle, setEditingModuleTitle] = useState("");
- const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
- const [activeEditorTab, setActiveEditorTab] = useState<"video" | "content" | "settings">("video");
- const [studentCount, setStudentCount] = useState(0);
- const [lessonStats, setLessonStats] = useState<Map<string, number>>(new Map());
- const [deleteTarget, setDeleteTarget] = useState<{ type: "module" | "lesson"; id: string; label: string } | null>(null);
- const [deletingItem, setDeletingItem] = useState(false);
- const [courseSettingsOpen, setCourseSettingsOpen] = useState(false);
- const [courseTitle, setCourseTitle] = useState("");
- const [courseDescription, setCourseDescription] = useState("");
- const [courseCategory, setCourseCategory] = useState("");
- const [courseThumbnail, setCourseThumbnail] = useState("");
- const [uploadingThumbnail, setUploadingThumbnail] = useState(false);
- const thumbnailInputRef = useRef<HTMLInputElement>(null);
+  const [newModuleTitle, setNewModuleTitle] = useState("");
+  const [showNewModule, setShowNewModule] = useState(false);
+  const [editingModuleId, setEditingModuleId] = useState<string | null>(null);
+  const [editingModuleTitle, setEditingModuleTitle] = useState("");
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [activeEditorTab, setActiveEditorTab] = useState<"video" | "content" | "settings">("video");
+  const [studentCount, setStudentCount] = useState(0);
+  const [lessonStats, setLessonStats] = useState<Map<string, number>>(new Map());
+  const [deleteTarget, setDeleteTarget] = useState<{ type: "module" | "lesson"; id: string; label: string } | null>(null);
+  const [deletingItem, setDeletingItem] = useState(false);
+  const [courseSettingsOpen, setCourseSettingsOpen] = useState(false);
+  const [courseTitle, setCourseTitle] = useState("");
+  const [courseDescription, setCourseDescription] = useState("");
+  const [courseCategory, setCourseCategory] = useState("");
+  const [courseThumbnail, setCourseThumbnail] = useState("");
+  const [uploadingThumbnail, setUploadingThumbnail] = useState(false);
+  const [previewMode, setPreviewMode] = useState(false);
+  const thumbnailInputRef = useRef<HTMLInputElement>(null);
 
- const titleInputRef = useRef<HTMLInputElement>(null);
- const saveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
- const videoInputRef = useRef<HTMLInputElement>(null);
- const attachmentInputRef = useRef<HTMLInputElement>(null);
+  const titleInputRef = useRef<HTMLInputElement>(null);
+  const saveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const videoInputRef = useRef<HTMLInputElement>(null);
+  const attachmentInputRef = useRef<HTMLInputElement>(null);
 
  // ─── Load All ───────────────────────────────────────────────────
  const loadAll = useCallback(async () => {
