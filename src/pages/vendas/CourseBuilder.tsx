@@ -857,72 +857,68 @@ export default function CourseBuilder() {
  )}
  </AnimatePresence>
 
- {/* ─── RIGHT: Lesson Editor ─── */}
- <main className="flex-1 bg-background overflow-y-auto" style={{ WebkitOverflowScrolling: "touch" }}>
- {selectedLesson ? (
- <div className="w-full max-w-3xl mx-auto px-4 sm:px-8 lg:px-10 py-6 sm:py-8 space-y-6">
+        {/* ─── RIGHT: Lesson Editor ─── */}
+        <main className="flex-1 bg-[#030303] overflow-y-auto z-10" style={{ WebkitOverflowScrolling: "touch" }}>
+          <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-emerald-500/[0.03] blur-[150px] rounded-full pointer-events-none" />
+          
+          {selectedLesson ? (
+            <div className="w-full max-w-4xl mx-auto px-6 sm:px-12 py-10 sm:py-16 space-y-12 relative z-10">
+              {/* Lesson Header */}
+              <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}>
+                <div className="flex items-center gap-3 mb-6">
+                  <div className="px-3 py-1 rounded-full bg-white/[0.03] border border-white/[0.05] flex items-center gap-2">
+                    <span className="text-[10px] font-black uppercase tracking-[0.25em] text-zinc-500">
+                      {modules.find(m => m.lessons.some(l => l.id === selectedLesson.id))?.title}
+                    </span>
+                  </div>
+                  <div className="h-1 w-1 rounded-full bg-zinc-800" />
+                  <span className="text-[10px] font-black uppercase tracking-[0.25em] text-emerald-500/80">Aula Atual</span>
+                </div>
 
- {/* Lesson Header */}
- <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3, ease }}>
- <div className="flex items-center gap-2.5 mb-4">
- <div className="h-7 w-7 border border-primary bg-primary/[0.08] flex items-center justify-center">
- <Hash className="h-3 w-3 text-primary" strokeWidth={2.5} />
- </div>
- <span className="text-[10px] font-display font-black uppercase tracking-[0.18em] text-muted-foreground/70 truncate">
- {modules.find(m => m.lessons.some(l => l.id === selectedLesson.id))?.title}
- </span>
- {/* Lesson status badges */}
- <div className="flex items-center gap-1.5 ml-auto shrink-0">
- {lessonVideoUrl && (
- <span className="inline-flex items-center gap-1 text-[9px] font-display font-black text-success-foreground bg-success border border-success px-2 py-0.5 uppercase tracking-[0.14em]">
- <CheckCircle2 className="h-2.5 w-2.5" /> Vídeo
- </span>
- )}
- {lessonIsFree && (
- <span className="text-[9px] font-display font-black text-info-foreground bg-info border border-info px-2 py-0.5 uppercase tracking-[0.14em]">Gratuita</span>
- )}
- </div>
- </div>
- {editingLessonTitle ? (
- <input
- ref={titleInputRef} value={lessonTitle}
- onChange={e => setLessonTitle(e.target.value)}
- onBlur={() => { setEditingLessonTitle(false); if (lessonTitle.trim() && lessonTitle !== selectedLesson.title) autoSave("title", lessonTitle.trim()); }}
- onKeyDown={e => { if (e.key === "Enter") (e.target as HTMLInputElement).blur(); }}
- className="w-full bg-transparent text-[32px] sm:text-[44px] font-display font-black tracking-[-0.04em] leading-[0.95] text-foreground focus:outline-none border-b-2 border-primary pb-1.5"
- autoFocus
- />
- ) : (
- <h2
- onClick={() => { setEditingLessonTitle(true); setTimeout(() => titleInputRef.current?.focus(), 50); }}
- className="text-[32px] sm:text-[44px] font-display font-black tracking-[-0.04em] leading-[0.95] text-foreground cursor-text hover:text-foreground/80 transition-colors"
- >
- {lessonTitle || "Sem título"}
- </h2>
- )}
- </motion.div>
+                {editingLessonTitle ? (
+                  <input
+                    ref={titleInputRef}
+                    value={lessonTitle}
+                    onChange={e => setLessonTitle(e.target.value)}
+                    onBlur={() => { 
+                      setEditingLessonTitle(false); 
+                      if (lessonTitle.trim() && lessonTitle !== selectedLesson.title) autoSave("title", lessonTitle.trim()); 
+                    }}
+                    onKeyDown={e => { if (e.key === "Enter") (e.target as HTMLInputElement).blur(); }}
+                    className="w-full bg-transparent text-[44px] sm:text-[64px] font-display font-black tracking-[-0.05em] leading-[0.9] text-white focus:outline-none border-b-2 border-emerald-500/50 pb-4 shadow-[0_4px_0_rgba(16,185,129,0.1)]"
+                    autoFocus
+                  />
+                ) : (
+                  <h2
+                    onClick={() => { setEditingLessonTitle(true); setTimeout(() => titleInputRef.current?.focus(), 50); }}
+                    className="text-[44px] sm:text-[64px] font-display font-black tracking-[-0.05em] leading-[0.9] text-white cursor-text hover:text-white/80 transition-all duration-300 drop-shadow-[0_4px_20px_rgba(0,0,0,0.5)]"
+                  >
+                    {lessonTitle || "Sem título"}
+                  </h2>
+                )}
+              </motion.div>
 
- {/* ── Editor Tabs ── */}
- <div className="flex items-center gap-0 border border-border bg-card w-fit">
- {editorTabs.map(tab => {
- const isActive = activeEditorTab === tab.id;
- return (
- <button
- key={tab.id}
- onClick={() => setActiveEditorTab(tab.id)}
- className={cn(
- "relative flex items-center gap-2 px-4 h-10 text-[10px] font-display font-black uppercase tracking-[0.16em] transition-colors duration-150 border-r border-border last:border-r-0",
- isActive
-   ? "bg-primary text-primary-foreground"
-   : "text-muted-foreground hover:text-foreground hover:bg-card-elevated"
- )}
- >
- <tab.icon className="h-3.5 w-3.5" />
- <span>{tab.label}</span>
- </button>
- );
- })}
- </div>
+              {/* ── Editor Tabs ── */}
+              <div className="flex items-center gap-1 p-1 rounded-2xl bg-white/[0.02] border border-white/[0.05] w-fit">
+                {editorTabs.map(tab => {
+                  const isActive = activeEditorTab === tab.id;
+                  return (
+                    <button
+                      key={tab.id}
+                      onClick={() => setActiveEditorTab(tab.id)}
+                      className={cn(
+                        "relative flex items-center gap-2.5 px-6 h-11 rounded-xl text-[11px] font-black uppercase tracking-widest transition-all duration-300",
+                        isActive
+                          ? "bg-white text-black shadow-[0_4px_15px_rgba(255,255,255,0.1)]"
+                          : "text-zinc-500 hover:text-zinc-300 hover:bg-white/[0.03]"
+                      )}
+                    >
+                      <tab.icon className="h-4 w-4" />
+                      <span>{tab.label}</span>
+                    </button>
+                  );
+                })}
+              </div>
 
  {/* ── Tab Content ── */}
  <AnimatePresence mode="wait">
