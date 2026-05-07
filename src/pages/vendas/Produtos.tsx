@@ -155,31 +155,35 @@ export default function Produtos() {
   };
 
   return (
-    <div className="mx-auto -mt-2 w-full max-w-[1440px] pb-24 md:-mt-3 md:pb-10">
-      {/* ── Hero header ── */}
-      <div className="relative flex flex-col gap-7 px-5 pt-1 sm:px-7 md:pt-1">
-        {/* Subtle radial accent behind title */}
-        <div
-          aria-hidden
-          className="pointer-events-none absolute -top-12 left-0 h-48 w-[520px] -z-[1] opacity-60 blur-3xl"
-          style={{
-            background:
-              "radial-gradient(60% 60% at 20% 50%, hsl(var(--primary) / 0.10), transparent 70%)",
-          }}
-        />
+    <div className="relative mx-auto w-full max-w-[1480px] pb-24 md:pb-10 antialiased [text-rendering:geometricPrecision]" style={{ fontFeatureSettings: '"ss01","cv11","tnum","kern"' }}>
+      {/* Decorative background elements */}
+      <div className="pointer-events-none absolute -top-24 left-1/2 h-[500px] w-full -translate-x-1/2 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-primary/5 via-transparent to-transparent opacity-50" />
+      <div className="pointer-events-none absolute left-0 top-0 h-full w-full bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-[0.03] mix-blend-overlay" />
 
-        <div className="flex flex-wrap items-end justify-between gap-4 animate-fade-in">
-          <h1 className="font-display text-[48px] font-black leading-[0.88] tracking-[-0.06em] text-foreground sm:text-[68px]">
-            Produtos
-          </h1>
-          <button
-            onClick={() => navigate("/vendas/produtos/novo/editar")}
-            className="group inline-flex h-9 items-center gap-2 rounded-xl bg-primary px-5 text-[12px] font-black uppercase tracking-wider text-primary-foreground transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] hover:bg-primary/90 hover:-translate-y-0.5 hover:shadow-[0_10px_30px_-10px_hsl(var(--primary)/0.5)]"
-          >
-            <Plus className="h-4 w-4 transition-transform duration-300 group-hover:rotate-90" strokeWidth={2.75} />
-            Novo
-          </button>
-        </div>
+      {/* ── Hero header ── */}
+      <div className="relative z-10 px-5 pt-4 sm:px-8 sm:pt-6">
+        <header className="border-b border-border/40 pb-7">
+          <div className="flex flex-col gap-5 xl:flex-row xl:items-start xl:justify-between">
+            <div className="min-w-0">
+              <h1 className="font-display text-[48px] font-black leading-[0.88] tracking-[-0.06em] text-foreground sm:text-[68px]">
+                Meus <span className="text-gradient-primary">Produtos</span>
+              </h1>
+              <p className="mt-4 flex items-center gap-1.5 text-[12px] font-bold tracking-[-0.005em] text-foreground">
+                <span className="inline-block h-2 w-[3px] rounded-full bg-primary" />
+                Gerencie seu catálogo e checkouts
+              </p>
+            </div>
+            <div className="flex w-full flex-wrap items-center gap-2 xl:w-auto xl:justify-end">
+              <button
+                onClick={() => navigate("/vendas/produtos/novo/editar")}
+                className="group inline-flex h-9 items-center gap-2 rounded-xl bg-primary px-5 text-[12px] font-black uppercase tracking-wider text-primary-foreground transition-all duration-300 hover:bg-primary/90 hover:-translate-y-0.5 hover:shadow-[0_10px_30px_-10px_hsl(var(--primary)/0.5)]"
+              >
+                <Plus className="h-4 w-4 transition-transform duration-300 group-hover:rotate-90" strokeWidth={2.75} />
+                Criar Produto
+              </button>
+            </div>
+          </div>
+        </header>
 
         {/* Tabs + Search row */}
         <div className="flex flex-col gap-3 pb-1 animate-fade-in stagger-2 sm:flex-row sm:items-center sm:justify-between">
