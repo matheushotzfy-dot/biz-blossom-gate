@@ -930,186 +930,170 @@ export default function CourseBuilder() {
  transition={{ duration: 0.2, ease }}
  className="space-y-5"
  >
- {/* ─── VIDEO TAB ─── */}
- {activeEditorTab === "video" && (
- <>
-  <div className="bg-card border border-border overflow-hidden">
-  {uploadingVideo ? (
-  <div className="aspect-video flex flex-col items-center justify-center gap-5 p-8 bg-card-elevated">
-  <div className="h-16 w-16 border border-primary bg-primary/10 flex items-center justify-center">
-  <Loader2 className="h-7 w-7 animate-spin text-primary" />
-  </div>
-  <div className="w-full max-w-xs">
-  <div className="flex justify-between text-[11px] mb-2">
-  <span className="font-display font-bold uppercase tracking-[0.16em] text-foreground">Enviando vídeo</span>
-  <span className="font-display font-black text-primary tabular-nums">{Math.round(videoUploadProgress)}%</span>
-  </div>
-  <div className="h-[3px] bg-card overflow-hidden border border-border">
-  <motion.div className="h-full bg-primary" animate={{ width: `${videoUploadProgress}%` }} transition={{ ease: "easeOut" }} />
-  </div>
-  </div>
-  <p className="text-[10px] text-muted-foreground font-display font-bold uppercase tracking-widest">Não feche esta página</p>
-  </div>
-  ) : lessonVideoUrl ? (
-  <div className="relative">
-  {isDirectVideoUrl(lessonVideoUrl) ? (
-  <video controls className="w-full aspect-video bg-foreground/5" src={lessonVideoUrl} />
-  ) : getVideoEmbed(lessonVideoUrl) ? (
-  <iframe
-  src={getVideoEmbed(lessonVideoUrl)!}
-  className="w-full aspect-video"
-  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-  allowFullScreen
-  />
-  ) : getVideoThumbnail(lessonVideoUrl) ? (
-  <div className="relative aspect-video">
-  <img src={getVideoThumbnail(lessonVideoUrl)!} alt="" className="w-full h-full object-cover" />
-  <div className="absolute inset-0 bg-foreground/40 flex items-center justify-center">
-  <div className="h-16 w-16 border border-border bg-card flex items-center justify-center">
-  <PlayCircle className="h-8 w-8 text-primary" />
-  </div>
-  </div>
-  </div>
-  ) : (
-  <div className="p-5 flex items-center gap-3 bg-card-elevated">
-  <div className="h-11 w-11 border border-primary bg-primary/10 flex items-center justify-center">
-  <Video className="h-4 w-4 text-primary" />
-  </div>
-  <div className="flex-1 min-w-0">
-  <p className="text-xs text-foreground font-display font-bold truncate">{lessonVideoUrl}</p>
-  <p className="text-[10px] text-success font-display font-bold uppercase tracking-widest mt-1 flex items-center gap-1"><CheckCircle2 className="h-2.5 w-2.5" /> Vídeo vinculado</p>
-  </div>
-  </div>
-  )}
-  <button
-  onClick={() => { setLessonVideoUrl(""); autoSave("video_url", null); }}
-  className="absolute top-3 right-3 h-9 w-9 bg-card border border-border flex items-center justify-center hover:border-destructive hover:bg-destructive hover:text-destructive-foreground transition-colors"
-  >
-  <X className="h-3.5 w-3.5" />
-  </button>
-  </div>
-  ) : (
-  <div
-  className="aspect-video flex flex-col items-center justify-center gap-5 cursor-pointer hover:bg-card-elevated transition-colors duration-[220ms] group/upload relative overflow-hidden"
-  onClick={() => videoInputRef.current?.click()}
-  onDragOver={e => e.preventDefault()}
-  onDrop={e => { e.preventDefault(); const f = e.dataTransfer.files[0]; if (f) handleVideoUpload(f); }}
-  >
-  <div className="relative h-16 w-16 border border-dashed border-border flex items-center justify-center group-hover/upload:border-primary group-hover/upload:bg-primary/5 transition-colors">
-  <Upload className="h-7 w-7 text-muted-foreground group-hover/upload:text-primary transition-colors" />
-  </div>
-  <div className="relative text-center">
-  <p className="text-[11px] font-display font-bold uppercase tracking-[0.18em] text-foreground">Arraste ou clique para enviar</p>
-  <p className="text-[10px] text-muted-foreground mt-2 font-display font-bold uppercase tracking-widest">MP4, WebM, OGG · até 500MB</p>
-  </div>
-  <p className="relative text-[10px] text-muted-foreground/60 font-display uppercase tracking-widest font-bold">ou cole um link abaixo</p>
-  </div>
-  )}
-  </div>
-  <input ref={videoInputRef} type="file" accept="video/mp4,video/webm,video/ogg,video/quicktime" className="hidden" onChange={e => { const f = e.target.files?.[0]; if (f) handleVideoUpload(f); }} />
+                {/* ─── VIDEO TAB ─── */}
+                {activeEditorTab === "video" && (
+                  <div className="space-y-6">
+                    <div className="rounded-3xl border border-white/[0.04] bg-white/[0.01] overflow-hidden group/player">
+                      {uploadingVideo ? (
+                        <div className="aspect-video flex flex-col items-center justify-center gap-8 p-12 bg-white/[0.02]">
+                          <div className="relative">
+                            <div className="h-20 w-20 rounded-2xl border border-emerald-500/20 bg-emerald-500/5 flex items-center justify-center">
+                              <Loader2 className="h-8 w-8 animate-spin text-emerald-400" />
+                            </div>
+                            <div className="absolute -inset-2 rounded-2xl border border-emerald-500/20 animate-pulse" />
+                          </div>
+                          <div className="w-full max-w-sm">
+                            <div className="flex justify-between text-[12px] mb-3">
+                              <span className="font-black uppercase tracking-widest text-white">Processando Vídeo</span>
+                              <span className="font-black text-emerald-400 tabular-nums">{Math.round(videoUploadProgress)}%</span>
+                            </div>
+                            <div className="h-1.5 bg-white/[0.03] rounded-full overflow-hidden border border-white/[0.05]">
+                              <motion.div className="h-full bg-emerald-500 shadow-[0_0_15px_rgba(16,185,129,0.5)]" animate={{ width: `${videoUploadProgress}%` }} transition={{ ease: "easeOut" }} />
+                            </div>
+                          </div>
+                          <p className="text-[10px] text-zinc-500 font-bold uppercase tracking-[0.2em]">Otimizando para 4K • Não feche a aba</p>
+                        </div>
+                      ) : lessonVideoUrl ? (
+                        <div className="relative aspect-video bg-black shadow-2xl overflow-hidden group">
+                          {isDirectVideoUrl(lessonVideoUrl) ? (
+                            <video controls className="w-full h-full" src={lessonVideoUrl} />
+                          ) : getVideoEmbed(lessonVideoUrl) ? (
+                            <iframe
+                              src={getVideoEmbed(lessonVideoUrl)!}
+                              className="w-full h-full"
+                              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                              allowFullScreen
+                            />
+                          ) : (
+                            <div className="w-full h-full flex flex-col items-center justify-center bg-white/[0.02] gap-4">
+                              <Video className="h-12 w-12 text-emerald-500/40" />
+                              <p className="text-zinc-500 font-bold text-sm tracking-widest uppercase">Streaming Ativo</p>
+                            </div>
+                          )}
+                          
+                          <button
+                            onClick={() => { setLessonVideoUrl(""); autoSave("video_url", null); }}
+                            className="absolute top-4 right-4 h-11 w-11 rounded-full bg-black/60 backdrop-blur-md border border-white/10 flex items-center justify-center hover:bg-red-500 hover:text-white transition-all opacity-0 group-hover:opacity-100 scale-90 group-hover:scale-100"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </button>
+                        </div>
+                      ) : (
+                        <div
+                          className="aspect-video flex flex-col items-center justify-center gap-6 cursor-pointer hover:bg-white/[0.03] transition-all duration-500 group/upload relative overflow-hidden"
+                          onClick={() => videoInputRef.current?.click()}
+                          onDragOver={e => e.preventDefault()}
+                          onDrop={e => { e.preventDefault(); const f = e.dataTransfer.files[0]; if (f) handleVideoUpload(f); }}
+                        >
+                          <div className="relative">
+                            <div className="h-24 w-24 rounded-3xl border border-dashed border-white/[0.1] flex items-center justify-center group-hover/upload:border-emerald-500/40 group-hover/upload:bg-emerald-500/[0.03] transition-all duration-500">
+                              <Upload className="h-8 w-8 text-zinc-600 group-hover/upload:text-emerald-400 group-hover/upload:scale-110 transition-all duration-500" />
+                            </div>
+                            <div className="absolute -inset-4 rounded-3xl border border-emerald-500/0 group-hover/upload:border-emerald-500/10 transition-all duration-700 animate-[ping_3s_infinite_alternate]" />
+                          </div>
+                          <div className="text-center relative z-10">
+                            <h3 className="text-[14px] font-black uppercase tracking-[0.25em] text-white">Upload de Vídeo</h3>
+                            <p className="text-[11px] text-zinc-500 mt-2 font-bold uppercase tracking-widest">Arraste arquivos 4K (MP4, MKV, MOV) • Máx 500MB</p>
+                          </div>
+                        </div>
+                      )}
+                    </div>
 
-  {/* Video URL Input */}
-  {!uploadingVideo && (
-  <div className="relative group">
-  <Video className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
-  <input
-  value={lessonVideoUrl}
-  onChange={e => { setLessonVideoUrl(e.target.value); debouncedSave("video_url", e.target.value || null); }}
-  placeholder="https://youtu.be/... ou https://vimeo.com/..."
-  className="w-full h-11 pl-11 pr-4 rounded-none bg-card border border-border text-sm font-display text-foreground placeholder:text-muted-foreground/60 focus:outline-none focus:border-primary transition-colors"
-  />
-  </div>
-  )}
- </>
- )}
+                    <div className="relative group">
+                      <div className="absolute inset-y-0 left-5 flex items-center pointer-events-none">
+                        <Globe className="h-4 w-4 text-zinc-600 group-focus-within:text-emerald-400 transition-colors" />
+                      </div>
+                      <input
+                        value={lessonVideoUrl}
+                        onChange={e => { setLessonVideoUrl(e.target.value); debouncedSave("video_url", e.target.value || null); }}
+                        placeholder="Importar via Link (Youtube, Vimeo, Wistia...)"
+                        className="w-full h-14 pl-14 pr-6 rounded-2xl bg-white/[0.02] border border-white/[0.05] text-[14px] font-medium text-white placeholder:text-zinc-600 focus:outline-none focus:border-emerald-500/40 focus:bg-white/[0.04] transition-all"
+                      />
+                    </div>
+                  </div>
+                )}
 
- {/* ─── CONTENT TAB ─── */}
- {activeEditorTab === "content" && (
- <>
- {/* Description */}
-  <div className="bg-card border border-border overflow-hidden">
-  <div className="flex items-center gap-2.5 px-5 py-4 border-b border-border bg-card-elevated">
-  <div className="h-9 w-9 border border-primary bg-primary/10 flex items-center justify-center">
-  <FileText className="h-4 w-4 text-primary" />
-  </div>
-  <div>
-  <span className="text-[11px] font-display font-black uppercase tracking-[0.16em] text-foreground block">Descrição da Aula</span>
-  <span className="text-[10px] text-muted-foreground font-display">Visível para alunos abaixo do player</span>
-  </div>
-  </div>
-  <textarea
-  value={lessonDescription}
-  onChange={e => { setLessonDescription(e.target.value); debouncedSave("description", e.target.value || null); }}
-  placeholder="Descreva o conteúdo desta aula para seus alunos..."
-  rows={8}
-  className="w-full bg-transparent p-5 text-sm text-foreground placeholder:text-muted-foreground/60 leading-relaxed focus:outline-none resize-none font-display"
-  />
-  </div>
+                {/* ─── CONTENT TAB ─── */}
+                {activeEditorTab === "content" && (
+                  <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+                    <div className="lg:col-span-8 space-y-6">
+                      <div className="rounded-3xl border border-white/[0.04] bg-white/[0.01] overflow-hidden">
+                        <div className="flex items-center gap-3 px-6 py-5 border-b border-white/[0.04] bg-white/[0.02]">
+                          <div className="h-10 w-10 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center">
+                            <FileText className="h-5 w-5 text-emerald-400" />
+                          </div>
+                          <div>
+                            <h3 className="text-[12px] font-black uppercase tracking-widest text-white">Resumo da Aula</h3>
+                            <span className="text-[10px] text-zinc-500 font-bold uppercase tracking-widest mt-0.5 block">Explique os pontos chave</span>
+                          </div>
+                        </div>
+                        <textarea
+                          value={lessonDescription}
+                          onChange={e => { setLessonDescription(e.target.value); debouncedSave("description", e.target.value || null); }}
+                          placeholder="Digite aqui as notas da aula, referências e links importantes..."
+                          rows={12}
+                          className="w-full bg-transparent p-8 text-[16px] text-zinc-300 placeholder:text-zinc-700 leading-relaxed focus:outline-none resize-none font-medium"
+                        />
+                      </div>
+                    </div>
 
-  {/* Attachments */}
-  <div className="bg-card border border-border overflow-hidden">
-  <div className="flex items-center justify-between px-5 py-4 border-b border-border bg-card-elevated">
-  <div className="flex items-center gap-2.5">
-  <div className="h-9 w-9 border border-info bg-info/10 flex items-center justify-center">
-  <Paperclip className="h-4 w-4 text-info" />
-  </div>
-  <div>
-  <span className="text-[11px] font-display font-black uppercase tracking-[0.16em] text-foreground block">Materiais de Apoio</span>
-  <span className="text-[10px] text-muted-foreground font-display tabular-nums">{attachments.length} arquivo{attachments.length !== 1 ? "s" : ""}</span>
-  </div>
-  </div>
-  <button
-  onClick={() => attachmentInputRef.current?.click()}
-  disabled={uploadingAttachment}
-  className="h-9 px-4 bg-info text-info-foreground text-[10px] font-display font-bold uppercase tracking-[0.16em] hover:bg-info/90 transition-colors flex items-center gap-1.5 disabled:opacity-50"
-  >
-  {uploadingAttachment ? <Loader2 className="h-3 w-3 animate-spin" /> : <Plus className="h-3 w-3" />}
-  Anexar
-  </button>
-  </div>
-  <input ref={attachmentInputRef} type="file" className="hidden" onChange={e => { const f = e.target.files?.[0]; if (f) handleAttachmentUpload(f); }} />
-
-  <div className="p-3">
-  {attachments.length > 0 ? (
-  <div className="space-y-1">
-  {attachments.map(att => (
-  <div key={att.id} className="flex items-center gap-3 px-3 py-3 border border-transparent hover:border-border hover:bg-card-elevated group transition-colors">
-  <div className="h-10 w-10 border border-border bg-card-elevated flex items-center justify-center shrink-0">
-  <File className="h-4 w-4 text-muted-foreground" />
-  </div>
-  <div className="flex-1 min-w-0">
-  <p className="text-xs font-display font-bold text-foreground truncate">{att.file_name}</p>
-  <p className="text-[10px] text-muted-foreground font-display tabular-nums mt-0.5">{formatFileSize(att.file_size)}</p>
-  </div>
-  <a href={att.file_url} target="_blank" rel="noopener noreferrer" className="h-8 w-8 border border-border bg-card flex items-center justify-center hover:border-primary hover:text-primary transition-colors opacity-0 group-hover:opacity-100">
-  <Download className="h-3.5 w-3.5 text-muted-foreground" />
-  </a>
-  <button onClick={() => deleteAttachment(att)} className="h-8 w-8 border border-border bg-card flex items-center justify-center hover:border-destructive hover:bg-destructive hover:text-destructive-foreground transition-colors opacity-0 group-hover:opacity-100">
-  <Trash2 className="h-3.5 w-3.5 text-muted-foreground" />
-  </button>
-  </div>
-  ))}
-  </div>
-  ) : (
-  <div
-  className="border border-dashed border-border py-10 flex flex-col items-center gap-3 text-muted-foreground hover:text-foreground hover:border-primary transition-colors cursor-pointer"
-  onClick={() => attachmentInputRef.current?.click()}
-  onDragOver={e => e.preventDefault()}
-  onDrop={e => { e.preventDefault(); const f = e.dataTransfer.files[0]; if (f) handleAttachmentUpload(f); }}
-  >
-  <div className="h-12 w-12 border border-border bg-card-elevated flex items-center justify-center">
-  <Upload className="h-5 w-5" />
-  </div>
-  <div className="text-center">
-  <p className="text-[11px] font-display font-bold uppercase tracking-[0.16em]">Arraste ou clique para anexar</p>
-  <p className="text-[10px] mt-1.5 font-display font-bold uppercase tracking-widest">PDF, DOCX, ZIP · até 50MB</p>
-  </div>
-  </div>
-  )}
-  </div>
-  </div>
- </>
- )}
+                    <div className="lg:col-span-4 space-y-6">
+                      <div className="rounded-3xl border border-white/[0.04] bg-white/[0.01] overflow-hidden">
+                        <div className="px-6 py-5 border-b border-white/[0.04] bg-white/[0.02] flex items-center justify-between">
+                          <div className="flex items-center gap-3">
+                            <div className="h-9 w-9 rounded-xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center">
+                              <Paperclip className="h-4 w-4 text-blue-400" />
+                            </div>
+                            <h3 className="text-[12px] font-black uppercase tracking-widest text-white">Materiais</h3>
+                          </div>
+                          <button
+                            onClick={() => attachmentInputRef.current?.click()}
+                            disabled={uploadingAttachment}
+                            className="h-8 w-8 rounded-lg bg-white/[0.05] border border-white/[0.1] text-zinc-400 hover:text-white hover:bg-white/[0.1] transition-all flex items-center justify-center"
+                          >
+                            {uploadingAttachment ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Plus className="h-4 w-4" />}
+                          </button>
+                        </div>
+                        
+                        <div className="p-4">
+                          {attachments.length > 0 ? (
+                            <div className="space-y-2">
+                              {attachments.map(att => (
+                                <div key={att.id} className="group/att flex items-center gap-3 p-3 rounded-2xl border border-white/[0.03] bg-white/[0.01] hover:border-white/[0.1] hover:bg-white/[0.03] transition-all">
+                                  <div className="h-9 w-9 rounded-lg bg-zinc-900 border border-white/[0.05] flex items-center justify-center shrink-0">
+                                    <File className="h-4 w-4 text-zinc-500" />
+                                  </div>
+                                  <div className="flex-1 min-w-0">
+                                    <p className="text-[11px] font-bold text-zinc-200 truncate tracking-tight">{att.file_name}</p>
+                                    <p className="text-[9px] text-zinc-600 font-bold uppercase tracking-widest mt-0.5">{formatFileSize(att.file_size)}</p>
+                                  </div>
+                                  <div className="flex items-center gap-1 opacity-0 group-hover/att:opacity-100 transition-all">
+                                    <a href={att.file_url} target="_blank" rel="noopener noreferrer" className="h-7 w-7 rounded-md bg-white/[0.05] flex items-center justify-center hover:bg-white/[0.1] transition-all">
+                                      <Download className="h-3.5 w-3.5 text-zinc-400" />
+                                    </a>
+                                    <button onClick={() => deleteAttachment(att)} className="h-7 w-7 rounded-md bg-red-500/10 flex items-center justify-center hover:bg-red-500/20 transition-all">
+                                      <Trash2 className="h-3.5 w-3.5 text-red-400/80" />
+                                    </button>
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          ) : (
+                            <div
+                              className="border border-dashed border-white/[0.05] rounded-2xl py-12 flex flex-col items-center gap-4 text-zinc-600 hover:text-zinc-400 hover:border-white/[0.1] hover:bg-white/[0.01] transition-all cursor-pointer"
+                              onClick={() => attachmentInputRef.current?.click()}
+                            >
+                              <div className="h-12 w-12 rounded-2xl bg-zinc-900 border border-white/[0.05] flex items-center justify-center">
+                                <Plus className="h-5 w-5" />
+                              </div>
+                              <p className="text-[10px] font-black uppercase tracking-[0.2em]">Adicionar Anexos</p>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
 
  {/* ─── SETTINGS TAB ─── */}
  {activeEditorTab === "settings" && (
