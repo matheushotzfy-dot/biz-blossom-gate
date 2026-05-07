@@ -1107,7 +1107,7 @@ export default function Vendas() {
             ) : (
               <>
                 {visibleItems.map((tx) => (
-                  <MobileCard key={tx.id} tx={tx} prods={products} onClick={() => setSelectedTx(tx)} />
+                  <MobileCard key={tx.id} tx={tx} prods={products} onClick={() => setSelectedTx(tx)} hidden={hidden} />
                 ))}
                 {totalPages > 1 && (
                   <div className="flex items-center justify-between border-t border-border bg-card px-3 py-2.5">
