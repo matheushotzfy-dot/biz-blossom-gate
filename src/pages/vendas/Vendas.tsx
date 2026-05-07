@@ -51,6 +51,7 @@ const _dateCache = new Map<string, string>();
 const _timeCache = new Map<string, string>();
 const fmtDate = (d: string) => { let v = _dateCache.get(d); if (!v) { v = _dateFmt.format(new Date(d)); _dateCache.set(d, v); } return v; };
 const fmtTime = (d: string) => { let v = _timeCache.get(d); if (!v) { v = _timeFmt.format(new Date(d)); _timeCache.set(d, v); } return v; };
+const fmtHour = (d: string) => { const h = new Date(d).getHours(); return `${h.toString().padStart(2, "0")}h`; };
 
 type StatusFilter = "all" | "completed" | "pending" | "failed" | "refunded" | "chargeback";
 type SortField = "date" | "amount" | "net" | "customer";
