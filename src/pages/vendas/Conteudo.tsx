@@ -251,16 +251,16 @@ export default function AdminConteudo() {
 
   return (
     <div className="mx-auto -mt-2 w-full max-w-[1440px] pb-24 md:-mt-3 md:pb-10">
-      {/* ── Hero header (Cakto Cinematic Noir) ── */}
-      <div className="relative flex flex-col gap-8 px-5 pt-2 sm:px-7 md:pt-3">
+      {/* ── Hero header ── */}
+      <div className="relative flex flex-col gap-6 px-5 pt-2 sm:px-7 md:pt-3">
         <div className="flex flex-wrap items-end justify-between gap-4 animate-fade-in">
           <div className="min-w-0">
             <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.22em] text-muted-foreground/70">
               <span className="inline-flex h-5 w-5 items-center justify-center border border-primary/40 bg-primary/[0.08] text-[10px] font-black text-primary">H</span>
               Hotzfy Members
             </div>
-            <h1 className="mt-3 font-display text-[44px] font-black leading-[0.88] tracking-[-0.055em] text-foreground sm:text-[64px]">
-              Conteúdo
+            <h1 className="mt-3 font-display text-[36px] font-black leading-[0.92] tracking-[-0.04em] text-foreground sm:text-[48px]">
+              Área de Membros
             </h1>
             <p className="mt-2 text-[13px] font-medium text-muted-foreground/70">
               Crie cursos, organize módulos e libere acesso ao seu aluno.
@@ -268,27 +268,27 @@ export default function AdminConteudo() {
           </div>
           <button
             onClick={openNew}
-            className="group inline-flex h-11 items-center gap-2 border border-primary bg-primary px-5 text-[12px] font-black uppercase tracking-[0.16em] text-primary-foreground transition-colors duration-200 hover:bg-primary/90"
+            className="group inline-flex h-11 items-center gap-2 border border-primary bg-primary px-6 text-[11px] font-black uppercase tracking-[0.16em] text-primary-foreground transition-colors duration-200 hover:bg-primary/90"
           >
             <Plus className="h-4 w-4" strokeWidth={3} />
             Novo curso
           </button>
         </div>
 
-        {/* KPIs — sharp grid, no blur, no rounded */}
+        {/* KPIs */}
         <div className="grid grid-cols-2 gap-px overflow-hidden border border-border bg-border sm:grid-cols-4 animate-fade-in stagger-1">
           {metricCards.map((item) => {
             const Icon = item.icon;
             return (
-              <div key={item.label} className="bg-card px-5 py-5">
+              <div key={item.label} className="bg-card px-5 py-4">
                 <div className="flex items-center gap-1.5 text-[10px] font-black uppercase tracking-[0.20em] text-muted-foreground/60">
                   <Icon className="h-3 w-3" strokeWidth={2.75} />
                   {item.label}
                 </div>
-                <div className="mt-3 font-display text-[28px] font-black leading-none tracking-[-0.03em] text-foreground tabular-nums">
+                <div className="mt-2.5 font-display text-[26px] font-black leading-none tracking-[-0.03em] text-foreground tabular-nums">
                   {item.value}
                 </div>
-                <p className="mt-2 text-[10.5px] font-bold uppercase tracking-[0.14em] text-muted-foreground/50">{item.meta}</p>
+                <p className="mt-1.5 text-[10px] font-bold uppercase tracking-[0.14em] text-muted-foreground/50">{item.meta}</p>
               </div>
             );
           })}
@@ -437,21 +437,24 @@ export default function AdminConteudo() {
             <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
           </div>
         ) : filteredCourses.length === 0 ? (
-          <div className="flex min-h-[360px] flex-col items-center justify-center px-6 text-center">
-            <div className="flex h-16 w-16 items-center justify-center rounded-2xl border border-border/70 bg-card-inset text-primary">
-              <GraduationCap className="h-7 w-7" />
+          <div className="flex min-h-[400px] flex-col items-center justify-center px-6 text-center">
+            <div className="flex h-16 w-16 items-center justify-center border border-border bg-card-elevated">
+              <GraduationCap className="h-7 w-7 text-primary" strokeWidth={1.6} />
             </div>
-            <h3 className="mt-5 text-base font-bold text-foreground">
-              {emptyFiltered ? "Nada apareceu nessa leitura" : "Sua operação de conteúdo começa aqui"}
+            <h3 className="mt-5 font-display text-lg font-black tracking-tight text-foreground">
+              {emptyFiltered ? "Nenhum resultado encontrado" : "Sua operação de conteúdo começa aqui"}
             </h3>
-            <p className="mt-1 max-w-sm text-sm text-muted-foreground">
-              {emptyFiltered ? "Troque busca ou filtro para encontrar a área certa." : "Crie a primeira área, conecte ao produto e deixe o catálogo pronto para o aluno."}
+            <p className="mt-1.5 max-w-sm text-[13px] text-muted-foreground leading-relaxed">
+              {emptyFiltered ? "Troque a busca ou o filtro para encontrar a área certa." : "Crie a primeira área, conecte ao produto e deixe o catálogo pronto para o aluno."}
             </p>
-            {!emptyFiltered ? (
-              <Button onClick={openNew} className="mt-5 h-10 rounded-xl px-4 text-xs font-semibold">
-                <Plus className="mr-2 h-3.5 w-3.5" /> Criar área
-              </Button>
-            ) : null}
+            {!emptyFiltered && (
+              <button
+                onClick={openNew}
+                className="mt-6 inline-flex h-11 items-center gap-2 border border-primary bg-primary px-6 text-[11px] font-black uppercase tracking-[0.14em] text-primary-foreground transition-colors hover:bg-primary/90"
+              >
+                <Plus className="h-4 w-4" strokeWidth={2.5} /> Criar área
+              </button>
+            )}
           </div>
         ) : viewMode === "grid" ? (
           <div className="grid gap-4 p-4 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
