@@ -299,37 +299,29 @@ function HeroBanner({ course }: { course: PurchaseRow }) {
         </button>
 
         {/* Content */}
-        <div className="relative z-10 flex h-full items-end pb-20 sm:pb-24">
-          <div className="mx-auto w-full max-w-[1600px] px-5 sm:px-10 lg:px-14">
-            <div className="max-w-2xl">
+        <div className="relative z-10 flex h-full items-end pb-28 md:pb-36">
+          <div className="mx-auto w-full max-w-[1800px] px-6 lg:px-16">
+            <div className="max-w-3xl">
               {/* Badge */}
-              <div className="inline-flex items-center gap-2 rounded-full border border-primary/30 bg-primary/10 backdrop-blur-sm px-3.5 py-1.5 text-[10px] font-black uppercase tracking-[0.22em] text-primary">
-                <span className="relative flex h-1.5 w-1.5">
-                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-primary opacity-75" />
-                  <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-primary" />
-                </span>
-                {isFinished ? "Concluído" : pct > 0 ? "Continue assistindo" : "Em destaque"}
+              <div className="inline-flex items-center gap-2.5 rounded-full border border-white/10 bg-white/5 backdrop-blur-xl px-4 py-2 text-[10px] font-black uppercase tracking-[0.25em] text-white">
+                <div className="h-1.5 w-1.5 rounded-full bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.8)]" />
+                {isFinished ? "Concluído" : pct > 0 ? "Continue Assistindo" : "Título em Destaque"}
               </div>
 
-              {/* Title with subtle text shadow for readability */}
-              <h1 className="mt-5 font-display text-5xl sm:text-6xl lg:text-7xl font-black tracking-[-0.04em] text-foreground leading-[0.95] [text-shadow:0_2px_24px_hsl(var(--background)/0.6)]">
+              {/* Title */}
+              <h1 className="mt-8 font-display text-[48px] md:text-[72px] lg:text-[100px] font-black tracking-[-0.06em] text-white leading-[0.85] [text-shadow:0_10px_40px_rgba(0,0,0,0.5)]">
                 {course.title}
               </h1>
 
-              {/* Meta */}
-              <div className="mt-5 flex flex-wrap items-center gap-3 text-sm">
-                <span className="inline-flex items-center gap-1 font-black text-success">
-                  <Star className="h-3.5 w-3.5 fill-current" /> 98% relevante
+              {/* Meta Row */}
+              <div className="mt-8 flex flex-wrap items-center gap-8 text-xs font-black uppercase tracking-[0.15em]">
+                <span className="text-emerald-400 flex items-center gap-2">
+                  <Star className="h-4 w-4 fill-current" /> 98% Relevante
                 </span>
-                <span className="h-1 w-1 rounded-full bg-muted-foreground/40" />
-                <span className="font-bold text-foreground capitalize">{course.category}</span>
-                <span className="h-1 w-1 rounded-full bg-muted-foreground/40" />
-                <span className="text-muted-foreground font-medium">{course.totalLessons} aulas</span>
+                <span className="text-zinc-500 font-medium capitalize tracking-widest">{course.category}</span>
+                <span className="text-zinc-500 font-medium">{course.totalLessons} Aulas</span>
                 {course.completedLessons > 0 && (
-                  <>
-                    <span className="h-1 w-1 rounded-full bg-muted-foreground/40" />
-                    <span className="text-primary font-bold">{course.completedLessons} concluídas</span>
-                  </>
+                  <span className="text-zinc-300">{course.completedLessons} Concluídas</span>
                 )}
               </div>
 
