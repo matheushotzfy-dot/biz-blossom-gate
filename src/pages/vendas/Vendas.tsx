@@ -316,37 +316,51 @@ function MobileCard({ tx, prods, onClick, hidden }: { tx: Tables<"transactions">
 
   return (
     <div 
-      className="group relative overflow-hidden bg-card p-4 transition-all active:scale-[0.98] border-b border-border/50" 
+      className="group relative mx-4 mb-4 overflow-hidden rounded-2xl border border-border/50 bg-card/60 p-5 shadow-sm backdrop-blur-sm transition-all active:scale-[0.98] hover:border-primary/30" 
       onClick={onClick}
     >
-      <div className="flex items-start justify-between gap-3">
-        <div className="flex items-center gap-3 min-w-0 flex-1">
-          <div className="relative">
-            <Avatar className="h-11 w-11 shrink-0 rounded-xl ring-1 ring-border/50">
-              <AvatarFallback className={cn("rounded-xl text-[12px] font-black", avatarColor(name))}>{initials(name)}</AvatarFallback>
+      {/* Decorative gradient background */}
+      <div className={cn("absolute -right-10 -top-10 h-32 w-32 rounded-full opacity-10 blur-3xl transition-all group-hover:opacity-20", st.bg)} />
+      
+      <div className="relative flex items-center justify-between gap-4">
+        <div className="flex items-center gap-4 min-w-0">
+          <div className="relative shrink-0">
+            <Avatar className="h-12 w-12 rounded-xl ring-2 ring-background shadow-md">
+              <AvatarFallback className={cn("rounded-xl text-[14px] font-black", avatarColor(name))}>{initials(name)}</AvatarFallback>
             </Avatar>
-            <div className={cn("absolute -bottom-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full border-2 border-card shadow-sm", method.bg, method.color)}>
-              <MethodIcon className="h-2.5 w-2.5" />
+            <div className={cn("absolute -bottom-1 -right-1 flex h-6 w-6 items-center justify-center rounded-lg border-2 border-card shadow-sm", method.bg, method.color)}>
+              <MethodIcon className="h-3 w-3" />
             </div>
           </div>
           <div className="min-w-0">
-            <p className="truncate text-[14px] font-bold tracking-tight text-foreground">{name}</p>
-            <p className="truncate text-[11px] font-medium text-muted-foreground/80 mt-0.5">{prodName}</p>
+            <p className="truncate text-[15px] font-black tracking-tight text-foreground leading-none">{name}</p>
+            <p className="truncate text-[12px] font-bold text-muted-foreground/70 mt-1.5 flex items-center gap-1.5">
+              <span className="inline-block h-1 w-1 rounded-full bg-muted-foreground/40" />
+              {prodName}
+            </p>
           </div>
         </div>
+        
         <div className="text-right shrink-0">
-          <p className={cn("text-[15px] font-black tabular-nums tracking-tight",
+          <p className={cn("text-[17px] font-black tabular-nums tracking-tight",
             tx.status === "completed" ? "text-success" : tx.status === "pending" ? "text-warning" : "text-foreground/60"
           )}>{hidden ? HIDE : fmt(net)}</p>
-          <p className="text-[10px] font-bold text-muted-foreground/60 tabular-nums mt-0.5">{fmtTime(tx.created_at)}</p>
+          <div className="mt-1 flex items-center justify-end gap-1.5">
+            <Clock className="h-3 w-3 text-muted-foreground/40" />
+            <p className="text-[10px] font-black text-muted-foreground/60 tabular-nums uppercase tracking-wider">{fmtTime(tx.created_at)}</p>
+          </div>
         </div>
       </div>
-      <div className="flex items-center justify-between gap-2 mt-4">
-        <span className={cn("inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-[10px] font-black uppercase tracking-wider", st.fg, st.bg, st.border)}>
-          <span className={cn("h-1.5 w-1.5 rounded-full", st.dot)} />
+      
+      <div className="relative mt-5 flex items-center justify-between border-t border-border/40 pt-4">
+        <span className={cn("inline-flex items-center gap-2 rounded-full border px-3 py-1 text-[10px] font-black uppercase tracking-[0.08em]", st.fg, st.bg, st.border)}>
+          <span className={cn("h-1.5 w-1.5 rounded-full animate-pulse", st.dot)} />
           {st.label}
         </span>
-        <p className="text-[10px] font-bold text-muted-foreground/80 tracking-tight">{fmtDate(tx.created_at)}</p>
+        <div className="flex items-center gap-2">
+           <CalendarDays className="h-3 w-3 text-muted-foreground/40" />
+           <p className="text-[10px] font-bold text-muted-foreground/80 tracking-tight">{fmtDate(tx.created_at)}</p>
+        </div>
       </div>
     </div>
   );
@@ -1094,29 +1108,32 @@ export default function Vendas() {
             )}
           </div>
 
-          <div className="divide-y divide-border md:hidden">
+          <div className="md:hidden">
             {loading ? (
               <div className="p-12 text-center">
                 <div className="mx-auto mb-3 h-5 w-5 animate-spin rounded-full border-2 border-muted border-t-foreground" />
               </div>
             ) : visibleItems.length === 0 ? (
-              <div className="flex flex-col items-center justify-center gap-2 py-12">
-                <ShoppingCart className="h-5 w-5 text-muted-foreground" />
-                <p className="text-[12px] font-semibold text-foreground">Nenhuma venda encontrada</p>
+              <div className="flex flex-col items-center justify-center gap-2 py-20">
+                <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-muted/50 border border-dashed border-border">
+                  <ShoppingCart className="h-6 w-6 text-muted-foreground/40" />
+                </div>
+                <p className="text-[14px] font-black text-foreground mt-2">Nenhuma venda encontrada</p>
+                <p className="text-[12px] font-medium text-muted-foreground/60">Ajuste os filtros e tente novamente.</p>
               </div>
             ) : (
-              <>
+              <div className="space-y-1 pt-4 pb-10">
                 {visibleItems.map((tx) => (
                   <MobileCard key={tx.id} tx={tx} prods={products} onClick={() => setSelectedTx(tx)} hidden={hidden} />
                 ))}
                 {totalPages > 1 && (
-                  <div className="flex items-center justify-between border-t border-border bg-card px-3 py-2.5">
-                    <button disabled={currentPage <= 1} onClick={() => setCurrentPage(p => p - 1)} className="text-[11.5px] font-semibold text-muted-foreground transition-colors hover:text-foreground disabled:opacity-25">← Anterior</button>
-                    <span className="text-[11.5px] font-bold tabular-nums text-foreground">{currentPage} / {totalPages}</span>
-                    <button disabled={currentPage >= totalPages} onClick={() => setCurrentPage(p => p + 1)} className="text-[11.5px] font-semibold text-muted-foreground transition-colors hover:text-foreground disabled:opacity-25">Próxima →</button>
+                  <div className="mx-4 mt-6 flex items-center justify-between rounded-xl border border-border/50 bg-card/40 p-3 backdrop-blur-sm">
+                    <button disabled={currentPage <= 1} onClick={() => setCurrentPage(p => p - 1)} className="text-[12px] font-black text-primary transition-all active:scale-95 disabled:opacity-25 uppercase tracking-wider">← Anterior</button>
+                    <span className="text-[12px] font-black tabular-nums text-foreground">{currentPage} de {totalPages}</span>
+                    <button disabled={currentPage >= totalPages} onClick={() => setCurrentPage(p => p + 1)} className="text-[12px] font-black text-primary transition-all active:scale-95 disabled:opacity-25 uppercase tracking-wider">Próxima →</button>
                   </div>
                 )}
-              </>
+              </div>
             )}
           </div>
         </section>
