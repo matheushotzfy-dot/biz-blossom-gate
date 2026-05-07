@@ -1097,106 +1097,106 @@ export default function CourseBuilder() {
                 )}
 
  {/* ─── SETTINGS TAB ─── */}
- {activeEditorTab === "settings" && (
- <div className="space-y-4">
- {/* Duration */}
-  <div className="bg-card border border-border p-5">
-  <div className="flex items-center justify-between">
-  <div className="flex items-center gap-3">
-  <div className="h-11 w-11 border border-info bg-info/10 flex items-center justify-center">
-  <Clock className="h-5 w-5 text-info" />
-  </div>
-  <div>
-  <p className="text-[11px] font-display font-black uppercase tracking-[0.16em] text-foreground">Duração</p>
-  <p className="text-[10px] text-muted-foreground mt-0.5 font-display">Tempo estimado de vídeo</p>
-  </div>
-  </div>
-  <div className="flex items-center gap-2">
-  <input
-  type="number" min={0} value={lessonDuration}
-  onChange={e => { const v = parseInt(e.target.value) || 0; setLessonDuration(v); debouncedSave("duration_minutes", v); }}
-  className="h-10 w-20 rounded-none bg-card-elevated border border-border text-center text-sm font-display font-bold tabular-nums text-foreground focus:outline-none focus:border-info transition-colors"
-  />
-  <span className="text-[10px] text-muted-foreground font-display font-bold uppercase tracking-widest">min</span>
-  </div>
-  </div>
-  </div>
+                {activeEditorTab === "settings" && (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    {/* Duration */}
+                    <div className="rounded-3xl border border-white/[0.04] bg-white/[0.01] p-6 hover:bg-white/[0.02] transition-all group">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-4">
+                          <div className="h-12 w-12 rounded-2xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center group-hover:scale-110 transition-transform">
+                            <Clock className="h-5 w-5 text-blue-400" />
+                          </div>
+                          <div>
+                            <p className="text-[12px] font-black uppercase tracking-widest text-white leading-none">Duração Estimada</p>
+                            <p className="text-[10px] text-zinc-500 mt-1.5 font-bold uppercase tracking-widest">Informação visual para o aluno</p>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-3">
+                          <input
+                            type="number" min={0} value={lessonDuration}
+                            onChange={e => { const v = parseInt(e.target.value) || 0; setLessonDuration(v); debouncedSave("duration_minutes", v); }}
+                            className="h-12 w-20 rounded-xl bg-[#080808] border border-white/[0.05] text-center text-[15px] font-black tabular-nums text-white focus:outline-none focus:border-blue-500/40 transition-all"
+                          />
+                          <span className="text-[10px] text-zinc-600 font-bold uppercase tracking-widest">min</span>
+                        </div>
+                      </div>
+                    </div>
 
-  {/* Free Lesson */}
-  <div className="bg-card border border-border p-5">
-  <div className="flex items-center justify-between">
-  <div className="flex items-center gap-3">
-  <div className="h-11 w-11 border border-success bg-success/10 flex items-center justify-center">
-  <Globe className="h-5 w-5 text-success" />
-  </div>
-  <div>
-  <p className="text-[11px] font-display font-black uppercase tracking-[0.16em] text-foreground">Aula Gratuita</p>
-  <p className="text-[10px] text-muted-foreground mt-0.5 font-display">Disponível sem compra como preview</p>
-  </div>
-  </div>
-  <Switch checked={lessonIsFree} onCheckedChange={v => { setLessonIsFree(v); autoSave("is_free", v); }} />
-  </div>
-  </div>
+                    {/* Free Lesson */}
+                    <div className="rounded-3xl border border-white/[0.04] bg-white/[0.01] p-6 hover:bg-white/[0.02] transition-all group">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-4">
+                          <div className="h-12 w-12 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center group-hover:scale-110 transition-transform">
+                            <Globe className="h-5 w-5 text-emerald-400" />
+                          </div>
+                          <div>
+                            <p className="text-[12px] font-black uppercase tracking-widest text-white leading-none">Aula de Degustação</p>
+                            <p className="text-[10px] text-zinc-500 mt-1.5 font-bold uppercase tracking-widest">Disponível sem compra ativa</p>
+                          </div>
+                        </div>
+                        <Switch checked={lessonIsFree} onCheckedChange={v => { setLessonIsFree(v); autoSave("is_free", v); }} />
+                      </div>
+                    </div>
 
-  {/* Drip */}
-  <div className="bg-card border border-border p-5">
-  <div className="flex items-center justify-between">
-  <div className="flex items-center gap-3">
-  <div className="h-11 w-11 border border-warning bg-warning/10 flex items-center justify-center">
-  <Calendar className="h-5 w-5 text-warning" />
-  </div>
-  <div>
-  <p className="text-[11px] font-display font-black uppercase tracking-[0.16em] text-foreground">Gotejamento</p>
-  <p className="text-[10px] text-muted-foreground mt-0.5 font-display">Liberar após X dias da compra</p>
-  </div>
-  </div>
-  <div className="flex items-center gap-2.5">
-  <Switch
-  checked={lessonDripEnabled}
-  onCheckedChange={v => {
-  setLessonDripEnabled(v);
-  if (!v) { setLessonDripDays(0); autoSave("drip_days", 0); }
-  }}
-  />
-  <AnimatePresence>
-  {lessonDripEnabled && (
-  <motion.div initial={{ opacity: 0, width: 0 }} animate={{ opacity: 1, width: "auto" }} exit={{ opacity: 0, width: 0 }} className="flex items-center gap-2 overflow-hidden">
-  <input
-  type="number" min={0} value={lessonDripDays}
-  onChange={e => { const v = parseInt(e.target.value) || 0; setLessonDripDays(v); debouncedSave("drip_days", v); }}
-  className="h-10 w-16 rounded-none bg-card-elevated border border-border text-center text-sm font-display font-bold tabular-nums text-foreground focus:outline-none focus:border-warning transition-colors"
-  />
-  <span className="text-[10px] text-muted-foreground font-display font-bold uppercase tracking-widest whitespace-nowrap">dias</span>
-  </motion.div>
-  )}
-  </AnimatePresence>
-  </div>
-  </div>
-  </div>
+                    {/* Drip */}
+                    <div className="rounded-3xl border border-white/[0.04] bg-white/[0.01] p-6 hover:bg-white/[0.02] transition-all group md:col-span-2">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-4">
+                          <div className="h-12 w-12 rounded-2xl bg-orange-500/10 border border-orange-500/20 flex items-center justify-center group-hover:scale-110 transition-transform">
+                            <Calendar className="h-5 w-5 text-orange-400" />
+                          </div>
+                          <div>
+                            <p className="text-[12px] font-black uppercase tracking-widest text-white leading-none">Liberação Programada (Drip)</p>
+                            <p className="text-[10px] text-zinc-500 mt-1.5 font-bold uppercase tracking-widest">Gotejamento por dias após a compra</p>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-4">
+                          <Switch
+                            checked={lessonDripEnabled}
+                            onCheckedChange={v => {
+                              setLessonDripEnabled(v);
+                              if (!v) { setLessonDripDays(0); autoSave("drip_days", 0); }
+                            }}
+                          />
+                          <AnimatePresence>
+                            {lessonDripEnabled && (
+                              <motion.div initial={{ opacity: 0, width: 0 }} animate={{ opacity: 1, width: "auto" }} exit={{ opacity: 0, width: 0 }} className="flex items-center gap-3 overflow-hidden">
+                                <input
+                                  type="number" min={0} value={lessonDripDays}
+                                  onChange={e => { const v = parseInt(e.target.value) || 0; setLessonDripDays(v); debouncedSave("drip_days", v); }}
+                                  className="h-12 w-20 rounded-xl bg-[#080808] border border-white/[0.05] text-center text-[15px] font-black tabular-nums text-white focus:outline-none focus:border-orange-500/40 transition-all"
+                                />
+                                <span className="text-[10px] text-zinc-600 font-bold uppercase tracking-widest whitespace-nowrap">dias</span>
+                              </motion.div>
+                            )}
+                          </AnimatePresence>
+                        </div>
+                      </div>
+                    </div>
 
-  {/* Danger Zone */}
-  <div className="border border-destructive bg-destructive/5 p-5">
-  <div className="flex items-center justify-between">
-  <div className="flex items-center gap-3">
-  <div className="h-11 w-11 border border-destructive bg-destructive/10 flex items-center justify-center">
-  <Trash2 className="h-5 w-5 text-destructive" />
-  </div>
-  <div>
-  <p className="text-[11px] font-display font-black uppercase tracking-[0.16em] text-destructive">Zona de Perigo</p>
-  <p className="text-[10px] text-muted-foreground mt-0.5 font-display">Esta ação não pode ser desfeita</p>
-  </div>
-  </div>
-  <Button
-  variant="ghost"
-  onClick={() => deleteLesson(selectedLesson.id)}
-  className="rounded-none border border-destructive bg-destructive text-destructive-foreground text-[10px] font-display font-bold uppercase tracking-[0.16em] hover:bg-destructive/90"
-  >
-  <Trash2 className="h-3.5 w-3.5 mr-1.5" /> Excluir Aula
-  </Button>
-  </div>
-  </div>
- </div>
- )}
+                    {/* Danger Zone */}
+                    <div className="rounded-3xl border border-red-500/10 bg-red-500/[0.02] p-6 hover:bg-red-500/[0.04] transition-all group md:col-span-2">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-4">
+                          <div className="h-12 w-12 rounded-2xl bg-red-500/10 border border-red-500/20 flex items-center justify-center group-hover:scale-110 transition-transform">
+                            <Trash2 className="h-5 w-5 text-red-400" />
+                          </div>
+                          <div>
+                            <p className="text-[12px] font-black uppercase tracking-widest text-red-400 leading-none">Zona Crítica</p>
+                            <p className="text-[10px] text-zinc-500 mt-1.5 font-bold uppercase tracking-widest">Esta ação removerá permanentemente a aula</p>
+                          </div>
+                        </div>
+                        <Button
+                          variant="ghost"
+                          onClick={() => deleteLesson(selectedLesson.id)}
+                          className="h-12 px-6 rounded-xl border border-red-500/20 bg-red-500/5 text-red-400 text-[11px] font-black uppercase tracking-widest hover:bg-red-500 hover:text-white transition-all"
+                        >
+                          <Trash2 className="h-4 w-4 mr-2" /> Excluir Aula
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
+                )}
  </motion.div>
  </AnimatePresence>
  </div>
