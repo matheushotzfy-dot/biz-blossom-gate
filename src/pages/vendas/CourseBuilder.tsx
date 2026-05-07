@@ -450,169 +450,174 @@ export default function CourseBuilder() {
  { id: "settings" as const, label: "Config", icon: Settings },
  ];
 
- return (
- <div className="fixed inset-0 z-[70] bg-background flex flex-col overflow-hidden">
- {/* ═══ Cakto Top Bar — sharp, solid, no blur ═══ */}
- <header className="h-14 border-b border-border bg-card flex items-center justify-between px-3 sm:px-5 shrink-0 z-50 relative">
+  return (
+    <div className="fixed inset-0 z-[70] bg-[#030303] text-zinc-100 flex flex-col overflow-hidden selection:bg-emerald-500/30 font-sans">
+      {/* ═══ PREMIUM TOP BAR ═══ */}
+      <header className="h-16 border-b border-white/[0.04] bg-[#050505]/80 backdrop-blur-xl flex items-center justify-between px-4 sm:px-6 shrink-0 z-50 relative">
+        <div className="relative flex items-center gap-4 min-w-0">
+          <button
+            onClick={() => navigate("/vendas/conteudo")}
+            className="group h-10 w-10 rounded-xl border border-white/[0.05] bg-white/[0.02] flex items-center justify-center hover:bg-white/[0.05] hover:border-white/[0.1] transition-all duration-300"
+          >
+            <ArrowLeft className="h-4 w-4 text-zinc-400 group-hover:text-white transition-colors" />
+          </button>
 
- <div className="relative flex items-center gap-3 min-w-0">
- <button
- onClick={() => navigate("/vendas/conteudo")}
- className="h-9 w-9 border border-border bg-card flex items-center justify-center hover:bg-card-elevated transition-colors duration-150 shrink-0"
- >
- <ArrowLeft className="h-4 w-4 text-muted-foreground" />
- </button>
+          {/* Brand Logo/Icon */}
+          <div className="hidden sm:flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-emerald-500 to-emerald-600 shadow-[0_0_20px_rgba(16,185,129,0.3)] shrink-0 overflow-hidden relative group">
+            <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-500" />
+            <Sparkles className="h-5 w-5 text-white relative z-10" />
+          </div>
 
- {/* Hotzfy 'H' brand chip */}
- <div className="hidden sm:flex h-9 w-9 items-center justify-center border border-primary bg-primary text-primary-foreground font-display font-black text-[14px] tracking-tight shrink-0">
- H
- </div>
+          <div className="hidden sm:flex flex-col min-w-0">
+            <div className="flex items-center gap-2.5">
+              <span className="text-[10px] font-black uppercase tracking-[0.25em] text-zinc-500/80">Builder</span>
+              {course.is_published ? (
+                <span className="flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-[9px] font-black uppercase tracking-wider text-emerald-400">
+                  <span className="h-1 w-1 rounded-full bg-emerald-400 animate-pulse" /> Live
+                </span>
+              ) : (
+                <span className="px-2 py-0.5 rounded-full bg-zinc-800 border border-white/[0.05] text-[9px] font-black uppercase tracking-wider text-zinc-500">
+                  Rascunho
+                </span>
+              )}
+            </div>
+            <div className="flex items-center gap-3 mt-1">
+              <h1 className="font-display font-black text-white leading-none truncate max-w-[220px] lg:max-w-[400px] tracking-[-0.03em] text-[16px]">
+                {course.title}
+              </h1>
+              <div className="h-1 w-1 rounded-full bg-zinc-700" />
+              <span className="text-[11px] font-bold text-zinc-500 tabular-nums">
+                {modules.length} Módulos · {totalLessons} Aulas
+              </span>
+            </div>
+          </div>
+        </div>
 
- <div className="hidden sm:flex flex-col min-w-0">
- <div className="flex items-center gap-2">
- <span className="text-[9px] font-black uppercase tracking-[0.20em] text-muted-foreground/60">Curso</span>
- {course.is_published ? (
- <span className="inline-flex h-[16px] items-center gap-1 border border-success bg-success px-1.5 text-[9px] font-black uppercase tracking-[0.16em] text-success-foreground">
- <span className="h-1 w-1 bg-success-foreground" /> Live
- </span>
- ) : (
- <span className="inline-flex h-[16px] items-center border border-border bg-muted px-1.5 text-[9px] font-black uppercase tracking-[0.16em] text-muted-foreground">
- Draft
- </span>
- )}
- </div>
- <div className="flex items-center gap-3 mt-0.5">
- <h1 className="font-display font-black text-foreground leading-none truncate max-w-[220px] lg:max-w-[340px] tracking-[-0.02em] text-[14px]">
- {course.title}
- </h1>
- <span className="text-[10px] font-bold uppercase tracking-[0.14em] text-muted-foreground/60 tabular-nums">
- {modules.length} mód · {totalLessons} aulas
- </span>
- {studentCount > 0 && (
- <span className="text-[10px] font-bold uppercase tracking-[0.14em] text-primary flex items-center gap-1 tabular-nums">
- <Users className="h-2.5 w-2.5" /> {studentCount}
- </span>
- )}
- {totalLessons > 0 && (
- <div className="flex items-center gap-1.5">
- <div className="h-[3px] w-16 bg-muted overflow-hidden">
- <motion.div
- className="h-full bg-primary"
- animate={{ width: `${progressPct}%` }}
- transition={{ duration: 0.6, ease }}
- />
- </div>
- <span className="text-[10px] font-black tabular-nums text-primary">{progressPct}%</span>
- </div>
- )}
- </div>
- </div>
- {/* Mobile title */}
- <div className="sm:hidden min-w-0">
- <h1 className="text-xs font-display font-black text-foreground truncate max-w-[140px]">{course.title}</h1>
- <span className="text-[10px] font-bold uppercase tracking-[0.14em] text-muted-foreground/60">{totalLessons} aulas</span>
- </div>
- </div>
+        <div className="flex items-center gap-2">
+          {/* Status Indicators */}
+          <AnimatePresence mode="wait">
+            <motion.div 
+              key={saveStatus} 
+              initial={{ opacity: 0, y: 5 }} 
+              animate={{ opacity: 1, y: 0 }} 
+              exit={{ opacity: 0, y: -5 }} 
+              className="hidden md:flex items-center gap-2 h-9 px-3 rounded-lg border border-white/[0.05] bg-white/[0.02]"
+            >
+              {saveStatus === "idle" && <span className="text-[10px] text-zinc-600 font-bold uppercase tracking-widest">Aguardando</span>}
+              {saveStatus === "saving" && (
+                <div className="flex items-center gap-2">
+                  <Loader2 className="h-3 w-3 animate-spin text-emerald-400" />
+                  <span className="text-[10px] text-zinc-400 font-bold uppercase tracking-widest">Salvando...</span>
+                </div>
+              )}
+              {saveStatus === "saved" && (
+                <div className="flex items-center gap-2">
+                  <CheckCircle2 className="h-3 w-3 text-emerald-400" />
+                  <span className="text-[10px] text-emerald-400 font-bold uppercase tracking-widest">Sincronizado</span>
+                </div>
+              )}
+            </motion.div>
+          </AnimatePresence>
 
- <div className="relative flex items-center gap-1.5">
- {/* Save status */}
- <AnimatePresence mode="wait">
- <motion.div key={saveStatus} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="hidden sm:flex items-center gap-1.5 mr-2 h-9 px-2.5 border border-border bg-card-elevated">
- {saveStatus === "idle" && <span className="text-[10px] text-muted-foreground/40 font-black uppercase tracking-[0.16em]">—</span>}
- {saveStatus === "saving" && <><Loader2 className="h-3 w-3 animate-spin text-muted-foreground" /><span className="text-[10px] text-muted-foreground font-black uppercase tracking-[0.16em]">Salvando</span></>}
- {saveStatus === "saved" && <><CheckCircle2 className="h-3 w-3 text-success" /><span className="text-[10px] text-success font-black uppercase tracking-[0.16em]">Salvo</span></>}
- {saveStatus === "error" && <><AlertCircle className="h-3 w-3 text-destructive" /><span className="text-[10px] text-destructive font-black uppercase tracking-[0.16em]">Erro</span></>}
- </motion.div>
- </AnimatePresence>
+          <div className="h-8 w-px bg-white/[0.05] mx-2 hidden sm:block" />
 
- {/* Analytics */}
- <button
- onClick={() => navigate(`/vendas/conteudo/${courseId}/analytics`)}
- className="hidden sm:flex h-9 w-9 border border-border bg-card items-center justify-center hover:bg-card-elevated hover:text-primary transition-colors text-muted-foreground"
- title="Analytics do curso"
- >
- <Activity className="h-3.5 w-3.5" />
- </button>
+          {/* Action Buttons */}
+          <div className="flex items-center gap-1.5">
+            <button
+              onClick={() => navigate(`/vendas/conteudo/${courseId}/analytics`)}
+              className="group h-10 w-10 rounded-xl border border-white/[0.05] bg-white/[0.02] flex items-center justify-center hover:bg-white/[0.05] hover:border-emerald-500/30 hover:text-emerald-400 transition-all text-zinc-400"
+              title="Estatísticas"
+            >
+              <Activity className="h-4 w-4" />
+            </button>
 
- {/* Course Settings */}
- <button
- onClick={openCourseSettings}
- className="hidden sm:flex h-9 w-9 border border-border bg-card items-center justify-center hover:bg-card-elevated hover:text-foreground transition-colors text-muted-foreground"
- title="Configurações do curso"
- >
- <Settings className="h-3.5 w-3.5" />
- </button>
+            <button
+              onClick={openCourseSettings}
+              className="group h-10 w-10 rounded-xl border border-white/[0.05] bg-white/[0.02] flex items-center justify-center hover:bg-white/[0.05] hover:border-white/[0.1] hover:text-white transition-all text-zinc-400"
+              title="Configurações"
+            >
+              <Settings className="h-4 w-4" />
+            </button>
 
- {/* Preview */}
- {course.is_published && (
- <button
- onClick={() => window.open(`/membros-area/curso/${courseId}`, "_blank")}
- className="hidden sm:flex h-9 px-3 border border-border bg-card text-[10px] font-black uppercase tracking-[0.16em] text-muted-foreground items-center gap-1.5 hover:border-foreground/40 hover:text-foreground transition-colors"
- >
- <Eye className="h-3.5 w-3.5" /> Preview
- </button>
- )}
+            {course.is_published && (
+              <button
+                onClick={() => window.open(`/membros-area/curso/${courseId}`, "_blank")}
+                className="hidden lg:flex h-10 px-5 rounded-xl border border-white/[0.05] bg-white/[0.02] text-[11px] font-black uppercase tracking-widest text-zinc-300 items-center gap-2 hover:bg-white/[0.05] hover:border-white/[0.1] transition-all"
+              >
+                <Eye className="h-4 w-4" /> Visualizar
+              </button>
+            )}
 
- <button
- onClick={togglePublish}
- className={cn(
- "h-9 px-4 text-[10px] font-black uppercase tracking-[0.16em] flex items-center gap-1.5 transition-colors duration-150 border",
- course.is_published
- ? "bg-success text-success-foreground border-success hover:bg-success/90"
- : "bg-primary text-primary-foreground border-primary hover:bg-primary/90"
- )}
- >
- {course.is_published ? (
- <><span className="h-1.5 w-1.5 bg-success-foreground" /> <span className="hidden sm:inline">Publicado</span><span className="sm:hidden">Live</span></>
- ) : (
- <><Globe className="h-3.5 w-3.5" /> <span className="hidden sm:inline">Publicar</span></>
- )}
- </button>
- </div>
- </header>
+            <button
+              onClick={togglePublish}
+              className={cn(
+                "h-10 px-6 rounded-xl text-[11px] font-black uppercase tracking-widest flex items-center gap-2.5 transition-all duration-300 shadow-lg",
+                course.is_published
+                  ? "bg-white text-black hover:bg-zinc-200"
+                  : "bg-emerald-500 text-white hover:bg-emerald-400 shadow-emerald-500/20"
+              )}
+            >
+              {course.is_published ? (
+                <>
+                  <EyeOff className="h-4 w-4" /> 
+                  <span>Pausar</span>
+                </>
+              ) : (
+                <>
+                  <Globe className="h-4 w-4" /> 
+                  <span>Publicar</span>
+                </>
+              )}
+            </button>
+          </div>
+        </div>
+      </header>
 
- {/* ═══ Split Screen ═══ */}
- <div className="flex-1 flex overflow-hidden relative">
- {/* ─── LEFT: Sidebar ─── */}
- <AnimatePresence initial={false}>
- {!sidebarCollapsed && (
- <motion.aside
- initial={{ width: 0, opacity: 0 }}
- animate={{ width: 360, opacity: 1 }}
- exit={{ width: 0, opacity: 0 }}
- transition={{ duration: 0.4, ease }}
- className="bg-card border-r border-border flex flex-col overflow-hidden shrink-0"
- >
- {/* ── Sidebar header ── */}
- <div className="px-4 py-3 border-b border-border flex items-center justify-between shrink-0 bg-card-elevated">
-   <div className="flex items-center gap-2.5 min-w-0">
-     <div className="h-8 w-8 border border-primary bg-primary/[0.10] flex items-center justify-center shrink-0">
-       <Layers className="h-3.5 w-3.5 text-primary" strokeWidth={2.25} />
-     </div>
-     <div className="min-w-0">
-       <span className="text-[11px] font-display font-black uppercase tracking-[0.16em] text-foreground block leading-tight">Currículo</span>
-       <span className="text-[9.5px] text-muted-foreground/70 font-bold uppercase tracking-[0.12em] tabular-nums">
-         {modules.length} mód · {totalLessons} aulas · {Math.round(totalLessons > 0 ? (modules.flatMap(m => m.lessons).filter(l => l.video_url).length / totalLessons) * 100 : 0)}% prontas
-       </span>
-     </div>
-   </div>
-   <div className="flex items-center gap-1 shrink-0">
-     <button
-       onClick={() => setShowNewModule(true)}
-       className="h-7 w-7 flex items-center justify-center bg-primary border border-primary text-primary-foreground hover:bg-primary/90 transition-colors"
-       title="Novo módulo"
-     >
-       <Plus className="h-3.5 w-3.5" strokeWidth={2.5} />
-     </button>
-     <button
-       onClick={() => setSidebarCollapsed(true)}
-       className="h-7 w-7 flex items-center justify-center border border-border bg-card hover:bg-card-elevated transition-colors text-muted-foreground hover:text-foreground"
-       title="Recolher"
-     >
-       <PanelLeftClose className="h-3.5 w-3.5" />
-     </button>
-   </div>
- </div>
+      {/* ═══ MAIN LAYOUT ═══ */}
+      <div className="flex-1 flex overflow-hidden relative bg-[#030303]">
+        {/* Background Gradients */}
+        <div className="absolute top-0 left-0 w-[500px] h-[500px] bg-emerald-500/5 blur-[120px] rounded-full pointer-events-none" />
+        <div className="absolute bottom-0 right-0 w-[500px] h-[500px] bg-blue-500/5 blur-[120px] rounded-full pointer-events-none" />
+
+        {/* ─── LEFT: Curriculum Sidebar ─── */}
+        <AnimatePresence initial={false}>
+          {!sidebarCollapsed && (
+            <motion.aside
+              initial={{ width: 0, opacity: 0 }}
+              animate={{ width: 380, opacity: 1 }}
+              exit={{ width: 0, opacity: 0 }}
+              transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+              className="bg-[#050505]/40 backdrop-blur-xl border-r border-white/[0.04] flex flex-col overflow-hidden shrink-0 z-20"
+            >
+              {/* Sidebar Header */}
+              <div className="px-6 py-5 border-b border-white/[0.04] flex items-center justify-between shrink-0">
+                <div className="flex items-center gap-3 min-w-0">
+                  <div className="h-10 w-10 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center shrink-0">
+                    <Layers className="h-5 w-5 text-emerald-400" />
+                  </div>
+                  <div className="min-w-0">
+                    <h2 className="text-[13px] font-display font-black uppercase tracking-widest text-white block leading-tight">Conteúdo</h2>
+                    <span className="text-[10px] text-zinc-500 font-bold uppercase tracking-widest">
+                      {totalLessons} Aulas no total
+                    </span>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => setShowNewModule(true)}
+                    className="h-8 w-8 rounded-lg flex items-center justify-center bg-emerald-500 text-white hover:bg-emerald-400 shadow-lg shadow-emerald-500/10 transition-all"
+                    title="Adicionar Módulo"
+                  >
+                    <Plus className="h-4 w-4" strokeWidth={3} />
+                  </button>
+                  <button
+                    onClick={() => setSidebarCollapsed(true)}
+                    className="h-8 w-8 rounded-lg flex items-center justify-center border border-white/[0.05] bg-white/[0.02] text-zinc-400 hover:text-white hover:bg-white/[0.05] transition-all"
+                  >
+                    <PanelLeftClose className="h-4 w-4" />
+                  </button>
+                </div>
+              </div>
 
  {/* ── Modules list ── */}
  <div className="flex-1 overflow-y-auto p-2 space-y-1.5" style={{ WebkitOverflowScrolling: "touch" }}>
