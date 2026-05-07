@@ -1108,29 +1108,32 @@ export default function Vendas() {
             )}
           </div>
 
-          <div className="divide-y divide-border md:hidden">
+          <div className="md:hidden">
             {loading ? (
               <div className="p-12 text-center">
                 <div className="mx-auto mb-3 h-5 w-5 animate-spin rounded-full border-2 border-muted border-t-foreground" />
               </div>
             ) : visibleItems.length === 0 ? (
-              <div className="flex flex-col items-center justify-center gap-2 py-12">
-                <ShoppingCart className="h-5 w-5 text-muted-foreground" />
-                <p className="text-[12px] font-semibold text-foreground">Nenhuma venda encontrada</p>
+              <div className="flex flex-col items-center justify-center gap-2 py-20">
+                <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-muted/50 border border-dashed border-border">
+                  <ShoppingCart className="h-6 w-6 text-muted-foreground/40" />
+                </div>
+                <p className="text-[14px] font-black text-foreground mt-2">Nenhuma venda encontrada</p>
+                <p className="text-[12px] font-medium text-muted-foreground/60">Ajuste os filtros e tente novamente.</p>
               </div>
             ) : (
-              <>
+              <div className="space-y-1 pt-4 pb-10">
                 {visibleItems.map((tx) => (
                   <MobileCard key={tx.id} tx={tx} prods={products} onClick={() => setSelectedTx(tx)} hidden={hidden} />
                 ))}
                 {totalPages > 1 && (
-                  <div className="flex items-center justify-between border-t border-border bg-card px-3 py-2.5">
-                    <button disabled={currentPage <= 1} onClick={() => setCurrentPage(p => p - 1)} className="text-[11.5px] font-semibold text-muted-foreground transition-colors hover:text-foreground disabled:opacity-25">← Anterior</button>
-                    <span className="text-[11.5px] font-bold tabular-nums text-foreground">{currentPage} / {totalPages}</span>
-                    <button disabled={currentPage >= totalPages} onClick={() => setCurrentPage(p => p + 1)} className="text-[11.5px] font-semibold text-muted-foreground transition-colors hover:text-foreground disabled:opacity-25">Próxima →</button>
+                  <div className="mx-4 mt-6 flex items-center justify-between rounded-xl border border-border/50 bg-card/40 p-3 backdrop-blur-sm">
+                    <button disabled={currentPage <= 1} onClick={() => setCurrentPage(p => p - 1)} className="text-[12px] font-black text-primary transition-all active:scale-95 disabled:opacity-25 uppercase tracking-wider">← Anterior</button>
+                    <span className="text-[12px] font-black tabular-nums text-foreground">{currentPage} de {totalPages}</span>
+                    <button disabled={currentPage >= totalPages} onClick={() => setCurrentPage(p => p + 1)} className="text-[12px] font-black text-primary transition-all active:scale-95 disabled:opacity-25 uppercase tracking-wider">Próxima →</button>
                   </div>
                 )}
-              </>
+              </div>
             )}
           </div>
         </section>
