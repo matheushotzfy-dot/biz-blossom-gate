@@ -5,7 +5,7 @@
 import { useEffect, useMemo, useState, useRef } from "react";
 import { useOutletContext, Link } from "react-router-dom";
 import type { User } from "@supabase/supabase-js";
-import { Play, ArrowUpRight, Award, BookOpen, ChevronRight, ChevronLeft, Star, Users, Trophy, Flame, Clock, Info, GraduationCap, PlayCircle } from "lucide-react";
+import { Play, ArrowUpRight, Award, BookOpen, ChevronRight, ChevronLeft, Star, Users, Trophy, Flame, Clock, Info, GraduationCap, PlayCircle, CheckCircle2 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
