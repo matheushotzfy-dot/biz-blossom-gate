@@ -678,18 +678,18 @@ export default function CourseCreationWizard({ open, onOpenChange, products, edi
         </div>
 
         {/* FOOTER */}
-        <footer className="shrink-0 border-t border-border bg-card">
-          <div className="mx-auto max-w-[920px] px-6 py-3 flex items-center justify-between gap-3">
+        <footer className="shrink-0 border-t border-white/[0.04] bg-[#080808]">
+          <div className="mx-auto max-w-[920px] px-6 py-4 flex items-center justify-between gap-3">
             <button
               type="button"
               onClick={step === 1 ? () => onOpenChange(false) : goBack}
-              className="h-10 px-4 text-[12px] font-bold text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1.5"
+              className="h-11 px-5 rounded-xl border border-white/[0.05] bg-white/[0.02] text-[11px] font-black uppercase tracking-widest text-zinc-500 hover:text-white hover:bg-white/[0.05] transition-all flex items-center gap-2"
             >
               {step === 1 ? (
                 "Cancelar"
               ) : (
                 <>
-                  <ArrowLeft className="h-3.5 w-3.5" />
+                  <ArrowLeft className="h-4 w-4" />
                   Voltar
                 </>
               )}
@@ -701,24 +701,24 @@ export default function CourseCreationWizard({ open, onOpenChange, products, edi
                   type="button"
                   onClick={goNext}
                   disabled={step === 1 && !titleValid}
-                  className="h-10 px-6 bg-primary text-primary-foreground text-[12px] font-bold hover:bg-primary/90 transition-colors disabled:opacity-50 flex items-center gap-1.5"
+                  className="h-11 px-8 rounded-xl bg-blue-600 text-white text-[11px] font-black uppercase tracking-widest hover:bg-blue-500 transition-all disabled:opacity-30 disabled:grayscale flex items-center gap-2 shadow-lg shadow-blue-500/20"
                 >
-                  Continuar
-                  <ArrowRight className="h-3.5 w-3.5" />
+                  Próximo
+                  <ArrowRight className="h-4 w-4" />
                 </button>
               ) : (
                 <button
                   type="button"
                   onClick={saveCourse}
                   disabled={saving || !titleValid}
-                  className="h-10 px-6 bg-primary text-primary-foreground text-[12px] font-bold hover:bg-primary/90 transition-colors disabled:opacity-50 flex items-center gap-1.5"
+                  className="h-11 px-8 rounded-xl bg-emerald-500 text-white text-[11px] font-black uppercase tracking-widest hover:bg-emerald-400 transition-all disabled:opacity-30 flex items-center gap-2 shadow-lg shadow-emerald-500/20"
                 >
                   {saving ? (
-                    <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                    <Loader2 className="h-4 w-4 animate-spin" />
                   ) : (
-                    <Check className="h-3.5 w-3.5" />
+                    <Check className="h-4 w-4" />
                   )}
-                  {isEditing ? "Salvar alterações" : "Criar curso"}
+                  {isEditing ? "Salvar Alterações" : "Criar Área Agora"}
                 </button>
               )}
             </div>
