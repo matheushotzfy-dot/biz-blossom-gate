@@ -276,22 +276,25 @@ export default function CourseCreationWizard({ open, onOpenChange, products, edi
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="flex h-[100dvh] max-h-[100dvh] w-[100vw] max-w-[100vw] flex-col gap-0 overflow-hidden border-0 bg-background p-0 rounded-none">
+      <DialogContent className="flex h-[100dvh] max-h-[100dvh] w-[100vw] max-w-[100vw] flex-col gap-0 overflow-hidden border-0 bg-[#050505] p-0 rounded-none text-white">
         {/* HEADER */}
-        <header className="shrink-0 border-b border-border bg-card">
-          <div className="mx-auto max-w-[920px] px-6 py-4 flex items-center justify-between gap-4">
+        <header className="shrink-0 border-b border-white/[0.04] bg-[#080808]/80 backdrop-blur-xl z-50">
+          <div className="mx-auto max-w-[920px] px-6 py-5 flex items-center justify-between gap-4">
             <div className="min-w-0">
-              <h2 className="font-display text-lg font-black tracking-tight text-foreground truncate">
-                {isEditing ? "Editar curso" : "Criar novo curso"}
-              </h2>
-              <p className="text-[11px] text-muted-foreground mt-0.5 font-medium">
-                Passo {step} de 3 — {STEPS[step - 1].helper}
+              <div className="flex items-center gap-2 mb-1">
+                <Sparkles className="h-4 w-4 text-blue-500 fill-blue-500/20" />
+                <h2 className="font-display text-xl font-black tracking-[-0.03em] text-white truncate">
+                  {isEditing ? "Ajustes da Área" : "Nova Área de Membros"}
+                </h2>
+              </div>
+              <p className="text-[11px] text-zinc-500 font-bold uppercase tracking-widest">
+                Etapa {step} de 3 — {STEPS[step - 1].helper}
               </p>
             </div>
             <button
               type="button"
               onClick={() => onOpenChange(false)}
-              className="h-9 w-9 flex items-center justify-center border border-border text-muted-foreground hover:border-primary hover:text-primary transition-colors"
+              className="h-10 w-10 flex items-center justify-center rounded-xl border border-white/[0.05] bg-white/[0.02] text-zinc-400 hover:border-white/[0.1] hover:text-white transition-all"
               aria-label="Fechar"
             >
               <X className="h-4 w-4" />
@@ -347,22 +350,25 @@ export default function CourseCreationWizard({ open, onOpenChange, products, edi
         </header>
 
         {/* BODY */}
-        <div className="flex-1 min-h-0 overflow-y-auto bg-background">
-          <div className="mx-auto max-w-[760px] px-6 py-8">
+        <div className="flex-1 min-h-0 overflow-y-auto bg-[#050505] relative">
+          <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-blue-500/[0.03] blur-[120px] rounded-full pointer-events-none" />
+          <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-indigo-500/[0.03] blur-[120px] rounded-full pointer-events-none" />
+          
+          <div className="mx-auto max-w-[760px] px-6 py-12 relative z-10">
             {/* STEP 1 — Informações */}
             {step === 1 && (
               <div className="space-y-6">
                 <div className="space-y-2">
-                  <label className="text-[11px] font-black uppercase tracking-[0.16em] text-foreground">
-                    Nome do curso <span className="text-destructive">*</span>
+                  <label className="text-[11px] font-black uppercase tracking-[0.2em] text-zinc-500">
+                    Nome da Área <span className="text-red-500">*</span>
                   </label>
                   <Input
                     value={form.title}
                     onChange={(e) => setForm((c) => ({ ...c, title: e.target.value.slice(0, 80) }))}
-                    placeholder="Ex: Como vender no Instagram"
-                    className="rounded-none border-border bg-card h-12 text-base font-medium focus-visible:border-primary"
+                    placeholder="Ex: Domine o Marketing Digital"
+                    className="rounded-xl border-white/[0.05] bg-white/[0.02] h-14 text-lg font-bold focus-visible:border-blue-500/50 transition-all placeholder:text-zinc-700"
                   />
-                  <p className="text-[10px] text-muted-foreground tabular-nums">{form.title.length}/80 caracteres</p>
+                  <p className="text-[10px] text-zinc-600 font-bold tabular-nums uppercase tracking-widest">{form.title.length}/80 caracteres</p>
                 </div>
 
                 <div className="space-y-2">
@@ -672,18 +678,18 @@ export default function CourseCreationWizard({ open, onOpenChange, products, edi
         </div>
 
         {/* FOOTER */}
-        <footer className="shrink-0 border-t border-border bg-card">
-          <div className="mx-auto max-w-[920px] px-6 py-3 flex items-center justify-between gap-3">
+        <footer className="shrink-0 border-t border-white/[0.04] bg-[#080808]">
+          <div className="mx-auto max-w-[920px] px-6 py-4 flex items-center justify-between gap-3">
             <button
               type="button"
               onClick={step === 1 ? () => onOpenChange(false) : goBack}
-              className="h-10 px-4 text-[12px] font-bold text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1.5"
+              className="h-11 px-5 rounded-xl border border-white/[0.05] bg-white/[0.02] text-[11px] font-black uppercase tracking-widest text-zinc-500 hover:text-white hover:bg-white/[0.05] transition-all flex items-center gap-2"
             >
               {step === 1 ? (
                 "Cancelar"
               ) : (
                 <>
-                  <ArrowLeft className="h-3.5 w-3.5" />
+                  <ArrowLeft className="h-4 w-4" />
                   Voltar
                 </>
               )}
@@ -695,24 +701,24 @@ export default function CourseCreationWizard({ open, onOpenChange, products, edi
                   type="button"
                   onClick={goNext}
                   disabled={step === 1 && !titleValid}
-                  className="h-10 px-6 bg-primary text-primary-foreground text-[12px] font-bold hover:bg-primary/90 transition-colors disabled:opacity-50 flex items-center gap-1.5"
+                  className="h-11 px-8 rounded-xl bg-blue-600 text-white text-[11px] font-black uppercase tracking-widest hover:bg-blue-500 transition-all disabled:opacity-30 disabled:grayscale flex items-center gap-2 shadow-lg shadow-blue-500/20"
                 >
-                  Continuar
-                  <ArrowRight className="h-3.5 w-3.5" />
+                  Próximo
+                  <ArrowRight className="h-4 w-4" />
                 </button>
               ) : (
                 <button
                   type="button"
                   onClick={saveCourse}
                   disabled={saving || !titleValid}
-                  className="h-10 px-6 bg-primary text-primary-foreground text-[12px] font-bold hover:bg-primary/90 transition-colors disabled:opacity-50 flex items-center gap-1.5"
+                  className="h-11 px-8 rounded-xl bg-emerald-500 text-white text-[11px] font-black uppercase tracking-widest hover:bg-emerald-400 transition-all disabled:opacity-30 flex items-center gap-2 shadow-lg shadow-emerald-500/20"
                 >
                   {saving ? (
-                    <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                    <Loader2 className="h-4 w-4 animate-spin" />
                   ) : (
-                    <Check className="h-3.5 w-3.5" />
+                    <Check className="h-4 w-4" />
                   )}
-                  {isEditing ? "Salvar alterações" : "Criar curso"}
+                  {isEditing ? "Salvar Alterações" : "Criar Área Agora"}
                 </button>
               )}
             </div>

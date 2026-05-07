@@ -73,53 +73,54 @@ const ease = [0.16, 1, 0.3, 1] as const;
 
 // ═══════════════════════════════════════════════════════════════════
 export default function CourseBuilder() {
- const { courseId } = useParams<{ courseId: string }>();
- const navigate = useNavigate();
- const { user } = useAuth();
+  const { courseId } = useParams<{ courseId: string }>();
+  const navigate = useNavigate();
+  const { user } = useAuth();
 
- const [course, setCourse] = useState<Course | null>(null);
- const [modules, setModules] = useState<Module[]>([]);
- const [expandedModules, setExpandedModules] = useState<Set<string>>(new Set());
- const [selectedLesson, setSelectedLesson] = useState<Lesson | null>(null);
- const [saveStatus, setSaveStatus] = useState<SaveStatus>("idle");
- const [loading, setLoading] = useState(true);
+  const [course, setCourse] = useState<Course | null>(null);
+  const [modules, setModules] = useState<Module[]>([]);
+  const [expandedModules, setExpandedModules] = useState<Set<string>>(new Set());
+  const [selectedLesson, setSelectedLesson] = useState<Lesson | null>(null);
+  const [saveStatus, setSaveStatus] = useState<SaveStatus>("idle");
+  const [loading, setLoading] = useState(true);
 
- const [editingLessonTitle, setEditingLessonTitle] = useState(false);
- const [lessonTitle, setLessonTitle] = useState("");
- const [lessonDescription, setLessonDescription] = useState("");
- const [lessonVideoUrl, setLessonVideoUrl] = useState("");
- const [lessonDripDays, setLessonDripDays] = useState(0);
- const [lessonIsFree, setLessonIsFree] = useState(false);
- const [lessonDripEnabled, setLessonDripEnabled] = useState(false);
- const [lessonDuration, setLessonDuration] = useState(0);
+  const [editingLessonTitle, setEditingLessonTitle] = useState(false);
+  const [lessonTitle, setLessonTitle] = useState("");
+  const [lessonDescription, setLessonDescription] = useState("");
+  const [lessonVideoUrl, setLessonVideoUrl] = useState("");
+  const [lessonDripDays, setLessonDripDays] = useState(0);
+  const [lessonIsFree, setLessonIsFree] = useState(false);
+  const [lessonDripEnabled, setLessonDripEnabled] = useState(false);
+  const [lessonDuration, setLessonDuration] = useState(0);
 
- const [attachments, setAttachments] = useState<Attachment[]>([]);
- const [uploadingVideo, setUploadingVideo] = useState(false);
- const [videoUploadProgress, setVideoUploadProgress] = useState(0);
- const [uploadingAttachment, setUploadingAttachment] = useState(false);
+  const [attachments, setAttachments] = useState<Attachment[]>([]);
+  const [uploadingVideo, setUploadingVideo] = useState(false);
+  const [videoUploadProgress, setVideoUploadProgress] = useState(0);
+  const [uploadingAttachment, setUploadingAttachment] = useState(false);
 
- const [newModuleTitle, setNewModuleTitle] = useState("");
- const [showNewModule, setShowNewModule] = useState(false);
- const [editingModuleId, setEditingModuleId] = useState<string | null>(null);
- const [editingModuleTitle, setEditingModuleTitle] = useState("");
- const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
- const [activeEditorTab, setActiveEditorTab] = useState<"video" | "content" | "settings">("video");
- const [studentCount, setStudentCount] = useState(0);
- const [lessonStats, setLessonStats] = useState<Map<string, number>>(new Map());
- const [deleteTarget, setDeleteTarget] = useState<{ type: "module" | "lesson"; id: string; label: string } | null>(null);
- const [deletingItem, setDeletingItem] = useState(false);
- const [courseSettingsOpen, setCourseSettingsOpen] = useState(false);
- const [courseTitle, setCourseTitle] = useState("");
- const [courseDescription, setCourseDescription] = useState("");
- const [courseCategory, setCourseCategory] = useState("");
- const [courseThumbnail, setCourseThumbnail] = useState("");
- const [uploadingThumbnail, setUploadingThumbnail] = useState(false);
- const thumbnailInputRef = useRef<HTMLInputElement>(null);
+  const [newModuleTitle, setNewModuleTitle] = useState("");
+  const [showNewModule, setShowNewModule] = useState(false);
+  const [editingModuleId, setEditingModuleId] = useState<string | null>(null);
+  const [editingModuleTitle, setEditingModuleTitle] = useState("");
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [activeEditorTab, setActiveEditorTab] = useState<"video" | "content" | "settings">("video");
+  const [studentCount, setStudentCount] = useState(0);
+  const [lessonStats, setLessonStats] = useState<Map<string, number>>(new Map());
+  const [deleteTarget, setDeleteTarget] = useState<{ type: "module" | "lesson"; id: string; label: string } | null>(null);
+  const [deletingItem, setDeletingItem] = useState(false);
+  const [courseSettingsOpen, setCourseSettingsOpen] = useState(false);
+  const [courseTitle, setCourseTitle] = useState("");
+  const [courseDescription, setCourseDescription] = useState("");
+  const [courseCategory, setCourseCategory] = useState("");
+  const [courseThumbnail, setCourseThumbnail] = useState("");
+  const [uploadingThumbnail, setUploadingThumbnail] = useState(false);
+  const [previewMode, setPreviewMode] = useState(false);
+  const thumbnailInputRef = useRef<HTMLInputElement>(null);
 
- const titleInputRef = useRef<HTMLInputElement>(null);
- const saveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
- const videoInputRef = useRef<HTMLInputElement>(null);
- const attachmentInputRef = useRef<HTMLInputElement>(null);
+  const titleInputRef = useRef<HTMLInputElement>(null);
+  const saveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const videoInputRef = useRef<HTMLInputElement>(null);
+  const attachmentInputRef = useRef<HTMLInputElement>(null);
 
  // ─── Load All ───────────────────────────────────────────────────
  const loadAll = useCallback(async () => {
@@ -444,14 +445,14 @@ export default function CourseBuilder() {
  const completedLessons = modules.reduce((a, m) => a + m.lessons.filter(l => l.video_url).length, 0);
  const progressPct = totalLessons > 0 ? Math.round((completedLessons / totalLessons) * 100) : 0;
 
- const editorTabs = [
- { id: "video" as const, label: "Vídeo", icon: Video },
- { id: "content" as const, label: "Conteúdo", icon: FileText },
- { id: "settings" as const, label: "Config", icon: Settings },
- ];
+  const editorTabs = [
+    { id: "video" as const, label: "Conteúdo", icon: PlayCircle },
+    { id: "content" as const, label: "Configuração", icon: Settings },
+    { id: "settings" as const, label: "Avançado", icon: Zap },
+  ];
 
   return (
-    <div className="fixed inset-0 z-[70] bg-[#030303] text-zinc-100 flex flex-col overflow-hidden selection:bg-emerald-500/30 font-sans">
+    <div className="fixed inset-0 z-[70] bg-[#050505] text-zinc-100 flex flex-col overflow-hidden selection:bg-blue-500/30 font-sans">
       {/* ═══ PREMIUM TOP BAR ═══ */}
       <header className="h-16 border-b border-white/[0.04] bg-[#050505]/80 backdrop-blur-xl flex items-center justify-between px-4 sm:px-6 shrink-0 z-50 relative">
         <div className="relative flex items-center gap-4 min-w-0">
@@ -574,10 +575,10 @@ export default function CourseBuilder() {
       </header>
 
       {/* ═══ MAIN LAYOUT ═══ */}
-      <div className="flex-1 flex overflow-hidden relative bg-[#030303]">
+      <div className="flex-1 flex overflow-hidden relative bg-[#050505]">
         {/* Background Gradients */}
-        <div className="absolute top-0 left-0 w-[500px] h-[500px] bg-emerald-500/5 blur-[120px] rounded-full pointer-events-none" />
-        <div className="absolute bottom-0 right-0 w-[500px] h-[500px] bg-blue-500/5 blur-[120px] rounded-full pointer-events-none" />
+        <div className="absolute top-0 left-0 w-[800px] h-[800px] bg-blue-500/[0.03] blur-[150px] rounded-full pointer-events-none" />
+        <div className="absolute bottom-0 right-0 w-[800px] h-[800px] bg-indigo-500/[0.03] blur-[150px] rounded-full pointer-events-none" />
 
         {/* ─── LEFT: Curriculum Sidebar ─── */}
         <AnimatePresence initial={false}>
@@ -1096,106 +1097,106 @@ export default function CourseBuilder() {
                 )}
 
  {/* ─── SETTINGS TAB ─── */}
- {activeEditorTab === "settings" && (
- <div className="space-y-4">
- {/* Duration */}
-  <div className="bg-card border border-border p-5">
-  <div className="flex items-center justify-between">
-  <div className="flex items-center gap-3">
-  <div className="h-11 w-11 border border-info bg-info/10 flex items-center justify-center">
-  <Clock className="h-5 w-5 text-info" />
-  </div>
-  <div>
-  <p className="text-[11px] font-display font-black uppercase tracking-[0.16em] text-foreground">Duração</p>
-  <p className="text-[10px] text-muted-foreground mt-0.5 font-display">Tempo estimado de vídeo</p>
-  </div>
-  </div>
-  <div className="flex items-center gap-2">
-  <input
-  type="number" min={0} value={lessonDuration}
-  onChange={e => { const v = parseInt(e.target.value) || 0; setLessonDuration(v); debouncedSave("duration_minutes", v); }}
-  className="h-10 w-20 rounded-none bg-card-elevated border border-border text-center text-sm font-display font-bold tabular-nums text-foreground focus:outline-none focus:border-info transition-colors"
-  />
-  <span className="text-[10px] text-muted-foreground font-display font-bold uppercase tracking-widest">min</span>
-  </div>
-  </div>
-  </div>
+                {activeEditorTab === "settings" && (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    {/* Duration */}
+                    <div className="rounded-3xl border border-white/[0.04] bg-white/[0.01] p-6 hover:bg-white/[0.02] transition-all group">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-4">
+                          <div className="h-12 w-12 rounded-2xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center group-hover:scale-110 transition-transform">
+                            <Clock className="h-5 w-5 text-blue-400" />
+                          </div>
+                          <div>
+                            <p className="text-[12px] font-black uppercase tracking-widest text-white leading-none">Duração Estimada</p>
+                            <p className="text-[10px] text-zinc-500 mt-1.5 font-bold uppercase tracking-widest">Informação visual para o aluno</p>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-3">
+                          <input
+                            type="number" min={0} value={lessonDuration}
+                            onChange={e => { const v = parseInt(e.target.value) || 0; setLessonDuration(v); debouncedSave("duration_minutes", v); }}
+                            className="h-12 w-20 rounded-xl bg-[#080808] border border-white/[0.05] text-center text-[15px] font-black tabular-nums text-white focus:outline-none focus:border-blue-500/40 transition-all"
+                          />
+                          <span className="text-[10px] text-zinc-600 font-bold uppercase tracking-widest">min</span>
+                        </div>
+                      </div>
+                    </div>
 
-  {/* Free Lesson */}
-  <div className="bg-card border border-border p-5">
-  <div className="flex items-center justify-between">
-  <div className="flex items-center gap-3">
-  <div className="h-11 w-11 border border-success bg-success/10 flex items-center justify-center">
-  <Globe className="h-5 w-5 text-success" />
-  </div>
-  <div>
-  <p className="text-[11px] font-display font-black uppercase tracking-[0.16em] text-foreground">Aula Gratuita</p>
-  <p className="text-[10px] text-muted-foreground mt-0.5 font-display">Disponível sem compra como preview</p>
-  </div>
-  </div>
-  <Switch checked={lessonIsFree} onCheckedChange={v => { setLessonIsFree(v); autoSave("is_free", v); }} />
-  </div>
-  </div>
+                    {/* Free Lesson */}
+                    <div className="rounded-3xl border border-white/[0.04] bg-white/[0.01] p-6 hover:bg-white/[0.02] transition-all group">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-4">
+                          <div className="h-12 w-12 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center group-hover:scale-110 transition-transform">
+                            <Globe className="h-5 w-5 text-emerald-400" />
+                          </div>
+                          <div>
+                            <p className="text-[12px] font-black uppercase tracking-widest text-white leading-none">Aula de Degustação</p>
+                            <p className="text-[10px] text-zinc-500 mt-1.5 font-bold uppercase tracking-widest">Disponível sem compra ativa</p>
+                          </div>
+                        </div>
+                        <Switch checked={lessonIsFree} onCheckedChange={v => { setLessonIsFree(v); autoSave("is_free", v); }} />
+                      </div>
+                    </div>
 
-  {/* Drip */}
-  <div className="bg-card border border-border p-5">
-  <div className="flex items-center justify-between">
-  <div className="flex items-center gap-3">
-  <div className="h-11 w-11 border border-warning bg-warning/10 flex items-center justify-center">
-  <Calendar className="h-5 w-5 text-warning" />
-  </div>
-  <div>
-  <p className="text-[11px] font-display font-black uppercase tracking-[0.16em] text-foreground">Gotejamento</p>
-  <p className="text-[10px] text-muted-foreground mt-0.5 font-display">Liberar após X dias da compra</p>
-  </div>
-  </div>
-  <div className="flex items-center gap-2.5">
-  <Switch
-  checked={lessonDripEnabled}
-  onCheckedChange={v => {
-  setLessonDripEnabled(v);
-  if (!v) { setLessonDripDays(0); autoSave("drip_days", 0); }
-  }}
-  />
-  <AnimatePresence>
-  {lessonDripEnabled && (
-  <motion.div initial={{ opacity: 0, width: 0 }} animate={{ opacity: 1, width: "auto" }} exit={{ opacity: 0, width: 0 }} className="flex items-center gap-2 overflow-hidden">
-  <input
-  type="number" min={0} value={lessonDripDays}
-  onChange={e => { const v = parseInt(e.target.value) || 0; setLessonDripDays(v); debouncedSave("drip_days", v); }}
-  className="h-10 w-16 rounded-none bg-card-elevated border border-border text-center text-sm font-display font-bold tabular-nums text-foreground focus:outline-none focus:border-warning transition-colors"
-  />
-  <span className="text-[10px] text-muted-foreground font-display font-bold uppercase tracking-widest whitespace-nowrap">dias</span>
-  </motion.div>
-  )}
-  </AnimatePresence>
-  </div>
-  </div>
-  </div>
+                    {/* Drip */}
+                    <div className="rounded-3xl border border-white/[0.04] bg-white/[0.01] p-6 hover:bg-white/[0.02] transition-all group md:col-span-2">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-4">
+                          <div className="h-12 w-12 rounded-2xl bg-orange-500/10 border border-orange-500/20 flex items-center justify-center group-hover:scale-110 transition-transform">
+                            <Calendar className="h-5 w-5 text-orange-400" />
+                          </div>
+                          <div>
+                            <p className="text-[12px] font-black uppercase tracking-widest text-white leading-none">Liberação Programada (Drip)</p>
+                            <p className="text-[10px] text-zinc-500 mt-1.5 font-bold uppercase tracking-widest">Gotejamento por dias após a compra</p>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-4">
+                          <Switch
+                            checked={lessonDripEnabled}
+                            onCheckedChange={v => {
+                              setLessonDripEnabled(v);
+                              if (!v) { setLessonDripDays(0); autoSave("drip_days", 0); }
+                            }}
+                          />
+                          <AnimatePresence>
+                            {lessonDripEnabled && (
+                              <motion.div initial={{ opacity: 0, width: 0 }} animate={{ opacity: 1, width: "auto" }} exit={{ opacity: 0, width: 0 }} className="flex items-center gap-3 overflow-hidden">
+                                <input
+                                  type="number" min={0} value={lessonDripDays}
+                                  onChange={e => { const v = parseInt(e.target.value) || 0; setLessonDripDays(v); debouncedSave("drip_days", v); }}
+                                  className="h-12 w-20 rounded-xl bg-[#080808] border border-white/[0.05] text-center text-[15px] font-black tabular-nums text-white focus:outline-none focus:border-orange-500/40 transition-all"
+                                />
+                                <span className="text-[10px] text-zinc-600 font-bold uppercase tracking-widest whitespace-nowrap">dias</span>
+                              </motion.div>
+                            )}
+                          </AnimatePresence>
+                        </div>
+                      </div>
+                    </div>
 
-  {/* Danger Zone */}
-  <div className="border border-destructive bg-destructive/5 p-5">
-  <div className="flex items-center justify-between">
-  <div className="flex items-center gap-3">
-  <div className="h-11 w-11 border border-destructive bg-destructive/10 flex items-center justify-center">
-  <Trash2 className="h-5 w-5 text-destructive" />
-  </div>
-  <div>
-  <p className="text-[11px] font-display font-black uppercase tracking-[0.16em] text-destructive">Zona de Perigo</p>
-  <p className="text-[10px] text-muted-foreground mt-0.5 font-display">Esta ação não pode ser desfeita</p>
-  </div>
-  </div>
-  <Button
-  variant="ghost"
-  onClick={() => deleteLesson(selectedLesson.id)}
-  className="rounded-none border border-destructive bg-destructive text-destructive-foreground text-[10px] font-display font-bold uppercase tracking-[0.16em] hover:bg-destructive/90"
-  >
-  <Trash2 className="h-3.5 w-3.5 mr-1.5" /> Excluir Aula
-  </Button>
-  </div>
-  </div>
- </div>
- )}
+                    {/* Danger Zone */}
+                    <div className="rounded-3xl border border-red-500/10 bg-red-500/[0.02] p-6 hover:bg-red-500/[0.04] transition-all group md:col-span-2">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-4">
+                          <div className="h-12 w-12 rounded-2xl bg-red-500/10 border border-red-500/20 flex items-center justify-center group-hover:scale-110 transition-transform">
+                            <Trash2 className="h-5 w-5 text-red-400" />
+                          </div>
+                          <div>
+                            <p className="text-[12px] font-black uppercase tracking-widest text-red-400 leading-none">Zona Crítica</p>
+                            <p className="text-[10px] text-zinc-500 mt-1.5 font-bold uppercase tracking-widest">Esta ação removerá permanentemente a aula</p>
+                          </div>
+                        </div>
+                        <Button
+                          variant="ghost"
+                          onClick={() => deleteLesson(selectedLesson.id)}
+                          className="h-12 px-6 rounded-xl border border-red-500/20 bg-red-500/5 text-red-400 text-[11px] font-black uppercase tracking-widest hover:bg-red-500 hover:text-white transition-all"
+                        >
+                          <Trash2 className="h-4 w-4 mr-2" /> Excluir Aula
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
+                )}
  </motion.div>
  </AnimatePresence>
  </div>
@@ -1351,17 +1352,17 @@ export default function CourseBuilder() {
  </AlertDialogContent>
  </AlertDialog>
 
- {/* ═══ Course Settings Sheet ═══ */}
- <Sheet open={courseSettingsOpen} onOpenChange={setCourseSettingsOpen}>
- <SheetContent className="w-full sm:max-w-lg overflow-y-auto">
- <SheetHeader className="mb-6">
- <SheetTitle className="font-display font-black text-xl tracking-tight flex items-center gap-3">
- <div className="h-10 w-10 border border-primary bg-primary/10 flex items-center justify-center">
- <Settings className="h-5 w-5 text-primary" />
- </div>
- Configurações do Curso
- </SheetTitle>
- </SheetHeader>
+  {/* ═══ Course Settings Sheet ═══ */}
+  <Sheet open={courseSettingsOpen} onOpenChange={setCourseSettingsOpen}>
+  <SheetContent className="w-full sm:max-w-lg overflow-y-auto bg-[#050505] border-white/[0.05] text-white">
+  <SheetHeader className="mb-8">
+  <SheetTitle className="font-display font-black text-2xl tracking-tight flex items-center gap-4">
+  <div className="h-12 w-12 rounded-2xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center">
+  <Settings className="h-6 w-6 text-blue-400" />
+  </div>
+  Ajustes da Área
+  </SheetTitle>
+  </SheetHeader>
 
  <div className="space-y-6">
  {/* Thumbnail */}
@@ -1391,15 +1392,15 @@ export default function CourseBuilder() {
  <input ref={thumbnailInputRef} type="file" accept="image/jpeg,image/png,image/webp" className="hidden" onChange={e => { const f = e.target.files?.[0]; if (f) handleThumbnailUpload(f); }} />
  </div>
 
- {/* Title */}
- <div>
- <Label className="text-[10px] font-display font-bold text-muted-foreground uppercase tracking-[0.18em] mb-2.5 block">Título do Curso</Label>
- <input
- value={courseTitle}
- onChange={e => setCourseTitle(e.target.value)}
- className="w-full h-11 px-4 rounded-none bg-card-elevated border border-border text-sm font-display font-bold text-foreground focus:outline-none focus:border-primary transition-colors"
- />
- </div>
+  {/* Title */}
+  <div className="space-y-3">
+  <Label className="text-[11px] font-black uppercase tracking-[0.2em] text-zinc-500">Título da Área</Label>
+  <input
+  value={courseTitle}
+  onChange={e => setCourseTitle(e.target.value)}
+  className="w-full h-14 px-5 rounded-xl bg-white/[0.02] border border-white/[0.05] text-[15px] font-bold text-white focus:outline-none focus:border-blue-500/40 transition-all"
+  />
+  </div>
 
  {/* Description */}
  <div>
