@@ -359,16 +359,16 @@ export default function CourseCreationWizard({ open, onOpenChange, products, edi
             {step === 1 && (
               <div className="space-y-6">
                 <div className="space-y-2">
-                  <label className="text-[11px] font-black uppercase tracking-[0.16em] text-foreground">
-                    Nome do curso <span className="text-destructive">*</span>
+                  <label className="text-[11px] font-black uppercase tracking-[0.2em] text-zinc-500">
+                    Nome da Área <span className="text-red-500">*</span>
                   </label>
                   <Input
                     value={form.title}
                     onChange={(e) => setForm((c) => ({ ...c, title: e.target.value.slice(0, 80) }))}
-                    placeholder="Ex: Como vender no Instagram"
-                    className="rounded-none border-border bg-card h-12 text-base font-medium focus-visible:border-primary"
+                    placeholder="Ex: Domine o Marketing Digital"
+                    className="rounded-xl border-white/[0.05] bg-white/[0.02] h-14 text-lg font-bold focus-visible:border-blue-500/50 transition-all placeholder:text-zinc-700"
                   />
-                  <p className="text-[10px] text-muted-foreground tabular-nums">{form.title.length}/80 caracteres</p>
+                  <p className="text-[10px] text-zinc-600 font-bold tabular-nums uppercase tracking-widest">{form.title.length}/80 caracteres</p>
                 </div>
 
                 <div className="space-y-2">
