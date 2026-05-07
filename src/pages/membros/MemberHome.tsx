@@ -314,49 +314,45 @@ function Rail({ title, subtitle, courses, variant }: { title: string; subtitle?:
   };
 
   return (
-    <section className="space-y-4 group/rail">
-      <div className="flex items-end justify-between px-6 lg:px-16">
+    <section className="space-y-6 group/rail">
+      <div className="flex items-end justify-between px-6 lg:px-16 max-w-[1800px] mx-auto">
         <div>
-          <h2 className="font-display text-xl lg:text-[22px] font-bold tracking-[-0.02em] text-zinc-100">{title}</h2>
-          {subtitle && <p className="text-[11px] text-zinc-600 font-medium mt-1">{subtitle}</p>}
+          <h2 className="font-display text-2xl lg:text-[28px] font-black tracking-[-0.03em] text-white/90">{title}</h2>
+          {subtitle && <p className="text-[11px] text-zinc-600 font-bold uppercase tracking-[0.2em] mt-2">{subtitle}</p>}
         </div>
-        <div className="hidden md:flex items-center gap-1">
+        <div className="hidden md:flex items-center gap-2">
           <button
             onClick={() => scroll(-1)}
             className={cn(
-              "h-8 w-8 rounded-md border border-white/10 flex items-center justify-center transition-all",
-              showLeft ? "bg-zinc-800/60 text-zinc-300 hover:bg-zinc-700/60" : "opacity-30 pointer-events-none"
+              "h-10 w-10 rounded-full border border-white/5 flex items-center justify-center transition-all duration-300",
+              showLeft ? "bg-zinc-900/80 text-white hover:bg-zinc-800 hover:border-white/20" : "opacity-0 pointer-events-none"
             )}
           >
-            <ChevronLeft className="h-4 w-4" />
+            <ChevronLeft className="h-5 w-5" />
           </button>
           <button
             onClick={() => scroll(1)}
             className={cn(
-              "h-8 w-8 rounded-md border border-white/10 flex items-center justify-center transition-all",
-              showRight ? "bg-zinc-800/60 text-zinc-300 hover:bg-zinc-700/60" : "opacity-30 pointer-events-none"
+              "h-10 w-10 rounded-full border border-white/5 flex items-center justify-center transition-all duration-300",
+              showRight ? "bg-zinc-900/80 text-white hover:bg-zinc-800 hover:border-white/20" : "opacity-100"
             )}
           >
-            <ChevronRight className="h-4 w-4" />
+            <ChevronRight className="h-5 w-5" />
           </button>
         </div>
       </div>
 
       <div className="relative">
-        {/* Gradient fades */}
-        <div className={cn("absolute left-0 top-0 bottom-0 w-12 bg-gradient-to-r from-[#050505] to-transparent z-10 pointer-events-none transition-opacity", showLeft ? "opacity-100" : "opacity-0")} />
-        <div className={cn("absolute right-0 top-0 bottom-0 w-12 bg-gradient-to-l from-[#050505] to-transparent z-10 pointer-events-none transition-opacity", showRight ? "opacity-100" : "opacity-0")} />
-
         <div
           ref={scrollRef}
           onScroll={checkScroll}
           className="overflow-x-auto no-scrollbar scroll-smooth snap-x snap-mandatory"
         >
-          <div className="flex gap-3 px-6 lg:px-16 pb-2">
+          <div className="flex gap-4 px-6 lg:px-16 pb-8 max-w-[1800px] mx-auto">
             {courses.map((c, i) => (
               <CourseCard key={c.id} course={c} variant={variant} index={i} />
             ))}
-            <div className="shrink-0 w-4 lg:w-10" aria-hidden />
+            <div className="shrink-0 w-8 lg:w-20" aria-hidden />
           </div>
         </div>
       </div>
