@@ -296,50 +296,68 @@ export default function AdminOverviewTab({ transactions, profiles, products, wit
   </motion.div>
 
 
- {/* ═══ HERO METRICS — 4 KPIs ═══ */}
- <motion.div variants={fadeUp} className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
- <HeroKpi
- icon={<PiggyBank className="h-6 w-6" />}
- label="Lucro Hoje"
- value={fmtCurrency(takeRateToday)}
- sub={`Mês: ${fmtCurrency(takeRateMonth)}`}
- gradient="from-emerald-500 to-teal-600"
- metallic
- />
- <HeroKpi
- icon={<Globe className="h-6 w-6" />}
- label="TPV Período"
- value={fmtCurrency(totalVolume)}
- sub={`${filteredApproved.length} transações aprovadas`}
- gradient="from-teal-400 to-cyan-600"
- />
- <HeroKpi
- icon={<Users className="h-6 w-6" />}
- label="Sellers Ativos Hoje"
- value={String(activeSellersToday)}
- sub={`de ${profiles.length} cadastrados`}
- gradient="from-emerald-400 to-green-600"
- />
- <HeroKpi
- icon={<ShieldAlert className="h-6 w-6" />}
- label="Taxa Chargeback"
- value={`${chargebackRate.toFixed(2)}%`}
- sub={`${chargebackTx.length} chargebacks`}
- gradient={chargebackAlert ? "from-red-500 to-rose-600" : "from-emerald-500 to-green-600"}
- alert={chargebackAlert}
- pulse={chargebackAlert}
- />
- </motion.div>
+  {/* ═══ PLATFORM HEALTH RADAR ═══ */}
+  <motion.div variants={fadeUp} className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
+    <HealthCard 
+      icon={<Flame className="h-6 w-6" />}
+      label="Vendas Hoje"
+      value={String(todayTx.length)}
+      sub={`R$ ${tpvToday.toLocaleString("pt-BR")}`}
+      trend="+12%"
+      trendType="positive"
+      color="orange"
+      pulse={todayTx.length > 0}
+    />
+    <HealthCard 
+      icon={<Activity className="h-6 w-6" />}
+      label="Taxa de Conversão"
+      value={`${conversionRate}%`}
+      sub="Média do sistema"
+      trend="+0.8%"
+      trendType="positive"
+      color="emerald"
+    />
+    <HealthCard 
+      icon={<ShieldAlert className="h-6 w-6" />}
+      label="Risco de Chargeback"
+      value={`${chargebackRate.toFixed(2)}%`}
+      sub={`${chargebackTx.length} incidentes`}
+      trend={chargebackRate > 1 ? "+5%" : "-2%"}
+      trendType={chargebackRate > 1 ? "negative" : "positive"}
+      color={chargebackAlert ? "red" : "blue"}
+      alert={chargebackAlert}
+    />
+    <HealthCard 
+      icon={<Radio className="h-6 w-6" />}
+      label="Saque Pendente"
+      value={fmtCurrency(pendingWdAmount)}
+      sub={`${pendingWd.length} solicitações`}
+      trend={pendingWd.length > 5 ? "High" : "Normal"}
+      trendType={pendingWd.length > 5 ? "negative" : "neutral"}
+      color="cyan"
+    />
+  </motion.div>
 
- {/* ═══ SECONDARY KPIs ═══ */}
- <motion.div variants={fadeUp} className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-3">
- <GlassKpi label="TPV Hoje" value={fmtCurrency(tpvToday)} icon={<DollarSign className="h-3.5 w-3.5" />} iconColor="text-emerald-400" />
- <GlassKpi label="TPV Mensal" value={fmtCurrency(tpvMonth)} icon={<BarChart3 className="h-3.5 w-3.5" />} iconColor="text-teal-400" />
- <GlassKpi label="Take Rate Hoje" value={fmtCurrency(takeRateToday)} icon={<TrendingUp className="h-3.5 w-3.5" />} iconColor="text-amber-400" />
- <GlassKpi label="Saldo Retido" value={fmtCurrency(totalRetained)} icon={<Lock className="h-3.5 w-3.5" />} iconColor="text-emerald-400/70" />
- <GlassKpi label="Vol. Sacado" value={fmtCurrency(totalWithdrawn)} icon={<ArrowDownToLine className="h-3.5 w-3.5" />} iconColor="text-teal-400" />
- <GlassKpi label="Ticket Médio" value={fmtCurrency(ticketMedio)} icon={<CreditCard className="h-3.5 w-3.5" />} iconColor="text-white/60" />
- </motion.div>
+  {/* ═══ SECONDARY METRICS ═══ */}
+  <motion.div variants={fadeUp} className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-3">
+    {[
+      { label: "TPV Mensal", value: fmtCurrency(tpvMonth), icon: <BarChart3 className="h-3.5 w-3.5" />, color: "text-teal-400" },
+      { label: "Sellers Ativos", value: activeSellersToday, icon: <Users className="h-3.5 w-3.5" />, color: "text-emerald-400" },
+      { label: "Ticket Médio", value: fmtCurrency(ticketMedio), icon: <CreditCard className="h-3.5 w-3.5" />, color: "text-white/60" },
+      { label: "Saldo Retido", value: fmtCurrency(totalRetained), icon: <Lock className="h-3.5 w-3.5" />, color: "text-emerald-400/70" },
+      { label: "Vol. Sacado", value: fmtCurrency(totalWithdrawn), icon: <ArrowDownToLine className="h-3.5 w-3.5" />, color: "text-teal-400" },
+      { label: "Disputas Abertas", value: openDisputes, icon: <AlertCircle className="h-3.5 w-3.5" />, color: "text-red-400" },
+    ].map((m, i) => (
+      <div key={i} className="bg-white/[0.02] border border-white/[0.05] rounded-2xl p-4 flex flex-col justify-center transition-all hover:bg-white/[0.04]">
+        <div className="flex items-center gap-2 mb-1.5">
+          <span className={m.color}>{m.icon}</span>
+          <p className="text-[9px] font-bold text-white/20 uppercase tracking-widest">{m.label}</p>
+        </div>
+        <p className="text-lg font-black text-white/70" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>{m.value}</p>
+      </div>
+    ))}
+  </motion.div>
+
 
  {/* ═══ VOLUME CHART + ACQUIRER + REALTIME ═══ */}
  <motion.div variants={fadeUp} className="grid grid-cols-1 xl:grid-cols-4 gap-4">
