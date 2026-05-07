@@ -273,7 +273,7 @@ export default function AdminConteudo() {
                 <div className="mt-4 font-display text-[32px] font-black leading-none tracking-[-0.03em] text-white tabular-nums">
                   {item.value}
                 </div>
-                <p className="mt-2 text-[10px] font-bold uppercase tracking-[0.16em] text-zinc-600\">{item.meta}</p>
+                <p className="mt-2 text-[10px] font-bold uppercase tracking-[0.16em] text-zinc-600">{item.meta}</p>
               </div>
             );
           })}
@@ -396,16 +396,16 @@ export default function AdminConteudo() {
                     key={course.id}
                     course={course}
                     stats={courseStats[course.id] || { modules: 0, lessons: 0 }}
-                    studentCount={studentCounts[course.id] || 0}
-                    revenue={getCourseRevenue(course)}
-                    product={products.find(p => p.id === course.product_id)}
-                    onEdit={() => openEdit(course)}
+                    students={studentCounts[course.id] || 0}
+                    revenueLabel={formatContentCurrency(getCourseRevenue(course))}
+                    productName={products.find(p => p.id === course.product_id)?.name}
+                    onOpenEdit={() => openEdit(course)}
                     onDelete={() => setDeleteTarget(course.id)}
                     onTogglePublish={() => togglePublish(course.id, course.is_published)}
                     onCopyLink={() => handleCopyMemberLink(course.id)}
-                    isCopied={copiedId === course.id}
+                    copied={copiedId === course.id}
                     onOpenBuilder={() => navigate(`/vendas/conteudo/${course.id}/builder`)}
-                    onOpenAnalytics={() => navigate(`/vendas/conteudo/${course.id}/analytics`)}
+                    onOpenPreview={() => window.open(getCourseLink(course.id), "_blank")}
                   />
                 ))}
               </div>
@@ -416,7 +416,7 @@ export default function AdminConteudo() {
                     <tr className="border-b border-white/[0.06] bg-zinc-900/30">
                       <th className="px-8 py-5 text-[11px] font-black uppercase tracking-[0.25em] text-zinc-500">Área de Membros</th>
                       <th className="px-8 py-5 text-[11px] font-black uppercase tracking-[0.25em] text-zinc-500">Status</th>
-                      <th className="px-8 py-5 text-[11px] font-black uppercase tracking-[0.25em] text-zinc-500 text-right\">Configurações</th>
+                      <th className="px-8 py-5 text-[11px] font-black uppercase tracking-[0.25em] text-zinc-500 text-right">Configurações</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-white/[0.04]">
@@ -425,16 +425,16 @@ export default function AdminConteudo() {
                         key={course.id}
                         course={course}
                         stats={courseStats[course.id] || { modules: 0, lessons: 0 }}
-                        studentCount={studentCounts[course.id] || 0}
-                        revenue={getCourseRevenue(course)}
-                        product={products.find(p => p.id === course.product_id)}
-                        onEdit={() => openEdit(course)}
+                        students={studentCounts[course.id] || 0}
+                        revenueLabel={formatContentCurrency(getCourseRevenue(course))}
+                        productName={products.find(p => p.id === course.product_id)?.name}
+                        onOpenEdit={() => openEdit(course)}
                         onDelete={() => setDeleteTarget(course.id)}
                         onTogglePublish={() => togglePublish(course.id, course.is_published)}
                         onCopyLink={() => handleCopyMemberLink(course.id)}
-                        isCopied={copiedId === course.id}
+                        copied={copiedId === course.id}
                         onOpenBuilder={() => navigate(`/vendas/conteudo/${course.id}/builder`)}
-                        onOpenAnalytics={() => navigate(`/vendas/conteudo/${course.id}/analytics`)}
+                        onOpenPreview={() => window.open(getCourseLink(course.id), "_blank")}
                       />
                     ))}
                   </tbody>
@@ -448,8 +448,9 @@ export default function AdminConteudo() {
       <CourseCreationWizard
         open={wizardOpen}
         onOpenChange={setWizardOpen}
-        editData={editCourseData}
-        onSuccess={reloadCourses}
+        editCourse={editCourseData}
+        products={products}
+        onSaved={reloadCourses}
       />
 
       <AlertDialog open={!!deleteTarget} onOpenChange={(open) => !open && setDeleteTarget(null)}>
