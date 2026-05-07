@@ -437,21 +437,24 @@ export default function AdminConteudo() {
             <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
           </div>
         ) : filteredCourses.length === 0 ? (
-          <div className="flex min-h-[360px] flex-col items-center justify-center px-6 text-center">
-            <div className="flex h-16 w-16 items-center justify-center rounded-2xl border border-border/70 bg-card-inset text-primary">
-              <GraduationCap className="h-7 w-7" />
+          <div className="flex min-h-[400px] flex-col items-center justify-center px-6 text-center">
+            <div className="flex h-16 w-16 items-center justify-center border border-border bg-card-elevated">
+              <GraduationCap className="h-7 w-7 text-primary" strokeWidth={1.6} />
             </div>
-            <h3 className="mt-5 text-base font-bold text-foreground">
-              {emptyFiltered ? "Nada apareceu nessa leitura" : "Sua operação de conteúdo começa aqui"}
+            <h3 className="mt-5 font-display text-lg font-black tracking-tight text-foreground">
+              {emptyFiltered ? "Nenhum resultado encontrado" : "Sua operação de conteúdo começa aqui"}
             </h3>
-            <p className="mt-1 max-w-sm text-sm text-muted-foreground">
-              {emptyFiltered ? "Troque busca ou filtro para encontrar a área certa." : "Crie a primeira área, conecte ao produto e deixe o catálogo pronto para o aluno."}
+            <p className="mt-1.5 max-w-sm text-[13px] text-muted-foreground leading-relaxed">
+              {emptyFiltered ? "Troque a busca ou o filtro para encontrar a área certa." : "Crie a primeira área, conecte ao produto e deixe o catálogo pronto para o aluno."}
             </p>
-            {!emptyFiltered ? (
-              <Button onClick={openNew} className="mt-5 h-10 rounded-xl px-4 text-xs font-semibold">
-                <Plus className="mr-2 h-3.5 w-3.5" /> Criar área
-              </Button>
-            ) : null}
+            {!emptyFiltered && (
+              <button
+                onClick={openNew}
+                className="mt-6 inline-flex h-11 items-center gap-2 border border-primary bg-primary px-6 text-[11px] font-black uppercase tracking-[0.14em] text-primary-foreground transition-colors hover:bg-primary/90"
+              >
+                <Plus className="h-4 w-4" strokeWidth={2.5} /> Criar área
+              </button>
+            )}
           </div>
         ) : viewMode === "grid" ? (
           <div className="grid gap-4 p-4 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
