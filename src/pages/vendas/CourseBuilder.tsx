@@ -1392,15 +1392,15 @@ export default function CourseBuilder() {
  <input ref={thumbnailInputRef} type="file" accept="image/jpeg,image/png,image/webp" className="hidden" onChange={e => { const f = e.target.files?.[0]; if (f) handleThumbnailUpload(f); }} />
  </div>
 
- {/* Title */}
- <div>
- <Label className="text-[10px] font-display font-bold text-muted-foreground uppercase tracking-[0.18em] mb-2.5 block">Título do Curso</Label>
- <input
- value={courseTitle}
- onChange={e => setCourseTitle(e.target.value)}
- className="w-full h-11 px-4 rounded-none bg-card-elevated border border-border text-sm font-display font-bold text-foreground focus:outline-none focus:border-primary transition-colors"
- />
- </div>
+  {/* Title */}
+  <div className="space-y-3">
+  <Label className="text-[11px] font-black uppercase tracking-[0.2em] text-zinc-500">Título da Área</Label>
+  <input
+  value={courseTitle}
+  onChange={e => setCourseTitle(e.target.value)}
+  className="w-full h-14 px-5 rounded-xl bg-white/[0.02] border border-white/[0.05] text-[15px] font-bold text-white focus:outline-none focus:border-blue-500/40 transition-all"
+  />
+  </div>
 
  {/* Description */}
  <div>
