@@ -10,7 +10,7 @@ import {
   Bug, UserX, Search, Banknote, ShieldCheck,
   FileWarning, Package2, Radio, BarChart3, Calendar,
   ChevronLeft, ChevronRight, PanelLeftClose, PanelLeft,
-  Flame, Sparkles, Crown, Globe, Palette,
+  Flame, Sparkles, Crown, Globe, Palette, CheckCircle2,
 } from "lucide-react";
 import { toast } from "sonner";
 import type { Tables } from "@/integrations/supabase/types";
@@ -19,8 +19,9 @@ import { cn } from "@/lib/utils";
 import { motion, AnimatePresence } from "framer-motion";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar as CalendarComponent } from "@/components/ui/calendar";
-import { format, subDays, startOfDay, endOfDay } from "date-fns";
+import { format, subDays, startOfDay } from "date-fns";
 import { ptBR } from "date-fns/locale";
+import { Button } from "@/components/ui/button";
 import AdminOverviewTab from "./tabs/AdminOverviewTab";
 import AdminSellersTab from "./tabs/AdminSellersTab";
 import AdminProductsTab from "./tabs/AdminProductsTab";
@@ -183,7 +184,6 @@ export default function AdminDashboard() {
   });
   const [themePickerOpen, setThemePickerOpen] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [searchQuery, setSearchQuery] = useState("");
 
   const themeConfig = ADMIN_THEMES[adminTheme];
 
@@ -346,8 +346,6 @@ export default function AdminDashboard() {
     activeItem: "from-emerald-500/[0.12] via-emerald-500/[0.08] to-teal-500/[0.04] border-emerald-500/[0.18] shadow-[inset_0_1px_0_rgba(16,185,129,0.12)]",
     activeIcon: "text-emerald-400 drop-shadow-[0_0_6px_rgba(16,185,129,0.6)]",
   };
-
-
 
   return (
     <div
