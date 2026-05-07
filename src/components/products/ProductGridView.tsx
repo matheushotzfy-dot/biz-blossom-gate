@@ -88,9 +88,9 @@ export function ProductGridView({ products, copiedId, toolbar, ...handlers }: Pr
             <article
               key={product.id}
               className={cn(
-                "group relative flex flex-col overflow-hidden rounded-[24px] border border-border/40 bg-card/60 backdrop-blur-sm",
+                "group relative flex flex-col overflow-hidden rounded-[28px] border border-border/50 bg-card/60 shadow-sm backdrop-blur-sm",
                 "transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)]",
-                "hover:border-primary/30 hover:shadow-[0_20px_40px_-12px_rgba(0,0,0,0.12)] hover:-translate-y-1",
+                "hover:border-primary/30 hover:shadow-[0_25px_50px_-12px_rgba(0,0,0,0.15)] hover:-translate-y-1.5",
                 isInactive && "border-destructive/30",
                 isPending && "border-warning/30",
                 isDraft && "border-dashed border-border/60",
@@ -109,24 +109,24 @@ export function ProductGridView({ products, copiedId, toolbar, ...handlers }: Pr
                     <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent opacity-60 transition-opacity duration-500 group-hover:opacity-40" />
                     <div className="pointer-events-none absolute inset-0 ring-1 ring-inset ring-white/10" />
                     
-                    <div className="absolute inset-x-0 bottom-0 z-[2] flex items-end justify-between p-4 backdrop-blur-md bg-black/40">
+                    <div className="absolute inset-x-0 bottom-0 z-[2] flex items-end justify-between p-5 backdrop-blur-md bg-black/60 border-t border-white/5">
                       <div>
-                        <p className="text-[9px] font-black uppercase tracking-[0.2em] text-white/60">Valor</p>
-                        <span className="mt-0.5 block font-display text-2xl font-black leading-none tracking-tight text-white tabular-nums">
+                        <p className="text-[9px] font-black uppercase tracking-[0.25em] text-white/50">Valor</p>
+                        <span className="mt-1 block font-display text-2xl font-black leading-none tracking-tight text-white tabular-nums">
                           {formatCurrency(Number(product.price))}
                         </span>
                       </div>
-                      <span className="rounded-full bg-white/10 border border-white/20 px-3 py-1 text-[10px] font-bold text-white uppercase tracking-wider">{deliveryLabel}</span>
+                      <span className="rounded-xl bg-white/10 border border-white/20 px-3 py-1.5 text-[10px] font-black text-white uppercase tracking-widest">{deliveryLabel}</span>
                     </div>
                   </>
                 ) : (
-                  <div className={cn("relative flex h-full w-full items-center justify-between px-6 py-4", surface)}>
-                    <div className="flex h-14 w-14 items-center justify-center rounded-2xl border border-border/60 bg-card/80 backdrop-blur-xl shadow-lg">
-                      <BookOpen className="h-6 w-6 text-primary/60" strokeWidth={1.5} />
+                  <div className={cn("relative flex h-full w-full items-center justify-between px-7 py-5", surface)}>
+                    <div className="flex h-16 w-16 items-center justify-center rounded-2xl border border-border/60 bg-card/90 backdrop-blur-xl shadow-2xl">
+                      <BookOpen className="h-7 w-7 text-primary" strokeWidth={1.5} />
                     </div>
                     <div className="min-w-0 flex-1 px-4 text-right">
-                      <p className="text-[9px] font-black uppercase tracking-[0.2em] text-muted-foreground/40">Valor de Venda</p>
-                      <p className="mt-1 font-display text-3xl font-black leading-none tracking-[-0.04em] text-foreground tabular-nums">{formatCurrency(Number(product.price))}</p>
+                      <p className="text-[9px] font-black uppercase tracking-[0.25em] text-muted-foreground/50">Preço de Venda</p>
+                      <p className="mt-2 font-display text-3xl font-black leading-none tracking-[-0.05em] text-foreground tabular-nums">{formatCurrency(Number(product.price))}</p>
                     </div>
                   </div>
                 )}
@@ -170,23 +170,23 @@ export function ProductGridView({ products, copiedId, toolbar, ...handlers }: Pr
               </div>
 
               {/* Bottom Content Section */}
-              <div className="flex flex-1 flex-col gap-4 p-5">
+              <div className="flex flex-1 flex-col gap-5 p-6">
                 <div className="min-w-0">
-                    <div className="flex items-start justify-between gap-3">
+                    <div className="flex items-start justify-between gap-4">
                       <div className="min-w-0">
-                        <h3 className="line-clamp-1 font-display text-lg font-black tracking-[-0.02em] text-foreground transition-colors group-hover:text-primary">
+                        <h3 className="line-clamp-1 font-display text-xl font-black tracking-tight text-foreground transition-colors group-hover:text-primary">
                           {product.name}
                         </h3>
-                        <div className="mt-1.5 flex items-center gap-2">
-                           <span className="text-[10px] font-black uppercase tracking-wider text-muted-foreground/40">{themeLabel}</span>
-                           <span className="h-1 w-1 rounded-full bg-border/60" />
-                           <span className="text-[10px] font-black uppercase tracking-wider text-primary/60">{deliveryLabel}</span>
+                        <div className="mt-2 flex items-center gap-2">
+                           <span className="text-[10px] font-black uppercase tracking-[0.12em] text-muted-foreground/60">{themeLabel}</span>
+                           <span className="h-1 w-1 rounded-full bg-border/80" />
+                           <span className="text-[10px] font-black uppercase tracking-[0.12em] text-primary/80">{deliveryLabel}</span>
                         </div>
                       </div>
                       {product.affiliate_enabled && (
-                        <div className="flex flex-col items-end">
-                           <span className="text-[8px] font-black uppercase tracking-widest text-muted-foreground/40 mb-1">Afiliados</span>
-                           <span className="rounded-lg bg-primary/10 border border-primary/20 px-2 py-1 text-[11px] font-black text-primary">{product.affiliate_commission}%</span>
+                        <div className="flex flex-col items-end shrink-0">
+                           <span className="text-[8px] font-black uppercase tracking-widest text-muted-foreground/50 mb-1">Afiliados</span>
+                           <span className="rounded-lg bg-primary/10 border border-primary/20 px-2 py-1 text-[11px] font-black text-primary shadow-sm shadow-primary/10">{product.affiliate_commission}%</span>
                         </div>
                       )}
                     </div>
