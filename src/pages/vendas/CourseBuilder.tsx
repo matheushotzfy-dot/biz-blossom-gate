@@ -445,14 +445,14 @@ export default function CourseBuilder() {
  const completedLessons = modules.reduce((a, m) => a + m.lessons.filter(l => l.video_url).length, 0);
  const progressPct = totalLessons > 0 ? Math.round((completedLessons / totalLessons) * 100) : 0;
 
- const editorTabs = [
- { id: "video" as const, label: "Vídeo", icon: Video },
- { id: "content" as const, label: "Conteúdo", icon: FileText },
- { id: "settings" as const, label: "Config", icon: Settings },
- ];
+  const editorTabs = [
+    { id: "video" as const, label: "Conteúdo", icon: PlayCircle },
+    { id: "content" as const, label: "Configuração", icon: Settings },
+    { id: "settings" as const, label: "Avançado", icon: Zap },
+  ];
 
   return (
-    <div className="fixed inset-0 z-[70] bg-[#030303] text-zinc-100 flex flex-col overflow-hidden selection:bg-emerald-500/30 font-sans">
+    <div className="fixed inset-0 z-[70] bg-[#050505] text-zinc-100 flex flex-col overflow-hidden selection:bg-blue-500/30 font-sans">
       {/* ═══ PREMIUM TOP BAR ═══ */}
       <header className="h-16 border-b border-white/[0.04] bg-[#050505]/80 backdrop-blur-xl flex items-center justify-between px-4 sm:px-6 shrink-0 z-50 relative">
         <div className="relative flex items-center gap-4 min-w-0">
