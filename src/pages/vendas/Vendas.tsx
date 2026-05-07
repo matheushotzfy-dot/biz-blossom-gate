@@ -533,22 +533,45 @@ export default function Vendas() {
     const current = calc(dateFiltered);
     const previous = calc(previousPeriodFiltered);
 
-    const dailyMap: Record<string, { net: number; count: number; ticket: number; pix: number; card: number; boleto: number; refunds: number; chargebacks: number; total: number }> = {};
+    const dailyMap: Record<string, { net: number; gross: number; count: number; ticket: number; pix: number; card: number; boleto: number; refunds: number; chargebacks: number; total: number }> = {};
     const prevDailyMap: Record<string, number> = {};
+
+    if (isSingleDay) {
+      for (let i = 0; i < 24; i++) {
+        const h = `${i.toString().padStart(2, "0")}h`;
+        dailyMap[h] = { net: 0, gross: 0, count: 0, ticket: 0, pix: 0, card: 0, boleto: 0, refunds: 0, chargebacks: 0, total: 0 };
+      }
+    }
+
+    const getLabel = (date: string) => isSingleDay ? fmtHour(date) : fmtDate(date);
+
     for (const t of current.approved) {
-      const day = fmtDate(t.created_at);
-      const e = dailyMap[day] || (dailyMap[day] = { net: 0, count: 0, ticket: 0, pix: 0, card: 0, boleto: 0, refunds: 0, chargebacks: 0, total: 0 });
-      e.net += Number(t.net_amount); e.count += 1;
+      const label = getLabel(t.created_at);
+      const e = dailyMap[label] || (dailyMap[label] = { net: 0, gross: 0, count: 0, ticket: 0, pix: 0, card: 0, boleto: 0, refunds: 0, chargebacks: 0, total: 0 });
+      e.net += Number(t.net_amount);
+      e.gross += Number(t.amount);
+      e.count += 1;
       if (t.payment_method === "pix") e.pix += Number(t.net_amount);
       else if (t.payment_method === "credit_card" || t.payment_method === "card") e.card += Number(t.net_amount);
       else if (t.payment_method === "boleto") e.boleto += Number(t.net_amount);
     }
-    for (const t of dateFiltered) { const day = fmtDate(t.created_at); const e = dailyMap[day] || (dailyMap[day] = { net: 0, count: 0, ticket: 0, pix: 0, card: 0, boleto: 0, refunds: 0, chargebacks: 0, total: 0 }); e.total += 1; if (t.status === "refunded") e.refunds += Number(t.amount); if (t.status === "chargeback") e.chargebacks += Number(t.amount); }
-    for (const t of previous.approved) { const day = fmtDate(t.created_at); prevDailyMap[day] = (prevDailyMap[day] || 0) + Number(t.net_amount); }
-    const dayKeys = Object.keys(dailyMap).reverse();
-    const currentDays = dayKeys.map(label => ({ label, value: dailyMap[label].net }));
-    const prevDays = Object.values(prevDailyMap);
-    const chartData = currentDays.map((d, i) => ({ ...d, previous: prevDays[i] || 0 }));
+
+    for (const t of dateFiltered) {
+      const label = getLabel(t.created_at);
+      const e = dailyMap[label] || (dailyMap[label] = { net: 0, gross: 0, count: 0, ticket: 0, pix: 0, card: 0, boleto: 0, refunds: 0, chargebacks: 0, total: 0 });
+      e.total += 1;
+      if (t.status === "refunded") e.refunds += Number(t.amount);
+      if (t.status === "chargeback") e.chargebacks += Number(t.amount);
+    }
+
+    for (const t of previous.approved) {
+      const label = getLabel(t.created_at);
+      prevDailyMap[label] = (prevDailyMap[label] || 0) + Number(t.net_amount);
+    }
+
+    const dayKeys = isSingleDay ? Object.keys(dailyMap) : Object.keys(dailyMap).reverse();
+    const currentDays = dayKeys.map(label => ({ label, value: dailyMap[label].net, gross: dailyMap[label].gross }));
+    const chartData = currentDays.map((d) => ({ ...d, previous: prevDailyMap[d.label] || 0 }));
 
     // Sparkline series per KPI
     const series = {
