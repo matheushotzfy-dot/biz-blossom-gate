@@ -219,28 +219,35 @@ export default function MemberCourse() {
  const isComplete = overallPct === 100 && totalLessons > 0;
  const activeModule = activeLesson ? modules.find(m => m.lessons.some(l => l.id === activeLesson.id)) : null;
 
-  if (loading) return (
+   if (loading) return (
     <div className="min-h-dvh flex items-center justify-center bg-[#050505]">
-      <div className="flex flex-col items-center gap-4">
-        <div className="h-12 w-12 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center">
-          <motion.div animate={{ rotate: 360 }} transition={{ duration: 1.5, repeat: Infinity, ease: "linear" }}>
-            <Play className="h-5 w-5 text-emerald-400 fill-current" />
-          </motion.div>
-        </div>
-        <div className="h-1 w-40 bg-white/5 overflow-hidden rounded-full">
-          <motion.div className="h-full w-full bg-emerald-500" animate={{ x: ["-100%", "100%"] }} transition={{ duration: 1, repeat: Infinity, ease: "easeInOut" }} />
+      <div className="flex flex-col items-center gap-6">
+        <motion.div 
+          animate={{ scale: [1, 1.1, 1], opacity: [0.5, 1, 0.5] }} 
+          transition={{ duration: 2, repeat: Infinity }}
+          className="h-16 w-16 rounded-2xl bg-white flex items-center justify-center"
+        >
+          <Play className="h-8 w-8 text-black fill-current ml-1" />
+        </motion.div>
+        <div className="h-1 w-48 bg-white/10 overflow-hidden rounded-full">
+          <motion.div className="h-full w-full bg-white" animate={{ x: ["-100%", "100%"] }} transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }} />
         </div>
       </div>
     </div>
   );
 
   if (!course) return (
-    <div className="min-h-dvh flex flex-col items-center justify-center gap-6 bg-[#050505] text-zinc-100">
-      <div className="h-20 w-20 rounded-2xl bg-zinc-900 border border-white/10 flex items-center justify-center">
-        <GraduationCap className="h-9 w-9 text-zinc-600" />
+    <div className="min-h-dvh flex flex-col items-center justify-center gap-8 bg-[#050505] text-white">
+      <div className="h-24 w-24 rounded-3xl bg-zinc-900 border border-white/5 flex items-center justify-center shadow-2xl">
+        <GraduationCap className="h-10 w-10 text-zinc-700" />
       </div>
-      <h1 className="font-display text-2xl font-black text-zinc-100 tracking-tight">Curso não encontrado</h1>
-      <Link to="/membros-area" className="text-sm text-zinc-500 hover:text-emerald-400 font-bold transition-colors">← Voltar ao início</Link>
+      <div className="text-center space-y-2">
+        <h1 className="font-display text-3xl font-black tracking-tight">Título Indisponível</h1>
+        <p className="text-zinc-500 text-sm max-w-xs mx-auto">Este conteúdo não pôde ser carregado ou você não possui as credenciais necessárias.</p>
+      </div>
+      <Link to="/membros-area" className="px-8 py-3 bg-white text-black font-black text-sm rounded-lg hover:bg-zinc-200 transition-colors uppercase tracking-widest">
+        Voltar ao Início
+      </Link>
     </div>
   );
 
@@ -250,15 +257,15 @@ export default function MemberCourse() {
   const CourseSidebar = () => (
     <div className="p-4 space-y-3">
       {/* Progress card */}
-      <div className="p-4 bg-zinc-900/50 border border-white/[0.06] rounded-lg">
-        <div className="flex items-center justify-between mb-3">
-          <span className="text-[10px] uppercase tracking-[0.2em] text-zinc-500 font-bold">Progresso</span>
-          <span className={cn("font-display text-lg font-black tabular-nums", isComplete ? "text-emerald-400" : "text-zinc-100")}>{overallPct}%</span>
+      <div className="p-5 bg-white/[0.03] border border-white/[0.05] rounded-xl backdrop-blur-md">
+        <div className="flex items-center justify-between mb-4">
+          <span className="text-[10px] uppercase tracking-[0.25em] text-zinc-500 font-black">Seu Progresso</span>
+          <span className={cn("font-display text-xl font-black tabular-nums", isComplete ? "text-emerald-400" : "text-white")}>{overallPct}%</span>
         </div>
-        <div className="h-1.5 bg-white/8 overflow-hidden rounded-full">
-          <motion.div initial={{ width: 0 }} animate={{ width: `${overallPct}%` }} transition={{ duration: 1, delay: 0.2, ease }} className={cn("h-full rounded-full", isComplete ? "bg-emerald-400" : "bg-emerald-500")} />
+        <div className="h-2 bg-white/5 overflow-hidden rounded-full">
+          <motion.div initial={{ width: 0 }} animate={{ width: `${overallPct}%` }} transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1] }} className={cn("h-full rounded-full", isComplete ? "bg-emerald-400 shadow-[0_0_12px_rgba(52,211,153,0.5)]" : "bg-white")} />
         </div>
-        <p className="text-[11px] text-zinc-600 mt-2.5 font-mono tabular-nums">{completedLessons}/{totalLessons} aulas</p>
+        <p className="text-[11px] text-zinc-500 mt-3 font-bold tracking-tight">{completedLessons} de {totalLessons} aulas concluídas</p>
         {isComplete && (
           <motion.div initial={{ opacity: 0, y: 4 }} animate={{ opacity: 1, y: 0 }} className="flex items-center gap-2 mt-3 pt-3 border-t border-emerald-500/20">
             <Trophy className="h-3.5 w-3.5 text-emerald-400" />
@@ -288,27 +295,27 @@ export default function MemberCourse() {
 
           return (
             <div key={mod.id} className={cn(
-              "rounded-lg overflow-hidden border transition-colors",
-              containsActive ? "border-emerald-500/30 bg-emerald-500/[0.03]" : "border-white/[0.06] bg-zinc-900/30 hover:border-white/10"
+              "rounded-xl overflow-hidden border transition-all duration-500",
+              containsActive ? "border-white/20 bg-white/[0.05]" : "border-white/[0.03] bg-zinc-900/20 hover:bg-white/[0.02]"
             )}>
               <button onClick={() => toggleModule(mod.id)} className="w-full text-left">
-                <div className="flex items-center gap-3 p-3.5">
+                <div className="flex items-center gap-4 p-4">
                   <div className={cn(
-                    "h-9 w-9 rounded-lg flex items-center justify-center font-display font-black text-sm tabular-nums shrink-0 border",
+                    "h-10 w-10 rounded-lg flex items-center justify-center font-display font-black text-sm tabular-nums shrink-0 border transition-all duration-500",
                     isModComplete
-                      ? "bg-emerald-500/15 text-emerald-400 border-emerald-500/30"
+                      ? "bg-emerald-500 text-black border-emerald-500"
                       : containsActive
-                      ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20"
-                      : "bg-zinc-900 text-zinc-500 border-white/10"
+                      ? "bg-white text-black border-white"
+                      : "bg-zinc-800/50 text-zinc-500 border-white/5"
                   )}>
-                    {isModComplete ? <Check className="h-4 w-4" /> : String(modIdx + 1).padStart(2, "0")}
+                    {isModComplete ? <Check className="h-5 w-5 stroke-[3]" /> : String(modIdx + 1).padStart(2, "0")}
                   </div>
                   <div className="min-w-0 flex-1">
-                    <p className="font-display text-[13px] font-bold text-zinc-200 line-clamp-1 tracking-tight">{mod.title}</p>
-                    <p className="text-[10px] text-zinc-600 font-mono tabular-nums mt-0.5">{modCompleted}/{mod.lessons.length} · {modPct}%</p>
+                    <p className="font-display text-[14px] font-black text-white line-clamp-1 tracking-tight uppercase">{mod.title}</p>
+                    <p className="text-[10px] text-zinc-500 font-bold tracking-widest uppercase mt-1">{mod.lessons.length} aulas</p>
                   </div>
-                  <motion.div animate={{ rotate: isExpanded ? 180 : 0 }} transition={{ duration: 0.2, ease }} className="shrink-0">
-                    <ChevronDown className="h-4 w-4 text-zinc-600" />
+                  <motion.div animate={{ rotate: isExpanded ? 180 : 0 }} transition={{ duration: 0.3 }} className="shrink-0">
+                    <ChevronDown className={cn("h-5 w-5 transition-colors", containsActive ? "text-white" : "text-zinc-600")} />
                   </motion.div>
                 </div>
                 {mod.lessons.length > 0 && (
