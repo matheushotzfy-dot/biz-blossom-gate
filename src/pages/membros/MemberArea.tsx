@@ -173,71 +173,65 @@ export default function MemberArea() {
   const isFiltering = search.trim() !== "" || statusFilter !== "all";
 
   return (
-    <div className="w-full pb-24 md:pb-16 -mt-px">
+    <div className="w-full pb-24 md:pb-32 bg-[#050505] text-white">
       {/* ═══ HERO CINEMATOGRÁFICO ═══ */}
       {heroCourse && !isFiltering && <HeroBanner course={heroCourse} />}
 
-      {/* ═══ Toolbar ═══ */}
-      <div className="mx-auto max-w-[1600px] px-5 sm:px-10 lg:px-14 mt-10">
-        <div className="flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
-          <div className="flex items-center gap-4">
-            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-primary/15 to-primary/5 border border-primary/20">
-              <ShoppingBag className="h-6 w-6 text-primary" strokeWidth={2} />
+      {/* ═══ Toolbar Premium ═══ */}
+      <div className="mx-auto max-w-[1800px] px-6 lg:px-16 mt-12">
+        <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
+          <div className="flex items-center gap-6">
+            <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-white text-black shadow-[0_0_30px_rgba(255,255,255,0.1)]">
+              <ShoppingBag className="h-8 w-8" strokeWidth={2.5} />
             </div>
             <div>
-              <h2 className="font-display text-3xl sm:text-4xl font-black tracking-[-0.03em] text-foreground leading-none">
-                Minha Biblioteca
+              <h2 className="font-display text-4xl lg:text-5xl font-black tracking-[-0.05em] text-white leading-none">
+                Biblioteca
               </h2>
-              <p className="text-xs text-muted-foreground mt-1.5 font-medium">
-                {stats.total} {stats.total === 1 ? "curso" : "cursos"} · {formatBRL(stats.totalSpent)} investidos · {stats.inProgress} em andamento
+              <p className="text-[11px] text-zinc-500 mt-2.5 font-black uppercase tracking-[0.2em]">
+                {stats.total} {stats.total === 1 ? "título" : "títulos"} · {formatBRL(stats.totalSpent)} investidos
               </p>
             </div>
           </div>
-          <div className="flex items-center gap-2">
-            <div className="relative flex-1 sm:flex-initial">
-              <Search className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground/60" />
+          
+          <div className="flex flex-col sm:flex-row items-center gap-4">
+            <div className="relative w-full sm:w-80">
+              <Search className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-600" />
               <input
                 value={search}
                 onChange={e => setSearch(e.target.value)}
-                placeholder="Buscar na biblioteca…"
-                className="h-12 w-full rounded-xl border border-border bg-card/60 pl-11 pr-10 text-sm text-foreground placeholder:text-muted-foreground/70 focus:border-primary/50 focus:outline-none focus:bg-card transition-colors sm:w-80"
+                placeholder="O que você quer aprender hoje?"
+                className="h-14 w-full rounded-xl bg-zinc-900/50 border border-white/5 pl-12 pr-12 text-sm text-white placeholder:text-zinc-600 focus:border-white/20 focus:outline-none focus:bg-zinc-900 transition-all"
               />
               {search && (
-                <button onClick={() => setSearch("")} className="absolute right-3.5 top-1/2 -translate-y-1/2 text-muted-foreground/60 hover:text-foreground">
+                <button onClick={() => setSearch("")} className="absolute right-4 top-1/2 -translate-y-1/2 text-zinc-600 hover:text-white">
                   <X className="h-4 w-4" />
                 </button>
               )}
             </div>
-          </div>
-        </div>
 
-        {/* Filter chips */}
-        <div className="mt-6 flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none">
-          {[
-            { key: "all" as const, label: "Tudo", count: stats.total },
-            { key: "in_progress" as const, label: "Em andamento", count: stats.inProgress },
-            { key: "not_started" as const, label: "Novos", count: newRows.length },
-            { key: "completed" as const, label: "Concluídos", count: stats.completed },
-          ].map(t => (
-            <button
-              key={t.key}
-              onClick={() => setStatusFilter(t.key)}
-              className={cn(
-                "shrink-0 inline-flex items-center gap-2 rounded-full border px-4 py-2 text-xs font-bold transition-all",
-                statusFilter === t.key
-                  ? "border-primary/40 bg-primary text-primary-foreground"
-                  : "border-border bg-card/40 text-muted-foreground hover:text-foreground hover:border-border/80"
-              )}
-            >
-              {t.label}
-              <span className={cn(
-                "tabular-nums text-[10px] rounded-full px-1.5 py-0.5",
-                statusFilter === t.key ? "bg-primary-foreground/20 text-primary-foreground" : "bg-muted/50 text-muted-foreground"
-              )}>
-                {t.count}
-              </span>
-            </button>
-          ))}
+            <div className="flex items-center gap-2 bg-zinc-900/40 p-1.5 rounded-xl border border-white/5">
+              {[
+                { key: "all" as const, label: "Tudo" },
+                { key: "in_progress" as const, label: "Retomar" },
+                { key: "not_started" as const, label: "Novos" },
+                { key: "completed" as const, label: "Concluídos" },
+              ].map(t => (
+                <button
+                  key={t.key}
+                  onClick={() => setStatusFilter(t.key)}
+                  className={cn(
+                    "px-4 py-2 text-[11px] font-black uppercase tracking-wider transition-all rounded-lg",
+                    statusFilter === t.key
+                      ? "bg-white text-black shadow-lg"
+                      : "text-zinc-500 hover:text-zinc-300"
+                  )}
+                >
+                  {t.label}
+                </button>
+              ))}
+            </div>
+          </div>
         </div>
       </div>
 
