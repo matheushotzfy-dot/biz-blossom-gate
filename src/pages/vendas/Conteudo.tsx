@@ -231,7 +231,7 @@ export default function AdminConteudo() {
     published: <CheckCircle2 className="h-3 w-3" strokeWidth={2.5} />,
     draft: <FileEdit className="h-3 w-3" strokeWidth={2.5} />,
   };
-
+  return (
     <div className="mx-auto -mt-2 w-full max-w-[1600px] pb-24 md:-mt-3 md:pb-10 bg-[#050505] min-h-screen text-white selection:bg-blue-500/30">
       {/* ── Hero header ── */}
       <div className="relative flex flex-col gap-10 px-6 pt-12 sm:px-10">
