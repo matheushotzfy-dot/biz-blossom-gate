@@ -252,62 +252,49 @@ export default function AdminOverviewTab({ transactions, profiles, products, wit
 
  return (
  <motion.div variants={stagger} initial="hidden" animate="show" className="space-y-6">
- {/* ═══ HERO SECTION — Lucro da Plataforma ═══ */}
- <motion.div variants={fadeUp} className="relative overflow-hidden rounded-3xl border border-emerald-500/[0.08] p-6 sm:p-8 lg:p-10"
- style={{ background: "linear-gradient(135deg, rgba(6,24,14,0.95) 0%, rgba(8,28,18,0.9) 40%, rgba(4,20,10,0.95) 100%)" }}>
- {/* Ambient glows */}
- <div className="absolute inset-0 pointer-events-none overflow-hidden">
- <motion.div animate={{ opacity: [0.15, 0.3, 0.15] }} transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
- className="absolute -top-32 -left-32 w-[500px] h-[500px] bg-emerald-500/20 rounded-full blur-[120px]" />
- <motion.div animate={{ opacity: [0.1, 0.2, 0.1] }} transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
- className="absolute -bottom-32 -right-32 w-[400px] h-[400px] bg-teal-500/15 rounded-full blur-[100px]" />
- <motion.div animate={{ scale: [1, 1.1, 1], opacity: [0.08, 0.15, 0.08] }} transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}
- className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[300px] bg-emerald-400/10 rounded-full blur-[150px]" />
- <div className="absolute inset-0 opacity-[0.02]" style={{ backgroundImage: "radial-gradient(rgba(255,255,255,0.8) 1px, transparent 1px)", backgroundSize: "28px 28px" }} />
- </div>
+  {/* ═══ GOD MODE HERO — Plataforma Lucro ═══ */}
+  <motion.div variants={fadeUp} className="relative overflow-hidden rounded-[2.5rem] border border-emerald-500/[0.12] p-8 sm:p-12 shadow-[0_40px_100px_rgba(0,0,0,0.8)]"
+    style={{ background: "linear-gradient(135deg, rgba(2,6,23,0.98) 0%, rgba(6,18,16,0.95) 40%, rgba(2,6,23,0.98) 100%)" }}>
+    
+    <div className="absolute inset-0 pointer-events-none overflow-hidden">
+      <motion.div animate={{ opacity: [0.15, 0.3, 0.15], scale: [1, 1.1, 1] }} transition={{ duration: 10, repeat: Infinity }}
+        className="absolute top-[-20%] left-[-10%] w-[80%] h-[80%] bg-emerald-500/10 rounded-full blur-[150px]" />
+      <div className="absolute inset-0 opacity-[0.03]" style={{ backgroundImage: "radial-gradient(rgba(16,185,129,0.8) 1px, transparent 1px)", backgroundSize: "40px 40px" }} />
+    </div>
 
- <div className="relative z-10">
- <div className="flex items-center gap-3 mb-8">
- <div className="h-px flex-1 max-w-[40px] bg-gradient-to-r from-emerald-500/50 to-transparent" />
- <div className="flex items-center gap-2">
- <Crown className="h-3 w-3 text-emerald-400/60" />
- <p className="text-[9px] font-black uppercase tracking-[0.35em] bg-gradient-to-r from-emerald-400 via-teal-300 to-emerald-400 bg-clip-text text-transparent">
- Lucro da Plataforma
- </p>
- </div>
- <div className="h-px flex-1 max-w-[40px] bg-gradient-to-l from-emerald-500/50 to-transparent" />
- </div>
+    <div className="relative z-10 flex flex-col items-center text-center space-y-6">
+      <div className="flex items-center gap-4 px-4 py-1.5 rounded-full bg-white/[0.03] border border-white/[0.08] backdrop-blur-md">
+        <div className="flex items-center gap-2">
+          <span className="relative flex h-2 w-2">
+            <span className="absolute h-full w-full animate-ping rounded-full bg-emerald-400 opacity-40" />
+            <span className="relative h-2 w-2 rounded-full bg-emerald-400" />
+          </span>
+          <span className="text-[10px] font-black uppercase tracking-[0.3em] text-white/40">Plataforma em Tempo Real</span>
+        </div>
+      </div>
 
- <div className="text-center mb-6 sm:mb-8">
- <p className="text-[36px] sm:text-[52px] lg:text-[68px] xl:text-[88px] font-black leading-[0.85] tracking-[-0.04em] text-white"
- style={{ fontFamily: "'Space Grotesk', monospace", textShadow: "0 0 120px rgba(16,185,129,0.25), 0 0 60px rgba(16,185,129,0.1)" }}>
- {fmtCurrency(takeRateTotal)}
- </p>
- <p className="text-[11px] sm:text-[12px] text-white/30 mt-3 sm:mt-4 font-medium">
- Take Rate: <span className="text-emerald-400 font-bold">{takeRatePct}%</span> · TPV: <span className="text-white/50 font-bold">{fmtCurrency(totalVolume)}</span>
- </p>
- </div>
+      <div className="space-y-1">
+        <p className="text-[10px] font-black uppercase tracking-[0.5em] text-white/20 mb-4">LUCRO TOTAL DA PLATAFORMA</p>
+        <h1 className="text-6xl sm:text-8xl lg:text-9xl font-black tracking-tighter text-white"
+          style={{ fontFamily: "'Space Grotesk', system-ui, sans-serif", textShadow: "0 0 80px rgba(16,185,129,0.3)" }}>
+          {fmtCurrency(takeRateTotal)}
+        </h1>
+      </div>
 
- <div className="flex flex-wrap items-center justify-center gap-2">
- <span className="inline-flex items-center gap-1.5 text-[10px] text-white/30 font-semibold bg-white/[0.04] border border-white/[0.06] rounded-full px-3 py-1.5">
- <CheckCircle2 className="h-3 w-3 text-emerald-400" /> {filteredApproved.length} aprovadas
- </span>
- <span className="inline-flex items-center gap-1.5 text-[10px] text-white/30 font-semibold bg-white/[0.04] border border-white/[0.06] rounded-full px-3 py-1.5">
- <Users className="h-3 w-3 text-teal-400" /> {activeSellersToday} sellers
- </span>
- <span className="inline-flex items-center gap-1.5 text-[10px] text-white/30 font-semibold bg-white/[0.04] border border-white/[0.06] rounded-full px-3 py-1.5">
- <Target className="h-3 w-3 text-emerald-400" /> {conversionRate}% conv.
- </span>
- <span className="inline-flex items-center gap-1.5 text-[10px] text-white/30 font-semibold bg-white/[0.04] border border-white/[0.06] rounded-full px-3 py-1.5">
- <span className="relative flex h-1.5 w-1.5">
- <span className="absolute h-full w-full animate-ping rounded-full bg-emerald-400 opacity-40" />
- <span className="relative h-1.5 w-1.5 rounded-full bg-emerald-400" />
- </span>
- Live
- </span>
- </div>
- </div>
- </motion.div>
+      <div className="flex flex-wrap items-center justify-center gap-4 pt-4">
+        <div className="flex flex-col items-center">
+          <span className="text-[10px] font-bold text-white/30 uppercase tracking-widest mb-1">Volume Total (TPV)</span>
+          <span className="text-xl font-black text-white/80">{fmtCurrency(totalVolume)}</span>
+        </div>
+        <div className="w-px h-8 bg-white/5 mx-2" />
+        <div className="flex flex-col items-center">
+          <span className="text-[10px] font-bold text-white/30 uppercase tracking-widest mb-1">Taxa de Serviço Média</span>
+          <span className="text-xl font-black text-emerald-400">{takeRatePct}%</span>
+        </div>
+      </div>
+    </div>
+  </motion.div>
+
 
  {/* ═══ HERO METRICS — 4 KPIs ═══ */}
  <motion.div variants={fadeUp} className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
