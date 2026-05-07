@@ -120,13 +120,13 @@ export function ProductGridView({ products, copiedId, toolbar, ...handlers }: Pr
                     </div>
                   </>
                 ) : (
-                  <div className={cn("relative flex h-full w-full items-center justify-between px-6 py-4", surface)}>
-                    <div className="flex h-14 w-14 items-center justify-center rounded-2xl border border-border/60 bg-card/80 backdrop-blur-xl shadow-lg">
-                      <BookOpen className="h-6 w-6 text-primary/60" strokeWidth={1.5} />
+                  <div className={cn("relative flex h-full w-full items-center justify-between px-7 py-5", surface)}>
+                    <div className="flex h-16 w-16 items-center justify-center rounded-2xl border border-border/60 bg-card/90 backdrop-blur-xl shadow-2xl">
+                      <BookOpen className="h-7 w-7 text-primary" strokeWidth={1.5} />
                     </div>
                     <div className="min-w-0 flex-1 px-4 text-right">
-                      <p className="text-[9px] font-black uppercase tracking-[0.2em] text-muted-foreground/40">Valor de Venda</p>
-                      <p className="mt-1 font-display text-3xl font-black leading-none tracking-[-0.04em] text-foreground tabular-nums">{formatCurrency(Number(product.price))}</p>
+                      <p className="text-[9px] font-black uppercase tracking-[0.25em] text-muted-foreground/50">Preço de Venda</p>
+                      <p className="mt-2 font-display text-3xl font-black leading-none tracking-[-0.05em] text-foreground tabular-nums">{formatCurrency(Number(product.price))}</p>
                     </div>
                   </div>
                 )}
