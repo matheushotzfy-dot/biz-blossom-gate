@@ -170,23 +170,23 @@ export function ProductGridView({ products, copiedId, toolbar, ...handlers }: Pr
               </div>
 
               {/* Bottom Content Section */}
-              <div className="flex flex-1 flex-col gap-4 p-5">
+              <div className="flex flex-1 flex-col gap-5 p-6">
                 <div className="min-w-0">
-                    <div className="flex items-start justify-between gap-3">
+                    <div className="flex items-start justify-between gap-4">
                       <div className="min-w-0">
-                        <h3 className="line-clamp-1 font-display text-lg font-black tracking-[-0.02em] text-foreground transition-colors group-hover:text-primary">
+                        <h3 className="line-clamp-1 font-display text-xl font-black tracking-tight text-foreground transition-colors group-hover:text-primary">
                           {product.name}
                         </h3>
-                        <div className="mt-1.5 flex items-center gap-2">
-                           <span className="text-[10px] font-black uppercase tracking-wider text-muted-foreground/40">{themeLabel}</span>
-                           <span className="h-1 w-1 rounded-full bg-border/60" />
-                           <span className="text-[10px] font-black uppercase tracking-wider text-primary/60">{deliveryLabel}</span>
+                        <div className="mt-2 flex items-center gap-2">
+                           <span className="text-[10px] font-black uppercase tracking-[0.12em] text-muted-foreground/60">{themeLabel}</span>
+                           <span className="h-1 w-1 rounded-full bg-border/80" />
+                           <span className="text-[10px] font-black uppercase tracking-[0.12em] text-primary/80">{deliveryLabel}</span>
                         </div>
                       </div>
                       {product.affiliate_enabled && (
-                        <div className="flex flex-col items-end">
-                           <span className="text-[8px] font-black uppercase tracking-widest text-muted-foreground/40 mb-1">Afiliados</span>
-                           <span className="rounded-lg bg-primary/10 border border-primary/20 px-2 py-1 text-[11px] font-black text-primary">{product.affiliate_commission}%</span>
+                        <div className="flex flex-col items-end shrink-0">
+                           <span className="text-[8px] font-black uppercase tracking-widest text-muted-foreground/50 mb-1">Afiliados</span>
+                           <span className="rounded-lg bg-primary/10 border border-primary/20 px-2 py-1 text-[11px] font-black text-primary shadow-sm shadow-primary/10">{product.affiliate_commission}%</span>
                         </div>
                       )}
                     </div>
