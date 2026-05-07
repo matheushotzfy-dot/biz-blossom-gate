@@ -183,6 +183,7 @@ export default function AdminDashboard() {
   });
   const [themePickerOpen, setThemePickerOpen] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
 
   const themeConfig = ADMIN_THEMES[adminTheme];
 
