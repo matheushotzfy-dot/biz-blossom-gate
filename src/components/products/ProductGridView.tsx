@@ -1,7 +1,8 @@
-import { Copy, Crosshair, ExternalLink, Link2, Palette, Pencil, Settings2, Sparkles, Check, BookOpen, ArrowUpRight, AlertTriangle, Trash2, FileEdit, Info } from "lucide-react";
+import { Copy, Crosshair, ExternalLink, Link2, Palette, Pencil, Check, BookOpen, Trash2, FileEdit } from "lucide-react";
 import { ProductActionsMenu, type ProductMenuHandlers } from "./ProductActionsMenu";
 import { DELIVERY_LABELS, formatCurrency, type Product, getCheckoutLink, getEffectiveStatus, getProductRequirements } from "./productPresentation";
 import { cn } from "@/lib/utils";
+import { Card, CardContent } from "@/components/ui/card";
 
 type ProductGridViewProps = ProductMenuHandlers & {
   copiedId: string | null;
@@ -36,22 +37,11 @@ const STATUS_META: Record<string, { label: string; dot: string; text: string; su
   },
 };
 
-const THUMB_SURFACES = [
-  "bg-card-inset border-border/60",
-  "bg-secondary border-border/60",
-  "bg-accent border-border/60",
-];
-
 const THEME_LABELS: Record<string, string> = {
   default: "Padrão",
   dark: "Cinza Escuro",
   light: "Cinza Suave",
   premium: "Premium",
-};
-
-const surfaceFor = (id: string) => {
-  const sum = id.split("").reduce((a, c) => a + c.charCodeAt(0), 0);
-  return THUMB_SURFACES[sum % THUMB_SURFACES.length];
 };
 
 const shortenLink = (url: string) => {
@@ -68,7 +58,7 @@ export function ProductGridView({ products, copiedId, toolbar, ...handlers }: Pr
     <div className="mx-auto w-full max-w-[1280px]">
       {toolbar && <div className="mb-5">{toolbar}</div>}
 
-      <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
+      <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
         {products.map((product) => {
           const effectiveStatus = getEffectiveStatus(product);
           const status = STATUS_META[effectiveStatus] || STATUS_META.inactive;
@@ -77,126 +67,117 @@ export function ProductGridView({ products, copiedId, toolbar, ...handlers }: Pr
           const isPending = effectiveStatus === "pending_review";
           const requirements = isDraft ? getProductRequirements(product) : [];
           const missingCount = requirements.filter((r) => !r.done).length;
-          const initial = product.name.charAt(0).toUpperCase();
           const deliveryLabel = DELIVERY_LABELS[product.delivery_type] || product.delivery_type;
           const isCopied = copiedId === product.id;
-          const surface = surfaceFor(product.id);
           const themeLabel = THEME_LABELS[product.checkout_theme || "default"] || "Padrão";
           const linkPreview = product.checkout_url ? shortenLink(product.checkout_url) : null;
 
           return (
-            <article
+            <Card
               key={product.id}
               className={cn(
-                "group relative flex flex-col overflow-hidden rounded-[28px] border border-border/50 bg-card/60 shadow-sm backdrop-blur-sm",
-                "transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)]",
-                "hover:border-primary/30 hover:shadow-[0_25px_50px_-12px_rgba(0,0,0,0.15)] hover:-translate-y-1.5",
+                "group relative overflow-hidden border-border/40 hover:border-border transition-all",
                 isInactive && "border-destructive/30",
                 isPending && "border-warning/30",
                 isDraft && "border-dashed border-border/60",
               )}
             >
-              {/* Top Image Section */}
-              <div className="relative aspect-[16/10] w-full overflow-hidden bg-card-inset after:pointer-events-none after:absolute after:inset-x-0 after:bottom-[-1px] after:z-[5] after:h-[3px] after:bg-card">
+              {/* Image / Pricing Area */}
+              <div className="relative aspect-[16/10] w-full overflow-hidden bg-muted/30">
                 {product.image_url ? (
                   <>
                     <img
                       src={product.image_url}
                       alt={product.name}
                       loading="lazy"
-                      className="h-full w-full object-cover transition-transform duration-1000 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:scale-110"
+                      className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
                     />
-                    <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent opacity-60 transition-opacity duration-500 group-hover:opacity-40" />
-                    <div className="pointer-events-none absolute inset-0 ring-1 ring-inset ring-white/10" />
+                    <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-background/90 via-background/30 to-transparent" />
                     
-                    <div className="absolute inset-x-0 bottom-0 z-[2] flex items-end justify-between p-5 backdrop-blur-md bg-black/60 border-t border-white/5">
+                    <div className="absolute inset-x-0 bottom-0 z-[2] flex items-end justify-between p-5">
                       <div>
-                        <p className="text-[9px] font-black uppercase tracking-[0.25em] text-white/50">Valor</p>
-                        <span className="mt-1 block font-display text-2xl font-black leading-none tracking-tight text-white tabular-nums">
+                        <p className="text-[9px] font-black uppercase tracking-[0.25em] text-muted-foreground">Valor</p>
+                        <span className="mt-1 block text-2xl font-black leading-none tracking-tight text-foreground tabular-nums">
                           {formatCurrency(Number(product.price))}
                         </span>
                       </div>
-                      <span className="rounded-xl bg-white/10 border border-white/20 px-3 py-1.5 text-[10px] font-black text-white uppercase tracking-widest">{deliveryLabel}</span>
+                      <span className="rounded-2xl bg-primary/10 border border-primary/20 px-3 py-1.5 text-[10px] font-black text-primary uppercase tracking-widest">{deliveryLabel}</span>
                     </div>
                   </>
                 ) : (
-                  <div className={cn("relative flex h-full w-full items-center justify-between px-7 py-5", surface)}>
-                    <div className="flex h-16 w-16 items-center justify-center rounded-2xl border border-border/60 bg-card/90 backdrop-blur-xl shadow-2xl">
-                      <BookOpen className="h-7 w-7 text-primary" strokeWidth={1.5} />
+                  <div className="relative flex h-full w-full items-center justify-between px-7 py-5 bg-muted/20">
+                    <div className="flex h-14 w-14 items-center justify-center rounded-2xl border border-border/60 bg-card">
+                      <BookOpen className="h-6 w-6 text-primary/60" strokeWidth={1.5} />
                     </div>
                     <div className="min-w-0 flex-1 px-4 text-right">
-                      <p className="text-[9px] font-black uppercase tracking-[0.25em] text-muted-foreground/50">Preço de Venda</p>
-                      <p className="mt-2 font-display text-3xl font-black leading-none tracking-[-0.05em] text-foreground tabular-nums">{formatCurrency(Number(product.price))}</p>
+                      <p className="text-[9px] font-black uppercase tracking-[0.25em] text-muted-foreground/60">Preço de Venda</p>
+                      <p className="mt-1 text-3xl font-black leading-none tracking-tight text-foreground tabular-nums">{formatCurrency(Number(product.price))}</p>
                     </div>
                   </div>
                 )}
 
-                {/* Faixa de revisão/inativo — overlay no topo da foto, não desalinha cards */}
+                {/* Inactive / Pending banner overlay */}
                 {(isInactive || isPending) && (
                   <div className={cn(
-                    "absolute inset-x-0 top-0 z-10 flex items-center justify-between gap-3 border-b px-4 py-2",
+                    "absolute inset-x-0 top-0 z-10 flex items-center gap-2 border-b px-4 py-2",
                     isInactive
                       ? "border-destructive/30 bg-destructive/95"
                       : "border-warning/30 bg-warning/95"
                   )}>
-                    <span className="flex items-center gap-2 min-w-0">
-                      <span className="relative flex h-1.5 w-1.5 shrink-0">
-                        <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-white opacity-70" />
-                        <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-white" />
-                      </span>
-                      <span className={cn(
-                        "truncate font-display text-[10.5px] font-bold uppercase tracking-[0.18em]",
-                        isInactive ? "text-destructive-foreground" : "text-warning-foreground"
-                      )}>
-                        {isInactive ? "Inativado pela equipe" : "Em análise pela equipe"}
-                      </span>
+                    <span className="relative flex h-1.5 w-1.5 shrink-0">
+                      <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-white opacity-70" />
+                      <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-white" />
+                    </span>
+                    <span className={cn(
+                      "truncate text-[10.5px] font-bold uppercase tracking-[0.18em]",
+                      isInactive ? "text-destructive-foreground" : "text-warning-foreground"
+                    )}>
+                      {isInactive ? "Inativado pela equipe" : "Em análise pela equipe"}
                     </span>
                   </div>
                 )}
 
-                {/* Status Badge — só quando não está em revisão/inativo */}
+                {/* Status Badge */}
                 {!(isInactive || isPending) && (
                   <div className="absolute right-4 top-4 z-10">
                     <span className={cn(
-                      "inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-[10px] font-black uppercase tracking-wider",
+                      "inline-flex items-center gap-1.5 rounded-2xl border px-3 py-1.5 text-[10px] font-black uppercase tracking-wider",
                       status.surface,
                       status.text,
                     )}>
-                      <span className={cn("h-1.5 w-1.5 rounded-full animate-pulse", status.dot)} />
+                      <span className={cn("h-1.5 w-1.5 rounded-full", status.dot)} />
                       {status.label}
                     </span>
                   </div>
                 )}
               </div>
 
-              {/* Bottom Content Section */}
-              <div className="flex flex-1 flex-col gap-5 p-6">
-                <div className="min-w-0">
-                    <div className="flex items-start justify-between gap-4">
-                      <div className="min-w-0">
-                        <h3 className="line-clamp-1 font-display text-xl font-black tracking-tight text-foreground transition-colors group-hover:text-primary">
-                          {product.name}
-                        </h3>
-                        <div className="mt-2 flex items-center gap-2">
-                           <span className="text-[10px] font-black uppercase tracking-[0.12em] text-muted-foreground/60">{themeLabel}</span>
-                           <span className="h-1 w-1 rounded-full bg-border/80" />
-                           <span className="text-[10px] font-black uppercase tracking-[0.12em] text-primary/80">{deliveryLabel}</span>
-                        </div>
-                      </div>
-                      {product.affiliate_enabled && (
-                        <div className="flex flex-col items-end shrink-0">
-                           <span className="text-[8px] font-black uppercase tracking-widest text-muted-foreground/50 mb-1">Afiliados</span>
-                           <span className="rounded-lg bg-primary/10 border border-primary/20 px-2 py-1 text-[11px] font-black text-primary shadow-sm shadow-primary/10">{product.affiliate_commission}%</span>
-                        </div>
-                      )}
+              {/* Content */}
+              <CardContent className="flex flex-1 flex-col gap-5 p-6">
+                <div className="flex items-start justify-between gap-3">
+                  <div className="min-w-0">
+                    <h3 className="line-clamp-1 text-lg font-black tracking-tight text-foreground transition-colors group-hover:text-primary">
+                      {product.name}
+                    </h3>
+                    <div className="mt-1.5 flex items-center gap-2">
+                      <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/40">{themeLabel}</span>
+                      <span className="h-1 w-1 rounded-full bg-border" />
+                      <span className="text-[10px] font-black uppercase tracking-widest text-primary/60">{deliveryLabel}</span>
                     </div>
+                  </div>
+                  {product.affiliate_enabled && (
+                    <div className="flex flex-col items-end shrink-0">
+                      <span className="text-[8px] font-black uppercase tracking-widest text-muted-foreground/40 mb-1">Afiliados</span>
+                      <span className="rounded-xl bg-primary/10 border border-primary/20 px-2 py-1 text-[11px] font-black text-primary">{product.affiliate_commission}%</span>
+                    </div>
+                  )}
                 </div>
 
-                {/* DRAFT mode: pendency checklist + giant delete button */}
+                {/* DRAFT: requirements checklist */}
                 {isDraft ? (
                   <>
-                    <div className="rounded-xl border border-dashed border-border/50 bg-muted/10 p-3.5">
-                      <div className="mb-2.5 flex items-center justify-between">
+                    <div className="rounded-2xl border border-dashed border-border/50 bg-muted/10 p-4">
+                      <div className="mb-3 flex items-center justify-between">
                         <p className="inline-flex items-center gap-1.5 text-[10px] font-black uppercase tracking-wider text-muted-foreground">
                           <FileEdit className="h-3 w-3" /> Falta terminar
                         </p>
@@ -204,7 +185,7 @@ export function ProductGridView({ products, copiedId, toolbar, ...handlers }: Pr
                           {missingCount} {missingCount === 1 ? "item" : "itens"}
                         </span>
                       </div>
-                      <ul className="space-y-1.5">
+                      <ul className="space-y-2">
                         {requirements.map((r) => (
                           <li key={r.key} className="flex items-center gap-2 text-[11.5px]">
                             {r.done ? (
@@ -224,7 +205,7 @@ export function ProductGridView({ products, copiedId, toolbar, ...handlers }: Pr
                       <button
                         type="button"
                         onClick={(e) => { e.stopPropagation(); handlers.onEditProduct(product); }}
-                        className="flex h-12 items-center justify-center gap-2 rounded-xl bg-primary text-[12.5px] font-black uppercase tracking-wider text-primary-foreground transition-all hover:bg-primary/90 hover:-translate-y-px"
+                        className="flex h-12 items-center justify-center gap-2 rounded-2xl bg-primary text-[12.5px] font-black uppercase tracking-wider text-primary-foreground transition-all hover:scale-[1.02] active:scale-[0.98] shadow-sm shadow-primary/20"
                       >
                         <Pencil className="h-4 w-4" strokeWidth={2.5} />
                         Continuar
@@ -232,7 +213,7 @@ export function ProductGridView({ products, copiedId, toolbar, ...handlers }: Pr
                       <button
                         type="button"
                         onClick={(e) => { e.stopPropagation(); handlers.onDeleteProduct(product); }}
-                        className="flex h-12 items-center justify-center gap-2 rounded-xl border border-destructive/40 bg-destructive/[0.06] px-4 text-[12px] font-black uppercase tracking-wider text-destructive transition-all hover:bg-destructive hover:text-destructive-foreground"
+                        className="flex h-12 items-center justify-center gap-2 rounded-2xl border border-destructive/40 bg-destructive/[0.06] px-4 text-[12px] font-black uppercase tracking-wider text-destructive transition-all hover:bg-destructive hover:text-destructive-foreground"
                         title="Excluir rascunho"
                       >
                         <Trash2 className="h-4 w-4" strokeWidth={2.5} />
@@ -243,34 +224,34 @@ export function ProductGridView({ products, copiedId, toolbar, ...handlers }: Pr
                 ) : (
                   <>
                     {/* Quick Info Grid */}
-                    <div className="grid grid-cols-2 gap-2">
-                      <div className="rounded-xl border border-border/20 bg-muted/5 p-3 transition-colors group-hover:bg-muted/10">
-                        <p className="text-[9px] font-black uppercase tracking-widest text-muted-foreground/30">Checkout</p>
-                        <div className="mt-1 flex items-center gap-1.5">
-                           <Check className={cn("h-3 w-3", product.checkout_url ? "text-success" : "text-muted-foreground/30")} />
-                           <p className="text-[12px] font-bold text-foreground/80">{product.checkout_url ? "Publicado" : "Pendente"}</p>
+                    <div className="grid grid-cols-2 gap-3">
+                      <div className="rounded-2xl border border-border/30 bg-muted/10 p-3.5">
+                        <p className="text-[9px] font-black uppercase tracking-widest text-muted-foreground/40">Checkout</p>
+                        <div className="mt-1.5 flex items-center gap-1.5">
+                          <Check className={cn("h-3 w-3", product.checkout_url ? "text-success" : "text-muted-foreground/30")} />
+                          <p className="text-[12px] font-bold text-foreground/80">{product.checkout_url ? "Publicado" : "Pendente"}</p>
                         </div>
                       </div>
-                      <div className="rounded-xl border border-border/20 bg-muted/5 p-3 transition-colors group-hover:bg-muted/10">
-                        <p className="text-[9px] font-black uppercase tracking-widest text-muted-foreground/30">Layout</p>
-                        <div className="mt-1 flex items-center gap-1.5">
-                           <Palette className="h-3 w-3 text-primary/60" />
-                           <p className="text-[12px] font-bold text-foreground/80">{themeLabel}</p>
+                      <div className="rounded-2xl border border-border/30 bg-muted/10 p-3.5">
+                        <p className="text-[9px] font-black uppercase tracking-widest text-muted-foreground/40">Layout</p>
+                        <div className="mt-1.5 flex items-center gap-1.5">
+                          <Palette className="h-3 w-3 text-primary/60" />
+                          <p className="text-[12px] font-bold text-foreground/80">{themeLabel}</p>
                         </div>
                       </div>
                     </div>
 
-                    {/* Checkout Link Copy */}
+                    {/* Checkout Link */}
                     {linkPreview && (
                       <button
                         type="button"
                         onClick={(e) => { e.stopPropagation(); handlers.onCopyLink(product); }}
-                        className="group/link flex items-center gap-2.5 rounded-xl border border-dashed border-border/40 bg-muted/5 px-3 py-2.5 text-left transition-all hover:border-primary/40 hover:bg-primary/[0.02]"
+                        className="group/link flex items-center gap-2.5 rounded-2xl border border-dashed border-border/40 bg-muted/5 px-3.5 py-3 text-left transition-all hover:border-primary/40 hover:bg-primary/[0.02]"
                       >
-                        <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-lg bg-primary/10 transition-transform group-hover/link:scale-110">
+                        <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-xl bg-primary/10 transition-transform group-hover/link:scale-110">
                           <Link2 className="h-3.5 w-3.5 text-primary" strokeWidth={2.5} />
                         </div>
-                        <span className="flex-1 truncate font-display text-[11px] font-bold text-muted-foreground/70">{linkPreview}</span>
+                        <span className="flex-1 truncate text-[11px] font-bold text-muted-foreground/70">{linkPreview}</span>
                         {isCopied ? (
                           <Check className="h-4 w-4 shrink-0 text-success" strokeWidth={3} />
                         ) : (
@@ -279,22 +260,22 @@ export function ProductGridView({ products, copiedId, toolbar, ...handlers }: Pr
                       </button>
                     )}
 
-                    {/* Action Bar — Premium: primary CTA + icon cluster */}
-                    <div className="mt-auto flex items-stretch gap-1.5 pt-1">
+                    {/* Action Bar */}
+                    <div className="mt-auto flex items-stretch gap-2 pt-1">
                       <button
                         type="button"
                         onClick={(e) => { e.stopPropagation(); handlers.onEditProduct(product); }}
-                        className="group/edit flex h-10 flex-1 items-center justify-center gap-2 rounded-lg border border-primary/30 bg-primary/[0.06] text-[11.5px] font-bold tracking-tight text-foreground transition-colors hover:border-primary/50 hover:bg-primary/[0.10] hover:text-primary"
+                        className="group/edit flex h-11 flex-1 items-center justify-center gap-2 rounded-2xl border border-primary/30 bg-primary/[0.06] text-[11.5px] font-black tracking-tight text-foreground transition-all hover:border-primary/50 hover:bg-primary/[0.10] hover:text-primary"
                       >
                         <Pencil className="h-3.5 w-3.5 text-primary/80 transition-colors group-hover/edit:text-primary" strokeWidth={2.25} />
-                        <span className="font-display">Editar produto</span>
+                        Editar produto
                       </button>
 
-                      <div className="flex items-stretch rounded-lg border border-border/40 bg-card divide-x divide-border/40 overflow-hidden">
+                      <div className="flex items-stretch rounded-2xl border border-border/40 bg-card divide-x divide-border/40 overflow-hidden">
                         <button
                           type="button"
                           onClick={(e) => { e.stopPropagation(); window.location.assign(`/vendas/produtos/${product.id}/checkout-builder`); }}
-                          className="flex h-10 w-10 items-center justify-center text-muted-foreground/70 transition-colors hover:bg-muted/40 hover:text-primary"
+                          className="flex h-11 w-11 items-center justify-center text-muted-foreground/70 transition-colors hover:bg-muted/40 hover:text-primary"
                           title="Checkout builder"
                           aria-label="Checkout builder"
                         >
@@ -303,7 +284,7 @@ export function ProductGridView({ products, copiedId, toolbar, ...handlers }: Pr
                         <button
                           type="button"
                           onClick={(e) => { e.stopPropagation(); handlers.onOpenPixels(product); }}
-                          className="flex h-10 w-10 items-center justify-center text-muted-foreground/70 transition-colors hover:bg-muted/40 hover:text-primary"
+                          className="flex h-11 w-11 items-center justify-center text-muted-foreground/70 transition-colors hover:bg-muted/40 hover:text-primary"
                           title="Pixels & tracking"
                           aria-label="Pixels & tracking"
                         >
@@ -313,7 +294,7 @@ export function ProductGridView({ products, copiedId, toolbar, ...handlers }: Pr
                           <button
                             type="button"
                             onClick={(e) => { e.stopPropagation(); handlers.onOpenCheckout(product); }}
-                            className="flex h-10 w-10 items-center justify-center text-muted-foreground/70 transition-colors hover:bg-muted/40 hover:text-primary"
+                            className="flex h-11 w-11 items-center justify-center text-muted-foreground/70 transition-colors hover:bg-muted/40 hover:text-primary"
                             title="Abrir checkout"
                             aria-label="Abrir checkout"
                           >
@@ -324,7 +305,7 @@ export function ProductGridView({ products, copiedId, toolbar, ...handlers }: Pr
                           <ProductActionsMenu
                             copied={isCopied}
                             product={product}
-                            triggerClassName="flex h-10 w-10 items-center justify-center text-muted-foreground/70 hover:bg-muted/40 hover:text-primary data-[state=open]:bg-muted/40 data-[state=open]:text-primary transition-colors border-0 rounded-none bg-transparent"
+                            triggerClassName="flex h-11 w-11 items-center justify-center text-muted-foreground/70 hover:bg-muted/40 hover:text-primary data-[state=open]:bg-muted/40 data-[state=open]:text-primary transition-colors border-0 rounded-none bg-transparent"
                             {...handlers}
                           />
                         </div>
@@ -332,15 +313,15 @@ export function ProductGridView({ products, copiedId, toolbar, ...handlers }: Pr
                     </div>
                   </>
                 )}
-              </div>
-            </article>
+              </CardContent>
+            </Card>
           );
         })}
       </div>
 
       <div className="mt-5 flex items-center justify-between px-1 text-[11.5px] text-muted-foreground/70">
         <span>
-          <span className="font-mono font-semibold text-foreground/80 tabular-nums">{products.length}</span>{" "}
+          <span className="font-mono font-black text-foreground/80 tabular-nums">{products.length}</span>{" "}
           {products.length === 1 ? "produto" : "produtos"}
         </span>
       </div>
