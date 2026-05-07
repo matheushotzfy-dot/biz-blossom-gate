@@ -276,22 +276,25 @@ export default function CourseCreationWizard({ open, onOpenChange, products, edi
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="flex h-[100dvh] max-h-[100dvh] w-[100vw] max-w-[100vw] flex-col gap-0 overflow-hidden border-0 bg-background p-0 rounded-none">
+      <DialogContent className="flex h-[100dvh] max-h-[100dvh] w-[100vw] max-w-[100vw] flex-col gap-0 overflow-hidden border-0 bg-[#050505] p-0 rounded-none text-white">
         {/* HEADER */}
-        <header className="shrink-0 border-b border-border bg-card">
-          <div className="mx-auto max-w-[920px] px-6 py-4 flex items-center justify-between gap-4">
+        <header className="shrink-0 border-b border-white/[0.04] bg-[#080808]/80 backdrop-blur-xl z-50">
+          <div className="mx-auto max-w-[920px] px-6 py-5 flex items-center justify-between gap-4">
             <div className="min-w-0">
-              <h2 className="font-display text-lg font-black tracking-tight text-foreground truncate">
-                {isEditing ? "Editar curso" : "Criar novo curso"}
-              </h2>
-              <p className="text-[11px] text-muted-foreground mt-0.5 font-medium">
-                Passo {step} de 3 — {STEPS[step - 1].helper}
+              <div className="flex items-center gap-2 mb-1">
+                <Sparkles className="h-4 w-4 text-blue-500 fill-blue-500/20" />
+                <h2 className="font-display text-xl font-black tracking-[-0.03em] text-white truncate">
+                  {isEditing ? "Ajustes da Área" : "Nova Área de Membros"}
+                </h2>
+              </div>
+              <p className="text-[11px] text-zinc-500 font-bold uppercase tracking-widest">
+                Etapa {step} de 3 — {STEPS[step - 1].helper}
               </p>
             </div>
             <button
               type="button"
               onClick={() => onOpenChange(false)}
-              className="h-9 w-9 flex items-center justify-center border border-border text-muted-foreground hover:border-primary hover:text-primary transition-colors"
+              className="h-10 w-10 flex items-center justify-center rounded-xl border border-white/[0.05] bg-white/[0.02] text-zinc-400 hover:border-white/[0.1] hover:text-white transition-all"
               aria-label="Fechar"
             >
               <X className="h-4 w-4" />
