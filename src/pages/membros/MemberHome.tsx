@@ -367,77 +367,88 @@ function CourseCard({ course, variant, index }: { course: Course; variant: "wide
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 10 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.4, ease, delay: Math.min(index * 0.04, 0.25) }}
-      className={cn("shrink-0 snap-start group", variant === "wide" ? "w-[320px] lg:w-[380px]" : "w-[180px] lg:w-[200px]")}
+      initial={{ opacity: 0, scale: 0.95 }}
+      whileInView={{ opacity: 1, scale: 1 }}
+      viewport={{ once: true }}
+      transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1], delay: Math.min(index * 0.05, 0.3) }}
+      className={cn(
+        "shrink-0 snap-start group cursor-pointer",
+        variant === "wide" ? "w-[340px] md:w-[420px]" : "w-[200px] md:w-[240px]"
+      )}
     >
       <Link to={`/membros-area/curso/${course.id}${course.lastLessonId ? `?lesson=${course.lastLessonId}` : ""}`} className="block">
         <div className={cn(
-          "relative overflow-hidden bg-zinc-900 border border-white/[0.06] rounded-md transition-all duration-500",
-          "group-hover:border-emerald-500/40 group-hover:shadow-[0_8px_40px_-12px_rgba(16,185,129,0.15)] group-hover:scale-[1.03] group-hover:z-20",
+          "relative overflow-hidden bg-zinc-900 rounded-lg transition-all duration-700 ease-[0.16,1,0.3,1]",
+          "border border-white/5",
+          "group-hover:border-white/20 group-hover:shadow-[0_20px_60px_-15px_rgba(0,0,0,0.8)]",
           variant === "wide" ? "aspect-video" : "aspect-[2/3]"
         )}>
+          {/* Main Thumbnail */}
           {course.thumbnail_url ? (
-            <img
+            <motion.img
               src={course.thumbnail_url}
               alt={course.title}
-              className="w-full h-full object-cover opacity-90 group-hover:opacity-100 transition-all duration-500"
+              className="w-full h-full object-cover opacity-80 group-hover:opacity-100 group-hover:scale-110 transition-all duration-1000"
               loading="lazy"
             />
           ) : (
-            <div className="w-full h-full bg-gradient-to-br from-emerald-900/40 via-zinc-900 to-blue-900/20 flex items-center justify-center p-6">
-              <span className="font-display text-sm font-bold opacity-25 text-center text-balance">{course.title}</span>
+            <div className="w-full h-full bg-gradient-to-br from-zinc-800 to-zinc-950 flex items-center justify-center p-6 text-center">
+              <span className="font-display text-xs font-bold opacity-30 tracking-tight">{course.title}</span>
             </div>
           )}
 
-          <div className="absolute inset-0 bg-gradient-to-t from-[#050505] via-[#050505]/10 to-transparent opacity-60 group-hover:opacity-80 transition-opacity" />
-
-          {/* Completion badge */}
+          {/* Gradients */}
+          <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent opacity-80" />
+          
+          {/* Completion Glow */}
           {isCompleted && (
-            <div className="absolute top-2.5 right-2.5 h-7 w-7 rounded-full bg-emerald-500 flex items-center justify-center shadow-lg">
-              <Award className="h-3.5 w-3.5 text-[#050505]" />
+            <div className="absolute top-3 right-3 h-8 w-8 rounded-full bg-emerald-500 flex items-center justify-center shadow-[0_0_20px_rgba(16,185,129,0.4)]">
+              <Award className="h-4 w-4 text-black" />
             </div>
           )}
 
-          {/* Hover play overlay */}
-          <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-            <div className="h-14 w-14 rounded-full bg-white/95 flex items-center justify-center shadow-[0_4px_20px_rgba(0,0,0,0.3)] scale-90 group-hover:scale-100 transition-transform duration-300">
-              <Play className="h-6 w-6 text-[#050505] fill-current ml-0.5" />
-            </div>
+          {/* Play Overlay */}
+          <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-500">
+            <motion.div 
+              initial={{ scale: 0.8 }}
+              whileHover={{ scale: 1.1 }}
+              className="h-16 w-16 rounded-full bg-white/10 backdrop-blur-md border border-white/20 flex items-center justify-center"
+            >
+              <Play className="h-7 w-7 text-white fill-current ml-1" />
+            </motion.div>
           </div>
 
-          {/* Progress bar — Netflix red bar */}
+          {/* Netflix Red Progress Bar */}
           {pct > 0 && (
-            <div className="absolute bottom-0 left-0 right-0 h-[3px] bg-white/10">
-              <div
-                className={cn("h-full transition-all", isCompleted ? "bg-emerald-400" : "bg-emerald-500")}
-                style={{ width: `${pct}%` }}
+            <div className="absolute bottom-0 left-0 right-0 h-[4px] bg-white/10">
+              <motion.div
+                initial={{ width: 0 }}
+                animate={{ width: `${pct}%` }}
+                className={cn("h-full transition-all duration-1000", isCompleted ? "bg-emerald-400" : "bg-emerald-500")}
               />
             </div>
           )}
 
-          {/* Bottom info overlay for poster */}
+          {/* Content Overlays */}
           {variant === "poster" && (
-            <div className="absolute bottom-0 inset-x-0 p-3.5">
-              <h3 className="font-display font-bold text-[13px] text-zinc-100 line-clamp-2 leading-snug [text-shadow:0_2px_8px_rgba(0,0,0,0.8)]">
+            <div className="absolute bottom-0 inset-x-0 p-4 transform translate-y-2 group-hover:translate-y-0 transition-transform duration-500">
+              <h3 className="font-display font-black text-[15px] text-white leading-tight line-clamp-2 drop-shadow-lg">
                 {course.title}
               </h3>
             </div>
           )}
         </div>
 
-        {/* Info below for wide variant */}
         {variant === "wide" && (
-          <div className="mt-3.5 space-y-1.5 px-0.5">
-            <h3 className="font-display font-bold text-zinc-100 text-[15px] group-hover:text-emerald-400 transition-colors line-clamp-1 tracking-tight">
+          <div className="mt-4 space-y-2">
+            <h3 className="font-display font-black text-white text-[17px] group-hover:text-emerald-400 transition-colors tracking-tight">
               {course.title}
             </h3>
-            <div className="flex items-center gap-2 text-[12px] text-zinc-500">
-              {course.lastLessonTitle && pct > 0 && pct < 100 ? (
-                <span className="truncate">{course.lastLessonTitle}</span>
-              ) : isCompleted ? (
-                <span className="text-emerald-400/80">Curso concluído</span>
+            <div className="flex items-center gap-3 text-[11px] font-bold uppercase tracking-[0.1em] text-zinc-500">
+              {isCompleted ? (
+                <span className="text-emerald-500/80 flex items-center gap-1.5"><CheckCircle2 className="h-3 w-3" /> Completo</span>
+              ) : pct > 0 ? (
+                <span className="text-zinc-300">Retomar {course.lastLessonTitle && `· ${course.lastLessonTitle}`}</span>
               ) : (
                 <span>{course.totalLessons} aulas · {course.moduleCount} módulos</span>
               )}
