@@ -521,11 +521,16 @@ function CertificationsRail({ certs }: { certs: Cert[] }) {
 }
 
 /* ─── Footer Stat ─── */
-function Stat({ label, value }: { label: string; value: string | number }) {
+function Stat({ label, value, icon: Icon }: { label: string; value: string | number; icon: any }) {
   return (
-    <div>
-      <p className="text-[10px] uppercase tracking-[0.18em] text-zinc-600 font-bold mb-1.5">{label}</p>
-      <p className="font-display text-2xl font-bold text-zinc-100 tabular-nums">{value}</p>
+    <div className="flex items-center gap-4">
+      <div className="h-10 w-10 rounded-xl bg-white/[0.03] border border-white/[0.05] flex items-center justify-center shrink-0">
+        <Icon className="h-4 w-4 text-zinc-500" />
+      </div>
+      <div>
+        <p className="text-[10px] uppercase tracking-[0.18em] text-zinc-600 font-bold mb-0.5">{label}</p>
+        <p className="font-display text-xl font-black text-zinc-100 tabular-nums leading-none tracking-tight">{value}</p>
+      </div>
     </div>
   );
 }
