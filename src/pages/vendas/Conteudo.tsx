@@ -232,21 +232,24 @@ export default function AdminConteudo() {
     draft: <FileEdit className="h-3 w-3" strokeWidth={2.5} />,
   };
 
-  return (
-    <div className="mx-auto -mt-2 w-full max-w-[1440px] pb-24 md:-mt-3 md:pb-10 bg-[#050505] min-h-screen text-white selection:bg-blue-500/30">
+    <div className="mx-auto -mt-2 w-full max-w-[1600px] pb-24 md:-mt-3 md:pb-10 bg-[#050505] min-h-screen text-white selection:bg-blue-500/30">
       {/* ── Hero header ── */}
-      <div className="relative flex flex-col gap-8 px-6 pt-10 sm:px-10">
-        <div className="flex flex-wrap items-end justify-between gap-6 animate-fade-in">
+      <div className="relative flex flex-col gap-10 px-6 pt-12 sm:px-10">
+        {/* Decorative background effects */}
+        <div className="absolute top-0 right-0 w-[600px] h-[400px] bg-blue-600/5 blur-[120px] rounded-full pointer-events-none" />
+        <div className="absolute top-40 left-0 w-[400px] h-[400px] bg-indigo-600/5 blur-[100px] rounded-full pointer-events-none" />
+
+        <div className="flex flex-wrap items-end justify-between gap-8 animate-fade-in relative z-10">
           <div className="min-w-0">
-            <div className="flex items-center gap-2.5 text-[11px] font-black uppercase tracking-[0.25em] text-blue-500/80 mb-2">
-              <div className="h-5 w-5 rounded bg-blue-500 flex items-center justify-center text-[10px] font-black text-white shadow-[0_0_15px_rgba(59,130,246,0.5)]">H</div>
-              HOTZFY MEMBERS
+            <div className="flex items-center gap-3 text-[11px] font-black uppercase tracking-[0.3em] text-blue-500 mb-4">
+              <div className="h-6 w-6 rounded-lg bg-blue-500/10 border border-blue-500/20 flex items-center justify-center text-[10px] font-black text-blue-500 shadow-[0_0_20px_rgba(59,130,246,0.2)]">H</div>
+              HOTZFY STUDIO
             </div>
-            <h1 className="font-display text-[44px] font-black leading-none tracking-[-0.05em] text-white sm:text-[64px] [text-shadow:0_4px_24px_rgba(0,0,0,0.5)]">
-              Área de Membros
+            <h1 className="font-display text-[48px] font-black leading-[0.9] tracking-[-0.05em] text-white sm:text-[72px] [text-shadow:0_8px_32px_rgba(0,0,0,0.5)]">
+              Gestão de <span className="text-transparent bg-clip-text bg-gradient-to-r from-white via-white to-white/40">Conteúdo</span>
             </h1>
-            <p className="mt-3 text-[14px] font-medium text-zinc-500 max-w-lg leading-relaxed">
-              Crie cursos, organize módulos e libere acesso ao seu aluno.
+            <p className="mt-4 text-[16px] font-medium text-zinc-400 max-w-xl leading-relaxed">
+              Sua central criativa. Organize módulos, aulas e acompanhe o engajamento dos seus alunos em tempo real.
             </p>
           </div>
           <button
