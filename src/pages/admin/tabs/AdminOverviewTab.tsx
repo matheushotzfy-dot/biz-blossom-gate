@@ -52,6 +52,51 @@ function ChartTooltip({ active, payload, label, fmtCurrency }: any) {
 const stagger = { hidden: { opacity: 0 }, show: { opacity: 1, transition: { staggerChildren: 0.06 } } };
 const fadeUp = { hidden: { opacity: 0, y: 12 }, show: { opacity: 1, y: 0, transition: { duration: 0.4 } } };
 
+function HealthCard({ icon, label, value, sub, trend, trendType, color, alert, pulse }: any) {
+  const colors: Record<string, string> = {
+    emerald: "border-emerald-500/10 bg-emerald-500/5 text-emerald-400 shadow-[0_0_20px_rgba(16,185,129,0.1)]",
+    blue: "border-blue-500/10 bg-blue-500/5 text-blue-400 shadow-[0_0_20px_rgba(59,130,246,0.1)]",
+    cyan: "border-cyan-500/10 bg-cyan-500/5 text-cyan-400 shadow-[0_0_20px_rgba(34,211,238,0.1)]",
+    orange: "border-orange-500/10 bg-orange-500/5 text-orange-400 shadow-[0_0_20px_rgba(245,158,11,0.1)]",
+    red: "border-red-500/10 bg-red-500/5 text-red-400 shadow-[0_0_20px_rgba(239,68,68,0.1)]",
+  };
+  
+  return (
+    <div className={cn(
+      "relative overflow-hidden rounded-3xl border p-5 flex flex-col justify-between group transition-all duration-300 hover:scale-[1.02]",
+      colors[color] || colors.emerald,
+      alert && "border-red-500/30 bg-red-500/10"
+    )}>
+      <div className="flex items-center justify-between mb-4">
+        <div className={cn("p-2.5 rounded-xl bg-white/5 border border-white/5 transition-transform group-hover:rotate-12", alert && "animate-bounce")}>
+          {icon}
+        </div>
+        {trend && (
+          <div className={cn(
+            "text-[10px] font-bold px-2 py-0.5 rounded-full",
+            trendType === "positive" ? "bg-emerald-500/10 text-emerald-400" : trendType === "negative" ? "bg-red-500/10 text-red-400" : "bg-white/5 text-white/40"
+          )}>
+            {trend}
+          </div>
+        )}
+      </div>
+      <div>
+        <p className="text-[10px] font-black uppercase tracking-[0.2em] opacity-40 mb-1">{label}</p>
+        <div className="flex items-baseline gap-2">
+          <p className="text-3xl font-black tracking-tight" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>{value}</p>
+          {pulse && (
+            <span className="relative flex h-2 w-2 mb-1">
+              <span className="absolute h-full w-full animate-ping rounded-full bg-current opacity-75" />
+              <span className="relative h-2 w-2 rounded-full bg-current" />
+            </span>
+          )}
+        </div>
+        <p className="text-[10px] font-medium opacity-30 mt-1 truncate">{sub}</p>
+      </div>
+    </div>
+  );
+}
+
 export default function AdminOverviewTab({ transactions, profiles, products, withdrawals, onWithdrawalAction, onUserStatus, fmtCurrency, isEmployee = false, dateRange }: Props) {
  const [disputes, setDisputes] = useState<Dispute[]>([]);
  const [realtimeTx, setRealtimeTx] = useState<Tables<"transactions">[]>([]);
@@ -207,107 +252,112 @@ export default function AdminOverviewTab({ transactions, profiles, products, wit
 
  return (
  <motion.div variants={stagger} initial="hidden" animate="show" className="space-y-6">
- {/* ═══ HERO SECTION — Lucro da Plataforma ═══ */}
- <motion.div variants={fadeUp} className="relative overflow-hidden rounded-3xl border border-emerald-500/[0.08] p-6 sm:p-8 lg:p-10"
- style={{ background: "linear-gradient(135deg, rgba(6,24,14,0.95) 0%, rgba(8,28,18,0.9) 40%, rgba(4,20,10,0.95) 100%)" }}>
- {/* Ambient glows */}
- <div className="absolute inset-0 pointer-events-none overflow-hidden">
- <motion.div animate={{ opacity: [0.15, 0.3, 0.15] }} transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
- className="absolute -top-32 -left-32 w-[500px] h-[500px] bg-emerald-500/20 rounded-full blur-[120px]" />
- <motion.div animate={{ opacity: [0.1, 0.2, 0.1] }} transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
- className="absolute -bottom-32 -right-32 w-[400px] h-[400px] bg-teal-500/15 rounded-full blur-[100px]" />
- <motion.div animate={{ scale: [1, 1.1, 1], opacity: [0.08, 0.15, 0.08] }} transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}
- className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[300px] bg-emerald-400/10 rounded-full blur-[150px]" />
- <div className="absolute inset-0 opacity-[0.02]" style={{ backgroundImage: "radial-gradient(rgba(255,255,255,0.8) 1px, transparent 1px)", backgroundSize: "28px 28px" }} />
- </div>
+  {/* ═══ GOD MODE HERO — Plataforma Lucro ═══ */}
+  <motion.div variants={fadeUp} className="relative overflow-hidden rounded-[2.5rem] border border-emerald-500/[0.12] p-8 sm:p-12 shadow-[0_40px_100px_rgba(0,0,0,0.8)]"
+    style={{ background: "linear-gradient(135deg, rgba(2,6,23,0.98) 0%, rgba(6,18,16,0.95) 40%, rgba(2,6,23,0.98) 100%)" }}>
+    
+    <div className="absolute inset-0 pointer-events-none overflow-hidden">
+      <motion.div animate={{ opacity: [0.15, 0.3, 0.15], scale: [1, 1.1, 1] }} transition={{ duration: 10, repeat: Infinity }}
+        className="absolute top-[-20%] left-[-10%] w-[80%] h-[80%] bg-emerald-500/10 rounded-full blur-[150px]" />
+      <div className="absolute inset-0 opacity-[0.03]" style={{ backgroundImage: "radial-gradient(rgba(16,185,129,0.8) 1px, transparent 1px)", backgroundSize: "40px 40px" }} />
+    </div>
 
- <div className="relative z-10">
- <div className="flex items-center gap-3 mb-8">
- <div className="h-px flex-1 max-w-[40px] bg-gradient-to-r from-emerald-500/50 to-transparent" />
- <div className="flex items-center gap-2">
- <Crown className="h-3 w-3 text-emerald-400/60" />
- <p className="text-[9px] font-black uppercase tracking-[0.35em] bg-gradient-to-r from-emerald-400 via-teal-300 to-emerald-400 bg-clip-text text-transparent">
- Lucro da Plataforma
- </p>
- </div>
- <div className="h-px flex-1 max-w-[40px] bg-gradient-to-l from-emerald-500/50 to-transparent" />
- </div>
+    <div className="relative z-10 flex flex-col items-center text-center space-y-6">
+      <div className="flex items-center gap-4 px-4 py-1.5 rounded-full bg-white/[0.03] border border-white/[0.08] backdrop-blur-md">
+        <div className="flex items-center gap-2">
+          <span className="relative flex h-2 w-2">
+            <span className="absolute h-full w-full animate-ping rounded-full bg-emerald-400 opacity-40" />
+            <span className="relative h-2 w-2 rounded-full bg-emerald-400" />
+          </span>
+          <span className="text-[10px] font-black uppercase tracking-[0.3em] text-white/40">Plataforma em Tempo Real</span>
+        </div>
+      </div>
 
- <div className="text-center mb-6 sm:mb-8">
- <p className="text-[36px] sm:text-[52px] lg:text-[68px] xl:text-[88px] font-black leading-[0.85] tracking-[-0.04em] text-white"
- style={{ fontFamily: "'Space Grotesk', monospace", textShadow: "0 0 120px rgba(16,185,129,0.25), 0 0 60px rgba(16,185,129,0.1)" }}>
- {fmtCurrency(takeRateTotal)}
- </p>
- <p className="text-[11px] sm:text-[12px] text-white/30 mt-3 sm:mt-4 font-medium">
- Take Rate: <span className="text-emerald-400 font-bold">{takeRatePct}%</span> · TPV: <span className="text-white/50 font-bold">{fmtCurrency(totalVolume)}</span>
- </p>
- </div>
+      <div className="space-y-1">
+        <p className="text-[10px] font-black uppercase tracking-[0.5em] text-white/20 mb-4">LUCRO TOTAL DA PLATAFORMA</p>
+        <h1 className="text-6xl sm:text-8xl lg:text-9xl font-black tracking-tighter text-white"
+          style={{ fontFamily: "'Space Grotesk', system-ui, sans-serif", textShadow: "0 0 80px rgba(16,185,129,0.3)" }}>
+          {fmtCurrency(takeRateTotal)}
+        </h1>
+      </div>
 
- <div className="flex flex-wrap items-center justify-center gap-2">
- <span className="inline-flex items-center gap-1.5 text-[10px] text-white/30 font-semibold bg-white/[0.04] border border-white/[0.06] rounded-full px-3 py-1.5">
- <CheckCircle2 className="h-3 w-3 text-emerald-400" /> {filteredApproved.length} aprovadas
- </span>
- <span className="inline-flex items-center gap-1.5 text-[10px] text-white/30 font-semibold bg-white/[0.04] border border-white/[0.06] rounded-full px-3 py-1.5">
- <Users className="h-3 w-3 text-teal-400" /> {activeSellersToday} sellers
- </span>
- <span className="inline-flex items-center gap-1.5 text-[10px] text-white/30 font-semibold bg-white/[0.04] border border-white/[0.06] rounded-full px-3 py-1.5">
- <Target className="h-3 w-3 text-emerald-400" /> {conversionRate}% conv.
- </span>
- <span className="inline-flex items-center gap-1.5 text-[10px] text-white/30 font-semibold bg-white/[0.04] border border-white/[0.06] rounded-full px-3 py-1.5">
- <span className="relative flex h-1.5 w-1.5">
- <span className="absolute h-full w-full animate-ping rounded-full bg-emerald-400 opacity-40" />
- <span className="relative h-1.5 w-1.5 rounded-full bg-emerald-400" />
- </span>
- Live
- </span>
- </div>
- </div>
- </motion.div>
+      <div className="flex flex-wrap items-center justify-center gap-4 pt-4">
+        <div className="flex flex-col items-center">
+          <span className="text-[10px] font-bold text-white/30 uppercase tracking-widest mb-1">Volume Total (TPV)</span>
+          <span className="text-xl font-black text-white/80">{fmtCurrency(totalVolume)}</span>
+        </div>
+        <div className="w-px h-8 bg-white/5 mx-2" />
+        <div className="flex flex-col items-center">
+          <span className="text-[10px] font-bold text-white/30 uppercase tracking-widest mb-1">Taxa de Serviço Média</span>
+          <span className="text-xl font-black text-emerald-400">{takeRatePct}%</span>
+        </div>
+      </div>
+    </div>
+  </motion.div>
 
- {/* ═══ HERO METRICS — 4 KPIs ═══ */}
- <motion.div variants={fadeUp} className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
- <HeroKpi
- icon={<PiggyBank className="h-6 w-6" />}
- label="Lucro Hoje"
- value={fmtCurrency(takeRateToday)}
- sub={`Mês: ${fmtCurrency(takeRateMonth)}`}
- gradient="from-emerald-500 to-teal-600"
- metallic
- />
- <HeroKpi
- icon={<Globe className="h-6 w-6" />}
- label="TPV Período"
- value={fmtCurrency(totalVolume)}
- sub={`${filteredApproved.length} transações aprovadas`}
- gradient="from-teal-400 to-cyan-600"
- />
- <HeroKpi
- icon={<Users className="h-6 w-6" />}
- label="Sellers Ativos Hoje"
- value={String(activeSellersToday)}
- sub={`de ${profiles.length} cadastrados`}
- gradient="from-emerald-400 to-green-600"
- />
- <HeroKpi
- icon={<ShieldAlert className="h-6 w-6" />}
- label="Taxa Chargeback"
- value={`${chargebackRate.toFixed(2)}%`}
- sub={`${chargebackTx.length} chargebacks`}
- gradient={chargebackAlert ? "from-red-500 to-rose-600" : "from-emerald-500 to-green-600"}
- alert={chargebackAlert}
- pulse={chargebackAlert}
- />
- </motion.div>
 
- {/* ═══ SECONDARY KPIs ═══ */}
- <motion.div variants={fadeUp} className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-3">
- <GlassKpi label="TPV Hoje" value={fmtCurrency(tpvToday)} icon={<DollarSign className="h-3.5 w-3.5" />} iconColor="text-emerald-400" />
- <GlassKpi label="TPV Mensal" value={fmtCurrency(tpvMonth)} icon={<BarChart3 className="h-3.5 w-3.5" />} iconColor="text-teal-400" />
- <GlassKpi label="Take Rate Hoje" value={fmtCurrency(takeRateToday)} icon={<TrendingUp className="h-3.5 w-3.5" />} iconColor="text-amber-400" />
- <GlassKpi label="Saldo Retido" value={fmtCurrency(totalRetained)} icon={<Lock className="h-3.5 w-3.5" />} iconColor="text-emerald-400/70" />
- <GlassKpi label="Vol. Sacado" value={fmtCurrency(totalWithdrawn)} icon={<ArrowDownToLine className="h-3.5 w-3.5" />} iconColor="text-teal-400" />
- <GlassKpi label="Ticket Médio" value={fmtCurrency(ticketMedio)} icon={<CreditCard className="h-3.5 w-3.5" />} iconColor="text-white/60" />
- </motion.div>
+  {/* ═══ PLATFORM HEALTH RADAR ═══ */}
+  <motion.div variants={fadeUp} className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
+    <HealthCard 
+      icon={<Flame className="h-6 w-6" />}
+      label="Vendas Hoje"
+      value={String(todayTx.length)}
+      sub={`R$ ${tpvToday.toLocaleString("pt-BR")}`}
+      trend="+12%"
+      trendType="positive"
+      color="orange"
+      pulse={todayTx.length > 0}
+    />
+    <HealthCard 
+      icon={<Activity className="h-6 w-6" />}
+      label="Taxa de Conversão"
+      value={`${conversionRate}%`}
+      sub="Média do sistema"
+      trend="+0.8%"
+      trendType="positive"
+      color="emerald"
+    />
+    <HealthCard 
+      icon={<ShieldAlert className="h-6 w-6" />}
+      label="Risco de Chargeback"
+      value={`${chargebackRate.toFixed(2)}%`}
+      sub={`${chargebackTx.length} incidentes`}
+      trend={chargebackRate > 1 ? "+5%" : "-2%"}
+      trendType={chargebackRate > 1 ? "negative" : "positive"}
+      color={chargebackAlert ? "red" : "blue"}
+      alert={chargebackAlert}
+    />
+    <HealthCard 
+      icon={<Radio className="h-6 w-6" />}
+      label="Saque Pendente"
+      value={fmtCurrency(pendingWdAmount)}
+      sub={`${pendingWd.length} solicitações`}
+      trend={pendingWd.length > 5 ? "High" : "Normal"}
+      trendType={pendingWd.length > 5 ? "negative" : "neutral"}
+      color="cyan"
+    />
+  </motion.div>
+
+  {/* ═══ SECONDARY METRICS ═══ */}
+  <motion.div variants={fadeUp} className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-3">
+    {[
+      { label: "TPV Mensal", value: fmtCurrency(tpvMonth), icon: <BarChart3 className="h-3.5 w-3.5" />, color: "text-teal-400" },
+      { label: "Sellers Ativos", value: activeSellersToday, icon: <Users className="h-3.5 w-3.5" />, color: "text-emerald-400" },
+      { label: "Ticket Médio", value: fmtCurrency(ticketMedio), icon: <CreditCard className="h-3.5 w-3.5" />, color: "text-white/60" },
+      { label: "Saldo Retido", value: fmtCurrency(totalRetained), icon: <Lock className="h-3.5 w-3.5" />, color: "text-emerald-400/70" },
+      { label: "Vol. Sacado", value: fmtCurrency(totalWithdrawn), icon: <ArrowDownToLine className="h-3.5 w-3.5" />, color: "text-teal-400" },
+      { label: "Disputas Abertas", value: openDisputes, icon: <AlertCircle className="h-3.5 w-3.5" />, color: "text-red-400" },
+    ].map((m, i) => (
+      <div key={i} className="bg-white/[0.02] border border-white/[0.05] rounded-2xl p-4 flex flex-col justify-center transition-all hover:bg-white/[0.04]">
+        <div className="flex items-center gap-2 mb-1.5">
+          <span className={m.color}>{m.icon}</span>
+          <p className="text-[9px] font-bold text-white/20 uppercase tracking-widest">{m.label}</p>
+        </div>
+        <p className="text-lg font-black text-white/70" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>{m.value}</p>
+      </div>
+    ))}
+  </motion.div>
+
 
  {/* ═══ VOLUME CHART + ACQUIRER + REALTIME ═══ */}
  <motion.div variants={fadeUp} className="grid grid-cols-1 xl:grid-cols-4 gap-4">
@@ -393,41 +443,39 @@ export default function AdminOverviewTab({ transactions, profiles, products, wit
  </div>
  </GlassPanel>
 
- {/* Realtime Feed */}
- <GlassPanel className="overflow-hidden flex flex-col max-h-[380px]">
- <div className="flex items-center gap-2.5 mb-3">
- <GlassPanelTitle color="red" icon={<Radio className="h-3.5 w-3.5 text-red-400 animate-pulse" />}>Feed Tempo Real</GlassPanelTitle>
- </div>
- <div className="flex-1 overflow-y-auto space-y-1 pr-1">
- {realtimeTx.map(t => (
- <div key={t.id} className="flex items-center gap-2.5 p-2.5 rounded-xl bg-white/[0.02] border border-white/[0.04] hover:bg-white/[0.04] transition-all">
- <div className={cn("h-1.5 w-1.5 rounded-full shrink-0",
- t.status === "completed" || t.status === "approved" ? "bg-emerald-400 shadow-[0_0_4px_rgba(52,211,153,0.6)]" :
- t.status === "pending" ? "bg-amber-400 animate-pulse" : "bg-red-400"
- )} />
- <div className="flex-1 min-w-0">
- <div className="flex items-center justify-between">
- <span className="text-[11px] font-bold text-white/80 truncate">{fmtCurrency(Number(t.amount))}</span>
- <span className={cn("text-[9px] font-bold uppercase", statusColorMap[t.status] || "text-white/20")}>
- {statusLabelMap[t.status] || t.status}
- </span>
- </div>
- <div className="flex items-center gap-1.5 mt-0.5">
- <span className="text-[9px] text-white/20 truncate">{t.customer_name || "Anônimo"}</span>
- <span className="text-[9px] text-white/10">•</span>
- <span className="text-[9px] text-white/20 uppercase">{t.payment_method || "—"}</span>
- <span className="text-[9px] text-white/10">•</span>
- <span className="text-[9px] text-white/20">{new Date(t.created_at).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })}</span>
- </div>
- </div>
- </div>
- ))}
- {realtimeTx.length === 0 && (
- <div className="flex items-center justify-center h-32 text-sm text-white/10">Aguardando transações...</div>
- )}
- </div>
- </GlassPanel>
- </motion.div>
+    {/* Realtime Feed */}
+    <div className="rounded-[2rem] bg-white/[0.02] border border-white/[0.06] p-6 flex flex-col shadow-2xl backdrop-blur-md overflow-hidden max-h-[420px]">
+      <div className="flex items-center gap-3 mb-6">
+        <Radio className="h-4 w-4 text-red-500 animate-pulse" />
+        <h3 className="text-sm font-black text-white/90 uppercase tracking-widest">Live Activity</h3>
+      </div>
+      <div className="flex-1 overflow-y-auto space-y-2 pr-1 scrollbar-none">
+        {realtimeTx.map(t => (
+          <div key={t.id} className="flex items-center gap-3 p-3.5 rounded-2xl bg-white/[0.02] border border-white/[0.04] hover:bg-white/[0.05] hover:border-white/[0.08] transition-all group">
+            <div className={cn("h-1.5 w-1.5 rounded-full shrink-0",
+              t.status === "completed" || t.status === "approved" ? "bg-emerald-400 shadow-[0_0_6px_rgba(52,211,153,0.6)]" :
+              t.status === "pending" ? "bg-amber-400 animate-pulse" : "bg-red-500 shadow-[0_0_6px_rgba(239,68,68,0.6)]"
+            )} />
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center justify-between mb-0.5">
+                <span className="text-[13px] font-black text-white/90" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>{fmtCurrency(Number(t.amount))}</span>
+                <span className={cn("text-[8px] font-black uppercase tracking-widest px-1.5 py-0.5 rounded bg-white/5", statusColorMap[t.status] || "text-white/20")}>
+                  {statusLabelMap[t.status] || t.status}
+                </span>
+              </div>
+              <div className="flex items-center gap-1.5 text-[9px] text-white/20">
+                <span className="truncate max-w-[100px]">{t.customer_name || "Anônimo"}</span>
+                <span>•</span>
+                <span className="uppercase">{t.payment_method || "—"}</span>
+                <span className="ml-auto">{new Date(t.created_at).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })}</span>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  </motion.div>
+
 
  {/* ═══ RISK RADAR ═══ */}
  <motion.div variants={fadeUp}>
