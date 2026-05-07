@@ -51,6 +51,7 @@ const _dateCache = new Map<string, string>();
 const _timeCache = new Map<string, string>();
 const fmtDate = (d: string) => { let v = _dateCache.get(d); if (!v) { v = _dateFmt.format(new Date(d)); _dateCache.set(d, v); } return v; };
 const fmtTime = (d: string) => { let v = _timeCache.get(d); if (!v) { v = _timeFmt.format(new Date(d)); _timeCache.set(d, v); } return v; };
+const fmtHour = (d: string) => { const h = new Date(d).getHours(); return `${h.toString().padStart(2, "0")}h`; };
 
 type StatusFilter = "all" | "completed" | "pending" | "failed" | "refunded" | "chargeback";
 type SortField = "date" | "amount" | "net" | "customer";
@@ -145,7 +146,7 @@ function SortHead({ label, field, sort, onSort, align = "left", className }: { l
 }
 
 /* ─── Revenue Chart ─── */
-function RevenueChart({ data, hidden }: { data: { label: string; value: number; previous: number }[]; hidden: boolean }) {
+function RevenueChart({ data, hidden }: { data: { label: string; value: number; gross?: number; previous: number }[]; hidden: boolean }) {
   if (data.length < 2 || hidden) {
     return (
       <div className="h-[260px] flex items-center justify-center">
@@ -153,6 +154,48 @@ function RevenueChart({ data, hidden }: { data: { label: string; value: number; 
       </div>
     );
   }
+
+  const CustomTooltip = ({ active, payload, label }: any) => {
+    if (active && payload && payload.length) {
+      const current = payload.find((p: any) => p.dataKey === "value");
+      const previous = payload.find((p: any) => p.dataKey === "previous");
+      return (
+        <div className="bg-popover border border-border rounded-lg shadow-xl p-3 min-w-[160px] animate-in fade-in zoom-in duration-200">
+          <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest mb-2.5 opacity-70">{label}</p>
+          <div className="space-y-3">
+            {current && (
+              <div className="space-y-1.5">
+                <div className="flex items-center justify-between gap-4">
+                  <div className="flex items-center gap-1.5">
+                    <div className="h-1.5 w-1.5 rounded-full bg-success" />
+                    <span className="text-[11px] font-bold text-foreground">Atual</span>
+                  </div>
+                  <span className="text-[12px] font-black text-success tabular-nums">{fmt(current.value)}</span>
+                </div>
+                {current.payload.gross !== undefined && (
+                  <div className="flex items-center justify-between gap-4 pl-3 border-l-2 border-success/30 ml-0.5">
+                    <span className="text-[10px] font-medium text-muted-foreground">Faturado</span>
+                    <span className="text-[10px] font-bold text-muted-foreground/90 tabular-nums">{fmt(current.payload.gross)}</span>
+                  </div>
+                )}
+              </div>
+            )}
+            {previous && (
+              <div className="flex items-center justify-between gap-4 pt-2 border-t border-border/60">
+                <div className="flex items-center gap-1.5 opacity-60">
+                  <div className="h-1.5 w-1.5 rounded-full bg-muted-foreground/50" />
+                  <span className="text-[11px] font-medium text-muted-foreground">Anterior</span>
+                </div>
+                <span className="text-[11px] font-bold text-muted-foreground/60 tabular-nums">{fmt(previous.value)}</span>
+              </div>
+            )}
+          </div>
+        </div>
+      );
+    }
+    return null;
+  };
+
   return (
     <ResponsiveContainer width="100%" height={260}>
       <AreaChart data={data} margin={{ top: 16, right: 16, left: 0, bottom: 4 }}>
@@ -163,12 +206,10 @@ function RevenueChart({ data, hidden }: { data: { label: string; value: number; 
           </linearGradient>
         </defs>
         <CartesianGrid strokeDasharray="3 4" stroke="hsl(var(--border))" strokeOpacity={0.4} vertical={false} />
-        <XAxis dataKey="label" tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))", fontWeight: 600 }} axisLine={false} tickLine={false} tickMargin={10} interval="preserveStartEnd" />
+        <XAxis dataKey="label" tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))", fontWeight: 600 }} axisLine={false} tickLine={false} tickMargin={10} interval={data.length > 20 ? 3 : "preserveStartEnd"} />
         <YAxis width={52} tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))", fontWeight: 600 }} axisLine={false} tickLine={false} tickMargin={8} tickFormatter={(v: number) => v >= 1000 ? `R$${(v / 1000).toFixed(v >= 10000 ? 0 : 1)}k` : `R$${v}`} />
         <ReTooltip
-          contentStyle={{ background: "hsl(var(--popover))", border: "1px solid hsl(var(--border))", borderRadius: 8, fontSize: 11, padding: "8px 10px" }}
-          formatter={(v: number, name: string) => [fmt(v), name === "value" ? "Atual" : "Anterior"]}
-          labelStyle={{ fontSize: 10, color: "hsl(var(--muted-foreground))", marginBottom: 4, fontWeight: 600 }}
+          content={<CustomTooltip />}
           cursor={{ stroke: "hsl(var(--success))", strokeWidth: 1, strokeDasharray: "3 3", strokeOpacity: 0.5 }}
         />
         <Area type="monotone" dataKey="previous" stroke="hsl(var(--muted-foreground))" strokeWidth={1} strokeDasharray="3 3" fill="none" opacity={0.5} dot={false} />
@@ -495,6 +536,16 @@ export default function Vendas() {
     return { dateFiltered: transactions.filter(t => new Date(t.created_at) >= start), previousPeriodFiltered: transactions.filter(t => { const d = new Date(t.created_at); return d >= prevStart && d < start; }) };
   }, [transactions, selectedPeriod, isCustom, customRange, brasiliaToday, toBrasiliaDate]);
 
+  const isSingleDay = useMemo(() => {
+    if (!isCustom) return selectedPeriod.days === 0 || selectedPeriod.days === 1;
+    if (customRange?.from) {
+      const start = customRange.from.toLocaleDateString("pt-BR", { timeZone: "America/Sao_Paulo" });
+      const end = (customRange.to || customRange.from).toLocaleDateString("pt-BR", { timeZone: "America/Sao_Paulo" });
+      return start === end;
+    }
+    return false;
+  }, [isCustom, selectedPeriod, customRange]);
+
   /* ─── Metrics ─── */
   const metrics = useMemo(() => {
     const calc = (txs: Tables<"transactions">[]) => {
@@ -522,22 +573,45 @@ export default function Vendas() {
     const current = calc(dateFiltered);
     const previous = calc(previousPeriodFiltered);
 
-    const dailyMap: Record<string, { net: number; count: number; ticket: number; pix: number; card: number; boleto: number; refunds: number; chargebacks: number; total: number }> = {};
+    const dailyMap: Record<string, { net: number; gross: number; count: number; ticket: number; pix: number; card: number; boleto: number; refunds: number; chargebacks: number; total: number }> = {};
     const prevDailyMap: Record<string, number> = {};
+
+    if (isSingleDay) {
+      for (let i = 0; i < 24; i++) {
+        const h = `${i.toString().padStart(2, "0")}h`;
+        dailyMap[h] = { net: 0, gross: 0, count: 0, ticket: 0, pix: 0, card: 0, boleto: 0, refunds: 0, chargebacks: 0, total: 0 };
+      }
+    }
+
+    const getLabel = (date: string) => isSingleDay ? fmtHour(date) : fmtDate(date);
+
     for (const t of current.approved) {
-      const day = fmtDate(t.created_at);
-      const e = dailyMap[day] || (dailyMap[day] = { net: 0, count: 0, ticket: 0, pix: 0, card: 0, boleto: 0, refunds: 0, chargebacks: 0, total: 0 });
-      e.net += Number(t.net_amount); e.count += 1;
+      const label = getLabel(t.created_at);
+      const e = dailyMap[label] || (dailyMap[label] = { net: 0, gross: 0, count: 0, ticket: 0, pix: 0, card: 0, boleto: 0, refunds: 0, chargebacks: 0, total: 0 });
+      e.net += Number(t.net_amount);
+      e.gross += Number(t.amount);
+      e.count += 1;
       if (t.payment_method === "pix") e.pix += Number(t.net_amount);
       else if (t.payment_method === "credit_card" || t.payment_method === "card") e.card += Number(t.net_amount);
       else if (t.payment_method === "boleto") e.boleto += Number(t.net_amount);
     }
-    for (const t of dateFiltered) { const day = fmtDate(t.created_at); const e = dailyMap[day] || (dailyMap[day] = { net: 0, count: 0, ticket: 0, pix: 0, card: 0, boleto: 0, refunds: 0, chargebacks: 0, total: 0 }); e.total += 1; if (t.status === "refunded") e.refunds += Number(t.amount); if (t.status === "chargeback") e.chargebacks += Number(t.amount); }
-    for (const t of previous.approved) { const day = fmtDate(t.created_at); prevDailyMap[day] = (prevDailyMap[day] || 0) + Number(t.net_amount); }
-    const dayKeys = Object.keys(dailyMap).reverse();
-    const currentDays = dayKeys.map(label => ({ label, value: dailyMap[label].net }));
-    const prevDays = Object.values(prevDailyMap);
-    const chartData = currentDays.map((d, i) => ({ ...d, previous: prevDays[i] || 0 }));
+
+    for (const t of dateFiltered) {
+      const label = getLabel(t.created_at);
+      const e = dailyMap[label] || (dailyMap[label] = { net: 0, gross: 0, count: 0, ticket: 0, pix: 0, card: 0, boleto: 0, refunds: 0, chargebacks: 0, total: 0 });
+      e.total += 1;
+      if (t.status === "refunded") e.refunds += Number(t.amount);
+      if (t.status === "chargeback") e.chargebacks += Number(t.amount);
+    }
+
+    for (const t of previous.approved) {
+      const label = getLabel(t.created_at);
+      prevDailyMap[label] = (prevDailyMap[label] || 0) + Number(t.net_amount);
+    }
+
+    const dayKeys = isSingleDay ? Object.keys(dailyMap) : Object.keys(dailyMap).reverse();
+    const currentDays = dayKeys.map(label => ({ label, value: dailyMap[label].net, gross: dailyMap[label].gross }));
+    const chartData = currentDays.map((d) => ({ ...d, previous: prevDailyMap[d.label] || 0 }));
 
     // Sparkline series per KPI
     const series = {
