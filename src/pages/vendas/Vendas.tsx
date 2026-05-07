@@ -496,6 +496,16 @@ export default function Vendas() {
     return { dateFiltered: transactions.filter(t => new Date(t.created_at) >= start), previousPeriodFiltered: transactions.filter(t => { const d = new Date(t.created_at); return d >= prevStart && d < start; }) };
   }, [transactions, selectedPeriod, isCustom, customRange, brasiliaToday, toBrasiliaDate]);
 
+  const isSingleDay = useMemo(() => {
+    if (!isCustom) return selectedPeriod.days === 0 || selectedPeriod.days === 1;
+    if (customRange?.from) {
+      const start = customRange.from.toLocaleDateString("pt-BR", { timeZone: "America/Sao_Paulo" });
+      const end = (customRange.to || customRange.from).toLocaleDateString("pt-BR", { timeZone: "America/Sao_Paulo" });
+      return start === end;
+    }
+    return false;
+  }, [isCustom, selectedPeriod, customRange]);
+
   /* ─── Metrics ─── */
   const metrics = useMemo(() => {
     const calc = (txs: Tables<"transactions">[]) => {
