@@ -52,6 +52,51 @@ function ChartTooltip({ active, payload, label, fmtCurrency }: any) {
 const stagger = { hidden: { opacity: 0 }, show: { opacity: 1, transition: { staggerChildren: 0.06 } } };
 const fadeUp = { hidden: { opacity: 0, y: 12 }, show: { opacity: 1, y: 0, transition: { duration: 0.4 } } };
 
+function HealthCard({ icon, label, value, sub, trend, trendType, color, alert, pulse }: any) {
+  const colors: Record<string, string> = {
+    emerald: "border-emerald-500/10 bg-emerald-500/5 text-emerald-400 shadow-[0_0_20px_rgba(16,185,129,0.1)]",
+    blue: "border-blue-500/10 bg-blue-500/5 text-blue-400 shadow-[0_0_20px_rgba(59,130,246,0.1)]",
+    cyan: "border-cyan-500/10 bg-cyan-500/5 text-cyan-400 shadow-[0_0_20px_rgba(34,211,238,0.1)]",
+    orange: "border-orange-500/10 bg-orange-500/5 text-orange-400 shadow-[0_0_20px_rgba(245,158,11,0.1)]",
+    red: "border-red-500/10 bg-red-500/5 text-red-400 shadow-[0_0_20px_rgba(239,68,68,0.1)]",
+  };
+  
+  return (
+    <div className={cn(
+      "relative overflow-hidden rounded-3xl border p-5 flex flex-col justify-between group transition-all duration-300 hover:scale-[1.02]",
+      colors[color] || colors.emerald,
+      alert && "border-red-500/30 bg-red-500/10"
+    )}>
+      <div className="flex items-center justify-between mb-4">
+        <div className={cn("p-2.5 rounded-xl bg-white/5 border border-white/5 transition-transform group-hover:rotate-12", alert && "animate-bounce")}>
+          {icon}
+        </div>
+        {trend && (
+          <div className={cn(
+            "text-[10px] font-bold px-2 py-0.5 rounded-full",
+            trendType === "positive" ? "bg-emerald-500/10 text-emerald-400" : trendType === "negative" ? "bg-red-500/10 text-red-400" : "bg-white/5 text-white/40"
+          )}>
+            {trend}
+          </div>
+        )}
+      </div>
+      <div>
+        <p className="text-[10px] font-black uppercase tracking-[0.2em] opacity-40 mb-1">{label}</p>
+        <div className="flex items-baseline gap-2">
+          <p className="text-3xl font-black tracking-tight" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>{value}</p>
+          {pulse && (
+            <span className="relative flex h-2 w-2 mb-1">
+              <span className="absolute h-full w-full animate-ping rounded-full bg-current opacity-75" />
+              <span className="relative h-2 w-2 rounded-full bg-current" />
+            </span>
+          )}
+        </div>
+        <p className="text-[10px] font-medium opacity-30 mt-1 truncate">{sub}</p>
+      </div>
+    </div>
+  );
+}
+
 export default function AdminOverviewTab({ transactions, profiles, products, withdrawals, onWithdrawalAction, onUserStatus, fmtCurrency, isEmployee = false, dateRange }: Props) {
  const [disputes, setDisputes] = useState<Dispute[]>([]);
  const [realtimeTx, setRealtimeTx] = useState<Tables<"transactions">[]>([]);
