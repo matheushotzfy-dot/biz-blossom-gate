@@ -1039,9 +1039,8 @@ export default function Vendas() {
                 )}
               </div>
             )}
-           </div>
+          </div>
         </div>
-      </div>
 
       {selectedTx && <TransactionDetailPanel tx={selectedTx} products={products} onClose={() => setSelectedTx(null)} onRefund={async () => toast.info("Entre em contato com o suporte.")} />}
       <ExportDialog open={showExportDialog} onOpenChange={setShowExportDialog} transactions={dateFiltered} products={products} onExport={handleExportCSV} />
