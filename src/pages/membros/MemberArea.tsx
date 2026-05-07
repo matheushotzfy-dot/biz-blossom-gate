@@ -351,27 +351,21 @@ function HeroBanner({ course }: { course: PurchaseRow }) {
               )}
 
               {/* Actions */}
-              <div className="mt-8 flex flex-wrap items-center gap-3">
+              <div className="mt-12 flex flex-wrap items-center gap-4">
                 <Link
                   to={`/membros/curso/${course.id}`}
-                  className="inline-flex items-center gap-3 rounded-xl bg-foreground px-8 py-3.5 text-base font-black text-background hover:bg-foreground/90 transition-all hover:scale-[1.02] active:scale-[0.98]"
+                  className="inline-flex items-center gap-4 rounded-lg bg-white px-12 py-5 text-lg font-black text-black hover:bg-zinc-200 transition-all hover:scale-[1.03] active:scale-[0.97] shadow-2xl"
                 >
-                  <Play className="h-6 w-6 fill-current" />
-                  {pct > 0 ? "Continuar" : "Assistir agora"}
+                  <Play className="h-7 w-7 fill-current" />
+                  {pct > 0 ? "Retomar" : "Assistir agora"}
                 </Link>
                 <Link
                   to={`/membros/curso/${course.id}`}
-                  className="inline-flex items-center gap-2.5 rounded-xl border border-border bg-card/40 backdrop-blur-md px-6 py-3.5 text-base font-bold text-foreground hover:bg-card/80 transition-all"
+                  className="inline-flex items-center gap-3 rounded-lg border border-white/10 bg-white/5 backdrop-blur-xl px-10 py-5 text-lg font-black text-white hover:bg-white/10 transition-all hover:scale-[1.03]"
                 >
-                  <Info className="h-5 w-5" />
+                  <Info className="h-6 w-6" />
                   Detalhes
                 </Link>
-                <button
-                  className="inline-flex h-12 w-12 items-center justify-center rounded-full border border-border bg-card/40 backdrop-blur-md text-foreground hover:bg-card/80 transition-all"
-                  aria-label="Adicionar à minha lista"
-                >
-                  <Plus className="h-5 w-5" />
-                </button>
               </div>
             </div>
           </div>
