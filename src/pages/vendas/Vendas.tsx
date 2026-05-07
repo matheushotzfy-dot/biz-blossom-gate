@@ -146,7 +146,7 @@ function SortHead({ label, field, sort, onSort, align = "left", className }: { l
 }
 
 /* ─── Revenue Chart ─── */
-function RevenueChart({ data, hidden }: { data: { label: string; value: number; previous: number }[]; hidden: boolean }) {
+function RevenueChart({ data, hidden }: { data: { label: string; value: number; gross?: number; previous: number }[]; hidden: boolean }) {
   if (data.length < 2 || hidden) {
     return (
       <div className="h-[260px] flex items-center justify-center">
@@ -154,6 +154,48 @@ function RevenueChart({ data, hidden }: { data: { label: string; value: number; 
       </div>
     );
   }
+
+  const CustomTooltip = ({ active, payload, label }: any) => {
+    if (active && payload && payload.length) {
+      const current = payload.find((p: any) => p.dataKey === "value");
+      const previous = payload.find((p: any) => p.dataKey === "previous");
+      return (
+        <div className="bg-popover border border-border rounded-lg shadow-xl p-3 min-w-[160px] animate-in fade-in zoom-in duration-200">
+          <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest mb-2.5 opacity-70">{label}</p>
+          <div className="space-y-3">
+            {current && (
+              <div className="space-y-1.5">
+                <div className="flex items-center justify-between gap-4">
+                  <div className="flex items-center gap-1.5">
+                    <div className="h-1.5 w-1.5 rounded-full bg-success" />
+                    <span className="text-[11px] font-bold text-foreground">Atual</span>
+                  </div>
+                  <span className="text-[12px] font-black text-success tabular-nums">{fmt(current.value)}</span>
+                </div>
+                {current.payload.gross !== undefined && (
+                  <div className="flex items-center justify-between gap-4 pl-3 border-l-2 border-success/30 ml-0.5">
+                    <span className="text-[10px] font-medium text-muted-foreground">Faturado</span>
+                    <span className="text-[10px] font-bold text-muted-foreground/90 tabular-nums">{fmt(current.payload.gross)}</span>
+                  </div>
+                )}
+              </div>
+            )}
+            {previous && (
+              <div className="flex items-center justify-between gap-4 pt-2 border-t border-border/60">
+                <div className="flex items-center gap-1.5 opacity-60">
+                  <div className="h-1.5 w-1.5 rounded-full bg-muted-foreground/50" />
+                  <span className="text-[11px] font-medium text-muted-foreground">Anterior</span>
+                </div>
+                <span className="text-[11px] font-bold text-muted-foreground/60 tabular-nums">{fmt(previous.value)}</span>
+              </div>
+            )}
+          </div>
+        </div>
+      );
+    }
+    return null;
+  };
+
   return (
     <ResponsiveContainer width="100%" height={260}>
       <AreaChart data={data} margin={{ top: 16, right: 16, left: 0, bottom: 4 }}>
@@ -164,12 +206,10 @@ function RevenueChart({ data, hidden }: { data: { label: string; value: number; 
           </linearGradient>
         </defs>
         <CartesianGrid strokeDasharray="3 4" stroke="hsl(var(--border))" strokeOpacity={0.4} vertical={false} />
-        <XAxis dataKey="label" tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))", fontWeight: 600 }} axisLine={false} tickLine={false} tickMargin={10} interval="preserveStartEnd" />
+        <XAxis dataKey="label" tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))", fontWeight: 600 }} axisLine={false} tickLine={false} tickMargin={10} interval={data.length > 20 ? 3 : "preserveStartEnd"} />
         <YAxis width={52} tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))", fontWeight: 600 }} axisLine={false} tickLine={false} tickMargin={8} tickFormatter={(v: number) => v >= 1000 ? `R$${(v / 1000).toFixed(v >= 10000 ? 0 : 1)}k` : `R$${v}`} />
         <ReTooltip
-          contentStyle={{ background: "hsl(var(--popover))", border: "1px solid hsl(var(--border))", borderRadius: 8, fontSize: 11, padding: "8px 10px" }}
-          formatter={(v: number, name: string) => [fmt(v), name === "value" ? "Atual" : "Anterior"]}
-          labelStyle={{ fontSize: 10, color: "hsl(var(--muted-foreground))", marginBottom: 4, fontWeight: 600 }}
+          content={<CustomTooltip />}
           cursor={{ stroke: "hsl(var(--success))", strokeWidth: 1, strokeDasharray: "3 3", strokeOpacity: 0.5 }}
         />
         <Area type="monotone" dataKey="previous" stroke="hsl(var(--muted-foreground))" strokeWidth={1} strokeDasharray="3 3" fill="none" opacity={0.5} dot={false} />
