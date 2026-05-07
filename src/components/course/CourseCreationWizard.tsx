@@ -350,8 +350,11 @@ export default function CourseCreationWizard({ open, onOpenChange, products, edi
         </header>
 
         {/* BODY */}
-        <div className="flex-1 min-h-0 overflow-y-auto bg-background">
-          <div className="mx-auto max-w-[760px] px-6 py-8">
+        <div className="flex-1 min-h-0 overflow-y-auto bg-[#050505] relative">
+          <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-blue-500/[0.03] blur-[120px] rounded-full pointer-events-none" />
+          <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-indigo-500/[0.03] blur-[120px] rounded-full pointer-events-none" />
+          
+          <div className="mx-auto max-w-[760px] px-6 py-12 relative z-10">
             {/* STEP 1 — Informações */}
             {step === 1 && (
               <div className="space-y-6">
