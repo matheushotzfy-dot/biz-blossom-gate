@@ -109,14 +109,14 @@ export function ProductGridView({ products, copiedId, toolbar, ...handlers }: Pr
                     <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent opacity-60 transition-opacity duration-500 group-hover:opacity-40" />
                     <div className="pointer-events-none absolute inset-0 ring-1 ring-inset ring-white/10" />
                     
-                    <div className="absolute inset-x-0 bottom-0 z-[2] flex items-end justify-between p-4 backdrop-blur-md bg-black/40">
+                    <div className="absolute inset-x-0 bottom-0 z-[2] flex items-end justify-between p-5 backdrop-blur-md bg-black/60 border-t border-white/5">
                       <div>
-                        <p className="text-[9px] font-black uppercase tracking-[0.2em] text-white/60">Valor</p>
-                        <span className="mt-0.5 block font-display text-2xl font-black leading-none tracking-tight text-white tabular-nums">
+                        <p className="text-[9px] font-black uppercase tracking-[0.25em] text-white/50">Valor</p>
+                        <span className="mt-1 block font-display text-2xl font-black leading-none tracking-tight text-white tabular-nums">
                           {formatCurrency(Number(product.price))}
                         </span>
                       </div>
-                      <span className="rounded-full bg-white/10 border border-white/20 px-3 py-1 text-[10px] font-bold text-white uppercase tracking-wider">{deliveryLabel}</span>
+                      <span className="rounded-xl bg-white/10 border border-white/20 px-3 py-1.5 text-[10px] font-black text-white uppercase tracking-widest">{deliveryLabel}</span>
                     </div>
                   </>
                 ) : (
