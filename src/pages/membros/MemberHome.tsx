@@ -162,80 +162,80 @@ export default function MemberHome() {
   }
 
   return (
-    <div className=\"bg-[#050505] text-zinc-100 antialiased selection:bg-emerald-500/30\">
+    <div className="bg-[#050505] text-zinc-100 antialiased selection:bg-emerald-500/30">
       {/* ═══ HERO — Netflix-style full-bleed cinematic ═══ */}
       {featured && (
-        <section className=\"relative h-[95dvh] w-full overflow-hidden -mt-16\">
+        <section className="relative h-[95dvh] w-full overflow-hidden -mt-16">
           {/* Background image with subtle zoom */}
-          <div className=\"absolute inset-0\">
+          <div className="absolute inset-0">
             {featured.thumbnail_url ? (
               <motion.img
                 src={featured.thumbnail_url}
-                alt=\"\"
-                className=\"w-full h-full object-cover\"
+                alt=""
+                className="w-full h-full object-cover"
                 initial={{ scale: 1.1, opacity: 0 }}
                 animate={{ scale: 1, opacity: 1 }}
                 transition={{ duration: 1.8, ease: [0.16, 1, 0.3, 1] }}
               />
             ) : (
-              <div className=\"w-full h-full bg-gradient-to-br from-emerald-950/80 via-zinc-950 to-blue-950/40\" />
+              <div className="w-full h-full bg-gradient-to-br from-emerald-950/80 via-zinc-950 to-blue-950/40" />
             )}
             
             {/* Multi-layer Netflix-style gradients */}
-            <div className=\"absolute inset-0 bg-gradient-to-r from-[#050505] via-[#050505]/70 to-transparent\" />
-            <div className=\"absolute inset-0 bg-gradient-to-t from-[#050505] via-[#050505]/40 to-transparent\" />
-            <div className=\"absolute inset-0 bg-gradient-to-b from-[#050505]/40 via-transparent to-transparent\" />
+            <div className="absolute inset-0 bg-gradient-to-r from-[#050505] via-[#050505]/70 to-transparent" />
+            <div className="absolute inset-0 bg-gradient-to-t from-[#050505] via-[#050505]/40 to-transparent" />
+            <div className="absolute inset-0 bg-gradient-to-b from-[#050505]/40 via-transparent to-transparent" />
             
             {/* Ambient Glow */}
-            <div className=\"absolute -left-[10%] top-[20%] w-[40%] h-[60%] bg-emerald-500/10 blur-[120px] rounded-full pointer-events-none\" />
+            <div className="absolute -left-[10%] top-[20%] w-[40%] h-[60%] bg-emerald-500/10 blur-[120px] rounded-full pointer-events-none" />
           </div>
 
           {/* Content — bottom-left Netflix position */}
-          <div className=\"relative h-full container mx-auto px-6 lg:px-12 flex flex-col justify-end pb-32 max-w-7xl\">
+          <div className="relative h-full container mx-auto px-6 lg:px-12 flex flex-col justify-end pb-32 max-w-7xl">
             <motion.div
               initial={{ opacity: 0, x: -30 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.8, delay: 0.5, ease: [0.16, 1, 0.3, 1] }}
-              className=\"max-w-2xl\"
+              className="max-w-2xl"
             >
               {/* Category pill */}
-              <div className=\"flex items-center gap-3 mb-6\">
-                <div className=\"flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/30 backdrop-blur-md\">
-                  <Flame className=\"h-3 w-3 text-emerald-400 fill-current animate-pulse\" />
-                  <span className=\"text-[10px] font-black uppercase tracking-[0.2em] text-emerald-400\">
+              <div className="flex items-center gap-3 mb-6">
+                <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/30 backdrop-blur-md">
+                  <Flame className="h-3 w-3 text-emerald-400 fill-current animate-pulse" />
+                  <span className="text-[10px] font-black uppercase tracking-[0.2em] text-emerald-400">
                     {featured.completedLessons > 0 && featured.completedLessons < featured.totalLessons
-                      ? \"Continue Assistindo\"
+                      ? "Continue Assistindo"
                       : featured.completedLessons === 0
-                      ? \"Novo Lançamento\"
-                      : \"Concluído\"}
+                      ? "Novo Lançamento"
+                      : "Concluído"}
                   </span>
                 </div>
-                <span className=\"text-[10px] text-zinc-500 uppercase tracking-[0.2em] font-black\">
+                <span className="text-[10px] text-zinc-500 uppercase tracking-[0.2em] font-black">
                   {featured.category}
                 </span>
               </div>
 
               {/* Title */}
-              <h1 className=\"font-display text-[48px] md:text-[72px] lg:text-[92px] font-black tracking-[-0.05em] leading-[0.88] mb-6 text-white drop-shadow-[0_8px_30px_rgba(0,0,0,0.5)]\">
+              <h1 className="font-display text-[48px] md:text-[72px] lg:text-[92px] font-black tracking-[-0.05em] leading-[0.88] mb-6 text-white drop-shadow-[0_8px_30px_rgba(0,0,0,0.5)]">
                 {featured.title}
               </h1>
 
               {/* Meta row */}
-              <div className=\"flex items-center gap-6 mb-8 flex-wrap\">
-                <div className=\"flex items-center gap-2\">
-                  <Star className=\"h-4 w-4 fill-amber-400 text-amber-400\" />
-                  <span className=\"font-display font-black text-sm text-zinc-100 tabular-nums\">4.9</span>
+              <div className="flex items-center gap-6 mb-8 flex-wrap">
+                <div className="flex items-center gap-2">
+                  <Star className="h-4 w-4 fill-amber-400 text-amber-400" />
+                  <span className="font-display font-black text-sm text-zinc-100 tabular-nums">4.9</span>
                 </div>
-                <div className=\"flex items-center gap-2\">
-                  <BookOpen className=\"h-4 w-4 text-zinc-400\" />
-                  <span className=\"text-sm font-bold text-zinc-300\">{featured.totalLessons} aulas</span>
+                <div className="flex items-center gap-2">
+                  <BookOpen className="h-4 w-4 text-zinc-400" />
+                  <span className="text-sm font-bold text-zinc-300">{featured.totalLessons} aulas</span>
                 </div>
-                <div className=\"flex items-center gap-2\">
-                  <Clock className=\"h-4 w-4 text-zinc-400\" />
-                  <span className=\"text-sm font-bold text-zinc-300\">{featured.moduleCount} módulos</span>
+                <div className="flex items-center gap-2">
+                  <Clock className="h-4 w-4 text-zinc-400" />
+                  <span className="text-sm font-bold text-zinc-300">{featured.moduleCount} módulos</span>
                 </div>
                 {featured.completedLessons > 0 && (
-                  <div className=\"px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-400 text-[10px] font-black uppercase tracking-widest border border-emerald-500/30\">
+                  <div className="px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-400 text-[10px] font-black uppercase tracking-widest border border-emerald-500/30">
                     {Math.round((featured.completedLessons / featured.totalLessons) * 100)}% CONCLUÍDO
                   </div>
                 )}
@@ -243,28 +243,28 @@ export default function MemberHome() {
 
               {/* Description */}
               {featured.description && (
-                <p className=\"max-w-xl text-zinc-300/80 text-lg leading-relaxed mb-10 line-clamp-3 font-medium\">
+                <p className="max-w-xl text-zinc-300/80 text-lg leading-relaxed mb-10 line-clamp-3 font-medium">
                   {featured.description}
                 </p>
               )}
 
               {/* CTA buttons — Netflix style */}
-              <div className=\"flex flex-wrap items-center gap-4\">
+              <div className="flex flex-wrap items-center gap-4">
                 <Link
-                  to={`/membros-area/curso/${featured.id}${featured.lastLessonId ? `?lesson=${featured.lastLessonId}` : \"\"}`}
-                  className=\"group inline-flex items-center gap-3 px-10 py-4 bg-white text-[#050505] font-display font-black text-[16px] rounded-md hover:bg-zinc-200 transition-all duration-300 active:scale-[0.97] shadow-[0_8px_30px_rgba(255,255,255,0.1)]\"
+                  to={`/membros-area/curso/${featured.id}${featured.lastLessonId ? `?lesson=${featured.lastLessonId}` : ""}`}
+                  className="group inline-flex items-center gap-3 px-10 py-4 bg-white text-[#050505] font-display font-black text-[16px] rounded-md hover:bg-zinc-200 transition-all duration-300 active:scale-[0.97] shadow-[0_8px_30px_rgba(255,255,255,0.1)]"
                 >
-                  <Play className=\"h-6 w-6 fill-current\" />
+                  <Play className="h-6 w-6 fill-current" />
                   {featured.completedLessons > 0 && featured.completedLessons < featured.totalLessons
-                    ? \"Continuar\"
-                    : \"Assistir Agora\"}
+                    ? "Continuar"
+                    : "Assistir Agora"}
                 </Link>
 
                 <Link
                   to={`/membros-area/curso/${featured.id}`}
-                  className=\"inline-flex items-center gap-3 px-8 py-4 bg-zinc-800/60 text-zinc-100 font-display font-black text-[15px] rounded-md hover:bg-zinc-700/80 transition-all duration-300 active:scale-[0.97] backdrop-blur-md border border-white/5\"
+                  className="inline-flex items-center gap-3 px-8 py-4 bg-zinc-800/60 text-zinc-100 font-display font-black text-[15px] rounded-md hover:bg-zinc-700/80 transition-all duration-300 active:scale-[0.97] backdrop-blur-md border border-white/5"
                 >
-                  <Info className=\"h-5 w-5\" />
+                  <Info className="h-5 w-5" />
                   Mais Informações
                 </Link>
               </div>
@@ -274,17 +274,17 @@ export default function MemberHome() {
       )}
 
       {/* ═══ RAILS — Netflix carousels ═══ */}
-      <main className=\"relative z-10 -mt-20 pb-32 space-y-16\">
+      <main className="relative z-10 -mt-20 pb-32 space-y-16">
         {continueWatching.length > 0 && (
-          <Rail title=\"Continuar Assistindo\" courses={continueWatching} variant=\"wide\" />
+          <Rail title="Continuar Assistindo" courses={continueWatching} variant="wide" />
         )}
 
         {fresh.length > 0 && (
-          <Rail title=\"Novidades para Você\" courses={fresh} variant=\"wide\" />
+          <Rail title="Novidades para Você" courses={fresh} variant="wide" />
         )}
 
         {courses.length > 0 && (
-          <Rail title=\"Minha Biblioteca\" subtitle={`${courses.length} cursos disponíveis`} courses={courses} variant=\"poster\" />
+          <Rail title="Minha Biblioteca" subtitle={`${courses.length} cursos disponíveis`} courses={courses} variant="poster" />
         )}
 
         {certs.length > 0 && (
@@ -292,16 +292,16 @@ export default function MemberHome() {
         )}
 
         {completed.length > 0 && (
-          <Rail title=\"Concluídos\" courses={completed} variant=\"wide\" />
+          <Rail title="Concluídos" courses={completed} variant="wide" />
         )}
 
         {/* Footer stats */}
-        <section className=\"container mx-auto px-6 lg:px-12 pt-20 border-t border-white/5\">
-          <div className=\"grid grid-cols-2 md:grid-cols-4 gap-8 opacity-40 hover:opacity-100 transition-opacity duration-700\">
-            <Stat label=\"Cursos Adquiridos\" value={courses.length} icon={GraduationCap} />
-            <Stat label=\"Aulas Assistidas\" value={`${totalCompleted}/${totalLessons}`} icon={PlayCircle} />
-            <Stat label=\"Certificados\" value={certs.length} icon={Award} />
-            <Stat label=\"Dias Seguidos\" value={continueWatching.length} icon={Flame} />
+        <section className="container mx-auto px-6 lg:px-12 pt-20 border-t border-white/5">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 opacity-40 hover:opacity-100 transition-opacity duration-700">
+            <Stat label="Cursos Adquiridos" value={courses.length} icon={GraduationCap} />
+            <Stat label="Aulas Assistidas" value={`${totalCompleted}/${totalLessons}`} icon={PlayCircle} />
+            <Stat label="Certificados" value={certs.length} icon={Award} />
+            <Stat label="Dias Seguidos" value={continueWatching.length} icon={Flame} />
           </div>
         </section>
       </main>
