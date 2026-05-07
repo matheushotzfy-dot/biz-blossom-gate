@@ -575,10 +575,10 @@ export default function CourseBuilder() {
       </header>
 
       {/* ═══ MAIN LAYOUT ═══ */}
-      <div className="flex-1 flex overflow-hidden relative bg-[#030303]">
+      <div className="flex-1 flex overflow-hidden relative bg-[#050505]">
         {/* Background Gradients */}
-        <div className="absolute top-0 left-0 w-[500px] h-[500px] bg-emerald-500/5 blur-[120px] rounded-full pointer-events-none" />
-        <div className="absolute bottom-0 right-0 w-[500px] h-[500px] bg-blue-500/5 blur-[120px] rounded-full pointer-events-none" />
+        <div className="absolute top-0 left-0 w-[800px] h-[800px] bg-blue-500/[0.03] blur-[150px] rounded-full pointer-events-none" />
+        <div className="absolute bottom-0 right-0 w-[800px] h-[800px] bg-indigo-500/[0.03] blur-[150px] rounded-full pointer-events-none" />
 
         {/* ─── LEFT: Curriculum Sidebar ─── */}
         <AnimatePresence initial={false}>
