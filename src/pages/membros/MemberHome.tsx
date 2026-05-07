@@ -162,137 +162,129 @@ export default function MemberHome() {
   }
 
   return (
-    <div className="bg-[#050505] text-zinc-100 antialiased">
+    <div className=\"bg-[#050505] text-zinc-100 antialiased selection:bg-emerald-500/30\">
       {/* ═══ HERO — Netflix-style full-bleed cinematic ═══ */}
       {featured && (
-        <section className="relative h-[92dvh] min-h-[600px] max-h-[900px] w-full overflow-hidden -mt-16">
+        <section className=\"relative h-[95dvh] w-full overflow-hidden -mt-16\">
           {/* Background image with subtle zoom */}
-          <div className="absolute inset-0">
+          <div className=\"absolute inset-0\">
             {featured.thumbnail_url ? (
               <motion.img
                 src={featured.thumbnail_url}
-                alt=""
-                className="w-full h-full object-cover"
-                initial={{ scale: 1.05 }}
-                animate={{ scale: 1 }}
-                transition={{ duration: 8, ease: "easeOut" }}
+                alt=\"\"
+                className=\"w-full h-full object-cover\"
+                initial={{ scale: 1.1, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                transition={{ duration: 1.8, ease: [0.16, 1, 0.3, 1] }}
               />
             ) : (
-              <div className="w-full h-full bg-gradient-to-br from-emerald-950/80 via-zinc-950 to-blue-950/40" />
+              <div className=\"w-full h-full bg-gradient-to-br from-emerald-950/80 via-zinc-950 to-blue-950/40\" />
             )}
+            
             {/* Multi-layer Netflix-style gradients */}
-            <div className="absolute inset-0 bg-gradient-to-r from-[#050505] via-[#050505]/80 to-[#050505]/20" />
-            <div className="absolute inset-0 bg-gradient-to-t from-[#050505] via-[#050505]/30 to-transparent" />
-            <div className="absolute inset-0 bg-gradient-to-b from-[#050505]/70 via-transparent to-transparent" />
-            {/* Vignette */}
-            <div className="absolute inset-0 [background:radial-gradient(ellipse_at_center,transparent_50%,rgba(5,5,5,0.8)_100%)]" />
+            <div className=\"absolute inset-0 bg-gradient-to-r from-[#050505] via-[#050505]/70 to-transparent\" />
+            <div className=\"absolute inset-0 bg-gradient-to-t from-[#050505] via-[#050505]/40 to-transparent\" />
+            <div className=\"absolute inset-0 bg-gradient-to-b from-[#050505]/40 via-transparent to-transparent\" />
+            
+            {/* Ambient Glow */}
+            <div className=\"absolute -left-[10%] top-[20%] w-[40%] h-[60%] bg-emerald-500/10 blur-[120px] rounded-full pointer-events-none\" />
           </div>
 
           {/* Content — bottom-left Netflix position */}
-          <motion.div
-            initial={{ opacity: 0, y: 50 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.9, ease, delay: 0.2 }}
-            className="relative h-full flex flex-col justify-end px-6 lg:px-16 pb-28 max-w-3xl"
-          >
-            {/* Category pill */}
-            <div className="flex items-center gap-3 mb-5">
-              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-md bg-emerald-500/15 border border-emerald-500/30 text-[10px] font-bold uppercase tracking-[0.18em] text-emerald-400">
-                <Flame className="h-3 w-3" />
-                {featured.completedLessons > 0 && featured.completedLessons < featured.totalLessons
-                  ? "Continue assistindo"
-                  : featured.completedLessons === 0
-                  ? "Novo"
-                  : "Concluído"}
-              </span>
-              <span className="text-[10px] text-zinc-500 uppercase tracking-[0.16em] font-bold capitalize">
-                {featured.category}
-              </span>
-            </div>
-
-            {/* Title */}
-            <h1 className="font-display text-[40px] md:text-[60px] lg:text-[80px] font-black tracking-[-0.045em] text-balance leading-[0.92] mb-5 text-white [text-shadow:0_4px_30px_rgba(0,0,0,0.5)]">
-              {featured.title}
-            </h1>
-
-            {/* Meta row */}
-            <div className="flex items-center gap-5 mb-5 flex-wrap">
-              <div className="flex items-center gap-1.5">
-                <Star className="h-4 w-4 fill-amber-400 text-amber-400" />
-                <span className="font-display font-bold text-sm text-zinc-200 tabular-nums">4.9</span>
-              </div>
-              <span className="h-1 w-1 rounded-full bg-zinc-700" />
-              <span className="text-sm text-zinc-400">{featured.totalLessons} aulas</span>
-              <span className="h-1 w-1 rounded-full bg-zinc-700" />
-              <span className="text-sm text-zinc-400">{featured.moduleCount} módulos</span>
-              {featured.completedLessons > 0 && (
-                <>
-                  <span className="h-1 w-1 rounded-full bg-zinc-700" />
-                  <span className="text-sm text-emerald-400 font-semibold">
-                    {Math.round((featured.completedLessons / featured.totalLessons) * 100)}% concluído
+          <div className=\"relative h-full container mx-auto px-6 lg:px-12 flex flex-col justify-end pb-32 max-w-7xl\">
+            <motion.div
+              initial={{ opacity: 0, x: -30 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.8, delay: 0.5, ease: [0.16, 1, 0.3, 1] }}
+              className=\"max-w-2xl\"
+            >
+              {/* Category pill */}
+              <div className=\"flex items-center gap-3 mb-6\">
+                <div className=\"flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/30 backdrop-blur-md\">
+                  <Flame className=\"h-3 w-3 text-emerald-400 fill-current animate-pulse\" />
+                  <span className=\"text-[10px] font-black uppercase tracking-[0.2em] text-emerald-400\">
+                    {featured.completedLessons > 0 && featured.completedLessons < featured.totalLessons
+                      ? \"Continue Assistindo\"
+                      : featured.completedLessons === 0
+                      ? \"Novo Lançamento\"
+                      : \"Concluído\"}
                   </span>
-                </>
-              )}
-            </div>
-
-            {/* Description */}
-            {featured.description && (
-              <p className="max-w-xl text-zinc-300/90 text-base lg:text-[17px] leading-relaxed mb-8 line-clamp-2 [text-shadow:0_2px_10px_rgba(0,0,0,0.5)]">
-                {featured.description}
-              </p>
-            )}
-
-            {/* CTA buttons — Netflix style */}
-            <div className="flex flex-wrap items-center gap-3">
-              <Link
-                to={`/membros-area/curso/${featured.id}${featured.lastLessonId ? `?lesson=${featured.lastLessonId}` : ""}`}
-                className="group inline-flex items-center gap-2.5 px-8 py-3.5 bg-white text-[#050505] font-display font-black text-[15px] rounded-md hover:bg-zinc-200 transition-all duration-300 active:scale-[0.97] shadow-[0_4px_20px_rgba(255,255,255,0.15)]"
-              >
-                <Play className="h-5 w-5 fill-current" />
-                {featured.completedLessons > 0 && featured.completedLessons < featured.totalLessons
-                  ? "Continuar"
-                  : featured.completedLessons === 0
-                  ? "Assistir"
-                  : "Rever"}
-              </Link>
-
-              <Link
-                to={`/membros-area/curso/${featured.id}`}
-                className="inline-flex items-center gap-2 px-6 py-3.5 bg-zinc-700/60 text-zinc-100 font-display font-bold text-[14px] rounded-md hover:bg-zinc-700/80 transition-all duration-300 active:scale-[0.97] backdrop-blur-sm"
-              >
-                Mais informações
-              </Link>
-            </div>
-
-            {/* Progress bar */}
-            {featured.totalLessons > 0 && featured.completedLessons > 0 && (
-              <div className="mt-6 max-w-md">
-                <div className="h-[3px] bg-white/15 overflow-hidden rounded-full">
-                  <motion.div
-                    className="h-full bg-emerald-400 rounded-full"
-                    initial={{ width: 0 }}
-                    animate={{ width: `${Math.round((featured.completedLessons / featured.totalLessons) * 100)}%` }}
-                    transition={{ duration: 1.2, ease, delay: 0.5 }}
-                  />
                 </div>
+                <span className=\"text-[10px] text-zinc-500 uppercase tracking-[0.2em] font-black\">
+                  {featured.category}
+                </span>
               </div>
-            )}
-          </motion.div>
+
+              {/* Title */}
+              <h1 className=\"font-display text-[48px] md:text-[72px] lg:text-[92px] font-black tracking-[-0.05em] leading-[0.88] mb-6 text-white drop-shadow-[0_8px_30px_rgba(0,0,0,0.5)]\">
+                {featured.title}
+              </h1>
+
+              {/* Meta row */}
+              <div className=\"flex items-center gap-6 mb-8 flex-wrap\">
+                <div className=\"flex items-center gap-2\">
+                  <Star className=\"h-4 w-4 fill-amber-400 text-amber-400\" />
+                  <span className=\"font-display font-black text-sm text-zinc-100 tabular-nums\">4.9</span>
+                </div>
+                <div className=\"flex items-center gap-2\">
+                  <BookOpen className=\"h-4 w-4 text-zinc-400\" />
+                  <span className=\"text-sm font-bold text-zinc-300\">{featured.totalLessons} aulas</span>
+                </div>
+                <div className=\"flex items-center gap-2\">
+                  <Clock className=\"h-4 w-4 text-zinc-400\" />
+                  <span className=\"text-sm font-bold text-zinc-300\">{featured.moduleCount} módulos</span>
+                </div>
+                {featured.completedLessons > 0 && (
+                  <div className=\"px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-400 text-[10px] font-black uppercase tracking-widest border border-emerald-500/30\">
+                    {Math.round((featured.completedLessons / featured.totalLessons) * 100)}% CONCLUÍDO
+                  </div>
+                )}
+              </div>
+
+              {/* Description */}
+              {featured.description && (
+                <p className=\"max-w-xl text-zinc-300/80 text-lg leading-relaxed mb-10 line-clamp-3 font-medium\">
+                  {featured.description}
+                </p>
+              )}
+
+              {/* CTA buttons — Netflix style */}
+              <div className=\"flex flex-wrap items-center gap-4\">
+                <Link
+                  to={`/membros-area/curso/${featured.id}${featured.lastLessonId ? `?lesson=${featured.lastLessonId}` : \"\"}`}
+                  className=\"group inline-flex items-center gap-3 px-10 py-4 bg-white text-[#050505] font-display font-black text-[16px] rounded-md hover:bg-zinc-200 transition-all duration-300 active:scale-[0.97] shadow-[0_8px_30px_rgba(255,255,255,0.1)]\"
+                >
+                  <Play className=\"h-6 w-6 fill-current\" />
+                  {featured.completedLessons > 0 && featured.completedLessons < featured.totalLessons
+                    ? \"Continuar\"
+                    : \"Assistir Agora\"}
+                </Link>
+
+                <Link
+                  to={`/membros-area/curso/${featured.id}`}
+                  className=\"inline-flex items-center gap-3 px-8 py-4 bg-zinc-800/60 text-zinc-100 font-display font-black text-[15px] rounded-md hover:bg-zinc-700/80 transition-all duration-300 active:scale-[0.97] backdrop-blur-md border border-white/5\"
+                >
+                  <Info className=\"h-5 w-5\" />
+                  Mais Informações
+                </Link>
+              </div>
+            </motion.div>
+          </div>
         </section>
       )}
 
       {/* ═══ RAILS — Netflix carousels ═══ */}
-      <main className="relative z-10 -mt-12 pb-32 space-y-12">
+      <main className=\"relative z-10 -mt-20 pb-32 space-y-16\">
         {continueWatching.length > 0 && (
-          <Rail title="Continue assistindo" courses={continueWatching} variant="wide" />
+          <Rail title=\"Continuar Assistindo\" courses={continueWatching} variant=\"wide\" />
         )}
 
         {fresh.length > 0 && (
-          <Rail title="Para começar" courses={fresh} variant="wide" />
+          <Rail title=\"Novidades para Você\" courses={fresh} variant=\"wide\" />
         )}
 
-        {courses.length > 1 && (
-          <Rail title="Toda sua biblioteca" subtitle={`${courses.length} cursos disponíveis`} courses={courses} variant="poster" />
+        {courses.length > 0 && (
+          <Rail title=\"Minha Biblioteca\" subtitle={`${courses.length} cursos disponíveis`} courses={courses} variant=\"poster\" />
         )}
 
         {certs.length > 0 && (
@@ -300,20 +292,21 @@ export default function MemberHome() {
         )}
 
         {completed.length > 0 && (
-          <Rail title="Concluídos" courses={completed} variant="wide" />
+          <Rail title=\"Concluídos\" courses={completed} variant=\"wide\" />
         )}
 
         {/* Footer stats */}
-        <section className="px-6 lg:px-16 pt-16 border-t border-white/5">
-          <div className="flex flex-wrap gap-x-16 gap-y-8 opacity-50 hover:opacity-100 transition-opacity duration-500">
-            <Stat label="Cursos" value={courses.length} />
-            <Stat label="Aulas concluídas" value={`${totalCompleted}/${totalLessons}`} />
-            <Stat label="Certificados" value={certs.length} />
-            <Stat label="Em andamento" value={continueWatching.length} />
+        <section className=\"container mx-auto px-6 lg:px-12 pt-20 border-t border-white/5\">
+          <div className=\"grid grid-cols-2 md:grid-cols-4 gap-8 opacity-40 hover:opacity-100 transition-opacity duration-700\">
+            <Stat label=\"Cursos Adquiridos\" value={courses.length} icon={GraduationCap} />
+            <Stat label=\"Aulas Assistidas\" value={`${totalCompleted}/${totalLessons}`} icon={PlayCircle} />
+            <Stat label=\"Certificados\" value={certs.length} icon={Award} />
+            <Stat label=\"Dias Seguidos\" value={continueWatching.length} icon={Flame} />
           </div>
         </section>
       </main>
     </div>
+
   );
 }
 

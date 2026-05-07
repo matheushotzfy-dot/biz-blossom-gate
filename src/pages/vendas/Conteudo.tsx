@@ -41,7 +41,6 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/hooks/useAuth";
@@ -207,16 +206,6 @@ export default function AdminConteudo() {
   const totalLessons = useMemo(() => Object.values(courseStats).reduce((acc, item) => acc + item.lessons, 0), [courseStats]);
   const totalRevenue = useMemo(() => courses.reduce((acc, course) => acc + getCourseRevenue(course), 0), [courses, revenueByProduct]);
 
-  const highlightCourse = useMemo(() => {
-    const liveCourse = courses.find((course) => course.is_published);
-    return liveCourse || courses[0] || null;
-  }, [courses]);
-
-  const highlightStats = highlightCourse ? courseStats[highlightCourse.id] || { modules: 0, lessons: 0 } : { modules: 0, lessons: 0 };
-  const highlightStudents = highlightCourse ? studentCounts[highlightCourse.id] || 0 : 0;
-  const highlightProduct = highlightCourse ? products.find((product) => product.id === highlightCourse.product_id) : undefined;
-  const highlightRevenue = highlightCourse ? getCourseRevenue(highlightCourse) : 0;
-
   const metricCards = [
     { label: "Áreas", value: numberAnimator(courses.length), meta: `${tabs[1].count} live`, icon: GraduationCap },
     { label: "Aulas", value: numberAnimator(totalLessons), meta: `${numberAnimator(totalModules)} módulos`, icon: BookOpen },
@@ -243,60 +232,56 @@ export default function AdminConteudo() {
     draft: <FileEdit className="h-3 w-3" strokeWidth={2.5} />,
   };
 
-  const tabAccent: Record<typeof filter, string> = {
-    all: "text-foreground",
-    published: "text-success",
-    draft: "text-muted-foreground",
-  };
-
   return (
-    <div className="mx-auto -mt-2 w-full max-w-[1440px] pb-24 md:-mt-3 md:pb-10">
+    <div className="mx-auto -mt-2 w-full max-w-[1440px] pb-24 md:-mt-3 md:pb-10 bg-[#050505] min-h-screen text-white selection:bg-blue-500/30">
       {/* ── Hero header ── */}
-      <div className="relative flex flex-col gap-6 px-5 pt-2 sm:px-7 md:pt-3">
-        <div className="flex flex-wrap items-end justify-between gap-4 animate-fade-in">
+      <div className="relative flex flex-col gap-8 px-6 pt-10 sm:px-10">
+        <div className="flex flex-wrap items-end justify-between gap-6 animate-fade-in">
           <div className="min-w-0">
-            <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.22em] text-muted-foreground/70">
-              <span className="inline-flex h-5 w-5 items-center justify-center border border-primary/40 bg-primary/[0.08] text-[10px] font-black text-primary">H</span>
-              Hotzfy Members
+            <div className="flex items-center gap-2.5 text-[11px] font-black uppercase tracking-[0.25em] text-blue-500/80 mb-2">
+              <div className="h-5 w-5 rounded bg-blue-500 flex items-center justify-center text-[10px] font-black text-white shadow-[0_0_15px_rgba(59,130,246,0.5)]">H</div>
+              HOTZFY MEMBERS
             </div>
-            <h1 className="mt-3 font-display text-[36px] font-black leading-[0.92] tracking-[-0.04em] text-foreground sm:text-[48px]">
+            <h1 className="font-display text-[44px] font-black leading-none tracking-[-0.05em] text-white sm:text-[64px] [text-shadow:0_4px_24px_rgba(0,0,0,0.5)]">
               Área de Membros
             </h1>
-            <p className="mt-2 text-[13px] font-medium text-muted-foreground/70">
+            <p className="mt-3 text-[14px] font-medium text-zinc-500 max-w-lg leading-relaxed">
               Crie cursos, organize módulos e libere acesso ao seu aluno.
             </p>
           </div>
           <button
             onClick={openNew}
-            className="group inline-flex h-11 items-center gap-2 border border-primary bg-primary px-6 text-[11px] font-black uppercase tracking-[0.16em] text-primary-foreground transition-colors duration-200 hover:bg-primary/90"
+            className="group relative inline-flex h-12 items-center gap-2.5 overflow-hidden rounded-md bg-blue-600 px-8 text-[12px] font-black uppercase tracking-[0.18em] text-white transition-all duration-300 hover:bg-blue-500 active:scale-[0.97] shadow-[0_4px_20px_rgba(37,99,235,0.3)]"
           >
-            <Plus className="h-4 w-4" strokeWidth={3} />
+            <Plus className="h-4.5 w-4.5" strokeWidth={3} />
             Novo curso
           </button>
         </div>
 
-        {/* KPIs */}
-        <div className="grid grid-cols-2 gap-px overflow-hidden border border-border bg-border sm:grid-cols-4 animate-fade-in stagger-1">
+        {/* KPIs — Styled like screenshot */}
+        <div className="grid grid-cols-2 gap-4 sm:grid-cols-4 animate-fade-in stagger-1">
           {metricCards.map((item) => {
             const Icon = item.icon;
             return (
-              <div key={item.label} className="bg-card px-5 py-4">
-                <div className="flex items-center gap-1.5 text-[10px] font-black uppercase tracking-[0.20em] text-muted-foreground/60">
-                  <Icon className="h-3 w-3" strokeWidth={2.75} />
+              <div key={item.label} className="relative overflow-hidden rounded-xl border border-white/[0.04] bg-zinc-900/40 p-6 backdrop-blur-sm transition-all hover:border-white/[0.08] hover:bg-zinc-900/60">
+                <div className="flex items-center gap-2 text-[11px] font-black uppercase tracking-[0.22em] text-zinc-500">
+                  <div className="h-7 w-7 rounded-lg bg-white/5 flex items-center justify-center">
+                    <Icon className="h-3.5 w-3.5" strokeWidth={2.5} />
+                  </div>
                   {item.label}
                 </div>
-                <div className="mt-2.5 font-display text-[26px] font-black leading-none tracking-[-0.03em] text-foreground tabular-nums">
+                <div className="mt-4 font-display text-[32px] font-black leading-none tracking-[-0.03em] text-white tabular-nums">
                   {item.value}
                 </div>
-                <p className="mt-1.5 text-[10px] font-bold uppercase tracking-[0.14em] text-muted-foreground/50">{item.meta}</p>
+                <p className="mt-2 text-[10px] font-bold uppercase tracking-[0.16em] text-zinc-600">{item.meta}</p>
               </div>
             );
           })}
         </div>
 
-        {/* Tabs + Search row */}
-        <div className="flex flex-col gap-3 pb-1 animate-fade-in stagger-2 sm:flex-row sm:items-center sm:justify-between">
-          <div className="inline-flex w-fit items-center gap-0 border border-border bg-card overflow-x-auto">
+        {/* Tabs + Search row — Styled like screenshot */}
+        <div className="flex flex-col gap-4 pt-4 animate-fade-in stagger-2 sm:flex-row sm:items-center sm:justify-between border-t border-white/[0.05]">
+          <div className="inline-flex items-center gap-1 rounded-lg bg-zinc-900/50 p-1 border border-white/[0.03]">
             {tabs.map((tab) => {
               const active = filter === tab.value;
               return (
@@ -304,22 +289,22 @@ export default function AdminConteudo() {
                   key={tab.value}
                   onClick={() => setFilter(tab.value)}
                   className={cn(
-                    "group/tab relative inline-flex shrink-0 items-center gap-2 h-9 px-4 text-[11px] font-black uppercase tracking-[0.14em] border-r border-border transition-colors duration-150 last:border-r-0",
+                    "relative flex items-center gap-2.5 h-10 px-5 text-[11px] font-black uppercase tracking-[0.16em] rounded-md transition-all duration-200",
                     active
-                      ? "bg-primary text-primary-foreground"
-                      : "text-muted-foreground/70 hover:text-foreground hover:bg-card-elevated"
+                      ? "bg-blue-600 text-white shadow-lg"
+                      : "text-zinc-500 hover:text-zinc-300 hover:bg-white/5"
                   )}
                 >
-                  <span className="flex h-3.5 w-3.5 items-center justify-center">
+                  <span className="flex items-center justify-center">
                     {tabIcon[tab.value]}
                   </span>
-                  <span className="font-display">{tab.label === "published" ? "Live" : tab.label === "draft" ? "Rascunhos" : tab.label}</span>
+                  <span className="font-display">{tab.label === "published" ? "Live" : tab.label === "draft" ? "Draft" : tab.label}</span>
                   {tab.count > 0 && (
                     <span className={cn(
-                      "inline-flex h-[18px] min-w-[20px] items-center justify-center px-1.5 text-[10px] font-black tabular-nums tracking-tight border",
+                      "inline-flex h-[20px] min-w-[22px] items-center justify-center px-1.5 text-[10px] font-black tabular-nums tracking-tight rounded",
                       active
-                        ? "bg-primary-foreground/15 text-primary-foreground border-primary-foreground/20"
-                        : "bg-muted/30 text-muted-foreground/60 border-border/60"
+                        ? "bg-white/20 text-white"
+                        : "bg-zinc-800 text-zinc-600"
                     )}>
                       {tab.count}
                     </span>
@@ -329,221 +314,159 @@ export default function AdminConteudo() {
             })}
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-3">
             <div className="relative group">
-              <Search className="absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground/50 transition-colors group-focus-within:text-primary" />
+              <Search className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-600 transition-colors group-focus-within:text-blue-500" />
               <input
                 value={search}
                 onChange={(event) => setSearch(event.target.value)}
                 placeholder="Buscar curso..."
-                className="h-9 w-full border border-border bg-card pl-9 pr-8 text-xs font-medium text-foreground placeholder:text-muted-foreground/60 transition-colors focus:border-primary focus:outline-none sm:w-72"
+                className="h-12 w-full rounded-xl border border-white/[0.06] bg-zinc-900/50 pl-11 pr-10 text-[13px] font-medium text-white placeholder:text-zinc-600 transition-all focus:border-blue-500/50 focus:bg-zinc-900 focus:outline-none sm:w-80 shadow-inner"
               />
               {search && (
-                <button onClick={() => setSearch("")} className="absolute right-2.5 top-1/2 -translate-y-1/2 p-0.5 text-muted-foreground/50 transition-colors hover:bg-secondary hover:text-foreground">
-                  <X className="h-3 w-3" />
+                <button onClick={() => setSearch("")} className="absolute right-3.5 top-1/2 -translate-y-1/2 p-1 text-zinc-600 hover:text-white transition-colors">
+                  <X className="h-3.5 w-3.5" />
                 </button>
               )}
             </div>
 
-            <div className="flex items-center gap-0 border border-border bg-card self-start">
+            <div className="flex items-center gap-1 rounded-xl bg-zinc-900/50 p-1 border border-white/[0.06]">
               <button
                 onClick={() => setViewMode("grid")}
                 className={cn(
-                  "flex h-9 w-9 items-center justify-center border-r border-border transition-colors",
-                  viewMode === "grid" ? "bg-primary text-primary-foreground" : "text-muted-foreground/70 hover:text-foreground hover:bg-card-elevated"
+                  "flex h-10 w-10 items-center justify-center rounded-lg transition-all",
+                  viewMode === "grid" ? "bg-blue-600 text-white" : "text-zinc-600 hover:text-zinc-300"
                 )}
                 title="Grade"
               >
-                <Grid3X3 className="h-3.5 w-3.5" strokeWidth={2.25} />
+                <Grid3X3 className="h-4 w-4" strokeWidth={2.5} />
               </button>
               <button
                 onClick={() => setViewMode("list")}
                 className={cn(
-                  "flex h-9 w-9 items-center justify-center transition-colors",
-                  viewMode === "list" ? "bg-primary text-primary-foreground" : "text-muted-foreground/70 hover:text-foreground hover:bg-card-elevated"
+                  "flex h-10 w-10 items-center justify-center rounded-lg transition-all",
+                  viewMode === "list" ? "bg-blue-600 text-white" : "text-zinc-600 hover:text-zinc-300"
                 )}
                 title="Lista"
               >
-                <List className="h-3.5 w-3.5" strokeWidth={2.25} />
+                <List className="h-4 w-4" strokeWidth={2.5} />
               </button>
             </div>
           </div>
         </div>
       </div>
 
-      {/* ── Highlight strip (foco atual) ── */}
-      {highlightCourse && (
-        <div className="mx-5 mt-6 sm:mx-7 animate-fade-in stagger-2">
-          <div className="flex flex-col gap-4 border border-border bg-card p-5 sm:flex-row sm:items-center sm:justify-between">
-            <div className="flex items-start gap-4 min-w-0">
-              <div className={cn(
-                "flex h-12 w-12 shrink-0 items-center justify-center border",
-                highlightCourse.is_published
-                  ? "border-success/40 bg-success/[0.10] text-success"
-                  : "border-border bg-card-elevated text-muted-foreground"
-              )}>
-                <GraduationCap className="h-5 w-5" strokeWidth={2.25} />
-              </div>
-              <div className="min-w-0">
-                <div className="flex items-center gap-2">
-                  <p className="text-[10px] font-black uppercase tracking-[0.20em] text-muted-foreground/60">Foco atual</p>
-                  <span className={cn(
-                    "inline-flex h-[18px] items-center border px-1.5 text-[9.5px] font-black uppercase tracking-[0.16em]",
-                    highlightCourse.is_published
-                      ? "border-success bg-success text-success-foreground"
-                      : "border-border bg-muted text-muted-foreground"
-                  )}>
-                    {highlightCourse.is_published ? "Live" : "Draft"}
-                  </span>
-                </div>
-                <h2 className="mt-1.5 truncate font-display text-[20px] font-black tracking-[-0.025em] text-foreground">
-                  {highlightCourse.title}
-                </h2>
-                <p className="mt-1 truncate text-[11.5px] font-medium text-muted-foreground/70">
-                  {highlightProduct?.name ? `${highlightProduct.name} · ` : ""}
-                  {highlightStats.lessons} aulas em {highlightStats.modules} módulos · {highlightStudents} alunos · <span className="text-success font-bold tabular-nums">{formatContentCurrency(highlightRevenue)}</span>
-                </p>
-              </div>
-            </div>
-
-            <div className="flex items-center gap-2">
-              <button
-                onClick={() => navigate(`/vendas/conteudo/${highlightCourse.id}/builder`)}
-                className="inline-flex h-9 items-center gap-1.5 border border-primary bg-primary px-4 text-[11px] font-black uppercase tracking-[0.14em] text-primary-foreground transition-colors hover:bg-primary/90"
-              >
-                <Settings2 className="h-3.5 w-3.5" strokeWidth={2.5} />
-                <span className="font-display">Builder</span>
-              </button>
-              {highlightCourse.is_published && (
-                <button
-                  onClick={() => window.open(getCourseLink(highlightCourse.id), "_blank")}
-                  className="inline-flex h-9 items-center gap-1.5 border border-border bg-card px-4 text-[11px] font-black uppercase tracking-[0.14em] text-muted-foreground transition-colors hover:border-foreground/40 hover:text-foreground"
-                >
-                  <ExternalLink className="h-3.5 w-3.5" strokeWidth={2.5} />
-                  <span className="font-display">Ver área</span>
-                </button>
-              )}
-            </div>
-          </div>
-        </div>
-      )}
-
       {/* ── Workspace ── */}
-      <div className="px-5 pt-6 sm:px-7">
-        <section className="overflow-hidden border border-border bg-card animate-fade-in stagger-3">
-
+      <div className="px-6 sm:px-10 mt-10 pb-20">
         {isLoading ? (
-          <div className="flex min-h-[360px] items-center justify-center">
-            <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+          <div className="flex min-h-[400px] items-center justify-center">
+            <div className="flex flex-col items-center gap-4">
+              <Loader2 className="h-8 w-8 animate-spin text-blue-500" />
+              <p className="text-xs text-zinc-500 font-black uppercase tracking-widest animate-pulse">Carregando áreas...</p>
+            </div>
           </div>
         ) : filteredCourses.length === 0 ? (
-          <div className="flex min-h-[400px] flex-col items-center justify-center px-6 text-center">
-            <div className="flex h-16 w-16 items-center justify-center border border-border bg-card-elevated">
-              <GraduationCap className="h-7 w-7 text-primary" strokeWidth={1.6} />
+          <div className="flex min-h-[500px] flex-col items-center justify-center px-6 text-center animate-fade-in">
+            <div className="h-24 w-24 rounded-[32px] bg-zinc-900 border border-white/[0.06] flex items-center justify-center mb-8 shadow-2xl relative group">
+              <div className="absolute inset-0 bg-blue-500/10 rounded-[32px] blur-2xl group-hover:bg-blue-500/20 transition-all" />
+              <GraduationCap className="h-10 w-10 text-zinc-700 relative z-10" />
             </div>
-            <h3 className="mt-5 font-display text-lg font-black tracking-tight text-foreground">
+            <h3 className="font-display text-2xl font-black tracking-tight text-white mb-3">
               {emptyFiltered ? "Nenhum resultado encontrado" : "Sua operação de conteúdo começa aqui"}
             </h3>
-            <p className="mt-1.5 max-w-sm text-[13px] text-muted-foreground leading-relaxed">
+            <p className="max-w-sm text-[14px] text-zinc-500 leading-relaxed mb-10">
               {emptyFiltered ? "Troque a busca ou o filtro para encontrar a área certa." : "Crie a primeira área, conecte ao produto e deixe o catálogo pronto para o aluno."}
             </p>
             {!emptyFiltered && (
               <button
                 onClick={openNew}
-                className="mt-6 inline-flex h-11 items-center gap-2 border border-primary bg-primary px-6 text-[11px] font-black uppercase tracking-[0.14em] text-primary-foreground transition-colors hover:bg-primary/90"
+                className="inline-flex h-12 items-center gap-3 rounded-md bg-blue-600 px-10 text-[12px] font-black uppercase tracking-[0.2em] text-white hover:bg-blue-500 transition-all active:scale-[0.97] shadow-xl shadow-blue-500/20"
               >
-                <Plus className="h-4 w-4" strokeWidth={2.5} /> Criar área
+                <Plus className="h-5 w-5" strokeWidth={3} />
+                Criar área
               </button>
             )}
           </div>
-        ) : viewMode === "grid" ? (
-          <div className="grid gap-4 p-4 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
-            {filteredCourses.map((course) => {
-              const stats = courseStats[course.id] || { modules: 0, lessons: 0 };
-              const product = products.find((item) => item.id === course.product_id);
-              const revenue = getCourseRevenue(course);
-              const students = studentCounts[course.id] || 0;
-
-              return (
-                <ContentCourseCard
-                  key={course.id}
-                  course={course}
-                  stats={stats}
-                  productName={product?.name}
-                  students={students}
-                  revenueLabel={formatContentCurrency(revenue)}
-                  copied={copiedId === course.id}
-                  onOpenBuilder={() => navigate(`/vendas/conteudo/${course.id}/builder`)}
-                  onOpenEdit={() => openEdit(course)}
-                  onTogglePublish={() => togglePublish(course.id, course.is_published)}
-                  onCopyLink={() => handleCopyMemberLink(course.id)}
-                  onOpenPreview={() => window.open(getCourseLink(course.id), "_blank")}
-                  onDelete={() => setDeleteTarget(course.id)}
-                />
-              );
-            })}
-          </div>
         ) : (
-          <div>
-            <div className="hidden grid-cols-[minmax(0,2.5fr)_minmax(0,1.05fr)_96px_96px_132px_112px] gap-4 border-b border-border/60 bg-card-inset px-4 py-2.5 text-[10px] font-semibold uppercase tracking-[0.16em] text-muted-foreground md:grid">
-              <div>Área</div>
-              <div>Produto</div>
-              <div className="text-right">Aulas</div>
-              <div className="text-right">Alunos</div>
-              <div className="text-right">Receita</div>
-              <div className="text-right">Ações</div>
-            </div>
-            {filteredCourses.map((course) => {
-              const stats = courseStats[course.id] || { modules: 0, lessons: 0 };
-              const product = products.find((item) => item.id === course.product_id);
-              const revenue = getCourseRevenue(course);
-              const students = studentCounts[course.id] || 0;
-
-              return (
-                <ContentCourseRow
-                  key={course.id}
-                  course={course}
-                  stats={stats}
-                  productName={product?.name}
-                  students={students}
-                  revenueLabel={formatContentCurrency(revenue)}
-                  copied={copiedId === course.id}
-                  onOpenBuilder={() => navigate(`/vendas/conteudo/${course.id}/builder`)}
-                  onOpenEdit={() => openEdit(course)}
-                  onTogglePublish={() => togglePublish(course.id, course.is_published)}
-                  onCopyLink={() => handleCopyMemberLink(course.id)}
-                  onOpenPreview={() => window.open(getCourseLink(course.id), "_blank")}
-                  onDelete={() => setDeleteTarget(course.id)}
-                />
-              );
-            })}
+          <div className="animate-fade-in stagger-3">
+            {viewMode === "grid" ? (
+              <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+                {filteredCourses.map((course) => (
+                  <ContentCourseCard
+                    key={course.id}
+                    course={course}
+                    stats={courseStats[course.id] || { modules: 0, lessons: 0 }}
+                    students={studentCounts[course.id] || 0}
+                    revenueLabel={formatContentCurrency(getCourseRevenue(course))}
+                    productName={products.find(p => p.id === course.product_id)?.name}
+                    onOpenEdit={() => openEdit(course)}
+                    onDelete={() => setDeleteTarget(course.id)}
+                    onTogglePublish={() => togglePublish(course.id, course.is_published)}
+                    onCopyLink={() => handleCopyMemberLink(course.id)}
+                    copied={copiedId === course.id}
+                    onOpenBuilder={() => navigate(`/vendas/conteudo/${course.id}/builder`)}
+                    onOpenPreview={() => window.open(getCourseLink(course.id), "_blank")}
+                  />
+                ))}
+              </div>
+            ) : (
+              <div className="rounded-2xl border border-white/[0.06] bg-zinc-900/10 backdrop-blur-md overflow-hidden">
+                <table className="w-full text-left">
+                  <thead>
+                    <tr className="border-b border-white/[0.06] bg-zinc-900/30">
+                      <th className="px-8 py-5 text-[11px] font-black uppercase tracking-[0.25em] text-zinc-500">Área de Membros</th>
+                      <th className="px-8 py-5 text-[11px] font-black uppercase tracking-[0.25em] text-zinc-500">Status</th>
+                      <th className="px-8 py-5 text-[11px] font-black uppercase tracking-[0.25em] text-zinc-500 text-right">Configurações</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-white/[0.04]">
+                    {filteredCourses.map((course) => (
+                      <ContentCourseRow
+                        key={course.id}
+                        course={course}
+                        stats={courseStats[course.id] || { modules: 0, lessons: 0 }}
+                        students={studentCounts[course.id] || 0}
+                        revenueLabel={formatContentCurrency(getCourseRevenue(course))}
+                        productName={products.find(p => p.id === course.product_id)?.name}
+                        onOpenEdit={() => openEdit(course)}
+                        onDelete={() => setDeleteTarget(course.id)}
+                        onTogglePublish={() => togglePublish(course.id, course.is_published)}
+                        onCopyLink={() => handleCopyMemberLink(course.id)}
+                        copied={copiedId === course.id}
+                        onOpenBuilder={() => navigate(`/vendas/conteudo/${course.id}/builder`)}
+                        onOpenPreview={() => window.open(getCourseLink(course.id), "_blank")}
+                      />
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
           </div>
         )}
-      </section>
       </div>
 
       <CourseCreationWizard
         open={wizardOpen}
         onOpenChange={setWizardOpen}
-        products={products}
         editCourse={editCourseData}
+        products={products}
         onSaved={reloadCourses}
       />
 
       <AlertDialog open={!!deleteTarget} onOpenChange={(open) => !open && setDeleteTarget(null)}>
-        <AlertDialogContent className="max-w-sm rounded-2xl">
+        <AlertDialogContent className="max-w-sm rounded-2xl bg-zinc-950 border-white/10">
           <AlertDialogHeader>
-            <AlertDialogTitle className="text-base font-semibold">Excluir área de membros</AlertDialogTitle>
-            <AlertDialogDescription className="text-[13px] text-muted-foreground">
-              Curso, módulos, aulas e acessos vinculados serão removidos.
+            <AlertDialogTitle className="text-base font-semibold text-white">Excluir área de membros</AlertDialogTitle>
+            <AlertDialogDescription className="text-[13px] text-zinc-400">
+              Curso, módulos, aulas e acessos vinculados serão removidos. Esta ação é irreversível.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel disabled={deletingCourse} className="h-9 rounded-lg text-[13px]">
+            <AlertDialogCancel disabled={deletingCourse} className="h-10 rounded-lg text-[13px] bg-transparent text-zinc-400 border-white/10 hover:bg-white/5">
               Cancelar
             </AlertDialogCancel>
-            <AlertDialogAction onClick={confirmDeleteCourse} disabled={deletingCourse} className="h-9 rounded-lg bg-destructive text-[13px] text-destructive-foreground hover:bg-destructive/90">
-              {deletingCourse ? <Loader2 className="mr-2 h-3.5 w-3.5 animate-spin" /> : null}
+            <AlertDialogAction onClick={confirmDeleteCourse} disabled={deletingCourse} className="h-10 rounded-lg bg-red-600 text-[13px] text-white hover:bg-red-500">
+              {deletingCourse ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
               {deletingCourse ? "Excluindo..." : "Excluir"}
             </AlertDialogAction>
           </AlertDialogFooter>
