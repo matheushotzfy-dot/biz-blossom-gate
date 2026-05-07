@@ -162,129 +162,113 @@ export default function MemberHome() {
   }
 
   return (
-    <div className="bg-[#050505] text-zinc-100 antialiased selection:bg-emerald-500/30">
-      {/* ═══ HERO — Netflix-style full-bleed cinematic ═══ */}
+    <div className="bg-[#050505] text-zinc-100 antialiased selection:bg-emerald-500/30 overflow-x-hidden">
+      {/* ═══ HERO — Cinematic 4K Experience ═══ */}
       {featured && (
-        <section className="relative h-[95dvh] w-full overflow-hidden -mt-16">
-          {/* Background image with subtle zoom */}
-          <div className="absolute inset-0">
+        <section className="relative h-[92dvh] w-full overflow-hidden">
+          {/* Main Background with Parallax-like scale */}
+          <div className="absolute inset-0 z-0">
             {featured.thumbnail_url ? (
               <motion.img
                 src={featured.thumbnail_url}
                 alt=""
                 className="w-full h-full object-cover"
-                initial={{ scale: 1.1, opacity: 0 }}
+                initial={{ scale: 1.15, opacity: 0 }}
                 animate={{ scale: 1, opacity: 1 }}
-                transition={{ duration: 1.8, ease: [0.16, 1, 0.3, 1] }}
+                transition={{ duration: 2.2, ease: [0.16, 1, 0.3, 1] }}
               />
             ) : (
-              <div className="w-full h-full bg-gradient-to-br from-emerald-950/80 via-zinc-950 to-blue-950/40" />
+              <div className="w-full h-full bg-gradient-to-br from-[#0a0a0a] via-[#050505] to-[#080808]" />
             )}
             
-            {/* Multi-layer Netflix-style gradients */}
-            <div className="absolute inset-0 bg-gradient-to-r from-[#050505] via-[#050505]/70 to-transparent" />
-            <div className="absolute inset-0 bg-gradient-to-t from-[#050505] via-[#050505]/40 to-transparent" />
-            <div className="absolute inset-0 bg-gradient-to-b from-[#050505]/40 via-transparent to-transparent" />
+            {/* Multi-layer Netflix-style gradients for depth */}
+            <div className="absolute inset-0 bg-gradient-to-r from-[#050505] via-[#050505]/80 to-transparent" />
+            <div className="absolute inset-0 bg-gradient-to-t from-[#050505] via-transparent to-transparent" />
+            <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_50%,rgba(16,185,129,0.08),transparent_50%)]" />
             
-            {/* Ambient Glow */}
-            <div className="absolute -left-[10%] top-[20%] w-[40%] h-[60%] bg-emerald-500/10 blur-[120px] rounded-full pointer-events-none" />
+            {/* Fine grain overlay for texture */}
+            <div className="absolute inset-0 opacity-[0.03] pointer-events-none mix-blend-overlay" style={{ backgroundImage: `url('https://grainy-gradients.vercel.app/noise.svg')` }} />
           </div>
 
-          {/* Content — bottom-left Netflix position */}
-          <div className="relative h-full container mx-auto px-6 lg:px-12 flex flex-col justify-end pb-32 max-w-7xl">
+          <div className="relative h-full container mx-auto px-6 lg:px-16 flex flex-col justify-end pb-28 max-w-[1800px]">
             <motion.div
-              initial={{ opacity: 0, x: -30 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.8, delay: 0.5, ease: [0.16, 1, 0.3, 1] }}
-              className="max-w-2xl"
+              initial={{ opacity: 0, y: 40 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 1, delay: 0.6, ease: [0.16, 1, 0.3, 1] }}
+              className="max-w-3xl"
             >
-              {/* Category pill */}
-              <div className="flex items-center gap-3 mb-6">
-                <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/30 backdrop-blur-md">
-                  <Flame className="h-3 w-3 text-emerald-400 fill-current animate-pulse" />
-                  <span className="text-[10px] font-black uppercase tracking-[0.2em] text-emerald-400">
-                    {featured.completedLessons > 0 && featured.completedLessons < featured.totalLessons
-                      ? "Continue Assistindo"
-                      : featured.completedLessons === 0
-                      ? "Novo Lançamento"
-                      : "Concluído"}
+              {/* Premium Label */}
+              <div className="flex items-center gap-4 mb-8">
+                <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 border border-white/10 backdrop-blur-xl">
+                  <div className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse shadow-[0_0_8px_rgba(52,211,153,0.8)]" />
+                  <span className="text-[10px] font-black uppercase tracking-[0.25em] text-white">
+                    {featured.completedLessons > 0 ? "Retomar Experiência" : "Original Hotzfy"}
                   </span>
                 </div>
-                <span className="text-[10px] text-zinc-500 uppercase tracking-[0.2em] font-black">
-                  {featured.category}
-                </span>
-              </div>
-
-              {/* Title */}
-              <h1 className="font-display text-[48px] md:text-[72px] lg:text-[92px] font-black tracking-[-0.05em] leading-[0.88] mb-6 text-white drop-shadow-[0_8px_30px_rgba(0,0,0,0.5)]">
-                {featured.title}
-              </h1>
-
-              {/* Meta row */}
-              <div className="flex items-center gap-6 mb-8 flex-wrap">
-                <div className="flex items-center gap-2">
-                  <Star className="h-4 w-4 fill-amber-400 text-amber-400" />
-                  <span className="font-display font-black text-sm text-zinc-100 tabular-nums">4.9</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <BookOpen className="h-4 w-4 text-zinc-400" />
-                  <span className="text-sm font-bold text-zinc-300">{featured.totalLessons} aulas</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Clock className="h-4 w-4 text-zinc-400" />
-                  <span className="text-sm font-bold text-zinc-300">{featured.moduleCount} módulos</span>
-                </div>
-                {featured.completedLessons > 0 && (
-                  <div className="px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-400 text-[10px] font-black uppercase tracking-widest border border-emerald-500/30">
-                    {Math.round((featured.completedLessons / featured.totalLessons) * 100)}% CONCLUÍDO
-                  </div>
+                {featured.category && (
+                  <span className="text-[10px] text-zinc-500 uppercase tracking-[0.25em] font-black">
+                    {featured.category}
+                  </span>
                 )}
               </div>
 
-              {/* Description */}
+              {/* Title — Ultra Display Typography */}
+              <h1 className="font-display text-[52px] md:text-[84px] lg:text-[110px] font-black tracking-[-0.06em] leading-[0.82] mb-8 text-white select-none">
+                {featured.title.split(' ').map((word, i) => (
+                  <span key={i} className="inline-block mr-[0.2em] last:mr-0 drop-shadow-[0_10px_40px_rgba(0,0,0,0.5)]">
+                    {word}
+                  </span>
+                ))}
+              </h1>
+
+              {/* Description — Elegant & Legible */}
               {featured.description && (
-                <p className="max-w-xl text-zinc-300/80 text-lg leading-relaxed mb-10 line-clamp-3 font-medium">
+                <p className="max-w-xl text-zinc-400 text-lg md:text-xl leading-relaxed mb-10 line-clamp-3 font-medium tracking-tight">
                   {featured.description}
                 </p>
               )}
 
-              {/* CTA buttons — Netflix style */}
+              {/* Action Suite */}
               <div className="flex flex-wrap items-center gap-4">
                 <Link
                   to={`/membros-area/curso/${featured.id}${featured.lastLessonId ? `?lesson=${featured.lastLessonId}` : ""}`}
-                  className="group inline-flex items-center gap-3 px-10 py-4 bg-white text-[#050505] font-display font-black text-[16px] rounded-md hover:bg-zinc-200 transition-all duration-300 active:scale-[0.97] shadow-[0_8px_30px_rgba(255,255,255,0.1)]"
+                  className="group relative flex items-center gap-4 px-12 py-5 bg-white text-[#050505] font-display font-black text-[17px] rounded-lg transition-all duration-500 active:scale-[0.96] hover:bg-zinc-100 overflow-hidden"
                 >
                   <Play className="h-6 w-6 fill-current" />
-                  {featured.completedLessons > 0 && featured.completedLessons < featured.totalLessons
-                    ? "Continuar"
-                    : "Assistir Agora"}
+                  <span>{featured.completedLessons > 0 ? "Retomar de onde parou" : "Iniciar agora"}</span>
+                  
+                  {/* Subtle shimmer effect */}
+                  <div className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-1000 bg-gradient-to-r from-transparent via-black/5 to-transparent" />
                 </Link>
 
                 <Link
                   to={`/membros-area/curso/${featured.id}`}
-                  className="inline-flex items-center gap-3 px-8 py-4 bg-zinc-800/60 text-zinc-100 font-display font-black text-[15px] rounded-md hover:bg-zinc-700/80 transition-all duration-300 active:scale-[0.97] backdrop-blur-md border border-white/5"
+                  className="flex items-center gap-3 px-10 py-5 bg-zinc-800/40 text-zinc-100 font-display font-black text-[16px] rounded-lg hover:bg-zinc-800/60 transition-all duration-300 active:scale-[0.96] backdrop-blur-2xl border border-white/5"
                 >
                   <Info className="h-5 w-5" />
-                  Mais Informações
+                  Detalhes
                 </Link>
               </div>
             </motion.div>
           </div>
+          
+          {/* Bottom shadow blend */}
+          <div className="absolute bottom-0 left-0 right-0 h-40 bg-gradient-to-t from-[#050505] to-transparent z-[1]" />
         </section>
       )}
 
-      {/* ═══ RAILS — Netflix carousels ═══ */}
-      <main className="relative z-10 -mt-20 pb-32 space-y-16">
+      {/* ═══ RAILS — Immersive Experience ═══ */}
+      <main className="relative z-10 -mt-32 pb-40 space-y-24">
         {continueWatching.length > 0 && (
-          <Rail title="Continuar Assistindo" courses={continueWatching} variant="wide" />
+          <Rail title="Continue assistindo" courses={continueWatching} variant="wide" />
         )}
 
         {fresh.length > 0 && (
-          <Rail title="Novidades para Você" courses={fresh} variant="wide" />
+          <Rail title="Adicionados recentemente" courses={fresh} variant="wide" />
         )}
 
         {courses.length > 0 && (
-          <Rail title="Minha Biblioteca" subtitle={`${courses.length} cursos disponíveis`} courses={courses} variant="poster" />
+          <Rail title="Sua Coleção Premium" subtitle={`${courses.length} títulos exclusivos`} courses={courses} variant="poster" />
         )}
 
         {certs.length > 0 && (
@@ -292,16 +276,16 @@ export default function MemberHome() {
         )}
 
         {completed.length > 0 && (
-          <Rail title="Concluídos" courses={completed} variant="wide" />
+          <Rail title="Domínio Completo" courses={completed} variant="wide" />
         )}
 
-        {/* Footer stats */}
-        <section className="container mx-auto px-6 lg:px-12 pt-20 border-t border-white/5">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 opacity-40 hover:opacity-100 transition-opacity duration-700">
-            <Stat label="Cursos Adquiridos" value={courses.length} icon={GraduationCap} />
-            <Stat label="Aulas Assistidas" value={`${totalCompleted}/${totalLessons}`} icon={PlayCircle} />
-            <Stat label="Certificados" value={certs.length} icon={Award} />
-            <Stat label="Dias Seguidos" value={continueWatching.length} icon={Flame} />
+        {/* Global Stats Hub */}
+        <section className="container mx-auto px-6 lg:px-16 pt-24 border-t border-white/[0.03] max-w-[1800px]">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-12 opacity-30 hover:opacity-100 transition-all duration-1000">
+            <Stat label="Conteúdos Adquiridos" value={courses.length} icon={GraduationCap} />
+            <Stat label="Progresso Total" value={`${totalCompleted}/${totalLessons}`} icon={PlayCircle} />
+            <Stat label="Certificações" value={certs.length} icon={Award} />
+            <Stat label="Foco e Disciplina" value={`${continueWatching.length}d`} icon={Flame} />
           </div>
         </section>
       </main>
