@@ -138,26 +138,15 @@ function MetricCard({
   const displayValue = hidden ? HIDE : (format === "currency" ? fmtCompact(value) : format === "percent" ? `${value.toFixed(1)}%` : value.toLocaleString("pt-BR"));
   
   return (
-    <div className="group relative overflow-hidden rounded-2xl border border-border/50 bg-card/40 p-5 backdrop-blur-xl transition-all duration-300 hover:border-primary/30 hover:shadow-2xl hover:shadow-primary/5">
-      <div className="absolute -right-4 -top-4 h-24 w-24 rounded-full bg-primary/5 blur-2xl transition-all group-hover:bg-primary/10" />
-      
-      <div className="flex items-start justify-between">
-        <div className="space-y-1">
-          <p className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground/80">{title}</p>
-          <h3 className={cn("text-2xl font-black tracking-tight font-display", color)}>{displayValue}</h3>
-        </div>
-        <div className={cn("flex h-10 w-10 items-center justify-center rounded-xl ring-1 ring-inset", color.replace("text-", "bg-") + "/10", color.replace("text-", "ring-") + "/20")}>
-          <Icon className="h-5 w-5" />
-        </div>
+    <div className="border border-border/40 rounded-2xl bg-card p-5 hover:border-border transition-colors">
+      <div className="flex justify-between items-start">
+        <span className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/60">{title}</span>
+        <Icon className={cn("h-4 w-4 opacity-40", color)} />
       </div>
-      
-      <div className="mt-4 flex items-end justify-between gap-4">
+      <h3 className="mt-2 text-2xl font-black tracking-tight">{displayValue}</h3>
+      <div className="mt-2 flex items-center justify-between gap-3">
         <DeltaBadge cur={value} prev={prevValue} positive={positive} />
-        {sparklineData && !hidden && (
-          <div className="h-8 w-24 shrink-0 overflow-hidden rounded-md opacity-60 transition-opacity group-hover:opacity-100">
-            <Sparkline points={sparklineData} color={`hsl(var(--${color.split("-")[1]}))`} />
-          </div>
-        )}
+        <p className="text-[10px] font-bold text-muted-foreground/40">vs período anterior</p>
       </div>
     </div>
   );
