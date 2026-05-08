@@ -53,27 +53,19 @@ function StatusPill({ status }: { status: string }) {
   );
 }
 
-/* ─── KPI Cell — Billion-Dollar SaaS ─── */
-function Kpi({ label, value, sub, icon: Icon, tone = "default" }: {
-  label: string; value: string; sub?: string; icon: any;
-  tone?: "default" | "success" | "warning" | "info" | "primary";
+/* ─── KPI Tile ─── */
+function KpiTile({ label, value, icon: Icon, tone = "primary", sub }: {
+  label: string; value: string; icon: any; tone?: "primary" | "success" | "warning" | "info"; sub?: string;
 }) {
-  const toneCls = {
-    default: "text-foreground",
-    success: "text-success",
-    warning: "text-warning",
-    info: "text-info",
-    primary: "text-primary",
-  }[tone];
   return (
-    <div className="bg-card px-5 py-4">
-      <div className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-[0.18em] text-muted-foreground/60">
-        <Icon className="h-3 w-3" strokeWidth={2.5} />
-        {label}
+    <Card className="p-5">
+      <div className={cn("h-9 w-9 rounded-xl flex items-center justify-center mb-3", `bg-${tone}/10 text-${tone}`)}>
+        <Icon className="h-4.5 w-4.5" strokeWidth={2.5} />
       </div>
-      <p className={cn("mt-2 font-display text-[22px] font-black leading-none tracking-tight tabular-nums", toneCls)}>{value}</p>
-      {sub && <p className="mt-1.5 text-[11px] font-medium text-muted-foreground/60 tabular-nums">{sub}</p>}
-    </div>
+      <p className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/50 mb-1">{label}</p>
+      <p className="font-display text-2xl font-black text-foreground tracking-tight tabular-nums">{value}</p>
+      {sub && <p className="text-[10px] font-bold text-muted-foreground/40 mt-1">{sub}</p>}
+    </Card>
   );
 }
 
