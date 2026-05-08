@@ -7,6 +7,7 @@ import {
   ShoppingBag, ArrowUpRight, ChevronLeft, ChevronRight, Sparkles, Info,
   Plus, Volume2, VolumeX, Star,
 } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
 
 type PurchaseRow = {
@@ -173,44 +174,46 @@ export default function MemberArea() {
   const isFiltering = search.trim() !== "" || statusFilter !== "all";
 
   return (
-    <div className="w-full pb-24 md:pb-32 bg-[#050505] text-white">
+    <div className="w-full pb-24 md:pb-32 bg-background text-foreground">
       {/* ═══ HERO CINEMATOGRÁFICO ═══ */}
       {heroCourse && !isFiltering && <HeroBanner course={heroCourse} />}
 
       {/* ═══ Toolbar Premium ═══ */}
-      <div className="mx-auto max-w-[1800px] px-6 lg:px-16 mt-12">
-        <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
+      <div className="mx-auto max-w-[1800px] px-6 lg:px-16 mt-16">
+        <div className="flex flex-col gap-8 lg:flex-row lg:items-end lg:justify-between border-b border-border/40 pb-12">
           <div className="flex items-center gap-6">
-            <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-white text-black shadow-[0_0_30px_rgba(255,255,255,0.1)]">
-              <ShoppingBag className="h-8 w-8" strokeWidth={2.5} />
+            <div className="flex h-20 w-20 items-center justify-center rounded-[2rem] bg-foreground text-background shadow-[0_0_40px_rgba(var(--foreground),0.15)] transition-transform hover:scale-110">
+              <ShoppingBag className="h-9 w-9" strokeWidth={2.5} />
             </div>
             <div>
-              <h2 className="font-display text-4xl lg:text-5xl font-black tracking-[-0.05em] text-white leading-none">
+              <h2 className="font-display text-[42px] lg:text-[56px] font-black tracking-[-0.05em] text-foreground leading-none">
                 Biblioteca
               </h2>
-              <p className="text-[11px] text-zinc-500 mt-2.5 font-black uppercase tracking-[0.2em]">
-                {stats.total} {stats.total === 1 ? "título" : "títulos"} · {formatBRL(stats.totalSpent)} investidos
+              <p className="text-[11px] text-muted-foreground mt-3 font-black uppercase tracking-[0.25em] flex items-center gap-3">
+                <span className="text-primary">{stats.total} {stats.total === 1 ? "título" : "títulos"}</span>
+                <span className="h-1 w-1 rounded-full bg-border" />
+                <span>{formatBRL(stats.totalSpent)} investidos</span>
               </p>
             </div>
           </div>
           
-          <div className="flex flex-col sm:flex-row items-center gap-4">
-            <div className="relative w-full sm:w-80">
-              <Search className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-600" />
+          <div className="flex flex-col sm:flex-row items-center gap-5">
+            <div className="relative w-full sm:w-[360px] group">
+              <Search className="absolute left-5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground/40 transition-colors group-focus-within:text-primary" />
               <input
                 value={search}
                 onChange={e => setSearch(e.target.value)}
                 placeholder="O que você quer aprender hoje?"
-                className="h-14 w-full rounded-xl bg-zinc-900/50 border border-white/5 pl-12 pr-12 text-sm text-white placeholder:text-zinc-600 focus:border-white/20 focus:outline-none focus:bg-zinc-900 transition-all"
+                className="h-14 w-full rounded-2xl bg-secondary/30 border border-border/40 pl-14 pr-12 text-[13px] font-medium text-foreground placeholder:text-muted-foreground/40 focus:border-primary/40 focus:outline-none focus:bg-secondary/50 transition-all shadow-inner"
               />
               {search && (
-                <button onClick={() => setSearch("")} className="absolute right-4 top-1/2 -translate-y-1/2 text-zinc-600 hover:text-white">
+                <button onClick={() => setSearch("")} className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground/40 hover:text-foreground transition-colors">
                   <X className="h-4 w-4" />
                 </button>
               )}
             </div>
 
-            <div className="flex items-center gap-2 bg-zinc-900/40 p-1.5 rounded-xl border border-white/5">
+            <div className="flex items-center gap-1 bg-secondary/20 p-1.5 rounded-2xl border border-border/30 backdrop-blur-md">
               {[
                 { key: "all" as const, label: "Tudo" },
                 { key: "in_progress" as const, label: "Retomar" },
@@ -221,10 +224,10 @@ export default function MemberArea() {
                   key={t.key}
                   onClick={() => setStatusFilter(t.key)}
                   className={cn(
-                    "px-4 py-2 text-[11px] font-black uppercase tracking-wider transition-all rounded-lg",
+                    "px-6 py-2.5 text-[11px] font-black uppercase tracking-[0.15em] transition-all rounded-xl",
                     statusFilter === t.key
-                      ? "bg-white text-black shadow-lg"
-                      : "text-zinc-500 hover:text-zinc-300"
+                      ? "bg-foreground text-background shadow-xl"
+                      : "text-muted-foreground hover:text-foreground hover:bg-secondary/40"
                   )}
                 >
                   {t.label}
@@ -270,106 +273,115 @@ function HeroBanner({ course }: { course: PurchaseRow }) {
 
   return (
     <section className="relative w-full overflow-hidden">
-      <div className="relative h-[72vh] min-h-[520px] max-h-[820px] w-full">
-        {/* Backdrop with Ken Burns slow zoom */}
-        {course.thumbnail_url ? (
-          <img
-            src={course.thumbnail_url}
-            alt=""
-            className="absolute inset-0 h-full w-full object-cover animate-[kenburns_22s_ease-out_infinite_alternate]"
-          />
-        ) : (
-          <div className="absolute inset-0 bg-gradient-to-br from-primary/40 via-primary/15 to-background" />
-        )}
+      <div className="relative h-[80vh] min-h-[600px] max-h-[900px] w-full">
+        {/* Backdrop with motion */}
+        <div className="absolute inset-0 z-0">
+          {course.thumbnail_url ? (
+            <motion.img
+              initial={{ scale: 1.1, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              transition={{ duration: 1.8, ease: [0.16, 1, 0.3, 1] }}
+              src={course.thumbnail_url}
+              alt=""
+              className="h-full w-full object-cover"
+            />
+          ) : (
+            <div className="absolute inset-0 bg-gradient-to-br from-primary/20 via-background to-background" />
+          )}
+        </div>
 
-        {/* Cinematic gradient stack */}
-        <div className="absolute inset-0 bg-gradient-to-r from-background via-background/90 to-transparent" />
-        <div className="absolute inset-0 bg-gradient-to-t from-background via-background/40 to-transparent" />
-        <div className="absolute inset-0 bg-gradient-to-b from-background/60 via-transparent to-transparent" />
-        {/* Vignette */}
-        <div className="absolute inset-0 [background:radial-gradient(ellipse_at_center,transparent_40%,hsl(var(--background))_120%)]" />
+        {/* Cinematic gradients */}
+        <div className="absolute inset-0 bg-gradient-to-r from-background via-background/80 to-transparent z-[1]" />
+        <div className="absolute inset-0 bg-gradient-to-t from-background via-transparent to-transparent z-[1]" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_50%,rgba(var(--primary),0.05),transparent_50%)] z-[1]" />
 
-        {/* Mute toggle (top-right) */}
+        {/* Mute toggle */}
         <button
           onClick={() => setMuted(m => !m)}
-          className="absolute top-6 right-6 sm:right-12 z-20 flex h-10 w-10 items-center justify-center rounded-full border border-border/60 bg-background/40 backdrop-blur-md text-foreground hover:bg-background/70 transition-all"
-          aria-label={muted ? "Ativar som" : "Mutar"}
+          className="absolute top-8 right-8 z-30 flex h-12 w-12 items-center justify-center rounded-full border border-white/10 bg-black/20 backdrop-blur-xl text-white hover:bg-black/40 transition-all active:scale-90"
         >
-          {muted ? <VolumeX className="h-4 w-4" /> : <Volume2 className="h-4 w-4" />}
+          {muted ? <VolumeX className="h-5 w-5" /> : <Volume2 className="h-5 w-5" />}
         </button>
 
         {/* Content */}
-        <div className="relative z-10 flex h-full items-end pb-28 md:pb-36">
+        <div className="relative z-10 flex h-full items-end pb-32">
           <div className="mx-auto w-full max-w-[1800px] px-6 lg:px-16">
-            <div className="max-w-3xl">
+            <motion.div 
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 1, delay: 0.4 }}
+              className="max-w-4xl"
+            >
               {/* Badge */}
-              <div className="inline-flex items-center gap-2.5 rounded-full border border-white/10 bg-white/5 backdrop-blur-xl px-4 py-2 text-[10px] font-black uppercase tracking-[0.25em] text-white">
-                <div className="h-1.5 w-1.5 rounded-full bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.8)]" />
-                {isFinished ? "Concluído" : pct > 0 ? "Continue Assistindo" : "Título em Destaque"}
-              </div>
-
-              {/* Title */}
-              <h1 className="mt-8 font-display text-[48px] md:text-[72px] lg:text-[100px] font-black tracking-[-0.06em] text-white leading-[0.85] [text-shadow:0_10px_40px_rgba(0,0,0,0.5)]">
-                {course.title}
-              </h1>
-
-              {/* Meta Row */}
-              <div className="mt-8 flex flex-wrap items-center gap-8 text-xs font-black uppercase tracking-[0.15em]">
-                <span className="text-emerald-400 flex items-center gap-2">
-                  <Star className="h-4 w-4 fill-current" /> 98% Relevante
-                </span>
-                <span className="text-zinc-500 font-medium capitalize tracking-widest">{course.category}</span>
-                <span className="text-zinc-500 font-medium">{course.totalLessons} Aulas</span>
-                {course.completedLessons > 0 && (
-                  <span className="text-zinc-300">{course.completedLessons} Concluídas</span>
+              <div className="flex items-center gap-3 mb-8">
+                <div className="flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-primary/10 border border-primary/20 backdrop-blur-md">
+                  <div className="h-1.5 w-1.5 rounded-full bg-primary animate-pulse shadow-[0_0_10px_rgba(var(--primary),0.8)]" />
+                  <span className="text-[10px] font-black uppercase tracking-[0.25em] text-primary-foreground">
+                    {isFinished ? "Curso Concluído" : pct > 0 ? "Continue Assistindo" : "Título em Destaque"}
+                  </span>
+                </div>
+                {course.category && (
+                  <span className="text-[10px] text-muted-foreground uppercase tracking-[0.25em] font-black">
+                    {course.category}
+                  </span>
                 )}
               </div>
 
+              {/* Title */}
+              <h1 className="font-display text-[56px] md:text-[88px] lg:text-[110px] font-black tracking-[-0.06em] leading-[0.82] mb-8 text-foreground drop-shadow-2xl">
+                {course.title}
+              </h1>
+
               {/* Description */}
               {course.description && (
-                <p className="mt-5 text-base sm:text-lg text-muted-foreground/95 leading-relaxed line-clamp-3 max-w-xl [text-shadow:0_1px_12px_hsl(var(--background)/0.6)]">
+                <p className="max-w-xl text-muted-foreground text-lg md:text-xl leading-relaxed mb-10 line-clamp-3 font-medium">
                   {course.description}
                 </p>
               )}
 
               {/* Progress */}
               {course.totalLessons > 0 && pct > 0 && (
-                <div className="mt-6 max-w-md">
-                  <div className="flex items-center justify-between text-xs mb-2">
-                    <span className="text-muted-foreground font-bold uppercase tracking-wider">Seu progresso</span>
-                    <span className={cn("font-black tabular-nums text-sm", isFinished ? "text-success" : "text-foreground")}>
-                      {pct}%
-                    </span>
+                <div className="mt-8 mb-10 max-w-md">
+                  <div className="flex items-center justify-between mb-2.5">
+                    <span className="text-[10px] font-black uppercase tracking-[0.15em] text-muted-foreground/60">Seu progresso</span>
+                    <span className="text-sm font-black tabular-nums">{pct}%</span>
                   </div>
-                  <div className="h-1.5 rounded-full bg-foreground/15 overflow-hidden">
-                    <div
-                      className={cn("h-full transition-all duration-1000", isFinished ? "bg-success" : "bg-primary")}
-                      style={{ width: `${pct}%` }}
+                  <div className="h-2 w-full rounded-full bg-muted/40 overflow-hidden backdrop-blur-sm">
+                    <motion.div
+                      initial={{ width: 0 }}
+                      animate={{ width: `${pct}%` }}
+                      transition={{ duration: 1.5, ease: "circOut" }}
+                      className={cn("h-full", isFinished ? "bg-success" : "bg-primary")}
                     />
                   </div>
                 </div>
               )}
 
-              {/* Actions */}
-              <div className="mt-12 flex flex-wrap items-center gap-4">
+              {/* Action Buttons */}
+              <div className="flex flex-wrap items-center gap-5">
                 <Link
                   to={`/membros/curso/${course.id}`}
-                  className="inline-flex items-center gap-4 rounded-lg bg-white px-12 py-5 text-lg font-black text-black hover:bg-zinc-200 transition-all hover:scale-[1.03] active:scale-[0.97] shadow-2xl"
+                  className="group relative flex items-center gap-4 px-12 py-5 bg-foreground text-background font-display font-black text-[17px] rounded-xl transition-all duration-500 hover:scale-[1.02] active:scale-[0.98] hover:bg-foreground/90 overflow-hidden shadow-xl"
                 >
-                  <Play className="h-7 w-7 fill-current" />
-                  {pct > 0 ? "Retomar" : "Assistir agora"}
+                  <Play className="h-6 w-6 fill-current" />
+                  <span>{pct > 0 ? "Retomar" : "Assistir agora"}</span>
+                  <div className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-1000 bg-gradient-to-r from-transparent via-background/10 to-transparent" />
                 </Link>
+
                 <Link
                   to={`/membros/curso/${course.id}`}
-                  className="inline-flex items-center gap-3 rounded-lg border border-white/10 bg-white/5 backdrop-blur-xl px-10 py-5 text-lg font-black text-white hover:bg-white/10 transition-all hover:scale-[1.03]"
+                  className="flex items-center gap-3 px-10 py-5 bg-secondary/40 text-foreground font-display font-black text-[16px] rounded-xl hover:bg-secondary/60 transition-all duration-300 active:scale-[0.98] backdrop-blur-xl border border-white/5"
                 >
-                  <Info className="h-6 w-6" />
-                  Detalhes
+                  <Info className="h-5 w-5" />
+                  Mais informações
                 </Link>
               </div>
-            </div>
+            </motion.div>
           </div>
         </div>
+
+        {/* Bottom shadow blend */}
+        <div className="absolute bottom-0 left-0 right-0 h-48 bg-gradient-to-t from-background to-transparent z-[1]" />
       </div>
     </section>
   );
@@ -402,29 +414,31 @@ function CarouselRow({
 
   return (
     <section className="group/row">
-      <div className="flex items-center justify-between mb-5 px-5 sm:px-10 lg:px-14">
-        <div className="flex items-center gap-3.5">
-          <div className={cn("flex h-11 w-11 items-center justify-center rounded-xl border", accentClass)}>
+      <div className="flex items-center justify-between mb-8 px-6 sm:px-10 lg:px-16">
+        <div className="flex items-center gap-4">
+          <div className={cn("flex h-12 w-12 items-center justify-center rounded-[1rem] border shadow-lg transition-transform group-hover/row:scale-110 duration-500", accentClass)}>
             {icon}
           </div>
-          <h3 className="font-display text-2xl sm:text-3xl font-black tracking-[-0.03em] text-foreground leading-none">
-            {title}
-          </h3>
-          <span className="text-xs font-black text-muted-foreground tabular-nums bg-muted/40 rounded-full px-2.5 py-1 border border-border/40">
-            {courses.length}
-          </span>
+          <div>
+            <h3 className="font-display text-2xl sm:text-3xl font-black tracking-[-0.04em] text-foreground leading-none">
+              {title}
+            </h3>
+            <p className="mt-1.5 text-[10px] font-black text-muted-foreground/50 uppercase tracking-[0.15em]">
+              {courses.length} {courses.length === 1 ? "título disponível" : "títulos disponíveis"}
+            </p>
+          </div>
         </div>
-        <div className="hidden md:flex items-center gap-2 opacity-0 group-hover/row:opacity-100 transition-opacity">
+        <div className="hidden md:flex items-center gap-2.5 opacity-0 group-hover/row:opacity-100 transition-all duration-500 translate-x-4 group-hover/row:translate-x-0">
           <button
             onClick={() => scroll("left")}
-            className="flex h-10 w-10 items-center justify-center rounded-xl border border-border bg-card/60 text-foreground hover:bg-card hover:border-border/80 transition-all active:scale-95"
+            className="flex h-11 w-11 items-center justify-center rounded-xl border border-border/40 bg-secondary/30 text-foreground hover:bg-foreground hover:text-background transition-all active:scale-90"
             aria-label="Anterior"
           >
             <ChevronLeft className="h-5 w-5" />
           </button>
           <button
             onClick={() => scroll("right")}
-            className="flex h-10 w-10 items-center justify-center rounded-xl border border-border bg-card/60 text-foreground hover:bg-card hover:border-border/80 transition-all active:scale-95"
+            className="flex h-11 w-11 items-center justify-center rounded-xl border border-border/40 bg-secondary/30 text-foreground hover:bg-foreground hover:text-background transition-all active:scale-90"
             aria-label="Próximo"
           >
             <ChevronRight className="h-5 w-5" />
@@ -434,11 +448,22 @@ function CarouselRow({
 
       <div
         ref={scrollRef}
-        className="flex gap-4 overflow-x-auto px-5 sm:px-10 lg:px-14 pb-6 scrollbar-none scroll-smooth snap-x"
+        className="flex gap-6 overflow-x-auto px-6 sm:px-10 lg:px-16 pb-12 scrollbar-none scroll-smooth snap-x"
       >
-        {courses.map(c => (
-          <NetflixCard key={c.id} course={c} />
+        {courses.map((c, i) => (
+          <motion.div
+            key={c.id}
+            initial={{ opacity: 0, x: 20 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.5, delay: i * 0.05 }}
+            className="snap-start"
+          >
+            <NetflixCard course={c} />
+          </motion.div>
         ))}
+        {/* Spacer for padding at the end */}
+        <div className="shrink-0 w-16 h-1" />
       </div>
     </section>
   );
@@ -458,20 +483,25 @@ function RankedRow({ title, courses }: { title: string; courses: PurchaseRow[] }
 
   return (
     <section className="group/row">
-      <div className="flex items-center justify-between mb-5 px-5 sm:px-10 lg:px-14">
-        <div className="flex items-center gap-3.5">
-          <div className="flex h-11 w-11 items-center justify-center rounded-xl border border-warning/25 bg-warning/10 text-warning">
+      <div className="flex items-center justify-between mb-8 px-6 sm:px-10 lg:px-16">
+        <div className="flex items-center gap-4">
+          <div className="flex h-12 w-12 items-center justify-center rounded-[1rem] border border-warning/25 bg-warning/10 text-warning shadow-lg transition-transform group-hover/row:scale-110 duration-500">
             <Star className="h-6 w-6 fill-current" />
           </div>
-          <h3 className="font-display text-2xl sm:text-3xl font-black tracking-[-0.03em] text-foreground leading-none">
-            {title}
-          </h3>
+          <div>
+            <h3 className="font-display text-2xl sm:text-3xl font-black tracking-[-0.04em] text-foreground leading-none">
+              {title}
+            </h3>
+            <p className="mt-1.5 text-[10px] font-black text-muted-foreground/50 uppercase tracking-[0.15em]">
+              Os títulos mais assistidos da sua coleção
+            </p>
+          </div>
         </div>
-        <div className="hidden md:flex items-center gap-2 opacity-0 group-hover/row:opacity-100 transition-opacity">
-          <button onClick={() => scroll("left")} className="flex h-10 w-10 items-center justify-center rounded-xl border border-border bg-card/60 text-foreground hover:bg-card transition-all active:scale-95">
+        <div className="hidden md:flex items-center gap-2.5 opacity-0 group-hover/row:opacity-100 transition-all duration-500 translate-x-4 group-hover/row:translate-x-0">
+          <button onClick={() => scroll("left")} className="flex h-11 w-11 items-center justify-center rounded-xl border border-border/40 bg-secondary/30 text-foreground hover:bg-foreground hover:text-background transition-all active:scale-90">
             <ChevronLeft className="h-5 w-5" />
           </button>
-          <button onClick={() => scroll("right")} className="flex h-10 w-10 items-center justify-center rounded-xl border border-border bg-card/60 text-foreground hover:bg-card transition-all active:scale-95">
+          <button onClick={() => scroll("right")} className="flex h-11 w-11 items-center justify-center rounded-xl border border-border/40 bg-secondary/30 text-foreground hover:bg-foreground hover:text-background transition-all active:scale-90">
             <ChevronRight className="h-5 w-5" />
           </button>
         </div>
@@ -479,45 +509,55 @@ function RankedRow({ title, courses }: { title: string; courses: PurchaseRow[] }
 
       <div
         ref={scrollRef}
-        className="flex gap-3 overflow-x-auto px-5 sm:px-10 lg:px-14 pb-6 scrollbar-none scroll-smooth snap-x"
+        className="flex gap-4 overflow-x-auto px-6 sm:px-10 lg:px-16 pb-12 scrollbar-none scroll-smooth snap-x"
       >
         {courses.slice(0, 10).map((c, i) => (
           <Link
             key={c.id}
             to={`/membros/curso/${c.id}`}
-            className="group/rank relative shrink-0 flex items-end snap-start"
+            className="group/rank relative shrink-0 flex items-end snap-start pb-4"
           >
-            {/* Giant rank number */}
+            {/* Giant rank number with premium style */}
             <span
-              className="font-display font-black text-foreground/15 leading-[0.8] tracking-[-0.08em] select-none pointer-events-none [-webkit-text-stroke:2px_hsl(var(--foreground)/0.3)]"
-              style={{ fontSize: "clamp(140px, 18vw, 240px)" }}
+              className="font-display font-black text-transparent leading-[0.8] tracking-[-0.1em] select-none pointer-events-none drop-shadow-[0_20px_50px_rgba(0,0,0,0.3)] transition-all duration-700 group-hover/rank:scale-110 group-hover/rank:translate-y-[-10px]"
+              style={{ 
+                fontSize: "clamp(160px, 20vw, 280px)",
+                WebkitTextStroke: "2px hsl(var(--foreground) / 0.1)",
+                backgroundImage: "linear-gradient(to bottom, hsl(var(--foreground)/0.15), transparent)",
+                backgroundClip: "text",
+                WebkitBackgroundClip: "text"
+              }}
             >
               {i + 1}
             </span>
             {/* Poster */}
-            <div className="relative -ml-6 sm:-ml-8 aspect-[2/3] w-[140px] sm:w-[170px] lg:w-[190px] overflow-hidden rounded-xl border border-border bg-muted shadow-2xl transition-all duration-300 group-hover/rank:scale-[1.05] group-hover/rank:border-primary/40">
+            <div className="relative -ml-10 sm:-ml-14 aspect-[2/3] w-[150px] sm:w-[190px] lg:w-[220px] overflow-hidden rounded-2xl border border-border/40 bg-muted shadow-[0_30px_60px_-15px_rgba(0,0,0,0.5)] transition-all duration-700 ease-[0.16,1,0.3,1] group-hover/rank:scale-[1.08] group-hover/rank:border-primary/40 group-hover/rank:translate-y-[-15px] group-hover/rank:shadow-[0_40px_80px_-20px_rgba(var(--primary),0.3)]">
               {c.thumbnail_url ? (
-                <img src={c.thumbnail_url} alt={c.title} className="h-full w-full object-cover" />
+                <img src={c.thumbnail_url} alt={c.title} className="h-full w-full object-cover transition-transform duration-1000 group-hover/rank:scale-110" />
               ) : (
-                <div className="h-full w-full flex items-center justify-center bg-gradient-to-br from-primary/20 to-card">
-                  <BookOpen className="h-10 w-10 text-muted-foreground/30" />
+                <div className="h-full w-full flex items-center justify-center bg-gradient-to-br from-primary/10 via-secondary/10 to-background">
+                  <BookOpen className="h-10 w-10 text-muted-foreground/20" strokeWidth={1} />
                 </div>
               )}
-              <div className="absolute inset-0 bg-gradient-to-t from-background/95 via-background/20 to-transparent opacity-0 group-hover/rank:opacity-100 transition-opacity duration-300" />
-              <div className="absolute inset-x-0 bottom-0 p-3 translate-y-2 opacity-0 group-hover/rank:opacity-100 group-hover/rank:translate-y-0 transition-all duration-300">
-                <p className="text-xs font-black text-foreground line-clamp-2">{c.title}</p>
+              <div className="absolute inset-0 bg-gradient-to-t from-background via-background/20 to-transparent opacity-60 group-hover/rank:opacity-100 transition-opacity duration-500" />
+              
+              <div className="absolute inset-x-0 bottom-0 p-5 translate-y-4 opacity-0 group-hover/rank:opacity-100 group-hover/rank:translate-y-0 transition-all duration-700 ease-[0.16,1,0.3,1]">
+                <p className="text-sm font-black text-foreground line-clamp-2 drop-shadow-lg leading-tight">{c.title}</p>
+                <div className="mt-3 flex items-center gap-2">
+                  <div className="h-1 w-full bg-white/10 rounded-full overflow-hidden">
+                    <div className="h-full bg-primary" style={{ width: `${Math.round((c.completedLessons / (c.totalLessons || 1)) * 100)}%` }} />
+                  </div>
+                </div>
               </div>
             </div>
           </Link>
         ))}
+        <div className="shrink-0 w-20 h-1" />
       </div>
     </section>
   );
 }
 
-/* ─────────────────────────────────────────────────────────
- * NETFLIX CARD — poster com hover-zoom premium
- * ───────────────────────────────────────────────────────── */
 function NetflixCard({ course }: { course: PurchaseRow }) {
   const pct = course.totalLessons > 0 ? Math.round((course.completedLessons / course.totalLessons) * 100) : 0;
   const isFinished = pct === 100 && course.totalLessons > 0;
@@ -525,76 +565,79 @@ function NetflixCard({ course }: { course: PurchaseRow }) {
   return (
     <Link
       to={`/membros/curso/${course.id}`}
-      className="group/card relative shrink-0 w-[300px] sm:w-[340px] lg:w-[360px] snap-start"
+      className="group/card relative block w-[320px] sm:w-[380px] lg:w-[420px]"
     >
-      {/* Poster */}
-      <div className="relative aspect-[16/10] w-full overflow-hidden rounded-2xl border border-border bg-muted shadow-lg transition-all duration-500 group-hover/card:scale-[1.05] group-hover/card:border-primary/40 group-hover/card:shadow-2xl group-hover/card:z-10">
+      <div className="relative aspect-[16/9] w-full overflow-hidden rounded-2xl border border-border/40 bg-secondary/10 shadow-lg transition-all duration-700 ease-[0.16,1,0.3,1] group-hover/card:scale-[1.05] group-hover/card:border-primary/40 group-hover/card:shadow-[0_40px_80px_-20px_rgba(0,0,0,0.6)] group-hover/card:z-20">
         {course.thumbnail_url ? (
           <img
             src={course.thumbnail_url}
             alt={course.title}
-            className="h-full w-full object-cover transition-transform duration-700 group-hover/card:scale-110"
+            className="h-full w-full object-cover transition-all duration-1000 group-hover/card:scale-110 group-hover/card:brightness-110"
           />
         ) : (
-          <div className="h-full w-full flex items-center justify-center bg-gradient-to-br from-primary/20 to-card">
-            <BookOpen className="h-14 w-14 text-muted-foreground/30" strokeWidth={1.2} />
+          <div className="h-full w-full flex items-center justify-center bg-gradient-to-br from-primary/5 via-secondary/10 to-background">
+            <BookOpen className="h-16 w-16 text-muted-foreground/10" strokeWidth={0.8} />
           </div>
         )}
 
-        {/* Top-left status badge */}
-        <div className="absolute top-3 left-3 z-10">
+        {/* Floating status badge */}
+        <div className="absolute top-4 left-4 z-10 transition-transform duration-500 group-hover/card:scale-110">
           {isFinished ? (
-            <span className="inline-flex items-center gap-1 rounded-md border border-success/30 bg-success/95 backdrop-blur-sm px-2 py-1 text-[10px] font-black uppercase tracking-wider text-success-foreground">
-              <Trophy className="h-3 w-3" /> Concluído
-            </span>
+            <div className="inline-flex items-center gap-2 rounded-lg bg-success px-3 py-1.5 text-[10px] font-black uppercase tracking-widest text-success-foreground shadow-lg">
+              <Trophy className="h-3.5 w-3.5" /> Concluído
+            </div>
           ) : pct > 0 ? (
-            <span className="inline-flex items-center gap-1 rounded-md border border-warning/30 bg-warning/95 backdrop-blur-sm px-2 py-1 text-[10px] font-black uppercase tracking-wider text-warning-foreground">
-              <Clock className="h-3 w-3" /> {pct}%
-            </span>
-          ) : course.accessStatus === "active" ? (
-            <span className="inline-flex items-center gap-1 rounded-md border border-info/30 bg-info/95 backdrop-blur-sm px-2 py-1 text-[10px] font-black uppercase tracking-wider text-info-foreground">
-              <Sparkles className="h-3 w-3" /> Novo
-            </span>
-          ) : null}
+            <div className="inline-flex items-center gap-2 rounded-lg bg-warning px-3 py-1.5 text-[10px] font-black uppercase tracking-widest text-warning-foreground shadow-lg">
+              <Clock className="h-3.5 w-3.5" /> {pct}%
+            </div>
+          ) : (
+            <div className="inline-flex items-center gap-2 rounded-lg bg-primary/90 backdrop-blur-md px-3 py-1.5 text-[10px] font-black uppercase tracking-widest text-primary-foreground shadow-lg">
+              <Sparkles className="h-3.5 w-3.5" /> Novo
+            </div>
+          )}
         </div>
 
-        {/* Hover overlay */}
-        <div className="absolute inset-0 bg-gradient-to-t from-background/95 via-background/30 to-transparent opacity-0 group-hover/card:opacity-100 transition-opacity duration-300" />
+        {/* Hover overlay with gradients */}
+        <div className="absolute inset-0 bg-gradient-to-t from-background via-transparent to-transparent opacity-80 group-hover/card:opacity-100 transition-opacity duration-500" />
+        <div className="absolute inset-0 bg-gradient-to-r from-background/40 via-transparent to-transparent opacity-0 group-hover/card:opacity-100 transition-opacity duration-700" />
 
-        {/* Center play button */}
-        <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover/card:opacity-100 transition-all duration-300 scale-90 group-hover/card:scale-100">
-          <div className="flex h-16 w-16 items-center justify-center rounded-full bg-foreground/95 backdrop-blur-sm border-2 border-foreground/20 shadow-2xl">
-            <Play className="h-7 w-7 fill-current text-background ml-0.5" />
+        {/* Cinematic play button */}
+        <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover/card:opacity-100 transition-all duration-700 scale-75 group-hover/card:scale-100">
+          <div className="flex h-20 w-20 items-center justify-center rounded-full bg-foreground text-background shadow-[0_0_50px_rgba(var(--foreground),0.3)] transition-transform hover:scale-110">
+            <Play className="h-9 w-9 fill-current ml-1" />
           </div>
         </div>
 
-        {/* Bottom progress bar */}
+        {/* Bottom progress bar — sleek */}
         {pct > 0 && (
-          <div className="absolute bottom-0 left-0 right-0 h-1 bg-background/40">
-            <div
-              className={cn("h-full", isFinished ? "bg-success" : "bg-primary")}
-              style={{ width: `${pct}%` }}
+          <div className="absolute bottom-0 left-0 right-0 h-1.5 bg-white/10 backdrop-blur-sm overflow-hidden">
+            <motion.div
+              initial={{ width: 0 }}
+              whileInView={{ width: `${pct}%` }}
+              transition={{ duration: 1.2, ease: "circOut" }}
+              className={cn("h-full", isFinished ? "bg-success shadow-[0_0_10px_rgba(var(--success),0.5)]" : "bg-primary shadow-[0_0_10px_rgba(var(--primary),0.5)]")}
             />
           </div>
         )}
       </div>
 
-      {/* Card info below */}
-      <div className="mt-3.5 px-1">
-        <h4 className="font-display text-base font-black tracking-tight text-foreground line-clamp-1 group-hover/card:text-primary transition-colors">
+      {/* Info below card */}
+      <div className="mt-6 px-1 transition-all duration-500 group-hover/card:translate-x-2">
+        <h4 className="font-display text-lg lg:text-xl font-black tracking-[-0.03em] text-foreground line-clamp-1 group-hover/card:text-primary transition-colors">
           {course.title}
         </h4>
-        <div className="mt-1.5 flex items-center gap-2 text-[11px] text-muted-foreground">
-          <span className="capitalize font-bold">{course.category}</span>
-          <span className="h-0.5 w-0.5 rounded-full bg-muted-foreground/40" />
-          <span className="tabular-nums font-medium">{course.totalLessons} aulas</span>
-          {course.completedLessons > 0 && !isFinished && (
-            <>
-              <span className="h-0.5 w-0.5 rounded-full bg-muted-foreground/40" />
-              <span className="text-primary font-black tabular-nums">{course.completedLessons}/{course.totalLessons}</span>
-            </>
-          )}
+        <div className="mt-2.5 flex items-center gap-3">
+          <span className="text-[10px] font-black uppercase tracking-widest text-primary/80 bg-primary/5 px-2 py-0.5 rounded border border-primary/10 transition-colors group-hover/card:bg-primary group-hover/card:text-primary-foreground">
+            {course.category}
+          </span>
+          <span className="h-1 w-1 rounded-full bg-border" />
+          <span className="text-[11px] font-black tabular-nums text-muted-foreground/60">{course.totalLessons} aulas exclusivas</span>
         </div>
+        {course.description && (
+          <p className="mt-3 text-xs text-muted-foreground/50 line-clamp-2 leading-relaxed font-medium transition-opacity group-hover/card:opacity-100 opacity-60">
+            {course.description}
+          </p>
+        )}
       </div>
     </Link>
   );
