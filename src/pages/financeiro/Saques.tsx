@@ -46,10 +46,10 @@ const PERIODS: { label: string; days: number }[] = [
 
 type StatusFilter = "all" | "pending" | "approved" | "rejected";
 
-const STATUS_CONFIG: Record<string, { label: string; fg: string; dot: string; bg: string; border: string; ring: string }> = {
-  approved: { label: "Aprovado", fg: "text-success", dot: "bg-success", bg: "bg-success/10", border: "border-success/20", ring: "ring-success/20" },
-  pending: { label: "Pendente", fg: "text-warning", dot: "bg-warning", bg: "bg-warning/10", border: "border-warning/20", ring: "ring-warning/20" },
-  rejected: { label: "Recusado", fg: "text-destructive", dot: "bg-destructive", bg: "bg-destructive/10", border: "border-destructive/20", ring: "ring-destructive/20" },
+const STATUS_CONFIG: Record<string, { label: string; fg: string; dot: string; bg: string; border: string }> = {
+  approved: { label: "Aprovado", fg: "text-success", dot: "bg-success", bg: "bg-success/10", border: "border-success/25" },
+  pending: { label: "Pendente", fg: "text-warning", dot: "bg-warning", bg: "bg-warning/10", border: "border-warning/25" },
+  rejected: { label: "Recusado", fg: "text-destructive", dot: "bg-destructive", bg: "bg-destructive/10", border: "border-destructive/25" },
 };
 
 function maskPix(value: string, type: string) {
@@ -705,19 +705,15 @@ export default function Saques() {
         <div className="hidden md:block">
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
-              <thead className="bg-muted/20">
+              <thead className="bg-muted/30">
                 <tr className="border-b border-border/60">
-                  {[
-                    { label: "Identificador", w: "w-[14%]" },
-                    { label: "Destino PIX", w: "w-[22%]" },
-                    { label: "Valor bruto", w: "w-[12%] text-right" },
-                    { label: "Taxa", w: "w-[10%] text-right" },
-                    { label: "Líquido", w: "w-[14%] text-right" },
-                    { label: "Status", w: "w-[14%]" },
-                    { label: "Solicitado em", w: "w-[14%]" },
-                  ].map(h => (
-                    <th key={h.label} className={cn("py-2.5 px-4 text-[10px] font-bold text-muted-foreground uppercase tracking-wider", h.w)}>{h.label}</th>
-                  ))}
+                  <th className="py-3 px-4 text-[10px] font-bold text-muted-foreground uppercase tracking-[0.14em] text-left w-[14%]">Identificador</th>
+                  <th className="py-3 px-4 text-[10px] font-bold text-muted-foreground uppercase tracking-[0.14em] text-left w-[22%]">Destino PIX</th>
+                  <th className="py-3 px-4 text-[10px] font-bold text-muted-foreground uppercase tracking-[0.14em] text-right w-[12%]">Valor bruto</th>
+                  <th className="py-3 px-4 text-[10px] font-bold text-muted-foreground uppercase tracking-[0.14em] text-right w-[10%]">Taxa</th>
+                  <th className="py-3 px-4 text-[10px] font-bold text-muted-foreground uppercase tracking-[0.14em] text-right w-[14%]">Líquido</th>
+                  <th className="py-3 px-4 text-[10px] font-bold text-muted-foreground uppercase tracking-[0.14em] text-left w-[14%]">Status</th>
+                  <th className="py-3 px-4 text-[10px] font-bold text-muted-foreground uppercase tracking-[0.14em] text-left w-[14%]">Solicitado em</th>
                 </tr>
               </thead>
               <tbody>
@@ -767,10 +763,8 @@ export default function Saques() {
                         <span className="font-display font-black text-success text-[13px] tabular-nums">{hidden ? HIDE : fmt(Number(w.net_amount))}</span>
                       </td>
                       <td className="py-3 px-4">
-                        <span className={cn("inline-flex items-center gap-1.5 px-2.5 h-6 rounded-md text-[10px] font-bold border", st.fg, st.bg, st.border)}>
-                          {w.status === "pending" && <span className="relative flex h-1.5 w-1.5"><span className="animate-ping absolute h-full w-full rounded-full bg-warning opacity-75" /><span className="relative h-1.5 w-1.5 rounded-full bg-warning" /></span>}
-                          {w.status === "approved" && <CheckCircle2 className="h-3 w-3" />}
-                          {w.status === "rejected" && <XCircle className="h-3 w-3" />}
+                        <span className={cn("inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-bold tracking-[-0.005em] border", st.fg, st.bg, st.border)}>
+                          <span className={cn("h-1.5 w-1.5 rounded-full", st.dot, w.status === "pending" && "animate-pulse")} />
                           {st.label}
                         </span>
                       </td>
