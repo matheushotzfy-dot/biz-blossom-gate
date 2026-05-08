@@ -378,10 +378,41 @@ export default function Dashboard() {
                   <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{fill: 'hsl(var(--muted-foreground)/0.5)', fontSize: 10, fontWeight: 700}} dy={10} />
                   <YAxis axisLine={false} tickLine={false} tick={{fill: 'hsl(var(--muted-foreground)/0.5)', fontSize: 10, fontWeight: 700}} tickFormatter={(v) => `R$${v}`} />
                   <Tooltip 
-                    contentStyle={{ borderRadius: '16px', border: '1px solid hsl(var(--border)/0.5)', backgroundColor: 'hsl(var(--card))', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)' }}
-                    itemStyle={{ fontSize: '12px', fontWeight: 900, color: 'hsl(var(--primary))' }}
+                    cursor={{ stroke: 'hsl(var(--primary))', strokeWidth: 1, strokeDasharray: '4 4' }}
+                    content={({ active, payload }) => {
+                      if (active && payload && payload.length) {
+                        return (
+                          <div className="bg-card/95 backdrop-blur-md border border-border/50 p-4 rounded-2xl shadow-2xl animate-in fade-in zoom-in duration-200">
+                            <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground mb-1">
+                              {payload[0].payload.fullLabel || payload[0].payload.name}
+                            </p>
+                            <p className="text-xl font-black text-primary tracking-tight">
+                              {fmt(payload[0].value as number)}
+                            </p>
+                            <div className="mt-2 h-1 w-full bg-primary/10 rounded-full overflow-hidden">
+                              <div className="h-full bg-primary animate-out slide-in-from-left-full duration-1000" style={{ width: '100%' }} />
+                            </div>
+                          </div>
+                        );
+                      }
+                      return null;
+                    }}
                   />
-                  <Area type="monotone" dataKey="vendas" stroke="hsl(var(--primary))" strokeWidth={3} fillOpacity={1} fill="url(#colorVendas)" />
+                  <Area 
+                    type="monotone" 
+                    dataKey="vendas" 
+                    stroke="hsl(var(--primary))" 
+                    strokeWidth={4} 
+                    fillOpacity={1} 
+                    fill="url(#colorVendas)"
+                    activeDot={{ 
+                      r: 6, 
+                      fill: "hsl(var(--primary))", 
+                      stroke: "hsl(var(--background))", 
+                      strokeWidth: 3,
+                      className: "drop-shadow-[0_0_8px_rgba(var(--primary),0.5)]"
+                    }}
+                  />
                 </AreaChart>
               </ResponsiveContainer>
             </div>
