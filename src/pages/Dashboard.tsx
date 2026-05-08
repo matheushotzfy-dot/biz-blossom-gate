@@ -170,22 +170,54 @@ export default function Dashboard() {
   }, [transactions, withdrawals]);
 
   const chartData = useMemo(() => {
+    const isSingleDay = (isCustom && customRange?.from && (!customRange.to || differenceInDays(customRange.to, customRange.from) === 0)) || (!isCustom && selectedPeriod.days === 0);
+    
+    if (isSingleDay) {
+      // Logic for hourly sales
+      const salesByHour = new Map<number, number>();
+      const targetDate = isCustom ? new Date(customRange!.from!) : brasiliaToday();
+      const targetDateStr = targetDate.toLocaleDateString("pt-BR", { timeZone: "America/Sao_Paulo" });
+
+      filteredTx.forEach(t => {
+        if (t.status !== "completed") return;
+        const date = new Date(t.created_at);
+        const hour = date.getHours();
+        salesByHour.set(hour, (salesByHour.get(hour) || 0) + Number(t.net_amount));
+      });
+
+      return Array.from({ length: 24 }, (_, i) => ({
+        name: `${i}h`,
+        vendas: salesByHour.get(i) || 0,
+        fullLabel: `${i}:00`,
+      }));
+    }
+
     const days = Math.max(selectedPeriod.days, 1);
     const startDate = new Date(brasiliaToday());
     startDate.setDate(startDate.getDate() - (days - 1));
     const revenueByDate = new Map<string, number>();
-    for (const t of transactions) {
+    
+    // Use transactions for overall history or filteredTx for specific range
+    const txSource = isCustom ? filteredTx : transactions;
+    
+    for (const t of txSource) {
       if (t.status !== "completed") continue;
       const dateKey = toBrasiliaDate(t.created_at);
       revenueByDate.set(dateKey, (revenueByDate.get(dateKey) || 0) + Number(t.net_amount));
     }
+
     return Array.from({ length: days }, (_, i) => {
       const d = new Date(startDate);
       d.setDate(d.getDate() + i);
+      const dateStr = d.toLocaleDateString("pt-BR", { timeZone: "America/Sao_Paulo" });
       const label = d.toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit" });
-      return { name: label, vendas: revenueByDate.get(d.toLocaleDateString("pt-BR", { timeZone: "America/Sao_Paulo" })) || 0 };
+      return { 
+        name: label, 
+        vendas: revenueByDate.get(dateStr) || 0,
+        fullLabel: d.toLocaleDateString("pt-BR", { day: "2-digit", month: "long" })
+      };
     });
-  }, [transactions, selectedPeriod.days]);
+  }, [transactions, filteredTx, selectedPeriod.days, isCustom, customRange]);
 
   const activity = useMemo(() => {
     const tx = transactions.slice(0, 10).map((t) => ({
@@ -346,10 +378,41 @@ export default function Dashboard() {
                   <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{fill: 'hsl(var(--muted-foreground)/0.5)', fontSize: 10, fontWeight: 700}} dy={10} />
                   <YAxis axisLine={false} tickLine={false} tick={{fill: 'hsl(var(--muted-foreground)/0.5)', fontSize: 10, fontWeight: 700}} tickFormatter={(v) => `R$${v}`} />
                   <Tooltip 
-                    contentStyle={{ borderRadius: '16px', border: '1px solid hsl(var(--border)/0.5)', backgroundColor: 'hsl(var(--card))', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)' }}
-                    itemStyle={{ fontSize: '12px', fontWeight: 900, color: 'hsl(var(--primary))' }}
+                    cursor={{ stroke: 'hsl(var(--primary))', strokeWidth: 1, strokeDasharray: '4 4' }}
+                    content={({ active, payload }) => {
+                      if (active && payload && payload.length) {
+                        return (
+                          <div className="bg-card/95 backdrop-blur-md border border-border/50 p-4 rounded-2xl shadow-2xl animate-in fade-in zoom-in duration-200">
+                            <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground mb-1">
+                              {payload[0].payload.fullLabel || payload[0].payload.name}
+                            </p>
+                            <p className="text-xl font-black text-primary tracking-tight">
+                              {fmt(payload[0].value as number)}
+                            </p>
+                            <div className="mt-2 h-1 w-full bg-primary/10 rounded-full overflow-hidden">
+                              <div className="h-full bg-primary animate-out slide-in-from-left-full duration-1000" style={{ width: '100%' }} />
+                            </div>
+                          </div>
+                        );
+                      }
+                      return null;
+                    }}
                   />
-                  <Area type="monotone" dataKey="vendas" stroke="hsl(var(--primary))" strokeWidth={3} fillOpacity={1} fill="url(#colorVendas)" />
+                  <Area 
+                    type="monotone" 
+                    dataKey="vendas" 
+                    stroke="hsl(var(--primary))" 
+                    strokeWidth={4} 
+                    fillOpacity={1} 
+                    fill="url(#colorVendas)"
+                    activeDot={{ 
+                      r: 6, 
+                      fill: "hsl(var(--primary))", 
+                      stroke: "hsl(var(--background))", 
+                      strokeWidth: 3,
+                      className: "drop-shadow-[0_0_8px_rgba(var(--primary),0.5)]"
+                    }}
+                  />
                 </AreaChart>
               </ResponsiveContainer>
             </div>
