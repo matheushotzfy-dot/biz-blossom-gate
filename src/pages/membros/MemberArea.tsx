@@ -173,7 +173,7 @@ export default function MemberArea() {
   const isFiltering = search.trim() !== "" || statusFilter !== "all";
 
   return (
-    <div className="w-full pb-24 md:pb-32 bg-[#050505] text-white">
+    <div className="w-full pb-24 md:pb-32 bg-background text-foreground">
       {/* ═══ HERO CINEMATOGRÁFICO ═══ */}
       {heroCourse && !isFiltering && <HeroBanner course={heroCourse} />}
 
