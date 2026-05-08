@@ -179,39 +179,41 @@ export default function MemberArea() {
       {heroCourse && !isFiltering && <HeroBanner course={heroCourse} />}
 
       {/* ═══ Toolbar Premium ═══ */}
-      <div className="mx-auto max-w-[1800px] px-6 lg:px-16 mt-12">
-        <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
+      <div className="mx-auto max-w-[1800px] px-6 lg:px-16 mt-16">
+        <div className="flex flex-col gap-8 lg:flex-row lg:items-end lg:justify-between border-b border-border/40 pb-12">
           <div className="flex items-center gap-6">
-            <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-white text-black shadow-[0_0_30px_rgba(255,255,255,0.1)]">
-              <ShoppingBag className="h-8 w-8" strokeWidth={2.5} />
+            <div className="flex h-20 w-20 items-center justify-center rounded-[2rem] bg-foreground text-background shadow-[0_0_40px_rgba(var(--foreground),0.15)] transition-transform hover:scale-110">
+              <ShoppingBag className="h-9 w-9" strokeWidth={2.5} />
             </div>
             <div>
-              <h2 className="font-display text-4xl lg:text-5xl font-black tracking-[-0.05em] text-white leading-none">
+              <h2 className="font-display text-[42px] lg:text-[56px] font-black tracking-[-0.05em] text-foreground leading-none">
                 Biblioteca
               </h2>
-              <p className="text-[11px] text-zinc-500 mt-2.5 font-black uppercase tracking-[0.2em]">
-                {stats.total} {stats.total === 1 ? "título" : "títulos"} · {formatBRL(stats.totalSpent)} investidos
+              <p className="text-[11px] text-muted-foreground mt-3 font-black uppercase tracking-[0.25em] flex items-center gap-3">
+                <span className="text-primary">{stats.total} {stats.total === 1 ? "título" : "títulos"}</span>
+                <span className="h-1 w-1 rounded-full bg-border" />
+                <span>{formatBRL(stats.totalSpent)} investidos</span>
               </p>
             </div>
           </div>
           
-          <div className="flex flex-col sm:flex-row items-center gap-4">
-            <div className="relative w-full sm:w-80">
-              <Search className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-600" />
+          <div className="flex flex-col sm:flex-row items-center gap-5">
+            <div className="relative w-full sm:w-[360px] group">
+              <Search className="absolute left-5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground/40 transition-colors group-focus-within:text-primary" />
               <input
                 value={search}
                 onChange={e => setSearch(e.target.value)}
                 placeholder="O que você quer aprender hoje?"
-                className="h-14 w-full rounded-xl bg-zinc-900/50 border border-white/5 pl-12 pr-12 text-sm text-white placeholder:text-zinc-600 focus:border-white/20 focus:outline-none focus:bg-zinc-900 transition-all"
+                className="h-14 w-full rounded-2xl bg-secondary/30 border border-border/40 pl-14 pr-12 text-[13px] font-medium text-foreground placeholder:text-muted-foreground/40 focus:border-primary/40 focus:outline-none focus:bg-secondary/50 transition-all shadow-inner"
               />
               {search && (
-                <button onClick={() => setSearch("")} className="absolute right-4 top-1/2 -translate-y-1/2 text-zinc-600 hover:text-white">
+                <button onClick={() => setSearch("")} className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground/40 hover:text-foreground transition-colors">
                   <X className="h-4 w-4" />
                 </button>
               )}
             </div>
 
-            <div className="flex items-center gap-2 bg-zinc-900/40 p-1.5 rounded-xl border border-white/5">
+            <div className="flex items-center gap-1 bg-secondary/20 p-1.5 rounded-2xl border border-border/30 backdrop-blur-md">
               {[
                 { key: "all" as const, label: "Tudo" },
                 { key: "in_progress" as const, label: "Retomar" },
@@ -222,10 +224,10 @@ export default function MemberArea() {
                   key={t.key}
                   onClick={() => setStatusFilter(t.key)}
                   className={cn(
-                    "px-4 py-2 text-[11px] font-black uppercase tracking-wider transition-all rounded-lg",
+                    "px-6 py-2.5 text-[11px] font-black uppercase tracking-[0.15em] transition-all rounded-xl",
                     statusFilter === t.key
-                      ? "bg-white text-black shadow-lg"
-                      : "text-zinc-500 hover:text-zinc-300"
+                      ? "bg-foreground text-background shadow-xl"
+                      : "text-muted-foreground hover:text-foreground hover:bg-secondary/40"
                   )}
                 >
                   {t.label}
