@@ -123,14 +123,20 @@ function DashboardLayoutInner() {
               <Menu className="h-4 w-4" strokeWidth={2} />
             </SidebarTrigger>
 
-            <button
-              onClick={() => setSearchOpen(true)}
-              className="ml-2 h-9 px-3 rounded-xl hover:bg-muted/60 transition-all flex items-center gap-2.5 text-muted-foreground/70 hover:text-foreground group"
-            >
-              <Search className="h-[15px] w-[15px] transition-transform group-hover:scale-110" strokeWidth={2} />
-              <span className="text-[13px] font-semibold hidden lg:inline tracking-tight">Buscar</span>
-              <kbd className="hidden lg:inline-flex h-5 items-center gap-1 rounded-md border border-border/40 bg-muted/30 px-1.5 text-[10px] font-bold text-muted-foreground/50">⌘K</kbd>
-            </button>
+            <div className="flex-1 flex items-center justify-center px-4 max-w-xl mx-auto">
+              <button
+                onClick={() => setSearchOpen(true)}
+                className="w-full max-w-[400px] h-[38px] px-4 rounded-[1.25rem] bg-secondary/20 border border-border/30 hover:bg-secondary/40 hover:border-primary/20 hover:shadow-[0_0_15px_-5px_rgba(var(--primary),0.1)] transition-all flex items-center gap-3 text-muted-foreground/60 hover:text-foreground group overflow-hidden relative"
+              >
+                <div className="absolute inset-0 bg-gradient-to-r from-primary/[0.03] to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+                <Search className="h-[14px] w-[14px] transition-transform group-hover:scale-110 text-primary/60 group-hover:text-primary" strokeWidth={2.5} />
+                <span className="text-[12px] font-medium tracking-tight flex-1 text-left">O que você está procurando?</span>
+                <div className="hidden lg:flex items-center gap-1.5 px-1.5 py-0.5 rounded-lg bg-muted/30 border border-border/40">
+                  <span className="text-[9px] font-black text-muted-foreground/40">⌘</span>
+                  <span className="text-[9px] font-black text-muted-foreground/40">K</span>
+                </div>
+              </button>
+            </div>
 
             <div className="flex-1 flex justify-center">
               <div className="group/balance relative flex items-center gap-3.5 px-5 h-[42px] rounded-[1.25rem] bg-secondary/30 border border-border/40 transition-all hover:bg-secondary/50 hover:border-primary/20 hover:shadow-[0_0_20px_-5px_rgba(var(--primary),0.1)]">
