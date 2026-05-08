@@ -575,5 +575,3 @@ export default function Afiliados() {
     </div>
   );
 }
-  );
-}
