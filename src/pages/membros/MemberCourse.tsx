@@ -541,7 +541,7 @@ export default function MemberCourse() {
                       <span className="tabular-nums text-zinc-500 font-mono">{String(currentIdx + 1).padStart(2, "0")} / {String(totalLessons).padStart(2, "0")}</span>
                     </p>
                   )}
-                  <h2 className="font-display text-3xl sm:text-4xl lg:text-[48px] font-black text-zinc-100 tracking-[-0.04em] leading-[1.02]">{activeLesson.title}</h2>
+                  <h2 className="font-display text-4xl sm:text-5xl lg:text-[64px] font-black text-zinc-100 tracking-[-0.05em] leading-[0.9]">{activeLesson.title}</h2>
                   <div className="flex items-center gap-3 mt-4 text-xs text-zinc-500 font-medium flex-wrap">
                     {hasVideo
                       ? <span className="flex items-center gap-1.5"><Video className="h-3.5 w-3.5 text-emerald-400/70" /> Vídeo</span>

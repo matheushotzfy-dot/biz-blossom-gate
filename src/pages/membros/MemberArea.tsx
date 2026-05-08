@@ -328,7 +328,7 @@ function HeroBanner({ course }: { course: PurchaseRow }) {
               </div>
 
               {/* Title */}
-              <h1 className="font-display text-[56px] md:text-[88px] lg:text-[110px] font-black tracking-[-0.06em] leading-[0.82] mb-8 text-foreground drop-shadow-2xl">
+              <h1 className="font-display text-[58px] md:text-[96px] lg:text-[120px] font-black tracking-[-0.07em] leading-[0.8] mb-8 text-foreground drop-shadow-2xl">
                 {course.title}
               </h1>
 
@@ -420,11 +420,11 @@ function CarouselRow({
             {icon}
           </div>
           <div>
-            <h3 className="font-display text-2xl sm:text-3xl font-black tracking-[-0.04em] text-foreground leading-none">
+            <h3 className="font-display text-2xl sm:text-[32px] font-black tracking-[-0.05em] text-foreground leading-none">
               {title}
             </h3>
-            <p className="mt-1.5 text-[10px] font-black text-muted-foreground/50 uppercase tracking-[0.15em]">
-              {courses.length} {courses.length === 1 ? "título disponível" : "títulos disponíveis"}
+            <p className="mt-2 text-[10px] font-black text-primary uppercase tracking-[0.2em] opacity-80">
+              {courses.length} {courses.length === 1 ? "conteúdo exclusivo" : "conteúdos exclusivos"}
             </p>
           </div>
         </div>

@@ -64,9 +64,9 @@ const HIDE = "•••";
 interface CoinPrice { brl: number; usd: number; brl_24h_change: number; }
 
 const STATUS_CONFIG: Record<string, { label: string; fg: string; dot: string; bg: string; border: string }> = {
- approved: { label: "Aprovado", fg: "text-success", dot: "bg-success", bg: "bg-success/8", border: "border-success/15" },
- pending: { label: "Pendente", fg: "text-warning", dot: "bg-warning", bg: "bg-warning/8", border: "border-warning/15" },
- rejected: { label: "Recusado", fg: "text-destructive", dot: "bg-destructive", bg: "bg-destructive/8", border: "border-destructive/15" },
+ approved: { label: "Aprovado", fg: "text-success", dot: "bg-success", bg: "bg-success/10", border: "border-success/25" },
+ pending: { label: "Pendente", fg: "text-warning", dot: "bg-warning", bg: "bg-warning/10", border: "border-warning/25" },
+ rejected: { label: "Recusado", fg: "text-destructive", dot: "bg-destructive", bg: "bg-destructive/10", border: "border-destructive/25" },
 };
 
 /* ─── Animated Number ─── */
@@ -549,13 +549,13 @@ export default function SaquesCrypto() {
  <div className="hidden md:block rounded-2xl border border-border/60 bg-card shadow-sm overflow-hidden">
  <div className="overflow-x-auto">
  <table className="w-full text-sm">
- <thead>
- <tr className="border-b border-border/[0.06]">
- {["ID", "Moeda", "Rede", "Valor", "Taxa", "Líquido", "Status", "Data"].map(h => (
- <th key={h} className="text-left py-3.5 px-4 text-[10px] font-display font-bold text-muted-foreground/25 uppercase tracking-wider">{h}</th>
- ))}
- </tr>
- </thead>
+  <thead className="bg-muted/30">
+  <tr className="border-b border-border/60">
+  {["ID", "Moeda", "Rede", "Valor", "Taxa", "Líquido", "Status", "Data"].map(h => (
+  <th key={h} className="text-left py-3 px-4 text-[10px] font-bold text-muted-foreground uppercase tracking-[0.14em]">{h}</th>
+  ))}
+  </tr>
+  </thead>
  <tbody>
  {filtered.length === 0 ? (
  <tr><td colSpan={8} className="py-16 text-center">
@@ -583,12 +583,10 @@ export default function SaquesCrypto() {
  <td className="py-4 px-4"><span className="font-display font-bold text-warning/70 text-[12px] tabular-nums">{hidden ? HIDE : `- ${fmt(Number(w.fee_amount))}`}</span></td>
  <td className="py-4 px-4"><span className="font-display font-black text-primary text-[14px] tabular-nums">{hidden ? HIDE : fmt(Number(w.net_amount))}</span></td>
  <td className="py-4 px-4">
- <span className={cn("inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[9px] font-display font-bold tracking-wide border", st.fg, st.bg, st.border)}>
- {w.status === "pending" && <span className="relative flex h-1.5 w-1.5"><span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-warning opacity-75" /><span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-warning" /></span>}
- {w.status === "approved" && <CheckCircle2 className="h-3 w-3" />}
- {w.status === "rejected" && <XCircle className="h-3 w-3" />}
- {st.label}
- </span>
+  <span className={cn("inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-bold tracking-[-0.005em] border", st.fg, st.bg, st.border)}>
+  <span className={cn("h-1.5 w-1.5 rounded-full", st.dot, w.status === "pending" && "animate-pulse")} />
+  {st.label}
+  </span>
  </td>
  <td className="py-4 px-4">
  <div className="flex flex-col">

@@ -126,7 +126,7 @@ export default function MemberHome() {
 
   if (loading) {
     return (
-      <div className="min-h-dvh flex items-center justify-center bg-[#050505]">
+      <div className="min-h-dvh flex items-center justify-center bg-background">
         <div className="flex flex-col items-center gap-6">
           <motion.div 
             animate={{ scale: [1, 1.1, 1], opacity: [0.5, 1, 0.5] }} 
@@ -149,7 +149,7 @@ export default function MemberHome() {
 
   if (courses.length === 0) {
     return (
-      <div className="min-h-dvh flex flex-col items-center justify-center px-6 text-center bg-[#050505] text-white">
+      <div className="min-h-dvh flex flex-col items-center justify-center px-6 text-center bg-background text-foreground">
         <div className="h-24 w-24 rounded-3xl bg-zinc-900 border border-white/5 flex items-center justify-center mb-10 shadow-2xl">
           <BookOpen className="h-10 w-10 text-zinc-700" />
         </div>
@@ -161,7 +161,7 @@ export default function MemberHome() {
   }
 
   return (
-    <div className="bg-[#050505] text-zinc-100 antialiased selection:bg-emerald-500/30 overflow-x-hidden">
+    <div className="bg-background text-foreground antialiased selection:bg-primary/30 overflow-x-hidden">
       {/* ═══ HERO — Cinematic 4K Experience ═══ */}
       {featured && (
         <section className="relative h-[92dvh] w-full overflow-hidden">
@@ -177,12 +177,12 @@ export default function MemberHome() {
                 transition={{ duration: 2.2, ease: [0.16, 1, 0.3, 1] }}
               />
             ) : (
-              <div className="w-full h-full bg-gradient-to-br from-[#0a0a0a] via-[#050505] to-[#080808]" />
+              <div className="w-full h-full bg-gradient-to-br from-background via-background/90 to-background/95" />
             )}
             
             {/* Multi-layer Netflix-style gradients for depth */}
-            <div className="absolute inset-0 bg-gradient-to-r from-[#050505] via-[#050505]/80 to-transparent" />
-            <div className="absolute inset-0 bg-gradient-to-t from-[#050505] via-transparent to-transparent" />
+            <div className="absolute inset-0 bg-gradient-to-r from-background via-background/80 to-transparent" />
+            <div className="absolute inset-0 bg-gradient-to-t from-background via-transparent to-transparent" />
             <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_50%,rgba(16,185,129,0.08),transparent_50%)]" />
             
             {/* Fine grain overlay for texture */}
