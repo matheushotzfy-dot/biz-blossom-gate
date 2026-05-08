@@ -18,11 +18,14 @@ export default function SaquesHub() {
       <div className="sticky top-0 z-40 w-full border-b border-border/40 bg-background/80 backdrop-blur-xl">
         <div className="mx-auto flex h-16 max-w-[1480px] items-center justify-between px-5 sm:px-8">
           <div className="flex items-center gap-6">
-            <div className="flex items-center gap-2">
-              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10 ring-1 ring-primary/20">
-                <ArrowDownToLine className="h-4 w-4 text-primary" />
+            <div className="flex items-center gap-3">
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 border border-primary/20 shadow-[0_0_20px_rgba(var(--primary),0.1)]">
+                <ArrowDownToLine className="h-5 w-5 text-primary" strokeWidth={2.5} />
               </div>
-              <h1 className="text-sm font-black uppercase tracking-[0.15em] text-foreground">Gestão de Saques</h1>
+              <div>
+                <h1 className="text-[11px] font-black uppercase tracking-[0.2em] text-muted-foreground/80 leading-tight">Finanças</h1>
+                <p className="text-sm font-black text-foreground tracking-tight mt-0.5">Gestão de Saques</p>
+              </div>
             </div>
             
             <nav className="hidden items-center gap-1 md:flex">
