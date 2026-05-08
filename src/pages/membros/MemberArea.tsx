@@ -414,29 +414,31 @@ function CarouselRow({
 
   return (
     <section className="group/row">
-      <div className="flex items-center justify-between mb-5 px-5 sm:px-10 lg:px-14">
-        <div className="flex items-center gap-3.5">
-          <div className={cn("flex h-11 w-11 items-center justify-center rounded-xl border", accentClass)}>
+      <div className="flex items-center justify-between mb-8 px-6 sm:px-10 lg:px-16">
+        <div className="flex items-center gap-4">
+          <div className={cn("flex h-12 w-12 items-center justify-center rounded-[1rem] border shadow-lg transition-transform group-hover/row:scale-110 duration-500", accentClass)}>
             {icon}
           </div>
-          <h3 className="font-display text-2xl sm:text-3xl font-black tracking-[-0.03em] text-foreground leading-none">
-            {title}
-          </h3>
-          <span className="text-xs font-black text-muted-foreground tabular-nums bg-muted/40 rounded-full px-2.5 py-1 border border-border/40">
-            {courses.length}
-          </span>
+          <div>
+            <h3 className="font-display text-2xl sm:text-3xl font-black tracking-[-0.04em] text-foreground leading-none">
+              {title}
+            </h3>
+            <p className="mt-1.5 text-[10px] font-black text-muted-foreground/50 uppercase tracking-[0.15em]">
+              {courses.length} {courses.length === 1 ? "título disponível" : "títulos disponíveis"}
+            </p>
+          </div>
         </div>
-        <div className="hidden md:flex items-center gap-2 opacity-0 group-hover/row:opacity-100 transition-opacity">
+        <div className="hidden md:flex items-center gap-2.5 opacity-0 group-hover/row:opacity-100 transition-all duration-500 translate-x-4 group-hover/row:translate-x-0">
           <button
             onClick={() => scroll("left")}
-            className="flex h-10 w-10 items-center justify-center rounded-xl border border-border bg-card/60 text-foreground hover:bg-card hover:border-border/80 transition-all active:scale-95"
+            className="flex h-11 w-11 items-center justify-center rounded-xl border border-border/40 bg-secondary/30 text-foreground hover:bg-foreground hover:text-background transition-all active:scale-90"
             aria-label="Anterior"
           >
             <ChevronLeft className="h-5 w-5" />
           </button>
           <button
             onClick={() => scroll("right")}
-            className="flex h-10 w-10 items-center justify-center rounded-xl border border-border bg-card/60 text-foreground hover:bg-card hover:border-border/80 transition-all active:scale-95"
+            className="flex h-11 w-11 items-center justify-center rounded-xl border border-border/40 bg-secondary/30 text-foreground hover:bg-foreground hover:text-background transition-all active:scale-90"
             aria-label="Próximo"
           >
             <ChevronRight className="h-5 w-5" />
@@ -446,11 +448,22 @@ function CarouselRow({
 
       <div
         ref={scrollRef}
-        className="flex gap-4 overflow-x-auto px-5 sm:px-10 lg:px-14 pb-6 scrollbar-none scroll-smooth snap-x"
+        className="flex gap-6 overflow-x-auto px-6 sm:px-10 lg:px-16 pb-12 scrollbar-none scroll-smooth snap-x"
       >
-        {courses.map(c => (
-          <NetflixCard key={c.id} course={c} />
+        {courses.map((c, i) => (
+          <motion.div
+            key={c.id}
+            initial={{ opacity: 0, x: 20 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.5, delay: i * 0.05 }}
+            className="snap-start"
+          >
+            <NetflixCard course={c} />
+          </motion.div>
         ))}
+        {/* Spacer for padding at the end */}
+        <div className="shrink-0 w-16 h-1" />
       </div>
     </section>
   );
