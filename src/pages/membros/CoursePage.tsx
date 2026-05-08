@@ -1,10 +1,12 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useParams, Link, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
-import { Play, CheckCircle2, ChevronLeft, ChevronDown, ChevronRight, BookOpen, Clock, ArrowLeft, ArrowRight, FileText, Video } from "lucide-react";
+import { Play, CheckCircle2, ChevronLeft, ChevronDown, ChevronRight, BookOpen, Clock, ArrowLeft, ArrowRight, FileText, Video, Trophy, Info, Maximize2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "sonner";
+import { cn } from "@/lib/utils";
 
 type Course = { id: string; title: string; description: string | null; thumbnail_url: string | null };
 type Module = { id: string; title: string; description: string | null; banner_url: string | null; sort_order: number; lessons: Lesson[] };
