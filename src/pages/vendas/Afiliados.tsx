@@ -351,6 +351,7 @@ export default function Afiliados() {
                 </div>
               )}
             </CardContent>
+          </Card>
         </div>
       )}
 
