@@ -155,207 +155,158 @@ export default function Afiliados() {
   };
 
   return (
-    <div className="mx-auto -mt-2 w-full max-w-[1440px] pb-24 md:-mt-3 md:pb-10">
-      {/* ── Hero header ── */}
-      <div className="relative flex flex-col gap-7 px-5 pt-1 sm:px-7 md:pt-1">
-        {/* Subtle radial accent behind title */}
-        <div
-          aria-hidden
-          className="pointer-events-none absolute -top-12 left-0 h-48 w-[520px] -z-[1] opacity-60 blur-3xl"
-          style={{
-            background:
-              "radial-gradient(60% 60% at 20% 50%, hsl(var(--primary) / 0.10), transparent 70%)",
-          }}
-        />
-
-        <div className="flex flex-wrap items-end justify-between gap-4 animate-fade-in">
-          <div>
-            <h1 className="font-display text-[40px] font-black leading-[0.9] tracking-[-0.055em] text-foreground sm:text-[52px]">
-              Afiliados
-            </h1>
-            <p className="mt-2 text-[13px] font-medium text-muted-foreground/80">
-              Programas, links e comissões em um único painel operacional.
-            </p>
+    <div className="p-4 md:p-8 space-y-8 max-w-[1600px] mx-auto animate-in fade-in duration-500">
+      {/* ── Header ── */}
+      <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6">
+        <div className="space-y-1">
+          <div className="flex items-center gap-3">
+             <div className="h-3 w-3 rounded-full bg-primary animate-pulse" />
+             <h1 className="text-3xl font-black tracking-tight text-foreground">Afiliados</h1>
           </div>
+          <p className="text-muted-foreground font-medium text-sm flex items-center gap-2">
+            <Users className="h-4 w-4" />
+            Programas, links e comissões em um único painel operacional.
+          </p>
+        </div>
 
-          <Dialog open={openCreate} onOpenChange={setOpenCreate}>
-            <DialogTrigger asChild>
-              <button className="group inline-flex h-11 items-center gap-2 rounded-xl bg-primary px-5 text-[13px] font-black uppercase tracking-wider text-primary-foreground transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] hover:bg-primary/90 hover:-translate-y-0.5 hover:shadow-[0_10px_30px_-10px_hsl(var(--primary)/0.5)]">
-                <Plus className="h-4 w-4 transition-transform duration-300 group-hover:rotate-90" strokeWidth={2.75} />
-                Novo link
-              </button>
-            </DialogTrigger>
-            <DialogContent className="max-w-md rounded-2xl p-0 overflow-hidden">
-              <div className="px-6 pt-6 pb-4 border-b border-border/30">
-                <DialogHeader>
-                  <DialogTitle className="font-heading text-base flex items-center gap-2">
-                    <Link2 className="h-4 w-4 text-primary" />
-                    Criar Link de Afiliado
-                  </DialogTitle>
-                </DialogHeader>
-              </div>
-              <div className="p-6 space-y-5">
-                <div className="space-y-1.5">
-                  <Label className="text-[10px] text-muted-foreground uppercase tracking-wider font-bold">Produto</Label>
-                  <Select value={selectedProduct} onValueChange={setSelectedProduct}>
-                    <SelectTrigger className="rounded-lg h-10"><SelectValue placeholder="Selecione um produto" /></SelectTrigger>
-                    <SelectContent className="max-h-[300px]">
-                      {affiliateProducts.length > 0 && (
-                        <>
-                          <div className="px-2 py-1.5 text-[9px] font-bold text-muted-foreground uppercase tracking-[0.15em]">Seus Produtos</div>
-                          {affiliateProducts.map(p => (
-                            <SelectItem key={`own-${p.id}`} value={p.id}>
-                              {p.name} — {fmt(Number(p.price))} ({(p as any).affiliate_commission || 30}%)
-                            </SelectItem>
-                          ))}
-                        </>
-                      )}
-                      {marketProducts.filter(mp => !affiliateProducts.some(ap => ap.id === mp.id)).length > 0 && (
-                        <>
-                          <div className="px-2 py-1.5 text-[9px] font-bold text-muted-foreground uppercase tracking-[0.15em] mt-1 border-t border-border/30 pt-2">Marketplace</div>
-                          {marketProducts.filter(mp => !affiliateProducts.some(ap => ap.id === mp.id)).map(p => (
-                            <SelectItem key={`mkt-${p.id}`} value={p.id}>
-                              {p.name} — {fmt(Number(p.price))}
-                            </SelectItem>
-                          ))}
-                        </>
-                      )}
-                      {affiliateProducts.length === 0 && marketProducts.length === 0 && (
-                        <div className="px-2 py-3 text-[11px] text-muted-foreground text-center">Nenhum produto disponível</div>
-                      )}
-                    </SelectContent>
-                  </Select>
-                </div>
-                {selectedProduct && (
-                  <div className="p-3 rounded-lg bg-success/5 border border-success/15 flex items-center gap-3">
-                    <Percent className="h-4 w-4 text-success shrink-0" />
-                    <p className="text-[11px] text-muted-foreground leading-snug">
-                      Comissão de <strong className="text-success font-bold">{
-                        (() => {
-                          const p = [...affiliateProducts, ...marketProducts].find(pr => pr.id === selectedProduct);
-                          return (p as any)?.affiliate_commission || 30;
-                        })()
-                      }%</strong> creditada por venda aprovada.
-                    </p>
+        <Dialog open={openCreate} onOpenChange={setOpenCreate}>
+          <DialogTrigger asChild>
+            <button className="bg-primary text-white px-8 h-12 rounded-2xl font-black text-sm flex items-center gap-2 shadow-lg shadow-primary/20 hover:scale-[1.02] active:scale-[0.98] transition-all">
+              <Plus className="h-5 w-5" strokeWidth={2.5} />
+              Novo link
+            </button>
+          </DialogTrigger>
+          <DialogContent className="max-w-md rounded-[2.5rem] p-0 overflow-hidden border-border/50 shadow-2xl">
+            <div className="px-8 pt-8 pb-4">
+              <DialogHeader>
+                <DialogTitle className="text-xl font-black flex items-center gap-3">
+                  <div className="h-10 w-10 rounded-xl bg-primary/10 flex items-center justify-center">
+                    <Link2 className="h-5 w-5 text-primary" />
                   </div>
-                )}
-                <Button onClick={handleCreateLink} className="w-full rounded-lg font-semibold h-10" disabled={!selectedProduct}>
-                  Gerar Link
-                </Button>
+                  Criar Link de Afiliado
+                </DialogTitle>
+              </DialogHeader>
+            </div>
+            <div className="px-8 pb-8 pt-4 space-y-6">
+              <div className="space-y-2">
+                <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/60 ml-1">Produto</Label>
+                <Select value={selectedProduct} onValueChange={setSelectedProduct}>
+                  <SelectTrigger className="h-12 rounded-2xl border-border/50 bg-muted/30 px-4 font-bold"><SelectValue placeholder="Selecione um produto" /></SelectTrigger>
+                  <SelectContent className="rounded-2xl border-border/50 shadow-xl p-2">
+                    {affiliateProducts.length > 0 && (
+                      <>
+                        <div className="px-3 py-2 text-[9px] font-black uppercase tracking-widest text-muted-foreground/40">Seus Produtos</div>
+                        {affiliateProducts.map(p => (
+                          <SelectItem key={`own-${p.id}`} value={p.id} className="rounded-xl font-bold py-2.5">
+                            {p.name} — {fmt(Number(p.price))}
+                          </SelectItem>
+                        ))}
+                      </>
+                    )}
+                    {marketProducts.filter(mp => !affiliateProducts.some(ap => ap.id === mp.id)).length > 0 && (
+                      <>
+                        <div className="px-3 py-2 text-[9px] font-black uppercase tracking-widest text-muted-foreground/40 mt-2 border-t border-border/10 pt-4">Marketplace</div>
+                        {marketProducts.filter(mp => !affiliateProducts.some(ap => ap.id === mp.id)).map(p => (
+                          <SelectItem key={`mkt-${p.id}`} value={p.id} className="rounded-xl font-bold py-2.5">
+                            {p.name} — {fmt(Number(p.price))}
+                          </SelectItem>
+                        ))}
+                      </>
+                    )}
+                  </SelectContent>
+                </Select>
               </div>
-            </DialogContent>
-          </Dialog>
-        </div>
+              <Button onClick={handleCreateLink} className="w-full h-12 rounded-2xl font-black text-sm shadow-lg shadow-primary/20" disabled={!selectedProduct}>
+                Gerar Link Operacional
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+      </div>
 
-        {/* ─── Global KPIs ─── */}
-        <div className="grid grid-cols-2 gap-px overflow-hidden rounded-xl border border-border/50 bg-border/40 lg:grid-cols-4 animate-fade-in stagger-1">
-          <Kpi
-            label="Comissões Ganhas"
-            value={fmt(totalCommissionEarned)}
-            sub={`${mySales.filter(s => s.status === "approved").length} venda(s) paga(s)`}
-            icon={DollarSign}
-            tone="success"
-          />
-          <Kpi
-            label="A Receber"
-            value={fmt(totalCommissionPending)}
-            sub={`${mySales.filter(s => s.status === "pending").length} pendente(s)`}
-            icon={Clock}
-            tone="warning"
-          />
-          <Kpi
-            label="Cliques · Conversão"
-            value={String(totalClicks)}
-            sub={`${conversionRate.toFixed(2)}% conversão`}
-            icon={MousePointerClick}
-            tone="info"
-          />
-          <Kpi
-            label="Links Ativos"
-            value={String(myLinks.filter(l => l.is_active).length)}
-            sub={`${myLinks.length} total`}
-            icon={Link2}
-            tone="primary"
-          />
-        </div>
+      {/* ─── Global KPIs ─── */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
+        <KpiTile
+          label="Comissões Ganhas"
+          value={fmt(totalCommissionEarned)}
+          sub={`${mySales.filter(s => s.status === "approved").length} venda(s) paga(s)`}
+          icon={DollarSign}
+          tone="success"
+        />
+        <KpiTile
+          label="A Receber"
+          value={fmt(totalCommissionPending)}
+          sub={`${mySales.filter(s => s.status === "pending").length} pendente(s)`}
+          icon={Clock}
+          tone="warning"
+        />
+        <KpiTile
+          label="Cliques · Conversão"
+          value={String(totalClicks)}
+          sub={`${conversionRate.toFixed(2)}% conversão`}
+          icon={MousePointerClick}
+          tone="info"
+        />
+        <KpiTile
+          label="Links Ativos"
+          value={String(myLinks.filter(l => l.is_active).length)}
+          sub={`${myLinks.length} total`}
+          icon={Link2}
+          tone="primary"
+        />
+      </div>
 
-        {/* ─── Segment-control Tabs ─── */}
-        <div className="inline-flex w-fit items-center gap-0.5 rounded-xl border border-border/50 bg-card/60 p-1 overflow-x-auto animate-fade-in stagger-2">
-          {TABS.map(t => {
-            const isActive = tab === t.id;
-            const count = t.id === "my-products" ? affiliateProducts.length
-              : t.id === "affiliate-of" ? myLinks.length
-              : marketProducts.length;
-            const accent = t.id === "my-products" ? "text-primary"
-              : t.id === "affiliate-of" ? "text-success"
-              : "text-info";
-            return (
-              <button
-                key={t.id}
-                onClick={() => { setTab(t.id); window.scrollTo({ top: 0, behavior: "instant" }); }}
-                className={cn(
-                  "group/tab relative inline-flex shrink-0 items-center gap-2 rounded-lg h-8 px-3 text-[12px] font-bold tracking-tight transition-colors duration-200",
-                  isActive
-                    ? "bg-secondary text-foreground"
-                    : "text-muted-foreground/80 hover:text-foreground"
-                )}
-              >
-                <span className={cn(
-                  "flex h-4 w-4 items-center justify-center transition-colors",
-                  isActive ? accent : "text-muted-foreground/50 group-hover/tab:text-foreground/70"
-                )}>
-                  <t.icon className="h-3 w-3" strokeWidth={2.5} />
-                </span>
-                <span className="font-display">{t.label}</span>
-                {count > 0 && (
-                  <span className={cn(
-                    "inline-flex h-[18px] min-w-[20px] items-center justify-center rounded-md px-1.5 text-[10px] font-black tabular-nums tracking-tight border transition-colors",
-                    isActive
-                      ? "bg-background/80 text-foreground border-border/40"
-                      : "bg-muted/30 text-muted-foreground/60 border-transparent"
-                  )}>
-                    {count}
-                  </span>
-                )}
-              </button>
-            );
-          })}
-        </div>
+      {/* ─── Tabs ─── */}
+      <div className="flex items-center bg-muted/30 p-1 rounded-2xl border border-border/50 w-fit">
+        {TABS.map(t => (
+          <button
+            key={t.id}
+            onClick={() => { setTab(t.id); }}
+            className={cn(
+              "px-6 py-2.5 rounded-xl text-xs font-black uppercase tracking-wider transition-all flex items-center gap-2",
+              tab === t.id ? "bg-card text-foreground shadow-sm ring-1 ring-border" : "text-muted-foreground hover:text-foreground"
+            )}
+          >
+            <t.icon className="h-3.5 w-3.5" />
+            {t.label}
+          </button>
+        ))}
       </div>
 
       {/* ── Workspace ── */}
-      <div className="px-5 pt-6 sm:px-7">
+      <div className="space-y-8">
 
       {/* ═══ MY PRODUCTS TAB ═══ */}
       {tab === "my-products" && (
-        <div className="space-y-6">
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-            <Kpi label="Produtos com Programa" value={String(affiliateProducts.length)} icon={ShoppingCart} />
-            <Kpi label="Afiliados Ativos" value={String(productLinks.length)} icon={Users} tone="info" />
-            <Kpi label="Receita via Afiliados" value={fmt(totalProductSalesViaAff)} icon={TrendingUp} tone="success" />
-            <Kpi label="Comissões Pagas" value={fmt(totalProductCommPaid)} icon={DollarSign} tone="warning" />
+        <div className="space-y-8">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
+            <KpiTile label="Produtos" value={String(affiliateProducts.length)} icon={ShoppingCart} tone="primary" />
+            <KpiTile label="Afiliados" value={String(productLinks.length)} icon={Users} tone="info" />
+            <KpiTile label="Receita Afiliados" value={fmt(totalProductSalesViaAff)} icon={TrendingUp} tone="success" />
+            <KpiTile label="Comissões Pagas" value={fmt(totalProductCommPaid)} icon={DollarSign} tone="warning" />
           </div>
 
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <Award className="h-4 w-4 text-muted-foreground" />
-              <h2 className="text-[13px] font-heading font-bold text-foreground">Programas Ativos</h2>
-              <span className="text-[11px] text-muted-foreground">· {affiliateProducts.length} produto(s)</span>
-            </div>
-          </div>
-
-          {affiliateProducts.length === 0 ? (
-            <EmptyState
-              icon={<Users className="h-7 w-7" />}
-              title="Nenhum programa ativo"
-              subtitle="Ative o programa de afiliados nas configurações de cada produto para escalar suas vendas."
-            />
-          ) : (
-            <div className="rounded-xl border border-border/60 bg-card overflow-hidden">
-              <table className="w-full">
-                <thead>
-                  <tr className="border-b border-border/40 bg-muted/20">
-                    <th className="text-left px-4 py-2.5 text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Produto</th>
+          <Card className="border-border/40 overflow-hidden">
+            <CardHeader className="flex flex-row items-center justify-between border-b border-border/40 px-8 py-6">
+              <div>
+                <CardTitle className="text-xl font-black">Programas Ativos</CardTitle>
+                <CardDescription className="text-xs font-bold uppercase tracking-wider">{affiliateProducts.length} produtos configurados</CardDescription>
+              </div>
+            </CardHeader>
+            <CardContent className="p-0">
+              {affiliateProducts.length === 0 ? (
+                <div className="p-20 text-center space-y-4">
+                   <div className="h-16 w-16 bg-muted rounded-2xl flex items-center justify-center mx-auto">
+                      <Users className="h-8 w-8 text-muted-foreground/30" />
+                   </div>
+                   <p className="text-sm font-black text-muted-foreground">Nenhum programa ativo ainda.</p>
+                </div>
+              ) : (
+                <div className="overflow-x-auto">
+                  <table className="w-full">
+                    <thead>
+                      <tr className="border-b border-border/30 bg-muted/10">
+                        <th className="text-left px-8 py-4 text-[10px] font-black uppercase tracking-[0.15em] text-muted-foreground/60">Produto</th>
                     <th className="text-right px-4 py-2.5 text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Preço</th>
                     <th className="text-right px-4 py-2.5 text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Comissão</th>
                     <th className="text-right px-4 py-2.5 text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Afiliados</th>
