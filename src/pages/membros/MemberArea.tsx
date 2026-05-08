@@ -271,106 +271,115 @@ function HeroBanner({ course }: { course: PurchaseRow }) {
 
   return (
     <section className="relative w-full overflow-hidden">
-      <div className="relative h-[72vh] min-h-[520px] max-h-[820px] w-full">
-        {/* Backdrop with Ken Burns slow zoom */}
-        {course.thumbnail_url ? (
-          <img
-            src={course.thumbnail_url}
-            alt=""
-            className="absolute inset-0 h-full w-full object-cover animate-[kenburns_22s_ease-out_infinite_alternate]"
-          />
-        ) : (
-          <div className="absolute inset-0 bg-gradient-to-br from-primary/40 via-primary/15 to-background" />
-        )}
+      <div className="relative h-[80vh] min-h-[600px] max-h-[900px] w-full">
+        {/* Backdrop with motion */}
+        <div className="absolute inset-0 z-0">
+          {course.thumbnail_url ? (
+            <motion.img
+              initial={{ scale: 1.1, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              transition={{ duration: 1.8, ease: [0.16, 1, 0.3, 1] }}
+              src={course.thumbnail_url}
+              alt=""
+              className="h-full w-full object-cover"
+            />
+          ) : (
+            <div className="absolute inset-0 bg-gradient-to-br from-primary/20 via-background to-background" />
+          )}
+        </div>
 
-        {/* Cinematic gradient stack */}
-        <div className="absolute inset-0 bg-gradient-to-r from-background via-background/90 to-transparent" />
-        <div className="absolute inset-0 bg-gradient-to-t from-background via-background/40 to-transparent" />
-        <div className="absolute inset-0 bg-gradient-to-b from-background/60 via-transparent to-transparent" />
-        {/* Vignette */}
-        <div className="absolute inset-0 [background:radial-gradient(ellipse_at_center,transparent_40%,hsl(var(--background))_120%)]" />
+        {/* Cinematic gradients */}
+        <div className="absolute inset-0 bg-gradient-to-r from-background via-background/80 to-transparent z-[1]" />
+        <div className="absolute inset-0 bg-gradient-to-t from-background via-transparent to-transparent z-[1]" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_50%,rgba(var(--primary),0.05),transparent_50%)] z-[1]" />
 
-        {/* Mute toggle (top-right) */}
+        {/* Mute toggle */}
         <button
           onClick={() => setMuted(m => !m)}
-          className="absolute top-6 right-6 sm:right-12 z-20 flex h-10 w-10 items-center justify-center rounded-full border border-border/60 bg-background/40 backdrop-blur-md text-foreground hover:bg-background/70 transition-all"
-          aria-label={muted ? "Ativar som" : "Mutar"}
+          className="absolute top-8 right-8 z-30 flex h-12 w-12 items-center justify-center rounded-full border border-white/10 bg-black/20 backdrop-blur-xl text-white hover:bg-black/40 transition-all active:scale-90"
         >
-          {muted ? <VolumeX className="h-4 w-4" /> : <Volume2 className="h-4 w-4" />}
+          {muted ? <VolumeX className="h-5 w-5" /> : <Volume2 className="h-5 w-5" />}
         </button>
 
         {/* Content */}
-        <div className="relative z-10 flex h-full items-end pb-28 md:pb-36">
+        <div className="relative z-10 flex h-full items-end pb-32">
           <div className="mx-auto w-full max-w-[1800px] px-6 lg:px-16">
-            <div className="max-w-3xl">
+            <motion.div 
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 1, delay: 0.4 }}
+              className="max-w-4xl"
+            >
               {/* Badge */}
-              <div className="inline-flex items-center gap-2.5 rounded-full border border-white/10 bg-white/5 backdrop-blur-xl px-4 py-2 text-[10px] font-black uppercase tracking-[0.25em] text-white">
-                <div className="h-1.5 w-1.5 rounded-full bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.8)]" />
-                {isFinished ? "Concluído" : pct > 0 ? "Continue Assistindo" : "Título em Destaque"}
-              </div>
-
-              {/* Title */}
-              <h1 className="mt-8 font-display text-[48px] md:text-[72px] lg:text-[100px] font-black tracking-[-0.06em] text-white leading-[0.85] [text-shadow:0_10px_40px_rgba(0,0,0,0.5)]">
-                {course.title}
-              </h1>
-
-              {/* Meta Row */}
-              <div className="mt-8 flex flex-wrap items-center gap-8 text-xs font-black uppercase tracking-[0.15em]">
-                <span className="text-emerald-400 flex items-center gap-2">
-                  <Star className="h-4 w-4 fill-current" /> 98% Relevante
-                </span>
-                <span className="text-zinc-500 font-medium capitalize tracking-widest">{course.category}</span>
-                <span className="text-zinc-500 font-medium">{course.totalLessons} Aulas</span>
-                {course.completedLessons > 0 && (
-                  <span className="text-zinc-300">{course.completedLessons} Concluídas</span>
+              <div className="flex items-center gap-3 mb-8">
+                <div className="flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-primary/10 border border-primary/20 backdrop-blur-md">
+                  <div className="h-1.5 w-1.5 rounded-full bg-primary animate-pulse shadow-[0_0_10px_rgba(var(--primary),0.8)]" />
+                  <span className="text-[10px] font-black uppercase tracking-[0.25em] text-primary-foreground">
+                    {isFinished ? "Curso Concluído" : pct > 0 ? "Continue Assistindo" : "Título em Destaque"}
+                  </span>
+                </div>
+                {course.category && (
+                  <span className="text-[10px] text-muted-foreground uppercase tracking-[0.25em] font-black">
+                    {course.category}
+                  </span>
                 )}
               </div>
 
+              {/* Title */}
+              <h1 className="font-display text-[56px] md:text-[88px] lg:text-[110px] font-black tracking-[-0.06em] leading-[0.82] mb-8 text-foreground drop-shadow-2xl">
+                {course.title}
+              </h1>
+
               {/* Description */}
               {course.description && (
-                <p className="mt-5 text-base sm:text-lg text-muted-foreground/95 leading-relaxed line-clamp-3 max-w-xl [text-shadow:0_1px_12px_hsl(var(--background)/0.6)]">
+                <p className="max-w-xl text-muted-foreground text-lg md:text-xl leading-relaxed mb-10 line-clamp-3 font-medium">
                   {course.description}
                 </p>
               )}
 
               {/* Progress */}
               {course.totalLessons > 0 && pct > 0 && (
-                <div className="mt-6 max-w-md">
-                  <div className="flex items-center justify-between text-xs mb-2">
-                    <span className="text-muted-foreground font-bold uppercase tracking-wider">Seu progresso</span>
-                    <span className={cn("font-black tabular-nums text-sm", isFinished ? "text-success" : "text-foreground")}>
-                      {pct}%
-                    </span>
+                <div className="mt-8 mb-10 max-w-md">
+                  <div className="flex items-center justify-between mb-2.5">
+                    <span className="text-[10px] font-black uppercase tracking-[0.15em] text-muted-foreground/60">Seu progresso</span>
+                    <span className="text-sm font-black tabular-nums">{pct}%</span>
                   </div>
-                  <div className="h-1.5 rounded-full bg-foreground/15 overflow-hidden">
-                    <div
-                      className={cn("h-full transition-all duration-1000", isFinished ? "bg-success" : "bg-primary")}
-                      style={{ width: `${pct}%` }}
+                  <div className="h-2 w-full rounded-full bg-muted/40 overflow-hidden backdrop-blur-sm">
+                    <motion.div
+                      initial={{ width: 0 }}
+                      animate={{ width: `${pct}%` }}
+                      transition={{ duration: 1.5, ease: "circOut" }}
+                      className={cn("h-full", isFinished ? "bg-success" : "bg-primary")}
                     />
                   </div>
                 </div>
               )}
 
-              {/* Actions */}
-              <div className="mt-12 flex flex-wrap items-center gap-4">
+              {/* Action Buttons */}
+              <div className="flex flex-wrap items-center gap-5">
                 <Link
                   to={`/membros/curso/${course.id}`}
-                  className="inline-flex items-center gap-4 rounded-lg bg-white px-12 py-5 text-lg font-black text-black hover:bg-zinc-200 transition-all hover:scale-[1.03] active:scale-[0.97] shadow-2xl"
+                  className="group relative flex items-center gap-4 px-12 py-5 bg-foreground text-background font-display font-black text-[17px] rounded-xl transition-all duration-500 hover:scale-[1.02] active:scale-[0.98] hover:bg-foreground/90 overflow-hidden shadow-xl"
                 >
-                  <Play className="h-7 w-7 fill-current" />
-                  {pct > 0 ? "Retomar" : "Assistir agora"}
+                  <Play className="h-6 w-6 fill-current" />
+                  <span>{pct > 0 ? "Retomar" : "Assistir agora"}</span>
+                  <div className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-1000 bg-gradient-to-r from-transparent via-background/10 to-transparent" />
                 </Link>
+
                 <Link
                   to={`/membros/curso/${course.id}`}
-                  className="inline-flex items-center gap-3 rounded-lg border border-white/10 bg-white/5 backdrop-blur-xl px-10 py-5 text-lg font-black text-white hover:bg-white/10 transition-all hover:scale-[1.03]"
+                  className="flex items-center gap-3 px-10 py-5 bg-secondary/40 text-foreground font-display font-black text-[16px] rounded-xl hover:bg-secondary/60 transition-all duration-300 active:scale-[0.98] backdrop-blur-xl border border-white/5"
                 >
-                  <Info className="h-6 w-6" />
-                  Detalhes
+                  <Info className="h-5 w-5" />
+                  Mais informações
                 </Link>
               </div>
-            </div>
+            </motion.div>
           </div>
         </div>
+
+        {/* Bottom shadow blend */}
+        <div className="absolute bottom-0 left-0 right-0 h-48 bg-gradient-to-t from-background to-transparent z-[1]" />
       </div>
     </section>
   );
