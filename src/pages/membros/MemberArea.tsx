@@ -7,6 +7,7 @@ import {
   ShoppingBag, ArrowUpRight, ChevronLeft, ChevronRight, Sparkles, Info,
   Plus, Volume2, VolumeX, Star,
 } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
 
 type PurchaseRow = {
