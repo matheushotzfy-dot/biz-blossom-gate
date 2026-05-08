@@ -268,13 +268,12 @@ export default function Saques() {
     { label: "Aprovação média", value: m.avgApprovalHours > 0 ? `${m.avgApprovalHours.toFixed(1)}h` : "—", count: m.approved.length, sub: "tempo até liberação", accent: "text-foreground" },
   ];
 
-  return (
     <div
       className="mx-auto w-full max-w-[1480px] pb-24 md:pb-10 antialiased [text-rendering:geometricPrecision] [-webkit-font-smoothing:antialiased] [-moz-osx-font-smoothing:grayscale]"
       style={{ fontFeatureSettings: '"ss01","cv11","tnum","kern"' }}
     >
-
       <div className="px-5 pt-4 sm:px-8 sm:pt-6">
+
 
         {/* Address warning — flat Vendas-like alert */}
         {!hasAddress && (

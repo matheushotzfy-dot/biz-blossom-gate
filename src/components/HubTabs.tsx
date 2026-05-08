@@ -8,14 +8,15 @@ export type HubTab = {
 };
 
 type HubTabsProps = {
- tabs: HubTab[];
- active: string;
- onChange: (id: string) => void;
+  tabs: HubTab[];
+  active: string;
+  onChange: (id: string) => void;
+  className?: string;
 };
 
-export function HubTabs({ tabs, active, onChange }: HubTabsProps) {
+export function HubTabs({ tabs, active, onChange, className }: HubTabsProps) {
   return (
-    <div className="mx-auto w-full max-w-[1180px] pt-4 pb-0">
+    <div className={cn("mx-auto w-full max-w-[1180px] pt-4 pb-0", className)}>
       <div className="flex gap-1 overflow-x-auto rounded-2xl border border-border/25 bg-card/45 p-1.5 backdrop-blur-xl scrollbar-none w-fit shadow-sm">
         {tabs.map((tab) => {
           const isActive = active === tab.id;
