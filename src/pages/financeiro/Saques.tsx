@@ -273,9 +273,7 @@ export default function Saques() {
       className="mx-auto w-full max-w-[1480px] pb-24 md:pb-10 antialiased [text-rendering:geometricPrecision] [-webkit-font-smoothing:antialiased] [-moz-osx-font-smoothing:grayscale]"
       style={{ fontFeatureSettings: '"ss01","cv11","tnum","kern"' }}
     >
-
       <div className="px-5 pt-4 sm:px-8 sm:pt-6">
-
         {/* Address warning — flat Vendas-like alert */}
         {!hasAddress && (
           <div
@@ -284,6 +282,7 @@ export default function Saques() {
           >
             <div className="h-8 w-8 rounded-md bg-warning/15 border border-warning/25 flex items-center justify-center shrink-0">
               <MapPin className="h-4 w-4 text-warning" strokeWidth={2.25} />
+
             </div>
             <div className="flex-1 min-w-0">
               <p className="text-[12px] font-display font-black text-warning tracking-[-0.01em]">Endereço não cadastrado</p>

@@ -235,13 +235,14 @@ export default function SaquesCrypto() {
  return cryptoWithdrawals.filter(w => w.id.toLowerCase().includes(q) || (w as any).crypto_currency?.toLowerCase().includes(q));
  }, [cryptoWithdrawals, search]);
 
- return (
- <div className="mx-auto w-full max-w-[1440px] pb-20 px-1 relative">
- {/* ════════════════════════════════════════════════════════════════ */}
- {/* HERO */}
- {/* ════════════════════════════════════════════════════════════════ */}
- <motion.section initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.6 }}
- className="relative mb-14 rounded-3xl p-6 sm:p-8 lg:p-10 border border-border/60 bg-card shadow-sm">
+  return (
+    <div className="mx-auto w-full max-w-[1480px] pb-20 px-5 sm:px-8 mt-6 relative">
+      {/* ════════════════════════════════════════════════════════════════ */}
+      {/* HERO */}
+      {/* ════════════════════════════════════════════════════════════════ */}
+      <motion.section initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.6 }}
+        className="relative mb-14 rounded-3xl p-6 sm:p-8 lg:p-10 border border-border/60 bg-card shadow-sm overflow-hidden">
+
  <div className="absolute -inset-16 pointer-events-none">
  <motion.div animate={{ x: [0, 30, 0], y: [0, -20, 0] }} transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }} className="absolute top-0 -left-16 w-[600px] h-[600px] bg-warning/8 rounded-full blur-[180px]" />
  <motion.div animate={{ x: [0, -20, 0], y: [0, 30, 0] }} transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }} className="absolute bottom-0 -right-16 w-[500px] h-[500px] bg-info/6 rounded-full blur-[160px]" />
