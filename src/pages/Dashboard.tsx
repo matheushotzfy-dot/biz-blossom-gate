@@ -170,22 +170,54 @@ export default function Dashboard() {
   }, [transactions, withdrawals]);
 
   const chartData = useMemo(() => {
+    const isSingleDay = (isCustom && customRange?.from && (!customRange.to || differenceInDays(customRange.to, customRange.from) === 0)) || (!isCustom && selectedPeriod.days === 0);
+    
+    if (isSingleDay) {
+      // Logic for hourly sales
+      const salesByHour = new Map<number, number>();
+      const targetDate = isCustom ? new Date(customRange!.from!) : brasiliaToday();
+      const targetDateStr = targetDate.toLocaleDateString("pt-BR", { timeZone: "America/Sao_Paulo" });
+
+      filteredTx.forEach(t => {
+        if (t.status !== "completed") return;
+        const date = new Date(t.created_at);
+        const hour = date.getHours();
+        salesByHour.set(hour, (salesByHour.get(hour) || 0) + Number(t.net_amount));
+      });
+
+      return Array.from({ length: 24 }, (_, i) => ({
+        name: `${i}h`,
+        vendas: salesByHour.get(i) || 0,
+        fullLabel: `${i}:00`,
+      }));
+    }
+
     const days = Math.max(selectedPeriod.days, 1);
     const startDate = new Date(brasiliaToday());
     startDate.setDate(startDate.getDate() - (days - 1));
     const revenueByDate = new Map<string, number>();
-    for (const t of transactions) {
+    
+    // Use transactions for overall history or filteredTx for specific range
+    const txSource = isCustom ? filteredTx : transactions;
+    
+    for (const t of txSource) {
       if (t.status !== "completed") continue;
       const dateKey = toBrasiliaDate(t.created_at);
       revenueByDate.set(dateKey, (revenueByDate.get(dateKey) || 0) + Number(t.net_amount));
     }
+
     return Array.from({ length: days }, (_, i) => {
       const d = new Date(startDate);
       d.setDate(d.getDate() + i);
+      const dateStr = d.toLocaleDateString("pt-BR", { timeZone: "America/Sao_Paulo" });
       const label = d.toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit" });
-      return { name: label, vendas: revenueByDate.get(d.toLocaleDateString("pt-BR", { timeZone: "America/Sao_Paulo" })) || 0 };
+      return { 
+        name: label, 
+        vendas: revenueByDate.get(dateStr) || 0,
+        fullLabel: d.toLocaleDateString("pt-BR", { day: "2-digit", month: "long" })
+      };
     });
-  }, [transactions, selectedPeriod.days]);
+  }, [transactions, filteredTx, selectedPeriod.days, isCustom, customRange]);
 
   const activity = useMemo(() => {
     const tx = transactions.slice(0, 10).map((t) => ({
