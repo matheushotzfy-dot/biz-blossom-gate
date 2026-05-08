@@ -14,6 +14,7 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { toast } from "sonner";
 import { EmptyState } from "@/components/PageShell";
 import { cn } from "@/lib/utils";
@@ -53,27 +54,19 @@ function StatusPill({ status }: { status: string }) {
   );
 }
 
-/* ─── KPI Cell — Billion-Dollar SaaS ─── */
-function Kpi({ label, value, sub, icon: Icon, tone = "default" }: {
-  label: string; value: string; sub?: string; icon: any;
-  tone?: "default" | "success" | "warning" | "info" | "primary";
+/* ─── KPI Tile ─── */
+function KpiTile({ label, value, icon: Icon, tone = "primary", sub }: {
+  label: string; value: string; icon: any; tone?: "primary" | "success" | "warning" | "info"; sub?: string;
 }) {
-  const toneCls = {
-    default: "text-foreground",
-    success: "text-success",
-    warning: "text-warning",
-    info: "text-info",
-    primary: "text-primary",
-  }[tone];
   return (
-    <div className="bg-card px-5 py-4">
-      <div className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-[0.18em] text-muted-foreground/60">
-        <Icon className="h-3 w-3" strokeWidth={2.5} />
-        {label}
+    <Card className="p-5">
+      <div className={cn("h-9 w-9 rounded-xl flex items-center justify-center mb-3", `bg-${tone}/10 text-${tone}`)}>
+        <Icon className="h-4.5 w-4.5" strokeWidth={2.5} />
       </div>
-      <p className={cn("mt-2 font-display text-[22px] font-black leading-none tracking-tight tabular-nums", toneCls)}>{value}</p>
-      {sub && <p className="mt-1.5 text-[11px] font-medium text-muted-foreground/60 tabular-nums">{sub}</p>}
-    </div>
+      <p className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/50 mb-1">{label}</p>
+      <p className="font-display text-2xl font-black text-foreground tracking-tight tabular-nums">{value}</p>
+      {sub && <p className="text-[10px] font-bold text-muted-foreground/40 mt-1">{sub}</p>}
+    </Card>
   );
 }
 
@@ -162,480 +155,423 @@ export default function Afiliados() {
   };
 
   return (
-    <div className="mx-auto -mt-2 w-full max-w-[1440px] pb-24 md:-mt-3 md:pb-10">
-      {/* ── Hero header ── */}
-      <div className="relative flex flex-col gap-7 px-5 pt-1 sm:px-7 md:pt-1">
-        {/* Subtle radial accent behind title */}
-        <div
-          aria-hidden
-          className="pointer-events-none absolute -top-12 left-0 h-48 w-[520px] -z-[1] opacity-60 blur-3xl"
-          style={{
-            background:
-              "radial-gradient(60% 60% at 20% 50%, hsl(var(--primary) / 0.10), transparent 70%)",
-          }}
-        />
-
-        <div className="flex flex-wrap items-end justify-between gap-4 animate-fade-in">
-          <div>
-            <h1 className="font-display text-[40px] font-black leading-[0.9] tracking-[-0.055em] text-foreground sm:text-[52px]">
-              Afiliados
-            </h1>
-            <p className="mt-2 text-[13px] font-medium text-muted-foreground/80">
-              Programas, links e comissões em um único painel operacional.
-            </p>
+    <div className="p-4 md:p-8 space-y-8 max-w-[1600px] mx-auto animate-in fade-in duration-500">
+      {/* ── Header ── */}
+      <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6">
+        <div className="space-y-1">
+          <div className="flex items-center gap-3">
+             <div className="h-3 w-3 rounded-full bg-primary animate-pulse" />
+             <h1 className="text-3xl font-black tracking-tight text-foreground">Afiliados</h1>
           </div>
+          <p className="text-muted-foreground font-medium text-sm flex items-center gap-2">
+            <Users className="h-4 w-4" />
+            Programas, links e comissões em um único painel operacional.
+          </p>
+        </div>
 
-          <Dialog open={openCreate} onOpenChange={setOpenCreate}>
-            <DialogTrigger asChild>
-              <button className="group inline-flex h-11 items-center gap-2 rounded-xl bg-primary px-5 text-[13px] font-black uppercase tracking-wider text-primary-foreground transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] hover:bg-primary/90 hover:-translate-y-0.5 hover:shadow-[0_10px_30px_-10px_hsl(var(--primary)/0.5)]">
-                <Plus className="h-4 w-4 transition-transform duration-300 group-hover:rotate-90" strokeWidth={2.75} />
-                Novo link
-              </button>
-            </DialogTrigger>
-            <DialogContent className="max-w-md rounded-2xl p-0 overflow-hidden">
-              <div className="px-6 pt-6 pb-4 border-b border-border/30">
-                <DialogHeader>
-                  <DialogTitle className="font-heading text-base flex items-center gap-2">
-                    <Link2 className="h-4 w-4 text-primary" />
-                    Criar Link de Afiliado
-                  </DialogTitle>
-                </DialogHeader>
-              </div>
-              <div className="p-6 space-y-5">
-                <div className="space-y-1.5">
-                  <Label className="text-[10px] text-muted-foreground uppercase tracking-wider font-bold">Produto</Label>
-                  <Select value={selectedProduct} onValueChange={setSelectedProduct}>
-                    <SelectTrigger className="rounded-lg h-10"><SelectValue placeholder="Selecione um produto" /></SelectTrigger>
-                    <SelectContent className="max-h-[300px]">
-                      {affiliateProducts.length > 0 && (
-                        <>
-                          <div className="px-2 py-1.5 text-[9px] font-bold text-muted-foreground uppercase tracking-[0.15em]">Seus Produtos</div>
-                          {affiliateProducts.map(p => (
-                            <SelectItem key={`own-${p.id}`} value={p.id}>
-                              {p.name} — {fmt(Number(p.price))} ({(p as any).affiliate_commission || 30}%)
-                            </SelectItem>
-                          ))}
-                        </>
-                      )}
-                      {marketProducts.filter(mp => !affiliateProducts.some(ap => ap.id === mp.id)).length > 0 && (
-                        <>
-                          <div className="px-2 py-1.5 text-[9px] font-bold text-muted-foreground uppercase tracking-[0.15em] mt-1 border-t border-border/30 pt-2">Marketplace</div>
-                          {marketProducts.filter(mp => !affiliateProducts.some(ap => ap.id === mp.id)).map(p => (
-                            <SelectItem key={`mkt-${p.id}`} value={p.id}>
-                              {p.name} — {fmt(Number(p.price))}
-                            </SelectItem>
-                          ))}
-                        </>
-                      )}
-                      {affiliateProducts.length === 0 && marketProducts.length === 0 && (
-                        <div className="px-2 py-3 text-[11px] text-muted-foreground text-center">Nenhum produto disponível</div>
-                      )}
-                    </SelectContent>
-                  </Select>
-                </div>
-                {selectedProduct && (
-                  <div className="p-3 rounded-lg bg-success/5 border border-success/15 flex items-center gap-3">
-                    <Percent className="h-4 w-4 text-success shrink-0" />
-                    <p className="text-[11px] text-muted-foreground leading-snug">
-                      Comissão de <strong className="text-success font-bold">{
-                        (() => {
-                          const p = [...affiliateProducts, ...marketProducts].find(pr => pr.id === selectedProduct);
-                          return (p as any)?.affiliate_commission || 30;
-                        })()
-                      }%</strong> creditada por venda aprovada.
-                    </p>
+        <Dialog open={openCreate} onOpenChange={setOpenCreate}>
+          <DialogTrigger asChild>
+            <button className="bg-primary text-white px-8 h-12 rounded-2xl font-black text-sm flex items-center gap-2 shadow-lg shadow-primary/20 hover:scale-[1.02] active:scale-[0.98] transition-all">
+              <Plus className="h-5 w-5" strokeWidth={2.5} />
+              Novo link
+            </button>
+          </DialogTrigger>
+          <DialogContent className="max-w-md rounded-[2.5rem] p-0 overflow-hidden border-border/50 shadow-2xl">
+            <div className="px-8 pt-8 pb-4">
+              <DialogHeader>
+                <DialogTitle className="text-xl font-black flex items-center gap-3">
+                  <div className="h-10 w-10 rounded-xl bg-primary/10 flex items-center justify-center">
+                    <Link2 className="h-5 w-5 text-primary" />
                   </div>
-                )}
-                <Button onClick={handleCreateLink} className="w-full rounded-lg font-semibold h-10" disabled={!selectedProduct}>
-                  Gerar Link
-                </Button>
+                  Criar Link de Afiliado
+                </DialogTitle>
+              </DialogHeader>
+            </div>
+            <div className="px-8 pb-8 pt-4 space-y-6">
+              <div className="space-y-2">
+                <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/60 ml-1">Produto</Label>
+                <Select value={selectedProduct} onValueChange={setSelectedProduct}>
+                  <SelectTrigger className="h-12 rounded-2xl border-border/50 bg-muted/30 px-4 font-bold"><SelectValue placeholder="Selecione um produto" /></SelectTrigger>
+                  <SelectContent className="rounded-2xl border-border/50 shadow-xl p-2">
+                    {affiliateProducts.length > 0 && (
+                      <>
+                        <div className="px-3 py-2 text-[9px] font-black uppercase tracking-widest text-muted-foreground/40">Seus Produtos</div>
+                        {affiliateProducts.map(p => (
+                          <SelectItem key={`own-${p.id}`} value={p.id} className="rounded-xl font-bold py-2.5">
+                            {p.name} — {fmt(Number(p.price))}
+                          </SelectItem>
+                        ))}
+                      </>
+                    )}
+                    {marketProducts.filter(mp => !affiliateProducts.some(ap => ap.id === mp.id)).length > 0 && (
+                      <>
+                        <div className="px-3 py-2 text-[9px] font-black uppercase tracking-widest text-muted-foreground/40 mt-2 border-t border-border/10 pt-4">Marketplace</div>
+                        {marketProducts.filter(mp => !affiliateProducts.some(ap => ap.id === mp.id)).map(p => (
+                          <SelectItem key={`mkt-${p.id}`} value={p.id} className="rounded-xl font-bold py-2.5">
+                            {p.name} — {fmt(Number(p.price))}
+                          </SelectItem>
+                        ))}
+                      </>
+                    )}
+                  </SelectContent>
+                </Select>
               </div>
-            </DialogContent>
-          </Dialog>
-        </div>
+              <Button onClick={handleCreateLink} className="w-full h-12 rounded-2xl font-black text-sm shadow-lg shadow-primary/20" disabled={!selectedProduct}>
+                Gerar Link Operacional
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+      </div>
 
-        {/* ─── Global KPIs ─── */}
-        <div className="grid grid-cols-2 gap-px overflow-hidden rounded-xl border border-border/50 bg-border/40 lg:grid-cols-4 animate-fade-in stagger-1">
-          <Kpi
-            label="Comissões Ganhas"
-            value={fmt(totalCommissionEarned)}
-            sub={`${mySales.filter(s => s.status === "approved").length} venda(s) paga(s)`}
-            icon={DollarSign}
-            tone="success"
-          />
-          <Kpi
-            label="A Receber"
-            value={fmt(totalCommissionPending)}
-            sub={`${mySales.filter(s => s.status === "pending").length} pendente(s)`}
-            icon={Clock}
-            tone="warning"
-          />
-          <Kpi
-            label="Cliques · Conversão"
-            value={String(totalClicks)}
-            sub={`${conversionRate.toFixed(2)}% conversão`}
-            icon={MousePointerClick}
-            tone="info"
-          />
-          <Kpi
-            label="Links Ativos"
-            value={String(myLinks.filter(l => l.is_active).length)}
-            sub={`${myLinks.length} total`}
-            icon={Link2}
-            tone="primary"
-          />
-        </div>
+      {/* ─── Global KPIs ─── */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
+        <KpiTile
+          label="Comissões Ganhas"
+          value={fmt(totalCommissionEarned)}
+          sub={`${mySales.filter(s => s.status === "approved").length} venda(s) paga(s)`}
+          icon={DollarSign}
+          tone="success"
+        />
+        <KpiTile
+          label="A Receber"
+          value={fmt(totalCommissionPending)}
+          sub={`${mySales.filter(s => s.status === "pending").length} pendente(s)`}
+          icon={Clock}
+          tone="warning"
+        />
+        <KpiTile
+          label="Cliques · Conversão"
+          value={String(totalClicks)}
+          sub={`${conversionRate.toFixed(2)}% conversão`}
+          icon={MousePointerClick}
+          tone="info"
+        />
+        <KpiTile
+          label="Links Ativos"
+          value={String(myLinks.filter(l => l.is_active).length)}
+          sub={`${myLinks.length} total`}
+          icon={Link2}
+          tone="primary"
+        />
+      </div>
 
-        {/* ─── Segment-control Tabs ─── */}
-        <div className="inline-flex w-fit items-center gap-0.5 rounded-xl border border-border/50 bg-card/60 p-1 overflow-x-auto animate-fade-in stagger-2">
-          {TABS.map(t => {
-            const isActive = tab === t.id;
-            const count = t.id === "my-products" ? affiliateProducts.length
-              : t.id === "affiliate-of" ? myLinks.length
-              : marketProducts.length;
-            const accent = t.id === "my-products" ? "text-primary"
-              : t.id === "affiliate-of" ? "text-success"
-              : "text-info";
-            return (
-              <button
-                key={t.id}
-                onClick={() => { setTab(t.id); window.scrollTo({ top: 0, behavior: "instant" }); }}
-                className={cn(
-                  "group/tab relative inline-flex shrink-0 items-center gap-2 rounded-lg h-8 px-3 text-[12px] font-bold tracking-tight transition-colors duration-200",
-                  isActive
-                    ? "bg-secondary text-foreground"
-                    : "text-muted-foreground/80 hover:text-foreground"
-                )}
-              >
-                <span className={cn(
-                  "flex h-4 w-4 items-center justify-center transition-colors",
-                  isActive ? accent : "text-muted-foreground/50 group-hover/tab:text-foreground/70"
-                )}>
-                  <t.icon className="h-3 w-3" strokeWidth={2.5} />
-                </span>
-                <span className="font-display">{t.label}</span>
-                {count > 0 && (
-                  <span className={cn(
-                    "inline-flex h-[18px] min-w-[20px] items-center justify-center rounded-md px-1.5 text-[10px] font-black tabular-nums tracking-tight border transition-colors",
-                    isActive
-                      ? "bg-background/80 text-foreground border-border/40"
-                      : "bg-muted/30 text-muted-foreground/60 border-transparent"
-                  )}>
-                    {count}
-                  </span>
-                )}
-              </button>
-            );
-          })}
-        </div>
+      {/* ─── Tabs ─── */}
+      <div className="flex items-center bg-muted/30 p-1 rounded-2xl border border-border/50 w-fit">
+        {TABS.map(t => (
+          <button
+            key={t.id}
+            onClick={() => { setTab(t.id); }}
+            className={cn(
+              "px-6 py-2.5 rounded-xl text-xs font-black uppercase tracking-wider transition-all flex items-center gap-2",
+              tab === t.id ? "bg-card text-foreground shadow-sm ring-1 ring-border" : "text-muted-foreground hover:text-foreground"
+            )}
+          >
+            <t.icon className="h-3.5 w-3.5" />
+            {t.label}
+          </button>
+        ))}
       </div>
 
       {/* ── Workspace ── */}
-      <div className="px-5 pt-6 sm:px-7">
+      <div className="space-y-8">
 
       {/* ═══ MY PRODUCTS TAB ═══ */}
       {tab === "my-products" && (
-        <div className="space-y-6">
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-            <Kpi label="Produtos com Programa" value={String(affiliateProducts.length)} icon={ShoppingCart} />
-            <Kpi label="Afiliados Ativos" value={String(productLinks.length)} icon={Users} tone="info" />
-            <Kpi label="Receita via Afiliados" value={fmt(totalProductSalesViaAff)} icon={TrendingUp} tone="success" />
-            <Kpi label="Comissões Pagas" value={fmt(totalProductCommPaid)} icon={DollarSign} tone="warning" />
+        <div className="space-y-8">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
+            <KpiTile label="Produtos" value={String(affiliateProducts.length)} icon={ShoppingCart} tone="primary" />
+            <KpiTile label="Afiliados" value={String(productLinks.length)} icon={Users} tone="info" />
+            <KpiTile label="Receita Afiliados" value={fmt(totalProductSalesViaAff)} icon={TrendingUp} tone="success" />
+            <KpiTile label="Comissões Pagas" value={fmt(totalProductCommPaid)} icon={DollarSign} tone="warning" />
           </div>
 
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <Award className="h-4 w-4 text-muted-foreground" />
-              <h2 className="text-[13px] font-heading font-bold text-foreground">Programas Ativos</h2>
-              <span className="text-[11px] text-muted-foreground">· {affiliateProducts.length} produto(s)</span>
-            </div>
-          </div>
-
-          {affiliateProducts.length === 0 ? (
-            <EmptyState
-              icon={<Users className="h-7 w-7" />}
-              title="Nenhum programa ativo"
-              subtitle="Ative o programa de afiliados nas configurações de cada produto para escalar suas vendas."
-            />
-          ) : (
-            <div className="rounded-xl border border-border/60 bg-card overflow-hidden">
-              <table className="w-full">
-                <thead>
-                  <tr className="border-b border-border/40 bg-muted/20">
-                    <th className="text-left px-4 py-2.5 text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Produto</th>
-                    <th className="text-right px-4 py-2.5 text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Preço</th>
-                    <th className="text-right px-4 py-2.5 text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Comissão</th>
-                    <th className="text-right px-4 py-2.5 text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Afiliados</th>
-                    <th className="text-right px-4 py-2.5 text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Vendas</th>
-                    <th className="text-right px-4 py-2.5 text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Receita</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {affiliateProducts.map((p) => {
-                    const pLinks = productLinks.filter(l => l.product_id === p.id).length;
-                    const pSales = productSales.filter(s => s.product_id === p.id);
-                    return (
-                      <tr key={p.id} className="border-b border-border/30 last:border-0 hover:bg-muted/15 transition-colors">
-                        <td className="px-4 py-3">
-                          <div className="flex items-center gap-3">
-                            {p.image_url ? (
-                              <img src={p.image_url} alt="" className="h-9 w-9 rounded-md object-cover ring-1 ring-border/30" />
-                            ) : (
-                              <div className="h-9 w-9 rounded-md bg-muted/40 flex items-center justify-center">
-                                <ShoppingCart className="h-4 w-4 text-muted-foreground/60" />
-                              </div>
-                            )}
-                            <span className="text-[12px] font-semibold text-foreground">{p.name}</span>
-                          </div>
-                        </td>
-                        <td className="px-4 py-3 text-right text-[12px] text-muted-foreground tabular-nums">{fmt(Number(p.price))}</td>
-                        <td className="px-4 py-3 text-right">
-                          <span className="text-[11px] font-bold text-success bg-success/10 px-2 py-0.5 rounded tabular-nums">
-                            {(p as any).affiliate_commission || 30}%
-                          </span>
-                        </td>
-                        <td className="px-4 py-3 text-right text-[12px] font-semibold text-foreground tabular-nums">{pLinks}</td>
-                        <td className="px-4 py-3 text-right text-[12px] font-semibold text-foreground tabular-nums">{pSales.length}</td>
-                        <td className="px-4 py-3 text-right text-[12px] font-bold text-foreground tabular-nums">
-                          {fmt(pSales.reduce((a, s) => a + s.sale_amount, 0))}
-                        </td>
+          <Card className="border-border/40 overflow-hidden">
+            <CardHeader className="flex flex-row items-center justify-between border-b border-border/40 px-8 py-6">
+              <div>
+                <CardTitle className="text-xl font-black">Programas Ativos</CardTitle>
+                <CardDescription className="text-xs font-bold uppercase tracking-wider">{affiliateProducts.length} produtos configurados</CardDescription>
+              </div>
+            </CardHeader>
+            <CardContent className="p-0">
+              {affiliateProducts.length === 0 ? (
+                <div className="p-20 text-center space-y-4">
+                   <div className="h-16 w-16 bg-muted rounded-2xl flex items-center justify-center mx-auto">
+                      <Users className="h-8 w-8 text-muted-foreground/30" />
+                   </div>
+                   <p className="text-sm font-black text-muted-foreground">Nenhum programa ativo ainda.</p>
+                </div>
+              ) : (
+                <div className="overflow-x-auto">
+                  <table className="w-full">
+                    <thead>
+                      <tr className="border-b border-border/30 bg-muted/10">
+                        <th className="text-left px-8 py-4 text-[10px] font-black uppercase tracking-[0.15em] text-muted-foreground/60">Produto</th>
+                        <th className="text-right px-8 py-4 text-[10px] font-black uppercase tracking-[0.15em] text-muted-foreground/60">Preço</th>
+                        <th className="text-right px-8 py-4 text-[10px] font-black uppercase tracking-[0.15em] text-muted-foreground/60">Comissão</th>
+                        <th className="text-right px-8 py-4 text-[10px] font-black uppercase tracking-[0.15em] text-muted-foreground/60">Afiliados</th>
+                        <th className="text-right px-8 py-4 text-[10px] font-black uppercase tracking-[0.15em] text-muted-foreground/60">Vendas</th>
+                        <th className="text-right px-8 py-4 text-[10px] font-black uppercase tracking-[0.15em] text-muted-foreground/60">Receita</th>
                       </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
-            </div>
-          )}
+                    </thead>
+                    <tbody className="divide-y divide-border/30">
+                      {affiliateProducts.map((p) => {
+                        const pLinks = productLinks.filter(l => l.product_id === p.id).length;
+                        const pSales = productSales.filter(s => s.product_id === p.id);
+                        return (
+                          <tr key={p.id} className="group hover:bg-muted/30 transition-all cursor-pointer">
+                            <td className="px-8 py-4">
+                              <div className="flex items-center gap-3">
+                                {p.image_url ? (
+                                  <img src={p.image_url} alt="" className="h-10 w-10 rounded-xl object-cover ring-1 ring-border/30" />
+                                ) : (
+                                  <div className="h-10 w-10 rounded-xl bg-muted/40 flex items-center justify-center">
+                                    <ShoppingCart className="h-5 w-5 text-muted-foreground/60" />
+                                  </div>
+                                )}
+                                <span className="text-sm font-black">{p.name}</span>
+                              </div>
+                            </td>
+                            <td className="px-8 py-4 text-right text-sm font-bold text-muted-foreground tabular-nums">{fmt(Number(p.price))}</td>
+                            <td className="px-8 py-4 text-right">
+                              <span className="text-[10px] font-black text-success bg-success/10 px-2.5 py-1 rounded-lg border border-success/20 tabular-nums uppercase">
+                                {(p as any).affiliate_commission || 30}%
+                              </span>
+                            </td>
+                            <td className="px-8 py-4 text-right text-sm font-black text-foreground tabular-nums">{pLinks}</td>
+                            <td className="px-8 py-4 text-right text-sm font-black text-foreground tabular-nums">{pSales.length}</td>
+                            <td className="px-8 py-4 text-right text-sm font-black text-foreground tabular-nums">
+                              {fmt(pSales.reduce((a, s) => a + s.sale_amount, 0))}
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </CardContent>
+          </Card>
         </div>
       )}
 
       {/* ═══ AFFILIATE OF TAB ═══ */}
       {tab === "affiliate-of" && (
-        <div className="space-y-6">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <Link2 className="h-4 w-4 text-muted-foreground" />
-              <h2 className="text-[13px] font-heading font-bold text-foreground">Meus Links</h2>
-              <span className="text-[11px] text-muted-foreground">· {myLinks.length} link(s)</span>
-            </div>
-            <Button size="sm" variant="outline" className="h-8 text-[11px] gap-1.5 rounded-lg" onClick={() => setOpenCreate(true)}>
-              <Plus className="h-3 w-3" /> Adicionar
-            </Button>
-          </div>
-
-          {myLinks.length === 0 ? (
-            <EmptyState
-              icon={<Link2 className="h-7 w-7" />}
-              title="Nenhum link de afiliado"
-              subtitle="Crie seu primeiro link para começar a ganhar comissões."
-              action={
-                <Button onClick={() => setOpenCreate(true)} className="gap-2 rounded-lg font-semibold">
-                  <Plus className="h-4 w-4" /> Criar Primeiro Link
-                </Button>
-              }
-            />
-          ) : (
-            <div className="rounded-xl border border-border/60 bg-card overflow-hidden">
-              <table className="w-full">
-                <thead>
-                  <tr className="border-b border-border/40 bg-muted/20">
-                    <th className="text-left px-4 py-2.5 text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Produto / Link</th>
-                    <th className="text-right px-4 py-2.5 text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Comissão</th>
-                    <th className="text-right px-4 py-2.5 text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Cliques</th>
-                    <th className="text-right px-4 py-2.5 text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Vendas</th>
-                    <th className="text-right px-4 py-2.5 text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Conv.</th>
-                    <th className="text-right px-4 py-2.5 text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Ganho</th>
-                    <th className="text-center px-4 py-2.5 text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Status</th>
-                    <th className="text-right px-4 py-2.5 text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Ações</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {myLinks.map((link) => {
-                    const linkSales = mySales.filter(s => s.affiliate_link_id === link.id);
-                    const linkRevenue = linkSales.reduce((a, s) => a + s.commission_amount, 0);
-                    const convRate = link.clicks > 0 ? ((linkSales.length / link.clicks) * 100).toFixed(1) : "0.0";
-                    return (
-                      <tr key={link.id} className="border-b border-border/30 last:border-0 hover:bg-muted/15 transition-colors">
-                        <td className="px-4 py-3 max-w-[280px]">
-                          <p className="text-[12px] font-semibold text-foreground truncate">{getProductName(link.product_id)}</p>
-                          <p className="font-mono text-[10px] text-muted-foreground/70 truncate mt-0.5">/pay/{link.slug}</p>
-                        </td>
-                        <td className="px-4 py-3 text-right">
-                          <span className="text-[11px] font-bold text-primary bg-primary/10 px-2 py-0.5 rounded tabular-nums">
-                            {link.commission_pct}%
-                          </span>
-                        </td>
-                        <td className="px-4 py-3 text-right text-[12px] text-muted-foreground tabular-nums">{link.clicks}</td>
-                        <td className="px-4 py-3 text-right text-[12px] font-semibold text-foreground tabular-nums">{linkSales.length}</td>
-                        <td className="px-4 py-3 text-right text-[12px] text-warning tabular-nums">{convRate}%</td>
-                        <td className="px-4 py-3 text-right text-[12px] font-bold text-success tabular-nums">{fmt(linkRevenue)}</td>
-                        <td className="px-4 py-3 text-center">
-                          <span className={cn(
-                            "inline-flex items-center gap-1.5 rounded-md px-2 py-0.5 text-[10px] font-bold border",
-                            link.is_active
-                              ? "bg-success/10 text-success border-success/20"
-                              : "bg-muted/30 text-muted-foreground border-border/30"
-                          )}>
-                            <span className={cn("h-1.5 w-1.5 rounded-full", link.is_active ? "bg-success" : "bg-muted-foreground")} />
-                            {link.is_active ? "Ativo" : "Pausado"}
-                          </span>
-                        </td>
-                        <td className="px-4 py-3">
-                          <div className="flex items-center justify-end gap-1">
-                            <button
-                              onClick={() => copyLink(link.slug)}
-                              title="Copiar link"
-                              className={cn(
-                                "h-7 w-7 rounded-md flex items-center justify-center transition-colors border",
-                                copiedSlug === link.slug
+        <div className="space-y-8">
+          <Card className="border-border/40 overflow-hidden">
+            <CardHeader className="flex flex-row items-center justify-between border-b border-border/40 px-8 py-6">
+              <div>
+                <CardTitle className="text-xl font-black">Meus Links</CardTitle>
+                <CardDescription className="text-xs font-bold uppercase tracking-wider">{myLinks.length} links operacionais</CardDescription>
+              </div>
+            </CardHeader>
+            <CardContent className="p-0">
+              {myLinks.length === 0 ? (
+                <div className="p-20 text-center space-y-4">
+                   <div className="h-16 w-16 bg-muted rounded-2xl flex items-center justify-center mx-auto">
+                      <Link2 className="h-8 w-8 text-muted-foreground/30" />
+                   </div>
+                   <p className="text-sm font-black text-muted-foreground">Nenhum link criado.</p>
+                </div>
+              ) : (
+                <div className="overflow-x-auto">
+                  <table className="w-full">
+                    <thead>
+                      <tr className="border-b border-border/30 bg-muted/10">
+                        <th className="text-left px-8 py-4 text-[10px] font-black uppercase tracking-[0.15em] text-muted-foreground/60">Produto / Link</th>
+                        <th className="text-right px-8 py-4 text-[10px] font-black uppercase tracking-[0.15em] text-muted-foreground/60">Comissão</th>
+                        <th className="text-right px-8 py-4 text-[10px] font-black uppercase tracking-[0.15em] text-muted-foreground/60">Cliques</th>
+                        <th className="text-right px-8 py-4 text-[10px] font-black uppercase tracking-[0.15em] text-muted-foreground/60">Vendas</th>
+                        <th className="text-right px-8 py-4 text-[10px] font-black uppercase tracking-[0.15em] text-muted-foreground/60">Conv.</th>
+                        <th className="text-right px-8 py-4 text-[10px] font-black uppercase tracking-[0.15em] text-muted-foreground/60">Ganho</th>
+                        <th className="text-center px-8 py-4 text-[10px] font-black uppercase tracking-[0.15em] text-muted-foreground/60">Status</th>
+                        <th className="text-right px-8 py-4 text-[10px] font-black uppercase tracking-[0.15em] text-muted-foreground/60">Ações</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-border/30">
+                      {myLinks.map((link) => {
+                        const linkSales = mySales.filter(s => s.affiliate_link_id === link.id);
+                        const linkRevenue = linkSales.reduce((a, s) => a + s.commission_amount, 0);
+                        const convRate = link.clicks > 0 ? ((linkSales.length / link.clicks) * 100).toFixed(1) : "0.0";
+                        return (
+                          <tr key={link.id} className="group hover:bg-muted/30 transition-all cursor-pointer">
+                            <td className="px-8 py-4 max-w-[280px]">
+                              <p className="text-sm font-black truncate">{getProductName(link.product_id)}</p>
+                              <p className="font-mono text-[10px] text-muted-foreground/50 truncate mt-0.5">/pay/{link.slug}</p>
+                            </td>
+                            <td className="px-8 py-4 text-right">
+                              <span className="text-[10px] font-black text-primary bg-primary/10 px-2.5 py-1 rounded-lg border border-primary/20 tabular-nums uppercase">
+                                {link.commission_pct}%
+                              </span>
+                            </td>
+                            <td className="px-8 py-4 text-right text-sm font-bold text-muted-foreground tabular-nums">{link.clicks}</td>
+                            <td className="px-8 py-4 text-right text-sm font-black text-foreground tabular-nums">{linkSales.length}</td>
+                            <td className="px-8 py-4 text-right text-sm font-black text-warning tabular-nums">{convRate}%</td>
+                            <td className="px-8 py-4 text-right text-sm font-black text-success tabular-nums">{fmt(linkRevenue)}</td>
+                            <td className="px-8 py-4 text-center">
+                              <span className={cn(
+                                "inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-[10px] font-black border uppercase",
+                                link.is_active
                                   ? "bg-success/10 text-success border-success/20"
-                                  : "bg-card text-muted-foreground border-border/40 hover:bg-muted/30 hover:text-foreground"
-                              )}
-                            >
-                              {copiedSlug === link.slug ? <CheckCircle2 className="h-3.5 w-3.5" /> : <Copy className="h-3.5 w-3.5" />}
-                            </button>
-                            <button
-                              onClick={() => toggleLinkActive(link)}
-                              title={link.is_active ? "Pausar" : "Ativar"}
-                              className="h-7 w-7 rounded-md flex items-center justify-center transition-colors border bg-card text-muted-foreground border-border/40 hover:bg-muted/30 hover:text-foreground"
-                            >
-                              {link.is_active ? <PowerOff className="h-3.5 w-3.5" /> : <Power className="h-3.5 w-3.5" />}
-                            </button>
-                          </div>
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
-            </div>
-          )}
+                                  : "bg-muted/30 text-muted-foreground border-border/30"
+                              )}>
+                                <span className={cn("h-1.5 w-1.5 rounded-full", link.is_active ? "bg-success" : "bg-muted-foreground")} />
+                                {link.is_active ? "Ativo" : "Pausado"}
+                              </span>
+                            </td>
+                            <td className="px-8 py-4">
+                              <div className="flex items-center justify-end gap-2">
+                                <button
+                                  onClick={() => copyLink(link.slug)}
+                                  className={cn(
+                                    "h-9 w-9 rounded-xl flex items-center justify-center transition-all border",
+                                    copiedSlug === link.slug
+                                      ? "bg-success/10 text-success border-success/20"
+                                      : "bg-card text-muted-foreground border-border/40 hover:bg-muted/30 hover:text-foreground"
+                                  )}
+                                >
+                                  {copiedSlug === link.slug ? <CheckCircle2 className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
+                                </button>
+                                <button
+                                  onClick={() => toggleLinkActive(link)}
+                                  className="h-9 w-9 rounded-xl flex items-center justify-center transition-all border bg-card text-muted-foreground border-border/40 hover:bg-muted/30 hover:text-foreground"
+                                >
+                                  {link.is_active ? <PowerOff className="h-4 w-4" /> : <Power className="h-4 w-4" />}
+                                </button>
+                              </div>
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </CardContent>
+          </Card>
 
-          {/* Sales history */}
           {mySales.length > 0 && (
-            <>
-              <div className="flex items-center gap-2 pt-2">
-                <Activity className="h-4 w-4 text-muted-foreground" />
-                <h2 className="text-[13px] font-heading font-bold text-foreground">Histórico de Comissões</h2>
-                <span className="text-[11px] text-muted-foreground">· {mySales.length} transação(ões)</span>
-              </div>
-              <div className="rounded-xl border border-border/60 bg-card overflow-hidden">
-                <table className="w-full">
-                  <thead>
-                    <tr className="border-b border-border/40 bg-muted/20">
-                      <th className="text-left px-4 py-2.5 text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Data</th>
-                      <th className="text-left px-4 py-2.5 text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Produto</th>
-                      <th className="text-right px-4 py-2.5 text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Venda</th>
-                      <th className="text-right px-4 py-2.5 text-[10px] font-bold uppercase tracking-wider text-muted-foreground">%</th>
-                      <th className="text-right px-4 py-2.5 text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Comissão</th>
-                      <th className="text-center px-4 py-2.5 text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Status</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {mySales.map((s) => (
-                      <tr key={s.id} className="border-b border-border/30 last:border-0 hover:bg-muted/15 transition-colors">
-                        <td className="px-4 py-3 text-[11px] text-muted-foreground tabular-nums font-mono">
-                          {new Date(s.created_at).toLocaleDateString("pt-BR")}
-                        </td>
-                        <td className="px-4 py-3 text-[12px] font-semibold text-foreground">{getProductName(s.product_id)}</td>
-                        <td className="px-4 py-3 text-right text-[12px] text-muted-foreground tabular-nums">{fmt(s.sale_amount)}</td>
-                        <td className="px-4 py-3 text-right text-[11px] text-muted-foreground tabular-nums">{s.commission_pct}%</td>
-                        <td className="px-4 py-3 text-right text-[12px] font-bold text-success tabular-nums">{fmt(s.commission_amount)}</td>
-                        <td className="px-4 py-3 text-center"><StatusPill status={s.status} /></td>
+            <Card className="border-border/40 overflow-hidden">
+              <CardHeader className="flex flex-row items-center justify-between border-b border-border/40 px-8 py-6">
+                <div>
+                  <CardTitle className="text-xl font-black">Histórico de Comissões</CardTitle>
+                  <CardDescription className="text-xs font-bold uppercase tracking-wider">{mySales.length} transações registradas</CardDescription>
+                </div>
+              </CardHeader>
+              <CardContent className="p-0">
+                <div className="overflow-x-auto">
+                  <table className="w-full">
+                    <thead>
+                      <tr className="border-b border-border/30 bg-muted/10">
+                        <th className="text-left px-8 py-4 text-[10px] font-black uppercase tracking-[0.15em] text-muted-foreground/60">Data</th>
+                        <th className="text-left px-8 py-4 text-[10px] font-black uppercase tracking-[0.15em] text-muted-foreground/60">Produto</th>
+                        <th className="text-right px-8 py-4 text-[10px] font-black uppercase tracking-[0.15em] text-muted-foreground/60">Venda</th>
+                        <th className="text-right px-8 py-4 text-[10px] font-black uppercase tracking-[0.15em] text-muted-foreground/60">%</th>
+                        <th className="text-right px-8 py-4 text-[10px] font-black uppercase tracking-[0.15em] text-muted-foreground/60">Comissão</th>
+                        <th className="text-center px-8 py-4 text-[10px] font-black uppercase tracking-[0.15em] text-muted-foreground/60">Status</th>
                       </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </>
+                    </thead>
+                    <tbody className="divide-y divide-border/30">
+                      {mySales.map((s) => (
+                        <tr key={s.id} className="hover:bg-muted/30 transition-all">
+                          <td className="px-8 py-4 text-xs font-bold text-muted-foreground tabular-nums font-mono">
+                            {new Date(s.created_at).toLocaleDateString("pt-BR")}
+                          </td>
+                          <td className="px-8 py-4 text-sm font-black text-foreground">{getProductName(s.product_id)}</td>
+                          <td className="px-8 py-4 text-right text-sm font-bold text-muted-foreground tabular-nums">{fmt(s.sale_amount)}</td>
+                          <td className="px-8 py-4 text-right text-xs font-black text-muted-foreground tabular-nums">{s.commission_pct}%</td>
+                          <td className="px-8 py-4 text-right text-sm font-black text-success tabular-nums">{fmt(s.commission_amount)}</td>
+                          <td className="px-8 py-4 text-center">
+                             <StatusPill status={s.status} />
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </CardContent>
+            </Card>
           )}
         </div>
       )}
 
       {/* ═══ MARKETPLACE TAB ═══ */}
       {tab === "marketplace" && (
-        <div className="space-y-5">
-          <div className="flex items-center justify-between gap-3">
-            <div className="relative flex-1 max-w-md">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground/60" />
+        <div className="space-y-8">
+          <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 bg-muted/30 p-6 rounded-[2.5rem] border border-border/50">
+            <div className="relative w-full md:max-w-md">
+              <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/40" />
               <Input
                 value={search}
                 onChange={e => setSearch(e.target.value)}
                 placeholder="Buscar produtos para afiliar..."
-                className="h-9 pl-9 text-[12px] rounded-lg"
+                className="h-12 pl-12 rounded-2xl border-border/50 bg-card font-bold"
               />
             </div>
-            <span className="text-[11px] text-muted-foreground tabular-nums">
-              {affiliateProducts.filter(p => !search || p.name.toLowerCase().includes(search.toLowerCase())).length} produto(s)
-            </span>
+            <div className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/40">
+              {affiliateProducts.filter(p => !search || p.name.toLowerCase().includes(search.toLowerCase())).length} produtos encontrados
+            </div>
           </div>
 
-          {affiliateProducts.filter(p => !search || p.name.toLowerCase().includes(search.toLowerCase())).length === 0 ? (
-            <EmptyState icon={<Globe className="h-7 w-7" />} title="Nenhum produto encontrado" subtitle="Não há produtos com programa de afiliados ativo no marketplace." />
-          ) : (
-            <div className="rounded-xl border border-border/60 bg-card overflow-hidden">
-              <table className="w-full">
-                <thead>
-                  <tr className="border-b border-border/40 bg-muted/20">
-                    <th className="text-left px-4 py-2.5 text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Produto</th>
-                    <th className="text-right px-4 py-2.5 text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Preço</th>
-                    <th className="text-right px-4 py-2.5 text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Comissão</th>
-                    <th className="text-right px-4 py-2.5 text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Ganho/Venda</th>
-                    <th className="text-right px-4 py-2.5 text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Ação</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {affiliateProducts.filter(p => !search || p.name.toLowerCase().includes(search.toLowerCase())).map((p) => {
-                    const pct = (p as any).affiliate_commission || 30;
-                    const earnPerSale = (Number(p.price) * pct) / 100;
-                    return (
-                      <tr key={p.id} className="border-b border-border/30 last:border-0 hover:bg-muted/15 transition-colors">
-                        <td className="px-4 py-3 max-w-[400px]">
-                          <div className="flex items-center gap-3">
-                            {p.image_url ? (
-                              <img src={p.image_url} alt="" className="h-10 w-10 rounded-md object-cover ring-1 ring-border/30" />
-                            ) : (
-                              <div className="h-10 w-10 rounded-md bg-muted/40 flex items-center justify-center">
-                                <ShoppingCart className="h-4 w-4 text-muted-foreground/60" />
-                              </div>
-                            )}
-                            <div className="min-w-0">
-                              <p className="text-[12px] font-semibold text-foreground truncate">{p.name}</p>
-                              <p className="text-[11px] text-muted-foreground truncate">{p.description || "Sem descrição"}</p>
-                            </div>
-                          </div>
-                        </td>
-                        <td className="px-4 py-3 text-right text-[12px] text-muted-foreground tabular-nums">{fmt(Number(p.price))}</td>
-                        <td className="px-4 py-3 text-right">
-                          <span className="text-[11px] font-bold text-success bg-success/10 px-2 py-0.5 rounded tabular-nums">{pct}%</span>
-                        </td>
-                        <td className="px-4 py-3 text-right text-[12px] font-bold text-success tabular-nums">{fmt(earnPerSale)}</td>
-                        <td className="px-4 py-3 text-right">
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            className="h-8 text-[11px] gap-1.5 rounded-md font-semibold"
-                            onClick={() => { setSelectedProduct(p.id); setOpenCreate(true); }}
-                          >
-                            Afiliar-se <ArrowUpRight className="h-3 w-3" />
-                          </Button>
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
-            </div>
-          )}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {affiliateProducts.filter(p => !search || p.name.toLowerCase().includes(search.toLowerCase())).map((p) => {
+              const pct = (p as any).affiliate_commission || 30;
+              const earnPerSale = (Number(p.price) * pct) / 100;
+              return (
+                <Card key={p.id} className="p-6 group hover:scale-[1.01]">
+                   <div className="flex items-start gap-6">
+                      {p.image_url ? (
+                        <img src={p.image_url} alt="" className="h-20 w-20 rounded-2xl object-cover ring-1 ring-border/30 shadow-lg" />
+                      ) : (
+                        <div className="h-20 w-20 rounded-2xl bg-muted/40 flex items-center justify-center shrink-0">
+                          <ShoppingCart className="h-8 w-8 text-muted-foreground/30" />
+                        </div>
+                      )}
+                      <div className="flex-1 min-w-0 space-y-1">
+                        <div className="flex items-center justify-between gap-2">
+                           <h3 className="text-lg font-black truncate">{p.name}</h3>
+                           <span className="text-[10px] font-black text-success bg-success/10 px-2.5 py-1 rounded-lg border border-success/20 uppercase tabular-nums">
+                              {pct}% COMISSÃO
+                           </span>
+                        </div>
+                        <p className="text-xs font-bold text-muted-foreground/60 line-clamp-2 leading-relaxed">
+                           {p.description || "Este produtor oferece uma excelente oportunidade de afiliação com suporte completo."}
+                        </p>
+                        <div className="pt-4 flex items-center justify-between">
+                           <div className="space-y-0.5">
+                              <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/40">Ganho Estimado</p>
+                              <p className="text-xl font-black text-success tabular-nums">{fmt(earnPerSale)}</p>
+                           </div>
+                           <Button
+                              onClick={() => { setSelectedProduct(p.id); setOpenCreate(true); }}
+                              className="h-10 px-6 rounded-xl font-black text-[11px] uppercase tracking-wider gap-2 shadow-lg shadow-primary/10"
+                           >
+                              Solicitar Afiliação
+                              <ArrowUpRight className="h-4 w-4" />
+                           </Button>
+                        </div>
+                      </div>
+                   </div>
+                </Card>
+              );
+            })}
+          </div>
         </div>
       )}
 
-      {/* Footer info */}
-      <div className="mt-8 rounded-lg border border-border/40 bg-muted/10 p-3 flex items-center gap-3">
-        <Shield className="h-4 w-4 text-muted-foreground/60 shrink-0" />
-        <p className="text-[11px] text-muted-foreground leading-snug">
-          Comissões creditadas automaticamente após confirmação do pagamento. Split processado no servidor com transparência total.
-        </p>
+      {/* Footer Info */}
+      <div className="pt-8 border-t border-border/40">
+         <div className="bg-primary/[0.02] border border-primary/10 rounded-3xl p-6 flex items-center gap-6">
+            <div className="h-12 w-12 rounded-2xl bg-primary/10 flex items-center justify-center shrink-0">
+               <Shield className="h-6 w-6 text-primary" />
+            </div>
+            <div>
+               <p className="text-sm font-black">Infraestrutura Operacional Segura</p>
+               <p className="text-xs font-bold text-muted-foreground/60 leading-relaxed">
+                  Comissões creditadas automaticamente via split de pagamento. Transparência total e rastreamento em tempo real de cada clique e conversão.
+               </p>
+            </div>
+         </div>
       </div>
       </div>
     </div>
