@@ -351,7 +351,8 @@ export default function Afiliados() {
                 </div>
               )}
             </CardContent>
-          </Card>
+        </div>
+      )}
 
       {/* ═══ AFFILIATE OF TAB ═══ */}
       {tab === "affiliate-of" && (
