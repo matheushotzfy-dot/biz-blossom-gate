@@ -307,51 +307,51 @@ export default function Afiliados() {
                     <thead>
                       <tr className="border-b border-border/30 bg-muted/10">
                         <th className="text-left px-8 py-4 text-[10px] font-black uppercase tracking-[0.15em] text-muted-foreground/60">Produto</th>
-                    <th className="text-right px-4 py-2.5 text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Preço</th>
-                    <th className="text-right px-4 py-2.5 text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Comissão</th>
-                    <th className="text-right px-4 py-2.5 text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Afiliados</th>
-                    <th className="text-right px-4 py-2.5 text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Vendas</th>
-                    <th className="text-right px-4 py-2.5 text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Receita</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {affiliateProducts.map((p) => {
-                    const pLinks = productLinks.filter(l => l.product_id === p.id).length;
-                    const pSales = productSales.filter(s => s.product_id === p.id);
-                    return (
-                      <tr key={p.id} className="border-b border-border/30 last:border-0 hover:bg-muted/15 transition-colors">
-                        <td className="px-4 py-3">
-                          <div className="flex items-center gap-3">
-                            {p.image_url ? (
-                              <img src={p.image_url} alt="" className="h-9 w-9 rounded-md object-cover ring-1 ring-border/30" />
-                            ) : (
-                              <div className="h-9 w-9 rounded-md bg-muted/40 flex items-center justify-center">
-                                <ShoppingCart className="h-4 w-4 text-muted-foreground/60" />
-                              </div>
-                            )}
-                            <span className="text-[12px] font-semibold text-foreground">{p.name}</span>
-                          </div>
-                        </td>
-                        <td className="px-4 py-3 text-right text-[12px] text-muted-foreground tabular-nums">{fmt(Number(p.price))}</td>
-                        <td className="px-4 py-3 text-right">
-                          <span className="text-[11px] font-bold text-success bg-success/10 px-2 py-0.5 rounded tabular-nums">
-                            {(p as any).affiliate_commission || 30}%
-                          </span>
-                        </td>
-                        <td className="px-4 py-3 text-right text-[12px] font-semibold text-foreground tabular-nums">{pLinks}</td>
-                        <td className="px-4 py-3 text-right text-[12px] font-semibold text-foreground tabular-nums">{pSales.length}</td>
-                        <td className="px-4 py-3 text-right text-[12px] font-bold text-foreground tabular-nums">
-                          {fmt(pSales.reduce((a, s) => a + s.sale_amount, 0))}
-                        </td>
+                        <th className="text-right px-8 py-4 text-[10px] font-black uppercase tracking-[0.15em] text-muted-foreground/60">Preço</th>
+                        <th className="text-right px-8 py-4 text-[10px] font-black uppercase tracking-[0.15em] text-muted-foreground/60">Comissão</th>
+                        <th className="text-right px-8 py-4 text-[10px] font-black uppercase tracking-[0.15em] text-muted-foreground/60">Afiliados</th>
+                        <th className="text-right px-8 py-4 text-[10px] font-black uppercase tracking-[0.15em] text-muted-foreground/60">Vendas</th>
+                        <th className="text-right px-8 py-4 text-[10px] font-black uppercase tracking-[0.15em] text-muted-foreground/60">Receita</th>
                       </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
-            </div>
-          )}
-        </div>
-      )}
+                    </thead>
+                    <tbody className="divide-y divide-border/30">
+                      {affiliateProducts.map((p) => {
+                        const pLinks = productLinks.filter(l => l.product_id === p.id).length;
+                        const pSales = productSales.filter(s => s.product_id === p.id);
+                        return (
+                          <tr key={p.id} className="group hover:bg-muted/30 transition-all cursor-pointer">
+                            <td className="px-8 py-4">
+                              <div className="flex items-center gap-3">
+                                {p.image_url ? (
+                                  <img src={p.image_url} alt="" className="h-10 w-10 rounded-xl object-cover ring-1 ring-border/30" />
+                                ) : (
+                                  <div className="h-10 w-10 rounded-xl bg-muted/40 flex items-center justify-center">
+                                    <ShoppingCart className="h-5 w-5 text-muted-foreground/60" />
+                                  </div>
+                                )}
+                                <span className="text-sm font-black">{p.name}</span>
+                              </div>
+                            </td>
+                            <td className="px-8 py-4 text-right text-sm font-bold text-muted-foreground tabular-nums">{fmt(Number(p.price))}</td>
+                            <td className="px-8 py-4 text-right">
+                              <span className="text-[10px] font-black text-success bg-success/10 px-2.5 py-1 rounded-lg border border-success/20 tabular-nums uppercase">
+                                {(p as any).affiliate_commission || 30}%
+                              </span>
+                            </td>
+                            <td className="px-8 py-4 text-right text-sm font-black text-foreground tabular-nums">{pLinks}</td>
+                            <td className="px-8 py-4 text-right text-sm font-black text-foreground tabular-nums">{pSales.length}</td>
+                            <td className="px-8 py-4 text-right text-sm font-black text-foreground tabular-nums">
+                              {fmt(pSales.reduce((a, s) => a + s.sale_amount, 0))}
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </CardContent>
+          </Card>
 
       {/* ═══ AFFILIATE OF TAB ═══ */}
       {tab === "affiliate-of" && (
