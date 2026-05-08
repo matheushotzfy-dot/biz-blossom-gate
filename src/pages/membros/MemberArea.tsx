@@ -483,20 +483,25 @@ function RankedRow({ title, courses }: { title: string; courses: PurchaseRow[] }
 
   return (
     <section className="group/row">
-      <div className="flex items-center justify-between mb-5 px-5 sm:px-10 lg:px-14">
-        <div className="flex items-center gap-3.5">
-          <div className="flex h-11 w-11 items-center justify-center rounded-xl border border-warning/25 bg-warning/10 text-warning">
+      <div className="flex items-center justify-between mb-8 px-6 sm:px-10 lg:px-16">
+        <div className="flex items-center gap-4">
+          <div className="flex h-12 w-12 items-center justify-center rounded-[1rem] border border-warning/25 bg-warning/10 text-warning shadow-lg transition-transform group-hover/row:scale-110 duration-500">
             <Star className="h-6 w-6 fill-current" />
           </div>
-          <h3 className="font-display text-2xl sm:text-3xl font-black tracking-[-0.03em] text-foreground leading-none">
-            {title}
-          </h3>
+          <div>
+            <h3 className="font-display text-2xl sm:text-3xl font-black tracking-[-0.04em] text-foreground leading-none">
+              {title}
+            </h3>
+            <p className="mt-1.5 text-[10px] font-black text-muted-foreground/50 uppercase tracking-[0.15em]">
+              Os títulos mais assistidos da sua coleção
+            </p>
+          </div>
         </div>
-        <div className="hidden md:flex items-center gap-2 opacity-0 group-hover/row:opacity-100 transition-opacity">
-          <button onClick={() => scroll("left")} className="flex h-10 w-10 items-center justify-center rounded-xl border border-border bg-card/60 text-foreground hover:bg-card transition-all active:scale-95">
+        <div className="hidden md:flex items-center gap-2.5 opacity-0 group-hover/row:opacity-100 transition-all duration-500 translate-x-4 group-hover/row:translate-x-0">
+          <button onClick={() => scroll("left")} className="flex h-11 w-11 items-center justify-center rounded-xl border border-border/40 bg-secondary/30 text-foreground hover:bg-foreground hover:text-background transition-all active:scale-90">
             <ChevronLeft className="h-5 w-5" />
           </button>
-          <button onClick={() => scroll("right")} className="flex h-10 w-10 items-center justify-center rounded-xl border border-border bg-card/60 text-foreground hover:bg-card transition-all active:scale-95">
+          <button onClick={() => scroll("right")} className="flex h-11 w-11 items-center justify-center rounded-xl border border-border/40 bg-secondary/30 text-foreground hover:bg-foreground hover:text-background transition-all active:scale-90">
             <ChevronRight className="h-5 w-5" />
           </button>
         </div>
@@ -504,45 +509,55 @@ function RankedRow({ title, courses }: { title: string; courses: PurchaseRow[] }
 
       <div
         ref={scrollRef}
-        className="flex gap-3 overflow-x-auto px-5 sm:px-10 lg:px-14 pb-6 scrollbar-none scroll-smooth snap-x"
+        className="flex gap-4 overflow-x-auto px-6 sm:px-10 lg:px-16 pb-12 scrollbar-none scroll-smooth snap-x"
       >
         {courses.slice(0, 10).map((c, i) => (
           <Link
             key={c.id}
             to={`/membros/curso/${c.id}`}
-            className="group/rank relative shrink-0 flex items-end snap-start"
+            className="group/rank relative shrink-0 flex items-end snap-start pb-4"
           >
-            {/* Giant rank number */}
+            {/* Giant rank number with premium style */}
             <span
-              className="font-display font-black text-foreground/15 leading-[0.8] tracking-[-0.08em] select-none pointer-events-none [-webkit-text-stroke:2px_hsl(var(--foreground)/0.3)]"
-              style={{ fontSize: "clamp(140px, 18vw, 240px)" }}
+              className="font-display font-black text-transparent leading-[0.8] tracking-[-0.1em] select-none pointer-events-none drop-shadow-[0_20px_50px_rgba(0,0,0,0.3)] transition-all duration-700 group-hover/rank:scale-110 group-hover/rank:translate-y-[-10px]"
+              style={{ 
+                fontSize: "clamp(160px, 20vw, 280px)",
+                WebkitTextStroke: "2px hsl(var(--foreground) / 0.1)",
+                backgroundImage: "linear-gradient(to bottom, hsl(var(--foreground)/0.15), transparent)",
+                backgroundClip: "text",
+                WebkitBackgroundClip: "text"
+              }}
             >
               {i + 1}
             </span>
             {/* Poster */}
-            <div className="relative -ml-6 sm:-ml-8 aspect-[2/3] w-[140px] sm:w-[170px] lg:w-[190px] overflow-hidden rounded-xl border border-border bg-muted shadow-2xl transition-all duration-300 group-hover/rank:scale-[1.05] group-hover/rank:border-primary/40">
+            <div className="relative -ml-10 sm:-ml-14 aspect-[2/3] w-[150px] sm:w-[190px] lg:w-[220px] overflow-hidden rounded-2xl border border-border/40 bg-muted shadow-[0_30px_60px_-15px_rgba(0,0,0,0.5)] transition-all duration-700 ease-[0.16,1,0.3,1] group-hover/rank:scale-[1.08] group-hover/rank:border-primary/40 group-hover/rank:translate-y-[-15px] group-hover/rank:shadow-[0_40px_80px_-20px_rgba(var(--primary),0.3)]">
               {c.thumbnail_url ? (
-                <img src={c.thumbnail_url} alt={c.title} className="h-full w-full object-cover" />
+                <img src={c.thumbnail_url} alt={c.title} className="h-full w-full object-cover transition-transform duration-1000 group-hover/rank:scale-110" />
               ) : (
-                <div className="h-full w-full flex items-center justify-center bg-gradient-to-br from-primary/20 to-card">
-                  <BookOpen className="h-10 w-10 text-muted-foreground/30" />
+                <div className="h-full w-full flex items-center justify-center bg-gradient-to-br from-primary/10 via-secondary/10 to-background">
+                  <BookOpen className="h-10 w-10 text-muted-foreground/20" strokeWidth={1} />
                 </div>
               )}
-              <div className="absolute inset-0 bg-gradient-to-t from-background/95 via-background/20 to-transparent opacity-0 group-hover/rank:opacity-100 transition-opacity duration-300" />
-              <div className="absolute inset-x-0 bottom-0 p-3 translate-y-2 opacity-0 group-hover/rank:opacity-100 group-hover/rank:translate-y-0 transition-all duration-300">
-                <p className="text-xs font-black text-foreground line-clamp-2">{c.title}</p>
+              <div className="absolute inset-0 bg-gradient-to-t from-background via-background/20 to-transparent opacity-60 group-hover/rank:opacity-100 transition-opacity duration-500" />
+              
+              <div className="absolute inset-x-0 bottom-0 p-5 translate-y-4 opacity-0 group-hover/rank:opacity-100 group-hover/rank:translate-y-0 transition-all duration-700 ease-[0.16,1,0.3,1]">
+                <p className="text-sm font-black text-foreground line-clamp-2 drop-shadow-lg leading-tight">{c.title}</p>
+                <div className="mt-3 flex items-center gap-2">
+                  <div className="h-1 w-full bg-white/10 rounded-full overflow-hidden">
+                    <div className="h-full bg-primary" style={{ width: `${Math.round((c.completedLessons / (c.totalLessons || 1)) * 100)}%` }} />
+                  </div>
+                </div>
               </div>
             </div>
           </Link>
         ))}
+        <div className="shrink-0 w-20 h-1" />
       </div>
     </section>
   );
 }
 
-/* ─────────────────────────────────────────────────────────
- * NETFLIX CARD — poster com hover-zoom premium
- * ───────────────────────────────────────────────────────── */
 function NetflixCard({ course }: { course: PurchaseRow }) {
   const pct = course.totalLessons > 0 ? Math.round((course.completedLessons / course.totalLessons) * 100) : 0;
   const isFinished = pct === 100 && course.totalLessons > 0;
@@ -550,76 +565,79 @@ function NetflixCard({ course }: { course: PurchaseRow }) {
   return (
     <Link
       to={`/membros/curso/${course.id}`}
-      className="group/card relative shrink-0 w-[300px] sm:w-[340px] lg:w-[360px] snap-start"
+      className="group/card relative block w-[320px] sm:w-[380px] lg:w-[420px]"
     >
-      {/* Poster */}
-      <div className="relative aspect-[16/10] w-full overflow-hidden rounded-2xl border border-border bg-muted shadow-lg transition-all duration-500 group-hover/card:scale-[1.05] group-hover/card:border-primary/40 group-hover/card:shadow-2xl group-hover/card:z-10">
+      <div className="relative aspect-[16/9] w-full overflow-hidden rounded-2xl border border-border/40 bg-secondary/10 shadow-lg transition-all duration-700 ease-[0.16,1,0.3,1] group-hover/card:scale-[1.05] group-hover/card:border-primary/40 group-hover/card:shadow-[0_40px_80px_-20px_rgba(0,0,0,0.6)] group-hover/card:z-20">
         {course.thumbnail_url ? (
           <img
             src={course.thumbnail_url}
             alt={course.title}
-            className="h-full w-full object-cover transition-transform duration-700 group-hover/card:scale-110"
+            className="h-full w-full object-cover transition-all duration-1000 group-hover/card:scale-110 group-hover/card:brightness-110"
           />
         ) : (
-          <div className="h-full w-full flex items-center justify-center bg-gradient-to-br from-primary/20 to-card">
-            <BookOpen className="h-14 w-14 text-muted-foreground/30" strokeWidth={1.2} />
+          <div className="h-full w-full flex items-center justify-center bg-gradient-to-br from-primary/5 via-secondary/10 to-background">
+            <BookOpen className="h-16 w-16 text-muted-foreground/10" strokeWidth={0.8} />
           </div>
         )}
 
-        {/* Top-left status badge */}
-        <div className="absolute top-3 left-3 z-10">
+        {/* Floating status badge */}
+        <div className="absolute top-4 left-4 z-10 transition-transform duration-500 group-hover/card:scale-110">
           {isFinished ? (
-            <span className="inline-flex items-center gap-1 rounded-md border border-success/30 bg-success/95 backdrop-blur-sm px-2 py-1 text-[10px] font-black uppercase tracking-wider text-success-foreground">
-              <Trophy className="h-3 w-3" /> Concluído
-            </span>
+            <div className="inline-flex items-center gap-2 rounded-lg bg-success px-3 py-1.5 text-[10px] font-black uppercase tracking-widest text-success-foreground shadow-lg">
+              <Trophy className="h-3.5 w-3.5" /> Concluído
+            </div>
           ) : pct > 0 ? (
-            <span className="inline-flex items-center gap-1 rounded-md border border-warning/30 bg-warning/95 backdrop-blur-sm px-2 py-1 text-[10px] font-black uppercase tracking-wider text-warning-foreground">
-              <Clock className="h-3 w-3" /> {pct}%
-            </span>
-          ) : course.accessStatus === "active" ? (
-            <span className="inline-flex items-center gap-1 rounded-md border border-info/30 bg-info/95 backdrop-blur-sm px-2 py-1 text-[10px] font-black uppercase tracking-wider text-info-foreground">
-              <Sparkles className="h-3 w-3" /> Novo
-            </span>
-          ) : null}
+            <div className="inline-flex items-center gap-2 rounded-lg bg-warning px-3 py-1.5 text-[10px] font-black uppercase tracking-widest text-warning-foreground shadow-lg">
+              <Clock className="h-3.5 w-3.5" /> {pct}%
+            </div>
+          ) : (
+            <div className="inline-flex items-center gap-2 rounded-lg bg-primary/90 backdrop-blur-md px-3 py-1.5 text-[10px] font-black uppercase tracking-widest text-primary-foreground shadow-lg">
+              <Sparkles className="h-3.5 w-3.5" /> Novo
+            </div>
+          )}
         </div>
 
-        {/* Hover overlay */}
-        <div className="absolute inset-0 bg-gradient-to-t from-background/95 via-background/30 to-transparent opacity-0 group-hover/card:opacity-100 transition-opacity duration-300" />
+        {/* Hover overlay with gradients */}
+        <div className="absolute inset-0 bg-gradient-to-t from-background via-transparent to-transparent opacity-80 group-hover/card:opacity-100 transition-opacity duration-500" />
+        <div className="absolute inset-0 bg-gradient-to-r from-background/40 via-transparent to-transparent opacity-0 group-hover/card:opacity-100 transition-opacity duration-700" />
 
-        {/* Center play button */}
-        <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover/card:opacity-100 transition-all duration-300 scale-90 group-hover/card:scale-100">
-          <div className="flex h-16 w-16 items-center justify-center rounded-full bg-foreground/95 backdrop-blur-sm border-2 border-foreground/20 shadow-2xl">
-            <Play className="h-7 w-7 fill-current text-background ml-0.5" />
+        {/* Cinematic play button */}
+        <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover/card:opacity-100 transition-all duration-700 scale-75 group-hover/card:scale-100">
+          <div className="flex h-20 w-20 items-center justify-center rounded-full bg-foreground text-background shadow-[0_0_50px_rgba(var(--foreground),0.3)] transition-transform hover:scale-110">
+            <Play className="h-9 w-9 fill-current ml-1" />
           </div>
         </div>
 
-        {/* Bottom progress bar */}
+        {/* Bottom progress bar — sleek */}
         {pct > 0 && (
-          <div className="absolute bottom-0 left-0 right-0 h-1 bg-background/40">
-            <div
-              className={cn("h-full", isFinished ? "bg-success" : "bg-primary")}
-              style={{ width: `${pct}%` }}
+          <div className="absolute bottom-0 left-0 right-0 h-1.5 bg-white/10 backdrop-blur-sm overflow-hidden">
+            <motion.div
+              initial={{ width: 0 }}
+              whileInView={{ width: `${pct}%` }}
+              transition={{ duration: 1.2, ease: "circOut" }}
+              className={cn("h-full", isFinished ? "bg-success shadow-[0_0_10px_rgba(var(--success),0.5)]" : "bg-primary shadow-[0_0_10px_rgba(var(--primary),0.5)]")}
             />
           </div>
         )}
       </div>
 
-      {/* Card info below */}
-      <div className="mt-3.5 px-1">
-        <h4 className="font-display text-base font-black tracking-tight text-foreground line-clamp-1 group-hover/card:text-primary transition-colors">
+      {/* Info below card */}
+      <div className="mt-6 px-1 transition-all duration-500 group-hover/card:translate-x-2">
+        <h4 className="font-display text-lg lg:text-xl font-black tracking-[-0.03em] text-foreground line-clamp-1 group-hover/card:text-primary transition-colors">
           {course.title}
         </h4>
-        <div className="mt-1.5 flex items-center gap-2 text-[11px] text-muted-foreground">
-          <span className="capitalize font-bold">{course.category}</span>
-          <span className="h-0.5 w-0.5 rounded-full bg-muted-foreground/40" />
-          <span className="tabular-nums font-medium">{course.totalLessons} aulas</span>
-          {course.completedLessons > 0 && !isFinished && (
-            <>
-              <span className="h-0.5 w-0.5 rounded-full bg-muted-foreground/40" />
-              <span className="text-primary font-black tabular-nums">{course.completedLessons}/{course.totalLessons}</span>
-            </>
-          )}
+        <div className="mt-2.5 flex items-center gap-3">
+          <span className="text-[10px] font-black uppercase tracking-widest text-primary/80 bg-primary/5 px-2 py-0.5 rounded border border-primary/10 transition-colors group-hover/card:bg-primary group-hover/card:text-primary-foreground">
+            {course.category}
+          </span>
+          <span className="h-1 w-1 rounded-full bg-border" />
+          <span className="text-[11px] font-black tabular-nums text-muted-foreground/60">{course.totalLessons} aulas exclusivas</span>
         </div>
+        {course.description && (
+          <p className="mt-3 text-xs text-muted-foreground/50 line-clamp-2 leading-relaxed font-medium transition-opacity group-hover/card:opacity-100 opacity-60">
+            {course.description}
+          </p>
+        )}
       </div>
     </Link>
   );
