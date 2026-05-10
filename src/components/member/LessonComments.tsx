@@ -138,31 +138,31 @@ export function LessonComments({ lessonId, currentUserId }: { lessonId: string; 
       </div>
 
       {/* New comment box */}
-      <div className="p-5 sm:p-6 border-b border-border/8">
-        <div className="flex gap-3">
-          <div className="h-8 w-8 rounded-lg bg-primary/10 text-primary text-[10px] font-display font-black flex items-center justify-center shrink-0">
-            EU
+      <div className="p-10 border-b border-white/5 bg-white/[0.01]">
+        <div className="flex gap-6">
+          <div className="h-12 w-12 rounded-2xl bg-zinc-800 border border-white/5 text-zinc-400 text-xs font-black flex items-center justify-center shrink-0">
+            VOCÊ
           </div>
           <div className="flex-1">
             <textarea
               value={content}
               onChange={(e) => setContent(e.target.value)}
-              placeholder="Tire uma dúvida ou compartilhe um insight…"
-              rows={2}
-              className="w-full bg-foreground/[0.03] border border-border/10 rounded-lg px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground/30 font-display focus:outline-none focus:border-primary/30 resize-none"
+              placeholder="Alguma dúvida sobre o conteúdo desta aula? Pergunte aqui..."
+              rows={3}
+              className="w-full bg-black border border-white/10 rounded-2xl px-6 py-4 text-[15px] text-zinc-100 placeholder:text-zinc-700 font-medium focus:outline-none focus:border-emerald-500/50 resize-none transition-all"
             />
-            <div className="flex items-center justify-between mt-2">
-              <span className="text-[10px] text-muted-foreground/30 font-display tabular-nums">
-                {content.length}/2000
+            <div className="flex items-center justify-between mt-4">
+              <span className="text-[10px] text-zinc-700 font-mono font-bold tracking-widest">
+                {content.length} / 2000
               </span>
               <button
                 onClick={() => submit(null, content)}
                 disabled={submitting || content.trim().length < 1}
                 className={cn(
-                  "flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-display font-bold transition-all active:scale-95",
+                  "flex items-center gap-2.5 px-8 py-3 rounded-xl text-sm font-black transition-all active:scale-95",
                   content.trim().length < 1
-                    ? "bg-foreground/5 text-muted-foreground/30 cursor-not-allowed"
-                    : "bg-foreground text-background hover:bg-foreground/90",
+                    ? "bg-zinc-800 text-zinc-600 cursor-not-allowed"
+                    : "bg-white text-black hover:bg-zinc-200",
                 )}
               >
                 {submitting ? <Loader2 className="h-3 w-3 animate-spin" /> : <Send className="h-3 w-3" />}
