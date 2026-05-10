@@ -7,9 +7,11 @@ import { useEffect, useState } from "react";
 import { Outlet, useNavigate, Link, useLocation } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import type { User } from "@supabase/supabase-js";
-import { LogOut } from "lucide-react";
+import { LogOut, Search, Settings } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
+import { MemberSidebar } from "@/components/member/MemberSidebar";
+
 
 export default function MemberLayout() {
   const navigate = useNavigate();
@@ -94,81 +96,85 @@ export default function MemberLayout() {
   const initial = user?.email?.charAt(0).toUpperCase() || "U";
   const displayName = user?.email?.split("@")[0] || "Membro";
 
+
   return (
-    <div className="min-h-dvh bg-[#050505] text-zinc-100 font-display antialiased selection:bg-emerald-500/30">
-      {/* Floating cinematic nav */}
-      <nav className={cn(
-        "fixed top-0 left-0 right-0 z-50 transition-all duration-700",
-        scrolled || isCourse
-          ? "bg-[#050505]/85 backdrop-blur-2xl border-b border-white/[0.03] py-2"
-          : "bg-gradient-to-b from-black/80 via-black/40 to-transparent py-4"
-      )}>
-        <div className="px-6 lg:px-16 h-16 flex items-center justify-between gap-4 max-w-[1800px] mx-auto">
-          {/* Logo — Hotzfy Premium */}
-          <Link to="/membros-area" className="flex items-center gap-3 shrink-0 group">
-            <div className="h-10 w-10 rounded-lg bg-white text-[#050505] flex items-center justify-center font-black text-xl tracking-tighter transition-transform group-hover:scale-110">
-              H
+    <div className="min-h-dvh bg-[#050505] text-zinc-100 font-display antialiased selection:bg-emerald-500/30 flex">
+      {!isCourse && <MemberSidebar />}
+
+      <div className="flex-1 flex flex-col min-h-screen relative overflow-x-hidden">
+        {/* Top cinematic bar — only shows when not in course player (which has its own header) */}
+        {!isCourse && (
+          <header className={cn(
+            "h-20 shrink-0 flex items-center justify-between px-6 lg:px-10 z-40 transition-all duration-500 sticky top-0",
+            scrolled ? "bg-[#050505]/80 backdrop-blur-2xl border-b border-white/[0.05]" : "bg-transparent"
+          )}>
+            <div className="flex-1 max-w-2xl relative group hidden md:block">
+              <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-500 transition-colors group-focus-within:text-primary" />
+              <input 
+                type="text" 
+                placeholder="Pesquisar por cursos, aulas ou materiais..."
+                className="w-full h-11 bg-white/[0.03] border border-white/5 rounded-xl pl-12 pr-4 text-sm font-medium text-white placeholder:text-zinc-600 focus:outline-none focus:border-primary/50 transition-all focus:bg-white/[0.05]"
+              />
             </div>
-            <span className="font-display font-black tracking-[-0.04em] text-white text-lg lg:text-xl uppercase">
-              Hotzfy <span className="text-zinc-500 font-medium">Members</span>
-            </span>
-          </Link>
 
-          {/* Right: avatar only */}
-          <div className="flex items-center gap-3">
-            {/* Profile */}
-            <div className="relative">
-              <button
-                onClick={(e) => { e.stopPropagation(); setProfileOpen(!profileOpen); }}
-                className="h-9 w-9 rounded-full bg-zinc-900 border border-white/10 hover:border-emerald-500/40 flex items-center justify-center font-display text-sm font-semibold text-zinc-200 transition-colors"
-              >
-                {initial}
-              </button>
+            <div className="flex items-center gap-6 ml-auto">
+              <div className="hidden sm:flex flex-col items-end">
+                <p className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-600">Pontos XP</p>
+                <p className="text-sm font-black text-emerald-400 tabular-nums">{stats.xp.toLocaleString("pt-BR")}</p>
+              </div>
+              <div className="h-10 w-px bg-white/5 hidden sm:block" />
+              <div className="flex items-center gap-4">
+                <div className="flex flex-col items-end hidden xs:flex">
+                  <p className="text-[12px] font-black text-white leading-none">{displayName}</p>
+                  <p className="text-[10px] text-zinc-500 mt-1 uppercase tracking-widest font-bold">Membro Premium</p>
+                </div>
+                <button
+                  onClick={(e) => { e.stopPropagation(); setProfileOpen(!profileOpen); }}
+                  className="h-10 w-10 rounded-xl bg-zinc-900 border border-white/10 flex items-center justify-center font-bold text-sm text-zinc-200 hover:border-primary/40 transition-all relative"
+                >
+                  {initial}
+                  <div className="absolute -top-1 -right-1 h-3 w-3 rounded-full bg-emerald-500 border-2 border-[#050505] shadow-[0_0_10px_rgba(16,185,129,0.5)]" />
+                </button>
+              </div>
+            </div>
 
-              <AnimatePresence>
-                {profileOpen && (
-                  <motion.div
-                    initial={{ opacity: 0, y: 6, scale: 0.97 }}
-                    animate={{ opacity: 1, y: 0, scale: 1 }}
-                    exit={{ opacity: 0, y: 6, scale: 0.97 }}
-                    transition={{ duration: 0.18, ease: [0.16, 1, 0.3, 1] }}
-                    onClick={(e) => e.stopPropagation()}
-                    className="absolute right-0 top-[calc(100%+10px)] w-72 rounded-sm bg-[#0c0c0c] border border-white/10 overflow-hidden"
-                  >
-                    <div className="p-5 border-b border-white/5">
-                      <p className="text-[10px] uppercase tracking-[0.18em] text-zinc-500 font-bold mb-1">Conectado como</p>
-                      <p className="font-display font-semibold text-zinc-100 truncate">{displayName}</p>
-                      <p className="text-xs text-zinc-500 truncate mt-0.5">{user?.email}</p>
-                    </div>
-                    <div className="p-3 grid grid-cols-2 gap-3 border-b border-white/5">
-                      <div>
-                        <p className="text-[9px] uppercase tracking-[0.18em] text-zinc-600 font-bold">XP</p>
-                        <p className="font-mono text-emerald-400 tabular-nums text-sm mt-1">{stats.xp.toLocaleString("pt-BR")}</p>
-                      </div>
-                      <div>
-                        <p className="text-[9px] uppercase tracking-[0.18em] text-zinc-600 font-bold">Streak</p>
-                        <p className="font-mono text-orange-400 tabular-nums text-sm mt-1">{stats.streak}d</p>
-                      </div>
-                    </div>
+            <AnimatePresence>
+              {profileOpen && (
+                <motion.div
+                  initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                  className="absolute right-10 top-24 w-72 rounded-2xl bg-[#0c0c0c] border border-white/10 shadow-2xl overflow-hidden z-50 p-2"
+                  onClick={e => e.stopPropagation()}
+                >
+                  <div className="p-4 border-b border-white/5">
+                    <p className="text-[10px] uppercase tracking-[0.18em] text-zinc-500 font-black mb-1">Conta Hotzfy</p>
+                    <p className="font-bold text-white truncate">{displayName}</p>
+                  </div>
+                  <div className="py-2">
+                    <button className="w-full flex items-center gap-3 px-4 py-3 hover:bg-white/5 rounded-xl transition-colors text-zinc-400 hover:text-white">
+                      <Settings className="h-4 w-4" />
+                      <span className="text-[13px] font-bold">Configurações</span>
+                    </button>
                     <button
                       onClick={handleLogout}
-                      className="flex items-center gap-3 w-full px-5 py-3 hover:bg-white/5 transition-colors text-left"
+                      className="w-full flex items-center gap-3 px-4 py-3 hover:bg-red-400/5 rounded-xl transition-colors text-zinc-400 hover:text-red-400"
                     >
-                      <LogOut className="h-4 w-4 text-zinc-500" />
-                      <span className="text-sm font-medium text-zinc-300">Sair</span>
+                      <LogOut className="h-4 w-4" />
+                      <span className="text-[13px] font-bold">Sair da conta</span>
                     </button>
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </div>
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </header>
+        )}
 
-          </div>
-        </div>
-      </nav>
-
-      <main className={cn(isCourse ? "pt-0" : "")}>
-        <Outlet context={{ user }} />
-      </main>
+        <main className={cn("flex-1", !isCourse && "px-6 lg:px-10 pb-20")}>
+          <Outlet context={{ user }} />
+        </main>
+      </div>
     </div>
   );
 }
+

@@ -1,12 +1,25 @@
-/**
- * MemberHome — Netflix Premium Experience
- * Full-bleed cinematic hero, horizontal snap rails, immersive thumbnails.
- */
 import { useEffect, useMemo, useState, useRef } from "react";
 import { useOutletContext, Link } from "react-router-dom";
 import type { User } from "@supabase/supabase-js";
-import { Play, ArrowUpRight, Award, BookOpen, ChevronRight, ChevronLeft, Star, Users, Trophy, Flame, Clock, Info, GraduationCap, PlayCircle, CheckCircle2, Search } from "lucide-react";
-import { motion, AnimatePresence } from "framer-motion";
+import { 
+  Play, 
+  Award, 
+  BookOpen, 
+  ChevronRight, 
+  ChevronLeft, 
+  Trophy, 
+  Flame, 
+  GraduationCap, 
+  PlayCircle, 
+  Clock, 
+  Sparkles,
+  ArrowRight,
+  Bookmark,
+  TrendingUp,
+  LayoutGrid,
+  List,
+} from "lucide-react";
+import { motion } from "framer-motion";
 import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
 
@@ -27,15 +40,14 @@ type Course = {
 
 type Cert = { id: string; code: string; course_title: string; issued_at: string };
 
-const ease = [0.16, 1, 0.3, 1] as const;
-
 export default function MemberHome() {
   const { user } = useOutletContext<{ user: User }>();
   const [courses, setCourses] = useState<Course[]>([]);
   const [certs, setCerts] = useState<Cert[]>([]);
   const [loading, setLoading] = useState(true);
+  const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
 
-  useEffect(() => { if (user) load(); /* eslint-disable-next-line */ }, [user]);
+  useEffect(() => { if (user) load(); }, [user]);
 
   async function load() {
     if (!user) return;
@@ -85,7 +97,7 @@ export default function MemberHome() {
         title: c.title,
         description: c.description,
         thumbnail_url: c.thumbnail_url,
-        category: c.category || "geral",
+        category: c.category || "Geral",
         totalLessons: allLessons.length,
         completedLessons: completed,
         lastLessonId: lastLesson?.id || null,
@@ -103,7 +115,7 @@ export default function MemberHome() {
       .select("id, code, course_title, issued_at")
       .eq("user_id", user.id)
       .order("issued_at", { ascending: false })
-      .limit(10);
+      .limit(5);
     setCerts((certData || []) as Cert[]);
 
     setLoading(false);
@@ -113,419 +125,325 @@ export default function MemberHome() {
     const h = new Date().getHours();
     return h < 12 ? "Bom dia" : h < 18 ? "Boa tarde" : "Boa noite";
   }, []);
+  
   const displayName = user?.email?.split("@")[0] || "Aluno";
 
   const continueWatching = courses
     .filter(c => c.completedLessons > 0 && c.completedLessons < c.totalLessons)
     .sort((a, b) => b.lastActivityAt - a.lastActivityAt);
+  
   const fresh = courses.filter(c => c.completedLessons === 0);
   const completed = courses.filter(c => c.totalLessons > 0 && c.completedLessons === c.totalLessons);
-  const featured = continueWatching[0] || fresh[0] || courses[0] || null;
+  const featured = continueWatching[0] || fresh[0] || null;
+
   const totalLessons = courses.reduce((a, c) => a + c.totalLessons, 0);
   const totalCompleted = courses.reduce((a, c) => a + c.completedLessons, 0);
 
   if (loading) {
     return (
-      <div className="min-h-dvh flex items-center justify-center bg-background">
-        <div className="flex flex-col items-center gap-6">
-          <motion.div 
-            animate={{ scale: [1, 1.1, 1], opacity: [0.5, 1, 0.5] }} 
-            transition={{ duration: 2, repeat: Infinity }}
-            className="h-20 w-20 rounded-2xl bg-white flex items-center justify-center shadow-[0_0_50px_rgba(255,255,255,0.1)]"
-          >
-            <Play className="h-10 w-10 text-black fill-current ml-1.5" />
-          </motion.div>
-          <div className="h-1 w-48 bg-white/10 overflow-hidden rounded-full">
-            <motion.div 
-              className="h-full w-full bg-white" 
-              animate={{ x: ["-100%", "100%"] }} 
-              transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }} 
-            />
+      <div className="h-[80vh] flex items-center justify-center">
+        <div className="flex flex-col items-center gap-4">
+          <div className="h-12 w-12 rounded-xl border border-primary/20 bg-primary/5 flex items-center justify-center animate-pulse">
+            <PlayCircle className="h-6 w-6 text-primary" />
           </div>
+          <p className="text-sm font-black text-zinc-500 uppercase tracking-widest">Preparando seu dashboard...</p>
         </div>
-      </div>
-    );
-  }
-
-  if (courses.length === 0) {
-    return (
-      <div className="min-h-dvh flex flex-col items-center justify-center px-6 text-center bg-background text-foreground">
-        <div className="h-24 w-24 rounded-3xl bg-zinc-900 border border-white/5 flex items-center justify-center mb-10 shadow-2xl">
-          <BookOpen className="h-10 w-10 text-zinc-700" />
-        </div>
-        <p className="text-[10px] uppercase tracking-[0.3em] text-zinc-500 font-black mb-4">{greeting}, {displayName}</p>
-        <h2 className="font-display text-4xl md:text-5xl font-black tracking-[-0.05em] text-white mb-6">Sua biblioteca está vazia</h2>
-        <p className="text-zinc-500 max-w-sm leading-relaxed font-medium">Quando você adquirir um conteúdo, ele aparecerá aqui com acesso imediato e experiência premium.</p>
       </div>
     );
   }
 
   return (
-    <div className="bg-background text-foreground antialiased selection:bg-primary/30 overflow-x-hidden">
-      {/* ═══ HERO — Cinematic 4K Experience ═══ */}
+    <div className="max-w-[1600px] mx-auto py-10 space-y-12">
+      {/* ═══ Header Section ═══ */}
+      <section>
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
+          <div>
+            <p className="text-[10px] font-black uppercase tracking-[0.3em] text-primary mb-2 flex items-center gap-2">
+              <Sparkles className="h-3 w-3" />
+              Bem-vindo de volta
+            </p>
+            <h1 className="text-4xl md:text-5xl font-black tracking-tighter text-white">
+              {greeting}, <span className="text-zinc-400">{displayName}</span>
+            </h1>
+          </div>
+          <div className="flex items-center gap-4 bg-white/[0.03] border border-white/5 p-2 rounded-2xl">
+            <button 
+              onClick={() => setViewMode("grid")}
+              className={cn("p-2 rounded-xl transition-all", viewMode === "grid" ? "bg-primary text-primary-foreground shadow-lg" : "text-zinc-500 hover:text-white")}
+            >
+              <LayoutGrid className="h-5 w-5" />
+            </button>
+            <button 
+              onClick={() => setViewMode("list")}
+              className={cn("p-2 rounded-xl transition-all", viewMode === "list" ? "bg-primary text-primary-foreground shadow-lg" : "text-zinc-500 hover:text-white")}
+            >
+              <List className="h-5 w-5" />
+            </button>
+          </div>
+        </div>
+
+        {/* Quick Stats Grid */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mt-10">
+          <StatCard label="Cursos Ativos" value={courses.length} icon={BookOpen} color="text-primary" />
+          <StatCard label="Aulas Concluídas" value={totalCompleted} subValue={`de ${totalLessons}`} icon={PlayCircle} color="text-emerald-400" />
+          <StatCard label="Certificados" value={certs.length} icon={Award} color="text-orange-400" />
+          <StatCard label="Nível de Foco" value="Pro" icon={Trophy} color="text-purple-400" />
+        </div>
+      </section>
+
+      {/* ═══ Featured / Continue Watching ═══ */}
       {featured && (
-        <section className="relative h-[92dvh] w-full overflow-hidden">
-          {/* Main Background with Parallax-like scale */}
-          <div className="absolute inset-0 z-0">
-            {featured.thumbnail_url ? (
-              <motion.img
-                src={featured.thumbnail_url}
-                alt=""
-                className="w-full h-full object-cover"
-                initial={{ scale: 1.15, opacity: 0 }}
-                animate={{ scale: 1, opacity: 1 }}
-                transition={{ duration: 2.2, ease: [0.16, 1, 0.3, 1] }}
-              />
-            ) : (
-              <div className="w-full h-full bg-gradient-to-br from-background via-background/90 to-background/95" />
-            )}
-            
-            {/* Multi-layer Netflix-style gradients for depth */}
-            <div className="absolute inset-0 bg-gradient-to-r from-background via-background/80 to-transparent" />
-            <div className="absolute inset-0 bg-gradient-to-t from-background via-transparent to-transparent" />
-            <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_50%,rgba(16,185,129,0.08),transparent_50%)]" />
-            
-            {/* Fine grain overlay for texture */}
-            <div className="absolute inset-0 opacity-[0.03] pointer-events-none mix-blend-overlay" style={{ backgroundImage: `url('https://grainy-gradients.vercel.app/noise.svg')` }} />
+        <section>
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-xl font-black text-white flex items-center gap-3">
+              <Clock className="h-5 w-5 text-primary" />
+              Continue de onde parou
+            </h2>
+            <Link to="/membros-area/cursos" className="text-[11px] font-black uppercase tracking-widest text-zinc-500 hover:text-primary transition-colors flex items-center gap-2">
+              Ver todos <ArrowRight className="h-3 w-3" />
+            </Link>
           </div>
 
-          <div className="relative h-full container mx-auto px-6 lg:px-16 flex flex-col justify-end pb-28 max-w-[1800px]">
-            {/* Search Bar Floating */}
-            <div className="absolute top-10 right-16 z-20 hidden lg:block">
-               <div className="relative group">
-                 <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-500 transition-colors group-focus-within:text-emerald-500" />
-                 <input 
-                  type="text" 
-                  placeholder="O que você quer aprender hoje?"
-                  className="w-[320px] h-12 bg-black/40 backdrop-blur-3xl border border-white/10 rounded-xl pl-12 pr-4 text-xs font-bold text-white placeholder:text-zinc-600 focus:outline-none focus:border-emerald-500/50 transition-all focus:w-[400px]"
-                 />
-               </div>
-            </div>
-
-            <motion.div
-              initial={{ opacity: 0, y: 40 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 1, delay: 0.6, ease: [0.16, 1, 0.3, 1] }}
-              className="max-w-3xl"
-            >
-              {/* Premium Label */}
-              <div className="flex items-center gap-4 mb-8">
-                <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 border border-white/10 backdrop-blur-3xl">
-                  <div className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse shadow-[0_0_10px_rgba(52,211,153,1)]" />
-                  <span className="text-[10px] font-black uppercase tracking-[0.3em] text-white">
-                    {featured.completedLessons > 0 ? "Continuar Jornada" : "Destaque da Semana"}
-                  </span>
-                </div>
-                {featured.category && (
-                  <span className="text-[10px] text-emerald-500/60 uppercase tracking-[0.3em] font-black">
+          <div className="relative overflow-hidden rounded-[2.5rem] border border-white/5 bg-[#0a0a0a] group">
+            <div className="flex flex-col lg:flex-row min-h-[400px]">
+              {/* Image Side */}
+              <div className="lg:w-1/2 relative h-64 lg:h-auto overflow-hidden">
+                <img 
+                  src={featured.thumbnail_url || ""} 
+                  alt={featured.title} 
+                  className="absolute inset-0 w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105"
+                />
+                <div className="absolute inset-0 bg-gradient-to-r from-[#0a0a0a] via-transparent to-transparent hidden lg:block" />
+                <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a0a] via-transparent to-transparent lg:hidden" />
+              </div>
+              
+              {/* Content Side */}
+              <div className="lg:w-1/2 p-8 lg:p-14 flex flex-col justify-center">
+                <div className="flex items-center gap-3 mb-6">
+                  <span className="px-3 py-1 rounded-full bg-primary/10 border border-primary/20 text-[10px] font-black uppercase tracking-widest text-primary">
                     {featured.category}
                   </span>
-                )}
-              </div>
-
-              {/* Title — Ultra Display Typography */}
-              <h1 className="font-display text-[64px] md:text-[96px] lg:text-[120px] font-black tracking-[-0.07em] leading-[0.8] mb-10 text-white select-none drop-shadow-[0_20px_50px_rgba(0,0,0,1)]">
-                {featured.title}
-              </h1>
-
-              {/* Description */}
-              {featured.description && (
-                <p className="max-w-xl text-zinc-400 text-lg md:text-2xl leading-relaxed mb-12 line-clamp-2 font-medium tracking-tight">
-                  {featured.description}
+                  <span className="text-[10px] font-black uppercase tracking-widest text-zinc-600">
+                    {featured.moduleCount} Módulos
+                  </span>
+                </div>
+                
+                <h3 className="text-3xl md:text-5xl font-black tracking-tighter text-white mb-6">
+                  {featured.title}
+                </h3>
+                
+                <p className="text-zinc-500 text-lg mb-8 line-clamp-2 max-w-xl">
+                  {featured.description || "Continue sua jornada de aprendizado e alcance seus objetivos com este curso exclusivo."}
                 </p>
-              )}
 
-              {/* Action Suite */}
-              <div className="flex flex-wrap items-center gap-6">
-                <Link
-                  to={`/membros-area/curso/${featured.id}${featured.lastLessonId ? `?lesson=${featured.lastLessonId}` : ""}`}
-                  className="group relative flex items-center gap-5 px-14 py-6 bg-white text-black font-display font-black text-[18px] rounded-2xl transition-all duration-500 active:scale-[0.96] hover:bg-zinc-100 overflow-hidden shadow-[0_20px_40px_rgba(255,255,255,0.1)]"
-                >
-                  <Play className="h-7 w-7 fill-current" />
-                  <span>{featured.completedLessons > 0 ? "Assistir Agora" : "Iniciar Masterclass"}</span>
-                  <div className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-1000 bg-gradient-to-r from-transparent via-black/10 to-transparent" />
-                </Link>
+                <div className="space-y-6">
+                  <div className="space-y-2">
+                    <div className="flex justify-between text-[11px] font-black uppercase tracking-widest text-zinc-500">
+                      <span>Seu progresso</span>
+                      <span className="text-emerald-400">{Math.round((featured.completedLessons / featured.totalLessons) * 100)}%</span>
+                    </div>
+                    <div className="h-1.5 w-full bg-white/5 rounded-full overflow-hidden">
+                      <div 
+                        className="h-full bg-emerald-500 transition-all duration-1000" 
+                        style={{ width: `${(featured.completedLessons / featured.totalLessons) * 100}%` }} 
+                      />
+                    </div>
+                  </div>
 
-                <Link
-                  to={`/membros-area/curso/${featured.id}`}
-                  className="flex items-center gap-3 px-10 py-6 bg-zinc-900/40 text-white font-display font-black text-[17px] rounded-2xl hover:bg-zinc-800/60 transition-all duration-300 active:scale-[0.96] backdrop-blur-3xl border border-white/5"
-                >
-                  Ver Grade
-                </Link>
+                  <Link 
+                    to={`/membros-area/curso/${featured.id}${featured.lastLessonId ? `?lesson=${featured.lastLessonId}` : ""}`}
+                    className="inline-flex items-center gap-4 px-10 py-5 bg-white text-black rounded-2xl font-black text-lg transition-all hover:scale-[1.02] active:scale-[0.98] shadow-[0_20px_40px_rgba(255,255,255,0.1)]"
+                  >
+                    <Play className="h-6 w-6 fill-current" />
+                    Continuar Aula
+                  </Link>
+                </div>
               </div>
-            </motion.div>
+            </div>
           </div>
-          
-          {/* Bottom shadow blend */}
-          <div className="absolute bottom-0 left-0 right-0 h-40 bg-gradient-to-t from-[#050505] to-transparent z-[1]" />
         </section>
       )}
 
-      {/* ═══ RAILS — Immersive Experience ═══ */}
-      <main className="relative z-10 -mt-32 pb-40 space-y-24">
-        {continueWatching.length > 0 && (
-          <Rail title="Continue assistindo" courses={continueWatching} variant="wide" />
-        )}
+      {/* ═══ Main Library ═══ */}
+      <section className="space-y-8">
+        <div className="flex items-center justify-between">
+          <h2 className="text-2xl font-black text-white flex items-center gap-3">
+            <LayoutGrid className="h-6 w-6 text-primary" />
+            Minha Biblioteca
+          </h2>
+          <div className="flex items-center gap-3">
+            <span className="text-xs font-bold text-zinc-600">{courses.length} cursos</span>
+          </div>
+        </div>
 
-        {fresh.length > 0 && (
-          <Rail title="Adicionados recentemente" courses={fresh} variant="wide" />
+        {viewMode === "grid" ? (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+            {courses.map((course, idx) => (
+              <CourseCard key={course.id} course={course} index={idx} />
+            ))}
+          </div>
+        ) : (
+          <div className="space-y-4">
+            {courses.map((course, idx) => (
+              <CourseListRow key={course.id} course={course} index={idx} />
+            ))}
+          </div>
         )}
+      </section>
 
-        {courses.length > 0 && (
-          <Rail title="Sua Coleção Premium" subtitle={`${courses.length} títulos exclusivos`} courses={courses} variant="poster" />
-        )}
+      {/* ═══ Certifications ═══ */}
+      {certs.length > 0 && (
+        <section className="bg-white/[0.02] border border-white/5 rounded-[2.5rem] p-8 lg:p-12">
+          <div className="flex items-center justify-between mb-10">
+            <div>
+              <h2 className="text-2xl font-black text-white">Certificações</h2>
+              <p className="text-zinc-500 text-sm mt-1">Seu histórico de conquistas e domínio de habilidades</p>
+            </div>
+            <Award className="h-10 w-10 text-orange-400 opacity-20" />
+          </div>
 
-        {certs.length > 0 && (
-          <CertificationsRail certs={certs} />
-        )}
-
-        {completed.length > 0 && (
-          <Rail title="Domínio Completo" courses={completed} variant="wide" />
-        )}
-
-        {/* Global Stats Hub */}
-        <section className="container mx-auto px-6 lg:px-16 pt-24 border-t border-white/[0.03] max-w-[1800px]">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-12 opacity-30 hover:opacity-100 transition-all duration-1000">
-            <Stat label="Conteúdos Adquiridos" value={courses.length} icon={GraduationCap} />
-            <Stat label="Progresso Total" value={`${totalCompleted}/${totalLessons}`} icon={PlayCircle} />
-            <Stat label="Certificações" value={certs.length} icon={Award} />
-            <Stat label="Foco e Disciplina" value={`${continueWatching.length}d`} icon={Flame} />
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {certs.map((cert) => (
+              <div key={cert.id} className="bg-white/[0.03] border border-white/5 p-6 rounded-2xl flex items-center justify-between group hover:bg-white/[0.05] transition-colors">
+                <div className="flex items-center gap-5">
+                  <div className="h-14 w-14 rounded-xl bg-orange-400/10 text-orange-400 flex items-center justify-center">
+                    <Award className="h-7 w-7" />
+                  </div>
+                  <div>
+                    <h4 className="font-black text-white tracking-tight">{cert.course_title}</h4>
+                    <p className="text-[10px] font-black uppercase tracking-widest text-zinc-600 mt-1">Concedido em {new Date(cert.issued_at).toLocaleDateString("pt-BR")}</p>
+                  </div>
+                </div>
+                <button className="h-10 w-10 rounded-xl bg-white/5 flex items-center justify-center text-zinc-400 group-hover:text-white transition-colors">
+                  <ArrowRight className="h-5 w-5" />
+                </button>
+              </div>
+            ))}
           </div>
         </section>
-      </main>
+      )}
     </div>
-
   );
 }
 
-/* ─── Rail with scroll buttons ─── */
-function Rail({ title, subtitle, courses, variant }: { title: string; subtitle?: string; courses: Course[]; variant: "wide" | "poster" }) {
-  const scrollRef = useRef<HTMLDivElement>(null);
-  const [showLeft, setShowLeft] = useState(false);
-  const [showRight, setShowRight] = useState(true);
-
-  const checkScroll = () => {
-    const el = scrollRef.current;
-    if (!el) return;
-    setShowLeft(el.scrollLeft > 20);
-    setShowRight(el.scrollLeft < el.scrollWidth - el.clientWidth - 20);
-  };
-
-  const scroll = (dir: -1 | 1) => {
-    const el = scrollRef.current;
-    if (!el) return;
-    el.scrollBy({ left: dir * el.clientWidth * 0.7, behavior: "smooth" });
-  };
-
+function StatCard({ label, value, subValue, icon: Icon, color }: { label: string; value: string | number; subValue?: string; icon: any; color: string }) {
   return (
-    <section className="space-y-6 group/rail">
-      <div className="flex items-end justify-between px-6 lg:px-16 max-w-[1800px] mx-auto">
-        <div>
-          <h2 className="font-display text-2xl lg:text-[28px] font-black tracking-[-0.03em] text-white/90">{title}</h2>
-          {subtitle && <p className="text-[11px] text-zinc-600 font-bold uppercase tracking-[0.2em] mt-2">{subtitle}</p>}
-        </div>
-        <div className="hidden md:flex items-center gap-2">
-          <button
-            onClick={() => scroll(-1)}
-            className={cn(
-              "h-10 w-10 rounded-full border border-white/5 flex items-center justify-center transition-all duration-300",
-              showLeft ? "bg-zinc-900/80 text-white hover:bg-zinc-800 hover:border-white/20" : "opacity-0 pointer-events-none"
-            )}
-          >
-            <ChevronLeft className="h-5 w-5" />
-          </button>
-          <button
-            onClick={() => scroll(1)}
-            className={cn(
-              "h-10 w-10 rounded-full border border-white/5 flex items-center justify-center transition-all duration-300",
-              showRight ? "bg-zinc-900/80 text-white hover:bg-zinc-800 hover:border-white/20" : "opacity-100"
-            )}
-          >
-            <ChevronRight className="h-5 w-5" />
-          </button>
-        </div>
+    <div className="bg-white/[0.03] border border-white/5 p-6 rounded-2xl hover:bg-white/[0.05] transition-all group">
+      <div className="flex items-center justify-between mb-4">
+        <p className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-600 group-hover:text-zinc-400 transition-colors">{label}</p>
+        <Icon className={cn("h-5 w-5 opacity-40 group-hover:opacity-100 transition-all", color)} />
       </div>
-
-      <div className="relative">
-        <div
-          ref={scrollRef}
-          onScroll={checkScroll}
-          className="overflow-x-auto no-scrollbar scroll-smooth snap-x snap-mandatory"
-        >
-          <div className="flex gap-4 px-6 lg:px-16 pb-8 max-w-[1800px] mx-auto">
-            {courses.map((c, i) => (
-              <CourseCard key={c.id} course={c} variant={variant} index={i} />
-            ))}
-            <div className="shrink-0 w-8 lg:w-20" aria-hidden />
-          </div>
-        </div>
+      <div className="flex items-baseline gap-2">
+        <span className="text-3xl font-black text-white tracking-tighter">{value}</span>
+        {subValue && <span className="text-xs font-bold text-zinc-600">{subValue}</span>}
       </div>
-    </section>
+    </div>
   );
 }
 
-/* ─── Course Card — Netflix hover effect ─── */
-function CourseCard({ course, variant, index }: { course: Course; variant: "wide" | "poster"; index: number }) {
-  const pct = course.totalLessons > 0 ? Math.round((course.completedLessons / course.totalLessons) * 100) : 0;
-  const isCompleted = pct === 100;
-
+function CourseCard({ course, index }: { course: Course; index: number }) {
+  const pct = Math.round((course.completedLessons / course.totalLessons) * 100) || 0;
+  
   return (
     <motion.div
-      initial={{ opacity: 0, scale: 0.95 }}
-      whileInView={{ opacity: 1, scale: 1 }}
-      viewport={{ once: true }}
-      transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1], delay: Math.min(index * 0.05, 0.3) }}
-      className={cn(
-        "shrink-0 snap-start group cursor-pointer",
-        variant === "wide" ? "w-[340px] md:w-[420px]" : "w-[200px] md:w-[240px]"
-      )}
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ delay: index * 0.1 }}
+      className="group relative flex flex-col bg-[#0a0a0a] border border-white/5 rounded-3xl overflow-hidden hover:border-primary/50 transition-all hover:shadow-[0_20px_50px_-12px_rgba(0,0,0,0.5)]"
     >
-      <Link to={`/membros-area/curso/${course.id}${course.lastLessonId ? `?lesson=${course.lastLessonId}` : ""}`} className="block">
-        <div className={cn(
-          "relative overflow-hidden bg-zinc-900 rounded-lg transition-all duration-700 ease-[0.16,1,0.3,1]",
-          "border border-white/5",
-          "group-hover:border-white/20 group-hover:shadow-[0_20px_60px_-15px_rgba(0,0,0,0.8)]",
-          variant === "wide" ? "aspect-video" : "aspect-[2/3]"
-        )}>
-          {/* Main Thumbnail */}
-          {course.thumbnail_url ? (
-            <motion.img
-              src={course.thumbnail_url}
-              alt={course.title}
-              className="w-full h-full object-cover opacity-80 group-hover:opacity-100 group-hover:scale-110 transition-all duration-1000"
-              loading="lazy"
-            />
-          ) : (
-            <div className="w-full h-full bg-gradient-to-br from-zinc-800 to-zinc-950 flex items-center justify-center p-6 text-center">
-              <span className="font-display text-xs font-bold opacity-30 tracking-tight">{course.title}</span>
-            </div>
-          )}
-
-          {/* Gradients */}
-          <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent opacity-80" />
+      <Link to={`/membros-area/curso/${course.id}`} className="block">
+        <div className="aspect-[16/10] relative overflow-hidden">
+          <img 
+            src={course.thumbnail_url || ""} 
+            alt={course.title} 
+            className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
           
-          {/* Completion Glow */}
-          {isCompleted && (
-            <div className="absolute top-3 right-3 h-8 w-8 rounded-full bg-emerald-500 flex items-center justify-center shadow-[0_0_20px_rgba(16,185,129,0.4)]">
-              <Award className="h-4 w-4 text-black" />
-            </div>
-          )}
-
-          {/* Play Overlay */}
-          <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-500">
-            <motion.div 
-              initial={{ scale: 0.8 }}
-              whileHover={{ scale: 1.1 }}
-              className="h-16 w-16 rounded-full bg-white/10 backdrop-blur-md border border-white/20 flex items-center justify-center"
-            >
-              <Play className="h-7 w-7 text-white fill-current ml-1" />
-            </motion.div>
-          </div>
-
-          {/* Netflix Red Progress Bar */}
           {pct > 0 && (
-            <div className="absolute bottom-0 left-0 right-0 h-[4px] bg-white/10">
-              <motion.div
-                initial={{ width: 0 }}
-                animate={{ width: `${pct}%` }}
-                className={cn("h-full transition-all duration-1000", isCompleted ? "bg-emerald-400" : "bg-emerald-500")}
-              />
+            <div className="absolute bottom-4 left-4 right-4 z-10">
+               <div className="h-1 w-full bg-white/20 rounded-full overflow-hidden">
+                  <div className="h-full bg-primary" style={{ width: `${pct}%` }} />
+               </div>
             </div>
           )}
-
-          {/* Content Overlays */}
-          {variant === "poster" && (
-            <div className="absolute bottom-0 inset-x-0 p-4 transform translate-y-2 group-hover:translate-y-0 transition-transform duration-500">
-              <h3 className="font-display font-black text-[15px] text-white leading-tight line-clamp-2 drop-shadow-lg">
-                {course.title}
-              </h3>
+          
+          <div className="absolute top-4 right-4 z-10 opacity-0 group-hover:opacity-100 transition-all translate-y-2 group-hover:translate-y-0">
+            <div className="h-10 w-10 rounded-xl bg-primary text-primary-foreground flex items-center justify-center shadow-lg">
+              <Play className="h-5 w-5 fill-current" />
             </div>
-          )}
+          </div>
         </div>
 
-        {variant === "wide" && (
-          <div className="mt-4 space-y-2">
-            <h3 className="font-display font-black text-white text-[17px] group-hover:text-emerald-400 transition-colors tracking-tight">
-              {course.title}
-            </h3>
-            <div className="flex items-center gap-3 text-[11px] font-bold uppercase tracking-[0.1em] text-zinc-500">
-              {isCompleted ? (
-                <span className="text-emerald-500/80 flex items-center gap-1.5"><CheckCircle2 className="h-3 w-3" /> Completo</span>
-              ) : pct > 0 ? (
-                <span className="text-zinc-300">Retomar {course.lastLessonTitle && `· ${course.lastLessonTitle}`}</span>
-              ) : (
-                <span>{course.totalLessons} aulas · {course.moduleCount} módulos</span>
-              )}
+        <div className="p-6 flex flex-col flex-1">
+          <div className="flex items-center justify-between mb-4">
+            <span className="text-[10px] font-black uppercase tracking-widest text-primary">{course.category}</span>
+            <div className="flex items-center gap-1 text-[10px] font-black text-zinc-600">
+               <Clock className="h-3 w-3" />
+               {course.totalLessons} Aulas
             </div>
           </div>
-        )}
+          
+          <h3 className="text-lg font-black text-white tracking-tight leading-snug line-clamp-2 mb-4 group-hover:text-primary transition-colors">
+            {course.title}
+          </h3>
+
+          <div className="mt-auto pt-4 border-t border-white/5 flex items-center justify-between">
+            <div className="flex -space-x-2">
+              {[1, 2, 3].map(i => (
+                <div key={i} className="h-6 w-6 rounded-full border-2 border-black bg-zinc-800 flex items-center justify-center text-[8px] font-bold text-zinc-500">
+                  {i}
+                </div>
+              ))}
+            </div>
+            <div className="text-[10px] font-black uppercase tracking-widest text-zinc-500">
+              {pct === 100 ? "Concluído" : pct > 0 ? `${pct}%` : "Começar"}
+            </div>
+          </div>
+        </div>
       </Link>
     </motion.div>
   );
 }
 
-/* ─── Certificações ─── */
-function CertificationsRail({ certs }: { certs: Cert[] }) {
+function CourseListRow({ course, index }: { course: Course; index: number }) {
+  const pct = Math.round((course.completedLessons / course.totalLessons) * 100) || 0;
+
   return (
-    <section className="space-y-4">
-      <div className="flex items-end justify-between px-6 lg:px-16">
-        <div>
-          <h2 className="font-display text-xl lg:text-[22px] font-bold tracking-[-0.02em] text-zinc-100">Suas certificações</h2>
-          <p className="text-[11px] text-zinc-600 font-medium mt-1">{certs.length} {certs.length === 1 ? "emitida" : "emitidas"}</p>
+    <motion.div
+      initial={{ opacity: 0, x: -20 }}
+      animate={{ opacity: 1, x: 0 }}
+      transition={{ delay: index * 0.05 }}
+      className="group bg-[#0a0a0a] border border-white/5 p-4 rounded-2xl flex items-center gap-6 hover:border-primary/50 transition-all"
+    >
+      <div className="h-16 w-24 rounded-lg overflow-hidden shrink-0">
+        <img src={course.thumbnail_url || ""} alt="" className="h-full w-full object-cover" />
+      </div>
+      
+      <div className="flex-1 min-w-0">
+        <h4 className="text-white font-black tracking-tight truncate group-hover:text-primary transition-colors">{course.title}</h4>
+        <div className="flex items-center gap-4 mt-1">
+          <span className="text-[10px] font-black uppercase tracking-widest text-primary">{course.category}</span>
+          <span className="text-[10px] font-black uppercase tracking-widest text-zinc-600">{course.totalLessons} Aulas</span>
         </div>
       </div>
 
-      <div className="overflow-x-auto no-scrollbar scroll-smooth snap-x snap-mandatory">
-        <div className="flex gap-4 px-6 lg:px-16 pb-2">
-          {certs.map((cert, i) => (
-            <motion.div
-              key={cert.id}
-              initial={{ opacity: 0, y: 12 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.4, ease, delay: Math.min(i * 0.05, 0.3) }}
-              className="shrink-0 snap-start w-72 p-6 rounded-md bg-gradient-to-br from-zinc-900/80 to-zinc-900/40 border border-white/[0.06] hover:border-emerald-500/40 transition-all duration-300 flex flex-col justify-between group min-h-[220px]"
-            >
-              <div>
-                <div className="h-10 w-10 rounded-lg bg-gradient-to-br from-emerald-500/20 to-emerald-500/5 border border-emerald-500/30 flex items-center justify-center mb-5">
-                  <Award className="h-5 w-5 text-emerald-400" />
-                </div>
-                <p className="text-[10px] font-bold text-emerald-400 tracking-[0.16em] uppercase mb-2">
-                  {new Date(cert.issued_at).toLocaleDateString("pt-BR", { month: "short", year: "numeric" })}
-                </p>
-                <h4 className="font-display text-lg font-bold leading-tight tracking-tight text-zinc-100 line-clamp-2">
-                  {cert.course_title}
-                </h4>
-              </div>
-              <div className="mt-4">
-                <p className="text-[10px] font-mono text-zinc-600 tracking-wider mb-3">ID · {cert.code}</p>
-                <Link
-                  to={`/certificado/${cert.code}`}
-                  target="_blank"
-                  className="flex items-center justify-between w-full py-2.5 border-t border-white/10 text-[10px] font-bold tracking-[0.16em] uppercase text-zinc-400 hover:text-emerald-400 transition-colors"
-                >
-                  Ver certificado
-                  <ArrowUpRight className="h-3.5 w-3.5" />
-                </Link>
-              </div>
-            </motion.div>
-          ))}
+      <div className="w-48 hidden md:block">
+        <div className="flex justify-between text-[10px] font-black uppercase tracking-widest text-zinc-600 mb-1.5">
+          <span>Progresso</span>
+          <span>{pct}%</span>
+        </div>
+        <div className="h-1 w-full bg-white/5 rounded-full overflow-hidden">
+          <div className="h-full bg-primary" style={{ width: `${pct}%` }} />
         </div>
       </div>
-    </section>
-  );
-}
 
-/* ─── Footer Stat ─── */
-function Stat({ label, value, icon: Icon }: { label: string; value: string | number; icon: any }) {
-  return (
-    <div className="flex items-center gap-4">
-      <div className="h-10 w-10 rounded-xl bg-white/[0.03] border border-white/[0.05] flex items-center justify-center shrink-0">
-        <Icon className="h-4 w-4 text-zinc-500" />
-      </div>
-      <div>
-        <p className="text-[10px] uppercase tracking-[0.18em] text-zinc-600 font-bold mb-0.5">{label}</p>
-        <p className="font-display text-xl font-black text-zinc-100 tabular-nums leading-none tracking-tight">{value}</p>
-      </div>
-    </div>
+      <Link 
+        to={`/membros-area/curso/${course.id}`}
+        className="h-12 w-12 rounded-xl bg-white/[0.03] border border-white/10 flex items-center justify-center text-zinc-500 hover:bg-primary hover:text-primary-foreground hover:border-primary transition-all group-hover:scale-105"
+      >
+        <ArrowRight className="h-5 w-5" />
+      </Link>
+    </motion.div>
   );
 }
