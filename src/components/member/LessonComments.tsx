@@ -122,16 +122,18 @@ export function LessonComments({ lessonId, currentUserId }: { lessonId: string; 
   const repliesOf = (id: string) => comments.filter((c) => c.parent_id === id);
 
   return (
-    <div className="rounded-xl bg-card/40 border border-border/10 overflow-hidden">
-      <div className="px-5 sm:px-6 py-4 border-b border-border/8 flex items-center gap-2">
-        <div className="h-7 w-7 rounded-lg bg-primary/10 flex items-center justify-center">
-          <MessageCircle className="h-3.5 w-3.5 text-primary/60" />
+    <div className="rounded-[2rem] bg-zinc-900/50 border border-white/5 overflow-hidden">
+      <div className="px-10 py-8 border-b border-white/5 flex items-center justify-between">
+        <div className="flex items-center gap-4">
+          <div className="h-10 w-10 rounded-xl bg-emerald-500/10 flex items-center justify-center">
+            <MessageCircle className="h-5 w-5 text-emerald-500" />
+          </div>
+          <h4 className="text-sm font-black text-white uppercase tracking-widest">
+            Comunidade & Suporte
+          </h4>
         </div>
-        <h4 className="text-xs font-display font-black text-foreground tracking-tight">
-          Perguntas & Comentários
-        </h4>
-        <span className="ml-auto text-[10px] text-muted-foreground/40 font-display tabular-nums">
-          {comments.length}
+        <span className="text-xs text-zinc-600 font-mono font-bold tracking-tight">
+          {comments.length} interações
         </span>
       </div>
 
