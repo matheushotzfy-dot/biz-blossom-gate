@@ -253,92 +253,60 @@ export default function MemberCourse() {
 
   const sidebarWidth = theaterMode ? "lg:w-0 lg:opacity-0 lg:pointer-events-none" : "w-[380px] xl:w-[420px]";
 
-  /* ─── Sidebar Component ─── */
   const CourseSidebar = () => (
-    <div className="p-4 space-y-3">
-      {/* Progress card */}
-      <div className="p-5 bg-white/[0.03] border border-white/[0.05] rounded-xl backdrop-blur-md">
-        <div className="flex items-center justify-between mb-4">
-          <span className="text-[10px] uppercase tracking-[0.25em] text-zinc-500 font-black">Seu Progresso</span>
-          <span className={cn("font-display text-xl font-black tabular-nums", isComplete ? "text-emerald-400" : "text-white")}>{overallPct}%</span>
+    <div className="flex flex-col h-full bg-[#050505] border-r border-white/5">
+      {/* Header */}
+      <div className="p-6 border-b border-white/5">
+        <h2 className="font-display text-lg font-black text-white truncate">{course.title}</h2>
+        <div className="flex items-center gap-2 mt-3">
+          <div className="h-1.5 flex-1 bg-white/10 rounded-full overflow-hidden">
+            <motion.div initial={{ width: 0 }} animate={{ width: `${overallPct}%` }} className="h-full bg-emerald-500" />
+          </div>
+          <span className="text-[10px] font-mono text-white/50">{overallPct}%</span>
         </div>
-        <div className="h-2 bg-white/5 overflow-hidden rounded-full">
-          <motion.div initial={{ width: 0 }} animate={{ width: `${overallPct}%` }} transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1] }} className={cn("h-full rounded-full", isComplete ? "bg-emerald-400 shadow-[0_0_12px_rgba(52,211,153,0.5)]" : "bg-white")} />
-        </div>
-        <p className="text-[11px] text-zinc-500 mt-3 font-bold tracking-tight">{completedLessons} de {totalLessons} aulas concluídas</p>
-        {isComplete && (
-          <motion.div initial={{ opacity: 0, y: 4 }} animate={{ opacity: 1, y: 0 }} className="flex items-center gap-2 mt-3 pt-3 border-t border-emerald-500/20">
-            <Trophy className="h-3.5 w-3.5 text-emerald-400" />
-            <span className="text-[10px] font-bold text-emerald-400 uppercase tracking-[0.16em]">Curso concluído</span>
-          </motion.div>
-        )}
       </div>
 
-      {/* Keyboard shortcuts */}
-      <div className="px-3 py-2 flex items-center gap-2 text-[9px] text-zinc-600 font-mono tracking-wider rounded-md bg-zinc-900/30">
-        <Keyboard className="h-3 w-3" />
-        <span>← → navegar</span>
-        <span className="text-zinc-800">·</span>
-        <span>C concluir</span>
-        <span className="text-zinc-800">·</span>
-        <span>T teatro</span>
+      {/* Modules List */}
+      <div className="flex-1 overflow-y-auto scrollbar-thin">
+        {modules.map((mod, modIdx) => (
+          <div key={mod.id} className="border-b border-white/5">
+            <button
+              onClick={() => toggleModule(mod.id)}
+              className="w-full px-6 py-4 flex items-center justify-between hover:bg-white/5 transition-colors"
+            >
+              <span className="text-[11px] font-black uppercase tracking-[0.2em] text-white/70">
+                {String(modIdx + 1).padStart(2, '0')}. {mod.title}
+              </span>
+              <ChevronDown className={cn("h-4 w-4 text-white/30 transition-transform", expandedModules.has(mod.id) && "rotate-180")} />
+            </button>
+            <AnimatePresence>
+              {expandedModules.has(mod.id) && (
+                <motion.div initial={{ height: 0 }} animate={{ height: "auto" }} exit={{ height: 0 }} className="overflow-hidden">
+                  {mod.lessons.map(lesson => (
+                    <button
+                      key={lesson.id}
+                      onClick={() => selectLesson(lesson)}
+                      className={cn(
+                        "w-full px-6 py-3 flex items-center gap-3 transition-colors text-left",
+                        activeLesson?.id === lesson.id ? "bg-white/10 text-white" : "text-white/40 hover:text-white/80 hover:bg-white/5"
+                      )}
+                    >
+                      {progress.get(lesson.id)?.completed ? (
+                        <CheckCircle2 className="h-4 w-4 text-emerald-500" />
+                      ) : (
+                        <div className="h-4 w-4 rounded-full border border-current" />
+                      )}
+                      <span className="text-[13px] font-medium truncate">{lesson.title}</span>
+                    </button>
+                  ))}
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
+        ))}
       </div>
-
-      {/* Modules list */}
-      <div className="space-y-2">
-        {modules.map((mod, modIdx) => {
-          const modCompleted = mod.lessons.filter(l => progress.get(l.id)?.completed).length;
-          const modPct = mod.lessons.length > 0 ? Math.round((modCompleted / mod.lessons.length) * 100) : 0;
-          const isModComplete = modPct === 100 && mod.lessons.length > 0;
-          const isExpanded = expandedModules.has(mod.id);
-          const containsActive = mod.lessons.some(l => l.id === activeLesson?.id);
-
-          return (
-            <div key={mod.id} className={cn(
-              "rounded-xl overflow-hidden border transition-all duration-500",
-              containsActive ? "border-white/20 bg-white/[0.05]" : "border-white/[0.03] bg-zinc-900/20 hover:bg-white/[0.02]"
-            )}>
-              <button onClick={() => toggleModule(mod.id)} className="w-full text-left">
-                <div className="flex items-center gap-4 p-4">
-                  <div className={cn(
-                    "h-10 w-10 rounded-lg flex items-center justify-center font-display font-black text-sm tabular-nums shrink-0 border transition-all duration-500",
-                    isModComplete
-                      ? "bg-emerald-500 text-black border-emerald-500"
-                      : containsActive
-                      ? "bg-white text-black border-white"
-                      : "bg-zinc-800/50 text-zinc-500 border-white/5"
-                  )}>
-                    {isModComplete ? <Check className="h-5 w-5 stroke-[3]" /> : String(modIdx + 1).padStart(2, "0")}
-                  </div>
-                  <div className="min-w-0 flex-1">
-                    <p className="font-display text-[14px] font-black text-white line-clamp-1 tracking-tight uppercase">{mod.title}</p>
-                    <p className="text-[10px] text-zinc-500 font-bold tracking-widest uppercase mt-1">{mod.lessons.length} aulas</p>
-                  </div>
-                  <motion.div animate={{ rotate: isExpanded ? 180 : 0 }} transition={{ duration: 0.3 }} className="shrink-0">
-                    <ChevronDown className={cn("h-5 w-5 transition-colors", containsActive ? "text-white" : "text-zinc-600")} />
-                  </motion.div>
-                </div>
-                {mod.lessons.length > 0 && (
-                  <div className="h-[2px] bg-white/5 mx-3.5 mb-px rounded-full overflow-hidden">
-                    <div className={cn("h-full rounded-full transition-all", isModComplete ? "bg-emerald-400" : "bg-emerald-500/60")} style={{ width: `${modPct}%` }} />
-                  </div>
-                )}
-              </button>
-
-              <AnimatePresence>
-                {isExpanded && (
-                  <motion.div
-                    initial={{ height: 0, opacity: 0 }}
-                    animate={{ height: "auto", opacity: 1 }}
-                    exit={{ height: 0, opacity: 0 }}
-                    transition={{ duration: 0.25, ease }}
-                    className="overflow-hidden"
-                  >
-                    <div className="border-t border-white/5">
-                      {mod.lessons.map((lesson, lIdx) => {
-                        const isActive = activeLesson?.id === lesson.id;
-                        const isCompleted = progress.get(lesson.id)?.completed;
-                        const isVideo = lesson.video_url && lesson.video_url.trim().length > 0;
+    </div>
+  );
                         return (
                           <button key={lesson.id} onClick={() => selectLesson(lesson)}
                             className={cn(
