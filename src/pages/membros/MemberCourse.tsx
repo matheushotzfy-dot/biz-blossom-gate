@@ -11,7 +11,7 @@ import {
   ArrowLeft, ArrowRight, FileText, Video, ChevronLeft, List,
   Award, X, Check, Layers, GraduationCap, Maximize2, Minimize2,
   Trophy, Download, Paperclip, ExternalLink, MessageCircle, StickyNote,
-  Keyboard, Settings, Share2, Heart, SkipForward, Volume2,
+  Keyboard, Settings, Share2, Heart, SkipForward, Volume2, ChevronRight,
 } from "lucide-react";
 import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
