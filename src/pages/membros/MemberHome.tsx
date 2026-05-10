@@ -190,6 +190,18 @@ export default function MemberHome() {
           </div>
 
           <div className="relative h-full container mx-auto px-6 lg:px-16 flex flex-col justify-end pb-28 max-w-[1800px]">
+            {/* Search Bar Floating */}
+            <div className="absolute top-10 right-16 z-20 hidden lg:block">
+               <div className="relative group">
+                 <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-500 transition-colors group-focus-within:text-emerald-500" />
+                 <input 
+                  type="text" 
+                  placeholder="O que você quer aprender hoje?"
+                  className="w-[320px] h-12 bg-black/40 backdrop-blur-3xl border border-white/10 rounded-xl pl-12 pr-4 text-xs font-bold text-white placeholder:text-zinc-600 focus:outline-none focus:border-emerald-500/50 transition-all focus:w-[400px]"
+                 />
+               </div>
+            </div>
+
             <motion.div
               initial={{ opacity: 0, y: 40 }}
               animate={{ opacity: 1, y: 0 }}
@@ -198,54 +210,47 @@ export default function MemberHome() {
             >
               {/* Premium Label */}
               <div className="flex items-center gap-4 mb-8">
-                <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 border border-white/10 backdrop-blur-xl">
-                  <div className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse shadow-[0_0_8px_rgba(52,211,153,0.8)]" />
-                  <span className="text-[10px] font-black uppercase tracking-[0.25em] text-white">
-                    {featured.completedLessons > 0 ? "Retomar Experiência" : "Original Hotzfy"}
+                <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 border border-white/10 backdrop-blur-3xl">
+                  <div className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse shadow-[0_0_10px_rgba(52,211,153,1)]" />
+                  <span className="text-[10px] font-black uppercase tracking-[0.3em] text-white">
+                    {featured.completedLessons > 0 ? "Continuar Jornada" : "Destaque da Semana"}
                   </span>
                 </div>
                 {featured.category && (
-                  <span className="text-[10px] text-zinc-500 uppercase tracking-[0.25em] font-black">
+                  <span className="text-[10px] text-emerald-500/60 uppercase tracking-[0.3em] font-black">
                     {featured.category}
                   </span>
                 )}
               </div>
 
               {/* Title — Ultra Display Typography */}
-              <h1 className="font-display text-[52px] md:text-[84px] lg:text-[110px] font-black tracking-[-0.06em] leading-[0.82] mb-8 text-white select-none">
-                {featured.title.split(' ').map((word, i) => (
-                  <span key={i} className="inline-block mr-[0.2em] last:mr-0 drop-shadow-[0_10px_40px_rgba(0,0,0,0.5)]">
-                    {word}
-                  </span>
-                ))}
+              <h1 className="font-display text-[64px] md:text-[96px] lg:text-[120px] font-black tracking-[-0.07em] leading-[0.8] mb-10 text-white select-none drop-shadow-[0_20px_50px_rgba(0,0,0,1)]">
+                {featured.title}
               </h1>
 
-              {/* Description — Elegant & Legible */}
+              {/* Description */}
               {featured.description && (
-                <p className="max-w-xl text-zinc-400 text-lg md:text-xl leading-relaxed mb-10 line-clamp-3 font-medium tracking-tight">
+                <p className="max-w-xl text-zinc-400 text-lg md:text-2xl leading-relaxed mb-12 line-clamp-2 font-medium tracking-tight">
                   {featured.description}
                 </p>
               )}
 
               {/* Action Suite */}
-              <div className="flex flex-wrap items-center gap-4">
+              <div className="flex flex-wrap items-center gap-6">
                 <Link
                   to={`/membros-area/curso/${featured.id}${featured.lastLessonId ? `?lesson=${featured.lastLessonId}` : ""}`}
-                  className="group relative flex items-center gap-4 px-12 py-5 bg-white text-[#050505] font-display font-black text-[17px] rounded-lg transition-all duration-500 active:scale-[0.96] hover:bg-zinc-100 overflow-hidden"
+                  className="group relative flex items-center gap-5 px-14 py-6 bg-white text-black font-display font-black text-[18px] rounded-2xl transition-all duration-500 active:scale-[0.96] hover:bg-zinc-100 overflow-hidden shadow-[0_20px_40px_rgba(255,255,255,0.1)]"
                 >
-                  <Play className="h-6 w-6 fill-current" />
-                  <span>{featured.completedLessons > 0 ? "Retomar de onde parou" : "Iniciar agora"}</span>
-                  
-                  {/* Subtle shimmer effect */}
-                  <div className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-1000 bg-gradient-to-r from-transparent via-black/5 to-transparent" />
+                  <Play className="h-7 w-7 fill-current" />
+                  <span>{featured.completedLessons > 0 ? "Assistir Agora" : "Iniciar Masterclass"}</span>
+                  <div className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-1000 bg-gradient-to-r from-transparent via-black/10 to-transparent" />
                 </Link>
 
                 <Link
                   to={`/membros-area/curso/${featured.id}`}
-                  className="flex items-center gap-3 px-10 py-5 bg-zinc-800/40 text-zinc-100 font-display font-black text-[16px] rounded-lg hover:bg-zinc-800/60 transition-all duration-300 active:scale-[0.96] backdrop-blur-2xl border border-white/5"
+                  className="flex items-center gap-3 px-10 py-6 bg-zinc-900/40 text-white font-display font-black text-[17px] rounded-2xl hover:bg-zinc-800/60 transition-all duration-300 active:scale-[0.96] backdrop-blur-3xl border border-white/5"
                 >
-                  <Info className="h-5 w-5" />
-                  Detalhes
+                  Ver Grade
                 </Link>
               </div>
             </motion.div>
