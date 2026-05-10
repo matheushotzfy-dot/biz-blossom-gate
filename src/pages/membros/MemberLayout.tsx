@@ -7,9 +7,11 @@ import { useEffect, useState } from "react";
 import { Outlet, useNavigate, Link, useLocation } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import type { User } from "@supabase/supabase-js";
-import { LogOut } from "lucide-react";
+import { LogOut, Search, Settings } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
+import { MemberSidebar } from "@/components/member/MemberSidebar";
+
 
 export default function MemberLayout() {
   const navigate = useNavigate();
