@@ -7,6 +7,7 @@ import { useParams, Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Award, ShieldCheck, Calendar, BookOpen, Loader2, ExternalLink, Printer } from "lucide-react";
 import { motion } from "framer-motion";
+import { Seo } from "@/components/Seo";
 
 type Cert = {
   id: string;
