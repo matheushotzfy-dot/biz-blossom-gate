@@ -169,12 +169,16 @@ export default function MemberHome() {
           <div className="flex items-center gap-4 bg-white/[0.03] border border-white/5 p-2 rounded-2xl">
             <button 
               onClick={() => setViewMode("grid")}
+              aria-label="Visualizar em grade"
+              aria-pressed={viewMode === "grid"}
               className={cn("p-2 rounded-xl transition-all", viewMode === "grid" ? "bg-primary text-primary-foreground shadow-lg" : "text-zinc-500 hover:text-white")}
             >
               <LayoutGrid className="h-5 w-5" />
             </button>
             <button 
               onClick={() => setViewMode("list")}
+              aria-label="Visualizar em lista"
+              aria-pressed={viewMode === "list"}
               className={cn("p-2 rounded-xl transition-all", viewMode === "list" ? "bg-primary text-primary-foreground shadow-lg" : "text-zinc-500 hover:text-white")}
             >
               <List className="h-5 w-5" />
@@ -314,7 +318,7 @@ export default function MemberHome() {
                     <p className="text-[10px] font-black uppercase tracking-widest text-zinc-600 mt-1">Concedido em {new Date(cert.issued_at).toLocaleDateString("pt-BR")}</p>
                   </div>
                 </div>
-                <button className="h-10 w-10 rounded-xl bg-white/5 flex items-center justify-center text-zinc-400 group-hover:text-white transition-colors">
+                <button aria-label={`Ver certificado de ${cert.course_title}`} className="h-10 w-10 rounded-xl bg-white/5 flex items-center justify-center text-zinc-400 group-hover:text-white transition-colors">
                   <ArrowRight className="h-5 w-5" />
                 </button>
               </div>
