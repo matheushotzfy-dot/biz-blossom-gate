@@ -18,6 +18,22 @@ import { cn } from "@/lib/utils";
 import hotzfyLogo from "@/assets/hotzfy-logo.png";
 import dashboardMockup from "@/assets/hero-dashboard-mockup.jpg";
 import abstractGem from "@/assets/hero-abstract-gem.png";
+import { Seo } from "@/components/Seo";
+
+const LANDING_FAQ = [
+  { q: "Preciso pagar mensalidade?", a: "Não! A HOTZFY não cobra mensalidades. Você só paga uma taxa por transação aprovada. Sem custos fixos ou surpresas." },
+  { q: "Quanto tempo leva para receber o dinheiro?", a: "Saques via PIX são processados em até 1 dia útil. Você pode sacar a qualquer momento diretamente pelo painel." },
+  { q: "Posso aceitar PIX e cartão de crédito?", a: "Sim! Oferecemos PIX instantâneo, cartão de crédito em até 12x e boleto bancário. Todos os métodos integrados no mesmo checkout." },
+  { q: "Tem área de membros?", a: "Sim! Nossa área de membros integrada permite entregar cursos, módulos e aulas com liberação automática e player de vídeo profissional." },
+  { q: "Posso ter afiliados vendendo meus produtos?", a: "Claro! O sistema de afiliados é integrado, com comissões configuráveis, dashboard exclusivo para afiliados e pagamento automático." },
+  { q: "A plataforma é segura?", a: "100%. Utilizamos criptografia de ponta, certificados SSL, antifraude avançado com blacklist global, velocity checks e tokenização de dados sensíveis." },
+];
+
+const LANDING_JSONLD = [
+  { "@context": "https://schema.org", "@type": "Organization", name: "HOTZFY", url: "https://hotzfy.com.br", logo: "https://hotzfy.com.br/apple-touch-icon.png" },
+  { "@context": "https://schema.org", "@type": "WebSite", name: "HOTZFY", url: "https://hotzfy.com.br" },
+  { "@context": "https://schema.org", "@type": "FAQPage", mainEntity: LANDING_FAQ.map(f => ({ "@type": "Question", name: f.q, acceptedAnswer: { "@type": "Answer", text: f.a } })) },
+];
 
 /* ─── Animated counter ─── */
 function Counter({ target, suffix = "", prefix = "" }: { target: number; suffix?: string; prefix?: string }) {
@@ -270,6 +286,12 @@ export default function LandingPage() {
 
  return (
  <div className="ambient-backdrop min-h-screen bg-background text-foreground overflow-x-hidden">
+ <Seo
+   title="HOTZFY — Plataforma #1 de Infoprodutos do Brasil"
+   description="Venda, gerencie e escale seus infoprodutos com checkout de alta conversão, área de membros Netflix-style e analytics em tempo real."
+   path="/"
+   jsonLd={LANDING_JSONLD}
+ />
 
  {/* ═══ NAVBAR ═══ */}
  <motion.nav className={cn(
@@ -278,7 +300,7 @@ export default function LandingPage() {
  )}>
  <div className="max-w-7xl mx-auto flex items-center justify-between px-4 md:px-8 h-14 md:h-20">
  <div className="flex items-center gap-2.5">
- <motion.img src={hotzfyLogo} alt="HOTZFY" className="h-7 w-7 md:h-9 md:w-9" whileHover={{ rotate: 12, scale: 1.1 }} />
+ <motion.img src={hotzfyLogo} alt="HOTZFY logo" className="h-7 w-7 md:h-9 md:w-9" whileHover={{ rotate: 12, scale: 1.1 }} />
  <span className="text-sm md:text-lg font-display font-black tracking-[-0.04em] text-foreground">HOTZFY</span>
  </div>
  <div className="hidden md:flex items-center gap-8">
@@ -299,7 +321,7 @@ export default function LandingPage() {
  Criar conta <ArrowRight className="h-3.5 w-3.5 ml-1" />
  </Button>
  {/* Mobile hamburger */}
- <button onClick={() => setMobileNav(!mobileNav)} className="md:hidden h-9 w-9 rounded-xl bg-card/40 flex items-center justify-center border border-border/15">
+ <button onClick={() => setMobileNav(!mobileNav)} aria-label={mobileNav ? "Fechar menu" : "Abrir menu"} aria-expanded={mobileNav} className="md:hidden h-9 w-9 rounded-xl bg-card/40 flex items-center justify-center border border-border/15">
  {mobileNav
  ? <span className="text-foreground text-lg leading-none">✕</span>
  : <span className="flex flex-col gap-1 items-center"><span className="block w-4 h-0.5 bg-foreground rounded" /><span className="block w-4 h-0.5 bg-foreground rounded" /><span className="block w-3 h-0.5 bg-foreground rounded" /></span>}
@@ -692,7 +714,7 @@ export default function LandingPage() {
  <div className="grid grid-cols-2 md:grid-cols-4 gap-6 md:gap-12">
  <div className="col-span-2 md:col-span-1">
  <div className="flex items-center gap-3 mb-4">
- <img src={hotzfyLogo} alt="HOTZFY" className="h-8 w-8" loading="lazy" width={512} height={512} />
+ <img src={hotzfyLogo} alt="HOTZFY logo" className="h-8 w-8" loading="lazy" width={512} height={512} />
  <span className="text-base font-display font-black tracking-[-0.03em] text-foreground">HOTZFY</span>
  </div>
  <p className="text-xs text-muted-foreground/40 font-display leading-relaxed">
