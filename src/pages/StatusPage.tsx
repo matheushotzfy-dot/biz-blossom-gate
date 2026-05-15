@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { CheckCircle2, AlertTriangle, Clock, Activity, Server, CreditCard, Shield, Zap, ArrowLeft } from "lucide-react";
 import { Link } from "react-router-dom";
+import { Seo } from "@/components/Seo";
 
 type ServiceStatus = "operational" | "degraded" | "down" | "checking";
 
