@@ -1,5 +1,6 @@
 import { ArrowLeft, Shield, Eye, Database, Lock, UserCheck, Globe, Bell, FileText } from "lucide-react";
 import { Link } from "react-router-dom";
+import { Seo } from "@/components/Seo";
 
 const LAST_UPDATED = "01 de Abril de 2026";
 const COMPANY_NAME = "HOTZFY";
@@ -70,10 +71,15 @@ const sections = [
 export default function PoliticaDePrivacidade() {
  return (
  <div className="min-h-screen bg-background">
+ <Seo
+   title="Política de Privacidade — HOTZFY"
+   description="Saiba como a HOTZFY coleta, usa e protege seus dados pessoais conforme a LGPD. Transparência total no tratamento de informações."
+   path="/politica-de-privacidade"
+ />
  {/* Header */}
  <header className="sticky top-0 z-50 bg-card/80 backdrop-blur-xl border-b border-border/40">
  <div className="max-w-4xl mx-auto flex items-center gap-4 px-6 py-4">
- <Link to="/" className="h-9 w-9 rounded-xl bg-primary/10 flex items-center justify-center hover:bg-primary/20 transition-colors">
+ <Link to="/" aria-label="Voltar para a página inicial" className="h-9 w-9 rounded-xl bg-primary/10 flex items-center justify-center hover:bg-primary/20 transition-colors">
  <ArrowLeft className="h-4 w-4 text-primary" />
  </Link>
  <div>

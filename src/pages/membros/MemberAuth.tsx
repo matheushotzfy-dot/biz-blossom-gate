@@ -11,6 +11,7 @@ import { Eye, EyeOff, Lock, Mail, GraduationCap, ArrowRight, Shield, Sparkles, B
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { motion, AnimatePresence, useMotionValue, useSpring, useTransform } from "framer-motion";
+import { Seo } from "@/components/Seo";
 
 /* ─── Floating particles ─── */
 function FloatingParticles() {
@@ -234,6 +235,7 @@ export default function MemberAuth() {
 
  return (
  <div className="h-screen flex bg-background text-foreground overflow-hidden">
+ <Seo title="Área de Membros — Login HOTZFY" description="Acesse a área de membros para assistir suas aulas, baixar materiais e acompanhar seu progresso." path="/membros-area/login" />
 
  {/* ═══ LEFT: Form ═══ */}
  <div className="flex-1 relative overflow-y-auto overflow-x-hidden">
@@ -375,7 +377,7 @@ export default function MemberAuth() {
  className={cn(inputCls, "pl-10 pr-12 w-full", focusedField === "password" && "shadow-md shadow-primary/5")}
  onFocus={() => setFocusedField("password")} onBlur={() => setFocusedField(null)}
  />
- <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3.5 top-1/2 -translate-y-1/2 text-muted-foreground/20 hover:text-muted-foreground/50 transition-colors">
+ <button type="button" onClick={() => setShowPassword(!showPassword)} aria-label={showPassword ? "Ocultar senha" : "Mostrar senha"} className="absolute right-3.5 top-1/2 -translate-y-1/2 text-muted-foreground/20 hover:text-muted-foreground/50 transition-colors">
  {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
  </button>
  </div>

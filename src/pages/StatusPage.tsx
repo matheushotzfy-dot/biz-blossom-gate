@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { CheckCircle2, AlertTriangle, Clock, Activity, Server, CreditCard, Shield, Zap, ArrowLeft } from "lucide-react";
 import { Link } from "react-router-dom";
+import { Seo } from "@/components/Seo";
 
 type ServiceStatus = "operational" | "degraded" | "down" | "checking";
 
@@ -108,6 +109,11 @@ export default function StatusPage() {
 
  return (
  <div className="min-h-screen bg-[#050505] text-white">
+ <Seo
+   title="Status dos serviços — HOTZFY"
+   description="Acompanhe em tempo real a disponibilidade da plataforma HOTZFY: gateway de pagamento, autenticação, área de membros e API."
+   path="/status"
+ />
  {/* Header */}
  <header className="border-b border-white/[0.06]">
  <div className="max-w-3xl mx-auto px-6 py-6 flex items-center justify-between">

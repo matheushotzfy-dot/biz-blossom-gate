@@ -20,6 +20,7 @@ import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { motion, AnimatePresence } from "framer-motion";
 import authHeroImg from "@/assets/auth-hero.jpg";
+import { Seo } from "@/components/Seo";
 
 /* ─────────────────── Document helpers ─────────────────── */
 function formatDocument(value: string): string {
@@ -299,6 +300,11 @@ export default function Auth() {
 
  return (
  <div className="h-screen overflow-hidden bg-background text-foreground">
+ <Seo
+   title={isLogin ? "Entrar — HOTZFY" : "Criar conta grátis — HOTZFY"}
+   description={isLogin ? "Acesse seu painel HOTZFY: produtos, vendas, saques e área de membros em um só lugar." : "Crie sua conta HOTZFY gratuitamente e comece a vender infoprodutos com checkout de alta conversão."}
+   path="/auth"
+ />
  <div className="fixed inset-0 pointer-events-none overflow-hidden">
  <div className="absolute bottom-0 left-1/3 h-80 w-80 rounded-full bg-primary/8 blur-3xl" />
  </div>

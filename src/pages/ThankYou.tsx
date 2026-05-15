@@ -5,6 +5,7 @@ import { CheckCircle2, Package, ArrowRight, ShieldCheck, Sparkles, Home, Zap, Gi
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
+import { Seo } from "@/components/Seo";
 
 type TxInfo = {
  product_name: string;
@@ -108,6 +109,7 @@ export default function ThankYou() {
 
  return (
  <div className="min-h-screen bg-background flex items-center justify-center p-4">
+ <Seo title="Obrigado pela compra — HOTZFY" description="Sua compra foi confirmada. Veja os próximos passos para acessar seu produto." path="/obrigado" noindex />
  <motion.div
  initial={{ opacity: 0, scale: 0.95, y: 20 }}
  animate={{ opacity: 1, scale: 1, y: 0 }}

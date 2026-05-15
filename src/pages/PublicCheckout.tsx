@@ -13,6 +13,7 @@ import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { QRCodeSVG } from "qrcode.react";
 import { initPixels, firePixelEvent, type PixelConfig } from "@/lib/pixelTracking";
+import { Seo } from "@/components/Seo";
 
 /* ─── Types ─── */
 type Product = {
@@ -655,6 +656,7 @@ export default function PublicCheckout() {
  /* ══════════════════════════════════════════════════════ */
  if (checkoutState === "pending") return (
  <div data-checkout-theme={themeMode} style={checkoutThemeStyle} className={`min-h-screen ${isDark ? "bg-[hsl(220_18%_11%)] text-[hsl(210_20%_96%)]" : "bg-[hsl(210_20%_98%)] text-gray-900"}`}>
+ <Seo title={`Aguardando pagamento — ${product.name}`} description={`Finalize o pagamento de ${product.name} via PIX ou boleto.`} path={`/pay/${slug || ""}`} noindex />
  <div className="max-w-lg mx-auto px-4 py-8 md:py-14 animate-fade-in">
  {/* Header */}
  <div className="flex items-center gap-4 mb-8">
@@ -662,12 +664,13 @@ export default function PublicCheckout() {
  {product.image_url ? <img src={product.image_url} alt="" className="h-16 w-16 rounded-2xl object-cover" /> : <Sparkles className="h-6 w-6 text-gray-300" />}
  </div>
  <div>
- <h2 className="font-bold text-lg text-gray-800">{product.name}</h2>
+ <h1 className="font-bold text-lg text-gray-800">{product.name}</h1>
  <p className="font-extrabold text-2xl tracking-tight" style={{ color: btnColor }}>R$ {fmtBRL(totalPrice)}</p>
  </div>
  </div>
 
  {/* Status badge */}
+ <h2 className="sr-only">Status do pagamento</h2>
  <div className="flex justify-center mb-8">
  <div className="inline-flex items-center gap-3 px-6 py-3.5 rounded-2xl border shadow-lg shadow-black/5" style={{ backgroundColor: btnColor + "08", borderColor: btnColor + "20" }}>
  <div className="relative">
@@ -766,6 +769,21 @@ export default function PublicCheckout() {
 
  return (
  <div data-checkout-theme={themeMode} className={`min-h-screen selection:bg-emerald-500/20 ${isDark ? "bg-[hsl(220_18%_11%)] text-[hsl(210_20%_96%)]" : isWhite ? "bg-[hsl(210_20%_98%)] text-gray-900" : "bg-[hsl(210_16%_94%)] text-gray-900"}`} style={checkoutThemeStyle}>
+ <Seo
+   title={`${product.name} — Checkout HOTZFY`}
+   description={(product.description || `Compre ${product.name} com pagamento seguro via PIX, cartão ou boleto.`).slice(0, 155)}
+   path={`/pay/${slug || ""}`}
+   ogType="product"
+   noindex
+   jsonLd={{
+     "@context": "https://schema.org",
+     "@type": "Product",
+     name: product.name,
+     description: product.description || undefined,
+     image: product.image_url || undefined,
+     offers: { "@type": "Offer", price: product.price, priceCurrency: "BRL", availability: "https://schema.org/InStock" },
+   }}
+ />
 
  {/* ═══ Social Proof Toast ═══ */}
  {product.checkout_social_proof && <RecentPurchaseToast productName={product.name} color={btnColor} />}

@@ -1,0 +1,18 @@
+# HOTZFY
+
+> Plataforma brasileira de pagamentos e gestão para infoprodutores: checkout de alta conversão, área de membros, analytics em tempo real e antifraude integrado.
+
+HOTZFY permite vender, gerenciar e escalar produtos digitais com PIX, cartão e boleto, sistema de afiliados, coproduções, cupons e saques rápidos.
+
+## Pages
+
+- [Home](/): Visão geral da plataforma, recursos, preços e FAQ.
+- [Login / Criar conta](/auth): Acesso ao painel do produtor.
+- [Status](/status): Status operacional dos serviços.
+- [Termos de Uso](/termos-de-uso): Termos e condições da plataforma.
+- [Política de Privacidade](/politica-de-privacidade): Tratamento de dados pessoais (LGPD).
+- [Área de Membros — Login](/membros-area/login): Acesso de alunos aos cursos.
+
+## Optional
+
+- [Sitemap](/sitemap.xml)
