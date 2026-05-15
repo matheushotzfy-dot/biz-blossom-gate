@@ -70,6 +70,7 @@ export default function Certificado() {
 
   return (
     <main className="min-h-dvh bg-background py-8 px-4 print:p-0">
+      <Seo title={`Certificado — ${cert.course_title}`} description={`Certificado de conclusão do curso ${cert.course_title}.`} path={`/certificado/${cert.code || ""}`} noindex />
       <div className="max-w-4xl mx-auto">
         {/* Toolbar (hidden on print) */}
         <div className="flex items-center justify-between mb-6 print:hidden">
