@@ -1,5 +1,6 @@
 import { ArrowLeft, Shield, FileText, Scale, AlertTriangle, CheckCircle2, Clock, Ban } from "lucide-react";
 import { Link } from "react-router-dom";
+import { Seo } from "@/components/Seo";
 
 const LAST_UPDATED = "01 de Abril de 2026";
 const COMPANY_NAME = "HOTZFY";
