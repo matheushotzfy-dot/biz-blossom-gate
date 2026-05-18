@@ -87,18 +87,21 @@ Deno.serve(async (req) => {
       );
     }
 
-    // ===== SERVER-SIDE ROLE CHECK =====
+    // ===== SERVER-SIDE ROLE CHECK (direct query, bypasses RPC permission issues) =====
     const userId = authData.user.id;
 
-    const { data: isAdmin } = await adminClient.rpc("has_role", {
-      _user_id: userId,
-      _role: "admin",
-    });
+    const { data: roleRows, error: roleError } = await adminClient
+      .from("user_roles")
+      .select("role")
+      .eq("user_id", userId);
 
-    const { data: isEmployee } = await adminClient.rpc("has_role", {
-      _user_id: userId,
-      _role: "employee",
-    });
+    if (roleError) {
+      console.error("[admin-login] role query error:", roleError.message);
+    }
+
+    const roles = (roleRows ?? []).map((r: { role: string }) => r.role);
+    const isAdmin = roles.includes("admin");
+    const isEmployee = roles.includes("employee");
 
     if (!isAdmin && !isEmployee) {
       await adminClient.from("admin_login_attempts").insert({
