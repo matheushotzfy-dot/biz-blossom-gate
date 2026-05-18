@@ -16,8 +16,14 @@ Deno.serve(async (req) => {
 
   try {
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
+    const anonKey = Deno.env.get("SUPABASE_ANON_KEY")!;
     const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
-    const adminClient = createClient(supabaseUrl, serviceRoleKey);
+    const authClient = createClient(supabaseUrl, anonKey, {
+      auth: { persistSession: false, autoRefreshToken: false },
+    });
+    const adminClient = createClient(supabaseUrl, serviceRoleKey, {
+      auth: { persistSession: false, autoRefreshToken: false },
+    });
 
     const { email, password } = await req.json();
 
@@ -70,7 +76,7 @@ Deno.serve(async (req) => {
     }
 
     // ===== AUTHENTICATE =====
-    const { data: authData, error: authError } = await adminClient.auth.signInWithPassword({
+    const { data: authData, error: authError } = await authClient.auth.signInWithPassword({
       email: trimmedEmail,
       password,
     });
