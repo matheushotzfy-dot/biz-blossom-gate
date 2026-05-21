@@ -1,29 +1,69 @@
-The objective is to unify the visual identity and quality standards of the Withdrawal and Members Area tabs, ensuring they follow the premium "Vendas/Dashboard" pattern with high-contrast typography, clean data presentation, and design system tokens.
 
-### 1. Financeiro: Saques (Pix & Crypto)
-- **PIX (Saques.tsx):**
-    - Refine the header metrics to match the Vendas dashboard "Command strip" style.
-    - Implement the `SortHead` pattern for the withdrawal history table.
-    - Standardize status badges (e.g., APPROVED, PENDING) with consistent background/border opacity and dot indicators.
-    - Use `tabular-nums` and specific font weights (`font-black`) for currency values.
-    - Improve the withdrawal request dialog to be more focused and clean.
-- **Crypto (SaquesCrypto.tsx):**
-    - Tone down "neon" effects to match a professional fintech aesthetic.
-    - Standardize the currency and price tracker UI.
-    - Sync table styles and badges with the PIX tab for total consistency.
+# Plano de Correção — 50 Findings
 
-### 2. Área de Membros
-- **MemberArea.tsx (Library):**
-    - Improve the grid and carousel presentation.
-    - Ensure all spacing uses semantic tokens (e.g., `lg:px-16`, `pb-24`).
-    - Standardize the "Hero" banner typography to match the ultra-display style in the Vendas page (large, tracking-tight).
-    - Refine course cards with better hover states and progress indicators.
-- **MemberHome.tsx (External Area):**
-    - Unify with internal tokens (`bg-background` instead of hardcoded hex).
-    - Sync the "Netflix" experience with the internal library for a seamless transition.
+Vou aplicar as correções em **3 ondas**, priorizando o que mais impacta segurança e estabilidade. Tudo será feito sem quebrar funcionalidades existentes.
 
-### Technical Details
-- Use `shadcn/ui` components (`Table`, `Card`, `Badge`, `Avatar`).
-- Apply `framer-motion` for subtle transitions (fade-in, slide-up).
-- Ensure high-contrast ratios for readability.
-- Maintain "Privacy Mode" (Hide/Show values) consistently across all financial views.
+## Onda 1 — Banco de Dados (Migração SQL)
+
+**Objetivo:** fechar buracos de segurança RLS e otimizar performance.
+
+- Revogar `EXECUTE` de funções `SECURITY DEFINER` sensíveis para `anon` e `authenticated` (linter findings 1–9): `get_course_analytics`, `get_ledger_balance`, `check_velocity`, `check_blacklist`, `check_signup_conflicts`, `get_affiliate_product_owner`, `get_checkout_status`, `is_product_active`, `current_user_has_role`. Manter `has_role` acessível.
+- Criar índices ausentes em colunas de FK e filtro frequente:
+  - `activity_logs(user_id, created_at desc)`
+  - `notifications(user_id, created_at desc)`
+  - `transactions(user_id, status, created_at desc)`
+  - `affiliate_sales(affiliate_user_id)`, `affiliate_links(product_id)`
+  - `withdrawals(user_id, status)`, `financial_ledger(user_id, created_at desc)`
+- Constraints de integridade financeira:
+  - `CHECK (amount >= 0)` em `transactions`, `withdrawals`, `affiliate_sales`, `balance_adjustments`.
+- `ON DELETE CASCADE` em `order_bumps_bump_product_id_fkey` (hoje deleta o pai e quebra o bump).
+- Soft delete em `products` (`deleted_at timestamptz`) + ajuste das RLS para filtrar `deleted_at IS NULL`.
+- Sanitização de PII em `activity_logs`: trigger remove chaves `password`, `token`, `secret`, `cpf` antes de gravar.
+- Trigger `update_updated_at_column` em `acquirers` e demais tabelas que faltam.
+- Limpar policies `deny_anon_*` redundantes (são `RESTRICTIVE` com `false` sem `PERMISSIVE` correspondente para anon) — manter apenas onde há ambiguidade real.
+
+## Onda 2 — Edge Functions
+
+**Objetivo:** validar input, evitar reprocessamento e endurecer respostas.
+
+- Adicionar **Zod validation** em `admin-login`, `manager-login`, `admin-2fa-verify`, `podpay-postback`, `podpay-create-transaction`, `podpay-cashout`, `podpay-refund`, `generate-api-key`, `export-report`, `admin-impersonate`.
+- Idempotência em `podpay-postback`: checar `processed_at` antes de processar splits.
+- Tipar `supabase: any` → `SupabaseClient` em `podpay-postback` (processCoProductionSplit / processAffiliateSplit).
+- CORS restrito: trocar `*` por allowlist dos domínios `hotzfy.com.br`, `www.hotzfy.com.br`, lovable preview.
+- Headers de segurança: `X-Content-Type-Options: nosniff`, `Referrer-Policy: no-referrer` em todas as respostas.
+- Retornar 500 com detalhe em `subscription-renewal` quando há falhas; sanitizar URLs nos `catch`.
+- `manager-login`: aplicar mesmo split `authClient`/`adminClient` já feito em `admin-login`.
+- Rate-limit IP em `admin-login` e `manager-login` via tabela `admin_login_attempts` (já existe) — bloquear após N tentativas/min.
+- Retry com backoff exponencial nas chamadas PodPay (`cashout`, `create-transaction`, `refund`).
+- `export-report`: paginar resultados em chunks de 1000 antes de montar CSV.
+
+## Onda 3 — Frontend
+
+**Objetivo:** reduzir `as any`, melhorar UX e acessibilidade sem mudar layout.
+
+- Centralizar `formatCurrency(value, locale='pt-BR', currency='BRL')` em `src/lib/utils.ts` e substituir hardcodes.
+- `pixelTracking.ts`: guardar flag `__pixel_loaded_<id>` para não reinjetar scripts em re-render.
+- Adicionar `aria-label` em botões icon-only restantes (modais, fechar painéis).
+- Memoizar listas filtradas (`Vendas.tsx`, `Marketplace.tsx`, `Webhooks.tsx`) com `useMemo`; `React.memo` em linhas pesadas.
+- Expor `error` no `useQueryData` e disparar Toast quando falhar.
+- Reduzir `as any`: gerar tipo manual para `co_productions` e `webhook_configs_safe` em `src/integrations/supabase/types.ts` está bloqueado (auto-gerado) → criar `src/types/db-extra.ts` com tipos auxiliares e remover ~50 `as any` em arquivos top: `Vendas.tsx`, `Coproducoes.tsx`, `AdminSellersTab.tsx`, `AdminManagersTab.tsx`, `useQueryData.tsx`.
+- Loading states em botões de ação (Vendas, Saques, Afiliados): desabilitar enquanto `isLoading`.
+- Deletar `src/pages/Dashboard.tsx.bak` e assets `ignore-*` não referenciados.
+- `public/robots.txt`: adicionar `Disallow: /admin`, `Disallow: /manager`, `Disallow: /financeiro`.
+- `public/manifest.json`: completar `theme_color`, `background_color`, ícones 192/512.
+
+## Detalhes técnicos
+
+- Migração será **uma única transação** com `IF NOT EXISTS` para índices e `DROP POLICY IF EXISTS` antes de recriar.
+- Tipos auxiliares ficam em `src/types/db-extra.ts` (não toca `types.ts` auto-gerado).
+- CORS allowlist via `const ALLOWED_ORIGINS = [...]` e função `buildCors(origin)` reutilizável (helper inline em cada função, não há shared/).
+- Zod: usar `npm:zod@3` direto via Deno specifier.
+
+## Fora do escopo
+
+- Refatorar `Vendas.tsx` (1000+ linhas) — só limpeza de tipos.
+- Substituir imagens `ignore-*` por WebP (apenas remover não-referenciadas).
+- Sitemap dinâmico (requer nova edge function, posso fazer depois se quiser).
+- Mover roles `text` → enum `app_role` (alto risco em prod com triggers existentes).
+
+Confirma que posso seguir com as 3 ondas?
