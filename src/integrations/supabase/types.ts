@@ -1538,6 +1538,7 @@ export type Database = {
           co_production_enabled: boolean
           co_production_split: number
           created_at: string
+          deleted_at: string | null
           delivery_type: string
           description: string | null
           display_name: string | null
@@ -1573,6 +1574,7 @@ export type Database = {
           co_production_enabled?: boolean
           co_production_split?: number
           created_at?: string
+          deleted_at?: string | null
           delivery_type?: string
           description?: string | null
           display_name?: string | null
@@ -1608,6 +1610,7 @@ export type Database = {
           co_production_enabled?: boolean
           co_production_split?: number
           created_at?: string
+          deleted_at?: string | null
           delivery_type?: string
           description?: string | null
           display_name?: string | null

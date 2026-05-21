@@ -1,11 +1,27 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
-};
+const ALLOWED_ORIGINS = new Set([
+  "https://hotzfy.com.br",
+  "https://www.hotzfy.com.br",
+  "https://biz-blossom-gate.lovable.app",
+  "https://id-preview--8b85380d-bbad-44c2-8000-ac99dd36affb.lovable.app",
+  "https://8b85380d-bbad-44c2-8000-ac99dd36affb.lovableproject.com",
+]);
+
+function buildCors(req: Request) {
+  const origin = req.headers.get("origin") ?? "";
+  const allow = ALLOWED_ORIGINS.has(origin) ? origin : "*";
+  return {
+    "Access-Control-Allow-Origin": allow,
+    "Vary": "Origin",
+    "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
+    "X-Content-Type-Options": "nosniff",
+    "Referrer-Policy": "no-referrer",
+  };
+}
 
 Deno.serve(async (req) => {
+  const corsHeaders = buildCors(req);
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
@@ -13,7 +29,13 @@ Deno.serve(async (req) => {
   try {
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
-    const adminClient = createClient(supabaseUrl, serviceRoleKey);
+    const anonKey = Deno.env.get("SUPABASE_ANON_KEY")!;
+    const authClient = createClient(supabaseUrl, anonKey, {
+      auth: { persistSession: false, autoRefreshToken: false },
+    });
+    const adminClient = createClient(supabaseUrl, serviceRoleKey, {
+      auth: { persistSession: false, autoRefreshToken: false },
+    });
 
     const { email, password } = await req.json();
 
@@ -39,7 +61,7 @@ Deno.serve(async (req) => {
       );
     }
 
-    // Rate limiting - reuse admin_login_attempts table
+    // Rate limiting via admin_login_attempts table
     const fifteenMinAgo = new Date(Date.now() - 15 * 60 * 1000).toISOString();
     const { data: recentAttempts } = await adminClient
       .from("admin_login_attempts")
@@ -56,8 +78,8 @@ Deno.serve(async (req) => {
       );
     }
 
-    // Authenticate
-    const { data: authData, error: authError } = await adminClient.auth.signInWithPassword({
+    // Auth via anon client; keep service-role on adminClient
+    const { data: authData, error: authError } = await authClient.auth.signInWithPassword({
       email: trimmedEmail,
       password,
     });
@@ -70,9 +92,14 @@ Deno.serve(async (req) => {
       );
     }
 
-    // Server-side role check - must be manager
+    // Role check via direct query (bypasses RPC permission issues)
     const userId = authData.user.id;
-    const { data: isManager } = await adminClient.rpc("has_role", { _user_id: userId, _role: "manager" });
+    const { data: roleRows } = await adminClient
+      .from("user_roles")
+      .select("role")
+      .eq("user_id", userId);
+    const roles = (roleRows ?? []).map((r: { role: string }) => r.role);
+    const isManager = roles.includes("manager");
 
     if (!isManager) {
       await adminClient.from("admin_login_attempts").insert({ email: trimmedEmail, success: false });
@@ -82,7 +109,6 @@ Deno.serve(async (req) => {
       );
     }
 
-    // Success
     await adminClient.from("admin_login_attempts").insert({ email: trimmedEmail, success: true });
 
     await adminClient.from("audit_logs").insert({

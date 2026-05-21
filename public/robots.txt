@@ -1,8 +1,18 @@
 User-agent: Googlebot
 Allow: /
+Disallow: /admin
+Disallow: /admin/
+Disallow: /manager
+Disallow: /manager/
+Disallow: /financeiro
+Disallow: /financeiro/
+Disallow: /membros/auth
 
 User-agent: Bingbot
 Allow: /
+Disallow: /admin
+Disallow: /manager
+Disallow: /financeiro
 
 User-agent: Twitterbot
 Allow: /
@@ -12,5 +22,8 @@ Allow: /
 
 User-agent: *
 Allow: /
+Disallow: /admin
+Disallow: /manager
+Disallow: /financeiro
 
 Sitemap: https://hotzfy.com.br/sitemap.xml
