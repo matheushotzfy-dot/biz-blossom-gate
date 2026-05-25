@@ -48,24 +48,6 @@ function GlowCard({ children, className, glowColor = "primary", delay = 0 }: {
  );
 }
 
-/* ═══ KPI Tile ═══ */
-function KpiTile({ label, value, icon: Icon, color = "primary", delay = 0, sub }: {
- label: string; value: string; icon: any; color?: string; delay?: number; sub?: string;
-}) {
- return (
- <GlowCard glowColor={color} delay={delay} className="p-5 shimmer">
- <div className={cn("absolute left-0 top-[20%] bottom-[20%] w-[3px] rounded-r-full opacity-0 group-hover:opacity-100 transition-opacity duration-500", `bg-${color}`)} />
- <div className="flex items-start justify-between mb-3">
- <div className={cn("h-10 w-10 rounded-xl flex items-center justify-center border transition-all duration-300 group-hover:scale-110", `bg-${color}/10 border-${color}/12 text-${color}`)}>
- <Icon className="h-4.5 w-4.5" />
- </div>
- </div>
- <p className="text-[9px] font-heading uppercase tracking-[0.2em] text-muted-foreground/35 mb-1.5">{label}</p>
- <span className="text-2xl font-heading tabular-nums tracking-tight text-foreground leading-none">{value}</span>
- {sub && <p className="text-[10px] text-muted-foreground/40 mt-1.5 font-display">{sub}</p>}
- </GlowCard>
- );
-}
 
 export default function Indicacoes() {
  const { user } = useAuth();
