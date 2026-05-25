@@ -163,6 +163,23 @@ export function useAppIntegrations() {
   });
 }
 
+export function useDisputes() {
+  const { user } = useAuth();
+  return useQuery({
+    queryKey: ["disputes", user?.id],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("disputes")
+        .select("*")
+        .eq("seller_user_id", user!.id)
+        .order("created_at", { ascending: false });
+      return (data || []) as Tables<"disputes">[];
+    },
+    enabled: !!user?.id,
+    staleTime: STALE_TIME,
+  });
+}
+
 export function useCourses() {
   const { user } = useAuth();
   return useQuery({

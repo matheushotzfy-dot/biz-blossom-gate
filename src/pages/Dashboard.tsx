@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useProfile } from "@/hooks/useProfile";
-import { useTransactions, useWithdrawals, useProducts as useProductsQuery } from "@/hooks/useQueryData";
+import { useTransactions, useWithdrawals, useProducts as useProductsQuery, useDisputes } from "@/hooks/useQueryData";
 import {
   Activity,
   ArrowDownRight,
@@ -102,6 +102,7 @@ export default function Dashboard() {
   const { profile } = useProfile();
   const { data: transactions = [] } = useTransactions();
   const { data: withdrawals = [] } = useWithdrawals(10);
+  const { data: disputes = [] } = useDisputes();
   const { data: productsData } = useProductsQuery();
   const [selectedPeriod, setSelectedPeriod] = useState<PeriodPreset>(PERIOD_PRESETS[0]);
   const [customRange, setCustomRange] = useState<DateRange | undefined>();
@@ -248,11 +249,21 @@ export default function Dashboard() {
   const statusBg = (s: string) => s === 'completed' ? 'bg-success/10' : s === 'pending' ? 'bg-warning/10' : 'bg-destructive/10';
   const statusColor = (s: string) => s === 'completed' ? 'text-success' : s === 'pending' ? 'text-warning' : 'text-destructive';
 
+  const pendingBalance = useMemo(() => {
+    return transactions
+      .filter(t => t.status === "completed" && t.retained_until && new Date(t.retained_until) > new Date())
+      .reduce((acc, t) => acc + Number(t.net_amount), 0);
+  }, [transactions]);
+
+  const medCount = useMemo(() => {
+    return disputes.filter(d => d.type === 'medpix' && d.status === 'open').length;
+  }, [disputes]);
+
   const financialCards = [
-    { label: "Faturamento", value: privacy.hidden ? CENSORED : fmt(revenue), icon: TrendingUp, color: "success" as const, sub: "Bruto no período", trend: 12 },
-    { label: "Vendas", value: approved.length, icon: Zap, color: "primary" as const, sub: "Transações concluídas", trend: 8 },
     { label: "Ticket Médio", value: privacy.hidden ? CENSORED : fmt(approved.length > 0 ? revenue / approved.length : 0), icon: BarChart3, color: "info" as const, sub: "Média por venda" },
-    { label: "Clientes", value: uniqueCustomers, icon: User, color: "warning" as const, sub: "Compradores únicos" },
+    { label: "Pedidos Pagos", value: approved.length, icon: Zap, color: "primary" as const, sub: "Transações concluídas", trend: 8 },
+    { label: "Saldo Pendente", value: privacy.hidden ? CENSORED : fmt(pendingBalance), icon: Clock3, color: "warning" as const, sub: "Em processamento" },
+    { label: "MEDS", value: medCount, icon: ShieldCheck, color: "destructive" as const, sub: "Disputas ativas" },
   ];
 
 
@@ -311,33 +322,49 @@ export default function Dashboard() {
 
       {/* Hero Financial Row */}
       <div className="grid lg:grid-cols-4 gap-6 md:gap-10">
-        <Card className="lg:col-span-2 relative overflow-hidden group border-primary/20 bg-gradient-to-br from-primary/[0.03] to-transparent shadow-xl shadow-primary/5 rounded-[2.5rem] min-h-[180px] md:min-h-[220px]">
+        <Card className="lg:col-span-2 relative overflow-hidden group border-primary/20 bg-gradient-to-br from-primary/[0.04] to-transparent shadow-xl shadow-primary/5 rounded-[2.5rem] min-h-[240px] md:min-h-[280px]">
           <div className="absolute top-0 right-0 p-12 opacity-[0.05] transition-all duration-700 group-hover:opacity-[0.1] group-hover:scale-110 group-hover:-rotate-6">
-            <Wallet className="h-48 w-48 -rotate-12" />
+            <TrendingUp className="h-48 w-48 -rotate-12" />
           </div>
-          <CardHeader className="pb-4 pt-6 px-6 md:px-8">
+          <CardHeader className="pb-2 pt-6 px-6 md:px-8">
              <div className="flex items-center gap-2 text-primary font-black uppercase tracking-[0.3em] text-[10px] bg-primary/5 w-fit px-3 py-1 rounded-full border border-primary/10">
-                <ShieldCheck className="h-3 w-3" />
-                Saldo Seguro Disponível
+                <BarChart3 className="h-3 w-3" />
+                Faturamento Total do Dia
              </div>
           </CardHeader>
           <CardContent className="pt-2 pb-6 px-6 md:px-8">
-            <div className="flex items-baseline gap-4">
-              <p className="text-[48px] font-black tracking-tighter leading-none bg-gradient-to-br from-foreground to-foreground/70 bg-clip-text text-transparent">
-                {privacy.hidden ? CENSORED : fmt(balance)}
-              </p>
-              <span className="text-muted-foreground/60 font-black text-xl tracking-tighter">BRL</span>
-            </div>
-            
-            <div className="mt-8 md:mt-12 flex flex-wrap gap-4 md:gap-6">
-               <Link to="/financeiro/saques" className="bg-primary text-primary-foreground px-6 md:px-10 h-11 md:h-14 rounded-2xl font-black text-xs md:text-sm flex items-center gap-2 shadow-2xl shadow-primary/30 hover:translate-y-[-2px] hover:shadow-primary/40 active:scale-[0.98] transition-all">
-                  <ArrowDownRight className="h-4 w-4 md:h-5 md:w-5" />
+            <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
+              <div className="space-y-4">
+                <div className="flex items-baseline gap-4">
+                  <p className="text-[54px] md:text-[64px] font-black tracking-tighter leading-none bg-gradient-to-br from-foreground to-foreground/70 bg-clip-text text-transparent">
+                    {privacy.hidden ? CENSORED : fmt(revenue)}
+                  </p>
+                  <span className="text-muted-foreground/60 font-black text-2xl tracking-tighter">BRL</span>
+                </div>
+                
+                <div className="flex items-center gap-6 p-4 rounded-3xl bg-background/40 border border-border/40 backdrop-blur-sm w-fit">
+                  <div className="space-y-1">
+                    <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/60">Saldo Disponível</p>
+                    <p className="text-lg font-black text-success tracking-tight">{privacy.hidden ? CENSORED : fmt(balance)}</p>
+                  </div>
+                  <div className="h-8 w-px bg-border/60" />
+                  <div className="space-y-1">
+                    <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/60">Conversão Geral</p>
+                    <p className="text-lg font-black text-primary tracking-tight">{conversion.toFixed(1)}%</p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex flex-col gap-3 min-w-[200px]">
+                <Link to="/financeiro/saques" className="bg-primary text-primary-foreground px-6 h-12 rounded-2xl font-black text-xs md:text-sm flex items-center justify-center gap-2 shadow-2xl shadow-primary/30 hover:translate-y-[-2px] hover:shadow-primary/40 active:scale-[0.98] transition-all">
+                  <ArrowDownRight className="h-4 w-4" />
                   Solicitar Saque
-               </Link>
-               <Link to="/vendas/links" className="bg-card border border-border px-6 md:px-10 h-11 md:h-14 rounded-2xl font-black text-xs md:text-sm flex items-center gap-2 hover:bg-accent hover:translate-y-[-2px] transition-all">
-                  <Zap className="h-4 w-4 md:h-5 md:w-5 text-success" />
+                </Link>
+                <Link to="/vendas/links" className="bg-card border border-border px-6 h-12 rounded-2xl font-black text-xs md:text-sm flex items-center justify-center gap-2 hover:bg-accent hover:translate-y-[-2px] transition-all">
+                  <Zap className="h-4 w-4 text-success" />
                   Link de Pagamento
-               </Link>
+                </Link>
+              </div>
             </div>
           </CardContent>
           
