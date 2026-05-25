@@ -399,23 +399,23 @@ export default function Dashboard() {
 
 
       {/* Main Operations Grid */}
-      <div className="grid lg:grid-cols-3 gap-8 md:gap-10">
-        <Card className="lg:col-span-2 border-border/40 overflow-hidden">
-          <CardHeader className="flex flex-row items-center justify-between border-b border-border/40 px-6 py-6 md:px-10 md:py-8">
+      <div className="grid lg:grid-cols-3 gap-6">
+        <Card className="lg:col-span-2 border-border/40 overflow-hidden shadow-lg shadow-black/5 rounded-3xl">
+          <CardHeader className="flex flex-row items-center justify-between border-b border-border/40 px-6 py-5 md:px-8">
             <div>
-              <CardTitle className="text-xl font-black">Fluxo de Vendas</CardTitle>
-              <CardDescription className="text-xs font-bold uppercase tracking-wider">Desempenho financeiro no tempo</CardDescription>
+              <CardTitle className="text-lg font-black">Fluxo de Vendas</CardTitle>
+              <CardDescription className="text-[10px] font-bold uppercase tracking-wider opacity-50">Desempenho financeiro</CardDescription>
             </div>
             <div className="flex items-center gap-4 text-xs font-bold">
                <div className="flex items-center gap-2">
                   <div className="h-2 w-2 rounded-full bg-primary" />
-                  <span>Aprovadas</span>
+                  <span className="opacity-60">Aprovadas</span>
                </div>
-               <div className="text-success font-black">{fmt(revenue)}</div>
+               <div className="text-primary font-black">{fmt(revenue)}</div>
             </div>
           </CardHeader>
           <CardContent className="p-0">
-            <div className="h-[300px] md:h-[400px] w-full pt-8 pb-6 pr-10 pl-6">
+            <div className="h-[300px] md:h-[350px] w-full pt-6 pb-4 pr-6 pl-2">
               <ResponsiveContainer width="100%" height="100%">
                 <AreaChart data={chartData} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
                   <defs>
@@ -469,12 +469,12 @@ export default function Dashboard() {
           </CardContent>
         </Card>
 
-        <Card className="border-border/40 overflow-hidden bg-secondary/10">
-          <CardHeader className="border-b border-border/40 px-8 py-6">
-            <CardTitle className="text-xl font-black">Saúde da Operação</CardTitle>
-            <CardDescription className="text-xs font-bold uppercase tracking-wider">KPIs críticos de performance</CardDescription>
+        <Card className="border-border/40 overflow-hidden bg-secondary/[0.03] shadow-lg shadow-black/5 rounded-3xl">
+          <CardHeader className="border-b border-border/40 px-6 py-5">
+            <CardTitle className="text-lg font-black">Saúde da Operação</CardTitle>
+            <CardDescription className="text-[10px] font-bold uppercase tracking-wider opacity-50">KPIs de performance</CardDescription>
           </CardHeader>
-          <CardContent className="px-8 py-8 space-y-8">
+          <CardContent className="px-6 py-6 space-y-6">
             <div className="space-y-3">
               <div className="flex justify-between items-end">
                 <span className="text-[10px] font-black uppercase tracking-[0.15em] text-muted-foreground/60">Taxa de Conversão</span>
@@ -518,11 +518,11 @@ export default function Dashboard() {
       </div>
 
       {/* Recent Activity */}
-      <Card className="border-border/40 overflow-hidden">
-        <CardHeader className="flex flex-row items-center justify-between border-b border-border/40 px-8 py-8">
+      <Card className="border-border/40 overflow-hidden shadow-lg shadow-black/5 rounded-3xl">
+        <CardHeader className="flex flex-row items-center justify-between border-b border-border/40 px-6 py-6 md:px-8">
           <div>
-            <CardTitle className="text-xl font-black">Últimas Transações</CardTitle>
-            <CardDescription className="text-xs font-bold uppercase tracking-wider">Acompanhamento em tempo real</CardDescription>
+            <CardTitle className="text-lg font-black">Últimas Transações</CardTitle>
+            <CardDescription className="text-[10px] font-bold uppercase tracking-wider opacity-50">Acompanhamento em tempo real</CardDescription>
           </div>
           <Link to="/vendas" className="text-xs font-black text-primary hover:underline underline-offset-4 flex items-center gap-1">
              Ver Histórico Completo
