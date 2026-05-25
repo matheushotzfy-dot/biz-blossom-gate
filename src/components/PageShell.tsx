@@ -168,41 +168,44 @@ export function GlassKpi({ label, value, sub, icon: Icon, tone = "primary", larg
   return (
     <div
       className={cn(
-        "group relative rounded-[2rem] bg-card/60 backdrop-blur-xl border border-border/40 overflow-hidden",
-        "hover:border-border/60 hover:shadow-2xl hover:-translate-y-1 transition-all duration-500",
+        "group relative rounded-[2.5rem] bg-card/60 backdrop-blur-2xl border border-border/40 overflow-hidden",
+        "hover:border-primary/20 hover:shadow-2xl hover:shadow-primary/5 hover:-translate-y-1.5 transition-all duration-500",
         t.glow,
-        large ? "p-6 md:p-8" : "p-4 md:p-5",
+        large ? "p-8 md:p-10" : "p-5 md:p-7",
         "animate-in fade-in slide-in-from-bottom-4"
       )}
       style={{ animationDelay: `${delay * 50}ms` }}
     >
       {/* Decorative gradient blob */}
       <div className={cn(
-        "absolute -right-8 -top-8 h-32 w-32 rounded-full bg-gradient-to-br opacity-0 blur-2xl transition-opacity duration-700 group-hover:opacity-[0.08]",
+        "absolute -right-12 -top-12 h-40 w-40 rounded-full bg-gradient-to-br opacity-0 blur-3xl transition-opacity duration-700 group-hover:opacity-[0.12]",
         t.bg
       )} />
+      
+      {/* Inner glass reflection */}
+      <div className="absolute inset-px rounded-[2.45rem] bg-gradient-to-br from-white/[0.03] to-transparent pointer-events-none" />
 
-      <div className="relative z-10 space-y-3">
+      <div className="relative z-10 space-y-4">
         <div className="flex items-center justify-between">
-          <p className="text-[10px] md:text-[11px] font-black text-muted-foreground/50 uppercase tracking-[0.25em] group-hover:text-muted-foreground/70 transition-colors">
+          <p className="text-[10px] md:text-[11px] font-black text-muted-foreground/40 uppercase tracking-[0.3em] group-hover:text-muted-foreground/60 transition-colors">
             {label}
           </p>
           <div className={cn(
-            "h-9 w-9 md:h-10 md:w-10 rounded-xl flex items-center justify-center transition-all duration-500 group-hover:scale-110 group-hover:rotate-3",
+            "h-11 w-11 md:h-13 md:w-13 rounded-2xl flex items-center justify-center transition-all duration-500 group-hover:scale-110 group-hover:rotate-3 shadow-lg",
             t.bg,
-            "border border-border/10 shadow-sm"
+            "border border-border/10"
           )}>
-            <Icon className={cn("h-5 w-5 md:h-6 md:w-6", t.color)} />
+            <Icon className={cn("h-6 w-6 md:h-7 md:w-7", t.color)} />
           </div>
         </div>
 
-        <div className="space-y-1">
+        <div className="space-y-1.5">
           <p className={cn(
-            "font-black text-foreground tracking-tighter tabular-nums leading-none",
-            large ? "text-3xl md:text-5xl" : "text-xl md:text-[28px]"
+            "font-black text-foreground tracking-tighter tabular-nums leading-none transition-all duration-300 group-hover:tracking-tight",
+            large ? "text-4xl md:text-6xl" : "text-2xl md:text-[32px]"
           )}>{value}</p>
           {sub && (
-            <p className="text-[10px] md:text-[11px] text-muted-foreground/40 mt-1.5 md:mt-2 font-bold group-hover:text-muted-foreground/60 transition-colors">
+            <p className="text-[10px] md:text-[11px] text-muted-foreground/30 mt-2 md:mt-3 font-bold group-hover:text-muted-foreground/50 transition-colors tracking-wide">
               {sub}
             </p>
           )}
@@ -210,7 +213,7 @@ export function GlassKpi({ label, value, sub, icon: Icon, tone = "primary", larg
       </div>
       
       {/* Subtle accent bar on top hover */}
-      <div className={cn("absolute inset-x-0 top-0 h-[2px] opacity-0 group-hover:opacity-100 transition-opacity duration-500", t.line)} />
+      <div className={cn("absolute inset-x-0 top-0 h-[3px] opacity-0 group-hover:opacity-100 transition-opacity duration-500", t.line)} />
     </div>
   );
 }
