@@ -752,8 +752,8 @@ export default function Vendas() {
     >
 
       {/* ─────────── COMANDO LIMPO ─────────── */}
-      <div className="px-5 pt-4 sm:px-8 sm:pt-6">
-        <header className="border-b border-border/70 pb-7">
+      <div className="px-5 pt-3 sm:px-8 sm:pt-4">
+        <header className="border-b border-border/70 pb-4">
           <div className="flex flex-col gap-5 xl:flex-row xl:items-start xl:justify-between">
             <div className="min-w-0">
               <h1 className="font-display text-[36px] font-black leading-[0.88] tracking-[-0.06em] text-foreground sm:text-[48px]">
@@ -867,7 +867,7 @@ export default function Vendas() {
             </TooltipProvider>
           </div>
 
-          <div className="mt-8 grid grid-cols-2 border-y border-border/70 lg:grid-cols-4 lg:divide-x lg:divide-border/70">
+          <div className="mt-5 grid grid-cols-2 border-y border-border/70 lg:grid-cols-4 lg:divide-x lg:divide-border/70">
             {[
               { label: "Receita bruta", value: hidden ? HIDE : fmtCompact(m.totalGross), sub: undefined, accent: "text-foreground", delta: { cur: m.totalGross, prev: p.totalGross }, rail: "bg-success" },
               { ...heroKpis[1], rail: "bg-info" },
