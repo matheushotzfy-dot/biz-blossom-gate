@@ -148,57 +148,73 @@ export function EmptyState({ icon, title, subtitle, action }: { icon: React.Reac
 }
 
 /**
- * GlassKpi — Unified KPI card used across all pages.
+ * GlassKpi — Unified premium KPI card used across all pages.
  */
 export function GlassKpi({ label, value, sub, icon: Icon, tone = "primary", large, delay = 0 }: {
- label: string; value: string; sub?: string;
- icon: React.ComponentType<{ className?: string }>;
- tone?: "primary" | "info" | "warning" | "success" | "destructive";
- large?: boolean; delay?: number;
+  label: string; value: string; sub?: string;
+  icon: React.ComponentType<{ className?: string }>;
+  tone?: "primary" | "info" | "warning" | "success" | "destructive";
+  large?: boolean; delay?: number;
 }) {
- const toneStyles: Record<string, { bg: string; color: string }> = {
- primary: { bg: "bg-primary/10", color: "text-primary" },
- info: { bg: "bg-info/10", color: "text-info" },
- warning: { bg: "bg-warning/10", color: "text-warning" },
- success: { bg: "bg-success/10", color: "text-success" },
- destructive: { bg: "bg-destructive/10", color: "text-destructive" },
- };
- const t = toneStyles[tone] || toneStyles.primary;
+  const toneStyles: Record<string, { bg: string; color: string; line: string; glow: string }> = {
+    primary: { bg: "bg-primary/10", color: "text-primary", line: "bg-primary", glow: "shadow-primary/5" },
+    info: { bg: "bg-info/10", color: "text-info", line: "bg-info", glow: "shadow-info/5" },
+    warning: { bg: "bg-warning/10", color: "text-warning", line: "bg-warning", glow: "shadow-warning/5" },
+    success: { bg: "bg-success/10", color: "text-success", line: "bg-success", glow: "shadow-success/5" },
+    destructive: { bg: "bg-destructive/10", color: "text-destructive", line: "bg-destructive", glow: "shadow-destructive/5" },
+  };
+  const t = toneStyles[tone] || toneStyles.primary;
 
- const accentBar: Record<string, string> = {
- primary: "bg-primary",
- info: "bg-info",
- warning: "bg-warning",
- success: "bg-success",
- destructive: "bg-destructive",
- };
+  return (
+    <div
+      className={cn(
+        "group relative rounded-[2rem] bg-card/60 backdrop-blur-xl border border-border/40 overflow-hidden",
+        "hover:border-border/60 hover:shadow-2xl hover:-translate-y-1 transition-all duration-500",
+        t.glow,
+        large ? "p-6 md:p-8" : "p-5 md:p-6",
+        "animate-in fade-in slide-in-from-bottom-4"
+      )}
+      style={{ animationDelay: `${delay * 50}ms` }}
+    >
+      {/* Decorative gradient blob */}
+      <div className={cn(
+        "absolute -right-8 -top-8 h-32 w-32 rounded-full bg-gradient-to-br opacity-0 blur-2xl transition-opacity duration-700 group-hover:opacity-[0.08]",
+        t.bg
+      )} />
 
- return (
- <div
- className={cn(
- "group relative rounded-xl md:rounded-2xl bg-card/60 backdrop-blur-xl border border-border/35 overflow-hidden",
- "hover:border-border/50 hover:shadow-[0_6px_24px_hsl(var(--foreground)/0.06)] transition-all duration-300",
- large ? "p-4 md:p-7" : "p-4 md:p-6"
- )}
- style={{ animationDelay: `${delay * 60}ms` }}
- >
- <div className={cn("absolute left-0 top-0 bottom-0 w-[3px] rounded-full", accentBar[tone] || accentBar.primary)} />
- <div className="pl-2">
- <div className="flex items-center justify-between mb-2.5 md:mb-3.5">
- <span className="text-[9px] md:text-[10px] font-bold text-muted-foreground/60 uppercase tracking-[0.16em]">{label}</span>
- <div className={cn("h-9 w-9 md:h-10 md:w-10 rounded-xl flex items-center justify-center ring-1 ring-border/15", t.bg)}>
- <Icon className={cn("h-4 w-4 md:h-[18px] md:w-[18px]", t.color)} />
- </div>
- </div>
- <p className={cn(
- "font-display font-black text-foreground tracking-[-0.03em] tabular-nums",
- large ? "text-2xl md:text-4xl" : "text-xl md:text-[28px]"
- )}>{value}</p>
- {sub && <p className="text-[10px] md:text-[11px] text-muted-foreground/50 mt-1.5 md:mt-2 font-medium">{sub}</p>}
- </div>
- </div>
- );
+      <div className="relative z-10 space-y-4">
+        <div className="flex items-center justify-between">
+          <p className="text-[10px] md:text-[11px] font-black text-muted-foreground/50 uppercase tracking-[0.25em] group-hover:text-muted-foreground/70 transition-colors">
+            {label}
+          </p>
+          <div className={cn(
+            "h-10 w-10 md:h-12 md:w-12 rounded-2xl flex items-center justify-center transition-all duration-500 group-hover:scale-110 group-hover:rotate-3",
+            t.bg,
+            "border border-border/10 shadow-sm"
+          )}>
+            <Icon className={cn("h-5 w-5 md:h-6 md:w-6", t.color)} />
+          </div>
+        </div>
+
+        <div className="space-y-1">
+          <p className={cn(
+            "font-black text-foreground tracking-tighter tabular-nums leading-none",
+            large ? "text-3xl md:text-5xl" : "text-2xl md:text-[32px]"
+          )}>{value}</p>
+          {sub && (
+            <p className="text-[10px] md:text-[11px] text-muted-foreground/40 mt-1.5 md:mt-2 font-bold group-hover:text-muted-foreground/60 transition-colors">
+              {sub}
+            </p>
+          )}
+        </div>
+      </div>
+      
+      {/* Subtle accent bar on top hover */}
+      <div className={cn("absolute inset-x-0 top-0 h-[2px] opacity-0 group-hover:opacity-100 transition-opacity duration-500", t.line)} />
+    </div>
+  );
 }
+
 
 /**
  * PageSkeleton — Loading skeleton for page content

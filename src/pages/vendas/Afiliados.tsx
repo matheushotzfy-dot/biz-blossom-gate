@@ -15,9 +15,11 @@ import { Switch } from "@/components/ui/switch";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { StatCard } from "@/components/StatCard";
 import { toast } from "sonner";
 import { EmptyState } from "@/components/PageShell";
 import { cn } from "@/lib/utils";
+
 
 const fmt = (v: number) => `R$ ${v.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}`;
 
@@ -54,21 +56,6 @@ function StatusPill({ status }: { status: string }) {
   );
 }
 
-/* ─── KPI Tile ─── */
-function KpiTile({ label, value, icon: Icon, tone = "primary", sub }: {
-  label: string; value: string; icon: any; tone?: "primary" | "success" | "warning" | "info"; sub?: string;
-}) {
-  return (
-    <Card className="p-5">
-      <div className={cn("h-9 w-9 rounded-xl flex items-center justify-center mb-3", `bg-${tone}/10 text-${tone}`)}>
-        <Icon className="h-4.5 w-4.5" strokeWidth={2.5} />
-      </div>
-      <p className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/50 mb-1">{label}</p>
-      <p className="font-display text-2xl font-black text-foreground tracking-tight tabular-nums">{value}</p>
-      {sub && <p className="text-[10px] font-bold text-muted-foreground/40 mt-1">{sub}</p>}
-    </Card>
-  );
-}
 
 export default function Afiliados() {
   const { user } = useAuth();
@@ -226,35 +213,36 @@ export default function Afiliados() {
 
       {/* ─── Global KPIs ─── */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
-        <KpiTile
-          label="Comissões Ganhas"
+        <StatCard
+          title="Comissões Ganhas"
           value={fmt(totalCommissionEarned)}
-          sub={`${mySales.filter(s => s.status === "approved").length} venda(s) paga(s)`}
+          description={`${mySales.filter(s => s.status === "approved").length} venda(s) paga(s)`}
           icon={DollarSign}
-          tone="success"
+          color="success"
         />
-        <KpiTile
-          label="A Receber"
+        <StatCard
+          title="A Receber"
           value={fmt(totalCommissionPending)}
-          sub={`${mySales.filter(s => s.status === "pending").length} pendente(s)`}
+          description={`${mySales.filter(s => s.status === "pending").length} pendente(s)`}
           icon={Clock}
-          tone="warning"
+          color="warning"
         />
-        <KpiTile
-          label="Cliques · Conversão"
+        <StatCard
+          title="Cliques · Conversão"
           value={String(totalClicks)}
-          sub={`${conversionRate.toFixed(2)}% conversão`}
+          description={`${conversionRate.toFixed(2)}% conversão`}
           icon={MousePointerClick}
-          tone="info"
+          color="info"
         />
-        <KpiTile
-          label="Links Ativos"
+        <StatCard
+          title="Links Ativos"
           value={String(myLinks.filter(l => l.is_active).length)}
-          sub={`${myLinks.length} total`}
+          description={`${myLinks.length} total`}
           icon={Link2}
-          tone="primary"
+          color="primary"
         />
       </div>
+
 
       {/* ─── Tabs ─── */}
       <div className="flex items-center bg-muted/30 p-1 rounded-2xl border border-border/50 w-fit">
@@ -280,11 +268,12 @@ export default function Afiliados() {
       {tab === "my-products" && (
         <div className="space-y-8">
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
-            <KpiTile label="Produtos" value={String(affiliateProducts.length)} icon={ShoppingCart} tone="primary" />
-            <KpiTile label="Afiliados" value={String(productLinks.length)} icon={Users} tone="info" />
-            <KpiTile label="Receita Afiliados" value={fmt(totalProductSalesViaAff)} icon={TrendingUp} tone="success" />
-            <KpiTile label="Comissões Pagas" value={fmt(totalProductCommPaid)} icon={DollarSign} tone="warning" />
+            <StatCard title="Produtos" value={String(affiliateProducts.length)} icon={ShoppingCart} color="primary" />
+            <StatCard title="Afiliados" value={String(productLinks.length)} icon={Users} color="info" />
+            <StatCard title="Receita Afiliados" value={fmt(totalProductSalesViaAff)} icon={TrendingUp} color="success" />
+            <StatCard title="Comissões Pagas" value={fmt(totalProductCommPaid)} icon={DollarSign} color="warning" />
           </div>
+
 
           <Card className="border-border/40 overflow-hidden">
             <CardHeader className="flex flex-row items-center justify-between border-b border-border/40 px-8 py-6">

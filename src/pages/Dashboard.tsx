@@ -26,11 +26,13 @@ import type { Tables } from "@/integrations/supabase/types";
 import { Link, useNavigate } from "react-router-dom";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { StatCard } from "@/components/StatCard";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
 import { format, differenceInDays } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { cn } from "@/lib/utils";
+import { cn, formatCurrency } from "@/lib/utils";
+
 import type { DateRange } from "react-day-picker";
 
 const PERIOD_PRESETS = [
@@ -239,11 +241,12 @@ export default function Dashboard() {
   const statusColor = (s: string) => s === 'completed' ? 'text-success' : s === 'pending' ? 'text-warning' : 'text-destructive';
 
   const financialCards = [
-    { label: "Faturamento", value: privacy.hidden ? CENSORED : fmt(revenue), icon: TrendingUp, color: "text-success", sub: "Bruto no período" },
-    { label: "Vendas", value: approved.length, icon: Zap, color: "text-primary", sub: "Transações concluídas" },
-    { label: "Ticket Médio", value: privacy.hidden ? CENSORED : fmt(approved.length > 0 ? revenue / approved.length : 0), icon: BarChart3, color: "text-info", sub: "Média por venda" },
-    { label: "Clientes", value: uniqueCustomers, icon: User, color: "text-warning", sub: "Compradores únicos" },
+    { label: "Faturamento", value: privacy.hidden ? CENSORED : fmt(revenue), icon: TrendingUp, color: "success" as const, sub: "Bruto no período", trend: 12 },
+    { label: "Vendas", value: approved.length, icon: Zap, color: "primary" as const, sub: "Transações concluídas", trend: 8 },
+    { label: "Ticket Médio", value: privacy.hidden ? CENSORED : fmt(approved.length > 0 ? revenue / approved.length : 0), icon: BarChart3, color: "info" as const, sub: "Média por venda" },
+    { label: "Clientes", value: uniqueCustomers, icon: User, color: "warning" as const, sub: "Compradores únicos" },
   ];
+
 
   return (
     <div className="p-4 md:p-8 space-y-8 max-w-[1600px] mx-auto animate-in fade-in duration-500">
@@ -300,53 +303,56 @@ export default function Dashboard() {
 
       {/* Hero Financial Row */}
       <div className="grid lg:grid-cols-4 gap-6">
-        <Card className="lg:col-span-2 relative overflow-hidden group border-primary/20 bg-primary/[0.02]">
-          <div className="absolute top-0 right-0 p-8 opacity-[0.03] transition-opacity group-hover:opacity-[0.06]">
-            <Wallet className="h-32 w-32 -rotate-12" />
+        <Card className="lg:col-span-2 relative overflow-hidden group border-primary/20 bg-gradient-to-br from-primary/[0.03] to-transparent shadow-xl shadow-primary/5 rounded-[2rem]">
+          <div className="absolute top-0 right-0 p-12 opacity-[0.05] transition-all duration-700 group-hover:opacity-[0.1] group-hover:scale-110 group-hover:-rotate-6">
+            <Wallet className="h-48 w-48 -rotate-12" />
           </div>
           <CardHeader className="pb-2">
-             <div className="flex items-center gap-2 text-primary font-black uppercase tracking-[0.2em] text-[10px]">
+             <div className="flex items-center gap-2 text-primary font-black uppercase tracking-[0.3em] text-[10px] bg-primary/5 w-fit px-3 py-1 rounded-full border border-primary/10">
                 <ShieldCheck className="h-3 w-3" />
                 Saldo Seguro Disponível
              </div>
           </CardHeader>
-          <CardContent className="pt-2">
+          <CardContent className="pt-4">
             <div className="flex items-baseline gap-4">
-              <p className="text-[56px] font-black tracking-tighter leading-none">{privacy.hidden ? CENSORED : fmt(balance)}</p>
-              <span className="text-muted-foreground font-bold text-sm">BRL</span>
+              <p className="text-[64px] font-black tracking-tighter leading-none bg-gradient-to-br from-foreground to-foreground/70 bg-clip-text text-transparent">
+                {privacy.hidden ? CENSORED : fmt(balance)}
+              </p>
+              <span className="text-muted-foreground/60 font-black text-xl tracking-tighter">BRL</span>
             </div>
-            <div className="mt-8 flex gap-3">
-               <Link to="/financeiro/saques" className="bg-primary text-white px-8 h-12 rounded-2xl font-black text-sm flex items-center gap-2 shadow-lg shadow-primary/20 hover:scale-[1.02] active:scale-[0.98] transition-all">
+            
+            <div className="mt-10 flex flex-wrap gap-4">
+               <Link to="/financeiro/saques" className="bg-primary text-primary-foreground px-10 h-14 rounded-2xl font-black text-sm flex items-center gap-2 shadow-2xl shadow-primary/30 hover:translate-y-[-2px] hover:shadow-primary/40 active:scale-[0.98] transition-all">
                   <ArrowDownRight className="h-5 w-5" />
                   Solicitar Saque
                </Link>
-               <Link to="/vendas/links" className="bg-card border border-border px-8 h-12 rounded-2xl font-black text-sm flex items-center gap-2 hover:bg-accent transition-all">
+               <Link to="/vendas/links" className="bg-card border border-border px-10 h-14 rounded-2xl font-black text-sm flex items-center gap-2 hover:bg-accent hover:translate-y-[-2px] transition-all">
                   <Zap className="h-5 w-5 text-success" />
-                  Link PIX
+                  Link de Pagamento
                </Link>
             </div>
           </CardContent>
+          
+          {/* Animated background element */}
+          <div className="absolute -bottom-24 -left-24 h-64 w-64 bg-primary/5 rounded-full blur-3xl opacity-50 group-hover:opacity-80 transition-opacity" />
         </Card>
 
-        <div className="grid grid-cols-1 gap-6 lg:col-span-2">
-           <div className="grid grid-cols-2 gap-6">
-              {financialCards.map((card) => (
-                <Card key={card.label} className="border-border/40 hover:border-border transition-colors">
-                  <CardHeader className="p-5 pb-2">
-                    <div className="flex justify-between items-start">
-                       <span className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/60">{card.label}</span>
-                       <card.icon className={cn("h-4 w-4 opacity-40", card.color)} />
-                    </div>
-                  </CardHeader>
-                  <CardContent className="p-5 pt-0">
-                    <p className="text-2xl font-black tracking-tight">{card.value}</p>
-                    <p className="text-[10px] font-bold text-muted-foreground/40 mt-1">{card.sub}</p>
-                  </CardContent>
-                </Card>
-              ))}
-           </div>
+        <div className="lg:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-6">
+          {financialCards.map((card) => (
+            <StatCard 
+              key={card.label}
+              title={card.label}
+              value={card.value}
+              icon={card.icon}
+              color={card.color}
+              description={card.sub}
+              trend={card.trend}
+              changeType={card.trend ? "positive" : "neutral"}
+            />
+          ))}
         </div>
       </div>
+
 
       {/* Main Operations Grid */}
       <div className="grid lg:grid-cols-3 gap-8">

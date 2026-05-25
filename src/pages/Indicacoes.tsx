@@ -7,11 +7,13 @@
 import { useEffect, useState, useMemo } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
-import { Gift, Copy, Users, DollarSign, CheckCircle2, Link2, Share2, TrendingUp, ArrowUpRight, Sparkles, Clock, Zap } from "lucide-react";
+import { Gift, Copy, Users, DollarSign, CheckCircle2, Link2, Share2, TrendingUp, ArrowUpRight, Sparkles, Clock, Zap, TrendingDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { motion } from "framer-motion";
+import { StatCard } from "@/components/StatCard";
 import { cn } from "@/lib/utils";
+
 
 const ease = [0.16, 1, 0.3, 1] as const;
 const fmt = (v: number) => `R$ ${v.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}`;
@@ -46,24 +48,6 @@ function GlowCard({ children, className, glowColor = "primary", delay = 0 }: {
  );
 }
 
-/* ═══ KPI Tile ═══ */
-function KpiTile({ label, value, icon: Icon, color = "primary", delay = 0, sub }: {
- label: string; value: string; icon: any; color?: string; delay?: number; sub?: string;
-}) {
- return (
- <GlowCard glowColor={color} delay={delay} className="p-5 shimmer">
- <div className={cn("absolute left-0 top-[20%] bottom-[20%] w-[3px] rounded-r-full opacity-0 group-hover:opacity-100 transition-opacity duration-500", `bg-${color}`)} />
- <div className="flex items-start justify-between mb-3">
- <div className={cn("h-10 w-10 rounded-xl flex items-center justify-center border transition-all duration-300 group-hover:scale-110", `bg-${color}/10 border-${color}/12 text-${color}`)}>
- <Icon className="h-4.5 w-4.5" />
- </div>
- </div>
- <p className="text-[9px] font-heading uppercase tracking-[0.2em] text-muted-foreground/35 mb-1.5">{label}</p>
- <span className="text-2xl font-heading tabular-nums tracking-tight text-foreground leading-none">{value}</span>
- {sub && <p className="text-[10px] text-muted-foreground/40 mt-1.5 font-display">{sub}</p>}
- </GlowCard>
- );
-}
 
 export default function Indicacoes() {
  const { user } = useAuth();
@@ -151,12 +135,13 @@ export default function Indicacoes() {
  </motion.section>
 
  {/* ═══ KPIs ═══ */}
- <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-8">
- <KpiTile label="Indicações" value={String(stats.total)} icon={Users} color="primary" delay={0} sub="enviadas" />
- <KpiTile label="Convertidas" value={String(stats.converted)} icon={CheckCircle2} color="success" delay={0.06} sub="ativadas" />
- <KpiTile label="Pendentes" value={String(stats.pending)} icon={Clock} color="warning" delay={0.12} sub="aguardando" />
- <KpiTile label="Total Ganho" value={fmt(stats.totalReward)} icon={DollarSign} color="primary" delay={0.18} sub="em recompensas" />
- </div>
+  <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+    <StatCard title="Indicações" value={String(stats.total)} icon={Users} color="primary" delay={0} description="enviadas" />
+    <StatCard title="Convertidas" value={String(stats.converted)} icon={CheckCircle2} color="success" delay={50} description="ativadas" />
+    <StatCard title="Pendentes" value={String(stats.pending)} icon={Clock} color="warning" delay={100} description="aguardando" />
+    <StatCard title="Total Ganho" value={fmt(stats.totalReward)} icon={DollarSign} color="primary" delay={150} description="em recompensas" />
+  </div>
+
 
  {/* ═══ How it Works ═══ */}
  <div className="mb-8">

@@ -8,11 +8,13 @@ import { useEffect, useState, useMemo } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import {
- Trophy, Star, Crown, Gem, Zap, Flame, Target, Shield, Award, TrendingUp,
- CheckCircle2, Sparkles, Lock, ArrowUpRight, Percent, Users, Package,
+  Trophy, Star, Crown, Gem, Zap, Flame, Target, Shield, Award, TrendingUp,
+  CheckCircle2, Sparkles, Lock, ArrowUpRight, Percent, Users, Package,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { motion } from "framer-motion";
+import { StatCard } from "@/components/StatCard";
+
 
 const ease = [0.16, 1, 0.3, 1] as const;
 
@@ -71,24 +73,6 @@ function GlowCard({ children, className, glowColor = "primary", delay = 0 }: {
  );
 }
 
-/* ═══ KPI Tile ═══ */
-function KpiTile({ label, value, icon: Icon, color = "primary", delay = 0, sub }: {
- label: string; value: string; icon: any; color?: string; delay?: number; sub?: string;
-}) {
- return (
- <GlowCard glowColor={color} delay={delay} className="p-5 shimmer">
- <div className={cn("absolute left-0 top-[20%] bottom-[20%] w-[3px] rounded-r-full opacity-0 group-hover:opacity-100 transition-opacity duration-500", `bg-${color}`)} />
- <div className="flex items-start justify-between mb-3">
- <div className={cn("h-10 w-10 rounded-xl flex items-center justify-center border transition-all duration-300 group-hover:scale-110", `bg-${color}/10 border-${color}/12 text-${color}`)}>
- <Icon className="h-4.5 w-4.5" />
- </div>
- </div>
- <p className="text-[9px] font-heading uppercase tracking-[0.2em] text-muted-foreground/35 mb-1.5">{label}</p>
- <span className="text-2xl font-heading tabular-nums tracking-tight text-foreground leading-none">{value}</span>
- {sub && <p className="text-[10px] text-muted-foreground/40 mt-1.5 font-display">{sub}</p>}
- </GlowCard>
- );
-}
 
 /* ═══ Progress Ring ═══ */
 function ProgressRing({ value, max = 100, size = 100, strokeWidth = 6, color = "primary" }: {
@@ -204,13 +188,14 @@ export default function Gamificacao() {
  </div>
  </motion.section>
 
- {/* ═══ KPIs ═══ */}
- <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-8">
- <KpiTile label="Nível Atual" value={level.name} icon={Crown} color="primary" delay={0} sub={`${currentLevelIdx + 1}° de ${LEVELS.length}`} />
- <KpiTile label="Vendas" value={String(stats.totalSales)} icon={TrendingUp} color="success" delay={0.06} sub="aprovadas" />
- <KpiTile label="Produtos" value={String(stats.products)} icon={Package} color="warning" delay={0.12} sub="ativos" />
- <KpiTile label="Conquistas" value={`${unlockedBadges.length}/${BADGES.length}`} icon={Trophy} color="info" delay={0.18} sub="desbloqueadas" />
- </div>
+  {/* ═══ KPIs ═══ */}
+  <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+    <StatCard title="Nível Atual" value={level.name} icon={Crown} color="primary" delay={0} description={`${currentLevelIdx + 1}° de ${LEVELS.length}`} />
+    <StatCard title="Vendas" value={String(stats.totalSales)} icon={TrendingUp} color="success" delay={50} description="aprovadas" />
+    <StatCard title="Produtos" value={String(stats.products)} icon={Package} color="warning" delay={100} description="ativos" />
+    <StatCard title="Conquistas" value={`${unlockedBadges.length}/${BADGES.length}`} icon={Trophy} color="info" delay={150} description="desbloqueadas" />
+  </div>
+
 
  {/* ═══ Progress to Next Level ═══ */}
  {nextLevel && (
