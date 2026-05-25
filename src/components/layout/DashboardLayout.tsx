@@ -142,21 +142,22 @@ function DashboardLayoutInner() {
 
             {/* ─── BALANCE ─── */}
             <div className="hidden md:flex items-center justify-center px-4">
-              <div className="group/balance relative flex items-center gap-3.5 px-5 h-[42px] rounded-[1.25rem] bg-secondary/30 border border-border/40 transition-all hover:bg-secondary/50 hover:border-primary/20 hover:shadow-[0_0_20px_-5px_rgba(var(--primary),0.1)]">
-                <div className="flex items-center gap-2.5">
-                  <div className="flex h-6 w-6 items-center justify-center rounded-lg bg-primary/10 text-primary">
-                    <Wallet className="h-3.5 w-3.5" strokeWidth={2.5} />
+              <div className="group/balance relative flex items-center gap-4 px-6 h-[46px] rounded-[1.5rem] bg-secondary/20 border border-border/30 backdrop-blur-md transition-all hover:bg-secondary/40 hover:border-primary/30 hover:shadow-[0_0_25px_-5px_rgba(var(--primary),0.15)] overflow-hidden">
+                <div className="absolute inset-0 bg-gradient-to-br from-primary/[0.03] to-transparent pointer-events-none" />
+                <div className="flex items-center gap-3 relative z-10">
+                  <div className="flex h-7 w-7 items-center justify-center rounded-xl bg-primary/10 text-primary shadow-sm border border-primary/10 group-hover/balance:scale-110 transition-transform duration-500">
+                    <Wallet className="h-4 w-4" strokeWidth={2.5} />
                   </div>
-                  <span className="text-[11px] font-black uppercase tracking-[0.15em] text-muted-foreground/40 group-hover/balance:text-muted-foreground/60 transition-colors">Saldo</span>
+                  <span className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/40 group-hover/balance:text-muted-foreground/70 transition-colors">Saldo</span>
                 </div>
-                <span className="text-[15px] font-display font-black text-foreground tabular-nums tracking-[-0.02em]">
+                <span className="text-[16px] font-display font-black text-foreground tabular-nums tracking-[-0.03em] relative z-10">
                   {privacyHidden ? "••••••" : formatBRL(Math.max(balance, 0))}
                 </span>
                 <button 
                   onClick={togglePrivacy}
-                  className="ml-0.5 h-7 w-7 rounded-lg flex items-center justify-center hover:bg-background/80 text-muted-foreground/30 hover:text-foreground transition-all active:scale-90"
+                  className="relative z-10 ml-1 h-8 w-8 rounded-xl flex items-center justify-center hover:bg-background/80 text-muted-foreground/30 hover:text-foreground transition-all active:scale-90"
                 >
-                  {privacyHidden ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
+                  {privacyHidden ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                 </button>
               </div>
             </div>
