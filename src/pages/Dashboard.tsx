@@ -255,7 +255,7 @@ export default function Dashboard() {
         <div className="space-y-1">
           <div className="flex items-center gap-3">
              <div className="h-3 w-3 rounded-full bg-success animate-pulse" />
-             <h1 className="text-3xl font-black tracking-tight text-foreground">{greeting}, {nickname}</h1>
+             <h1 className="text-2xl font-black tracking-tight text-foreground">{greeting}, {nickname}</h1>
           </div>
           <p className="text-muted-foreground font-medium text-sm flex items-center gap-2">
             <Activity className="h-4 w-4" />
@@ -315,7 +315,7 @@ export default function Dashboard() {
           </CardHeader>
           <CardContent className="pt-4">
             <div className="flex items-baseline gap-4">
-              <p className="text-[64px] font-black tracking-tighter leading-none bg-gradient-to-br from-foreground to-foreground/70 bg-clip-text text-transparent">
+              <p className="text-[48px] font-black tracking-tighter leading-none bg-gradient-to-br from-foreground to-foreground/70 bg-clip-text text-transparent">
                 {privacy.hidden ? CENSORED : fmt(balance)}
               </p>
               <span className="text-muted-foreground/60 font-black text-xl tracking-tighter">BRL</span>
