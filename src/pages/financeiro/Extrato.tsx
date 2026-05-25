@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useMemo, useCallback } from "react";
 import { useAuth } from "@/hooks/useAuth";
-import { useTransactions, useProducts } from "@/hooks/useQueryData";
+import { supabase } from "@/integrations/supabase/client";
+import { useTransactions, useProducts, useWithdrawals } from "@/hooks/useQueryData";
 import {
   Search, X, EyeOff, Eye, Phone, Mail, Clock, RefreshCw,
   Download, FileText, ChevronDown, ChevronUp, ArrowUpDown, ArrowUpRight, ArrowDownRight,
@@ -271,6 +272,7 @@ function MobileCard({ tx, prods, onClick }: { tx: Tables<"transactions">; prods:
 export default function Extrato() {
   const { user } = useAuth();
   const { data: transactions = [], isLoading: loading } = useTransactions();
+  const { data: withdrawals = [] } = useWithdrawals();
   const { data: productsRaw = [] } = useProducts();
   const products = useMemo(() => {
     const map: Record<string, string> = {};
@@ -459,6 +461,19 @@ export default function Extrato() {
     return () => window.removeEventListener("keydown", handler);
   }, [toggleHidden, toggleDensity, handleExportCSV]);
 
+  const [availableBalance, setAvailableBalance] = useState<number>(0);
+
+  useEffect(() => {
+    if (!user?.id) return;
+    const fetchBalance = async () => {
+      const { data, error } = await supabase.rpc("get_ledger_balance", { _user_id: user.id });
+      if (!error && data !== null) setAvailableBalance(Number(data));
+    };
+    fetchBalance();
+    const interval = setInterval(fetchBalance, 15000);
+    return () => clearInterval(interval);
+  }, [user?.id]);
+
   const m = metrics.current;
   const p = metrics.previous;
   const lastSaleText = metrics.lastSaleAt ? formatDistanceToNow(new Date(metrics.lastSaleAt), { locale: ptBR, addSuffix: true }) : null;
@@ -480,10 +495,10 @@ export default function Extrato() {
   const chargebackRate = m.approved.length > 0 ? (m.chargebacks.length / m.approved.length) * 100 : 0;
 
   const heroKpis = [
+    { label: "Saldo disponível", value: hidden ? HIDE : fmtCompact(availableBalance), sub: "Valor para saque", accent: "text-primary", spark: metrics.series.net, sparkColor: "hsl(var(--primary))", delta: undefined },
     { label: "Receita líquida", value: hidden ? HIDE : fmtCompact(m.totalNet), sub: hidden ? "—" : `Bruto ${fmtCompact(m.totalGross)}`, accent: "text-success", spark: metrics.series.net, sparkColor: "hsl(var(--success))", delta: { cur: m.totalNet, prev: p.totalNet } },
-    { label: "Receita bruta", value: hidden ? HIDE : fmtCompact(m.totalGross), sub: `${m.approved.length} ${m.approved.length === 1 ? "venda" : "vendas"}`, accent: "text-foreground", spark: metrics.series.count, sparkColor: "hsl(var(--info))", delta: { cur: m.totalGross, prev: p.totalGross } },
     { label: "Ticket médio", value: hidden ? HIDE : fmtCompact(m.avgTicket), sub: `${m.uniqueCustomers} ${m.uniqueCustomers === 1 ? "cliente" : "clientes"}`, accent: "text-foreground", spark: metrics.series.ticket, sparkColor: "hsl(var(--foreground))", delta: { cur: m.avgTicket, prev: p.avgTicket } },
-    { label: "Aprovação", value: `${approvalRate.toFixed(1)}%`, sub: `${dateFiltered.length} tentativas`, accent: approvalRate >= 60 ? "text-success" : "text-warning", spark: metrics.series.count, sparkColor: approvalRate >= 60 ? "hsl(var(--success))" : "hsl(var(--warning))", delta: undefined as undefined | { cur: number; prev: number } },
+    { label: "Aprovação", value: `${approvalRate.toFixed(1)}%`, sub: `${dateFiltered.length} tentativas`, accent: approvalRate >= 60 ? "text-success" : "text-warning", spark: metrics.series.count, sparkColor: approvalRate >= 60 ? "hsl(var(--success))" : "hsl(var(--warning))", delta: undefined },
   ];
 
   const riskKpis = [

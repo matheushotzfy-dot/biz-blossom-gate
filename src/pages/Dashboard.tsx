@@ -109,6 +109,18 @@ export default function Dashboard() {
   const [datePickerOpen, setDatePickerOpen] = useState(false);
   const privacy = usePrivacyMode();
   const [detailTx, setDetailTx] = useState<Tables<"transactions"> | null>(null);
+  const [availableBalance, setAvailableBalance] = useState<number>(0);
+
+  useEffect(() => {
+    if (!user?.id) return;
+    const fetchBalance = async () => {
+      const { data, error } = await supabase.rpc("get_ledger_balance", { _user_id: user.id });
+      if (!error && data !== null) setAvailableBalance(Number(data));
+    };
+    fetchBalance();
+    const interval = setInterval(fetchBalance, 15000);
+    return () => clearInterval(interval);
+  }, [user?.id]);
 
   const filteredTx = useMemo(() => {
     if (isCustom && customRange?.from) {
@@ -164,12 +176,8 @@ export default function Dashboard() {
     };
   }, [filteredTx]);
 
-  const balance = useMemo(() => {
-    const totalRevenue = transactions.filter(t => t.status === "completed").reduce((acc, t) => acc + Number(t.net_amount), 0);
-    const totalWithdrawn = withdrawals.filter(w => w.status === "approved" || w.status === "pending").reduce((acc, w) => acc + Number(w.amount), 0);
-    const totalRetained = transactions.filter(t => t.status === "completed" && !t.retention_released && Number(t.retained_amount) > 0).reduce((acc, t) => acc + Number(t.retained_amount), 0);
-    return Math.max(totalRevenue - totalWithdrawn - totalRetained, 0);
-  }, [transactions, withdrawals]);
+  // Using availableBalance from RPC now
+  const balance = availableBalance;
 
   const chartData = useMemo(() => {
     const isSingleDay = (isCustom && customRange?.from && (!customRange.to || differenceInDays(customRange.to, customRange.from) === 0)) || (!isCustom && selectedPeriod.days === 0);
