@@ -20,6 +20,7 @@ import {
   Phone,
   User,
   ArrowUpRight,
+  Barcode,
 } from "lucide-react";
 import { Area, AreaChart, ResponsiveContainer, Tooltip, XAxis, YAxis, CartesianGrid } from "recharts";
 import type { Tables } from "@/integrations/supabase/types";
@@ -148,7 +149,7 @@ export default function Dashboard() {
     return transactions.filter((t) => new Date(t.created_at) >= start);
   }, [transactions, selectedPeriod, isCustom, customRange]);
 
-  const { approved, revenue, conversion, uniqueCustomers, pixConversion, cardConversion, chargebackRate, pixApprovedCount, pixTotalCount, cardApprovedCount, cardTotalCount } = useMemo(() => {
+  const { approved, revenue, conversion, uniqueCustomers, pixConversion, cardConversion, boletoConversion, chargebackRate, pixApprovedCount, pixTotalCount, cardApprovedCount, cardTotalCount, boletoApprovedCount, boletoTotalCount } = useMemo(() => {
     const _approved = filteredTx.filter((t) => t.status === "completed");
     const _revenue = _approved.reduce((acc, t) => acc + Number(t.net_amount), 0);
     const _conversion = filteredTx.length > 0 ? (_approved.length / filteredTx.length) * 100 : 0;
@@ -161,6 +162,10 @@ export default function Dashboard() {
     const cardApproved = cardTx.filter(t => t.status === "completed");
     const _cardConversion = cardTx.length > 0 ? (cardApproved.length / cardTx.length) * 100 : 0;
 
+    const boletoTx = filteredTx.filter(t => t.payment_method === "boleto");
+    const boletoApproved = boletoTx.filter(t => t.status === "completed");
+    const _boletoConversion = boletoTx.length > 0 ? (boletoApproved.length / boletoTx.length) * 100 : 0;
+
     const _chargebackRate = filteredTx.length > 0 ? (filteredTx.filter(t => t.status === "chargeback").length / filteredTx.length) * 100 : 0;
     const _uniqueCustomers = new Set(filteredTx.map(t => t.customer_email).filter(Boolean)).size;
 
@@ -171,9 +176,11 @@ export default function Dashboard() {
       uniqueCustomers: _uniqueCustomers,
       pixConversion: _pixConversion,
       cardConversion: _cardConversion,
+      boletoConversion: _boletoConversion,
       chargebackRate: _chargebackRate,
       pixApprovedCount: pixApproved.length, pixTotalCount: pixTx.length,
       cardApprovedCount: cardApproved.length, cardTotalCount: cardTx.length,
+      boletoApprovedCount: boletoApproved.length, boletoTotalCount: boletoTx.length,
     };
   }, [filteredTx]);
 
@@ -277,8 +284,8 @@ export default function Dashboard() {
              <h1 className="text-xl md:text-2xl font-black tracking-tight text-foreground">{greeting}, {nickname}</h1>
           </div>
           <p className="text-muted-foreground font-medium text-[11px] md:text-xs flex items-center gap-2">
-            <Activity className="h-3.5 w-3.5" />
-            Operação saudável e em pleno funcionamento.
+            <Activity className="h-3.5 w-3.5 text-primary" />
+            Acompanhe o desempenho da sua operação em tempo real.
           </p>
         </div>
         
@@ -469,49 +476,76 @@ export default function Dashboard() {
           </CardContent>
         </Card>
 
-        <Card className="border-border/40 overflow-hidden bg-secondary/[0.03] shadow-lg shadow-black/5 rounded-3xl">
+        <Card className="border-border/40 overflow-hidden bg-gradient-to-b from-card to-background/20 shadow-xl shadow-black/5 rounded-3xl">
           <CardHeader className="border-b border-border/40 px-6 py-5">
-            <CardTitle className="text-lg font-black">Saúde da Operação</CardTitle>
-            <CardDescription className="text-[10px] font-bold uppercase tracking-wider opacity-50">KPIs de performance</CardDescription>
+            <div className="flex items-center justify-between">
+              <div>
+                <CardTitle className="text-lg font-black">Conversão Geral</CardTitle>
+                <CardDescription className="text-[10px] font-bold uppercase tracking-wider opacity-50">Desempenho por método</CardDescription>
+              </div>
+              <div className="bg-primary/10 text-primary px-3 py-1.5 rounded-xl border border-primary/20">
+                <span className="text-xl font-black">{conversion.toFixed(1)}%</span>
+              </div>
+            </div>
           </CardHeader>
-          <CardContent className="px-6 py-6 space-y-6">
-            <div className="space-y-3">
-              <div className="flex justify-between items-end">
-                <span className="text-[10px] font-black uppercase tracking-[0.15em] text-muted-foreground/60">Taxa de Conversão</span>
-                <span className="text-2xl font-black text-primary">{conversion.toFixed(1)}%</span>
-              </div>
-              <div className="h-2 w-full bg-muted rounded-full overflow-hidden">
-                <div className="h-full bg-primary rounded-full" style={{ width: `${conversion}%` }} />
-              </div>
-            </div>
-
-            <div className="grid grid-cols-2 gap-6">
-              <div className="space-y-2">
-                 <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/40">Conversão PIX</p>
-                 <p className="text-xl font-black">{pixConversion.toFixed(0)}%</p>
-              </div>
-              <div className="space-y-2 text-right">
-                 <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/40">Conversão Card</p>
-                 <p className="text-xl font-black">{cardConversion.toFixed(0)}%</p>
-              </div>
-            </div>
-
-            <div className="pt-6 border-t border-border/40">
-               <div className="flex items-center justify-between">
+          <CardContent className="px-6 py-8 space-y-8">
+            <div className="space-y-6">
+              {/* PIX */}
+              <div className="group space-y-3">
+                <div className="flex justify-between items-center">
                   <div className="flex items-center gap-3">
-                     <div className="h-10 w-10 rounded-xl bg-success/10 border border-success/20 flex items-center justify-center">
-                        <ShieldCheck className="h-5 w-5 text-success" />
-                     </div>
-                     <div>
-                        <p className="text-xs font-black">Risco & Fraude</p>
-                        <p className="text-[10px] font-bold text-muted-foreground">Monitoramento ativo</p>
-                     </div>
+                    <div className="h-9 w-9 rounded-xl bg-[#32BCAD]/10 border border-[#32BCAD]/20 flex items-center justify-center text-[#32BCAD]">
+                      <Zap className="h-4.5 w-4.5" />
+                    </div>
+                    <div>
+                      <p className="text-xs font-black uppercase tracking-wider">PIX</p>
+                      <p className="text-[10px] font-bold text-muted-foreground/50">{pixApprovedCount} de {pixTotalCount} pagos</p>
+                    </div>
                   </div>
-                  <div className="text-right">
-                     <p className="text-sm font-black text-success">Excelente</p>
-                     <p className="text-[10px] font-bold text-muted-foreground">Score: {Math.max(0, 100 - chargebackRate * 12).toFixed(0)}</p>
+                  <span className="text-lg font-black text-[#32BCAD]">{pixConversion.toFixed(0)}%</span>
+                </div>
+                <div className="h-2 w-full bg-muted/30 rounded-full overflow-hidden border border-border/20">
+                  <div className="h-full bg-gradient-to-r from-[#32BCAD]/40 to-[#32BCAD] rounded-full transition-all duration-1000" style={{ width: `${pixConversion}%` }} />
+                </div>
+              </div>
+
+              {/* Cartão */}
+              <div className="group space-y-3">
+                <div className="flex justify-between items-center">
+                  <div className="flex items-center gap-3">
+                    <div className="h-9 w-9 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center text-primary">
+                      <CreditCard className="h-4.5 w-4.5" />
+                    </div>
+                    <div>
+                      <p className="text-xs font-black uppercase tracking-wider">Cartão</p>
+                      <p className="text-[10px] font-bold text-muted-foreground/50">{cardApprovedCount} de {cardTotalCount} pagos</p>
+                    </div>
                   </div>
-               </div>
+                  <span className="text-lg font-black text-primary">{cardConversion.toFixed(0)}%</span>
+                </div>
+                <div className="h-2 w-full bg-muted/30 rounded-full overflow-hidden border border-border/20">
+                  <div className="h-full bg-gradient-to-r from-primary/40 to-primary rounded-full transition-all duration-1000" style={{ width: `${cardConversion}%` }} />
+                </div>
+              </div>
+
+              {/* Boleto */}
+              <div className="group space-y-3">
+                <div className="flex justify-between items-center">
+                  <div className="flex items-center gap-3">
+                    <div className="h-9 w-9 rounded-xl bg-orange-500/10 border border-orange-500/20 flex items-center justify-center text-orange-500">
+                      <Barcode className="h-4.5 w-4.5" />
+                    </div>
+                    <div>
+                      <p className="text-xs font-black uppercase tracking-wider">Boleto</p>
+                      <p className="text-[10px] font-bold text-muted-foreground/50">{boletoApprovedCount} de {boletoTotalCount} pagos</p>
+                    </div>
+                  </div>
+                  <span className="text-lg font-black text-orange-500">{boletoConversion.toFixed(0)}%</span>
+                </div>
+                <div className="h-2 w-full bg-muted/30 rounded-full overflow-hidden border border-border/20">
+                  <div className="h-full bg-gradient-to-r from-orange-500/40 to-orange-500 rounded-full transition-all duration-1000" style={{ width: `${boletoConversion}%` }} />
+                </div>
+              </div>
             </div>
           </CardContent>
         </Card>
