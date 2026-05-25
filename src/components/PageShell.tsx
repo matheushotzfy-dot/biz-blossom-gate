@@ -79,7 +79,7 @@ export function SectionHeader({ icon, title, subtitle, action }: { icon: React.R
 export function PageTitle({ icon, title, subtitle }: { icon: React.ReactNode; title: string; subtitle: string }) {
  return (
  <div className="flex items-center gap-3 md:gap-4">
- <div className="flex h-11 w-11 md:h-13 md:w-13 shrink-0 items-center justify-center rounded-xl md:rounded-2xl border border-border/35 bg-card/50 backdrop-blur-xl shadow-sm">
+ <div className="flex h-10 w-10 md:h-11 md:w-11 shrink-0 items-center justify-center rounded-xl md:rounded-2xl border border-border/35 bg-card/50 backdrop-blur-xl shadow-sm">
  <span className="text-primary">{icon}</span>
  </div>
  <div className="space-y-0.5 md:space-y-1 min-w-0">
@@ -171,7 +171,7 @@ export function GlassKpi({ label, value, sub, icon: Icon, tone = "primary", larg
         "group relative rounded-[2rem] bg-card/60 backdrop-blur-xl border border-border/40 overflow-hidden",
         "hover:border-border/60 hover:shadow-2xl hover:-translate-y-1 transition-all duration-500",
         t.glow,
-        large ? "p-6 md:p-8" : "p-5 md:p-6",
+        large ? "p-6 md:p-8" : "p-4 md:p-5",
         "animate-in fade-in slide-in-from-bottom-4"
       )}
       style={{ animationDelay: `${delay * 50}ms` }}
@@ -182,13 +182,13 @@ export function GlassKpi({ label, value, sub, icon: Icon, tone = "primary", larg
         t.bg
       )} />
 
-      <div className="relative z-10 space-y-4">
+      <div className="relative z-10 space-y-3">
         <div className="flex items-center justify-between">
           <p className="text-[10px] md:text-[11px] font-black text-muted-foreground/50 uppercase tracking-[0.25em] group-hover:text-muted-foreground/70 transition-colors">
             {label}
           </p>
           <div className={cn(
-            "h-10 w-10 md:h-12 md:w-12 rounded-2xl flex items-center justify-center transition-all duration-500 group-hover:scale-110 group-hover:rotate-3",
+            "h-9 w-9 md:h-10 md:w-10 rounded-xl flex items-center justify-center transition-all duration-500 group-hover:scale-110 group-hover:rotate-3",
             t.bg,
             "border border-border/10 shadow-sm"
           )}>
@@ -199,7 +199,7 @@ export function GlassKpi({ label, value, sub, icon: Icon, tone = "primary", larg
         <div className="space-y-1">
           <p className={cn(
             "font-black text-foreground tracking-tighter tabular-nums leading-none",
-            large ? "text-3xl md:text-5xl" : "text-2xl md:text-[32px]"
+            large ? "text-3xl md:text-5xl" : "text-xl md:text-[28px]"
           )}>{value}</p>
           {sub && (
             <p className="text-[10px] md:text-[11px] text-muted-foreground/40 mt-1.5 md:mt-2 font-bold group-hover:text-muted-foreground/60 transition-colors">

@@ -249,13 +249,13 @@ export default function Dashboard() {
 
 
   return (
-    <div className="p-4 md:p-8 space-y-8 max-w-[1600px] mx-auto animate-in fade-in duration-500">
+    <div className="p-4 md:p-6 space-y-6 max-w-[1600px] mx-auto animate-in fade-in duration-500">
       {/* Header */}
       <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6">
         <div className="space-y-1">
           <div className="flex items-center gap-3">
              <div className="h-3 w-3 rounded-full bg-success animate-pulse" />
-             <h1 className="text-3xl font-black tracking-tight text-foreground">{greeting}, {nickname}</h1>
+             <h1 className="text-2xl font-black tracking-tight text-foreground">{greeting}, {nickname}</h1>
           </div>
           <p className="text-muted-foreground font-medium text-sm flex items-center gap-2">
             <Activity className="h-4 w-4" />
@@ -315,13 +315,13 @@ export default function Dashboard() {
           </CardHeader>
           <CardContent className="pt-4">
             <div className="flex items-baseline gap-4">
-              <p className="text-[64px] font-black tracking-tighter leading-none bg-gradient-to-br from-foreground to-foreground/70 bg-clip-text text-transparent">
+              <p className="text-[48px] font-black tracking-tighter leading-none bg-gradient-to-br from-foreground to-foreground/70 bg-clip-text text-transparent">
                 {privacy.hidden ? CENSORED : fmt(balance)}
               </p>
               <span className="text-muted-foreground/60 font-black text-xl tracking-tighter">BRL</span>
             </div>
             
-            <div className="mt-10 flex flex-wrap gap-4">
+            <div className="mt-6 flex flex-wrap gap-4">
                <Link to="/financeiro/saques" className="bg-primary text-primary-foreground px-10 h-14 rounded-2xl font-black text-sm flex items-center gap-2 shadow-2xl shadow-primary/30 hover:translate-y-[-2px] hover:shadow-primary/40 active:scale-[0.98] transition-all">
                   <ArrowDownRight className="h-5 w-5" />
                   Solicitar Saque
@@ -371,7 +371,7 @@ export default function Dashboard() {
             </div>
           </CardHeader>
           <CardContent className="p-0">
-            <div className="h-[360px] w-full pt-8 pb-4 pr-8 pl-4">
+            <div className="h-[360px] w-full pt-4 pb-4 pr-8 pl-4">
               <ResponsiveContainer width="100%" height="100%">
                 <AreaChart data={chartData} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
                   <defs>
