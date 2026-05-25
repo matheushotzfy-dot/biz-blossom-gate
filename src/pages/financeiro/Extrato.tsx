@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useMemo, useCallback } from "react";
 import { useAuth } from "@/hooks/useAuth";
+import { supabase } from "@/integrations/supabase/client";
 import { useTransactions, useProducts, useWithdrawals } from "@/hooks/useQueryData";
 import {
   Search, X, EyeOff, Eye, Phone, Mail, Clock, RefreshCw,
