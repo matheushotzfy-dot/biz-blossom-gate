@@ -249,10 +249,10 @@ export default function Dashboard() {
 
 
   return (
-    <div className="p-4 md:p-6 space-y-6 max-w-[1600px] mx-auto animate-in fade-in duration-500">
+    <div className="p-3 md:p-6 pt-1 md:pt-2 space-y-3 md:space-y-4 max-w-[1600px] mx-auto animate-in fade-in duration-500">
       {/* Header */}
-      <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6">
-        <div className="space-y-1">
+      <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-3 md:gap-6">
+        <div className="space-y-0.5">
           <div className="flex items-center gap-3">
              <div className="h-3 w-3 rounded-full bg-success animate-pulse" />
              <h1 className="text-2xl font-black tracking-tight text-foreground">{greeting}, {nickname}</h1>
@@ -302,8 +302,8 @@ export default function Dashboard() {
       </div>
 
       {/* Hero Financial Row */}
-      <div className="grid lg:grid-cols-4 gap-6">
-        <Card className="lg:col-span-2 relative overflow-hidden group border-primary/20 bg-gradient-to-br from-primary/[0.03] to-transparent shadow-xl shadow-primary/5 rounded-[2rem]">
+      <div className="grid lg:grid-cols-4 gap-4 md:gap-6">
+        <Card className="lg:col-span-2 relative overflow-hidden group border-primary/20 bg-gradient-to-br from-primary/[0.03] to-transparent shadow-xl shadow-primary/5 rounded-[2rem] min-h-[160px] md:min-h-[200px]">
           <div className="absolute top-0 right-0 p-12 opacity-[0.05] transition-all duration-700 group-hover:opacity-[0.1] group-hover:scale-110 group-hover:-rotate-6">
             <Wallet className="h-48 w-48 -rotate-12" />
           </div>
@@ -313,7 +313,7 @@ export default function Dashboard() {
                 Saldo Seguro Disponível
              </div>
           </CardHeader>
-          <CardContent className="pt-4">
+          <CardContent className="pt-2 md:pt-4">
             <div className="flex items-baseline gap-4">
               <p className="text-[48px] font-black tracking-tighter leading-none bg-gradient-to-br from-foreground to-foreground/70 bg-clip-text text-transparent">
                 {privacy.hidden ? CENSORED : fmt(balance)}
@@ -321,13 +321,13 @@ export default function Dashboard() {
               <span className="text-muted-foreground/60 font-black text-xl tracking-tighter">BRL</span>
             </div>
             
-            <div className="mt-6 flex flex-wrap gap-4">
-               <Link to="/financeiro/saques" className="bg-primary text-primary-foreground px-10 h-14 rounded-2xl font-black text-sm flex items-center gap-2 shadow-2xl shadow-primary/30 hover:translate-y-[-2px] hover:shadow-primary/40 active:scale-[0.98] transition-all">
-                  <ArrowDownRight className="h-5 w-5" />
+            <div className="mt-4 md:mt-6 flex flex-wrap gap-3 md:gap-4">
+               <Link to="/financeiro/saques" className="bg-primary text-primary-foreground px-6 md:px-10 h-11 md:h-14 rounded-2xl font-black text-xs md:text-sm flex items-center gap-2 shadow-2xl shadow-primary/30 hover:translate-y-[-2px] hover:shadow-primary/40 active:scale-[0.98] transition-all">
+                  <ArrowDownRight className="h-4 w-4 md:h-5 md:w-5" />
                   Solicitar Saque
                </Link>
-               <Link to="/vendas/links" className="bg-card border border-border px-10 h-14 rounded-2xl font-black text-sm flex items-center gap-2 hover:bg-accent hover:translate-y-[-2px] transition-all">
-                  <Zap className="h-5 w-5 text-success" />
+               <Link to="/vendas/links" className="bg-card border border-border px-6 md:px-10 h-11 md:h-14 rounded-2xl font-black text-xs md:text-sm flex items-center gap-2 hover:bg-accent hover:translate-y-[-2px] transition-all">
+                  <Zap className="h-4 w-4 md:h-5 md:w-5 text-success" />
                   Link de Pagamento
                </Link>
             </div>
@@ -337,7 +337,7 @@ export default function Dashboard() {
           <div className="absolute -bottom-24 -left-24 h-64 w-64 bg-primary/5 rounded-full blur-3xl opacity-50 group-hover:opacity-80 transition-opacity" />
         </Card>
 
-        <div className="lg:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="lg:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
           {financialCards.map((card) => (
             <StatCard 
               key={card.label}
@@ -355,9 +355,9 @@ export default function Dashboard() {
 
 
       {/* Main Operations Grid */}
-      <div className="grid lg:grid-cols-3 gap-8">
+      <div className="grid lg:grid-cols-3 gap-6 md:gap-8">
         <Card className="lg:col-span-2 border-border/40 overflow-hidden">
-          <CardHeader className="flex flex-row items-center justify-between border-b border-border/40 px-8 py-6">
+          <CardHeader className="flex flex-row items-center justify-between border-b border-border/40 px-6 py-4 md:px-8 md:py-5">
             <div>
               <CardTitle className="text-xl font-black">Fluxo de Vendas</CardTitle>
               <CardDescription className="text-xs font-bold uppercase tracking-wider">Desempenho financeiro no tempo</CardDescription>
@@ -371,7 +371,7 @@ export default function Dashboard() {
             </div>
           </CardHeader>
           <CardContent className="p-0">
-            <div className="h-[360px] w-full pt-4 pb-4 pr-8 pl-4">
+            <div className="h-[280px] md:h-[360px] w-full pt-4 pb-4 pr-8 pl-4">
               <ResponsiveContainer width="100%" height="100%">
                 <AreaChart data={chartData} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
                   <defs>
