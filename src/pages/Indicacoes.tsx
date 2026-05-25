@@ -135,12 +135,13 @@ export default function Indicacoes() {
  </motion.section>
 
  {/* ═══ KPIs ═══ */}
- <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-8">
- <KpiTile label="Indicações" value={String(stats.total)} icon={Users} color="primary" delay={0} sub="enviadas" />
- <KpiTile label="Convertidas" value={String(stats.converted)} icon={CheckCircle2} color="success" delay={0.06} sub="ativadas" />
- <KpiTile label="Pendentes" value={String(stats.pending)} icon={Clock} color="warning" delay={0.12} sub="aguardando" />
- <KpiTile label="Total Ganho" value={fmt(stats.totalReward)} icon={DollarSign} color="primary" delay={0.18} sub="em recompensas" />
- </div>
+  <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+    <StatCard title="Indicações" value={String(stats.total)} icon={Users} color="primary" delay={0} description="enviadas" />
+    <StatCard title="Convertidas" value={String(stats.converted)} icon={CheckCircle2} color="success" delay={50} description="ativadas" />
+    <StatCard title="Pendentes" value={String(stats.pending)} icon={Clock} color="warning" delay={100} description="aguardando" />
+    <StatCard title="Total Ganho" value={fmt(stats.totalReward)} icon={DollarSign} color="primary" delay={150} description="em recompensas" />
+  </div>
+
 
  {/* ═══ How it Works ═══ */}
  <div className="mb-8">
