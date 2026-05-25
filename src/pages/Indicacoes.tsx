@@ -7,11 +7,13 @@
 import { useEffect, useState, useMemo } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
-import { Gift, Copy, Users, DollarSign, CheckCircle2, Link2, Share2, TrendingUp, ArrowUpRight, Sparkles, Clock, Zap } from "lucide-react";
+import { Gift, Copy, Users, DollarSign, CheckCircle2, Link2, Share2, TrendingUp, ArrowUpRight, Sparkles, Clock, Zap, TrendingDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { motion } from "framer-motion";
+import { StatCard } from "@/components/StatCard";
 import { cn } from "@/lib/utils";
+
 
 const ease = [0.16, 1, 0.3, 1] as const;
 const fmt = (v: number) => `R$ ${v.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}`;
