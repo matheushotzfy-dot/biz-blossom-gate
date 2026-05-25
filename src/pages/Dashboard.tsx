@@ -249,7 +249,7 @@ export default function Dashboard() {
 
 
   return (
-    <div className="p-4 md:p-8 space-y-8 max-w-[1600px] mx-auto animate-in fade-in duration-500">
+    <div className="p-4 md:p-6 space-y-6 max-w-[1600px] mx-auto animate-in fade-in duration-500">
       {/* Header */}
       <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6">
         <div className="space-y-1">
@@ -321,7 +321,7 @@ export default function Dashboard() {
               <span className="text-muted-foreground/60 font-black text-xl tracking-tighter">BRL</span>
             </div>
             
-            <div className="mt-10 flex flex-wrap gap-4">
+            <div className="mt-6 flex flex-wrap gap-4">
                <Link to="/financeiro/saques" className="bg-primary text-primary-foreground px-10 h-14 rounded-2xl font-black text-sm flex items-center gap-2 shadow-2xl shadow-primary/30 hover:translate-y-[-2px] hover:shadow-primary/40 active:scale-[0.98] transition-all">
                   <ArrowDownRight className="h-5 w-5" />
                   Solicitar Saque

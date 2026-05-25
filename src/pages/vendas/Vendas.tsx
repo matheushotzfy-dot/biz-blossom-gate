@@ -877,7 +877,7 @@ export default function Vendas() {
               <div
                 key={`${k.label}-${animKey}`}
                 className={cn(
-                  "vendas-rise group relative min-h-[140px] px-6 py-6 transition-colors duration-200 hover:bg-muted/25 rounded-xl border border-transparent hover:border-border/40",
+                  "vendas-rise group relative min-h-[110px] px-6 py-4 transition-colors duration-200 hover:bg-muted/25 rounded-xl border border-transparent hover:border-border/40",
                   idx === 1 && "vendas-rise-d1",
                   idx === 2 && "vendas-rise-d2",
                   idx === 3 && "vendas-rise-d3",
@@ -891,14 +891,14 @@ export default function Vendas() {
                 </div>
                 <p
                   className={cn(
-                    "mt-3 pl-2 font-display text-[34px] font-black leading-[0.9] tracking-[-0.06em] tabular-nums sm:text-[40px]",
+                    "mt-2 pl-2 font-display text-[28px] font-black leading-[0.9] tracking-[-0.06em] tabular-nums sm:text-[32px]",
                     k.accent,
                   )}
                   style={{ fontVariantNumeric: "tabular-nums slashed-zero" }}
                 >
                   {k.value}
                 </p>
-                <div className="mt-4 flex items-center gap-2 pl-2">
+                <div className="mt-2.5 flex items-center gap-2 pl-2">
                   <p className="truncate text-[11.5px] font-bold text-muted-foreground/85">{k.sub}</p>
                   {k.delta && <DeltaBadge cur={k.delta.cur} prev={k.delta.prev} />}
                 </div>
@@ -911,16 +911,16 @@ export default function Vendas() {
               <div
                 key={`${r.label}-${animKey}`}
                 className={cn(
-                  "vendas-rise group relative flex flex-col gap-2.5 px-6 py-6 transition-colors duration-200 hover:bg-muted/25",
+                  "vendas-rise group relative flex flex-col gap-1.5 px-6 py-4 transition-colors duration-200 hover:bg-muted/25",
                   idx === 0 && "vendas-rise-d3",
                   idx === 1 && "vendas-rise-d4",
                   idx === 2 && "vendas-rise-d5",
                 )}
               >
                 <div className="flex items-baseline justify-between gap-3">
-                  <p className="font-display text-[19px] font-black tracking-[-0.035em] text-foreground">{r.label}</p>
+                  <p className="font-display text-[17px] font-black tracking-[-0.035em] text-foreground">{r.label}</p>
                   <p
-                    className={cn("font-display text-[26px] font-black leading-none tabular-nums tracking-[-0.05em]", r.accent)}
+                    className={cn("font-display text-[22px] font-black leading-none tabular-nums tracking-[-0.05em]", r.accent)}
                     style={{ fontVariantNumeric: "tabular-nums slashed-zero" }}
                   >
                     {r.value}

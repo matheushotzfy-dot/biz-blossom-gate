@@ -112,11 +112,11 @@ export function StatCard({
         c.bg
       )} />
 
-      <div className="relative p-6 space-y-4">
+      <div className="relative p-4 md:p-5 space-y-3">
         <div className="flex items-center justify-between">
           {Icon && (
             <div className={cn(
-              "flex h-12 w-12 items-center justify-center rounded-2xl transition-all duration-500 group-hover:scale-110 group-hover:rotate-3",
+              "flex h-10 w-10 items-center justify-center rounded-xl transition-all duration-500 group-hover:scale-110 group-hover:rotate-3",
               c.iconBg
             )}>
               <Icon className="h-6 w-6" />
@@ -142,7 +142,7 @@ export function StatCard({
           </p>
           <div className="flex items-baseline gap-2">
             <h3 className={cn(
-              "text-3xl font-black tracking-tighter transition-all duration-300 group-hover:tracking-tight",
+              "text-2xl md:text-[28px] font-black tracking-tighter transition-all duration-300 group-hover:tracking-tight",
               variant === "gradient" ? "bg-gradient-to-br from-foreground to-foreground/70 bg-clip-text text-transparent" : "text-foreground"
             )}>
               {value}
