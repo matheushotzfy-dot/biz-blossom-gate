@@ -302,7 +302,7 @@ export default function Dashboard() {
       </div>
 
       {/* Hero Financial Row */}
-      <div className="grid lg:grid-cols-4 gap-4 md:gap-6">
+      <div className="grid lg:grid-cols-4 gap-6 md:gap-10">
         <Card className="lg:col-span-2 relative overflow-hidden group border-primary/20 bg-gradient-to-br from-primary/[0.03] to-transparent shadow-xl shadow-primary/5 rounded-[2.5rem] min-h-[180px] md:min-h-[220px]">
           <div className="absolute top-0 right-0 p-12 opacity-[0.05] transition-all duration-700 group-hover:opacity-[0.1] group-hover:scale-110 group-hover:-rotate-6">
             <Wallet className="h-48 w-48 -rotate-12" />
@@ -321,7 +321,7 @@ export default function Dashboard() {
               <span className="text-muted-foreground/60 font-black text-xl tracking-tighter">BRL</span>
             </div>
             
-            <div className="mt-4 md:mt-6 flex flex-wrap gap-3 md:gap-4">
+            <div className="mt-8 md:mt-12 flex flex-wrap gap-4 md:gap-6">
                <Link to="/financeiro/saques" className="bg-primary text-primary-foreground px-6 md:px-10 h-11 md:h-14 rounded-2xl font-black text-xs md:text-sm flex items-center gap-2 shadow-2xl shadow-primary/30 hover:translate-y-[-2px] hover:shadow-primary/40 active:scale-[0.98] transition-all">
                   <ArrowDownRight className="h-4 w-4 md:h-5 md:w-5" />
                   Solicitar Saque
@@ -337,7 +337,7 @@ export default function Dashboard() {
           <div className="absolute -bottom-24 -left-24 h-64 w-64 bg-primary/5 rounded-full blur-3xl opacity-50 group-hover:opacity-80 transition-opacity" />
         </Card>
 
-        <div className="lg:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
+        <div className="lg:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-10">
           {financialCards.map((card) => (
             <StatCard 
               key={card.label}
