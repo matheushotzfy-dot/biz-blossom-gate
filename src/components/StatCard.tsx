@@ -1,16 +1,21 @@
 import { LucideIcon, TrendingUp, TrendingDown } from "lucide-react";
 import { cn } from "@/lib/utils";
 
+export type StatCardColor = "primary" | "success" | "warning" | "destructive" | "info" | "neutral";
+
 interface StatCardProps {
   title: string;
   value: string | number;
-  icon: LucideIcon;
+  icon?: LucideIcon;
   change?: string;
   changeType?: "positive" | "negative" | "neutral";
   className?: string;
-  trend?: number; // percentage trend
-  color?: "primary" | "success" | "warning" | "destructive" | "info";
+  trend?: number;
+  color?: StatCardColor;
   description?: string;
+  delay?: number;
+  variant?: "default" | "glass" | "gradient";
+  showLine?: boolean;
 }
 
 export function StatCard({ 
@@ -22,51 +27,108 @@ export function StatCard({
   className,
   trend,
   color = "primary",
-  description
+  description,
+  delay = 0,
+  variant = "default",
+  showLine = false
 }: StatCardProps) {
-  const colorMap = {
-    primary: "from-primary/20 to-primary/5 text-primary border-primary/20",
-    success: "from-success/20 to-success/5 text-success border-success/20",
-    warning: "from-warning/20 to-warning/5 text-warning border-warning/20",
-    destructive: "from-destructive/20 to-destructive/5 text-destructive border-destructive/20",
-    info: "from-info/20 to-info/5 text-info border-info/20",
+  
+  const colors: Record<StatCardColor, {
+    bg: string;
+    text: string;
+    border: string;
+    iconBg: string;
+    line: string;
+    glow: string;
+  }> = {
+    primary: {
+      bg: "from-primary/10 to-transparent",
+      text: "text-primary",
+      border: "border-primary/20",
+      iconBg: "bg-primary/10 text-primary",
+      line: "bg-primary",
+      glow: "shadow-primary/5"
+    },
+    success: {
+      bg: "from-success/10 to-transparent",
+      text: "text-success",
+      border: "border-success/20",
+      iconBg: "bg-success/10 text-success",
+      line: "bg-success",
+      glow: "shadow-success/5"
+    },
+    warning: {
+      bg: "from-warning/10 to-transparent",
+      text: "text-warning",
+      border: "border-warning/20",
+      iconBg: "bg-warning/10 text-warning",
+      line: "bg-warning",
+      glow: "shadow-warning/5"
+    },
+    destructive: {
+      bg: "from-destructive/10 to-transparent",
+      text: "text-destructive",
+      border: "border-destructive/20",
+      iconBg: "bg-destructive/10 text-destructive",
+      line: "bg-destructive",
+      glow: "shadow-destructive/5"
+    },
+    info: {
+      bg: "from-info/10 to-transparent",
+      text: "text-info",
+      border: "border-info/20",
+      iconBg: "bg-info/10 text-info",
+      line: "bg-info",
+      glow: "shadow-info/5"
+    },
+    neutral: {
+      bg: "from-foreground/5 to-transparent",
+      text: "text-foreground",
+      border: "border-border/50",
+      iconBg: "bg-muted text-muted-foreground",
+      line: "bg-border",
+      glow: "shadow-black/5"
+    }
   };
 
-  const iconBgMap = {
-    primary: "bg-primary/10 text-primary",
-    success: "bg-success/10 text-success",
-    warning: "bg-warning/10 text-warning",
-    destructive: "bg-destructive/10 text-destructive",
-    info: "bg-info/10 text-info",
-  };
+  const c = colors[color];
 
   return (
-    <div className={cn(
-      "group relative overflow-hidden rounded-3xl border border-border/50 bg-card p-6 transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl hover:shadow-primary/5",
-      className
-    )}>
-      {/* Decorative background gradient */}
+    <div 
+      className={cn(
+        "group relative overflow-hidden rounded-[2rem] border transition-all duration-500 hover:-translate-y-1 hover:shadow-2xl animate-in fade-in slide-in-from-bottom-4",
+        variant === "glass" ? "bg-white/5 backdrop-blur-xl border-white/10" : "bg-card border-border/50",
+        c.glow,
+        className
+      )}
+      style={{ animationDelay: `${delay}ms` }}
+    >
+      {/* Accent line */}
+      {showLine && <div className={cn("absolute inset-x-0 top-0 h-1", c.line)} />}
+
+      {/* Decorative gradient blob */}
       <div className={cn(
-        "absolute -right-8 -top-8 h-32 w-32 rounded-full bg-gradient-to-br opacity-[0.03] blur-2xl transition-opacity group-hover:opacity-[0.08]",
-        colorMap[color].split(" ")[0],
-        colorMap[color].split(" ")[1]
+        "absolute -right-8 -top-8 h-32 w-32 rounded-full bg-gradient-to-br opacity-0 blur-2xl transition-opacity duration-700 group-hover:opacity-20",
+        c.bg
       )} />
 
-      <div className="relative flex flex-col gap-4">
+      <div className="relative p-6 space-y-4">
         <div className="flex items-center justify-between">
-          <div className={cn(
-            "flex h-12 w-12 items-center justify-center rounded-2xl transition-transform duration-500 group-hover:scale-110",
-            iconBgMap[color]
-          )}>
-            <Icon className="h-6 w-6" />
-          </div>
+          {Icon && (
+            <div className={cn(
+              "flex h-12 w-12 items-center justify-center rounded-2xl transition-all duration-500 group-hover:scale-110 group-hover:rotate-3",
+              c.iconBg
+            )}>
+              <Icon className="h-6 w-6" />
+            </div>
+          )}
           
           {(change || trend !== undefined) && (
             <div className={cn(
-              "flex items-center gap-1 rounded-full px-2.5 py-1 text-[11px] font-black uppercase tracking-wider",
-              changeType === "positive" ? "bg-success/10 text-success" : 
-              changeType === "negative" ? "bg-destructive/10 text-destructive" : 
-              "bg-muted text-muted-foreground"
+              "flex items-center gap-1.5 rounded-full px-3 py-1.5 text-[10px] font-black uppercase tracking-wider",
+              changeType === "positive" ? "bg-success/10 text-success border border-success/10" : 
+              changeType === "negative" ? "bg-destructive/10 text-destructive border border-destructive/10" : 
+              "bg-muted text-muted-foreground border border-border/50"
             )}>
               {changeType === "positive" ? <TrendingUp className="h-3 w-3" /> : changeType === "negative" ? <TrendingDown className="h-3 w-3" /> : null}
               {change || (trend !== undefined ? `${trend > 0 ? "+" : ""}${trend}%` : "")}
@@ -74,23 +136,31 @@ export function StatCard({
           )}
         </div>
 
-        <div className="space-y-1.5">
-          <p className="text-[11px] font-black uppercase tracking-[0.2em] text-muted-foreground/60">
+        <div className="space-y-1">
+          <p className="text-[11px] font-black uppercase tracking-[0.25em] text-muted-foreground/60 transition-colors group-hover:text-muted-foreground/80">
             {title}
           </p>
           <div className="flex items-baseline gap-2">
-            <h3 className="text-3xl font-black tracking-tighter text-foreground">
+            <h3 className={cn(
+              "text-3xl font-black tracking-tighter transition-all duration-300 group-hover:tracking-tight",
+              variant === "gradient" ? "bg-gradient-to-br from-foreground to-foreground/70 bg-clip-text text-transparent" : "text-foreground"
+            )}>
               {value}
             </h3>
           </div>
           {description && (
-            <p className="text-[10px] font-bold text-muted-foreground/40">
+            <p className="text-[10px] font-bold text-muted-foreground/40 leading-relaxed group-hover:text-muted-foreground/60 transition-colors">
               {description}
             </p>
           )}
         </div>
       </div>
+      
+      {/* Bottom subtle glow */}
+      <div className={cn(
+        "absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-current to-transparent opacity-0 transition-opacity duration-700 group-hover:opacity-20",
+        c.text
+      )} />
     </div>
   );
 }
-
