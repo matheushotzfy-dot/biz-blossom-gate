@@ -112,7 +112,7 @@ export function StatCard({
         c.bg
       )} />
 
-      <div className="relative p-4 md:p-5 space-y-3">
+      <div className="relative p-3 md:p-4 space-y-2 md:space-y-3">
         <div className="flex items-center justify-between">
           {Icon && (
             <div className={cn(

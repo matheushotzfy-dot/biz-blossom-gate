@@ -211,7 +211,7 @@ function DashboardLayoutInner() {
  <MobileRevenueBar />
 
  <div ref={scrollRef} className="relative z-10 flex-1 overflow-y-auto overscroll-contain px-3 sm:px-4 md:px-7 xl:px-10 pb-20 md:pb-10 min-h-0" style={{ WebkitOverflowScrolling: 'touch' }}>
-  <div className="mx-auto w-full max-w-[1180px] py-4 md:py-8">
+  <div className="mx-auto w-full max-w-[1180px] py-2 md:py-4">
   <div key={pathname} className="page-rise">
   <Outlet />
   </div>
