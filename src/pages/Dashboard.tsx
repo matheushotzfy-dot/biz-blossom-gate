@@ -347,7 +347,10 @@ export default function Dashboard() {
                 
                 <div className="flex items-center gap-8 p-5 rounded-[2rem] bg-background/50 border border-border/50 backdrop-blur-xl w-fit shadow-sm transition-all group-hover:border-primary/20 group-hover:bg-background/60">
                   <div className="space-y-1.5">
-                    <p className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/50">Saldo Disponível</p>
+                    <div className="flex items-center gap-2">
+                      <Wallet className="h-3 w-3 text-muted-foreground/50" />
+                      <p className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/50">Saldo Disponível</p>
+                    </div>
                     <div className="flex items-center gap-2">
                       <div className="h-2 w-2 rounded-full bg-success animate-pulse" />
                       <p className="text-xl font-black text-success tracking-tight">{privacy.hidden ? CENSORED : fmt(balance)}</p>
