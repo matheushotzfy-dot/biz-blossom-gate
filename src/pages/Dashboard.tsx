@@ -283,14 +283,16 @@ export default function Dashboard() {
         </div>
         
         <div className="flex flex-wrap items-center gap-3">
-          <div className="flex items-center bg-muted/30 p-1 rounded-2xl border border-border/50">
+          <div className="flex items-center bg-muted/20 p-1.5 rounded-[1.25rem] border border-border/40 backdrop-blur-md">
             {PERIOD_PRESETS.map(p => (
               <button 
                 key={p.label}
                 onClick={() => { setSelectedPeriod(p); setIsCustom(false); }}
                 className={cn(
-                  "px-5 py-2.5 rounded-xl text-xs font-black uppercase tracking-wider transition-all",
-                  !isCustom && selectedPeriod.label === p.label ? "bg-card text-foreground shadow-sm ring-1 ring-border" : "text-muted-foreground hover:text-foreground"
+                  "px-6 py-2.5 rounded-[1rem] text-[10px] font-black uppercase tracking-[0.15em] transition-all duration-300",
+                  !isCustom && selectedPeriod.label === p.label 
+                    ? "bg-card text-primary shadow-lg shadow-black/5 ring-1 ring-border border-transparent" 
+                    : "text-muted-foreground/60 hover:text-foreground hover:bg-muted/40"
                 )}
               >
                 {p.label}
@@ -301,14 +303,16 @@ export default function Dashboard() {
           <Popover open={datePickerOpen} onOpenChange={setDatePickerOpen}>
             <PopoverTrigger asChild>
               <button className={cn(
-                "h-11 px-5 rounded-2xl border flex items-center gap-2 text-xs font-black uppercase tracking-wider transition-all",
-                isCustom ? "border-primary bg-primary/5 text-primary" : "border-border bg-card text-muted-foreground"
+                "h-[46px] px-6 rounded-[1.25rem] border-2 flex items-center gap-3 text-[10px] font-black uppercase tracking-[0.15em] transition-all duration-300",
+                isCustom 
+                  ? "border-primary/30 bg-primary/5 text-primary shadow-lg shadow-primary/5" 
+                  : "border-border/40 bg-card text-muted-foreground/60 hover:border-border hover:text-foreground hover:shadow-md"
               )}>
                 <CalendarDays className="h-4 w-4" />
                 {isCustom && customRange?.from ? format(customRange.from, "dd/MM") + " - " + (customRange.to ? format(customRange.to, "dd/MM") : "") : "Personalizado"}
               </button>
             </PopoverTrigger>
-            <PopoverContent align="end" className="p-0 border-border/50 rounded-3xl overflow-hidden shadow-2xl">
+            <PopoverContent align="end" className="p-0 border-border/50 rounded-[2rem] overflow-hidden shadow-2xl">
               <Calendar 
                 mode="range" 
                 selected={customRange} 
