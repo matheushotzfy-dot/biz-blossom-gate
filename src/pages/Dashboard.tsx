@@ -252,7 +252,7 @@ export default function Dashboard() {
     <div className="p-4 md:p-8 pt-4 md:pt-6 space-y-6 md:space-y-8 max-w-[1600px] mx-auto animate-in fade-in duration-500">
       {/* Header */}
       <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 md:gap-8">
-        <div className="space-y-0.5">
+        <div className="space-y-2">
           <div className="flex items-center gap-3">
              <div className="h-3 w-3 rounded-full bg-success animate-pulse" />
              <h1 className="text-2xl font-black tracking-tight text-foreground">{greeting}, {nickname}</h1>
@@ -355,9 +355,9 @@ export default function Dashboard() {
 
 
       {/* Main Operations Grid */}
-      <div className="grid lg:grid-cols-3 gap-6 md:gap-8">
+      <div className="grid lg:grid-cols-3 gap-8 md:gap-10">
         <Card className="lg:col-span-2 border-border/40 overflow-hidden">
-          <CardHeader className="flex flex-row items-center justify-between border-b border-border/40 px-6 py-4 md:px-8 md:py-5">
+          <CardHeader className="flex flex-row items-center justify-between border-b border-border/40 px-6 py-6 md:px-10 md:py-8">
             <div>
               <CardTitle className="text-xl font-black">Fluxo de Vendas</CardTitle>
               <CardDescription className="text-xs font-bold uppercase tracking-wider">Desempenho financeiro no tempo</CardDescription>
@@ -371,7 +371,7 @@ export default function Dashboard() {
             </div>
           </CardHeader>
           <CardContent className="p-0">
-            <div className="h-[280px] md:h-[360px] w-full pt-4 pb-4 pr-8 pl-4">
+            <div className="h-[300px] md:h-[400px] w-full pt-8 pb-6 pr-10 pl-6">
               <ResponsiveContainer width="100%" height="100%">
                 <AreaChart data={chartData} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
                   <defs>
@@ -475,7 +475,7 @@ export default function Dashboard() {
 
       {/* Recent Activity */}
       <Card className="border-border/40 overflow-hidden">
-        <CardHeader className="flex flex-row items-center justify-between border-b border-border/40 px-8 py-6">
+        <CardHeader className="flex flex-row items-center justify-between border-b border-border/40 px-8 py-8">
           <div>
             <CardTitle className="text-xl font-black">Últimas Transações</CardTitle>
             <CardDescription className="text-xs font-bold uppercase tracking-wider">Acompanhamento em tempo real</CardDescription>
@@ -488,7 +488,7 @@ export default function Dashboard() {
         <CardContent className="p-0">
           <div className="divide-y divide-border/30">
             {activity.map((item) => (
-              <div key={item.id} className="group flex items-center justify-between px-8 py-4 hover:bg-muted/30 transition-all cursor-pointer">
+              <div key={item.id} className="group flex items-center justify-between px-8 py-6 hover:bg-muted/30 transition-all cursor-pointer">
                 <div className="flex items-center gap-4">
                   <div className={cn("h-11 w-11 rounded-2xl flex items-center justify-center transition-transform group-hover:scale-110", statusBg(item.status))}>
                     <CreditCard className={cn("h-5 w-5", statusColor(item.status))} />
