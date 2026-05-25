@@ -249,9 +249,9 @@ export default function Dashboard() {
 
 
   return (
-    <div className="p-3 md:p-6 pt-1 md:pt-2 space-y-3 md:space-y-4 max-w-[1600px] mx-auto animate-in fade-in duration-500">
+    <div className="p-4 md:p-8 pt-4 md:pt-6 space-y-6 md:space-y-8 max-w-[1600px] mx-auto animate-in fade-in duration-500">
       {/* Header */}
-      <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-3 md:gap-6">
+      <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 md:gap-8">
         <div className="space-y-0.5">
           <div className="flex items-center gap-3">
              <div className="h-3 w-3 rounded-full bg-success animate-pulse" />
@@ -303,17 +303,17 @@ export default function Dashboard() {
 
       {/* Hero Financial Row */}
       <div className="grid lg:grid-cols-4 gap-4 md:gap-6">
-        <Card className="lg:col-span-2 relative overflow-hidden group border-primary/20 bg-gradient-to-br from-primary/[0.03] to-transparent shadow-xl shadow-primary/5 rounded-[2rem] min-h-[160px] md:min-h-[200px]">
+        <Card className="lg:col-span-2 relative overflow-hidden group border-primary/20 bg-gradient-to-br from-primary/[0.03] to-transparent shadow-xl shadow-primary/5 rounded-[2.5rem] min-h-[180px] md:min-h-[220px]">
           <div className="absolute top-0 right-0 p-12 opacity-[0.05] transition-all duration-700 group-hover:opacity-[0.1] group-hover:scale-110 group-hover:-rotate-6">
             <Wallet className="h-48 w-48 -rotate-12" />
           </div>
-          <CardHeader className="pb-2">
+          <CardHeader className="pb-4 pt-6 px-6 md:px-8">
              <div className="flex items-center gap-2 text-primary font-black uppercase tracking-[0.3em] text-[10px] bg-primary/5 w-fit px-3 py-1 rounded-full border border-primary/10">
                 <ShieldCheck className="h-3 w-3" />
                 Saldo Seguro Disponível
              </div>
           </CardHeader>
-          <CardContent className="pt-2 md:pt-4">
+          <CardContent className="pt-2 pb-6 px-6 md:px-8">
             <div className="flex items-baseline gap-4">
               <p className="text-[48px] font-black tracking-tighter leading-none bg-gradient-to-br from-foreground to-foreground/70 bg-clip-text text-transparent">
                 {privacy.hidden ? CENSORED : fmt(balance)}
