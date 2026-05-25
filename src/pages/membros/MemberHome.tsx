@@ -21,7 +21,9 @@ import {
 } from "lucide-react";
 import { motion } from "framer-motion";
 import { supabase } from "@/integrations/supabase/client";
+import { StatCard } from "@/components/StatCard";
 import { cn } from "@/lib/utils";
+
 
 type Course = {
   id: string;
@@ -188,11 +190,12 @@ export default function MemberHome() {
 
         {/* Quick Stats Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mt-10">
-          <StatCard label="Cursos Ativos" value={courses.length} icon={BookOpen} color="text-primary" />
-          <StatCard label="Aulas Concluídas" value={totalCompleted} subValue={`de ${totalLessons}`} icon={PlayCircle} color="text-emerald-400" />
-          <StatCard label="Certificados" value={certs.length} icon={Award} color="text-orange-400" />
-          <StatCard label="Nível de Foco" value="Pro" icon={Trophy} color="text-purple-400" />
+          <StatCard title="Cursos Ativos" value={courses.length} icon={BookOpen} color="primary" variant="glass" />
+          <StatCard title="Aulas Concluídas" value={totalCompleted} description={`de ${totalLessons} totais`} icon={PlayCircle} color="success" variant="glass" />
+          <StatCard title="Certificados" value={certs.length} icon={Award} color="warning" variant="glass" />
+          <StatCard title="Nível de Foco" value="Pro" icon={Trophy} color="info" variant="glass" />
         </div>
+
       </section>
 
       {/* ═══ Featured / Continue Watching ═══ */}
@@ -330,20 +333,6 @@ export default function MemberHome() {
   );
 }
 
-function StatCard({ label, value, subValue, icon: Icon, color }: { label: string; value: string | number; subValue?: string; icon: any; color: string }) {
-  return (
-    <div className="bg-white/[0.03] border border-white/5 p-6 rounded-2xl hover:bg-white/[0.05] transition-all group">
-      <div className="flex items-center justify-between mb-4">
-        <p className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-600 group-hover:text-zinc-400 transition-colors">{label}</p>
-        <Icon className={cn("h-5 w-5 opacity-40 group-hover:opacity-100 transition-all", color)} />
-      </div>
-      <div className="flex items-baseline gap-2">
-        <span className="text-3xl font-black text-white tracking-tighter">{value}</span>
-        {subValue && <span className="text-xs font-bold text-zinc-600">{subValue}</span>}
-      </div>
-    </div>
-  );
-}
 
 function CourseCard({ course, index }: { course: Course; index: number }) {
   const pct = Math.round((course.completedLessons / course.totalLessons) * 100) || 0;
