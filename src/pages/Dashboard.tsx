@@ -283,14 +283,16 @@ export default function Dashboard() {
         </div>
         
         <div className="flex flex-wrap items-center gap-3">
-          <div className="flex items-center bg-muted/30 p-1 rounded-2xl border border-border/50">
+          <div className="flex items-center bg-muted/20 p-1.5 rounded-[1.25rem] border border-border/40 backdrop-blur-md">
             {PERIOD_PRESETS.map(p => (
               <button 
                 key={p.label}
                 onClick={() => { setSelectedPeriod(p); setIsCustom(false); }}
                 className={cn(
-                  "px-5 py-2.5 rounded-xl text-xs font-black uppercase tracking-wider transition-all",
-                  !isCustom && selectedPeriod.label === p.label ? "bg-card text-foreground shadow-sm ring-1 ring-border" : "text-muted-foreground hover:text-foreground"
+                  "px-6 py-2.5 rounded-[1rem] text-[10px] font-black uppercase tracking-[0.15em] transition-all duration-300",
+                  !isCustom && selectedPeriod.label === p.label 
+                    ? "bg-card text-primary shadow-lg shadow-black/5 ring-1 ring-border border-transparent" 
+                    : "text-muted-foreground/60 hover:text-foreground hover:bg-muted/40"
                 )}
               >
                 {p.label}
@@ -301,14 +303,16 @@ export default function Dashboard() {
           <Popover open={datePickerOpen} onOpenChange={setDatePickerOpen}>
             <PopoverTrigger asChild>
               <button className={cn(
-                "h-11 px-5 rounded-2xl border flex items-center gap-2 text-xs font-black uppercase tracking-wider transition-all",
-                isCustom ? "border-primary bg-primary/5 text-primary" : "border-border bg-card text-muted-foreground"
+                "h-[46px] px-6 rounded-[1.25rem] border-2 flex items-center gap-3 text-[10px] font-black uppercase tracking-[0.15em] transition-all duration-300",
+                isCustom 
+                  ? "border-primary/30 bg-primary/5 text-primary shadow-lg shadow-primary/5" 
+                  : "border-border/40 bg-card text-muted-foreground/60 hover:border-border hover:text-foreground hover:shadow-md"
               )}>
                 <CalendarDays className="h-4 w-4" />
                 {isCustom && customRange?.from ? format(customRange.from, "dd/MM") + " - " + (customRange.to ? format(customRange.to, "dd/MM") : "") : "Personalizado"}
               </button>
             </PopoverTrigger>
-            <PopoverContent align="end" className="p-0 border-border/50 rounded-3xl overflow-hidden shadow-2xl">
+            <PopoverContent align="end" className="p-0 border-border/50 rounded-[2rem] overflow-hidden shadow-2xl">
               <Calendar 
                 mode="range" 
                 selected={customRange} 
@@ -322,54 +326,65 @@ export default function Dashboard() {
 
       {/* Hero Financial Row */}
       <div className="grid lg:grid-cols-4 gap-6 md:gap-10">
-        <Card className="lg:col-span-2 relative overflow-hidden group border-primary/20 bg-gradient-to-br from-primary/[0.04] to-transparent shadow-xl shadow-primary/5 rounded-[2.5rem] min-h-[240px] md:min-h-[280px]">
-          <div className="absolute top-0 right-0 p-12 opacity-[0.05] transition-all duration-700 group-hover:opacity-[0.1] group-hover:scale-110 group-hover:-rotate-6">
+        <Card className="lg:col-span-2 relative overflow-hidden group border-primary/20 bg-gradient-to-br from-primary/[0.06] via-card to-card shadow-2xl shadow-primary/5 rounded-[2.5rem] min-h-[240px] md:min-h-[280px]">
+          {/* Main card inner glow */}
+          <div className="absolute inset-px rounded-[2.45rem] bg-gradient-to-br from-primary/[0.02] to-transparent pointer-events-none" />
+          
+          <div className="absolute top-0 right-0 p-12 opacity-[0.05] transition-all duration-700 group-hover:opacity-[0.12] group-hover:scale-110 group-hover:-rotate-6">
             <TrendingUp className="h-48 w-48 -rotate-12" />
           </div>
-          <CardHeader className="pb-2 pt-6 px-6 md:px-8">
-             <div className="flex items-center gap-2 text-primary font-black uppercase tracking-[0.3em] text-[10px] bg-primary/5 w-fit px-3 py-1 rounded-full border border-primary/10">
-                <BarChart3 className="h-3 w-3" />
+          <CardHeader className="pb-2 pt-8 px-6 md:px-10">
+             <div className="flex items-center gap-2 text-primary font-black uppercase tracking-[0.3em] text-[10px] bg-primary/10 w-fit px-4 py-1.5 rounded-full border border-primary/20 shadow-sm transition-all group-hover:bg-primary/15">
+                <BarChart3 className="h-3.5 w-3.5" />
                 Faturamento Total do Dia
              </div>
           </CardHeader>
-          <CardContent className="pt-2 pb-6 px-6 md:px-8">
-            <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
-              <div className="space-y-4">
+          <CardContent className="pt-2 pb-8 px-6 md:px-10">
+            <div className="flex flex-col md:flex-row md:items-end justify-between gap-8">
+              <div className="space-y-6">
                 <div className="flex items-baseline gap-4">
-                  <p className="text-[54px] md:text-[64px] font-black tracking-tighter leading-none bg-gradient-to-br from-foreground to-foreground/70 bg-clip-text text-transparent">
+                  <p className="text-[58px] md:text-[72px] font-black tracking-tighter leading-none bg-gradient-to-br from-foreground via-foreground to-foreground/70 bg-clip-text text-transparent group-hover:tracking-tight transition-all duration-500">
                     {privacy.hidden ? CENSORED : fmt(revenue)}
                   </p>
-                  <span className="text-muted-foreground/60 font-black text-2xl tracking-tighter">BRL</span>
+                  <span className="text-muted-foreground/40 font-black text-2xl tracking-tighter">BRL</span>
                 </div>
                 
-                <div className="flex items-center gap-6 p-4 rounded-3xl bg-background/40 border border-border/40 backdrop-blur-sm w-fit">
-                  <div className="space-y-1">
-                    <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/60">Saldo Disponível</p>
-                    <p className="text-lg font-black text-success tracking-tight">{privacy.hidden ? CENSORED : fmt(balance)}</p>
+                <div className="flex items-center gap-8 p-5 rounded-[2rem] bg-background/50 border border-border/50 backdrop-blur-xl w-fit shadow-sm transition-all group-hover:border-primary/20 group-hover:bg-background/60">
+                  <div className="space-y-1.5">
+                    <div className="flex items-center gap-2">
+                      <Wallet className="h-3 w-3 text-muted-foreground/50" />
+                      <p className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/50">Saldo Disponível</p>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <div className="h-2 w-2 rounded-full bg-success animate-pulse" />
+                      <p className="text-xl font-black text-success tracking-tight">{privacy.hidden ? CENSORED : fmt(balance)}</p>
+                    </div>
                   </div>
-                  <div className="h-8 w-px bg-border/60" />
-                  <div className="space-y-1">
-                    <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/60">Conversão Geral</p>
-                    <p className="text-lg font-black text-primary tracking-tight">{conversion.toFixed(1)}%</p>
+                  <div className="h-10 w-px bg-border/80" />
+                  <div className="space-y-1.5">
+                    <p className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/50">Conversão Geral</p>
+                    <p className="text-xl font-black text-primary tracking-tight">{conversion.toFixed(1)}%</p>
                   </div>
                 </div>
               </div>
 
-              <div className="flex flex-col gap-3 min-w-[200px]">
-                <Link to="/financeiro/saques" className="bg-primary text-primary-foreground px-6 h-12 rounded-2xl font-black text-xs md:text-sm flex items-center justify-center gap-2 shadow-2xl shadow-primary/30 hover:translate-y-[-2px] hover:shadow-primary/40 active:scale-[0.98] transition-all">
-                  <ArrowDownRight className="h-4 w-4" />
+              <div className="flex flex-col gap-3.5 min-w-[220px]">
+                <Link to="/financeiro/saques" className="group/btn relative overflow-hidden bg-primary text-primary-foreground px-8 h-14 rounded-2xl font-black text-sm flex items-center justify-center gap-2.5 shadow-2xl shadow-primary/30 hover:translate-y-[-3px] hover:shadow-primary/50 active:scale-[0.97] transition-all">
+                  <div className="absolute inset-0 bg-gradient-to-r from-white/10 to-transparent opacity-0 group-hover/btn:opacity-100 transition-opacity" />
+                  <ArrowDownRight className="h-5 w-5 transition-transform group-hover/btn:translate-x-0.5 group-hover/btn:translate-y-0.5" />
                   Solicitar Saque
                 </Link>
-                <Link to="/vendas/links" className="bg-card border border-border px-6 h-12 rounded-2xl font-black text-xs md:text-sm flex items-center justify-center gap-2 hover:bg-accent hover:translate-y-[-2px] transition-all">
-                  <Zap className="h-4 w-4 text-success" />
+                <Link to="/vendas/links" className="bg-card border-2 border-border/80 px-8 h-14 rounded-2xl font-black text-sm flex items-center justify-center gap-2.5 hover:bg-accent hover:border-primary/30 hover:translate-y-[-3px] hover:shadow-xl transition-all active:scale-[0.97]">
+                  <Zap className="h-5 w-5 text-success animate-pulse" />
                   Link de Pagamento
                 </Link>
               </div>
             </div>
           </CardContent>
           
-          {/* Animated background element */}
-          <div className="absolute -bottom-24 -left-24 h-64 w-64 bg-primary/5 rounded-full blur-3xl opacity-50 group-hover:opacity-80 transition-opacity" />
+          {/* Premium animated decorative elements */}
+          <div className="absolute -bottom-24 -left-24 h-64 w-64 bg-primary/10 rounded-full blur-[100px] opacity-40 group-hover:opacity-60 transition-opacity duration-700" />
+          <div className="absolute top-1/2 -right-12 h-32 w-32 bg-primary/5 rounded-full blur-[60px] opacity-30 group-hover:opacity-50 transition-opacity duration-700" />
         </Card>
 
         <div className="lg:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-10">
