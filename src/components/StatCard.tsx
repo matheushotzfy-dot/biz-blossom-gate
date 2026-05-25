@@ -96,8 +96,8 @@ export function StatCard({
   return (
     <div 
       className={cn(
-        "group relative overflow-hidden rounded-[2rem] border transition-all duration-500 hover:-translate-y-1 hover:shadow-2xl animate-in fade-in slide-in-from-bottom-4",
-        variant === "glass" ? "bg-white/5 backdrop-blur-xl border-white/10" : "bg-card border-border/50",
+        "group relative overflow-hidden rounded-[2.5rem] border transition-all duration-500 hover:-translate-y-1 hover:shadow-2xl animate-in fade-in slide-in-from-bottom-4",
+        variant === "glass" ? "bg-white/5 backdrop-blur-xl border-white/10" : "bg-card border-border/40",
         c.glow,
         className
       )}
@@ -112,7 +112,7 @@ export function StatCard({
         c.bg
       )} />
 
-      <div className="relative p-3 md:p-4 space-y-2 md:space-y-3">
+      <div className="relative p-5 md:p-6 space-y-4 md:space-y-5">
         <div className="flex items-center justify-between">
           {Icon && (
             <div className={cn(
