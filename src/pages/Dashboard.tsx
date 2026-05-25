@@ -260,25 +260,25 @@ export default function Dashboard() {
   }, [disputes]);
 
   const financialCards = [
-    { label: "Ticket Médio", value: privacy.hidden ? CENSORED : fmt(approved.length > 0 ? revenue / approved.length : 0), icon: BarChart3, color: "info" as const, sub: "Média por venda" },
-    { label: "Pedidos Pagos", value: approved.length, icon: Zap, color: "primary" as const, sub: "Transações concluídas", trend: 8 },
-    { label: "Saldo Pendente", value: privacy.hidden ? CENSORED : fmt(pendingBalance), icon: Clock3, color: "warning" as const, sub: "Em processamento" },
-    { label: "MEDS", value: medCount, icon: ShieldCheck, color: "destructive" as const, sub: "Disputas ativas" },
+    { label: "Ticket Médio", value: privacy.hidden ? CENSORED : fmt(approved.length > 0 ? revenue / approved.length : 0), icon: BarChart3, color: "info" as const, sub: "Média/venda" },
+    { label: "Pedidos Pagos", value: approved.length, icon: Zap, color: "primary" as const, sub: "Concluídos", trend: 8 },
+    { label: "Saldo Pendente", value: privacy.hidden ? CENSORED : fmt(pendingBalance), icon: Clock3, color: "warning" as const, sub: "Processando" },
+    { label: "MEDS", value: medCount, icon: ShieldCheck, color: "destructive" as const, sub: "Disputas" },
   ];
 
 
   return (
-    <div className="p-4 md:p-8 pt-4 md:pt-6 space-y-6 md:space-y-8 max-w-[1600px] mx-auto animate-in fade-in duration-500">
+    <div className="p-4 md:p-6 pt-2 md:pt-4 space-y-6 max-w-[1600px] mx-auto animate-in fade-in duration-500">
       {/* Header */}
-      <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 md:gap-8">
-        <div className="space-y-2">
-          <div className="flex items-center gap-3">
-             <div className="h-3 w-3 rounded-full bg-success animate-pulse" />
-             <h1 className="text-2xl font-black tracking-tight text-foreground">{greeting}, {nickname}</h1>
+      <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4">
+        <div className="space-y-1">
+          <div className="flex items-center gap-2">
+             <div className="h-2 w-2 rounded-full bg-success animate-pulse" />
+             <h1 className="text-xl md:text-2xl font-black tracking-tight text-foreground">{greeting}, {nickname}</h1>
           </div>
-          <p className="text-muted-foreground font-medium text-sm flex items-center gap-2">
-            <Activity className="h-4 w-4" />
-            Sua operação está saudável e em pleno funcionamento.
+          <p className="text-muted-foreground font-medium text-[11px] md:text-xs flex items-center gap-2">
+            <Activity className="h-3.5 w-3.5" />
+            Operação saudável e em pleno funcionamento.
           </p>
         </div>
         
@@ -325,69 +325,63 @@ export default function Dashboard() {
       </div>
 
       {/* Hero Financial Row */}
-      <div className="grid lg:grid-cols-4 gap-6 md:gap-10">
-        <Card className="lg:col-span-2 relative overflow-hidden group border-primary/20 bg-gradient-to-br from-primary/[0.06] via-card to-card shadow-2xl shadow-primary/5 rounded-[2.5rem] min-h-[240px] md:min-h-[280px]">
+      <div className="grid lg:grid-cols-4 gap-6">
+        <Card className="lg:col-span-2 relative overflow-hidden group border-primary/20 bg-gradient-to-br from-primary/[0.04] via-card to-card shadow-xl shadow-primary/5 rounded-3xl min-h-[220px]">
           {/* Main card inner glow */}
-          <div className="absolute inset-px rounded-[2.45rem] bg-gradient-to-br from-primary/[0.02] to-transparent pointer-events-none" />
+          <div className="absolute inset-px rounded-[1.45rem] bg-gradient-to-br from-primary/[0.01] to-transparent pointer-events-none" />
           
-          <div className="absolute top-0 right-0 p-12 opacity-[0.05] transition-all duration-700 group-hover:opacity-[0.12] group-hover:scale-110 group-hover:-rotate-6">
-            <TrendingUp className="h-48 w-48 -rotate-12" />
+          <div className="absolute top-0 right-0 p-8 opacity-[0.03] transition-all duration-700 group-hover:opacity-[0.08] group-hover:scale-110">
+            <Wallet className="h-40 w-40 -rotate-12" />
           </div>
-          <CardHeader className="pb-2 pt-8 px-6 md:px-10">
-             <div className="flex items-center gap-2 text-primary font-black uppercase tracking-[0.3em] text-[10px] bg-primary/10 w-fit px-4 py-1.5 rounded-full border border-primary/20 shadow-sm transition-all group-hover:bg-primary/15">
-                <BarChart3 className="h-3.5 w-3.5" />
-                Faturamento Total do Dia
+
+          <CardHeader className="pb-1 pt-6 px-6 md:px-8">
+             <div className="flex items-center gap-2 text-primary font-bold uppercase tracking-widest text-[10px] bg-primary/10 w-fit px-3 py-1 rounded-full border border-primary/10 transition-all">
+                <BarChart3 className="h-3 w-3" />
+                Faturamento do Dia
              </div>
           </CardHeader>
-          <CardContent className="pt-2 pb-8 px-6 md:px-10">
-            <div className="flex flex-col md:flex-row md:items-end justify-between gap-8">
-              <div className="space-y-6">
-                <div className="flex items-baseline gap-4">
-                  <p className="text-[58px] md:text-[72px] font-black tracking-tighter leading-none bg-gradient-to-br from-foreground via-foreground to-foreground/70 bg-clip-text text-transparent group-hover:tracking-tight transition-all duration-500">
+          
+          <CardContent className="pt-2 pb-6 px-6 md:px-8">
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+              <div className="space-y-5">
+                <div className="flex items-baseline gap-3">
+                  <p className="text-4xl md:text-5xl lg:text-6xl font-black tracking-tight text-foreground">
                     {privacy.hidden ? CENSORED : fmt(revenue)}
                   </p>
-                  <span className="text-muted-foreground/40 font-black text-2xl tracking-tighter">BRL</span>
+                  <span className="text-muted-foreground/30 font-bold text-lg">BRL</span>
                 </div>
                 
-                <div className="flex items-center gap-8 p-5 rounded-[2rem] bg-background/50 border border-border/50 backdrop-blur-xl w-fit shadow-sm transition-all group-hover:border-primary/20 group-hover:bg-background/60">
-                  <div className="space-y-1.5">
+                <div className="flex items-center gap-6 p-4 rounded-2xl bg-background/40 border border-border/40 backdrop-blur-sm w-fit group-hover:border-primary/20 transition-all">
+                  <div className="space-y-1">
                     <div className="flex items-center gap-2">
-                      <Wallet className="h-3 w-3 text-muted-foreground/50" />
-                      <p className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/50">Saldo Disponível</p>
+                      <Wallet className="h-3 w-3 text-muted-foreground/60" />
+                      <p className="text-[9px] font-bold uppercase tracking-wider text-muted-foreground/60">Saldo Disponível</p>
                     </div>
-                    <div className="flex items-center gap-2">
-                      <div className="h-2 w-2 rounded-full bg-success animate-pulse" />
-                      <p className="text-xl font-black text-success tracking-tight">{privacy.hidden ? CENSORED : fmt(balance)}</p>
-                    </div>
+                    <p className="text-lg font-black text-success tracking-tight leading-none">{privacy.hidden ? CENSORED : fmt(balance)}</p>
                   </div>
-                  <div className="h-10 w-px bg-border/80" />
-                  <div className="space-y-1.5">
-                    <p className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/50">Conversão Geral</p>
-                    <p className="text-xl font-black text-primary tracking-tight">{conversion.toFixed(1)}%</p>
+                  <div className="h-8 w-px bg-border/40" />
+                  <div className="space-y-1">
+                    <p className="text-[9px] font-bold uppercase tracking-wider text-muted-foreground/60">Conversão</p>
+                    <p className="text-lg font-black text-primary tracking-tight leading-none">{conversion.toFixed(1)}%</p>
                   </div>
                 </div>
               </div>
 
-              <div className="flex flex-col gap-3.5 min-w-[220px]">
-                <Link to="/financeiro/saques" className="group/btn relative overflow-hidden bg-primary text-primary-foreground px-8 h-14 rounded-2xl font-black text-sm flex items-center justify-center gap-2.5 shadow-2xl shadow-primary/30 hover:translate-y-[-3px] hover:shadow-primary/50 active:scale-[0.97] transition-all">
-                  <div className="absolute inset-0 bg-gradient-to-r from-white/10 to-transparent opacity-0 group-hover/btn:opacity-100 transition-opacity" />
-                  <ArrowDownRight className="h-5 w-5 transition-transform group-hover/btn:translate-x-0.5 group-hover/btn:translate-y-0.5" />
+              <div className="flex flex-col gap-2.5 sm:min-w-[180px]">
+                <Link to="/financeiro/saques" className="group/btn relative overflow-hidden bg-primary text-primary-foreground px-6 h-12 rounded-xl font-bold text-xs flex items-center justify-center gap-2 shadow-lg shadow-primary/20 hover:translate-y-[-2px] hover:shadow-primary/30 active:scale-[0.98] transition-all">
+                  <ArrowDownRight className="h-4 w-4" />
                   Solicitar Saque
                 </Link>
-                <Link to="/vendas/links" className="bg-card border-2 border-border/80 px-8 h-14 rounded-2xl font-black text-sm flex items-center justify-center gap-2.5 hover:bg-accent hover:border-primary/30 hover:translate-y-[-3px] hover:shadow-xl transition-all active:scale-[0.97]">
-                  <Zap className="h-5 w-5 text-success animate-pulse" />
+                <Link to="/vendas/links" className="bg-card border border-border/60 px-6 h-12 rounded-xl font-bold text-xs flex items-center justify-center gap-2 hover:bg-accent hover:border-primary/20 hover:translate-y-[-2px] transition-all active:scale-[0.98]">
+                  <Zap className="h-4 w-4 text-success" />
                   Link de Pagamento
                 </Link>
               </div>
             </div>
           </CardContent>
-          
-          {/* Premium animated decorative elements */}
-          <div className="absolute -bottom-24 -left-24 h-64 w-64 bg-primary/10 rounded-full blur-[100px] opacity-40 group-hover:opacity-60 transition-opacity duration-700" />
-          <div className="absolute top-1/2 -right-12 h-32 w-32 bg-primary/5 rounded-full blur-[60px] opacity-30 group-hover:opacity-50 transition-opacity duration-700" />
         </Card>
 
-        <div className="lg:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-10">
+        <div className="lg:col-span-2 grid grid-cols-2 gap-4 md:gap-6">
           {financialCards.map((card) => (
             <StatCard 
               key={card.label}
@@ -405,23 +399,23 @@ export default function Dashboard() {
 
 
       {/* Main Operations Grid */}
-      <div className="grid lg:grid-cols-3 gap-8 md:gap-10">
-        <Card className="lg:col-span-2 border-border/40 overflow-hidden">
-          <CardHeader className="flex flex-row items-center justify-between border-b border-border/40 px-6 py-6 md:px-10 md:py-8">
+      <div className="grid lg:grid-cols-3 gap-6">
+        <Card className="lg:col-span-2 border-border/40 overflow-hidden shadow-lg shadow-black/5 rounded-3xl">
+          <CardHeader className="flex flex-row items-center justify-between border-b border-border/40 px-6 py-5 md:px-8">
             <div>
-              <CardTitle className="text-xl font-black">Fluxo de Vendas</CardTitle>
-              <CardDescription className="text-xs font-bold uppercase tracking-wider">Desempenho financeiro no tempo</CardDescription>
+              <CardTitle className="text-lg font-black">Fluxo de Vendas</CardTitle>
+              <CardDescription className="text-[10px] font-bold uppercase tracking-wider opacity-50">Desempenho financeiro</CardDescription>
             </div>
             <div className="flex items-center gap-4 text-xs font-bold">
                <div className="flex items-center gap-2">
                   <div className="h-2 w-2 rounded-full bg-primary" />
-                  <span>Aprovadas</span>
+                  <span className="opacity-60">Aprovadas</span>
                </div>
-               <div className="text-success font-black">{fmt(revenue)}</div>
+               <div className="text-primary font-black">{fmt(revenue)}</div>
             </div>
           </CardHeader>
           <CardContent className="p-0">
-            <div className="h-[300px] md:h-[400px] w-full pt-8 pb-6 pr-10 pl-6">
+            <div className="h-[300px] md:h-[350px] w-full pt-6 pb-4 pr-6 pl-2">
               <ResponsiveContainer width="100%" height="100%">
                 <AreaChart data={chartData} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
                   <defs>
@@ -475,12 +469,12 @@ export default function Dashboard() {
           </CardContent>
         </Card>
 
-        <Card className="border-border/40 overflow-hidden bg-secondary/10">
-          <CardHeader className="border-b border-border/40 px-8 py-6">
-            <CardTitle className="text-xl font-black">Saúde da Operação</CardTitle>
-            <CardDescription className="text-xs font-bold uppercase tracking-wider">KPIs críticos de performance</CardDescription>
+        <Card className="border-border/40 overflow-hidden bg-secondary/[0.03] shadow-lg shadow-black/5 rounded-3xl">
+          <CardHeader className="border-b border-border/40 px-6 py-5">
+            <CardTitle className="text-lg font-black">Saúde da Operação</CardTitle>
+            <CardDescription className="text-[10px] font-bold uppercase tracking-wider opacity-50">KPIs de performance</CardDescription>
           </CardHeader>
-          <CardContent className="px-8 py-8 space-y-8">
+          <CardContent className="px-6 py-6 space-y-6">
             <div className="space-y-3">
               <div className="flex justify-between items-end">
                 <span className="text-[10px] font-black uppercase tracking-[0.15em] text-muted-foreground/60">Taxa de Conversão</span>
@@ -524,11 +518,11 @@ export default function Dashboard() {
       </div>
 
       {/* Recent Activity */}
-      <Card className="border-border/40 overflow-hidden">
-        <CardHeader className="flex flex-row items-center justify-between border-b border-border/40 px-8 py-8">
+      <Card className="border-border/40 overflow-hidden shadow-lg shadow-black/5 rounded-3xl">
+        <CardHeader className="flex flex-row items-center justify-between border-b border-border/40 px-6 py-6 md:px-8">
           <div>
-            <CardTitle className="text-xl font-black">Últimas Transações</CardTitle>
-            <CardDescription className="text-xs font-bold uppercase tracking-wider">Acompanhamento em tempo real</CardDescription>
+            <CardTitle className="text-lg font-black">Últimas Transações</CardTitle>
+            <CardDescription className="text-[10px] font-bold uppercase tracking-wider opacity-50">Acompanhamento em tempo real</CardDescription>
           </div>
           <Link to="/vendas" className="text-xs font-black text-primary hover:underline underline-offset-4 flex items-center gap-1">
              Ver Histórico Completo
