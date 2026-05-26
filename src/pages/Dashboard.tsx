@@ -112,6 +112,7 @@ export default function Dashboard() {
   const [datePickerOpen, setDatePickerOpen] = useState(false);
   const privacy = usePrivacyMode();
   const [detailTx, setDetailTx] = useState<Tables<"transactions"> | null>(null);
+  const [pixDialogOpen, setPixDialogOpen] = useState(false);
   const [availableBalance, setAvailableBalance] = useState<number>(0);
 
   useEffect(() => {
