@@ -1,0 +1,210 @@
+// Quick PIX generation — creates a standalone PIX cobrança without a product
+// Auth required: user_id is derived from the JWT
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+
+const corsHeaders = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Headers":
+    "authorization, x-client-info, apikey, content-type",
+};
+
+function safeLog(message: string, context: Record<string, unknown> = {}) {
+  const safe: Record<string, unknown> = {};
+  const ALLOWED = ["transactionId", "status", "amount", "podpayId", "error", "code"];
+  for (const k of ALLOWED) if (k in context) safe[k] = context[k];
+  console.log(`[quick-pix] ${message}`, JSON.stringify(safe));
+}
+
+Deno.serve(async (req) => {
+  if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
+
+  try {
+    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
+    const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+    const anonKey = Deno.env.get("SUPABASE_ANON_KEY")!;
+
+    // === Auth: get user from JWT ===
+    const authHeader = req.headers.get("Authorization") ?? "";
+    const jwt = authHeader.replace("Bearer ", "");
+    if (!jwt) {
+      return new Response(JSON.stringify({ success: false, error: "Não autenticado" }), {
+        status: 401,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+    const supaUser = createClient(supabaseUrl, anonKey, {
+      global: { headers: { Authorization: `Bearer ${jwt}` } },
+    });
+    const { data: userData, error: userErr } = await supaUser.auth.getUser();
+    if (userErr || !userData.user) {
+      return new Response(JSON.stringify({ success: false, error: "Sessão inválida" }), {
+        status: 401,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+    const userId = userData.user.id;
+
+    // === Input ===
+    const body = await req.json().catch(() => ({}));
+    const {
+      amount,
+      customerName,
+      customerEmail,
+      customerDocument,
+      description,
+    } = body ?? {};
+
+    const amt = Number(amount);
+    if (!amt || amt < 1 || amt > 100000) {
+      return new Response(
+        JSON.stringify({ success: false, error: "Valor inválido (mín. R$ 1, máx. R$ 100.000)" }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+      );
+    }
+    const cleanDoc = String(customerDocument || "").replace(/\D/g, "");
+    if (cleanDoc.length !== 11 && cleanDoc.length !== 14) {
+      return new Response(
+        JSON.stringify({ success: false, error: "CPF ou CNPJ inválido" }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+      );
+    }
+    const safeName = String(customerName || "").trim().slice(0, 200);
+    if (safeName.length < 3) {
+      return new Response(
+        JSON.stringify({ success: false, error: "Nome obrigatório" }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+      );
+    }
+    const emailRaw = String(customerEmail || "").trim().toLowerCase().slice(0, 255);
+    const safeEmail = emailRaw && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailRaw)
+      ? emailRaw
+      : `pix+${cleanDoc}@hotzfy.com.br`;
+
+    const supabase = createClient(supabaseUrl, serviceKey);
+
+    // === Fees (PIX) ===
+    const { data: fees } = await supabase.from("fees").select("*");
+    let feeAmount = 0;
+    const pixFee = fees?.find((f) => f.name === "Taxa PIX");
+    const fixedFee = fees?.find((f) =>
+      f.name === "Taxa Fixa por Transação" && f.fee_type === "fixed"
+    );
+    if (pixFee) {
+      feeAmount += pixFee.fee_type === "percentage"
+        ? (amt * Number(pixFee.value)) / 100
+        : Number(pixFee.value);
+    }
+    if (fixedFee) feeAmount += Number(fixedFee.value);
+    feeAmount = Math.round(feeAmount * 100) / 100;
+    if (feeAmount < 0 || feeAmount >= amt) feeAmount = 0;
+    const netAmount = Math.round((amt - feeAmount) * 100) / 100;
+    const amountInCents = Math.round(amt * 100);
+
+    // === PodPay ===
+    const publicKey = Deno.env.get("PODPAY_PUBLIC_KEY")!;
+    const secretKey = Deno.env.get("PODPAY_SECRET_KEY")!;
+    const auth = "Basic " + btoa(publicKey + ":" + secretKey);
+
+    const desc = String(description || "Cobrança PIX").trim().slice(0, 100) || "Cobrança PIX";
+    const podpayPayload = {
+      amount: amountInCents,
+      paymentMethod: "pix",
+      items: [{
+        externalRef: `quick-${userId.slice(0, 8)}`,
+        title: desc,
+        unitPrice: amountInCents,
+        quantity: 1,
+        tangible: false,
+      }],
+      customer: {
+        name: safeName,
+        email: safeEmail,
+        document: {
+          number: cleanDoc,
+          type: cleanDoc.length > 11 ? "cnpj" : "cpf",
+        },
+      },
+      postbackUrl: `${supabaseUrl}/functions/v1/podpay-postback`,
+      externalRef: `quick-${userId}`,
+      ip: req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "0.0.0.0",
+      pix: { expiresInMinutes: 30 },
+    };
+
+    safeLog("Creating quick PIX", { amount: amountInCents });
+
+    const controller = new AbortController();
+    const t = setTimeout(() => controller.abort(), 15000);
+    let response: Response;
+    try {
+      response = await fetch("https://api.podpay.co/v1/transactions", {
+        method: "POST",
+        headers: {
+          Authorization: auth,
+          "Content-Type": "application/json",
+          Accept: "application/json",
+        },
+        body: JSON.stringify(podpayPayload),
+        signal: controller.signal,
+      });
+    } catch (e) {
+      clearTimeout(t);
+      const isAbort = e instanceof Error && e.name === "AbortError";
+      safeLog("PodPay fetch failed", { error: isAbort ? "timeout" : "network" });
+      return new Response(
+        JSON.stringify({ success: false, error: "Tempo esgotado. Tente novamente." }),
+        { status: 504, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+      );
+    } finally {
+      clearTimeout(t);
+    }
+
+    const podpayData = await response.json();
+    if (!response.ok) {
+      safeLog("PodPay error", { status: response.status });
+      return new Response(
+        JSON.stringify({ success: false, error: "Não foi possível gerar o PIX. Tente novamente." }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+      );
+    }
+
+    const podpayId = podpayData.data?.id || podpayData.id;
+    const pix = podpayData.data?.pix || podpayData.pix || null;
+
+    const { data: transaction } = await supabase.from("transactions").insert({
+      user_id: userId,
+      product_id: null,
+      amount: amt,
+      fee_amount: feeAmount,
+      net_amount: netAmount,
+      status: "pending",
+      payment_method: "pix",
+      customer_name: safeName,
+      customer_email: safeEmail,
+      customer_document: cleanDoc,
+      podpay_payment_id: podpayId ? String(podpayId) : null,
+    }).select().single();
+
+    safeLog("Quick PIX created", { transactionId: transaction?.id, podpayId });
+
+    return new Response(
+      JSON.stringify({
+        success: true,
+        data: {
+          transactionId: transaction?.id,
+          podpayId,
+          amount: amt,
+          pix,
+        },
+      }),
+      { headers: { ...corsHeaders, "Content-Type": "application/json" } },
+    );
+  } catch (error) {
+    safeLog("Internal error", {
+      error: error instanceof Error ? error.message : "unknown",
+    });
+    return new Response(
+      JSON.stringify({ success: false, error: "Erro interno. Tente novamente." }),
+      { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+    );
+  }
+});
