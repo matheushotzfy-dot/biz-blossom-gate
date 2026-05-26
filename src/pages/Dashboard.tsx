@@ -349,32 +349,30 @@ export default function Dashboard() {
           </CardHeader>
           
           <CardContent className="pt-2 pb-6 px-6 md:px-8">
-            <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-6">
-              <div className="space-y-5 flex-1 min-w-0">
-                <div className="flex items-baseline gap-3 flex-wrap">
-                  <p className="text-4xl md:text-5xl font-black tracking-tight text-foreground leading-none">
-                    {privacy.hidden ? CENSORED : fmt(revenue)}
-                  </p>
-                  <span className="text-muted-foreground/30 font-bold text-base">BRL</span>
-                </div>
+            <div className="flex flex-col gap-5">
+              <div className="flex items-baseline gap-3 flex-wrap">
+                <p className="text-4xl md:text-5xl font-black tracking-tight text-foreground leading-none">
+                  {privacy.hidden ? CENSORED : fmt(revenue)}
+                </p>
+                <span className="text-muted-foreground/30 font-bold text-base">BRL</span>
+              </div>
 
-                <div className="flex flex-wrap items-center gap-4 md:gap-6 p-4 rounded-2xl bg-background/40 border border-border/40 backdrop-blur-sm w-fit group-hover:border-primary/20 transition-all">
-                  <div className="space-y-1">
-                    <div className="flex items-center gap-2">
-                      <Wallet className="h-3 w-3 text-muted-foreground/60" />
-                      <p className="text-[9px] font-bold uppercase tracking-wider text-muted-foreground/60">Saldo Disponível</p>
-                    </div>
-                    <p className="text-lg font-black text-success tracking-tight leading-none">{privacy.hidden ? CENSORED : fmt(balance)}</p>
+              <div className="flex flex-wrap items-center gap-4 md:gap-6 p-4 rounded-2xl bg-background/40 border border-border/40 backdrop-blur-sm w-fit group-hover:border-primary/20 transition-all">
+                <div className="space-y-1">
+                  <div className="flex items-center gap-2">
+                    <Wallet className="h-3 w-3 text-muted-foreground/60" />
+                    <p className="text-[9px] font-bold uppercase tracking-wider text-muted-foreground/60">Saldo Disponível</p>
                   </div>
-                  <div className="hidden sm:block h-8 w-px bg-border/40" />
-                  <div className="space-y-1">
-                    <p className="text-[9px] font-bold uppercase tracking-wider text-muted-foreground/60">Conversão</p>
-                    <p className="text-lg font-black text-primary tracking-tight leading-none">{conversion.toFixed(1)}%</p>
-                  </div>
+                  <p className="text-lg font-black text-success tracking-tight leading-none">{privacy.hidden ? CENSORED : fmt(balance)}</p>
+                </div>
+                <div className="hidden sm:block h-8 w-px bg-border/40" />
+                <div className="space-y-1">
+                  <p className="text-[9px] font-bold uppercase tracking-wider text-muted-foreground/60">Conversão</p>
+                  <p className="text-lg font-black text-primary tracking-tight leading-none">{conversion.toFixed(1)}%</p>
                 </div>
               </div>
 
-              <div className="flex flex-col gap-2.5 w-full lg:w-[185px] shrink-0">
+              <div className="grid grid-cols-2 gap-3 pt-1">
                 <Link
                   to="/financeiro/saques"
                   className="bg-primary text-primary-foreground h-11 px-4 rounded-xl font-bold text-[12px] flex items-center justify-center gap-2 shadow-md shadow-primary/25 hover:shadow-lg hover:shadow-primary/30 hover:-translate-y-0.5 active:scale-[0.98] transition-all whitespace-nowrap"
