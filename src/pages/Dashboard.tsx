@@ -349,8 +349,8 @@ export default function Dashboard() {
           </CardHeader>
           
           <CardContent className="pt-2 pb-6 px-6 md:px-8">
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
-              <div className="space-y-5">
+            <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
+              <div className="space-y-6 flex-1">
                 <div className="flex items-baseline gap-3">
                   <p className="text-4xl md:text-5xl lg:text-6xl font-black tracking-tight text-foreground">
                     {privacy.hidden ? CENSORED : fmt(revenue)}
@@ -358,7 +358,7 @@ export default function Dashboard() {
                   <span className="text-muted-foreground/30 font-bold text-lg">BRL</span>
                 </div>
                 
-                <div className="flex items-center gap-6 p-4 rounded-2xl bg-background/40 border border-border/40 backdrop-blur-sm w-fit group-hover:border-primary/20 transition-all">
+                <div className="flex flex-wrap items-center gap-4 md:gap-6 p-4 rounded-2xl bg-background/40 border border-border/40 backdrop-blur-sm w-fit group-hover:border-primary/20 transition-all">
                   <div className="space-y-1">
                     <div className="flex items-center gap-2">
                       <Wallet className="h-3 w-3 text-muted-foreground/60" />
@@ -366,7 +366,7 @@ export default function Dashboard() {
                     </div>
                     <p className="text-lg font-black text-success tracking-tight leading-none">{privacy.hidden ? CENSORED : fmt(balance)}</p>
                   </div>
-                  <div className="h-8 w-px bg-border/40" />
+                  <div className="hidden sm:block h-8 w-px bg-border/40" />
                   <div className="space-y-1">
                     <p className="text-[9px] font-bold uppercase tracking-wider text-muted-foreground/60">Conversão</p>
                     <p className="text-lg font-black text-primary tracking-tight leading-none">{conversion.toFixed(1)}%</p>
@@ -374,12 +374,12 @@ export default function Dashboard() {
                 </div>
               </div>
 
-              <div className="flex flex-col gap-2.5 sm:min-w-[180px]">
-                <Link to="/financeiro/saques" className="group/btn relative overflow-hidden bg-primary text-primary-foreground px-6 h-12 rounded-xl font-bold text-xs flex items-center justify-center gap-2 shadow-lg shadow-primary/20 hover:translate-y-[-2px] hover:shadow-primary/30 active:scale-[0.98] transition-all">
+              <div className="flex flex-col sm:flex-row md:flex-col lg:flex-row gap-3 w-full md:w-auto">
+                <Link to="/financeiro/saques" className="group/btn flex-1 md:flex-none relative overflow-hidden bg-primary text-primary-foreground px-6 h-12 rounded-xl font-bold text-xs flex items-center justify-center gap-2 shadow-lg shadow-primary/20 hover:translate-y-[-2px] hover:shadow-primary/30 active:scale-[0.98] transition-all whitespace-nowrap">
                   <ArrowDownRight className="h-4 w-4" />
                   Solicitar Saque
                 </Link>
-                <Link to="/vendas/links" className="bg-card border border-border/60 px-6 h-12 rounded-xl font-bold text-xs flex items-center justify-center gap-2 hover:bg-accent hover:border-primary/20 hover:translate-y-[-2px] transition-all active:scale-[0.98]">
+                <Link to="/vendas/links" className="flex-1 md:flex-none bg-card border border-border/60 px-6 h-12 rounded-xl font-bold text-xs flex items-center justify-center gap-2 hover:bg-accent hover:border-primary/20 hover:translate-y-[-2px] transition-all active:scale-[0.98] whitespace-nowrap">
                   <Zap className="h-4 w-4 text-success" />
                   Link de Pagamento
                 </Link>
