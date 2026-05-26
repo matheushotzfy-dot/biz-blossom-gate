@@ -592,6 +592,7 @@ export default function Dashboard() {
           </div>
         </CardContent>
       </Card>
+      <QuickPixDialog open={pixDialogOpen} onOpenChange={setPixDialogOpen} />
     </div>
   );
 }
