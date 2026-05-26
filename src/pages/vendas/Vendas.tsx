@@ -753,35 +753,38 @@ export default function Vendas() {
 
       {/* ─────────── COMANDO LIMPO ─────────── */}
       <div className="px-5 pt-3 sm:px-8 sm:pt-4">
-        <header className="border-b border-border/70 pb-4">
-          <div className="flex flex-col gap-5 xl:flex-row xl:items-start xl:justify-between">
+        <header>
+          <div className="flex flex-col gap-6 xl:flex-row xl:items-start xl:justify-between">
             <div className="min-w-0">
-              <h1 className="font-display text-[36px] font-black leading-[0.88] tracking-[-0.06em] text-foreground sm:text-[48px]">
-                Vendas
-              </h1>
-              <div className="mt-5 flex flex-wrap items-end gap-x-5 gap-y-2">
+              <div className="flex items-center gap-3">
+                <h1 className="font-display text-[42px] font-black leading-none tracking-[-0.05em] text-foreground sm:text-[48px]">
+                  Vendas
+                </h1>
+              </div>
+              
+              <div className="mt-6 flex flex-wrap items-baseline gap-x-6 gap-y-2">
                 <p
                   key={`hero-${animKey}`}
                   className={cn(
-                    "vendas-rise font-display text-[42px] font-black leading-[0.84] tracking-[-0.075em] tabular-nums sm:text-[56px]",
+                    "vendas-rise font-display text-[56px] font-black leading-none tracking-[-0.06em] tabular-nums sm:text-[68px]",
                     hidden ? "text-foreground" : "text-success",
                   )}
                   style={{ fontVariantNumeric: "tabular-nums slashed-zero" }}
                 >
                   {hidden ? HIDE : fmt(m.totalNet)}
                 </p>
-                <div className="pb-1.5">
-                  <p className="flex items-center gap-1.5 text-[12px] font-bold tracking-[-0.005em] text-foreground">
-                    <span className="inline-block h-2 w-[3px] rounded-full bg-success" />
+                <div className="flex flex-col gap-1">
+                  <p className="flex items-center gap-1.5 text-[12px] font-black uppercase tracking-widest text-success">
+                    <span className="inline-block h-2 w-2 rounded-full bg-success animate-pulse" />
                     Receita líquida no período
                   </p>
-                  <p className="mt-1 text-[11.5px] font-medium text-muted-foreground/85">
-                    <span className="font-bold text-foreground">{periodLabel}</span>
-                    <span className="mx-1.5 inline-block h-[3px] w-[3px] -translate-y-[3px] rounded-full bg-muted-foreground/40 align-middle" />
-                    {dateFiltered.length} {dateFiltered.length === 1 ? "transação" : "transações"}
+                  <p className="text-[13px] font-bold text-muted-foreground/90">
+                    <span className="text-foreground">{periodLabel}</span>
+                    <span className="mx-2 text-muted-foreground/30">•</span>
+                    {dateFiltered.length} {dateFiltered.length === 1 ? "venda" : "vendas"}
                     {lastSaleText && (
                       <>
-                        <span className="mx-1.5 inline-block h-[3px] w-[3px] -translate-y-[3px] rounded-full bg-muted-foreground/40 align-middle" />
+                        <span className="mx-2 text-muted-foreground/30">•</span>
                         última {lastSaleText}
                       </>
                     )}
