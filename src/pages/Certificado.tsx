@@ -26,12 +26,9 @@ export default function Certificado() {
   useEffect(() => {
     if (!code) return;
     (async () => {
-      const { data } = await supabase
-        .from("certificates")
-        .select("id, code, course_title, student_name, total_lessons, issued_at")
-        .eq("code", code.toUpperCase())
-        .maybeSingle();
-      setCert(data as Cert | null);
+      const { data } = await supabase.rpc("verify_certificate", { _code: code });
+      const row = Array.isArray(data) ? data[0] : data;
+      setCert((row as Cert) || null);
       setLoading(false);
     })();
   }, [code]);

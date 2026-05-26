@@ -2814,6 +2814,17 @@ export type Database = {
         Returns: boolean
       }
       is_product_active: { Args: { _product_id: string }; Returns: boolean }
+      verify_certificate: {
+        Args: { _code: string }
+        Returns: {
+          code: string
+          course_title: string
+          id: string
+          issued_at: string
+          student_name: string
+          total_lessons: number
+        }[]
+      }
     }
     Enums: {
       app_role: "admin" | "user" | "employee" | "manager"
