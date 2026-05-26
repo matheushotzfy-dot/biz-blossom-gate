@@ -26,6 +26,7 @@ import { Area, AreaChart, ResponsiveContainer, Tooltip, XAxis, YAxis, CartesianG
 import type { Tables } from "@/integrations/supabase/types";
 import { Link, useNavigate } from "react-router-dom";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
+import QuickPixDialog from "@/components/QuickPixDialog";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { StatCard } from "@/components/StatCard";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
@@ -111,6 +112,7 @@ export default function Dashboard() {
   const [datePickerOpen, setDatePickerOpen] = useState(false);
   const privacy = usePrivacyMode();
   const [detailTx, setDetailTx] = useState<Tables<"transactions"> | null>(null);
+  const [pixDialogOpen, setPixDialogOpen] = useState(false);
   const [availableBalance, setAvailableBalance] = useState<number>(0);
 
   useEffect(() => {
@@ -380,13 +382,14 @@ export default function Dashboard() {
                   <ArrowDownRight className="h-4 w-4 shrink-0" />
                   <span>Solicitar Saque</span>
                 </Link>
-                <Link
-                  to="/vendas/links"
+                <button
+                  type="button"
+                  onClick={() => setPixDialogOpen(true)}
                   className="bg-background/60 border border-border/60 text-foreground h-11 px-4 rounded-xl font-bold text-[12px] flex items-center justify-center gap-2 hover:bg-accent hover:border-primary/30 hover:-translate-y-0.5 active:scale-[0.98] transition-all whitespace-nowrap"
                 >
                   <Zap className="h-4 w-4 text-success shrink-0" />
                   <span>Link de Pagamento</span>
-                </Link>
+                </button>
               </div>
             </div>
           </CardContent>
@@ -589,6 +592,7 @@ export default function Dashboard() {
           </div>
         </CardContent>
       </Card>
+      <QuickPixDialog open={pixDialogOpen} onOpenChange={setPixDialogOpen} />
     </div>
   );
 }
