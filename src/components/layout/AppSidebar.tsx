@@ -177,16 +177,25 @@ function SidebarSectionNav({ section, pathname, isFirst }: SidebarSectionNavProp
                     end={item.exact}
                     activeClassName=""
                     className={cn(
-                      "group/nav relative flex h-[46px] w-full items-center gap-3 rounded-xl border px-3 text-[13px] font-bold transition-colors duration-200 group-data-[collapsible=icon]:h-12 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0",
+                      "group/nav relative flex h-[46px] w-full items-center gap-3 rounded-xl px-3 text-[13px] font-bold",
+                      "transition-all duration-[260ms] ease-[cubic-bezier(0.32,0.72,0,1)]",
+                      "active:scale-[0.98]",
+                      "group-data-[collapsible=icon]:h-12 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0",
                       isActive
-                        ? "border-sidebar-primary/35 bg-sidebar-primary text-sidebar-primary-foreground"
-                        : "border-transparent text-sidebar-foreground/62 hover:border-sidebar-border/70 hover:bg-sidebar-accent/55 hover:text-sidebar-accent-foreground",
+                        ? "bg-sidebar-primary text-sidebar-primary-foreground"
+                        : "text-sidebar-foreground/65 hover:bg-sidebar-accent/55 hover:text-sidebar-accent-foreground hover:translate-x-[2px]",
                     )}
                   >
+                    {/* Active indicator rail */}
+                    {isActive && (
+                      <span className="absolute left-0 top-1/2 h-5 w-[3px] -translate-y-1/2 rounded-r-full bg-sidebar-primary-foreground group-data-[collapsible=icon]:hidden" />
+                    )}
                     <item.icon
                       className={cn(
-                        "h-5 w-5 transition-colors duration-200",
-                        isActive ? "text-primary-foreground" : "text-muted-foreground/40 group-hover/nav:text-foreground"
+                        "h-5 w-5 transition-transform duration-[260ms] ease-[cubic-bezier(0.32,0.72,0,1)]",
+                        isActive
+                          ? "text-primary-foreground"
+                          : "text-muted-foreground/50 group-hover/nav:text-foreground group-hover/nav:scale-[1.08]",
                       )}
                       strokeWidth={isActive ? 2.5 : 2}
                     />
@@ -205,9 +214,10 @@ function SidebarSectionNav({ section, pathname, isFirst }: SidebarSectionNavProp
                     {item.count !== undefined && item.count > 0 && !item.badge && (
                       <span className={cn(
                         "ml-auto rounded-md px-2 py-0.5 text-[11px] font-bold tabular-nums group-data-[collapsible=icon]:hidden",
+                        "transition-colors duration-[260ms] ease-[cubic-bezier(0.32,0.72,0,1)]",
                         isActive
-                          ? "bg-sidebar-primary/25 text-sidebar-primary"
-                          : "bg-sidebar-border/50 text-sidebar-foreground/65",
+                          ? "bg-sidebar-primary-foreground/15 text-sidebar-primary-foreground"
+                          : "bg-sidebar-border/50 text-sidebar-foreground/65 group-hover/nav:bg-sidebar-border group-hover/nav:text-foreground",
                       )}>
                         {item.count}
                       </span>

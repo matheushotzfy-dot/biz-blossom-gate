@@ -1,69 +1,120 @@
+## Objetivo
 
-# Plano de Correção — 50 Findings
+Elevar visualmente 4 superfícies financeiras + interações do sidebar, mantendo 100% da lógica de negócio. Tudo segue a memória do projeto: **sem glassmorphism, sem shadow exagerado, sem blur, sem glow** — bordas 1px sólidas, tokens semânticos, Plus Jakarta Sans / Space Grotesk / JetBrains Mono para números, transições suaves 220-280ms cubic-bezier.
 
-Vou aplicar as correções em **3 ondas**, priorizando o que mais impacta segurança e estabilidade. Tudo será feito sem quebrar funcionalidades existentes.
+## 1. SaquesHub (wrapper)
 
-## Onda 1 — Banco de Dados (Migração SQL)
+Hoje usa `backdrop-blur-xl` e `shadow-[0_0_20px_...]` no header — viola padrão.
 
-**Objetivo:** fechar buracos de segurança RLS e otimizar performance.
+- Trocar header para `bg-background` com `border-b border-border` sólido (sem blur).
+- Remover shadow do ícone, substituir por borda + fundo sólido.
+- Unificar abas PIX/Crypto: pílula ativa em `bg-primary/10 text-primary` com `border border-primary/25`, inativa em `text-muted-foreground hover:bg-muted/40`.
+- Reduzir altura do header (h-16 → h-14) para densidade premium.
+- Indicador "Sistema Online" minimalista: ponto verde + label, sem `animate-ping`.
 
-- Revogar `EXECUTE` de funções `SECURITY DEFINER` sensíveis para `anon` e `authenticated` (linter findings 1–9): `get_course_analytics`, `get_ledger_balance`, `check_velocity`, `check_blacklist`, `check_signup_conflicts`, `get_affiliate_product_owner`, `get_checkout_status`, `is_product_active`, `current_user_has_role`. Manter `has_role` acessível.
-- Criar índices ausentes em colunas de FK e filtro frequente:
-  - `activity_logs(user_id, created_at desc)`
-  - `notifications(user_id, created_at desc)`
-  - `transactions(user_id, status, created_at desc)`
-  - `affiliate_sales(affiliate_user_id)`, `affiliate_links(product_id)`
-  - `withdrawals(user_id, status)`, `financial_ledger(user_id, created_at desc)`
-- Constraints de integridade financeira:
-  - `CHECK (amount >= 0)` em `transactions`, `withdrawals`, `affiliate_sales`, `balance_adjustments`.
-- `ON DELETE CASCADE` em `order_bumps_bump_product_id_fkey` (hoje deleta o pai e quebra o bump).
-- Soft delete em `products` (`deleted_at timestamptz`) + ajuste das RLS para filtrar `deleted_at IS NULL`.
-- Sanitização de PII em `activity_logs`: trigger remove chaves `password`, `token`, `secret`, `cpf` antes de gravar.
-- Trigger `update_updated_at_column` em `acquirers` e demais tabelas que faltam.
-- Limpar policies `deny_anon_*` redundantes (são `RESTRICTIVE` com `false` sem `PERMISSIVE` correspondente para anon) — manter apenas onde há ambiguidade real.
+## 2. Saques PIX (`Saques.tsx`)
 
-## Onda 2 — Edge Functions
+A página já é densa e bem estruturada. Refino cirúrgico, sem reescrever lógica:
 
-**Objetivo:** validar input, evitar reprocessamento e endurecer respostas.
+**Hero (header)**
+- Valor disponível: manter tipografia gigante, mas adicionar microcopy "Disponível para saque" em uppercase 9px acima do número (cria contexto imediato).
+- Linha de meta-info (pendentes / retido / refresh) → reorganizar como 3 chips horizontais com divisores `|`, mais escaneável.
+- Botão "Novo saque": realçar com ícone `+` em círculo `bg-success-foreground/15` interno + texto, mantendo `bg-success`.
 
-- Adicionar **Zod validation** em `admin-login`, `manager-login`, `admin-2fa-verify`, `podpay-postback`, `podpay-create-transaction`, `podpay-cashout`, `podpay-refund`, `generate-api-key`, `export-report`, `admin-impersonate`.
-- Idempotência em `podpay-postback`: checar `processed_at` antes de processar splits.
-- Tipar `supabase: any` → `SupabaseClient` em `podpay-postback` (processCoProductionSplit / processAffiliateSplit).
-- CORS restrito: trocar `*` por allowlist dos domínios `hotzfy.com.br`, `www.hotzfy.com.br`, lovable preview.
-- Headers de segurança: `X-Content-Type-Options: nosniff`, `Referrer-Policy: no-referrer` em todas as respostas.
-- Retornar 500 com detalhe em `subscription-renewal` quando há falhas; sanitizar URLs nos `catch`.
-- `manager-login`: aplicar mesmo split `authClient`/`adminClient` já feito em `admin-login`.
-- Rate-limit IP em `admin-login` e `manager-login` via tabela `admin_login_attempts` (já existe) — bloquear após N tentativas/min.
-- Retry com backoff exponencial nas chamadas PodPay (`cashout`, `create-transaction`, `refund`).
-- `export-report`: paginar resultados em chunks de 1000 antes de montar CSV.
+**KPIs**
+- Eliminar `rail` lateral colorido (decoração frágil). Trocar por **micro-sparkline embutida** de 24h no canto direito de cada KPI (Total sacado, Aprovação, Pendentes) — premium real.
+- Padronizar ícone monocromático top-right por KPI em vez do trace de cor lateral.
 
-## Onda 3 — Frontend
+**Dialog "Solicitar Saque"**
+- Aumentar para `max-w-[440px]`.
+- Saldo no topo: card maior com label + valor enorme + microcopy de retido.
+- Campo de valor: input gigante (h-16, font-black 32px) com prefixo R$ flutuante, atalhos 25/50/75/Máx como chips arredondados maiores.
+- Breakdown (solicitado → taxa → líquido) virá como mini-tabela com 3 linhas, separadas por `border-border/40`, número líquido em verde grande.
+- Seleção de chave PIX: cards com `radio` à direita, ícone do tipo (CPF/Email/Phone) à esquerda em cor por tipo (sutil).
+- CTA inferior fixo com altura 48px, micro-status "Aprovação em até 24h úteis" abaixo.
 
-**Objetivo:** reduzir `as any`, melhorar UX e acessibilidade sem mudar layout.
+**Gráfico**
+- Adicionar header com valor agregado em destaque + mini badge de variação vs período anterior.
+- Reduzir altura para 200px, padding interno consistente.
+- Cor da área: `primary` com stop opacity 0.18 → 0 (mais sutil).
 
-- Centralizar `formatCurrency(value, locale='pt-BR', currency='BRL')` em `src/lib/utils.ts` e substituir hardcodes.
-- `pixelTracking.ts`: guardar flag `__pixel_loaded_<id>` para não reinjetar scripts em re-render.
-- Adicionar `aria-label` em botões icon-only restantes (modais, fechar painéis).
-- Memoizar listas filtradas (`Vendas.tsx`, `Marketplace.tsx`, `Webhooks.tsx`) com `useMemo`; `React.memo` em linhas pesadas.
-- Expor `error` no `useQueryData` e disparar Toast quando falhar.
-- Reduzir `as any`: gerar tipo manual para `co_productions` e `webhook_configs_safe` em `src/integrations/supabase/types.ts` está bloqueado (auto-gerado) → criar `src/types/db-extra.ts` com tipos auxiliares e remover ~50 `as any` em arquivos top: `Vendas.tsx`, `Coproducoes.tsx`, `AdminSellersTab.tsx`, `AdminManagersTab.tsx`, `useQueryData.tsx`.
-- Loading states em botões de ação (Vendas, Saques, Afiliados): desabilitar enquanto `isLoading`.
-- Deletar `src/pages/Dashboard.tsx.bak` e assets `ignore-*` não referenciados.
-- `public/robots.txt`: adicionar `Disallow: /admin`, `Disallow: /manager`, `Disallow: /financeiro`.
-- `public/manifest.json`: completar `theme_color`, `background_color`, ícones 192/512.
+**Histórico**
+- Tabs de status: pílulas com contador, cores sólidas por status (sem `bg-secondary` cinza neutro no ativo — destacar com cor própria).
+- Linhas da tabela: altura uniforme 56px, hover `bg-muted/30`, valor monetário sempre em `tabular-nums`, status como chip `border + bg/10`.
+
+## 3. Saques Crypto (`SaquesCrypto.tsx`)
+
+Foco maior aqui — precisa de presença real de mesa de operações cripto.
+
+**Hero**
+- Mesma estrutura do PIX para consistência (valor disponível enorme + linha de meta).
+- Adicionar widget **"Cotações ao vivo"** logo abaixo do título: 3 cards horizontais (BTC / USDT / XMR) com símbolo, preço em BRL, variação 24h colorida, mini-sparkline. Atualização visível (timestamp).
+
+**Seletor de ativo**
+- Trocar dropdown atual por **grid de 3 cards-pílula** (BTC / USDT / XMR) — selecionado fica com `border-primary` + bg `primary/8`, mostra ícone do símbolo (letra estilizada se sem SVG) na cor do ativo (laranja BTC, verde USDT, laranja XMR) com saturação reduzida.
+
+**Seletor de rede**
+- Lista vertical compacta com ícone monocromático, nome da rede + sigla curta à direita.
+- Indicador de taxa estimada por rede ("≈ R$ X em taxa de rede") quando aplicável.
+
+**Dialog "Novo saque crypto"**
+- Estrutura igual ao PIX para coerência: saldo → valor → ativo/rede → endereço → breakdown → CTA.
+- Campo de endereço com validação básica de formato + botão "Colar" e "QR scan" (ícone, ainda placeholder).
+- Aviso de irreversibilidade: faixa amarela sutil `bg-warning/8 border-warning/25` acima do CTA.
+
+**KPIs cripto**
+- Total sacado, ticket médio em USD/BRL toggle, número de redes utilizadas, tempo médio de confirmação.
+- Sparkline em cada KPI (consistente com PIX).
+
+**Histórico**
+- Coluna extra: rede (chip pequeno com sigla).
+- Hash da transação como link `font-mono` truncado com `tooltip` no hover do full hash.
+
+## 4. QuickPixDialog (Link de Pagamento)
+
+Hoje usa `bg-gradient-to-br`, `backdrop-blur`, `ring`, `shadow-md` — viola padrão.
+
+- Remover todos os gradientes e blur. Header sólido `bg-card` com `border-b border-border`.
+- Ícone do header sem ring/glow, apenas `bg-primary/10 border border-primary/20`.
+- Inputs: padronizar com a altura/estilo dos outros formulários do projeto (h-11 default, h-14 só pro campo de valor).
+- Botão CTA: `bg-primary` sólido, sem shadow.
+- Tela de resultado:
+  - QR code em card `bg-white border border-border` (mantém branco interno para contraste do QR, é correto).
+  - Bloco "PIX copia e cola" com fundo `bg-muted/40` (não `background/60` translúcido), borda sólida.
+  - Timer como chip discreto sem fundo colorido, ícone + número monospace.
+  - Mensagem "Aguardando pagamento" com ponto pulsante verde (consistente com sidebar status).
+- Tela de confirmação: ícone success em círculo sólido `bg-success/10 border border-success/30`, sem ring.
+
+## 5. Sidebar — interações mais lisas (`AppSidebar.tsx`)
+
+Hoje: `transition-colors duration-200` linear. Memória pede 220-280ms com cubic-bezier suave.
+
+- Trocar todos os hovers para `transition-all duration-[260ms] ease-[cubic-bezier(0.32,0.72,0,1)]` (curva Apple).
+- Itens do menu:
+  - Hover atual: `hover:bg-sidebar-accent/55` → adicionar **translação sutil** `hover:translate-x-[2px]` e ícone com `group-hover/nav:scale-[1.08]` para feedback orgânico.
+  - Estado ativo: manter `bg-sidebar-primary` mas adicionar **indicador vertical** à esquerda (`absolute left-0 top-1/2 h-5 w-[3px] -translate-y-1/2 bg-primary-foreground rounded-r-full`) — assinatura premium.
+  - Border do item: trocar `border-transparent` → fundo sólido no hover (sem borda piscando).
+- Active state em click: `active:scale-[0.98]` global em todos os botões do sidebar (header, footer, items).
+- Card de receita (RevenueCard): suavizar hover (sem `hover:shadow-lg`, trocar por subtle `hover:bg-sidebar-accent/45` + `translate-y-[-1px]`).
+- Botões do footer (Suporte / Perfil / Logout): mesma curva e micro-translation.
 
 ## Detalhes técnicos
 
-- Migração será **uma única transação** com `IF NOT EXISTS` para índices e `DROP POLICY IF EXISTS` antes de recriar.
-- Tipos auxiliares ficam em `src/types/db-extra.ts` (não toca `types.ts` auto-gerado).
-- CORS allowlist via `const ALLOWED_ORIGINS = [...]` e função `buildCors(origin)` reutilizável (helper inline em cada função, não há shared/).
-- Zod: usar `npm:zod@3` direto via Deno specifier.
+- Nenhuma mudança em queries, hooks, RPCs, edge functions ou tabelas.
+- Nenhum arquivo novo — apenas edição de:
+  - `src/pages/financeiro/SaquesHub.tsx`
+  - `src/pages/financeiro/Saques.tsx`
+  - `src/pages/financeiro/SaquesCrypto.tsx`
+  - `src/components/QuickPixDialog.tsx`
+  - `src/components/layout/AppSidebar.tsx`
+- Tokens semânticos exclusivamente (`primary`, `success`, `warning`, `destructive`, `muted-foreground`, `border`, `card`, `background`, `sidebar-*`).
+- Tipografia financeira: `font-display` (Space Grotesk) para números grandes, `tabular-nums slashed-zero` em todo valor monetário.
+- Sem `framer-motion` novo onde já existe; sem `backdrop-blur` em lugar nenhum.
+- Validação final: abrir cada página no preview e verificar densidade, contraste, alinhamento.
 
-## Fora do escopo
+## Critérios de pronto
 
-- Refatorar `Vendas.tsx` (1000+ linhas) — só limpeza de tipos.
-- Substituir imagens `ignore-*` por WebP (apenas remover não-referenciadas).
-- Sitemap dinâmico (requer nova edge function, posso fazer depois se quiser).
-- Mover roles `text` → enum `app_role` (alto risco em prod com triggers existentes).
-
-Confirma que posso seguir com as 3 ondas?
+- Saques PIX e Crypto visualmente irmãos, ambos com presença de "mesa de operações de tesouraria".
+- QuickPixDialog limpo, sem nenhum efeito que violasse a memória.
+- Sidebar com hover/active claramente mais "liso" e premium.
+- Build verde, sem regressões funcionais.
