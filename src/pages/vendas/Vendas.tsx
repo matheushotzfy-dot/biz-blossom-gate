@@ -794,8 +794,8 @@ export default function Vendas() {
             </div>
 
             <TooltipProvider delayDuration={250}>
-              <div className="flex w-full flex-wrap items-center gap-1 xl:w-auto xl:justify-end">
-                <div className="hidden items-center rounded-lg border border-border/60 bg-card p-[3px] md:inline-flex">
+              <div className="flex w-full flex-wrap items-center gap-2 xl:w-auto xl:justify-end">
+                <div className="flex items-center rounded-xl border border-border/40 bg-card/40 p-1">
                   {PERIODS.map((opt) => {
                     const active = !isCustom && selectedPeriod.label === opt.label;
                     return (
@@ -803,10 +803,10 @@ export default function Vendas() {
                         key={opt.label}
                         onClick={() => { setSelectedPeriod(opt); setIsCustom(false); setCustomRange(undefined); }}
                         className={cn(
-                          "relative rounded-[6px] px-2.5 py-[5px] text-[11px] font-bold tracking-[-0.005em] transition-all duration-200",
+                          "relative rounded-lg px-3 py-1.5 text-[12px] font-black transition-all duration-200",
                           active
-                            ? "bg-success/15 text-success ring-1 ring-success/30"
-                            : "text-muted-foreground/90 hover:text-foreground",
+                            ? "bg-success/10 text-success shadow-sm"
+                            : "text-muted-foreground/60 hover:text-foreground",
                         )}
                       >
                         {opt.label}
@@ -815,57 +815,50 @@ export default function Vendas() {
                   })}
                 </div>
 
-                <span className="hidden h-5 w-px bg-border/60 md:mx-1 md:block" />
+                <div className="flex items-center gap-2">
+                  <Tooltip>
+                    <Popover open={datePickerOpen} onOpenChange={setDatePickerOpen}>
+                      <TooltipTrigger asChild>
+                        <PopoverTrigger asChild>
+                          <button aria-label="Calendário" className={cn("inline-flex h-10 w-10 items-center justify-center rounded-xl border transition-all duration-200",
+                            isCustom ? "border-foreground/40 bg-secondary text-foreground" : "border-border/40 bg-card/40 text-muted-foreground hover:border-border/80 hover:text-foreground")}>
+                            <CalendarDays className="h-[18px] w-[18px]" strokeWidth={2.2} />
+                          </button>
+                        </PopoverTrigger>
+                      </TooltipTrigger>
+                      <PopoverContent align="end" className="w-auto overflow-hidden rounded-xl border border-border bg-popover p-0 shadow-2xl">
+                        <Calendar mode="range" selected={customRange} onSelect={(range) => { setCustomRange(range); setIsCustom(true); if (range?.from && range?.to) setTimeout(() => setDatePickerOpen(false), 300); }} numberOfMonths={1} locale={ptBR} disabled={(date) => date > new Date()} className="p-3" />
+                      </PopoverContent>
+                    </Popover>
+                    <TooltipContent side="bottom">Calendário</TooltipContent>
+                  </Tooltip>
 
-                <Tooltip>
-                  <Popover open={datePickerOpen} onOpenChange={setDatePickerOpen}>
+                  <Tooltip>
                     <TooltipTrigger asChild>
-                      <PopoverTrigger asChild>
-                        <button aria-label="Período personalizado" className={cn("inline-flex h-8 w-8 items-center justify-center rounded-md border transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-foreground/20",
-                          isCustom ? "border-foreground/80 bg-secondary text-foreground" : "border-border/60 bg-card/70 text-muted-foreground/90 hover:border-foreground/40 hover:bg-muted/60 hover:text-foreground")}>
-                          <CalendarDays className="h-[15px] w-[15px]" strokeWidth={2.1} />
-                        </button>
-                      </PopoverTrigger>
+                      <button onClick={() => window.location.reload()} className="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-border/40 bg-card/40 text-muted-foreground transition-all duration-200 hover:border-border/80 hover:text-foreground">
+                        <RefreshCw className="h-[18px] w-[18px]" strokeWidth={2.2} />
+                      </button>
                     </TooltipTrigger>
-                    <PopoverContent align="end" className="w-auto overflow-hidden rounded-lg border border-border bg-popover p-0 shadow-lg">
-                      <Calendar mode="range" selected={customRange} onSelect={(range) => { setCustomRange(range); setIsCustom(true); if (range?.from && range?.to) setTimeout(() => setDatePickerOpen(false), 300); }} numberOfMonths={1} locale={ptBR} disabled={(date) => date > new Date()} className="pointer-events-auto p-3" />
-                    </PopoverContent>
-                  </Popover>
-                  <TooltipContent side="bottom" className="flex items-center gap-2">Período personalizado</TooltipContent>
-                </Tooltip>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <button onClick={() => window.location.reload()} aria-label="Atualizar" className="group inline-flex h-8 w-8 items-center justify-center rounded-md border border-border/60 bg-card/70 text-muted-foreground/90 transition-all duration-200 hover:border-foreground/40 hover:bg-muted/60 hover:text-foreground focus:outline-none focus-visible:ring-2 focus-visible:ring-foreground/20">
-                      <RefreshCw className="h-[15px] w-[15px] transition-transform duration-500 group-hover:rotate-180" strokeWidth={2.1} />
-                    </button>
-                  </TooltipTrigger>
-                  <TooltipContent side="bottom" className="flex items-center gap-2">Atualizar <Kbd>R</Kbd></TooltipContent>
-                </Tooltip>
+                    <TooltipContent side="bottom">Atualizar</TooltipContent>
+                  </Tooltip>
 
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <button onClick={toggleHidden} aria-label={hidden ? "Mostrar valores" : "Ocultar valores"} className={cn("inline-flex h-8 w-8 items-center justify-center rounded-md border transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-foreground/20",
-                      hidden ? "border-foreground/80 bg-secondary text-foreground" : "border-border/60 bg-card/70 text-muted-foreground/90 hover:border-foreground/40 hover:bg-muted/60 hover:text-foreground")}>
-                      {hidden ? <EyeOff className="h-[15px] w-[15px]" strokeWidth={2.1} /> : <Eye className="h-[15px] w-[15px]" strokeWidth={2.1} />}
-                    </button>
-                  </TooltipTrigger>
-                  <TooltipContent side="bottom" className="flex items-center gap-2">{hidden ? "Mostrar valores" : "Ocultar valores"} <Kbd>P</Kbd></TooltipContent>
-                </Tooltip>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <button onClick={toggleHidden} className="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-border/40 bg-card/40 text-muted-foreground transition-all duration-200 hover:border-border/80 hover:text-foreground">
+                        {hidden ? <EyeOff className="h-[18px] w-[18px]" strokeWidth={2.2} /> : <Eye className="h-[18px] w-[18px]" strokeWidth={2.2} />}
+                      </button>
+                    </TooltipTrigger>
+                    <TooltipContent side="bottom">Privacidade</TooltipContent>
+                  </Tooltip>
 
-                <span className="hidden h-5 w-px bg-border/60 md:mx-1 md:block" />
-
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <button
-                      onClick={() => setShowExportDialog(true)}
-                      className="inline-flex h-8 items-center gap-1.5 rounded-lg bg-primary px-3.5 text-[11px] font-black tracking-[-0.005em] text-primary-foreground transition-all duration-200 hover:bg-primary/90 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/50"
-                    >
-                      <Download className="h-[14px] w-[14px]" strokeWidth={2.6} />
-                      Exportar
-                    </button>
-                  </TooltipTrigger>
-                  <TooltipContent side="bottom" className="flex items-center gap-2">Exportar CSV <Kbd>E</Kbd></TooltipContent>
-                </Tooltip>
+                  <button
+                    onClick={() => setShowExportDialog(true)}
+                    className="inline-flex h-10 items-center gap-2 rounded-xl bg-[#2563eb] px-5 text-[13px] font-black tracking-tight text-white transition-all duration-200 hover:bg-[#1d4ed8] hover:scale-[1.02] active:scale-[0.98] shadow-lg shadow-blue-500/20"
+                  >
+                    <Download className="h-[16px] w-[16px]" strokeWidth={2.8} />
+                    Exportar
+                  </button>
+                </div>
               </div>
             </TooltipProvider>
           </div>
