@@ -867,71 +867,58 @@ export default function Vendas() {
             </TooltipProvider>
           </div>
 
-          <div className="mt-5 grid grid-cols-2 border-y border-border/70 lg:grid-cols-4 lg:divide-x lg:divide-border/70">
+          <div className="mt-8 grid grid-cols-1 gap-4 lg:grid-cols-4">
             {[
-              { label: "Receita bruta", value: hidden ? HIDE : fmtCompact(m.totalGross), sub: undefined, accent: "text-foreground", delta: { cur: m.totalGross, prev: p.totalGross }, rail: "bg-success" },
-              { ...heroKpis[1], rail: "bg-info" },
-              { ...heroKpis[2], rail: "bg-foreground/40" },
-              { ...heroKpis[3], rail: approvalRate >= 60 ? "bg-success" : "bg-warning" },
+              { label: "RECEITA BRUTA", value: hidden ? HIDE : fmtCompact(m.totalGross), sub: `${m.approved.length} aprovadas`, accent: "text-foreground", delta: { cur: m.totalGross, prev: p.totalGross } },
+              { label: "VENDAS APROVADAS", value: hidden ? HIDE : m.approved.length.toLocaleString("pt-BR"), sub: `${dateFiltered.length} tentativas`, accent: "text-foreground", delta: { cur: m.approved.length, prev: p.approved.length } },
+              { label: "TICKET MÉDIO", value: hidden ? HIDE : fmtCompact(m.avgTicket), sub: `${m.uniqueCustomers} clientes`, accent: "text-foreground", delta: { cur: m.avgTicket, prev: p.avgTicket } },
+              { label: "APROVAÇÃO", value: `${approvalRate.toFixed(1)}%`, sub: `${m.pending.length} pendentes`, accent: "text-warning", delta: undefined },
             ].map((k, idx) => (
               <div
                 key={`${k.label}-${animKey}`}
                 className={cn(
-                  "vendas-rise group relative min-h-[110px] px-6 py-4 transition-colors duration-200 hover:bg-muted/25 rounded-xl border border-transparent hover:border-border/40",
+                  "vendas-rise group relative flex flex-col justify-center rounded-2xl border border-border/40 bg-card/30 px-6 py-7 transition-all duration-300 hover:border-border/80 hover:bg-card/50",
                   idx === 1 && "vendas-rise-d1",
                   idx === 2 && "vendas-rise-d2",
-                  idx === 3 && "vendas-rise-d3",
-                  idx > 1 && "border-t border-border/70 lg:border-t-0",
-                  idx === 1 && "border-l border-border/70 lg:border-l-0",
+                  idx === 3 && "vendas-rise-d3"
                 )}
               >
-                <span className={cn("absolute left-0 top-6 h-8 w-[3px] rounded-r-full opacity-0 group-hover:opacity-100 transition-opacity", k.rail)} />
-                <div className="flex items-center justify-between gap-2 pl-2">
-                  <p className="text-[10.5px] font-black uppercase tracking-[0.22em] text-muted-foreground/60">{k.label}</p>
+                <p className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/50">{k.label}</p>
+                <div className="mt-3 flex items-baseline gap-2">
+                  <p className={cn("font-display text-[32px] font-black leading-none tracking-[-0.04em] tabular-nums sm:text-[36px]", k.accent)}>
+                    {k.value}
+                  </p>
                 </div>
-                <p
-                  className={cn(
-                    "mt-2 pl-2 font-display text-[28px] font-black leading-[0.9] tracking-[-0.06em] tabular-nums sm:text-[32px]",
-                    k.accent,
-                  )}
-                  style={{ fontVariantNumeric: "tabular-nums slashed-zero" }}
-                >
-                  {k.value}
-                </p>
-                <div className="mt-2.5 flex items-center gap-2 pl-2">
-                  <p className="truncate text-[11.5px] font-bold text-muted-foreground/85">{k.sub}</p>
+                <div className="mt-4 flex items-center justify-between">
+                  <p className="text-[11.5px] font-bold text-muted-foreground/70">{k.sub}</p>
                   {k.delta && <DeltaBadge cur={k.delta.cur} prev={k.delta.prev} />}
                 </div>
               </div>
             ))}
           </div>
 
-          <div className="grid grid-cols-1 border-b border-border/70 sm:grid-cols-3 sm:divide-x sm:divide-border/70">
-            {riskKpis.map((r, idx) => (
+          <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-3">
+            {[
+              { label: "Reembolsos", value: hidden ? HIDE : fmtCompact(refundedAmount), sub: `${m.refunded.length} Transações · ${m.refundRate.toFixed(2)}%`, accent: "text-foreground" },
+              { label: "MED", value: hidden ? HIDE : fmt(0), sub: "0 Transações · 0,00%", accent: "text-foreground" },
+              { label: "Chargebacks", value: hidden ? HIDE : fmtCompact(chargebackAmount), sub: `${m.chargebacks.length} Transações · ${m.chargebackRate.toFixed(2)}%`, accent: "text-foreground" },
+            ].map((r, idx) => (
               <div
                 key={`${r.label}-${animKey}`}
                 className={cn(
-                  "vendas-rise group relative flex flex-col gap-1.5 px-6 py-4 transition-colors duration-200 hover:bg-muted/25",
+                  "vendas-rise group relative flex items-center justify-between rounded-2xl border border-border/40 bg-card/20 px-6 py-5 transition-all duration-300 hover:border-border/70 hover:bg-card/40",
                   idx === 0 && "vendas-rise-d3",
                   idx === 1 && "vendas-rise-d4",
                   idx === 2 && "vendas-rise-d5",
                 )}
               >
-                <div className="flex items-baseline justify-between gap-3">
-                  <p className="font-display text-[17px] font-black tracking-[-0.035em] text-foreground">{r.label}</p>
-                  <p
-                    className={cn("font-display text-[22px] font-black leading-none tabular-nums tracking-[-0.05em]", r.accent)}
-                    style={{ fontVariantNumeric: "tabular-nums slashed-zero" }}
-                  >
-                    {r.value}
-                  </p>
+                <div className="space-y-1">
+                  <p className="font-display text-[15px] font-black tracking-[-0.02em] text-foreground/90">{r.label}</p>
+                  <p className="text-[11px] font-bold text-muted-foreground/60 uppercase tracking-wider">{r.sub}</p>
                 </div>
-                <div className="flex items-center gap-2 text-[12.5px] font-semibold text-muted-foreground">
-                  <span className="font-display tabular-nums font-black text-foreground">{r.count}</span>
-                  <span>{r.count === 1 ? "Transação" : "Transações"}</span>
-                  <span className="inline-block h-[3px] w-[3px] rounded-full bg-muted-foreground/50" />
-                  <span className="tabular-nums font-bold">{r.rate.toFixed(2).replace(".", ",")}%</span>
-                </div>
+                <p className={cn("font-display text-[20px] font-black leading-none tabular-nums tracking-[-0.04em]", r.accent)}>
+                  {r.value}
+                </p>
               </div>
             ))}
           </div>
