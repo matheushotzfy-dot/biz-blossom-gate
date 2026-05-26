@@ -349,15 +349,15 @@ export default function Dashboard() {
           </CardHeader>
           
           <CardContent className="pt-2 pb-6 px-6 md:px-8">
-            <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
-              <div className="space-y-6 flex-1">
-                <div className="flex items-baseline gap-3">
-                  <p className="text-4xl md:text-5xl lg:text-6xl font-black tracking-tight text-foreground">
+            <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-6">
+              <div className="space-y-5 flex-1 min-w-0">
+                <div className="flex items-baseline gap-3 flex-wrap">
+                  <p className="text-4xl md:text-5xl font-black tracking-tight text-foreground leading-none">
                     {privacy.hidden ? CENSORED : fmt(revenue)}
                   </p>
-                  <span className="text-muted-foreground/30 font-bold text-lg">BRL</span>
+                  <span className="text-muted-foreground/30 font-bold text-base">BRL</span>
                 </div>
-                
+
                 <div className="flex flex-wrap items-center gap-4 md:gap-6 p-4 rounded-2xl bg-background/40 border border-border/40 backdrop-blur-sm w-fit group-hover:border-primary/20 transition-all">
                   <div className="space-y-1">
                     <div className="flex items-center gap-2">
@@ -374,14 +374,20 @@ export default function Dashboard() {
                 </div>
               </div>
 
-              <div className="flex flex-col sm:flex-row md:flex-col lg:flex-row gap-3 w-full md:w-auto">
-                <Link to="/financeiro/saques" className="group/btn flex-1 md:flex-none relative overflow-hidden bg-primary text-primary-foreground px-6 h-12 rounded-xl font-bold text-xs flex items-center justify-center gap-2 shadow-lg shadow-primary/20 hover:translate-y-[-2px] hover:shadow-primary/30 active:scale-[0.98] transition-all whitespace-nowrap">
-                  <ArrowDownRight className="h-4 w-4" />
-                  Solicitar Saque
+              <div className="flex flex-col gap-2.5 w-full lg:w-[185px] shrink-0">
+                <Link
+                  to="/financeiro/saques"
+                  className="bg-primary text-primary-foreground h-11 px-4 rounded-xl font-bold text-[12px] flex items-center justify-center gap-2 shadow-md shadow-primary/25 hover:shadow-lg hover:shadow-primary/30 hover:-translate-y-0.5 active:scale-[0.98] transition-all whitespace-nowrap"
+                >
+                  <ArrowDownRight className="h-4 w-4 shrink-0" />
+                  <span>Solicitar Saque</span>
                 </Link>
-                <Link to="/vendas/links" className="flex-1 md:flex-none bg-card border border-border/60 px-6 h-12 rounded-xl font-bold text-xs flex items-center justify-center gap-2 hover:bg-accent hover:border-primary/20 hover:translate-y-[-2px] transition-all active:scale-[0.98] whitespace-nowrap">
-                  <Zap className="h-4 w-4 text-success" />
-                  Link de Pagamento
+                <Link
+                  to="/vendas/links"
+                  className="bg-background/60 border border-border/60 text-foreground h-11 px-4 rounded-xl font-bold text-[12px] flex items-center justify-center gap-2 hover:bg-accent hover:border-primary/30 hover:-translate-y-0.5 active:scale-[0.98] transition-all whitespace-nowrap"
+                >
+                  <Zap className="h-4 w-4 text-success shrink-0" />
+                  <span>Link de Pagamento</span>
                 </Link>
               </div>
             </div>
