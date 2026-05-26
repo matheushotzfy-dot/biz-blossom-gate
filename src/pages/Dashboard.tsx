@@ -26,6 +26,7 @@ import { Area, AreaChart, ResponsiveContainer, Tooltip, XAxis, YAxis, CartesianG
 import type { Tables } from "@/integrations/supabase/types";
 import { Link, useNavigate } from "react-router-dom";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
+import QuickPixDialog from "@/components/QuickPixDialog";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { StatCard } from "@/components/StatCard";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
