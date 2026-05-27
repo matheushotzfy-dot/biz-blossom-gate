@@ -301,10 +301,7 @@ export function AppSidebar() {
       label: "INFOPRODUTOS",
       items: [
         { title: "Produtos", url: "/vendas/produtos", icon: Package, count: counts.products },
-        { title: "Área De Membros", url: "/vendas/conteudo", icon: Layers, count: counts.courses },
-        { title: "Afiliados", url: "/vendas/afiliados", icon: Users },
         { title: "Cupons", url: "/vendas/cupons", icon: Ticket, count: counts.coupons },
-        { title: "Assinaturas", url: "/vendas/assinaturas", icon: Repeat, count: counts.subscriptions },
       ],
     },
     {
@@ -324,7 +321,6 @@ export function AppSidebar() {
       label: "CONTA",
       items: [
         { title: "Meu Perfil", url: "/perfil", icon: User },
-        { title: "Minhas Compras", url: "/membros", icon: GraduationCap },
         { title: "Premiações", url: "/premiacoes", icon: Trophy },
         { title: "Suporte", url: "/suporte", icon: MessageSquare },
       ],
