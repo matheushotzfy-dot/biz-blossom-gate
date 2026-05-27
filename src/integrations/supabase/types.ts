@@ -2806,6 +2806,21 @@ export type Database = {
       }
       get_course_analytics: { Args: { _course_id: string }; Returns: Json }
       get_ledger_balance: { Args: { _user_id: string }; Returns: number }
+      get_quiz_questions_for_student: {
+        Args: { _quiz_id: string }
+        Returns: {
+          explanation: string
+          id: string
+          options: Json
+          question: string
+          quiz_id: string
+          sort_order: number
+        }[]
+      }
+      grade_quiz_attempt: {
+        Args: { _answers: Json; _quiz_id: string }
+        Returns: Json
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]

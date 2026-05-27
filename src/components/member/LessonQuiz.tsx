@@ -9,7 +9,8 @@ import { CheckCircle2, XCircle, Award, RotateCcw, Brain } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 type Quiz = { id: string; title: string; description: string | null; passing_score: number; max_attempts: number };
-type Question = { id: string; question: string; options: string[]; correct_index: number; explanation: string | null; sort_order: number };
+type Question = { id: string; question: string; options: string[]; explanation: string | null; sort_order: number };
+type GradeResult = { score: number; passed: boolean; total: number; correct: number; results: { question_id: string; correct_index: number; is_correct: boolean }[] };
 type Attempt = { id: string; score: number; passed: boolean; created_at: string };
 
 interface Props {
@@ -23,6 +24,7 @@ export function LessonQuiz({ lessonId, userId }: Props) {
   const [attempts, setAttempts] = useState<Attempt[]>([]);
   const [answers, setAnswers] = useState<Record<string, number>>({});
   const [submitted, setSubmitted] = useState<{ score: number; passed: boolean } | null>(null);
+  const [correctMap, setCorrectMap] = useState<Record<string, number>>({});
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
 
@@ -32,14 +34,19 @@ export function LessonQuiz({ lessonId, userId }: Props) {
     setLoading(true);
     setSubmitted(null);
     setAnswers({});
+    setCorrectMap({});
     const { data: q } = await supabase.from("quizzes").select("*").eq("lesson_id", lessonId).maybeSingle();
     if (!q) { setQuiz(null); setLoading(false); return; }
     setQuiz(q as Quiz);
     const [{ data: qs }, { data: at }] = await Promise.all([
-      supabase.from("quiz_questions").select("*").eq("quiz_id", q.id).order("sort_order"),
+      supabase.rpc("get_quiz_questions_for_student", { _quiz_id: q.id }),
       supabase.from("quiz_attempts").select("id, score, passed, created_at").eq("quiz_id", q.id).eq("user_id", userId).order("created_at", { ascending: false }),
     ]);
-    setQuestions((qs || []) as Question[]);
+    const list = ((qs || []) as any[]).map((row) => ({
+      ...row,
+      options: Array.isArray(row.options) ? row.options : (typeof row.options === "string" ? JSON.parse(row.options) : []),
+    })) as Question[];
+    setQuestions(list);
     setAttempts((at || []) as Attempt[]);
     setLoading(false);
   }
@@ -51,18 +58,19 @@ export function LessonQuiz({ lessonId, userId }: Props) {
       return;
     }
     setSubmitting(true);
-    const correct = questions.filter(q => answers[q.id] === q.correct_index).length;
-    const score = Math.round((correct / questions.length) * 100);
-    const passed = score >= quiz.passing_score;
-    const { error } = await supabase.from("quiz_attempts").insert({
-      quiz_id: quiz.id, user_id: userId, answers, score, passed,
-    });
+    const { data, error } = await supabase.rpc("grade_quiz_attempt", { _quiz_id: quiz.id, _answers: answers });
     setSubmitting(false);
-    if (error) { toast.error("Erro ao enviar"); return; }
-    setSubmitted({ score, passed });
-    if (passed) toast.success(`Aprovado com ${score}%!`);
-    else toast.error(`Você obteve ${score}%. Mínimo: ${quiz.passing_score}%`);
-    load();
+    if (error || !data) { toast.error("Erro ao enviar"); return; }
+    const result = data as unknown as GradeResult;
+    const map: Record<string, number> = {};
+    result.results.forEach(r => { map[r.question_id] = r.correct_index; });
+    setCorrectMap(map);
+    setSubmitted({ score: result.score, passed: result.passed });
+    if (result.passed) toast.success(`Aprovado com ${result.score}%!`);
+    else toast.error(`Você obteve ${result.score}%. Mínimo: ${quiz.passing_score}%`);
+    // Refresh attempts list
+    const { data: at } = await supabase.from("quiz_attempts").select("id, score, passed, created_at").eq("quiz_id", quiz.id).eq("user_id", userId).order("created_at", { ascending: false });
+    setAttempts((at || []) as Attempt[]);
   }
 
   if (loading) return null;
@@ -113,8 +121,8 @@ export function LessonQuiz({ lessonId, userId }: Props) {
               <div className="space-y-2">
                 {q.options.map((opt, oi) => {
                   const selected = userAns === oi;
-                  const isCorrect = showResults && oi === q.correct_index;
-                  const isWrong = showResults && selected && oi !== q.correct_index;
+                  const isCorrect = showResults && oi === correctMap[q.id];
+                  const isWrong = showResults && selected && oi !== correctMap[q.id];
                   return (
                     <button
                       key={oi}
