@@ -19,13 +19,9 @@ const tabs = [
 
 const moreGroups = [
  {
- label: "Infoprodutos",
+ label: "Vendas",
  items: [
- { title: "Conteúdo", url: "/vendas/conteudo", icon: Layers },
- { title: "Afiliados", url: "/vendas/afiliados", icon: Users },
  { title: "Cupons", url: "/vendas/cupons", icon: Ticket },
- { title: "Assinaturas", url: "/vendas/assinaturas", icon: Repeat },
- { title: "Marketplace", url: "/marketplace", icon: Store },
  ],
  },
  {
@@ -45,7 +41,6 @@ const moreGroups = [
  label: "Conta",
  items: [
  { title: "Perfil", url: "/perfil", icon: User },
- { title: "Compras", url: "/membros", icon: GraduationCap },
  { title: "Premiações", url: "/premiacoes", icon: Trophy },
  { title: "Suporte", url: "/suporte", icon: MessageSquare },
  ],
