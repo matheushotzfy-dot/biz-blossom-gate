@@ -274,15 +274,59 @@ export type Database = {
           },
         ]
       }
+      api_idempotency_keys: {
+        Row: {
+          api_key_id: string
+          created_at: string
+          expires_at: string
+          id: string
+          key: string
+          request_hash: string
+          response_body: Json
+          response_status: number
+        }
+        Insert: {
+          api_key_id: string
+          created_at?: string
+          expires_at?: string
+          id?: string
+          key: string
+          request_hash: string
+          response_body: Json
+          response_status?: number
+        }
+        Update: {
+          api_key_id?: string
+          created_at?: string
+          expires_at?: string
+          id?: string
+          key?: string
+          request_hash?: string
+          response_body?: Json
+          response_status?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "api_idempotency_keys_api_key_id_fkey"
+            columns: ["api_key_id"]
+            isOneToOne: false
+            referencedRelation: "api_keys"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       api_keys: {
         Row: {
           created_at: string
           expires_at: string | null
           id: string
+          ip_allowlist: string[]
           is_active: boolean
           last_used_at: string | null
           name: string
+          permissions: string[]
           public_key: string
+          revoked_at: string | null
           secret_key_hash: string
           secret_key_prefix: string
           updated_at: string
@@ -292,10 +336,13 @@ export type Database = {
           created_at?: string
           expires_at?: string | null
           id?: string
+          ip_allowlist?: string[]
           is_active?: boolean
           last_used_at?: string | null
           name?: string
+          permissions?: string[]
           public_key: string
+          revoked_at?: string | null
           secret_key_hash: string
           secret_key_prefix: string
           updated_at?: string
@@ -305,16 +352,90 @@ export type Database = {
           created_at?: string
           expires_at?: string | null
           id?: string
+          ip_allowlist?: string[]
           is_active?: boolean
           last_used_at?: string | null
           name?: string
+          permissions?: string[]
           public_key?: string
+          revoked_at?: string | null
           secret_key_hash?: string
           secret_key_prefix?: string
           updated_at?: string
           user_id?: string
         }
         Relationships: []
+      }
+      api_rate_limit_buckets: {
+        Row: {
+          bucket_key: string
+          count: number
+          window_start: string
+        }
+        Insert: {
+          bucket_key: string
+          count?: number
+          window_start: string
+        }
+        Update: {
+          bucket_key?: string
+          count?: number
+          window_start?: string
+        }
+        Relationships: []
+      }
+      api_request_logs: {
+        Row: {
+          api_key_id: string | null
+          created_at: string
+          endpoint: string
+          error_code: string | null
+          id: string
+          ip: string | null
+          latency_ms: number
+          method: string
+          request_id: string
+          status_code: number
+          user_agent: string | null
+          user_id: string | null
+        }
+        Insert: {
+          api_key_id?: string | null
+          created_at?: string
+          endpoint: string
+          error_code?: string | null
+          id?: string
+          ip?: string | null
+          latency_ms?: number
+          method: string
+          request_id: string
+          status_code: number
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          api_key_id?: string | null
+          created_at?: string
+          endpoint?: string
+          error_code?: string | null
+          id?: string
+          ip?: string | null
+          latency_ms?: number
+          method?: string
+          request_id?: string
+          status_code?: number
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "api_request_logs_api_key_id_fkey"
+            columns: ["api_key_id"]
+            isOneToOne: false
+            referencedRelation: "api_keys"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       app_integrations: {
         Row: {
@@ -2182,6 +2303,7 @@ export type Database = {
       transactions: {
         Row: {
           amount: number
+          api_key_id: string | null
           checkout_session_id: string | null
           created_at: string
           customer_address: string | null
@@ -2189,23 +2311,30 @@ export type Database = {
           customer_email: string | null
           customer_name: string | null
           customer_phone: string | null
+          external_id: string | null
           fee_amount: number
           id: string
           is_simulated: boolean
+          metadata: Json
           net_amount: number
           payment_method: string | null
+          pix_copy_paste: string | null
+          pix_expires_at: string | null
+          pix_qrcode: string | null
           podpay_event_id: string | null
           podpay_payment_id: string | null
           product_id: string | null
           retained_amount: number
           retained_until: string | null
           retention_released: boolean
+          source: string
           status: string
           updated_at: string
           user_id: string
         }
         Insert: {
           amount: number
+          api_key_id?: string | null
           checkout_session_id?: string | null
           created_at?: string
           customer_address?: string | null
@@ -2213,23 +2342,30 @@ export type Database = {
           customer_email?: string | null
           customer_name?: string | null
           customer_phone?: string | null
+          external_id?: string | null
           fee_amount?: number
           id?: string
           is_simulated?: boolean
+          metadata?: Json
           net_amount?: number
           payment_method?: string | null
+          pix_copy_paste?: string | null
+          pix_expires_at?: string | null
+          pix_qrcode?: string | null
           podpay_event_id?: string | null
           podpay_payment_id?: string | null
           product_id?: string | null
           retained_amount?: number
           retained_until?: string | null
           retention_released?: boolean
+          source?: string
           status?: string
           updated_at?: string
           user_id: string
         }
         Update: {
           amount?: number
+          api_key_id?: string | null
           checkout_session_id?: string | null
           created_at?: string
           customer_address?: string | null
@@ -2237,22 +2373,35 @@ export type Database = {
           customer_email?: string | null
           customer_name?: string | null
           customer_phone?: string | null
+          external_id?: string | null
           fee_amount?: number
           id?: string
           is_simulated?: boolean
+          metadata?: Json
           net_amount?: number
           payment_method?: string | null
+          pix_copy_paste?: string | null
+          pix_expires_at?: string | null
+          pix_qrcode?: string | null
           podpay_event_id?: string | null
           podpay_payment_id?: string | null
           product_id?: string | null
           retained_amount?: number
           retained_until?: string | null
           retention_released?: boolean
+          source?: string
           status?: string
           updated_at?: string
           user_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "transactions_api_key_id_fkey"
+            columns: ["api_key_id"]
+            isOneToOne: false
+            referencedRelation: "api_keys"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "transactions_product_id_fkey"
             columns: ["product_id"]
@@ -2444,6 +2593,82 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      webhook_deliveries: {
+        Row: {
+          attempt: number
+          created_at: string
+          delivered_at: string | null
+          error: string | null
+          event: string
+          id: string
+          next_retry_at: string | null
+          payload: Json
+          response_body: string | null
+          response_status: number | null
+          status: string
+          transaction_id: string | null
+          updated_at: string
+          user_id: string
+          webhook_config_id: string
+        }
+        Insert: {
+          attempt?: number
+          created_at?: string
+          delivered_at?: string | null
+          error?: string | null
+          event: string
+          id?: string
+          next_retry_at?: string | null
+          payload: Json
+          response_body?: string | null
+          response_status?: number | null
+          status?: string
+          transaction_id?: string | null
+          updated_at?: string
+          user_id: string
+          webhook_config_id: string
+        }
+        Update: {
+          attempt?: number
+          created_at?: string
+          delivered_at?: string | null
+          error?: string | null
+          event?: string
+          id?: string
+          next_retry_at?: string | null
+          payload?: Json
+          response_body?: string | null
+          response_status?: number | null
+          status?: string
+          transaction_id?: string | null
+          updated_at?: string
+          user_id?: string
+          webhook_config_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "webhook_deliveries_transaction_id_fkey"
+            columns: ["transaction_id"]
+            isOneToOne: false
+            referencedRelation: "transactions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "webhook_deliveries_webhook_config_id_fkey"
+            columns: ["webhook_config_id"]
+            isOneToOne: false
+            referencedRelation: "webhook_configs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "webhook_deliveries_webhook_config_id_fkey"
+            columns: ["webhook_config_id"]
+            isOneToOne: false
+            referencedRelation: "webhook_configs_safe"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       withdrawals: {
         Row: {
@@ -2771,6 +2996,18 @@ export type Database = {
       }
     }
     Functions: {
+      bump_rate_limit: {
+        Args: {
+          _bucket_key: string
+          _max_count: number
+          _window_seconds: number
+        }
+        Returns: {
+          allowed: boolean
+          current_count: number
+          reset_at: string
+        }[]
+      }
       check_blacklist: {
         Args: { _document?: string; _email?: string; _ip?: string }
         Returns: {
@@ -2829,6 +3066,16 @@ export type Database = {
         Returns: boolean
       }
       is_product_active: { Args: { _product_id: string }; Returns: boolean }
+      touch_api_key: { Args: { _api_key_id: string }; Returns: undefined }
+      verify_api_secret: {
+        Args: { _hash: string; _prefix: string }
+        Returns: {
+          api_key_id: string
+          ip_allowlist: string[]
+          permissions: string[]
+          user_id: string
+        }[]
+      }
       verify_certificate: {
         Args: { _code: string }
         Returns: {

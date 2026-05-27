@@ -1,120 +1,128 @@
+# Plano: API PIX Pública + Redesign das Abas de Integrações
+
 ## Objetivo
+Transformar o Hotzfy num **gateway PIX confiável** para integradores externos. Hoje existe `pk_live/sk_live` no banco mas **nenhum endpoint público real** que aceite essas chaves — vamos criar isso do zero, com segurança de produção, e dar uma cara profissional às 3 abas.
 
-Elevar visualmente 4 superfícies financeiras + interações do sidebar, mantendo 100% da lógica de negócio. Tudo segue a memória do projeto: **sem glassmorphism, sem shadow exagerado, sem blur, sem glow** — bordas 1px sólidas, tokens semânticos, Plus Jakarta Sans / Space Grotesk / JetBrains Mono para números, transições suaves 220-280ms cubic-bezier.
+---
 
-## 1. SaquesHub (wrapper)
+## Parte 1 — Infraestrutura da API PIX (foco principal)
 
-Hoje usa `backdrop-blur-xl` e `shadow-[0_0_20px_...]` no header — viola padrão.
+### 1.1 Nova Edge Function pública: `pix-api`
+Endpoint único versionado em `/v1` que aceita autenticação por chave secreta (`sk_live_...`) via header `Authorization: Bearer sk_live_xxx` ou `X-API-Key`. Rotas:
 
-- Trocar header para `bg-background` com `border-b border-border` sólido (sem blur).
-- Remover shadow do ícone, substituir por borda + fundo sólido.
-- Unificar abas PIX/Crypto: pílula ativa em `bg-primary/10 text-primary` com `border border-primary/25`, inativa em `text-muted-foreground hover:bg-muted/40`.
-- Reduzir altura do header (h-16 → h-14) para densidade premium.
-- Indicador "Sistema Online" minimalista: ponto verde + label, sem `animate-ping`.
+| Método | Path | Função |
+|---|---|---|
+| POST | `/v1/pix/charges` | Criar cobrança PIX (retorna `qr_code`, `qr_code_base64`, `copy_paste`, `expires_at`, `transaction_id`) |
+| GET | `/v1/pix/charges/:id` | Consultar status de uma cobrança |
+| GET | `/v1/pix/charges` | Listar cobranças (paginação cursor) |
+| POST | `/v1/pix/charges/:id/refund` | Reembolsar (opcional fase 2) |
+| GET | `/v1/ping` | Health-check autenticado |
 
-## 2. Saques PIX (`Saques.tsx`)
+**Validação rigorosa de input com Zod** (amount em centavos, customer name/email/document, expiration, metadata, external_id de idempotência).
 
-A página já é densa e bem estruturada. Refino cirúrgico, sem reescrever lógica:
+**Respostas padronizadas** — sempre JSON, com `error.code`, `error.message`, `error.request_id`. Nunca vaza stack trace, nunca vaza `user_id` de outro vendedor, nunca expõe campos internos (`fee_amount`, retenção, etc) — só os campos públicos documentados.
 
-**Hero (header)**
-- Valor disponível: manter tipografia gigante, mas adicionar microcopy "Disponível para saque" em uppercase 9px acima do número (cria contexto imediato).
-- Linha de meta-info (pendentes / retido / refresh) → reorganizar como 3 chips horizontais com divisores `|`, mais escaneável.
-- Botão "Novo saque": realçar com ícone `+` em círculo `bg-success-foreground/15` interno + texto, mantendo `bg-success`.
+### 1.2 Autenticação por chave secreta
+- Hash SHA-256 da `sk_live` no banco (já existe `secret_key_hash`).
+- Lookup via `secret_key_prefix` (12 chars) + comparação constante-tempo do hash completo.
+- Bloqueio se `is_active=false` ou `expires_at` vencido.
+- Atualiza `last_used_at` async (sem atrasar a resposta).
+- **Nunca** loga a chave em texto, nem em logs de erro nem em activity_logs.
 
-**KPIs**
-- Eliminar `rail` lateral colorido (decoração frágil). Trocar por **micro-sparkline embutida** de 24h no canto direito de cada KPI (Total sacado, Aprovação, Pendentes) — premium real.
-- Padronizar ícone monocromático top-right por KPI em vez do trace de cor lateral.
+### 1.3 Rate limiting (anti-bot / anti-flood)
+Nova tabela `api_rate_limits` (em memória curta via tabela com TTL ou sliding window):
+- **Burst:** 30 req / 10s por `api_key_id`
+- **Sustentado:** 600 req / minuto por `api_key_id`
+- **Criação de cobrança:** 60/min por chave + 10/min por `customer_document` (anti-fraude)
+- **IP fallback:** 100 req / 10s por IP quando chave inválida (impede brute force de chaves)
 
-**Dialog "Solicitar Saque"**
-- Aumentar para `max-w-[440px]`.
-- Saldo no topo: card maior com label + valor enorme + microcopy de retido.
-- Campo de valor: input gigante (h-16, font-black 32px) com prefixo R$ flutuante, atalhos 25/50/75/Máx como chips arredondados maiores.
-- Breakdown (solicitado → taxa → líquido) virá como mini-tabela com 3 linhas, separadas por `border-border/40`, número líquido em verde grande.
-- Seleção de chave PIX: cards com `radio` à direita, ícone do tipo (CPF/Email/Phone) à esquerda em cor por tipo (sutil).
-- CTA inferior fixo com altura 48px, micro-status "Aprovação em até 24h úteis" abaixo.
+Resposta `429` com headers `X-RateLimit-Limit`, `X-RateLimit-Remaining`, `X-RateLimit-Reset`, `Retry-After`. Logs em `api_rate_limit_events` para o admin ver abusos.
 
-**Gráfico**
-- Adicionar header com valor agregado em destaque + mini badge de variação vs período anterior.
-- Reduzir altura para 200px, padding interno consistente.
-- Cor da área: `primary` com stop opacity 0.18 → 0 (mais sutil).
+### 1.4 Idempotência
+Header `Idempotency-Key` (UUID enviado pelo integrador). Tabela `api_idempotency_keys` (chave + hash do body + response). TTL 24h. Garante que retry de rede não cria cobranças duplicadas.
 
-**Histórico**
-- Tabs de status: pílulas com contador, cores sólidas por status (sem `bg-secondary` cinza neutro no ativo — destacar com cor própria).
-- Linhas da tabela: altura uniforme 56px, hover `bg-muted/30`, valor monetário sempre em `tabular-nums`, status como chip `border + bg/10`.
+### 1.5 Webhooks (entrega para o integrador)
+Quando a transação muda de status, dispara HTTP POST para `webhook_configs.url` ativo do vendedor:
+- Assinatura **HMAC-SHA256** no header `X-Hotzfy-Signature` (segredo = `webhook_configs.secret`).
+- Header `X-Hotzfy-Event` (`charge.paid`, `charge.expired`, `charge.refunded`, `charge.chargeback`).
+- **Retry exponencial:** 5 tentativas (10s, 30s, 2min, 10min, 1h). Nova tabela `webhook_deliveries` com status e response.
+- Timeout de 10s. Só URLs `https://` (validador já existe).
+- Endpoint na UI para reenviar manualmente e ver histórico de entregas.
 
-## 3. Saques Crypto (`SaquesCrypto.tsx`)
+### 1.6 Logs e auditoria
+Nova tabela `api_request_logs` (api_key_id, endpoint, status_code, latency_ms, ip, user_agent, created_at, request_id). **Sem corpo** da requisição (PII). Retenção 30 dias. Aparece num painel "Logs da API" para o vendedor debugar.
 
-Foco maior aqui — precisa de presença real de mesa de operações cripto.
+### 1.7 Hardening de segurança
+- CORS restritivo (a API pública é server-to-server — sem CORS aberto; só `OPTIONS` para health-check).
+- Rejeita requests sem `Content-Type: application/json` em POST.
+- Limite de body 100KB.
+- Strip de campos não-whitelisted no input (evita mass-assignment).
+- RLS reforçado: `api_keys`, `webhook_configs`, `api_request_logs`, `webhook_deliveries`, `api_idempotency_keys` — só dono vê, service_role processa.
+- Erros 500 retornam apenas `request_id` — detalhe fica no log do servidor.
 
-**Hero**
-- Mesma estrutura do PIX para consistência (valor disponível enorme + linha de meta).
-- Adicionar widget **"Cotações ao vivo"** logo abaixo do título: 3 cards horizontais (BTC / USDT / XMR) com símbolo, preço em BRL, variação 24h colorida, mini-sparkline. Atualização visível (timestamp).
+---
 
-**Seletor de ativo**
-- Trocar dropdown atual por **grid de 3 cards-pílula** (BTC / USDT / XMR) — selecionado fica com `border-primary` + bg `primary/8`, mostra ícone do símbolo (letra estilizada se sem SVG) na cor do ativo (laranja BTC, verde USDT, laranja XMR) com saturação reduzida.
+## Parte 2 — Redesign das 3 abas (UI profissional, sem cara de AI)
 
-**Seletor de rede**
-- Lista vertical compacta com ícone monocromático, nome da rede + sigla curta à direita.
-- Indicador de taxa estimada por rede ("≈ R$ X em taxa de rede") quando aplicável.
+### Princípios
+- Zero "cards padrão piscando". Layout editorial, denso, com hierarquia clara.
+- Tipografia: Space Grotesk para números/chaves, JetBrains Mono para snippets de código, Plus Jakarta Sans para texto.
+- Bordas 1px sólidas (sem glow/blur — respeita memória "Billion-Dollar SaaS").
+- Sem animações de entrada em listas. Transições só em hover/foco (220ms).
 
-**Dialog "Novo saque crypto"**
-- Estrutura igual ao PIX para coerência: saldo → valor → ativo/rede → endereço → breakdown → CTA.
-- Campo de endereço com validação básica de formato + botão "Colar" e "QR scan" (ícone, ainda placeholder).
-- Aviso de irreversibilidade: faixa amarela sutil `bg-warning/8 border-warning/25` acima do CTA.
+### 2.1 Aba **Credenciais API**
+Layout em duas colunas:
+- **Esquerda:** lista de chaves com nome editável inline, prefixo da `sk_live_xxx••••`, status pill, último uso ("há 2h"), botão de rotacionar, botão de revogar com confirmação.
+- **Direita:** painel de detalhe da chave selecionada — `public_key` (copiável), `secret_key` (só visível 1x após criação, depois substituída por aviso), permissões (read/write), IPs permitidos (allowlist opcional), expires_at.
+- Modal de criação com fluxo "copie agora — não mostraremos de novo" (cópia para clipboard + download .env).
+- Banner discreto no topo com link para Docs.
 
-**KPIs cripto**
-- Total sacado, ticket médio em USD/BRL toggle, número de redes utilizadas, tempo médio de confirmação.
-- Sparkline em cada KPI (consistente com PIX).
+### 2.2 Aba **Webhooks**
+- Tabela densa: URL, eventos (chips), status (Ativo/Pausado), última entrega (✓/✗ + timestamp), taxa de sucesso (últimas 100).
+- Drawer lateral ao clicar numa linha: editor de URL, seleção de eventos por checkbox, secret (gerar/rotacionar), botão "Enviar evento de teste" (envia payload mock).
+- Sub-aba "Entregas" com timeline das últimas tentativas (status_code, latência, response body truncado, botão reenviar).
+- Indicador visual claro de webhook quebrado (3+ falhas seguidas → badge âmbar).
 
-**Histórico**
-- Coluna extra: rede (chip pequeno com sigla).
-- Hash da transação como link `font-mono` truncado com `tooltip` no hover do full hash.
+### 2.3 Aba **API Docs**
+Substituir as duas docs atuais por **uma única doc estilo Stripe**:
+- Sidebar fixa com sumário (Autenticação, Idempotência, Erros, Rate Limits, Cobranças PIX, Webhooks, Changelog).
+- Conteúdo em coluna central com snippets em tabs (cURL / Node / PHP / Python) — código real, copiável.
+- Bloco "Try it" inline em cada endpoint: form + botão "Testar com minha chave" (usa a `sk_live` do usuário logado).
+- Tabela de códigos de erro com `code`, `http_status`, descrição, como resolver.
+- Sem hero genérico. Header simples com versão da API + status (puxa de `status.hotzfy.com.br`).
 
-## 4. QuickPixDialog (Link de Pagamento)
-
-Hoje usa `bg-gradient-to-br`, `backdrop-blur`, `ring`, `shadow-md` — viola padrão.
-
-- Remover todos os gradientes e blur. Header sólido `bg-card` com `border-b border-border`.
-- Ícone do header sem ring/glow, apenas `bg-primary/10 border border-primary/20`.
-- Inputs: padronizar com a altura/estilo dos outros formulários do projeto (h-11 default, h-14 só pro campo de valor).
-- Botão CTA: `bg-primary` sólido, sem shadow.
-- Tela de resultado:
-  - QR code em card `bg-white border border-border` (mantém branco interno para contraste do QR, é correto).
-  - Bloco "PIX copia e cola" com fundo `bg-muted/40` (não `background/60` translúcido), borda sólida.
-  - Timer como chip discreto sem fundo colorido, ícone + número monospace.
-  - Mensagem "Aguardando pagamento" com ponto pulsante verde (consistente com sidebar status).
-- Tela de confirmação: ícone success em círculo sólido `bg-success/10 border border-success/30`, sem ring.
-
-## 5. Sidebar — interações mais lisas (`AppSidebar.tsx`)
-
-Hoje: `transition-colors duration-200` linear. Memória pede 220-280ms com cubic-bezier suave.
-
-- Trocar todos os hovers para `transition-all duration-[260ms] ease-[cubic-bezier(0.32,0.72,0,1)]` (curva Apple).
-- Itens do menu:
-  - Hover atual: `hover:bg-sidebar-accent/55` → adicionar **translação sutil** `hover:translate-x-[2px]` e ícone com `group-hover/nav:scale-[1.08]` para feedback orgânico.
-  - Estado ativo: manter `bg-sidebar-primary` mas adicionar **indicador vertical** à esquerda (`absolute left-0 top-1/2 h-5 w-[3px] -translate-y-1/2 bg-primary-foreground rounded-r-full`) — assinatura premium.
-  - Border do item: trocar `border-transparent` → fundo sólido no hover (sem borda piscando).
-- Active state em click: `active:scale-[0.98]` global em todos os botões do sidebar (header, footer, items).
-- Card de receita (RevenueCard): suavizar hover (sem `hover:shadow-lg`, trocar por subtle `hover:bg-sidebar-accent/45` + `translate-y-[-1px]`).
-- Botões do footer (Suporte / Perfil / Logout): mesma curva e micro-translation.
+---
 
 ## Detalhes técnicos
 
-- Nenhuma mudança em queries, hooks, RPCs, edge functions ou tabelas.
-- Nenhum arquivo novo — apenas edição de:
-  - `src/pages/financeiro/SaquesHub.tsx`
-  - `src/pages/financeiro/Saques.tsx`
-  - `src/pages/financeiro/SaquesCrypto.tsx`
-  - `src/components/QuickPixDialog.tsx`
-  - `src/components/layout/AppSidebar.tsx`
-- Tokens semânticos exclusivamente (`primary`, `success`, `warning`, `destructive`, `muted-foreground`, `border`, `card`, `background`, `sidebar-*`).
-- Tipografia financeira: `font-display` (Space Grotesk) para números grandes, `tabular-nums slashed-zero` em todo valor monetário.
-- Sem `framer-motion` novo onde já existe; sem `backdrop-blur` em lugar nenhum.
-- Validação final: abrir cada página no preview e verificar densidade, contraste, alinhamento.
+**Migrations necessárias:**
+- `api_request_logs` (id, api_key_id, user_id, endpoint, method, status_code, latency_ms, ip, request_id, created_at) + RLS dono + service_role.
+- `api_idempotency_keys` (api_key_id, key, request_hash, response jsonb, expires_at) + UNIQUE(api_key_id, key).
+- `webhook_deliveries` (id, webhook_config_id, transaction_id, event, payload jsonb, status, attempt, response_status, response_body, next_retry_at, created_at) + RLS dono.
+- `api_rate_limit_events` (api_key_id, window_start, count) — ou usar Deno KV se preferir, mas tabela é mais auditável.
+- Função `verify_api_secret(_prefix text, _full_key text)` SECURITY DEFINER que faz hash + lookup constante-tempo.
+- GRANTs explícitos para todas tabelas novas.
 
-## Critérios de pronto
+**Edge functions novas/alteradas:**
+- `pix-api` (nova, único entry com roteamento interno por path).
+- `webhook-dispatcher` (nova, invocada por trigger DB em mudança de status de `transactions`).
+- `generate-api-key` (manter, mas adicionar action `rotate` e `revoke` se já não existir).
 
-- Saques PIX e Crypto visualmente irmãos, ambos com presença de "mesa de operações de tesouraria".
-- QuickPixDialog limpo, sem nenhum efeito que violasse a memória.
-- Sidebar com hover/active claramente mais "liso" e premium.
-- Build verde, sem regressões funcionais.
+**Frontend:**
+- `src/pages/vendas/ApiKeys.tsx` reescrita.
+- `src/pages/vendas/Webhooks.tsx` reescrita + nova sub-página de deliveries.
+- `src/pages/vendas/Documentacao.tsx` + `ApiDocsComplete.tsx` → consolidar em `ApiDocs.tsx` única.
+- Novos componentes: `CodeBlock` (com tabs de linguagem e cópia), `KeyRevealOnce` (modal de criação), `WebhookTestPanel`, `DeliveryTimeline`.
+
+**Sem mexer em:**
+- `quick-pix` (endpoint interno do dashboard continua igual).
+- Fluxo de checkout / transações / ledger — só consumimos, não alteramos.
+
+---
+
+## Fora de escopo (perguntar antes de começar?)
+1. **Refunds via API** — fase 2 ou já incluir no MVP?
+2. **Sandbox/test mode** (`sk_test_...` separado) — ou só `live` por enquanto?
+3. **IP allowlist por chave** — incluir agora ou deixar para depois?
+
+Me confirma esses 3 pontos e qualquer ajuste no escopo das abas, que eu já mando ver na implementação.

@@ -377,69 +377,23 @@ Deno.serve(async (req) => {
       }
     }
 
-    // === Forward to user's webhook if configured ===
-    const productId = externalRef;
-    if (productId) {
-      const { data: product } = await supabase
-        .from('products')
-        .select('user_id')
-        .eq('id', productId)
-        .single();
-
-      if (product) {
-        const { data: webhooks } = await supabase
-          .from('webhook_configs')
-          .select('id, url, events, secret')
-          .eq('user_id', product.user_id)
-          .eq('is_active', true);
-
-        if (webhooks) {
-          const dispatches = webhooks.map(async (webhook) => {
-            const eventType = `payment.${ourStatus}`;
-            if (webhook.events.length === 0 || webhook.events.includes(eventType)) {
-              const controller = new AbortController();
-              const timeout = setTimeout(() => controller.abort(), 5000);
-              try {
-                const webhookBody = JSON.stringify({
-                  event: eventType,
-                  data: {
-                    transaction_id: transactionId,
-                    podpay_payment_id: podpayPaymentId,
-                    status: ourStatus,
-                    product_id: productId,
-                  },
-                  timestamp: new Date().toISOString(),
-                });
-
-                // FIX #5: Sign webhook payload with HMAC-SHA256
-                const webhookHeaders: Record<string, string> = { 'Content-Type': 'application/json' };
-                if (webhook.secret) {
-                  const enc = new TextEncoder();
-                  const hmacKey = await crypto.subtle.importKey(
-                    'raw', enc.encode(webhook.secret),
-                    { name: 'HMAC', hash: 'SHA-256' }, false, ['sign']
-                  );
-                  const sig = await crypto.subtle.sign('HMAC', hmacKey, enc.encode(webhookBody));
-                  const sigHex = Array.from(new Uint8Array(sig)).map(b => b.toString(16).padStart(2, '0')).join('');
-                  webhookHeaders['x-hotzfy-signature'] = sigHex;
-                }
-
-                await fetch(webhook.url, {
-                  method: 'POST',
-                  headers: webhookHeaders,
-                  signal: controller.signal,
-                  body: webhookBody,
-                });
-              } catch (e) {
-                safeLog('Webhook dispatch error', { error: e instanceof Error ? e.message : 'unknown' });
-              } finally {
-                clearTimeout(timeout);
-              }
-            }
-          });
-          await Promise.allSettled(dispatches);
-        }
-      }
+    // === Trigger central webhook dispatcher (queue-based with retries & HMAC) ===
+    // Delivery rows are auto-created by the enqueue_webhook_on_tx_change trigger.
+    // We just nudge the worker to flush the queue immediately.
+    try {
+      const dispatcherUrl = `${supabaseUrl}/functions/v1/webhook-dispatcher`;
+      const serviceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
+      // fire-and-forget
+      fetch(dispatcherUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${serviceKey}`,
+        },
+        body: '{}',
+      }).catch(() => {});
+    } catch (_e) {
+      // never break postback on dispatcher hiccup
     }
 
     return new Response(
