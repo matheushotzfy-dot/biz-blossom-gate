@@ -257,7 +257,7 @@ export default function MemberAuth() {
  <GraduationCap className="h-4 w-4 text-primary-foreground" />
  </motion.div>
  <div>
- <span className="text-sm font-display font-black tracking-[-0.04em] text-foreground">Área de Membros</span>
+ <span className="text-sm font-display font-bold tracking-[-0.04em] text-foreground">Área de Membros</span>
  <div className="flex items-center gap-1.5">
  <div className="h-1 w-1 rounded-full bg-primary animate-pulse" />
  <span className="text-[7px] text-muted-foreground/35 font-bold tracking-[0.12em] uppercase font-display">Conteúdo Exclusivo</span>
@@ -299,7 +299,7 @@ export default function MemberAuth() {
  initial={{ opacity: 0, y: 16 }}
  animate={{ opacity: 1, y: 0 }}
  transition={{ delay: 0.3, duration: 0.7 }}
- className="text-[28px] font-display font-black tracking-[-0.045em] text-foreground leading-[1.08]"
+ className="text-[28px] font-display font-bold tracking-[-0.045em] text-foreground leading-[1.08]"
  >
  {mode === "login" ? (
  <>Acesse seus <span className="text-gradient">cursos</span></>
@@ -471,7 +471,7 @@ export default function MemberAuth() {
  </motion.div>
 
  <motion.h2 initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8, delay: 0.3 }}
- className="text-[2rem] xl:text-[2.5rem] font-display font-black mb-5 text-foreground leading-[1.04] tracking-[-0.05em]">
+ className="text-[2rem] xl:text-[2.5rem] font-display font-bold mb-5 text-foreground leading-[1.04] tracking-[-0.05em]">
  Aprenda com os{" "}
  <span className="text-gradient relative inline-block">
  melhores
@@ -502,7 +502,7 @@ export default function MemberAuth() {
  className="text-center p-4 rounded-2xl bg-card/20 backdrop-blur-xl border border-border/8 hover:border-primary/15 hover:bg-card/35 hover:shadow-xl hover:shadow-primary/5 transition-all duration-300 group cursor-default"
  >
  <s.icon className="h-3.5 w-3.5 mx-auto mb-2 text-primary/40 group-hover:text-primary/60 transition-colors" />
- <p className="text-[17px] font-display font-black text-foreground tracking-[-0.03em] tabular-nums">{s.value}</p>
+ <p className="text-[17px] font-display font-bold text-foreground tracking-[-0.03em] tabular-nums">{s.value}</p>
  <p className="text-[7px] text-muted-foreground/35 font-bold uppercase tracking-[0.15em] mt-0.5 font-display">{s.label}</p>
  </motion.div>
  ))}

@@ -119,13 +119,13 @@ export default function MemberLayout() {
 
             <div className="flex items-center gap-6 ml-auto">
               <div className="hidden sm:flex flex-col items-end">
-                <p className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-600">Pontos XP</p>
-                <p className="text-sm font-black text-emerald-400 tabular-nums">{stats.xp.toLocaleString("pt-BR")}</p>
+                <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-zinc-600">Pontos XP</p>
+                <p className="text-sm font-bold text-emerald-400 tabular-nums">{stats.xp.toLocaleString("pt-BR")}</p>
               </div>
               <div className="h-10 w-px bg-white/5 hidden sm:block" />
               <div className="flex items-center gap-4">
                 <div className="flex flex-col items-end hidden xs:flex">
-                  <p className="text-[12px] font-black text-white leading-none">{displayName}</p>
+                  <p className="text-[12px] font-bold text-white leading-none">{displayName}</p>
                   <p className="text-[10px] text-zinc-500 mt-1 uppercase tracking-widest font-bold">Membro Premium</p>
                 </div>
                 <button
@@ -148,7 +148,7 @@ export default function MemberLayout() {
                   onClick={e => e.stopPropagation()}
                 >
                   <div className="p-4 border-b border-white/5">
-                    <p className="text-[10px] uppercase tracking-[0.18em] text-zinc-500 font-black mb-1">Conta Hotzfy</p>
+                    <p className="text-[10px] uppercase tracking-[0.18em] text-zinc-500 font-bold mb-1">Conta Hotzfy</p>
                     <p className="font-bold text-white truncate">{displayName}</p>
                   </div>
                   <div className="py-2">

@@ -191,12 +191,12 @@ export default function CoursePage() {
           </Link>
           <div className="min-w-0">
             <div className="flex items-center gap-3 mb-2">
-              <div className="px-2 py-0.5 rounded bg-primary/10 border border-primary/20 text-[10px] font-black uppercase tracking-widest text-primary">
+              <div className="px-2 py-0.5 rounded bg-primary/10 border border-primary/20 text-[10px] font-bold uppercase tracking-widest text-primary">
                 Modo Estudo
               </div>
-              <span className="text-[11px] font-black text-muted-foreground/40 uppercase tracking-[0.15em]">Sua Jornada</span>
+              <span className="text-[11px] font-bold text-muted-foreground/40 uppercase tracking-[0.15em]">Sua Jornada</span>
             </div>
-            <h1 className="font-display text-3xl md:text-4xl font-black tracking-[-0.04em] text-foreground truncate">
+            <h1 className="font-display text-3xl md:text-4xl font-bold tracking-[-0.04em] text-foreground truncate">
               {course.title}
             </h1>
             <div className="flex items-center gap-4 mt-3">
@@ -208,7 +208,7 @@ export default function CoursePage() {
                   className="h-full bg-primary shadow-[0_0_10px_rgba(var(--primary),0.5)]" 
                 />
               </div>
-              <span className="text-[12px] font-black text-muted-foreground tabular-nums">
+              <span className="text-[12px] font-bold text-muted-foreground tabular-nums">
                 {completedLessons}/{totalLessons} <span className="text-primary ml-1">{overallPct}% concluído</span>
               </span>
             </div>
@@ -249,10 +249,10 @@ export default function CoursePage() {
                     <div className="h-24 w-24 rounded-[2rem] bg-primary/10 flex items-center justify-center mb-8 relative z-10">
                       <FileText className="h-10 w-10 text-primary" strokeWidth={1.5} />
                     </div>
-                    <h3 className="text-2xl font-display font-black text-foreground relative z-10">{activeLesson.title}</h3>
+                    <h3 className="text-2xl font-display font-bold text-foreground relative z-10">{activeLesson.title}</h3>
                     <p className="text-muted-foreground mt-3 max-w-sm relative z-10">Este conteúdo é em formato de texto. Leia atentamente abaixo.</p>
                     {activeLesson.duration_minutes > 0 && (
-                      <div className="flex items-center gap-2 mt-6 text-[11px] font-black uppercase tracking-widest text-primary bg-primary/10 px-4 py-2 rounded-full relative z-10">
+                      <div className="flex items-center gap-2 mt-6 text-[11px] font-bold uppercase tracking-widest text-primary bg-primary/10 px-4 py-2 rounded-full relative z-10">
                         <Clock className="h-3.5 w-3.5" />
                         <span>{activeLesson.duration_minutes} min de leitura</span>
                       </div>
@@ -277,9 +277,9 @@ export default function CoursePage() {
                         <FileText className="h-4 w-4" />
                       </div>
                     )}
-                    <span className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/60">Conteúdo atual</span>
+                    <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground/60">Conteúdo atual</span>
                   </div>
-                  <h2 className="text-2xl font-display font-black tracking-tight text-foreground truncate">{activeLesson.title}</h2>
+                  <h2 className="text-2xl font-display font-bold tracking-tight text-foreground truncate">{activeLesson.title}</h2>
                   {activeLesson.duration_minutes > 0 && (
                     <p className="text-[11px] font-bold text-muted-foreground/40 mt-1 flex items-center gap-1.5">
                       <Clock className="h-3.5 w-3.5" /> {activeLesson.duration_minutes} minutos de conteúdo
@@ -291,7 +291,7 @@ export default function CoursePage() {
                   size="lg"
                   variant={progress.get(activeLesson.id)?.completed ? "outline" : "default"}
                   className={cn(
-                    "h-14 px-10 rounded-2xl font-display font-black text-[15px] transition-all active:scale-95 shadow-xl",
+                    "h-14 px-10 rounded-2xl font-display font-bold text-[15px] transition-all active:scale-95 shadow-xl",
                     progress.get(activeLesson.id)?.completed ? "border-success/30 text-success hover:bg-success/5" : "bg-foreground text-background hover:bg-foreground/90"
                   )}
                   onClick={() => markComplete(activeLesson.id)}
@@ -311,7 +311,7 @@ export default function CoursePage() {
                   <div className="absolute top-0 right-0 p-8 opacity-[0.03] pointer-events-none">
                     <Info className="h-32 w-32" />
                   </div>
-                  <h4 className="text-[11px] font-black text-primary uppercase tracking-[0.3em] mb-6 flex items-center gap-3">
+                  <h4 className="text-[11px] font-bold text-primary uppercase tracking-[0.3em] mb-6 flex items-center gap-3">
                     <div className="h-1.5 w-1.5 rounded-full bg-primary" />
                     Sobre esta experiência
                   </h4>
@@ -327,7 +327,7 @@ export default function CoursePage() {
                 <div className="h-20 w-20 rounded-full bg-secondary/20 flex items-center justify-center mx-auto mb-6">
                   <BookOpen className="h-8 w-8 text-muted-foreground/30" />
                 </div>
-                <p className="text-[16px] font-black text-muted-foreground/40 uppercase tracking-widest">Selecione uma aula no menu</p>
+                <p className="text-[16px] font-bold text-muted-foreground/40 uppercase tracking-widest">Selecione uma aula no menu</p>
               </div>
             </div>
           )}
@@ -336,8 +336,8 @@ export default function CoursePage() {
         {/* Premium Sidebar - Modules & Lessons */}
         <div className="lg:col-span-4 space-y-6">
           <div className="flex items-center justify-between mb-4">
-            <h3 className="text-[11px] font-black text-muted-foreground uppercase tracking-[0.3em]">Grade Curricular</h3>
-            <span className="text-[10px] font-black text-primary bg-primary/10 px-2 py-0.5 rounded">{modules.length} Módulos</span>
+            <h3 className="text-[11px] font-bold text-muted-foreground uppercase tracking-[0.3em]">Grade Curricular</h3>
+            <span className="text-[10px] font-bold text-primary bg-primary/10 px-2 py-0.5 rounded">{modules.length} Módulos</span>
           </div>
           
           <div className="space-y-4">
@@ -368,9 +368,9 @@ export default function CoursePage() {
                           <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent" />
                           <div className="absolute bottom-4 left-5 right-5 flex items-end justify-between">
                             <div>
-                              <p className="text-white text-lg font-display font-black tracking-tight">{mod.title}</p>
+                              <p className="text-white text-lg font-display font-bold tracking-tight">{mod.title}</p>
                               <div className="flex items-center gap-3 mt-1.5">
-                                <span className="text-white/60 text-[10px] font-black uppercase tracking-widest">{mod.lessons.length} aulas</span>
+                                <span className="text-white/60 text-[10px] font-bold uppercase tracking-widest">{mod.lessons.length} aulas</span>
                                 <div className="h-1 w-20 bg-white/20 rounded-full overflow-hidden">
                                   <div className="h-full bg-primary" style={{ width: `${modPct}%` }} />
                                 </div>
@@ -385,12 +385,12 @@ export default function CoursePage() {
                         <div className="flex items-center justify-between p-6">
                           <div className="flex items-center gap-4">
                             <span className={cn(
-                              "h-10 w-10 rounded-xl flex items-center justify-center text-xs font-black transition-colors duration-500",
+                              "h-10 w-10 rounded-xl flex items-center justify-center text-xs font-bold transition-colors duration-500",
                               isExpanded ? "bg-primary text-primary-foreground" : "bg-secondary text-muted-foreground"
                             )}>{modIdx + 1}</span>
                             <div>
-                              <p className="text-[15px] font-black tracking-tight text-foreground">{mod.title}</p>
-                              <p className="text-[10px] text-muted-foreground/60 font-black uppercase tracking-widest mt-1">{mod.lessons.length} aulas • {modPct}% completo</p>
+                              <p className="text-[15px] font-bold tracking-tight text-foreground">{mod.title}</p>
+                              <p className="text-[10px] text-muted-foreground/60 font-bold uppercase tracking-widest mt-1">{mod.lessons.length} aulas • {modPct}% completo</p>
                             </div>
                           </div>
                           <ChevronDown className={cn("h-5 w-5 text-muted-foreground/40 transition-transform duration-500", isExpanded && "rotate-180")} />
@@ -441,7 +441,7 @@ export default function CoursePage() {
                                         <CheckCircle2 className="h-3.5 w-3.5" />
                                       </div>
                                     ) : (
-                                      <span className={cn("text-[10px] font-black font-mono w-6 text-center", isActive ? "text-background/40" : "text-muted-foreground/30")}>
+                                      <span className={cn("text-[10px] font-bold font-mono w-6 text-center", isActive ? "text-background/40" : "text-muted-foreground/30")}>
                                         {(lessonIdx + 1).toString().padStart(2, '0')}
                                       </span>
                                     )}
@@ -487,12 +487,12 @@ export default function CoursePage() {
                 <Trophy className="h-6 w-6" />
               </div>
               <div>
-                <p className="text-[10px] font-black uppercase tracking-[0.2em] text-primary/60">Sua Conquista</p>
-                <p className="text-lg font-display font-black text-foreground">Hotzfy Pioneer</p>
+                <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-primary/60">Sua Conquista</p>
+                <p className="text-lg font-display font-bold text-foreground">Hotzfy Pioneer</p>
               </div>
             </div>
             <p className="text-xs text-muted-foreground leading-relaxed mb-6 font-medium">Continue sua jornada para desbloquear novos módulos e certificações exclusivas.</p>
-            <Button variant="outline" className="w-full rounded-xl border-primary/20 hover:bg-primary/5 text-primary text-xs font-black uppercase tracking-widest h-11">
+            <Button variant="outline" className="w-full rounded-xl border-primary/20 hover:bg-primary/5 text-primary text-xs font-bold uppercase tracking-widest h-11">
               Ver Certificado
             </Button>
           </div>
