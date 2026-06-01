@@ -5,19 +5,19 @@
  */
 
 import { useEffect, useState, useRef, useMemo } from "react";
+import { useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useProfile } from "@/hooks/useProfile";
 import {
   User, Camera, Trophy, Wallet, Shield, BadgeCheck,
   Calendar, Fingerprint, Copy, Check, MapPin, Loader2,
-  AlertTriangle, Lock, TrendingUp, Receipt, Activity,
-  Crown, Sparkles,
+  AlertTriangle, Lock, Activity, Sparkles,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { FinanceiroHero, FinanceiroKpi, FinanceiroKpiGrid } from "@/components/financeiro/FinanceiroHero";
+import { FinanceiroHero } from "@/components/financeiro/FinanceiroHero";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 
@@ -141,8 +141,25 @@ export default function Perfil() {
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
+  const addressRef = useRef<HTMLDivElement>(null);
   const [formInit, setFormInit] = useState(false);
   const [addressInit, setAddressInit] = useState(false);
+  const [addressHighlight, setAddressHighlight] = useState(false);
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  useEffect(() => {
+    if (searchParams.get("focus") === "address") {
+      setTimeout(() => {
+        addressRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
+        setAddressHighlight(true);
+        setTimeout(() => setAddressHighlight(false), 4000);
+        const next = new URLSearchParams(searchParams);
+        next.delete("focus");
+        setSearchParams(next, { replace: true });
+      }, 250);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   useEffect(() => {
     if (profile && !formInit) {
@@ -286,37 +303,35 @@ export default function Perfil() {
         status={{ tone: accStatus.tone === "destructive" ? "destructive" : accStatus.tone, label: `Conta ${accStatus.label}`, pulse: accStatus.tone === "warning" }}
       />
 
-      {/* KPI GRID */}
-      <FinanceiroKpiGrid cols={4}>
-        <FinanceiroKpi
-          label="Receita líquida"
-          value={fmtCompact(allTimeRevenue)}
-          sub={`Tier ${tierLabel}`}
-          icon={TrendingUp}
-          tone="success"
-        />
-        <FinanceiroKpi
-          label="Vendas aprovadas"
-          value={totalSales.toLocaleString("pt-BR")}
-          sub={`${last30Sales} nos últimos 30D`}
-          icon={Receipt}
-          tone="info"
-        />
-        <FinanceiroKpi
-          label="Membro há"
-          value={`${memberDays}d`}
-          sub={profile?.created_at ? new Date(profile.created_at).toLocaleDateString("pt-BR") : "—"}
-          icon={Calendar}
-          tone="neutral"
-        />
-        <FinanceiroKpi
-          label="Próxima meta"
-          value={milestone.next.label}
-          sub={`${milestone.pct.toFixed(0)}% concluído`}
-          icon={Trophy}
-          tone="primary"
-        />
-      </FinanceiroKpiGrid>
+      {/* Quick info strip */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+        <div className="rounded-xl border border-border/50 bg-card p-4">
+          <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.14em]">Membro há</p>
+          <p className="text-lg font-display font-black text-foreground tabular-nums mt-1">{memberDays}d</p>
+          <p className="text-[10px] text-muted-foreground/70 mt-0.5">
+            {profile?.created_at ? new Date(profile.created_at).toLocaleDateString("pt-BR") : "—"}
+          </p>
+        </div>
+        <div className="rounded-xl border border-border/50 bg-card p-4">
+          <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.14em]">Vendas</p>
+          <p className="text-lg font-display font-black text-foreground tabular-nums mt-1">{totalSales.toLocaleString("pt-BR")}</p>
+          <p className="text-[10px] text-muted-foreground/70 mt-0.5">{last30Sales} nos últimos 30d</p>
+        </div>
+        <div className="rounded-xl border border-border/50 bg-card p-4">
+          <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.14em]">Tier</p>
+          <p className="text-lg font-display font-black text-foreground mt-1">{tierLabel}</p>
+          <p className="text-[10px] text-muted-foreground/70 mt-0.5">{milestone.pct.toFixed(0)}% até {milestone.next.label}</p>
+        </div>
+        <div className="rounded-xl border border-border/50 bg-card p-4">
+          <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.14em]">Status</p>
+          <p className={cn("text-lg font-display font-black mt-1",
+            accStatus.tone === "success" && "text-success",
+            accStatus.tone === "warning" && "text-warning",
+            accStatus.tone === "destructive" && "text-destructive",
+          )}>{accStatus.label}</p>
+          <p className="text-[10px] text-muted-foreground/70 mt-0.5">Conta verificada via KYC</p>
+        </div>
+      </div>
 
       {/* IDENTITY CARD */}
       <div className="rounded-xl border border-border/50 bg-card overflow-hidden animate-fade-in stagger-2">
@@ -388,25 +403,7 @@ export default function Perfil() {
                   <User className="h-3 w-3" /> @{profile.nickname}
                 </span>
               )}
-              {milestone.tier >= 3 && (
-                <span className="inline-flex items-center gap-1.5 px-2 py-1 rounded-md bg-primary/10 border border-primary/20 text-[10px] font-bold text-primary uppercase tracking-[0.1em]">
-                  <Crown className="h-3 w-3" /> {tierLabel}
-                </span>
-              )}
             </div>
-          </div>
-
-          {/* Revenue summary */}
-          <div className="md:text-right md:pl-6 md:border-l border-border/40 md:min-w-[220px]">
-            <p className="text-[10px] uppercase tracking-[0.16em] font-bold text-muted-foreground mb-1.5">
-              Receita líquida total
-            </p>
-            <p className="text-[28px] md:text-[32px] font-display font-black text-foreground tabular-nums tracking-[-0.025em] leading-none">
-              {fmtCurrency(allTimeRevenue)}
-            </p>
-            <p className="text-[11px] text-muted-foreground/80 mt-2 font-medium">
-              {totalSales} vendas · Tier <span className="text-foreground font-bold">{tierLabel}</span>
-            </p>
           </div>
         </div>
       </div>
@@ -481,7 +478,7 @@ export default function Perfil() {
             {user?.id && (
               <InfoRow
                 label="ID da conta"
-                value={`${user.id.slice(0, 8)}...`}
+                value={<span className="font-mono text-[11px]">{user.id}</span>}
                 copyable={user.id}
               />
             )}
@@ -580,6 +577,22 @@ export default function Perfil() {
       </div>
 
       {/* ENDEREÇO */}
+      <div
+        ref={addressRef}
+        className={cn(
+          "rounded-xl transition-all duration-500",
+          addressHighlight && "ring-4 ring-warning/60 ring-offset-2 ring-offset-background animate-pulse"
+        )}
+      >
+        {addressHighlight && !isAddressLocked && (
+          <div className="mb-3 p-4 rounded-xl bg-warning text-warning-foreground border-2 border-warning shadow-lg flex items-start gap-3 animate-fade-in">
+            <AlertTriangle className="h-5 w-5 shrink-0 mt-0.5" />
+            <div>
+              <p className="text-sm font-black uppercase tracking-wide">Atenção!</p>
+              <p className="text-xs font-medium mt-1">Para realizar saques, preencha seu endereço corretamente abaixo.</p>
+            </div>
+          </div>
+        )}
       <Panel
         icon={MapPin}
         title="Endereço do vendedor"
@@ -713,6 +726,7 @@ export default function Perfil() {
           </form>
         </div>
       </Panel>
+      </div>
     </div>
   );
 }

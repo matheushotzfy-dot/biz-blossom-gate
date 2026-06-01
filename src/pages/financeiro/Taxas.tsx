@@ -63,39 +63,7 @@ export default function Taxas() {
         />
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Simulation */}
-        <div className="bg-card rounded-[24px] border border-border/60 shadow-sm overflow-hidden flex flex-col">
-          <div className="p-6 border-b border-border/40">
-            <div className="flex items-center gap-3">
-              <div className="h-10 w-10 bg-primary/10 border border-primary/10 rounded-xl flex items-center justify-center text-primary">
-                <Calculator size={20} strokeWidth={2.5} />
-              </div>
-              <div>
-                <h2 className="font-black text-foreground tracking-tight uppercase">Simulação</h2>
-                <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mt-1">Exemplo de venda (R$ 1.000,00)</p>
-              </div>
-            </div>
-          </div>
-          
-          <div className="p-6 space-y-4 flex-1">
-            {[
-              { label: "Valor Bruto", value: "R$ 1.000,00", cls: "text-foreground" },
-              { label: `Taxa Média (4,5%)`, value: "- R$ 45,00", cls: "text-red-500" },
-              { label: "Tarifa Fixa", value: "- R$ 1,00", cls: "text-red-500" },
-            ].map((row) => (
-              <div key={row.label} className="flex justify-between items-center">
-                <span className="text-[11px] font-bold text-muted-foreground/60 uppercase tracking-widest">{row.label}</span>
-                <span className={cn("text-sm font-black tabular-nums", row.cls)}>{row.value}</span>
-              </div>
-            ))}
-            <div className="pt-4 border-t border-border/40 flex justify-between items-center">
-              <span className="text-[12px] font-black text-foreground uppercase tracking-widest">Líquido Estimado</span>
-              <span className="text-3xl font-black text-emerald-500 tabular-nums tracking-tighter">R$ 954,00</span>
-            </div>
-          </div>
-        </div>
-
+      <div className="grid grid-cols-1 gap-6">
         {/* Retentions & Deadlines */}
         <div className="bg-card rounded-[24px] border border-border/60 shadow-sm overflow-hidden flex flex-col">
           <div className="p-6 border-b border-border/40">

@@ -1,10 +1,12 @@
 import { useEffect, useState, useMemo } from "react";
+import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import { useProfile } from "@/hooks/useProfile";
 import { useWithdrawals, usePixKeys, useBankAccounts, useInvalidateAll } from "@/hooks/useQueryData";
 import {
   Plus, Wallet, Clock, History, Search, ArrowDownToLine, Info,
-  CheckCircle2, AlertCircle, XCircle, ChevronRight, Key, Building2, Trash2
+  CheckCircle2, Key, Building2, MapPin,
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
@@ -25,6 +27,8 @@ const STATUS_CONFIG: Record<string, { label: string; color: string; bg: string }
 
 export default function Saques() {
   const { user } = useAuth();
+  const { profile } = useProfile();
+  const navigate = useNavigate();
   const { data: withdrawals = [] } = useWithdrawals();
   const { data: pixKeys = [] } = usePixKeys();
   const { data: bankAccounts = [] } = useBankAccounts();
@@ -35,12 +39,15 @@ export default function Saques() {
   const [search, setSearch] = useState("");
   const invalidateAll = useInvalidateAll();
 
+  const hasAddress = !!(profile as any)?.zip_code && !!(profile as any)?.street
+    && !!(profile as any)?.street_number && !!(profile as any)?.city && !!(profile as any)?.state;
+
   useEffect(() => {
     if (!user?.id) return;
     const fetchBalance = async () => {
       const { data } = await supabase.rpc("get_ledger_balance", { _user_id: user.id });
       if (data !== null) setAvailableBalance(Number(data));
-      
+
       const { data: tx } = await supabase
         .from("transactions")
         .select("retained_amount")
@@ -58,13 +65,28 @@ export default function Saques() {
     return withdrawals.filter(w => w.id.toLowerCase().includes(q) || fmt(Number(w.amount)).includes(q));
   }, [withdrawals, search]);
 
+  const handleOpenChange = (next: boolean) => {
+    if (next && !hasAddress) {
+      toast.error("Preencha seu endereço antes de solicitar saques");
+      navigate("/perfil?focus=address");
+      return;
+    }
+    setOpen(next);
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!hasAddress) {
+      toast.error("Endereço obrigatório para saques");
+      navigate("/perfil?focus=address");
+      setOpen(false);
+      return;
+    }
     const numAmount = parseFloat(amount);
     if (!user || isNaN(numAmount) || numAmount <= WITHDRAW_FEE) { toast.error("Valor inválido"); return; }
     if (numAmount > availableBalance) { toast.error("Saldo insuficiente"); return; }
     if (pixKeys.length === 0 && bankAccounts.length === 0) { toast.error("Cadastre uma chave PIX ou conta bancária"); return; }
-    
+
     const { error } = await supabase.from("withdrawals").insert({ user_id: user.id, amount: numAmount });
     if (error) { toast.error(error.message); return; }
     toast.success("Solicitação enviada!"); setOpen(false); setAmount(""); invalidateAll(["withdrawals"]);
@@ -83,7 +105,7 @@ export default function Saques() {
             Solicite a transferência dos seus lucros
           </p>
         </div>
-        <Dialog open={open} onOpenChange={setOpen}>
+        <Dialog open={open} onOpenChange={handleOpenChange}>
           <DialogTrigger asChild>
             <button className="bg-primary text-primary-foreground h-11 px-6 rounded-xl font-black text-sm hover:opacity-90 transition-all flex items-center gap-2 shadow-sm uppercase tracking-widest">
               <Plus size={18} strokeWidth={3} /> Solicitar Saque
@@ -273,10 +295,10 @@ export default function Saques() {
                     {pixKeys.slice(0, 2).map((pk: any) => (
                       <div key={pk.id} className="p-3 rounded-xl bg-muted/30 border border-border/60 flex items-center justify-between group">
                         <div className="min-w-0">
-                          <p className="text-[11px] font-black text-foreground truncate">{pk.pix_key}</p>
-                          <p className="text-[9px] font-bold text-muted-foreground/60 uppercase">{pk.pix_type}</p>
+                          <p className="text-[11px] font-black text-foreground truncate">{pk.key_value}</p>
+                          <p className="text-[9px] font-bold text-muted-foreground/60 uppercase">{pk.key_type}</p>
                         </div>
-                        {pk.is_default && <CheckCircle2 size={12} className="text-emerald-500" />}
+                        <CheckCircle2 size={12} className="text-emerald-500" />
                       </div>
                     ))}
                   </div>
