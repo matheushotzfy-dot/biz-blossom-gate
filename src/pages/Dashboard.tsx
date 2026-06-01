@@ -269,10 +269,10 @@ export default function Dashboard() {
   }, [disputes]);
 
   const financialCards = [
-    { label: "Ticket Médio", value: privacy.hidden ? CENSORED : fmt(approved.length > 0 ? revenue / approved.length : 0), icon: BarChart3, color: "info" as const, sub: "Média/venda" },
-    { label: "Pedidos Pagos", value: approved.length, icon: Zap, color: "primary" as const, sub: "Concluídos", trend: 8 },
-    { label: "Saldo Pendente", value: privacy.hidden ? CENSORED : fmt(pendingBalance), icon: Clock3, color: "warning" as const, sub: "Processando" },
-    { label: "MEDS", value: medCount, icon: ShieldCheck, color: "destructive" as const, sub: "Disputas" },
+    { label: "Ticket Médio", value: privacy.hidden ? CENSORED : fmt(approved.length > 0 ? revenue / approved.length : 0), icon: BarChart3, color: "neutral" as const, sub: "Média por venda" },
+    { label: "Pedidos Pagos", value: approved.length, icon: Zap, color: "success" as const, sub: "Vendas concluídas", trend: 8 },
+    { label: "Saldo Pendente", value: privacy.hidden ? CENSORED : fmt(pendingBalance), icon: Clock3, color: "warning" as const, sub: "Aguardando liberação" },
+    { label: "Disputas / MEDS", value: medCount, icon: ShieldCheck, color: "destructive" as const, sub: "Ações necessárias" },
   ];
 
 
