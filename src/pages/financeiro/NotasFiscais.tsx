@@ -75,17 +75,18 @@ export default function NotasFiscais() {
   };
 
   return (
-    <PageShell>
+    <div className="animate-fade-in space-y-6">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
-        <PageTitle
-          icon={<FileText className="h-6 w-6" />}
-          title="Notas Fiscais"
-          subtitle="Emissão e gestão de NF-e para vendas aprovadas"
-        />
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+        <div>
+          <h1 className="text-2xl font-black text-foreground tracking-tight">Notas Fiscais</h1>
+          <p className="text-[11px] font-bold text-muted-foreground uppercase tracking-widest mt-1">
+            Gestão de NF-e para vendas aprovadas
+          </p>
+        </div>
         {stats.pendentes > 0 && (
-          <Button className="gap-2 rounded-xl text-sm font-bold h-10 px-5 shadow-lg shadow-primary/20">
-            <FileText className="h-4 w-4" /> Emitir {stats.pendentes} pendentes
+          <Button className="bg-primary text-primary-foreground h-11 px-6 rounded-xl font-black text-xs uppercase tracking-widest shadow-sm">
+            <FileText className="h-4 w-4 mr-2" /> Emitir {stats.pendentes} pendentes
           </Button>
         )}
       </div>
