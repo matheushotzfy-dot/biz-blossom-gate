@@ -3,52 +3,47 @@ import { Building2, Landmark, Zap, PieChart, Banknote, FileText, Loader2 } from 
 import { HubTabs, type HubTab } from "@/components/HubTabs";
 
 function lazyRetry(importFn: () => Promise<{ default: ComponentType<any> }>) {
- return lazy(() =>
- importFn().catch(() =>
- new Promise<{ default: ComponentType<any> }>((resolve) => {
- setTimeout(() => resolve(importFn()), 1500);
- })
- )
- );
+  return lazy(() =>
+    importFn().catch(() =>
+      new Promise<{ default: ComponentType<any> }>((resolve) => {
+        setTimeout(() => resolve(importFn()), 1500);
+      })
+    )
+  );
 }
 
-const DadosBancarios = lazyRetry(() => import("./DadosBancarios"));
 const Adquirente = lazyRetry(() => import("./Adquirente"));
 const Taxas = lazyRetry(() => import("./Taxas"));
-const ControleGastos = lazyRetry(() => import("./ControleGastos"));
-const Antecipacao = lazyRetry(() => import("./Antecipacao"));
 const NotasFiscais = lazyRetry(() => import("./NotasFiscais"));
 
 const TABS: HubTab[] = [
-  { id: "dados", label: "Dados Bancários", icon: Building2 },
   { id: "adquirente", label: "Adquirente", icon: Landmark },
   { id: "taxas", label: "Taxas", icon: Zap },
   { id: "nfe", label: "Notas Fiscais", icon: FileText },
 ];
 
 const COMPONENTS: Record<string, ReturnType<typeof lazyRetry>> = {
-  dados: DadosBancarios,
   adquirente: Adquirente,
   taxas: Taxas,
   nfe: NotasFiscais,
 };
 
 const Loading = () => (
- <div className="flex items-center justify-center py-20">
- <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
- </div>
+  <div className="flex items-center justify-center py-20">
+    <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+  </div>
 );
 
 export default function ConfigFinanceiro() {
- const [tab, setTab] = useState("dados");
- const ActiveComponent = COMPONENTS[tab];
+  const [tab, setTab] = useState("adquirente");
+  const ActiveComponent = COMPONENTS[tab];
 
- return (
- <>
- <HubTabs tabs={TABS} active={tab} onChange={setTab} />
- <Suspense fallback={<Loading />}>
- <ActiveComponent />
- </Suspense>
- </>
- );
+  return (
+    <div className="space-y-6">
+      <HubTabs tabs={TABS} active={tab} onChange={setTab} />
+      <Suspense fallback={<Loading />}>
+        <ActiveComponent />
+      </Suspense>
+    </div>
+  );
 }
