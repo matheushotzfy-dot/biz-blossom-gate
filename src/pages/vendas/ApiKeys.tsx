@@ -87,17 +87,41 @@ export default function ApiKeys() {
             Acesse nossa infraestrutura via integração direta
           </p>
         </div>
-        <Button onClick={() => setShowCreateDialog(true)} className="h-11 px-6 rounded-xl font-black text-xs uppercase tracking-widest gap-2">
-          <Plus className="h-4 w-4" /> Gerar Nova Chave
-        </Button>
+        <div className="flex items-center gap-2">
+          <Link to="/vendas/documentacao" className="h-11 px-4 rounded-xl border border-border/60 bg-card text-muted-foreground hover:text-foreground inline-flex items-center gap-2 text-[10px] font-black uppercase tracking-widest">
+            <BookOpen className="h-4 w-4" /> Docs
+          </Link>
+          <Button onClick={() => setShowCreateDialog(true)} className="h-11 px-6 rounded-xl font-black text-xs uppercase tracking-widest gap-2">
+            <Plus className="h-4 w-4" /> Gerar Nova Chave
+          </Button>
+        </div>
       </div>
 
       {/* KPI Row */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <StatCard title="Chaves Ativas" value={keys.filter(k => k.is_active).length} icon={Shield} color="success" description="Operacionais" />
-        <StatCard title="Uso Recente" value="Ativo" icon={Globe} color="info" description="Tráfego detectado" />
-        <StatCard title="Segurança" value="AES-256" icon={Lock} color="primary" description="Criptografia militar" />
-        <StatCard title="Endpoints" value="REST" icon={Code2} color="neutral" description="Padrão JSON" />
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        {[
+          { icon: Shield, label: "Chaves Ativas", value: String(keys.filter(k => k.is_active).length), sub: "Operacionais" },
+          { icon: Globe,  label: "Total Geradas", value: String(keys.length),                          sub: "Histórico completo" },
+          { icon: Lock,   label: "Criptografia",  value: "SHA-256",                                    sub: "Secrets hasheadas" },
+          { icon: Code2,  label: "Padrão",        value: "REST",                                       sub: "JSON · Bearer Auth" },
+        ].map((card) => {
+          const Icon = card.icon;
+          return (
+            <div key={card.label} className="bg-card p-8 rounded-[24px] border border-border/60 shadow-sm relative overflow-hidden group">
+              <div className="relative z-10">
+                <div className="flex items-center gap-2 text-muted-foreground/60 mb-3">
+                  <Icon size={16} />
+                  <span className="text-[10px] font-black uppercase tracking-[0.15em]">{card.label}</span>
+                </div>
+                <p className="text-3xl font-black text-foreground tabular-nums tracking-tighter">{card.value}</p>
+                <p className="text-[10px] font-bold text-muted-foreground/70 uppercase mt-2 tracking-widest">{card.sub}</p>
+              </div>
+              <div className="absolute right-[-20px] bottom-[-20px] opacity-[0.03] rotate-[-15deg] group-hover:scale-110 transition-transform duration-500">
+                <Icon size={160} />
+              </div>
+            </div>
+          );
+        })}
       </div>
 
       {/* Table Section */}
