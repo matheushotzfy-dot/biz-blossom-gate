@@ -853,7 +853,7 @@ export default function Vendas() {
 
                   <button
                     onClick={() => setShowExportDialog(true)}
-                    className="inline-flex h-10 items-center gap-2 rounded-xl bg-[#2563eb] px-5 text-[13px] font-bold tracking-tight text-white transition-all duration-200 hover:bg-[#1d4ed8] hover:scale-[1.02] active:scale-[0.98] shadow-lg shadow-blue-500/20"
+                    className="inline-flex h-10 items-center gap-2 rounded-xl bg-primary px-5 text-[13px] font-bold tracking-tight text-primary-foreground transition-all duration-200 hover:bg-primary/90 hover:scale-[1.02] active:scale-[0.98] shadow-lg shadow-primary/20"
                   >
                     <Download className="h-[16px] w-[16px]" strokeWidth={2.8} />
                     Exportar
