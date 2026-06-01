@@ -58,37 +58,38 @@ input[type="number"]::-webkit-inner-spin-button {
   }
 
   .dark {
-    --background: 220 14% 16%;
-    --foreground: 210 30% 98%;
-    --card: 220 13% 19%;
-    --card-elevated: 220 13% 22%;
-    --card-inset: 220 14% 14%;
-    --card-foreground: 210 30% 98%;
-    --popover: 220 13% 19%;
-    --popover-foreground: 210 30% 98%;
-    --primary: 212 95% 60%;
-    --primary-foreground: 210 40% 99%;
-    --secondary: 220 12% 24%;
-    --secondary-foreground: 210 30% 98%;
-    --muted: 220 12% 24%;
-    --muted-foreground: 215 15% 75%;
-    --accent: 220 12% 24%;
-    --accent-foreground: 210 30% 98%;
-    --destructive: 0 62% 45%;
+    --background: 220 38% 14%;
+    --foreground: 210 40% 98%;
+    --card: 220 36% 18%;
+    --card-elevated: 220 34% 22%;
+    --card-inset: 220 40% 12%;
+    --card-foreground: 210 40% 98%;
+    --popover: 220 36% 18%;
+    --popover-foreground: 210 40% 98%;
+    --primary: 212 100% 62%;
+    --primary-foreground: 220 40% 10%;
+    --secondary: 220 30% 24%;
+    --secondary-foreground: 210 40% 98%;
+    --muted: 220 30% 24%;
+    --muted-foreground: 215 25% 78%;
+    --accent: 220 30% 26%;
+    --accent-foreground: 210 40% 98%;
+    --destructive: 0 70% 55%;
     --destructive-foreground: 210 40% 99%;
-    --border: 220 12% 28%;
-    --input: 220 12% 28%;
-    --ring: 212 95% 60%;
+    --border: 220 28% 28%;
+    --input: 220 28% 28%;
+    --ring: 212 100% 62%;
 
-    --sidebar-background: 220 13% 18%;
-    --sidebar-foreground: 215 15% 78%;
-    --sidebar-primary: 212 95% 60%;
-    --sidebar-primary-foreground: 210 40% 99%;
-    --sidebar-accent: 220 12% 24%;
-    --sidebar-accent-foreground: 210 30% 98%;
-    --sidebar-border: 220 12% 26%;
-    --sidebar-ring: 212 95% 60%;
+    --sidebar-background: 220 38% 17%;
+    --sidebar-foreground: 215 25% 82%;
+    --sidebar-primary: 212 100% 62%;
+    --sidebar-primary-foreground: 220 40% 10%;
+    --sidebar-accent: 220 32% 24%;
+    --sidebar-accent-foreground: 210 40% 98%;
+    --sidebar-border: 220 28% 26%;
+    --sidebar-ring: 212 100% 62%;
   }
+
 }
 
 @layer base {
