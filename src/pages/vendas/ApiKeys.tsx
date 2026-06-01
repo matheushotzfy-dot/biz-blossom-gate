@@ -153,6 +153,7 @@ export default function ApiKeys() {
             <thead>
               <tr className="bg-muted/30 text-[10px] uppercase font-black tracking-[0.2em] text-muted-foreground/60 border-b border-border/40">
                 <th className="px-8 py-5">Nome / Chave Pública</th>
+                <th className="px-8 py-5">Último Uso</th>
                 <th className="px-8 py-5 text-center">Status</th>
                 <th className="px-8 py-5 text-right">Ações</th>
               </tr>
@@ -160,7 +161,7 @@ export default function ApiKeys() {
             <tbody className="divide-y divide-border/40">
               {filtered.length === 0 ? (
                 <tr>
-                  <td colSpan={3} className="px-8 py-20 text-center text-[11px] font-black uppercase tracking-widest opacity-30">
+                  <td colSpan={4} className="px-8 py-20 text-center text-[11px] font-black uppercase tracking-widest opacity-30">
                     Nenhuma credencial gerada
                   </td>
                 </tr>
@@ -169,7 +170,24 @@ export default function ApiKeys() {
                   <tr key={k.id} className="hover:bg-muted/20 transition-colors">
                     <td className="px-8 py-5">
                       <p className="text-sm font-black text-foreground">{k.name}</p>
-                      <code className="text-[10px] font-mono text-muted-foreground/60 mt-1">{k.public_key}</code>
+                      <div className="flex items-center gap-2 mt-1.5">
+                        <code className="text-[10px] font-mono text-muted-foreground/70 truncate max-w-[280px]">{k.public_key}</code>
+                        <button
+                          onClick={() => { navigator.clipboard.writeText(k.public_key); toast.success("Chave pública copiada"); }}
+                          className="p-1 rounded-md hover:bg-muted text-muted-foreground/60 hover:text-foreground transition-colors"
+                          title="Copiar chave pública"
+                        >
+                          <Copy size={11} />
+                        </button>
+                      </div>
+                    </td>
+                    <td className="px-8 py-5">
+                      <p className="text-xs font-bold text-foreground tabular-nums">
+                        {k.last_used_at ? format(new Date(k.last_used_at), "dd MMM yyyy", { locale: ptBR }) : "—"}
+                      </p>
+                      <p className="text-[10px] font-bold text-muted-foreground/60 uppercase tracking-widest mt-0.5">
+                        {k.last_used_at ? format(new Date(k.last_used_at), "HH:mm", { locale: ptBR }) : "Nunca utilizada"}
+                      </p>
                     </td>
                     <td className="px-8 py-5">
                       <div className="flex justify-center">
@@ -183,7 +201,7 @@ export default function ApiKeys() {
                       </div>
                     </td>
                     <td className="px-8 py-5 text-right space-x-2">
-                      <button onClick={() => handleRevoke(k.id, k.is_active)} className="h-8 w-8 rounded-lg bg-muted/40 border border-border/60 inline-flex items-center justify-center hover:bg-muted transition-all">
+                      <button onClick={() => handleRevoke(k.id, k.is_active)} className="h-8 w-8 rounded-lg bg-muted/40 border border-border/60 inline-flex items-center justify-center hover:bg-muted transition-all" title={k.is_active ? "Revogar" : "Reativar"}>
                         {k.is_active ? <PowerOff size={14} /> : <Power size={14} className="text-emerald-500" />}
                       </button>
                     </td>
