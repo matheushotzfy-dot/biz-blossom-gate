@@ -16,17 +16,15 @@ export default function Taxas() {
   const effectiveRate = exampleAmount > 0 ? ((examplePctCost + totalFixed) / exampleAmount) * 100 : 0;
 
   return (
-    <div className="mx-auto w-full max-w-[1440px] pb-20 space-y-6">
-      <FinanceiroHero
-        title="Taxas e Tarifas"
-        subtitle="Estrutura completa e transparente. Visualize cada percentual e tarifa fixa aplicada nas suas transações."
-        status={{ tone: "success", label: `${fees.length} ${fees.length === 1 ? "taxa configurada" : "taxas configuradas"}`, pulse: true }}
-        actions={
-          <div className="hidden sm:inline-flex items-center gap-1.5 rounded-xl border border-success/20 bg-success/5 px-3 h-11 text-[11px] font-black uppercase tracking-[0.12em] text-success">
-            <ShieldCheck className="h-3.5 w-3.5" /> 100% transparente
-          </div>
-        }
-      />
+    <div className="animate-fade-in space-y-6">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+        <div>
+          <h1 className="text-2xl font-black text-foreground tracking-tight">Taxas e Tarifas</h1>
+          <p className="text-[11px] font-bold text-muted-foreground uppercase tracking-widest mt-1">
+            Estrutura completa e transparente
+          </p>
+        </div>
+      </div>
 
       {/* KPI Grid */}
       <FinanceiroKpiGrid cols={4}>
