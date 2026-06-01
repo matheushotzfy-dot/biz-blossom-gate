@@ -5,19 +5,19 @@
  */
 
 import { useEffect, useState, useRef, useMemo } from "react";
+import { useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useProfile } from "@/hooks/useProfile";
 import {
   User, Camera, Trophy, Wallet, Shield, BadgeCheck,
   Calendar, Fingerprint, Copy, Check, MapPin, Loader2,
-  AlertTriangle, Lock, TrendingUp, Receipt, Activity,
-  Crown, Sparkles,
+  AlertTriangle, Lock, Activity, Sparkles,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { FinanceiroHero, FinanceiroKpi, FinanceiroKpiGrid } from "@/components/financeiro/FinanceiroHero";
+import { FinanceiroHero } from "@/components/financeiro/FinanceiroHero";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 
