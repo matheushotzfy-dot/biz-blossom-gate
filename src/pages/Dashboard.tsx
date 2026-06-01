@@ -283,7 +283,7 @@ export default function Dashboard() {
         <div className="space-y-1">
           <div className="flex items-center gap-2">
              <div className="h-2 w-2 rounded-full bg-success animate-pulse" />
-             <h1 className="text-xl md:text-2xl font-black tracking-tight text-foreground">{greeting}, {nickname}</h1>
+             <h1 className="text-xl md:text-2xl font-bold tracking-tight text-foreground">{greeting}, {nickname}</h1>
           </div>
           <p className="text-muted-foreground font-medium text-[11px] md:text-xs flex items-center gap-2">
             <Activity className="h-3.5 w-3.5 text-primary" />
@@ -298,7 +298,7 @@ export default function Dashboard() {
                 key={p.label}
                 onClick={() => { setSelectedPeriod(p); setIsCustom(false); }}
                 className={cn(
-                  "px-6 py-2.5 rounded-[1rem] text-[10px] font-black uppercase tracking-[0.15em] transition-all duration-300",
+                  "px-6 py-2.5 rounded-[1rem] text-[10px] font-bold uppercase tracking-[0.15em] transition-all duration-300",
                   !isCustom && selectedPeriod.label === p.label 
                     ? "bg-card text-primary shadow-lg shadow-black/5 ring-1 ring-border border-transparent" 
                     : "text-muted-foreground/60 hover:text-foreground hover:bg-muted/40"
@@ -312,7 +312,7 @@ export default function Dashboard() {
           <Popover open={datePickerOpen} onOpenChange={setDatePickerOpen}>
             <PopoverTrigger asChild>
               <button className={cn(
-                "h-[46px] px-6 rounded-[1.25rem] border-2 flex items-center gap-3 text-[10px] font-black uppercase tracking-[0.15em] transition-all duration-300",
+                "h-[46px] px-6 rounded-[1.25rem] border-2 flex items-center gap-3 text-[10px] font-bold uppercase tracking-[0.15em] transition-all duration-300",
                 isCustom 
                   ? "border-primary/30 bg-primary/5 text-primary shadow-lg shadow-primary/5" 
                   : "border-border/40 bg-card text-muted-foreground/60 hover:border-border hover:text-foreground hover:shadow-md"
@@ -353,7 +353,7 @@ export default function Dashboard() {
           <CardContent className="pt-2 pb-6 px-6 md:px-8">
             <div className="flex flex-col gap-5">
               <div className="flex items-baseline gap-3 flex-wrap">
-                <p className="text-4xl md:text-5xl font-black tracking-tight text-foreground leading-none">
+                <p className="text-4xl md:text-5xl font-bold tracking-tight text-foreground leading-none">
                   {privacy.hidden ? CENSORED : fmt(revenue)}
                 </p>
                 <span className="text-muted-foreground/30 font-bold text-base">BRL</span>
@@ -365,12 +365,12 @@ export default function Dashboard() {
                     <Wallet className="h-3 w-3 text-muted-foreground/60" />
                     <p className="text-[9px] font-bold uppercase tracking-wider text-muted-foreground/60">Saldo Disponível</p>
                   </div>
-                  <p className="text-lg font-black text-success tracking-tight leading-none">{privacy.hidden ? CENSORED : fmt(balance)}</p>
+                  <p className="text-lg font-bold text-success tracking-tight leading-none">{privacy.hidden ? CENSORED : fmt(balance)}</p>
                 </div>
                 <div className="hidden sm:block h-8 w-px bg-border/40" />
                 <div className="space-y-1">
                   <p className="text-[9px] font-bold uppercase tracking-wider text-muted-foreground/60">Conversão</p>
-                  <p className="text-lg font-black text-primary tracking-tight leading-none">{conversion.toFixed(1)}%</p>
+                  <p className="text-lg font-bold text-primary tracking-tight leading-none">{conversion.toFixed(1)}%</p>
                 </div>
               </div>
 
@@ -417,7 +417,7 @@ export default function Dashboard() {
         <Card className="lg:col-span-2 border-border/40 overflow-hidden shadow-lg shadow-black/5 rounded-3xl">
           <CardHeader className="flex flex-row items-center justify-between border-b border-border/40 px-6 py-5 md:px-8">
             <div>
-              <CardTitle className="text-lg font-black">Fluxo de Vendas</CardTitle>
+              <CardTitle className="text-lg font-bold">Fluxo de Vendas</CardTitle>
               <CardDescription className="text-[10px] font-bold uppercase tracking-wider opacity-50">Desempenho financeiro</CardDescription>
             </div>
             <div className="flex items-center gap-4 text-xs font-bold">
@@ -425,7 +425,7 @@ export default function Dashboard() {
                   <div className="h-2 w-2 rounded-full bg-primary" />
                   <span className="opacity-60">Aprovadas</span>
                </div>
-               <div className="text-primary font-black">{fmt(revenue)}</div>
+               <div className="text-primary font-bold">{fmt(revenue)}</div>
             </div>
           </CardHeader>
           <CardContent className="p-0">
@@ -447,10 +447,10 @@ export default function Dashboard() {
                       if (active && payload && payload.length) {
                         return (
                           <div className="bg-card/95 backdrop-blur-md border border-border/50 p-4 rounded-2xl shadow-2xl animate-in fade-in zoom-in duration-200">
-                            <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground mb-1">
+                            <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-1">
                               {payload[0].payload.fullLabel || payload[0].payload.name}
                             </p>
-                            <p className="text-xl font-black text-primary tracking-tight">
+                            <p className="text-xl font-bold text-primary tracking-tight">
                               {fmt(payload[0].value as number)}
                             </p>
                             <div className="mt-2 h-1 w-full bg-primary/10 rounded-full overflow-hidden">
@@ -487,11 +487,11 @@ export default function Dashboard() {
           <CardHeader className="border-b border-border/40 px-6 py-5">
             <div className="flex items-center justify-between">
               <div>
-                <CardTitle className="text-lg font-black">Conversão Geral</CardTitle>
+                <CardTitle className="text-lg font-bold">Conversão Geral</CardTitle>
                 <CardDescription className="text-[10px] font-bold uppercase tracking-wider opacity-50">Desempenho por método</CardDescription>
               </div>
               <div className="bg-primary/10 text-primary px-3 py-1.5 rounded-xl border border-primary/20">
-                <span className="text-xl font-black">{conversion.toFixed(1)}%</span>
+                <span className="text-xl font-bold">{conversion.toFixed(1)}%</span>
               </div>
             </div>
           </CardHeader>
@@ -505,11 +505,11 @@ export default function Dashboard() {
                       <Zap className="h-4.5 w-4.5" />
                     </div>
                     <div>
-                      <p className="text-xs font-black uppercase tracking-wider">PIX</p>
+                      <p className="text-xs font-bold uppercase tracking-wider">PIX</p>
                       <p className="text-[10px] font-bold text-muted-foreground/50">{pixApprovedCount} de {pixTotalCount} pagos</p>
                     </div>
                   </div>
-                  <span className="text-lg font-black text-[#32BCAD]">{pixConversion.toFixed(0)}%</span>
+                  <span className="text-lg font-bold text-[#32BCAD]">{pixConversion.toFixed(0)}%</span>
                 </div>
                 <div className="h-2 w-full bg-muted/30 rounded-full overflow-hidden border border-border/20">
                   <div className="h-full bg-gradient-to-r from-[#32BCAD]/40 to-[#32BCAD] rounded-full transition-all duration-1000" style={{ width: `${pixConversion}%` }} />
@@ -524,11 +524,11 @@ export default function Dashboard() {
                       <CreditCard className="h-4.5 w-4.5" />
                     </div>
                     <div>
-                      <p className="text-xs font-black uppercase tracking-wider">Cartão</p>
+                      <p className="text-xs font-bold uppercase tracking-wider">Cartão</p>
                       <p className="text-[10px] font-bold text-muted-foreground/50">{cardApprovedCount} de {cardTotalCount} pagos</p>
                     </div>
                   </div>
-                  <span className="text-lg font-black text-primary">{cardConversion.toFixed(0)}%</span>
+                  <span className="text-lg font-bold text-primary">{cardConversion.toFixed(0)}%</span>
                 </div>
                 <div className="h-2 w-full bg-muted/30 rounded-full overflow-hidden border border-border/20">
                   <div className="h-full bg-gradient-to-r from-primary/40 to-primary rounded-full transition-all duration-1000" style={{ width: `${cardConversion}%` }} />
@@ -543,11 +543,11 @@ export default function Dashboard() {
                       <Barcode className="h-4.5 w-4.5" />
                     </div>
                     <div>
-                      <p className="text-xs font-black uppercase tracking-wider">Boleto</p>
+                      <p className="text-xs font-bold uppercase tracking-wider">Boleto</p>
                       <p className="text-[10px] font-bold text-muted-foreground/50">{boletoApprovedCount} de {boletoTotalCount} pagos</p>
                     </div>
                   </div>
-                  <span className="text-lg font-black text-orange-500">{boletoConversion.toFixed(0)}%</span>
+                  <span className="text-lg font-bold text-orange-500">{boletoConversion.toFixed(0)}%</span>
                 </div>
                 <div className="h-2 w-full bg-muted/30 rounded-full overflow-hidden border border-border/20">
                   <div className="h-full bg-gradient-to-r from-orange-500/40 to-orange-500 rounded-full transition-all duration-1000" style={{ width: `${boletoConversion}%` }} />
@@ -562,10 +562,10 @@ export default function Dashboard() {
       <Card className="border-border/40 overflow-hidden shadow-lg shadow-black/5 rounded-3xl">
         <CardHeader className="flex flex-row items-center justify-between border-b border-border/40 px-6 py-6 md:px-8">
           <div>
-            <CardTitle className="text-lg font-black">Últimas Transações</CardTitle>
+            <CardTitle className="text-lg font-bold">Últimas Transações</CardTitle>
             <CardDescription className="text-[10px] font-bold uppercase tracking-wider opacity-50">Acompanhamento em tempo real</CardDescription>
           </div>
-          <Link to="/vendas" className="text-xs font-black text-primary hover:underline underline-offset-4 flex items-center gap-1">
+          <Link to="/vendas" className="text-xs font-bold text-primary hover:underline underline-offset-4 flex items-center gap-1">
              Ver Histórico Completo
              <ChevronRight className="h-3 w-3" />
           </Link>
@@ -579,13 +579,13 @@ export default function Dashboard() {
                     <CreditCard className={cn("h-5 w-5", statusColor(item.status))} />
                   </div>
                   <div>
-                    <p className="text-sm font-black">{item.label === "pix" ? "Pagamento via PIX" : item.label === "credit_card" ? "Pagamento via Cartão" : "Transação"}</p>
+                    <p className="text-sm font-bold">{item.label === "pix" ? "Pagamento via PIX" : item.label === "credit_card" ? "Pagamento via Cartão" : "Transação"}</p>
                     <p className="text-[10px] font-bold text-muted-foreground/50 uppercase tracking-widest">{timeAgo(item.createdAt)}</p>
                   </div>
                 </div>
                 <div className="text-right">
-                  <p className="text-sm font-black">{fmt(item.amount)}</p>
-                  <p className={cn("text-[10px] font-black uppercase tracking-widest", statusColor(item.status))}>{statusLabel(item.status)}</p>
+                  <p className="text-sm font-bold">{fmt(item.amount)}</p>
+                  <p className={cn("text-[10px] font-bold uppercase tracking-widest", statusColor(item.status))}>{statusLabel(item.status)}</p>
                 </div>
               </div>
             ))}

@@ -118,16 +118,16 @@ function RevenueCard({ collapsed, revenue, milestone, onOpenRewards }: RevenueCa
           <Zap className="h-5 w-5" strokeWidth={2.5} fill="currentColor" />
         </div>
         <div className="min-w-0 flex-1">
-          <p className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/40 leading-none">
+          <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground/40 leading-none">
             Volume Total
           </p>
-          <p className="mt-2 font-display text-2xl font-black leading-none tracking-[-0.03em] text-foreground tabular-nums">
+          <p className="mt-2 font-display text-2xl font-bold leading-none tracking-[-0.03em] text-foreground tabular-nums">
             {formatRevenue(revenue)}
           </p>
         </div>
       </div>
 
-      <div className="mt-6 flex items-center justify-between text-[9px] font-black tracking-[0.2em] uppercase text-muted-foreground/30">
+      <div className="mt-6 flex items-center justify-between text-[9px] font-bold tracking-[0.2em] uppercase text-muted-foreground/30">
         <span>{milestone.current.label}</span>
         <span>Meta: {milestone.next.label}</span>
       </div>
@@ -141,10 +141,10 @@ function RevenueCard({ collapsed, revenue, milestone, onOpenRewards }: RevenueCa
 
       <div className="mt-4 flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <span className="text-[14px] font-black text-primary tabular-nums tracking-tight">{pct}%</span>
-          <span className="text-[9px] font-black uppercase tracking-wider text-muted-foreground/30">Concluído</span>
+          <span className="text-[14px] font-bold text-primary tabular-nums tracking-tight">{pct}%</span>
+          <span className="text-[9px] font-bold uppercase tracking-wider text-muted-foreground/30">Concluído</span>
         </div>
-        <div className="inline-flex items-center gap-1 text-[10px] font-black uppercase tracking-widest text-primary/60 group-hover/rev:text-primary transition-colors">
+        <div className="inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-widest text-primary/60 group-hover/rev:text-primary transition-colors">
           Rewards
           <ChevronRight className="h-3 w-3 transition-transform group-hover/rev:translate-x-0.5" strokeWidth={3} />
         </div>
@@ -203,7 +203,7 @@ function SidebarSectionNav({ section, pathname, isFirst }: SidebarSectionNavProp
                       {item.title}
                     </span>
                     {item.badge && (
-                      <span className="ml-auto inline-flex items-center gap-1 text-[10px] font-black uppercase tracking-[0.15em] text-sidebar-primary group-data-[collapsible=icon]:hidden">
+                      <span className="ml-auto inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-[0.15em] text-sidebar-primary group-data-[collapsible=icon]:hidden">
                         <span className="relative flex h-1.5 w-1.5">
                           <span className="absolute inset-0 animate-ping rounded-full bg-sidebar-primary opacity-70" />
                           <span className="relative h-1.5 w-1.5 rounded-full bg-sidebar-primary" />
@@ -346,7 +346,7 @@ export function AppSidebar() {
           </div>
           <div className="min-w-0 group-data-[collapsible=icon]:hidden">
             <div className="flex items-center gap-1.5">
-              <h1 className="text-[20px] leading-none font-display font-black tracking-tight text-sidebar-accent-foreground">
+              <h1 className="text-[20px] leading-none font-display font-bold tracking-tight text-sidebar-accent-foreground">
                 HOTZFY
               </h1>
               <Crown className="h-3 w-3 text-sidebar-primary" strokeWidth={2.5} fill="hsl(var(--sidebar-primary))" />
@@ -406,7 +406,7 @@ export function AppSidebar() {
           onClick={() => navigate("/perfil")}
           className="flex w-full items-center gap-3 rounded-xl border border-transparent px-2.5 py-2.5 text-left transition-colors hover:border-sidebar-border/60 hover:bg-sidebar-accent/40 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0"
         >
-          <div className="relative flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-sidebar-primary/18 text-[13px] font-black text-sidebar-primary ring-1 ring-sidebar-primary/30">
+          <div className="relative flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-sidebar-primary/18 text-[13px] font-bold text-sidebar-primary ring-1 ring-sidebar-primary/30">
             {userInitial}
             <span className="absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 rounded-full border-2 border-sidebar bg-success" />
           </div>
