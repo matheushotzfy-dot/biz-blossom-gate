@@ -386,25 +386,7 @@ export default function Perfil() {
                   <User className="h-3 w-3" /> @{profile.nickname}
                 </span>
               )}
-              {milestone.tier >= 3 && (
-                <span className="inline-flex items-center gap-1.5 px-2 py-1 rounded-md bg-primary/10 border border-primary/20 text-[10px] font-bold text-primary uppercase tracking-[0.1em]">
-                  <Crown className="h-3 w-3" /> {tierLabel}
-                </span>
-              )}
             </div>
-          </div>
-
-          {/* Revenue summary */}
-          <div className="md:text-right md:pl-6 md:border-l border-border/40 md:min-w-[220px]">
-            <p className="text-[10px] uppercase tracking-[0.16em] font-bold text-muted-foreground mb-1.5">
-              Receita líquida total
-            </p>
-            <p className="text-[28px] md:text-[32px] font-display font-black text-foreground tabular-nums tracking-[-0.025em] leading-none">
-              {fmtCurrency(allTimeRevenue)}
-            </p>
-            <p className="text-[11px] text-muted-foreground/80 mt-2 font-medium">
-              {totalSales} vendas · Tier <span className="text-foreground font-bold">{tierLabel}</span>
-            </p>
           </div>
         </div>
       </div>
