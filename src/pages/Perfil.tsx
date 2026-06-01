@@ -726,6 +726,7 @@ export default function Perfil() {
           </form>
         </div>
       </Panel>
+      </div>
     </div>
   );
 }
