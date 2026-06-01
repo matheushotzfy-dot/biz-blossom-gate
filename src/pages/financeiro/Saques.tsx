@@ -2,7 +2,7 @@ import { useEffect, useState, useMemo } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useWithdrawals, useInvalidateAll } from "@/hooks/useQueryData";
-import { Plus, Wallet, Clock, History, Search, ArrowDownToLine, Info, CheckCircle2, X } from "lucide-react";
+import { Plus, Wallet, Clock, History, Search, ArrowDownToLine, Info, CheckCircle2, X, Shield } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { toast } from "sonner";
