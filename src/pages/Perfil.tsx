@@ -141,8 +141,25 @@ export default function Perfil() {
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
+  const addressRef = useRef<HTMLDivElement>(null);
   const [formInit, setFormInit] = useState(false);
   const [addressInit, setAddressInit] = useState(false);
+  const [addressHighlight, setAddressHighlight] = useState(false);
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  useEffect(() => {
+    if (searchParams.get("focus") === "address") {
+      setTimeout(() => {
+        addressRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
+        setAddressHighlight(true);
+        setTimeout(() => setAddressHighlight(false), 4000);
+        const next = new URLSearchParams(searchParams);
+        next.delete("focus");
+        setSearchParams(next, { replace: true });
+      }, 250);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   useEffect(() => {
     if (profile && !formInit) {
