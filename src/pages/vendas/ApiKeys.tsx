@@ -1,19 +1,20 @@
 import { useState, useEffect, useMemo } from "react";
 import {
-  KeyRound, Plus, Copy, Check, Trash2, ShieldOff, Eye, EyeOff,
-  AlertTriangle, Shield, Search, MoreHorizontal, Download, Globe, Lock, Code2, Power, PowerOff
+  KeyRound, Plus, Copy, Check, Shield, Search, Globe, Lock, Code2, Power, PowerOff, BookOpen,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import { Link } from "react-router-dom";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription,
 } from "@/components/ui/dialog";
-import { StatCard } from "@/components/StatCard";
+import { format } from "date-fns";
+import { ptBR } from "date-fns/locale";
 
 interface ApiKey {
   id: string;
