@@ -1,7 +1,7 @@
 /**
- * Identidade & KYC — Ultra-Premium Verification Page
+ * Identidade & KYC — alinhada ao padrão Saques
  * @module Identidade
- * @version 5.0.0 — Immersive Redesign
+ * @version 6.0.0 — Clean, no orbs, no blur, no gradients
  */
 
 import { useEffect, useState, useRef } from "react";
@@ -11,618 +11,459 @@ import { useAuth } from "@/hooks/useAuth";
 import { useProfile } from "@/hooks/useProfile";
 import { usePixKeys, useBankAccounts } from "@/hooks/useQueryData";
 import {
- UserCircle, Save, Shield, FileCheck, Key, CheckCircle2,
- Upload, Camera, Image, Loader2, Lock, Info, Fingerprint,
- Wallet, BadgeCheck, Building2, CreditCard, Edit3, Zap,
- Eye, Star, TrendingUp, ArrowUp, Globe, Award, Crown,
- AlertTriangle, ChevronDown, Sparkles,
+  UserCircle, Save, Shield, FileCheck, CheckCircle2,
+  Upload, Camera, Image as ImageIcon, Loader2, Lock, Info, Fingerprint,
+  Wallet, BadgeCheck, Building2, CreditCard, Edit3,
+  AlertTriangle,
 } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
-import type { Tables } from "@/integrations/supabase/types";
 import { cn } from "@/lib/utils";
-import { motion } from "framer-motion";
 
-const ease = [0.16, 1, 0.3, 1] as const;
-
-/* ─── Status Map ─── */
-const STATUS_MAP: Record<string, { label: string; cls: string; ring: string; icon: any }> = {
- approved: { label: "Conta Verificada", cls: "text-success bg-success/8", ring: "ring-success/15", icon: BadgeCheck },
- pending_review: { label: "Em Análise", cls: "text-warning bg-warning/8", ring: "ring-warning/15", icon: Shield },
- rejected: { label: "Reprovada", cls: "text-destructive bg-destructive/8", ring: "ring-destructive/15", icon: Shield },
- blocked: { label: "Bloqueada", cls: "text-destructive bg-destructive/8", ring: "ring-destructive/15", icon: Shield },
+const STATUS_MAP: Record<string, { label: string; color: string; bg: string; icon: any }> = {
+  approved:       { label: "Conta Verificada", color: "text-emerald-500", bg: "bg-emerald-500/10", icon: BadgeCheck },
+  pending_review: { label: "Em Análise",       color: "text-amber-500",   bg: "bg-amber-500/10",   icon: Shield },
+  rejected:       { label: "Reprovada",        color: "text-red-500",     bg: "bg-red-500/10",     icon: Shield },
+  blocked:        { label: "Bloqueada",        color: "text-red-500",     bg: "bg-red-500/10",     icon: Shield },
 };
 
-/* ─── CPF/CNPJ formatting ─── */
-function formatCPF(value: string): string {
- const d = value.replace(/\D/g, "").slice(0, 11);
- if (d.length <= 3) return d;
- if (d.length <= 6) return `${d.slice(0, 3)}.${d.slice(3)}`;
- if (d.length <= 9) return `${d.slice(0, 3)}.${d.slice(3, 6)}.${d.slice(6)}`;
- return `${d.slice(0, 3)}.${d.slice(3, 6)}.${d.slice(6, 9)}-${d.slice(9)}`;
+function formatCPF(value: string) {
+  const d = value.replace(/\D/g, "").slice(0, 11);
+  if (d.length <= 3) return d;
+  if (d.length <= 6) return `${d.slice(0,3)}.${d.slice(3)}`;
+  if (d.length <= 9) return `${d.slice(0,3)}.${d.slice(3,6)}.${d.slice(6)}`;
+  return `${d.slice(0,3)}.${d.slice(3,6)}.${d.slice(6,9)}-${d.slice(9)}`;
 }
-function formatCNPJ(value: string): string {
- const d = value.replace(/\D/g, "").slice(0, 14);
- if (d.length <= 2) return d;
- if (d.length <= 5) return `${d.slice(0, 2)}.${d.slice(2)}`;
- if (d.length <= 8) return `${d.slice(0, 2)}.${d.slice(2, 5)}.${d.slice(5)}`;
- if (d.length <= 12) return `${d.slice(0, 2)}.${d.slice(2, 5)}.${d.slice(5, 8)}/${d.slice(8)}`;
- return `${d.slice(0, 2)}.${d.slice(2, 5)}.${d.slice(5, 8)}/${d.slice(8, 12)}-${d.slice(12)}`;
+function formatCNPJ(value: string) {
+  const d = value.replace(/\D/g, "").slice(0, 14);
+  if (d.length <= 2) return d;
+  if (d.length <= 5) return `${d.slice(0,2)}.${d.slice(2)}`;
+  if (d.length <= 8) return `${d.slice(0,2)}.${d.slice(2,5)}.${d.slice(5)}`;
+  if (d.length <= 12) return `${d.slice(0,2)}.${d.slice(2,5)}.${d.slice(5,8)}/${d.slice(8)}`;
+  return `${d.slice(0,2)}.${d.slice(2,5)}.${d.slice(5,8)}/${d.slice(8,12)}-${d.slice(12)}`;
 }
-function formatDocument(value: string, type: string): string {
- return type === "cnpj" ? formatCNPJ(value) : formatCPF(value);
-}
+const formatDoc = (v: string, t: string) => t === "cnpj" ? formatCNPJ(v) : formatCPF(v);
 
-const pixKeyTypeLabels: Record<string, string> = {
- cpf: "CPF", cnpj: "CNPJ", email: "E-mail", telefone: "Telefone", aleatoria: "Aleatória",
+const pixKeyLabels: Record<string, string> = {
+  cpf: "CPF", cnpj: "CNPJ", email: "E-mail", telefone: "Telefone", aleatoria: "Aleatória",
 };
-
-/* ─── Completion Ring ─── */
-function CompletionRing({ pct }: { pct: number }) {
- const circ = 2 * Math.PI * 20;
- const offset = circ - (pct / 100) * circ;
- const color = pct === 100 ? "hsl(var(--success))" : pct >= 60 ? "hsl(var(--primary))" : "hsl(var(--warning))";
- return (
- <div className="relative h-16 w-16">
- <svg className="h-16 w-16 -rotate-90" viewBox="0 0 48 48">
- <circle cx="24" cy="24" r="20" fill="none" stroke="hsl(var(--border) / 0.1)" strokeWidth="3" />
- <motion.circle
- cx="24" cy="24" r="20" fill="none" stroke={color} strokeWidth="3"
- strokeLinecap="round" strokeDasharray={circ} strokeDashoffset={circ}
- animate={{ strokeDashoffset: offset }}
- transition={{ duration: 1.5, delay: 0.3, ease }}
- style={{ filter: `drop-shadow(0 0 6px ${color}40)` }}
- />
- </svg>
- <div className="absolute inset-0 flex items-center justify-center">
- <span className="text-[13px] font-display font-black tabular-nums" style={{ color }}>{pct}%</span>
- </div>
- </div>
- );
-}
 
 export default function Identidade() {
- const { user } = useAuth();
- const { profile } = useProfile();
- const { data: pixKeys = [] } = usePixKeys();
- const { data: bankAccounts = [] } = useBankAccounts();
- const [nickname, setNickname] = useState("");
- const [saving, setSaving] = useState(false);
- const [kycDocs, setKycDocs] = useState<Record<string, string | null>>({ front: null, back: null, selfie: null, cnpj_card: null });
- const [uploading, setUploading] = useState<string | null>(null);
- const [nicknameInit, setNicknameInit] = useState(false);
- const [searchParams] = useSearchParams();
- const kycSectionRef = useRef<HTMLDivElement>(null);
- const hasScrolledToKyc = useRef(false);
+  const { user } = useAuth();
+  const { profile } = useProfile();
+  const { data: pixKeys = [] } = usePixKeys();
+  const { data: bankAccounts = [] } = useBankAccounts();
+  const [nickname, setNickname] = useState("");
+  const [saving, setSaving] = useState(false);
+  const [kycDocs, setKycDocs] = useState<Record<string, string | null>>({ front: null, back: null, selfie: null, cnpj_card: null });
+  const [uploading, setUploading] = useState<string | null>(null);
+  const [nicknameInit, setNicknameInit] = useState(false);
+  const [searchParams] = useSearchParams();
+  const kycRef = useRef<HTMLDivElement>(null);
+  const scrolled = useRef(false);
 
- useEffect(() => {
- const scrollTo = searchParams.get("scrollTo");
- if (scrollTo === "kyc" && kycSectionRef.current && !hasScrolledToKyc.current) {
- hasScrolledToKyc.current = true;
- setTimeout(() => {
- kycSectionRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
- }, 600);
- }
- }, [searchParams]);
+  useEffect(() => {
+    if (searchParams.get("scrollTo") === "kyc" && kycRef.current && !scrolled.current) {
+      scrolled.current = true;
+      setTimeout(() => kycRef.current?.scrollIntoView({ behavior: "smooth", block: "center" }), 400);
+    }
+  }, [searchParams]);
 
- useEffect(() => {
- if (profile && !nicknameInit) {
- setNickname(profile.nickname || "");
- setNicknameInit(true);
- }
- }, [profile, nicknameInit]);
+  useEffect(() => {
+    if (profile && !nicknameInit) {
+      setNickname(profile.nickname || "");
+      setNicknameInit(true);
+    }
+  }, [profile, nicknameInit]);
 
- useEffect(() => { loadKycDocs(); }, [user, profile?.document_type]);
+  useEffect(() => { loadKycDocs(); }, [user, profile?.document_type]);
 
- const loadKycDocs = async () => {
- if (!user) return;
- const isCnpj = profile?.document_type === "cnpj";
- const types = isCnpj ? ["front", "back", "selfie", "cnpj_card"] : ["front", "back", "selfie"];
- const results = await Promise.all(
- types.map(type => supabase.storage.from("kyc-documents").list(`${user.id}`, { search: type }))
- );
- const docs: Record<string, string | null> = { front: null, back: null, selfie: null, cnpj_card: null };
- types.forEach((type, i) => {
- const data = results[i].data;
- if (data && data.length > 0) {
- const { data: urlData } = supabase.storage.from("kyc-documents").getPublicUrl(`${user.id}/${data[0].name}`);
- docs[type] = urlData?.publicUrl || null;
- }
- });
- setKycDocs(docs);
- };
+  const loadKycDocs = async () => {
+    if (!user) return;
+    const isCnpj = profile?.document_type === "cnpj";
+    const types = isCnpj ? ["front", "back", "selfie", "cnpj_card"] : ["front", "back", "selfie"];
+    const results = await Promise.all(
+      types.map(t => supabase.storage.from("kyc-documents").list(`${user.id}`, { search: t }))
+    );
+    const docs: Record<string, string | null> = { front: null, back: null, selfie: null, cnpj_card: null };
+    types.forEach((t, i) => {
+      const data = results[i].data;
+      if (data && data.length > 0) {
+        const { data: url } = supabase.storage.from("kyc-documents").getPublicUrl(`${user.id}/${data[0].name}`);
+        docs[t] = url?.publicUrl || null;
+      }
+    });
+    setKycDocs(docs);
+  };
 
- const handleUpload = async (type: string, file: File) => {
- if (!user) return;
- const ALLOWED_KYC_TYPES = ["image/jpeg", "image/png", "image/webp", "image/heic"];
- if (!ALLOWED_KYC_TYPES.includes(file.type)) { toast.error("Formato inválido. Use JPEG, PNG, WebP ou HEIC"); return; }
- if (file.size > 10 * 1024 * 1024) { toast.error("Máximo 10MB"); return; }
- setUploading(type);
- const ext = file.name.split(".").pop();
- const path = `${user.id}/${type}_${crypto.randomUUID().slice(0, 8)}.${ext}`;
- const { error } = await supabase.storage.from("kyc-documents").upload(path, file, { upsert: true });
- if (error) toast.error("Erro no upload"); else { toast.success("Documento enviado!"); await loadKycDocs(); }
- setUploading(null);
- };
+  const handleUpload = async (type: string, file: File) => {
+    if (!user) return;
+    if (!["image/jpeg", "image/png", "image/webp", "image/heic"].includes(file.type)) { toast.error("Formato inválido"); return; }
+    if (file.size > 10 * 1024 * 1024) { toast.error("Máximo 10MB"); return; }
+    setUploading(type);
+    const ext = file.name.split(".").pop();
+    const path = `${user.id}/${type}_${crypto.randomUUID().slice(0, 8)}.${ext}`;
+    const { error } = await supabase.storage.from("kyc-documents").upload(path, file, { upsert: true });
+    if (error) toast.error("Erro no upload"); else { toast.success("Documento enviado"); await loadKycDocs(); }
+    setUploading(null);
+  };
 
- const handleSaveNickname = async () => {
- if (!user) return;
- setSaving(true);
- const { error } = await supabase.from("profiles").update({ nickname }).eq("user_id", user.id);
- if (error) toast.error("Erro ao salvar");
- else toast.success("Apelido atualizado!");
- setSaving(false);
- };
+  const handleSaveNickname = async () => {
+    if (!user) return;
+    setSaving(true);
+    const { error } = await supabase.from("profiles").update({ nickname }).eq("user_id", user.id);
+    if (error) toast.error("Erro ao salvar"); else toast.success("Apelido atualizado");
+    setSaving(false);
+  };
 
- const isCnpj = profile?.document_type === "cnpj";
- const status = STATUS_MAP[profile?.account_status || "pending_review"] || STATUS_MAP.pending_review;
- const StatusIcon = status.icon;
- const completionSteps = [
- { label: "Dados pessoais", done: !!(profile?.full_name && profile?.email), icon: UserCircle },
- { label: "Documento", done: !!profile?.document_number, icon: Fingerprint },
- { label: "Telefone", done: !!profile?.phone, icon: Zap },
- { label: "Chave PIX", done: pixKeys.length > 0, icon: Wallet },
- { label: "Doc. frente", done: !!kycDocs.front, icon: Image },
- { label: "Doc. verso", done: !!kycDocs.back, icon: Image },
- { label: "Selfie c/ doc", done: !!kycDocs.selfie, icon: Camera },
- ...(isCnpj ? [{ label: "Cartão CNPJ", done: !!kycDocs.cnpj_card, icon: Building2 }] : []),
- ];
- const completionPct = Math.round((completionSteps.filter((s) => s.done).length / completionSteps.length) * 100);
- const isApproved = profile?.account_status === "approved";
- const formattedDoc = profile?.document_number
- ? formatDocument(profile.document_number, profile.document_type || "cpf")
- : "Não informado";
+  const isCnpj = profile?.document_type === "cnpj";
+  const status = STATUS_MAP[profile?.account_status || "pending_review"] || STATUS_MAP.pending_review;
+  const StatusIcon = status.icon;
+  const completionSteps = [
+    { label: "Dados pessoais", done: !!(profile?.full_name && profile?.email) },
+    { label: "Documento",      done: !!profile?.document_number },
+    { label: "Telefone",       done: !!profile?.phone },
+    { label: "Chave PIX",      done: pixKeys.length > 0 },
+    { label: "Doc. frente",    done: !!kycDocs.front },
+    { label: "Doc. verso",     done: !!kycDocs.back },
+    { label: "Selfie c/ doc",  done: !!kycDocs.selfie },
+    ...(isCnpj ? [{ label: "Cartão CNPJ", done: !!kycDocs.cnpj_card }] : []),
+  ];
+  const doneCount = completionSteps.filter(s => s.done).length;
+  const pct = Math.round((doneCount / completionSteps.length) * 100);
+  const isApproved = profile?.account_status === "approved";
+  const formattedDoc = profile?.document_number
+    ? formatDoc(profile.document_number, profile.document_type || "cpf")
+    : "Não informado";
 
- return (
- <div className="mx-auto w-full max-w-[1440px] pb-20 px-1 relative space-y-5">
- {/* Ambient */}
- <div className="fixed inset-0 pointer-events-none overflow-hidden -z-10">
- <motion.div animate={{ scale: [1, 1.15, 1], opacity: [0.08, 0.15, 0.08] }} transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }} className="absolute -top-48 -right-48 w-[600px] h-[600px] bg-primary/20 rounded-full blur-[200px]" />
- <motion.div animate={{ scale: [1, 1.1, 1], opacity: [0.05, 0.1, 0.05] }} transition={{ duration: 12, repeat: Infinity, ease: "easeInOut" }} className="absolute -bottom-32 -left-32 w-[500px] h-[500px] bg-info/15 rounded-full blur-[180px]" />
- </div>
+  const KPIS = [
+    { icon: Fingerprint, label: "Verificação",  value: `${pct}%`,             sub: `${doneCount}/${completionSteps.length} etapas` },
+    { icon: Wallet,      label: "Chaves PIX",   value: `${pixKeys.length}/3`, sub: pixKeys.length ? "Cadastradas" : "Nenhuma" },
+    { icon: Building2,   label: "Contas Bancárias", value: bankAccounts.length, sub: bankAccounts.length ? "Vinculadas" : "Nenhuma" },
+    { icon: Shield,      label: "Status",       value: status.label,          sub: isApproved ? "Saques liberados" : "Aguardando aprovação" },
+  ];
 
- {/* ═══ HERO ═══ */}
- <motion.section
- initial={{ opacity: 0 }}
- animate={{ opacity: 1 }}
- transition={{ duration: 0.6 }}
- className="relative rounded-2xl bg-card/95 ring-1 ring-border/20 overflow-hidden"
- >
- <div className="h-1.5 bg-gradient-to-r from-primary via-info/80 to-warning/60" />
- <div className="absolute inset-0 bg-gradient-to-br from-primary/[0.04] via-transparent to-info/[0.03] pointer-events-none" />
- <div className="absolute inset-0 opacity-[0.012]" style={{ backgroundImage: "radial-gradient(hsl(var(--foreground)) 1px, transparent 1px)", backgroundSize: "20px 20px" }} />
+  return (
+    <div className="space-y-6 animate-in fade-in duration-500">
+      {/* Header */}
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+        <div className="space-y-1">
+          <h1 className="text-2xl font-black text-foreground tracking-tight uppercase">Identidade & KYC</h1>
+          <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.2em] flex items-center gap-2">
+            <Fingerprint className="h-3.5 w-3.5 text-primary" />
+            Verifique sua conta para liberar saques
+          </p>
+        </div>
+        <div className={cn(
+          "inline-flex items-center gap-2 px-4 h-11 rounded-xl border border-current/15",
+          status.bg, status.color
+        )}>
+          <StatusIcon className="h-4 w-4" strokeWidth={2.5} />
+          <span className="text-[11px] font-black uppercase tracking-widest">{status.label}</span>
+        </div>
+      </div>
 
- <div className="relative z-10 p-6 md:p-8">
- <div className="flex items-center justify-between mb-6">
- <div className="flex items-center gap-2.5">
- <div className="h-8 w-8 rounded-xl bg-primary/8 ring-1 ring-primary/15 flex items-center justify-center">
- <Fingerprint className="h-3.5 w-3.5 text-primary" />
- </div>
- <span className="text-[10px] font-display font-black uppercase tracking-[0.2em] text-muted-foreground/40">Identidade & KYC</span>
- </div>
- <div className="flex items-center gap-1.5">
- <div className="relative">
- <div className="h-1.5 w-1.5 rounded-full bg-success animate-pulse" />
- <div className="absolute inset-0 h-1.5 w-1.5 rounded-full bg-success/40 animate-ping" />
- </div>
- <span className="text-[9px] font-display font-bold text-success/70 uppercase tracking-[0.15em]">Seguro</span>
- </div>
- </div>
+      {/* KPIs */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        {KPIS.map((k) => {
+          const Icon = k.icon;
+          return (
+            <div key={k.label} className="bg-card p-8 rounded-[24px] border border-border/60 shadow-sm relative overflow-hidden group">
+              <div className="relative z-10">
+                <div className="flex items-center gap-2 text-muted-foreground/60 mb-3">
+                  <Icon size={16} />
+                  <span className="text-[10px] font-black uppercase tracking-[0.15em]">{k.label}</span>
+                </div>
+                <p className="text-3xl font-black text-foreground tabular-nums tracking-tighter">{k.value}</p>
+                <p className="text-[10px] font-bold text-muted-foreground/70 uppercase mt-2 truncate tracking-widest">{k.sub}</p>
+              </div>
+              <div className="absolute right-[-20px] bottom-[-20px] opacity-[0.03] rotate-[-15deg] group-hover:scale-110 transition-transform duration-500">
+                <Icon size={160} />
+              </div>
+            </div>
+          );
+        })}
+      </div>
 
- <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15, ease }} className="flex flex-col md:flex-row md:items-center gap-6">
- <CompletionRing pct={completionPct} />
+      {/* Progress bar + steps */}
+      <div className="bg-card rounded-[24px] border border-border/60 shadow-sm overflow-hidden">
+        <div className="p-6 border-b border-border/40 flex items-center justify-between gap-3">
+          <div className="flex items-center gap-3">
+            <div className="h-10 w-10 bg-primary/10 border border-primary/10 rounded-xl flex items-center justify-center text-primary">
+              <CheckCircle2 size={20} strokeWidth={2.5} />
+            </div>
+            <div>
+              <h2 className="font-black text-foreground tracking-tight leading-none uppercase">Progresso</h2>
+              <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mt-1">{doneCount}/{completionSteps.length} etapas concluídas</p>
+            </div>
+          </div>
+          <span className="text-3xl font-black text-foreground tabular-nums tracking-tighter">{pct}%</span>
+        </div>
+        <div className="p-6">
+          <div className="h-2 rounded-full bg-muted/40 border border-border/40 overflow-hidden">
+            <div className="h-full rounded-full bg-primary transition-[width] duration-700"
+              style={{ width: `${Math.max(pct, 2)}%` }} />
+          </div>
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mt-5">
+            {completionSteps.map(step => (
+              <div key={step.label} className={cn(
+                "flex items-center gap-2 px-3 py-2.5 rounded-xl border",
+                step.done ? "bg-emerald-500/5 border-emerald-500/20" : "bg-muted/20 border-border/40"
+              )}>
+                {step.done
+                  ? <CheckCircle2 className="h-3.5 w-3.5 text-emerald-500 shrink-0" />
+                  : <div className="h-3.5 w-3.5 rounded-full border border-border/60 shrink-0" />}
+                <span className={cn("text-[10px] font-black uppercase tracking-widest truncate",
+                  step.done ? "text-emerald-500" : "text-muted-foreground/60")}>{step.label}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
 
- <div className="flex-1">
- <div className="flex items-center gap-3 mb-2 flex-wrap">
- <h1 className="text-xl md:text-2xl font-display font-black tracking-[-0.04em] text-foreground">Verificação de Conta</h1>
- <div className={cn("inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[9px] font-display font-bold ring-1", status.cls, status.ring)}>
- <StatusIcon className="h-3 w-3" />
- {status.label}
- </div>
- </div>
- <p className="text-[11px] text-muted-foreground/40 font-medium">Complete todos os passos para liberar saques e funcionalidades premium</p>
- </div>
+      {/* Dados Pessoais + PIX/Bancos */}
+      <div className="grid grid-cols-1 lg:grid-cols-[1.2fr_1fr] gap-6">
+        <div className="bg-card rounded-[24px] border border-border/60 shadow-sm overflow-hidden">
+          <div className="p-6 border-b border-border/40 flex items-center gap-3">
+            <div className="h-10 w-10 bg-primary/10 border border-primary/10 rounded-xl flex items-center justify-center text-primary">
+              <UserCircle size={20} strokeWidth={2.5} />
+            </div>
+            <div>
+              <h2 className="font-black text-foreground tracking-tight leading-none uppercase">Dados Pessoais</h2>
+              <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mt-1">Imutáveis após cadastro</p>
+            </div>
+          </div>
+          <div className="p-6 space-y-4">
+            <div className="flex items-center gap-2 p-3 rounded-xl bg-muted/20 border border-border/40">
+              <Lock className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
+              <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+                Campos travados por segurança KYC · Apenas o apelido é editável
+              </p>
+            </div>
+            <LockedField label="Nome completo" value={profile?.full_name || "—"} />
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <LockedField label="E-mail" value={profile?.email || "—"} />
+              <LockedField label="Telefone" value={profile?.phone || "—"} />
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <LockedField label={isCnpj ? "CNPJ" : "CPF"} value={formattedDoc} mono />
+              <LockedField label="Tipo Documento" value={(profile?.document_type || "cpf").toUpperCase()} />
+            </div>
 
- <div className="hidden md:flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-muted/5 ring-1 ring-border/10 shrink-0">
- <CheckCircle2 className="h-3.5 w-3.5 text-primary" />
- <span className="text-[11px] font-display font-bold text-foreground/60 tabular-nums">
- {completionSteps.filter(s => s.done).length}/{completionSteps.length}
- </span>
- <span className="text-[10px] text-muted-foreground/30">etapas</span>
- </div>
- </motion.div>
+            <div className="pt-4 border-t border-border/40">
+              <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground flex items-center gap-1.5 mb-2">
+                <Edit3 className="h-3 w-3" /> Apelido (editável)
+              </label>
+              <div className="flex gap-2">
+                <Input value={nickname} onChange={(e) => setNickname(e.target.value)}
+                  className="h-11 rounded-xl flex-1 bg-muted/20 border-border/60 font-bold"
+                  placeholder="Como quer ser chamado?" />
+                <button onClick={handleSaveNickname} disabled={saving}
+                  className="h-11 px-5 rounded-xl bg-primary text-primary-foreground font-black text-xs uppercase tracking-widest flex items-center gap-2 hover:opacity-90 disabled:opacity-50">
+                  {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" strokeWidth={3} />}
+                  Salvar
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
 
- {isApproved && (
- <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3, ease }} className="mt-5 rounded-xl bg-success/5 ring-1 ring-success/15 p-4 flex items-center gap-3">
- <div className="h-10 w-10 rounded-xl bg-success/10 ring-1 ring-success/20 flex items-center justify-center shrink-0">
- <BadgeCheck className="h-5 w-5 text-success" />
- </div>
- <div>
- <p className="text-[12px] font-display font-bold text-success">Conta Verificada com Sucesso</p>
- <p className="text-[10px] text-success/60">Todas as funcionalidades estão liberadas. Saques habilitados.</p>
- </div>
- </motion.div>
- )}
- </div>
- </motion.section>
+        <div className="space-y-6">
+          {/* PIX */}
+          <div className="bg-card rounded-[24px] border border-border/60 shadow-sm overflow-hidden">
+            <div className="p-6 border-b border-border/40 flex items-center justify-between gap-3">
+              <div className="flex items-center gap-3">
+                <div className="h-10 w-10 bg-primary/10 border border-primary/10 rounded-xl flex items-center justify-center text-primary">
+                  <Wallet size={20} strokeWidth={2.5} />
+                </div>
+                <div>
+                  <h2 className="font-black text-foreground tracking-tight leading-none uppercase">Chaves PIX</h2>
+                  <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mt-1">Cadastre em Saques</p>
+                </div>
+              </div>
+              <span className="text-[10px] font-black uppercase tracking-widest px-2.5 py-1 rounded-md bg-muted/30 border border-border/60 tabular-nums">
+                {pixKeys.length}/3
+              </span>
+            </div>
+            <div className="p-4">
+              {pixKeys.length === 0 ? (
+                <div className="text-center py-6 opacity-40">
+                  <Wallet className="h-7 w-7 mx-auto mb-2" />
+                  <p className="text-[10px] font-black uppercase tracking-widest">Nenhuma chave</p>
+                </div>
+              ) : (
+                <div className="space-y-2">
+                  {pixKeys.map(pk => (
+                    <div key={pk.id} className="flex items-center gap-3 p-3 rounded-xl border border-border/40 bg-muted/10">
+                      <div className="h-8 w-8 rounded-lg bg-primary/10 border border-primary/10 flex items-center justify-center shrink-0">
+                        <Fingerprint className="h-3.5 w-3.5 text-primary" />
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <p className="text-[9px] font-black text-primary uppercase tracking-widest">{pixKeyLabels[pk.key_type] || pk.key_type}</p>
+                        <p className="font-mono text-[11px] text-foreground truncate font-bold">{pk.key_value}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
 
- {/* ═══ Steps Progress ═══ */}
- <motion.div
- initial={{ opacity: 0, y: 12 }}
- animate={{ opacity: 1, y: 0 }}
- transition={{ delay: 0.2, ease }}
- className="relative rounded-2xl bg-card/95 ring-1 ring-border/20 p-5 overflow-hidden"
- >
- <div className="absolute left-0 top-0 bottom-0 w-[3px] rounded-full bg-primary" />
- <div className="relative z-10">
- <div className="flex items-center gap-2.5 mb-4">
- <div className="h-8 w-8 rounded-xl bg-primary/8 ring-1 ring-primary/15 flex items-center justify-center">
- <TrendingUp className="h-3.5 w-3.5 text-primary" />
- </div>
- <span className="text-[11px] font-display font-black text-foreground/70">Progresso da Verificação</span>
- </div>
+          {/* Bancos */}
+          <div className="bg-card rounded-[24px] border border-border/60 shadow-sm overflow-hidden">
+            <div className="p-6 border-b border-border/40 flex items-center justify-between gap-3">
+              <div className="flex items-center gap-3">
+                <div className="h-10 w-10 bg-primary/10 border border-primary/10 rounded-xl flex items-center justify-center text-primary">
+                  <Building2 size={20} strokeWidth={2.5} />
+                </div>
+                <div>
+                  <h2 className="font-black text-foreground tracking-tight leading-none uppercase">Contas Bancárias</h2>
+                  <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mt-1">Cadastre em Saques</p>
+                </div>
+              </div>
+              <span className="text-[10px] font-black uppercase tracking-widest px-2.5 py-1 rounded-md bg-muted/30 border border-border/60 tabular-nums">
+                {bankAccounts.length}
+              </span>
+            </div>
+            <div className="p-4">
+              {bankAccounts.length === 0 ? (
+                <div className="text-center py-6 opacity-40">
+                  <Building2 className="h-7 w-7 mx-auto mb-2" />
+                  <p className="text-[10px] font-black uppercase tracking-widest">Nenhuma conta</p>
+                </div>
+              ) : (
+                <div className="space-y-2">
+                  {bankAccounts.map(acc => (
+                    <div key={acc.id} className="flex items-center gap-3 p-3 rounded-xl border border-border/40 bg-muted/10">
+                      <div className="h-8 w-8 rounded-lg bg-primary/10 border border-primary/10 flex items-center justify-center shrink-0">
+                        <CreditCard className="h-3.5 w-3.5 text-primary" />
+                      </div>
+                      <div className="min-w-0">
+                        <p className="text-[12px] font-black text-foreground tracking-tight">{acc.bank_name}</p>
+                        <p className="text-[10px] font-bold font-mono text-muted-foreground/70">Ag. {acc.agency} · Cc. {acc.account_number}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
 
- <div className="h-2.5 rounded-full bg-muted/10 ring-1 ring-border/8 overflow-hidden mb-4">
- <motion.div
- initial={{ width: 0 }}
- animate={{ width: `${completionPct}%` }}
- transition={{ duration: 1.2, delay: 0.3, ease }}
- className="h-full rounded-full bg-gradient-to-r from-primary via-primary/80 to-primary/60 relative"
- style={{ boxShadow: "0 0 12px hsl(var(--primary) / 0.3)" }}
- >
- <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent animate-shimmer" />
- </motion.div>
- </div>
+      {/* KYC Documentos */}
+      <div ref={kycRef} className="bg-card rounded-[24px] border border-border/60 shadow-sm overflow-hidden">
+        <div className="p-6 border-b border-border/40 flex items-center gap-3">
+          <div className="h-10 w-10 bg-primary/10 border border-primary/10 rounded-xl flex items-center justify-center text-primary">
+            <FileCheck size={20} strokeWidth={2.5} />
+          </div>
+          <div>
+            <h2 className="font-black text-foreground tracking-tight leading-none uppercase">Documentos KYC</h2>
+            <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mt-1">Envie para liberar saques</p>
+          </div>
+        </div>
 
- <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-2">
- {completionSteps.map((step, idx) => (
- <motion.div
- key={step.label}
- initial={{ opacity: 0, scale: 0.95 }}
- animate={{ opacity: 1, scale: 1 }}
- transition={{ delay: 0.35 + idx * 0.04, ease }}
- className={cn(
- "flex items-center gap-2 p-2.5 rounded-xl ring-1 transition-all duration-300",
- step.done ? "bg-primary/5 ring-primary/10" : "bg-muted/3 ring-border/8"
- )}
- >
- {step.done ? (
- <CheckCircle2 className="h-3.5 w-3.5 shrink-0 text-primary" />
- ) : (
- <div className="h-3.5 w-3.5 rounded-full ring-1 ring-border/20 shrink-0" />
- )}
- <span className={cn(
- "text-[9px] font-display font-bold truncate",
- step.done ? "text-primary/60" : "text-muted-foreground/30"
- )}>{step.label}</span>
- </motion.div>
- ))}
- </div>
- </div>
- </motion.div>
+        <div className="p-6">
+          {(!kycDocs.front || !kycDocs.back || !kycDocs.selfie || (isCnpj && !kycDocs.cnpj_card)) && !isApproved && (
+            <div className="flex items-start gap-2 p-3 rounded-xl bg-amber-500/5 border border-amber-500/20 mb-5">
+              <AlertTriangle className="h-4 w-4 text-amber-500 shrink-0 mt-0.5" />
+              <p className="text-[11px] font-bold text-amber-600 dark:text-amber-400">
+                Envie todos os documentos abaixo para completar a verificação.
+                {isCnpj && " Como seu cadastro é CNPJ, o Cartão CNPJ também é obrigatório."}
+              </p>
+            </div>
+          )}
 
- {/* ═══ Main Content Grid ═══ */}
- <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
- {/* ─── Dados Pessoais ─── */}
- <motion.div
- initial={{ opacity: 0, y: 16 }}
- animate={{ opacity: 1, y: 0 }}
- transition={{ delay: 0.3, ease }}
- className="relative rounded-2xl bg-card/95 ring-1 ring-border/20 p-5 md:p-6 overflow-hidden hover:ring-border/40 transition-all duration-300"
- >
- <div className="absolute left-0 top-0 bottom-0 w-[3px] rounded-full bg-info" />
- <div className="absolute inset-0 bg-gradient-to-br from-info/[0.02] to-transparent pointer-events-none" />
+          <div className={cn("grid grid-cols-1 gap-3", isCnpj ? "md:grid-cols-2 lg:grid-cols-4" : "md:grid-cols-3")}>
+            <DocSlot type="front"     label="Documento (Frente)" desc="RG, CNH ou doc. com foto"   icon={ImageIcon}  preview={kycDocs.front}     uploading={uploading === "front"}     onUpload={(f) => handleUpload("front", f)} />
+            <DocSlot type="back"      label="Documento (Verso)"  desc="Verso do mesmo documento"   icon={ImageIcon}  preview={kycDocs.back}      uploading={uploading === "back"}      onUpload={(f) => handleUpload("back", f)} />
+            <DocSlot type="selfie"    label="Selfie c/ Documento" desc="Doc. ao lado do rosto"     icon={Camera}     preview={kycDocs.selfie}    uploading={uploading === "selfie"}    onUpload={(f) => handleUpload("selfie", f)} />
+            {isCnpj && (
+              <DocSlot type="cnpj_card" label="Cartão CNPJ"        desc="Comprovante de inscrição" icon={Building2}  preview={kycDocs.cnpj_card} uploading={uploading === "cnpj_card"} onUpload={(f) => handleUpload("cnpj_card", f)} />
+            )}
+          </div>
 
- <div className="relative z-10">
- <div className="flex items-center gap-2.5 mb-4">
- <div className="h-9 w-9 rounded-xl bg-info/8 ring-1 ring-info/15 flex items-center justify-center">
- <UserCircle className="h-4 w-4 text-info" />
- </div>
- <div>
- <p className="text-[11px] font-display font-black text-foreground/70">Dados Pessoais</p>
- <p className="text-[9px] text-muted-foreground/40">Informações imutáveis após cadastro</p>
- </div>
- </div>
-
- <div className="flex items-center gap-2 mb-4 p-3 rounded-xl bg-info/5 ring-1 ring-info/10">
- <Lock className="h-3.5 w-3.5 shrink-0 text-info/60" />
- <p className="text-[10px] font-medium text-info/60">Campos travados por segurança KYC. Apenas o apelido é editável.</p>
- </div>
-
- <div className="space-y-3">
- <LockedField label="Nome completo" value={profile?.full_name || "—"} />
- <div className="grid grid-cols-2 gap-3">
- <LockedField label="E-mail" value={profile?.email || "—"} />
- <LockedField label="Telefone" value={profile?.phone || "—"} />
- </div>
- <div className="grid grid-cols-2 gap-3">
- <LockedField label={profile?.document_type === "cnpj" ? "CNPJ" : "CPF"} value={formattedDoc} />
- <LockedField label="Tipo Doc." value={(profile?.document_type || "cpf").toUpperCase()} />
- </div>
-
- <div className="pt-4 border-t border-border/10">
- <Label className="text-[9px] text-muted-foreground/40 uppercase tracking-[0.15em] font-display font-bold flex items-center gap-1">
- <Edit3 className="h-2.5 w-2.5" /> Apelido (editável)
- </Label>
- <div className="flex gap-2 mt-1.5">
- <Input value={nickname} onChange={(e) => setNickname(e.target.value)} className="h-10 rounded-xl flex-1 bg-muted/10 border-border/20" placeholder="Como quer ser chamado?" />
- <Button onClick={handleSaveNickname} className="rounded-xl font-display font-bold h-10 px-5 shrink-0 shadow-lg shadow-primary/10 active:scale-[0.985]" disabled={saving}>
- <Save className="h-4 w-4" />
- </Button>
- </div>
- </div>
- </div>
- </div>
- </motion.div>
-
- {/* ─── Right Column ─── */}
- <div className="space-y-4">
- {/* Chaves PIX */}
- <motion.div
- initial={{ opacity: 0, y: 16 }}
- animate={{ opacity: 1, y: 0 }}
- transition={{ delay: 0.35, ease }}
- className="relative rounded-2xl bg-card/95 ring-1 ring-border/20 p-5 overflow-hidden hover:ring-border/40 transition-all duration-300"
- >
- <div className="absolute left-0 top-0 bottom-0 w-[3px] rounded-full bg-primary" />
-
- <div className="relative z-10">
- <div className="flex items-center justify-between mb-4">
- <div className="flex items-center gap-2.5">
- <div className="h-8 w-8 rounded-xl bg-primary/8 ring-1 ring-primary/15 flex items-center justify-center">
- <Wallet className="h-3.5 w-3.5 text-primary" />
- </div>
- <span className="text-[11px] font-display font-black text-foreground/70">Chaves PIX</span>
- </div>
- <span className="text-[9px] font-display font-bold px-2.5 py-1 rounded-lg bg-primary/8 ring-1 ring-primary/15 text-primary tabular-nums">{pixKeys.length}/3</span>
- </div>
-
- {pixKeys.length === 0 ? (
- <div className="text-center py-6 rounded-xl bg-muted/3 ring-1 ring-border/5">
- <Wallet className="h-7 w-7 mx-auto mb-2 text-muted-foreground/15" />
- <p className="text-[11px] text-muted-foreground/30 font-medium">Nenhuma chave cadastrada</p>
- <p className="text-[9px] text-muted-foreground/20 mt-0.5">Cadastre em Financeiro → Dados Bancários</p>
- </div>
- ) : (
- <div className="space-y-2">
- {pixKeys.map((pk, idx) => (
- <motion.div
- key={pk.id}
- initial={{ opacity: 0, x: -8 }}
- animate={{ opacity: 1, x: 0 }}
- transition={{ delay: 0.4 + idx * 0.05, ease }}
- className="flex items-center gap-3 p-3 rounded-xl ring-1 ring-border/10 bg-muted/3 hover:ring-border/20 transition-all"
- >
- <div className="h-8 w-8 rounded-lg bg-primary/8 ring-1 ring-primary/12 flex items-center justify-center shrink-0">
- <Fingerprint className="h-3.5 w-3.5 text-primary/70" />
- </div>
- <div className="min-w-0 flex-1">
- <p className="text-[9px] text-primary/50 font-display font-bold uppercase tracking-[0.15em]">{pixKeyTypeLabels[pk.key_type] || pk.key_type}</p>
- <p className="font-mono text-[12px] text-foreground/70 truncate font-medium">{pk.key_value}</p>
- </div>
- </motion.div>
- ))}
- </div>
- )}
- </div>
- </motion.div>
-
- {/* Contas Bancárias */}
- <motion.div
- initial={{ opacity: 0, y: 16 }}
- animate={{ opacity: 1, y: 0 }}
- transition={{ delay: 0.4, ease }}
- className="relative rounded-2xl bg-card/95 ring-1 ring-border/20 p-5 overflow-hidden hover:ring-border/40 transition-all duration-300"
- >
- <div className="absolute left-0 top-0 bottom-0 w-[3px] rounded-full bg-info" />
-
- <div className="relative z-10">
- <div className="flex items-center justify-between mb-4">
- <div className="flex items-center gap-2.5">
- <div className="h-8 w-8 rounded-xl bg-info/8 ring-1 ring-info/15 flex items-center justify-center">
- <Building2 className="h-3.5 w-3.5 text-info" />
- </div>
- <span className="text-[11px] font-display font-black text-foreground/70">Contas Bancárias</span>
- </div>
- <span className="text-[9px] font-display font-bold px-2.5 py-1 rounded-lg bg-info/8 ring-1 ring-info/15 text-info tabular-nums">{bankAccounts.length}</span>
- </div>
-
- {bankAccounts.length === 0 ? (
- <div className="text-center py-6 rounded-xl bg-muted/3 ring-1 ring-border/5">
- <Building2 className="h-7 w-7 mx-auto mb-2 text-muted-foreground/15" />
- <p className="text-[11px] text-muted-foreground/30 font-medium">Nenhuma conta cadastrada</p>
- <p className="text-[9px] text-muted-foreground/20 mt-0.5">Cadastre em Financeiro → Dados Bancários</p>
- </div>
- ) : (
- <div className="space-y-2">
- {bankAccounts.map((acc, idx) => (
- <motion.div
- key={acc.id}
- initial={{ opacity: 0, x: -8 }}
- animate={{ opacity: 1, x: 0 }}
- transition={{ delay: 0.45 + idx * 0.05, ease }}
- className="flex items-center gap-3 p-3 rounded-xl ring-1 ring-border/10 bg-muted/3 hover:ring-border/20 transition-all"
- >
- <div className="h-8 w-8 rounded-lg bg-info/8 ring-1 ring-info/12 flex items-center justify-center shrink-0">
- <CreditCard className="h-3.5 w-3.5 text-info/70" />
- </div>
- <div className="min-w-0">
- <p className="text-[12px] font-display font-bold text-foreground/70">{acc.bank_name}</p>
- <p className="text-[9px] text-muted-foreground/40 font-mono">Ag. {acc.agency} • Cc. {acc.account_number}</p>
- </div>
- </motion.div>
- ))}
- </div>
- )}
- </div>
- </motion.div>
-
- {/* Segurança */}
- <motion.div
- initial={{ opacity: 0, y: 16 }}
- animate={{ opacity: 1, y: 0 }}
- transition={{ delay: 0.45, ease }}
- className="relative rounded-2xl bg-card/95 ring-1 ring-border/20 p-5 overflow-hidden hover:ring-border/40 transition-all duration-300"
- >
- <div className="absolute left-0 top-0 bottom-0 w-[3px] rounded-full bg-success" />
-
- <div className="relative z-10">
- <div className="flex items-center gap-2.5 mb-4">
- <div className="h-8 w-8 rounded-xl bg-success/8 ring-1 ring-success/15 flex items-center justify-center">
- <Key className="h-3.5 w-3.5 text-success" />
- </div>
- <span className="text-[11px] font-display font-black text-foreground/70">Segurança</span>
- </div>
-
- <div className="space-y-2">
- {[
- { icon: Shield, label: "Criptografia SSL", active: true },
- { icon: FileCheck, label: "LGPD Compliant", active: true },
- { icon: Key, label: "2FA (Em breve)", active: false },
- ].map((item, idx) => (
- <motion.div
- key={item.label}
- initial={{ opacity: 0, x: -8 }}
- animate={{ opacity: 1, x: 0 }}
- transition={{ delay: 0.5 + idx * 0.04, ease }}
- className="flex items-center justify-between p-3 rounded-xl ring-1 ring-border/8 bg-muted/3 hover:ring-border/15 transition-all"
- >
- <div className="flex items-center gap-2.5">
- <div className={cn("h-7 w-7 rounded-lg flex items-center justify-center ring-1", item.active ? "bg-success/8 ring-success/12" : "bg-muted/5 ring-border/8")}>
- <item.icon className={cn("h-3 w-3", item.active ? "text-success/70" : "text-muted-foreground/20")} />
- </div>
- <span className="text-[11px] text-foreground/60 font-medium">{item.label}</span>
- </div>
- <span className={cn(
- "text-[8px] font-display font-bold px-2 py-0.5 rounded-lg ring-1",
- item.active ? "text-success bg-success/8 ring-success/12" : "text-muted-foreground/20 bg-muted/3 ring-border/5"
- )}>
- {item.active ? "Ativo" : "Em breve"}
- </span>
- </motion.div>
- ))}
- </div>
- </div>
- </motion.div>
- </div>
- </div>
-
- {/* ═══ KYC Documents ═══ */}
- <motion.div
- ref={kycSectionRef}
- initial={{ opacity: 0, y: 16 }}
- animate={{ opacity: 1, y: 0 }}
- transition={{ delay: 0.5, ease }}
- className="relative rounded-2xl bg-card/95 ring-1 ring-border/20 p-5 md:p-6 overflow-hidden"
- >
- <div className="absolute left-0 top-0 bottom-0 w-[3px] rounded-full bg-warning" />
- <div className="absolute inset-0 bg-gradient-to-br from-warning/[0.02] to-transparent pointer-events-none" />
-
- <div className="relative z-10">
- <div className="flex items-center gap-2.5 mb-2">
- <div className="h-9 w-9 rounded-xl bg-warning/8 ring-1 ring-warning/15 flex items-center justify-center">
- <FileCheck className="h-4 w-4 text-warning" />
- </div>
- <div>
- <p className="text-[11px] font-display font-black text-foreground/70">Verificação KYC</p>
- <p className="text-[9px] text-muted-foreground/40">Envie seus documentos para liberar saques</p>
- </div>
- </div>
-
- {/* Alert for incomplete docs */}
- {(!kycDocs.front || !kycDocs.back || !kycDocs.selfie || (isCnpj && !kycDocs.cnpj_card)) && !isApproved && (
- <div className="flex items-center gap-2 p-3 rounded-xl bg-warning/5 ring-1 ring-warning/10 mb-4 mt-3">
- <AlertTriangle className="h-3.5 w-3.5 text-warning shrink-0" />
- <p className="text-[10px] text-warning/70 font-medium">
- Envie todos os documentos abaixo para completar a verificação e liberar os saques.
- {isCnpj && " Como seu cadastro é CNPJ, o Cartão CNPJ também é obrigatório."}
- </p>
- </div>
- )}
-
- <div className={cn("grid grid-cols-1 gap-3 mt-4", isCnpj ? "md:grid-cols-2 lg:grid-cols-4" : "md:grid-cols-3")}>
- <DocSlot type="front" label="Documento (Frente)" desc="RG, CNH ou outro documento com foto" icon={<Image className="h-5 w-5" />} preview={kycDocs.front} uploading={uploading === "front"} onUpload={(f) => handleUpload("front", f)} locked={!!kycDocs.front} />
- <DocSlot type="back" label="Documento (Verso)" desc="Verso do documento enviado acima" icon={<Image className="h-5 w-5" />} preview={kycDocs.back} uploading={uploading === "back"} onUpload={(f) => handleUpload("back", f)} locked={!!kycDocs.back} />
- <DocSlot type="selfie" label="Selfie com Documento" desc="Segure o documento ao lado do rosto" icon={<Camera className="h-5 w-5" />} preview={kycDocs.selfie} uploading={uploading === "selfie"} onUpload={(f) => handleUpload("selfie", f)} locked={!!kycDocs.selfie} />
- {isCnpj && (
- <DocSlot type="cnpj_card" label="Cartão CNPJ" desc="Comprovante de inscrição e situação cadastral" icon={<Building2 className="h-5 w-5" />} preview={kycDocs.cnpj_card} uploading={uploading === "cnpj_card"} onUpload={(f) => handleUpload("cnpj_card", f)} locked={!!kycDocs.cnpj_card} />
- )}
- </div>
-
- {kycDocs.front && kycDocs.back && kycDocs.selfie && (!isCnpj || kycDocs.cnpj_card) && (
- <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="mt-4 flex items-center gap-2 text-[10px] text-info p-3 rounded-xl bg-info/5 ring-1 ring-info/10">
- <Info className="h-3.5 w-3.5 shrink-0" />
- <span className="font-medium">Todos os documentos enviados. Aguarde aprovação ou contate o suporte.</span>
- </motion.div>
- )}
- </div>
- </motion.div>
- </div>
- );
+          {kycDocs.front && kycDocs.back && kycDocs.selfie && (!isCnpj || kycDocs.cnpj_card) && (
+            <div className="mt-5 flex items-center gap-2 p-3 rounded-xl bg-emerald-500/5 border border-emerald-500/20">
+              <Info className="h-4 w-4 text-emerald-500 shrink-0" />
+              <p className="text-[11px] font-bold text-emerald-600 dark:text-emerald-400">
+                Todos os documentos enviados — aguarde aprovação ou contate o suporte.
+              </p>
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
 }
 
-/* ─── Sub-components ─── */
-
-function LockedField({ label, value }: { label: string; value: string }) {
- return (
- <div>
- <Label className="text-[9px] text-muted-foreground/40 uppercase tracking-[0.15em] font-display font-bold flex items-center gap-1">
- <Lock className="h-2.5 w-2.5" /> {label}
- </Label>
- <div className="mt-1.5 h-10 rounded-xl ring-1 ring-border/10 bg-muted/5 flex items-center px-3 text-[13px] text-foreground/60 font-medium">
- {value}
- </div>
- </div>
- );
+function LockedField({ label, value, mono = false }: { label: string; value: string; mono?: boolean }) {
+  return (
+    <div>
+      <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground flex items-center gap-1.5 mb-2">
+        <Lock className="h-3 w-3" /> {label}
+      </label>
+      <div className={cn(
+        "h-11 rounded-xl border border-border/60 bg-muted/20 flex items-center px-3.5 text-sm text-foreground/80 font-bold",
+        mono && "font-mono"
+      )}>
+        {value}
+      </div>
+    </div>
+  );
 }
 
-function DocSlot({ type, label, desc, icon, preview, uploading, onUpload, locked }: {
- type: string; label: string; desc: string; icon: React.ReactNode; preview: string | null;
- uploading: boolean; onUpload: (file: File) => void; locked: boolean;
+function DocSlot({ type, label, desc, icon: Icon, preview, uploading, onUpload }: {
+  type: string; label: string; desc: string; icon: any; preview: string | null;
+  uploading: boolean; onUpload: (file: File) => void;
 }) {
- const ref = useRef<HTMLInputElement>(null);
- const canUpload = !locked && !uploading;
- return (
- <motion.div
- whileHover={canUpload ? { scale: 1.01 } : undefined}
- onClick={() => canUpload && ref.current?.click()}
- className={cn(
- "relative flex flex-col items-center gap-3 p-6 rounded-2xl transition-all ring-1 group",
- locked
- ? "bg-primary/3 ring-primary/15 cursor-default"
- : "bg-muted/3 ring-border/10 cursor-pointer hover:ring-warning/20 hover:bg-warning/[0.02]"
- )}
- >
- <input ref={ref} type="file" accept="image/*,.pdf" className="hidden" onChange={(e) => e.target.files?.[0] && onUpload(e.target.files[0])} />
- 
- <div className={cn(
- "h-16 w-16 rounded-2xl flex items-center justify-center ring-1 transition-all duration-300",
- locked ? "bg-primary/10 ring-primary/15 text-primary" : "bg-muted/10 ring-border/10 text-muted-foreground/30 group-hover:ring-warning/15 group-hover:text-warning/50"
- )}>
- {uploading ? <Loader2 className="h-6 w-6 animate-spin" /> : locked ? <CheckCircle2 className="h-7 w-7" /> : icon}
- </div>
- 
- <div className="text-center">
- <p className={cn("text-[12px] font-display font-bold", locked ? "text-foreground/70" : "text-foreground/50")}>{label}</p>
- <p className={cn("text-[9px] mt-0.5 leading-relaxed max-w-[180px]", locked ? "text-primary/50" : "text-muted-foreground/30")}>
- {locked ? "Enviado ✓" : desc}
- </p>
- </div>
+  const ref = useRef<HTMLInputElement>(null);
+  const locked = !!preview;
+  const canUpload = !locked && !uploading;
+  return (
+    <div
+      onClick={() => canUpload && ref.current?.click()}
+      className={cn(
+        "relative flex flex-col items-center gap-3 p-6 rounded-2xl border transition-all group",
+        locked
+          ? "bg-emerald-500/5 border-emerald-500/20 cursor-default"
+          : "bg-muted/20 border-border/60 cursor-pointer hover:border-primary/40 hover:bg-muted/30"
+      )}
+    >
+      <input ref={ref} type="file" accept="image/*" className="hidden"
+        onChange={(e) => e.target.files?.[0] && onUpload(e.target.files[0])} />
 
- {!locked && !uploading && (
- <div className="mt-1 flex items-center gap-1.5 text-[9px] font-display font-bold text-warning/50 group-hover:text-warning/70 transition-colors">
- <Upload className="h-3 w-3" />
- <span>Clique para enviar</span>
- </div>
- )}
+      <div className={cn(
+        "h-14 w-14 rounded-2xl border flex items-center justify-center",
+        locked
+          ? "bg-emerald-500/10 border-emerald-500/20 text-emerald-500"
+          : "bg-card border-border/60 text-muted-foreground/60 group-hover:text-primary group-hover:border-primary/40"
+      )}>
+        {uploading ? <Loader2 className="h-5 w-5 animate-spin" />
+                   : locked ? <CheckCircle2 className="h-6 w-6" strokeWidth={2.5} />
+                            : <Icon className="h-5 w-5" />}
+      </div>
 
- {locked && (
- <div className="absolute top-3 right-3">
- <Lock className="h-3.5 w-3.5 text-primary/30" />
- </div>
- )}
- </motion.div>
- );
+      <div className="text-center">
+        <p className={cn("text-[12px] font-black tracking-tight",
+          locked ? "text-emerald-500" : "text-foreground")}>{label}</p>
+        <p className="text-[10px] font-bold text-muted-foreground/70 mt-1 uppercase tracking-widest leading-tight max-w-[180px]">
+          {locked ? "Enviado" : desc}
+        </p>
+      </div>
+
+      {!locked && !uploading && (
+        <div className="flex items-center gap-1.5 text-[9px] font-black uppercase tracking-widest text-primary opacity-0 group-hover:opacity-100 transition-opacity">
+          <Upload className="h-3 w-3" />
+          <span>Clique para enviar</span>
+        </div>
+      )}
+
+      {locked && (
+        <div className="absolute top-3 right-3">
+          <Lock className="h-3.5 w-3.5 text-emerald-500/60" />
+        </div>
+      )}
+    </div>
+  );
 }
