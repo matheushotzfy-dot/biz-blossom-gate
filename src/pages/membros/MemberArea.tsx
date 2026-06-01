@@ -155,13 +155,13 @@ export default function MemberArea() {
           <div className="flex h-20 w-20 items-center justify-center rounded-3xl border border-border bg-secondary">
             <ShoppingBag className="h-9 w-9 text-muted-foreground" strokeWidth={1.4} />
           </div>
-          <p className="mt-5 text-lg font-black text-foreground">Sua biblioteca está vazia</p>
+          <p className="mt-5 text-lg font-bold text-foreground">Sua biblioteca está vazia</p>
           <p className="mt-2 max-w-[400px] text-sm leading-relaxed text-muted-foreground">
             Quando você adquirir um produto, ele aparecerá aqui com acesso imediato ao conteúdo.
           </p>
           <Link
             to="/marketplace"
-            className="mt-7 inline-flex items-center gap-2 rounded-xl bg-primary px-6 py-3 text-sm font-black text-primary-foreground hover:bg-primary/90 transition-colors"
+            className="mt-7 inline-flex items-center gap-2 rounded-xl bg-primary px-6 py-3 text-sm font-bold text-primary-foreground hover:bg-primary/90 transition-colors"
           >
             Explorar marketplace
             <ArrowUpRight className="h-4 w-4" />
@@ -186,10 +186,10 @@ export default function MemberArea() {
               <ShoppingBag className="h-9 w-9" strokeWidth={2.5} />
             </div>
             <div>
-              <h2 className="font-display text-[42px] lg:text-[56px] font-black tracking-[-0.05em] text-foreground leading-none">
+              <h2 className="font-display text-[42px] lg:text-[56px] font-bold tracking-[-0.05em] text-foreground leading-none">
                 Biblioteca
               </h2>
-              <p className="text-[11px] text-muted-foreground mt-3 font-black uppercase tracking-[0.25em] flex items-center gap-3">
+              <p className="text-[11px] text-muted-foreground mt-3 font-bold uppercase tracking-[0.25em] flex items-center gap-3">
                 <span className="text-primary">{stats.total} {stats.total === 1 ? "título" : "títulos"}</span>
                 <span className="h-1 w-1 rounded-full bg-border" />
                 <span>{formatBRL(stats.totalSpent)} investidos</span>
@@ -224,7 +224,7 @@ export default function MemberArea() {
                   key={t.key}
                   onClick={() => setStatusFilter(t.key)}
                   className={cn(
-                    "px-6 py-2.5 text-[11px] font-black uppercase tracking-[0.15em] transition-all rounded-xl",
+                    "px-6 py-2.5 text-[11px] font-bold uppercase tracking-[0.15em] transition-all rounded-xl",
                     statusFilter === t.key
                       ? "bg-foreground text-background shadow-xl"
                       : "text-muted-foreground hover:text-foreground hover:bg-secondary/40"
@@ -316,19 +316,19 @@ function HeroBanner({ course }: { course: PurchaseRow }) {
               <div className="flex items-center gap-3 mb-8">
                 <div className="flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-primary/10 border border-primary/20 backdrop-blur-md">
                   <div className="h-1.5 w-1.5 rounded-full bg-primary animate-pulse shadow-[0_0_10px_rgba(var(--primary),0.8)]" />
-                  <span className="text-[10px] font-black uppercase tracking-[0.25em] text-primary-foreground">
+                  <span className="text-[10px] font-bold uppercase tracking-[0.25em] text-primary-foreground">
                     {isFinished ? "Curso Concluído" : pct > 0 ? "Continue Assistindo" : "Título em Destaque"}
                   </span>
                 </div>
                 {course.category && (
-                  <span className="text-[10px] text-muted-foreground uppercase tracking-[0.25em] font-black">
+                  <span className="text-[10px] text-muted-foreground uppercase tracking-[0.25em] font-bold">
                     {course.category}
                   </span>
                 )}
               </div>
 
               {/* Title */}
-              <h1 className="font-display text-[58px] md:text-[96px] lg:text-[120px] font-black tracking-[-0.07em] leading-[0.8] mb-8 text-foreground drop-shadow-2xl">
+              <h1 className="font-display text-[58px] md:text-[96px] lg:text-[120px] font-bold tracking-[-0.07em] leading-[0.8] mb-8 text-foreground drop-shadow-2xl">
                 {course.title}
               </h1>
 
@@ -343,8 +343,8 @@ function HeroBanner({ course }: { course: PurchaseRow }) {
               {course.totalLessons > 0 && pct > 0 && (
                 <div className="mt-8 mb-10 max-w-md">
                   <div className="flex items-center justify-between mb-2.5">
-                    <span className="text-[10px] font-black uppercase tracking-[0.15em] text-muted-foreground/60">Seu progresso</span>
-                    <span className="text-sm font-black tabular-nums">{pct}%</span>
+                    <span className="text-[10px] font-bold uppercase tracking-[0.15em] text-muted-foreground/60">Seu progresso</span>
+                    <span className="text-sm font-bold tabular-nums">{pct}%</span>
                   </div>
                   <div className="h-2 w-full rounded-full bg-muted/40 overflow-hidden backdrop-blur-sm">
                     <motion.div
@@ -361,7 +361,7 @@ function HeroBanner({ course }: { course: PurchaseRow }) {
               <div className="flex flex-wrap items-center gap-5">
                 <Link
                   to={`/membros/curso/${course.id}`}
-                  className="group relative flex items-center gap-4 px-12 py-5 bg-foreground text-background font-display font-black text-[17px] rounded-xl transition-all duration-500 hover:scale-[1.02] active:scale-[0.98] hover:bg-foreground/90 overflow-hidden shadow-xl"
+                  className="group relative flex items-center gap-4 px-12 py-5 bg-foreground text-background font-display font-bold text-[17px] rounded-xl transition-all duration-500 hover:scale-[1.02] active:scale-[0.98] hover:bg-foreground/90 overflow-hidden shadow-xl"
                 >
                   <Play className="h-6 w-6 fill-current" />
                   <span>{pct > 0 ? "Retomar" : "Assistir agora"}</span>
@@ -370,7 +370,7 @@ function HeroBanner({ course }: { course: PurchaseRow }) {
 
                 <Link
                   to={`/membros/curso/${course.id}`}
-                  className="flex items-center gap-3 px-10 py-5 bg-secondary/40 text-foreground font-display font-black text-[16px] rounded-xl hover:bg-secondary/60 transition-all duration-300 active:scale-[0.98] backdrop-blur-xl border border-white/5"
+                  className="flex items-center gap-3 px-10 py-5 bg-secondary/40 text-foreground font-display font-bold text-[16px] rounded-xl hover:bg-secondary/60 transition-all duration-300 active:scale-[0.98] backdrop-blur-xl border border-white/5"
                 >
                   <Info className="h-5 w-5" />
                   Mais informações
@@ -420,10 +420,10 @@ function CarouselRow({
             {icon}
           </div>
           <div>
-            <h3 className="font-display text-2xl sm:text-[32px] font-black tracking-[-0.05em] text-foreground leading-none">
+            <h3 className="font-display text-2xl sm:text-[32px] font-bold tracking-[-0.05em] text-foreground leading-none">
               {title}
             </h3>
-            <p className="mt-2 text-[10px] font-black text-primary uppercase tracking-[0.2em] opacity-80">
+            <p className="mt-2 text-[10px] font-bold text-primary uppercase tracking-[0.2em] opacity-80">
               {courses.length} {courses.length === 1 ? "conteúdo exclusivo" : "conteúdos exclusivos"}
             </p>
           </div>
@@ -489,10 +489,10 @@ function RankedRow({ title, courses }: { title: string; courses: PurchaseRow[] }
             <Star className="h-6 w-6 fill-current" />
           </div>
           <div>
-            <h3 className="font-display text-2xl sm:text-3xl font-black tracking-[-0.04em] text-foreground leading-none">
+            <h3 className="font-display text-2xl sm:text-3xl font-bold tracking-[-0.04em] text-foreground leading-none">
               {title}
             </h3>
-            <p className="mt-1.5 text-[10px] font-black text-muted-foreground/50 uppercase tracking-[0.15em]">
+            <p className="mt-1.5 text-[10px] font-bold text-muted-foreground/50 uppercase tracking-[0.15em]">
               Os títulos mais assistidos da sua coleção
             </p>
           </div>
@@ -519,7 +519,7 @@ function RankedRow({ title, courses }: { title: string; courses: PurchaseRow[] }
           >
             {/* Giant rank number with premium style */}
             <span
-              className="font-display font-black text-transparent leading-[0.8] tracking-[-0.1em] select-none pointer-events-none drop-shadow-[0_20px_50px_rgba(0,0,0,0.3)] transition-all duration-700 group-hover/rank:scale-110 group-hover/rank:translate-y-[-10px]"
+              className="font-display font-bold text-transparent leading-[0.8] tracking-[-0.1em] select-none pointer-events-none drop-shadow-[0_20px_50px_rgba(0,0,0,0.3)] transition-all duration-700 group-hover/rank:scale-110 group-hover/rank:translate-y-[-10px]"
               style={{ 
                 fontSize: "clamp(160px, 20vw, 280px)",
                 WebkitTextStroke: "2px hsl(var(--foreground) / 0.1)",
@@ -542,7 +542,7 @@ function RankedRow({ title, courses }: { title: string; courses: PurchaseRow[] }
               <div className="absolute inset-0 bg-gradient-to-t from-background via-background/20 to-transparent opacity-60 group-hover/rank:opacity-100 transition-opacity duration-500" />
               
               <div className="absolute inset-x-0 bottom-0 p-5 translate-y-4 opacity-0 group-hover/rank:opacity-100 group-hover/rank:translate-y-0 transition-all duration-700 ease-[0.16,1,0.3,1]">
-                <p className="text-sm font-black text-foreground line-clamp-2 drop-shadow-lg leading-tight">{c.title}</p>
+                <p className="text-sm font-bold text-foreground line-clamp-2 drop-shadow-lg leading-tight">{c.title}</p>
                 <div className="mt-3 flex items-center gap-2">
                   <div className="h-1 w-full bg-white/10 rounded-full overflow-hidden">
                     <div className="h-full bg-primary" style={{ width: `${Math.round((c.completedLessons / (c.totalLessons || 1)) * 100)}%` }} />
@@ -583,15 +583,15 @@ function NetflixCard({ course }: { course: PurchaseRow }) {
         {/* Floating status badge */}
         <div className="absolute top-4 left-4 z-10 transition-transform duration-500 group-hover/card:scale-110">
           {isFinished ? (
-            <div className="inline-flex items-center gap-2 rounded-lg bg-success px-3 py-1.5 text-[10px] font-black uppercase tracking-widest text-success-foreground shadow-lg">
+            <div className="inline-flex items-center gap-2 rounded-lg bg-success px-3 py-1.5 text-[10px] font-bold uppercase tracking-widest text-success-foreground shadow-lg">
               <Trophy className="h-3.5 w-3.5" /> Concluído
             </div>
           ) : pct > 0 ? (
-            <div className="inline-flex items-center gap-2 rounded-lg bg-warning px-3 py-1.5 text-[10px] font-black uppercase tracking-widest text-warning-foreground shadow-lg">
+            <div className="inline-flex items-center gap-2 rounded-lg bg-warning px-3 py-1.5 text-[10px] font-bold uppercase tracking-widest text-warning-foreground shadow-lg">
               <Clock className="h-3.5 w-3.5" /> {pct}%
             </div>
           ) : (
-            <div className="inline-flex items-center gap-2 rounded-lg bg-primary/90 backdrop-blur-md px-3 py-1.5 text-[10px] font-black uppercase tracking-widest text-primary-foreground shadow-lg">
+            <div className="inline-flex items-center gap-2 rounded-lg bg-primary/90 backdrop-blur-md px-3 py-1.5 text-[10px] font-bold uppercase tracking-widest text-primary-foreground shadow-lg">
               <Sparkles className="h-3.5 w-3.5" /> Novo
             </div>
           )}
@@ -623,15 +623,15 @@ function NetflixCard({ course }: { course: PurchaseRow }) {
 
       {/* Info below card */}
       <div className="mt-6 px-1 transition-all duration-500 group-hover/card:translate-x-2">
-        <h4 className="font-display text-lg lg:text-xl font-black tracking-[-0.03em] text-foreground line-clamp-1 group-hover/card:text-primary transition-colors">
+        <h4 className="font-display text-lg lg:text-xl font-bold tracking-[-0.03em] text-foreground line-clamp-1 group-hover/card:text-primary transition-colors">
           {course.title}
         </h4>
         <div className="mt-2.5 flex items-center gap-3">
-          <span className="text-[10px] font-black uppercase tracking-widest text-primary/80 bg-primary/5 px-2 py-0.5 rounded border border-primary/10 transition-colors group-hover/card:bg-primary group-hover/card:text-primary-foreground">
+          <span className="text-[10px] font-bold uppercase tracking-widest text-primary/80 bg-primary/5 px-2 py-0.5 rounded border border-primary/10 transition-colors group-hover/card:bg-primary group-hover/card:text-primary-foreground">
             {course.category}
           </span>
           <span className="h-1 w-1 rounded-full bg-border" />
-          <span className="text-[11px] font-black tabular-nums text-muted-foreground/60">{course.totalLessons} aulas exclusivas</span>
+          <span className="text-[11px] font-bold tabular-nums text-muted-foreground/60">{course.totalLessons} aulas exclusivas</span>
         </div>
         {course.description && (
           <p className="mt-3 text-xs text-muted-foreground/50 line-clamp-2 leading-relaxed font-medium transition-opacity group-hover/card:opacity-100 opacity-60">
@@ -652,7 +652,7 @@ function GridSection({ courses }: { courses: PurchaseRow[] }) {
       <div className="px-5 sm:px-10 lg:px-14">
         <div className="flex flex-col items-center justify-center rounded-3xl border border-dashed border-border bg-card/40 px-6 py-24 text-center">
           <Search className="h-10 w-10 text-muted-foreground/40" strokeWidth={1.5} />
-          <p className="mt-4 text-base font-black text-foreground">Nenhum resultado</p>
+          <p className="mt-4 text-base font-bold text-foreground">Nenhum resultado</p>
           <p className="mt-1.5 text-sm text-muted-foreground">Tente ajustar os filtros ou a busca.</p>
         </div>
       </div>

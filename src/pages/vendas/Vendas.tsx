@@ -161,7 +161,7 @@ function RevenueChart({ data, hidden }: { data: { label: string; value: number; 
       const previous = payload.find((p: any) => p.dataKey === "previous");
       return (
         <div className="bg-popover border border-border rounded-lg shadow-xl p-3 min-w-[160px] animate-in fade-in zoom-in duration-200">
-          <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest mb-2.5 opacity-70">{label}</p>
+          <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-2.5 opacity-70">{label}</p>
           <div className="space-y-3">
             {current && (
               <div className="space-y-1.5">
@@ -170,7 +170,7 @@ function RevenueChart({ data, hidden }: { data: { label: string; value: number; 
                     <div className="h-1.5 w-1.5 rounded-full bg-success" />
                     <span className="text-[11px] font-bold text-foreground">Atual</span>
                   </div>
-                  <span className="text-[12px] font-black text-success tabular-nums">{fmt(current.value)}</span>
+                  <span className="text-[12px] font-bold text-success tabular-nums">{fmt(current.value)}</span>
                 </div>
                 {current.payload.gross !== undefined && (
                   <div className="flex items-center justify-between gap-4 pl-3 border-l-2 border-success/30 ml-0.5">
@@ -245,7 +245,7 @@ function TxRow({ tx, prods, onClick, density = "comfortable" }: { tx: Tables<"tr
       <td className={cn("pl-5 pr-3 align-middle", py)}>
         <div className="flex items-center gap-3">
           <Avatar className={cn(avatarSize, "shrink-0 rounded-md ring-1 ring-border/40")}>
-            <AvatarFallback className={cn("rounded-md text-[11px] font-black tracking-[-0.01em]", avatarColor(name))}>{initials(name)}</AvatarFallback>
+            <AvatarFallback className={cn("rounded-md text-[11px] font-bold tracking-[-0.01em]", avatarColor(name))}>{initials(name)}</AvatarFallback>
           </Avatar>
           <div className="min-w-0">
             <p className="truncate text-[13px] font-bold tracking-[-0.01em] text-foreground leading-tight">{name}</p>
@@ -281,7 +281,7 @@ function TxRow({ tx, prods, onClick, density = "comfortable" }: { tx: Tables<"tr
         {fee > 0 && <p className="text-[10px] text-muted-foreground/80 tabular-nums mt-0.5">−{fmt(fee)} taxa</p>}
       </td>
       <td className={cn("px-4 align-middle text-right", py)}>
-        <p className={cn("text-[14px] font-black tabular-nums tracking-[-0.015em]",
+        <p className={cn("text-[14px] font-bold tabular-nums tracking-[-0.015em]",
           tx.status === "completed" ? "text-success" : tx.status === "pending" ? "text-warning" : "text-foreground/60"
         )} style={{ fontVariantNumeric: "tabular-nums slashed-zero" }}>{fmt(net)}</p>
       </td>
@@ -757,7 +757,7 @@ export default function Vendas() {
           <div className="flex flex-col gap-6 xl:flex-row xl:items-start xl:justify-between">
             <div className="min-w-0">
               <div className="flex items-center gap-3">
-                <h1 className="font-display text-[42px] font-black leading-none tracking-[-0.05em] text-foreground sm:text-[48px]">
+                <h1 className="font-display text-[42px] font-bold leading-none tracking-[-0.05em] text-foreground sm:text-[48px]">
                   Vendas
                 </h1>
               </div>
@@ -766,7 +766,7 @@ export default function Vendas() {
                 <p
                   key={`hero-${animKey}`}
                   className={cn(
-                    "vendas-rise font-display text-[56px] font-black leading-none tracking-[-0.06em] tabular-nums sm:text-[68px]",
+                    "vendas-rise font-display text-[56px] font-bold leading-none tracking-[-0.06em] tabular-nums sm:text-[68px]",
                     hidden ? "text-foreground" : "text-success",
                   )}
                   style={{ fontVariantNumeric: "tabular-nums slashed-zero" }}
@@ -774,7 +774,7 @@ export default function Vendas() {
                   {hidden ? HIDE : fmt(m.totalNet)}
                 </p>
                 <div className="flex flex-col gap-1">
-                  <p className="flex items-center gap-1.5 text-[12px] font-black uppercase tracking-widest text-success">
+                  <p className="flex items-center gap-1.5 text-[12px] font-bold uppercase tracking-widest text-success">
                     <span className="inline-block h-2 w-2 rounded-full bg-success animate-pulse" />
                     Receita líquida no período
                   </p>
@@ -803,7 +803,7 @@ export default function Vendas() {
                         key={opt.label}
                         onClick={() => { setSelectedPeriod(opt); setIsCustom(false); setCustomRange(undefined); }}
                         className={cn(
-                          "relative rounded-lg px-3 py-1.5 text-[12px] font-black transition-all duration-200",
+                          "relative rounded-lg px-3 py-1.5 text-[12px] font-bold transition-all duration-200",
                           active
                             ? "bg-success/10 text-success shadow-sm"
                             : "text-muted-foreground/60 hover:text-foreground",
@@ -853,7 +853,7 @@ export default function Vendas() {
 
                   <button
                     onClick={() => setShowExportDialog(true)}
-                    className="inline-flex h-10 items-center gap-2 rounded-xl bg-[#2563eb] px-5 text-[13px] font-black tracking-tight text-white transition-all duration-200 hover:bg-[#1d4ed8] hover:scale-[1.02] active:scale-[0.98] shadow-lg shadow-blue-500/20"
+                    className="inline-flex h-10 items-center gap-2 rounded-xl bg-primary px-5 text-[13px] font-bold tracking-tight text-primary-foreground transition-all duration-200 hover:bg-primary/90 hover:scale-[1.02] active:scale-[0.98] shadow-lg shadow-primary/20"
                   >
                     <Download className="h-[16px] w-[16px]" strokeWidth={2.8} />
                     Exportar
@@ -879,9 +879,9 @@ export default function Vendas() {
                   idx === 3 && "vendas-rise-d3"
                 )}
               >
-                <p className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/50">{k.label}</p>
+                <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground/50">{k.label}</p>
                 <div className="mt-3 flex items-baseline gap-2">
-                  <p className={cn("font-display text-[32px] font-black leading-none tracking-[-0.04em] tabular-nums sm:text-[36px]", k.accent)}>
+                  <p className={cn("font-display text-[32px] font-bold leading-none tracking-[-0.04em] tabular-nums sm:text-[36px]", k.accent)}>
                     {k.value}
                   </p>
                 </div>
@@ -909,10 +909,10 @@ export default function Vendas() {
                 )}
               >
                 <div className="space-y-1">
-                  <p className="font-display text-[15px] font-black tracking-[-0.02em] text-foreground/90">{r.label}</p>
+                  <p className="font-display text-[15px] font-bold tracking-[-0.02em] text-foreground/90">{r.label}</p>
                   <p className="text-[11px] font-bold text-muted-foreground/60 uppercase tracking-wider">{r.sub}</p>
                 </div>
-                <p className={cn("font-display text-[20px] font-black leading-none tabular-nums tracking-[-0.04em]", r.accent)}>
+                <p className={cn("font-display text-[20px] font-bold leading-none tabular-nums tracking-[-0.04em]", r.accent)}>
                   {r.value}
                 </p>
               </div>
@@ -949,16 +949,16 @@ export default function Vendas() {
           <div className="relative border-b border-border/70 px-6 pt-6 pb-5">
             <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
               <div className="min-w-0">
-                <h2 className="font-display text-[32px] font-black leading-[0.9] tracking-[-0.055em] text-foreground sm:text-[38px]">
+                <h2 className="font-display text-[32px] font-bold leading-[0.9] tracking-[-0.055em] text-foreground sm:text-[38px]">
                   Extrato de Vendas
                 </h2>
                 <div className="mt-3 flex flex-wrap items-center gap-x-5 gap-y-1.5">
                   <span className="text-[12px] font-semibold text-muted-foreground/85">
-                    <span className="font-numbers font-black tabular-nums text-foreground">{sortedFiltered.length.toLocaleString("pt-BR")}</span> {sortedFiltered.length === 1 ? "resultado" : "resultados"}
+                    <span className="font-numbers font-bold tabular-nums text-foreground">{sortedFiltered.length.toLocaleString("pt-BR")}</span> {sortedFiltered.length === 1 ? "resultado" : "resultados"}
                   </span>
                   <span className="h-3 w-px bg-border/70" />
                   <span className="text-[12px] font-semibold text-muted-foreground/85">
-                    Líquido <span className="font-numbers font-black tabular-nums text-success" style={{ fontVariantNumeric: "tabular-nums slashed-zero" }}>{hidden ? HIDE : fmt(filteredNetTotal)}</span>
+                    Líquido <span className="font-numbers font-bold tabular-nums text-success" style={{ fontVariantNumeric: "tabular-nums slashed-zero" }}>{hidden ? HIDE : fmt(filteredNetTotal)}</span>
                   </span>
                 </div>
               </div>
@@ -1008,7 +1008,7 @@ export default function Vendas() {
                     <span>{tab.label}</span>
                     <span
                       className={cn(
-                        "ml-0.5 inline-flex h-[18px] min-w-[22px] items-center justify-center rounded-md px-1.5 text-[10.5px] font-black tabular-nums leading-none transition-colors",
+                        "ml-0.5 inline-flex h-[18px] min-w-[22px] items-center justify-center rounded-md px-1.5 text-[10.5px] font-bold tabular-nums leading-none transition-colors",
                         active
                           ? "bg-primary text-primary-foreground"
                           : "bg-muted/60 text-muted-foreground/85 group-hover:bg-muted",
@@ -1039,8 +1039,8 @@ export default function Vendas() {
                       <tr className="border-b border-border/70 bg-muted/15">
                         <SortHead label="Cliente" field="customer" sort={sort} onSort={handleSort} className="pl-5" />
                         <SortHead label="Produto / Data" field="date" sort={sort} onSort={handleSort} />
-                        <th className="px-3 py-3 text-left text-[10px] font-black uppercase tracking-[0.16em] text-muted-foreground/90">Status</th>
-                        <th className="px-3 py-3 text-left text-[10px] font-black uppercase tracking-[0.16em] text-muted-foreground/90">Método</th>
+                        <th className="px-3 py-3 text-left text-[10px] font-bold uppercase tracking-[0.16em] text-muted-foreground/90">Status</th>
+                        <th className="px-3 py-3 text-left text-[10px] font-bold uppercase tracking-[0.16em] text-muted-foreground/90">Método</th>
                         <SortHead label="Bruto / Taxa" field="amount" sort={sort} onSort={handleSort} align="right" />
                         <SortHead label="Líquido" field="net" sort={sort} onSort={handleSort} align="right" />
                         <th className="w-12" />

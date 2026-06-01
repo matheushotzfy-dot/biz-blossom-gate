@@ -134,8 +134,8 @@ function DashboardLayoutInner() {
                 <span className="text-[12px] font-medium tracking-tight flex-1 text-left hidden sm:inline truncate">O que você está procurando?</span>
                 <span className="text-[12px] font-medium tracking-tight flex-1 text-left sm:hidden">Buscar...</span>
                 <div className="hidden lg:flex items-center gap-1.5 px-1.5 py-0.5 rounded-lg bg-background/50 border border-border/40 shadow-sm">
-                  <span className="text-[9px] font-black text-muted-foreground/30">⌘</span>
-                  <span className="text-[9px] font-black text-muted-foreground/30">K</span>
+                  <span className="text-[9px] font-bold text-muted-foreground/30">⌘</span>
+                  <span className="text-[9px] font-bold text-muted-foreground/30">K</span>
                 </div>
               </button>
             </div>
@@ -148,9 +148,9 @@ function DashboardLayoutInner() {
                   <div className="flex h-7 w-7 items-center justify-center rounded-xl bg-primary/10 text-primary shadow-sm border border-primary/10 group-hover/balance:scale-110 transition-transform duration-500">
                     <Wallet className="h-4 w-4" strokeWidth={2.5} />
                   </div>
-                  <span className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/40 group-hover/balance:text-muted-foreground/70 transition-colors">Saldo</span>
+                  <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground/40 group-hover/balance:text-muted-foreground/70 transition-colors">Saldo</span>
                 </div>
-                <span className="text-[16px] font-display font-black text-foreground tabular-nums tracking-[-0.03em] relative z-10">
+                <span className="text-[16px] font-display font-bold text-foreground tabular-nums tracking-[-0.03em] relative z-10">
                   {privacyHidden ? "••••••" : formatBRL(Math.max(balance, 0))}
                 </span>
                 <button 
@@ -242,7 +242,7 @@ function DashboardLayoutInner() {
  <div className="mx-auto mb-5 h-20 w-20 rounded-full bg-primary/10 flex items-center justify-center">
  <CheckCircle2 className="h-10 w-10 text-primary" />
  </div>
- <h2 className="text-2xl font-display font-black text-foreground mb-2">CONTA APROVADA! ✅</h2>
+ <h2 className="text-2xl font-display font-bold text-foreground mb-2">CONTA APROVADA! ✅</h2>
  <p className="text-muted-foreground text-sm mb-6">
  Sua conta foi verificada com sucesso. Agora você pode realizar saques e utilizar todas as funcionalidades da plataforma!
  </p>

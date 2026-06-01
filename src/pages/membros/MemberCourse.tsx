@@ -183,11 +183,11 @@ export default function MemberCourse() {
           className="hidden lg:flex flex-col h-full bg-[#080808] border-r border-white/5 relative z-20"
         >
           <div className="p-8 border-b border-white/5 bg-gradient-to-b from-white/[0.02] to-transparent">
-            <Link to="/membros-area" className="flex items-center gap-2 text-zinc-500 hover:text-white transition-colors mb-6 text-[10px] font-black uppercase tracking-widest">
+            <Link to="/membros-area" className="flex items-center gap-2 text-zinc-500 hover:text-white transition-colors mb-6 text-[10px] font-bold uppercase tracking-widest">
               <ChevronLeft className="h-4 w-4" />
               Voltar ao Início
             </Link>
-            <h2 className="font-display text-2xl font-black text-white leading-tight tracking-tight mb-4">{course.title}</h2>
+            <h2 className="font-display text-2xl font-bold text-white leading-tight tracking-tight mb-4">{course.title}</h2>
             <div className="flex items-center justify-between mb-2">
               <span className="text-[10px] text-zinc-500 font-bold uppercase tracking-widest">Seu progresso</span>
               <span className="text-xs font-mono font-bold text-emerald-400">{overallPct}%</span>
@@ -205,10 +205,10 @@ export default function MemberCourse() {
                   className="w-full px-8 py-4 flex items-center justify-between hover:bg-white/[0.03] transition-colors group"
                 >
                   <div className="flex items-center gap-4">
-                    <div className="h-8 w-8 rounded-lg bg-zinc-900 border border-white/5 flex items-center justify-center text-[10px] font-black text-zinc-500 group-hover:text-white transition-colors">
+                    <div className="h-8 w-8 rounded-lg bg-zinc-900 border border-white/5 flex items-center justify-center text-[10px] font-bold text-zinc-500 group-hover:text-white transition-colors">
                       {String(modIdx + 1).padStart(2, '0')}
                     </div>
-                    <span className="text-[13px] font-black uppercase tracking-widest text-zinc-300 group-hover:text-white transition-colors truncate max-w-[200px]">
+                    <span className="text-[13px] font-bold uppercase tracking-widest text-zinc-300 group-hover:text-white transition-colors truncate max-w-[200px]">
                       {mod.title}
                     </span>
                   </div>
@@ -263,8 +263,8 @@ export default function MemberCourse() {
               </button>
             )}
             <div>
-              <p className="text-[9px] font-black uppercase tracking-[0.3em] text-zinc-500 mb-1">Módulo atual</p>
-              <h3 className="text-sm font-black text-white uppercase tracking-tight truncate max-w-xs lg:max-w-md">
+              <p className="text-[9px] font-bold uppercase tracking-[0.3em] text-zinc-500 mb-1">Módulo atual</p>
+              <h3 className="text-sm font-bold text-white uppercase tracking-tight truncate max-w-xs lg:max-w-md">
                 {modules.find(m => m.id === activeLesson?.module_id)?.title || "Carregando..."}
               </h3>
             </div>
@@ -301,7 +301,7 @@ export default function MemberCourse() {
                     <div className="h-24 w-24 rounded-full bg-white/5 flex items-center justify-center mb-8">
                       <FileText className="h-10 w-10 text-zinc-700" />
                     </div>
-                    <h2 className="text-3xl font-display font-black mb-4">Material de Leitura</h2>
+                    <h2 className="text-3xl font-display font-bold mb-4">Material de Leitura</h2>
                     <p className="text-zinc-500 max-w-sm">Esta aula não possui vídeo. Acompanhe o conteúdo textual abaixo em 'Materiais'.</p>
                   </div>
                 )}
@@ -310,7 +310,7 @@ export default function MemberCourse() {
               {/* Bottom bar for player info */}
               {!theaterMode && (
                 <div className="absolute -bottom-6 left-12 right-12 h-12 bg-white/10 backdrop-blur-3xl rounded-2xl border border-white/10 z-10 flex items-center justify-between px-6 opacity-0 group-hover/player:opacity-100 transition-opacity">
-                  <div className="flex items-center gap-4 text-[10px] font-black uppercase tracking-widest">
+                  <div className="flex items-center gap-4 text-[10px] font-bold uppercase tracking-widest">
                     <span className="text-zinc-400">Pressione <kbd className="bg-white/20 px-1 rounded">C</kbd> para concluir</span>
                     <span className="h-1 w-1 rounded-full bg-zinc-800" />
                     <span className="text-zinc-400">Pressione <kbd className="bg-white/20 px-1 rounded">T</kbd> para teatro</span>
@@ -328,14 +328,14 @@ export default function MemberCourse() {
               <div className="flex flex-col md:flex-row md:items-end justify-between gap-8 mb-16">
                 <div className="max-w-2xl">
                   <div className="flex items-center gap-3 mb-6">
-                    <span className="px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-[10px] font-black uppercase tracking-widest text-emerald-400">
+                    <span className="px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-[10px] font-bold uppercase tracking-widest text-emerald-400">
                       Aula Premium
                     </span>
-                    <span className="text-zinc-600 text-[10px] font-black uppercase tracking-widest">
+                    <span className="text-zinc-600 text-[10px] font-bold uppercase tracking-widest">
                       {activeLesson?.duration_minutes} min de conteúdo
                     </span>
                   </div>
-                  <h1 className="text-4xl md:text-6xl font-display font-black text-white tracking-tight leading-none mb-6">
+                  <h1 className="text-4xl md:text-6xl font-display font-bold text-white tracking-tight leading-none mb-6">
                     {activeLesson?.title}
                   </h1>
                 </div>
@@ -348,7 +348,7 @@ export default function MemberCourse() {
                     onClick={() => markComplete(activeLesson!.id)}
                     disabled={progress.get(activeLesson?.id || "")?.completed}
                     className={cn(
-                      "h-16 px-10 rounded-2xl font-display font-black text-lg transition-all active:scale-95 shadow-2xl flex items-center gap-4",
+                      "h-16 px-10 rounded-2xl font-display font-bold text-lg transition-all active:scale-95 shadow-2xl flex items-center gap-4",
                       progress.get(activeLesson?.id || "")?.completed
                         ? "bg-emerald-500/10 text-emerald-500 border border-emerald-500/20"
                         : "bg-white text-black hover:bg-zinc-200"
@@ -375,7 +375,7 @@ export default function MemberCourse() {
                     key={tab.id}
                     onClick={() => setActiveTab(tab.id as any)}
                     className={cn(
-                      "pb-6 text-[11px] font-black uppercase tracking-[0.2em] relative transition-colors",
+                      "pb-6 text-[11px] font-bold uppercase tracking-[0.2em] relative transition-colors",
                       activeTab === tab.id ? "text-white" : "text-zinc-600 hover:text-zinc-400"
                     )}
                   >
@@ -405,7 +405,7 @@ export default function MemberCourse() {
                           <GraduationCap className="h-6 w-6 text-emerald-500" />
                         </div>
                         <div>
-                          <h4 className="text-sm font-black text-white uppercase tracking-widest mb-2">Dica de Estudo</h4>
+                          <h4 className="text-sm font-bold text-white uppercase tracking-widest mb-2">Dica de Estudo</h4>
                           <p className="text-zinc-500 text-sm leading-relaxed">
                             Mantenha o foco e anote os pontos principais. Você pode usar a aba de 'Anotações' ao lado para marcar momentos específicos do vídeo.
                           </p>
@@ -430,7 +430,7 @@ export default function MemberCourse() {
                             </div>
                             <div>
                               <p className="text-sm font-bold text-white mb-1 line-clamp-1">{att.file_name}</p>
-                              <p className="text-[10px] text-zinc-600 font-black uppercase tracking-widest">Baixar Material</p>
+                              <p className="text-[10px] text-zinc-600 font-bold uppercase tracking-widest">Baixar Material</p>
                             </div>
                           </div>
                           <ExternalLink className="h-4 w-4 text-zinc-700 group-hover:text-white transition-colors" />
@@ -468,9 +468,9 @@ export default function MemberCourse() {
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-[100] bg-black/95 backdrop-blur-xl flex items-center justify-center p-10 text-center">
             <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }}>
               <Trophy className="h-32 w-32 text-emerald-400 mx-auto mb-10" />
-              <h2 className="text-6xl font-display font-black mb-4">Incrível!</h2>
+              <h2 className="text-6xl font-display font-bold mb-4">Incrível!</h2>
               <p className="text-zinc-400 text-xl max-w-md mx-auto mb-12">Você acaba de concluir mais um passo na sua jornada. Continue focado!</p>
-              <button onClick={() => setShowCelebration(false)} className="px-12 py-5 bg-white text-black font-black rounded-2xl hover:scale-105 transition-transform">
+              <button onClick={() => setShowCelebration(false)} className="px-12 py-5 bg-white text-black font-bold rounded-2xl hover:scale-105 transition-transform">
                 Continuar Estudando
               </button>
             </motion.div>

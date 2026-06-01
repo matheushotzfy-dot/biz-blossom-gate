@@ -148,7 +148,7 @@ export default function MemberHome() {
           <div className="h-12 w-12 rounded-xl border border-primary/20 bg-primary/5 flex items-center justify-center animate-pulse">
             <PlayCircle className="h-6 w-6 text-primary" />
           </div>
-          <p className="text-sm font-black text-zinc-500 uppercase tracking-widest">Preparando seu dashboard...</p>
+          <p className="text-sm font-bold text-zinc-500 uppercase tracking-widest">Preparando seu dashboard...</p>
         </div>
       </div>
     );
@@ -160,11 +160,11 @@ export default function MemberHome() {
       <section>
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
           <div>
-            <p className="text-[10px] font-black uppercase tracking-[0.3em] text-primary mb-2 flex items-center gap-2">
+            <p className="text-[10px] font-bold uppercase tracking-[0.3em] text-primary mb-2 flex items-center gap-2">
               <Sparkles className="h-3 w-3" />
               Bem-vindo de volta
             </p>
-            <h1 className="text-4xl md:text-5xl font-black tracking-tighter text-white">
+            <h1 className="text-4xl md:text-5xl font-bold tracking-tighter text-white">
               {greeting}, <span className="text-zinc-400">{displayName}</span>
             </h1>
           </div>
@@ -202,11 +202,11 @@ export default function MemberHome() {
       {featured && (
         <section>
           <div className="flex items-center justify-between mb-6">
-            <h2 className="text-xl font-black text-white flex items-center gap-3">
+            <h2 className="text-xl font-bold text-white flex items-center gap-3">
               <Clock className="h-5 w-5 text-primary" />
               Continue de onde parou
             </h2>
-            <Link to="/membros-area/cursos" className="text-[11px] font-black uppercase tracking-widest text-zinc-500 hover:text-primary transition-colors flex items-center gap-2">
+            <Link to="/membros-area/cursos" className="text-[11px] font-bold uppercase tracking-widest text-zinc-500 hover:text-primary transition-colors flex items-center gap-2">
               Ver todos <ArrowRight className="h-3 w-3" />
             </Link>
           </div>
@@ -227,15 +227,15 @@ export default function MemberHome() {
               {/* Content Side */}
               <div className="lg:w-1/2 p-8 lg:p-14 flex flex-col justify-center">
                 <div className="flex items-center gap-3 mb-6">
-                  <span className="px-3 py-1 rounded-full bg-primary/10 border border-primary/20 text-[10px] font-black uppercase tracking-widest text-primary">
+                  <span className="px-3 py-1 rounded-full bg-primary/10 border border-primary/20 text-[10px] font-bold uppercase tracking-widest text-primary">
                     {featured.category}
                   </span>
-                  <span className="text-[10px] font-black uppercase tracking-widest text-zinc-600">
+                  <span className="text-[10px] font-bold uppercase tracking-widest text-zinc-600">
                     {featured.moduleCount} Módulos
                   </span>
                 </div>
                 
-                <h3 className="text-3xl md:text-5xl font-black tracking-tighter text-white mb-6">
+                <h3 className="text-3xl md:text-5xl font-bold tracking-tighter text-white mb-6">
                   {featured.title}
                 </h3>
                 
@@ -245,7 +245,7 @@ export default function MemberHome() {
 
                 <div className="space-y-6">
                   <div className="space-y-2">
-                    <div className="flex justify-between text-[11px] font-black uppercase tracking-widest text-zinc-500">
+                    <div className="flex justify-between text-[11px] font-bold uppercase tracking-widest text-zinc-500">
                       <span>Seu progresso</span>
                       <span className="text-emerald-400">{Math.round((featured.completedLessons / featured.totalLessons) * 100)}%</span>
                     </div>
@@ -259,7 +259,7 @@ export default function MemberHome() {
 
                   <Link 
                     to={`/membros-area/curso/${featured.id}${featured.lastLessonId ? `?lesson=${featured.lastLessonId}` : ""}`}
-                    className="inline-flex items-center gap-4 px-10 py-5 bg-white text-black rounded-2xl font-black text-lg transition-all hover:scale-[1.02] active:scale-[0.98] shadow-[0_20px_40px_rgba(255,255,255,0.1)]"
+                    className="inline-flex items-center gap-4 px-10 py-5 bg-white text-black rounded-2xl font-bold text-lg transition-all hover:scale-[1.02] active:scale-[0.98] shadow-[0_20px_40px_rgba(255,255,255,0.1)]"
                   >
                     <Play className="h-6 w-6 fill-current" />
                     Continuar Aula
@@ -274,7 +274,7 @@ export default function MemberHome() {
       {/* ═══ Main Library ═══ */}
       <section className="space-y-8">
         <div className="flex items-center justify-between">
-          <h2 className="text-2xl font-black text-white flex items-center gap-3">
+          <h2 className="text-2xl font-bold text-white flex items-center gap-3">
             <LayoutGrid className="h-6 w-6 text-primary" />
             Minha Biblioteca
           </h2>
@@ -303,7 +303,7 @@ export default function MemberHome() {
         <section className="bg-white/[0.02] border border-white/5 rounded-[2.5rem] p-8 lg:p-12">
           <div className="flex items-center justify-between mb-10">
             <div>
-              <h2 className="text-2xl font-black text-white">Certificações</h2>
+              <h2 className="text-2xl font-bold text-white">Certificações</h2>
               <p className="text-zinc-500 text-sm mt-1">Seu histórico de conquistas e domínio de habilidades</p>
             </div>
             <Award className="h-10 w-10 text-orange-400 opacity-20" />
@@ -317,8 +317,8 @@ export default function MemberHome() {
                     <Award className="h-7 w-7" />
                   </div>
                   <div>
-                    <h4 className="font-black text-white tracking-tight">{cert.course_title}</h4>
-                    <p className="text-[10px] font-black uppercase tracking-widest text-zinc-600 mt-1">Concedido em {new Date(cert.issued_at).toLocaleDateString("pt-BR")}</p>
+                    <h4 className="font-bold text-white tracking-tight">{cert.course_title}</h4>
+                    <p className="text-[10px] font-bold uppercase tracking-widest text-zinc-600 mt-1">Concedido em {new Date(cert.issued_at).toLocaleDateString("pt-BR")}</p>
                   </div>
                 </div>
                 <button aria-label={`Ver certificado de ${cert.course_title}`} className="h-10 w-10 rounded-xl bg-white/5 flex items-center justify-center text-zinc-400 group-hover:text-white transition-colors">
@@ -370,14 +370,14 @@ function CourseCard({ course, index }: { course: Course; index: number }) {
 
         <div className="p-6 flex flex-col flex-1">
           <div className="flex items-center justify-between mb-4">
-            <span className="text-[10px] font-black uppercase tracking-widest text-primary">{course.category}</span>
-            <div className="flex items-center gap-1 text-[10px] font-black text-zinc-600">
+            <span className="text-[10px] font-bold uppercase tracking-widest text-primary">{course.category}</span>
+            <div className="flex items-center gap-1 text-[10px] font-bold text-zinc-600">
                <Clock className="h-3 w-3" />
                {course.totalLessons} Aulas
             </div>
           </div>
           
-          <h3 className="text-lg font-black text-white tracking-tight leading-snug line-clamp-2 mb-4 group-hover:text-primary transition-colors">
+          <h3 className="text-lg font-bold text-white tracking-tight leading-snug line-clamp-2 mb-4 group-hover:text-primary transition-colors">
             {course.title}
           </h3>
 
@@ -389,7 +389,7 @@ function CourseCard({ course, index }: { course: Course; index: number }) {
                 </div>
               ))}
             </div>
-            <div className="text-[10px] font-black uppercase tracking-widest text-zinc-500">
+            <div className="text-[10px] font-bold uppercase tracking-widest text-zinc-500">
               {pct === 100 ? "Concluído" : pct > 0 ? `${pct}%` : "Começar"}
             </div>
           </div>
@@ -414,15 +414,15 @@ function CourseListRow({ course, index }: { course: Course; index: number }) {
       </div>
       
       <div className="flex-1 min-w-0">
-        <h4 className="text-white font-black tracking-tight truncate group-hover:text-primary transition-colors">{course.title}</h4>
+        <h4 className="text-white font-bold tracking-tight truncate group-hover:text-primary transition-colors">{course.title}</h4>
         <div className="flex items-center gap-4 mt-1">
-          <span className="text-[10px] font-black uppercase tracking-widest text-primary">{course.category}</span>
-          <span className="text-[10px] font-black uppercase tracking-widest text-zinc-600">{course.totalLessons} Aulas</span>
+          <span className="text-[10px] font-bold uppercase tracking-widest text-primary">{course.category}</span>
+          <span className="text-[10px] font-bold uppercase tracking-widest text-zinc-600">{course.totalLessons} Aulas</span>
         </div>
       </div>
 
       <div className="w-48 hidden md:block">
-        <div className="flex justify-between text-[10px] font-black uppercase tracking-widest text-zinc-600 mb-1.5">
+        <div className="flex justify-between text-[10px] font-bold uppercase tracking-widest text-zinc-600 mb-1.5">
           <span>Progresso</span>
           <span>{pct}%</span>
         </div>

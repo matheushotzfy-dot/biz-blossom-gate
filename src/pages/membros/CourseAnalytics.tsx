@@ -85,7 +85,7 @@ export default function CourseAnalytics() {
         <div className="flex items-start justify-between mb-8">
           <div>
             <p className="text-xs font-display font-bold text-muted-foreground/60 uppercase tracking-wider mb-1">Analytics do curso</p>
-            <h1 className="text-3xl font-display font-black text-foreground tracking-tight">{course?.title || "Curso"}</h1>
+            <h1 className="text-3xl font-display font-bold text-foreground tracking-tight">{course?.title || "Curso"}</h1>
           </div>
           <TrendingUp className="h-8 w-8 text-primary/60" />
         </div>
@@ -97,21 +97,21 @@ export default function CourseAnalytics() {
                 <span className="text-[11px] font-display font-bold text-muted-foreground uppercase tracking-wider">{c.label}</span>
                 <c.icon className={`h-4 w-4 ${c.color}`} />
               </div>
-              <p className="text-2xl font-display font-black text-foreground tabular-nums">{c.value}</p>
+              <p className="text-2xl font-display font-bold text-foreground tabular-nums">{c.value}</p>
               {c.sub && <p className="text-[11px] text-muted-foreground/70 font-display mt-0.5">{c.sub}</p>}
             </div>
           ))}
         </div>
 
         <div className="rounded-xl border border-border/15 bg-card/30 p-5">
-          <h2 className="font-display font-black text-foreground text-sm tracking-tight mb-3">Top 10 alunos</h2>
+          <h2 className="font-display font-bold text-foreground text-sm tracking-tight mb-3">Top 10 alunos</h2>
           {students.length === 0 ? (
             <p className="text-xs text-muted-foreground/60 font-display italic py-3 text-center">Sem dados de progresso ainda.</p>
           ) : (
             <ul className="divide-y divide-border/10">
               {students.map((s, i) => (
                 <li key={s.user_id} className="py-2.5 flex items-center gap-3">
-                  <span className="h-7 w-7 rounded-md bg-primary/10 text-primary text-xs font-display font-black flex items-center justify-center shrink-0">#{i + 1}</span>
+                  <span className="h-7 w-7 rounded-md bg-primary/10 text-primary text-xs font-display font-bold flex items-center justify-center shrink-0">#{i + 1}</span>
                   <span className="flex-1 font-mono text-xs text-muted-foreground truncate">{s.user_id.slice(0, 8)}…</span>
                   <span className="font-display font-bold text-xs text-foreground tabular-nums">{s.lessons_completed} aulas</span>
                   <span className="text-[10px] text-muted-foreground/60 font-mono">{new Date(s.last_activity).toLocaleDateString("pt-BR")}</span>

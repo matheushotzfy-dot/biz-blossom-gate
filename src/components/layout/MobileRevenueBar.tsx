@@ -43,7 +43,7 @@ export function MobileRevenueBar() {
  {/* Logo */}
  <div className="flex items-center gap-2 shrink-0">
  <img src={hotzfyLogo} alt="HOTZFY" className="h-7 w-7 rounded-lg object-contain" />
- <span className="text-sm font-display font-black text-foreground tracking-tight">HOTZFY</span>
+ <span className="text-sm font-display font-bold text-foreground tracking-tight">HOTZFY</span>
  </div>
 
  <div className="flex-1" />
@@ -54,7 +54,7 @@ export function MobileRevenueBar() {
  {loading ? (
  <span className="h-3 w-10 rounded bg-primary/20 animate-pulse" />
  ) : (
- <span className="text-[11px] font-black font-numbers text-primary tabular-nums">{fmtCompact(revenue)}</span>
+ <span className="text-[11px] font-bold font-numbers text-primary tabular-nums">{fmtCompact(revenue)}</span>
  )}
  </div>
 
