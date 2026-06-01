@@ -286,37 +286,35 @@ export default function Perfil() {
         status={{ tone: accStatus.tone === "destructive" ? "destructive" : accStatus.tone, label: `Conta ${accStatus.label}`, pulse: accStatus.tone === "warning" }}
       />
 
-      {/* KPI GRID */}
-      <FinanceiroKpiGrid cols={4}>
-        <FinanceiroKpi
-          label="Receita líquida"
-          value={fmtCompact(allTimeRevenue)}
-          sub={`Tier ${tierLabel}`}
-          icon={TrendingUp}
-          tone="success"
-        />
-        <FinanceiroKpi
-          label="Vendas aprovadas"
-          value={totalSales.toLocaleString("pt-BR")}
-          sub={`${last30Sales} nos últimos 30D`}
-          icon={Receipt}
-          tone="info"
-        />
-        <FinanceiroKpi
-          label="Membro há"
-          value={`${memberDays}d`}
-          sub={profile?.created_at ? new Date(profile.created_at).toLocaleDateString("pt-BR") : "—"}
-          icon={Calendar}
-          tone="neutral"
-        />
-        <FinanceiroKpi
-          label="Próxima meta"
-          value={milestone.next.label}
-          sub={`${milestone.pct.toFixed(0)}% concluído`}
-          icon={Trophy}
-          tone="primary"
-        />
-      </FinanceiroKpiGrid>
+      {/* Quick info strip */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+        <div className="rounded-xl border border-border/50 bg-card p-4">
+          <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.14em]">Membro há</p>
+          <p className="text-lg font-display font-black text-foreground tabular-nums mt-1">{memberDays}d</p>
+          <p className="text-[10px] text-muted-foreground/70 mt-0.5">
+            {profile?.created_at ? new Date(profile.created_at).toLocaleDateString("pt-BR") : "—"}
+          </p>
+        </div>
+        <div className="rounded-xl border border-border/50 bg-card p-4">
+          <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.14em]">Vendas</p>
+          <p className="text-lg font-display font-black text-foreground tabular-nums mt-1">{totalSales.toLocaleString("pt-BR")}</p>
+          <p className="text-[10px] text-muted-foreground/70 mt-0.5">{last30Sales} nos últimos 30d</p>
+        </div>
+        <div className="rounded-xl border border-border/50 bg-card p-4">
+          <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.14em]">Tier</p>
+          <p className="text-lg font-display font-black text-foreground mt-1">{tierLabel}</p>
+          <p className="text-[10px] text-muted-foreground/70 mt-0.5">{milestone.pct.toFixed(0)}% até {milestone.next.label}</p>
+        </div>
+        <div className="rounded-xl border border-border/50 bg-card p-4">
+          <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.14em]">Status</p>
+          <p className={cn("text-lg font-display font-black mt-1",
+            accStatus.tone === "success" && "text-success",
+            accStatus.tone === "warning" && "text-warning",
+            accStatus.tone === "destructive" && "text-destructive",
+          )}>{accStatus.label}</p>
+          <p className="text-[10px] text-muted-foreground/70 mt-0.5">Conta verificada via KYC</p>
+        </div>
+      </div>
 
       {/* IDENTITY CARD */}
       <div className="rounded-xl border border-border/50 bg-card overflow-hidden animate-fade-in stagger-2">
