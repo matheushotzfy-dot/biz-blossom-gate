@@ -4,10 +4,11 @@ import { useAuth } from "@/hooks/useAuth";
 import {
   Landmark, CheckCircle2, TrendingUp, Loader2,
   Shield, Zap, Crown, ArrowUpRight, Activity, Info, Layers,
-  ChevronRight, ArrowRight
 } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
+import { FinanceiroHero, FinanceiroKpi, FinanceiroKpiGrid } from "@/components/financeiro/FinanceiroHero";
 
 interface VisibleAcquirer {
   id: string;
@@ -62,179 +63,253 @@ export default function Adquirente() {
   }
 
   const selectedAcq = acquirers.find(a => a.id === currentAcquirerId);
+  const avgConversion = acquirers.length > 0 ? (acquirers.reduce((a, b) => a + b.conversion_rate, 0) / acquirers.length) : 0;
   const bestConversion = acquirers.length > 0 ? Math.max(...acquirers.map(a => a.conversion_rate)) : 0;
+  const deltaVsAvg = selectedAcq ? selectedAcq.conversion_rate - avgConversion : 0;
+  const deltaVsBest = selectedAcq ? selectedAcq.conversion_rate - bestConversion : 0;
 
   return (
-    <div className="mx-auto w-full max-w-[1480px] pb-10">
-      <div className="px-5 pt-4 sm:px-8 sm:pt-6">
-        
-        {/* ─── HEADER PREMIUM ─── */}
-        <header className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 pb-8 border-b border-border/60">
-          <div>
-            <div className="flex items-center gap-2 mb-3">
-              <div className="h-9 w-9 bg-primary/10 border border-primary/25 rounded-xl flex items-center justify-center">
-                <Layers className="h-4 w-4 text-primary" strokeWidth={2.5} />
+    <div className="mx-auto w-full max-w-[1440px] pb-20 space-y-6">
+      <FinanceiroHero
+        title="Adquirente"
+        subtitle="Escolha o processador de pagamentos que roteará suas próximas vendas. Maior conversão = mais aprovações."
+        status={
+          selectedAcq
+            ? { tone: "success", label: `Roteando via ${selectedAcq.name}`, pulse: true }
+            : { tone: "warning", label: "Nenhum processador selecionado" }
+        }
+        actions={
+          selectedAcq?.type === "black" ? (
+            <div className="hidden sm:inline-flex items-center gap-1.5 rounded-xl border border-border/50 bg-card px-3 h-11 text-[11px] font-black uppercase tracking-[0.12em] text-foreground">
+              <Crown className="h-3.5 w-3.5" /> Black tier
+            </div>
+          ) : undefined
+        }
+      />
+
+      {/* KPI Grid */}
+      <FinanceiroKpiGrid cols={4}>
+        <FinanceiroKpi
+          label="Conversão atual"
+          value={selectedAcq ? `${selectedAcq.conversion_rate}%` : "—"}
+          sub={selectedAcq ? `${deltaVsAvg >= 0 ? "+" : ""}${deltaVsAvg.toFixed(1)}pp vs média` : "Selecione um processador"}
+          icon={Activity}
+          tone={selectedAcq && deltaVsAvg >= 0 ? "success" : "neutral"}
+        />
+        <FinanceiroKpi
+          label="vs Melhor"
+          value={selectedAcq ? (deltaVsBest === 0 ? "Top" : `${deltaVsBest.toFixed(1)}pp`) : "—"}
+          sub={selectedAcq && deltaVsBest === 0 ? "Você está no topo" : `Top: ${bestConversion}%`}
+          icon={TrendingUp}
+          tone={selectedAcq && deltaVsBest === 0 ? "success" : "info"}
+        />
+        <FinanceiroKpi
+          label="Conversão média"
+          value={`${avgConversion.toFixed(1)}%`}
+          sub={`Entre ${acquirers.length} processadores`}
+          icon={Activity}
+          tone="info"
+        />
+        <FinanceiroKpi
+          label="Catálogo"
+          value={String(acquirers.length)}
+          sub={`${acquirers.length === 1 ? "Processador disponível" : "Processadores disponíveis"}`}
+          icon={Layers}
+          tone="neutral"
+        />
+      </FinanceiroKpiGrid>
+
+      {/* Selected card */}
+      {selectedAcq && (
+        <section className="rounded-xl border border-primary/30 bg-card overflow-hidden animate-fade-in stagger-2">
+          <div className="flex items-center gap-4 p-5">
+            <div className={cn(
+              "h-14 w-14 rounded-xl flex items-center justify-center shrink-0 border font-display font-black text-lg",
+              selectedAcq.type === "black"
+                ? "bg-foreground/5 border-border text-foreground"
+                : "bg-primary/10 border-primary/30 text-primary"
+            )}>
+              {selectedAcq.name[0]}
+            </div>
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-2 mb-1 flex-wrap">
+                <h2 className="font-display text-[20px] font-black tracking-tight text-foreground">{selectedAcq.name}</h2>
+                <span className="inline-flex items-center gap-1 rounded-md border border-success/20 bg-success/10 px-2 py-0.5 text-[10px] font-black uppercase tracking-[0.12em] text-success">
+                  <span className="h-1.5 w-1.5 rounded-full bg-success animate-pulse" />
+                  Ativo
+                </span>
+                {selectedAcq.type === "black" && (
+                  <span className="inline-flex items-center gap-1 rounded-md border border-border bg-foreground/5 px-2 py-0.5 text-[10px] font-black uppercase tracking-[0.12em] text-foreground">
+                    <Crown className="h-3 w-3" /> Black
+                  </span>
+                )}
               </div>
-              <h1 className="text-[13px] font-black uppercase tracking-[0.18em] text-muted-foreground/80">Roteamento de Vendas</h1>
+              <p className="text-[12px] text-muted-foreground/80 font-medium line-clamp-2">
+                {selectedAcq.description || "Processador ativo para roteamento de novas transações."}
+              </p>
             </div>
-            <div className="mt-4 flex flex-wrap items-end gap-x-12 gap-y-6">
-              <div>
-                <p className="text-[10px] font-black uppercase tracking-[0.15em] text-muted-foreground mb-1">Processador Ativo</p>
-                <h2 className="font-display text-[42px] md:text-[54px] font-black leading-none tracking-[-0.05em] text-foreground">
-                  {selectedAcq?.name || "Nenhum"}
-                </h2>
-              </div>
-              {selectedAcq && (
-                <div>
-                  <p className="text-[10px] font-black uppercase tracking-[0.15em] text-muted-foreground mb-1">Conversão Atual</p>
-                  <h3 className="font-display text-[32px] md:text-[40px] font-black leading-none tracking-[-0.05em] text-success tabular-nums">
-                    {selectedAcq.conversion_rate}%
-                  </h3>
-                </div>
-              )}
-            </div>
-          </div>
-
-          <div className="flex items-center gap-3">
-            <div className="px-4 py-2 rounded-xl bg-muted/40 border border-border/40 flex items-center gap-2.5">
-              <span className="h-2 w-2 bg-emerald-500 rounded-full animate-pulse" />
-              <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Gateway Online</span>
-            </div>
-          </div>
-        </header>
-
-        {/* ─── GRID DE PROCESSADORES ─── */}
-        <div className="mt-10 grid grid-cols-1 lg:grid-cols-12 gap-10">
-          
-          <div className="lg:col-span-8 space-y-6">
-            <div className="flex items-center justify-between mb-4">
-              <div className="flex items-center gap-3">
-                <div className="h-8 w-8 bg-primary/10 rounded-lg flex items-center justify-center text-primary">
-                  <Activity size={16} strokeWidth={2.5} />
-                </div>
-                <h2 className="text-sm font-black uppercase tracking-widest text-foreground">Processadores Disponíveis</h2>
-              </div>
-              <span className="text-[10px] font-black text-muted-foreground bg-muted px-2 py-0.5 rounded-md uppercase tracking-widest">
-                Total: {acquirers.length}
-              </span>
-            </div>
-
-            <div className="grid grid-cols-1 gap-4">
-              {acquirers.map((acq) => {
-                const isSelected = currentAcquirerId === acq.id;
-                const isBlack = acq.type === "black";
-                const isTop = acq.conversion_rate === bestConversion;
-
-                return (
-                  <div
-                    key={acq.id}
-                    onClick={() => !saving && !isSelected && selectAcquirer(acq.id)}
-                    className={cn(
-                      "p-6 rounded-[2rem] border transition-all duration-300 cursor-pointer relative overflow-hidden group",
-                      isSelected 
-                        ? "bg-primary/[0.03] border-primary/40 shadow-lg shadow-primary/5" 
-                        : "bg-card border-border/60 hover:border-primary/30 hover:bg-muted/30"
-                    )}
-                  >
-                    <div className="flex items-center justify-between gap-6 relative z-10">
-                      <div className="flex items-center gap-4 flex-1">
-                        <div className={cn(
-                          "h-14 w-14 rounded-2xl flex items-center justify-center text-xl font-display font-black border transition-transform duration-500 group-hover:scale-110",
-                          isSelected 
-                            ? "bg-primary text-primary-foreground border-transparent" 
-                            : isBlack ? "bg-foreground/5 border-border text-foreground" : "bg-muted border-border/60 text-muted-foreground"
-                        )}>
-                          {acq.name[0]}
-                        </div>
-                        <div>
-                          <div className="flex items-center gap-2 flex-wrap">
-                            <h3 className="font-display font-black text-lg text-foreground tracking-tight">{acq.name}</h3>
-                            {isBlack && (
-                              <span className="px-2 py-0.5 rounded-md bg-foreground/5 border border-border text-[9px] font-black uppercase tracking-widest">
-                                <Crown size={10} className="inline mr-1" /> Black
-                              </span>
-                            )}
-                            {isTop && !isSelected && (
-                              <span className="px-2 py-0.5 rounded-md bg-success/10 border border-success/20 text-[9px] font-black uppercase tracking-widest text-success">
-                                Top Conversão
-                              </span>
-                            )}
-                          </div>
-                          <p className="text-[11px] text-muted-foreground font-bold leading-relaxed mt-1 line-clamp-1">
-                            {acq.description || "Processador de alta performance para roteamento dinâmico."}
-                          </p>
-                        </div>
-                      </div>
-
-                      <div className="flex items-center gap-8 shrink-0">
-                        <div className="text-right">
-                          <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground mb-1 opacity-50">Taxa de Conversão</p>
-                          <p className={cn(
-                            "text-2xl font-black tabular-nums tracking-tighter",
-                            isSelected ? "text-primary" : isTop ? "text-success" : "text-foreground"
-                          )}>
-                            {acq.conversion_rate}%
-                          </p>
-                        </div>
-                        
-                        <div className={cn(
-                          "h-10 w-10 rounded-xl flex items-center justify-center transition-all",
-                          isSelected ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground group-hover:bg-primary/20 group-hover:text-primary"
-                        )}>
-                          {isSelected ? <CheckCircle2 size={20} /> : <ArrowRight size={20} />}
-                        </div>
-                      </div>
-                    </div>
-                    {isSelected && (
-                      <div className="absolute right-[-20px] bottom-[-20px] opacity-[0.03] rotate-[-15deg]">
-                        <CheckCircle2 size={160} />
-                      </div>
-                    )}
-                  </div>
-                );
-              })}
+            <div className="text-right shrink-0">
+              <p className="text-[10px] font-black uppercase tracking-[0.16em] text-muted-foreground mb-1">Conversão</p>
+              <p className="font-display text-[32px] font-black text-success leading-none tabular-nums">
+                {selectedAcq.conversion_rate}<span className="text-[16px] text-success/70 font-bold">%</span>
+              </p>
             </div>
           </div>
+        </section>
+      )}
 
-          <div className="lg:col-span-4 space-y-6">
-            <div className="p-8 rounded-[2rem] bg-card border border-border/60 space-y-6 shadow-sm">
-              <div className="flex items-center gap-3">
-                <div className="h-10 w-10 bg-primary/10 rounded-xl flex items-center justify-center text-primary">
-                  <Shield size={20} />
-                </div>
-                <h3 className="font-black text-foreground uppercase tracking-widest text-[11px]">Segurança & Roteamento</h3>
-              </div>
-              
-              <div className="space-y-4">
-                {[
-                  { icon: Zap, label: "Roteamento Inteligente", desc: "Aplicação imediata em novas vendas.", color: "text-info" },
-                  { icon: TrendingUp, label: "Foco em Conversão", desc: "Gateways otimizados para aprovação.", color: "text-success" },
-                  { icon: Landmark, label: "Payout Automático", desc: "Saldo liberado conforme adquirente.", color: "text-primary" }
-                ].map((item, idx) => (
-                  <div key={idx} className="flex gap-4 p-4 rounded-2xl bg-muted/30 border border-border/40 transition-colors hover:bg-muted/50">
-                    <item.icon className={cn("h-5 w-5 shrink-0 mt-0.5", item.color)} />
-                    <div>
-                      <p className="text-[12px] font-black text-foreground uppercase tracking-tight">{item.label}</p>
-                      <p className="text-[11px] text-muted-foreground font-medium mt-1 leading-relaxed">{item.desc}</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-
-              <div className="p-4 rounded-2xl bg-primary/5 border border-primary/10">
-                <div className="flex items-center gap-2 mb-2">
-                  <Info size={14} className="text-primary" />
-                  <p className="text-[10px] font-black text-primary uppercase tracking-widest">Informação Importante</p>
-                </div>
-                <p className="text-[10px] text-muted-foreground font-bold leading-relaxed">
-                  A troca de adquirente é processada instantaneamente. Vendas já realizadas continuam no processador de origem até o payout.
-                </p>
-              </div>
-            </div>
+      {/* Acquirers list */}
+      {acquirers.length === 0 ? (
+        <div className="rounded-2xl border border-border/50 bg-card p-16 flex flex-col items-center gap-4">
+          <div className="h-16 w-16 rounded-2xl bg-secondary border border-border/50 flex items-center justify-center">
+            <Landmark className="h-7 w-7 text-muted-foreground/60" />
           </div>
-
+          <p className="text-[14px] text-foreground font-display font-bold">Nenhuma adquirente disponível</p>
+          <p className="text-[12px] text-muted-foreground/70 font-medium">O administrador ainda não liberou processadores para seleção.</p>
         </div>
-      </div>
+      ) : (
+        <section className="rounded-xl border border-border/50 bg-card overflow-hidden animate-fade-in stagger-3">
+          <div className="flex items-center justify-between px-5 py-3.5 border-b border-border/50">
+            <div className="flex items-center gap-2.5">
+              <div className="h-7 w-7 rounded-md bg-primary/10 text-primary flex items-center justify-center">
+                <Activity className="h-3.5 w-3.5" strokeWidth={2.25} />
+              </div>
+              <div>
+                <h2 className="text-[14px] font-display font-black text-foreground tracking-[-0.01em]">Processadores disponíveis</h2>
+                <p className="text-[11px] text-muted-foreground/70 font-medium">Ordenados por taxa de conversão · Clique para selecionar</p>
+              </div>
+            </div>
+            <span className="text-[10px] font-black tabular-nums text-muted-foreground bg-secondary/60 px-1.5 py-0.5 rounded">
+              {acquirers.length}
+            </span>
+          </div>
+
+          <div className="divide-y divide-border/40">
+            {acquirers.map((acq) => {
+              const isSelected = currentAcquirerId === acq.id;
+              const isBlack = acq.type === "black";
+              const isTop = acq.conversion_rate === bestConversion;
+              const conversionPct = bestConversion > 0 ? (acq.conversion_rate / bestConversion) * 100 : 0;
+
+              return (
+                <div
+                  key={acq.id}
+                  onClick={() => !saving && !isSelected && selectAcquirer(acq.id)}
+                  className={cn(
+                    "px-5 py-4 transition-colors duration-200 group cursor-pointer",
+                    isSelected ? "bg-primary/5" : "hover:bg-secondary/30"
+                  )}
+                >
+                  <div className="flex items-center justify-between gap-4">
+                    <div className="flex items-center gap-3.5 min-w-0 flex-1">
+                      <div className={cn(
+                        "h-11 w-11 rounded-xl flex items-center justify-center text-base font-display font-black shrink-0 border",
+                        isSelected
+                          ? "bg-primary/10 border-primary/30 text-primary"
+                          : isBlack
+                            ? "bg-foreground/5 border-border text-foreground"
+                            : "bg-secondary border-border/50 text-foreground/80"
+                      )}>
+                        {acq.name[0]}
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <div className="flex items-center gap-2 mb-1 flex-wrap">
+                          <h3 className="font-display font-black text-foreground text-[14px] tracking-tight">{acq.name}</h3>
+                          <span className={cn(
+                            "inline-flex items-center gap-1 rounded-md border px-1.5 py-0.5 text-[9px] font-black uppercase tracking-[0.12em]",
+                            isBlack ? "border-border bg-foreground/5 text-foreground" : "border-info/20 bg-info/10 text-info"
+                          )}>
+                            {isBlack && <Crown className="h-2.5 w-2.5" />}
+                            {acq.type}
+                          </span>
+                          {isTop && !isSelected && (
+                            <span className="inline-flex items-center gap-1 rounded-md border border-success/20 bg-success/10 px-1.5 py-0.5 text-[9px] font-black uppercase tracking-[0.12em] text-success">
+                              <TrendingUp className="h-2.5 w-2.5" /> Top
+                            </span>
+                          )}
+                          {isSelected && (
+                            <span className="inline-flex items-center gap-1 rounded-md border border-primary/30 bg-primary/10 px-1.5 py-0.5 text-[9px] font-black uppercase tracking-[0.12em] text-primary">
+                              <CheckCircle2 className="h-2.5 w-2.5" /> Ativo
+                            </span>
+                          )}
+                        </div>
+                        {acq.description && (
+                          <p className="text-[11px] text-muted-foreground/80 font-medium line-clamp-1">{acq.description}</p>
+                        )}
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-4 shrink-0">
+                      <div className="hidden sm:flex flex-col items-end gap-1">
+                        <span className="text-[18px] font-display font-black text-foreground tabular-nums leading-none">
+                          {acq.conversion_rate}<span className="text-xs text-muted-foreground/60 font-normal">%</span>
+                        </span>
+                        <div className="h-1 w-24 rounded-full bg-secondary overflow-hidden">
+                          <div
+                            className={cn("h-full rounded-full transition-[width] duration-300", isSelected ? "bg-primary" : isTop ? "bg-success" : "bg-foreground/40")}
+                            style={{ width: `${conversionPct}%` }}
+                          />
+                        </div>
+                      </div>
+
+                      {isSelected ? (
+                        <div className="flex items-center gap-1.5 text-[11px] font-black uppercase tracking-[0.12em] text-primary px-3">
+                          <CheckCircle2 className="h-3.5 w-3.5" />
+                          Selecionado
+                        </div>
+                      ) : (
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="h-9 px-3 rounded-lg text-[11px] font-display font-black uppercase tracking-[0.12em] gap-1.5 border-border/50"
+                          disabled={saving}
+                          onClick={(e) => { e.stopPropagation(); selectAcquirer(acq.id); }}
+                        >
+                          {saving ? <Loader2 className="h-3 w-3 animate-spin" /> : <ArrowUpRight className="h-3 w-3" />}
+                          Selecionar
+                        </Button>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </section>
+      )}
+
+      {/* INFO */}
+      <section className="rounded-xl border border-border/50 bg-card overflow-hidden animate-fade-in stagger-3">
+        <div className="flex items-center gap-2.5 px-5 py-3.5 border-b border-border/50">
+          <div className="h-7 w-7 rounded-md bg-info/10 text-info flex items-center justify-center">
+            <Info className="h-3.5 w-3.5" strokeWidth={2.25} />
+          </div>
+          <div>
+            <h2 className="text-[14px] font-display font-black text-foreground tracking-[-0.01em]">Como o processador é usado</h2>
+            <p className="text-[11px] text-muted-foreground/70 font-medium">Sua escolha define qual gateway processa todas as novas transações.</p>
+          </div>
+        </div>
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-px bg-border/40">
+          {[
+            { icon: Zap, label: "Roteamento instantâneo", desc: "Aplicado em novas vendas", tone: "info" as const },
+            { icon: TrendingUp, label: "Taxa de aprovação", desc: "% transações aprovadas", tone: "success" as const },
+            { icon: Shield, label: "PCI DSS Level 1", desc: "Criptografia ponta-a-ponta", tone: "warning" as const },
+          ].map((item) => {
+            const tone = { info: "bg-info/10 text-info", success: "bg-success/10 text-success", warning: "bg-warning/10 text-warning" }[item.tone];
+            return (
+              <div key={item.label} className="bg-card px-4 py-3 flex items-center gap-2.5">
+                <div className={cn("h-7 w-7 rounded-md flex items-center justify-center shrink-0", tone)}>
+                  <item.icon className="h-3.5 w-3.5" strokeWidth={2.25} />
+                </div>
+                <div className="min-w-0">
+                  <p className="text-[12px] font-display font-black text-foreground truncate">{item.label}</p>
+                  <p className="text-[11px] text-muted-foreground/70 font-medium truncate">{item.desc}</p>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </section>
     </div>
   );
 }
