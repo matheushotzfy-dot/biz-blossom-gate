@@ -188,12 +188,11 @@ export default function MemberHome() {
           </div>
         </div>
 
-        {/* Quick Stats Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mt-10">
-          <StatCard title="Cursos Ativos" value={courses.length} icon={BookOpen} color="primary" variant="glass" />
-          <StatCard title="Aulas Concluídas" value={totalCompleted} description={`de ${totalLessons} totais`} icon={PlayCircle} color="success" variant="glass" />
-          <StatCard title="Certificados" value={certs.length} icon={Award} color="warning" variant="glass" />
-          <StatCard title="Nível de Foco" value="Pro" icon={Trophy} color="info" variant="glass" />
+          <StatCard title="Cursos Ativos" value={courses.length} icon={BookOpen} color="primary" />
+          <StatCard title="Aulas Concluídas" value={totalCompleted} description={`de ${totalLessons} totais`} icon={PlayCircle} color="success" />
+          <StatCard title="Certificados" value={certs.length} icon={Award} color="warning" />
+          <StatCard title="Nível de Foco" value="Pro" icon={Trophy} color="info" />
         </div>
 
       </section>
