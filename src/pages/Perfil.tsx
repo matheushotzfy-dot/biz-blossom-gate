@@ -577,6 +577,22 @@ export default function Perfil() {
       </div>
 
       {/* ENDEREÇO */}
+      <div
+        ref={addressRef}
+        className={cn(
+          "rounded-xl transition-all duration-500",
+          addressHighlight && "ring-4 ring-warning/60 ring-offset-2 ring-offset-background animate-pulse"
+        )}
+      >
+        {addressHighlight && !isAddressLocked && (
+          <div className="mb-3 p-4 rounded-xl bg-warning text-warning-foreground border-2 border-warning shadow-lg flex items-start gap-3 animate-fade-in">
+            <AlertTriangle className="h-5 w-5 shrink-0 mt-0.5" />
+            <div>
+              <p className="text-sm font-black uppercase tracking-wide">Atenção!</p>
+              <p className="text-xs font-medium mt-1">Para realizar saques, preencha seu endereço corretamente abaixo.</p>
+            </div>
+          </div>
+        )}
       <Panel
         icon={MapPin}
         title="Endereço do vendedor"
