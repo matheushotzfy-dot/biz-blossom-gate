@@ -27,6 +27,8 @@ const STATUS_CONFIG: Record<string, { label: string; color: string; bg: string }
 
 export default function Saques() {
   const { user } = useAuth();
+  const { profile } = useProfile();
+  const navigate = useNavigate();
   const { data: withdrawals = [] } = useWithdrawals();
   const { data: pixKeys = [] } = usePixKeys();
   const { data: bankAccounts = [] } = useBankAccounts();
@@ -37,12 +39,15 @@ export default function Saques() {
   const [search, setSearch] = useState("");
   const invalidateAll = useInvalidateAll();
 
+  const hasAddress = !!(profile as any)?.zip_code && !!(profile as any)?.street
+    && !!(profile as any)?.street_number && !!(profile as any)?.city && !!(profile as any)?.state;
+
   useEffect(() => {
     if (!user?.id) return;
     const fetchBalance = async () => {
       const { data } = await supabase.rpc("get_ledger_balance", { _user_id: user.id });
       if (data !== null) setAvailableBalance(Number(data));
-      
+
       const { data: tx } = await supabase
         .from("transactions")
         .select("retained_amount")
@@ -60,13 +65,28 @@ export default function Saques() {
     return withdrawals.filter(w => w.id.toLowerCase().includes(q) || fmt(Number(w.amount)).includes(q));
   }, [withdrawals, search]);
 
+  const handleOpenChange = (next: boolean) => {
+    if (next && !hasAddress) {
+      toast.error("Preencha seu endereço antes de solicitar saques");
+      navigate("/perfil?focus=address");
+      return;
+    }
+    setOpen(next);
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!hasAddress) {
+      toast.error("Endereço obrigatório para saques");
+      navigate("/perfil?focus=address");
+      setOpen(false);
+      return;
+    }
     const numAmount = parseFloat(amount);
     if (!user || isNaN(numAmount) || numAmount <= WITHDRAW_FEE) { toast.error("Valor inválido"); return; }
     if (numAmount > availableBalance) { toast.error("Saldo insuficiente"); return; }
     if (pixKeys.length === 0 && bankAccounts.length === 0) { toast.error("Cadastre uma chave PIX ou conta bancária"); return; }
-    
+
     const { error } = await supabase.from("withdrawals").insert({ user_id: user.id, amount: numAmount });
     if (error) { toast.error(error.message); return; }
     toast.success("Solicitação enviada!"); setOpen(false); setAmount(""); invalidateAll(["withdrawals"]);
