@@ -69,23 +69,15 @@ export default function Adquirente() {
   const deltaVsBest = selectedAcq ? selectedAcq.conversion_rate - bestConversion : 0;
 
   return (
-    <div className="mx-auto w-full max-w-[1440px] pb-20 space-y-6">
-      <FinanceiroHero
-        title="Adquirente"
-        subtitle="Escolha o processador de pagamentos que roteará suas próximas vendas. Maior conversão = mais aprovações."
-        status={
-          selectedAcq
-            ? { tone: "success", label: `Roteando via ${selectedAcq.name}`, pulse: true }
-            : { tone: "warning", label: "Nenhum processador selecionado" }
-        }
-        actions={
-          selectedAcq?.type === "black" ? (
-            <div className="hidden sm:inline-flex items-center gap-1.5 rounded-xl border border-border/50 bg-card px-3 h-11 text-[11px] font-black uppercase tracking-[0.12em] text-foreground">
-              <Crown className="h-3.5 w-3.5" /> Black tier
-            </div>
-          ) : undefined
-        }
-      />
+    <div className="animate-fade-in space-y-6">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+        <div>
+          <h1 className="text-2xl font-black text-foreground tracking-tight">Adquirente</h1>
+          <p className="text-[11px] font-bold text-muted-foreground uppercase tracking-widest mt-1">
+            Escolha o processador de pagamentos
+          </p>
+        </div>
+      </div>
 
       {/* KPI Grid */}
       <FinanceiroKpiGrid cols={4}>
@@ -121,7 +113,7 @@ export default function Adquirente() {
 
       {/* Selected card */}
       {selectedAcq && (
-        <section className="rounded-xl border border-primary/30 bg-card overflow-hidden animate-fade-in stagger-2">
+        <section className="bg-card rounded-[24px] border border-primary/30 shadow-sm overflow-hidden animate-fade-in stagger-2">
           <div className="flex items-center gap-4 p-5">
             <div className={cn(
               "h-14 w-14 rounded-xl flex items-center justify-center shrink-0 border font-display font-black text-lg",
@@ -168,14 +160,14 @@ export default function Adquirente() {
           <p className="text-[12px] text-muted-foreground/70 font-medium">O administrador ainda não liberou processadores para seleção.</p>
         </div>
       ) : (
-        <section className="rounded-xl border border-border/50 bg-card overflow-hidden animate-fade-in stagger-3">
+        <section className="bg-card rounded-[24px] border border-border shadow-sm overflow-hidden animate-fade-in stagger-3">
           <div className="flex items-center justify-between px-5 py-3.5 border-b border-border/50">
             <div className="flex items-center gap-2.5">
               <div className="h-7 w-7 rounded-md bg-primary/10 text-primary flex items-center justify-center">
                 <Activity className="h-3.5 w-3.5" strokeWidth={2.25} />
               </div>
               <div>
-                <h2 className="text-[14px] font-display font-black text-foreground tracking-[-0.01em]">Processadores disponíveis</h2>
+                <h2 className="font-black text-foreground tracking-tight">Processadores disponíveis</h2>
                 <p className="text-[11px] text-muted-foreground/70 font-medium">Ordenados por taxa de conversão · Clique para selecionar</p>
               </div>
             </div>
@@ -279,7 +271,7 @@ export default function Adquirente() {
       )}
 
       {/* INFO */}
-      <section className="rounded-xl border border-border/50 bg-card overflow-hidden animate-fade-in stagger-3">
+      <section className="bg-card rounded-[24px] border border-border shadow-sm overflow-hidden animate-fade-in stagger-3">
         <div className="flex items-center gap-2.5 px-5 py-3.5 border-b border-border/50">
           <div className="h-7 w-7 rounded-md bg-info/10 text-info flex items-center justify-center">
             <Info className="h-3.5 w-3.5" strokeWidth={2.25} />

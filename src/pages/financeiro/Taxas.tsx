@@ -16,17 +16,15 @@ export default function Taxas() {
   const effectiveRate = exampleAmount > 0 ? ((examplePctCost + totalFixed) / exampleAmount) * 100 : 0;
 
   return (
-    <div className="mx-auto w-full max-w-[1440px] pb-20 space-y-6">
-      <FinanceiroHero
-        title="Taxas e Tarifas"
-        subtitle="Estrutura completa e transparente. Visualize cada percentual e tarifa fixa aplicada nas suas transações."
-        status={{ tone: "success", label: `${fees.length} ${fees.length === 1 ? "taxa configurada" : "taxas configuradas"}`, pulse: true }}
-        actions={
-          <div className="hidden sm:inline-flex items-center gap-1.5 rounded-xl border border-success/20 bg-success/5 px-3 h-11 text-[11px] font-black uppercase tracking-[0.12em] text-success">
-            <ShieldCheck className="h-3.5 w-3.5" /> 100% transparente
-          </div>
-        }
-      />
+    <div className="animate-fade-in space-y-6">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+        <div>
+          <h1 className="text-2xl font-black text-foreground tracking-tight">Taxas e Tarifas</h1>
+          <p className="text-[11px] font-bold text-muted-foreground uppercase tracking-widest mt-1">
+            Estrutura completa e transparente
+          </p>
+        </div>
+      </div>
 
       {/* KPI Grid */}
       <FinanceiroKpiGrid cols={4}>
@@ -61,13 +59,13 @@ export default function Taxas() {
       </FinanceiroKpiGrid>
 
       {/* Live simulation */}
-      <section className="rounded-xl border border-border/50 bg-card overflow-hidden animate-fade-in stagger-2">
+      <section className="bg-card rounded-[24px] border border-border shadow-sm overflow-hidden animate-fade-in stagger-2">
         <div className="flex items-center justify-between px-5 py-3.5 border-b border-border/50">
           <div className="flex items-center gap-2.5">
             <div className="h-7 w-7 rounded-md bg-primary/10 text-primary flex items-center justify-center">
               <Calculator className="h-3.5 w-3.5" strokeWidth={2.25} />
             </div>
-            <h2 className="text-[14px] font-display font-black text-foreground tracking-[-0.01em]">
+            <h2 className="font-black text-foreground tracking-tight">
               Simulação ao vivo · venda de R$ 1.000,00
             </h2>
           </div>
@@ -130,13 +128,13 @@ export default function Taxas() {
       )}
 
       {/* Formula */}
-      <section className="rounded-xl border border-border/50 bg-card overflow-hidden animate-fade-in stagger-3">
+      <section className="bg-card rounded-[24px] border border-border shadow-sm overflow-hidden animate-fade-in stagger-3">
         <div className="flex items-center gap-2.5 px-5 py-3.5 border-b border-border/50">
           <div className="h-7 w-7 rounded-md bg-primary/10 text-primary flex items-center justify-center">
             <Receipt className="h-3.5 w-3.5" strokeWidth={2.25} />
           </div>
           <div>
-            <h2 className="text-[14px] font-display font-black text-foreground tracking-[-0.01em]">Fórmula de cálculo</h2>
+            <h2 className="font-black text-foreground tracking-tight">Fórmula de cálculo</h2>
             <p className="text-[11px] text-muted-foreground/70 font-medium">Como o valor líquido é calculado em cada transação</p>
           </div>
         </div>
@@ -203,14 +201,14 @@ function FeeSection({
   const toneBg = tone === "info" ? "bg-info/10 text-info" : "bg-warning/10 text-warning";
   const toneText = tone === "info" ? "text-info" : "text-warning";
   return (
-    <section className="rounded-xl border border-border/50 bg-card overflow-hidden">
+    <section className="bg-card rounded-[24px] border border-border shadow-sm overflow-hidden">
       <div className="flex items-center justify-between px-5 py-3.5 border-b border-border/50">
         <div className="flex items-center gap-2.5">
           <div className={cn("h-7 w-7 rounded-md flex items-center justify-center", toneBg)}>
             <Icon className="h-3.5 w-3.5" strokeWidth={2.25} />
           </div>
           <div>
-            <h3 className="text-[14px] font-display font-black text-foreground tracking-[-0.01em]">{title}</h3>
+            <h3 className="font-black text-foreground tracking-tight">{title}</h3>
             <p className="text-[11px] text-muted-foreground/70 font-medium">{description}</p>
           </div>
         </div>
