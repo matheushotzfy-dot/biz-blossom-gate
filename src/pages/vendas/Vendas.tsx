@@ -266,10 +266,13 @@ export default function Vendas() {
         </div>
       </div>
 
-      <TransactionDetailPanel 
-        transaction={detailTx} 
-        onClose={() => setDetailTx(null)} 
-      />
+      {detailTx && (
+        <TransactionDetailPanel 
+          tx={detailTx} 
+          products={prodsMap}
+          onClose={() => setDetailTx(null)} 
+        />
+      )}
     </div>
   );
 }
