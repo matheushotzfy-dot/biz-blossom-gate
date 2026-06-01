@@ -7,7 +7,7 @@ import { useWithdrawals, usePixKeys, useInvalidateAll } from "@/hooks/useQueryDa
 import {
   Plus, Key, CheckCircle2, Wallet, Shield,
   Eye, EyeOff, Clock, History, TrendingUp, ArrowUpRight,
-  ArrowDown, DollarSign, CreditCard, ChevronRight, X
+  ArrowDown, DollarSign, CreditCard, ChevronRight, X, Search
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
