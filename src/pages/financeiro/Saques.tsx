@@ -105,7 +105,7 @@ export default function Saques() {
             Solicite a transferência dos seus lucros
           </p>
         </div>
-        <Dialog open={open} onOpenChange={setOpen}>
+        <Dialog open={open} onOpenChange={handleOpenChange}>
           <DialogTrigger asChild>
             <button className="bg-primary text-primary-foreground h-11 px-6 rounded-xl font-black text-sm hover:opacity-90 transition-all flex items-center gap-2 shadow-sm uppercase tracking-widest">
               <Plus size={18} strokeWidth={3} /> Solicitar Saque
