@@ -253,141 +253,75 @@ export default function DadosBancarios() {
 
  const primaryAccount = accounts[0];
 
- return (
-  <div className="relative animate-fade-in">
-   <div className="relative z-[1] mx-auto w-full max-w-[1180px] space-y-5 pb-10">
-
-    {/* ════ ACCOUNT SUMMARY HEADER ════ */}
-    <motion.section
-     initial={{ opacity: 0, y: 8 }}
-     animate={{ opacity: 1, y: 0 }}
-     transition={{ duration: 0.4 }}
-     className="rounded-2xl border border-border bg-card overflow-hidden"
-    >
-     <div className="flex flex-col lg:flex-row lg:items-stretch">
-      <div className="flex-1 p-6 lg:border-r border-border">
-       <div className="flex items-start gap-4">
-        <div className="h-12 w-12 rounded-xl bg-primary/10 ring-1 ring-primary/20 flex items-center justify-center shrink-0">
-         <Landmark className="h-5 w-5 text-primary" />
-        </div>
-        <div className="flex-1 min-w-0">
-         <div className="flex items-center gap-2 mb-1">
-          <span className="text-[10px] font-display font-bold uppercase tracking-[0.14em] text-muted-foreground">
-           Conta de Recebimento
-          </span>
-          <span className="inline-flex items-center gap-1 rounded border border-success/20 bg-success/10 px-1.5 py-0.5 text-[9px] font-display font-bold uppercase tracking-wider text-success">
-           <CheckCircle2 className="h-2.5 w-2.5" /> Ativa
-          </span>
-         </div>
-         <h1 className="text-xl font-heading font-black text-foreground tracking-[-0.02em]">
-          Dados Bancários
-         </h1>
-         <p className="text-xs text-muted-foreground font-display mt-0.5">
-          Gerencie chaves PIX e contas bancárias para saques
-         </p>
-        </div>
-       </div>
-      </div>
-
-      <div className="grid grid-cols-3 lg:w-[480px] border-t lg:border-t-0 border-border">
-       <div className="p-5 border-r border-border">
-        <p className="text-[9px] font-display font-bold uppercase tracking-[0.16em] text-muted-foreground mb-1.5">PIX</p>
-        <p className="text-2xl font-heading font-black text-foreground tabular-nums leading-none">
-         {pixKeys.length}
-         <span className="text-sm text-muted-foreground/50 font-normal">/3</span>
-        </p>
-        <p className="text-[10px] text-muted-foreground/60 font-display mt-1">
-         {pixKeys.length === 0 ? "Nenhuma chave" : pixKeys.length === 3 ? "Limite atingido" : "Slots disponíveis"}
-        </p>
-       </div>
-       <div className="p-5 border-r border-border">
-        <p className="text-[9px] font-display font-bold uppercase tracking-[0.16em] text-muted-foreground mb-1.5">Contas</p>
-        <p className="text-2xl font-heading font-black text-foreground tabular-nums leading-none">
-         {accounts.length}
-        </p>
-        <p className="text-[10px] text-muted-foreground/60 font-display mt-1">
-         {accounts.length === 0 ? "Nenhuma cadastrada" : "Para recebimentos"}
-        </p>
-       </div>
-       <div className="p-5 flex flex-col justify-between">
+  return (
+    <div className="animate-fade-in space-y-6">
+      {/* Header */}
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
-         <p className="text-[9px] font-display font-bold uppercase tracking-[0.16em] text-muted-foreground mb-1.5">Proteção</p>
-         <p className="text-sm font-heading font-black text-success leading-none flex items-center gap-1.5">
-          <Lock className="h-3.5 w-3.5" /> AES-256
-         </p>
+          <h1 className="text-2xl font-black text-foreground tracking-tight">Dados Bancários</h1>
+          <p className="text-[11px] font-bold text-muted-foreground uppercase tracking-widest mt-1">
+            Gerencie suas chaves PIX e contas bancárias
+          </p>
         </div>
-        <p className="text-[10px] text-muted-foreground/60 font-display mt-1">Criptografia ativa</p>
-       </div>
       </div>
-     </div>
-    </motion.section>
 
-    {/* ════ PIX KEYS ════ */}
-    <motion.section
-     initial={{ opacity: 0, y: 8 }}
-     animate={{ opacity: 1, y: 0 }}
-     transition={{ delay: 0.1 }}
-     className="rounded-2xl border border-border bg-card overflow-hidden"
-    >
-     <div className="flex items-center justify-between px-6 py-4 border-b border-border">
-      <div className="flex items-center gap-3">
-       <div className="h-9 w-9 rounded-lg bg-primary/10 flex items-center justify-center">
-        <Key className="h-4 w-4 text-primary" />
-       </div>
-       <div>
-        <h3 className="text-sm font-display font-black text-foreground tracking-tight">Chaves PIX</h3>
-        <p className="text-[11px] text-muted-foreground font-display">Utilizadas para receber saques · Máximo 3 chaves</p>
-       </div>
-      </div>
-      <div className="flex items-center gap-1.5 text-xs font-display font-bold text-muted-foreground">
-       <span className="h-1.5 w-1.5 rounded-full bg-success" />
-       {pixKeys.length}/3 cadastradas
-      </div>
-     </div>
-
-     {pixKeys.length > 0 && (
-      <div className="divide-y divide-border">
-       {pixKeys.map((pk, i) => {
-        const IconComp = getPixIcon(pk.key_type);
-        const isPrimary = i === 0;
-        return (
-         <motion.div
-          key={pk.id}
-          initial={{ opacity: 0 }} animate={{ opacity: 1 }}
-          transition={{ duration: 0.2, delay: i * 0.04 }}
-          className="flex items-center justify-between px-6 py-3.5 hover:bg-muted/30 transition-colors group"
-         >
-          <div className="flex items-center gap-3.5 min-w-0 flex-1">
-           <div className="h-9 w-9 rounded-lg bg-muted/50 border border-border flex items-center justify-center shrink-0">
-            <IconComp className="h-4 w-4 text-foreground/70" />
-           </div>
-           <div className="min-w-0 flex-1">
-            <div className="flex items-center gap-2 mb-0.5">
-             <span className="text-[10px] font-display font-bold uppercase tracking-[0.12em] text-muted-foreground">
-              {pixTypeLabel(pk.key_type)}
-             </span>
-             {isPrimary && (
-              <span className="inline-flex items-center gap-1 rounded border border-primary/20 bg-primary/10 px-1.5 py-0.5 text-[9px] font-display font-bold uppercase tracking-wider text-primary">
-               <Star className="h-2.5 w-2.5 fill-primary" /> Principal
-              </span>
-             )}
-             <span className="inline-flex items-center gap-1 text-[10px] font-display font-semibold text-success">
-              <CheckCircle2 className="h-2.5 w-2.5" /> Verificada
-             </span>
+      {/* PIX KEYS SECTION */}
+      <div className="bg-card rounded-[24px] border border-border shadow-sm overflow-hidden">
+        <div className="p-6 border-b border-border flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="h-10 w-10 bg-muted rounded-xl flex items-center justify-center text-muted-foreground">
+              <Key size={20} />
             </div>
-            <p className="font-mono text-foreground text-sm truncate">{pk.key_value}</p>
-           </div>
+            <div>
+              <h2 className="font-black text-foreground tracking-tight">Chaves PIX</h2>
+              <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">
+                Utilizadas para recebimento de saques
+              </p>
+            </div>
           </div>
-          <Button variant="ghost" size="sm"
-           className="text-muted-foreground hover:text-destructive hover:bg-destructive/5 shrink-0 h-8 px-2.5 opacity-0 group-hover:opacity-100 transition-opacity"
-           onClick={() => handleDeletePix(pk.id)}>
-           <Trash2 className="h-3.5 w-3.5" />
-          </Button>
-         </motion.div>
-        );
-       })}
-      </div>
-     )}
+          <div className="text-[11px] font-black uppercase tracking-widest text-muted-foreground">
+            {pixKeys.length}/3 Cadastradas
+          </div>
+        </div>
+
+        {pixKeys.length > 0 && (
+          <div className="divide-y divide-border">
+            {pixKeys.map((pk, i) => {
+              const IconComp = getPixIcon(pk.key_type);
+              const isPrimary = i === 0;
+              return (
+                <div
+                  key={pk.id}
+                  className="flex items-center justify-between p-6 hover:bg-muted/30 transition-colors group"
+                >
+                  <div className="flex items-center gap-4">
+                    <div className="h-12 w-12 rounded-xl bg-muted/50 border border-border flex items-center justify-center shrink-0">
+                      <IconComp className="h-5 w-5 text-foreground/70" />
+                    </div>
+                    <div>
+                      <div className="flex items-center gap-2 mb-1">
+                        <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">
+                          {pixTypeLabel(pk.key_type)}
+                        </span>
+                        {isPrimary && (
+                          <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[8px] font-black uppercase tracking-widest border border-primary/20 bg-primary/10 text-primary">
+                            Principal
+                          </span>
+                        )}
+                      </div>
+                      <p className="font-mono text-foreground text-sm font-bold">{pk.key_value}</p>
+                    </div>
+                  </div>
+                  <Button variant="ghost" size="sm"
+                    className="text-muted-foreground hover:text-destructive hover:bg-destructive/5 h-10 w-10 rounded-xl"
+                    onClick={() => handleDeletePix(pk.id)}>
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                </div>
+              );
+            })}
+          </div>
+        )}
 
      {pixKeys.length < 3 && (
       <div className="bg-muted/20 border-t border-border px-6 py-4">
