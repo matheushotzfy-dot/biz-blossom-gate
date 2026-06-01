@@ -478,7 +478,7 @@ export default function Perfil() {
             {user?.id && (
               <InfoRow
                 label="ID da conta"
-                value={`${user.id.slice(0, 8)}...`}
+                value={<span className="font-mono text-[11px]">{user.id}</span>}
                 copyable={user.id}
               />
             )}
