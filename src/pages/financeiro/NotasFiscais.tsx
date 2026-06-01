@@ -338,6 +338,6 @@ export default function NotasFiscais() {
           ))}
         </div>
       </Panel>
-    </PageShell>
+    </div>
   );
 }
