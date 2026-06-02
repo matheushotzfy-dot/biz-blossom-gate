@@ -105,49 +105,51 @@ type RevenueCardProps = {
 function RevenueCard({ collapsed, revenue, milestone, onOpenRewards }: RevenueCardProps) {
   if (collapsed) return null;
 
-  const pct = Math.round(milestone.pct);
+  const pct = Math.max(0, Math.min(100, Math.round(milestone.pct)));
 
   return (
     <button
       type="button"
       onClick={onOpenRewards}
-      className="group/rev relative mt-6 block w-full overflow-hidden rounded-[1.5rem] border border-sidebar-border/50 bg-sidebar-accent/30 p-5 text-left transition-all duration-300 hover:bg-sidebar-accent/50 hover:border-sidebar-primary/20 hover:shadow-lg hover:shadow-black/5"
+      className="group/rev mt-5 block w-full rounded-lg border border-sidebar-border/70 bg-sidebar-accent/25 px-3.5 py-3 text-left transition-colors duration-200 hover:border-sidebar-primary/30 hover:bg-sidebar-accent/45"
     >
-      <div className="flex items-center gap-4">
-        <div className="relative flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary transition-transform group-hover/rev:scale-110">
-          <Zap className="h-5 w-5" strokeWidth={2.5} fill="currentColor" />
-        </div>
-        <div className="min-w-0 flex-1">
-          <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground/40 leading-none">
-            Volume Total
-          </p>
-          <p className="mt-2 font-display text-2xl font-bold leading-none tracking-[-0.03em] text-foreground tabular-nums">
-            {formatRevenue(revenue)}
-          </p>
-        </div>
+      <div className="flex items-center justify-between">
+        <span className="text-[9.5px] font-bold uppercase tracking-[0.18em] text-sidebar-foreground/50">
+          Volume Total
+        </span>
+        <span className="inline-flex items-center gap-1 rounded-md border border-sidebar-border/60 bg-sidebar/40 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-[0.14em] text-sidebar-foreground/60">
+          <Zap className="h-2.5 w-2.5 text-sidebar-primary" strokeWidth={3} />
+          Live
+        </span>
       </div>
 
-      <div className="mt-6 flex items-center justify-between text-[9px] font-bold tracking-[0.2em] uppercase text-muted-foreground/30">
+      <p className="mt-1.5 font-display text-[22px] font-black leading-none tracking-[-0.04em] text-sidebar-accent-foreground tabular-nums">
+        {formatRevenue(revenue)}
+      </p>
+
+      <div className="mt-3 flex items-baseline justify-between text-[10px] font-semibold tabular-nums text-sidebar-foreground/55">
         <span>{milestone.current.label}</span>
-        <span>Meta: {milestone.next.label}</span>
+        <span className="text-sidebar-foreground/40">
+          Meta <span className="text-sidebar-foreground/70">{milestone.next.label}</span>
+        </span>
       </div>
 
-      <div className="mt-2.5 h-1.5 overflow-hidden rounded-full bg-sidebar-border/40">
+      <div className="mt-1.5 h-[3px] overflow-hidden rounded-full bg-sidebar-border/50">
         <div
-          className="h-full rounded-full bg-primary transition-[width] duration-1000 ease-out shadow-[0_0_8px_rgba(var(--primary),0.5)]"
+          className="h-full rounded-full bg-sidebar-primary transition-[width] duration-700 ease-out"
           style={{ width: `${pct}%` }}
         />
       </div>
 
-      <div className="mt-4 flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <span className="text-[14px] font-bold text-primary tabular-nums tracking-tight">{pct}%</span>
-          <span className="text-[9px] font-bold uppercase tracking-wider text-muted-foreground/30">Concluído</span>
-        </div>
-        <div className="inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-widest text-primary/60 group-hover/rev:text-primary transition-colors">
+      <div className="mt-2.5 flex items-center justify-between">
+        <span className="font-numbers text-[11px] font-bold tabular-nums text-sidebar-accent-foreground">
+          {pct}<span className="text-sidebar-foreground/45">%</span>
+          <span className="ml-1.5 text-[9px] font-bold uppercase tracking-[0.16em] text-sidebar-foreground/45">Concluído</span>
+        </span>
+        <span className="inline-flex items-center gap-0.5 text-[9.5px] font-bold uppercase tracking-[0.18em] text-sidebar-primary/80 transition-colors group-hover/rev:text-sidebar-primary">
           Rewards
           <ChevronRight className="h-3 w-3 transition-transform group-hover/rev:translate-x-0.5" strokeWidth={3} />
-        </div>
+        </span>
       </div>
     </button>
   );
