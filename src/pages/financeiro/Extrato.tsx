@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useMemo, useCallback } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
-import { useTransactions, useProducts, useWithdrawals } from "@/hooks/useQueryData";
+import { useTransactions, useProducts, useWithdrawals, useLedgerBalance } from "@/hooks/useQueryData";
 import {
   Search, X, EyeOff, Eye, Phone, Mail, Clock, RefreshCw,
   Download, FileText, ChevronDown, ChevronUp, ArrowUpDown, ArrowUpRight, ArrowDownRight,
