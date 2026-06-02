@@ -6,6 +6,26 @@ import type { Tables } from "@/integrations/supabase/types";
 
 const STALE_TIME = 2 * 60 * 1000;
 
+/**
+ * Live ledger balance with shared cache + 15s refetch.
+ * Replaces ad-hoc setInterval(fetchBalance, 15000) in Dashboard/Extrato.
+ */
+export function useLedgerBalance() {
+  const { user } = useAuth();
+  return useQuery({
+    queryKey: ["ledger_balance", user?.id],
+    queryFn: async () => {
+      const { data, error } = await supabase.rpc("get_ledger_balance", { _user_id: user!.id });
+      if (error) throw error;
+      return Number(data ?? 0);
+    },
+    enabled: !!user?.id,
+    staleTime: 10 * 1000,
+    refetchInterval: 15 * 1000,
+    refetchIntervalInBackground: false,
+  });
+}
+
 type PixKey = { id: string; key_type: string; key_value: string; created_at: string; user_id: string };
 
 export function useProducts() {
