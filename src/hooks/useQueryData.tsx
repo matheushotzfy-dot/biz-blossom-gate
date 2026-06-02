@@ -33,11 +33,12 @@ export function useProducts() {
   return useQuery({
     queryKey: ["products", user?.id],
     queryFn: async () => {
-      const { data } = await supabase
+      const { data, error } = await supabase
         .from("products")
         .select("*")
         .eq("user_id", user!.id)
         .order("created_at", { ascending: false });
+      if (error) throw error;
       return (data || []) as Tables<"products">[];
     },
     enabled: !!user?.id,
@@ -50,11 +51,12 @@ export function useTransactions() {
   return useQuery({
     queryKey: ["transactions", user?.id],
     queryFn: async () => {
-      const { data } = await supabase
+      const { data, error } = await supabase
         .from("transactions")
         .select("*")
         .eq("user_id", user!.id)
         .order("created_at", { ascending: false });
+      if (error) throw error;
       return (data || []) as Tables<"transactions">[];
     },
     enabled: !!user?.id,
@@ -74,6 +76,7 @@ export function useWithdrawals(limit?: number) {
         .order("created_at", { ascending: false });
       if (limit) q = q.limit(limit);
       const { data } = await q;
+      if (error) throw error;
       return (data || []) as Tables<"withdrawals">[];
     },
     enabled: !!user?.id,
@@ -86,11 +89,12 @@ export function usePixKeys() {
   return useQuery({
     queryKey: ["pix_keys", user?.id],
     queryFn: async () => {
-      const { data } = await supabase
+      const { data, error } = await supabase
         .from("pix_keys")
         .select("*")
         .eq("user_id", user!.id)
         .order("created_at");
+      if (error) throw error;
       return (data || []) as PixKey[];
     },
     enabled: !!user?.id,
@@ -103,11 +107,12 @@ export function useBankAccounts() {
   return useQuery({
     queryKey: ["bank_accounts", user?.id],
     queryFn: async () => {
-      const { data } = await supabase
+      const { data, error } = await supabase
         .from("bank_accounts")
         .select("*")
         .eq("user_id", user!.id)
         .order("created_at");
+      if (error) throw error;
       return (data || []) as Tables<"bank_accounts">[];
     },
     enabled: !!user?.id,
@@ -120,11 +125,12 @@ export function useCoupons() {
   return useQuery({
     queryKey: ["coupons", user?.id],
     queryFn: async () => {
-      const { data } = await supabase
+      const { data, error } = await supabase
         .from("coupons")
         .select("*")
         .eq("user_id", user!.id)
         .order("created_at", { ascending: false });
+      if (error) throw error;
       return (data || []) as Tables<"coupons">[];
     },
     enabled: !!user?.id,
@@ -137,11 +143,12 @@ export function useExpenses() {
   return useQuery({
     queryKey: ["expenses", user?.id],
     queryFn: async () => {
-      const { data } = await supabase
+      const { data, error } = await supabase
         .from("expenses")
         .select("*")
         .eq("user_id", user!.id)
         .order("expense_date", { ascending: false });
+      if (error) throw error;
       return (data || []) as Tables<"expenses">[];
     },
     enabled: !!user?.id,
@@ -154,11 +161,12 @@ export function useWebhooks() {
   return useQuery({
     queryKey: ["webhooks", user?.id],
     queryFn: async () => {
-      const { data } = await supabase
+      const { data, error } = await supabase
         .from("webhook_configs_safe" as any)
         .select("*")
         .eq("user_id", user!.id)
         .order("created_at", { ascending: false });
+      if (error) throw error;
       return (data || []) as any[];
     },
     enabled: !!user?.id,
@@ -171,11 +179,12 @@ export function useAppIntegrations() {
   return useQuery({
     queryKey: ["app_integrations", user?.id],
     queryFn: async () => {
-      const { data } = await supabase
+      const { data, error } = await supabase
         .from("app_integrations")
         .select("*")
         .eq("user_id", user!.id)
         .order("created_at", { ascending: false });
+      if (error) throw error;
       return (data || []) as Tables<"app_integrations">[];
     },
     enabled: !!user?.id,
@@ -188,11 +197,12 @@ export function useDisputes() {
   return useQuery({
     queryKey: ["disputes", user?.id],
     queryFn: async () => {
-      const { data } = await supabase
+      const { data, error } = await supabase
         .from("disputes")
         .select("*")
         .eq("seller_user_id", user!.id)
         .order("created_at", { ascending: false });
+      if (error) throw error;
       return (data || []) as Tables<"disputes">[];
     },
     enabled: !!user?.id,
@@ -205,11 +215,12 @@ export function useCourses() {
   return useQuery({
     queryKey: ["courses", user?.id],
     queryFn: async () => {
-      const { data } = await supabase
+      const { data, error } = await supabase
         .from("courses")
         .select("*, modules ( id, lessons ( id ) )")
         .eq("user_id", user!.id)
         .order("sort_order");
+      if (error) throw error;
       return (data || []) as any[];
     },
     enabled: !!user?.id,
@@ -221,10 +232,11 @@ export function useFees() {
   return useQuery({
     queryKey: ["fees"],
     queryFn: async () => {
-      const { data } = await supabase
+      const { data, error } = await supabase
         .from("fees")
         .select("*")
         .order("created_at");
+      if (error) throw error;
       return (data || []) as Tables<"fees">[];
     },
     staleTime: 5 * 60 * 1000, // fees rarely change
@@ -242,7 +254,8 @@ export function usePrefetchDashboardData() {
     qc.prefetchQuery({
       queryKey: ["products", uid],
       queryFn: async () => {
-        const { data } = await supabase.from("products").select("*").eq("user_id", uid).order("created_at", { ascending: false });
+        const { data, error } = await supabase.from("products").select("*").eq("user_id", uid).order("created_at", { ascending: false });
+        if (error) throw error;
         return (data || []) as Tables<"products">[];
       },
       staleTime: STALE_TIME,
@@ -250,7 +263,8 @@ export function usePrefetchDashboardData() {
     qc.prefetchQuery({
       queryKey: ["transactions", uid],
       queryFn: async () => {
-        const { data } = await supabase.from("transactions").select("*").eq("user_id", uid).order("created_at", { ascending: false });
+        const { data, error } = await supabase.from("transactions").select("*").eq("user_id", uid).order("created_at", { ascending: false });
+        if (error) throw error;
         return (data || []) as Tables<"transactions">[];
       },
       staleTime: STALE_TIME,
@@ -258,7 +272,8 @@ export function usePrefetchDashboardData() {
     qc.prefetchQuery({
       queryKey: ["withdrawals", uid, 10],
       queryFn: async () => {
-        const { data } = await supabase.from("withdrawals").select("*").eq("user_id", uid).order("created_at", { ascending: false }).limit(10);
+        const { data, error } = await supabase.from("withdrawals").select("*").eq("user_id", uid).order("created_at", { ascending: false }).limit(10);
+        if (error) throw error;
         return (data || []) as Tables<"withdrawals">[];
       },
       staleTime: STALE_TIME,
@@ -266,7 +281,8 @@ export function usePrefetchDashboardData() {
     qc.prefetchQuery({
       queryKey: ["fees"],
       queryFn: async () => {
-        const { data } = await supabase.from("fees").select("*").order("created_at");
+        const { data, error } = await supabase.from("fees").select("*").order("created_at");
+        if (error) throw error;
         return (data || []) as Tables<"fees">[];
       },
       staleTime: 5 * 60 * 1000,
