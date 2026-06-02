@@ -56,14 +56,17 @@ export default function CheckoutSettingsDialog({ product, open, onOpenChange, on
  .then(({ data }) => { if (data) setOrderBumps(data); });
  }, [user?.id, open, product.id]);
 
- const uploadBanner = async (file: File, type: string): Promise<string | null> => {
- const ext = file.name.split(".").pop();
- const path = `${user!.id}/${product.id}-${type}.${ext}`;
- const { error } = await supabase.storage.from("checkout-banners").upload(path, file, { upsert: true });
- if (error) { toast.error("Erro ao enviar banner"); return null; }
- const { data } = supabase.storage.from("checkout-banners").getPublicUrl(path);
- return data.publicUrl;
- };
+  const uploadBanner = async (file: File, type: string): Promise<string | null> => {
+    const ALLOWED = ["image/jpeg", "image/png", "image/webp"];
+    if (!ALLOWED.includes(file.type)) { toast.error("Use JPG, PNG ou WebP"); return null; }
+    if (file.size > 5 * 1024 * 1024) { toast.error("Banner: máximo 5MB"); return null; }
+    const ext = (file.name.split(".").pop() || "jpg").toLowerCase().replace(/[^a-z0-9]/g, "");
+    const path = `${user!.id}/${product.id}-${type}.${ext}`;
+    const { error } = await supabase.storage.from("checkout-banners").upload(path, file, { upsert: true });
+    if (error) { toast.error("Erro ao enviar banner"); return null; }
+    const { data } = supabase.storage.from("checkout-banners").getPublicUrl(path);
+    return data.publicUrl;
+  };
 
  const handleSave = async () => {
  setSaving(true);

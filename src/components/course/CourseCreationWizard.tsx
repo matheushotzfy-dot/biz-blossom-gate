@@ -139,6 +139,7 @@ export default function CourseCreationWizard({ open, onOpenChange, products, edi
   const titleValid = form.title.trim().length >= 3;
 
   const handleFile = async (file: File) => {
+    if (!user) { toast.error("Sessão expirada"); return; }
     const allowed = ["image/jpeg", "image/png", "image/webp", "image/gif"];
     if (!allowed.includes(file.type)) {
       toast.error("Use PNG, JPG, WEBP ou GIF.");
@@ -150,8 +151,9 @@ export default function CourseCreationWizard({ open, onOpenChange, products, edi
     }
     setUploading(true);
     try {
-      const ext = file.name.split(".").pop();
-      const path = `content/${crypto.randomUUID()}.${ext}`;
+      const ext = (file.name.split(".").pop() || "jpg").toLowerCase().replace(/[^a-z0-9]/g, "");
+      // IDOR-safe: prefixar com user.id (RLS no bucket exige owner = auth.uid())
+      const path = `${user.id}/thumbnails/${crypto.randomUUID()}.${ext}`;
       const { error } = await supabase.storage.from("product-images").upload(path, file);
       if (error) throw error;
       const { data } = supabase.storage.from("product-images").getPublicUrl(path);

@@ -296,15 +296,21 @@ export default function CheckoutBuilder() {
  setSaving(true);
  let desktopUrl = bannerDesktopPreview;
  let mobileUrl = bannerMobilePreview;
+ const ALLOWED_BANNER = ["image/jpeg", "image/png", "image/webp"];
+ const MAX_BANNER = 5 * 1024 * 1024;
  if (bannerDesktopFile) {
- const ext = bannerDesktopFile.name.split(".").pop();
+ if (!ALLOWED_BANNER.includes(bannerDesktopFile.type)) { toast.error("Banner desktop: use JPG, PNG ou WebP"); setSaving(false); return; }
+ if (bannerDesktopFile.size > MAX_BANNER) { toast.error("Banner desktop: máximo 5MB"); setSaving(false); return; }
+ const ext = (bannerDesktopFile.name.split(".").pop() || "jpg").toLowerCase().replace(/[^a-z0-9]/g, "");
  const path = `${user.id}/${productId}-desktop.${ext}`;
  const { error } = await supabase.storage.from("checkout-banners").upload(path, bannerDesktopFile, { upsert: true });
  if (!error) { const { data } = supabase.storage.from("checkout-banners").getPublicUrl(path); desktopUrl = data.publicUrl; }
  setBannerDesktopFile(null);
  }
  if (bannerMobileFile) {
- const ext = bannerMobileFile.name.split(".").pop();
+ if (!ALLOWED_BANNER.includes(bannerMobileFile.type)) { toast.error("Banner mobile: use JPG, PNG ou WebP"); setSaving(false); return; }
+ if (bannerMobileFile.size > MAX_BANNER) { toast.error("Banner mobile: máximo 5MB"); setSaving(false); return; }
+ const ext = (bannerMobileFile.name.split(".").pop() || "jpg").toLowerCase().replace(/[^a-z0-9]/g, "");
  const path = `${user.id}/${productId}-mobile.${ext}`;
  const { error } = await supabase.storage.from("checkout-banners").upload(path, bannerMobileFile, { upsert: true });
  if (!error) { const { data } = supabase.storage.from("checkout-banners").getPublicUrl(path); mobileUrl = data.publicUrl; }

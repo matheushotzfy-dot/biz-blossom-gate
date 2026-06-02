@@ -558,11 +558,17 @@ export default function AdminTransactionsTab({ transactions, profiles, products,
  onChange={async (e) => {
  const file = e.target.files?.[0];
  if (!file) return;
- const filePath = `disputes/${selectedTx.id}/${file.name}`;
+ const ALLOWED = ["application/pdf", "image/jpeg", "image/png"];
+ if (!ALLOWED.includes(file.type)) { toast.error("Use PDF, JPG ou PNG"); return; }
+ if (file.size > 10 * 1024 * 1024) { toast.error("Máximo 10MB"); return; }
+ // sanitizar nome (evitar path traversal e caracteres maliciosos)
+ const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, "_").slice(0, 80);
+ const ext = (safeName.split(".").pop() || "bin").toLowerCase();
+ const filePath = `disputes/${selectedTx.id}/${crypto.randomUUID()}.${ext}`;
  const { error } = await supabase.storage.from("kyc-documents").upload(filePath, file, { upsert: true });
  if (error) { toast.error("Erro no upload"); return; }
  toast.success("Comprovante enviado!");
- await logAdminAction("upload_dispute_evidence", "transaction", selectedTx.id, { file: file.name });
+ await logAdminAction("upload_dispute_evidence", "transaction", selectedTx.id, { file: safeName });
  setDisputeOpen(false);
  }}
  />
