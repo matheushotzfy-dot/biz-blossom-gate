@@ -86,13 +86,16 @@ export default function Identidade() {
       types.map(t => supabase.storage.from("kyc-documents").list(`${user.id}`, { search: t }))
     );
     const docs: Record<string, string | null> = { front: null, back: null, selfie: null, cnpj_card: null };
-    types.forEach((t, i) => {
+    // KYC bucket é privado — usar signed URLs (1h) em vez de getPublicUrl
+    await Promise.all(types.map(async (t, i) => {
       const data = results[i].data;
       if (data && data.length > 0) {
-        const { data: url } = supabase.storage.from("kyc-documents").getPublicUrl(`${user.id}/${data[0].name}`);
-        docs[t] = url?.publicUrl || null;
+        const { data: signed } = await supabase.storage
+          .from("kyc-documents")
+          .createSignedUrl(`${user.id}/${data[0].name}`, 3600);
+        docs[t] = signed?.signedUrl || null;
       }
-    });
+    }));
     setKycDocs(docs);
   };
 

@@ -235,6 +235,9 @@ export default function ProductEditor() {
  }, [user?.id, productId, isNew]);
 
  const uploadImage = async (file: File, bucket: string, path: string): Promise<string | null> => {
+ const ALLOWED = ["image/jpeg", "image/png", "image/webp", "image/gif"];
+ if (!ALLOWED.includes(file.type)) { toast.error("Use JPG, PNG, WebP ou GIF"); return null; }
+ if (file.size > 5 * 1024 * 1024) { toast.error("Imagem: máximo 5MB"); return null; }
  const { error } = await supabase.storage.from(bucket).upload(path, file, { upsert: true });
  if (error) { toast.error("Erro ao enviar imagem"); return null; }
  const { data } = supabase.storage.from(bucket).getPublicUrl(path);
