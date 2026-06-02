@@ -75,7 +75,7 @@ export function useWithdrawals(limit?: number) {
         .eq("user_id", user!.id)
         .order("created_at", { ascending: false });
       if (limit) q = q.limit(limit);
-      const { data } = await q;
+      const { data, error } = await q;
       if (error) throw error;
       return (data || []) as Tables<"withdrawals">[];
     },
