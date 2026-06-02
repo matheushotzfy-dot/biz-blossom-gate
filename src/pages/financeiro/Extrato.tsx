@@ -461,18 +461,7 @@ export default function Extrato() {
     return () => window.removeEventListener("keydown", handler);
   }, [toggleHidden, toggleDensity, handleExportCSV]);
 
-  const [availableBalance, setAvailableBalance] = useState<number>(0);
-
-  useEffect(() => {
-    if (!user?.id) return;
-    const fetchBalance = async () => {
-      const { data, error } = await supabase.rpc("get_ledger_balance", { _user_id: user.id });
-      if (!error && data !== null) setAvailableBalance(Number(data));
-    };
-    fetchBalance();
-    const interval = setInterval(fetchBalance, 15000);
-    return () => clearInterval(interval);
-  }, [user?.id]);
+  const { data: availableBalance = 0 } = useLedgerBalance();
 
   const m = metrics.current;
   const p = metrics.previous;
