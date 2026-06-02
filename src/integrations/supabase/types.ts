@@ -2961,6 +2961,44 @@ export type Database = {
         }
         Relationships: []
       }
+      quiz_questions_safe: {
+        Row: {
+          created_at: string | null
+          explanation: string | null
+          id: string | null
+          options: Json | null
+          question: string | null
+          quiz_id: string | null
+          sort_order: number | null
+        }
+        Insert: {
+          created_at?: string | null
+          explanation?: string | null
+          id?: string | null
+          options?: Json | null
+          question?: string | null
+          quiz_id?: string | null
+          sort_order?: number | null
+        }
+        Update: {
+          created_at?: string | null
+          explanation?: string | null
+          id?: string | null
+          options?: Json | null
+          question?: string | null
+          quiz_id?: string | null
+          sort_order?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "quiz_questions_quiz_id_fkey"
+            columns: ["quiz_id"]
+            isOneToOne: false
+            referencedRelation: "quizzes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       webhook_configs_safe: {
         Row: {
           created_at: string | null
