@@ -41,7 +41,7 @@ export default function ThankYou() {
  .from("transactions")
  .select("amount, payment_method, customer_name, customer_email, status, product_id")
  .eq("id", txId)
- .single();
+ .maybeSingle();
  if (data) {
  let productName = "Produto";
  if (data.product_id) {

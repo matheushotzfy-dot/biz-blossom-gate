@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useProfile } from "@/hooks/useProfile";
-import { useTransactions, useWithdrawals, useProducts as useProductsQuery, useDisputes } from "@/hooks/useQueryData";
+import { useTransactions, useWithdrawals, useProducts as useProductsQuery, useDisputes, useLedgerBalance } from "@/hooks/useQueryData";
 import {
   Activity,
   ArrowDownRight,
@@ -113,18 +113,7 @@ export default function Dashboard() {
   const privacy = usePrivacyMode();
   const [detailTx, setDetailTx] = useState<Tables<"transactions"> | null>(null);
   const [pixDialogOpen, setPixDialogOpen] = useState(false);
-  const [availableBalance, setAvailableBalance] = useState<number>(0);
-
-  useEffect(() => {
-    if (!user?.id) return;
-    const fetchBalance = async () => {
-      const { data, error } = await supabase.rpc("get_ledger_balance", { _user_id: user.id });
-      if (!error && data !== null) setAvailableBalance(Number(data));
-    };
-    fetchBalance();
-    const interval = setInterval(fetchBalance, 15000);
-    return () => clearInterval(interval);
-  }, [user?.id]);
+  const { data: availableBalance = 0 } = useLedgerBalance();
 
   const filteredTx = useMemo(() => {
     if (isCustom && customRange?.from) {
