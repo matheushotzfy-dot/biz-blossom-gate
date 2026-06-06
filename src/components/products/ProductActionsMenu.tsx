@@ -7,6 +7,7 @@ import {
   Pencil,
   Star,
   Trash2,
+  ChevronRight,
   type LucideIcon,
 } from "lucide-react";
 
@@ -20,6 +21,7 @@ import {
 import { cn } from "@/lib/utils";
 
 import type { Product } from "./productPresentation";
+import { formatCurrency } from "./productPresentation";
 
 export type ProductMenuHandlers = {
   onCopyLink: (product: Product) => void;
@@ -42,6 +44,7 @@ type Row = {
   label: string;
   shortcut?: string;
   action: () => void;
+  variant?: "default" | "destructive";
 };
 
 export function ProductActionsMenu({
@@ -65,7 +68,7 @@ export function ProductActionsMenu({
   const groupDistribution: Row[] = [
     ...(product.checkout_url
       ? [
-          { icon: copied ? Copy : Copy, label: copied ? "Link copiado" : "Copiar link de checkout", shortcut: "C", action: () => onCopyLink(product) },
+          { icon: copied ? Copy : Copy, label: copied ? "Link copiado" : "Copiar checkout", shortcut: "C", action: () => onCopyLink(product) },
           { icon: ExternalLink, label: "Abrir checkout",       shortcut: "O", action: () => onOpenCheckout(product) },
         ]
       : []),
@@ -78,70 +81,97 @@ export function ProductActionsMenu({
     <DropdownMenuItem
       key={row.label}
       onClick={row.action}
-      className="group/row flex h-8 cursor-pointer items-center gap-2.5 rounded-md px-2 text-[12.5px] text-foreground/85 outline-none transition-colors focus:bg-secondary focus:text-foreground data-[highlighted]:bg-secondary data-[highlighted]:text-foreground"
+      className={cn(
+        "group flex h-9 cursor-pointer items-center gap-3 rounded-lg px-2.5 text-[13px] font-medium transition-all duration-200 outline-none",
+        row.variant === "destructive"
+          ? "text-destructive focus:bg-destructive/10 data-[highlighted]:bg-destructive/10"
+          : "text-foreground/90 focus:bg-accent/80 focus:text-foreground data-[highlighted]:bg-accent/80 data-[highlighted]:text-foreground"
+      )}
     >
-      <row.icon className="h-3.5 w-3.5 shrink-0 text-muted-foreground transition-colors group-hover/row:text-foreground group-data-[highlighted]/row:text-foreground" strokeWidth={1.75} />
-      <span className="flex-1 truncate font-medium">{row.label}</span>
-      {row.shortcut && (
-        <kbd className="ml-2 hidden h-5 min-w-[20px] items-center justify-center rounded border border-border bg-secondary px-1 font-mono text-[10px] font-medium text-muted-foreground sm:inline-flex">
+      <div className={cn(
+        "flex h-5 w-5 items-center justify-center rounded-md transition-colors",
+        row.variant === "destructive" ? "text-destructive/80 group-hover:text-destructive" : "bg-primary/5 text-primary/70 group-hover:bg-primary/10 group-hover:text-primary"
+      )}>
+        <row.icon className="h-3.5 w-3.5" strokeWidth={2.2} />
+      </div>
+      
+      <span className="flex-1 truncate tracking-tight">{row.label}</span>
+      
+      {row.shortcut ? (
+        <kbd className="ml-auto hidden h-4.5 min-w-[18px] items-center justify-center rounded border border-border/60 bg-muted/40 px-1 font-mono text-[9px] font-bold text-muted-foreground/80 sm:inline-flex">
           {row.shortcut}
         </kbd>
+      ) : (
+        <ChevronRight className="ml-auto h-3 w-3 text-muted-foreground/30 opacity-0 transition-all group-hover:translate-x-0.5 group-hover:opacity-100" />
       )}
     </DropdownMenuItem>
   );
 
   return (
-    <DropdownMenu>
+    <DropdownMenu modal={false}>
       <DropdownMenuTrigger asChild>
         <button
           type="button"
           onClick={(e) => e.stopPropagation()}
           className={cn(
+            "group relative flex items-center justify-center rounded-xl border border-border/50 bg-card transition-all duration-300",
             labeledTrigger
-              ? "inline-flex h-10 min-w-[108px] items-center justify-center gap-2 rounded-lg border border-border bg-card px-3 text-[11.5px] font-semibold text-foreground/80 transition-colors hover:border-primary/40 hover:text-foreground"
-              : "flex h-10 w-10 items-center justify-center rounded-lg border border-border bg-card text-muted-foreground transition-colors hover:border-primary/40 hover:text-foreground",
+              ? "h-10 gap-2 px-4 text-[12px] font-bold uppercase tracking-wider text-foreground/80 hover:border-primary/40 hover:bg-secondary/50 active:scale-[0.98]"
+              : "h-10 w-10 text-muted-foreground/60 hover:border-primary/40 hover:bg-secondary/50 hover:text-foreground active:scale-95",
             triggerClassName,
           )}
         >
-          <MoreHorizontal className={labeledTrigger ? "h-3.5 w-3.5" : "h-4 w-4"} strokeWidth={1.8} />
-          {triggerLabel && <span>{triggerLabel}</span>}
+          <MoreHorizontal className={labeledTrigger ? "h-3.5 w-3.5" : "h-4 w-4"} strokeWidth={2.2} />
+          {triggerLabel && <span className="font-display">{triggerLabel}</span>}
         </button>
       </DropdownMenuTrigger>
 
       <DropdownMenuContent
         align="end"
-        side="top"
+        side="bottom"
         sideOffset={8}
-        collisionPadding={16}
-        className="w-[260px] overflow-hidden rounded-lg border border-border bg-popover p-1"
+        className="w-[240px] animate-in fade-in zoom-in-95 overflow-hidden rounded-2xl border border-border/60 bg-popover/95 p-1.5 shadow-2xl backdrop-blur-xl"
       >
-        {/* Header — minimal, single line */}
-        <div className="px-2 pb-1 pt-1.5">
-          <p className="truncate text-[11px] font-semibold text-muted-foreground">
-            {product.name || "Produto"}
-          </p>
+        {/* Compact Product Identity Header */}
+        <div className="flex items-center gap-3 px-2 pb-2 pt-1.5">
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-border/40 bg-muted/30 p-1">
+            {product.image_url ? (
+              <img src={product.image_url} alt="" className="h-full w-full rounded-lg object-cover" />
+            ) : (
+              <Star className="h-4 w-4 text-muted-foreground/40" />
+            )}
+          </div>
+          <div className="min-w-0 flex-1 flex flex-col">
+            <span className="truncate text-[13px] font-bold leading-tight tracking-tight text-foreground">
+              {product.name || "Sem nome"}
+            </span>
+            <span className="text-[11px] font-medium text-muted-foreground">
+              {formatCurrency(Number(product.price || 0))}
+            </span>
+          </div>
         </div>
 
-        <DropdownMenuSeparator className="my-1 bg-border" />
+        <DropdownMenuSeparator className="mx-1 my-1.5 bg-border/40" />
 
-        {groupManagement.map(renderRow)}
+        <div className="space-y-0.5">
+          {groupManagement.map(renderRow)}
+        </div>
 
-        <DropdownMenuSeparator className="my-1 bg-border" />
+        <DropdownMenuSeparator className="mx-1 my-1.5 bg-border/40" />
 
-        {groupDistribution.map(renderRow)}
+        <div className="space-y-0.5">
+          {groupDistribution.map(renderRow)}
+        </div>
 
-        <DropdownMenuSeparator className="my-1 bg-border" />
+        <DropdownMenuSeparator className="mx-1 my-1.5 bg-border/40" />
 
-        <DropdownMenuItem
-          onClick={() => onDeleteProduct(product)}
-          className="group/del flex h-8 cursor-pointer items-center gap-2.5 rounded-md px-2 text-[12.5px] text-destructive outline-none transition-colors focus:bg-destructive/10 data-[highlighted]:bg-destructive/10"
-        >
-          <Trash2 className="h-3.5 w-3.5 shrink-0" strokeWidth={1.75} />
-          <span className="flex-1 truncate font-medium">Excluir produto</span>
-          <kbd className="ml-2 hidden h-5 min-w-[20px] items-center justify-center rounded border border-destructive/30 bg-destructive/10 px-1 font-mono text-[10px] font-medium text-destructive sm:inline-flex">
-            ⌫
-          </kbd>
-        </DropdownMenuItem>
+        {renderRow({
+          icon: Trash2,
+          label: "Excluir produto",
+          shortcut: "⌫",
+          variant: "destructive",
+          action: () => onDeleteProduct(product),
+        })}
       </DropdownMenuContent>
     </DropdownMenu>
   );
