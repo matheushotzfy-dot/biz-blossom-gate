@@ -610,29 +610,25 @@ export default function PixelSettingsDialog({ product, open, onOpenChange }: Pro
 
 /* ─── Subcomponents ─── */
 
-function StatCell({
-  icon: Icon, label, value, accent, border,
-}: { icon: any; label: string; value: number; accent?: "success" | "primary"; border?: boolean }) {
+function KpiCell({
+  label, value, accent,
+}: { label: string; value: number; accent?: "success" | "primary" }) {
   const color =
     accent === "success" ? "text-success" :
     accent === "primary" ? "text-primary" :
     "text-foreground";
   return (
-    <div className={cn("flex items-center gap-3 px-4 py-3", border && "border-x border-border")}>
-      <div className="h-7 w-7 rounded-md border border-border bg-card flex items-center justify-center shrink-0">
-        <Icon className={cn("h-3.5 w-3.5", color)} strokeWidth={2.2} />
-      </div>
-      <div className="min-w-0">
-        <p className="text-[9.5px] font-display font-black uppercase tracking-[0.14em] text-muted-foreground leading-none">
-          {label}
-        </p>
-        <p className={cn("mt-1 text-[16px] font-numbers font-black tabular-nums leading-none", color)}>
-          {value}
-        </p>
-      </div>
+    <div className="flex flex-col items-center justify-center px-4 py-2 min-w-[68px] border-r border-border last:border-r-0">
+      <p className={cn("font-numbers text-[18px] font-black tabular-nums leading-none", color)}>
+        {value}
+      </p>
+      <p className="mt-1 font-display text-[8.5px] font-black uppercase tracking-[0.18em] text-muted-foreground leading-none">
+        {label}
+      </p>
     </div>
   );
 }
+
 
 function StatusDot({ active }: { active: boolean }) {
   return (
