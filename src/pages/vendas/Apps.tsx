@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Puzzle, Settings2, Zap, Shield, Sparkles, CheckCircle2 } from "lucide-react";
+import { Puzzle, Settings2, Zap, Shield, Sparkles, CheckCircle2, Clock } from "lucide-react";
 import { PageShell } from "@/components/PageShell";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
@@ -14,6 +14,7 @@ import { toast } from "sonner";
 import type { Tables } from "@/integrations/supabase/types";
 import { useNavigate } from "react-router-dom";
 import { cn } from "@/lib/utils";
+
 
 import utmifyLogo from "@/assets/apps/utmify.png";
 import notazzLogo from "@/assets/apps/notazz.svg";
