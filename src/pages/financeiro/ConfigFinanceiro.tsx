@@ -1,5 +1,5 @@
 import { useState, lazy, Suspense, ComponentType } from "react";
-import { Building2, Landmark, Zap, PieChart, Banknote, FileText, Loader2 } from "lucide-react";
+import { Landmark, Zap, Loader2 } from "lucide-react";
 import { HubTabs, type HubTab } from "@/components/HubTabs";
 
 function lazyRetry(importFn: () => Promise<{ default: ComponentType<any> }>) {
@@ -14,18 +14,15 @@ function lazyRetry(importFn: () => Promise<{ default: ComponentType<any> }>) {
 
 const Adquirente = lazyRetry(() => import("./Adquirente"));
 const Taxas = lazyRetry(() => import("./Taxas"));
-const NotasFiscais = lazyRetry(() => import("./NotasFiscais"));
 
 const TABS: HubTab[] = [
   { id: "adquirente", label: "Adquirente", icon: Landmark },
   { id: "taxas", label: "Taxas", icon: Zap },
-  { id: "nfe", label: "Notas Fiscais", icon: FileText },
 ];
 
 const COMPONENTS: Record<string, ReturnType<typeof lazyRetry>> = {
   adquirente: Adquirente,
   taxas: Taxas,
-  nfe: NotasFiscais,
 };
 
 const Loading = () => (
