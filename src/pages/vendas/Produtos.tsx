@@ -247,7 +247,8 @@ export default function Produtos() {
 
 
       {/* ── Product workspace ── */}
-      <div className="px-5 pt-6 pb-8 sm:px-7">
+      <div>
+
         {filtered.length === 0 ? (
           <div className="relative flex flex-col items-center justify-center overflow-hidden rounded-3xl border border-dashed border-border/60 bg-card/40 px-6 py-24 text-center animate-fade-in stagger-3">
             <div
