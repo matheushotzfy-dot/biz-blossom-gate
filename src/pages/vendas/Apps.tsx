@@ -277,199 +277,216 @@ export default function Apps() {
  </div>
  </section>
 
- {/* ─── Premium Integration Dialog ─── */}
- {dialogApp && dialogApp.id !== "webhooks" && (
- <Dialog open={!!dialogApp} onOpenChange={(v) => { if (!v) closeDialog(); }}>
- <DialogContent className="max-w-lg rounded-2xl border-border/60 bg-card/95 backdrop-blur-xl p-0 overflow-hidden shadow-2xl max-h-[90vh] overflow-y-auto">
- <div className="absolute inset-0 bg-gradient-to-b from-primary/[0.03] to-transparent pointer-events-none rounded-2xl" />
+      {/* ─── Integration Dialog · Billion-Dollar SaaS ─── */}
+      {dialogApp && dialogApp.id !== "webhooks" && (
+        <Dialog open={!!dialogApp} onOpenChange={(v) => { if (!v) closeDialog(); }}>
+          <DialogContent className="max-w-[560px] rounded-2xl border border-border bg-card p-0 overflow-hidden max-h-[92vh] flex flex-col gap-0">
+            {/* Header */}
+            <div className="flex items-center gap-4 border-b border-border bg-card px-6 py-5">
+              <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-xl border border-border bg-secondary p-2.5">
+                <img src={dialogApp.logo} alt={dialogApp.name} className="h-full w-full object-contain" />
+              </div>
+              <div className="min-w-0 flex-1">
+                <div className="flex items-center gap-2">
+                  <DialogTitle className="font-display text-[15px] font-black tracking-tight text-foreground">
+                    {editId ? `Editar ${dialogApp.name}` : `Conectar ${dialogApp.name}`}
+                  </DialogTitle>
+                  <span className="inline-flex h-5 items-center rounded-md border border-border bg-secondary px-1.5 text-[9px] font-bold uppercase tracking-[0.14em] text-muted-foreground">
+                    {dialogApp.category}
+                  </span>
+                </div>
+                <p className="mt-1 text-xs text-muted-foreground">{dialogApp.desc}</p>
+              </div>
+            </div>
 
- {/* Header */}
- <div className="relative px-6 pt-6 pb-5 border-b border-border/20">
- <div className="flex items-center gap-4">
- <div className="h-14 w-14 rounded-xl bg-card border border-border/30 flex items-center justify-center overflow-hidden p-2.5 shadow-sm">
- <img src={dialogApp.logo} alt={dialogApp.name} className="w-full h-full object-contain" />
- </div>
- <div>
- <DialogTitle className="text-lg font-bold text-foreground">
- {editId ? `Editar ${dialogApp.name}` : `Conectar ${dialogApp.name}`}
- </DialogTitle>
- <p className="text-xs text-muted-foreground/60 mt-0.5">{dialogApp.desc}</p>
- </div>
- </div>
- </div>
+            {/* Body */}
+            <div className="flex-1 overflow-y-auto px-6 py-5 space-y-5">
+              {dialogApp.helpText && (
+                <div className="flex items-start gap-2.5 rounded-xl border border-primary/20 bg-primary/[0.04] px-3.5 py-3">
+                  <Sparkles className="mt-0.5 h-3.5 w-3.5 shrink-0 text-primary" strokeWidth={2.2} />
+                  <p className="text-[12px] leading-relaxed text-foreground/80">{dialogApp.helpText}</p>
+                </div>
+              )}
 
- <div className="relative px-6 pb-6 space-y-5 pt-5">
- {/* Help text */}
- {dialogApp.helpText && (
- <div className="flex items-start gap-3 rounded-xl bg-primary/5 border border-primary/10 p-4">
- <Sparkles className="h-4 w-4 text-primary mt-0.5 shrink-0" />
- <p className="text-[12px] text-muted-foreground leading-relaxed">{dialogApp.helpText}</p>
- </div>
- )}
+              {/* Produto vinculado */}
+              {dialogApp.events.length > 0 && (
+                <div className="space-y-2">
+                  <Label className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-[0.16em] text-muted-foreground">
+                    <span className="h-1.5 w-1.5 rounded-full bg-primary" />
+                    Produto vinculado
+                  </Label>
+                  <Select value={formProductId} onValueChange={setFormProductId}>
+                    <SelectTrigger className="h-11 rounded-xl border border-border bg-secondary">
+                      <SelectValue placeholder="Selecione o produto para esta integração" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {products.length === 0 ? (
+                        <div className="px-3 py-6 text-center text-xs text-muted-foreground">
+                          Nenhum produto cadastrado
+                        </div>
+                      ) : (
+                        products.map(p => <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>)
+                      )}
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
 
- {/* Product selection */}
- {dialogApp.events.length > 0 && (
- <div className="space-y-2">
- <Label className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground flex items-center gap-1.5">
- <div className="h-1.5 w-1.5 rounded-full bg-primary" />
- Produto vinculado
- </Label>
- <Select value={formProductId} onValueChange={setFormProductId}>
- <SelectTrigger className="rounded-xl h-11 border-border/40 bg-background hover:bg-muted/20 transition-colors">
- <SelectValue placeholder="Selecione o produto para esta integração" />
- </SelectTrigger>
- <SelectContent className="rounded-xl">
- {products.map(p => <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>)}
- </SelectContent>
- </Select>
- </div>
- )}
+              {/* Credenciais */}
+              {dialogApp.fields.length > 0 && (
+                <div className="space-y-2">
+                  <Label className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-[0.16em] text-muted-foreground">
+                    <Shield className="h-3 w-3 text-primary" strokeWidth={2.2} />
+                    Credenciais
+                  </Label>
+                  <div className="rounded-xl border border-border bg-secondary divide-y divide-border">
+                    {dialogApp.fields.map(field => (
+                      <div key={field.key} className="px-4 py-3.5 space-y-1.5">
+                        <label className="flex items-center justify-between text-[11px] font-semibold text-foreground">
+                          <span>
+                            {field.label}
+                            {field.required && <span className="ml-1 text-primary">*</span>}
+                          </span>
+                          {!field.required && (
+                            <span className="text-[9px] font-bold uppercase tracking-[0.14em] text-muted-foreground/60">
+                              Opcional
+                            </span>
+                          )}
+                        </label>
+                        <Input
+                          placeholder={field.placeholder}
+                          value={formFields[field.key] || ""}
+                          onChange={(e) => setFormFields({ ...formFields, [field.key]: e.target.value })}
+                          className="h-10 rounded-lg border border-border bg-card font-mono text-xs"
+                        />
+                        {field.help && (
+                          <p className="text-[10px] leading-relaxed text-muted-foreground/70">{field.help}</p>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
 
- {/* Credential fields */}
- {dialogApp.fields.length > 0 && (
- <div className="space-y-3">
- <Label className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground flex items-center gap-1.5">
- <Shield className="h-3 w-3 text-primary" />
- Credenciais
- </Label>
- <div className="space-y-3 rounded-xl border border-border/30 bg-muted/5 p-4">
- {dialogApp.fields.map(field => (
- <div key={field.key} className="space-y-1.5">
- <label className="text-[12px] font-semibold text-foreground/80">
- {field.label} {field.required && <span className="text-primary">*</span>}
- </label>
- <Input
- placeholder={field.placeholder}
- value={formFields[field.key] || ""}
- onChange={(e) => setFormFields({ ...formFields, [field.key]: e.target.value })}
- className="rounded-xl h-11 font-mono text-xs border-border/30 bg-background"
- />
- {field.help && (
- <p className="text-[10px] text-muted-foreground/50 pl-1">{field.help}</p>
- )}
- </div>
- ))}
- </div>
- </div>
- )}
+              {/* Eventos */}
+              {dialogApp.events.length > 0 && (
+                <div className="space-y-2">
+                  <Label className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-[0.16em] text-muted-foreground">
+                    <Zap className="h-3 w-3 text-primary" strokeWidth={2.2} />
+                    Eventos de disparo
+                  </Label>
 
- {/* Events */}
- {dialogApp.events.length > 0 && (
- <div className="space-y-3">
- <Label className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground flex items-center gap-1.5">
- <Zap className="h-3 w-3 text-primary" />
- Eventos de disparo
- </Label>
+                  <div className="inline-flex h-10 w-full items-center rounded-xl border border-border bg-secondary p-1">
+                    {(["all", "custom"] as const).map(mode => (
+                      <button
+                        key={mode}
+                        type="button"
+                        onClick={() => setFormEventMode(mode)}
+                        className={cn(
+                          "flex-1 h-full rounded-lg text-[11.5px] font-bold transition-colors flex items-center justify-center gap-1.5",
+                          formEventMode === mode
+                            ? "bg-card border border-border text-foreground"
+                            : "text-muted-foreground hover:text-foreground"
+                        )}
+                      >
+                        {formEventMode === mode && <CheckCircle2 className="h-3 w-3 text-primary" strokeWidth={2.4} />}
+                        {mode === "all" ? `Todos (${dialogApp.events.length})` : "Personalizado"}
+                      </button>
+                    ))}
+                  </div>
 
- <div className="grid grid-cols-2 gap-2">
- {(["all", "custom"] as const).map(mode => (
- <button
- key={mode}
- onClick={() => setFormEventMode(mode)}
- className={cn(
- "rounded-xl border px-4 py-3 text-xs font-bold transition-all",
- formEventMode === mode
- ? "border-primary/30 bg-primary/10 text-primary"
- : "border-border/30 text-muted-foreground/60 hover:border-border/50 hover:bg-muted/10"
- )}
- >
- <div className="flex items-center justify-center gap-2">
- {formEventMode === mode && <CheckCircle2 className="h-3.5 w-3.5" />}
- {mode === "all" ? `Todos (${dialogApp.events.length})` : "Personalizado"}
- </div>
- </button>
- ))}
- </div>
+                  {formEventMode === "custom" && (
+                    <div className="rounded-xl border border-border bg-secondary overflow-hidden">
+                      <div className="max-h-56 overflow-y-auto divide-y divide-border">
+                        {dialogApp.events.map(event => {
+                          const selected = formSelectedEvents.includes(event);
+                          const isReversal = event.includes("Refund") || event.includes("Chargeback");
+                          const isPending = event.includes("Pix") || event.includes("Boleto");
+                          const tone = isReversal
+                            ? "border-destructive/30 bg-destructive/10 text-destructive"
+                            : isPending
+                            ? "border-warning/30 bg-warning/10 text-warning"
+                            : event === "Lead"
+                            ? "border-info/30 bg-info/10 text-info"
+                            : "border-primary/30 bg-primary/10 text-primary";
 
- {formEventMode === "custom" && (
- <div className="rounded-xl border border-border/30 bg-background overflow-hidden">
- <div className="max-h-52 overflow-y-auto p-2 space-y-0.5">
- {dialogApp.events.map(event => {
- const selected = formSelectedEvents.includes(event);
- const eventTone = event.includes("Refund") || event.includes("Chargeback")
- ? "border-destructive/20 bg-destructive/10 text-destructive"
- : event.includes("Pix") || event.includes("Boleto")
- ? "border-warning/20 bg-warning/10 text-warning"
- : event === "Lead"
- ? "border-info/20 bg-info/10 text-info"
- : "border-primary/20 bg-primary/10 text-primary";
+                          return (
+                            <label
+                              key={event}
+                              className={cn(
+                                "flex items-center gap-3 px-3.5 py-2.5 text-xs cursor-pointer transition-colors",
+                                selected ? "bg-card text-foreground" : "text-muted-foreground hover:bg-card/60 hover:text-foreground"
+                              )}
+                            >
+                              <Checkbox
+                                checked={selected}
+                                onCheckedChange={() => toggleEvent(event)}
+                                className="data-[state=checked]:bg-primary data-[state=checked]:border-primary"
+                              />
+                              <span className="flex-1 font-semibold">{event}</span>
+                              <span className={cn("rounded-md border px-1.5 py-0.5 text-[8.5px] font-bold uppercase tracking-[0.12em]", tone)}>
+                                {isReversal ? "reversal" : isPending ? "pending" : "trigger"}
+                              </span>
+                            </label>
+                          );
+                        })}
+                      </div>
+                      <div className="border-t border-border bg-card px-3.5 py-2">
+                        <span className="text-[10px] font-semibold text-muted-foreground">
+                          {formSelectedEvents.length} de {dialogApp.events.length} eventos selecionados
+                        </span>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
 
- return (
- <label
- key={event}
- className={cn(
- "flex items-center gap-3 rounded-xl px-3 py-2.5 text-xs cursor-pointer transition-all",
- selected ? "bg-primary/5 text-foreground" : "text-muted-foreground/60 hover:bg-muted/20 hover:text-foreground"
- )}
- >
- <Checkbox
- checked={selected}
- onCheckedChange={() => toggleEvent(event)}
- className="data-[state=checked]:bg-primary data-[state=checked]:border-primary"
- />
- <span className="font-medium flex-1">{event}</span>
- <span className={cn("text-[8px] font-bold px-1.5 py-0.5 rounded border uppercase tracking-wider", eventTone)}>
- {event.includes("Refund") || event.includes("Chargeback") ? "reversal" : "trigger"}
- </span>
- </label>
- );
- })}
- </div>
- {formSelectedEvents.length > 0 && (
- <div className="border-t border-border/20 px-3 py-2 bg-muted/5">
- <span className="text-[10px] font-medium text-muted-foreground/60">
- {formSelectedEvents.length} de {dialogApp.events.length} selecionados
- </span>
- </div>
- )}
- </div>
- )}
- </div>
- )}
+            {/* Footer */}
+            <div className="border-t border-border bg-card px-6 py-4 space-y-2.5">
+              <Button
+                onClick={handleSave}
+                disabled={saving}
+                className="w-full h-11 rounded-xl font-bold text-[13px] bg-primary text-primary-foreground hover:bg-primary/90"
+              >
+                {saving ? (
+                  <span className="flex items-center gap-2">
+                    <div className="h-3.5 w-3.5 border-2 border-primary-foreground/30 border-t-primary-foreground rounded-full animate-spin" />
+                    Salvando...
+                  </span>
+                ) : (
+                  <span className="flex items-center gap-2">
+                    {editId ? <Settings2 className="h-4 w-4" /> : <Zap className="h-4 w-4" />}
+                    {editId ? "Salvar alterações" : "Ativar integração"}
+                  </span>
+                )}
+              </Button>
 
- <Button
- onClick={handleSave}
- disabled={saving}
- className="w-full h-12 rounded-xl font-bold text-sm gradient-primary text-primary-foreground shadow-lg shadow-primary/20 hover:shadow-primary/30 transition-all"
- >
- {saving ? (
- <span className="flex items-center gap-2">
- <div className="h-4 w-4 border-2 border-primary-foreground/30 border-t-primary-foreground rounded-full animate-spin" />
- Salvando...
- </span>
- ) : (
- <span className="flex items-center gap-2">
- {editId ? <Settings2 className="h-4 w-4" /> : <Zap className="h-4 w-4" />}
- {editId ? "Salvar Alterações" : "Ativar Integração"}
- </span>
- )}
- </Button>
-
- {editId && ["zapi","utmify","activecampaign","notazz","themembers","spedy","astron","memberkit","smsfunnel","voxuy","cademi"].includes(dialogApp.id) && (
- <Button
- variant="outline"
- disabled={testing}
- onClick={async () => {
- setTesting(true);
- const { data, error } = await supabase.functions.invoke("apps-dispatcher", {
- body: { action: "test", integration_id: editId },
- });
- setTesting(false);
- if (error || !data?.ok) {
- toast.error(`Falha no teste: ${data?.error || data?.body || error?.message || "desconhecido"}`);
- } else {
- toast.success(`Teste OK (HTTP ${data.status})`);
- }
- }}
- className="w-full h-11 rounded-xl text-xs font-bold border-border/40"
- >
- {testing ? "Testando..." : "Testar conexão (envio real)"}
- </Button>
- )}
- </div>
- </DialogContent>
- </Dialog>
- )}
- </PageShell>
- );
+              {editId && ["zapi","utmify","activecampaign","notazz","themembers","spedy","astron","memberkit","smsfunnel","voxuy","cademi"].includes(dialogApp.id) && (
+                <Button
+                  variant="outline"
+                  disabled={testing}
+                  onClick={async () => {
+                    setTesting(true);
+                    const { data, error } = await supabase.functions.invoke("apps-dispatcher", {
+                      body: { action: "test", integration_id: editId },
+                    });
+                    setTesting(false);
+                    if (error || !data?.ok) {
+                      toast.error(`Falha no teste: ${data?.error || data?.body || error?.message || "desconhecido"}`);
+                    } else {
+                      toast.success(`Teste OK (HTTP ${data.status})`);
+                    }
+                  }}
+                  className="w-full h-10 rounded-xl text-[12px] font-bold border border-border bg-secondary hover:bg-card"
+                >
+                  {testing ? "Testando conexão..." : "Testar conexão (envio real)"}
+                </Button>
+              )}
+            </div>
+          </DialogContent>
+        </Dialog>
+      )}
+    </PageShell>
+  );
 }
