@@ -262,5 +262,68 @@ export function PageSkeleton({ rows = 3, kpis = 4 }: { rows?: number; kpis?: num
  ))}
  </div>
  </div>
- );
+  );
 }
+
+/**
+ * TableSkeleton — Loading skeleton for tabular lists (rows with avatar/icon + 2 text lines + value)
+ * Use inside a Card/Panel that already has its own border.
+ */
+export function TableSkeleton({ rows = 6, columns = 4 }: { rows?: number; columns?: number }) {
+  return (
+    <div className="divide-y divide-border/30 animate-pulse">
+      {Array.from({ length: rows }).map((_, i) => (
+        <div key={i} className="flex items-center gap-4 px-6 py-4">
+          <div className="h-10 w-10 rounded-xl bg-muted/20 shrink-0" />
+          <div className="flex-1 space-y-2">
+            <div className="h-3.5 rounded bg-muted/25" style={{ width: `${55 + ((i * 13) % 30)}%` }} />
+            <div className="h-2.5 w-1/3 rounded bg-muted/15" />
+          </div>
+          {Array.from({ length: Math.max(0, columns - 2) }).map((_, j) => (
+            <div key={j} className="hidden md:block h-3 w-16 rounded bg-muted/15" />
+          ))}
+          <div className="h-7 w-20 rounded-lg bg-muted/20" />
+        </div>
+      ))}
+    </div>
+  );
+}
+
+/**
+ * GridSkeleton — Loading skeleton for card grids (products, marketplace, courses).
+ */
+export function GridSkeleton({ items = 6, cols = 3 }: { items?: number; cols?: 2 | 3 | 4 }) {
+  const colsCls = cols === 4 ? "lg:grid-cols-4" : cols === 2 ? "lg:grid-cols-2" : "lg:grid-cols-3";
+  return (
+    <div className={cn("grid gap-4 animate-pulse grid-cols-1 sm:grid-cols-2", colsCls)}>
+      {Array.from({ length: items }).map((_, i) => (
+        <div key={i} className="rounded-2xl border border-border/25 bg-card/30 overflow-hidden">
+          <div className="aspect-[16/10] bg-muted/15" />
+          <div className="p-4 space-y-3">
+            <div className="h-4 w-3/4 rounded bg-muted/25" />
+            <div className="h-3 w-1/2 rounded bg-muted/15" />
+            <div className="flex items-center justify-between pt-2">
+              <div className="h-5 w-20 rounded bg-muted/20" />
+              <div className="h-7 w-16 rounded-lg bg-muted/15" />
+            </div>
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+/**
+ * SectionSkeleton — Compact skeleton for a single content section/panel.
+ */
+export function SectionSkeleton({ lines = 4 }: { lines?: number }) {
+  return (
+    <div className="rounded-2xl border border-border/25 bg-card/30 p-6 space-y-3 animate-pulse">
+      <div className="h-5 w-40 rounded bg-muted/25" />
+      {Array.from({ length: lines }).map((_, i) => (
+        <div key={i} className="h-3 rounded bg-muted/15" style={{ width: `${60 + ((i * 17) % 35)}%` }} />
+      ))}
+    </div>
+  );
+}
+

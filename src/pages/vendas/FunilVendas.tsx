@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
-import { EmptyState } from "@/components/PageShell";
+import { EmptyState, PageSkeleton } from "@/components/PageShell";
 
 interface FunnelStage {
  stage: string;
@@ -86,8 +86,8 @@ export default function FunilVendas() {
 
  if (loading) {
  return (
- <div className="flex items-center justify-center py-20">
- <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+ <div className="mx-auto w-full max-w-[1180px] space-y-6 p-4 md:p-6">
+ <PageSkeleton kpis={4} rows={5} />
  </div>
  );
  }

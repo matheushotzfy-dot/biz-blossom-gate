@@ -15,7 +15,7 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
-import { EmptyState } from "@/components/PageShell";
+import { EmptyState, TableSkeleton } from "@/components/PageShell";
 
 type Ticket = {
   id: string;
@@ -377,9 +377,7 @@ export default function Suporte() {
 
         <div className="overflow-x-auto">
           {loading ? (
-            <div className="flex items-center justify-center py-20">
-              <Loader2 className="h-8 w-8 text-primary animate-spin" />
-            </div>
+            <TableSkeleton rows={5} columns={4} />
           ) : tickets.length === 0 ? (
             <EmptyState
               icon={<Inbox className="h-7 w-7" />}
