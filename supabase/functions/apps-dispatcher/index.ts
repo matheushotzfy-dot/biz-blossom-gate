@@ -108,6 +108,7 @@ async function deliverUtmify(integration: Integration, d: Delivery) {
   const customer = d.payload?.customer || {};
   const utm = d.payload?.utm || {};
 
+  // UTMify accepted statuses (per https://docs.utmify.com.br): paid | waiting_payment | refused | refunded | chargedback
   const statusMap: Record<string, string> = {
     Purchase: "paid",
     Refund: "refunded",
@@ -117,25 +118,46 @@ async function deliverUtmify(integration: Integration, d: Delivery) {
     BoletoGenerated: "waiting_payment",
   };
 
-  const amountCents = Math.round(Number(tx.amount || 0) * 100);
+  // UTMify accepted payment methods: credit_card | pix | billet (boleto)
+  const pmMap: Record<string, string> = {
+    credit_card: "credit_card",
+    creditcard: "credit_card",
+    card: "credit_card",
+    pix: "pix",
+    boleto: "billet",
+    billet: "billet",
+  };
+  const paymentMethod = pmMap[String(tx.payment_method || "").toLowerCase()] ?? "credit_card";
+
+  const amount = Number(tx.amount || 0);
+  const net = Number(tx.net_amount ?? tx.amount ?? 0);
+  const amountCents = Math.round(amount * 100);
+  const gatewayFeeCents = Math.max(0, Math.round((amount - net) * 100));
+  const userCommissionCents = Math.max(0, Math.round(net * 100));
+
+  // sanitize phone to digits-only (UTMify accepts null or string)
+  const phoneDigits = String(customer.phone || "").replace(/\D/g, "");
+
+  const nowUtmify = formatUtmifyDate(new Date().toISOString());
+
   const body = {
-    orderId: tx.id,
+    orderId: String(tx.id || `hotzfy_${Date.now()}`),
     platform: "Hotzfy",
-    paymentMethod: tx.payment_method === "credit_card" ? "credit_card" : tx.payment_method,
+    paymentMethod,
     status: statusMap[d.event] ?? "waiting_payment",
-    createdAt: tx.created_at,
-    approvedDate: d.event === "Purchase" ? new Date().toISOString() : null,
-    refundedAt: d.event === "Refund" ? new Date().toISOString() : null,
+    createdAt: formatUtmifyDate(tx.created_at) ?? nowUtmify,
+    approvedDate: d.event === "Purchase" ? nowUtmify : null,
+    refundedAt: d.event === "Refund" ? nowUtmify : null,
     customer: {
-      name: customer.name,
-      email: customer.email,
-      phone: customer.phone,
-      document: customer.document,
+      name: customer.name || "Cliente",
+      email: customer.email || "",
+      phone: phoneDigits || null,
+      document: String(customer.document || "").replace(/\D/g, "") || null,
       country: "BR",
-      ip: null,
+      ip: d.payload?.customer?.ip ?? null,
     },
     products: [{
-      id: tx.product_id,
+      id: String(tx.product_id || "unknown"),
       name: d.payload?.product_name || "Produto",
       planId: null,
       planName: null,
@@ -153,15 +175,19 @@ async function deliverUtmify(integration: Integration, d: Delivery) {
     },
     commission: {
       totalPriceInCents: amountCents,
-      gatewayFeeInCents: Math.round(Number(tx.amount - tx.net_amount || 0) * 100),
-      userCommissionInCents: Math.round(Number(tx.net_amount || 0) * 100),
+      gatewayFeeInCents: gatewayFeeCents,
+      userCommissionInCents: userCommissionCents,
     },
-    isTest: false,
+    isTest: d.is_test === true,
   };
 
   return await timedFetch("https://api.utmify.com.br/api-credentials/orders", {
     method: "POST",
-    headers: { "Content-Type": "application/json", "x-api-token": token },
+    headers: {
+      "Content-Type": "application/json",
+      "Accept": "application/json",
+      "x-api-token": token,
+    },
     body: JSON.stringify(body),
   });
 }
