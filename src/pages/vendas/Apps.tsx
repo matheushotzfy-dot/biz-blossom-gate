@@ -37,8 +37,9 @@ interface AppField {
 
 interface AppDef {
  id: string; name: string; desc: string; logo: string; category: string;
- fields: AppField[]; events: string[]; helpText?: string;
+ fields: AppField[]; events: string[]; helpText?: string; comingSoon?: boolean;
 }
+
 
 const APPS: AppDef[] = [
  {
