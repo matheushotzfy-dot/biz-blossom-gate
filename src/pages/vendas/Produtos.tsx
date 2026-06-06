@@ -15,6 +15,8 @@ import {
   XCircle,
 } from "lucide-react";
 import { toast } from "sonner";
+import { FinanceiroHero } from "@/components/financeiro/FinanceiroHero";
+
 
 import PixelSettingsDialog from "@/components/PixelSettingsDialog";
 import { ProductGridView } from "@/components/products/ProductGridView";
@@ -155,101 +157,98 @@ export default function Produtos() {
   };
 
   return (
-    <div className="mx-auto -mt-2 w-full max-w-[1440px] pb-24 md:-mt-3 md:pb-10">
-      {/* ── Hero header ── */}
-      <div className="relative flex flex-col gap-7 px-5 pt-1 sm:px-7 md:pt-1">
-        {/* Subtle radial accent behind title */}
-        <div
-          aria-hidden
-          className="pointer-events-none absolute -top-12 left-0 h-48 w-[520px] -z-[1] opacity-60 blur-3xl"
-          style={{
-            background:
-              "radial-gradient(60% 60% at 20% 50%, hsl(var(--primary) / 0.10), transparent 70%)",
-          }}
-        />
-
-        <div className="flex flex-wrap items-end justify-between gap-4 animate-fade-in">
-          <h1 className="font-display text-[48px] font-black leading-[0.88] tracking-[-0.06em] text-foreground sm:text-[68px]">
-            Produtos
-          </h1>
+    <div className="mx-auto w-full max-w-[1440px] space-y-6 px-5 pb-24 pt-1 sm:px-7 md:pb-10">
+      {/* ── Hero (Financeiro pattern) ── */}
+      <FinanceiroHero
+        eyebrow={`${products.length} ${products.length === 1 ? "produto" : "produtos"} no catálogo`}
+        title="Produtos"
+        subtitle="Gerencie seu catálogo, checkout e área de membros em um só lugar."
+        status={counts.pending_review > 0
+          ? { tone: "warning", label: `${counts.pending_review} em revisão`, pulse: true }
+          : counts.active > 0
+            ? { tone: "success", label: `${counts.active} ativos` }
+            : undefined}
+        actions={
           <button
             onClick={() => navigate("/vendas/produtos/novo/editar")}
-            className="group inline-flex h-9 items-center gap-2 rounded-xl bg-primary px-5 text-[12px] font-black uppercase tracking-wider text-primary-foreground transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] hover:bg-primary/90 hover:-translate-y-0.5 hover:shadow-[0_10px_30px_-10px_hsl(var(--primary)/0.5)]"
+            className="group inline-flex h-10 items-center gap-2 rounded-lg bg-primary px-4 text-[12px] font-bold uppercase tracking-wider text-primary-foreground transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] hover:bg-primary/90"
           >
-            <Plus className="h-4 w-4 transition-transform duration-300 group-hover:rotate-90" strokeWidth={2.75} />
-            Novo
+            <Plus className="h-4 w-4 transition-transform duration-300 group-hover:rotate-90" strokeWidth={2.5} />
+            Novo produto
           </button>
+        }
+      />
+
+      {/* ── Tabs + Search row ── */}
+      <div className="flex flex-col gap-3 animate-fade-in stagger-2 sm:flex-row sm:items-center sm:justify-between">
+        <div className="inline-flex w-fit items-center gap-0.5 rounded-xl border border-border/50 bg-card/60 p-1 overflow-x-auto">
+          {tabs.map((item) => {
+            const active = tab === item.value;
+            return (
+              <button
+                key={item.value}
+                onClick={() => setTab(item.value)}
+                className={cn(
+                  "group/tab relative inline-flex shrink-0 items-center gap-2 rounded-lg h-8 px-3 text-[12px] font-bold tracking-tight transition-colors duration-200",
+                  active
+                    ? "bg-secondary text-foreground"
+                    : "text-muted-foreground/80 hover:text-foreground"
+                )}
+              >
+                <span className={cn(
+                  "flex h-4 w-4 items-center justify-center transition-colors",
+                  active ? tabAccent[item.value] : "text-muted-foreground/50 group-hover/tab:text-foreground/70"
+                )}>
+                  {tabIcon[item.value]}
+                </span>
+                <span className="font-display">{item.label}</span>
+                {item.count > 0 && (
+                  <span className={cn(
+                    "inline-flex h-[18px] min-w-[20px] items-center justify-center rounded-md px-1.5 text-[10px] font-black tabular-nums tracking-tight border transition-colors",
+                    active
+                      ? "bg-background/80 text-foreground border-border/40"
+                      : "bg-muted/30 text-muted-foreground/60 border-transparent"
+                  )}>
+                    {item.count}
+                  </span>
+                )}
+              </button>
+            );
+          })}
         </div>
 
-        {/* Tabs + Search row */}
-        <div className="flex flex-col gap-3 pb-1 animate-fade-in stagger-2 sm:flex-row sm:items-center sm:justify-between">
-          <div className="inline-flex w-fit items-center gap-0.5 rounded-xl border border-border/50 bg-card/60 p-1 overflow-x-auto">
-            {tabs.map((item) => {
-              const active = tab === item.value;
-              return (
-                <button
-                  key={item.value}
-                  onClick={() => setTab(item.value)}
-                  className={cn(
-                    "group/tab relative inline-flex shrink-0 items-center gap-2 rounded-lg h-8 px-3 text-[12px] font-bold tracking-tight transition-colors duration-200",
-                    active
-                      ? "bg-secondary text-foreground"
-                      : "text-muted-foreground/80 hover:text-foreground"
-                  )}
-                >
-                  <span className={cn(
-                    "flex h-4 w-4 items-center justify-center transition-colors",
-                    active ? tabAccent[item.value] : "text-muted-foreground/50 group-hover/tab:text-foreground/70"
-                  )}>
-                    {tabIcon[item.value]}
-                  </span>
-                  <span className="font-display">{item.label}</span>
-                  {item.count > 0 && (
-                    <span className={cn(
-                      "inline-flex h-[18px] min-w-[20px] items-center justify-center rounded-md px-1.5 text-[10px] font-black tabular-nums tracking-tight border transition-colors",
-                      active
-                        ? "bg-background/80 text-foreground border-border/40"
-                        : "bg-muted/30 text-muted-foreground/60 border-transparent"
-                    )}>
-                      {item.count}
-                    </span>
-                  )}
-                </button>
-              );
-            })}
-          </div>
-
-          <div className="flex items-center gap-2">
-            {showClearDraftsBtn && (
-              <button
-                onClick={() => setClearDraftsOpen(true)}
-                className="inline-flex h-9 items-center gap-1.5 rounded-lg border border-destructive/40 bg-destructive/[0.06] px-3 text-[11.5px] font-black uppercase tracking-wider text-destructive transition-all duration-200 hover:bg-destructive hover:text-destructive-foreground hover:-translate-y-px"
-              >
-                <Trash2 className="h-3.5 w-3.5" strokeWidth={2.5} />
-                Limpar rascunhos
-                <span className="rounded bg-destructive/20 px-1.5 py-px text-[10px] tabular-nums">{draftIds.length}</span>
+        <div className="flex items-center gap-2">
+          {showClearDraftsBtn && (
+            <button
+              onClick={() => setClearDraftsOpen(true)}
+              className="inline-flex h-9 items-center gap-1.5 rounded-lg border border-destructive/40 bg-destructive/[0.06] px-3 text-[11px] font-bold uppercase tracking-wider text-destructive transition-all duration-200 hover:bg-destructive hover:text-destructive-foreground"
+            >
+              <Trash2 className="h-3.5 w-3.5" strokeWidth={2.5} />
+              Limpar rascunhos
+              <span className="rounded bg-destructive/20 px-1.5 py-px text-[10px] tabular-nums">{draftIds.length}</span>
+            </button>
+          )}
+          <div className="relative group">
+            <Search className="absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground/50 transition-colors group-focus-within:text-primary" />
+            <input
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder="Buscar produto..."
+              className="h-9 w-full rounded-lg border border-border/60 bg-secondary/40 pl-9 pr-8 text-xs font-medium text-foreground placeholder:text-muted-foreground/60 transition-all focus:border-primary/50 focus:bg-card focus:outline-none focus:ring-2 focus:ring-primary/15 sm:w-72"
+            />
+            {search && (
+              <button onClick={() => setSearch("")} className="absolute right-2.5 top-1/2 -translate-y-1/2 rounded p-0.5 text-muted-foreground/50 transition-colors hover:bg-secondary hover:text-foreground">
+                <X className="h-3 w-3" />
               </button>
             )}
-            <div className="relative group">
-              <Search className="absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground/50 transition-colors group-focus-within:text-primary" />
-              <input
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                placeholder="Buscar produto..."
-                className="h-9 w-full rounded-lg border border-border/60 bg-secondary/40 pl-9 pr-8 text-xs font-medium text-foreground placeholder:text-muted-foreground/60 transition-all focus:border-primary/50 focus:bg-card focus:outline-none focus:ring-2 focus:ring-primary/15 sm:w-72"
-              />
-              {search && (
-                <button onClick={() => setSearch("")} className="absolute right-2.5 top-1/2 -translate-y-1/2 rounded p-0.5 text-muted-foreground/50 transition-colors hover:bg-secondary hover:text-foreground">
-                  <X className="h-3 w-3" />
-                </button>
-              )}
-            </div>
           </div>
         </div>
       </div>
 
+
       {/* ── Product workspace ── */}
-      <div className="px-5 pt-6 pb-8 sm:px-7">
+      <div>
+
         {filtered.length === 0 ? (
           <div className="relative flex flex-col items-center justify-center overflow-hidden rounded-3xl border border-dashed border-border/60 bg-card/40 px-6 py-24 text-center animate-fade-in stagger-3">
             <div
