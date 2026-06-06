@@ -6,6 +6,7 @@ import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
+import { GridSkeleton } from "@/components/PageShell";
 
 type MarketplaceProduct = {
  id: string;
@@ -185,7 +186,7 @@ export default function Marketplace() {
 
  {/* ─── Products Grid ─── */}
  {loading ? (
- <div className="flex justify-center py-16"><div className="h-8 w-8 border-2 border-primary border-t-transparent rounded-full animate-spin" /></div>
+ <GridSkeleton items={6} cols={3} />
  ) : filtered.length === 0 ? (
  <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} className="rounded-2xl border border-border/60 bg-card shadow-sm p-16 flex flex-col items-center gap-4">
  <div className="h-16 w-16 rounded-2xl bg-muted/5 border border-border/6 flex items-center justify-center">

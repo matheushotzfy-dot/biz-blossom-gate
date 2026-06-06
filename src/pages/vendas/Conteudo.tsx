@@ -362,12 +362,7 @@ export default function AdminConteudo() {
       {/* ── Workspace ── */}
       <div className="px-6 sm:px-10 mt-10 pb-20">
         {isLoading ? (
-          <div className="flex min-h-[400px] items-center justify-center">
-            <div className="flex flex-col items-center gap-4">
-              <Loader2 className="h-8 w-8 animate-spin text-primary" />
-              <p className="text-xs text-muted-foreground font-bold uppercase tracking-widest animate-pulse">Carregando áreas...</p>
-            </div>
-          </div>
+          <GridSkeleton items={6} cols={4} />
         ) : filteredCourses.length === 0 ? (
           <div className="flex min-h-[500px] flex-col items-center justify-center px-6 text-center animate-fade-in">
             <div className="h-24 w-24 rounded-[32px] bg-card border border-border/40 flex items-center justify-center mb-8 shadow-xl relative group">
