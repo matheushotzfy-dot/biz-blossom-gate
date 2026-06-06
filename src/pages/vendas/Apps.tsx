@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Puzzle, Settings2, Zap, Shield, Sparkles, CheckCircle2 } from "lucide-react";
+import { Puzzle, Settings2, Zap, Shield, Sparkles, CheckCircle2, Clock } from "lucide-react";
 import { PageShell } from "@/components/PageShell";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
@@ -14,6 +14,7 @@ import { toast } from "sonner";
 import type { Tables } from "@/integrations/supabase/types";
 import { useNavigate } from "react-router-dom";
 import { cn } from "@/lib/utils";
+
 
 import utmifyLogo from "@/assets/apps/utmify.png";
 import notazzLogo from "@/assets/apps/notazz.svg";
@@ -36,8 +37,9 @@ interface AppField {
 
 interface AppDef {
  id: string; name: string; desc: string; logo: string; category: string;
- fields: AppField[]; events: string[]; helpText?: string;
+ fields: AppField[]; events: string[]; helpText?: string; comingSoon?: boolean;
 }
+
 
 const APPS: AppDef[] = [
  {
@@ -60,7 +62,7 @@ const APPS: AppDef[] = [
  },
  {
  id: "activecampaign", name: "ActiveCampaign", desc: "Automação de e-mail marketing", category: "Marketing",
- logo: activecampaignLogo,
+ logo: activecampaignLogo, comingSoon: true,
  fields: [
  { key: "api_key", label: "API Key", placeholder: "Cole sua API key", type: "api_key", required: true, help: "Settings → Developer → API Key" },
  { key: "api_url", label: "URL da conta", placeholder: "https://suaconta.api-us1.com", type: "api_url", required: true, help: "Settings → Developer → URL" },
@@ -68,6 +70,7 @@ const APPS: AppDef[] = [
  events: ["Purchase", "Lead", "InitiateCheckout", "Refund", "Chargeback"],
  helpText: "Adiciona contatos e aplica tags automaticamente.",
  },
+
  {
  id: "notazz", name: "Notazz", desc: "Emissão automática de notas fiscais", category: "Fiscal",
  logo: notazzLogo,
@@ -77,7 +80,7 @@ const APPS: AppDef[] = [
  },
  {
  id: "themembers", name: "TheMembers", desc: "Área de membros", category: "Membros",
- logo: themembersLogo,
+ logo: themembersLogo, comingSoon: true,
  fields: [
  { key: "api_key", label: "API Key", placeholder: "Cole sua API key", type: "api_key", required: true, help: "TheMembers → Integrações → API → Chave" },
  { key: "api_url", label: "URL da API (opcional)", placeholder: "https://api.themembers.com.br", type: "api_url", required: false },
@@ -94,39 +97,40 @@ const APPS: AppDef[] = [
  },
  {
  id: "astron", name: "Astron Members", desc: "Área de membros premium", category: "Membros",
- logo: astronLogo,
+ logo: astronLogo, comingSoon: true,
  fields: [{ key: "api_key", label: "API Key", placeholder: "Cole sua API key", type: "api_key", required: true, help: "Astron → Configurações → Integrações → API Key" }],
  events: ["Purchase", "Refund", "Chargeback"],
  helpText: "Libera/revoga acesso na plataforma Astron.",
  },
  {
  id: "memberkit", name: "MemberKit", desc: "Gestão completa de membros", category: "Membros",
- logo: memberkitLogo,
+ logo: memberkitLogo, comingSoon: true,
  fields: [{ key: "api_key", label: "API Key", placeholder: "Cole sua API key", type: "api_key", required: true, help: "MemberKit → Configurações → API → Chave" }],
  events: ["Purchase", "Refund", "Chargeback"],
  helpText: "Gerencia acesso dos membros automaticamente.",
  },
  {
  id: "smsfunnel", name: "SMSFunnel", desc: "Automação de SMS marketing", category: "Comunicação",
- logo: smsfunnelLogo,
+ logo: smsfunnelLogo, comingSoon: true,
  fields: [{ key: "api_key", label: "Token", placeholder: "Cole seu token", type: "api_key", required: true, help: "SMSFunnel → Configurações → API → Token" }],
  events: ["Purchase", "Lead", "InitiateCheckout", "PixGenerated", "BoletoGenerated", "Refund"],
  helpText: "Dispara SMS automáticos com base nos eventos.",
  },
  {
  id: "voxuy", name: "Voxuy", desc: "Chatbot e automação WhatsApp", category: "Comunicação",
- logo: voxuyLogo,
+ logo: voxuyLogo, comingSoon: true,
  fields: [{ key: "api_key", label: "API Key", placeholder: "Cole sua API key", type: "api_key", required: true, help: "Voxuy → Configurações → API → Chave" }],
  events: ["Purchase", "Lead", "InitiateCheckout", "PixGenerated", "Refund", "Chargeback"],
  helpText: "Mensagens automáticas via WhatsApp com Voxuy.",
  },
  {
  id: "cademi", name: "Cademi", desc: "Plataforma de cursos online", category: "Membros",
- logo: cademiLogo,
+ logo: cademiLogo, comingSoon: true,
  fields: [{ key: "api_key", label: "API Key", placeholder: "Cole sua API key", type: "api_key", required: true, help: "Cademi → Integrações → API → Chave" }],
  events: ["Purchase", "Refund", "Chargeback"],
  helpText: "Libera/revoga acesso dos alunos automaticamente.",
  },
+
  {
  id: "webhooks", name: "Webhooks", desc: "Integre com qualquer sistema", category: "Avançado",
  logo: webhooksLogo,
@@ -159,6 +163,7 @@ export default function Apps() {
  const [formSelectedEvents, setFormSelectedEvents] = useState<string[]>([]);
 
  const openDialog = (app: AppDef, existing?: AppIntegration) => {
+ if (app.comingSoon) { toast.info(`${app.name} estará disponível em breve.`); return; }
  if (app.id === "webhooks") { navigate("/integracoes?tab=webhooks"); return; }
  setDialogApp(app);
  if (existing) {
@@ -175,6 +180,7 @@ export default function Apps() {
  setEditId(null); setFormProductId(""); setFormFields({}); setFormEventMode("all"); setFormSelectedEvents([]);
  }
  };
+
 
  const closeDialog = () => { setDialogApp(null); setEditId(null); };
 
@@ -234,19 +240,23 @@ export default function Apps() {
  </div>
 
  <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
- {APPS.map((app, idx) => {
+ {[...APPS].sort((a, b) => Number(!!a.comingSoon) - Number(!!b.comingSoon)).map((app, idx) => {
  const integration = getIntegration(app.id);
  const active = Boolean(integration?.is_active);
+ const isComingSoon = Boolean(app.comingSoon);
 
  return (
  <button
  key={app.id}
  onClick={() => openDialog(app, integration || undefined)}
+ disabled={isComingSoon}
  className={cn(
- "group relative flex h-32 items-center overflow-hidden rounded-[26px] border px-7 text-left backdrop-blur-xl transition-all duration-300 ease-out animate-fade-in active:scale-[0.985] md:h-[8.5rem] md:px-8",
- active
- ? "border-primary/30 bg-card shadow-[0_18px_40px_hsl(var(--primary)/0.10)] hover:border-primary/40 hover:shadow-[0_24px_52px_hsl(var(--primary)/0.14)]"
- : "border-border/50 bg-card/95 shadow-[0_14px_32px_hsl(var(--foreground)/0.06)] hover:-translate-y-0.5 hover:border-border/70 hover:shadow-[0_22px_46px_hsl(var(--foreground)/0.10)]"
+ "group relative flex h-32 items-center overflow-hidden rounded-[26px] border px-7 text-left backdrop-blur-xl transition-all duration-300 ease-out animate-fade-in md:h-[8.5rem] md:px-8",
+ isComingSoon
+ ? "border-border/40 bg-card/50 cursor-not-allowed"
+ : active
+ ? "border-primary/30 bg-card shadow-[0_18px_40px_hsl(var(--primary)/0.10)] hover:border-primary/40 hover:shadow-[0_24px_52px_hsl(var(--primary)/0.14)] active:scale-[0.985]"
+ : "border-border/50 bg-card/95 shadow-[0_14px_32px_hsl(var(--foreground)/0.06)] hover:-translate-y-0.5 hover:border-border/70 hover:shadow-[0_22px_46px_hsl(var(--foreground)/0.10)] active:scale-[0.985]"
  )}
  style={{ animationDelay: `${idx * 35}ms`, animationFillMode: "backwards" }}
  >
@@ -254,26 +264,48 @@ export default function Apps() {
  <div className="absolute inset-0 bg-gradient-to-br from-background/35 via-transparent to-background/20" />
  <div className={cn(
  "absolute inset-y-0 left-0 w-[3px] transition-opacity duration-300",
- active ? "bg-primary opacity-100" : "bg-border opacity-0 group-hover:opacity-100"
+ active ? "bg-primary opacity-100" : "bg-border opacity-0 group-hover:opacity-100",
+ isComingSoon && "opacity-0"
  )} />
  <div className={cn(
  "absolute -right-10 top-1/2 h-28 w-28 -translate-y-1/2 rounded-full blur-3xl transition-opacity duration-300",
- active ? "bg-primary/15 opacity-100" : "bg-muted opacity-0 group-hover:opacity-60"
+ active ? "bg-primary/15 opacity-100" : "bg-muted opacity-0 group-hover:opacity-60",
+ isComingSoon && "opacity-0"
  )} />
  </div>
 
               <div className="relative z-[1] flex h-full w-full items-center justify-center">
-                <div className="flex h-20 w-32 items-center justify-center md:h-24 md:w-40">
+                <div className={cn(
+                  "flex h-20 w-32 items-center justify-center md:h-24 md:w-40 transition-all",
+                  isComingSoon && "grayscale opacity-40"
+                )}>
                   <img
                     src={app.logo}
                     alt={app.name}
-                    className="max-h-full max-w-full object-contain transition-transform duration-300 group-hover:scale-[1.06]"
+                    className={cn(
+                      "max-h-full max-w-full object-contain transition-transform duration-300",
+                      !isComingSoon && "group-hover:scale-[1.06]"
+                    )}
                   />
                 </div>
               </div>
+
+              {isComingSoon && (
+                <span className="absolute right-3 top-3 z-[2] inline-flex items-center gap-1 rounded-md border border-border/60 bg-background/80 px-1.5 py-0.5 text-[8.5px] font-bold uppercase tracking-[0.16em] text-muted-foreground">
+                  <Clock className="h-2.5 w-2.5" strokeWidth={2.5} />
+                  Em breve
+                </span>
+              )}
+              {active && !isComingSoon && (
+                <span className="absolute right-3 top-3 z-[2] inline-flex items-center gap-1 rounded-md border border-success/30 bg-success/10 px-1.5 py-0.5 text-[8.5px] font-bold uppercase tracking-[0.16em] text-success">
+                  <CheckCircle2 className="h-2.5 w-2.5" strokeWidth={2.5} />
+                  Ativo
+                </span>
+              )}
  </button>
  );
  })}
+
  </div>
  </section>
 

@@ -1,109 +1,120 @@
 import { useFees } from "@/hooks/useQueryData";
-import { Percent, Info, DollarSign, Calculator, Receipt, ShieldCheck, TrendingDown, Zap, CreditCard, Banknote, Clock } from "lucide-react";
+import { Percent, Info, DollarSign, Zap, CreditCard, Banknote, Clock } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { StatCard } from "@/components/StatCard";
+import { FinanceiroHero, FinanceiroKpi, FinanceiroKpiGrid } from "@/components/financeiro/FinanceiroHero";
 
 const fmt = (v: number) => `R$ ${v.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}`;
 
 export default function Taxas() {
   const { data: fees = [] } = useFees();
 
-  // Find standard fee values (fallback if not in DB yet)
   const getFee = (name: string, def: number) => {
-    const f = fees.find(f => f.name.toLowerCase().includes(name.toLowerCase()));
+    const f = fees.find((f) => f.name.toLowerCase().includes(name.toLowerCase()));
     return f ? f.value : def;
   };
 
   const pixRate = getFee("pix", 1.99);
   const cardRate = getFee("cartão", 4.99);
   const boletoRate = getFee("boleto", 3.49);
-  const withdrawFee = getFee("saque", 5.00);
+  const withdrawFee = getFee("saque", 5.0);
+
+  const deadlines = [
+    { label: "Pix", value: "Instantâneo", sub: "Disponível após aprovação", tone: "success" as const },
+    { label: "Cartão (D+1)", value: "24 horas", sub: "Padrão da plataforma", tone: "info" as const },
+    { label: "Boleto", value: "D+1", sub: "Após a compensação", tone: "warning" as const },
+  ];
+
+  const toneCls: Record<string, string> = {
+    success: "bg-success/10 text-success",
+    info: "bg-info/10 text-info",
+    warning: "bg-warning/10 text-warning",
+  };
 
   return (
-    <div className="space-y-6 animate-in fade-in duration-500">
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-        <div className="space-y-1">
-          <h1 className="text-2xl font-black text-foreground tracking-tight uppercase">Taxas e Tarifas</h1>
-          <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.2em] flex items-center gap-2">
-            <Percent className="h-3.5 w-3.5 text-primary" />
-            Estrutura de custos simplificada e transparente
+    <div className="space-y-6 animate-fade-in">
+      <FinanceiroHero
+        eyebrow="Estrutura de custos transparente"
+        title="Taxas e Tarifas"
+        subtitle="Veja o custo aplicado a cada método de pagamento e o prazo de liberação dos recebíveis."
+        status={{ tone: "info", label: "Plano vigente" }}
+      />
+
+      {/* KPI Grid — same standard as Adquirente */}
+      <FinanceiroKpiGrid cols={4}>
+        <FinanceiroKpi
+          label="Taxa Pix"
+          value={`${pixRate}%`}
+          sub="Receba na hora"
+          icon={Zap}
+          tone="success"
+        />
+        <FinanceiroKpi
+          label="Taxa Cartão"
+          value={`${cardRate}%`}
+          sub="Até 12x parcelado"
+          icon={CreditCard}
+          tone="info"
+        />
+        <FinanceiroKpi
+          label="Taxa Boleto"
+          value={`${boletoRate}%`}
+          sub="Compensação 24h"
+          icon={Banknote}
+          tone="warning"
+        />
+        <FinanceiroKpi
+          label="Tarifa de Saque"
+          value={fmt(withdrawFee)}
+          sub="Fixo por solicitação"
+          icon={DollarSign}
+          tone="primary"
+        />
+      </FinanceiroKpiGrid>
+
+      {/* Prazos de liberação */}
+      <section className="bg-card rounded-[24px] border border-border shadow-sm overflow-hidden animate-fade-in stagger-2">
+        <div className="flex items-center gap-2.5 px-5 py-3.5 border-b border-border/50">
+          <div className="h-7 w-7 rounded-md bg-warning/10 text-warning flex items-center justify-center">
+            <Clock className="h-3.5 w-3.5" strokeWidth={2.25} />
+          </div>
+          <div>
+            <h2 className="text-[14px] font-display font-black text-foreground tracking-[-0.01em]">Prazos de liberação</h2>
+            <p className="text-[11px] text-muted-foreground/70 font-medium">Quando seu saldo fica disponível para saque.</p>
+          </div>
+        </div>
+        <div className="divide-y divide-border/40">
+          {deadlines.map((p) => (
+            <div key={p.label} className="flex items-center justify-between gap-4 px-5 py-3.5">
+              <div className="flex items-center gap-3 min-w-0">
+                <div className={cn("h-9 w-9 rounded-md flex items-center justify-center shrink-0", toneCls[p.tone])}>
+                  <Clock className="h-3.5 w-3.5" strokeWidth={2.25} />
+                </div>
+                <div className="min-w-0">
+                  <p className="text-[13px] font-display font-black text-foreground tracking-tight">{p.label}</p>
+                  <p className="text-[11px] text-muted-foreground/70 font-medium truncate">{p.sub}</p>
+                </div>
+              </div>
+              <span className="text-[13px] font-display font-black text-foreground tabular-nums tracking-tight shrink-0">
+                {p.value}
+              </span>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* Info footer */}
+      <section className="bg-card rounded-[24px] border border-border shadow-sm overflow-hidden animate-fade-in stagger-3">
+        <div className="flex items-start gap-3 px-5 py-4">
+          <div className="h-7 w-7 rounded-md bg-info/10 text-info flex items-center justify-center shrink-0">
+            <Info className="h-3.5 w-3.5" strokeWidth={2.25} />
+          </div>
+          <p className="text-[12px] text-muted-foreground leading-relaxed font-medium">
+            As taxas exibidas são baseadas no seu plano atual. Para volumes superiores a{" "}
+            <span className="font-black text-foreground tabular-nums">R$ 100.000/mês</span>, fale com seu gerente de conta
+            para uma proposta personalizada.
           </p>
         </div>
-      </div>
-
-      {/* Main Rates Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <StatCard 
-          title="Taxa Pix" 
-          value={`${pixRate}%`} 
-          icon={Zap} 
-          color="success" 
-          description="Receba na hora"
-        />
-        <StatCard 
-          title="Taxa Cartão" 
-          value={`${cardRate}%`} 
-          icon={CreditCard} 
-          color="info" 
-          description="Até 12x"
-        />
-        <StatCard 
-          title="Taxa Boleto" 
-          value={`${boletoRate}%`} 
-          icon={Banknote} 
-          color="warning" 
-          description="Compensação 24h"
-        />
-        <StatCard 
-          title="Tarifa de Saque" 
-          value={fmt(withdrawFee)} 
-          icon={DollarSign} 
-          color="primary" 
-          description="Fixo por pedido"
-        />
-      </div>
-
-      <div className="grid grid-cols-1 gap-6">
-        {/* Retentions & Deadlines */}
-        <div className="bg-card rounded-[24px] border border-border/60 shadow-sm overflow-hidden flex flex-col">
-          <div className="p-6 border-b border-border/40">
-            <div className="flex items-center gap-3">
-              <div className="h-10 w-10 bg-amber-500/10 border border-amber-500/10 rounded-xl flex items-center justify-center text-amber-500">
-                <Clock size={20} strokeWidth={2.5} />
-              </div>
-              <div>
-                <h2 className="font-black text-foreground tracking-tight uppercase">Prazos</h2>
-                <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mt-1">Liberação de recebíveis</p>
-              </div>
-            </div>
-          </div>
-          
-          <div className="p-6 space-y-4 flex-1">
-            {[
-              { label: "Pix", value: "Instantâneo", sub: "Disponível após aprovação", tone: "success" },
-              { label: "Cartão (D+1)", value: "24 horas", sub: "Padrão da plataforma", tone: "info" },
-              { label: "Boleto", value: "D+1", sub: "Após a compensação", tone: "warning" },
-            ].map((p) => (
-              <div key={p.label} className="flex items-center justify-between p-3 rounded-2xl bg-muted/30 border border-border/60">
-                <div>
-                  <p className="text-[11px] font-black text-foreground uppercase tracking-widest">{p.label}</p>
-                  <p className="text-[10px] font-medium text-muted-foreground/60">{p.sub}</p>
-                </div>
-                <div className="text-right">
-                   <p className="text-xs font-black text-foreground uppercase">{p.value}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
-
-      <div className="p-4 rounded-2xl border border-primary/20 bg-primary/5 flex items-start gap-3">
-        <Info className="h-4 w-4 text-primary shrink-0 mt-0.5" />
-        <p className="text-[11px] font-medium text-muted-foreground/80 leading-relaxed">
-          As taxas exibidas são baseadas no seu plano atual. Para volumes superiores a R$ 100k/mês, entre em contato com seu gerente de conta para uma proposta personalizada.
-        </p>
-      </div>
+      </section>
     </div>
   );
 }
