@@ -9,9 +9,11 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import {
   Trophy, Lock, CheckCircle2, Gift, Crown, Target, Sparkles, Flame,
-  Gem, Star, Award, Quote,
+  Gem, Star, Award, Quote, TrendingUp, Activity,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { FinanceiroHero, FinanceiroKpi, FinanceiroKpiGrid } from "@/components/financeiro/FinanceiroHero";
+
 
 import braceletCard from "@/assets/awards/bracelet-card-10k.png";
 import plaque100k from "@/assets/awards/plaque-100k.png";
