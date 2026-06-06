@@ -367,15 +367,15 @@ export default function Dashboard() {
               <div className="flex flex-col sm:flex-row">
                 {/* Quick presets rail */}
                 <div className="sm:w-[148px] sm:border-r border-b sm:border-b-0 border-border bg-secondary/15 p-2 flex sm:flex-col gap-0.5 overflow-x-auto sm:overflow-visible">
-                  {[
+                  {([
                     { label: "Hoje", days: 0 },
                     { label: "Ontem", days: 1, offset: 1 },
                     { label: "Últimos 7 dias", days: 6 },
                     { label: "Últimos 15 dias", days: 14 },
                     { label: "Últimos 30 dias", days: 29 },
-                    { label: "Este mês", monthMode: "current" as const },
-                    { label: "Mês passado", monthMode: "previous" as const },
-                  ].map((preset) => {
+                    { label: "Este mês", monthMode: "current" },
+                    { label: "Mês passado", monthMode: "previous" },
+                  ] as { label: string; days?: number; offset?: number; monthMode?: "current" | "previous" }[]).map((preset) => {
                     const apply = () => {
                       const today = new Date();
                       let from: Date, to: Date;
