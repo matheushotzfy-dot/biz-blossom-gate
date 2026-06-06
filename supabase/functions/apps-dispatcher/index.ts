@@ -671,6 +671,11 @@ Deno.serve(async (req) => {
       notazz: deliverNotazz,
       themembers: deliverTheMembers,
       spedy: deliverSpedy,
+      astron: deliverAstron,
+      memberkit: deliverMemberKit,
+      smsfunnel: deliverSmsFunnel,
+      voxuy: deliverVoxuy,
+      cademi: deliverCademi,
     };
     const handler = handlers[integ.app_name];
     const result = handler
