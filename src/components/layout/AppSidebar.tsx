@@ -106,50 +106,75 @@ function RevenueCard({ collapsed, revenue, milestone, onOpenRewards }: RevenueCa
   if (collapsed) return null;
 
   const pct = Math.max(0, Math.min(100, Math.round(milestone.pct)));
+  const remaining = Math.max(0, milestone.next.value - revenue);
 
   return (
     <button
       type="button"
       onClick={onOpenRewards}
-      className="group/rev mt-5 block w-full rounded-lg border border-sidebar-border/70 bg-sidebar-accent/25 px-3.5 py-3 text-left transition-colors duration-200 hover:border-sidebar-primary/30 hover:bg-sidebar-accent/45"
+      className="group/rev mt-4 block w-full overflow-hidden rounded-lg border border-sidebar-border/70 bg-sidebar-accent/20 text-left transition-colors duration-200 hover:border-sidebar-primary/40 hover:bg-sidebar-accent/35"
     >
-      <div className="flex items-center justify-between">
-        <span className="text-[9.5px] font-bold uppercase tracking-[0.18em] text-sidebar-foreground/50">
-          Volume Total
+      {/* Top row — eyebrow + live ticker */}
+      <div className="flex items-center justify-between border-b border-sidebar-border/50 bg-sidebar-accent/30 px-3.5 py-2">
+        <span className="font-display text-[9px] font-black uppercase tracking-[0.22em] text-sidebar-foreground/55">
+          Volume · Hoje
         </span>
-        <span className="inline-flex items-center gap-1 rounded-md border border-sidebar-border/60 bg-sidebar/40 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-[0.14em] text-sidebar-foreground/60">
-          <Zap className="h-2.5 w-2.5 text-sidebar-primary" strokeWidth={3} />
+        <span className="inline-flex items-center gap-1.5 font-display text-[8.5px] font-black uppercase tracking-[0.18em] text-success">
+          <span className="relative flex h-1.5 w-1.5">
+            <span className="absolute inset-0 animate-ping rounded-full bg-success opacity-70" />
+            <span className="relative h-1.5 w-1.5 rounded-full bg-success" />
+          </span>
           Live
         </span>
       </div>
 
-      <p className="mt-1.5 font-display text-[22px] font-black leading-none tracking-[-0.04em] text-sidebar-accent-foreground tabular-nums">
-        {formatRevenue(revenue)}
-      </p>
+      <div className="px-3.5 pb-3.5 pt-3">
+        {/* Main figure */}
+        <div className="flex items-baseline gap-1.5">
+          <p className="font-numbers text-[24px] font-black leading-none tracking-[-0.045em] text-sidebar-accent-foreground tabular-nums">
+            {formatRevenue(revenue)}
+          </p>
+          <span className="font-display text-[9.5px] font-bold uppercase tracking-[0.18em] text-sidebar-foreground/45">
+            BRL
+          </span>
+        </div>
 
-      <div className="mt-3 flex items-baseline justify-between text-[10px] font-semibold tabular-nums text-sidebar-foreground/55">
-        <span>{milestone.current.label}</span>
-        <span className="text-sidebar-foreground/40">
-          Meta <span className="text-sidebar-foreground/70">{milestone.next.label}</span>
-        </span>
-      </div>
+        {/* Progress segmented */}
+        <div className="mt-3.5 flex h-[5px] gap-[2px] overflow-hidden rounded-[2px]">
+          {Array.from({ length: 24 }).map((_, i) => {
+            const segPct = ((i + 1) / 24) * 100;
+            const filled = pct >= segPct;
+            return (
+              <div
+                key={i}
+                className={cn(
+                  "flex-1 transition-colors duration-500",
+                  filled ? "bg-sidebar-primary" : "bg-sidebar-border/60"
+                )}
+              />
+            );
+          })}
+        </div>
 
-      <div className="mt-1.5 h-[3px] overflow-hidden rounded-full bg-sidebar-border/50">
-        <div
-          className="h-full rounded-full bg-sidebar-primary transition-[width] duration-700 ease-out"
-          style={{ width: `${pct}%` }}
-        />
-      </div>
+        {/* Scale labels */}
+        <div className="mt-2 flex items-center justify-between font-numbers text-[9.5px] font-bold tabular-nums text-sidebar-foreground/45">
+          <span>{milestone.current.label}</span>
+          <span className="font-display text-[8.5px] font-black uppercase tracking-[0.16em] text-sidebar-primary tabular-nums">
+            {pct}% · meta
+          </span>
+          <span>{milestone.next.label}</span>
+        </div>
 
-      <div className="mt-2.5 flex items-center justify-between">
-        <span className="font-numbers text-[11px] font-bold tabular-nums text-sidebar-accent-foreground">
-          {pct}<span className="text-sidebar-foreground/45">%</span>
-          <span className="ml-1.5 text-[9px] font-bold uppercase tracking-[0.16em] text-sidebar-foreground/45">Concluído</span>
-        </span>
-        <span className="inline-flex items-center gap-0.5 text-[9.5px] font-bold uppercase tracking-[0.18em] text-sidebar-primary/80 transition-colors group-hover/rev:text-sidebar-primary">
-          Rewards
-          <ChevronRight className="h-3 w-3 transition-transform group-hover/rev:translate-x-0.5" strokeWidth={3} />
-        </span>
+        {/* Footer */}
+        <div className="mt-3 flex items-center justify-between border-t border-sidebar-border/40 pt-2.5">
+          <span className="font-display text-[9.5px] font-bold uppercase tracking-[0.16em] text-sidebar-foreground/55">
+            Faltam <span className="font-numbers text-sidebar-accent-foreground tabular-nums">{formatRevenue(remaining)}</span>
+          </span>
+          <span className="inline-flex items-center gap-0.5 font-display text-[9.5px] font-black uppercase tracking-[0.2em] text-sidebar-primary transition-transform group-hover/rev:translate-x-0.5">
+            Rewards
+            <ChevronRight className="h-3 w-3" strokeWidth={3} />
+          </span>
+        </div>
       </div>
     </button>
   );
@@ -339,26 +364,36 @@ export function AppSidebar() {
 
   return (
     <Sidebar collapsible="icon" className="border-r-2 border-sidebar-border/80 bg-sidebar">
-      <SidebarHeader className="relative border-b border-sidebar-border/70 px-4 pb-5 pt-5">
+      <SidebarHeader className="relative border-b border-sidebar-border/70 px-4 pb-4 pt-4">
         {/* Brand */}
-        <div className={cn("flex items-center gap-2.5", collapsed && "justify-center")}>
-          <div className="relative h-9 w-9 shrink-0 overflow-hidden rounded-lg border border-sidebar-border/80 bg-sidebar-accent/60">
-            <img src={hotzfyLogo} alt="HOTZFY" className="h-full w-full object-contain p-1" />
+        <div className={cn("flex items-center gap-3", collapsed && "justify-center")}>
+          <div className="relative h-10 w-10 shrink-0 overflow-hidden rounded-[10px] border border-sidebar-border bg-gradient-to-br from-sidebar-accent to-sidebar-accent/40 ring-1 ring-inset ring-sidebar-primary/10">
+            <img src={hotzfyLogo} alt="HOTZFY" className="h-full w-full object-contain p-[3px]" />
+            <span className="pointer-events-none absolute inset-0 rounded-[10px] bg-gradient-to-br from-sidebar-primary/0 via-transparent to-sidebar-primary/10" />
           </div>
-          <div className="min-w-0 group-data-[collapsible=icon]:hidden">
+          <div className="min-w-0 flex-1 group-data-[collapsible=icon]:hidden">
             <div className="flex items-center gap-1.5">
-              <h1 className="font-display text-[15px] leading-none font-black tracking-[-0.03em] text-sidebar-accent-foreground">
+              <h1 className="font-display text-[15.5px] leading-none font-black tracking-[-0.045em] text-sidebar-accent-foreground">
                 HOTZFY
               </h1>
-              <Crown className="h-3 w-3 text-sidebar-primary" strokeWidth={2.5} fill="hsl(var(--sidebar-primary))" />
+              <span className="inline-flex h-[14px] items-center gap-0.5 rounded-[3px] border border-sidebar-primary/40 bg-sidebar-primary/15 px-1 font-display text-[8px] font-black uppercase tracking-[0.16em] text-sidebar-primary">
+                <Crown className="h-2 w-2" strokeWidth={3} fill="currentColor" />
+                Pro
+              </span>
             </div>
-            <p className="mt-1.5 inline-flex items-center gap-1.5 rounded-md border border-sidebar-border/60 bg-sidebar-accent/30 px-1.5 py-0.5 text-[9.5px] font-bold uppercase tracking-[0.14em] text-sidebar-foreground/65">
+            <div className="mt-1.5 flex items-center gap-1.5">
               <span className="relative flex h-1.5 w-1.5">
                 <span className="absolute inset-0 animate-ping rounded-full bg-success opacity-60" />
                 <span className="relative h-1.5 w-1.5 rounded-full bg-success" />
               </span>
-              Operacional
-            </p>
+              <span className="font-display text-[9.5px] font-black uppercase tracking-[0.2em] text-sidebar-foreground/70">
+                Operacional
+              </span>
+              <span className="ml-auto h-px flex-1 bg-sidebar-border/50" />
+              <span className="font-numbers text-[9px] font-bold uppercase tracking-[0.16em] text-sidebar-foreground/45 tabular-nums">
+                v2.4
+              </span>
+            </div>
           </div>
         </div>
         <RevenueCard
@@ -368,6 +403,7 @@ export function AppSidebar() {
           onOpenRewards={() => navigate("/premiacoes")}
         />
       </SidebarHeader>
+
 
       <SidebarContent className="relative gap-0 overflow-y-auto px-2.5 py-3">
         {sections.map((section, idx) => (

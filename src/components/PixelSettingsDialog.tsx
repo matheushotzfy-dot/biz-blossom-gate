@@ -183,90 +183,98 @@ export default function PixelSettingsDialog({ product, open, onOpenChange }: Pro
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-[920px] max-h-[92vh] overflow-hidden flex flex-col p-0 rounded-2xl border border-border bg-card gap-0">
+      <DialogContent className="max-w-[960px] max-h-[92vh] overflow-hidden flex flex-col p-0 rounded-xl border border-border bg-card gap-0">
         {/* ═══ HEADER ═══ */}
-        <div className="relative border-b border-border bg-card px-7 py-5">
+        <div className="relative border-b border-border bg-gradient-to-b from-muted/30 to-card px-8 pt-6 pb-0">
           <button
             onClick={() => onOpenChange(false)}
-            className="absolute top-4 right-4 h-8 w-8 rounded-md border border-border bg-background flex items-center justify-center text-muted-foreground hover:text-foreground hover:border-border/80 transition-colors"
+            className="absolute top-5 right-5 h-8 w-8 rounded-md border border-border bg-card flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors"
             aria-label="Fechar"
           >
             <X className="h-4 w-4" />
           </button>
 
           <div className="flex items-start gap-4">
-            <div className="h-11 w-11 rounded-md border border-border bg-background flex items-center justify-center shrink-0">
+            <div className="relative h-12 w-12 rounded-lg border border-border bg-card flex items-center justify-center shrink-0">
               <Crosshair className="h-5 w-5 text-primary" strokeWidth={2.2} />
+              <span className="absolute -bottom-1 -right-1 h-3.5 w-3.5 rounded-full border-2 border-card bg-success" />
             </div>
-            <div className="min-w-0 flex-1">
-              <div className="flex items-center gap-2">
-                <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded border border-border bg-muted/40 text-[9px] font-display font-bold uppercase tracking-[0.16em] text-muted-foreground">
-                  <Sparkles className="h-2.5 w-2.5" /> Tracking
+            <div className="min-w-0 flex-1 pt-0.5">
+              <div className="flex items-center gap-1.5">
+                <span className="font-display text-[9.5px] font-black uppercase tracking-[0.2em] text-muted-foreground">
+                  Tracking / Conversão
                 </span>
-                <span className="text-[10px] font-display font-bold uppercase tracking-[0.14em] text-muted-foreground/60 truncate">
+                <span className="h-1 w-1 rounded-full bg-muted-foreground/40" />
+                <span className="font-display text-[9.5px] font-bold uppercase tracking-[0.16em] text-muted-foreground/70 truncate">
                   {product.name}
                 </span>
               </div>
-              <h2 className="mt-1.5 text-[20px] font-display font-black tracking-[-0.02em] text-foreground leading-tight">
+              <h2 className="mt-1 text-[22px] font-display font-black tracking-[-0.03em] text-foreground leading-tight">
                 Pixels & Conversão
               </h2>
-              <p className="mt-1 text-[12px] text-muted-foreground font-display">
-                Configure pixels de rastreamento e gatilhos de conversão para este produto.
+              <p className="mt-1 text-[12.5px] text-muted-foreground leading-snug max-w-[560px]">
+                Conecte pixels de rastreamento e configure gatilhos de conversão por produto.
               </p>
+            </div>
+
+            {/* Compact KPI strip */}
+            <div className="hidden md:flex items-stretch border border-border rounded-lg overflow-hidden bg-card shrink-0">
+              <KpiCell label="Total" value={pixels.length} />
+              <KpiCell label="Ativos" value={totalActive} accent="success" />
+              <KpiCell label={platform.short} value={platformPixels.length} accent="primary" />
             </div>
           </div>
 
-          {/* Stats row — sharp tabular */}
-          <div className="mt-5 grid grid-cols-3 gap-0 border border-border rounded-md overflow-hidden bg-background">
-            <StatCell icon={Layers} label="Total" value={pixels.length} />
-            <StatCell icon={Power} label="Ativos" value={totalActive} accent="success" border />
-            <StatCell icon={Signal} label={platform.short} value={platformPixels.length} accent="primary" />
+          {/* ═══ PLATFORM TABS ═══ */}
+          <div className="mt-5 -mx-8 px-8 border-t border-border/70">
+            <div className="flex gap-0 overflow-x-auto">
+              {PLATFORMS.map(p => {
+                const isActive = activePlatform === p.id;
+                const count = pixels.filter(px => px.platform === p.id).length;
+                const activeCount = pixels.filter(px => px.platform === p.id && px.is_active).length;
+                return (
+                  <button
+                    key={p.id}
+                    onClick={() => setActivePlatform(p.id)}
+                    className={cn(
+                      "relative group flex items-center gap-2.5 px-4 py-3 text-[12px] font-display font-bold transition-colors whitespace-nowrap",
+                      isActive
+                        ? "text-foreground"
+                        : "text-muted-foreground/70 hover:text-foreground"
+                    )}
+                  >
+                    <p.LogoComp
+                      className={cn("h-[15px] w-[15px] shrink-0 transition-opacity", isActive ? "" : "opacity-50 group-hover:opacity-90")}
+                      style={isActive ? { color: p.brandColor } : {}}
+                    />
+                    <span>{p.short}</span>
+                    {count > 0 && (
+                      <span
+                        className={cn(
+                          "inline-flex items-center justify-center min-w-[22px] h-[18px] px-1.5 rounded-[4px] text-[9.5px] font-numbers font-black tabular-nums border",
+                          isActive
+                            ? activeCount > 0
+                              ? "bg-success/10 border-success/30 text-success"
+                              : "bg-muted border-border text-foreground"
+                            : "bg-muted/40 border-border/60 text-muted-foreground"
+                        )}
+                      >
+                        {count}
+                      </span>
+                    )}
+                    {isActive && (
+                      <span
+                        className="absolute bottom-0 left-2 right-2 h-[2px]"
+                        style={{ backgroundColor: p.brandColor }}
+                      />
+                    )}
+                  </button>
+                );
+              })}
+            </div>
           </div>
         </div>
 
-        {/* ═══ PLATFORM TABS ═══ */}
-        <div className="border-b border-border bg-background px-3 py-2 overflow-x-auto">
-          <div className="flex gap-1 min-w-max">
-            {PLATFORMS.map(p => {
-              const isActive = activePlatform === p.id;
-              const count = pixels.filter(px => px.platform === p.id).length;
-              return (
-                <button
-                  key={p.id}
-                  onClick={() => setActivePlatform(p.id)}
-                  className={cn(
-                    "group flex items-center gap-2 px-3.5 py-2 rounded-md text-[12px] font-display font-bold transition-colors border",
-                    isActive
-                      ? "bg-card border-border text-foreground"
-                      : "bg-transparent border-transparent text-muted-foreground hover:text-foreground hover:bg-muted/30"
-                  )}
-                >
-                  <p.LogoComp
-                    className={cn("h-4 w-4 shrink-0", isActive ? "" : "opacity-60 group-hover:opacity-100 transition-opacity")}
-                    style={isActive ? { color: p.brandColor } : {}}
-                  />
-                  <span>{p.short}</span>
-                  {count > 0 && (
-                    <span
-                      className={cn(
-                        "ml-0.5 inline-flex items-center justify-center min-w-[18px] h-[18px] px-1 rounded text-[10px] font-numbers font-bold",
-                        isActive ? "bg-muted text-foreground" : "bg-muted/40 text-muted-foreground"
-                      )}
-                    >
-                      {count}
-                    </span>
-                  )}
-                  {isActive && (
-                    <span
-                      className="ml-0.5 h-1.5 w-1.5 rounded-full"
-                      style={{ backgroundColor: p.brandColor }}
-                    />
-                  )}
-                </button>
-              );
-            })}
-          </div>
-        </div>
 
         {/* ═══ CONTENT ═══ */}
         <div className="flex-1 overflow-y-auto bg-background/40">
@@ -602,29 +610,25 @@ export default function PixelSettingsDialog({ product, open, onOpenChange }: Pro
 
 /* ─── Subcomponents ─── */
 
-function StatCell({
-  icon: Icon, label, value, accent, border,
-}: { icon: any; label: string; value: number; accent?: "success" | "primary"; border?: boolean }) {
+function KpiCell({
+  label, value, accent,
+}: { label: string; value: number; accent?: "success" | "primary" }) {
   const color =
     accent === "success" ? "text-success" :
     accent === "primary" ? "text-primary" :
     "text-foreground";
   return (
-    <div className={cn("flex items-center gap-3 px-4 py-3", border && "border-x border-border")}>
-      <div className="h-7 w-7 rounded-md border border-border bg-card flex items-center justify-center shrink-0">
-        <Icon className={cn("h-3.5 w-3.5", color)} strokeWidth={2.2} />
-      </div>
-      <div className="min-w-0">
-        <p className="text-[9.5px] font-display font-black uppercase tracking-[0.14em] text-muted-foreground leading-none">
-          {label}
-        </p>
-        <p className={cn("mt-1 text-[16px] font-numbers font-black tabular-nums leading-none", color)}>
-          {value}
-        </p>
-      </div>
+    <div className="flex flex-col items-center justify-center px-4 py-2 min-w-[68px] border-r border-border last:border-r-0">
+      <p className={cn("font-numbers text-[18px] font-black tabular-nums leading-none", color)}>
+        {value}
+      </p>
+      <p className="mt-1 font-display text-[8.5px] font-black uppercase tracking-[0.18em] text-muted-foreground leading-none">
+        {label}
+      </p>
     </div>
   );
 }
+
 
 function StatusDot({ active }: { active: boolean }) {
   return (
