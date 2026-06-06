@@ -1,25 +1,18 @@
-import { useEffect, useState, useMemo, useCallback } from "react";
-import { supabase } from "@/integrations/supabase/client";
-import { useAuth } from "@/hooks/useAuth";
+import { useState, useMemo, useEffect } from "react";
 import { useTransactions, useProducts } from "@/hooks/useQueryData";
 import {
-  Search, EyeOff, Eye, Phone, Mail, Clock, Check,
-  Download, FileText, ChevronDown, ChevronUp, ArrowUpDown, ArrowUpRight, ArrowDownRight,
-  CreditCard, ShoppingCart, MessageCircle, Filter, Zap, LayoutGrid, List as ListIcon,
-  Plus, History, BarChart3, TrendingUp, Wallet
+  Search, EyeOff, Eye, Check, Download, FileText,
+  CreditCard, ShoppingCart, Zap, History, BarChart3, TrendingUp, Wallet,
+  CalendarIcon, ChevronLeft, ChevronRight,
 } from "lucide-react";
 import { TransactionDetailPanel } from "@/components/transactions/TransactionDetailPanel";
 import type { Tables } from "@/integrations/supabase/types";
-import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
-import { cn, formatCurrency } from "@/lib/utils";
+import { cn } from "@/lib/utils";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import {
-  DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { format } from "date-fns";
+import { format, startOfDay, endOfDay, subDays, startOfMonth, endOfMonth, subMonths, differenceInDays } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import type { DateRange } from "react-day-picker";
 import { StatCard } from "@/components/StatCard";
@@ -42,13 +35,44 @@ const METHODS_MAP: Record<string, { label: string; icon: any }> = {
   boleto: { label: "Boleto", icon: FileText },
 };
 
+const PAGE_SIZE = 25;
+
+type PresetId = "today" | "yesterday" | "7d" | "14d" | "30d" | "lastMonth" | "custom";
+
+const buildPreset = (id: PresetId): DateRange => {
+  const now = new Date();
+  switch (id) {
+    case "today": return { from: startOfDay(now), to: endOfDay(now) };
+    case "yesterday": { const y = subDays(now, 1); return { from: startOfDay(y), to: endOfDay(y) }; }
+    case "7d": return { from: startOfDay(subDays(now, 6)), to: endOfDay(now) };
+    case "14d": return { from: startOfDay(subDays(now, 13)), to: endOfDay(now) };
+    case "30d": return { from: startOfDay(subDays(now, 29)), to: endOfDay(now) };
+    case "lastMonth": { const lm = subMonths(now, 1); return { from: startOfMonth(lm), to: endOfMonth(lm) }; }
+    default: return { from: startOfDay(now), to: endOfDay(now) };
+  }
+};
+
+const PRESETS: { id: PresetId; label: string }[] = [
+  { id: "today", label: "Hoje" },
+  { id: "yesterday", label: "Ontem" },
+  { id: "7d", label: "Últimos 7 dias" },
+  { id: "14d", label: "Últimos 14 dias" },
+  { id: "30d", label: "Últimos 30 dias" },
+  { id: "lastMonth", label: "Mês passado" },
+  { id: "custom", label: "Personalizado" },
+];
+
 export default function Vendas() {
-  const { user } = useAuth();
   const { data: transactions = [] } = useTransactions();
   const { data: products = [] } = useProducts();
   const [search, setSearch] = useState("");
   const [detailTx, setDetailTx] = useState<Tables<"transactions"> | null>(null);
   const [privacyHidden, setPrivacyHidden] = useState(() => localStorage.getItem("privacy_mode") === "true");
+  const [preset, setPreset] = useState<PresetId>("30d");
+  const [range, setRange] = useState<DateRange | undefined>(() => buildPreset("30d"));
+  const [tempRange, setTempRange] = useState<DateRange | undefined>(range);
+  const [dateOpen, setDateOpen] = useState(false);
+  const [page, setPage] = useState(1);
 
   const togglePrivacy = () => {
     setPrivacyHidden(prev => {
@@ -58,26 +82,56 @@ export default function Vendas() {
     });
   };
 
+  const selectPreset = (id: PresetId) => {
+    setPreset(id);
+    if (id === "custom") {
+      setTempRange(range);
+      return;
+    }
+    const r = buildPreset(id);
+    setRange(r);
+    setTempRange(r);
+    setDateOpen(false);
+  };
+
+  const applyCustom = () => {
+    if (tempRange?.from && tempRange?.to) {
+      setRange(tempRange);
+      setPreset("custom");
+      setDateOpen(false);
+    }
+  };
+
   const prodsMap = useMemo(() => {
     const m: Record<string, string> = {};
     products.forEach((p) => { m[p.id] = p.name; });
     return m;
   }, [products]);
 
-  const filtered = useMemo(() => {
+  const filteredByDate = useMemo(() => {
+    if (!range?.from || !range?.to) return transactions;
+    const fromMs = range.from.getTime();
+    const toMs = range.to.getTime();
     return transactions.filter((t) => {
-      if (!search) return true;
-      const q = search.toLowerCase();
-      return (
-        t.customer_name?.toLowerCase().includes(q) ||
-        t.customer_email?.toLowerCase().includes(q) ||
-        t.id.toLowerCase().includes(q)
-      );
+      const ts = new Date(t.created_at).getTime();
+      return ts >= fromMs && ts <= toMs;
     });
-  }, [transactions, search]);
+  }, [transactions, range]);
+
+  const filtered = useMemo(() => {
+    if (!search) return filteredByDate;
+    const q = search.toLowerCase();
+    return filteredByDate.filter((t) =>
+      t.customer_name?.toLowerCase().includes(q) ||
+      t.customer_email?.toLowerCase().includes(q) ||
+      t.id.toLowerCase().includes(q)
+    );
+  }, [filteredByDate, search]);
+
+  useEffect(() => { setPage(1); }, [search, range]);
 
   const stats = useMemo(() => {
-    const approved = transactions.filter(t => t.status === "completed");
+    const approved = filteredByDate.filter(t => t.status === "completed");
     const revenue = approved.reduce((acc, t) => acc + Number(t.net_amount), 0);
     const gross = approved.reduce((acc, t) => acc + Number(t.amount), 0);
     return {
@@ -86,9 +140,25 @@ export default function Vendas() {
       gross,
       avg: approved.length > 0 ? revenue / approved.length : 0
     };
-  }, [transactions]);
+  }, [filteredByDate]);
+
+  const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
+  const currentPage = Math.min(page, totalPages);
+  const paged = useMemo(() => {
+    const start = (currentPage - 1) * PAGE_SIZE;
+    return filtered.slice(start, start + PAGE_SIZE);
+  }, [filtered, currentPage]);
 
   const CENSORED = "••••••";
+
+  const rangeLabel = useMemo(() => {
+    const p = PRESETS.find(p => p.id === preset);
+    if (preset !== "custom" && p) return p.label;
+    if (range?.from && range?.to) {
+      return `${format(range.from, "dd MMM", { locale: ptBR })} — ${format(range.to, "dd MMM", { locale: ptBR })}`;
+    }
+    return "Selecionar período";
+  }, [preset, range]);
 
   return (
     <div className="space-y-6 animate-in fade-in duration-500">
@@ -101,10 +171,69 @@ export default function Vendas() {
             Gestão completa de transações e recebíveis
           </p>
         </div>
-        <div className="flex items-center gap-3">
-          <Button 
-            variant="outline" 
-            size="sm" 
+        <div className="flex items-center gap-2">
+          <Popover open={dateOpen} onOpenChange={setDateOpen}>
+            <PopoverTrigger asChild>
+              <Button
+                variant="outline"
+                size="sm"
+                className="h-10 px-4 rounded-xl border-border/60 hover:bg-muted/50 font-bold text-xs uppercase tracking-wider gap-2"
+              >
+                <CalendarIcon className="h-4 w-4" />
+                {rangeLabel}
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent align="end" sideOffset={8} className="w-auto p-0 overflow-hidden">
+              <div className="flex">
+                <div className="w-[170px] border-r border-border/60 bg-secondary/30 p-2 space-y-0.5">
+                  <div className="px-2 pt-1 pb-2 text-[9px] font-black uppercase tracking-[0.18em] text-muted-foreground/70">Período</div>
+                  {PRESETS.map((p) => (
+                    <button
+                      key={p.id}
+                      onClick={() => selectPreset(p.id)}
+                      className={cn(
+                        "w-full text-left px-2.5 py-1.5 rounded-md text-[12px] font-semibold transition-colors",
+                        preset === p.id
+                          ? "bg-primary/15 text-primary"
+                          : "text-foreground/80 hover:bg-muted/60"
+                      )}
+                    >
+                      {p.label}
+                    </button>
+                  ))}
+                </div>
+                <div className="p-3">
+                  <div className="flex items-center justify-between px-1 pb-2">
+                    <span className="text-[10px] font-black uppercase tracking-[0.18em] text-muted-foreground/70">
+                      {tempRange?.from && tempRange?.to
+                        ? `${format(tempRange.from, "dd/MM")} — ${format(tempRange.to, "dd/MM")}`
+                        : "Selecione um intervalo"}
+                    </span>
+                    {tempRange?.from && tempRange?.to && (
+                      <span className="text-[10px] font-bold text-primary tabular-nums">
+                        {differenceInDays(tempRange.to, tempRange.from) + 1}d
+                      </span>
+                    )}
+                  </div>
+                  <Calendar
+                    mode="range"
+                    selected={tempRange}
+                    onSelect={(r) => { setTempRange(r); setPreset("custom"); }}
+                    numberOfMonths={2}
+                    locale={ptBR}
+                    className="pointer-events-auto"
+                  />
+                  <div className="flex justify-end gap-2 pt-2 border-t border-border/40 mt-2">
+                    <Button variant="ghost" size="sm" className="h-8 text-xs" onClick={() => setDateOpen(false)}>Cancelar</Button>
+                    <Button size="sm" className="h-8 text-xs" onClick={applyCustom} disabled={!tempRange?.from || !tempRange?.to}>Aplicar</Button>
+                  </div>
+                </div>
+              </div>
+            </PopoverContent>
+          </Popover>
+          <Button
+            variant="outline"
+            size="sm"
             onClick={togglePrivacy}
             className="h-10 px-4 rounded-xl border-border/60 hover:bg-muted/50 font-bold text-xs uppercase tracking-wider gap-2"
           >
@@ -119,34 +248,10 @@ export default function Vendas() {
 
       {/* KPI Row */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <StatCard 
-          title="Faturamento Líquido" 
-          value={privacyHidden ? CENSORED : fmt(stats.revenue)} 
-          icon={Wallet} 
-          color="success" 
-          description="Total após taxas"
-        />
-        <StatCard 
-          title="Vendas Aprovadas" 
-          value={stats.count} 
-          icon={Check} 
-          color="primary" 
-          description="Pedidos concluídos"
-        />
-        <StatCard 
-          title="Ticket Médio" 
-          value={privacyHidden ? CENSORED : fmt(stats.avg)} 
-          icon={BarChart3} 
-          color="info" 
-          description="Média por venda"
-        />
-        <StatCard 
-          title="Volume Bruto" 
-          value={privacyHidden ? CENSORED : fmt(stats.gross)} 
-          icon={TrendingUp} 
-          color="neutral" 
-          description="Total processado"
-        />
+        <StatCard title="Faturamento Líquido" value={privacyHidden ? CENSORED : fmt(stats.revenue)} icon={Wallet} color="success" description="Total após taxas" />
+        <StatCard title="Vendas Aprovadas" value={stats.count} icon={Check} color="primary" description="Pedidos concluídos" />
+        <StatCard title="Ticket Médio" value={privacyHidden ? CENSORED : fmt(stats.avg)} icon={BarChart3} color="info" description="Média por venda" />
+        <StatCard title="Volume Bruto" value={privacyHidden ? CENSORED : fmt(stats.gross)} icon={TrendingUp} color="neutral" description="Total processado" />
       </div>
 
       {/* Table Section */}
@@ -159,15 +264,15 @@ export default function Vendas() {
             <div>
               <h2 className="font-black text-foreground tracking-tight leading-none">Transações</h2>
               <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mt-1">
-                {filtered.length} Registros encontrados
+                {filtered.length} Registros · {rangeLabel}
               </p>
             </div>
           </div>
           <div className="relative w-full md:w-80">
             <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground/50" size={16} />
-            <input 
-              type="text" 
-              placeholder="Buscar cliente, e-mail ou ID..." 
+            <input
+              type="text"
+              placeholder="Buscar cliente, e-mail ou ID..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               className="w-full h-11 pl-11 pr-4 bg-muted/30 border border-border/60 rounded-xl text-sm font-bold focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all placeholder:text-muted-foreground/40"
@@ -187,7 +292,7 @@ export default function Vendas() {
               </tr>
             </thead>
             <tbody className="divide-y divide-border/40">
-              {filtered.length === 0 ? (
+              {paged.length === 0 ? (
                 <tr>
                   <td colSpan={5} className="px-8 py-20 text-center">
                     <div className="flex flex-col items-center opacity-30">
@@ -197,16 +302,12 @@ export default function Vendas() {
                   </td>
                 </tr>
               ) : (
-                filtered.map((t) => {
+                paged.map((t) => {
                   const status = STATUS_MAP[t.status] || STATUS_MAP.pending;
                   const method = METHODS_MAP[t.payment_method || ""] || { label: t.payment_method, icon: FileText };
                   const MethodIcon = method.icon;
                   return (
-                    <tr 
-                      key={t.id} 
-                      onClick={() => setDetailTx(t)}
-                      className="hover:bg-muted/20 transition-colors group cursor-pointer"
-                    >
+                    <tr key={t.id} onClick={() => setDetailTx(t)} className="hover:bg-muted/20 transition-colors group cursor-pointer">
                       <td className="px-8 py-5">
                         <div className="flex items-center gap-3">
                           <Avatar className="h-9 w-9 rounded-xl border border-border/40 shrink-0">
@@ -224,10 +325,7 @@ export default function Vendas() {
                       </td>
                       <td className="px-8 py-5">
                         <div className="flex justify-center">
-                          <span className={cn(
-                            "inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest border",
-                            status.cls
-                          )}>
+                          <span className={cn("inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest border", status.cls)}>
                             <span className={cn("h-1.5 w-1.5 rounded-full", status.dot)} />
                             {status.label}
                           </span>
@@ -264,14 +362,60 @@ export default function Vendas() {
             </tbody>
           </table>
         </div>
+
+        {/* Pagination */}
+        {filtered.length > 0 && (
+          <div className="px-6 py-4 border-t border-border/40 flex flex-col sm:flex-row items-center justify-between gap-3">
+            <div className="text-[10px] font-black uppercase tracking-[0.18em] text-muted-foreground/70 tabular-nums">
+              Mostrando {(currentPage - 1) * PAGE_SIZE + 1}–{Math.min(currentPage * PAGE_SIZE, filtered.length)} de {filtered.length}
+            </div>
+            <div className="flex items-center gap-1.5">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setPage((p) => Math.max(1, p - 1))}
+                disabled={currentPage === 1}
+                className="h-8 w-8 p-0 rounded-md border-border/60"
+              >
+                <ChevronLeft className="h-4 w-4" />
+              </Button>
+              {Array.from({ length: totalPages }).slice(0, 7).map((_, idx) => {
+                let pageNum = idx + 1;
+                if (totalPages > 7) {
+                  if (currentPage > 4) pageNum = currentPage - 3 + idx;
+                  if (pageNum > totalPages) pageNum = totalPages - (6 - idx);
+                }
+                return (
+                  <button
+                    key={pageNum}
+                    onClick={() => setPage(pageNum)}
+                    className={cn(
+                      "h-8 min-w-8 px-2.5 rounded-md text-[11px] font-black tabular-nums transition-colors border",
+                      pageNum === currentPage
+                        ? "bg-primary text-primary-foreground border-primary"
+                        : "bg-card text-foreground/70 border-border/60 hover:bg-muted/50"
+                    )}
+                  >
+                    {pageNum}
+                  </button>
+                );
+              })}
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                disabled={currentPage === totalPages}
+                className="h-8 w-8 p-0 rounded-md border-border/60"
+              >
+                <ChevronRight className="h-4 w-4" />
+              </Button>
+            </div>
+          </div>
+        )}
       </div>
 
       {detailTx && (
-        <TransactionDetailPanel 
-          tx={detailTx} 
-          products={prodsMap}
-          onClose={() => setDetailTx(null)} 
-        />
+        <TransactionDetailPanel tx={detailTx} products={prodsMap} onClose={() => setDetailTx(null)} />
       )}
     </div>
   );
