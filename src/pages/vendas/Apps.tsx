@@ -80,7 +80,7 @@ const APPS: AppDef[] = [
  },
  {
  id: "themembers", name: "TheMembers", desc: "Área de membros", category: "Membros",
- logo: themembersLogo,
+ logo: themembersLogo, comingSoon: true,
  fields: [
  { key: "api_key", label: "API Key", placeholder: "Cole sua API key", type: "api_key", required: true, help: "TheMembers → Integrações → API → Chave" },
  { key: "api_url", label: "URL da API (opcional)", placeholder: "https://api.themembers.com.br", type: "api_url", required: false },
@@ -97,39 +97,40 @@ const APPS: AppDef[] = [
  },
  {
  id: "astron", name: "Astron Members", desc: "Área de membros premium", category: "Membros",
- logo: astronLogo,
+ logo: astronLogo, comingSoon: true,
  fields: [{ key: "api_key", label: "API Key", placeholder: "Cole sua API key", type: "api_key", required: true, help: "Astron → Configurações → Integrações → API Key" }],
  events: ["Purchase", "Refund", "Chargeback"],
  helpText: "Libera/revoga acesso na plataforma Astron.",
  },
  {
  id: "memberkit", name: "MemberKit", desc: "Gestão completa de membros", category: "Membros",
- logo: memberkitLogo,
+ logo: memberkitLogo, comingSoon: true,
  fields: [{ key: "api_key", label: "API Key", placeholder: "Cole sua API key", type: "api_key", required: true, help: "MemberKit → Configurações → API → Chave" }],
  events: ["Purchase", "Refund", "Chargeback"],
  helpText: "Gerencia acesso dos membros automaticamente.",
  },
  {
  id: "smsfunnel", name: "SMSFunnel", desc: "Automação de SMS marketing", category: "Comunicação",
- logo: smsfunnelLogo,
+ logo: smsfunnelLogo, comingSoon: true,
  fields: [{ key: "api_key", label: "Token", placeholder: "Cole seu token", type: "api_key", required: true, help: "SMSFunnel → Configurações → API → Token" }],
  events: ["Purchase", "Lead", "InitiateCheckout", "PixGenerated", "BoletoGenerated", "Refund"],
  helpText: "Dispara SMS automáticos com base nos eventos.",
  },
  {
  id: "voxuy", name: "Voxuy", desc: "Chatbot e automação WhatsApp", category: "Comunicação",
- logo: voxuyLogo,
+ logo: voxuyLogo, comingSoon: true,
  fields: [{ key: "api_key", label: "API Key", placeholder: "Cole sua API key", type: "api_key", required: true, help: "Voxuy → Configurações → API → Chave" }],
  events: ["Purchase", "Lead", "InitiateCheckout", "PixGenerated", "Refund", "Chargeback"],
  helpText: "Mensagens automáticas via WhatsApp com Voxuy.",
  },
  {
  id: "cademi", name: "Cademi", desc: "Plataforma de cursos online", category: "Membros",
- logo: cademiLogo,
+ logo: cademiLogo, comingSoon: true,
  fields: [{ key: "api_key", label: "API Key", placeholder: "Cole sua API key", type: "api_key", required: true, help: "Cademi → Integrações → API → Chave" }],
  events: ["Purchase", "Refund", "Chargeback"],
  helpText: "Libera/revoga acesso dos alunos automaticamente.",
  },
+
  {
  id: "webhooks", name: "Webhooks", desc: "Integre com qualquer sistema", category: "Avançado",
  logo: webhooksLogo,
