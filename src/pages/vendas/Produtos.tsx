@@ -15,6 +15,8 @@ import {
   XCircle,
 } from "lucide-react";
 import { toast } from "sonner";
+import { FinanceiroHero } from "@/components/financeiro/FinanceiroHero";
+
 
 import PixelSettingsDialog from "@/components/PixelSettingsDialog";
 import { ProductGridView } from "@/components/products/ProductGridView";
