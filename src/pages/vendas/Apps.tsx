@@ -163,6 +163,7 @@ export default function Apps() {
  const [formSelectedEvents, setFormSelectedEvents] = useState<string[]>([]);
 
  const openDialog = (app: AppDef, existing?: AppIntegration) => {
+ if (app.comingSoon) { toast.info(`${app.name} estará disponível em breve.`); return; }
  if (app.id === "webhooks") { navigate("/integracoes?tab=webhooks"); return; }
  setDialogApp(app);
  if (existing) {
@@ -179,6 +180,7 @@ export default function Apps() {
  setEditId(null); setFormProductId(""); setFormFields({}); setFormEventMode("all"); setFormSelectedEvents([]);
  }
  };
+
 
  const closeDialog = () => { setDialogApp(null); setEditId(null); };
 
