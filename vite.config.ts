@@ -13,8 +13,12 @@ export default defineConfig(({ mode }) => ({
   },
   plugins: [react()],
   resolve: {
+    dedupe: ["react", "react-dom"],
     alias: {
       "@": path.resolve(__dirname, "./src"),
     },
+  },
+  optimizeDeps: {
+    include: ["react", "react-dom", "@tanstack/react-query", "react-router-dom", "react-helmet-async"],
   },
 }));

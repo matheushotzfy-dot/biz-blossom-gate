@@ -1,4 +1,4 @@
-const CACHE_NAME = 'hotzfy-v1';
+const CACHE_NAME = 'hotzfy-v2';
 const STATIC_ASSETS = ['/'];
 
 self.addEventListener('install', (event) => {
@@ -20,6 +20,21 @@ self.addEventListener('activate', (event) => {
 self.addEventListener('fetch', (event) => {
   const { request } = event;
   if (request.method !== 'GET') return;
+
+  const url = new URL(request.url);
+
+  // Never cache Vite/dev-server modules or HTML navigations. Mixing stale
+  // optimized chunks with fresh React chunks causes invalid hook call errors.
+  if (
+    request.mode === 'navigate' ||
+    url.pathname.startsWith('/node_modules/') ||
+    url.pathname.startsWith('/src/') ||
+    url.pathname.startsWith('/@vite/') ||
+    url.pathname.startsWith('/@react-refresh') ||
+    url.pathname.endsWith('.map')
+  ) {
+    return;
+  }
 
   // Network-first for API/supabase calls
   if (request.url.includes('/rest/') || request.url.includes('/functions/') || request.url.includes('/auth/')) {
