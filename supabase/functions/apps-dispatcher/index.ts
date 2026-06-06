@@ -576,6 +576,11 @@ async function deliverOne(admin: ReturnType<typeof createClient>, d: Delivery) {
   else if (integ.app_name === "notazz") result = await deliverNotazz(integ, d);
   else if (integ.app_name === "themembers") result = await deliverTheMembers(integ, d);
   else if (integ.app_name === "spedy") result = await deliverSpedy(integ, d);
+  else if (integ.app_name === "astron") result = await deliverAstron(integ, d);
+  else if (integ.app_name === "memberkit") result = await deliverMemberKit(integ, d);
+  else if (integ.app_name === "smsfunnel") result = await deliverSmsFunnel(integ, d);
+  else if (integ.app_name === "voxuy") result = await deliverVoxuy(integ, d);
+  else if (integ.app_name === "cademi") result = await deliverCademi(integ, d);
   else {
     await admin.from("app_deliveries").update({
       status: "exhausted",
