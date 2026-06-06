@@ -33,7 +33,7 @@ const PAGES = [
   { label: "Cupons", href: "/vendas/cupons", icon: Ticket },
   { label: "Extrato", href: "/financeiro/extrato", icon: FileText },
   { label: "Financeiro", href: "/financeiro/saques", icon: ArrowDownToLine },
-  { label: "Config. Financeiro", href: "/financeiro/config", icon: Building2 },
+  { label: "Taxas", href: "/financeiro/config", icon: Building2 },
   { label: "Integrações", href: "/integracoes", icon: Puzzle },
   { label: "Meu Perfil", href: "/perfil", icon: User },
   { label: "Identidade & KYC", href: "/perfil?tab=identidade", icon: Shield },
