@@ -24,6 +24,16 @@ interface Delivery {
   event: string;
   payload: Record<string, any>;
   attempt: number;
+  is_test?: boolean;
+}
+
+// UTMify expects "YYYY-MM-DD HH:mm:ss" in UTC (per official docs)
+function formatUtmifyDate(input?: string | null): string | null {
+  if (!input) return null;
+  const d = new Date(input);
+  if (isNaN(d.getTime())) return null;
+  const pad = (n: number) => String(n).padStart(2, "0");
+  return `${d.getUTCFullYear()}-${pad(d.getUTCMonth() + 1)}-${pad(d.getUTCDate())} ${pad(d.getUTCHours())}:${pad(d.getUTCMinutes())}:${pad(d.getUTCSeconds())}`;
 }
 
 interface Integration {
