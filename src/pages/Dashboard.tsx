@@ -274,46 +274,54 @@ export default function Dashboard() {
              <div className="h-2 w-2 rounded-full bg-success animate-pulse" />
              <h1 className="text-xl md:text-2xl font-bold tracking-tight text-foreground">{greeting}, {nickname}</h1>
           </div>
-          <p className="text-muted-foreground font-medium text-[11px] md:text-xs flex items-center gap-2">
-            <Activity className="h-3.5 w-3.5 text-primary" />
-            Acompanhe o desempenho da sua operação em tempo real.
-          </p>
         </div>
-        
-        <div className="flex flex-wrap items-center gap-3">
-          <div className="flex items-center bg-muted/20 p-1.5 rounded-[1.25rem] border border-border/40 backdrop-blur-md">
-            {PERIOD_PRESETS.map(p => (
-              <button 
-                key={p.label}
-                onClick={() => { setSelectedPeriod(p); setIsCustom(false); }}
-                className={cn(
-                  "px-6 py-2.5 rounded-[1rem] text-[10px] font-bold uppercase tracking-[0.15em] transition-all duration-300",
-                  !isCustom && selectedPeriod.label === p.label 
-                    ? "bg-card text-primary shadow-lg shadow-black/5 ring-1 ring-border border-transparent" 
-                    : "text-muted-foreground/60 hover:text-foreground hover:bg-muted/40"
-                )}
-              >
-                {p.label}
-              </button>
-            ))}
+
+        <div className="flex flex-wrap items-stretch gap-2">
+          {/* Segmented period selector — sharp, institutional */}
+          <div className="inline-flex items-stretch rounded-xl border border-border bg-card overflow-hidden h-11">
+            {PERIOD_PRESETS.map((p, i) => {
+              const isActive = !isCustom && selectedPeriod.label === p.label;
+              return (
+                <button
+                  key={p.label}
+                  onClick={() => { setSelectedPeriod(p); setIsCustom(false); }}
+                  className={cn(
+                    "relative px-4 sm:px-5 text-[10px] font-display font-black uppercase tracking-[0.16em] transition-colors duration-200 tabular-nums",
+                    i > 0 && "border-l border-border",
+                    isActive
+                      ? "bg-primary/10 text-primary"
+                      : "text-muted-foreground/70 hover:text-foreground hover:bg-secondary/40"
+                  )}
+                >
+                  {isActive && (
+                    <span className="absolute left-0 right-0 top-0 h-[2px] bg-primary" />
+                  )}
+                  {p.label}
+                </button>
+              );
+            })}
           </div>
-          
+
           <Popover open={datePickerOpen} onOpenChange={setDatePickerOpen}>
             <PopoverTrigger asChild>
               <button className={cn(
-                "h-[46px] px-6 rounded-[1.25rem] border-2 flex items-center gap-3 text-[10px] font-bold uppercase tracking-[0.15em] transition-all duration-300",
-                isCustom 
-                  ? "border-primary/30 bg-primary/5 text-primary shadow-lg shadow-primary/5" 
-                  : "border-border/40 bg-card text-muted-foreground/60 hover:border-border hover:text-foreground hover:shadow-md"
+                "h-11 px-4 rounded-xl border flex items-center gap-2.5 text-[10px] font-display font-black uppercase tracking-[0.16em] transition-colors duration-200",
+                isCustom
+                  ? "border-primary/40 bg-primary/10 text-primary"
+                  : "border-border bg-card text-muted-foreground/70 hover:text-foreground hover:border-border/80 hover:bg-secondary/40"
               )}>
-                <CalendarDays className="h-4 w-4" />
-                {isCustom && customRange?.from ? format(customRange.from, "dd/MM") + " - " + (customRange.to ? format(customRange.to, "dd/MM") : "") : "Personalizado"}
+                <CalendarDays className="h-3.5 w-3.5" strokeWidth={2.25} />
+                <span className="tabular-nums">
+                  {isCustom && customRange?.from
+                    ? format(customRange.from, "dd/MM") + (customRange.to ? " – " + format(customRange.to, "dd/MM") : "")
+                    : "Personalizado"}
+                </span>
               </button>
             </PopoverTrigger>
-            <PopoverContent align="end" className="p-0 border-border/50 rounded-[2rem] overflow-hidden shadow-2xl">
-              <Calendar 
-                mode="range" 
-                selected={customRange} 
+            <PopoverContent align="end" className="p-0 border border-border rounded-xl overflow-hidden">
+              <Calendar
+                mode="range"
+                selected={customRange}
                 onSelect={(r) => { setCustomRange(r); setIsCustom(true); }}
                 locale={ptBR}
               />
@@ -321,6 +329,8 @@ export default function Dashboard() {
           </Popover>
         </div>
       </div>
+
+
 
       {/* Hero Financial Row */}
       <div className="grid lg:grid-cols-4 gap-6">
