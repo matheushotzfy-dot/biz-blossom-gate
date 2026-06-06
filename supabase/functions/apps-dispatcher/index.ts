@@ -1,0 +1,291 @@
+// Apps delivery worker — Z-API and UTMify.
+// Picks pending app_deliveries rows whose next_retry_at is due and POSTs them
+// to the right provider. Retries with exponential backoff. Can be invoked by
+// cron, manually, or fire-and-forget from podpay-postback.
+
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+
+const corsHeaders = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Headers": "authorization, content-type",
+};
+
+const RETRY_DELAYS_SECONDS = [10, 30, 120, 600, 3600];
+const MAX_ATTEMPTS = RETRY_DELAYS_SECONDS.length;
+const DELIVERY_TIMEOUT_MS = 10_000;
+const BATCH_SIZE = 25;
+
+interface Delivery {
+  id: string;
+  integration_id: string;
+  user_id: string;
+  transaction_id: string | null;
+  app_name: string;
+  event: string;
+  payload: Record<string, any>;
+  attempt: number;
+}
+
+interface Integration {
+  id: string;
+  app_name: string;
+  api_key: string | null;
+  api_url: string | null;
+  webhook_url: string | null;
+  is_active: boolean;
+  config: Record<string, any>;
+}
+
+async function timedFetch(url: string, init: RequestInit) {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), DELIVERY_TIMEOUT_MS);
+  try {
+    const res = await fetch(url, { ...init, signal: controller.signal });
+    const body = await res.text().catch(() => "");
+    return { status: res.status, body: body.slice(0, 2000), error: null as string | null };
+  } catch (err) {
+    return { status: 0, body: "", error: (err as Error).message };
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
+// ────────────────── Z-API ──────────────────
+// Z-API REST: https://{api_url=instance_id}/token/{api_key=instance_token}/send-text
+// Optional Client-Token via webhook_url field.
+async function deliverZapi(integration: Integration, d: Delivery) {
+  const instanceId = integration.api_url?.trim();
+  const instanceToken = integration.api_key?.trim();
+  const clientToken = integration.webhook_url?.trim();
+  if (!instanceId || !instanceToken) {
+    return { status: 0, body: "", error: "Z-API missing instance_id or instance_token" };
+  }
+  const phone = String(d.payload?.customer?.phone || "").replace(/\D/g, "");
+  if (!phone) {
+    return { status: 0, body: "", error: "Z-API skipped: customer phone missing" };
+  }
+  const name = d.payload?.customer?.name || "";
+  const amountBRL = Number(d.payload?.transaction?.amount || 0)
+    .toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
+  const messages: Record<string, string> = {
+    Purchase: `✅ Olá ${name}, sua compra de ${amountBRL} foi aprovada! Em instantes você receberá os detalhes de acesso.`,
+    Refund: `Olá ${name}, identificamos o estorno da sua compra de ${amountBRL}.`,
+    Chargeback: `Olá ${name}, notamos uma contestação no pagamento de ${amountBRL}. Entre em contato para regularizar.`,
+    InitiateCheckout: `Olá ${name}, vimos que você iniciou um checkout de ${amountBRL}. Posso ajudar a finalizar?`,
+    PixGenerated: `Olá ${name}, seu PIX de ${amountBRL} foi gerado. Pague em até 30 min para garantir.`,
+    BoletoGenerated: `Olá ${name}, seu boleto de ${amountBRL} foi gerado.`,
+  };
+  const message = messages[d.event] ?? `Atualização do pedido: ${d.event}`;
+
+  const url = `https://api.z-api.io/instances/${instanceId}/token/${instanceToken}/send-text`;
+  const headers: Record<string, string> = { "Content-Type": "application/json" };
+  if (clientToken) headers["Client-Token"] = clientToken;
+  return await timedFetch(url, {
+    method: "POST",
+    headers,
+    body: JSON.stringify({ phone: phone.startsWith("55") ? phone : `55${phone}`, message }),
+  });
+}
+
+// ────────────────── UTMify ──────────────────
+// API: POST https://api.utmify.com.br/api-credentials/orders
+// header: x-api-token
+async function deliverUtmify(integration: Integration, d: Delivery) {
+  const token = integration.api_key?.trim();
+  if (!token) return { status: 0, body: "", error: "UTMify missing api_token" };
+
+  const tx = d.payload?.transaction || {};
+  const customer = d.payload?.customer || {};
+  const utm = d.payload?.utm || {};
+
+  const statusMap: Record<string, string> = {
+    Purchase: "paid",
+    Refund: "refunded",
+    Chargeback: "chargedback",
+    InitiateCheckout: "waiting_payment",
+    PixGenerated: "waiting_payment",
+    BoletoGenerated: "waiting_payment",
+  };
+
+  const amountCents = Math.round(Number(tx.amount || 0) * 100);
+  const body = {
+    orderId: tx.id,
+    platform: "Hotzfy",
+    paymentMethod: tx.payment_method === "credit_card" ? "credit_card" : tx.payment_method,
+    status: statusMap[d.event] ?? "waiting_payment",
+    createdAt: tx.created_at,
+    approvedDate: d.event === "Purchase" ? new Date().toISOString() : null,
+    refundedAt: d.event === "Refund" ? new Date().toISOString() : null,
+    customer: {
+      name: customer.name,
+      email: customer.email,
+      phone: customer.phone,
+      document: customer.document,
+      country: "BR",
+      ip: null,
+    },
+    products: [{
+      id: tx.product_id,
+      name: d.payload?.product_name || "Produto",
+      planId: null,
+      planName: null,
+      quantity: 1,
+      priceInCents: amountCents,
+    }],
+    trackingParameters: {
+      src: utm.src ?? null,
+      sck: utm.sck ?? null,
+      utm_source: utm.utm_source ?? null,
+      utm_campaign: utm.utm_campaign ?? null,
+      utm_medium: utm.utm_medium ?? null,
+      utm_content: utm.utm_content ?? null,
+      utm_term: utm.utm_term ?? null,
+    },
+    commission: {
+      totalPriceInCents: amountCents,
+      gatewayFeeInCents: Math.round(Number(tx.amount - tx.net_amount || 0) * 100),
+      userCommissionInCents: Math.round(Number(tx.net_amount || 0) * 100),
+    },
+    isTest: false,
+  };
+
+  return await timedFetch("https://api.utmify.com.br/api-credentials/orders", {
+    method: "POST",
+    headers: { "Content-Type": "application/json", "x-api-token": token },
+    body: JSON.stringify(body),
+  });
+}
+
+// ────────────────── Worker ──────────────────
+async function deliverOne(admin: ReturnType<typeof createClient>, d: Delivery) {
+  const { data: integ } = await admin
+    .from("app_integrations")
+    .select("id, app_name, api_key, api_url, webhook_url, is_active, config")
+    .eq("id", d.integration_id)
+    .maybeSingle<Integration>();
+
+  if (!integ || !integ.is_active) {
+    await admin.from("app_deliveries").update({
+      status: "exhausted",
+      error: "Integration disabled or removed",
+    }).eq("id", d.id);
+    return;
+  }
+
+  let result: { status: number; body: string; error: string | null };
+  if (integ.app_name === "zapi") result = await deliverZapi(integ, d);
+  else if (integ.app_name === "utmify") result = await deliverUtmify(integ, d);
+  else {
+    await admin.from("app_deliveries").update({
+      status: "exhausted",
+      error: `Unsupported app_name: ${integ.app_name}`,
+    }).eq("id", d.id);
+    return;
+  }
+
+  const ok = result.status >= 200 && result.status < 300;
+  const attempt = d.attempt + 1;
+
+  if (ok) {
+    await admin.from("app_deliveries").update({
+      status: "delivered",
+      attempt,
+      response_status: result.status,
+      response_body: result.body,
+      delivered_at: new Date().toISOString(),
+      error: null,
+    }).eq("id", d.id);
+    return;
+  }
+
+  if (attempt >= MAX_ATTEMPTS) {
+    await admin.from("app_deliveries").update({
+      status: "exhausted",
+      attempt,
+      response_status: result.status,
+      response_body: result.body,
+      error: result.error ?? `HTTP ${result.status}`,
+    }).eq("id", d.id);
+    return;
+  }
+
+  const delay = RETRY_DELAYS_SECONDS[Math.min(attempt - 1, RETRY_DELAYS_SECONDS.length - 1)];
+  await admin.from("app_deliveries").update({
+    status: "pending",
+    attempt,
+    response_status: result.status,
+    response_body: result.body,
+    error: result.error ?? `HTTP ${result.status}`,
+    next_retry_at: new Date(Date.now() + delay * 1000).toISOString(),
+  }).eq("id", d.id);
+}
+
+Deno.serve(async (req) => {
+  if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
+
+  const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
+  const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+  const admin = createClient(supabaseUrl, serviceKey);
+
+  // Optional test mode: { action: "test", integration_id, sample_event? }
+  let action: string | undefined;
+  let testIntegrationId: string | undefined;
+  if (req.method === "POST") {
+    try {
+      const body = await req.json();
+      action = body?.action;
+      testIntegrationId = body?.integration_id;
+    } catch { /* ignore */ }
+  }
+
+  if (action === "test" && testIntegrationId) {
+    const { data: integ } = await admin
+      .from("app_integrations")
+      .select("id, user_id, app_name, api_key, api_url, webhook_url, is_active, config")
+      .eq("id", testIntegrationId)
+      .maybeSingle<Integration & { user_id: string }>();
+    if (!integ) {
+      return new Response(JSON.stringify({ ok: false, error: "Integration not found" }),
+        { status: 404, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    }
+    const fakeDelivery: Delivery = {
+      id: "test", integration_id: integ.id, user_id: integ.user_id, transaction_id: null,
+      app_name: integ.app_name, event: "Purchase", attempt: 0,
+      payload: {
+        event: "Purchase",
+        transaction: { id: "test_tx_" + Date.now(), amount: 99.9, net_amount: 95, payment_method: "pix", created_at: new Date().toISOString() },
+        customer: { name: "Cliente Teste", email: "teste@hotzfy.com", phone: "11999999999", document: "00000000000" },
+        utm: {},
+      },
+    };
+    const result = integ.app_name === "zapi"
+      ? await deliverZapi(integ, fakeDelivery)
+      : integ.app_name === "utmify"
+      ? await deliverUtmify(integ, fakeDelivery)
+      : { status: 0, body: "", error: `Unsupported: ${integ.app_name}` };
+
+    const ok = result.status >= 200 && result.status < 300;
+    return new Response(JSON.stringify({ ok, ...result }),
+      { status: ok ? 200 : 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+  }
+
+  // Drain pending queue
+  const { data: pending, error } = await admin
+    .from("app_deliveries")
+    .select("id, integration_id, user_id, transaction_id, app_name, event, payload, attempt")
+    .eq("status", "pending")
+    .lte("next_retry_at", new Date().toISOString())
+    .order("created_at", { ascending: true })
+    .limit(BATCH_SIZE);
+
+  if (error) {
+    return new Response(JSON.stringify({ ok: false, error: error.message }),
+      { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+  }
+
+  const list = (pending ?? []) as Delivery[];
+  await Promise.allSettled(list.map((d) => deliverOne(admin, d)));
+
+  return new Response(JSON.stringify({ ok: true, processed: list.length }),
+    { headers: { ...corsHeaders, "Content-Type": "application/json" } });
+});

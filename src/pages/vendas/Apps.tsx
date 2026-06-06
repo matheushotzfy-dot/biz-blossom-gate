@@ -152,6 +152,7 @@ export default function Apps() {
  const [dialogApp, setDialogApp] = useState<AppDef | null>(null);
  const [editId, setEditId] = useState<string | null>(null);
  const [saving, setSaving] = useState(false);
+ const [testing, setTesting] = useState(false);
  const [formProductId, setFormProductId] = useState("");
  const [formFields, setFormFields] = useState<Record<string, string>>({});
  const [formEventMode, setFormEventMode] = useState<"all" | "custom">("all");
@@ -443,6 +444,28 @@ export default function Apps() {
  </span>
  )}
  </Button>
+
+ {editId && (dialogApp.id === "zapi" || dialogApp.id === "utmify") && (
+ <Button
+ variant="outline"
+ disabled={testing}
+ onClick={async () => {
+ setTesting(true);
+ const { data, error } = await supabase.functions.invoke("apps-dispatcher", {
+ body: { action: "test", integration_id: editId },
+ });
+ setTesting(false);
+ if (error || !data?.ok) {
+ toast.error(`Falha no teste: ${data?.error || data?.body || error?.message || "desconhecido"}`);
+ } else {
+ toast.success(`Teste OK (HTTP ${data.status})`);
+ }
+ }}
+ className="w-full h-11 rounded-xl text-xs font-bold border-border/40"
+ >
+ {testing ? "Testando..." : "Testar conexão (envio real)"}
+ </Button>
+ )}
  </div>
  </DialogContent>
  </Dialog>

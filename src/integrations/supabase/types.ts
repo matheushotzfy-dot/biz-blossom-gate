@@ -437,6 +437,85 @@ export type Database = {
           },
         ]
       }
+      app_deliveries: {
+        Row: {
+          app_name: string
+          attempt: number
+          created_at: string
+          delivered_at: string | null
+          error: string | null
+          event: string
+          id: string
+          integration_id: string
+          next_retry_at: string | null
+          payload: Json
+          response_body: string | null
+          response_status: number | null
+          status: string
+          transaction_id: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          app_name: string
+          attempt?: number
+          created_at?: string
+          delivered_at?: string | null
+          error?: string | null
+          event: string
+          id?: string
+          integration_id: string
+          next_retry_at?: string | null
+          payload: Json
+          response_body?: string | null
+          response_status?: number | null
+          status?: string
+          transaction_id?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          app_name?: string
+          attempt?: number
+          created_at?: string
+          delivered_at?: string | null
+          error?: string | null
+          event?: string
+          id?: string
+          integration_id?: string
+          next_retry_at?: string | null
+          payload?: Json
+          response_body?: string | null
+          response_status?: number | null
+          status?: string
+          transaction_id?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "app_deliveries_integration_id_fkey"
+            columns: ["integration_id"]
+            isOneToOne: false
+            referencedRelation: "app_integrations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "app_deliveries_integration_id_fkey"
+            columns: ["integration_id"]
+            isOneToOne: false
+            referencedRelation: "app_integrations_safe"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "app_deliveries_transaction_id_fkey"
+            columns: ["transaction_id"]
+            isOneToOne: false
+            referencedRelation: "transactions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       app_integrations: {
         Row: {
           api_key: string | null
