@@ -13,6 +13,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import * as SelectPrimitive from "@radix-ui/react-select";
 import { QRCodeSVG } from "qrcode.react";
 import {
  ArrowLeft, Save, Package, DollarSign, ImagePlus, X, Settings, ShoppingCart,
@@ -22,8 +23,35 @@ import {
  Layers, UserPlus, Lock, Gift, BarChart3, Star, Palette, Sparkles,
  Check, ChevronRight, TrendingUp, MousePointerClick, GraduationCap, Video, Loader2,
  MessageSquare, Share2, Download, Smartphone, Monitor, AlertTriangle,
- RefreshCw, Hash, Target, Heart, Megaphone, Rocket, Award
+ RefreshCw, Hash, Target, Heart, Megaphone, Rocket, Award,
+ BookOpen, Code2, Briefcase, type LucideIcon
 } from "lucide-react";
+
+/* Rich Select item — icon + label + description in the menu,
+   but only the label shows in the trigger (via ItemText). */
+function RichSelectItem({
+  value, icon: Icon, label, desc,
+}: { value: string; icon: LucideIcon; label: string; desc: string }) {
+  return (
+    <SelectPrimitive.Item
+      value={value}
+      className="relative flex w-full cursor-pointer select-none items-center gap-3 rounded-xl px-2.5 py-2.5 outline-none transition-colors hover:bg-primary/[0.06] focus:bg-primary/[0.08] data-[highlighted]:bg-primary/[0.08] data-[state=checked]:bg-primary/[0.08]"
+    >
+      <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-border bg-secondary text-muted-foreground transition-colors group-hover:border-primary/30 group-data-[state=checked]:border-primary/30 group-data-[state=checked]:bg-primary/10 group-data-[state=checked]:text-primary [[data-state=checked]_&]:border-primary/30 [[data-state=checked]_&]:bg-primary/10 [[data-state=checked]_&]:text-primary">
+        <Icon className="h-3.5 w-3.5" strokeWidth={2} />
+      </span>
+      <span className="flex-1 min-w-0">
+        <SelectPrimitive.ItemText asChild>
+          <span className="block truncate font-display text-[12.5px] font-bold tracking-tight text-foreground">{label}</span>
+        </SelectPrimitive.ItemText>
+        <span className="mt-0.5 block truncate text-[10.5px] text-muted-foreground">{desc}</span>
+      </span>
+      <SelectPrimitive.ItemIndicator className="ml-auto">
+        <Check className="h-3.5 w-3.5 text-primary" strokeWidth={2.4} />
+      </SelectPrimitive.ItemIndicator>
+    </SelectPrimitive.Item>
+  );
+}
 
 const ALLOWED_IMAGE_TYPES = ["image/jpeg", "image/png", "image/webp", "image/gif"];
 const MAX_FILE_SIZE = 10 * 1024 * 1024;
