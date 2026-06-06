@@ -310,7 +310,7 @@ export function AppSidebar() {
       label: "FINANCEIRO",
       items: [
         { title: "Financeiro", url: "/financeiro/saques", icon: ArrowDownToLine },
-        { title: "Config. Financeiro", url: "/financeiro/config", icon: Building2 },
+        { title: "Taxas", url: "/financeiro/config", icon: Building2 },
       ],
     },
     {

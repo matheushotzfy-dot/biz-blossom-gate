@@ -58,7 +58,10 @@ const MAX_FILE_SIZE = 10 * 1024 * 1024;
 
 type TabKey = "geral" | "configuracoes" | "conteudo" | "order-bump" | "upsell" | "checkout" | "co-producao" | "cupons" | "afiliados" | "links";
 
-const TABS: { key: TabKey; label: string; icon: React.ComponentType<{ className?: string }>; color: string }[] = [
+// Abas temporariamente desativadas — voltaremos a ativar futuramente.
+const DISABLED_TABS: TabKey[] = ["conteudo", "cupons", "afiliados"];
+
+const ALL_TABS: { key: TabKey; label: string; icon: React.ComponentType<{ className?: string }>; color: string }[] = [
  { key: "geral", label: "Geral", icon: Package, color: "primary" },
  { key: "configuracoes", label: "Configurações", icon: Settings, color: "info" },
  { key: "conteudo", label: "Conteúdo", icon: GraduationCap, color: "primary" },
@@ -70,6 +73,8 @@ const TABS: { key: TabKey; label: string; icon: React.ComponentType<{ className?
  { key: "afiliados", label: "Afiliados", icon: Users, color: "success" },
  { key: "links", label: "Links", icon: Link2, color: "primary" },
 ];
+
+const TABS = ALL_TABS.filter(t => !DISABLED_TABS.includes(t.key));
 
 /* ─── Completion Progress Ring ─── */
 function CompletionRing({ percent }: { percent: number }) {
@@ -719,8 +724,8 @@ export default function ProductEditor() {
   })}
   </div>
 
-  {/* Quick info */}
-  {!tabsLocked && product?.checkout_url && (
+  {/* Quick info — temporariamente desativado, voltaremos depois */}
+  {false && !tabsLocked && product?.checkout_url && (
   <div className="rounded-2xl border border-border bg-card p-3.5 space-y-2.5">
   <p className="text-[9px] font-display font-bold uppercase tracking-[0.15em] text-muted-foreground">Ações Rápidas</p>
   <Button
@@ -1014,8 +1019,8 @@ function TabConfiguracoes({ price, pixEnabled, setPixEnabled, boletoEnabled, set
  <PaymentMethodRow icon={CreditCard} label="Cartão de Crédito" sublabel="Taxa: 6,38% • Até 12x" color="text-info" checked={creditCardEnabled} onChange={setCreditCardEnabled} />
  </div>
 
- {/* Payment summary */}
- {price && parseFloat(price) > 0 && (
+ {/* Simulação de taxas — temporariamente desativada, voltaremos depois */}
+ {false && price && parseFloat(price) > 0 && (
  <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="rounded-xl bg-muted/5 border border-border p-3 space-y-2">
  <p className="text-[9px] font-display font-black uppercase tracking-[0.15em] text-muted-foreground/40">Simulação de taxas (R$ {Number(price).toFixed(2)})</p>
  <div className="grid grid-cols-3 gap-3">

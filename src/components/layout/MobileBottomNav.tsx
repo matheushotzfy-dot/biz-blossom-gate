@@ -27,7 +27,7 @@ const moreGroups = [
  {
  label: "Financeiro",
  items: [
- { title: "Config", url: "/financeiro/config", icon: Building2 },
+ { title: "Taxas", url: "/financeiro/config", icon: Building2 },
  ],
  },
  {
