@@ -2758,6 +2758,69 @@ export type Database = {
           },
         ]
       }
+      app_integrations_safe: {
+        Row: {
+          api_key_masked: string | null
+          api_url: string | null
+          app_name: string | null
+          config: Json | null
+          created_at: string | null
+          events: Json | null
+          has_api_key: boolean | null
+          id: string | null
+          is_active: boolean | null
+          product_id: string | null
+          updated_at: string | null
+          user_id: string | null
+          webhook_url: string | null
+        }
+        Insert: {
+          api_key_masked?: never
+          api_url?: string | null
+          app_name?: string | null
+          config?: Json | null
+          created_at?: string | null
+          events?: Json | null
+          has_api_key?: never
+          id?: string | null
+          is_active?: boolean | null
+          product_id?: string | null
+          updated_at?: string | null
+          user_id?: string | null
+          webhook_url?: string | null
+        }
+        Update: {
+          api_key_masked?: never
+          api_url?: string | null
+          app_name?: string | null
+          config?: Json | null
+          created_at?: string | null
+          events?: Json | null
+          has_api_key?: never
+          id?: string | null
+          is_active?: boolean | null
+          product_id?: string | null
+          updated_at?: string | null
+          user_id?: string | null
+          webhook_url?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "app_integrations_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "app_integrations_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products_public"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       disputes_seller: {
         Row: {
           amount: number | null
