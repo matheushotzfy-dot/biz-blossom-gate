@@ -445,7 +445,7 @@ export default function Apps() {
  )}
  </Button>
 
- {editId && ["zapi","utmify","activecampaign","notazz","themembers","spedy"].includes(dialogApp.id) && (
+ {editId && ["zapi","utmify","activecampaign","notazz","themembers","spedy","astron","memberkit","smsfunnel","voxuy","cademi"].includes(dialogApp.id) && (
  <Button
  variant="outline"
  disabled={testing}
