@@ -445,10 +445,17 @@ Deno.serve(async (req) => {
         utm: {},
       },
     };
-    const result = integ.app_name === "zapi"
-      ? await deliverZapi(integ, fakeDelivery)
-      : integ.app_name === "utmify"
-      ? await deliverUtmify(integ, fakeDelivery)
+    const handlers: Record<string, (i: Integration, d: Delivery) => Promise<{ status: number; body: string; error: string | null }>> = {
+      zapi: deliverZapi,
+      utmify: deliverUtmify,
+      activecampaign: deliverActiveCampaign,
+      notazz: deliverNotazz,
+      themembers: deliverTheMembers,
+      spedy: deliverSpedy,
+    };
+    const handler = handlers[integ.app_name];
+    const result = handler
+      ? await handler(integ, fakeDelivery)
       : { status: 0, body: "", error: `Unsupported: ${integ.app_name}` };
 
     const ok = result.status >= 200 && result.status < 300;
