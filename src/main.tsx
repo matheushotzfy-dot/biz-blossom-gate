@@ -6,10 +6,26 @@ import { initAntiTamper } from "./lib/antiTamper";
 
 initAntiTamper();
 
-// Register service worker for PWA
+const clearDevelopmentServiceWorkers = async () => {
+  const registrations = await navigator.serviceWorker.getRegistrations();
+  await Promise.all(registrations.map((registration) => registration.unregister()));
+
+  if ("caches" in window) {
+    const cacheKeys = await caches.keys();
+    await Promise.all(cacheKeys.map((key) => caches.delete(key)));
+  }
+};
+
+// Register service worker only for production builds.
+// In Vite preview/dev, cache-first SW responses can mix stale .vite chunks
+// with fresh React chunks and trigger invalid hook calls.
 if ("serviceWorker" in navigator) {
   window.addEventListener("load", () => {
-    navigator.serviceWorker.register("/sw.js").catch(() => {});
+    if (import.meta.env.PROD) {
+      navigator.serviceWorker.register("/sw.js").catch(() => {});
+    } else {
+      clearDevelopmentServiceWorkers().catch(() => {});
+    }
   });
 }
 
