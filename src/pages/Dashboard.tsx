@@ -332,14 +332,111 @@ export default function Dashboard() {
                 </span>
               </button>
             </PopoverTrigger>
-            <PopoverContent align="end" className="p-0 border border-border rounded-xl overflow-hidden bg-card">
-              <Calendar
-                mode="range"
-                selected={customRange}
-                onSelect={(r) => { setCustomRange(r); setIsCustom(true); }}
-                locale={ptBR}
-              />
+            <PopoverContent
+              align="end"
+              sideOffset={8}
+              className="p-0 border border-border rounded-xl overflow-hidden bg-card w-auto"
+            >
+              {/* Header */}
+              <div className="flex items-center justify-between gap-4 px-4 py-3 border-b border-border bg-secondary/30">
+                <div className="flex items-center gap-2">
+                  <div className="h-6 w-6 rounded-md bg-primary/10 text-primary flex items-center justify-center">
+                    <CalendarDays className="h-3 w-3" strokeWidth={2.25} />
+                  </div>
+                  <div className="flex flex-col leading-tight">
+                    <span className="text-[9px] font-display font-black uppercase tracking-[0.18em] text-muted-foreground/70">
+                      Período personalizado
+                    </span>
+                    <span className="text-[11px] font-display font-bold text-foreground tabular-nums">
+                      {customRange?.from
+                        ? format(customRange.from, "dd MMM", { locale: ptBR }) +
+                          (customRange.to
+                            ? " — " + format(customRange.to, "dd MMM yyyy", { locale: ptBR })
+                            : " — selecione fim")
+                        : "Selecione o intervalo"}
+                    </span>
+                  </div>
+                </div>
+                {customRange?.from && customRange?.to && (
+                  <span className="text-[10px] font-display font-black uppercase tracking-[0.16em] text-primary tabular-nums px-2 py-1 rounded-md bg-primary/10 border border-primary/20">
+                    {differenceInDays(customRange.to, customRange.from) + 1}d
+                  </span>
+                )}
+              </div>
+
+              <div className="flex flex-col sm:flex-row">
+                {/* Quick presets rail */}
+                <div className="sm:w-[148px] sm:border-r border-b sm:border-b-0 border-border bg-secondary/15 p-2 flex sm:flex-col gap-0.5 overflow-x-auto sm:overflow-visible">
+                  {([
+                    { label: "Hoje", days: 0 },
+                    { label: "Ontem", days: 1, offset: 1 },
+                    { label: "Últimos 7 dias", days: 6 },
+                    { label: "Últimos 15 dias", days: 14 },
+                    { label: "Últimos 30 dias", days: 29 },
+                    { label: "Este mês", monthMode: "current" },
+                    { label: "Mês passado", monthMode: "previous" },
+                  ] as { label: string; days?: number; offset?: number; monthMode?: "current" | "previous" }[]).map((preset) => {
+                    const apply = () => {
+                      const today = new Date();
+                      let from: Date, to: Date;
+                      if (preset.monthMode === "current") {
+                        from = new Date(today.getFullYear(), today.getMonth(), 1);
+                        to = today;
+                      } else if (preset.monthMode === "previous") {
+                        from = new Date(today.getFullYear(), today.getMonth() - 1, 1);
+                        to = new Date(today.getFullYear(), today.getMonth(), 0);
+                      } else if (preset.offset) {
+                        from = new Date(today);
+                        from.setDate(today.getDate() - preset.offset);
+                        to = new Date(from);
+                      } else {
+                        from = new Date(today);
+                        from.setDate(today.getDate() - (preset.days || 0));
+                        to = new Date(today);
+                      }
+                      setCustomRange({ from, to });
+                      setIsCustom(true);
+                    };
+                    return (
+                      <button
+                        key={preset.label}
+                        onClick={apply}
+                        className="text-left px-2.5 py-2 rounded-md text-[11px] font-display font-bold text-muted-foreground/80 hover:text-foreground hover:bg-secondary/60 transition-colors duration-150 whitespace-nowrap"
+                      >
+                        {preset.label}
+                      </button>
+                    );
+                  })}
+                </div>
+
+                {/* Calendar */}
+                <Calendar
+                  mode="range"
+                  selected={customRange}
+                  onSelect={(r) => { setCustomRange(r); setIsCustom(true); }}
+                  locale={ptBR}
+                  numberOfMonths={1}
+                />
+              </div>
+
+              {/* Footer */}
+              <div className="flex items-center justify-between gap-2 px-4 py-2.5 border-t border-border bg-secondary/20">
+                <button
+                  onClick={() => { setCustomRange(undefined); setIsCustom(false); setSelectedPeriod(PERIOD_PRESETS[0]); }}
+                  className="text-[10px] font-display font-black uppercase tracking-[0.14em] text-muted-foreground/60 hover:text-foreground transition-colors duration-150"
+                >
+                  Limpar
+                </button>
+                <button
+                  onClick={() => setDatePickerOpen(false)}
+                  disabled={!customRange?.from || !customRange?.to}
+                  className="px-3 py-1.5 rounded-md text-[10px] font-display font-black uppercase tracking-[0.14em] bg-primary text-primary-foreground hover:bg-primary/90 transition-colors duration-150 disabled:opacity-40 disabled:cursor-not-allowed"
+                >
+                  Aplicar
+                </button>
+              </div>
             </PopoverContent>
+
           </Popover>
         </div>
 
