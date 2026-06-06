@@ -156,6 +156,189 @@ async function deliverUtmify(integration: Integration, d: Delivery) {
   });
 }
 
+// ────────────────── ActiveCampaign ──────────────────
+// 1) Upsert contact via POST {api_url}/api/3/contact/sync  (header: Api-Token)
+// 2) Find/create tag for event (tag_name = `hotzfy_${event_lower}`)
+// 3) Apply tag via POST /api/3/contactTags
+async function deliverActiveCampaign(integration: Integration, d: Delivery) {
+  const apiUrl = integration.api_url?.trim().replace(/\/+$/, "");
+  const apiKey = integration.api_key?.trim();
+  if (!apiUrl || !apiKey) return { status: 0, body: "", error: "ActiveCampaign missing api_url or api_key" };
+
+  const email = String(d.payload?.customer?.email || "").trim();
+  if (!email) return { status: 0, body: "", error: "ActiveCampaign skipped: customer email missing" };
+
+  const fullName = String(d.payload?.customer?.name || "").trim();
+  const [firstName, ...rest] = fullName.split(/\s+/);
+  const lastName = rest.join(" ");
+  const headers = { "Api-Token": apiKey, "Content-Type": "application/json", "Accept": "application/json" };
+  const tagName = `hotzfy_${d.event.toLowerCase()}`;
+
+  // 1) sync contact
+  const syncRes = await timedFetch(`${apiUrl}/api/3/contact/sync`, {
+    method: "POST",
+    headers,
+    body: JSON.stringify({
+      contact: {
+        email,
+        firstName: firstName || undefined,
+        lastName: lastName || undefined,
+        phone: d.payload?.customer?.phone || undefined,
+      },
+    }),
+  });
+  if (syncRes.status < 200 || syncRes.status >= 300) return syncRes;
+  let contactId: string | null = null;
+  try { contactId = JSON.parse(syncRes.body)?.contact?.id ?? null; } catch { /* ignore */ }
+  if (!contactId) return { status: syncRes.status, body: syncRes.body, error: "ActiveCampaign: contact id missing" };
+
+  // 2) find or create tag
+  let tagId: string | null = null;
+  const tagSearch = await timedFetch(`${apiUrl}/api/3/tags?search=${encodeURIComponent(tagName)}`, {
+    method: "GET",
+    headers,
+  });
+  if (tagSearch.status >= 200 && tagSearch.status < 300) {
+    try {
+      const parsed = JSON.parse(tagSearch.body);
+      tagId = parsed?.tags?.find((t: any) => t.tag === tagName)?.id ?? null;
+    } catch { /* ignore */ }
+  }
+  if (!tagId) {
+    const tagCreate = await timedFetch(`${apiUrl}/api/3/tags`, {
+      method: "POST",
+      headers,
+      body: JSON.stringify({ tag: { tag: tagName, tagType: "contact", description: "Hotzfy event tag" } }),
+    });
+    try { tagId = JSON.parse(tagCreate.body)?.tag?.id ?? null; } catch { /* ignore */ }
+    if (!tagId) return { status: tagCreate.status, body: tagCreate.body, error: "ActiveCampaign: failed to create tag" };
+  }
+
+  // 3) apply tag
+  return await timedFetch(`${apiUrl}/api/3/contactTags`, {
+    method: "POST",
+    headers,
+    body: JSON.stringify({ contactTag: { contact: contactId, tag: tagId } }),
+  });
+}
+
+// ────────────────── Notazz ──────────────────
+// Notazz REST: POST https://app.notazz.com/api/emissaoNF.php
+// auth via apikey in body (legacy form-encoded). Emits NF-e from data.
+async function deliverNotazz(integration: Integration, d: Delivery) {
+  const apiKey = integration.api_key?.trim();
+  if (!apiKey) return { status: 0, body: "", error: "Notazz missing api_key" };
+  // Only emit on Purchase, cancel on Refund
+  if (d.event !== "Purchase" && d.event !== "Refund") {
+    return { status: 200, body: "skipped: event not relevant for Notazz", error: null };
+  }
+  const tx = d.payload?.transaction || {};
+  const customer = d.payload?.customer || {};
+  const doc = String(customer.document || "").replace(/\D/g, "");
+  if (!doc) return { status: 0, body: "", error: "Notazz: customer document missing" };
+
+  const params = new URLSearchParams({
+    API_KEY: apiKey,
+    OPERATION: d.event === "Purchase" ? "ISSUE" : "CANCEL",
+    DESTINATION_TAXID: doc,
+    DESTINATION_NAME: String(customer.name || "Cliente"),
+    DESTINATION_EMAIL: String(customer.email || ""),
+    AMOUNT: Number(tx.amount || 0).toFixed(2),
+    EXTERNAL_ID: String(tx.id || ""),
+    CANCEL_REASON: d.event === "Refund" ? "Estorno solicitado pelo cliente" : "",
+  });
+
+  return await timedFetch("https://app.notazz.com/api/emissaoNF.php", {
+    method: "POST",
+    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+    body: params.toString(),
+  });
+}
+
+// ────────────────── TheMembers ──────────────────
+// POST {api_url || https://api.themembers.com.br}/integrations/transactions
+// header: Authorization: Bearer {api_key}
+async function deliverTheMembers(integration: Integration, d: Delivery) {
+  const apiKey = integration.api_key?.trim();
+  if (!apiKey) return { status: 0, body: "", error: "TheMembers missing api_key" };
+  const base = (integration.api_url?.trim() || "https://api.themembers.com.br").replace(/\/+$/, "");
+  const tx = d.payload?.transaction || {};
+  const customer = d.payload?.customer || {};
+
+  const statusMap: Record<string, string> = {
+    Purchase: "approved",
+    Refund: "refunded",
+    Chargeback: "chargeback",
+    PixGenerated: "pending",
+    BoletoGenerated: "pending",
+    InitiateCheckout: "pending",
+  };
+
+  return await timedFetch(`${base}/integrations/transactions`, {
+    method: "POST",
+    headers: {
+      "Authorization": `Bearer ${apiKey}`,
+      "Content-Type": "application/json",
+      "Accept": "application/json",
+    },
+    body: JSON.stringify({
+      transaction_id: tx.id,
+      external_id: tx.external_id ?? tx.id,
+      status: statusMap[d.event] ?? "pending",
+      amount: Number(tx.amount || 0),
+      payment_method: tx.payment_method,
+      product_id: tx.product_id,
+      customer: {
+        name: customer.name,
+        email: customer.email,
+        document: customer.document,
+        phone: customer.phone,
+      },
+      event: d.event,
+      occurred_at: new Date().toISOString(),
+    }),
+  });
+}
+
+// ────────────────── Spedy ──────────────────
+// POST https://api.spedy.com.br/v1/orders   header: Authorization: Bearer {token}
+// Only triggers on Purchase (creates shipping order).
+async function deliverSpedy(integration: Integration, d: Delivery) {
+  const token = integration.api_key?.trim();
+  if (!token) return { status: 0, body: "", error: "Spedy missing api_key" };
+  if (d.event !== "Purchase") {
+    return { status: 200, body: "skipped: Spedy only acts on Purchase", error: null };
+  }
+  const tx = d.payload?.transaction || {};
+  const customer = d.payload?.customer || {};
+
+  return await timedFetch("https://api.spedy.com.br/v1/orders", {
+    method: "POST",
+    headers: {
+      "Authorization": `Bearer ${token}`,
+      "Content-Type": "application/json",
+      "Accept": "application/json",
+    },
+    body: JSON.stringify({
+      external_id: tx.id,
+      total: Number(tx.amount || 0),
+      payment_method: tx.payment_method,
+      customer: {
+        name: customer.name,
+        email: customer.email,
+        document: customer.document,
+        phone: customer.phone,
+      },
+      items: [{
+        sku: tx.product_id,
+        name: "Produto digital",
+        quantity: 1,
+        price: Number(tx.amount || 0),
+      }],
+    }),
+  });
+}
+
 // ────────────────── Worker ──────────────────
 async function deliverOne(admin: ReturnType<typeof createClient>, d: Delivery) {
   const { data: integ } = await admin
