@@ -430,20 +430,18 @@ Deno.serve(async (req) => {
     // Delivery rows are auto-created by the enqueue_webhook_on_tx_change trigger.
     // We just nudge the worker to flush the queue immediately.
     try {
-      const dispatcherUrl = `${supabaseUrl}/functions/v1/webhook-dispatcher`;
       const serviceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
-      // fire-and-forget
-      fetch(dispatcherUrl, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${serviceKey}`,
-        },
-        body: '{}',
-      }).catch(() => {});
+      const headers = {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${serviceKey}`,
+      };
+      // fire-and-forget both dispatchers (webhooks + apps like Z-API/UTMify)
+      fetch(`${supabaseUrl}/functions/v1/webhook-dispatcher`, { method: 'POST', headers, body: '{}' }).catch(() => {});
+      fetch(`${supabaseUrl}/functions/v1/apps-dispatcher`, { method: 'POST', headers, body: '{}' }).catch(() => {});
     } catch (_e) {
       // never break postback on dispatcher hiccup
     }
+
 
     return new Response(
       JSON.stringify({ success: true }),
