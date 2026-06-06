@@ -20,6 +20,7 @@ import {
 import { toast } from "sonner";
 
 import CourseCreationWizard from "@/components/course/CourseCreationWizard";
+import { GridSkeleton } from "@/components/PageShell";
 import { ContentCourseCard } from "@/components/course/ContentCourseCard";
 import { ContentCourseRow } from "@/components/course/ContentCourseRow";
 import {
