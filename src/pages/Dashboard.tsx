@@ -276,49 +276,63 @@ export default function Dashboard() {
           </div>
         </div>
 
-        <div className="flex flex-wrap items-stretch gap-2">
-          {/* Segmented period selector — sharp, institutional */}
-          <div className="inline-flex items-stretch rounded-xl border border-border bg-card overflow-hidden h-11">
-            {PERIOD_PRESETS.map((p, i) => {
+        {/* Period selector — institutional, dense, Bloomberg-style */}
+        <div className="inline-flex items-stretch h-11 rounded-xl border border-border bg-card overflow-hidden">
+          {/* Eyebrow with live pulse */}
+          <div className="hidden sm:flex items-center gap-2 px-3.5 border-r border-border bg-secondary/30">
+            <span className="relative flex h-1.5 w-1.5">
+              <span className="absolute inline-flex h-full w-full rounded-full bg-success/60 animate-ping" />
+              <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-success" />
+            </span>
+            <span className="text-[9px] font-display font-black uppercase tracking-[0.22em] text-muted-foreground/70">
+              Período
+            </span>
+          </div>
+
+          {/* Segments */}
+          <div className="flex items-stretch divide-x divide-border">
+            {PERIOD_PRESETS.map((p) => {
               const isActive = !isCustom && selectedPeriod.label === p.label;
+              const shortLabel = p.label === "Hoje" ? "Hoje" : `${p.days}D`;
               return (
                 <button
                   key={p.label}
                   onClick={() => { setSelectedPeriod(p); setIsCustom(false); }}
                   className={cn(
-                    "relative px-4 sm:px-5 text-[10px] font-display font-black uppercase tracking-[0.16em] transition-colors duration-200 tabular-nums",
-                    i > 0 && "border-l border-border",
+                    "relative px-4 flex items-center justify-center text-[11px] font-display font-black uppercase tracking-[0.14em] tabular-nums transition-colors duration-200 min-w-[58px]",
                     isActive
-                      ? "bg-primary/10 text-primary"
-                      : "text-muted-foreground/70 hover:text-foreground hover:bg-secondary/40"
+                      ? "text-primary bg-primary/[0.08]"
+                      : "text-muted-foreground/60 hover:text-foreground hover:bg-secondary/40"
                   )}
                 >
                   {isActive && (
-                    <span className="absolute left-0 right-0 top-0 h-[2px] bg-primary" />
+                    <span className="absolute inset-x-0 bottom-0 h-[2px] bg-primary" />
                   )}
-                  {p.label}
+                  {shortLabel}
                 </button>
               );
             })}
           </div>
 
+          {/* Custom range trigger — integrated */}
           <Popover open={datePickerOpen} onOpenChange={setDatePickerOpen}>
             <PopoverTrigger asChild>
               <button className={cn(
-                "h-11 px-4 rounded-xl border flex items-center gap-2.5 text-[10px] font-display font-black uppercase tracking-[0.16em] transition-colors duration-200",
+                "relative border-l border-border px-4 flex items-center gap-2 text-[11px] font-display font-black uppercase tracking-[0.14em] transition-colors duration-200",
                 isCustom
-                  ? "border-primary/40 bg-primary/10 text-primary"
-                  : "border-border bg-card text-muted-foreground/70 hover:text-foreground hover:border-border/80 hover:bg-secondary/40"
+                  ? "text-primary bg-primary/[0.08]"
+                  : "text-muted-foreground/60 hover:text-foreground hover:bg-secondary/40"
               )}>
+                {isCustom && <span className="absolute inset-x-0 bottom-0 h-[2px] bg-primary" />}
                 <CalendarDays className="h-3.5 w-3.5" strokeWidth={2.25} />
                 <span className="tabular-nums">
                   {isCustom && customRange?.from
                     ? format(customRange.from, "dd/MM") + (customRange.to ? " – " + format(customRange.to, "dd/MM") : "")
-                    : "Personalizado"}
+                    : "Custom"}
                 </span>
               </button>
             </PopoverTrigger>
-            <PopoverContent align="end" className="p-0 border border-border rounded-xl overflow-hidden">
+            <PopoverContent align="end" className="p-0 border border-border rounded-xl overflow-hidden bg-card">
               <Calendar
                 mode="range"
                 selected={customRange}
@@ -328,6 +342,7 @@ export default function Dashboard() {
             </PopoverContent>
           </Popover>
         </div>
+
       </div>
 
 
