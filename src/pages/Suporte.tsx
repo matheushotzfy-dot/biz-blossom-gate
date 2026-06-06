@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
+import { EmptyState } from "@/components/PageShell";
 
 type Ticket = {
   id: string;
@@ -380,29 +381,33 @@ export default function Suporte() {
               <Loader2 className="h-8 w-8 text-primary animate-spin" />
             </div>
           ) : tickets.length === 0 ? (
-            <div className="py-20 text-center px-6">
-              <div className="flex flex-col items-center opacity-30">
-                <Inbox size={48} strokeWidth={1} />
-                <p className="mt-4 text-[11px] font-black uppercase tracking-widest">Nenhum ticket aberto</p>
-              </div>
-              <button
-                onClick={() => setShowForm(true)}
-                className="mt-6 inline-flex items-center gap-2 h-10 px-5 rounded-xl bg-primary text-primary-foreground text-xs font-black uppercase tracking-widest hover:opacity-90"
-              >
-                <Plus className="h-3.5 w-3.5" strokeWidth={3} /> Abrir Ticket
-              </button>
-            </div>
+            <EmptyState
+              icon={<Inbox className="h-7 w-7" />}
+              title="Nenhum ticket aberto"
+              subtitle="Quando precisar de ajuda, abra um ticket e nossa equipe responde rapidamente."
+              action={
+                <button
+                  onClick={() => setShowForm(true)}
+                  className="inline-flex items-center gap-2 h-10 px-5 rounded-xl bg-primary text-primary-foreground text-xs font-black uppercase tracking-widest hover:opacity-90 transition-opacity"
+                >
+                  <Plus className="h-3.5 w-3.5" strokeWidth={3} /> Abrir Ticket
+                </button>
+              }
+            />
           ) : filtered.length === 0 ? (
-            <div className="py-16 text-center">
-              <Search className="mx-auto h-6 w-6 text-muted-foreground/40 mb-2" />
-              <p className="text-sm font-black text-foreground uppercase tracking-tight">Nenhum ticket encontrado</p>
-              <button
-                onClick={() => { setSearch(""); setStatusFilter("all"); }}
-                className="text-[11px] text-primary hover:underline mt-2 font-black uppercase tracking-widest"
-              >
-                Limpar filtros
-              </button>
-            </div>
+            <EmptyState
+              icon={<Search className="h-7 w-7" />}
+              title="Nenhum ticket encontrado"
+              subtitle="Tente ajustar os filtros ou termo de busca."
+              action={
+                <button
+                  onClick={() => { setSearch(""); setStatusFilter("all"); }}
+                  className="text-[11px] text-primary hover:underline font-black uppercase tracking-widest"
+                >
+                  Limpar filtros
+                </button>
+              }
+            />
           ) : (
             <table className="w-full text-left">
               <thead>

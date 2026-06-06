@@ -284,12 +284,11 @@ export default function Afiliados() {
             </CardHeader>
             <CardContent className="p-0">
               {affiliateProducts.length === 0 ? (
-                <div className="p-20 text-center space-y-4">
-                   <div className="h-16 w-16 bg-muted rounded-2xl flex items-center justify-center mx-auto">
-                      <Users className="h-8 w-8 text-muted-foreground/30" />
-                   </div>
-                   <p className="text-sm font-black text-muted-foreground">Nenhum programa ativo ainda.</p>
-                </div>
+                <EmptyState
+                  icon={<Users className="h-7 w-7" />}
+                  title="Nenhum programa ativo ainda"
+                  subtitle="Habilite o programa de afiliados nos seus produtos para começar a recrutar afiliados."
+                />
               ) : (
                 <div className="overflow-x-auto">
                   <table className="w-full">
@@ -356,12 +355,11 @@ export default function Afiliados() {
             </CardHeader>
             <CardContent className="p-0">
               {myLinks.length === 0 ? (
-                <div className="p-20 text-center space-y-4">
-                   <div className="h-16 w-16 bg-muted rounded-2xl flex items-center justify-center mx-auto">
-                      <Link2 className="h-8 w-8 text-muted-foreground/30" />
-                   </div>
-                   <p className="text-sm font-black text-muted-foreground">Nenhum link criado.</p>
-                </div>
+                <EmptyState
+                  icon={<Link2 className="h-7 w-7" />}
+                  title="Nenhum link criado"
+                  subtitle="Acesse o Marketplace e afilie-se a um produto para gerar seu primeiro link."
+                />
               ) : (
                 <div className="overflow-x-auto">
                   <table className="w-full">

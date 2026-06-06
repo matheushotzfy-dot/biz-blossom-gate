@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import { EmptyState } from "@/components/PageShell";
 
 interface FunnelStage {
  stage: string;
@@ -137,17 +138,17 @@ export default function FunilVendas() {
  </Card>
  </div>
 
- {stats.total === 0 ? (
- <Card className="border-border/40 bg-card/60">
- <CardContent className="py-16 text-center">
- <BarChart3 className="h-10 w-10 mx-auto text-muted-foreground/30 mb-3" />
- <p className="text-sm font-semibold text-muted-foreground">Nenhuma transação encontrada</p>
- <p className="text-xs text-muted-foreground/60 mt-1">
- Crie um produto e faça vendas para ver seu funil aqui.
- </p>
- </CardContent>
- </Card>
- ) : (
+  {stats.total === 0 ? (
+  <Card className="border-border/40 bg-card/60">
+  <CardContent className="p-0">
+  <EmptyState
+  icon={<BarChart3 className="h-7 w-7" />}
+  title="Nenhuma transação encontrada"
+  subtitle="Crie um produto e faça vendas para ver seu funil aqui."
+  />
+  </CardContent>
+  </Card>
+  ) : (
  <Card className="border-border/40 bg-card/60 backdrop-blur-xl">
  <CardHeader className="pb-2">
  <CardTitle className="flex items-center gap-2 text-sm font-bold">

@@ -13,6 +13,7 @@ import { toast } from "sonner";
 import { motion } from "framer-motion";
 import { StatCard } from "@/components/StatCard";
 import { cn } from "@/lib/utils";
+import { EmptyState } from "@/components/PageShell";
 
 
 const ease = [0.16, 1, 0.3, 1] as const;
@@ -193,17 +194,13 @@ export default function Indicacoes() {
  </div>
  </div>
 
- {referrals.length === 0 ? (
- <GlowCard glowColor="primary" className="p-10">
- <div className="text-center">
- <div className="mx-auto mb-4 h-16 w-16 rounded-2xl bg-muted/10 ring-1 ring-border/10 flex items-center justify-center">
- <Gift className="h-7 w-7 text-muted-foreground/20" />
- </div>
- <p className="text-[14px] font-heading font-bold text-foreground/60">Nenhuma indicação ainda</p>
- <p className="text-[11px] text-muted-foreground/35 mt-1.5">Compartilhe seu link para começar a ganhar</p>
- </div>
- </GlowCard>
- ) : (
+  {referrals.length === 0 ? (
+  <EmptyState
+  icon={<Gift className="h-7 w-7" />}
+  title="Nenhuma indicação ainda"
+  subtitle="Compartilhe seu link para começar a ganhar R$ 50 por amigo indicado."
+  />
+  ) : (
  <div className="space-y-2">
  {referrals.map((ref, i) => (
  <GlowCard
