@@ -339,6 +339,220 @@ async function deliverSpedy(integration: Integration, d: Delivery) {
   });
 }
 
+// ────────────────── Astron Members ──────────────────
+// POST {api_url || https://api.astronmembers.com}/v1/enrollments
+// header: Authorization: Bearer {api_key}
+// config.product_external_id (optional) – id do produto na Astron
+async function deliverAstron(integration: Integration, d: Delivery) {
+  const apiKey = integration.api_key?.trim();
+  if (!apiKey) return { status: 0, body: "", error: "Astron missing api_key" };
+  const base = (integration.api_url?.trim() || "https://api.astronmembers.com").replace(/\/+$/, "");
+  const tx = d.payload?.transaction || {};
+  const customer = d.payload?.customer || {};
+  const productExternalId = (integration.config as any)?.product_external_id ?? tx.product_id;
+
+  const actionMap: Record<string, string> = {
+    Purchase: "create",
+    Refund: "cancel",
+    Chargeback: "cancel",
+  };
+  const action = actionMap[d.event];
+  if (!action) return { status: 200, body: "skipped: event not relevant for Astron", error: null };
+
+  const path = action === "create" ? "/v1/enrollments" : `/v1/enrollments/${encodeURIComponent(String(tx.id))}/cancel`;
+  return await timedFetch(`${base}${path}`, {
+    method: "POST",
+    headers: {
+      "Authorization": `Bearer ${apiKey}`,
+      "Content-Type": "application/json",
+      "Accept": "application/json",
+    },
+    body: JSON.stringify({
+      external_id: tx.id,
+      product_id: productExternalId,
+      student: {
+        name: customer.name,
+        email: customer.email,
+        document: customer.document,
+        phone: customer.phone,
+      },
+      reason: action === "cancel" ? d.event.toLowerCase() : undefined,
+    }),
+  });
+}
+
+// ────────────────── MemberKit ──────────────────
+// POST {api_url || https://memberkit.com.br}/api/v1/subscribers
+// header: Authorization: Token {api_key}
+// config.classroom_id (recomendado) – id da turma
+async function deliverMemberKit(integration: Integration, d: Delivery) {
+  const apiKey = integration.api_key?.trim();
+  if (!apiKey) return { status: 0, body: "", error: "MemberKit missing api_key" };
+  const base = (integration.api_url?.trim() || "https://memberkit.com.br").replace(/\/+$/, "");
+  const classroomId = (integration.config as any)?.classroom_id;
+  const customer = d.payload?.customer || {};
+  const email = String(customer.email || "").trim();
+  if (!email) return { status: 0, body: "", error: "MemberKit: customer email missing" };
+
+  const headers = {
+    "Authorization": `Token ${apiKey}`,
+    "Content-Type": "application/json",
+    "Accept": "application/json",
+  };
+
+  if (d.event === "Purchase") {
+    return await timedFetch(`${base}/api/v1/subscribers`, {
+      method: "POST",
+      headers,
+      body: JSON.stringify({
+        subscriber: {
+          name: customer.name || email,
+          email,
+          phone_number: customer.phone || undefined,
+          classroom_ids: classroomId ? [classroomId] : undefined,
+          send_welcome_email: true,
+        },
+      }),
+    });
+  }
+  if (d.event === "Refund" || d.event === "Chargeback") {
+    if (!classroomId) {
+      return { status: 200, body: "skipped: classroom_id not configured for revoke", error: null };
+    }
+    return await timedFetch(`${base}/api/v1/subscribers/remove_from_classroom`, {
+      method: "POST",
+      headers,
+      body: JSON.stringify({ email, classroom_id: classroomId }),
+    });
+  }
+  return { status: 200, body: "skipped: event not relevant for MemberKit", error: null };
+}
+
+// ────────────────── SMSFunnel ──────────────────
+// POST {api_url || https://api.smsfunnel.com.br}/v1/messages
+// header: Authorization: Bearer {api_key}
+async function deliverSmsFunnel(integration: Integration, d: Delivery) {
+  const apiKey = integration.api_key?.trim();
+  if (!apiKey) return { status: 0, body: "", error: "SMSFunnel missing api_key" };
+  const base = (integration.api_url?.trim() || "https://api.smsfunnel.com.br").replace(/\/+$/, "");
+  const phone = String(d.payload?.customer?.phone || "").replace(/\D/g, "");
+  if (!phone) return { status: 0, body: "", error: "SMSFunnel: customer phone missing" };
+  const name = d.payload?.customer?.name || "";
+  const amountBRL = Number(d.payload?.transaction?.amount || 0)
+    .toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
+  const templates: Record<string, string> = {
+    Purchase: `Olá ${name}, sua compra de ${amountBRL} foi aprovada! Acesse seu produto.`,
+    Refund: `Olá ${name}, seu estorno de ${amountBRL} foi processado.`,
+    Chargeback: `Olá ${name}, há uma contestação no pagamento de ${amountBRL}. Entre em contato.`,
+    PixGenerated: `Olá ${name}, seu PIX de ${amountBRL} foi gerado. Pague em até 30 min.`,
+    BoletoGenerated: `Olá ${name}, seu boleto de ${amountBRL} foi gerado.`,
+    InitiateCheckout: `Olá ${name}, finalize sua compra de ${amountBRL}.`,
+  };
+  const message = templates[d.event] ?? `Atualização: ${d.event}`;
+  return await timedFetch(`${base}/v1/messages`, {
+    method: "POST",
+    headers: {
+      "Authorization": `Bearer ${apiKey}`,
+      "Content-Type": "application/json",
+      "Accept": "application/json",
+    },
+    body: JSON.stringify({
+      to: phone.startsWith("55") ? phone : `55${phone}`,
+      message,
+      external_id: d.payload?.transaction?.id,
+    }),
+  });
+}
+
+// ────────────────── Voxuy ──────────────────
+// POST {api_url || https://api.voxuy.com}/v1/messages
+// header: Authorization: Bearer {api_key}  ou  api_key como token simples
+// config.instance_id (opcional)
+async function deliverVoxuy(integration: Integration, d: Delivery) {
+  const apiKey = integration.api_key?.trim();
+  if (!apiKey) return { status: 0, body: "", error: "Voxuy missing api_key" };
+  const base = (integration.api_url?.trim() || "https://api.voxuy.com").replace(/\/+$/, "");
+  const instanceId = (integration.config as any)?.instance_id;
+  const phone = String(d.payload?.customer?.phone || "").replace(/\D/g, "");
+  if (!phone) return { status: 0, body: "", error: "Voxuy: customer phone missing" };
+  const name = d.payload?.customer?.name || "";
+  const amountBRL = Number(d.payload?.transaction?.amount || 0)
+    .toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
+  const templates: Record<string, string> = {
+    Purchase: `✅ Olá ${name}, sua compra de ${amountBRL} foi aprovada!`,
+    Refund: `Olá ${name}, seu estorno de ${amountBRL} foi processado.`,
+    Chargeback: `Olá ${name}, contestação detectada no valor de ${amountBRL}.`,
+    PixGenerated: `Olá ${name}, seu PIX de ${amountBRL} foi gerado. Pague em até 30 min.`,
+    BoletoGenerated: `Olá ${name}, seu boleto de ${amountBRL} foi gerado.`,
+    InitiateCheckout: `Olá ${name}, finalize sua compra de ${amountBRL}.`,
+  };
+  const message = templates[d.event] ?? `Atualização: ${d.event}`;
+  return await timedFetch(`${base}/v1/messages`, {
+    method: "POST",
+    headers: {
+      "Authorization": `Bearer ${apiKey}`,
+      "Content-Type": "application/json",
+      "Accept": "application/json",
+    },
+    body: JSON.stringify({
+      instance_id: instanceId,
+      phone: phone.startsWith("55") ? phone : `55${phone}`,
+      message,
+      external_id: d.payload?.transaction?.id,
+    }),
+  });
+}
+
+// ────────────────── Cademi ──────────────────
+// POST {api_url || https://api.cademi.com.br}/api/v1/enrollments
+// header: Authorization: Bearer {api_key}
+// config.course_id (recomendado)
+async function deliverCademi(integration: Integration, d: Delivery) {
+  const apiKey = integration.api_key?.trim();
+  if (!apiKey) return { status: 0, body: "", error: "Cademi missing api_key" };
+  const base = (integration.api_url?.trim() || "https://api.cademi.com.br").replace(/\/+$/, "");
+  const courseId = (integration.config as any)?.course_id;
+  const customer = d.payload?.customer || {};
+  const email = String(customer.email || "").trim();
+  if (!email) return { status: 0, body: "", error: "Cademi: customer email missing" };
+
+  const headers = {
+    "Authorization": `Bearer ${apiKey}`,
+    "Content-Type": "application/json",
+    "Accept": "application/json",
+  };
+
+  if (d.event === "Purchase") {
+    return await timedFetch(`${base}/api/v1/enrollments`, {
+      method: "POST",
+      headers,
+      body: JSON.stringify({
+        external_id: d.payload?.transaction?.id,
+        course_id: courseId,
+        student: {
+          name: customer.name || email,
+          email,
+          document: customer.document,
+          phone: customer.phone,
+        },
+        send_welcome_email: true,
+      }),
+    });
+  }
+  if (d.event === "Refund" || d.event === "Chargeback") {
+    return await timedFetch(`${base}/api/v1/enrollments/cancel`, {
+      method: "POST",
+      headers,
+      body: JSON.stringify({
+        email,
+        course_id: courseId,
+        reason: d.event.toLowerCase(),
+      }),
+    });
+  }
+  return { status: 200, body: "skipped: event not relevant for Cademi", error: null };
+}
+
 // ────────────────── Worker ──────────────────
 async function deliverOne(admin: ReturnType<typeof createClient>, d: Delivery) {
   const { data: integ } = await admin
@@ -362,6 +576,11 @@ async function deliverOne(admin: ReturnType<typeof createClient>, d: Delivery) {
   else if (integ.app_name === "notazz") result = await deliverNotazz(integ, d);
   else if (integ.app_name === "themembers") result = await deliverTheMembers(integ, d);
   else if (integ.app_name === "spedy") result = await deliverSpedy(integ, d);
+  else if (integ.app_name === "astron") result = await deliverAstron(integ, d);
+  else if (integ.app_name === "memberkit") result = await deliverMemberKit(integ, d);
+  else if (integ.app_name === "smsfunnel") result = await deliverSmsFunnel(integ, d);
+  else if (integ.app_name === "voxuy") result = await deliverVoxuy(integ, d);
+  else if (integ.app_name === "cademi") result = await deliverCademi(integ, d);
   else {
     await admin.from("app_deliveries").update({
       status: "exhausted",
@@ -452,6 +671,11 @@ Deno.serve(async (req) => {
       notazz: deliverNotazz,
       themembers: deliverTheMembers,
       spedy: deliverSpedy,
+      astron: deliverAstron,
+      memberkit: deliverMemberKit,
+      smsfunnel: deliverSmsFunnel,
+      voxuy: deliverVoxuy,
+      cademi: deliverCademi,
     };
     const handler = handlers[integ.app_name];
     const result = handler
