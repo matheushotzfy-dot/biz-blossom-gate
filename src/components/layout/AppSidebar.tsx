@@ -364,26 +364,36 @@ export function AppSidebar() {
 
   return (
     <Sidebar collapsible="icon" className="border-r-2 border-sidebar-border/80 bg-sidebar">
-      <SidebarHeader className="relative border-b border-sidebar-border/70 px-4 pb-5 pt-5">
+      <SidebarHeader className="relative border-b border-sidebar-border/70 px-4 pb-4 pt-4">
         {/* Brand */}
-        <div className={cn("flex items-center gap-2.5", collapsed && "justify-center")}>
-          <div className="relative h-9 w-9 shrink-0 overflow-hidden rounded-lg border border-sidebar-border/80 bg-sidebar-accent/60">
-            <img src={hotzfyLogo} alt="HOTZFY" className="h-full w-full object-contain p-1" />
+        <div className={cn("flex items-center gap-3", collapsed && "justify-center")}>
+          <div className="relative h-10 w-10 shrink-0 overflow-hidden rounded-[10px] border border-sidebar-border bg-gradient-to-br from-sidebar-accent to-sidebar-accent/40 ring-1 ring-inset ring-sidebar-primary/10">
+            <img src={hotzfyLogo} alt="HOTZFY" className="h-full w-full object-contain p-[3px]" />
+            <span className="pointer-events-none absolute inset-0 rounded-[10px] bg-gradient-to-br from-sidebar-primary/0 via-transparent to-sidebar-primary/10" />
           </div>
-          <div className="min-w-0 group-data-[collapsible=icon]:hidden">
+          <div className="min-w-0 flex-1 group-data-[collapsible=icon]:hidden">
             <div className="flex items-center gap-1.5">
-              <h1 className="font-display text-[15px] leading-none font-black tracking-[-0.03em] text-sidebar-accent-foreground">
+              <h1 className="font-display text-[15.5px] leading-none font-black tracking-[-0.045em] text-sidebar-accent-foreground">
                 HOTZFY
               </h1>
-              <Crown className="h-3 w-3 text-sidebar-primary" strokeWidth={2.5} fill="hsl(var(--sidebar-primary))" />
+              <span className="inline-flex h-[14px] items-center gap-0.5 rounded-[3px] border border-sidebar-primary/40 bg-sidebar-primary/15 px-1 font-display text-[8px] font-black uppercase tracking-[0.16em] text-sidebar-primary">
+                <Crown className="h-2 w-2" strokeWidth={3} fill="currentColor" />
+                Pro
+              </span>
             </div>
-            <p className="mt-1.5 inline-flex items-center gap-1.5 rounded-md border border-sidebar-border/60 bg-sidebar-accent/30 px-1.5 py-0.5 text-[9.5px] font-bold uppercase tracking-[0.14em] text-sidebar-foreground/65">
+            <div className="mt-1.5 flex items-center gap-1.5">
               <span className="relative flex h-1.5 w-1.5">
                 <span className="absolute inset-0 animate-ping rounded-full bg-success opacity-60" />
                 <span className="relative h-1.5 w-1.5 rounded-full bg-success" />
               </span>
-              Operacional
-            </p>
+              <span className="font-display text-[9.5px] font-black uppercase tracking-[0.2em] text-sidebar-foreground/70">
+                Operacional
+              </span>
+              <span className="ml-auto h-px flex-1 bg-sidebar-border/50" />
+              <span className="font-numbers text-[9px] font-bold uppercase tracking-[0.16em] text-sidebar-foreground/45 tabular-nums">
+                v2.4
+              </span>
+            </div>
           </div>
         </div>
         <RevenueCard
@@ -393,6 +403,7 @@ export function AppSidebar() {
           onOpenRewards={() => navigate("/premiacoes")}
         />
       </SidebarHeader>
+
 
       <SidebarContent className="relative gap-0 overflow-y-auto px-2.5 py-3">
         {sections.map((section, idx) => (
