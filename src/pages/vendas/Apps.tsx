@@ -62,7 +62,7 @@ const APPS: AppDef[] = [
  },
  {
  id: "activecampaign", name: "ActiveCampaign", desc: "Automação de e-mail marketing", category: "Marketing",
- logo: activecampaignLogo,
+ logo: activecampaignLogo, comingSoon: true,
  fields: [
  { key: "api_key", label: "API Key", placeholder: "Cole sua API key", type: "api_key", required: true, help: "Settings → Developer → API Key" },
  { key: "api_url", label: "URL da conta", placeholder: "https://suaconta.api-us1.com", type: "api_url", required: true, help: "Settings → Developer → URL" },
@@ -70,6 +70,7 @@ const APPS: AppDef[] = [
  events: ["Purchase", "Lead", "InitiateCheckout", "Refund", "Chargeback"],
  helpText: "Adiciona contatos e aplica tags automaticamente.",
  },
+
  {
  id: "notazz", name: "Notazz", desc: "Emissão automática de notas fiscais", category: "Fiscal",
  logo: notazzLogo,
