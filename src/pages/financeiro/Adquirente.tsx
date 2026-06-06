@@ -70,14 +70,15 @@ export default function Adquirente() {
 
   return (
     <div className="animate-fade-in space-y-6">
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-        <div>
-          <h1 className="text-2xl font-black text-foreground tracking-tight">Adquirente</h1>
-          <p className="text-[11px] font-bold text-muted-foreground uppercase tracking-widest mt-1">
-            Escolha o processador de pagamentos
-          </p>
-        </div>
-      </div>
+      <FinanceiroHero
+        eyebrow={`${acquirers.length} ${acquirers.length === 1 ? "processador disponível" : "processadores disponíveis"}`}
+        title="Adquirente"
+        subtitle="Selecione o gateway que processa todas as suas novas transações."
+        status={selectedAcq
+          ? { tone: "success", label: `${selectedAcq.name} ativo`, pulse: true }
+          : { tone: "warning", label: "Nenhum selecionado" }}
+      />
+
 
       {/* KPI Grid */}
       <FinanceiroKpiGrid cols={4}>
