@@ -1,9 +1,58 @@
-const corsHeaders = {
+export const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version',
 };
 
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+
+/** Map PodPay status to internal status. Exported for tests. */
+export const STATUS_MAP: Record<string, string> = {
+  'waiting_payment': 'pending',
+  'pending': 'pending',
+  'authorized': 'pending',
+  'approved': 'completed',
+  'paid': 'completed',
+  'refused': 'failed',
+  'failed': 'failed',
+  'cancelled': 'cancelled',
+  'refunded': 'refunded',
+  'chargeback': 'chargeback',
+  'in_protest': 'dispute',
+};
+
+/** Compute HMAC-SHA256 signature as lowercase hex. Exported for tests. */
+export async function computeHmacHex(rawBody: string, secret: string): Promise<string> {
+  const encoder = new TextEncoder();
+  const key = await crypto.subtle.importKey(
+    'raw',
+    encoder.encode(secret),
+    { name: 'HMAC', hash: 'SHA-256' },
+    false,
+    ['sign', 'verify']
+  );
+  const mac = await crypto.subtle.sign('HMAC', key, encoder.encode(rawBody));
+  return Array.from(new Uint8Array(mac))
+    .map((b) => b.toString(16).padStart(2, '0'))
+    .join('');
+}
+
+/** Constant-time hex signature compare. Exported for tests. */
+export async function verifySignature(rawBody: string, signatureHex: string, secret: string): Promise<boolean> {
+  if (!signatureHex || !/^[0-9a-fA-F]+$/.test(signatureHex) || signatureHex.length % 2 !== 0) return false;
+  const expected = await computeHmacHex(rawBody, secret);
+  if (expected.length !== signatureHex.length) return false;
+  let mismatch = 0;
+  const a = signatureHex.toLowerCase();
+  for (let i = 0; i < expected.length; i++) {
+    mismatch |= expected.charCodeAt(i) ^ a.charCodeAt(i);
+  }
+  return mismatch === 0;
+}
+
+/** Compute split amount given net amount (cents/units) and percentage (0-100). Exported for tests. */
+export function computeSplitAmount(amount: number, pct: number): number {
+  return Math.round(amount * pct) / 100;
+}
 
 /** Log only safe fields — never PII or full payloads */
 function safeLog(message: string, context: Record<string, unknown> = {}) {
