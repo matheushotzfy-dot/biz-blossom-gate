@@ -88,41 +88,65 @@ export default function Premiacoes() {
   }, [revenue]);
 
   return (
-    <div className="space-y-6 animate-in fade-in duration-500">
-      {/* Header */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-        <div className="space-y-1">
-          <h1 className="text-2xl font-black text-foreground tracking-tight uppercase">Premiações</h1>
-          <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.2em] flex items-center gap-2">
-            <Trophy className="h-3.5 w-3.5 text-primary" />
-            Trilha de conquistas físicas HOTZFY
-          </p>
-        </div>
-        {currentTier && (
-          <div className="inline-flex items-center gap-2 bg-card border border-border/60 px-4 h-11 rounded-xl">
-            <currentTier.icon className={cn("h-4 w-4", currentTier.accent)} strokeWidth={2.5} />
-            <span className="text-[10px] font-black uppercase tracking-[0.18em] text-muted-foreground">Tier Atual</span>
-            <span className="text-sm font-black text-foreground tracking-tight">{currentTier.tier}</span>
-          </div>
-        )}
-      </div>
+    <div className="space-y-6 animate-fade-in">
+      {/* Hero (Financeiro pattern) */}
+      <FinanceiroHero
+        eyebrow={currentTier ? `${currentTier.tier} · ${unlockedCount}/${AWARDS.length} marcos` : `${AWARDS.length} marcos na trilha`}
+        title="Premiações"
+        subtitle="Trilha de conquistas físicas HOTZFY. Cada marco representa uma entrega exclusiva."
+        status={currentTier
+          ? { tone: "success", label: `${currentTier.tier} desbloqueado` }
+          : { tone: "info", label: "Trilha iniciada" }}
+      />
 
-      {/* HERO — Faturamento + Próximo marco lado a lado */}
-      <div className="grid grid-cols-1 lg:grid-cols-[1.5fr_1fr] gap-6">
+      {/* KPI strip */}
+      <FinanceiroKpiGrid cols={4}>
+        <FinanceiroKpi
+          label="Faturamento líquido"
+          value={fmtC(revenue)}
+          sub="Total aprovado"
+          icon={Trophy}
+          tone="primary"
+        />
+        <FinanceiroKpi
+          label="Tier atual"
+          value={currentTier?.tier || "—"}
+          sub={currentTier ? `${currentTier.label} desbloqueado` : "Faça sua primeira venda"}
+          icon={currentTier?.icon || Award}
+          tone={currentTier ? "success" : "neutral"}
+        />
+        <FinanceiroKpi
+          label="Próximo marco"
+          value={nextAward ? `${nextProgress.toFixed(0)}%` : "Lenda"}
+          sub={nextAward ? `Faltam ${fmtC(remaining)}` : "Hall of Fame"}
+          icon={Target}
+          tone={nextAward ? "info" : "primary"}
+        />
+        <FinanceiroKpi
+          label="Jornada"
+          value={`${overallProgress.toFixed(0)}%`}
+          sub={`${unlockedCount}/${AWARDS.length} marcos`}
+          icon={Activity}
+          tone="neutral"
+        />
+      </FinanceiroKpiGrid>
+
+      {/* Faturamento + Próximo marco */}
+      <div className="grid grid-cols-1 lg:grid-cols-[1.5fr_1fr] gap-px overflow-hidden rounded-2xl border border-border/50 bg-border/40 animate-fade-in stagger-2">
         {/* Revenue card */}
-        <div className="bg-card p-8 rounded-[24px] border border-border/60 shadow-sm relative overflow-hidden group">
+        <div className="bg-card p-7 relative">
           <div className="relative z-10">
             <div className="flex items-center gap-2 text-muted-foreground/60 mb-4">
-              <Trophy size={16} />
-              <span className="text-[10px] font-black uppercase tracking-[0.15em]">Faturamento Líquido Total</span>
+              <Trophy size={14} strokeWidth={2.25} />
+              <span className="text-[10px] font-bold uppercase tracking-[0.18em]">Faturamento líquido total</span>
             </div>
-            <p className="font-display text-[52px] font-black text-foreground tabular-nums tracking-tighter leading-none">
+            <p className="font-display text-[44px] font-black text-foreground tabular-nums tracking-[-0.03em] leading-none">
               <AnimNum value={revenue} />
             </p>
 
-            {/* Trail of milestone dots */}
-            <div className="mt-8 relative">
-              <div className="h-[3px] rounded-full bg-muted/40 border border-border/40 overflow-hidden">
+            {/* Milestone dots */}
+            <div className="mt-7 relative">
+              <div className="h-[3px] rounded-full bg-secondary border border-border/40 overflow-hidden">
                 <div className="h-full rounded-full bg-primary transition-[width] duration-1000"
                   style={{ width: `${Math.max(overallProgress, 2)}%` }} />
               </div>
@@ -133,12 +157,12 @@ export default function Premiacoes() {
                   return (
                     <div key={a.id} className="flex flex-col items-center gap-1.5">
                       <div className={cn(
-                        "h-6 w-6 rounded-lg border-2 flex items-center justify-center transition-all",
+                        "h-6 w-6 rounded-md border flex items-center justify-center transition-colors",
                         done ? "bg-primary border-primary text-primary-foreground" : "bg-card border-border/60 text-muted-foreground/40"
                       )}>
                         <Icon size={11} strokeWidth={2.5} />
                       </div>
-                      <span className={cn("text-[9px] font-black tabular-nums uppercase tracking-widest",
+                      <span className={cn("text-[9px] font-bold tabular-nums uppercase tracking-widest",
                         done ? "text-foreground" : "text-muted-foreground/40")}>{a.label}</span>
                     </div>
                   );
@@ -146,60 +170,53 @@ export default function Premiacoes() {
               </div>
             </div>
           </div>
-          <div className="absolute right-[-30px] bottom-[-30px] opacity-[0.03] rotate-[-15deg] group-hover:scale-110 transition-transform duration-500">
-            <Trophy size={200} />
-          </div>
         </div>
 
         {/* Next milestone */}
-        <div className="bg-card p-8 rounded-[24px] border border-border/60 shadow-sm relative overflow-hidden">
+        <div className="bg-card p-7 relative">
           {nextAward ? (
             <div className="relative z-10 h-full flex flex-col">
               <div className="flex items-center gap-2 text-muted-foreground/60 mb-4">
-                <Target size={16} />
-                <span className="text-[10px] font-black uppercase tracking-[0.15em]">Próximo Marco</span>
+                <Target size={14} strokeWidth={2.25} />
+                <span className="text-[10px] font-bold uppercase tracking-[0.18em]">Próximo marco</span>
               </div>
               <div className="flex items-start gap-4">
-                <div className="h-20 w-20 rounded-2xl bg-muted/30 border border-border/60 flex items-center justify-center shrink-0 overflow-hidden">
-                  <img src={nextAward.image} alt={nextAward.title} className="h-16 w-16 object-contain grayscale opacity-50" />
+                <div className="h-16 w-16 rounded-xl bg-secondary border border-border/60 flex items-center justify-center shrink-0 overflow-hidden">
+                  <img src={nextAward.image} alt={nextAward.title} className="h-14 w-14 object-contain grayscale opacity-50" />
                 </div>
                 <div className="min-w-0">
-                  <p className={cn("text-[10px] font-black uppercase tracking-widest", nextAward.accent)}>{nextAward.tier}</p>
-                  <p className="text-xl font-black text-foreground tracking-tight mt-0.5 leading-tight">{nextAward.title}</p>
-                  <p className="text-[11px] font-bold text-muted-foreground tabular-nums mt-1">meta {fmtC(nextAward.value)}</p>
+                  <p className={cn("text-[10px] font-bold uppercase tracking-[0.18em]", nextAward.accent)}>{nextAward.tier}</p>
+                  <p className="text-[17px] font-black text-foreground tracking-tight mt-0.5 leading-tight">{nextAward.title}</p>
+                  <p className="text-[11px] font-semibold text-muted-foreground tabular-nums mt-1">meta {fmtC(nextAward.value)}</p>
                 </div>
               </div>
 
-              <div className="mt-auto pt-6">
+              <div className="mt-auto pt-5">
                 <div className="flex items-center justify-between mb-2">
-                  <span className="text-[10px] font-black text-muted-foreground/70 uppercase tracking-widest">Progresso</span>
-                  <span className="text-2xl font-black text-foreground tabular-nums tracking-tight">{nextProgress.toFixed(1)}%</span>
+                  <span className="text-[10px] font-bold text-muted-foreground/70 uppercase tracking-[0.18em]">Progresso</span>
+                  <span className="font-display text-[22px] font-black text-foreground tabular-nums tracking-tight leading-none">{nextProgress.toFixed(1)}%</span>
                 </div>
-                <div className="h-2 rounded-full bg-muted/40 border border-border/40 overflow-hidden">
+                <div className="h-1.5 rounded-full bg-secondary border border-border/40 overflow-hidden">
                   <div className="h-full rounded-full bg-primary transition-[width] duration-700"
                     style={{ width: `${Math.max(nextProgress, 2)}%` }} />
                 </div>
-                <p className="text-[10px] text-muted-foreground mt-3 font-bold uppercase tracking-widest">
-                  Faltam <span className="font-black text-foreground tabular-nums normal-case">{fmtFull(remaining)}</span>
+                <p className="text-[11px] text-muted-foreground mt-3 font-medium">
+                  Faltam <span className="font-black text-foreground tabular-nums">{fmtFull(remaining)}</span>
                 </p>
               </div>
             </div>
           ) : (
             <div className="relative z-10 h-full flex flex-col items-start justify-center">
-              <Crown className="h-12 w-12 text-violet-400 mb-3" />
-              <p className="text-2xl font-black text-foreground tracking-tight">Hall of Fame</p>
-              <p className="text-[11px] font-bold text-muted-foreground uppercase tracking-widest mt-2">
-                Você é <span className="text-violet-400">Lenda HOTZFY</span>
+              <Crown className="h-10 w-10 text-primary mb-3" />
+              <p className="text-xl font-black text-foreground tracking-tight">Hall of Fame</p>
+              <p className="text-[11px] font-bold text-muted-foreground uppercase tracking-[0.18em] mt-2">
+                Você é <span className="text-primary">Lenda HOTZFY</span>
               </p>
-            </div>
-          )}
-          {nextAward && (
-            <div className="absolute right-[-20px] bottom-[-20px] opacity-[0.04] rotate-[-15deg]">
-              <nextAward.icon size={160} />
             </div>
           )}
         </div>
       </div>
+
 
       {/* TRILHA SERPENTEADA — vertical com cards alternados */}
       <div className="bg-card rounded-[24px] border border-border/60 shadow-sm overflow-hidden">
