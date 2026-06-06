@@ -910,26 +910,30 @@ function TabGeral({ name, setName, description, setDescription, price, setPrice,
             <div className="p-5 space-y-1.5">
               <label className="text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">Categoria</label>
               <Select value={category} onValueChange={setCategory}>
-                <SelectTrigger className="h-11 bg-secondary border-border"><SelectValue /></SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="infoproduto">Infoproduto</SelectItem>
-                  <SelectItem value="curso">Curso Online</SelectItem>
-                  <SelectItem value="ebook">E-book</SelectItem>
-                  <SelectItem value="mentoria">Mentoria</SelectItem>
-                  <SelectItem value="software">Software / SaaS</SelectItem>
-                  <SelectItem value="servico">Serviço</SelectItem>
-                  <SelectItem value="comunidade">Comunidade</SelectItem>
-                  <SelectItem value="outro">Outro</SelectItem>
+                <SelectTrigger className="h-12 bg-card border-border font-display font-bold text-[13px] tracking-tight">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent className="w-[var(--radix-select-trigger-width)] max-w-none p-1.5">
+                  <RichSelectItem value="infoproduto" icon={Package}      label="Infoproduto"     desc="Conteúdo digital genérico" />
+                  <RichSelectItem value="curso"       icon={GraduationCap} label="Curso Online"    desc="Aulas em módulos" />
+                  <RichSelectItem value="ebook"       icon={BookOpen}     label="E-book"          desc="Material em PDF" />
+                  <RichSelectItem value="mentoria"    icon={Users}        label="Mentoria"        desc="Acompanhamento 1:1 ou grupo" />
+                  <RichSelectItem value="software"    icon={Code2}        label="Software / SaaS" desc="Aplicativo ou ferramenta" />
+                  <RichSelectItem value="servico"     icon={Briefcase}    label="Serviço"         desc="Trabalho prestado" />
+                  <RichSelectItem value="comunidade"  icon={MessageSquare} label="Comunidade"     desc="Grupo recorrente" />
+                  <RichSelectItem value="outro"       icon={Layers}       label="Outro"           desc="Modelo personalizado" />
                 </SelectContent>
               </Select>
             </div>
             <div className="p-5 space-y-1.5">
               <label className="text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">Tipo de pagamento</label>
               <Select value={paymentType} onValueChange={setPaymentType}>
-                <SelectTrigger className="h-11 bg-secondary border-border"><SelectValue /></SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="unico">Pagamento único</SelectItem>
-                  <SelectItem value="assinatura">Assinatura recorrente</SelectItem>
+                <SelectTrigger className="h-12 bg-card border-border font-display font-bold text-[13px] tracking-tight">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent className="w-[var(--radix-select-trigger-width)] max-w-none p-1.5">
+                  <RichSelectItem value="unico"       icon={DollarSign} label="Pagamento único"      desc="Cobrança única" />
+                  <RichSelectItem value="assinatura"  icon={RefreshCw}  label="Assinatura recorrente" desc="Cobrança automática" />
                 </SelectContent>
               </Select>
             </div>
