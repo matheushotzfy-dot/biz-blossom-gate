@@ -692,12 +692,13 @@ Deno.serve(async (req) => {
     }
     const fakeDelivery: Delivery = {
       id: "test", integration_id: integ.id, user_id: integ.user_id, transaction_id: null,
-      app_name: integ.app_name, event: "Purchase", attempt: 0,
+      app_name: integ.app_name, event: "Purchase", attempt: 0, is_test: true,
       payload: {
         event: "Purchase",
-        transaction: { id: "test_tx_" + Date.now(), amount: 99.9, net_amount: 95, payment_method: "pix", created_at: new Date().toISOString() },
+        transaction: { id: "test_tx_" + Date.now(), product_id: "test_product", amount: 99.9, net_amount: 95, payment_method: "pix", created_at: new Date().toISOString() },
         customer: { name: "Cliente Teste", email: "teste@hotzfy.com", phone: "11999999999", document: "00000000000" },
-        utm: {},
+        product_name: "Produto de Teste",
+        utm: { utm_source: "hotzfy_test", utm_campaign: "integration_test", utm_medium: "test" },
       },
     };
     const handlers: Record<string, (i: Integration, d: Delivery) => Promise<{ status: number; body: string; error: string | null }>> = {
