@@ -358,6 +358,10 @@ async function deliverOne(admin: ReturnType<typeof createClient>, d: Delivery) {
   let result: { status: number; body: string; error: string | null };
   if (integ.app_name === "zapi") result = await deliverZapi(integ, d);
   else if (integ.app_name === "utmify") result = await deliverUtmify(integ, d);
+  else if (integ.app_name === "activecampaign") result = await deliverActiveCampaign(integ, d);
+  else if (integ.app_name === "notazz") result = await deliverNotazz(integ, d);
+  else if (integ.app_name === "themembers") result = await deliverTheMembers(integ, d);
+  else if (integ.app_name === "spedy") result = await deliverSpedy(integ, d);
   else {
     await admin.from("app_deliveries").update({
       status: "exhausted",
