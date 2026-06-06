@@ -9,6 +9,13 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { toast } from "sonner";
+import {
+  bankAccountSchema,
+  pixKeySchema,
+  flattenZodErrors,
+  type FieldErrors,
+} from "@/lib/validation";
+import { InlineError, errorInputClass } from "@/components/ui/inline-error";
 
 const PIX_TYPES = [
   { value: "cpf", label: "CPF" },
@@ -23,6 +30,12 @@ const ACCOUNT_TYPES = [
   { value: "poupanca", label: "Poupança" },
 ];
 
+type PixForm = { key_type: "cpf" | "cnpj" | "email" | "phone" | "random"; key_value: string };
+type BankForm = {
+  bank_name: string; bank_code: string; agency: string; account_number: string;
+  account_type: "corrente" | "poupanca"; holder_name: string; holder_document: string;
+};
+
 export default function DadosBancarios() {
   const { user } = useAuth();
   const { data: accounts = [] } = useBankAccounts();
@@ -33,21 +46,31 @@ export default function DadosBancarios() {
   const [bankOpen, setBankOpen] = useState(false);
   const [busy, setBusy] = useState(false);
 
-  const [pixForm, setPixForm] = useState({ key_type: "cpf", key_value: "" });
-  const [bankForm, setBankForm] = useState({
+  const [pixForm, setPixForm] = useState<PixForm>({ key_type: "cpf", key_value: "" });
+  const [pixErrors, setPixErrors] = useState<FieldErrors<PixForm>>({});
+
+  const [bankForm, setBankForm] = useState<BankForm>({
     bank_name: "", bank_code: "", agency: "", account_number: "",
     account_type: "corrente", holder_name: "", holder_document: "",
   });
+  const [bankErrors, setBankErrors] = useState<FieldErrors<BankForm>>({});
 
   const handleAddPix = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!user) return;
-    if (!pixForm.key_value.trim()) { toast.error("Informe a chave PIX"); return; }
+    const parsed = pixKeySchema.safeParse(pixForm);
+    if (!parsed.success) {
+      const errs = flattenZodErrors<PixForm>(parsed.error);
+      setPixErrors(errs);
+      toast.error(Object.values(errs)[0] || "Verifique os campos");
+      return;
+    }
+    setPixErrors({});
     setBusy(true);
     const { error } = await supabase.from("pix_keys").insert({
       user_id: user.id,
-      key_type: pixForm.key_type,
-      key_value: pixForm.key_value.trim(),
+      key_type: parsed.data.key_type,
+      key_value: parsed.data.key_value.trim(),
     });
     setBusy(false);
     if (error) { toast.error(error.message || "Erro ao adicionar chave"); return; }
@@ -68,20 +91,24 @@ export default function DadosBancarios() {
   const handleAddBank = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!user) return;
-    const f = bankForm;
-    if (!f.bank_name || !f.agency || !f.account_number || !f.holder_name || !f.holder_document) {
-      toast.error("Preencha todos os campos obrigatórios"); return;
+    const parsed = bankAccountSchema.safeParse(bankForm);
+    if (!parsed.success) {
+      const errs = flattenZodErrors<BankForm>(parsed.error);
+      setBankErrors(errs);
+      toast.error(Object.values(errs)[0] || "Verifique os campos");
+      return;
     }
+    setBankErrors({});
     setBusy(true);
     const { error } = await supabase.from("bank_accounts").insert({
       user_id: user.id,
-      bank_name: f.bank_name,
-      bank_code: f.bank_code || null,
-      agency: f.agency,
-      account_number: f.account_number,
-      account_type: f.account_type,
-      holder_name: f.holder_name,
-      holder_document: f.holder_document.replace(/\D/g, ""),
+      bank_name: parsed.data.bank_name,
+      bank_code: parsed.data.bank_code || null,
+      agency: parsed.data.agency,
+      account_number: parsed.data.account_number,
+      account_type: parsed.data.account_type,
+      holder_name: parsed.data.holder_name,
+      holder_document: parsed.data.holder_document.replace(/\D/g, ""),
     });
     setBusy(false);
     if (error) { toast.error(error.message || "Erro ao adicionar conta"); return; }
@@ -97,6 +124,13 @@ export default function DadosBancarios() {
     if (error) { toast.error("Erro ao remover"); return; }
     toast.success("Conta removida");
     invalidateAll(["bank_accounts"]);
+  };
+
+  const clearPixError = (field: keyof PixForm) => {
+    if (pixErrors[field]) setPixErrors((p) => ({ ...p, [field]: undefined }));
+  };
+  const clearBankError = (field: keyof BankForm) => {
+    if (bankErrors[field]) setBankErrors((p) => ({ ...p, [field]: undefined }));
   };
 
   return (
@@ -115,7 +149,7 @@ export default function DadosBancarios() {
               </p>
             </div>
           </div>
-          <Dialog open={pixOpen} onOpenChange={setPixOpen}>
+          <Dialog open={pixOpen} onOpenChange={(o) => { setPixOpen(o); if (!o) setPixErrors({}); }}>
             <DialogTrigger asChild>
               <Button
                 disabled={pixKeys.length >= 3}
@@ -126,10 +160,13 @@ export default function DadosBancarios() {
             </DialogTrigger>
             <DialogContent className="max-w-md">
               <DialogHeader><DialogTitle>Adicionar Chave PIX</DialogTitle></DialogHeader>
-              <form onSubmit={handleAddPix} className="space-y-4 pt-2">
+              <form onSubmit={handleAddPix} className="space-y-4 pt-2" noValidate>
                 <div className="space-y-2">
                   <Label>Tipo de chave</Label>
-                  <Select value={pixForm.key_type} onValueChange={(v) => setPixForm({ ...pixForm, key_type: v })}>
+                  <Select
+                    value={pixForm.key_type}
+                    onValueChange={(v) => { setPixForm({ ...pixForm, key_type: v as PixForm["key_type"] }); clearPixError("key_value"); }}
+                  >
                     <SelectTrigger><SelectValue /></SelectTrigger>
                     <SelectContent>
                       {PIX_TYPES.map(t => <SelectItem key={t.value} value={t.value}>{t.label}</SelectItem>)}
@@ -140,10 +177,13 @@ export default function DadosBancarios() {
                   <Label>Chave</Label>
                   <Input
                     value={pixForm.key_value}
-                    onChange={(e) => setPixForm({ ...pixForm, key_value: e.target.value })}
+                    onChange={(e) => { setPixForm({ ...pixForm, key_value: e.target.value }); clearPixError("key_value"); }}
                     placeholder="Digite sua chave PIX"
-                    required
+                    aria-invalid={!!pixErrors.key_value}
+                    aria-describedby={pixErrors.key_value ? "pix-key-error" : undefined}
+                    className={errorInputClass(!!pixErrors.key_value)}
                   />
+                  <InlineError id="pix-key-error" message={pixErrors.key_value} />
                 </div>
                 <Button type="submit" disabled={busy} className="w-full">
                   {busy ? "Adicionando..." : "Adicionar Chave PIX"}
@@ -190,7 +230,7 @@ export default function DadosBancarios() {
               </p>
             </div>
           </div>
-          <Dialog open={bankOpen} onOpenChange={setBankOpen}>
+          <Dialog open={bankOpen} onOpenChange={(o) => { setBankOpen(o); if (!o) setBankErrors({}); }}>
             <DialogTrigger asChild>
               <Button className="h-10 px-4 rounded-xl font-black text-[10px] uppercase tracking-widest">
                 <Plus size={14} strokeWidth={3} className="mr-1.5" /> Nova Conta
@@ -198,28 +238,59 @@ export default function DadosBancarios() {
             </DialogTrigger>
             <DialogContent className="max-w-md">
               <DialogHeader><DialogTitle>Adicionar Conta Bancária</DialogTitle></DialogHeader>
-              <form onSubmit={handleAddBank} className="space-y-3 pt-2">
+              <form onSubmit={handleAddBank} className="space-y-3 pt-2" noValidate>
                 <div className="space-y-1.5">
                   <Label>Banco</Label>
-                  <Input value={bankForm.bank_name} onChange={(e) => setBankForm({ ...bankForm, bank_name: e.target.value })} placeholder="Ex: Nubank, Itaú..." required />
+                  <Input
+                    value={bankForm.bank_name}
+                    onChange={(e) => { setBankForm({ ...bankForm, bank_name: e.target.value }); clearBankError("bank_name"); }}
+                    placeholder="Ex: Nubank, Itaú..."
+                    aria-invalid={!!bankErrors.bank_name}
+                    className={errorInputClass(!!bankErrors.bank_name)}
+                  />
+                  <InlineError message={bankErrors.bank_name} />
                 </div>
                 <div className="grid grid-cols-3 gap-3">
                   <div className="space-y-1.5">
                     <Label>Cód. Banco</Label>
-                    <Input value={bankForm.bank_code} onChange={(e) => setBankForm({ ...bankForm, bank_code: e.target.value })} placeholder="260" />
+                    <Input
+                      value={bankForm.bank_code}
+                      onChange={(e) => { setBankForm({ ...bankForm, bank_code: e.target.value }); clearBankError("bank_code"); }}
+                      placeholder="260"
+                      aria-invalid={!!bankErrors.bank_code}
+                      className={errorInputClass(!!bankErrors.bank_code)}
+                    />
+                    <InlineError message={bankErrors.bank_code} />
                   </div>
                   <div className="space-y-1.5">
                     <Label>Agência</Label>
-                    <Input value={bankForm.agency} onChange={(e) => setBankForm({ ...bankForm, agency: e.target.value })} placeholder="0001" required />
+                    <Input
+                      value={bankForm.agency}
+                      onChange={(e) => { setBankForm({ ...bankForm, agency: e.target.value }); clearBankError("agency"); }}
+                      placeholder="0001"
+                      aria-invalid={!!bankErrors.agency}
+                      className={errorInputClass(!!bankErrors.agency)}
+                    />
+                    <InlineError message={bankErrors.agency} />
                   </div>
                   <div className="space-y-1.5">
                     <Label>Conta</Label>
-                    <Input value={bankForm.account_number} onChange={(e) => setBankForm({ ...bankForm, account_number: e.target.value })} placeholder="12345-6" required />
+                    <Input
+                      value={bankForm.account_number}
+                      onChange={(e) => { setBankForm({ ...bankForm, account_number: e.target.value }); clearBankError("account_number"); }}
+                      placeholder="12345-6"
+                      aria-invalid={!!bankErrors.account_number}
+                      className={errorInputClass(!!bankErrors.account_number)}
+                    />
+                    <InlineError message={bankErrors.account_number} />
                   </div>
                 </div>
                 <div className="space-y-1.5">
                   <Label>Tipo de conta</Label>
-                  <Select value={bankForm.account_type} onValueChange={(v) => setBankForm({ ...bankForm, account_type: v })}>
+                  <Select
+                    value={bankForm.account_type}
+                    onValueChange={(v) => setBankForm({ ...bankForm, account_type: v as BankForm["account_type"] })}
+                  >
                     <SelectTrigger><SelectValue /></SelectTrigger>
                     <SelectContent>
                       {ACCOUNT_TYPES.map(t => <SelectItem key={t.value} value={t.value}>{t.label}</SelectItem>)}
@@ -228,11 +299,24 @@ export default function DadosBancarios() {
                 </div>
                 <div className="space-y-1.5">
                   <Label>Nome do titular</Label>
-                  <Input value={bankForm.holder_name} onChange={(e) => setBankForm({ ...bankForm, holder_name: e.target.value })} required />
+                  <Input
+                    value={bankForm.holder_name}
+                    onChange={(e) => { setBankForm({ ...bankForm, holder_name: e.target.value }); clearBankError("holder_name"); }}
+                    aria-invalid={!!bankErrors.holder_name}
+                    className={errorInputClass(!!bankErrors.holder_name)}
+                  />
+                  <InlineError message={bankErrors.holder_name} />
                 </div>
                 <div className="space-y-1.5">
                   <Label>CPF/CNPJ do titular</Label>
-                  <Input value={bankForm.holder_document} onChange={(e) => setBankForm({ ...bankForm, holder_document: e.target.value })} placeholder="Somente números" required />
+                  <Input
+                    value={bankForm.holder_document}
+                    onChange={(e) => { setBankForm({ ...bankForm, holder_document: e.target.value }); clearBankError("holder_document"); }}
+                    placeholder="Somente números"
+                    aria-invalid={!!bankErrors.holder_document}
+                    className={errorInputClass(!!bankErrors.holder_document)}
+                  />
+                  <InlineError message={bankErrors.holder_document} />
                 </div>
                 <Button type="submit" disabled={busy} className="w-full mt-2">
                   {busy ? "Adicionando..." : "Salvar Conta Bancária"}
