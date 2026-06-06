@@ -105,76 +105,68 @@ type RevenueCardProps = {
 function RevenueCard({ collapsed, revenue, milestone, onOpenRewards }: RevenueCardProps) {
   if (collapsed) return null;
 
-  const pct = Math.max(0, Math.min(100, Math.round(milestone.pct)));
+  const pct = Math.max(0, Math.min(100, milestone.pct));
+  const pctDisplay = Math.round(pct);
   const remaining = Math.max(0, milestone.next.value - revenue);
+  const tierName = milestone.current.tier;
 
   return (
     <button
       type="button"
       onClick={onOpenRewards}
-      className="group/rev mt-4 block w-full overflow-hidden rounded-lg border border-sidebar-border/70 bg-sidebar-accent/20 text-left transition-colors duration-200 hover:border-sidebar-primary/40 hover:bg-sidebar-accent/35"
+      className="group/rev relative mt-4 block w-full overflow-hidden rounded-[10px] border border-sidebar-border bg-sidebar-accent/15 px-3.5 py-3 text-left transition-colors duration-200 hover:border-sidebar-primary/35 hover:bg-sidebar-accent/25"
     >
-      {/* Top row — eyebrow + live ticker */}
-      <div className="flex items-center justify-between border-b border-sidebar-border/50 bg-sidebar-accent/30 px-3.5 py-2">
-        <span className="font-display text-[9px] font-black uppercase tracking-[0.22em] text-sidebar-foreground/55">
-          Volume · Hoje
-        </span>
-        <span className="inline-flex items-center gap-1.5 font-display text-[8.5px] font-black uppercase tracking-[0.18em] text-success">
-          <span className="relative flex h-1.5 w-1.5">
-            <span className="absolute inset-0 animate-ping rounded-full bg-success opacity-70" />
-            <span className="relative h-1.5 w-1.5 rounded-full bg-success" />
+      {/* Header */}
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-1.5">
+          <TrendingUp className="h-3 w-3 text-sidebar-foreground/40" strokeWidth={2.5} />
+          <span className="font-display text-[9px] font-bold uppercase tracking-[0.2em] text-sidebar-foreground/50">
+            Faturamento
           </span>
-          Live
+        </div>
+        <span className="font-display text-[9px] font-bold uppercase tracking-[0.18em] text-sidebar-foreground/40">
+          {tierName}
         </span>
       </div>
 
-      <div className="px-3.5 pb-3.5 pt-3">
-        {/* Main figure */}
-        <div className="flex items-baseline gap-1.5">
-          <p className="font-numbers text-[24px] font-black leading-none tracking-[-0.045em] text-sidebar-accent-foreground tabular-nums">
-            {formatRevenue(revenue)}
-          </p>
-          <span className="font-display text-[9.5px] font-bold uppercase tracking-[0.18em] text-sidebar-foreground/45">
-            BRL
-          </span>
-        </div>
+      {/* Main figure */}
+      <div className="mt-2 flex items-baseline gap-1.5">
+        <p className="font-numbers text-[22px] font-black leading-none tracking-[-0.04em] text-sidebar-accent-foreground tabular-nums">
+          {formatRevenue(revenue)}
+        </p>
+        <span className="font-display text-[9px] font-semibold uppercase tracking-[0.14em] text-sidebar-foreground/35">
+          total
+        </span>
+      </div>
 
-        {/* Progress segmented */}
-        <div className="mt-3.5 flex h-[5px] gap-[2px] overflow-hidden rounded-[2px]">
-          {Array.from({ length: 24 }).map((_, i) => {
-            const segPct = ((i + 1) / 24) * 100;
-            const filled = pct >= segPct;
-            return (
-              <div
-                key={i}
-                className={cn(
-                  "flex-1 transition-colors duration-500",
-                  filled ? "bg-sidebar-primary" : "bg-sidebar-border/60"
-                )}
-              />
-            );
-          })}
-        </div>
+      {/* Progress bar */}
+      <div className="relative mt-3 h-[3px] w-full overflow-hidden rounded-full bg-sidebar-border/50">
+        <div
+          className="absolute inset-y-0 left-0 rounded-full bg-sidebar-primary transition-[width] duration-700 ease-out"
+          style={{ width: `${pct}%` }}
+        />
+      </div>
 
-        {/* Scale labels */}
-        <div className="mt-2 flex items-center justify-between font-numbers text-[9.5px] font-bold tabular-nums text-sidebar-foreground/45">
-          <span>{milestone.current.label}</span>
-          <span className="font-display text-[8.5px] font-black uppercase tracking-[0.16em] text-sidebar-primary tabular-nums">
-            {pct}% · meta
-          </span>
-          <span>{milestone.next.label}</span>
-        </div>
+      {/* Scale */}
+      <div className="mt-1.5 flex items-center justify-between font-numbers text-[9px] font-semibold tabular-nums text-sidebar-foreground/40">
+        <span>{milestone.current.label}</span>
+        <span>{milestone.next.label}</span>
+      </div>
 
-        {/* Footer */}
-        <div className="mt-3 flex items-center justify-between border-t border-sidebar-border/40 pt-2.5">
-          <span className="font-display text-[9.5px] font-bold uppercase tracking-[0.16em] text-sidebar-foreground/55">
-            Faltam <span className="font-numbers text-sidebar-accent-foreground tabular-nums">{formatRevenue(remaining)}</span>
+      {/* Footer */}
+      <div className="mt-2.5 flex items-center justify-between border-t border-sidebar-border/40 pt-2">
+        <div className="flex items-baseline gap-1">
+          <span className="font-numbers text-[11px] font-bold tabular-nums text-sidebar-accent-foreground">
+            {pctDisplay}%
           </span>
-          <span className="inline-flex items-center gap-0.5 font-display text-[9.5px] font-black uppercase tracking-[0.2em] text-sidebar-primary transition-transform group-hover/rev:translate-x-0.5">
-            Rewards
-            <ChevronRight className="h-3 w-3" strokeWidth={3} />
+          <span className="font-display text-[9px] font-semibold uppercase tracking-[0.14em] text-sidebar-foreground/45">
+            · faltam {formatRevenue(remaining)}
           </span>
         </div>
+        <span className="inline-flex items-center gap-0.5 font-display text-[9px] font-bold uppercase tracking-[0.18em] text-sidebar-primary/90 transition-transform group-hover/rev:translate-x-0.5">
+          Rewards
+          <ChevronRight className="h-2.5 w-2.5" strokeWidth={3} />
+        </span>
       </div>
     </button>
   );
