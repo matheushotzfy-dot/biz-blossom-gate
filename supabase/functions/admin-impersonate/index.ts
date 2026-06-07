@@ -104,13 +104,15 @@ Deno.serve(async (req) => {
       );
     }
 
-    // Generate a magic link for impersonation
+    // Generate a one-time recovery link, then exchange it server-side for a session.
+    // generateLink (magiclink) does NOT return access/refresh tokens directly; the
+    // returned `hashed_token` must be verified via auth.verifyOtp to mint a session.
     const { data: linkData, error: linkError } = await adminClient.auth.admin.generateLink({
       type: "magiclink",
       email: targetUser.user.email!,
     });
 
-    if (linkError || !linkData) {
+    if (linkError || !linkData?.properties?.hashed_token) {
       console.error("[admin-impersonate] Failed to generate link:", linkError?.message);
       return new Response(
         JSON.stringify({ success: false, error: "Failed to generate impersonation session" }),
@@ -118,22 +120,37 @@ Deno.serve(async (req) => {
       );
     }
 
-    // Audit log (no PII in details beyond what's necessary)
+    // Exchange the hashed token for an actual session using a fresh anon client
+    const exchangeClient = createClient(supabaseUrl, Deno.env.get("SUPABASE_ANON_KEY")!, {
+      auth: { persistSession: false, autoRefreshToken: false },
+    });
+    const { data: verifyData, error: verifyError } = await exchangeClient.auth.verifyOtp({
+      token_hash: linkData.properties.hashed_token,
+      type: "magiclink",
+    });
+
+    if (verifyError || !verifyData.session) {
+      console.error("[admin-impersonate] OTP exchange failed:", verifyError?.message);
+      return new Response(
+        JSON.stringify({ success: false, error: "Failed to mint impersonation session" }),
+        { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    // Audit log
     await adminClient.from("audit_logs").insert({
       admin_user_id: caller.id,
       action: "impersonate_user",
       entity_type: "profile",
       entity_id: targetUserId,
-      details: {
-        timestamp: new Date().toISOString(),
-      },
+      details: { timestamp: new Date().toISOString() },
     });
 
     return new Response(
       JSON.stringify({
         success: true,
-        access_token: (linkData.properties as any)?.access_token,
-        refresh_token: (linkData.properties as any)?.refresh_token,
+        access_token: verifyData.session.access_token,
+        refresh_token: verifyData.session.refresh_token,
       }),
       { headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );

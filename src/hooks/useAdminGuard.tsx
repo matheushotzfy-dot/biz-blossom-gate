@@ -24,24 +24,30 @@ export function useAdminGuard() {
       return;
     }
 
-    // Check admin role first, then employee
-    Promise.all([
-      supabase.rpc("current_user_has_role", { _role: "admin" }),
-      supabase.rpc("current_user_has_role", { _role: "employee" as any }),
-    ]).then(([adminRes, employeeRes]) => {
-      const hasAdmin = adminRes.data === true;
-      const hasEmployee = employeeRes.data === true;
-
-      if (!hasAdmin && !hasEmployee) {
-        // Don't sign out — user may be a regular user who navigated here by mistake
-        navigate("/admin-matheus", { replace: true });
-        return;
+    let cancelled = false;
+    (async () => {
+      try {
+        const [adminRes, employeeRes] = await Promise.all([
+          supabase.rpc("current_user_has_role", { _role: "admin" }),
+          supabase.rpc("current_user_has_role", { _role: "employee" as any }),
+        ]);
+        if (cancelled) return;
+        const hasAdmin = adminRes.data === true;
+        const hasEmployee = employeeRes.data === true;
+        if (!hasAdmin && !hasEmployee) {
+          navigate("/admin-matheus", { replace: true });
+          return;
+        }
+        setIsAdmin(hasAdmin);
+        setIsEmployee(hasEmployee && !hasAdmin);
+      } catch {
+        if (!cancelled) navigate("/admin-matheus", { replace: true });
+      } finally {
+        if (!cancelled) setLoading(false);
       }
+    })();
 
-      setIsAdmin(hasAdmin);
-      setIsEmployee(hasEmployee && !hasAdmin);
-      setLoading(false);
-    });
+    return () => { cancelled = true; };
   }, [user, authLoading, navigate]);
 
   return { isAdmin, isEmployee, loading, user };

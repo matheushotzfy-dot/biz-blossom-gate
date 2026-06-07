@@ -195,34 +195,49 @@ export default function AdminDashboard() {
 
   useEffect(() => {
     if (!user) return;
-    Promise.all([
-      supabase.rpc("current_user_has_role", { _role: "admin" }),
-      supabase.rpc("current_user_has_role", { _role: "employee" as any }),
-    ]).then(([adminRes, employeeRes]) => {
-      const hasAdmin = adminRes.data === true;
-      const hasEmployee = employeeRes.data === true;
-      if (!hasAdmin && !hasEmployee) { navigate("/admin-matheus"); return; }
-      if (hasAdmin) setIsAdmin(true);
-      else if (hasEmployee) setIsEmployee(true);
-      setLoading(false);
-      loadData();
-    });
-  }, [user]);
+    let cancelled = false;
+    (async () => {
+      try {
+        const [adminRes, employeeRes] = await Promise.all([
+          supabase.rpc("current_user_has_role", { _role: "admin" }),
+          supabase.rpc("current_user_has_role", { _role: "employee" as any }),
+        ]);
+        if (cancelled) return;
+        const hasAdmin = adminRes.data === true;
+        const hasEmployee = employeeRes.data === true;
+        if (!hasAdmin && !hasEmployee) { navigate("/admin-matheus"); return; }
+        if (hasAdmin) setIsAdmin(true);
+        else if (hasEmployee) setIsEmployee(true);
+        await loadData();
+      } catch (e) {
+        if (!cancelled) toast.error("Falha ao verificar permissões");
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    })();
+    return () => { cancelled = true; };
+  }, [user, navigate]);
 
-  const loadData = async () => {
+  const loadData = useCallback(async () => {
     setSyncing(true);
-    const [txRes, pRes, prodRes, wRes] = await Promise.all([
-      supabase.from("transactions").select("id, user_id, product_id, amount, fee_amount, net_amount, status, payment_method, customer_name, customer_email, created_at, updated_at, retained_amount, retention_released").order("created_at", { ascending: false }).limit(1000),
-      supabase.from("profiles").select("id, user_id, full_name, email, account_status, document_number, document_type, phone, nickname, seller_type, acquirer_id, balance_frozen, created_at, updated_at, avatar_url, kyc_rejection_reason, admin_notes, last_login_at").order("created_at", { ascending: false }).limit(1000),
-      supabase.from("products").select("id, user_id, name, price, status, created_at, updated_at, image_url, checkout_url, affiliate_enabled, affiliate_commission").limit(1000),
-      supabase.from("withdrawals").select("id, user_id, amount, fee_amount, net_amount, status, created_at, processed_at, bank_account_id, withdrawal_type, crypto_currency, crypto_network, crypto_address").order("created_at", { ascending: false }).limit(1000),
-    ]);
-    if (txRes.data) setTransactions(txRes.data as any);
-    if (pRes.data) setProfiles(pRes.data as any);
-    if (prodRes.data) setProducts(prodRes.data as any);
-    if (wRes.data) setWithdrawals(wRes.data as any);
-    setSyncing(false);
-  };
+    try {
+      const [txRes, pRes, prodRes, wRes] = await Promise.all([
+        supabase.from("transactions").select("id, user_id, product_id, amount, fee_amount, net_amount, status, payment_method, customer_name, customer_email, created_at, updated_at, retained_amount, retention_released").order("created_at", { ascending: false }).limit(1000),
+        supabase.from("profiles").select("id, user_id, full_name, email, account_status, document_number, document_type, phone, nickname, seller_type, acquirer_id, balance_frozen, created_at, updated_at, avatar_url, kyc_rejection_reason, admin_notes, last_login_at").order("created_at", { ascending: false }).limit(1000),
+        supabase.from("products").select("id, user_id, name, price, status, created_at, updated_at, image_url, checkout_url, affiliate_enabled, affiliate_commission").limit(1000),
+        supabase.from("withdrawals").select("id, user_id, amount, fee_amount, net_amount, status, created_at, processed_at, bank_account_id, withdrawal_type, crypto_currency, crypto_network, crypto_address").order("created_at", { ascending: false }).limit(1000),
+      ]);
+      if (txRes.error) throw txRes.error;
+      if (txRes.data) setTransactions(txRes.data as any);
+      if (pRes.data) setProfiles(pRes.data as any);
+      if (prodRes.data) setProducts(prodRes.data as any);
+      if (wRes.data) setWithdrawals(wRes.data as any);
+    } catch (e: any) {
+      toast.error("Erro ao carregar dados: " + (e?.message ?? "desconhecido"));
+    } finally {
+      setSyncing(false);
+    }
+  }, []);
 
   const handleDatePreset = (days: number) => {
     const to = new Date();
@@ -627,11 +642,11 @@ export default function AdminDashboard() {
                 {activeTab === "analytics" && isAdmin && (
                   <AdminAnalyticsTab transactions={transactions} profiles={profiles} products={products} withdrawals={withdrawals} fmtCurrency={fmtCurrency} />
                 )}
-                {activeTab === "transactions" && (
+                {activeTab === "transactions" && isAdmin && (
                   <AdminTransactionsTab transactions={transactions} profiles={profiles} products={products} fmtCurrency={fmtCurrency} onReload={loadData} />
                 )}
                 {activeTab === "sellers" && (
-                  <AdminSellersTab profiles={profiles} transactions={transactions} withdrawals={withdrawals} onReload={loadData} fmtCurrency={fmtCurrency} />
+                  <AdminSellersTab profiles={profiles} transactions={transactions} withdrawals={withdrawals} onReload={loadData} fmtCurrency={fmtCurrency} isAdmin={isAdmin} />
                 )}
                 {activeTab === "products" && (
                   <AdminProductsTab products={products} profiles={profiles} transactions={transactions} fmtCurrency={fmtCurrency} onReload={loadData} />
