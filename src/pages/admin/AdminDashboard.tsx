@@ -193,6 +193,30 @@ export default function AdminDashboard() {
     toast.success(`Tema "${ADMIN_THEMES[t].label}" aplicado!`);
   };
 
+  const loadData = useCallback(async () => {
+    setSyncing(true);
+    try {
+      const [txRes, pRes, prodRes, wRes] = await Promise.all([
+        supabase.from("transactions").select("id, user_id, product_id, amount, fee_amount, net_amount, status, payment_method, customer_name, customer_email, created_at, updated_at, retained_amount, retention_released").order("created_at", { ascending: false }).limit(1000),
+        supabase.from("profiles").select("id, user_id, full_name, email, account_status, document_number, document_type, phone, nickname, seller_type, acquirer_id, balance_frozen, created_at, updated_at, avatar_url, kyc_rejection_reason, admin_notes, last_login_at").order("created_at", { ascending: false }).limit(1000),
+        supabase.from("products").select("id, user_id, name, price, status, created_at, updated_at, image_url, checkout_url, affiliate_enabled, affiliate_commission").limit(1000),
+        supabase.from("withdrawals").select("id, user_id, amount, fee_amount, net_amount, status, created_at, processed_at, bank_account_id, withdrawal_type, crypto_currency, crypto_network, crypto_address").order("created_at", { ascending: false }).limit(1000),
+      ]);
+      if (txRes.error) throw txRes.error;
+      if (pRes.error) throw pRes.error;
+      if (prodRes.error) throw prodRes.error;
+      if (wRes.error) throw wRes.error;
+      setTransactions((txRes.data ?? []) as any);
+      setProfiles((pRes.data ?? []) as any);
+      setProducts((prodRes.data ?? []) as any);
+      setWithdrawals((wRes.data ?? []) as any);
+    } catch (e: any) {
+      toast.error("Erro ao carregar dados: " + (e?.message ?? "desconhecido"));
+    } finally {
+      setSyncing(false);
+    }
+  }, []);
+
   useEffect(() => {
     if (!user) return;
     let cancelled = false;
@@ -206,8 +230,10 @@ export default function AdminDashboard() {
         const hasAdmin = adminRes.data === true;
         const hasEmployee = employeeRes.data === true;
         if (!hasAdmin && !hasEmployee) { navigate("/admin-matheus"); return; }
+        if (cancelled) return;
         if (hasAdmin) setIsAdmin(true);
         else if (hasEmployee) setIsEmployee(true);
+        if (cancelled) return;
         await loadData();
       } catch (e) {
         if (!cancelled) toast.error("Falha ao verificar permissões");
@@ -216,28 +242,7 @@ export default function AdminDashboard() {
       }
     })();
     return () => { cancelled = true; };
-  }, [user, navigate]);
-
-  const loadData = useCallback(async () => {
-    setSyncing(true);
-    try {
-      const [txRes, pRes, prodRes, wRes] = await Promise.all([
-        supabase.from("transactions").select("id, user_id, product_id, amount, fee_amount, net_amount, status, payment_method, customer_name, customer_email, created_at, updated_at, retained_amount, retention_released").order("created_at", { ascending: false }).limit(1000),
-        supabase.from("profiles").select("id, user_id, full_name, email, account_status, document_number, document_type, phone, nickname, seller_type, acquirer_id, balance_frozen, created_at, updated_at, avatar_url, kyc_rejection_reason, admin_notes, last_login_at").order("created_at", { ascending: false }).limit(1000),
-        supabase.from("products").select("id, user_id, name, price, status, created_at, updated_at, image_url, checkout_url, affiliate_enabled, affiliate_commission").limit(1000),
-        supabase.from("withdrawals").select("id, user_id, amount, fee_amount, net_amount, status, created_at, processed_at, bank_account_id, withdrawal_type, crypto_currency, crypto_network, crypto_address").order("created_at", { ascending: false }).limit(1000),
-      ]);
-      if (txRes.error) throw txRes.error;
-      if (txRes.data) setTransactions(txRes.data as any);
-      if (pRes.data) setProfiles(pRes.data as any);
-      if (prodRes.data) setProducts(prodRes.data as any);
-      if (wRes.data) setWithdrawals(wRes.data as any);
-    } catch (e: any) {
-      toast.error("Erro ao carregar dados: " + (e?.message ?? "desconhecido"));
-    } finally {
-      setSyncing(false);
-    }
-  }, []);
+  }, [user, navigate, loadData]);
 
   const handleDatePreset = (days: number) => {
     const to = new Date();
@@ -642,7 +647,7 @@ export default function AdminDashboard() {
                 {activeTab === "analytics" && isAdmin && (
                   <AdminAnalyticsTab transactions={transactions} profiles={profiles} products={products} withdrawals={withdrawals} fmtCurrency={fmtCurrency} />
                 )}
-                {activeTab === "transactions" && isAdmin && (
+                {activeTab === "transactions" && (
                   <AdminTransactionsTab transactions={transactions} profiles={profiles} products={products} fmtCurrency={fmtCurrency} onReload={loadData} />
                 )}
                 {activeTab === "sellers" && (
@@ -658,7 +663,7 @@ export default function AdminDashboard() {
                   <AdminTopProductsTab products={products} profiles={profiles} transactions={transactions} fmtCurrency={fmtCurrency} />
                 )}
                 {activeTab === "withdrawals" && isAdmin && (
-                  <AdminWithdrawalsTab withdrawals={withdrawals} profiles={profiles} onWithdrawalAction={handleWithdrawalAction} fmtCurrency={fmtCurrency} />
+                  <AdminWithdrawalsTab withdrawals={withdrawals} profiles={profiles} onWithdrawalAction={handleWithdrawalAction} onReload={loadData} fmtCurrency={fmtCurrency} />
                 )}
                 {activeTab === "acquirers" && isAdmin && <AdminAcquirersTab />}
                 {activeTab === "risk-compliance" && isAdmin && (

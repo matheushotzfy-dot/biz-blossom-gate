@@ -61,7 +61,7 @@ interface Props {
  isAdmin?: boolean;
 }
 
-export default function AdminSellersTab({ profiles, transactions, withdrawals, onReload, fmtCurrency }: Props) {
+export default function AdminSellersTab({ profiles, transactions, withdrawals, onReload, fmtCurrency, isAdmin = false }: Props) {
  const { user } = useAuth();
  const [search, setSearch] = useState("");
  const [sellerFilter, setSellerFilter] = useState<"all" | "white" | "black" | "unset" | "kyc">("all");
@@ -98,6 +98,12 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
  const openUserDetail = async (profile: Tables<"profiles">) => {
  setSelectedUser(profile);
  setLoading(true);
+ // Reset stale data from previous seller
+ setUserLogs([]); setUserProducts([]); setUserWithdrawals([]);
+ setUserTransactions([]); setUserPixKeys([]); setUserDisputes([]);
+ setBalanceAdjustments([]); setKycImages([]);
+ setUserRetention(null); setRetentionForm({ pix_pct: "", card_pct: "", days: "" });
+ setAdminNotes(""); setSelectedAcquirerId("");
  const [logsRes, productsRes, wdRes, txRes, feesRes, adjRes, pixRes, disputesRes, retRes] = await Promise.all([
  supabase.from("activity_logs").select("id, user_id, action, entity_type, entity_id, old_data, new_data, created_at").eq("user_id", profile.user_id).order("created_at", { ascending: false }).limit(100),
  supabase.from("products").select("id, user_id, name, price, status, created_at, image_url").eq("user_id", profile.user_id).order("created_at", { ascending: false }).limit(100) as any,
@@ -213,9 +219,9 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
  toast.error(data?.error || "Erro ao acessar como usuário");
  return;
  }
- const { access_token, refresh_token } = data;
+   const { access_token, refresh_token } = data;
  if (access_token && refresh_token) {
- // Store tokens in localStorage with tight 15s window (sessionStorage doesn't share across tabs)
+ // Store tokens in localStorage with tight 15s pickup window
  localStorage.setItem("impersonate_session", JSON.stringify({
  access_token,
  refresh_token,
@@ -224,7 +230,12 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
  }));
  // Open dashboard in new tab — useAuth will detect and apply the session
  window.open(window.location.origin + "/dashboard?impersonate=1", "_blank");
- toast.success(`Abrindo dashboard como ${data.email}`);
+ // Hard-clean: even if the new tab never picks it up, tokens disappear after 15s
+ setTimeout(() => {
+ try { localStorage.removeItem("impersonate_session"); } catch { /* ignore */ }
+ }, 15_000);
+ const targetEmail = profiles.find(p => p.user_id === userId)?.email || userId.slice(0, 8);
+ toast.success(`Abrindo dashboard como ${targetEmail}`);
  } else {
  toast.error("Tokens de impersonação não disponíveis");
  }

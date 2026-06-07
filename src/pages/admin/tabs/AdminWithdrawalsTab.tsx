@@ -30,6 +30,7 @@ interface Props {
  withdrawals: Tables<"withdrawals">[];
  profiles: Tables<"profiles">[];
  onWithdrawalAction: (id: string, action: "approved" | "rejected") => void;
+ onReload: () => void;
  fmtCurrency: (v: number) => string;
 }
 
@@ -44,7 +45,7 @@ const isHighValue = (amount: number) => amount >= 50000;
 
 type SubTab = "queue" | "adjustments" | "statement";
 
-export default function AdminWithdrawalsTab({ withdrawals, profiles, onWithdrawalAction, fmtCurrency }: Props) {
+export default function AdminWithdrawalsTab({ withdrawals, profiles, onWithdrawalAction, onReload, fmtCurrency }: Props) {
  const { user } = useAuth();
  const [search, setSearch] = useState("");
  const [statusFilter, setStatusFilter] = useState("all");
@@ -140,7 +141,7 @@ export default function AdminWithdrawalsTab({ withdrawals, profiles, onWithdrawa
  toast.success(msg);
  setSelectedIds(new Set());
  setBatchProcessing(false);
- if (ok > 0) onWithdrawalAction("", "approved");
+ if (ok > 0) onReload();
  };
 
  const handleBatchReject = async () => {
@@ -154,7 +155,7 @@ export default function AdminWithdrawalsTab({ withdrawals, profiles, onWithdrawa
  toast.success(`${ok} saques recusados em lote`);
  setSelectedIds(new Set());
  setBatchProcessing(false);
- if (ok > 0) onWithdrawalAction("", "rejected"); // trigger parent reload
+ if (ok > 0) onReload(); // trigger parent reload
  };
 
  /* ── Single Reject with Reason ── */
@@ -166,7 +167,7 @@ export default function AdminWithdrawalsTab({ withdrawals, profiles, onWithdrawa
  toast.success("Saque recusado com motivo registrado");
  setRejectDialog(null);
  setRejectReason("");
- onWithdrawalAction("", "rejected"); // trigger parent reload
+ onReload(); // trigger parent reload
  };
 
  const toggleSelect = (id: string) => {

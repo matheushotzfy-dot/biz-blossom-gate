@@ -100,6 +100,8 @@ export default function AdminProductsTab({ products, profiles, transactions, fmt
  pending_review: ["active", "inactive"],
  active: ["pending_review", "inactive"],
  inactive: ["active", "pending_review"],
+ suspended: ["active", "inactive"],
+ rejected: ["active", "pending_review", "inactive"],
  };
 
  const handleProductStatus = async (productId: string, status: string, userId: string, reason?: string) => {
@@ -167,8 +169,8 @@ export default function AdminProductsTab({ products, profiles, transactions, fmt
 
  const pendingReview = useMemo(() => products.filter(p => p.status === "pending_review"), [products]);
  const activeCount = products.filter(p => p.status === "active").length;
-  const blockedCount = products.filter(p => p.status === "inactive").length;
-  const rejectedCount = 0;
+  const blockedCount = products.filter(p => p.status === "inactive" || p.status === "suspended").length;
+  const rejectedCount = products.filter(p => p.status === "rejected").length;
 
  return (
  <div className="space-y-5 animate-fade-in">

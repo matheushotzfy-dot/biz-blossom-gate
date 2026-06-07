@@ -11,7 +11,7 @@ interface Props {
 
 export default function AdminInactiveSellersTab({ profiles, transactions, fmtCurrency }: Props) {
  const [search, setSearch] = useState("");
- const [daysThreshold, setDaysThreshold] = useState(2);
+ const [daysThreshold, setDaysThreshold] = useState(30);
 
  const now = new Date();
  const thresholdDate = new Date(now.getTime() - daysThreshold * 24 * 60 * 60 * 1000);

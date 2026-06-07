@@ -716,11 +716,11 @@ export function GlassPanel({ children, className }: { children: React.ReactNode;
 export function GlassPanelTitle({ children, color, icon }: { children: React.ReactNode; color: string; icon?: React.ReactNode }) {
  const colorMap: Record<string, string> = {
  emerald: "bg-emerald-400 shadow-[0_0_10px_rgba(16,185,129,0.6)]",
- indigo: "bg-emerald-400 shadow-[0_0_10px_rgba(16,185,129,0.6)]",
+ indigo: "bg-indigo-400 shadow-[0_0_10px_rgba(99,102,241,0.6)]",
  amber: "bg-amber-400 shadow-[0_0_10px_rgba(245,158,11,0.6)]",
  blue: "bg-teal-400 shadow-[0_0_10px_rgba(20,184,166,0.6)]",
  red: "bg-red-400 shadow-[0_0_10px_rgba(248,113,113,0.6)]",
- violet: "bg-emerald-400 shadow-[0_0_10px_rgba(16,185,129,0.6)]",
+ violet: "bg-violet-400 shadow-[0_0_10px_rgba(139,92,246,0.6)]",
  cyan: "bg-cyan-400 shadow-[0_0_10px_rgba(34,211,238,0.6)]",
  zinc: "bg-zinc-400/40",
  teal: "bg-teal-400 shadow-[0_0_10px_rgba(20,184,166,0.6)]",
@@ -728,11 +728,11 @@ export function GlassPanelTitle({ children, color, icon }: { children: React.Rea
  };
  const textColorMap: Record<string, string> = {
  emerald: "text-emerald-400",
- indigo: "text-emerald-400",
+ indigo: "text-indigo-400",
  amber: "text-amber-400",
  blue: "text-teal-400",
  red: "text-red-400",
- violet: "text-emerald-400",
+ violet: "text-violet-400",
  cyan: "text-cyan-400",
  zinc: "text-zinc-400",
  teal: "text-teal-400",
