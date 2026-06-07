@@ -356,9 +356,9 @@ export default function CheckoutBuilder() {
  const addBump = async () => {
  if (!selectedBumpProduct) return;
  if (orderBumps.some(b => b.bump_product_id === selectedBumpProduct)) { toast.error("Já adicionado"); return; }
- const { data, error } = await supabase.from("order_bumps").insert({ product_id: productId!, bump_product_id: selectedBumpProduct, sort_order: orderBumps.length }).select("id, bump_product_id").single();
- if (error) { toast.error("Erro ao adicionar"); return; }
- if (data) setOrderBumps(prev => [...prev, data]);
+ const { data, error } = await supabase.from("order_bumps").insert({ product_id: productId!, bump_product_id: selectedBumpProduct, sort_order: orderBumps.length }).select("id, bump_product_id").maybeSingle();
+ if (error || !data) { toast.error("Erro ao adicionar"); return; }
+ setOrderBumps(prev => [...prev, data]);
  setSelectedBumpProduct("");
  toast.success("Bump adicionado!");
  };
