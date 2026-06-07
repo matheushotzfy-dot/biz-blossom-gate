@@ -1,9 +1,25 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
+const ALLOWED_ORIGINS = new Set([
+  "https://hotzfy.com.br",
+  "https://www.hotzfy.com.br",
+  "https://biz-blossom-gate.lovable.app",
+  "http://localhost:5173",
+  "http://localhost:8080",
+]);
+const LOVABLE_PREVIEW_RE = /^https:\/\/[a-z0-9-]+\.lovable\.app$/i;
+const CORS_BASE_HEADERS: Record<string, string> = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
+  "Access-Control-Allow-Methods": "POST, OPTIONS",
+  "Vary": "Origin",
 };
+function buildCors(req: Request): Record<string, string> {
+  const origin = req.headers.get("Origin") ?? "";
+  const allowed = !origin || ALLOWED_ORIGINS.has(origin) || LOVABLE_PREVIEW_RE.test(origin);
+  return allowed && origin
+    ? { ...CORS_BASE_HEADERS, "Access-Control-Allow-Origin": origin }
+    : CORS_BASE_HEADERS;
+}
 
 /**
  * Admin 2FA — Generates OTP (hashed), stores hash in DB.
@@ -22,6 +38,7 @@ async function sha256Hex(input: string): Promise<string> {
 }
 
 Deno.serve(async (req) => {
+  const corsHeaders = buildCors(req);
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
