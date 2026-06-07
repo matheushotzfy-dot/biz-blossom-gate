@@ -17,6 +17,16 @@ Deno.serve(async (req) => {
   try {
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+
+    // Require service-role bearer auth (called by pg_cron / internal jobs only).
+    const authHeader = req.headers.get("authorization") ?? "";
+    if (authHeader !== `Bearer ${serviceKey}`) {
+      return new Response(JSON.stringify({ error: "Unauthorized" }), {
+        status: 401,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
     const supabase = createClient(supabaseUrl, serviceKey);
 
     const now = new Date().toISOString();
@@ -88,12 +98,28 @@ Deno.serve(async (req) => {
         default: periodEnd.setMonth(periodEnd.getMonth() + 1);
       }
 
+      // Apply platform fee on renewal (same as PIX default: 1.99% + R$2.50)
+      // Custom user fees override
+      let pctFee = 0.0199;
+      let fixedFee = 2.5;
+      const { data: customFee } = await supabase
+        .from("custom_user_fees")
+        .select("transaction_percentage, transaction_fixed")
+        .eq("user_id", sub.seller_user_id)
+        .maybeSingle();
+      if (customFee) {
+        if (customFee.transaction_percentage != null) pctFee = Number(customFee.transaction_percentage) / 100;
+        if (customFee.transaction_fixed != null) fixedFee = Number(customFee.transaction_fixed);
+      }
+      const feeAmount = Math.round((plan.price * pctFee + fixedFee) * 100) / 100;
+      const netAmount = Math.max(0, Math.round((plan.price - feeAmount) * 100) / 100);
+
       // Create a renewal transaction
       const { error: txError } = await supabase.from("transactions").insert({
         user_id: sub.seller_user_id,
         amount: plan.price,
-        fee_amount: 0,
-        net_amount: plan.price,
+        fee_amount: feeAmount,
+        net_amount: netAmount,
         status: "completed",
         payment_method: "subscription",
         customer_email: sub.subscriber_email,

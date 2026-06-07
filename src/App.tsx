@@ -40,7 +40,7 @@ import MemberArea from "./pages/membros/MemberArea";
 import CoursePage from "./pages/membros/CoursePage";
 import AdminLogin from "./pages/admin/AdminLogin";
 import AdminDashboard from "./pages/admin/AdminDashboard";
-import AdminAuditoria from "./pages/admin/AdminAuditoria";
+
 import AdminConfiguracoes from "./pages/admin/AdminConfiguracoes";
 import PublicCheckout from "./pages/PublicCheckout";
 // NotFound removido — todas as rotas inválidas redirecionam para /dashboard
