@@ -26,6 +26,7 @@ function buildCors(req: Request): Record<string, string> {
  * Authenticates, checks role, returns session tokens.
  */
 Deno.serve(async (req) => {
+  const corsHeaders = buildCors(req);
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
