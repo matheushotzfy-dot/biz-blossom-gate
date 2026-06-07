@@ -33,7 +33,7 @@ import Cupons from "./pages/vendas/Cupons";
 import Assinaturas from "./pages/vendas/Assinaturas";
 import DashboardAfiliado from "./pages/vendas/DashboardAfiliado";
 import Suporte from "./pages/Suporte";
-import VendasHub from "./pages/VendasHub";
+// VendasHub deprecated — removed from routes/imports
 import Gamificacao from "./pages/Gamificacao";
 import Marketplace from "./pages/Marketplace";
 import MemberArea from "./pages/membros/MemberArea";

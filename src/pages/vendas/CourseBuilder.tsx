@@ -320,12 +320,13 @@ export default function CourseBuilder() {
  // ─── Lesson CRUD ───────────────────────────────────────────────
  const createLesson = async (moduleId: string) => {
  const mod = modules.find(m => m.id === moduleId);
- const { data } = await supabase.from("lessons").insert({
+ const { data, error } = await supabase.from("lessons").insert({
  module_id: moduleId, title: "Nova Aula", sort_order: mod?.lessons.length || 0
- }).select().single();
+ }).select().maybeSingle();
+ if (error || !data) { toast.error("Erro ao criar aula"); return; }
  toast.success("Aula criada!");
  await loadAll();
- if (data) selectLesson(data as Lesson);
+ selectLesson(data as Lesson);
  };
 
  const deleteLesson = async (id: string) => {

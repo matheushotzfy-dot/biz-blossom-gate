@@ -340,7 +340,7 @@ export default function ProductEditor() {
  if (isNew && !createdProductId) {
  const slug = crypto.randomUUID().slice(0, 8);
  const checkoutUrl = `${window.location.origin}/pay/${slug}`;
- const { data: newProduct, error } = await supabase.from("products").insert({ ...productData, status: "draft", user_id: user.id, checkout_url: checkoutUrl } as any).select("*").single();
+ const { data: newProduct, error } = await supabase.from("products").insert({ ...productData, status: "draft", user_id: user.id, checkout_url: checkoutUrl } as any).select("*").maybeSingle();
  if (error || !newProduct) { toast.error("Erro ao criar produto"); return; }
 
  if (deliveryType === "digital") {
@@ -432,7 +432,7 @@ export default function ProductEditor() {
  checkout_email_confirm: product.checkout_email_confirm,
  affiliate_enabled: product.affiliate_enabled,
  affiliate_commission: product.affiliate_commission,
- } as any).select("id").single();
+ } as any).select("id").maybeSingle();
  if (error) { toast.error("Erro ao duplicar"); return; }
  toast.success("Produto duplicado com sucesso!");
  invalidateAll(["products"]);
@@ -471,9 +471,9 @@ export default function ProductEditor() {
  if (orderBumps.some(b => b.bump_product_id === selectedBumpProduct)) { toast.error("Produto já adicionado"); return; }
  const { data, error } = await supabase.from("order_bumps").insert({
  product_id: productId!, bump_product_id: selectedBumpProduct, sort_order: orderBumps.length,
- }).select("id, bump_product_id").single();
- if (error) { toast.error("Erro ao adicionar"); return; }
- if (data) setOrderBumps(prev => [...prev, data]);
+ }).select("id, bump_product_id").maybeSingle();
+ if (error || !data) { toast.error("Erro ao adicionar"); return; }
+ setOrderBumps(prev => [...prev, data]);
  setSelectedBumpProduct("");
  toast.success("Order bump adicionado!");
  };
@@ -499,7 +499,7 @@ export default function ProductEditor() {
  product_id: productId!,
  user_id: user.id,
  is_active: true,
- }).select().single();
+ }).select().maybeSingle();
  if (error) {
  if (error.code === "23505") toast.error("Código já existe");
  else toast.error("Erro ao criar cupom");
@@ -2124,11 +2124,12 @@ function TabConteudo({ productId, isNew }: { productId?: string; isNew: boolean 
   const createCourse = async () => {
     if (!user || creating) return;
     setCreating(true);
-    const { data } = await supabase.from("courses").insert({
+    const { data, error } = await supabase.from("courses").insert({
       user_id: user.id, product_id: productId, title: "Novo Curso", is_published: false
-    } as any).select().single();
+    } as any).select().maybeSingle();
     setCreating(false);
-    if (data) navigate(`/vendas/conteudo/${data.id}/builder`);
+    if (error || !data) { toast.error("Erro ao criar curso"); return; }
+    navigate(`/vendas/conteudo/${data.id}/builder`);
   };
 
   if (isNew) {
