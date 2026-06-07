@@ -249,7 +249,7 @@ export default function CourseCreationWizard({ open, onOpenChange, products, edi
         return;
       }
 
-      const { data, error } = await supabase.from("courses").insert(payload).select().single();
+      const { data, error } = await supabase.from("courses").insert(payload).select().maybeSingle();
       if (error || !data) throw error ?? new Error("Falha ao criar.");
 
       if (modules.length > 0) {
