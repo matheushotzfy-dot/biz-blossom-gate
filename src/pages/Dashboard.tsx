@@ -498,7 +498,7 @@ export default function Dashboard() {
         </Card>
 
 
-        <div className="lg:col-span-2 grid grid-cols-2 gap-4 md:gap-6">
+        <div className="lg:col-span-2 grid grid-cols-1 sm:grid-cols-2 gap-4 md:gap-6">
           {financialCards.map((card) => (
             <StatCard 
               key={card.label}
@@ -604,7 +604,7 @@ export default function Dashboard() {
               <div className="group space-y-3">
                 <div className="flex justify-between items-center">
                   <div className="flex items-center gap-3">
-                    <div className="h-9 w-9 rounded-xl bg-[#32BCAD]/10 border border-[#32BCAD]/20 flex items-center justify-center text-[#32BCAD]">
+                    <div className="h-9 w-9 rounded-xl bg-info/10 border border-info/20 flex items-center justify-center text-info">
                       <Zap className="h-4.5 w-4.5" />
                     </div>
                     <div>
@@ -612,10 +612,10 @@ export default function Dashboard() {
                       <p className="text-[10px] font-bold text-muted-foreground/50">{pixApprovedCount} de {pixTotalCount} pagos</p>
                     </div>
                   </div>
-                  <span className="text-lg font-bold text-[#32BCAD]">{pixConversion.toFixed(0)}%</span>
+                  <span className="text-lg font-bold text-info">{pixConversion.toFixed(0)}%</span>
                 </div>
                 <div className="h-2 w-full bg-muted/30 rounded-full overflow-hidden border border-border/20">
-                  <div className="h-full bg-gradient-to-r from-[#32BCAD]/40 to-[#32BCAD] rounded-full transition-all duration-1000" style={{ width: `${pixConversion}%` }} />
+                  <div className="h-full bg-gradient-to-r from-info/40 to-info rounded-full transition-all duration-1000" style={{ width: `${pixConversion}%` }} />
                 </div>
               </div>
 

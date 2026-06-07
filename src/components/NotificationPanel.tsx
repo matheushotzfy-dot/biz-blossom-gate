@@ -96,7 +96,7 @@ export function NotificationPanel({ open, onClose }: Props) {
   <div className="fixed inset-0 z-[60] bg-black/10 backdrop-blur-[2px]" onClick={onClose} />
 
   {/* Panel */}
-  <div className="fixed right-4 top-14 z-[70] w-full max-w-[400px] animate-in slide-in-from-top-2 fade-in duration-200">
+  <div className="fixed left-2 right-2 top-14 z-[70] mx-auto sm:left-auto sm:right-4 sm:mx-0 sm:max-w-[400px] animate-in slide-in-from-top-2 fade-in duration-200">
   <div className="rounded-2xl border border-border/50 bg-card shadow-xl overflow-hidden">
   {/* Header */}
   <div className="flex items-center justify-between px-5 py-4 border-b border-border/20">

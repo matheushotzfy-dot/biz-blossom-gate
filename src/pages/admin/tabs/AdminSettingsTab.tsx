@@ -169,7 +169,7 @@ export default function AdminSettingsTab() {
  } else {
  const { data, error } = await supabase.from("retention_settings")
  .insert({ ...payload, user_id: null } as any)
- .select("id").single();
+ .select("id").maybeSingle();
  if (error || !data) { toast.error("Erro ao criar retenção global"); setSaving(false); return; }
  savedId = data.id;
  setGlobalRetention(prev => ({ ...prev, id: data.id }));

@@ -17,7 +17,7 @@ type HubTabsProps = {
 export function HubTabs({ tabs, active, onChange, className }: HubTabsProps) {
   return (
     <div className={cn("mx-auto w-full max-w-[1180px] pt-4 pb-0", className)}>
-      <div className="flex gap-1 overflow-x-auto rounded-2xl border border-border/25 bg-card/45 p-1.5 backdrop-blur-xl scrollbar-none w-fit shadow-sm">
+      <div className="flex gap-1 overflow-x-auto rounded-2xl border border-border/25 bg-card/45 p-1.5 backdrop-blur-xl scrollbar-none w-full sm:w-fit shadow-sm">
         {tabs.map((tab) => {
           const isActive = active === tab.id;
           return (

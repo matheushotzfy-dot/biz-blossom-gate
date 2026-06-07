@@ -128,9 +128,9 @@ export default function CheckoutSettingsDialog({ product, open, onOpenChange, on
  product_id: product.id,
  bump_product_id: selectedBumpProduct,
  sort_order: orderBumps.length,
- }).select("id, bump_product_id").single();
- if (error) { toast.error("Erro ao adicionar"); return; }
- if (data) setOrderBumps(prev => [...prev, data]);
+ }).select("id, bump_product_id").maybeSingle();
+ if (error || !data) { toast.error("Erro ao adicionar"); return; }
+ setOrderBumps(prev => [...prev, data]);
  setSelectedBumpProduct("");
  toast.success("Order bump adicionado!");
  };
