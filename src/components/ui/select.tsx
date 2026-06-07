@@ -114,9 +114,9 @@ const SelectItem = React.forwardRef<
  )}
  {...props}
  >
- <span className="absolute left-2.5 flex h-4.5 w-4.5 items-center justify-center">
+ <span className="absolute left-2.5 flex h-[18px] w-[18px] items-center justify-center">
  <SelectPrimitive.ItemIndicator>
- <div className="h-4.5 w-4.5 rounded-md bg-primary/15 flex items-center justify-center">
+ <div className="h-[18px] w-[18px] rounded-md bg-primary/15 flex items-center justify-center">
  <Check className="h-3 w-3 text-primary" />
  </div>
  </SelectPrimitive.ItemIndicator>

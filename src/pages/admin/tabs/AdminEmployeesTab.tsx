@@ -109,7 +109,7 @@ export default function AdminEmployeesTab({ profiles, onReload }: Props) {
  <div>
  <h2 className="text-xl font-bold text-foreground flex items-center gap-2.5">
  <div className="h-9 w-9 rounded-xl bg-gradient-to-br from-indigo-500 to-violet-600 flex items-center justify-center shadow-lg shadow-indigo-500/20">
- <UserCog className="h-4.5 w-4.5 text-white" />
+ <UserCog className="h-[18px] w-[18px] text-white" />
  </div>
  Staff / Funcionários
  </h2>
@@ -148,7 +148,7 @@ export default function AdminEmployeesTab({ profiles, onReload }: Props) {
  <div className="rounded-2xl border border-border bg-card/50 p-5">
  <div className="flex items-start gap-3">
  <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-amber-500/10 to-orange-500/10 border border-amber-500/15 flex items-center justify-center shrink-0">
- <Mail className="h-4.5 w-4.5 text-amber-400" />
+ <Mail className="h-[18px] w-[18px] text-amber-400" />
  </div>
  <div>
  <h3 className="text-[13px] font-semibold text-foreground">Como o Staff faz login?</h3>

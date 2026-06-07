@@ -217,7 +217,7 @@ export default function AdminManagersTab({ profiles, onReload }: Props) {
  <div>
  <h2 className="text-xl font-bold text-foreground flex items-center gap-2.5">
  <div className="h-9 w-9 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center shadow-lg shadow-emerald-500/20">
- <Shield className="h-4.5 w-4.5 text-white" />
+ <Shield className="h-[18px] w-[18px] text-white" />
  </div>
  Gerentes de Contas
  </h2>
@@ -262,7 +262,7 @@ export default function AdminManagersTab({ profiles, onReload }: Props) {
  <div className="rounded-2xl border border-border bg-card/50 p-5">
  <div className="flex items-start gap-3">
  <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-emerald-500/10 to-teal-500/10 border border-emerald-500/15 flex items-center justify-center shrink-0">
- <Mail className="h-4.5 w-4.5 text-emerald-400" />
+ <Mail className="h-[18px] w-[18px] text-emerald-400" />
  </div>
  <div>
  <h3 className="text-[13px] font-semibold text-foreground">Como o Gerente faz login?</h3>
