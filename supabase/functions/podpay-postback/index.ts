@@ -395,34 +395,45 @@ Deno.serve(async (req) => {
       }
     }
 
-    // Fallback: update by product_id if no podpay_payment_id match
-    // FIX: Use .order + .limit(1) to avoid updating multiple pending transactions
+    // Fallback: update by product_id + amount + customer_email to avoid wrong-customer match.
+    // Only used when no podpay_payment_id correlation exists. Requires strict triple-match.
     if (!transactionId && externalRef) {
-      const { data: pendingTx } = await supabase
-        .from('transactions')
-        .select('id')
-        .eq('product_id', externalRef)
-        .eq('status', 'pending')
-        .order('created_at', { ascending: false })
-        .limit(1)
-        .maybeSingle();
+      const fallbackEmail = (body?.customer?.email ?? body?.payer?.email ?? '').toString().trim().toLowerCase();
+      const fallbackAmount = Number(body?.amount ?? body?.value ?? body?.transaction?.amount ?? NaN);
 
-      if (pendingTx) {
-        const updateData: Record<string, unknown> = { status: ourStatus };
-        if (podpayPaymentId) updateData.podpay_payment_id = podpayPaymentId;
-        if (podpayEventId) updateData.podpay_event_id = podpayEventId;
-
-        const { error } = await supabase
+      if (fallbackEmail && Number.isFinite(fallbackAmount) && fallbackAmount > 0) {
+        const { data: pendingTx } = await supabase
           .from('transactions')
-          .update(updateData)
-          .eq('id', pendingTx.id);
+          .select('id')
+          .eq('product_id', externalRef)
+          .eq('status', 'pending')
+          .eq('customer_email', fallbackEmail)
+          .eq('amount', fallbackAmount)
+          .order('created_at', { ascending: false })
+          .limit(1)
+          .maybeSingle();
 
-        if (error) {
-          safeLog('Error updating transaction by product_id', { productId: externalRef, error: error.message });
+        if (pendingTx) {
+          const updateData: Record<string, unknown> = { status: ourStatus };
+          if (podpayPaymentId) updateData.podpay_payment_id = podpayPaymentId;
+          if (podpayEventId) updateData.podpay_event_id = podpayEventId;
+
+          const { error } = await supabase
+            .from('transactions')
+            .update(updateData)
+            .eq('id', pendingTx.id);
+
+          if (error) {
+            safeLog('Error updating transaction by strict fallback', { productId: externalRef, error: error.message });
+          } else {
+            transactionId = pendingTx.id;
+            safeLog('Transaction updated via strict fallback (product+email+amount)', { transactionId: pendingTx.id, status: ourStatus });
+          }
         } else {
-          transactionId = pendingTx.id;
-          safeLog('Transaction updated via product_id fallback', { transactionId: pendingTx.id, status: ourStatus });
+          safeLog('Strict fallback found no match — postback ignored to prevent wrong-customer credit', { productId: externalRef });
         }
+      } else {
+        safeLog('Fallback skipped — missing email or amount in postback', { productId: externalRef });
       }
     }
 
