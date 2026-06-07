@@ -249,12 +249,12 @@ export default function Vendas() {
             variant="outline"
             size="sm"
             onClick={togglePrivacy}
-            className="h-10 px-4 rounded-xl border-border/60 hover:bg-muted/50 font-bold text-xs uppercase tracking-wider gap-2"
+            className="h-10 px-3 sm:px-4 rounded-xl border-border/60 hover:bg-muted/50 font-bold text-xs uppercase tracking-wider gap-2"
           >
             {privacyHidden ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-            Privacidade
+            <span className="hidden sm:inline">Privacidade</span>
           </Button>
-          <Button className="h-10 px-6 rounded-xl font-black text-xs uppercase tracking-widest gap-2">
+          <Button className="h-10 px-4 sm:px-6 rounded-xl font-black text-xs uppercase tracking-widest gap-2">
             <Download className="h-4 w-4" /> Exportar
           </Button>
         </div>
