@@ -168,7 +168,7 @@ export default function Vendas() {
             Gestão completa de transações e recebíveis
           </p>
         </div>
-        <div className="flex items-center gap-2 flex-wrap">
+        <div className="flex items-center gap-2 flex-wrap w-full md:w-auto">
           {/* Period selector — institutional, segmented */}
           <div className="inline-flex items-stretch h-10 rounded-xl border border-border bg-card overflow-hidden">
             <div className="flex items-stretch divide-x divide-border">
