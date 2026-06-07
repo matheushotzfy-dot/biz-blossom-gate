@@ -127,6 +127,38 @@ export default function Vendas() {
 
   useEffect(() => { setPage(1); }, [search, range]);
 
+  const exportCSV = () => {
+    if (!filtered.length) return;
+    const headers = ["ID","Data","Cliente","Email","Documento","Produto","Método","Status","Valor Bruto","Taxa","Valor Líquido"];
+    const escape = (v: any) => {
+      const s = v == null ? "" : String(v);
+      return /[",\n;]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
+    };
+    const rows = filtered.map((t) => [
+      t.id,
+      new Date(t.created_at).toLocaleString("pt-BR"),
+      t.customer_name ?? "",
+      t.customer_email ?? "",
+      t.customer_document ?? "",
+      prodsMap[t.product_id ?? ""] ?? "",
+      t.payment_method ?? "",
+      t.status ?? "",
+      Number(t.amount).toFixed(2),
+      Number(t.fee_amount ?? 0).toFixed(2),
+      Number(t.net_amount ?? 0).toFixed(2),
+    ].map(escape).join(";"));
+    const csv = "\uFEFF" + [headers.join(";"), ...rows].join("\n");
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `vendas_${new Date().toISOString().slice(0,10)}.csv`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  };
+
   const stats = useMemo(() => {
     const approved = filteredByDate.filter(t => t.status === "completed");
     const revenue = approved.reduce((acc, t) => acc + Number(t.net_amount), 0);
@@ -254,7 +286,7 @@ export default function Vendas() {
             {privacyHidden ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
             <span className="hidden sm:inline">Privacidade</span>
           </Button>
-          <Button className="h-10 px-4 sm:px-6 rounded-xl font-black text-xs uppercase tracking-widest gap-2">
+          <Button onClick={exportCSV} disabled={!filtered.length} className="h-10 px-4 sm:px-6 rounded-xl font-black text-xs uppercase tracking-widest gap-2">
             <Download className="h-4 w-4" /> Exportar
           </Button>
         </div>
