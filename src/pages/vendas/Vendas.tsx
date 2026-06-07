@@ -37,30 +37,27 @@ const METHODS_MAP: Record<string, { label: string; icon: any }> = {
 
 const PAGE_SIZE = 25;
 
-type PresetId = "today" | "yesterday" | "7d" | "14d" | "30d" | "lastMonth" | "custom";
+type PresetId = "today" | "7d" | "15d" | "30d" | "custom";
 
 const buildPreset = (id: PresetId): DateRange => {
   const now = new Date();
   switch (id) {
     case "today": return { from: startOfDay(now), to: endOfDay(now) };
-    case "yesterday": { const y = subDays(now, 1); return { from: startOfDay(y), to: endOfDay(y) }; }
     case "7d": return { from: startOfDay(subDays(now, 6)), to: endOfDay(now) };
-    case "14d": return { from: startOfDay(subDays(now, 13)), to: endOfDay(now) };
+    case "15d": return { from: startOfDay(subDays(now, 14)), to: endOfDay(now) };
     case "30d": return { from: startOfDay(subDays(now, 29)), to: endOfDay(now) };
-    case "lastMonth": { const lm = subMonths(now, 1); return { from: startOfMonth(lm), to: endOfMonth(lm) }; }
     default: return { from: startOfDay(now), to: endOfDay(now) };
   }
 };
 
 const PRESETS: { id: PresetId; label: string }[] = [
   { id: "today", label: "Hoje" },
-  { id: "yesterday", label: "Ontem" },
   { id: "7d", label: "Últimos 7 dias" },
-  { id: "14d", label: "Últimos 14 dias" },
+  { id: "15d", label: "Últimos 15 dias" },
   { id: "30d", label: "Últimos 30 dias" },
-  { id: "lastMonth", label: "Mês passado" },
   { id: "custom", label: "Personalizado" },
 ];
+
 
 export default function Vendas() {
   const { data: transactions = [] } = useTransactions();
@@ -174,23 +171,14 @@ export default function Vendas() {
         <div className="flex items-center gap-2 flex-wrap">
           {/* Period selector — institutional, segmented */}
           <div className="inline-flex items-stretch h-10 rounded-xl border border-border bg-card overflow-hidden">
-            <div className="hidden sm:flex items-center gap-2 px-3 border-r border-border bg-secondary/30">
-              <span className="relative flex h-1.5 w-1.5">
-                <span className="absolute inline-flex h-full w-full rounded-full bg-emerald-500/60 animate-ping" />
-                <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-emerald-500" />
-              </span>
-              <span className="text-[9px] font-black uppercase tracking-[0.22em] text-muted-foreground/70">Período</span>
-            </div>
             <div className="flex items-stretch divide-x divide-border">
               {PRESETS.filter(p => p.id !== "custom").map((p) => {
                 const isActive = preset === p.id;
                 const short =
                   p.id === "today" ? "Hoje" :
-                  p.id === "yesterday" ? "Ontem" :
                   p.id === "7d" ? "7D" :
-                  p.id === "14d" ? "14D" :
-                  p.id === "30d" ? "30D" :
-                  "Mês ant.";
+                  p.id === "15d" ? "15D" :
+                  "30D";
                 return (
                   <button
                     key={p.id}
@@ -207,6 +195,7 @@ export default function Vendas() {
                   </button>
                 );
               })}
+
               <Popover open={dateOpen} onOpenChange={setDateOpen}>
                 <PopoverTrigger asChild>
                   <button
