@@ -254,7 +254,7 @@ export default function Vendas() {
             {privacyHidden ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
             <span className="hidden sm:inline">Privacidade</span>
           </Button>
-          <Button className="h-10 px-4 sm:px-6 rounded-xl font-black text-xs uppercase tracking-widest gap-2">
+          <Button onClick={exportCSV} disabled={!filtered.length} className="h-10 px-4 sm:px-6 rounded-xl font-black text-xs uppercase tracking-widest gap-2">
             <Download className="h-4 w-4" /> Exportar
           </Button>
         </div>
