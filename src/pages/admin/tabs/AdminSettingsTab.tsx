@@ -155,16 +155,27 @@ export default function AdminSettingsTab() {
  const saveGlobalRetention = async () => {
  if (!user) return;
  setSaving(true);
- const { error } = await supabase.from("retention_settings").update({
+ const payload = {
  pix_retention_pct: Number(globalRetention.pix_retention_pct),
  card_retention_pct: Number(globalRetention.card_retention_pct),
  retention_days: Number(globalRetention.retention_days),
  updated_by: user.id,
  updated_at: new Date().toISOString(),
- }).eq("id", globalRetention.id);
+ };
+ let savedId = globalRetention.id;
+ if (globalRetention.id) {
+ const { error } = await supabase.from("retention_settings").update(payload).eq("id", globalRetention.id);
  if (error) { toast.error("Erro ao salvar retenção"); setSaving(false); return; }
+ } else {
+ const { data, error } = await supabase.from("retention_settings")
+ .insert({ ...payload, user_id: null } as any)
+ .select("id").single();
+ if (error || !data) { toast.error("Erro ao criar retenção global"); setSaving(false); return; }
+ savedId = data.id;
+ setGlobalRetention(prev => ({ ...prev, id: data.id }));
+ }
  toast.success("Retenção global salva!");
- await logAdminAction("update_global_retention", "retention_settings", globalRetention.id, globalRetention as any);
+ await logAdminAction("update_global_retention", "retention_settings", savedId, payload as any);
  setSaving(false);
  };
 
