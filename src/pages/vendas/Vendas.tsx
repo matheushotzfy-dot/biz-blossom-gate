@@ -321,9 +321,41 @@ export default function Vendas() {
             {privacyHidden ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
             <span className="hidden sm:inline">Privacidade</span>
           </Button>
-          <Button onClick={exportCSV} disabled={!filtered.length} className="h-10 px-4 sm:px-6 rounded-xl font-black text-xs uppercase tracking-widest gap-2">
-            <Download className="h-4 w-4" /> Exportar
-          </Button>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button disabled={!filtered.length} className="h-10 px-4 sm:px-6 rounded-xl font-black text-xs uppercase tracking-widest gap-2">
+                <Download className="h-4 w-4" /> Exportar
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-64">
+              <DropdownMenuLabel className="text-[10px] font-black uppercase tracking-[0.14em] text-muted-foreground">
+                Exportar dados da tabela
+              </DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem onClick={exportXLSX} className="gap-3 py-2.5 cursor-pointer">
+                <div className="h-8 w-8 rounded-md bg-success/10 border border-success/20 flex items-center justify-center text-success font-black text-[10px]">
+                  XLSX
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className="text-xs font-bold">Excel (.xlsx)</div>
+                  <div className="text-[10px] text-muted-foreground">Planilha formatada</div>
+                </div>
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={exportCSV} className="gap-3 py-2.5 cursor-pointer">
+                <div className="h-8 w-8 rounded-md bg-info/10 border border-info/20 flex items-center justify-center text-info font-black text-[10px]">
+                  CSV
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className="text-xs font-bold">CSV (.csv)</div>
+                  <div className="text-[10px] text-muted-foreground">Compatível com qualquer ferramenta</div>
+                </div>
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <div className="px-2 py-1.5 text-[10px] text-muted-foreground">
+                {filtered.length} {filtered.length === 1 ? "linha" : "linhas"} • Período atual
+              </div>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
       </div>
 
