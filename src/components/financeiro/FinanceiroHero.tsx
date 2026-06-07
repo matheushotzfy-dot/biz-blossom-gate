@@ -32,8 +32,8 @@ export function FinanceiroHero({
         className="pointer-events-none absolute -top-24 -left-20 h-[280px] w-[520px] rounded-full opacity-60"
         style={{ background: "radial-gradient(closest-side, hsl(var(--primary) / 0.10), transparent 70%)" }}
       />
-      <div className="relative flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
-        <div className="space-y-3 min-w-0">
+      <div className="relative flex flex-col gap-4 sm:gap-5 sm:flex-row sm:items-end sm:justify-between">
+        <div className="space-y-2 sm:space-y-3 min-w-0">
           {(status || eyebrow) && (
             <div className="inline-flex items-center gap-2 rounded-full border border-border/50 bg-card/60 px-2.5 py-1">
               {status && (
@@ -44,14 +44,14 @@ export function FinanceiroHero({
               </span>
             </div>
           )}
-          <h1 className="font-display text-[40px] sm:text-[52px] font-black leading-[0.95] tracking-[-0.03em] text-foreground">
+          <h1 className="font-display text-[28px] sm:text-[40px] lg:text-[52px] font-black leading-[0.95] tracking-[-0.03em] text-foreground break-words">
             {title}
           </h1>
           {subtitle && (
-            <p className="text-[13px] text-muted-foreground/80 max-w-xl leading-relaxed">{subtitle}</p>
+            <p className="text-[12px] sm:text-[13px] text-muted-foreground/80 max-w-xl leading-relaxed">{subtitle}</p>
           )}
         </div>
-        {actions && <div className="flex items-center gap-2 shrink-0">{actions}</div>}
+        {actions && <div className="flex flex-wrap items-center gap-2 sm:shrink-0">{actions}</div>}
       </div>
     </div>
   );
