@@ -320,12 +320,13 @@ export default function CourseBuilder() {
  // ─── Lesson CRUD ───────────────────────────────────────────────
  const createLesson = async (moduleId: string) => {
  const mod = modules.find(m => m.id === moduleId);
- const { data } = await supabase.from("lessons").insert({
+ const { data, error } = await supabase.from("lessons").insert({
  module_id: moduleId, title: "Nova Aula", sort_order: mod?.lessons.length || 0
- }).select().single();
+ }).select().maybeSingle();
+ if (error || !data) { toast.error("Erro ao criar aula"); return; }
  toast.success("Aula criada!");
  await loadAll();
- if (data) selectLesson(data as Lesson);
+ selectLesson(data as Lesson);
  };
 
  const deleteLesson = async (id: string) => {
@@ -336,7 +337,7 @@ export default function CourseBuilder() {
  const duplicateLesson = async (lesson: Lesson) => {
  const mod = modules.find(m => m.lessons.some(l => l.id === lesson.id));
  if (!mod) return;
- const { data } = await supabase.from("lessons").insert({
+ const { data, error } = await supabase.from("lessons").insert({
  module_id: lesson.module_id,
  title: `${lesson.title} (cópia)`,
  description: lesson.description,
@@ -345,10 +346,11 @@ export default function CourseBuilder() {
  is_free: lesson.is_free,
  drip_days: lesson.drip_days,
  sort_order: mod.lessons.length,
- }).select().single();
+ }).select().maybeSingle();
+ if (error || !data) { toast.error("Erro ao duplicar aula"); return; }
  toast.success("Aula duplicada!");
  await loadAll();
- if (data) selectLesson(data as Lesson);
+ selectLesson(data as Lesson);
  };
 
  // ─── Course Settings ───────────────────────────────────────────
