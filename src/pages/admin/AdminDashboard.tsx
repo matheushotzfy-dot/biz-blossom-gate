@@ -405,7 +405,7 @@ export default function AdminDashboard() {
         {/* Logo */}
         <div className="relative h-[64px] flex items-center px-4 gap-3 border-b border-white/[0.06] shrink-0">
           <div className={cn("relative h-10 w-10 rounded-xl bg-gradient-to-br flex items-center justify-center ring-1 ring-white/15 shrink-0", accentClasses.gradient, accentClasses.shadow)}>
-            <Rocket className="h-4.5 w-4.5 text-white drop-shadow-sm" />
+            <Rocket className="h-[18px] w-[18px] text-white drop-shadow-sm" />
             <div className="absolute inset-0 rounded-xl bg-gradient-to-t from-transparent to-white/[0.12]" />
           </div>
           {!sidebarCollapsed && (
