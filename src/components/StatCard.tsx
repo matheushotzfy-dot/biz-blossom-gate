@@ -71,18 +71,18 @@ export function StatCard({
   return (
     <div 
       className={cn(
-        "group relative overflow-hidden rounded-2xl border border-border/60 bg-card p-5 transition-all duration-300 hover:border-primary/40 hover:shadow-lg hover:shadow-black/5 animate-in fade-in slide-in-from-bottom-2",
+        "group relative overflow-hidden rounded-2xl border border-border/60 bg-card p-3 sm:p-5 transition-all duration-300 hover:border-primary/40 hover:shadow-lg hover:shadow-black/5 animate-in fade-in slide-in-from-bottom-2",
         className
       )}
       style={{ animationDelay: `${delay}ms` }}
     >
-      <div className="flex items-start justify-between gap-4">
-        <div className="space-y-3 flex-1 min-w-0">
+      <div className="flex items-start justify-between gap-2 sm:gap-4">
+        <div className="space-y-2 sm:space-y-3 flex-1 min-w-0">
           <div className="space-y-1">
-            <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground/60 leading-none truncate">
+            <p className="text-[9px] sm:text-[10px] font-bold uppercase tracking-[0.16em] sm:tracking-[0.2em] text-muted-foreground/60 leading-tight break-words">
               {title}
             </p>
-            <h3 className="text-2xl font-display font-bold text-foreground tracking-[-0.02em] tabular-nums truncate">
+            <h3 className="text-lg sm:text-2xl font-display font-bold text-foreground tracking-[-0.02em] tabular-nums break-all leading-tight">
               {value}
             </h3>
           </div>
@@ -100,7 +100,7 @@ export function StatCard({
               </span>
             )}
             {description && (
-              <p className="text-[11px] font-medium text-muted-foreground/70 truncate">
+              <p className="text-[10px] sm:text-[11px] font-medium text-muted-foreground/70 leading-tight">
                 {description}
               </p>
             )}
@@ -109,10 +109,10 @@ export function StatCard({
 
         {Icon && (
           <div className={cn(
-            "h-8 w-8 rounded-lg flex items-center justify-center border transition-all duration-300 group-hover:scale-110 group-hover:shadow-sm shrink-0",
+            "h-7 w-7 sm:h-8 sm:w-8 rounded-lg flex items-center justify-center border transition-all duration-300 group-hover:scale-110 group-hover:shadow-sm shrink-0",
             c.iconBg
           )}>
-            <Icon className="h-4 w-4" strokeWidth={2.5} />
+            <Icon className="h-3.5 w-3.5 sm:h-4 sm:w-4" strokeWidth={2.5} />
           </div>
         )}
       </div>
