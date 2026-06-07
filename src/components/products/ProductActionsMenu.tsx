@@ -66,28 +66,28 @@ export function ProductActionsMenu({
 }: ProductActionsMenuProps) {
   const sections: Section[] = [
     {
-      title: "Gestão",
+      title: "\u200B",
       rows: [
-        { icon: Pencil,         label: "Editar produto",   hint: "Detalhes e preços", action: () => onEditProduct(product) },
-        { icon: Palette,        label: "Checkout builder", hint: "Personalizar página", action: () => window.location.assign(`/vendas/produtos/${product.id}/checkout-builder`) },
-        { icon: GraduationCap,  label: "Área de membros",  hint: "Conteúdo do aluno",   action: () => onOpenMembers(product) },
+        { icon: Pencil,         label: "Editar produto",   hint: "\u200B", action: () => onEditProduct(product) },
+        { icon: Palette,        label: "Checkout builder", hint: "\u200B", action: () => window.location.assign(`/vendas/produtos/${product.id}/checkout-builder`) },
+        { icon: GraduationCap,  label: "Área de membros",  hint: "\u200B",   action: () => onOpenMembers(product) },
       ],
     },
     {
-      title: "Distribuição",
+      title: "\u200B",
       rows: [
         ...(product.checkout_url
           ? [
               {
                 icon: copied ? CheckCircle2 : Copy,
                 label: copied ? "Link copiado" : "Copiar checkout",
-                hint: copied ? "Pronto para colar" : "URL pública",
+                hint: copied ? "Pronto para colar" : "\u200B",
                 action: () => onCopyLink(product),
               },
-              { icon: ExternalLink, label: "Abrir checkout", hint: "Em nova aba", action: () => onOpenCheckout(product) },
+              { icon: ExternalLink, label: "Abrir checkout", hint: "\u200B", action: () => onOpenCheckout(product) },
             ]
           : []),
-        { icon: Crosshair, label: "Pixels & tracking", hint: "Meta, Google, TikTok", action: () => onOpenPixels(product) },
+        { icon: Crosshair, label: "Pixels & tracking", hint: "\u200B", action: () => onOpenPixels(product) },
       ],
     },
   ];
