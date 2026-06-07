@@ -305,15 +305,15 @@ export default function CourseCreationWizard({ open, onOpenChange, products, edi
 
           {/* Stepper */}
           <div className="border-t border-border bg-card-elevated">
-            <div className="mx-auto max-w-[920px] px-6 py-3 flex items-center gap-1">
+            <div className="mx-auto max-w-[920px] px-3 sm:px-6 py-3 flex items-center gap-1">
               {STEPS.map((s, i) => {
                 const isDone = step > s.n;
                 const isCurrent = step === s.n;
                 return (
-                  <div key={s.n} className="flex items-center gap-1 flex-1">
+                  <div key={s.n} className="flex items-center gap-1 flex-1 min-w-0">
                     <div
                       className={cn(
-                        "flex items-center gap-2.5 flex-1 px-3 py-2.5 border transition-all",
+                        "flex items-center gap-2 sm:gap-2.5 flex-1 min-w-0 px-2 sm:px-3 py-2 sm:py-2.5 border transition-all",
                         isCurrent && "border-primary bg-primary/[0.06]",
                         isDone && "border-success/30 bg-success/[0.04]",
                         !isCurrent && !isDone && "border-border bg-background"
@@ -321,7 +321,7 @@ export default function CourseCreationWizard({ open, onOpenChange, products, edi
                     >
                       <div
                         className={cn(
-                          "h-7 w-7 flex items-center justify-center text-[11px] font-black tabular-nums border transition-all",
+                          "h-6 w-6 sm:h-7 sm:w-7 shrink-0 flex items-center justify-center text-[11px] font-black tabular-nums border transition-all",
                           isCurrent && "border-primary bg-primary text-primary-foreground",
                           isDone && "border-success bg-success text-success-foreground",
                           !isCurrent && !isDone && "border-border bg-card text-muted-foreground"
@@ -329,17 +329,25 @@ export default function CourseCreationWizard({ open, onOpenChange, products, edi
                       >
                         {isDone ? <Check className="h-3.5 w-3.5" /> : s.n}
                       </div>
-                      <div className="min-w-0">
+                      <div className="min-w-0 hidden sm:block">
                         <span
                           className={cn(
-                            "text-[12px] font-bold block",
+                            "text-[12px] font-bold block truncate",
                             isCurrent ? "text-foreground" : "text-muted-foreground"
                           )}
                         >
                           {s.label}
                         </span>
-                        <span className="text-[10px] text-muted-foreground/60 hidden sm:block">{s.helper}</span>
+                        <span className="text-[10px] text-muted-foreground/60 hidden md:block truncate">{s.helper}</span>
                       </div>
+                      <span
+                        className={cn(
+                          "sm:hidden text-[11px] font-bold truncate",
+                          isCurrent ? "text-foreground" : "text-muted-foreground"
+                        )}
+                      >
+                        {s.label}
+                      </span>
                     </div>
                     {i < STEPS.length - 1 && (
                       <div className={cn("h-px w-2 shrink-0", isDone ? "bg-success" : "bg-border")} />
