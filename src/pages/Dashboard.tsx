@@ -278,16 +278,7 @@ export default function Dashboard() {
 
         {/* Period selector — institutional, dense, Bloomberg-style */}
         <div className="inline-flex items-stretch h-11 rounded-xl border border-border bg-card overflow-hidden">
-          {/* Eyebrow with live pulse */}
-          <div className="hidden sm:flex items-center gap-2 px-3.5 border-r border-border bg-secondary/30">
-            <span className="relative flex h-1.5 w-1.5">
-              <span className="absolute inline-flex h-full w-full rounded-full bg-success/60 animate-ping" />
-              <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-success" />
-            </span>
-            <span className="text-[9px] font-display font-black uppercase tracking-[0.22em] text-muted-foreground/70">
-              Período
-            </span>
-          </div>
+
 
           {/* Segments */}
           <div className="flex items-stretch divide-x divide-border">
