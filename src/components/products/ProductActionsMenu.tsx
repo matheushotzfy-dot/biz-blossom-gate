@@ -1,13 +1,14 @@
 import {
   Copy,
+  CheckCircle2,
   Crosshair,
   ExternalLink,
   MoreHorizontal,
   Palette,
   Pencil,
-  Star,
+  GraduationCap,
   Trash2,
-  ChevronRight,
+  Package,
   type LucideIcon,
 } from "lucide-react";
 
@@ -15,7 +16,6 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { cn } from "@/lib/utils";
@@ -42,8 +42,14 @@ type ProductActionsMenuProps = ProductMenuHandlers & {
 type Row = {
   icon: LucideIcon;
   label: string;
+  hint?: string;
   action: () => void;
   variant?: "default" | "destructive";
+};
+
+type Section = {
+  title: string;
+  rows: Row[];
 };
 
 export function ProductActionsMenu({
@@ -58,47 +64,83 @@ export function ProductActionsMenu({
   onOpenMembers,
   onOpenPixels,
 }: ProductActionsMenuProps) {
-  const groupManagement: Row[] = [
-    { icon: Pencil,  label: "Editar produto",   action: () => onEditProduct(product) },
-    { icon: Palette, label: "Checkout builder", action: () => window.location.assign(`/vendas/produtos/${product.id}/checkout-builder`) },
-    { icon: Star,    label: "Área de membros",  action: () => onOpenMembers(product) },
-  ];
-
-  const groupDistribution: Row[] = [
-    ...(product.checkout_url
-      ? [
-          { icon: copied ? Copy : Copy, label: copied ? "Link copiado" : "Copiar checkout", action: () => onCopyLink(product) },
-          { icon: ExternalLink, label: "Abrir checkout",       action: () => onOpenCheckout(product) },
-        ]
-      : []),
-    { icon: Crosshair, label: "Pixels & tracking", action: () => onOpenPixels(product) },
+  const sections: Section[] = [
+    {
+      title: "Gestão",
+      rows: [
+        { icon: Pencil,         label: "Editar produto",   hint: "Detalhes e preços", action: () => onEditProduct(product) },
+        { icon: Palette,        label: "Checkout builder", hint: "Personalizar página", action: () => window.location.assign(`/vendas/produtos/${product.id}/checkout-builder`) },
+        { icon: GraduationCap,  label: "Área de membros",  hint: "Conteúdo do aluno",   action: () => onOpenMembers(product) },
+      ],
+    },
+    {
+      title: "Distribuição",
+      rows: [
+        ...(product.checkout_url
+          ? [
+              {
+                icon: copied ? CheckCircle2 : Copy,
+                label: copied ? "Link copiado" : "Copiar checkout",
+                hint: copied ? "Pronto para colar" : "URL pública",
+                action: () => onCopyLink(product),
+              },
+              { icon: ExternalLink, label: "Abrir checkout", hint: "Em nova aba", action: () => onOpenCheckout(product) },
+            ]
+          : []),
+        { icon: Crosshair, label: "Pixels & tracking", hint: "Meta, Google, TikTok", action: () => onOpenPixels(product) },
+      ],
+    },
   ];
 
   const labeledTrigger = Boolean(triggerLabel);
 
-  const renderRow = (row: Row) => (
-    <DropdownMenuItem
-      key={row.label}
-      onClick={row.action}
-      className={cn(
-        "group flex h-9 cursor-pointer items-center gap-3 rounded-lg px-2.5 text-[13px] font-medium transition-all duration-200 outline-none",
-        row.variant === "destructive"
-          ? "text-destructive focus:bg-destructive/10 data-[highlighted]:bg-destructive/10"
-          : "text-foreground/90 focus:bg-secondary/80 focus:text-foreground data-[highlighted]:bg-secondary/80 data-[highlighted]:text-foreground"
-      )}
-    >
-      <div className={cn(
-        "flex h-5 w-5 items-center justify-center rounded-md transition-colors",
-        row.variant === "destructive" ? "text-destructive/80 group-hover:text-destructive" : "text-muted-foreground/60 group-hover:text-foreground group-data-[highlighted]:text-foreground"
-      )}>
-        <row.icon className="h-3.5 w-3.5" strokeWidth={2} />
-      </div>
-      
-      <span className="flex-1 truncate tracking-tight">{row.label}</span>
-      
-      <ChevronRight className="ml-auto h-3 w-3 text-muted-foreground/30 opacity-0 transition-all group-hover:translate-x-0.5 group-hover:opacity-100 group-data-[highlighted]:opacity-100" />
-    </DropdownMenuItem>
-  );
+  const renderRow = (row: Row) => {
+    const isDestructive = row.variant === "destructive";
+    return (
+      <DropdownMenuItem
+        key={row.label}
+        onClick={row.action}
+        className={cn(
+          "group/row relative flex h-12 cursor-pointer items-center gap-3 rounded-xl px-2.5 outline-none transition-colors duration-150",
+          isDestructive
+            ? "focus:bg-destructive/[0.08] data-[highlighted]:bg-destructive/[0.08]"
+            : "focus:bg-muted/40 data-[highlighted]:bg-muted/40",
+        )}
+      >
+        <div
+          className={cn(
+            "flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border transition-colors",
+            isDestructive
+              ? "border-destructive/15 bg-destructive/[0.06] text-destructive"
+              : "border-border/60 bg-muted/30 text-muted-foreground group-hover/row:border-primary/30 group-hover/row:bg-primary/[0.08] group-hover/row:text-primary group-data-[highlighted]/row:border-primary/30 group-data-[highlighted]/row:bg-primary/[0.08] group-data-[highlighted]/row:text-primary",
+          )}
+        >
+          <row.icon className="h-3.5 w-3.5" strokeWidth={2.25} />
+        </div>
+
+        <div className="flex min-w-0 flex-1 flex-col">
+          <span
+            className={cn(
+              "truncate text-[12px] font-black uppercase tracking-[0.08em] leading-none",
+              isDestructive ? "text-destructive" : "text-foreground",
+            )}
+          >
+            {row.label}
+          </span>
+          {row.hint && (
+            <span
+              className={cn(
+                "mt-1 truncate text-[10px] font-bold uppercase tracking-[0.14em] leading-none",
+                isDestructive ? "text-destructive/60" : "text-muted-foreground/50",
+              )}
+            >
+              {row.hint}
+            </span>
+          )}
+        </div>
+      </DropdownMenuItem>
+    );
+  };
 
   return (
     <DropdownMenu modal={false}>
@@ -107,15 +149,15 @@ export function ProductActionsMenu({
           type="button"
           onClick={(e) => e.stopPropagation()}
           className={cn(
-            "group relative flex items-center justify-center rounded-xl border border-border/40 bg-card/50 transition-all duration-300",
+            "group relative flex items-center justify-center rounded-xl border border-border/60 bg-card transition-all duration-200",
             labeledTrigger
-              ? "h-10 gap-2 px-4 text-[12px] font-bold uppercase tracking-wider text-foreground/80 hover:border-primary/40 hover:bg-card active:scale-[0.98]"
-              : "h-10 w-10 text-muted-foreground/60 hover:border-primary/40 hover:bg-card hover:text-foreground active:scale-95 shadow-sm",
+              ? "h-10 gap-2 px-4 text-[11px] font-black uppercase tracking-[0.18em] text-foreground/80 hover:border-primary/40 hover:bg-muted/40 active:scale-[0.98]"
+              : "h-10 w-10 text-muted-foreground hover:border-primary/40 hover:bg-muted/40 hover:text-foreground active:scale-95",
             triggerClassName,
           )}
         >
-          <MoreHorizontal className={labeledTrigger ? "h-3.5 w-3.5" : "h-4 w-4"} strokeWidth={2.2} />
-          {triggerLabel && <span className="font-display">{triggerLabel}</span>}
+          <MoreHorizontal className={labeledTrigger ? "h-3.5 w-3.5" : "h-4 w-4"} strokeWidth={2.25} />
+          {triggerLabel && <span>{triggerLabel}</span>}
         </button>
       </DropdownMenuTrigger>
 
@@ -123,47 +165,47 @@ export function ProductActionsMenu({
         align="end"
         side="bottom"
         sideOffset={8}
-        className="w-[220px] animate-in fade-in zoom-in-95 overflow-hidden rounded-2xl border border-border/40 bg-card p-1.5 shadow-[0_10px_40px_-10px_rgba(0,0,0,0.3)] backdrop-blur-md"
+        className="w-[280px] overflow-hidden rounded-2xl border border-border/60 bg-card p-0 shadow-sm"
       >
         {/* Identity Header */}
-        <div className="flex items-center gap-3 px-2 pb-2 pt-1.5">
-          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-border/20 bg-muted/20 p-1">
+        <div className="flex items-center gap-3 border-b border-border/40 bg-muted/20 px-4 py-3.5">
+          <div className="flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-xl border border-border/60 bg-card">
             {product.image_url ? (
-              <img src={product.image_url} alt="" className="h-full w-full rounded object-cover" />
+              <img src={product.image_url} alt="" className="h-full w-full object-cover" />
             ) : (
-              <Star className="h-3.5 w-3.5 text-muted-foreground/40" />
+              <Package className="h-4 w-4 text-muted-foreground/50" strokeWidth={2} />
             )}
           </div>
-          <div className="min-w-0 flex-1 flex flex-col justify-center">
-            <span className="truncate text-[12px] font-bold tracking-tight text-foreground">
+          <div className="flex min-w-0 flex-1 flex-col gap-1">
+            <span className="truncate text-[13px] font-black tracking-tight text-foreground leading-none">
               {product.name || "Sem nome"}
             </span>
-            <span className="text-[10px] font-medium text-muted-foreground/60">
+            <span className="text-[10px] font-black uppercase tracking-[0.18em] text-primary tabular-nums leading-none">
               {formatCurrency(Number(product.price || 0))}
             </span>
           </div>
         </div>
 
-        <DropdownMenuSeparator className="mx-1 my-1.5 bg-border/20" />
+        {sections.map((section) => (
+          <div key={section.title} className="border-b border-border/40 px-2 py-2.5 last:border-b-0">
+            <div className="px-2.5 pb-1.5 text-[9px] font-black uppercase tracking-[0.22em] text-muted-foreground/50">
+              {section.title}
+            </div>
+            <div className="space-y-0.5">
+              {section.rows.map(renderRow)}
+            </div>
+          </div>
+        ))}
 
-        <div className="space-y-0.5">
-          {groupManagement.map(renderRow)}
+        <div className="border-t border-border/40 bg-destructive/[0.02] px-2 py-2">
+          {renderRow({
+            icon: Trash2,
+            label: "Excluir produto",
+            hint: "Ação irreversível",
+            variant: "destructive",
+            action: () => onDeleteProduct(product),
+          })}
         </div>
-
-        <DropdownMenuSeparator className="mx-1 my-1.5 bg-border/20" />
-
-        <div className="space-y-0.5">
-          {groupDistribution.map(renderRow)}
-        </div>
-
-        <DropdownMenuSeparator className="mx-1 my-1.5 bg-border/20" />
-
-        {renderRow({
-          icon: Trash2,
-          label: "Excluir produto",
-          variant: "destructive",
-          action: () => onDeleteProduct(product),
-        })}
       </DropdownMenuContent>
     </DropdownMenu>
   );
