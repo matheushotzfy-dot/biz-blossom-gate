@@ -211,7 +211,7 @@ export default function Vendas() {
                     <span className="tabular-nums">
                       {preset === "custom" && range?.from
                         ? format(range.from, "dd/MM") + (range.to ? " – " + format(range.to, "dd/MM") : "")
-                        : "Custom"}
+                        : "Personalizado"}
                     </span>
                   </button>
                 </PopoverTrigger>
