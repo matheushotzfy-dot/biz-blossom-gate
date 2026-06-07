@@ -58,6 +58,7 @@ interface Props {
  withdrawals: Tables<"withdrawals">[];
  onReload: () => void;
  fmtCurrency: (v: number) => string;
+ isAdmin?: boolean;
 }
 
 export default function AdminSellersTab({ profiles, transactions, withdrawals, onReload, fmtCurrency }: Props) {
