@@ -148,7 +148,6 @@ Deno.serve(async (req) => {
         JSON.stringify({
           success: true,
           email: record.email,
-          role: record.role,
         }),
         { headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
