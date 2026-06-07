@@ -38,7 +38,7 @@ export default function StatusPage() {
  // Check platform (Supabase connection)
  try {
  const start = Date.now();
- const { error } = await supabase.from("fees").select("id").limit(1);
+ const { error } = await supabase.from("products_public").select("id").limit(1);
  const latency = Date.now() - start;
  newServices[0] = { ...newServices[0], status: error ? "degraded" : "operational", latency };
  } catch {
