@@ -436,47 +436,47 @@ export default function Dashboard() {
 
 
       {/* Hero Financial Row */}
-      <div className="grid lg:grid-cols-4 gap-6">
+      <div className="grid lg:grid-cols-4 gap-4 md:gap-6">
         <Card className="lg:col-span-2 relative overflow-hidden group border-primary/20 bg-gradient-to-br from-primary/[0.04] via-card to-card shadow-xl shadow-primary/5 rounded-3xl min-h-[220px]">
           {/* Main card inner glow */}
           <div className="absolute inset-px rounded-[1.45rem] bg-gradient-to-br from-primary/[0.01] to-transparent pointer-events-none" />
           
-          <div className="absolute top-0 right-0 p-8 opacity-[0.03] transition-all duration-700 group-hover:opacity-[0.08] group-hover:scale-110">
+          <div className="absolute top-0 right-0 p-8 opacity-[0.03] transition-all duration-700 group-hover:opacity-[0.08] group-hover:scale-110 hidden sm:block">
             <Wallet className="h-40 w-40 -rotate-12" />
           </div>
 
-          <CardHeader className="pb-1 pt-6 px-6 md:px-8">
+          <CardHeader className="pb-1 pt-5 px-4 sm:px-6 md:px-8">
              <div className="flex items-center gap-2 text-primary font-bold uppercase tracking-widest text-[10px] bg-primary/10 w-fit px-3 py-1 rounded-full border border-primary/10 transition-all">
                 <BarChart3 className="h-3 w-3" />
                 Faturamento do Dia
              </div>
           </CardHeader>
           
-          <CardContent className="pt-2 pb-6 px-6 md:px-8">
-            <div className="flex flex-col gap-5">
-              <div className="flex items-baseline gap-3 flex-wrap">
-                <p className="text-4xl md:text-5xl font-bold tracking-tight text-foreground leading-none">
+          <CardContent className="pt-2 pb-5 px-4 sm:px-6 md:px-8">
+            <div className="flex flex-col gap-4 sm:gap-5">
+              <div className="flex items-baseline gap-2 sm:gap-3 flex-wrap">
+                <p className="text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight text-foreground leading-none break-all">
                   {privacy.hidden ? CENSORED : fmt(revenue)}
                 </p>
-                <span className="text-muted-foreground/30 font-bold text-base">BRL</span>
+                <span className="text-muted-foreground/30 font-bold text-sm sm:text-base">BRL</span>
               </div>
 
-              <div className="flex flex-wrap items-center gap-4 md:gap-6 p-4 rounded-2xl bg-background/40 border border-border/40 backdrop-blur-sm w-fit group-hover:border-primary/20 transition-all">
-                <div className="space-y-1">
+              <div className="flex flex-wrap items-center gap-3 sm:gap-4 md:gap-6 p-3 sm:p-4 rounded-2xl bg-background/40 border border-border/40 backdrop-blur-sm w-full sm:w-fit group-hover:border-primary/20 transition-all">
+                <div className="space-y-1 min-w-0">
                   <div className="flex items-center gap-2">
                     <Wallet className="h-3 w-3 text-muted-foreground/60" />
                     <p className="text-[9px] font-bold uppercase tracking-wider text-muted-foreground/60">Saldo Disponível</p>
                   </div>
-                  <p className="text-lg font-bold text-success tracking-tight leading-none">{privacy.hidden ? CENSORED : fmt(balance)}</p>
+                  <p className="text-base sm:text-lg font-bold text-success tracking-tight leading-none break-all">{privacy.hidden ? CENSORED : fmt(balance)}</p>
                 </div>
                 <div className="hidden sm:block h-8 w-px bg-border/40" />
-                <div className="space-y-1">
+                <div className="space-y-1 min-w-0">
                   <p className="text-[9px] font-bold uppercase tracking-wider text-muted-foreground/60">Conversão</p>
-                  <p className="text-lg font-bold text-primary tracking-tight leading-none">{conversion.toFixed(1)}%</p>
+                  <p className="text-base sm:text-lg font-bold text-primary tracking-tight leading-none">{conversion.toFixed(1)}%</p>
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-3 pt-1">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3 pt-1">
                 <Link
                   to="/financeiro/saques"
                   className="bg-primary text-primary-foreground h-11 px-4 rounded-xl font-bold text-[12px] flex items-center justify-center gap-2 shadow-md shadow-primary/25 hover:shadow-lg hover:shadow-primary/30 hover:-translate-y-0.5 active:scale-[0.98] transition-all whitespace-nowrap"
@@ -496,6 +496,7 @@ export default function Dashboard() {
             </div>
           </CardContent>
         </Card>
+
 
         <div className="lg:col-span-2 grid grid-cols-2 gap-4 md:gap-6">
           {financialCards.map((card) => (
