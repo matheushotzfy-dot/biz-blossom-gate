@@ -48,12 +48,16 @@ export function initAntiTamper() {
     }
   });
 
-  // 5. Console warning honeypot
-  const warningStyle = 'color: red; font-size: 24px; font-weight: bold;';
-  const infoStyle = 'color: white; font-size: 14px;';
-  console.log('%c⛔ PARE!', warningStyle);
-  console.log(
-    '%cEste é um recurso do navegador destinado a desenvolvedores. Se alguém lhe disse para copiar e colar algo aqui, isso é FRAUDE e pode comprometer sua conta.',
-    infoStyle
-  );
+  // 5. Console warning honeypot (production only — silent in dev)
+  if (!import.meta.env.DEV) {
+    const warningStyle = 'color: red; font-size: 24px; font-weight: bold;';
+    const infoStyle = 'color: white; font-size: 14px;';
+    // eslint-disable-next-line no-console
+    console.log('%c⛔ PARE!', warningStyle);
+    // eslint-disable-next-line no-console
+    console.log(
+      '%cEste é um recurso do navegador destinado a desenvolvedores. Se alguém lhe disse para copiar e colar algo aqui, isso é FRAUDE e pode comprometer sua conta.',
+      infoStyle
+    );
+  }
 }
