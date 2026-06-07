@@ -16,6 +16,9 @@ import { format, startOfDay, endOfDay, subDays, startOfMonth, endOfMonth, subMon
 import { ptBR } from "date-fns/locale";
 import type { DateRange } from "react-day-picker";
 import { StatCard } from "@/components/StatCard";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import * as XLSX from "xlsx";
+import { toast } from "sonner";
 
 const fmt = (v: number) => v === 0 ? "R$ 0,00" : `R$ ${v.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 
@@ -127,36 +130,68 @@ export default function Vendas() {
 
   useEffect(() => { setPage(1); }, [search, range]);
 
-  const exportCSV = () => {
-    if (!filtered.length) return;
-    const headers = ["ID","Data","Cliente","Email","Documento","Produto","Método","Status","Valor Bruto","Taxa","Valor Líquido"];
-    const escape = (v: any) => {
-      const s = v == null ? "" : String(v);
-      return /[",\n;]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
-    };
-    const rows = filtered.map((t) => [
-      t.id,
-      new Date(t.created_at).toLocaleString("pt-BR"),
-      t.customer_name ?? "",
-      t.customer_email ?? "",
-      t.customer_document ?? "",
-      prodsMap[t.product_id ?? ""] ?? "",
-      t.payment_method ?? "",
-      t.status ?? "",
-      Number(t.amount).toFixed(2),
-      Number(t.fee_amount ?? 0).toFixed(2),
-      Number(t.net_amount ?? 0).toFixed(2),
-    ].map(escape).join(";"));
-    const csv = "\uFEFF" + [headers.join(";"), ...rows].join("\n");
-    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+  const buildRows = () => filtered.map((t) => ({
+    "ID da Transação": t.id,
+    "Data": new Date(t.created_at).toLocaleString("pt-BR"),
+    "Cliente": t.customer_name ?? "",
+    "Email": t.customer_email ?? "",
+    "Documento": t.customer_document ?? "",
+    "Telefone": (t as any).customer_phone ?? "",
+    "Produto": prodsMap[t.product_id ?? ""] ?? "",
+    "Método": t.payment_method ?? "",
+    "Status": STATUS_MAP[t.status ?? ""]?.label ?? t.status ?? "",
+    "Valor Bruto (R$)": Number(t.amount),
+    "Taxa (R$)": Number(t.fee_amount ?? 0),
+    "Valor Líquido (R$)": Number(t.net_amount ?? 0),
+  }));
+
+  const fileName = (ext: string) => {
+    const tag = range?.from && range?.to
+      ? `${format(range.from, "yyyy-MM-dd")}_a_${format(range.to, "yyyy-MM-dd")}`
+      : new Date().toISOString().slice(0, 10);
+    return `vendas_${tag}.${ext}`;
+  };
+
+  const download = (blob: Blob, name: string) => {
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = `vendas_${new Date().toISOString().slice(0,10)}.csv`;
+    a.download = name;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
+  };
+
+  const exportCSV = () => {
+    if (!filtered.length) return toast.error("Nenhuma transação para exportar");
+    const rows = buildRows();
+    const headers = Object.keys(rows[0]);
+    const esc = (v: any) => {
+      const s = v == null ? "" : String(v);
+      return /[",\n;]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
+    };
+    const csv = "\uFEFF" + [
+      headers.join(";"),
+      ...rows.map((r) => headers.map((h) => esc((r as any)[h])).join(";")),
+    ].join("\n");
+    download(new Blob([csv], { type: "text/csv;charset=utf-8;" }), fileName("csv"));
+    toast.success(`${rows.length} transações exportadas (CSV)`);
+  };
+
+  const exportXLSX = () => {
+    if (!filtered.length) return toast.error("Nenhuma transação para exportar");
+    const rows = buildRows();
+    const wb = XLSX.utils.book_new();
+    const ws = XLSX.utils.json_to_sheet(rows);
+    const headers = Object.keys(rows[0]);
+    ws["!cols"] = headers.map((h) => ({
+      wch: Math.min(40, Math.max(h.length + 2, ...rows.map((r) => String((r as any)[h] ?? "").length + 2))),
+    }));
+    XLSX.utils.book_append_sheet(wb, ws, "Vendas");
+    const buf = XLSX.write(wb, { bookType: "xlsx", type: "array" });
+    download(new Blob([buf], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" }), fileName("xlsx"));
+    toast.success(`${rows.length} transações exportadas (Excel)`);
   };
 
   const stats = useMemo(() => {
@@ -286,9 +321,41 @@ export default function Vendas() {
             {privacyHidden ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
             <span className="hidden sm:inline">Privacidade</span>
           </Button>
-          <Button onClick={exportCSV} disabled={!filtered.length} className="h-10 px-4 sm:px-6 rounded-xl font-black text-xs uppercase tracking-widest gap-2">
-            <Download className="h-4 w-4" /> Exportar
-          </Button>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button disabled={!filtered.length} className="h-10 px-4 sm:px-6 rounded-xl font-black text-xs uppercase tracking-widest gap-2">
+                <Download className="h-4 w-4" /> Exportar
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-64">
+              <DropdownMenuLabel className="text-[10px] font-black uppercase tracking-[0.14em] text-muted-foreground">
+                Exportar dados da tabela
+              </DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem onClick={exportXLSX} className="gap-3 py-2.5 cursor-pointer">
+                <div className="h-8 w-8 rounded-md bg-success/10 border border-success/20 flex items-center justify-center text-success font-black text-[10px]">
+                  XLSX
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className="text-xs font-bold">Excel (.xlsx)</div>
+                  <div className="text-[10px] text-muted-foreground">Planilha formatada</div>
+                </div>
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={exportCSV} className="gap-3 py-2.5 cursor-pointer">
+                <div className="h-8 w-8 rounded-md bg-info/10 border border-info/20 flex items-center justify-center text-info font-black text-[10px]">
+                  CSV
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className="text-xs font-bold">CSV (.csv)</div>
+                  <div className="text-[10px] text-muted-foreground">Compatível com qualquer ferramenta</div>
+                </div>
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <div className="px-2 py-1.5 text-[10px] text-muted-foreground">
+                {filtered.length} {filtered.length === 1 ? "linha" : "linhas"} • Período atual
+              </div>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
       </div>
 
