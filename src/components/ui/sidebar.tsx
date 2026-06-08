@@ -141,7 +141,7 @@ const Sidebar = React.forwardRef<
  if (collapsible === "none") {
  return (
  <div
- className={cn("flex h-full w-[--sidebar-width] flex-col bg-sidebar text-sidebar-foreground", className)}
+ className={cn("flex h-full w-[--sidebar-width] flex-col bg-sidebar text-sidebar-foreground border-r border-border/60", className)}
  ref={ref}
  {...props}
  >
