@@ -127,7 +127,7 @@ function DashboardLayoutInner() {
             <div className="flex-1 max-w-sm lg:max-w-md ml-4 mr-auto">
               <button
                 onClick={() => setSearchOpen(true)}
-                className="w-full h-[38px] px-4 rounded-xl bg-card-inset border border-border hover:bg-accent hover:border-primary/30 transition-colors flex items-center gap-3 text-muted-foreground hover:text-foreground group overflow-hidden relative"
+                className="w-full h-[38px] px-4 rounded-xl bg-muted border border-border hover:bg-accent hover:border-primary/30 transition-colors flex items-center gap-3 text-muted-foreground hover:text-foreground group overflow-hidden relative"
               >
                 <div className="absolute inset-0 bg-gradient-to-r from-primary/[0.03] to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
                 <Search className="h-[14px] w-[14px] transition-transform group-hover:scale-110 text-primary/60 group-hover:text-primary" strokeWidth={2.5} />

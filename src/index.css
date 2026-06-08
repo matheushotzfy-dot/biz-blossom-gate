@@ -198,6 +198,19 @@ input[type="number"]::-webkit-inner-spin-button {
     box-shadow: none !important;
   }
 
+  .platform-shell section[class*="border"],
+  .platform-shell article[class*="border"],
+  .platform-shell [data-card],
+  .platform-shell [class*="dashboard-"][class*="border"] {
+    border-color: hsl(var(--border)) !important;
+  }
+
+  .platform-shell [class*="bg-muted"][class*="border"][class*="rounded"]:not(button):not(input):not(textarea):not(select),
+  .platform-shell [class*="bg-background"][class*="border"][class*="rounded"]:not(button):not(input):not(textarea):not(select) {
+    background-color: hsl(var(--card-inset)) !important;
+    border-color: hsl(var(--border)) !important;
+  }
+
   .platform-card::before,
   .dashboard-panel::before,
   .dashboard-hero-surface::before,
