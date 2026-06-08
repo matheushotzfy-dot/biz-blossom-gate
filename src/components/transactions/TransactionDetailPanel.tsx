@@ -19,6 +19,7 @@ import {
  X,
  Zap,
 } from "lucide-react";
+import { PixLogoMark } from "@/components/icons/PixLogoMark";
 
 import { StatusBadge } from "@/components/StatusBadge";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
