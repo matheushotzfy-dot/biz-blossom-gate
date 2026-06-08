@@ -19,6 +19,7 @@ import {
  X,
  Zap,
 } from "lucide-react";
+import { PixLogoMark } from "@/components/icons/PixLogoMark";
 
 import { StatusBadge } from "@/components/StatusBadge";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
@@ -187,7 +188,7 @@ export function TransactionDetailPanel({ tx, products, onClose, onRefund }: Tran
  <div className="mt-3 flex flex-wrap items-center gap-2">
  <StatusBadge status={tx.status} />
  <span className={cn("inline-flex items-center gap-1 rounded-full border px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.18em]", methodTone)}>
- {tx.payment_method === "pix" && <Smartphone className="h-3 w-3" />}
+ {tx.payment_method === "pix" && <PixLogoMark className="h-3 w-3" />}
  {tx.payment_method === "credit_card" && <CreditCard className="h-3 w-3" />}
  {tx.payment_method === "boleto" && <Package className="h-3 w-3" />}
  {methodLabel}
