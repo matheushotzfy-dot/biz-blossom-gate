@@ -27,46 +27,27 @@ function DashboardLayoutInner() {
  const [showApproved, setShowApproved] = useState(false);
  const [searchOpen, setSearchOpen] = useState(false);
  const [notifOpen, setNotifOpen] = useState(false);
-  const unreadCount = useNotificationCount();
-  const { data: transactions = [] } = useTransactions();
-  const { data: withdrawals = [] } = useWithdrawals();
-  const [balanceAdjustments, setBalanceAdjustments] = useState(0);
-  const [privacyHidden, setPrivacyHidden] = useState(() => {
-    try { return localStorage.getItem("privacy_mode") === "true"; } catch { return false; }
-  });
+   const unreadCount = useNotificationCount();
+   const { data: transactions = [] } = useTransactions();
+   const { data: withdrawals = [] } = useWithdrawals();
+   const { data: ledgerBalance = 0 } = useLedgerBalance();
+   const [privacyHidden, setPrivacyHidden] = useState(() => {
+     try { return localStorage.getItem("privacy_mode") === "true"; } catch { return false; }
+   });
 
-  const togglePrivacy = () => {
-    setPrivacyHidden(prev => {
-      const next = !prev;
-      try { localStorage.setItem("privacy_mode", String(next)); } catch {}
-      return next;
-    });
-  };
+   const togglePrivacy = () => {
+     setPrivacyHidden(prev => {
+       const next = !prev;
+       try { localStorage.setItem("privacy_mode", String(next)); } catch {}
+       return next;
+     });
+   };
 
-  useEffect(() => {
-    if (!user?.id) return;
-    supabase.from("balance_adjustments").select("amount, type").eq("user_id", user.id)
-      .then(({ data }) => {
-        if (data) {
-          const adj = data.reduce((acc, a) => acc + (a.type === "credit" ? Number(a.amount) : -Number(a.amount)), 0);
-          setBalanceAdjustments(adj);
-        }
-      });
-  }, [user?.id]);
+   // Single source of truth: ledger RPC (same as Dashboard / Extrato / Saques)
+   const balance = ledgerBalance;
 
-  const balance = transactions
-    .filter(t => t.status === "completed")
-    .reduce((acc, t) => acc + Number(t.net_amount), 0) + 
-    balanceAdjustments - 
-    withdrawals
-      .filter(w => w.status === "approved" || w.status === "pending")
-      .reduce((acc, w) => acc + Number(w.amount), 0) -
-    transactions
-      .filter(t => t.status === "completed" && !t.retention_released && Number(t.retained_amount) > 0)
-      .reduce((acc, t) => acc + Number(t.retained_amount), 0);
-
-  const formatBRL = (v: number) => 
-    v.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
+   const formatBRL = (v: number) =>
+     v.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
 
  useEffect(() => {
  scrollRef.current?.scrollTo({ top: 0, left: 0 });
