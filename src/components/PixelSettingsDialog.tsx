@@ -205,45 +205,52 @@ export default function PixelSettingsDialog({ product, open, onOpenChange }: Pro
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-[1080px] w-[96vw] max-h-[92vh] overflow-hidden flex flex-col p-0 rounded-xl border border-border bg-card gap-0">
         {/* ═══ HEADER ═══ */}
-        <div className="relative border-b border-border bg-card px-7 py-5">
+        <div className="relative border-b border-border bg-card px-7 py-4">
           <button
             onClick={() => onOpenChange(false)}
-            className="absolute top-4 right-4 h-8 w-8 rounded-md border border-border bg-card flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors"
+            className="absolute top-3.5 right-3.5 h-7 w-7 rounded-md border border-border bg-card flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors"
             aria-label="Fechar"
           >
-            <X className="h-4 w-4" />
+            <X className="h-3.5 w-3.5" />
           </button>
 
-          <div className="flex items-start gap-4">
-            <div className="relative h-12 w-12 rounded-lg border border-border bg-background flex items-center justify-center shrink-0">
-              <Crosshair className="h-5 w-5 text-primary" strokeWidth={2.2} />
-              <span className="absolute -bottom-1 -right-1 h-3.5 w-3.5 rounded-full border-2 border-card bg-success" />
+          <div className="flex items-center gap-3.5">
+            <div className="relative h-9 w-9 rounded-md border border-border bg-background flex items-center justify-center shrink-0">
+              <Crosshair className="h-4 w-4 text-primary" strokeWidth={2.2} />
             </div>
-            <div className="min-w-0 flex-1 pt-0.5">
-              <div className="flex items-center gap-1.5">
-                <span className="font-display text-[9.5px] font-black uppercase tracking-[0.2em] text-muted-foreground">
-                  Tracking · Server-Side + Browser
-                </span>
-                <span className="h-1 w-1 rounded-full bg-muted-foreground/40" />
-                <span className="font-display text-[9.5px] font-bold uppercase tracking-[0.16em] text-muted-foreground/70 truncate max-w-[280px]">
+            <div className="min-w-0 flex-1">
+              <div className="flex items-center gap-2">
+                <h2 className="text-[14px] font-display font-black tracking-[-0.01em] text-foreground leading-none">
+                  Pixels & Conversão
+                </h2>
+                <span className="h-3 w-px bg-border" />
+                <span className="font-display text-[10px] font-bold uppercase tracking-[0.14em] text-muted-foreground truncate max-w-[320px]">
                   {product.name}
                 </span>
+                <span
+                  className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[8.5px] font-display font-black uppercase tracking-[0.14em] border bg-success/10 border-success/30 text-success"
+                  title="Server-Side Conversions API ativo"
+                >
+                  <span className="relative flex h-1.5 w-1.5">
+                    <span className="absolute inline-flex h-full w-full rounded-full bg-success opacity-60 animate-ping" />
+                    <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-success" />
+                  </span>
+                  Live
+                </span>
               </div>
-              <h2 className="mt-1 text-[20px] font-display font-black tracking-[-0.03em] text-foreground leading-tight">
-                Pixels & Conversão
-              </h2>
-              <p className="mt-1 text-[12px] text-muted-foreground leading-snug max-w-[560px]">
-                Conecte Facebook, Google Ads, TikTok e Kwai com deduplicação automática (eventID) entre Pixel do navegador e Conversions API.
+              <p className="mt-1 text-[11px] text-muted-foreground leading-snug font-display">
+                Disparos sincronizados browser ↔ servidor com <span className="font-mono text-foreground/80">eventID</span> compartilhado para deduplicação.
               </p>
             </div>
 
-            <div className="hidden md:flex items-stretch border border-border rounded-lg overflow-hidden bg-background shrink-0">
+            <div className="hidden md:flex items-stretch border border-border rounded-md overflow-hidden bg-background shrink-0 mr-10">
               <KpiCell label="Pixels" value={pixels.length} />
               <KpiCell label="Ativos" value={totalActive} accent="success" />
               <KpiCell label={platform.short} value={platformPixels.length} accent="primary" />
             </div>
           </div>
         </div>
+
 
         {/* ═══ BODY (rail + workspace) ═══ */}
         <div className="flex-1 flex min-h-0 overflow-hidden">
