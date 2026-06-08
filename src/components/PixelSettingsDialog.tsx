@@ -1,14 +1,15 @@
 /**
- * Pixel Settings Dialog — Billion-Dollar SaaS v5
- * Clean, sharp, 100% solid. No glow, no blur, no glassmorphism.
+ * Pixel Settings Dialog — Billion-Dollar SaaS v6
+ * Two-column layout: platform rail (left) + workspace (right).
+ * 100% solid, sharp borders, no glassmorphism. GA4 removed.
  */
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import {
   Crosshair, Plus, Trash2, Radio, Settings2, Zap,
-  ChevronDown, Sparkles, Signal, Layers,
-  Power, X, CircleCheck, Hash, Key, Globe2,
+  ChevronDown, Sparkles, CircleCheck, Hash, Key, Globe2,
+  X, ShieldCheck, Activity, BookOpen, ExternalLink,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -26,7 +27,7 @@ interface Props {
   onOpenChange: (v: boolean) => void;
 }
 
-type Platform = "facebook" | "google_ads" | "google_analytics" | "tiktok" | "kwai";
+type Platform = "facebook" | "google_ads" | "tiktok" | "kwai";
 
 interface Pixel {
   id: string;
@@ -81,22 +82,24 @@ function KwaiLogo({ className, style }: { className?: string; style?: React.CSSP
     </svg>
   );
 }
-function AnalyticsLogo({ className, style }: { className?: string; style?: React.CSSProperties }) {
-  return (
-    <svg className={className} style={style} viewBox="0 0 24 24" fill="none">
-      <rect x="3" y="14" width="4" height="8" rx="1" fill="#F9AB00"/>
-      <rect x="10" y="9" width="4" height="13" rx="1" fill="#E37400"/>
-      <rect x="17" y="4" width="4" height="18" rx="1" fill="#F9AB00"/>
-    </svg>
-  );
-}
 
-const PLATFORMS: { id: Platform; label: string; short: string; brandColor: string; LogoComp: React.FC<{className?: string; style?: React.CSSProperties}>; fields: string[] }[] = [
-  { id: "facebook",         label: "Facebook Pixel",   short: "Facebook",   brandColor: "#1877F2", LogoComp: FacebookLogo,  fields: ["pixel_id", "api_token", "domain"] },
-  { id: "google_ads",       label: "Google Ads",       short: "Google Ads", brandColor: "#4285F4", LogoComp: GoogleLogo,    fields: ["pixel_id", "api_token"] },
-  { id: "google_analytics", label: "Google Analytics", short: "GA4",        brandColor: "#E37400", LogoComp: AnalyticsLogo, fields: ["pixel_id"] },
-  { id: "tiktok",           label: "TikTok Pixel",     short: "TikTok",     brandColor: "#FF004F", LogoComp: TikTokLogo,    fields: ["pixel_id", "api_token"] },
-  { id: "kwai",             label: "Kwai Pixel",       short: "Kwai",       brandColor: "#FF6B2C", LogoComp: KwaiLogo,      fields: ["pixel_id", "api_token"] },
+type PlatformMeta = {
+  id: Platform;
+  label: string;
+  short: string;
+  tagline: string;
+  brandColor: string;
+  LogoComp: React.FC<{className?: string; style?: React.CSSProperties}>;
+  fields: string[];
+  docsUrl: string;
+  idHint: string;
+};
+
+const PLATFORMS: PlatformMeta[] = [
+  { id: "facebook",   label: "Facebook / Meta Pixel", short: "Facebook",   tagline: "Meta Conversions API + Browser Pixel",  brandColor: "#1877F2", LogoComp: FacebookLogo, fields: ["pixel_id", "api_token", "domain"], docsUrl: "https://www.facebook.com/business/help/952192354843755", idHint: "15 a 16 dígitos" },
+  { id: "google_ads", label: "Google Ads",            short: "Google Ads", tagline: "Conversion Tracking via gtag",          brandColor: "#4285F4", LogoComp: GoogleLogo,   fields: ["pixel_id", "api_token"],           docsUrl: "https://support.google.com/google-ads/answer/6095821", idHint: "AW-123456789 / 123456789" },
+  { id: "tiktok",     label: "TikTok Pixel",          short: "TikTok",     tagline: "TikTok Events API + Pixel SDK",         brandColor: "#FF004F", LogoComp: TikTokLogo,   fields: ["pixel_id", "api_token"],           docsUrl: "https://ads.tiktok.com/help/article/get-started-pixel", idHint: "20 caracteres alfanuméricos" },
+  { id: "kwai",       label: "Kwai for Business",     short: "Kwai",       tagline: "Kwai Pixel SDK",                        brandColor: "#FF6B2C", LogoComp: KwaiLogo,     fields: ["pixel_id", "api_token"],           docsUrl: "https://ads.kwai.com/", idHint: "ID fornecido pelo Kwai Ads" },
 ];
 
 const ease = [0.16, 1, 0.3, 1] as const;
@@ -117,6 +120,7 @@ export default function PixelSettingsDialog({ product, open, onOpenChange }: Pro
   useEffect(() => {
     if (!open || !user) return;
     loadPixels();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open, user, product.id]);
 
   const loadPixels = async () => {
@@ -136,6 +140,22 @@ export default function PixelSettingsDialog({ product, open, onOpenChange }: Pro
   const platformPixels = pixels.filter(p => p.platform === activePlatform);
   const platform = PLATFORMS.find(p => p.id === activePlatform)!;
 
+  const platformStats = useMemo(() => {
+    const m: Record<Platform, { total: number; active: number }> = {
+      facebook: { total: 0, active: 0 },
+      google_ads: { total: 0, active: 0 },
+      tiktok: { total: 0, active: 0 },
+      kwai: { total: 0, active: 0 },
+    };
+    pixels.forEach(p => {
+      if (m[p.platform]) {
+        m[p.platform].total++;
+        if (p.is_active) m[p.platform].active++;
+      }
+    });
+    return m;
+  }, [pixels]);
+
   const addPixel = async () => {
     if (!newPixelId.trim()) { toast.error("Pixel ID é obrigatório"); return; }
     const events = newEventMode === "all" ? ALL_EVENTS : newSelectedEvents;
@@ -148,7 +168,7 @@ export default function PixelSettingsDialog({ product, open, onOpenChange }: Pro
       pix_conversion_value: 100, boleto_conversion_value: 100, disable_bump_events: false,
     });
     if (error) { toast.error("Erro ao adicionar pixel"); return; }
-    toast.success("Pixel adicionado!");
+    toast.success(`Pixel ${platform.short} adicionado`);
     setNewPixelId(""); setNewApiToken(""); setNewDomain("");
     setNewEventMode("all"); setNewSelectedEvents([...ALL_EVENTS]);
     loadPixels();
@@ -183,421 +203,454 @@ export default function PixelSettingsDialog({ product, open, onOpenChange }: Pro
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-[960px] max-h-[92vh] overflow-hidden flex flex-col p-0 rounded-xl border border-border bg-card gap-0">
+      <DialogContent className="max-w-[1080px] w-[96vw] max-h-[92vh] overflow-hidden flex flex-col p-0 rounded-xl border border-border bg-card gap-0">
         {/* ═══ HEADER ═══ */}
-        <div className="relative border-b border-border bg-gradient-to-b from-muted/30 to-card px-8 pt-6 pb-0">
+        <div className="relative border-b border-border bg-card px-7 py-5">
           <button
             onClick={() => onOpenChange(false)}
-            className="absolute top-5 right-5 h-8 w-8 rounded-md border border-border bg-card flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors"
+            className="absolute top-4 right-4 h-8 w-8 rounded-md border border-border bg-card flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors"
             aria-label="Fechar"
           >
             <X className="h-4 w-4" />
           </button>
 
           <div className="flex items-start gap-4">
-            <div className="relative h-12 w-12 rounded-lg border border-border bg-card flex items-center justify-center shrink-0">
+            <div className="relative h-12 w-12 rounded-lg border border-border bg-background flex items-center justify-center shrink-0">
               <Crosshair className="h-5 w-5 text-primary" strokeWidth={2.2} />
               <span className="absolute -bottom-1 -right-1 h-3.5 w-3.5 rounded-full border-2 border-card bg-success" />
             </div>
             <div className="min-w-0 flex-1 pt-0.5">
               <div className="flex items-center gap-1.5">
                 <span className="font-display text-[9.5px] font-black uppercase tracking-[0.2em] text-muted-foreground">
-                  Tracking / Conversão
+                  Tracking · Server-Side + Browser
                 </span>
                 <span className="h-1 w-1 rounded-full bg-muted-foreground/40" />
-                <span className="font-display text-[9.5px] font-bold uppercase tracking-[0.16em] text-muted-foreground/70 truncate">
+                <span className="font-display text-[9.5px] font-bold uppercase tracking-[0.16em] text-muted-foreground/70 truncate max-w-[280px]">
                   {product.name}
                 </span>
               </div>
-              <h2 className="mt-1 text-[22px] font-display font-black tracking-[-0.03em] text-foreground leading-tight">
+              <h2 className="mt-1 text-[20px] font-display font-black tracking-[-0.03em] text-foreground leading-tight">
                 Pixels & Conversão
               </h2>
-              <p className="mt-1 text-[12.5px] text-muted-foreground leading-snug max-w-[560px]">
-                Conecte pixels de rastreamento e configure gatilhos de conversão por produto.
+              <p className="mt-1 text-[12px] text-muted-foreground leading-snug max-w-[560px]">
+                Conecte Facebook, Google Ads, TikTok e Kwai com deduplicação automática (eventID) entre Pixel do navegador e Conversions API.
               </p>
             </div>
 
-            {/* Compact KPI strip */}
-            <div className="hidden md:flex items-stretch border border-border rounded-lg overflow-hidden bg-card shrink-0">
-              <KpiCell label="Total" value={pixels.length} />
+            <div className="hidden md:flex items-stretch border border-border rounded-lg overflow-hidden bg-background shrink-0">
+              <KpiCell label="Pixels" value={pixels.length} />
               <KpiCell label="Ativos" value={totalActive} accent="success" />
               <KpiCell label={platform.short} value={platformPixels.length} accent="primary" />
             </div>
           </div>
+        </div>
 
-          {/* ═══ PLATFORM TABS ═══ */}
-          <div className="mt-5 -mx-8 px-8 border-t border-border/70">
-            <div className="flex gap-0 overflow-x-auto">
+        {/* ═══ BODY (rail + workspace) ═══ */}
+        <div className="flex-1 flex min-h-0 overflow-hidden">
+          {/* PLATFORM RAIL */}
+          <aside className="w-[220px] shrink-0 border-r border-border bg-background/40 overflow-y-auto py-3">
+            <div className="px-4 pb-2 text-[9.5px] font-display font-black uppercase tracking-[0.2em] text-muted-foreground/70">
+              Plataformas
+            </div>
+            <nav className="px-2 space-y-1">
               {PLATFORMS.map(p => {
                 const isActive = activePlatform === p.id;
-                const count = pixels.filter(px => px.platform === p.id).length;
-                const activeCount = pixels.filter(px => px.platform === p.id && px.is_active).length;
+                const stats = platformStats[p.id];
                 return (
                   <button
                     key={p.id}
-                    onClick={() => setActivePlatform(p.id)}
+                    onClick={() => { setActivePlatform(p.id); setExpandedPixel(null); }}
                     className={cn(
-                      "relative group flex items-center gap-2.5 px-4 py-3 text-[12px] font-display font-bold transition-colors whitespace-nowrap",
+                      "relative w-full flex items-center gap-3 px-3 py-2.5 rounded-md text-left transition-colors border",
                       isActive
-                        ? "text-foreground"
-                        : "text-muted-foreground/70 hover:text-foreground"
+                        ? "bg-card border-border"
+                        : "bg-transparent border-transparent hover:bg-card hover:border-border/60"
                     )}
                   >
-                    <p.LogoComp
-                      className={cn("h-[15px] w-[15px] shrink-0 transition-opacity", isActive ? "" : "opacity-50 group-hover:opacity-90")}
-                      style={isActive ? { color: p.brandColor } : {}}
-                    />
-                    <span>{p.short}</span>
-                    {count > 0 && (
-                      <span
-                        className={cn(
-                          "inline-flex items-center justify-center min-w-[22px] h-[18px] px-1.5 rounded-[4px] text-[9.5px] font-numbers font-black tabular-nums border",
-                          isActive
-                            ? activeCount > 0
-                              ? "bg-success/10 border-success/30 text-success"
-                              : "bg-muted border-border text-foreground"
-                            : "bg-muted/40 border-border/60 text-muted-foreground"
-                        )}
-                      >
-                        {count}
-                      </span>
-                    )}
                     {isActive && (
                       <span
-                        className="absolute bottom-0 left-2 right-2 h-[2px]"
+                        className="absolute left-0 top-1.5 bottom-1.5 w-[3px] rounded-r"
                         style={{ backgroundColor: p.brandColor }}
                       />
+                    )}
+                    <div
+                      className={cn(
+                        "h-8 w-8 rounded-md border border-border flex items-center justify-center shrink-0 bg-background"
+                      )}
+                    >
+                      <p.LogoComp
+                        className={cn("h-4 w-4", isActive ? "" : "opacity-70")}
+                        style={{ color: isActive ? p.brandColor : "hsl(var(--muted-foreground))" }}
+                      />
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <p className={cn(
+                        "text-[12px] font-display font-bold leading-tight truncate",
+                        isActive ? "text-foreground" : "text-muted-foreground"
+                      )}>{p.short}</p>
+                      <p className="text-[9.5px] font-display text-muted-foreground/70 tabular-nums mt-0.5">
+                        {stats.total} pixel{stats.total !== 1 ? "s" : ""}
+                        {stats.active > 0 && <> · <span className="text-success font-bold">{stats.active} on</span></>}
+                      </p>
+                    </div>
+                    {stats.total > 0 && (
+                      <span className={cn(
+                        "inline-flex items-center justify-center min-w-[22px] h-[18px] px-1.5 rounded text-[9.5px] font-numbers font-black tabular-nums border",
+                        stats.active > 0
+                          ? "bg-success/10 border-success/30 text-success"
+                          : "bg-muted/40 border-border text-muted-foreground"
+                      )}>
+                        {stats.total}
+                      </span>
                     )}
                   </button>
                 );
               })}
+            </nav>
+
+            <div className="mt-4 mx-3 p-3 rounded-md border border-border bg-card">
+              <div className="flex items-center gap-1.5 text-[9.5px] font-display font-black uppercase tracking-[0.16em] text-success">
+                <ShieldCheck className="h-3 w-3" /> Server-Side Ready
+              </div>
+              <p className="text-[10.5px] text-muted-foreground mt-1.5 leading-relaxed">
+                Eventos disparam em paralelo no navegador e no servidor com <span className="font-mono text-foreground">eventID</span> compartilhado para deduplicação.
+              </p>
             </div>
-          </div>
-        </div>
+          </aside>
 
+          {/* WORKSPACE */}
+          <div className="flex-1 overflow-y-auto bg-background/20">
+            {/* Brand strip */}
+            <div
+              className="border-b border-border px-7 py-4 flex items-center gap-4 relative overflow-hidden"
+              style={{
+                backgroundImage: `linear-gradient(90deg, ${platform.brandColor}14, transparent 60%)`,
+              }}
+            >
+              <div className="h-11 w-11 rounded-md border border-border bg-background flex items-center justify-center shrink-0">
+                <platform.LogoComp className="h-5 w-5" style={{ color: platform.brandColor }} />
+              </div>
+              <div className="min-w-0 flex-1">
+                <div className="flex items-center gap-2">
+                  <h3 className="text-[15px] font-display font-black tracking-tight text-foreground leading-tight">
+                    {platform.label}
+                  </h3>
+                  <span
+                    className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[8.5px] font-display font-black uppercase tracking-[0.14em] border"
+                    style={{
+                      color: platform.brandColor,
+                      borderColor: `${platform.brandColor}40`,
+                      backgroundColor: `${platform.brandColor}12`,
+                    }}
+                  >
+                    <Activity className="h-2.5 w-2.5" /> Integrado
+                  </span>
+                </div>
+                <p className="text-[11px] text-muted-foreground mt-0.5 font-display">{platform.tagline}</p>
+              </div>
+              <a
+                href={platform.docsUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="hidden sm:inline-flex items-center gap-1.5 h-8 px-3 rounded-md border border-border bg-card text-[10.5px] font-display font-bold text-muted-foreground hover:text-foreground hover:border-border transition-colors"
+              >
+                <BookOpen className="h-3 w-3" /> Documentação <ExternalLink className="h-2.5 w-2.5" />
+              </a>
+            </div>
 
-        {/* ═══ CONTENT ═══ */}
-        <div className="flex-1 overflow-y-auto bg-background/40">
-          <div className="px-7 py-6 space-y-6">
-
-            {/* Section title — existing pixels */}
-            <div className="flex items-center justify-between">
+            <div className="px-7 py-6 space-y-6">
+              {/* Section title */}
               <div className="flex items-center gap-2">
                 <span className="text-[10px] font-display font-black uppercase tracking-[0.18em] text-muted-foreground">
                   Pixels Configurados
                 </span>
                 <span className="h-px flex-1 bg-border" />
+                <span className="text-[10px] font-display font-bold text-muted-foreground tabular-nums">
+                  {platformPixels.length}
+                </span>
               </div>
-            </div>
 
-            {/* Existing pixels */}
-            {loading ? (
-              <div className="space-y-2">
-                {[0, 1].map(i => (
-                  <div key={i} className="h-[68px] rounded-md border border-border bg-card animate-pulse" />
-                ))}
-              </div>
-            ) : platformPixels.length === 0 ? (
-              <div className="border border-dashed border-border rounded-md py-10 text-center bg-card">
-                <div className="mx-auto h-10 w-10 rounded-md border border-border bg-background flex items-center justify-center mb-3">
-                  <Radio className="h-4 w-4 text-muted-foreground" />
+              {/* Pixel list */}
+              {loading ? (
+                <div className="space-y-2">
+                  {[0, 1].map(i => (
+                    <div key={i} className="h-[68px] rounded-md border border-border bg-card animate-pulse" />
+                  ))}
                 </div>
-                <p className="text-[13px] font-display font-bold text-foreground">Nenhum pixel {platform.short}</p>
-                <p className="text-[11px] text-muted-foreground mt-1 max-w-[320px] mx-auto leading-relaxed">
-                  Adicione um novo pixel abaixo para começar a rastrear conversões.
-                </p>
-              </div>
-            ) : (
-              <div className="space-y-2">
-                <AnimatePresence initial={false}>
-                  {platformPixels.map((px) => {
-                    const isExpanded = expandedPixel === px.id;
-                    const activeEvents = (px.events || []).length;
-                    return (
-                      <motion.div
-                        key={px.id}
-                        layout="position"
-                        initial={{ opacity: 0, y: 4 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: -4 }}
-                        transition={{ duration: 0.22, ease }}
-                        className={cn(
-                          "rounded-md border bg-card overflow-hidden",
-                          isExpanded ? "border-primary/40" : "border-border hover:border-border/80"
-                        )}
-                      >
-                        {/* Row header */}
-                        <div className="flex items-center gap-3 px-4 py-3">
-                          {/* Brand badge */}
-                          <div
-                            className="h-9 w-9 rounded-md border border-border flex items-center justify-center shrink-0 bg-background"
-                          >
-                            <platform.LogoComp
-                              className="h-4 w-4"
-                              style={{ color: px.is_active ? platform.brandColor : "hsl(var(--muted-foreground))" }}
-                            />
-                          </div>
-
-                          {/* ID + meta */}
-                          <button
-                            onClick={() => setExpandedPixel(isExpanded ? null : px.id)}
-                            className="flex-1 min-w-0 text-left"
-                          >
-                            <div className="flex items-center gap-2">
-                              <p className="font-mono text-[12px] font-bold text-foreground truncate">{px.pixel_id}</p>
-                              <StatusDot active={px.is_active} />
+              ) : platformPixels.length === 0 ? (
+                <div className="border border-dashed border-border rounded-md py-10 text-center bg-card">
+                  <div className="mx-auto h-10 w-10 rounded-md border border-border bg-background flex items-center justify-center mb-3">
+                    <Radio className="h-4 w-4 text-muted-foreground" />
+                  </div>
+                  <p className="text-[13px] font-display font-bold text-foreground">Nenhum pixel {platform.short}</p>
+                  <p className="text-[11px] text-muted-foreground mt-1 max-w-[320px] mx-auto leading-relaxed">
+                    Adicione um novo pixel abaixo para começar a rastrear conversões.
+                  </p>
+                </div>
+              ) : (
+                <div className="space-y-2">
+                  <AnimatePresence initial={false}>
+                    {platformPixels.map((px) => {
+                      const isExpanded = expandedPixel === px.id;
+                      const activeEvents = (px.events || []).length;
+                      return (
+                        <motion.div
+                          key={px.id}
+                          layout="position"
+                          initial={{ opacity: 0, y: 4 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          exit={{ opacity: 0, y: -4 }}
+                          transition={{ duration: 0.22, ease }}
+                          className={cn(
+                            "rounded-md border bg-card overflow-hidden",
+                            isExpanded ? "border-primary/40" : "border-border"
+                          )}
+                        >
+                          <div className="flex items-center gap-3 px-4 py-3">
+                            <div className="h-9 w-9 rounded-md border border-border flex items-center justify-center shrink-0 bg-background">
+                              <platform.LogoComp
+                                className="h-4 w-4"
+                                style={{ color: px.is_active ? platform.brandColor : "hsl(var(--muted-foreground))" }}
+                              />
                             </div>
-                            <div className="mt-0.5 flex items-center gap-1.5 text-[10.5px] text-muted-foreground font-display">
-                              <span className="tabular-nums">{activeEvents} evento{activeEvents !== 1 ? "s" : ""}</span>
-                              {px.api_token && <><Dot /><span>API Token</span></>}
-                              {px.fire_on_pix_qr && <><Dot /><span>PIX QR</span></>}
-                              {px.fire_on_boleto && <><Dot /><span>Boleto</span></>}
-                            </div>
-                          </button>
 
-                          {/* Actions */}
-                          <div className="flex items-center gap-1">
-                            <Switch
-                              checked={px.is_active}
-                              onCheckedChange={v => updatePixelSettings(px.id, { is_active: v })}
-                            />
-                            <button
-                              className="h-8 w-8 rounded-md border border-transparent hover:border-destructive/30 flex items-center justify-center text-muted-foreground hover:text-destructive hover:bg-destructive/5 transition-colors"
-                              onClick={() => removePixel(px.id)}
-                              aria-label="Remover pixel"
-                            >
-                              <Trash2 className="h-3.5 w-3.5" />
-                            </button>
                             <button
                               onClick={() => setExpandedPixel(isExpanded ? null : px.id)}
-                              className={cn(
-                                "h-8 w-8 rounded-md border border-border flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted/30 transition-all",
-                                isExpanded && "rotate-180 bg-muted/40 text-foreground"
-                              )}
-                              aria-label="Expandir"
+                              className="flex-1 min-w-0 text-left"
                             >
-                              <ChevronDown className="h-3.5 w-3.5" />
-                            </button>
-                          </div>
-                        </div>
-
-                        {/* Expanded panel */}
-                        <AnimatePresence initial={false}>
-                          {isExpanded && (
-                            <motion.div
-                              initial={{ height: 0, opacity: 0 }}
-                              animate={{ height: "auto", opacity: 1 }}
-                              exit={{ height: 0, opacity: 0 }}
-                              transition={{ duration: 0.22, ease }}
-                              className="overflow-hidden"
-                            >
-                              <div className="border-t border-border px-4 py-4 space-y-5 bg-background/40">
-                                {/* Events */}
-                                <div>
-                                  <SectionLabel icon={Zap}>Eventos Rastreados</SectionLabel>
-                                  <div className="flex flex-wrap gap-1.5">
-                                    {ALL_EVENTS.map(event => {
-                                      const active = (px.events || []).includes(event);
-                                      return (
-                                        <button
-                                          key={event}
-                                          type="button"
-                                          onClick={() => togglePixelEvent(px.id, event)}
-                                          className={cn(
-                                            "inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-[10.5px] font-display font-bold transition-colors border",
-                                            active
-                                              ? "bg-primary/10 border-primary/30 text-primary"
-                                              : "bg-card border-border text-muted-foreground hover:text-foreground hover:border-border/80"
-                                          )}
-                                        >
-                                          {active && <CircleCheck className="h-3 w-3" />}
-                                          {event}
-                                        </button>
-                                      );
-                                    })}
-                                  </div>
-                                </div>
-
-                                {/* Triggers */}
-                                <div>
-                                  <SectionLabel icon={Settings2}>Gatilhos de Conversão</SectionLabel>
-                                  <div className="space-y-2">
-                                    <TriggerCard
-                                      label="Disparar Purchase ao gerar QR Code PIX"
-                                      desc={px.fire_on_pix_qr ? "Purchase dispara na geração do QR Code" : "Purchase dispara apenas após confirmação do pagamento"}
-                                      checked={px.fire_on_pix_qr}
-                                      onChange={v => updatePixelSettings(px.id, { fire_on_pix_qr: v })}
-                                      showSlider={px.fire_on_pix_qr}
-                                      sliderValue={px.pix_conversion_value}
-                                      onSliderChange={v => updatePixelSettings(px.id, { pix_conversion_value: v })}
-                                    />
-                                    <TriggerCard
-                                      label="Disparar Purchase ao gerar Boleto"
-                                      desc={px.fire_on_boleto ? "Purchase dispara na geração do boleto" : "Purchase dispara apenas no pagamento confirmado"}
-                                      checked={px.fire_on_boleto}
-                                      onChange={v => updatePixelSettings(px.id, { fire_on_boleto: v })}
-                                      showSlider={px.fire_on_boleto}
-                                      sliderValue={px.boleto_conversion_value}
-                                      onSliderChange={v => updatePixelSettings(px.id, { boleto_conversion_value: v })}
-                                    />
-                                    <TriggerCard
-                                      label="Desativar eventos de Order Bumps"
-                                      desc="Não dispara eventos de conversão para produtos adicionais"
-                                      checked={px.disable_bump_events}
-                                      onChange={v => updatePixelSettings(px.id, { disable_bump_events: v })}
-                                    />
-                                  </div>
-                                </div>
+                              <div className="flex items-center gap-2">
+                                <p className="font-mono text-[12px] font-bold text-foreground truncate">{px.pixel_id}</p>
+                                <StatusDot active={px.is_active} />
                               </div>
-                            </motion.div>
-                          )}
-                        </AnimatePresence>
-                      </motion.div>
-                    );
-                  })}
-                </AnimatePresence>
-              </div>
-            )}
+                              <div className="mt-0.5 flex items-center gap-1.5 text-[10.5px] text-muted-foreground font-display">
+                                <span className="tabular-nums">{activeEvents} evento{activeEvents !== 1 ? "s" : ""}</span>
+                                {px.api_token && <><Dot /><span>API Token</span></>}
+                                {px.fire_on_pix_qr && <><Dot /><span className="text-success font-bold">PIX QR</span></>}
+                                {px.fire_on_boleto && <><Dot /><span className="text-success font-bold">Boleto</span></>}
+                              </div>
+                            </button>
 
-            {/* Section title — add new */}
-            <div className="flex items-center gap-2 pt-2">
-              <span className="text-[10px] font-display font-black uppercase tracking-[0.18em] text-muted-foreground">
-                Adicionar Novo Pixel
-              </span>
-              <span className="h-px flex-1 bg-border" />
-            </div>
+                            <div className="flex items-center gap-1">
+                              <Switch
+                                checked={px.is_active}
+                                onCheckedChange={v => updatePixelSettings(px.id, { is_active: v })}
+                              />
+                              <button
+                                className="h-8 w-8 rounded-md border border-transparent hover:border-destructive/30 flex items-center justify-center text-muted-foreground hover:text-destructive hover:bg-destructive/5 transition-colors"
+                                onClick={() => removePixel(px.id)}
+                                aria-label="Remover pixel"
+                              >
+                                <Trash2 className="h-3.5 w-3.5" />
+                              </button>
+                              <button
+                                onClick={() => setExpandedPixel(isExpanded ? null : px.id)}
+                                className={cn(
+                                  "h-8 w-8 rounded-md border border-border flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted/30 transition-all",
+                                  isExpanded && "rotate-180 bg-muted/40 text-foreground"
+                                )}
+                                aria-label="Expandir"
+                              >
+                                <ChevronDown className="h-3.5 w-3.5" />
+                              </button>
+                            </div>
+                          </div>
 
-            {/* ADD NEW PIXEL */}
-            <div className="rounded-md border border-border bg-card overflow-hidden">
-              {/* Brand strip */}
-              <div className="flex items-center gap-3 border-b border-border px-5 py-3.5 bg-background/60">
-                <div className="h-9 w-9 rounded-md border border-border bg-background flex items-center justify-center">
-                  <platform.LogoComp className="h-4 w-4" style={{ color: platform.brandColor }} />
+                          <AnimatePresence initial={false}>
+                            {isExpanded && (
+                              <motion.div
+                                initial={{ height: 0, opacity: 0 }}
+                                animate={{ height: "auto", opacity: 1 }}
+                                exit={{ height: 0, opacity: 0 }}
+                                transition={{ duration: 0.22, ease }}
+                                className="overflow-hidden"
+                              >
+                                <div className="border-t border-border px-4 py-4 space-y-5 bg-background/40">
+                                  <div>
+                                    <SectionLabel icon={Zap}>Eventos Rastreados</SectionLabel>
+                                    <div className="flex flex-wrap gap-1.5">
+                                      {ALL_EVENTS.map(event => {
+                                        const active = (px.events || []).includes(event);
+                                        return (
+                                          <button
+                                            key={event}
+                                            type="button"
+                                            onClick={() => togglePixelEvent(px.id, event)}
+                                            className={cn(
+                                              "inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-[10.5px] font-display font-bold transition-colors border",
+                                              active
+                                                ? "bg-primary/10 border-primary/30 text-primary"
+                                                : "bg-card border-border text-muted-foreground hover:text-foreground"
+                                            )}
+                                          >
+                                            {active && <CircleCheck className="h-3 w-3" />}
+                                            {event}
+                                          </button>
+                                        );
+                                      })}
+                                    </div>
+                                  </div>
+
+                                  <div>
+                                    <SectionLabel icon={Settings2}>Gatilhos de Conversão</SectionLabel>
+                                    <div className="space-y-2">
+                                      <TriggerCard
+                                        label="Disparar Purchase ao gerar QR Code PIX"
+                                        desc={px.fire_on_pix_qr ? "Purchase dispara na geração do QR Code" : "Purchase dispara apenas após confirmação do pagamento"}
+                                        checked={px.fire_on_pix_qr}
+                                        onChange={v => updatePixelSettings(px.id, { fire_on_pix_qr: v })}
+                                        showSlider={px.fire_on_pix_qr}
+                                        sliderValue={px.pix_conversion_value}
+                                        onSliderChange={v => updatePixelSettings(px.id, { pix_conversion_value: v })}
+                                      />
+                                      <TriggerCard
+                                        label="Disparar Purchase ao gerar Boleto"
+                                        desc={px.fire_on_boleto ? "Purchase dispara na geração do boleto" : "Purchase dispara apenas no pagamento confirmado"}
+                                        checked={px.fire_on_boleto}
+                                        onChange={v => updatePixelSettings(px.id, { fire_on_boleto: v })}
+                                        showSlider={px.fire_on_boleto}
+                                        sliderValue={px.boleto_conversion_value}
+                                        onSliderChange={v => updatePixelSettings(px.id, { boleto_conversion_value: v })}
+                                      />
+                                      <TriggerCard
+                                        label="Desativar eventos de Order Bumps"
+                                        desc="Não dispara eventos de conversão para produtos adicionais"
+                                        checked={px.disable_bump_events}
+                                        onChange={v => updatePixelSettings(px.id, { disable_bump_events: v })}
+                                      />
+                                    </div>
+                                  </div>
+                                </div>
+                              </motion.div>
+                            )}
+                          </AnimatePresence>
+                        </motion.div>
+                      );
+                    })}
+                  </AnimatePresence>
                 </div>
-                <div className="min-w-0">
-                  <p className="text-[13px] font-display font-bold text-foreground leading-tight">
-                    {platform.label}
-                  </p>
-                  <p className="text-[10.5px] text-muted-foreground font-display mt-0.5">
-                    Preencha as credenciais e selecione os eventos que deseja rastrear.
-                  </p>
-                </div>
+              )}
+
+              {/* Section title — add */}
+              <div className="flex items-center gap-2 pt-2">
+                <span className="text-[10px] font-display font-black uppercase tracking-[0.18em] text-muted-foreground">
+                  Adicionar Novo Pixel
+                </span>
+                <span className="h-px flex-1 bg-border" />
               </div>
 
-              <div className="px-5 py-5 space-y-5">
-                {/* Fields */}
-                <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-                  <Field label="Pixel ID" icon={Hash}>
-                    <Input
-                      value={newPixelId}
-                      onChange={e => setNewPixelId(e.target.value)}
-                      placeholder="Ex: 123456789012345"
-                      className="h-10 rounded-md border-border bg-background text-[12.5px] font-mono focus-visible:ring-1 focus-visible:ring-primary/40 focus-visible:border-primary/40"
-                    />
-                  </Field>
-                  {platform.fields.includes("api_token") && (
-                    <Field label="API Token" icon={Key}>
+              <div className="rounded-md border border-border bg-card overflow-hidden">
+                <div className="px-5 py-5 space-y-5">
+                  <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                    <Field label="Pixel ID" icon={Hash} hint={platform.idHint}>
                       <Input
-                        value={newApiToken}
-                        onChange={e => setNewApiToken(e.target.value)}
-                        placeholder="Token de conversão"
+                        value={newPixelId}
+                        onChange={e => setNewPixelId(e.target.value)}
+                        placeholder="Ex: 123456789012345"
+                        className="h-10 rounded-md border-border bg-background text-[12.5px] font-mono focus-visible:ring-1 focus-visible:ring-primary/40 focus-visible:border-primary/40"
+                      />
+                    </Field>
+                    {platform.fields.includes("api_token") && (
+                      <Field label="API Token / Access Token" icon={Key} hint="Necessário para Conversions API (server-side)">
+                        <Input
+                          value={newApiToken}
+                          onChange={e => setNewApiToken(e.target.value)}
+                          placeholder="Token de conversão"
+                          className="h-10 rounded-md border-border bg-background text-[12.5px] font-mono focus-visible:ring-1 focus-visible:ring-primary/40 focus-visible:border-primary/40"
+                        />
+                      </Field>
+                    )}
+                  </div>
+                  {platform.fields.includes("domain") && (
+                    <Field label="Domínio Verificado" icon={Globe2} hint="Recomendado para iOS 14+ (Aggregated Event Measurement)">
+                      <Input
+                        value={newDomain}
+                        onChange={e => setNewDomain(e.target.value)}
+                        placeholder="seusite.com"
                         className="h-10 rounded-md border-border bg-background text-[12.5px] font-mono focus-visible:ring-1 focus-visible:ring-primary/40 focus-visible:border-primary/40"
                       />
                     </Field>
                   )}
-                </div>
-                {platform.fields.includes("domain") && (
-                  <Field label="Domínio" icon={Globe2}>
-                    <Input
-                      value={newDomain}
-                      onChange={e => setNewDomain(e.target.value)}
-                      placeholder="seusite.com"
-                      className="h-10 rounded-md border-border bg-background text-[12.5px] font-mono focus-visible:ring-1 focus-visible:ring-primary/40 focus-visible:border-primary/40"
-                    />
-                  </Field>
-                )}
 
-                {/* Events selector */}
-                <div>
-                  <Label className="text-[10px] font-display font-black uppercase tracking-[0.16em] text-muted-foreground mb-2 block">
-                    Eventos
-                  </Label>
-                  <div className="grid grid-cols-2 gap-2">
-                    {[
-                      { mode: "all" as const, label: "Todos os eventos", icon: Sparkles, desc: "Recomendado" },
-                      { mode: "custom" as const, label: "Personalizado", icon: Settings2, desc: "Selecione manualmente" },
-                    ].map(opt => (
-                      <button
-                        key={opt.mode}
-                        type="button"
-                        onClick={() => { setNewEventMode(opt.mode); if (opt.mode === "all") setNewSelectedEvents([...ALL_EVENTS]); }}
-                        className={cn(
-                          "flex items-center gap-2.5 rounded-md px-3 py-2.5 text-left transition-colors border",
-                          newEventMode === opt.mode
-                            ? "bg-primary/10 border-primary/30 text-primary"
-                            : "bg-background border-border text-muted-foreground hover:text-foreground hover:border-border/80"
-                        )}
-                      >
-                        <opt.icon className="h-3.5 w-3.5 shrink-0" />
-                        <div className="min-w-0">
-                          <p className="text-[11.5px] font-display font-bold leading-tight">{opt.label}</p>
-                          <p className={cn(
-                            "text-[9.5px] font-display mt-0.5 leading-tight",
-                            newEventMode === opt.mode ? "text-primary/70" : "text-muted-foreground/70"
-                          )}>{opt.desc}</p>
-                        </div>
-                      </button>
-                    ))}
+                  <div>
+                    <Label className="text-[10px] font-display font-black uppercase tracking-[0.16em] text-muted-foreground mb-2 block">
+                      Eventos
+                    </Label>
+                    <div className="grid grid-cols-2 gap-2">
+                      {[
+                        { mode: "all" as const, label: "Todos os eventos", icon: Sparkles, desc: "Recomendado" },
+                        { mode: "custom" as const, label: "Personalizado", icon: Settings2, desc: "Selecione manualmente" },
+                      ].map(opt => (
+                        <button
+                          key={opt.mode}
+                          type="button"
+                          onClick={() => { setNewEventMode(opt.mode); if (opt.mode === "all") setNewSelectedEvents([...ALL_EVENTS]); }}
+                          className={cn(
+                            "flex items-center gap-2.5 rounded-md px-3 py-2.5 text-left transition-colors border",
+                            newEventMode === opt.mode
+                              ? "bg-primary/10 border-primary/30 text-primary"
+                              : "bg-background border-border text-muted-foreground hover:text-foreground"
+                          )}
+                        >
+                          <opt.icon className="h-3.5 w-3.5 shrink-0" />
+                          <div className="min-w-0">
+                            <p className="text-[11.5px] font-display font-bold leading-tight">{opt.label}</p>
+                            <p className={cn(
+                              "text-[9.5px] font-display mt-0.5 leading-tight",
+                              newEventMode === opt.mode ? "text-primary/70" : "text-muted-foreground/70"
+                            )}>{opt.desc}</p>
+                          </div>
+                        </button>
+                      ))}
+                    </div>
+
+                    <AnimatePresence initial={false}>
+                      {newEventMode === "custom" && (
+                        <motion.div
+                          initial={{ height: 0, opacity: 0 }}
+                          animate={{ height: "auto", opacity: 1 }}
+                          exit={{ height: 0, opacity: 0 }}
+                          transition={{ duration: 0.22, ease }}
+                          className="overflow-hidden"
+                        >
+                          <div className="mt-2.5 flex flex-wrap gap-1.5 p-3 rounded-md border border-border bg-background">
+                            {ALL_EVENTS.map(event => {
+                              const sel = newSelectedEvents.includes(event);
+                              return (
+                                <button
+                                  key={event}
+                                  type="button"
+                                  onClick={() => toggleNewEvent(event)}
+                                  className={cn(
+                                    "inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-[10.5px] font-display font-bold transition-colors border",
+                                    sel
+                                      ? "bg-primary/10 border-primary/30 text-primary"
+                                      : "bg-card border-border text-muted-foreground hover:text-foreground"
+                                  )}
+                                >
+                                  {sel && <CircleCheck className="h-3 w-3" />}
+                                  {event}
+                                </button>
+                              );
+                            })}
+                          </div>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
                   </div>
 
-                  <AnimatePresence initial={false}>
-                    {newEventMode === "custom" && (
-                      <motion.div
-                        initial={{ height: 0, opacity: 0 }}
-                        animate={{ height: "auto", opacity: 1 }}
-                        exit={{ height: 0, opacity: 0 }}
-                        transition={{ duration: 0.22, ease }}
-                        className="overflow-hidden"
-                      >
-                        <div className="mt-2.5 flex flex-wrap gap-1.5 p-3 rounded-md border border-border bg-background">
-                          {ALL_EVENTS.map(event => {
-                            const sel = newSelectedEvents.includes(event);
-                            return (
-                              <button
-                                key={event}
-                                type="button"
-                                onClick={() => toggleNewEvent(event)}
-                                className={cn(
-                                  "inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-[10.5px] font-display font-bold transition-colors border",
-                                  sel
-                                    ? "bg-primary/10 border-primary/30 text-primary"
-                                    : "bg-card border-border text-muted-foreground hover:text-foreground hover:border-border/80"
-                                )}
-                              >
-                                {sel && <CircleCheck className="h-3 w-3" />}
-                                {event}
-                              </button>
-                            );
-                          })}
-                        </div>
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
-                </div>
-
-                {/* Footer */}
-                <div className="flex items-center justify-between pt-2 border-t border-border">
-                  <p className="text-[10.5px] text-muted-foreground font-display">
-                    <span className="font-numbers font-bold text-foreground tabular-nums">{platformPixels.length}</span>
-                    <span className="mx-1 text-muted-foreground/60">/</span>
-                    <span className="font-numbers tabular-nums">50</span> pixels nesta plataforma
-                  </p>
-                  <Button
-                    onClick={addPixel}
-                    className="h-10 gap-2 rounded-md px-5 text-[12px] font-display font-bold"
-                  >
-                    <Plus className="h-3.5 w-3.5" /> Adicionar Pixel
-                  </Button>
+                  <div className="flex items-center justify-between pt-2 border-t border-border">
+                    <p className="text-[10.5px] text-muted-foreground font-display">
+                      <span className="font-numbers font-bold text-foreground tabular-nums">{platformPixels.length}</span>
+                      <span className="mx-1 text-muted-foreground/60">/</span>
+                      <span className="font-numbers tabular-nums">50</span> pixels nesta plataforma
+                    </p>
+                    <Button
+                      onClick={addPixel}
+                      className="h-10 gap-2 rounded-md px-5 text-[12px] font-display font-bold"
+                    >
+                      <Plus className="h-3.5 w-3.5" /> Adicionar Pixel
+                    </Button>
+                  </div>
                 </div>
               </div>
             </div>
@@ -629,7 +682,6 @@ function KpiCell({
   );
 }
 
-
 function StatusDot({ active }: { active: boolean }) {
   return (
     <span
@@ -658,13 +710,16 @@ function SectionLabel({ icon: Icon, children }: { icon: any; children: React.Rea
   );
 }
 
-function Field({ label, icon: Icon, children }: { label: string; icon: any; children: React.ReactNode }) {
+function Field({ label, icon: Icon, hint, children }: { label: string; icon: any; hint?: string; children: React.ReactNode }) {
   return (
     <div>
       <Label className="text-[10px] font-display font-black uppercase tracking-[0.14em] text-muted-foreground mb-1.5 flex items-center gap-1.5">
         <Icon className="h-3 w-3" /> {label}
       </Label>
       {children}
+      {hint && (
+        <p className="mt-1 text-[9.5px] text-muted-foreground/70 font-display leading-snug">{hint}</p>
+      )}
     </div>
   );
 }
