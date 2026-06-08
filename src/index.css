@@ -116,6 +116,15 @@ input[type="number"]::-webkit-inner-spin-button {
     background-color: hsl(var(--background));
   }
 
+  .bg-card,
+  .bg-popover,
+  .bg-background,
+  .bg-muted,
+  .bg-accent,
+  .bg-secondary {
+    color: hsl(var(--foreground));
+  }
+
   #root {
     height: 100%;
   }
@@ -160,6 +169,100 @@ input[type="number"]::-webkit-inner-spin-button {
 @layer utilities {
   .gradient-primary {
     background: linear-gradient(135deg, hsl(var(--primary)), hsl(var(--info)));
+  }
+
+  .platform-shell {
+    background-color: hsl(var(--background));
+    background-image:
+      linear-gradient(hsl(var(--border) / 0.34) 1px, transparent 1px),
+      linear-gradient(90deg, hsl(var(--border) / 0.24) 1px, transparent 1px);
+    background-size: 48px 48px;
+  }
+
+  .platform-card,
+  .dashboard-panel,
+  .dashboard-hero-surface,
+  .dashboard-surface,
+  .dashboard-tile,
+  .mesh-gradient-hero,
+  .seller-panel,
+  .seller-shell,
+  .platform-shell [class*="bg-card"][class*="border"][class*="rounded"] {
+    position: relative;
+    isolation: isolate;
+    border-color: hsl(var(--border)) !important;
+    background-color: hsl(var(--card)) !important;
+    background-image:
+      linear-gradient(180deg, hsl(var(--foreground) / 0.035), transparent 92%),
+      linear-gradient(90deg, hsl(var(--primary) / 0.06), transparent 36%) !important;
+    box-shadow: none !important;
+  }
+
+  .platform-shell section[class*="border"],
+  .platform-shell article[class*="border"],
+  .platform-shell [data-card],
+  .platform-shell [class*="dashboard-"][class*="border"] {
+    border-color: hsl(var(--border)) !important;
+  }
+
+  .platform-shell [class*="bg-muted"][class*="border"][class*="rounded"]:not(button):not(input):not(textarea):not(select),
+  .platform-shell [class*="bg-background"][class*="border"][class*="rounded"]:not(button):not(input):not(textarea):not(select) {
+    background-color: hsl(var(--card-inset)) !important;
+    border-color: hsl(var(--border)) !important;
+  }
+
+  .platform-card::before,
+  .dashboard-panel::before,
+  .dashboard-hero-surface::before,
+  .dashboard-surface::before,
+  .dashboard-tile::before,
+  .mesh-gradient-hero::before,
+  .seller-panel::before,
+  .seller-shell::before,
+  .platform-shell [class*="bg-card"][class*="border"][class*="rounded"]::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    border-left: 4px solid hsl(var(--primary));
+    border-top: 1px solid hsl(var(--foreground) / 0.08);
+    opacity: 1;
+  }
+
+  .platform-card::after,
+  .dashboard-panel::after,
+  .dashboard-hero-surface::after,
+  .dashboard-surface::after,
+  .dashboard-tile::after,
+  .platform-shell [class*="bg-card"][class*="border"][class*="rounded"]::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    z-index: 0;
+    width: 76px;
+    height: 76px;
+    pointer-events: none;
+    background:
+      linear-gradient(135deg, transparent 49%, hsl(var(--border) / 0.72) 50%, transparent 51%),
+      linear-gradient(45deg, transparent 49%, hsl(var(--border) / 0.46) 50%, transparent 51%);
+    background-size: 12px 12px;
+    opacity: 0.55;
+    mask-image: linear-gradient(135deg, black, transparent 72%);
+  }
+
+  .platform-card > *,
+  .dashboard-panel > *,
+  .dashboard-hero-surface > *,
+  .dashboard-surface > *,
+  .dashboard-tile > *,
+  .mesh-gradient-hero > *,
+  .seller-panel > *,
+  .seller-shell > *,
+  .platform-shell [class*="bg-card"][class*="border"][class*="rounded"] > * {
+    position: relative;
+    z-index: 1;
   }
 
   .dashboard-page {

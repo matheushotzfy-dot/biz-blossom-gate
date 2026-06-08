@@ -71,7 +71,7 @@ export function StatCard({
   return (
     <div 
       className={cn(
-        "group relative overflow-hidden rounded-2xl border border-border/60 bg-card p-3 sm:p-5 transition-all duration-300 hover:border-primary/40 hover:shadow-lg hover:shadow-black/5 animate-in fade-in slide-in-from-bottom-2",
+        "platform-card group relative overflow-hidden rounded-2xl border border-border bg-card p-3 sm:p-5 transition-colors duration-300 animate-in fade-in slide-in-from-bottom-2",
         className
       )}
       style={{ animationDelay: `${delay}ms` }}
