@@ -679,7 +679,11 @@ export default function Dashboard() {
               <div key={item.id} className="group flex items-center justify-between px-8 py-6 hover:bg-muted/30 transition-all cursor-pointer">
                 <div className="flex items-center gap-4">
                   <div className={cn("h-11 w-11 rounded-2xl flex items-center justify-center transition-transform group-hover:scale-110", statusBg(item.status))}>
-                    <CreditCard className={cn("h-5 w-5", statusColor(item.status))} />
+                    {item.label === "pix" ? (
+                      <PixLogoMark className="h-5 w-5" />
+                    ) : (
+                      <CreditCard className={cn("h-5 w-5", statusColor(item.status))} />
+                    )}
                   </div>
                   <div>
                     <p className="text-sm font-bold">{item.label === "pix" ? "Pagamento via PIX" : item.label === "credit_card" ? "Pagamento via Cartão" : "Transação"}</p>
