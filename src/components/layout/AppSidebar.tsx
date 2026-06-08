@@ -159,9 +159,6 @@ function RevenueCard({ collapsed, revenue, milestone, onOpenRewards }: RevenueCa
           <span className="font-numbers text-[11px] font-bold tabular-nums text-sidebar-accent-foreground">
             {pctDisplay}%
           </span>
-          <span className="font-display text-[9px] font-semibold uppercase tracking-[0.14em] text-sidebar-foreground/45">
-            · faltam {formatRevenue(remaining)}
-          </span>
         </div>
         <span className="inline-flex items-center gap-0.5 font-display text-[9px] font-bold uppercase tracking-[0.18em] text-sidebar-primary/90 transition-transform group-hover/rev:translate-x-0.5">
           PREMIAÇÕES
