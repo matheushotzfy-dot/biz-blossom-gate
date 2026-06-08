@@ -327,53 +327,66 @@ export default function PixelSettingsDialog({ product, open, onOpenChange }: Pro
 
           {/* WORKSPACE */}
           <div className="flex-1 overflow-y-auto bg-background/20">
-            {/* Brand strip */}
+            {/* Brand hero */}
             <div
-              className="border-b border-border px-7 py-4 flex items-center gap-4 relative overflow-hidden"
+              className="border-b border-border px-7 py-5 relative overflow-hidden"
               style={{
-                backgroundImage: `linear-gradient(90deg, ${platform.brandColor}14, transparent 60%)`,
+                backgroundImage: `linear-gradient(90deg, ${platform.brandColor}0E 0%, transparent 55%)`,
               }}
             >
-              <div className="h-11 w-11 rounded-md border border-border bg-background flex items-center justify-center shrink-0">
-                <platform.LogoComp className="h-5 w-5" style={{ color: platform.brandColor }} />
-              </div>
-              <div className="min-w-0 flex-1">
-                <div className="flex items-center gap-2">
-                  <h3 className="text-[15px] font-display font-black tracking-tight text-foreground leading-tight">
-                    {platform.label}
-                  </h3>
-                  <span
-                    className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[8.5px] font-display font-black uppercase tracking-[0.14em] border"
-                    style={{
-                      color: platform.brandColor,
-                      borderColor: `${platform.brandColor}40`,
-                      backgroundColor: `${platform.brandColor}12`,
-                    }}
-                  >
-                    <Activity className="h-2.5 w-2.5" /> Integrado
-                  </span>
+              <span
+                className="absolute left-0 top-0 bottom-0 w-[3px]"
+                style={{ backgroundColor: platform.brandColor }}
+              />
+              <div className="flex items-center gap-4">
+                <div
+                  className="h-12 w-12 rounded-md border flex items-center justify-center shrink-0 bg-card"
+                  style={{ borderColor: `${platform.brandColor}38` }}
+                >
+                  <platform.LogoComp className="h-5 w-5" style={{ color: platform.brandColor }} />
                 </div>
-                <p className="text-[11px] text-muted-foreground mt-0.5 font-display">{platform.tagline}</p>
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-center gap-2">
+                    <h3 className="text-[15px] font-display font-black tracking-[-0.01em] text-foreground leading-none">
+                      {platform.label}
+                    </h3>
+                    <span
+                      className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[8.5px] font-display font-black uppercase tracking-[0.14em] border"
+                      style={{
+                        color: platform.brandColor,
+                        borderColor: `${platform.brandColor}40`,
+                        backgroundColor: `${platform.brandColor}12`,
+                      }}
+                    >
+                      <Activity className="h-2.5 w-2.5" /> Integrado
+                    </span>
+                  </div>
+                  <p className="text-[11px] text-muted-foreground mt-1.5 font-display flex items-center gap-2">
+                    <span>{platform.tagline}</span>
+                    <span className="h-1 w-1 rounded-full bg-muted-foreground/40" />
+                    <span className="font-mono text-foreground/70">{platform.idHint}</span>
+                  </p>
+                </div>
+                <a
+                  href={platform.docsUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="hidden sm:inline-flex items-center gap-1.5 h-8 px-3 rounded-md border border-border bg-card text-[10.5px] font-display font-bold text-muted-foreground hover:text-foreground transition-colors"
+                >
+                  <BookOpen className="h-3 w-3" /> Documentação <ExternalLink className="h-2.5 w-2.5" />
+                </a>
               </div>
-              <a
-                href={platform.docsUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="hidden sm:inline-flex items-center gap-1.5 h-8 px-3 rounded-md border border-border bg-card text-[10.5px] font-display font-bold text-muted-foreground hover:text-foreground hover:border-border transition-colors"
-              >
-                <BookOpen className="h-3 w-3" /> Documentação <ExternalLink className="h-2.5 w-2.5" />
-              </a>
             </div>
 
-            <div className="px-7 py-6 space-y-6">
+            <div className="px-7 py-5 space-y-5">
               {/* Section title */}
               <div className="flex items-center gap-2">
                 <span className="text-[10px] font-display font-black uppercase tracking-[0.18em] text-muted-foreground">
                   Pixels Configurados
                 </span>
                 <span className="h-px flex-1 bg-border" />
-                <span className="text-[10px] font-display font-bold text-muted-foreground tabular-nums">
-                  {platformPixels.length}
+                <span className="font-numbers text-[10px] font-black text-muted-foreground tabular-nums">
+                  {platformPixels.length.toString().padStart(2, "0")}
                 </span>
               </div>
 
@@ -385,16 +398,27 @@ export default function PixelSettingsDialog({ product, open, onOpenChange }: Pro
                   ))}
                 </div>
               ) : platformPixels.length === 0 ? (
-                <div className="border border-dashed border-border rounded-md py-10 text-center bg-card">
-                  <div className="mx-auto h-10 w-10 rounded-md border border-border bg-background flex items-center justify-center mb-3">
-                    <Radio className="h-4 w-4 text-muted-foreground" />
+                <div className="border border-dashed border-border rounded-md py-8 px-5 flex items-center gap-4 bg-card">
+                  <div
+                    className="h-10 w-10 rounded-md border flex items-center justify-center shrink-0"
+                    style={{
+                      borderColor: `${platform.brandColor}30`,
+                      backgroundColor: `${platform.brandColor}0A`,
+                    }}
+                  >
+                    <Radio className="h-4 w-4" style={{ color: platform.brandColor }} />
                   </div>
-                  <p className="text-[13px] font-display font-bold text-foreground">Nenhum pixel {platform.short}</p>
-                  <p className="text-[11px] text-muted-foreground mt-1 max-w-[320px] mx-auto leading-relaxed">
-                    Adicione um novo pixel abaixo para começar a rastrear conversões.
-                  </p>
+                  <div className="min-w-0 flex-1">
+                    <p className="text-[12.5px] font-display font-bold text-foreground leading-tight">
+                      Nenhum pixel {platform.short} configurado
+                    </p>
+                    <p className="text-[10.5px] text-muted-foreground mt-1 leading-relaxed font-display">
+                      Preencha o formulário abaixo para começar a disparar conversões para esta plataforma.
+                    </p>
+                  </div>
                 </div>
               ) : (
+
                 <div className="space-y-2">
                   <AnimatePresence initial={false}>
                     {platformPixels.map((px) => {
