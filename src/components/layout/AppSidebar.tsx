@@ -164,7 +164,7 @@ function RevenueCard({ collapsed, revenue, milestone, onOpenRewards }: RevenueCa
           </span>
         </div>
         <span className="inline-flex items-center gap-0.5 font-display text-[9px] font-bold uppercase tracking-[0.18em] text-sidebar-primary/90 transition-transform group-hover/rev:translate-x-0.5">
-          Rewards
+          PREMIAÇÕES
           <ChevronRight className="h-2.5 w-2.5" strokeWidth={3} />
         </span>
       </div>
@@ -370,7 +370,7 @@ export function AppSidebar() {
               </h1>
               <span className="inline-flex h-[14px] items-center gap-0.5 rounded-[3px] border border-sidebar-primary/40 bg-sidebar-primary/15 px-1 font-display text-[8px] font-black uppercase tracking-[0.16em] text-sidebar-primary">
                 <Crown className="h-2 w-2" strokeWidth={3} fill="currentColor" />
-                Pro
+                
               </span>
             </div>
             <div className="mt-1.5 flex items-center gap-1.5">
@@ -379,7 +379,7 @@ export function AppSidebar() {
                 <span className="relative h-1.5 w-1.5 rounded-full bg-success" />
               </span>
               <span className="font-display text-[9.5px] font-black uppercase tracking-[0.2em] text-sidebar-foreground/70">
-                Operacional
+                {"\n"}
               </span>
               <span className="ml-auto h-px flex-1 bg-sidebar-border/50" />
               <span className="font-numbers text-[9px] font-bold uppercase tracking-[0.16em] text-sidebar-foreground/45 tabular-nums">
