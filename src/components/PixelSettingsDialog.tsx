@@ -315,14 +315,6 @@ export default function PixelSettingsDialog({ product, open, onOpenChange }: Pro
               })}
             </nav>
 
-            <div className="mt-4 mx-3 p-3 rounded-md border border-border bg-card">
-              <div className="flex items-center gap-1.5 text-[9.5px] font-display font-black uppercase tracking-[0.16em] text-success">
-                <ShieldCheck className="h-3 w-3" /> Server-Side Ready
-              </div>
-              <p className="text-[10.5px] text-muted-foreground mt-1.5 leading-relaxed">
-                Eventos disparam em paralelo no navegador e no servidor com <span className="font-mono text-foreground">eventID</span> compartilhado para deduplicação.
-              </p>
-            </div>
           </aside>
 
           {/* WORKSPACE */}
@@ -350,31 +342,11 @@ export default function PixelSettingsDialog({ product, open, onOpenChange }: Pro
                     <h3 className="text-[15px] font-display font-black tracking-[-0.01em] text-foreground leading-none">
                       {platform.label}
                     </h3>
-                    <span
-                      className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[8.5px] font-display font-black uppercase tracking-[0.14em] border"
-                      style={{
-                        color: platform.brandColor,
-                        borderColor: `${platform.brandColor}40`,
-                        backgroundColor: `${platform.brandColor}12`,
-                      }}
-                    >
-                      <Activity className="h-2.5 w-2.5" /> Integrado
-                    </span>
                   </div>
-                  <p className="text-[11px] text-muted-foreground mt-1.5 font-display flex items-center gap-2">
-                    <span>{platform.tagline}</span>
-                    <span className="h-1 w-1 rounded-full bg-muted-foreground/40" />
-                    <span className="font-mono text-foreground/70">{platform.idHint}</span>
+                  <p className="text-[11px] text-muted-foreground mt-1.5 font-display">
+                    {platform.tagline}
                   </p>
                 </div>
-                <a
-                  href={platform.docsUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="hidden sm:inline-flex items-center gap-1.5 h-8 px-3 rounded-md border border-border bg-card text-[10.5px] font-display font-bold text-muted-foreground hover:text-foreground transition-colors"
-                >
-                  <BookOpen className="h-3 w-3" /> Documentação <ExternalLink className="h-2.5 w-2.5" />
-                </a>
               </div>
             </div>
 
