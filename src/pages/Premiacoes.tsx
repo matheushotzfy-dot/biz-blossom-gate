@@ -9,12 +9,13 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import {
   Trophy, Lock, CheckCircle2, Gift, Crown, Target, Sparkles, Flame,
-  Gem, Star, Award, Quote, TrendingUp, Activity,
+  Gem, Star, Award, Quote, TrendingUp, Activity, ChevronRight,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { FinanceiroHero, FinanceiroKpi, FinanceiroKpiGrid } from "@/components/financeiro/FinanceiroHero";
+import { FinanceiroKpi, FinanceiroKpiGrid } from "@/components/financeiro/FinanceiroHero";
 
-
+import heroStage from "@/assets/awards/premiacoes-hero-stage.jpg";
+import hotzfyLogo from "@/assets/hotzfy-logo.png";
 import braceletCard from "@/assets/awards/bracelet-card-10k.png";
 import plaque100k from "@/assets/awards/plaque-100k.png";
 import plaque250k from "@/assets/awards/plaque-250k.png";
@@ -22,6 +23,7 @@ import plaque500k from "@/assets/awards/plaque-500k.png";
 import plaque1m from "@/assets/awards/plaque-1m.png";
 import plaque5m from "@/assets/awards/plaque-5m.png";
 import plaque10m from "@/assets/awards/plaque-10m.png";
+
 
 type Award = {
   id: string; value: number; label: string; tier: string; title: string;
