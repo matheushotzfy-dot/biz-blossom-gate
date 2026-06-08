@@ -604,8 +604,8 @@ export default function Dashboard() {
               <div className="group space-y-3">
                 <div className="flex justify-between items-center">
                   <div className="flex items-center gap-3">
-                    <div className="h-9 w-9 rounded-xl bg-info/10 border border-info/20 flex items-center justify-center text-info">
-                      <Zap className="h-4.5 w-4.5" />
+                    <div className="h-9 w-9 rounded-xl bg-info/10 border border-info/20 flex items-center justify-center">
+                      <PixLogoMark className="h-5 w-5" />
                     </div>
                     <div>
                       <p className="text-xs font-bold uppercase tracking-wider">PIX</p>
