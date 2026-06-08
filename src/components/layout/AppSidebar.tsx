@@ -312,7 +312,7 @@ export function AppSidebar() {
     {
       label: "COMANDO",
       items: [
-        { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard, badge: "Live", exact: true },
+        { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard, exact: true },
         { title: "Vendas", url: "/vendas", icon: BarChart3, exact: true },
       ],
     },
