@@ -112,13 +112,13 @@ function DashboardLayoutInner() {
       <SidebarProvider
         style={{ "--sidebar-width": "19.5rem", "--sidebar-width-icon": "4.5rem" } as { [key: string]: string }}
       >
- <div className="flex w-full h-full bg-background">
+ <div className="flex w-full h-full bg-background platform-shell">
  <AppSidebar />
 
   <SidebarInset className="ambient-backdrop relative min-w-0 bg-background flex flex-col h-full min-h-0 overflow-hidden">
    {/* Ambient light is handled by .ambient-backdrop CSS — no extra blobs needed */}
 
-          <header className="relative z-30 h-16 flex items-center border-b border-border bg-background/95 backdrop-blur-xl px-4 lg:px-6 sticky top-0 md:flex transition-all duration-300 shadow-sm shadow-black/[0.02]">
+          <header className="relative z-30 h-16 flex items-center border-b border-border bg-card px-4 lg:px-6 sticky top-0 md:flex transition-colors duration-300">
             <SidebarTrigger className="h-9 w-9 rounded-xl hover:bg-muted/60 transition-all flex items-center justify-center text-muted-foreground/70 hover:text-foreground">
               <Menu className="h-4 w-4" strokeWidth={2} />
             </SidebarTrigger>
@@ -127,7 +127,7 @@ function DashboardLayoutInner() {
             <div className="flex-1 max-w-sm lg:max-w-md ml-4 mr-auto">
               <button
                 onClick={() => setSearchOpen(true)}
-                className="w-full h-[38px] px-4 rounded-[1.25rem] bg-muted/20 border border-border/20 hover:bg-muted/40 hover:border-primary/20 hover:shadow-[0_0_15px_-5px_rgba(var(--primary),0.1)] transition-all flex items-center gap-3 text-muted-foreground/60 hover:text-foreground group overflow-hidden relative"
+                className="w-full h-[38px] px-4 rounded-xl bg-card-inset border border-border hover:bg-accent hover:border-primary/30 transition-colors flex items-center gap-3 text-muted-foreground hover:text-foreground group overflow-hidden relative"
               >
                 <div className="absolute inset-0 bg-gradient-to-r from-primary/[0.03] to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
                 <Search className="h-[14px] w-[14px] transition-transform group-hover:scale-110 text-primary/60 group-hover:text-primary" strokeWidth={2.5} />
@@ -142,7 +142,7 @@ function DashboardLayoutInner() {
 
             {/* ─── BALANCE ─── */}
             <div className="hidden md:flex items-center justify-center px-4">
-              <div className="group/balance relative flex items-center gap-4 px-6 h-[46px] rounded-[1.5rem] bg-secondary/20 border border-border/30 backdrop-blur-md transition-all hover:bg-secondary/40 hover:border-primary/30 hover:shadow-[0_0_25px_-5px_rgba(var(--primary),0.15)] overflow-hidden">
+              <div className="platform-card group/balance relative flex items-center gap-4 px-6 h-[46px] rounded-xl bg-card border border-border transition-colors hover:border-primary/30 overflow-hidden">
                 <div className="absolute inset-0 bg-gradient-to-br from-primary/[0.03] to-transparent pointer-events-none" />
                 <div className="flex items-center gap-3 relative z-10">
                   <div className="flex h-7 w-7 items-center justify-center rounded-xl bg-primary/10 text-primary shadow-sm border border-primary/10 group-hover/balance:scale-110 transition-transform duration-500">
