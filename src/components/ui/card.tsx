@@ -3,9 +3,11 @@ import * as React from "react";
 import { cn } from "@/lib/utils";
 
 const Card = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement>>(({ className, ...props }, ref) => (
-  <div ref={ref} className={cn("group relative rounded-2xl border border-border/80 bg-card text-card-foreground shadow-sm shadow-black/[0.03] transition-all duration-[250ms] ease-[cubic-bezier(0.16,1,0.3,1)] hover:border-primary/20 hover:shadow-[0_4px_20px_hsl(var(--primary)/0.08)] overflow-hidden", className)} {...props}>
-    <div className="absolute top-0 left-0 w-1.5 h-full bg-primary opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-    {props.children}
+  <div ref={ref} className={cn("group relative rounded-2xl border border-border/90 bg-card text-card-foreground shadow-sm shadow-black/[0.04] transition-all duration-[300ms] ease-[cubic-bezier(0.16,1,0.3,1)] hover:border-primary/40 hover:shadow-[0_8px_30px_hsl(var(--primary)/0.12)] overflow-hidden", className)} {...props}>
+    <div className="absolute top-0 left-0 w-1.5 h-full bg-primary transition-all duration-300" />
+    <div className="relative z-10 h-full">
+      {props.children}
+    </div>
   </div>
 ));
 Card.displayName = "Card";
