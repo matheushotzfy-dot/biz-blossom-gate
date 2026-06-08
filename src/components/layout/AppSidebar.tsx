@@ -86,9 +86,15 @@ function getMilestone(revenue: number) {
 }
 
 function formatRevenue(revenue: number) {
-  if (revenue >= 1000000) return `R$ ${(revenue / 1000000).toFixed(2).replace(".", ",")}M`;
-  if (revenue >= 1000) return `R$ ${(revenue / 1000).toFixed(1).replace(".", ",")}K`;
-  return `R$ ${revenue.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+  if (revenue >= 1000000) return `R$ ${(revenue / 1000000).toFixed(2).replace(",", ".")}M`;
+  if (revenue >= 1000) return `R$ ${(revenue / 1000).toFixed(1).replace(",", ".")}K`;
+  return `R$ ${revenue.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+}
+
+function splitRevenue(revenue: number): { prefix: string; value: string; suffix: string } {
+  if (revenue >= 1000000) return { prefix: "R$", value: (revenue / 1000000).toFixed(2).replace(",", "."), suffix: "M" };
+  if (revenue >= 1000) return { prefix: "R$", value: (revenue / 1000).toFixed(1).replace(",", "."), suffix: "K" };
+  return { prefix: "R$", value: revenue.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 }), suffix: "" };
 }
 
 function isItemActive(pathname: string, item: SidebarItem) {
@@ -107,8 +113,10 @@ function RevenueCard({ collapsed, revenue, milestone, onOpenRewards }: RevenueCa
 
   const pct = Math.max(0, Math.min(100, milestone.pct));
   const pctDisplay = Math.round(pct);
-  const remaining = Math.max(0, milestone.next.value - revenue);
+  
   const tierName = milestone.current.tier;
+
+  const parts = splitRevenue(revenue);
 
   return (
     <button
@@ -124,43 +132,59 @@ function RevenueCard({ collapsed, revenue, milestone, onOpenRewards }: RevenueCa
             Faturamento
           </span>
         </div>
-        <span className="font-display text-[9px] font-bold uppercase tracking-[0.18em] text-sidebar-foreground/40">
+        <span className="rounded border border-sidebar-primary/25 bg-sidebar-primary/10 px-1.5 py-[1px] font-display text-[8.5px] font-black uppercase tracking-[0.18em] text-sidebar-primary">
           {tierName}
         </span>
       </div>
 
       {/* Main figure */}
-      <div className="mt-2 flex items-baseline gap-1.5">
-        <p className="font-numbers text-[22px] font-black leading-none tracking-[-0.04em] text-sidebar-accent-foreground tabular-nums">
-          {formatRevenue(revenue)}
+      <div className="mt-2.5 flex items-baseline gap-1.5">
+        <span className="font-numbers text-[13px] font-bold leading-none text-sidebar-foreground/45 tabular-nums">
+          {parts.prefix}
+        </span>
+        <p className="font-numbers text-[26px] font-black leading-none tracking-[-0.045em] text-sidebar-accent-foreground tabular-nums">
+          {parts.value}
+          <span className="ml-0.5 text-[18px] font-black text-sidebar-foreground/55">{parts.suffix}</span>
         </p>
-        <span className="font-display text-[9px] font-semibold uppercase tracking-[0.14em] text-sidebar-foreground/35">
+        <span className="ml-auto font-display text-[8.5px] font-bold uppercase tracking-[0.18em] text-sidebar-foreground/35">
           total
         </span>
       </div>
 
-      {/* Progress bar */}
-      <div className="relative mt-3 h-[3px] w-full overflow-hidden rounded-full bg-sidebar-border/50">
-        <div
-          className="absolute inset-y-0 left-0 rounded-full bg-sidebar-primary transition-[width] duration-700 ease-out"
-          style={{ width: `${pct}%` }}
-        />
+      {/* Progress bar with ticks */}
+      <div className="relative mt-3">
+        <div className="pointer-events-none absolute -top-[3px] left-0 z-10 flex w-full justify-between px-px">
+          <span className="h-[5px] w-px bg-sidebar-foreground/25" />
+          <span className="h-[5px] w-px bg-sidebar-foreground/15" />
+          <span className="h-[5px] w-px bg-sidebar-foreground/15" />
+          <span className="h-[5px] w-px bg-sidebar-foreground/15" />
+          <span className="h-[5px] w-px bg-sidebar-foreground/25" />
+        </div>
+        <div className="h-[4px] w-full overflow-hidden rounded-full bg-sidebar-border/50">
+          <div
+            className="h-full rounded-full bg-sidebar-primary transition-[width] duration-700 ease-out"
+            style={{ width: `${pct}%` }}
+          />
+        </div>
       </div>
 
       {/* Scale */}
-      <div className="mt-1.5 flex items-center justify-between font-numbers text-[9px] font-semibold tabular-nums text-sidebar-foreground/40">
-        <span>{milestone.current.label}</span>
-        <span>{milestone.next.label}</span>
+      <div className="mt-2 flex items-center justify-between font-numbers text-[9px] font-semibold tabular-nums text-sidebar-foreground/40">
+        <span>{milestone.current.label.replace(",", ".")}</span>
+        <span>{milestone.next.label.replace(",", ".")}</span>
       </div>
 
       {/* Footer */}
       <div className="mt-2.5 flex items-center justify-between border-t border-sidebar-border/40 pt-2">
         <div className="flex items-baseline gap-1">
-          <span className="font-numbers text-[11px] font-bold tabular-nums text-sidebar-accent-foreground">
+          <span className="font-numbers text-[12px] font-black tabular-nums text-sidebar-accent-foreground">
             {pctDisplay}%
           </span>
+          <span className="font-display text-[8.5px] font-bold uppercase tracking-[0.16em] text-sidebar-foreground/40">
+            da meta
+          </span>
         </div>
-        <span className="inline-flex items-center gap-0.5 font-display text-[9px] font-bold uppercase tracking-[0.18em] text-sidebar-primary/90 transition-transform group-hover/rev:translate-x-0.5">
+        <span className="inline-flex items-center gap-0.5 font-display text-[9px] font-black uppercase tracking-[0.2em] text-sidebar-primary transition-transform group-hover/rev:translate-x-0.5">
           PREMIAÇÕES
           <ChevronRight className="h-2.5 w-2.5" strokeWidth={3} />
         </span>
