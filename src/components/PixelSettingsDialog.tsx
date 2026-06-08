@@ -205,45 +205,52 @@ export default function PixelSettingsDialog({ product, open, onOpenChange }: Pro
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-[1080px] w-[96vw] max-h-[92vh] overflow-hidden flex flex-col p-0 rounded-xl border border-border bg-card gap-0">
         {/* ═══ HEADER ═══ */}
-        <div className="relative border-b border-border bg-card px-7 py-5">
+        <div className="relative border-b border-border bg-card px-7 py-4">
           <button
             onClick={() => onOpenChange(false)}
-            className="absolute top-4 right-4 h-8 w-8 rounded-md border border-border bg-card flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors"
+            className="absolute top-3.5 right-3.5 h-7 w-7 rounded-md border border-border bg-card flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors"
             aria-label="Fechar"
           >
-            <X className="h-4 w-4" />
+            <X className="h-3.5 w-3.5" />
           </button>
 
-          <div className="flex items-start gap-4">
-            <div className="relative h-12 w-12 rounded-lg border border-border bg-background flex items-center justify-center shrink-0">
-              <Crosshair className="h-5 w-5 text-primary" strokeWidth={2.2} />
-              <span className="absolute -bottom-1 -right-1 h-3.5 w-3.5 rounded-full border-2 border-card bg-success" />
+          <div className="flex items-center gap-3.5">
+            <div className="relative h-9 w-9 rounded-md border border-border bg-background flex items-center justify-center shrink-0">
+              <Crosshair className="h-4 w-4 text-primary" strokeWidth={2.2} />
             </div>
-            <div className="min-w-0 flex-1 pt-0.5">
-              <div className="flex items-center gap-1.5">
-                <span className="font-display text-[9.5px] font-black uppercase tracking-[0.2em] text-muted-foreground">
-                  Tracking · Server-Side + Browser
-                </span>
-                <span className="h-1 w-1 rounded-full bg-muted-foreground/40" />
-                <span className="font-display text-[9.5px] font-bold uppercase tracking-[0.16em] text-muted-foreground/70 truncate max-w-[280px]">
+            <div className="min-w-0 flex-1">
+              <div className="flex items-center gap-2">
+                <h2 className="text-[14px] font-display font-black tracking-[-0.01em] text-foreground leading-none">
+                  Pixels & Conversão
+                </h2>
+                <span className="h-3 w-px bg-border" />
+                <span className="font-display text-[10px] font-bold uppercase tracking-[0.14em] text-muted-foreground truncate max-w-[320px]">
                   {product.name}
                 </span>
+                <span
+                  className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[8.5px] font-display font-black uppercase tracking-[0.14em] border bg-success/10 border-success/30 text-success"
+                  title="Server-Side Conversions API ativo"
+                >
+                  <span className="relative flex h-1.5 w-1.5">
+                    <span className="absolute inline-flex h-full w-full rounded-full bg-success opacity-60 animate-ping" />
+                    <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-success" />
+                  </span>
+                  Live
+                </span>
               </div>
-              <h2 className="mt-1 text-[20px] font-display font-black tracking-[-0.03em] text-foreground leading-tight">
-                Pixels & Conversão
-              </h2>
-              <p className="mt-1 text-[12px] text-muted-foreground leading-snug max-w-[560px]">
-                Conecte Facebook, Google Ads, TikTok e Kwai com deduplicação automática (eventID) entre Pixel do navegador e Conversions API.
+              <p className="mt-1 text-[11px] text-muted-foreground leading-snug font-display">
+                Disparos sincronizados browser ↔ servidor com <span className="font-mono text-foreground/80">eventID</span> compartilhado para deduplicação.
               </p>
             </div>
 
-            <div className="hidden md:flex items-stretch border border-border rounded-lg overflow-hidden bg-background shrink-0">
+            <div className="hidden md:flex items-stretch border border-border rounded-md overflow-hidden bg-background shrink-0 mr-10">
               <KpiCell label="Pixels" value={pixels.length} />
               <KpiCell label="Ativos" value={totalActive} accent="success" />
               <KpiCell label={platform.short} value={platformPixels.length} accent="primary" />
             </div>
           </div>
         </div>
+
 
         {/* ═══ BODY (rail + workspace) ═══ */}
         <div className="flex-1 flex min-h-0 overflow-hidden">
@@ -320,53 +327,66 @@ export default function PixelSettingsDialog({ product, open, onOpenChange }: Pro
 
           {/* WORKSPACE */}
           <div className="flex-1 overflow-y-auto bg-background/20">
-            {/* Brand strip */}
+            {/* Brand hero */}
             <div
-              className="border-b border-border px-7 py-4 flex items-center gap-4 relative overflow-hidden"
+              className="border-b border-border px-7 py-5 relative overflow-hidden"
               style={{
-                backgroundImage: `linear-gradient(90deg, ${platform.brandColor}14, transparent 60%)`,
+                backgroundImage: `linear-gradient(90deg, ${platform.brandColor}0E 0%, transparent 55%)`,
               }}
             >
-              <div className="h-11 w-11 rounded-md border border-border bg-background flex items-center justify-center shrink-0">
-                <platform.LogoComp className="h-5 w-5" style={{ color: platform.brandColor }} />
-              </div>
-              <div className="min-w-0 flex-1">
-                <div className="flex items-center gap-2">
-                  <h3 className="text-[15px] font-display font-black tracking-tight text-foreground leading-tight">
-                    {platform.label}
-                  </h3>
-                  <span
-                    className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[8.5px] font-display font-black uppercase tracking-[0.14em] border"
-                    style={{
-                      color: platform.brandColor,
-                      borderColor: `${platform.brandColor}40`,
-                      backgroundColor: `${platform.brandColor}12`,
-                    }}
-                  >
-                    <Activity className="h-2.5 w-2.5" /> Integrado
-                  </span>
+              <span
+                className="absolute left-0 top-0 bottom-0 w-[3px]"
+                style={{ backgroundColor: platform.brandColor }}
+              />
+              <div className="flex items-center gap-4">
+                <div
+                  className="h-12 w-12 rounded-md border flex items-center justify-center shrink-0 bg-card"
+                  style={{ borderColor: `${platform.brandColor}38` }}
+                >
+                  <platform.LogoComp className="h-5 w-5" style={{ color: platform.brandColor }} />
                 </div>
-                <p className="text-[11px] text-muted-foreground mt-0.5 font-display">{platform.tagline}</p>
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-center gap-2">
+                    <h3 className="text-[15px] font-display font-black tracking-[-0.01em] text-foreground leading-none">
+                      {platform.label}
+                    </h3>
+                    <span
+                      className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[8.5px] font-display font-black uppercase tracking-[0.14em] border"
+                      style={{
+                        color: platform.brandColor,
+                        borderColor: `${platform.brandColor}40`,
+                        backgroundColor: `${platform.brandColor}12`,
+                      }}
+                    >
+                      <Activity className="h-2.5 w-2.5" /> Integrado
+                    </span>
+                  </div>
+                  <p className="text-[11px] text-muted-foreground mt-1.5 font-display flex items-center gap-2">
+                    <span>{platform.tagline}</span>
+                    <span className="h-1 w-1 rounded-full bg-muted-foreground/40" />
+                    <span className="font-mono text-foreground/70">{platform.idHint}</span>
+                  </p>
+                </div>
+                <a
+                  href={platform.docsUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="hidden sm:inline-flex items-center gap-1.5 h-8 px-3 rounded-md border border-border bg-card text-[10.5px] font-display font-bold text-muted-foreground hover:text-foreground transition-colors"
+                >
+                  <BookOpen className="h-3 w-3" /> Documentação <ExternalLink className="h-2.5 w-2.5" />
+                </a>
               </div>
-              <a
-                href={platform.docsUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="hidden sm:inline-flex items-center gap-1.5 h-8 px-3 rounded-md border border-border bg-card text-[10.5px] font-display font-bold text-muted-foreground hover:text-foreground hover:border-border transition-colors"
-              >
-                <BookOpen className="h-3 w-3" /> Documentação <ExternalLink className="h-2.5 w-2.5" />
-              </a>
             </div>
 
-            <div className="px-7 py-6 space-y-6">
+            <div className="px-7 py-5 space-y-5">
               {/* Section title */}
               <div className="flex items-center gap-2">
                 <span className="text-[10px] font-display font-black uppercase tracking-[0.18em] text-muted-foreground">
                   Pixels Configurados
                 </span>
                 <span className="h-px flex-1 bg-border" />
-                <span className="text-[10px] font-display font-bold text-muted-foreground tabular-nums">
-                  {platformPixels.length}
+                <span className="font-numbers text-[10px] font-black text-muted-foreground tabular-nums">
+                  {platformPixels.length.toString().padStart(2, "0")}
                 </span>
               </div>
 
@@ -378,16 +398,27 @@ export default function PixelSettingsDialog({ product, open, onOpenChange }: Pro
                   ))}
                 </div>
               ) : platformPixels.length === 0 ? (
-                <div className="border border-dashed border-border rounded-md py-10 text-center bg-card">
-                  <div className="mx-auto h-10 w-10 rounded-md border border-border bg-background flex items-center justify-center mb-3">
-                    <Radio className="h-4 w-4 text-muted-foreground" />
+                <div className="border border-dashed border-border rounded-md py-8 px-5 flex items-center gap-4 bg-card">
+                  <div
+                    className="h-10 w-10 rounded-md border flex items-center justify-center shrink-0"
+                    style={{
+                      borderColor: `${platform.brandColor}30`,
+                      backgroundColor: `${platform.brandColor}0A`,
+                    }}
+                  >
+                    <Radio className="h-4 w-4" style={{ color: platform.brandColor }} />
                   </div>
-                  <p className="text-[13px] font-display font-bold text-foreground">Nenhum pixel {platform.short}</p>
-                  <p className="text-[11px] text-muted-foreground mt-1 max-w-[320px] mx-auto leading-relaxed">
-                    Adicione um novo pixel abaixo para começar a rastrear conversões.
-                  </p>
+                  <div className="min-w-0 flex-1">
+                    <p className="text-[12.5px] font-display font-bold text-foreground leading-tight">
+                      Nenhum pixel {platform.short} configurado
+                    </p>
+                    <p className="text-[10.5px] text-muted-foreground mt-1 leading-relaxed font-display">
+                      Preencha o formulário abaixo para começar a disparar conversões para esta plataforma.
+                    </p>
+                  </div>
                 </div>
               ) : (
+
                 <div className="space-y-2">
                   <AnimatePresence initial={false}>
                     {platformPixels.map((px) => {
