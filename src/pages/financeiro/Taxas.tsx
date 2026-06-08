@@ -46,7 +46,7 @@ export default function Taxas() {
           label="Taxa Pix"
           value={`${pixRate}%`}
           sub="Receba na hora"
-          icon={Zap}
+          icon={PixLogoMark as unknown as LucideIcon}
           tone="success"
         />
         <FinanceiroKpi
