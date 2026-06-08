@@ -1,7 +1,8 @@
 import { useFees } from "@/hooks/useQueryData";
-import { Percent, Info, DollarSign, Zap, CreditCard, Banknote, Clock } from "lucide-react";
+import { Percent, Info, DollarSign, Zap, CreditCard, Banknote, Clock, type LucideIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { FinanceiroHero, FinanceiroKpi, FinanceiroKpiGrid } from "@/components/financeiro/FinanceiroHero";
+import { PixLogoMark } from "@/components/icons/PixLogoMark";
 
 const fmt = (v: number) => `R$ ${v.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}`;
 
