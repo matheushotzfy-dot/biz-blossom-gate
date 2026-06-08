@@ -368,23 +368,6 @@ export function AppSidebar() {
               <h1 className="font-display text-[15.5px] leading-none font-black tracking-[-0.045em] text-sidebar-accent-foreground">
                 HOTZFY
               </h1>
-              <span className="inline-flex h-[14px] items-center gap-0.5 rounded-[3px] border border-sidebar-primary/40 bg-sidebar-primary/15 px-1 font-display text-[8px] font-black uppercase tracking-[0.16em] text-sidebar-primary">
-                <Crown className="h-2 w-2" strokeWidth={3} fill="currentColor" />
-                
-              </span>
-            </div>
-            <div className="mt-1.5 flex items-center gap-1.5">
-              <span className="relative flex h-1.5 w-1.5">
-                <span className="absolute inset-0 animate-ping rounded-full bg-success opacity-60" />
-                <span className="relative h-1.5 w-1.5 rounded-full bg-success" />
-              </span>
-              <span className="font-display text-[9.5px] font-black uppercase tracking-[0.2em] text-sidebar-foreground/70">
-                {"\n"}
-              </span>
-              <span className="ml-auto h-px flex-1 bg-sidebar-border/50" />
-              <span className="font-numbers text-[9px] font-bold uppercase tracking-[0.16em] text-sidebar-foreground/45 tabular-nums">
-                v2.4
-              </span>
             </div>
           </div>
         </div>
