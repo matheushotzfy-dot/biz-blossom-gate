@@ -315,14 +315,6 @@ export default function PixelSettingsDialog({ product, open, onOpenChange }: Pro
               })}
             </nav>
 
-            <div className="mt-4 mx-3 p-3 rounded-md border border-border bg-card">
-              <div className="flex items-center gap-1.5 text-[9.5px] font-display font-black uppercase tracking-[0.16em] text-success">
-                <ShieldCheck className="h-3 w-3" /> Server-Side Ready
-              </div>
-              <p className="text-[10.5px] text-muted-foreground mt-1.5 leading-relaxed">
-                Eventos disparam em paralelo no navegador e no servidor com <span className="font-mono text-foreground">eventID</span> compartilhado para deduplicação.
-              </p>
-            </div>
           </aside>
 
           {/* WORKSPACE */}
