@@ -86,7 +86,7 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
  const [showRejectDialog, setShowRejectDialog] = useState(false);
  const [rejectTargetUserId, setRejectTargetUserId] = useState<string>("");
  const [userRetention, setUserRetention] = useState<RetentionSettings | null>(null);
- const [retentionForm, setRetentionForm] = useState({ pix_pct: "", card_pct: "", days: "" });
+ const [retentionForm, setRetentionForm] = useState({ pix_pct: "", card_pct: "", days: "", card_release_days: "7" });
  const [impersonating, setImpersonating] = useState(false);
 
  useEffect(() => {
