@@ -262,7 +262,13 @@ export default function PublicCheckout() {
  const [state, setState] = useState("");
  const [loadingCep, setLoadingCep] = useState(false);
  const [socialCount] = useState(Math.floor(Math.random() * 200) + 80);
- const [copiedPix, setCopiedPix] = useState(false);
+  const [copiedPix, setCopiedPix] = useState(false);
+
+  // Coupon
+  const [couponInput, setCouponInput] = useState("");
+  const [couponApplying, setCouponApplying] = useState(false);
+  const [appliedCoupon, setAppliedCoupon] = useState<null | { code: string; coupon_id: string; discount_amount: number; apply_to_bumps: boolean; discount_type: string; discount_value: number; }>(null);
+
 
  // Timer
  const timerMinutes = product?.checkout_timer_minutes ?? 15;
