@@ -34,7 +34,9 @@ Deno.serve(async (req) => {
       ip,
       checkoutSessionId,
       idempotencyKey,
+      couponCode,
     } = body;
+
 
     if (!productId || !paymentMethod || !customerName || !customerEmail || !customerDocument) {
       return new Response(
