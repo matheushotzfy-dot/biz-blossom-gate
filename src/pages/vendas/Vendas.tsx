@@ -6,6 +6,7 @@ import {
   CalendarIcon, ChevronLeft, ChevronRight,
 } from "lucide-react";
 import { TransactionDetailPanel } from "@/components/transactions/TransactionDetailPanel";
+import { PixLogoMark } from "@/components/icons/PixLogoMark";
 import type { Tables } from "@/integrations/supabase/types";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -446,10 +447,17 @@ export default function Vendas() {
                       </td>
                       <td className="px-8 py-5">
                         <div className="flex justify-center">
-                          <span className="inline-flex items-center gap-2 px-3 py-1 rounded-xl bg-muted/40 border border-border/60 text-[10px] font-bold text-muted-foreground/80">
-                            <MethodIcon className="h-3.5 w-3.5" />
-                            {method.label}
-                          </span>
+                          {t.payment_method === "pix" ? (
+                            <span className="inline-flex items-center gap-2 px-3 py-1 rounded-xl bg-[hsl(173_58%_47%/0.08)] border border-[hsl(173_58%_47%/0.25)] text-[10px] font-bold text-[hsl(173_58%_47%)]">
+                              <PixLogoMark className="h-3.5 w-3.5" />
+                              Pix
+                            </span>
+                          ) : (
+                            <span className="inline-flex items-center gap-2 px-3 py-1 rounded-xl bg-muted/40 border border-border/60 text-[10px] font-bold text-muted-foreground/80">
+                              <MethodIcon className="h-3.5 w-3.5" />
+                              {method.label}
+                            </span>
+                          )}
                         </div>
                       </td>
                       <td className="px-8 py-5 text-right">
