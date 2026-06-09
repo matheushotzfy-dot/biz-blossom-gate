@@ -558,17 +558,17 @@ export default function AdminTransactionsTab({ transactions, profiles, products,
  onChange={async (e) => {
  const file = e.target.files?.[0];
  if (!file) return;
- const ALLOWED = ["application/pdf", "image/jpeg", "image/png"];
- if (!ALLOWED.includes(file.type)) { toast.error("Use PDF, JPG ou PNG"); return; }
- if (file.size > 10 * 1024 * 1024) { toast.error("Máximo 10MB"); return; }
- // sanitizar nome (evitar path traversal e caracteres maliciosos)
- const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, "_").slice(0, 80);
- const ext = (safeName.split(".").pop() || "bin").toLowerCase();
- const filePath = `disputes/${selectedTx.id}/${crypto.randomUUID()}.${ext}`;
- const { error } = await supabase.storage.from("kyc-documents").upload(filePath, file, { upsert: true });
- if (error) { toast.error("Erro no upload"); return; }
- toast.success("Comprovante enviado!");
- await logAdminAction("upload_dispute_evidence", "transaction", selectedTx.id, { file: safeName });
+  const ALLOWED = ["application/pdf", "image/jpeg", "image/png"];
+  if (!ALLOWED.includes(file.type)) { toast.error("Use PDF, JPG ou PNG"); return; }
+  if (file.size > 10 * 1024 * 1024) { toast.error("Máximo 10MB"); return; }
+  const mimeExt: Record<string, string> = { "application/pdf": "pdf", "image/jpeg": "jpg", "image/png": "png" };
+  const ext = mimeExt[file.type];
+  const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, "_").slice(0, 80);
+  const filePath = `disputes/${selectedTx.id}/${crypto.randomUUID()}.${ext}`;
+  const { error } = await supabase.storage.from("dispute-evidence").upload(filePath, file, { upsert: true, contentType: file.type });
+  if (error) { toast.error("Erro no upload"); return; }
+  toast.success("Comprovante enviado!");
+  await logAdminAction("upload_dispute_evidence", "transaction", selectedTx.id, { file: safeName });
  setDisputeOpen(false);
  }}
  />
