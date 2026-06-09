@@ -84,7 +84,7 @@ export default function Saques() {
       return;
     }
     const numAmount = parseFloat(amount);
-    if (!user || isNaN(numAmount) || numAmount <= WITHDRAW_FEE) { toast.error("Valor inválido"); return; }
+    if (!user || isNaN(numAmount) || numAmount <= withdrawFee) { toast.error("Valor inválido"); return; }
     if (numAmount > availableBalance) { toast.error("Saldo insuficiente"); return; }
     if (pixKeys.length === 0 && bankAccounts.length === 0) { toast.error("Cadastre uma chave PIX ou conta bancária"); return; }
 
@@ -93,7 +93,7 @@ export default function Saques() {
     toast.success("Solicitação enviada!"); setOpen(false); setAmount(""); invalidateAll(["withdrawals"]);
   };
 
-  const netPreview = parseFloat(amount) > WITHDRAW_FEE ? parseFloat(amount) - WITHDRAW_FEE : 0;
+  const netPreview = parseFloat(amount) > withdrawFee ? parseFloat(amount) - withdrawFee : 0;
 
   return (
     <div className="space-y-6 animate-in fade-in duration-500">
@@ -130,13 +130,13 @@ export default function Saques() {
                   />
                 </div>
                 <p className="text-[10px] text-muted-foreground font-medium flex items-center gap-1.5">
-                  <Info className="h-3 w-3" /> Taxa fixa de {fmt(WITHDRAW_FEE)} por transação.
+                  <Info className="h-3 w-3" /> Taxa fixa de {fmt(withdrawFee)} por transação.
                 </p>
               </div>
               <div className="bg-muted/30 p-5 rounded-2xl border border-border/60 space-y-3">
                 <div className="flex justify-between text-xs font-bold">
                   <span className="text-muted-foreground uppercase tracking-widest">Taxa Administrativa</span>
-                  <span className="text-red-500">-{fmt(WITHDRAW_FEE)}</span>
+                  <span className="text-red-500">-{fmt(withdrawFee)}</span>
                 </div>
                 <div className="flex justify-between border-t border-border/40 pt-4 items-center">
                   <span className="text-[11px] font-black uppercase tracking-widest text-muted-foreground">Você receberá</span>
