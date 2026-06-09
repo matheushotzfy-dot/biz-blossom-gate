@@ -210,39 +210,58 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
    if (selectedUser?.user_id === userId) setSelectedUser(null);
  };
 
- // ── Impersonation ──
- const handleImpersonate = async (userId: string) => {
- setImpersonating(true);
- try {
- const { data, error } = await supabase.functions.invoke("admin-impersonate", {
- body: { targetUserId: userId },
- });
- if (error || !data?.success) {
- toast.error(data?.error || "Erro ao acessar como usuário");
- return;
- }
-   const { access_token, refresh_token } = data;
- if (access_token && refresh_token) {
- // Store tokens in localStorage with tight 15s pickup window
- localStorage.setItem("impersonate_session", JSON.stringify({
- access_token,
- refresh_token,
- admin_id: user?.id,
- timestamp: Date.now(),
- }));
- // Open dashboard in new tab — useAuth will detect and apply the session
- window.open(window.location.origin + "/dashboard?impersonate=1", "_blank");
- // Hard-clean: even if the new tab never picks it up, tokens disappear after 15s
- setTimeout(() => {
- try { localStorage.removeItem("impersonate_session"); } catch { /* ignore */ }
- }, 15_000);
- const targetEmail = profiles.find(p => p.user_id === userId)?.email || userId.slice(0, 8);
- toast.success(`Abrindo dashboard como ${targetEmail}`);
- } else {
- toast.error("Tokens de impersonação não disponíveis");
- }
- } catch {
- toast.error("Erro na impersonação");
+  // ── Impersonation (postMessage pure-channel, no storage) ──
+  const handleImpersonate = async (userId: string) => {
+    setImpersonating(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("admin-impersonate", {
+        body: { targetUserId: userId },
+      });
+      if (error || !data?.success) {
+        toast.error(data?.error || "Erro ao acessar como usuário");
+        return;
+      }
+      const { access_token, refresh_token } = data;
+      if (!access_token || !refresh_token) {
+        toast.error("Tokens de impersonação não disponíveis");
+        return;
+      }
+
+      const expectedOrigin = window.location.origin;
+      const target = window.open(expectedOrigin + "/impersonate-receiver", "_blank");
+      if (!target) {
+        toast.error("Permita pop-ups para impersonar este usuário");
+        return;
+      }
+
+      let delivered = false;
+      const onMessage = (event: MessageEvent) => {
+        if (event.origin !== expectedOrigin) return;
+        if (event.source !== target) return;
+        if (event.data?.type !== "IMPERSONATE_READY") return;
+        if (delivered) return;
+        delivered = true;
+        try {
+          target.postMessage(
+            { type: "IMPERSONATE_TOKENS", access_token, refresh_token },
+            expectedOrigin,
+          );
+        } catch {
+          /* ignore */
+        }
+        window.removeEventListener("message", onMessage);
+      };
+      window.addEventListener("message", onMessage);
+
+      // Hard timeout: drop the handler + tokens from memory if receiver never asks
+      setTimeout(() => {
+        window.removeEventListener("message", onMessage);
+      }, 15_000);
+
+      const targetEmail = profiles.find(p => p.user_id === userId)?.email || userId.slice(0, 8);
+      toast.success(`Abrindo dashboard como ${targetEmail}`);
+    } catch {
+      toast.error("Erro na impersonação");
  } finally {
  setImpersonating(false);
  }

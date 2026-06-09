@@ -14,40 +14,12 @@ export function useAuth() {
       setLoading(false);
     });
 
-    // Check for impersonation tokens (localStorage with tight 15s window + immediate cleanup)
-    const impersonateData = localStorage.getItem("impersonate_session");
-    if (impersonateData) {
-      try {
-        const { access_token, refresh_token, timestamp } = JSON.parse(impersonateData);
-        // Immediate cleanup BEFORE using - one-time use
-        localStorage.removeItem("impersonate_session");
-        if (Date.now() - timestamp < 15000 && access_token && refresh_token) {
-          supabase.auth.setSession({ access_token, refresh_token }).then(({ error }) => {
-            if (error) {
-              // Fallback to normal flow
-              initNormalSession();
-            } else {
-              // Clean URL param
-              const url = new URL(window.location.href);
-              url.searchParams.delete("impersonate");
-              window.history.replaceState({}, "", url.toString());
-            }
-          });
-          return () => subscription.unsubscribe();
-        }
-      } catch {
-        localStorage.removeItem("impersonate_session");
-      }
-    }
-
-    initNormalSession();
-
-    function initNormalSession() {
-      supabase.auth.getSession().then(({ data: { session } }) => {
-        setUser(session?.user ?? null);
-        setLoading(false);
-      });
-    }
+    // Initial session check (impersonation handled via /impersonate-receiver postMessage flow,
+    // no tokens are ever stored in localStorage)
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setUser(session?.user ?? null);
+      setLoading(false);
+    });
 
     return () => subscription.unsubscribe();
   }, []);

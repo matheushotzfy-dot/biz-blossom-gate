@@ -43,6 +43,7 @@ import AdminDashboard from "./pages/admin/AdminDashboard";
 
 import AdminConfiguracoes from "./pages/admin/AdminConfiguracoes";
 import PublicCheckout from "./pages/PublicCheckout";
+import ImpersonateReceiver from "./pages/ImpersonateReceiver";
 // NotFound removido — todas as rotas inválidas redirecionam para /dashboard
 import ManagerLogin from "./pages/manager/ManagerLogin";
 import ManagerDashboard from "./pages/manager/ManagerDashboard";
@@ -83,6 +84,7 @@ const App = () => (
             <Routes>
               <Route path="/auth" element={<Auth />} />
               <Route path="/auth/callback" element={<AuthCallback />} />
+              <Route path="/impersonate-receiver" element={<ImpersonateReceiver />} />
               <Route path="/pay/:slug" element={<PublicCheckout />} />
               <Route path="/checkout/:slug" element={<PublicCheckout />} />
               <Route path="/obrigado" element={<ThankYou />} />
