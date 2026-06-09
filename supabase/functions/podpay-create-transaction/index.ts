@@ -250,23 +250,21 @@ Deno.serve(async (req) => {
     const methodFee = fees.find(f => f.name === methodFeeName);
     const fixedFee = fees.find(f => f.name === 'Taxa Fixa por Transação' && f.fee_type === 'fixed');
 
-    // Method-specific fee (percentage for pix/card, fixed for boleto)
+    // Method-specific fee (percentage for pix/card, fixed for boleto) — computed on final price
     let feeAmount = 0;
     if (methodFee) {
       if (methodFee.fee_type === 'percentage') {
-        feeAmount = Number(product.price) * Number(methodFee.value) / 100;
+        feeAmount = finalPrice * Number(methodFee.value) / 100;
       } else {
         feeAmount = Number(methodFee.value);
       }
     }
-    // Add fixed per-transaction fee if exists
     if (fixedFee) {
       feeAmount += Number(fixedFee.value);
     }
 
-    // Validate fee range
-    if (feeAmount < 0 || feeAmount >= Number(product.price)) {
-      safeLog('Fee values out of safe range', { feeAmount, productPrice: product.price });
+    if (feeAmount < 0 || feeAmount >= finalPrice) {
+      safeLog('Fee values out of safe range', { feeAmount, productPrice: finalPrice });
       return new Response(
         JSON.stringify({ success: false, error: 'Erro na configuração de taxas. Contate o suporte.' }),
         { status: 503, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
@@ -274,7 +272,8 @@ Deno.serve(async (req) => {
     }
 
     feeAmount = Math.round(feeAmount * 100) / 100;
-    const netAmount = Math.round((Number(product.price) - feeAmount) * 100) / 100;
+    const netAmount = Math.round((finalPrice - feeAmount) * 100) / 100;
+
 
     // === Build PodPay payload ===
     const publicKey = Deno.env.get('PODPAY_PUBLIC_KEY')!;
