@@ -452,7 +452,21 @@ export default function AdminSettingsTab() {
  setSellerRetentions(prev => prev.map(s => s.id === r.id ? { ...s, retention_days: e.target.value } : s));
  }} className="h-8 text-sm" />
  </div>
- </div>
+                      </div>
+                      <div>
+                        <Label className="text-[10px] text-muted-foreground">Liberação Cartão</Label>
+                        <Select value={String(r.card_release_days ?? 7)} onValueChange={v => {
+                          setSellerRetentions(prev => prev.map(s => s.id === r.id ? { ...s, card_release_days: Number(v) } : s));
+                        }}>
+                          <SelectTrigger className="h-8 text-sm"><SelectValue /></SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="1">D+1</SelectItem>
+                            <SelectItem value="7">D+7</SelectItem>
+                            <SelectItem value="15">D+15</SelectItem>
+                            <SelectItem value="30">D+30</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
  <Button size="sm" variant="outline" className="w-full gap-1" onClick={() => saveSellerRetention(r)}>
  <Save className="h-3 w-3" /> Salvar
  </Button>
