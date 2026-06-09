@@ -5,7 +5,7 @@ import {
  CreditCard, QrCode, FileText, CheckCircle2, Copy, Clock, Loader2,
  RefreshCw, ShieldCheck, ChevronDown, User, Mail, FileDigit, Phone,
  Sparkles, Plus, Package, Lock, Eye, Zap, Star, TrendingUp,
- ArrowRight, Check, AlertCircle, Users, Timer, Heart,
+ ArrowRight, Check, AlertCircle, Users, Timer, Heart, Ticket,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
