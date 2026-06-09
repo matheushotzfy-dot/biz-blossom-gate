@@ -108,7 +108,9 @@ export default function Cupons() {
       discount_value: Number(form.discount_value),
       max_uses: form.max_uses ? Number(form.max_uses) : null,
       expires_at: form.expires_at || null,
+      apply_to_bumps: form.apply_to_bumps,
     });
+
     setSaving(false);
     if (error) {
       toast.error(error.message.includes("duplicate") ? "Cupom já existe." : "Erro ao criar cupom.");
@@ -275,14 +277,20 @@ export default function Cupons() {
                     <SelectTrigger className="mt-1.5 h-11 rounded-xl">
                       <SelectValue />
                     </SelectTrigger>
-                    <SelectContent>
+                    <SelectContent position="popper" className="z-[120] max-h-[280px]">
                       <SelectItem value="all">Todos os produtos</SelectItem>
-                      {activeProducts.map(p => (
+                      {products.filter(p => p.status !== "draft").map(p => (
                         <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
+                  <p className="text-[10px] text-muted-foreground/50 mt-1.5">
+                    {products.filter(p => p.status !== "draft").length === 0
+                      ? "Crie um produto primeiro para vincular cupom a um produto específico."
+                      : `${products.filter(p => p.status !== "draft").length} produto(s) disponíveis`}
+                  </p>
                 </div>
+
 
                 <div className="grid grid-cols-2 gap-3">
                   <div>

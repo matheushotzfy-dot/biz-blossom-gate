@@ -34,7 +34,9 @@ Deno.serve(async (req) => {
       ip,
       checkoutSessionId,
       idempotencyKey,
+      couponCode,
     } = body;
+
 
     if (!productId || !paymentMethod || !customerName || !customerEmail || !customerDocument) {
       return new Response(
@@ -209,7 +211,24 @@ Deno.serve(async (req) => {
       );
     }
 
-    const amountInCents = Math.round(Number(product.price) * 100);
+    // === Validate & apply coupon (server-authoritative) ===
+    let couponId: string | null = null;
+    let discountAmount = 0;
+    let finalPrice = Number(product.price);
+    if (couponCode && typeof couponCode === 'string' && couponCode.trim().length > 0) {
+      const { data: cv, error: cvErr } = await supabase.rpc('validate_coupon', {
+        _code: couponCode.trim(),
+        _product_id: product.id,
+        _amount: Number(product.price),
+      });
+      if (!cvErr && Array.isArray(cv) && cv[0]?.valid) {
+        discountAmount = Math.round(Number(cv[0].discount_amount) * 100) / 100;
+        couponId = cv[0].coupon_id;
+        finalPrice = Math.round((Number(product.price) - discountAmount) * 100) / 100;
+      }
+    }
+    const amountInCents = Math.round(finalPrice * 100);
+
 
     // === Calculate fees from DB (payment-method-specific) ===
     const { data: fees, error: feesError } = await supabase.from('fees').select('*');
@@ -231,23 +250,21 @@ Deno.serve(async (req) => {
     const methodFee = fees.find(f => f.name === methodFeeName);
     const fixedFee = fees.find(f => f.name === 'Taxa Fixa por Transação' && f.fee_type === 'fixed');
 
-    // Method-specific fee (percentage for pix/card, fixed for boleto)
+    // Method-specific fee (percentage for pix/card, fixed for boleto) — computed on final price
     let feeAmount = 0;
     if (methodFee) {
       if (methodFee.fee_type === 'percentage') {
-        feeAmount = Number(product.price) * Number(methodFee.value) / 100;
+        feeAmount = finalPrice * Number(methodFee.value) / 100;
       } else {
         feeAmount = Number(methodFee.value);
       }
     }
-    // Add fixed per-transaction fee if exists
     if (fixedFee) {
       feeAmount += Number(fixedFee.value);
     }
 
-    // Validate fee range
-    if (feeAmount < 0 || feeAmount >= Number(product.price)) {
-      safeLog('Fee values out of safe range', { feeAmount, productPrice: product.price });
+    if (feeAmount < 0 || feeAmount >= finalPrice) {
+      safeLog('Fee values out of safe range', { feeAmount, productPrice: finalPrice });
       return new Response(
         JSON.stringify({ success: false, error: 'Erro na configuração de taxas. Contate o suporte.' }),
         { status: 503, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
@@ -255,7 +272,8 @@ Deno.serve(async (req) => {
     }
 
     feeAmount = Math.round(feeAmount * 100) / 100;
-    const netAmount = Math.round((Number(product.price) - feeAmount) * 100) / 100;
+    const netAmount = Math.round((finalPrice - feeAmount) * 100) / 100;
+
 
     // === Build PodPay payload ===
     const publicKey = Deno.env.get('PODPAY_PUBLIC_KEY')!;
@@ -350,7 +368,7 @@ Deno.serve(async (req) => {
     const { data: transaction, error: txError } = await supabase.from('transactions').insert({
       user_id: product.user_id,
       product_id: product.id,
-      amount: Number(product.price),
+      amount: finalPrice,
       fee_amount: feeAmount,
       net_amount: netAmount,
       status: 'pending',
@@ -361,7 +379,10 @@ Deno.serve(async (req) => {
       customer_phone: safePhone,
       podpay_payment_id: podpayId ? String(podpayId) : null,
       checkout_session_id: checkoutSessionId || null,
+      coupon_id: couponId,
+      discount_amount: discountAmount,
     }).select().single();
+
 
     if (txError) {
       safeLog('DB error saving transaction', { error: txError.message, code: txError.code });
