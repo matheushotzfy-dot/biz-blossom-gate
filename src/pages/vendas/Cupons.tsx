@@ -108,7 +108,9 @@ export default function Cupons() {
       discount_value: Number(form.discount_value),
       max_uses: form.max_uses ? Number(form.max_uses) : null,
       expires_at: form.expires_at || null,
+      apply_to_bumps: form.apply_to_bumps,
     });
+
     setSaving(false);
     if (error) {
       toast.error(error.message.includes("duplicate") ? "Cupom já existe." : "Erro ao criar cupom.");
