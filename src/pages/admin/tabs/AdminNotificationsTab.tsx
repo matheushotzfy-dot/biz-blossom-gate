@@ -59,7 +59,7 @@ export default function AdminNotificationsTab({ profiles }: Props) {
  if (sendTarget === "all") {
  const { error } = await supabase.from("notifications").insert({ title: sendTitle.trim(), message: sendMessage.trim(), type: sendType, user_id: null, created_by: user!.id });
  if (error) throw error;
- await logAdminAction("send_global_notification", "notification", undefined, { title: sendTitle.trim(), type: sendType });
+ await logAdminAction("send_global_notification", "notification", null, { title: sendTitle.trim(), type: sendType });
  toast.success("Notificação global enviada para todos os sellers!");
  } else {
  if (!selectedUserId) { toast.error("Selecione um seller"); setSending(false); return; }

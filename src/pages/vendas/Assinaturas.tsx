@@ -151,7 +151,8 @@ export default function Assinaturas() {
     if (plan.interval === "monthly") return acc + plan.price;
     if (plan.interval === "yearly")  return acc + plan.price / 12;
     if (plan.interval === "weekly")  return acc + plan.price * 4.33;
-    return acc + plan.price * 30;
+    if (plan.interval === "daily")   return acc + plan.price * 30.44;
+    return acc;
   }, 0);
 
   const filtered = tab === "plans"

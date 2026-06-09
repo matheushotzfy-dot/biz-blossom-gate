@@ -56,20 +56,21 @@ export function NotificationPanel({ open, onClose }: Props) {
  if (open && user) loadNotifications();
  }, [open, user]);
 
- // Realtime subscription
- useEffect(() => {
- if (!user) return;
- const channel = supabase
- .channel("notifications-realtime")
- .on("postgres_changes", { event: "INSERT", schema: "public", table: "notifications" }, (payload) => {
- const n = payload.new as Notification;
- if (n.user_id === user.id || n.user_id === null) {
- setNotifications(prev => [n, ...prev].slice(0, 30));
- }
- })
- .subscribe();
- return () => { supabase.removeChannel(channel); };
- }, [user]);
+  // Realtime subscription — channel name scoped per user to avoid duplicate-channel
+  // collisions when multiple sessions exist in the same browser context.
+  useEffect(() => {
+    if (!user) return;
+    const channel = supabase
+      .channel(`notifications-realtime-${user.id}`)
+      .on("postgres_changes", { event: "INSERT", schema: "public", table: "notifications" }, (payload) => {
+        const n = payload.new as Notification;
+        if (n.user_id === user.id || n.user_id === null) {
+          setNotifications(prev => [n, ...prev].slice(0, 30));
+        }
+      })
+      .subscribe();
+    return () => { supabase.removeChannel(channel); };
+  }, [user]);
 
  const markAsRead = async (id: string) => {
  await supabase.from("notifications").update({ is_read: true }).eq("id", id);

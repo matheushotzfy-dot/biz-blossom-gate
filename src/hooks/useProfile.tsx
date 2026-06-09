@@ -24,12 +24,15 @@ export function ProfileProvider({ children }: { children: React.ReactNode }) {
 
   const fetchProfile = useCallback(async () => {
     if (!user?.id) { setProfile(null); setLoading(false); return; }
-    const { data } = await supabase
+    const { data, error } = await supabase
       .from("profiles")
       .select("*")
       .eq("user_id", user.id)
       .maybeSingle();
-    if (data) setProfile(data);
+    if (error) {
+      console.error("[useProfile] fetch error:", error.message);
+    }
+    setProfile(data ?? null);
     setLoading(false);
   }, [user?.id]);
 

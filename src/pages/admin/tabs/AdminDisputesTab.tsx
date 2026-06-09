@@ -39,33 +39,44 @@ export default function AdminDisputesTab({ type, title, profiles, transactions, 
  const [editNotes, setEditNotes] = useState("");
  const [editStatus, setEditStatus] = useState("");
 
- const load = async () => {
- const { data } = await supabase.from("disputes").select("*").eq("type", type).order("created_at", { ascending: false });
- if (data) setDisputes(data as any);
- };
+  const load = async () => {
+    try {
+      const { data, error } = await supabase
+        .from("disputes")
+        .select("*")
+        .eq("type", type)
+        .order("created_at", { ascending: false })
+        .limit(500);
+      if (error) throw error;
+      setDisputes((data || []) as any);
+    } catch (e) {
+      console.error("[AdminDisputesTab] load error:", e);
+      toast.error("Erro ao carregar disputas");
+    }
+  };
 
- useEffect(() => { load(); }, [type]);
+  useEffect(() => { load(); }, [type]);
 
- const handleCreate = async () => {
- if (!user || !form.seller_user_id || !form.amount) { toast.error("Preencha os campos obrigatórios"); return; }
- const { error } = await supabase.from("disputes").insert({
- type,
- seller_user_id: form.seller_user_id,
- buyer_name: form.buyer_name || null,
- buyer_email: form.buyer_email || null,
- buyer_phone: form.buyer_phone || null,
- reason: form.reason || null,
- amount: Number(form.amount),
- transaction_id: form.transaction_id || null,
- admin_user_id: user.id,
- } as any);
- if (error) { toast.error("Erro ao criar"); return; }
- toast.success("Disputa criada!");
- await logAdminAction(`create_${type}`, "dispute", form.seller_user_id, { amount: form.amount, reason: form.reason });
- setCreating(false);
- setForm({ seller_user_id: "", buyer_name: "", buyer_email: "", buyer_phone: "", reason: "", amount: "", transaction_id: "" });
- load();
- };
+  const handleCreate = async () => {
+    if (!user || !form.seller_user_id || !form.amount) { toast.error("Preencha os campos obrigatórios"); return; }
+    const { data: inserted, error } = await supabase.from("disputes").insert({
+      type,
+      seller_user_id: form.seller_user_id,
+      buyer_name: form.buyer_name || null,
+      buyer_email: form.buyer_email || null,
+      buyer_phone: form.buyer_phone || null,
+      reason: form.reason || null,
+      amount: Number(form.amount),
+      transaction_id: form.transaction_id || null,
+      admin_user_id: user.id,
+    } as any).select("id").maybeSingle();
+    if (error) { toast.error("Erro ao criar"); return; }
+    toast.success("Disputa criada!");
+    await logAdminAction(`create_${type}`, "dispute", inserted?.id ?? form.seller_user_id, { amount: form.amount, reason: form.reason, seller_user_id: form.seller_user_id });
+    setCreating(false);
+    setForm({ seller_user_id: "", buyer_name: "", buyer_email: "", buyer_phone: "", reason: "", amount: "", transaction_id: "" });
+    load();
+  };
 
  const handleUpdate = async () => {
  if (!editing || !user) return;

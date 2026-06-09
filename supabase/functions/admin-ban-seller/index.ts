@@ -4,14 +4,29 @@
 
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers":
-    "authorization, x-client-info, apikey, content-type",
-  "Access-Control-Allow-Methods": "POST, OPTIONS",
-};
+const ALLOWED_ORIGINS = new Set([
+  "https://hotzfy.com.br",
+  "https://www.hotzfy.com.br",
+  "https://biz-blossom-gate.lovable.app",
+  "https://id-preview--8b85380d-bbad-44c2-8000-ac99dd36affb.lovable.app",
+  "https://8b85380d-bbad-44c2-8000-ac99dd36affb.lovableproject.com",
+]);
 
-function json(body: unknown, status = 200) {
+function buildCors(req: Request) {
+  const origin = req.headers.get("origin") ?? "";
+  const isAllowed = ALLOWED_ORIGINS.has(origin);
+  const headers: Record<string, string> = {
+    "Vary": "Origin",
+    "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+    "Access-Control-Allow-Methods": "POST, OPTIONS",
+    "X-Content-Type-Options": "nosniff",
+    "Referrer-Policy": "no-referrer",
+  };
+  if (isAllowed) headers["Access-Control-Allow-Origin"] = origin;
+  return headers;
+}
+
+function json(body: unknown, corsHeaders: Record<string, string>, status = 200) {
   return new Response(JSON.stringify(body), {
     status,
     headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -19,8 +34,9 @@ function json(body: unknown, status = 200) {
 }
 
 Deno.serve(async (req) => {
+  const corsHeaders = buildCors(req);
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
-  if (req.method !== "POST") return json({ success: false, error: "Method not allowed" }, 405);
+  if (req.method !== "POST") return json({ success: false, error: "Method not allowed" }, corsHeaders, 405);
 
   try {
     const authHeader = req.headers.get("Authorization");

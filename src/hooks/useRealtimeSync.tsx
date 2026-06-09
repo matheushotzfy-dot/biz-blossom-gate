@@ -18,7 +18,7 @@ export function useRealtimeSync() {
     const uid = user.id;
 
     const invalidate = (keys: string[]) => {
-      keys.forEach((k) => qc.invalidateQueries({ queryKey: [k] }));
+      keys.forEach((k) => qc.invalidateQueries({ queryKey: [k, uid] }));
     };
 
     const channel = supabase

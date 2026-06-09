@@ -293,8 +293,12 @@ export function usePrefetchDashboardData() {
 
 export function useInvalidateAll() {
   const qc = useQueryClient();
-  return (keys?: string[]) => {
-    const invalidateKeys = keys || ["products", "transactions", "withdrawals", "pix_keys", "bank_accounts", "coupons", "expenses", "webhooks", "app_integrations", "courses", "fees"];
-    invalidateKeys.forEach(k => qc.invalidateQueries({ queryKey: [k] }));
-  };
+  const { user } = useAuth();
+  return useCallback((keys?: string[]) => {
+    const invalidateKeys = keys || ["products", "transactions", "withdrawals", "pix_keys", "bank_accounts", "coupons", "expenses", "webhooks", "app_integrations", "courses", "fees", "ledger_balance"];
+    invalidateKeys.forEach(k =>
+      // exact:false matches both ["k"] and ["k", uid, ...] cache entries
+      qc.invalidateQueries({ queryKey: [k], exact: false })
+    );
+  }, [qc, user?.id]);
 }
