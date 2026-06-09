@@ -91,15 +91,109 @@ export default function Premiacoes() {
 
   return (
     <div className="space-y-6 animate-fade-in">
-      {/* Hero (Financeiro pattern) */}
-      <FinanceiroHero
-        eyebrow={currentTier ? `${currentTier.tier} · ${unlockedCount}/${AWARDS.length} marcos` : `${AWARDS.length} marcos na trilha`}
-        title="Premiações"
-        subtitle="Trilha de conquistas físicas HOTZFY. Cada marco representa uma entrega exclusiva."
-        status={currentTier
-          ? { tone: "success", label: `${currentTier.tier} desbloqueado` }
-          : { tone: "info", label: "Trilha iniciada" }}
-      />
+      {/* ===== CINEMATIC HERO — HOTZFY Premiações Stage ===== */}
+      <section className="relative overflow-hidden rounded-[28px] border border-border/60 bg-[#05070a]">
+        {/* Background image */}
+        <div className="absolute inset-0">
+          <img
+            src={heroStage}
+            alt=""
+            width={1920}
+            height={896}
+            className="h-full w-full object-cover object-center opacity-95"
+          />
+          {/* Vignette top */}
+          <div className="absolute inset-x-0 top-0 h-1/3 bg-gradient-to-b from-[#05070a] via-[#05070a]/60 to-transparent" />
+          {/* Vignette bottom */}
+          <div className="absolute inset-x-0 bottom-0 h-2/5 bg-gradient-to-t from-[#05070a] via-[#05070a]/80 to-transparent" />
+          {/* Side fades */}
+          <div className="absolute inset-y-0 left-0 w-1/4 bg-gradient-to-r from-[#05070a]/80 to-transparent" />
+          <div className="absolute inset-y-0 right-0 w-1/4 bg-gradient-to-l from-[#05070a]/80 to-transparent" />
+          {/* Emerald glow accent */}
+          <div className="absolute left-1/2 top-[15%] -translate-x-1/2 h-[420px] w-[720px] rounded-full bg-primary/15 blur-[120px] pointer-events-none" />
+          {/* Grain */}
+          <div
+            className="absolute inset-0 opacity-[0.06] mix-blend-overlay pointer-events-none"
+            style={{ backgroundImage: "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E\")" }}
+          />
+        </div>
+
+        {/* Foreground content */}
+        <div className="relative z-10 px-6 sm:px-12 lg:px-16 pt-12 pb-14 sm:pt-16 sm:pb-20 min-h-[520px] flex flex-col">
+          {/* Top row — brand + tier badge */}
+          <div className="flex items-center justify-between gap-4">
+            <div className="inline-flex items-center gap-2.5 px-3 py-1.5 rounded-full border border-white/15 bg-white/[0.04] backdrop-blur-md">
+              <img src={hotzfyLogo} alt="HOTZFY" className="h-4 w-auto" />
+              <span className="h-3 w-px bg-white/20" />
+              <span className="text-[10px] font-black uppercase tracking-[0.22em] text-white/80">
+                Premiações
+              </span>
+            </div>
+
+            <div className={cn(
+              "inline-flex items-center gap-2 px-3 py-1.5 rounded-full border backdrop-blur-md",
+              currentTier
+                ? "border-primary/40 bg-primary/15 text-primary"
+                : "border-white/15 bg-white/[0.04] text-white/70"
+            )}>
+              {currentTier ? <CheckCircle2 className="h-3 w-3" strokeWidth={2.5} /> : <Sparkles className="h-3 w-3" />}
+              <span className="text-[10px] font-black uppercase tracking-[0.2em]">
+                {currentTier ? `${currentTier.tier} desbloqueado` : "Trilha iniciada"}
+              </span>
+            </div>
+          </div>
+
+          {/* Headline — center stage */}
+          <div className="mt-auto max-w-3xl">
+            <p className="text-[11px] font-black uppercase tracking-[0.32em] text-primary/90 mb-4">
+              Hall das Conquistas
+            </p>
+            <h1 className="font-display text-4xl sm:text-5xl lg:text-[64px] font-black text-white leading-[0.95] tracking-[-0.035em]">
+              Seja reconhecido <br className="hidden sm:block" />
+              pelo seu <span className="text-primary">trabalho</span>.
+            </h1>
+            <p className="mt-5 max-w-xl text-[14px] sm:text-[15px] leading-relaxed text-white/65 font-medium">
+              Cada marco entrega uma plaquinha física exclusiva HOTZFY — peças premium
+              que materializam sua jornada de faturamento.
+            </p>
+          </div>
+
+          {/* Bottom strip — milestone ticks across the stage */}
+          <div className="mt-10 pt-6 border-t border-white/10">
+            <div className="flex items-center justify-between mb-3">
+              <span className="text-[10px] font-black uppercase tracking-[0.22em] text-white/50">
+                {unlockedCount}/{AWARDS.length} marcos
+              </span>
+              <span className="text-[10px] font-black uppercase tracking-[0.22em] text-white/70 tabular-nums">
+                {overallProgress.toFixed(0)}% da jornada
+              </span>
+            </div>
+            <div className="relative h-[3px] rounded-full bg-white/10 overflow-hidden">
+              <div
+                className="h-full rounded-full bg-gradient-to-r from-primary/80 via-primary to-primary/80 transition-[width] duration-1000"
+                style={{ width: `${Math.max(overallProgress, 2)}%` }}
+              />
+            </div>
+            <div className="mt-3 grid grid-cols-7 gap-2">
+              {AWARDS.map((a) => {
+                const done = revenue >= a.value;
+                return (
+                  <div key={a.id} className="flex flex-col items-center gap-1">
+                    <div className={cn(
+                      "h-1.5 w-1.5 rounded-full transition-colors",
+                      done ? "bg-primary shadow-[0_0_8px_hsl(var(--primary))]" : "bg-white/25"
+                    )} />
+                    <span className={cn(
+                      "text-[9px] font-black tabular-nums uppercase tracking-widest",
+                      done ? "text-white" : "text-white/40"
+                    )}>{a.label}</span>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+      </section>
 
       {/* KPI strip */}
       <FinanceiroKpiGrid cols={4}>
@@ -132,6 +226,7 @@ export default function Premiacoes() {
           tone="neutral"
         />
       </FinanceiroKpiGrid>
+
 
       {/* Faturamento + Próximo marco */}
       <div className="grid grid-cols-1 lg:grid-cols-[1.5fr_1fr] gap-px overflow-hidden rounded-2xl border border-border/50 bg-border/40 animate-fade-in stagger-2">
