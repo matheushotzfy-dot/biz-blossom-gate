@@ -6,6 +6,7 @@ import {
   CalendarIcon, ChevronLeft, ChevronRight,
 } from "lucide-react";
 import { TransactionDetailPanel } from "@/components/transactions/TransactionDetailPanel";
+import { PixLogoMark } from "@/components/icons/PixLogoMark";
 import type { Tables } from "@/integrations/supabase/types";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
