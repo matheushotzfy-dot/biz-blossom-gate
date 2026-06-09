@@ -197,13 +197,14 @@ export default function AdminSettingsTab() {
 
  const addSellerRetention = async () => {
  if (!user || !newRetentionSeller) return;
- const { error } = await supabase.from("retention_settings").insert({
- user_id: newRetentionSeller,
- pix_retention_pct: 0,
- card_retention_pct: 0,
- retention_days: 14,
- updated_by: user.id,
- });
+    const { error } = await supabase.from("retention_settings").insert({
+      user_id: newRetentionSeller,
+      pix_retention_pct: 0,
+      card_retention_pct: 0,
+      retention_days: 14,
+      card_release_days: 7,
+      updated_by: user.id,
+    });
  if (error) { toast.error(error.message.includes("duplicate") ? "Seller já tem retenção individual" : "Erro"); return; }
  toast.success("Retenção individual adicionada!");
  setNewRetentionSeller("");
