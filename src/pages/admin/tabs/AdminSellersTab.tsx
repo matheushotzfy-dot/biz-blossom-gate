@@ -749,34 +749,46 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
  <TabsContent value="retention" className="mt-4 space-y-4">
  <AdminPanel>
  <PanelTitle color="amber" icon={<Lock className="h-4 w-4" />}>Rolling Reserve (Retenção de Segurança)</PanelTitle>
- <p className="text-xs text-muted-foreground mt-2 mb-4">
- Configure o percentual do saldo retido para cobrir chargebacks. Deixe em branco para usar a configuração global.
- </p>
- <div className="grid grid-cols-3 gap-4">
- <div>
- <Label className="text-[10px] text-muted-foreground">Retenção PIX (%)</Label>
- <NumberInput step={0.1} min={0} max={100} value={retentionForm.pix_pct}
- onChange={v => setRetentionForm(p => ({ ...p, pix_pct: v }))}
- placeholder="0" className="mt-1 text-xs" />
- </div>
- <div>
- <Label className="text-[10px] text-muted-foreground">Retenção Cartão (%)</Label>
- <NumberInput step={0.1} min={0} max={100} value={retentionForm.card_pct}
- onChange={v => setRetentionForm(p => ({ ...p, card_pct: v }))}
- placeholder="5" className="mt-1 text-xs" />
- </div>
- <div>
- <Label className="text-[10px] text-muted-foreground">Dias de Retenção</Label>
- <NumberInput min={1} max={365} value={retentionForm.days}
- onChange={v => setRetentionForm(p => ({ ...p, days: v }))}
- placeholder="14" className="mt-1 text-xs" />
- </div>
- </div>
- {userRetention && (
- <div className="mt-3 rounded-lg border border-border bg-muted/10 p-3 text-xs text-muted-foreground">
- Configuração atual: PIX {userRetention.pix_retention_pct}% | Cartão {userRetention.card_retention_pct}% | {userRetention.retention_days} dias
- </div>
- )}
+              <p className="text-xs text-muted-foreground mt-2 mb-4">
+                Reserva de segurança (% retido por X dias) e janela de liberação do cartão (D+N). Deixe em branco para usar o global.
+              </p>
+              <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+                <div>
+                  <Label className="text-[10px] text-muted-foreground">Retenção PIX (%)</Label>
+                  <NumberInput step={0.1} min={0} max={100} value={retentionForm.pix_pct}
+                    onChange={v => setRetentionForm(p => ({ ...p, pix_pct: v }))}
+                    placeholder="0" className="mt-1 text-xs" />
+                </div>
+                <div>
+                  <Label className="text-[10px] text-muted-foreground">Retenção Cartão (%)</Label>
+                  <NumberInput step={0.1} min={0} max={100} value={retentionForm.card_pct}
+                    onChange={v => setRetentionForm(p => ({ ...p, card_pct: v }))}
+                    placeholder="5" className="mt-1 text-xs" />
+                </div>
+                <div>
+                  <Label className="text-[10px] text-muted-foreground">Dias Reserva</Label>
+                  <NumberInput min={1} max={365} value={retentionForm.days}
+                    onChange={v => setRetentionForm(p => ({ ...p, days: v }))}
+                    placeholder="14" className="mt-1 text-xs" />
+                </div>
+                <div>
+                  <Label className="text-[10px] text-muted-foreground">Liberação Cartão</Label>
+                  <Select value={retentionForm.card_release_days} onValueChange={v => setRetentionForm(p => ({ ...p, card_release_days: v }))}>
+                    <SelectTrigger className="mt-1 h-9 text-xs"><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="1">D+1</SelectItem>
+                      <SelectItem value="7">D+7 (padrão)</SelectItem>
+                      <SelectItem value="15">D+15</SelectItem>
+                      <SelectItem value="30">D+30</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+              {userRetention && (
+                <div className="mt-3 rounded-lg border border-border bg-muted/10 p-3 text-xs text-muted-foreground">
+                  Atual: PIX {userRetention.pix_retention_pct}% | Cartão {userRetention.card_retention_pct}% | {userRetention.retention_days}d reserva | Liberação cartão D+{userRetention.card_release_days ?? 7}
+                </div>
+              )}
  <Button size="sm" className="bg-primary/10 text-primary border border-primary/20 rounded-xl text-xs mt-4" onClick={handleSaveRetention}>
  <Save className="h-3 w-3 mr-1" /> Salvar Rolling Reserve
  </Button>
