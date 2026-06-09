@@ -378,11 +378,24 @@ export default function AdminSettingsTab() {
  <Input type="number" step="0.1" value={globalRetention.card_retention_pct} onChange={e => setGlobalRetention(p => ({ ...p, card_retention_pct: e.target.value }))} className="h-10" />
  </div>
  </div>
- <div className="space-y-2">
- <Label className="text-xs text-muted-foreground">Dias de Retenção</Label>
- <Input type="number" step="1" value={globalRetention.retention_days} onChange={e => setGlobalRetention(p => ({ ...p, retention_days: e.target.value }))} className="h-10" />
- <p className="text-[10px] text-muted-foreground">O saldo retido será liberado automaticamente após esse número de dias</p>
- </div>
+          <div className="space-y-2">
+            <Label className="text-xs text-muted-foreground">Dias de Retenção (Reserva)</Label>
+            <Input type="number" step="1" value={globalRetention.retention_days} onChange={e => setGlobalRetention(p => ({ ...p, retention_days: e.target.value }))} className="h-10" />
+            <p className="text-[10px] text-muted-foreground">O saldo retido (rolling reserve) será liberado após esse número de dias</p>
+          </div>
+          <div className="space-y-2">
+            <Label className="text-xs text-muted-foreground flex items-center gap-1.5"><CreditCard className="h-3 w-3" /> Liberação Cartão (padrão D+7)</Label>
+            <Select value={globalRetention.card_release_days} onValueChange={v => setGlobalRetention(p => ({ ...p, card_release_days: v }))}>
+              <SelectTrigger className="h-10"><SelectValue /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="1">D+1 (1 dia)</SelectItem>
+                <SelectItem value="7">D+7 (7 dias) — padrão</SelectItem>
+                <SelectItem value="15">D+15 (15 dias)</SelectItem>
+                <SelectItem value="30">D+30 (30 dias)</SelectItem>
+              </SelectContent>
+            </Select>
+            <p className="text-[10px] text-muted-foreground">Quanto tempo o valor de vendas no cartão fica retido antes de virar saldo disponível.</p>
+          </div>
  <Button onClick={saveGlobalRetention} disabled={saving} className="w-full gap-2">
  <Save className="h-4 w-4" /> Salvar Retenção Global
  </Button>
