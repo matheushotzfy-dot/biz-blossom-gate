@@ -250,14 +250,15 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
  // ── Rolling Reserve ──
  const handleSaveRetention = async () => {
  if (!selectedUser || !user) return;
- const payload = {
- user_id: selectedUser.user_id,
- pix_retention_pct: retentionForm.pix_pct ? Number(retentionForm.pix_pct) : 0,
- card_retention_pct: retentionForm.card_pct ? Number(retentionForm.card_pct) : 0,
- retention_days: retentionForm.days ? Number(retentionForm.days) : 14,
- updated_by: user.id,
- updated_at: new Date().toISOString(),
- };
+    const payload = {
+      user_id: selectedUser.user_id,
+      pix_retention_pct: retentionForm.pix_pct ? Number(retentionForm.pix_pct) : 0,
+      card_retention_pct: retentionForm.card_pct ? Number(retentionForm.card_pct) : 0,
+      retention_days: retentionForm.days ? Number(retentionForm.days) : 14,
+      card_release_days: retentionForm.card_release_days ? Number(retentionForm.card_release_days) : 7,
+      updated_by: user.id,
+      updated_at: new Date().toISOString(),
+    };
  const { error } = await supabase.from("retention_settings").upsert(payload, { onConflict: "user_id" });
  if (error) { toast.error("Erro ao salvar retenção"); return; }
  toast.success("Rolling Reserve atualizado!");
