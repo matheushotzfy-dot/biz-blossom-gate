@@ -398,8 +398,18 @@ Deno.serve(async (req) => {
     // Fallback: update by product_id + amount + customer_email to avoid wrong-customer match.
     // Only used when no podpay_payment_id correlation exists. Requires strict triple-match.
     if (!transactionId && externalRef) {
-      const fallbackEmail = (body?.customer?.email ?? body?.payer?.email ?? '').toString().trim().toLowerCase();
-      const fallbackAmount = Number(body?.amount ?? body?.value ?? body?.transaction?.amount ?? NaN);
+      const pAny = payload as any;
+      const dAny = data as any;
+      const fallbackEmail = (
+        dAny?.customer?.email ?? pAny?.customer?.email ?? pAny?.payer?.email ?? ''
+      ).toString().trim().toLowerCase();
+      const fallbackAmountRaw = dAny?.amount ?? pAny?.amount ?? pAny?.value ?? pAny?.transaction?.amount;
+      // PodPay sends amount in cents — normalize to reais if it's an integer >= 100
+      let fallbackAmount = Number(fallbackAmountRaw);
+      if (Number.isFinite(fallbackAmount) && Number.isInteger(fallbackAmount) && fallbackAmount >= 100) {
+        fallbackAmount = fallbackAmount / 100;
+      }
+
 
       if (fallbackEmail && Number.isFinite(fallbackAmount) && fallbackAmount > 0) {
         const { data: pendingTx } = await supabase
