@@ -495,9 +495,22 @@ export default function PublicCheckout() {
  );
 
  /* ─── Computed values ─── */
- const price = Number(product.price);
- const bumpsTotal = orderBumps.filter(b => selectedBumps.has(b.id)).reduce((s, b) => s + Number(b.bump_product.price), 0);
- const totalPrice = price + bumpsTotal;
+  const price = Number(product.price);
+  const bumpsTotal = orderBumps.filter(b => selectedBumps.has(b.id)).reduce((s, b) => s + Number(b.bump_product.price), 0);
+  const subtotal = price + bumpsTotal;
+  // Recompute discount on selected items (server is authoritative on submit)
+  let discountValue = 0;
+  if (appliedCoupon) {
+    const base = appliedCoupon.apply_to_bumps ? subtotal : price;
+    if (appliedCoupon.discount_type === "percentage") {
+      discountValue = Math.round((base * Number(appliedCoupon.discount_value) / 100) * 100) / 100;
+    } else {
+      discountValue = Math.min(Number(appliedCoupon.discount_value), Math.max(base - 0.01, 0));
+    }
+    if (discountValue < 0) discountValue = 0;
+  }
+  const totalPrice = Math.max(subtotal - discountValue, 0.01);
+
  const btnColor = product.checkout_button_color || "#10b981";
  const themeMode = product.checkout_theme === "white" ? "white" : product.checkout_theme === "dark" ? "dark" : "gray";
  const isWhite = themeMode === "white";
