@@ -97,12 +97,13 @@ export default function AdminSettingsTab() {
  if (retentionRes.data) {
  const global = retentionRes.data.find((r: any) => r.user_id === null);
  if (global) {
- setGlobalRetention({
- id: global.id,
- pix_retention_pct: String(global.pix_retention_pct),
- card_retention_pct: String(global.card_retention_pct),
- retention_days: String(global.retention_days),
- });
+          setGlobalRetention({
+            id: global.id,
+            pix_retention_pct: String(global.pix_retention_pct),
+            card_retention_pct: String(global.card_retention_pct),
+            retention_days: String(global.retention_days),
+            card_release_days: String((global as any).card_release_days ?? 7),
+          });
  }
  setSellerRetentions(retentionRes.data.filter((r: any) => r.user_id !== null));
  }
