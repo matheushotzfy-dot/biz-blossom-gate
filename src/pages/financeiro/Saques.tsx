@@ -17,7 +17,7 @@ import { ptBR } from "date-fns/locale";
 import DadosBancarios from "./DadosBancarios";
 
 const fmt = (v: number) => v === 0 ? "R$ 0,00" : `R$ ${v.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}`;
-const WITHDRAW_FEE = 5;
+const DEFAULT_WITHDRAW_FEE = 5;
 
 const STATUS_CONFIG: Record<string, { label: string; color: string; bg: string }> = {
   approved: { label: "Concluído", color: "text-emerald-500", bg: "bg-emerald-500/10" },
