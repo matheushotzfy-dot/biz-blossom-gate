@@ -104,7 +104,8 @@ export default function Identidade() {
     if (!["image/jpeg", "image/png", "image/webp", "image/heic"].includes(file.type)) { toast.error("Formato inválido"); return; }
     if (file.size > 10 * 1024 * 1024) { toast.error("Máximo 10MB"); return; }
     setUploading(type);
-    const ext = file.name.split(".").pop();
+    const mimeExt: Record<string, string> = { "image/jpeg": "jpg", "image/png": "png", "image/webp": "webp", "image/heic": "heic" };
+    const ext = mimeExt[file.type] || "bin";
     const path = `${user.id}/${type}_${crypto.randomUUID().slice(0, 8)}.${ext}`;
     const { error } = await supabase.storage.from("kyc-documents").upload(path, file, { upsert: true });
     if (error) toast.error("Erro no upload"); else { toast.success("Documento enviado"); await loadKycDocs(); }

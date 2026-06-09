@@ -120,7 +120,8 @@ export default function Afiliados() {
   };
 
   const toggleLinkActive = async (link: AffiliateLink) => {
-    await supabase.from("affiliate_links" as any).update({ is_active: !link.is_active }).eq("id", link.id);
+    if (!user) return;
+    await supabase.from("affiliate_links" as any).update({ is_active: !link.is_active }).eq("id", link.id).eq("affiliate_user_id", user.id);
     loadData();
   };
 
