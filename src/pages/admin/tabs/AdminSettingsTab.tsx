@@ -433,25 +433,24 @@ export default function AdminSettingsTab() {
  <Trash2 className="h-3.5 w-3.5" />
  </Button>
  </div>
- <div className="grid grid-cols-3 gap-2">
- <div>
- <Label className="text-[10px] text-muted-foreground">PIX %</Label>
- <Input type="number" step="0.1" value={r.pix_retention_pct} onChange={e => {
- setSellerRetentions(prev => prev.map(s => s.id === r.id ? { ...s, pix_retention_pct: e.target.value } : s));
- }} className="h-8 text-sm" />
- </div>
- <div>
- <Label className="text-[10px] text-muted-foreground">Cartão %</Label>
- <Input type="number" step="0.1" value={r.card_retention_pct} onChange={e => {
- setSellerRetentions(prev => prev.map(s => s.id === r.id ? { ...s, card_retention_pct: e.target.value } : s));
- }} className="h-8 text-sm" />
- </div>
- <div>
- <Label className="text-[10px] text-muted-foreground">Dias</Label>
- <Input type="number" step="1" value={r.retention_days} onChange={e => {
- setSellerRetentions(prev => prev.map(s => s.id === r.id ? { ...s, retention_days: e.target.value } : s));
- }} className="h-8 text-sm" />
- </div>
+                    <div className="grid grid-cols-2 gap-2">
+                      <div>
+                        <Label className="text-[10px] text-muted-foreground">PIX %</Label>
+                        <Input type="number" step="0.1" value={r.pix_retention_pct} onChange={e => {
+                          setSellerRetentions(prev => prev.map(s => s.id === r.id ? { ...s, pix_retention_pct: e.target.value } : s));
+                        }} className="h-8 text-sm" />
+                      </div>
+                      <div>
+                        <Label className="text-[10px] text-muted-foreground">Cartão %</Label>
+                        <Input type="number" step="0.1" value={r.card_retention_pct} onChange={e => {
+                          setSellerRetentions(prev => prev.map(s => s.id === r.id ? { ...s, card_retention_pct: e.target.value } : s));
+                        }} className="h-8 text-sm" />
+                      </div>
+                      <div>
+                        <Label className="text-[10px] text-muted-foreground">Dias Reserva</Label>
+                        <Input type="number" step="1" value={r.retention_days} onChange={e => {
+                          setSellerRetentions(prev => prev.map(s => s.id === r.id ? { ...s, retention_days: e.target.value } : s));
+                        }} className="h-8 text-sm" />
                       </div>
                       <div>
                         <Label className="text-[10px] text-muted-foreground">Liberação Cartão</Label>
@@ -467,6 +466,7 @@ export default function AdminSettingsTab() {
                           </SelectContent>
                         </Select>
                       </div>
+                    </div>
  <Button size="sm" variant="outline" className="w-full gap-1" onClick={() => saveSellerRetention(r)}>
  <Save className="h-3 w-3" /> Salvar
  </Button>
