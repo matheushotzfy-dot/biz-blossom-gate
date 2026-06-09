@@ -368,7 +368,7 @@ Deno.serve(async (req) => {
     const { data: transaction, error: txError } = await supabase.from('transactions').insert({
       user_id: product.user_id,
       product_id: product.id,
-      amount: Number(product.price),
+      amount: finalPrice,
       fee_amount: feeAmount,
       net_amount: netAmount,
       status: 'pending',
@@ -379,7 +379,10 @@ Deno.serve(async (req) => {
       customer_phone: safePhone,
       podpay_payment_id: podpayId ? String(podpayId) : null,
       checkout_session_id: checkoutSessionId || null,
+      coupon_id: couponId,
+      discount_amount: discountAmount,
     }).select().single();
+
 
     if (txError) {
       safeLog('DB error saving transaction', { error: txError.message, code: txError.code });
