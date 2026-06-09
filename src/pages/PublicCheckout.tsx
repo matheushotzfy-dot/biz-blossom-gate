@@ -1177,7 +1177,78 @@ export default function PublicCheckout() {
  <span className="text-gray-700 font-semibold tabular-nums">R$ {fmtBRL(Number(b.bump_product.price))}</span>
  </div>
  ))}
+ {/* Cupom */}
+ <div className="border-t border-gray-100 pt-3">
+   {appliedCoupon ? (
+     <div className="flex items-center justify-between rounded-lg bg-emerald-50 border border-emerald-200 px-3 py-2">
+       <div className="flex items-center gap-2 min-w-0">
+         <Ticket className="h-3.5 w-3.5 text-emerald-600 shrink-0" />
+         <span className="text-xs font-bold text-emerald-700 truncate">{appliedCoupon.code}</span>
+         <span className="text-[10px] text-emerald-600">−R$ {fmtBRL(discountValue)}</span>
+       </div>
+       <button
+         type="button"
+         onClick={() => { setAppliedCoupon(null); setCouponInput(""); }}
+         className="text-[10px] font-bold text-emerald-700 hover:text-emerald-900"
+       >Remover</button>
+     </div>
+   ) : (
+     <div className="flex gap-2">
+       <input
+         type="text"
+         value={couponInput}
+         onChange={(e) => setCouponInput(e.target.value.toUpperCase().replace(/\s/g, ""))}
+         placeholder="Cupom de desconto"
+         className="flex-1 h-9 px-3 rounded-lg border border-gray-200 bg-white text-xs font-mono font-bold text-gray-700 placeholder:font-sans placeholder:font-medium placeholder:text-gray-300 focus:outline-none focus:border-gray-400"
+       />
+       <button
+         type="button"
+         disabled={!couponInput.trim() || couponApplying}
+         onClick={async () => {
+           if (!couponInput.trim() || !product) return;
+           setCouponApplying(true);
+           try {
+             const { data, error } = await supabase.rpc("validate_coupon", {
+               _code: couponInput.trim(),
+               _product_id: product.id,
+               _amount: price,
+             });
+             const row = Array.isArray(data) ? data[0] : data;
+             if (error || !row?.valid) {
+               toast.error(row?.error || "Cupom inválido");
+             } else {
+               setAppliedCoupon({
+                 code: couponInput.trim().toUpperCase(),
+                 coupon_id: row.coupon_id,
+                 discount_amount: Number(row.discount_amount),
+                 apply_to_bumps: !!row.apply_to_bumps,
+                 discount_type: row.discount_type,
+                 discount_value: Number(row.discount_value),
+               });
+               toast.success("Cupom aplicado!");
+             }
+           } catch {
+             toast.error("Erro ao validar cupom");
+           } finally {
+             setCouponApplying(false);
+           }
+         }}
+         className="h-9 px-4 rounded-lg text-xs font-bold text-white disabled:opacity-50 transition-opacity"
+         style={{ backgroundColor: btnColor }}
+       >{couponApplying ? "..." : "Aplicar"}</button>
+     </div>
+   )}
+ </div>
+
+ {discountValue > 0 && (
+   <div className="flex justify-between items-center text-xs">
+     <span className="text-gray-400">Desconto</span>
+     <span className="text-emerald-600 font-semibold tabular-nums">− R$ {fmtBRL(discountValue)}</span>
+   </div>
+ )}
+
  <div className="border-t border-gray-100 pt-3 flex justify-between items-center">
+
  <span className="font-bold text-gray-800 text-base">Total</span>
  <div className="text-right">
  <span className="font-extrabold text-xl tracking-tight tabular-nums" style={{ color: btnColor }}>
