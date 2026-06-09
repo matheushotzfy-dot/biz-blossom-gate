@@ -183,13 +183,14 @@ export default function AdminSettingsTab() {
 
  const saveSellerRetention = async (r: any) => {
  if (!user) return;
- const { error } = await supabase.from("retention_settings").update({
- pix_retention_pct: Number(r.pix_retention_pct),
- card_retention_pct: Number(r.card_retention_pct),
- retention_days: Number(r.retention_days),
- updated_by: user.id,
- updated_at: new Date().toISOString(),
- }).eq("id", r.id);
+    const { error } = await supabase.from("retention_settings").update({
+      pix_retention_pct: Number(r.pix_retention_pct),
+      card_retention_pct: Number(r.card_retention_pct),
+      retention_days: Number(r.retention_days),
+      card_release_days: Number(r.card_release_days ?? 7),
+      updated_by: user.id,
+      updated_at: new Date().toISOString(),
+    }).eq("id", r.id);
  if (error) { toast.error("Erro"); return; }
  toast.success("Retenção do seller salva!");
  };
