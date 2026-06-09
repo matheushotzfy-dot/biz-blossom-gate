@@ -40,7 +40,7 @@ interface PixKey {
 }
 
 interface RetentionSettings {
- id?: string; user_id: string | null; pix_retention_pct: number; card_retention_pct: number; retention_days: number;
+  id?: string; user_id: string | null; pix_retention_pct: number; card_retention_pct: number; retention_days: number; card_release_days?: number;
 }
 
 const ACTION_LABELS: Record<string, { label: string; color: string; icon: any }> = {
