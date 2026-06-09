@@ -211,7 +211,24 @@ Deno.serve(async (req) => {
       );
     }
 
-    const amountInCents = Math.round(Number(product.price) * 100);
+    // === Validate & apply coupon (server-authoritative) ===
+    let couponId: string | null = null;
+    let discountAmount = 0;
+    let finalPrice = Number(product.price);
+    if (couponCode && typeof couponCode === 'string' && couponCode.trim().length > 0) {
+      const { data: cv, error: cvErr } = await supabase.rpc('validate_coupon', {
+        _code: couponCode.trim(),
+        _product_id: product.id,
+        _amount: Number(product.price),
+      });
+      if (!cvErr && Array.isArray(cv) && cv[0]?.valid) {
+        discountAmount = Math.round(Number(cv[0].discount_amount) * 100) / 100;
+        couponId = cv[0].coupon_id;
+        finalPrice = Math.round((Number(product.price) - discountAmount) * 100) / 100;
+      }
+    }
+    const amountInCents = Math.round(finalPrice * 100);
+
 
     // === Calculate fees from DB (payment-method-specific) ===
     const { data: fees, error: feesError } = await supabase.from('fees').select('*');
