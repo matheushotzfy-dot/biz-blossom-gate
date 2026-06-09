@@ -770,6 +770,7 @@ export type Database = {
       }
       coupons: {
         Row: {
+          apply_to_bumps: boolean
           code: string
           created_at: string
           current_uses: number
@@ -784,6 +785,7 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          apply_to_bumps?: boolean
           code: string
           created_at?: string
           current_uses?: number
@@ -798,6 +800,7 @@ export type Database = {
           user_id: string
         }
         Update: {
+          apply_to_bumps?: boolean
           code?: string
           created_at?: string
           current_uses?: number
@@ -2384,12 +2387,14 @@ export type Database = {
           amount: number
           api_key_id: string | null
           checkout_session_id: string | null
+          coupon_id: string | null
           created_at: string
           customer_address: string | null
           customer_document: string | null
           customer_email: string | null
           customer_name: string | null
           customer_phone: string | null
+          discount_amount: number
           external_id: string | null
           fee_amount: number
           id: string
@@ -2415,12 +2420,14 @@ export type Database = {
           amount: number
           api_key_id?: string | null
           checkout_session_id?: string | null
+          coupon_id?: string | null
           created_at?: string
           customer_address?: string | null
           customer_document?: string | null
           customer_email?: string | null
           customer_name?: string | null
           customer_phone?: string | null
+          discount_amount?: number
           external_id?: string | null
           fee_amount?: number
           id?: string
@@ -2446,12 +2453,14 @@ export type Database = {
           amount?: number
           api_key_id?: string | null
           checkout_session_id?: string | null
+          coupon_id?: string | null
           created_at?: string
           customer_address?: string | null
           customer_document?: string | null
           customer_email?: string | null
           customer_name?: string | null
           customer_phone?: string | null
+          discount_amount?: number
           external_id?: string | null
           fee_amount?: number
           id?: string
@@ -2479,6 +2488,13 @@ export type Database = {
             columns: ["api_key_id"]
             isOneToOne: false
             referencedRelation: "api_keys"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "transactions_coupon_id_fkey"
+            columns: ["coupon_id"]
+            isOneToOne: false
+            referencedRelation: "coupons"
             referencedColumns: ["id"]
           },
           {
@@ -3244,6 +3260,18 @@ export type Database = {
       }
       is_product_active: { Args: { _product_id: string }; Returns: boolean }
       touch_api_key: { Args: { _api_key_id: string }; Returns: undefined }
+      validate_coupon: {
+        Args: { _amount: number; _code: string; _product_id: string }
+        Returns: {
+          apply_to_bumps: boolean
+          coupon_id: string
+          discount_amount: number
+          discount_type: string
+          discount_value: number
+          error: string
+          valid: boolean
+        }[]
+      }
       verify_api_secret: {
         Args: { _hash: string; _prefix: string }
         Returns: {
