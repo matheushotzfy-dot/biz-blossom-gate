@@ -3105,7 +3105,6 @@ export type Database = {
       }
       quiz_questions_safe: {
         Row: {
-          created_at: string | null
           explanation: string | null
           id: string | null
           options: Json | null
@@ -3114,7 +3113,6 @@ export type Database = {
           sort_order: number | null
         }
         Insert: {
-          created_at?: string | null
           explanation?: string | null
           id?: string | null
           options?: Json | null
@@ -3123,7 +3121,6 @@ export type Database = {
           sort_order?: number | null
         }
         Update: {
-          created_at?: string | null
           explanation?: string | null
           id?: string | null
           options?: Json | null
