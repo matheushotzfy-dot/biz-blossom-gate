@@ -434,11 +434,13 @@ export default function PublicCheckout() {
  processingRef.current = true; setProcessing(true);
  try {
  const sessionId = getCheckoutSessionId(slug || "default");
- const payload: Record<string, unknown> = {
- productId: product.id, paymentMethod: method, customerName: name,
- customerEmail: email, customerDocument: docDigits, customerPhone: phoneDigits,
- checkoutSessionId: sessionId,
- };
+  const payload: Record<string, unknown> = {
+  productId: product.id, paymentMethod: method, customerName: name,
+  customerEmail: email, customerDocument: docDigits, customerPhone: phoneDigits,
+  checkoutSessionId: sessionId,
+  couponCode: appliedCoupon?.code || null,
+  };
+
  if (method === "credit_card") { payload.installments = parseInt(installments); payload.cardToken = null; }
  const { data, error } = await supabase.functions.invoke("podpay-create-transaction", { body: payload });
  if (error || !data?.success) { toast.error("Não foi possível processar. Tente novamente."); setCheckoutState("failed"); return; }
