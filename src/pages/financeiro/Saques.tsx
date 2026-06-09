@@ -56,6 +56,14 @@ export default function Saques() {
         .eq("status", "completed")
         .eq("retention_released", false);
       if (tx) setRetainedAmount(tx.reduce((acc, t) => acc + Number(t.retained_amount || 0), 0));
+
+      const { data: feeRow } = await supabase
+        .from("fees")
+        .select("value")
+        .eq("name", "Taxa de Saque")
+        .eq("fee_type", "fixed")
+        .maybeSingle();
+      if (feeRow?.value != null) setWithdrawFee(Number(feeRow.value));
     };
     fetchBalance();
   }, [user?.id]);
