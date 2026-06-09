@@ -42,7 +42,7 @@ export default function AdminSettingsTab() {
  const [editingFees, setEditingFees] = useState<Record<string, string>>({});
 
  // Retention settings
- const [globalRetention, setGlobalRetention] = useState({ pix_retention_pct: "0", card_retention_pct: "0", retention_days: "14", id: "" });
+ const [globalRetention, setGlobalRetention] = useState({ pix_retention_pct: "0", card_retention_pct: "0", retention_days: "14", card_release_days: "7", id: "" });
  const [sellerRetentions, setSellerRetentions] = useState<any[]>([]);
  const [profiles, setProfiles] = useState<{ user_id: string; full_name: string | null; email: string | null }[]>([]);
  const [newRetentionSeller, setNewRetentionSeller] = useState("");
