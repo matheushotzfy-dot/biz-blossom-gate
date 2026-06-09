@@ -40,7 +40,7 @@ interface PixKey {
 }
 
 interface RetentionSettings {
- id?: string; user_id: string | null; pix_retention_pct: number; card_retention_pct: number; retention_days: number;
+  id?: string; user_id: string | null; pix_retention_pct: number; card_retention_pct: number; retention_days: number; card_release_days?: number;
 }
 
 const ACTION_LABELS: Record<string, { label: string; color: string; icon: any }> = {
@@ -86,7 +86,7 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
  const [showRejectDialog, setShowRejectDialog] = useState(false);
  const [rejectTargetUserId, setRejectTargetUserId] = useState<string>("");
  const [userRetention, setUserRetention] = useState<RetentionSettings | null>(null);
- const [retentionForm, setRetentionForm] = useState({ pix_pct: "", card_pct: "", days: "" });
+ const [retentionForm, setRetentionForm] = useState({ pix_pct: "", card_pct: "", days: "", card_release_days: "7" });
  const [impersonating, setImpersonating] = useState(false);
 
  useEffect(() => {
@@ -102,7 +102,7 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
  setUserLogs([]); setUserProducts([]); setUserWithdrawals([]);
  setUserTransactions([]); setUserPixKeys([]); setUserDisputes([]);
  setBalanceAdjustments([]); setKycImages([]);
- setUserRetention(null); setRetentionForm({ pix_pct: "", card_pct: "", days: "" });
+ setUserRetention(null); setRetentionForm({ pix_pct: "", card_pct: "", days: "", card_release_days: "7" });
  setAdminNotes(""); setSelectedAcquirerId("");
  const [logsRes, productsRes, wdRes, txRes, feesRes, adjRes, pixRes, disputesRes, retRes] = await Promise.all([
  supabase.from("activity_logs").select("id, user_id, action, entity_type, entity_id, old_data, new_data, created_at").eq("user_id", profile.user_id).order("created_at", { ascending: false }).limit(100),
@@ -113,28 +113,29 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
  supabase.from("balance_adjustments").select("id, user_id, amount, type, reason, admin_user_id, created_at").eq("user_id", profile.user_id).order("created_at", { ascending: false }).limit(50),
  supabase.from("pix_keys").select("id, key_type, key_value, created_at").eq("user_id", profile.user_id),
  supabase.from("disputes").select("id, seller_user_id, transaction_id, amount, type, status, reason, created_at").eq("seller_user_id", profile.user_id).order("created_at", { ascending: false }).limit(50) as any,
- supabase.from("retention_settings").select("id, user_id, pix_retention_pct, card_retention_pct, retention_days").eq("user_id", profile.user_id).maybeSingle(),
- ]);
- if (logsRes.data) setUserLogs(logsRes.data as any);
- if (productsRes.data) setUserProducts(productsRes.data);
- if (wdRes.data) setUserWithdrawals(wdRes.data);
- if (txRes.data) setUserTransactions(txRes.data);
- if (adjRes.data) setBalanceAdjustments(adjRes.data);
- if (pixRes.data) setUserPixKeys(pixRes.data as PixKey[]);
- if (disputesRes.data) setUserDisputes(disputesRes.data as any[]);
- setSelectedAcquirerId(profile.acquirer_id || "");
- setAdminNotes((profile as any).admin_notes || "");
- if (retRes.data) {
- setUserRetention(retRes.data as any);
- setRetentionForm({
- pix_pct: String(retRes.data.pix_retention_pct ?? ""),
- card_pct: String(retRes.data.card_retention_pct ?? ""),
- days: String(retRes.data.retention_days ?? ""),
- });
- } else {
- setUserRetention(null);
- setRetentionForm({ pix_pct: "", card_pct: "", days: "" });
- }
+      supabase.from("retention_settings").select("id, user_id, pix_retention_pct, card_retention_pct, retention_days, card_release_days").eq("user_id", profile.user_id).maybeSingle(),
+    ]);
+    if (logsRes.data) setUserLogs(logsRes.data as any);
+    if (productsRes.data) setUserProducts(productsRes.data);
+    if (wdRes.data) setUserWithdrawals(wdRes.data);
+    if (txRes.data) setUserTransactions(txRes.data);
+    if (adjRes.data) setBalanceAdjustments(adjRes.data);
+    if (pixRes.data) setUserPixKeys(pixRes.data as PixKey[]);
+    if (disputesRes.data) setUserDisputes(disputesRes.data as any[]);
+    setSelectedAcquirerId(profile.acquirer_id || "");
+    setAdminNotes((profile as any).admin_notes || "");
+    if (retRes.data) {
+      setUserRetention(retRes.data as any);
+      setRetentionForm({
+        pix_pct: String(retRes.data.pix_retention_pct ?? ""),
+        card_pct: String(retRes.data.card_retention_pct ?? ""),
+        days: String(retRes.data.retention_days ?? ""),
+        card_release_days: String((retRes.data as any).card_release_days ?? 7),
+      });
+    } else {
+      setUserRetention(null);
+      setRetentionForm({ pix_pct: "", card_pct: "", days: "", card_release_days: "7" });
+    }
  if (feesRes.data) {
  setCustomFees({
  transaction_percentage: feesRes.data.transaction_percentage?.toString() || "",
@@ -249,14 +250,15 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
  // ── Rolling Reserve ──
  const handleSaveRetention = async () => {
  if (!selectedUser || !user) return;
- const payload = {
- user_id: selectedUser.user_id,
- pix_retention_pct: retentionForm.pix_pct ? Number(retentionForm.pix_pct) : 0,
- card_retention_pct: retentionForm.card_pct ? Number(retentionForm.card_pct) : 0,
- retention_days: retentionForm.days ? Number(retentionForm.days) : 14,
- updated_by: user.id,
- updated_at: new Date().toISOString(),
- };
+    const payload = {
+      user_id: selectedUser.user_id,
+      pix_retention_pct: retentionForm.pix_pct ? Number(retentionForm.pix_pct) : 0,
+      card_retention_pct: retentionForm.card_pct ? Number(retentionForm.card_pct) : 0,
+      retention_days: retentionForm.days ? Number(retentionForm.days) : 14,
+      card_release_days: retentionForm.card_release_days ? Number(retentionForm.card_release_days) : 7,
+      updated_by: user.id,
+      updated_at: new Date().toISOString(),
+    };
  const { error } = await supabase.from("retention_settings").upsert(payload, { onConflict: "user_id" });
  if (error) { toast.error("Erro ao salvar retenção"); return; }
  toast.success("Rolling Reserve atualizado!");
@@ -747,34 +749,46 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
  <TabsContent value="retention" className="mt-4 space-y-4">
  <AdminPanel>
  <PanelTitle color="amber" icon={<Lock className="h-4 w-4" />}>Rolling Reserve (Retenção de Segurança)</PanelTitle>
- <p className="text-xs text-muted-foreground mt-2 mb-4">
- Configure o percentual do saldo retido para cobrir chargebacks. Deixe em branco para usar a configuração global.
- </p>
- <div className="grid grid-cols-3 gap-4">
- <div>
- <Label className="text-[10px] text-muted-foreground">Retenção PIX (%)</Label>
- <NumberInput step={0.1} min={0} max={100} value={retentionForm.pix_pct}
- onChange={v => setRetentionForm(p => ({ ...p, pix_pct: v }))}
- placeholder="0" className="mt-1 text-xs" />
- </div>
- <div>
- <Label className="text-[10px] text-muted-foreground">Retenção Cartão (%)</Label>
- <NumberInput step={0.1} min={0} max={100} value={retentionForm.card_pct}
- onChange={v => setRetentionForm(p => ({ ...p, card_pct: v }))}
- placeholder="5" className="mt-1 text-xs" />
- </div>
- <div>
- <Label className="text-[10px] text-muted-foreground">Dias de Retenção</Label>
- <NumberInput min={1} max={365} value={retentionForm.days}
- onChange={v => setRetentionForm(p => ({ ...p, days: v }))}
- placeholder="14" className="mt-1 text-xs" />
- </div>
- </div>
- {userRetention && (
- <div className="mt-3 rounded-lg border border-border bg-muted/10 p-3 text-xs text-muted-foreground">
- Configuração atual: PIX {userRetention.pix_retention_pct}% | Cartão {userRetention.card_retention_pct}% | {userRetention.retention_days} dias
- </div>
- )}
+              <p className="text-xs text-muted-foreground mt-2 mb-4">
+                Reserva de segurança (% retido por X dias) e janela de liberação do cartão (D+N). Deixe em branco para usar o global.
+              </p>
+              <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+                <div>
+                  <Label className="text-[10px] text-muted-foreground">Retenção PIX (%)</Label>
+                  <NumberInput step={0.1} min={0} max={100} value={retentionForm.pix_pct}
+                    onChange={v => setRetentionForm(p => ({ ...p, pix_pct: v }))}
+                    placeholder="0" className="mt-1 text-xs" />
+                </div>
+                <div>
+                  <Label className="text-[10px] text-muted-foreground">Retenção Cartão (%)</Label>
+                  <NumberInput step={0.1} min={0} max={100} value={retentionForm.card_pct}
+                    onChange={v => setRetentionForm(p => ({ ...p, card_pct: v }))}
+                    placeholder="5" className="mt-1 text-xs" />
+                </div>
+                <div>
+                  <Label className="text-[10px] text-muted-foreground">Dias Reserva</Label>
+                  <NumberInput min={1} max={365} value={retentionForm.days}
+                    onChange={v => setRetentionForm(p => ({ ...p, days: v }))}
+                    placeholder="14" className="mt-1 text-xs" />
+                </div>
+                <div>
+                  <Label className="text-[10px] text-muted-foreground">Liberação Cartão</Label>
+                  <Select value={retentionForm.card_release_days} onValueChange={v => setRetentionForm(p => ({ ...p, card_release_days: v }))}>
+                    <SelectTrigger className="mt-1 h-9 text-xs"><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="1">D+1</SelectItem>
+                      <SelectItem value="7">D+7 (padrão)</SelectItem>
+                      <SelectItem value="15">D+15</SelectItem>
+                      <SelectItem value="30">D+30</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+              {userRetention && (
+                <div className="mt-3 rounded-lg border border-border bg-muted/10 p-3 text-xs text-muted-foreground">
+                  Atual: PIX {userRetention.pix_retention_pct}% | Cartão {userRetention.card_retention_pct}% | {userRetention.retention_days}d reserva | Liberação cartão D+{userRetention.card_release_days ?? 7}
+                </div>
+              )}
  <Button size="sm" className="bg-primary/10 text-primary border border-primary/20 rounded-xl text-xs mt-4" onClick={handleSaveRetention}>
  <Save className="h-3 w-3 mr-1" /> Salvar Rolling Reserve
  </Button>

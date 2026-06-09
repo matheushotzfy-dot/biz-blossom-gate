@@ -42,7 +42,7 @@ export default function AdminSettingsTab() {
  const [editingFees, setEditingFees] = useState<Record<string, string>>({});
 
  // Retention settings
- const [globalRetention, setGlobalRetention] = useState({ pix_retention_pct: "0", card_retention_pct: "0", retention_days: "14", id: "" });
+ const [globalRetention, setGlobalRetention] = useState({ pix_retention_pct: "0", card_retention_pct: "0", retention_days: "14", card_release_days: "7", id: "" });
  const [sellerRetentions, setSellerRetentions] = useState<any[]>([]);
  const [profiles, setProfiles] = useState<{ user_id: string; full_name: string | null; email: string | null }[]>([]);
  const [newRetentionSeller, setNewRetentionSeller] = useState("");
@@ -97,12 +97,13 @@ export default function AdminSettingsTab() {
  if (retentionRes.data) {
  const global = retentionRes.data.find((r: any) => r.user_id === null);
  if (global) {
- setGlobalRetention({
- id: global.id,
- pix_retention_pct: String(global.pix_retention_pct),
- card_retention_pct: String(global.card_retention_pct),
- retention_days: String(global.retention_days),
- });
+          setGlobalRetention({
+            id: global.id,
+            pix_retention_pct: String(global.pix_retention_pct),
+            card_retention_pct: String(global.card_retention_pct),
+            retention_days: String(global.retention_days),
+            card_release_days: String((global as any).card_release_days ?? 7),
+          });
  }
  setSellerRetentions(retentionRes.data.filter((r: any) => r.user_id !== null));
  }
@@ -155,13 +156,14 @@ export default function AdminSettingsTab() {
  const saveGlobalRetention = async () => {
  if (!user) return;
  setSaving(true);
- const payload = {
- pix_retention_pct: Number(globalRetention.pix_retention_pct),
- card_retention_pct: Number(globalRetention.card_retention_pct),
- retention_days: Number(globalRetention.retention_days),
- updated_by: user.id,
- updated_at: new Date().toISOString(),
- };
+    const payload = {
+      pix_retention_pct: Number(globalRetention.pix_retention_pct),
+      card_retention_pct: Number(globalRetention.card_retention_pct),
+      retention_days: Number(globalRetention.retention_days),
+      card_release_days: Number(globalRetention.card_release_days),
+      updated_by: user.id,
+      updated_at: new Date().toISOString(),
+    };
  let savedId = globalRetention.id;
  if (globalRetention.id) {
  const { error } = await supabase.from("retention_settings").update(payload).eq("id", globalRetention.id);
@@ -181,26 +183,28 @@ export default function AdminSettingsTab() {
 
  const saveSellerRetention = async (r: any) => {
  if (!user) return;
- const { error } = await supabase.from("retention_settings").update({
- pix_retention_pct: Number(r.pix_retention_pct),
- card_retention_pct: Number(r.card_retention_pct),
- retention_days: Number(r.retention_days),
- updated_by: user.id,
- updated_at: new Date().toISOString(),
- }).eq("id", r.id);
+    const { error } = await supabase.from("retention_settings").update({
+      pix_retention_pct: Number(r.pix_retention_pct),
+      card_retention_pct: Number(r.card_retention_pct),
+      retention_days: Number(r.retention_days),
+      card_release_days: Number(r.card_release_days ?? 7),
+      updated_by: user.id,
+      updated_at: new Date().toISOString(),
+    }).eq("id", r.id);
  if (error) { toast.error("Erro"); return; }
  toast.success("Retenção do seller salva!");
  };
 
  const addSellerRetention = async () => {
  if (!user || !newRetentionSeller) return;
- const { error } = await supabase.from("retention_settings").insert({
- user_id: newRetentionSeller,
- pix_retention_pct: 0,
- card_retention_pct: 0,
- retention_days: 14,
- updated_by: user.id,
- });
+    const { error } = await supabase.from("retention_settings").insert({
+      user_id: newRetentionSeller,
+      pix_retention_pct: 0,
+      card_retention_pct: 0,
+      retention_days: 14,
+      card_release_days: 7,
+      updated_by: user.id,
+    });
  if (error) { toast.error(error.message.includes("duplicate") ? "Seller já tem retenção individual" : "Erro"); return; }
  toast.success("Retenção individual adicionada!");
  setNewRetentionSeller("");
@@ -374,11 +378,24 @@ export default function AdminSettingsTab() {
  <Input type="number" step="0.1" value={globalRetention.card_retention_pct} onChange={e => setGlobalRetention(p => ({ ...p, card_retention_pct: e.target.value }))} className="h-10" />
  </div>
  </div>
- <div className="space-y-2">
- <Label className="text-xs text-muted-foreground">Dias de Retenção</Label>
- <Input type="number" step="1" value={globalRetention.retention_days} onChange={e => setGlobalRetention(p => ({ ...p, retention_days: e.target.value }))} className="h-10" />
- <p className="text-[10px] text-muted-foreground">O saldo retido será liberado automaticamente após esse número de dias</p>
- </div>
+          <div className="space-y-2">
+            <Label className="text-xs text-muted-foreground">Dias de Retenção (Reserva)</Label>
+            <Input type="number" step="1" value={globalRetention.retention_days} onChange={e => setGlobalRetention(p => ({ ...p, retention_days: e.target.value }))} className="h-10" />
+            <p className="text-[10px] text-muted-foreground">O saldo retido (rolling reserve) será liberado após esse número de dias</p>
+          </div>
+          <div className="space-y-2">
+            <Label className="text-xs text-muted-foreground flex items-center gap-1.5"><CreditCard className="h-3 w-3" /> Liberação Cartão (padrão D+7)</Label>
+            <Select value={globalRetention.card_release_days} onValueChange={v => setGlobalRetention(p => ({ ...p, card_release_days: v }))}>
+              <SelectTrigger className="h-10"><SelectValue /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="1">D+1 (1 dia)</SelectItem>
+                <SelectItem value="7">D+7 (7 dias) — padrão</SelectItem>
+                <SelectItem value="15">D+15 (15 dias)</SelectItem>
+                <SelectItem value="30">D+30 (30 dias)</SelectItem>
+              </SelectContent>
+            </Select>
+            <p className="text-[10px] text-muted-foreground">Quanto tempo o valor de vendas no cartão fica retido antes de virar saldo disponível.</p>
+          </div>
  <Button onClick={saveGlobalRetention} disabled={saving} className="w-full gap-2">
  <Save className="h-4 w-4" /> Salvar Retenção Global
  </Button>
@@ -416,26 +433,40 @@ export default function AdminSettingsTab() {
  <Trash2 className="h-3.5 w-3.5" />
  </Button>
  </div>
- <div className="grid grid-cols-3 gap-2">
- <div>
- <Label className="text-[10px] text-muted-foreground">PIX %</Label>
- <Input type="number" step="0.1" value={r.pix_retention_pct} onChange={e => {
- setSellerRetentions(prev => prev.map(s => s.id === r.id ? { ...s, pix_retention_pct: e.target.value } : s));
- }} className="h-8 text-sm" />
- </div>
- <div>
- <Label className="text-[10px] text-muted-foreground">Cartão %</Label>
- <Input type="number" step="0.1" value={r.card_retention_pct} onChange={e => {
- setSellerRetentions(prev => prev.map(s => s.id === r.id ? { ...s, card_retention_pct: e.target.value } : s));
- }} className="h-8 text-sm" />
- </div>
- <div>
- <Label className="text-[10px] text-muted-foreground">Dias</Label>
- <Input type="number" step="1" value={r.retention_days} onChange={e => {
- setSellerRetentions(prev => prev.map(s => s.id === r.id ? { ...s, retention_days: e.target.value } : s));
- }} className="h-8 text-sm" />
- </div>
- </div>
+                    <div className="grid grid-cols-2 gap-2">
+                      <div>
+                        <Label className="text-[10px] text-muted-foreground">PIX %</Label>
+                        <Input type="number" step="0.1" value={r.pix_retention_pct} onChange={e => {
+                          setSellerRetentions(prev => prev.map(s => s.id === r.id ? { ...s, pix_retention_pct: e.target.value } : s));
+                        }} className="h-8 text-sm" />
+                      </div>
+                      <div>
+                        <Label className="text-[10px] text-muted-foreground">Cartão %</Label>
+                        <Input type="number" step="0.1" value={r.card_retention_pct} onChange={e => {
+                          setSellerRetentions(prev => prev.map(s => s.id === r.id ? { ...s, card_retention_pct: e.target.value } : s));
+                        }} className="h-8 text-sm" />
+                      </div>
+                      <div>
+                        <Label className="text-[10px] text-muted-foreground">Dias Reserva</Label>
+                        <Input type="number" step="1" value={r.retention_days} onChange={e => {
+                          setSellerRetentions(prev => prev.map(s => s.id === r.id ? { ...s, retention_days: e.target.value } : s));
+                        }} className="h-8 text-sm" />
+                      </div>
+                      <div>
+                        <Label className="text-[10px] text-muted-foreground">Liberação Cartão</Label>
+                        <Select value={String(r.card_release_days ?? 7)} onValueChange={v => {
+                          setSellerRetentions(prev => prev.map(s => s.id === r.id ? { ...s, card_release_days: Number(v) } : s));
+                        }}>
+                          <SelectTrigger className="h-8 text-sm"><SelectValue /></SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="1">D+1</SelectItem>
+                            <SelectItem value="7">D+7</SelectItem>
+                            <SelectItem value="15">D+15</SelectItem>
+                            <SelectItem value="30">D+30</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </div>
  <Button size="sm" variant="outline" className="w-full gap-1" onClick={() => saveSellerRetention(r)}>
  <Save className="h-3 w-3" /> Salvar
  </Button>

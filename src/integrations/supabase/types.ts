@@ -2092,6 +2092,7 @@ export type Database = {
       }
       retention_settings: {
         Row: {
+          card_release_days: number
           card_retention_pct: number
           created_at: string
           id: string
@@ -2102,6 +2103,7 @@ export type Database = {
           user_id: string | null
         }
         Insert: {
+          card_release_days?: number
           card_retention_pct?: number
           created_at?: string
           id?: string
@@ -2112,6 +2114,7 @@ export type Database = {
           user_id?: string | null
         }
         Update: {
+          card_release_days?: number
           card_retention_pct?: number
           created_at?: string
           id?: string
@@ -3230,6 +3233,7 @@ export type Database = {
         Args: { _product_id: string }
         Returns: string
       }
+      get_card_release_days: { Args: { _user_id: string }; Returns: number }
       get_checkout_status: {
         Args: { _transaction_id: string }
         Returns: string
@@ -3259,6 +3263,7 @@ export type Database = {
         Returns: boolean
       }
       is_product_active: { Args: { _product_id: string }; Returns: boolean }
+      release_due_card_holds: { Args: never; Returns: number }
       touch_api_key: { Args: { _api_key_id: string }; Returns: undefined }
       validate_coupon: {
         Args: { _amount: number; _code: string; _product_id: string }
