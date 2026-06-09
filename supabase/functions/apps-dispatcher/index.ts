@@ -15,6 +15,20 @@ const MAX_ATTEMPTS = RETRY_DELAYS_SECONDS.length;
 const DELIVERY_TIMEOUT_MS = 10_000;
 const BATCH_SIZE = 25;
 
+// SSRF guard: reject non-HTTPS and internal/RFC1918 destinations for any
+// seller-controlled outbound URL. Defence-in-depth on top of the DB trigger
+// `validate_integration_url` (which blocks new/updated rows).
+const PRIVATE_HOST_RE = /^(localhost|127\.|10\.|192\.168\.|169\.254\.|0\.0\.0\.0|::1|fc|fd|172\.(1[6-9]|2[0-9]|3[01])\.)/i;
+function assertSafeUrl(rawUrl: string | null | undefined): string {
+  if (!rawUrl) throw new Error("URL da integração ausente");
+  let u: URL;
+  try { u = new URL(rawUrl.trim()); } catch { throw new Error("URL da integração inválida"); }
+  if (u.protocol !== "https:") throw new Error("URL da integração deve usar HTTPS");
+  const host = u.hostname.replace(/^\[|\]$/g, "");
+  if (PRIVATE_HOST_RE.test(host)) throw new Error("URL da integração aponta para endereço interno");
+  return u.toString().replace(/\/+$/, "");
+}
+
 interface Delivery {
   id: string;
   integration_id: string;
@@ -197,9 +211,10 @@ async function deliverUtmify(integration: Integration, d: Delivery) {
 // 2) Find/create tag for event (tag_name = `hotzfy_${event_lower}`)
 // 3) Apply tag via POST /api/3/contactTags
 async function deliverActiveCampaign(integration: Integration, d: Delivery) {
-  const apiUrl = integration.api_url?.trim().replace(/\/+$/, "");
   const apiKey = integration.api_key?.trim();
-  if (!apiUrl || !apiKey) return { status: 0, body: "", error: "ActiveCampaign missing api_url or api_key" };
+  if (!integration.api_url || !apiKey) return { status: 0, body: "", error: "ActiveCampaign missing api_url or api_key" };
+  let apiUrl: string;
+  try { apiUrl = assertSafeUrl(integration.api_url); } catch (e) { return { status: 0, body: "", error: (e as Error).message }; }
 
   const email = String(d.payload?.customer?.email || "").trim();
   if (!email) return { status: 0, body: "", error: "ActiveCampaign skipped: customer email missing" };
@@ -297,7 +312,8 @@ async function deliverNotazz(integration: Integration, d: Delivery) {
 async function deliverTheMembers(integration: Integration, d: Delivery) {
   const apiKey = integration.api_key?.trim();
   if (!apiKey) return { status: 0, body: "", error: "TheMembers missing api_key" };
-  const base = (integration.api_url?.trim() || "https://api.themembers.com.br").replace(/\/+$/, "");
+  let base: string;
+  try { base = assertSafeUrl(integration.api_url || "https://api.themembers.com.br"); } catch (e) { return { status: 0, body: "", error: (e as Error).message }; }
   const tx = d.payload?.transaction || {};
   const customer = d.payload?.customer || {};
 
@@ -382,7 +398,8 @@ async function deliverSpedy(integration: Integration, d: Delivery) {
 async function deliverAstron(integration: Integration, d: Delivery) {
   const apiKey = integration.api_key?.trim();
   if (!apiKey) return { status: 0, body: "", error: "Astron missing api_key" };
-  const base = (integration.api_url?.trim() || "https://api.astronmembers.com").replace(/\/+$/, "");
+  let base: string;
+  try { base = assertSafeUrl(integration.api_url || "https://api.astronmembers.com"); } catch (e) { return { status: 0, body: "", error: (e as Error).message }; }
   const tx = d.payload?.transaction || {};
   const customer = d.payload?.customer || {};
   const productExternalId = (integration.config as any)?.product_external_id ?? tx.product_id;
@@ -424,7 +441,8 @@ async function deliverAstron(integration: Integration, d: Delivery) {
 async function deliverMemberKit(integration: Integration, d: Delivery) {
   const apiKey = integration.api_key?.trim();
   if (!apiKey) return { status: 0, body: "", error: "MemberKit missing api_key" };
-  const base = (integration.api_url?.trim() || "https://memberkit.com.br").replace(/\/+$/, "");
+  let base: string;
+  try { base = assertSafeUrl(integration.api_url || "https://memberkit.com.br"); } catch (e) { return { status: 0, body: "", error: (e as Error).message }; }
   const classroomId = (integration.config as any)?.classroom_id;
   const customer = d.payload?.customer || {};
   const email = String(customer.email || "").trim();
@@ -470,7 +488,8 @@ async function deliverMemberKit(integration: Integration, d: Delivery) {
 async function deliverSmsFunnel(integration: Integration, d: Delivery) {
   const apiKey = integration.api_key?.trim();
   if (!apiKey) return { status: 0, body: "", error: "SMSFunnel missing api_key" };
-  const base = (integration.api_url?.trim() || "https://api.smsfunnel.com.br").replace(/\/+$/, "");
+  let base: string;
+  try { base = assertSafeUrl(integration.api_url || "https://api.smsfunnel.com.br"); } catch (e) { return { status: 0, body: "", error: (e as Error).message }; }
   const phone = String(d.payload?.customer?.phone || "").replace(/\D/g, "");
   if (!phone) return { status: 0, body: "", error: "SMSFunnel: customer phone missing" };
   const name = d.payload?.customer?.name || "";
@@ -507,7 +526,8 @@ async function deliverSmsFunnel(integration: Integration, d: Delivery) {
 async function deliverVoxuy(integration: Integration, d: Delivery) {
   const apiKey = integration.api_key?.trim();
   if (!apiKey) return { status: 0, body: "", error: "Voxuy missing api_key" };
-  const base = (integration.api_url?.trim() || "https://api.voxuy.com").replace(/\/+$/, "");
+  let base: string;
+  try { base = assertSafeUrl(integration.api_url || "https://api.voxuy.com"); } catch (e) { return { status: 0, body: "", error: (e as Error).message }; }
   const instanceId = (integration.config as any)?.instance_id;
   const phone = String(d.payload?.customer?.phone || "").replace(/\D/g, "");
   if (!phone) return { status: 0, body: "", error: "Voxuy: customer phone missing" };
@@ -546,7 +566,8 @@ async function deliverVoxuy(integration: Integration, d: Delivery) {
 async function deliverCademi(integration: Integration, d: Delivery) {
   const apiKey = integration.api_key?.trim();
   if (!apiKey) return { status: 0, body: "", error: "Cademi missing api_key" };
-  const base = (integration.api_url?.trim() || "https://api.cademi.com.br").replace(/\/+$/, "");
+  let base: string;
+  try { base = assertSafeUrl(integration.api_url || "https://api.cademi.com.br"); } catch (e) { return { status: 0, body: "", error: (e as Error).message }; }
   const courseId = (integration.config as any)?.course_id;
   const customer = d.payload?.customer || {};
   const email = String(customer.email || "").trim();
