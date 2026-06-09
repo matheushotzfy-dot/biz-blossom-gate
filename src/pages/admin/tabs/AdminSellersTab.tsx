@@ -113,28 +113,29 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
  supabase.from("balance_adjustments").select("id, user_id, amount, type, reason, admin_user_id, created_at").eq("user_id", profile.user_id).order("created_at", { ascending: false }).limit(50),
  supabase.from("pix_keys").select("id, key_type, key_value, created_at").eq("user_id", profile.user_id),
  supabase.from("disputes").select("id, seller_user_id, transaction_id, amount, type, status, reason, created_at").eq("seller_user_id", profile.user_id).order("created_at", { ascending: false }).limit(50) as any,
- supabase.from("retention_settings").select("id, user_id, pix_retention_pct, card_retention_pct, retention_days").eq("user_id", profile.user_id).maybeSingle(),
- ]);
- if (logsRes.data) setUserLogs(logsRes.data as any);
- if (productsRes.data) setUserProducts(productsRes.data);
- if (wdRes.data) setUserWithdrawals(wdRes.data);
- if (txRes.data) setUserTransactions(txRes.data);
- if (adjRes.data) setBalanceAdjustments(adjRes.data);
- if (pixRes.data) setUserPixKeys(pixRes.data as PixKey[]);
- if (disputesRes.data) setUserDisputes(disputesRes.data as any[]);
- setSelectedAcquirerId(profile.acquirer_id || "");
- setAdminNotes((profile as any).admin_notes || "");
- if (retRes.data) {
- setUserRetention(retRes.data as any);
- setRetentionForm({
- pix_pct: String(retRes.data.pix_retention_pct ?? ""),
- card_pct: String(retRes.data.card_retention_pct ?? ""),
- days: String(retRes.data.retention_days ?? ""),
- });
- } else {
- setUserRetention(null);
- setRetentionForm({ pix_pct: "", card_pct: "", days: "" });
- }
+      supabase.from("retention_settings").select("id, user_id, pix_retention_pct, card_retention_pct, retention_days, card_release_days").eq("user_id", profile.user_id).maybeSingle(),
+    ]);
+    if (logsRes.data) setUserLogs(logsRes.data as any);
+    if (productsRes.data) setUserProducts(productsRes.data);
+    if (wdRes.data) setUserWithdrawals(wdRes.data);
+    if (txRes.data) setUserTransactions(txRes.data);
+    if (adjRes.data) setBalanceAdjustments(adjRes.data);
+    if (pixRes.data) setUserPixKeys(pixRes.data as PixKey[]);
+    if (disputesRes.data) setUserDisputes(disputesRes.data as any[]);
+    setSelectedAcquirerId(profile.acquirer_id || "");
+    setAdminNotes((profile as any).admin_notes || "");
+    if (retRes.data) {
+      setUserRetention(retRes.data as any);
+      setRetentionForm({
+        pix_pct: String(retRes.data.pix_retention_pct ?? ""),
+        card_pct: String(retRes.data.card_retention_pct ?? ""),
+        days: String(retRes.data.retention_days ?? ""),
+        card_release_days: String((retRes.data as any).card_release_days ?? 7),
+      });
+    } else {
+      setUserRetention(null);
+      setRetentionForm({ pix_pct: "", card_pct: "", days: "", card_release_days: "7" });
+    }
  if (feesRes.data) {
  setCustomFees({
  transaction_percentage: feesRes.data.transaction_percentage?.toString() || "",
