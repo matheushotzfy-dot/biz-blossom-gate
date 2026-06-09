@@ -156,13 +156,14 @@ export default function AdminSettingsTab() {
  const saveGlobalRetention = async () => {
  if (!user) return;
  setSaving(true);
- const payload = {
- pix_retention_pct: Number(globalRetention.pix_retention_pct),
- card_retention_pct: Number(globalRetention.card_retention_pct),
- retention_days: Number(globalRetention.retention_days),
- updated_by: user.id,
- updated_at: new Date().toISOString(),
- };
+    const payload = {
+      pix_retention_pct: Number(globalRetention.pix_retention_pct),
+      card_retention_pct: Number(globalRetention.card_retention_pct),
+      retention_days: Number(globalRetention.retention_days),
+      card_release_days: Number(globalRetention.card_release_days),
+      updated_by: user.id,
+      updated_at: new Date().toISOString(),
+    };
  let savedId = globalRetention.id;
  if (globalRetention.id) {
  const { error } = await supabase.from("retention_settings").update(payload).eq("id", globalRetention.id);
