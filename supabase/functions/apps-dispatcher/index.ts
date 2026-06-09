@@ -15,6 +15,20 @@ const MAX_ATTEMPTS = RETRY_DELAYS_SECONDS.length;
 const DELIVERY_TIMEOUT_MS = 10_000;
 const BATCH_SIZE = 25;
 
+// SSRF guard: reject non-HTTPS and internal/RFC1918 destinations for any
+// seller-controlled outbound URL. Defence-in-depth on top of the DB trigger
+// `validate_integration_url` (which blocks new/updated rows).
+const PRIVATE_HOST_RE = /^(localhost|127\.|10\.|192\.168\.|169\.254\.|0\.0\.0\.0|::1|fc|fd|172\.(1[6-9]|2[0-9]|3[01])\.)/i;
+function assertSafeUrl(rawUrl: string | null | undefined): string {
+  if (!rawUrl) throw new Error("URL da integração ausente");
+  let u: URL;
+  try { u = new URL(rawUrl.trim()); } catch { throw new Error("URL da integração inválida"); }
+  if (u.protocol !== "https:") throw new Error("URL da integração deve usar HTTPS");
+  const host = u.hostname.replace(/^\[|\]$/g, "");
+  if (PRIVATE_HOST_RE.test(host)) throw new Error("URL da integração aponta para endereço interno");
+  return u.toString().replace(/\/+$/, "");
+}
+
 interface Delivery {
   id: string;
   integration_id: string;
