@@ -195,18 +195,19 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
  onReload();
  };
 
- // ── Ban Seller ──
+ // ── Ban Seller (atomic via edge function) ──
  const handleBanSeller = async (userId: string) => {
- // Block account + freeze balance + suspend all products
- const [profileRes, productsRes] = await Promise.all([
- supabase.from("profiles").update({ account_status: "blocked", balance_frozen: true } as any).eq("user_id", userId),
- supabase.from("products").update({ status: "suspended" }).eq("user_id", userId),
- ]);
- if (profileRes.error || productsRes.error) { toast.error("Erro ao banir seller"); return; }
- toast.success("Seller banido! Conta bloqueada, saldo congelado e checkouts suspensos.");
- await logAdminAction("ban_seller", "profile", userId, { action: "block+freeze+suspend_products" });
- onReload();
- if (selectedUser?.user_id === userId) setSelectedUser(null);
+   const { data, error } = await supabase.functions.invoke("admin-ban-seller", {
+     body: { targetUserId: userId },
+   });
+   if (error || !data?.success) {
+     toast.error(data?.error || "Erro ao banir seller");
+     return;
+   }
+   toast.success("Seller banido! Conta bloqueada, saldo congelado e checkouts suspensos.");
+   await logAdminAction("ban_seller", "profile", userId, { action: "atomic_block+freeze+suspend" });
+   onReload();
+   if (selectedUser?.user_id === userId) setSelectedUser(null);
  };
 
  // ── Impersonation ──
