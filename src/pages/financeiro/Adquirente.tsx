@@ -34,7 +34,7 @@ export default function Adquirente() {
   const loadData = async () => {
     setLoading(true);
     const [acqRes, profileRes] = await Promise.all([
-      supabase.from("acquirers").select("id, name, slug, type, description, conversion_rate").order("conversion_rate", { ascending: false }),
+      supabase.from("acquirers").select("id, name, slug, type, description, conversion_rate").eq("seller_visible", true).eq("is_active", true).order("conversion_rate", { ascending: false }),
       supabase.from("profiles").select("acquirer_id").eq("user_id", user!.id).maybeSingle(),
     ]);
     if (acqRes.data) setAcquirers(acqRes.data as unknown as VisibleAcquirer[]);
