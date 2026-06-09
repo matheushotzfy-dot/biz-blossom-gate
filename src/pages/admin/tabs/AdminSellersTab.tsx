@@ -102,7 +102,7 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
  setUserLogs([]); setUserProducts([]); setUserWithdrawals([]);
  setUserTransactions([]); setUserPixKeys([]); setUserDisputes([]);
  setBalanceAdjustments([]); setKycImages([]);
- setUserRetention(null); setRetentionForm({ pix_pct: "", card_pct: "", days: "" });
+ setUserRetention(null); setRetentionForm({ pix_pct: "", card_pct: "", days: "", card_release_days: "7" });
  setAdminNotes(""); setSelectedAcquirerId("");
  const [logsRes, productsRes, wdRes, txRes, feesRes, adjRes, pixRes, disputesRes, retRes] = await Promise.all([
  supabase.from("activity_logs").select("id, user_id, action, entity_type, entity_id, old_data, new_data, created_at").eq("user_id", profile.user_id).order("created_at", { ascending: false }).limit(100),
