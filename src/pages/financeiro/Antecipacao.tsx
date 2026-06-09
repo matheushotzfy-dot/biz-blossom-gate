@@ -16,14 +16,15 @@ import { FinanceiroHero, FinanceiroKpi, FinanceiroKpiGrid } from "@/components/f
 const fmt = (v: number) => `R$ ${v.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 
 export default function Antecipacao() {
-  useAuth();
+  const { user } = useAuth();
   const { data: transactions } = useTransactions();
   const [antecipationDays, setAntecipationDays] = useState(15);
 
   const stats = useMemo(() => {
-    if (!transactions) return { retainedTotal: 0, eligibleCount: 0, eligible: [] as any[] };
+    if (!transactions || !user) return { retainedTotal: 0, eligibleCount: 0, eligible: [] as any[] };
     const now = new Date();
     const retained = transactions.filter(t =>
+      t.user_id === user.id &&
       t.status === "completed" && !t.is_simulated && t.retained_amount > 0 &&
       !t.retention_released && t.retained_until && new Date(t.retained_until) > now
     );
@@ -32,7 +33,7 @@ export default function Antecipacao() {
       eligibleCount: retained.length,
       eligible: retained,
     };
-  }, [transactions]);
+  }, [transactions, user?.id]);
 
   const antecipationFeeRate = 0.025;
   const antecipationCalc = useMemo(() => {
@@ -44,7 +45,9 @@ export default function Antecipacao() {
       if (!tx.retained_until) return;
       const daysRemaining = Math.max(0, Math.ceil((new Date(tx.retained_until).getTime() - now.getTime()) / (1000 * 60 * 60 * 24)));
       if (daysRemaining <= antecipationDays) {
-        const fee = tx.retained_amount * antecipationFeeRate * (daysRemaining / 15);
+        // Cap multiplier at 1 — fee never exceeds the base 2.5%
+        const multiplier = Math.min(daysRemaining / 15, 1);
+        const fee = tx.retained_amount * antecipationFeeRate * multiplier;
         totalOriginal += tx.retained_amount;
         totalFee += fee;
         count += 1;

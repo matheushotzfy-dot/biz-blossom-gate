@@ -72,8 +72,8 @@ export default function Cupons() {
 
   const activeProducts = products.filter(p => p.status === "active");
   const activeCoupons = coupons.filter(c => c.is_active && !isExpired(c) && !isExhausted(c));
-  const totalUses = coupons.reduce((a, c) => a + c.current_uses, 0);
-  const totalDiscount = coupons.reduce((a, c) => a + c.total_discount_amount, 0);
+  const totalUses = coupons.reduce((a, c) => a + Number(c.current_uses || 0), 0);
+  const totalDiscount = coupons.reduce((a, c) => a + Number(c.total_discount_amount || 0), 0);
 
   const filtered = useMemo(() => {
     return coupons.filter(c => {
@@ -113,7 +113,8 @@ export default function Cupons() {
 
     setSaving(false);
     if (error) {
-      toast.error(error.message.includes("duplicate") ? "Cupom já existe." : "Erro ao criar cupom.");
+      const isDup = (error as any).code === "23505" || error.message.toLowerCase().includes("duplicate");
+      toast.error(isDup ? "Cupom já existe." : "Erro ao criar cupom.");
       return;
     }
     toast.success("Cupom criado com sucesso!");
@@ -123,16 +124,20 @@ export default function Cupons() {
   };
 
   const handleDelete = async (id: string) => {
+    if (!user) return;
     if (!window.confirm("Excluir este cupom permanentemente?")) return;
     setDeleting(id);
-    await supabase.from("coupons").delete().eq("id", id);
-    toast.success("Cupom removido.");
+    const { error } = await supabase.from("coupons").delete().eq("id", id).eq("user_id", user.id);
     setDeleting(null);
+    if (error) { toast.error("Erro ao remover cupom."); return; }
+    toast.success("Cupom removido.");
     refetch();
   };
 
   const handleToggle = async (coupon: Coupon) => {
-    await supabase.from("coupons").update({ is_active: !coupon.is_active }).eq("id", coupon.id);
+    if (!user) return;
+    const { error } = await supabase.from("coupons").update({ is_active: !coupon.is_active }).eq("id", coupon.id).eq("user_id", user.id);
+    if (error) { toast.error("Erro ao alterar status do cupom."); return; }
     refetch();
   };
 

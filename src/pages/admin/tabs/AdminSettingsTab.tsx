@@ -205,7 +205,7 @@ export default function AdminSettingsTab() {
       card_release_days: 7,
       updated_by: user.id,
     });
- if (error) { toast.error(error.message.includes("duplicate") ? "Seller já tem retenção individual" : "Erro"); return; }
+ if (error) { toast.error((error as any).code === "23505" ? "Seller já tem retenção individual" : "Erro"); return; }
  toast.success("Retenção individual adicionada!");
  setNewRetentionSeller("");
  loadAll();
@@ -261,7 +261,7 @@ export default function AdminSettingsTab() {
  <AdminKpi icon={<Zap className="h-5 w-5" />} label="Taxas Cadastradas" value={String(fees.length)} sub="Na plataforma" gradient="from-amber-500 to-orange-600" glowColor="rgba(245,158,11,0.15)" />
  <AdminKpi icon={<ArrowDownToLine className="h-5 w-5" />} label="Auto-Aprovar" value={autoApproveEnabled ? "Ativo" : "Inativo"} sub={autoApproveEnabled ? `Até R$ ${autoApproveMaxAmount}` : "Desabilitado"} gradient={autoApproveEnabled ? "from-emerald-500 to-emerald-600" : "from-zinc-500 to-zinc-600"} glowColor={autoApproveEnabled ? "rgba(52,211,153,0.15)" : "rgba(100,100,100,0.1)"} />
  <AdminKpi icon={<Lock className="h-5 w-5" />} label="Retenção PIX" value={`${globalRetention.pix_retention_pct}%`} sub={`${globalRetention.retention_days} dias`} gradient="from-violet-500 to-purple-600" glowColor="rgba(139,92,246,0.15)" />
- <AdminKpi icon={<CreditCard className="h-5 w-5" />} label="Retenção Cartão" value={`${globalRetention.card_retention_pct}%`} sub={`${globalRetention.retention_days} dias`} gradient="from-blue-500 to-indigo-600" glowColor="rgba(59,130,246,0.15)" />
+ <AdminKpi icon={<CreditCard className="h-5 w-5" />} label="Retenção Cartão" value={`${globalRetention.card_retention_pct}%`} sub={`${globalRetention.card_release_days ?? 7} dias para liberação`} gradient="from-blue-500 to-indigo-600" glowColor="rgba(59,130,246,0.15)" />
  </div>
 
  <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">

@@ -10,14 +10,15 @@ const ALLOWED_ORIGINS = new Set([
 
 function buildCors(req: Request) {
   const origin = req.headers.get("origin") ?? "";
-  const allow = ALLOWED_ORIGINS.has(origin) ? origin : "*";
-  return {
-    "Access-Control-Allow-Origin": allow,
+  const isAllowed = ALLOWED_ORIGINS.has(origin);
+  const headers: Record<string, string> = {
     "Vary": "Origin",
     "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
     "X-Content-Type-Options": "nosniff",
     "Referrer-Policy": "no-referrer",
   };
+  if (isAllowed) headers["Access-Control-Allow-Origin"] = origin;
+  return headers;
 }
 
 Deno.serve(async (req) => {

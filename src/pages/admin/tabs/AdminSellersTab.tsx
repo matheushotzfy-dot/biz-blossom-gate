@@ -96,23 +96,24 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
  }, []);
 
  const openUserDetail = async (profile: Tables<"profiles">) => {
- setSelectedUser(profile);
- setLoading(true);
- // Reset stale data from previous seller
- setUserLogs([]); setUserProducts([]); setUserWithdrawals([]);
- setUserTransactions([]); setUserPixKeys([]); setUserDisputes([]);
- setBalanceAdjustments([]); setKycImages([]);
- setUserRetention(null); setRetentionForm({ pix_pct: "", card_pct: "", days: "", card_release_days: "7" });
- setAdminNotes(""); setSelectedAcquirerId("");
- const [logsRes, productsRes, wdRes, txRes, feesRes, adjRes, pixRes, disputesRes, retRes] = await Promise.all([
- supabase.from("activity_logs").select("id, user_id, action, entity_type, entity_id, old_data, new_data, created_at").eq("user_id", profile.user_id).order("created_at", { ascending: false }).limit(100),
- supabase.from("products").select("id, user_id, name, price, status, created_at, image_url").eq("user_id", profile.user_id).order("created_at", { ascending: false }).limit(100) as any,
- supabase.from("withdrawals").select("id, user_id, amount, fee_amount, net_amount, status, created_at, withdrawal_type").eq("user_id", profile.user_id).order("created_at", { ascending: false }).limit(100) as any,
- supabase.from("transactions").select("id, user_id, product_id, amount, fee_amount, net_amount, status, payment_method, customer_name, created_at").eq("user_id", profile.user_id).order("created_at", { ascending: false }).limit(200) as any,
- supabase.from("custom_user_fees").select("id, user_id, transaction_percentage, transaction_fixed, withdrawal_fee, admin_user_id").eq("user_id", profile.user_id).maybeSingle(),
- supabase.from("balance_adjustments").select("id, user_id, amount, type, reason, admin_user_id, created_at").eq("user_id", profile.user_id).order("created_at", { ascending: false }).limit(50),
- supabase.from("pix_keys").select("id, key_type, key_value, created_at").eq("user_id", profile.user_id),
- supabase.from("disputes").select("id, seller_user_id, transaction_id, amount, type, status, reason, created_at").eq("seller_user_id", profile.user_id).order("created_at", { ascending: false }).limit(50) as any,
+  setSelectedUser(profile);
+  setLoading(true);
+  // Reset stale data from previous seller
+  setUserLogs([]); setUserProducts([]); setUserWithdrawals([]);
+  setUserTransactions([]); setUserPixKeys([]); setUserDisputes([]);
+  setBalanceAdjustments([]); setKycImages([]);
+  setUserRetention(null); setRetentionForm({ pix_pct: "", card_pct: "", days: "", card_release_days: "7" });
+  setAdminNotes(""); setSelectedAcquirerId("");
+  try {
+    const [logsRes, productsRes, wdRes, txRes, feesRes, adjRes, pixRes, disputesRes, retRes] = await Promise.all([
+      supabase.from("activity_logs").select("id, user_id, action, entity_type, entity_id, old_data, new_data, created_at").eq("user_id", profile.user_id).order("created_at", { ascending: false }).limit(100),
+      supabase.from("products").select("id, user_id, name, price, status, created_at, image_url").eq("user_id", profile.user_id).order("created_at", { ascending: false }).limit(100) as any,
+      supabase.from("withdrawals").select("id, user_id, amount, fee_amount, net_amount, status, created_at, withdrawal_type").eq("user_id", profile.user_id).order("created_at", { ascending: false }).limit(100) as any,
+      supabase.from("transactions").select("id, user_id, product_id, amount, fee_amount, net_amount, status, payment_method, customer_name, created_at").eq("user_id", profile.user_id).order("created_at", { ascending: false }).limit(200) as any,
+      supabase.from("custom_user_fees").select("id, user_id, transaction_percentage, transaction_fixed, withdrawal_fee, admin_user_id").eq("user_id", profile.user_id).maybeSingle(),
+      supabase.from("balance_adjustments").select("id, user_id, amount, type, reason, admin_user_id, created_at").eq("user_id", profile.user_id).order("created_at", { ascending: false }).limit(50),
+      supabase.from("pix_keys").select("id, key_type, key_value, created_at").eq("user_id", profile.user_id),
+      supabase.from("disputes").select("id, seller_user_id, transaction_id, amount, type, status, reason, created_at").eq("seller_user_id", profile.user_id).order("created_at", { ascending: false }).limit(50) as any,
       supabase.from("retention_settings").select("id, user_id, pix_retention_pct, card_retention_pct, retention_days, card_release_days").eq("user_id", profile.user_id).maybeSingle(),
     ]);
     if (logsRes.data) setUserLogs(logsRes.data as any);
@@ -136,30 +137,34 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
       setUserRetention(null);
       setRetentionForm({ pix_pct: "", card_pct: "", days: "", card_release_days: "7" });
     }
- if (feesRes.data) {
- setCustomFees({
- transaction_percentage: feesRes.data.transaction_percentage?.toString() || "",
- transaction_fixed: feesRes.data.transaction_fixed?.toString() || "",
- withdrawal_fee: feesRes.data.withdrawal_fee?.toString() || "",
- pix_percentage: "", boleto_percentage: "", card_percentage: "",
- });
- } else {
- setCustomFees({ transaction_percentage: "", transaction_fixed: "", withdrawal_fee: "", pix_percentage: "", boleto_percentage: "", card_percentage: "" });
- }
- try {
- const { data: kycFiles } = await supabase.storage.from("kyc-documents").list(profile.user_id);
- if (kycFiles && kycFiles.length > 0) {
- const signedUrls = await Promise.all(
- kycFiles.map(async (f) => {
- const { data } = await supabase.storage.from("kyc-documents").createSignedUrl(`${profile.user_id}/${f.name}`, 3600);
- return data?.signedUrl || null;
- })
- );
- setKycImages(signedUrls.filter(Boolean) as string[]);
- } else setKycImages([]);
- } catch { setKycImages([]); }
- setLoading(false);
- };
+    if (feesRes.data) {
+      setCustomFees({
+        transaction_percentage: feesRes.data.transaction_percentage?.toString() || "",
+        transaction_fixed: feesRes.data.transaction_fixed?.toString() || "",
+        withdrawal_fee: feesRes.data.withdrawal_fee?.toString() || "",
+        pix_percentage: "", boleto_percentage: "", card_percentage: "",
+      });
+    } else {
+      setCustomFees({ transaction_percentage: "", transaction_fixed: "", withdrawal_fee: "", pix_percentage: "", boleto_percentage: "", card_percentage: "" });
+    }
+    try {
+      const { data: kycFiles } = await supabase.storage.from("kyc-documents").list(profile.user_id);
+      if (kycFiles && kycFiles.length > 0) {
+        const signedUrls = await Promise.all(
+          kycFiles.map(async (f) => {
+            const { data } = await supabase.storage.from("kyc-documents").createSignedUrl(`${profile.user_id}/${f.name}`, 3600);
+            return data?.signedUrl || null;
+          })
+        );
+        setKycImages(signedUrls.filter(Boolean) as string[]);
+      } else setKycImages([]);
+    } catch { setKycImages([]); }
+  } catch (e: any) {
+    toast.error("Erro ao carregar dados do seller: " + (e?.message ?? "desconhecido"));
+  } finally {
+    setLoading(false);
+  }
+  };
 
  // ── KYC Actions ──
  const handleApproveKyc = async (userId: string) => {
@@ -295,13 +300,14 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
  await logAdminAction("update_admin_notes", "profile", selectedUser.user_id, { notes: sanitized });
  };
 
- const handleUserStatus = async (userId: string, status: string) => {
- const { error } = await supabase.from("profiles").update({ account_status: status }).eq("user_id", userId);
- if (error) { toast.error("Erro ao atualizar"); return; }
- toast.success(`Conta ${status === "approved" ? "aprovada" : "bloqueada"}!`);
- await logAdminAction(status === "approved" ? "approve_user" : "block_user", "profile", userId, { new_status: status });
- onReload();
- };
+  const handleUserStatus = async (userId: string, status: string) => {
+    if (!isAdmin && !isEmployee) { toast.error("Sem permissão"); return; }
+    const { error } = await supabase.from("profiles").update({ account_status: status }).eq("user_id", userId);
+    if (error) { toast.error("Erro ao atualizar"); return; }
+    toast.success(`Conta ${status === "approved" ? "aprovada" : "bloqueada"}!`);
+    await logAdminAction(status === "approved" ? "approve_user" : "block_user", "profile", userId, { new_status: status });
+    onReload();
+  };
 
  const handleSetSellerType = async (userId: string, sellerType: string | null) => {
  const { error } = await supabase.from("profiles").update({ seller_type: sellerType } as any).eq("user_id", userId);
@@ -353,9 +359,10 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
  if (error) { toast.error("Erro ao ajustar saldo"); return; }
  toast.success(`Saldo ${adjustType === "credit" ? "creditado" : "debitado"}!`);
  await logAdminAction(`balance_${adjustType}`, "balance_adjustment", selectedUser.user_id, { amount: adjustAmount, reason: sanitizedReason });
- setAdjustAmount(""); setAdjustReason("");
- const { data } = await supabase.from("balance_adjustments").select("*").eq("user_id", selectedUser.user_id).order("created_at", { ascending: false });
- if (data) setBalanceAdjustments(data);
+  setAdjustAmount(""); setAdjustReason("");
+  const { data } = await supabase.from("balance_adjustments").select("*").eq("user_id", selectedUser.user_id).order("created_at", { ascending: false });
+  if (data) setBalanceAdjustments(data);
+  onReload();
  };
 
  // ── Filtering ──

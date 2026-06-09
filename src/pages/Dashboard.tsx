@@ -251,7 +251,7 @@ export default function Dashboard() {
   const pendingBalance = useMemo(() => {
     return transactions
       .filter(t => t.status === "completed" && t.retained_until && new Date(t.retained_until) > new Date())
-      .reduce((acc, t) => acc + Number(t.net_amount), 0);
+      .reduce((acc, t) => acc + Number(t.retained_amount || 0), 0);
   }, [transactions]);
 
   const medCount = useMemo(() => {

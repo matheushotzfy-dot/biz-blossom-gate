@@ -17,16 +17,24 @@ export function useManagerGuard() {
       return;
     }
 
+    let cancelled = false;
     supabase.rpc("current_user_has_role", { _role: "manager" as any })
-      .then(({ data }) => {
-        if (data !== true) {
-          // Don't sign out — user may be a regular user who navigated here by mistake
+      .then(({ data, error }) => {
+        if (cancelled) return;
+        if (error || data !== true) {
           navigate("/gerentes", { replace: true });
           return;
         }
         setIsManager(true);
-        setLoading(false);
+      })
+      .catch(() => {
+        if (!cancelled) navigate("/gerentes", { replace: true });
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false);
       });
+
+    return () => { cancelled = true; };
   }, [user, authLoading, navigate]);
 
   return { isManager, loading, user };

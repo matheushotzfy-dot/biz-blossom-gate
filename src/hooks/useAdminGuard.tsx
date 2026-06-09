@@ -43,7 +43,9 @@ export function useAdminGuard() {
       } catch {
         if (!cancelled) navigate("/admin-matheus", { replace: true });
       } finally {
-        if (!cancelled) setLoading(false);
+        // Always release loading — even if unmounted, state setter on
+        // unmounted component is a no-op and React swallows it.
+        setLoading(false);
       }
     })();
 

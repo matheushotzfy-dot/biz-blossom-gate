@@ -65,15 +65,16 @@ export function KycOnboardingPopup() {
  })();
  }, [user?.id, isCnpj]);
 
- const handleUpload = useCallback(async (type: string, file: File) => {
- if (!user) return;
- if (!ALLOWED_KYC_TYPES.includes(file.type)) { toast.error("Formato inválido. Use JPEG, PNG ou WebP"); return; }
- if (file.size > 10 * 1024 * 1024) { toast.error("Máximo 10MB"); return; }
- setUploading(type);
- const ext = file.name.split(".").pop();
- const path = `${user.id}/${type}_${crypto.randomUUID().slice(0, 8)}.${ext}`;
- const { error } = await supabase.storage.from("kyc-documents").upload(path, file, { upsert: true });
- if (error) { toast.error("Erro no upload"); }
+  const handleUpload = useCallback(async (type: string, file: File) => {
+    if (!user) return;
+    if (!ALLOWED_KYC_TYPES.includes(file.type)) { toast.error("Formato inválido. Use JPEG, PNG ou WebP"); return; }
+    if (file.size > 10 * 1024 * 1024) { toast.error("Máximo 10MB"); return; }
+    setUploading(type);
+    const mimeExt: Record<string, string> = { "image/jpeg": "jpg", "image/png": "png", "image/webp": "webp" };
+    const ext = mimeExt[file.type] || (file.name.split(".").pop() ?? "jpg");
+    const path = `${user.id}/${type}.${ext}`;
+    const { error } = await supabase.storage.from("kyc-documents").upload(path, file, { upsert: true, contentType: file.type });
+    if (error) { toast.error("Erro no upload"); }
  else {
  toast.success("Documento enviado!");
  setDocs(prev => {
