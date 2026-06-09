@@ -59,7 +59,9 @@ Deno.serve(async (req) => {
       }
 
       const trimmedEmail = email.trim().toLowerCase();
-      const otp = String(Math.floor(100000 + Math.random() * 900000));
+      const _rand = new Uint32Array(1);
+      crypto.getRandomValues(_rand);
+      const otp = String(100000 + (_rand[0] % 900000));
       const otpHash = await sha256Hex(otp);
       const expiresAt = new Date(Date.now() + 5 * 60 * 1000).toISOString();
       const tempTokenValue = crypto.randomUUID();
