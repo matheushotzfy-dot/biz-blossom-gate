@@ -36,6 +36,7 @@ export default function Saques() {
   const [amount, setAmount] = useState("");
   const [availableBalance, setAvailableBalance] = useState<number>(0);
   const [retainedAmount, setRetainedAmount] = useState<number>(0);
+  const [withdrawFee, setWithdrawFee] = useState<number>(DEFAULT_WITHDRAW_FEE);
   const [search, setSearch] = useState("");
   const invalidateAll = useInvalidateAll();
 
