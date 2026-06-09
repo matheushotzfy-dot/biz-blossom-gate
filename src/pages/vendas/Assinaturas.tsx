@@ -133,7 +133,8 @@ export default function Assinaturas() {
   };
 
   const togglePlan = async (plan: Plan) => {
-    await supabase.from("subscription_plans").update({ is_active: !plan.is_active }).eq("id", plan.id);
+    if (!user) return;
+    await supabase.from("subscription_plans").update({ is_active: !plan.is_active }).eq("id", plan.id).eq("user_id", user.id);
     toast.success(plan.is_active ? "Plano desativado" : "Plano ativado");
     fetchData();
   };
