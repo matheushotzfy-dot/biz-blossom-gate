@@ -84,6 +84,7 @@ const App = () => (
             <Routes>
               <Route path="/auth" element={<Auth />} />
               <Route path="/auth/callback" element={<AuthCallback />} />
+              <Route path="/impersonate-receiver" element={<ImpersonateReceiver />} />
               <Route path="/pay/:slug" element={<PublicCheckout />} />
               <Route path="/checkout/:slug" element={<PublicCheckout />} />
               <Route path="/obrigado" element={<ThankYou />} />
