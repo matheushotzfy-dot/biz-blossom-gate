@@ -196,6 +196,14 @@ export default function Perfil() {
         const cutoff = Date.now() - 30 * 24 * 60 * 60 * 1000;
         setLast30Sales(data.filter(t => new Date(t.created_at).getTime() >= cutoff).length);
       });
+   }, [user]);
+
+  const [maxTicket, setMaxTicket] = useState<number | null>(null);
+  useEffect(() => {
+    if (!user) return;
+    supabase.rpc("get_my_max_ticket" as any).then(({ data }) => {
+      if (typeof data === "number") setMaxTicket(data);
+    });
   }, [user]);
 
   const isAddressLocked = !!(profile as any)?.address_locked;
@@ -489,6 +497,13 @@ export default function Perfil() {
         <Panel icon={Wallet} title="Limites operacionais" subtitle="Parâmetros vigentes da sua conta">
           <div className="px-5 pb-5">
             {[
+              {
+                label: "Ticket máximo por transação",
+                value: maxTicket != null
+                  ? `R$ ${maxTicket.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+                  : "—",
+                success: true,
+              },
               { label: "Limite diário PIX", value: "Ilimitado", success: true },
               { label: "Limite diário de saque", value: "Ilimitado", success: true },
               { label: "Saques simultâneos", value: "3 pendentes" },
