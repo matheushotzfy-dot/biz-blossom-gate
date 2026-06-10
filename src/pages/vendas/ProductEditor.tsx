@@ -279,16 +279,18 @@ export default function ProductEditor() {
  return data.publicUrl;
  };
 
- const handleSave = async () => {
- if (!user) return;
- const priceNum = parseFloat(price);
- if (!name.trim()) { toast.error("Nome é obrigatório"); setActiveTab("geral"); return; }
- if (description.trim().length < 50) { toast.error("Descrição deve ter no mínimo 50 caracteres"); setActiveTab("geral"); return; }
- if (isNaN(priceNum) || priceNum < 1) { toast.error("Preço mínimo é R$ 1,00"); setActiveTab("geral"); return; }
- if (priceNum > 99999.99) { toast.error("Preço máximo é R$ 99.999,99"); setActiveTab("geral"); return; }
- if (!pageUrl.trim() || !/^https?:\/\/.+\..+/.test(pageUrl.trim())) { toast.error("Insira uma página de vendas com domínio válido (ex: https://seusite.com)"); setActiveTab("geral"); return; }
- if (!supportEmail.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(supportEmail.trim())) { toast.error("Insira um e-mail de suporte válido (ex: suporte@seusite.com)"); setActiveTab("geral"); return; }
- if (!displayName.trim()) { toast.error("Nome de exibição é obrigatório"); setActiveTab("geral"); return; }
+  const handleSave = async () => {
+    if (!user) return;
+    // Normaliza preço aceitando "10,50", "10.50", "R$ 10,50", etc.
+    const priceNum = parseFloat(String(price).replace(/[^0-9,.-]/g, "").replace(",", "."));
+    if (!name.trim()) { toast.error("Nome é obrigatório"); setActiveTab("geral"); return; }
+    if (description.trim().length < 50) { toast.error("Descrição deve ter no mínimo 50 caracteres"); setActiveTab("geral"); return; }
+    if (isNaN(priceNum) || priceNum < 1) { toast.error("Preço mínimo é R$ 1,00"); setActiveTab("geral"); return; }
+    if (priceNum > 99999.99) { toast.error("Preço máximo é R$ 99.999,99"); setActiveTab("geral"); return; }
+    if (!pageUrl.trim() || !/^https?:\/\/.+\..+/.test(pageUrl.trim())) { toast.error("Insira uma página de vendas com domínio válido (ex: https://seusite.com)"); setActiveTab("geral"); return; }
+    if (!supportEmail.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(supportEmail.trim())) { toast.error("Insira um e-mail de suporte válido (ex: suporte@seusite.com)"); setActiveTab("geral"); return; }
+    if (!supportPhone.trim() || supportPhone.replace(/\D/g, "").length < 10) { toast.error("Insira um telefone de suporte válido (com DDD)"); setActiveTab("geral"); return; }
+    if (!displayName.trim()) { toast.error("Nome de exibição é obrigatório"); setActiveTab("geral"); return; }
 
  setSaving(true);
  try {
