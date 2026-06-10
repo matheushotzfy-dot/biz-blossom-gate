@@ -33,65 +33,97 @@ interface Props {
  dateRange?: { from: Date; to: Date };
 }
 
-/* ═══ Custom Tooltip ═══ */
+/* ═══ Custom Tooltip — Premium ═══ */
 function ChartTooltip({ active, payload, label, fmtCurrency }: any) {
- if (!active || !payload?.length) return null;
- return (
- <div className="pointer-events-none select-none rounded-xl border border-white/[0.08] bg-[#061210]/95 backdrop-blur-xl px-4 py-3 shadow-[0_20px_50px_rgba(0,0,0,0.5)]">
- <p className="mb-1.5 text-[10px] font-bold text-white/30 uppercase tracking-wider">{label}</p>
- {payload.map((p: any, i: number) => (
- <p key={i} className="text-[12px] font-bold" style={{ color: p.color }}>
- {p.name}: {typeof p.value === "number" && p.value > 100 ? fmtCurrency(p.value) : p.value}
- </p>
- ))}
- </div>
- );
+  if (!active || !payload?.length) return null;
+  return (
+    <div className="pointer-events-none select-none rounded-xl border border-emerald-500/20 bg-[#04100a]/[0.98] px-3.5 py-2.5 shadow-[0_24px_60px_rgba(0,0,0,0.6)]">
+      <p className="mb-1.5 text-[9px] font-extrabold text-emerald-300/60 uppercase tracking-[0.18em]">{label}</p>
+      <div className="space-y-1">
+        {payload.map((p: any, i: number) => (
+          <div key={i} className="flex items-center justify-between gap-4 text-[11px]">
+            <div className="flex items-center gap-1.5">
+              <span className="h-1.5 w-1.5 rounded-full" style={{ background: p.color, boxShadow: `0 0 6px ${p.color}` }} />
+              <span className="text-white/55 font-medium">{p.name}</span>
+            </div>
+            <span className="font-black tabular-nums" style={{ color: p.color, fontFamily: "'Space Grotesk', monospace" }}>
+              {typeof p.value === "number" && p.value > 100 ? fmtCurrency(p.value) : p.value}
+            </span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
 }
 
 /* ═══ Stagger animation ═══ */
-const stagger = { hidden: { opacity: 0 }, show: { opacity: 1, transition: { staggerChildren: 0.06 } } };
-const fadeUp = { hidden: { opacity: 0, y: 12 }, show: { opacity: 1, y: 0, transition: { duration: 0.4 } } };
+const stagger = { hidden: { opacity: 0 }, show: { opacity: 1, transition: { staggerChildren: 0.04 } } };
+const fadeUp = { hidden: { opacity: 0, y: 8 }, show: { opacity: 1, y: 0, transition: { duration: 0.35 } } };
 
-function HealthCard({ icon, label, value, sub, trend, trendType, color, alert, pulse }: any) {
-  const colors: Record<string, string> = {
-    emerald: "border-emerald-500/10 bg-emerald-500/5 text-emerald-400 shadow-[0_0_20px_rgba(16,185,129,0.1)]",
-    blue: "border-blue-500/10 bg-blue-500/5 text-blue-400 shadow-[0_0_20px_rgba(59,130,246,0.1)]",
-    cyan: "border-cyan-500/10 bg-cyan-500/5 text-cyan-400 shadow-[0_0_20px_rgba(34,211,238,0.1)]",
-    orange: "border-orange-500/10 bg-orange-500/5 text-orange-400 shadow-[0_0_20px_rgba(245,158,11,0.1)]",
-    red: "border-red-500/10 bg-red-500/5 text-red-400 shadow-[0_0_20px_rgba(239,68,68,0.1)]",
+/* ═══ Premium KPI Card with inline sparkline ═══ */
+function HealthCard({ icon, label, value, sub, trend, trendType, color, alert, pulse, sparkData }: any) {
+  const palette: Record<string, { stroke: string; text: string; ring: string; iconBg: string; dot: string }> = {
+    emerald: { stroke: "#10b981", text: "text-emerald-300", ring: "border-emerald-500/15", iconBg: "bg-emerald-500/10 text-emerald-300", dot: "bg-emerald-400" },
+    blue:    { stroke: "#3b82f6", text: "text-sky-300",     ring: "border-sky-500/15",     iconBg: "bg-sky-500/10 text-sky-300",         dot: "bg-sky-400" },
+    cyan:    { stroke: "#22d3ee", text: "text-cyan-300",    ring: "border-cyan-500/15",    iconBg: "bg-cyan-500/10 text-cyan-300",       dot: "bg-cyan-400" },
+    orange:  { stroke: "#f59e0b", text: "text-amber-300",   ring: "border-amber-500/15",   iconBg: "bg-amber-500/10 text-amber-300",     dot: "bg-amber-400" },
+    red:     { stroke: "#ef4444", text: "text-red-300",     ring: "border-red-500/20",     iconBg: "bg-red-500/10 text-red-300",         dot: "bg-red-400" },
   };
-  
+  const p = palette[color] || palette.emerald;
+  const gradId = `spark-${color}-${String(label).replace(/\s+/g, "")}`;
+
   return (
     <div className={cn(
-      "relative overflow-hidden rounded-3xl border p-5 flex flex-col justify-between group transition-all duration-300 hover:scale-[1.02]",
-      colors[color] || colors.emerald,
-      alert && "border-red-500/30 bg-red-500/10"
+      "relative overflow-hidden rounded-2xl border bg-[#06120e]/60 p-5 flex flex-col justify-between group transition-colors duration-300 hover:bg-[#08160f]/85",
+      p.ring,
+      alert && "border-red-500/30 bg-red-500/[0.05]"
     )}>
-      <div className="flex items-center justify-between mb-4">
-        <div className={cn("p-2.5 rounded-xl bg-white/5 border border-white/5 transition-transform group-hover:rotate-12", alert && "animate-bounce")}>
+      {sparkData && sparkData.length > 1 && (
+        <div className="absolute inset-x-0 bottom-0 h-[58px] opacity-90 pointer-events-none">
+          <ResponsiveContainer width="100%" height="100%">
+            <AreaChart data={sparkData} margin={{ top: 0, right: 0, bottom: 0, left: 0 }}>
+              <defs>
+                <linearGradient id={gradId} x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor={p.stroke} stopOpacity={0.42} />
+                  <stop offset="100%" stopColor={p.stroke} stopOpacity={0} />
+                </linearGradient>
+              </defs>
+              <Area type="monotone" dataKey="v" stroke={p.stroke} strokeWidth={1.5} fill={`url(#${gradId})`} dot={false} isAnimationActive={false} />
+            </AreaChart>
+          </ResponsiveContainer>
+        </div>
+      )}
+
+      <div className="relative flex items-start justify-between mb-3">
+        <div className={cn("h-9 w-9 rounded-xl flex items-center justify-center border border-white/[0.04]", p.iconBg)}>
           {icon}
         </div>
         {trend && (
           <div className={cn(
-            "text-[10px] font-bold px-2 py-0.5 rounded-full",
-            trendType === "positive" ? "bg-emerald-500/10 text-emerald-400" : trendType === "negative" ? "bg-red-500/10 text-red-400" : "bg-white/5 text-white/40"
+            "text-[9px] font-extrabold px-2 py-0.5 rounded-md border tabular-nums",
+            trendType === "positive" ? "bg-emerald-500/10 text-emerald-300 border-emerald-500/20" :
+            trendType === "negative" ? "bg-red-500/10 text-red-300 border-red-500/20" :
+            "bg-white/[0.04] text-white/40 border-white/[0.06]"
           )}>
-            {trend}
+            {trendType === "positive" ? "↑" : trendType === "negative" ? "↓" : "•"} {trend}
           </div>
         )}
       </div>
-      <div>
-        <p className="text-[10px] font-black uppercase tracking-[0.2em] opacity-40 mb-1">{label}</p>
+      <div className="relative">
+        <p className="text-[9px] font-extrabold uppercase tracking-[0.22em] text-white/35 mb-1">{label}</p>
         <div className="flex items-baseline gap-2">
-          <p className="text-3xl font-black tracking-tight" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>{value}</p>
+          <p className="text-[28px] font-black leading-none tracking-[-0.02em] text-white tabular-nums"
+             style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
+            {value}
+          </p>
           {pulse && (
-            <span className="relative flex h-2 w-2 mb-1">
-              <span className="absolute h-full w-full animate-ping rounded-full bg-current opacity-75" />
-              <span className="relative h-2 w-2 rounded-full bg-current" />
+            <span className="relative flex h-1.5 w-1.5 mb-1">
+              <span className={cn("absolute h-full w-full animate-ping rounded-full opacity-75", p.dot)} />
+              <span className={cn("relative h-1.5 w-1.5 rounded-full", p.dot)} />
             </span>
           )}
         </div>
-        <p className="text-[10px] font-medium opacity-30 mt-1 truncate">{sub}</p>
+        <p className="text-[10.5px] font-medium text-white/35 mt-1.5 truncate">{sub}</p>
       </div>
     </div>
   );
@@ -221,7 +253,29 @@ export default function AdminOverviewTab({ transactions, profiles, products, wit
  chargebacks: dayTx.filter(t => t.status === "chargeback").length,
  refunds: dayTx.filter(t => t.status === "refunded").length,
  };
- }), [allTx]);
+  }), [allTx]);
+
+  /* ── Sparkline data (last 14 days, per metric) ── */
+  const sparkSeries = useMemo(() => {
+    const buckets = Array.from({ length: 14 }, (_, i) => {
+      const d = new Date(); d.setDate(d.getDate() - (13 - i));
+      const key = d.toDateString();
+      const txs = approved.filter(t => new Date(t.created_at).toDateString() === key);
+      const all = allTx.filter(t => new Date(t.created_at).toDateString() === key);
+      return {
+        vendas: txs.length,
+        tpv: txs.reduce((a, t) => a + Number(t.amount), 0),
+        conv: all.length > 0 ? (txs.length / all.length) * 100 : 0,
+        cb: all.filter(t => t.status === "chargeback").length,
+      };
+    });
+    return {
+      vendas: buckets.map(b => ({ v: b.vendas })),
+      conv: buckets.map(b => ({ v: b.conv })),
+      cb: buckets.map(b => ({ v: b.cb })),
+      tpv: buckets.map(b => ({ v: b.tpv })),
+    };
+  }, [approved, allTx]);
 
  const kycPending = profiles.filter(p => p.account_status === "pending_review" || p.account_status === "pending");
  const highValueWd = pendingWd.filter(w => Number(w.amount) >= 5000);
@@ -252,87 +306,115 @@ export default function AdminOverviewTab({ transactions, profiles, products, wit
 
  return (
  <motion.div variants={stagger} initial="hidden" animate="show" className="space-y-6">
-  {/* ═══ GOD MODE HERO — Plataforma Lucro ═══ */}
-  <motion.div variants={fadeUp} className="relative overflow-hidden rounded-[2.5rem] border border-emerald-500/[0.12] p-8 sm:p-12 shadow-[0_40px_100px_rgba(0,0,0,0.8)]"
-    style={{ background: "linear-gradient(135deg, rgba(2,6,23,0.98) 0%, rgba(6,18,16,0.95) 40%, rgba(2,6,23,0.98) 100%)" }}>
-    
-    <div className="absolute inset-0 pointer-events-none overflow-hidden">
-      <motion.div animate={{ opacity: [0.15, 0.3, 0.15], scale: [1, 1.1, 1] }} transition={{ duration: 10, repeat: Infinity }}
-        className="absolute top-[-20%] left-[-10%] w-[80%] h-[80%] bg-emerald-500/10 rounded-full blur-[150px]" />
-      <div className="absolute inset-0 opacity-[0.03]" style={{ backgroundImage: "radial-gradient(rgba(16,185,129,0.8) 1px, transparent 1px)", backgroundSize: "40px 40px" }} />
-    </div>
+  {/* ═══ EXECUTIVE HERO — Lucro + Sparkline ═══ */}
+  <motion.div variants={fadeUp} className="relative overflow-hidden rounded-3xl border border-emerald-500/[0.14] bg-[#04100a]/80"
+    style={{ backgroundImage: "radial-gradient(120% 80% at 100% 0%, rgba(16,185,129,0.10) 0%, transparent 55%), radial-gradient(80% 60% at 0% 100%, rgba(20,184,166,0.06) 0%, transparent 60%)" }}>
 
-    <div className="relative z-10 flex flex-col items-center text-center space-y-6">
-      <div className="flex items-center gap-4 px-4 py-1.5 rounded-full bg-white/[0.03] border border-white/[0.08] backdrop-blur-md">
-        <div className="flex items-center gap-2">
+    {/* Subtle dot grid */}
+    <div className="absolute inset-0 opacity-[0.025] pointer-events-none" style={{ backgroundImage: "radial-gradient(rgba(16,185,129,1) 1px, transparent 1px)", backgroundSize: "28px 28px" }} />
+
+    <div className="relative grid grid-cols-1 lg:grid-cols-[1.2fr,1fr] gap-6 p-6 sm:p-8">
+      {/* Left: Headline number */}
+      <div className="flex flex-col justify-between gap-5">
+        <div className="flex items-center gap-2.5">
           <span className="relative flex h-2 w-2">
-            <span className="absolute h-full w-full animate-ping rounded-full bg-emerald-400 opacity-40" />
+            <span className="absolute h-full w-full animate-ping rounded-full bg-emerald-400 opacity-60" />
             <span className="relative h-2 w-2 rounded-full bg-emerald-400" />
           </span>
-          <span className="text-[10px] font-black uppercase tracking-[0.3em] text-white/40">Plataforma em Tempo Real</span>
+          <span className="text-[9px] font-extrabold uppercase tracking-[0.32em] text-emerald-300/70">Live · Plataforma</span>
+          <span className="ml-auto text-[9px] font-bold uppercase tracking-[0.2em] text-white/25 hidden sm:inline">
+            {new Date().toLocaleString("pt-BR", { dateStyle: "medium", timeStyle: "short" })}
+          </span>
+        </div>
+
+        <div>
+          <p className="text-[10px] font-extrabold uppercase tracking-[0.32em] text-white/35 mb-2">Lucro Total da Plataforma</p>
+          <h1 className="text-5xl sm:text-6xl lg:text-7xl font-black tracking-[-0.04em] text-white tabular-nums leading-[0.95]"
+            style={{ fontFamily: "'Space Grotesk', system-ui, sans-serif" }}>
+            {fmtCurrency(takeRateTotal)}
+          </h1>
+          <div className="mt-4 grid grid-cols-3 gap-4 max-w-md">
+            <div>
+              <p className="text-[9px] font-bold text-white/35 uppercase tracking-[0.15em] mb-1">TPV</p>
+              <p className="text-base font-black text-white/90 tabular-nums" style={{ fontFamily: "'Space Grotesk', monospace" }}>{fmtCurrency(totalVolume)}</p>
+            </div>
+            <div>
+              <p className="text-[9px] font-bold text-white/35 uppercase tracking-[0.15em] mb-1">Take Rate</p>
+              <p className="text-base font-black text-emerald-300 tabular-nums" style={{ fontFamily: "'Space Grotesk', monospace" }}>{takeRatePct}%</p>
+            </div>
+            <div>
+              <p className="text-[9px] font-bold text-white/35 uppercase tracking-[0.15em] mb-1">Ticket Médio</p>
+              <p className="text-base font-black text-white/90 tabular-nums" style={{ fontFamily: "'Space Grotesk', monospace" }}>{fmtCurrency(ticketMedio)}</p>
+            </div>
+          </div>
         </div>
       </div>
 
-      <div className="space-y-1">
-        <p className="text-[10px] font-black uppercase tracking-[0.5em] text-white/20 mb-4">LUCRO TOTAL DA PLATAFORMA</p>
-        <h1 className="text-6xl sm:text-8xl lg:text-9xl font-black tracking-tighter text-white"
-          style={{ fontFamily: "'Space Grotesk', system-ui, sans-serif", textShadow: "0 0 80px rgba(16,185,129,0.3)" }}>
-          {fmtCurrency(takeRateTotal)}
-        </h1>
-      </div>
-
-      <div className="flex flex-wrap items-center justify-center gap-4 pt-4">
-        <div className="flex flex-col items-center">
-          <span className="text-[10px] font-bold text-white/30 uppercase tracking-widest mb-1">Volume Total (TPV)</span>
-          <span className="text-xl font-black text-white/80">{fmtCurrency(totalVolume)}</span>
+      {/* Right: Mini area chart of TPV last 14d */}
+      <div className="relative min-h-[160px]">
+        <div className="flex items-center justify-between mb-2">
+          <p className="text-[9px] font-extrabold uppercase tracking-[0.22em] text-white/40">TPV · Últimos 14 dias</p>
+          <p className="text-[10px] font-bold text-emerald-300/80 tabular-nums">{fmtCurrency(sparkSeries.tpv.reduce((a, b) => a + b.v, 0))}</p>
         </div>
-        <div className="w-px h-8 bg-white/5 mx-2" />
-        <div className="flex flex-col items-center">
-          <span className="text-[10px] font-bold text-white/30 uppercase tracking-widest mb-1">Taxa de Serviço Média</span>
-          <span className="text-xl font-black text-emerald-400">{takeRatePct}%</span>
+        <div className="h-[140px]">
+          <ResponsiveContainer width="100%" height="100%">
+            <AreaChart data={sparkSeries.tpv} margin={{ top: 4, right: 4, bottom: 0, left: 0 }}>
+              <defs>
+                <linearGradient id="heroTpvGrad" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor="#10b981" stopOpacity={0.55} />
+                  <stop offset="100%" stopColor="#10b981" stopOpacity={0} />
+                </linearGradient>
+              </defs>
+              <Tooltip cursor={false} wrapperStyle={{ pointerEvents: "none", zIndex: 20 }} content={<ChartTooltip fmtCurrency={fmtCurrency} />} />
+              <Area type="monotone" dataKey="v" name="TPV" stroke="#10b981" strokeWidth={2} fill="url(#heroTpvGrad)" dot={false} isAnimationActive={false} />
+            </AreaChart>
+          </ResponsiveContainer>
         </div>
       </div>
     </div>
   </motion.div>
 
 
-  {/* ═══ PLATFORM HEALTH RADAR ═══ */}
+  {/* ═══ PLATFORM HEALTH RADAR — KPIs com Sparkline ═══ */}
   <motion.div variants={fadeUp} className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
-    <HealthCard 
-      icon={<Flame className="h-6 w-6" />}
+    <HealthCard
+      icon={<Flame className="h-[18px] w-[18px]" />}
       label="Vendas Hoje"
       value={String(todayTx.length)}
-      sub={`R$ ${tpvToday.toLocaleString("pt-BR")}`}
-      trend="+12%"
-      trendType="positive"
+      sub={`R$ ${tpvToday.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}`}
+      trend={`${todayTx.length > 0 ? "+" : ""}${todayTx.length}`}
+      trendType={todayTx.length > 0 ? "positive" : "neutral"}
       color="orange"
       pulse={todayTx.length > 0}
+      sparkData={sparkSeries.vendas}
     />
-    <HealthCard 
-      icon={<Activity className="h-6 w-6" />}
+    <HealthCard
+      icon={<Activity className="h-[18px] w-[18px]" />}
       label="Taxa de Conversão"
       value={`${conversionRate}%`}
-      sub="Média do sistema"
-      trend="+0.8%"
+      sub="Aprovadas / Total"
+      trend={`${conversionRate}%`}
       trendType="positive"
       color="emerald"
+      sparkData={sparkSeries.conv}
     />
-    <HealthCard 
-      icon={<ShieldAlert className="h-6 w-6" />}
-      label="Risco de Chargeback"
+    <HealthCard
+      icon={<ShieldAlert className="h-[18px] w-[18px]" />}
+      label="Chargeback"
       value={`${chargebackRate.toFixed(2)}%`}
       sub={`${chargebackTx.length} incidentes`}
-      trend={chargebackRate > 1 ? "+5%" : "-2%"}
+      trend={chargebackRate > 1 ? "ALERTA" : "OK"}
       trendType={chargebackRate > 1 ? "negative" : "positive"}
       color={chargebackAlert ? "red" : "blue"}
       alert={chargebackAlert}
+      sparkData={sparkSeries.cb}
     />
-    <HealthCard 
-      icon={<Radio className="h-6 w-6" />}
+    <HealthCard
+      icon={<Radio className="h-[18px] w-[18px]" />}
       label="Saque Pendente"
       value={fmtCurrency(pendingWdAmount)}
       sub={`${pendingWd.length} solicitações`}
-      trend={pendingWd.length > 5 ? "High" : "Normal"}
+      trend={pendingWd.length > 5 ? "Alto" : "Normal"}
       trendType={pendingWd.length > 5 ? "negative" : "neutral"}
       color="cyan"
     />
