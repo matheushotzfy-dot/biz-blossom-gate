@@ -308,6 +308,24 @@ export default function AdminOverviewTab({ transactions, profiles, products, wit
 
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-4">
         <Panel
+          className="xl:col-span-3"
+          title="Movimento por horário"
+          icon={<Clock3 className="h-3.5 w-3.5" />}
+          action={<span className="text-[10px] font-black uppercase tracking-[0.18em] text-muted-foreground">{rangeLabel}</span>}
+        >
+          <ResponsiveContainer width="100%" height={220}>
+            <BarChart data={hourlyData} margin={{ top: 8, right: 8, bottom: 0, left: -8 }}>
+              <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" strokeOpacity={0.35} vertical={false} />
+              <XAxis dataKey="hour" stroke="hsl(var(--muted-foreground))" fontSize={10} tickLine={false} axisLine={false} interval={1} />
+              <YAxis stroke="hsl(var(--muted-foreground))" fontSize={10} tickLine={false} axisLine={false} tickFormatter={(v) => v >= 1000 ? `${(v / 1000).toFixed(0)}K` : v} />
+              <Tooltip cursor={{ fill: "hsl(var(--primary) / 0.08)" }} content={<ChartTooltip fmtCurrency={fmtCurrency} />} />
+              <Bar dataKey="tpv" name="TPV" fill="hsl(var(--primary))" radius={[8, 8, 0, 0]} isAnimationActive animationDuration={900} />
+              <Bar dataKey="lucro" name="Lucro" fill="hsl(var(--success))" radius={[8, 8, 0, 0]} isAnimationActive animationDuration={1100} />
+            </BarChart>
+          </ResponsiveContainer>
+        </Panel>
+
+        <Panel
           className="xl:col-span-2"
           title="Volume & Take Rate"
           icon={<TrendingUp className="h-3.5 w-3.5" />}
