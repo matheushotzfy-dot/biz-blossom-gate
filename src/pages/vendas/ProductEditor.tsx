@@ -22,7 +22,7 @@ import {
  Upload, CheckCircle2, Copy, Globe, Zap, Crosshair, Percent, Clock,
  Layers, UserPlus, Lock, Gift, BarChart3, Star, Palette, Sparkles,
  Check, ChevronRight, TrendingUp, MousePointerClick, GraduationCap, Video, Loader2,
- MessageSquare, Share2, Download, Smartphone, Monitor, AlertTriangle,
+ MessageSquare, Share2, Download, Smartphone, Monitor, AlertTriangle, Phone,
  RefreshCw, Hash, Target, Heart, Megaphone, Rocket, Award,
  BookOpen, Code2, Briefcase, type LucideIcon
 } from "lucide-react";
