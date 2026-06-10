@@ -66,14 +66,27 @@ export default function ApiKeys() {
     } finally { setCreating(false); }
   };
 
-  const handleRevoke = async (id: string, active: boolean) => {
-    const { error } = await supabase.functions.invoke("generate-api-key", { 
-      body: { action: "revoke", keyId: id } 
+  const handleRename = async () => {
+    if (!editingKey || !editName.trim()) return;
+    const { error } = await supabase.functions.invoke("generate-api-key", {
+      body: { action: "rename", keyId: editingKey.id, name: editName.trim() },
     });
-    if (error) { toast.error("Erro ao alterar"); return; }
-    toast.success(active ? "Revogada" : "Ativada");
+    if (error) { toast.error("Erro ao renomear"); return; }
+    toast.success("Nome atualizado");
+    setEditingKey(null);
     fetchKeys();
   };
+
+  const handleDelete = async (id: string, name: string) => {
+    if (!confirm(`Excluir a credencial "${name}"? Esta ação não pode ser desfeita.`)) return;
+    const { error } = await supabase.functions.invoke("generate-api-key", {
+      body: { action: "delete", keyId: id },
+    });
+    if (error) { toast.error("Erro ao excluir"); return; }
+    toast.success("Credencial excluída");
+    fetchKeys();
+  };
+
 
   const filtered = useMemo(() => 
     keys.filter(k => !query || k.name.toLowerCase().includes(query.toLowerCase())),
