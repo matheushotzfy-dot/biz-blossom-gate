@@ -23,6 +23,7 @@ import {
 } from "@/components/ui/select";
 import type { Tables } from "@/integrations/supabase/types";
 import { GlassPanel as AdminPanel, GlassPanelTitle as PanelTitle } from "./AdminOverviewTab";
+import { LinearHero, LinearStat, LinearStatRow } from "@/components/admin/LinearKit";
 import { logAdminAction } from "@/lib/auditLog";
 
 interface ActivityLog {
