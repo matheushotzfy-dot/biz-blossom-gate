@@ -288,6 +288,32 @@ export default function ApiKeys() {
           </div>
         </DialogContent>
       </Dialog>
+
+      <Dialog open={!!editingKey} onOpenChange={(o) => !o && setEditingKey(null)}>
+        <DialogContent className="max-w-md bg-card border-border/60 rounded-[32px]">
+          <DialogHeader>
+            <DialogTitle className="text-xl font-black uppercase tracking-tight">Renomear Credencial</DialogTitle>
+            <DialogDescription className="text-xs">
+              Apenas o nome de exibição é alterado. As chaves continuam as mesmas.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="py-4 space-y-4">
+            <div className="space-y-2">
+              <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Novo Nome</Label>
+              <Input
+                value={editName}
+                onChange={(e) => setEditName(e.target.value)}
+                placeholder="Ex: Produção"
+                className="h-12 border-border/60 rounded-xl font-bold"
+                autoFocus
+              />
+            </div>
+            <Button onClick={handleRename} disabled={!editName.trim()} className="w-full h-12 rounded-xl font-black uppercase tracking-widest text-xs">
+              Salvar
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
