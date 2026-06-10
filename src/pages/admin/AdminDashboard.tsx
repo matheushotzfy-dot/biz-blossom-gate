@@ -551,14 +551,14 @@ export default function AdminDashboard() {
             {DATE_PRESETS.map(p => (
               <button
                 key={p.label}
-                onClick={() => handleDatePreset(p.days)}
+                onClick={() => handleDatePreset(p.id)}
                 className={cn(
                   "px-3 py-1.5 rounded-lg text-[10px] font-bold transition-all",
-                  datePreset === (p.days === 0 ? "Hoje" : `${p.days}d`)
+                  datePreset === p.id
                     ? cn(accentClasses.bgSoft, accentClasses.text, "shadow-sm ring-1", accentClasses.ringActive)
                     : ""
                 )}
-                style={datePreset !== (p.days === 0 ? "Hoje" : `${p.days}d`) ? { color: themeConfig.textMuted } : {}}
+                style={datePreset !== p.id ? { color: themeConfig.textMuted } : {}}
               >
                 {p.label}
               </button>
