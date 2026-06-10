@@ -66,13 +66,19 @@ export default function AdminInactiveSellersTab({ profiles, transactions, fmtCur
  };
 
  return (
- <div className="space-y-5 animate-fade-in">
- <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
- <AdminKpi icon={<UserX className="h-4 w-4" />} label="Sellers Inativos" value={String(inactiveSellers.length)} sub={`+${daysThreshold} dias sem atividade`} alert={inactiveSellers.length > 0} />
- <AdminKpi icon={<TrendingDown className="h-4 w-4" />} label="Receita Acumulada" value={fmtCurrency(totalLostRevenue)} sub="Desses sellers" />
- <AdminKpi icon={<Calendar className="h-4 w-4" />} label="Média Inatividade" value={`${avgDaysInactive} dias`} sub="Por seller" />
- <AdminKpi icon={<AlertTriangle className="h-4 w-4" />} label="Críticos" value={`${weekPlus} (7d) / ${monthPlus} (30d)`} sub="Inativos severos" alert={monthPlus > 0} />
- </div>
+ <div className="space-y-6 animate-fade-in">
+ <LinearHero
+   eyebrow="Retenção · Sellers Inativos"
+   title="Sellers inativos"
+   subtitle="Identifique vendedores em risco de churn e dispare campanhas de remarketing."
+   status={{ tone: monthPlus > 0 ? "destructive" : "warning", label: `${inactiveSellers.length} inativos`, pulse: monthPlus > 0 }}
+ />
+ <LinearStatRow>
+   <LinearStat icon={UserX} label="Sellers Inativos" value={String(inactiveSellers.length)} sub={`+${daysThreshold} dias sem atividade`} tone="warning" />
+   <LinearStat icon={TrendingDown} label="Receita Acumulada" value={fmtCurrency(totalLostRevenue)} sub="Desses sellers" tone="neutral" />
+   <LinearStat icon={Calendar} label="Média Inatividade" value={`${avgDaysInactive}d`} sub="Por seller" tone="neutral" />
+   <LinearStat icon={AlertTriangle} label="Críticos" value={`${weekPlus}/${monthPlus}`} sub="7d / 30d" tone="destructive" />
+ </LinearStatRow>
 
  <div className="flex flex-wrap items-center gap-3">
  <div className="relative flex-1 max-w-sm">
