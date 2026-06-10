@@ -117,7 +117,7 @@ export default function ApiKeys() {
       {/* KPI Row */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         {[
-          { icon: Shield, label: "Chaves Ativas", value: String(keys.filter(k => k.is_active).length), sub: "Operacionais" },
+          { icon: Shield, label: "Credenciais", value: String(keys.length), sub: "Sem limite" },
           { icon: Globe,  label: "Total Geradas", value: String(keys.length),                          sub: "Histórico completo" },
           { icon: Lock,   label: "Criptografia",  value: "SHA-256",                                    sub: "Secrets hasheadas" },
           { icon: Code2,  label: "Padrão",        value: "REST",                                       sub: "JSON · Bearer Auth" },
