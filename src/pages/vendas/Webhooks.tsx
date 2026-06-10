@@ -284,13 +284,17 @@ export default function Webhooks() {
                       </div>
                     </td>
                     <td className="px-8 py-5 text-right space-x-2">
-                      <button onClick={() => toggleActive(wh.id, wh.is_active)} className="h-8 w-8 rounded-lg bg-muted/40 border border-border/60 inline-flex items-center justify-center hover:bg-muted transition-all">
+                      <button onClick={() => openEdit(wh)} title="Editar" className="h-8 w-8 rounded-lg bg-muted/40 border border-border/60 inline-flex items-center justify-center hover:bg-muted transition-all">
+                        <Pencil size={14} />
+                      </button>
+                      <button onClick={() => toggleActive(wh.id, wh.is_active)} title={wh.is_active ? "Pausar" : "Ativar"} className="h-8 w-8 rounded-lg bg-muted/40 border border-border/60 inline-flex items-center justify-center hover:bg-muted transition-all">
                         {wh.is_active ? <PowerOff size={14} /> : <Power size={14} className="text-emerald-500" />}
                       </button>
-                      <button onClick={() => deleteWebhook(wh.id)} className="h-8 w-8 rounded-lg bg-red-500/10 border border-red-500/20 inline-flex items-center justify-center text-red-500 hover:bg-red-500 hover:text-white transition-all">
+                      <button onClick={() => deleteWebhook(wh.id)} title="Excluir" className="h-8 w-8 rounded-lg bg-red-500/10 border border-red-500/20 inline-flex items-center justify-center text-red-500 hover:bg-red-500 hover:text-white transition-all">
                         <Trash2 size={14} />
                       </button>
                     </td>
+
                   </tr>
                 ))
               )}
