@@ -7,6 +7,7 @@ import {
   CreditCard, Package, BarChart3, Activity, Percent,
   ShieldAlert, RotateCcw, Lock, Eye, Radio,
   AlertCircle, UserCheck, Flame, Wallet, Target,
+  CalendarDays, Clock3, Hourglass, UserPlus, Gauge,
 } from "lucide-react";
 import {
   AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
@@ -61,17 +62,17 @@ function Panel({ children, className, title, icon, action }: {
   title?: string; icon?: React.ReactNode; action?: React.ReactNode;
 }) {
   return (
-    <div className={cn("rounded-xl border border-border/50 bg-card overflow-hidden flex flex-col", className)}>
+    <div className={cn("rounded-[24px] border border-border/60 bg-card overflow-hidden flex flex-col transition-colors hover:border-primary/20", className)}>
       {(title || icon) && (
-        <div className="flex items-center justify-between px-4 py-3 border-b border-border/40">
+        <div className="flex items-center justify-between px-5 py-4 border-b border-border/40">
           <div className="flex items-center gap-2">
             {icon && <span className="text-muted-foreground">{icon}</span>}
-            <h3 className="text-[12px] font-bold uppercase tracking-[0.14em] text-foreground/85">{title}</h3>
+            <h3 className="text-[12px] font-black uppercase tracking-[0.16em] text-foreground/90">{title}</h3>
           </div>
           {action}
         </div>
       )}
-      <div className="p-4 flex-1">{children}</div>
+      <div className="p-5 flex-1">{children}</div>
     </div>
   );
 }
@@ -232,6 +233,26 @@ export default function AdminOverviewTab({ transactions, profiles, products, wit
 
  const kycPending = profiles.filter(p => p.account_status === "pending_review" || p.account_status === "pending");
  const highValueWd = pendingWd.filter(w => Number(w.amount) >= 5000);
+ const newUsersInRange = useMemo(() => profiles.filter(p => {
+  if (!dateRange) return new Date(p.created_at).toDateString() === todayStr;
+  const d = new Date(p.created_at);
+  return d >= dateRange.from && d <= dateRange.to;
+ }), [profiles, dateRange, todayStr]);
+ const rangeLabel = useMemo(() => {
+  if (!dateRange) return "Período selecionado";
+  const sameDay = dateRange.from.toDateString() === dateRange.to.toDateString();
+  const fmt = (d: Date) => d.toLocaleDateString("pt-BR", { day: "2-digit", month: "short" });
+  return sameDay ? `${fmt(dateRange.from)} · por horário` : `${fmt(dateRange.from)} → ${fmt(dateRange.to)}`;
+ }, [dateRange]);
+ const hourlyData = useMemo(() => Array.from({ length: 24 }, (_, hour) => {
+  const txs = filteredApproved.filter(t => new Date(t.created_at).getHours() === hour);
+  return {
+    hour: `${String(hour).padStart(2, "0")}h`,
+    tpv: txs.reduce((a, t) => a + Number(t.amount), 0),
+    lucro: txs.reduce((a, t) => a + Number(t.fee_amount), 0),
+    vendas: txs.length,
+  };
+ }), [filteredApproved]);
 
  const statusColorMap: Record<string, string> = {
  completed: "text-emerald-400", approved: "text-emerald-400", pending: "text-amber-400",
@@ -266,26 +287,44 @@ export default function AdminOverviewTab({ transactions, profiles, products, wit
     <div className="space-y-6 animate-fade-in">
       <FinanceiroHero
         eyebrow="Plataforma · Visão Executiva"
-        title={fmtCurrency(takeRateTotal)}
-        subtitle={`Lucro total da plataforma · TPV ${fmtCurrency(totalVolume)} · Take rate ${takeRatePct}% · Ticket médio ${fmtCurrency(ticketMedio)}`}
+        title={fmtCurrency(totalVolume)}
+        subtitle={`Valor movimentado no período · lucro ${fmtCurrency(takeRateTotal)} · take rate ${takeRatePct}% · ticket médio ${fmtCurrency(ticketMedio)} · ${rangeLabel}`}
         status={{ tone: "success", label: "Live", pulse: true }}
       />
 
       <FinanceiroKpiGrid cols={4}>
-        <FinanceiroKpi label="Vendas Hoje" value={String(todayTx.length)} sub={`${fmtCurrency(tpvToday)} em TPV`} icon={Flame} tone={todayTx.length > 0 ? "success" : "neutral"} />
-        <FinanceiroKpi label="Conversão" value={`${conversionRate}%`} sub={`${approved.length}/${allTx.length} txs`} icon={Activity} tone="primary" />
-        <FinanceiroKpi label="Chargeback" value={`${chargebackRate.toFixed(2)}%`} sub={`${chargebackTx.length} incidentes`} icon={ShieldAlert} tone={chargebackAlert ? "destructive" : "info"} />
-        <FinanceiroKpi label="Saque Pendente" value={fmtCurrency(pendingWdAmount)} sub={`${pendingWd.length} solicitações`} icon={Radio} tone={pendingWd.length > 5 ? "warning" : "neutral"} />
+        <FinanceiroKpi label="Movimentado Hoje" value={fmtCurrency(tpvToday)} sub={`${todayTx.length} vendas aprovadas`} icon={Flame} tone={todayTx.length > 0 ? "success" : "neutral"} />
+        <FinanceiroKpi label="Lucro Hoje" value={fmtCurrency(takeRateToday)} sub={`${activeSellersToday} sellers venderam`} icon={DollarSign} tone="primary" />
+        <FinanceiroKpi label="Saques Pendentes" value={fmtCurrency(pendingWdAmount)} sub={`${pendingWd.length} solicitações · ${highValueWd.length} altos`} icon={Hourglass} tone={pendingWd.length > 5 ? "warning" : "neutral"} />
+        <FinanceiroKpi label="Novos Usuários" value={String(newUsersInRange.length)} sub="cadastros no período" icon={UserPlus} tone="info" />
       </FinanceiroKpiGrid>
 
       <FinanceiroKpiGrid cols={4}>
-        <FinanceiroKpi label="TPV Mensal" value={fmtCurrency(tpvMonth)} sub={`${monthTx.length} txs no mês`} icon={BarChart3} tone="info" />
-        <FinanceiroKpi label="Sellers Ativos" value={String(activeSellersToday)} sub="vendendo hoje" icon={Users} tone="success" />
+        <FinanceiroKpi label="Lucro no Período" value={fmtCurrency(takeRateTotal)} sub={`${takeRatePct}% de take rate`} icon={TrendingUp} tone="success" />
+        <FinanceiroKpi label="Aprovações KYC" value={String(kycPending.length)} sub="usuários aguardando análise" icon={UserCheck} tone={kycPending.length > 0 ? "warning" : "neutral"} />
         <FinanceiroKpi label="Saldo Retido" value={fmtCurrency(totalRetained)} sub="aguardando liberação" icon={Lock} tone="warning" />
         <FinanceiroKpi label="Volume Sacado" value={fmtCurrency(totalWithdrawn)} sub="pagos no período" icon={ArrowDownToLine} tone="neutral" />
       </FinanceiroKpiGrid>
 
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-4">
+        <Panel
+          className="xl:col-span-3"
+          title="Movimento por horário"
+          icon={<Clock3 className="h-3.5 w-3.5" />}
+          action={<span className="text-[10px] font-black uppercase tracking-[0.18em] text-muted-foreground">{rangeLabel}</span>}
+        >
+          <ResponsiveContainer width="100%" height={220}>
+            <BarChart data={hourlyData} margin={{ top: 8, right: 8, bottom: 0, left: -8 }}>
+              <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" strokeOpacity={0.35} vertical={false} />
+              <XAxis dataKey="hour" stroke="hsl(var(--muted-foreground))" fontSize={10} tickLine={false} axisLine={false} interval={1} />
+              <YAxis stroke="hsl(var(--muted-foreground))" fontSize={10} tickLine={false} axisLine={false} tickFormatter={(v) => v >= 1000 ? `${(v / 1000).toFixed(0)}K` : v} />
+              <Tooltip cursor={{ fill: "hsl(var(--primary) / 0.08)" }} content={<ChartTooltip fmtCurrency={fmtCurrency} />} />
+              <Bar dataKey="tpv" name="TPV" fill="hsl(var(--primary))" radius={[8, 8, 0, 0]} isAnimationActive animationDuration={900} />
+              <Bar dataKey="lucro" name="Lucro" fill="hsl(var(--success))" radius={[8, 8, 0, 0]} isAnimationActive animationDuration={1100} />
+            </BarChart>
+          </ResponsiveContainer>
+        </Panel>
+
         <Panel
           className="xl:col-span-2"
           title="Volume & Take Rate"

@@ -19,7 +19,7 @@ import { cn } from "@/lib/utils";
 import { motion, AnimatePresence } from "framer-motion";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar as CalendarComponent } from "@/components/ui/calendar";
-import { format, subDays, startOfDay } from "date-fns";
+import { format, subDays, startOfDay, endOfDay } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { Button } from "@/components/ui/button";
 import AdminOverviewTab from "./tabs/AdminOverviewTab";
@@ -150,11 +150,14 @@ const ADMIN_THEMES: Record<AdminTheme, {
   },
 };
 
-const DATE_PRESETS = [
-  { label: "Hoje", days: 0 },
-  { label: "7d", days: 7 },
-  { label: "30d", days: 30 },
-  { label: "90d", days: 90 },
+type DatePresetId = "today" | "yesterday" | "7d" | "14d" | "40d";
+
+const DATE_PRESETS: { id: DatePresetId; label: string }[] = [
+  { id: "today", label: "Hoje" },
+  { id: "yesterday", label: "Ontem" },
+  { id: "7d", label: "7 dias" },
+  { id: "14d", label: "14 dias" },
+  { id: "40d", label: "40 dias" },
 ];
 
 export default function AdminDashboard() {
@@ -171,10 +174,10 @@ export default function AdminDashboard() {
   const [syncing, setSyncing] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [dateRange, setDateRange] = useState<{ from: Date; to: Date }>({
-    from: subDays(new Date(), 30),
-    to: new Date(),
+    from: startOfDay(new Date()),
+    to: endOfDay(new Date()),
   });
-  const [datePreset, setDatePreset] = useState("30d");
+  const [datePreset, setDatePreset] = useState<DatePresetId | "custom">("today");
   const [calOpen, setCalOpen] = useState(false);
   const [adminTheme, setAdminTheme] = useState<AdminTheme>(() => {
     const saved = localStorage.getItem("admin-theme") as string;
@@ -201,7 +204,7 @@ export default function AdminDashboard() {
       const [txRes, pRes, prodRes, wRes] = await Promise.all([
         supabase.from("transactions").select("id, user_id, product_id, amount, fee_amount, net_amount, status, payment_method, customer_name, customer_email, created_at, updated_at, retained_amount, retention_released").gte("created_at", fromIso).lte("created_at", toIso).order("created_at", { ascending: false }).limit(2000),
         supabase.from("profiles").select("id, user_id, full_name, email, account_status, document_number, document_type, phone, nickname, seller_type, acquirer_id, balance_frozen, created_at, updated_at, avatar_url, kyc_rejection_reason, admin_notes, last_login_at").order("created_at", { ascending: false }).limit(1000),
-        supabase.from("products").select("id, user_id, name, price, status, created_at, updated_at, image_url, checkout_url, affiliate_enabled, affiliate_commission").limit(1000),
+        supabase.from("products").select("id, user_id, name, price, status, created_at, updated_at, image_url, checkout_url, affiliate_enabled, affiliate_commission").order("created_at", { ascending: false }).limit(1000),
         supabase.from("withdrawals").select("id, user_id, amount, fee_amount, net_amount, status, created_at, processed_at, bank_account_id, withdrawal_type, crypto_currency, crypto_network, crypto_address").gte("created_at", fromIso).lte("created_at", toIso).order("created_at", { ascending: false }).limit(2000),
       ]);
       if (txRes.error) throw txRes.error;
@@ -246,11 +249,17 @@ export default function AdminDashboard() {
     return () => { cancelled = true; };
   }, [user, navigate, loadData]);
 
-  const handleDatePreset = (days: number) => {
-    const to = new Date();
-    const from = days === 0 ? startOfDay(to) : subDays(to, days);
-    setDateRange({ from, to });
-    setDatePreset(days === 0 ? "Hoje" : `${days}d`);
+  const handleDatePreset = (preset: DatePresetId) => {
+    const now = new Date();
+    if (preset === "today") setDateRange({ from: startOfDay(now), to: endOfDay(now) });
+    else if (preset === "yesterday") {
+      const yesterday = subDays(now, 1);
+      setDateRange({ from: startOfDay(yesterday), to: endOfDay(yesterday) });
+    } else {
+      const days = Number(preset.replace("d", ""));
+      setDateRange({ from: startOfDay(subDays(now, days - 1)), to: endOfDay(now) });
+    }
+    setDatePreset(preset);
   };
 
   if (loading) return (
@@ -542,14 +551,14 @@ export default function AdminDashboard() {
             {DATE_PRESETS.map(p => (
               <button
                 key={p.label}
-                onClick={() => handleDatePreset(p.days)}
+                onClick={() => handleDatePreset(p.id)}
                 className={cn(
                   "px-3 py-1.5 rounded-lg text-[10px] font-bold transition-all",
-                  datePreset === (p.days === 0 ? "Hoje" : `${p.days}d`)
+                  datePreset === p.id
                     ? cn(accentClasses.bgSoft, accentClasses.text, "shadow-sm ring-1", accentClasses.ringActive)
                     : ""
                 )}
-                style={datePreset !== (p.days === 0 ? "Hoje" : `${p.days}d`) ? { color: themeConfig.textMuted } : {}}
+                style={datePreset !== p.id ? { color: themeConfig.textMuted } : {}}
               >
                 {p.label}
               </button>
