@@ -170,7 +170,8 @@ async function processAffiliateSplit(supabase: any, transactionId: string) {
     const link = affiliateLinks[0];
     if (link.owner_user_id !== tx.user_id) return; // Link must belong to the product owner
 
-    const commissionAmount = Math.round(tx.amount * link.commission_pct) / 100;
+    // Commission is calculated on net_amount (after platform fees), not gross
+    const commissionAmount = Math.round(tx.net_amount * link.commission_pct) / 100;
     if (commissionAmount <= 0) return;
 
     const idemKey = `affiliate_${transactionId}_${link.id}`;
@@ -268,35 +269,17 @@ Deno.serve(async (req) => {
       );
     }
 
-    const encoder = new TextEncoder();
-    const key = await crypto.subtle.importKey(
-      'raw',
-      encoder.encode(webhookSecret),
-      { name: 'HMAC', hash: 'SHA-256' },
-      false,
-      ['sign', 'verify']
-    );
-    const mac = await crypto.subtle.sign('HMAC', key, encoder.encode(rawBody));
-    
-    // Constant-time comparison to prevent timing attacks
-    const signatureBytes = new Uint8Array(signature.match(/.{1,2}/g)!.map(b => parseInt(b, 16)));
-    const computedBytes = new Uint8Array(mac);
-    
-    if (signatureBytes.length !== computedBytes.length) {
-      safeLog('Invalid webhook signature (length mismatch)');
+    // Hex validation — empty/odd/non-hex would crash signature.match below
+    if (!/^[0-9a-fA-F]+$/.test(signature) || signature.length % 2 !== 0) {
+      safeLog('Invalid webhook signature format');
       return new Response(
         JSON.stringify({ success: false, error: 'Invalid signature' }),
         { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
-    
-    // Constant-time compare
-    let mismatch = 0;
-    for (let i = 0; i < signatureBytes.length; i++) {
-      mismatch |= signatureBytes[i] ^ computedBytes[i];
-    }
-    
-    if (mismatch !== 0) {
+
+    const valid = await verifySignature(rawBody, signature, webhookSecret);
+    if (!valid) {
       safeLog('Invalid webhook signature');
       return new Response(
         JSON.stringify({ success: false, error: 'Invalid signature' }),
