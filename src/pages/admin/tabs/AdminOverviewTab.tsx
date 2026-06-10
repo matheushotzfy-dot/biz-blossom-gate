@@ -306,87 +306,115 @@ export default function AdminOverviewTab({ transactions, profiles, products, wit
 
  return (
  <motion.div variants={stagger} initial="hidden" animate="show" className="space-y-6">
-  {/* ═══ GOD MODE HERO — Plataforma Lucro ═══ */}
-  <motion.div variants={fadeUp} className="relative overflow-hidden rounded-[2.5rem] border border-emerald-500/[0.12] p-8 sm:p-12 shadow-[0_40px_100px_rgba(0,0,0,0.8)]"
-    style={{ background: "linear-gradient(135deg, rgba(2,6,23,0.98) 0%, rgba(6,18,16,0.95) 40%, rgba(2,6,23,0.98) 100%)" }}>
-    
-    <div className="absolute inset-0 pointer-events-none overflow-hidden">
-      <motion.div animate={{ opacity: [0.15, 0.3, 0.15], scale: [1, 1.1, 1] }} transition={{ duration: 10, repeat: Infinity }}
-        className="absolute top-[-20%] left-[-10%] w-[80%] h-[80%] bg-emerald-500/10 rounded-full blur-[150px]" />
-      <div className="absolute inset-0 opacity-[0.03]" style={{ backgroundImage: "radial-gradient(rgba(16,185,129,0.8) 1px, transparent 1px)", backgroundSize: "40px 40px" }} />
-    </div>
+  {/* ═══ EXECUTIVE HERO — Lucro + Sparkline ═══ */}
+  <motion.div variants={fadeUp} className="relative overflow-hidden rounded-3xl border border-emerald-500/[0.14] bg-[#04100a]/80"
+    style={{ backgroundImage: "radial-gradient(120% 80% at 100% 0%, rgba(16,185,129,0.10) 0%, transparent 55%), radial-gradient(80% 60% at 0% 100%, rgba(20,184,166,0.06) 0%, transparent 60%)" }}>
 
-    <div className="relative z-10 flex flex-col items-center text-center space-y-6">
-      <div className="flex items-center gap-4 px-4 py-1.5 rounded-full bg-white/[0.03] border border-white/[0.08] backdrop-blur-md">
-        <div className="flex items-center gap-2">
+    {/* Subtle dot grid */}
+    <div className="absolute inset-0 opacity-[0.025] pointer-events-none" style={{ backgroundImage: "radial-gradient(rgba(16,185,129,1) 1px, transparent 1px)", backgroundSize: "28px 28px" }} />
+
+    <div className="relative grid grid-cols-1 lg:grid-cols-[1.2fr,1fr] gap-6 p-6 sm:p-8">
+      {/* Left: Headline number */}
+      <div className="flex flex-col justify-between gap-5">
+        <div className="flex items-center gap-2.5">
           <span className="relative flex h-2 w-2">
-            <span className="absolute h-full w-full animate-ping rounded-full bg-emerald-400 opacity-40" />
+            <span className="absolute h-full w-full animate-ping rounded-full bg-emerald-400 opacity-60" />
             <span className="relative h-2 w-2 rounded-full bg-emerald-400" />
           </span>
-          <span className="text-[10px] font-black uppercase tracking-[0.3em] text-white/40">Plataforma em Tempo Real</span>
+          <span className="text-[9px] font-extrabold uppercase tracking-[0.32em] text-emerald-300/70">Live · Plataforma</span>
+          <span className="ml-auto text-[9px] font-bold uppercase tracking-[0.2em] text-white/25 hidden sm:inline">
+            {new Date().toLocaleString("pt-BR", { dateStyle: "medium", timeStyle: "short" })}
+          </span>
+        </div>
+
+        <div>
+          <p className="text-[10px] font-extrabold uppercase tracking-[0.32em] text-white/35 mb-2">Lucro Total da Plataforma</p>
+          <h1 className="text-5xl sm:text-6xl lg:text-7xl font-black tracking-[-0.04em] text-white tabular-nums leading-[0.95]"
+            style={{ fontFamily: "'Space Grotesk', system-ui, sans-serif" }}>
+            {fmtCurrency(takeRateTotal)}
+          </h1>
+          <div className="mt-4 grid grid-cols-3 gap-4 max-w-md">
+            <div>
+              <p className="text-[9px] font-bold text-white/35 uppercase tracking-[0.15em] mb-1">TPV</p>
+              <p className="text-base font-black text-white/90 tabular-nums" style={{ fontFamily: "'Space Grotesk', monospace" }}>{fmtCurrency(totalVolume)}</p>
+            </div>
+            <div>
+              <p className="text-[9px] font-bold text-white/35 uppercase tracking-[0.15em] mb-1">Take Rate</p>
+              <p className="text-base font-black text-emerald-300 tabular-nums" style={{ fontFamily: "'Space Grotesk', monospace" }}>{takeRatePct}%</p>
+            </div>
+            <div>
+              <p className="text-[9px] font-bold text-white/35 uppercase tracking-[0.15em] mb-1">Ticket Médio</p>
+              <p className="text-base font-black text-white/90 tabular-nums" style={{ fontFamily: "'Space Grotesk', monospace" }}>{fmtCurrency(ticketMedio)}</p>
+            </div>
+          </div>
         </div>
       </div>
 
-      <div className="space-y-1">
-        <p className="text-[10px] font-black uppercase tracking-[0.5em] text-white/20 mb-4">LUCRO TOTAL DA PLATAFORMA</p>
-        <h1 className="text-6xl sm:text-8xl lg:text-9xl font-black tracking-tighter text-white"
-          style={{ fontFamily: "'Space Grotesk', system-ui, sans-serif", textShadow: "0 0 80px rgba(16,185,129,0.3)" }}>
-          {fmtCurrency(takeRateTotal)}
-        </h1>
-      </div>
-
-      <div className="flex flex-wrap items-center justify-center gap-4 pt-4">
-        <div className="flex flex-col items-center">
-          <span className="text-[10px] font-bold text-white/30 uppercase tracking-widest mb-1">Volume Total (TPV)</span>
-          <span className="text-xl font-black text-white/80">{fmtCurrency(totalVolume)}</span>
+      {/* Right: Mini area chart of TPV last 14d */}
+      <div className="relative min-h-[160px]">
+        <div className="flex items-center justify-between mb-2">
+          <p className="text-[9px] font-extrabold uppercase tracking-[0.22em] text-white/40">TPV · Últimos 14 dias</p>
+          <p className="text-[10px] font-bold text-emerald-300/80 tabular-nums">{fmtCurrency(sparkSeries.tpv.reduce((a, b) => a + b.v, 0))}</p>
         </div>
-        <div className="w-px h-8 bg-white/5 mx-2" />
-        <div className="flex flex-col items-center">
-          <span className="text-[10px] font-bold text-white/30 uppercase tracking-widest mb-1">Taxa de Serviço Média</span>
-          <span className="text-xl font-black text-emerald-400">{takeRatePct}%</span>
+        <div className="h-[140px]">
+          <ResponsiveContainer width="100%" height="100%">
+            <AreaChart data={sparkSeries.tpv} margin={{ top: 4, right: 4, bottom: 0, left: 0 }}>
+              <defs>
+                <linearGradient id="heroTpvGrad" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor="#10b981" stopOpacity={0.55} />
+                  <stop offset="100%" stopColor="#10b981" stopOpacity={0} />
+                </linearGradient>
+              </defs>
+              <Tooltip cursor={false} wrapperStyle={{ pointerEvents: "none", zIndex: 20 }} content={<ChartTooltip fmtCurrency={fmtCurrency} />} />
+              <Area type="monotone" dataKey="v" name="TPV" stroke="#10b981" strokeWidth={2} fill="url(#heroTpvGrad)" dot={false} isAnimationActive={false} />
+            </AreaChart>
+          </ResponsiveContainer>
         </div>
       </div>
     </div>
   </motion.div>
 
 
-  {/* ═══ PLATFORM HEALTH RADAR ═══ */}
+  {/* ═══ PLATFORM HEALTH RADAR — KPIs com Sparkline ═══ */}
   <motion.div variants={fadeUp} className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
-    <HealthCard 
-      icon={<Flame className="h-6 w-6" />}
+    <HealthCard
+      icon={<Flame className="h-[18px] w-[18px]" />}
       label="Vendas Hoje"
       value={String(todayTx.length)}
-      sub={`R$ ${tpvToday.toLocaleString("pt-BR")}`}
-      trend="+12%"
-      trendType="positive"
+      sub={`R$ ${tpvToday.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}`}
+      trend={`${todayTx.length > 0 ? "+" : ""}${todayTx.length}`}
+      trendType={todayTx.length > 0 ? "positive" : "neutral"}
       color="orange"
       pulse={todayTx.length > 0}
+      sparkData={sparkSeries.vendas}
     />
-    <HealthCard 
-      icon={<Activity className="h-6 w-6" />}
+    <HealthCard
+      icon={<Activity className="h-[18px] w-[18px]" />}
       label="Taxa de Conversão"
       value={`${conversionRate}%`}
-      sub="Média do sistema"
-      trend="+0.8%"
+      sub="Aprovadas / Total"
+      trend={`${conversionRate}%`}
       trendType="positive"
       color="emerald"
+      sparkData={sparkSeries.conv}
     />
-    <HealthCard 
-      icon={<ShieldAlert className="h-6 w-6" />}
-      label="Risco de Chargeback"
+    <HealthCard
+      icon={<ShieldAlert className="h-[18px] w-[18px]" />}
+      label="Chargeback"
       value={`${chargebackRate.toFixed(2)}%`}
       sub={`${chargebackTx.length} incidentes`}
-      trend={chargebackRate > 1 ? "+5%" : "-2%"}
+      trend={chargebackRate > 1 ? "ALERTA" : "OK"}
       trendType={chargebackRate > 1 ? "negative" : "positive"}
       color={chargebackAlert ? "red" : "blue"}
       alert={chargebackAlert}
+      sparkData={sparkSeries.cb}
     />
-    <HealthCard 
-      icon={<Radio className="h-6 w-6" />}
+    <HealthCard
+      icon={<Radio className="h-[18px] w-[18px]" />}
       label="Saque Pendente"
       value={fmtCurrency(pendingWdAmount)}
       sub={`${pendingWd.length} solicitações`}
-      trend={pendingWd.length > 5 ? "High" : "Normal"}
+      trend={pendingWd.length > 5 ? "Alto" : "Normal"}
       trendType={pendingWd.length > 5 ? "negative" : "neutral"}
       color="cyan"
     />
