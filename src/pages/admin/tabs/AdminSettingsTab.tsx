@@ -139,18 +139,34 @@ export default function AdminSettingsTab() {
  setSaving(false);
  };
 
- const updateGlobalFee = async (feeId: string) => {
- if (!user) return;
- const newValue = Number(editingFees[feeId]);
- if (isNaN(newValue) || newValue < 0) { toast.error("Valor inválido"); return; }
- const fee = fees.find(f => f.id === feeId);
- if (!fee) return;
- const { error } = await supabase.from("fees").update({ value: newValue }).eq("id", feeId);
- if (error) { toast.error("Erro ao atualizar taxa"); return; }
- toast.success(`Taxa "${fee.name}" atualizada!`);
- await logAdminAction("update_global_fee", "fees", feeId, { name: fee.name, old_value: fee.value, new_value: newValue } as any);
- loadAll();
- };
+  const updateGlobalFee = async (feeId: string) => {
+    if (!user) return;
+    const newValue = Number(editingFees[feeId]);
+    if (isNaN(newValue) || newValue < 0) { toast.error("Valor inválido"); return; }
+    const fee = fees.find(f => f.id === feeId);
+    if (!fee) return;
+    const { error } = await supabase.from("fees").update({ value: newValue }).eq("id", feeId);
+    if (error) { toast.error("Erro ao atualizar taxa"); return; }
+    toast.success(`Taxa "${fee.name}" atualizada!`);
+    await logAdminAction("update_global_fee", "fees", feeId, { name: fee.name, old_value: fee.value, new_value: newValue } as any);
+    loadAll();
+  };
+
+  // Wipe all per-seller overrides → everyone (new and old) falls back to platform defaults
+  const applyGlobalToAllSellers = async () => {
+    if (!user) return;
+    if (!window.confirm("Aplicar taxas globais a TODOS os sellers? Isso APAGA todas as taxas individuais (atuais e antigos).")) return;
+    setSaving(true);
+    const { error, count } = await supabase
+      .from("custom_user_fees")
+      .delete({ count: "exact" })
+      .not("user_id", "is", null);
+    if (error) { toast.error("Erro ao aplicar global: " + error.message); setSaving(false); return; }
+    toast.success(`Taxas globais aplicadas. ${count ?? 0} overrides removidos.`);
+    await logAdminAction("apply_global_fees_to_all", "custom_user_fees", "bulk", { removed: count } as any);
+    setSaving(false);
+  };
+
 
  // Retention
  const saveGlobalRetention = async () => {
