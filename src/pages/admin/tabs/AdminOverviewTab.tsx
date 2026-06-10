@@ -560,7 +560,7 @@ function HeroKpi({ icon, label, value, sub, gradient, metallic, alert }: {
  {sub && <p className="mt-2 sm:mt-2.5 text-[11px] font-medium text-white/40">{sub}</p>}
  </div>
  </div>
- </motion.div>
+ </div>
  );
 }
 
