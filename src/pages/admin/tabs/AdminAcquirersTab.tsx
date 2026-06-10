@@ -156,39 +156,25 @@ export default function AdminAcquirersTab() {
  );
 
  return (
- <div className="space-y-6">
- <div className="flex items-center justify-between">
- <div>
- <h2 className="text-lg font-extrabold text-foreground">Adquirentes</h2>
- <p className="text-[11px] text-muted-foreground mt-0.5">Gerencie adquirentes, taxa de conversão e visibilidade para sellers</p>
- </div>
- <Button size="sm" className="bg-muted/30 border border-border hover:bg-muted/50 text-foreground rounded-xl text-xs gap-1.5" onClick={() => { resetForm(); setEditingId(null); setShowForm(true); }}>
- <Plus className="h-3.5 w-3.5" /> Nova Adquirente
- </Button>
- </div>
+ <div className="space-y-6 animate-fade-in">
+ <LinearHero
+   eyebrow="Infraestrutura · Adquirentes"
+   title="Adquirentes"
+   subtitle="Gerencie adquirentes, taxa de conversão e visibilidade para sellers."
+   status={{ tone: "success", label: `${acquirers.filter(a => a.is_active).length} ativas` }}
+   actions={
+     <Button size="sm" className="rounded-lg bg-foreground text-background hover:bg-foreground/90 text-xs gap-1.5 h-8" onClick={() => { resetForm(); setEditingId(null); setShowForm(true); }}>
+       <Plus className="h-3.5 w-3.5" /> Nova Adquirente
+     </Button>
+   }
+ />
 
- <div className="grid grid-cols-4 gap-4">
- <div className="rounded-2xl bg-card border border-border p-5">
- <p className="text-[10px] text-muted-foreground uppercase tracking-wider font-bold">Black</p>
- <p className="text-2xl font-black text-foreground mt-1">{blackAcquirers.length}</p>
- <p className="text-[10px] text-muted-foreground mt-1">{blackAcquirers.filter(a => a.is_active).length} ativas</p>
- </div>
- <div className="rounded-2xl bg-card border border-border p-5">
- <p className="text-[10px] text-muted-foreground uppercase tracking-wider font-bold">White</p>
- <p className="text-2xl font-black text-foreground mt-1">{whiteAcquirers.length}</p>
- <p className="text-[10px] text-muted-foreground mt-1">{whiteAcquirers.filter(a => a.is_active).length} ativas</p>
- </div>
- <div className="rounded-2xl bg-card border border-border p-5">
- <p className="text-[10px] text-muted-foreground uppercase tracking-wider font-bold">Total Ativas</p>
- <p className="text-2xl font-black text-primary mt-1">{acquirers.filter(a => a.is_active).length}</p>
- <p className="text-[10px] text-muted-foreground mt-1">de {acquirers.length}</p>
- </div>
- <div className="rounded-2xl bg-card border border-border p-5">
- <p className="text-[10px] text-muted-foreground uppercase tracking-wider font-bold">Visíveis p/ Sellers</p>
- <p className="text-2xl font-black text-primary mt-1">{acquirers.filter(a => a.seller_visible && a.is_active).length}</p>
- <p className="text-[10px] text-muted-foreground mt-1">disponíveis</p>
- </div>
- </div>
+ <LinearStatRow>
+   <LinearStat icon={Shield} label="Black" value={String(blackAcquirers.length)} sub={`${blackAcquirers.filter(a => a.is_active).length} ativas`} tone="neutral" />
+   <LinearStat icon={Globe} label="White" value={String(whiteAcquirers.length)} sub={`${whiteAcquirers.filter(a => a.is_active).length} ativas`} tone="info" />
+   <LinearStat icon={Power} label="Total Ativas" value={String(acquirers.filter(a => a.is_active).length)} sub={`de ${acquirers.length}`} tone="success" />
+   <LinearStat icon={Eye} label="Visíveis p/ Sellers" value={String(acquirers.filter(a => a.seller_visible && a.is_active).length)} sub="Disponíveis" tone="primary" />
+ </LinearStatRow>
 
  <AdminPanel>
  <PanelTitle color="zinc" icon={<Shield className="h-4 w-4" />}>Adquirentes Black ({blackAcquirers.length})</PanelTitle>
