@@ -40,7 +40,7 @@ export default function AdminTopSellersTab({ profiles, transactions, fmtCurrency
   const typeBadge = (type: string | null) => type === "black" ? "BLACK" : type === "white" ? "WHITE" : "SEM TIPO";
 
   return <div className="space-y-6 animate-fade-in">
-    <FinanceiroHero eyebrow="Ranking Comercial" title="Top Sellers" subtitle="Leaderboard financeiro por TPV, lucro, share de volume e consistência operacional." status={{ tone: "warning", label: "Performance", pulse: true }} actions={<PremiumSegmented value={period} onChange={setPeriod} options={[{ value: "today", label: "Hoje" }, { value: "week", label: "7d" }, { value: "month", label: "30d" }, { value: "all", label: "Tudo" }]} />} />
+    <FinanceiroHero eyebrow="Ranking Comercial" title="Top Sellers" subtitle="Leaderboard financeiro por TPV, lucro, share de volume e consistência operacional." status={{ tone: "warning", label: "Performance", pulse: true }} actions={<PremiumSegmented<Period> value={period} onChange={setPeriod} options={[{ value: "today", label: "Hoje" }, { value: "week", label: "7d" }, { value: "month", label: "30d" }, { value: "all", label: "Tudo" }]} />} />
 
     <PremiumMetricGrid cols={4}>
       <PremiumMetric icon={Users} label="Sellers Ativos" value={String(ranked.length)} sub="com venda no período" tone="neutral" />
