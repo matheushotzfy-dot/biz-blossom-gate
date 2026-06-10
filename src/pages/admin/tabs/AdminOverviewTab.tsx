@@ -2,51 +2,50 @@ import { useState, useEffect, useMemo } from "react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import {
- DollarSign, PiggyBank, Landmark, Users, ArrowDownToLine,
- TrendingUp, AlertTriangle, CheckCircle2, XCircle, Zap,
- Shield, Globe, CreditCard, Package, BarChart3, Activity, Percent,
- ShieldAlert, RotateCcw, Clock, Smartphone, FileText, Lock,
- TrendingDown, Eye, Radio, Server, Wifi, WifiOff, AlertCircle,
- UserCheck, UserX, ChevronRight, Sparkles, Crown, Flame, Target,
+  DollarSign, Users, ArrowDownToLine,
+  TrendingUp, CheckCircle2, XCircle,
+  CreditCard, Package, BarChart3, Activity, Percent,
+  ShieldAlert, RotateCcw, Lock, Eye, Radio,
+  AlertCircle, UserCheck, Flame, Wallet, Target,
 } from "lucide-react";
 import {
- AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
- PieChart, Pie, Cell, BarChart, Bar, LineChart, Line,
+  AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
+  BarChart, Bar, LineChart, Line, Cell,
 } from "recharts";
 import { Button } from "@/components/ui/button";
-import { StatusBadge } from "@/components/StatusBadge";
+import { FinanceiroHero, FinanceiroKpi, FinanceiroKpiGrid, type KpiTone } from "@/components/financeiro/FinanceiroHero";
 import type { Tables } from "@/integrations/supabase/types";
 import { cn } from "@/lib/utils";
-import { motion } from "framer-motion";
+import React from "react";
 
 interface Dispute { id: string; type: string; status: string; seller_user_id: string; amount: number; created_at: string; }
 
 interface Props {
- transactions: Tables<"transactions">[];
- profiles: Tables<"profiles">[];
- products: Tables<"products">[];
- withdrawals: Tables<"withdrawals">[];
- onWithdrawalAction: (id: string, action: "approved" | "rejected") => void;
- onUserStatus: (userId: string, status: string) => void;
- fmtCurrency: (v: number) => string;
- isEmployee?: boolean;
- dateRange?: { from: Date; to: Date };
+  transactions: Tables<"transactions">[];
+  profiles: Tables<"profiles">[];
+  products: Tables<"products">[];
+  withdrawals: Tables<"withdrawals">[];
+  onWithdrawalAction: (id: string, action: "approved" | "rejected") => void;
+  onUserStatus: (userId: string, status: string) => void;
+  fmtCurrency: (v: number) => string;
+  isEmployee?: boolean;
+  dateRange?: { from: Date; to: Date };
 }
 
-/* ═══ Custom Tooltip — Premium ═══ */
+/* ── Premium Recharts Tooltip — semantic tokens ── */
 function ChartTooltip({ active, payload, label, fmtCurrency }: any) {
   if (!active || !payload?.length) return null;
   return (
-    <div className="pointer-events-none select-none rounded-xl border border-emerald-500/20 bg-[#04100a]/[0.98] px-3.5 py-2.5 shadow-[0_24px_60px_rgba(0,0,0,0.6)]">
-      <p className="mb-1.5 text-[9px] font-extrabold text-emerald-300/60 uppercase tracking-[0.18em]">{label}</p>
+    <div className="pointer-events-none select-none rounded-lg border border-border bg-card px-3 py-2 shadow-xl">
+      {label && <p className="mb-1.5 text-[9px] font-bold text-muted-foreground uppercase tracking-[0.16em]">{label}</p>}
       <div className="space-y-1">
         {payload.map((p: any, i: number) => (
           <div key={i} className="flex items-center justify-between gap-4 text-[11px]">
             <div className="flex items-center gap-1.5">
-              <span className="h-1.5 w-1.5 rounded-full" style={{ background: p.color, boxShadow: `0 0 6px ${p.color}` }} />
-              <span className="text-white/55 font-medium">{p.name}</span>
+              <span className="h-1.5 w-1.5 rounded-full" style={{ background: p.color }} />
+              <span className="text-muted-foreground font-medium">{p.name}</span>
             </div>
-            <span className="font-black tabular-nums" style={{ color: p.color, fontFamily: "'Space Grotesk', monospace" }}>
+            <span className="font-black tabular-nums text-foreground">
               {typeof p.value === "number" && p.value > 100 ? fmtCurrency(p.value) : p.value}
             </span>
           </div>
@@ -56,78 +55,32 @@ function ChartTooltip({ active, payload, label, fmtCurrency }: any) {
   );
 }
 
-/* ═══ Stagger animation ═══ */
-const stagger = { hidden: { opacity: 0 }, show: { opacity: 1, transition: { staggerChildren: 0.04 } } };
-const fadeUp = { hidden: { opacity: 0, y: 8 }, show: { opacity: 1, y: 0, transition: { duration: 0.35 } } };
-
-/* ═══ Premium KPI Card with inline sparkline ═══ */
-function HealthCard({ icon, label, value, sub, trend, trendType, color, alert, pulse, sparkData }: any) {
-  const palette: Record<string, { stroke: string; text: string; ring: string; iconBg: string; dot: string }> = {
-    emerald: { stroke: "#10b981", text: "text-emerald-300", ring: "border-emerald-500/15", iconBg: "bg-emerald-500/10 text-emerald-300", dot: "bg-emerald-400" },
-    blue:    { stroke: "#3b82f6", text: "text-sky-300",     ring: "border-sky-500/15",     iconBg: "bg-sky-500/10 text-sky-300",         dot: "bg-sky-400" },
-    cyan:    { stroke: "#22d3ee", text: "text-cyan-300",    ring: "border-cyan-500/15",    iconBg: "bg-cyan-500/10 text-cyan-300",       dot: "bg-cyan-400" },
-    orange:  { stroke: "#f59e0b", text: "text-amber-300",   ring: "border-amber-500/15",   iconBg: "bg-amber-500/10 text-amber-300",     dot: "bg-amber-400" },
-    red:     { stroke: "#ef4444", text: "text-red-300",     ring: "border-red-500/20",     iconBg: "bg-red-500/10 text-red-300",         dot: "bg-red-400" },
-  };
-  const p = palette[color] || palette.emerald;
-  const gradId = `spark-${color}-${String(label).replace(/\s+/g, "")}`;
-
+/* ── Card primitive — exactly the Financeiro pattern ── */
+function Panel({ children, className, title, icon, action }: {
+  children: React.ReactNode; className?: string;
+  title?: string; icon?: React.ReactNode; action?: React.ReactNode;
+}) {
   return (
-    <div className={cn(
-      "relative overflow-hidden rounded-2xl border bg-[#06120e]/60 p-5 flex flex-col justify-between group transition-colors duration-300 hover:bg-[#08160f]/85",
-      p.ring,
-      alert && "border-red-500/30 bg-red-500/[0.05]"
-    )}>
-      {sparkData && sparkData.length > 1 && (
-        <div className="absolute inset-x-0 bottom-0 h-[58px] opacity-90 pointer-events-none">
-          <ResponsiveContainer width="100%" height="100%">
-            <AreaChart data={sparkData} margin={{ top: 0, right: 0, bottom: 0, left: 0 }}>
-              <defs>
-                <linearGradient id={gradId} x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor={p.stroke} stopOpacity={0.42} />
-                  <stop offset="100%" stopColor={p.stroke} stopOpacity={0} />
-                </linearGradient>
-              </defs>
-              <Area type="monotone" dataKey="v" stroke={p.stroke} strokeWidth={1.5} fill={`url(#${gradId})`} dot={false} isAnimationActive={false} />
-            </AreaChart>
-          </ResponsiveContainer>
+    <div className={cn("rounded-xl border border-border/50 bg-card overflow-hidden flex flex-col", className)}>
+      {(title || icon) && (
+        <div className="flex items-center justify-between px-4 py-3 border-b border-border/40">
+          <div className="flex items-center gap-2">
+            {icon && <span className="text-muted-foreground">{icon}</span>}
+            <h3 className="text-[12px] font-bold uppercase tracking-[0.14em] text-foreground/85">{title}</h3>
+          </div>
+          {action}
         </div>
       )}
-
-      <div className="relative flex items-start justify-between mb-3">
-        <div className={cn("h-9 w-9 rounded-xl flex items-center justify-center border border-white/[0.04]", p.iconBg)}>
-          {icon}
-        </div>
-        {trend && (
-          <div className={cn(
-            "text-[9px] font-extrabold px-2 py-0.5 rounded-md border tabular-nums",
-            trendType === "positive" ? "bg-emerald-500/10 text-emerald-300 border-emerald-500/20" :
-            trendType === "negative" ? "bg-red-500/10 text-red-300 border-red-500/20" :
-            "bg-white/[0.04] text-white/40 border-white/[0.06]"
-          )}>
-            {trendType === "positive" ? "↑" : trendType === "negative" ? "↓" : "•"} {trend}
-          </div>
-        )}
-      </div>
-      <div className="relative">
-        <p className="text-[9px] font-extrabold uppercase tracking-[0.22em] text-white/35 mb-1">{label}</p>
-        <div className="flex items-baseline gap-2">
-          <p className="text-[28px] font-black leading-none tracking-[-0.02em] text-white tabular-nums"
-             style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
-            {value}
-          </p>
-          {pulse && (
-            <span className="relative flex h-1.5 w-1.5 mb-1">
-              <span className={cn("absolute h-full w-full animate-ping rounded-full opacity-75", p.dot)} />
-              <span className={cn("relative h-1.5 w-1.5 rounded-full", p.dot)} />
-            </span>
-          )}
-        </div>
-        <p className="text-[10.5px] font-medium text-white/35 mt-1.5 truncate">{sub}</p>
-      </div>
+      <div className="p-4 flex-1">{children}</div>
     </div>
   );
 }
+
+function StatusDot({ tone, pulse }: { tone: "success" | "warning" | "destructive" | "info" | "neutral"; pulse?: boolean }) {
+  const cls = { success: "bg-success", warning: "bg-warning", destructive: "bg-destructive", info: "bg-info", neutral: "bg-muted-foreground" }[tone];
+  return <span className={cn("h-1.5 w-1.5 rounded-full", cls, pulse && "animate-pulse")} />;
+}
+
 
 export default function AdminOverviewTab({ transactions, profiles, products, withdrawals, onWithdrawalAction, onUserStatus, fmtCurrency, isEmployee = false, dateRange }: Props) {
  const [disputes, setDisputes] = useState<Dispute[]>([]);
