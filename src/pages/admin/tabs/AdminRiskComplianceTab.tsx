@@ -177,13 +177,21 @@ export default function AdminRiskComplianceTab({ profiles, transactions, fmtCurr
 
  return (
  <div className="space-y-5 animate-fade-in">
+ {/* Hero */}
+ <FinanceiroHero
+   eyebrow="Operações · Anti-Fraude"
+   title="Risco & Compliance"
+   subtitle="Blacklist global, velocity rules, radar de chargebacks e trilha de fraude."
+   status={{ tone: highRiskSellers > 0 ? "destructive" : "success", label: highRiskSellers > 0 ? `${highRiskSellers} sellers em risco` : "Operação saudável", pulse: highRiskSellers > 0 }}
+ />
+
  {/* KPIs */}
- <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
- <Kpi icon={<Ban className="h-5 w-5" />} label="Blacklist Ativa" value={String(activeBlacklist)} sub="Entradas bloqueadas" gradient="from-red-600 to-rose-700" alert={activeBlacklist > 0} />
- <Kpi icon={<Zap className="h-5 w-5" />} label="Velocity Rules" value={`${enabledRules}/${velocityRules.length}`} sub="Regras ativas" gradient="from-amber-500 to-orange-600" />
- <Kpi icon={<ShieldAlert className="h-5 w-5" />} label="Bloqueios Hoje" value={String(blockedToday)} sub="Tentativas barradas" gradient="from-violet-500 to-purple-600" alert={blockedToday > 5} />
- <Kpi icon={<AlertTriangle className="h-5 w-5" />} label="Sellers em Risco" value={String(highRiskSellers)} sub="Chargeback > 1.5%" gradient="from-destructive to-red-700" alert={highRiskSellers > 0} />
- </div>
+ <FinanceiroKpiGrid cols={4}>
+   <FinanceiroKpi icon={Ban} label="Blacklist Ativa" value={String(activeBlacklist)} sub="Entradas bloqueadas" tone="destructive" />
+   <FinanceiroKpi icon={Zap} label="Velocity Rules" value={`${enabledRules}/${velocityRules.length}`} sub="Regras ativas" tone="warning" />
+   <FinanceiroKpi icon={ShieldAlert} label="Bloqueios Hoje" value={String(blockedToday)} sub="Tentativas barradas" tone="info" />
+   <FinanceiroKpi icon={AlertTriangle} label="Sellers em Risco" value={String(highRiskSellers)} sub="Chargeback > 1.5%" tone="destructive" />
+ </FinanceiroKpiGrid>
 
  {/* Sub-Tabs */}
  <div className="flex items-center gap-1 p-1 rounded-xl bg-muted/30 border border-border w-fit flex-wrap">
