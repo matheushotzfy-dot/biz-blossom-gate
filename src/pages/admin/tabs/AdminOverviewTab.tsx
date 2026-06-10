@@ -253,7 +253,29 @@ export default function AdminOverviewTab({ transactions, profiles, products, wit
  chargebacks: dayTx.filter(t => t.status === "chargeback").length,
  refunds: dayTx.filter(t => t.status === "refunded").length,
  };
- }), [allTx]);
+  }), [allTx]);
+
+  /* ── Sparkline data (last 14 days, per metric) ── */
+  const sparkSeries = useMemo(() => {
+    const buckets = Array.from({ length: 14 }, (_, i) => {
+      const d = new Date(); d.setDate(d.getDate() - (13 - i));
+      const key = d.toDateString();
+      const txs = approved.filter(t => new Date(t.created_at).toDateString() === key);
+      const all = allTx.filter(t => new Date(t.created_at).toDateString() === key);
+      return {
+        vendas: txs.length,
+        tpv: txs.reduce((a, t) => a + Number(t.amount), 0),
+        conv: all.length > 0 ? (txs.length / all.length) * 100 : 0,
+        cb: all.filter(t => t.status === "chargeback").length,
+      };
+    });
+    return {
+      vendas: buckets.map(b => ({ v: b.vendas })),
+      conv: buckets.map(b => ({ v: b.conv })),
+      cb: buckets.map(b => ({ v: b.cb })),
+      tpv: buckets.map(b => ({ v: b.tpv })),
+    };
+  }, [approved, allTx]);
 
  const kycPending = profiles.filter(p => p.account_status === "pending_review" || p.account_status === "pending");
  const highValueWd = pendingWd.filter(w => Number(w.amount) >= 5000);
