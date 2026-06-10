@@ -497,6 +497,13 @@ export default function Perfil() {
         <Panel icon={Wallet} title="Limites operacionais" subtitle="Parâmetros vigentes da sua conta">
           <div className="px-5 pb-5">
             {[
+              {
+                label: "Ticket máximo por transação",
+                value: maxTicket != null
+                  ? `R$ ${maxTicket.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+                  : "—",
+                success: true,
+              },
               { label: "Limite diário PIX", value: "Ilimitado", success: true },
               { label: "Limite diário de saque", value: "Ilimitado", success: true },
               { label: "Saques simultâneos", value: "3 pendentes" },
