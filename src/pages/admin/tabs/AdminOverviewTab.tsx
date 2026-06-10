@@ -233,6 +233,26 @@ export default function AdminOverviewTab({ transactions, profiles, products, wit
 
  const kycPending = profiles.filter(p => p.account_status === "pending_review" || p.account_status === "pending");
  const highValueWd = pendingWd.filter(w => Number(w.amount) >= 5000);
+ const newUsersInRange = useMemo(() => profiles.filter(p => {
+  if (!dateRange) return new Date(p.created_at).toDateString() === todayStr;
+  const d = new Date(p.created_at);
+  return d >= dateRange.from && d <= dateRange.to;
+ }), [profiles, dateRange, todayStr]);
+ const rangeLabel = useMemo(() => {
+  if (!dateRange) return "Período selecionado";
+  const sameDay = dateRange.from.toDateString() === dateRange.to.toDateString();
+  const fmt = (d: Date) => d.toLocaleDateString("pt-BR", { day: "2-digit", month: "short" });
+  return sameDay ? `${fmt(dateRange.from)} · por horário` : `${fmt(dateRange.from)} → ${fmt(dateRange.to)}`;
+ }, [dateRange]);
+ const hourlyData = useMemo(() => Array.from({ length: 24 }, (_, hour) => {
+  const txs = filteredApproved.filter(t => new Date(t.created_at).getHours() === hour);
+  return {
+    hour: `${String(hour).padStart(2, "0")}h`,
+    tpv: txs.reduce((a, t) => a + Number(t.amount), 0),
+    lucro: txs.reduce((a, t) => a + Number(t.fee_amount), 0),
+    vendas: txs.length,
+  };
+ }), [filteredApproved]);
 
  const statusColorMap: Record<string, string> = {
  completed: "text-emerald-400", approved: "text-emerald-400", pending: "text-amber-400",
