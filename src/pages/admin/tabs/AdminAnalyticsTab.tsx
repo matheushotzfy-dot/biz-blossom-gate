@@ -1,7 +1,7 @@
 import { useMemo } from "react";
 import {
  BarChart3, TrendingUp, Users, CreditCard, DollarSign, Percent,
- Calendar, Target, Layers, Activity, PieChart as PieIcon, ArrowUpRight, Wallet, ShieldAlert,
+ Calendar, Target, Layers, PieChart as PieIcon,
 } from "lucide-react";
 import {
  AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
