@@ -678,17 +678,24 @@ export default function Dashboard() {
         <CardContent className="p-0">
           <div className="divide-y divide-border/30">
             {activity.map((item) => (
-              <div key={item.id} className="group flex items-center justify-between px-8 py-6 hover:bg-muted/30 transition-all cursor-pointer">
+              <button
+                key={item.id}
+                type="button"
+                onClick={() => setDetailTx(item.tx)}
+                className="group w-full text-left flex items-center justify-between px-8 py-6 hover:bg-muted/30 transition-all cursor-pointer"
+              >
                 <div className="flex items-center gap-4">
                   <div className={cn("h-11 w-11 rounded-2xl flex items-center justify-center transition-transform group-hover:scale-110", statusBg(item.status))}>
                     {item.label === "pix" ? (
                       <PixLogoMark className="h-5 w-5" />
+                    ) : item.label === "boleto" ? (
+                      <Barcode className={cn("h-5 w-5", statusColor(item.status))} />
                     ) : (
                       <CreditCard className={cn("h-5 w-5", statusColor(item.status))} />
                     )}
                   </div>
                   <div>
-                    <p className="text-sm font-bold">{item.label === "pix" ? "Pagamento via PIX" : item.label === "credit_card" ? "Pagamento via Cartão" : "Transação"}</p>
+                    <p className="text-sm font-bold">{item.label === "pix" ? "Pagamento via PIX" : item.label === "credit_card" ? "Pagamento via Cartão" : item.label === "boleto" ? "Pagamento via Boleto" : "Transação"}</p>
                     <p className="text-[10px] font-bold text-muted-foreground/50 uppercase tracking-widest">{timeAgo(item.createdAt)}</p>
                   </div>
                 </div>
@@ -696,11 +703,61 @@ export default function Dashboard() {
                   <p className="text-sm font-bold">{fmt(item.amount)}</p>
                   <p className={cn("text-[10px] font-bold uppercase tracking-widest", statusColor(item.status))}>{statusLabel(item.status)}</p>
                 </div>
-              </div>
+              </button>
             ))}
           </div>
         </CardContent>
       </Card>
+
+      {/* Transaction quick-detail popup */}
+      <Dialog open={!!detailTx} onOpenChange={(v) => !v && setDetailTx(null)}>
+        <DialogContent className="max-w-md">
+          {detailTx && (
+            <div className="space-y-4">
+              <div>
+                <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/60">Detalhes da venda</p>
+                <h3 className="text-xl font-bold mt-1">{fmt(Number(detailTx.amount))}</h3>
+                <p className={cn("text-xs font-bold uppercase tracking-widest mt-1", statusColor(detailTx.status))}>{statusLabel(detailTx.status)}</p>
+              </div>
+              <div className="grid grid-cols-2 gap-3 text-xs">
+                <div className="rounded-xl border border-border/40 p-3">
+                  <p className="text-muted-foreground/60 text-[10px] uppercase tracking-wider mb-1">Método</p>
+                  <p className="font-semibold flex items-center gap-1.5">
+                    {detailTx.payment_method === "pix" ? <><PixLogoMark className="h-3.5 w-3.5"/> PIX</>
+                      : detailTx.payment_method === "credit_card" ? <><CreditCard className="h-3.5 w-3.5"/> Cartão</>
+                      : detailTx.payment_method === "boleto" ? <><Barcode className="h-3.5 w-3.5"/> Boleto</>
+                      : "—"}
+                  </p>
+                </div>
+                <div className="rounded-xl border border-border/40 p-3">
+                  <p className="text-muted-foreground/60 text-[10px] uppercase tracking-wider mb-1">Líquido</p>
+                  <p className="font-semibold">{fmt(Number(detailTx.net_amount || 0))}</p>
+                </div>
+                <div className="rounded-xl border border-border/40 p-3 col-span-2">
+                  <p className="text-muted-foreground/60 text-[10px] uppercase tracking-wider mb-1 flex items-center gap-1"><User className="h-3 w-3"/> Cliente</p>
+                  <p className="font-semibold truncate">{detailTx.customer_name || "—"}</p>
+                  {detailTx.customer_email && <p className="text-muted-foreground text-[11px] truncate flex items-center gap-1 mt-0.5"><Mail className="h-3 w-3"/>{detailTx.customer_email}</p>}
+                </div>
+                <div className="rounded-xl border border-border/40 p-3 col-span-2">
+                  <p className="text-muted-foreground/60 text-[10px] uppercase tracking-wider mb-1 flex items-center gap-1"><Hash className="h-3 w-3"/> ID</p>
+                  <p className="font-mono text-[11px] truncate">{detailTx.id}</p>
+                </div>
+                <div className="rounded-xl border border-border/40 p-3 col-span-2">
+                  <p className="text-muted-foreground/60 text-[10px] uppercase tracking-wider mb-1 flex items-center gap-1"><CalendarDays className="h-3 w-3"/> Criada</p>
+                  <p className="font-semibold">{new Date(detailTx.created_at).toLocaleString("pt-BR")}</p>
+                </div>
+              </div>
+              <button
+                onClick={() => { const id = detailTx.id; setDetailTx(null); navigate(`/vendas?tx=${id}`); }}
+                className="w-full h-11 rounded-xl bg-primary text-primary-foreground font-bold text-sm flex items-center justify-center gap-2 hover:opacity-90 transition-opacity"
+              >
+                Ver completo na aba Vendas <ChevronRight className="h-4 w-4" />
+              </button>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+
       <QuickPixDialog open={pixDialogOpen} onOpenChange={setPixDialogOpen} />
     </div>
   );
