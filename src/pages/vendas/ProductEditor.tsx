@@ -1046,15 +1046,40 @@ function TabGeral({ name, setName, description, setDescription, price, setPrice,
               <p className={cn("text-[10px]", emailValid ? "text-success" : "text-muted-foreground/60")}>{emailValid ? "E-mail válido" : "Insira um e-mail válido"}</p>
             </div>
           </div>
-          <div className="space-y-1.5">
-            <label className="text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground flex items-center gap-1.5">
-              <Users className="h-3 w-3" /> Nome de exibição do produtor
-            </label>
-            <Input value={displayName} onChange={(e: any) => setDisplayName(e.target.value)} placeholder="Nome que aparecerá no checkout" className="h-11 bg-secondary border-border" required />
-            <p className="text-[10px] text-muted-foreground/60">Aparecerá no rodapé do checkout</p>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+            <div className="space-y-1.5">
+              <label className="text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground flex items-center gap-1.5">
+                <Phone className="h-3 w-3" /> Telefone de suporte
+              </label>
+              <Input
+                value={supportPhone}
+                onChange={(e: any) => setSupportPhone(formatPhone(e.target.value))}
+                placeholder="(11) 91234-5678"
+                inputMode="tel"
+                className={cn("h-11 bg-secondary border-border", supportPhone && !phoneValid && "border-destructive/50")}
+                required
+              />
+              <p className={cn("text-[10px]", phoneValid ? "text-success" : "text-muted-foreground/60")}>{phoneValid ? "Telefone válido" : "Insira o DDD + número (10 ou 11 dígitos)"}</p>
+            </div>
+            <div className="space-y-1.5">
+              <label className="text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground flex items-center gap-1.5">
+                <Users className="h-3 w-3" /> Nome de exibição do produtor
+              </label>
+              <Input value={displayName} onChange={(e: any) => setDisplayName(e.target.value)} placeholder="Nome que aparecerá no checkout" className="h-11 bg-secondary border-border" required />
+              <p className="text-[10px] text-muted-foreground/60">Aparecerá no rodapé do checkout</p>
+            </div>
           </div>
         </div>
       </section>
+
+      {/* Bottom Next/Save button — easier than scrolling up */}
+      {onNext && (
+        <div className="flex justify-end pt-2">
+          <Button onClick={onNext} size="lg" className="gap-2 rounded-xl font-display font-bold px-8 h-12">
+            Salvar e continuar <ChevronRight className="h-4 w-4" />
+          </Button>
+        </div>
+      )}
     </div>
   );
 }
