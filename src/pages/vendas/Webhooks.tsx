@@ -46,46 +46,75 @@ export default function Webhooks() {
   const { data: webhooks = [] } = useWebhooks();
   const invalidateAll = useInvalidateAll();
   const [createOpen, setCreateOpen] = useState(false);
+  const [editingId, setEditingId] = useState<string | null>(null);
   const [query, setQuery] = useState("");
   const [url, setUrl] = useState("");
   const [selectedEvents, setSelectedEvents] = useState<string[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleCreate = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!user) return;
-    if (selectedEvents.length === 0) { toast.error("Selecione os eventos"); return; }
-    if (!url.startsWith("https://")) { toast.error("URL deve ser HTTPS"); return; }
-    
-    setIsSubmitting(true);
-    const secret = crypto.randomUUID().replace(/-/g, "").slice(0, 32);
-    const { error } = await supabase
-      .from("webhook_configs")
-      .insert({ user_id: user.id, url, events: selectedEvents, secret });
-    
-    setIsSubmitting(false);
-    if (error) { toast.error("Erro ao criar"); return; }
-    
-    toast.success("Webhook adicionado");
-    setCreateOpen(false);
+  const resetForm = () => {
     setUrl("");
     setSelectedEvents([]);
-    invalidateAll(["webhooks"]);
+    setEditingId(null);
+  };
+
+  const openCreate = () => { resetForm(); setCreateOpen(true); };
+  const openEdit = (wh: any) => {
+    setEditingId(wh.id);
+    setUrl(wh.url);
+    setSelectedEvents(wh.events || []);
+    setCreateOpen(true);
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!user) return;
+    if (selectedEvents.length === 0) { toast.error("Selecione ao menos um evento"); return; }
+    if (!url.startsWith("https://")) { toast.error("URL deve começar com https://"); return; }
+
+    setIsSubmitting(true);
+    try {
+      if (editingId) {
+        const { error } = await supabase
+          .from("webhook_configs")
+          .update({ url, events: selectedEvents })
+          .eq("id", editingId)
+          .eq("user_id", user.id);
+        if (error) { toast.error(error.message || "Erro ao atualizar"); return; }
+        toast.success("Webhook atualizado");
+      } else {
+        const secret = "whsec_" + crypto.randomUUID().replace(/-/g, "") +
+          crypto.randomUUID().replace(/-/g, "").slice(0, 8);
+        const { error } = await supabase
+          .from("webhook_configs")
+          .insert({ user_id: user.id, url, events: selectedEvents, secret, is_active: true });
+        if (error) { toast.error(error.message || "Erro ao criar webhook"); return; }
+        toast.success("Webhook adicionado");
+      }
+      setCreateOpen(false);
+      resetForm();
+      invalidateAll(["webhooks"]);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const toggleActive = async (id: string, current: boolean) => {
     if (!user) return;
-    await supabase.from("webhook_configs").update({ is_active: !current }).eq("id", id);
+    const { error } = await supabase.from("webhook_configs").update({ is_active: !current }).eq("id", id);
+    if (error) { toast.error(error.message); return; }
     invalidateAll(["webhooks"]);
     toast.success(current ? "Pausado" : "Ativado");
   };
 
   const deleteWebhook = async (id: string) => {
-    if (!confirm("Excluir este endpoint?")) return;
-    await supabase.from("webhook_configs").delete().eq("id", id);
+    if (!confirm("Excluir este endpoint? Os eventos pendentes serão cancelados.")) return;
+    const { error } = await supabase.from("webhook_configs").delete().eq("id", id);
+    if (error) { toast.error(error.message); return; }
     toast.success("Removido");
     invalidateAll(["webhooks"]);
   };
+
 
   const filtered = useMemo(() => 
     webhooks.filter((w: any) => !query || w.url.toLowerCase().includes(query.toLowerCase())),
