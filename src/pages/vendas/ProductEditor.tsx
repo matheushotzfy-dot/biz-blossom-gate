@@ -842,6 +842,29 @@ function TabGeral({ name, setName, description, setDescription, price, setPrice,
   const descValid = description.length >= 50;
   const urlValid = /^https?:\/\/.+\..+/.test(pageUrl.trim());
   const emailValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(supportEmail.trim());
+  const phoneDigits = (supportPhone || "").replace(/\D/g, "");
+  const phoneValid = phoneDigits.length >= 10 && phoneDigits.length <= 11;
+  const formatPhone = (v: string) => {
+    const d = v.replace(/\D/g, "").slice(0, 11);
+    if (d.length <= 2) return d.length ? `(${d}` : "";
+    if (d.length <= 6) return `(${d.slice(0,2)}) ${d.slice(2)}`;
+    if (d.length <= 10) return `(${d.slice(0,2)}) ${d.slice(2,6)}-${d.slice(6)}`;
+    return `(${d.slice(0,2)}) ${d.slice(2,7)}-${d.slice(7)}`;
+  };
+  const handlePriceChange = (raw: string) => {
+    // Aceita "10", "10,50", "10.50". Mantém apenas dígitos e um separador.
+    let v = raw.replace(/[^0-9,.]/g, "");
+    // unifica para vírgula como separador decimal visualmente
+    v = v.replace(/\./g, ",");
+    // permite só uma vírgula
+    const parts = v.split(",");
+    if (parts.length > 2) v = parts[0] + "," + parts.slice(1).join("");
+    // máx 2 casas decimais
+    const [int, dec] = v.split(",");
+    if (dec !== undefined) v = int + "," + dec.slice(0, 2);
+    setPrice(v);
+  };
+  const priceNumber = parseFloat(String(price).replace(",", ".")) || 0;
 
   return (
     <div className="space-y-8">
