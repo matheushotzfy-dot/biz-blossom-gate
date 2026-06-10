@@ -145,10 +145,16 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
         card_percentage: (feesRes.data as any).card_percentage?.toString() || "",
         card_fixed:      (feesRes.data as any).card_fixed?.toString()      || "",
         withdrawal_fee:  feesRes.data.withdrawal_fee?.toString()           || "",
+        max_ticket:      (feesRes.data as any).max_ticket?.toString()      || "",
       });
     } else {
-      setCustomFees({ pix_percentage: "", pix_fixed: "", card_percentage: "", card_fixed: "", withdrawal_fee: "" });
+      setCustomFees({ pix_percentage: "", pix_fixed: "", card_percentage: "", card_fixed: "", withdrawal_fee: "", max_ticket: "" });
     }
+    // Resolve effective max ticket (custom > global)
+    try {
+      const { data: eff } = await supabase.rpc("get_user_max_ticket", { _user_id: profile.user_id });
+      setEffectiveMaxTicket(eff != null ? Number(eff) : null);
+    } catch { setEffectiveMaxTicket(null); }
     try {
       const { data: kycFiles } = await supabase.storage.from("kyc-documents").list(profile.user_id);
       if (kycFiles && kycFiles.length > 0) {
