@@ -19,23 +19,27 @@ import { StatCard } from "@/components/StatCard";
 
 const EVENT_GROUPS = [
   {
-    label: "Vendas",
+    label: "Pagamentos",
     events: [
+      { key: "payment.created", label: "Criada (Pendente)" },
       { key: "payment.approved", label: "Aprovada" },
       { key: "payment.failed", label: "Falha" },
+      { key: "payment.expired", label: "Expirada" },
       { key: "payment.refunded", label: "Reembolso" },
     ],
   },
   {
-    label: "Outros",
+    label: "Risco & Saques",
     events: [
       { key: "chargeback.received", label: "Chargeback" },
-      { key: "payout.approved", label: "Saque" },
+      { key: "payout.approved", label: "Saque aprovado" },
+      { key: "payout.rejected", label: "Saque rejeitado" },
     ],
   },
 ];
 
 const ALL_EVENTS = EVENT_GROUPS.flatMap((g) => g.events.map((e) => e.key));
+
 
 export default function Webhooks() {
   const { user } = useAuth();
