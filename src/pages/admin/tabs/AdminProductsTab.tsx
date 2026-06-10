@@ -21,7 +21,8 @@ import {
 } from "@/components/ui/sheet";
 import { toast } from "sonner";
 import type { Tables } from "@/integrations/supabase/types";
-import { GlassPanel as AdminPanel, GlassPanelTitle as PanelTitle, AdminKpi } from "./AdminOverviewTab";
+import { GlassPanel as AdminPanel, GlassPanelTitle as PanelTitle } from "./AdminOverviewTab";
+import { LinearHero, LinearStat, LinearStatRow } from "@/components/admin/LinearKit";
 import { logAdminAction } from "@/lib/auditLog";
 import { cn } from "@/lib/utils";
 
