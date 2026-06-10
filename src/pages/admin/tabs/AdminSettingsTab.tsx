@@ -425,6 +425,45 @@ export default function AdminSettingsTab() {
    </Button>
  </div>
  </AdminPanel>
+
+ {/* Ticket Máximo Global */}
+ <AdminPanel>
+   <PanelTitle color="emerald" icon={<DollarSign className="h-4 w-4" />}>Ticket Máximo — Limite por Transação</PanelTitle>
+   <p className="text-[11px] text-muted-foreground mt-1 mb-4">
+     Valor máximo permitido por transação. Vale para PIX, cartão e boleto, no checkout próprio e via API.
+     Tentativas acima do limite são bloqueadas com erro.
+   </p>
+
+   <div className="rounded-lg border border-emerald-500/15 bg-emerald-500/[0.04] p-3 mb-4">
+     <p className="text-[10px] font-extrabold uppercase tracking-[0.18em] text-emerald-300/80">Limite Global Atual</p>
+     <p className="text-2xl font-black text-white tabular-nums mt-1" style={{ fontFamily: "'Space Grotesk', monospace" }}>
+       R$ {Number(maxTicketGlobal).toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
+     </p>
+   </div>
+
+   <Label className="text-xs text-muted-foreground">Novo limite (R$)</Label>
+   <Input
+     type="number" step="0.01" min="1"
+     value={maxTicketInput}
+     onChange={e => setMaxTicketInput(e.target.value)}
+     className="h-10 mt-1.5 mb-3 tabular-nums"
+     placeholder="10000.00"
+   />
+
+   <div className="grid grid-cols-1 gap-2">
+     <Button onClick={saveMaxTicketNewOnly} disabled={savingMaxTicket} size="sm" className="w-full gap-2">
+       <Save className="h-3.5 w-3.5" />
+       Aplicar SOMENTE para novos usuários
+     </Button>
+     <Button onClick={saveMaxTicketForAll} disabled={savingMaxTicket} variant="destructive" size="sm" className="w-full gap-2">
+       <Users className="h-3.5 w-3.5" />
+       Aplicar a TODOS (apaga limites individuais)
+     </Button>
+   </div>
+   <p className="text-[10px] text-muted-foreground/70 mt-3">
+     Dica: limites individuais por seller podem ser definidos na aba <strong>Sellers</strong> &rarr; abrir seller &rarr; campo <em>Ticket Máximo</em>.
+   </p>
+ </AdminPanel>
  </div>
 
 
