@@ -178,6 +178,36 @@ export default function AdminSettingsTab() {
     setSaving(false);
   };
 
+  // Max Ticket: aplica apenas para novos usuários (snapshot do valor atual nos antigos)
+  const saveMaxTicketNewOnly = async () => {
+    const val = Number(maxTicketInput);
+    if (!val || val <= 0) { toast.error("Informe um valor válido"); return; }
+    if (!window.confirm(`Definir limite de R$ ${val.toLocaleString("pt-BR")} para novos usuários? Os usuários existentes mantêm o limite atual.`)) return;
+    setSavingMaxTicket(true);
+    const { data, error } = await supabase.rpc("set_max_ticket_new_users_only", { _new_value: val });
+    if (error) { toast.error("Erro: " + error.message); setSavingMaxTicket(false); return; }
+    toast.success(`Novo limite global: R$ ${val.toLocaleString("pt-BR")}. Limite anterior preservado nos usuários existentes.`);
+    await logAdminAction("set_max_ticket_new_only", "platform_settings", "max_ticket_default", data as any);
+    setMaxTicketGlobal(String(val));
+    setSavingMaxTicket(false);
+  };
+
+  // Max Ticket: aplica para TODOS (limpa overrides individuais)
+  const saveMaxTicketForAll = async () => {
+    const val = Number(maxTicketInput);
+    if (!val || val <= 0) { toast.error("Informe um valor válido"); return; }
+    if (!window.confirm(`Aplicar R$ ${val.toLocaleString("pt-BR")} a TODOS os sellers (novos e antigos)? Isso APAGA todos os limites individuais de ticket.`)) return;
+    setSavingMaxTicket(true);
+    const { data, error } = await supabase.rpc("set_max_ticket_for_all", { _new_value: val });
+    if (error) { toast.error("Erro: " + error.message); setSavingMaxTicket(false); return; }
+    toast.success(`Limite R$ ${val.toLocaleString("pt-BR")} aplicado a todos os sellers.`);
+    await logAdminAction("set_max_ticket_for_all", "platform_settings", "max_ticket_default", data as any);
+    setMaxTicketGlobal(String(val));
+    setSavingMaxTicket(false);
+  };
+
+
+
 
  // Retention
  const saveGlobalRetention = async () => {
