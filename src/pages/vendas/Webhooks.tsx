@@ -132,20 +132,21 @@ export default function Webhooks() {
             Notificações HTTP em tempo real para seu servidor
           </p>
         </div>
-        <Dialog open={createOpen} onOpenChange={setCreateOpen}>
+        <Dialog open={createOpen} onOpenChange={(o) => { setCreateOpen(o); if (!o) resetForm(); }}>
           <DialogTrigger asChild>
-            <Button className="h-11 px-6 rounded-xl font-black text-xs uppercase tracking-widest gap-2">
+            <Button onClick={openCreate} className="h-11 px-6 rounded-xl font-black text-xs uppercase tracking-widest gap-2">
               <Plus className="h-4 w-4" /> Novo Endpoint
             </Button>
           </DialogTrigger>
           <DialogContent className="max-w-lg bg-card border-border/60">
             <DialogHeader>
-              <DialogTitle className="text-xl font-black uppercase tracking-tight">Adicionar Webhook</DialogTitle>
+              <DialogTitle className="text-xl font-black uppercase tracking-tight">{editingId ? "Editar Webhook" : "Adicionar Webhook"}</DialogTitle>
               <DialogDescription className="text-xs">
-                Receba eventos da plataforma via POST HTTPS.
+                Receba eventos da plataforma via POST HTTPS. Cada evento é assinado com HMAC-SHA256 e isolado por conta.
               </DialogDescription>
             </DialogHeader>
-            <form onSubmit={handleCreate} className="space-y-6 pt-2">
+            <form onSubmit={handleSubmit} className="space-y-6 pt-2">
+
               <div className="space-y-2">
                 <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">URL de Destino</Label>
                 <div className="relative">
