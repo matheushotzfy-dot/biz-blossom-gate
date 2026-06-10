@@ -41,6 +41,11 @@ export default function AdminSettingsTab() {
  const [autoApproveMaxAmount, setAutoApproveMaxAmount] = useState("100");
  const [editingFees, setEditingFees] = useState<Record<string, string>>({});
 
+ // Max Ticket
+ const [maxTicketGlobal, setMaxTicketGlobal] = useState<string>("10000");
+ const [maxTicketInput, setMaxTicketInput] = useState<string>("10000");
+ const [savingMaxTicket, setSavingMaxTicket] = useState(false);
+
  // Retention settings
  const [globalRetention, setGlobalRetention] = useState({ pix_retention_pct: "0", card_retention_pct: "0", retention_days: "14", card_release_days: "7", id: "" });
  const [sellerRetentions, setSellerRetentions] = useState<any[]>([]);
