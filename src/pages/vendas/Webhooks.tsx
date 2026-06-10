@@ -182,8 +182,9 @@ export default function Webhooks() {
               </div>
 
               <Button type="submit" disabled={isSubmitting || !url} className="w-full h-12 rounded-xl font-black uppercase tracking-widest text-xs">
-                {isSubmitting ? "Adicionando..." : "Salvar Configuração"}
+                {isSubmitting ? "Salvando..." : editingId ? "Atualizar Webhook" : "Salvar Configuração"}
               </Button>
+
             </form>
           </DialogContent>
         </Dialog>
