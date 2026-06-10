@@ -3243,6 +3243,7 @@ export type Database = {
           blocked: boolean
         }[]
       }
+      current_user_email: { Args: never; Returns: string }
       current_user_has_role: {
         Args: { _role: Database["public"]["Enums"]["app_role"] }
         Returns: boolean
