@@ -71,7 +71,8 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
  const [userWithdrawals, setUserWithdrawals] = useState<Tables<"withdrawals">[]>([]);
  const [userTransactions, setUserTransactions] = useState<Tables<"transactions">[]>([]);
  const [userPixKeys, setUserPixKeys] = useState<PixKey[]>([]);
- const [customFees, setCustomFees] = useState({ pix_percentage: "", pix_fixed: "", card_percentage: "", card_fixed: "", withdrawal_fee: "" });
+ const [customFees, setCustomFees] = useState({ pix_percentage: "", pix_fixed: "", card_percentage: "", card_fixed: "", withdrawal_fee: "", max_ticket: "" });
+ const [effectiveMaxTicket, setEffectiveMaxTicket] = useState<number | null>(null);
  const [adjustAmount, setAdjustAmount] = useState("");
  const [adjustType, setAdjustType] = useState<"credit" | "debit">("credit");
  const [adjustReason, setAdjustReason] = useState("");
@@ -110,7 +111,7 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
       supabase.from("products").select("id, user_id, name, price, status, created_at, image_url").eq("user_id", profile.user_id).order("created_at", { ascending: false }).limit(100) as any,
       supabase.from("withdrawals").select("id, user_id, amount, fee_amount, net_amount, status, created_at, withdrawal_type").eq("user_id", profile.user_id).order("created_at", { ascending: false }).limit(100) as any,
       supabase.from("transactions").select("id, user_id, product_id, amount, fee_amount, net_amount, status, payment_method, customer_name, created_at").eq("user_id", profile.user_id).order("created_at", { ascending: false }).limit(200) as any,
-      supabase.from("custom_user_fees").select("id, user_id, pix_percentage, pix_fixed, card_percentage, card_fixed, withdrawal_fee, admin_user_id").eq("user_id", profile.user_id).maybeSingle(),
+      supabase.from("custom_user_fees").select("id, user_id, pix_percentage, pix_fixed, card_percentage, card_fixed, withdrawal_fee, max_ticket, admin_user_id").eq("user_id", profile.user_id).maybeSingle(),
       supabase.from("balance_adjustments").select("id, user_id, amount, type, reason, admin_user_id, created_at").eq("user_id", profile.user_id).order("created_at", { ascending: false }).limit(50),
       supabase.from("pix_keys").select("id, key_type, key_value, created_at").eq("user_id", profile.user_id),
       supabase.from("disputes").select("id, seller_user_id, transaction_id, amount, type, status, reason, created_at").eq("seller_user_id", profile.user_id).order("created_at", { ascending: false }).limit(50) as any,
@@ -144,10 +145,16 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
         card_percentage: (feesRes.data as any).card_percentage?.toString() || "",
         card_fixed:      (feesRes.data as any).card_fixed?.toString()      || "",
         withdrawal_fee:  feesRes.data.withdrawal_fee?.toString()           || "",
+        max_ticket:      (feesRes.data as any).max_ticket?.toString()      || "",
       });
     } else {
-      setCustomFees({ pix_percentage: "", pix_fixed: "", card_percentage: "", card_fixed: "", withdrawal_fee: "" });
+      setCustomFees({ pix_percentage: "", pix_fixed: "", card_percentage: "", card_fixed: "", withdrawal_fee: "", max_ticket: "" });
     }
+    // Resolve effective max ticket (custom > global)
+    try {
+      const { data: eff } = await supabase.rpc("get_user_max_ticket", { _user_id: profile.user_id });
+      setEffectiveMaxTicket(eff != null ? Number(eff) : null);
+    } catch { setEffectiveMaxTicket(null); }
     try {
       const { data: kycFiles } = await supabase.storage.from("kyc-documents").list(profile.user_id);
       if (kycFiles && kycFiles.length > 0) {
@@ -336,6 +343,7 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
  card_percentage: customFees.card_percentage ? Number(customFees.card_percentage) : null,
  card_fixed:      customFees.card_fixed      ? Number(customFees.card_fixed)      : null,
  withdrawal_fee:  customFees.withdrawal_fee  ? Number(customFees.withdrawal_fee)  : null,
+ max_ticket:      customFees.max_ticket      ? Number(customFees.max_ticket)      : null,
  updated_at: new Date().toISOString(),
  };
  const { error } = await supabase.from("custom_user_fees").upsert(payload, { onConflict: "user_id" });

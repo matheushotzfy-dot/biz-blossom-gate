@@ -41,6 +41,11 @@ export default function AdminSettingsTab() {
  const [autoApproveMaxAmount, setAutoApproveMaxAmount] = useState("100");
  const [editingFees, setEditingFees] = useState<Record<string, string>>({});
 
+ // Max Ticket
+ const [maxTicketGlobal, setMaxTicketGlobal] = useState<string>("10000");
+ const [maxTicketInput, setMaxTicketInput] = useState<string>("10000");
+ const [savingMaxTicket, setSavingMaxTicket] = useState(false);
+
  // Retention settings
  const [globalRetention, setGlobalRetention] = useState({ pix_retention_pct: "0", card_retention_pct: "0", retention_days: "14", card_release_days: "7", id: "" });
  const [sellerRetentions, setSellerRetentions] = useState<any[]>([]);
@@ -92,6 +97,12 @@ export default function AdminSettingsTab() {
  setBlackPercentage(String(v.percentage ?? 4.99));
  setBlackFixed(String(v.fixed ?? 2.50));
  setBlackWithdrawal(String(v.withdrawal ?? 5.00));
+ }
+  const maxTicketSet = settingsRes.data.find((s: any) => s.key === "max_ticket_default");
+ if (maxTicketSet) {
+   const v = (maxTicketSet as any).value?.value ?? 10000;
+   setMaxTicketGlobal(String(v));
+   setMaxTicketInput(String(v));
  }
  }
  if (retentionRes.data) {
@@ -166,6 +177,36 @@ export default function AdminSettingsTab() {
     await logAdminAction("apply_global_fees_to_all", "custom_user_fees", "bulk", { removed: count } as any);
     setSaving(false);
   };
+
+  // Max Ticket: aplica apenas para novos usuários (snapshot do valor atual nos antigos)
+  const saveMaxTicketNewOnly = async () => {
+    const val = Number(maxTicketInput);
+    if (!val || val <= 0) { toast.error("Informe um valor válido"); return; }
+    if (!window.confirm(`Definir limite de R$ ${val.toLocaleString("pt-BR")} para novos usuários? Os usuários existentes mantêm o limite atual.`)) return;
+    setSavingMaxTicket(true);
+    const { data, error } = await supabase.rpc("set_max_ticket_new_users_only", { _new_value: val });
+    if (error) { toast.error("Erro: " + error.message); setSavingMaxTicket(false); return; }
+    toast.success(`Novo limite global: R$ ${val.toLocaleString("pt-BR")}. Limite anterior preservado nos usuários existentes.`);
+    await logAdminAction("set_max_ticket_new_only", "platform_settings", "max_ticket_default", data as any);
+    setMaxTicketGlobal(String(val));
+    setSavingMaxTicket(false);
+  };
+
+  // Max Ticket: aplica para TODOS (limpa overrides individuais)
+  const saveMaxTicketForAll = async () => {
+    const val = Number(maxTicketInput);
+    if (!val || val <= 0) { toast.error("Informe um valor válido"); return; }
+    if (!window.confirm(`Aplicar R$ ${val.toLocaleString("pt-BR")} a TODOS os sellers (novos e antigos)? Isso APAGA todos os limites individuais de ticket.`)) return;
+    setSavingMaxTicket(true);
+    const { data, error } = await supabase.rpc("set_max_ticket_for_all", { _new_value: val });
+    if (error) { toast.error("Erro: " + error.message); setSavingMaxTicket(false); return; }
+    toast.success(`Limite R$ ${val.toLocaleString("pt-BR")} aplicado a todos os sellers.`);
+    await logAdminAction("set_max_ticket_for_all", "platform_settings", "max_ticket_default", data as any);
+    setMaxTicketGlobal(String(val));
+    setSavingMaxTicket(false);
+  };
+
+
 
 
  // Retention
@@ -383,6 +424,45 @@ export default function AdminSettingsTab() {
      <Users className="h-3.5 w-3.5" /> Aplicar taxa global a TODOS os sellers (apaga individuais)
    </Button>
  </div>
+ </AdminPanel>
+
+ {/* Ticket Máximo Global */}
+ <AdminPanel>
+   <PanelTitle color="emerald" icon={<DollarSign className="h-4 w-4" />}>Ticket Máximo — Limite por Transação</PanelTitle>
+   <p className="text-[11px] text-muted-foreground mt-1 mb-4">
+     Valor máximo permitido por transação. Vale para PIX, cartão e boleto, no checkout próprio e via API.
+     Tentativas acima do limite são bloqueadas com erro.
+   </p>
+
+   <div className="rounded-lg border border-emerald-500/15 bg-emerald-500/[0.04] p-3 mb-4">
+     <p className="text-[10px] font-extrabold uppercase tracking-[0.18em] text-emerald-300/80">Limite Global Atual</p>
+     <p className="text-2xl font-black text-white tabular-nums mt-1" style={{ fontFamily: "'Space Grotesk', monospace" }}>
+       R$ {Number(maxTicketGlobal).toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
+     </p>
+   </div>
+
+   <Label className="text-xs text-muted-foreground">Novo limite (R$)</Label>
+   <Input
+     type="number" step="0.01" min="1"
+     value={maxTicketInput}
+     onChange={e => setMaxTicketInput(e.target.value)}
+     className="h-10 mt-1.5 mb-3 tabular-nums"
+     placeholder="10000.00"
+   />
+
+   <div className="grid grid-cols-1 gap-2">
+     <Button onClick={saveMaxTicketNewOnly} disabled={savingMaxTicket} size="sm" className="w-full gap-2">
+       <Save className="h-3.5 w-3.5" />
+       Aplicar SOMENTE para novos usuários
+     </Button>
+     <Button onClick={saveMaxTicketForAll} disabled={savingMaxTicket} variant="destructive" size="sm" className="w-full gap-2">
+       <Users className="h-3.5 w-3.5" />
+       Aplicar a TODOS (apaga limites individuais)
+     </Button>
+   </div>
+   <p className="text-[10px] text-muted-foreground/70 mt-3">
+     Dica: limites individuais por seller podem ser definidos na aba <strong>Sellers</strong> &rarr; abrir seller &rarr; campo <em>Ticket Máximo</em>.
+   </p>
  </AdminPanel>
  </div>
 
