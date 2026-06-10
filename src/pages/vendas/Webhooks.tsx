@@ -3,9 +3,10 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useWebhooks, useInvalidateAll } from "@/hooks/useQueryData";
 import {
-  Webhook, Plus, Trash2, Globe, Shield, Copy, Check, Search,
+  Webhook, Plus, Trash2, Globe, Shield, Copy, Check, Search, Pencil,
   Power, PowerOff, CircleDot, Code2, Zap, LayoutGrid, Clock, ShieldCheck
 } from "lucide-react";
+
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
