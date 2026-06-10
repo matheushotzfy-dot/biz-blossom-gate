@@ -1,7 +1,8 @@
 import { useState, useEffect, useMemo } from "react";
 import {
-  KeyRound, Plus, Copy, Check, Shield, Search, Globe, Lock, Code2, Power, PowerOff, BookOpen,
+  KeyRound, Plus, Copy, Shield, Search, Globe, Lock, Code2, Pencil, Trash2, BookOpen,
 } from "lucide-react";
+
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -35,6 +36,9 @@ export default function ApiKeys() {
   const [newKeyName, setNewKeyName] = useState("Produção");
   const [newKeyData, setNewKeyData] = useState<any | null>(null);
   const [creating, setCreating] = useState(false);
+  const [editingKey, setEditingKey] = useState<ApiKey | null>(null);
+  const [editName, setEditName] = useState("");
+
 
   const fetchKeys = async () => {
     if (!user) return;
@@ -62,14 +66,27 @@ export default function ApiKeys() {
     } finally { setCreating(false); }
   };
 
-  const handleRevoke = async (id: string, active: boolean) => {
-    const { error } = await supabase.functions.invoke("generate-api-key", { 
-      body: { action: "revoke", keyId: id } 
+  const handleRename = async () => {
+    if (!editingKey || !editName.trim()) return;
+    const { error } = await supabase.functions.invoke("generate-api-key", {
+      body: { action: "rename", keyId: editingKey.id, name: editName.trim() },
     });
-    if (error) { toast.error("Erro ao alterar"); return; }
-    toast.success(active ? "Revogada" : "Ativada");
+    if (error) { toast.error("Erro ao renomear"); return; }
+    toast.success("Nome atualizado");
+    setEditingKey(null);
     fetchKeys();
   };
+
+  const handleDelete = async (id: string, name: string) => {
+    if (!confirm(`Excluir a credencial "${name}"? Esta ação não pode ser desfeita.`)) return;
+    const { error } = await supabase.functions.invoke("generate-api-key", {
+      body: { action: "delete", keyId: id },
+    });
+    if (error) { toast.error("Erro ao excluir"); return; }
+    toast.success("Credencial excluída");
+    fetchKeys();
+  };
+
 
   const filtered = useMemo(() => 
     keys.filter(k => !query || k.name.toLowerCase().includes(query.toLowerCase())),
@@ -100,7 +117,7 @@ export default function ApiKeys() {
       {/* KPI Row */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         {[
-          { icon: Shield, label: "Chaves Ativas", value: String(keys.filter(k => k.is_active).length), sub: "Operacionais" },
+          { icon: Shield, label: "Credenciais", value: String(keys.length), sub: "Sem limite" },
           { icon: Globe,  label: "Total Geradas", value: String(keys.length),                          sub: "Histórico completo" },
           { icon: Lock,   label: "Criptografia",  value: "SHA-256",                                    sub: "Secrets hasheadas" },
           { icon: Code2,  label: "Padrão",        value: "REST",                                       sub: "JSON · Bearer Auth" },
@@ -201,10 +218,22 @@ export default function ApiKeys() {
                       </div>
                     </td>
                     <td className="px-8 py-5 text-right space-x-2">
-                      <button onClick={() => handleRevoke(k.id, k.is_active)} className="h-8 w-8 rounded-lg bg-muted/40 border border-border/60 inline-flex items-center justify-center hover:bg-muted transition-all" title={k.is_active ? "Revogar" : "Reativar"}>
-                        {k.is_active ? <PowerOff size={14} /> : <Power size={14} className="text-emerald-500" />}
+                      <button
+                        onClick={() => { setEditingKey(k); setEditName(k.name); }}
+                        className="h-8 w-8 rounded-lg bg-muted/40 border border-border/60 inline-flex items-center justify-center hover:bg-muted transition-all"
+                        title="Renomear"
+                      >
+                        <Pencil size={14} />
+                      </button>
+                      <button
+                        onClick={() => handleDelete(k.id, k.name)}
+                        className="h-8 w-8 rounded-lg bg-destructive/10 border border-destructive/20 text-destructive inline-flex items-center justify-center hover:bg-destructive hover:text-destructive-foreground transition-all"
+                        title="Excluir"
+                      >
+                        <Trash2 size={14} />
                       </button>
                     </td>
+
                   </tr>
                 ))
               )}
@@ -255,6 +284,32 @@ export default function ApiKeys() {
             </div>
             <Button onClick={() => setNewKeyData(null)} className="w-full h-12 rounded-xl font-black uppercase tracking-widest text-xs">
               Já salvei minha chave
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={!!editingKey} onOpenChange={(o) => !o && setEditingKey(null)}>
+        <DialogContent className="max-w-md bg-card border-border/60 rounded-[32px]">
+          <DialogHeader>
+            <DialogTitle className="text-xl font-black uppercase tracking-tight">Renomear Credencial</DialogTitle>
+            <DialogDescription className="text-xs">
+              Apenas o nome de exibição é alterado. As chaves continuam as mesmas.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="py-4 space-y-4">
+            <div className="space-y-2">
+              <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Novo Nome</Label>
+              <Input
+                value={editName}
+                onChange={(e) => setEditName(e.target.value)}
+                placeholder="Ex: Produção"
+                className="h-12 border-border/60 rounded-xl font-bold"
+                autoFocus
+              />
+            </div>
+            <Button onClick={handleRename} disabled={!editName.trim()} className="w-full h-12 rounded-xl font-black uppercase tracking-widest text-xs">
+              Salvar
             </Button>
           </div>
         </DialogContent>

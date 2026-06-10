@@ -97,32 +97,31 @@ Deno.serve(async (req) => {
       );
     }
 
-    if (action === 'revoke') {
+    if (action === 'rename') {
       const keyId = body.keyId;
-      if (!keyId) {
+      const name = String(body.name || '').slice(0, 100).trim();
+      if (!keyId || !name) {
         return new Response(
-          JSON.stringify({ error: 'keyId é obrigatório' }),
+          JSON.stringify({ error: 'keyId e nome são obrigatórios' }),
           { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
         );
       }
-
       const { error } = await supabase.from('api_keys')
-        .update({ is_active: false })
+        .update({ name })
         .eq('id', keyId)
         .eq('user_id', user.id);
-
       if (error) {
         return new Response(
-          JSON.stringify({ error: 'Erro ao revogar chave' }),
+          JSON.stringify({ error: 'Erro ao renomear chave' }),
           { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
         );
       }
-
       return new Response(
         JSON.stringify({ success: true }),
         { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
+
 
     if (action === 'delete') {
       const keyId = body.keyId;

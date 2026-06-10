@@ -4,7 +4,7 @@ import { BookOpen, Copy, Check, Zap, Shield, Terminal, Globe, Lock, AlertTriangl
 import { PageShell, PageTitle } from "@/components/PageShell";
 import { cn } from "@/lib/utils";
 
-const BASE_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1`;
+const BASE_URL = "https://api.hotzfy.com.br/v1";
 
 /* ─── Reusable Components ─── */
 function CopyBlock({ code, language = "json" }: { code: string; language?: string }) {

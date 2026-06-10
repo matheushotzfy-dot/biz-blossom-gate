@@ -3,9 +3,10 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useWebhooks, useInvalidateAll } from "@/hooks/useQueryData";
 import {
-  Webhook, Plus, Trash2, Globe, Shield, Copy, Check, Search,
+  Webhook, Plus, Trash2, Globe, Shield, Copy, Check, Search, Pencil,
   Power, PowerOff, CircleDot, Code2, Zap, LayoutGrid, Clock, ShieldCheck
 } from "lucide-react";
+
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -19,69 +20,102 @@ import { StatCard } from "@/components/StatCard";
 
 const EVENT_GROUPS = [
   {
-    label: "Vendas",
+    label: "Pagamentos",
     events: [
+      { key: "payment.created", label: "Criada (Pendente)" },
       { key: "payment.approved", label: "Aprovada" },
       { key: "payment.failed", label: "Falha" },
+      { key: "payment.expired", label: "Expirada" },
       { key: "payment.refunded", label: "Reembolso" },
     ],
   },
   {
-    label: "Outros",
+    label: "Risco & Saques",
     events: [
       { key: "chargeback.received", label: "Chargeback" },
-      { key: "payout.approved", label: "Saque" },
+      { key: "payout.approved", label: "Saque aprovado" },
+      { key: "payout.rejected", label: "Saque rejeitado" },
     ],
   },
 ];
 
 const ALL_EVENTS = EVENT_GROUPS.flatMap((g) => g.events.map((e) => e.key));
 
+
 export default function Webhooks() {
   const { user } = useAuth();
   const { data: webhooks = [] } = useWebhooks();
   const invalidateAll = useInvalidateAll();
   const [createOpen, setCreateOpen] = useState(false);
+  const [editingId, setEditingId] = useState<string | null>(null);
   const [query, setQuery] = useState("");
   const [url, setUrl] = useState("");
   const [selectedEvents, setSelectedEvents] = useState<string[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleCreate = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!user) return;
-    if (selectedEvents.length === 0) { toast.error("Selecione os eventos"); return; }
-    if (!url.startsWith("https://")) { toast.error("URL deve ser HTTPS"); return; }
-    
-    setIsSubmitting(true);
-    const secret = crypto.randomUUID().replace(/-/g, "").slice(0, 32);
-    const { error } = await supabase
-      .from("webhook_configs")
-      .insert({ user_id: user.id, url, events: selectedEvents, secret });
-    
-    setIsSubmitting(false);
-    if (error) { toast.error("Erro ao criar"); return; }
-    
-    toast.success("Webhook adicionado");
-    setCreateOpen(false);
+  const resetForm = () => {
     setUrl("");
     setSelectedEvents([]);
-    invalidateAll(["webhooks"]);
+    setEditingId(null);
+  };
+
+  const openCreate = () => { resetForm(); setCreateOpen(true); };
+  const openEdit = (wh: any) => {
+    setEditingId(wh.id);
+    setUrl(wh.url);
+    setSelectedEvents(wh.events || []);
+    setCreateOpen(true);
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!user) return;
+    if (selectedEvents.length === 0) { toast.error("Selecione ao menos um evento"); return; }
+    if (!url.startsWith("https://")) { toast.error("URL deve começar com https://"); return; }
+
+    setIsSubmitting(true);
+    try {
+      if (editingId) {
+        const { error } = await supabase
+          .from("webhook_configs")
+          .update({ url, events: selectedEvents })
+          .eq("id", editingId)
+          .eq("user_id", user.id);
+        if (error) { toast.error(error.message || "Erro ao atualizar"); return; }
+        toast.success("Webhook atualizado");
+      } else {
+        const secret = "whsec_" + crypto.randomUUID().replace(/-/g, "") +
+          crypto.randomUUID().replace(/-/g, "").slice(0, 8);
+        const { error } = await supabase
+          .from("webhook_configs")
+          .insert({ user_id: user.id, url, events: selectedEvents, secret, is_active: true });
+        if (error) { toast.error(error.message || "Erro ao criar webhook"); return; }
+        toast.success("Webhook adicionado");
+      }
+      setCreateOpen(false);
+      resetForm();
+      invalidateAll(["webhooks"]);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const toggleActive = async (id: string, current: boolean) => {
     if (!user) return;
-    await supabase.from("webhook_configs").update({ is_active: !current }).eq("id", id);
+    const { error } = await supabase.from("webhook_configs").update({ is_active: !current }).eq("id", id);
+    if (error) { toast.error(error.message); return; }
     invalidateAll(["webhooks"]);
     toast.success(current ? "Pausado" : "Ativado");
   };
 
   const deleteWebhook = async (id: string) => {
-    if (!confirm("Excluir este endpoint?")) return;
-    await supabase.from("webhook_configs").delete().eq("id", id);
+    if (!confirm("Excluir este endpoint? Os eventos pendentes serão cancelados.")) return;
+    const { error } = await supabase.from("webhook_configs").delete().eq("id", id);
+    if (error) { toast.error(error.message); return; }
     toast.success("Removido");
     invalidateAll(["webhooks"]);
   };
+
 
   const filtered = useMemo(() => 
     webhooks.filter((w: any) => !query || w.url.toLowerCase().includes(query.toLowerCase())),
@@ -99,20 +133,21 @@ export default function Webhooks() {
             Notificações HTTP em tempo real para seu servidor
           </p>
         </div>
-        <Dialog open={createOpen} onOpenChange={setCreateOpen}>
+        <Dialog open={createOpen} onOpenChange={(o) => { setCreateOpen(o); if (!o) resetForm(); }}>
           <DialogTrigger asChild>
-            <Button className="h-11 px-6 rounded-xl font-black text-xs uppercase tracking-widest gap-2">
+            <Button onClick={openCreate} className="h-11 px-6 rounded-xl font-black text-xs uppercase tracking-widest gap-2">
               <Plus className="h-4 w-4" /> Novo Endpoint
             </Button>
           </DialogTrigger>
           <DialogContent className="max-w-lg bg-card border-border/60">
             <DialogHeader>
-              <DialogTitle className="text-xl font-black uppercase tracking-tight">Adicionar Webhook</DialogTitle>
+              <DialogTitle className="text-xl font-black uppercase tracking-tight">{editingId ? "Editar Webhook" : "Adicionar Webhook"}</DialogTitle>
               <DialogDescription className="text-xs">
-                Receba eventos da plataforma via POST HTTPS.
+                Receba eventos da plataforma via POST HTTPS. Cada evento é assinado com HMAC-SHA256 e isolado por conta.
               </DialogDescription>
             </DialogHeader>
-            <form onSubmit={handleCreate} className="space-y-6 pt-2">
+            <form onSubmit={handleSubmit} className="space-y-6 pt-2">
+
               <div className="space-y-2">
                 <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">URL de Destino</Label>
                 <div className="relative">
@@ -148,8 +183,9 @@ export default function Webhooks() {
               </div>
 
               <Button type="submit" disabled={isSubmitting || !url} className="w-full h-12 rounded-xl font-black uppercase tracking-widest text-xs">
-                {isSubmitting ? "Adicionando..." : "Salvar Configuração"}
+                {isSubmitting ? "Salvando..." : editingId ? "Atualizar Webhook" : "Salvar Configuração"}
               </Button>
+
             </form>
           </DialogContent>
         </Dialog>
@@ -249,13 +285,17 @@ export default function Webhooks() {
                       </div>
                     </td>
                     <td className="px-8 py-5 text-right space-x-2">
-                      <button onClick={() => toggleActive(wh.id, wh.is_active)} className="h-8 w-8 rounded-lg bg-muted/40 border border-border/60 inline-flex items-center justify-center hover:bg-muted transition-all">
+                      <button onClick={() => openEdit(wh)} title="Editar" className="h-8 w-8 rounded-lg bg-muted/40 border border-border/60 inline-flex items-center justify-center hover:bg-muted transition-all">
+                        <Pencil size={14} />
+                      </button>
+                      <button onClick={() => toggleActive(wh.id, wh.is_active)} title={wh.is_active ? "Pausar" : "Ativar"} className="h-8 w-8 rounded-lg bg-muted/40 border border-border/60 inline-flex items-center justify-center hover:bg-muted transition-all">
                         {wh.is_active ? <PowerOff size={14} /> : <Power size={14} className="text-emerald-500" />}
                       </button>
-                      <button onClick={() => deleteWebhook(wh.id)} className="h-8 w-8 rounded-lg bg-red-500/10 border border-red-500/20 inline-flex items-center justify-center text-red-500 hover:bg-red-500 hover:text-white transition-all">
+                      <button onClick={() => deleteWebhook(wh.id)} title="Excluir" className="h-8 w-8 rounded-lg bg-red-500/10 border border-red-500/20 inline-flex items-center justify-center text-red-500 hover:bg-red-500 hover:text-white transition-all">
                         <Trash2 size={14} />
                       </button>
                     </td>
+
                   </tr>
                 ))
               )}
