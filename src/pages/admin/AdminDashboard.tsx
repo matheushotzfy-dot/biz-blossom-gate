@@ -140,13 +140,13 @@ const ADMIN_THEMES: Record<AdminTheme, {
     border: "rgba(255,255,255,0.07)", cardBg: "rgba(139,92,246,0.04)", isDark: true,
   },
   "midnight": {
-    label: "Midnight Blue",
-    bg: "linear-gradient(135deg, #060a14 0%, #081020 30%, #0a1428 60%, #060a14 100%)",
-    sidebarBg: "linear-gradient(180deg, rgba(6,10,20,0.98) 0%, rgba(4,8,16,0.99) 100%)",
-    topBarBg: "linear-gradient(90deg, rgba(6,10,20,0.85) 0%, rgba(8,14,28,0.75) 100%)",
-    accent: "cyan", accentLight: "rgba(34,211,238,0.12)", accentGlow: "rgba(34,211,238,0.35)",
-    textPrimary: "rgba(255,255,255,0.93)", textSecondary: "rgba(255,255,255,0.58)", textMuted: "rgba(255,255,255,0.30)",
-    border: "rgba(255,255,255,0.07)", cardBg: "rgba(34,211,238,0.04)", isDark: true,
+    label: "Midnight Emerald",
+    bg: "radial-gradient(ellipse at top, #0f2540 0%, #0a1628 35%, #060d1a 70%, #04081a 100%)",
+    sidebarBg: "linear-gradient(180deg, rgba(10,22,40,0.98) 0%, rgba(6,13,26,0.99) 100%)",
+    topBarBg: "linear-gradient(90deg, rgba(10,22,40,0.85) 0%, rgba(15,37,64,0.70) 100%)",
+    accent: "emerald", accentLight: "rgba(16,185,129,0.14)", accentGlow: "rgba(16,185,129,0.45)",
+    textPrimary: "rgba(255,255,255,0.95)", textSecondary: "rgba(255,255,255,0.62)", textMuted: "rgba(255,255,255,0.34)",
+    border: "rgba(148,184,232,0.10)", cardBg: "rgba(16,185,129,0.05)", isDark: true,
   },
 };
 
