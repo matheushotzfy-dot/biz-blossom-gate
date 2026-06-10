@@ -287,21 +287,21 @@ export default function AdminOverviewTab({ transactions, profiles, products, wit
     <div className="space-y-6 animate-fade-in">
       <FinanceiroHero
         eyebrow="Plataforma · Visão Executiva"
-        title={fmtCurrency(takeRateTotal)}
-        subtitle={`Lucro total da plataforma · TPV ${fmtCurrency(totalVolume)} · Take rate ${takeRatePct}% · Ticket médio ${fmtCurrency(ticketMedio)}`}
+        title={fmtCurrency(totalVolume)}
+        subtitle={`Valor movimentado no período · lucro ${fmtCurrency(takeRateTotal)} · take rate ${takeRatePct}% · ticket médio ${fmtCurrency(ticketMedio)} · ${rangeLabel}`}
         status={{ tone: "success", label: "Live", pulse: true }}
       />
 
       <FinanceiroKpiGrid cols={4}>
-        <FinanceiroKpi label="Vendas Hoje" value={String(todayTx.length)} sub={`${fmtCurrency(tpvToday)} em TPV`} icon={Flame} tone={todayTx.length > 0 ? "success" : "neutral"} />
-        <FinanceiroKpi label="Conversão" value={`${conversionRate}%`} sub={`${approved.length}/${allTx.length} txs`} icon={Activity} tone="primary" />
-        <FinanceiroKpi label="Chargeback" value={`${chargebackRate.toFixed(2)}%`} sub={`${chargebackTx.length} incidentes`} icon={ShieldAlert} tone={chargebackAlert ? "destructive" : "info"} />
-        <FinanceiroKpi label="Saque Pendente" value={fmtCurrency(pendingWdAmount)} sub={`${pendingWd.length} solicitações`} icon={Radio} tone={pendingWd.length > 5 ? "warning" : "neutral"} />
+        <FinanceiroKpi label="Movimentado Hoje" value={fmtCurrency(tpvToday)} sub={`${todayTx.length} vendas aprovadas`} icon={Flame} tone={todayTx.length > 0 ? "success" : "neutral"} />
+        <FinanceiroKpi label="Lucro Hoje" value={fmtCurrency(takeRateToday)} sub={`${activeSellersToday} sellers venderam`} icon={DollarSign} tone="primary" />
+        <FinanceiroKpi label="Saques Pendentes" value={fmtCurrency(pendingWdAmount)} sub={`${pendingWd.length} solicitações · ${highValueWd.length} altos`} icon={Hourglass} tone={pendingWd.length > 5 ? "warning" : "neutral"} />
+        <FinanceiroKpi label="Novos Usuários" value={String(newUsersInRange.length)} sub="cadastros no período" icon={UserPlus} tone="info" />
       </FinanceiroKpiGrid>
 
       <FinanceiroKpiGrid cols={4}>
-        <FinanceiroKpi label="TPV Mensal" value={fmtCurrency(tpvMonth)} sub={`${monthTx.length} txs no mês`} icon={BarChart3} tone="info" />
-        <FinanceiroKpi label="Sellers Ativos" value={String(activeSellersToday)} sub="vendendo hoje" icon={Users} tone="success" />
+        <FinanceiroKpi label="Lucro no Período" value={fmtCurrency(takeRateTotal)} sub={`${takeRatePct}% de take rate`} icon={TrendingUp} tone="success" />
+        <FinanceiroKpi label="Aprovações KYC" value={String(kycPending.length)} sub="usuários aguardando análise" icon={UserCheck} tone={kycPending.length > 0 ? "warning" : "neutral"} />
         <FinanceiroKpi label="Saldo Retido" value={fmtCurrency(totalRetained)} sub="aguardando liberação" icon={Lock} tone="warning" />
         <FinanceiroKpi label="Volume Sacado" value={fmtCurrency(totalWithdrawn)} sub="pagos no período" icon={ArrowDownToLine} tone="neutral" />
       </FinanceiroKpiGrid>
