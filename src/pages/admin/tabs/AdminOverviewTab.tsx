@@ -244,436 +244,283 @@ export default function AdminOverviewTab({ transactions, profiles, products, wit
 
  const openDisputes = disputes.filter(d => d.status === "open" || d.status === "in_review").length;
 
- if (isEmployee) {
- return (
- <motion.div variants={stagger} initial="hidden" animate="show" className="space-y-5">
- <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
- <HeroKpi icon={<Users className="h-5 w-5" />} label="Sellers" value={String(profiles.length)} sub="Total cadastrados" gradient="from-emerald-500 to-teal-600" />
- <HeroKpi icon={<Package className="h-5 w-5" />} label="Produtos" value={String(products.length)} sub={`${products.filter(p => p.status === "active").length} ativos`} gradient="from-teal-500 to-cyan-600" />
- <HeroKpi icon={<CreditCard className="h-5 w-5" />} label="Transações" value={String(allTx.length)} sub={`${approved.length} aprovadas`} gradient="from-emerald-400 to-green-600" />
- <HeroKpi icon={<Percent className="h-5 w-5" />} label="Conversão" value={`${conversionRate}%`} sub={`${approved.length}/${allTx.length}`} gradient="from-amber-500 to-orange-600" />
- </div>
- </motion.div>
- );
- }
-
- return (
- <motion.div variants={stagger} initial="hidden" animate="show" className="space-y-6">
-  {/* ═══ EXECUTIVE HERO — Lucro + Sparkline ═══ */}
-  <motion.div variants={fadeUp} className="relative overflow-hidden rounded-3xl border border-emerald-500/[0.14] bg-[#04100a]/80"
-    style={{ backgroundImage: "radial-gradient(120% 80% at 100% 0%, rgba(16,185,129,0.10) 0%, transparent 55%), radial-gradient(80% 60% at 0% 100%, rgba(20,184,166,0.06) 0%, transparent 60%)" }}>
-
-    {/* Subtle dot grid */}
-    <div className="absolute inset-0 opacity-[0.025] pointer-events-none" style={{ backgroundImage: "radial-gradient(rgba(16,185,129,1) 1px, transparent 1px)", backgroundSize: "28px 28px" }} />
-
-    <div className="relative grid grid-cols-1 lg:grid-cols-[1.2fr,1fr] gap-6 p-6 sm:p-8">
-      {/* Left: Headline number */}
-      <div className="flex flex-col justify-between gap-5">
-        <div className="flex items-center gap-2.5">
-          <span className="relative flex h-2 w-2">
-            <span className="absolute h-full w-full animate-ping rounded-full bg-emerald-400 opacity-60" />
-            <span className="relative h-2 w-2 rounded-full bg-emerald-400" />
-          </span>
-          <span className="text-[9px] font-extrabold uppercase tracking-[0.32em] text-emerald-300/70">Live · Plataforma</span>
-          <span className="ml-auto text-[9px] font-bold uppercase tracking-[0.2em] text-white/25 hidden sm:inline">
-            {new Date().toLocaleString("pt-BR", { dateStyle: "medium", timeStyle: "short" })}
-          </span>
-        </div>
-
-        <div>
-          <p className="text-[10px] font-extrabold uppercase tracking-[0.32em] text-white/35 mb-2">Lucro Total da Plataforma</p>
-          <h1 className="text-5xl sm:text-6xl lg:text-7xl font-black tracking-[-0.04em] text-white tabular-nums leading-[0.95]"
-            style={{ fontFamily: "'Space Grotesk', system-ui, sans-serif" }}>
-            {fmtCurrency(takeRateTotal)}
-          </h1>
-          <div className="mt-4 grid grid-cols-3 gap-4 max-w-md">
-            <div>
-              <p className="text-[9px] font-bold text-white/35 uppercase tracking-[0.15em] mb-1">TPV</p>
-              <p className="text-base font-black text-white/90 tabular-nums" style={{ fontFamily: "'Space Grotesk', monospace" }}>{fmtCurrency(totalVolume)}</p>
-            </div>
-            <div>
-              <p className="text-[9px] font-bold text-white/35 uppercase tracking-[0.15em] mb-1">Take Rate</p>
-              <p className="text-base font-black text-emerald-300 tabular-nums" style={{ fontFamily: "'Space Grotesk', monospace" }}>{takeRatePct}%</p>
-            </div>
-            <div>
-              <p className="text-[9px] font-bold text-white/35 uppercase tracking-[0.15em] mb-1">Ticket Médio</p>
-              <p className="text-base font-black text-white/90 tabular-nums" style={{ fontFamily: "'Space Grotesk', monospace" }}>{fmtCurrency(ticketMedio)}</p>
-            </div>
-          </div>
-        </div>
+  if (isEmployee) {
+    return (
+      <div className="space-y-5 animate-fade-in">
+        <FinanceiroHero
+          eyebrow="Painel Staff"
+          title="Visão geral"
+          subtitle="Acesso restrito a operações autorizadas."
+        />
+        <FinanceiroKpiGrid cols={4}>
+          <FinanceiroKpi label="Sellers" value={String(profiles.length)} sub="Cadastrados" icon={Users} tone="primary" />
+          <FinanceiroKpi label="Produtos" value={String(products.length)} sub={`${products.filter(p => p.status === "active").length} ativos`} icon={Package} tone="info" />
+          <FinanceiroKpi label="Transações" value={String(allTx.length)} sub={`${approved.length} aprovadas`} icon={CreditCard} tone="success" />
+          <FinanceiroKpi label="Conversão" value={`${conversionRate}%`} sub={`${approved.length}/${allTx.length}`} icon={Percent} tone="warning" />
+        </FinanceiroKpiGrid>
       </div>
+    );
+  }
 
-      {/* Right: Mini area chart of TPV last 14d */}
-      <div className="relative min-h-[160px]">
-        <div className="flex items-center justify-between mb-2">
-          <p className="text-[9px] font-extrabold uppercase tracking-[0.22em] text-white/40">TPV · Últimos 14 dias</p>
-          <p className="text-[10px] font-bold text-emerald-300/80 tabular-nums">{fmtCurrency(sparkSeries.tpv.reduce((a, b) => a + b.v, 0))}</p>
-        </div>
-        <div className="h-[140px]">
-          <ResponsiveContainer width="100%" height="100%">
-            <AreaChart data={sparkSeries.tpv} margin={{ top: 4, right: 4, bottom: 0, left: 0 }}>
+  return (
+    <div className="space-y-6 animate-fade-in">
+      <FinanceiroHero
+        eyebrow="Plataforma · Visão Executiva"
+        title={fmtCurrency(takeRateTotal)}
+        subtitle={`Lucro total da plataforma · TPV ${fmtCurrency(totalVolume)} · Take rate ${takeRatePct}% · Ticket médio ${fmtCurrency(ticketMedio)}`}
+        status={{ tone: "success", label: "Live", pulse: true }}
+      />
+
+      <FinanceiroKpiGrid cols={4}>
+        <FinanceiroKpi label="Vendas Hoje" value={String(todayTx.length)} sub={`${fmtCurrency(tpvToday)} em TPV`} icon={Flame} tone={todayTx.length > 0 ? "success" : "neutral"} />
+        <FinanceiroKpi label="Conversão" value={`${conversionRate}%`} sub={`${approved.length}/${allTx.length} txs`} icon={Activity} tone="primary" />
+        <FinanceiroKpi label="Chargeback" value={`${chargebackRate.toFixed(2)}%`} sub={`${chargebackTx.length} incidentes`} icon={ShieldAlert} tone={chargebackAlert ? "destructive" : "info"} />
+        <FinanceiroKpi label="Saque Pendente" value={fmtCurrency(pendingWdAmount)} sub={`${pendingWd.length} solicitações`} icon={Radio} tone={pendingWd.length > 5 ? "warning" : "neutral"} />
+      </FinanceiroKpiGrid>
+
+      <FinanceiroKpiGrid cols={4}>
+        <FinanceiroKpi label="TPV Mensal" value={fmtCurrency(tpvMonth)} sub={`${monthTx.length} txs no mês`} icon={BarChart3} tone="info" />
+        <FinanceiroKpi label="Sellers Ativos" value={String(activeSellersToday)} sub="vendendo hoje" icon={Users} tone="success" />
+        <FinanceiroKpi label="Saldo Retido" value={fmtCurrency(totalRetained)} sub="aguardando liberação" icon={Lock} tone="warning" />
+        <FinanceiroKpi label="Volume Sacado" value={fmtCurrency(totalWithdrawn)} sub="pagos no período" icon={ArrowDownToLine} tone="neutral" />
+      </FinanceiroKpiGrid>
+
+      <div className="grid grid-cols-1 xl:grid-cols-3 gap-4">
+        <Panel
+          className="xl:col-span-2"
+          title="Volume & Take Rate"
+          icon={<TrendingUp className="h-3.5 w-3.5" />}
+          action={
+            <div className="flex gap-0.5 bg-muted/30 border border-border/40 rounded-md p-0.5">
+              {(["7d", "30d"] as const).map(f => (
+                <button key={f} onClick={() => setChartPeriod(f)}
+                  className={cn(
+                    "px-2.5 py-1 rounded text-[10px] font-bold transition-colors",
+                    chartPeriod === f ? "bg-primary/15 text-primary" : "text-muted-foreground hover:text-foreground"
+                  )}>{f}</button>
+              ))}
+            </div>
+          }
+        >
+          <ResponsiveContainer width="100%" height={240}>
+            <AreaChart data={chartData} margin={{ top: 8, right: 8, bottom: 0, left: -8 }}>
               <defs>
-                <linearGradient id="heroTpvGrad" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="#10b981" stopOpacity={0.55} />
-                  <stop offset="100%" stopColor="#10b981" stopOpacity={0} />
+                <linearGradient id="tpvArea" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor="hsl(var(--primary))" stopOpacity={0.28} />
+                  <stop offset="100%" stopColor="hsl(var(--primary))" stopOpacity={0} />
                 </linearGradient>
               </defs>
-              <Tooltip cursor={false} wrapperStyle={{ pointerEvents: "none", zIndex: 20 }} content={<ChartTooltip fmtCurrency={fmtCurrency} />} />
-              <Area type="monotone" dataKey="v" name="TPV" stroke="#10b981" strokeWidth={2} fill="url(#heroTpvGrad)" dot={false} isAnimationActive={false} />
+              <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" strokeOpacity={0.4} vertical={false} />
+              <XAxis dataKey="name" stroke="hsl(var(--muted-foreground))" fontSize={10} tickLine={false} axisLine={false} />
+              <YAxis stroke="hsl(var(--muted-foreground))" fontSize={10} tickLine={false} axisLine={false} tickFormatter={(v) => v >= 1000 ? `${(v / 1000).toFixed(0)}K` : v} />
+              <Tooltip cursor={{ stroke: "hsl(var(--primary))", strokeOpacity: 0.3, strokeWidth: 1 }} content={<ChartTooltip fmtCurrency={fmtCurrency} />} />
+              <Area type="monotone" dataKey="tpv" name="TPV" stroke="hsl(var(--primary))" strokeWidth={2} fill="url(#tpvArea)" dot={false} isAnimationActive={false} />
+              <Area type="monotone" dataKey="takeRate" name="Take Rate" stroke="hsl(var(--warning))" fillOpacity={0} strokeWidth={1.5} strokeDasharray="4 2" dot={false} isAnimationActive={false} />
             </AreaChart>
           </ResponsiveContainer>
-        </div>
+        </Panel>
+
+        <Panel title="Métodos de Pagamento" icon={<CreditCard className="h-3.5 w-3.5" />}>
+          <div className="space-y-3.5">
+            {methodApproval.sort((a, b) => b.volume - a.volume).map(m => {
+              const tone: "success" | "warning" | "destructive" = m.rate >= 85 ? "success" : m.rate >= 60 ? "warning" : "destructive";
+              const barCls = { success: "bg-success", warning: "bg-warning", destructive: "bg-destructive" }[tone];
+              const txtCls = { success: "text-success", warning: "text-warning", destructive: "text-destructive" }[tone];
+              return (
+                <div key={m.method}>
+                  <div className="flex items-center justify-between text-[11px] mb-1.5">
+                    <div className="flex items-center gap-1.5">
+                      <StatusDot tone={tone} />
+                      <span className="font-semibold text-foreground/85">{m.method}</span>
+                    </div>
+                    <span className={cn("font-black tabular-nums", txtCls)}>{m.rate.toFixed(1)}%</span>
+                  </div>
+                  <div className="h-1.5 rounded-full bg-muted/40 overflow-hidden">
+                    <div className={cn("h-full transition-all duration-500", barCls)} style={{ width: `${m.rate}%` }} />
+                  </div>
+                  <div className="flex justify-between text-[9px] text-muted-foreground/70 mt-1 tabular-nums">
+                    <span>{fmtCurrency(m.volume)}</span>
+                    <span>{m.approved}/{m.total} tx</span>
+                  </div>
+                </div>
+              );
+            })}
+            {methodApproval.length === 0 && <div className="text-center text-[11px] text-muted-foreground py-6">Sem dados no período</div>}
+          </div>
+        </Panel>
       </div>
-    </div>
-  </motion.div>
 
+      <div className="grid grid-cols-1 xl:grid-cols-3 gap-4">
+        <Panel title="Atividade ao vivo" icon={<Radio className="h-3.5 w-3.5 text-destructive animate-pulse" />} className="max-h-[420px]">
+          <div className="space-y-1.5 max-h-[360px] overflow-y-auto pr-1">
+            {realtimeTx.length === 0 && <div className="text-center text-[11px] text-muted-foreground py-8">Aguardando transações...</div>}
+            {realtimeTx.map(t => {
+              const isOk = t.status === "completed" || t.status === "approved";
+              const isPending = t.status === "pending";
+              const tone: "success" | "warning" | "destructive" = isOk ? "success" : isPending ? "warning" : "destructive";
+              return (
+                <div key={t.id} className="flex items-center gap-2.5 px-3 py-2.5 rounded-lg border border-border/40 hover:bg-muted/30 transition-colors">
+                  <StatusDot tone={tone} pulse={isPending} />
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center justify-between mb-0.5">
+                      <span className="text-[12px] font-bold text-foreground tabular-nums">{fmtCurrency(Number(t.amount))}</span>
+                      <span className={cn("text-[8px] font-bold uppercase tracking-widest",
+                        tone === "success" ? "text-success" : tone === "warning" ? "text-warning" : "text-destructive")}>
+                        {statusLabelMap[t.status] || t.status}
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-1.5 text-[9px] text-muted-foreground/80">
+                      <span className="truncate max-w-[120px]">{t.customer_name || "Anônimo"}</span>
+                      <span>·</span>
+                      <span className="uppercase">{t.payment_method || "—"}</span>
+                      <span className="ml-auto tabular-nums">{new Date(t.created_at).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })}</span>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </Panel>
 
-  {/* ═══ PLATFORM HEALTH RADAR — KPIs com Sparkline ═══ */}
-  <motion.div variants={fadeUp} className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
-    <HealthCard
-      icon={<Flame className="h-[18px] w-[18px]" />}
-      label="Vendas Hoje"
-      value={String(todayTx.length)}
-      sub={`R$ ${tpvToday.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}`}
-      trend={`${todayTx.length > 0 ? "+" : ""}${todayTx.length}`}
-      trendType={todayTx.length > 0 ? "positive" : "neutral"}
-      color="orange"
-      pulse={todayTx.length > 0}
-      sparkData={sparkSeries.vendas}
-    />
-    <HealthCard
-      icon={<Activity className="h-[18px] w-[18px]" />}
-      label="Taxa de Conversão"
-      value={`${conversionRate}%`}
-      sub="Aprovadas / Total"
-      trend={`${conversionRate}%`}
-      trendType="positive"
-      color="emerald"
-      sparkData={sparkSeries.conv}
-    />
-    <HealthCard
-      icon={<ShieldAlert className="h-[18px] w-[18px]" />}
-      label="Chargeback"
-      value={`${chargebackRate.toFixed(2)}%`}
-      sub={`${chargebackTx.length} incidentes`}
-      trend={chargebackRate > 1 ? "ALERTA" : "OK"}
-      trendType={chargebackRate > 1 ? "negative" : "positive"}
-      color={chargebackAlert ? "red" : "blue"}
-      alert={chargebackAlert}
-      sparkData={sparkSeries.cb}
-    />
-    <HealthCard
-      icon={<Radio className="h-[18px] w-[18px]" />}
-      label="Saque Pendente"
-      value={fmtCurrency(pendingWdAmount)}
-      sub={`${pendingWd.length} solicitações`}
-      trend={pendingWd.length > 5 ? "Alto" : "Normal"}
-      trendType={pendingWd.length > 5 ? "negative" : "neutral"}
-      color="cyan"
-    />
-  </motion.div>
+        <Panel title="Devoluções · 7 dias" icon={<RotateCcw className="h-3.5 w-3.5" />}>
+          <ResponsiveContainer width="100%" height={200}>
+            <LineChart data={refundTrend} margin={{ top: 8, right: 8, bottom: 0, left: -16 }}>
+              <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" strokeOpacity={0.4} vertical={false} />
+              <XAxis dataKey="name" stroke="hsl(var(--muted-foreground))" fontSize={10} tickLine={false} axisLine={false} />
+              <YAxis stroke="hsl(var(--muted-foreground))" fontSize={10} tickLine={false} axisLine={false} allowDecimals={false} />
+              <Tooltip cursor={{ stroke: "hsl(var(--border))" }} content={<ChartTooltip fmtCurrency={fmtCurrency} />} />
+              <Line type="monotone" dataKey="chargebacks" name="Chargebacks" stroke="hsl(var(--destructive))" strokeWidth={2} dot={{ r: 2.5, fill: "hsl(var(--destructive))" }} isAnimationActive={false} />
+              <Line type="monotone" dataKey="refunds" name="Reembolsos" stroke="hsl(var(--warning))" strokeWidth={2} dot={{ r: 2.5, fill: "hsl(var(--warning))" }} isAnimationActive={false} />
+            </LineChart>
+          </ResponsiveContainer>
+          <div className="flex items-center gap-4 mt-3 pt-3 border-t border-border/40">
+            <div className="flex items-center gap-1.5 text-[10px]"><StatusDot tone="destructive" /><span className="text-muted-foreground">Chargebacks</span></div>
+            <div className="flex items-center gap-1.5 text-[10px]"><StatusDot tone="warning" /><span className="text-muted-foreground">Reembolsos</span></div>
+          </div>
+        </Panel>
 
-  {/* ═══ SECONDARY METRICS ═══ */}
-  <motion.div variants={fadeUp} className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-3">
-    {[
-      { label: "TPV Mensal", value: fmtCurrency(tpvMonth), icon: <BarChart3 className="h-3.5 w-3.5" />, color: "text-teal-400" },
-      { label: "Sellers Ativos", value: activeSellersToday, icon: <Users className="h-3.5 w-3.5" />, color: "text-emerald-400" },
-      { label: "Ticket Médio", value: fmtCurrency(ticketMedio), icon: <CreditCard className="h-3.5 w-3.5" />, color: "text-white/60" },
-      { label: "Saldo Retido", value: fmtCurrency(totalRetained), icon: <Lock className="h-3.5 w-3.5" />, color: "text-emerald-400/70" },
-      { label: "Vol. Sacado", value: fmtCurrency(totalWithdrawn), icon: <ArrowDownToLine className="h-3.5 w-3.5" />, color: "text-teal-400" },
-      { label: "Disputas Abertas", value: openDisputes, icon: <AlertCircle className="h-3.5 w-3.5" />, color: "text-red-400" },
-    ].map((m, i) => (
-      <div key={i} className="bg-white/[0.02] border border-white/[0.05] rounded-2xl p-4 flex flex-col justify-center transition-all hover:bg-white/[0.04]">
-        <div className="flex items-center gap-2 mb-1.5">
-          <span className={m.color}>{m.icon}</span>
-          <p className="text-[9px] font-bold text-white/20 uppercase tracking-widest">{m.label}</p>
-        </div>
-        <p className="text-lg font-black text-white/70" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>{m.value}</p>
+        <Panel title="Alertas de Risco" icon={<ShieldAlert className="h-3.5 w-3.5" />}>
+          <div className="space-y-2">
+            <RiskRow label="Taxa de Chargeback" value={`${chargebackRate.toFixed(2)}%`} threshold="< 1%" alert={chargebackAlert} />
+            <RiskRow label="Disputas Abertas" value={String(openDisputes)} threshold="< 5" alert={openDisputes > 5} />
+            <RiskRow label="Saques Pendentes" value={fmtCurrency(pendingWdAmount)} threshold={`${pendingWd.length} na fila`} alert={pendingWd.length > 10} />
+            <RiskRow label="KYC Pendente" value={String(kycPending.length)} threshold="aguardando aprovação" alert={kycPending.length > 0} />
+          </div>
+        </Panel>
       </div>
-    ))}
-  </motion.div>
 
-
- {/* ═══ VOLUME CHART + ACQUIRER + REALTIME ═══ */}
- <motion.div variants={fadeUp} className="grid grid-cols-1 xl:grid-cols-4 gap-4">
- {/* Volume Chart */}
- <GlassPanel className="xl:col-span-2 flex flex-col">
- <div className="flex items-center justify-between mb-4">
- <GlassPanelTitle color="emerald">Volume & Take Rate</GlassPanelTitle>
- <div className="flex gap-0.5 bg-white/[0.04] border border-white/[0.06] rounded-lg p-0.5">
- {(["7d", "30d"] as const).map(f => (
- <button key={f} onClick={() => setChartPeriod(f)}
- className={cn("px-2.5 py-1 rounded-md text-[10px] font-bold transition-all", chartPeriod === f ? "bg-emerald-500/15 text-emerald-400" : "text-white/20 hover:text-white/50")}>
- {f}
- </button>
- ))}
- </div>
- </div>
- <ResponsiveContainer width="100%" height={220}>
- <AreaChart data={chartData}>
- <defs>
- <linearGradient id="tpvGradGod2" x1="0" y1="0" x2="0" y2="1">
- <stop offset="0%" stopColor="#10b981" stopOpacity={0.25} />
- <stop offset="100%" stopColor="#10b981" stopOpacity={0} />
- </linearGradient>
- </defs>
- <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.04)" vertical={false} />
- <XAxis dataKey="name" stroke="rgba(255,255,255,0.15)" fontSize={9} tickLine={false} axisLine={false} />
- <YAxis stroke="rgba(255,255,255,0.15)" fontSize={9} tickLine={false} axisLine={false} tickFormatter={(v) => v >= 1000 ? `${(v/1000).toFixed(0)}K` : v} />
- <Tooltip cursor={false} wrapperStyle={{ pointerEvents: "none", zIndex: 20 }} content={<ChartTooltip fmtCurrency={fmtCurrency} />} />
- <Area type="monotone" dataKey="tpv" stroke="#10b981" fill="url(#tpvGradGod2)" strokeWidth={2} dot={false} activeDot={false} name="TPV" isAnimationActive={false} />
- <Area type="monotone" dataKey="takeRate" stroke="#f59e0b" fillOpacity={0} strokeWidth={1.5} dot={false} activeDot={false} strokeDasharray="4 2" name="Take Rate" isAnimationActive={false} />
- </AreaChart>
- </ResponsiveContainer>
- </GlassPanel>
-
- {/* Acquirer Routing Performance */}
- <GlassPanel className="flex flex-col max-h-[380px]">
- <GlassPanelTitle color="cyan" icon={<Server className="h-3.5 w-3.5" />}>Performance Adquirentes</GlassPanelTitle>
- <div className="space-y-3 mt-4 flex-1 overflow-y-auto">
- {methodApproval.sort((a, b) => b.volume - a.volume).map(m => {
- const isHealthy = m.rate >= 85;
- const isWarning = m.rate >= 60 && m.rate < 85;
- return (
- <div key={m.method}>
- <div className="flex justify-between items-center text-[11px] mb-1.5">
- <div className="flex items-center gap-2">
- <span className={cn("h-1.5 w-1.5 rounded-full", isHealthy ? "bg-emerald-400 shadow-[0_0_6px_rgba(52,211,153,0.6)]" : isWarning ? "bg-amber-400" : "bg-red-400 animate-pulse")} />
- <span className="font-semibold text-white/80">{m.method}</span>
- </div>
- <span className={cn("font-black", isHealthy ? "text-emerald-400" : isWarning ? "text-amber-400" : "text-red-400")}>
- {m.rate.toFixed(1)}%
- </span>
- </div>
- <div className="h-2 rounded-full bg-white/[0.04] overflow-hidden">
- <div
- className={cn("h-full rounded-full transition-all duration-700",
- isHealthy ? "bg-gradient-to-r from-emerald-500 to-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.3)]"
- : isWarning ? "bg-gradient-to-r from-amber-500 to-amber-400"
- : "bg-gradient-to-r from-red-500 to-red-400"
- )}
- style={{ width: `${m.rate}%` }}
- />
- </div>
- <div className="flex justify-between text-[9px] text-white/20 mt-1">
- <span>{fmtCurrency(m.volume)}</span>
- <span>{m.approved}/{m.total} tx</span>
- </div>
- </div>
- );
- })}
- <div className="mt-3 pt-3 border-t border-white/[0.04] space-y-1.5">
- <div className="flex items-center gap-2 text-[10px]">
- <Wifi className="h-3 w-3 text-emerald-400" />
- <span className="text-white/40 font-medium">Roteamento Inteligente</span>
- <span className="ml-auto text-[8px] font-bold text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-500/20">ATIVO</span>
- </div>
- {methodApproval.filter(m => m.rate < 70).map(m => (
- <div key={m.method} className="flex items-center gap-2 text-[9px] text-amber-400/70">
- <AlertCircle className="h-2.5 w-2.5" />
- <span>{m.method}: Latência Alta — Roteando alternativa</span>
- </div>
- ))}
- </div>
- </div>
- </GlassPanel>
-
-    {/* Realtime Feed */}
-    <div className="rounded-[2rem] bg-white/[0.02] border border-white/[0.06] p-6 flex flex-col shadow-2xl backdrop-blur-md overflow-hidden max-h-[420px]">
-      <div className="flex items-center gap-3 mb-6">
-        <Radio className="h-4 w-4 text-red-500 animate-pulse" />
-        <h3 className="text-sm font-black text-white/90 uppercase tracking-widest">Live Activity</h3>
-      </div>
-      <div className="flex-1 overflow-y-auto space-y-2 pr-1 scrollbar-none">
-        {realtimeTx.map(t => (
-          <div key={t.id} className="flex items-center gap-3 p-3.5 rounded-2xl bg-white/[0.02] border border-white/[0.04] hover:bg-white/[0.05] hover:border-white/[0.08] transition-all group">
-            <div className={cn("h-1.5 w-1.5 rounded-full shrink-0",
-              t.status === "completed" || t.status === "approved" ? "bg-emerald-400 shadow-[0_0_6px_rgba(52,211,153,0.6)]" :
-              t.status === "pending" ? "bg-amber-400 animate-pulse" : "bg-red-500 shadow-[0_0_6px_rgba(239,68,68,0.6)]"
-            )} />
-            <div className="flex-1 min-w-0">
-              <div className="flex items-center justify-between mb-0.5">
-                <span className="text-[13px] font-black text-white/90" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>{fmtCurrency(Number(t.amount))}</span>
-                <span className={cn("text-[8px] font-black uppercase tracking-widest px-1.5 py-0.5 rounded bg-white/5", statusColorMap[t.status] || "text-white/20")}>
-                  {statusLabelMap[t.status] || t.status}
-                </span>
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        <Panel title={`Aprovações KYC (${kycPending.length})`} icon={<UserCheck className="h-3.5 w-3.5" />}>
+          <div className="space-y-2 max-h-[320px] overflow-y-auto pr-1">
+            {kycPending.slice(0, 10).map(p => (
+              <div key={p.id} className="flex items-center justify-between px-3 py-2.5 rounded-lg border border-border/40 hover:bg-muted/30 transition-colors group">
+                <div className="min-w-0 flex-1">
+                  <p className="text-[12px] font-semibold text-foreground truncate">{p.full_name || "Sem nome"}</p>
+                  <p className="text-[10px] text-muted-foreground truncate">{p.email}</p>
+                  <p className="text-[9px] text-muted-foreground/60 font-mono mt-0.5">{p.document_number || "Sem documento"}</p>
+                </div>
+                <div className="flex gap-1.5 shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
+                  <Button size="sm" variant="outline" className="h-7 text-[10px] gap-1 border-success/30 text-success hover:bg-success/10 hover:text-success" onClick={() => onUserStatus(p.user_id, "approved")}>
+                    <CheckCircle2 className="h-3 w-3" /> Aprovar
+                  </Button>
+                  <Button size="sm" variant="outline" className="h-7 text-[10px] gap-1" onClick={() => {
+                    window.open(`mailto:${p.email || ""}?subject=Verificação KYC`, "_blank");
+                    toast.info(`Analisando ${p.full_name || p.email}`);
+                  }}>
+                    <Eye className="h-3 w-3" /> Analisar
+                  </Button>
+                </div>
               </div>
-              <div className="flex items-center gap-1.5 text-[9px] text-white/20">
-                <span className="truncate max-w-[100px]">{t.customer_name || "Anônimo"}</span>
-                <span>•</span>
-                <span className="uppercase">{t.payment_method || "—"}</span>
-                <span className="ml-auto">{new Date(t.created_at).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })}</span>
+            ))}
+            {kycPending.length === 0 && (
+              <div className="flex flex-col items-center justify-center py-10 text-muted-foreground/50">
+                <CheckCircle2 className="h-6 w-6 mb-2" />
+                <p className="text-[11px]">Nenhum KYC pendente</p>
+              </div>
+            )}
+          </div>
+        </Panel>
+
+        <Panel title={`Saques em revisão (${pendingWd.length})`} icon={<Wallet className="h-3.5 w-3.5" />}>
+          <div className="space-y-2 max-h-[320px] overflow-y-auto pr-1">
+            {pendingWd.slice(0, 10).map(w => {
+              const sp = profiles.find(p => p.user_id === w.user_id);
+              const isNew = sp ? (Date.now() - new Date(sp.created_at).getTime()) / (1000 * 60 * 60 * 24) < 30 : false;
+              const isHigh = Number(w.amount) >= 5000;
+              return (
+                <div key={w.id} className="flex items-center justify-between px-3 py-2.5 rounded-lg border border-border/40 hover:bg-muted/30 transition-colors group">
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center gap-2">
+                      <p className="text-[12px] font-bold text-foreground tabular-nums">{fmtCurrency(Number(w.amount))}</p>
+                      {isHigh && <span className="text-[8px] font-bold px-1.5 py-0.5 rounded bg-warning/10 text-warning border border-warning/25">ALTO</span>}
+                      {isNew && <span className="text-[8px] font-bold px-1.5 py-0.5 rounded bg-info/10 text-info border border-info/25">NOVO</span>}
+                    </div>
+                    <p className="text-[10px] text-muted-foreground truncate">{sp?.full_name || "—"} · {sp?.email || ""}</p>
+                  </div>
+                  <div className="flex gap-1.5 shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <Button size="sm" variant="outline" className="h-7 text-[10px] gap-1 border-success/30 text-success hover:bg-success/10 hover:text-success" onClick={() => onWithdrawalAction(w.id, "approved")}>
+                      <CheckCircle2 className="h-3 w-3" /> Aprovar
+                    </Button>
+                    <Button size="sm" variant="outline" className="h-7 text-[10px] gap-1 border-destructive/30 text-destructive hover:bg-destructive/10 hover:text-destructive" onClick={() => onWithdrawalAction(w.id, "rejected")}>
+                      <XCircle className="h-3 w-3" /> Recusar
+                    </Button>
+                  </div>
+                </div>
+              );
+            })}
+            {pendingWd.length === 0 && (
+              <div className="flex flex-col items-center justify-center py-10 text-muted-foreground/50">
+                <CheckCircle2 className="h-6 w-6 mb-2" />
+                <p className="text-[11px]">Nenhum saque pendente</p>
+              </div>
+            )}
+          </div>
+        </Panel>
+      </div>
+
+      <Panel title="Bloqueios Anti-Fraude" icon={<ShieldAlert className="h-3.5 w-3.5 text-destructive" />}>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-2 max-h-[280px] overflow-y-auto pr-1">
+          {fraudLogs.length > 0 ? fraudLogs.slice(0, 20).map((f: any) => (
+            <div key={f.id} className="px-3 py-2 rounded-lg border border-destructive/20 bg-destructive/5">
+              <div className="flex items-center gap-2 mb-1">
+                <StatusDot tone="destructive" />
+                <span className="text-[11px] font-bold text-destructive truncate">{f.block_reason || "Blocked"}</span>
+                <span className="ml-auto text-[9px] text-muted-foreground tabular-nums">{new Date(f.created_at).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })}</span>
+              </div>
+              <div className="flex gap-1.5 flex-wrap">
+                {f.block_type && <span className="text-[8px] font-bold px-1.5 py-0.5 rounded bg-destructive/10 text-destructive border border-destructive/20">{f.block_type}</span>}
+                {f.matched_type && <span className="text-[8px] font-bold px-1.5 py-0.5 rounded bg-warning/10 text-warning border border-warning/20">{f.matched_type}</span>}
+                {f.customer_email && <span className="text-[9px] text-muted-foreground truncate">{f.customer_email}</span>}
               </div>
             </div>
-          </div>
-        ))}
+          )) : (
+            <div className="col-span-full text-center py-8 text-[11px] text-muted-foreground">Nenhum bloqueio recente</div>
+          )}
+        </div>
+      </Panel>
+    </div>
+  );
+}
+
+/* ── Risk Row (Financeiro style) ── */
+function RiskRow({ label, value, threshold, alert }: { label: string; value: string; threshold: string; alert: boolean }) {
+  return (
+    <div className={cn(
+      "flex items-center justify-between px-3 py-2.5 rounded-lg border transition-colors",
+      alert ? "bg-destructive/5 border-destructive/25" : "bg-muted/20 border-border/40"
+    )}>
+      <div className="min-w-0">
+        <p className="text-[11px] font-semibold text-foreground/85">{label}</p>
+        <p className="text-[9px] text-muted-foreground/70 mt-0.5">{threshold}</p>
+      </div>
+      <div className="flex items-center gap-2 shrink-0">
+        <span className={cn("text-[13px] font-black tabular-nums", alert ? "text-destructive" : "text-success")}>{value}</span>
+        {alert
+          ? <span className="h-1.5 w-1.5 rounded-full bg-destructive animate-pulse" />
+          : <CheckCircle2 className="h-3.5 w-3.5 text-success/70" />}
       </div>
     </div>
-  </motion.div>
-
-
- {/* ═══ RISK RADAR ═══ */}
- <motion.div variants={fadeUp}>
- <div className="flex items-center gap-3 mb-4">
- <div className="h-px flex-1 max-w-[24px] bg-gradient-to-r from-white/10 to-transparent" />
- <h3 className="text-[10px] font-black uppercase tracking-[0.3em] text-white/15">Compliance & Risco</h3>
- <div className="h-px flex-1 bg-gradient-to-l from-transparent via-white/10 to-transparent" />
- </div>
- <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 items-stretch">
- {/* Live Fraud Feed */}
- <GlassPanel className="lg:col-span-1 max-h-[340px] overflow-hidden flex flex-col">
- <GlassPanelTitle color="red" icon={<ShieldAlert className="h-3.5 w-3.5" />}>Bloqueios Anti-Fraude</GlassPanelTitle>
- <div className="flex-1 overflow-y-auto mt-3 space-y-1.5 pr-1">
- {fraudLogs.length > 0 ? fraudLogs.slice(0, 12).map((f: any) => (
- <div key={f.id} className="p-2.5 rounded-xl bg-red-500/[0.03] border border-red-500/10 hover:bg-red-500/[0.06] transition-all">
- <div className="flex items-center gap-2 mb-1">
- <span className="h-1.5 w-1.5 rounded-full bg-red-400 shrink-0" />
- <span className="text-[10px] font-bold text-red-300 truncate">{f.block_reason || "Blocked"}</span>
- <span className="ml-auto text-[8px] text-white/15">{new Date(f.created_at).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })}</span>
- </div>
- <div className="flex gap-1.5 flex-wrap">
- {f.block_type && <span className="text-[8px] font-bold px-1.5 py-0.5 rounded bg-red-500/15 text-red-300 border border-red-500/20">{f.block_type}</span>}
- {f.matched_type && <span className="text-[8px] font-bold px-1.5 py-0.5 rounded bg-amber-500/10 text-amber-300 border border-amber-500/20">{f.matched_type}</span>}
- {f.customer_email && <span className="text-[8px] text-white/20 truncate">{f.customer_email}</span>}
- </div>
- </div>
- )) : (
- <div className="flex items-center justify-center h-24 text-[11px] text-white/15">Nenhum bloqueio recente</div>
- )}
- </div>
- </GlassPanel>
-
- {/* Refund/Chargeback Trend */}
- <GlassPanel className="lg:col-span-1">
- <GlassPanelTitle color="amber" icon={<RotateCcw className="h-3.5 w-3.5" />}>Devoluções (7d)</GlassPanelTitle>
- <ResponsiveContainer width="100%" height={200} className="mt-3">
- <LineChart data={refundTrend}>
- <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.04)" vertical={false} />
- <XAxis dataKey="name" stroke="rgba(255,255,255,0.15)" fontSize={9} tickLine={false} axisLine={false} />
- <YAxis stroke="rgba(255,255,255,0.15)" fontSize={9} tickLine={false} axisLine={false} allowDecimals={false} />
- <Tooltip cursor={false} wrapperStyle={{ pointerEvents: "none", zIndex: 20 }} content={<ChartTooltip fmtCurrency={fmtCurrency} />} />
- <Line type="monotone" dataKey="chargebacks" stroke="#ef4444" strokeWidth={2} dot={{ r: 3, fill: "#ef4444" }} activeDot={false} name="Chargebacks" isAnimationActive={false} />
- <Line type="monotone" dataKey="refunds" stroke="#f59e0b" strokeWidth={2} dot={{ r: 3, fill: "#f59e0b" }} activeDot={false} name="Reembolsos" isAnimationActive={false} />
- </LineChart>
- </ResponsiveContainer>
- <div className="flex items-center gap-4 mt-2">
- <div className="flex items-center gap-1.5 text-[9px]"><span className="h-2 w-2 rounded-full bg-red-500" /><span className="text-white/30">Chargebacks</span></div>
- <div className="flex items-center gap-1.5 text-[9px]"><span className="h-2 w-2 rounded-full bg-amber-500" /><span className="text-white/30">Reembolsos</span></div>
- </div>
- </GlassPanel>
-
- {/* Risk Alerts */}
- <GlassPanel>
- <GlassPanelTitle color="emerald" icon={<AlertTriangle className="h-3.5 w-3.5" />}>Alertas de Risco</GlassPanelTitle>
- <div className="space-y-3 mt-4">
- <RiskAlert label="Taxa Chargeback" value={`${chargebackRate.toFixed(2)}%`} threshold="< 1%" alert={chargebackAlert} />
- <RiskAlert label="Disputas Abertas" value={String(openDisputes)} threshold="< 5" alert={openDisputes > 5} />
- <RiskAlert label="Saques Pendentes" value={fmtCurrency(pendingWdAmount)} threshold={`${pendingWd.length} na fila`} alert={pendingWd.length > 10} />
- <RiskAlert label="Sellers Sem KYC" value={String(kycPending.length)} threshold="Aguardando aprovação" alert={kycPending.length > 0} />
- </div>
- </GlassPanel>
- </div>
- </motion.div>
-
- {/* ═══ OPERATIONS: KYC + WITHDRAWALS ═══ */}
- <motion.div variants={fadeUp}>
- <div className="flex items-center gap-3 mb-4">
- <div className="h-px flex-1 max-w-[24px] bg-gradient-to-r from-white/10 to-transparent" />
- <h3 className="text-[10px] font-black uppercase tracking-[0.3em] text-white/15">Fila Operacional</h3>
- <div className="h-px flex-1 bg-gradient-to-l from-transparent via-white/10 to-transparent" />
- </div>
- <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
- {/* KYC Queue */}
- <GlassPanel>
- <div className="flex items-center justify-between mb-3">
- <GlassPanelTitle color="emerald" icon={<UserCheck className="h-3.5 w-3.5" />}>
- Aprovações KYC Pendentes ({kycPending.length})
- </GlassPanelTitle>
- </div>
- <div className="space-y-2 max-h-[300px] overflow-y-auto pr-1">
- {kycPending.slice(0, 10).map(p => (
- <div key={p.id} className="flex items-center justify-between p-3 rounded-xl bg-white/[0.02] border border-white/[0.04] hover:bg-white/[0.04] transition-all group">
- <div className="min-w-0 flex-1">
- <p className="text-[12px] font-semibold text-white/80 truncate">{p.full_name || "Sem nome"}</p>
- <p className="text-[10px] text-white/25 truncate">{p.email}</p>
- <p className="text-[9px] text-white/15 font-mono mt-0.5">{p.document_number || "Sem documento"}</p>
- </div>
- <div className="flex gap-1.5 shrink-0 opacity-60 group-hover:opacity-100 transition-opacity">
- <Button size="sm" className="h-7 text-[9px] bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20 border border-emerald-500/20 gap-1 rounded-lg shadow-none font-bold"
- onClick={() => onUserStatus(p.user_id, "approved")}>
- <CheckCircle2 className="h-3 w-3" /> Aprovar
- </Button>
- <Button size="sm" className="h-7 text-[9px] bg-white/[0.03] text-white/30 hover:text-white/60 hover:bg-white/[0.06] border border-white/[0.06] gap-1 rounded-lg shadow-none font-bold"
- onClick={() => {
- window.open(`mailto:${p.email || ""}?subject=Verificação KYC - Documentação Pendente`, "_blank");
- toast.info(`Abrindo análise de ${p.full_name || p.email || "seller"}`, { description: `Doc: ${p.document_number || "Não informado"} | Tipo: ${p.seller_type || "N/A"}` });
- }}>
- <Eye className="h-3 w-3" /> Analisar
- </Button>
- </div>
- </div>
- ))}
- {kycPending.length === 0 && (
- <div className="flex flex-col items-center justify-center py-8 text-white/10">
- <CheckCircle2 className="h-6 w-6 mb-2" />
- <p className="text-[11px]">Nenhum KYC pendente</p>
- </div>
- )}
- </div>
- </GlassPanel>
-
- {/* High-Value Withdrawals */}
- <GlassPanel>
- <div className="flex items-center justify-between mb-3">
- <GlassPanelTitle color="amber" icon={<AlertTriangle className="h-3.5 w-3.5" />}>
- Saques em Revisão ({highValueWd.length + pendingWd.filter(w => {
- const p = profiles.find(pr => pr.user_id === w.user_id);
- const days = p ? (Date.now() - new Date(p.created_at).getTime()) / (1000 * 60 * 60 * 24) : 999;
- return days < 30;
- }).length})
- </GlassPanelTitle>
- </div>
- <div className="space-y-2 max-h-[300px] overflow-y-auto pr-1">
- {pendingWd.slice(0, 10).map(w => {
- const sp = profiles.find(p => p.user_id === w.user_id);
- const isNew = sp ? (Date.now() - new Date(sp.created_at).getTime()) / (1000 * 60 * 60 * 24) < 30 : false;
- const isHigh = Number(w.amount) >= 5000;
- if (!isNew && !isHigh) return null;
- return (
- <div key={w.id} className="flex items-center justify-between p-3 rounded-xl bg-white/[0.02] border border-white/[0.04] hover:bg-white/[0.04] transition-all group">
- <div className="min-w-0 flex-1">
- <div className="flex items-center gap-2">
- <p className="text-[12px] font-bold text-white/80">{fmtCurrency(Number(w.amount))}</p>
- {isHigh && <span className="text-[7px] font-bold px-1.5 py-0.5 rounded-full bg-amber-500/15 text-amber-400 border border-amber-500/20">ALTO</span>}
- {isNew && <span className="text-[7px] font-bold px-1.5 py-0.5 rounded-full bg-teal-500/15 text-teal-400 border border-teal-500/20">NOVO</span>}
- </div>
- <p className="text-[10px] text-white/25 truncate">{sp?.full_name || "—"} • {sp?.email || ""}</p>
- </div>
- <div className="flex gap-1.5 shrink-0 opacity-60 group-hover:opacity-100 transition-opacity">
- <Button size="sm" className="h-7 text-[9px] bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20 border border-emerald-500/20 gap-1 rounded-lg shadow-none font-bold"
- onClick={() => onWithdrawalAction(w.id, "approved")}>
- <CheckCircle2 className="h-3 w-3" /> Aprovar
- </Button>
- <Button size="sm" className="h-7 text-[9px] bg-red-500/10 text-red-400 hover:bg-red-500/20 border border-red-500/20 gap-1 rounded-lg shadow-none font-bold"
- onClick={() => onWithdrawalAction(w.id, "rejected")}>
- <XCircle className="h-3 w-3" /> Recusar
- </Button>
- </div>
- </div>
- );
- })}
- {pendingWd.length === 0 && (
- <div className="flex flex-col items-center justify-center py-8 text-white/10">
- <CheckCircle2 className="h-6 w-6 mb-2" />
- <p className="text-[11px]">Nenhum saque pendente</p>
- </div>
- )}
- </div>
- </GlassPanel>
- </div>
- </motion.div>
- </motion.div>
- );
+  );
 }
 
 /* ═══════════════════════════════════════════════
