@@ -788,9 +788,9 @@ export default function ProductEditor() {
  exit={{ opacity: 0, y: -6 }}
  transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
  >
- {activeTab === "geral" && <TabGeral
- {...{ name, setName, description, setDescription, price, setPrice, status, setStatus, pageUrl, setPageUrl, imagePreview, setImagePreview, imageFile, setImageFile, fileInputRef, handleFileChange, category, setCategory, paymentType, setPaymentType, displayName, setDisplayName, supportEmail, setSupportEmail, warrantyDays, setWarrantyDays, isDragging, setIsDragging, handleDrop }}
- />}
+  {activeTab === "geral" && <TabGeral
+  {...{ name, setName, description, setDescription, price, setPrice, status, setStatus, pageUrl, setPageUrl, imagePreview, setImagePreview, imageFile, setImageFile, fileInputRef, handleFileChange, category, setCategory, paymentType, setPaymentType, displayName, setDisplayName, supportEmail, setSupportEmail, supportPhone, setSupportPhone, warrantyDays, setWarrantyDays, isDragging, setIsDragging, handleDrop }}
+  />}
 
  {activeTab === "configuracoes" && <TabConfiguracoes
  {...{ price, pixEnabled, setPixEnabled, boletoEnabled, setBoletoEnabled, creditCardEnabled, setCreditCardEnabled, emailConfirm, setEmailConfirm, showCouponField, setShowCouponField, addressRequired, setAddressRequired, deliveryType, setDeliveryType }}
