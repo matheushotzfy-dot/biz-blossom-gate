@@ -895,6 +895,7 @@ export type Database = {
           card_percentage: number | null
           created_at: string
           id: string
+          max_ticket: number | null
           pix_fixed: number | null
           pix_percentage: number | null
           transaction_fixed: number | null
@@ -909,6 +910,7 @@ export type Database = {
           card_percentage?: number | null
           created_at?: string
           id?: string
+          max_ticket?: number | null
           pix_fixed?: number | null
           pix_percentage?: number | null
           transaction_fixed?: number | null
@@ -923,6 +925,7 @@ export type Database = {
           card_percentage?: number | null
           created_at?: string
           id?: string
+          max_ticket?: number | null
           pix_fixed?: number | null
           pix_percentage?: number | null
           transaction_fixed?: number | null
@@ -3255,6 +3258,7 @@ export type Database = {
       }
       get_course_analytics: { Args: { _course_id: string }; Returns: Json }
       get_ledger_balance: { Args: { _user_id: string }; Returns: number }
+      get_my_max_ticket: { Args: never; Returns: number }
       get_quiz_questions_for_student: {
         Args: { _quiz_id: string }
         Returns: {
@@ -3266,6 +3270,7 @@ export type Database = {
           sort_order: number
         }[]
       }
+      get_user_max_ticket: { Args: { _user_id: string }; Returns: number }
       grade_quiz_attempt: {
         Args: { _answers: Json; _quiz_id: string }
         Returns: Json
@@ -3279,6 +3284,11 @@ export type Database = {
       }
       is_product_active: { Args: { _product_id: string }; Returns: boolean }
       release_due_card_holds: { Args: never; Returns: number }
+      set_max_ticket_for_all: { Args: { _new_value: number }; Returns: Json }
+      set_max_ticket_new_users_only: {
+        Args: { _new_value: number }
+        Returns: Json
+      }
       touch_api_key: { Args: { _api_key_id: string }; Returns: undefined }
       validate_coupon: {
         Args: { _amount: number; _code: string; _product_id: string }
