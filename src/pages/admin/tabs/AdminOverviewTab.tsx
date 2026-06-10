@@ -533,7 +533,7 @@ function HeroKpi({ icon, label, value, sub, gradient, metallic, alert }: {
  gradient: string; metallic?: boolean; alert?: boolean; pulse?: boolean;
 }) {
  return (
- <motion.div variants={fadeUp} className="relative group">
+ <div className="relative group">
  <div className={cn(
  "relative isolate overflow-hidden rounded-2xl border p-5 sm:p-6 transition-all duration-300",
  "border-white/[0.08] bg-gradient-to-b from-white/[0.05] to-white/[0.02]",
