@@ -139,18 +139,34 @@ export default function AdminSettingsTab() {
  setSaving(false);
  };
 
- const updateGlobalFee = async (feeId: string) => {
- if (!user) return;
- const newValue = Number(editingFees[feeId]);
- if (isNaN(newValue) || newValue < 0) { toast.error("Valor inválido"); return; }
- const fee = fees.find(f => f.id === feeId);
- if (!fee) return;
- const { error } = await supabase.from("fees").update({ value: newValue }).eq("id", feeId);
- if (error) { toast.error("Erro ao atualizar taxa"); return; }
- toast.success(`Taxa "${fee.name}" atualizada!`);
- await logAdminAction("update_global_fee", "fees", feeId, { name: fee.name, old_value: fee.value, new_value: newValue } as any);
- loadAll();
- };
+  const updateGlobalFee = async (feeId: string) => {
+    if (!user) return;
+    const newValue = Number(editingFees[feeId]);
+    if (isNaN(newValue) || newValue < 0) { toast.error("Valor inválido"); return; }
+    const fee = fees.find(f => f.id === feeId);
+    if (!fee) return;
+    const { error } = await supabase.from("fees").update({ value: newValue }).eq("id", feeId);
+    if (error) { toast.error("Erro ao atualizar taxa"); return; }
+    toast.success(`Taxa "${fee.name}" atualizada!`);
+    await logAdminAction("update_global_fee", "fees", feeId, { name: fee.name, old_value: fee.value, new_value: newValue } as any);
+    loadAll();
+  };
+
+  // Wipe all per-seller overrides → everyone (new and old) falls back to platform defaults
+  const applyGlobalToAllSellers = async () => {
+    if (!user) return;
+    if (!window.confirm("Aplicar taxas globais a TODOS os sellers? Isso APAGA todas as taxas individuais (atuais e antigos).")) return;
+    setSaving(true);
+    const { error, count } = await supabase
+      .from("custom_user_fees")
+      .delete({ count: "exact" })
+      .not("user_id", "is", null);
+    if (error) { toast.error("Erro ao aplicar global: " + error.message); setSaving(false); return; }
+    toast.success(`Taxas globais aplicadas. ${count ?? 0} overrides removidos.`);
+    await logAdminAction("apply_global_fees_to_all", "custom_user_fees", "bulk", { removed: count } as any);
+    setSaving(false);
+  };
+
 
  // Retention
  const saveGlobalRetention = async () => {
@@ -359,8 +375,17 @@ export default function AdminSettingsTab() {
  ))}
  </div>
  )}
+ <div className="mt-5 pt-4 border-t border-border/50 space-y-2">
+   <p className="text-[11px] text-muted-foreground">
+     Por padrão, as taxas globais valem apenas para <strong>novos sellers</strong>. Sellers com taxa individual mantêm a deles. Use o botão abaixo para forçar a taxa global em <strong>TODOS</strong> (novos e antigos), apagando overrides individuais.
+   </p>
+   <Button onClick={applyGlobalToAllSellers} disabled={saving} variant="destructive" size="sm" className="w-full gap-2">
+     <Users className="h-3.5 w-3.5" /> Aplicar taxa global a TODOS os sellers (apaga individuais)
+   </Button>
+ </div>
  </AdminPanel>
  </div>
+
 
  {/* ─── RETENTION SETTINGS ─── */}
  <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
