@@ -10,6 +10,7 @@ import { Switch } from "@/components/ui/switch";
 import { toast } from "sonner";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { GlassPanel as AdminPanel, GlassPanelTitle as PanelTitle } from "./AdminOverviewTab";
+import { LinearHero, LinearStat, LinearStatRow } from "@/components/admin/LinearKit";
 import { logAdminAction } from "@/lib/auditLog";
 
 interface Acquirer {
