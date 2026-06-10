@@ -36,6 +36,9 @@ export default function ApiKeys() {
   const [newKeyName, setNewKeyName] = useState("Produção");
   const [newKeyData, setNewKeyData] = useState<any | null>(null);
   const [creating, setCreating] = useState(false);
+  const [editingKey, setEditingKey] = useState<ApiKey | null>(null);
+  const [editName, setEditName] = useState("");
+
 
   const fetchKeys = async () => {
     if (!user) return;
