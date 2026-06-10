@@ -242,21 +242,20 @@ export default function AdminTransactionsTab({ transactions, profiles, products,
  return (
  <div className="space-y-5 animate-fade-in">
  {/* Hero */}
- <FinanceiroHero
+ <LinearHero
    eyebrow="Operações · Transações"
    title="Radar de Transações"
    subtitle="Monitore aprovações, chargebacks e volume em tempo real."
    status={{ tone: kpis.chargebacks > 0 ? "destructive" : "success", label: kpis.chargebacks > 0 ? `${kpis.chargebacks} chargebacks` : "Operação saudável", pulse: kpis.chargebacks > 0 }}
  />
 
- {/* KPIs */}
- <FinanceiroKpiGrid cols={5}>
-   <FinanceiroKpi icon={CreditCard} label="Total Transações" value={String(transactions.length)} sub="Todas" tone="neutral" />
-   <FinanceiroKpi icon={CheckCircle2} label="Aprovadas" value={String(kpis.completed)} sub={`${((kpis.completed / Math.max(transactions.length, 1)) * 100).toFixed(1)}% taxa`} tone="success" />
-   <FinanceiroKpi icon={Clock} label="Pendentes" value={String(kpis.pending)} sub="Aguardando" tone="warning" />
-   <FinanceiroKpi icon={ShieldAlert} label="Chargebacks" value={String(kpis.chargebacks)} sub={`${kpis.refunded} estornos`} tone="destructive" />
-   <FinanceiroKpi icon={DollarSign} label="Volume Hoje" value={fmtCurrency(kpis.todayV)} sub={`${kpis.todayN} transações`} tone="primary" />
- </FinanceiroKpiGrid>
+ <LinearStatRow>
+   <LinearStat icon={CreditCard} label="Total" value={String(transactions.length)} sub="Transações" tone="neutral" />
+   <LinearStat icon={CheckCircle2} label="Aprovadas" value={String(kpis.completed)} sub={`${((kpis.completed / Math.max(transactions.length, 1)) * 100).toFixed(1)}% taxa`} tone="success" />
+   <LinearStat icon={Clock} label="Pendentes" value={String(kpis.pending)} sub="Aguardando" tone="warning" />
+   <LinearStat icon={ShieldAlert} label="Chargebacks" value={String(kpis.chargebacks)} sub={`${kpis.refunded} estornos`} tone="destructive" />
+   <LinearStat icon={DollarSign} label="Volume Hoje" value={fmtCurrency(kpis.todayV)} sub={`${kpis.todayN} transações`} tone="primary" />
+ </LinearStatRow>
 
  {/* Filters */}
  <div className="flex flex-wrap items-center gap-3">
