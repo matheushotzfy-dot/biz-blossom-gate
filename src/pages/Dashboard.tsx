@@ -237,6 +237,7 @@ export default function Dashboard() {
       amount: Number(t.amount),
       status: t.status,
       label: t.payment_method || "Venda",
+      tx: t,
     }));
     return tx.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
   }, [transactions]);
