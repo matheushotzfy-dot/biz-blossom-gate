@@ -230,7 +230,7 @@ Deno.serve(async (req) => {
     const amountInCents = Math.round(finalPrice * 100);
 
 
-    // === Calculate fees from DB (payment-method-specific) ===
+    // === Calculate fees: per-method, with custom_user_fees override ===
     const { data: fees, error: feesError } = await supabase.from('fees').select('*');
     if (feesError || !fees || fees.length === 0) {
       safeLog('Fee configuration missing', { error: feesError?.message || 'no fees found' });
@@ -240,29 +240,35 @@ Deno.serve(async (req) => {
       );
     }
 
-    // Map payment method to fee names
-    const feeNameMap: Record<string, string> = {
-      pix: 'Taxa PIX',
-      credit_card: 'Taxa Cartão',
-      boleto: 'Taxa Boleto',
-    };
-    const methodFeeName = feeNameMap[paymentMethod] || 'Taxa PIX';
-    const methodFee = fees.find(f => f.name === methodFeeName);
-    const fixedFee = fees.find(f => f.name === 'Taxa Fixa por Transação' && f.fee_type === 'fixed');
+    // Platform defaults from fees table
+    const getFee = (name: string) => Number(fees.find(f => f.name === name)?.value ?? 0);
+    const platformPixPct   = getFee('Taxa PIX');
+    const platformPixFixed = getFee('Taxa Fixa PIX');
+    const platformCardPct  = getFee('Taxa Cartão');
+    const platformBoleto   = getFee('Taxa Boleto');
+    const platformExtraFx  = getFee('Taxa Fixa por Transação');
 
-    // Method-specific fee (percentage for pix/card, fixed for boleto) — computed on final price
-    let feeAmount = 0;
-    if (methodFee) {
-      if (methodFee.fee_type === 'percentage') {
-        feeAmount = finalPrice * Number(methodFee.value) / 100;
-      } else {
-        feeAmount = Number(methodFee.value);
-      }
-    }
-    if (fixedFee) {
-      feeAmount += Number(fixedFee.value);
+    // Per-seller overrides
+    const { data: cuf } = await supabase
+      .from('custom_user_fees')
+      .select('pix_percentage, pix_fixed, card_percentage, card_fixed, transaction_percentage, transaction_fixed')
+      .eq('user_id', product.user_id)
+      .maybeSingle();
+
+    let pct = 0;
+    let fixed = 0;
+    if (paymentMethod === 'pix') {
+      pct   = Number(cuf?.pix_percentage ?? cuf?.transaction_percentage ?? platformPixPct);
+      fixed = Number(cuf?.pix_fixed      ?? platformPixFixed) + platformExtraFx;
+    } else if (paymentMethod === 'credit_card') {
+      pct   = Number(cuf?.card_percentage ?? cuf?.transaction_percentage ?? platformCardPct);
+      fixed = Number(cuf?.card_fixed      ?? cuf?.transaction_fixed      ?? 0) + platformExtraFx;
+    } else { // boleto
+      pct   = 0;
+      fixed = platformBoleto + platformExtraFx;
     }
 
+    let feeAmount = Math.round((finalPrice * pct / 100 + fixed) * 100) / 100;
     if (feeAmount < 0 || feeAmount >= finalPrice) {
       safeLog('Fee values out of safe range', { feeAmount, productPrice: finalPrice });
       return new Response(
@@ -270,8 +276,6 @@ Deno.serve(async (req) => {
         { status: 503, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
-
-    feeAmount = Math.round(feeAmount * 100) / 100;
     const netAmount = Math.round((finalPrice - feeAmount) * 100) / 100;
 
 
