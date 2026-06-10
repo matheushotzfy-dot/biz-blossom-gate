@@ -218,10 +218,22 @@ export default function ApiKeys() {
                       </div>
                     </td>
                     <td className="px-8 py-5 text-right space-x-2">
-                      <button onClick={() => handleRevoke(k.id, k.is_active)} className="h-8 w-8 rounded-lg bg-muted/40 border border-border/60 inline-flex items-center justify-center hover:bg-muted transition-all" title={k.is_active ? "Revogar" : "Reativar"}>
-                        {k.is_active ? <PowerOff size={14} /> : <Power size={14} className="text-emerald-500" />}
+                      <button
+                        onClick={() => { setEditingKey(k); setEditName(k.name); }}
+                        className="h-8 w-8 rounded-lg bg-muted/40 border border-border/60 inline-flex items-center justify-center hover:bg-muted transition-all"
+                        title="Renomear"
+                      >
+                        <Pencil size={14} />
+                      </button>
+                      <button
+                        onClick={() => handleDelete(k.id, k.name)}
+                        className="h-8 w-8 rounded-lg bg-destructive/10 border border-destructive/20 text-destructive inline-flex items-center justify-center hover:bg-destructive hover:text-destructive-foreground transition-all"
+                        title="Excluir"
+                      >
+                        <Trash2 size={14} />
                       </button>
                     </td>
+
                   </tr>
                 ))
               )}
