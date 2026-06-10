@@ -98,6 +98,12 @@ export default function AdminSettingsTab() {
  setBlackFixed(String(v.fixed ?? 2.50));
  setBlackWithdrawal(String(v.withdrawal ?? 5.00));
  }
+  const maxTicketSet = settingsRes.data.find((s: any) => s.key === "max_ticket_default");
+ if (maxTicketSet) {
+   const v = (maxTicketSet as any).value?.value ?? 10000;
+   setMaxTicketGlobal(String(v));
+   setMaxTicketInput(String(v));
+ }
  }
  if (retentionRes.data) {
  const global = retentionRes.data.find((r: any) => r.user_id === null);
