@@ -140,13 +140,13 @@ const ADMIN_THEMES: Record<AdminTheme, {
     border: "rgba(255,255,255,0.07)", cardBg: "rgba(139,92,246,0.04)", isDark: true,
   },
   "midnight": {
-    label: "Midnight Blue",
-    bg: "linear-gradient(135deg, #060a14 0%, #081020 30%, #0a1428 60%, #060a14 100%)",
-    sidebarBg: "linear-gradient(180deg, rgba(6,10,20,0.98) 0%, rgba(4,8,16,0.99) 100%)",
-    topBarBg: "linear-gradient(90deg, rgba(6,10,20,0.85) 0%, rgba(8,14,28,0.75) 100%)",
-    accent: "cyan", accentLight: "rgba(34,211,238,0.12)", accentGlow: "rgba(34,211,238,0.35)",
-    textPrimary: "rgba(255,255,255,0.93)", textSecondary: "rgba(255,255,255,0.58)", textMuted: "rgba(255,255,255,0.30)",
-    border: "rgba(255,255,255,0.07)", cardBg: "rgba(34,211,238,0.04)", isDark: true,
+    label: "Midnight Emerald",
+    bg: "radial-gradient(ellipse at top, #0f2540 0%, #0a1628 35%, #060d1a 70%, #04081a 100%)",
+    sidebarBg: "linear-gradient(180deg, rgba(10,22,40,0.98) 0%, rgba(6,13,26,0.99) 100%)",
+    topBarBg: "linear-gradient(90deg, rgba(10,22,40,0.85) 0%, rgba(15,37,64,0.70) 100%)",
+    accent: "emerald", accentLight: "rgba(16,185,129,0.14)", accentGlow: "rgba(16,185,129,0.45)",
+    textPrimary: "rgba(255,255,255,0.95)", textSecondary: "rgba(255,255,255,0.62)", textMuted: "rgba(255,255,255,0.34)",
+    border: "rgba(148,184,232,0.10)", cardBg: "rgba(16,185,129,0.05)", isDark: true,
   },
 };
 
@@ -180,7 +180,7 @@ export default function AdminDashboard() {
     const saved = localStorage.getItem("admin-theme") as string;
     if (saved === "light-green") return "midnight";
     if (saved && saved in ADMIN_THEMES) return saved as AdminTheme;
-    return "dark-green";
+    return "midnight";
   });
   const [themePickerOpen, setThemePickerOpen] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -341,14 +341,14 @@ export default function AdminDashboard() {
     activeItem: "from-violet-500/[0.12] via-violet-500/[0.08] to-purple-500/[0.04] border-violet-500/[0.18] shadow-[inset_0_1px_0_rgba(139,92,246,0.12)]",
     activeIcon: "text-violet-400 drop-shadow-[0_0_6px_rgba(139,92,246,0.6)]",
   } : adminTheme === "midnight" ? {
-    gradient: "from-cyan-500 via-sky-600 to-blue-700",
-    text: "text-cyan-400", textSoft: "text-cyan-400/60", textGlow: "text-cyan-400/50",
-    bg: "bg-cyan-500", bgSoft: "bg-cyan-500/10", bgBorder: "border-cyan-500/10",
-    shadow: "shadow-[0_0_30px_rgba(34,211,238,0.3)]", glowBg: "bg-cyan-950/25",
-    ringActive: "ring-cyan-500/20", indicatorGradient: "from-cyan-400 via-sky-500 to-blue-500",
-    indicatorShadow: "shadow-[0_0_14px_rgba(34,211,238,0.7)]",
-    activeItem: "from-cyan-500/[0.12] via-sky-500/[0.08] to-blue-500/[0.04] border-cyan-500/[0.18] shadow-[inset_0_1px_0_rgba(34,211,238,0.12)]",
-    activeIcon: "text-cyan-400 drop-shadow-[0_0_6px_rgba(34,211,238,0.5)]",
+    gradient: "from-emerald-400 via-emerald-500 to-teal-600",
+    text: "text-emerald-400", textSoft: "text-emerald-400/65", textGlow: "text-emerald-400/55",
+    bg: "bg-emerald-400", bgSoft: "bg-emerald-500/10", bgBorder: "border-emerald-500/15",
+    shadow: "shadow-[0_0_36px_rgba(16,185,129,0.45)]", glowBg: "bg-emerald-500/15",
+    ringActive: "ring-emerald-500/25", indicatorGradient: "from-emerald-400 via-emerald-500 to-teal-500",
+    indicatorShadow: "shadow-[0_0_16px_rgba(16,185,129,0.85)]",
+    activeItem: "from-emerald-500/[0.16] via-emerald-500/[0.10] to-teal-500/[0.05] border-emerald-500/[0.22] shadow-[inset_0_1px_0_rgba(16,185,129,0.18)]",
+    activeIcon: "text-emerald-400 drop-shadow-[0_0_8px_rgba(16,185,129,0.7)]",
   } : adminTheme === "mint" ? {
     gradient: "from-emerald-400 via-teal-500 to-cyan-600",
     text: "text-emerald-300", textSoft: "text-emerald-300/60", textGlow: "text-emerald-300/50",
@@ -401,7 +401,7 @@ export default function AdminDashboard() {
         
         {/* Sidebar ambient glow */}
         <div className="absolute inset-0 pointer-events-none overflow-hidden">
-          <div className={cn("absolute top-0 left-0 right-0 h-32 bg-gradient-to-b to-transparent", adminTheme === "dark" ? "from-violet-500/[0.06]" : adminTheme === "midnight" ? "from-cyan-500/[0.06]" : "from-emerald-500/[0.06]")} />
+          <div className={cn("absolute top-0 left-0 right-0 h-32 bg-gradient-to-b to-transparent", adminTheme === "dark" ? "from-violet-500/[0.06]" : "from-emerald-500/[0.07]")} />
         </div>
 
         {/* Logo */}
