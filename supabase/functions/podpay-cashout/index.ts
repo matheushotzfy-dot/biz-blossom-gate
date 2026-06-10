@@ -21,6 +21,7 @@ function buildCors(req: Request): Record<string, string> {
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 Deno.serve(async (req) => {
+  const corsHeaders = buildCors(req);
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }
