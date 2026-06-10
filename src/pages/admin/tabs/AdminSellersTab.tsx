@@ -1188,11 +1188,26 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
          placeholder="5.00" className="mt-1 text-xs" />
      </div>
    </div>
- </div>
+  </div>
 
- <Button size="sm" className="bg-primary/10 text-primary border border-primary/20 rounded-xl text-xs" onClick={handleSaveCustomFees}>
- <Save className="h-3 w-3 mr-1" /> Salvar Taxas
- </Button>
+  <div className="space-y-3">
+    <p className="text-[10px] font-black uppercase tracking-widest text-emerald-500">Limites Operacionais</p>
+    <div className="grid grid-cols-2 gap-4">
+      <div>
+        <Label className="text-[10px] text-muted-foreground">Ticket Máximo (R$)</Label>
+        <NumberInput step={0.01} min={0} value={customFees.max_ticket}
+          onChange={v => setCustomFees(p => ({ ...p, max_ticket: v }))}
+          placeholder="10000.00" className="mt-1 text-xs" />
+        <p className="text-[10px] text-muted-foreground mt-1">
+          Em vigor: <span className="font-mono text-foreground">R$ {(effectiveMaxTicket ?? 0).toLocaleString("pt-BR", { minimumFractionDigits: 2 })}</span>
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <Button size="sm" className="bg-primary/10 text-primary border border-primary/20 rounded-xl text-xs" onClick={handleSaveCustomFees}>
+  <Save className="h-3 w-3 mr-1" /> Salvar Taxas
+  </Button>
  </div>
  </TabsContent>
  </Tabs>
