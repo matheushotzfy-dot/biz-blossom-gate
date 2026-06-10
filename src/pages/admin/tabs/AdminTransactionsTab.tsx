@@ -241,14 +241,22 @@ export default function AdminTransactionsTab({ transactions, profiles, products,
 
  return (
  <div className="space-y-5 animate-fade-in">
+ {/* Hero */}
+ <FinanceiroHero
+   eyebrow="Operações · Transações"
+   title="Radar de Transações"
+   subtitle="Monitore aprovações, chargebacks e volume em tempo real."
+   status={{ tone: kpis.chargebacks > 0 ? "destructive" : "success", label: kpis.chargebacks > 0 ? `${kpis.chargebacks} chargebacks` : "Operação saudável", pulse: kpis.chargebacks > 0 }}
+ />
+
  {/* KPIs */}
- <div className="grid grid-cols-2 lg:grid-cols-5 gap-3">
- <AdminKpi icon={<CreditCard className="h-5 w-5" />} label="Total Transações" value={String(transactions.length)} sub="Todas" />
- <AdminKpi icon={<CheckCircle2 className="h-5 w-5" />} label="Aprovadas" value={String(kpis.completed)} sub={`${((kpis.completed / Math.max(transactions.length, 1)) * 100).toFixed(1)}% taxa`} highlight />
- <AdminKpi icon={<Clock className="h-5 w-5" />} label="Pendentes" value={String(kpis.pending)} sub="Aguardando" alert={kpis.pending > 5} />
- <AdminKpi icon={<ShieldAlert className="h-5 w-5" />} label="Chargebacks" value={String(kpis.chargebacks)} sub={`${kpis.refunded} estornos`} alert={kpis.chargebacks > 0} />
- <AdminKpi icon={<DollarSign className="h-5 w-5" />} label="Volume Hoje" value={fmtCurrency(kpis.todayV)} sub={`${kpis.todayN} transações`} />
- </div>
+ <FinanceiroKpiGrid cols={5}>
+   <FinanceiroKpi icon={CreditCard} label="Total Transações" value={String(transactions.length)} sub="Todas" tone="neutral" />
+   <FinanceiroKpi icon={CheckCircle2} label="Aprovadas" value={String(kpis.completed)} sub={`${((kpis.completed / Math.max(transactions.length, 1)) * 100).toFixed(1)}% taxa`} tone="success" />
+   <FinanceiroKpi icon={Clock} label="Pendentes" value={String(kpis.pending)} sub="Aguardando" tone="warning" />
+   <FinanceiroKpi icon={ShieldAlert} label="Chargebacks" value={String(kpis.chargebacks)} sub={`${kpis.refunded} estornos`} tone="destructive" />
+   <FinanceiroKpi icon={DollarSign} label="Volume Hoje" value={fmtCurrency(kpis.todayV)} sub={`${kpis.todayN} transações`} tone="primary" />
+ </FinanceiroKpiGrid>
 
  {/* Filters */}
  <div className="flex flex-wrap items-center gap-3">
