@@ -838,7 +838,7 @@ export default function ProductEditor() {
  TAB COMPONENTS
  ═══════════════════════════════════════════════ */
 
-function TabGeral({ name, setName, description, setDescription, price, setPrice, status, setStatus, pageUrl, setPageUrl, imagePreview, setImagePreview, imageFile, setImageFile, fileInputRef, handleFileChange, category, setCategory, paymentType, setPaymentType, displayName, setDisplayName, supportEmail, setSupportEmail, warrantyDays, setWarrantyDays, isDragging, setIsDragging, handleDrop }: any) {
+function TabGeral({ name, setName, description, setDescription, price, setPrice, status, setStatus, pageUrl, setPageUrl, imagePreview, setImagePreview, imageFile, setImageFile, fileInputRef, handleFileChange, category, setCategory, paymentType, setPaymentType, displayName, setDisplayName, supportEmail, setSupportEmail, supportPhone, setSupportPhone, warrantyDays, setWarrantyDays, isDragging, setIsDragging, handleDrop, onNext }: any) {
   const descValid = description.length >= 50;
   const urlValid = /^https?:\/\/.+\..+/.test(pageUrl.trim());
   const emailValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(supportEmail.trim());
