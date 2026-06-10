@@ -3248,6 +3248,17 @@ export type Database = {
         Args: { _role: Database["public"]["Enums"]["app_role"] }
         Returns: boolean
       }
+      get_admin_dashboard_data: {
+        Args: {
+          _from: string
+          _product_limit?: number
+          _profile_limit?: number
+          _to: string
+          _tx_limit?: number
+          _withdrawal_limit?: number
+        }
+        Returns: Json
+      }
       get_affiliate_product_owner: {
         Args: { _product_id: string }
         Returns: string
