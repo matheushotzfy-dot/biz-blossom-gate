@@ -1765,6 +1765,7 @@ export type Database = {
           rejection_reason: string | null
           status: string
           support_email: string | null
+          support_phone: string | null
           updated_at: string
           user_id: string
         }
@@ -1801,6 +1802,7 @@ export type Database = {
           rejection_reason?: string | null
           status?: string
           support_email?: string | null
+          support_phone?: string | null
           updated_at?: string
           user_id: string
         }
@@ -1837,6 +1839,7 @@ export type Database = {
           rejection_reason?: string | null
           status?: string
           support_email?: string | null
+          support_phone?: string | null
           updated_at?: string
           user_id?: string
         }

@@ -22,7 +22,7 @@ import {
  Upload, CheckCircle2, Copy, Globe, Zap, Crosshair, Percent, Clock,
  Layers, UserPlus, Lock, Gift, BarChart3, Star, Palette, Sparkles,
  Check, ChevronRight, TrendingUp, MousePointerClick, GraduationCap, Video, Loader2,
- MessageSquare, Share2, Download, Smartphone, Monitor, AlertTriangle,
+ MessageSquare, Share2, Download, Smartphone, Monitor, AlertTriangle, Phone,
  RefreshCw, Hash, Target, Heart, Megaphone, Rocket, Award,
  BookOpen, Code2, Briefcase, type LucideIcon
 } from "lucide-react";
@@ -131,8 +131,9 @@ export default function ProductEditor() {
  const [imagePreview, setImagePreview] = useState<string | null>(null);
  const [category, setCategory] = useState("infoproduto");
  const [paymentType, setPaymentType] = useState("unico");
- const [displayName, setDisplayName] = useState("");
- const [supportEmail, setSupportEmail] = useState("");
+  const [displayName, setDisplayName] = useState("");
+  const [supportEmail, setSupportEmail] = useState("");
+  const [supportPhone, setSupportPhone] = useState("");
 
  const [warrantyDays, setWarrantyDays] = useState("7");
  const [deliveryType, setDeliveryType] = useState("digital");
@@ -250,8 +251,9 @@ export default function ProductEditor() {
  setCoProductionEnabled(data.co_production_enabled || false);
  setCoProducerEmail(data.co_producer_email || "");
  setCoProductionSplit(String(data.co_production_split || 50));
- setSupportEmail((data as any).support_email || "");
- setDisplayName((data as any).display_name || "");
+  setSupportEmail((data as any).support_email || "");
+  setSupportPhone((data as any).support_phone || "");
+  setDisplayName((data as any).display_name || "");
  setDeliveryType((data as any).delivery_type || "digital");
  setLoading(false);
  })();
@@ -277,16 +279,18 @@ export default function ProductEditor() {
  return data.publicUrl;
  };
 
- const handleSave = async () => {
- if (!user) return;
- const priceNum = parseFloat(price);
- if (!name.trim()) { toast.error("Nome é obrigatório"); setActiveTab("geral"); return; }
- if (description.trim().length < 50) { toast.error("Descrição deve ter no mínimo 50 caracteres"); setActiveTab("geral"); return; }
- if (isNaN(priceNum) || priceNum < 1) { toast.error("Preço mínimo é R$ 1,00"); setActiveTab("geral"); return; }
- if (priceNum > 99999.99) { toast.error("Preço máximo é R$ 99.999,99"); setActiveTab("geral"); return; }
- if (!pageUrl.trim() || !/^https?:\/\/.+\..+/.test(pageUrl.trim())) { toast.error("Insira uma página de vendas com domínio válido (ex: https://seusite.com)"); setActiveTab("geral"); return; }
- if (!supportEmail.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(supportEmail.trim())) { toast.error("Insira um e-mail de suporte válido (ex: suporte@seusite.com)"); setActiveTab("geral"); return; }
- if (!displayName.trim()) { toast.error("Nome de exibição é obrigatório"); setActiveTab("geral"); return; }
+  const handleSave = async () => {
+    if (!user) return;
+    // Normaliza preço aceitando "10,50", "10.50", "R$ 10,50", etc.
+    const priceNum = parseFloat(String(price).replace(/[^0-9,.-]/g, "").replace(",", "."));
+    if (!name.trim()) { toast.error("Nome é obrigatório"); setActiveTab("geral"); return; }
+    if (description.trim().length < 50) { toast.error("Descrição deve ter no mínimo 50 caracteres"); setActiveTab("geral"); return; }
+    if (isNaN(priceNum) || priceNum < 1) { toast.error("Preço mínimo é R$ 1,00"); setActiveTab("geral"); return; }
+    if (priceNum > 99999.99) { toast.error("Preço máximo é R$ 99.999,99"); setActiveTab("geral"); return; }
+    if (!pageUrl.trim() || !/^https?:\/\/.+\..+/.test(pageUrl.trim())) { toast.error("Insira uma página de vendas com domínio válido (ex: https://seusite.com)"); setActiveTab("geral"); return; }
+    if (!supportEmail.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(supportEmail.trim())) { toast.error("Insira um e-mail de suporte válido (ex: suporte@seusite.com)"); setActiveTab("geral"); return; }
+    if (!supportPhone.trim() || supportPhone.replace(/\D/g, "").length < 10) { toast.error("Insira um telefone de suporte válido (com DDD)"); setActiveTab("geral"); return; }
+    if (!displayName.trim()) { toast.error("Nome de exibição é obrigatório"); setActiveTab("geral"); return; }
 
  setSaving(true);
  try {
@@ -315,9 +319,10 @@ export default function ProductEditor() {
  status,
  page_url: pageUrl || null,
  image_url: imageUrl,
- support_email: supportEmail.trim() || null,
- display_name: displayName.trim() || null,
- delivery_type: deliveryType,
+  support_email: supportEmail.trim() || null,
+  support_phone: supportPhone.trim() || null,
+  display_name: displayName.trim() || null,
+  delivery_type: deliveryType,
  affiliate_enabled: affiliateEnabled,
  affiliate_commission: Number(affiliateCommission) || 30,
  co_production_enabled: coProductionEnabled,
@@ -783,9 +788,9 @@ export default function ProductEditor() {
  exit={{ opacity: 0, y: -6 }}
  transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
  >
- {activeTab === "geral" && <TabGeral
- {...{ name, setName, description, setDescription, price, setPrice, status, setStatus, pageUrl, setPageUrl, imagePreview, setImagePreview, imageFile, setImageFile, fileInputRef, handleFileChange, category, setCategory, paymentType, setPaymentType, displayName, setDisplayName, supportEmail, setSupportEmail, warrantyDays, setWarrantyDays, isDragging, setIsDragging, handleDrop }}
- />}
+  {activeTab === "geral" && <TabGeral
+  {...{ name, setName, description, setDescription, price, setPrice, status, setStatus, pageUrl, setPageUrl, imagePreview, setImagePreview, imageFile, setImageFile, fileInputRef, handleFileChange, category, setCategory, paymentType, setPaymentType, displayName, setDisplayName, supportEmail, setSupportEmail, supportPhone, setSupportPhone, warrantyDays, setWarrantyDays, isDragging, setIsDragging, handleDrop, onNext: handleSave }}
+  />}
 
  {activeTab === "configuracoes" && <TabConfiguracoes
  {...{ price, pixEnabled, setPixEnabled, boletoEnabled, setBoletoEnabled, creditCardEnabled, setCreditCardEnabled, emailConfirm, setEmailConfirm, showCouponField, setShowCouponField, addressRequired, setAddressRequired, deliveryType, setDeliveryType }}
@@ -833,10 +838,33 @@ export default function ProductEditor() {
  TAB COMPONENTS
  ═══════════════════════════════════════════════ */
 
-function TabGeral({ name, setName, description, setDescription, price, setPrice, status, setStatus, pageUrl, setPageUrl, imagePreview, setImagePreview, imageFile, setImageFile, fileInputRef, handleFileChange, category, setCategory, paymentType, setPaymentType, displayName, setDisplayName, supportEmail, setSupportEmail, warrantyDays, setWarrantyDays, isDragging, setIsDragging, handleDrop }: any) {
+function TabGeral({ name, setName, description, setDescription, price, setPrice, status, setStatus, pageUrl, setPageUrl, imagePreview, setImagePreview, imageFile, setImageFile, fileInputRef, handleFileChange, category, setCategory, paymentType, setPaymentType, displayName, setDisplayName, supportEmail, setSupportEmail, supportPhone, setSupportPhone, warrantyDays, setWarrantyDays, isDragging, setIsDragging, handleDrop, onNext }: any) {
   const descValid = description.length >= 50;
   const urlValid = /^https?:\/\/.+\..+/.test(pageUrl.trim());
   const emailValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(supportEmail.trim());
+  const phoneDigits = (supportPhone || "").replace(/\D/g, "");
+  const phoneValid = phoneDigits.length >= 10 && phoneDigits.length <= 11;
+  const formatPhone = (v: string) => {
+    const d = v.replace(/\D/g, "").slice(0, 11);
+    if (d.length <= 2) return d.length ? `(${d}` : "";
+    if (d.length <= 6) return `(${d.slice(0,2)}) ${d.slice(2)}`;
+    if (d.length <= 10) return `(${d.slice(0,2)}) ${d.slice(2,6)}-${d.slice(6)}`;
+    return `(${d.slice(0,2)}) ${d.slice(2,7)}-${d.slice(7)}`;
+  };
+  const handlePriceChange = (raw: string) => {
+    // Aceita "10", "10,50", "10.50". Mantém apenas dígitos e um separador.
+    let v = raw.replace(/[^0-9,.]/g, "");
+    // unifica para vírgula como separador decimal visualmente
+    v = v.replace(/\./g, ",");
+    // permite só uma vírgula
+    const parts = v.split(",");
+    if (parts.length > 2) v = parts[0] + "," + parts.slice(1).join("");
+    // máx 2 casas decimais
+    const [int, dec] = v.split(",");
+    if (dec !== undefined) v = int + "," + dec.slice(0, 2);
+    setPrice(v);
+  };
+  const priceNumber = parseFloat(String(price).replace(",", ".")) || 0;
 
   return (
     <div className="space-y-8">
@@ -937,8 +965,23 @@ function TabGeral({ name, setName, description, setDescription, price, setPrice,
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent className="w-[var(--radix-select-trigger-width)] max-w-none p-1.5">
-                  <RichSelectItem value="unico"       icon={DollarSign} label="Pagamento único"      desc="Cobrança única" />
-                  <RichSelectItem value="assinatura"  icon={RefreshCw}  label="Assinatura recorrente" desc="Cobrança automática" />
+                  <RichSelectItem value="unico" icon={DollarSign} label="Pagamento único" desc="Cobrança única (uma vez)" />
+                  <SelectPrimitive.Item
+                    value="assinatura"
+                    disabled
+                    className="relative flex w-full cursor-not-allowed select-none items-center gap-3 rounded-xl px-2.5 py-2.5 outline-none opacity-50"
+                  >
+                    <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-border bg-secondary text-muted-foreground">
+                      <RefreshCw className="h-3.5 w-3.5" strokeWidth={2} />
+                    </span>
+                    <span className="flex-1 min-w-0">
+                      <SelectPrimitive.ItemText asChild>
+                        <span className="block font-display text-[12.5px] font-bold tracking-tight text-foreground">Assinatura recorrente</span>
+                      </SelectPrimitive.ItemText>
+                      <span className="mt-0.5 block text-[10.5px] text-muted-foreground">Cobrança automática mensal</span>
+                    </span>
+                    <span className="ml-auto text-[9px] font-bold uppercase tracking-[0.12em] text-warning px-1.5 py-0.5 rounded border border-warning/40 bg-warning/10">Em breve</span>
+                  </SelectPrimitive.Item>
                 </SelectContent>
               </Select>
             </div>
@@ -949,8 +992,20 @@ function TabGeral({ name, setName, description, setDescription, price, setPrice,
                 <label className="text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">Preço de venda</label>
                 <div className="relative">
                   <span className="absolute left-4 top-1/2 -translate-y-1/2 text-base font-display font-bold text-muted-foreground">R$</span>
-                  <Input type="number" step="0.01" min="1" max="99999.99" value={price} onChange={(e: any) => setPrice(e.target.value)} className="h-14 pl-12 text-3xl font-numbers font-black tracking-[-0.03em] bg-secondary border-border text-success" placeholder="0,00" />
+                  <Input
+                    type="text"
+                    inputMode="decimal"
+                    value={price}
+                    onChange={(e: any) => handlePriceChange(e.target.value)}
+                    className="h-14 pl-12 text-3xl font-numbers font-black tracking-[-0.03em] bg-secondary border-border text-success"
+                    placeholder="0,00"
+                  />
                 </div>
+                {priceNumber > 0 && (
+                  <p className="text-[10px] font-bold text-muted-foreground">
+                    Valor cobrado: R$ {priceNumber.toFixed(2).replace(".", ",")}
+                  </p>
+                )}
               </div>
               <div className="w-32 space-y-1.5">
                 <label className="text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">Garantia</label>
@@ -991,15 +1046,40 @@ function TabGeral({ name, setName, description, setDescription, price, setPrice,
               <p className={cn("text-[10px]", emailValid ? "text-success" : "text-muted-foreground/60")}>{emailValid ? "E-mail válido" : "Insira um e-mail válido"}</p>
             </div>
           </div>
-          <div className="space-y-1.5">
-            <label className="text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground flex items-center gap-1.5">
-              <Users className="h-3 w-3" /> Nome de exibição do produtor
-            </label>
-            <Input value={displayName} onChange={(e: any) => setDisplayName(e.target.value)} placeholder="Nome que aparecerá no checkout" className="h-11 bg-secondary border-border" required />
-            <p className="text-[10px] text-muted-foreground/60">Aparecerá no rodapé do checkout</p>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+            <div className="space-y-1.5">
+              <label className="text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground flex items-center gap-1.5">
+                <Phone className="h-3 w-3" /> Telefone de suporte
+              </label>
+              <Input
+                value={supportPhone}
+                onChange={(e: any) => setSupportPhone(formatPhone(e.target.value))}
+                placeholder="(11) 91234-5678"
+                inputMode="tel"
+                className={cn("h-11 bg-secondary border-border", supportPhone && !phoneValid && "border-destructive/50")}
+                required
+              />
+              <p className={cn("text-[10px]", phoneValid ? "text-success" : "text-muted-foreground/60")}>{phoneValid ? "Telefone válido" : "Insira o DDD + número (10 ou 11 dígitos)"}</p>
+            </div>
+            <div className="space-y-1.5">
+              <label className="text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground flex items-center gap-1.5">
+                <Users className="h-3 w-3" /> Nome de exibição do produtor
+              </label>
+              <Input value={displayName} onChange={(e: any) => setDisplayName(e.target.value)} placeholder="Nome que aparecerá no checkout" className="h-11 bg-secondary border-border" required />
+              <p className="text-[10px] text-muted-foreground/60">Aparecerá no rodapé do checkout</p>
+            </div>
           </div>
         </div>
       </section>
+
+      {/* Bottom Next/Save button — easier than scrolling up */}
+      {onNext && (
+        <div className="flex justify-end pt-2">
+          <Button onClick={onNext} size="lg" className="gap-2 rounded-xl font-display font-bold px-8 h-12">
+            Salvar e continuar <ChevronRight className="h-4 w-4" />
+          </Button>
+        </div>
+      )}
     </div>
   );
 }
