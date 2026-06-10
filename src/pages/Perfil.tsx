@@ -196,6 +196,14 @@ export default function Perfil() {
         const cutoff = Date.now() - 30 * 24 * 60 * 60 * 1000;
         setLast30Sales(data.filter(t => new Date(t.created_at).getTime() >= cutoff).length);
       });
+   }, [user]);
+
+  const [maxTicket, setMaxTicket] = useState<number | null>(null);
+  useEffect(() => {
+    if (!user) return;
+    supabase.rpc("get_my_max_ticket" as any).then(({ data }) => {
+      if (typeof data === "number") setMaxTicket(data);
+    });
   }, [user]);
 
   const isAddressLocked = !!(profile as any)?.address_locked;
