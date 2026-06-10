@@ -1,7 +1,8 @@
 import { useState, useEffect, useMemo } from "react";
 import {
-  KeyRound, Plus, Copy, Check, Shield, Search, Globe, Lock, Code2, Power, PowerOff, BookOpen,
+  KeyRound, Plus, Copy, Shield, Search, Globe, Lock, Code2, Pencil, Trash2, BookOpen,
 } from "lucide-react";
+
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
