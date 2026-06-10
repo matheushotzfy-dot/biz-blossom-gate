@@ -23,6 +23,7 @@ import {
 } from "@/components/ui/select";
 import type { Tables } from "@/integrations/supabase/types";
 import { GlassPanel as AdminPanel, GlassPanelTitle as PanelTitle } from "./AdminOverviewTab";
+import { LinearHero, LinearStat, LinearStatRow } from "@/components/admin/LinearKit";
 import { logAdminAction } from "@/lib/auditLog";
 
 interface ActivityLog {
@@ -445,7 +446,23 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
  };
 
  return (
- <div className="space-y-4">
+ <div className="space-y-6">
+ <LinearHero
+   eyebrow="Plataforma · Sellers"
+   title="Vendedores"
+   subtitle="Aprove KYC, classifique tiers, monitore saldo e gerencie acesso da base."
+   status={{ tone: kycPendingProfiles.length > 0 ? "warning" : "success", label: `${profiles.length} cadastrados`, pulse: kycPendingProfiles.length > 0 }}
+ />
+
+ <LinearStatRow>
+   <LinearStat icon={Users} label="Total" value={String(profiles.length)} sub="Base ativa" tone="neutral" />
+   <LinearStat icon={FileText} label="KYC Pendente" value={String(kycPendingProfiles.length)} sub="Aguardando aprovação" tone="warning" />
+   <LinearStat icon={Shield} label="Black" value={String(blackCount)} sub="Tier high-volume" tone="neutral" />
+   <LinearStat icon={CheckCircle2} label="White" value={String(whiteCount)} sub="Tier regulado" tone="info" />
+   <LinearStat icon={AlertTriangle} label="Sem Tier" value={String(unsetCount)} sub="Não classificados" tone="warning" />
+   <LinearStat icon={Snowflake} label="Congelados" value={String(profiles.filter(p => (p as any).balance_frozen === true).length)} sub="Saldo bloqueado" tone="destructive" />
+ </LinearStatRow>
+
  {/* ── KYC Alert Banner ── */}
  {kycPendingProfiles.length > 0 && sellerFilter !== "kyc" && (
  <div className="rounded-xl border border-warning/20 bg-warning/5 p-4 flex items-center justify-between">

@@ -21,7 +21,8 @@ import {
 } from "@/components/ui/sheet";
 import { toast } from "sonner";
 import type { Tables } from "@/integrations/supabase/types";
-import { GlassPanel as AdminPanel, GlassPanelTitle as PanelTitle, AdminKpi } from "./AdminOverviewTab";
+import { GlassPanel as AdminPanel, GlassPanelTitle as PanelTitle } from "./AdminOverviewTab";
+import { LinearHero, LinearStat, LinearStatRow } from "@/components/admin/LinearKit";
 import { logAdminAction } from "@/lib/auditLog";
 import { cn } from "@/lib/utils";
 
@@ -173,15 +174,22 @@ export default function AdminProductsTab({ products, profiles, transactions, fmt
   const rejectedCount = products.filter(p => p.status === "rejected").length;
 
  return (
- <div className="space-y-5 animate-fade-in">
+ <div className="space-y-6 animate-fade-in">
+ <LinearHero
+   eyebrow="Catálogo · Produtos"
+   title="Curadoria de produtos"
+   subtitle="Revise produtos pendentes, suspenda violações e monitore o catálogo global."
+   status={{ tone: pendingReview.length > 0 ? "warning" : "success", label: pendingReview.length > 0 ? `${pendingReview.length} em revisão` : "Sem pendências", pulse: pendingReview.length > 0 }}
+ />
+
  {/* KPIs */}
- <div className="grid grid-cols-2 lg:grid-cols-5 gap-3">
- <AdminKpi icon={<Package className="h-5 w-5" />} label="Total Produtos" value={String(products.length)} sub="Cadastrados" />
- <AdminKpi icon={<Clock className="h-5 w-5" />} label="Em Revisão" value={String(pendingReview.length)} sub="Aguardando" alert={pendingReview.length > 0} />
- <AdminKpi icon={<CheckCircle2 className="h-5 w-5" />} label="Ativos" value={String(activeCount)} sub={`${((activeCount / Math.max(products.length, 1)) * 100).toFixed(0)}%`} highlight />
- <AdminKpi icon={<Ban className="h-5 w-5" />} label="Suspensos" value={String(blockedCount)} sub="Checkout inativo" alert={blockedCount > 0} />
- <AdminKpi icon={<ShieldAlert className="h-5 w-5" />} label="Recusados" value={String(rejectedCount)} sub="Contra políticas" alert={rejectedCount > 0} />
- </div>
+ <LinearStatRow>
+   <LinearStat icon={Package} label="Total" value={String(products.length)} sub="Cadastrados" tone="neutral" />
+   <LinearStat icon={Clock} label="Em Revisão" value={String(pendingReview.length)} sub="Aguardando" tone="warning" />
+   <LinearStat icon={CheckCircle2} label="Ativos" value={String(activeCount)} sub={`${((activeCount / Math.max(products.length, 1)) * 100).toFixed(0)}% do total`} tone="success" />
+   <LinearStat icon={Ban} label="Suspensos" value={String(blockedCount)} sub="Checkout inativo" tone="destructive" />
+   <LinearStat icon={ShieldAlert} label="Recusados" value={String(rejectedCount)} sub="Contra políticas" tone="destructive" />
+ </LinearStatRow>
 
  {/* ═══ REVIEW BOARD ═══ */}
  {pendingReview.length > 0 && (

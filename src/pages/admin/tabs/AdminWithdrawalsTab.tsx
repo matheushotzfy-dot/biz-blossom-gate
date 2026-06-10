@@ -20,7 +20,7 @@ import { logAdminAction } from "@/lib/auditLog";
 import { useAuth } from "@/hooks/useAuth";
 import type { Tables } from "@/integrations/supabase/types";
 import { GlassPanel as AdminPanel, GlassPanelTitle as PanelTitle } from "./AdminOverviewTab";
-import { FinanceiroHero, FinanceiroKpi, FinanceiroKpiGrid } from "@/components/financeiro/FinanceiroHero";
+import { LinearHero, LinearStat, LinearStatRow } from "@/components/admin/LinearKit";
 
 /* ── Types ── */
 interface AuditLog { id: string; admin_user_id: string; action: string; entity_id: string | null; created_at: string; }
@@ -270,24 +270,23 @@ export default function AdminWithdrawalsTab({ withdrawals, profiles, onWithdrawa
  return (
  <div className="space-y-5 animate-fade-in">
  {/* Hero */}
- <FinanceiroHero
+ <LinearHero
    eyebrow="Operações · Saques"
    title="Fila de Saques"
    subtitle="Aprove pagamentos, monitore risco e gerencie ajustes de saldo."
    status={{ tone: pending.length > 0 ? "warning" : "success", label: pending.length > 0 ? `${pending.length} aguardando` : "Fila zerada", pulse: pending.length > 0 }}
  />
 
- {/* KPIs */}
- <FinanceiroKpiGrid cols={4}>
-   <FinanceiroKpi icon={ArrowDownToLine} label="Total Saques" value={String(withdrawals.length)} sub="Histórico" tone="neutral" />
-   <FinanceiroKpi icon={Clock} label="Pendentes" value={fmtCurrency(totalPending)} sub={`${pending.length} solicitações`} tone="warning" />
-   <FinanceiroKpi icon={CheckCircle2} label="Aprovados" value={fmtCurrency(totalApproved)} sub={`${approved.length} pagos`} tone="success" />
-   <FinanceiroKpi icon={XCircle} label="Recusados" value={String(rejected.length)} sub="Negados" tone="destructive" />
-   <FinanceiroKpi icon={Wallet} label="Taxas" value={fmtCurrency(totalFees)} sub="Coletadas" tone="primary" />
-   <FinanceiroKpi icon={ShieldAlert} label="Risco" value={String(riskCount)} sub="Requer revisão" tone="destructive" />
-   <FinanceiroKpi icon={TrendingUp} label="Ajustes +" value={fmtCurrency(totalAdjCredits)} sub="Créditos" tone="info" />
-   <FinanceiroKpi icon={TrendingDown} label="Ajustes -" value={fmtCurrency(totalAdjDebits)} sub="Débitos" tone="warning" />
- </FinanceiroKpiGrid>
+ <LinearStatRow>
+   <LinearStat icon={ArrowDownToLine} label="Total Saques" value={String(withdrawals.length)} sub="Histórico" tone="neutral" />
+   <LinearStat icon={Clock} label="Pendentes" value={fmtCurrency(totalPending)} sub={`${pending.length} solicitações`} tone="warning" />
+   <LinearStat icon={CheckCircle2} label="Aprovados" value={fmtCurrency(totalApproved)} sub={`${approved.length} pagos`} tone="success" />
+   <LinearStat icon={XCircle} label="Recusados" value={String(rejected.length)} sub="Negados" tone="destructive" />
+   <LinearStat icon={Wallet} label="Taxas" value={fmtCurrency(totalFees)} sub="Coletadas" tone="primary" />
+   <LinearStat icon={ShieldAlert} label="Risco" value={String(riskCount)} sub="Requer revisão" tone="destructive" />
+   <LinearStat icon={TrendingUp} label="Ajustes +" value={fmtCurrency(totalAdjCredits)} sub="Créditos" tone="info" />
+   <LinearStat icon={TrendingDown} label="Ajustes -" value={fmtCurrency(totalAdjDebits)} sub="Débitos" tone="warning" />
+ </LinearStatRow>
 
  {/* Sub-Tabs */}
  <div className="flex items-center gap-1 p-1 rounded-xl bg-muted/30 border border-border w-fit">
