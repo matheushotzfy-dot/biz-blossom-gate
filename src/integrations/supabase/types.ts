@@ -891,8 +891,12 @@ export type Database = {
       custom_user_fees: {
         Row: {
           admin_user_id: string
+          card_fixed: number | null
+          card_percentage: number | null
           created_at: string
           id: string
+          pix_fixed: number | null
+          pix_percentage: number | null
           transaction_fixed: number | null
           transaction_percentage: number | null
           updated_at: string
@@ -901,8 +905,12 @@ export type Database = {
         }
         Insert: {
           admin_user_id: string
+          card_fixed?: number | null
+          card_percentage?: number | null
           created_at?: string
           id?: string
+          pix_fixed?: number | null
+          pix_percentage?: number | null
           transaction_fixed?: number | null
           transaction_percentage?: number | null
           updated_at?: string
@@ -911,8 +919,12 @@ export type Database = {
         }
         Update: {
           admin_user_id?: string
+          card_fixed?: number | null
+          card_percentage?: number | null
           created_at?: string
           id?: string
+          pix_fixed?: number | null
+          pix_percentage?: number | null
           transaction_fixed?: number | null
           transaction_percentage?: number | null
           updated_at?: string
