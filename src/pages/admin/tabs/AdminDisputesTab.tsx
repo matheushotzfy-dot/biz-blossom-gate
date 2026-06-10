@@ -10,6 +10,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import type { Tables } from "@/integrations/supabase/types";
 import { GlassPanel as AdminPanel, GlassPanelTitle as PanelTitle } from "./AdminOverviewTab";
+import { FinanceiroHero, FinanceiroKpi, FinanceiroKpiGrid } from "@/components/financeiro/FinanceiroHero";
 import { logAdminAction } from "@/lib/auditLog";
 
 interface Dispute {
@@ -122,31 +123,33 @@ export default function AdminDisputesTab({ type, title, profiles, transactions, 
  };
 
  return (
- <div className="space-y-4">
- <div className="flex items-center justify-between">
- <div className="relative max-w-md flex-1">
+ <div className="space-y-5">
+ {/* Hero */}
+ <FinanceiroHero
+   eyebrow={`Operações · ${title}`}
+   title={title}
+   subtitle="Gerencie disputas, evidências e resoluções com agilidade."
+   status={{ tone: disputes.filter(d => d.status === "open").length > 0 ? "warning" : "success", label: `${disputes.filter(d => d.status === "open").length} abertas`, pulse: disputes.filter(d => d.status === "open").length > 0 }}
+   actions={
+     <Button size="sm" className="bg-info/10 text-info border border-info/20 rounded-xl text-xs gap-1 hover:bg-info/20" onClick={() => setCreating(true)}>
+       <Plus className="h-3 w-3" /> Nova Disputa
+     </Button>
+   }
+ />
+
+ {/* KPIs */}
+ <FinanceiroKpiGrid cols={4}>
+   <FinanceiroKpi icon={AlertTriangle} label="Total" value={String(disputes.length)} sub="Histórico" tone="neutral" />
+   <FinanceiroKpi icon={Clock} label="Abertas" value={String(disputes.filter(d => d.status === "open").length)} sub="Requer ação" tone="warning" />
+   <FinanceiroKpi icon={MessageSquare} label="Em Análise" value={String(disputes.filter(d => d.status === "in_review").length)} sub="Avaliando" tone="info" />
+   <FinanceiroKpi icon={CheckCircle2} label="Resolvidas" value={String(disputes.filter(d => d.status.startsWith("resolved") || d.status === "closed").length)} sub="Encerradas" tone="success" />
+ </FinanceiroKpiGrid>
+
+ {/* Search */}
+ <div className="relative max-w-md">
  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
  <input placeholder="Buscar por nome, e-mail, ID..." value={search} onChange={e => setSearch(e.target.value)}
  className="w-full h-10 pl-10 pr-4 bg-muted/30 border border-border rounded-xl text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary/30" />
- </div>
- <Button size="sm" className="bg-info/10 text-info border border-info/20 rounded-xl text-xs gap-1" onClick={() => setCreating(true)}>
- <Plus className="h-3 w-3" /> Nova Disputa
- </Button>
- </div>
-
- {/* Stats */}
- <div className="grid grid-cols-4 gap-3">
- {[
- { l: "Total", v: disputes.length, c: "text-foreground" },
- { l: "Abertas", v: disputes.filter(d => d.status === "open").length, c: "text-warning" },
- { l: "Em Análise", v: disputes.filter(d => d.status === "in_review").length, c: "text-info" },
- { l: "Resolvidas", v: disputes.filter(d => d.status.startsWith("resolved") || d.status === "closed").length, c: "text-primary" },
- ].map(s => (
- <div key={s.l} className="rounded-xl bg-card border border-border p-4">
- <p className="text-[10px] text-muted-foreground uppercase tracking-wider">{s.l}</p>
- <p className={`text-2xl font-extrabold mt-1 ${s.c}`}>{s.v}</p>
- </div>
- ))}
  </div>
 
  {/* Table */}

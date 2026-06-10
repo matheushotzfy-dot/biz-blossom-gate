@@ -19,7 +19,8 @@ import { toast } from "sonner";
 import { logAdminAction } from "@/lib/auditLog";
 import { useAuth } from "@/hooks/useAuth";
 import type { Tables } from "@/integrations/supabase/types";
-import { GlassPanel as AdminPanel, GlassPanelTitle as PanelTitle, AdminKpi } from "./AdminOverviewTab";
+import { GlassPanel as AdminPanel, GlassPanelTitle as PanelTitle } from "./AdminOverviewTab";
+import { FinanceiroHero, FinanceiroKpi, FinanceiroKpiGrid } from "@/components/financeiro/FinanceiroHero";
 
 /* ── Types ── */
 interface AuditLog { id: string; admin_user_id: string; action: string; entity_id: string | null; created_at: string; }
@@ -268,17 +269,25 @@ export default function AdminWithdrawalsTab({ withdrawals, profiles, onWithdrawa
 
  return (
  <div className="space-y-5 animate-fade-in">
+ {/* Hero */}
+ <FinanceiroHero
+   eyebrow="Operações · Saques"
+   title="Fila de Saques"
+   subtitle="Aprove pagamentos, monitore risco e gerencie ajustes de saldo."
+   status={{ tone: pending.length > 0 ? "warning" : "success", label: pending.length > 0 ? `${pending.length} aguardando` : "Fila zerada", pulse: pending.length > 0 }}
+ />
+
  {/* KPIs */}
- <div className="grid grid-cols-2 lg:grid-cols-4 xl:grid-cols-8 gap-3">
- <AdminKpi icon={<ArrowDownToLine className="h-5 w-5" />} label="Total Saques" value={String(withdrawals.length)} sub="Histórico" gradient="from-blue-500 to-indigo-600" glowColor="rgba(59,130,246,0.15)" />
- <AdminKpi icon={<Clock className="h-5 w-5" />} label="Pendentes" value={fmtCurrency(totalPending)} sub={`${pending.length} solicitações`} gradient="from-amber-500 to-orange-600" glowColor="rgba(245,158,11,0.15)" alert={pending.length > 0} />
- <AdminKpi icon={<CheckCircle2 className="h-5 w-5" />} label="Aprovados" value={fmtCurrency(totalApproved)} sub={`${approved.length} pagos`} gradient="from-emerald-500 to-emerald-600" glowColor="rgba(52,211,153,0.15)" />
- <AdminKpi icon={<XCircle className="h-5 w-5" />} label="Recusados" value={String(rejected.length)} sub="Negados" gradient="from-red-500 to-rose-600" glowColor="rgba(239,68,68,0.15)" />
- <AdminKpi icon={<Wallet className="h-5 w-5" />} label="Taxas" value={fmtCurrency(totalFees)} sub="Coletadas" gradient="from-violet-500 to-purple-600" glowColor="rgba(139,92,246,0.15)" highlight />
- <AdminKpi icon={<ShieldAlert className="h-5 w-5" />} label="Risco" value={String(riskCount)} sub="Requer revisão" gradient="from-red-600 to-pink-600" glowColor="rgba(239,68,68,0.2)" alert={riskCount > 0} />
- <AdminKpi icon={<TrendingUp className="h-5 w-5" />} label="Ajustes +" value={fmtCurrency(totalAdjCredits)} sub="Créditos" gradient="from-teal-500 to-cyan-600" glowColor="rgba(6,182,212,0.15)" />
- <AdminKpi icon={<TrendingDown className="h-5 w-5" />} label="Ajustes -" value={fmtCurrency(totalAdjDebits)} sub="Débitos" gradient="from-orange-500 to-red-500" glowColor="rgba(249,115,22,0.15)" />
- </div>
+ <FinanceiroKpiGrid cols={4}>
+   <FinanceiroKpi icon={ArrowDownToLine} label="Total Saques" value={String(withdrawals.length)} sub="Histórico" tone="neutral" />
+   <FinanceiroKpi icon={Clock} label="Pendentes" value={fmtCurrency(totalPending)} sub={`${pending.length} solicitações`} tone="warning" />
+   <FinanceiroKpi icon={CheckCircle2} label="Aprovados" value={fmtCurrency(totalApproved)} sub={`${approved.length} pagos`} tone="success" />
+   <FinanceiroKpi icon={XCircle} label="Recusados" value={String(rejected.length)} sub="Negados" tone="destructive" />
+   <FinanceiroKpi icon={Wallet} label="Taxas" value={fmtCurrency(totalFees)} sub="Coletadas" tone="primary" />
+   <FinanceiroKpi icon={ShieldAlert} label="Risco" value={String(riskCount)} sub="Requer revisão" tone="destructive" />
+   <FinanceiroKpi icon={TrendingUp} label="Ajustes +" value={fmtCurrency(totalAdjCredits)} sub="Créditos" tone="info" />
+   <FinanceiroKpi icon={TrendingDown} label="Ajustes -" value={fmtCurrency(totalAdjDebits)} sub="Débitos" tone="warning" />
+ </FinanceiroKpiGrid>
 
  {/* Sub-Tabs */}
  <div className="flex items-center gap-1 p-1 rounded-xl bg-muted/30 border border-border w-fit">
