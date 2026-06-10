@@ -1,15 +1,16 @@
 import { useMemo } from "react";
 import {
  BarChart3, TrendingUp, Users, CreditCard, DollarSign, Percent,
- Calendar, Target, Layers, Activity, PieChart as PieIcon, ArrowUpRight,
+ Calendar, Target, Layers, Activity, PieChart as PieIcon, ArrowUpRight, Wallet, ShieldAlert,
 } from "lucide-react";
 import {
  AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
- BarChart, Bar, PieChart, Pie, Cell, Legend, LineChart, Line,
+ BarChart, Bar, PieChart, Pie, Cell, Legend, LineChart, Line, ComposedChart,
 } from "recharts";
 import type { Tables } from "@/integrations/supabase/types";
-import { GlassPanel as AdminPanel, GlassPanelTitle as PanelTitle, AdminKpi } from "./AdminOverviewTab";
 import { cn } from "@/lib/utils";
+import { FinanceiroHero } from "@/components/financeiro/FinanceiroHero";
+import { PremiumMetric, PremiumMetricGrid, PremiumPanel } from "./AdminPremium";
 
 interface Props {
  transactions: Tables<"transactions">[];
@@ -19,7 +20,18 @@ interface Props {
  fmtCurrency: (v: number) => string;
 }
 
-const COLORS = ["#6366f1", "#f59e0b", "#ef4444", "#3b82f6", "#8b5cf6"];
+const COLORS = ["hsl(var(--primary))", "hsl(var(--success))", "hsl(var(--warning))", "hsl(var(--info))", "hsl(var(--destructive))"];
+
+function TooltipBox({ active, payload, label, fmtCurrency }: any) {
+ if (!active || !payload?.length) return null;
+ return <div className="rounded-xl border border-border bg-card px-3 py-2 text-[11px] shadow-xl">
+  {label && <p className="mb-1 text-[9px] font-black uppercase tracking-widest text-muted-foreground">{label}</p>}
+  {payload.map((p: any) => <div key={p.dataKey} className="flex items-center justify-between gap-5 py-0.5">
+   <span className="font-bold text-muted-foreground">{p.name}</span>
+   <span className="font-black tabular-nums text-foreground">{typeof p.value === "number" && p.value > 100 ? fmtCurrency(p.value) : p.value}</span>
+  </div>)}
+ </div>;
+}
 
 export default function AdminAnalyticsTab({ transactions, profiles, products, withdrawals, fmtCurrency }: Props) {
 
@@ -185,127 +197,83 @@ export default function AdminAnalyticsTab({ transactions, profiles, products, wi
  const activeSellers = new Set(approved.map(t => t.user_id)).size;
  const avgTicket = approved.length > 0 ? totalRevenue / approved.length : 0;
 
- return (
- <div className="space-y-5 animate-fade-in">
- {/* KPIs */}
- <div className="grid grid-cols-2 lg:grid-cols-6 gap-3">
- <AdminKpi icon={<DollarSign className="h-5 w-5" />} label="Receita Líquida" value={fmtCurrency(totalRevenue)} sub="Total aprovado" highlight />
- <AdminKpi icon={<Percent className="h-5 w-5" />} label="Take Rate" value={fmtCurrency(totalFees)} sub={`${transactions.length > 0 ? ((totalFees / (totalRevenue + totalFees)) * 100).toFixed(1) : 0}%`} />
- <AdminKpi icon={<Target className="h-5 w-5" />} label="Taxa Aprovação" value={`${approvalRate.toFixed(1)}%`} sub={`${approved.length}/${transactions.length}`} />
- <AdminKpi icon={<Users className="h-5 w-5" />} label="Sellers Ativos" value={String(activeSellers)} sub={`de ${profiles.length}`} />
- <AdminKpi icon={<CreditCard className="h-5 w-5" />} label="Ticket Médio" value={fmtCurrency(avgTicket)} sub="Por venda" />
- <AdminKpi icon={<TrendingUp className="h-5 w-5" />} label="Projeção Mês" value={fmtCurrency(forecast.monthProjection)} sub={forecast.trend === "up" ? "Crescendo" : forecast.trend === "down" ? "Caindo" : "Estável"} />
- </div>
+  return (
+  <div className="space-y-6 animate-fade-in">
+  <FinanceiroHero eyebrow="Analytics · Command Center" title={fmtCurrency(totalRevenue + totalFees)} subtitle={`TPV analisado · lucro ${fmtCurrency(totalFees)} · aprovação ${approvalRate.toFixed(1)}% · ${activeSellers} sellers ativos`} status={{ tone: "success", label: "Stripe-level analytics", pulse: true }} />
+  <PremiumMetricGrid cols={6}>
+  <PremiumMetric icon={DollarSign} label="Receita Líquida" value={fmtCurrency(totalRevenue)} sub="Total aprovado" tone="success" />
+  <PremiumMetric icon={Percent} label="Lucro / Taxas" value={fmtCurrency(totalFees)} sub={`${transactions.length > 0 ? ((totalFees / (totalRevenue + totalFees)) * 100).toFixed(1) : 0}% do TPV`} tone="primary" />
+  <PremiumMetric icon={Target} label="Aprovação" value={`${approvalRate.toFixed(1)}%`} sub={`${approved.length}/${transactions.length} transações`} tone="info" />
+  <PremiumMetric icon={Users} label="Sellers Ativos" value={String(activeSellers)} sub={`base total ${profiles.length}`} tone="neutral" />
+  <PremiumMetric icon={CreditCard} label="Ticket Médio" value={fmtCurrency(avgTicket)} sub="por venda aprovada" tone="warning" />
+  <PremiumMetric icon={TrendingUp} label="Projeção Mês" value={fmtCurrency(forecast.monthProjection)} sub={forecast.trend === "up" ? "Crescendo" : forecast.trend === "down" ? "Contraindo" : "Estável"} tone={forecast.trend === "up" ? "success" : "neutral"} />
+  </PremiumMetricGrid>
 
- <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
- {/* Revenue Forecast */}
- <AdminPanel className="lg:col-span-2">
- <PanelTitle color="emerald" icon={<TrendingUp className="h-4 w-4" />}>
- Receita (30 dias + 7 dias projetados)
- </PanelTitle>
- <div className="h-[300px] mt-4">
- <ResponsiveContainer width="100%" height="100%">
- <AreaChart data={forecast.chartData}>
- <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.04)" vertical={false} />
- <XAxis dataKey="date" tick={{ fontSize: 10, fill: "rgba(255,255,255,0.3)" }} interval={4} tickLine={false} axisLine={false} />
- <YAxis tick={{ fontSize: 10, fill: "rgba(255,255,255,0.3)" }} tickLine={false} axisLine={false} />
- <Tooltip contentStyle={{ backgroundColor: "#0C0C18", border: "1px solid rgba(255,255,255,0.08)", borderRadius: "12px", fontSize: 12, color: "#fff" }} />
- <Area type="monotone" dataKey="receita" stroke="#6366f1" fill="#6366f1" fillOpacity={0.15} name="Receita" />
- <Area type="monotone" dataKey="previsao" stroke="#f59e0b" fill="#f59e0b" fillOpacity={0.1} strokeDasharray="5 5" name="Previsão" />
- </AreaChart>
- </ResponsiveContainer>
- </div>
- </AdminPanel>
+  <div className="grid grid-cols-1 xl:grid-cols-3 gap-4">
+  <PremiumPanel className="xl:col-span-2" title="Receita + projeção" eyebrow="30 dias reais · 7 dias forecast" icon={TrendingUp}>
+  <ResponsiveContainer width="100%" height={330}>
+  <ComposedChart data={forecast.chartData} margin={{ top: 10, right: 10, bottom: 0, left: -8 }}>
+  <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" strokeOpacity={0.36} vertical={false} />
+  <XAxis dataKey="date" stroke="hsl(var(--muted-foreground))" fontSize={10} interval={4} tickLine={false} axisLine={false} />
+  <YAxis stroke="hsl(var(--muted-foreground))" fontSize={10} tickLine={false} axisLine={false} tickFormatter={(v) => v >= 1000 ? `${(v / 1000).toFixed(0)}K` : v} />
+  <Tooltip content={<TooltipBox fmtCurrency={fmtCurrency} />} cursor={{ stroke: "hsl(var(--primary))", strokeOpacity: 0.24 }} />
+  <Area type="monotone" dataKey="receita" stroke="hsl(var(--primary))" fill="hsl(var(--primary) / 0.18)" strokeWidth={2.4} name="Receita" isAnimationActive animationDuration={900} />
+  <Line type="monotone" dataKey="previsao" stroke="hsl(var(--warning))" strokeWidth={2.2} strokeDasharray="6 4" dot={false} name="Previsão" isAnimationActive animationDuration={1100} />
+  </ComposedChart>
+  </ResponsiveContainer>
+  </PremiumPanel>
 
- {/* Conversion Funnel */}
- <AdminPanel>
- <PanelTitle color="blue" icon={<Layers className="h-4 w-4" />}>Funil de Conversão</PanelTitle>
- <div className="mt-4 space-y-2">
- {funnel.map((stage, i) => (
- <div key={stage.stage} className="space-y-1">
- <div className="flex justify-between text-xs">
- <span className="font-medium text-white/80">{stage.stage}</span>
- <span className="text-white/30">{stage.count} ({stage.pct.toFixed(1)}%)</span>
- </div>
- <div className="h-6 bg-white/[0.04] rounded-lg overflow-hidden relative">
- <div
- className="h-full rounded-lg transition-all duration-500"
- style={{ width: `${Math.max(stage.pct, 2)}%`, backgroundColor: stage.color, opacity: 0.8 }}
- />
- </div>
- </div>
- ))}
- </div>
- </AdminPanel>
+  <PremiumPanel title="Métodos" eyebrow="Distribuição" icon={PieIcon}>
+  <ResponsiveContainer width="100%" height={330}>
+  <PieChart>
+  <Pie data={methodPie} dataKey="value" nameKey="name" cx="50%" cy="50%" innerRadius={58} outerRadius={104} paddingAngle={4} label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}>
+  {methodPie.map((_, i) => <Cell key={i} fill={COLORS[i % COLORS.length]} stroke="hsl(var(--card))" strokeWidth={2} />)}
+  </Pie>
+  <Tooltip content={<TooltipBox fmtCurrency={fmtCurrency} />} />
+  </PieChart>
+  </ResponsiveContainer>
+  </PremiumPanel>
+  </div>
 
- {/* Method Distribution */}
- <AdminPanel>
- <PanelTitle color="violet" icon={<PieIcon className="h-4 w-4" />}>Distribuição por Método</PanelTitle>
- <div className="h-[250px] mt-4">
- <ResponsiveContainer width="100%" height="100%">
- <PieChart>
- <Pie data={methodPie} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={80} label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}>
- {methodPie.map((_, i) => (
- <Cell key={i} fill={COLORS[i % COLORS.length]} />
- ))}
- </Pie>
- <Tooltip contentStyle={{ backgroundColor: "#0C0C18", border: "1px solid rgba(255,255,255,0.08)", borderRadius: "12px", fontSize: 12, color: "#fff" }} />
- </PieChart>
- </ResponsiveContainer>
- </div>
- </AdminPanel>
+  <div className="grid grid-cols-1 xl:grid-cols-3 gap-4">
+  <PremiumPanel title="Funil de Conversão" eyebrow="Transações" icon={Layers}>
+  <div className="space-y-3">
+  {funnel.map((stage) => (
+  <div key={stage.stage} className="space-y-1.5">
+  <div className="flex justify-between text-xs"><span className="font-black text-foreground">{stage.stage}</span><span className="font-bold text-muted-foreground">{stage.count} · {stage.pct.toFixed(1)}%</span></div>
+  <div className="h-8 overflow-hidden rounded-xl border border-border/50 bg-muted/30"><div className="h-full rounded-xl transition-all duration-700" style={{ width: `${Math.max(stage.pct, 2)}%`, backgroundColor: stage.color }} /></div>
+  </div>
+  ))}
+  </div>
+  </PremiumPanel>
 
- {/* Daily Revenue Bars */}
- <AdminPanel className="lg:col-span-2">
- <PanelTitle color="amber" icon={<BarChart3 className="h-4 w-4" />}>Receita vs Taxas (14 dias)</PanelTitle>
- <div className="h-[280px] mt-4">
- <ResponsiveContainer width="100%" height="100%">
- <BarChart data={dailyBars}>
- <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.04)" vertical={false} />
- <XAxis dataKey="day" tick={{ fontSize: 10, fill: "rgba(255,255,255,0.3)" }} tickLine={false} axisLine={false} />
- <YAxis tick={{ fontSize: 10, fill: "rgba(255,255,255,0.3)" }} tickLine={false} axisLine={false} />
- <Tooltip contentStyle={{ backgroundColor: "#0C0C18", border: "1px solid rgba(255,255,255,0.08)", borderRadius: "12px", fontSize: 12, color: "#fff" }} />
- <Legend wrapperStyle={{ fontSize: 11, color: "rgba(255,255,255,0.5)" }} />
- <Bar dataKey="receita" fill="#6366f1" name="Receita Líquida" radius={[4, 4, 0, 0]} />
- <Bar dataKey="taxas" fill="#f59e0b" name="Taxas Coletadas" radius={[4, 4, 0, 0]} />
- </BarChart>
- </ResponsiveContainer>
- </div>
- </AdminPanel>
+  <PremiumPanel className="xl:col-span-2" title="Receita vs taxas" eyebrow="Últimos 14 dias" icon={BarChart3}>
+  <ResponsiveContainer width="100%" height={280}>
+  <BarChart data={dailyBars} margin={{ top: 8, right: 8, bottom: 0, left: -8 }}>
+  <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" strokeOpacity={0.36} vertical={false} />
+  <XAxis dataKey="day" stroke="hsl(var(--muted-foreground))" fontSize={10} tickLine={false} axisLine={false} />
+  <YAxis stroke="hsl(var(--muted-foreground))" fontSize={10} tickLine={false} axisLine={false} tickFormatter={(v) => v >= 1000 ? `${(v / 1000).toFixed(0)}K` : v} />
+  <Tooltip content={<TooltipBox fmtCurrency={fmtCurrency} />} />
+  <Legend wrapperStyle={{ fontSize: 11 }} />
+  <Bar dataKey="receita" fill="hsl(var(--primary))" name="Receita Líquida" radius={[8, 8, 0, 0]} isAnimationActive animationDuration={800} />
+  <Bar dataKey="taxas" fill="hsl(var(--success))" name="Taxas Coletadas" radius={[8, 8, 0, 0]} isAnimationActive animationDuration={1000} />
+  </BarChart>
+  </ResponsiveContainer>
+  </PremiumPanel>
+  </div>
 
- {/* Cohort Analysis */}
- <AdminPanel className="lg:col-span-2">
- <PanelTitle color="cyan" icon={<Calendar className="h-4 w-4" />}>Análise de Cohort — Sellers por Mês de Cadastro</PanelTitle>
- <div className="overflow-x-auto mt-4">
- <table className="w-full text-sm">
- <thead><tr className="border-b border-white/[0.06]">
- {["Mês", "Novos Sellers", "Ativos (venderam)", "Receita Gerada", "Retenção"].map(h => (
- <th key={h} className="text-left p-3 text-[10px] font-semibold text-white/25 uppercase tracking-wider">{h}</th>
- ))}
- </tr></thead>
- <tbody>
- {cohortData.map(c => (
- <tr key={c.month} className="border-b border-white/[0.04] hover:bg-white/[0.03] transition-colors">
- <td className="p-3 text-xs font-bold text-white/80">{c.month}</td>
- <td className="p-3 text-xs text-white/60">{c.newSellers}</td>
- <td className="p-3 text-xs text-indigo-400 font-medium">{c.activeSellers}</td>
- <td className="p-3 text-xs font-bold text-white/80">{fmtCurrency(c.revenue)}</td>
- <td className="p-3">
- <div className="flex items-center gap-2">
- <div className="h-2 w-16 bg-white/[0.06] rounded-full overflow-hidden">
- <div className={cn("h-full rounded-full", c.retention >= 50 ? "bg-indigo-500" : c.retention >= 25 ? "bg-amber-500" : "bg-red-500")}
- style={{ width: `${c.retention}%` }} />
- </div>
- <span className="text-[10px] text-white/30">{c.retention}%</span>
- </div>
- </td>
- </tr>
- ))}
- </tbody>
- </table>
- </div>
- </AdminPanel>
- </div>
- </div>
- );
+  <PremiumPanel title="Cohort de Sellers" eyebrow="Retenção e ativação mensal" icon={Calendar}>
+  <div className="overflow-x-auto">
+  <table className="w-full text-sm">
+  <thead><tr className="border-b border-border/40 bg-muted/30 text-[10px] font-black uppercase tracking-[0.18em] text-muted-foreground/70">{["Mês", "Novos", "Ativos", "Receita", "Retenção"].map(h => <th key={h} className="px-5 py-4 text-left">{h}</th>)}</tr></thead>
+  <tbody>
+  {cohortData.map(c => <tr key={c.month} className="border-b border-border/40 transition-colors hover:bg-muted/20">
+  <td className="px-5 py-4 text-xs font-black text-foreground">{c.month}</td><td className="px-5 py-4 text-xs font-bold text-muted-foreground">{c.newSellers}</td><td className="px-5 py-4 text-xs font-black text-primary">{c.activeSellers}</td><td className="px-5 py-4 text-xs font-black text-foreground">{fmtCurrency(c.revenue)}</td><td className="px-5 py-4"><div className="flex items-center gap-3"><div className="h-2 w-24 overflow-hidden rounded-full bg-muted/50"><div className={cn("h-full rounded-full", c.retention >= 50 ? "bg-success" : c.retention >= 25 ? "bg-warning" : "bg-destructive")} style={{ width: `${c.retention}%` }} /></div><span className="text-[10px] font-black text-muted-foreground">{c.retention}%</span></div></td>
+  </tr>)}
+  </tbody>
+  </table>
+  </div>
+  </PremiumPanel>
+  </div>
+  );
 }
