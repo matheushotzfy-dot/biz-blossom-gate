@@ -343,6 +343,7 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
  card_percentage: customFees.card_percentage ? Number(customFees.card_percentage) : null,
  card_fixed:      customFees.card_fixed      ? Number(customFees.card_fixed)      : null,
  withdrawal_fee:  customFees.withdrawal_fee  ? Number(customFees.withdrawal_fee)  : null,
+ max_ticket:      customFees.max_ticket      ? Number(customFees.max_ticket)      : null,
  updated_at: new Date().toISOString(),
  };
  const { error } = await supabase.from("custom_user_fees").upsert(payload, { onConflict: "user_id" });
