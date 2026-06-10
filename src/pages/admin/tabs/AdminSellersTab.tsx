@@ -71,7 +71,7 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
  const [userWithdrawals, setUserWithdrawals] = useState<Tables<"withdrawals">[]>([]);
  const [userTransactions, setUserTransactions] = useState<Tables<"transactions">[]>([]);
  const [userPixKeys, setUserPixKeys] = useState<PixKey[]>([]);
- const [customFees, setCustomFees] = useState({ transaction_percentage: "", transaction_fixed: "", withdrawal_fee: "", pix_percentage: "", boleto_percentage: "", card_percentage: "" });
+ const [customFees, setCustomFees] = useState({ pix_percentage: "", pix_fixed: "", card_percentage: "", card_fixed: "", withdrawal_fee: "" });
  const [adjustAmount, setAdjustAmount] = useState("");
  const [adjustType, setAdjustType] = useState<"credit" | "debit">("credit");
  const [adjustReason, setAdjustReason] = useState("");
@@ -110,7 +110,7 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
       supabase.from("products").select("id, user_id, name, price, status, created_at, image_url").eq("user_id", profile.user_id).order("created_at", { ascending: false }).limit(100) as any,
       supabase.from("withdrawals").select("id, user_id, amount, fee_amount, net_amount, status, created_at, withdrawal_type").eq("user_id", profile.user_id).order("created_at", { ascending: false }).limit(100) as any,
       supabase.from("transactions").select("id, user_id, product_id, amount, fee_amount, net_amount, status, payment_method, customer_name, created_at").eq("user_id", profile.user_id).order("created_at", { ascending: false }).limit(200) as any,
-      supabase.from("custom_user_fees").select("id, user_id, transaction_percentage, transaction_fixed, withdrawal_fee, admin_user_id").eq("user_id", profile.user_id).maybeSingle(),
+      supabase.from("custom_user_fees").select("id, user_id, pix_percentage, pix_fixed, card_percentage, card_fixed, withdrawal_fee, admin_user_id").eq("user_id", profile.user_id).maybeSingle(),
       supabase.from("balance_adjustments").select("id, user_id, amount, type, reason, admin_user_id, created_at").eq("user_id", profile.user_id).order("created_at", { ascending: false }).limit(50),
       supabase.from("pix_keys").select("id, key_type, key_value, created_at").eq("user_id", profile.user_id),
       supabase.from("disputes").select("id, seller_user_id, transaction_id, amount, type, status, reason, created_at").eq("seller_user_id", profile.user_id).order("created_at", { ascending: false }).limit(50) as any,
@@ -139,13 +139,14 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
     }
     if (feesRes.data) {
       setCustomFees({
-        transaction_percentage: feesRes.data.transaction_percentage?.toString() || "",
-        transaction_fixed: feesRes.data.transaction_fixed?.toString() || "",
-        withdrawal_fee: feesRes.data.withdrawal_fee?.toString() || "",
-        pix_percentage: "", boleto_percentage: "", card_percentage: "",
+        pix_percentage:  (feesRes.data as any).pix_percentage?.toString()  || "",
+        pix_fixed:       (feesRes.data as any).pix_fixed?.toString()       || "",
+        card_percentage: (feesRes.data as any).card_percentage?.toString() || "",
+        card_fixed:      (feesRes.data as any).card_fixed?.toString()      || "",
+        withdrawal_fee:  feesRes.data.withdrawal_fee?.toString()           || "",
       });
     } else {
-      setCustomFees({ transaction_percentage: "", transaction_fixed: "", withdrawal_fee: "", pix_percentage: "", boleto_percentage: "", card_percentage: "" });
+      setCustomFees({ pix_percentage: "", pix_fixed: "", card_percentage: "", card_fixed: "", withdrawal_fee: "" });
     }
     try {
       const { data: kycFiles } = await supabase.storage.from("kyc-documents").list(profile.user_id);
@@ -328,15 +329,17 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
 
  const handleSaveCustomFees = async () => {
  if (!selectedUser || !user) return;
- const payload = {
+ const payload: any = {
  user_id: selectedUser.user_id, admin_user_id: user.id,
- transaction_percentage: customFees.transaction_percentage ? Number(customFees.transaction_percentage) : null,
- transaction_fixed: customFees.transaction_fixed ? Number(customFees.transaction_fixed) : null,
- withdrawal_fee: customFees.withdrawal_fee ? Number(customFees.withdrawal_fee) : null,
+ pix_percentage:  customFees.pix_percentage  ? Number(customFees.pix_percentage)  : null,
+ pix_fixed:       customFees.pix_fixed       ? Number(customFees.pix_fixed)       : null,
+ card_percentage: customFees.card_percentage ? Number(customFees.card_percentage) : null,
+ card_fixed:      customFees.card_fixed      ? Number(customFees.card_fixed)      : null,
+ withdrawal_fee:  customFees.withdrawal_fee  ? Number(customFees.withdrawal_fee)  : null,
  updated_at: new Date().toISOString(),
  };
  const { error } = await supabase.from("custom_user_fees").upsert(payload, { onConflict: "user_id" });
- if (error) { toast.error("Erro ao salvar taxas"); return; }
+ if (error) { toast.error("Erro ao salvar taxas: " + error.message); return; }
  toast.success("Taxas personalizadas salvas!");
  await logAdminAction("update_custom_fees", "custom_user_fees", selectedUser.user_id, payload);
  };
@@ -1129,27 +1132,56 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
  {/* ── Taxas Customizadas ── */}
  <TabsContent value="fees" className="mt-4">
  <div className="bg-muted/20 rounded-xl border border-border p-4 space-y-4">
- <p className="text-xs font-bold text-muted-foreground">Taxas personalizadas (deixe em branco para usar a taxa padrão)</p>
- <div className="grid grid-cols-3 gap-4">
- <div>
- <Label className="text-[10px] text-muted-foreground">Taxa por transação (%)</Label>
- <NumberInput step={0.01} min={0} value={customFees.transaction_percentage}
- onChange={v => setCustomFees(p => ({ ...p, transaction_percentage: v }))}
- placeholder="4.99" className="mt-1 text-xs" />
+ <p className="text-xs font-bold text-muted-foreground">Taxas personalizadas por método (em branco = usa a taxa padrão da plataforma)</p>
+
+ <div className="space-y-3">
+   <p className="text-[10px] font-black uppercase tracking-widest text-emerald-500">PIX</p>
+   <div className="grid grid-cols-2 gap-4">
+     <div>
+       <Label className="text-[10px] text-muted-foreground">PIX — Percentual (%)</Label>
+       <NumberInput step={0.01} min={0} value={customFees.pix_percentage}
+         onChange={v => setCustomFees(p => ({ ...p, pix_percentage: v }))}
+         placeholder="4.99" className="mt-1 text-xs" />
+     </div>
+     <div>
+       <Label className="text-[10px] text-muted-foreground">PIX — Fixa (R$)</Label>
+       <NumberInput step={0.01} min={0} value={customFees.pix_fixed}
+         onChange={v => setCustomFees(p => ({ ...p, pix_fixed: v }))}
+         placeholder="3.99" className="mt-1 text-xs" />
+     </div>
+   </div>
  </div>
- <div>
- <Label className="text-[10px] text-muted-foreground">Taxa fixa por transação (R$)</Label>
- <NumberInput step={0.01} min={0} value={customFees.transaction_fixed}
- onChange={v => setCustomFees(p => ({ ...p, transaction_fixed: v }))}
- placeholder="2.50" className="mt-1 text-xs" />
+
+ <div className="space-y-3">
+   <p className="text-[10px] font-black uppercase tracking-widest text-blue-500">Cartão</p>
+   <div className="grid grid-cols-2 gap-4">
+     <div>
+       <Label className="text-[10px] text-muted-foreground">Cartão — Percentual (%)</Label>
+       <NumberInput step={0.01} min={0} value={customFees.card_percentage}
+         onChange={v => setCustomFees(p => ({ ...p, card_percentage: v }))}
+         placeholder="5.99" className="mt-1 text-xs" />
+     </div>
+     <div>
+       <Label className="text-[10px] text-muted-foreground">Cartão — Fixa (R$)</Label>
+       <NumberInput step={0.01} min={0} value={customFees.card_fixed}
+         onChange={v => setCustomFees(p => ({ ...p, card_fixed: v }))}
+         placeholder="0.00" className="mt-1 text-xs" />
+     </div>
+   </div>
  </div>
- <div>
- <Label className="text-[10px] text-muted-foreground">Taxa de saque (R$)</Label>
- <NumberInput step={0.01} min={0} value={customFees.withdrawal_fee}
- onChange={v => setCustomFees(p => ({ ...p, withdrawal_fee: v }))}
- placeholder="5.00" className="mt-1 text-xs" />
+
+ <div className="space-y-3">
+   <p className="text-[10px] font-black uppercase tracking-widest text-amber-500">Saque</p>
+   <div className="grid grid-cols-2 gap-4">
+     <div>
+       <Label className="text-[10px] text-muted-foreground">Saque PIX (R$)</Label>
+       <NumberInput step={0.01} min={0} value={customFees.withdrawal_fee}
+         onChange={v => setCustomFees(p => ({ ...p, withdrawal_fee: v }))}
+         placeholder="5.00" className="mt-1 text-xs" />
+     </div>
+   </div>
  </div>
- </div>
+
  <Button size="sm" className="bg-primary/10 text-primary border border-primary/20 rounded-xl text-xs" onClick={handleSaveCustomFees}>
  <Save className="h-3 w-3 mr-1" /> Salvar Taxas
  </Button>
