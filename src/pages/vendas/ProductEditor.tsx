@@ -131,8 +131,9 @@ export default function ProductEditor() {
  const [imagePreview, setImagePreview] = useState<string | null>(null);
  const [category, setCategory] = useState("infoproduto");
  const [paymentType, setPaymentType] = useState("unico");
- const [displayName, setDisplayName] = useState("");
- const [supportEmail, setSupportEmail] = useState("");
+  const [displayName, setDisplayName] = useState("");
+  const [supportEmail, setSupportEmail] = useState("");
+  const [supportPhone, setSupportPhone] = useState("");
 
  const [warrantyDays, setWarrantyDays] = useState("7");
  const [deliveryType, setDeliveryType] = useState("digital");
