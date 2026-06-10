@@ -965,8 +965,23 @@ function TabGeral({ name, setName, description, setDescription, price, setPrice,
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent className="w-[var(--radix-select-trigger-width)] max-w-none p-1.5">
-                  <RichSelectItem value="unico"       icon={DollarSign} label="Pagamento único"      desc="Cobrança única" />
-                  <RichSelectItem value="assinatura"  icon={RefreshCw}  label="Assinatura recorrente" desc="Cobrança automática" />
+                  <RichSelectItem value="unico" icon={DollarSign} label="Pagamento único" desc="Cobrança única (uma vez)" />
+                  <SelectPrimitive.Item
+                    value="assinatura"
+                    disabled
+                    className="relative flex w-full cursor-not-allowed select-none items-center gap-3 rounded-xl px-2.5 py-2.5 outline-none opacity-50"
+                  >
+                    <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-border bg-secondary text-muted-foreground">
+                      <RefreshCw className="h-3.5 w-3.5" strokeWidth={2} />
+                    </span>
+                    <span className="flex-1 min-w-0">
+                      <SelectPrimitive.ItemText asChild>
+                        <span className="block font-display text-[12.5px] font-bold tracking-tight text-foreground">Assinatura recorrente</span>
+                      </SelectPrimitive.ItemText>
+                      <span className="mt-0.5 block text-[10.5px] text-muted-foreground">Cobrança automática mensal</span>
+                    </span>
+                    <span className="ml-auto text-[9px] font-bold uppercase tracking-[0.12em] text-warning px-1.5 py-0.5 rounded border border-warning/40 bg-warning/10">Em breve</span>
+                  </SelectPrimitive.Item>
                 </SelectContent>
               </Select>
             </div>
@@ -977,8 +992,20 @@ function TabGeral({ name, setName, description, setDescription, price, setPrice,
                 <label className="text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">Preço de venda</label>
                 <div className="relative">
                   <span className="absolute left-4 top-1/2 -translate-y-1/2 text-base font-display font-bold text-muted-foreground">R$</span>
-                  <Input type="number" step="0.01" min="1" max="99999.99" value={price} onChange={(e: any) => setPrice(e.target.value)} className="h-14 pl-12 text-3xl font-numbers font-black tracking-[-0.03em] bg-secondary border-border text-success" placeholder="0,00" />
+                  <Input
+                    type="text"
+                    inputMode="decimal"
+                    value={price}
+                    onChange={(e: any) => handlePriceChange(e.target.value)}
+                    className="h-14 pl-12 text-3xl font-numbers font-black tracking-[-0.03em] bg-secondary border-border text-success"
+                    placeholder="0,00"
+                  />
                 </div>
+                {priceNumber > 0 && (
+                  <p className="text-[10px] font-bold text-muted-foreground">
+                    Valor cobrado: R$ {priceNumber.toFixed(2).replace(".", ",")}
+                  </p>
+                )}
               </div>
               <div className="w-32 space-y-1.5">
                 <label className="text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">Garantia</label>
