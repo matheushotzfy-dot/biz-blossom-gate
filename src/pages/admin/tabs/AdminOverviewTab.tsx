@@ -7,6 +7,7 @@ import {
   CreditCard, Package, BarChart3, Activity, Percent,
   ShieldAlert, RotateCcw, Lock, Eye, Radio,
   AlertCircle, UserCheck, Flame, Wallet, Target,
+  CalendarDays, Clock3, Hourglass, UserPlus, Gauge,
 } from "lucide-react";
 import {
   AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
@@ -61,17 +62,17 @@ function Panel({ children, className, title, icon, action }: {
   title?: string; icon?: React.ReactNode; action?: React.ReactNode;
 }) {
   return (
-    <div className={cn("rounded-xl border border-border/50 bg-card overflow-hidden flex flex-col", className)}>
+    <div className={cn("rounded-[24px] border border-border/60 bg-card overflow-hidden flex flex-col transition-colors hover:border-primary/20", className)}>
       {(title || icon) && (
-        <div className="flex items-center justify-between px-4 py-3 border-b border-border/40">
+        <div className="flex items-center justify-between px-5 py-4 border-b border-border/40">
           <div className="flex items-center gap-2">
             {icon && <span className="text-muted-foreground">{icon}</span>}
-            <h3 className="text-[12px] font-bold uppercase tracking-[0.14em] text-foreground/85">{title}</h3>
+            <h3 className="text-[12px] font-black uppercase tracking-[0.16em] text-foreground/90">{title}</h3>
           </div>
           {action}
         </div>
       )}
-      <div className="p-4 flex-1">{children}</div>
+      <div className="p-5 flex-1">{children}</div>
     </div>
   );
 }
