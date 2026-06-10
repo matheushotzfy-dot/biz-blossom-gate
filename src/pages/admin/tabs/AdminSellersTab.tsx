@@ -301,7 +301,7 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
  };
 
   const handleUserStatus = async (userId: string, status: string) => {
-    if (!isAdmin && !isEmployee) { toast.error("Sem permissão"); return; }
+    if (!isAdmin) { toast.error("Sem permissão"); return; }
     const { error } = await supabase.from("profiles").update({ account_status: status }).eq("user_id", userId);
     if (error) { toast.error("Erro ao atualizar"); return; }
     toast.success(`Conta ${status === "approved" ? "aprovada" : "bloqueada"}!`);

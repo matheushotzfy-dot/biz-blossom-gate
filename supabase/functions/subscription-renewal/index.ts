@@ -98,10 +98,24 @@ Deno.serve(async (req) => {
         default: periodEnd.setMonth(periodEnd.getMonth() + 1);
       }
 
-      // Apply platform fee on renewal (same as PIX default: 1.99% + R$2.50)
-      // Custom user fees override
+      // Resolve fees dynamically: custom_user_fees override → fees table → safe default
       let pctFee = 0.0199;
       let fixedFee = 2.5;
+      const { data: defaultPct } = await supabase
+        .from("fees")
+        .select("value")
+        .eq("name", "Taxa de Transação")
+        .eq("fee_type", "percentage")
+        .maybeSingle();
+      if (defaultPct?.value != null) pctFee = Number(defaultPct.value) / 100;
+      const { data: defaultFixed } = await supabase
+        .from("fees")
+        .select("value")
+        .eq("name", "Taxa de Transação")
+        .eq("fee_type", "fixed")
+        .maybeSingle();
+      if (defaultFixed?.value != null) fixedFee = Number(defaultFixed.value);
+
       const { data: customFee } = await supabase
         .from("custom_user_fees")
         .select("transaction_percentage, transaction_fixed")

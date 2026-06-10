@@ -196,11 +196,13 @@ export default function AdminDashboard() {
   const loadData = useCallback(async () => {
     setSyncing(true);
     try {
+      const fromIso = dateRange.from.toISOString();
+      const toIso = dateRange.to.toISOString();
       const [txRes, pRes, prodRes, wRes] = await Promise.all([
-        supabase.from("transactions").select("id, user_id, product_id, amount, fee_amount, net_amount, status, payment_method, customer_name, customer_email, created_at, updated_at, retained_amount, retention_released").order("created_at", { ascending: false }).limit(1000),
+        supabase.from("transactions").select("id, user_id, product_id, amount, fee_amount, net_amount, status, payment_method, customer_name, customer_email, created_at, updated_at, retained_amount, retention_released").gte("created_at", fromIso).lte("created_at", toIso).order("created_at", { ascending: false }).limit(2000),
         supabase.from("profiles").select("id, user_id, full_name, email, account_status, document_number, document_type, phone, nickname, seller_type, acquirer_id, balance_frozen, created_at, updated_at, avatar_url, kyc_rejection_reason, admin_notes, last_login_at").order("created_at", { ascending: false }).limit(1000),
         supabase.from("products").select("id, user_id, name, price, status, created_at, updated_at, image_url, checkout_url, affiliate_enabled, affiliate_commission").limit(1000),
-        supabase.from("withdrawals").select("id, user_id, amount, fee_amount, net_amount, status, created_at, processed_at, bank_account_id, withdrawal_type, crypto_currency, crypto_network, crypto_address").order("created_at", { ascending: false }).limit(1000),
+        supabase.from("withdrawals").select("id, user_id, amount, fee_amount, net_amount, status, created_at, processed_at, bank_account_id, withdrawal_type, crypto_currency, crypto_network, crypto_address").gte("created_at", fromIso).lte("created_at", toIso).order("created_at", { ascending: false }).limit(2000),
       ]);
       if (txRes.error) throw txRes.error;
       if (pRes.error) throw pRes.error;
@@ -215,7 +217,7 @@ export default function AdminDashboard() {
     } finally {
       setSyncing(false);
     }
-  }, []);
+  }, [dateRange.from, dateRange.to]);
 
   useEffect(() => {
     if (!user) return;

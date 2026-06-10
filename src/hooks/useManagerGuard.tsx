@@ -18,21 +18,21 @@ export function useManagerGuard() {
     }
 
     let cancelled = false;
-    supabase.rpc("current_user_has_role", { _role: "manager" as any })
-      .then(({ data, error }) => {
+    (async () => {
+      try {
+        const { data, error } = await supabase.rpc("current_user_has_role", { _role: "manager" as any });
         if (cancelled) return;
         if (error || data !== true) {
           navigate("/gerentes", { replace: true });
           return;
         }
         setIsManager(true);
-      })
-      .catch(() => {
+      } catch {
         if (!cancelled) navigate("/gerentes", { replace: true });
-      })
-      .finally(() => {
+      } finally {
         if (!cancelled) setLoading(false);
-      });
+      }
+    })();
 
     return () => { cancelled = true; };
   }, [user, authLoading, navigate]);
