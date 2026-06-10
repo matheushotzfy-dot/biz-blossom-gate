@@ -401,7 +401,7 @@ export default function AdminDashboard() {
         
         {/* Sidebar ambient glow */}
         <div className="absolute inset-0 pointer-events-none overflow-hidden">
-          <div className={cn("absolute top-0 left-0 right-0 h-32 bg-gradient-to-b to-transparent", adminTheme === "dark" ? "from-violet-500/[0.06]" : adminTheme === "midnight" ? "from-cyan-500/[0.06]" : "from-emerald-500/[0.06]")} />
+          <div className={cn("absolute top-0 left-0 right-0 h-32 bg-gradient-to-b to-transparent", adminTheme === "dark" ? "from-violet-500/[0.06]" : "from-emerald-500/[0.07]")} />
         </div>
 
         {/* Logo */}
