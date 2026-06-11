@@ -703,11 +703,11 @@ const ACCENT_MAP: Record<string, { stripe: string; text: string; bg: string }> =
   zinc:    { stripe: "bg-muted-foreground/40", text: "text-muted-foreground", bg: "bg-muted/40" },
 };
 
-/* ── Panel: semantic, sharp 1px border, optional left accent stripe ── */
+/* ── Panel: semantic, sharp 1px border ── */
 export function GlassPanel({ children, className }: { children: React.ReactNode; className?: string }) {
   return (
     <div className={cn(
-      "relative rounded-2xl border border-border/60 bg-card overflow-hidden transition-colors hover:border-primary/20",
+      "relative rounded-2xl border border-border/60 bg-card p-5 overflow-hidden transition-colors hover:border-primary/20",
       className
     )}>
       {children}
