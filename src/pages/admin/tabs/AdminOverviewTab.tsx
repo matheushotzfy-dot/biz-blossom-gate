@@ -15,6 +15,7 @@ import {
 } from "recharts";
 import { Button } from "@/components/ui/button";
 import { FinanceiroHero, FinanceiroKpi, FinanceiroKpiGrid, type KpiTone } from "@/components/financeiro/FinanceiroHero";
+import KycReviewDialog from "@/components/admin/KycReviewDialog";
 import type { Tables } from "@/integrations/supabase/types";
 import { cn } from "@/lib/utils";
 import React from "react";
