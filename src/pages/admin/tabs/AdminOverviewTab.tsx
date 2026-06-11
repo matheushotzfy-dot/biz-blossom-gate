@@ -538,7 +538,7 @@ export default function AdminOverviewTab({ transactions, profiles, products, wit
         </Panel>
 
 
-        <Panel title={`Saques em revisão (${pendingWd.length})`} icon={<Wallet className="h-3.5 w-3.5" />}>
+        <Panel title={`Saques em revisão (${pendingWd.length})`} icon={<Wallet className="h-3.5 w-3.5" />} tone={pendingWd.length > 0 ? "info" : "neutral"}>
           <div className="space-y-2 max-h-[320px] overflow-y-auto pr-1">
             {pendingWd.slice(0, 10).map(w => {
               const sp = profiles.find(p => p.user_id === w.user_id);
