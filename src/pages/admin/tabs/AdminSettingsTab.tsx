@@ -38,8 +38,10 @@ export default function AdminSettingsTab() {
  const [blackPercentage, setBlackPercentage] = useState("4.99");
  const [blackFixed, setBlackFixed] = useState("2.50");
  const [blackWithdrawal, setBlackWithdrawal] = useState("5.00");
- const [autoApproveEnabled, setAutoApproveEnabled] = useState(false);
- const [autoApproveMaxAmount, setAutoApproveMaxAmount] = useState("100");
+  const [autoApproveEnabled, setAutoApproveEnabled] = useState(false);
+  const [autoApproveMaxAmount, setAutoApproveMaxAmount] = useState("100");
+  const [requireEmailVerification, setRequireEmailVerification] = useState(true);
+  const [savingEmailVerif, setSavingEmailVerif] = useState(false);
  const [editingFees, setEditingFees] = useState<Record<string, string>>({});
 
  // Max Ticket
