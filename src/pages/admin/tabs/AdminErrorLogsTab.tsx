@@ -3,6 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { AlertTriangle, Search, CheckCircle2, Clock, Bug, RefreshCw, XCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { GlassPanel as AdminPanel, GlassPanelTitle as PanelTitle, AdminKpi } from "./AdminOverviewTab";
+import { FinanceiroHero } from "@/components/financeiro/FinanceiroHero";
 import type { Tables } from "@/integrations/supabase/types";
 
 interface ErrorLog {
