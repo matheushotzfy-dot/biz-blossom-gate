@@ -438,7 +438,7 @@ export default function AdminOverviewTab({ transactions, profiles, products, wit
       </div>
 
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-4">
-        <Panel title="Atividade ao vivo" icon={<Radio className="h-3.5 w-3.5 text-destructive animate-pulse" />} className="max-h-[420px]">
+        <Panel title="Atividade ao vivo" icon={<Radio className="h-3.5 w-3.5 text-destructive animate-pulse" />} tone="destructive" className="max-h-[420px]">
           <div className="space-y-1.5 max-h-[360px] overflow-y-auto pr-1">
             {realtimeTx.length === 0 && <div className="text-center text-[11px] text-muted-foreground py-8">Aguardando transações...</div>}
             {realtimeTx.map(t => {
