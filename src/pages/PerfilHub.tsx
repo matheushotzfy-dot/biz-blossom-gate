@@ -6,7 +6,7 @@ import Perfil from "./Perfil";
 import Identidade from "./financeiro/Identidade";
 
 const TABS: HubTab[] = [
- { id: "perfil", label: "Meu Perfil", icon: User },
+ { id: "perfil", label: "Meu Perfil & KYC", icon: User },
  { id: "identidade", label: "Identidade & KYC", icon: UserCircle },
 ];
 

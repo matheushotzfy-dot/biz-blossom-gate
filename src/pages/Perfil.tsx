@@ -305,7 +305,7 @@ export default function Perfil() {
     <div className="container mx-auto max-w-[1400px] px-4 sm:px-6 lg:px-8 py-6 space-y-6">
       {/* HERO */}
       <FinanceiroHero
-        eyebrow="MEU PERFIL"
+        eyebrow="MEU PERFIL & KYC"
         title="Identidade & Conta"
         subtitle="Dados cadastrais, limites operacionais, progresso de faturamento e endereço fiscal."
         status={{ tone: accStatus.tone === "destructive" ? "destructive" : accStatus.tone, label: `Conta ${accStatus.label}`, pulse: accStatus.tone === "warning" }}
