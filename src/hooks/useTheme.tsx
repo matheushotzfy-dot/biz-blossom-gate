@@ -9,7 +9,7 @@ interface ThemeContextType {
 }
 
 const ThemeContext = createContext<ThemeContextType>({
-  theme: "light",
+  theme: "dark",
   setTheme: () => {},
   toggleTheme: () => {},
 });
@@ -18,7 +18,8 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const [theme, setTheme] = useState<Theme>(() => {
     const saved = localStorage.getItem("paygate-theme") as Theme | null;
     if (saved === "light" || saved === "dark") return saved;
-    return "light";
+    // Default: dark mode on first visit, persists user's later choice
+    return "dark";
   });
 
   useEffect(() => {
