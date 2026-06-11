@@ -486,7 +486,7 @@ export default function AdminOverviewTab({ transactions, profiles, products, wit
           </div>
         </Panel>
 
-        <Panel title="Alertas de Risco" icon={<ShieldAlert className="h-3.5 w-3.5" />}>
+        <Panel title="Alertas de Risco" icon={<ShieldAlert className="h-3.5 w-3.5" />} tone="destructive">
           <div className="space-y-2">
             <RiskRow label="Taxa de Chargeback" value={`${chargebackRate.toFixed(2)}%`} threshold="< 1%" alert={chargebackAlert} />
             <RiskRow label="Disputas Abertas" value={String(openDisputes)} threshold="< 5" alert={openDisputes > 5} />
