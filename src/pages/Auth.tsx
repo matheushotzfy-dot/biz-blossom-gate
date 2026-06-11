@@ -255,14 +255,25 @@ export default function Auth() {
  emailRedirectTo: `${window.location.origin}/auth/callback`,
  },
  });
- if (error) throw error;
+  if (error) throw error;
 
- // Double-check: Supabase may return fake success for existing emails
- // If identities array is empty, the email already exists
- toast.success("Conta criada com sucesso! Verifique seu e-mail para ativar a conta.");
- setIsLogin(true);
- setStep(1);
- }
+  // Auto-confirm if admin has disabled email verification
+  let autoConfirmed = false;
+  try {
+    const { data: cfn } = await supabase.functions.invoke("auto-confirm-signup", {
+      body: { email: email.toLowerCase().trim() },
+    });
+    autoConfirmed = !!(cfn as any)?.confirmed;
+  } catch { /* fallback: keep verification flow */ }
+
+  if (autoConfirmed) {
+    toast.success("Conta criada com sucesso! Faça login para continuar.");
+  } else {
+    toast.success("Conta criada com sucesso! Verifique seu e-mail para ativar a conta.");
+  }
+  setIsLogin(true);
+  setStep(1);
+  }
  } catch (error: unknown) {
  const msg = (error as { message?: string })?.message || "";
  if (msg.includes("Invalid login")) toast.error("E-mail ou senha incorretos.");
