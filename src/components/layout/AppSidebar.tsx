@@ -360,7 +360,7 @@ export function AppSidebar() {
     {
       label: "CONTA",
       items: [
-        { title: "Meu Perfil", url: "/perfil", icon: User },
+        { title: "Meu Perfil & KYC", url: "/perfil", icon: User },
         { title: "Premiações", url: "/premiacoes", icon: Trophy },
         { title: "Suporte", url: "/suporte", icon: MessageSquare },
       ],
