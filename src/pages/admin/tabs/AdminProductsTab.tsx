@@ -334,7 +334,7 @@ export default function AdminProductsTab({ products, profiles, transactions, fmt
  {stats.chargebacks}
  </span>
  </td>
- <td className="p-3"><StatusBadge status={p.status} /></td>
+ <td className="p-3">{isDeleted ? <span className="px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-destructive/15 text-destructive border border-destructive/30">Apagado</span> : <StatusBadge status={p.status} />}</td>
  <td className="p-3" onClick={e => e.stopPropagation()}>
  <DropdownMenu>
  <DropdownMenuTrigger asChild>
