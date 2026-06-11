@@ -419,6 +419,28 @@ export default function AdminSettingsTab() {
  </div>
  </AdminPanel>
 
+ {/* Email Verification Toggle */}
+ <AdminPanel>
+   <PanelTitle color="emerald" icon={<Lock className="h-4 w-4" />}>Verificação de E-mail no Cadastro</PanelTitle>
+   <div className="space-y-4 mt-4">
+     <div className="flex items-center justify-between p-3 rounded-xl border border-border bg-muted/30">
+       <div className="pr-4">
+         <p className="text-sm font-semibold text-foreground">Exigir confirmação de e-mail</p>
+         <p className="text-xs text-muted-foreground mt-0.5">
+           Quando <strong>ativado</strong>, o usuário precisa clicar no link enviado por e-mail antes de logar.
+           Quando <strong>desativado</strong>, novas contas são criadas já confirmadas e o login é liberado imediatamente.
+         </p>
+       </div>
+       <Switch checked={requireEmailVerification} onCheckedChange={saveEmailVerification} disabled={savingEmailVerif} />
+     </div>
+     <p className="text-[11px] text-muted-foreground">
+       Status atual: <strong className={requireEmailVerification ? "text-emerald-400" : "text-amber-400"}>
+         {requireEmailVerification ? "Verificação OBRIGATÓRIA" : "Verificação DESATIVADA (auto-confirmação)"}
+       </strong>
+     </p>
+   </div>
+ </AdminPanel>
+
  {/* Global Platform Fees */}
  <AdminPanel>
  <PanelTitle color="amber" icon={<Zap className="h-4 w-4" />}>Taxas Globais da Plataforma</PanelTitle>
