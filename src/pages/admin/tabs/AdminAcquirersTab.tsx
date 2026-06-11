@@ -94,66 +94,116 @@ export default function AdminAcquirersTab() {
  setEditingId(acq.id); setShowForm(true);
  };
 
- const AcquirerCard = ({ acq }: { acq: Acquirer }) => (
- <div className={`rounded-2xl border p-5 transition-all hover:scale-[1.01] ${
- acq.is_active ? "border-border bg-card" : "border-border/50 bg-muted/20 opacity-50"
- }`}>
- <div className="flex items-start justify-between">
- <div className="flex items-center gap-3">
- <div className={`h-12 w-12 rounded-2xl flex items-center justify-center text-lg font-black ${
- acq.type === "black" ? "bg-muted text-foreground shadow-lg" : "bg-secondary text-secondary-foreground shadow-lg"
- }`}>{acq.name[0]}</div>
- <div>
- <h3 className="text-sm font-extrabold text-foreground">{acq.name}</h3>
- <p className="text-[10px] font-mono text-muted-foreground">{acq.slug}</p>
- </div>
- </div>
- <div className="flex items-center gap-2 flex-wrap justify-end">
- <span className={`px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wider ${
- acq.type === "black" ? "bg-muted text-muted-foreground border border-border" : "bg-secondary text-secondary-foreground border border-border"
- }`}>{acq.type}</span>
- {acq.is_active ? (
- <span className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-primary/10 text-primary text-[9px] font-bold">
- <span className="h-1.5 w-1.5 rounded-full bg-primary animate-pulse" /> Ativa
- </span>
- ) : (
- <span className="px-2 py-0.5 rounded-full bg-destructive/10 text-destructive text-[9px] font-bold">Inativa</span>
- )}
- </div>
- </div>
+ const AcquirerCard = ({ acq }: { acq: Acquirer }) => {
+ const isBlack = acq.type === "black";
+ const conv = Math.max(0, Math.min(100, Number(acq.conversion_rate) || 0));
+ const convColor = conv >= 90 ? "text-success" : conv >= 75 ? "text-primary" : conv >= 50 ? "text-warning" : "text-destructive";
+ const ringColor = conv >= 90 ? "stroke-success" : conv >= 75 ? "stroke-primary" : conv >= 50 ? "stroke-warning" : "stroke-destructive";
+ const circumference = 2 * Math.PI * 22;
+ const dash = (conv / 100) * circumference;
+ return (
+   <div className={cn(
+     "group relative rounded-2xl border bg-card p-5 transition-all duration-300 overflow-hidden",
+     acq.is_active ? "border-border hover:border-primary/40" : "border-border/40 opacity-60",
+   )}>
+     {/* Top status strip */}
+     <div className={cn(
+       "absolute top-0 left-0 right-0 h-[3px]",
+       acq.is_active ? (isBlack ? "bg-foreground" : "bg-primary") : "bg-border",
+     )} />
 
- {/* Conversion rate + visibility badges */}
- <div className="flex items-center gap-3 mt-3">
- <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-muted/20 border border-border/50">
- <TrendingUp className="h-3 w-3 text-primary" />
- <span className="text-[11px] font-bold text-foreground">{acq.conversion_rate}%</span>
- <span className="text-[9px] text-muted-foreground">conversão</span>
- </div>
- <button
- onClick={() => toggleSellerVisible(acq)}
- className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg border transition-all text-[10px] font-bold ${
- acq.seller_visible
- ? "bg-primary/10 border-primary/30 text-primary"
- : "bg-muted/20 border-border/50 text-muted-foreground"
- }`}
- >
- {acq.seller_visible ? <Eye className="h-3 w-3" /> : <EyeOff className="h-3 w-3" />}
- {acq.seller_visible ? "Visível p/ Sellers" : "Oculta p/ Sellers"}
- </button>
- </div>
+     <div className="flex items-start justify-between gap-4">
+       <div className="flex items-center gap-3 min-w-0">
+         <div className={cn(
+           "h-12 w-12 rounded-xl flex items-center justify-center text-base font-black tracking-tight shrink-0 border",
+           isBlack
+             ? "bg-foreground text-background border-foreground/20"
+             : "bg-primary/10 text-primary border-primary/30",
+         )}>
+           {acq.name[0]?.toUpperCase()}
+         </div>
+         <div className="min-w-0">
+           <h3 className="text-[13px] font-black text-foreground tracking-tight truncate">{acq.name}</h3>
+           <p className="text-[10px] font-mono text-muted-foreground truncate">{acq.slug}</p>
+           <div className="flex items-center gap-1.5 mt-1">
+             <span className={cn(
+               "px-1.5 py-0.5 rounded text-[8.5px] font-black uppercase tracking-[0.14em] border",
+               isBlack ? "bg-foreground/10 text-foreground border-foreground/20" : "bg-primary/10 text-primary border-primary/30",
+             )}>{acq.type}</span>
+             {acq.is_active ? (
+               <span className="flex items-center gap-1 px-1.5 py-0.5 rounded bg-success/10 text-success border border-success/30 text-[8.5px] font-black uppercase tracking-[0.14em]">
+                 <span className="h-1 w-1 rounded-full bg-success animate-pulse" /> Ativa
+               </span>
+             ) : (
+               <span className="px-1.5 py-0.5 rounded bg-destructive/10 text-destructive border border-destructive/30 text-[8.5px] font-black uppercase tracking-[0.14em]">Inativa</span>
+             )}
+           </div>
+         </div>
+       </div>
 
- {acq.description && <p className="text-[11px] text-muted-foreground mt-3">{acq.description}</p>}
- {acq.api_endpoint && <p className="text-[10px] font-mono text-muted-foreground/50 mt-1 truncate">{acq.api_endpoint}</p>}
- <div className="flex items-center gap-2 mt-4 pt-3 border-t border-border">
- <Button size="sm" variant="ghost" className="h-7 text-[10px] text-muted-foreground hover:text-foreground gap-1" onClick={() => openEdit(acq)}>
- <Edit className="h-3 w-3" /> Editar
- </Button>
- <Button size="sm" variant="ghost" className={`h-7 text-[10px] gap-1 ${acq.is_active ? "text-destructive/60 hover:text-destructive" : "text-primary/60 hover:text-primary"}`} onClick={() => toggleActive(acq)}>
- {acq.is_active ? <><PowerOff className="h-3 w-3" /> Desativar</> : <><Power className="h-3 w-3" /> Ativar</>}
- </Button>
- </div>
- </div>
+       {/* Conversion ring */}
+       <div className="relative h-14 w-14 shrink-0">
+         <svg className="h-14 w-14 -rotate-90" viewBox="0 0 50 50">
+           <circle cx="25" cy="25" r="22" className="stroke-border/40 fill-none" strokeWidth="4" />
+           <circle
+             cx="25" cy="25" r="22"
+             className={cn("fill-none transition-all duration-700", ringColor)}
+             strokeWidth="4"
+             strokeLinecap="round"
+             strokeDasharray={`${dash} ${circumference}`}
+           />
+         </svg>
+         <div className="absolute inset-0 flex flex-col items-center justify-center">
+           <span className={cn("text-[11px] font-black leading-none tabular-nums", convColor)}>{conv.toFixed(0)}<span className="text-[7px] align-top">%</span></span>
+           <span className="text-[7px] text-muted-foreground uppercase tracking-wider mt-0.5">conv</span>
+         </div>
+       </div>
+     </div>
+
+     {/* Description */}
+     {acq.description && (
+       <p className="text-[11px] text-muted-foreground mt-3 line-clamp-2 leading-relaxed">{acq.description}</p>
+     )}
+     {acq.api_endpoint && (
+       <div className="mt-3 px-2.5 py-1.5 rounded-lg bg-muted/30 border border-border/50">
+         <p className="text-[8.5px] font-black uppercase tracking-[0.14em] text-muted-foreground/70 mb-0.5">Endpoint</p>
+         <p className="text-[10px] font-mono text-foreground/80 truncate">{acq.api_endpoint}</p>
+       </div>
+     )}
+
+     {/* Actions */}
+     <div className="mt-4 pt-3 border-t border-border/60 flex items-center gap-2">
+       <button
+         onClick={() => toggleSellerVisible(acq)}
+         className={cn(
+           "flex items-center gap-1.5 px-2.5 h-7 rounded-lg border text-[10px] font-bold transition-all",
+           acq.seller_visible
+             ? "bg-primary/10 border-primary/30 text-primary hover:bg-primary/15"
+             : "bg-muted/30 border-border text-muted-foreground hover:text-foreground",
+         )}
+       >
+         {acq.seller_visible ? <Eye className="h-3 w-3" /> : <EyeOff className="h-3 w-3" />}
+         {acq.seller_visible ? "Visível" : "Oculta"}
+       </button>
+       <div className="flex-1" />
+       <Button size="sm" variant="ghost" className="h-7 text-[10px] gap-1 hover:bg-muted/40" onClick={() => openEdit(acq)}>
+         <Edit className="h-3 w-3" /> Editar
+       </Button>
+       <Button
+         size="sm"
+         variant="ghost"
+         className={cn(
+           "h-7 text-[10px] gap-1",
+           acq.is_active ? "text-destructive hover:bg-destructive/10" : "text-success hover:bg-success/10",
+         )}
+         onClick={() => toggleActive(acq)}
+       >
+         {acq.is_active ? <><PowerOff className="h-3 w-3" /> Desativar</> : <><Power className="h-3 w-3" /> Ativar</>}
+       </Button>
+     </div>
+   </div>
  );
+ };
 
  return (
  <div className="space-y-6 animate-fade-in">
