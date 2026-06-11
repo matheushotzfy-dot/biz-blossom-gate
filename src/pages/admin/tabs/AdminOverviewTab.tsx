@@ -113,6 +113,16 @@ export default function AdminOverviewTab({ transactions, profiles, products, wit
  const [fraudLogs, setFraudLogs] = useState<any[]>([]);
  const [kycReview, setKycReview] = useState<Tables<"profiles"> | null>(null);
 
+ const handleKycApprove = async (userId: string) => {
+   const { error } = await supabase.from("profiles").update({
+     account_status: "approved",
+     kyc_rejection_reason: null,
+   } as any).eq("user_id", userId);
+   if (error) { toast.error("Erro ao aprovar KYC"); return; }
+   toast.success("KYC aprovado!");
+   onUserStatus(userId, "approved");
+ };
+
  const handleKycReject = async (userId: string, reason: string) => {
    const { error } = await supabase.from("profiles").update({
      account_status: "rejected",
@@ -120,8 +130,9 @@ export default function AdminOverviewTab({ transactions, profiles, products, wit
    } as any).eq("user_id", userId);
    if (error) { toast.error("Erro ao recusar KYC"); return; }
    toast.success("KYC recusado");
-   onUserStatus(userId, "rejected_silent_refresh" as any); // triggers reload via parent
+   onUserStatus(userId, "rejected");
  };
+
 
 
  useEffect(() => {
