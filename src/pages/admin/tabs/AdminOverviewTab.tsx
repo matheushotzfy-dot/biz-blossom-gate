@@ -329,28 +329,79 @@ export default function AdminOverviewTab({ transactions, profiles, products, wit
     );
   }
 
+  const heroKpis = [
+    { label: "Movimentado Hoje", value: fmtCurrency(tpvToday), sub: `${todayTx.length} vendas aprovadas`, icon: Flame, tone: (todayTx.length > 0 ? "success" : "neutral") as const, spark: sparkSeries.tpv },
+    { label: "Lucro Hoje", value: fmtCurrency(takeRateToday), sub: `${activeSellersToday} sellers venderam`, icon: DollarSign, tone: "primary" as const, spark: sparkSeries.tpv },
+    { label: "Saques Pendentes", value: fmtCurrency(pendingWdAmount), sub: `${pendingWd.length} solicitações · ${highValueWd.length} altos`, icon: Hourglass, tone: (pendingWd.length > 5 ? "warning" : "neutral") as const, spark: sparkSeries.vendas },
+    { label: "Novos Usuários", value: String(newUsersInRange.length), sub: "cadastros no período", icon: UserPlus, tone: "info" as const, spark: sparkSeries.vendas },
+    { label: "Lucro no Período", value: fmtCurrency(takeRateTotal), sub: `${takeRatePct}% de take rate`, icon: TrendingUp, tone: "success" as const, spark: sparkSeries.tpv },
+    { label: "Aprovações KYC", value: String(kycPending.length), sub: "usuários aguardando análise", icon: UserCheck, tone: (kycPending.length > 0 ? "warning" : "neutral") as const, spark: sparkSeries.vendas },
+    { label: "Saldo Retido", value: fmtCurrency(totalRetained), sub: "aguardando liberação", icon: Lock, tone: "warning" as const, spark: sparkSeries.tpv },
+    { label: "Volume Sacado", value: fmtCurrency(totalWithdrawn), sub: "pagos no período", icon: ArrowDownToLine, tone: "neutral" as const, spark: sparkSeries.tpv },
+  ];
+
   return (
     <div className="space-y-6 animate-fade-in">
-      <FinanceiroHero
-        eyebrow="Plataforma · Visão Executiva"
-        title={fmtCurrency(totalVolume)}
-        subtitle={`Valor movimentado no período · lucro ${fmtCurrency(takeRateTotal)} · take rate ${takeRatePct}% · ticket médio ${fmtCurrency(ticketMedio)} · ${rangeLabel}`}
-        status={{ tone: "success", label: "Live", pulse: true }}
-      />
+      {/* ── Command Center Hero ── */}
+      <div className="relative overflow-hidden rounded-3xl border border-border/60 bg-card">
+        <div className="pointer-events-none absolute inset-0">
+          <div className="absolute -top-32 -left-24 h-[420px] w-[640px] rounded-full opacity-40" style={{ background: "radial-gradient(closest-side, hsl(var(--primary) / 0.22), transparent 70%)" }} />
+          <div className="absolute -bottom-40 -right-32 h-[420px] w-[640px] rounded-full opacity-30" style={{ background: "radial-gradient(closest-side, hsl(var(--success) / 0.18), transparent 70%)" }} />
+          <div className="absolute inset-0 opacity-[0.04]" style={{ backgroundImage: "linear-gradient(hsl(var(--foreground)) 1px, transparent 1px), linear-gradient(90deg, hsl(var(--foreground)) 1px, transparent 1px)", backgroundSize: "44px 44px" }} />
+        </div>
 
-      <FinanceiroKpiGrid cols={4}>
-        <FinanceiroKpi label="Movimentado Hoje" value={fmtCurrency(tpvToday)} sub={`${todayTx.length} vendas aprovadas`} icon={Flame} tone={todayTx.length > 0 ? "success" : "neutral"} />
-        <FinanceiroKpi label="Lucro Hoje" value={fmtCurrency(takeRateToday)} sub={`${activeSellersToday} sellers venderam`} icon={DollarSign} tone="primary" />
-        <FinanceiroKpi label="Saques Pendentes" value={fmtCurrency(pendingWdAmount)} sub={`${pendingWd.length} solicitações · ${highValueWd.length} altos`} icon={Hourglass} tone={pendingWd.length > 5 ? "warning" : "neutral"} />
-        <FinanceiroKpi label="Novos Usuários" value={String(newUsersInRange.length)} sub="cadastros no período" icon={UserPlus} tone="info" />
-      </FinanceiroKpiGrid>
+        <div className="relative grid grid-cols-1 lg:grid-cols-[1.4fr_1fr] gap-0">
+          <div className="p-6 sm:p-8 border-b lg:border-b-0 lg:border-r border-border/60">
+            <div className="flex items-center gap-2 mb-5">
+              <span className="inline-flex items-center gap-1.5 rounded-full border border-success/30 bg-success/10 px-2.5 py-1">
+                <span className="h-1.5 w-1.5 rounded-full bg-success animate-pulse" />
+                <span className="text-[9.5px] font-black uppercase tracking-[0.22em] text-success">Live</span>
+              </span>
+              <span className="text-[9.5px] font-black uppercase tracking-[0.22em] text-muted-foreground/70">Plataforma · Command Center</span>
+            </div>
+            <h1 className="font-display text-[32px] sm:text-[52px] lg:text-[64px] font-black leading-[0.92] tracking-[-0.035em] text-foreground tabular-nums">
+              {fmtCurrency(totalVolume)}
+            </h1>
+            <p className="mt-3 text-[12px] sm:text-[13px] text-muted-foreground/85 leading-relaxed max-w-2xl">
+              Volume movimentado no período · {rangeLabel}
+            </p>
 
-      <FinanceiroKpiGrid cols={4}>
-        <FinanceiroKpi label="Lucro no Período" value={fmtCurrency(takeRateTotal)} sub={`${takeRatePct}% de take rate`} icon={TrendingUp} tone="success" />
-        <FinanceiroKpi label="Aprovações KYC" value={String(kycPending.length)} sub="usuários aguardando análise" icon={UserCheck} tone={kycPending.length > 0 ? "warning" : "neutral"} />
-        <FinanceiroKpi label="Saldo Retido" value={fmtCurrency(totalRetained)} sub="aguardando liberação" icon={Lock} tone="warning" />
-        <FinanceiroKpi label="Volume Sacado" value={fmtCurrency(totalWithdrawn)} sub="pagos no período" icon={ArrowDownToLine} tone="neutral" />
-      </FinanceiroKpiGrid>
+            <div className="mt-6 grid grid-cols-3 gap-px rounded-xl overflow-hidden border border-border/60 bg-border/40">
+              <HeroStat label="Lucro" value={fmtCurrency(takeRateTotal)} accent="text-success" />
+              <HeroStat label="Take Rate" value={`${takeRatePct}%`} accent="text-primary" />
+              <HeroStat label="Ticket Médio" value={fmtCurrency(ticketMedio)} accent="text-info" />
+            </div>
+          </div>
+
+          <div className="p-6 sm:p-8 flex flex-col justify-between gap-5">
+            <div>
+              <p className="text-[9.5px] font-black uppercase tracking-[0.22em] text-muted-foreground/70 mb-3">Pulso 14 dias</p>
+              <ResponsiveContainer width="100%" height={140}>
+                <AreaChart data={sparkSeries.tpv.map((p, i) => ({ ...p, name: i }))} margin={{ top: 4, right: 4, bottom: 0, left: 0 }}>
+                  <defs>
+                    <linearGradient id="heroSpark" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0%" stopColor="hsl(var(--primary))" stopOpacity={0.45} />
+                      <stop offset="100%" stopColor="hsl(var(--primary))" stopOpacity={0} />
+                    </linearGradient>
+                  </defs>
+                  <Area type="monotone" dataKey="v" stroke="hsl(var(--primary))" strokeWidth={2} fill="url(#heroSpark)" dot={false} isAnimationActive={false} />
+                </AreaChart>
+              </ResponsiveContainer>
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <PulseBadge icon={Activity} label="Conversão" value={`${conversionRate}%`} tone="success" />
+              <PulseBadge icon={CheckCircle2} label="Aprovadas" value={String(filteredApproved.length)} tone="primary" />
+              <PulseBadge icon={ShieldAlert} label="Chargeback" value={`${chargebackRate.toFixed(2)}%`} tone={chargebackAlert ? "destructive" : "neutral"} />
+              <PulseBadge icon={Users} label="Sellers Ativos" value={String(activeSellersToday)} tone="info" />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* ── Premium KPI Grid with sparklines ── */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-3">
+        {heroKpis.map((k, i) => <MetricCard key={i} {...k} />)}
+      </div>
 
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-4">
         <Panel
