@@ -685,105 +685,124 @@ function GlassKpi({ label, value, icon, iconColor }: {
  );
 }
 
-/* ── Glass Panel ── */
+/* ═══════════════════════════════════════════════
+ SHARED ADMIN KIT — Billion-Dollar SaaS / Seller-pattern
+ Semantic tokens only. Used across all admin tabs.
+ ═══════════════════════════════════════════════ */
+
+const ACCENT_MAP: Record<string, { stripe: string; text: string; bg: string }> = {
+  emerald: { stripe: "bg-success",        text: "text-success",        bg: "bg-success/10" },
+  green:   { stripe: "bg-success",        text: "text-success",        bg: "bg-success/10" },
+  teal:    { stripe: "bg-info",           text: "text-info",           bg: "bg-info/10" },
+  blue:    { stripe: "bg-info",           text: "text-info",           bg: "bg-info/10" },
+  cyan:    { stripe: "bg-info",           text: "text-info",           bg: "bg-info/10" },
+  indigo:  { stripe: "bg-primary",        text: "text-primary",        bg: "bg-primary/10" },
+  violet:  { stripe: "bg-primary",        text: "text-primary",        bg: "bg-primary/10" },
+  amber:   { stripe: "bg-warning",        text: "text-warning",        bg: "bg-warning/10" },
+  red:     { stripe: "bg-destructive",    text: "text-destructive",    bg: "bg-destructive/10" },
+  zinc:    { stripe: "bg-muted-foreground/40", text: "text-muted-foreground", bg: "bg-muted/40" },
+};
+
+/* ── Panel: semantic, sharp 1px border, optional left accent stripe ── */
 export function GlassPanel({ children, className }: { children: React.ReactNode; className?: string }) {
- return (
- <div className={cn(
- "relative isolate overflow-hidden rounded-2xl border border-white/[0.08] p-5",
- "bg-gradient-to-b from-white/[0.05] to-white/[0.015]",
- "shadow-[0_14px_36px_rgba(0,0,0,0.3),inset_0_1px_0_rgba(255,255,255,0.05)]",
- "transition-[border-color,box-shadow] duration-300 hover:border-white/[0.12]",
- className
- )}>
- {children}
- </div>
- );
+  return (
+    <div className={cn(
+      "relative rounded-2xl border border-border/60 bg-card overflow-hidden transition-colors hover:border-primary/20",
+      className
+    )}>
+      {children}
+    </div>
+  );
 }
 
-/* ── Glass Panel Title ── */
+/* ── Panel section title — accent stripe + icon + uppercase label ── */
 export function GlassPanelTitle({ children, color, icon }: { children: React.ReactNode; color: string; icon?: React.ReactNode }) {
- const colorMap: Record<string, string> = {
- emerald: "bg-emerald-400 shadow-[0_0_10px_rgba(16,185,129,0.6)]",
- indigo: "bg-indigo-400 shadow-[0_0_10px_rgba(99,102,241,0.6)]",
- amber: "bg-amber-400 shadow-[0_0_10px_rgba(245,158,11,0.6)]",
- blue: "bg-teal-400 shadow-[0_0_10px_rgba(20,184,166,0.6)]",
- red: "bg-red-400 shadow-[0_0_10px_rgba(248,113,113,0.6)]",
- violet: "bg-violet-400 shadow-[0_0_10px_rgba(139,92,246,0.6)]",
- cyan: "bg-cyan-400 shadow-[0_0_10px_rgba(34,211,238,0.6)]",
- zinc: "bg-zinc-400/40",
- teal: "bg-teal-400 shadow-[0_0_10px_rgba(20,184,166,0.6)]",
- green: "bg-green-400 shadow-[0_0_10px_rgba(74,222,128,0.6)]",
- };
- const textColorMap: Record<string, string> = {
- emerald: "text-emerald-400",
- indigo: "text-indigo-400",
- amber: "text-amber-400",
- blue: "text-teal-400",
- red: "text-red-400",
- violet: "text-violet-400",
- cyan: "text-cyan-400",
- zinc: "text-zinc-400",
- teal: "text-teal-400",
- green: "text-green-400",
- };
- return (
- <h3 className="text-[13px] font-bold flex items-center gap-2.5 text-white/[0.92]">
- <span className={cn("w-1 h-4 rounded-full", colorMap[color] || colorMap.emerald)} />
- {icon && <span className={textColorMap[color] || "text-emerald-400"}>{icon}</span>}
- {children}
- </h3>
- );
+  const c = ACCENT_MAP[color] || ACCENT_MAP.emerald;
+  return (
+    <h3 className="flex items-center gap-2.5 text-[12px] font-black uppercase tracking-[0.16em] text-foreground/90">
+      <span className={cn("h-4 w-[3px] rounded-full", c.stripe)} />
+      {icon && <span className={c.text}>{icon}</span>}
+      {children}
+    </h3>
+  );
 }
 
 /* ── Risk Alert Row ── */
 function RiskAlert({ label, value, threshold, alert }: { label: string; value: string; threshold: string; alert: boolean }) {
- return (
- <div className={cn(
- "flex items-center justify-between p-3.5 rounded-xl transition-all",
- alert ? "bg-red-500/[0.06] border border-red-500/15" : "bg-white/[0.025] border border-white/[0.05]"
- )}>
- <div>
- <p className="text-[11px] font-semibold text-white/65">{label}</p>
- <p className="text-[9px] text-white/25 mt-0.5">{threshold}</p>
- </div>
- <div className="flex items-center gap-2.5">
- <span className={cn("text-sm font-black", alert ? "text-red-400" : "text-emerald-400")} style={{ fontFamily: "'Space Grotesk', monospace" }}>{value}</span>
- {alert ? (
- <span className="h-2.5 w-2.5 rounded-full bg-red-400 animate-pulse shadow-[0_0_8px_rgba(248,113,113,0.6)]" />
- ) : (
- <CheckCircle2 className="h-3.5 w-3.5 text-emerald-400/50" />
- )}
- </div>
- </div>
- );
+  return (
+    <div className={cn(
+      "flex items-center justify-between px-3 py-2.5 rounded-lg border transition-colors",
+      alert ? "bg-destructive/5 border-destructive/25" : "bg-muted/20 border-border/40"
+    )}>
+      <div className="min-w-0">
+        <p className="text-[11px] font-semibold text-foreground/85">{label}</p>
+        <p className="text-[9px] text-muted-foreground/70 mt-0.5">{threshold}</p>
+      </div>
+      <div className="flex items-center gap-2 shrink-0">
+        <span className={cn("text-[13px] font-black tabular-nums", alert ? "text-destructive" : "text-success")}>{value}</span>
+        {alert
+          ? <span className="h-1.5 w-1.5 rounded-full bg-destructive animate-pulse" />
+          : <CheckCircle2 className="h-3.5 w-3.5 text-success/70" />}
+      </div>
+    </div>
+  );
 }
 
-/* ── Legacy exports ── */
+/* ── Legacy aliases ── */
 export { GlassPanel as AdminPanel, GlassPanelTitle as PanelTitle };
+
+/* ── Admin KPI — premium, semantic, 1px borders, tabular nums ── */
 export function AdminKpi({ icon, label, value, sub, alert, highlight, iconColor, gradient, glowColor }: {
- icon: React.ReactNode; label: string; value: string; sub?: string;
- alert?: boolean; highlight?: boolean; iconColor?: string;
- gradient?: string; glowColor?: string;
+  icon: React.ReactNode; label: string; value: string; sub?: string;
+  alert?: boolean; highlight?: boolean; iconColor?: string;
+  gradient?: string; glowColor?: string;
 }) {
- return (
- <div className={cn(
- "rounded-xl bg-gradient-to-b from-white/[0.05] to-white/[0.02] border border-white/[0.08] p-4",
- "shadow-[inset_0_1px_0_rgba(255,255,255,0.06),0_4px_16px_rgba(0,0,0,0.25)]",
- "hover:border-white/[0.12] transition-all duration-300",
- alert && "border-amber-500/20 ring-1 ring-amber-500/10"
- )}
- style={{ boxShadow: highlight && glowColor ? `inset 0 1px 0 rgba(255,255,255,0.05), 0 0 35px ${glowColor}` : undefined }}
- >
- <div className="flex items-center justify-between mb-2.5">
- <span className="text-[8px] uppercase tracking-[0.22em] text-white/[0.18] font-bold">{label}</span>
- {gradient ? (
- <div className={cn("h-9 w-9 rounded-xl bg-gradient-to-br flex items-center justify-center text-white shadow-md ring-1 ring-white/[0.12]", gradient)}>{icon}</div>
- ) : (
- <div className={cn("h-9 w-9 rounded-lg bg-white/[0.05] flex items-center justify-center ring-1 ring-white/[0.05]", iconColor || "text-white/30")}>{icon}</div>
- )}
- </div>
- <p className={cn("text-xl font-extrabold tracking-tight text-white", highlight && "text-amber-400")} style={{ fontFamily: "'Space Grotesk', monospace" }}>{value}</p>
- {sub && <p className="text-[10px] text-white/25 mt-1.5 font-medium">{sub}</p>}
- </div>
- );
+  // Map legacy `gradient` like "from-emerald-500 to-..." to a semantic tone
+  const tone = gradient?.includes("emerald") || gradient?.includes("green") ? "success"
+    : gradient?.includes("amber") || gradient?.includes("orange") || gradient?.includes("yellow") ? "warning"
+    : gradient?.includes("red") || gradient?.includes("rose") || gradient?.includes("pink") ? "destructive"
+    : gradient?.includes("blue") || gradient?.includes("cyan") || gradient?.includes("sky") || gradient?.includes("teal") ? "info"
+    : gradient?.includes("violet") || gradient?.includes("indigo") || gradient?.includes("purple") ? "primary"
+    : "neutral";
+  const toneText: Record<string, string> = {
+    success: "text-success", info: "text-info", warning: "text-warning",
+    destructive: "text-destructive", primary: "text-primary", neutral: "text-foreground",
+  };
+  const toneIcon: Record<string, string> = {
+    success: "bg-success/10 text-success", info: "bg-info/10 text-info",
+    warning: "bg-warning/10 text-warning", destructive: "bg-destructive/10 text-destructive",
+    primary: "bg-primary/10 text-primary", neutral: "bg-secondary text-muted-foreground",
+  };
+  return (
+    <div className={cn(
+      "relative overflow-hidden rounded-2xl border border-border/60 bg-card px-4 py-4 sm:px-5 sm:py-5",
+      "transition-colors hover:border-primary/25",
+      "before:absolute before:left-0 before:top-0 before:bottom-0 before:w-[3px]",
+      tone === "success" && "before:bg-success",
+      tone === "info" && "before:bg-info",
+      tone === "warning" && "before:bg-warning",
+      tone === "destructive" && "before:bg-destructive",
+      tone === "primary" && "before:bg-primary",
+      tone === "neutral" && "before:bg-transparent",
+      alert && "border-destructive/40 before:bg-destructive",
+      highlight && "border-warning/40 before:bg-warning",
+    )}>
+      <div className="flex items-center justify-between gap-2 mb-3">
+        <span className="text-[9px] sm:text-[10px] font-bold uppercase tracking-[0.16em] text-muted-foreground/80 leading-tight break-words">{label}</span>
+        <div className={cn(
+          "h-7 w-7 sm:h-8 sm:w-8 rounded-md flex items-center justify-center shrink-0",
+          toneIcon[tone]
+        )}>
+          <span className="[&_svg]:h-3.5 [&_svg]:w-3.5">{icon}</span>
+        </div>
+      </div>
+      <p className={cn(
+        "font-display text-[20px] sm:text-[24px] font-black leading-none tracking-tight tabular-nums break-all",
+        toneText[tone],
+        alert && "text-destructive",
+        highlight && "text-warning",
+      )}>{value}</p>
+      {sub && <p className="mt-2 text-[10px] sm:text-[11px] text-muted-foreground/70 font-medium truncate">{sub}</p>}
+    </div>
+  );
 }
