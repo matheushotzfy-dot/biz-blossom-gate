@@ -469,7 +469,7 @@ export default function AdminOverviewTab({ transactions, profiles, products, wit
           </div>
         </Panel>
 
-        <Panel title="Devoluções · 7 dias" icon={<RotateCcw className="h-3.5 w-3.5" />}>
+        <Panel title="Devoluções · 7 dias" icon={<RotateCcw className="h-3.5 w-3.5" />} tone="warning">
           <ResponsiveContainer width="100%" height={200}>
             <LineChart data={refundTrend} margin={{ top: 8, right: 8, bottom: 0, left: -16 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" strokeOpacity={0.4} vertical={false} />
