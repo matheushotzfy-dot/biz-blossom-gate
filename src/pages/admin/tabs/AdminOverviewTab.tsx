@@ -58,16 +58,38 @@ function ChartTooltip({ active, payload, label, fmtCurrency }: any) {
 }
 
 /* ── Card primitive — exactly the Financeiro pattern ── */
-function Panel({ children, className, title, icon, action }: {
+function Panel({ children, className, title, icon, action, tone = "neutral" }: {
   children: React.ReactNode; className?: string;
   title?: string; icon?: React.ReactNode; action?: React.ReactNode;
+  tone?: "neutral" | "primary" | "success" | "warning" | "destructive" | "info";
 }) {
+  const toneAccent = {
+    neutral:     "before:bg-transparent",
+    primary:     "before:bg-primary",
+    success:     "before:bg-success",
+    warning:     "before:bg-warning",
+    destructive: "before:bg-destructive",
+    info:        "before:bg-info",
+  }[tone];
+  const toneIcon = {
+    neutral:     "text-muted-foreground",
+    primary:     "text-primary",
+    success:     "text-success",
+    warning:     "text-warning",
+    destructive: "text-destructive",
+    info:        "text-info",
+  }[tone];
   return (
-    <div className={cn("rounded-[24px] border border-border/60 bg-card overflow-hidden flex flex-col transition-colors hover:border-primary/20", className)}>
+    <div className={cn(
+      "relative rounded-[24px] border border-border/60 bg-card overflow-hidden flex flex-col transition-colors hover:border-primary/20",
+      "before:absolute before:left-0 before:top-0 before:bottom-0 before:w-[3px]",
+      toneAccent,
+      className
+    )}>
       {(title || icon) && (
         <div className="flex items-center justify-between px-5 py-4 border-b border-border/40">
           <div className="flex items-center gap-2">
-            {icon && <span className="text-muted-foreground">{icon}</span>}
+            {icon && <span className={toneIcon}>{icon}</span>}
             <h3 className="text-[12px] font-black uppercase tracking-[0.16em] text-foreground/90">{title}</h3>
           </div>
           {action}
