@@ -4,6 +4,7 @@ import { Tag, Search, ToggleLeft, Percent, DollarSign } from "lucide-react";
 import { StatusBadge } from "@/components/StatusBadge";
 import type { Tables } from "@/integrations/supabase/types";
 import { GlassPanel as AdminPanel, GlassPanelTitle as PanelTitle, AdminKpi } from "./AdminOverviewTab";
+import { FinanceiroHero } from "@/components/financeiro/FinanceiroHero";
 
 interface Props {
  profiles: Tables<"profiles">[];
@@ -31,7 +32,12 @@ export default function AdminCouponsTab({ profiles, fmtCurrency }: Props) {
  });
 
  return (
- <div className="space-y-5 animate-fade-in">
+ <div className="space-y-6 animate-fade-in">
+ <FinanceiroHero
+   eyebrow="Promoções"
+   title="Cupons da plataforma"
+   subtitle={`${coupons.length} cupons no total · ${active.length} ativos · ${totalUses} utilizações`}
+ />
  <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
  <AdminKpi icon={<Tag className="h-5 w-5" />} label="Total Cupons" value={String(coupons.length)} sub="Criados" gradient="from-violet-500 to-purple-600" glowColor="rgba(139,92,246,0.15)" />
  <AdminKpi icon={<ToggleLeft className="h-5 w-5" />} label="Ativos" value={String(active.length)} sub="Em uso" gradient="from-emerald-500 to-emerald-600" glowColor="rgba(52,211,153,0.15)" />

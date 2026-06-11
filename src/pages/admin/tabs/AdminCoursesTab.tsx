@@ -4,6 +4,7 @@ import { GraduationCap, Search, BookOpen, Users, Video, Eye } from "lucide-react
 import { StatusBadge } from "@/components/StatusBadge";
 import type { Tables } from "@/integrations/supabase/types";
 import { GlassPanel as AdminPanel, GlassPanelTitle as PanelTitle, AdminKpi } from "./AdminOverviewTab";
+import { FinanceiroHero } from "@/components/financeiro/FinanceiroHero";
 
 interface Props {
  profiles: Tables<"profiles">[];
@@ -65,7 +66,12 @@ export default function AdminCoursesTab({ profiles, products }: Props) {
  if (loading) return <div className="flex items-center justify-center py-20 text-muted-foreground text-sm">Carregando cursos...</div>;
 
  return (
- <div className="space-y-5 animate-fade-in">
+ <div className="space-y-6 animate-fade-in">
+ <FinanceiroHero
+   eyebrow="Educação"
+   title="Cursos da plataforma"
+   subtitle={`${courses.length} cursos · ${published.length} publicados · ${totalStudents} alunos ativos`}
+ />
  <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
  <AdminKpi icon={<GraduationCap className="h-5 w-5" />} label="Total Cursos" value={String(courses.length)} sub="Na plataforma" gradient="from-indigo-500 to-indigo-600" glowColor="rgba(99,102,241,0.15)" />
  <AdminKpi icon={<Eye className="h-5 w-5" />} label="Publicados" value={String(published.length)} sub="Visíveis" gradient="from-emerald-500 to-emerald-600" glowColor="rgba(52,211,153,0.15)" />
