@@ -15,6 +15,8 @@ type CustomFees = {
   pix_fixed: number | null;
   card_percentage: number | null;
   card_fixed: number | null;
+  boleto_percentage: number | null;
+  boleto_fixed: number | null;
   transaction_percentage: number | null;
   transaction_fixed: number | null;
   withdrawal_fee: number | null;
@@ -29,28 +31,26 @@ export default function Taxas() {
     if (!user?.id) return;
     supabase
       .from("custom_user_fees")
-      .select("pix_percentage, pix_fixed, card_percentage, card_fixed, transaction_percentage, transaction_fixed, withdrawal_fee")
+      .select("pix_percentage, pix_fixed, card_percentage, card_fixed, boleto_percentage, boleto_fixed, transaction_percentage, transaction_fixed, withdrawal_fee")
       .eq("user_id", user.id)
       .maybeSingle()
       .then(({ data }) => setCustom((data as any) ?? null));
   }, [user?.id]);
 
-  const getFee = (name: string, def: number) => {
-    const f = fees.find((f) => f.name.toLowerCase().includes(name.toLowerCase()));
+  // Match by exact platform fee name set in admin panel
+  const platformFee = (exactName: string, def = 0) => {
+    const f = fees.find((f) => f.name === exactName);
     return f ? Number(f.value) : def;
   };
 
-  // Resolve: custom user fee → platform default → hard fallback
-  const pixPct = custom?.pix_percentage ?? custom?.transaction_percentage ?? getFee("pix", 1.99);
-  const pixFix = custom?.pix_fixed ?? custom?.transaction_fixed ?? getFee("pix fixa", 0.99);
-
-  const cardPct = custom?.card_percentage ?? custom?.transaction_percentage ?? getFee("cartão", 4.99);
-  const cardFix = custom?.card_fixed ?? custom?.transaction_fixed ?? getFee("cartão fixa", 0.99);
-
-  const boletoPct = getFee("boleto", 3.49);
-  const boletoFix = getFee("boleto fixa", 1.99);
-
-  const withdrawFee = custom?.withdrawal_fee ?? getFee("saque", 5.0);
+  // Resolution order: per-seller custom → platform default (admin panel) → 0
+  const pixPct    = custom?.pix_percentage    ?? platformFee("Taxa PIX", 0);
+  const pixFix    = custom?.pix_fixed         ?? platformFee("Taxa Fixa PIX", 0);
+  const cardPct   = custom?.card_percentage   ?? platformFee("Taxa Cartão", 0);
+  const cardFix   = custom?.card_fixed        ?? platformFee("Taxa Fixa Cartão", 0);
+  const boletoPct = custom?.boleto_percentage ?? platformFee("Taxa Boleto Percentual", 0);
+  const boletoFix = custom?.boleto_fixed      ?? platformFee("Taxa Fixa Boleto", platformFee("Taxa Boleto", 0));
+  const withdrawFee = custom?.withdrawal_fee  ?? platformFee("Taxa de Saque", 5);
 
   const methodCards = [
     {

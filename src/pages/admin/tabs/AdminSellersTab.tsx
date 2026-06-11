@@ -72,7 +72,7 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
  const [userWithdrawals, setUserWithdrawals] = useState<Tables<"withdrawals">[]>([]);
  const [userTransactions, setUserTransactions] = useState<Tables<"transactions">[]>([]);
  const [userPixKeys, setUserPixKeys] = useState<PixKey[]>([]);
- const [customFees, setCustomFees] = useState({ pix_percentage: "", pix_fixed: "", card_percentage: "", card_fixed: "", withdrawal_fee: "", max_ticket: "" });
+ const [customFees, setCustomFees] = useState({ pix_percentage: "", pix_fixed: "", card_percentage: "", card_fixed: "", boleto_percentage: "", boleto_fixed: "", withdrawal_fee: "", max_ticket: "" });
  const [effectiveMaxTicket, setEffectiveMaxTicket] = useState<number | null>(null);
  const [adjustAmount, setAdjustAmount] = useState("");
  const [adjustType, setAdjustType] = useState<"credit" | "debit">("credit");
@@ -112,7 +112,7 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
       supabase.from("products").select("id, user_id, name, price, status, created_at, image_url").eq("user_id", profile.user_id).order("created_at", { ascending: false }).limit(100) as any,
       supabase.from("withdrawals").select("id, user_id, amount, fee_amount, net_amount, status, created_at, withdrawal_type").eq("user_id", profile.user_id).order("created_at", { ascending: false }).limit(100) as any,
       supabase.from("transactions").select("id, user_id, product_id, amount, fee_amount, net_amount, status, payment_method, customer_name, created_at").eq("user_id", profile.user_id).order("created_at", { ascending: false }).limit(200) as any,
-      supabase.from("custom_user_fees").select("id, user_id, pix_percentage, pix_fixed, card_percentage, card_fixed, withdrawal_fee, max_ticket, admin_user_id").eq("user_id", profile.user_id).maybeSingle(),
+      supabase.from("custom_user_fees").select("id, user_id, pix_percentage, pix_fixed, card_percentage, card_fixed, boleto_percentage, boleto_fixed, withdrawal_fee, max_ticket, admin_user_id").eq("user_id", profile.user_id).maybeSingle(),
       supabase.from("balance_adjustments").select("id, user_id, amount, type, reason, admin_user_id, created_at").eq("user_id", profile.user_id).order("created_at", { ascending: false }).limit(50),
       supabase.from("pix_keys").select("id, key_type, key_value, created_at").eq("user_id", profile.user_id),
       supabase.from("disputes").select("id, seller_user_id, transaction_id, amount, type, status, reason, created_at").eq("seller_user_id", profile.user_id).order("created_at", { ascending: false }).limit(50) as any,
@@ -141,15 +141,17 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
     }
     if (feesRes.data) {
       setCustomFees({
-        pix_percentage:  (feesRes.data as any).pix_percentage?.toString()  || "",
-        pix_fixed:       (feesRes.data as any).pix_fixed?.toString()       || "",
-        card_percentage: (feesRes.data as any).card_percentage?.toString() || "",
-        card_fixed:      (feesRes.data as any).card_fixed?.toString()      || "",
-        withdrawal_fee:  feesRes.data.withdrawal_fee?.toString()           || "",
-        max_ticket:      (feesRes.data as any).max_ticket?.toString()      || "",
+        pix_percentage:    (feesRes.data as any).pix_percentage?.toString()    || "",
+        pix_fixed:         (feesRes.data as any).pix_fixed?.toString()         || "",
+        card_percentage:   (feesRes.data as any).card_percentage?.toString()   || "",
+        card_fixed:        (feesRes.data as any).card_fixed?.toString()        || "",
+        boleto_percentage: (feesRes.data as any).boleto_percentage?.toString() || "",
+        boleto_fixed:      (feesRes.data as any).boleto_fixed?.toString()      || "",
+        withdrawal_fee:    feesRes.data.withdrawal_fee?.toString()             || "",
+        max_ticket:        (feesRes.data as any).max_ticket?.toString()        || "",
       });
     } else {
-      setCustomFees({ pix_percentage: "", pix_fixed: "", card_percentage: "", card_fixed: "", withdrawal_fee: "", max_ticket: "" });
+      setCustomFees({ pix_percentage: "", pix_fixed: "", card_percentage: "", card_fixed: "", boleto_percentage: "", boleto_fixed: "", withdrawal_fee: "", max_ticket: "" });
     }
     // Resolve effective max ticket (custom > global)
     try {
@@ -339,12 +341,14 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
  if (!selectedUser || !user) return;
  const payload: any = {
  user_id: selectedUser.user_id, admin_user_id: user.id,
- pix_percentage:  customFees.pix_percentage  ? Number(customFees.pix_percentage)  : null,
- pix_fixed:       customFees.pix_fixed       ? Number(customFees.pix_fixed)       : null,
- card_percentage: customFees.card_percentage ? Number(customFees.card_percentage) : null,
- card_fixed:      customFees.card_fixed      ? Number(customFees.card_fixed)      : null,
- withdrawal_fee:  customFees.withdrawal_fee  ? Number(customFees.withdrawal_fee)  : null,
- max_ticket:      customFees.max_ticket      ? Number(customFees.max_ticket)      : null,
+ pix_percentage:    customFees.pix_percentage    ? Number(customFees.pix_percentage)    : null,
+ pix_fixed:         customFees.pix_fixed         ? Number(customFees.pix_fixed)         : null,
+ card_percentage:   customFees.card_percentage   ? Number(customFees.card_percentage)   : null,
+ card_fixed:        customFees.card_fixed        ? Number(customFees.card_fixed)        : null,
+ boleto_percentage: customFees.boleto_percentage ? Number(customFees.boleto_percentage) : null,
+ boleto_fixed:      customFees.boleto_fixed      ? Number(customFees.boleto_fixed)      : null,
+ withdrawal_fee:    customFees.withdrawal_fee    ? Number(customFees.withdrawal_fee)    : null,
+ max_ticket:        customFees.max_ticket        ? Number(customFees.max_ticket)        : null,
  updated_at: new Date().toISOString(),
  };
  const { error } = await supabase.from("custom_user_fees").upsert(payload, { onConflict: "user_id" });
@@ -1193,7 +1197,25 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
          placeholder="0.00" className="mt-1 text-xs" />
      </div>
    </div>
- </div>
+  </div>
+
+  <div className="space-y-3">
+    <p className="text-[10px] font-black uppercase tracking-widest text-amber-400">Boleto</p>
+    <div className="grid grid-cols-2 gap-4">
+      <div>
+        <Label className="text-[10px] text-muted-foreground">Boleto — Percentual (%)</Label>
+        <NumberInput step={0.01} min={0} value={customFees.boleto_percentage}
+          onChange={v => setCustomFees(p => ({ ...p, boleto_percentage: v }))}
+          placeholder="0.00" className="mt-1 text-xs" />
+      </div>
+      <div>
+        <Label className="text-[10px] text-muted-foreground">Boleto — Fixa (R$)</Label>
+        <NumberInput step={0.01} min={0} value={customFees.boleto_fixed}
+          onChange={v => setCustomFees(p => ({ ...p, boleto_fixed: v }))}
+          placeholder="3.49" className="mt-1 text-xs" />
+      </div>
+    </div>
+  </div>
 
  <div className="space-y-3">
    <p className="text-[10px] font-black uppercase tracking-widest text-amber-500">Saque</p>
