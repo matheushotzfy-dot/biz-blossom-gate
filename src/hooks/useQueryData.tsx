@@ -37,6 +37,7 @@ export function useProducts() {
         .from("products")
         .select("*")
         .eq("user_id", user!.id)
+        .is("deleted_at", null)
         .order("created_at", { ascending: false });
       if (error) throw error;
       return (data || []) as Tables<"products">[];
@@ -255,7 +256,7 @@ export function usePrefetchDashboardData() {
     qc.prefetchQuery({
       queryKey: ["products", uid],
       queryFn: async () => {
-        const { data, error } = await supabase.from("products").select("*").eq("user_id", uid).order("created_at", { ascending: false });
+        const { data, error } = await supabase.from("products").select("*").eq("user_id", uid).is("deleted_at", null).order("created_at", { ascending: false });
         if (error) throw error;
         return (data || []) as Tables<"products">[];
       },

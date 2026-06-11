@@ -161,17 +161,26 @@ export default function AdminProductsTab({ products, profiles, transactions, fmt
 
  const filtered = useMemo(() => {
  return products.filter(p => {
- if (statusFilter !== "all" && p.status !== statusFilter) return false;
+ const isDeleted = !!(p as any).deleted_at;
+ if (statusFilter === "deleted") {
+   if (!isDeleted) return false;
+ } else if (statusFilter === "all") {
+   if (isDeleted) return false;
+ } else {
+   if (isDeleted) return false;
+   if (p.status !== statusFilter) return false;
+ }
  if (!search) return true;
  const s = search.toLowerCase();
  return p.name.toLowerCase().includes(s) || p.description?.toLowerCase().includes(s) || getSellerName(p.user_id).toLowerCase().includes(s);
  });
  }, [products, statusFilter, search, profileMap]);
 
- const pendingReview = useMemo(() => products.filter(p => p.status === "pending_review"), [products]);
- const activeCount = products.filter(p => p.status === "active").length;
-  const blockedCount = products.filter(p => p.status === "inactive" || p.status === "suspended").length;
-  const rejectedCount = products.filter(p => p.status === "rejected").length;
+ const pendingReview = useMemo(() => products.filter(p => p.status === "pending_review" && !(p as any).deleted_at), [products]);
+ const activeCount = products.filter(p => p.status === "active" && !(p as any).deleted_at).length;
+  const blockedCount = products.filter(p => (p.status === "inactive" || p.status === "suspended") && !(p as any).deleted_at).length;
+  const rejectedCount = products.filter(p => p.status === "rejected" && !(p as any).deleted_at).length;
+  const deletedCount = products.filter(p => !!(p as any).deleted_at).length;
 
  return (
  <div className="space-y-6 animate-fade-in">
@@ -184,11 +193,11 @@ export default function AdminProductsTab({ products, profiles, transactions, fmt
 
  {/* KPIs */}
  <LinearStatRow>
-   <LinearStat icon={Package} label="Total" value={String(products.length)} sub="Cadastrados" tone="neutral" />
+   <LinearStat icon={Package} label="Total" value={String(products.length - deletedCount)} sub="Ativos no catálogo" tone="neutral" />
    <LinearStat icon={Clock} label="Em Revisão" value={String(pendingReview.length)} sub="Aguardando" tone="warning" />
-   <LinearStat icon={CheckCircle2} label="Ativos" value={String(activeCount)} sub={`${((activeCount / Math.max(products.length, 1)) * 100).toFixed(0)}% do total`} tone="success" />
+   <LinearStat icon={CheckCircle2} label="Ativos" value={String(activeCount)} sub={`${((activeCount / Math.max(products.length - deletedCount, 1)) * 100).toFixed(0)}% publicados`} tone="success" />
    <LinearStat icon={Ban} label="Suspensos" value={String(blockedCount)} sub="Checkout inativo" tone="destructive" />
-   <LinearStat icon={ShieldAlert} label="Recusados" value={String(rejectedCount)} sub="Contra políticas" tone="destructive" />
+   <LinearStat icon={ShieldAlert} label="Apagados" value={String(deletedCount)} sub="Soft-delete (histórico)" tone="destructive" />
  </LinearStatRow>
 
  {/* ═══ REVIEW BOARD ═══ */}
@@ -258,18 +267,24 @@ export default function AdminProductsTab({ products, profiles, transactions, fmt
  <Select value={statusFilter} onValueChange={setStatusFilter}>
  <SelectTrigger className="w-[160px] h-10 text-xs rounded-xl"><SelectValue placeholder="Status" /></SelectTrigger>
  <SelectContent>
-  <SelectItem value="all">Todos status</SelectItem>
+  <SelectItem value="all">Ativos (todos status)</SelectItem>
   <SelectItem value="draft">Rascunho</SelectItem>
   <SelectItem value="active">Ativos</SelectItem>
   <SelectItem value="pending_review">Em Revisão</SelectItem>
   <SelectItem value="inactive">Inativos</SelectItem>
+  <SelectItem value="deleted">🗑️ Apagados (histórico)</SelectItem>
   </SelectContent>
  </Select>
  </div>
 
  {/* Full Table */}
  <AdminPanel>
- <PanelTitle color="violet" icon={<Package className="h-4 w-4" />}>Todos os Produtos ({filtered.length})</PanelTitle>
+ <PanelTitle color={statusFilter === "deleted" ? "amber" : "violet"} icon={<Package className="h-4 w-4" />}>
+   {statusFilter === "deleted" ? `🗑️ Produtos Apagados — histórico completo (${filtered.length})` : `Todos os Produtos (${filtered.length})`}
+ </PanelTitle>
+ {statusFilter === "deleted" && (
+   <p className="text-[11px] text-muted-foreground mt-1">Produtos removidos pelo seller. O histórico de vendas, clientes e valores fica preservado para auditoria.</p>
+ )}
  <div className="overflow-x-auto mt-4">
  <table className="w-full text-sm">
  <thead><tr className="border-b border-border">
@@ -283,12 +298,14 @@ export default function AdminProductsTab({ products, profiles, transactions, fmt
  const isBlocked = p.status === "blocked";
  const isRejected = p.status === "rejected";
  const isPending = p.status === "pending_review";
+ const isDeleted = !!(p as any).deleted_at;
  return (
  <tr key={p.id} className={cn(
  "border-b border-border/50 hover:bg-muted/20 transition-colors cursor-pointer",
  isBlocked && "bg-destructive/[0.03]",
  isRejected && "bg-warning/[0.03]",
  isPending && "bg-info/[0.03]",
+ isDeleted && "bg-destructive/[0.05] opacity-90",
  )} onClick={() => openXRay(p)}>
  <td className="p-3">
  <div className="flex items-center gap-3">
@@ -317,7 +334,7 @@ export default function AdminProductsTab({ products, profiles, transactions, fmt
  {stats.chargebacks}
  </span>
  </td>
- <td className="p-3"><StatusBadge status={p.status} /></td>
+ <td className="p-3">{isDeleted ? <span className="px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-destructive/15 text-destructive border border-destructive/30">Apagado</span> : <StatusBadge status={p.status} />}</td>
  <td className="p-3" onClick={e => e.stopPropagation()}>
  <DropdownMenu>
  <DropdownMenuTrigger asChild>
