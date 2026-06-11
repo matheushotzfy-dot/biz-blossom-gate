@@ -4,6 +4,7 @@ import { GraduationCap, Search, BookOpen, Users, Video, Eye } from "lucide-react
 import { StatusBadge } from "@/components/StatusBadge";
 import type { Tables } from "@/integrations/supabase/types";
 import { GlassPanel as AdminPanel, GlassPanelTitle as PanelTitle, AdminKpi } from "./AdminOverviewTab";
+import { FinanceiroHero } from "@/components/financeiro/FinanceiroHero";
 
 interface Props {
  profiles: Tables<"profiles">[];
