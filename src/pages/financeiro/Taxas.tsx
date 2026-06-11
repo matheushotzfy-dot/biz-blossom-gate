@@ -4,7 +4,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { Info, DollarSign, CreditCard, Banknote, Clock, type LucideIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { FinanceiroHero, FinanceiroKpi, FinanceiroKpiGrid } from "@/components/financeiro/FinanceiroHero";
+import { FinanceiroHero } from "@/components/financeiro/FinanceiroHero";
 import { PixLogoMark } from "@/components/icons/PixLogoMark";
 
 const fmt = (v: number) => `R$ ${v.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}`;
