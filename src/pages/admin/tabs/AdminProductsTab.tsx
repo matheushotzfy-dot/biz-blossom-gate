@@ -279,7 +279,12 @@ export default function AdminProductsTab({ products, profiles, transactions, fmt
 
  {/* Full Table */}
  <AdminPanel>
- <PanelTitle color="violet" icon={<Package className="h-4 w-4" />}>Todos os Produtos ({filtered.length})</PanelTitle>
+ <PanelTitle color={statusFilter === "deleted" ? "amber" : "violet"} icon={<Package className="h-4 w-4" />}>
+   {statusFilter === "deleted" ? `🗑️ Produtos Apagados — histórico completo (${filtered.length})` : `Todos os Produtos (${filtered.length})`}
+ </PanelTitle>
+ {statusFilter === "deleted" && (
+   <p className="text-[11px] text-muted-foreground mt-1">Produtos removidos pelo seller. O histórico de vendas, clientes e valores fica preservado para auditoria.</p>
+ )}
  <div className="overflow-x-auto mt-4">
  <table className="w-full text-sm">
  <thead><tr className="border-b border-border">
@@ -293,12 +298,14 @@ export default function AdminProductsTab({ products, profiles, transactions, fmt
  const isBlocked = p.status === "blocked";
  const isRejected = p.status === "rejected";
  const isPending = p.status === "pending_review";
+ const isDeleted = !!(p as any).deleted_at;
  return (
  <tr key={p.id} className={cn(
  "border-b border-border/50 hover:bg-muted/20 transition-colors cursor-pointer",
  isBlocked && "bg-destructive/[0.03]",
  isRejected && "bg-warning/[0.03]",
  isPending && "bg-info/[0.03]",
+ isDeleted && "bg-destructive/[0.05] opacity-90",
  )} onClick={() => openXRay(p)}>
  <td className="p-3">
  <div className="flex items-center gap-3">
