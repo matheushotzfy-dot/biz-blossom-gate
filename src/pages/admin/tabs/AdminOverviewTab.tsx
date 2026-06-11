@@ -15,6 +15,7 @@ import {
 } from "recharts";
 import { Button } from "@/components/ui/button";
 import { FinanceiroHero, FinanceiroKpi, FinanceiroKpiGrid, type KpiTone } from "@/components/financeiro/FinanceiroHero";
+import KycReviewDialog from "@/components/admin/KycReviewDialog";
 import type { Tables } from "@/integrations/supabase/types";
 import { cn } from "@/lib/utils";
 import React from "react";
@@ -57,16 +58,38 @@ function ChartTooltip({ active, payload, label, fmtCurrency }: any) {
 }
 
 /* ── Card primitive — exactly the Financeiro pattern ── */
-function Panel({ children, className, title, icon, action }: {
+function Panel({ children, className, title, icon, action, tone = "neutral" }: {
   children: React.ReactNode; className?: string;
   title?: string; icon?: React.ReactNode; action?: React.ReactNode;
+  tone?: "neutral" | "primary" | "success" | "warning" | "destructive" | "info";
 }) {
+  const toneAccent = {
+    neutral:     "before:bg-transparent",
+    primary:     "before:bg-primary",
+    success:     "before:bg-success",
+    warning:     "before:bg-warning",
+    destructive: "before:bg-destructive",
+    info:        "before:bg-info",
+  }[tone];
+  const toneIcon = {
+    neutral:     "text-muted-foreground",
+    primary:     "text-primary",
+    success:     "text-success",
+    warning:     "text-warning",
+    destructive: "text-destructive",
+    info:        "text-info",
+  }[tone];
   return (
-    <div className={cn("rounded-[24px] border border-border/60 bg-card overflow-hidden flex flex-col transition-colors hover:border-primary/20", className)}>
+    <div className={cn(
+      "relative rounded-[24px] border border-border/60 bg-card overflow-hidden flex flex-col transition-colors hover:border-primary/20",
+      "before:absolute before:left-0 before:top-0 before:bottom-0 before:w-[3px]",
+      toneAccent,
+      className
+    )}>
       {(title || icon) && (
         <div className="flex items-center justify-between px-5 py-4 border-b border-border/40">
           <div className="flex items-center gap-2">
-            {icon && <span className="text-muted-foreground">{icon}</span>}
+            {icon && <span className={toneIcon}>{icon}</span>}
             <h3 className="text-[12px] font-black uppercase tracking-[0.16em] text-foreground/90">{title}</h3>
           </div>
           {action}
@@ -88,6 +111,29 @@ export default function AdminOverviewTab({ transactions, profiles, products, wit
  const [realtimeTx, setRealtimeTx] = useState<Tables<"transactions">[]>([]);
  const [chartPeriod, setChartPeriod] = useState<"7d" | "30d">("7d");
  const [fraudLogs, setFraudLogs] = useState<any[]>([]);
+ const [kycReview, setKycReview] = useState<Tables<"profiles"> | null>(null);
+
+ const handleKycApprove = async (userId: string) => {
+   const { error } = await supabase.from("profiles").update({
+     account_status: "approved",
+     kyc_rejection_reason: null,
+   } as any).eq("user_id", userId);
+   if (error) { toast.error("Erro ao aprovar KYC"); return; }
+   toast.success("KYC aprovado!");
+   onUserStatus(userId, "approved");
+ };
+
+ const handleKycReject = async (userId: string, reason: string) => {
+   const { error } = await supabase.from("profiles").update({
+     account_status: "rejected",
+     kyc_rejection_reason: reason,
+   } as any).eq("user_id", userId);
+   if (error) { toast.error("Erro ao recusar KYC"); return; }
+   toast.success("KYC recusado");
+   onUserStatus(userId, "rejected");
+ };
+
+
 
  useEffect(() => {
  Promise.all([
@@ -311,6 +357,7 @@ export default function AdminOverviewTab({ transactions, profiles, products, wit
           className="xl:col-span-3"
           title="Movimento por horário"
           icon={<Clock3 className="h-3.5 w-3.5" />}
+          tone="primary"
           action={<span className="text-[10px] font-black uppercase tracking-[0.18em] text-muted-foreground">{rangeLabel}</span>}
         >
           <ResponsiveContainer width="100%" height={220}>
@@ -329,6 +376,7 @@ export default function AdminOverviewTab({ transactions, profiles, products, wit
           className="xl:col-span-2"
           title="Volume & Take Rate"
           icon={<TrendingUp className="h-3.5 w-3.5" />}
+          tone="success"
           action={
             <div className="flex gap-0.5 bg-muted/30 border border-border/40 rounded-md p-0.5">
               {(["7d", "30d"] as const).map(f => (
@@ -359,7 +407,7 @@ export default function AdminOverviewTab({ transactions, profiles, products, wit
           </ResponsiveContainer>
         </Panel>
 
-        <Panel title="Métodos de Pagamento" icon={<CreditCard className="h-3.5 w-3.5" />}>
+        <Panel title="Métodos de Pagamento" icon={<CreditCard className="h-3.5 w-3.5" />} tone="info">
           <div className="space-y-3.5">
             {methodApproval.sort((a, b) => b.volume - a.volume).map(m => {
               const tone: "success" | "warning" | "destructive" = m.rate >= 85 ? "success" : m.rate >= 60 ? "warning" : "destructive";
@@ -390,7 +438,7 @@ export default function AdminOverviewTab({ transactions, profiles, products, wit
       </div>
 
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-4">
-        <Panel title="Atividade ao vivo" icon={<Radio className="h-3.5 w-3.5 text-destructive animate-pulse" />} className="max-h-[420px]">
+        <Panel title="Atividade ao vivo" icon={<Radio className="h-3.5 w-3.5 text-destructive animate-pulse" />} tone="destructive" className="max-h-[420px]">
           <div className="space-y-1.5 max-h-[360px] overflow-y-auto pr-1">
             {realtimeTx.length === 0 && <div className="text-center text-[11px] text-muted-foreground py-8">Aguardando transações...</div>}
             {realtimeTx.map(t => {
@@ -421,7 +469,7 @@ export default function AdminOverviewTab({ transactions, profiles, products, wit
           </div>
         </Panel>
 
-        <Panel title="Devoluções · 7 dias" icon={<RotateCcw className="h-3.5 w-3.5" />}>
+        <Panel title="Devoluções · 7 dias" icon={<RotateCcw className="h-3.5 w-3.5" />} tone="warning">
           <ResponsiveContainer width="100%" height={200}>
             <LineChart data={refundTrend} margin={{ top: 8, right: 8, bottom: 0, left: -16 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" strokeOpacity={0.4} vertical={false} />
@@ -438,7 +486,7 @@ export default function AdminOverviewTab({ transactions, profiles, products, wit
           </div>
         </Panel>
 
-        <Panel title="Alertas de Risco" icon={<ShieldAlert className="h-3.5 w-3.5" />}>
+        <Panel title="Alertas de Risco" icon={<ShieldAlert className="h-3.5 w-3.5" />} tone="destructive">
           <div className="space-y-2">
             <RiskRow label="Taxa de Chargeback" value={`${chargebackRate.toFixed(2)}%`} threshold="< 1%" alert={chargebackAlert} />
             <RiskRow label="Disputas Abertas" value={String(openDisputes)} threshold="< 5" alert={openDisputes > 5} />
@@ -449,27 +497,36 @@ export default function AdminOverviewTab({ transactions, profiles, products, wit
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        <Panel title={`Aprovações KYC (${kycPending.length})`} icon={<UserCheck className="h-3.5 w-3.5" />}>
+        <Panel title={`Aprovações KYC (${kycPending.length})`} icon={<UserCheck className="h-3.5 w-3.5" />} tone={kycPending.length > 0 ? "warning" : "neutral"}>
           <div className="space-y-2 max-h-[320px] overflow-y-auto pr-1">
             {kycPending.slice(0, 10).map(p => (
-              <div key={p.id} className="flex items-center justify-between px-3 py-2.5 rounded-lg border border-border/40 hover:bg-muted/30 transition-colors group">
+              <button
+                key={p.id}
+                type="button"
+                onClick={() => setKycReview(p)}
+                className="w-full text-left flex items-center justify-between px-3 py-2.5 rounded-lg border border-border/40 hover:border-warning/40 hover:bg-warning/5 transition-colors group"
+              >
                 <div className="min-w-0 flex-1">
                   <p className="text-[12px] font-semibold text-foreground truncate">{p.full_name || "Sem nome"}</p>
                   <p className="text-[10px] text-muted-foreground truncate">{p.email}</p>
                   <p className="text-[9px] text-muted-foreground/60 font-mono mt-0.5">{p.document_number || "Sem documento"}</p>
                 </div>
-                <div className="flex gap-1.5 shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
-                  <Button size="sm" variant="outline" className="h-7 text-[10px] gap-1 border-success/30 text-success hover:bg-success/10 hover:text-success" onClick={() => onUserStatus(p.user_id, "approved")}>
+                <div className="flex gap-1.5 shrink-0">
+                  <span
+                    role="button"
+                    tabIndex={-1}
+                    onClick={(e) => { e.stopPropagation(); handleKycApprove(p.user_id); }}
+                    className="inline-flex items-center gap-1 h-7 px-2.5 rounded-md text-[10px] font-bold border border-success/30 text-success hover:bg-success/10 transition-colors"
+                  >
                     <CheckCircle2 className="h-3 w-3" /> Aprovar
-                  </Button>
-                  <Button size="sm" variant="outline" className="h-7 text-[10px] gap-1" onClick={() => {
-                    window.open(`mailto:${p.email || ""}?subject=Verificação KYC`, "_blank");
-                    toast.info(`Analisando ${p.full_name || p.email}`);
-                  }}>
+                  </span>
+                  <span
+                    className="inline-flex items-center gap-1 h-7 px-2.5 rounded-md text-[10px] font-bold border border-warning/30 text-warning bg-warning/5 group-hover:bg-warning/15 transition-colors"
+                  >
                     <Eye className="h-3 w-3" /> Analisar
-                  </Button>
+                  </span>
                 </div>
-              </div>
+              </button>
             ))}
             {kycPending.length === 0 && (
               <div className="flex flex-col items-center justify-center py-10 text-muted-foreground/50">
@@ -480,7 +537,8 @@ export default function AdminOverviewTab({ transactions, profiles, products, wit
           </div>
         </Panel>
 
-        <Panel title={`Saques em revisão (${pendingWd.length})`} icon={<Wallet className="h-3.5 w-3.5" />}>
+
+        <Panel title={`Saques em revisão (${pendingWd.length})`} icon={<Wallet className="h-3.5 w-3.5" />} tone={pendingWd.length > 0 ? "info" : "neutral"}>
           <div className="space-y-2 max-h-[320px] overflow-y-auto pr-1">
             {pendingWd.slice(0, 10).map(w => {
               const sp = profiles.find(p => p.user_id === w.user_id);
@@ -517,7 +575,7 @@ export default function AdminOverviewTab({ transactions, profiles, products, wit
         </Panel>
       </div>
 
-      <Panel title="Bloqueios Anti-Fraude" icon={<ShieldAlert className="h-3.5 w-3.5 text-destructive" />}>
+      <Panel title="Bloqueios Anti-Fraude" icon={<ShieldAlert className="h-3.5 w-3.5 text-destructive" />} tone="destructive">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-2 max-h-[280px] overflow-y-auto pr-1">
           {fraudLogs.length > 0 ? fraudLogs.slice(0, 20).map((f: any) => (
             <div key={f.id} className="px-3 py-2 rounded-lg border border-destructive/20 bg-destructive/5">
@@ -537,9 +595,18 @@ export default function AdminOverviewTab({ transactions, profiles, products, wit
           )}
         </div>
       </Panel>
+
+      <KycReviewDialog
+        profile={kycReview}
+        open={!!kycReview}
+        onClose={() => setKycReview(null)}
+        onApprove={handleKycApprove}
+        onReject={handleKycReject}
+      />
     </div>
   );
 }
+
 
 /* ── Risk Row (Financeiro style) ── */
 function RiskRow({ label, value, threshold, alert }: { label: string; value: string; threshold: string; alert: boolean }) {
