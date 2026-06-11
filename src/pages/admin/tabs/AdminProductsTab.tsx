@@ -193,11 +193,11 @@ export default function AdminProductsTab({ products, profiles, transactions, fmt
 
  {/* KPIs */}
  <LinearStatRow>
-   <LinearStat icon={Package} label="Total" value={String(products.length)} sub="Cadastrados" tone="neutral" />
+   <LinearStat icon={Package} label="Total" value={String(products.length - deletedCount)} sub="Ativos no catálogo" tone="neutral" />
    <LinearStat icon={Clock} label="Em Revisão" value={String(pendingReview.length)} sub="Aguardando" tone="warning" />
-   <LinearStat icon={CheckCircle2} label="Ativos" value={String(activeCount)} sub={`${((activeCount / Math.max(products.length, 1)) * 100).toFixed(0)}% do total`} tone="success" />
+   <LinearStat icon={CheckCircle2} label="Ativos" value={String(activeCount)} sub={`${((activeCount / Math.max(products.length - deletedCount, 1)) * 100).toFixed(0)}% publicados`} tone="success" />
    <LinearStat icon={Ban} label="Suspensos" value={String(blockedCount)} sub="Checkout inativo" tone="destructive" />
-   <LinearStat icon={ShieldAlert} label="Recusados" value={String(rejectedCount)} sub="Contra políticas" tone="destructive" />
+   <LinearStat icon={ShieldAlert} label="Apagados" value={String(deletedCount)} sub="Soft-delete (histórico)" tone="destructive" />
  </LinearStatRow>
 
  {/* ═══ REVIEW BOARD ═══ */}
