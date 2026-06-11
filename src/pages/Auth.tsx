@@ -837,7 +837,7 @@ export default function Auth() {
  {/* Bottom trust line */}
  <div className="flex items-center gap-3 pt-2">
  <div className="h-2 w-2 rounded-full bg-success" />
- <span className="text-[9px] font-medium text-white/35 uppercase tracking-[0.1em]">Plataforma online · PCI DSS · LGPD · SSL 256-bit</span>
+ <span className="text-[9px] font-medium text-white/35 uppercase tracking-[0.1em]">&nbsp;SSL 256-BIT</span>
  </div>
  </motion.div>
  </div>
