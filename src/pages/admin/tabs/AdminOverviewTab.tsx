@@ -575,7 +575,7 @@ export default function AdminOverviewTab({ transactions, profiles, products, wit
         </Panel>
       </div>
 
-      <Panel title="Bloqueios Anti-Fraude" icon={<ShieldAlert className="h-3.5 w-3.5 text-destructive" />}>
+      <Panel title="Bloqueios Anti-Fraude" icon={<ShieldAlert className="h-3.5 w-3.5 text-destructive" />} tone="destructive">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-2 max-h-[280px] overflow-y-auto pr-1">
           {fraudLogs.length > 0 ? fraudLogs.slice(0, 20).map((f: any) => (
             <div key={f.id} className="px-3 py-2 rounded-lg border border-destructive/20 bg-destructive/5">
