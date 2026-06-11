@@ -267,11 +267,12 @@ export default function AdminProductsTab({ products, profiles, transactions, fmt
  <Select value={statusFilter} onValueChange={setStatusFilter}>
  <SelectTrigger className="w-[160px] h-10 text-xs rounded-xl"><SelectValue placeholder="Status" /></SelectTrigger>
  <SelectContent>
-  <SelectItem value="all">Todos status</SelectItem>
+  <SelectItem value="all">Ativos (todos status)</SelectItem>
   <SelectItem value="draft">Rascunho</SelectItem>
   <SelectItem value="active">Ativos</SelectItem>
   <SelectItem value="pending_review">Em Revisão</SelectItem>
   <SelectItem value="inactive">Inativos</SelectItem>
+  <SelectItem value="deleted">🗑️ Apagados (histórico)</SelectItem>
   </SelectContent>
  </Select>
  </div>
