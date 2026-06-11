@@ -161,17 +161,26 @@ export default function AdminProductsTab({ products, profiles, transactions, fmt
 
  const filtered = useMemo(() => {
  return products.filter(p => {
- if (statusFilter !== "all" && p.status !== statusFilter) return false;
+ const isDeleted = !!(p as any).deleted_at;
+ if (statusFilter === "deleted") {
+   if (!isDeleted) return false;
+ } else if (statusFilter === "all") {
+   if (isDeleted) return false;
+ } else {
+   if (isDeleted) return false;
+   if (p.status !== statusFilter) return false;
+ }
  if (!search) return true;
  const s = search.toLowerCase();
  return p.name.toLowerCase().includes(s) || p.description?.toLowerCase().includes(s) || getSellerName(p.user_id).toLowerCase().includes(s);
  });
  }, [products, statusFilter, search, profileMap]);
 
- const pendingReview = useMemo(() => products.filter(p => p.status === "pending_review"), [products]);
- const activeCount = products.filter(p => p.status === "active").length;
-  const blockedCount = products.filter(p => p.status === "inactive" || p.status === "suspended").length;
-  const rejectedCount = products.filter(p => p.status === "rejected").length;
+ const pendingReview = useMemo(() => products.filter(p => p.status === "pending_review" && !(p as any).deleted_at), [products]);
+ const activeCount = products.filter(p => p.status === "active" && !(p as any).deleted_at).length;
+  const blockedCount = products.filter(p => (p.status === "inactive" || p.status === "suspended") && !(p as any).deleted_at).length;
+  const rejectedCount = products.filter(p => p.status === "rejected" && !(p as any).deleted_at).length;
+  const deletedCount = products.filter(p => !!(p as any).deleted_at).length;
 
  return (
  <div className="space-y-6 animate-fade-in">
