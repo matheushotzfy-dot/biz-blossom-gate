@@ -38,8 +38,10 @@ export default function AdminSettingsTab() {
  const [blackPercentage, setBlackPercentage] = useState("4.99");
  const [blackFixed, setBlackFixed] = useState("2.50");
  const [blackWithdrawal, setBlackWithdrawal] = useState("5.00");
- const [autoApproveEnabled, setAutoApproveEnabled] = useState(false);
- const [autoApproveMaxAmount, setAutoApproveMaxAmount] = useState("100");
+  const [autoApproveEnabled, setAutoApproveEnabled] = useState(false);
+  const [autoApproveMaxAmount, setAutoApproveMaxAmount] = useState("100");
+  const [requireEmailVerification, setRequireEmailVerification] = useState(true);
+  const [savingEmailVerif, setSavingEmailVerif] = useState(false);
  const [editingFees, setEditingFees] = useState<Record<string, string>>({});
 
  // Max Ticket
@@ -99,12 +101,16 @@ export default function AdminSettingsTab() {
  setBlackFixed(String(v.fixed ?? 2.50));
  setBlackWithdrawal(String(v.withdrawal ?? 5.00));
  }
-  const maxTicketSet = settingsRes.data.find((s: any) => s.key === "max_ticket_default");
+   const maxTicketSet = settingsRes.data.find((s: any) => s.key === "max_ticket_default");
  if (maxTicketSet) {
-   const v = (maxTicketSet as any).value?.value ?? 10000;
-   setMaxTicketGlobal(String(v));
-   setMaxTicketInput(String(v));
- }
+    const v = (maxTicketSet as any).value?.value ?? 10000;
+    setMaxTicketGlobal(String(v));
+    setMaxTicketInput(String(v));
+  }
+  const emailVerif = settingsRes.data.find((s: any) => s.key === "require_email_verification");
+  if (emailVerif) {
+    setRequireEmailVerification(((emailVerif as any).value?.enabled ?? true) === true);
+  }
  }
  if (retentionRes.data) {
  const global = retentionRes.data.find((r: any) => r.user_id === null);
@@ -150,6 +156,24 @@ export default function AdminSettingsTab() {
  await logAdminAction("update_auto_approve", "platform_settings", "auto_approve_withdrawals", val as any);
  setSaving(false);
  };
+
+ const saveEmailVerification = async (enabled: boolean) => {
+   if (!user) return;
+   setSavingEmailVerif(true);
+   setRequireEmailVerification(enabled);
+   const { error } = await supabase.from("platform_settings")
+     .upsert({ key: "require_email_verification", value: { enabled } as any, updated_at: new Date().toISOString(), updated_by: user.id }, { onConflict: "key" });
+   if (error) {
+     toast.error("Erro ao salvar");
+     setRequireEmailVerification(!enabled);
+     setSavingEmailVerif(false);
+     return;
+   }
+   toast.success(enabled ? "Verificação de e-mail ATIVADA" : "Verificação de e-mail DESATIVADA — contas serão criadas já confirmadas");
+   await logAdminAction("update_require_email_verification", "platform_settings", "require_email_verification", { enabled } as any);
+   setSavingEmailVerif(false);
+ };
+
 
   const updateGlobalFee = async (feeId: string) => {
     if (!user) return;
@@ -393,6 +417,28 @@ export default function AdminSettingsTab() {
  <Save className="h-4 w-4" /> Salvar Configuração
  </Button>
  </div>
+ </AdminPanel>
+
+ {/* Email Verification Toggle */}
+ <AdminPanel>
+   <PanelTitle color="emerald" icon={<Lock className="h-4 w-4" />}>Verificação de E-mail no Cadastro</PanelTitle>
+   <div className="space-y-4 mt-4">
+     <div className="flex items-center justify-between p-3 rounded-xl border border-border bg-muted/30">
+       <div className="pr-4">
+         <p className="text-sm font-semibold text-foreground">Exigir confirmação de e-mail</p>
+         <p className="text-xs text-muted-foreground mt-0.5">
+           Quando <strong>ativado</strong>, o usuário precisa clicar no link enviado por e-mail antes de logar.
+           Quando <strong>desativado</strong>, novas contas são criadas já confirmadas e o login é liberado imediatamente.
+         </p>
+       </div>
+       <Switch checked={requireEmailVerification} onCheckedChange={saveEmailVerification} disabled={savingEmailVerif} />
+     </div>
+     <p className="text-[11px] text-muted-foreground">
+       Status atual: <strong className={requireEmailVerification ? "text-emerald-400" : "text-amber-400"}>
+         {requireEmailVerification ? "Verificação OBRIGATÓRIA" : "Verificação DESATIVADA (auto-confirmação)"}
+       </strong>
+     </p>
+   </div>
  </AdminPanel>
 
  {/* Global Platform Fees */}
