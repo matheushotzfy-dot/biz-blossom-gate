@@ -593,9 +593,18 @@ export default function AdminOverviewTab({ transactions, profiles, products, wit
           )}
         </div>
       </Panel>
+
+      <KycReviewDialog
+        profile={kycReview}
+        open={!!kycReview}
+        onClose={() => setKycReview(null)}
+        onApprove={handleKycApprove}
+        onReject={handleKycReject}
+      />
     </div>
   );
 }
+
 
 /* ── Risk Row (Financeiro style) ── */
 function RiskRow({ label, value, threshold, alert }: { label: string; value: string; threshold: string; alert: boolean }) {
