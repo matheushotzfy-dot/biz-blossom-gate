@@ -329,28 +329,79 @@ export default function AdminOverviewTab({ transactions, profiles, products, wit
     );
   }
 
+  const heroKpis: { label: string; value: string; sub: string; icon: any; tone: KpiTone; spark: { v: number }[] }[] = [
+    { label: "Movimentado Hoje", value: fmtCurrency(tpvToday), sub: `${todayTx.length} vendas aprovadas`, icon: Flame, tone: todayTx.length > 0 ? "success" : "neutral", spark: sparkSeries.tpv },
+    { label: "Lucro Hoje", value: fmtCurrency(takeRateToday), sub: `${activeSellersToday} sellers venderam`, icon: DollarSign, tone: "primary", spark: sparkSeries.tpv },
+    { label: "Saques Pendentes", value: fmtCurrency(pendingWdAmount), sub: `${pendingWd.length} solicitações · ${highValueWd.length} altos`, icon: Hourglass, tone: pendingWd.length > 5 ? "warning" : "neutral", spark: sparkSeries.vendas },
+    { label: "Novos Usuários", value: String(newUsersInRange.length), sub: "cadastros no período", icon: UserPlus, tone: "info", spark: sparkSeries.vendas },
+    { label: "Lucro no Período", value: fmtCurrency(takeRateTotal), sub: `${takeRatePct}% de take rate`, icon: TrendingUp, tone: "success", spark: sparkSeries.tpv },
+    { label: "Aprovações KYC", value: String(kycPending.length), sub: "usuários aguardando análise", icon: UserCheck, tone: kycPending.length > 0 ? "warning" : "neutral", spark: sparkSeries.vendas },
+    { label: "Saldo Retido", value: fmtCurrency(totalRetained), sub: "aguardando liberação", icon: Lock, tone: "warning", spark: sparkSeries.tpv },
+    { label: "Volume Sacado", value: fmtCurrency(totalWithdrawn), sub: "pagos no período", icon: ArrowDownToLine, tone: "neutral", spark: sparkSeries.tpv },
+  ];
+
   return (
     <div className="space-y-6 animate-fade-in">
-      <FinanceiroHero
-        eyebrow="Plataforma · Visão Executiva"
-        title={fmtCurrency(totalVolume)}
-        subtitle={`Valor movimentado no período · lucro ${fmtCurrency(takeRateTotal)} · take rate ${takeRatePct}% · ticket médio ${fmtCurrency(ticketMedio)} · ${rangeLabel}`}
-        status={{ tone: "success", label: "Live", pulse: true }}
-      />
+      {/* ── Command Center Hero ── */}
+      <div className="relative overflow-hidden rounded-3xl border border-border/60 bg-card">
+        <div className="pointer-events-none absolute inset-0">
+          <div className="absolute -top-32 -left-24 h-[420px] w-[640px] rounded-full opacity-40" style={{ background: "radial-gradient(closest-side, hsl(var(--primary) / 0.22), transparent 70%)" }} />
+          <div className="absolute -bottom-40 -right-32 h-[420px] w-[640px] rounded-full opacity-30" style={{ background: "radial-gradient(closest-side, hsl(var(--success) / 0.18), transparent 70%)" }} />
+          <div className="absolute inset-0 opacity-[0.04]" style={{ backgroundImage: "linear-gradient(hsl(var(--foreground)) 1px, transparent 1px), linear-gradient(90deg, hsl(var(--foreground)) 1px, transparent 1px)", backgroundSize: "44px 44px" }} />
+        </div>
 
-      <FinanceiroKpiGrid cols={4}>
-        <FinanceiroKpi label="Movimentado Hoje" value={fmtCurrency(tpvToday)} sub={`${todayTx.length} vendas aprovadas`} icon={Flame} tone={todayTx.length > 0 ? "success" : "neutral"} />
-        <FinanceiroKpi label="Lucro Hoje" value={fmtCurrency(takeRateToday)} sub={`${activeSellersToday} sellers venderam`} icon={DollarSign} tone="primary" />
-        <FinanceiroKpi label="Saques Pendentes" value={fmtCurrency(pendingWdAmount)} sub={`${pendingWd.length} solicitações · ${highValueWd.length} altos`} icon={Hourglass} tone={pendingWd.length > 5 ? "warning" : "neutral"} />
-        <FinanceiroKpi label="Novos Usuários" value={String(newUsersInRange.length)} sub="cadastros no período" icon={UserPlus} tone="info" />
-      </FinanceiroKpiGrid>
+        <div className="relative grid grid-cols-1 lg:grid-cols-[1.4fr_1fr] gap-0">
+          <div className="p-6 sm:p-8 border-b lg:border-b-0 lg:border-r border-border/60">
+            <div className="flex items-center gap-2 mb-5">
+              <span className="inline-flex items-center gap-1.5 rounded-full border border-success/30 bg-success/10 px-2.5 py-1">
+                <span className="h-1.5 w-1.5 rounded-full bg-success animate-pulse" />
+                <span className="text-[9.5px] font-black uppercase tracking-[0.22em] text-success">Live</span>
+              </span>
+              <span className="text-[9.5px] font-black uppercase tracking-[0.22em] text-muted-foreground/70">Plataforma · Command Center</span>
+            </div>
+            <h1 className="font-display text-[32px] sm:text-[52px] lg:text-[64px] font-black leading-[0.92] tracking-[-0.035em] text-foreground tabular-nums">
+              {fmtCurrency(totalVolume)}
+            </h1>
+            <p className="mt-3 text-[12px] sm:text-[13px] text-muted-foreground/85 leading-relaxed max-w-2xl">
+              Volume movimentado no período · {rangeLabel}
+            </p>
 
-      <FinanceiroKpiGrid cols={4}>
-        <FinanceiroKpi label="Lucro no Período" value={fmtCurrency(takeRateTotal)} sub={`${takeRatePct}% de take rate`} icon={TrendingUp} tone="success" />
-        <FinanceiroKpi label="Aprovações KYC" value={String(kycPending.length)} sub="usuários aguardando análise" icon={UserCheck} tone={kycPending.length > 0 ? "warning" : "neutral"} />
-        <FinanceiroKpi label="Saldo Retido" value={fmtCurrency(totalRetained)} sub="aguardando liberação" icon={Lock} tone="warning" />
-        <FinanceiroKpi label="Volume Sacado" value={fmtCurrency(totalWithdrawn)} sub="pagos no período" icon={ArrowDownToLine} tone="neutral" />
-      </FinanceiroKpiGrid>
+            <div className="mt-6 grid grid-cols-3 gap-px rounded-xl overflow-hidden border border-border/60 bg-border/40">
+              <HeroStat label="Lucro" value={fmtCurrency(takeRateTotal)} accent="text-success" />
+              <HeroStat label="Take Rate" value={`${takeRatePct}%`} accent="text-primary" />
+              <HeroStat label="Ticket Médio" value={fmtCurrency(ticketMedio)} accent="text-info" />
+            </div>
+          </div>
+
+          <div className="p-6 sm:p-8 flex flex-col justify-between gap-5">
+            <div>
+              <p className="text-[9.5px] font-black uppercase tracking-[0.22em] text-muted-foreground/70 mb-3">Pulso 14 dias</p>
+              <ResponsiveContainer width="100%" height={140}>
+                <AreaChart data={sparkSeries.tpv.map((p, i) => ({ ...p, name: i }))} margin={{ top: 4, right: 4, bottom: 0, left: 0 }}>
+                  <defs>
+                    <linearGradient id="heroSpark" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0%" stopColor="hsl(var(--primary))" stopOpacity={0.45} />
+                      <stop offset="100%" stopColor="hsl(var(--primary))" stopOpacity={0} />
+                    </linearGradient>
+                  </defs>
+                  <Area type="monotone" dataKey="v" stroke="hsl(var(--primary))" strokeWidth={2} fill="url(#heroSpark)" dot={false} isAnimationActive={false} />
+                </AreaChart>
+              </ResponsiveContainer>
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <PulseBadge icon={Activity} label="Conversão" value={`${conversionRate}%`} tone="success" />
+              <PulseBadge icon={CheckCircle2} label="Aprovadas" value={String(filteredApproved.length)} tone="primary" />
+              <PulseBadge icon={ShieldAlert} label="Chargeback" value={`${chargebackRate.toFixed(2)}%`} tone={chargebackAlert ? "destructive" : "neutral"} />
+              <PulseBadge icon={Users} label="Sellers Ativos" value={String(activeSellersToday)} tone="info" />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* ── Premium KPI Grid with sparklines ── */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-3">
+        {heroKpis.map((k, i) => <MetricCard key={i} {...k} />)}
+      </div>
 
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-4">
         <Panel
@@ -603,6 +654,84 @@ export default function AdminOverviewTab({ transactions, profiles, products, wit
         onApprove={handleKycApprove}
         onReject={handleKycReject}
       />
+    </div>
+  );
+}
+
+/* ── Hero internals ── */
+function HeroStat({ label, value, accent }: { label: string; value: string; accent: string }) {
+  return (
+    <div className="bg-card px-3 py-3">
+      <p className="text-[9px] font-black uppercase tracking-[0.18em] text-muted-foreground/70">{label}</p>
+      <p className={cn("mt-1 font-display text-[15px] sm:text-[17px] font-black tabular-nums leading-none", accent)}>{value}</p>
+    </div>
+  );
+}
+
+function PulseBadge({ icon: Icon, label, value, tone }: { icon: any; label: string; value: string; tone: "success" | "primary" | "info" | "warning" | "destructive" | "neutral" }) {
+  const t = {
+    success: "text-success border-success/25 bg-success/5",
+    primary: "text-primary border-primary/25 bg-primary/5",
+    info: "text-info border-info/25 bg-info/5",
+    warning: "text-warning border-warning/25 bg-warning/5",
+    destructive: "text-destructive border-destructive/25 bg-destructive/5",
+    neutral: "text-muted-foreground border-border bg-muted/20",
+  }[tone];
+  return (
+    <div className={cn("flex items-center justify-between rounded-xl border px-3 py-2.5", t)}>
+      <div className="flex items-center gap-2 min-w-0">
+        <Icon className="h-3.5 w-3.5 shrink-0" strokeWidth={2.25} />
+        <span className="text-[10px] font-bold uppercase tracking-wider truncate">{label}</span>
+      </div>
+      <span className="text-[12px] font-black tabular-nums shrink-0">{value}</span>
+    </div>
+  );
+}
+
+/* ── Metric Card with sparkline ── */
+function MetricCard({ label, value, sub, icon: Icon, tone, spark }: { label: string; value: string; sub?: string; icon: any; tone: KpiTone; spark: { v: number }[] }) {
+  const toneText: Record<KpiTone, string> = {
+    success: "text-success", info: "text-info", warning: "text-warning",
+    neutral: "text-foreground", destructive: "text-destructive", primary: "text-primary",
+  };
+  const toneStroke: Record<KpiTone, string> = {
+    success: "hsl(var(--success))", info: "hsl(var(--info))", warning: "hsl(var(--warning))",
+    neutral: "hsl(var(--muted-foreground))", destructive: "hsl(var(--destructive))", primary: "hsl(var(--primary))",
+  };
+  const toneBg: Record<KpiTone, string> = {
+    success: "bg-success/10 text-success", info: "bg-info/10 text-info", warning: "bg-warning/10 text-warning",
+    neutral: "bg-muted/40 text-muted-foreground", destructive: "bg-destructive/10 text-destructive", primary: "bg-primary/10 text-primary",
+  };
+  const toneRail: Record<KpiTone, string> = {
+    success: "bg-success", info: "bg-info", warning: "bg-warning",
+    neutral: "bg-border", destructive: "bg-destructive", primary: "bg-primary",
+  };
+  return (
+    <div className="group relative overflow-hidden rounded-2xl border border-border/60 bg-card p-4 transition-all hover:border-primary/30">
+      <div className={cn("absolute top-0 left-0 right-0 h-[2px]", toneRail[tone])} />
+      <div className="flex items-start justify-between gap-3">
+        <div className="min-w-0">
+          <p className="text-[9.5px] font-black uppercase tracking-[0.18em] text-muted-foreground/70 truncate">{label}</p>
+          <p className={cn("mt-2 font-display text-[22px] sm:text-[24px] font-black leading-none tabular-nums tracking-tight break-all", toneText[tone])}>{value}</p>
+          {sub && <p className="mt-2 text-[10.5px] text-muted-foreground/75 truncate">{sub}</p>}
+        </div>
+        <div className={cn("h-8 w-8 rounded-lg flex items-center justify-center shrink-0", toneBg[tone])}>
+          <Icon className="h-4 w-4" strokeWidth={2.25} />
+        </div>
+      </div>
+      <div className="mt-3 -mx-1 h-10 opacity-90 group-hover:opacity-100 transition-opacity">
+        <ResponsiveContainer width="100%" height="100%">
+          <AreaChart data={spark} margin={{ top: 2, right: 0, bottom: 0, left: 0 }}>
+            <defs>
+              <linearGradient id={`spark-${label.replace(/\s/g, "")}`} x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stopColor={toneStroke[tone]} stopOpacity={0.35} />
+                <stop offset="100%" stopColor={toneStroke[tone]} stopOpacity={0} />
+              </linearGradient>
+            </defs>
+            <Area type="monotone" dataKey="v" stroke={toneStroke[tone]} strokeWidth={1.75} fill={`url(#spark-${label.replace(/\s/g, "")})`} dot={false} isAnimationActive={false} />
+          </AreaChart>
+        </ResponsiveContainer>
+      </div>
     </div>
   );
 }
