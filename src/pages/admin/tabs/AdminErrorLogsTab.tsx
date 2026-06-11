@@ -68,7 +68,13 @@ export default function AdminErrorLogsTab({ profiles }: Props) {
  };
 
  return (
- <div className="space-y-5 animate-fade-in">
+ <div className="space-y-6 animate-fade-in">
+ <FinanceiroHero
+   eyebrow="Saúde do sistema"
+   title="Logs de erros"
+   subtitle={`${errors.length} registros · ${openCount} abertos · ${todayCount} hoje · ${uniqueUsers} contas afetadas`}
+   status={openCount > 0 ? { tone: "destructive", label: `${openCount} abertos`, pulse: true } : { tone: "success", label: "Tudo limpo" }}
+ />
  <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
  <AdminKpi icon={<Bug className="h-5 w-5" />} label="Total Erros" value={String(errors.length)} sub="Registros" gradient="from-red-500 to-rose-600" glowColor="rgba(239,68,68,0.15)" />
  <AdminKpi icon={<AlertTriangle className="h-5 w-5" />} label="Não Resolvidos" value={String(openCount)} sub="Pendentes" gradient="from-amber-500 to-orange-600" glowColor="rgba(245,158,11,0.15)" alert={openCount > 0} />
