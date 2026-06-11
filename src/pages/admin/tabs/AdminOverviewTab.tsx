@@ -357,6 +357,7 @@ export default function AdminOverviewTab({ transactions, profiles, products, wit
           className="xl:col-span-3"
           title="Movimento por horário"
           icon={<Clock3 className="h-3.5 w-3.5" />}
+          tone="primary"
           action={<span className="text-[10px] font-black uppercase tracking-[0.18em] text-muted-foreground">{rangeLabel}</span>}
         >
           <ResponsiveContainer width="100%" height={220}>
