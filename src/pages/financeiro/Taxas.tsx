@@ -145,15 +145,18 @@ export default function Taxas() {
       </section>
 
       {/* Withdrawal fee — destacada */}
-      <FinanceiroKpiGrid cols={1}>
-        <FinanceiroKpi
-          label="Tarifa de Saque"
-          value={fmt(withdrawFee)}
-          sub="Fixo por solicitação de saque (Pix)"
-          icon={DollarSign}
-          tone="primary"
-        />
-      </FinanceiroKpiGrid>
+      <section className="bg-card rounded-[20px] border border-border shadow-sm p-5 flex items-center gap-4 animate-fade-in">
+        <div className={cn("h-12 w-12 rounded-xl flex items-center justify-center shrink-0", toneCls.primary)}>
+          <DollarSign className="h-5 w-5" strokeWidth={2.25} />
+        </div>
+        <div className="flex-1 min-w-0">
+          <p className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider">Tarifa de Saque</p>
+          <p className="text-[11px] text-muted-foreground/70 font-medium">Fixo por solicitação de saque (Pix)</p>
+        </div>
+        <span className="font-display text-[26px] font-black text-foreground tabular-nums leading-none tracking-[-0.02em]">
+          {fmt(withdrawFee)}
+        </span>
+      </section>
 
       {/* Prazos de liberação */}
       <section className="bg-card rounded-[24px] border border-border shadow-sm overflow-hidden animate-fade-in stagger-2">
