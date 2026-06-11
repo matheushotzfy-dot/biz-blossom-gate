@@ -407,7 +407,7 @@ export default function AdminOverviewTab({ transactions, profiles, products, wit
           </ResponsiveContainer>
         </Panel>
 
-        <Panel title="Métodos de Pagamento" icon={<CreditCard className="h-3.5 w-3.5" />}>
+        <Panel title="Métodos de Pagamento" icon={<CreditCard className="h-3.5 w-3.5" />} tone="info">
           <div className="space-y-3.5">
             {methodApproval.sort((a, b) => b.volume - a.volume).map(m => {
               const tone: "success" | "warning" | "destructive" = m.rate >= 85 ? "success" : m.rate >= 60 ? "warning" : "destructive";
