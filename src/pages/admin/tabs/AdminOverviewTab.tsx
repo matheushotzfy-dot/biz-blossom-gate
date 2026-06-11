@@ -376,6 +376,7 @@ export default function AdminOverviewTab({ transactions, profiles, products, wit
           className="xl:col-span-2"
           title="Volume & Take Rate"
           icon={<TrendingUp className="h-3.5 w-3.5" />}
+          tone="success"
           action={
             <div className="flex gap-0.5 bg-muted/30 border border-border/40 rounded-md p-0.5">
               {(["7d", "30d"] as const).map(f => (
