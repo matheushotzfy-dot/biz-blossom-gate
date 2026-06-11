@@ -157,6 +157,24 @@ export default function AdminSettingsTab() {
  setSaving(false);
  };
 
+ const saveEmailVerification = async (enabled: boolean) => {
+   if (!user) return;
+   setSavingEmailVerif(true);
+   setRequireEmailVerification(enabled);
+   const { error } = await supabase.from("platform_settings")
+     .upsert({ key: "require_email_verification", value: { enabled } as any, updated_at: new Date().toISOString(), updated_by: user.id }, { onConflict: "key" });
+   if (error) {
+     toast.error("Erro ao salvar");
+     setRequireEmailVerification(!enabled);
+     setSavingEmailVerif(false);
+     return;
+   }
+   toast.success(enabled ? "Verificação de e-mail ATIVADA" : "Verificação de e-mail DESATIVADA — contas serão criadas já confirmadas");
+   await logAdminAction("update_require_email_verification", "platform_settings", "require_email_verification", { enabled } as any);
+   setSavingEmailVerif(false);
+ };
+
+
   const updateGlobalFee = async (feeId: string) => {
     if (!user) return;
     const newValue = Number(editingFees[feeId]);
