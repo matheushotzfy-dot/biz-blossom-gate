@@ -110,7 +110,12 @@ export default function Produtos() {
   const confirmDelete = async () => {
     if (!user || !deleteTarget) return;
     setDeleting(true);
-    const { error } = await supabase.from("products").delete().eq("id", deleteTarget).eq("user_id", user.id);
+    // Soft delete: keep record for admin audit (sales, customers, history)
+    const { error } = await supabase
+      .from("products")
+      .update({ deleted_at: new Date().toISOString(), status: "inactive" } as any)
+      .eq("id", deleteTarget)
+      .eq("user_id", user.id);
     setDeleting(false);
     setDeleteTarget(null);
     if (error) { toast.error("Erro ao excluir produto"); return; }
@@ -121,6 +126,7 @@ export default function Produtos() {
   const confirmClearDrafts = async () => {
     if (!user || draftIds.length === 0) return;
     setClearingDrafts(true);
+    // Drafts can be hard-deleted (no sales history)
     const { error } = await supabase.from("products").delete().in("id", draftIds).eq("user_id", user.id);
     setClearingDrafts(false);
     setClearDraftsOpen(false);
