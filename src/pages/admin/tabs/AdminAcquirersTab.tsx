@@ -12,6 +12,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { GlassPanel as AdminPanel, GlassPanelTitle as PanelTitle } from "./AdminOverviewTab";
 import { LinearHero, LinearStat, LinearStatRow } from "@/components/admin/LinearKit";
 import { logAdminAction } from "@/lib/auditLog";
+import { cn } from "@/lib/utils";
 
 interface Acquirer {
  id: string; name: string; slug: string; type: string; is_active: boolean;
