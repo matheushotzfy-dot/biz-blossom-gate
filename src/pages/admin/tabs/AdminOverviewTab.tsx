@@ -495,27 +495,36 @@ export default function AdminOverviewTab({ transactions, profiles, products, wit
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        <Panel title={`Aprovações KYC (${kycPending.length})`} icon={<UserCheck className="h-3.5 w-3.5" />}>
+        <Panel title={`Aprovações KYC (${kycPending.length})`} icon={<UserCheck className="h-3.5 w-3.5" />} tone={kycPending.length > 0 ? "warning" : "neutral"}>
           <div className="space-y-2 max-h-[320px] overflow-y-auto pr-1">
             {kycPending.slice(0, 10).map(p => (
-              <div key={p.id} className="flex items-center justify-between px-3 py-2.5 rounded-lg border border-border/40 hover:bg-muted/30 transition-colors group">
+              <button
+                key={p.id}
+                type="button"
+                onClick={() => setKycReview(p)}
+                className="w-full text-left flex items-center justify-between px-3 py-2.5 rounded-lg border border-border/40 hover:border-warning/40 hover:bg-warning/5 transition-colors group"
+              >
                 <div className="min-w-0 flex-1">
                   <p className="text-[12px] font-semibold text-foreground truncate">{p.full_name || "Sem nome"}</p>
                   <p className="text-[10px] text-muted-foreground truncate">{p.email}</p>
                   <p className="text-[9px] text-muted-foreground/60 font-mono mt-0.5">{p.document_number || "Sem documento"}</p>
                 </div>
-                <div className="flex gap-1.5 shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
-                  <Button size="sm" variant="outline" className="h-7 text-[10px] gap-1 border-success/30 text-success hover:bg-success/10 hover:text-success" onClick={() => onUserStatus(p.user_id, "approved")}>
+                <div className="flex gap-1.5 shrink-0">
+                  <span
+                    role="button"
+                    tabIndex={-1}
+                    onClick={(e) => { e.stopPropagation(); handleKycApprove(p.user_id); }}
+                    className="inline-flex items-center gap-1 h-7 px-2.5 rounded-md text-[10px] font-bold border border-success/30 text-success hover:bg-success/10 transition-colors"
+                  >
                     <CheckCircle2 className="h-3 w-3" /> Aprovar
-                  </Button>
-                  <Button size="sm" variant="outline" className="h-7 text-[10px] gap-1" onClick={() => {
-                    window.open(`mailto:${p.email || ""}?subject=Verificação KYC`, "_blank");
-                    toast.info(`Analisando ${p.full_name || p.email}`);
-                  }}>
+                  </span>
+                  <span
+                    className="inline-flex items-center gap-1 h-7 px-2.5 rounded-md text-[10px] font-bold border border-warning/30 text-warning bg-warning/5 group-hover:bg-warning/15 transition-colors"
+                  >
                     <Eye className="h-3 w-3" /> Analisar
-                  </Button>
+                  </span>
                 </div>
-              </div>
+              </button>
             ))}
             {kycPending.length === 0 && (
               <div className="flex flex-col items-center justify-center py-10 text-muted-foreground/50">
@@ -525,6 +534,7 @@ export default function AdminOverviewTab({ transactions, profiles, products, wit
             )}
           </div>
         </Panel>
+
 
         <Panel title={`Saques em revisão (${pendingWd.length})`} icon={<Wallet className="h-3.5 w-3.5" />}>
           <div className="space-y-2 max-h-[320px] overflow-y-auto pr-1">
