@@ -865,7 +865,8 @@ export default function ProductEditor() {
 
 function TabGeral({ name, setName, description, setDescription, price, setPrice, status, setStatus, pageUrl, setPageUrl, imagePreview, setImagePreview, imageFile, setImageFile, fileInputRef, handleFileChange, category, setCategory, paymentType, setPaymentType, displayName, setDisplayName, supportEmail, setSupportEmail, supportPhone, setSupportPhone, warrantyDays, setWarrantyDays, isDragging, setIsDragging, handleDrop, onNext }: any) {
   const descValid = description.length >= 50;
-  const urlValid = /^https?:\/\/.+\..+/.test(pageUrl.trim());
+  // Aceita URL sem https://
+  const urlValid = pageUrl.trim().length > 3 && /\.[a-z]{2,}/i.test(pageUrl.trim());
   const emailValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(supportEmail.trim());
   const phoneDigits = (supportPhone || "").replace(/\D/g, "");
   const phoneValid = phoneDigits.length >= 10 && phoneDigits.length <= 11;
@@ -876,20 +877,32 @@ function TabGeral({ name, setName, description, setDescription, price, setPrice,
     if (d.length <= 10) return `(${d.slice(0,2)}) ${d.slice(2,6)}-${d.slice(6)}`;
     return `(${d.slice(0,2)}) ${d.slice(2,7)}-${d.slice(7)}`;
   };
+  // Formata para BR: 1.000,00 / 10.500,50. Trabalha em centavos pra evitar bug de cursor.
   const handlePriceChange = (raw: string) => {
-    // Aceita "10", "10,50", "10.50". Mantém apenas dígitos e um separador.
-    let v = raw.replace(/[^0-9,.]/g, "");
-    // unifica para vírgula como separador decimal visualmente
-    v = v.replace(/\./g, ",");
-    // permite só uma vírgula
-    const parts = v.split(",");
-    if (parts.length > 2) v = parts[0] + "," + parts.slice(1).join("");
-    // máx 2 casas decimais
-    const [int, dec] = v.split(",");
-    if (dec !== undefined) v = int + "," + dec.slice(0, 2);
-    setPrice(v);
+    const digits = raw.replace(/\D/g, "").slice(0, 8); // até 99.999.999 centavos
+    if (!digits) { setPrice(""); return; }
+    const cents = parseInt(digits, 10);
+    const value = cents / 100;
+    setPrice(value.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 }));
   };
-  const priceNumber = parseFloat(String(price).replace(",", ".")) || 0;
+  const priceNumber = (() => {
+    const s = String(price);
+    if (!s) return 0;
+    return s.includes(",")
+      ? parseFloat(s.replace(/\./g, "").replace(",", ".")) || 0
+      : parseFloat(s) || 0;
+  })();
+
+  const CATEGORIES = [
+    { value: "infoproduto", label: "Infoproduto",     desc: "Conteúdo digital genérico", icon: Package },
+    { value: "curso",       label: "Curso Online",    desc: "Aulas em módulos",          icon: GraduationCap },
+    { value: "ebook",       label: "E-book",          desc: "Material em PDF",           icon: BookOpen },
+    { value: "mentoria",    label: "Mentoria",        desc: "Acompanhamento 1:1",        icon: Users },
+    { value: "software",    label: "Software / SaaS", desc: "Aplicativo ou ferramenta",  icon: Code2 },
+    { value: "servico",     label: "Serviço",         desc: "Trabalho prestado",         icon: Briefcase },
+    { value: "comunidade",  label: "Comunidade",      desc: "Grupo recorrente",          icon: MessageSquare },
+    { value: "outro",       label: "Outro",           desc: "Modelo personalizado",      icon: Layers },
+  ];
 
   return (
     <div className="space-y-8">
