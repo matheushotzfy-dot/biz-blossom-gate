@@ -62,6 +62,8 @@ const NAV_SECTIONS: { id: string; label: string; items: { id: string; label: str
       { id: "inactive-sellers", label: "Inativos", icon: UserX, employeeAccess: false },
       { id: "employees", label: "Staff", icon: UserCog, employeeAccess: false },
       { id: "managers", label: "Gerentes", icon: Shield, employeeAccess: false },
+      { id: "staff-commissions", label: "Comissões Staff", icon: Coins, employeeAccess: false },
+
     ],
   },
   {
