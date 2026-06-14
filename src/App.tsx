@@ -67,12 +67,21 @@ const queryClient = new QueryClient({
       retry: 1,
       refetchOnWindowFocus: false,
       staleTime: 2 * 60 * 1000,
+      gcTime: 24 * 60 * 60 * 1000, // keep cached data 24h so it persists across tab switches
     },
     mutations: {
       retry: 0,
     },
   },
 });
+
+const persister = typeof window !== "undefined"
+  ? createSyncStoragePersister({
+      storage: window.localStorage,
+      key: "hotzfy-query-cache",
+      throttleTime: 1000,
+    })
+  : undefined;
 
 const App = () => (
   <ErrorBoundary>
