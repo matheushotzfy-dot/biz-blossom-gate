@@ -20,7 +20,7 @@ import type { Tables } from "@/integrations/supabase/types";
 import { cn } from "@/lib/utils";
 import React from "react";
 
-interface Dispute { id: string; type: string; status: string; seller_user_id: string; amount: number; created_at: string; }
+interface Dispute { id: string; type: string; status: string; seller_user_id: string; amount: number; created_at: string; transaction_id: string | null; }
 
 interface Props {
   transactions: Tables<"transactions">[];
