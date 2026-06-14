@@ -6,8 +6,9 @@ import {
   Shield, LogOut, Zap, LayoutDashboard, Users, Package, AlertTriangle,
   RotateCcw, ShieldAlert, CreditCard, ArrowDownToLine, Tag, GraduationCap,
   Activity, Settings, Bell, MessageSquare,
-  UserCog, RefreshCw, Rocket,
+  UserCog, RefreshCw, Rocket, Coins,
   Bug, UserX, Search, Banknote, ShieldCheck,
+
   FileWarning, Package2, Radio, BarChart3, Calendar,
   ChevronLeft, ChevronRight, PanelLeftClose, PanelLeft,
   Flame, Sparkles, Crown, Globe, Palette, CheckCircle2, Trophy,
