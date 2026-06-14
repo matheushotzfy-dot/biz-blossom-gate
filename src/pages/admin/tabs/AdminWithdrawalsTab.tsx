@@ -165,13 +165,36 @@ export default function AdminWithdrawalsTab({ withdrawals, profiles, onWithdrawa
  /* ── Single Reject with Reason ── */
  const handleRejectWithReason = async () => {
  if (!rejectDialog || !rejectReason.trim()) { toast.error("Informe o motivo da rejeição"); return; }
- const { error } = await supabase.from("withdrawals").update({ status: "rejected" }).eq("id", rejectDialog).eq("status", "pending");
- if (error) { toast.error("Erro ao recusar"); return; }
+ if (rejectReason.trim().length < 3) { toast.error("Motivo muito curto"); return; }
+ const { error } = await supabase.from("withdrawals")
+   .update({ status: "rejected", rejection_reason: rejectReason.trim(), processed_by: user?.id } as any)
+   .eq("id", rejectDialog).eq("status", "pending");
+ if (error) { toast.error(error.message || "Erro ao recusar"); return; }
  await logAdminAction("reject_withdrawal", "withdrawal", rejectDialog, { reason: rejectReason.trim() } as any);
  toast.success("Saque recusado com motivo registrado");
  setRejectDialog(null);
  setRejectReason("");
- onReload(); // trigger parent reload
+ onReload();
+ };
+
+ /* ── Proof upload ── */
+ const handleProofUpload = async (withdrawalId: string, file: File) => {
+   if (!user) return;
+   if (file.size > 5 * 1024 * 1024) { toast.error("Arquivo > 5MB"); return; }
+   const path = `${withdrawalId}/${Date.now()}-${file.name.replace(/[^\w.-]/g, "_")}`;
+   const { error: upErr } = await supabase.storage.from("withdrawal-proofs").upload(path, file, { upsert: true });
+   if (upErr) { toast.error("Erro ao enviar: " + upErr.message); return; }
+   const { error } = await supabase.from("withdrawals").update({ payment_proof_url: path } as any).eq("id", withdrawalId);
+   if (error) { toast.error("Erro ao salvar"); return; }
+   await logAdminAction("upload_withdrawal_proof", "withdrawal", withdrawalId, { path });
+   toast.success("Comprovante anexado");
+   onReload();
+ };
+
+ const handleViewProof = async (path: string) => {
+   const { data, error } = await supabase.storage.from("withdrawal-proofs").createSignedUrl(path, 300);
+   if (error || !data?.signedUrl) { toast.error("Erro ao gerar link"); return; }
+   window.open(data.signedUrl, "_blank", "noopener,noreferrer");
  };
 
  const toggleSelect = (id: string) => {
