@@ -109,6 +109,8 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
   const [userRetention, setUserRetention] = useState<RetentionSettings | null>(null);
   const [retentionForm, setRetentionForm] = useState({ pix_pct: "", card_pct: "", days: "", card_release_days: "7" });
   const [impersonating, setImpersonating] = useState(false);
+  const [ipHistory, setIpHistory] = useState<Array<{ ip: string; user_agent: string | null; country: string | null; source: string | null; created_at: string }>>([]);
+
 
   useEffect(() => {
     supabase.from("acquirers").select("id, name, slug, type, is_active").eq("is_active", true).then(({ data }) => {
@@ -121,11 +123,12 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
     setLoading(true);
     setUserLogs([]); setUserProducts([]); setUserWithdrawals([]);
     setUserTransactions([]); setUserPixKeys([]); setUserDisputes([]);
-    setBalanceAdjustments([]); setKycImages([]);
+    setBalanceAdjustments([]); setKycImages([]); setIpHistory([]);
     setUserRetention(null); setRetentionForm({ pix_pct: "", card_pct: "", days: "", card_release_days: "7" });
     setAdminNotes(""); setSelectedAcquirerId("");
+
     try {
-      const [logsRes, productsRes, wdRes, txRes, feesRes, adjRes, pixRes, disputesRes, retRes] = await Promise.all([
+      const [logsRes, productsRes, wdRes, txRes, feesRes, adjRes, pixRes, disputesRes, retRes, ipRes] = await Promise.all([
         supabase.from("activity_logs").select("id, user_id, action, entity_type, entity_id, old_data, new_data, created_at").eq("user_id", profile.user_id).order("created_at", { ascending: false }).limit(100),
         supabase.from("products").select("id, user_id, name, price, status, created_at, image_url").eq("user_id", profile.user_id).order("created_at", { ascending: false }).limit(100) as any,
         supabase.from("withdrawals").select("id, user_id, amount, fee_amount, net_amount, status, created_at, withdrawal_type").eq("user_id", profile.user_id).order("created_at", { ascending: false }).limit(100) as any,
@@ -135,14 +138,18 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
         supabase.from("pix_keys").select("id, key_type, key_value, created_at").eq("user_id", profile.user_id),
         supabase.from("disputes").select("id, seller_user_id, transaction_id, amount, type, status, reason, created_at").eq("seller_user_id", profile.user_id).order("created_at", { ascending: false }).limit(50) as any,
         supabase.from("retention_settings").select("id, user_id, pix_retention_pct, card_retention_pct, retention_days, card_release_days").eq("user_id", profile.user_id).maybeSingle(),
+        supabase.from("ip_logs").select("ip, user_agent, country, source, created_at").eq("user_id", profile.user_id).order("created_at", { ascending: false }).limit(50),
       ]);
       if (logsRes.data) setUserLogs(logsRes.data as any);
+
       if (productsRes.data) setUserProducts(productsRes.data);
       if (wdRes.data) setUserWithdrawals(wdRes.data);
       if (txRes.data) setUserTransactions(txRes.data);
       if (adjRes.data) setBalanceAdjustments(adjRes.data);
       if (pixRes.data) setUserPixKeys(pixRes.data as PixKey[]);
       if (disputesRes.data) setUserDisputes(disputesRes.data as any[]);
+      if (ipRes.data) setIpHistory(ipRes.data as any);
+
       setSelectedAcquirerId(profile.acquirer_id || "");
       setAdminNotes((profile as any).admin_notes || "");
       if (retRes.data) {
@@ -817,6 +824,30 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
                     <InfoRow label="Cadastro" value={selectedUser ? new Date(selectedUser.created_at).toLocaleString("pt-BR") : ""} />
                     <InfoRow label="Saldo Congelado" value={selectedUser && isFrozen(selectedUser) ? "SIM" : "NÃO"} />
                   </div>
+
+                  {/* ── Histórico de IP ── */}
+                  <div className="rounded-xl border border-border bg-muted/20 p-4">
+                    <p className="text-[10px] font-black uppercase tracking-wider text-muted-foreground mb-3 flex items-center gap-2">
+                      <Globe className="h-3 w-3" /> Histórico de IP ({ipHistory.length})
+                    </p>
+                    {ipHistory.length === 0 ? (
+                      <p className="text-xs text-muted-foreground/70">Nenhum acesso registrado ainda.</p>
+                    ) : (
+                      <div className="max-h-48 overflow-y-auto space-y-1">
+                        {ipHistory.map((h, i) => (
+                          <div key={i} className="flex items-center justify-between gap-2 text-[11px] py-1.5 px-2 rounded-lg hover:bg-muted/30 border-b border-border/40 last:border-0">
+                            <span className="font-mono text-foreground">{h.ip}</span>
+                            <span className="text-muted-foreground/70 truncate max-w-[200px]" title={h.user_agent || ""}>{h.user_agent?.split(" ").slice(-2).join(" ") || "—"}</span>
+                            <span className="text-[9px] uppercase font-bold text-muted-foreground/60 px-1.5 py-0.5 rounded bg-muted/50">{h.source || "login"}</span>
+                            {h.country && <span className="text-[9px] uppercase font-bold text-info">{h.country}</span>}
+                            <span className="text-muted-foreground/60 tabular-nums">{new Date(h.created_at).toLocaleString("pt-BR", { dateStyle: "short", timeStyle: "short" })}</span>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+
+
                   {(selectedUser as any)?.kyc_rejection_reason && (
                     <div className="rounded-xl border border-destructive/20 bg-destructive/5 p-4">
                       <p className="text-xs font-bold text-destructive mb-1">Motivo da última recusa KYC:</p>

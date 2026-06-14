@@ -1275,6 +1275,36 @@ export type Database = {
         }
         Relationships: []
       }
+      ip_logs: {
+        Row: {
+          country: string | null
+          created_at: string
+          id: string
+          ip: string
+          source: string | null
+          user_agent: string | null
+          user_id: string
+        }
+        Insert: {
+          country?: string | null
+          created_at?: string
+          id?: string
+          ip: string
+          source?: string | null
+          user_agent?: string | null
+          user_id: string
+        }
+        Update: {
+          country?: string | null
+          created_at?: string
+          id?: string
+          ip?: string
+          source?: string | null
+          user_agent?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       lesson_attachments: {
         Row: {
           created_at: string
