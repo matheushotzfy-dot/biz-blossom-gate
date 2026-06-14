@@ -165,13 +165,36 @@ export default function AdminWithdrawalsTab({ withdrawals, profiles, onWithdrawa
  /* ── Single Reject with Reason ── */
  const handleRejectWithReason = async () => {
  if (!rejectDialog || !rejectReason.trim()) { toast.error("Informe o motivo da rejeição"); return; }
- const { error } = await supabase.from("withdrawals").update({ status: "rejected" }).eq("id", rejectDialog).eq("status", "pending");
- if (error) { toast.error("Erro ao recusar"); return; }
+ if (rejectReason.trim().length < 3) { toast.error("Motivo muito curto"); return; }
+ const { error } = await supabase.from("withdrawals")
+   .update({ status: "rejected", rejection_reason: rejectReason.trim(), processed_by: user?.id } as any)
+   .eq("id", rejectDialog).eq("status", "pending");
+ if (error) { toast.error(error.message || "Erro ao recusar"); return; }
  await logAdminAction("reject_withdrawal", "withdrawal", rejectDialog, { reason: rejectReason.trim() } as any);
  toast.success("Saque recusado com motivo registrado");
  setRejectDialog(null);
  setRejectReason("");
- onReload(); // trigger parent reload
+ onReload();
+ };
+
+ /* ── Proof upload ── */
+ const handleProofUpload = async (withdrawalId: string, file: File) => {
+   if (!user) return;
+   if (file.size > 5 * 1024 * 1024) { toast.error("Arquivo > 5MB"); return; }
+   const path = `${withdrawalId}/${Date.now()}-${file.name.replace(/[^\w.-]/g, "_")}`;
+   const { error: upErr } = await supabase.storage.from("withdrawal-proofs").upload(path, file, { upsert: true });
+   if (upErr) { toast.error("Erro ao enviar: " + upErr.message); return; }
+   const { error } = await supabase.from("withdrawals").update({ payment_proof_url: path } as any).eq("id", withdrawalId);
+   if (error) { toast.error("Erro ao salvar"); return; }
+   await logAdminAction("upload_withdrawal_proof", "withdrawal", withdrawalId, { path });
+   toast.success("Comprovante anexado");
+   onReload();
+ };
+
+ const handleViewProof = async (path: string) => {
+   const { data, error } = await supabase.storage.from("withdrawal-proofs").createSignedUrl(path, 300);
+   if (error || !data?.signedUrl) { toast.error("Erro ao gerar link"); return; }
+   window.open(data.signedUrl, "_blank", "noopener,noreferrer");
  };
 
  const toggleSelect = (id: string) => {
@@ -428,6 +451,30 @@ export default function AdminWithdrawalsTab({ withdrawals, profiles, onWithdrawa
  <XCircle className="h-3 w-3" /> Recusar
  </Button>
  </div>
+ )}
+ {w.status === "approved" && (
+   (w as any).payment_proof_url ? (
+     <div className="flex items-center gap-1">
+       <Button size="sm" variant="ghost" className="h-7 text-[10px] gap-1" onClick={() => handleViewProof((w as any).payment_proof_url)}>
+         <FileText className="h-3 w-3" /> Ver comprovante
+       </Button>
+       <label className="text-[10px] text-muted-foreground underline cursor-pointer">
+         Trocar
+         <input type="file" hidden accept="image/*,application/pdf" onChange={e => e.target.files?.[0] && handleProofUpload(w.id, e.target.files[0])} />
+       </label>
+     </div>
+   ) : (
+     <label className="inline-flex items-center gap-1 h-7 px-2 text-[10px] bg-primary/10 text-primary border border-primary/20 rounded-xl cursor-pointer hover:bg-primary/20">
+       <FileText className="h-3 w-3" /> Anexar comprovante
+       <input type="file" hidden accept="image/*,application/pdf" onChange={e => e.target.files?.[0] && handleProofUpload(w.id, e.target.files[0])} />
+     </label>
+   )
+ )}
+ {w.status === "rejected" && (w as any).rejection_reason && (
+   <div className="max-w-[200px]">
+     <p className="text-[10px] font-bold text-destructive uppercase">Motivo</p>
+     <p className="text-[10px] text-muted-foreground line-clamp-2">{(w as any).rejection_reason}</p>
+   </div>
  )}
  </td>
  </tr>

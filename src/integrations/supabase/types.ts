@@ -951,6 +951,7 @@ export type Database = {
           buyer_name: string | null
           buyer_phone: string | null
           created_at: string
+          evidence_urls: Json
           id: string
           reason: string | null
           resolved_at: string | null
@@ -959,6 +960,7 @@ export type Database = {
           transaction_id: string | null
           type: string
           updated_at: string
+          won_by_seller: boolean | null
         }
         Insert: {
           admin_notes?: string | null
@@ -968,6 +970,7 @@ export type Database = {
           buyer_name?: string | null
           buyer_phone?: string | null
           created_at?: string
+          evidence_urls?: Json
           id?: string
           reason?: string | null
           resolved_at?: string | null
@@ -976,6 +979,7 @@ export type Database = {
           transaction_id?: string | null
           type?: string
           updated_at?: string
+          won_by_seller?: boolean | null
         }
         Update: {
           admin_notes?: string | null
@@ -985,6 +989,7 @@ export type Database = {
           buyer_name?: string | null
           buyer_phone?: string | null
           created_at?: string
+          evidence_urls?: Json
           id?: string
           reason?: string | null
           resolved_at?: string | null
@@ -993,6 +998,7 @@ export type Database = {
           transaction_id?: string | null
           type?: string
           updated_at?: string
+          won_by_seller?: boolean | null
         }
         Relationships: [
           {
@@ -3157,7 +3163,10 @@ export type Database = {
           fee_amount: number
           id: string
           net_amount: number
+          payment_proof_url: string | null
           processed_at: string | null
+          processed_by: string | null
+          rejection_reason: string | null
           status: string
           user_id: string
           withdrawal_type: string
@@ -3172,7 +3181,10 @@ export type Database = {
           fee_amount?: number
           id?: string
           net_amount?: number
+          payment_proof_url?: string | null
           processed_at?: string | null
+          processed_by?: string | null
+          rejection_reason?: string | null
           status?: string
           user_id: string
           withdrawal_type?: string
@@ -3187,7 +3199,10 @@ export type Database = {
           fee_amount?: number
           id?: string
           net_amount?: number
+          payment_proof_url?: string | null
           processed_at?: string | null
+          processed_by?: string | null
+          rejection_reason?: string | null
           status?: string
           user_id?: string
           withdrawal_type?: string
