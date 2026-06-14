@@ -2189,6 +2189,84 @@ export type Database = {
         }
         Relationships: []
       }
+      reward_claims: {
+        Row: {
+          admin_notes: string | null
+          created_at: string
+          delivered_at: string | null
+          document: string | null
+          id: string
+          phone: string
+          recipient_name: string
+          shipping_city: string
+          shipping_complement: string | null
+          shipping_neighborhood: string
+          shipping_number: string
+          shipping_state: string
+          shipping_street: string
+          shipping_zip: string
+          status: string
+          tier_id: string
+          tier_label: string
+          tier_value: number
+          tracking_carrier: string | null
+          tracking_code: string | null
+          tracking_url: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          admin_notes?: string | null
+          created_at?: string
+          delivered_at?: string | null
+          document?: string | null
+          id?: string
+          phone: string
+          recipient_name: string
+          shipping_city: string
+          shipping_complement?: string | null
+          shipping_neighborhood: string
+          shipping_number: string
+          shipping_state: string
+          shipping_street: string
+          shipping_zip: string
+          status?: string
+          tier_id: string
+          tier_label: string
+          tier_value: number
+          tracking_carrier?: string | null
+          tracking_code?: string | null
+          tracking_url?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          admin_notes?: string | null
+          created_at?: string
+          delivered_at?: string | null
+          document?: string | null
+          id?: string
+          phone?: string
+          recipient_name?: string
+          shipping_city?: string
+          shipping_complement?: string | null
+          shipping_neighborhood?: string
+          shipping_number?: string
+          shipping_state?: string
+          shipping_street?: string
+          shipping_zip?: string
+          status?: string
+          tier_id?: string
+          tier_label?: string
+          tier_value?: number
+          tracking_carrier?: string | null
+          tracking_code?: string | null
+          tracking_url?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       seller_acquirer_config: {
         Row: {
           acquirer_id: string

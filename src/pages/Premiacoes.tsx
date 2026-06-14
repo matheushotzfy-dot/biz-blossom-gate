@@ -9,9 +9,14 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import {
   Trophy, Lock, CheckCircle2, Gift, Crown, Target, Sparkles, Flame,
-  Gem, Star, Award, Quote, ChevronLeft, ChevronRight, Zap, Eye,
+  Gem, Star, Award, Quote, ChevronLeft, ChevronRight, Zap, Eye, MapPin, Clock, Truck, Package,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
+
 
 import heroStage from "@/assets/awards/premiacoes-hero-stage.jpg";
 import hotzfyLogo from "@/assets/hotzfy-logo.png";
@@ -136,13 +141,24 @@ export default function Premiacoes() {
   const { user } = useAuth();
   const [revenue, setRevenue] = useState(0);
   const [focusId, setFocusId] = useState<string | null>(null);
+  const [claimOpen, setClaimOpen] = useState(false);
+  const [submittingClaim, setSubmittingClaim] = useState(false);
+  const [existingClaims, setExistingClaims] = useState<any[]>([]);
+  const [claimForm, setClaimForm] = useState({
+    recipient_name: "", phone: "", document: "",
+    shipping_street: "", shipping_number: "", shipping_complement: "",
+    shipping_neighborhood: "", shipping_city: "", shipping_state: "", shipping_zip: "",
+  });
 
   useEffect(() => {
     if (!user?.id) return;
     supabase.from("transactions").select("net_amount")
       .eq("user_id", user.id).eq("status", "completed")
       .then(({ data }) => { if (data) setRevenue(data.reduce((s, t) => s + Number(t.net_amount), 0)); });
+    (supabase as any).from("reward_claims").select("id, tier_id, status").eq("user_id", user.id)
+      .then(({ data }: any) => { if (data) setExistingClaims(data); });
   }, [user?.id]);
+
 
   const { currentIdx, unlockedCount, nextAward, currentTier, overallProgress, nextProgress, remaining } = useMemo(() => {
     const currentIdx = AWARDS.findIndex((a) => revenue < a.value);
@@ -453,29 +469,28 @@ export default function Premiacoes() {
                 </div>
               </div>
 
-              <button
-                type="button"
-                className={cn(
-                  "mt-5 w-full inline-flex items-center justify-center gap-2 h-11 rounded-xl text-[12px] font-black uppercase tracking-[0.18em] transition-all",
-                  focusedDone
-                    ? "text-primary-foreground hover:brightness-110"
-                    : "border border-border/60 bg-muted/30 text-muted-foreground hover:text-foreground hover:border-foreground/30 cursor-default"
-                )}
-                style={focusedDone ? { background: `rgb(${focused.accentRgb})` } : undefined}
-                disabled={!focusedDone}
-              >
-                {focusedDone ? (
-                  <>
-                    <Zap className="h-3.5 w-3.5" strokeWidth={2.5} />
-                    Solicitar resgate
-                  </>
-                ) : (
-                  <>
-                    <Lock className="h-3 w-3" strokeWidth={2.5} />
-                    Atinja a meta para desbloquear
-                  </>
-                )}
-              </button>
+              {(() => {
+                const alreadyClaimed = existingClaims.some(c => c.tier_id === focused.id && c.status !== "cancelled");
+                return (
+                  <button
+                    type="button"
+                    onClick={() => focusedDone && !alreadyClaimed && setClaimOpen(true)}
+                    className={cn(
+                      "mt-5 w-full inline-flex items-center justify-center gap-2 h-11 rounded-xl text-[12px] font-black uppercase tracking-[0.18em] transition-all",
+                      focusedDone && !alreadyClaimed
+                        ? "text-primary-foreground hover:brightness-110"
+                        : "border border-border/60 bg-muted/30 text-muted-foreground hover:text-foreground hover:border-foreground/30 cursor-default"
+                    )}
+                    style={focusedDone && !alreadyClaimed ? { background: `rgb(${focused.accentRgb})` } : undefined}
+                    disabled={!focusedDone || alreadyClaimed}
+                  >
+                    {alreadyClaimed ? (<><CheckCircle2 className="h-3.5 w-3.5" /> Solicitação registrada</>) :
+                     focusedDone ? (<><Zap className="h-3.5 w-3.5" strokeWidth={2.5} /> Solicitar resgate</>) :
+                     (<><Lock className="h-3 w-3" strokeWidth={2.5} /> Atinja a meta para desbloquear</>)}
+                  </button>
+                );
+              })()}
+
             </div>
           </div>
         </div>
@@ -638,6 +653,59 @@ export default function Premiacoes() {
           </div>
         </div>
       </section>
+
+      {/* Claim dialog */}
+      <Dialog open={claimOpen} onOpenChange={setClaimOpen}>
+        <DialogContent className="max-w-xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2"><Trophy className="h-4 w-4 text-amber-400" /> Solicitar {focused.title}</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-3">
+            <p className="text-xs text-muted-foreground">Preencha os dados de envio. A equipe HOTZFY entrará em contato após a postagem.</p>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+              <Input placeholder="Nome do recebedor *" value={claimForm.recipient_name} onChange={e => setClaimForm({ ...claimForm, recipient_name: e.target.value })} />
+              <Input placeholder="Telefone (com DDD) *" value={claimForm.phone} onChange={e => setClaimForm({ ...claimForm, phone: e.target.value })} />
+              <Input placeholder="CPF / CNPJ" value={claimForm.document} onChange={e => setClaimForm({ ...claimForm, document: e.target.value })} className="sm:col-span-2" />
+              <Input placeholder="Rua *" value={claimForm.shipping_street} onChange={e => setClaimForm({ ...claimForm, shipping_street: e.target.value })} className="sm:col-span-2" />
+              <Input placeholder="Número *" value={claimForm.shipping_number} onChange={e => setClaimForm({ ...claimForm, shipping_number: e.target.value })} />
+              <Input placeholder="Complemento" value={claimForm.shipping_complement} onChange={e => setClaimForm({ ...claimForm, shipping_complement: e.target.value })} />
+              <Input placeholder="Bairro *" value={claimForm.shipping_neighborhood} onChange={e => setClaimForm({ ...claimForm, shipping_neighborhood: e.target.value })} className="sm:col-span-2" />
+              <Input placeholder="Cidade *" value={claimForm.shipping_city} onChange={e => setClaimForm({ ...claimForm, shipping_city: e.target.value })} />
+              <Input placeholder="UF *" maxLength={2} value={claimForm.shipping_state} onChange={e => setClaimForm({ ...claimForm, shipping_state: e.target.value.toUpperCase() })} />
+              <Input placeholder="CEP *" value={claimForm.shipping_zip} onChange={e => setClaimForm({ ...claimForm, shipping_zip: e.target.value })} className="sm:col-span-2" />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="ghost" onClick={() => setClaimOpen(false)}>Cancelar</Button>
+            <Button disabled={submittingClaim} onClick={async () => {
+              if (!user?.id) return;
+              const required = ["recipient_name","phone","shipping_street","shipping_number","shipping_neighborhood","shipping_city","shipping_state","shipping_zip"] as const;
+              for (const k of required) if (!String((claimForm as any)[k] || "").trim()) { toast.error("Preencha todos os campos obrigatórios"); return; }
+              setSubmittingClaim(true);
+              const { error, data } = await (supabase as any).from("reward_claims").insert({
+                user_id: user.id,
+                tier_id: focused.id, tier_label: focused.title, tier_value: focused.value,
+                recipient_name: claimForm.recipient_name.trim(),
+                phone: claimForm.phone.trim(),
+                document: claimForm.document.trim() || null,
+                shipping_street: claimForm.shipping_street.trim(),
+                shipping_number: claimForm.shipping_number.trim(),
+                shipping_complement: claimForm.shipping_complement.trim() || null,
+                shipping_neighborhood: claimForm.shipping_neighborhood.trim(),
+                shipping_city: claimForm.shipping_city.trim(),
+                shipping_state: claimForm.shipping_state.trim(),
+                shipping_zip: claimForm.shipping_zip.trim(),
+              }).select().maybeSingle();
+              setSubmittingClaim(false);
+              if (error) { toast.error("Erro ao solicitar premiação"); return; }
+              if (data) setExistingClaims(prev => [...prev, data]);
+              toast.success("Premiação solicitada! Você receberá atualizações por notificação.");
+              setClaimOpen(false);
+            }}>{submittingClaim ? "Enviando..." : "Confirmar solicitação"}</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
+
