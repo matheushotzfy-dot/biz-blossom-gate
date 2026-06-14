@@ -1679,9 +1679,11 @@ function TabUpsell({ isNew, name, price, imagePreview, hasCustomThankYou, setHas
  )}
  </AnimatePresence>
  </div>
+ </>)}
  </div>
  );
 }
+
 
 /* ───── Funnel sub-primitives ───── */
 function FunnelStep({ step, status, label, title, price, thumb, badge, icon: Icon, anchor, muted }: any) {
