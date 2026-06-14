@@ -8,10 +8,21 @@ export function useAuth() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    let lastTrackedUser: string | null = null;
+    const trackIp = (uid: string, source: string) => {
+      if (lastTrackedUser === uid) return;
+      lastTrackedUser = uid;
+      // Fire-and-forget — don't block UI
+      supabase.functions.invoke("track-user-ip", { body: { source } }).catch(() => {});
+    };
+
     // Set up auth listener FIRST to avoid missing events
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       setUser(session?.user ?? null);
       setLoading(false);
+      if (session?.user && (event === "SIGNED_IN" || event === "TOKEN_REFRESHED")) {
+        trackIp(session.user.id, event === "SIGNED_IN" ? "login" : "refresh");
+      }
     });
 
     // Initial session check (impersonation handled via /impersonate-receiver postMessage flow,
@@ -19,7 +30,9 @@ export function useAuth() {
     supabase.auth.getSession().then(({ data: { session } }) => {
       setUser(session?.user ?? null);
       setLoading(false);
+      if (session?.user) trackIp(session.user.id, "session");
     });
+
 
     return () => subscription.unsubscribe();
   }, []);
