@@ -32,6 +32,7 @@ interface Props {
   fmtCurrency: (v: number) => string;
   isEmployee?: boolean;
   dateRange?: { from: Date; to: Date };
+  onNavigate?: (tabId: string) => void;
 }
 
 /* ── Premium Recharts Tooltip — semantic tokens ── */
