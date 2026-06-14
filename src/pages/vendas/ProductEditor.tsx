@@ -852,6 +852,42 @@ export default function ProductEditor() {
  />}
  </motion.div>
  </AnimatePresence>
+
+ {/* Navegação inferior — Anterior / Próximo em todas as abas */}
+ {(() => {
+   const idx = TABS.findIndex(t => t.key === activeTab);
+   const prev = idx > 0 ? TABS[idx - 1] : null;
+   const next = idx >= 0 && idx < TABS.length - 1 ? TABS[idx + 1] : null;
+   const goNext = () => {
+     if (!next) return;
+     if (tabsLocked) { handleSave(); return; }
+     setActiveTab(next.key);
+   };
+   const goPrev = () => { if (prev && !tabsLocked) setActiveTab(prev.key); };
+   return (
+     <div className="mt-8 flex items-center justify-between gap-3 pt-4 border-t border-border">
+       <Button
+         variant="outline"
+         onClick={goPrev}
+         disabled={!prev || tabsLocked}
+         className="gap-2 rounded-xl font-display font-bold h-11 px-5"
+       >
+         <ChevronRight className="h-4 w-4 rotate-180" />
+         {prev ? prev.label : "Anterior"}
+       </Button>
+       {next ? (
+         <Button onClick={goNext} disabled={saving} className="gap-2 rounded-xl font-display font-bold h-11 px-6">
+           {tabsLocked ? "Salvar e continuar" : `Próximo: ${next.label}`}
+           <ChevronRight className="h-4 w-4" />
+         </Button>
+       ) : (
+         <Button onClick={handleSave} disabled={saving} className="gap-2 rounded-xl font-display font-bold h-11 px-6">
+           <Save className="h-4 w-4" /> Salvar alterações
+         </Button>
+       )}
+     </div>
+   );
+ })()}
  </div>
  </div>
  </div>
