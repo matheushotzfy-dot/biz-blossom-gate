@@ -88,8 +88,8 @@ export default function AdminAcquirersTab() {
     setLoading(true);
     const [acqRes, heRes, foRes, profRes, txRes, dispRes] = await Promise.all([
       supabase.from("acquirers").select("*").order("priority", { ascending: false }).order("created_at"),
-      (supabase as any).from("acquirer_health_events").select("*").order("created_at", { ascending: false }).limit(200),
-      (supabase as any).from("acquirer_failover_events").select("*").order("created_at", { ascending: false }).limit(100),
+      supabase.from("acquirer_health_events").select("*").order("created_at", { ascending: false }).limit(200),
+      supabase.from("acquirer_failover_events").select("*").order("created_at", { ascending: false }).limit(100),
       supabase.from("profiles").select("user_id, acquirer_id"),
       supabase.from("transactions").select("user_id, amount, status, payment_method, created_at").gte("created_at", new Date(Date.now() - 30 * 86400000).toISOString()),
       supabase.from("disputes").select("transaction_id, type, created_at").gte("created_at", new Date(Date.now() - 30 * 86400000).toISOString()),
@@ -191,7 +191,7 @@ export default function AdminAcquirersTab() {
   };
 
   const setHealth = async (acq: Acquirer, newStatus: Health) => {
-    const { error } = await (supabase as any).from("acquirers").update({
+    const { error } = await supabase.from("acquirers").update({
       health_status: newStatus, last_health_check_at: new Date().toISOString(),
     }).eq("id", acq.id);
     if (error) { toast.error("Erro"); return; }

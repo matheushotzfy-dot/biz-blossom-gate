@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { Fragment, useMemo, useState } from "react";
 import { Trophy, Crown, Medal, TrendingUp, Users, DollarSign, Percent, BarChart3, Calendar, Receipt, Clock, CreditCard, Smartphone, FileText, Download, ChevronDown, ChevronRight } from "lucide-react";
 import type { Tables } from "@/integrations/supabase/types";
 import { FinanceiroHero } from "@/components/financeiro/FinanceiroHero";
@@ -208,8 +208,8 @@ export default function AdminTopSellersTab({ profiles, transactions, fmtCurrency
               {ranked.map((s, i) => {
                 const isOpen = expanded === s.userId;
                 return (
-                  <>
-                    <tr key={s.userId} className={cn(premiumTable.row, "cursor-pointer")} onClick={() => setExpanded(isOpen ? null : s.userId)}>
+                  <Fragment key={s.userId}>
+                    <tr className={cn(premiumTable.row, "cursor-pointer")} onClick={() => setExpanded(isOpen ? null : s.userId)}>
                       <td className={premiumTable.td}>{rankIcon(i)}</td>
                       <td className={premiumTable.td}>
                         <div className="flex items-center gap-3">
@@ -276,7 +276,7 @@ export default function AdminTopSellersTab({ profiles, transactions, fmtCurrency
                         </td>
                       </tr>
                     )}
-                  </>
+                  </Fragment>
                 );
               })}
               {ranked.length === 0 && (

@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { Fragment, useMemo, useState } from "react";
 import { UserX, Search, Mail, AlertTriangle, Calendar, TrendingDown, Phone, Copy, Download, MessageCircle, FileText, ChevronRight, ChevronDown, DollarSign, Percent, Receipt } from "lucide-react";
 import { FinanceiroHero } from "@/components/financeiro/FinanceiroHero";
 import { PremiumMetric, PremiumMetricGrid, PremiumPanel, premiumTable } from "./AdminPremium";
@@ -154,8 +154,8 @@ export default function AdminInactiveSellersTab({ profiles, transactions, fmtCur
                 const isOpen = expanded === r.id;
                 const wa = fmtWhats(r.phone);
                 return (
-                  <>
-                    <tr key={r.id} className={cn(premiumTable.row, "cursor-pointer", r.daysSince >= 30 && "bg-destructive/[0.03]")} onClick={() => setExpanded(isOpen ? null : r.id)}>
+                  <Fragment key={r.id}>
+                    <tr className={cn(premiumTable.row, "cursor-pointer", r.daysSince >= 30 && "bg-destructive/[0.03]")} onClick={() => setExpanded(isOpen ? null : r.id)}>
                       <td className={premiumTable.td}>
                         <div className="flex items-center gap-3">
                           <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-muted/40 text-xs font-black text-foreground">{r.name[0]?.toUpperCase() || "?"}</div>
@@ -243,7 +243,7 @@ export default function AdminInactiveSellersTab({ profiles, transactions, fmtCur
                         </td>
                       </tr>
                     )}
-                  </>
+                  </Fragment>
                 );
               })}
               {filtered.length === 0 && (
