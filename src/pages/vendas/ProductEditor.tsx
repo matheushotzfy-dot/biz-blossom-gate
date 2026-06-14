@@ -2009,12 +2009,39 @@ function TabCoProducao({ isNew, coProducerEmail, setCoProducerEmail, coProductio
  </Select>
  </div>
 
- <Button className="gap-2 rounded-xl font-display font-bold" disabled={!coProducerEmail}>
- <UserPlus className="h-4 w-4" /> Convidar Co-Produtor
+ <Button onClick={inviteCoProducer} className="gap-2 rounded-xl font-display font-bold" disabled={!coProducerEmail || invitingCoProducer}>
+ <UserPlus className="h-4 w-4" /> {invitingCoProducer ? "Enviando..." : "Convidar Co-Produtor"}
  </Button>
  </EditorCard>
 
- <EmptyCard icon={Handshake} message="Nenhum co-produtor cadastrado" />
+ {coProductionsList.length > 0 ? (
+   <div className="space-y-2">
+     {coProductionsList.map((cp: any) => (
+       <div key={cp.id} className="flex items-center justify-between rounded-2xl border border-border bg-card p-4 relative overflow-hidden">
+         <div className={cn("absolute left-0 top-0 bottom-0 w-[3px] rounded-full",
+           cp.status === "accepted" ? "bg-success" : cp.status === "rejected" ? "bg-destructive" : "bg-warning")} />
+         <div className="flex items-center gap-3 pl-1 min-w-0">
+           <div className={cn("h-10 w-10 rounded-xl flex items-center justify-center shrink-0",
+             cp.status === "accepted" ? "bg-success/10 text-success" : cp.status === "rejected" ? "bg-destructive/10 text-destructive" : "bg-warning/10 text-warning")}>
+             <Handshake className="h-4 w-4" />
+           </div>
+           <div className="min-w-0">
+             <p className="text-sm font-display font-bold truncate">{cp.co_producer_email}</p>
+             <p className="text-[11px] text-muted-foreground/70 font-numbers">
+               {cp.split_percentage}% • {cp.status === "accepted" ? "Aceito" : cp.status === "rejected" ? "Rejeitado" : "Convite pendente"}
+             </p>
+           </div>
+         </div>
+         <Button variant="ghost" size="sm" onClick={() => removeCoProducer(cp.id)} className="text-destructive hover:text-destructive h-9 w-9 p-0 rounded-xl">
+           <Trash2 className="h-4 w-4" />
+         </Button>
+       </div>
+     ))}
+   </div>
+ ) : (
+   <EmptyCard icon={Handshake} message="Nenhum co-produtor cadastrado" />
+ )}
+
  </>
  )}
  </div>
