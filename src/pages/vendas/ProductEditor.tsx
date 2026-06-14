@@ -398,7 +398,19 @@ export default function ProductEditor() {
  checkout_email_confirm: emailConfirm,
  checkout_banner_desktop_url: desktopUrl || null,
  checkout_banner_mobile_url: mobileUrl || null,
+ upsell_enabled: upsellEnabled,
+ upsell_type: upsellEnabled ? upsellType : "none",
+ upsell_name: upsellName.trim() || null,
+ upsell_price: upsellPrice ? Number(String(upsellPrice).replace(",", ".")) : null,
+ upsell_discount: parseInt(upsellDiscount) || 30,
+ upsell_url: upsellUrl.trim() || null,
+ downsell_enabled: downsellEnabled,
+ downsell_url: downsellUrl.trim() || null,
+ downsell_price: downsellPrice ? Number(String(downsellPrice).replace(",", ".")) : null,
+ downsell_delay: parseInt(downsellDelay) || 5,
+ email_timing: emailTiming,
  };
+
 
  if (isNew && !createdProductId) {
  const slug = crypto.randomUUID().slice(0, 8);
