@@ -653,6 +653,59 @@ export default function Premiacoes() {
           </div>
         </div>
       </section>
+
+      {/* Claim dialog */}
+      <Dialog open={claimOpen} onOpenChange={setClaimOpen}>
+        <DialogContent className="max-w-xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2"><Trophy className="h-4 w-4 text-amber-400" /> Solicitar {focused.title}</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-3">
+            <p className="text-xs text-muted-foreground">Preencha os dados de envio. A equipe HOTZFY entrará em contato após a postagem.</p>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+              <Input placeholder="Nome do recebedor *" value={claimForm.recipient_name} onChange={e => setClaimForm({ ...claimForm, recipient_name: e.target.value })} />
+              <Input placeholder="Telefone (com DDD) *" value={claimForm.phone} onChange={e => setClaimForm({ ...claimForm, phone: e.target.value })} />
+              <Input placeholder="CPF / CNPJ" value={claimForm.document} onChange={e => setClaimForm({ ...claimForm, document: e.target.value })} className="sm:col-span-2" />
+              <Input placeholder="Rua *" value={claimForm.shipping_street} onChange={e => setClaimForm({ ...claimForm, shipping_street: e.target.value })} className="sm:col-span-2" />
+              <Input placeholder="Número *" value={claimForm.shipping_number} onChange={e => setClaimForm({ ...claimForm, shipping_number: e.target.value })} />
+              <Input placeholder="Complemento" value={claimForm.shipping_complement} onChange={e => setClaimForm({ ...claimForm, shipping_complement: e.target.value })} />
+              <Input placeholder="Bairro *" value={claimForm.shipping_neighborhood} onChange={e => setClaimForm({ ...claimForm, shipping_neighborhood: e.target.value })} className="sm:col-span-2" />
+              <Input placeholder="Cidade *" value={claimForm.shipping_city} onChange={e => setClaimForm({ ...claimForm, shipping_city: e.target.value })} />
+              <Input placeholder="UF *" maxLength={2} value={claimForm.shipping_state} onChange={e => setClaimForm({ ...claimForm, shipping_state: e.target.value.toUpperCase() })} />
+              <Input placeholder="CEP *" value={claimForm.shipping_zip} onChange={e => setClaimForm({ ...claimForm, shipping_zip: e.target.value })} className="sm:col-span-2" />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="ghost" onClick={() => setClaimOpen(false)}>Cancelar</Button>
+            <Button disabled={submittingClaim} onClick={async () => {
+              if (!user?.id) return;
+              const required = ["recipient_name","phone","shipping_street","shipping_number","shipping_neighborhood","shipping_city","shipping_state","shipping_zip"] as const;
+              for (const k of required) if (!String((claimForm as any)[k] || "").trim()) { toast.error("Preencha todos os campos obrigatórios"); return; }
+              setSubmittingClaim(true);
+              const { error, data } = await (supabase as any).from("reward_claims").insert({
+                user_id: user.id,
+                tier_id: focused.id, tier_label: focused.title, tier_value: focused.value,
+                recipient_name: claimForm.recipient_name.trim(),
+                phone: claimForm.phone.trim(),
+                document: claimForm.document.trim() || null,
+                shipping_street: claimForm.shipping_street.trim(),
+                shipping_number: claimForm.shipping_number.trim(),
+                shipping_complement: claimForm.shipping_complement.trim() || null,
+                shipping_neighborhood: claimForm.shipping_neighborhood.trim(),
+                shipping_city: claimForm.shipping_city.trim(),
+                shipping_state: claimForm.shipping_state.trim(),
+                shipping_zip: claimForm.shipping_zip.trim(),
+              }).select().maybeSingle();
+              setSubmittingClaim(false);
+              if (error) { toast.error("Erro ao solicitar premiação"); return; }
+              if (data) setExistingClaims(prev => [...prev, data]);
+              toast.success("Premiação solicitada! Você receberá atualizações por notificação.");
+              setClaimOpen(false);
+            }}>{submittingClaim ? "Enviando..." : "Confirmar solicitação"}</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
+
