@@ -1862,9 +1862,11 @@ export type Database = {
           admin_notes: string | null
           avatar_url: string | null
           balance_frozen: boolean
+          boleto_enabled: boolean
           city: string | null
           complement: string | null
           created_at: string
+          credit_card_enabled: boolean
           document_number: string | null
           document_type: string | null
           email: string | null
@@ -1893,9 +1895,11 @@ export type Database = {
           admin_notes?: string | null
           avatar_url?: string | null
           balance_frozen?: boolean
+          boleto_enabled?: boolean
           city?: string | null
           complement?: string | null
           created_at?: string
+          credit_card_enabled?: boolean
           document_number?: string | null
           document_type?: string | null
           email?: string | null
@@ -1924,9 +1928,11 @@ export type Database = {
           admin_notes?: string | null
           avatar_url?: string | null
           balance_frozen?: boolean
+          boleto_enabled?: boolean
           city?: string | null
           complement?: string | null
           created_at?: string
+          credit_card_enabled?: boolean
           document_number?: string | null
           document_type?: string | null
           email?: string | null

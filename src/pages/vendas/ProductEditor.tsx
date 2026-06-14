@@ -110,6 +110,9 @@ export default function ProductEditor() {
  const { productId } = useParams<{ productId: string }>();
  const navigate = useNavigate();
  const { user } = useAuth();
+ // Admin pode desativar Boleto/Cartão por seller — quando desativado, não exibimos o toggle no produto.
+ const [adminBoletoEnabled, setAdminBoletoEnabled] = useState(true);
+ const [adminCardEnabled, setAdminCardEnabled] = useState(true);
  const invalidateAll = useInvalidateAll();
  const isNew = productId === "novo";
 
@@ -136,7 +139,7 @@ export default function ProductEditor() {
   const [supportPhone, setSupportPhone] = useState("");
 
  const [warrantyDays, setWarrantyDays] = useState("7");
- const [deliveryType, setDeliveryType] = useState("digital");
+ const [deliveryType, setDeliveryType] = useState("link");
  const [memberAreaEnabled, setMemberAreaEnabled] = useState(false);
 
  const [buttonColor, setButtonColor] = useState("#10b981");
@@ -149,7 +152,7 @@ export default function ProductEditor() {
  const [creditCardEnabled, setCreditCardEnabled] = useState(true);
  const [addressRequired, setAddressRequired] = useState(false);
  const [emailConfirm, setEmailConfirm] = useState(true);
- const [showCouponField, setShowCouponField] = useState(true);
+ const [showCouponField, setShowCouponField] = useState(false);
  const [bannerDesktopPreview, setBannerDesktopPreview] = useState("");
  const [bannerMobilePreview, setBannerMobilePreview] = useState("");
  const [bannerDesktopFile, setBannerDesktopFile] = useState<File | null>(null);
@@ -257,10 +260,21 @@ export default function ProductEditor() {
  setDeliveryType((data as any).delivery_type || "digital");
  setLoading(false);
  })();
- }, [productId, user?.id, isNew]);
+  }, [productId, user?.id, isNew]);
 
- useEffect(() => {
- if (!user?.id || isNew) return;
+  // Carrega gates de pagamento definidos pelo admin no perfil do seller
+  useEffect(() => {
+    if (!user?.id) return;
+    supabase.from("profiles").select("boleto_enabled, credit_card_enabled" as any).eq("user_id", user.id).maybeSingle()
+      .then(({ data }: any) => {
+        if (!data) return;
+        if (data.boleto_enabled === false) { setAdminBoletoEnabled(false); setBoletoEnabled(false); }
+        if (data.credit_card_enabled === false) { setAdminCardEnabled(false); setCreditCardEnabled(false); }
+      });
+  }, [user?.id]);
+
+  useEffect(() => {
+    if (!user?.id || isNew) return;
  supabase.from("products").select("*").eq("user_id", user.id).eq("status", "active").neq("id", productId!)
  .then(({ data }) => { if (data) setAllProducts(data); });
  supabase.from("order_bumps").select("id, bump_product_id").eq("product_id", productId!)
@@ -279,18 +293,29 @@ export default function ProductEditor() {
  return data.publicUrl;
  };
 
-  const handleSave = async () => {
-    if (!user) return;
-    // Normaliza preço aceitando "10,50", "10.50", "R$ 10,50", etc.
-    const priceNum = parseFloat(String(price).replace(/[^0-9,.-]/g, "").replace(",", "."));
-    if (!name.trim()) { toast.error("Nome é obrigatório"); setActiveTab("geral"); return; }
-    if (description.trim().length < 50) { toast.error("Descrição deve ter no mínimo 50 caracteres"); setActiveTab("geral"); return; }
-    if (isNaN(priceNum) || priceNum < 1) { toast.error("Preço mínimo é R$ 1,00"); setActiveTab("geral"); return; }
-    if (priceNum > 99999.99) { toast.error("Preço máximo é R$ 99.999,99"); setActiveTab("geral"); return; }
-    if (!pageUrl.trim() || !/^https?:\/\/.+\..+/.test(pageUrl.trim())) { toast.error("Insira uma página de vendas com domínio válido (ex: https://seusite.com)"); setActiveTab("geral"); return; }
-    if (!supportEmail.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(supportEmail.trim())) { toast.error("Insira um e-mail de suporte válido (ex: suporte@seusite.com)"); setActiveTab("geral"); return; }
-    if (!supportPhone.trim() || supportPhone.replace(/\D/g, "").length < 10) { toast.error("Insira um telefone de suporte válido (com DDD)"); setActiveTab("geral"); return; }
-    if (!displayName.trim()) { toast.error("Nome de exibição é obrigatório"); setActiveTab("geral"); return; }
+   const handleSave = async () => {
+     if (!user) return;
+     // Normaliza preço aceitando "10,50", "10.50", "1.000,50", "R$ 1.000,50", etc.
+     const cleanPrice = String(price).replace(/[^0-9,.-]/g, "");
+     // Se tem vírgula, ela é o separador decimal e pontos são milhares (formato BR)
+     const priceNum = cleanPrice.includes(",")
+       ? parseFloat(cleanPrice.replace(/\./g, "").replace(",", "."))
+       : parseFloat(cleanPrice);
+     // Normaliza pageUrl: aceita sem https:// e adiciona automaticamente
+     let normalizedPageUrl = pageUrl.trim();
+     if (normalizedPageUrl && !/^https?:\/\//i.test(normalizedPageUrl)) {
+       normalizedPageUrl = `https://${normalizedPageUrl}`;
+     }
+     if (!name.trim()) { toast.error("Nome é obrigatório"); setActiveTab("geral"); return; }
+     if (description.trim().length < 50) { toast.error("Descrição deve ter no mínimo 50 caracteres"); setActiveTab("geral"); return; }
+     if (isNaN(priceNum) || priceNum < 1) { toast.error("Preço mínimo é R$ 1,00"); setActiveTab("geral"); return; }
+     if (priceNum > 99999.99) { toast.error("Preço máximo é R$ 99.999,99"); setActiveTab("geral"); return; }
+     if (!normalizedPageUrl || !/^https?:\/\/.+\..+/.test(normalizedPageUrl)) { toast.error("Insira uma página de vendas válida (ex: seusite.com)"); setActiveTab("geral"); return; }
+     if (!supportEmail.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(supportEmail.trim())) { toast.error("Insira um e-mail de suporte válido (ex: suporte@seusite.com)"); setActiveTab("geral"); return; }
+     if (!supportPhone.trim() || supportPhone.replace(/\D/g, "").length < 10) { toast.error("Insira um telefone de suporte válido (com DDD)"); setActiveTab("geral"); return; }
+     if (!displayName.trim()) { toast.error("Nome de exibição é obrigatório"); setActiveTab("geral"); return; }
+     // sincroniza o input para refletir a URL normalizada (caso o usuário salve sem ter prefixo)
+     if (normalizedPageUrl !== pageUrl) setPageUrl(normalizedPageUrl);
 
  setSaving(true);
  try {
@@ -317,7 +342,7 @@ export default function ProductEditor() {
  description: description.trim() || null,
  price: priceNum,
  status,
- page_url: pageUrl || null,
+ page_url: normalizedPageUrl || null,
  image_url: imageUrl,
   support_email: supportEmail.trim() || null,
   support_phone: supportPhone.trim() || null,
@@ -792,9 +817,9 @@ export default function ProductEditor() {
   {...{ name, setName, description, setDescription, price, setPrice, status, setStatus, pageUrl, setPageUrl, imagePreview, setImagePreview, imageFile, setImageFile, fileInputRef, handleFileChange, category, setCategory, paymentType, setPaymentType, displayName, setDisplayName, supportEmail, setSupportEmail, supportPhone, setSupportPhone, warrantyDays, setWarrantyDays, isDragging, setIsDragging, handleDrop, onNext: handleSave }}
   />}
 
- {activeTab === "configuracoes" && <TabConfiguracoes
- {...{ price, pixEnabled, setPixEnabled, boletoEnabled, setBoletoEnabled, creditCardEnabled, setCreditCardEnabled, emailConfirm, setEmailConfirm, showCouponField, setShowCouponField, addressRequired, setAddressRequired, deliveryType, setDeliveryType }}
- />}
+{activeTab === "configuracoes" && <TabConfiguracoes
+ {...{ price, pixEnabled, setPixEnabled, boletoEnabled, setBoletoEnabled, creditCardEnabled, setCreditCardEnabled, emailConfirm, setEmailConfirm, showCouponField, setShowCouponField, addressRequired, setAddressRequired, deliveryType, setDeliveryType, adminBoletoEnabled, adminCardEnabled }}
+/>}
 
  {activeTab === "conteudo" && <TabConteudo productId={effectiveProductId} isNew={tabsLocked} />}
 
@@ -827,6 +852,42 @@ export default function ProductEditor() {
  />}
  </motion.div>
  </AnimatePresence>
+
+ {/* Navegação inferior — Anterior / Próximo em todas as abas */}
+ {(() => {
+   const idx = TABS.findIndex(t => t.key === activeTab);
+   const prev = idx > 0 ? TABS[idx - 1] : null;
+   const next = idx >= 0 && idx < TABS.length - 1 ? TABS[idx + 1] : null;
+   const goNext = () => {
+     if (!next) return;
+     if (tabsLocked) { handleSave(); return; }
+     setActiveTab(next.key);
+   };
+   const goPrev = () => { if (prev && !tabsLocked) setActiveTab(prev.key); };
+   return (
+     <div className="mt-8 flex items-center justify-between gap-3 pt-4 border-t border-border">
+       <Button
+         variant="outline"
+         onClick={goPrev}
+         disabled={!prev || tabsLocked}
+         className="gap-2 rounded-xl font-display font-bold h-11 px-5"
+       >
+         <ChevronRight className="h-4 w-4 rotate-180" />
+         {prev ? prev.label : "Anterior"}
+       </Button>
+       {next ? (
+         <Button onClick={goNext} disabled={saving} className="gap-2 rounded-xl font-display font-bold h-11 px-6">
+           {tabsLocked ? "Salvar e continuar" : `Próximo: ${next.label}`}
+           <ChevronRight className="h-4 w-4" />
+         </Button>
+       ) : (
+         <Button onClick={handleSave} disabled={saving} className="gap-2 rounded-xl font-display font-bold h-11 px-6">
+           <Save className="h-4 w-4" /> Salvar alterações
+         </Button>
+       )}
+     </div>
+   );
+ })()}
  </div>
  </div>
  </div>
@@ -840,7 +901,8 @@ export default function ProductEditor() {
 
 function TabGeral({ name, setName, description, setDescription, price, setPrice, status, setStatus, pageUrl, setPageUrl, imagePreview, setImagePreview, imageFile, setImageFile, fileInputRef, handleFileChange, category, setCategory, paymentType, setPaymentType, displayName, setDisplayName, supportEmail, setSupportEmail, supportPhone, setSupportPhone, warrantyDays, setWarrantyDays, isDragging, setIsDragging, handleDrop, onNext }: any) {
   const descValid = description.length >= 50;
-  const urlValid = /^https?:\/\/.+\..+/.test(pageUrl.trim());
+  // Aceita URL sem https://
+  const urlValid = pageUrl.trim().length > 3 && /\.[a-z]{2,}/i.test(pageUrl.trim());
   const emailValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(supportEmail.trim());
   const phoneDigits = (supportPhone || "").replace(/\D/g, "");
   const phoneValid = phoneDigits.length >= 10 && phoneDigits.length <= 11;
@@ -851,20 +913,32 @@ function TabGeral({ name, setName, description, setDescription, price, setPrice,
     if (d.length <= 10) return `(${d.slice(0,2)}) ${d.slice(2,6)}-${d.slice(6)}`;
     return `(${d.slice(0,2)}) ${d.slice(2,7)}-${d.slice(7)}`;
   };
+  // Formata para BR: 1.000,00 / 10.500,50. Trabalha em centavos pra evitar bug de cursor.
   const handlePriceChange = (raw: string) => {
-    // Aceita "10", "10,50", "10.50". Mantém apenas dígitos e um separador.
-    let v = raw.replace(/[^0-9,.]/g, "");
-    // unifica para vírgula como separador decimal visualmente
-    v = v.replace(/\./g, ",");
-    // permite só uma vírgula
-    const parts = v.split(",");
-    if (parts.length > 2) v = parts[0] + "," + parts.slice(1).join("");
-    // máx 2 casas decimais
-    const [int, dec] = v.split(",");
-    if (dec !== undefined) v = int + "," + dec.slice(0, 2);
-    setPrice(v);
+    const digits = raw.replace(/\D/g, "").slice(0, 8); // até 99.999.999 centavos
+    if (!digits) { setPrice(""); return; }
+    const cents = parseInt(digits, 10);
+    const value = cents / 100;
+    setPrice(value.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 }));
   };
-  const priceNumber = parseFloat(String(price).replace(",", ".")) || 0;
+  const priceNumber = (() => {
+    const s = String(price);
+    if (!s) return 0;
+    return s.includes(",")
+      ? parseFloat(s.replace(/\./g, "").replace(",", ".")) || 0
+      : parseFloat(s) || 0;
+  })();
+
+  const CATEGORIES = [
+    { value: "infoproduto", label: "Infoproduto",     desc: "Conteúdo digital genérico", icon: Package },
+    { value: "curso",       label: "Curso Online",    desc: "Aulas em módulos",          icon: GraduationCap },
+    { value: "ebook",       label: "E-book",          desc: "Material em PDF",           icon: BookOpen },
+    { value: "mentoria",    label: "Mentoria",        desc: "Acompanhamento 1:1",        icon: Users },
+    { value: "software",    label: "Software / SaaS", desc: "Aplicativo ou ferramenta",  icon: Code2 },
+    { value: "servico",     label: "Serviço",         desc: "Trabalho prestado",         icon: Briefcase },
+    { value: "comunidade",  label: "Comunidade",      desc: "Grupo recorrente",          icon: MessageSquare },
+    { value: "outro",       label: "Outro",           desc: "Modelo personalizado",      icon: Layers },
+  ];
 
   return (
     <div className="space-y-8">
@@ -939,52 +1013,63 @@ function TabGeral({ name, setName, description, setDescription, price, setPrice,
           <p className="mt-0.5 text-xs text-muted-foreground">Como seu produto é classificado e cobrado.</p>
         </header>
         <div className="rounded-2xl border border-border bg-card divide-y divide-border">
-          <div className="grid grid-cols-1 sm:grid-cols-2 divide-y sm:divide-y-0 sm:divide-x divide-border">
-            <div className="p-5 space-y-1.5">
-              <label className="text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">Categoria</label>
-              <Select value={category} onValueChange={setCategory}>
-                <SelectTrigger className="h-12 bg-card border-border font-display font-bold text-[13px] tracking-tight">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent className="w-[var(--radix-select-trigger-width)] max-w-none p-1.5">
-                  <RichSelectItem value="infoproduto" icon={Package}      label="Infoproduto"     desc="Conteúdo digital genérico" />
-                  <RichSelectItem value="curso"       icon={GraduationCap} label="Curso Online"    desc="Aulas em módulos" />
-                  <RichSelectItem value="ebook"       icon={BookOpen}     label="E-book"          desc="Material em PDF" />
-                  <RichSelectItem value="mentoria"    icon={Users}        label="Mentoria"        desc="Acompanhamento 1:1 ou grupo" />
-                  <RichSelectItem value="software"    icon={Code2}        label="Software / SaaS" desc="Aplicativo ou ferramenta" />
-                  <RichSelectItem value="servico"     icon={Briefcase}    label="Serviço"         desc="Trabalho prestado" />
-                  <RichSelectItem value="comunidade"  icon={MessageSquare} label="Comunidade"     desc="Grupo recorrente" />
-                  <RichSelectItem value="outro"       icon={Layers}       label="Outro"           desc="Modelo personalizado" />
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="p-5 space-y-1.5">
-              <label className="text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">Tipo de pagamento</label>
-              <Select value={paymentType} onValueChange={setPaymentType}>
-                <SelectTrigger className="h-12 bg-card border-border font-display font-bold text-[13px] tracking-tight">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent className="w-[var(--radix-select-trigger-width)] max-w-none p-1.5">
-                  <RichSelectItem value="unico" icon={DollarSign} label="Pagamento único" desc="Cobrança única (uma vez)" />
-                  <SelectPrimitive.Item
-                    value="assinatura"
-                    disabled
-                    className="relative flex w-full cursor-not-allowed select-none items-center gap-3 rounded-xl px-2.5 py-2.5 outline-none opacity-50"
+          <div className="p-5 space-y-3">
+            <label className="text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">Categoria</label>
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+              {CATEGORIES.map((opt) => {
+                const Icon = opt.icon;
+                const active = category === opt.value;
+                return (
+                  <button
+                    key={opt.value}
+                    type="button"
+                    onClick={() => setCategory(opt.value)}
+                    className={cn(
+                      "relative flex flex-col items-start gap-2 p-3 rounded-xl border text-left transition-colors duration-200",
+                      active
+                        ? "bg-primary/5 border-primary/40"
+                        : "bg-secondary/40 border-border hover:border-primary/20"
+                    )}
                   >
-                    <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-border bg-secondary text-muted-foreground">
-                      <RefreshCw className="h-3.5 w-3.5" strokeWidth={2} />
-                    </span>
-                    <span className="flex-1 min-w-0">
-                      <SelectPrimitive.ItemText asChild>
-                        <span className="block font-display text-[12.5px] font-bold tracking-tight text-foreground">Assinatura recorrente</span>
-                      </SelectPrimitive.ItemText>
-                      <span className="mt-0.5 block text-[10.5px] text-muted-foreground">Cobrança automática mensal</span>
-                    </span>
-                    <span className="ml-auto text-[9px] font-bold uppercase tracking-[0.12em] text-warning px-1.5 py-0.5 rounded border border-warning/40 bg-warning/10">Em breve</span>
-                  </SelectPrimitive.Item>
-                </SelectContent>
-              </Select>
+                    {active && <div className="absolute left-0 top-2 bottom-2 w-[3px] rounded-full bg-primary" />}
+                    <div className={cn("h-8 w-8 rounded-lg flex items-center justify-center border", active ? "bg-primary/10 border-primary/30 text-primary" : "bg-card border-border text-muted-foreground")}>
+                      <Icon className="h-4 w-4" />
+                    </div>
+                    <div className="min-w-0">
+                      <p className={cn("text-[12px] font-display font-bold leading-tight truncate", active ? "text-primary" : "text-foreground")}>{opt.label}</p>
+                      <p className="text-[10px] text-muted-foreground/70 leading-tight mt-0.5 line-clamp-1">{opt.desc}</p>
+                    </div>
+                  </button>
+                );
+              })}
             </div>
+          </div>
+          <div className="p-5 space-y-1.5">
+            <label className="text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">Tipo de pagamento</label>
+            <Select value={paymentType} onValueChange={setPaymentType}>
+              <SelectTrigger className="h-12 bg-card border-border font-display font-bold text-[13px] tracking-tight">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent className="w-[var(--radix-select-trigger-width)] max-w-none p-1.5">
+                <RichSelectItem value="unico" icon={DollarSign} label="Pagamento único" desc="Cobrança única (uma vez)" />
+                <SelectPrimitive.Item
+                  value="assinatura"
+                  disabled
+                  className="relative flex w-full cursor-not-allowed select-none items-center gap-3 rounded-xl px-2.5 py-2.5 outline-none opacity-50"
+                >
+                  <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-border bg-secondary text-muted-foreground">
+                    <RefreshCw className="h-3.5 w-3.5" strokeWidth={2} />
+                  </span>
+                  <span className="flex-1 min-w-0">
+                    <SelectPrimitive.ItemText asChild>
+                      <span className="block font-display text-[12.5px] font-bold tracking-tight text-foreground">Assinatura recorrente</span>
+                    </SelectPrimitive.ItemText>
+                    <span className="mt-0.5 block text-[10.5px] text-muted-foreground">Cobrança automática mensal</span>
+                  </span>
+                  <span className="ml-auto text-[9px] font-bold uppercase tracking-[0.12em] text-warning px-1.5 py-0.5 rounded border border-warning/40 bg-warning/10">Em breve</span>
+                </SelectPrimitive.Item>
+              </SelectContent>
+            </Select>
           </div>
           <div className="p-5">
             <div className="flex items-end justify-between gap-6">
@@ -1003,7 +1088,7 @@ function TabGeral({ name, setName, description, setDescription, price, setPrice,
                 </div>
                 {priceNumber > 0 && (
                   <p className="text-[10px] font-bold text-muted-foreground">
-                    Valor cobrado: R$ {priceNumber.toFixed(2).replace(".", ",")}
+                    Valor cobrado: R$ {priceNumber.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                   </p>
                 )}
               </div>
@@ -1035,8 +1120,8 @@ function TabGeral({ name, setName, description, setDescription, price, setPrice,
               <label className="text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground flex items-center gap-1.5">
                 <ExternalLink className="h-3 w-3" /> Página de vendas
               </label>
-              <Input value={pageUrl} onChange={(e: any) => setPageUrl(e.target.value)} placeholder="https://seuproduto.com" type="url" className={cn("h-11 bg-secondary border-border", pageUrl && !urlValid && "border-destructive/50")} required />
-              <p className={cn("text-[10px]", urlValid ? "text-success" : "text-muted-foreground/60")}>{urlValid ? "URL válida" : "Insira o domínio completo"}</p>
+              <Input value={pageUrl} onChange={(e: any) => setPageUrl(e.target.value)} placeholder="seuproduto.com" type="text" className={cn("h-11 bg-secondary border-border", pageUrl && !urlValid && "border-destructive/50")} required />
+              <p className={cn("text-[10px]", urlValid ? "text-success" : "text-muted-foreground/60")}>{urlValid ? "URL válida — o https:// é adicionado automaticamente" : "Insira o domínio (ex: seusite.com.br) — o https:// é opcional"}</p>
             </div>
             <div className="space-y-1.5">
               <label className="text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground flex items-center gap-1.5">
@@ -1084,7 +1169,7 @@ function TabGeral({ name, setName, description, setDescription, price, setPrice,
   );
 }
 
-function TabConfiguracoes({ price, pixEnabled, setPixEnabled, boletoEnabled, setBoletoEnabled, creditCardEnabled, setCreditCardEnabled, emailConfirm, setEmailConfirm, showCouponField, setShowCouponField, addressRequired, setAddressRequired, deliveryType, setDeliveryType }: any) {
+function TabConfiguracoes({ price, pixEnabled, setPixEnabled, boletoEnabled, setBoletoEnabled, creditCardEnabled, setCreditCardEnabled, emailConfirm, setEmailConfirm, showCouponField, setShowCouponField, addressRequired, setAddressRequired, deliveryType, setDeliveryType, adminBoletoEnabled = true, adminCardEnabled = true }: any) {
  return (
  <div className="space-y-6">
  <SectionHeader icon={Settings} title="Configurações" subtitle="Métodos de pagamento, formulário e entrega de conteúdo." />
@@ -1095,8 +1180,8 @@ function TabConfiguracoes({ price, pixEnabled, setPixEnabled, boletoEnabled, set
  </h3>
  <div className="space-y-2">
  <PaymentMethodRow icon={QrCode} label="PIX" sublabel="Taxa: 2,49% • Aprovação imediata" color="text-success" checked={pixEnabled} onChange={setPixEnabled} />
- <PaymentMethodRow icon={FileText} label="Boleto" sublabel="Taxa: 2,49% + R$ 2,49" color="text-warning" checked={boletoEnabled} onChange={setBoletoEnabled} />
- <PaymentMethodRow icon={CreditCard} label="Cartão de Crédito" sublabel="Taxa: 6,38% • Até 12x" color="text-info" checked={creditCardEnabled} onChange={setCreditCardEnabled} />
+ {adminBoletoEnabled && <PaymentMethodRow icon={FileText} label="Boleto" sublabel="Taxa: 2,49% + R$ 2,49" color="text-warning" checked={boletoEnabled} onChange={setBoletoEnabled} />}
+ {adminCardEnabled && <PaymentMethodRow icon={CreditCard} label="Cartão de Crédito" sublabel="Taxa: 6,38% • Até 12x" color="text-info" checked={creditCardEnabled} onChange={setCreditCardEnabled} />}
  </div>
 
  {/* Simulação de taxas — temporariamente desativada, voltaremos depois */}
