@@ -320,6 +320,39 @@ export default function AdminDisputesTab({ type, title, profiles, transactions, 
  <Label className="text-[10px] text-muted-foreground">Notas do Admin</Label>
  <textarea value={editNotes} onChange={e => setEditNotes(e.target.value)} rows={3} className="w-full px-3 py-2 bg-muted/30 border border-border rounded-md text-xs text-foreground mt-1 resize-none" />
  </div>
+
+ {/* Evidence */}
+ <div className="bg-muted/30 rounded-xl border border-border p-3">
+   <div className="flex items-center justify-between mb-2">
+     <p className="text-[10px] text-muted-foreground uppercase tracking-wider font-bold">Evidências / Comprovantes</p>
+     <label className="inline-flex items-center gap-1 h-7 px-2 text-[10px] bg-primary/10 text-primary border border-primary/20 rounded-lg cursor-pointer hover:bg-primary/20">
+       + Anexar
+       <input type="file" hidden accept="image/*,application/pdf" onChange={e => e.target.files?.[0] && handleEvidenceUpload(e.target.files[0])} />
+     </label>
+   </div>
+   <div className="space-y-1">
+     {(((editing as any).evidence_urls as any[]) || []).length === 0 && (
+       <p className="text-[10px] text-muted-foreground italic">Sem evidências anexadas</p>
+     )}
+     {(((editing as any).evidence_urls as any[]) || []).map((ev: any, i: number) => (
+       <button key={i} onClick={() => handleViewEvidence(ev.path)}
+         className="w-full text-left flex items-center gap-2 px-2 py-1.5 rounded-lg bg-background/50 border border-border hover:bg-muted/30 text-[11px]">
+         <Package className="h-3 w-3 text-primary" />
+         <span className="flex-1 truncate text-foreground">{ev.name || ev.path}</span>
+         <span className="text-[9px] text-muted-foreground">{new Date(ev.uploaded_at).toLocaleDateString("pt-BR")}</span>
+       </button>
+     ))}
+   </div>
+ </div>
+
+ {editing.resolved_at && (
+   <div className={`rounded-xl border p-3 ${editing.won_by_seller ? "bg-primary/[0.06] border-primary/30" : "bg-destructive/[0.06] border-destructive/30"}`}>
+     <p className="text-[10px] uppercase font-bold text-muted-foreground">Desfecho</p>
+     <p className={`text-sm font-black ${editing.won_by_seller ? "text-primary" : "text-destructive"}`}>
+       {editing.won_by_seller ? "✓ Ganha pelo vendedor" : "✗ Perdida (favor ao comprador)"}
+     </p>
+   </div>
+ )}
  <Button className="w-full rounded-xl" onClick={handleUpdate}><Save className="h-3 w-3 mr-1" /> Salvar</Button>
  </div>
  );
