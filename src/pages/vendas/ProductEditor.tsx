@@ -1443,15 +1443,34 @@ function TabUpsell({ isNew, name, price, imagePreview, hasCustomThankYou, setHas
  const upPrice = Number(upsellPrice || 0);
  const downPrice = Number(downsellPrice || 0);
 
- const isConfigured = upsellType !== "none";
+ const isConfigured = upsellEnabled && upsellType !== "none";
 
  // Projected AOV: assume 18% accept upsell, 12% of refusers accept downsell
- const projectedAov = mainPrice + (upPrice * 0.18) + (downsellEnabled ? downPrice * 0.12 * 0.82 : 0);
+ const projectedAov = mainPrice + (isConfigured ? upPrice * 0.18 : 0) + (isConfigured && downsellEnabled ? downPrice * 0.12 * 0.82 : 0);
  const upliftPct = mainPrice > 0 ? Math.round(((projectedAov - mainPrice) / mainPrice) * 100) : 0;
 
  return (
  <div className="space-y-6">
  <SectionHeader icon={ArrowUpRight} title="Funil pós-pagamento" subtitle="Defina a sequência de ofertas exibidas após a compra inicial." />
+
+ {/* Master toggle */}
+ <div className="rounded-2xl border border-border bg-card p-4 flex items-center justify-between gap-4">
+   <div className="flex items-start gap-3 min-w-0">
+     <div className={cn("h-10 w-10 rounded-xl flex items-center justify-center shrink-0", upsellEnabled ? "bg-primary/10 text-primary" : "bg-muted/30 text-muted-foreground/50")}>
+       <ArrowUpRight className="h-4 w-4" />
+     </div>
+     <div className="min-w-0">
+       <p className="text-sm font-display font-bold text-foreground">Ativar upsell pós-pagamento</p>
+       <p className="text-xs text-muted-foreground/70 mt-0.5">Quando desligado, o comprador vai direto para a página de obrigado.</p>
+     </div>
+   </div>
+   <Switch checked={upsellEnabled} onCheckedChange={setUpsellEnabled} />
+ </div>
+
+ {!upsellEnabled ? (
+   <EmptyCard icon={ArrowUpRight} message="Upsell desativado. Ative acima para configurar o funil." />
+ ) : (<>
+
 
  {/* ═══ FUNNEL FLOW VISUAL ═══ */}
  <div className="rounded-2xl border border-border bg-card overflow-hidden">
