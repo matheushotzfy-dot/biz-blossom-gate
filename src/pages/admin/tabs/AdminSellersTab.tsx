@@ -70,6 +70,12 @@ const ACTION_LABELS: Record<string, { label: string; color: string; icon: any }>
   resolve_dispute_buyer: { label: "Disputa: Vitória Comprador", color: "text-destructive", icon: XCircle },
   reply_ticket: { label: "Suporte Respondido", color: "text-info", icon: Send },
   close_ticket: { label: "Suporte Encerrado", color: "text-muted-foreground", icon: CheckCircle2 },
+  manual_refund: { label: "Estorno Manual", color: "text-warning", icon: DollarSign },
+  open_dispute: { label: "MED Aberto (Admin)", color: "text-warning", icon: AlertTriangle },
+  blacklist_email: { label: "E-mail Blacklist", color: "text-destructive", icon: Ban },
+  blacklist_cpf: { label: "CPF Blacklist", color: "text-destructive", icon: UserX },
+  blacklist_cnpj: { label: "CNPJ Blacklist", color: "text-destructive", icon: UserX },
+
 };
 
 interface Props {
