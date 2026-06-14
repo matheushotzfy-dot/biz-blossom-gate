@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { Fragment, useMemo, useState } from "react";
 import { Trophy, Crown, Medal, TrendingUp, Users, DollarSign, Percent, BarChart3, Calendar, Receipt, Clock, CreditCard, Smartphone, FileText, Download, ChevronDown, ChevronRight } from "lucide-react";
 import type { Tables } from "@/integrations/supabase/types";
 import { FinanceiroHero } from "@/components/financeiro/FinanceiroHero";
