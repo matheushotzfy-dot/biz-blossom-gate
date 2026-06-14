@@ -1933,7 +1933,7 @@ function TabCheckout({ isNew, name, price, productId, buttonColor, setButtonColo
  );
 }
 
-function TabCoProducao({ isNew, coProducerEmail, setCoProducerEmail, coProductionSplit, setCoProductionSplit, coProductionDuration, setCoProductionDuration, coProductionSalesType, setCoProductionSalesType }: any) {
+function TabCoProducao({ isNew, coProducerEmail, setCoProducerEmail, coProductionSplit, setCoProductionSplit, coProductionDuration, setCoProductionDuration, coProductionSalesType, setCoProductionSalesType, coProductionsList = [], inviteCoProducer, removeCoProducer, invitingCoProducer }: any) {
  return (
  <div className="space-y-6">
  <SectionHeader icon={Handshake} title="Co-Produção" subtitle="Divida receitas com parceiros de produção." />
