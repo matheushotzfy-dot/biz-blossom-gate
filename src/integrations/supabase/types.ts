@@ -1923,16 +1923,19 @@ export type Database = {
           acquirer_id: string | null
           address_locked: boolean | null
           admin_notes: string | null
+          approved_by: string | null
           avatar_url: string | null
           balance_frozen: boolean
           boleto_enabled: boolean
           city: string | null
           complement: string | null
           created_at: string
+          created_by_admin: string | null
           credit_card_enabled: boolean
           document_number: string | null
           document_type: string | null
           email: string | null
+          frozen: boolean
           full_name: string | null
           id: string
           kyc_rejection_reason: string | null
@@ -1944,6 +1947,7 @@ export type Database = {
           pix_key: string | null
           pix_key_type: string | null
           seller_type: string | null
+          staff_role_type: string | null
           state: string | null
           street: string | null
           street_number: string | null
@@ -1956,16 +1960,19 @@ export type Database = {
           acquirer_id?: string | null
           address_locked?: boolean | null
           admin_notes?: string | null
+          approved_by?: string | null
           avatar_url?: string | null
           balance_frozen?: boolean
           boleto_enabled?: boolean
           city?: string | null
           complement?: string | null
           created_at?: string
+          created_by_admin?: string | null
           credit_card_enabled?: boolean
           document_number?: string | null
           document_type?: string | null
           email?: string | null
+          frozen?: boolean
           full_name?: string | null
           id?: string
           kyc_rejection_reason?: string | null
@@ -1977,6 +1984,7 @@ export type Database = {
           pix_key?: string | null
           pix_key_type?: string | null
           seller_type?: string | null
+          staff_role_type?: string | null
           state?: string | null
           street?: string | null
           street_number?: string | null
@@ -1989,16 +1997,19 @@ export type Database = {
           acquirer_id?: string | null
           address_locked?: boolean | null
           admin_notes?: string | null
+          approved_by?: string | null
           avatar_url?: string | null
           balance_frozen?: boolean
           boleto_enabled?: boolean
           city?: string | null
           complement?: string | null
           created_at?: string
+          created_by_admin?: string | null
           credit_card_enabled?: boolean
           document_number?: string | null
           document_type?: string | null
           email?: string | null
+          frozen?: boolean
           full_name?: string | null
           id?: string
           kyc_rejection_reason?: string | null
@@ -2010,6 +2021,7 @@ export type Database = {
           pix_key?: string | null
           pix_key_type?: string | null
           seller_type?: string | null
+          staff_role_type?: string | null
           state?: string | null
           street?: string | null
           street_number?: string | null
@@ -2395,6 +2407,201 @@ export type Database = {
           created_at?: string
           id?: string
           seller_user_id?: string
+        }
+        Relationships: []
+      }
+      staff_audit_log: {
+        Row: {
+          action: string
+          after: Json | null
+          before: Json | null
+          created_at: string
+          entity_id: string | null
+          entity_type: string | null
+          id: string
+          metadata: Json | null
+          staff_user_id: string
+        }
+        Insert: {
+          action: string
+          after?: Json | null
+          before?: Json | null
+          created_at?: string
+          entity_id?: string | null
+          entity_type?: string | null
+          id?: string
+          metadata?: Json | null
+          staff_user_id: string
+        }
+        Update: {
+          action?: string
+          after?: Json | null
+          before?: Json | null
+          created_at?: string
+          entity_id?: string | null
+          entity_type?: string | null
+          id?: string
+          metadata?: Json | null
+          staff_user_id?: string
+        }
+        Relationships: []
+      }
+      staff_commission_config: {
+        Row: {
+          base: string
+          base_pct: number
+          created_at: string
+          is_active: boolean
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          base?: string
+          base_pct?: number
+          created_at?: string
+          is_active?: boolean
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          base?: string
+          base_pct?: number
+          created_at?: string
+          is_active?: boolean
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      staff_commission_overrides: {
+        Row: {
+          created_at: string
+          id: string
+          pct: number
+          seller_user_id: string
+          staff_user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          pct: number
+          seller_user_id: string
+          staff_user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          pct?: number
+          seller_user_id?: string
+          staff_user_id?: string
+        }
+        Relationships: []
+      }
+      staff_commission_payouts: {
+        Row: {
+          amount: number
+          created_at: string
+          id: string
+          method: string | null
+          notes: string | null
+          processed_at: string | null
+          processed_by: string | null
+          staff_user_id: string
+          status: string
+        }
+        Insert: {
+          amount: number
+          created_at?: string
+          id?: string
+          method?: string | null
+          notes?: string | null
+          processed_at?: string | null
+          processed_by?: string | null
+          staff_user_id: string
+          status?: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          id?: string
+          method?: string | null
+          notes?: string | null
+          processed_at?: string | null
+          processed_by?: string | null
+          staff_user_id?: string
+          status?: string
+        }
+        Relationships: []
+      }
+      staff_commissions_ledger: {
+        Row: {
+          amount: number
+          balance_after: number
+          base_amount: number
+          created_at: string
+          description: string | null
+          dispute_id: string | null
+          id: string
+          idempotency_key: string | null
+          pct: number
+          seller_user_id: string | null
+          staff_user_id: string
+          transaction_id: string | null
+          type: string
+        }
+        Insert: {
+          amount: number
+          balance_after: number
+          base_amount?: number
+          created_at?: string
+          description?: string | null
+          dispute_id?: string | null
+          id?: string
+          idempotency_key?: string | null
+          pct?: number
+          seller_user_id?: string | null
+          staff_user_id: string
+          transaction_id?: string | null
+          type: string
+        }
+        Update: {
+          amount?: number
+          balance_after?: number
+          base_amount?: number
+          created_at?: string
+          description?: string | null
+          dispute_id?: string | null
+          id?: string
+          idempotency_key?: string | null
+          pct?: number
+          seller_user_id?: string | null
+          staff_user_id?: string
+          transaction_id?: string | null
+          type?: string
+        }
+        Relationships: []
+      }
+      staff_permissions: {
+        Row: {
+          created_at: string
+          granted_by: string | null
+          id: string
+          permission_key: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          granted_by?: string | null
+          id?: string
+          permission_key: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          granted_by?: string | null
+          id?: string
+          permission_key?: string
+          user_id?: string
         }
         Relationships: []
       }
@@ -3435,6 +3642,10 @@ export type Database = {
           sort_order: number
         }[]
       }
+      get_staff_commission_balance: {
+        Args: { _staff: string }
+        Returns: number
+      }
       get_user_max_ticket: { Args: { _user_id: string }; Returns: number }
       grade_quiz_attempt: {
         Args: { _answers: Json; _quiz_id: string }
@@ -3447,8 +3658,17 @@ export type Database = {
         }
         Returns: boolean
       }
+      has_staff_permission: {
+        Args: { _key: string; _user_id: string }
+        Returns: boolean
+      }
       is_product_active: { Args: { _product_id: string }; Returns: boolean }
       release_due_card_holds: { Args: never; Returns: number }
+      resolve_commission_pct: {
+        Args: { _seller: string; _staff: string }
+        Returns: number
+      }
+      resolve_commission_staff: { Args: { _seller: string }; Returns: string }
       set_max_ticket_for_all: { Args: { _new_value: number }; Returns: Json }
       set_max_ticket_new_users_only: {
         Args: { _new_value: number }

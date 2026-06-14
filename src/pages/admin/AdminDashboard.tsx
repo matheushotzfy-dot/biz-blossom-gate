@@ -6,8 +6,9 @@ import {
   Shield, LogOut, Zap, LayoutDashboard, Users, Package, AlertTriangle,
   RotateCcw, ShieldAlert, CreditCard, ArrowDownToLine, Tag, GraduationCap,
   Activity, Settings, Bell, MessageSquare,
-  UserCog, RefreshCw, Rocket,
+  UserCog, RefreshCw, Rocket, Coins,
   Bug, UserX, Search, Banknote, ShieldCheck,
+
   FileWarning, Package2, Radio, BarChart3, Calendar,
   ChevronLeft, ChevronRight, PanelLeftClose, PanelLeft,
   Flame, Sparkles, Crown, Globe, Palette, CheckCircle2, Trophy,
@@ -41,6 +42,8 @@ import AdminInactiveSellersTab from "./tabs/AdminInactiveSellersTab";
 import AdminRiskComplianceTab from "./tabs/AdminRiskComplianceTab";
 import AdminAnalyticsTab from "./tabs/AdminAnalyticsTab";
 import AdminManagersTab from "./tabs/AdminManagersTab";
+import AdminStaffCommissionsTab from "./tabs/AdminStaffCommissionsTab";
+
 import AdminNotificationsTab from "./tabs/AdminNotificationsTab";
 import AdminAffiliateSalesTab from "./tabs/AdminAffiliateSalesTab";
 import AdminSupportTab from "./tabs/AdminSupportTab";
@@ -61,6 +64,8 @@ const NAV_SECTIONS: { id: string; label: string; items: { id: string; label: str
       { id: "inactive-sellers", label: "Inativos", icon: UserX, employeeAccess: false },
       { id: "employees", label: "Staff", icon: UserCog, employeeAccess: false },
       { id: "managers", label: "Gerentes", icon: Shield, employeeAccess: false },
+      { id: "staff-commissions", label: "Comissões Staff", icon: Coins, employeeAccess: false },
+
     ],
   },
   {
@@ -694,6 +699,8 @@ export default function AdminDashboard() {
                 )}
                 {activeTab === "employees" && isAdmin && <AdminEmployeesTab profiles={profiles} onReload={loadData} />}
                 {activeTab === "managers" && isAdmin && <AdminManagersTab profiles={profiles} onReload={loadData} />}
+                {activeTab === "staff-commissions" && isAdmin && <AdminStaffCommissionsTab profiles={profiles} />}
+
                 {activeTab === "notifications" && isAdmin && <AdminNotificationsTab profiles={profiles} />}
                 {activeTab === "coupons" && isAdmin && <AdminCouponsTab profiles={profiles} fmtCurrency={fmtCurrency} />}
                 {activeTab === "courses" && isAdmin && <AdminCoursesTab profiles={profiles} products={products} />}

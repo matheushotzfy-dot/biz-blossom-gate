@@ -100,7 +100,7 @@ Deno.serve(async (req) => {
       .select("role")
       .eq("user_id", userId);
     const roles = (roleRows ?? []).map((r: { role: string }) => r.role);
-    const isManager = roles.includes("manager");
+    const isManager = roles.includes("manager") || roles.includes("employee");
 
     if (!isManager) {
       await adminClient.from("admin_login_attempts").insert({ email: trimmedEmail, success: false });
@@ -109,6 +109,21 @@ Deno.serve(async (req) => {
         { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
+
+    // Block frozen staff accounts
+    const { data: profileRow } = await adminClient
+      .from("profiles")
+      .select("frozen")
+      .eq("user_id", userId)
+      .maybeSingle();
+    if (profileRow?.frozen) {
+      await adminClient.from("admin_login_attempts").insert({ email: trimmedEmail, success: false });
+      return new Response(
+        JSON.stringify({ success: false, error: "Conta congelada. Contate o administrador." }),
+        { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
 
     await adminClient.from("admin_login_attempts").insert({ email: trimmedEmail, success: true });
 
