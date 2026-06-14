@@ -85,7 +85,14 @@ const persister = typeof window !== "undefined"
 
 const App = () => (
   <ErrorBoundary>
-    <QueryClientProvider client={queryClient}>
+    <PersistQueryClientProvider
+      client={queryClient}
+      persistOptions={{
+        persister: persister!,
+        maxAge: 24 * 60 * 60 * 1000,
+        buster: "v1",
+      }}
+    >
       <ThemeProvider>
         <TooltipProvider>
           <Toaster />
@@ -162,7 +169,7 @@ const App = () => (
           </BrowserRouter>
         </TooltipProvider>
       </ThemeProvider>
-    </QueryClientProvider>
+    </PersistQueryClientProvider>
   </ErrorBoundary>
 );
 
