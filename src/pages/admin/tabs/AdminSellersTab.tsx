@@ -511,6 +511,42 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
         </div>
       )}
 
+      {/* ── Top movers do dia ── */}
+      {todayMovers.length > 0 && (
+        <div className="rounded-2xl border border-border bg-card p-4">
+          <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center gap-2">
+              <TrendingUp className="h-4 w-4 text-success" />
+              <p className="text-[11px] font-black uppercase tracking-widest text-foreground">Top Movers · Hoje</p>
+            </div>
+            <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-widest">
+              {todayMovers.length} ativos · {fmtCurrency(todayMovers.reduce((a, m) => a + m.gross, 0))}
+            </p>
+          </div>
+          <div className="flex flex-wrap gap-2">
+            {todayMovers.map(m => (
+              <button
+                key={m.user_id}
+                onClick={() => openUserDetail(m.profile!)}
+                className="group inline-flex items-center gap-2 px-3 py-2 rounded-xl border border-border bg-muted/20 hover:border-primary/40 hover:bg-primary/5 transition-colors"
+              >
+                <div className="h-7 w-7 rounded-lg bg-primary/10 flex items-center justify-center text-[11px] font-black text-primary shrink-0">
+                  {(m.profile!.full_name || m.profile!.email || "?")[0].toUpperCase()}
+                </div>
+                <div className="text-left">
+                  <p className="text-[11px] font-bold text-foreground leading-tight max-w-[160px] truncate">
+                    {m.profile!.full_name || m.profile!.email}
+                  </p>
+                  <p className="text-[10px] text-muted-foreground tabular-nums">
+                    {m.count} venda{m.count > 1 ? "s" : ""} · <span className="font-black text-success">{fmtCurrency(m.gross)}</span>
+                  </p>
+                </div>
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+
       {/* Filter tabs + search */}
       <div className="flex items-center gap-4 flex-wrap">
         <div className="inline-flex flex-wrap gap-1 rounded-xl border border-border/60 bg-muted/30 p-1">
