@@ -22,7 +22,7 @@ interface Dispute {
 }
 
 interface Props {
- type: "medpix" | "pre_med_pix" | "refund";
+ type: "medpix" | "pre_med_pix" | "refund" | "chargeback";
  title: string;
  profiles: Tables<"profiles">[];
  transactions: Tables<"transactions">[];
