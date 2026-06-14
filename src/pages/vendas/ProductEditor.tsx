@@ -2220,9 +2220,10 @@ function TabAfiliados({ isNew, productId, affiliateEnabled, setAffiliateEnabled,
 }
 
 function TabLinks({ isNew, product, pageUrl, affiliateEnabled, productId, getCheckoutLink, copyLink, name, price }: any) {
-  const [showQR, setShowQR] = useState(false);
-  const checkoutLink = getCheckoutLink();
-  const affiliateInviteLink = `${window.location.origin}/affiliate/invite/${productId?.slice(0, 8)}`;
+   const [showQR, setShowQR] = useState(false);
+   const checkoutLink = getCheckoutLink();
+   const affiliateInviteLink = `${window.location.origin}/vendas/afiliados?product=${productId || ""}`;
+
 
   const shareLinks = [
     { label: "WhatsApp", icon: MessageSquare, url: `https://wa.me/?text=${encodeURIComponent(`Confira: ${name} por apenas R$ ${Number(price || 0).toFixed(2)}! ${checkoutLink}`)}` },
