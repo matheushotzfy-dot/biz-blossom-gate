@@ -2,7 +2,6 @@ import { useState, useRef, useEffect, useCallback } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
-import { useProfile } from "@/hooks/useProfile";
 import { useInvalidateAll } from "@/hooks/useQueryData";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
@@ -111,10 +110,9 @@ export default function ProductEditor() {
  const { productId } = useParams<{ productId: string }>();
  const navigate = useNavigate();
  const { user } = useAuth();
- const { profile } = useProfile();
  // Admin pode desativar Boleto/Cartão por seller — quando desativado, não exibimos o toggle no produto.
- const adminBoletoEnabled = (profile as any)?.boleto_enabled ?? true;
- const adminCardEnabled = (profile as any)?.credit_card_enabled ?? true;
+ const [adminBoletoEnabled, setAdminBoletoEnabled] = useState(true);
+ const [adminCardEnabled, setAdminCardEnabled] = useState(true);
  const invalidateAll = useInvalidateAll();
  const isNew = productId === "novo";
 
