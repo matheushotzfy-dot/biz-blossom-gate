@@ -46,6 +46,7 @@ import AdminAffiliateSalesTab from "./tabs/AdminAffiliateSalesTab";
 import AdminSupportTab from "./tabs/AdminSupportTab";
 import AdminSubscriptionsTab from "./tabs/AdminSubscriptionsTab";
 import AdminReferralsTab from "./tabs/AdminReferralsTab";
+import AdminRewardsTab from "./tabs/AdminRewardsTab";
 
 const EMPLOYEE_ALLOWED_TABS = new Set(["god-mode", "sellers", "products", "transactions"] as string[]);
 
