@@ -85,6 +85,7 @@ export default function AdminDisputesTab({ type, title, profiles, transactions, 
  if (editStatus === "resolved_seller" || editStatus === "resolved_buyer" || editStatus === "closed") {
  update.resolved_at = new Date().toISOString();
  update.admin_user_id = user.id;
+ update.won_by_seller = editStatus === "resolved_seller";
  }
  const { error } = await supabase.from("disputes").update(update).eq("id", editing.id);
  if (error) { toast.error("Erro ao atualizar"); return; }
@@ -92,6 +93,26 @@ export default function AdminDisputesTab({ type, title, profiles, transactions, 
  await logAdminAction(`update_${type}`, "dispute", editing.id, { status: editStatus, notes: editNotes });
  setEditing(null);
  load();
+ };
+
+ const handleEvidenceUpload = async (file: File) => {
+   if (!editing || !user) return;
+   if (file.size > 10 * 1024 * 1024) { toast.error("Arquivo > 10MB"); return; }
+   const path = `${editing.id}/${Date.now()}-${file.name.replace(/[^\w.-]/g, "_")}`;
+   const { error: upErr } = await supabase.storage.from("dispute-evidence").upload(path, file);
+   if (upErr) { toast.error("Erro ao enviar: " + upErr.message); return; }
+   const next = [ ...((editing as any).evidence_urls || []), { path, name: file.name, uploaded_at: new Date().toISOString() } ];
+   const { error } = await supabase.from("disputes").update({ evidence_urls: next } as any).eq("id", editing.id);
+   if (error) { toast.error("Erro ao salvar"); return; }
+   toast.success("Evidência anexada");
+   setEditing({ ...editing, evidence_urls: next } as any);
+   load();
+ };
+
+ const handleViewEvidence = async (path: string) => {
+   const { data, error } = await supabase.storage.from("dispute-evidence").createSignedUrl(path, 300);
+   if (error || !data?.signedUrl) { toast.error("Erro ao gerar link"); return; }
+   window.open(data.signedUrl, "_blank", "noopener,noreferrer");
  };
 
  const filtered = disputes.filter(d => {
