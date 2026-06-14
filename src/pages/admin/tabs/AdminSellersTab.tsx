@@ -138,8 +138,10 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
         supabase.from("pix_keys").select("id, key_type, key_value, created_at").eq("user_id", profile.user_id),
         supabase.from("disputes").select("id, seller_user_id, transaction_id, amount, type, status, reason, created_at").eq("seller_user_id", profile.user_id).order("created_at", { ascending: false }).limit(50) as any,
         supabase.from("retention_settings").select("id, user_id, pix_retention_pct, card_retention_pct, retention_days, card_release_days").eq("user_id", profile.user_id).maybeSingle(),
+        supabase.from("ip_logs").select("ip, user_agent, country, source, created_at").eq("user_id", profile.user_id).order("created_at", { ascending: false }).limit(50),
       ]);
       if (logsRes.data) setUserLogs(logsRes.data as any);
+
       if (productsRes.data) setUserProducts(productsRes.data);
       if (wdRes.data) setUserWithdrawals(wdRes.data);
       if (txRes.data) setUserTransactions(txRes.data);
