@@ -1435,19 +1435,14 @@ function TabOrderBump({ isNew, orderBumps, allProducts, availableForBump, select
  );
 }
 
-function TabUpsell({ name, price, imagePreview, hasCustomThankYou, setHasCustomThankYou, thankYouUrl, setThankYouUrl, sendConfirmationEmail, setSendConfirmationEmail, emailTiming, setEmailTiming }: any) {
- const [upsellType, setUpsellType] = useState("none");
- const [upsellName, setUpsellName] = useState("");
- const [upsellPrice, setUpsellPrice] = useState("");
- const [upsellDiscount, setUpsellDiscount] = useState("30");
- const [downsellEnabled, setDownsellEnabled] = useState(false);
- const [downsellUrl, setDownsellUrl] = useState("");
- const [downsellPrice, setDownsellPrice] = useState("");
- const [downsellDelay, setDownsellDelay] = useState("5");
+function TabUpsell({ isNew, name, price, imagePreview, hasCustomThankYou, setHasCustomThankYou, thankYouUrl, setThankYouUrl, sendConfirmationEmail, setSendConfirmationEmail, emailTiming, setEmailTiming,
+  upsellEnabled, setUpsellEnabled, upsellType, setUpsellType, upsellName, setUpsellName, upsellPrice, setUpsellPrice, upsellDiscount, setUpsellDiscount, upsellUrl, setUpsellUrl,
+  downsellEnabled, setDownsellEnabled, downsellUrl, setDownsellUrl, downsellPrice, setDownsellPrice, downsellDelay, setDownsellDelay }: any) {
 
  const mainPrice = Number(price || 0);
  const upPrice = Number(upsellPrice || 0);
  const downPrice = Number(downsellPrice || 0);
+
  const isConfigured = upsellType !== "none";
 
  // Projected AOV: assume 18% accept upsell, 12% of refusers accept downsell
