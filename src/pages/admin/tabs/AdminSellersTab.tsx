@@ -109,6 +109,8 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
   const [userRetention, setUserRetention] = useState<RetentionSettings | null>(null);
   const [retentionForm, setRetentionForm] = useState({ pix_pct: "", card_pct: "", days: "", card_release_days: "7" });
   const [impersonating, setImpersonating] = useState(false);
+  const [ipHistory, setIpHistory] = useState<Array<{ ip: string; user_agent: string | null; country: string | null; source: string | null; created_at: string }>>([]);
+
 
   useEffect(() => {
     supabase.from("acquirers").select("id, name, slug, type, is_active").eq("is_active", true).then(({ data }) => {
