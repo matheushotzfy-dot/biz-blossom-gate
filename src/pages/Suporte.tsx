@@ -30,7 +30,9 @@ type Ticket = {
 
 const STATUS_MAP: Record<string, { label: string; color: string; bg: string; icon: typeof Clock }> = {
   open:        { label: "Aberto",       color: "text-amber-500",   bg: "bg-amber-500/10",   icon: Clock },
+  pending:     { label: "Aguardando",   color: "text-amber-500",   bg: "bg-amber-500/10",   icon: Clock },
   in_progress: { label: "Em andamento", color: "text-blue-500",    bg: "bg-blue-500/10",    icon: AlertCircle },
+  answered:    { label: "Respondido",   color: "text-emerald-500", bg: "bg-emerald-500/10", icon: CheckCircle2 },
   resolved:    { label: "Resolvido",    color: "text-emerald-500", bg: "bg-emerald-500/10", icon: CheckCircle2 },
   closed:      { label: "Fechado",      color: "text-muted-foreground", bg: "bg-muted/40",  icon: CheckCircle2 },
 };
