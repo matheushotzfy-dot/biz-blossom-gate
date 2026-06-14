@@ -214,6 +214,18 @@ export default function AdminOverviewTab({ transactions, profiles, products, wit
  const conversionRate = filteredTx.length > 0 ? ((filteredApproved.length / filteredTx.length) * 100).toFixed(1) : "0.0";
  const ticketMedio = filteredApproved.length > 0 ? totalVolume / filteredApproved.length : 0;
 
+ // Lucro últimos 30 dias (fixo, independente do dateRange)
+ const last30Start = useMemo(() => { const d = new Date(); d.setDate(d.getDate() - 30); return d; }, []);
+ const last30Tx = useMemo(() => approved.filter(t => new Date(t.created_at) >= last30Start), [approved, last30Start]);
+ const profit30d = last30Tx.reduce((a, t) => a + Number(t.fee_amount), 0);
+
+ // MEDs pendentes para o card
+ const pendingMeds = useMemo(
+   () => disputes.filter(d => d.status === "open" || d.status === "in_review"),
+   [disputes]
+ );
+ const pendingMedsAmount = pendingMeds.reduce((a, d) => a + Number(d.amount), 0);
+
  const methodApproval = useMemo(() => {
  const methods: Record<string, { total: number; approved: number; volume: number }> = {};
  filteredTx.forEach(t => {
