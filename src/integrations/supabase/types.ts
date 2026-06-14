@@ -1766,6 +1766,11 @@ export type Database = {
           delivery_type: string
           description: string | null
           display_name: string | null
+          downsell_delay: number | null
+          downsell_enabled: boolean
+          downsell_price: number | null
+          downsell_url: string | null
+          email_timing: string
           id: string
           image_url: string | null
           name: string
@@ -1776,6 +1781,12 @@ export type Database = {
           support_email: string | null
           support_phone: string | null
           updated_at: string
+          upsell_discount: number | null
+          upsell_enabled: boolean
+          upsell_name: string | null
+          upsell_price: number | null
+          upsell_type: string
+          upsell_url: string | null
           user_id: string
         }
         Insert: {
@@ -1803,6 +1814,11 @@ export type Database = {
           delivery_type?: string
           description?: string | null
           display_name?: string | null
+          downsell_delay?: number | null
+          downsell_enabled?: boolean
+          downsell_price?: number | null
+          downsell_url?: string | null
+          email_timing?: string
           id?: string
           image_url?: string | null
           name: string
@@ -1813,6 +1829,12 @@ export type Database = {
           support_email?: string | null
           support_phone?: string | null
           updated_at?: string
+          upsell_discount?: number | null
+          upsell_enabled?: boolean
+          upsell_name?: string | null
+          upsell_price?: number | null
+          upsell_type?: string
+          upsell_url?: string | null
           user_id: string
         }
         Update: {
@@ -1840,6 +1862,11 @@ export type Database = {
           delivery_type?: string
           description?: string | null
           display_name?: string | null
+          downsell_delay?: number | null
+          downsell_enabled?: boolean
+          downsell_price?: number | null
+          downsell_url?: string | null
+          email_timing?: string
           id?: string
           image_url?: string | null
           name?: string
@@ -1850,6 +1877,12 @@ export type Database = {
           support_email?: string | null
           support_phone?: string | null
           updated_at?: string
+          upsell_discount?: number | null
+          upsell_enabled?: boolean
+          upsell_name?: string | null
+          upsell_price?: number | null
+          upsell_type?: string
+          upsell_url?: string | null
           user_id?: string
         }
         Relationships: []
