@@ -148,6 +148,8 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
       if (adjRes.data) setBalanceAdjustments(adjRes.data);
       if (pixRes.data) setUserPixKeys(pixRes.data as PixKey[]);
       if (disputesRes.data) setUserDisputes(disputesRes.data as any[]);
+      if (ipRes.data) setIpHistory(ipRes.data as any);
+
       setSelectedAcquirerId(profile.acquirer_id || "");
       setAdminNotes((profile as any).admin_notes || "");
       if (retRes.data) {
