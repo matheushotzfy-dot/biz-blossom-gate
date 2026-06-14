@@ -260,10 +260,21 @@ export default function ProductEditor() {
  setDeliveryType((data as any).delivery_type || "digital");
  setLoading(false);
  })();
- }, [productId, user?.id, isNew]);
+  }, [productId, user?.id, isNew]);
 
- useEffect(() => {
- if (!user?.id || isNew) return;
+  // Carrega gates de pagamento definidos pelo admin no perfil do seller
+  useEffect(() => {
+    if (!user?.id) return;
+    supabase.from("profiles").select("boleto_enabled, credit_card_enabled" as any).eq("user_id", user.id).maybeSingle()
+      .then(({ data }: any) => {
+        if (!data) return;
+        if (data.boleto_enabled === false) { setAdminBoletoEnabled(false); setBoletoEnabled(false); }
+        if (data.credit_card_enabled === false) { setAdminCardEnabled(false); setCreditCardEnabled(false); }
+      });
+  }, [user?.id]);
+
+  useEffect(() => {
+    if (!user?.id || isNew) return;
  supabase.from("products").select("*").eq("user_id", user.id).eq("status", "active").neq("id", productId!)
  .then(({ data }) => { if (data) setAllProducts(data); });
  supabase.from("order_bumps").select("id, bump_product_id").eq("product_id", productId!)
