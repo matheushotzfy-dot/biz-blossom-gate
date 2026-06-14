@@ -311,7 +311,10 @@ export default function ProductEditor() {
  .then(({ data }) => { if (data) setOrderBumps(data); });
  supabase.from("coupons").select("*").eq("user_id", user.id).eq("product_id", productId!).order("created_at", { ascending: false })
  .then(({ data }) => { if (data) setCoupons(data); });
+ supabase.from("co_productions").select("*").eq("product_id", productId!).order("created_at", { ascending: false })
+ .then(({ data }) => { if (data) setCoProductionsList(data); });
  }, [user?.id, productId, isNew]);
+
 
  const uploadImage = async (file: File, bucket: string, path: string): Promise<string | null> => {
  const ALLOWED = ["image/jpeg", "image/png", "image/webp", "image/gif"];
