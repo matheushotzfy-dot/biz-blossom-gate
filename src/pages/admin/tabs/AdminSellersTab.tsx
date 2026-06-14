@@ -52,6 +52,24 @@ const ACTION_LABELS: Record<string, { label: string; color: string; icon: any }>
   course_created: { label: "Curso Criado", color: "text-success", icon: Plus },
   course_updated: { label: "Curso Editado", color: "text-info", icon: Edit },
   course_deleted: { label: "Curso Excluído", color: "text-destructive", icon: Trash2 },
+  approve_kyc: { label: "KYC Aprovado", color: "text-success", icon: CheckCircle2 },
+  reject_kyc: { label: "KYC Recusado", color: "text-destructive", icon: XCircle },
+  freeze_balance: { label: "Saldo Congelado", color: "text-info", icon: Snowflake },
+  unfreeze_balance: { label: "Saldo Descongelado", color: "text-success", icon: Unlock },
+  ban_seller: { label: "Seller Banido", color: "text-destructive", icon: UserX },
+  balance_credit: { label: "Crédito Manual", color: "text-success", icon: DollarSign },
+  balance_debit: { label: "Débito Manual", color: "text-destructive", icon: DollarSign },
+  update_retention: { label: "Rolling Reserve Atualizado", color: "text-info", icon: Lock },
+  update_admin_notes: { label: "Observações Salvas", color: "text-muted-foreground", icon: MessageSquareText },
+  update_custom_fees: { label: "Taxas Personalizadas", color: "text-warning", icon: Percent },
+  set_seller_type: { label: "Tier Alterado", color: "text-info", icon: Shield },
+  set_seller_acquirer: { label: "Adquirente Alterada", color: "text-info", icon: Landmark },
+  impersonate_user: { label: "Login Como Usuário", color: "text-warning", icon: LogIn },
+  delete_pix_key: { label: "Chave PIX Removida", color: "text-destructive", icon: Trash2 },
+  resolve_dispute_seller: { label: "Disputa: Vitória Seller", color: "text-success", icon: CheckCircle2 },
+  resolve_dispute_buyer: { label: "Disputa: Vitória Comprador", color: "text-destructive", icon: XCircle },
+  reply_ticket: { label: "Suporte Respondido", color: "text-info", icon: Send },
+  close_ticket: { label: "Suporte Encerrado", color: "text-muted-foreground", icon: CheckCircle2 },
 };
 
 interface Props {
@@ -320,6 +338,30 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
     await logAdminAction("update_custom_fees", "custom_user_fees", selectedUser.user_id, payload);
   };
 
+  const handleResolveDispute = async (disputeId: string, side: "seller" | "buyer") => {
+    const status = side === "seller" ? "resolved_seller" : "resolved_buyer";
+    const label = side === "seller" ? "Vitória do seller — saldo devolvido." : "Vitória do comprador — débito mantido.";
+    if (!window.confirm(side === "seller" ? "Confirmar vitória do seller? O saldo retido será devolvido." : "Confirmar vitória do comprador? O débito será mantido e a transação marcada como chargeback.")) return;
+    const { error } = await supabase.from("disputes").update({ status, resolved_at: new Date().toISOString() } as any).eq("id", disputeId);
+    if (error) { toast.error("Erro ao resolver disputa: " + error.message); return; }
+    toast.success(label);
+    await logAdminAction(`resolve_dispute_${side}`, "dispute", disputeId, { status });
+    if (selectedUser) {
+      const { data } = await supabase.from("disputes").select("id, seller_user_id, transaction_id, amount, type, status, reason, created_at").eq("seller_user_id", selectedUser.user_id).order("created_at", { ascending: false }).limit(50) as any;
+      if (data) setUserDisputes(data);
+    }
+    onReload();
+  };
+
+  const handleDeletePixKey = async (pixKeyId: string) => {
+    if (!window.confirm("Remover esta chave PIX do seller?")) return;
+    const { error } = await supabase.from("pix_keys").delete().eq("id", pixKeyId);
+    if (error) { toast.error("Erro ao remover chave: " + error.message); return; }
+    toast.success("Chave PIX removida.");
+    await logAdminAction("delete_pix_key", "pix_key", pixKeyId);
+    setUserPixKeys(prev => prev.filter(k => k.id !== pixKeyId));
+  };
+
   const handleBalanceAdjustment = async () => {
     if (!selectedUser || !user || !adjustAmount || !adjustReason) { toast.error("Preencha todos os campos"); return; }
     const amount = Number(adjustAmount);
@@ -358,6 +400,24 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
   const blackCount = profiles.filter(p => (p as any).seller_type === "black").length;
   const unsetCount = profiles.filter(p => (p as any).seller_type == null).length;
   const frozenCount = profiles.filter(p => (p as any).balance_frozen === true).length;
+
+  // Top movers do dia (sellers que mais movimentaram hoje)
+  const todayStart = new Date(); todayStart.setHours(0, 0, 0, 0);
+  const todayMovers = (() => {
+    const byUser = new Map<string, { gross: number; count: number }>();
+    for (const t of transactions) {
+      if (!t.created_at || new Date(t.created_at) < todayStart) continue;
+      if (t.status !== "completed" && t.status !== "approved") continue;
+      const cur = byUser.get(t.user_id) || { gross: 0, count: 0 };
+      cur.gross += Number(t.amount); cur.count += 1;
+      byUser.set(t.user_id, cur);
+    }
+    return Array.from(byUser.entries())
+      .map(([user_id, s]) => ({ user_id, ...s, profile: profiles.find(p => p.user_id === user_id) }))
+      .filter(m => m.profile)
+      .sort((a, b) => b.gross - a.gross)
+      .slice(0, 8);
+  })();
 
   const getSellerStats = (userId: string) => {
     const txs = transactions.filter(t => t.user_id === userId);
@@ -448,6 +508,42 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
           <Button size="sm" variant="outline" className="rounded-xl text-xs border-warning/30 text-warning" onClick={() => setSellerFilter("kyc")}>
             Ver Fila KYC
           </Button>
+        </div>
+      )}
+
+      {/* ── Top movers do dia ── */}
+      {todayMovers.length > 0 && (
+        <div className="rounded-2xl border border-border bg-card p-4">
+          <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center gap-2">
+              <TrendingUp className="h-4 w-4 text-success" />
+              <p className="text-[11px] font-black uppercase tracking-widest text-foreground">Top Movers · Hoje</p>
+            </div>
+            <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-widest">
+              {todayMovers.length} ativos · {fmtCurrency(todayMovers.reduce((a, m) => a + m.gross, 0))}
+            </p>
+          </div>
+          <div className="flex flex-wrap gap-2">
+            {todayMovers.map(m => (
+              <button
+                key={m.user_id}
+                onClick={() => openUserDetail(m.profile!)}
+                className="group inline-flex items-center gap-2 px-3 py-2 rounded-xl border border-border bg-muted/20 hover:border-primary/40 hover:bg-primary/5 transition-colors"
+              >
+                <div className="h-7 w-7 rounded-lg bg-primary/10 flex items-center justify-center text-[11px] font-black text-primary shrink-0">
+                  {(m.profile!.full_name || m.profile!.email || "?")[0].toUpperCase()}
+                </div>
+                <div className="text-left">
+                  <p className="text-[11px] font-bold text-foreground leading-tight max-w-[160px] truncate">
+                    {m.profile!.full_name || m.profile!.email}
+                  </p>
+                  <p className="text-[10px] text-muted-foreground tabular-nums">
+                    {m.count} venda{m.count > 1 ? "s" : ""} · <span className="font-black text-success">{fmtCurrency(m.gross)}</span>
+                  </p>
+                </div>
+              </button>
+            ))}
+          </div>
         </div>
       )}
 
@@ -904,21 +1000,38 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
                       <table className={premiumTable.table}>
                         <thead>
                           <tr className={premiumTable.headRow}>
-                            {["Tipo", "Valor", "Status", "Comprador", "Motivo", "Data"].map(h => <th key={h} className={premiumTable.th}>{h}</th>)}
+                            {["Tipo", "Valor", "Status", "Comprador", "Motivo", "Data", "Ações"].map(h => <th key={h} className={premiumTable.th}>{h}</th>)}
                           </tr>
                         </thead>
                         <tbody>
-                          {userDisputes.map((d: any) => (
-                            <tr key={d.id} className={premiumTable.row}>
-                              <td className={premiumTable.td}><span className="text-[10px] font-bold uppercase text-foreground">{d.type}</span></td>
-                              <td className={premiumTable.td}><span className="font-display text-[12px] font-black tabular-nums text-warning">{fmtCurrency(Number(d.amount))}</span></td>
-                              <td className={premiumTable.td}><StatusBadge status={d.status} /></td>
-                              <td className={premiumTable.td}><span className="text-[11px] text-muted-foreground">{d.buyer_name || "—"}</span></td>
-                              <td className={premiumTable.td}><span className="text-[11px] text-muted-foreground max-w-[200px] truncate block">{d.reason || "—"}</span></td>
-                              <td className={premiumTable.td}><span className="text-[10px] text-muted-foreground">{new Date(d.created_at).toLocaleDateString("pt-BR")}</span></td>
-                            </tr>
-                          ))}
-                          {userDisputes.length === 0 && <tr><td colSpan={6} className="p-8 text-center text-muted-foreground text-xs">Sem disputas</td></tr>}
+                          {userDisputes.map((d: any) => {
+                            const isOpen = d.status === "open" || d.status === "in_review" || d.status === "pending_recorrer";
+                            return (
+                              <tr key={d.id} className={premiumTable.row}>
+                                <td className={premiumTable.td}><span className="text-[10px] font-bold uppercase text-foreground">{d.type}</span></td>
+                                <td className={premiumTable.td}><span className="font-display text-[12px] font-black tabular-nums text-warning">{fmtCurrency(Number(d.amount))}</span></td>
+                                <td className={premiumTable.td}><StatusBadge status={d.status} /></td>
+                                <td className={premiumTable.td}><span className="text-[11px] text-muted-foreground">{d.buyer_name || "—"}</span></td>
+                                <td className={premiumTable.td}><span className="text-[11px] text-muted-foreground max-w-[200px] truncate block">{d.reason || "—"}</span></td>
+                                <td className={premiumTable.td}><span className="text-[10px] text-muted-foreground">{new Date(d.created_at).toLocaleDateString("pt-BR")}</span></td>
+                                <td className={premiumTable.td}>
+                                  {isOpen ? (
+                                    <div className="flex gap-1">
+                                      <Button size="sm" variant="outline" className="h-7 text-[10px] rounded-lg border-success/30 text-success" onClick={() => handleResolveDispute(d.id, "seller")}>
+                                        <CheckCircle2 className="h-3 w-3 mr-1" /> Seller
+                                      </Button>
+                                      <Button size="sm" variant="outline" className="h-7 text-[10px] rounded-lg border-destructive/30 text-destructive" onClick={() => handleResolveDispute(d.id, "buyer")}>
+                                        <XCircle className="h-3 w-3 mr-1" /> Comprador
+                                      </Button>
+                                    </div>
+                                  ) : (
+                                    <span className="text-[10px] text-muted-foreground">—</span>
+                                  )}
+                                </td>
+                              </tr>
+                            );
+                          })}
+                          {userDisputes.length === 0 && <tr><td colSpan={7} className="p-8 text-center text-muted-foreground text-xs">Sem disputas</td></tr>}
                         </tbody>
                       </table>
                     </div>
@@ -942,6 +1055,9 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
                               <p className="text-sm font-mono text-foreground mt-0.5">{pk.key_value}</p>
                             </div>
                             <p className="text-[10px] text-muted-foreground">{new Date(pk.created_at).toLocaleDateString("pt-BR")}</p>
+                            <Button size="sm" variant="ghost" className="h-8 w-8 p-0 text-destructive hover:bg-destructive/10" onClick={() => handleDeletePixKey(pk.id)} title="Remover chave">
+                              <Trash2 className="h-3.5 w-3.5" />
+                            </Button>
                           </div>
                         ))}
                       </div>
