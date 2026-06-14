@@ -2205,8 +2205,9 @@ function TabAfiliados({ isNew, productId, affiliateEnabled, setAffiliateEnabled,
  <h4 className="text-[15px] font-display font-black flex items-center gap-2"><UserPlus className="h-4 w-4 text-success" /> Convidar afiliados</h4>
  <p className="text-xs text-muted-foreground/60">Compartilhe esse link para convidar os seus afiliados:</p>
  <div className="flex items-center gap-2">
- <Input readOnly value={`${window.location.origin}/affiliate/invite/${productId?.slice(0, 8)}`} className="h-9 font-mono text-xs bg-muted/10 border-border" />
- <Button variant="outline" size="sm" onClick={() => copyLink(`${window.location.origin}/affiliate/invite/${productId?.slice(0, 8)}`)} className="gap-1.5 h-9 shrink-0 rounded-xl">
+ <Input readOnly value={`${window.location.origin}/vendas/afiliados?product=${productId || ""}`} className="h-9 font-mono text-xs bg-muted/10 border-border" />
+ <Button variant="outline" size="sm" onClick={() => copyLink(`${window.location.origin}/vendas/afiliados?product=${productId || ""}`)} className="gap-1.5 h-9 shrink-0 rounded-xl">
+
  <Copy className="h-3.5 w-3.5" /> Copiar
  </Button>
  </div>
