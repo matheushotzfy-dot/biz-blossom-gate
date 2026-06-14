@@ -276,7 +276,7 @@ export default function AdminTopSellersTab({ profiles, transactions, fmtCurrency
                         </td>
                       </tr>
                     )}
-                  </>
+                  </Fragment>
                 );
               })}
               {ranked.length === 0 && (
