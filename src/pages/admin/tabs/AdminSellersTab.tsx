@@ -70,6 +70,12 @@ const ACTION_LABELS: Record<string, { label: string; color: string; icon: any }>
   resolve_dispute_buyer: { label: "Disputa: Vitória Comprador", color: "text-destructive", icon: XCircle },
   reply_ticket: { label: "Suporte Respondido", color: "text-info", icon: Send },
   close_ticket: { label: "Suporte Encerrado", color: "text-muted-foreground", icon: CheckCircle2 },
+  manual_refund: { label: "Estorno Manual", color: "text-warning", icon: DollarSign },
+  open_dispute: { label: "MED Aberto (Admin)", color: "text-warning", icon: AlertTriangle },
+  blacklist_email: { label: "E-mail Blacklist", color: "text-destructive", icon: Ban },
+  blacklist_cpf: { label: "CPF Blacklist", color: "text-destructive", icon: UserX },
+  blacklist_cnpj: { label: "CNPJ Blacklist", color: "text-destructive", icon: UserX },
+
 };
 
 interface Props {
@@ -132,7 +138,7 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
         supabase.from("activity_logs").select("id, user_id, action, entity_type, entity_id, old_data, new_data, created_at").eq("user_id", profile.user_id).order("created_at", { ascending: false }).limit(100),
         supabase.from("products").select("id, user_id, name, price, status, created_at, image_url").eq("user_id", profile.user_id).order("created_at", { ascending: false }).limit(100) as any,
         supabase.from("withdrawals").select("id, user_id, amount, fee_amount, net_amount, status, created_at, withdrawal_type").eq("user_id", profile.user_id).order("created_at", { ascending: false }).limit(100) as any,
-        supabase.from("transactions").select("id, user_id, product_id, amount, fee_amount, net_amount, status, payment_method, customer_name, created_at").eq("user_id", profile.user_id).order("created_at", { ascending: false }).limit(200) as any,
+        supabase.from("transactions").select("id, user_id, product_id, amount, fee_amount, net_amount, status, payment_method, customer_name, customer_email, customer_phone, customer_document, created_at").eq("user_id", profile.user_id).order("created_at", { ascending: false }).limit(200) as any,
         supabase.from("custom_user_fees").select("id, user_id, pix_percentage, pix_fixed, card_percentage, card_fixed, boleto_percentage, boleto_fixed, withdrawal_fee, max_ticket, admin_user_id").eq("user_id", profile.user_id).maybeSingle(),
         supabase.from("balance_adjustments").select("id, user_id, amount, type, reason, admin_user_id, created_at").eq("user_id", profile.user_id).order("created_at", { ascending: false }).limit(50),
         supabase.from("pix_keys").select("id, key_type, key_value, created_at").eq("user_id", profile.user_id),
@@ -460,14 +466,17 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
   const userMedAmount = userDisputes.reduce((a: number, d: any) => a + Number(d.amount || 0), 0);
   const userMedRate = userApproved.length > 0 ? ((userMedTotal / userApproved.length) * 100).toFixed(2) : "0.00";
 
-  const buyersMap = new Map<string, { name: string; email: string; phone: string; total: number; count: number }>();
+  const buyersMap = new Map<string, { name: string; email: string; phone: string; document: string; total: number; count: number; txs: any[]; lastAt: string }>();
   userTransactions.forEach(t => {
-    const key = t.customer_email || t.customer_name || "unknown";
-    const existing = buyersMap.get(key) || { name: t.customer_name || "", email: t.customer_email || "", phone: t.customer_phone || "", total: 0, count: 0 };
+    const key = t.customer_email || t.customer_document || t.customer_name || "unknown";
+    const existing = buyersMap.get(key) || { name: t.customer_name || "", email: t.customer_email || "", phone: (t as any).customer_phone || "", document: (t as any).customer_document || "", total: 0, count: 0, txs: [] as any[], lastAt: "" };
     existing.total += Number(t.amount); existing.count += 1;
+    existing.txs.push(t);
+    if (!existing.lastAt || new Date(t.created_at) > new Date(existing.lastAt)) existing.lastAt = t.created_at;
     buyersMap.set(key, existing);
   });
   const buyers = Array.from(buyersMap.values()).sort((a, b) => b.total - a.total);
+
 
   const isFrozen = (p: Tables<"profiles">) => (p as any).balance_frozen === true;
 
@@ -1265,24 +1274,121 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
                     <table className={premiumTable.table}>
                       <thead>
                         <tr className={premiumTable.headRow}>
-                          {["Cliente", "E-mail", "WhatsApp", "Compras", "Total"].map(h => <th key={h} className={premiumTable.th}>{h}</th>)}
+                          {["Cliente", "Contato", "Doc", "Compras", "Total", "Última", "Ações"].map(h => <th key={h} className={premiumTable.th}>{h}</th>)}
                         </tr>
                       </thead>
                       <tbody>
-                        {buyers.map((b, i) => (
-                          <tr key={i} className={premiumTable.row}>
-                            <td className={premiumTable.td}><span className="text-[12px] font-bold text-foreground">{b.name || "—"}</span></td>
-                            <td className={premiumTable.td}><span className="text-[11px] text-muted-foreground">{b.email || "—"}</span></td>
-                            <td className={premiumTable.td}><span className="text-[11px] text-muted-foreground">{b.phone || "—"}</span></td>
-                            <td className={premiumTable.td}><span className="text-[11px] font-bold text-foreground bg-muted/30 px-2 py-0.5 rounded-md">{b.count}</span></td>
-                            <td className={premiumTable.td}><span className="font-display text-[13px] font-black tabular-nums text-primary">{fmtCurrency(b.total)}</span></td>
-                          </tr>
-                        ))}
-                        {buyers.length === 0 && <tr><td colSpan={5} className="p-8 text-center text-muted-foreground text-xs">Nenhum cliente</td></tr>}
+                        {buyers.map((b, i) => {
+                          const lastTx = b.txs[0];
+                          const lastCompleted = b.txs.find((t: any) => t.status === "completed" || t.status === "approved");
+                          return (
+                            <tr key={i} className={premiumTable.row}>
+                              <td className={premiumTable.td}>
+                                <div className="flex flex-col">
+                                  <span className="text-[12px] font-bold text-foreground">{b.name || "—"}</span>
+                                  <span className="text-[10px] text-muted-foreground">{b.email || "—"}</span>
+                                </div>
+                              </td>
+                              <td className={premiumTable.td}><span className="text-[11px] text-muted-foreground font-mono">{b.phone || "—"}</span></td>
+                              <td className={premiumTable.td}><span className="text-[10px] text-muted-foreground font-mono">{b.document || "—"}</span></td>
+                              <td className={premiumTable.td}><span className="text-[11px] font-bold text-foreground bg-muted/30 px-2 py-0.5 rounded-md">{b.count}</span></td>
+                              <td className={premiumTable.td}><span className="font-display text-[13px] font-black tabular-nums text-primary">{fmtCurrency(b.total)}</span></td>
+                              <td className={premiumTable.td}><span className="text-[10px] text-muted-foreground tabular-nums">{b.lastAt ? new Date(b.lastAt).toLocaleDateString("pt-BR") : "—"}</span></td>
+                              <td className={premiumTable.td}>
+                                <DropdownMenu>
+                                  <DropdownMenuTrigger asChild>
+                                    <Button size="sm" variant="ghost" className="h-7 w-7 p-0"><MoreHorizontal className="h-3.5 w-3.5" /></Button>
+                                  </DropdownMenuTrigger>
+                                  <DropdownMenuContent align="end" className="w-56">
+                                    <DropdownMenuItem
+                                      disabled={!lastCompleted}
+                                      onClick={async () => {
+                                        if (!lastCompleted || !selectedUser) return;
+                                        if (!window.confirm(`Estornar a última transação aprovada (${fmtCurrency(Number(lastCompleted.amount))}) deste cliente?`)) return;
+                                        const { error } = await supabase.from("transactions").update({ status: "refunded" } as any).eq("id", lastCompleted.id);
+                                        if (error) { toast.error("Erro ao estornar: " + error.message); return; }
+                                        toast.success("Transação estornada.");
+                                        await logAdminAction("manual_refund", "transaction", lastCompleted.id, { amount: lastCompleted.amount, buyer: b.email });
+                                        openUserDetail(selectedUser);
+                                      }}
+                                      className="text-warning"
+                                    >
+                                      <DollarSign className="h-3.5 w-3.5 mr-2" /> Estornar última compra
+                                    </DropdownMenuItem>
+                                    <DropdownMenuItem
+                                      disabled={!lastCompleted}
+                                      onClick={async () => {
+                                        if (!lastCompleted || !selectedUser || !user) return;
+                                        if (!window.confirm(`Abrir MED/Chargeback nesta transação (${fmtCurrency(Number(lastCompleted.amount))})?`)) return;
+                                        const { error } = await supabase.from("disputes").insert({
+                                          transaction_id: lastCompleted.id,
+                                          seller_user_id: selectedUser.user_id,
+                                          buyer_name: b.name, buyer_email: b.email, buyer_phone: b.phone,
+                                          type: "med", status: "open",
+                                          amount: lastCompleted.amount,
+                                          reason: "Aberto manualmente pelo admin",
+                                          admin_user_id: user.id,
+                                        } as any);
+                                        if (error) { toast.error("Erro ao abrir MED: " + error.message); return; }
+                                        toast.success("MED aberto. Saldo retido até resolução.");
+                                        await logAdminAction("open_dispute", "transaction", lastCompleted.id, { amount: lastCompleted.amount });
+                                        openUserDetail(selectedUser);
+                                      }}
+                                    >
+                                      <AlertTriangle className="h-3.5 w-3.5 mr-2" /> Abrir MED na última
+                                    </DropdownMenuItem>
+                                    <DropdownMenuSeparator />
+                                    <DropdownMenuItem
+                                      disabled={!b.email}
+                                      onClick={async () => {
+                                        if (!b.email || !user) return;
+                                        const reason = window.prompt("Motivo da blacklist:", "Comportamento abusivo");
+                                        if (!reason) return;
+                                        const { error } = await supabase.from("global_blacklist").upsert({
+                                          entry_type: "email", entry_value: b.email.toLowerCase(),
+                                          reason: reason.slice(0, 500), added_by: user.id, is_active: true,
+                                        }, { onConflict: "entry_type,entry_value" });
+                                        if (error) { toast.error("Erro: " + error.message); return; }
+                                        toast.success(`E-mail ${b.email} adicionado à blacklist global.`);
+                                        await logAdminAction("blacklist_email", "global_blacklist", b.email, { reason });
+                                      }}
+                                      className="text-destructive"
+                                    >
+                                      <Ban className="h-3.5 w-3.5 mr-2" /> Adicionar e-mail à blacklist
+                                    </DropdownMenuItem>
+                                    <DropdownMenuItem
+                                      disabled={!b.document}
+                                      onClick={async () => {
+                                        if (!b.document || !user) return;
+                                        const doc = b.document.replace(/\D/g, "");
+                                        const type = doc.length === 11 ? "cpf" : "cnpj";
+                                        const reason = window.prompt(`Motivo da blacklist (${type.toUpperCase()}):`, "Fraude confirmada");
+                                        if (!reason) return;
+                                        const { error } = await supabase.from("global_blacklist").upsert({
+                                          entry_type: type, entry_value: doc,
+                                          reason: reason.slice(0, 500), added_by: user.id, is_active: true,
+                                        }, { onConflict: "entry_type,entry_value" });
+                                        if (error) { toast.error("Erro: " + error.message); return; }
+                                        toast.success(`${type.toUpperCase()} adicionado à blacklist.`);
+                                        await logAdminAction(`blacklist_${type}`, "global_blacklist", doc, { reason });
+                                      }}
+                                      className="text-destructive"
+                                    >
+                                      <UserX className="h-3.5 w-3.5 mr-2" /> Adicionar documento à blacklist
+                                    </DropdownMenuItem>
+                                  </DropdownMenuContent>
+                                </DropdownMenu>
+                              </td>
+                            </tr>
+                          );
+                        })}
+                        {buyers.length === 0 && <tr><td colSpan={7} className="p-8 text-center text-muted-foreground text-xs">Nenhum cliente</td></tr>}
                       </tbody>
                     </table>
                   </div>
+                  <p className="text-[10px] text-muted-foreground/60 mt-2 px-1">Estornos e MEDs disparam automaticamente os ajustes de saldo via triggers do ledger.</p>
                 </TabsContent>
+
 
                 {/* ── Logs ── */}
                 <TabsContent value="logs" className="mt-4">
