@@ -99,6 +99,7 @@ const NAV_SECTIONS: { id: string; label: string; items: { id: string; label: str
       { id: "error-logs", label: "Error Logs", icon: Bug, employeeAccess: false },
       { id: "notifications", label: "Notificações", icon: Bell, employeeAccess: false },
       { id: "support", label: "Suporte", icon: MessageSquare, employeeAccess: false },
+      { id: "rewards", label: "Premiações", icon: Trophy, employeeAccess: false },
       { id: "audit", label: "Auditoria", icon: Activity, employeeAccess: false },
     ],
   },
