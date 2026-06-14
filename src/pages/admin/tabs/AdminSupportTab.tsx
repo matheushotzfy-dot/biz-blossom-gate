@@ -45,6 +45,8 @@ export default function AdminSupportTab({
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("pending_admin");
   const [expandedId, setExpandedId] = useState<string | null>(null);
+  // admin_user_id -> { name, role } to attribute replies ("GERENTE - CARLOS")
+  const [responders, setResponders] = useState<Record<string, { name: string; role: string }>>({});
 
   const load = async () => {
     const { data } = await supabase
@@ -52,7 +54,30 @@ export default function AdminSupportTab({
       .select("*")
       .order("created_at", { ascending: false })
       .limit(500);
-    if (data) setTickets(data);
+    if (data) {
+      setTickets(data);
+      const ids = Array.from(new Set(
+        (data as any[]).map(t => t.admin_user_id).filter(Boolean)
+      )) as string[];
+      if (ids.length > 0) {
+        const [profilesRes, rolesRes] = await Promise.all([
+          supabase.from("profiles").select("user_id, full_name, email").in("user_id", ids),
+          supabase.from("user_roles").select("user_id, role").in("user_id", ids),
+        ]);
+        const roleByUser: Record<string, string[]> = {};
+        (rolesRes.data || []).forEach((r: any) => { (roleByUser[r.user_id] ||= []).push(r.role); });
+        const map: Record<string, { name: string; role: string }> = {};
+        (profilesRes.data || []).forEach((p: any) => {
+          const roles = roleByUser[p.user_id] || [];
+          const top = roles.includes("admin") ? "ADMIN"
+            : roles.includes("manager") ? "GERENTE"
+            : roles.includes("employee") ? "FUNCIONÁRIO"
+            : "STAFF";
+          map[p.user_id] = { name: (p.full_name || p.email || "—").toUpperCase(), role: top };
+        });
+        setResponders(map);
+      }
+    }
     setLoading(false);
   };
 
@@ -64,11 +89,13 @@ export default function AdminSupportTab({
   const handleReply = async (ticket: Ticket) => {
     if (!replyText.trim()) return;
     setSending(true);
+    const { data: { user } } = await supabase.auth.getUser();
     const { error } = await supabase.from("support_tickets").update({
       admin_reply: replyText.trim(),
+      admin_user_id: user?.id ?? null,
       status: "answered",
       replied_at: new Date().toISOString(),
-    }).eq("id", ticket.id);
+    } as any).eq("id", ticket.id);
     if (error) { toast.error("Erro ao responder"); setSending(false); return; }
     toast.success("Resposta enviada — o cliente foi notificado.");
     await logAdminAction("reply_ticket", "support_ticket", ticket.id);
@@ -259,8 +286,15 @@ export default function AdminSupportTab({
                     {/* Resposta atual */}
                     {ticket.admin_reply && !isReplying && (
                       <div>
-                        <p className="text-[10px] font-black text-emerald-500 uppercase tracking-widest mb-2">
-                          Resposta enviada {ticket.replied_at && `· ${formatDate(ticket.replied_at)}`}
+                        <p className="text-[10px] font-black text-emerald-500 uppercase tracking-widest mb-2 flex items-center gap-2">
+                          <span>
+                            {(() => {
+                              const aid = (ticket as any).admin_user_id as string | null;
+                              const r = aid ? responders[aid] : null;
+                              return r ? `${r.role} - ${r.name}` : "EQUIPE DE SUPORTE";
+                            })()}
+                          </span>
+                          {ticket.replied_at && <span className="text-muted-foreground/60 font-bold">· {formatDate(ticket.replied_at)}</span>}
                         </p>
                         <div className="rounded-lg border border-emerald-500/20 bg-emerald-500/5 border-l-2 border-l-emerald-500 p-3 text-[13px] text-foreground/90 whitespace-pre-wrap leading-relaxed">
                           {ticket.admin_reply}
