@@ -486,7 +486,7 @@ export default function AdminDashboard() {
         </header>
 
         {/* Main content */}
-        <main className="flex-1 overflow-y-auto bg-[#f4f6fa] scrollbar-thin" data-admin-content>
+        <main className="flex-1 overflow-y-auto bg-[#f4f6fa] scrollbar-thin admin-shell" data-admin-content>
           <div className="p-4 lg:p-6 xl:p-8">
             <div className="mx-auto max-w-[1800px]">
               {activeTab === "god-mode" && (

@@ -1406,3 +1406,167 @@ button svg, a svg, [role="button"] svg {
 .scrollbar-none::-webkit-scrollbar {
   display: none;
 }
+
+/* ═══════════════════════════════════════════════════════════════════
+   ADMIN SHELL — PHP-admin clean reskin
+   Applied via <div class="admin-shell"> wrapping all tab content.
+   Forces light professional surfaces over dark utility tokens used
+   by individual tab components, without rewriting them.
+   ═══════════════════════════════════════════════════════════════════ */
+
+.admin-shell {
+  color: #0f172a;
+  background: transparent;
+  font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+}
+
+/* Surfaces: any bg-white/X or bg-black/X → solid white card */
+.admin-shell [class*="bg-white/"],
+.admin-shell [class*="bg-black/"],
+.admin-shell .bg-card\/95,
+.admin-shell .bg-card\/80,
+.admin-shell .bg-card\/60,
+.admin-shell .bg-background\/50,
+.admin-shell .bg-background\/80 {
+  background-color: #ffffff !important;
+}
+
+/* Page-level / surface-2 backgrounds */
+.admin-shell [class*="bg-slate-9"],
+.admin-shell [class*="bg-slate-8"],
+.admin-shell [class*="bg-zinc-9"],
+.admin-shell [class*="bg-zinc-8"],
+.admin-shell [class*="bg-neutral-9"],
+.admin-shell [class*="bg-gray-9"] {
+  background-color: #f8fafc !important;
+}
+
+/* Borders */
+.admin-shell [class*="border-white/"],
+.admin-shell [class*="border-black/"],
+.admin-shell .border-border,
+.admin-shell [class*="border-slate-7"],
+.admin-shell [class*="border-slate-8"],
+.admin-shell [class*="border-zinc-7"],
+.admin-shell [class*="border-zinc-8"] {
+  border-color: #e2e8f0 !important;
+}
+
+/* Kill dark gradients used as card backgrounds */
+.admin-shell [class*="bg-gradient-to-"][class*="from-slate-9"],
+.admin-shell [class*="bg-gradient-to-"][class*="from-zinc-9"],
+.admin-shell [class*="bg-gradient-to-"][class*="from-neutral-9"],
+.admin-shell [class*="bg-gradient-to-"][class*="from-black"] {
+  background-image: none !important;
+  background-color: #ffffff !important;
+}
+
+/* Text colors */
+.admin-shell .text-white,
+.admin-shell .text-white\/95,
+.admin-shell .text-white\/90,
+.admin-shell .text-white\/85,
+.admin-shell .text-foreground { color: #0f172a !important; }
+
+.admin-shell .text-white\/80,
+.admin-shell .text-white\/75,
+.admin-shell .text-white\/70,
+.admin-shell .text-white\/65,
+.admin-shell .text-white\/60 { color: #334155 !important; }
+
+.admin-shell .text-white\/55,
+.admin-shell .text-white\/50,
+.admin-shell .text-white\/45,
+.admin-shell .text-white\/40,
+.admin-shell .text-muted-foreground { color: #64748b !important; }
+
+.admin-shell .text-white\/35,
+.admin-shell .text-white\/30,
+.admin-shell .text-white\/25,
+.admin-shell .text-white\/20,
+.admin-shell .text-white\/15,
+.admin-shell .text-white\/10 { color: #94a3b8 !important; }
+
+/* Neutralize blur / glow effects */
+.admin-shell [class*="backdrop-blur"] { backdrop-filter: none !important; }
+.admin-shell [class*="drop-shadow-[0_0"],
+.admin-shell [class*="shadow-[0_0_"] { box-shadow: none !important; filter: none !important; }
+
+/* Soften over-rounded corners */
+.admin-shell .rounded-3xl { border-radius: 0.5rem !important; }
+.admin-shell .rounded-2xl { border-radius: 0.5rem !important; }
+.admin-shell .rounded-xl  { border-radius: 0.375rem !important; }
+
+/* Solid card baseline: any descendant looking like a card */
+.admin-shell .rounded-md,
+.admin-shell .rounded-lg,
+.admin-shell .rounded-xl,
+.admin-shell .rounded-2xl {
+  /* keep author bg unless dark token caught above */
+}
+
+/* Inputs / selects inside admin-shell */
+.admin-shell input:not([type="checkbox"]):not([type="radio"]),
+.admin-shell textarea,
+.admin-shell select {
+  background-color: #ffffff !important;
+  border-color: #cbd5e1 !important;
+  color: #0f172a !important;
+}
+.admin-shell input::placeholder,
+.admin-shell textarea::placeholder { color: #94a3b8 !important; }
+.admin-shell input:focus,
+.admin-shell textarea:focus,
+.admin-shell select:focus {
+  border-color: #1e293b !important;
+  box-shadow: 0 0 0 1px rgba(30,41,59,0.15) !important;
+}
+
+/* Tables */
+.admin-shell table { color: #0f172a !important; }
+.admin-shell thead { background-color: #f8fafc !important; }
+.admin-shell thead th { color: #475569 !important; font-weight: 600 !important; }
+.admin-shell tbody tr { border-color: #eef2f6 !important; }
+.admin-shell tbody tr:hover { background-color: #f8fafc !important; }
+
+/* Accent color preservation — keep semantic colors visible
+   (emerald/red/amber/blue) but darken them slightly so they read
+   against white surfaces. Specific shades stay as-authored. */
+.admin-shell .text-emerald-400 { color: #059669 !important; }
+.admin-shell .text-emerald-300 { color: #10b981 !important; }
+.admin-shell .text-red-400 { color: #dc2626 !important; }
+.admin-shell .text-rose-400 { color: #e11d48 !important; }
+.admin-shell .text-amber-400 { color: #d97706 !important; }
+.admin-shell .text-yellow-400 { color: #ca8a04 !important; }
+.admin-shell .text-blue-400 { color: #2563eb !important; }
+.admin-shell .text-violet-400 { color: #7c3aed !important; }
+.admin-shell .text-cyan-400 { color: #0891b2 !important; }
+
+/* Accent backgrounds (badges/pills) — semi-transparent emerald etc. */
+.admin-shell [class*="bg-emerald-500/"],
+.admin-shell [class*="bg-emerald-400/"] { background-color: #ecfdf5 !important; color: #047857 !important; }
+.admin-shell [class*="bg-red-500/"],
+.admin-shell [class*="bg-rose-500/"] { background-color: #fef2f2 !important; color: #b91c1c !important; }
+.admin-shell [class*="bg-amber-500/"],
+.admin-shell [class*="bg-yellow-500/"] { background-color: #fffbeb !important; color: #b45309 !important; }
+.admin-shell [class*="bg-blue-500/"],
+.admin-shell [class*="bg-sky-500/"] { background-color: #eff6ff !important; color: #1d4ed8 !important; }
+.admin-shell [class*="bg-violet-500/"],
+.admin-shell [class*="bg-purple-500/"] { background-color: #f5f3ff !important; color: #6d28d9 !important; }
+
+/* Ring / focus colors lighter */
+.admin-shell [class*="ring-white/"] { --tw-ring-color: rgba(15,23,42,0.08) !important; }
+
+/* Hover overlays */
+.admin-shell .hover\:bg-white\/5:hover,
+.admin-shell .hover\:bg-white\/10:hover,
+.admin-shell .hover\:bg-white\/\[0\.03\]:hover,
+.admin-shell .hover\:bg-white\/\[0\.05\]:hover,
+.admin-shell .hover\:bg-white\/\[0\.08\]:hover {
+  background-color: #f1f5f9 !important;
+}
+
+/* Buttons with dark surface inside admin-shell get a subtle border */
+.admin-shell button[class*="bg-white/"]:not([class*="bg-white/0 "]) {
+  border: 1px solid #e2e8f0;
+}
