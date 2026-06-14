@@ -824,6 +824,30 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
                     <InfoRow label="Cadastro" value={selectedUser ? new Date(selectedUser.created_at).toLocaleString("pt-BR") : ""} />
                     <InfoRow label="Saldo Congelado" value={selectedUser && isFrozen(selectedUser) ? "SIM" : "NÃO"} />
                   </div>
+
+                  {/* ── Histórico de IP ── */}
+                  <div className="rounded-xl border border-border bg-muted/20 p-4">
+                    <p className="text-[10px] font-black uppercase tracking-wider text-muted-foreground mb-3 flex items-center gap-2">
+                      <Globe className="h-3 w-3" /> Histórico de IP ({ipHistory.length})
+                    </p>
+                    {ipHistory.length === 0 ? (
+                      <p className="text-xs text-muted-foreground/70">Nenhum acesso registrado ainda.</p>
+                    ) : (
+                      <div className="max-h-48 overflow-y-auto space-y-1">
+                        {ipHistory.map((h, i) => (
+                          <div key={i} className="flex items-center justify-between gap-2 text-[11px] py-1.5 px-2 rounded-lg hover:bg-muted/30 border-b border-border/40 last:border-0">
+                            <span className="font-mono text-foreground">{h.ip}</span>
+                            <span className="text-muted-foreground/70 truncate max-w-[200px]" title={h.user_agent || ""}>{h.user_agent?.split(" ").slice(-2).join(" ") || "—"}</span>
+                            <span className="text-[9px] uppercase font-bold text-muted-foreground/60 px-1.5 py-0.5 rounded bg-muted/50">{h.source || "login"}</span>
+                            {h.country && <span className="text-[9px] uppercase font-bold text-info">{h.country}</span>}
+                            <span className="text-muted-foreground/60 tabular-nums">{new Date(h.created_at).toLocaleString("pt-BR", { dateStyle: "short", timeStyle: "short" })}</span>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+
+
                   {(selectedUser as any)?.kyc_rejection_reason && (
                     <div className="rounded-xl border border-destructive/20 bg-destructive/5 p-4">
                       <p className="text-xs font-bold text-destructive mb-1">Motivo da última recusa KYC:</p>
