@@ -721,7 +721,13 @@ function MetricCard({ label, value, sub, icon: Icon, tone, spark, onClick }: { l
   };
   const Comp: any = onClick ? "button" : "div";
   return (
-    <div className="group relative overflow-hidden rounded-2xl border border-border/60 bg-card p-4 transition-all hover:border-primary/30">
+    <Comp
+      onClick={onClick}
+      className={cn(
+        "group relative overflow-hidden rounded-2xl border border-border/60 bg-card p-4 transition-all hover:border-primary/30 text-left w-full",
+        onClick && "cursor-pointer hover:-translate-y-0.5"
+      )}
+    >
       <div className={cn("absolute top-0 left-0 right-0 h-[2px]", toneRail[tone])} />
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
@@ -746,7 +752,7 @@ function MetricCard({ label, value, sub, icon: Icon, tone, spark, onClick }: { l
           </AreaChart>
         </ResponsiveContainer>
       </div>
-    </div>
+    </Comp>
   );
 }
 
