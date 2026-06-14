@@ -148,19 +148,26 @@ export default function AdminWithdrawalsTab({ withdrawals, profiles, onWithdrawa
  if (ok > 0) onReload();
  };
 
- const handleBatchReject = async () => {
- if (selectedIds.size === 0) { toast.error("Selecione ao menos 1 saque"); return; }
- setBatchProcessing(true);
- let ok = 0;
- for (const id of selectedIds) {
- const { error } = await supabase.from("withdrawals").update({ status: "rejected" }).eq("id", id).eq("status", "pending");
- if (!error) { await logAdminAction("reject_withdrawal", "withdrawal", id, { method: "batch" }); ok++; }
- }
- toast.success(`${ok} saques recusados em lote`);
- setSelectedIds(new Set());
- setBatchProcessing(false);
- if (ok > 0) onReload(); // trigger parent reload
- };
+  const handleBatchReject = async () => {
+  if (selectedIds.size === 0) { toast.error("Selecione ao menos 1 saque"); return; }
+  const reason = window.prompt("Motivo da rejeição em lote (mín. 3 caracteres):", "Rejeitado em lote pela administração");
+  if (!reason || reason.trim().length < 3) { toast.error("Motivo obrigatório (mín. 3 caracteres)"); return; }
+  setBatchProcessing(true);
+  let ok = 0, fail = 0;
+  for (const id of selectedIds) {
+  const { error } = await supabase.from("withdrawals")
+    .update({ status: "rejected", rejection_reason: reason.trim(), processed_by: user?.id } as any)
+    .eq("id", id).eq("status", "pending");
+  if (!error) { await logAdminAction("reject_withdrawal", "withdrawal", id, { method: "batch", reason: reason.trim() } as any); ok++; }
+  else { fail++; }
+  }
+  let msg = `${ok} saques recusados em lote`;
+  if (fail > 0) msg += `, ${fail} falhas`;
+  toast.success(msg);
+  setSelectedIds(new Set());
+  setBatchProcessing(false);
+  if (ok > 0) onReload();
+  };
 
  /* ── Single Reject with Reason ── */
  const handleRejectWithReason = async () => {
