@@ -141,13 +141,24 @@ export default function Premiacoes() {
   const { user } = useAuth();
   const [revenue, setRevenue] = useState(0);
   const [focusId, setFocusId] = useState<string | null>(null);
+  const [claimOpen, setClaimOpen] = useState(false);
+  const [submittingClaim, setSubmittingClaim] = useState(false);
+  const [existingClaims, setExistingClaims] = useState<any[]>([]);
+  const [claimForm, setClaimForm] = useState({
+    recipient_name: "", phone: "", document: "",
+    shipping_street: "", shipping_number: "", shipping_complement: "",
+    shipping_neighborhood: "", shipping_city: "", shipping_state: "", shipping_zip: "",
+  });
 
   useEffect(() => {
     if (!user?.id) return;
     supabase.from("transactions").select("net_amount")
       .eq("user_id", user.id).eq("status", "completed")
       .then(({ data }) => { if (data) setRevenue(data.reduce((s, t) => s + Number(t.net_amount), 0)); });
+    (supabase as any).from("reward_claims").select("id, tier_id, status").eq("user_id", user.id)
+      .then(({ data }: any) => { if (data) setExistingClaims(data); });
   }, [user?.id]);
+
 
   const { currentIdx, unlockedCount, nextAward, currentTier, overallProgress, nextProgress, remaining } = useMemo(() => {
     const currentIdx = AWARDS.findIndex((a) => revenue < a.value);
