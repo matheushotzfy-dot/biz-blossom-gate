@@ -639,6 +639,59 @@ export default function AdminOverviewTab({ transactions, profiles, products, wit
         </Panel>
       </div>
 
+      {/* ── MEDs / Chargebacks pendentes ── */}
+      <Panel
+        title={`MEDs Pendentes (${pendingMeds.length})`}
+        icon={<AlertCircle className="h-3.5 w-3.5" />}
+        tone={pendingMeds.length > 0 ? "destructive" : "neutral"}
+        action={
+          onNavigate ? (
+            <button
+              onClick={() => onNavigate("medpix")}
+              className="text-[10px] font-black uppercase tracking-[0.16em] text-primary hover:underline"
+            >
+              Ver todos →
+            </button>
+          ) : undefined
+        }
+      >
+        {pendingMeds.length === 0 ? (
+          <div className="flex flex-col items-center justify-center py-8 text-muted-foreground/60">
+            <CheckCircle2 className="h-6 w-6 mb-2" />
+            <p className="text-[11px]">Nenhum MED em aberto</p>
+          </div>
+        ) : (
+          <div className="space-y-2 max-h-[320px] overflow-y-auto pr-1">
+            {pendingMeds.slice(0, 10).map(d => {
+              const tx = transactions.find(t => t.id === d.transaction_id);
+              const seller = profiles.find(p => p.user_id === d.seller_user_id);
+              return (
+                <button
+                  key={d.id}
+                  type="button"
+                  onClick={() => onNavigate?.("medpix")}
+                  className="w-full text-left flex items-center justify-between px-3 py-2.5 rounded-lg border border-destructive/30 hover:bg-destructive/5 transition-colors"
+                >
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center gap-2 mb-0.5">
+                      <p className="text-[12px] font-bold text-foreground tabular-nums">{fmtCurrency(Number(d.amount))}</p>
+                      <span className="text-[8px] font-bold px-1.5 py-0.5 rounded bg-destructive/10 text-destructive border border-destructive/25 uppercase">
+                        {d.type === "medpix" ? "MED" : d.type === "pre_med_pix" ? "Pre-MED" : "Reemb"}
+                      </span>
+                      <span className="text-[8px] font-bold px-1.5 py-0.5 rounded bg-warning/10 text-warning border border-warning/25 uppercase">
+                        {d.status === "open" ? "Aberto" : "Em análise"}
+                      </span>
+                    </div>
+                    <p className="text-[10px] text-muted-foreground truncate">{seller?.full_name || "—"} · {seller?.email || ""}</p>
+                    <p className="text-[9px] text-muted-foreground/60 font-mono">TX: {d.transaction_id?.slice(0, 8) || "—"} · {tx?.payment_method || "—"}</p>
+                  </div>
+                </button>
+              );
+            })}
+          </div>
+        )}
+      </Panel>
+
       <Panel title="Bloqueios Anti-Fraude" icon={<ShieldAlert className="h-3.5 w-3.5 text-destructive" />} tone="destructive">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-2 max-h-[280px] overflow-y-auto pr-1">
           {fraudLogs.length > 0 ? fraudLogs.slice(0, 20).map((f: any) => (
