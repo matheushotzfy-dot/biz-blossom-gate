@@ -740,6 +740,52 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
                       </Button>
                     </div>
                   </div>
+
+                  {/* ── Métodos de Pagamento Permitidos ── */}
+                  <div className="rounded-xl border border-border bg-muted/20 p-4">
+                    <p className="text-[10px] font-black uppercase tracking-wider text-muted-foreground mb-1">Métodos de Pagamento</p>
+                    <p className="text-[10px] text-muted-foreground/70 mb-3">Desativando aqui, o seller não verá a opção nos próprios produtos.</p>
+                    <div className="grid grid-cols-2 gap-2">
+                      {([
+                        { key: "boleto_enabled", label: "Boleto" },
+                        { key: "credit_card_enabled", label: "Cartão de Crédito" },
+                      ] as const).map(opt => {
+                        const enabled = (selectedUser as any)?.[opt.key] !== false;
+                        return (
+                          <button
+                            key={opt.key}
+                            type="button"
+                            onClick={async () => {
+                              if (!selectedUser) return;
+                              const next = !enabled;
+                              const { error } = await supabase
+                                .from("profiles")
+                                .update({ [opt.key]: next } as any)
+                                .eq("user_id", selectedUser.user_id);
+                              if (error) { toast.error("Erro ao atualizar"); return; }
+                              setSelectedUser({ ...selectedUser, [opt.key]: next } as any);
+                              toast.success(`${opt.label} ${next ? "ativado" : "desativado"}`);
+                              await logAdminAction(`toggle_${opt.key}`, "profile", selectedUser.user_id, { enabled: next });
+                            }}
+                            className={cn(
+                              "flex items-center justify-between rounded-lg border px-3 py-2.5 transition-colors",
+                              enabled
+                                ? "border-success/30 bg-success/5 hover:bg-success/10"
+                                : "border-destructive/30 bg-destructive/5 hover:bg-destructive/10"
+                            )}
+                          >
+                            <span className="text-xs font-bold text-foreground">{opt.label}</span>
+                            <span className={cn(
+                              "text-[9px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded",
+                              enabled ? "bg-success/15 text-success" : "bg-destructive/15 text-destructive"
+                            )}>
+                              {enabled ? "Ativo" : "Bloqueado"}
+                            </span>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
                   {kycImages.length > 0 ? (
                     <div>
                       <p className="text-[10px] font-black uppercase tracking-wider text-muted-foreground mb-2">Documentos KYC:</p>
