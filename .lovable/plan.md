@@ -1,128 +1,106 @@
-# Plano: API PIX Pública + Redesign das Abas de Integrações
+## Plano — Admin: Top Sellers, Inativos, Staff & Gerentes, Comissões
 
-## Objetivo
-Transformar o Hotzfy num **gateway PIX confiável** para integradores externos. Hoje existe `pk_live/sk_live` no banco mas **nenhum endpoint público real** que aceite essas chaves — vamos criar isso do zero, com segurança de produção, e dar uma cara profissional às 3 abas.
-
----
-
-## Parte 1 — Infraestrutura da API PIX (foco principal)
-
-### 1.1 Nova Edge Function pública: `pix-api`
-Endpoint único versionado em `/v1` que aceita autenticação por chave secreta (`sk_live_...`) via header `Authorization: Bearer sk_live_xxx` ou `X-API-Key`. Rotas:
-
-| Método | Path | Função |
-|---|---|---|
-| POST | `/v1/pix/charges` | Criar cobrança PIX (retorna `qr_code`, `qr_code_base64`, `copy_paste`, `expires_at`, `transaction_id`) |
-| GET | `/v1/pix/charges/:id` | Consultar status de uma cobrança |
-| GET | `/v1/pix/charges` | Listar cobranças (paginação cursor) |
-| POST | `/v1/pix/charges/:id/refund` | Reembolsar (opcional fase 2) |
-| GET | `/v1/ping` | Health-check autenticado |
-
-**Validação rigorosa de input com Zod** (amount em centavos, customer name/email/document, expiration, metadata, external_id de idempotência).
-
-**Respostas padronizadas** — sempre JSON, com `error.code`, `error.message`, `error.request_id`. Nunca vaza stack trace, nunca vaza `user_id` de outro vendedor, nunca expõe campos internos (`fee_amount`, retenção, etc) — só os campos públicos documentados.
-
-### 1.2 Autenticação por chave secreta
-- Hash SHA-256 da `sk_live` no banco (já existe `secret_key_hash`).
-- Lookup via `secret_key_prefix` (12 chars) + comparação constante-tempo do hash completo.
-- Bloqueio se `is_active=false` ou `expires_at` vencido.
-- Atualiza `last_used_at` async (sem atrasar a resposta).
-- **Nunca** loga a chave em texto, nem em logs de erro nem em activity_logs.
-
-### 1.3 Rate limiting (anti-bot / anti-flood)
-Nova tabela `api_rate_limits` (em memória curta via tabela com TTL ou sliding window):
-- **Burst:** 30 req / 10s por `api_key_id`
-- **Sustentado:** 600 req / minuto por `api_key_id`
-- **Criação de cobrança:** 60/min por chave + 10/min por `customer_document` (anti-fraude)
-- **IP fallback:** 100 req / 10s por IP quando chave inválida (impede brute force de chaves)
-
-Resposta `429` com headers `X-RateLimit-Limit`, `X-RateLimit-Remaining`, `X-RateLimit-Reset`, `Retry-After`. Logs em `api_rate_limit_events` para o admin ver abusos.
-
-### 1.4 Idempotência
-Header `Idempotency-Key` (UUID enviado pelo integrador). Tabela `api_idempotency_keys` (chave + hash do body + response). TTL 24h. Garante que retry de rede não cria cobranças duplicadas.
-
-### 1.5 Webhooks (entrega para o integrador)
-Quando a transação muda de status, dispara HTTP POST para `webhook_configs.url` ativo do vendedor:
-- Assinatura **HMAC-SHA256** no header `X-Hotzfy-Signature` (segredo = `webhook_configs.secret`).
-- Header `X-Hotzfy-Event` (`charge.paid`, `charge.expired`, `charge.refunded`, `charge.chargeback`).
-- **Retry exponencial:** 5 tentativas (10s, 30s, 2min, 10min, 1h). Nova tabela `webhook_deliveries` com status e response.
-- Timeout de 10s. Só URLs `https://` (validador já existe).
-- Endpoint na UI para reenviar manualmente e ver histórico de entregas.
-
-### 1.6 Logs e auditoria
-Nova tabela `api_request_logs` (api_key_id, endpoint, status_code, latency_ms, ip, user_agent, created_at, request_id). **Sem corpo** da requisição (PII). Retenção 30 dias. Aparece num painel "Logs da API" para o vendedor debugar.
-
-### 1.7 Hardening de segurança
-- CORS restritivo (a API pública é server-to-server — sem CORS aberto; só `OPTIONS` para health-check).
-- Rejeita requests sem `Content-Type: application/json` em POST.
-- Limite de body 100KB.
-- Strip de campos não-whitelisted no input (evita mass-assignment).
-- RLS reforçado: `api_keys`, `webhook_configs`, `api_request_logs`, `webhook_deliveries`, `api_idempotency_keys` — só dono vê, service_role processa.
-- Erros 500 retornam apenas `request_id` — detalhe fica no log do servidor.
+Base da comissão: **net_amount** (líquido). Pagamento: **manual** — você lança/aprova; sistema só calcula, acumula e exibe.
 
 ---
 
-## Parte 2 — Redesign das 3 abas (UI profissional, sem cara de AI)
+### 1. Top Sellers (reformular `AdminTopSellersTab`)
 
-### Princípios
-- Zero "cards padrão piscando". Layout editorial, denso, com hierarquia clara.
-- Tipografia: Space Grotesk para números/chaves, JetBrains Mono para snippets de código, Plus Jakarta Sans para texto.
-- Bordas 1px sólidas (sem glow/blur — respeita memória "Billion-Dollar SaaS").
-- Sem animações de entrada em listas. Transições só em hover/foco (220ms).
+Foco em faturamento detalhado, sem decoração inútil.
 
-### 2.1 Aba **Credenciais API**
-Layout em duas colunas:
-- **Esquerda:** lista de chaves com nome editável inline, prefixo da `sk_live_xxx••••`, status pill, último uso ("há 2h"), botão de rotacionar, botão de revogar com confirmação.
-- **Direita:** painel de detalhe da chave selecionada — `public_key` (copiável), `secret_key` (só visível 1x após criação, depois substituída por aviso), permissões (read/write), IPs permitidos (allowlist opcional), expires_at.
-- Modal de criação com fluxo "copie agora — não mostraremos de novo" (cópia para clipboard + download .env).
-- Banner discreto no topo com link para Docs.
+- **Filtros sticky**: período (Hoje / 7d / 30d / Mês / Custom) + busca por nome/email.
+- **KPIs do topo** (4 cards densos, tabular): TPV bruto, Líquido (net), Taxas geradas, Ticket médio.
+- **Tabela ranking** — colunas: Posição, Seller (avatar+nome+email), Vendas (qtd), TPV bruto, Líquido, Taxas, Ticket médio, Aprovação %, Chargeback %, MED %, Última venda. Ordenável por qualquer coluna. 50/página.
+- **Linha expandível** ao clicar: 
+  - Breakdown por método (PIX / Cartão / Boleto) com valor e %.
+  - Top 5 produtos do seller no período.
+  - Heatmap simples de horário (24h × 7d) com volume de vendas.
+  - Atalhos: "Ver perfil completo" (abre o `SellerDetailDialog` já existente), "Login as user", "Ajustar taxas".
+- Export CSV do ranking.
 
-### 2.2 Aba **Webhooks**
-- Tabela densa: URL, eventos (chips), status (Ativo/Pausado), última entrega (✓/✗ + timestamp), taxa de sucesso (últimas 100).
-- Drawer lateral ao clicar numa linha: editor de URL, seleção de eventos por checkbox, secret (gerar/rotacionar), botão "Enviar evento de teste" (envia payload mock).
-- Sub-aba "Entregas" com timeline das últimas tentativas (status_code, latência, response body truncado, botão reenviar).
-- Indicador visual claro de webhook quebrado (3+ falhas seguidas → badge âmbar).
+### 2. Inativos (refazer `AdminInactiveSellersTab`)
 
-### 2.3 Aba **API Docs**
-Substituir as duas docs atuais por **uma única doc estilo Stripe**:
-- Sidebar fixa com sumário (Autenticação, Idempotência, Erros, Rate Limits, Cobranças PIX, Webhooks, Changelog).
-- Conteúdo em coluna central com snippets em tabs (cURL / Node / PHP / Python) — código real, copiável.
-- Bloco "Try it" inline em cada endpoint: form + botão "Testar com minha chave" (usa a `sk_live` do usuário logado).
-- Tabela de códigos de erro com `code`, `http_status`, descrição, como resolver.
-- Sem hero genérico. Header simples com versão da API + status (puxa de `status.hotzfy.com.br`).
+Mesma densidade billion-dollar SaaS dos outros painéis.
 
----
+- Critério: sem venda há ≥ 30 dias (configurável: 30/60/90).
+- Cards de resumo: total inativos, faturamento histórico acumulado, taxas históricas pagas, ticket histórico médio.
+- **Tabela**: Seller, Contato (email + WhatsApp clicáveis, ícones), Documento, Última venda (há X dias), Vendas totais (qtd), Faturamento histórico (bruto/líquido), Taxas pagas, Saldo atual, Status KYC, Observação curta.
+- Ações por linha: WhatsApp direto (`wa.me`), copiar email, abrir detalhes, adicionar nota rápida, marcar "Recuperado" (move para ativos), Login as user.
+- Painel lateral de detalhes ao clicar — mesma estética do painel de transações: dados pessoais, histórico financeiro consolidado, últimas 10 transações, observações editáveis (`seller_notes`), tentativas de reativação (registradas em `activity_logs`).
 
-## Detalhes técnicos
+### 3. Staff & Gerentes — criação e permissões
 
-**Migrations necessárias:**
-- `api_request_logs` (id, api_key_id, user_id, endpoint, method, status_code, latency_ms, ip, request_id, created_at) + RLS dono + service_role.
-- `api_idempotency_keys` (api_key_id, key, request_hash, response jsonb, expires_at) + UNIQUE(api_key_id, key).
-- `webhook_deliveries` (id, webhook_config_id, transaction_id, event, payload jsonb, status, attempt, response_status, response_body, next_retry_at, created_at) + RLS dono.
-- `api_rate_limit_events` (api_key_id, window_start, count) — ou usar Deno KV se preferir, mas tabela é mais auditável.
-- Função `verify_api_secret(_prefix text, _full_key text)` SECURITY DEFINER que faz hash + lookup constante-tempo.
-- GRANTs explícitos para todas tabelas novas.
+Hoje `AdminEmployeesTab` e `AdminManagersTab` só promovem contas existentes. Mudar para criação direta pelo admin.
 
-**Edge functions novas/alteradas:**
-- `pix-api` (nova, único entry com roteamento interno por path).
-- `webhook-dispatcher` (nova, invocada por trigger DB em mudança de status de `transactions`).
-- `generate-api-key` (manter, mas adicionar action `rotate` e `revoke` se já não existir).
+**Migração** (esquema):
+- Nova tabela `staff_permissions` (user_id, key, granted_by) — granular: `view_sellers`, `edit_fees`, `approve_kyc`, `view_financial`, `process_refund_request` (apenas solicitar), `view_disputes`, `manage_meds`, etc. RLS: só admin escreve; staff/manager lê o próprio.
+- Coluna `profiles.frozen` (boolean) → quando true, edge function de login nega acesso.
+- Coluna `profiles.created_by_admin` (uuid) e `profiles.staff_role_type` (`employee` | `manager`).
+- Coluna em `profiles`: `approved_by` (uuid) — preenchida automaticamente quando staff/manager aprova KYC do seller. Imutável (trigger).
+- Tabela `staff_audit_log` (staff_user_id, action, entity_type, entity_id, before, after, created_at) — append-only, RLS admin-only read, trigger imutável (sem UPDATE/DELETE).
 
-**Frontend:**
-- `src/pages/vendas/ApiKeys.tsx` reescrita.
-- `src/pages/vendas/Webhooks.tsx` reescrita + nova sub-página de deliveries.
-- `src/pages/vendas/Documentacao.tsx` + `ApiDocsComplete.tsx` → consolidar em `ApiDocs.tsx` única.
-- Novos componentes: `CodeBlock` (com tabs de linguagem e cópia), `KeyRevealOnce` (modal de criação), `WebhookTestPanel`, `DeliveryTimeline`.
+**Edge functions novas**:
+- `admin-create-staff` (verify_jwt=false + admin check): recebe `{ email, password, full_name, role: 'employee'|'manager', permissions[], commission_pct }`, usa service role para `auth.admin.createUser({ email_confirm: true })`, popula `profiles`, insere `user_roles`, insere `staff_permissions`, insere `staff_commission_config`. Retorna user_id.
+- `admin-freeze-staff`: alterna `profiles.frozen`, registra em `staff_audit_log`.
+- `admin-reset-staff-password`: troca senha via service role.
+- Atualizar `manager-login` para checar `frozen=true` e barrar.
 
-**Sem mexer em:**
-- `quick-pix` (endpoint interno do dashboard continua igual).
-- Fluxo de checkout / transações / ledger — só consumimos, não alteramos.
+**UI** — duas abas separadas (Gerente / Staff), cada uma:
+- Botão "Criar conta" → modal com email, senha (com gerador), nome, função, switches de permissões, % comissão inicial, sellers atribuídos (gerente).
+- Lista densa: nome, email, função, % comissão, sellers atribuídos (qtd), status (ativo/congelado), criado em.
+- Por linha — ações: editar permissões (drawer com switches), alterar % comissão, alterar taxa mínima permitida (gerente), congelar/descongelar, resetar senha, ver auditoria, excluir.
+- Drawer "Auditoria": timeline das ações do staff (aprovações de KYC, mudanças de taxa, processamento, refunds solicitados, etc.) — lê `staff_audit_log`.
 
----
+**Reforço de permissões**: hook `useStaffPermission(key)` no front + checagem real no backend via RLS/edge function (front nunca é fonte de verdade). Triggers em `transactions`, `withdrawals`, `disputes`, `profiles` gravam `staff_audit_log` automaticamente quando o autor é staff/manager.
 
-## Fora de escopo (perguntar antes de começar?)
-1. **Refunds via API** — fase 2 ou já incluir no MVP?
-2. **Sandbox/test mode** (`sk_test_...` separado) — ou só `live` por enquanto?
-3. **IP allowlist por chave** — incluir agora ou deixar para depois?
+**Aprovações com rastro**: ao aprovar KYC/produto/saque, trigger preenche `approved_by`. UI do seller exibe "Aprovado por: João (staff)" — para sempre.
 
-Me confirma esses 3 pontos e qualquer ajuste no escopo das abas, que eu já mando ver na implementação.
+### 4. Comissões de Staff/Gerente
+
+**Migração**:
+- `staff_commission_config` (user_id PK, base_pct numeric, base text default 'net_amount', is_active bool).
+- `staff_commission_overrides` (staff_user_id, seller_user_id, pct) — opcional por seller, sobrepõe a global.
+- `staff_commissions_ledger` (id, staff_user_id, seller_user_id, transaction_id, type ['accrual','clawback_refund','clawback_med','payout','adjustment'], base_amount, pct, amount, balance_after, created_at, idempotency_key UNIQUE). Append-only, RLS admin + próprio staff (read).
+
+**Triggers** (`AFTER UPDATE` em `transactions` e `disputes`):
+- Venda completed → busca staff/gerente vinculado (gerente via `manager_seller_assignments`; staff via futura `staff_seller_assignments` ou por aprovador do KYC — definimos: usar `profiles.approved_by` como fallback). Aplica `pct × net_amount` → `accrual`.
+- Refund/chargeback → `clawback_refund`/`clawback_med` negativo do mesmo valor (idempotente).
+- Disputa MED resolvida contra seller → `clawback_med`.
+
+Tudo idempotente via `idempotency_key = '<type>_<tx_or_dispute_id>_<staff_id>'`.
+
+**Nova aba admin: "Comissões Staff/Gerente"** (`AdminStaffCommissionsTab`):
+- KPIs: total a pagar (saldo positivo somado), pago no mês, clawbacks no mês, comissão média %.
+- Tabela: Nome, Função, % padrão, Acumulado período, Clawbacks, Saldo a pagar, Último pagamento. Filtro por período.
+- Clique abre painel:
+  - Detalhe de todas as movimentações do ledger (transação, seller, base, %, valor, tipo).
+  - Editor de % global e de overrides por seller (tabela editável inline).
+  - Botão "Registrar pagamento" → modal (valor, método, observação) → insere `payout` no ledger e cria registro em `withdrawals` (tipo `staff_commission`) marcado como aprovado manualmente.
+  - Export CSV.
+
+**Visibilidade no painel do staff/gerente**: card no dashboard deles mostrando saldo de comissão, últimas movimentações, MEDs/refunds que descontaram, botão "Solicitar pagamento" (cria entry `payout_request` pendente — só você aprova).
+
+### 5. Visual / UX
+
+- Tabelas: 1px border, sem sombra/blur, fonte tabular para números, hover muda só o background, ações aparecem no hover (padrão Management Lists).
+- Drawers laterais 760px via portal, mesma estrutura do `TransactionDetailPanel`.
+- Sem animações de entrada em listas densas; transições 220-280ms apenas em drawers/modais.
+- Todos os tokens semânticos (sem cor hardcoded).
+
+### 6. Ordem de execução
+
+1. Migração: `staff_permissions`, `staff_audit_log`, colunas `frozen`/`created_by_admin`/`staff_role_type`/`approved_by`, `staff_commission_config`, `staff_commission_overrides`, `staff_commissions_ledger`, triggers de auditoria e de comissão, GRANTS + RLS.
+2. Edge functions: `admin-create-staff`, `admin-freeze-staff`, `admin-reset-staff-password`; atualizar `manager-login`.
+3. Refatorar `AdminEmployeesTab` e `AdminManagersTab` (criar conta, permissões, congelar, auditoria, % comissão).
+4. Criar `AdminStaffCommissionsTab` + entry no `AdminDashboard`.
+5. Refazer `AdminTopSellersTab` (ranking detalhado + expansão).
+6. Refazer `AdminInactiveSellersTab` (cards + tabela + painel de detalhes).
+7. Card de comissão no dashboard do staff/gerente.
+8. QA end-to-end: criar staff/gerente novo, aprovar KYC com ele, registrar venda, verificar accrual, refund → clawback, congelar conta → login bloqueado, auditoria visível.
+
+### Notas técnicas
+
+- Toda escrita sensível passa por edge function com checagem `has_role(auth.uid(),'admin')` server-side.
+- `staff_audit_log` ganha trigger `RAISE EXCEPTION` em UPDATE/DELETE (imutável).
+- Ledger de comissão usa `pg_advisory_xact_lock(hashtext(staff_user_id::text))` como o financial_ledger.
+- Reaproveitar `SellerDetailDialog` e `TransactionDetailPanel` existentes para evitar duplicação.
