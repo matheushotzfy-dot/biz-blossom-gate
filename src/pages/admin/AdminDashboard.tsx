@@ -80,6 +80,7 @@ const NAV_SECTIONS: { id: string; label: string; items: { id: string; label: str
     items: [
       { id: "risk-compliance", label: "Anti-Fraude", icon: ShieldCheck, employeeAccess: false },
       { id: "medpix", label: "MedPix", icon: AlertTriangle, employeeAccess: false },
+      { id: "chargeback", label: "Chargeback", icon: CreditCard, employeeAccess: false },
       { id: "refunds", label: "Reembolsos", icon: RotateCcw, employeeAccess: false },
       { id: "premed", label: "Pre-Med", icon: ShieldAlert, employeeAccess: false },
     ],
