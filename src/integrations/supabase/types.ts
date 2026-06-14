@@ -1794,6 +1794,7 @@ export type Database = {
           checkout_timer_enabled: boolean | null
           checkout_timer_minutes: number | null
           checkout_url: string | null
+          classification: string
           co_producer_email: string | null
           co_production_enabled: boolean
           co_production_split: number
@@ -1842,6 +1843,7 @@ export type Database = {
           checkout_timer_enabled?: boolean | null
           checkout_timer_minutes?: number | null
           checkout_url?: string | null
+          classification?: string
           co_producer_email?: string | null
           co_production_enabled?: boolean
           co_production_split?: number
@@ -1890,6 +1892,7 @@ export type Database = {
           checkout_timer_enabled?: boolean | null
           checkout_timer_minutes?: number | null
           checkout_url?: string | null
+          classification?: string
           co_producer_email?: string | null
           co_production_enabled?: boolean
           co_production_split?: number
