@@ -469,29 +469,28 @@ export default function Premiacoes() {
                 </div>
               </div>
 
-              <button
-                type="button"
-                className={cn(
-                  "mt-5 w-full inline-flex items-center justify-center gap-2 h-11 rounded-xl text-[12px] font-black uppercase tracking-[0.18em] transition-all",
-                  focusedDone
-                    ? "text-primary-foreground hover:brightness-110"
-                    : "border border-border/60 bg-muted/30 text-muted-foreground hover:text-foreground hover:border-foreground/30 cursor-default"
-                )}
-                style={focusedDone ? { background: `rgb(${focused.accentRgb})` } : undefined}
-                disabled={!focusedDone}
-              >
-                {focusedDone ? (
-                  <>
-                    <Zap className="h-3.5 w-3.5" strokeWidth={2.5} />
-                    Solicitar resgate
-                  </>
-                ) : (
-                  <>
-                    <Lock className="h-3 w-3" strokeWidth={2.5} />
-                    Atinja a meta para desbloquear
-                  </>
-                )}
-              </button>
+              {(() => {
+                const alreadyClaimed = existingClaims.some(c => c.tier_id === focused.id && c.status !== "cancelled");
+                return (
+                  <button
+                    type="button"
+                    onClick={() => focusedDone && !alreadyClaimed && setClaimOpen(true)}
+                    className={cn(
+                      "mt-5 w-full inline-flex items-center justify-center gap-2 h-11 rounded-xl text-[12px] font-black uppercase tracking-[0.18em] transition-all",
+                      focusedDone && !alreadyClaimed
+                        ? "text-primary-foreground hover:brightness-110"
+                        : "border border-border/60 bg-muted/30 text-muted-foreground hover:text-foreground hover:border-foreground/30 cursor-default"
+                    )}
+                    style={focusedDone && !alreadyClaimed ? { background: `rgb(${focused.accentRgb})` } : undefined}
+                    disabled={!focusedDone || alreadyClaimed}
+                  >
+                    {alreadyClaimed ? (<><CheckCircle2 className="h-3.5 w-3.5" /> Solicitação registrada</>) :
+                     focusedDone ? (<><Zap className="h-3.5 w-3.5" strokeWidth={2.5} /> Solicitar resgate</>) :
+                     (<><Lock className="h-3 w-3" strokeWidth={2.5} /> Atinja a meta para desbloquear</>)}
+                  </button>
+                );
+              })()}
+
             </div>
           </div>
         </div>
