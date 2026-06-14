@@ -537,7 +537,7 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
                           <div>
                             <div className="flex items-center gap-1.5">
                               <p className="text-[12px] font-bold text-foreground">{p.full_name || "Sem nome"}</p>
-                              {frozen && <Snowflake className="h-3 w-3 text-info" title="Saldo Congelado" />}
+                              {frozen && <Snowflake className="h-3 w-3 text-info" aria-label="Saldo Congelado" />}
                             </div>
                             <p className="text-[10px] text-muted-foreground">{p.email}</p>
                           </div>

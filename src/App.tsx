@@ -2,7 +2,9 @@ import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { QueryClient } from "@tanstack/react-query";
+import { PersistQueryClientProvider } from "@tanstack/react-query-persist-client";
+import { createSyncStoragePersister } from "@tanstack/query-sync-storage-persister";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import Index from "./pages/Index";
 import ScrollToTop from "@/components/ScrollToTop";
@@ -65,6 +67,7 @@ const queryClient = new QueryClient({
       retry: 1,
       refetchOnWindowFocus: false,
       staleTime: 2 * 60 * 1000,
+      gcTime: 24 * 60 * 60 * 1000, // keep cached data 24h so it persists across tab switches
     },
     mutations: {
       retry: 0,
@@ -72,9 +75,24 @@ const queryClient = new QueryClient({
   },
 });
 
+const persister = typeof window !== "undefined"
+  ? createSyncStoragePersister({
+      storage: window.localStorage,
+      key: "hotzfy-query-cache",
+      throttleTime: 1000,
+    })
+  : undefined;
+
 const App = () => (
   <ErrorBoundary>
-    <QueryClientProvider client={queryClient}>
+    <PersistQueryClientProvider
+      client={queryClient}
+      persistOptions={{
+        persister: persister!,
+        maxAge: 24 * 60 * 60 * 1000,
+        buster: "v1",
+      }}
+    >
       <ThemeProvider>
         <TooltipProvider>
           <Toaster />
@@ -151,7 +169,7 @@ const App = () => (
           </BrowserRouter>
         </TooltipProvider>
       </ThemeProvider>
-    </QueryClientProvider>
+    </PersistQueryClientProvider>
   </ErrorBoundary>
 );
 
