@@ -559,6 +559,43 @@ export default function ProductEditor() {
  toast.success("Order bump removido");
  };
 
+ const inviteCoProducer = async () => {
+   if (!user || isNew || !effectiveProductId) return;
+   const email = coProducerEmail.trim().toLowerCase();
+   if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { toast.error("E-mail inválido"); return; }
+   const split = Number(coProductionSplit);
+   if (isNaN(split) || split < 1 || split > 99) { toast.error("Percentual deve ser entre 1 e 99%"); return; }
+   if (coProductionsList.some((c: any) => c.co_producer_email?.toLowerCase() === email && c.status !== "rejected")) {
+     toast.error("Este co-produtor já foi convidado");
+     return;
+   }
+   setInvitingCoProducer(true);
+   try {
+     const { data, error } = await supabase.from("co_productions").insert({
+       product_id: effectiveProductId,
+       owner_user_id: user.id,
+       co_producer_email: email,
+       split_percentage: split,
+       status: "pending",
+     } as any).select().maybeSingle();
+     if (error || !data) { toast.error("Erro ao convidar co-produtor"); return; }
+     setCoProductionsList(prev => [data, ...prev]);
+     await supabase.from("products").update({ co_production_enabled: true, co_producer_email: email, co_production_split: split } as any).eq("id", effectiveProductId).eq("user_id", user.id);
+     setCoProductionEnabled(true);
+     toast.success("Convite enviado!");
+   } finally {
+     setInvitingCoProducer(false);
+   }
+ };
+
+ const removeCoProducer = async (id: string) => {
+   const { error } = await supabase.from("co_productions").delete().eq("id", id);
+   if (error) { toast.error("Erro ao remover"); return; }
+   setCoProductionsList(prev => prev.filter((c: any) => c.id !== id));
+   toast.success("Co-produtor removido");
+ };
+
+
  const createCoupon = async () => {
  if (!user || isNew || !newCouponCode.trim()) return;
  const val = parseFloat(newCouponValue);
