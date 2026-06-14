@@ -460,14 +460,17 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
   const userMedAmount = userDisputes.reduce((a: number, d: any) => a + Number(d.amount || 0), 0);
   const userMedRate = userApproved.length > 0 ? ((userMedTotal / userApproved.length) * 100).toFixed(2) : "0.00";
 
-  const buyersMap = new Map<string, { name: string; email: string; phone: string; total: number; count: number }>();
+  const buyersMap = new Map<string, { name: string; email: string; phone: string; document: string; total: number; count: number; txs: any[]; lastAt: string }>();
   userTransactions.forEach(t => {
-    const key = t.customer_email || t.customer_name || "unknown";
-    const existing = buyersMap.get(key) || { name: t.customer_name || "", email: t.customer_email || "", phone: t.customer_phone || "", total: 0, count: 0 };
+    const key = t.customer_email || t.customer_document || t.customer_name || "unknown";
+    const existing = buyersMap.get(key) || { name: t.customer_name || "", email: t.customer_email || "", phone: (t as any).customer_phone || "", document: (t as any).customer_document || "", total: 0, count: 0, txs: [] as any[], lastAt: "" };
     existing.total += Number(t.amount); existing.count += 1;
+    existing.txs.push(t);
+    if (!existing.lastAt || new Date(t.created_at) > new Date(existing.lastAt)) existing.lastAt = t.created_at;
     buyersMap.set(key, existing);
   });
   const buyers = Array.from(buyersMap.values()).sort((a, b) => b.total - a.total);
+
 
   const isFrozen = (p: Tables<"profiles">) => (p as any).balance_frozen === true;
 
