@@ -342,15 +342,15 @@ export default function AdminOverviewTab({ transactions, profiles, products, wit
     );
   }
 
-  const heroKpis: { label: string; value: string; sub: string; icon: any; tone: KpiTone; spark: { v: number }[] }[] = [
-    { label: "Movimentado Hoje", value: fmtCurrency(tpvToday), sub: `${todayTx.length} vendas aprovadas`, icon: Flame, tone: todayTx.length > 0 ? "success" : "neutral", spark: sparkSeries.tpv },
-    { label: "Lucro Hoje", value: fmtCurrency(takeRateToday), sub: `${activeSellersToday} sellers venderam`, icon: DollarSign, tone: "primary", spark: sparkSeries.tpv },
-    { label: "Saques Pendentes", value: fmtCurrency(pendingWdAmount), sub: `${pendingWd.length} solicitações · ${highValueWd.length} altos`, icon: Hourglass, tone: pendingWd.length > 5 ? "warning" : "neutral", spark: sparkSeries.vendas },
-    { label: "Novos Usuários", value: String(newUsersInRange.length), sub: "cadastros no período", icon: UserPlus, tone: "info", spark: sparkSeries.vendas },
-    { label: "Lucro no Período", value: fmtCurrency(takeRateTotal), sub: `${takeRatePct}% de take rate`, icon: TrendingUp, tone: "success", spark: sparkSeries.tpv },
-    { label: "Aprovações KYC", value: String(kycPending.length), sub: "usuários aguardando análise", icon: UserCheck, tone: kycPending.length > 0 ? "warning" : "neutral", spark: sparkSeries.vendas },
-    { label: "Saldo Retido", value: fmtCurrency(totalRetained), sub: "aguardando liberação", icon: Lock, tone: "warning", spark: sparkSeries.tpv },
-    { label: "Volume Sacado", value: fmtCurrency(totalWithdrawn), sub: "pagos no período", icon: ArrowDownToLine, tone: "neutral", spark: sparkSeries.tpv },
+  const heroKpis: { label: string; value: string; sub: string; icon: any; tone: KpiTone; spark: { v: number }[]; nav?: string }[] = [
+    { label: "Movimentado Hoje", value: fmtCurrency(tpvToday), sub: `${todayTx.length} vendas aprovadas`, icon: Flame, tone: todayTx.length > 0 ? "success" : "neutral", spark: sparkSeries.tpv, nav: "transactions" },
+    { label: "Lucro Hoje", value: fmtCurrency(takeRateToday), sub: `${activeSellersToday} sellers venderam`, icon: DollarSign, tone: "primary", spark: sparkSeries.tpv, nav: "transactions" },
+    { label: "Saques Pendentes", value: fmtCurrency(pendingWdAmount), sub: `${pendingWd.length} solicitações · ${highValueWd.length} altos`, icon: Hourglass, tone: pendingWd.length > 5 ? "warning" : "neutral", spark: sparkSeries.vendas, nav: "withdrawals" },
+    { label: "Novos Usuários", value: String(newUsersInRange.length), sub: "cadastros no período", icon: UserPlus, tone: "info", spark: sparkSeries.vendas, nav: "sellers" },
+    { label: "Lucro Últimos 30 Dias", value: fmtCurrency(profit30d), sub: `${last30Tx.length} vendas · ${takeRatePct}% take rate`, icon: TrendingUp, tone: "success", spark: sparkSeries.tpv, nav: "analytics" },
+    { label: "MEDs Pendentes", value: String(pendingMeds.length), sub: pendingMeds.length > 0 ? `${fmtCurrency(pendingMedsAmount)} em disputa` : "Nenhum em aberto", icon: AlertCircle, tone: pendingMeds.length > 0 ? "destructive" : "neutral", spark: sparkSeries.cb, nav: "medpix" },
+    { label: "Aprovações KYC", value: String(kycPending.length), sub: "usuários aguardando análise", icon: UserCheck, tone: kycPending.length > 0 ? "warning" : "neutral", spark: sparkSeries.vendas, nav: "sellers" },
+    { label: "Saldo Retido", value: fmtCurrency(totalRetained), sub: "aguardando liberação", icon: Lock, tone: "warning", spark: sparkSeries.tpv, nav: "transactions" },
   ];
 
   return (
