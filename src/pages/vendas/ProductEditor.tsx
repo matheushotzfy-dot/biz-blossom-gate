@@ -136,7 +136,7 @@ export default function ProductEditor() {
   const [supportPhone, setSupportPhone] = useState("");
 
  const [warrantyDays, setWarrantyDays] = useState("7");
- const [deliveryType, setDeliveryType] = useState("digital");
+ const [deliveryType, setDeliveryType] = useState("link");
  const [memberAreaEnabled, setMemberAreaEnabled] = useState(false);
 
  const [buttonColor, setButtonColor] = useState("#10b981");
@@ -149,7 +149,7 @@ export default function ProductEditor() {
  const [creditCardEnabled, setCreditCardEnabled] = useState(true);
  const [addressRequired, setAddressRequired] = useState(false);
  const [emailConfirm, setEmailConfirm] = useState(true);
- const [showCouponField, setShowCouponField] = useState(true);
+ const [showCouponField, setShowCouponField] = useState(false);
  const [bannerDesktopPreview, setBannerDesktopPreview] = useState("");
  const [bannerMobilePreview, setBannerMobilePreview] = useState("");
  const [bannerDesktopFile, setBannerDesktopFile] = useState<File | null>(null);
@@ -279,18 +279,29 @@ export default function ProductEditor() {
  return data.publicUrl;
  };
 
-  const handleSave = async () => {
-    if (!user) return;
-    // Normaliza preço aceitando "10,50", "10.50", "R$ 10,50", etc.
-    const priceNum = parseFloat(String(price).replace(/[^0-9,.-]/g, "").replace(",", "."));
-    if (!name.trim()) { toast.error("Nome é obrigatório"); setActiveTab("geral"); return; }
-    if (description.trim().length < 50) { toast.error("Descrição deve ter no mínimo 50 caracteres"); setActiveTab("geral"); return; }
-    if (isNaN(priceNum) || priceNum < 1) { toast.error("Preço mínimo é R$ 1,00"); setActiveTab("geral"); return; }
-    if (priceNum > 99999.99) { toast.error("Preço máximo é R$ 99.999,99"); setActiveTab("geral"); return; }
-    if (!pageUrl.trim() || !/^https?:\/\/.+\..+/.test(pageUrl.trim())) { toast.error("Insira uma página de vendas com domínio válido (ex: https://seusite.com)"); setActiveTab("geral"); return; }
-    if (!supportEmail.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(supportEmail.trim())) { toast.error("Insira um e-mail de suporte válido (ex: suporte@seusite.com)"); setActiveTab("geral"); return; }
-    if (!supportPhone.trim() || supportPhone.replace(/\D/g, "").length < 10) { toast.error("Insira um telefone de suporte válido (com DDD)"); setActiveTab("geral"); return; }
-    if (!displayName.trim()) { toast.error("Nome de exibição é obrigatório"); setActiveTab("geral"); return; }
+   const handleSave = async () => {
+     if (!user) return;
+     // Normaliza preço aceitando "10,50", "10.50", "1.000,50", "R$ 1.000,50", etc.
+     const cleanPrice = String(price).replace(/[^0-9,.-]/g, "");
+     // Se tem vírgula, ela é o separador decimal e pontos são milhares (formato BR)
+     const priceNum = cleanPrice.includes(",")
+       ? parseFloat(cleanPrice.replace(/\./g, "").replace(",", "."))
+       : parseFloat(cleanPrice);
+     // Normaliza pageUrl: aceita sem https:// e adiciona automaticamente
+     let normalizedPageUrl = pageUrl.trim();
+     if (normalizedPageUrl && !/^https?:\/\//i.test(normalizedPageUrl)) {
+       normalizedPageUrl = `https://${normalizedPageUrl}`;
+     }
+     if (!name.trim()) { toast.error("Nome é obrigatório"); setActiveTab("geral"); return; }
+     if (description.trim().length < 50) { toast.error("Descrição deve ter no mínimo 50 caracteres"); setActiveTab("geral"); return; }
+     if (isNaN(priceNum) || priceNum < 1) { toast.error("Preço mínimo é R$ 1,00"); setActiveTab("geral"); return; }
+     if (priceNum > 99999.99) { toast.error("Preço máximo é R$ 99.999,99"); setActiveTab("geral"); return; }
+     if (!normalizedPageUrl || !/^https?:\/\/.+\..+/.test(normalizedPageUrl)) { toast.error("Insira uma página de vendas válida (ex: seusite.com)"); setActiveTab("geral"); return; }
+     if (!supportEmail.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(supportEmail.trim())) { toast.error("Insira um e-mail de suporte válido (ex: suporte@seusite.com)"); setActiveTab("geral"); return; }
+     if (!supportPhone.trim() || supportPhone.replace(/\D/g, "").length < 10) { toast.error("Insira um telefone de suporte válido (com DDD)"); setActiveTab("geral"); return; }
+     if (!displayName.trim()) { toast.error("Nome de exibição é obrigatório"); setActiveTab("geral"); return; }
+     // sincroniza o input para refletir a URL normalizada (caso o usuário salve sem ter prefixo)
+     if (normalizedPageUrl !== pageUrl) setPageUrl(normalizedPageUrl);
 
  setSaving(true);
  try {
@@ -317,7 +328,7 @@ export default function ProductEditor() {
  description: description.trim() || null,
  price: priceNum,
  status,
- page_url: pageUrl || null,
+ page_url: normalizedPageUrl || null,
  image_url: imageUrl,
   support_email: supportEmail.trim() || null,
   support_phone: supportPhone.trim() || null,
