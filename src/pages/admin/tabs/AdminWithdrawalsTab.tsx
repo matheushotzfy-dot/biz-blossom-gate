@@ -452,6 +452,30 @@ export default function AdminWithdrawalsTab({ withdrawals, profiles, onWithdrawa
  </Button>
  </div>
  )}
+ {w.status === "approved" && (
+   (w as any).payment_proof_url ? (
+     <div className="flex items-center gap-1">
+       <Button size="sm" variant="ghost" className="h-7 text-[10px] gap-1" onClick={() => handleViewProof((w as any).payment_proof_url)}>
+         <FileText className="h-3 w-3" /> Ver comprovante
+       </Button>
+       <label className="text-[10px] text-muted-foreground underline cursor-pointer">
+         Trocar
+         <input type="file" hidden accept="image/*,application/pdf" onChange={e => e.target.files?.[0] && handleProofUpload(w.id, e.target.files[0])} />
+       </label>
+     </div>
+   ) : (
+     <label className="inline-flex items-center gap-1 h-7 px-2 text-[10px] bg-primary/10 text-primary border border-primary/20 rounded-xl cursor-pointer hover:bg-primary/20">
+       <FileText className="h-3 w-3" /> Anexar comprovante
+       <input type="file" hidden accept="image/*,application/pdf" onChange={e => e.target.files?.[0] && handleProofUpload(w.id, e.target.files[0])} />
+     </label>
+   )
+ )}
+ {w.status === "rejected" && (w as any).rejection_reason && (
+   <div className="max-w-[200px]">
+     <p className="text-[10px] font-bold text-destructive uppercase">Motivo</p>
+     <p className="text-[10px] text-muted-foreground line-clamp-2">{(w as any).rejection_reason}</p>
+   </div>
+ )}
  </td>
  </tr>
  );
