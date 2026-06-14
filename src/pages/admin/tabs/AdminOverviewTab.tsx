@@ -413,7 +413,7 @@ export default function AdminOverviewTab({ transactions, profiles, products, wit
 
       {/* ── Premium KPI Grid with sparklines ── */}
       <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-3">
-        {heroKpis.map((k, i) => <MetricCard key={i} {...k} />)}
+        {heroKpis.map((k, i) => <MetricCard key={i} {...k} onClick={k.nav && onNavigate ? () => onNavigate(k.nav!) : undefined} />)}
       </div>
 
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-4">
