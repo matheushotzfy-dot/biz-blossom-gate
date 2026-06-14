@@ -338,6 +338,30 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
     await logAdminAction("update_custom_fees", "custom_user_fees", selectedUser.user_id, payload);
   };
 
+  const handleResolveDispute = async (disputeId: string, side: "seller" | "buyer") => {
+    const status = side === "seller" ? "resolved_seller" : "resolved_buyer";
+    const label = side === "seller" ? "Vitória do seller — saldo devolvido." : "Vitória do comprador — débito mantido.";
+    if (!window.confirm(side === "seller" ? "Confirmar vitória do seller? O saldo retido será devolvido." : "Confirmar vitória do comprador? O débito será mantido e a transação marcada como chargeback.")) return;
+    const { error } = await supabase.from("disputes").update({ status, resolved_at: new Date().toISOString() } as any).eq("id", disputeId);
+    if (error) { toast.error("Erro ao resolver disputa: " + error.message); return; }
+    toast.success(label);
+    await logAdminAction(`resolve_dispute_${side}`, "dispute", disputeId, { status });
+    if (selectedUser) {
+      const { data } = await supabase.from("disputes").select("id, seller_user_id, transaction_id, amount, type, status, reason, created_at").eq("seller_user_id", selectedUser.user_id).order("created_at", { ascending: false }).limit(50) as any;
+      if (data) setUserDisputes(data);
+    }
+    onReload();
+  };
+
+  const handleDeletePixKey = async (pixKeyId: string) => {
+    if (!window.confirm("Remover esta chave PIX do seller?")) return;
+    const { error } = await supabase.from("pix_keys").delete().eq("id", pixKeyId);
+    if (error) { toast.error("Erro ao remover chave: " + error.message); return; }
+    toast.success("Chave PIX removida.");
+    await logAdminAction("delete_pix_key", "pix_key", pixKeyId);
+    setUserPixKeys(prev => prev.filter(k => k.id !== pixKeyId));
+  };
+
   const handleBalanceAdjustment = async () => {
     if (!selectedUser || !user || !adjustAmount || !adjustReason) { toast.error("Preencha todos os campos"); return; }
     const amount = Number(adjustAmount);
