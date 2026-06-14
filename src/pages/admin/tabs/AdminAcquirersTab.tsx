@@ -207,7 +207,7 @@ export default function AdminAcquirersTab() {
         title="Centro de Adquirentes"
         subtitle="Monitore saúde, latência, conversão, MEDPIX e gerencie chaves, webhooks e roteamento de failover."
         status={{
-          tone: offlineCount > 0 ? "danger" : degradedCount > 0 ? "warning" : "success",
+          tone: offlineCount > 0 ? "destructive" : degradedCount > 0 ? "warning" : "success",
           label: offlineCount > 0 ? `${offlineCount} OFFLINE` : degradedCount > 0 ? `${degradedCount} degradado(s)` : `${acquirers.filter(a => a.is_active).length} ativas`,
         }}
         actions={
