@@ -14,45 +14,203 @@ export type Database = {
   }
   public: {
     Tables: {
+      acquirer_failover_events: {
+        Row: {
+          created_at: string
+          error_message: string | null
+          from_acquirer_id: string | null
+          id: string
+          metadata: Json | null
+          reason: string
+          seller_id: string | null
+          success: boolean
+          to_acquirer_id: string | null
+          transaction_id: string | null
+          trigger_type: string
+        }
+        Insert: {
+          created_at?: string
+          error_message?: string | null
+          from_acquirer_id?: string | null
+          id?: string
+          metadata?: Json | null
+          reason: string
+          seller_id?: string | null
+          success?: boolean
+          to_acquirer_id?: string | null
+          transaction_id?: string | null
+          trigger_type?: string
+        }
+        Update: {
+          created_at?: string
+          error_message?: string | null
+          from_acquirer_id?: string | null
+          id?: string
+          metadata?: Json | null
+          reason?: string
+          seller_id?: string | null
+          success?: boolean
+          to_acquirer_id?: string | null
+          transaction_id?: string | null
+          trigger_type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "acquirer_failover_events_from_acquirer_id_fkey"
+            columns: ["from_acquirer_id"]
+            isOneToOne: false
+            referencedRelation: "acquirers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "acquirer_failover_events_to_acquirer_id_fkey"
+            columns: ["to_acquirer_id"]
+            isOneToOne: false
+            referencedRelation: "acquirers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      acquirer_health_events: {
+        Row: {
+          acquirer_id: string
+          created_at: string
+          error_code: string | null
+          event_type: string
+          id: string
+          latency_ms: number | null
+          message: string | null
+          metadata: Json | null
+          severity: string
+        }
+        Insert: {
+          acquirer_id: string
+          created_at?: string
+          error_code?: string | null
+          event_type: string
+          id?: string
+          latency_ms?: number | null
+          message?: string | null
+          metadata?: Json | null
+          severity?: string
+        }
+        Update: {
+          acquirer_id?: string
+          created_at?: string
+          error_code?: string | null
+          event_type?: string
+          id?: string
+          latency_ms?: number | null
+          message?: string | null
+          metadata?: Json | null
+          severity?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "acquirer_health_events_acquirer_id_fkey"
+            columns: ["acquirer_id"]
+            isOneToOne: false
+            referencedRelation: "acquirers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       acquirers: {
         Row: {
+          allow_failover: boolean
           api_endpoint: string | null
+          api_environment: string | null
+          api_key_encrypted: string | null
+          api_secret_encrypted: string | null
+          avg_latency_ms: number | null
           conversion_rate: number
           created_at: string
           description: string | null
+          health_status: string
           id: string
           is_active: boolean
+          last_failure_at: string | null
+          last_health_check_at: string | null
+          last_latency_ms: number | null
+          max_transaction_amount: number | null
+          min_transaction_amount: number | null
           name: string
+          notes: string | null
+          priority: number
           seller_visible: boolean
           slug: string
+          supported_methods: string[]
+          transaction_fee_fixed: number | null
+          transaction_fee_percentage: number | null
           type: string
           updated_at: string
+          uptime_pct: number | null
+          webhook_secret: string | null
+          webhook_url: string | null
         }
         Insert: {
+          allow_failover?: boolean
           api_endpoint?: string | null
+          api_environment?: string | null
+          api_key_encrypted?: string | null
+          api_secret_encrypted?: string | null
+          avg_latency_ms?: number | null
           conversion_rate?: number
           created_at?: string
           description?: string | null
+          health_status?: string
           id?: string
           is_active?: boolean
+          last_failure_at?: string | null
+          last_health_check_at?: string | null
+          last_latency_ms?: number | null
+          max_transaction_amount?: number | null
+          min_transaction_amount?: number | null
           name: string
+          notes?: string | null
+          priority?: number
           seller_visible?: boolean
           slug: string
+          supported_methods?: string[]
+          transaction_fee_fixed?: number | null
+          transaction_fee_percentage?: number | null
           type?: string
           updated_at?: string
+          uptime_pct?: number | null
+          webhook_secret?: string | null
+          webhook_url?: string | null
         }
         Update: {
+          allow_failover?: boolean
           api_endpoint?: string | null
+          api_environment?: string | null
+          api_key_encrypted?: string | null
+          api_secret_encrypted?: string | null
+          avg_latency_ms?: number | null
           conversion_rate?: number
           created_at?: string
           description?: string | null
+          health_status?: string
           id?: string
           is_active?: boolean
+          last_failure_at?: string | null
+          last_health_check_at?: string | null
+          last_latency_ms?: number | null
+          max_transaction_amount?: number | null
+          min_transaction_amount?: number | null
           name?: string
+          notes?: string | null
+          priority?: number
           seller_visible?: boolean
           slug?: string
+          supported_methods?: string[]
+          transaction_fee_fixed?: number | null
+          transaction_fee_percentage?: number | null
           type?: string
           updated_at?: string
+          uptime_pct?: number | null
+          webhook_secret?: string | null
+          webhook_url?: string | null
         }
         Relationships: []
       }
@@ -3588,6 +3746,18 @@ export type Database = {
       }
     }
     Functions: {
+      admin_bulk_assign_acquirer: {
+        Args: {
+          _new_acquirer_id: string
+          _reason?: string
+          _seller_ids: string[]
+        }
+        Returns: {
+          error: string
+          seller_id: string
+          success: boolean
+        }[]
+      }
       bump_rate_limit: {
         Args: {
           _bucket_key: string
@@ -3681,6 +3851,10 @@ export type Database = {
         Returns: boolean
       }
       is_product_active: { Args: { _product_id: string }; Returns: boolean }
+      pick_failover_acquirer: {
+        Args: { _current_acquirer_id: string }
+        Returns: string
+      }
       release_due_card_holds: { Args: never; Returns: number }
       resolve_commission_pct: {
         Args: { _seller: string; _staff: string }
