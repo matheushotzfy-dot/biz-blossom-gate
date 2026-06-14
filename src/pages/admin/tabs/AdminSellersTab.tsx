@@ -1000,21 +1000,38 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
                       <table className={premiumTable.table}>
                         <thead>
                           <tr className={premiumTable.headRow}>
-                            {["Tipo", "Valor", "Status", "Comprador", "Motivo", "Data"].map(h => <th key={h} className={premiumTable.th}>{h}</th>)}
+                            {["Tipo", "Valor", "Status", "Comprador", "Motivo", "Data", "Ações"].map(h => <th key={h} className={premiumTable.th}>{h}</th>)}
                           </tr>
                         </thead>
                         <tbody>
-                          {userDisputes.map((d: any) => (
-                            <tr key={d.id} className={premiumTable.row}>
-                              <td className={premiumTable.td}><span className="text-[10px] font-bold uppercase text-foreground">{d.type}</span></td>
-                              <td className={premiumTable.td}><span className="font-display text-[12px] font-black tabular-nums text-warning">{fmtCurrency(Number(d.amount))}</span></td>
-                              <td className={premiumTable.td}><StatusBadge status={d.status} /></td>
-                              <td className={premiumTable.td}><span className="text-[11px] text-muted-foreground">{d.buyer_name || "—"}</span></td>
-                              <td className={premiumTable.td}><span className="text-[11px] text-muted-foreground max-w-[200px] truncate block">{d.reason || "—"}</span></td>
-                              <td className={premiumTable.td}><span className="text-[10px] text-muted-foreground">{new Date(d.created_at).toLocaleDateString("pt-BR")}</span></td>
-                            </tr>
-                          ))}
-                          {userDisputes.length === 0 && <tr><td colSpan={6} className="p-8 text-center text-muted-foreground text-xs">Sem disputas</td></tr>}
+                          {userDisputes.map((d: any) => {
+                            const isOpen = d.status === "open" || d.status === "in_review" || d.status === "pending_recorrer";
+                            return (
+                              <tr key={d.id} className={premiumTable.row}>
+                                <td className={premiumTable.td}><span className="text-[10px] font-bold uppercase text-foreground">{d.type}</span></td>
+                                <td className={premiumTable.td}><span className="font-display text-[12px] font-black tabular-nums text-warning">{fmtCurrency(Number(d.amount))}</span></td>
+                                <td className={premiumTable.td}><StatusBadge status={d.status} /></td>
+                                <td className={premiumTable.td}><span className="text-[11px] text-muted-foreground">{d.buyer_name || "—"}</span></td>
+                                <td className={premiumTable.td}><span className="text-[11px] text-muted-foreground max-w-[200px] truncate block">{d.reason || "—"}</span></td>
+                                <td className={premiumTable.td}><span className="text-[10px] text-muted-foreground">{new Date(d.created_at).toLocaleDateString("pt-BR")}</span></td>
+                                <td className={premiumTable.td}>
+                                  {isOpen ? (
+                                    <div className="flex gap-1">
+                                      <Button size="sm" variant="outline" className="h-7 text-[10px] rounded-lg border-success/30 text-success" onClick={() => handleResolveDispute(d.id, "seller")}>
+                                        <CheckCircle2 className="h-3 w-3 mr-1" /> Seller
+                                      </Button>
+                                      <Button size="sm" variant="outline" className="h-7 text-[10px] rounded-lg border-destructive/30 text-destructive" onClick={() => handleResolveDispute(d.id, "buyer")}>
+                                        <XCircle className="h-3 w-3 mr-1" /> Comprador
+                                      </Button>
+                                    </div>
+                                  ) : (
+                                    <span className="text-[10px] text-muted-foreground">—</span>
+                                  )}
+                                </td>
+                              </tr>
+                            );
+                          })}
+                          {userDisputes.length === 0 && <tr><td colSpan={7} className="p-8 text-center text-muted-foreground text-xs">Sem disputas</td></tr>}
                         </tbody>
                       </table>
                     </div>
