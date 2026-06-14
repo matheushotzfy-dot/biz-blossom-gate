@@ -9,9 +9,14 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import {
   Trophy, Lock, CheckCircle2, Gift, Crown, Target, Sparkles, Flame,
-  Gem, Star, Award, Quote, ChevronLeft, ChevronRight, Zap, Eye,
+  Gem, Star, Award, Quote, ChevronLeft, ChevronRight, Zap, Eye, MapPin, Clock, Truck, Package,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
+
 
 import heroStage from "@/assets/awards/premiacoes-hero-stage.jpg";
 import hotzfyLogo from "@/assets/hotzfy-logo.png";
