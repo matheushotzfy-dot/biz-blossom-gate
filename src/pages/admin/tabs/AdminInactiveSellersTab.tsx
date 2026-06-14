@@ -243,7 +243,7 @@ export default function AdminInactiveSellersTab({ profiles, transactions, fmtCur
                         </td>
                       </tr>
                     )}
-                  </>
+                  </Fragment>
                 );
               })}
               {filtered.length === 0 && (
