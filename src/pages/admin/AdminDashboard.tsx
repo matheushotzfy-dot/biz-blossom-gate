@@ -42,6 +42,8 @@ import AdminInactiveSellersTab from "./tabs/AdminInactiveSellersTab";
 import AdminRiskComplianceTab from "./tabs/AdminRiskComplianceTab";
 import AdminAnalyticsTab from "./tabs/AdminAnalyticsTab";
 import AdminManagersTab from "./tabs/AdminManagersTab";
+import AdminStaffCommissionsTab from "./tabs/AdminStaffCommissionsTab";
+
 import AdminNotificationsTab from "./tabs/AdminNotificationsTab";
 import AdminAffiliateSalesTab from "./tabs/AdminAffiliateSalesTab";
 import AdminSupportTab from "./tabs/AdminSupportTab";
