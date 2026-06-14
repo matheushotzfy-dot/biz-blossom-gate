@@ -208,8 +208,8 @@ export default function AdminTopSellersTab({ profiles, transactions, fmtCurrency
               {ranked.map((s, i) => {
                 const isOpen = expanded === s.userId;
                 return (
-                  <>
-                    <tr key={s.userId} className={cn(premiumTable.row, "cursor-pointer")} onClick={() => setExpanded(isOpen ? null : s.userId)}>
+                  <Fragment key={s.userId}>
+                    <tr className={cn(premiumTable.row, "cursor-pointer")} onClick={() => setExpanded(isOpen ? null : s.userId)}>
                       <td className={premiumTable.td}>{rankIcon(i)}</td>
                       <td className={premiumTable.td}>
                         <div className="flex items-center gap-3">
