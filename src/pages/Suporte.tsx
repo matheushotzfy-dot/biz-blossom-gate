@@ -112,9 +112,9 @@ export default function Suporte() {
 
   const stats = useMemo(() => ({
     total:    tickets.length,
-    open:     tickets.filter(t => t.status === "open" || t.status === "in_progress").length,
-    resolved: tickets.filter(t => t.status === "resolved" || t.status === "closed").length,
-    awaiting: tickets.filter(t => t.status === "open" && !t.admin_reply).length,
+    open:     tickets.filter(t => ["open","pending","in_progress"].includes(t.status)).length,
+    resolved: tickets.filter(t => ["answered","resolved","closed"].includes(t.status)).length,
+    awaiting: tickets.filter(t => ["open","pending"].includes(t.status) && !t.admin_reply).length,
   }), [tickets]);
 
   const filtered = useMemo(() => {
@@ -128,10 +128,10 @@ export default function Suporte() {
   }, [tickets, search, statusFilter]);
 
   const STATUS_FILTERS: { value: string; label: string; count: number }[] = [
-    { value: "all",         label: "Todos",     count: tickets.length },
-    { value: "open",        label: "Abertos",   count: tickets.filter(t => t.status === "open").length },
-    { value: "in_progress", label: "Andamento", count: tickets.filter(t => t.status === "in_progress").length },
-    { value: "resolved",    label: "Resolvidos",count: tickets.filter(t => t.status === "resolved").length },
+    { value: "all",      label: "Todos",      count: tickets.length },
+    { value: "open",     label: "Abertos",    count: tickets.filter(t => t.status === "open" || t.status === "pending").length },
+    { value: "answered", label: "Respondidos",count: tickets.filter(t => t.status === "answered").length },
+    { value: "closed",   label: "Fechados",   count: tickets.filter(t => t.status === "closed" || t.status === "resolved").length },
   ];
 
   const KPI_CARDS = [
