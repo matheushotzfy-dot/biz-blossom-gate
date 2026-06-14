@@ -401,6 +401,24 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
   const unsetCount = profiles.filter(p => (p as any).seller_type == null).length;
   const frozenCount = profiles.filter(p => (p as any).balance_frozen === true).length;
 
+  // Top movers do dia (sellers que mais movimentaram hoje)
+  const todayStart = new Date(); todayStart.setHours(0, 0, 0, 0);
+  const todayMovers = (() => {
+    const byUser = new Map<string, { gross: number; count: number }>();
+    for (const t of transactions) {
+      if (!t.created_at || new Date(t.created_at) < todayStart) continue;
+      if (t.status !== "completed" && t.status !== "approved") continue;
+      const cur = byUser.get(t.user_id) || { gross: 0, count: 0 };
+      cur.gross += Number(t.amount); cur.count += 1;
+      byUser.set(t.user_id, cur);
+    }
+    return Array.from(byUser.entries())
+      .map(([user_id, s]) => ({ user_id, ...s, profile: profiles.find(p => p.user_id === user_id) }))
+      .filter(m => m.profile)
+      .sort((a, b) => b.gross - a.gross)
+      .slice(0, 8);
+  })();
+
   const getSellerStats = (userId: string) => {
     const txs = transactions.filter(t => t.user_id === userId);
     const completed = txs.filter(t => t.status === "completed" || t.status === "approved");
