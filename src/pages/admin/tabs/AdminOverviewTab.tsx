@@ -702,7 +702,7 @@ function PulseBadge({ icon: Icon, label, value, tone }: { icon: any; label: stri
 }
 
 /* ── Metric Card with sparkline ── */
-function MetricCard({ label, value, sub, icon: Icon, tone, spark }: { label: string; value: string; sub?: string; icon: any; tone: KpiTone; spark: { v: number }[] }) {
+function MetricCard({ label, value, sub, icon: Icon, tone, spark, onClick }: { label: string; value: string; sub?: string; icon: any; tone: KpiTone; spark: { v: number }[]; onClick?: () => void }) {
   const toneText: Record<KpiTone, string> = {
     success: "text-success", info: "text-info", warning: "text-warning",
     neutral: "text-foreground", destructive: "text-destructive", primary: "text-primary",
@@ -719,6 +719,7 @@ function MetricCard({ label, value, sub, icon: Icon, tone, spark }: { label: str
     success: "bg-success", info: "bg-info", warning: "bg-warning",
     neutral: "bg-border", destructive: "bg-destructive", primary: "bg-primary",
   };
+  const Comp: any = onClick ? "button" : "div";
   return (
     <div className="group relative overflow-hidden rounded-2xl border border-border/60 bg-card p-4 transition-all hover:border-primary/30">
       <div className={cn("absolute top-0 left-0 right-0 h-[2px]", toneRail[tone])} />
