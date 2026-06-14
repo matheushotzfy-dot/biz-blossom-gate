@@ -181,6 +181,23 @@ export default function ProductEditor() {
  const [sendConfirmationEmail, setSendConfirmationEmail] = useState(true);
  const [emailTiming, setEmailTiming] = useState("immediate");
 
+ // Upsell / Downsell (persistido em products)
+ const [upsellEnabled, setUpsellEnabled] = useState(false);
+ const [upsellType, setUpsellType] = useState<"none" | "page" | "popup">("none");
+ const [upsellName, setUpsellName] = useState("");
+ const [upsellPrice, setUpsellPrice] = useState("");
+ const [upsellDiscount, setUpsellDiscount] = useState("30");
+ const [upsellUrl, setUpsellUrl] = useState("");
+ const [downsellEnabled, setDownsellEnabled] = useState(false);
+ const [downsellUrl, setDownsellUrl] = useState("");
+ const [downsellPrice, setDownsellPrice] = useState("");
+ const [downsellDelay, setDownsellDelay] = useState("5");
+
+ // Co-produções existentes
+ const [coProductionsList, setCoProductionsList] = useState<any[]>([]);
+ const [invitingCoProducer, setInvitingCoProducer] = useState(false);
+
+
  const [orderBumps, setOrderBumps] = useState<{ id: string; bump_product_id: string }[]>([]);
  const [allProducts, setAllProducts] = useState<Tables<"products">[]>([]);
  const [selectedBumpProduct, setSelectedBumpProduct] = useState("");
@@ -253,14 +270,27 @@ export default function ProductEditor() {
  setAffiliateCommission(String(data.affiliate_commission || 30));
  setCoProductionEnabled(data.co_production_enabled || false);
  setCoProducerEmail(data.co_producer_email || "");
- setCoProductionSplit(String(data.co_production_split || 50));
-  setSupportEmail((data as any).support_email || "");
-  setSupportPhone((data as any).support_phone || "");
-  setDisplayName((data as any).display_name || "");
+  setCoProductionSplit(String(data.co_production_split || 50));
+   setSupportEmail((data as any).support_email || "");
+   setSupportPhone((data as any).support_phone || "");
+   setDisplayName((data as any).display_name || "");
  setDeliveryType((data as any).delivery_type || "digital");
+ // Upsell
+ setUpsellEnabled((data as any).upsell_enabled || false);
+ setUpsellType(((data as any).upsell_type as any) || "none");
+ setUpsellName((data as any).upsell_name || "");
+ setUpsellPrice((data as any).upsell_price != null ? String((data as any).upsell_price) : "");
+ setUpsellDiscount(String((data as any).upsell_discount ?? 30));
+ setUpsellUrl((data as any).upsell_url || "");
+ setDownsellEnabled((data as any).downsell_enabled || false);
+ setDownsellUrl((data as any).downsell_url || "");
+ setDownsellPrice((data as any).downsell_price != null ? String((data as any).downsell_price) : "");
+ setDownsellDelay(String((data as any).downsell_delay ?? 5));
+ setEmailTiming((data as any).email_timing || "immediate");
  setLoading(false);
  })();
-  }, [productId, user?.id, isNew]);
+   }, [productId, user?.id, isNew]);
+
 
   // Carrega gates de pagamento definidos pelo admin no perfil do seller
   useEffect(() => {
@@ -281,7 +311,10 @@ export default function ProductEditor() {
  .then(({ data }) => { if (data) setOrderBumps(data); });
  supabase.from("coupons").select("*").eq("user_id", user.id).eq("product_id", productId!).order("created_at", { ascending: false })
  .then(({ data }) => { if (data) setCoupons(data); });
+ supabase.from("co_productions").select("*").eq("product_id", productId!).order("created_at", { ascending: false })
+ .then(({ data }) => { if (data) setCoProductionsList(data); });
  }, [user?.id, productId, isNew]);
+
 
  const uploadImage = async (file: File, bucket: string, path: string): Promise<string | null> => {
  const ALLOWED = ["image/jpeg", "image/png", "image/webp", "image/gif"];
@@ -365,7 +398,19 @@ export default function ProductEditor() {
  checkout_email_confirm: emailConfirm,
  checkout_banner_desktop_url: desktopUrl || null,
  checkout_banner_mobile_url: mobileUrl || null,
+ upsell_enabled: upsellEnabled,
+ upsell_type: upsellEnabled ? upsellType : "none",
+ upsell_name: upsellName.trim() || null,
+ upsell_price: upsellPrice ? Number(String(upsellPrice).replace(",", ".")) : null,
+ upsell_discount: parseInt(upsellDiscount) || 30,
+ upsell_url: upsellUrl.trim() || null,
+ downsell_enabled: downsellEnabled,
+ downsell_url: downsellUrl.trim() || null,
+ downsell_price: downsellPrice ? Number(String(downsellPrice).replace(",", ".")) : null,
+ downsell_delay: parseInt(downsellDelay) || 5,
+ email_timing: emailTiming,
  };
+
 
  if (isNew && !createdProductId) {
  const slug = crypto.randomUUID().slice(0, 8);
@@ -513,6 +558,43 @@ export default function ProductEditor() {
  setOrderBumps(prev => prev.filter(b => b.id !== id));
  toast.success("Order bump removido");
  };
+
+ const inviteCoProducer = async () => {
+   if (!user || isNew || !effectiveProductId) return;
+   const email = coProducerEmail.trim().toLowerCase();
+   if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { toast.error("E-mail inválido"); return; }
+   const split = Number(coProductionSplit);
+   if (isNaN(split) || split < 1 || split > 99) { toast.error("Percentual deve ser entre 1 e 99%"); return; }
+   if (coProductionsList.some((c: any) => c.co_producer_email?.toLowerCase() === email && c.status !== "rejected")) {
+     toast.error("Este co-produtor já foi convidado");
+     return;
+   }
+   setInvitingCoProducer(true);
+   try {
+     const { data, error } = await supabase.from("co_productions").insert({
+       product_id: effectiveProductId,
+       owner_user_id: user.id,
+       co_producer_email: email,
+       split_percentage: split,
+       status: "pending",
+     } as any).select().maybeSingle();
+     if (error || !data) { toast.error("Erro ao convidar co-produtor"); return; }
+     setCoProductionsList(prev => [data, ...prev]);
+     await supabase.from("products").update({ co_production_enabled: true, co_producer_email: email, co_production_split: split } as any).eq("id", effectiveProductId).eq("user_id", user.id);
+     setCoProductionEnabled(true);
+     toast.success("Convite enviado!");
+   } finally {
+     setInvitingCoProducer(false);
+   }
+ };
+
+ const removeCoProducer = async (id: string) => {
+   const { error } = await supabase.from("co_productions").delete().eq("id", id);
+   if (error) { toast.error("Erro ao remover"); return; }
+   setCoProductionsList(prev => prev.filter((c: any) => c.id !== id));
+   toast.success("Co-produtor removido");
+ };
+
 
  const createCoupon = async () => {
  if (!user || isNew || !newCouponCode.trim()) return;
@@ -828,7 +910,9 @@ export default function ProductEditor() {
  />}
 
     {activeTab === "upsell" && <TabUpsell
- {...{ name, price, imagePreview, hasCustomThankYou, setHasCustomThankYou, thankYouUrl, setThankYouUrl, sendConfirmationEmail, setSendConfirmationEmail, emailTiming, setEmailTiming }}
+ {...{ isNew: tabsLocked, name, price, imagePreview, hasCustomThankYou, setHasCustomThankYou, thankYouUrl, setThankYouUrl, sendConfirmationEmail, setSendConfirmationEmail, emailTiming, setEmailTiming,
+       upsellEnabled, setUpsellEnabled, upsellType, setUpsellType, upsellName, setUpsellName, upsellPrice, setUpsellPrice, upsellDiscount, setUpsellDiscount, upsellUrl, setUpsellUrl,
+       downsellEnabled, setDownsellEnabled, downsellUrl, setDownsellUrl, downsellPrice, setDownsellPrice, downsellDelay, setDownsellDelay }}
  />}
 
  {activeTab === "checkout" && <TabCheckout
@@ -836,8 +920,9 @@ export default function ProductEditor() {
  />}
 
  {activeTab === "co-producao" && <TabCoProducao
- {...{ isNew: tabsLocked, coProducerEmail, setCoProducerEmail, coProductionSplit, setCoProductionSplit, coProductionDuration, setCoProductionDuration, coProductionSalesType, setCoProductionSalesType }}
+ {...{ isNew: tabsLocked, coProducerEmail, setCoProducerEmail, coProductionSplit, setCoProductionSplit, coProductionDuration, setCoProductionDuration, coProductionSalesType, setCoProductionSalesType, coProductionsList, inviteCoProducer, removeCoProducer, invitingCoProducer }}
  />}
+
 
  {activeTab === "cupons" && <TabCupons
  {...{ isNew: tabsLocked, coupons, newCouponCode, setNewCouponCode, newCouponType, setNewCouponType, newCouponValue, setNewCouponValue, newCouponMaxUses, setNewCouponMaxUses, creatingCoupon, createCoupon, toggleCoupon, deleteCoupon }}
@@ -1326,8 +1411,21 @@ function TabOrderBump({ isNew, orderBumps, allProducts, availableForBump, select
  );
  })}
  </div>
+ ) : allProducts.length === 0 ? (
+  <div className="rounded-2xl border border-dashed border-border bg-card/50 p-8 text-center space-y-3">
+    <div className="mx-auto h-12 w-12 rounded-2xl bg-warning/10 flex items-center justify-center">
+      <Layers className="h-5 w-5 text-warning" />
+    </div>
+    <p className="text-sm font-display font-bold text-foreground">Sem produtos para oferecer</p>
+    <p className="text-xs text-muted-foreground max-w-md mx-auto leading-relaxed">
+      Order bumps são produtos adicionais que aparecem no checkout. Você precisa ter pelo menos mais um produto ativo para configurar.
+    </p>
+    <Button onClick={() => window.open("/vendas/produtos/novo", "_blank")} variant="outline" className="gap-1.5 rounded-xl mt-2">
+      <Plus className="h-4 w-4" /> Criar outro produto
+    </Button>
+  </div>
  ) : (
- <EmptyCard icon={Layers} message="Nenhum bump adicionado" />
+ <EmptyCard icon={Layers} message="Nenhum bump adicionado. Selecione um produto abaixo." />
  )}
 
  {availableForBump.length > 0 && orderBumps.length < 5 && (
@@ -1343,35 +1441,50 @@ function TabOrderBump({ isNew, orderBumps, allProducts, availableForBump, select
  <Button onClick={addBump} disabled={!selectedBumpProduct} className="gap-1.5 rounded-xl"><Plus className="h-4 w-4" /> Adicionar</Button>
  </div>
  )}
- <p className="text-xs text-muted-foreground/40 text-right font-numbers tabular-nums">{orderBumps.length}/5</p>
+ {allProducts.length > 0 && <p className="text-xs text-muted-foreground/40 text-right font-numbers tabular-nums">{orderBumps.length}/5</p>}
+
  </>
  )}
  </div>
  );
 }
 
-function TabUpsell({ name, price, imagePreview, hasCustomThankYou, setHasCustomThankYou, thankYouUrl, setThankYouUrl, sendConfirmationEmail, setSendConfirmationEmail, emailTiming, setEmailTiming }: any) {
- const [upsellType, setUpsellType] = useState("none");
- const [upsellName, setUpsellName] = useState("");
- const [upsellPrice, setUpsellPrice] = useState("");
- const [upsellDiscount, setUpsellDiscount] = useState("30");
- const [downsellEnabled, setDownsellEnabled] = useState(false);
- const [downsellUrl, setDownsellUrl] = useState("");
- const [downsellPrice, setDownsellPrice] = useState("");
- const [downsellDelay, setDownsellDelay] = useState("5");
+function TabUpsell({ isNew, name, price, imagePreview, hasCustomThankYou, setHasCustomThankYou, thankYouUrl, setThankYouUrl, sendConfirmationEmail, setSendConfirmationEmail, emailTiming, setEmailTiming,
+  upsellEnabled, setUpsellEnabled, upsellType, setUpsellType, upsellName, setUpsellName, upsellPrice, setUpsellPrice, upsellDiscount, setUpsellDiscount, upsellUrl, setUpsellUrl,
+  downsellEnabled, setDownsellEnabled, downsellUrl, setDownsellUrl, downsellPrice, setDownsellPrice, downsellDelay, setDownsellDelay }: any) {
 
  const mainPrice = Number(price || 0);
  const upPrice = Number(upsellPrice || 0);
  const downPrice = Number(downsellPrice || 0);
- const isConfigured = upsellType !== "none";
+
+ const isConfigured = upsellEnabled && upsellType !== "none";
 
  // Projected AOV: assume 18% accept upsell, 12% of refusers accept downsell
- const projectedAov = mainPrice + (upPrice * 0.18) + (downsellEnabled ? downPrice * 0.12 * 0.82 : 0);
+ const projectedAov = mainPrice + (isConfigured ? upPrice * 0.18 : 0) + (isConfigured && downsellEnabled ? downPrice * 0.12 * 0.82 : 0);
  const upliftPct = mainPrice > 0 ? Math.round(((projectedAov - mainPrice) / mainPrice) * 100) : 0;
 
  return (
  <div className="space-y-6">
  <SectionHeader icon={ArrowUpRight} title="Funil pós-pagamento" subtitle="Defina a sequência de ofertas exibidas após a compra inicial." />
+
+ {/* Master toggle */}
+ <div className="rounded-2xl border border-border bg-card p-4 flex items-center justify-between gap-4">
+   <div className="flex items-start gap-3 min-w-0">
+     <div className={cn("h-10 w-10 rounded-xl flex items-center justify-center shrink-0", upsellEnabled ? "bg-primary/10 text-primary" : "bg-muted/30 text-muted-foreground/50")}>
+       <ArrowUpRight className="h-4 w-4" />
+     </div>
+     <div className="min-w-0">
+       <p className="text-sm font-display font-bold text-foreground">Ativar upsell pós-pagamento</p>
+       <p className="text-xs text-muted-foreground/70 mt-0.5">Quando desligado, o comprador vai direto para a página de obrigado.</p>
+     </div>
+   </div>
+   <Switch checked={upsellEnabled} onCheckedChange={setUpsellEnabled} />
+ </div>
+
+ {!upsellEnabled ? (
+   <EmptyCard icon={ArrowUpRight} message="Upsell desativado. Ative acima para configurar o funil." />
+ ) : (<>
+
 
  {/* ═══ FUNNEL FLOW VISUAL ═══ */}
  <div className="rounded-2xl border border-border bg-card overflow-hidden">
@@ -1580,9 +1693,11 @@ function TabUpsell({ name, price, imagePreview, hasCustomThankYou, setHasCustomT
  )}
  </AnimatePresence>
  </div>
+ </>)}
  </div>
  );
 }
+
 
 /* ───── Funnel sub-primitives ───── */
 function FunnelStep({ step, status, label, title, price, thumb, badge, icon: Icon, anchor, muted }: any) {
@@ -1818,7 +1933,7 @@ function TabCheckout({ isNew, name, price, productId, buttonColor, setButtonColo
  );
 }
 
-function TabCoProducao({ isNew, coProducerEmail, setCoProducerEmail, coProductionSplit, setCoProductionSplit, coProductionDuration, setCoProductionDuration, coProductionSalesType, setCoProductionSalesType }: any) {
+function TabCoProducao({ isNew, coProducerEmail, setCoProducerEmail, coProductionSplit, setCoProductionSplit, coProductionDuration, setCoProductionDuration, coProductionSalesType, setCoProductionSalesType, coProductionsList = [], inviteCoProducer, removeCoProducer, invitingCoProducer }: any) {
  return (
  <div className="space-y-6">
  <SectionHeader icon={Handshake} title="Co-Produção" subtitle="Divida receitas com parceiros de produção." />
@@ -1894,12 +2009,39 @@ function TabCoProducao({ isNew, coProducerEmail, setCoProducerEmail, coProductio
  </Select>
  </div>
 
- <Button className="gap-2 rounded-xl font-display font-bold" disabled={!coProducerEmail}>
- <UserPlus className="h-4 w-4" /> Convidar Co-Produtor
+ <Button onClick={inviteCoProducer} className="gap-2 rounded-xl font-display font-bold" disabled={!coProducerEmail || invitingCoProducer}>
+ <UserPlus className="h-4 w-4" /> {invitingCoProducer ? "Enviando..." : "Convidar Co-Produtor"}
  </Button>
  </EditorCard>
 
- <EmptyCard icon={Handshake} message="Nenhum co-produtor cadastrado" />
+ {coProductionsList.length > 0 ? (
+   <div className="space-y-2">
+     {coProductionsList.map((cp: any) => (
+       <div key={cp.id} className="flex items-center justify-between rounded-2xl border border-border bg-card p-4 relative overflow-hidden">
+         <div className={cn("absolute left-0 top-0 bottom-0 w-[3px] rounded-full",
+           cp.status === "accepted" ? "bg-success" : cp.status === "rejected" ? "bg-destructive" : "bg-warning")} />
+         <div className="flex items-center gap-3 pl-1 min-w-0">
+           <div className={cn("h-10 w-10 rounded-xl flex items-center justify-center shrink-0",
+             cp.status === "accepted" ? "bg-success/10 text-success" : cp.status === "rejected" ? "bg-destructive/10 text-destructive" : "bg-warning/10 text-warning")}>
+             <Handshake className="h-4 w-4" />
+           </div>
+           <div className="min-w-0">
+             <p className="text-sm font-display font-bold truncate">{cp.co_producer_email}</p>
+             <p className="text-[11px] text-muted-foreground/70 font-numbers">
+               {cp.split_percentage}% • {cp.status === "accepted" ? "Aceito" : cp.status === "rejected" ? "Rejeitado" : "Convite pendente"}
+             </p>
+           </div>
+         </div>
+         <Button variant="ghost" size="sm" onClick={() => removeCoProducer(cp.id)} className="text-destructive hover:text-destructive h-9 w-9 p-0 rounded-xl">
+           <Trash2 className="h-4 w-4" />
+         </Button>
+       </div>
+     ))}
+   </div>
+ ) : (
+   <EmptyCard icon={Handshake} message="Nenhum co-produtor cadastrado" />
+ )}
+
  </>
  )}
  </div>
@@ -2063,8 +2205,9 @@ function TabAfiliados({ isNew, productId, affiliateEnabled, setAffiliateEnabled,
  <h4 className="text-[15px] font-display font-black flex items-center gap-2"><UserPlus className="h-4 w-4 text-success" /> Convidar afiliados</h4>
  <p className="text-xs text-muted-foreground/60">Compartilhe esse link para convidar os seus afiliados:</p>
  <div className="flex items-center gap-2">
- <Input readOnly value={`${window.location.origin}/affiliate/invite/${productId?.slice(0, 8)}`} className="h-9 font-mono text-xs bg-muted/10 border-border" />
- <Button variant="outline" size="sm" onClick={() => copyLink(`${window.location.origin}/affiliate/invite/${productId?.slice(0, 8)}`)} className="gap-1.5 h-9 shrink-0 rounded-xl">
+ <Input readOnly value={`${window.location.origin}/vendas/afiliados?product=${productId || ""}`} className="h-9 font-mono text-xs bg-muted/10 border-border" />
+ <Button variant="outline" size="sm" onClick={() => copyLink(`${window.location.origin}/vendas/afiliados?product=${productId || ""}`)} className="gap-1.5 h-9 shrink-0 rounded-xl">
+
  <Copy className="h-3.5 w-3.5" /> Copiar
  </Button>
  </div>
@@ -2078,9 +2221,10 @@ function TabAfiliados({ isNew, productId, affiliateEnabled, setAffiliateEnabled,
 }
 
 function TabLinks({ isNew, product, pageUrl, affiliateEnabled, productId, getCheckoutLink, copyLink, name, price }: any) {
-  const [showQR, setShowQR] = useState(false);
-  const checkoutLink = getCheckoutLink();
-  const affiliateInviteLink = `${window.location.origin}/affiliate/invite/${productId?.slice(0, 8)}`;
+   const [showQR, setShowQR] = useState(false);
+   const checkoutLink = getCheckoutLink();
+   const affiliateInviteLink = `${window.location.origin}/vendas/afiliados?product=${productId || ""}`;
+
 
   const shareLinks = [
     { label: "WhatsApp", icon: MessageSquare, url: `https://wa.me/?text=${encodeURIComponent(`Confira: ${name} por apenas R$ ${Number(price || 0).toFixed(2)}! ${checkoutLink}`)}` },
