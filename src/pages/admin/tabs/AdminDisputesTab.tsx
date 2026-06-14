@@ -19,6 +19,7 @@ interface Dispute {
  type: string; status: string; reason: string | null; admin_notes: string | null;
  amount: number; resolved_at: string | null; admin_user_id: string | null;
  created_at: string; updated_at: string;
+ evidence_urls?: any[]; won_by_seller?: boolean | null;
 }
 
 interface Props {
