@@ -270,14 +270,27 @@ export default function ProductEditor() {
  setAffiliateCommission(String(data.affiliate_commission || 30));
  setCoProductionEnabled(data.co_production_enabled || false);
  setCoProducerEmail(data.co_producer_email || "");
- setCoProductionSplit(String(data.co_production_split || 50));
-  setSupportEmail((data as any).support_email || "");
-  setSupportPhone((data as any).support_phone || "");
-  setDisplayName((data as any).display_name || "");
+  setCoProductionSplit(String(data.co_production_split || 50));
+   setSupportEmail((data as any).support_email || "");
+   setSupportPhone((data as any).support_phone || "");
+   setDisplayName((data as any).display_name || "");
  setDeliveryType((data as any).delivery_type || "digital");
+ // Upsell
+ setUpsellEnabled((data as any).upsell_enabled || false);
+ setUpsellType(((data as any).upsell_type as any) || "none");
+ setUpsellName((data as any).upsell_name || "");
+ setUpsellPrice((data as any).upsell_price != null ? String((data as any).upsell_price) : "");
+ setUpsellDiscount(String((data as any).upsell_discount ?? 30));
+ setUpsellUrl((data as any).upsell_url || "");
+ setDownsellEnabled((data as any).downsell_enabled || false);
+ setDownsellUrl((data as any).downsell_url || "");
+ setDownsellPrice((data as any).downsell_price != null ? String((data as any).downsell_price) : "");
+ setDownsellDelay(String((data as any).downsell_delay ?? 5));
+ setEmailTiming((data as any).email_timing || "immediate");
  setLoading(false);
  })();
-  }, [productId, user?.id, isNew]);
+   }, [productId, user?.id, isNew]);
+
 
   // Carrega gates de pagamento definidos pelo admin no perfil do seller
   useEffect(() => {
