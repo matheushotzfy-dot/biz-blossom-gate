@@ -977,52 +977,63 @@ function TabGeral({ name, setName, description, setDescription, price, setPrice,
           <p className="mt-0.5 text-xs text-muted-foreground">Como seu produto é classificado e cobrado.</p>
         </header>
         <div className="rounded-2xl border border-border bg-card divide-y divide-border">
-          <div className="grid grid-cols-1 sm:grid-cols-2 divide-y sm:divide-y-0 sm:divide-x divide-border">
-            <div className="p-5 space-y-1.5">
-              <label className="text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">Categoria</label>
-              <Select value={category} onValueChange={setCategory}>
-                <SelectTrigger className="h-12 bg-card border-border font-display font-bold text-[13px] tracking-tight">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent className="w-[var(--radix-select-trigger-width)] max-w-none p-1.5">
-                  <RichSelectItem value="infoproduto" icon={Package}      label="Infoproduto"     desc="Conteúdo digital genérico" />
-                  <RichSelectItem value="curso"       icon={GraduationCap} label="Curso Online"    desc="Aulas em módulos" />
-                  <RichSelectItem value="ebook"       icon={BookOpen}     label="E-book"          desc="Material em PDF" />
-                  <RichSelectItem value="mentoria"    icon={Users}        label="Mentoria"        desc="Acompanhamento 1:1 ou grupo" />
-                  <RichSelectItem value="software"    icon={Code2}        label="Software / SaaS" desc="Aplicativo ou ferramenta" />
-                  <RichSelectItem value="servico"     icon={Briefcase}    label="Serviço"         desc="Trabalho prestado" />
-                  <RichSelectItem value="comunidade"  icon={MessageSquare} label="Comunidade"     desc="Grupo recorrente" />
-                  <RichSelectItem value="outro"       icon={Layers}       label="Outro"           desc="Modelo personalizado" />
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="p-5 space-y-1.5">
-              <label className="text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">Tipo de pagamento</label>
-              <Select value={paymentType} onValueChange={setPaymentType}>
-                <SelectTrigger className="h-12 bg-card border-border font-display font-bold text-[13px] tracking-tight">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent className="w-[var(--radix-select-trigger-width)] max-w-none p-1.5">
-                  <RichSelectItem value="unico" icon={DollarSign} label="Pagamento único" desc="Cobrança única (uma vez)" />
-                  <SelectPrimitive.Item
-                    value="assinatura"
-                    disabled
-                    className="relative flex w-full cursor-not-allowed select-none items-center gap-3 rounded-xl px-2.5 py-2.5 outline-none opacity-50"
+          <div className="p-5 space-y-3">
+            <label className="text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">Categoria</label>
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+              {CATEGORIES.map((opt) => {
+                const Icon = opt.icon;
+                const active = category === opt.value;
+                return (
+                  <button
+                    key={opt.value}
+                    type="button"
+                    onClick={() => setCategory(opt.value)}
+                    className={cn(
+                      "relative flex flex-col items-start gap-2 p-3 rounded-xl border text-left transition-colors duration-200",
+                      active
+                        ? "bg-primary/5 border-primary/40"
+                        : "bg-secondary/40 border-border hover:border-primary/20"
+                    )}
                   >
-                    <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-border bg-secondary text-muted-foreground">
-                      <RefreshCw className="h-3.5 w-3.5" strokeWidth={2} />
-                    </span>
-                    <span className="flex-1 min-w-0">
-                      <SelectPrimitive.ItemText asChild>
-                        <span className="block font-display text-[12.5px] font-bold tracking-tight text-foreground">Assinatura recorrente</span>
-                      </SelectPrimitive.ItemText>
-                      <span className="mt-0.5 block text-[10.5px] text-muted-foreground">Cobrança automática mensal</span>
-                    </span>
-                    <span className="ml-auto text-[9px] font-bold uppercase tracking-[0.12em] text-warning px-1.5 py-0.5 rounded border border-warning/40 bg-warning/10">Em breve</span>
-                  </SelectPrimitive.Item>
-                </SelectContent>
-              </Select>
+                    {active && <div className="absolute left-0 top-2 bottom-2 w-[3px] rounded-full bg-primary" />}
+                    <div className={cn("h-8 w-8 rounded-lg flex items-center justify-center border", active ? "bg-primary/10 border-primary/30 text-primary" : "bg-card border-border text-muted-foreground")}>
+                      <Icon className="h-4 w-4" />
+                    </div>
+                    <div className="min-w-0">
+                      <p className={cn("text-[12px] font-display font-bold leading-tight truncate", active ? "text-primary" : "text-foreground")}>{opt.label}</p>
+                      <p className="text-[10px] text-muted-foreground/70 leading-tight mt-0.5 line-clamp-1">{opt.desc}</p>
+                    </div>
+                  </button>
+                );
+              })}
             </div>
+          </div>
+          <div className="p-5 space-y-1.5">
+            <label className="text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">Tipo de pagamento</label>
+            <Select value={paymentType} onValueChange={setPaymentType}>
+              <SelectTrigger className="h-12 bg-card border-border font-display font-bold text-[13px] tracking-tight">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent className="w-[var(--radix-select-trigger-width)] max-w-none p-1.5">
+                <RichSelectItem value="unico" icon={DollarSign} label="Pagamento único" desc="Cobrança única (uma vez)" />
+                <SelectPrimitive.Item
+                  value="assinatura"
+                  disabled
+                  className="relative flex w-full cursor-not-allowed select-none items-center gap-3 rounded-xl px-2.5 py-2.5 outline-none opacity-50"
+                >
+                  <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-border bg-secondary text-muted-foreground">
+                    <RefreshCw className="h-3.5 w-3.5" strokeWidth={2} />
+                  </span>
+                  <span className="flex-1 min-w-0">
+                    <SelectPrimitive.ItemText asChild>
+                      <span className="block font-display text-[12.5px] font-bold tracking-tight text-foreground">Assinatura recorrente</span>
+                    </SelectPrimitive.ItemText>
+                    <span className="mt-0.5 block text-[10.5px] text-muted-foreground">Cobrança automática mensal</span>
+                  </span>
+                  <span className="ml-auto text-[9px] font-bold uppercase tracking-[0.12em] text-warning px-1.5 py-0.5 rounded border border-warning/40 bg-warning/10">Em breve</span>
+                </SelectPrimitive.Item>
+              </SelectContent>
+            </Select>
           </div>
           <div className="p-5">
             <div className="flex items-end justify-between gap-6">
