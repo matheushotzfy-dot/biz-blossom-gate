@@ -1052,7 +1052,7 @@ function TabGeral({ name, setName, description, setDescription, price, setPrice,
                 </div>
                 {priceNumber > 0 && (
                   <p className="text-[10px] font-bold text-muted-foreground">
-                    Valor cobrado: R$ {priceNumber.toFixed(2).replace(".", ",")}
+                    Valor cobrado: R$ {priceNumber.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                   </p>
                 )}
               </div>
@@ -1084,8 +1084,8 @@ function TabGeral({ name, setName, description, setDescription, price, setPrice,
               <label className="text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground flex items-center gap-1.5">
                 <ExternalLink className="h-3 w-3" /> Página de vendas
               </label>
-              <Input value={pageUrl} onChange={(e: any) => setPageUrl(e.target.value)} placeholder="https://seuproduto.com" type="url" className={cn("h-11 bg-secondary border-border", pageUrl && !urlValid && "border-destructive/50")} required />
-              <p className={cn("text-[10px]", urlValid ? "text-success" : "text-muted-foreground/60")}>{urlValid ? "URL válida" : "Insira o domínio completo"}</p>
+              <Input value={pageUrl} onChange={(e: any) => setPageUrl(e.target.value)} placeholder="seuproduto.com" type="text" className={cn("h-11 bg-secondary border-border", pageUrl && !urlValid && "border-destructive/50")} required />
+              <p className={cn("text-[10px]", urlValid ? "text-success" : "text-muted-foreground/60")}>{urlValid ? "URL válida — o https:// é adicionado automaticamente" : "Insira o domínio (ex: seusite.com.br) — o https:// é opcional"}</p>
             </div>
             <div className="space-y-1.5">
               <label className="text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground flex items-center gap-1.5">
