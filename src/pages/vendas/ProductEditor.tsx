@@ -1411,8 +1411,21 @@ function TabOrderBump({ isNew, orderBumps, allProducts, availableForBump, select
  );
  })}
  </div>
+ ) : allProducts.length === 0 ? (
+  <div className="rounded-2xl border border-dashed border-border bg-card/50 p-8 text-center space-y-3">
+    <div className="mx-auto h-12 w-12 rounded-2xl bg-warning/10 flex items-center justify-center">
+      <Layers className="h-5 w-5 text-warning" />
+    </div>
+    <p className="text-sm font-display font-bold text-foreground">Sem produtos para oferecer</p>
+    <p className="text-xs text-muted-foreground max-w-md mx-auto leading-relaxed">
+      Order bumps são produtos adicionais que aparecem no checkout. Você precisa ter pelo menos mais um produto ativo para configurar.
+    </p>
+    <Button onClick={() => window.open("/vendas/produtos/novo", "_blank")} variant="outline" className="gap-1.5 rounded-xl mt-2">
+      <Plus className="h-4 w-4" /> Criar outro produto
+    </Button>
+  </div>
  ) : (
- <EmptyCard icon={Layers} message="Nenhum bump adicionado" />
+ <EmptyCard icon={Layers} message="Nenhum bump adicionado. Selecione um produto abaixo." />
  )}
 
  {availableForBump.length > 0 && orderBumps.length < 5 && (
@@ -1428,7 +1441,8 @@ function TabOrderBump({ isNew, orderBumps, allProducts, availableForBump, select
  <Button onClick={addBump} disabled={!selectedBumpProduct} className="gap-1.5 rounded-xl"><Plus className="h-4 w-4" /> Adicionar</Button>
  </div>
  )}
- <p className="text-xs text-muted-foreground/40 text-right font-numbers tabular-nums">{orderBumps.length}/5</p>
+ {allProducts.length > 0 && <p className="text-xs text-muted-foreground/40 text-right font-numbers tabular-nums">{orderBumps.length}/5</p>}
+
  </>
  )}
  </div>
