@@ -693,7 +693,10 @@ export default function AdminDashboard() {
                   <AdminDisputesTab type="medpix" title="MedPix" profiles={profiles} transactions={transactions} products={products} fmtCurrency={fmtCurrency} />
                 )}
                 {activeTab === "refunds" && isAdmin && (
-                  <AdminDisputesTab type="refund" title="Reembolsos" profiles={profiles} transactions={transactions} products={products} fmtCurrency={fmtCurrency} />
+                  <AdminDisputesTab type="refund" title="Reembolsos (Interno)" profiles={profiles} transactions={transactions} products={products} fmtCurrency={fmtCurrency} />
+                )}
+                {activeTab === "chargeback" && isAdmin && (
+                  <AdminDisputesTab type="chargeback" title="Chargeback (Cartão)" profiles={profiles} transactions={transactions} products={products} fmtCurrency={fmtCurrency} />
                 )}
                 {activeTab === "premed" && isAdmin && (
                   <AdminDisputesTab type="pre_med_pix" title="Pre-Med PIX" profiles={profiles} transactions={transactions} products={products} fmtCurrency={fmtCurrency} />
