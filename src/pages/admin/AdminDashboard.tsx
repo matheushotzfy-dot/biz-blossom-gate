@@ -655,6 +655,7 @@ export default function AdminDashboard() {
                     withdrawals={withdrawals} onWithdrawalAction={handleWithdrawalAction}
                     onUserStatus={handleUserStatus} fmtCurrency={fmtCurrency}
                     isEmployee={isEmployee} dateRange={dateRange}
+                    onNavigate={setActiveTab}
                   />
                 )}
                 {activeTab === "analytics" && isAdmin && (

@@ -20,7 +20,7 @@ import type { Tables } from "@/integrations/supabase/types";
 import { cn } from "@/lib/utils";
 import React from "react";
 
-interface Dispute { id: string; type: string; status: string; seller_user_id: string; amount: number; created_at: string; }
+interface Dispute { id: string; type: string; status: string; seller_user_id: string; amount: number; created_at: string; transaction_id: string | null; }
 
 interface Props {
   transactions: Tables<"transactions">[];
@@ -32,6 +32,7 @@ interface Props {
   fmtCurrency: (v: number) => string;
   isEmployee?: boolean;
   dateRange?: { from: Date; to: Date };
+  onNavigate?: (tabId: string) => void;
 }
 
 /* ── Premium Recharts Tooltip — semantic tokens ── */
@@ -106,7 +107,7 @@ function StatusDot({ tone, pulse }: { tone: "success" | "warning" | "destructive
 }
 
 
-export default function AdminOverviewTab({ transactions, profiles, products, withdrawals, onWithdrawalAction, onUserStatus, fmtCurrency, isEmployee = false, dateRange }: Props) {
+export default function AdminOverviewTab({ transactions, profiles, products, withdrawals, onWithdrawalAction, onUserStatus, fmtCurrency, isEmployee = false, dateRange, onNavigate }: Props) {
  const [disputes, setDisputes] = useState<Dispute[]>([]);
  const [realtimeTx, setRealtimeTx] = useState<Tables<"transactions">[]>([]);
  const [chartPeriod, setChartPeriod] = useState<"7d" | "30d">("7d");
@@ -137,7 +138,7 @@ export default function AdminOverviewTab({ transactions, profiles, products, wit
 
  useEffect(() => {
  Promise.all([
- supabase.from("disputes").select("id,type,status,seller_user_id,amount,created_at"),
+ supabase.from("disputes").select("id,type,status,seller_user_id,amount,created_at,transaction_id"),
  supabase.from("fraud_logs").select("*").order("created_at", { ascending: false }).limit(20),
  ]).then(([dRes, fRes]) => {
  if (dRes.data) setDisputes(dRes.data as Dispute[]);
@@ -212,6 +213,18 @@ export default function AdminOverviewTab({ transactions, profiles, products, wit
  const activeSellersToday = new Set(todayTx.map(t => t.user_id)).size;
  const conversionRate = filteredTx.length > 0 ? ((filteredApproved.length / filteredTx.length) * 100).toFixed(1) : "0.0";
  const ticketMedio = filteredApproved.length > 0 ? totalVolume / filteredApproved.length : 0;
+
+ // Lucro últimos 30 dias (fixo, independente do dateRange)
+ const last30Start = useMemo(() => { const d = new Date(); d.setDate(d.getDate() - 30); return d; }, []);
+ const last30Tx = useMemo(() => approved.filter(t => new Date(t.created_at) >= last30Start), [approved, last30Start]);
+ const profit30d = last30Tx.reduce((a, t) => a + Number(t.fee_amount), 0);
+
+ // MEDs pendentes para o card
+ const pendingMeds = useMemo(
+   () => disputes.filter(d => d.status === "open" || d.status === "in_review"),
+   [disputes]
+ );
+ const pendingMedsAmount = pendingMeds.reduce((a, d) => a + Number(d.amount), 0);
 
  const methodApproval = useMemo(() => {
  const methods: Record<string, { total: number; approved: number; volume: number }> = {};
@@ -329,15 +342,15 @@ export default function AdminOverviewTab({ transactions, profiles, products, wit
     );
   }
 
-  const heroKpis: { label: string; value: string; sub: string; icon: any; tone: KpiTone; spark: { v: number }[] }[] = [
-    { label: "Movimentado Hoje", value: fmtCurrency(tpvToday), sub: `${todayTx.length} vendas aprovadas`, icon: Flame, tone: todayTx.length > 0 ? "success" : "neutral", spark: sparkSeries.tpv },
-    { label: "Lucro Hoje", value: fmtCurrency(takeRateToday), sub: `${activeSellersToday} sellers venderam`, icon: DollarSign, tone: "primary", spark: sparkSeries.tpv },
-    { label: "Saques Pendentes", value: fmtCurrency(pendingWdAmount), sub: `${pendingWd.length} solicitações · ${highValueWd.length} altos`, icon: Hourglass, tone: pendingWd.length > 5 ? "warning" : "neutral", spark: sparkSeries.vendas },
-    { label: "Novos Usuários", value: String(newUsersInRange.length), sub: "cadastros no período", icon: UserPlus, tone: "info", spark: sparkSeries.vendas },
-    { label: "Lucro no Período", value: fmtCurrency(takeRateTotal), sub: `${takeRatePct}% de take rate`, icon: TrendingUp, tone: "success", spark: sparkSeries.tpv },
-    { label: "Aprovações KYC", value: String(kycPending.length), sub: "usuários aguardando análise", icon: UserCheck, tone: kycPending.length > 0 ? "warning" : "neutral", spark: sparkSeries.vendas },
-    { label: "Saldo Retido", value: fmtCurrency(totalRetained), sub: "aguardando liberação", icon: Lock, tone: "warning", spark: sparkSeries.tpv },
-    { label: "Volume Sacado", value: fmtCurrency(totalWithdrawn), sub: "pagos no período", icon: ArrowDownToLine, tone: "neutral", spark: sparkSeries.tpv },
+  const heroKpis: { label: string; value: string; sub: string; icon: any; tone: KpiTone; spark: { v: number }[]; nav?: string }[] = [
+    { label: "Movimentado Hoje", value: fmtCurrency(tpvToday), sub: `${todayTx.length} vendas aprovadas`, icon: Flame, tone: todayTx.length > 0 ? "success" : "neutral", spark: sparkSeries.tpv, nav: "transactions" },
+    { label: "Lucro Hoje", value: fmtCurrency(takeRateToday), sub: `${activeSellersToday} sellers venderam`, icon: DollarSign, tone: "primary", spark: sparkSeries.tpv, nav: "transactions" },
+    { label: "Saques Pendentes", value: fmtCurrency(pendingWdAmount), sub: `${pendingWd.length} solicitações · ${highValueWd.length} altos`, icon: Hourglass, tone: pendingWd.length > 5 ? "warning" : "neutral", spark: sparkSeries.vendas, nav: "withdrawals" },
+    { label: "Novos Usuários", value: String(newUsersInRange.length), sub: "cadastros no período", icon: UserPlus, tone: "info", spark: sparkSeries.vendas, nav: "sellers" },
+    { label: "Lucro Últimos 30 Dias", value: fmtCurrency(profit30d), sub: `${last30Tx.length} vendas · ${takeRatePct}% take rate`, icon: TrendingUp, tone: "success", spark: sparkSeries.tpv, nav: "analytics" },
+    { label: "MEDs Pendentes", value: String(pendingMeds.length), sub: pendingMeds.length > 0 ? `${fmtCurrency(pendingMedsAmount)} em disputa` : "Nenhum em aberto", icon: AlertCircle, tone: pendingMeds.length > 0 ? "destructive" : "neutral", spark: sparkSeries.cb, nav: "medpix" },
+    { label: "Aprovações KYC", value: String(kycPending.length), sub: "usuários aguardando análise", icon: UserCheck, tone: kycPending.length > 0 ? "warning" : "neutral", spark: sparkSeries.vendas, nav: "sellers" },
+    { label: "Saldo Retido", value: fmtCurrency(totalRetained), sub: "aguardando liberação", icon: Lock, tone: "warning", spark: sparkSeries.tpv, nav: "transactions" },
   ];
 
   return (
@@ -400,7 +413,7 @@ export default function AdminOverviewTab({ transactions, profiles, products, wit
 
       {/* ── Premium KPI Grid with sparklines ── */}
       <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-3">
-        {heroKpis.map((k, i) => <MetricCard key={i} {...k} />)}
+        {heroKpis.map((k, i) => <MetricCard key={i} {...k} onClick={k.nav && onNavigate ? () => onNavigate(k.nav!) : undefined} />)}
       </div>
 
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-4">
@@ -626,6 +639,59 @@ export default function AdminOverviewTab({ transactions, profiles, products, wit
         </Panel>
       </div>
 
+      {/* ── MEDs / Chargebacks pendentes ── */}
+      <Panel
+        title={`MEDs Pendentes (${pendingMeds.length})`}
+        icon={<AlertCircle className="h-3.5 w-3.5" />}
+        tone={pendingMeds.length > 0 ? "destructive" : "neutral"}
+        action={
+          onNavigate ? (
+            <button
+              onClick={() => onNavigate("medpix")}
+              className="text-[10px] font-black uppercase tracking-[0.16em] text-primary hover:underline"
+            >
+              Ver todos →
+            </button>
+          ) : undefined
+        }
+      >
+        {pendingMeds.length === 0 ? (
+          <div className="flex flex-col items-center justify-center py-8 text-muted-foreground/60">
+            <CheckCircle2 className="h-6 w-6 mb-2" />
+            <p className="text-[11px]">Nenhum MED em aberto</p>
+          </div>
+        ) : (
+          <div className="space-y-2 max-h-[320px] overflow-y-auto pr-1">
+            {pendingMeds.slice(0, 10).map(d => {
+              const tx = transactions.find(t => t.id === d.transaction_id);
+              const seller = profiles.find(p => p.user_id === d.seller_user_id);
+              return (
+                <button
+                  key={d.id}
+                  type="button"
+                  onClick={() => onNavigate?.("medpix")}
+                  className="w-full text-left flex items-center justify-between px-3 py-2.5 rounded-lg border border-destructive/30 hover:bg-destructive/5 transition-colors"
+                >
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center gap-2 mb-0.5">
+                      <p className="text-[12px] font-bold text-foreground tabular-nums">{fmtCurrency(Number(d.amount))}</p>
+                      <span className="text-[8px] font-bold px-1.5 py-0.5 rounded bg-destructive/10 text-destructive border border-destructive/25 uppercase">
+                        {d.type === "medpix" ? "MED" : d.type === "pre_med_pix" ? "Pre-MED" : "Reemb"}
+                      </span>
+                      <span className="text-[8px] font-bold px-1.5 py-0.5 rounded bg-warning/10 text-warning border border-warning/25 uppercase">
+                        {d.status === "open" ? "Aberto" : "Em análise"}
+                      </span>
+                    </div>
+                    <p className="text-[10px] text-muted-foreground truncate">{seller?.full_name || "—"} · {seller?.email || ""}</p>
+                    <p className="text-[9px] text-muted-foreground/60 font-mono">TX: {d.transaction_id?.slice(0, 8) || "—"} · {tx?.payment_method || "—"}</p>
+                  </div>
+                </button>
+              );
+            })}
+          </div>
+        )}
+      </Panel>
+
       <Panel title="Bloqueios Anti-Fraude" icon={<ShieldAlert className="h-3.5 w-3.5 text-destructive" />} tone="destructive">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-2 max-h-[280px] overflow-y-auto pr-1">
           {fraudLogs.length > 0 ? fraudLogs.slice(0, 20).map((f: any) => (
@@ -689,7 +755,7 @@ function PulseBadge({ icon: Icon, label, value, tone }: { icon: any; label: stri
 }
 
 /* ── Metric Card with sparkline ── */
-function MetricCard({ label, value, sub, icon: Icon, tone, spark }: { label: string; value: string; sub?: string; icon: any; tone: KpiTone; spark: { v: number }[] }) {
+function MetricCard({ label, value, sub, icon: Icon, tone, spark, onClick }: { label: string; value: string; sub?: string; icon: any; tone: KpiTone; spark: { v: number }[]; onClick?: () => void }) {
   const toneText: Record<KpiTone, string> = {
     success: "text-success", info: "text-info", warning: "text-warning",
     neutral: "text-foreground", destructive: "text-destructive", primary: "text-primary",
@@ -706,8 +772,15 @@ function MetricCard({ label, value, sub, icon: Icon, tone, spark }: { label: str
     success: "bg-success", info: "bg-info", warning: "bg-warning",
     neutral: "bg-border", destructive: "bg-destructive", primary: "bg-primary",
   };
+  const Comp: any = onClick ? "button" : "div";
   return (
-    <div className="group relative overflow-hidden rounded-2xl border border-border/60 bg-card p-4 transition-all hover:border-primary/30">
+    <Comp
+      onClick={onClick}
+      className={cn(
+        "group relative overflow-hidden rounded-2xl border border-border/60 bg-card p-4 transition-all hover:border-primary/30 text-left w-full",
+        onClick && "cursor-pointer hover:-translate-y-0.5"
+      )}
+    >
       <div className={cn("absolute top-0 left-0 right-0 h-[2px]", toneRail[tone])} />
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
@@ -732,7 +805,7 @@ function MetricCard({ label, value, sub, icon: Icon, tone, spark }: { label: str
           </AreaChart>
         </ResponsiveContainer>
       </div>
-    </div>
+    </Comp>
   );
 }
 
