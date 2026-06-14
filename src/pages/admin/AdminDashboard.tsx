@@ -10,7 +10,7 @@ import {
   Bug, UserX, Search, Banknote, ShieldCheck,
   FileWarning, Package2, Radio, BarChart3, Calendar,
   ChevronLeft, ChevronRight, PanelLeftClose, PanelLeft,
-  Flame, Sparkles, Crown, Globe, Palette, CheckCircle2,
+  Flame, Sparkles, Crown, Globe, Palette, CheckCircle2, Trophy,
 } from "lucide-react";
 import { toast } from "sonner";
 import type { Tables } from "@/integrations/supabase/types";
