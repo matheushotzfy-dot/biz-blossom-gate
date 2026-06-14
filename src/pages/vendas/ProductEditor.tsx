@@ -181,6 +181,23 @@ export default function ProductEditor() {
  const [sendConfirmationEmail, setSendConfirmationEmail] = useState(true);
  const [emailTiming, setEmailTiming] = useState("immediate");
 
+ // Upsell / Downsell (persistido em products)
+ const [upsellEnabled, setUpsellEnabled] = useState(false);
+ const [upsellType, setUpsellType] = useState<"none" | "page" | "popup">("none");
+ const [upsellName, setUpsellName] = useState("");
+ const [upsellPrice, setUpsellPrice] = useState("");
+ const [upsellDiscount, setUpsellDiscount] = useState("30");
+ const [upsellUrl, setUpsellUrl] = useState("");
+ const [downsellEnabled, setDownsellEnabled] = useState(false);
+ const [downsellUrl, setDownsellUrl] = useState("");
+ const [downsellPrice, setDownsellPrice] = useState("");
+ const [downsellDelay, setDownsellDelay] = useState("5");
+
+ // Co-produções existentes
+ const [coProductionsList, setCoProductionsList] = useState<any[]>([]);
+ const [invitingCoProducer, setInvitingCoProducer] = useState(false);
+
+
  const [orderBumps, setOrderBumps] = useState<{ id: string; bump_product_id: string }[]>([]);
  const [allProducts, setAllProducts] = useState<Tables<"products">[]>([]);
  const [selectedBumpProduct, setSelectedBumpProduct] = useState("");
