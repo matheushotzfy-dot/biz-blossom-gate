@@ -700,6 +700,7 @@ export default function AdminDashboard() {
                 {activeTab === "subscriptions" && isAdmin && <AdminSubscriptionsTab profiles={profiles} fmtCurrency={fmtCurrency} />}
                 {activeTab === "referrals" && isAdmin && <AdminReferralsTab profiles={profiles} fmtCurrency={fmtCurrency} />}
                 {activeTab === "support" && isAdmin && <AdminSupportTab profiles={profiles} />}
+                {activeTab === "rewards" && isAdmin && <AdminRewardsTab profiles={profiles} />}
                 {activeTab === "audit" && isAdmin && <AdminAuditTab profiles={profiles} />}
                 {activeTab === "error-logs" && isAdmin && <AdminErrorLogsTab profiles={profiles} />}
                 {activeTab === "inactive-sellers" && isAdmin && (
