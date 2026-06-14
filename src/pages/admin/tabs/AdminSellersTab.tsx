@@ -25,6 +25,7 @@ import type { Tables } from "@/integrations/supabase/types";
 import { FinanceiroHero, FinanceiroKpi, FinanceiroKpiGrid } from "@/components/financeiro/FinanceiroHero";
 import { PremiumPanel, PremiumEmpty, premiumTable } from "./AdminPremium";
 import { logAdminAction } from "@/lib/auditLog";
+import { cn } from "@/lib/utils";
 
 interface ActivityLog {
   id: string; user_id: string; action: string; entity_type: string;
