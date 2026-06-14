@@ -138,7 +138,7 @@ export default function AdminOverviewTab({ transactions, profiles, products, wit
 
  useEffect(() => {
  Promise.all([
- supabase.from("disputes").select("id,type,status,seller_user_id,amount,created_at"),
+ supabase.from("disputes").select("id,type,status,seller_user_id,amount,created_at,transaction_id"),
  supabase.from("fraud_logs").select("*").order("created_at", { ascending: false }).limit(20),
  ]).then(([dRes, fRes]) => {
  if (dRes.data) setDisputes(dRes.data as Dispute[]);
