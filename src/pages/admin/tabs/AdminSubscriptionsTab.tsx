@@ -1,7 +1,7 @@
 import { RefreshCw, Hammer } from "lucide-react";
 import { FinanceiroHero } from "@/components/financeiro/FinanceiroHero";
 
-export default function AdminSubscriptionsTab() {
+export default function AdminSubscriptionsTab(_props: any) {
   return (
     <div className="space-y-6 animate-fade-in">
       <FinanceiroHero
