@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { Fragment, useMemo, useState } from "react";
 import { UserX, Search, Mail, AlertTriangle, Calendar, TrendingDown, Phone, Copy, Download, MessageCircle, FileText, ChevronRight, ChevronDown, DollarSign, Percent, Receipt } from "lucide-react";
 import { FinanceiroHero } from "@/components/financeiro/FinanceiroHero";
 import { PremiumMetric, PremiumMetricGrid, PremiumPanel, premiumTable } from "./AdminPremium";
