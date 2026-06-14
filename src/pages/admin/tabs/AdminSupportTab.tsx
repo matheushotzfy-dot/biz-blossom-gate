@@ -286,8 +286,15 @@ export default function AdminSupportTab({
                     {/* Resposta atual */}
                     {ticket.admin_reply && !isReplying && (
                       <div>
-                        <p className="text-[10px] font-black text-emerald-500 uppercase tracking-widest mb-2">
-                          Resposta enviada {ticket.replied_at && `· ${formatDate(ticket.replied_at)}`}
+                        <p className="text-[10px] font-black text-emerald-500 uppercase tracking-widest mb-2 flex items-center gap-2">
+                          <span>
+                            {(() => {
+                              const aid = (ticket as any).admin_user_id as string | null;
+                              const r = aid ? responders[aid] : null;
+                              return r ? `${r.role} - ${r.name}` : "EQUIPE DE SUPORTE";
+                            })()}
+                          </span>
+                          {ticket.replied_at && <span className="text-muted-foreground/60 font-bold">· {formatDate(ticket.replied_at)}</span>}
                         </p>
                         <div className="rounded-lg border border-emerald-500/20 bg-emerald-500/5 border-l-2 border-l-emerald-500 p-3 text-[13px] text-foreground/90 whitespace-pre-wrap leading-relaxed">
                           {ticket.admin_reply}
