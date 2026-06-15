@@ -308,12 +308,12 @@ export default function AdminDashboard() {
         {/* Brand */}
         <div className="h-[56px] flex items-center px-4 gap-2.5 af-border border-b shrink-0">
           <div className="h-8 w-8 rounded-md af-accent-bg flex items-center justify-center shrink-0">
-            <Shield className="h-4 w-4 text-white" strokeWidth={2.25} />
+            <Shield className="h-4 w-4" strokeWidth={2.25} />
           </div>
           {!sidebarCollapsed && (
             <div className="min-w-0">
-              <h1 className="text-[14px] font-semibold tracking-tight text-[#0f172a] leading-tight">HOTZFY</h1>
-              <p className="text-[10px] text-[#64748b] leading-tight">{isEmployee ? "Staff Panel" : "Admin Panel"}</p>
+              <h1 className="text-[14px] font-semibold tracking-tight af-text leading-tight">HOTZFY</h1>
+              <p className="text-[10px] af-muted leading-tight">{isEmployee ? "Staff Panel" : "Admin Panel"}</p>
             </div>
           )}
         </div>
@@ -322,12 +322,12 @@ export default function AdminDashboard() {
         {!sidebarCollapsed && (
           <div className="px-3 pt-3 pb-1">
             <div className="relative">
-              <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-[#94a3b8]" />
+              <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 af-muted-2" />
               <input
                 value={navQuery}
                 onChange={(e) => setNavQuery(e.target.value)}
                 placeholder="Buscar..."
-                className="w-full h-8 pl-8 pr-2.5 text-[12px] bg-[#f8fafc] border border-[#e2e8f0] rounded-md text-[#0f172a] placeholder:text-[#94a3b8] focus:outline-none focus:border-[#1e293b]/40 focus:ring-1 focus:ring-[#1e293b]/15"
+                className="af-input w-full h-8 pl-8 pr-2.5 text-[12px] rounded-md focus:outline-none"
               />
             </div>
           </div>
@@ -338,11 +338,11 @@ export default function AdminDashboard() {
           {filteredSections.map(section => (
             <div key={section.id} className="mb-3">
               {!sidebarCollapsed && (
-                <p className="text-[10px] font-semibold uppercase tracking-[0.08em] text-[#94a3b8] px-2.5 mb-1 mt-1">
+                <p className="text-[10px] font-semibold uppercase tracking-[0.08em] af-muted-2 px-2.5 mb-1 mt-1">
                   {section.label}
                 </p>
               )}
-              {sidebarCollapsed && <div className="h-px bg-[#e2e8f0] mx-2 mb-1.5" />}
+              {sidebarCollapsed && <div className="h-px af-border border-t mx-2 mb-1.5" />}
               <div className="space-y-px">
                 {section.items.map((item) => {
                   const isActive = activeTab === item.id;
@@ -355,20 +355,19 @@ export default function AdminDashboard() {
                       className={cn(
                         "relative w-full flex items-center gap-2.5 rounded-md transition-colors group",
                         sidebarCollapsed ? "justify-center px-0 py-2" : "px-2.5 py-1.5",
-                        isActive
-                          ? "bg-[#1e293b] text-white"
-                          : "text-[#475569] hover:bg-[#f1f5f9] hover:text-[#0f172a]"
+                        isActive ? "af-accent-bg" : "af-text-3 hover:af-surface-2 hover:af-text"
                       )}
+                      style={!isActive ? {} : undefined}
                     >
-                      <item.icon className={cn("h-[15px] w-[15px] shrink-0", isActive ? "text-white" : "text-[#64748b] group-hover:text-[#0f172a]")} strokeWidth={2} />
+                      <item.icon className={cn("h-[15px] w-[15px] shrink-0", isActive ? "" : "af-muted group-hover:af-text")} strokeWidth={2} />
                       {!sidebarCollapsed && (
                         <span className={cn("text-[12.5px] truncate", isActive ? "font-semibold" : "font-medium")}>{item.label}</span>
                       )}
                       {hasBadge && (
                         <span className={cn(
-                          "h-4 min-w-[16px] px-1 rounded-full bg-[#ef4444] text-white text-[9px] font-bold flex items-center justify-center",
+                          "h-4 min-w-[16px] px-1 rounded-full text-white text-[9px] font-bold flex items-center justify-center",
                           sidebarCollapsed ? "absolute -top-0.5 -right-0.5 h-3.5 min-w-[14px]" : "ml-auto"
-                        )}>
+                        )} style={{ background: "var(--as-danger)" }}>
                           {pendingWdCount}
                         </span>
                       )}
@@ -381,17 +380,18 @@ export default function AdminDashboard() {
         </nav>
 
         {/* Sidebar footer */}
-        <div className="border-t border-[#e2e8f0] p-2 space-y-0.5 shrink-0">
+        <div className="af-border border-t p-2 space-y-0.5 shrink-0">
           <button
             onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
-            className="w-full flex items-center justify-center gap-2 px-2.5 py-1.5 rounded-md text-[#64748b] hover:bg-[#f1f5f9] hover:text-[#0f172a] transition-colors max-lg:hidden"
+            className="w-full flex items-center justify-center gap-2 px-2.5 py-1.5 rounded-md af-muted hover:af-surface-2 hover:af-text transition-colors max-lg:hidden"
           >
             {sidebarCollapsed ? <PanelLeft className="h-4 w-4" /> : <PanelLeftClose className="h-4 w-4" />}
             {!sidebarCollapsed && <span className="text-[11.5px] font-medium">Recolher</span>}
           </button>
           <button
             onClick={handleLogout}
-            className="w-full flex items-center justify-center gap-2 px-2.5 py-1.5 rounded-md text-[#64748b] hover:bg-[#fef2f2] hover:text-[#b91c1c] transition-colors"
+            className="w-full flex items-center justify-center gap-2 px-2.5 py-1.5 rounded-md af-muted hover:af-surface-2 transition-colors"
+            style={{ }}
           >
             <LogOut className="h-4 w-4" />
             {!sidebarCollapsed && <span className="text-[11.5px] font-medium">Sair</span>}
@@ -402,23 +402,23 @@ export default function AdminDashboard() {
       {/* ═══ MAIN AREA ═══ */}
       <div className="flex-1 flex flex-col min-w-0">
         {/* Top bar */}
-        <header className="h-[56px] flex items-center px-4 lg:px-6 gap-3 shrink-0 bg-white border-b border-[#e2e8f0]">
+        <header className="h-[56px] flex items-center px-4 lg:px-6 gap-3 shrink-0 af-surface af-border border-b">
           <div className="flex items-center gap-3 flex-1 min-w-0">
             <button
               onClick={() => setMobileMenuOpen(true)}
-              className="lg:hidden h-8 w-8 rounded-md flex items-center justify-center border border-[#e2e8f0] text-[#475569] hover:bg-[#f1f5f9]"
+              className="lg:hidden h-8 w-8 rounded-md flex items-center justify-center af-border border af-text-3 hover:af-surface-2"
             >
               <PanelLeft className="h-4 w-4" />
             </button>
 
             <div className="flex items-center gap-2 min-w-0">
-              <span className="text-[11px] font-medium text-[#94a3b8] hidden sm:inline">Admin</span>
-              <ChevronDown className="h-3 w-3 text-[#cbd5e1] -rotate-90 hidden sm:inline" />
-              <h2 className="text-[14px] font-semibold text-[#0f172a] truncate">{activeTabLabel}</h2>
+              <span className="text-[11px] font-medium af-muted-2 hidden sm:inline">Admin</span>
+              <ChevronDown className="h-3 w-3 af-muted-2 -rotate-90 hidden sm:inline" />
+              <h2 className="text-[14px] font-semibold af-text truncate">{activeTabLabel}</h2>
             </div>
 
             {syncing && (
-              <span className="flex items-center gap-1.5 text-[10.5px] font-medium text-[#64748b] bg-[#f1f5f9] border border-[#e2e8f0] rounded-md px-2 py-0.5">
+              <span className="flex items-center gap-1.5 text-[10.5px] font-medium af-muted af-surface-2 af-border border rounded-md px-2 py-0.5">
                 <RefreshCw className="h-3 w-3 animate-spin" />
                 Sincronizando
               </span>
@@ -426,7 +426,7 @@ export default function AdminDashboard() {
           </div>
 
           {/* Date picker */}
-          <div className="hidden md:flex items-center gap-px p-0.5 rounded-md bg-[#f1f5f9] border border-[#e2e8f0]">
+          <div className="hidden md:flex items-center gap-px p-0.5 rounded-md af-surface-2 af-border border">
             {DATE_PRESETS.map(p => (
               <button
                 key={p.label}
@@ -434,8 +434,8 @@ export default function AdminDashboard() {
                 className={cn(
                   "px-2.5 py-1 rounded text-[11px] font-semibold transition-colors",
                   datePreset === p.id
-                    ? "bg-white text-[#0f172a] shadow-[0_1px_2px_rgba(15,23,42,0.06)] border border-[#e2e8f0]"
-                    : "text-[#64748b] hover:text-[#0f172a]"
+                    ? "af-surface af-text af-border border"
+                    : "af-muted hover:af-text"
                 )}
               >
                 {p.label}
@@ -443,11 +443,11 @@ export default function AdminDashboard() {
             ))}
             <Popover open={calOpen} onOpenChange={setCalOpen}>
               <PopoverTrigger asChild>
-                <button className="px-1.5 py-1 rounded text-[#64748b] hover:text-[#0f172a] hover:bg-white transition-colors">
+                <button className="px-1.5 py-1 rounded af-muted hover:af-text hover:af-surface transition-colors">
                   <Calendar className="h-3.5 w-3.5" />
                 </button>
               </PopoverTrigger>
-              <PopoverContent className="w-auto p-0 bg-white border border-[#e2e8f0] rounded-md shadow-lg" align="end">
+              <PopoverContent className="w-auto p-0 af-surface af-border border rounded-md shadow-lg" align="end">
                 <CalendarComponent
                   mode="range"
                   selected={{ from: dateRange.from, to: dateRange.to }}
@@ -468,20 +468,30 @@ export default function AdminDashboard() {
           {/* Right controls */}
           <div className="flex items-center gap-2 shrink-0">
             {isEmployee && (
-              <span className="text-[10px] font-semibold text-[#92400e] bg-[#fef3c7] border border-[#fde68a] rounded-md px-2 py-0.5">STAFF</span>
+              <span className="text-[10px] font-semibold rounded-md px-2 py-0.5"
+                style={{ background: "rgba(217,119,6,0.12)", color: "var(--as-warning)", border: "1px solid rgba(217,119,6,0.30)" }}>STAFF</span>
             )}
-            <span className="hidden lg:flex items-center gap-1.5 text-[11px] font-medium text-[#64748b] bg-[#f8fafc] border border-[#e2e8f0] rounded-md px-2.5 py-1">
-              <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
+            <span className="hidden lg:flex items-center gap-1.5 text-[11px] font-medium af-muted af-surface-2 af-border border rounded-md px-2.5 py-1">
+              <span className="h-1.5 w-1.5 rounded-full" style={{ background: "var(--as-success)" }} />
               Volume {totalRevenue >= 1000 ? `R$ ${(totalRevenue / 1000).toFixed(1)}K` : fmtCurrency(totalRevenue)}
             </span>
 
             <button
-              className="relative h-8 w-8 rounded-md flex items-center justify-center border border-[#e2e8f0] text-[#475569] hover:bg-[#f1f5f9] transition-colors"
+              onClick={toggleTheme}
+              className="h-8 w-8 rounded-md flex items-center justify-center af-border border af-text-3 hover:af-surface-2 transition-colors"
+              title={theme === "dark" ? "Tema claro" : "Tema escuro"}
+            >
+              {theme === "dark" ? <Sun className="h-3.5 w-3.5" /> : <Moon className="h-3.5 w-3.5" />}
+            </button>
+
+            <button
+              className="relative h-8 w-8 rounded-md flex items-center justify-center af-border border af-text-3 hover:af-surface-2 transition-colors"
               title="Notificações"
             >
               <Bell className="h-3.5 w-3.5" />
               {pendingWdCount > 0 && (
-                <span className="absolute -top-1 -right-1 h-3.5 min-w-[14px] px-1 rounded-full bg-[#ef4444] text-white text-[9px] font-bold flex items-center justify-center">
+                <span className="absolute -top-1 -right-1 h-3.5 min-w-[14px] px-1 rounded-full text-white text-[9px] font-bold flex items-center justify-center"
+                  style={{ background: "var(--as-danger)" }}>
                   {pendingWdCount}
                 </span>
               )}
@@ -490,7 +500,7 @@ export default function AdminDashboard() {
             <button
               onClick={loadData}
               disabled={syncing}
-              className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-[11.5px] font-semibold bg-[#1e293b] hover:bg-[#0f172a] text-white transition-colors disabled:opacity-60"
+              className="af-accent-bg flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-[11.5px] font-semibold transition-colors disabled:opacity-60"
             >
               <RefreshCw className={cn("h-3 w-3", syncing && "animate-spin")} />
               <span className="hidden sm:inline">Sync</span>
@@ -499,7 +509,7 @@ export default function AdminDashboard() {
         </header>
 
         {/* Main content */}
-        <main className="flex-1 overflow-y-auto bg-[#f4f6fa] scrollbar-thin admin-shell" data-admin-content>
+        <main className="flex-1 overflow-y-auto af-bg-soft scrollbar-thin admin-shell" data-admin-content>
           <div className="p-4 lg:p-6 xl:p-8">
             <div className="mx-auto max-w-[1800px]">
               {activeTab === "god-mode" && (
