@@ -121,12 +121,14 @@ const DATE_PRESETS: { id: DatePresetId; label: string }[] = [
 export default function AdminDashboard() {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const { theme, toggleTheme } = useTheme();
   const [transactions, setTransactions] = useState<Tables<"transactions">[]>([]);
   const [profiles, setProfiles] = useState<Tables<"profiles">[]>([]);
   const [products, setProducts] = useState<Tables<"products">[]>([]);
   const [withdrawals, setWithdrawals] = useState<Tables<"withdrawals">[]>([]);
   const [isAdmin, setIsAdmin] = useState(false);
   const [isEmployee, setIsEmployee] = useState(false);
+  const [roleChecked, setRoleChecked] = useState(false);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<TabId>("god-mode");
   const [syncing, setSyncing] = useState(false);
@@ -162,6 +164,7 @@ export default function AdminDashboard() {
     }
   }, [dateRange.from, dateRange.to]);
 
+  // ── Role check (runs ONCE when user is available) ──
   useEffect(() => {
     if (!user) return;
     let cancelled = false;
@@ -177,15 +180,24 @@ export default function AdminDashboard() {
         if (!hasAdmin && !hasEmployee) { navigate("/admin-matheus"); return; }
         if (hasAdmin) setIsAdmin(true);
         else if (hasEmployee) setIsEmployee(true);
-        await loadData();
+        setRoleChecked(true);
       } catch {
         if (!cancelled) toast.error("Falha ao verificar permissões");
-      } finally {
-        if (!cancelled) setLoading(false);
       }
     })();
     return () => { cancelled = true; };
-  }, [user, navigate, loadData]);
+  }, [user, navigate]);
+
+  // ── Data load (independent: reacts to date range changes, no role re-check) ──
+  useEffect(() => {
+    if (!roleChecked) return;
+    let cancelled = false;
+    (async () => {
+      await loadData();
+      if (!cancelled) setLoading(false);
+    })();
+    return () => { cancelled = true; };
+  }, [roleChecked, loadData]);
 
   const handleDatePreset = (preset: DatePresetId) => {
     const now = new Date();
