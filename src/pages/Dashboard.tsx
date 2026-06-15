@@ -292,7 +292,7 @@ export default function Dashboard() {
                   key={p.label}
                   onClick={() => { setSelectedPeriod(p); setIsCustom(false); }}
                   className={cn(
-                    "relative px-4 flex items-center justify-center text-[11px] font-display font-black uppercase tracking-[0.14em] tabular-nums transition-colors duration-200 min-w-[58px]",
+                    "seller-segment relative px-4 flex items-center justify-center text-[11px] font-display font-black uppercase tracking-[0.14em] tabular-nums min-w-[58px]",
                     isActive
                       ? "text-primary bg-primary/[0.08]"
                       : "text-muted-foreground/60 hover:text-foreground hover:bg-secondary/40"
@@ -311,7 +311,7 @@ export default function Dashboard() {
           <Popover open={datePickerOpen} onOpenChange={setDatePickerOpen}>
             <PopoverTrigger asChild>
               <button className={cn(
-                "relative border-l border-border px-4 flex items-center gap-2 text-[11px] font-display font-black uppercase tracking-[0.14em] transition-colors duration-200",
+                "seller-segment relative border-l border-border px-4 flex items-center gap-2 text-[11px] font-display font-black uppercase tracking-[0.14em]",
                 isCustom
                   ? "text-primary bg-primary/[0.08]"
                   : "text-muted-foreground/60 hover:text-foreground hover:bg-secondary/40"
@@ -394,7 +394,7 @@ export default function Dashboard() {
                       <button
                         key={preset.label}
                         onClick={apply}
-                        className="text-left px-2.5 py-2 rounded-md text-[11px] font-display font-bold text-muted-foreground/80 hover:text-foreground hover:bg-secondary/60 transition-colors duration-150 whitespace-nowrap"
+                        className="seller-menu-item text-left px-2.5 py-2 rounded-md text-[11px] font-display font-bold text-muted-foreground/80 hover:text-foreground hover:bg-secondary/60 whitespace-nowrap"
                       >
                         {preset.label}
                       </button>
@@ -416,14 +416,14 @@ export default function Dashboard() {
               <div className="flex items-center justify-between gap-2 px-4 py-2.5 border-t border-border bg-secondary/20">
                 <button
                   onClick={() => { setCustomRange(undefined); setIsCustom(false); setSelectedPeriod(PERIOD_PRESETS[0]); }}
-                  className="text-[10px] font-display font-black uppercase tracking-[0.14em] text-muted-foreground/60 hover:text-foreground transition-colors duration-150"
+                  className="seller-text-action text-[10px] font-display font-black uppercase tracking-[0.14em] text-muted-foreground/60 hover:text-foreground"
                 >
                   Limpar
                 </button>
                 <button
                   onClick={() => setDatePickerOpen(false)}
                   disabled={!customRange?.from || !customRange?.to}
-                  className="px-3 py-1.5 rounded-md text-[10px] font-display font-black uppercase tracking-[0.14em] bg-primary text-primary-foreground hover:bg-primary/90 transition-colors duration-150 disabled:opacity-40 disabled:cursor-not-allowed"
+                  className="seller-action px-3 py-1.5 rounded-md text-[10px] font-display font-black uppercase tracking-[0.14em] bg-primary text-primary-foreground hover:bg-primary/90 disabled:opacity-40 disabled:cursor-not-allowed"
                 >
                   Aplicar
                 </button>
