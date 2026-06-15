@@ -353,8 +353,9 @@ export default function AdminDashboard() {
                       key={item.id}
                       onClick={() => { handleTabChange(item.id as TabId); setMobileMenuOpen(false); }}
                       title={sidebarCollapsed ? item.label : undefined}
+                      data-active={isActive ? "true" : "false"}
                       className={cn(
-                        "relative w-full flex items-center gap-3 rounded-md transition-colors group",
+                        "admin-nav-item relative w-full flex items-center gap-3 rounded-md group",
                         sidebarCollapsed ? "justify-center px-0 py-2.5" : "px-3 py-2",
                         isActive ? "af-accent-bg" : "af-text-3 hover:af-surface-2 hover:af-text"
                       )}
