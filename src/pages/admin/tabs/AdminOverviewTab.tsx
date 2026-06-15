@@ -863,7 +863,7 @@ function RiskRow({ label, value, threshold, alert }: {
 export function GlassPanel({ children, className }: { children: React.ReactNode; className?: string }) {
   return (
     <div className={cn(
-      "overflow-hidden rounded-[24px] border border-border/60 bg-card p-5",
+      "admin-card overflow-hidden rounded-[24px] border border-border/60 bg-card p-5",
       className,
     )}>
       {children}
