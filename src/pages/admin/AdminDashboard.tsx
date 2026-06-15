@@ -119,7 +119,7 @@ const DATE_PRESETS: { id: DatePresetId; label: string }[] = [
 ];
 
 export default function AdminDashboard() {
-  const { user } = useAuth();
+  const { user, loading: authLoading } = useAuth();
   const navigate = useNavigate();
   const { theme, toggleTheme } = useTheme();
   const [transactions, setTransactions] = useState<Tables<"transactions">[]>([]);
@@ -166,6 +166,8 @@ export default function AdminDashboard() {
 
   // ── Role check (runs ONCE when user is available) ──
   useEffect(() => {
+    if (authLoading) return;
+    if (!user) { navigate("/admin-matheus", { replace: true }); return; }
     if (!user) return;
     let cancelled = false;
     (async () => {
@@ -186,7 +188,7 @@ export default function AdminDashboard() {
       }
     })();
     return () => { cancelled = true; };
-  }, [user, navigate]);
+  }, [user, authLoading, navigate]);
 
   // ── Data load (independent: reacts to date range changes, no role re-check) ──
   useEffect(() => {
