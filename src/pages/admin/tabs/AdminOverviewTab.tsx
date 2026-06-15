@@ -770,9 +770,9 @@ export default function AdminOverviewTab({
 
 function HeroStat({ label, value, tone }: { label: string; value: string; tone: Tone }) {
   return (
-    <div className="rounded-2xl border border-border/60 bg-muted/20 px-3.5 py-3">
+    <div className="px-4 first:pl-0 last:pr-0">
       <p className="text-[9.5px] font-black uppercase tracking-[0.22em] text-muted-foreground/70">{label}</p>
-      <p className={cn("mt-1.5 font-display text-base font-black tabular-nums leading-none", TONE_TEXT[tone])}>
+      <p className={cn("mt-2 font-display text-[17px] font-black tabular-nums leading-none tracking-tight", TONE_TEXT[tone])}>
         {value}
       </p>
     </div>
@@ -783,12 +783,12 @@ function PulseStat({ icon: Icon, label, value, tone }: {
   icon: any; label: string; value: string; tone: Tone;
 }) {
   return (
-    <div className={cn("flex items-center justify-between rounded-xl border px-2.5 py-2", TONE_PILL[tone])}>
+    <div className="flex items-center justify-between gap-2">
       <span className="flex min-w-0 items-center gap-1.5">
-        <Icon className="h-3 w-3 shrink-0" strokeWidth={2.4} />
-        <span className="truncate text-[10px] font-black uppercase tracking-wider">{label}</span>
+        <Icon className={cn("h-3 w-3 shrink-0", TONE_TEXT[tone])} strokeWidth={2.4} />
+        <span className="truncate text-[10px] font-black uppercase tracking-wider text-muted-foreground">{label}</span>
       </span>
-      <span className="shrink-0 text-xs font-black tabular-nums">{value}</span>
+      <span className={cn("shrink-0 text-xs font-black tabular-nums", TONE_TEXT[tone])}>{value}</span>
     </div>
   );
 }
