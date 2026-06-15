@@ -775,7 +775,7 @@ export default function AdminOverviewTab({
 
 function HeroStat({ label, value, tone }: { label: string; value: string; tone: Tone }) {
   return (
-    <div className="px-4 first:pl-0 last:pr-0">
+    <div className="bg-card p-3.5">
       <p className="text-[9.5px] font-black uppercase tracking-[0.22em] text-muted-foreground/70">{label}</p>
       <p className={cn("mt-2 font-display text-[17px] font-black tabular-nums leading-none tracking-tight", TONE_TEXT[tone])}>
         {value}
@@ -788,12 +788,41 @@ function PulseStat({ icon: Icon, label, value, tone }: {
   icon: any; label: string; value: string; tone: Tone;
 }) {
   return (
-    <div className="flex items-center justify-between gap-2">
+    <div className="flex items-center justify-between gap-2 rounded-lg border border-border/60 bg-muted/20 px-3 py-2">
       <span className="flex min-w-0 items-center gap-1.5">
         <Icon className={cn("h-3 w-3 shrink-0", TONE_TEXT[tone])} strokeWidth={2.4} />
         <span className="truncate text-[10px] font-black uppercase tracking-wider text-muted-foreground">{label}</span>
       </span>
       <span className={cn("shrink-0 text-xs font-black tabular-nums", TONE_TEXT[tone])}>{value}</span>
+    </div>
+  );
+}
+
+function CommandMini({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="bg-primary px-3 py-2.5">
+      <p className="text-[9px] font-black uppercase tracking-[0.18em] text-primary-foreground/70">{label}</p>
+      <p className="mt-1 font-display text-lg font-black leading-none text-primary-foreground tabular-nums">{value}</p>
+    </div>
+  );
+}
+
+function DashboardKpi({ icon: Icon, label, value, sub, tone }: {
+  icon: any; label: string; value: string; sub?: string; tone: Tone;
+}) {
+  return (
+    <div className="group relative overflow-hidden rounded-xl border border-border/70 bg-card p-4 transition-colors hover:border-primary/35">
+      <div className="relative z-10 flex items-start justify-between gap-3">
+        <div className="min-w-0">
+          <p className="text-[9px] font-black uppercase tracking-[0.2em] text-muted-foreground/70">{label}</p>
+          <p className={cn("mt-3 break-words font-display text-[25px] font-black leading-none tracking-tight tabular-nums", TONE_TEXT[tone])}>{value}</p>
+          {sub && <p className="mt-2 truncate text-[11px] font-bold text-muted-foreground/75">{sub}</p>}
+        </div>
+        <div className={cn("flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border", TONE_PILL[tone])}>
+          <Icon className="h-5 w-5" strokeWidth={2.35} />
+        </div>
+      </div>
+      <div className={cn("absolute inset-x-0 bottom-0 h-0.5", TONE_BAR[tone])} />
     </div>
   );
 }
