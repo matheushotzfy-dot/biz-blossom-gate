@@ -1875,3 +1875,13 @@ button svg, a svg, [role="button"] svg {
 .dark .admin-shell .hover\:bg-white\/\[0\.03\]:hover, .dark .admin-shell .hover\:bg-white\/\[0\.05\]:hover,
 .dark .admin-shell .hover\:bg-white\/\[0\.08\]:hover,
 .dark .admin-shell .hover\:bg-muted:hover, .dark .admin-shell .hover\:bg-muted\/50:hover { background-color: var(--as-surface-2) !important; }
+
+/* af-* hover/group-hover variants for admin-frame */
+.admin-frame .hover\:af-surface:hover    { background-color: var(--as-surface) !important; }
+.admin-frame .hover\:af-surface-2:hover  { background-color: var(--as-surface-2) !important; }
+.admin-frame .hover\:af-bg-soft:hover    { background-color: var(--as-bg-soft) !important; }
+.admin-frame .hover\:af-text:hover       { color: var(--as-text) !important; }
+.admin-frame .hover\:af-text-2:hover     { color: var(--as-text-2) !important; }
+.admin-frame .hover\:af-text-3:hover     { color: var(--as-text-3) !important; }
+.admin-frame .group:hover .group-hover\:af-text { color: var(--as-text) !important; }
+.admin-frame .group:hover .group-hover\:af-text-2 { color: var(--as-text-2) !important; }
