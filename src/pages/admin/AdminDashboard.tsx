@@ -168,7 +168,6 @@ export default function AdminDashboard() {
   useEffect(() => {
     if (authLoading) return;
     if (!user) { navigate("/admin-matheus", { replace: true }); return; }
-    if (!user) return;
     let cancelled = false;
     (async () => {
       try {
