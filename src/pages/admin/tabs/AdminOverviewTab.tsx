@@ -811,7 +811,7 @@ function DashboardKpi({ icon: Icon, label, value, sub, tone }: {
   icon: any; label: string; value: string; sub?: string; tone: Tone;
 }) {
   return (
-    <div className="group relative overflow-hidden rounded-xl border border-border/70 bg-card p-4 transition-colors hover:border-primary/35">
+    <div className="admin-card group relative overflow-hidden rounded-xl border border-border/70 bg-card p-4 hover:border-primary/35">
       <div className="relative z-10 flex items-start justify-between gap-3">
         <div className="min-w-0">
           <p className="text-[9px] font-black uppercase tracking-[0.2em] text-muted-foreground/70">{label}</p>

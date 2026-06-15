@@ -1212,7 +1212,120 @@ input[type="number"]::-webkit-inner-spin-button {
   }
 }
 
-/* ─── Premium scrollbar ─── */
+/* ─── Admin Panel tactile polish (mirror of seller) ─── */
+.admin-fluid {
+  animation: pageFluid 360ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  will-change: transform, opacity, filter;
+}
+.admin-fluid > * {
+  animation: pageFluid 420ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation-delay: 40ms;
+}
+.admin-fluid > *:nth-child(n+2) { animation-delay: 80ms; }
+.admin-fluid > *:nth-child(n+3) { animation-delay: 120ms; }
+.admin-fluid > *:nth-child(n+4) { animation-delay: 150ms; }
+
+/* Sidebar nav items */
+.admin-nav-item {
+  position: relative;
+  overflow: hidden;
+  transition: transform 220ms cubic-bezier(0.22, 1, 0.36, 1),
+              background-color 220ms cubic-bezier(0.22, 1, 0.36, 1),
+              color 220ms cubic-bezier(0.22, 1, 0.36, 1),
+              border-color 220ms cubic-bezier(0.22, 1, 0.36, 1) !important;
+}
+.admin-nav-item::after {
+  content: "";
+  position: absolute;
+  left: 4px;
+  top: 8px;
+  bottom: 8px;
+  width: 2.5px;
+  border-radius: 999px;
+  background: hsl(var(--primary));
+  opacity: 0;
+  transform: scaleY(0.3);
+  transition: opacity 220ms cubic-bezier(0.22, 1, 0.36, 1), transform 220ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+.admin-nav-item:not([data-active="true"]):hover {
+  transform: translate3d(5px, 0, 0);
+}
+.admin-nav-item:not([data-active="true"]):hover::after { opacity: 1; transform: scaleY(1); }
+.admin-nav-item svg { transition: transform 240ms cubic-bezier(0.22, 1, 0.36, 1); }
+.admin-nav-item:not([data-active="true"]):hover svg { transform: translate3d(2px, 0, 0) scale(1.15) rotate(-3deg); }
+
+/* Cards / KPIs inside admin */
+.admin-card {
+  cursor: default;
+  transition: transform 260ms cubic-bezier(0.22, 1, 0.36, 1),
+              border-color 260ms cubic-bezier(0.22, 1, 0.36, 1),
+              background-color 260ms cubic-bezier(0.22, 1, 0.36, 1) !important;
+}
+.admin-card:hover {
+  transform: translate3d(0, -4px, 0) scale(1.01);
+  border-color: hsl(var(--primary) / 0.55) !important;
+}
+.admin-card:hover .admin-card-title,
+.admin-card:hover h3 { color: hsl(var(--primary)); }
+
+/* Tabs / menu items / buttons get the same uniform lift */
+.admin-shell [role="tab"],
+.admin-shell [role="menuitem"],
+.admin-shell [role="option"],
+.admin-shell [data-radix-collection-item] {
+  transition: transform 220ms cubic-bezier(0.22, 1, 0.36, 1),
+              background-color 220ms cubic-bezier(0.22, 1, 0.36, 1),
+              color 220ms cubic-bezier(0.22, 1, 0.36, 1),
+              border-color 220ms cubic-bezier(0.22, 1, 0.36, 1) !important;
+}
+.admin-shell [role="tab"]:not([data-state="active"]):hover,
+.admin-shell [role="menuitem"]:hover,
+.admin-shell [role="option"]:hover,
+.admin-shell [data-radix-collection-item]:hover {
+  transform: translate3d(0, -1px, 0);
+  color: hsl(var(--foreground));
+}
+.admin-shell button:not(:disabled):not([data-no-fluid]):not([role="tab"]):not([role="menuitem"]):not([role="option"]):not([role="switch"]):not([role="checkbox"]):not([role="radio"]):not([data-radix-collection-item]),
+.admin-shell a[role="button"]:not([data-no-fluid]) {
+  transition: transform 220ms cubic-bezier(0.22, 1, 0.36, 1),
+              background-color 220ms cubic-bezier(0.22, 1, 0.36, 1),
+              border-color 220ms cubic-bezier(0.22, 1, 0.36, 1),
+              color 220ms cubic-bezier(0.22, 1, 0.36, 1),
+              filter 220ms cubic-bezier(0.22, 1, 0.36, 1) !important;
+}
+.admin-shell button:not(:disabled):not([data-no-fluid]):not([role="tab"]):not([role="menuitem"]):not([role="option"]):not([role="switch"]):not([role="checkbox"]):not([role="radio"]):not([data-radix-collection-item]):hover,
+.admin-shell a[role="button"]:not([data-no-fluid]):hover {
+  transform: translate3d(0, -1.5px, 0);
+  filter: brightness(1.08);
+}
+.admin-shell button:not(:disabled):not([data-no-fluid]):not([role="tab"]):not([role="menuitem"]):not([role="option"]):not([role="switch"]):not([role="checkbox"]):not([role="radio"]):not([data-radix-collection-item]):active,
+.admin-shell a[role="button"]:not([data-no-fluid]):active {
+  transform: translate3d(0, 0, 0) scale(0.98);
+  filter: brightness(0.96);
+}
+.admin-shell tbody tr {
+  transition: background-color 200ms cubic-bezier(0.22, 1, 0.36, 1) !important;
+}
+.admin-shell tbody tr:hover { background-color: hsl(var(--muted) / 0.45); }
+
+@media (prefers-reduced-motion: reduce) {
+  .admin-fluid, .admin-fluid > *,
+  .admin-nav-item, .admin-nav-item::after, .admin-nav-item svg,
+  .admin-card,
+  .admin-shell [role="tab"],
+  .admin-shell [role="menuitem"],
+  .admin-shell [role="option"],
+  .admin-shell [data-radix-collection-item],
+  .admin-shell button,
+  .admin-shell a[role="button"],
+  .admin-shell tbody tr {
+    transition: none !important;
+    transform: none !important;
+    filter: none !important;
+    animation: none !important;
+  }
+}
+
 ::-webkit-scrollbar { width: 5px; height: 5px; }
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { 
