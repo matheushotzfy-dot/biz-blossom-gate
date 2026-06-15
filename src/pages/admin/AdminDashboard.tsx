@@ -403,7 +403,7 @@ export default function AdminDashboard() {
       {/* ═══ MAIN AREA ═══ */}
       <div className="flex-1 flex flex-col min-w-0">
         {/* Top bar */}
-        <header className="h-[56px] flex items-center px-4 lg:px-6 gap-3 shrink-0 af-surface af-border border-b">
+        <header className="h-[64px] flex items-center px-4 lg:px-6 gap-3 shrink-0 af-surface af-border border-b">
           <div className="flex items-center gap-3 flex-1 min-w-0">
             <button
               onClick={() => setMobileMenuOpen(true)}
@@ -413,13 +413,13 @@ export default function AdminDashboard() {
             </button>
 
             <div className="flex items-center gap-2 min-w-0">
-              <span className="text-[11px] font-medium af-muted-2 hidden sm:inline">Admin</span>
+              <span className="text-[12px] font-medium af-muted-2 hidden sm:inline">Admin</span>
               <ChevronDown className="h-3 w-3 af-muted-2 -rotate-90 hidden sm:inline" />
-              <h2 className="text-[14px] font-semibold af-text truncate">{activeTabLabel}</h2>
+              <h2 className="text-[16px] font-semibold af-text truncate">{activeTabLabel}</h2>
             </div>
 
             {syncing && (
-              <span className="flex items-center gap-1.5 text-[10.5px] font-medium af-muted af-surface-2 af-border border rounded-md px-2 py-0.5">
+              <span className="flex items-center gap-1.5 text-[11.5px] font-medium af-muted af-surface-2 af-border border rounded-md px-2.5 py-1">
                 <RefreshCw className="h-3 w-3 animate-spin" />
                 Sincronizando
               </span>
@@ -433,7 +433,7 @@ export default function AdminDashboard() {
                 key={p.label}
                 onClick={() => handleDatePreset(p.id)}
                 className={cn(
-                  "px-2.5 py-1 rounded text-[11px] font-semibold transition-colors",
+                   "px-3 py-1.5 rounded text-[12px] font-semibold transition-colors",
                   datePreset === p.id
                     ? "af-surface af-text af-border border"
                     : "af-muted hover:af-text"
@@ -472,24 +472,24 @@ export default function AdminDashboard() {
               <span className="text-[10px] font-semibold rounded-md px-2 py-0.5"
                 style={{ background: "rgba(217,119,6,0.12)", color: "var(--as-warning)", border: "1px solid rgba(217,119,6,0.30)" }}>STAFF</span>
             )}
-            <span className="hidden lg:flex items-center gap-1.5 text-[11px] font-medium af-muted af-surface-2 af-border border rounded-md px-2.5 py-1">
+              <span className="hidden lg:flex items-center gap-1.5 text-[12px] font-medium af-muted af-surface-2 af-border border rounded-md px-3 py-1.5">
               <span className="h-1.5 w-1.5 rounded-full" style={{ background: "var(--as-success)" }} />
               Volume {totalRevenue >= 1000 ? `R$ ${(totalRevenue / 1000).toFixed(1)}K` : fmtCurrency(totalRevenue)}
             </span>
 
             <button
               onClick={toggleTheme}
-              className="h-8 w-8 rounded-md flex items-center justify-center af-border border af-text-3 hover:af-surface-2 transition-colors"
+              className="h-9 w-9 rounded-md flex items-center justify-center af-border border af-text-3 hover:af-surface-2 transition-colors"
               title={theme === "dark" ? "Tema claro" : "Tema escuro"}
             >
-              {theme === "dark" ? <Sun className="h-3.5 w-3.5" /> : <Moon className="h-3.5 w-3.5" />}
+              {theme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
             </button>
 
             <button
-              className="relative h-8 w-8 rounded-md flex items-center justify-center af-border border af-text-3 hover:af-surface-2 transition-colors"
+              className="relative h-9 w-9 rounded-md flex items-center justify-center af-border border af-text-3 hover:af-surface-2 transition-colors"
               title="Notificações"
             >
-              <Bell className="h-3.5 w-3.5" />
+              <Bell className="h-4 w-4" />
               {pendingWdCount > 0 && (
                 <span className="absolute -top-1 -right-1 h-3.5 min-w-[14px] px-1 rounded-full text-white text-[9px] font-bold flex items-center justify-center"
                   style={{ background: "var(--as-danger)" }}>
@@ -501,7 +501,7 @@ export default function AdminDashboard() {
             <button
               onClick={loadData}
               disabled={syncing}
-              className="af-accent-bg flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-[11.5px] font-semibold transition-colors disabled:opacity-60"
+              className="af-accent-bg flex items-center gap-2 px-3 py-2 rounded-md text-[12.5px] font-semibold transition-colors disabled:opacity-60"
             >
               <RefreshCw className={cn("h-3 w-3", syncing && "animate-spin")} />
               <span className="hidden sm:inline">Sync</span>
@@ -511,7 +511,7 @@ export default function AdminDashboard() {
 
         {/* Main content */}
         <main className="flex-1 overflow-y-auto af-bg-soft scrollbar-thin admin-shell" data-admin-content>
-          <div className="p-4 lg:p-6 xl:p-8">
+          <div className="p-5 lg:p-7 xl:p-9">
             <div className="mx-auto max-w-[1800px]">
               {activeTab === "god-mode" && (
                 <AdminOverviewTab
