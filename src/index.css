@@ -1885,3 +1885,339 @@ button svg, a svg, [role="button"] svg {
 .admin-frame .hover\:af-text-3:hover     { color: var(--as-text-3) !important; }
 .admin-frame .group:hover .group-hover\:af-text { color: var(--as-text) !important; }
 .admin-frame .group:hover .group-hover\:af-text-2 { color: var(--as-text-2) !important; }
+
+/* ═══════════════════════════════════════════════════════════════════
+   ADMIN CONSOLE V3 — serious PHP-style infrastructure UI
+   Final scoped layer: fixes hardcoded light classes in dark mode and
+   upgrades density, contrast, sizing, portals, sheets and tables.
+   ═══════════════════════════════════════════════════════════════════ */
+.admin-shell,
+.admin-frame {
+  --as-bg: #e8edf3;
+  --as-bg-soft: #eef2f7;
+  --as-surface: #ffffff;
+  --as-surface-2: #f7f9fc;
+  --as-elev: #ffffff;
+  --as-border: #cfd8e3;
+  --as-border-soft: #e3e9f0;
+  --as-border-strong: #aebdcb;
+  --as-text: #111827;
+  --as-text-2: #2f3b4a;
+  --as-text-3: #536173;
+  --as-muted: #64748b;
+  --as-muted-2: #8b99aa;
+  --as-accent: #0b1220;
+  --as-accent-hover: #182338;
+  --as-on-accent: #f8fafc;
+  --as-success: #047857;
+  --as-warning: #b45309;
+  --as-danger: #b91c1c;
+  --as-info: #1d4ed8;
+  --as-success-bg: #e7f7ef;
+  --as-warning-bg: #fff4d7;
+  --as-danger-bg: #fde8e8;
+  --as-info-bg: #e8f1ff;
+  --as-radius: 7px;
+  --as-ring: 0 0 0 3px color-mix(in srgb, var(--as-accent) 12%, transparent);
+  color-scheme: light;
+}
+
+.dark .admin-shell,
+.dark .admin-frame {
+  --as-bg: #060b12;
+  --as-bg-soft: #08111d;
+  --as-surface: #0d1624;
+  --as-surface-2: #121d2d;
+  --as-elev: #182436;
+  --as-border: #263448;
+  --as-border-soft: #1c293b;
+  --as-border-strong: #364961;
+  --as-text: #f1f5f9;
+  --as-text-2: #d4deea;
+  --as-text-3: #adbbcb;
+  --as-muted: #8a99ad;
+  --as-muted-2: #6f7f94;
+  --as-accent: #f1f5f9;
+  --as-accent-hover: #ffffff;
+  --as-on-accent: #06101c;
+  --as-success: #34d399;
+  --as-warning: #fbbf24;
+  --as-danger: #f87171;
+  --as-info: #60a5fa;
+  --as-success-bg: rgba(52, 211, 153, 0.13);
+  --as-warning-bg: rgba(251, 191, 36, 0.14);
+  --as-danger-bg: rgba(248, 113, 113, 0.14);
+  --as-info-bg: rgba(96, 165, 250, 0.14);
+  color-scheme: dark;
+}
+
+.admin-frame {
+  background:
+    linear-gradient(180deg, var(--as-bg-soft), var(--as-bg)) !important;
+  color: var(--as-text) !important;
+}
+
+.admin-shell {
+  background: transparent !important;
+  color: var(--as-text) !important;
+  font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  letter-spacing: 0 !important;
+}
+.admin-shell *,
+.admin-frame * { letter-spacing: 0 !important; }
+.admin-shell h1,
+.admin-shell h2,
+.admin-shell h3,
+.admin-shell h4,
+.admin-shell .font-display {
+  font-family: 'Space Grotesk', 'Plus Jakarta Sans', system-ui, sans-serif !important;
+  color: var(--as-text) !important;
+  font-weight: 650 !important;
+}
+
+.admin-frame .af-surface,
+.admin-frame .af-surface-2,
+.admin-frame .af-bg,
+.admin-frame .af-bg-soft,
+.admin-shell .bg-white,
+.admin-shell [class*="bg-white/"],
+.admin-shell .bg-card,
+.admin-shell [class*="bg-card/"],
+.admin-shell .bg-popover,
+.admin-shell [class*="bg-popover/"],
+.admin-shell [class*="bg-[#fff"],
+.admin-shell [class*="bg-[#ffffff"],
+.admin-shell [class*="bg-[#fafbfc"],
+.admin-shell [class*="bg-[#f8fafc"],
+.admin-shell [class*="bg-[#f1f5f9"],
+.admin-shell .bg-slate-50,
+.admin-shell .bg-slate-100,
+.admin-shell .bg-muted,
+.admin-shell [class*="bg-muted/"] {
+  background-color: var(--as-surface) !important;
+  background-image: none !important;
+}
+.admin-frame .af-bg,
+.admin-frame .af-bg-soft { background-color: var(--as-bg-soft) !important; }
+.admin-frame .af-surface-2,
+.admin-shell .bg-slate-50,
+.admin-shell .bg-slate-100,
+.admin-shell [class*="bg-[#fafbfc"],
+.admin-shell [class*="bg-[#f8fafc"],
+.admin-shell [class*="bg-[#f1f5f9"] { background-color: var(--as-surface-2) !important; }
+
+.admin-shell section,
+.admin-shell article,
+.admin-shell [role="dialog"],
+.admin-shell [data-radix-dialog-content],
+.admin-shell [data-radix-sheet-content],
+.admin-shell .rounded-md,
+.admin-shell .rounded-lg,
+.admin-shell .rounded-xl,
+.admin-shell .rounded-2xl,
+.admin-shell .rounded-3xl {
+  border-radius: var(--as-radius) !important;
+}
+
+.admin-shell [class*="border-[#"],
+.admin-shell .border-slate-100,
+.admin-shell .border-slate-200,
+.admin-shell .border-slate-300,
+.admin-shell .border-border,
+.admin-shell .border-input,
+.admin-frame .af-border,
+.admin-frame .af-border-soft,
+.admin-shell .divide-border > * + * {
+  border-color: var(--as-border) !important;
+}
+
+.admin-shell [class*="text-[#0f172a"],
+.admin-shell [class*="text-[#111827"],
+.admin-shell .text-slate-950,
+.admin-shell .text-slate-900,
+.admin-shell .text-foreground,
+.admin-frame .af-text { color: var(--as-text) !important; }
+.admin-shell [class*="text-[#1e293b"],
+.admin-shell [class*="text-[#334155"],
+.admin-shell .text-slate-800,
+.admin-shell .text-slate-700,
+.admin-frame .af-text-2 { color: var(--as-text-2) !important; }
+.admin-shell [class*="text-[#475569"],
+.admin-shell [class*="text-[#64748b"],
+.admin-shell .text-slate-600,
+.admin-shell .text-slate-500,
+.admin-shell .text-muted-foreground,
+.admin-frame .af-text-3,
+.admin-frame .af-muted { color: var(--as-muted) !important; }
+.admin-shell [class*="text-[#94a3b8"],
+.admin-shell .text-slate-400,
+.admin-shell .text-slate-300,
+.admin-frame .af-muted-2 { color: var(--as-muted-2) !important; }
+
+.admin-shell .text-white,
+.admin-shell [class*="text-white/"] { color: var(--as-text) !important; }
+.admin-shell button.bg-slate-900,
+.admin-shell button.bg-primary,
+.admin-frame .af-accent-bg {
+  background-color: var(--as-accent) !important;
+  border-color: var(--as-accent) !important;
+  color: var(--as-on-accent) !important;
+}
+.admin-shell button.bg-slate-900 *,
+.admin-shell button.bg-primary *,
+.admin-frame .af-accent-bg * { color: var(--as-on-accent) !important; }
+
+.admin-shell [class*="text-[#047857"],
+.admin-shell [class*="text-[#059669"],
+.admin-shell .text-emerald-500,
+.admin-shell .text-emerald-600,
+.admin-shell .text-emerald-700 { color: var(--as-success) !important; }
+.admin-shell [class*="text-[#b45309"],
+.admin-shell .text-amber-500,
+.admin-shell .text-amber-600,
+.admin-shell .text-amber-700 { color: var(--as-warning) !important; }
+.admin-shell [class*="text-[#b91c1c"],
+.admin-shell .text-red-500,
+.admin-shell .text-red-600,
+.admin-shell .text-red-700 { color: var(--as-danger) !important; }
+.admin-shell [class*="text-[#1d4ed8"],
+.admin-shell .text-blue-500,
+.admin-shell .text-blue-600,
+.admin-shell .text-sky-600 { color: var(--as-info) !important; }
+.admin-shell [class*="bg-[#ecfdf5"],
+.admin-shell .bg-emerald-50,
+.admin-shell [class*="bg-emerald-500/"] { background-color: var(--as-success-bg) !important; color: var(--as-success) !important; }
+.admin-shell [class*="bg-[#fffbeb"],
+.admin-shell .bg-amber-50,
+.admin-shell [class*="bg-amber-500/"] { background-color: var(--as-warning-bg) !important; color: var(--as-warning) !important; }
+.admin-shell [class*="bg-[#fef2f2"],
+.admin-shell .bg-red-50,
+.admin-shell [class*="bg-red-500/"] { background-color: var(--as-danger-bg) !important; color: var(--as-danger) !important; }
+.admin-shell [class*="bg-[#eff6ff"],
+.admin-shell .bg-blue-50,
+.admin-shell [class*="bg-blue-500/"],
+.admin-shell [class*="bg-sky-500/"] { background-color: var(--as-info-bg) !important; color: var(--as-info) !important; }
+
+.admin-shell input:not([type="checkbox"]):not([type="radio"]):not([type="range"]),
+.admin-shell textarea,
+.admin-shell select,
+.admin-shell [role="combobox"],
+.admin-frame .af-input {
+  min-height: 38px !important;
+  background: var(--as-surface) !important;
+  border: 1px solid var(--as-border-strong) !important;
+  color: var(--as-text) !important;
+  border-radius: 6px !important;
+  font-size: 13.5px !important;
+  font-weight: 500 !important;
+  box-shadow: inset 0 1px 0 color-mix(in srgb, var(--as-text) 4%, transparent) !important;
+}
+.admin-shell input::placeholder,
+.admin-shell textarea::placeholder,
+.admin-frame .af-input::placeholder { color: var(--as-muted-2) !important; opacity: 1; }
+.admin-shell input:focus,
+.admin-shell textarea:focus,
+.admin-shell select:focus,
+.admin-shell [role="combobox"]:focus-visible,
+.admin-frame .af-input:focus {
+  border-color: var(--as-accent) !important;
+  box-shadow: var(--as-ring) !important;
+}
+
+.admin-shell table {
+  color: var(--as-text) !important;
+  border-collapse: separate !important;
+  border-spacing: 0 !important;
+  font-size: 13px !important;
+}
+.admin-shell thead,
+.admin-shell thead tr,
+.admin-shell [class*="bg-[#fafbfc"] {
+  background-color: var(--as-surface-2) !important;
+}
+.admin-shell thead th {
+  color: var(--as-text-3) !important;
+  border-bottom: 1px solid var(--as-border) !important;
+  padding: 12px 14px !important;
+  font-size: 10.5px !important;
+  font-weight: 750 !important;
+  letter-spacing: 0.04em !important;
+}
+.admin-shell tbody td {
+  color: inherit;
+  border-bottom-color: var(--as-border-soft) !important;
+  padding: 12px 14px !important;
+}
+.admin-shell tbody tr:hover,
+.admin-shell .hover\:bg-slate-50:hover,
+.admin-shell .hover\:bg-\[\#fafbfc\]:hover,
+.admin-frame .hover\:af-surface-2:hover { background-color: var(--as-elev) !important; }
+
+.admin-shell button,
+.admin-frame button {
+  min-height: 32px;
+  border-radius: 6px !important;
+  font-weight: 650 !important;
+}
+.admin-shell button.border,
+.admin-shell button.bg-white,
+.admin-shell button.bg-background,
+.admin-shell button.bg-secondary,
+.admin-shell button[class*="bg-white"],
+.admin-frame button.af-border {
+  background-color: var(--as-surface) !important;
+  border-color: var(--as-border) !important;
+  color: var(--as-text-2) !important;
+}
+
+.admin-shell pre,
+.admin-shell code,
+.admin-shell .font-mono {
+  font-family: 'JetBrains Mono', ui-monospace, monospace !important;
+}
+.admin-shell pre {
+  background: var(--as-surface-2) !important;
+  border-color: var(--as-border) !important;
+  color: var(--as-text-2) !important;
+}
+
+[data-radix-popper-content-wrapper] [role="listbox"],
+[data-radix-popper-content-wrapper] [role="menu"],
+[data-radix-select-content],
+[data-radix-dialog-content],
+[data-radix-sheet-content] {
+  background: var(--as-surface, hsl(var(--popover))) !important;
+  border-color: var(--as-border, hsl(var(--border))) !important;
+  color: var(--as-text, hsl(var(--popover-foreground))) !important;
+}
+
+.admin-frame [data-admin-content] {
+  --card: 216 35% 99%;
+  --card-foreground: 222 40% 11%;
+  --popover: 216 35% 99%;
+  --popover-foreground: 222 40% 11%;
+  --muted: 214 28% 94%;
+  --muted-foreground: 215 16% 46%;
+  --border: 214 24% 83%;
+  --input: 214 24% 74%;
+  --accent: 214 28% 94%;
+  --accent-foreground: 222 40% 11%;
+  --primary: 222 47% 11%;
+  --primary-foreground: 210 40% 98%;
+}
+.dark .admin-frame [data-admin-content] {
+  --card: 216 45% 10%;
+  --card-foreground: 210 40% 96%;
+  --popover: 216 45% 10%;
+  --popover-foreground: 210 40% 96%;
+  --muted: 216 36% 14%;
+  --muted-foreground: 215 20% 68%;
+  --border: 216 28% 22%;
+  --input: 216 28% 30%;
+  --accent: 216 36% 16%;
+  --accent-foreground: 210 40% 96%;
+  --primary: 210 40% 96%;
+  --primary-foreground: 216 45% 8%;
+}
