@@ -907,7 +907,7 @@ export function AdminKpi({ icon, label, value, sub, alert, highlight, gradient }
     gradient?.includes("violet") || gradient?.includes("indigo") || gradient?.includes("purple") ? "primary" :
     "neutral";
   return (
-    <div className="group relative overflow-hidden rounded-[24px] border border-border/60 bg-card p-5 transition-colors hover:border-primary/25">
+    <div className="admin-card group relative overflow-hidden rounded-[24px] border border-border/60 bg-card p-5 hover:border-primary/35">
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
           <p className="text-[9.5px] font-black uppercase tracking-[0.22em] text-muted-foreground/70 leading-tight">
