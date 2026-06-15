@@ -167,7 +167,7 @@ function DashboardLayoutInner() {
 
             <div className="mx-2 h-5 w-px bg-border/60" />
 
-            <button onClick={() => navigate("/perfil")} className="flex items-center">
+            <button onClick={() => navigate("/perfil")} className="seller-clickable flex items-center rounded-xl border-transparent p-0.5">
               <Avatar className="h-7 w-7 ring-1 ring-border/60 hover:ring-primary/40 transition-all cursor-pointer">
                 <AvatarImage src={profile?.avatar_url || undefined} className="object-cover" />
                 <AvatarFallback className="bg-muted text-foreground text-[11px] font-semibold">
@@ -181,7 +181,7 @@ function DashboardLayoutInner() {
  {profile && profile.account_status !== "approved" && (
  <button
  onClick={() => navigate("/perfil?tab=identidade&scrollTo=kyc")}
- className="relative z-20 flex items-center gap-3 w-full px-5 lg:px-8 py-3 border-b transition-colors cursor-pointer bg-warning/8 border-warning/20 text-warning hover:bg-warning/12"
+  className="seller-clickable relative z-20 flex items-center gap-3 w-full px-5 lg:px-8 py-3 border-b cursor-pointer bg-warning/8 border-warning/20 text-warning hover:bg-warning/12"
  >
  <AlertTriangle className="h-4 w-4 shrink-0" />
  <p className="text-[13px] font-semibold flex-1 text-left">
