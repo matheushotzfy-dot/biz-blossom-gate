@@ -1520,12 +1520,13 @@ button svg, a svg, [role="button"] svg {
 .admin-shell .shadow-md,
 .admin-shell .shadow-sm { box-shadow: 0 1px 2px rgba(15,23,42,0.05) !important; }
 
-/* ── RADIUS — flat PHP-admin feel ─────────────────────────── */
-.admin-shell .rounded-3xl,
-.admin-shell .rounded-2xl { border-radius: 6px !important; }
-.admin-shell .rounded-xl  { border-radius: 6px !important; }
-.admin-shell .rounded-lg  { border-radius: 5px !important; }
-.admin-shell .rounded-md  { border-radius: 4px !important; }
+/* ── RADIUS — polished, soft like TopSellers ──────────────── */
+.admin-shell .rounded-3xl { border-radius: 28px !important; }
+.admin-shell .rounded-2xl { border-radius: 20px !important; }
+.admin-shell .rounded-xl  { border-radius: 14px !important; }
+.admin-shell .rounded-lg  { border-radius: 10px !important; }
+.admin-shell .rounded-md  { border-radius: 8px !important; }
+.admin-shell .rounded-sm  { border-radius: 6px !important; }
 
 /* ── INPUTS / SELECTS / TEXTAREAS ─────────────────────────── */
 .admin-shell input:not([type="checkbox"]):not([type="radio"]):not([type="range"]),
@@ -1533,14 +1534,15 @@ button svg, a svg, [role="button"] svg {
 .admin-shell select,
 .admin-shell [role="combobox"] {
   background-color: #ffffff !important;
-  border: 1px solid #cbd5e1 !important;
+  border: 1px solid #e2e8f0 !important;
   color: #0f172a !important;
-  border-radius: 4px !important;
+  border-radius: 10px !important;
   font-size: 13px !important;
-  height: 34px;
-  transition: border-color 120ms, box-shadow 120ms;
+  height: 38px;
+  padding: 0 12px;
+  transition: border-color 160ms ease, box-shadow 160ms ease;
 }
-.admin-shell textarea { height: auto; min-height: 72px; padding: 8px 10px; }
+.admin-shell textarea { height: auto; min-height: 84px; padding: 10px 12px; }
 .admin-shell input::placeholder,
 .admin-shell textarea::placeholder { color: #94a3b8 !important; }
 .admin-shell input:focus,
@@ -1549,7 +1551,7 @@ button svg, a svg, [role="button"] svg {
 .admin-shell [role="combobox"]:focus-visible {
   outline: none !important;
   border-color: #0f172a !important;
-  box-shadow: 0 0 0 3px rgba(15,23,42,0.06) !important;
+  box-shadow: 0 0 0 4px rgba(15,23,42,0.06) !important;
 }
 
 /* ── BUTTONS ──────────────────────────────────────────────── */
