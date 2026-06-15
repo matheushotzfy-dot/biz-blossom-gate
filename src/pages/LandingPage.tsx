@@ -499,25 +499,136 @@ export default function LandingPage() {
  </div>
  </section>
 
- {/* ═══ SOCIAL PROOF BAR ═══ */}
- <Section className="py-8 md:py-16 border-y border-border/5">
- <motion.div initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} viewport={{ once: true }}
- className="text-center">
- <div className="grid grid-cols-2 md:flex md:flex-wrap items-center justify-center gap-3 md:gap-6">
- {[
- { number: "2K+", label: "produtores ativos" },
- { number: "R$ 50M+", label: "processados" },
- { number: "99.9%", label: "uptime" },
- { number: "<2s", label: "tempo de saque PIX" },
- ].map((item) => (
- <div key={item.label} className="flex items-center gap-2 md:gap-3 px-3 md:px-5 py-2.5 md:py-3 rounded-xl md:rounded-2xl bg-card/20 border border-border/8">
- <span className="text-sm md:text-lg font-display font-black text-primary tabular-nums whitespace-nowrap">{item.number}</span>
- <span className="text-[8px] md:text-[10px] text-muted-foreground/40 font-display font-medium uppercase tracking-wider leading-tight">{item.label}</span>
- </div>
- ))}
- </div>
- </motion.div>
- </Section>
+      {/* ═══ TRUSTED PAYMENT METHODS STRIP ═══ */}
+      <Section className="py-10 md:py-14 border-y border-border/5">
+        <motion.div initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} viewport={{ once: true }} className="text-center">
+          <p className="text-[10px] md:text-[11px] text-muted-foreground/40 font-display font-bold uppercase tracking-[0.25em] mb-6 md:mb-8">
+            Métodos de pagamento aceitos · Processamento certificado
+          </p>
+          <div className="flex flex-wrap items-center justify-center gap-2.5 md:gap-3">
+            {[
+              { label: "PIX", accent: true },
+              { label: "VISA" },
+              { label: "MASTERCARD" },
+              { label: "ELO" },
+              { label: "AMEX" },
+              { label: "HIPERCARD" },
+              { label: "DINERS" },
+              { label: "BOLETO" },
+              { label: "APPLE PAY" },
+              { label: "GOOGLE PAY" },
+            ].map((m) => (
+              <div key={m.label} className={cn(
+                "px-4 md:px-5 h-10 md:h-11 rounded-xl flex items-center border tabular-nums",
+                "bg-card/40 border-border/15 text-[11px] md:text-[12px] font-display font-black tracking-[0.18em]",
+                m.accent ? "text-primary border-primary/25 bg-primary/5" : "text-foreground/70"
+              )}>
+                {m.label}
+              </div>
+            ))}
+          </div>
+        </motion.div>
+      </Section>
+
+      {/* ═══ SECURITY / COMPLIANCE BAND ═══ */}
+      <Section className="py-12 md:py-20">
+        <div className="grid md:grid-cols-2 gap-8 md:gap-12 items-center max-w-6xl mx-auto">
+          <motion.div initial={{ opacity: 0, x: -20 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }} transition={{ duration: 0.7 }}>
+            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-success/10 border border-success/20 text-[10px] font-bold text-success uppercase tracking-[0.18em] mb-5 font-display">
+              <Shield className="h-3 w-3" /> Infraestrutura nível bancário
+            </div>
+            <h2 className="text-3xl md:text-5xl font-display font-black tracking-[-0.04em] text-foreground leading-[1.1] mb-5">
+              Compliance, criptografia e <span className="text-gradient">antifraude</span> de verdade.
+            </h2>
+            <p className="text-[15px] md:text-base text-muted-foreground/60 font-display leading-relaxed max-w-lg">
+              Auditados continuamente, monitorados 24/7 e em conformidade com os principais padrões globais de segurança de pagamentos.
+            </p>
+          </motion.div>
+
+          <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.7 }}
+            className="grid grid-cols-2 gap-3 md:gap-4">
+            {[
+              { label: "PCI DSS", sub: "Level 1", icon: Lock },
+              { label: "SSL / TLS 1.3", sub: "256-bit", icon: Fingerprint },
+              { label: "LGPD", sub: "Compliant", icon: BadgeCheck },
+              { label: "Antifraude", sub: "AI + ML", icon: Shield },
+              { label: "ISO 27001", sub: "Certified", icon: Award },
+              { label: "3DS 2.0", sub: "Authentication", icon: Eye },
+            ].map((b) => (
+              <div key={b.label} className="group flex items-center gap-3 p-4 rounded-2xl bg-card/40 border border-border/15 hover:border-primary/25 transition-all duration-300">
+                <div className="h-10 w-10 rounded-xl bg-primary/8 border border-primary/15 flex items-center justify-center shrink-0">
+                  <b.icon className="h-4 w-4 text-primary" />
+                </div>
+                <div className="min-w-0">
+                  <p className="text-[13px] font-display font-black text-foreground leading-tight tracking-tight truncate">{b.label}</p>
+                  <p className="text-[10px] text-muted-foreground/40 font-display font-bold uppercase tracking-wider mt-0.5">{b.sub}</p>
+                </div>
+              </div>
+            ))}
+          </motion.div>
+        </div>
+      </Section>
+
+      {/* ═══ COMPARISON TABLE ═══ */}
+      <Section className="bg-gradient-to-b from-transparent via-primary/[0.02] to-transparent">
+        <SectionHeader
+          badge="Comparativo"
+          title={<>Por que produtores trocam <span className="text-gradient">pela HOTZFY</span></>}
+          subtitle="Mais recursos, menos taxas, suporte de verdade. Compare e veja a diferença."
+        />
+        <motion.div initial={{ opacity: 0, y: 24 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.7 }}
+          className="max-w-5xl mx-auto rounded-3xl border border-border/15 overflow-hidden bg-card/30">
+          <div className="grid grid-cols-4 text-[10px] md:text-xs font-display font-black uppercase tracking-[0.12em] border-b border-border/15 bg-card/50">
+            <div className="p-4 md:p-5 text-muted-foreground/50">Recurso</div>
+            <div className="p-4 md:p-5 text-primary flex items-center gap-1.5"><Gem className="h-3 w-3" /> HOTZFY</div>
+            <div className="p-4 md:p-5 text-muted-foreground/40">Concorrente A</div>
+            <div className="p-4 md:p-5 text-muted-foreground/40">Concorrente B</div>
+          </div>
+          {[
+            { f: "Taxa PIX", h: "1,99%", a: "3,99%", b: "4,99%" },
+            { f: "Mensalidade", h: "R$ 0", a: "R$ 97", b: "R$ 49" },
+            { f: "Saque PIX", h: "1 dia útil", a: "D+7", b: "D+14" },
+            { f: "Área de membros", h: true, a: false, b: true },
+            { f: "Afiliados nativos", h: true, a: true, b: false },
+            { f: "API & Webhooks", h: true, a: false, b: false },
+            { f: "Antifraude AI", h: true, a: false, b: false },
+            { f: "Suporte 24/7", h: true, a: false, b: false },
+          ].map((row, i) => (
+            <div key={i} className={cn("grid grid-cols-4 text-[13px] md:text-sm font-display border-b border-border/10 last:border-0", i % 2 && "bg-card/20")}>
+              <div className="p-4 md:p-5 text-foreground/80 font-semibold">{row.f}</div>
+              {[row.h, row.a, row.b].map((cell, j) => (
+                <div key={j} className={cn("p-4 md:p-5 flex items-center font-bold tabular-nums", j === 0 ? "text-primary" : "text-muted-foreground/50")}>
+                  {typeof cell === "boolean"
+                    ? (cell
+                        ? <CheckCircle2 className={cn("h-4 w-4", j === 0 ? "text-primary" : "text-muted-foreground/40")} />
+                        : <span className="text-muted-foreground/25">—</span>)
+                    : cell}
+                </div>
+              ))}
+            </div>
+          ))}
+        </motion.div>
+      </Section>
+
+      {/* ═══ SOCIAL PROOF BAR ═══ */}
+      <Section className="py-8 md:py-16 border-y border-border/5">
+        <motion.div initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} viewport={{ once: true }}
+          className="text-center">
+          <div className="grid grid-cols-2 md:flex md:flex-wrap items-center justify-center gap-3 md:gap-6">
+            {[
+              { number: "2K+", label: "produtores ativos" },
+              { number: "R$ 50M+", label: "processados" },
+              { number: "99.9%", label: "uptime" },
+              { number: "<2s", label: "tempo de saque PIX" },
+            ].map((item) => (
+              <div key={item.label} className="flex items-center gap-2 md:gap-3 px-3 md:px-5 py-2.5 md:py-3 rounded-xl md:rounded-2xl bg-card/20 border border-border/8">
+                <span className="text-sm md:text-lg font-display font-black text-primary tabular-nums whitespace-nowrap">{item.number}</span>
+                <span className="text-[8px] md:text-[10px] text-muted-foreground/40 font-display font-medium uppercase tracking-wider leading-tight">{item.label}</span>
+              </div>
+            ))}
+          </div>
+        </motion.div>
+      </Section>
 
  {/* ═══ FEATURES BENTO GRID ═══ */}
  <Section id="recursos">
