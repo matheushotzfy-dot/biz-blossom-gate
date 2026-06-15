@@ -103,7 +103,7 @@ function DashboardLayoutInner() {
    {/* Ambient light is handled by .ambient-backdrop CSS — no extra blobs needed */}
 
           <header className="relative z-30 h-16 flex items-center border-b border-border bg-card px-4 lg:px-6 sticky top-0 md:flex transition-colors duration-300">
-            <SidebarTrigger className="h-9 w-9 rounded-xl hover:bg-muted/60 transition-all flex items-center justify-center text-muted-foreground/70 hover:text-foreground">
+            <SidebarTrigger className="seller-clickable h-9 w-9 rounded-xl hover:bg-muted/60 flex items-center justify-center text-muted-foreground/70 hover:text-foreground">
               <Menu className="h-4 w-4" strokeWidth={2} />
             </SidebarTrigger>
 
@@ -111,7 +111,7 @@ function DashboardLayoutInner() {
             <div className="flex-1 max-w-sm lg:max-w-md ml-4 mr-auto">
               <button
                 onClick={() => setSearchOpen(true)}
-                className="w-full h-[38px] px-4 rounded-xl bg-muted border border-border hover:bg-accent hover:border-primary/30 transition-colors flex items-center gap-3 text-muted-foreground hover:text-foreground group overflow-hidden relative"
+                className="seller-clickable w-full h-[38px] px-4 rounded-xl bg-muted hover:bg-accent flex items-center gap-3 text-muted-foreground hover:text-foreground group overflow-hidden relative"
               >
                 <div className="absolute inset-0 bg-gradient-to-r from-primary/[0.03] to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
                 <Search className="h-[14px] w-[14px] transition-transform group-hover:scale-110 text-primary/60 group-hover:text-primary" strokeWidth={2.5} />
@@ -139,7 +139,7 @@ function DashboardLayoutInner() {
                 </span>
                 <button 
                   onClick={togglePrivacy}
-                  className="relative z-10 ml-1 h-8 w-8 rounded-xl flex items-center justify-center hover:bg-background/80 text-muted-foreground/30 hover:text-foreground transition-all active:scale-90"
+                  className="seller-clickable relative z-10 ml-1 h-8 w-8 rounded-xl flex items-center justify-center hover:bg-background/80 text-muted-foreground/30 hover:text-foreground active:scale-90"
                 >
                   {privacyHidden ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                 </button>
@@ -149,14 +149,14 @@ function DashboardLayoutInner() {
             <div className="flex items-center gap-0.5 ml-auto md:ml-0">
               <button
                 onClick={toggleTheme}
-                className="h-8 w-8 rounded-md hover:bg-muted/60 transition-colors flex items-center justify-center text-muted-foreground/70 hover:text-foreground"
+                className="seller-clickable h-8 w-8 rounded-md hover:bg-muted/60 flex items-center justify-center text-muted-foreground/70 hover:text-foreground"
               >
                 {theme === "dark" ? <Sun className="h-[15px] w-[15px]" strokeWidth={1.85} /> : <Moon className="h-[15px] w-[15px]" strokeWidth={1.85} />}
               </button>
 
               <button
                 onClick={() => setNotifOpen(!notifOpen)}
-                className="relative h-8 w-8 rounded-md hover:bg-muted/60 transition-colors flex items-center justify-center text-muted-foreground/70 hover:text-foreground"
+                className="seller-clickable relative h-8 w-8 rounded-md hover:bg-muted/60 flex items-center justify-center text-muted-foreground/70 hover:text-foreground"
               >
                 <Bell className="h-[15px] w-[15px]" strokeWidth={1.85} />
                 {unreadCount > 0 && (
@@ -167,7 +167,7 @@ function DashboardLayoutInner() {
 
             <div className="mx-2 h-5 w-px bg-border/60" />
 
-            <button onClick={() => navigate("/perfil")} className="flex items-center">
+            <button onClick={() => navigate("/perfil")} className="seller-clickable flex items-center rounded-xl border-transparent p-0.5">
               <Avatar className="h-7 w-7 ring-1 ring-border/60 hover:ring-primary/40 transition-all cursor-pointer">
                 <AvatarImage src={profile?.avatar_url || undefined} className="object-cover" />
                 <AvatarFallback className="bg-muted text-foreground text-[11px] font-semibold">
@@ -181,7 +181,7 @@ function DashboardLayoutInner() {
  {profile && profile.account_status !== "approved" && (
  <button
  onClick={() => navigate("/perfil?tab=identidade&scrollTo=kyc")}
- className="relative z-20 flex items-center gap-3 w-full px-5 lg:px-8 py-3 border-b transition-colors cursor-pointer bg-warning/8 border-warning/20 text-warning hover:bg-warning/12"
+  className="seller-clickable relative z-20 flex items-center gap-3 w-full px-5 lg:px-8 py-3 border-b cursor-pointer bg-warning/8 border-warning/20 text-warning hover:bg-warning/12"
  >
  <AlertTriangle className="h-4 w-4 shrink-0" />
  <p className="text-[13px] font-semibold flex-1 text-left">

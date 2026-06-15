@@ -122,7 +122,7 @@ function RevenueCard({ collapsed, revenue, milestone, onOpenRewards }: RevenueCa
     <button
       type="button"
       onClick={onOpenRewards}
-      className="group/rev relative mt-4 block w-full overflow-hidden rounded-[10px] border border-sidebar-border bg-sidebar-accent/15 px-3.5 py-3 text-left transition-colors duration-200 hover:border-sidebar-primary/35 hover:bg-sidebar-accent/25"
+      className="seller-clickable group/rev relative mt-4 block w-full overflow-hidden rounded-[10px] border-sidebar-border bg-sidebar-accent/15 px-3.5 py-3 text-left hover:border-sidebar-primary/60 hover:bg-sidebar-accent/35"
     >
       {/* Header */}
       <div className="flex items-center justify-between">
@@ -217,13 +217,13 @@ function SidebarSectionNav({ section, pathname, isFirst }: SidebarSectionNavProp
                     end={item.exact}
                     activeClassName=""
                     className={cn(
-                      "group/nav relative flex h-[46px] w-full items-center gap-3 rounded-xl px-3 text-[13px] font-bold",
+                      "seller-nav-option group/nav relative flex h-[46px] w-full items-center gap-3 rounded-xl border border-transparent px-3 text-[13px] font-bold",
                       "transition-all duration-[260ms] ease-[cubic-bezier(0.32,0.72,0,1)]",
                       "active:scale-[0.98]",
                       "group-data-[collapsible=icon]:h-12 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0",
                       isActive
                         ? "bg-sidebar-primary text-sidebar-primary-foreground"
-                        : "text-sidebar-foreground/65 hover:bg-sidebar-accent/55 hover:text-sidebar-accent-foreground hover:translate-x-[2px]",
+                        : "text-sidebar-foreground/65",
                     )}
                   >
                     {/* Active indicator rail */}
@@ -417,7 +417,7 @@ export function AppSidebar() {
         <button
           type="button"
           onClick={() => window.open("https://wa.me/5511999999999?text=Preciso%20de%20suporte%20para%20escalar!", "_blank")}
-          className="group/sup relative flex w-full items-center gap-3 overflow-hidden rounded-xl border border-sidebar-border/70 bg-sidebar-accent/45 px-3 py-3 text-left transition-colors duration-200 hover:border-sidebar-primary/30 hover:bg-sidebar-accent/70 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0"
+          className="seller-clickable group/sup relative flex w-full items-center gap-3 overflow-hidden rounded-xl border-sidebar-border/70 bg-sidebar-accent/45 px-3 py-3 text-left hover:border-sidebar-primary/60 hover:bg-sidebar-accent/75 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0"
         >
           <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-sidebar-primary/25 bg-sidebar-primary/10 text-sidebar-primary">
             <Headphones className="h-4 w-4" strokeWidth={2.5} />
@@ -437,7 +437,7 @@ export function AppSidebar() {
         <button
           type="button"
           onClick={() => navigate("/perfil")}
-          className="flex w-full items-center gap-3 rounded-xl border border-transparent px-2.5 py-2.5 text-left transition-colors hover:border-sidebar-border/60 hover:bg-sidebar-accent/40 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0"
+          className="seller-clickable flex w-full items-center gap-3 rounded-xl border-transparent px-2.5 py-2.5 text-left hover:border-sidebar-primary/40 hover:bg-sidebar-accent/55 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0"
         >
           <div className="relative flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-sidebar-primary/18 text-[13px] font-bold text-sidebar-primary ring-1 ring-sidebar-primary/30">
             {userInitial}
@@ -456,7 +456,7 @@ export function AppSidebar() {
         <button
           type="button"
           onClick={handleLogout}
-          className="flex h-10 w-full items-center gap-2.5 rounded-xl px-3 text-[12.5px] font-semibold text-sidebar-foreground/60 transition-colors hover:bg-destructive/10 hover:text-destructive group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0"
+          className="seller-clickable flex h-10 w-full items-center gap-2.5 rounded-xl px-3 text-[12.5px] font-semibold text-sidebar-foreground/60 hover:bg-destructive/10 hover:text-destructive group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0"
         >
           <LogOut className="h-4 w-4 shrink-0" strokeWidth={2} />
           <span className="group-data-[collapsible=icon]:hidden">Sair da conta</span>
