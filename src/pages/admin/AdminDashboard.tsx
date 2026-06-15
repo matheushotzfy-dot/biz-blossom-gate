@@ -301,45 +301,45 @@ export default function AdminDashboard() {
       <aside
         className={cn(
           "relative z-[70] h-full flex flex-col shrink-0 transition-[width] duration-200 af-surface af-border border-r",
-          sidebarCollapsed ? "w-[64px]" : "w-[240px]",
+          sidebarCollapsed ? "w-[72px]" : "w-[264px]",
           "max-lg:fixed max-lg:left-0 max-lg:top-0",
           mobileMenuOpen ? "max-lg:translate-x-0" : "max-lg:-translate-x-full"
         )}
       >
         {/* Brand */}
-        <div className="h-[56px] flex items-center px-4 gap-2.5 af-border border-b shrink-0">
-          <div className="h-8 w-8 rounded-md af-accent-bg flex items-center justify-center shrink-0">
-            <Shield className="h-4 w-4" strokeWidth={2.25} />
+        <div className="h-[64px] flex items-center px-4 gap-3 af-border border-b shrink-0">
+          <div className="h-9 w-9 rounded-md af-accent-bg flex items-center justify-center shrink-0">
+            <Shield className="h-[18px] w-[18px]" strokeWidth={2.25} />
           </div>
           {!sidebarCollapsed && (
             <div className="min-w-0">
-              <h1 className="text-[14px] font-semibold tracking-tight af-text leading-tight">HOTZFY</h1>
-              <p className="text-[10px] af-muted leading-tight">{isEmployee ? "Staff Panel" : "Admin Panel"}</p>
+              <h1 className="text-[15px] font-semibold tracking-tight af-text leading-tight">HOTZFY</h1>
+              <p className="text-[11px] af-muted leading-tight">{isEmployee ? "Staff Panel" : "Admin Panel"}</p>
             </div>
           )}
         </div>
 
         {/* Search */}
         {!sidebarCollapsed && (
-          <div className="px-3 pt-3 pb-1">
+          <div className="px-3 pt-3.5 pb-2">
             <div className="relative">
-              <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 af-muted-2" />
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 af-muted-2" />
               <input
                 value={navQuery}
                 onChange={(e) => setNavQuery(e.target.value)}
                 placeholder="Buscar..."
-                className="af-input w-full h-8 pl-8 pr-2.5 text-[12px] rounded-md focus:outline-none"
+                className="af-input w-full h-9 pl-9 pr-3 text-[13px] rounded-md focus:outline-none"
               />
             </div>
           </div>
         )}
 
         {/* Navigation */}
-        <nav className="flex-1 overflow-y-auto py-2 px-2 scrollbar-thin">
+        <nav className="flex-1 overflow-y-auto py-3 px-2.5 scrollbar-thin">
           {filteredSections.map(section => (
-            <div key={section.id} className="mb-3">
+            <div key={section.id} className="mb-4">
               {!sidebarCollapsed && (
-                <p className="text-[10px] font-semibold uppercase tracking-[0.08em] af-muted-2 px-2.5 mb-1 mt-1">
+                <p className="text-[10.5px] font-semibold uppercase tracking-[0.08em] af-muted-2 px-2.5 mb-1.5 mt-1">
                   {section.label}
                 </p>
               )}
@@ -354,15 +354,15 @@ export default function AdminDashboard() {
                       onClick={() => { handleTabChange(item.id as TabId); setMobileMenuOpen(false); }}
                       title={sidebarCollapsed ? item.label : undefined}
                       className={cn(
-                        "relative w-full flex items-center gap-2.5 rounded-md transition-colors group",
-                        sidebarCollapsed ? "justify-center px-0 py-2" : "px-2.5 py-1.5",
+                        "relative w-full flex items-center gap-3 rounded-md transition-colors group",
+                        sidebarCollapsed ? "justify-center px-0 py-2.5" : "px-3 py-2",
                         isActive ? "af-accent-bg" : "af-text-3 hover:af-surface-2 hover:af-text"
                       )}
                       style={!isActive ? {} : undefined}
                     >
-                      <item.icon className={cn("h-[15px] w-[15px] shrink-0", isActive ? "" : "af-muted group-hover:af-text")} strokeWidth={2} />
+                      <item.icon className={cn("h-4 w-4 shrink-0", isActive ? "" : "af-muted group-hover:af-text")} strokeWidth={2} />
                       {!sidebarCollapsed && (
-                        <span className={cn("text-[12.5px] truncate", isActive ? "font-semibold" : "font-medium")}>{item.label}</span>
+                        <span className={cn("text-[13.5px] truncate", isActive ? "font-semibold" : "font-medium")}>{item.label}</span>
                       )}
                       {hasBadge && (
                         <span className={cn(
