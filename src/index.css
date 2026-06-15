@@ -991,32 +991,82 @@ input[type="number"]::-webkit-inner-spin-button {
 }
 
 /* ─── Seller dashboard tactile buttons ─── */
-.seller-action {
+.seller-action,
+.seller-clickable {
   position: relative;
   isolation: isolate;
   overflow: hidden;
+  cursor: pointer;
   border: 1px solid hsl(var(--border) / 0.52);
-  transition: transform 260ms cubic-bezier(0.22, 1, 0.36, 1), border-color 260ms cubic-bezier(0.22, 1, 0.36, 1), background-color 260ms cubic-bezier(0.22, 1, 0.36, 1), opacity 260ms cubic-bezier(0.22, 1, 0.36, 1);
+  transition: transform 240ms cubic-bezier(0.22, 1, 0.36, 1), outline-color 240ms cubic-bezier(0.22, 1, 0.36, 1), border-color 240ms cubic-bezier(0.22, 1, 0.36, 1), background-color 240ms cubic-bezier(0.22, 1, 0.36, 1), opacity 240ms cubic-bezier(0.22, 1, 0.36, 1);
 }
-.seller-action::before {
+.seller-action::before,
+.seller-clickable::before {
   content: "";
   position: absolute;
   inset: 0;
   z-index: -1;
-  background: linear-gradient(105deg, transparent 0%, hsl(var(--primary) / 0.12) 46%, transparent 76%);
-  transform: translate3d(-115%, 0, 0);
-  transition: transform 520ms cubic-bezier(0.22, 1, 0.36, 1);
+  background: linear-gradient(100deg, transparent 0%, hsl(var(--primary) / 0.22) 45%, transparent 76%);
+  transform: translate3d(-125%, 0, 0);
+  transition: transform 560ms cubic-bezier(0.22, 1, 0.36, 1), opacity 240ms ease;
+  opacity: 0.85;
 }
-.seller-action:hover {
-  transform: translate3d(0, -2px, 0);
-  border-color: hsl(var(--primary) / 0.48);
+.seller-action:hover,
+.seller-clickable:hover {
+  transform: translate3d(0, -3px, 0) scale(1.015);
+  border-color: hsl(var(--primary) / 0.72);
+  outline: 2px solid hsl(var(--primary) / 0.18);
+  outline-offset: 2px;
 }
-.seller-action:hover::before { transform: translate3d(115%, 0, 0); }
-.seller-action:active { transform: translate3d(0, 0, 0) scale(0.985); }
-.seller-action svg {
+.seller-action:hover::before,
+.seller-clickable:hover::before { transform: translate3d(125%, 0, 0); }
+.seller-action:active,
+.seller-clickable:active { transform: translate3d(0, 0, 0) scale(0.975); }
+.seller-action svg,
+.seller-clickable svg {
   transition: transform 260ms cubic-bezier(0.22, 1, 0.36, 1), color 260ms cubic-bezier(0.22, 1, 0.36, 1);
 }
-.seller-action:hover svg { transform: translate3d(2px, 0, 0) scale(1.06); }
+.seller-action:hover svg,
+.seller-clickable:hover svg { transform: translate3d(3px, 0, 0) scale(1.12); }
+.seller-nav-option {
+  position: relative;
+  overflow: hidden;
+  cursor: pointer;
+}
+.seller-nav-option::after {
+  content: "";
+  position: absolute;
+  left: 8px;
+  top: 9px;
+  bottom: 9px;
+  width: 3px;
+  border-radius: 999px;
+  background: hsl(var(--sidebar-primary));
+  opacity: 0;
+  transform: scaleY(0.3);
+  transition: opacity 220ms cubic-bezier(0.22, 1, 0.36, 1), transform 220ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+.seller-nav-option:not([aria-current="page"]):hover {
+  transform: translate3d(6px, 0, 0) scale(1.018);
+  background-color: hsl(var(--sidebar-accent) / 0.86) !important;
+  color: hsl(var(--sidebar-accent-foreground)) !important;
+  border-color: hsl(var(--sidebar-primary) / 0.35);
+}
+.seller-nav-option:hover::after {
+  opacity: 1;
+  transform: scaleY(1);
+}
+.seller-nav-option:not([aria-current="page"]):hover svg { transform: translate3d(2px, 0, 0) scale(1.18) rotate(-4deg); }
+.seller-hover-card {
+  cursor: default;
+  transition: transform 260ms cubic-bezier(0.22, 1, 0.36, 1), border-color 260ms cubic-bezier(0.22, 1, 0.36, 1), background-color 260ms cubic-bezier(0.22, 1, 0.36, 1) !important;
+}
+.seller-hover-card:hover {
+  transform: translate3d(0, -5px, 0) scale(1.012);
+  border-color: hsl(var(--primary) / 0.58) !important;
+  background-color: hsl(var(--card) / 1) !important;
+}
+.seller-hover-card:hover h3 { color: hsl(var(--primary)); }
 .seller-segment,
 .seller-menu-item,
 .seller-text-action,
