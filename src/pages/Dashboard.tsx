@@ -439,7 +439,7 @@ export default function Dashboard() {
 
       {/* Hero Financial Row */}
       <div className="grid lg:grid-cols-4 gap-4 md:gap-6">
-        <Card className="lg:col-span-2 relative overflow-hidden group border-primary/20 bg-gradient-to-br from-primary/[0.04] via-card to-card shadow-xl shadow-primary/5 rounded-3xl min-h-[220px]">
+        <Card className="seller-hover-card lg:col-span-2 relative overflow-hidden group border-primary/20 bg-gradient-to-br from-primary/[0.04] via-card to-card shadow-xl shadow-primary/5 rounded-3xl min-h-[220px]">
           {/* Main card inner glow */}
           <div className="absolute inset-px rounded-[1.45rem] bg-gradient-to-br from-primary/[0.01] to-transparent pointer-events-none" />
           
@@ -519,7 +519,7 @@ export default function Dashboard() {
 
       {/* Main Operations Grid */}
       <div className="grid lg:grid-cols-3 gap-6">
-        <Card className="lg:col-span-2 border-border/40 overflow-hidden shadow-lg shadow-black/5 rounded-3xl">
+        <Card className="seller-hover-card lg:col-span-2 border-border/40 overflow-hidden shadow-lg shadow-black/5 rounded-3xl">
           <CardHeader className="flex flex-row items-center justify-between border-b border-border/40 px-6 py-5 md:px-8">
             <div>
               <CardTitle className="text-lg font-bold">Fluxo de Vendas</CardTitle>
@@ -588,7 +588,7 @@ export default function Dashboard() {
           </CardContent>
         </Card>
 
-        <Card className="border-border/40 overflow-hidden bg-gradient-to-b from-card to-background/20 shadow-xl shadow-black/5 rounded-3xl">
+        <Card className="seller-hover-card border-border/40 overflow-hidden bg-gradient-to-b from-card to-background/20 shadow-xl shadow-black/5 rounded-3xl">
           <CardHeader className="border-b border-border/40 px-6 py-5">
             <div className="flex items-center justify-between">
               <div>
@@ -664,7 +664,7 @@ export default function Dashboard() {
       </div>
 
       {/* Recent Activity */}
-      <Card className="border-border/40 overflow-hidden shadow-lg shadow-black/5 rounded-3xl">
+      <Card className="seller-hover-card border-border/40 overflow-hidden shadow-lg shadow-black/5 rounded-3xl">
         <CardHeader className="flex flex-row items-center justify-between border-b border-border/40 px-6 py-6 md:px-8">
           <div>
             <CardTitle className="text-lg font-bold">Últimas Transações</CardTitle>
