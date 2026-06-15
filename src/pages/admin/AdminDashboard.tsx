@@ -512,7 +512,7 @@ export default function AdminDashboard() {
 
         {/* Main content */}
         <main className="flex-1 overflow-y-auto af-bg-soft scrollbar-thin admin-shell" data-admin-content>
-          <div className="p-5 lg:p-7 xl:p-9">
+          <div className="p-5 lg:p-7 xl:p-9 admin-fluid" key={activeTab}>
             <div className="mx-auto max-w-[1800px]">
               {activeTab === "god-mode" && (
                 <AdminOverviewTab
