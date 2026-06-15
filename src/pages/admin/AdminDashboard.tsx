@@ -275,12 +275,12 @@ export default function AdminDashboard() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-[#f4f6fa] font-sans">
+      <div className="admin-frame min-h-screen flex items-center justify-center af-bg-soft">
         <div className="flex flex-col items-center gap-4">
-          <div className="h-12 w-12 rounded-md bg-[#1e293b] flex items-center justify-center">
-            <Shield className="h-6 w-6 text-white" />
+          <div className="h-12 w-12 rounded-md af-accent-bg flex items-center justify-center">
+            <Shield className="h-6 w-6" />
           </div>
-          <div className="flex items-center gap-2 text-[12px] text-[#64748b] font-medium">
+          <div className="flex items-center gap-2 text-[12px] af-muted font-medium">
             <RefreshCw className="h-3.5 w-3.5 animate-spin" />
             Carregando painel...
           </div>
@@ -290,24 +290,24 @@ export default function AdminDashboard() {
   }
 
   return (
-    <div className="h-screen flex overflow-hidden bg-[#f4f6fa] text-[#0f172a] font-sans">
+    <div className="admin-frame h-screen flex overflow-hidden af-bg-soft af-text">
       {/* Mobile overlay */}
       {mobileMenuOpen && (
-        <div className="fixed inset-0 z-[60] lg:hidden bg-[#0f172a]/40" onClick={() => setMobileMenuOpen(false)} />
+        <div className="fixed inset-0 z-[60] lg:hidden" style={{ background: "rgba(0,0,0,0.45)" }} onClick={() => setMobileMenuOpen(false)} />
       )}
 
       {/* ═══ SIDEBAR ═══ */}
       <aside
         className={cn(
-          "relative z-[70] h-full flex flex-col shrink-0 transition-[width] duration-200 bg-white border-r border-[#e2e8f0]",
+          "relative z-[70] h-full flex flex-col shrink-0 transition-[width] duration-200 af-surface af-border border-r",
           sidebarCollapsed ? "w-[64px]" : "w-[240px]",
           "max-lg:fixed max-lg:left-0 max-lg:top-0",
           mobileMenuOpen ? "max-lg:translate-x-0" : "max-lg:-translate-x-full"
         )}
       >
         {/* Brand */}
-        <div className="h-[56px] flex items-center px-4 gap-2.5 border-b border-[#e2e8f0] shrink-0">
-          <div className="h-8 w-8 rounded-md bg-[#1e293b] flex items-center justify-center shrink-0">
+        <div className="h-[56px] flex items-center px-4 gap-2.5 af-border border-b shrink-0">
+          <div className="h-8 w-8 rounded-md af-accent-bg flex items-center justify-center shrink-0">
             <Shield className="h-4 w-4 text-white" strokeWidth={2.25} />
           </div>
           {!sidebarCollapsed && (
