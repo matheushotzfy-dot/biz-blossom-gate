@@ -307,74 +307,79 @@ export default function AdminOverviewTab({
      ADMIN VIEW
      ═════════════════════════════════════════════════════════════ */
   return (
-    <div className="space-y-6 animate-fade-in">
-      {/* ── Hero ── */}
-      <FinanceiroHero
-        eyebrow="Command Center"
-        title="Visão Geral"
-        subtitle="Pulso financeiro em tempo real: TPV, lucro, risco e operações pendentes."
-        status={{ tone: "success", label: "Ao Vivo", pulse: true }}
-        actions={
-          <div className="inline-flex items-center gap-2 rounded-full border border-border/60 bg-card px-3 py-1.5 text-[10.5px] font-bold text-muted-foreground">
-            <CalendarDays className="h-3.5 w-3.5" />
-            {rangeLabel}
-          </div>
-        }
-      />
-
-      {/* ── Volume Hero Card ── */}
-      <div className="relative overflow-hidden rounded-3xl border border-border/60 bg-card">
-        <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-primary/40 to-transparent" />
-        <div
-          className="pointer-events-none absolute -top-40 -right-28 h-[460px] w-[460px] rounded-full opacity-40"
-          style={{ background: "radial-gradient(closest-side, hsl(var(--primary) / 0.18), transparent 70%)" }}
-        />
-        <div className="relative grid grid-cols-1 lg:grid-cols-[1.35fr_1fr]">
-          <div className="px-7 py-7 lg:px-9 lg:py-8 border-b lg:border-b-0 lg:border-r border-border/50">
-            <div className="flex items-center gap-2">
-              <span className="h-1.5 w-1.5 rounded-full bg-success animate-pulse" />
-              <p className="text-[10px] font-black uppercase tracking-[0.24em] text-muted-foreground/80">
-                Volume Movimentado · {rangeLabel}
-              </p>
+    <div className="space-y-5 animate-fade-in">
+      {/* ── Command Summary ── */}
+      <section className="overflow-hidden rounded-xl border border-primary/30 bg-card">
+        <div className="flex flex-col gap-3 border-b border-primary/20 bg-primary px-5 py-4 text-primary-foreground lg:flex-row lg:items-center lg:justify-between">
+          <div className="min-w-0">
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="inline-flex items-center gap-2 rounded-md border border-primary-foreground/20 bg-primary-foreground/10 px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.18em]">
+                <span className="h-1.5 w-1.5 rounded-full bg-success animate-pulse" />
+                Ao vivo
+              </span>
+              <span className="inline-flex items-center gap-2 rounded-md border border-primary-foreground/20 bg-primary-foreground/10 px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.18em]">
+                <CalendarDays className="h-3.5 w-3.5" />
+                {rangeLabel}
+              </span>
             </div>
-            <h2 className="mt-4 font-display text-[44px] lg:text-[52px] font-black leading-[0.95] tracking-[-0.035em] text-foreground tabular-nums">
-              {fmtCurrency(totalVolume)}
-            </h2>
-            <p className="mt-2.5 text-[11.5px] font-bold text-muted-foreground">
-              <span className="text-success">{filteredApproved.length}</span> aprovadas de <span className="text-foreground">{filteredTx.length}</span> transações
+            <h1 className="mt-3 font-display text-[34px] font-black leading-none tracking-tight sm:text-[44px] lg:text-[54px]">
+              Admin Command Center
+            </h1>
+          </div>
+          <div className="grid grid-cols-2 gap-px overflow-hidden rounded-lg border border-primary-foreground/20 bg-primary-foreground/20 text-primary-foreground sm:min-w-[360px]">
+            <CommandMini label="Transações" value={String(filteredTx.length)} />
+            <CommandMini label="Aprovadas" value={String(filteredApproved.length)} />
+            <CommandMini label="Conversão" value={`${conversionRate}%`} />
+            <CommandMini label="Chargeback" value={`${chargebackRate.toFixed(2)}%`} />
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1.15fr)_minmax(420px,0.85fr)]">
+          <div className="border-b border-border/60 p-5 lg:border-b-0 lg:border-r lg:p-7">
+            <p className="text-[10px] font-black uppercase tracking-[0.24em] text-muted-foreground/80">
+              Volume movimentado no período
             </p>
-
-            <div className="mt-7 grid grid-cols-3 divide-x divide-border/50 border-t border-border/40 pt-5">
-              <HeroStat label="Lucro" value={fmtCurrency(takeRateTotal)} tone="success" />
-              <HeroStat label="Take Rate" value={`${takeRatePct}%`} tone="primary" />
-              <HeroStat label="Ticket Médio" value={fmtCurrency(ticketMedio)} tone="info" />
+            <div className="mt-4 flex flex-col gap-4 xl:flex-row xl:items-end xl:justify-between">
+              <div>
+                <h2 className="font-display text-[48px] font-black leading-[0.9] tracking-tight text-foreground tabular-nums sm:text-[64px] lg:text-[72px]">
+                  {fmtCurrency(totalVolume)}
+                </h2>
+                <p className="mt-3 text-[12px] font-bold text-muted-foreground">
+                  <span className="text-success">{filteredApproved.length}</span> aprovadas de <span className="text-foreground">{filteredTx.length}</span> transações
+                </p>
+              </div>
+              <div className="grid min-w-[280px] grid-cols-3 gap-px overflow-hidden rounded-lg border border-border/60 bg-border/60">
+                <HeroStat label="Lucro" value={fmtCurrency(takeRateTotal)} tone="success" />
+                <HeroStat label="Take" value={`${takeRatePct}%`} tone="primary" />
+                <HeroStat label="Ticket" value={fmtCurrency(ticketMedio)} tone="info" />
+              </div>
             </div>
           </div>
 
-          <div className="flex flex-col justify-between gap-5 px-7 py-7 lg:px-9 lg:py-8">
-            <div>
-              <div className="mb-3 flex items-center justify-between">
-                <p className="text-[10px] font-black uppercase tracking-[0.24em] text-muted-foreground/80">
-                  Pulso · 7 dias
-                </p>
-                <span className="font-display text-sm font-black text-foreground tabular-nums">
-                  {fmtCurrency(tpvMonth)}
-                </span>
-              </div>
-              <ResponsiveContainer width="100%" height={108}>
+          <div className="p-5 lg:p-7">
+            <div className="mb-4 flex items-center justify-between gap-3">
+              <p className="text-[10px] font-black uppercase tracking-[0.24em] text-muted-foreground/80">
+                Pulso de volume · 7 dias
+              </p>
+              <span className="font-display text-base font-black text-foreground tabular-nums">
+                {fmtCurrency(tpvMonth)}
+              </span>
+            </div>
+            <div className="h-[150px] border-y border-border/50 py-3">
+              <ResponsiveContainer width="100%" height="100%">
                 <AreaChart data={chartData} margin={{ top: 4, right: 4, bottom: 0, left: 0 }}>
                   <defs>
                     <linearGradient id="heroSpark" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="0%" stopColor="hsl(var(--primary))" stopOpacity={0.28} />
+                      <stop offset="0%" stopColor="hsl(var(--primary))" stopOpacity={0.32} />
                       <stop offset="100%" stopColor="hsl(var(--primary))" stopOpacity={0} />
                     </linearGradient>
                   </defs>
-                  <Area type="monotone" dataKey="tpv" stroke="hsl(var(--primary))" strokeWidth={2}
+                  <Area type="monotone" dataKey="tpv" stroke="hsl(var(--primary))" strokeWidth={2.5}
                         fill="url(#heroSpark)" dot={false} isAnimationActive={false} />
                 </AreaChart>
               </ResponsiveContainer>
             </div>
-            <div className="grid grid-cols-2 gap-x-5 gap-y-2.5 border-t border-border/40 pt-4">
+            <div className="mt-4 grid grid-cols-2 gap-2">
               <PulseStat icon={Activity} label="Conversão" value={`${conversionRate}%`} tone="success" />
               <PulseStat icon={CheckCircle2} label="Aprovadas" value={String(filteredApproved.length)} tone="primary" />
               <PulseStat icon={ShieldAlert} label="Chargeback" value={`${chargebackRate.toFixed(2)}%`} tone={chargebackAlert ? "destructive" : "neutral"} />
@@ -382,19 +387,19 @@ export default function AdminOverviewTab({
             </div>
           </div>
         </div>
-      </div>
+      </section>
 
       {/* ── KPI Grid ── */}
-      <PremiumMetricGrid cols={4}>
-        <PremiumMetric icon={Flame}        label="Movimentado Hoje"  value={fmtCurrency(tpvToday)}        sub={`${todayTx.length} vendas aprovadas`} tone={todayTx.length > 0 ? "success" : "neutral"} />
-        <PremiumMetric icon={DollarSign}   label="Lucro Hoje"         value={fmtCurrency(takeRateToday)}   sub={`${activeSellersToday} sellers venderam`} tone="primary" />
-        <PremiumMetric icon={Hourglass}    label="Saques Pendentes"   value={fmtCurrency(pendingWdAmount)} sub={`${pendingWd.length} solicitações · ${highValueWd.length} altos`} tone={pendingWd.length > 5 ? "warning" : "neutral"} />
-        <PremiumMetric icon={UserPlus}     label="Novos Usuários"     value={String(newUsersInRange.length)} sub="cadastros no período" tone="info" />
-        <PremiumMetric icon={TrendingUp}   label="Lucro · 30 dias"    value={fmtCurrency(profit30d)}       sub={`${last30Tx.length} vendas · take ${takeRatePct}%`} tone="success" />
-        <PremiumMetric icon={AlertCircle}  label="MEDs Pendentes"     value={String(pendingMeds.length)}   sub={pendingMeds.length > 0 ? `${fmtCurrency(pendingMedsAmount)} em disputa` : "Nenhum em aberto"} tone={pendingMeds.length > 0 ? "destructive" : "neutral"} />
-        <PremiumMetric icon={UserCheck}    label="Aprovações KYC"     value={String(kycPending.length)}    sub="aguardando análise" tone={kycPending.length > 0 ? "warning" : "neutral"} />
-        <PremiumMetric icon={Lock}         label="Saldo Retido"       value={fmtCurrency(totalRetained)}   sub="aguardando liberação" tone="warning" />
-      </PremiumMetricGrid>
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
+        <DashboardKpi icon={Flame}        label="Movimentado Hoje"  value={fmtCurrency(tpvToday)}        sub={`${todayTx.length} vendas aprovadas`} tone={todayTx.length > 0 ? "success" : "neutral"} />
+        <DashboardKpi icon={DollarSign}   label="Lucro Hoje"         value={fmtCurrency(takeRateToday)}   sub={`${activeSellersToday} sellers venderam`} tone="primary" />
+        <DashboardKpi icon={Hourglass}    label="Saques Pendentes"   value={fmtCurrency(pendingWdAmount)} sub={`${pendingWd.length} solicitações · ${highValueWd.length} altos`} tone={pendingWd.length > 5 ? "warning" : "neutral"} />
+        <DashboardKpi icon={UserPlus}     label="Novos Usuários"     value={String(newUsersInRange.length)} sub="cadastros no período" tone="info" />
+        <DashboardKpi icon={TrendingUp}   label="Lucro · 30 dias"    value={fmtCurrency(profit30d)}       sub={`${last30Tx.length} vendas · take ${takeRatePct}%`} tone="success" />
+        <DashboardKpi icon={AlertCircle}  label="MEDs Pendentes"     value={String(pendingMeds.length)}   sub={pendingMeds.length > 0 ? `${fmtCurrency(pendingMedsAmount)} em disputa` : "Nenhum em aberto"} tone={pendingMeds.length > 0 ? "destructive" : "neutral"} />
+        <DashboardKpi icon={UserCheck}    label="Aprovações KYC"     value={String(kycPending.length)}    sub="aguardando análise" tone={kycPending.length > 0 ? "warning" : "neutral"} />
+        <DashboardKpi icon={Lock}         label="Saldo Retido"       value={fmtCurrency(totalRetained)}   sub="aguardando liberação" tone="warning" />
+      </div>
 
       {/* ── Hourly + Methods ── */}
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-5">
@@ -770,7 +775,7 @@ export default function AdminOverviewTab({
 
 function HeroStat({ label, value, tone }: { label: string; value: string; tone: Tone }) {
   return (
-    <div className="px-4 first:pl-0 last:pr-0">
+    <div className="bg-card p-3.5">
       <p className="text-[9.5px] font-black uppercase tracking-[0.22em] text-muted-foreground/70">{label}</p>
       <p className={cn("mt-2 font-display text-[17px] font-black tabular-nums leading-none tracking-tight", TONE_TEXT[tone])}>
         {value}
@@ -783,12 +788,41 @@ function PulseStat({ icon: Icon, label, value, tone }: {
   icon: any; label: string; value: string; tone: Tone;
 }) {
   return (
-    <div className="flex items-center justify-between gap-2">
+    <div className="flex items-center justify-between gap-2 rounded-lg border border-border/60 bg-muted/20 px-3 py-2">
       <span className="flex min-w-0 items-center gap-1.5">
         <Icon className={cn("h-3 w-3 shrink-0", TONE_TEXT[tone])} strokeWidth={2.4} />
         <span className="truncate text-[10px] font-black uppercase tracking-wider text-muted-foreground">{label}</span>
       </span>
       <span className={cn("shrink-0 text-xs font-black tabular-nums", TONE_TEXT[tone])}>{value}</span>
+    </div>
+  );
+}
+
+function CommandMini({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="bg-primary px-3 py-2.5">
+      <p className="text-[9px] font-black uppercase tracking-[0.18em] text-primary-foreground/70">{label}</p>
+      <p className="mt-1 font-display text-lg font-black leading-none text-primary-foreground tabular-nums">{value}</p>
+    </div>
+  );
+}
+
+function DashboardKpi({ icon: Icon, label, value, sub, tone }: {
+  icon: any; label: string; value: string; sub?: string; tone: Tone;
+}) {
+  return (
+    <div className="group relative overflow-hidden rounded-xl border border-border/70 bg-card p-4 transition-colors hover:border-primary/35">
+      <div className="relative z-10 flex items-start justify-between gap-3">
+        <div className="min-w-0">
+          <p className="text-[9px] font-black uppercase tracking-[0.2em] text-muted-foreground/70">{label}</p>
+          <p className={cn("mt-3 break-words font-display text-[25px] font-black leading-none tracking-tight tabular-nums", TONE_TEXT[tone])}>{value}</p>
+          {sub && <p className="mt-2 truncate text-[11px] font-bold text-muted-foreground/75">{sub}</p>}
+        </div>
+        <div className={cn("flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border", TONE_PILL[tone])}>
+          <Icon className="h-5 w-5" strokeWidth={2.35} />
+        </div>
+      </div>
+      <div className={cn("absolute inset-x-0 bottom-0 h-0.5", TONE_BAR[tone])} />
     </div>
   );
 }
