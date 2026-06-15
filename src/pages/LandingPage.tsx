@@ -443,58 +443,110 @@ export default function LandingPage() {
  </motion.div>
  </div>
 
- {/* Right column — Dashboard mockup */}
- <motion.div
- initial={{ opacity: 0, x: 60, rotateY: 8 }}
- animate={{ opacity: 1, x: 0, rotateY: 0 }}
- transition={{ delay: 0.6, duration: 1, ease: [0.16, 1, 0.3, 1] }}
- className="relative hidden lg:block"
- >
- {/* Glow behind */}
- <div className="absolute -inset-8 rounded-[40px] bg-gradient-to-br from-primary/15 via-transparent to-info/10 blur-3xl opacity-50" />
- {/* Floating gem */}
- <motion.img src={abstractGem} alt="" aria-hidden className="absolute -top-16 -right-12 w-32 h-32 z-20 opacity-60"
- animate={{ y: [0, -12, 0], rotate: [0, 5, 0] }} transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
- loading="lazy" width={800} height={800} />
- {/* Main mockup */}
- <div className="relative rounded-3xl overflow-hidden border border-border/15 shadow-[0_40px_100px_rgba(0,0,0,0.15)]">
- <img src={dashboardMockup} alt="HOTZFY Dashboard" className="w-full h-auto" width={1920} height={1080} />
- {/* Glass overlay */}
- <div className="absolute inset-0 bg-gradient-to-t from-background/40 via-transparent to-transparent" />
- </div>
- {/* Floating metric cards */}
- <motion.div
- animate={{ y: [0, -8, 0] }}
- transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
- className="absolute -left-8 top-1/3 p-4 rounded-2xl bg-card/80 backdrop-blur-xl border border-border/15 shadow-2xl z-20"
- >
- <div className="flex items-center gap-3">
- <div className="h-10 w-10 rounded-xl bg-success/10 flex items-center justify-center">
- <TrendingUp className="h-4 w-4 text-success" />
- </div>
- <div>
- <p className="text-[10px] text-muted-foreground/40 font-display font-bold uppercase tracking-wider">Hoje</p>
- <p className="text-lg font-display font-black text-foreground tabular-nums">R$ 12.450</p>
- </div>
- </div>
- </motion.div>
+          {/* Right column — Live Gateway Panel (real UI) */}
+          <motion.div
+            initial={{ opacity: 0, y: 32 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.5, duration: 0.9, ease: [0.16, 1, 0.3, 1] }}
+            className="relative hidden lg:block"
+          >
+            {/* Outer device frame */}
+            <div className="relative rounded-3xl border border-border/20 bg-card/60 backdrop-blur-xl overflow-hidden">
+              {/* Top chrome */}
+              <div className="flex items-center justify-between px-5 py-3 border-b border-border/15 bg-card/80">
+                <div className="flex items-center gap-1.5">
+                  <span className="h-2.5 w-2.5 rounded-full bg-destructive/60" />
+                  <span className="h-2.5 w-2.5 rounded-full bg-warning/60" />
+                  <span className="h-2.5 w-2.5 rounded-full bg-success/60" />
+                </div>
+                <div className="flex items-center gap-1.5 px-3 py-1 rounded-md bg-background/60 border border-border/15 text-[10px] font-display font-bold text-muted-foreground/60 tracking-wider">
+                  <Lock className="h-2.5 w-2.5 text-success" /> app.hotzfy.com.br
+                </div>
+                <div className="flex items-center gap-1.5">
+                  <span className="relative flex h-2 w-2">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-success opacity-60" />
+                    <span className="relative inline-flex rounded-full h-2 w-2 bg-success" />
+                  </span>
+                  <span className="text-[9px] font-display font-bold uppercase tracking-wider text-success/80">Live</span>
+                </div>
+              </div>
 
- <motion.div
- animate={{ y: [0, 8, 0] }}
- transition={{ duration: 5, repeat: Infinity, ease: "easeInOut", delay: 1 }}
- className="absolute -right-6 bottom-1/4 p-3 rounded-2xl bg-card/80 backdrop-blur-xl border border-border/15 shadow-2xl z-20"
- >
- <div className="flex items-center gap-2">
- <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center">
- <CheckCircle2 className="h-3.5 w-3.5 text-primary" />
- </div>
- <div>
- <p className="text-[9px] text-muted-foreground/40 font-display font-bold uppercase tracking-wider">Aprovação</p>
- <p className="text-base font-display font-black text-primary tabular-nums">98.7%</p>
- </div>
- </div>
- </motion.div>
- </motion.div>
+              {/* Body */}
+              <div className="p-5 space-y-4">
+                {/* Revenue card */}
+                <div className="rounded-2xl border border-border/15 bg-background/50 p-5">
+                  <div className="flex items-center justify-between mb-3">
+                    <div>
+                      <p className="text-[9px] font-display font-black uppercase tracking-[0.18em] text-muted-foreground/40">Faturamento · Hoje</p>
+                      <p className="text-3xl font-display font-black text-foreground tabular-nums tracking-[-0.04em] mt-1">R$ 84.231<span className="text-base text-muted-foreground/40">,90</span></p>
+                    </div>
+                    <div className="flex items-center gap-1 px-2 py-1 rounded-lg bg-success/10 border border-success/20">
+                      <TrendingUp className="h-3 w-3 text-success" />
+                      <span className="text-[10px] font-display font-black text-success tabular-nums">+24,8%</span>
+                    </div>
+                  </div>
+                  {/* Mini bar chart */}
+                  <div className="flex items-end gap-1.5 h-16 mt-4">
+                    {[40, 55, 35, 70, 60, 85, 50, 95, 75, 90, 65, 100].map((h, i) => (
+                      <motion.div key={i}
+                        initial={{ height: 0 }}
+                        animate={{ height: `${h}%` }}
+                        transition={{ delay: 0.8 + i * 0.05, duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+                        className={cn("flex-1 rounded-sm", i === 11 ? "bg-primary" : "bg-primary/30")}
+                      />
+                    ))}
+                  </div>
+                </div>
+
+                {/* Mini KPIs */}
+                <div className="grid grid-cols-3 gap-2.5">
+                  {[
+                    { label: "Aprovação", value: "98,7%", tone: "text-success" },
+                    { label: "Ticket médio", value: "R$ 297", tone: "text-foreground" },
+                    { label: "PIX", value: "1.842", tone: "text-primary" },
+                  ].map((k) => (
+                    <div key={k.label} className="rounded-xl border border-border/15 bg-background/40 p-3">
+                      <p className="text-[8px] font-display font-black uppercase tracking-[0.15em] text-muted-foreground/40">{k.label}</p>
+                      <p className={cn("text-sm font-display font-black tabular-nums tracking-tight mt-1", k.tone)}>{k.value}</p>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Live transactions */}
+                <div className="rounded-2xl border border-border/15 bg-background/50 overflow-hidden">
+                  <div className="flex items-center justify-between px-4 py-2.5 border-b border-border/10">
+                    <p className="text-[9px] font-display font-black uppercase tracking-[0.18em] text-muted-foreground/50">Transações ao vivo</p>
+                    <span className="text-[9px] font-display font-bold text-success/70">● em tempo real</span>
+                  </div>
+                  <div className="divide-y divide-border/10">
+                    {[
+                      { who: "M. Silva", what: "Curso Pro · PIX", value: "R$ 497,00", ok: true },
+                      { who: "J. Costa", what: "Mentoria · Cartão 3x", value: "R$ 1.297,00", ok: true },
+                      { who: "A. Pereira", what: "E-book · PIX", value: "R$ 47,00", ok: true },
+                    ].map((t, i) => (
+                      <motion.div key={i}
+                        initial={{ opacity: 0, x: -8 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ delay: 1.2 + i * 0.15 }}
+                        className="flex items-center justify-between px-4 py-2.5"
+                      >
+                        <div className="flex items-center gap-2.5 min-w-0">
+                          <div className="h-7 w-7 rounded-lg bg-success/10 border border-success/20 flex items-center justify-center shrink-0">
+                            <CheckCircle2 className="h-3 w-3 text-success" />
+                          </div>
+                          <div className="min-w-0">
+                            <p className="text-[11px] font-display font-bold text-foreground truncate">{t.who}</p>
+                            <p className="text-[9px] font-display text-muted-foreground/50 truncate">{t.what}</p>
+                          </div>
+                        </div>
+                        <p className="text-[11px] font-display font-black text-foreground tabular-nums shrink-0 ml-2">{t.value}</p>
+                      </motion.div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </motion.div>
  </div>
  </div>
  </section>
