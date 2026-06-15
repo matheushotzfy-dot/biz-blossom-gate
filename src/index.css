@@ -1116,6 +1116,102 @@ input[type="number"]::-webkit-inner-spin-button {
   .seller-row-action { transition: none !important; transform: none !important; }
 }
 
+/* ─── Global tactile polish across every seller page ─── */
+.page-fluid [role="tab"],
+.page-fluid [role="menuitem"],
+.page-fluid [role="option"],
+.page-fluid .tab-trigger,
+.page-fluid [data-radix-collection-item] {
+  transition: transform 220ms cubic-bezier(0.22, 1, 0.36, 1),
+              background-color 220ms cubic-bezier(0.22, 1, 0.36, 1),
+              color 220ms cubic-bezier(0.22, 1, 0.36, 1),
+              border-color 220ms cubic-bezier(0.22, 1, 0.36, 1) !important;
+}
+.page-fluid [role="tab"]:not([data-state="active"]):hover,
+.page-fluid [role="menuitem"]:hover,
+.page-fluid [role="option"]:hover,
+.page-fluid [data-radix-collection-item]:hover {
+  transform: translate3d(0, -1px, 0);
+  color: hsl(var(--foreground));
+}
+.page-fluid [role="tab"][data-state="active"] {
+  transform: translate3d(0, -1px, 0);
+}
+
+/* Buttons get a uniform lift + sheen everywhere inside the seller app */
+.page-fluid button:not(:disabled):not([data-no-fluid]):not([role="tab"]):not([role="menuitem"]):not([role="option"]):not([role="switch"]):not([role="checkbox"]):not([role="radio"]):not([data-radix-collection-item]),
+.page-fluid a[role="button"]:not([data-no-fluid]) {
+  transition: transform 220ms cubic-bezier(0.22, 1, 0.36, 1),
+              background-color 220ms cubic-bezier(0.22, 1, 0.36, 1),
+              border-color 220ms cubic-bezier(0.22, 1, 0.36, 1),
+              color 220ms cubic-bezier(0.22, 1, 0.36, 1),
+              filter 220ms cubic-bezier(0.22, 1, 0.36, 1) !important;
+}
+.page-fluid button:not(:disabled):not([data-no-fluid]):not([role="tab"]):not([role="menuitem"]):not([role="option"]):not([role="switch"]):not([role="checkbox"]):not([role="radio"]):not([data-radix-collection-item]):hover,
+.page-fluid a[role="button"]:not([data-no-fluid]):hover {
+  transform: translate3d(0, -1.5px, 0);
+  filter: brightness(1.08);
+}
+.page-fluid button:not(:disabled):not([data-no-fluid]):not([role="tab"]):not([role="menuitem"]):not([role="option"]):not([role="switch"]):not([role="checkbox"]):not([role="radio"]):not([data-radix-collection-item]):active,
+.page-fluid a[role="button"]:not([data-no-fluid]):active {
+  transform: translate3d(0, 0, 0) scale(0.98);
+  filter: brightness(0.96);
+}
+
+/* Cards lift gently when they wrap interactive content */
+.page-fluid a > [data-card],
+.page-fluid button > [data-card],
+.page-fluid [data-card][data-interactive="true"] {
+  transition: transform 260ms cubic-bezier(0.22, 1, 0.36, 1),
+              border-color 260ms cubic-bezier(0.22, 1, 0.36, 1) !important;
+}
+.page-fluid a:hover > [data-card],
+.page-fluid button:hover > [data-card],
+.page-fluid [data-card][data-interactive="true"]:hover {
+  transform: translate3d(0, -3px, 0);
+  border-color: hsl(var(--primary) / 0.5);
+}
+
+/* Table rows feel alive on hover */
+.page-fluid tbody tr {
+  transition: background-color 200ms cubic-bezier(0.22, 1, 0.36, 1),
+              color 200ms cubic-bezier(0.22, 1, 0.36, 1) !important;
+}
+.page-fluid tbody tr:hover {
+  background-color: hsl(var(--muted) / 0.45);
+}
+
+/* Inputs / selects get a subtle focus pop */
+.page-fluid input:not([data-no-fluid]),
+.page-fluid textarea:not([data-no-fluid]),
+.page-fluid select:not([data-no-fluid]),
+.page-fluid [role="combobox"]:not([data-no-fluid]) {
+  transition: border-color 200ms cubic-bezier(0.22, 1, 0.36, 1),
+              background-color 200ms cubic-bezier(0.22, 1, 0.36, 1),
+              box-shadow 200ms cubic-bezier(0.22, 1, 0.36, 1) !important;
+}
+.page-fluid input:not([data-no-fluid]):hover:not(:focus),
+.page-fluid textarea:not([data-no-fluid]):hover:not(:focus),
+.page-fluid select:not([data-no-fluid]):hover:not(:focus),
+.page-fluid [role="combobox"]:not([data-no-fluid]):hover:not(:focus) {
+  border-color: hsl(var(--primary) / 0.45);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .page-fluid [role="tab"],
+  .page-fluid [role="menuitem"],
+  .page-fluid [role="option"],
+  .page-fluid [data-radix-collection-item],
+  .page-fluid button,
+  .page-fluid a[role="button"],
+  .page-fluid tbody tr,
+  .page-fluid [data-card][data-interactive="true"] {
+    transition: none !important;
+    transform: none !important;
+    filter: none !important;
+  }
+}
+
 /* ─── Premium scrollbar ─── */
 ::-webkit-scrollbar { width: 5px; height: 5px; }
 ::-webkit-scrollbar-track { background: transparent; }
