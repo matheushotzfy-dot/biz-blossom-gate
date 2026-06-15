@@ -24,7 +24,8 @@ function DashboardLayoutInner() {
  usePrefetchDashboardData();
  useRealtimeSync();
  const navigate = useNavigate();
- const { pathname } = useLocation();
+  const { pathname, search } = useLocation();
+  const routeKey = pathname + search;
  const scrollRef = useRef<HTMLDivElement>(null);
  const [showApproved, setShowApproved] = useState(false);
  const [searchOpen, setSearchOpen] = useState(false);
@@ -51,9 +52,9 @@ function DashboardLayoutInner() {
    const formatBRL = (v: number) =>
      v.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
 
- useEffect(() => {
- scrollRef.current?.scrollTo({ top: 0, left: 0 });
-  }, [pathname]);
+  useEffect(() => {
+  scrollRef.current?.scrollTo({ top: 0, left: 0 });
+   }, [routeKey]);
 
   // Sync privacy mode with dashboard
   useEffect(() => {
@@ -196,7 +197,7 @@ function DashboardLayoutInner() {
 
  <div ref={scrollRef} className="relative z-10 flex-1 overflow-y-auto overscroll-contain px-3 sm:px-4 md:px-7 xl:px-10 pb-20 md:pb-10 min-h-0" style={{ WebkitOverflowScrolling: 'touch' }}>
   <div className="mx-auto w-full max-w-[1180px] py-2 md:py-4">
-  <div key={pathname} className="page-rise">
+  <div key={routeKey} className="page-fluid">
   <Outlet />
   </div>
   </div>
