@@ -323,51 +323,58 @@ export default function AdminOverviewTab({
       />
 
       {/* ── Volume Hero Card ── */}
-      <div className="relative overflow-hidden rounded-[28px] border border-border/60 bg-card">
+      <div className="relative overflow-hidden rounded-3xl border border-border/60 bg-card">
+        <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-primary/40 to-transparent" />
         <div
-          className="pointer-events-none absolute -top-32 -right-24 h-[420px] w-[420px] rounded-full opacity-50"
-          style={{ background: "radial-gradient(closest-side, hsl(var(--primary) / 0.16), transparent 70%)" }}
+          className="pointer-events-none absolute -top-40 -right-28 h-[460px] w-[460px] rounded-full opacity-40"
+          style={{ background: "radial-gradient(closest-side, hsl(var(--primary) / 0.18), transparent 70%)" }}
         />
-        <div className="relative grid grid-cols-1 lg:grid-cols-[1.4fr_1fr]">
-          <div className="p-6 lg:p-8 border-b lg:border-b-0 lg:border-r border-border/40">
-            <p className="text-[10px] font-black uppercase tracking-[0.22em] text-muted-foreground/70">
-              Volume Movimentado
-            </p>
-            <h2 className="mt-3 font-display text-[44px] lg:text-[56px] font-black leading-none tracking-[-0.03em] text-foreground tabular-nums">
+        <div className="relative grid grid-cols-1 lg:grid-cols-[1.35fr_1fr]">
+          <div className="px-7 py-7 lg:px-9 lg:py-8 border-b lg:border-b-0 lg:border-r border-border/50">
+            <div className="flex items-center gap-2">
+              <span className="h-1.5 w-1.5 rounded-full bg-success animate-pulse" />
+              <p className="text-[10px] font-black uppercase tracking-[0.24em] text-muted-foreground/80">
+                Volume Movimentado · {rangeLabel}
+              </p>
+            </div>
+            <h2 className="mt-4 font-display text-[44px] lg:text-[52px] font-black leading-[0.95] tracking-[-0.035em] text-foreground tabular-nums">
               {fmtCurrency(totalVolume)}
             </h2>
+            <p className="mt-2.5 text-[11.5px] font-bold text-muted-foreground">
+              <span className="text-success">{filteredApproved.length}</span> aprovadas de <span className="text-foreground">{filteredTx.length}</span> transações
+            </p>
 
-            <div className="mt-6 grid grid-cols-3 gap-3">
+            <div className="mt-7 grid grid-cols-3 divide-x divide-border/50 border-t border-border/40 pt-5">
               <HeroStat label="Lucro" value={fmtCurrency(takeRateTotal)} tone="success" />
               <HeroStat label="Take Rate" value={`${takeRatePct}%`} tone="primary" />
               <HeroStat label="Ticket Médio" value={fmtCurrency(ticketMedio)} tone="info" />
             </div>
           </div>
 
-          <div className="flex flex-col justify-between gap-4 p-6 lg:p-8">
+          <div className="flex flex-col justify-between gap-5 px-7 py-7 lg:px-9 lg:py-8">
             <div>
-              <div className="mb-2 flex items-center justify-between">
-                <p className="text-[10px] font-black uppercase tracking-[0.22em] text-muted-foreground/70">
+              <div className="mb-3 flex items-center justify-between">
+                <p className="text-[10px] font-black uppercase tracking-[0.24em] text-muted-foreground/80">
                   Pulso · 7 dias
                 </p>
                 <span className="font-display text-sm font-black text-foreground tabular-nums">
                   {fmtCurrency(tpvMonth)}
                 </span>
               </div>
-              <ResponsiveContainer width="100%" height={120}>
+              <ResponsiveContainer width="100%" height={108}>
                 <AreaChart data={chartData} margin={{ top: 4, right: 4, bottom: 0, left: 0 }}>
                   <defs>
                     <linearGradient id="heroSpark" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="0%" stopColor="hsl(var(--primary))" stopOpacity={0.25} />
+                      <stop offset="0%" stopColor="hsl(var(--primary))" stopOpacity={0.28} />
                       <stop offset="100%" stopColor="hsl(var(--primary))" stopOpacity={0} />
                     </linearGradient>
                   </defs>
-                  <Area type="monotone" dataKey="tpv" stroke="hsl(var(--primary))" strokeWidth={2.5}
+                  <Area type="monotone" dataKey="tpv" stroke="hsl(var(--primary))" strokeWidth={2}
                         fill="url(#heroSpark)" dot={false} isAnimationActive={false} />
                 </AreaChart>
               </ResponsiveContainer>
             </div>
-            <div className="grid grid-cols-2 gap-2">
+            <div className="grid grid-cols-2 gap-x-5 gap-y-2.5 border-t border-border/40 pt-4">
               <PulseStat icon={Activity} label="Conversão" value={`${conversionRate}%`} tone="success" />
               <PulseStat icon={CheckCircle2} label="Aprovadas" value={String(filteredApproved.length)} tone="primary" />
               <PulseStat icon={ShieldAlert} label="Chargeback" value={`${chargebackRate.toFixed(2)}%`} tone={chargebackAlert ? "destructive" : "neutral"} />
@@ -763,9 +770,9 @@ export default function AdminOverviewTab({
 
 function HeroStat({ label, value, tone }: { label: string; value: string; tone: Tone }) {
   return (
-    <div className="rounded-2xl border border-border/60 bg-muted/20 px-3.5 py-3">
+    <div className="px-4 first:pl-0 last:pr-0">
       <p className="text-[9.5px] font-black uppercase tracking-[0.22em] text-muted-foreground/70">{label}</p>
-      <p className={cn("mt-1.5 font-display text-base font-black tabular-nums leading-none", TONE_TEXT[tone])}>
+      <p className={cn("mt-2 font-display text-[17px] font-black tabular-nums leading-none tracking-tight", TONE_TEXT[tone])}>
         {value}
       </p>
     </div>
@@ -776,12 +783,12 @@ function PulseStat({ icon: Icon, label, value, tone }: {
   icon: any; label: string; value: string; tone: Tone;
 }) {
   return (
-    <div className={cn("flex items-center justify-between rounded-xl border px-2.5 py-2", TONE_PILL[tone])}>
+    <div className="flex items-center justify-between gap-2">
       <span className="flex min-w-0 items-center gap-1.5">
-        <Icon className="h-3 w-3 shrink-0" strokeWidth={2.4} />
-        <span className="truncate text-[10px] font-black uppercase tracking-wider">{label}</span>
+        <Icon className={cn("h-3 w-3 shrink-0", TONE_TEXT[tone])} strokeWidth={2.4} />
+        <span className="truncate text-[10px] font-black uppercase tracking-wider text-muted-foreground">{label}</span>
       </span>
-      <span className="shrink-0 text-xs font-black tabular-nums">{value}</span>
+      <span className={cn("shrink-0 text-xs font-black tabular-nums", TONE_TEXT[tone])}>{value}</span>
     </div>
   );
 }
