@@ -1555,7 +1555,7 @@ button svg, a svg, [role="button"] svg {
 }
 
 /* ── BUTTONS ──────────────────────────────────────────────── */
-.admin-shell button { font-weight: 500; letter-spacing: -0.01em; transition: all 120ms; }
+.admin-shell button { font-weight: 600; letter-spacing: -0.01em; transition: all 160ms ease; border-radius: 10px; }
 .admin-shell button.bg-primary {
   background-color: #0f172a !important;
   color: #ffffff !important;
