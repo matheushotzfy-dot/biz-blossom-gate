@@ -292,7 +292,7 @@ export default function Dashboard() {
                   key={p.label}
                   onClick={() => { setSelectedPeriod(p); setIsCustom(false); }}
                   className={cn(
-                    "relative px-4 flex items-center justify-center text-[11px] font-display font-black uppercase tracking-[0.14em] tabular-nums transition-colors duration-200 min-w-[58px]",
+                    "seller-segment relative px-4 flex items-center justify-center text-[11px] font-display font-black uppercase tracking-[0.14em] tabular-nums min-w-[58px]",
                     isActive
                       ? "text-primary bg-primary/[0.08]"
                       : "text-muted-foreground/60 hover:text-foreground hover:bg-secondary/40"
@@ -311,7 +311,7 @@ export default function Dashboard() {
           <Popover open={datePickerOpen} onOpenChange={setDatePickerOpen}>
             <PopoverTrigger asChild>
               <button className={cn(
-                "relative border-l border-border px-4 flex items-center gap-2 text-[11px] font-display font-black uppercase tracking-[0.14em] transition-colors duration-200",
+                "seller-segment relative border-l border-border px-4 flex items-center gap-2 text-[11px] font-display font-black uppercase tracking-[0.14em]",
                 isCustom
                   ? "text-primary bg-primary/[0.08]"
                   : "text-muted-foreground/60 hover:text-foreground hover:bg-secondary/40"
@@ -394,7 +394,7 @@ export default function Dashboard() {
                       <button
                         key={preset.label}
                         onClick={apply}
-                        className="text-left px-2.5 py-2 rounded-md text-[11px] font-display font-bold text-muted-foreground/80 hover:text-foreground hover:bg-secondary/60 transition-colors duration-150 whitespace-nowrap"
+                        className="seller-menu-item text-left px-2.5 py-2 rounded-md text-[11px] font-display font-bold text-muted-foreground/80 hover:text-foreground hover:bg-secondary/60 whitespace-nowrap"
                       >
                         {preset.label}
                       </button>
@@ -416,14 +416,14 @@ export default function Dashboard() {
               <div className="flex items-center justify-between gap-2 px-4 py-2.5 border-t border-border bg-secondary/20">
                 <button
                   onClick={() => { setCustomRange(undefined); setIsCustom(false); setSelectedPeriod(PERIOD_PRESETS[0]); }}
-                  className="text-[10px] font-display font-black uppercase tracking-[0.14em] text-muted-foreground/60 hover:text-foreground transition-colors duration-150"
+                  className="seller-text-action text-[10px] font-display font-black uppercase tracking-[0.14em] text-muted-foreground/60 hover:text-foreground"
                 >
                   Limpar
                 </button>
                 <button
                   onClick={() => setDatePickerOpen(false)}
                   disabled={!customRange?.from || !customRange?.to}
-                  className="px-3 py-1.5 rounded-md text-[10px] font-display font-black uppercase tracking-[0.14em] bg-primary text-primary-foreground hover:bg-primary/90 transition-colors duration-150 disabled:opacity-40 disabled:cursor-not-allowed"
+                  className="seller-action px-3 py-1.5 rounded-md text-[10px] font-display font-black uppercase tracking-[0.14em] bg-primary text-primary-foreground hover:bg-primary/90 disabled:opacity-40 disabled:cursor-not-allowed"
                 >
                   Aplicar
                 </button>
@@ -481,7 +481,7 @@ export default function Dashboard() {
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3 pt-1">
                 <Link
                   to="/financeiro/saques"
-                  className="bg-primary text-primary-foreground h-11 px-4 rounded-xl font-bold text-[12px] flex items-center justify-center gap-2 shadow-md shadow-primary/25 hover:shadow-lg hover:shadow-primary/30 hover:-translate-y-0.5 active:scale-[0.98] transition-all whitespace-nowrap"
+                  className="seller-action bg-primary text-primary-foreground h-11 px-4 rounded-xl font-bold text-[12px] flex items-center justify-center gap-2 whitespace-nowrap"
                 >
                   <ArrowDownRight className="h-4 w-4 shrink-0" />
                   <span>Solicitar Saque</span>
@@ -489,7 +489,7 @@ export default function Dashboard() {
                 <button
                   type="button"
                   onClick={() => setPixDialogOpen(true)}
-                  className="bg-background/60 border border-border/60 text-foreground h-11 px-4 rounded-xl font-bold text-[12px] flex items-center justify-center gap-2 hover:bg-accent hover:border-primary/30 hover:-translate-y-0.5 active:scale-[0.98] transition-all whitespace-nowrap"
+                  className="seller-action bg-background/60 text-foreground h-11 px-4 rounded-xl font-bold text-[12px] flex items-center justify-center gap-2 hover:bg-accent whitespace-nowrap"
                 >
                   <Zap className="h-4 w-4 text-success shrink-0" />
                   <span>Link de Pagamento</span>
@@ -670,7 +670,7 @@ export default function Dashboard() {
             <CardTitle className="text-lg font-bold">Últimas Transações</CardTitle>
             <CardDescription className="text-[10px] font-bold uppercase tracking-wider opacity-50">Acompanhamento em tempo real</CardDescription>
           </div>
-          <Link to="/vendas" className="text-xs font-bold text-primary hover:underline underline-offset-4 flex items-center gap-1">
+          <Link to="/vendas" className="seller-link-action text-xs font-bold text-primary hover:underline underline-offset-4 flex items-center gap-1">
              Ver Histórico Completo
              <ChevronRight className="h-3 w-3" />
           </Link>
@@ -682,7 +682,7 @@ export default function Dashboard() {
                 key={item.id}
                 type="button"
                 onClick={() => setDetailTx(item.tx)}
-                className="group w-full text-left flex items-center justify-between px-8 py-6 hover:bg-muted/30 transition-all cursor-pointer"
+                className="seller-row-action group w-full text-left flex items-center justify-between px-8 py-6 cursor-pointer"
               >
                 <div className="flex items-center gap-4">
                   <div className={cn("h-11 w-11 rounded-2xl flex items-center justify-center transition-transform group-hover:scale-110", statusBg(item.status))}>
@@ -749,7 +749,7 @@ export default function Dashboard() {
               </div>
               <button
                 onClick={() => { const id = detailTx.id; setDetailTx(null); navigate(`/vendas?tx=${id}`); }}
-                className="w-full h-11 rounded-xl bg-primary text-primary-foreground font-bold text-sm flex items-center justify-center gap-2 hover:opacity-90 transition-opacity"
+                className="seller-action w-full h-11 rounded-xl bg-primary text-primary-foreground font-bold text-sm flex items-center justify-center gap-2 hover:opacity-90"
               >
                 Ver completo na aba Vendas <ChevronRight className="h-4 w-4" />
               </button>
