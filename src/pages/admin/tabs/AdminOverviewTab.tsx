@@ -2,10 +2,10 @@ import { useState, useEffect, useMemo } from "react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import {
-  DollarSign, Users, ArrowDownToLine, TrendingUp, CheckCircle2, XCircle,
+  DollarSign, Users, TrendingUp, CheckCircle2, XCircle,
   CreditCard, Package, Activity, Percent, ShieldAlert, RotateCcw, Lock,
   Eye, Radio, AlertCircle, UserCheck, Flame, Wallet, CalendarDays,
-  Clock3, Hourglass, UserPlus, ChevronRight, ArrowUpRight,
+  Clock3, Hourglass, UserPlus, ArrowUpRight,
 } from "lucide-react";
 import {
   AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
@@ -15,8 +15,15 @@ import KycReviewDialog from "@/components/admin/KycReviewDialog";
 import type { Tables } from "@/integrations/supabase/types";
 import { cn } from "@/lib/utils";
 import React from "react";
+import { FinanceiroHero } from "@/components/financeiro/FinanceiroHero";
+import {
+  PremiumPanel, PremiumMetric, PremiumMetricGrid, PremiumSegmented, premiumTable,
+} from "./AdminPremium";
 
-interface Dispute { id: string; type: string; status: string; seller_user_id: string; amount: number; created_at: string; transaction_id: string | null; }
+interface Dispute {
+  id: string; type: string; status: string; seller_user_id: string;
+  amount: number; created_at: string; transaction_id: string | null;
+}
 
 interface Props {
   transactions: Tables<"transactions">[];
@@ -31,122 +38,68 @@ interface Props {
   onNavigate?: (tabId: string) => void;
 }
 
+type Tone = "primary" | "success" | "warning" | "destructive" | "info" | "neutral";
+
 /* ═════════════════════════════════════════════════════════════
-   PHP-ADMIN CLEAN — Primitive kit
-   White surfaces, 1px slate borders, no gradients, no glow.
-   Compact, dense, professional. Pure semantic colors.
+   PREMIUM KIT — soft surfaces, generous radius, semantic tokens
+   Inspired by AdminTopSellersTab. Works in light + dark via the
+   admin-shell token cascade.
    ═════════════════════════════════════════════════════════════ */
 
-const TONE_CFG = {
-  neutral:     { stripe: "#cbd5e1", text: "text-[#475569]", pill: "bg-[#f1f5f9] text-[#475569] border-[#e2e8f0]" },
-  primary:     { stripe: "#1e293b", text: "text-[#1e293b]", pill: "bg-[#f1f5f9] text-[#1e293b] border-[#cbd5e1]" },
-  success:     { stripe: "#10b981", text: "text-[#047857]", pill: "bg-[#ecfdf5] text-[#047857] border-[#a7f3d0]" },
-  warning:     { stripe: "#f59e0b", text: "text-[#b45309]", pill: "bg-[#fffbeb] text-[#b45309] border-[#fde68a]" },
-  destructive: { stripe: "#ef4444", text: "text-[#b91c1c]", pill: "bg-[#fef2f2] text-[#b91c1c] border-[#fecaca]" },
-  info:        { stripe: "#3b82f6", text: "text-[#1d4ed8]", pill: "bg-[#eff6ff] text-[#1d4ed8] border-[#bfdbfe]" },
-} as const;
-type Tone = keyof typeof TONE_CFG;
+const TONE_TEXT: Record<Tone, string> = {
+  primary:     "text-primary",
+  success:     "text-success",
+  warning:     "text-warning",
+  destructive: "text-destructive",
+  info:        "text-info",
+  neutral:     "text-foreground",
+};
+const TONE_PILL: Record<Tone, string> = {
+  primary:     "bg-primary/10 text-primary border-primary/20",
+  success:     "bg-success/10 text-success border-success/20",
+  warning:     "bg-warning/10 text-warning border-warning/20",
+  destructive: "bg-destructive/10 text-destructive border-destructive/20",
+  info:        "bg-info/10 text-info border-info/20",
+  neutral:     "bg-muted/40 text-muted-foreground border-border/60",
+};
+const TONE_BAR: Record<Tone, string> = {
+  primary:     "bg-primary",
+  success:     "bg-success",
+  warning:     "bg-warning",
+  destructive: "bg-destructive",
+  info:        "bg-info",
+  neutral:     "bg-muted-foreground",
+};
 
-/* Card primitive — white surface, slate border, optional left accent rail */
-function Card({ children, className, tone }: { children: React.ReactNode; className?: string; tone?: Tone }) {
-  return (
-    <div className={cn(
-      "relative bg-white border border-[#e2e8f0] rounded-md overflow-hidden",
-      className
-    )} style={tone ? { boxShadow: `inset 3px 0 0 0 ${TONE_CFG[tone].stripe}` } : undefined}>
-      {children}
-    </div>
-  );
-}
-
-function CardHeader({ title, icon, action, sub }: {
-  title: string; icon?: React.ReactNode; action?: React.ReactNode; sub?: string;
+function Pill({ tone = "neutral", children, className }: {
+  tone?: Tone; children: React.ReactNode; className?: string;
 }) {
   return (
-    <div className="flex items-center justify-between px-4 py-2.5 border-b border-[#eef2f6] bg-[#fafbfc]">
-      <div className="flex items-center gap-2 min-w-0">
-        {icon && <span className="text-[#64748b] [&_svg]:h-3.5 [&_svg]:w-3.5">{icon}</span>}
-        <h3 className="text-[12px] font-semibold text-[#0f172a] truncate">{title}</h3>
-        {sub && <span className="text-[10.5px] text-[#94a3b8] truncate hidden sm:inline">· {sub}</span>}
-      </div>
-      {action && <div className="shrink-0">{action}</div>}
-    </div>
-  );
-}
-
-function CardBody({ children, className }: { children: React.ReactNode; className?: string }) {
-  return <div className={cn("p-4", className)}>{children}</div>;
-}
-
-/* Compact tone pill */
-function Pill({ tone = "neutral", children, className }: { tone?: Tone; children: React.ReactNode; className?: string }) {
-  return (
     <span className={cn(
-      "inline-flex items-center gap-1 h-5 px-1.5 rounded text-[9.5px] font-semibold uppercase tracking-wide border",
-      TONE_CFG[tone].pill,
-      className
+      "inline-flex items-center gap-1 h-5 px-2 rounded-full border text-[9.5px] font-black uppercase tracking-wider",
+      TONE_PILL[tone], className,
     )}>
       {children}
     </span>
   );
 }
 
-/* KPI card — clean, tabular, optional click-through */
-function Kpi({ label, value, sub, icon: Icon, tone = "neutral", delta, onClick }: {
-  label: string; value: string; sub?: string; icon: any; tone?: Tone;
-  delta?: { value: string; positive: boolean }; onClick?: () => void;
-}) {
-  const cfg = TONE_CFG[tone];
-  const Comp: any = onClick ? "button" : "div";
-  return (
-    <Comp
-      onClick={onClick}
-      className={cn(
-        "relative bg-white border border-[#e2e8f0] rounded-md p-4 text-left w-full transition-colors",
-        onClick && "hover:border-[#cbd5e1] hover:bg-[#fafbfc] cursor-pointer group"
-      )}
-      style={{ boxShadow: `inset 3px 0 0 0 ${cfg.stripe}` }}
-    >
-      <div className="flex items-start justify-between gap-3 mb-2.5">
-        <p className="text-[10.5px] font-semibold uppercase tracking-wider text-[#64748b] leading-tight">{label}</p>
-        <div className="h-6 w-6 rounded flex items-center justify-center bg-[#f8fafc] border border-[#eef2f6] text-[#475569] shrink-0">
-          <Icon className="h-3.5 w-3.5" strokeWidth={2} />
-        </div>
-      </div>
-      <p className={cn("text-[22px] font-bold leading-none tracking-tight tabular-nums", cfg.text)}
-         style={{ fontFamily: "'Plus Jakarta Sans', system-ui, sans-serif" }}>
-        {value}
-      </p>
-      <div className="mt-2 flex items-center justify-between gap-2 min-h-[16px]">
-        {sub && <p className="text-[10.5px] text-[#64748b] truncate">{sub}</p>}
-        {delta && (
-          <span className={cn(
-            "text-[10px] font-semibold tabular-nums",
-            delta.positive ? "text-[#047857]" : "text-[#b91c1c]"
-          )}>
-            {delta.positive ? "▲" : "▼"} {delta.value}
-          </span>
-        )}
-      </div>
-      {onClick && <ChevronRight className="absolute right-2 top-1/2 -translate-y-1/2 h-3 w-3 text-[#cbd5e1] opacity-0 group-hover:opacity-100 transition-opacity" />}
-    </Comp>
-  );
-}
-
-/* Recharts tooltip — solid white */
+/* Tooltip — solid card, rounded, no glow */
 function ChartTip({ active, payload, label, fmtCurrency }: any) {
   if (!active || !payload?.length) return null;
   return (
-    <div className="bg-white border border-[#e2e8f0] rounded-md px-3 py-2 shadow-sm pointer-events-none">
-      {label && <p className="text-[10px] font-semibold uppercase tracking-wider text-[#94a3b8] mb-1">{label}</p>}
-      <div className="space-y-0.5">
+    <div className="rounded-xl border border-border/60 bg-card px-3 py-2 shadow-sm pointer-events-none">
+      {label && (
+        <p className="mb-1 text-[10px] font-black uppercase tracking-[0.18em] text-muted-foreground/70">{label}</p>
+      )}
+      <div className="space-y-1">
         {payload.map((p: any, i: number) => (
           <div key={i} className="flex items-center justify-between gap-4 text-[11px]">
             <span className="flex items-center gap-1.5">
-              <span className="h-2 w-2 rounded-sm" style={{ background: p.color }} />
-              <span className="text-[#64748b]">{p.name}</span>
+              <span className="h-2 w-2 rounded-full" style={{ background: p.color }} />
+              <span className="text-muted-foreground">{p.name}</span>
             </span>
-            <span className="font-semibold tabular-nums text-[#0f172a]">
+            <span className="font-bold tabular-nums text-foreground">
               {typeof p.value === "number" && p.value > 100 ? fmtCurrency(p.value) : p.value}
             </span>
           </div>
@@ -232,17 +185,14 @@ export default function AdminOverviewTab({
   const tpvMonth = monthTx.reduce((a, t) => a + Number(t.amount), 0);
   const totalVolume = filteredApproved.reduce((a, t) => a + Number(t.amount), 0);
   const takeRateToday = todayTx.reduce((a, t) => a + Number(t.fee_amount), 0);
-  const takeRateMonth = monthTx.reduce((a, t) => a + Number(t.fee_amount), 0);
   const takeRateTotal = filteredApproved.reduce((a, t) => a + Number(t.fee_amount), 0);
   const takeRatePct = totalVolume > 0 ? ((takeRateTotal / totalVolume) * 100).toFixed(2) : "0.00";
 
-  const filteredWithdrawals = useMemo(() => {
-    if (!dateRange) return withdrawals;
-    return withdrawals.filter(w => { const d = new Date(w.created_at); return d >= dateRange.from && d <= dateRange.to; });
-  }, [withdrawals, dateRange]);
   const pendingWd = withdrawals.filter(w => w.status === "pending");
   const pendingWdAmount = pendingWd.reduce((a, w) => a + Number(w.amount), 0);
-  const totalRetained = filteredApproved.filter(t => !t.retention_released && Number(t.retained_amount) > 0).reduce((a, t) => a + Number(t.retained_amount), 0);
+  const totalRetained = filteredApproved
+    .filter(t => !t.retention_released && Number(t.retained_amount) > 0)
+    .reduce((a, t) => a + Number(t.retained_amount), 0);
 
   const chargebackTx = filteredTx.filter(t => t.status === "chargeback");
   const chargebackRate = filteredApproved.length > 0 ? ((chargebackTx.length / filteredApproved.length) * 100) : 0;
@@ -293,7 +243,11 @@ export default function AdminOverviewTab({
     const d = new Date(); d.setDate(d.getDate() - (6 - i));
     const dayStr = d.toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit" });
     const dayTx = allTx.filter(t => new Date(t.created_at).toDateString() === d.toDateString());
-    return { name: dayStr, chargebacks: dayTx.filter(t => t.status === "chargeback").length, refunds: dayTx.filter(t => t.status === "refunded").length };
+    return {
+      name: dayStr,
+      chargebacks: dayTx.filter(t => t.status === "chargeback").length,
+      refunds: dayTx.filter(t => t.status === "refunded").length,
+    };
   }), [allTx]);
 
   const kycPending = profiles.filter(p => p.account_status === "pending_review" || p.account_status === "pending");
@@ -310,7 +264,12 @@ export default function AdminOverviewTab({
   }, [dateRange]);
   const hourlyData = useMemo(() => Array.from({ length: 24 }, (_, hour) => {
     const txs = filteredApproved.filter(t => new Date(t.created_at).getHours() === hour);
-    return { hour: `${String(hour).padStart(2, "0")}h`, tpv: txs.reduce((a, t) => a + Number(t.amount), 0), lucro: txs.reduce((a, t) => a + Number(t.fee_amount), 0), vendas: txs.length };
+    return {
+      hour: `${String(hour).padStart(2, "0")}h`,
+      tpv: txs.reduce((a, t) => a + Number(t.amount), 0),
+      lucro: txs.reduce((a, t) => a + Number(t.fee_amount), 0),
+      vendas: txs.length,
+    };
   }), [filteredApproved]);
 
   const statusLabelMap: Record<string, string> = {
@@ -327,18 +286,19 @@ export default function AdminOverviewTab({
   /* ── Employee view ── */
   if (isEmployee) {
     return (
-      <div className="space-y-4">
-        <div className="bg-white border border-[#e2e8f0] rounded-md p-5">
-          <p className="text-[10px] font-semibold uppercase tracking-wider text-[#94a3b8]">Painel Staff</p>
-          <h1 className="text-[22px] font-semibold text-[#0f172a] mt-1">Visão geral</h1>
-          <p className="text-[12.5px] text-[#64748b] mt-1">Acesso restrito a operações autorizadas.</p>
-        </div>
-        <div className="grid grid-cols-2 xl:grid-cols-4 gap-3">
-          <Kpi label="Sellers" value={String(profiles.length)} sub="Cadastrados" icon={Users} tone="primary" />
-          <Kpi label="Produtos" value={String(products.length)} sub={`${products.filter(p => p.status === "active").length} ativos`} icon={Package} tone="info" />
-          <Kpi label="Transações" value={String(allTx.length)} sub={`${approved.length} aprovadas`} icon={CreditCard} tone="success" />
-          <Kpi label="Conversão" value={`${conversionRate}%`} sub={`${approved.length}/${allTx.length}`} icon={Percent} tone="warning" />
-        </div>
+      <div className="space-y-6 animate-fade-in">
+        <FinanceiroHero
+          eyebrow="Painel Staff"
+          title="Visão geral"
+          subtitle="Acesso restrito a operações autorizadas."
+          status={{ tone: "info", label: "Staff", pulse: true }}
+        />
+        <PremiumMetricGrid cols={4}>
+          <PremiumMetric icon={Users} label="Sellers" value={String(profiles.length)} sub="Cadastrados" tone="primary" />
+          <PremiumMetric icon={Package} label="Produtos" value={String(products.length)} sub={`${products.filter(p => p.status === "active").length} ativos`} tone="info" />
+          <PremiumMetric icon={CreditCard} label="Transações" value={String(allTx.length)} sub={`${approved.length} aprovadas`} tone="success" />
+          <PremiumMetric icon={Percent} label="Conversão" value={`${conversionRate}%`} sub={`${approved.length}/${allTx.length}`} tone="warning" />
+        </PremiumMetricGrid>
       </div>
     );
   }
@@ -347,59 +307,63 @@ export default function AdminOverviewTab({
      ADMIN VIEW
      ═════════════════════════════════════════════════════════════ */
   return (
-    <div className="space-y-4">
-      {/* ── Hero strip: page header with volume + period ── */}
-      <div className="bg-white border border-[#e2e8f0] rounded-md">
-        <div className="grid grid-cols-1 lg:grid-cols-[1.4fr_1fr]">
-          <div className="p-5 lg:p-6 border-b lg:border-b-0 lg:border-r border-[#eef2f6]">
-            <div className="flex items-center gap-2 mb-4">
-              <span className="flex items-center gap-1.5 px-2 py-0.5 rounded bg-[#ecfdf5] border border-[#a7f3d0]">
-                <span className="h-1.5 w-1.5 rounded-full bg-[#10b981] animate-pulse" />
-                <span className="text-[9.5px] font-bold uppercase tracking-wider text-[#047857]">Ao vivo</span>
-              </span>
-              <span className="text-[10px] font-semibold uppercase tracking-wider text-[#94a3b8]">Command Center</span>
-              <span className="ml-auto text-[10.5px] text-[#94a3b8] flex items-center gap-1.5">
-                <CalendarDays className="h-3 w-3" />
-                {rangeLabel}
-              </span>
-            </div>
+    <div className="space-y-6 animate-fade-in">
+      {/* ── Hero ── */}
+      <FinanceiroHero
+        eyebrow="Command Center"
+        title="Visão Geral"
+        subtitle="Pulso financeiro em tempo real: TPV, lucro, risco e operações pendentes."
+        status={{ tone: "success", label: "Ao Vivo", pulse: true }}
+        actions={
+          <div className="inline-flex items-center gap-2 rounded-full border border-border/60 bg-card px-3 py-1.5 text-[10.5px] font-bold text-muted-foreground">
+            <CalendarDays className="h-3.5 w-3.5" />
+            {rangeLabel}
+          </div>
+        }
+      />
 
-            <p className="text-[11px] font-semibold uppercase tracking-wider text-[#64748b]">Volume Movimentado</p>
-            <h1 className="mt-1.5 text-[36px] lg:text-[44px] font-bold text-[#0f172a] tabular-nums leading-none tracking-tight">
+      {/* ── Volume Hero Card ── */}
+      <div className="relative overflow-hidden rounded-[28px] border border-border/60 bg-card">
+        <div
+          className="pointer-events-none absolute -top-32 -right-24 h-[420px] w-[420px] rounded-full opacity-50"
+          style={{ background: "radial-gradient(closest-side, hsl(var(--primary) / 0.16), transparent 70%)" }}
+        />
+        <div className="relative grid grid-cols-1 lg:grid-cols-[1.4fr_1fr]">
+          <div className="p-6 lg:p-8 border-b lg:border-b-0 lg:border-r border-border/40">
+            <p className="text-[10px] font-black uppercase tracking-[0.22em] text-muted-foreground/70">
+              Volume Movimentado
+            </p>
+            <h2 className="mt-3 font-display text-[44px] lg:text-[56px] font-black leading-none tracking-[-0.03em] text-foreground tabular-nums">
               {fmtCurrency(totalVolume)}
-            </h1>
+            </h2>
 
-            <div className="mt-5 grid grid-cols-3 gap-px bg-[#eef2f6] border border-[#eef2f6] rounded overflow-hidden">
-              <div className="bg-white px-3.5 py-3">
-                <p className="text-[9.5px] font-semibold uppercase tracking-wider text-[#94a3b8]">Lucro</p>
-                <p className="mt-1 text-[16px] font-bold text-[#047857] tabular-nums leading-none">{fmtCurrency(takeRateTotal)}</p>
-              </div>
-              <div className="bg-white px-3.5 py-3">
-                <p className="text-[9.5px] font-semibold uppercase tracking-wider text-[#94a3b8]">Take Rate</p>
-                <p className="mt-1 text-[16px] font-bold text-[#1e293b] tabular-nums leading-none">{takeRatePct}%</p>
-              </div>
-              <div className="bg-white px-3.5 py-3">
-                <p className="text-[9.5px] font-semibold uppercase tracking-wider text-[#94a3b8]">Ticket Médio</p>
-                <p className="mt-1 text-[16px] font-bold text-[#1d4ed8] tabular-nums leading-none">{fmtCurrency(ticketMedio)}</p>
-              </div>
+            <div className="mt-6 grid grid-cols-3 gap-3">
+              <HeroStat label="Lucro" value={fmtCurrency(takeRateTotal)} tone="success" />
+              <HeroStat label="Take Rate" value={`${takeRatePct}%`} tone="primary" />
+              <HeroStat label="Ticket Médio" value={fmtCurrency(ticketMedio)} tone="info" />
             </div>
           </div>
 
-          <div className="p-5 lg:p-6 flex flex-col justify-between gap-4">
+          <div className="flex flex-col justify-between gap-4 p-6 lg:p-8">
             <div>
-              <div className="flex items-center justify-between mb-2">
-                <p className="text-[10px] font-semibold uppercase tracking-wider text-[#64748b]">Pulso · 7 dias</p>
-                <span className="text-[10.5px] font-semibold text-[#0f172a] tabular-nums">{fmtCurrency(tpvMonth)}</span>
+              <div className="mb-2 flex items-center justify-between">
+                <p className="text-[10px] font-black uppercase tracking-[0.22em] text-muted-foreground/70">
+                  Pulso · 7 dias
+                </p>
+                <span className="font-display text-sm font-black text-foreground tabular-nums">
+                  {fmtCurrency(tpvMonth)}
+                </span>
               </div>
               <ResponsiveContainer width="100%" height={120}>
                 <AreaChart data={chartData} margin={{ top: 4, right: 4, bottom: 0, left: 0 }}>
                   <defs>
                     <linearGradient id="heroSpark" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="0%" stopColor="#1e293b" stopOpacity={0.18} />
-                      <stop offset="100%" stopColor="#1e293b" stopOpacity={0} />
+                      <stop offset="0%" stopColor="hsl(var(--primary))" stopOpacity={0.25} />
+                      <stop offset="100%" stopColor="hsl(var(--primary))" stopOpacity={0} />
                     </linearGradient>
                   </defs>
-                  <Area type="monotone" dataKey="tpv" stroke="#1e293b" strokeWidth={2} fill="url(#heroSpark)" dot={false} isAnimationActive={false} />
+                  <Area type="monotone" dataKey="tpv" stroke="hsl(var(--primary))" strokeWidth={2.5}
+                        fill="url(#heroSpark)" dot={false} isAnimationActive={false} />
                 </AreaChart>
               </ResponsiveContainer>
             </div>
@@ -414,345 +378,375 @@ export default function AdminOverviewTab({
       </div>
 
       {/* ── KPI Grid ── */}
-      <div className="grid grid-cols-2 xl:grid-cols-4 gap-3">
-        <Kpi label="Movimentado Hoje" value={fmtCurrency(tpvToday)} sub={`${todayTx.length} vendas aprovadas`} icon={Flame} tone={todayTx.length > 0 ? "success" : "neutral"} onClick={() => onNavigate?.("transactions")} />
-        <Kpi label="Lucro Hoje" value={fmtCurrency(takeRateToday)} sub={`${activeSellersToday} sellers venderam`} icon={DollarSign} tone="primary" onClick={() => onNavigate?.("transactions")} />
-        <Kpi label="Saques Pendentes" value={fmtCurrency(pendingWdAmount)} sub={`${pendingWd.length} solicitações · ${highValueWd.length} altos`} icon={Hourglass} tone={pendingWd.length > 5 ? "warning" : "neutral"} onClick={() => onNavigate?.("withdrawals")} />
-        <Kpi label="Novos Usuários" value={String(newUsersInRange.length)} sub="cadastros no período" icon={UserPlus} tone="info" onClick={() => onNavigate?.("sellers")} />
-        <Kpi label="Lucro · 30 dias" value={fmtCurrency(profit30d)} sub={`${last30Tx.length} vendas · take ${takeRatePct}%`} icon={TrendingUp} tone="success" onClick={() => onNavigate?.("analytics")} />
-        <Kpi label="MEDs Pendentes" value={String(pendingMeds.length)} sub={pendingMeds.length > 0 ? `${fmtCurrency(pendingMedsAmount)} em disputa` : "Nenhum em aberto"} icon={AlertCircle} tone={pendingMeds.length > 0 ? "destructive" : "neutral"} onClick={() => onNavigate?.("medpix")} />
-        <Kpi label="Aprovações KYC" value={String(kycPending.length)} sub="aguardando análise" icon={UserCheck} tone={kycPending.length > 0 ? "warning" : "neutral"} onClick={() => onNavigate?.("sellers")} />
-        <Kpi label="Saldo Retido" value={fmtCurrency(totalRetained)} sub="aguardando liberação" icon={Lock} tone="warning" onClick={() => onNavigate?.("transactions")} />
-      </div>
+      <PremiumMetricGrid cols={4}>
+        <PremiumMetric icon={Flame}        label="Movimentado Hoje"  value={fmtCurrency(tpvToday)}        sub={`${todayTx.length} vendas aprovadas`} tone={todayTx.length > 0 ? "success" : "neutral"} />
+        <PremiumMetric icon={DollarSign}   label="Lucro Hoje"         value={fmtCurrency(takeRateToday)}   sub={`${activeSellersToday} sellers venderam`} tone="primary" />
+        <PremiumMetric icon={Hourglass}    label="Saques Pendentes"   value={fmtCurrency(pendingWdAmount)} sub={`${pendingWd.length} solicitações · ${highValueWd.length} altos`} tone={pendingWd.length > 5 ? "warning" : "neutral"} />
+        <PremiumMetric icon={UserPlus}     label="Novos Usuários"     value={String(newUsersInRange.length)} sub="cadastros no período" tone="info" />
+        <PremiumMetric icon={TrendingUp}   label="Lucro · 30 dias"    value={fmtCurrency(profit30d)}       sub={`${last30Tx.length} vendas · take ${takeRatePct}%`} tone="success" />
+        <PremiumMetric icon={AlertCircle}  label="MEDs Pendentes"     value={String(pendingMeds.length)}   sub={pendingMeds.length > 0 ? `${fmtCurrency(pendingMedsAmount)} em disputa` : "Nenhum em aberto"} tone={pendingMeds.length > 0 ? "destructive" : "neutral"} />
+        <PremiumMetric icon={UserCheck}    label="Aprovações KYC"     value={String(kycPending.length)}    sub="aguardando análise" tone={kycPending.length > 0 ? "warning" : "neutral"} />
+        <PremiumMetric icon={Lock}         label="Saldo Retido"       value={fmtCurrency(totalRetained)}   sub="aguardando liberação" tone="warning" />
+      </PremiumMetricGrid>
 
       {/* ── Hourly + Methods ── */}
-      <div className="grid grid-cols-1 xl:grid-cols-3 gap-3">
-        <Card className="xl:col-span-2" tone="primary">
-          <CardHeader title="Movimento por horário" icon={<Clock3 />} sub={rangeLabel} />
-          <CardBody>
-            <ResponsiveContainer width="100%" height={220}>
+      <div className="grid grid-cols-1 xl:grid-cols-3 gap-5">
+        <div className="xl:col-span-2">
+          <PremiumPanel title="Movimento por horário" eyebrow={rangeLabel} icon={Clock3}>
+            <ResponsiveContainer width="100%" height={240}>
               <BarChart data={hourlyData} margin={{ top: 8, right: 8, bottom: 0, left: -8 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#eef2f6" vertical={false} />
-                <XAxis dataKey="hour" stroke="#94a3b8" fontSize={10} tickLine={false} axisLine={false} interval={1} />
-                <YAxis stroke="#94a3b8" fontSize={10} tickLine={false} axisLine={false} tickFormatter={(v) => v >= 1000 ? `${(v / 1000).toFixed(0)}K` : v} />
-                <Tooltip cursor={{ fill: "#f1f5f9" }} content={<ChartTip fmtCurrency={fmtCurrency} />} />
-                <Bar dataKey="tpv" name="TPV" fill="#1e293b" radius={[3, 3, 0, 0]} isAnimationActive={false} />
-                <Bar dataKey="lucro" name="Lucro" fill="#10b981" radius={[3, 3, 0, 0]} isAnimationActive={false} />
+                <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border) / 0.5)" vertical={false} />
+                <XAxis dataKey="hour" stroke="hsl(var(--muted-foreground))" fontSize={10} tickLine={false} axisLine={false} interval={1} />
+                <YAxis stroke="hsl(var(--muted-foreground))" fontSize={10} tickLine={false} axisLine={false}
+                       tickFormatter={(v) => v >= 1000 ? `${(v / 1000).toFixed(0)}K` : v} />
+                <Tooltip cursor={{ fill: "hsl(var(--muted) / 0.3)" }} content={<ChartTip fmtCurrency={fmtCurrency} />} />
+                <Bar dataKey="tpv" name="TPV" fill="hsl(var(--primary))" radius={[6, 6, 0, 0]} isAnimationActive={false} />
+                <Bar dataKey="lucro" name="Lucro" fill="hsl(var(--success))" radius={[6, 6, 0, 0]} isAnimationActive={false} />
               </BarChart>
             </ResponsiveContainer>
-          </CardBody>
-        </Card>
+          </PremiumPanel>
+        </div>
 
-        <Card tone="info">
-          <CardHeader title="Métodos de Pagamento" icon={<CreditCard />} />
-          <CardBody>
-            <div className="space-y-3">
-              {methodApproval.sort((a, b) => b.volume - a.volume).map(m => {
-                const tone: Tone = m.rate >= 85 ? "success" : m.rate >= 60 ? "warning" : "destructive";
-                const cfg = TONE_CFG[tone];
-                return (
-                  <div key={m.method}>
-                    <div className="flex items-center justify-between text-[11.5px] mb-1.5">
-                      <span className="font-semibold text-[#0f172a]">{m.method}</span>
-                      <span className={cn("font-bold tabular-nums", cfg.text)}>{m.rate.toFixed(1)}%</span>
-                    </div>
-                    <div className="h-1.5 rounded-full bg-[#f1f5f9] overflow-hidden">
-                      <div className="h-full transition-all duration-500" style={{ width: `${m.rate}%`, background: cfg.stripe }} />
-                    </div>
-                    <div className="flex justify-between text-[9.5px] text-[#94a3b8] mt-1 tabular-nums">
-                      <span>{fmtCurrency(m.volume)}</span>
-                      <span>{m.approved}/{m.total} tx</span>
-                    </div>
+        <PremiumPanel title="Métodos de Pagamento" icon={CreditCard}>
+          <div className="space-y-4">
+            {methodApproval.sort((a, b) => b.volume - a.volume).map(m => {
+              const tone: Tone = m.rate >= 85 ? "success" : m.rate >= 60 ? "warning" : "destructive";
+              return (
+                <div key={m.method}>
+                  <div className="mb-1.5 flex items-center justify-between text-xs">
+                    <span className="font-black text-foreground">{m.method}</span>
+                    <span className={cn("font-black tabular-nums", TONE_TEXT[tone])}>{m.rate.toFixed(1)}%</span>
                   </div>
-                );
-              })}
-              {methodApproval.length === 0 && <div className="text-center text-[11.5px] text-[#94a3b8] py-6">Sem dados no período</div>}
-            </div>
-          </CardBody>
-        </Card>
+                  <div className="h-2 overflow-hidden rounded-full bg-muted/40">
+                    <div className={cn("h-full rounded-full transition-all duration-500", TONE_BAR[tone])}
+                         style={{ width: `${Math.max(m.rate, 2)}%` }} />
+                  </div>
+                  <div className="mt-1.5 flex justify-between text-[10px] font-bold text-muted-foreground tabular-nums">
+                    <span>{fmtCurrency(m.volume)}</span>
+                    <span>{m.approved}/{m.total} tx</span>
+                  </div>
+                </div>
+              );
+            })}
+            {methodApproval.length === 0 && (
+              <p className="py-8 text-center text-xs font-bold text-muted-foreground">Sem dados no período</p>
+            )}
+          </div>
+        </PremiumPanel>
       </div>
 
       {/* ── Volume chart + Refund trend ── */}
-      <div className="grid grid-cols-1 xl:grid-cols-2 gap-3">
-        <Card tone="success">
-          <CardHeader
-            title="Volume & Take Rate" icon={<TrendingUp />}
-            action={
-              <div className="flex gap-px bg-[#f1f5f9] border border-[#e2e8f0] rounded p-0.5">
-                {(["7d", "30d"] as const).map(f => (
-                  <button
-                    key={f}
-                    onClick={() => setChartPeriod(f)}
-                    className={cn(
-                      "px-2 py-0.5 rounded text-[10px] font-semibold transition-colors",
-                      chartPeriod === f ? "bg-white text-[#0f172a] border border-[#e2e8f0] shadow-sm" : "text-[#64748b] hover:text-[#0f172a]"
-                    )}
-                  >{f}</button>
-                ))}
-              </div>
-            }
-          />
-          <CardBody>
-            <ResponsiveContainer width="100%" height={220}>
-              <AreaChart data={chartData} margin={{ top: 8, right: 8, bottom: 0, left: -8 }}>
-                <defs>
-                  <linearGradient id="tpvArea" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="#10b981" stopOpacity={0.18} />
-                    <stop offset="100%" stopColor="#10b981" stopOpacity={0} />
-                  </linearGradient>
-                </defs>
-                <CartesianGrid strokeDasharray="3 3" stroke="#eef2f6" vertical={false} />
-                <XAxis dataKey="name" stroke="#94a3b8" fontSize={10} tickLine={false} axisLine={false} />
-                <YAxis stroke="#94a3b8" fontSize={10} tickLine={false} axisLine={false} tickFormatter={(v) => v >= 1000 ? `${(v / 1000).toFixed(0)}K` : v} />
-                <Tooltip cursor={{ stroke: "#cbd5e1", strokeWidth: 1 }} content={<ChartTip fmtCurrency={fmtCurrency} />} />
-                <Area type="monotone" dataKey="tpv" name="TPV" stroke="#10b981" strokeWidth={2} fill="url(#tpvArea)" dot={false} isAnimationActive={false} />
-                <Area type="monotone" dataKey="takeRate" name="Take Rate" stroke="#f59e0b" fillOpacity={0} strokeWidth={1.5} strokeDasharray="4 2" dot={false} isAnimationActive={false} />
-              </AreaChart>
-            </ResponsiveContainer>
-          </CardBody>
-        </Card>
+      <div className="grid grid-cols-1 xl:grid-cols-2 gap-5">
+        <PremiumPanel
+          title="Volume & Take Rate"
+          icon={TrendingUp}
+          action={
+            <PremiumSegmented<"7d" | "30d">
+              value={chartPeriod}
+              onChange={setChartPeriod}
+              options={[{ value: "7d", label: "7d" }, { value: "30d", label: "30d" }]}
+            />
+          }
+        >
+          <ResponsiveContainer width="100%" height={240}>
+            <AreaChart data={chartData} margin={{ top: 8, right: 8, bottom: 0, left: -8 }}>
+              <defs>
+                <linearGradient id="tpvArea" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor="hsl(var(--success))" stopOpacity={0.25} />
+                  <stop offset="100%" stopColor="hsl(var(--success))" stopOpacity={0} />
+                </linearGradient>
+              </defs>
+              <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border) / 0.5)" vertical={false} />
+              <XAxis dataKey="name" stroke="hsl(var(--muted-foreground))" fontSize={10} tickLine={false} axisLine={false} />
+              <YAxis stroke="hsl(var(--muted-foreground))" fontSize={10} tickLine={false} axisLine={false}
+                     tickFormatter={(v) => v >= 1000 ? `${(v / 1000).toFixed(0)}K` : v} />
+              <Tooltip cursor={{ stroke: "hsl(var(--border))", strokeWidth: 1 }} content={<ChartTip fmtCurrency={fmtCurrency} />} />
+              <Area type="monotone" dataKey="tpv" name="TPV" stroke="hsl(var(--success))" strokeWidth={2.5}
+                    fill="url(#tpvArea)" dot={false} isAnimationActive={false} />
+              <Area type="monotone" dataKey="takeRate" name="Take Rate" stroke="hsl(var(--warning))" fillOpacity={0}
+                    strokeWidth={1.75} strokeDasharray="4 2" dot={false} isAnimationActive={false} />
+            </AreaChart>
+          </ResponsiveContainer>
+        </PremiumPanel>
 
-        <Card tone="warning">
-          <CardHeader title="Devoluções · 7 dias" icon={<RotateCcw />} />
-          <CardBody>
-            <ResponsiveContainer width="100%" height={200}>
-              <LineChart data={refundTrend} margin={{ top: 8, right: 8, bottom: 0, left: -16 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#eef2f6" vertical={false} />
-                <XAxis dataKey="name" stroke="#94a3b8" fontSize={10} tickLine={false} axisLine={false} />
-                <YAxis stroke="#94a3b8" fontSize={10} tickLine={false} axisLine={false} allowDecimals={false} />
-                <Tooltip cursor={{ stroke: "#cbd5e1" }} content={<ChartTip fmtCurrency={fmtCurrency} />} />
-                <Line type="monotone" dataKey="chargebacks" name="Chargebacks" stroke="#ef4444" strokeWidth={2} dot={{ r: 2.5, fill: "#ef4444" }} isAnimationActive={false} />
-                <Line type="monotone" dataKey="refunds" name="Reembolsos" stroke="#f59e0b" strokeWidth={2} dot={{ r: 2.5, fill: "#f59e0b" }} isAnimationActive={false} />
-              </LineChart>
-            </ResponsiveContainer>
-            <div className="flex items-center gap-4 mt-3 pt-3 border-t border-[#eef2f6] text-[10.5px]">
-              <span className="flex items-center gap-1.5"><span className="h-1.5 w-1.5 rounded-full bg-[#ef4444]" /><span className="text-[#64748b]">Chargebacks</span></span>
-              <span className="flex items-center gap-1.5"><span className="h-1.5 w-1.5 rounded-full bg-[#f59e0b]" /><span className="text-[#64748b]">Reembolsos</span></span>
-            </div>
-          </CardBody>
-        </Card>
+        <PremiumPanel title="Devoluções · 7 dias" icon={RotateCcw}>
+          <ResponsiveContainer width="100%" height={220}>
+            <LineChart data={refundTrend} margin={{ top: 8, right: 8, bottom: 0, left: -16 }}>
+              <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border) / 0.5)" vertical={false} />
+              <XAxis dataKey="name" stroke="hsl(var(--muted-foreground))" fontSize={10} tickLine={false} axisLine={false} />
+              <YAxis stroke="hsl(var(--muted-foreground))" fontSize={10} tickLine={false} axisLine={false} allowDecimals={false} />
+              <Tooltip cursor={{ stroke: "hsl(var(--border))" }} content={<ChartTip fmtCurrency={fmtCurrency} />} />
+              <Line type="monotone" dataKey="chargebacks" name="Chargebacks" stroke="hsl(var(--destructive))"
+                    strokeWidth={2.5} dot={{ r: 3, fill: "hsl(var(--destructive))" }} isAnimationActive={false} />
+              <Line type="monotone" dataKey="refunds" name="Reembolsos" stroke="hsl(var(--warning))"
+                    strokeWidth={2.5} dot={{ r: 3, fill: "hsl(var(--warning))" }} isAnimationActive={false} />
+            </LineChart>
+          </ResponsiveContainer>
+          <div className="mt-3 flex items-center gap-5 border-t border-border/40 pt-3 text-[10.5px] font-bold">
+            <span className="flex items-center gap-1.5">
+              <span className="h-1.5 w-1.5 rounded-full bg-destructive" />
+              <span className="text-muted-foreground">Chargebacks</span>
+            </span>
+            <span className="flex items-center gap-1.5">
+              <span className="h-1.5 w-1.5 rounded-full bg-warning" />
+              <span className="text-muted-foreground">Reembolsos</span>
+            </span>
+          </div>
+        </PremiumPanel>
       </div>
 
       {/* ── Live activity + Risk alerts ── */}
-      <div className="grid grid-cols-1 xl:grid-cols-3 gap-3">
-        <Card className="xl:col-span-2" tone="destructive">
-          <CardHeader
+      <div className="grid grid-cols-1 xl:grid-cols-3 gap-5">
+        <div className="xl:col-span-2">
+          <PremiumPanel
             title="Atividade ao vivo"
-            icon={<Radio className="animate-pulse" />}
-            action={<span className="text-[10px] font-semibold text-[#94a3b8]">{realtimeTx.length} eventos</span>}
-          />
-          <div className="overflow-hidden">
-            <table className="w-full text-[11.5px]">
-              <thead>
-                <tr className="bg-[#fafbfc] border-b border-[#eef2f6] text-left">
-                  <th className="px-4 py-2 text-[10px] font-semibold uppercase tracking-wider text-[#64748b]">Status</th>
-                  <th className="px-3 py-2 text-[10px] font-semibold uppercase tracking-wider text-[#64748b]">Cliente</th>
-                  <th className="px-3 py-2 text-[10px] font-semibold uppercase tracking-wider text-[#64748b]">Método</th>
-                  <th className="px-3 py-2 text-[10px] font-semibold uppercase tracking-wider text-[#64748b] text-right">Valor</th>
-                  <th className="px-4 py-2 text-[10px] font-semibold uppercase tracking-wider text-[#64748b] text-right">Hora</th>
-                </tr>
-              </thead>
-              <tbody>
-                {realtimeTx.length === 0 && (
-                  <tr><td colSpan={5} className="text-center text-[11px] text-[#94a3b8] py-8">Aguardando transações...</td></tr>
-                )}
-                {realtimeTx.slice(0, 8).map(t => {
-                  const tone = statusToneMap[t.status] || "neutral";
-                  return (
-                    <tr key={t.id} className="border-b border-[#f1f5f9] last:border-0 hover:bg-[#fafbfc] transition-colors">
-                      <td className="px-4 py-2.5"><Pill tone={tone}>{statusLabelMap[t.status] || t.status}</Pill></td>
-                      <td className="px-3 py-2.5 text-[#0f172a] truncate max-w-[180px]">{t.customer_name || "Anônimo"}</td>
-                      <td className="px-3 py-2.5 text-[#64748b] uppercase text-[10.5px]">{t.payment_method || "—"}</td>
-                      <td className="px-3 py-2.5 text-right font-semibold text-[#0f172a] tabular-nums">{fmtCurrency(Number(t.amount))}</td>
-                      <td className="px-4 py-2.5 text-right text-[#94a3b8] tabular-nums">{new Date(t.created_at).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })}</td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
-        </Card>
-
-        <Card tone="destructive">
-          <CardHeader title="Alertas de Risco" icon={<ShieldAlert />} />
-          <CardBody className="space-y-2">
-            <RiskRow label="Taxa de Chargeback" value={`${chargebackRate.toFixed(2)}%`} threshold="Meta < 1%" alert={chargebackAlert} />
-            <RiskRow label="Disputas Abertas" value={String(openDisputes)} threshold="Meta < 5" alert={openDisputes > 5} />
-            <RiskRow label="Saques Pendentes" value={fmtCurrency(pendingWdAmount)} threshold={`${pendingWd.length} na fila`} alert={pendingWd.length > 10} />
-            <RiskRow label="KYC Pendente" value={String(kycPending.length)} threshold="aguardando aprovação" alert={kycPending.length > 0} />
-          </CardBody>
-        </Card>
-      </div>
-
-      {/* ── KYC queue + Pending withdrawals ── */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
-        <Card tone={kycPending.length > 0 ? "warning" : "neutral"}>
-          <CardHeader
-            title={`Aprovações KYC (${kycPending.length})`} icon={<UserCheck />}
-            action={onNavigate && <button onClick={() => onNavigate("sellers")} className="text-[10.5px] font-semibold text-[#1d4ed8] hover:underline flex items-center gap-1">Ver todos <ArrowUpRight className="h-3 w-3" /></button>}
-          />
-          <div className="max-h-[340px] overflow-y-auto">
-            {kycPending.length === 0 ? (
-              <div className="flex flex-col items-center justify-center py-10 text-[#94a3b8]">
-                <CheckCircle2 className="h-6 w-6 mb-2" />
-                <p className="text-[11.5px]">Nenhum KYC pendente</p>
-              </div>
-            ) : (
-              <table className="w-full text-[11.5px]">
+            icon={Radio}
+            eyebrow={`${realtimeTx.length} eventos em tempo real`}
+          >
+            <div className={premiumTable.wrapper}>
+              <table className={premiumTable.table}>
+                <thead>
+                  <tr className={premiumTable.headRow}>
+                    <th className={premiumTable.th}>Status</th>
+                    <th className={premiumTable.th}>Cliente</th>
+                    <th className={premiumTable.th}>Método</th>
+                    <th className={cn(premiumTable.th, "text-right")}>Valor</th>
+                    <th className={cn(premiumTable.th, "text-right")}>Hora</th>
+                  </tr>
+                </thead>
                 <tbody>
-                  {kycPending.slice(0, 10).map(p => (
-                    <tr key={p.id} className="border-b border-[#f1f5f9] last:border-0 hover:bg-[#fafbfc]">
-                      <td className="px-4 py-2.5">
-                        <button type="button" onClick={() => setKycReview(p)} className="text-left w-full">
-                          <p className="font-semibold text-[#0f172a] truncate">{p.full_name || "Sem nome"}</p>
-                          <p className="text-[10.5px] text-[#64748b] truncate">{p.email}</p>
-                          <p className="text-[9.5px] text-[#94a3b8] font-mono mt-0.5">{p.document_number || "Sem documento"}</p>
-                        </button>
-                      </td>
-                      <td className="px-3 py-2.5 text-right whitespace-nowrap">
-                        <div className="inline-flex gap-1">
-                          <button
-                            onClick={() => handleKycApprove(p.user_id)}
-                            className="inline-flex items-center gap-1 h-7 px-2 rounded text-[10.5px] font-semibold border border-[#a7f3d0] text-[#047857] bg-[#ecfdf5] hover:bg-[#d1fae5] transition-colors"
-                          >
-                            <CheckCircle2 className="h-3 w-3" /> Aprovar
-                          </button>
-                          <button
-                            onClick={() => setKycReview(p)}
-                            className="inline-flex items-center gap-1 h-7 px-2 rounded text-[10.5px] font-semibold border border-[#fde68a] text-[#b45309] bg-[#fffbeb] hover:bg-[#fef3c7] transition-colors"
-                          >
-                            <Eye className="h-3 w-3" /> Analisar
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            )}
-          </div>
-        </Card>
-
-        <Card tone={pendingWd.length > 0 ? "info" : "neutral"}>
-          <CardHeader
-            title={`Saques em revisão (${pendingWd.length})`} icon={<Wallet />}
-            action={onNavigate && <button onClick={() => onNavigate("withdrawals")} className="text-[10.5px] font-semibold text-[#1d4ed8] hover:underline flex items-center gap-1">Ver todos <ArrowUpRight className="h-3 w-3" /></button>}
-          />
-          <div className="max-h-[340px] overflow-y-auto">
-            {pendingWd.length === 0 ? (
-              <div className="flex flex-col items-center justify-center py-10 text-[#94a3b8]">
-                <CheckCircle2 className="h-6 w-6 mb-2" />
-                <p className="text-[11.5px]">Nenhum saque pendente</p>
-              </div>
-            ) : (
-              <table className="w-full text-[11.5px]">
-                <tbody>
-                  {pendingWd.slice(0, 10).map(w => {
-                    const sp = profiles.find(p => p.user_id === w.user_id);
-                    const isNew = sp ? (Date.now() - new Date(sp.created_at).getTime()) / (1000 * 60 * 60 * 24) < 30 : false;
-                    const isHigh = Number(w.amount) >= 5000;
+                  {realtimeTx.length === 0 && (
+                    <tr><td colSpan={5} className="py-12 text-center text-xs font-bold text-muted-foreground">Aguardando transações…</td></tr>
+                  )}
+                  {realtimeTx.slice(0, 8).map(t => {
+                    const tone = statusToneMap[t.status] || "neutral";
                     return (
-                      <tr key={w.id} className="border-b border-[#f1f5f9] last:border-0 hover:bg-[#fafbfc]">
-                        <td className="px-4 py-2.5">
-                          <div className="flex items-center gap-2 mb-0.5 flex-wrap">
-                            <span className="font-bold text-[#0f172a] tabular-nums">{fmtCurrency(Number(w.amount))}</span>
-                            {isHigh && <Pill tone="warning">Alto</Pill>}
-                            {isNew && <Pill tone="info">Novo</Pill>}
-                          </div>
-                          <p className="text-[10.5px] text-[#64748b] truncate">{sp?.full_name || "—"} · {sp?.email || ""}</p>
+                      <tr key={t.id} className={premiumTable.row}>
+                        <td className={premiumTable.td}><Pill tone={tone}>{statusLabelMap[t.status] || t.status}</Pill></td>
+                        <td className={cn(premiumTable.td, "max-w-[180px] truncate text-xs font-bold text-foreground")}>
+                          {t.customer_name || "Anônimo"}
                         </td>
-                        <td className="px-3 py-2.5 text-right whitespace-nowrap">
-                          <div className="inline-flex gap-1">
-                            <button onClick={() => onWithdrawalAction(w.id, "approved")}
-                              className="inline-flex items-center gap-1 h-7 px-2 rounded text-[10.5px] font-semibold border border-[#a7f3d0] text-[#047857] bg-[#ecfdf5] hover:bg-[#d1fae5] transition-colors">
-                              <CheckCircle2 className="h-3 w-3" /> OK
-                            </button>
-                            <button onClick={() => onWithdrawalAction(w.id, "rejected")}
-                              className="inline-flex items-center gap-1 h-7 px-2 rounded text-[10.5px] font-semibold border border-[#fecaca] text-[#b91c1c] bg-[#fef2f2] hover:bg-[#fee2e2] transition-colors">
-                              <XCircle className="h-3 w-3" />
-                            </button>
-                          </div>
+                        <td className={cn(premiumTable.td, "text-[10.5px] font-bold uppercase text-muted-foreground")}>
+                          {t.payment_method || "—"}
+                        </td>
+                        <td className={cn(premiumTable.td, "text-right text-xs font-black text-foreground tabular-nums")}>
+                          {fmtCurrency(Number(t.amount))}
+                        </td>
+                        <td className={cn(premiumTable.td, "text-right text-[10.5px] font-bold text-muted-foreground tabular-nums")}>
+                          {new Date(t.created_at).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })}
                         </td>
                       </tr>
                     );
                   })}
                 </tbody>
               </table>
-            )}
+            </div>
+          </PremiumPanel>
+        </div>
+
+        <PremiumPanel title="Alertas de Risco" icon={ShieldAlert}>
+          <div className="space-y-2.5">
+            <RiskRow label="Taxa de Chargeback" value={`${chargebackRate.toFixed(2)}%`} threshold="Meta < 1%" alert={chargebackAlert} />
+            <RiskRow label="Disputas Abertas" value={String(openDisputes)} threshold="Meta < 5" alert={openDisputes > 5} />
+            <RiskRow label="Saques Pendentes" value={fmtCurrency(pendingWdAmount)} threshold={`${pendingWd.length} na fila`} alert={pendingWd.length > 10} />
+            <RiskRow label="KYC Pendente" value={String(kycPending.length)} threshold="aguardando aprovação" alert={kycPending.length > 0} />
           </div>
-        </Card>
+        </PremiumPanel>
       </div>
 
-      {/* ── MEDs ── */}
-      <Card tone={pendingMeds.length > 0 ? "destructive" : "neutral"}>
-        <CardHeader
-          title={`MEDs Pendentes (${pendingMeds.length})`} icon={<AlertCircle />}
-          action={onNavigate && <button onClick={() => onNavigate("medpix")} className="text-[10.5px] font-semibold text-[#1d4ed8] hover:underline flex items-center gap-1">Ver todos <ArrowUpRight className="h-3 w-3" /></button>}
-        />
-        {pendingMeds.length === 0 ? (
-          <CardBody>
-            <div className="flex flex-col items-center justify-center py-8 text-[#94a3b8]">
-              <CheckCircle2 className="h-6 w-6 mb-2" />
-              <p className="text-[11.5px]">Nenhum MED em aberto</p>
+      {/* ── KYC queue + Pending withdrawals ── */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
+        <PremiumPanel
+          title={`Aprovações KYC (${kycPending.length})`}
+          icon={UserCheck}
+          action={onNavigate && (
+            <button onClick={() => onNavigate("sellers")}
+                    className="inline-flex items-center gap-1 text-[10.5px] font-black uppercase tracking-wider text-primary hover:underline">
+              Ver todos <ArrowUpRight className="h-3 w-3" />
+            </button>
+          )}
+        >
+          {kycPending.length === 0 ? (
+            <div className="flex flex-col items-center justify-center gap-2 py-10 text-muted-foreground">
+              <div className="flex h-12 w-12 items-center justify-center rounded-2xl border border-border/60 bg-muted/30">
+                <CheckCircle2 className="h-5 w-5 opacity-50" />
+              </div>
+              <p className="text-xs font-bold">Nenhum KYC pendente</p>
             </div>
-          </CardBody>
-        ) : (
-          <table className="w-full text-[11.5px]">
-            <thead>
-              <tr className="bg-[#fafbfc] border-b border-[#eef2f6] text-left">
-                <th className="px-4 py-2 text-[10px] font-semibold uppercase tracking-wider text-[#64748b]">Valor</th>
-                <th className="px-3 py-2 text-[10px] font-semibold uppercase tracking-wider text-[#64748b]">Tipo</th>
-                <th className="px-3 py-2 text-[10px] font-semibold uppercase tracking-wider text-[#64748b]">Status</th>
-                <th className="px-3 py-2 text-[10px] font-semibold uppercase tracking-wider text-[#64748b]">Seller</th>
-                <th className="px-4 py-2 text-[10px] font-semibold uppercase tracking-wider text-[#64748b]">TX</th>
-              </tr>
-            </thead>
-            <tbody>
-              {pendingMeds.slice(0, 10).map(d => {
-                const tx = transactions.find(t => t.id === d.transaction_id);
-                const seller = profiles.find(p => p.user_id === d.seller_user_id);
-                return (
-                  <tr key={d.id} className="border-b border-[#f1f5f9] last:border-0 hover:bg-[#fafbfc] cursor-pointer"
-                      onClick={() => onNavigate?.("medpix")}>
-                    <td className="px-4 py-2.5 font-bold text-[#0f172a] tabular-nums">{fmtCurrency(Number(d.amount))}</td>
-                    <td className="px-3 py-2.5"><Pill tone="destructive">{d.type === "medpix" ? "MED" : d.type === "pre_med_pix" ? "Pre-MED" : "Reemb"}</Pill></td>
-                    <td className="px-3 py-2.5"><Pill tone="warning">{d.status === "open" ? "Aberto" : "Em análise"}</Pill></td>
-                    <td className="px-3 py-2.5 text-[#0f172a] truncate max-w-[200px]">{seller?.full_name || "—"}</td>
-                    <td className="px-4 py-2.5 font-mono text-[10.5px] text-[#94a3b8]">{d.transaction_id?.slice(0, 8) || "—"} · {tx?.payment_method || "—"}</td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        )}
-      </Card>
-
-      {/* ── Fraud blocks ── */}
-      <Card tone="destructive">
-        <CardHeader title="Bloqueios Anti-Fraude" icon={<ShieldAlert />} />
-        <CardBody>
-          {fraudLogs.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-2 max-h-[280px] overflow-y-auto">
-              {fraudLogs.slice(0, 20).map((f: any) => (
-                <div key={f.id} className="bg-[#fef2f2] border border-[#fecaca] rounded px-3 py-2">
-                  <div className="flex items-center gap-2 mb-1">
-                    <span className="h-1.5 w-1.5 rounded-full bg-[#ef4444]" />
-                    <span className="text-[11px] font-semibold text-[#b91c1c] truncate">{f.block_reason || "Blocked"}</span>
-                    <span className="ml-auto text-[9.5px] text-[#94a3b8] tabular-nums">{new Date(f.created_at).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })}</span>
-                  </div>
-                  <div className="flex gap-1.5 flex-wrap items-center">
-                    {f.block_type && <Pill tone="destructive">{f.block_type}</Pill>}
-                    {f.matched_type && <Pill tone="warning">{f.matched_type}</Pill>}
-                    {f.customer_email && <span className="text-[10px] text-[#64748b] truncate">{f.customer_email}</span>}
+          ) : (
+            <div className="max-h-[340px] overflow-y-auto -mx-2">
+              {kycPending.slice(0, 10).map(p => (
+                <div key={p.id} className="flex items-center gap-3 rounded-xl px-2 py-2.5 transition-colors hover:bg-muted/30">
+                  <button type="button" onClick={() => setKycReview(p)} className="flex-1 min-w-0 text-left">
+                    <p className="truncate text-xs font-black text-foreground">{p.full_name || "Sem nome"}</p>
+                    <p className="truncate text-[10.5px] font-bold text-muted-foreground">{p.email}</p>
+                    <p className="mt-0.5 truncate font-mono text-[10px] text-muted-foreground/70">
+                      {p.document_number || "Sem documento"}
+                    </p>
+                  </button>
+                  <div className="flex shrink-0 gap-1.5">
+                    <button onClick={() => handleKycApprove(p.user_id)}
+                            className="inline-flex h-8 items-center gap-1 rounded-lg border border-success/30 bg-success/10 px-2.5 text-[10.5px] font-black text-success hover:bg-success/15">
+                      <CheckCircle2 className="h-3 w-3" /> Aprovar
+                    </button>
+                    <button onClick={() => setKycReview(p)}
+                            className="inline-flex h-8 items-center gap-1 rounded-lg border border-warning/30 bg-warning/10 px-2.5 text-[10.5px] font-black text-warning hover:bg-warning/15">
+                      <Eye className="h-3 w-3" /> Analisar
+                    </button>
                   </div>
                 </div>
               ))}
             </div>
-          ) : (
-            <div className="text-center py-8 text-[11.5px] text-[#94a3b8]">Nenhum bloqueio recente</div>
           )}
-        </CardBody>
-      </Card>
+        </PremiumPanel>
+
+        <PremiumPanel
+          title={`Saques em revisão (${pendingWd.length})`}
+          icon={Wallet}
+          action={onNavigate && (
+            <button onClick={() => onNavigate("withdrawals")}
+                    className="inline-flex items-center gap-1 text-[10.5px] font-black uppercase tracking-wider text-primary hover:underline">
+              Ver todos <ArrowUpRight className="h-3 w-3" />
+            </button>
+          )}
+        >
+          {pendingWd.length === 0 ? (
+            <div className="flex flex-col items-center justify-center gap-2 py-10 text-muted-foreground">
+              <div className="flex h-12 w-12 items-center justify-center rounded-2xl border border-border/60 bg-muted/30">
+                <CheckCircle2 className="h-5 w-5 opacity-50" />
+              </div>
+              <p className="text-xs font-bold">Nenhum saque pendente</p>
+            </div>
+          ) : (
+            <div className="max-h-[340px] overflow-y-auto -mx-2">
+              {pendingWd.slice(0, 10).map(w => {
+                const sp = profiles.find(p => p.user_id === w.user_id);
+                const isNew = sp ? (Date.now() - new Date(sp.created_at).getTime()) / (1000 * 60 * 60 * 24) < 30 : false;
+                const isHigh = Number(w.amount) >= 5000;
+                return (
+                  <div key={w.id} className="flex items-center gap-3 rounded-xl px-2 py-2.5 transition-colors hover:bg-muted/30">
+                    <div className="min-w-0 flex-1">
+                      <div className="mb-0.5 flex flex-wrap items-center gap-1.5">
+                        <span className="font-display text-sm font-black text-foreground tabular-nums">
+                          {fmtCurrency(Number(w.amount))}
+                        </span>
+                        {isHigh && <Pill tone="warning">Alto</Pill>}
+                        {isNew && <Pill tone="info">Novo</Pill>}
+                      </div>
+                      <p className="truncate text-[10.5px] font-bold text-muted-foreground">
+                        {sp?.full_name || "—"} · {sp?.email || ""}
+                      </p>
+                    </div>
+                    <div className="flex shrink-0 gap-1.5">
+                      <button onClick={() => onWithdrawalAction(w.id, "approved")}
+                              className="inline-flex h-8 items-center gap-1 rounded-lg border border-success/30 bg-success/10 px-2.5 text-[10.5px] font-black text-success hover:bg-success/15">
+                        <CheckCircle2 className="h-3 w-3" /> OK
+                      </button>
+                      <button onClick={() => onWithdrawalAction(w.id, "rejected")}
+                              className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-destructive/30 bg-destructive/10 text-destructive hover:bg-destructive/15">
+                        <XCircle className="h-3.5 w-3.5" />
+                      </button>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </PremiumPanel>
+      </div>
+
+      {/* ── MEDs ── */}
+      <PremiumPanel
+        title={`MEDs Pendentes (${pendingMeds.length})`}
+        icon={AlertCircle}
+        action={onNavigate && (
+          <button onClick={() => onNavigate("medpix")}
+                  className="inline-flex items-center gap-1 text-[10.5px] font-black uppercase tracking-wider text-primary hover:underline">
+            Ver todos <ArrowUpRight className="h-3 w-3" />
+          </button>
+        )}
+      >
+        {pendingMeds.length === 0 ? (
+          <div className="flex flex-col items-center justify-center gap-2 py-10 text-muted-foreground">
+            <div className="flex h-12 w-12 items-center justify-center rounded-2xl border border-border/60 bg-muted/30">
+              <CheckCircle2 className="h-5 w-5 opacity-50" />
+            </div>
+            <p className="text-xs font-bold">Nenhum MED em aberto</p>
+          </div>
+        ) : (
+          <div className={premiumTable.wrapper}>
+            <table className={premiumTable.table}>
+              <thead>
+                <tr className={premiumTable.headRow}>
+                  <th className={premiumTable.th}>Valor</th>
+                  <th className={premiumTable.th}>Tipo</th>
+                  <th className={premiumTable.th}>Status</th>
+                  <th className={premiumTable.th}>Seller</th>
+                  <th className={premiumTable.th}>TX</th>
+                </tr>
+              </thead>
+              <tbody>
+                {pendingMeds.slice(0, 10).map(d => {
+                  const tx = transactions.find(t => t.id === d.transaction_id);
+                  const seller = profiles.find(p => p.user_id === d.seller_user_id);
+                  return (
+                    <tr key={d.id} className={cn(premiumTable.row, "cursor-pointer")}
+                        onClick={() => onNavigate?.("medpix")}>
+                      <td className={cn(premiumTable.td, "font-display text-sm font-black text-foreground tabular-nums")}>
+                        {fmtCurrency(Number(d.amount))}
+                      </td>
+                      <td className={premiumTable.td}>
+                        <Pill tone="destructive">{d.type === "medpix" ? "MED" : d.type === "pre_med_pix" ? "Pre-MED" : "Reemb"}</Pill>
+                      </td>
+                      <td className={premiumTable.td}>
+                        <Pill tone="warning">{d.status === "open" ? "Aberto" : "Em análise"}</Pill>
+                      </td>
+                      <td className={cn(premiumTable.td, "max-w-[200px] truncate text-xs font-bold text-foreground")}>
+                        {seller?.full_name || "—"}
+                      </td>
+                      <td className={cn(premiumTable.td, "font-mono text-[10.5px] text-muted-foreground")}>
+                        {d.transaction_id?.slice(0, 8) || "—"} · {tx?.payment_method || "—"}
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </PremiumPanel>
+
+      {/* ── Fraud blocks ── */}
+      <PremiumPanel title="Bloqueios Anti-Fraude" icon={ShieldAlert}>
+        {fraudLogs.length > 0 ? (
+          <div className="grid max-h-[320px] grid-cols-1 gap-2.5 overflow-y-auto md:grid-cols-2">
+            {fraudLogs.slice(0, 20).map((f: any) => (
+              <div key={f.id} className="rounded-xl border border-destructive/20 bg-destructive/5 px-3.5 py-2.5">
+                <div className="mb-1.5 flex items-center gap-2">
+                  <span className="h-1.5 w-1.5 rounded-full bg-destructive" />
+                  <span className="truncate text-xs font-black text-destructive">
+                    {f.block_reason || "Blocked"}
+                  </span>
+                  <span className="ml-auto text-[10px] font-bold text-muted-foreground tabular-nums">
+                    {new Date(f.created_at).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })}
+                  </span>
+                </div>
+                <div className="flex flex-wrap items-center gap-1.5">
+                  {f.block_type && <Pill tone="destructive">{f.block_type}</Pill>}
+                  {f.matched_type && <Pill tone="warning">{f.matched_type}</Pill>}
+                  {f.customer_email && (
+                    <span className="truncate text-[10.5px] font-bold text-muted-foreground">
+                      {f.customer_email}
+                    </span>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <p className="py-10 text-center text-xs font-bold text-muted-foreground">Nenhum bloqueio recente</p>
+        )}
+      </PremiumPanel>
 
       <KycReviewDialog
         profile={kycReview}
@@ -765,66 +759,91 @@ export default function AdminOverviewTab({
   );
 }
 
-/* ── Pulse stat (hero side) ── */
-function PulseStat({ icon: Icon, label, value, tone }: { icon: any; label: string; value: string; tone: Tone }) {
-  const cfg = TONE_CFG[tone];
+/* ─── Subcomponents ───────────────────────────────────────── */
+
+function HeroStat({ label, value, tone }: { label: string; value: string; tone: Tone }) {
   return (
-    <div className={cn("flex items-center justify-between rounded border px-2.5 py-2", cfg.pill)}>
-      <span className="flex items-center gap-1.5 min-w-0">
-        <Icon className="h-3 w-3 shrink-0" strokeWidth={2} />
-        <span className="text-[10px] font-semibold uppercase tracking-wider truncate">{label}</span>
-      </span>
-      <span className="text-[12px] font-bold tabular-nums shrink-0">{value}</span>
+    <div className="rounded-2xl border border-border/60 bg-muted/20 px-3.5 py-3">
+      <p className="text-[9.5px] font-black uppercase tracking-[0.22em] text-muted-foreground/70">{label}</p>
+      <p className={cn("mt-1.5 font-display text-base font-black tabular-nums leading-none", TONE_TEXT[tone])}>
+        {value}
+      </p>
     </div>
   );
 }
 
-/* ── Risk row ── */
-function RiskRow({ label, value, threshold, alert }: { label: string; value: string; threshold: string; alert: boolean }) {
+function PulseStat({ icon: Icon, label, value, tone }: {
+  icon: any; label: string; value: string; tone: Tone;
+}) {
+  return (
+    <div className={cn("flex items-center justify-between rounded-xl border px-2.5 py-2", TONE_PILL[tone])}>
+      <span className="flex min-w-0 items-center gap-1.5">
+        <Icon className="h-3 w-3 shrink-0" strokeWidth={2.4} />
+        <span className="truncate text-[10px] font-black uppercase tracking-wider">{label}</span>
+      </span>
+      <span className="shrink-0 text-xs font-black tabular-nums">{value}</span>
+    </div>
+  );
+}
+
+function RiskRow({ label, value, threshold, alert }: {
+  label: string; value: string; threshold: string; alert: boolean;
+}) {
   return (
     <div className={cn(
-      "flex items-center justify-between px-3 py-2.5 rounded border",
-      alert ? "bg-[#fef2f2] border-[#fecaca]" : "bg-[#f8fafc] border-[#eef2f6]"
+      "flex items-center justify-between rounded-xl border px-3 py-2.5 transition-colors",
+      alert ? "border-destructive/25 bg-destructive/5" : "border-border/60 bg-muted/20",
     )}>
       <div className="min-w-0">
-        <p className="text-[11.5px] font-semibold text-[#0f172a]">{label}</p>
-        <p className="text-[10px] text-[#94a3b8] mt-0.5">{threshold}</p>
+        <p className="text-xs font-black text-foreground">{label}</p>
+        <p className="mt-0.5 text-[10px] font-bold text-muted-foreground">{threshold}</p>
       </div>
-      <div className="flex items-center gap-2 shrink-0">
-        <span className={cn("text-[13px] font-bold tabular-nums", alert ? "text-[#b91c1c]" : "text-[#047857]")}>{value}</span>
+      <div className="flex shrink-0 items-center gap-2">
+        <span className={cn(
+          "font-display text-sm font-black tabular-nums",
+          alert ? "text-destructive" : "text-success",
+        )}>
+          {value}
+        </span>
         {alert
-          ? <span className="h-1.5 w-1.5 rounded-full bg-[#ef4444] animate-pulse" />
-          : <CheckCircle2 className="h-3.5 w-3.5 text-[#10b981]" />}
+          ? <span className="h-1.5 w-1.5 rounded-full bg-destructive animate-pulse" />
+          : <CheckCircle2 className="h-4 w-4 text-success" />}
       </div>
     </div>
   );
 }
 
 /* ═════════════════════════════════════════════════════════════
-   PUBLIC API — restyled primitives shared with other admin tabs.
-   Keeps backward-compatible exports (GlassPanel, AdminKpi, etc.)
-   but renders them in the new PHP-admin clean aesthetic.
+   PUBLIC API — backward-compatible exports for other admin tabs.
+   Now rendered in the Premium aesthetic (soft borders, generous
+   radius, semantic tokens — works in light & dark).
    ═════════════════════════════════════════════════════════════ */
 
 export function GlassPanel({ children, className }: { children: React.ReactNode; className?: string }) {
   return (
-    <div className={cn("bg-white border border-[#e2e8f0] rounded-md p-4 overflow-hidden", className)}>
+    <div className={cn(
+      "overflow-hidden rounded-[24px] border border-border/60 bg-card p-5",
+      className,
+    )}>
       {children}
     </div>
   );
 }
 
-export function GlassPanelTitle({ children, color, icon }: { children: React.ReactNode; color: string; icon?: React.ReactNode }) {
+export function GlassPanelTitle({ children, color, icon }: {
+  children: React.ReactNode; color: string; icon?: React.ReactNode;
+}) {
   const colorMap: Record<string, string> = {
-    emerald: "#10b981", green: "#10b981", teal: "#14b8a6", blue: "#3b82f6",
-    cyan: "#06b6d4", indigo: "#6366f1", violet: "#8b5cf6", amber: "#f59e0b",
-    red: "#ef4444", zinc: "#64748b",
+    emerald: "hsl(var(--success))", green: "hsl(var(--success))", teal: "hsl(var(--info))",
+    blue: "hsl(var(--info))", cyan: "hsl(var(--info))", indigo: "hsl(var(--primary))",
+    violet: "hsl(var(--primary))", amber: "hsl(var(--warning))", red: "hsl(var(--destructive))",
+    zinc: "hsl(var(--muted-foreground))",
   };
-  const c = colorMap[color] || "#1e293b";
+  const c = colorMap[color] || "hsl(var(--primary))";
   return (
-    <h3 className="flex items-center gap-2 text-[12px] font-semibold text-[#0f172a] mb-3 pb-2 border-b border-[#eef2f6]">
-      <span className="h-3.5 w-[3px] rounded-full" style={{ background: c }} />
-      {icon && <span style={{ color: c }} className="[&_svg]:h-3.5 [&_svg]:w-3.5">{icon}</span>}
+    <h3 className="mb-4 flex items-center gap-2 border-b border-border/40 pb-3 font-display text-sm font-black uppercase tracking-tight text-foreground">
+      <span className="h-4 w-[3px] rounded-full" style={{ background: c }} />
+      {icon && <span style={{ color: c }} className="[&_svg]:h-4 [&_svg]:w-4">{icon}</span>}
       {children}
     </h3>
   );
@@ -834,7 +853,8 @@ export { GlassPanel as AdminPanel, GlassPanelTitle as PanelTitle };
 
 export function AdminKpi({ icon, label, value, sub, alert, highlight, gradient }: {
   icon: React.ReactNode; label: string; value: string; sub?: string;
-  alert?: boolean; highlight?: boolean; iconColor?: string; gradient?: string; glowColor?: string;
+  alert?: boolean; highlight?: boolean; iconColor?: string;
+  gradient?: string; glowColor?: string;
 }) {
   const tone: Tone =
     alert ? "destructive" :
@@ -845,20 +865,28 @@ export function AdminKpi({ icon, label, value, sub, alert, highlight, gradient }
     gradient?.includes("blue") || gradient?.includes("cyan") || gradient?.includes("sky") || gradient?.includes("teal") ? "info" :
     gradient?.includes("violet") || gradient?.includes("indigo") || gradient?.includes("purple") ? "primary" :
     "neutral";
-  const cfg = TONE_CFG[tone];
   return (
-    <div
-      className="relative bg-white border border-[#e2e8f0] rounded-md p-4"
-      style={{ boxShadow: `inset 3px 0 0 0 ${cfg.stripe}` }}
-    >
-      <div className="flex items-start justify-between gap-2 mb-2.5">
-        <span className="text-[10px] font-semibold uppercase tracking-wider text-[#64748b] leading-tight">{label}</span>
-        <div className="h-6 w-6 rounded flex items-center justify-center bg-[#f8fafc] border border-[#eef2f6] text-[#475569] shrink-0">
-          <span className="[&_svg]:h-3.5 [&_svg]:w-3.5">{icon}</span>
+    <div className="group relative overflow-hidden rounded-[24px] border border-border/60 bg-card p-5 transition-colors hover:border-primary/25">
+      <div className="flex items-start justify-between gap-3">
+        <div className="min-w-0">
+          <p className="text-[9.5px] font-black uppercase tracking-[0.22em] text-muted-foreground/70 leading-tight">
+            {label}
+          </p>
+          <p className={cn(
+            "mt-3 break-words font-display text-2xl font-black leading-none tracking-tight tabular-nums",
+            TONE_TEXT[tone],
+          )}>
+            {value}
+          </p>
+          {sub && <p className="mt-2 truncate text-[11px] font-bold text-muted-foreground/70">{sub}</p>}
+        </div>
+        <div className={cn(
+          "flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border",
+          TONE_PILL[tone],
+        )}>
+          <span className="[&_svg]:h-5 [&_svg]:w-5">{icon}</span>
         </div>
       </div>
-      <p className={cn("text-[22px] font-bold leading-none tracking-tight tabular-nums", cfg.text)}>{value}</p>
-      {sub && <p className="mt-2 text-[10.5px] text-[#64748b] truncate">{sub}</p>}
     </div>
   );
 }
