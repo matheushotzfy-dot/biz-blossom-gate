@@ -1678,3 +1678,200 @@ button svg, a svg, [role="button"] svg {
 .admin-shell ::-webkit-scrollbar { width: 8px; height: 8px; }
 .admin-shell ::-webkit-scrollbar-thumb { background-color: #cbd5e1; border-radius: 4px; }
 .admin-shell ::-webkit-scrollbar-track { background-color: transparent; }
+
+/* ═══════════════════════════════════════════════════════════════════
+   ADMIN SHELL — Theme tokens & DARK MODE overrides (additive)
+   ═══════════════════════════════════════════════════════════════════ */
+
+/* Tokens shared by .admin-shell and .admin-frame (outer chrome) */
+.admin-shell, .admin-frame {
+  --as-bg:           #f1f5f9;
+  --as-bg-soft:      #f4f6fa;
+  --as-surface:      #ffffff;
+  --as-surface-2:    #f8fafc;
+  --as-elev:         #ffffff;
+  --as-border:       #e2e8f0;
+  --as-border-soft:  #eef2f6;
+  --as-border-strong:#cbd5e1;
+  --as-text:         #0f172a;
+  --as-text-2:       #334155;
+  --as-text-3:       #475569;
+  --as-muted:        #64748b;
+  --as-muted-2:      #94a3b8;
+  --as-accent:       #0f172a;
+  --as-accent-hover: #1e293b;
+  --as-on-accent:    #ffffff;
+  --as-success:      #059669;
+  --as-warning:      #d97706;
+  --as-danger:       #dc2626;
+  --as-info:         #0284c7;
+  --as-ring:         0 0 0 3px rgba(15,23,42,0.08);
+}
+.dark .admin-shell, .dark .admin-frame {
+  --as-bg:           #0a0e17;
+  --as-bg-soft:      #0d1320;
+  --as-surface:      #121826;
+  --as-surface-2:    #161d2d;
+  --as-elev:         #1a2233;
+  --as-border:       #1f2a3d;
+  --as-border-soft:  #19223333;
+  --as-border-strong:#2b3a55;
+  --as-text:         #e6ecf5;
+  --as-text-2:       #c1cad8;
+  --as-text-3:       #97a3b6;
+  --as-muted:        #7b8699;
+  --as-muted-2:      #5a667a;
+  --as-accent:       #e6ecf5;
+  --as-accent-hover: #ffffff;
+  --as-on-accent:    #0b0f17;
+  --as-success:      #34d399;
+  --as-warning:      #fbbf24;
+  --as-danger:       #f87171;
+  --as-info:         #38bdf8;
+  --as-ring:         0 0 0 3px rgba(230,236,245,0.14);
+}
+
+/* ── Admin frame (outer chrome wrapper for dashboard + login) ── */
+.admin-frame {
+  background: var(--as-bg) !important;
+  color: var(--as-text) !important;
+  font-family: 'Inter', 'Plus Jakarta Sans', system-ui, sans-serif;
+}
+.admin-frame .af-surface     { background-color: var(--as-surface)    !important; }
+.admin-frame .af-surface-2   { background-color: var(--as-surface-2)  !important; }
+.admin-frame .af-bg          { background-color: var(--as-bg)         !important; }
+.admin-frame .af-bg-soft     { background-color: var(--as-bg-soft)    !important; }
+.admin-frame .af-border      { border-color:     var(--as-border)     !important; }
+.admin-frame .af-border-soft { border-color:     var(--as-border-soft)!important; }
+.admin-frame .af-text        { color:            var(--as-text)       !important; }
+.admin-frame .af-text-2      { color:            var(--as-text-2)     !important; }
+.admin-frame .af-text-3      { color:            var(--as-text-3)     !important; }
+.admin-frame .af-muted       { color:            var(--as-muted)      !important; }
+.admin-frame .af-muted-2     { color:            var(--as-muted-2)    !important; }
+.admin-frame .af-accent-bg   { background-color: var(--as-accent)     !important; color: var(--as-on-accent) !important; }
+.admin-frame .af-accent-bg:hover { background-color: var(--as-accent-hover) !important; }
+.admin-frame .af-input {
+  background-color: var(--as-surface) !important;
+  border: 1px solid var(--as-border-strong) !important;
+  color: var(--as-text) !important;
+}
+.admin-frame .af-input::placeholder { color: var(--as-muted-2) !important; }
+.admin-frame .af-input:focus {
+  outline: none !important;
+  border-color: var(--as-text) !important;
+  box-shadow: var(--as-ring) !important;
+}
+
+/* ── DARK MODE overrides for the existing .admin-shell rules ── */
+.dark .admin-shell { background: var(--as-bg) !important; color: var(--as-text) !important; }
+.dark .admin-shell h1, .dark .admin-shell h2, .dark .admin-shell h3, .dark .admin-shell h4 { color: var(--as-text) !important; }
+
+.dark .admin-shell [class*="bg-white/"],
+.dark .admin-shell [class*="bg-black/"],
+.dark .admin-shell .bg-card, .dark .admin-shell .bg-card\/95, .dark .admin-shell .bg-card\/80, .dark .admin-shell .bg-card\/60,
+.dark .admin-shell .bg-background\/50, .dark .admin-shell .bg-background\/80, .dark .admin-shell .bg-popover,
+.dark .admin-shell .bg-muted\/40, .dark .admin-shell .bg-muted\/30, .dark .admin-shell .bg-muted\/20,
+.dark .admin-shell .bg-white { background-color: var(--as-surface) !important; }
+
+.dark .admin-shell .bg-background, .dark .admin-shell .bg-muted, .dark .admin-shell .bg-muted\/50, .dark .admin-shell .bg-muted\/60,
+.dark .admin-shell .bg-slate-50, .dark .admin-shell .bg-slate-100,
+.dark .admin-shell [class*="bg-slate-9"], .dark .admin-shell [class*="bg-slate-8"],
+.dark .admin-shell [class*="bg-zinc-9"], .dark .admin-shell [class*="bg-zinc-8"],
+.dark .admin-shell [class*="bg-neutral-9"], .dark .admin-shell [class*="bg-gray-9"] {
+  background-color: var(--as-surface-2) !important;
+}
+
+.dark .admin-shell [class*="bg-gradient-to-"][class*="from-slate-9"],
+.dark .admin-shell [class*="bg-gradient-to-"][class*="from-zinc-9"],
+.dark .admin-shell [class*="bg-gradient-to-"][class*="from-neutral-9"],
+.dark .admin-shell [class*="bg-gradient-to-"][class*="from-black"],
+.dark .admin-shell [class*="bg-gradient-to-"][class*="from-slate-8"] { background-color: var(--as-surface) !important; }
+
+.dark .admin-shell [class*="border-white/"], .dark .admin-shell [class*="border-black/"],
+.dark .admin-shell .border-border, .dark .admin-shell .border-input,
+.dark .admin-shell .border-slate-100, .dark .admin-shell .border-slate-200,
+.dark .admin-shell [class*="border-slate-7"], .dark .admin-shell [class*="border-slate-8"],
+.dark .admin-shell [class*="border-zinc-7"], .dark .admin-shell [class*="border-zinc-8"],
+.dark .admin-shell .divide-border > * + * { border-color: var(--as-border) !important; }
+.dark .admin-shell .border-slate-300 { border-color: var(--as-border-strong) !important; }
+
+.dark .admin-shell .text-white, .dark .admin-shell .text-white\/95, .dark .admin-shell .text-white\/90, .dark .admin-shell .text-white\/85,
+.dark .admin-shell .text-foreground, .dark .admin-shell .text-slate-900,
+.dark .admin-shell .text-primary-foreground { color: var(--as-text) !important; }
+.dark .admin-shell .text-white\/80, .dark .admin-shell .text-white\/75, .dark .admin-shell .text-white\/70, .dark .admin-shell .text-slate-700,
+.dark .admin-shell .text-white\/65, .dark .admin-shell .text-white\/60 { color: var(--as-text-2) !important; }
+.dark .admin-shell .text-slate-600 { color: var(--as-text-3) !important; }
+.dark .admin-shell .text-white\/55, .dark .admin-shell .text-white\/50, .dark .admin-shell .text-white\/45, .dark .admin-shell .text-white\/40,
+.dark .admin-shell .text-muted-foreground, .dark .admin-shell .text-slate-500,
+.dark .admin-shell [class*="text-slate-4"], .dark .admin-shell [class*="text-zinc-4"] { color: var(--as-muted) !important; }
+.dark .admin-shell .text-white\/35, .dark .admin-shell .text-white\/30, .dark .admin-shell .text-white\/25, .dark .admin-shell .text-white\/20,
+.dark .admin-shell .text-slate-400, .dark .admin-shell .text-slate-300,
+.dark .admin-shell .text-white\/15, .dark .admin-shell .text-white\/10 { color: var(--as-muted-2) !important; }
+
+/* Semantic accents — dark mode legibility */
+.dark .admin-shell .text-emerald-600, .dark .admin-shell .text-emerald-700 { color: var(--as-success) !important; }
+.dark .admin-shell .text-amber-600, .dark .admin-shell .text-amber-700 { color: var(--as-warning) !important; }
+.dark .admin-shell .text-red-600, .dark .admin-shell .text-red-700 { color: var(--as-danger) !important; }
+.dark .admin-shell .text-sky-600 { color: var(--as-info) !important; }
+.dark .admin-shell .bg-emerald-50, .dark .admin-shell .bg-emerald-50\/40 { background-color: rgba(52,211,153,0.10) !important; }
+.dark .admin-shell .bg-red-50, .dark .admin-shell .bg-red-50\/40 { background-color: rgba(248,113,113,0.10) !important; }
+.dark .admin-shell .bg-amber-50, .dark .admin-shell .bg-amber-50\/30 { background-color: rgba(251,191,36,0.09) !important; }
+.dark .admin-shell .border-emerald-300 { border-color: rgba(52,211,153,0.45) !important; }
+.dark .admin-shell .border-red-300 { border-color: rgba(248,113,113,0.45) !important; }
+.dark .admin-shell .border-amber-300 { border-color: rgba(251,191,36,0.45) !important; }
+.dark .admin-shell .bg-emerald-500 { background-color: rgba(52,211,153,0.18) !important; color: var(--as-success) !important; }
+.dark .admin-shell .bg-red-500 { background-color: rgba(248,113,113,0.18) !important; color: var(--as-danger) !important; }
+.dark .admin-shell .bg-amber-500 { background-color: rgba(251,191,36,0.16) !important; color: var(--as-warning) !important; }
+
+/* Inputs / selects / textareas */
+.dark .admin-shell input:not([type="checkbox"]):not([type="radio"]):not([type="range"]),
+.dark .admin-shell textarea, .dark .admin-shell select, .dark .admin-shell [role="combobox"] {
+  background-color: var(--as-surface) !important;
+  border-color: var(--as-border-strong) !important;
+  color: var(--as-text) !important;
+}
+.dark .admin-shell input::placeholder, .dark .admin-shell textarea::placeholder { color: var(--as-muted-2) !important; }
+.dark .admin-shell input:focus, .dark .admin-shell textarea:focus, .dark .admin-shell select:focus, .dark .admin-shell [role="combobox"]:focus-visible {
+  border-color: var(--as-text) !important;
+  box-shadow: var(--as-ring) !important;
+}
+
+/* Buttons */
+.dark .admin-shell button.bg-primary { background-color: var(--as-accent) !important; color: var(--as-on-accent) !important; border-color: var(--as-accent) !important; }
+.dark .admin-shell button.bg-primary:hover { background-color: var(--as-accent-hover) !important; }
+.dark .admin-shell button.bg-secondary { background-color: var(--as-surface-2) !important; color: var(--as-text) !important; border-color: var(--as-border) !important; }
+.dark .admin-shell button.border.bg-background {
+  background-color: var(--as-surface) !important; border-color: var(--as-border-strong) !important; color: var(--as-text) !important;
+}
+.dark .admin-shell button.border.bg-background:hover { background-color: var(--as-surface-2) !important; }
+
+/* Tables */
+.dark .admin-shell table { color: var(--as-text) !important; }
+.dark .admin-shell thead { background-color: var(--as-surface-2) !important; }
+.dark .admin-shell thead th { color: var(--as-text-3) !important; border-color: var(--as-border) !important; }
+.dark .admin-shell tbody tr:hover { background-color: var(--as-surface-2) !important; }
+.dark .admin-shell tbody td { border-color: var(--as-border-soft) !important; }
+
+/* Dialogs / popovers / dropdowns */
+.dark .admin-shell [role="dialog"],
+.dark .admin-shell [role="menu"],
+.dark .admin-shell [data-radix-popper-content-wrapper] > * {
+  background-color: var(--as-surface) !important;
+  border-color: var(--as-border) !important;
+  color: var(--as-text) !important;
+}
+
+/* Tabs */
+.dark .admin-shell [role="tablist"] { background-color: var(--as-surface) !important; border-color: var(--as-border) !important; }
+.dark .admin-shell [role="tab"] { color: var(--as-muted) !important; }
+.dark .admin-shell [role="tab"][data-state="active"] { background-color: var(--as-elev) !important; color: var(--as-text) !important; }
+
+/* Separators / scrollbars */
+.dark .admin-shell hr, .dark .admin-shell .separator { border-color: var(--as-border) !important; background-color: var(--as-border) !important; }
+.dark .admin-shell ::-webkit-scrollbar-thumb { background-color: var(--as-border-strong); }
+
+/* Hover overlays */
+.dark .admin-shell .hover\:bg-white\/5:hover, .dark .admin-shell .hover\:bg-white\/10:hover,
+.dark .admin-shell .hover\:bg-white\/\[0\.03\]:hover, .dark .admin-shell .hover\:bg-white\/\[0\.05\]:hover,
+.dark .admin-shell .hover\:bg-white\/\[0\.08\]:hover,
+.dark .admin-shell .hover\:bg-muted:hover, .dark .admin-shell .hover\:bg-muted\/50:hover { background-color: var(--as-surface-2) !important; }
