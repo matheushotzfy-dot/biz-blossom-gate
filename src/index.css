@@ -1886,178 +1886,183 @@ button svg, a svg, [role="button"] svg {
 .admin-frame .group:hover .group-hover\:af-text { color: var(--as-text) !important; }
 .admin-frame .group:hover .group-hover\:af-text-2 { color: var(--as-text-2) !important; }
 
+
 /* ═══════════════════════════════════════════════════════════════════
-   ADMIN CONSOLE V3 — serious PHP-style infrastructure UI
-   Final scoped layer: fixes hardcoded light classes in dark mode and
-   upgrades density, contrast, sizing, portals, sheets and tables.
+   ADMIN CONSOLE V4 — Navy Trust palette · Sora + Manrope · Focada
+   Final token layer. Cascades to every admin tab.
    ═══════════════════════════════════════════════════════════════════ */
 .admin-shell,
 .admin-frame {
-  --as-bg: #e8edf3;
-  --as-bg-soft: #eef2f7;
-  --as-surface: #ffffff;
-  --as-surface-2: #f7f9fc;
-  --as-elev: #ffffff;
-  --as-border: #cfd8e3;
-  --as-border-soft: #e3e9f0;
-  --as-border-strong: #aebdcb;
-  --as-text: #111827;
-  --as-text-2: #2f3b4a;
-  --as-text-3: #536173;
-  --as-muted: #64748b;
-  --as-muted-2: #8b99aa;
-  --as-accent: #0b1220;
-  --as-accent-hover: #182338;
-  --as-on-accent: #f8fafc;
-  --as-success: #047857;
-  --as-warning: #b45309;
-  --as-danger: #b91c1c;
-  --as-info: #1d4ed8;
-  --as-success-bg: #e7f7ef;
-  --as-warning-bg: #fff4d7;
-  --as-danger-bg: #fde8e8;
-  --as-info-bg: #e8f1ff;
-  --as-radius: 7px;
-  --as-ring: 0 0 0 3px color-mix(in srgb, var(--as-accent) 12%, transparent);
+  --as-bg:            #eef2f8;
+  --as-bg-soft:       #f4f7fb;
+  --as-surface:       #ffffff;
+  --as-surface-2:     #f6f9fc;
+  --as-elev:          #ffffff;
+  --as-border:        #d6dfeb;
+  --as-border-soft:   #e6ecf3;
+  --as-border-strong: #b8c5d6;
+  --as-text:          #0f1b3d;
+  --as-text-2:        #1e3a5f;
+  --as-text-3:        #3b6fa0;
+  --as-muted:         #5b6f88;
+  --as-muted-2:       #8aa0bb;
+  --as-accent:        #0f1b3d;
+  --as-accent-hover:  #1e3a5f;
+  --as-accent-soft:   #e8edf3;
+  --as-on-accent:     #ffffff;
+  --as-rail:          #3b6fa0;
+  --as-success:       #047857;
+  --as-warning:       #b45309;
+  --as-danger:        #b91c1c;
+  --as-info:          #1d4ed8;
+  --as-success-bg:    #e7f5ee;
+  --as-warning-bg:    #fff3da;
+  --as-danger-bg:     #fde8e8;
+  --as-info-bg:       #e8efff;
+  --as-radius:        6px;
+  --as-ring:          0 0 0 3px rgba(15, 27, 61, 0.14);
   color-scheme: light;
 }
-
 .dark .admin-shell,
 .dark .admin-frame {
-  --as-bg: #060b12;
-  --as-bg-soft: #08111d;
-  --as-surface: #0d1624;
-  --as-surface-2: #121d2d;
-  --as-elev: #182436;
-  --as-border: #263448;
-  --as-border-soft: #1c293b;
-  --as-border-strong: #364961;
-  --as-text: #f1f5f9;
-  --as-text-2: #d4deea;
-  --as-text-3: #adbbcb;
-  --as-muted: #8a99ad;
-  --as-muted-2: #6f7f94;
-  --as-accent: #f1f5f9;
-  --as-accent-hover: #ffffff;
-  --as-on-accent: #06101c;
-  --as-success: #34d399;
-  --as-warning: #fbbf24;
-  --as-danger: #f87171;
-  --as-info: #60a5fa;
-  --as-success-bg: rgba(52, 211, 153, 0.13);
-  --as-warning-bg: rgba(251, 191, 36, 0.14);
-  --as-danger-bg: rgba(248, 113, 113, 0.14);
-  --as-info-bg: rgba(96, 165, 250, 0.14);
+  --as-bg:            #060c1a;
+  --as-bg-soft:       #08111f;
+  --as-surface:       #0c1730;
+  --as-surface-2:     #11203f;
+  --as-elev:          #16294f;
+  --as-border:        #1f3258;
+  --as-border-soft:   #182748;
+  --as-border-strong: #2c4474;
+  --as-text:          #e8edf3;
+  --as-text-2:        #c7d3e4;
+  --as-text-3:        #93a8c8;
+  --as-muted:         #7d92b1;
+  --as-muted-2:       #5e7392;
+  --as-accent:        #3b6fa0;
+  --as-accent-hover:  #5187be;
+  --as-accent-soft:   rgba(59,111,160,0.16);
+  --as-on-accent:     #ffffff;
+  --as-rail:          #60a5fa;
+  --as-success:       #34d399;
+  --as-warning:       #fbbf24;
+  --as-danger:        #f87171;
+  --as-info:          #60a5fa;
+  --as-success-bg:    rgba(52,211,153,0.14);
+  --as-warning-bg:    rgba(251,191,36,0.14);
+  --as-danger-bg:     rgba(248,113,113,0.14);
+  --as-info-bg:       rgba(96,165,250,0.14);
   color-scheme: dark;
 }
 
 .admin-frame {
-  background:
-    linear-gradient(180deg, var(--as-bg-soft), var(--as-bg)) !important;
+  background: var(--as-bg) !important;
   color: var(--as-text) !important;
+  font-family: 'Manrope','Plus Jakarta Sans',system-ui,sans-serif;
+  font-feature-settings: "ss01","cv11","tnum";
 }
+.admin-frame .af-bg, .admin-frame .af-bg-soft { background-color: var(--as-bg-soft) !important; }
+.admin-frame .af-surface   { background-color: var(--as-surface) !important; }
+.admin-frame .af-surface-2 { background-color: var(--as-surface-2) !important; }
+.admin-frame .af-border    { border-color: var(--as-border) !important; }
+.admin-frame .af-border-soft { border-color: var(--as-border-soft) !important; }
+.admin-frame .af-text      { color: var(--as-text) !important; }
+.admin-frame .af-text-2    { color: var(--as-text-2) !important; }
+.admin-frame .af-text-3    { color: var(--as-text-3) !important; }
+.admin-frame .af-muted     { color: var(--as-muted) !important; }
+.admin-frame .af-muted-2   { color: var(--as-muted-2) !important; }
+.admin-frame .af-accent-bg { background-color: var(--as-accent) !important; color: var(--as-on-accent) !important; border-color: var(--as-accent) !important; }
+.admin-frame .af-accent-bg:hover { background-color: var(--as-accent-hover) !important; }
+.admin-frame .af-accent-bg * { color: var(--as-on-accent) !important; }
+
+/* Sidebar focada — accent rail on active row */
+.admin-frame aside .af-accent-bg {
+  background-color: var(--as-accent-soft) !important;
+  color: var(--as-text) !important;
+  border-color: transparent !important;
+  position: relative;
+}
+.admin-frame aside .af-accent-bg::before {
+  content: ""; position: absolute; left: 0; top: 6px; bottom: 6px;
+  width: 3px; background: var(--as-rail); border-radius: 0 2px 2px 0;
+}
+.admin-frame aside .af-accent-bg * { color: var(--as-text) !important; }
+.admin-frame aside .af-accent-bg svg { color: var(--as-rail) !important; }
 
 .admin-shell {
   background: transparent !important;
   color: var(--as-text) !important;
-  font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
-  font-size: 14px;
+  font-family: 'Manrope','Plus Jakarta Sans',system-ui,sans-serif;
+  font-size: 13.5px;
   font-weight: 500;
   letter-spacing: 0 !important;
+  font-feature-settings: "ss01","cv11","tnum";
 }
-.admin-shell *,
-.admin-frame * { letter-spacing: 0 !important; }
-.admin-shell h1,
-.admin-shell h2,
-.admin-shell h3,
-.admin-shell h4,
-.admin-shell .font-display {
-  font-family: 'Space Grotesk', 'Plus Jakarta Sans', system-ui, sans-serif !important;
+.admin-shell *, .admin-frame * { letter-spacing: 0 !important; }
+.admin-shell h1, .admin-shell h2, .admin-shell h3, .admin-shell h4,
+.admin-shell .font-display,
+.admin-frame h1, .admin-frame h2, .admin-frame h3 {
+  font-family: 'Sora','Manrope',system-ui,sans-serif !important;
   color: var(--as-text) !important;
-  font-weight: 650 !important;
+  font-weight: 700 !important;
+  letter-spacing: -0.012em !important;
 }
+.admin-shell h1 { font-size: 22px !important; line-height: 1.18 !important; }
+.admin-shell h2 { font-size: 17px !important; line-height: 1.25 !important; }
+.admin-shell h3 { font-size: 14.5px !important; line-height: 1.3 !important; }
 
-.admin-frame .af-surface,
-.admin-frame .af-surface-2,
-.admin-frame .af-bg,
-.admin-frame .af-bg-soft,
-.admin-shell .bg-white,
-.admin-shell [class*="bg-white/"],
-.admin-shell .bg-card,
-.admin-shell [class*="bg-card/"],
-.admin-shell .bg-popover,
-.admin-shell [class*="bg-popover/"],
-.admin-shell [class*="bg-[#fff"],
-.admin-shell [class*="bg-[#ffffff"],
-.admin-shell [class*="bg-[#fafbfc"],
-.admin-shell [class*="bg-[#f8fafc"],
-.admin-shell [class*="bg-[#f1f5f9"],
-.admin-shell .bg-slate-50,
-.admin-shell .bg-slate-100,
-.admin-shell .bg-muted,
-.admin-shell [class*="bg-muted/"] {
+.admin-shell .bg-white, .admin-shell [class*="bg-white/"],
+.admin-shell .bg-card, .admin-shell [class*="bg-card/"],
+.admin-shell .bg-popover, .admin-shell [class*="bg-popover/"],
+.admin-shell [class*="bg-[#fff"], .admin-shell [class*="bg-[#ffffff"],
+.admin-shell .bg-muted, .admin-shell [class*="bg-muted/"],
+.admin-shell .bg-background, .admin-shell [class*="bg-background/"] {
   background-color: var(--as-surface) !important;
   background-image: none !important;
 }
-.admin-frame .af-bg,
-.admin-frame .af-bg-soft { background-color: var(--as-bg-soft) !important; }
-.admin-frame .af-surface-2,
-.admin-shell .bg-slate-50,
-.admin-shell .bg-slate-100,
-.admin-shell [class*="bg-[#fafbfc"],
-.admin-shell [class*="bg-[#f8fafc"],
+.admin-shell .bg-slate-50, .admin-shell .bg-slate-100,
+.admin-shell [class*="bg-[#fafbfc"], .admin-shell [class*="bg-[#f8fafc"],
 .admin-shell [class*="bg-[#f1f5f9"] { background-color: var(--as-surface-2) !important; }
 
-.admin-shell section,
-.admin-shell article,
+.admin-shell [class*="bg-gradient-to-"][class*="from-slate-9"],
+.admin-shell [class*="bg-gradient-to-"][class*="from-zinc-9"],
+.admin-shell [class*="bg-gradient-to-"][class*="from-neutral-9"],
+.admin-shell [class*="bg-gradient-to-"][class*="from-black"],
+.admin-shell [class*="bg-gradient-to-"][class*="from-slate-8"] {
+  background-image: none !important;
+  background-color: var(--as-surface) !important;
+}
+
+.admin-shell section, .admin-shell article,
 .admin-shell [role="dialog"],
 .admin-shell [data-radix-dialog-content],
 .admin-shell [data-radix-sheet-content],
-.admin-shell .rounded-md,
-.admin-shell .rounded-lg,
-.admin-shell .rounded-xl,
-.admin-shell .rounded-2xl,
-.admin-shell .rounded-3xl {
+.admin-shell .rounded-md, .admin-shell .rounded-lg,
+.admin-shell .rounded-xl, .admin-shell .rounded-2xl, .admin-shell .rounded-3xl {
   border-radius: var(--as-radius) !important;
 }
 
 .admin-shell [class*="border-[#"],
-.admin-shell .border-slate-100,
-.admin-shell .border-slate-200,
-.admin-shell .border-slate-300,
-.admin-shell .border-border,
-.admin-shell .border-input,
-.admin-frame .af-border,
-.admin-frame .af-border-soft,
-.admin-shell .divide-border > * + * {
-  border-color: var(--as-border) !important;
-}
+.admin-shell .border-slate-100, .admin-shell .border-slate-200, .admin-shell .border-slate-300,
+.admin-shell [class*="border-slate-7"], .admin-shell [class*="border-slate-8"],
+.admin-shell [class*="border-white/"], .admin-shell [class*="border-black/"],
+.admin-shell .border-border, .admin-shell .border-input,
+.admin-frame .af-border, .admin-frame .af-border-soft,
+.admin-shell .divide-border > * + * { border-color: var(--as-border) !important; }
 
-.admin-shell [class*="text-[#0f172a"],
-.admin-shell [class*="text-[#111827"],
-.admin-shell .text-slate-950,
-.admin-shell .text-slate-900,
-.admin-shell .text-foreground,
-.admin-frame .af-text { color: var(--as-text) !important; }
-.admin-shell [class*="text-[#1e293b"],
-.admin-shell [class*="text-[#334155"],
-.admin-shell .text-slate-800,
-.admin-shell .text-slate-700,
+.admin-shell .text-white, .admin-shell [class*="text-white/"],
+.admin-shell [class*="text-[#0f172a"], .admin-shell [class*="text-[#111827"],
+.admin-shell .text-slate-950, .admin-shell .text-slate-900,
+.admin-shell .text-foreground, .admin-frame .af-text { color: var(--as-text) !important; }
+.admin-shell [class*="text-[#1e293b"], .admin-shell [class*="text-[#334155"],
+.admin-shell .text-slate-800, .admin-shell .text-slate-700,
 .admin-frame .af-text-2 { color: var(--as-text-2) !important; }
-.admin-shell [class*="text-[#475569"],
-.admin-shell [class*="text-[#64748b"],
-.admin-shell .text-slate-600,
-.admin-shell .text-slate-500,
-.admin-shell .text-muted-foreground,
-.admin-frame .af-text-3,
-.admin-frame .af-muted { color: var(--as-muted) !important; }
-.admin-shell [class*="text-[#94a3b8"],
-.admin-shell .text-slate-400,
-.admin-shell .text-slate-300,
-.admin-frame .af-muted-2 { color: var(--as-muted-2) !important; }
+.admin-shell [class*="text-[#475569"], .admin-shell [class*="text-[#64748b"],
+.admin-shell .text-slate-600, .admin-shell .text-slate-500,
+.admin-shell .text-muted-foreground, .admin-shell [class*="text-slate-4"],
+.admin-frame .af-text-3, .admin-frame .af-muted { color: var(--as-muted) !important; }
+.admin-shell [class*="text-[#94a3b8"], .admin-shell .text-slate-400,
+.admin-shell .text-slate-300, .admin-frame .af-muted-2 { color: var(--as-muted-2) !important; }
 
-.admin-shell .text-white,
-.admin-shell [class*="text-white/"] { color: var(--as-text) !important; }
 .admin-shell button.bg-slate-900,
 .admin-shell button.bg-primary,
 .admin-frame .af-accent-bg {
@@ -2065,45 +2070,30 @@ button svg, a svg, [role="button"] svg {
   border-color: var(--as-accent) !important;
   color: var(--as-on-accent) !important;
 }
-.admin-shell button.bg-slate-900 *,
-.admin-shell button.bg-primary *,
-.admin-frame .af-accent-bg * { color: var(--as-on-accent) !important; }
+.admin-shell button.bg-slate-900 *, .admin-shell button.bg-primary * { color: var(--as-on-accent) !important; }
 
-.admin-shell [class*="text-[#047857"],
-.admin-shell [class*="text-[#059669"],
-.admin-shell .text-emerald-500,
-.admin-shell .text-emerald-600,
-.admin-shell .text-emerald-700 { color: var(--as-success) !important; }
-.admin-shell [class*="text-[#b45309"],
-.admin-shell .text-amber-500,
-.admin-shell .text-amber-600,
-.admin-shell .text-amber-700 { color: var(--as-warning) !important; }
-.admin-shell [class*="text-[#b91c1c"],
-.admin-shell .text-red-500,
-.admin-shell .text-red-600,
-.admin-shell .text-red-700 { color: var(--as-danger) !important; }
-.admin-shell [class*="text-[#1d4ed8"],
-.admin-shell .text-blue-500,
-.admin-shell .text-blue-600,
-.admin-shell .text-sky-600 { color: var(--as-info) !important; }
-.admin-shell [class*="bg-[#ecfdf5"],
-.admin-shell .bg-emerald-50,
-.admin-shell [class*="bg-emerald-500/"] { background-color: var(--as-success-bg) !important; color: var(--as-success) !important; }
-.admin-shell [class*="bg-[#fffbeb"],
-.admin-shell .bg-amber-50,
-.admin-shell [class*="bg-amber-500/"] { background-color: var(--as-warning-bg) !important; color: var(--as-warning) !important; }
-.admin-shell [class*="bg-[#fef2f2"],
-.admin-shell .bg-red-50,
-.admin-shell [class*="bg-red-500/"] { background-color: var(--as-danger-bg) !important; color: var(--as-danger) !important; }
-.admin-shell [class*="bg-[#eff6ff"],
+.admin-shell .text-emerald-400, .admin-shell .text-emerald-500,
+.admin-shell .text-emerald-600, .admin-shell .text-emerald-700 { color: var(--as-success) !important; }
+.admin-shell .text-amber-400, .admin-shell .text-amber-500,
+.admin-shell .text-amber-600, .admin-shell .text-amber-700,
+.admin-shell .text-orange-400, .admin-shell .text-orange-500 { color: var(--as-warning) !important; }
+.admin-shell .text-red-400, .admin-shell .text-red-500,
+.admin-shell .text-red-600, .admin-shell .text-red-700,
+.admin-shell .text-rose-400, .admin-shell .text-rose-500 { color: var(--as-danger) !important; }
+.admin-shell .text-blue-400, .admin-shell .text-blue-500,
+.admin-shell .text-blue-600, .admin-shell .text-sky-500, .admin-shell .text-sky-600 { color: var(--as-info) !important; }
+
+.admin-shell .bg-emerald-50, .admin-shell [class*="bg-emerald-500/"],
+.admin-shell .bg-emerald-500 { background-color: var(--as-success-bg) !important; color: var(--as-success) !important; }
+.admin-shell .bg-amber-50, .admin-shell .bg-yellow-50,
+.admin-shell [class*="bg-amber-500/"], .admin-shell .bg-amber-500 { background-color: var(--as-warning-bg) !important; color: var(--as-warning) !important; }
+.admin-shell .bg-red-50, .admin-shell .bg-rose-50,
+.admin-shell [class*="bg-red-500/"], .admin-shell .bg-red-500 { background-color: var(--as-danger-bg) !important; color: var(--as-danger) !important; }
 .admin-shell .bg-blue-50,
-.admin-shell [class*="bg-blue-500/"],
-.admin-shell [class*="bg-sky-500/"] { background-color: var(--as-info-bg) !important; color: var(--as-info) !important; }
+.admin-shell [class*="bg-blue-500/"], .admin-shell [class*="bg-sky-500/"] { background-color: var(--as-info-bg) !important; color: var(--as-info) !important; }
 
 .admin-shell input:not([type="checkbox"]):not([type="radio"]):not([type="range"]),
-.admin-shell textarea,
-.admin-shell select,
-.admin-shell [role="combobox"],
+.admin-shell textarea, .admin-shell select, .admin-shell [role="combobox"],
 .admin-frame .af-input {
   min-height: 38px !important;
   background: var(--as-surface) !important;
@@ -2112,77 +2102,104 @@ button svg, a svg, [role="button"] svg {
   border-radius: 6px !important;
   font-size: 13.5px !important;
   font-weight: 500 !important;
-  box-shadow: inset 0 1px 0 color-mix(in srgb, var(--as-text) 4%, transparent) !important;
+  font-family: inherit !important;
+  box-shadow: none !important;
+  transition: border-color 120ms, box-shadow 120ms;
 }
-.admin-shell input::placeholder,
-.admin-shell textarea::placeholder,
+.admin-shell input::placeholder, .admin-shell textarea::placeholder,
 .admin-frame .af-input::placeholder { color: var(--as-muted-2) !important; opacity: 1; }
-.admin-shell input:focus,
-.admin-shell textarea:focus,
-.admin-shell select:focus,
-.admin-shell [role="combobox"]:focus-visible,
+.admin-shell input:focus, .admin-shell textarea:focus,
+.admin-shell select:focus, .admin-shell [role="combobox"]:focus-visible,
 .admin-frame .af-input:focus {
-  border-color: var(--as-accent) !important;
+  outline: none !important;
+  border-color: var(--as-text-3) !important;
   box-shadow: var(--as-ring) !important;
 }
+
+.admin-shell button, .admin-frame button {
+  min-height: 34px;
+  border-radius: 6px !important;
+  font-weight: 600 !important;
+  font-family: inherit !important;
+  font-size: 13px !important;
+  transition: background-color 120ms, border-color 120ms, color 120ms;
+}
+.admin-shell button.border, .admin-shell button.bg-white,
+.admin-shell button.bg-background, .admin-shell button.bg-secondary,
+.admin-shell button[class*="bg-white"], .admin-frame button.af-border {
+  background-color: var(--as-surface) !important;
+  border: 1px solid var(--as-border-strong) !important;
+  color: var(--as-text-2) !important;
+}
+.admin-shell button.border:hover, .admin-shell button.bg-white:hover,
+.admin-shell button.bg-secondary:hover { background-color: var(--as-surface-2) !important; color: var(--as-text) !important; }
 
 .admin-shell table {
   color: var(--as-text) !important;
   border-collapse: separate !important;
   border-spacing: 0 !important;
   font-size: 13px !important;
+  width: 100%;
 }
-.admin-shell thead,
-.admin-shell thead tr,
-.admin-shell [class*="bg-[#fafbfc"] {
-  background-color: var(--as-surface-2) !important;
-}
+.admin-shell thead, .admin-shell thead tr,
+.admin-shell [class*="bg-[#fafbfc"] { background-color: var(--as-surface-2) !important; }
 .admin-shell thead th {
   color: var(--as-text-3) !important;
   border-bottom: 1px solid var(--as-border) !important;
-  padding: 12px 14px !important;
+  padding: 11px 14px !important;
   font-size: 10.5px !important;
-  font-weight: 750 !important;
-  letter-spacing: 0.04em !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.06em !important;
+  text-transform: uppercase;
+  font-family: 'Sora','Manrope',system-ui,sans-serif !important;
 }
 .admin-shell tbody td {
-  color: inherit;
-  border-bottom-color: var(--as-border-soft) !important;
-  padding: 12px 14px !important;
+  color: var(--as-text-2);
+  border-bottom: 1px solid var(--as-border-soft) !important;
+  padding: 11px 14px !important;
+  font-size: 13px !important;
 }
+.admin-shell tbody tr { transition: background-color 100ms; }
 .admin-shell tbody tr:hover,
 .admin-shell .hover\:bg-slate-50:hover,
 .admin-shell .hover\:bg-\[\#fafbfc\]:hover,
-.admin-frame .hover\:af-surface-2:hover { background-color: var(--as-elev) !important; }
+.admin-frame .hover\:af-surface-2:hover { background-color: var(--as-surface-2) !important; }
+.admin-shell tbody tr:last-child td { border-bottom: 0 !important; }
 
-.admin-shell button,
-.admin-frame button {
-  min-height: 32px;
-  border-radius: 6px !important;
-  font-weight: 650 !important;
-}
-.admin-shell button.border,
-.admin-shell button.bg-white,
-.admin-shell button.bg-background,
-.admin-shell button.bg-secondary,
-.admin-shell button[class*="bg-white"],
-.admin-frame button.af-border {
+.admin-shell [role="tablist"] {
   background-color: var(--as-surface) !important;
-  border-color: var(--as-border) !important;
-  color: var(--as-text-2) !important;
+  border: 1px solid var(--as-border) !important;
+  padding: 3px !important;
+  border-radius: 6px !important;
+}
+.admin-shell [role="tab"] {
+  background-color: transparent !important;
+  color: var(--as-muted) !important;
+  font-weight: 600 !important;
+  border-radius: 4px !important;
+  font-size: 12.5px !important;
+  font-family: 'Sora','Manrope',system-ui,sans-serif !important;
+}
+.admin-shell [role="tab"][data-state="active"] {
+  background-color: var(--as-accent) !important;
+  color: var(--as-on-accent) !important;
+  box-shadow: none !important;
 }
 
-.admin-shell pre,
-.admin-shell code,
-.admin-shell .font-mono {
-  font-family: 'JetBrains Mono', ui-monospace, monospace !important;
+.admin-shell [role="dialog"],
+.admin-shell [role="menu"],
+.admin-shell [data-radix-popper-content-wrapper] > * {
+  background-color: var(--as-surface) !important;
+  border: 1px solid var(--as-border) !important;
+  color: var(--as-text) !important;
+  border-radius: var(--as-radius) !important;
+  box-shadow: 0 10px 28px -10px rgba(15,27,61,0.18), 0 2px 6px rgba(15,27,61,0.06) !important;
 }
-.admin-shell pre {
-  background: var(--as-surface-2) !important;
-  border-color: var(--as-border) !important;
-  color: var(--as-text-2) !important;
+.dark .admin-shell [role="dialog"],
+.dark .admin-shell [role="menu"],
+.dark .admin-shell [data-radix-popper-content-wrapper] > * {
+  box-shadow: 0 12px 36px -10px rgba(0,0,0,0.55), 0 2px 8px rgba(0,0,0,0.35) !important;
 }
-
 [data-radix-popper-content-wrapper] [role="listbox"],
 [data-radix-popper-content-wrapper] [role="menu"],
 [data-radix-select-content],
@@ -2191,33 +2208,67 @@ button svg, a svg, [role="button"] svg {
   background: var(--as-surface, hsl(var(--popover))) !important;
   border-color: var(--as-border, hsl(var(--border))) !important;
   color: var(--as-text, hsl(var(--popover-foreground))) !important;
+  font-family: 'Manrope','Plus Jakarta Sans',system-ui,sans-serif !important;
 }
+
+.admin-shell [class*="backdrop-blur"] { backdrop-filter: none !important; -webkit-backdrop-filter: none !important; }
+.admin-shell [class*="drop-shadow-[0_0"], .admin-shell [class*="shadow-[0_0_"],
+.admin-shell .shadow-glow, .admin-shell .shadow-2xl, .admin-shell .shadow-xl {
+  box-shadow: 0 1px 2px rgba(15,27,61,0.05) !important; filter: none !important;
+}
+.admin-shell .shadow-lg { box-shadow: 0 2px 4px rgba(15,27,61,0.06) !important; }
+.admin-shell .shadow, .admin-shell .shadow-md, .admin-shell .shadow-sm {
+  box-shadow: 0 1px 2px rgba(15,27,61,0.05) !important;
+}
+.dark .admin-shell .shadow-lg, .dark .admin-shell .shadow-md,
+.dark .admin-shell .shadow, .dark .admin-shell .shadow-sm { box-shadow: 0 1px 2px rgba(0,0,0,0.4) !important; }
+
+.admin-shell .tabular-nums, .admin-shell .tnum { font-variant-numeric: tabular-nums; }
+.admin-shell pre, .admin-shell code, .admin-shell .font-mono {
+  font-family: 'JetBrains Mono', ui-monospace, monospace !important;
+}
+.admin-shell pre {
+  background: var(--as-surface-2) !important;
+  border-color: var(--as-border) !important;
+  color: var(--as-text-2) !important;
+}
+
+.admin-shell .hover\:bg-white\/5:hover, .admin-shell .hover\:bg-white\/10:hover,
+.admin-shell .hover\:bg-white\/\[0\.03\]:hover, .admin-shell .hover\:bg-white\/\[0\.05\]:hover,
+.admin-shell .hover\:bg-white\/\[0\.08\]:hover,
+.admin-shell .hover\:bg-muted:hover, .admin-shell .hover\:bg-muted\/50:hover { background-color: var(--as-surface-2) !important; }
+
+.admin-shell svg { stroke-width: 1.85; }
+.admin-shell hr, .admin-shell .separator { border-color: var(--as-border-soft) !important; background-color: var(--as-border-soft) !important; }
+.admin-shell ::-webkit-scrollbar { width: 9px; height: 9px; }
+.admin-shell ::-webkit-scrollbar-thumb { background-color: var(--as-border-strong); border-radius: 4px; }
+.admin-shell ::-webkit-scrollbar-track { background-color: transparent; }
 
 .admin-frame [data-admin-content] {
   --card: 216 35% 99%;
-  --card-foreground: 222 40% 11%;
+  --card-foreground: 222 70% 15%;
   --popover: 216 35% 99%;
-  --popover-foreground: 222 40% 11%;
+  --popover-foreground: 222 70% 15%;
   --muted: 214 28% 94%;
-  --muted-foreground: 215 16% 46%;
+  --muted-foreground: 215 18% 44%;
   --border: 214 24% 83%;
   --input: 214 24% 74%;
   --accent: 214 28% 94%;
-  --accent-foreground: 222 40% 11%;
-  --primary: 222 47% 11%;
+  --accent-foreground: 222 70% 15%;
+  --primary: 222 60% 16%;
   --primary-foreground: 210 40% 98%;
 }
 .dark .admin-frame [data-admin-content] {
-  --card: 216 45% 10%;
+  --card: 216 60% 11%;
   --card-foreground: 210 40% 96%;
-  --popover: 216 45% 10%;
+  --popover: 216 60% 11%;
   --popover-foreground: 210 40% 96%;
-  --muted: 216 36% 14%;
-  --muted-foreground: 215 20% 68%;
-  --border: 216 28% 22%;
-  --input: 216 28% 30%;
-  --accent: 216 36% 16%;
+  --muted: 216 40% 16%;
+  --muted-foreground: 215 22% 70%;
+  --border: 216 32% 22%;
+  --input: 216 32% 30%;
+  --accent: 216 40% 18%;
   --accent-foreground: 210 40% 96%;
-  --primary: 210 40% 96%;
-  --primary-foreground: 216 45% 8%;
+  --primary: 210 90% 64%;
+  --primary-foreground: 216 60% 8%;
 }
