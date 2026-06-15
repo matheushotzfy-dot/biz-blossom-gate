@@ -2,6 +2,7 @@ import { useEffect, useState, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useNavigate } from "react-router-dom";
+import { useTheme } from "@/hooks/useTheme";
 import {
   Shield, LogOut, Zap, LayoutDashboard, Users, Package, AlertTriangle,
   RotateCcw, ShieldAlert, CreditCard, ArrowDownToLine, Tag, GraduationCap,
@@ -10,7 +11,7 @@ import {
   Bug, UserX, Banknote, ShieldCheck,
   Package2, BarChart3, Calendar,
   PanelLeftClose, PanelLeft,
-  Trophy, Search, ChevronDown,
+  Trophy, Search, ChevronDown, Sun, Moon,
 } from "lucide-react";
 import { toast } from "sonner";
 import type { Tables } from "@/integrations/supabase/types";
