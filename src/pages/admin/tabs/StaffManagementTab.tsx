@@ -8,10 +8,12 @@ import { Switch } from "@/components/ui/switch";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import {
   Plus, Search, Shield, Snowflake, Sun, KeyRound, Trash2, History, Settings2,
-  UserCog, Users, RefreshCw, Copy, Eye, EyeOff,
+  UserCog, Users, RefreshCw, Copy, Eye, EyeOff, Activity, Percent, UsersRound,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { Tables } from "@/integrations/supabase/types";
+import { FinanceiroHero } from "@/components/financeiro/FinanceiroHero";
+import { PremiumPanel, PremiumMetric, PremiumMetricGrid, PremiumEmpty, premiumTable } from "./AdminPremium";
 
 export const STAFF_PERMISSIONS: { key: string; label: string; group: string }[] = [
   { key: "view_sellers", label: "Ver vendedores", group: "Visualização" },
@@ -181,122 +183,166 @@ export default function StaffManagementTab({ profiles, onReload, role }: Props) 
     load();
   };
 
+  const activeCount = rows.filter((r) => !r.frozen).length;
+  const frozenCount = rows.filter((r) => r.frozen).length;
+  const avgPct = rows.length ? rows.reduce((s, r) => s + r.pct, 0) / rows.length : 0;
+  const totalAssigned = rows.reduce((s, r) => s + r.assignedCount, 0);
+
   return (
-    <div className="space-y-4">
-      <header className="flex items-center justify-between">
-        <div>
-          <h2 className="text-lg font-bold text-foreground flex items-center gap-2">
-            {isManager ? <Users className="h-4 w-4 text-emerald-400" /> : <UserCog className="h-4 w-4 text-indigo-400" />}
-            {heading}
-          </h2>
-          <p className="text-xs text-muted-foreground mt-0.5">
-            {rows.length} conta{rows.length !== 1 ? "s" : ""} • {rows.filter((r) => r.frozen).length} congelada(s)
-          </p>
-        </div>
-        <div className="flex gap-2">
-          <Button variant="outline" size="sm" onClick={load} className="rounded-md gap-1.5">
-            <RefreshCw className="h-3.5 w-3.5" /> Atualizar
-          </Button>
-          <Button onClick={() => setShowCreate(true)} size="sm" className={cn(
-            "rounded-md gap-1.5 text-white",
-            isManager ? "bg-emerald-600 hover:bg-emerald-700" : "bg-indigo-600 hover:bg-indigo-700"
-          )}>
-            <Plus className="h-3.5 w-3.5" /> Criar conta
-          </Button>
-        </div>
-      </header>
+    <div className="space-y-6">
+      <FinanceiroHero
+        eyebrow={isManager ? "Admin · Gerentes" : "Admin · Staff"}
+        title={heading}
+        subtitle={isManager
+          ? "Gerentes de contas com permissões delegadas e carteira de sellers."
+          : "Funcionários operacionais com permissões granulares e auditoria completa."}
+        status={{ tone: rows.length ? "success" : "neutral", label: `${rows.length} conta${rows.length !== 1 ? "s" : ""}`, pulse: rows.length > 0 }}
+        actions={
+          <div className="flex gap-2">
+            <Button variant="outline" size="sm" onClick={load} className="rounded-md gap-1.5">
+              <RefreshCw className="h-3.5 w-3.5" /> Atualizar
+            </Button>
+            <Button onClick={() => setShowCreate(true)} size="sm" className="rounded-md gap-1.5">
+              <Plus className="h-3.5 w-3.5" /> Criar conta
+            </Button>
+          </div>
+        }
+      />
 
-      <div className="relative max-w-sm">
-        <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
-        <Input
-          value={filter} onChange={(e) => setFilter(e.target.value)}
-          placeholder="Filtrar por nome ou e-mail..."
-          className="pl-8 h-9 text-sm rounded-md"
-        />
-      </div>
+      <PremiumMetricGrid cols={isManager ? 4 : 3}>
+        <PremiumMetric label="Ativas" value={String(activeCount)} sub="contas operacionais" icon={Activity} tone="success" />
+        <PremiumMetric label="Congeladas" value={String(frozenCount)} sub="acesso suspenso" icon={Snowflake} tone="info" />
+        <PremiumMetric label="% Média" value={`${avgPct.toFixed(2)}%`} sub="comissão sobre net" icon={Percent} tone="primary" />
+        {isManager && (
+          <PremiumMetric label="Sellers" value={String(totalAssigned)} sub="atribuídos no total" icon={UsersRound} tone="warning" />
+        )}
+      </PremiumMetricGrid>
 
-      <div className="border border-border rounded-md overflow-hidden bg-card">
-        <table className="w-full text-sm">
-          <thead className="bg-muted/30 text-[10px] uppercase tracking-wider text-muted-foreground">
-            <tr>
-              <th className="text-left p-2.5 font-semibold">Conta</th>
-              <th className="text-left p-2.5 font-semibold">Status</th>
-              <th className="text-right p-2.5 font-semibold tabular-nums">% Comissão</th>
-              {isManager && <th className="text-right p-2.5 font-semibold tabular-nums">Sellers</th>}
-              <th className="text-left p-2.5 font-semibold">Permissões</th>
-              <th className="text-right p-2.5 font-semibold">Ações</th>
-            </tr>
-          </thead>
-          <tbody>
-            {loading ? (
-              <tr><td colSpan={6} className="p-8 text-center text-muted-foreground">Carregando...</td></tr>
-            ) : filtered.length === 0 ? (
-              <tr><td colSpan={6} className="p-8 text-center text-muted-foreground">
-                Nenhuma conta. Use "Criar conta" para adicionar.
-              </td></tr>
-            ) : filtered.map((row) => (
-              <tr key={row.user_id} className="border-t border-border hover:bg-muted/20">
-                <td className="p-2.5">
-                  <div className="font-medium text-foreground">{row.full_name || "—"}</div>
-                  <div className="text-[11px] text-muted-foreground">{row.email}</div>
-                </td>
-                <td className="p-2.5">
-                  {row.frozen ? (
-                    <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-semibold bg-blue-500/10 text-blue-400 border border-blue-500/20">
-                      <Snowflake className="h-3 w-3" /> Congelada
-                    </span>
-                  ) : (
-                    <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
-                      Ativa
-                    </span>
-                  )}
-                </td>
-                <td className="p-2.5 text-right tabular-nums">
-                  <input
-                    type="number" step="0.01" min="0" max="100"
-                    defaultValue={row.pct}
-                    onBlur={(e) => {
-                      const v = parseFloat(e.target.value);
-                      if (v !== row.pct) setPct(row, v);
-                    }}
-                    className="w-20 text-right bg-transparent border border-border rounded px-1.5 py-1 font-mono text-xs"
-                  />
-                  <span className="text-muted-foreground ml-1">%</span>
-                </td>
-                {isManager && (
-                  <td className="p-2.5 text-right tabular-nums font-mono text-xs">{row.assignedCount}</td>
-                )}
-                <td className="p-2.5">
-                  <span className="text-[11px] text-muted-foreground">
-                    {row.permissions.length} ativa(s)
-                  </span>
-                </td>
-                <td className="p-2.5 text-right">
-                  <div className="flex items-center justify-end gap-1">
-                    <Button size="sm" variant="ghost" onClick={() => setShowPerm(row)} title="Permissões" className="h-7 w-7 p-0">
-                      <Shield className="h-3.5 w-3.5" />
-                    </Button>
-                    <Button size="sm" variant="ghost" onClick={() => openAudit(row)} title="Auditoria" className="h-7 w-7 p-0">
-                      <History className="h-3.5 w-3.5" />
-                    </Button>
-                    <Button size="sm" variant="ghost" onClick={() => resetPassword(row)} title="Resetar senha" className="h-7 w-7 p-0">
-                      <KeyRound className="h-3.5 w-3.5" />
-                    </Button>
-                    <Button size="sm" variant="ghost" onClick={() => toggleFreeze(row)}
-                      title={row.frozen ? "Descongelar" : "Congelar"} className="h-7 w-7 p-0">
-                      {row.frozen ? <Sun className="h-3.5 w-3.5" /> : <Snowflake className="h-3.5 w-3.5" />}
-                    </Button>
-                    <Button size="sm" variant="ghost" onClick={() => removeStaff(row)} title="Excluir"
-                      className="h-7 w-7 p-0 text-destructive hover:text-destructive">
-                      <Trash2 className="h-3.5 w-3.5" />
-                    </Button>
-                  </div>
-                </td>
+      <PremiumPanel
+        eyebrow="Diretório"
+        title={isManager ? "Gerentes" : "Funcionários"}
+        icon={isManager ? Users : UserCog}
+        action={
+          <div className="relative w-full sm:w-72">
+            <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground group-focus-within:text-primary" />
+            <Input
+              value={filter} onChange={(e) => setFilter(e.target.value)}
+              placeholder="Filtrar por nome ou e-mail..."
+              className="pl-8 h-9 text-sm rounded-md focus-visible:ring-primary/30"
+            />
+          </div>
+        }
+      >
+        <div className={premiumTable.wrapper}>
+          <table className={premiumTable.table}>
+            <thead>
+              <tr className={premiumTable.headRow}>
+                <th className={premiumTable.th}>Conta</th>
+                <th className={premiumTable.th}>Status</th>
+                <th className={cn(premiumTable.th, "text-right")}>% Comissão</th>
+                {isManager && <th className={cn(premiumTable.th, "text-right")}>Sellers</th>}
+                <th className={premiumTable.th}>Permissões</th>
+                <th className={cn(premiumTable.th, "text-right")}>Ações</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+            </thead>
+            <tbody>
+              {loading ? (
+                <tr><td colSpan={6} className="p-10 text-center text-sm text-muted-foreground">Carregando...</td></tr>
+              ) : filtered.length === 0 ? (
+                <tr><td colSpan={6}>
+                  <PremiumEmpty
+                    icon={isManager ? Users : UserCog}
+                    title="Nenhuma conta encontrada"
+                    subtitle='Use "Criar conta" para adicionar um novo membro.'
+                  />
+                </td></tr>
+              ) : filtered.map((row) => (
+                <tr key={row.user_id} className={premiumTable.row}>
+                  <td className={premiumTable.td}>
+                    <div className="flex items-center gap-3">
+                      <div className={cn(
+                        "flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border text-[11px] font-black uppercase",
+                        isManager ? "bg-success/10 border-success/20 text-success" : "bg-primary/10 border-primary/20 text-primary"
+                      )}>
+                        {(row.full_name || row.email || "?").slice(0, 2).toUpperCase()}
+                      </div>
+                      <div className="min-w-0">
+                        <div className="font-bold text-foreground truncate">{row.full_name || "—"}</div>
+                        <div className="text-[11px] text-muted-foreground truncate">{row.email}</div>
+                      </div>
+                    </div>
+                  </td>
+                  <td className={premiumTable.td}>
+                    {row.frozen ? (
+                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-black uppercase tracking-wider bg-info/10 text-info border border-info/20">
+                        <Snowflake className="h-3 w-3" /> Congelada
+                      </span>
+                    ) : (
+                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-black uppercase tracking-wider bg-success/10 text-success border border-success/20">
+                        <span className="h-1.5 w-1.5 rounded-full bg-success animate-pulse" /> Ativa
+                      </span>
+                    )}
+                  </td>
+                  <td className={cn(premiumTable.td, "text-right")}>
+                    <div className="inline-flex items-center gap-1">
+                      <input
+                        type="number" step="0.01" min="0" max="100"
+                        defaultValue={row.pct}
+                        onBlur={(e) => {
+                          const v = parseFloat(e.target.value);
+                          if (v !== row.pct) setPct(row, v);
+                        }}
+                        className="w-20 text-right bg-muted/30 border border-border/60 rounded-md px-2 py-1 font-mono text-xs focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary/40"
+                      />
+                      <span className="text-muted-foreground text-xs">%</span>
+                    </div>
+                  </td>
+                  {isManager && (
+                    <td className={cn(premiumTable.td, "text-right tabular-nums font-mono text-xs")}>
+                      <span className={cn(
+                        "inline-flex items-center justify-center min-w-[2rem] px-2 py-0.5 rounded-md border",
+                        row.assignedCount > 0 ? "bg-primary/10 text-primary border-primary/20" : "bg-muted/30 text-muted-foreground border-border/60"
+                      )}>
+                        {row.assignedCount}
+                      </span>
+                    </td>
+                  )}
+                  <td className={premiumTable.td}>
+                    <button
+                      onClick={() => setShowPerm(row)}
+                      className="inline-flex items-center gap-1.5 text-[11px] font-bold text-muted-foreground hover:text-primary transition-colors"
+                    >
+                      <Shield className="h-3 w-3" />
+                      {row.permissions.length} ativa{row.permissions.length !== 1 ? "s" : ""}
+                    </button>
+                  </td>
+                  <td className={cn(premiumTable.td, "text-right")}>
+                    <div className="flex items-center justify-end gap-1 opacity-60 group-hover:opacity-100 transition-opacity">
+                      <Button size="sm" variant="ghost" onClick={() => setShowPerm(row)} title="Permissões" className="h-7 w-7 p-0 hover:bg-primary/10 hover:text-primary">
+                        <Shield className="h-3.5 w-3.5" />
+                      </Button>
+                      <Button size="sm" variant="ghost" onClick={() => openAudit(row)} title="Auditoria" className="h-7 w-7 p-0 hover:bg-primary/10 hover:text-primary">
+                        <History className="h-3.5 w-3.5" />
+                      </Button>
+                      <Button size="sm" variant="ghost" onClick={() => resetPassword(row)} title="Resetar senha" className="h-7 w-7 p-0 hover:bg-warning/10 hover:text-warning">
+                        <KeyRound className="h-3.5 w-3.5" />
+                      </Button>
+                      <Button size="sm" variant="ghost" onClick={() => toggleFreeze(row)}
+                        title={row.frozen ? "Descongelar" : "Congelar"} className="h-7 w-7 p-0 hover:bg-info/10 hover:text-info">
+                        {row.frozen ? <Sun className="h-3.5 w-3.5" /> : <Snowflake className="h-3.5 w-3.5" />}
+                      </Button>
+                      <Button size="sm" variant="ghost" onClick={() => removeStaff(row)} title="Excluir"
+                        className="h-7 w-7 p-0 text-destructive hover:bg-destructive/10 hover:text-destructive">
+                        <Trash2 className="h-3.5 w-3.5" />
+                      </Button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </PremiumPanel>
 
       <CreateStaffDialog
         open={showCreate}
