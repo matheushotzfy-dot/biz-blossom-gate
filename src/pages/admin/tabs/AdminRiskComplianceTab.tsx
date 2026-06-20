@@ -18,7 +18,8 @@ import { logAdminAction } from "@/lib/auditLog";
 import { useAuth } from "@/hooks/useAuth";
 import type { Tables } from "@/integrations/supabase/types";
 import { GlassPanel as Panel, GlassPanelTitle } from "./AdminOverviewTab";
-import { FinanceiroHero, FinanceiroKpi, FinanceiroKpiGrid } from "@/components/financeiro/FinanceiroHero";
+import { FinanceiroHero } from "@/components/financeiro/FinanceiroHero";
+import { PremiumMetric, PremiumMetricGrid } from "./AdminPremium";
 
 /* ── Types ── */
 interface BlacklistEntry { id: string; entry_type: string; entry_value: string; reason: string; added_by: string; is_active: boolean; created_at: string; }
@@ -185,13 +186,13 @@ export default function AdminRiskComplianceTab({ profiles, transactions, fmtCurr
    status={{ tone: highRiskSellers > 0 ? "destructive" : "success", label: highRiskSellers > 0 ? `${highRiskSellers} sellers em risco` : "Operação saudável", pulse: highRiskSellers > 0 }}
  />
 
- {/* KPIs */}
- <FinanceiroKpiGrid cols={4}>
-   <FinanceiroKpi icon={Ban} label="Blacklist Ativa" value={String(activeBlacklist)} sub="Entradas bloqueadas" tone="destructive" />
-   <FinanceiroKpi icon={Zap} label="Velocity Rules" value={`${enabledRules}/${velocityRules.length}`} sub="Regras ativas" tone="warning" />
-   <FinanceiroKpi icon={ShieldAlert} label="Bloqueios Hoje" value={String(blockedToday)} sub="Tentativas barradas" tone="info" />
-   <FinanceiroKpi icon={AlertTriangle} label="Sellers em Risco" value={String(highRiskSellers)} sub="Chargeback > 1.5%" tone="destructive" />
- </FinanceiroKpiGrid>
+  {/* KPIs */}
+  <PremiumMetricGrid cols={4}>
+    <PremiumMetric icon={Ban} label="Blacklist Ativa" value={String(activeBlacklist)} sub="Entradas bloqueadas" tone="destructive" />
+    <PremiumMetric icon={Zap} label="Velocity Rules" value={`${enabledRules}/${velocityRules.length}`} sub="Regras ativas" tone="warning" />
+    <PremiumMetric icon={ShieldAlert} label="Bloqueios Hoje" value={String(blockedToday)} sub="Tentativas barradas" tone="info" />
+    <PremiumMetric icon={AlertTriangle} label="Sellers em Risco" value={String(highRiskSellers)} sub="Chargeback > 1.5%" tone="destructive" />
+  </PremiumMetricGrid>
 
  {/* Sub-Tabs */}
  <div className="flex items-center gap-1 p-1 rounded-xl bg-muted/30 border border-border w-fit flex-wrap">

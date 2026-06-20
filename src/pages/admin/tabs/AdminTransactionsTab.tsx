@@ -17,6 +17,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { logAdminAction } from "@/lib/auditLog";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
+import { FinanceiroHero } from "@/components/financeiro/FinanceiroHero";
+import { PremiumMetric, PremiumMetricGrid } from "./AdminPremium";
 
 interface Props {
   transactions: Tables<"transactions">[];
@@ -255,37 +257,33 @@ export default function AdminTransactionsTab({ transactions, profiles, products,
   const activeFilters = (statusFilter !== "all" ? 1 : 0) + (methodFilter !== "all" ? 1 : 0) + (sellerFilter !== "all" ? 1 : 0);
 
   return (
-    <div className="space-y-4">
-      {/* ── Page header ─────────────────────────────────── */}
-      <header className="flex items-end justify-between border-b border-slate-200 pb-4">
-        <div>
-          <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-500 mb-1">Operações · Pagamentos</div>
-          <h1 className="text-[22px] font-semibold text-slate-900 leading-tight">Transações</h1>
-          <p className="text-[12px] text-slate-500 mt-1">Console operacional · aprovações, chargebacks e fluxo de caixa.</p>
-        </div>
-        <div className="flex items-center gap-2">
-          <span className={cn(
-            "inline-flex items-center gap-1.5 px-2 h-7 rounded border text-[11px] font-medium tabular-nums",
-            kpis.chargebacks > 0 ? "border-red-300 bg-red-50 text-red-700" : "border-emerald-300 bg-emerald-50 text-emerald-700"
-          )}>
-            <span className={cn("h-1.5 w-1.5 rounded-full", kpis.chargebacks > 0 ? "bg-red-500" : "bg-emerald-500")} />
-            {kpis.chargebacks > 0 ? `${kpis.chargebacks} chargebacks ativos` : "Operação saudável"}
-          </span>
-          <Button size="sm" variant="outline" className="h-8 text-[11px] gap-1.5" onClick={exportCsv}>
+    <div className="space-y-5 animate-fade-in">
+      {/* Hero */}
+      <FinanceiroHero
+        eyebrow="Operações · Pagamentos"
+        title="Transações"
+        subtitle="Console operacional — aprovações, chargebacks e fluxo de caixa em tempo real."
+        status={{
+          tone: kpis.chargebacks > 0 ? "destructive" : "success",
+          label: kpis.chargebacks > 0 ? `${kpis.chargebacks} chargebacks ativos` : "Operação saudável",
+          pulse: kpis.chargebacks > 0,
+        }}
+        actions={
+          <Button size="sm" variant="outline" className="h-9 text-[11px] gap-1.5 rounded-lg" onClick={exportCsv}>
             <Download className="h-3.5 w-3.5" /> Exportar CSV
           </Button>
-        </div>
-      </header>
+        }
+      />
 
-      {/* ── KPI strip ─────────────────────────────────── */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2">
-        <Stat label="Volume bruto" value={fmtCurrency(kpis.totalGross)} sub={`${kpis.completed} aprovadas`} tone="info" icon={DollarSign} />
-        <Stat label="Líquido" value={fmtCurrency(kpis.totalNet)} sub={`Taxas ${fmtCurrency(kpis.totalFees)}`} tone="success" icon={CheckCircle2} />
-        <Stat label="Aprovação" value={`${kpis.approvalRate.toFixed(1)}%`} sub={`${transactions.length} total`} tone="default" />
-        <Stat label="Hoje" value={fmtCurrency(kpis.todayV)} sub={`${kpis.todayN} transações`} tone="info" />
-        <Stat label="Pendentes" value={kpis.pending.toLocaleString("pt-BR")} sub="Aguardando" tone="warning" icon={Clock} />
-        <Stat label="Chargebacks" value={kpis.chargebacks.toLocaleString("pt-BR")} sub={`${kpis.refunded} estornos`} tone={kpis.chargebacks > 0 ? "danger" : "default"} icon={ShieldAlert} />
-      </div>
+      {/* KPIs */}
+      <PremiumMetricGrid cols={6}>
+        <PremiumMetric icon={DollarSign} label="Volume bruto" value={fmtCurrency(kpis.totalGross)} sub={`${kpis.completed} aprovadas`} tone="info" />
+        <PremiumMetric icon={CheckCircle2} label="Líquido" value={fmtCurrency(kpis.totalNet)} sub={`Taxas ${fmtCurrency(kpis.totalFees)}`} tone="success" />
+        <PremiumMetric icon={ArrowUpDown} label="Aprovação" value={`${kpis.approvalRate.toFixed(1)}%`} sub={`${transactions.length} total`} tone="primary" />
+        <PremiumMetric icon={CreditCard} label="Hoje" value={fmtCurrency(kpis.todayV)} sub={`${kpis.todayN} transações`} tone="info" />
+        <PremiumMetric icon={Clock} label="Pendentes" value={kpis.pending.toLocaleString("pt-BR")} sub="Aguardando" tone="warning" />
+        <PremiumMetric icon={ShieldAlert} label="Chargebacks" value={kpis.chargebacks.toLocaleString("pt-BR")} sub={`${kpis.refunded} estornos`} tone={kpis.chargebacks > 0 ? "destructive" : "neutral"} />
+      </PremiumMetricGrid>
 
       {/* ── Status pills ─────────────────────────────────── */}
       <div className="flex items-center gap-1.5 flex-wrap">
