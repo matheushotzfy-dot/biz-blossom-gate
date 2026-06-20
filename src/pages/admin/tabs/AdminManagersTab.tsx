@@ -5,9 +5,10 @@ import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
-import { Settings, Save } from "lucide-react";
+import { ShieldAlert, Save, Percent, Banknote, ArrowDownToLine } from "lucide-react";
 import { toast } from "sonner";
 import type { Tables } from "@/integrations/supabase/types";
+import { PremiumPanel } from "./AdminPremium";
 
 interface Props {
   profiles: Tables<"profiles">[];
