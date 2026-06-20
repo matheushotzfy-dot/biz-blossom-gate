@@ -799,23 +799,36 @@ function CommandMini({ label, value }: { label: string; value: string }) {
   );
 }
 
-function DashboardKpi({ icon: Icon, label, value, sub, tone }: {
-  icon: any; label: string; value: string; sub?: string; tone: Tone;
+function DashboardKpi({ icon: Icon, label, value, sub, tone, onClick }: {
+  icon: any; label: string; value: string; sub?: string; tone: Tone; onClick?: () => void;
 }) {
+  const isInteractive = typeof onClick === "function";
+  const Tag: any = isInteractive ? "button" : "div";
   return (
-    <div className="admin-card group relative overflow-hidden rounded-xl border border-border/70 bg-card p-4 hover:border-primary/35">
+    <Tag
+      type={isInteractive ? "button" : undefined}
+      onClick={onClick}
+      className={cn(
+        "admin-card group relative overflow-hidden rounded-xl border border-border/70 bg-card p-4 text-left transition-all duration-300",
+        isInteractive && "cursor-pointer hover:-translate-y-0.5 hover:border-primary/40 hover:bg-muted/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40",
+      )}
+    >
       <div className="relative z-10 flex items-start justify-between gap-3">
         <div className="min-w-0">
           <p className="text-[9px] font-black uppercase tracking-[0.2em] text-muted-foreground/70">{label}</p>
           <p className={cn("mt-3 break-words font-display text-[25px] font-black leading-none tracking-tight tabular-nums", TONE_TEXT[tone])}>{value}</p>
           {sub && <p className="mt-2 truncate text-[11px] font-bold text-muted-foreground/75">{sub}</p>}
         </div>
-        <div className={cn("flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border", TONE_PILL[tone])}>
+        <div className={cn("flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border transition-transform duration-300 group-hover:scale-110 group-hover:rotate-3", TONE_PILL[tone])}>
           <Icon className="h-5 w-5" strokeWidth={2.35} />
         </div>
       </div>
-      <div className={cn("absolute inset-x-0 bottom-0 h-0.5", TONE_BAR[tone])} />
-    </div>
+      <Icon className="pointer-events-none absolute -bottom-6 -right-4 h-24 w-24 rotate-[-12deg] text-foreground/[0.03] transition-transform duration-500 group-hover:scale-110" strokeWidth={1.4} />
+      <span className={cn("absolute inset-x-0 bottom-0 h-[2px] origin-left scale-x-0 transition-transform duration-500 group-hover:scale-x-100", TONE_BAR[tone])} />
+      {isInteractive && (
+        <ArrowUpRight className="absolute right-3 top-3 h-3.5 w-3.5 text-muted-foreground/40 opacity-0 transition-all duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 group-hover:opacity-100" />
+      )}
+    </Tag>
   );
 }
 
