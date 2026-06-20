@@ -754,6 +754,28 @@ function HeroStat({ label, value, tone }: { label: string; value: string; tone: 
   );
 }
 
+function HeroBigStat({ label, value, sub, tone, wide }: {
+  label: string; value: string; sub?: string; tone: Tone; wide?: boolean;
+}) {
+  return (
+    <div className={cn(
+      "group relative bg-card p-4 sm:p-5 transition-colors hover:bg-muted/20",
+      wide && "lg:col-span-2",
+    )}>
+      <p className="text-[9.5px] font-black uppercase tracking-[0.22em] text-muted-foreground/70">{label}</p>
+      <p className={cn(
+        "mt-2.5 font-display font-black leading-none tracking-tight tabular-nums break-words",
+        wide ? "text-[28px] sm:text-[36px]" : "text-[20px] sm:text-[24px]",
+        TONE_TEXT[tone],
+      )}>
+        {value}
+      </p>
+      {sub && <p className="mt-2 text-[10.5px] font-bold text-muted-foreground/75 truncate">{sub}</p>}
+      <span className={cn("absolute inset-x-0 bottom-0 h-[2px] origin-left scale-x-0 transition-transform duration-500 group-hover:scale-x-100", TONE_BAR[tone])} />
+    </div>
+  );
+}
+
 function PulseStat({ icon: Icon, label, value, tone }: {
   icon: any; label: string; value: string; tone: Tone;
 }) {
