@@ -174,8 +174,9 @@ export default function AdminInactiveSellersTab({ profiles, transactions, fmtCur
                         </span>
                       </td>
                       <td className={premiumTable.td}>
-                        <span className={cn("text-xs font-black tabular-nums",
+                        <span className={cn("inline-flex items-center gap-1.5 text-xs font-black tabular-nums",
                           r.daysSince >= 30 ? "text-destructive" : r.daysSince >= 14 ? "text-warning" : "text-foreground")}>
+                          {r.daysSince >= 30 && <span className="relative flex h-1.5 w-1.5"><span className="absolute inset-0 animate-ping rounded-full bg-destructive opacity-75" /><span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-destructive" /></span>}
                           {r.daysSince}d
                         </span>
                       </td>
