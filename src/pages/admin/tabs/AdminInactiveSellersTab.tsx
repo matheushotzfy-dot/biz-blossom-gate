@@ -123,16 +123,18 @@ export default function AdminInactiveSellersTab({ profiles, transactions, fmtCur
       </PremiumMetricGrid>
 
       <div className="flex flex-wrap items-center gap-3">
-        <div className="relative flex-1 max-w-sm">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+        <div className="relative flex-1 max-w-sm group">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground transition-colors group-focus-within:text-primary" />
           <input placeholder="Buscar por nome, email, telefone, doc..." value={search} onChange={e => setSearch(e.target.value)}
-            className="w-full h-9 pl-10 pr-4 bg-card border border-border rounded-lg text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary/30" />
+            className="w-full h-9 pl-10 pr-4 bg-card border border-border rounded-lg text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary/40 focus:ring-2 focus:ring-primary/20 transition-all" />
         </div>
         <div className="flex gap-0.5 bg-muted/30 border border-border rounded-lg p-0.5">
           {[2, 5, 7, 14, 30, 60].map(d => (
             <button key={d} onClick={() => setDaysThreshold(d)}
-              className={cn("px-2.5 py-1 rounded text-[10px] font-bold transition-all",
-                daysThreshold === d ? "bg-primary/10 text-primary" : "text-muted-foreground hover:text-foreground")}>
+              className={cn("relative px-2.5 py-1 rounded text-[10px] font-bold transition-all duration-200",
+                daysThreshold === d
+                  ? "bg-primary/15 text-primary shadow-[inset_0_0_0_1px_hsl(var(--primary)/0.25)]"
+                  : "text-muted-foreground hover:text-foreground hover:bg-muted/50")}>
               {d}d+
             </button>
           ))}
