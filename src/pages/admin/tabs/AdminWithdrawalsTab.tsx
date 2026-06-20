@@ -20,7 +20,8 @@ import { logAdminAction } from "@/lib/auditLog";
 import { useAuth } from "@/hooks/useAuth";
 import type { Tables } from "@/integrations/supabase/types";
 import { GlassPanel as AdminPanel, GlassPanelTitle as PanelTitle } from "./AdminOverviewTab";
-import { LinearHero, LinearStat, LinearStatRow } from "@/components/admin/LinearKit";
+import { FinanceiroHero } from "@/components/financeiro/FinanceiroHero";
+import { PremiumMetric, PremiumMetricGrid } from "./AdminPremium";
 
 /* ── Types ── */
 interface AuditLog { id: string; admin_user_id: string; action: string; entity_id: string | null; created_at: string; }
@@ -299,24 +300,24 @@ export default function AdminWithdrawalsTab({ withdrawals, profiles, onWithdrawa
 
  return (
  <div className="space-y-5 animate-fade-in">
- {/* Hero */}
- <LinearHero
-   eyebrow="Operações · Saques"
-   title="Fila de Saques"
-   subtitle="Aprove pagamentos, monitore risco e gerencie ajustes de saldo."
-   status={{ tone: pending.length > 0 ? "warning" : "success", label: pending.length > 0 ? `${pending.length} aguardando` : "Fila zerada", pulse: pending.length > 0 }}
- />
+  {/* Hero */}
+  <FinanceiroHero
+    eyebrow="Operações · Saques"
+    title="Fila de Saques"
+    subtitle="Aprove pagamentos, monitore risco e gerencie ajustes de saldo."
+    status={{ tone: pending.length > 0 ? "warning" : "success", label: pending.length > 0 ? `${pending.length} aguardando` : "Fila zerada", pulse: pending.length > 0 }}
+  />
 
- <LinearStatRow>
-   <LinearStat icon={ArrowDownToLine} label="Total Saques" value={String(withdrawals.length)} sub="Histórico" tone="neutral" />
-   <LinearStat icon={Clock} label="Pendentes" value={fmtCurrency(totalPending)} sub={`${pending.length} solicitações`} tone="warning" />
-   <LinearStat icon={CheckCircle2} label="Aprovados" value={fmtCurrency(totalApproved)} sub={`${approved.length} pagos`} tone="success" />
-   <LinearStat icon={XCircle} label="Recusados" value={String(rejected.length)} sub="Negados" tone="destructive" />
-   <LinearStat icon={Wallet} label="Taxas" value={fmtCurrency(totalFees)} sub="Coletadas" tone="primary" />
-   <LinearStat icon={ShieldAlert} label="Risco" value={String(riskCount)} sub="Requer revisão" tone="destructive" />
-   <LinearStat icon={TrendingUp} label="Ajustes +" value={fmtCurrency(totalAdjCredits)} sub="Créditos" tone="info" />
-   <LinearStat icon={TrendingDown} label="Ajustes -" value={fmtCurrency(totalAdjDebits)} sub="Débitos" tone="warning" />
- </LinearStatRow>
+  <PremiumMetricGrid cols={4}>
+    <PremiumMetric icon={ArrowDownToLine} label="Total Saques" value={String(withdrawals.length)} sub="Histórico" tone="neutral" />
+    <PremiumMetric icon={Clock} label="Pendentes" value={fmtCurrency(totalPending)} sub={`${pending.length} solicitações`} tone="warning" />
+    <PremiumMetric icon={CheckCircle2} label="Aprovados" value={fmtCurrency(totalApproved)} sub={`${approved.length} pagos`} tone="success" />
+    <PremiumMetric icon={XCircle} label="Recusados" value={String(rejected.length)} sub="Negados" tone="destructive" />
+    <PremiumMetric icon={Wallet} label="Taxas" value={fmtCurrency(totalFees)} sub="Coletadas" tone="primary" />
+    <PremiumMetric icon={ShieldAlert} label="Risco" value={String(riskCount)} sub="Requer revisão" tone="destructive" />
+    <PremiumMetric icon={TrendingUp} label="Ajustes +" value={fmtCurrency(totalAdjCredits)} sub="Créditos" tone="info" />
+    <PremiumMetric icon={TrendingDown} label="Ajustes -" value={fmtCurrency(totalAdjDebits)} sub="Débitos" tone="warning" />
+  </PremiumMetricGrid>
 
  {/* Sub-Tabs */}
  <div className="flex items-center gap-1 p-1 rounded-xl bg-muted/30 border border-border w-fit">

@@ -10,7 +10,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import type { Tables } from "@/integrations/supabase/types";
 import { GlassPanel as AdminPanel, GlassPanelTitle as PanelTitle } from "./AdminOverviewTab";
-import { FinanceiroHero, FinanceiroKpi, FinanceiroKpiGrid } from "@/components/financeiro/FinanceiroHero";
+import { FinanceiroHero } from "@/components/financeiro/FinanceiroHero";
+import { PremiumMetric, PremiumMetricGrid } from "./AdminPremium";
 import { logAdminAction } from "@/lib/auditLog";
 
 interface Dispute {
@@ -159,13 +160,13 @@ export default function AdminDisputesTab({ type, title, profiles, transactions, 
    }
  />
 
- {/* KPIs */}
- <FinanceiroKpiGrid cols={4}>
-   <FinanceiroKpi icon={AlertTriangle} label="Total" value={String(disputes.length)} sub="Histórico" tone="neutral" />
-   <FinanceiroKpi icon={Clock} label="Abertas" value={String(disputes.filter(d => d.status === "open").length)} sub="Requer ação" tone="warning" />
-   <FinanceiroKpi icon={MessageSquare} label="Em Análise" value={String(disputes.filter(d => d.status === "in_review").length)} sub="Avaliando" tone="info" />
-   <FinanceiroKpi icon={CheckCircle2} label="Resolvidas" value={String(disputes.filter(d => d.status.startsWith("resolved") || d.status === "closed").length)} sub="Encerradas" tone="success" />
- </FinanceiroKpiGrid>
+  {/* KPIs */}
+  <PremiumMetricGrid cols={4}>
+    <PremiumMetric icon={AlertTriangle} label="Total" value={String(disputes.length)} sub="Histórico" tone="neutral" />
+    <PremiumMetric icon={Clock} label="Abertas" value={String(disputes.filter(d => d.status === "open").length)} sub="Requer ação" tone="warning" />
+    <PremiumMetric icon={MessageSquare} label="Em Análise" value={String(disputes.filter(d => d.status === "in_review").length)} sub="Avaliando" tone="info" />
+    <PremiumMetric icon={CheckCircle2} label="Resolvidas" value={String(disputes.filter(d => d.status.startsWith("resolved") || d.status === "closed").length)} sub="Encerradas" tone="success" />
+  </PremiumMetricGrid>
 
  {/* Search */}
  <div className="relative max-w-md">
