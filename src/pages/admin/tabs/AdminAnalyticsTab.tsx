@@ -254,7 +254,7 @@ export default function AdminAnalyticsTab({ transactions, profiles, products, wi
       </div>
 
       {/* ── Volume comparison chart ── */}
-      <SigmaPanel
+      <PremiumPanel
         title="Volume diário · atual vs anterior"
         action={
           <div className="flex items-center gap-3 text-[10px]">
@@ -280,11 +280,11 @@ export default function AdminAnalyticsTab({ transactions, profiles, products, wi
             <Line type="monotone" dataKey="profit" name="Lucro" stroke="hsl(var(--success))" strokeWidth={1.5} dot={false} isAnimationActive={false} />
           </ComposedChart>
         </ResponsiveContainer>
-      </SigmaPanel>
+      </PremiumPanel>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         {/* ── Heatmap ── */}
-        <SigmaPanel title="Heatmap · dia × hora" className="lg:col-span-2">
+        <PremiumPanel title="Heatmap · dia × hora" className="lg:col-span-2">
           <div className="overflow-x-auto">
             <div className="min-w-[680px]">
               <div className="grid grid-cols-[40px_repeat(24,1fr)] gap-px text-[8.5px] mb-1">
@@ -322,10 +322,10 @@ export default function AdminAnalyticsTab({ transactions, profiles, products, wi
               </div>
             </div>
           </div>
-        </SigmaPanel>
+        </PremiumPanel>
 
         {/* ── Status Mix ── */}
-        <SigmaPanel title="Status das transações">
+        <PremiumPanel title="Status das transações">
           <div className="space-y-2.5">
             {statusMix.map(({ status, count }) => {
               const pct = current.length > 0 ? (count / current.length) * 100 : 0;
@@ -364,12 +364,12 @@ export default function AdminAnalyticsTab({ transactions, profiles, products, wi
             })}
             {statusMix.length === 0 && <p className="text-center text-[11px] text-muted-foreground py-6">Sem dados</p>}
           </div>
-        </SigmaPanel>
+        </PremiumPanel>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         {/* ── Payment methods ── */}
-        <SigmaPanel title="Métodos de pagamento">
+        <PremiumPanel title="Métodos de pagamento">
           <table className="w-full font-mono">
             <thead>
               <tr className="border-b border-border">
@@ -396,10 +396,10 @@ export default function AdminAnalyticsTab({ transactions, profiles, products, wi
               )}
             </tbody>
           </table>
-        </SigmaPanel>
+        </PremiumPanel>
 
         {/* ── Top sellers ── */}
-        <SigmaPanel title="Top sellers · volume">
+        <PremiumPanel title="Top sellers · volume">
           <ResponsiveContainer width="100%" height={280}>
             <BarChart data={topSellers} layout="vertical" margin={{ top: 0, right: 16, bottom: 0, left: 0 }}>
               <CartesianGrid strokeDasharray="2 4" stroke="hsl(var(--border))" horizontal={false} />
@@ -413,11 +413,11 @@ export default function AdminAnalyticsTab({ transactions, profiles, products, wi
               </Bar>
             </BarChart>
           </ResponsiveContainer>
-        </SigmaPanel>
+        </PremiumPanel>
       </div>
 
       {/* ── Funnel KPIs ── */}
-      <SigmaPanel title="Funil & qualidade">
+      <PremiumPanel title="Funil & qualidade">
         <div className="grid grid-cols-2 lg:grid-cols-5 gap-4">
           <FunnelStep label="Tentativas" value={String(totalAttempts)} icon={Activity} />
           <FunnelStep label="Aprovadas" value={String(approved.length)} icon={Target} tone="success" pct={totalAttempts > 0 ? (approved.length / totalAttempts) * 100 : 0} />
@@ -425,7 +425,7 @@ export default function AdminAnalyticsTab({ transactions, profiles, products, wi
           <FunnelStep label="Devolvidas" value={String(refunded)} icon={TrendingDown} tone="warning" pct={totalAttempts > 0 ? (refunded / totalAttempts) * 100 : 0} />
           <FunnelStep label="Repeat Buyer" value={`${repeatRate.toFixed(1)}%`} icon={Users} tone="primary" sub={`${buyerCount} únicos`} />
         </div>
-      </SigmaPanel>
+      </PremiumPanel>
     </div>
   );
 }
