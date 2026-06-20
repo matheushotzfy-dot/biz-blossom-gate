@@ -1,7 +1,7 @@
 import { useMemo, useState } from "react";
 import {
   TrendingUp, TrendingDown, Users, CreditCard, DollarSign, Activity,
-  Layers, Target, Zap, ArrowUpRight, ArrowDownRight, Calendar,
+  Layers, Target, Zap, ArrowUpRight, ArrowDownRight, Calendar, BarChart3,
 } from "lucide-react";
 import {
   AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
@@ -9,6 +9,8 @@ import {
 } from "recharts";
 import type { Tables } from "@/integrations/supabase/types";
 import { cn } from "@/lib/utils";
+import { FinanceiroHero } from "@/components/financeiro/FinanceiroHero";
+import { PremiumPanel, PremiumSegmented } from "./AdminPremium";
 
 interface Props {
   transactions: Tables<"transactions">[];
@@ -45,7 +47,7 @@ function SigmaTooltip({ active, payload, label, fmtCurrency }: any) {
   );
 }
 
-/* ── Big Metric (Sigma style) ── */
+/* ── Big Metric (premium · tactile hover) ── */
 function BigMetric({ label, value, delta, sub, tone = "neutral" }: {
   label: string; value: string; delta?: number; sub?: string;
   tone?: "neutral" | "primary" | "success" | "destructive";
@@ -57,10 +59,16 @@ function BigMetric({ label, value, delta, sub, tone = "neutral" }: {
     success: "text-success",
     destructive: "text-destructive",
   }[tone];
+  const barCls = {
+    neutral: "bg-foreground/40",
+    primary: "bg-primary",
+    success: "bg-success",
+    destructive: "bg-destructive",
+  }[tone];
   return (
-    <div className="border-r border-border last:border-r-0 px-5 py-4 first:pl-0">
+    <div className="group relative bg-card px-4 py-4 sm:px-5 sm:py-5 transition-colors hover:bg-muted/20">
       <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-muted-foreground/70">{label}</p>
-      <p className={cn("mt-2 font-display text-[26px] sm:text-[30px] font-black leading-none tabular-nums tracking-tight", toneCls)}>
+      <p className={cn("mt-2 font-display text-[22px] sm:text-[26px] font-black leading-none tabular-nums tracking-tight break-words", toneCls)}>
         {value}
       </p>
       <div className="mt-2 flex items-center gap-2 text-[10.5px]">
@@ -75,21 +83,7 @@ function BigMetric({ label, value, delta, sub, tone = "neutral" }: {
         )}
         {sub && <span className="text-muted-foreground/75 truncate">{sub}</span>}
       </div>
-    </div>
-  );
-}
-
-/* ── Sigma Panel ── */
-function SigmaPanel({ title, action, children, className }: {
-  title: string; action?: React.ReactNode; children: React.ReactNode; className?: string;
-}) {
-  return (
-    <div className={cn("border border-border bg-card rounded-lg overflow-hidden", className)}>
-      <div className="flex items-center justify-between px-4 py-3 border-b border-border">
-        <h3 className="text-[11px] font-black uppercase tracking-[0.18em] text-foreground/85">{title}</h3>
-        {action}
-      </div>
-      <div className="p-4">{children}</div>
+      <span className={cn("absolute inset-x-0 bottom-0 h-[2px] origin-left scale-x-0 transition-transform duration-500 group-hover:scale-x-100", barCls)} />
     </div>
   );
 }
@@ -219,48 +213,40 @@ export default function AdminAnalyticsTab({ transactions, profiles, products, wi
   }, [current]);
 
   return (
-    <div className="space-y-5">
-      {/* ── Header ── */}
-      <div className="flex flex-wrap items-end justify-between gap-4 pb-4 border-b border-border">
-        <div>
-          <p className="text-[10px] font-bold uppercase tracking-[0.22em] text-muted-foreground">Analytics · Sigma</p>
-          <h1 className="font-display text-[28px] sm:text-[34px] font-black leading-none tracking-tight text-foreground mt-1">
-            Performance da Plataforma
-          </h1>
-          <p className="text-[12px] text-muted-foreground/75 mt-1.5">
-            Métricas comparativas — período atual vs. anterior · {approved.length} transações
-          </p>
-        </div>
-        <div className="flex items-center gap-1 border border-border rounded-md p-0.5 bg-card">
-          {(["7d", "30d", "90d", "ytd"] as Period[]).map(p => (
-            <button
-              key={p}
-              onClick={() => setPeriod(p)}
-              className={cn(
-                "px-3 py-1.5 rounded text-[11px] font-bold uppercase tracking-wider transition-colors",
-                period === p ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground"
-              )}
-            >
-              {p === "ytd" ? "YTD" : p}
-            </button>
-          ))}
-        </div>
+    <div className="space-y-6 animate-fade-in">
+      {/* ── Hero ── */}
+      <FinanceiroHero
+        eyebrow="Admin · Analytics"
+        title="Performance da Plataforma"
+        subtitle={`Métricas comparativas — período atual vs anterior · ${approved.length} transações aprovadas`}
+        status={{ tone: tpvDelta >= 0 ? "success" : "warning", label: tpvDelta >= 0 ? "Crescimento positivo" : "Atenção", pulse: true }}
+        actions={
+          <PremiumSegmented<Period>
+            value={period}
+            onChange={setPeriod}
+            options={[
+              { value: "7d", label: "7d" },
+              { value: "30d", label: "30d" },
+              { value: "90d", label: "90d" },
+              { value: "ytd", label: "YTD" },
+            ]}
+          />
+        }
+      />
+
+      {/* ── Big Numbers Strip · 1px-divider grid ── */}
+      <div className="grid grid-cols-2 gap-px overflow-hidden rounded-2xl border border-border/60 bg-border/60 sm:grid-cols-3 lg:grid-cols-6 animate-fade-in stagger-1">
+        <BigMetric label="Volume" value={fmtCurrency(tpv)} delta={tpvDelta} sub="vs período anterior" tone="primary" />
+        <BigMetric label="Lucro" value={fmtCurrency(profit)} delta={profitDelta} sub="receita líquida" tone="success" />
+        <BigMetric label="Take Rate" value={`${takeRate.toFixed(2)}%`} delta={takeRateDelta} sub="margem efetiva" />
+        <BigMetric label="Ticket Médio" value={fmtCurrency(ticket)} delta={ticketDelta} sub={`${approved.length} vendas`} />
+        <BigMetric label="Conversão" value={`${conv.toFixed(1)}%`} delta={convDelta} sub={`${approved.length}/${current.length}`} />
+        <BigMetric label="Sellers Ativos" value={String(activeSellers)} delta={sellersDelta} sub="únicos no período" />
       </div>
 
-      {/* ── Big Numbers Strip ── */}
-      <div className="border border-border bg-card rounded-lg">
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 px-5 py-3">
-          <BigMetric label="Volume" value={fmtCurrency(tpv)} delta={tpvDelta} sub="vs período anterior" tone="primary" />
-          <BigMetric label="Lucro" value={fmtCurrency(profit)} delta={profitDelta} sub="receita líquida" tone="success" />
-          <BigMetric label="Take Rate" value={`${takeRate.toFixed(2)}%`} delta={takeRateDelta} sub="margem efetiva" />
-          <BigMetric label="Ticket Médio" value={fmtCurrency(ticket)} delta={ticketDelta} sub={`${approved.length} vendas`} />
-          <BigMetric label="Conversão" value={`${conv.toFixed(1)}%`} delta={convDelta} sub={`${approved.length}/${current.length}`} />
-          <BigMetric label="Sellers Ativos" value={String(activeSellers)} delta={sellersDelta} sub="únicos no período" />
-        </div>
-      </div>
 
       {/* ── Volume comparison chart ── */}
-      <SigmaPanel
+      <PremiumPanel
         title="Volume diário · atual vs anterior"
         action={
           <div className="flex items-center gap-3 text-[10px]">
@@ -286,11 +272,11 @@ export default function AdminAnalyticsTab({ transactions, profiles, products, wi
             <Line type="monotone" dataKey="profit" name="Lucro" stroke="hsl(var(--success))" strokeWidth={1.5} dot={false} isAnimationActive={false} />
           </ComposedChart>
         </ResponsiveContainer>
-      </SigmaPanel>
+      </PremiumPanel>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         {/* ── Heatmap ── */}
-        <SigmaPanel title="Heatmap · dia × hora" className="lg:col-span-2">
+        <PremiumPanel title="Heatmap · dia × hora" className="lg:col-span-2">
           <div className="overflow-x-auto">
             <div className="min-w-[680px]">
               <div className="grid grid-cols-[40px_repeat(24,1fr)] gap-px text-[8.5px] mb-1">
@@ -328,10 +314,10 @@ export default function AdminAnalyticsTab({ transactions, profiles, products, wi
               </div>
             </div>
           </div>
-        </SigmaPanel>
+        </PremiumPanel>
 
         {/* ── Status Mix ── */}
-        <SigmaPanel title="Status das transações">
+        <PremiumPanel title="Status das transações">
           <div className="space-y-2.5">
             {statusMix.map(({ status, count }) => {
               const pct = current.length > 0 ? (count / current.length) * 100 : 0;
@@ -370,12 +356,12 @@ export default function AdminAnalyticsTab({ transactions, profiles, products, wi
             })}
             {statusMix.length === 0 && <p className="text-center text-[11px] text-muted-foreground py-6">Sem dados</p>}
           </div>
-        </SigmaPanel>
+        </PremiumPanel>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         {/* ── Payment methods ── */}
-        <SigmaPanel title="Métodos de pagamento">
+        <PremiumPanel title="Métodos de pagamento">
           <table className="w-full font-mono">
             <thead>
               <tr className="border-b border-border">
@@ -402,10 +388,10 @@ export default function AdminAnalyticsTab({ transactions, profiles, products, wi
               )}
             </tbody>
           </table>
-        </SigmaPanel>
+        </PremiumPanel>
 
         {/* ── Top sellers ── */}
-        <SigmaPanel title="Top sellers · volume">
+        <PremiumPanel title="Top sellers · volume">
           <ResponsiveContainer width="100%" height={280}>
             <BarChart data={topSellers} layout="vertical" margin={{ top: 0, right: 16, bottom: 0, left: 0 }}>
               <CartesianGrid strokeDasharray="2 4" stroke="hsl(var(--border))" horizontal={false} />
@@ -419,11 +405,11 @@ export default function AdminAnalyticsTab({ transactions, profiles, products, wi
               </Bar>
             </BarChart>
           </ResponsiveContainer>
-        </SigmaPanel>
+        </PremiumPanel>
       </div>
 
       {/* ── Funnel KPIs ── */}
-      <SigmaPanel title="Funil & qualidade">
+      <PremiumPanel title="Funil & qualidade">
         <div className="grid grid-cols-2 lg:grid-cols-5 gap-4">
           <FunnelStep label="Tentativas" value={String(totalAttempts)} icon={Activity} />
           <FunnelStep label="Aprovadas" value={String(approved.length)} icon={Target} tone="success" pct={totalAttempts > 0 ? (approved.length / totalAttempts) * 100 : 0} />
@@ -431,7 +417,7 @@ export default function AdminAnalyticsTab({ transactions, profiles, products, wi
           <FunnelStep label="Devolvidas" value={String(refunded)} icon={TrendingDown} tone="warning" pct={totalAttempts > 0 ? (refunded / totalAttempts) * 100 : 0} />
           <FunnelStep label="Repeat Buyer" value={`${repeatRate.toFixed(1)}%`} icon={Users} tone="primary" sub={`${buyerCount} únicos`} />
         </div>
-      </SigmaPanel>
+      </PremiumPanel>
     </div>
   );
 }
@@ -449,7 +435,7 @@ function FunnelStep({ label, value, icon: Icon, tone = "neutral", pct, sub }: {
     primary: "text-primary border-primary/30",
   }[tone];
   return (
-    <div className={cn("border rounded-md p-3.5", toneCls)}>
+    <div className={cn("group relative overflow-hidden border rounded-xl p-4 bg-card transition-all duration-300 hover:-translate-y-0.5 hover:border-primary/40 hover:bg-muted/20", toneCls)}>
       <div className="flex items-center justify-between mb-2">
         <span className="text-[9.5px] font-bold uppercase tracking-[0.16em] text-muted-foreground/80">{label}</span>
         <Icon className="h-3.5 w-3.5 opacity-60" />
