@@ -56,39 +56,41 @@ export default function AdminManagersTab({ profiles, onReload }: Props) {
     <div className="space-y-6">
       <StaffManagementTab profiles={profiles} onReload={onReload} role="manager" />
 
-      <div className="border border-border rounded-md bg-card p-4">
-        <div className="flex items-center justify-between mb-3">
-          <h3 className="text-sm font-semibold flex items-center gap-1.5">
-            <Settings className="h-4 w-4 text-emerald-400" /> Taxas mínimas que gerentes podem aplicar
-          </h3>
-          <Button size="sm" onClick={saveLimits} disabled={saving} className="gap-1.5 h-8">
-            <Save className="h-3.5 w-3.5" /> {saving ? "Salvando..." : "Salvar"}
+      <PremiumPanel
+        eyebrow="Governança"
+        title="Limites mínimos de taxas para gerentes"
+        icon={ShieldAlert}
+        action={
+          <Button size="sm" onClick={saveLimits} disabled={saving} className="gap-1.5 h-9">
+            <Save className="h-3.5 w-3.5" /> {saving ? "Salvando..." : "Salvar limites"}
           </Button>
+        }
+      >
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          {[
+            { icon: Percent, label: "% mínima de taxa", value: limits.min_transaction_percentage, suffix: "%", key: "min_transaction_percentage" as const, tone: "primary" },
+            { icon: Banknote, label: "Taxa fixa mínima", value: limits.min_transaction_fixed, suffix: "R$", key: "min_transaction_fixed" as const, tone: "success" },
+            { icon: ArrowDownToLine, label: "Taxa saque mínima", value: limits.min_withdrawal_fee, suffix: "R$", key: "min_withdrawal_fee" as const, tone: "warning" },
+          ].map((f) => (
+            <div key={f.key} className="group relative overflow-hidden rounded-xl border border-border/60 bg-muted/20 p-4 transition-colors hover:border-primary/30">
+              <div className="flex items-center justify-between mb-3">
+                <Label className="text-[10px] font-black uppercase tracking-[0.18em] text-muted-foreground/70">{f.label}</Label>
+                <f.icon className="h-4 w-4 text-muted-foreground/60 group-hover:text-primary transition-colors" />
+              </div>
+              <div className="flex items-baseline gap-2">
+                <span className="text-[11px] font-bold text-muted-foreground">{f.suffix}</span>
+                <Input type="number" step="0.01" min="0" value={f.value}
+                  onChange={(e) => setLimits((s) => ({ ...s, [f.key]: parseFloat(e.target.value) || 0 }))}
+                  className="h-10 text-lg font-display font-black tabular-nums bg-transparent border-0 border-b border-border/40 rounded-none px-0 focus-visible:ring-0 focus-visible:border-primary" />
+              </div>
+            </div>
+          ))}
         </div>
-        <div className="grid grid-cols-3 gap-3">
-          <div>
-            <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">% mínima de taxa</Label>
-            <Input type="number" step="0.01" min="0" value={limits.min_transaction_percentage}
-              onChange={(e) => setLimits((s) => ({ ...s, min_transaction_percentage: parseFloat(e.target.value) || 0 }))}
-              className="h-9 text-sm mt-1 font-mono" />
-          </div>
-          <div>
-            <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">Taxa fixa mínima (R$)</Label>
-            <Input type="number" step="0.01" min="0" value={limits.min_transaction_fixed}
-              onChange={(e) => setLimits((s) => ({ ...s, min_transaction_fixed: parseFloat(e.target.value) || 0 }))}
-              className="h-9 text-sm mt-1 font-mono" />
-          </div>
-          <div>
-            <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">Taxa saque mínima (R$)</Label>
-            <Input type="number" step="0.01" min="0" value={limits.min_withdrawal_fee}
-              onChange={(e) => setLimits((s) => ({ ...s, min_withdrawal_fee: parseFloat(e.target.value) || 0 }))}
-              className="h-9 text-sm mt-1 font-mono" />
-          </div>
-        </div>
-        <p className="text-[10px] text-muted-foreground mt-2">
+        <p className="mt-4 text-[11px] text-muted-foreground/80 flex items-start gap-1.5">
+          <ShieldAlert className="h-3.5 w-3.5 mt-0.5 text-warning shrink-0" />
           Gerentes não conseguem aplicar taxas abaixo destes valores. Admin não tem restrição.
         </p>
-      </div>
+      </PremiumPanel>
     </div>
   );
 }
