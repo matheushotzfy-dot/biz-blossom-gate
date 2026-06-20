@@ -47,7 +47,7 @@ function SigmaTooltip({ active, payload, label, fmtCurrency }: any) {
   );
 }
 
-/* ── Big Metric (Sigma style) ── */
+/* ── Big Metric (premium · tactile hover) ── */
 function BigMetric({ label, value, delta, sub, tone = "neutral" }: {
   label: string; value: string; delta?: number; sub?: string;
   tone?: "neutral" | "primary" | "success" | "destructive";
@@ -59,10 +59,16 @@ function BigMetric({ label, value, delta, sub, tone = "neutral" }: {
     success: "text-success",
     destructive: "text-destructive",
   }[tone];
+  const barCls = {
+    neutral: "bg-foreground/40",
+    primary: "bg-primary",
+    success: "bg-success",
+    destructive: "bg-destructive",
+  }[tone];
   return (
-    <div className="border-r border-border last:border-r-0 px-5 py-4 first:pl-0">
+    <div className="group relative bg-card px-4 py-4 sm:px-5 sm:py-5 transition-colors hover:bg-muted/20">
       <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-muted-foreground/70">{label}</p>
-      <p className={cn("mt-2 font-display text-[26px] sm:text-[30px] font-black leading-none tabular-nums tracking-tight", toneCls)}>
+      <p className={cn("mt-2 font-display text-[22px] sm:text-[26px] font-black leading-none tabular-nums tracking-tight break-words", toneCls)}>
         {value}
       </p>
       <div className="mt-2 flex items-center gap-2 text-[10.5px]">
@@ -77,21 +83,7 @@ function BigMetric({ label, value, delta, sub, tone = "neutral" }: {
         )}
         {sub && <span className="text-muted-foreground/75 truncate">{sub}</span>}
       </div>
-    </div>
-  );
-}
-
-/* ── Sigma Panel ── */
-function SigmaPanel({ title, action, children, className }: {
-  title: string; action?: React.ReactNode; children: React.ReactNode; className?: string;
-}) {
-  return (
-    <div className={cn("border border-border bg-card rounded-lg overflow-hidden", className)}>
-      <div className="flex items-center justify-between px-4 py-3 border-b border-border">
-        <h3 className="text-[11px] font-black uppercase tracking-[0.18em] text-foreground/85">{title}</h3>
-        {action}
-      </div>
-      <div className="p-4">{children}</div>
+      <span className={cn("absolute inset-x-0 bottom-0 h-[2px] origin-left scale-x-0 transition-transform duration-500 group-hover:scale-x-100", barCls)} />
     </div>
   );
 }
