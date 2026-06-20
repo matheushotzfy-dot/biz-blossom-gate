@@ -672,7 +672,7 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
                           {stats.conversionRate.toFixed(1)}%
                         </span>
                       </td>
-                      <td className={premiumTable.td}>
+                      <td className={premiumTable.td} onClick={(e) => e.stopPropagation()}>
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
                             <Button variant="ghost" size="sm" className="h-7 w-7 p-0"><MoreHorizontal className="h-4 w-4" /></Button>
