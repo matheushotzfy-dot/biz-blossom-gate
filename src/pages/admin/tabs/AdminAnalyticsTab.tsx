@@ -1,7 +1,7 @@
 import { useMemo, useState } from "react";
 import {
   TrendingUp, TrendingDown, Users, CreditCard, DollarSign, Activity,
-  Layers, Target, Zap, ArrowUpRight, ArrowDownRight, Calendar,
+  Layers, Target, Zap, ArrowUpRight, ArrowDownRight, Calendar, BarChart3,
 } from "lucide-react";
 import {
   AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
@@ -9,6 +9,8 @@ import {
 } from "recharts";
 import type { Tables } from "@/integrations/supabase/types";
 import { cn } from "@/lib/utils";
+import { FinanceiroHero } from "@/components/financeiro/FinanceiroHero";
+import { PremiumPanel, PremiumSegmented } from "./AdminPremium";
 
 interface Props {
   transactions: Tables<"transactions">[];
