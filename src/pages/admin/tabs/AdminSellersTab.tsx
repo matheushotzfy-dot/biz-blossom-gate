@@ -640,7 +640,11 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
                   const stats = getSellerStats(p.user_id);
                   const frozen = isFrozen(p);
                   return (
-                    <tr key={p.id} className={premiumTable.row}>
+                    <tr
+                      key={p.id}
+                      onClick={() => openUserDetail(p)}
+                      className={cn(premiumTable.row, "cursor-pointer transition-colors hover:bg-muted/30")}
+                    >
                       <td className={premiumTable.td}>
                         <div className="flex items-center gap-2">
                           <div className="h-8 w-8 rounded-xl bg-primary/10 flex items-center justify-center text-xs font-bold text-primary shrink-0">
