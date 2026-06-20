@@ -435,7 +435,7 @@ function FunnelStep({ label, value, icon: Icon, tone = "neutral", pct, sub }: {
     primary: "text-primary border-primary/30",
   }[tone];
   return (
-    <div className={cn("border rounded-md p-3.5", toneCls)}>
+    <div className={cn("group relative overflow-hidden border rounded-xl p-4 bg-card transition-all duration-300 hover:-translate-y-0.5 hover:border-primary/40 hover:bg-muted/20", toneCls)}>
       <div className="flex items-center justify-between mb-2">
         <span className="text-[9.5px] font-bold uppercase tracking-[0.16em] text-muted-foreground/80">{label}</span>
         <Icon className="h-3.5 w-3.5 opacity-60" />
