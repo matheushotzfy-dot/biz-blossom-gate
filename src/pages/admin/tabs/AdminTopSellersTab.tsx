@@ -161,54 +161,108 @@ export default function AdminTopSellersTab({ profiles, transactions, fmtCurrency
       </PremiumMetricGrid>
 
       {ranked.slice(0, 3).length > 0 && (
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          {ranked.slice(0, 3).map((s, i) => {
-            const tone = i === 0 ? "warning" : i === 1 ? "muted-foreground" : "primary";
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:items-end">
+          {/* Re-ordena visualmente: 2º, 1º, 3º para criar o efeito de pódio */}
+          {[1, 0, 2].map((rankIdx) => {
+            const s = ranked[rankIdx];
+            if (!s) return <div key={`empty-${rankIdx}`} className="hidden md:block" />;
+            const i = rankIdx;
             const share = totals.gross > 0 ? (s.gross / totals.gross) * 100 : 0;
+            const isFirst = i === 0;
+            const heightCls = isFirst ? "md:min-h-[360px]" : i === 1 ? "md:min-h-[300px]" : "md:min-h-[280px]";
+            const accent = isFirst ? "warning" : i === 1 ? "muted" : "primary";
             return (
               <button
                 key={s.userId}
                 onClick={() => setExpanded(expanded === s.userId ? null : s.userId)}
                 className={cn(
-                  "group relative overflow-hidden rounded-[24px] border bg-card p-6 text-left transition-all duration-300",
-                  "hover:-translate-y-0.5 hover:border-primary/40 hover:bg-muted/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40",
-                  i === 0 ? "border-warning/30" : "border-border/60"
+                  "group relative overflow-hidden rounded-[28px] border bg-card p-6 text-left transition-all duration-500",
+                  "hover:-translate-y-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40",
+                  heightCls,
+                  isFirst
+                    ? "border-warning/40 shadow-[0_0_0_1px_hsl(var(--warning)/0.15)_inset] md:scale-[1.04]"
+                    : "border-border/60 hover:border-primary/40"
                 )}
               >
+                {/* Halo background */}
+                <div
+                  className="pointer-events-none absolute -top-24 left-1/2 h-56 w-56 -translate-x-1/2 rounded-full opacity-40 blur-3xl transition-opacity duration-500 group-hover:opacity-80"
+                  style={{
+                    background:
+                      accent === "warning"
+                        ? "radial-gradient(circle, hsl(var(--warning)/0.35), transparent 70%)"
+                        : accent === "primary"
+                        ? "radial-gradient(circle, hsl(var(--primary)/0.25), transparent 70%)"
+                        : "radial-gradient(circle, hsl(var(--muted-foreground)/0.18), transparent 70%)",
+                  }}
+                />
+                {/* Top accent bar */}
                 <span className={cn(
-                  "absolute inset-x-0 top-0 h-[2px] origin-left scale-x-0 transition-transform duration-500 group-hover:scale-x-100",
-                  i === 0 ? "bg-warning" : i === 1 ? "bg-muted-foreground/60" : "bg-primary"
+                  "absolute inset-x-0 top-0 h-[3px]",
+                  isFirst ? "bg-gradient-to-r from-transparent via-warning to-transparent" :
+                  i === 1 ? "bg-gradient-to-r from-transparent via-muted-foreground/60 to-transparent" :
+                  "bg-gradient-to-r from-transparent via-primary to-transparent"
                 )} />
-                <div className="absolute -top-16 -right-16 h-40 w-40 rounded-full opacity-0 blur-3xl transition-opacity duration-500 group-hover:opacity-100" style={{ background: i === 0 ? "hsl(var(--warning) / 0.15)" : "hsl(var(--primary) / 0.12)" }} />
 
-                <div className="relative flex items-start justify-between gap-3">
-                  <div className="flex items-center gap-3 min-w-0">
-                    <div className={cn(
-                      "flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl border text-lg font-black transition-transform duration-300 group-hover:scale-105",
-                      i === 0 ? "border-warning/30 bg-warning/10 text-warning" : "border-border/60 bg-muted/30 text-foreground"
-                    )}>
-                      {s.name[0]?.toUpperCase() || "?"}
-                    </div>
-                    <div className="min-w-0">
-                      <p className="truncate text-sm font-black text-foreground">{s.name}</p>
-                      <p className="truncate text-[11px] font-bold text-muted-foreground">{s.email}</p>
-                      <p className="mt-1 text-[9px] font-black uppercase tracking-wider text-muted-foreground/60">{typeBadge(s.sellerType)} · {s.txApproved} vendas</p>
-                    </div>
+                {/* Rank chip flutuante */}
+                <div className={cn(
+                  "absolute right-5 top-5 flex h-12 w-12 items-center justify-center rounded-2xl border-2 backdrop-blur-sm transition-transform duration-300 group-hover:scale-110 group-hover:rotate-6",
+                  isFirst ? "border-warning/50 bg-warning/15" :
+                  i === 1 ? "border-border bg-muted/40" :
+                  "border-primary/30 bg-primary/10"
+                )}>
+                  {rankIcon(i)}
+                </div>
+
+                <div className="relative flex flex-col items-center pt-4 text-center">
+                  <div className={cn(
+                    "flex shrink-0 items-center justify-center rounded-full border-2 font-black transition-all duration-500 group-hover:scale-110",
+                    isFirst ? "h-24 w-24 border-warning/40 bg-warning/10 text-warning text-3xl" :
+                    "h-20 w-20 border-border/60 bg-muted/30 text-foreground text-2xl"
+                  )}>
+                    {s.name[0]?.toUpperCase() || "?"}
                   </div>
-                  <div className="transition-transform duration-300 group-hover:scale-110">{rankIcon(i)}</div>
+                  {isFirst && (
+                    <div className="mt-3 inline-flex items-center gap-1 rounded-full border border-warning/30 bg-warning/10 px-3 py-1 text-[9px] font-black uppercase tracking-[0.18em] text-warning">
+                      <Crown className="h-3 w-3" /> Top Performer
+                    </div>
+                  )}
+                  <p className={cn("mt-3 truncate max-w-full font-black text-foreground", isFirst ? "text-base" : "text-sm")}>{s.name}</p>
+                  <p className="truncate max-w-full text-[10px] font-bold text-muted-foreground">{s.email}</p>
                 </div>
-                <div className="relative mt-6 grid grid-cols-2 gap-3 text-[10px] font-black uppercase tracking-wider">
-                  <div><span className="text-muted-foreground">Bruto</span><p className="mt-1 font-display text-base text-primary tabular-nums">{fmtCurrency(s.gross)}</p></div>
-                  <div><span className="text-muted-foreground">Líquido</span><p className="mt-1 font-display text-base text-info tabular-nums">{fmtCurrency(s.net)}</p></div>
-                  <div><span className="text-muted-foreground">Taxas</span><p className="mt-1 text-sm text-success tabular-nums">{fmtCurrency(s.fees)}</p></div>
-                  <div><span className="text-muted-foreground">Ticket</span><p className="mt-1 text-sm text-foreground tabular-nums">{fmtCurrency(s.ticketAvg)}</p></div>
+
+                <div className="relative mt-5 grid grid-cols-2 gap-3 border-t border-border/40 pt-4 text-center">
+                  <div>
+                    <p className="text-[9px] font-black uppercase tracking-wider text-muted-foreground">Bruto</p>
+                    <p className={cn("mt-1 font-display font-black tabular-nums", isFirst ? "text-xl text-warning" : "text-base text-primary")}>{fmtCurrency(s.gross)}</p>
+                  </div>
+                  <div>
+                    <p className="text-[9px] font-black uppercase tracking-wider text-muted-foreground">Vendas</p>
+                    <p className={cn("mt-1 font-display font-black tabular-nums text-foreground", isFirst ? "text-xl" : "text-base")}>{s.txApproved}</p>
+                  </div>
+                  <div>
+                    <p className="text-[9px] font-black uppercase tracking-wider text-muted-foreground">Líquido</p>
+                    <p className="mt-1 text-sm font-bold text-info tabular-nums">{fmtCurrency(s.net)}</p>
+                  </div>
+                  <div>
+                    <p className="text-[9px] font-black uppercase tracking-wider text-muted-foreground">Ticket</p>
+                    <p className="mt-1 text-sm font-bold text-foreground tabular-nums">{fmtCurrency(s.ticketAvg)}</p>
+                  </div>
                 </div>
+
                 <div className="relative mt-4">
-                  <div className="mb-1 flex justify-between text-[9px] font-black uppercase tracking-wider text-muted-foreground"><span>Share TPV</span><span>{share.toFixed(1)}%</span></div>
-                  <div className="h-1.5 overflow-hidden rounded-full bg-muted/50">
+                  <div className="mb-1 flex justify-between text-[9px] font-black uppercase tracking-wider text-muted-foreground">
+                    <span>Share TPV</span><span className={isFirst ? "text-warning" : "text-foreground"}>{share.toFixed(1)}%</span>
+                  </div>
+                  <div className="h-2 overflow-hidden rounded-full bg-muted/40">
                     <div
-                      className={cn("h-full rounded-full transition-all duration-700", i === 0 ? "bg-gradient-to-r from-warning to-warning/60" : "bg-gradient-to-r from-primary to-primary/60")}
-                      style={{ width: `${Math.max(share, 2)}%` }}
+                      className={cn(
+                        "h-full rounded-full transition-all duration-1000",
+                        isFirst ? "bg-gradient-to-r from-warning via-warning to-warning/60" :
+                        i === 1 ? "bg-gradient-to-r from-muted-foreground to-muted-foreground/50" :
+                        "bg-gradient-to-r from-primary to-primary/60"
+                      )}
+                      style={{ width: `${Math.max(share, 3)}%` }}
                     />
                   </div>
                 </div>
