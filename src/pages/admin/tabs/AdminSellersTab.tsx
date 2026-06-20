@@ -495,19 +495,18 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
         status={{ tone: kycPendingProfiles.length > 0 ? "warning" : "success", label: `${profiles.length} cadastrados`, pulse: kycPendingProfiles.length > 0 }}
       />
 
-      <FinanceiroKpiGrid cols={4}>
-        <FinanceiroKpi icon={Users} label="Total" value={String(profiles.length)} sub="Base ativa" tone="neutral" />
-        <FinanceiroKpi icon={FileText} label="KYC Pendente" value={String(kycPendingProfiles.length)} sub="Aguardando aprovação" tone="warning" />
-        <FinanceiroKpi icon={Shield} label="Black" value={String(blackCount)} sub="Tier high-volume" tone="neutral" />
-        <FinanceiroKpi icon={CheckCircle2} label="White" value={String(whiteCount)} sub="Tier regulado" tone="info" />
-      </FinanceiroKpiGrid>
+      {/* ── KPI strip · clickable filters ── */}
+      <div className="grid grid-cols-2 gap-px overflow-hidden rounded-2xl border border-border/60 bg-border/60 sm:grid-cols-4 xl:grid-cols-8 animate-fade-in stagger-1">
+        <SellerKpi icon={Users}          label="Total"          value={String(profiles.length)}            sub="Base ativa"          tone="neutral"     active={sellerFilter === "all"}   onClick={() => setSellerFilter("all")} />
+        <SellerKpi icon={FileText}       label="KYC Pendente"   value={String(kycPendingProfiles.length)}  sub="Aguardando análise"  tone="warning"     active={sellerFilter === "kyc"}   onClick={() => setSellerFilter("kyc")} />
+        <SellerKpi icon={Shield}         label="Black"          value={String(blackCount)}                 sub="High-volume"          tone="neutral"     active={sellerFilter === "black"} onClick={() => setSellerFilter("black")} />
+        <SellerKpi icon={CheckCircle2}   label="White"          value={String(whiteCount)}                 sub="Tier regulado"        tone="info"        active={sellerFilter === "white"} onClick={() => setSellerFilter("white")} />
+        <SellerKpi icon={AlertTriangle}  label="Sem Tier"       value={String(unsetCount)}                 sub="Não classificados"    tone="warning"     active={sellerFilter === "unset"} onClick={() => setSellerFilter("unset")} />
+        <SellerKpi icon={Snowflake}      label="Congelados"     value={String(frozenCount)}                sub="Saldo bloqueado"      tone="destructive" />
+        <SellerKpi icon={TrendingUp}     label="Transações"     value={String(transactions.length)}        sub="Total registrado"     tone="primary" />
+        <SellerKpi icon={ArrowDownToLine} label="Saques"        value={String(withdrawals.length)}         sub="Total registrado"     tone="neutral" />
+      </div>
 
-      <FinanceiroKpiGrid cols={4}>
-        <FinanceiroKpi icon={AlertTriangle} label="Sem Tier" value={String(unsetCount)} sub="Não classificados" tone="warning" />
-        <FinanceiroKpi icon={Snowflake} label="Congelados" value={String(frozenCount)} sub="Saldo bloqueado" tone="destructive" />
-        <FinanceiroKpi icon={TrendingUp} label="Transações" value={String(transactions.length)} sub="Total registrado" tone="primary" />
-        <FinanceiroKpi icon={ArrowDownToLine} label="Saques" value={String(withdrawals.length)} sub="Total registrado" tone="neutral" />
-      </FinanceiroKpiGrid>
 
       {/* ── KYC Alert Banner ── */}
       {kycPendingProfiles.length > 0 && sellerFilter !== "kyc" && (
