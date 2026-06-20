@@ -1553,3 +1553,51 @@ function MiniKpi({ label, value, tone = "neutral" }: { label: string; value: str
     </div>
   );
 }
+
+/* ── SellerKpi: 1px-divider clickable KPI in seller hero strip ── */
+type SellerKpiTone = "neutral" | "primary" | "success" | "warning" | "info" | "destructive";
+function SellerKpi({ icon: Icon, label, value, sub, tone = "neutral", active, onClick }: {
+  icon: any; label: string; value: string; sub?: string; tone?: SellerKpiTone;
+  active?: boolean; onClick?: () => void;
+}) {
+  const valueCls: Record<SellerKpiTone, string> = {
+    neutral: "text-foreground", primary: "text-primary", success: "text-success",
+    warning: "text-warning", info: "text-info", destructive: "text-destructive",
+  };
+  const iconBg: Record<SellerKpiTone, string> = {
+    neutral: "bg-secondary text-muted-foreground", primary: "bg-primary/10 text-primary",
+    success: "bg-success/10 text-success", warning: "bg-warning/10 text-warning",
+    info: "bg-info/10 text-info", destructive: "bg-destructive/10 text-destructive",
+  };
+  const barCls: Record<SellerKpiTone, string> = {
+    neutral: "bg-foreground/40", primary: "bg-primary", success: "bg-success",
+    warning: "bg-warning", info: "bg-info", destructive: "bg-destructive",
+  };
+  const isInteractive = typeof onClick === "function";
+  const Tag: any = isInteractive ? "button" : "div";
+  return (
+    <Tag
+      type={isInteractive ? "button" : undefined}
+      onClick={onClick}
+      className={cn(
+        "group relative w-full bg-card px-3 py-3.5 sm:px-4 sm:py-4 text-left flex flex-col gap-2 transition-colors",
+        isInteractive && "cursor-pointer hover:bg-muted/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40",
+        active && "bg-muted/30",
+      )}
+    >
+      <div className="flex items-center justify-between gap-2">
+        <span className="text-[9px] sm:text-[10px] font-bold uppercase tracking-[0.16em] text-muted-foreground/70 leading-tight">{label}</span>
+        <div className={cn("h-6 w-6 sm:h-7 sm:w-7 rounded-md flex items-center justify-center shrink-0 transition-transform duration-300 group-hover:scale-110", iconBg[tone])}>
+          <Icon className="h-3 w-3 sm:h-3.5 sm:w-3.5" strokeWidth={2.25} />
+        </div>
+      </div>
+      <div className={cn("font-display text-[20px] sm:text-[24px] font-black leading-none tabular-nums tracking-tight", valueCls[tone])}>{value}</div>
+      {sub && <div className="text-[10px] sm:text-[11px] text-muted-foreground/70 font-medium truncate">{sub}</div>}
+      <span className={cn(
+        "absolute inset-x-0 bottom-0 h-[2px] origin-left transition-transform duration-500",
+        active ? "scale-x-100" : "scale-x-0 group-hover:scale-x-100",
+        barCls[tone],
+      )} />
+    </Tag>
+  );
+}
