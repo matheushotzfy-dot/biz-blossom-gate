@@ -592,7 +592,7 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
         <PremiumPanel title={`Fila de Aprovação KYC`} eyebrow={`${filtered.length} pendentes`} icon={FileText}>
           <div className="space-y-3">
             {filtered.map(p => (
-              <div key={p.id} className="rounded-xl border border-border bg-card p-4 flex items-center gap-4">
+              <div key={p.id} className="group rounded-xl border border-border bg-card p-4 flex items-center gap-4 transition-all duration-300 hover:-translate-y-0.5 hover:border-primary/40 hover:bg-muted/20">
                 <div className="h-12 w-12 rounded-xl bg-primary/10 flex items-center justify-center text-sm font-bold text-primary">
                   {(p.full_name || "U")[0].toUpperCase()}
                 </div>
