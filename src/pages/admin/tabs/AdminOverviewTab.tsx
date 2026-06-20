@@ -307,98 +307,68 @@ export default function AdminOverviewTab({
      ADMIN VIEW
      ═════════════════════════════════════════════════════════════ */
   return (
-    <div className="space-y-5 animate-fade-in">
-      {/* ── Command Summary ── */}
-      <section className="overflow-hidden rounded-xl border border-primary/30 bg-card">
-        <div className="flex flex-col gap-3 border-b border-primary/20 bg-primary px-5 py-4 text-primary-foreground lg:flex-row lg:items-center lg:justify-between">
-          <div className="min-w-0">
-            <div className="flex flex-wrap items-center gap-2">
-              <span className="inline-flex items-center gap-2 rounded-md border border-primary-foreground/20 bg-primary-foreground/10 px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.18em]">
-                <span className="h-1.5 w-1.5 rounded-full bg-success animate-pulse" />
-                Ao vivo
-              </span>
-              <span className="inline-flex items-center gap-2 rounded-md border border-primary-foreground/20 bg-primary-foreground/10 px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.18em]">
-                <CalendarDays className="h-3.5 w-3.5" />
-                {rangeLabel}
-              </span>
-            </div>
-            <h1 className="mt-3 font-display text-[34px] font-black leading-none tracking-tight sm:text-[44px] lg:text-[54px]">
-              Admin Command Center
-            </h1>
-          </div>
-          <div className="grid grid-cols-2 gap-px overflow-hidden rounded-lg border border-primary-foreground/20 bg-primary-foreground/20 text-primary-foreground sm:min-w-[360px]">
-            <CommandMini label="Transações" value={String(filteredTx.length)} />
-            <CommandMini label="Aprovadas" value={String(filteredApproved.length)} />
-            <CommandMini label="Conversão" value={`${conversionRate}%`} />
-            <CommandMini label="Chargeback" value={`${chargebackRate.toFixed(2)}%`} />
-          </div>
+    <div className="space-y-6 animate-fade-in">
+      {/* ── Hero (matches seller Financeiro aesthetic) ── */}
+      <FinanceiroHero
+        eyebrow="Admin · Command Center"
+        title="Visão Geral"
+        subtitle={`Operação em tempo real · ${rangeLabel}`}
+        status={{ tone: chargebackAlert ? "destructive" : "success", label: chargebackAlert ? "Alerta de risco" : "Tudo sob controle", pulse: true }}
+      />
+
+      {/* ── Hero KPI strip · 1px divider grid ── */}
+      <div className="grid grid-cols-2 gap-px overflow-hidden rounded-2xl border border-border/60 bg-border/60 lg:grid-cols-6">
+        <HeroBigStat label="Volume no período" value={fmtCurrency(totalVolume)} sub={`${filteredApproved.length}/${filteredTx.length} tx`} tone="primary" wide />
+        <HeroBigStat label="Lucro líquido" value={fmtCurrency(takeRateTotal)} sub={`Take ${takeRatePct}%`} tone="success" />
+        <HeroBigStat label="Ticket médio" value={fmtCurrency(ticketMedio)} sub="por venda" tone="info" />
+        <HeroBigStat label="Conversão" value={`${conversionRate}%`} sub="aprovação geral" tone="warning" />
+        <HeroBigStat label="Chargeback" value={`${chargebackRate.toFixed(2)}%`} sub="meta < 1%" tone={chargebackAlert ? "destructive" : "neutral"} />
+      </div>
+
+      {/* ── Pulse chart ── */}
+      <PremiumPanel
+        title="Pulso de Volume"
+        eyebrow={chartPeriod === "7d" ? "Últimos 7 dias" : "Últimos 30 dias"}
+        icon={Activity}
+        action={
+          <PremiumSegmented<"7d" | "30d">
+            value={chartPeriod}
+            onChange={setChartPeriod}
+            options={[{ value: "7d", label: "7d" }, { value: "30d", label: "30d" }]}
+          />
+        }
+      >
+        <div className="h-[180px]">
+          <ResponsiveContainer width="100%" height="100%">
+            <AreaChart data={chartData} margin={{ top: 4, right: 4, bottom: 0, left: -8 }}>
+              <defs>
+                <linearGradient id="heroSpark" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor="hsl(var(--primary))" stopOpacity={0.35} />
+                  <stop offset="100%" stopColor="hsl(var(--primary))" stopOpacity={0} />
+                </linearGradient>
+              </defs>
+              <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border) / 0.5)" vertical={false} />
+              <XAxis dataKey="name" stroke="hsl(var(--muted-foreground))" fontSize={10} tickLine={false} axisLine={false} />
+              <YAxis stroke="hsl(var(--muted-foreground))" fontSize={10} tickLine={false} axisLine={false}
+                     tickFormatter={(v) => v >= 1000 ? `${(v / 1000).toFixed(0)}K` : v} />
+              <Tooltip cursor={{ stroke: "hsl(var(--border))" }} content={<ChartTip fmtCurrency={fmtCurrency} />} />
+              <Area type="monotone" dataKey="tpv" name="TPV" stroke="hsl(var(--primary))" strokeWidth={2.5}
+                    fill="url(#heroSpark)" dot={false} isAnimationActive={false} />
+            </AreaChart>
+          </ResponsiveContainer>
         </div>
+      </PremiumPanel>
 
-        <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1.15fr)_minmax(420px,0.85fr)]">
-          <div className="border-b border-border/60 p-5 lg:border-b-0 lg:border-r lg:p-7">
-            <p className="text-[10px] font-black uppercase tracking-[0.24em] text-muted-foreground/80">
-              Volume movimentado no período
-            </p>
-            <div className="mt-4 flex flex-col gap-4 xl:flex-row xl:items-end xl:justify-between">
-              <div>
-                <h2 className="font-display text-[48px] font-black leading-[0.9] tracking-tight text-foreground tabular-nums sm:text-[64px] lg:text-[72px]">
-                  {fmtCurrency(totalVolume)}
-                </h2>
-                <p className="mt-3 text-[12px] font-bold text-muted-foreground">
-                  <span className="text-success">{filteredApproved.length}</span> aprovadas de <span className="text-foreground">{filteredTx.length}</span> transações
-                </p>
-              </div>
-              <div className="grid min-w-[280px] grid-cols-3 gap-px overflow-hidden rounded-lg border border-border/60 bg-border/60">
-                <HeroStat label="Lucro" value={fmtCurrency(takeRateTotal)} tone="success" />
-                <HeroStat label="Take" value={`${takeRatePct}%`} tone="primary" />
-                <HeroStat label="Ticket" value={fmtCurrency(ticketMedio)} tone="info" />
-              </div>
-            </div>
-          </div>
-
-          <div className="p-5 lg:p-7">
-            <div className="mb-4 flex items-center justify-between gap-3">
-              <p className="text-[10px] font-black uppercase tracking-[0.24em] text-muted-foreground/80">
-                Pulso de volume · 7 dias
-              </p>
-              <span className="font-display text-base font-black text-foreground tabular-nums">
-                {fmtCurrency(tpvMonth)}
-              </span>
-            </div>
-            <div className="h-[150px] border-y border-border/50 py-3">
-              <ResponsiveContainer width="100%" height="100%">
-                <AreaChart data={chartData} margin={{ top: 4, right: 4, bottom: 0, left: 0 }}>
-                  <defs>
-                    <linearGradient id="heroSpark" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="0%" stopColor="hsl(var(--primary))" stopOpacity={0.32} />
-                      <stop offset="100%" stopColor="hsl(var(--primary))" stopOpacity={0} />
-                    </linearGradient>
-                  </defs>
-                  <Area type="monotone" dataKey="tpv" stroke="hsl(var(--primary))" strokeWidth={2.5}
-                        fill="url(#heroSpark)" dot={false} isAnimationActive={false} />
-                </AreaChart>
-              </ResponsiveContainer>
-            </div>
-            <div className="mt-4 grid grid-cols-2 gap-2">
-              <PulseStat icon={Activity} label="Conversão" value={`${conversionRate}%`} tone="success" />
-              <PulseStat icon={CheckCircle2} label="Aprovadas" value={String(filteredApproved.length)} tone="primary" />
-              <PulseStat icon={ShieldAlert} label="Chargeback" value={`${chargebackRate.toFixed(2)}%`} tone={chargebackAlert ? "destructive" : "neutral"} />
-              <PulseStat icon={Users} label="Sellers ativos" value={String(activeSellersToday)} tone="info" />
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* ── KPI Grid ── */}
+      {/* ── KPI Grid (clickable, with tactile hover) ── */}
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
-        <DashboardKpi icon={Flame}        label="Movimentado Hoje"  value={fmtCurrency(tpvToday)}        sub={`${todayTx.length} vendas aprovadas`} tone={todayTx.length > 0 ? "success" : "neutral"} />
-        <DashboardKpi icon={DollarSign}   label="Lucro Hoje"         value={fmtCurrency(takeRateToday)}   sub={`${activeSellersToday} sellers venderam`} tone="primary" />
-        <DashboardKpi icon={Hourglass}    label="Saques Pendentes"   value={fmtCurrency(pendingWdAmount)} sub={`${pendingWd.length} solicitações · ${highValueWd.length} altos`} tone={pendingWd.length > 5 ? "warning" : "neutral"} />
-        <DashboardKpi icon={UserPlus}     label="Novos Usuários"     value={String(newUsersInRange.length)} sub="cadastros no período" tone="info" />
-        <DashboardKpi icon={TrendingUp}   label="Lucro · 30 dias"    value={fmtCurrency(profit30d)}       sub={`${last30Tx.length} vendas · take ${takeRatePct}%`} tone="success" />
-        <DashboardKpi icon={AlertCircle}  label="MEDs Pendentes"     value={String(pendingMeds.length)}   sub={pendingMeds.length > 0 ? `${fmtCurrency(pendingMedsAmount)} em disputa` : "Nenhum em aberto"} tone={pendingMeds.length > 0 ? "destructive" : "neutral"} />
-        <DashboardKpi icon={UserCheck}    label="Aprovações KYC"     value={String(kycPending.length)}    sub="aguardando análise" tone={kycPending.length > 0 ? "warning" : "neutral"} />
-        <DashboardKpi icon={Lock}         label="Saldo Retido"       value={fmtCurrency(totalRetained)}   sub="aguardando liberação" tone="warning" />
+        <DashboardKpi icon={Flame}        label="Movimentado Hoje"  value={fmtCurrency(tpvToday)}        sub={`${todayTx.length} vendas aprovadas`} tone={todayTx.length > 0 ? "success" : "neutral"} onClick={() => onNavigate?.("transactions")} />
+        <DashboardKpi icon={DollarSign}   label="Lucro Hoje"         value={fmtCurrency(takeRateToday)}   sub={`${activeSellersToday} sellers venderam`} tone="primary" onClick={() => onNavigate?.("transactions")} />
+        <DashboardKpi icon={Hourglass}    label="Saques Pendentes"   value={fmtCurrency(pendingWdAmount)} sub={`${pendingWd.length} solicitações · ${highValueWd.length} altos`} tone={pendingWd.length > 5 ? "warning" : "neutral"} onClick={() => onNavigate?.("withdrawals")} />
+        <DashboardKpi icon={UserPlus}     label="Novos Usuários"     value={String(newUsersInRange.length)} sub="cadastros no período" tone="info" onClick={() => onNavigate?.("sellers")} />
+        <DashboardKpi icon={TrendingUp}   label="Lucro · 30 dias"    value={fmtCurrency(profit30d)}       sub={`${last30Tx.length} vendas · take ${takeRatePct}%`} tone="success" onClick={() => onNavigate?.("transactions")} />
+        <DashboardKpi icon={AlertCircle}  label="MEDs Pendentes"     value={String(pendingMeds.length)}   sub={pendingMeds.length > 0 ? `${fmtCurrency(pendingMedsAmount)} em disputa` : "Nenhum em aberto"} tone={pendingMeds.length > 0 ? "destructive" : "neutral"} onClick={() => onNavigate?.("medpix")} />
+        <DashboardKpi icon={UserCheck}    label="Aprovações KYC"     value={String(kycPending.length)}    sub="aguardando análise" tone={kycPending.length > 0 ? "warning" : "neutral"} onClick={() => onNavigate?.("sellers")} />
+        <DashboardKpi icon={Lock}         label="Saldo Retido"       value={fmtCurrency(totalRetained)}   sub="aguardando liberação" tone="warning" onClick={() => onNavigate?.("transactions")} />
       </div>
 
       {/* ── Hourly + Methods ── */}
@@ -784,6 +754,28 @@ function HeroStat({ label, value, tone }: { label: string; value: string; tone: 
   );
 }
 
+function HeroBigStat({ label, value, sub, tone, wide }: {
+  label: string; value: string; sub?: string; tone: Tone; wide?: boolean;
+}) {
+  return (
+    <div className={cn(
+      "group relative bg-card p-4 sm:p-5 transition-colors hover:bg-muted/20",
+      wide && "lg:col-span-2",
+    )}>
+      <p className="text-[9.5px] font-black uppercase tracking-[0.22em] text-muted-foreground/70">{label}</p>
+      <p className={cn(
+        "mt-2.5 font-display font-black leading-none tracking-tight tabular-nums break-words",
+        wide ? "text-[28px] sm:text-[36px]" : "text-[20px] sm:text-[24px]",
+        TONE_TEXT[tone],
+      )}>
+        {value}
+      </p>
+      {sub && <p className="mt-2 text-[10.5px] font-bold text-muted-foreground/75 truncate">{sub}</p>}
+      <span className={cn("absolute inset-x-0 bottom-0 h-[2px] origin-left scale-x-0 transition-transform duration-500 group-hover:scale-x-100", TONE_BAR[tone])} />
+    </div>
+  );
+}
+
 function PulseStat({ icon: Icon, label, value, tone }: {
   icon: any; label: string; value: string; tone: Tone;
 }) {
@@ -807,23 +799,36 @@ function CommandMini({ label, value }: { label: string; value: string }) {
   );
 }
 
-function DashboardKpi({ icon: Icon, label, value, sub, tone }: {
-  icon: any; label: string; value: string; sub?: string; tone: Tone;
+function DashboardKpi({ icon: Icon, label, value, sub, tone, onClick }: {
+  icon: any; label: string; value: string; sub?: string; tone: Tone; onClick?: () => void;
 }) {
+  const isInteractive = typeof onClick === "function";
+  const Tag: any = isInteractive ? "button" : "div";
   return (
-    <div className="admin-card group relative overflow-hidden rounded-xl border border-border/70 bg-card p-4 hover:border-primary/35">
+    <Tag
+      type={isInteractive ? "button" : undefined}
+      onClick={onClick}
+      className={cn(
+        "admin-card group relative overflow-hidden rounded-xl border border-border/70 bg-card p-4 text-left transition-all duration-300",
+        isInteractive && "cursor-pointer hover:-translate-y-0.5 hover:border-primary/40 hover:bg-muted/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40",
+      )}
+    >
       <div className="relative z-10 flex items-start justify-between gap-3">
         <div className="min-w-0">
           <p className="text-[9px] font-black uppercase tracking-[0.2em] text-muted-foreground/70">{label}</p>
           <p className={cn("mt-3 break-words font-display text-[25px] font-black leading-none tracking-tight tabular-nums", TONE_TEXT[tone])}>{value}</p>
           {sub && <p className="mt-2 truncate text-[11px] font-bold text-muted-foreground/75">{sub}</p>}
         </div>
-        <div className={cn("flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border", TONE_PILL[tone])}>
+        <div className={cn("flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border transition-transform duration-300 group-hover:scale-110 group-hover:rotate-3", TONE_PILL[tone])}>
           <Icon className="h-5 w-5" strokeWidth={2.35} />
         </div>
       </div>
-      <div className={cn("absolute inset-x-0 bottom-0 h-0.5", TONE_BAR[tone])} />
-    </div>
+      <Icon className="pointer-events-none absolute -bottom-6 -right-4 h-24 w-24 rotate-[-12deg] text-foreground/[0.03] transition-transform duration-500 group-hover:scale-110" strokeWidth={1.4} />
+      <span className={cn("absolute inset-x-0 bottom-0 h-[2px] origin-left scale-x-0 transition-transform duration-500 group-hover:scale-x-100", TONE_BAR[tone])} />
+      {isInteractive && (
+        <ArrowUpRight className="absolute right-3 top-3 h-3.5 w-3.5 text-muted-foreground/40 opacity-0 transition-all duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 group-hover:opacity-100" />
+      )}
+    </Tag>
   );
 }
 
