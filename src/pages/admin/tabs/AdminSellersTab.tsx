@@ -495,19 +495,18 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
         status={{ tone: kycPendingProfiles.length > 0 ? "warning" : "success", label: `${profiles.length} cadastrados`, pulse: kycPendingProfiles.length > 0 }}
       />
 
-      <FinanceiroKpiGrid cols={4}>
-        <FinanceiroKpi icon={Users} label="Total" value={String(profiles.length)} sub="Base ativa" tone="neutral" />
-        <FinanceiroKpi icon={FileText} label="KYC Pendente" value={String(kycPendingProfiles.length)} sub="Aguardando aprovação" tone="warning" />
-        <FinanceiroKpi icon={Shield} label="Black" value={String(blackCount)} sub="Tier high-volume" tone="neutral" />
-        <FinanceiroKpi icon={CheckCircle2} label="White" value={String(whiteCount)} sub="Tier regulado" tone="info" />
-      </FinanceiroKpiGrid>
+      {/* ── KPI strip · clickable filters ── */}
+      <div className="grid grid-cols-2 gap-px overflow-hidden rounded-2xl border border-border/60 bg-border/60 sm:grid-cols-4 xl:grid-cols-8 animate-fade-in stagger-1">
+        <SellerKpi icon={Users}          label="Total"          value={String(profiles.length)}            sub="Base ativa"          tone="neutral"     active={sellerFilter === "all"}   onClick={() => setSellerFilter("all")} />
+        <SellerKpi icon={FileText}       label="KYC Pendente"   value={String(kycPendingProfiles.length)}  sub="Aguardando análise"  tone="warning"     active={sellerFilter === "kyc"}   onClick={() => setSellerFilter("kyc")} />
+        <SellerKpi icon={Shield}         label="Black"          value={String(blackCount)}                 sub="High-volume"          tone="neutral"     active={sellerFilter === "black"} onClick={() => setSellerFilter("black")} />
+        <SellerKpi icon={CheckCircle2}   label="White"          value={String(whiteCount)}                 sub="Tier regulado"        tone="info"        active={sellerFilter === "white"} onClick={() => setSellerFilter("white")} />
+        <SellerKpi icon={AlertTriangle}  label="Sem Tier"       value={String(unsetCount)}                 sub="Não classificados"    tone="warning"     active={sellerFilter === "unset"} onClick={() => setSellerFilter("unset")} />
+        <SellerKpi icon={Snowflake}      label="Congelados"     value={String(frozenCount)}                sub="Saldo bloqueado"      tone="destructive" />
+        <SellerKpi icon={TrendingUp}     label="Transações"     value={String(transactions.length)}        sub="Total registrado"     tone="primary" />
+        <SellerKpi icon={ArrowDownToLine} label="Saques"        value={String(withdrawals.length)}         sub="Total registrado"     tone="neutral" />
+      </div>
 
-      <FinanceiroKpiGrid cols={4}>
-        <FinanceiroKpi icon={AlertTriangle} label="Sem Tier" value={String(unsetCount)} sub="Não classificados" tone="warning" />
-        <FinanceiroKpi icon={Snowflake} label="Congelados" value={String(frozenCount)} sub="Saldo bloqueado" tone="destructive" />
-        <FinanceiroKpi icon={TrendingUp} label="Transações" value={String(transactions.length)} sub="Total registrado" tone="primary" />
-        <FinanceiroKpi icon={ArrowDownToLine} label="Saques" value={String(withdrawals.length)} sub="Total registrado" tone="neutral" />
-      </FinanceiroKpiGrid>
 
       {/* ── KYC Alert Banner ── */}
       {kycPendingProfiles.length > 0 && sellerFilter !== "kyc" && (
@@ -593,7 +592,7 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
         <PremiumPanel title={`Fila de Aprovação KYC`} eyebrow={`${filtered.length} pendentes`} icon={FileText}>
           <div className="space-y-3">
             {filtered.map(p => (
-              <div key={p.id} className="rounded-xl border border-border bg-card p-4 flex items-center gap-4">
+              <div key={p.id} className="group rounded-xl border border-border bg-card p-4 flex items-center gap-4 transition-all duration-300 hover:-translate-y-0.5 hover:border-primary/40 hover:bg-muted/20">
                 <div className="h-12 w-12 rounded-xl bg-primary/10 flex items-center justify-center text-sm font-bold text-primary">
                   {(p.full_name || "U")[0].toUpperCase()}
                 </div>
@@ -641,7 +640,11 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
                   const stats = getSellerStats(p.user_id);
                   const frozen = isFrozen(p);
                   return (
-                    <tr key={p.id} className={premiumTable.row}>
+                    <tr
+                      key={p.id}
+                      onClick={() => openUserDetail(p)}
+                      className={cn(premiumTable.row, "cursor-pointer transition-colors hover:bg-muted/30")}
+                    >
                       <td className={premiumTable.td}>
                         <div className="flex items-center gap-2">
                           <div className="h-8 w-8 rounded-xl bg-primary/10 flex items-center justify-center text-xs font-bold text-primary shrink-0">
@@ -669,7 +672,7 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
                           {stats.conversionRate.toFixed(1)}%
                         </span>
                       </td>
-                      <td className={premiumTable.td}>
+                      <td className={premiumTable.td} onClick={(e) => e.stopPropagation()}>
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
                             <Button variant="ghost" size="sm" className="h-7 w-7 p-0"><MoreHorizontal className="h-4 w-4" /></Button>
@@ -1552,5 +1555,53 @@ function MiniKpi({ label, value, tone = "neutral" }: { label: string; value: str
       <p className="text-[10px] font-black uppercase tracking-wider text-muted-foreground">{label}</p>
       <p className={`font-display text-lg font-black mt-1 tabular-nums ${valueCls[tone]}`}>{value}</p>
     </div>
+  );
+}
+
+/* ── SellerKpi: 1px-divider clickable KPI in seller hero strip ── */
+type SellerKpiTone = "neutral" | "primary" | "success" | "warning" | "info" | "destructive";
+function SellerKpi({ icon: Icon, label, value, sub, tone = "neutral", active, onClick }: {
+  icon: any; label: string; value: string; sub?: string; tone?: SellerKpiTone;
+  active?: boolean; onClick?: () => void;
+}) {
+  const valueCls: Record<SellerKpiTone, string> = {
+    neutral: "text-foreground", primary: "text-primary", success: "text-success",
+    warning: "text-warning", info: "text-info", destructive: "text-destructive",
+  };
+  const iconBg: Record<SellerKpiTone, string> = {
+    neutral: "bg-secondary text-muted-foreground", primary: "bg-primary/10 text-primary",
+    success: "bg-success/10 text-success", warning: "bg-warning/10 text-warning",
+    info: "bg-info/10 text-info", destructive: "bg-destructive/10 text-destructive",
+  };
+  const barCls: Record<SellerKpiTone, string> = {
+    neutral: "bg-foreground/40", primary: "bg-primary", success: "bg-success",
+    warning: "bg-warning", info: "bg-info", destructive: "bg-destructive",
+  };
+  const isInteractive = typeof onClick === "function";
+  const Tag: any = isInteractive ? "button" : "div";
+  return (
+    <Tag
+      type={isInteractive ? "button" : undefined}
+      onClick={onClick}
+      className={cn(
+        "group relative w-full bg-card px-3 py-3.5 sm:px-4 sm:py-4 text-left flex flex-col gap-2 transition-colors",
+        isInteractive && "cursor-pointer hover:bg-muted/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40",
+        active && "bg-muted/30",
+      )}
+    >
+      <div className="flex items-center justify-between gap-2">
+        <span className="text-[9px] sm:text-[10px] font-bold uppercase tracking-[0.16em] text-muted-foreground/70 leading-tight">{label}</span>
+        <div className={cn("h-6 w-6 sm:h-7 sm:w-7 rounded-md flex items-center justify-center shrink-0 transition-transform duration-300 group-hover:scale-110", iconBg[tone])}>
+          <Icon className="h-3 w-3 sm:h-3.5 sm:w-3.5" strokeWidth={2.25} />
+        </div>
+      </div>
+      <div className={cn("font-display text-[20px] sm:text-[24px] font-black leading-none tabular-nums tracking-tight", valueCls[tone])}>{value}</div>
+      {sub && <div className="text-[10px] sm:text-[11px] text-muted-foreground/70 font-medium truncate">{sub}</div>}
+      <span className={cn(
+        "absolute inset-x-0 bottom-0 h-[2px] origin-left transition-transform duration-500",
+        active ? "scale-x-100" : "scale-x-0 group-hover:scale-x-100",
+        barCls[tone],
+      )} />
+    </Tag>
   );
 }
