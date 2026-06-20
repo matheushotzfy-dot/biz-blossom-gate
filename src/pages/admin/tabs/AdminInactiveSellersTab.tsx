@@ -122,6 +122,44 @@ export default function AdminInactiveSellersTab({ profiles, transactions, fmtCur
         <PremiumMetric icon={AlertTriangle} label="Críticos (30d+)" value={String(totals.critical)} sub={`média ${totals.avgDays}d sem atividade`} tone={totals.critical > 0 ? "destructive" : "neutral"} />
       </PremiumMetricGrid>
 
+      {/* Faixa de distribuição de risco */}
+      {rows.length > 0 && (() => {
+        const buckets = [
+          { label: "Recente", range: "7-13d", count: rows.filter(r => r.daysSince >= 7 && r.daysSince < 14).length, color: "bg-success", text: "text-success" },
+          { label: "Alerta", range: "14-29d", count: rows.filter(r => r.daysSince >= 14 && r.daysSince < 30).length, color: "bg-warning", text: "text-warning" },
+          { label: "Crítico", range: "30-59d", count: rows.filter(r => r.daysSince >= 30 && r.daysSince < 60).length, color: "bg-destructive/80", text: "text-destructive" },
+          { label: "Churn", range: "60d+", count: rows.filter(r => r.daysSince >= 60).length, color: "bg-destructive", text: "text-destructive" },
+        ];
+        const total = buckets.reduce((a, b) => a + b.count, 0) || 1;
+        return (
+          <div className="rounded-[24px] border border-border/60 bg-card p-5">
+            <div className="mb-3 flex items-center justify-between">
+              <div>
+                <p className="text-[9px] font-black uppercase tracking-[0.22em] text-muted-foreground/70">Distribuição de Risco</p>
+                <p className="font-display text-sm font-black uppercase tracking-tight text-foreground">Pipeline de churn</p>
+              </div>
+              <span className="text-[10px] font-bold text-muted-foreground">{rows.length} sellers segmentados</span>
+            </div>
+            <div className="flex h-3 w-full overflow-hidden rounded-full border border-border/40 bg-muted/30">
+              {buckets.map(b => b.count > 0 && (
+                <div key={b.label} className={cn("h-full transition-all duration-700", b.color)} style={{ width: `${(b.count / total) * 100}%` }} title={`${b.label}: ${b.count}`} />
+              ))}
+            </div>
+            <div className="mt-3 grid grid-cols-2 sm:grid-cols-4 gap-3">
+              {buckets.map(b => (
+                <div key={b.label} className="flex items-center gap-2 rounded-lg border border-border/40 bg-muted/20 p-2">
+                  <span className={cn("h-2.5 w-2.5 rounded-full shrink-0", b.color)} />
+                  <div className="min-w-0">
+                    <p className="text-[9px] font-black uppercase tracking-wider text-muted-foreground">{b.label} · {b.range}</p>
+                    <p className={cn("font-display text-base font-black tabular-nums", b.text)}>{b.count}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        );
+      })()}
+
       <div className="flex flex-wrap items-center gap-3">
         <div className="relative flex-1 max-w-sm group">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground transition-colors group-focus-within:text-primary" />
