@@ -8,10 +8,12 @@ import { Switch } from "@/components/ui/switch";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import {
   Plus, Search, Shield, Snowflake, Sun, KeyRound, Trash2, History, Settings2,
-  UserCog, Users, RefreshCw, Copy, Eye, EyeOff,
+  UserCog, Users, RefreshCw, Copy, Eye, EyeOff, Activity, Percent, UsersRound,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { Tables } from "@/integrations/supabase/types";
+import { FinanceiroHero } from "@/components/financeiro/FinanceiroHero";
+import { PremiumPanel, PremiumMetric, PremiumMetricGrid, PremiumEmpty, premiumTable } from "./AdminPremium";
 
 export const STAFF_PERMISSIONS: { key: string; label: string; group: string }[] = [
   { key: "view_sellers", label: "Ver vendedores", group: "Visualização" },
