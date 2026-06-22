@@ -173,7 +173,7 @@ export default function Coproducoes() {
     if (split < 1 || split > 99) { toast.error("Split deve ser entre 1% e 99%"); return; }
     await supabase.from("products").update({
       co_production_enabled: true, co_producer_email: coEmail.trim(), co_production_split: split,
-    } as any).eq("id", selectedProduct).eq("user_id", user.id);
+    }).eq("id", selectedProduct).eq("user_id", user.id);
     const { error } = await supabase.from("co_productions").insert({
       product_id: selectedProduct, owner_user_id: user.id,
       co_producer_email: coEmail.trim().toLowerCase(), split_percentage: split,
