@@ -2,8 +2,9 @@ import { useState, useMemo } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useWebhooks, useInvalidateAll } from "@/hooks/useQueryData";
+import type { Tables } from "@/integrations/supabase/types";
 import {
-  Webhook, Plus, Trash2, Globe, Shield, Copy, Check, Search, Pencil,
+  Webhook, Plus, Trash2, Globe, Shield, Search, Pencil,
   Power, PowerOff, CircleDot, Code2, Zap, LayoutGrid, Clock, ShieldCheck
 } from "lucide-react";
 
@@ -41,6 +42,8 @@ const EVENT_GROUPS = [
 
 const ALL_EVENTS = EVENT_GROUPS.flatMap((g) => g.events.map((e) => e.key));
 
+type WebhookConfig = Tables<"webhook_configs_safe">;
+
 
 export default function Webhooks() {
   const { user } = useAuth();
@@ -60,10 +63,11 @@ export default function Webhooks() {
   };
 
   const openCreate = () => { resetForm(); setCreateOpen(true); };
-  const openEdit = (wh: any) => {
+  const openEdit = (wh: WebhookConfig) => {
+    if (!wh.id || !wh.url) return;
     setEditingId(wh.id);
     setUrl(wh.url);
-    setSelectedEvents(wh.events || []);
+    setSelectedEvents(wh.events ?? []);
     setCreateOpen(true);
   };
 
@@ -118,7 +122,7 @@ export default function Webhooks() {
 
 
   const filtered = useMemo(() => 
-    webhooks.filter((w: any) => !query || w.url.toLowerCase().includes(query.toLowerCase())),
+    webhooks.filter((w) => !query || (w.url ?? "").toLowerCase().includes(query.toLowerCase())),
     [webhooks, query]
   );
 

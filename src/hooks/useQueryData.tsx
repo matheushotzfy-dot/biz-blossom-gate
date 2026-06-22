@@ -163,12 +163,12 @@ export function useWebhooks() {
     queryKey: ["webhooks", user?.id],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from("webhook_configs_safe" as any)
+        .from("webhook_configs_safe")
         .select("*")
         .eq("user_id", user!.id)
         .order("created_at", { ascending: false });
       if (error) throw error;
-      return (data || []) as any[];
+      return (data || []) as Tables<"webhook_configs_safe">[];
     },
     enabled: !!user?.id,
     staleTime: STALE_TIME,
