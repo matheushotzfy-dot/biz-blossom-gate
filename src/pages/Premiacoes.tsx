@@ -130,8 +130,8 @@ export default function Premiacoes() {
     supabase.from("transactions").select("net_amount")
       .eq("user_id", user.id).eq("status", "completed")
       .then(({ data }) => { if (data) setRevenue(data.reduce((s, t) => s + Number(t.net_amount), 0)); });
-    (supabase as any).from("reward_claims").select("id, tier_id, status").eq("user_id", user.id)
-      .then(({ data }: any) => { if (data) setExistingClaims(data); });
+    supabase.from("reward_claims").select("id, tier_id, status").eq("user_id", user.id)
+      .then(({ data }) => { if (data) setExistingClaims(data); });
   }, [user?.id]);
 
   const { unlockedCount, nextAward, currentTier, overallProgress, remaining } = useMemo(() => {
@@ -163,7 +163,7 @@ export default function Premiacoes() {
       {/* =================== HERO — CINEMATIC STAGE =================== */}
       <section
         className="relative overflow-hidden rounded-[28px] border border-border/60 text-white isolate"
-        style={{ ['--tier' as any]: focused.accent }}
+        style={{ ['--tier' as string]: focused.accent } as React.CSSProperties}
       >
         {/* Cinematic backdrop */}
         <div className="absolute inset-0 -z-10">
@@ -466,7 +466,7 @@ export default function Premiacoes() {
                 <button
                   type="button"
                   onClick={() => setFocusId(a.id)}
-                  style={{ ['--tier' as any]: a.accent }}
+                  style={{ ['--tier' as string]: a.accent } as React.CSSProperties}
                   className={cn(
                     "group relative w-full text-left flex flex-col rounded-2xl overflow-hidden transition-all duration-300",
                     "border bg-background hover:-translate-y-1 hover:shadow-[0_20px_40px_-20px_hsl(var(--tier)/0.5)]",
@@ -602,9 +602,9 @@ export default function Premiacoes() {
             <Button disabled={submittingClaim} onClick={async () => {
               if (!user?.id) return;
               const required = ["recipient_name","phone","shipping_street","shipping_number","shipping_neighborhood","shipping_city","shipping_state","shipping_zip"] as const;
-              for (const k of required) if (!String((claimForm as any)[k] || "").trim()) { toast.error("Preencha todos os campos obrigatórios"); return; }
+              for (const k of required) if (!String(claimForm[k] || "").trim()) { toast.error("Preencha todos os campos obrigatórios"); return; }
               setSubmittingClaim(true);
-              const { error, data } = await (supabase as any).from("reward_claims").insert({
+              const { error, data } = await supabase.from("reward_claims").insert({
                 user_id: user.id,
                 tier_id: focused.id, tier_label: focused.title, tier_value: focused.value,
                 recipient_name: claimForm.recipient_name.trim(),

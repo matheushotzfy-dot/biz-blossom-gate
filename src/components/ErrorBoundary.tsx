@@ -23,8 +23,11 @@ async function logErrorToDb(error: Error, context: string) {
 }
 
 // Global handlers for uncaught errors (outside React tree)
-if (typeof window !== "undefined" && !(window as any).__lov_error_handlers__) {
-  (window as any).__lov_error_handlers__ = true;
+declare global {
+  interface Window { __lov_error_handlers__?: boolean }
+}
+if (typeof window !== "undefined" && !window.__lov_error_handlers__) {
+  window.__lov_error_handlers__ = true;
   window.addEventListener("error", (event) => {
     if (event.error) logErrorToDb(event.error, "window.onerror");
   });
