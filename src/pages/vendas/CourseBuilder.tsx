@@ -164,7 +164,7 @@ export default function CourseBuilder() {
         setActiveEditorTab("video");
         // Load attachments for auto-selected lesson
         supabase
-          .from("lesson_attachments" as any).select("*")
+          .from("lesson_attachments").select("*")
           .eq("lesson_id", firstLesson.id).order("created_at", { ascending: false })
           .then(({ data }) => setAttachments((data || []) as unknown as Attachment[]));
         return firstLesson;
@@ -189,7 +189,7 @@ export default function CourseBuilder() {
 
  const loadAttachments = useCallback(async (lessonId: string) => {
  const { data } = await supabase
- .from("lesson_attachments" as any).select("*")
+ .from("lesson_attachments").select("*")
  .eq("lesson_id", lessonId).order("created_at", { ascending: false });
  setAttachments((data || []) as unknown as Attachment[]);
  }, []);
@@ -262,7 +262,7 @@ export default function CourseBuilder() {
  const { error: uploadError } = await supabase.storage.from("course-content").upload(path, file);
  if (uploadError) { toast.error("Erro no upload"); setUploadingAttachment(false); return; }
  const { data: urlData } = supabase.storage.from("course-content").getPublicUrl(path);
- const { error: dbError } = await supabase.from("lesson_attachments" as any).insert({
+ const { error: dbError } = await supabase.from("lesson_attachments").insert({
  lesson_id: selectedLesson.id, user_id: user.id,
  file_name: file.name, file_url: urlData.publicUrl, file_size: file.size, file_type: file.type,
  });
@@ -272,7 +272,7 @@ export default function CourseBuilder() {
  };
 
  const deleteAttachment = async (att: Attachment) => {
- await supabase.from("lesson_attachments" as any).delete().eq("id", att.id);
+ await supabase.from("lesson_attachments").delete().eq("id", att.id);
  setAttachments(prev => prev.filter(a => a.id !== att.id));
  toast.success("Anexo removido");
  };
@@ -307,7 +307,7 @@ export default function CourseBuilder() {
  }
  toast.success("Módulo excluído");
  } else {
- await supabase.from("lesson_attachments" as any).delete().eq("lesson_id", deleteTarget.id);
+ await supabase.from("lesson_attachments").delete().eq("lesson_id", deleteTarget.id);
  await supabase.from("lessons").delete().eq("id", deleteTarget.id);
  if (selectedLesson?.id === deleteTarget.id) setSelectedLesson(null);
  toast.success("Aula excluída");
