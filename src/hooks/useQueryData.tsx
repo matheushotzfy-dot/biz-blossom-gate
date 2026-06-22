@@ -181,12 +181,12 @@ export function useAppIntegrations() {
     queryKey: ["app_integrations", user?.id],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from("app_integrations_safe" as any)
+        .from("app_integrations_safe")
         .select("*")
         .eq("user_id", user!.id)
         .order("created_at", { ascending: false });
       if (error) throw error;
-      return (data || []) as any[];
+      return (data || []) as Tables<"app_integrations_safe">[];
     },
     enabled: !!user?.id,
     staleTime: STALE_TIME,
@@ -199,12 +199,12 @@ export function useDisputes() {
     queryKey: ["disputes", user?.id],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from("disputes_seller" as any)
+        .from("disputes_seller")
         .select("*")
         .eq("seller_user_id", user!.id)
         .order("created_at", { ascending: false });
       if (error) throw error;
-      return (data || []) as any[];
+      return (data || []) as Tables<"disputes_seller">[];
     },
     enabled: !!user?.id,
     staleTime: STALE_TIME,
