@@ -35,7 +35,7 @@ function loadFacebookPixel(pixelId: string) {
   if (loadedScripts.has(key)) return;
   loadedScripts.add(key);
 
-  const w = window as any;
+  const w = window as PixelWindow;
   if (!w.fbq) {
     const n: any = function (...args: any[]) {
       n.callMethod ? n.callMethod.apply(n, args) : n.queue.push(args);
@@ -62,7 +62,7 @@ function loadGoogleAds(conversionId: string) {
   if (loadedScripts.has(key)) return;
   loadedScripts.add(key);
 
-  const w = window as any;
+  const w = window as PixelWindow;
   w.dataLayer = w.dataLayer || [];
   w.gtag = function (...args: any[]) { w.dataLayer.push(args); };
   w.gtag('js', new Date());
@@ -80,7 +80,7 @@ function loadGoogleAnalytics(measurementId: string) {
   if (loadedScripts.has(key)) return;
   loadedScripts.add(key);
 
-  const w = window as any;
+  const w = window as PixelWindow;
   w.dataLayer = w.dataLayer || [];
   w.gtag = function (...args: any[]) { w.dataLayer.push(args); };
   w.gtag('js', new Date());
@@ -98,7 +98,7 @@ function loadTikTokPixel(pixelId: string) {
   if (loadedScripts.has(key)) return;
   loadedScripts.add(key);
 
-  const w = window as any;
+  const w = window as PixelWindow;
   if (!w.ttq) {
     const ttq: any = (w.ttq = w.ttq || []);
     ttq.methods = ['page', 'track', 'identify', 'instances', 'debug', 'on', 'off', 'once', 'ready', 'alias', 'group', 'enableCookie', 'disableCookie'];
@@ -135,7 +135,7 @@ function loadKwaiPixel(pixelId: string) {
   if (loadedScripts.has(key)) return;
   loadedScripts.add(key);
 
-  const w = window as any;
+  const w = window as PixelWindow;
   if (!w.kwaiq) {
     const kwaiq: any = (w.kwaiq = w.kwaiq || { callMethod: undefined, queue: [] });
     kwaiq.load = function (id: string) {
@@ -198,7 +198,7 @@ const TIKTOK_EVENT_MAP: Record<string, string> = {
 // ============ FIRE EVENTS ============
 
 function fireFacebookEvent(pixelId: string, eventName: string, params?: Record<string, any>) {
-  const w = window as any;
+  const w = window as PixelWindow;
   if (!w.fbq) return;
   const fbEvent = FB_EVENT_MAP[eventName] || eventName;
   const eventId = params?.event_id;
@@ -209,7 +209,7 @@ function fireFacebookEvent(pixelId: string, eventName: string, params?: Record<s
 }
 
 function fireGoogleAdsEvent(conversionId: string, eventName: string, params?: Record<string, any>) {
-  const w = window as any;
+  const w = window as PixelWindow;
   if (!w.gtag) return;
   const gaEvent = GA_EVENT_MAP[eventName] || eventName;
   if (eventName === 'Purchase' || eventName === 'BoletoGenerated' || eventName === 'PixGenerated') {
@@ -224,14 +224,14 @@ function fireGoogleAdsEvent(conversionId: string, eventName: string, params?: Re
 }
 
 function fireGoogleAnalyticsEvent(measurementId: string, eventName: string, params?: Record<string, any>) {
-  const w = window as any;
+  const w = window as PixelWindow;
   if (!w.gtag) return;
   const gaEvent = GA_EVENT_MAP[eventName] || eventName;
   w.gtag('event', gaEvent, { send_to: measurementId, ...params });
 }
 
 function fireTikTokEvent(pixelId: string, eventName: string, params?: Record<string, any>) {
-  const w = window as any;
+  const w = window as PixelWindow;
   if (!w.ttq) return;
   const ttEvent = TIKTOK_EVENT_MAP[eventName] || eventName;
   if (eventName === 'PageView') {
@@ -242,7 +242,7 @@ function fireTikTokEvent(pixelId: string, eventName: string, params?: Record<str
 }
 
 function fireKwaiEvent(pixelId: string, eventName: string, params?: Record<string, any>) {
-  const w = window as any;
+  const w = window as PixelWindow;
   if (!w.kwaiq) return;
   if (eventName === 'PageView') {
     w.kwaiq.page();
