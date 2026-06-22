@@ -34,6 +34,24 @@ import Coproducoes from "./pages/vendas/Coproducoes";
 import Cupons from "./pages/vendas/Cupons";
 import Assinaturas from "./pages/vendas/Assinaturas";
 import DashboardAfiliado from "./pages/vendas/DashboardAfiliado";
+import ABTesting from "./pages/vendas/ABTesting";
+import ApiDocsComplete from "./pages/vendas/ApiDocsComplete";
+import AutoCupons from "./pages/vendas/AutoCupons";
+import CalculadoraLucro from "./pages/vendas/CalculadoraLucro";
+import CentralAjuda from "./pages/vendas/CentralAjuda";
+import CheckoutWhatsApp from "./pages/vendas/CheckoutWhatsApp";
+import FunilVendas from "./pages/vendas/FunilVendas";
+import LinkPagamento from "./pages/vendas/LinkPagamento";
+import ProofPopup from "./pages/vendas/ProofPopup";
+import RecuperacaoWhatsApp from "./pages/vendas/RecuperacaoWhatsApp";
+import RelatorioChurn from "./pages/vendas/RelatorioChurn";
+import SmartCheckout from "./pages/vendas/SmartCheckout";
+import UpsellPosPagamento from "./pages/vendas/UpsellPosPagamento";
+import Adquirente from "./pages/financeiro/Adquirente";
+import Antecipacao from "./pages/financeiro/Antecipacao";
+import ControleGastos from "./pages/financeiro/ControleGastos";
+import NotasFiscais from "./pages/financeiro/NotasFiscais";
+import Taxas from "./pages/financeiro/Taxas";
 import Suporte from "./pages/Suporte";
 // VendasHub deprecated — removed from routes/imports
 import Gamificacao from "./pages/Gamificacao";
@@ -159,6 +177,25 @@ const App = () => (
                 <Route path="/vendas/coproducoes" element={<Coproducoes />} />
                 <Route path="/vendas/assinaturas" element={<Assinaturas />} />
                 <Route path="/vendas/dashboard-afiliado" element={<DashboardAfiliado />} />
+                <Route path="/vendas/ab-testing" element={<ABTesting />} />
+                <Route path="/vendas/api-docs" element={<ApiDocsComplete />} />
+                <Route path="/vendas/auto-cupons" element={<AutoCupons />} />
+                <Route path="/vendas/calculadora-lucro" element={<CalculadoraLucro />} />
+                <Route path="/vendas/central-ajuda" element={<CentralAjuda />} />
+                <Route path="/vendas/checkout-whatsapp" element={<CheckoutWhatsApp />} />
+                <Route path="/vendas/funil" element={<FunilVendas />} />
+                <Route path="/vendas/link-pagamento" element={<LinkPagamento />} />
+                <Route path="/vendas/prova-social" element={<ProofPopup />} />
+                <Route path="/vendas/recuperacao-whatsapp" element={<RecuperacaoWhatsApp />} />
+                <Route path="/vendas/churn" element={<RelatorioChurn />} />
+                <Route path="/vendas/smart-checkout" element={<SmartCheckout />} />
+                <Route path="/vendas/upsell" element={<UpsellPosPagamento />} />
+
+                <Route path="/financeiro/adquirente" element={<Adquirente />} />
+                <Route path="/financeiro/antecipacao" element={<Antecipacao />} />
+                <Route path="/financeiro/gastos" element={<ControleGastos />} />
+                <Route path="/financeiro/notas" element={<NotasFiscais />} />
+                <Route path="/financeiro/taxas" element={<Taxas />} />
 
                 <Route path="/marketplace" element={<Marketplace />} />
                 <Route path="/membros" element={<MemberArea />} />
