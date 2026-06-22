@@ -61,7 +61,7 @@ export default function KycReviewDialog({ profile, open, onClose, onApprove, onR
             return data?.signedUrl ? { kind: detectKind(f.name), url: data.signedUrl, name: f.name } : null;
           })
         );
-        if (!cancelled) setDocs(signed.filter(Boolean) as any);
+        if (!cancelled) setDocs(signed.filter((d): d is { kind: DocKind; url: string; name: string } => d !== null));
       } finally {
         if (!cancelled) setLoadingDocs(false);
       }
@@ -70,7 +70,7 @@ export default function KycReviewDialog({ profile, open, onClose, onApprove, onR
   }, [open, profile?.user_id]);
 
   if (!profile) return null;
-  const p = profile as any;
+  const p = profile;
   const isCnpj = p.document_type === "cnpj";
   const addressParts = [p.street, p.street_number, p.neighborhood, p.city, p.state, p.zip_code].filter(Boolean);
 
@@ -118,7 +118,7 @@ export default function KycReviewDialog({ profile, open, onClose, onApprove, onR
               <h4 className="text-[10px] font-black uppercase tracking-[0.18em] text-muted-foreground mb-3">Identidade</h4>
               <div className="space-y-2">
                 <InfoRow icon={User} label="Nome completo" value={profile.full_name} />
-                <InfoRow icon={User} label="Apelido" value={(profile as any).nickname} />
+                <InfoRow icon={User} label="Apelido" value={profile.nickname} />
                 <InfoRow icon={FileDigit} label={(profile.document_type || "doc").toUpperCase()} value={profile.document_number} mono />
                 <InfoRow icon={Mail} label="E-mail" value={profile.email} />
                 <InfoRow icon={Phone} label="Telefone" value={profile.phone} mono />
