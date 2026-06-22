@@ -176,6 +176,7 @@ export default function MemberArea() {
 
   return (
     <div className="w-full pb-24 md:pb-32 bg-background text-foreground">
+      <Seo title="Meus Cursos | Hotzfy" description="Acesse todos os cursos e produtos digitais que você adquiriu." path="/membros" noindex />
       {/* ═══ HERO CINEMATOGRÁFICO ═══ */}
       {heroCourse && !isFiltering && <HeroBanner course={heroCourse} />}
 
