@@ -130,8 +130,8 @@ export default function Premiacoes() {
     supabase.from("transactions").select("net_amount")
       .eq("user_id", user.id).eq("status", "completed")
       .then(({ data }) => { if (data) setRevenue(data.reduce((s, t) => s + Number(t.net_amount), 0)); });
-    (supabase as any).from("reward_claims").select("id, tier_id, status").eq("user_id", user.id)
-      .then(({ data }: any) => { if (data) setExistingClaims(data); });
+    supabase.from("reward_claims").select("id, tier_id, status").eq("user_id", user.id)
+      .then(({ data }) => { if (data) setExistingClaims(data); });
   }, [user?.id]);
 
   const { unlockedCount, nextAward, currentTier, overallProgress, remaining } = useMemo(() => {
