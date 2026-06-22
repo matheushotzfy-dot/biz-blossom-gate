@@ -9,6 +9,7 @@ import {
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
+import { Seo } from "@/components/Seo";
 
 type PurchaseRow = {
   id: string;
