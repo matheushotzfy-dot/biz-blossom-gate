@@ -144,6 +144,7 @@ export default function Suporte() {
 
   return (
     <div className="space-y-6 animate-in fade-in duration-500">
+      <Seo title="Suporte | Hotzfy" description="Abra tickets e fale com nosso time de suporte. Resposta em até 24h úteis." path="/suporte" noindex />
       {/* Header — padrão Saques */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div className="space-y-1">
