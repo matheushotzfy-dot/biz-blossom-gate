@@ -94,12 +94,12 @@ export default function MemberCourse() {
     if (!modulesData) { setLoading(false); return; }
 
     const moduleIds = modulesData.map(m => m.id);
-    let lessonsData: any[] = [];
+    let lessonsData: Lesson[] = [];
     if (moduleIds.length > 0) {
       const { data } = await supabase.from("lessons").select("*").in("module_id", moduleIds).order("sort_order");
-      if (data) lessonsData = data;
+      if (data) lessonsData = data as Lesson[];
     }
-    const enrichedModules: Module[] = modulesData.map(m => ({ ...m, lessons: lessonsData.filter((l: any) => l.module_id === m.id) as Lesson[] }));
+    const enrichedModules: Module[] = modulesData.map(m => ({ ...m, lessons: lessonsData.filter(l => l.module_id === m.id) }));
     setModules(enrichedModules);
     setExpandedModules(new Set(enrichedModules.map(m => m.id)));
 
