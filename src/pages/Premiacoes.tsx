@@ -604,7 +604,7 @@ export default function Premiacoes() {
               const required = ["recipient_name","phone","shipping_street","shipping_number","shipping_neighborhood","shipping_city","shipping_state","shipping_zip"] as const;
               for (const k of required) if (!String(claimForm[k] || "").trim()) { toast.error("Preencha todos os campos obrigatórios"); return; }
               setSubmittingClaim(true);
-              const { error, data } = await (supabase as any).from("reward_claims").insert({
+              const { error, data } = await supabase.from("reward_claims").insert({
                 user_id: user.id,
                 tier_id: focused.id, tier_label: focused.title, tier_value: focused.value,
                 recipient_name: claimForm.recipient_name.trim(),
