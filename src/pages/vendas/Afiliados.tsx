@@ -78,8 +78,8 @@ export default function Afiliados() {
   const loadData = async () => {
     if (!user) return;
     const [linksRes, salesRes] = await Promise.all([
-      supabase.from("affiliate_links" as any).select("*").or(`affiliate_user_id.eq.${user.id},owner_user_id.eq.${user.id}`).order("created_at", { ascending: false }),
-      supabase.from("affiliate_sales" as any).select("*").or(`affiliate_user_id.eq.${user.id},seller_user_id.eq.${user.id}`).order("created_at", { ascending: false }),
+      supabase.from("affiliate_links").select("*").or(`affiliate_user_id.eq.${user.id},owner_user_id.eq.${user.id}`).order("created_at", { ascending: false }),
+      supabase.from("affiliate_sales").select("*").or(`affiliate_user_id.eq.${user.id},seller_user_id.eq.${user.id}`).order("created_at", { ascending: false }),
     ]);
     if (linksRes.data) setLinks(linksRes.data as unknown as AffiliateLink[]);
     if (salesRes.data) setSales(salesRes.data as unknown as AffiliateSale[]);
@@ -98,7 +98,7 @@ export default function Afiliados() {
     const product = [...affiliateProducts, ...marketProducts].find(p => p.id === selectedProduct);
     if (!product) { toast.error("Produto não encontrado"); return; }
     const slug = `aff-${crypto.randomUUID().slice(0, 10)}`;
-    const { error } = await supabase.from("affiliate_links" as any).insert({
+    const { error } = await supabase.from("affiliate_links").insert({
       product_id: selectedProduct,
       affiliate_user_id: user.id,
       owner_user_id: (product as any).user_id || user.id,
@@ -121,7 +121,7 @@ export default function Afiliados() {
 
   const toggleLinkActive = async (link: AffiliateLink) => {
     if (!user) return;
-    await supabase.from("affiliate_links" as any).update({ is_active: !link.is_active }).eq("id", link.id).eq("affiliate_user_id", user.id);
+    await supabase.from("affiliate_links").update({ is_active: !link.is_active }).eq("id", link.id).eq("affiliate_user_id", user.id);
     loadData();
   };
 

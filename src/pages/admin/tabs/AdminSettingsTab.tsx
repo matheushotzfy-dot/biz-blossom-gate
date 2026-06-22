@@ -287,7 +287,7 @@ export default function AdminSettingsTab() {
       card_release_days: 7,
       updated_by: user.id,
     });
- if (error) { toast.error((error as any).code === "23505" ? "Seller já tem retenção individual" : "Erro"); return; }
+ if (error) { toast.error((error as { code?: string }).code === "23505" ? "Seller já tem retenção individual" : "Erro"); return; }
  toast.success("Retenção individual adicionada!");
  setNewRetentionSeller("");
  loadAll();
