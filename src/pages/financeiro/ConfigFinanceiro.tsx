@@ -1,5 +1,6 @@
 import { lazy, Suspense, ComponentType } from "react";
 import { Loader2 } from "lucide-react";
+import { Seo } from "@/components/Seo";
 
 function lazyRetry(importFn: () => Promise<{ default: ComponentType<any> }>) {
   return lazy(() =>
