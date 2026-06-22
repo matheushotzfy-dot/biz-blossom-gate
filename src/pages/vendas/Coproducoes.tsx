@@ -204,7 +204,7 @@ export default function Coproducoes() {
     if (!window.confirm("Cancelar esta coprodução?")) return;
     const cp = coproductions.find(c => c.id === id);
     if (cp) {
-      await supabase.from("products").update({ co_production_enabled: false, co_producer_email: null } as any)
+      await supabase.from("products").update({ co_production_enabled: false, co_producer_email: null })
         .eq("id", cp.product_id).eq("user_id", user!.id);
     }
     const { error } = await supabase.from("co_productions").delete().eq("id", id);
