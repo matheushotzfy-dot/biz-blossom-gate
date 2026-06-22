@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { Puzzle, Webhook, BookOpen, KeyRound } from "lucide-react";
 import { HubTabs, type HubTab } from "@/components/HubTabs";
+import { Seo } from "@/components/Seo";
 import { useSearchParams } from "react-router-dom";
 import Apps from "./vendas/Apps";
 import Webhooks from "./vendas/Webhooks";
