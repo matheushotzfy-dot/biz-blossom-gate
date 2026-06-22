@@ -54,7 +54,7 @@ type ViewMode = "grid" | "list";
 export default function AdminConteudo() {
   const { user } = useAuth();
   const navigate = useNavigate();
-  const { data: coursesRaw = [], isLoading } = useCoursesQuery();
+  const { data: coursesRaw = [], isLoading, isError, refetch } = useCoursesQuery();
   const { data: productsRaw = [] } = useProductsQuery();
   const { data: transactions = [] } = useTransactions();
   const invalidateAll = useInvalidateAll();
