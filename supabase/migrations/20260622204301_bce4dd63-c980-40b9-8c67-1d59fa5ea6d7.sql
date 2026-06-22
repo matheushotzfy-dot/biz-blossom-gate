@@ -1,0 +1,1 @@
+ALTER VIEW public.app_integrations_safe SET (security_invoker = true);

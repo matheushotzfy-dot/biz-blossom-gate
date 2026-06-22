@@ -9,6 +9,7 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import Index from "./pages/Index";
 import ScrollToTop from "@/components/ScrollToTop";
 import { RequireAuth } from "@/hooks/useAuth";
+import { RequireAdmin } from "@/hooks/useAdminGuard";
 import { RequireManager } from "@/hooks/useManagerGuard";
 import { ThemeProvider } from "@/hooks/useTheme";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
@@ -45,7 +46,7 @@ import AdminDashboard from "./pages/admin/AdminDashboard";
 import AdminConfiguracoes from "./pages/admin/AdminConfiguracoes";
 import PublicCheckout from "./pages/PublicCheckout";
 import ImpersonateReceiver from "./pages/ImpersonateReceiver";
-// NotFound removido — todas as rotas inválidas redirecionam para /dashboard
+import NotFound from "./pages/NotFound";
 import ManagerLogin from "./pages/manager/ManagerLogin";
 import ManagerDashboard from "./pages/manager/ManagerDashboard";
 import TermosDeUso from "./pages/TermosDeUso";
@@ -119,9 +120,9 @@ const App = () => (
               </Route>
 
               <Route path="/admin-matheus" element={<AdminLogin />} />
-              <Route path="/admin-matheus/dashboard" element={<AdminDashboard />} />
+              <Route path="/admin-matheus/dashboard" element={<RequireAdmin><AdminDashboard /></RequireAdmin>} />
               
-              <Route path="/admin-matheus/configuracoes" element={<AdminConfiguracoes />} />
+              <Route path="/admin-matheus/configuracoes" element={<RequireAdmin><AdminConfiguracoes /></RequireAdmin>} />
 
               <Route path="/gerentes" element={<ManagerLogin />} />
               <Route path="/gerentes/dashboard" element={<RequireManager><ManagerDashboard /></RequireManager>} />
@@ -140,7 +141,7 @@ const App = () => (
               >
                 <Route path="/dashboard" element={<Dashboard />} />
                 <Route path="/perfil" element={<PerfilHub />} />
-                <Route path="/financeiro/identidade" element={<Navigate to="/perfil?tab=identidade" replace />} />
+                {/* /financeiro/identidade já redirecionado na rota pública acima */}
                 <Route path="/premiacoes" element={<PremiacoesHub />} />
                 <Route path="/gamificacao" element={<Gamificacao />} />
                 <Route path="/suporte" element={<Suporte />} />
@@ -163,7 +164,7 @@ const App = () => (
                 <Route path="/membros" element={<MemberArea />} />
                 <Route path="/membros/curso/:courseId" element={<CoursePage />} />
               </Route>
-              <Route path="*" element={<Navigate to="/dashboard" replace />} />
+              <Route path="*" element={<NotFound />} />
             </Routes>
           </BrowserRouter>
         </TooltipProvider>
