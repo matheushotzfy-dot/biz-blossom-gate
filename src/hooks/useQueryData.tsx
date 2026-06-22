@@ -28,7 +28,7 @@ export function useLedgerBalance() {
 
 type PixKey = { id: string; key_type: string; key_value: string; created_at: string; user_id: string };
 type CourseWithModules = Tables<"courses"> & {
-  modules: Array<{ id: string; lessons: Array<{ id: string }> }> | null;
+  modules: Array<{ id: string; title: string; banner_url: string | null; lessons: Array<{ id: string }> }> | null;
 };
 
 export function useProducts() {
@@ -222,7 +222,7 @@ export function useCourses() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("courses")
-        .select("*, modules ( id, lessons ( id ) )")
+        .select("*, modules ( id, title, banner_url, lessons ( id ) )")
         .eq("user_id", user!.id)
         .order("sort_order");
       if (error) throw error;
