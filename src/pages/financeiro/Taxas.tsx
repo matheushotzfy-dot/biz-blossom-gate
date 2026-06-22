@@ -34,7 +34,7 @@ export default function Taxas() {
       .select("pix_percentage, pix_fixed, card_percentage, card_fixed, boleto_percentage, boleto_fixed, transaction_percentage, transaction_fixed, withdrawal_fee")
       .eq("user_id", user.id)
       .maybeSingle()
-      .then(({ data }) => setCustom((data as any) ?? null));
+      .then(({ data }) => setCustom(data ?? null));
   }, [user?.id]);
 
   // Match by exact platform fee name set in admin panel
