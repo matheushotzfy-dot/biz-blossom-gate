@@ -14,6 +14,7 @@ import {
 import { cn } from "@/lib/utils";
 import { motion } from "framer-motion";
 import { StatCard } from "@/components/StatCard";
+import { Seo } from "@/components/Seo";
 
 
 const ease = [0.16, 1, 0.3, 1] as const;
@@ -126,6 +127,7 @@ export default function Gamificacao() {
 
  return (
  <div className="mx-auto w-full max-w-[1440px] pb-20 px-1 relative">
+ <Seo title="Gamificação | Hotzfy" description="Suba de nível, conquiste badges e acompanhe sua evolução como produtor." path="/gamificacao" noindex />
  {/* ═══ HERO ═══ */}
  <motion.section
  initial={{ opacity: 0 }}

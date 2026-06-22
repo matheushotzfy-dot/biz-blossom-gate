@@ -7,6 +7,7 @@ import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { GridSkeleton } from "@/components/PageShell";
+import { Seo } from "@/components/Seo";
 
 type MarketplaceProduct = {
  id: string;
@@ -91,6 +92,7 @@ export default function Marketplace() {
 
  return (
  <div className="mx-auto w-full max-w-[1440px] pb-20 px-1 relative">
+ <Seo title="Marketplace de Afiliados | Hotzfy" description="Descubra produtos para promover, ganhe comissões e amplie seu portfólio de afiliado." path="/marketplace" noindex />
  {/* ════════════════════════════════════════════════════════════════ */}
  {/* HERO */}
  {/* ════════════════════════════════════════════════════════════════ */}

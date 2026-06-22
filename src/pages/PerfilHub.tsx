@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { User, UserCircle } from "lucide-react";
 import { HubTabs, type HubTab } from "@/components/HubTabs";
+import { Seo } from "@/components/Seo";
 import Perfil from "./Perfil";
 import Identidade from "./financeiro/Identidade";
 
@@ -40,6 +41,7 @@ export default function PerfilHub() {
 
  return (
  <>
+ <Seo title="Perfil & KYC | Hotzfy" description="Gerencie seus dados pessoais, identidade e verificação KYC." path="/perfil" noindex />
  <HubTabs tabs={TABS} active={tab} onChange={handleTabChange} />
  {tab === "perfil" ? <Perfil /> : <Identidade />}
  </>
