@@ -113,7 +113,7 @@ export default function Produtos() {
     // Soft delete: keep record for admin audit (sales, customers, history)
     const { error } = await supabase
       .from("products")
-      .update({ deleted_at: new Date().toISOString(), status: "inactive" } as any)
+      .update({ deleted_at: new Date().toISOString(), status: "inactive" })
       .eq("id", deleteTarget)
       .eq("user_id", user.id);
     setDeleting(false);
