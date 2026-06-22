@@ -7,6 +7,7 @@ import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { GridSkeleton } from "@/components/PageShell";
+import { Seo } from "@/components/Seo";
 
 type MarketplaceProduct = {
  id: string;
