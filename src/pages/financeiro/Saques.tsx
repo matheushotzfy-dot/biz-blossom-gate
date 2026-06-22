@@ -29,7 +29,7 @@ export default function Saques() {
   const { user } = useAuth();
   const { profile } = useProfile();
   const navigate = useNavigate();
-  const { data: withdrawals = [] } = useWithdrawals();
+  const { data: withdrawals = [], isError: withdrawalsError, refetch: refetchWithdrawals } = useWithdrawals();
   const { data: pixKeys = [] } = usePixKeys();
   const { data: bankAccounts = [] } = useBankAccounts();
   const [open, setOpen] = useState(false);
@@ -223,7 +223,22 @@ export default function Saques() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-border/40">
-                  {filtered.length === 0 ? (
+                  {withdrawalsError ? (
+                    <tr>
+                      <td colSpan={3} className="px-8 py-20 text-center">
+                        <div className="flex flex-col items-center gap-3">
+                          <History size={48} strokeWidth={1} className="opacity-30" />
+                          <p className="text-[11px] font-black uppercase tracking-widest text-destructive">Falha ao carregar histórico</p>
+                          <button
+                            onClick={() => refetchWithdrawals()}
+                            className="px-4 py-2 bg-primary text-primary-foreground text-[10px] font-black uppercase tracking-widest rounded-lg hover:bg-primary/90 transition-colors"
+                          >
+                            Tentar novamente
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ) : filtered.length === 0 ? (
                     <tr>
                       <td colSpan={3} className="px-8 py-20 text-center">
                         <div className="flex flex-col items-center opacity-30">
