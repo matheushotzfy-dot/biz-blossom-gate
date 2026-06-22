@@ -67,5 +67,5 @@ export function isProductDraft(product: Product): boolean {
 /** Returns the effective status considering auto-draft detection. */
 export function getEffectiveStatus(product: Product): "draft" | "active" | "pending_review" | "inactive" {
   if (isProductDraft(product)) return "draft";
-  return (product.status as any) || "active";
+  return (product.status as "draft" | "active" | "pending_review" | "inactive") || "active";
 }

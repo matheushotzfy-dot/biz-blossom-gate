@@ -263,7 +263,7 @@ export default function Auth() {
     const { data: cfn } = await supabase.functions.invoke("auto-confirm-signup", {
       body: { email: email.toLowerCase().trim() },
     });
-    autoConfirmed = !!(cfn as any)?.confirmed;
+    autoConfirmed = !!(cfn as { confirmed?: boolean } | null)?.confirmed;
   } catch { /* fallback: keep verification flow */ }
 
   if (autoConfirmed) {
