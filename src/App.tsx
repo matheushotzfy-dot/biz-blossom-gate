@@ -120,9 +120,9 @@ const App = () => (
               </Route>
 
               <Route path="/admin-matheus" element={<AdminLogin />} />
-              <Route path="/admin-matheus/dashboard" element={<AdminDashboard />} />
+              <Route path="/admin-matheus/dashboard" element={<RequireAdmin><AdminDashboard /></RequireAdmin>} />
               
-              <Route path="/admin-matheus/configuracoes" element={<AdminConfiguracoes />} />
+              <Route path="/admin-matheus/configuracoes" element={<RequireAdmin><AdminConfiguracoes /></RequireAdmin>} />
 
               <Route path="/gerentes" element={<ManagerLogin />} />
               <Route path="/gerentes/dashboard" element={<RequireManager><ManagerDashboard /></RequireManager>} />
