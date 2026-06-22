@@ -602,7 +602,7 @@ export default function Premiacoes() {
             <Button disabled={submittingClaim} onClick={async () => {
               if (!user?.id) return;
               const required = ["recipient_name","phone","shipping_street","shipping_number","shipping_neighborhood","shipping_city","shipping_state","shipping_zip"] as const;
-              for (const k of required) if (!String((claimForm as any)[k] || "").trim()) { toast.error("Preencha todos os campos obrigatórios"); return; }
+              for (const k of required) if (!String(claimForm[k] || "").trim()) { toast.error("Preencha todos os campos obrigatórios"); return; }
               setSubmittingClaim(true);
               const { error, data } = await (supabase as any).from("reward_claims").insert({
                 user_id: user.id,
