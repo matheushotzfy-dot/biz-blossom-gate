@@ -10,7 +10,7 @@ import { cn } from "@/lib/utils";
 
 type Course = { id: string; title: string; description: string | null; thumbnail_url: string | null };
 type Module = { id: string; title: string; description: string | null; banner_url: string | null; sort_order: number; lessons: Lesson[] };
-type Lesson = { id: string; title: string; description: string | null; video_url: string | null; duration_minutes: number; is_free: boolean; sort_order: number };
+type Lesson = { id: string; title: string; description: string | null; video_url: string | null; duration_minutes: number; is_free: boolean; sort_order: number; module_id: string };
 type Progress = { lesson_id: string; completed: boolean; progress_seconds: number };
 
 function extractYouTubeId(url: string): string | null {
@@ -83,17 +83,17 @@ export default function CoursePage() {
  if (!modulesData) { setLoading(false); return; }
 
  const moduleIds = modulesData.map(m => m.id);
- let lessonsData: any[] = [];
+ let lessonsData: Lesson[] = [];
  if (moduleIds.length > 0) {
  const { data } = await supabase
  .from("lessons").select("id, title, description, video_url, duration_minutes, is_free, sort_order, module_id")
  .in("module_id", moduleIds).order("sort_order");
- if (data) lessonsData = data;
+ if (data) lessonsData = data as Lesson[];
  }
 
  const enrichedModules: Module[] = modulesData.map(m => ({
  ...m,
- lessons: lessonsData.filter((l: any) => l.module_id === m.id) as Lesson[],
+ lessons: lessonsData.filter(l => l.module_id === m.id),
  }));
  setModules(enrichedModules);
 
