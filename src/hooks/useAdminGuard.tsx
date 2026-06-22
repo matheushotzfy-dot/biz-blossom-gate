@@ -29,7 +29,7 @@ export function useAdminGuard() {
       try {
         const [adminRes, employeeRes] = await Promise.all([
           supabase.rpc("current_user_has_role", { _role: "admin" }),
-          supabase.rpc("current_user_has_role", { _role: "employee" as any }),
+          supabase.rpc("current_user_has_role", { _role: "employee" }),
         ]);
         if (cancelled) return;
         const hasAdmin = adminRes.data === true;

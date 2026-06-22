@@ -70,9 +70,9 @@ export default function Produtos() {
   }, [productsWithStatus, search, tab]);
 
   const counts = useMemo(() => {
-    const c = { active: 0, draft: 0, pending_review: 0, inactive: 0 };
+    const c: Record<"active" | "draft" | "pending_review" | "inactive", number> = { active: 0, draft: 0, pending_review: 0, inactive: 0 };
     for (const { eff } of productsWithStatus) {
-      if (eff in c) (c as any)[eff]++;
+      if (eff in c) c[eff as keyof typeof c]++;
     }
     return c;
   }, [productsWithStatus]);
@@ -113,7 +113,7 @@ export default function Produtos() {
     // Soft delete: keep record for admin audit (sales, customers, history)
     const { error } = await supabase
       .from("products")
-      .update({ deleted_at: new Date().toISOString(), status: "inactive" } as any)
+      .update({ deleted_at: new Date().toISOString(), status: "inactive" })
       .eq("id", deleteTarget)
       .eq("user_id", user.id);
     setDeleting(false);
