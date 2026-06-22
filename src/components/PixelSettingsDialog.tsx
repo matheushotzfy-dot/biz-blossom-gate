@@ -196,7 +196,7 @@ export default function PixelSettingsDialog({ product, open, onOpenChange }: Pro
     if (!pixel) return;
     const current = pixel.events || [];
     const updated = current.includes(event) ? current.filter(e => e !== event) : [...current, event];
-    updatePixelSettings(pixelId, { events: updated } as any);
+    updatePixelSettings(pixelId, { events: updated });
   };
 
   const totalActive = pixels.filter(p => p.is_active).length;
