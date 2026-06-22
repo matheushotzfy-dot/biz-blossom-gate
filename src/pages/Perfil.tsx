@@ -12,7 +12,7 @@ import { useProfile } from "@/hooks/useProfile";
 import {
   User, Camera, Trophy, Wallet, Shield, BadgeCheck,
   Calendar, Fingerprint, Copy, Check, MapPin, Loader2,
-  AlertTriangle, Lock, Activity, Sparkles,
+  AlertTriangle, Lock, Activity, Sparkles, type LucideIcon,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -93,7 +93,7 @@ function InfoRow({ label, value, copyable, locked, valueClass }: {
 function Panel({
   icon: Icon, title, subtitle, action, children, className,
 }: {
-  icon: any; title: string; subtitle?: string; action?: React.ReactNode;
+  icon: LucideIcon; title: string; subtitle?: string; action?: React.ReactNode;
   children: React.ReactNode; className?: string;
 }) {
   return (
@@ -171,13 +171,13 @@ export default function Perfil() {
   useEffect(() => {
     if (profile && !addressInit) {
       setAddressForm({
-        zip_code: (profile as any).zip_code || "",
-        street: (profile as any).street || "",
-        street_number: (profile as any).street_number || "",
-        complement: (profile as any).complement || "",
-        neighborhood: (profile as any).neighborhood || "",
-        city: (profile as any).city || "",
-        state: (profile as any).state || "",
+        zip_code: profile.zip_code || "",
+        street: profile.street || "",
+        street_number: profile.street_number || "",
+        complement: profile.complement || "",
+        neighborhood: profile.neighborhood || "",
+        city: profile.city || "",
+        state: profile.state || "",
       });
       setAddressInit(true);
     }
@@ -201,14 +201,14 @@ export default function Perfil() {
   const [maxTicket, setMaxTicket] = useState<number | null>(null);
   useEffect(() => {
     if (!user) return;
-    supabase.rpc("get_my_max_ticket" as any).then(({ data }) => {
+    supabase.rpc("get_my_max_ticket").then(({ data }) => {
       if (typeof data === "number") setMaxTicket(data);
     });
   }, [user]);
 
-  const isAddressLocked = !!(profile as any)?.address_locked;
-  const hasAddress = !!(profile as any)?.zip_code && !!(profile as any)?.street
-    && !!(profile as any)?.street_number && !!(profile as any)?.city && !!(profile as any)?.state;
+  const isAddressLocked = !!profile?.address_locked;
+  const hasAddress = !!profile?.zip_code && !!profile?.street
+    && !!profile?.street_number && !!profile?.city && !!profile?.state;
   const milestone = useMemo(() => getCurrentMilestone(allTimeRevenue), [allTimeRevenue]);
 
   const handleCepLookup = async (cep: string) => {
@@ -243,7 +243,7 @@ export default function Perfil() {
     const { error } = await supabase.from("profiles").update(updates).eq("user_id", user.id);
     if (error) toast.error("Erro ao salvar endereço");
     else {
-      updateProfile(updates as any);
+      updateProfile(updates);
       toast.success("Endereço salvo! Agora você pode realizar saques normalmente.");
     }
     setSavingAddress(false);
