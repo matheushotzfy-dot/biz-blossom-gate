@@ -27,6 +27,9 @@ export function useLedgerBalance() {
 }
 
 type PixKey = { id: string; key_type: string; key_value: string; created_at: string; user_id: string };
+type CourseWithModules = Tables<"courses"> & {
+  modules: Array<{ id: string; title: string; banner_url: string | null; lessons: Array<{ id: string }> }> | null;
+};
 
 export function useProducts() {
   const { user } = useAuth();
@@ -163,12 +166,12 @@ export function useWebhooks() {
     queryKey: ["webhooks", user?.id],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from("webhook_configs_safe" as any)
+        .from("webhook_configs_safe")
         .select("*")
         .eq("user_id", user!.id)
         .order("created_at", { ascending: false });
       if (error) throw error;
-      return (data || []) as any[];
+      return (data || []) as Tables<"webhook_configs_safe">[];
     },
     enabled: !!user?.id,
     staleTime: STALE_TIME,
@@ -181,12 +184,12 @@ export function useAppIntegrations() {
     queryKey: ["app_integrations", user?.id],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from("app_integrations_safe" as any)
+        .from("app_integrations_safe")
         .select("*")
         .eq("user_id", user!.id)
         .order("created_at", { ascending: false });
       if (error) throw error;
-      return (data || []) as any[];
+      return (data || []) as Tables<"app_integrations_safe">[];
     },
     enabled: !!user?.id,
     staleTime: STALE_TIME,
@@ -199,12 +202,12 @@ export function useDisputes() {
     queryKey: ["disputes", user?.id],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from("disputes_seller" as any)
+        .from("disputes_seller")
         .select("*")
         .eq("seller_user_id", user!.id)
         .order("created_at", { ascending: false });
       if (error) throw error;
-      return (data || []) as any[];
+      return (data || []) as Tables<"disputes_seller">[];
     },
     enabled: !!user?.id,
     staleTime: STALE_TIME,
@@ -219,11 +222,11 @@ export function useCourses() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("courses")
-        .select("*, modules ( id, lessons ( id ) )")
+        .select("*, modules ( id, title, banner_url, lessons ( id ) )")
         .eq("user_id", user!.id)
         .order("sort_order");
       if (error) throw error;
-      return (data || []) as any[];
+      return (data || []) as CourseWithModules[];
     },
     enabled: !!user?.id,
     staleTime: STALE_TIME,
