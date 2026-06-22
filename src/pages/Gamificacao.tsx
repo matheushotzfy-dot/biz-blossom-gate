@@ -127,6 +127,7 @@ export default function Gamificacao() {
 
  return (
  <div className="mx-auto w-full max-w-[1440px] pb-20 px-1 relative">
+ <Seo title="Gamificação | Hotzfy" description="Suba de nível, conquiste badges e acompanhe sua evolução como produtor." path="/gamificacao" noindex />
  {/* ═══ HERO ═══ */}
  <motion.section
  initial={{ opacity: 0 }}
