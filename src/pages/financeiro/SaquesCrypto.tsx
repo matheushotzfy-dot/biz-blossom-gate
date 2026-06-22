@@ -163,7 +163,7 @@ export default function SaquesCrypto() {
     const { error } = await supabase.from("withdrawals").insert({
       user_id: user.id, amount: numAmount, withdrawal_type: "crypto",
       crypto_currency: selectedAsset.symbol, crypto_network: selectedNetwork.id, crypto_address: cryptoAddress.trim(),
-    } as any);
+    });
     if (error) {
       const msg = error.message || "";
       if (msg.includes("Saldo insuficiente")) toast.error(msg);
