@@ -10,7 +10,7 @@ import { cn } from "@/lib/utils";
 
 type Course = { id: string; title: string; description: string | null; thumbnail_url: string | null };
 type Module = { id: string; title: string; description: string | null; banner_url: string | null; sort_order: number; lessons: Lesson[] };
-type Lesson = { id: string; title: string; description: string | null; video_url: string | null; duration_minutes: number; is_free: boolean; sort_order: number };
+type Lesson = { id: string; title: string; description: string | null; video_url: string | null; duration_minutes: number; is_free: boolean; sort_order: number; module_id: string };
 type Progress = { lesson_id: string; completed: boolean; progress_seconds: number };
 
 function extractYouTubeId(url: string): string | null {
