@@ -9,6 +9,7 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import Index from "./pages/Index";
 import ScrollToTop from "@/components/ScrollToTop";
 import { RequireAuth } from "@/hooks/useAuth";
+import { RequireAdmin } from "@/hooks/useAdminGuard";
 import { RequireManager } from "@/hooks/useManagerGuard";
 import { ThemeProvider } from "@/hooks/useTheme";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
