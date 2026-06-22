@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { ArrowDownToLine, Bitcoin, PiggyBank, History, LayoutDashboard } from "lucide-react";
 import { HubTabs, type HubTab } from "@/components/HubTabs";
+import { Seo } from "@/components/Seo";
 import Saques from "./Saques";
 import SaquesCrypto from "./SaquesCrypto";
 
