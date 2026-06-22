@@ -14,6 +14,7 @@ import {
 import { cn } from "@/lib/utils";
 import { motion } from "framer-motion";
 import { StatCard } from "@/components/StatCard";
+import { Seo } from "@/components/Seo";
 
 
 const ease = [0.16, 1, 0.3, 1] as const;
