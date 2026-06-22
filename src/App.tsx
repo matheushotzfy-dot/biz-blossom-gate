@@ -177,6 +177,25 @@ const App = () => (
                 <Route path="/vendas/coproducoes" element={<Coproducoes />} />
                 <Route path="/vendas/assinaturas" element={<Assinaturas />} />
                 <Route path="/vendas/dashboard-afiliado" element={<DashboardAfiliado />} />
+                <Route path="/vendas/ab-testing" element={<ABTesting />} />
+                <Route path="/vendas/api-docs" element={<ApiDocsComplete />} />
+                <Route path="/vendas/auto-cupons" element={<AutoCupons />} />
+                <Route path="/vendas/calculadora-lucro" element={<CalculadoraLucro />} />
+                <Route path="/vendas/central-ajuda" element={<CentralAjuda />} />
+                <Route path="/vendas/checkout-whatsapp" element={<CheckoutWhatsApp />} />
+                <Route path="/vendas/funil" element={<FunilVendas />} />
+                <Route path="/vendas/link-pagamento" element={<LinkPagamento />} />
+                <Route path="/vendas/prova-social" element={<ProofPopup />} />
+                <Route path="/vendas/recuperacao-whatsapp" element={<RecuperacaoWhatsApp />} />
+                <Route path="/vendas/churn" element={<RelatorioChurn />} />
+                <Route path="/vendas/smart-checkout" element={<SmartCheckout />} />
+                <Route path="/vendas/upsell" element={<UpsellPosPagamento />} />
+
+                <Route path="/financeiro/adquirente" element={<Adquirente />} />
+                <Route path="/financeiro/antecipacao" element={<Antecipacao />} />
+                <Route path="/financeiro/gastos" element={<ControleGastos />} />
+                <Route path="/financeiro/notas" element={<NotasFiscais />} />
+                <Route path="/financeiro/taxas" element={<Taxas />} />
 
                 <Route path="/marketplace" element={<Marketplace />} />
                 <Route path="/membros" element={<MemberArea />} />
