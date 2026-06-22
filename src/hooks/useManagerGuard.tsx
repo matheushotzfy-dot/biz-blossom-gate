@@ -20,7 +20,7 @@ export function useManagerGuard() {
     let cancelled = false;
     (async () => {
       try {
-        const { data, error } = await supabase.rpc("current_user_has_role", { _role: "manager" as any });
+        const { data, error } = await supabase.rpc("current_user_has_role", { _role: "manager" });
         if (cancelled) return;
         if (error || data !== true) {
           navigate("/gerentes", { replace: true });
