@@ -158,7 +158,7 @@ export default function Coproducoes() {
 
   const loadData = async () => {
     if (!user) return;
-    const { data } = await supabase.from("co_productions" as any).select("*").or(
+    const { data } = await supabase.from("co_productions").select("*").or(
       `owner_user_id.eq.${user.id},co_producer_email.eq.${user.email}`
     ).order("created_at", { ascending: false });
     if (data) setCoproductions(data as unknown as CoProduction[]);
@@ -174,7 +174,7 @@ export default function Coproducoes() {
     await supabase.from("products").update({
       co_production_enabled: true, co_producer_email: coEmail.trim(), co_production_split: split,
     } as any).eq("id", selectedProduct).eq("user_id", user.id);
-    const { error } = await supabase.from("co_productions" as any).insert({
+    const { error } = await supabase.from("co_productions").insert({
       product_id: selectedProduct, owner_user_id: user.id,
       co_producer_email: coEmail.trim().toLowerCase(), split_percentage: split,
     });
@@ -186,7 +186,7 @@ export default function Coproducoes() {
 
   const handleAccept = async (id: string) => {
     if (!user) return;
-    const { error } = await supabase.from("co_productions" as any).update({
+    const { error } = await supabase.from("co_productions").update({
       status: "accepted", co_producer_user_id: user.id, accepted_at: new Date().toISOString(),
     }).eq("id", id);
     if (error) { toast.error("Erro ao aceitar"); return; }
@@ -195,7 +195,7 @@ export default function Coproducoes() {
 
   const handleReject = async (id: string) => {
     if (!window.confirm("Recusar este convite de coprodução?")) return;
-    const { error } = await supabase.from("co_productions" as any).update({ status: "rejected" }).eq("id", id);
+    const { error } = await supabase.from("co_productions").update({ status: "rejected" }).eq("id", id);
     if (error) { toast.error("Erro ao recusar"); return; }
     toast.success("Convite recusado."); loadData();
   };
@@ -207,7 +207,7 @@ export default function Coproducoes() {
       await supabase.from("products").update({ co_production_enabled: false, co_producer_email: null } as any)
         .eq("id", cp.product_id).eq("user_id", user!.id);
     }
-    const { error } = await supabase.from("co_productions" as any).delete().eq("id", id);
+    const { error } = await supabase.from("co_productions").delete().eq("id", id);
     if (error) { toast.error("Erro ao cancelar"); return; }
     toast.success("Coprodução cancelada."); loadData();
   };
