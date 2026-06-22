@@ -61,7 +61,7 @@ export default function KycReviewDialog({ profile, open, onClose, onApprove, onR
             return data?.signedUrl ? { kind: detectKind(f.name), url: data.signedUrl, name: f.name } : null;
           })
         );
-        if (!cancelled) setDocs(signed.filter(Boolean) as any);
+        if (!cancelled) setDocs(signed.filter((d): d is { kind: DocKind; url: string; name: string } => d !== null));
       } finally {
         if (!cancelled) setLoadingDocs(false);
       }
