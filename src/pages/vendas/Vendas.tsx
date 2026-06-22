@@ -228,6 +228,7 @@ export default function Vendas() {
 
   return (
     <div className="space-y-6 animate-in fade-in duration-500">
+      <Seo title="Vendas | Hotzfy" description="Histórico completo de transações, filtros avançados e exportação de relatórios." path="/vendas" noindex />
       {/* Header */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div className="space-y-1">
