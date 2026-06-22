@@ -19,6 +19,9 @@ export interface PixelConfig {
   is_active: boolean;
 }
 
+// Window augmented with arbitrary pixel SDK globals (fbq, gtag, ttq, kwaiq, dataLayer, ...)
+type PixelWindow = Window & typeof globalThis & Record<string, any>;
+
 // Track which scripts have been loaded
 const loadedScripts = new Set<string>();
 
