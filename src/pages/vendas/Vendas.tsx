@@ -188,7 +188,7 @@ export default function Vendas() {
     const ws = XLSX.utils.json_to_sheet(rows);
     const headers = Object.keys(rows[0]);
     ws["!cols"] = headers.map((h) => ({
-      wch: Math.min(40, Math.max(h.length + 2, ...rows.map((r) => String((r as any)[h] ?? "").length + 2))),
+      wch: Math.min(40, Math.max(h.length + 2, ...rows.map((r) => String(r[h as keyof typeof r] ?? "").length + 2))),
     }));
     XLSX.utils.book_append_sheet(wb, ws, "Vendas");
     const buf = XLSX.write(wb, { bookType: "xlsx", type: "array" });
