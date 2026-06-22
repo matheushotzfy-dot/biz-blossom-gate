@@ -70,7 +70,7 @@ export default function KycReviewDialog({ profile, open, onClose, onApprove, onR
   }, [open, profile?.user_id]);
 
   if (!profile) return null;
-  const p = profile as any;
+  const p = profile;
   const isCnpj = p.document_type === "cnpj";
   const addressParts = [p.street, p.street_number, p.neighborhood, p.city, p.state, p.zip_code].filter(Boolean);
 
