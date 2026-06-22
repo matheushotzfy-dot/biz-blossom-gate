@@ -134,7 +134,7 @@ export default function SaquesCrypto() {
   }, [user?.id, refetchWithdrawals]);
 
   const cryptoWithdrawals = useMemo(
-    () => withdrawals.filter(w => (w as any).withdrawal_type === "crypto"),
+    () => withdrawals.filter(w => w.withdrawal_type === "crypto"),
     [withdrawals]
   );
 
@@ -197,7 +197,7 @@ export default function SaquesCrypto() {
   const totalRequested = cryptoWithdrawals.reduce((a, w) => a + Number(w.amount), 0);
   const totalFees = cryptoWithdrawals.reduce((a, w) => a + Number(w.fee_amount), 0);
   const avgTicket = approved.length > 0 ? totalApproved / approved.length : 0;
-  const networksUsed = new Set(cryptoWithdrawals.map(w => (w as any).crypto_network).filter(Boolean)).size;
+  const networksUsed = new Set(cryptoWithdrawals.map(w => w.crypto_network).filter(Boolean)).size;
 
   const markupPrice = getMarkupPrice(selectedAsset.id);
   const numAmount = parseFloat(amount) || 0;
@@ -208,7 +208,7 @@ export default function SaquesCrypto() {
   const filtered = useMemo(() => {
     if (!search) return cryptoWithdrawals;
     const q = search.toLowerCase();
-    return cryptoWithdrawals.filter(w => w.id.toLowerCase().includes(q) || (w as any).crypto_currency?.toLowerCase().includes(q));
+    return cryptoWithdrawals.filter(w => w.id.toLowerCase().includes(q) || w.crypto_currency?.toLowerCase().includes(q));
   }, [cryptoWithdrawals, search]);
 
   const ease = "transition-all duration-[260ms] ease-[cubic-bezier(0.32,0.72,0,1)]";
@@ -624,7 +624,7 @@ export default function SaquesCrypto() {
                       </div>
                     </td></tr>
                   ) : filtered.map((w) => {
-                    const wa = w as any;
+                    const wa = w;
                     const asset = CRYPTO_ASSETS.find(a => a.symbol === wa.crypto_currency);
                     const st = STATUS_CONFIG[w.status] || STATUS_CONFIG.pending;
                     return (
@@ -690,7 +690,7 @@ export default function SaquesCrypto() {
                 <p className="text-[12px] text-foreground font-display font-bold">Nenhum saque crypto</p>
               </div>
             ) : filtered.map((w) => {
-              const wa = w as any;
+              const wa = w;
               const asset = CRYPTO_ASSETS.find(a => a.symbol === wa.crypto_currency);
               const st = STATUS_CONFIG[w.status] || STATUS_CONFIG.pending;
               return (
