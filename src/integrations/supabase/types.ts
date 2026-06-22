@@ -3851,6 +3851,20 @@ export type Database = {
         Returns: boolean
       }
       is_product_active: { Args: { _product_id: string }; Returns: boolean }
+      list_visible_acquirers: {
+        Args: never
+        Returns: {
+          conversion_rate: number
+          description: string
+          id: string
+          is_active: boolean
+          name: string
+          priority: number
+          seller_visible: boolean
+          slug: string
+          type: string
+        }[]
+      }
       pick_failover_acquirer: {
         Args: { _current_acquirer_id: string }
         Returns: string
