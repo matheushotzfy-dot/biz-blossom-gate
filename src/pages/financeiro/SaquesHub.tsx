@@ -15,6 +15,7 @@ export default function SaquesHub() {
 
   return (
     <div className="min-h-screen bg-background antialiased selection:bg-primary/20">
+      <Seo title="Saques | Hotzfy" description="Solicite saques via PIX ou Crypto e acompanhe o histórico das suas retiradas." path="/financeiro/saques" noindex />
       <main className="mx-auto w-full">
         {tab === "pix" ? <Saques /> : <SaquesCrypto />}
       </main>
