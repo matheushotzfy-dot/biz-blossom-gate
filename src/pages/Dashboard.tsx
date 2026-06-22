@@ -104,10 +104,10 @@ export default function Dashboard() {
   const navigate = useNavigate();
   const { user } = useAuth();
   const { profile } = useProfile();
-  const { data: transactions = [] } = useTransactions();
+  const { data: transactions = [], isError: txError, refetch: refetchTx } = useTransactions();
   const { data: withdrawals = [] } = useWithdrawals(10);
   const { data: disputes = [] } = useDisputes();
-  const { data: productsData } = useProductsQuery();
+  const { data: productsData, isError: productsError } = useProductsQuery();
   const [selectedPeriod, setSelectedPeriod] = useState<PeriodPreset>(PERIOD_PRESETS[0]);
   const [customRange, setCustomRange] = useState<DateRange | undefined>();
   const [isCustom, setIsCustom] = useState(false);
@@ -271,6 +271,12 @@ export default function Dashboard() {
   return (
     <div className="p-4 md:p-6 pt-2 md:pt-4 space-y-6 max-w-[1600px] mx-auto animate-in fade-in duration-500 overflow-x-hidden">
       <Seo title="Dashboard | Hotzfy" description="Painel de controle com vendas, saldo, transações e KPIs em tempo real." path="/dashboard" noindex />
+      {(txError || productsError) && (
+        <div className="flex items-center justify-between gap-3 rounded-lg border border-destructive/30 bg-destructive/5 px-4 py-3 text-[12px] text-destructive">
+          <span className="font-medium">Falha ao carregar parte dos dados. Algumas métricas podem estar desatualizadas.</span>
+          <button onClick={() => refetchTx()} className="rounded-md border border-destructive/40 px-3 py-1 text-[11px] font-semibold uppercase tracking-wider hover:bg-destructive/10 transition-colors">Tentar novamente</button>
+        </div>
+      )}
       {/* Header */}
       <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4">
         <div className="space-y-1">

@@ -54,7 +54,7 @@ type ViewMode = "grid" | "list";
 export default function AdminConteudo() {
   const { user } = useAuth();
   const navigate = useNavigate();
-  const { data: coursesRaw = [], isLoading } = useCoursesQuery();
+  const { data: coursesRaw = [], isLoading, isError, refetch } = useCoursesQuery();
   const { data: productsRaw = [] } = useProductsQuery();
   const { data: transactions = [] } = useTransactions();
   const invalidateAll = useInvalidateAll();
@@ -364,6 +364,15 @@ export default function AdminConteudo() {
       <div className="px-6 sm:px-10 mt-10 pb-20">
         {isLoading ? (
           <GridSkeleton items={6} cols={4} />
+        ) : isError ? (
+          <div className="flex min-h-[400px] flex-col items-center justify-center px-6 text-center animate-fade-in">
+            <div className="h-20 w-20 rounded-[24px] bg-destructive/10 border border-destructive/30 flex items-center justify-center mb-6">
+              <GraduationCap className="h-8 w-8 text-destructive" />
+            </div>
+            <h3 className="font-display text-xl font-bold tracking-tight text-foreground mb-2">Falha ao carregar conteúdos</h3>
+            <p className="max-w-sm text-[13px] text-muted-foreground mb-6">Não foi possível buscar suas áreas. Verifique a conexão e tente novamente.</p>
+            <button onClick={() => refetch()} className="h-11 px-8 rounded-md bg-primary text-primary-foreground text-[12px] font-bold uppercase tracking-[0.2em] hover:bg-primary/90 transition-all">Tentar novamente</button>
+          </div>
         ) : filteredCourses.length === 0 ? (
           <div className="flex min-h-[500px] flex-col items-center justify-center px-6 text-center animate-fade-in">
             <div className="h-24 w-24 rounded-[32px] bg-card border border-border/40 flex items-center justify-center mb-8 shadow-xl relative group">
