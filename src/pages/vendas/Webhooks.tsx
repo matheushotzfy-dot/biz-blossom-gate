@@ -4,8 +4,8 @@ import { useAuth } from "@/hooks/useAuth";
 import { useWebhooks, useInvalidateAll } from "@/hooks/useQueryData";
 import type { Tables } from "@/integrations/supabase/types";
 import {
-  Webhook, Plus, Trash2, Globe, Shield, Search, Pencil,
-  Power, PowerOff, CircleDot, Code2, Zap, LayoutGrid, Clock, ShieldCheck
+  Plus, Trash2, Globe, Shield, Search, Pencil,
+  Power, PowerOff, CircleDot, Code2, Zap, LayoutGrid, ShieldCheck
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -39,8 +39,6 @@ const EVENT_GROUPS = [
     ],
   },
 ];
-
-const ALL_EVENTS = EVENT_GROUPS.flatMap((g) => g.events.map((e) => e.key));
 
 type WebhookConfig = Tables<"webhook_configs_safe">;
 
@@ -206,7 +204,7 @@ export default function Webhooks() {
         />
         <StatCard 
           title="Status" 
-          value={webhooks.filter((w: any) => w.is_active).length + " Ativos"} 
+          value={webhooks.filter((w) => w.is_active).length + " Ativos"} 
           icon={CircleDot} 
           color="success" 
           description="Processando agora"
@@ -268,8 +266,8 @@ export default function Webhooks() {
                   </td>
                 </tr>
               ) : (
-                filtered.map((wh: any) => (
-                  <tr key={wh.id} className="hover:bg-muted/20 transition-colors">
+                filtered.map((wh) => (
+                  <tr key={wh.id ?? wh.url} className="hover:bg-muted/20 transition-colors">
                     <td className="px-8 py-5">
                       <div className="flex items-center gap-3">
                         <div className={cn("h-2 w-2 rounded-full", wh.is_active ? "bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]" : "bg-muted-foreground/30")} />
@@ -292,10 +290,10 @@ export default function Webhooks() {
                       <button onClick={() => openEdit(wh)} title="Editar" className="h-8 w-8 rounded-lg bg-muted/40 border border-border/60 inline-flex items-center justify-center hover:bg-muted transition-all">
                         <Pencil size={14} />
                       </button>
-                      <button onClick={() => toggleActive(wh.id, wh.is_active)} title={wh.is_active ? "Pausar" : "Ativar"} className="h-8 w-8 rounded-lg bg-muted/40 border border-border/60 inline-flex items-center justify-center hover:bg-muted transition-all">
+                        <button onClick={() => wh.id && toggleActive(wh.id, Boolean(wh.is_active))} title={wh.is_active ? "Pausar" : "Ativar"} className="h-8 w-8 rounded-lg bg-muted/40 border border-border/60 inline-flex items-center justify-center hover:bg-muted transition-all">
                         {wh.is_active ? <PowerOff size={14} /> : <Power size={14} className="text-emerald-500" />}
                       </button>
-                      <button onClick={() => deleteWebhook(wh.id)} title="Excluir" className="h-8 w-8 rounded-lg bg-red-500/10 border border-red-500/20 inline-flex items-center justify-center text-red-500 hover:bg-red-500 hover:text-white transition-all">
+                        <button onClick={() => wh.id && deleteWebhook(wh.id)} title="Excluir" className="h-8 w-8 rounded-lg bg-red-500/10 border border-red-500/20 inline-flex items-center justify-center text-red-500 hover:bg-red-500 hover:text-white transition-all">
                         <Trash2 size={14} />
                       </button>
                     </td>
