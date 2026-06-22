@@ -37,6 +37,7 @@ import { ptBR } from "date-fns/locale";
 import { cn, formatCurrency } from "@/lib/utils";
 
 import type { DateRange } from "react-day-picker";
+import { Seo } from "@/components/Seo";
 
 const PERIOD_PRESETS = [
   { label: "Hoje", days: 0 },
