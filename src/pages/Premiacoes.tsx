@@ -466,7 +466,7 @@ export default function Premiacoes() {
                 <button
                   type="button"
                   onClick={() => setFocusId(a.id)}
-                  style={{ ['--tier' as any]: a.accent }}
+                  style={{ ['--tier' as string]: a.accent } as React.CSSProperties}
                   className={cn(
                     "group relative w-full text-left flex flex-col rounded-2xl overflow-hidden transition-all duration-300",
                     "border bg-background hover:-translate-y-1 hover:shadow-[0_20px_40px_-20px_hsl(var(--tier)/0.5)]",
