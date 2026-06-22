@@ -37,6 +37,7 @@ import { ptBR } from "date-fns/locale";
 import { cn, formatCurrency } from "@/lib/utils";
 
 import type { DateRange } from "react-day-picker";
+import { Seo } from "@/components/Seo";
 
 const PERIOD_PRESETS = [
   { label: "Hoje", days: 0 },
@@ -268,7 +269,8 @@ export default function Dashboard() {
 
 
   return (
-    <div className="p-4 md:p-6 pt-2 md:pt-4 space-y-6 max-w-[1600px] mx-auto animate-in fade-in duration-500">
+    <div className="p-4 md:p-6 pt-2 md:pt-4 space-y-6 max-w-[1600px] mx-auto animate-in fade-in duration-500 overflow-x-hidden">
+      <Seo title="Dashboard | Hotzfy" description="Painel de controle com vendas, saldo, transações e KPIs em tempo real." path="/dashboard" noindex />
       {/* Header */}
       <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4">
         <div className="space-y-1">

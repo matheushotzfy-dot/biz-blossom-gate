@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { Puzzle, Webhook, BookOpen, KeyRound } from "lucide-react";
 import { HubTabs, type HubTab } from "@/components/HubTabs";
+import { Seo } from "@/components/Seo";
 import { useSearchParams } from "react-router-dom";
 import Apps from "./vendas/Apps";
 import Webhooks from "./vendas/Webhooks";
@@ -37,6 +38,7 @@ export default function IntegracoesHub() {
 
  return (
  <>
+ <Seo title="Integrações | Hotzfy" description="Conecte apps, webhooks, gerencie chaves de API e consulte a documentação técnica." path="/integracoes" noindex />
  <HubTabs tabs={TABS} active={tab} onChange={setTab} />
  <ActiveComponent />
  </>
