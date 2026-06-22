@@ -163,7 +163,7 @@ export default function Premiacoes() {
       {/* =================== HERO — CINEMATIC STAGE =================== */}
       <section
         className="relative overflow-hidden rounded-[28px] border border-border/60 text-white isolate"
-        style={{ ['--tier' as any]: focused.accent }}
+        style={{ ['--tier' as string]: focused.accent } as React.CSSProperties}
       >
         {/* Cinematic backdrop */}
         <div className="absolute inset-0 -z-10">
