@@ -63,24 +63,10 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "acquirer_failover_events_from_acquirer_id_fkey"
-            columns: ["from_acquirer_id"]
-            isOneToOne: false
-            referencedRelation: "acquirers_public"
-            referencedColumns: ["id"]
-          },
-          {
             foreignKeyName: "acquirer_failover_events_to_acquirer_id_fkey"
             columns: ["to_acquirer_id"]
             isOneToOne: false
             referencedRelation: "acquirers"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "acquirer_failover_events_to_acquirer_id_fkey"
-            columns: ["to_acquirer_id"]
-            isOneToOne: false
-            referencedRelation: "acquirers_public"
             referencedColumns: ["id"]
           },
         ]
@@ -125,13 +111,6 @@ export type Database = {
             columns: ["acquirer_id"]
             isOneToOne: false
             referencedRelation: "acquirers"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "acquirer_health_events_acquirer_id_fkey"
-            columns: ["acquirer_id"]
-            isOneToOne: false
-            referencedRelation: "acquirers_public"
             referencedColumns: ["id"]
           },
         ]
@@ -2225,13 +2204,6 @@ export type Database = {
             referencedRelation: "acquirers"
             referencedColumns: ["id"]
           },
-          {
-            foreignKeyName: "profiles_acquirer_id_fkey"
-            columns: ["acquirer_id"]
-            isOneToOne: false
-            referencedRelation: "acquirers_public"
-            referencedColumns: ["id"]
-          },
         ]
       }
       quiz_attempts: {
@@ -2544,13 +2516,6 @@ export type Database = {
             columns: ["acquirer_id"]
             isOneToOne: false
             referencedRelation: "acquirers"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "seller_acquirer_config_acquirer_id_fkey"
-            columns: ["acquirer_id"]
-            isOneToOne: false
-            referencedRelation: "acquirers_public"
             referencedColumns: ["id"]
           },
         ]
@@ -3415,42 +3380,6 @@ export type Database = {
       }
     }
     Views: {
-      acquirers_public: {
-        Row: {
-          conversion_rate: number | null
-          description: string | null
-          id: string | null
-          is_active: boolean | null
-          name: string | null
-          priority: number | null
-          seller_visible: boolean | null
-          slug: string | null
-          type: string | null
-        }
-        Insert: {
-          conversion_rate?: number | null
-          description?: string | null
-          id?: string | null
-          is_active?: boolean | null
-          name?: string | null
-          priority?: number | null
-          seller_visible?: boolean | null
-          slug?: string | null
-          type?: string | null
-        }
-        Update: {
-          conversion_rate?: number | null
-          description?: string | null
-          id?: string | null
-          is_active?: boolean | null
-          name?: string | null
-          priority?: number | null
-          seller_visible?: boolean | null
-          slug?: string | null
-          type?: string | null
-        }
-        Relationships: []
-      }
       affiliate_links_public: {
         Row: {
           product_id: string | null
@@ -3922,6 +3851,20 @@ export type Database = {
         Returns: boolean
       }
       is_product_active: { Args: { _product_id: string }; Returns: boolean }
+      list_visible_acquirers: {
+        Args: never
+        Returns: {
+          conversion_rate: number
+          description: string
+          id: string
+          is_active: boolean
+          name: string
+          priority: number
+          seller_visible: boolean
+          slug: string
+          type: string
+        }[]
+      }
       pick_failover_acquirer: {
         Args: { _current_acquirer_id: string }
         Returns: string
