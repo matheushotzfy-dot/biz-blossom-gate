@@ -138,7 +138,7 @@ export default function Vendas() {
     "Cliente": t.customer_name ?? "",
     "Email": t.customer_email ?? "",
     "Documento": t.customer_document ?? "",
-    "Telefone": (t as any).customer_phone ?? "",
+    "Telefone": t.customer_phone ?? "",
     "Produto": prodsMap[t.product_id ?? ""] ?? "",
     "Método": t.payment_method ?? "",
     "Status": STATUS_MAP[t.status ?? ""]?.label ?? t.status ?? "",
