@@ -175,7 +175,7 @@ export default function Vendas() {
     };
     const csv = "\uFEFF" + [
       headers.join(";"),
-      ...rows.map((r) => headers.map((h) => esc((r as any)[h])).join(";")),
+      ...rows.map((r) => headers.map((h) => esc(r[h as keyof typeof r])).join(";")),
     ].join("\n");
     download(new Blob([csv], { type: "text/csv;charset=utf-8;" }), fileName("csv"));
     toast.success(`${rows.length} transações exportadas (CSV)`);
