@@ -136,8 +136,8 @@ export default function StaffManagementTab({ profiles, onReload, role }: Props) 
     const { data, error } = await supabase.functions.invoke("admin-manage-staff", {
       body: { action, target_user_id: row.user_id },
     });
-    if (error || (data as any)?.error) {
-      toast.error((data as any)?.error ?? error?.message ?? "Erro");
+    if (error || (data as { error?: string })?.error) {
+      toast.error((data as { error?: string })?.error ?? error?.message ?? "Erro");
       return;
     }
     toast.success(row.frozen ? "Conta descongelada" : "Conta congelada");
@@ -151,8 +151,8 @@ export default function StaffManagementTab({ profiles, onReload, role }: Props) 
     const { data, error } = await supabase.functions.invoke("admin-manage-staff", {
       body: { action: "reset_password", target_user_id: row.user_id, password: pw },
     });
-    if (error || (data as any)?.error) {
-      toast.error((data as any)?.error ?? error?.message ?? "Erro");
+    if (error || (data as { error?: string })?.error) {
+      toast.error((data as { error?: string })?.error ?? error?.message ?? "Erro");
       return;
     }
     await navigator.clipboard.writeText(pw).catch(() => {});
@@ -164,8 +164,8 @@ export default function StaffManagementTab({ profiles, onReload, role }: Props) 
     const { data, error } = await supabase.functions.invoke("admin-manage-staff", {
       body: { action: "delete", target_user_id: row.user_id },
     });
-    if (error || (data as any)?.error) {
-      toast.error((data as any)?.error ?? error?.message ?? "Erro");
+    if (error || (data as { error?: string })?.error) {
+      toast.error((data as { error?: string })?.error ?? error?.message ?? "Erro");
       return;
     }
     toast.success("Conta excluída.");
@@ -404,8 +404,8 @@ function CreateStaffDialog({ open, onOpenChange, role, onCreated }: {
       body: { email, password, full_name: name, role, permissions: Array.from(perms), commission_pct: pct },
     });
     setSubmitting(false);
-    if (error || (data as any)?.error) {
-      toast.error((data as any)?.error ?? error?.message ?? "Falha");
+    if (error || (data as { error?: string })?.error) {
+      toast.error((data as { error?: string })?.error ?? error?.message ?? "Falha");
       return;
     }
     await navigator.clipboard.writeText(`Email: ${email}\nSenha: ${password}`).catch(() => {});

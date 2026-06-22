@@ -113,7 +113,7 @@ export default function Cupons() {
 
     setSaving(false);
     if (error) {
-      const isDup = (error as any).code === "23505" || error.message.toLowerCase().includes("duplicate");
+      const isDup = (error as { code?: string }).code === "23505" || error.message.toLowerCase().includes("duplicate");
       toast.error(isDup ? "Cupom já existe." : "Erro ao criar cupom.");
       return;
     }
