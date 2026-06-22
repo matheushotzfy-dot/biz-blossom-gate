@@ -268,7 +268,7 @@ export default function Coproducoes() {
                 <Select value={selectedProduct} onValueChange={setSelectedProduct}>
                   <SelectTrigger className="mt-1.5 rounded-xl h-11"><SelectValue placeholder="Selecione um produto" /></SelectTrigger>
                   <SelectContent>
-                    {products.filter(p => !(p as any).co_production_enabled).map(p => (
+                    {products.filter(p => !p.co_production_enabled).map(p => (
                       <SelectItem key={p.id} value={p.id}>{p.name} — {fmt(Number(p.price))}</SelectItem>
                     ))}
                   </SelectContent>
