@@ -101,7 +101,7 @@ export default function MemberLayout() {
     <div className="min-h-dvh bg-[#050505] text-zinc-100 font-display antialiased selection:bg-emerald-500/30 flex">
       {!isCourse && <MemberSidebar />}
 
-      <div className="flex-1 flex flex-col min-h-screen relative overflow-x-hidden">
+      <div className="flex-1 flex flex-col relative overflow-x-hidden">
         {/* Top cinematic bar — only shows when not in course player (which has its own header) */}
         {!isCourse && (
           <header className={cn(
