@@ -64,12 +64,12 @@ export function RequireAdmin({ children }: { children: React.ReactNode }) {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#050505] flex items-center justify-center">
+      <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="flex flex-col items-center gap-4">
-          <div className="h-14 w-14 rounded-[18px] bg-gradient-to-br from-indigo-500 to-violet-600 flex items-center justify-center shadow-[0_0_60px_rgba(99,102,241,0.3)] animate-pulse">
-            <Shield className="h-7 w-7 text-white" />
+          <div className="h-14 w-14 rounded-[18px] bg-primary/15 border border-primary/30 flex items-center justify-center animate-pulse">
+            <Shield className="h-7 w-7 text-primary" />
           </div>
-          <p className="text-[11px] text-white/20 font-medium tracking-wider uppercase">
+          <p className="text-[11px] text-muted-foreground font-medium tracking-wider uppercase">
             Verificando permissões...
           </p>
         </div>
