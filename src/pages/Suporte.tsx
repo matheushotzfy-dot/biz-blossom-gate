@@ -16,6 +16,7 @@ import {
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { EmptyState, TableSkeleton } from "@/components/PageShell";
+import { Seo } from "@/components/Seo";
 
 type Ticket = {
   id: string;
