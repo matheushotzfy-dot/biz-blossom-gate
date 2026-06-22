@@ -27,6 +27,9 @@ export function useLedgerBalance() {
 }
 
 type PixKey = { id: string; key_type: string; key_value: string; created_at: string; user_id: string };
+type CourseWithModules = Tables<"courses"> & {
+  modules: Array<{ id: string; lessons: Array<{ id: string }> }> | null;
+};
 
 export function useProducts() {
   const { user } = useAuth();
@@ -223,7 +226,7 @@ export function useCourses() {
         .eq("user_id", user!.id)
         .order("sort_order");
       if (error) throw error;
-      return (data || []) as any[];
+      return (data || []) as CourseWithModules[];
     },
     enabled: !!user?.id,
     staleTime: STALE_TIME,
