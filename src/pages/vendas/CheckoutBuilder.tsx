@@ -397,7 +397,7 @@ export default function CheckoutBuilder() {
  <div className="h-screen bg-background flex flex-col lg:flex-row overflow-hidden">
  
  {/* ─── LEFT: Control Panel ─── */}
- <aside className="w-full lg:w-[420px] shrink-0 border-b lg:border-b-0 lg:border-r border-border/50 bg-card/50 backdrop-blur-sm flex flex-col h-[50vh] lg:h-screen min-h-0">
+ <aside className="w-full lg:w-[420px] shrink-0 border-b lg:border-b-0 lg:border-r border-border/50 bg-card/50 backdrop-blur-sm flex flex-col max-h-[60vh] lg:max-h-none lg:h-screen min-h-0">
  
  {/* Header */}
  <div className="px-4 py-3 border-b border-border/40 bg-card/80">
