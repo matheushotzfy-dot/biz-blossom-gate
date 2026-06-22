@@ -29,7 +29,7 @@ export default function Saques() {
   const { user } = useAuth();
   const { profile } = useProfile();
   const navigate = useNavigate();
-  const { data: withdrawals = [] } = useWithdrawals();
+  const { data: withdrawals = [], isError: withdrawalsError, refetch: refetchWithdrawals } = useWithdrawals();
   const { data: pixKeys = [] } = usePixKeys();
   const { data: bankAccounts = [] } = useBankAccounts();
   const [open, setOpen] = useState(false);
