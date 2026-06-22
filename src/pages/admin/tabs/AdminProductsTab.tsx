@@ -115,7 +115,7 @@ export default function AdminProductsTab({ products, profiles, transactions, fmt
       supabase.from("order_bumps").select("*, bump_product:products!order_bumps_bump_product_id_fkey(id,name,price)").eq("product_id", pid),
       txIds.length ? supabase.from("disputes").select("*").in("transaction_id", txIds) : Promise.resolve({ data: [] } as any),
       supabase.from("affiliate_sales").select("*").eq("product_id", pid),
-    ]).then(([obRes, dRes, asRes]: any[]) => {
+    ]).then(([obRes, dRes, asRes]) => {
       setOrderBumps(obRes.data || []);
       setDisputes(dRes.data || []);
       setAffiliateSales(asRes.data || []);
