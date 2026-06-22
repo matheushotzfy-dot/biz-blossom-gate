@@ -103,7 +103,7 @@ export default function MemberCourse() {
     setModules(enrichedModules);
     setExpandedModules(new Set(enrichedModules.map(m => m.id)));
 
-    const allLessonIds = lessonsData.map((l: any) => l.id);
+    const allLessonIds = lessonsData.map(l => l.id);
     if (allLessonIds.length > 0) {
       const { data: progressData } = await supabase.from("user_progress").select("lesson_id, completed, progress_seconds").eq("user_id", user.id).in("lesson_id", allLessonIds);
       const pMap = new Map<string, Progress>();
@@ -111,7 +111,7 @@ export default function MemberCourse() {
       setProgress(pMap);
 
       const targetId = allLessonIds[0];
-      const targetLesson = lessonsData.find((l: any) => l.id === targetId) as Lesson | undefined;
+      const targetLesson = lessonsData.find(l => l.id === targetId);
       if (targetLesson) {
         setActiveLesson(targetLesson);
         loadAttachments(targetLesson.id);
