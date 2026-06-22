@@ -164,7 +164,7 @@ const App = () => (
                 <Route path="/membros" element={<MemberArea />} />
                 <Route path="/membros/curso/:courseId" element={<CoursePage />} />
               </Route>
-              <Route path="*" element={<Navigate to="/dashboard" replace />} />
+              <Route path="*" element={<NotFound />} />
             </Routes>
           </BrowserRouter>
         </TooltipProvider>
