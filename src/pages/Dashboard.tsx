@@ -104,10 +104,10 @@ export default function Dashboard() {
   const navigate = useNavigate();
   const { user } = useAuth();
   const { profile } = useProfile();
-  const { data: transactions = [] } = useTransactions();
+  const { data: transactions = [], isError: txError, refetch: refetchTx } = useTransactions();
   const { data: withdrawals = [] } = useWithdrawals(10);
   const { data: disputes = [] } = useDisputes();
-  const { data: productsData } = useProductsQuery();
+  const { data: productsData, isError: productsError } = useProductsQuery();
   const [selectedPeriod, setSelectedPeriod] = useState<PeriodPreset>(PERIOD_PRESETS[0]);
   const [customRange, setCustomRange] = useState<DateRange | undefined>();
   const [isCustom, setIsCustom] = useState(false);
