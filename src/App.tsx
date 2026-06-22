@@ -141,7 +141,7 @@ const App = () => (
               >
                 <Route path="/dashboard" element={<Dashboard />} />
                 <Route path="/perfil" element={<PerfilHub />} />
-                <Route path="/financeiro/identidade" element={<Navigate to="/perfil?tab=identidade" replace />} />
+                {/* /financeiro/identidade já redirecionado na rota pública acima */}
                 <Route path="/premiacoes" element={<PremiacoesHub />} />
                 <Route path="/gamificacao" element={<Gamificacao />} />
                 <Route path="/suporte" element={<Suporte />} />
