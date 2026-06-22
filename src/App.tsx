@@ -46,7 +46,7 @@ import AdminDashboard from "./pages/admin/AdminDashboard";
 import AdminConfiguracoes from "./pages/admin/AdminConfiguracoes";
 import PublicCheckout from "./pages/PublicCheckout";
 import ImpersonateReceiver from "./pages/ImpersonateReceiver";
-// NotFound removido — todas as rotas inválidas redirecionam para /dashboard
+import NotFound from "./pages/NotFound";
 import ManagerLogin from "./pages/manager/ManagerLogin";
 import ManagerDashboard from "./pages/manager/ManagerDashboard";
 import TermosDeUso from "./pages/TermosDeUso";
