@@ -68,7 +68,7 @@ export function ProductGridView({ products, copiedId, toolbar, ...handlers }: Pr
     <div className="mx-auto w-full max-w-[1280px]">
       {toolbar && <div className="mb-5">{toolbar}</div>}
 
-      <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
+      <div className="grid grid-cols-1 gap-3 sm:gap-5 sm:grid-cols-2 lg:grid-cols-3">
         {products.map((product) => {
           const effectiveStatus = getEffectiveStatus(product);
           const status = STATUS_META[effectiveStatus] || STATUS_META.inactive;
