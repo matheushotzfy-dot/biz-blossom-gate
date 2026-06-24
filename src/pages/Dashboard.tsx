@@ -740,6 +740,9 @@ export default function Dashboard() {
             <ChevronRight className="h-4 w-4 text-muted-foreground/50 group-hover:text-primary group-hover:translate-x-0.5 transition-all shrink-0" />
           </Link>
         ))}
+      </div>
+
+
 
       {/* Recent Activity */}
       <Card className="seller-hover-card border-border/40 overflow-hidden shadow-lg shadow-black/5 rounded-3xl">
