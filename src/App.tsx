@@ -170,6 +170,10 @@ const App = () => (
 
                 <Route path="/vendas/conteudo" element={<Conteudo />} />
                 <Route path="/integracoes" element={<IntegracoesHub />} />
+                <Route path="/integracoes/apps" element={<IntegracoesHub />} />
+                <Route path="/integracoes/webhooks" element={<IntegracoesHub />} />
+                <Route path="/integracoes/documentacao" element={<IntegracoesHub />} />
+                <Route path="/integracoes/credenciais" element={<IntegracoesHub />} />
                 <Route path="/vendas/afiliados" element={<Afiliados />} />
                 <Route path="/vendas/cupons" element={<Cupons />} />
                 <Route path="/vendas/coproducoes" element={<Coproducoes />} />

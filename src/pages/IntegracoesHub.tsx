@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { Puzzle, Webhook, BookOpen, KeyRound } from "lucide-react";
 import { HubTabs, type HubTab } from "@/components/HubTabs";
 import { Seo } from "@/components/Seo";
-import { useSearchParams } from "react-router-dom";
+import { useLocation, useSearchParams } from "react-router-dom";
 import Apps from "./vendas/Apps";
 import Webhooks from "./vendas/Webhooks";
 import Documentacao from "./vendas/Documentacao";
@@ -22,17 +22,32 @@ const COMPONENTS: Record<string, React.FC> = {
  keys: ApiKeys,
 };
 
+const PATH_TABS: Record<string, string> = {
+ "/integracoes/apps": "apps",
+ "/integracoes/webhooks": "webhooks",
+ "/integracoes/documentacao": "api",
+ "/integracoes/credenciais": "keys",
+};
+
 export default function IntegracoesHub() {
+ const location = useLocation();
  const [searchParams, setSearchParams] = useSearchParams();
- const initialTab = searchParams.get("tab");
+ const routeTab = PATH_TABS[location.pathname];
+ const initialTab = routeTab || searchParams.get("tab");
  const [tab, setTab] = useState(initialTab && COMPONENTS[initialTab] ? initialTab : "apps");
 
  useEffect(() => {
+  const pathnameTab = PATH_TABS[location.pathname];
+  if (pathnameTab) {
+   setTab(pathnameTab);
+   return;
+  }
+
  const paramTab = searchParams.get("tab");
  if (paramTab && COMPONENTS[paramTab]) {
    setTab(paramTab);
  }
- }, [searchParams]);
+ }, [location.pathname, searchParams]);
 
  const handleTabChange = (nextTab: string) => {
   setTab(nextTab);
