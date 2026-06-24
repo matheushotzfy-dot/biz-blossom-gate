@@ -715,10 +715,10 @@ export default function Dashboard() {
             {/* Quick integration shortcuts */}
             <div className="grid grid-cols-2 gap-3 pt-2">
               {[
-                { label: "Credenciais API", icon: KeyRound, to: "/integracoes?tab=keys", color: "text-primary", bg: "bg-primary/10", border: "border-primary/20" },
-                { label: "Documentação", icon: BookOpen, to: "/integracoes?tab=api", color: "text-info", bg: "bg-info/10", border: "border-info/20" },
-                { label: "Webhooks", icon: Webhook, to: "/integracoes?tab=webhooks", color: "text-orange-500", bg: "bg-orange-500/10", border: "border-orange-500/20" },
-                { label: "Integrações", icon: Puzzle, to: "/integracoes?tab=apps", color: "text-emerald-500", bg: "bg-emerald-500/10", border: "border-emerald-500/20" },
+                { label: "Credenciais API", icon: KeyRound, to: "/integracoes?tab=keys" },
+                { label: "Documentação", icon: BookOpen, to: "/integracoes?tab=api" },
+                { label: "Webhooks", icon: Webhook, to: "/integracoes?tab=webhooks" },
+                { label: "Integrações", icon: Puzzle, to: "/integracoes?tab=apps" },
               ].map((item) => (
                 <Link
                   key={item.label}
