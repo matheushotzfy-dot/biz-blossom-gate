@@ -398,10 +398,47 @@ export default function Vendas() {
 
         {/* Mobile cards (< md) */}
         <div className="md:hidden divide-y divide-border/40">
-          {paged.length === 0 ? (
-            <div className="px-6 py-16 text-center opacity-30 flex flex-col items-center">
-              <ShoppingCart size={40} strokeWidth={1} />
-              <p className="mt-3 text-[11px] font-black uppercase tracking-widest">Nenhuma transação</p>
+          {txLoading ? (
+            Array.from({ length: 5 }).map((_, i) => (
+              <div key={i} className="px-4 py-3.5 flex items-center gap-3 animate-pulse">
+                <div className="h-10 w-10 rounded-xl bg-muted/60 shrink-0" />
+                <div className="flex-1 space-y-2">
+                  <div className="flex justify-between gap-2">
+                    <div className="h-3 w-32 rounded bg-muted/60" />
+                    <div className="h-3 w-16 rounded bg-muted/60" />
+                  </div>
+                  <div className="h-2.5 w-40 rounded bg-muted/40" />
+                  <div className="flex gap-1.5">
+                    <div className="h-4 w-14 rounded-full bg-muted/40" />
+                    <div className="h-4 w-12 rounded-full bg-muted/40" />
+                  </div>
+                </div>
+              </div>
+            ))
+          ) : txError ? (
+            <div className="px-6 py-14 text-center flex flex-col items-center gap-3">
+              <div className="h-12 w-12 rounded-2xl bg-destructive/10 border border-destructive/20 flex items-center justify-center">
+                <FileText size={20} className="text-destructive" />
+              </div>
+              <div>
+                <p className="text-[13px] font-black text-foreground">Erro ao carregar vendas</p>
+                <p className="text-[11px] text-muted-foreground/70 mt-1">Verifique sua conexão e tente novamente.</p>
+              </div>
+              <button onClick={() => refetchTx()} className="h-9 px-4 rounded-xl bg-primary text-primary-foreground text-[11px] font-black uppercase tracking-wider">
+                Tentar novamente
+              </button>
+            </div>
+          ) : paged.length === 0 ? (
+            <div className="px-6 py-14 text-center flex flex-col items-center gap-3">
+              <div className="h-14 w-14 rounded-2xl bg-muted/40 border border-border/60 flex items-center justify-center">
+                <ShoppingCart size={22} strokeWidth={1.5} className="text-muted-foreground/50" />
+              </div>
+              <div>
+                <p className="text-[13px] font-black text-foreground">Nenhuma transação no período</p>
+                <p className="text-[11px] text-muted-foreground/70 mt-1">
+                  {search ? "Tente outro termo de busca." : "Ajuste o filtro de período ou aguarde novas vendas."}
+                </p>
+              </div>
             </div>
           ) : (
             paged.map((t) => {
@@ -450,6 +487,7 @@ export default function Vendas() {
             })
           )}
         </div>
+
 
         <div className="hidden md:block overflow-x-auto">
           <table className="w-full text-left">
