@@ -592,7 +592,7 @@ export default function Dashboard() {
                 {item.sub}
               </p>
             </div>
-            <div className="relative z-10 hidden sm:flex h-7 w-7 shrink-0 items-center justify-center rounded-lg border border-border/45 bg-background/40 text-muted-foreground/45 transition-[transform,border-color,background-color,color] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:translate-x-1 group-hover:border-primary/50 group-hover:bg-primary/12 group-hover:text-primary">
+            <div className="relative z-10 hidden xl:flex h-7 w-7 shrink-0 items-center justify-center rounded-lg border border-border/45 bg-background/40 text-muted-foreground/45 transition-[transform,border-color,background-color,color] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:translate-x-1 group-hover:border-primary/50 group-hover:bg-primary/12 group-hover:text-primary">
               <ChevronRight className="h-4 w-4" />
             </div>
             <span className="pointer-events-none absolute inset-x-4 top-0 z-0 h-px bg-gradient-to-r from-transparent via-primary/70 to-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
