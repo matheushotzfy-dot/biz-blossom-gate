@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Puzzle, Webhook, BookOpen, KeyRound } from "lucide-react";
 import { HubTabs, type HubTab } from "@/components/HubTabs";
 import { Seo } from "@/components/Seo";
@@ -24,22 +24,27 @@ const COMPONENTS: Record<string, React.FC> = {
 
 export default function IntegracoesHub() {
  const [searchParams, setSearchParams] = useSearchParams();
- const [tab, setTab] = useState(searchParams.get("tab") || "apps");
+ const initialTab = searchParams.get("tab");
+ const [tab, setTab] = useState(initialTab && COMPONENTS[initialTab] ? initialTab : "apps");
 
  useEffect(() => {
  const paramTab = searchParams.get("tab");
  if (paramTab && COMPONENTS[paramTab]) {
- setTab(paramTab);
- setSearchParams({}, { replace: true });
+   setTab(paramTab);
  }
  }, [searchParams]);
+
+ const handleTabChange = (nextTab: string) => {
+  setTab(nextTab);
+  setSearchParams(nextTab === "apps" ? {} : { tab: nextTab }, { replace: true });
+ };
 
  const ActiveComponent = COMPONENTS[tab] || Apps;
 
  return (
  <>
  <Seo title="Integrações | Hotzfy" description="Conecte apps, webhooks, gerencie chaves de API e consulte a documentação técnica." path="/integracoes" noindex />
- <HubTabs tabs={TABS} active={tab} onChange={setTab} />
+ <HubTabs tabs={TABS} active={tab} onChange={handleTabChange} />
  <ActiveComponent />
  </>
  );
