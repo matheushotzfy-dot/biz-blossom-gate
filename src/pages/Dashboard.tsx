@@ -586,7 +586,7 @@ export default function Dashboard() {
             </div>
           </CardHeader>
           <CardContent className="p-0">
-            <div className="h-[300px] md:h-[350px] w-full pt-6 pb-4 pr-6 pl-2">
+            <div className="h-[320px] w-full pt-6 pb-4 pr-6 pl-2">
               <ResponsiveContainer width="100%" height="100%">
                 <AreaChart data={chartData} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
                   <defs>
