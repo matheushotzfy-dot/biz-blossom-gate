@@ -146,12 +146,13 @@ export function GlobalSearchDialog({ open, onOpenChange }: { open: boolean; onOp
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="overflow-hidden p-0 border-none bg-transparent shadow-none max-w-xl ring-0 focus:ring-0 [&>button:last-child]:hidden h-fit flex items-start justify-center pt-24">
+      <DialogContent className="overflow-visible p-0 border-none bg-transparent shadow-none w-[calc(100vw-2rem)] max-w-xl ring-0 outline-none focus:ring-0 focus:outline-none focus-visible:ring-0 focus-visible:outline-none [&>button:last-child]:hidden top-[18%] translate-y-0 sm:top-[20%]">
         <motion.div
           initial={{ opacity: 0, scale: 0.98, y: -10 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
-          className="w-full bg-card/95 backdrop-blur-3xl rounded-2xl border border-border/40 shadow-[0_32px_128px_-16px_rgba(0,0,0,0.5)] overflow-hidden flex flex-col"
+          className="w-full bg-card/95 backdrop-blur-3xl rounded-2xl border border-border/40 shadow-[0_32px_128px_-16px_rgba(0,0,0,0.5)] overflow-hidden flex flex-col outline-none"
           onKeyDown={handleKeyDown}
+          tabIndex={-1}
         >
           {/* Header */}
           <div className="flex items-center h-14 px-4 gap-3 border-b border-border/10">

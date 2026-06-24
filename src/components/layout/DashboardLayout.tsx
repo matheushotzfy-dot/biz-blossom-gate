@@ -94,7 +94,7 @@ function DashboardLayoutInner() {
 
  return (
       <SidebarProvider
-        style={{ "--sidebar-width": "19.5rem", "--sidebar-width-icon": "4.5rem" } as { [key: string]: string }}
+        style={{ "--sidebar-width": "19.5rem", "--sidebar-width-icon": "5rem" } as { [key: string]: string }}
       >
  <div className="flex w-full h-full bg-background platform-shell">
  <AppSidebar />
@@ -102,27 +102,23 @@ function DashboardLayoutInner() {
   <SidebarInset className="ambient-backdrop relative min-w-0 bg-background flex flex-col h-full min-h-0 overflow-hidden">
    {/* Ambient light is handled by .ambient-backdrop CSS — no extra blobs needed */}
 
-          <header className="relative z-30 h-16 flex items-center border-b border-border bg-card px-4 lg:px-6 sticky top-0 md:flex transition-colors duration-300">
-            <SidebarTrigger className="seller-clickable h-9 w-9 rounded-xl hover:bg-muted/60 flex items-center justify-center text-muted-foreground/70 hover:text-foreground">
-              <Menu className="h-4 w-4" strokeWidth={2} />
+          <header className="relative z-30 h-16 flex items-center gap-2 border-b border-border bg-card px-4 lg:px-6 sticky top-0 md:flex transition-colors duration-300">
+            <SidebarTrigger className="sidebar-toggle-fx group/trg seller-clickable relative h-10 w-10 rounded-xl border border-border/60 bg-muted/40 hover:bg-primary/10 hover:border-primary/50 flex items-center justify-center text-muted-foreground hover:text-primary transition-all duration-300 overflow-hidden">
+              <span className="pointer-events-none absolute inset-0 bg-gradient-to-br from-primary/20 via-transparent to-transparent opacity-0 group-hover/trg:opacity-100 transition-opacity duration-300" />
+              <span className="pointer-events-none absolute -inset-1 rounded-2xl ring-1 ring-primary/0 group-hover/trg:ring-primary/30 transition" />
             </SidebarTrigger>
 
-            {/* ─── SEARCH TRIGGER ─── */}
-            <div className="flex-1 max-w-sm lg:max-w-md ml-4 mr-auto">
-              <button
-                onClick={() => setSearchOpen(true)}
-                className="seller-clickable w-full h-[38px] px-4 rounded-xl bg-muted hover:bg-accent flex items-center gap-3 text-muted-foreground hover:text-foreground group overflow-hidden relative"
-              >
-                <div className="absolute inset-0 bg-gradient-to-r from-primary/[0.03] to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-                <Search className="h-[14px] w-[14px] transition-transform group-hover:scale-110 text-primary/60 group-hover:text-primary" strokeWidth={2.5} />
-                <span className="text-[12px] font-medium tracking-tight flex-1 text-left hidden sm:inline truncate">O que você está procurando?</span>
-                <span className="text-[12px] font-medium tracking-tight flex-1 text-left sm:hidden">Buscar...</span>
-                <div className="hidden lg:flex items-center gap-1.5 px-1.5 py-0.5 rounded-lg bg-background/50 border border-border/40 shadow-sm">
-                  <span className="text-[9px] font-bold text-muted-foreground/30">⌘</span>
-                  <span className="text-[9px] font-bold text-muted-foreground/30">K</span>
-                </div>
-              </button>
-            </div>
+            {/* ─── SEARCH BUTTON (icon only) ─── */}
+            <button
+              onClick={() => setSearchOpen(true)}
+              aria-label="Pesquisar"
+              className="group/search seller-clickable relative h-10 w-10 rounded-xl border border-border/60 bg-muted/40 hover:bg-primary/10 hover:border-primary/50 flex items-center justify-center text-muted-foreground hover:text-primary transition-all duration-300 overflow-hidden ml-1 mr-auto"
+            >
+              <span className="pointer-events-none absolute inset-0 bg-gradient-to-br from-primary/20 via-transparent to-transparent opacity-0 group-hover/search:opacity-100 transition-opacity duration-300" />
+              <Search className="relative h-[16px] w-[16px] transition-transform duration-300 group-hover/search:scale-110 group-hover/search:rotate-[-8deg]" strokeWidth={2.5} />
+              <span className="pointer-events-none absolute -inset-1 rounded-2xl ring-1 ring-primary/0 group-hover/search:ring-primary/30 transition" />
+            </button>
+
 
             {/* ─── BALANCE ─── */}
             <div className="hidden md:flex items-center justify-center px-4">
