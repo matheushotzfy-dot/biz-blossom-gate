@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Puzzle, Webhook, BookOpen, KeyRound } from "lucide-react";
+import { Blocks, Webhook, BookOpen, KeyRound } from "lucide-react";
 import { HubTabs, type HubTab } from "@/components/HubTabs";
 import { Seo } from "@/components/Seo";
 import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
