@@ -606,8 +606,8 @@ export default function Dashboard() {
       </div>
 
       {/* Main Operations Grid */}
-      <div className="grid lg:grid-cols-3 gap-6 items-stretch">
-        <Card className="seller-hover-card lg:col-span-2 border-border/40 overflow-hidden shadow-lg shadow-black/5 rounded-3xl flex flex-col h-full">
+      <div className="contents lg:grid lg:grid-cols-3 lg:gap-6 lg:items-stretch">
+        <Card className="order-2 lg:order-none seller-hover-card lg:col-span-2 border-border/40 overflow-hidden shadow-lg shadow-black/5 rounded-3xl flex flex-col h-full">
           <CardHeader className="flex flex-row items-center justify-between border-b border-border/40 px-6 py-5 md:px-8">
             <div>
               <CardTitle className="text-lg font-bold">Fluxo de Vendas</CardTitle>
