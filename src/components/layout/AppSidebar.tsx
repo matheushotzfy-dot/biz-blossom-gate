@@ -201,12 +201,13 @@ type SidebarSectionNavProps = {
 
 function SidebarSectionNav({ section, pathname, isFirst }: SidebarSectionNavProps) {
   return (
-    <SidebarGroup className="px-0 py-0">
+    <SidebarGroup className="px-0 py-0 group-data-[collapsible=icon]:flex-1 group-data-[collapsible=icon]:flex group-data-[collapsible=icon]:flex-col group-data-[collapsible=icon]:justify-center">
       {!isFirst && (
-        <div className="mx-4 my-2.5 h-px bg-sidebar-border/50 group-data-[collapsible=icon]:mx-2 group-data-[collapsible=icon]:my-2" />
+        <div className="mx-4 my-2.5 h-px bg-sidebar-border/50 group-data-[collapsible=icon]:mx-3 group-data-[collapsible=icon]:my-1.5" />
       )}
       <SidebarGroupContent>
-        <SidebarMenu className="gap-1 px-0">
+        <SidebarMenu className="gap-1 px-0 group-data-[collapsible=icon]:gap-2">
+
           {section.items.map((item) => {
             const isActive = isItemActive(pathname, item);
             return (
@@ -406,7 +407,7 @@ export function AppSidebar() {
       </SidebarHeader>
 
 
-      <SidebarContent className="relative gap-0 overflow-y-auto px-2.5 py-3">
+      <SidebarContent className="relative gap-0 overflow-y-auto px-2.5 py-3 group-data-[collapsible=icon]:justify-between group-data-[collapsible=icon]:py-4">
         {sections.map((section, idx) => (
           <SidebarSectionNav
             key={section.label}
@@ -416,6 +417,7 @@ export function AppSidebar() {
           />
         ))}
       </SidebarContent>
+
 
       <SidebarFooter className="relative gap-2 border-t border-sidebar-border/60 p-3">
         {/* Solicitar Suporte — featured card */}
