@@ -255,7 +255,24 @@ export default function Produtos() {
       {/* ── Product workspace ── */}
       <div>
 
-        {filtered.length === 0 ? (
+        {productsLoading ? (
+          <div className="grid grid-cols-1 gap-3 sm:gap-5 sm:grid-cols-2 lg:grid-cols-3">
+            {Array.from({ length: 6 }).map((_, i) => (
+              <div key={i} className="rounded-[20px] border border-border/40 bg-card/40 overflow-hidden animate-pulse">
+                <div className="aspect-[16/10] w-full bg-muted/50" />
+                <div className="p-4 space-y-3">
+                  <div className="h-4 w-3/4 rounded bg-muted/60" />
+                  <div className="h-3 w-1/2 rounded bg-muted/40" />
+                  <div className="grid grid-cols-2 gap-2 pt-1">
+                    <div className="h-12 rounded-xl bg-muted/30" />
+                    <div className="h-12 rounded-xl bg-muted/30" />
+                  </div>
+                  <div className="h-10 rounded-lg bg-muted/40" />
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : filtered.length === 0 ? (
           <div className="relative flex flex-col items-center justify-center overflow-hidden rounded-3xl border border-dashed border-border/60 bg-card/40 px-6 py-24 text-center animate-fade-in stagger-3">
             <div
               aria-hidden
