@@ -583,7 +583,7 @@ export default function Dashboard() {
             to={item.to}
             className="group relative isolate flex min-h-[102px] w-full min-w-0 flex-col items-start justify-between gap-2 overflow-hidden rounded-[1.05rem] border border-border/70 bg-card p-3 outline-none transition-[transform,border-color,background-color] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] hover:-translate-y-1 hover:border-primary/70 hover:bg-primary/[0.045] focus-visible:ring-2 focus-visible:ring-primary/40 active:translate-y-0 active:scale-[0.99] sm:min-h-[86px] sm:flex-row sm:items-center sm:justify-start sm:gap-2.5 sm:rounded-2xl sm:px-3.5"
           >
-            <div className="relative z-10 flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-border/70 bg-background/70 text-foreground/75 transition-[border-color,background-color,color,transform] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:scale-105 group-hover:-rotate-3 group-hover:border-primary/55 group-hover:bg-primary/12 group-hover:text-primary">
+            <div className="relative z-10 flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-border/70 bg-background/70 text-foreground/75 transition-[border-color,background-color,color,transform] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:scale-105 group-hover:-rotate-3 group-hover:border-primary/55 group-hover:bg-primary/[0.12] group-hover:text-primary">
               <item.icon className="h-4 w-4 sm:h-[18px] sm:w-[18px] transition-transform duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:scale-110" />
             </div>
             <div className="relative z-10 min-w-0 flex-1 pr-0.5">
@@ -594,7 +594,7 @@ export default function Dashboard() {
                 {item.sub}
               </p>
             </div>
-            <div className="relative z-10 hidden xl:flex h-7 w-7 shrink-0 items-center justify-center rounded-lg border border-border/45 bg-background/40 text-muted-foreground/45 transition-[transform,border-color,background-color,color] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:translate-x-1 group-hover:border-primary/50 group-hover:bg-primary/12 group-hover:text-primary">
+            <div className="relative z-10 hidden xl:flex h-7 w-7 shrink-0 items-center justify-center rounded-lg border border-border/45 bg-background/40 text-muted-foreground/45 transition-[transform,border-color,background-color,color] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:translate-x-1 group-hover:border-primary/50 group-hover:bg-primary/[0.12] group-hover:text-primary">
               <ChevronRight className="h-4 w-4" />
             </div>
             <span className="pointer-events-none absolute inset-x-4 top-0 z-0 h-px bg-gradient-to-r from-transparent via-primary/70 to-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
@@ -639,7 +639,7 @@ export default function Dashboard() {
                     content={({ active, payload }) => {
                       if (active && payload && payload.length) {
                         return (
-                          <div className="bg-card/95 backdrop-blur-md border border-border/50 p-4 rounded-2xl shadow-2xl animate-in fade-in zoom-in duration-200">
+                          <div className="rounded-2xl border border-border/50 bg-card/95 p-4 animate-in fade-in zoom-in duration-200">
                             <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-1">
                               {payload[0].payload.fullLabel || payload[0].payload.name}
                             </p>
@@ -667,7 +667,7 @@ export default function Dashboard() {
                       fill: "hsl(var(--primary))", 
                       stroke: "hsl(var(--background))", 
                       strokeWidth: 3,
-                      className: "drop-shadow-[0_0_8px_rgba(var(--primary),0.5)]"
+                      className: "text-primary"
                     }}
                   />
                 </AreaChart>
@@ -714,7 +714,7 @@ export default function Dashboard() {
                 <div className="flex justify-between items-center">
                   <div className="flex items-center gap-3">
                     <div className="h-9 w-9 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center text-primary">
-                      <CreditCard className="h-4.5 w-4.5" />
+                      <CreditCard className="h-[18px] w-[18px]" />
                     </div>
                     <div>
                       <p className="text-xs font-bold uppercase tracking-wider">Cartão</p>
@@ -733,7 +733,7 @@ export default function Dashboard() {
                 <div className="flex justify-between items-center">
                   <div className="flex items-center gap-3">
                     <div className="h-9 w-9 rounded-xl bg-warning/10 border border-warning/20 flex items-center justify-center text-warning">
-                      <Barcode className="h-4.5 w-4.5" />
+                      <Barcode className="h-[18px] w-[18px]" />
                     </div>
                     <div>
                       <p className="text-xs font-bold uppercase tracking-wider">Boleto</p>
