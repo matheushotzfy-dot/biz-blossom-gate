@@ -167,9 +167,32 @@ export default function ApiKeys() {
 
         {/* Mobile cards */}
         <div className="md:hidden divide-y divide-border/40">
-          {filtered.length === 0 ? (
-            <div className="px-6 py-14 text-center text-[11px] font-black uppercase tracking-widest opacity-30">
-              Nenhuma credencial gerada
+          {loading ? (
+            Array.from({ length: 3 }).map((_, i) => (
+              <div key={i} className="px-4 py-3.5 space-y-2.5 animate-pulse">
+                <div className="flex justify-between gap-2">
+                  <div className="h-4 w-32 rounded bg-muted/60" />
+                  <div className="h-4 w-16 rounded-full bg-muted/60" />
+                </div>
+                <div className="h-9 rounded-lg bg-muted/30" />
+                <div className="flex gap-2">
+                  <div className="h-9 flex-1 rounded-lg bg-muted/40" />
+                  <div className="h-9 flex-1 rounded-lg bg-muted/40" />
+                </div>
+              </div>
+            ))
+          ) : filtered.length === 0 ? (
+            <div className="px-6 py-14 text-center flex flex-col items-center gap-3">
+              <div className="h-14 w-14 rounded-2xl bg-primary/10 border border-primary/20 flex items-center justify-center">
+                <KeyRound size={22} className="text-primary" strokeWidth={1.75} />
+              </div>
+              <div>
+                <p className="text-[13px] font-black text-foreground">Nenhuma credencial gerada</p>
+                <p className="text-[11px] text-muted-foreground/70 mt-1">Crie uma chave para integrar via API.</p>
+              </div>
+              <button onClick={() => setShowCreateDialog(true)} className="h-9 px-4 rounded-xl bg-primary text-primary-foreground text-[11px] font-black uppercase tracking-wider inline-flex items-center gap-1.5">
+                <Plus className="h-3.5 w-3.5" /> Gerar Chave
+              </button>
             </div>
           ) : (
             filtered.map((k) => (
