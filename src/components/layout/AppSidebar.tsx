@@ -211,7 +211,7 @@ function SidebarSectionNav({ section, pathname, isFirst }: SidebarSectionNavProp
             const isActive = isItemActive(pathname, item);
             return (
               <SidebarMenuItem key={item.url}>
-                <SidebarMenuButton asChild className="h-auto rounded-2xl p-0 hover:bg-transparent active:bg-transparent">
+                <SidebarMenuButton asChild className="h-auto rounded-2xl p-0 hover:bg-transparent active:bg-transparent group-data-[collapsible=icon]:!size-auto group-data-[collapsible=icon]:!p-0">
                   <NavLink
                     to={item.url}
                     end={item.exact}
@@ -220,22 +220,26 @@ function SidebarSectionNav({ section, pathname, isFirst }: SidebarSectionNavProp
                       "seller-nav-option group/nav relative flex h-[46px] w-full items-center gap-3 rounded-xl border border-transparent px-3 text-[13px] font-bold",
                       "transition-all duration-[260ms] ease-[cubic-bezier(0.32,0.72,0,1)]",
                       "active:scale-[0.98]",
-                      "group-data-[collapsible=icon]:h-12 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0",
+                      "group-data-[collapsible=icon]:h-12 group-data-[collapsible=icon]:w-12 group-data-[collapsible=icon]:mx-auto group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0 group-data-[collapsible=icon]:gap-0",
                       isActive
-                        ? "bg-sidebar-primary text-sidebar-primary-foreground"
-                        : "text-sidebar-foreground/65",
+                        ? "bg-sidebar-primary text-sidebar-primary-foreground group-data-[collapsible=icon]:shadow-[0_6px_20px_-8px_hsl(var(--sidebar-primary)/0.65)]"
+                        : "text-sidebar-foreground/65 hover:bg-sidebar-accent/45 hover:text-sidebar-accent-foreground group-data-[collapsible=icon]:hover:bg-sidebar-accent/60 group-data-[collapsible=icon]:hover:border-sidebar-primary/40",
                     )}
                   >
                     {/* Active indicator rail */}
                     {isActive && (
                       <span className="absolute left-0 top-1/2 h-5 w-[3px] -translate-y-1/2 rounded-r-full bg-sidebar-primary-foreground group-data-[collapsible=icon]:hidden" />
                     )}
+                    {/* Collapsed active glow dot */}
+                    {isActive && (
+                      <span className="hidden group-data-[collapsible=icon]:block absolute -bottom-1 left-1/2 -translate-x-1/2 h-1 w-1 rounded-full bg-sidebar-primary-foreground" />
+                    )}
                     <item.icon
                       className={cn(
-                        "h-5 w-5 transition-transform duration-[260ms] ease-[cubic-bezier(0.32,0.72,0,1)]",
+                        "h-5 w-5 transition-transform duration-[260ms] ease-[cubic-bezier(0.32,0.72,0,1)] group-data-[collapsible=icon]:h-[22px] group-data-[collapsible=icon]:w-[22px]",
                         isActive
                           ? "text-primary-foreground"
-                          : "text-muted-foreground/50 group-hover/nav:text-foreground group-hover/nav:scale-[1.08]",
+                          : "text-muted-foreground/50 group-hover/nav:text-foreground group-hover/nav:scale-[1.12]",
                       )}
                       strokeWidth={isActive ? 2.5 : 2}
                     />
@@ -265,6 +269,7 @@ function SidebarSectionNav({ section, pathname, isFirst }: SidebarSectionNavProp
                   </NavLink>
                 </SidebarMenuButton>
               </SidebarMenuItem>
+
             );
           })}
         </SidebarMenu>
