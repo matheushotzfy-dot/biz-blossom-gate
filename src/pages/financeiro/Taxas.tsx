@@ -102,16 +102,28 @@ export default function Taxas() {
       />
 
       {/* Method cards — percentual + fixa juntos */}
-      <section className="grid grid-cols-1 md:grid-cols-3 gap-4 animate-fade-in stagger-1">
+      <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 animate-fade-in stagger-1">
         {methodCards.map((m) => {
           const Icon = m.icon;
           return (
             <div
               key={m.label}
-              className="group relative bg-card rounded-[20px] border border-border shadow-sm overflow-hidden p-5 transition-colors hover:border-foreground/20"
+              className="group relative isolate bg-card rounded-[20px] border border-border/70 overflow-hidden p-5 transition-[transform,border-color,box-shadow,background-color] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] hover:-translate-y-1 hover:border-primary/55 hover:bg-primary/[0.035] hover:shadow-[0_22px_50px_-22px_hsl(var(--primary)/0.45)]"
             >
-              <div className="flex items-center justify-between mb-4">
-                <div className={cn("h-10 w-10 rounded-xl flex items-center justify-center", toneCls[m.tone])}>
+              {/* top sheen */}
+              <span className="pointer-events-none absolute inset-x-4 top-0 z-0 h-px bg-gradient-to-r from-transparent via-primary/70 to-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
+              {/* left rail */}
+              <span className="pointer-events-none absolute left-0 top-5 bottom-5 z-0 w-[3px] origin-center scale-y-50 rounded-r-full bg-primary opacity-0 transition-[opacity,transform] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:scale-y-100 group-hover:opacity-100" />
+              {/* diagonal sweep */}
+              <span className="pointer-events-none absolute inset-0 z-0 -translate-x-[120%] bg-[linear-gradient(115deg,transparent_0%,hsl(var(--primary)/0.10)_44%,transparent_72%)] opacity-0 transition-[transform,opacity] duration-700 ease-out group-hover:translate-x-[120%] group-hover:opacity-100" />
+
+              <div className="relative z-10 flex items-center justify-between mb-4">
+                <div
+                  className={cn(
+                    "h-10 w-10 rounded-xl flex items-center justify-center transition-transform duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:scale-110 group-hover:-rotate-6",
+                    toneCls[m.tone],
+                  )}
+                >
                   <Icon className="h-4.5 w-4.5" strokeWidth={2.25} />
                 </div>
                 <span className="text-[10px] font-black uppercase tracking-[0.18em] text-muted-foreground/60">
@@ -119,21 +131,21 @@ export default function Taxas() {
                 </span>
               </div>
 
-              <p className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider mb-1.5">
+              <p className="relative z-10 text-[11px] font-bold text-muted-foreground uppercase tracking-wider mb-1.5">
                 Taxa {m.label}
               </p>
 
-              <div className="flex items-baseline gap-1.5 flex-wrap">
-                <span className="font-display text-[28px] font-black text-foreground tabular-nums leading-none tracking-[-0.02em]">
+              <div className="relative z-10 flex items-baseline gap-1.5 flex-wrap">
+                <span className="font-display text-[26px] sm:text-[28px] font-black text-foreground tabular-nums leading-none tracking-[-0.02em] transition-colors duration-300 group-hover:text-primary">
                   {pct(m.percent)}
                 </span>
                 <span className="text-base font-black text-muted-foreground/70 leading-none">+</span>
-                <span className="font-display text-[22px] font-black text-foreground tabular-nums leading-none tracking-[-0.02em]">
+                <span className="font-display text-[20px] sm:text-[22px] font-black text-foreground tabular-nums leading-none tracking-[-0.02em]">
                   {fmt(m.fixed)}
                 </span>
               </div>
 
-              <div className="mt-3 pt-3 border-t border-border/40 flex items-center justify-between">
+              <div className="relative z-10 mt-3 pt-3 border-t border-border/40 flex items-center justify-between">
                 <span className="text-[11px] font-medium text-muted-foreground">{m.sub}</span>
                 <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground/50">
                   % + fixa
@@ -145,15 +157,16 @@ export default function Taxas() {
       </section>
 
       {/* Withdrawal fee — destacada */}
-      <section className="bg-card rounded-[20px] border border-border shadow-sm p-5 flex items-center gap-4 animate-fade-in">
-        <div className={cn("h-12 w-12 rounded-xl flex items-center justify-center shrink-0", toneCls.primary)}>
+      <section className="group relative isolate bg-card rounded-[20px] border border-border/70 overflow-hidden p-5 flex items-center gap-3 sm:gap-4 animate-fade-in transition-[transform,border-color,box-shadow] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] hover:-translate-y-0.5 hover:border-primary/55 hover:shadow-[0_18px_44px_-22px_hsl(var(--primary)/0.45)]">
+        <span className="pointer-events-none absolute inset-0 z-0 -translate-x-[120%] bg-[linear-gradient(115deg,transparent_0%,hsl(var(--primary)/0.08)_44%,transparent_72%)] opacity-0 transition-[transform,opacity] duration-700 ease-out group-hover:translate-x-[120%] group-hover:opacity-100" />
+        <div className={cn("relative z-10 h-12 w-12 rounded-xl flex items-center justify-center shrink-0 transition-transform duration-500 group-hover:scale-110 group-hover:-rotate-6", toneCls.primary)}>
           <DollarSign className="h-5 w-5" strokeWidth={2.25} />
         </div>
-        <div className="flex-1 min-w-0">
+        <div className="relative z-10 flex-1 min-w-0">
           <p className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider">Tarifa de Saque</p>
-          <p className="text-[11px] text-muted-foreground/70 font-medium">Fixo por solicitação de saque (Pix)</p>
+          <p className="text-[11px] text-muted-foreground/70 font-medium truncate">Fixo por solicitação de saque (Pix)</p>
         </div>
-        <span className="font-display text-[26px] font-black text-foreground tabular-nums leading-none tracking-[-0.02em]">
+        <span className="relative z-10 font-display text-[22px] sm:text-[26px] font-black text-foreground tabular-nums leading-none tracking-[-0.02em] transition-colors duration-300 group-hover:text-primary">
           {fmt(withdrawFee)}
         </span>
       </section>
