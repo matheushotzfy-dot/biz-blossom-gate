@@ -750,10 +750,8 @@ export default function Dashboard() {
           </CardContent>
         </Card>
       </div>
-
-
-
-
+      </div>
+      {/* /Reorderable section */}
 
       {/* Recent Activity */}
       <Card className="seller-hover-card border-border/40 overflow-hidden shadow-lg shadow-black/5 rounded-3xl">
