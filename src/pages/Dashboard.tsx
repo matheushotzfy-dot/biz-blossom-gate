@@ -256,15 +256,55 @@ export default function Dashboard() {
       .reduce((acc, t) => acc + Number(t.retained_amount || 0), 0);
   }, [transactions]);
 
-  const medCount = useMemo(() => {
-    return disputes.filter(d => d.type === 'medpix' && d.status === 'open').length;
-  }, [disputes]);
+  // Compare to previous period (same length) for trend deltas
+  const { prevApprovedCount, prevRevenue } = useMemo(() => {
+    const today = brasiliaToday();
+    let start: Date;
+    let end: Date;
 
-  const financialCards = [
-    { label: "Ticket Médio", value: privacy.hidden ? CENSORED : fmt(approved.length > 0 ? revenue / approved.length : 0), icon: BarChart3, color: "neutral" as const, sub: "Média por venda" },
-    { label: "Pedidos Pagos", value: approved.length, icon: Zap, color: "success" as const, sub: "Vendas concluídas", trend: 8 },
-    { label: "Saldo Pendente", value: privacy.hidden ? CENSORED : fmt(pendingBalance), icon: Clock3, color: "warning" as const, sub: "Aguardando liberação" },
-    { label: "Disputas / MEDS", value: medCount, icon: ShieldCheck, color: "destructive" as const, sub: "Ações necessárias" },
+    if (isCustom && customRange?.from) {
+      start = new Date(customRange.from);
+      end = customRange.to ? new Date(customRange.to) : new Date(customRange.from);
+    } else if (selectedPeriod.days === 0) {
+      start = new Date(today);
+      end = new Date(today);
+    } else {
+      start = new Date(today);
+      start.setDate(start.getDate() - selectedPeriod.days);
+      end = new Date(today);
+    }
+    start.setHours(0, 0, 0, 0);
+    end.setHours(23, 59, 59, 999);
+
+    const lenMs = end.getTime() - start.getTime();
+    const prevEnd = new Date(start.getTime() - 1);
+    const prevStart = new Date(prevEnd.getTime() - lenMs);
+
+    const prevTx = transactions.filter(t => {
+      const d = new Date(t.created_at);
+      return d >= prevStart && d <= prevEnd;
+    });
+    const prevApp = prevTx.filter(t => t.status === "completed");
+    return {
+      prevApprovedCount: prevApp.length,
+      prevRevenue: prevApp.reduce((acc, t) => acc + Number(t.net_amount), 0),
+    };
+  }, [transactions, selectedPeriod, isCustom, customRange]);
+
+  const pctChange = (curr: number, prev: number): number | undefined => {
+    if (prev === 0) return curr === 0 ? 0 : undefined;
+    return Math.round(((curr - prev) / prev) * 100);
+  };
+
+  const ordersTrend = pctChange(approved.length, prevApprovedCount);
+  const revenueTrend = pctChange(revenue, prevRevenue);
+  const compareLabel = (!isCustom && selectedPeriod.days === 0) ? "vs ontem" : "vs período anterior";
+
+  const financialCards: Array<{ label: string; value: string | number; icon: typeof BarChart3; color: "neutral" | "success" | "warning" | "destructive"; sub: string; trend?: number }> = [
+    { label: "Ticket Médio", value: privacy.hidden ? CENSORED : fmt(approved.length > 0 ? revenue / approved.length : 0), icon: BarChart3, color: "neutral", sub: "Média por venda" },
+    { label: "Pedidos Pagos", value: approved.length, icon: Zap, color: "success", sub: `Vendas concluídas · ${compareLabel}`, trend: ordersTrend },
+    { label: "Saldo Pendente", value: privacy.hidden ? CENSORED : fmt(pendingBalance), icon: Clock3, color: "warning", sub: "Aguardando liberação" },
+    { label: "Faturamento Total", value: privacy.hidden ? CENSORED : fmt(revenue), icon: TrendingUp, color: "success", sub: `Valor total de vendas · ${compareLabel}`, trend: revenueTrend },
   ];
 
 
