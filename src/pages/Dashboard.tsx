@@ -554,8 +554,7 @@ export default function Dashboard() {
           </CardContent>
         </Card>
 
-
-        <div className="lg:col-span-2 grid grid-cols-2 gap-3 sm:gap-4 md:gap-5">
+        <div className="order-3 lg:order-none lg:col-span-2 grid grid-cols-2 gap-3 sm:gap-4 md:gap-5">
           {financialCards.map((card) => (
             <StatCard 
               key={card.label}
