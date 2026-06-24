@@ -552,7 +552,7 @@ export default function Dashboard() {
         </Card>
 
 
-        <div className="lg:col-span-2 grid grid-cols-1 sm:grid-cols-2 gap-4 md:gap-6">
+        <div className="lg:col-span-2 grid grid-cols-2 gap-3 sm:gap-4 md:gap-5">
           {financialCards.map((card) => (
             <StatCard 
               key={card.label}
@@ -569,7 +569,7 @@ export default function Dashboard() {
       </div>
 
       {/* Integration shortcuts row */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 2xl:grid-cols-4 gap-3 md:gap-4">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-3 md:gap-4">
         {[
           { label: "Credenciais API", sub: "Gerencie suas chaves", icon: KeyRound, to: "/integracoes/credenciais" },
           { label: "Documentação", sub: "Guia de integração", icon: BookOpen, to: "/integracoes/documentacao" },
