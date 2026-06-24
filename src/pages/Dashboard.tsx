@@ -579,7 +579,7 @@ export default function Dashboard() {
           <Link
             key={item.label}
             to={item.to}
-            className="group relative flex items-center justify-between gap-3 rounded-2xl border border-border/50 bg-card px-4 py-3.5 outline-none transition-all duration-200 hover:border-primary/50 hover:bg-card hover:-translate-y-0.5 focus-visible:ring-2 focus-visible:ring-primary/40"
+            className="group relative flex items-center justify-between gap-3 overflow-hidden rounded-2xl border border-border/50 bg-card px-4 py-3.5 outline-none transition-all duration-200 hover:border-primary/50 hover:-translate-y-0.5 focus-visible:ring-2 focus-visible:ring-primary/40 [&::after]:!hidden"
           >
             <div className="flex items-center gap-3 min-w-0">
               <div className="h-10 w-10 rounded-xl border border-border/50 bg-muted/30 flex items-center justify-center text-foreground/70 group-hover:text-primary group-hover:border-primary/40 group-hover:bg-primary/5 transition-colors shrink-0">
