@@ -579,15 +579,12 @@ export default function Dashboard() {
           <Link
             key={item.label}
             to={item.to}
-            className="group relative flex items-center justify-between gap-3 overflow-hidden rounded-2xl border border-border/50 bg-card px-4 py-3.5 outline-none transition-all duration-300 ease-out hover:border-primary/60 hover:-translate-y-1 hover:shadow-[0_12px_30px_-12px_hsl(var(--primary)/0.45)] focus-visible:ring-2 focus-visible:ring-primary/40 [&::after]:!hidden"
+            className="group relative flex items-center justify-between gap-3 overflow-hidden rounded-2xl border border-border/50 bg-card px-4 py-3.5 outline-none transition-[transform,border-color,box-shadow] duration-300 ease-out hover:border-primary/60 hover:-translate-y-0.5 hover:shadow-[0_10px_24px_-12px_hsl(var(--primary)/0.4)] focus-visible:ring-2 focus-visible:ring-primary/40 [&::after]:!hidden"
           >
-            {/* gradient sheen on hover */}
-            <span className="pointer-events-none absolute inset-0 bg-gradient-to-br from-primary/[0.08] via-transparent to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
-            {/* shimmer sweep */}
-            <span className="pointer-events-none absolute inset-y-0 -left-1/2 w-1/2 -skew-x-12 bg-gradient-to-r from-transparent via-primary/15 to-transparent opacity-0 transition-all duration-700 ease-out group-hover:left-[120%] group-hover:opacity-100" />
+            <span className="pointer-events-none absolute inset-0 bg-gradient-to-br from-primary/[0.07] to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
 
             <div className="relative flex items-center gap-3 min-w-0">
-              <div className="h-10 w-10 rounded-xl border border-border/50 bg-muted/30 flex items-center justify-center text-foreground/70 transition-all duration-300 group-hover:text-primary group-hover:border-primary/50 group-hover:bg-primary/10 group-hover:scale-105 group-hover:rotate-[-4deg] shrink-0">
+              <div className="h-10 w-10 rounded-xl border border-border/50 bg-muted/30 flex items-center justify-center text-foreground/70 transition-colors duration-300 group-hover:text-primary group-hover:border-primary/50 group-hover:bg-primary/10 shrink-0">
                 <item.icon className="h-[18px] w-[18px]" />
               </div>
               <div className="min-w-0">
