@@ -715,17 +715,17 @@ export default function Dashboard() {
             {/* Quick integration shortcuts */}
             <div className="grid grid-cols-2 gap-3 pt-2">
               {[
-                { label: "Credenciais API", icon: KeyRound, to: "/integracoes?tab=keys", color: "text-primary", bg: "bg-primary/10", border: "border-primary/20" },
-                { label: "Documentação", icon: BookOpen, to: "/integracoes?tab=api", color: "text-info", bg: "bg-info/10", border: "border-info/20" },
-                { label: "Webhooks", icon: Webhook, to: "/integracoes?tab=webhooks", color: "text-orange-500", bg: "bg-orange-500/10", border: "border-orange-500/20" },
-                { label: "Integrações", icon: Puzzle, to: "/integracoes?tab=apps", color: "text-emerald-500", bg: "bg-emerald-500/10", border: "border-emerald-500/20" },
+                { label: "Credenciais API", icon: KeyRound, to: "/integracoes?tab=keys" },
+                { label: "Documentação", icon: BookOpen, to: "/integracoes?tab=api" },
+                { label: "Webhooks", icon: Webhook, to: "/integracoes?tab=webhooks" },
+                { label: "Integrações", icon: Puzzle, to: "/integracoes?tab=apps" },
               ].map((item) => (
                 <Link
                   key={item.label}
                   to={item.to}
                   className="seller-hover-card group flex flex-col items-center justify-center gap-2 rounded-2xl border border-border/40 bg-card/50 px-3 py-4 text-center transition-all hover:border-primary/40"
                 >
-                  <div className={cn("h-9 w-9 rounded-xl border flex items-center justify-center", item.bg, item.border, item.color)}>
+                  <div className="h-9 w-9 rounded-xl border border-border/40 bg-muted/30 flex items-center justify-center text-foreground/70 group-hover:text-primary group-hover:border-primary/40 transition-colors">
                     <item.icon className="h-4.5 w-4.5" />
                   </div>
                   <span className="text-[11px] font-bold uppercase tracking-wider leading-tight">{item.label}</span>
