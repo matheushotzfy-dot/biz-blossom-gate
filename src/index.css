@@ -1067,6 +1067,35 @@ input[type="number"]::-webkit-inner-spin-button {
   background-color: hsl(var(--card) / 1) !important;
 }
 .seller-hover-card:hover h3 { color: hsl(var(--primary)); }
+.seller-hover-card:active {
+  transform: translate3d(0, 0, 0) scale(0.985);
+}
+
+@media (max-width: 640px) {
+  .dashboard-page .platform-card::before,
+  .dashboard-page .dashboard-panel::before,
+  .dashboard-page .dashboard-hero-surface::before,
+  .dashboard-page .dashboard-surface::before,
+  .dashboard-page .dashboard-tile::before {
+    border-left-width: 2px;
+  }
+
+  .dashboard-page .platform-card::after,
+  .dashboard-page .dashboard-panel::after,
+  .dashboard-page .dashboard-hero-surface::after,
+  .dashboard-page .dashboard-surface::after,
+  .dashboard-page .dashboard-tile::after {
+    width: 48px;
+    height: 48px;
+    opacity: 0.32;
+  }
+}
+
+@media (hover: none) {
+  .seller-hover-card:hover {
+    transform: none;
+  }
+}
 .seller-segment,
 .seller-menu-item,
 .seller-text-action,
