@@ -42,7 +42,7 @@ type FilterTab = "all" | "active" | "draft" | "pending_review" | "inactive";
 export default function Produtos() {
   const { user } = useAuth();
   const navigate = useNavigate();
-  const { data: products = [], refetch: loadProducts } = useProducts();
+  const { data: products = [], refetch: loadProducts, isLoading: productsLoading } = useProducts();
 
   const [pixelProduct, setPixelProduct] = useState<Product | null>(null);
   const [copiedId, setCopiedId] = useState<string | null>(null);
