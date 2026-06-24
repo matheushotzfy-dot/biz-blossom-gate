@@ -489,9 +489,12 @@ export default function Dashboard() {
 
 
 
+      {/* Reorderable section — mobile: hero → chart → stats → shortcuts → conversion */}
+      <div className="flex flex-col gap-4 lg:block lg:space-y-4">
+
       {/* Hero Financial Row */}
-      <div className="grid lg:grid-cols-4 gap-4 md:gap-6">
-        <Card className="seller-hover-card lg:col-span-2 relative overflow-hidden group border-primary/20 bg-gradient-to-br from-primary/[0.04] via-card to-card shadow-xl shadow-primary/5 rounded-3xl min-h-[220px]">
+      <div className="contents lg:grid lg:grid-cols-4 lg:gap-6">
+        <Card className="order-1 lg:order-none seller-hover-card lg:col-span-2 relative overflow-hidden group border-primary/20 bg-gradient-to-br from-primary/[0.04] via-card to-card shadow-xl shadow-primary/5 rounded-3xl min-h-[220px]">
           {/* Main card inner glow */}
           <div className="absolute inset-px rounded-[1.45rem] bg-gradient-to-br from-primary/[0.01] to-transparent pointer-events-none" />
           
