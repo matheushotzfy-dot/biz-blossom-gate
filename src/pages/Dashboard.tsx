@@ -586,7 +586,7 @@ export default function Dashboard() {
             </div>
           </CardHeader>
           <CardContent className="p-0">
-            <div className="h-[300px] md:h-[350px] w-full pt-6 pb-4 pr-6 pl-2">
+            <div className="h-[320px] w-full pt-6 pb-4 pr-6 pl-2">
               <ResponsiveContainer width="100%" height="100%">
                 <AreaChart data={chartData} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
                   <defs>
@@ -652,10 +652,10 @@ export default function Dashboard() {
               </div>
             </div>
           </CardHeader>
-          <CardContent className="px-6 py-8 space-y-8">
-            <div className="space-y-6">
+          <CardContent className="px-6 py-6">
+            <div className="space-y-5">
               {/* PIX */}
-              <div className="group space-y-3">
+              <div className="group space-y-2.5">
                 <div className="flex justify-between items-center">
                   <div className="flex items-center gap-3">
                     <div className="h-9 w-9 rounded-xl bg-info/10 border border-info/20 flex items-center justify-center">
@@ -674,7 +674,7 @@ export default function Dashboard() {
               </div>
 
               {/* Cartão */}
-              <div className="group space-y-3">
+              <div className="group space-y-2.5">
                 <div className="flex justify-between items-center">
                   <div className="flex items-center gap-3">
                     <div className="h-9 w-9 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center text-primary">
@@ -693,7 +693,7 @@ export default function Dashboard() {
               </div>
 
               {/* Boleto */}
-              <div className="group space-y-3">
+              <div className="group space-y-2.5">
                 <div className="flex justify-between items-center">
                   <div className="flex items-center gap-3">
                     <div className="h-9 w-9 rounded-xl bg-orange-500/10 border border-orange-500/20 flex items-center justify-center text-orange-500">
@@ -711,28 +711,38 @@ export default function Dashboard() {
                 </div>
               </div>
             </div>
-
-            {/* Quick integration shortcuts */}
-            <div className="grid grid-cols-2 gap-3 pt-2">
-              {[
-                { label: "Credenciais API", icon: KeyRound, to: "/integracoes?tab=keys" },
-                { label: "Documentação", icon: BookOpen, to: "/integracoes?tab=api" },
-                { label: "Webhooks", icon: Webhook, to: "/integracoes?tab=webhooks" },
-                { label: "Integrações", icon: Puzzle, to: "/integracoes?tab=apps" },
-              ].map((item) => (
-                <Link
-                  key={item.label}
-                  to={item.to}
-                  className="group flex flex-col items-center justify-center gap-2 rounded-2xl border border-border/40 bg-card/50 px-3 py-4 text-center transition-colors hover:border-primary/40 hover:bg-card"
-                >
-                  <item.icon className="h-5 w-5 text-foreground/70 group-hover:text-primary transition-colors" />
-                  <span className="text-[11px] font-bold uppercase tracking-wider leading-tight">{item.label}</span>
-                </Link>
-              ))}
-            </div>
           </CardContent>
         </Card>
       </div>
+
+      {/* Integration shortcuts row */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
+        {[
+          { label: "Credenciais API", sub: "Gerencie suas chaves", icon: KeyRound, to: "/integracoes?tab=keys" },
+          { label: "Documentação", sub: "Guia de integração", icon: BookOpen, to: "/integracoes?tab=api" },
+          { label: "Webhooks", sub: "Eventos em tempo real", icon: Webhook, to: "/integracoes?tab=webhooks" },
+          { label: "Integrações", sub: "Conecte seus apps", icon: Puzzle, to: "/integracoes?tab=apps" },
+        ].map((item) => (
+          <Link
+            key={item.label}
+            to={item.to}
+            className="seller-hover-card group flex items-center justify-between gap-4 rounded-3xl border border-border/40 bg-card px-5 py-4 shadow-lg shadow-black/5 transition-colors hover:border-primary/40"
+          >
+            <div className="flex items-center gap-3 min-w-0">
+              <div className="h-10 w-10 rounded-2xl border border-border/40 bg-muted/40 flex items-center justify-center text-foreground/70 group-hover:text-primary group-hover:border-primary/40 transition-colors shrink-0">
+                <item.icon className="h-5 w-5" />
+              </div>
+              <div className="min-w-0">
+                <p className="text-sm font-bold leading-tight truncate">{item.label}</p>
+                <p className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground/60 truncate">{item.sub}</p>
+              </div>
+            </div>
+            <ChevronRight className="h-4 w-4 text-muted-foreground/50 group-hover:text-primary group-hover:translate-x-0.5 transition-all shrink-0" />
+          </Link>
+        ))}
+      </div>
+
+
 
       {/* Recent Activity */}
       <Card className="seller-hover-card border-border/40 overflow-hidden shadow-lg shadow-black/5 rounded-3xl">
