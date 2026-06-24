@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Puzzle, Settings2, Zap, Shield, Sparkles, CheckCircle2, Clock } from "lucide-react";
+import { Settings2, Zap, Shield, Sparkles, CheckCircle2, Clock } from "lucide-react";
 import { PageShell } from "@/components/PageShell";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
