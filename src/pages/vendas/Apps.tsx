@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Puzzle, Settings2, Zap, Shield, Sparkles, CheckCircle2, Clock } from "lucide-react";
+import { Settings2, Zap, Shield, Sparkles, CheckCircle2, Clock } from "lucide-react";
 import { PageShell } from "@/components/PageShell";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
@@ -225,19 +225,21 @@ export default function Apps() {
  return (
  <PageShell>
  <section className="space-y-6">
- <div className="flex items-center justify-between gap-4">
- <div className="space-y-1">
- <div className="inline-flex h-11 w-11 items-center justify-center rounded-2xl border border-border/50 bg-card/80 text-primary shadow-[0_10px_30px_hsl(var(--foreground)/0.06)] backdrop-blur-xl">
- <Puzzle className="h-5 w-5" />
- </div>
- <h1 className="font-display text-2xl font-black tracking-tight text-foreground md:text-3xl">Apps</h1>
- <p className="text-sm text-muted-foreground/70">Clique no logo para configurar a integração.</p>
- </div>
+  <div className="flex items-end justify-between gap-4 flex-wrap">
+  <div className="space-y-1">
+  <span className="inline-flex items-center gap-1.5 rounded-full border border-primary/25 bg-primary/[0.06] px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.18em] text-primary">
+  <span className="h-1.5 w-1.5 rounded-full bg-primary" />
+  Conectores
+  </span>
+  <h1 className="font-display text-2xl font-black tracking-tight text-foreground md:text-3xl">Apps</h1>
+  <p className="text-sm text-muted-foreground/70">Clique no logo para configurar a integração.</p>
+  </div>
 
- <div className="hidden rounded-full border border-border/50 bg-card/80 px-4 py-2 text-[11px] font-bold uppercase tracking-[0.16em] text-muted-foreground/70 backdrop-blur-xl md:inline-flex">
- {integrations.length} ativas
- </div>
- </div>
+  <div className="inline-flex items-center gap-2 rounded-full border border-border/60 bg-card/80 px-3.5 py-1.5 text-[11px] font-bold uppercase tracking-[0.16em] text-muted-foreground/80 backdrop-blur-xl">
+  <span className="h-1.5 w-1.5 rounded-full bg-success animate-pulse" />
+  {integrations.length} ativas
+  </div>
+  </div>
 
  <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
  {[...APPS].sort((a, b) => Number(!!a.comingSoon) - Number(!!b.comingSoon)).map((app, idx) => {
