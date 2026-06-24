@@ -540,7 +540,7 @@ export default function Dashboard() {
                   className="seller-action bg-background/60 text-foreground h-11 px-4 rounded-xl font-bold text-[12px] flex items-center justify-center gap-2 hover:bg-accent whitespace-nowrap"
                 >
                   <Zap className="h-4 w-4 text-success shrink-0" />
-                  <span>Link de Pagamento</span>
+                  <span>Gerar Pix</span>
                 </button>
               </div>
             </div>
