@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { Puzzle, Webhook, BookOpen, KeyRound } from "lucide-react";
 import { HubTabs, type HubTab } from "@/components/HubTabs";
 import { Seo } from "@/components/Seo";
-import { useLocation, useSearchParams } from "react-router-dom";
+import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import Apps from "./vendas/Apps";
 import Webhooks from "./vendas/Webhooks";
 import Documentacao from "./vendas/Documentacao";
@@ -29,8 +29,16 @@ const PATH_TABS: Record<string, string> = {
  "/integracoes/credenciais": "keys",
 };
 
+const TAB_PATHS: Record<string, string> = {
+ apps: "/integracoes/apps",
+ webhooks: "/integracoes/webhooks",
+ api: "/integracoes/documentacao",
+ keys: "/integracoes/credenciais",
+};
+
 export default function IntegracoesHub() {
  const location = useLocation();
+ const navigate = useNavigate();
  const [searchParams, setSearchParams] = useSearchParams();
  const routeTab = PATH_TABS[location.pathname];
  const initialTab = routeTab || searchParams.get("tab");
@@ -51,6 +59,11 @@ export default function IntegracoesHub() {
 
  const handleTabChange = (nextTab: string) => {
   setTab(nextTab);
+  const nextPath = TAB_PATHS[nextTab];
+  if (nextPath) {
+   navigate(nextPath, { replace: true });
+   return;
+  }
   setSearchParams(nextTab === "apps" ? {} : { tab: nextTab }, { replace: true });
  };
 

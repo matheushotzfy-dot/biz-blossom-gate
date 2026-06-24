@@ -569,7 +569,7 @@ export default function Dashboard() {
       </div>
 
       {/* Integration shortcuts row */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 2xl:grid-cols-4 gap-3 md:gap-4">
         {[
           { label: "Credenciais API", sub: "Gerencie suas chaves", icon: KeyRound, to: "/integracoes/credenciais" },
           { label: "Documentação", sub: "Guia de integração", icon: BookOpen, to: "/integracoes/documentacao" },
@@ -579,27 +579,26 @@ export default function Dashboard() {
           <Link
             key={item.label}
             to={item.to}
-            className="group relative flex min-h-[84px] items-center gap-3 overflow-hidden rounded-2xl border border-border/60 bg-card pl-5 pr-3 py-3.5 outline-none transition-[transform,border-color,background-color,box-shadow] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] hover:-translate-y-1 hover:border-primary/70 hover:bg-primary/[0.05] hover:shadow-[0_18px_40px_-20px_hsl(var(--primary)/0.55)] focus-visible:ring-2 focus-visible:ring-primary/40 [&::after]:!hidden"
+            className="group relative isolate flex min-h-[88px] w-full min-w-0 items-center gap-2.5 overflow-hidden rounded-2xl border border-border/70 bg-card px-3.5 py-3 outline-none transition-[transform,border-color,background-color] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] hover:-translate-y-1 hover:border-primary/70 hover:bg-primary/[0.045] focus-visible:ring-2 focus-visible:ring-primary/40 active:translate-y-0 active:scale-[0.99] [&::after]:!hidden"
           >
-            {/* Animated left rail */}
-            <span className="pointer-events-none absolute left-0 top-1/2 -translate-y-1/2 h-0 w-[3px] rounded-r-full bg-gradient-to-b from-primary via-primary to-primary/40 transition-[height,opacity] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] opacity-0 group-hover:h-[72%] group-hover:opacity-100" />
-
-            {/* Diagonal sheen sweep */}
-            <span className="pointer-events-none absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-primary/15 to-transparent skew-x-[-20deg] transition-transform duration-[900ms] ease-out group-hover:translate-x-full" />
-
-            {/* Soft glow wash */}
-            <span className="pointer-events-none absolute -inset-px rounded-2xl bg-[radial-gradient(circle_at_top_left,hsl(var(--primary)/0.18),transparent_60%)] opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
-
-            <div className="relative flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-border/60 bg-muted/30 text-foreground/75 transition-[border-color,background-color,color,transform,box-shadow] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:border-primary/60 group-hover:bg-primary/15 group-hover:text-primary group-hover:scale-[1.08] group-hover:shadow-[0_0_0_4px_hsl(var(--primary)/0.08),0_8px_20px_-8px_hsl(var(--primary)/0.5)]">
-              <item.icon className="h-[17px] w-[17px] transition-transform duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:rotate-[-6deg]" />
+            <div className="relative z-10 flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-border/70 bg-background/70 text-foreground/75 transition-[border-color,background-color,color,transform] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:scale-105 group-hover:-rotate-3 group-hover:border-primary/55 group-hover:bg-primary/12 group-hover:text-primary">
+              <item.icon className="h-[18px] w-[18px] transition-transform duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:scale-110" />
             </div>
-            <div className="relative min-w-0 flex-1">
-              <p className="text-[13px] font-bold leading-tight transition-colors duration-300 group-hover:text-primary">{item.label}</p>
-              <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground/60 truncate mt-0.5 transition-colors duration-300 group-hover:text-muted-foreground/90">{item.sub}</p>
+            <div className="relative z-10 min-w-0 flex-1 pr-0.5">
+              <p className="max-w-full break-words text-[13px] font-black leading-[1.15] text-foreground transition-colors duration-300 group-hover:text-primary">
+                {item.label}
+              </p>
+              <p className="mt-1 max-w-full break-words text-[10px] font-bold uppercase leading-[1.25] tracking-[0.08em] text-muted-foreground/60 transition-colors duration-300 group-hover:text-muted-foreground/90">
+                {item.sub}
+              </p>
             </div>
-            <div className="relative flex h-7 w-7 shrink-0 items-center justify-center rounded-lg border border-transparent text-muted-foreground/40 transition-[transform,border-color,background-color,color] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:translate-x-1 group-hover:border-primary/40 group-hover:bg-primary/10 group-hover:text-primary">
+            <div className="relative z-10 flex h-7 w-7 shrink-0 items-center justify-center rounded-lg border border-border/45 bg-background/40 text-muted-foreground/45 transition-[transform,border-color,background-color,color] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:translate-x-1 group-hover:border-primary/50 group-hover:bg-primary/12 group-hover:text-primary">
               <ChevronRight className="h-4 w-4" />
             </div>
+            <span className="pointer-events-none absolute inset-x-4 top-0 z-0 h-px bg-gradient-to-r from-transparent via-primary/70 to-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
+            <span className="pointer-events-none absolute left-0 top-3 bottom-3 z-0 w-[3px] origin-center scale-y-50 rounded-r-full bg-primary opacity-0 transition-[opacity,transform] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:scale-y-100 group-hover:opacity-100" />
+            <span className="pointer-events-none absolute inset-0 z-0 -translate-x-[120%] bg-[linear-gradient(115deg,transparent_0%,hsl(var(--primary)/0.10)_44%,transparent_72%)] opacity-0 transition-[transform,opacity] duration-700 ease-out group-hover:translate-x-[120%] group-hover:opacity-100" />
+            <span className="pointer-events-none absolute inset-0 z-0 bg-primary/[0.025] opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
           </Link>
         ))}
       </div>
