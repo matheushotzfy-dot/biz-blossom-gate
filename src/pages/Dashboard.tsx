@@ -489,9 +489,12 @@ export default function Dashboard() {
 
 
 
+      {/* Reorderable section — mobile: hero → chart → stats → shortcuts → conversion */}
+      <div className="flex flex-col gap-4 lg:block lg:space-y-4">
+
       {/* Hero Financial Row */}
-      <div className="grid lg:grid-cols-4 gap-4 md:gap-6">
-        <Card className="seller-hover-card lg:col-span-2 relative overflow-hidden group border-primary/20 bg-gradient-to-br from-primary/[0.04] via-card to-card shadow-xl shadow-primary/5 rounded-3xl min-h-[220px]">
+      <div className="contents lg:grid lg:grid-cols-4 lg:gap-6">
+        <Card className="order-1 lg:order-none seller-hover-card lg:col-span-2 relative overflow-hidden group border-primary/20 bg-gradient-to-br from-primary/[0.04] via-card to-card shadow-xl shadow-primary/5 rounded-3xl min-h-[220px]">
           {/* Main card inner glow */}
           <div className="absolute inset-px rounded-[1.45rem] bg-gradient-to-br from-primary/[0.01] to-transparent pointer-events-none" />
           
@@ -551,8 +554,7 @@ export default function Dashboard() {
           </CardContent>
         </Card>
 
-
-        <div className="lg:col-span-2 grid grid-cols-2 gap-3 sm:gap-4 md:gap-5">
+        <div className="order-3 lg:order-none lg:col-span-2 grid grid-cols-2 gap-3 sm:gap-4 md:gap-5">
           {financialCards.map((card) => (
             <StatCard 
               key={card.label}
@@ -569,7 +571,7 @@ export default function Dashboard() {
       </div>
 
       {/* Integration shortcuts row */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-2.5 sm:gap-3 md:gap-4">
+      <div className="order-4 lg:order-none grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-2.5 sm:gap-3 md:gap-4">
         {[
           { label: "Credenciais API", sub: "Gerencie suas chaves", icon: KeyRound, to: "/integracoes/credenciais" },
           { label: "Documentação", sub: "Guia de integração", icon: BookOpen, to: "/integracoes/documentacao" },
@@ -604,8 +606,8 @@ export default function Dashboard() {
       </div>
 
       {/* Main Operations Grid */}
-      <div className="grid lg:grid-cols-3 gap-6 items-stretch">
-        <Card className="seller-hover-card lg:col-span-2 border-border/40 overflow-hidden shadow-lg shadow-black/5 rounded-3xl flex flex-col h-full">
+      <div className="contents lg:grid lg:grid-cols-3 lg:gap-6 lg:items-stretch">
+        <Card className="order-2 lg:order-none seller-hover-card lg:col-span-2 border-border/40 overflow-hidden shadow-lg shadow-black/5 rounded-3xl flex flex-col h-full">
           <CardHeader className="flex flex-row items-center justify-between border-b border-border/40 px-6 py-5 md:px-8">
             <div>
               <CardTitle className="text-lg font-bold">Fluxo de Vendas</CardTitle>
@@ -674,7 +676,7 @@ export default function Dashboard() {
           </CardContent>
         </Card>
 
-        <Card className="seller-hover-card border-border/40 overflow-hidden bg-gradient-to-b from-card to-background/20 shadow-xl shadow-black/5 rounded-3xl flex flex-col h-full">
+        <Card className="order-5 lg:order-none seller-hover-card border-border/40 overflow-hidden bg-gradient-to-b from-card to-background/20 shadow-xl shadow-black/5 rounded-3xl flex flex-col h-full">
           <CardHeader className="border-b border-border/40 px-6 py-5">
             <div className="flex items-center justify-between">
               <div>
@@ -748,10 +750,8 @@ export default function Dashboard() {
           </CardContent>
         </Card>
       </div>
-
-
-
-
+      </div>
+      {/* /Reorderable section */}
 
       {/* Recent Activity */}
       <Card className="seller-hover-card border-border/40 overflow-hidden shadow-lg shadow-black/5 rounded-3xl">
