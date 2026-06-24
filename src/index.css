@@ -2665,3 +2665,56 @@ button svg, a svg, [role="button"] svg {
   --primary: 210 90% 64%;
   --primary-foreground: 216 60% 8%;
 }
+
+/* ────────────────────────────────────────────────────────────
+   📱 MOBILE APP POLISH — Global responsive squeeze (≤640px)
+   Applies app-like spacing/typography across pages without
+   per-file edits. Targets common oversized patterns.
+   ──────────────────────────────────────────────────────────── */
+@media (max-width: 640px) {
+  /* Tighten oversized card paddings */
+  .p-8 { padding: 1rem !important; }
+  .p-6 { padding: 0.875rem !important; }
+  .p-5 { padding: 0.875rem !important; }
+
+  /* Softer large radii on mobile */
+  .rounded-\[32px\] { border-radius: 22px !important; }
+  .rounded-\[24px\] { border-radius: 18px !important; }
+  .rounded-3xl { border-radius: 18px !important; }
+
+  /* Cap monster numbers so they don't break layout */
+  .text-4xl { font-size: 1.75rem !important; line-height: 1.1 !important; }
+  .text-3xl { font-size: 1.5rem !important; line-height: 1.15 !important; }
+  .text-2xl { font-size: 1.25rem !important; line-height: 1.2 !important; }
+
+  /* Heroes & wide headers tightened */
+  .px-8 { padding-left: 0.875rem !important; padding-right: 0.875rem !important; }
+  .py-8 { padding-top: 1rem !important; padding-bottom: 1rem !important; }
+  .py-5 { padding-top: 0.75rem !important; padding-bottom: 0.75rem !important; }
+
+  /* Tables: pad-cells smaller so horizontal scroll isn't absurd */
+  table .px-8 { padding-left: 0.75rem !important; padding-right: 0.75rem !important; }
+  table .py-5 { padding-top: 0.75rem !important; padding-bottom: 0.75rem !important; }
+
+  /* Big stat numbers slightly smaller for two-up grid */
+  .stat-card-value, .tabular-nums.text-4xl { font-size: 1.5rem !important; }
+
+  /* Buttons big sizes shrink */
+  .h-14 { height: 3rem !important; }
+  .h-12 { height: 2.75rem !important; }
+
+  /* Page-wrapper bottom padding for mobile bottom-nav clearance */
+  main, [data-page-shell] { padding-bottom: env(safe-area-inset-bottom, 0); }
+}
+
+/* Tactile press feedback for clickable surfaces */
+@media (hover: none) and (pointer: coarse) {
+  button:active, [role="button"]:active, a:active {
+    transform: scale(0.97);
+    transition: transform 120ms ease;
+  }
+}
+
+/* Mobile horizontal scrollbar hide for tabs/chips */
+.scrollbar-none::-webkit-scrollbar { display: none; }
+.scrollbar-none { scrollbar-width: none; }

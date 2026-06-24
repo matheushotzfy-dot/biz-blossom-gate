@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Puzzle, Webhook, BookOpen, KeyRound } from "lucide-react";
+import { Blocks, Webhook, BookOpen, KeyRound } from "lucide-react";
 import { HubTabs, type HubTab } from "@/components/HubTabs";
 import { Seo } from "@/components/Seo";
 import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
@@ -9,7 +9,7 @@ import Documentacao from "./vendas/Documentacao";
 import ApiKeys from "./vendas/ApiKeys";
 
 const TABS: HubTab[] = [
- { id: "apps", label: "Integrações", icon: Puzzle },
+ { id: "apps", label: "Integrações", icon: Blocks },
  { id: "webhooks", label: "Webhooks", icon: Webhook },
  { id: "api", label: "API Docs", icon: BookOpen },
  { id: "keys", label: "Credenciais API", icon: KeyRound },

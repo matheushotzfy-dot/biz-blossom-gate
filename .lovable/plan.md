@@ -1,106 +1,97 @@
-## Plano — Admin: Top Sellers, Inativos, Staff & Gerentes, Comissões
+## Objetivo
+Refazer o layout mobile (≤640px) de várias abas pra ficar com cara de **aplicativo nativo premium** — cards densos porém respiráveis, tipografia legível, hierarquia clara, sem overflow, sem cards desproporcionais, microinterações táteis.
 
-Base da comissão: **net_amount** (líquido). Pagamento: **manual** — você lança/aprova; sistema só calcula, acumula e exibe.
+## Páginas no escopo
+1. `src/pages/vendas/Vendas.tsx` — aba Vendas
+2. `src/pages/vendas/Produtos.tsx` — aba Produtos
+3. `src/pages/IntegracoesHub.tsx` + grid de opções (a "opção" bugada que você citou)
+4. `src/pages/financeiro/*` — hub financeiro (Saldo, Saques, Taxas, Extrato)
+5. `src/pages/PerfilHub.tsx` / `Perfil.tsx`
+6. `src/pages/vendas/ApiKeys.tsx` — Credenciais
+7. `src/pages/vendas/Documentacao.tsx` + `ApiDocsComplete.tsx`
 
----
+## Padrão visual mobile (aplicado em todas)
 
-### 1. Top Sellers (reformular `AdminTopSellersTab`)
+**Layout & grid**
+- Container mobile: `px-3 pb-24 pt-3` (respiro nas bordas + espaço pra bottom nav)
+- Stat cards: grid `grid-cols-2 gap-2.5` (nada de 1-col gigante nem 4-col esmagado)
+- Listas: cards full-width `rounded-2xl` com altura uniforme, sem texto saindo
+- Tabs/segmented control: scroll horizontal com snap (`overflow-x-auto snap-x`) ao invés de quebrar linha
 
-Foco em faturamento detalhado, sem decoração inútil.
+**Cards (estilo app)**
+- `rounded-2xl border border-border/60 bg-card/80` 100% sólido
+- Padding `p-3.5` mobile, `p-5` desktop
+- Header: ícone 36×36 em pill `rounded-xl bg-primary/10` + título `text-[13px] font-semibold` + valor `text-xl font-bold tabular-nums`
+- Truncate em TODO texto longo (`truncate` + `min-w-0` no flex parent)
+- Sub-label `text-[11px] text-muted-foreground`
 
-- **Filtros sticky**: período (Hoje / 7d / 30d / Mês / Custom) + busca por nome/email.
-- **KPIs do topo** (4 cards densos, tabular): TPV bruto, Líquido (net), Taxas geradas, Ticket médio.
-- **Tabela ranking** — colunas: Posição, Seller (avatar+nome+email), Vendas (qtd), TPV bruto, Líquido, Taxas, Ticket médio, Aprovação %, Chargeback %, MED %, Última venda. Ordenável por qualquer coluna. 50/página.
-- **Linha expandível** ao clicar: 
-  - Breakdown por método (PIX / Cartão / Boleto) com valor e %.
-  - Top 5 produtos do seller no período.
-  - Heatmap simples de horário (24h × 7d) com volume de vendas.
-  - Atalhos: "Ver perfil completo" (abre o `SellerDetailDialog` já existente), "Login as user", "Ajustar taxas".
-- Export CSV do ranking.
+**Tipografia mobile**
+- H1 página: `text-[22px] font-bold tracking-tight`
+- H2 seção: `text-[15px] font-semibold`
+- Body: `text-[13px]`
+- Números financeiros: `font-mono tabular-nums`
 
-### 2. Inativos (refazer `AdminInactiveSellersTab`)
+**Interações táteis**
+- `active:scale-[0.97] transition-transform duration-150`
+- `hover:bg-accent/40` em itens de lista
+- Loading skeletons no mesmo formato dos cards finais
 
-Mesma densidade billion-dollar SaaS dos outros painéis.
+**Bugs a corrigir**
+- Remover qualquer ícone "quebra-cabeça" remanescente em IntegracoesHub
+- Garantir `min-w-0` em flex children pra impedir overflow
+- Substituir classes Tailwind inválidas (ex: `h-4.5`, `bg-x/12`) por válidas
+- Charts: `ResponsiveContainer` com `aspect-ratio` ao invés de altura fixa, pra não estourar no mobile
 
-- Critério: sem venda há ≥ 30 dias (configurável: 30/60/90).
-- Cards de resumo: total inativos, faturamento histórico acumulado, taxas históricas pagas, ticket histórico médio.
-- **Tabela**: Seller, Contato (email + WhatsApp clicáveis, ícones), Documento, Última venda (há X dias), Vendas totais (qtd), Faturamento histórico (bruto/líquido), Taxas pagas, Saldo atual, Status KYC, Observação curta.
-- Ações por linha: WhatsApp direto (`wa.me`), copiar email, abrir detalhes, adicionar nota rápida, marcar "Recuperado" (move para ativos), Login as user.
-- Painel lateral de detalhes ao clicar — mesma estética do painel de transações: dados pessoais, histórico financeiro consolidado, últimas 10 transações, observações editáveis (`seller_notes`), tentativas de reativação (registradas em `activity_logs`).
+## Mudanças específicas por página
 
-### 3. Staff & Gerentes — criação e permissões
+**Vendas (`Vendas.tsx`)**
+- KPIs no topo: grid 2×2 compacto (receita, vendas, ticket médio, conversão)
+- Filtros: segmented control horizontal scrollable (Hoje/7d/30d/Custom)
+- Lista de transações: card por linha mobile (cliente + valor à direita + status pill), tabela só ≥md
+- FAB de "Exportar" fixo bottom-right no mobile
 
-Hoje `AdminEmployeesTab` e `AdminManagersTab` só promovem contas existentes. Mudar para criação direta pelo admin.
+**Produtos (`Produtos.tsx`)**
+- Grid `grid-cols-2 gap-3` mobile (não 1-col)
+- Card produto: thumbnail 16:9, nome 2 linhas truncado, preço destacado, badge status
+- Busca sticky no topo `sticky top-0 bg-background/95 backdrop-blur`
 
-**Migração** (esquema):
-- Nova tabela `staff_permissions` (user_id, key, granted_by) — granular: `view_sellers`, `edit_fees`, `approve_kyc`, `view_financial`, `process_refund_request` (apenas solicitar), `view_disputes`, `manage_meds`, etc. RLS: só admin escreve; staff/manager lê o próprio.
-- Coluna `profiles.frozen` (boolean) → quando true, edge function de login nega acesso.
-- Coluna `profiles.created_by_admin` (uuid) e `profiles.staff_role_type` (`employee` | `manager`).
-- Coluna em `profiles`: `approved_by` (uuid) — preenchida automaticamente quando staff/manager aprova KYC do seller. Imutável (trigger).
-- Tabela `staff_audit_log` (staff_user_id, action, entity_type, entity_id, before, after, created_at) — append-only, RLS admin-only read, trigger imutável (sem UPDATE/DELETE).
+**Financeiro (hub + sub-páginas)**
+- Card de saldo principal full-width destaque (gradiente sutil emerald)
+- Ações rápidas: 4 ícones em linha (Sacar, Extrato, Taxas, Antecipar) estilo app bancário
+- Lista de movimentações: ícone categoria + descrição + valor colorido (verde/vermelho) + data pequena
 
-**Edge functions novas**:
-- `admin-create-staff` (verify_jwt=false + admin check): recebe `{ email, password, full_name, role: 'employee'|'manager', permissions[], commission_pct }`, usa service role para `auth.admin.createUser({ email_confirm: true })`, popula `profiles`, insere `user_roles`, insere `staff_permissions`, insere `staff_commission_config`. Retorna user_id.
-- `admin-freeze-staff`: alterna `profiles.frozen`, registra em `staff_audit_log`.
-- `admin-reset-staff-password`: troca senha via service role.
-- Atualizar `manager-login` para checar `frozen=true` e barrar.
+**IntegracoesHub**
+- Remover ícone bugado
+- Grid 2-col mobile com cards iguais: logo serviço + nome + status pill (Conectado/Disponível)
+- Categorias como chips horizontais scrolláveis
+- Tap no card abre bottom-sheet com detalhes ao invés de navegar
 
-**UI** — duas abas separadas (Gerente / Staff), cada uma:
-- Botão "Criar conta" → modal com email, senha (com gerador), nome, função, switches de permissões, % comissão inicial, sellers atribuídos (gerente).
-- Lista densa: nome, email, função, % comissão, sellers atribuídos (qtd), status (ativo/congelado), criado em.
-- Por linha — ações: editar permissões (drawer com switches), alterar % comissão, alterar taxa mínima permitida (gerente), congelar/descongelar, resetar senha, ver auditoria, excluir.
-- Drawer "Auditoria": timeline das ações do staff (aprovações de KYC, mudanças de taxa, processamento, refunds solicitados, etc.) — lê `staff_audit_log`.
+**Perfil (PerfilHub + Perfil)**
+- Header avatar + nome + email centralizado (estilo iOS Settings)
+- Lista de seções com ícone à esquerda, label, chevron à direita
+- Agrupado em "cards" de 3-5 itens com divisor sutil
+- Toggle de dark mode inline
 
-**Reforço de permissões**: hook `useStaffPermission(key)` no front + checagem real no backend via RLS/edge function (front nunca é fonte de verdade). Triggers em `transactions`, `withdrawals`, `disputes`, `profiles` gravam `staff_audit_log` automaticamente quando o autor é staff/manager.
+**Credenciais (ApiKeys)**
+- Cards de chave: label + key parcial mascarada + botão copy grande
+- Ações em swipe/long-press no mobile (revelar/revogar)
+- CTA "Nova chave" sticky no bottom
 
-**Aprovações com rastro**: ao aprovar KYC/produto/saque, trigger preenche `approved_by`. UI do seller exibe "Aprovado por: João (staff)" — para sempre.
+**Documentação**
+- TOC colapsável no topo mobile (accordion)
+- Code blocks com scroll horizontal + botão copy fixo
+- Tipografia leitura: `text-[14px] leading-relaxed`
+- Nav lateral vira drawer no mobile
 
-### 4. Comissões de Staff/Gerente
+## Detalhes técnicos
+- Tudo via tokens semânticos (sem `text-white`, `bg-black`)
+- Reaproveitar `StatCard.tsx` já refinado
+- Componentes shadcn já existentes (Card, Badge, Button, Sheet, ScrollArea)
+- Sem novas libs
+- Verificação Playwright em 360px, 390px, 768px, 1280px após implementar — screenshot de cada página
 
-**Migração**:
-- `staff_commission_config` (user_id PK, base_pct numeric, base text default 'net_amount', is_active bool).
-- `staff_commission_overrides` (staff_user_id, seller_user_id, pct) — opcional por seller, sobrepõe a global.
-- `staff_commissions_ledger` (id, staff_user_id, seller_user_id, transaction_id, type ['accrual','clawback_refund','clawback_med','payout','adjustment'], base_amount, pct, amount, balance_after, created_at, idempotency_key UNIQUE). Append-only, RLS admin + próprio staff (read).
+## Fora do escopo
+- Lógica de negócio, queries, edge functions
+- Layout desktop (já está OK conforme conversas anteriores) — só ajustes pontuais se quebrar
 
-**Triggers** (`AFTER UPDATE` em `transactions` e `disputes`):
-- Venda completed → busca staff/gerente vinculado (gerente via `manager_seller_assignments`; staff via futura `staff_seller_assignments` ou por aprovador do KYC — definimos: usar `profiles.approved_by` como fallback). Aplica `pct × net_amount` → `accrual`.
-- Refund/chargeback → `clawback_refund`/`clawback_med` negativo do mesmo valor (idempotente).
-- Disputa MED resolvida contra seller → `clawback_med`.
-
-Tudo idempotente via `idempotency_key = '<type>_<tx_or_dispute_id>_<staff_id>'`.
-
-**Nova aba admin: "Comissões Staff/Gerente"** (`AdminStaffCommissionsTab`):
-- KPIs: total a pagar (saldo positivo somado), pago no mês, clawbacks no mês, comissão média %.
-- Tabela: Nome, Função, % padrão, Acumulado período, Clawbacks, Saldo a pagar, Último pagamento. Filtro por período.
-- Clique abre painel:
-  - Detalhe de todas as movimentações do ledger (transação, seller, base, %, valor, tipo).
-  - Editor de % global e de overrides por seller (tabela editável inline).
-  - Botão "Registrar pagamento" → modal (valor, método, observação) → insere `payout` no ledger e cria registro em `withdrawals` (tipo `staff_commission`) marcado como aprovado manualmente.
-  - Export CSV.
-
-**Visibilidade no painel do staff/gerente**: card no dashboard deles mostrando saldo de comissão, últimas movimentações, MEDs/refunds que descontaram, botão "Solicitar pagamento" (cria entry `payout_request` pendente — só você aprova).
-
-### 5. Visual / UX
-
-- Tabelas: 1px border, sem sombra/blur, fonte tabular para números, hover muda só o background, ações aparecem no hover (padrão Management Lists).
-- Drawers laterais 760px via portal, mesma estrutura do `TransactionDetailPanel`.
-- Sem animações de entrada em listas densas; transições 220-280ms apenas em drawers/modais.
-- Todos os tokens semânticos (sem cor hardcoded).
-
-### 6. Ordem de execução
-
-1. Migração: `staff_permissions`, `staff_audit_log`, colunas `frozen`/`created_by_admin`/`staff_role_type`/`approved_by`, `staff_commission_config`, `staff_commission_overrides`, `staff_commissions_ledger`, triggers de auditoria e de comissão, GRANTS + RLS.
-2. Edge functions: `admin-create-staff`, `admin-freeze-staff`, `admin-reset-staff-password`; atualizar `manager-login`.
-3. Refatorar `AdminEmployeesTab` e `AdminManagersTab` (criar conta, permissões, congelar, auditoria, % comissão).
-4. Criar `AdminStaffCommissionsTab` + entry no `AdminDashboard`.
-5. Refazer `AdminTopSellersTab` (ranking detalhado + expansão).
-6. Refazer `AdminInactiveSellersTab` (cards + tabela + painel de detalhes).
-7. Card de comissão no dashboard do staff/gerente.
-8. QA end-to-end: criar staff/gerente novo, aprovar KYC com ele, registrar venda, verificar accrual, refund → clawback, congelar conta → login bloqueado, auditoria visível.
-
-### Notas técnicas
-
-- Toda escrita sensível passa por edge function com checagem `has_role(auth.uid(),'admin')` server-side.
-- `staff_audit_log` ganha trigger `RAISE EXCEPTION` em UPDATE/DELETE (imutável).
-- Ledger de comissão usa `pg_advisory_xact_lock(hashtext(staff_user_id::text))` como o financial_ledger.
-- Reaproveitar `SellerDetailDialog` e `TransactionDetailPanel` existentes para evitar duplicação.
+Posso seguir e implementar tudo isso?

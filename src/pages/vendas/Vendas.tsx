@@ -396,7 +396,62 @@ export default function Vendas() {
           </div>
         </div>
 
-        <div className="overflow-x-auto">
+        {/* Mobile cards (< md) */}
+        <div className="md:hidden divide-y divide-border/40">
+          {paged.length === 0 ? (
+            <div className="px-6 py-16 text-center opacity-30 flex flex-col items-center">
+              <ShoppingCart size={40} strokeWidth={1} />
+              <p className="mt-3 text-[11px] font-black uppercase tracking-widest">Nenhuma transação</p>
+            </div>
+          ) : (
+            paged.map((t) => {
+              const status = STATUS_MAP[t.status] || STATUS_MAP.pending;
+              const method = METHODS_MAP[t.payment_method || ""] || { label: t.payment_method, icon: FileText };
+              const MethodIcon = method.icon;
+              return (
+                <button
+                  key={t.id}
+                  onClick={() => setDetailTx(t)}
+                  className="w-full text-left px-4 py-3.5 flex items-center gap-3 active:bg-muted/30 transition-colors"
+                >
+                  <Avatar className="h-10 w-10 rounded-xl border border-border/40 shrink-0">
+                    <AvatarFallback className="bg-primary/5 text-primary text-[10px] font-black uppercase">
+                      {(t.customer_name || "C").slice(0, 2)}
+                    </AvatarFallback>
+                  </Avatar>
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center justify-between gap-2">
+                      <p className="text-[13px] font-black text-foreground truncate">{t.customer_name || "Cliente"}</p>
+                      <p className="text-[13px] font-black text-foreground tabular-nums shrink-0">
+                        {privacyHidden ? CENSORED : fmt(Number(t.amount))}
+                      </p>
+                    </div>
+                    <div className="flex items-center justify-between gap-2 mt-1">
+                      <p className="text-[11px] font-medium text-muted-foreground/70 truncate">
+                        {prodsMap[t.product_id || ""] || "Sem produto"}
+                      </p>
+                      <p className="text-[10px] font-bold text-muted-foreground/60 tabular-nums shrink-0">
+                        {format(new Date(t.created_at), "dd/MM HH:mm", { locale: ptBR })}
+                      </p>
+                    </div>
+                    <div className="flex items-center gap-1.5 mt-2">
+                      <span className={cn("inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider border", status.cls)}>
+                        <span className={cn("h-1 w-1 rounded-full", status.dot)} />
+                        {status.label}
+                      </span>
+                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[9px] font-bold bg-muted/40 border border-border/60 text-muted-foreground/80">
+                        {t.payment_method === "pix" ? <PixLogoMark className="h-2.5 w-2.5" /> : <MethodIcon className="h-2.5 w-2.5" />}
+                        {method.label}
+                      </span>
+                    </div>
+                  </div>
+                </button>
+              );
+            })
+          )}
+        </div>
+
+        <div className="hidden md:block overflow-x-auto">
           <table className="w-full text-left">
             <thead>
               <tr className="bg-muted/30 text-[10px] uppercase font-black tracking-[0.2em] text-muted-foreground/60 border-b border-border/40">
@@ -485,6 +540,7 @@ export default function Vendas() {
             </tbody>
           </table>
         </div>
+
 
         {/* Pagination */}
         {filtered.length > 0 && (

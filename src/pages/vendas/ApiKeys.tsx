@@ -165,7 +165,59 @@ export default function ApiKeys() {
           </div>
         </div>
 
-        <div className="overflow-x-auto">
+        {/* Mobile cards */}
+        <div className="md:hidden divide-y divide-border/40">
+          {filtered.length === 0 ? (
+            <div className="px-6 py-14 text-center text-[11px] font-black uppercase tracking-widest opacity-30">
+              Nenhuma credencial gerada
+            </div>
+          ) : (
+            filtered.map((k) => (
+              <div key={k.id} className="px-4 py-3.5 space-y-2.5">
+                <div className="flex items-start justify-between gap-2">
+                  <div className="min-w-0 flex-1">
+                    <p className="text-[14px] font-black text-foreground truncate">{k.name}</p>
+                    <p className="text-[10px] font-bold text-muted-foreground/60 uppercase tracking-wider mt-0.5">
+                      {k.last_used_at ? `Usada ${format(new Date(k.last_used_at), "dd MMM HH:mm", { locale: ptBR })}` : "Nunca utilizada"}
+                    </p>
+                  </div>
+                  <span className={cn(
+                    "inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider border shrink-0",
+                    k.is_active ? "bg-emerald-500/10 text-emerald-500 border-emerald-500/20" : "bg-muted text-muted-foreground border-border/60"
+                  )}>
+                    <span className={cn("h-1 w-1 rounded-full", k.is_active ? "bg-emerald-500" : "bg-muted-foreground/50")} />
+                    {k.is_active ? "Ativa" : "Revogada"}
+                  </span>
+                </div>
+                <div className="flex items-center gap-2 rounded-lg bg-muted/30 border border-border/40 px-2.5 py-2">
+                  <code className="flex-1 text-[10px] font-mono text-muted-foreground/80 truncate">{k.public_key}</code>
+                  <button
+                    onClick={() => { navigator.clipboard.writeText(k.public_key); toast.success("Chave pública copiada"); }}
+                    className="h-7 w-7 rounded-md bg-card border border-border/60 inline-flex items-center justify-center text-muted-foreground/70 active:bg-muted"
+                  >
+                    <Copy size={12} />
+                  </button>
+                </div>
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => { setEditingKey(k); setEditName(k.name); }}
+                    className="flex-1 h-9 rounded-lg bg-muted/40 border border-border/60 text-[11px] font-bold uppercase tracking-wider inline-flex items-center justify-center gap-1.5"
+                  >
+                    <Pencil size={12} /> Renomear
+                  </button>
+                  <button
+                    onClick={() => handleDelete(k.id, k.name)}
+                    className="flex-1 h-9 rounded-lg bg-destructive/10 border border-destructive/20 text-destructive text-[11px] font-bold uppercase tracking-wider inline-flex items-center justify-center gap-1.5"
+                  >
+                    <Trash2 size={12} /> Excluir
+                  </button>
+                </div>
+              </div>
+            ))
+          )}
+        </div>
+
+        <div className="hidden md:block overflow-x-auto">
           <table className="w-full text-left">
             <thead>
               <tr className="bg-muted/30 text-[10px] uppercase font-black tracking-[0.2em] text-muted-foreground/60 border-b border-border/40">
@@ -240,6 +292,7 @@ export default function ApiKeys() {
             </tbody>
           </table>
         </div>
+
       </div>
 
       <Dialog open={showCreateDialog} onOpenChange={setShowCreateDialog}>
