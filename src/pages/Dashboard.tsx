@@ -579,20 +579,21 @@ export default function Dashboard() {
           <Link
             key={item.label}
             to={item.to}
-            className="group relative flex items-center justify-between gap-3 overflow-hidden rounded-2xl border border-border/50 bg-card px-4 py-3.5 outline-none transition-[transform,border-color,box-shadow] duration-300 ease-out hover:border-primary/60 hover:-translate-y-0.5 hover:shadow-[0_10px_24px_-12px_hsl(var(--primary)/0.4)] focus-visible:ring-2 focus-visible:ring-primary/40 [&::after]:!hidden"
+            className="group relative flex min-h-[78px] items-center justify-between gap-3 overflow-hidden rounded-2xl border border-border/55 bg-card px-4 py-3.5 outline-none transition-[transform,border-color,background-color] duration-300 ease-out hover:-translate-y-1 hover:border-primary/55 hover:bg-primary/[0.045] focus-visible:ring-2 focus-visible:ring-primary/40 [&::after]:!hidden"
           >
-            <span className="pointer-events-none absolute inset-0 bg-gradient-to-br from-primary/[0.07] to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
+            <span className="pointer-events-none absolute left-0 top-2 bottom-2 w-1.5 rounded-r-full bg-primary/65 transition-all duration-300 ease-out group-hover:top-1.5 group-hover:bottom-1.5 group-hover:w-2.5 group-hover:bg-primary" />
+            <span className="pointer-events-none absolute inset-y-0 left-0 w-24 bg-gradient-to-r from-primary/[0.09] to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
 
             <div className="relative flex items-center gap-3 min-w-0">
-              <div className="h-10 w-10 rounded-xl border border-border/50 bg-muted/30 flex items-center justify-center text-foreground/70 transition-colors duration-300 group-hover:text-primary group-hover:border-primary/50 group-hover:bg-primary/10 shrink-0">
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-border/55 bg-muted/30 text-foreground/70 transition-[transform,border-color,background-color,color] duration-300 group-hover:scale-[1.03] group-hover:border-primary/55 group-hover:bg-primary/10 group-hover:text-primary">
                 <item.icon className="h-[18px] w-[18px]" />
               </div>
               <div className="min-w-0">
-                <p className="text-[13px] font-bold leading-tight truncate transition-colors group-hover:text-primary">{item.label}</p>
+                <p className="text-[13px] font-bold leading-tight truncate transition-colors duration-300 group-hover:text-primary">{item.label}</p>
                 <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground/60 truncate mt-0.5">{item.sub}</p>
               </div>
             </div>
-            <ChevronRight className="relative h-4 w-4 text-muted-foreground/40 group-hover:text-primary group-hover:translate-x-1 transition-all duration-300 shrink-0" />
+            <ChevronRight className="relative h-4 w-4 shrink-0 text-muted-foreground/40 transition-[transform,color] duration-300 group-hover:translate-x-1.5 group-hover:text-primary" />
           </Link>
         ))}
       </div>
