@@ -302,7 +302,7 @@ export default function Dashboard() {
 
   const financialCards: Array<{ label: string; value: string | number; icon: typeof BarChart3; color: "neutral" | "success" | "warning" | "destructive"; sub: string; trend?: number }> = [
     { label: "Ticket Médio", value: privacy.hidden ? CENSORED : fmt(approved.length > 0 ? revenue / approved.length : 0), icon: BarChart3, color: "neutral", sub: "Média por venda" },
-    { label: "Pedidos Pagos", value: approved.length, icon: Zap, color: "success", sub: `Vendas concluídas · ${compareLabel}`, trend: ordersTrend },
+    { label: "Pedidos Pagos", value: approved.length, icon: Zap, color: "success", sub: "Vendas concluídas" },
     { label: "Saldo Pendente", value: privacy.hidden ? CENSORED : fmt(pendingBalance), icon: Clock3, color: "warning", sub: "Aguardando liberação" },
     { label: "Faturamento Total", value: privacy.hidden ? CENSORED : fmt(revenue), icon: TrendingUp, color: "success", sub: `Valor total de vendas · ${compareLabel}`, trend: revenueTrend },
   ];
