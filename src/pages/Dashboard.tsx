@@ -666,7 +666,7 @@ export default function Dashboard() {
           </CardContent>
         </Card>
 
-        <Card className="seller-hover-card border-border/40 overflow-hidden bg-gradient-to-b from-card to-background/20 shadow-xl shadow-black/5 rounded-3xl">
+        <Card className="seller-hover-card border-border/40 overflow-hidden bg-gradient-to-b from-card to-background/20 shadow-xl shadow-black/5 rounded-3xl flex flex-col h-full">
           <CardHeader className="border-b border-border/40 px-6 py-5">
             <div className="flex items-center justify-between">
               <div>
@@ -678,7 +678,7 @@ export default function Dashboard() {
               </div>
             </div>
           </CardHeader>
-          <CardContent className="px-6 py-6">
+          <CardContent className="px-6 py-5 flex-1 flex flex-col justify-center">
             <div className="space-y-5">
               {/* PIX */}
               <div className="group space-y-2.5">
