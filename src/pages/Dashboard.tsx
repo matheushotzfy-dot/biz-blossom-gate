@@ -569,7 +569,7 @@ export default function Dashboard() {
       </div>
 
       {/* Integration shortcuts row */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-3 md:gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-2.5 sm:gap-3 md:gap-4">
         {[
           { label: "Credenciais API", sub: "Gerencie suas chaves", icon: KeyRound, to: "/integracoes/credenciais" },
           { label: "Documentação", sub: "Guia de integração", icon: BookOpen, to: "/integracoes/documentacao" },
@@ -585,14 +585,14 @@ export default function Dashboard() {
               <item.icon className="h-4 w-4 sm:h-[18px] sm:w-[18px] transition-transform duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:scale-110" />
             </div>
             <div className="relative z-10 min-w-0 flex-1 pr-0.5">
-              <p className="max-w-full break-words text-[12px] sm:text-[13px] font-black leading-[1.15] text-foreground transition-colors duration-300 group-hover:text-primary">
+              <p className="truncate text-[12px] sm:text-[13px] font-black leading-[1.15] text-foreground transition-colors duration-300 group-hover:text-primary">
                 {item.label}
               </p>
-              <p className="mt-1 max-w-full break-words text-[9px] sm:text-[10px] font-bold uppercase leading-[1.25] tracking-[0.08em] text-muted-foreground/60 transition-colors duration-300 group-hover:text-muted-foreground/90">
+              <p className="mt-1 truncate text-[9px] sm:text-[10px] font-bold uppercase leading-[1.25] tracking-[0.08em] text-muted-foreground/60 transition-colors duration-300 group-hover:text-muted-foreground/90">
                 {item.sub}
               </p>
             </div>
-            <div className="relative z-10 hidden sm:flex h-7 w-7 shrink-0 items-center justify-center rounded-lg border border-border/45 bg-background/40 text-muted-foreground/45 transition-[transform,border-color,background-color,color] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:translate-x-1 group-hover:border-primary/50 group-hover:bg-primary/12 group-hover:text-primary">
+            <div className="relative z-10 hidden xl:flex h-7 w-7 shrink-0 items-center justify-center rounded-lg border border-border/45 bg-background/40 text-muted-foreground/45 transition-[transform,border-color,background-color,color] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:translate-x-1 group-hover:border-primary/50 group-hover:bg-primary/12 group-hover:text-primary">
               <ChevronRight className="h-4 w-4" />
             </div>
             <span className="pointer-events-none absolute inset-x-4 top-0 z-0 h-px bg-gradient-to-r from-transparent via-primary/70 to-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
