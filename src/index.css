@@ -2681,8 +2681,10 @@ button svg, a svg, [role="button"] svg {
   .rounded-\[32px\] { border-radius: 22px !important; }
   .rounded-\[24px\] { border-radius: 18px !important; }
   .rounded-3xl { border-radius: 18px !important; }
+  .rounded-2xl { border-radius: 16px !important; }
 
   /* Cap monster numbers so they don't break layout */
+  .text-5xl { font-size: 2rem !important; line-height: 1.05 !important; letter-spacing: -0.02em; }
   .text-4xl { font-size: 1.75rem !important; line-height: 1.1 !important; }
   .text-3xl { font-size: 1.5rem !important; line-height: 1.15 !important; }
   .text-2xl { font-size: 1.25rem !important; line-height: 1.2 !important; }
@@ -2691,10 +2693,13 @@ button svg, a svg, [role="button"] svg {
   .px-8 { padding-left: 0.875rem !important; padding-right: 0.875rem !important; }
   .py-8 { padding-top: 1rem !important; padding-bottom: 1rem !important; }
   .py-5 { padding-top: 0.75rem !important; padding-bottom: 0.75rem !important; }
+  .gap-8 { gap: 1rem !important; }
+  .gap-6 { gap: 0.875rem !important; }
 
   /* Tables: pad-cells smaller so horizontal scroll isn't absurd */
   table .px-8 { padding-left: 0.75rem !important; padding-right: 0.75rem !important; }
   table .py-5 { padding-top: 0.75rem !important; padding-bottom: 0.75rem !important; }
+  table th, table td { font-size: 12.5px !important; }
 
   /* Big stat numbers slightly smaller for two-up grid */
   .stat-card-value, .tabular-nums.text-4xl { font-size: 1.5rem !important; }
@@ -2704,7 +2709,81 @@ button svg, a svg, [role="button"] svg {
   .h-12 { height: 2.75rem !important; }
 
   /* Page-wrapper bottom padding for mobile bottom-nav clearance */
-  main, [data-page-shell] { padding-bottom: env(safe-area-inset-bottom, 0); }
+  main, [data-page-shell] {
+    padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 88px) !important;
+  }
+
+  /* Prevent horizontal page bleed from rogue elements */
+  html, body, #root { overflow-x: hidden; }
+
+  /* Inputs: bump font-size to 16px to stop iOS auto-zoom */
+  input:not([type="checkbox"]):not([type="radio"]),
+  select, textarea { font-size: 16px !important; }
+
+  /* Sticky page headers: thinner */
+  header.sticky, [data-sticky-header] { padding-top: 0.5rem !important; padding-bottom: 0.5rem !important; }
+
+  /* Dialog/Sheet: comfortable radius */
+  [role="dialog"][data-state="open"] {
+    border-radius: 22px 22px 0 0 !important;
+  }
+
+  /* Tabs lists: scrollable, no wrap */
+  [role="tablist"] {
+    overflow-x: auto;
+    scrollbar-width: none;
+    flex-wrap: nowrap !important;
+    scroll-snap-type: x mandatory;
+  }
+  [role="tablist"]::-webkit-scrollbar { display: none; }
+  [role="tablist"] [role="tab"] { scroll-snap-align: start; flex-shrink: 0; }
+
+  /* Toasts above bottom nav */
+  [data-sonner-toaster] { bottom: 96px !important; }
+
+  /* Replace heavy shadows with hairline on mobile */
+  .shadow-lg, .shadow-xl, .shadow-2xl { box-shadow: 0 1px 0 hsl(var(--border)) !important; }
+
+  /* Skeletons: smooth on mobile */
+  [data-skeleton], .skeleton { border-radius: 12px !important; }
+
+  /* Avoid 4-col / 3-col grids overflowing on tiny screens */
+  .grid-cols-4 { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
+  .grid-cols-3 { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
+
+  /* Charts: cap height so they don't dominate */
+  .recharts-responsive-container { max-height: 240px !important; }
+
+  /* Section headings consistency */
+  h1, h2 { letter-spacing: -0.02em; }
+
+  /* Soft elevation upgrade for primary surfaces */
+  .platform-card, .dashboard-tile, .dashboard-surface { border-radius: 18px !important; }
+
+  /* Bottom-nav shadow lifted */
+  nav.fixed.bottom-0 {
+    box-shadow: 0 -1px 0 hsl(var(--border)), 0 -10px 30px -20px rgb(0 0 0 / 0.25);
+  }
+
+  /* Drop oversized icons in tab headers */
+  [role="tab"] svg { width: 16px !important; height: 16px !important; }
+
+  /* Inputs: cohesive height + radius */
+  input:not([type="checkbox"]):not([type="radio"]):not([type="range"]),
+  select { min-height: 44px; border-radius: 12px !important; }
+
+  /* Better text legibility */
+  body { -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility; }
+
+  /* Empty states centered with breathing room */
+  [data-empty-state] { padding: 2rem 1rem !important; }
+
+  /* Dropdown menus: near-full-width on mobile */
+  [data-radix-popper-content-wrapper] [role="menu"] {
+    min-width: calc(100vw - 32px) !important;
+    max-width: calc(100vw - 32px) !important;
+    border-radius: 16px !important;
+  }
 }
 
 /* Tactile press feedback for clickable surfaces */
@@ -2713,8 +2792,23 @@ button svg, a svg, [role="button"] svg {
     transform: scale(0.97);
     transition: transform 120ms ease;
   }
+  .seller-hover-card:hover { transform: none !important; }
 }
 
 /* Mobile horizontal scrollbar hide for tabs/chips */
 .scrollbar-none::-webkit-scrollbar { display: none; }
 .scrollbar-none { scrollbar-width: none; }
+
+/* Smoother focus rings everywhere */
+*:focus-visible { outline: none; box-shadow: 0 0 0 2px hsl(var(--ring) / 0.55); border-radius: inherit; }
+
+/* Selection color matches brand */
+::selection { background: hsl(var(--primary) / 0.25); color: hsl(var(--foreground)); }
+
+/* Scrollbar polish (desktop) */
+@media (min-width: 641px) {
+  *::-webkit-scrollbar { width: 10px; height: 10px; }
+  *::-webkit-scrollbar-thumb { background: hsl(var(--border)); border-radius: 8px; border: 2px solid transparent; background-clip: padding-box; }
+  *::-webkit-scrollbar-thumb:hover { background: hsl(var(--muted-foreground) / 0.4); background-clip: padding-box; border: 2px solid transparent; }
+  *::-webkit-scrollbar-track { background: transparent; }
+}

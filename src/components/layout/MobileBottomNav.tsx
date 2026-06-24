@@ -157,7 +157,7 @@ export function MobileBottomNav() {
       {/* ═══ Bottom Tab Bar ═══ */}
       <nav className="fixed bottom-0 left-0 right-0 z-50 md:hidden">
         <div className="bg-card/95 backdrop-blur-xl border-t border-border">
-          <div className="flex items-center justify-around px-1 pt-1 pb-[env(safe-area-inset-bottom,0px)]">
+          <div className="flex items-center justify-around px-1 pt-1.5 pb-[env(safe-area-inset-bottom,0px)]">
             {tabs.map((tab) => {
               const isMore = tab.path === "__more__";
               const isActive = isMore
@@ -172,22 +172,25 @@ export function MobileBottomNav() {
                     else { setMoreOpen(false); navigate(tab.path); }
                   }}
                   className={cn(
-                    "flex flex-col items-center gap-0.5 py-1.5 px-3 min-w-[56px] active:scale-[0.92] transition-all duration-150",
-                    isActive ? "text-primary" : "text-muted-foreground/60"
+                    "relative flex flex-col items-center gap-0.5 py-1.5 px-2 min-w-[56px] active:scale-[0.92] transition-all duration-150",
+                    isActive ? "text-primary" : "text-muted-foreground/70"
                   )}
                 >
                   <div className={cn(
-                    "h-8 w-10 rounded-xl flex items-center justify-center transition-all duration-200",
+                    "h-8 w-11 rounded-[12px] flex items-center justify-center transition-all duration-200",
                     isActive && "bg-primary/[0.12]"
                   )}>
                     <tab.icon className={cn("h-[18px] w-[18px]", isActive && "stroke-[2.5]")} />
                   </div>
                   <span className={cn(
-                    "text-[9.5px] font-semibold",
+                    "text-[9.5px] leading-none font-semibold tracking-tight",
                     isActive && "font-black"
                   )}>
                     {tab.label}
                   </span>
+                  {isActive && !isMore && (
+                    <span className="absolute -bottom-0.5 left-1/2 -translate-x-1/2 h-[3px] w-[3px] rounded-full bg-primary" />
+                  )}
                 </button>
               );
             })}
