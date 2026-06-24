@@ -579,17 +579,12 @@ export default function Dashboard() {
           <Link
             key={item.label}
             to={item.to}
-            className="group relative isolate flex min-h-[92px] w-full min-w-0 items-center gap-3 overflow-hidden rounded-2xl border border-border/70 bg-card px-4 py-3.5 outline-none transition-[transform,border-color,background-color] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] hover:-translate-y-1 hover:border-primary/70 hover:bg-primary/[0.045] focus-visible:ring-2 focus-visible:ring-primary/40 active:translate-y-0 active:scale-[0.99] [&::after]:!hidden"
+            className="group relative isolate flex min-h-[88px] w-full min-w-0 items-center gap-2.5 overflow-hidden rounded-2xl border border-border/70 bg-card px-3.5 py-3 outline-none transition-[transform,border-color,background-color] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] hover:-translate-y-1 hover:border-primary/70 hover:bg-primary/[0.045] focus-visible:ring-2 focus-visible:ring-primary/40 active:translate-y-0 active:scale-[0.99] [&::after]:!hidden"
           >
-            <span className="pointer-events-none absolute inset-x-4 top-0 h-px bg-gradient-to-r from-transparent via-primary/70 to-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
-            <span className="pointer-events-none absolute left-0 top-3 bottom-3 w-[3px] origin-center scale-y-50 rounded-r-full bg-primary opacity-0 transition-[opacity,transform] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:scale-y-100 group-hover:opacity-100" />
-            <span className="pointer-events-none absolute inset-0 -translate-x-[120%] bg-[linear-gradient(115deg,transparent_0%,hsl(var(--primary)/0.10)_44%,transparent_72%)] opacity-0 transition-[transform,opacity] duration-700 ease-out group-hover:translate-x-[120%] group-hover:opacity-100" />
-            <span className="pointer-events-none absolute inset-0 bg-primary/[0.025] opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
-
-            <div className="relative flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-border/70 bg-background/70 text-foreground/75 transition-[border-color,background-color,color,transform] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:scale-105 group-hover:-rotate-3 group-hover:border-primary/55 group-hover:bg-primary/12 group-hover:text-primary">
+            <div className="relative z-10 flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-border/70 bg-background/70 text-foreground/75 transition-[border-color,background-color,color,transform] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:scale-105 group-hover:-rotate-3 group-hover:border-primary/55 group-hover:bg-primary/12 group-hover:text-primary">
               <item.icon className="h-[18px] w-[18px] transition-transform duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:scale-110" />
             </div>
-            <div className="relative min-w-0 flex-1 pr-1">
+            <div className="relative z-10 min-w-0 flex-1 pr-0.5">
               <p className="max-w-full break-words text-[13px] font-black leading-[1.15] text-foreground transition-colors duration-300 group-hover:text-primary">
                 {item.label}
               </p>
@@ -597,9 +592,13 @@ export default function Dashboard() {
                 {item.sub}
               </p>
             </div>
-            <div className="relative flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-border/45 bg-background/40 text-muted-foreground/45 transition-[transform,border-color,background-color,color] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:translate-x-1 group-hover:border-primary/50 group-hover:bg-primary/12 group-hover:text-primary">
+            <div className="relative z-10 flex h-7 w-7 shrink-0 items-center justify-center rounded-lg border border-border/45 bg-background/40 text-muted-foreground/45 transition-[transform,border-color,background-color,color] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:translate-x-1 group-hover:border-primary/50 group-hover:bg-primary/12 group-hover:text-primary">
               <ChevronRight className="h-4 w-4" />
             </div>
+            <span className="pointer-events-none absolute inset-x-4 top-0 z-0 h-px bg-gradient-to-r from-transparent via-primary/70 to-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
+            <span className="pointer-events-none absolute left-0 top-3 bottom-3 z-0 w-[3px] origin-center scale-y-50 rounded-r-full bg-primary opacity-0 transition-[opacity,transform] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:scale-y-100 group-hover:opacity-100" />
+            <span className="pointer-events-none absolute inset-0 z-0 -translate-x-[120%] bg-[linear-gradient(115deg,transparent_0%,hsl(var(--primary)/0.10)_44%,transparent_72%)] opacity-0 transition-[transform,opacity] duration-700 ease-out group-hover:translate-x-[120%] group-hover:opacity-100" />
+            <span className="pointer-events-none absolute inset-0 z-0 bg-primary/[0.025] opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
           </Link>
         ))}
       </div>
