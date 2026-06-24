@@ -201,12 +201,13 @@ type SidebarSectionNavProps = {
 
 function SidebarSectionNav({ section, pathname, isFirst }: SidebarSectionNavProps) {
   return (
-    <SidebarGroup className="px-0 py-0 group-data-[collapsible=icon]:flex-1 group-data-[collapsible=icon]:flex group-data-[collapsible=icon]:flex-col group-data-[collapsible=icon]:justify-center">
+    <SidebarGroup className="px-0 py-0">
       {!isFirst && (
-        <div className="mx-4 my-2.5 h-px bg-sidebar-border/50 group-data-[collapsible=icon]:mx-3 group-data-[collapsible=icon]:my-1.5" />
+        <div className="mx-4 my-2.5 h-px bg-sidebar-border/50 group-data-[collapsible=icon]:mx-3 group-data-[collapsible=icon]:my-2.5" />
       )}
       <SidebarGroupContent>
         <SidebarMenu className="gap-1 px-0 group-data-[collapsible=icon]:gap-2">
+
 
           {section.items.map((item) => {
             const isActive = isItemActive(pathname, item);
@@ -407,7 +408,7 @@ export function AppSidebar() {
       </SidebarHeader>
 
 
-      <SidebarContent className="relative gap-0 overflow-y-auto px-2.5 py-3 group-data-[collapsible=icon]:justify-between group-data-[collapsible=icon]:py-4">
+      <SidebarContent className="relative gap-0 overflow-y-auto px-2.5 py-3 group-data-[collapsible=icon]:py-4">
         {sections.map((section, idx) => (
           <SidebarSectionNav
             key={section.label}
