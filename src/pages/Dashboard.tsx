@@ -741,32 +741,7 @@ export default function Dashboard() {
         </Card>
       </div>
 
-      {/* Integration shortcuts row */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
-        {[
-          { label: "Credenciais API", sub: "Gerencie suas chaves", icon: KeyRound, to: "/integracoes?tab=keys" },
-          { label: "Documentação", sub: "Guia de integração", icon: BookOpen, to: "/integracoes?tab=api" },
-          { label: "Webhooks", sub: "Eventos em tempo real", icon: Webhook, to: "/integracoes?tab=webhooks" },
-          { label: "Integrações", sub: "Conecte seus apps", icon: Puzzle, to: "/integracoes?tab=apps" },
-        ].map((item) => (
-          <Link
-            key={item.label}
-            to={item.to}
-            className="seller-hover-card group flex items-center justify-between gap-4 rounded-3xl border border-border/40 bg-card px-5 py-4 shadow-lg shadow-black/5 transition-colors hover:border-primary/40"
-          >
-            <div className="flex items-center gap-3 min-w-0">
-              <div className="h-10 w-10 rounded-2xl border border-border/40 bg-muted/40 flex items-center justify-center text-foreground/70 group-hover:text-primary group-hover:border-primary/40 transition-colors shrink-0">
-                <item.icon className="h-5 w-5" />
-              </div>
-              <div className="min-w-0">
-                <p className="text-sm font-bold leading-tight truncate">{item.label}</p>
-                <p className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground/60 truncate">{item.sub}</p>
-              </div>
-            </div>
-            <ChevronRight className="h-4 w-4 text-muted-foreground/50 group-hover:text-primary group-hover:translate-x-0.5 transition-all shrink-0" />
-          </Link>
-        ))}
-      </div>
+
 
 
 
