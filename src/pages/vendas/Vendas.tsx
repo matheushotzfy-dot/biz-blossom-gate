@@ -65,7 +65,7 @@ const PRESETS: { id: PresetId; label: string }[] = [
 
 
 export default function Vendas() {
-  const { data: transactions = [] } = useTransactions();
+  const { data: transactions = [], isLoading: txLoading, isError: txError, refetch: refetchTx } = useTransactions();
   const { data: products = [] } = useProducts();
   const [search, setSearch] = useState("");
   const [detailTx, setDetailTx] = useState<Tables<"transactions"> | null>(null);
