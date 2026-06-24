@@ -9,7 +9,7 @@ import Documentacao from "./vendas/Documentacao";
 import ApiKeys from "./vendas/ApiKeys";
 
 const TABS: HubTab[] = [
- { id: "apps", label: "Integrações", icon: Puzzle },
+ { id: "apps", label: "Integrações", icon: Blocks },
  { id: "webhooks", label: "Webhooks", icon: Webhook },
  { id: "api", label: "API Docs", icon: BookOpen },
  { id: "keys", label: "Credenciais API", icon: KeyRound },
