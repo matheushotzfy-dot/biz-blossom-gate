@@ -71,26 +71,26 @@ export function StatCard({
   return (
     <div 
       className={cn(
-        "seller-hover-card platform-card group relative flex h-full min-h-[116px] flex-col justify-between overflow-hidden rounded-[1.05rem] border border-border bg-card p-3 animate-in fade-in slide-in-from-bottom-2 sm:min-h-[148px] sm:rounded-2xl sm:p-5",
+        "seller-hover-card platform-card group relative flex h-full min-h-[108px] flex-col justify-between overflow-hidden rounded-[16px] border border-border bg-card p-3.5 animate-in fade-in slide-in-from-bottom-2 active:scale-[0.985] sm:min-h-[148px] sm:rounded-2xl sm:p-5",
         className
       )}
       style={{ animationDelay: `${delay}ms` }}
     >
       <div className="flex items-start justify-between gap-2 sm:gap-4">
-        <div className="min-w-0 flex-1 space-y-2 sm:space-y-3">
+        <div className="min-w-0 flex-1 space-y-1.5 sm:space-y-3">
           <div className="space-y-1">
-            <p className="truncate text-[8px] font-bold uppercase leading-tight tracking-[0.12em] text-muted-foreground/60 sm:text-[10px] sm:tracking-[0.18em]">
+            <p className="truncate text-[9px] font-bold uppercase leading-tight tracking-[0.14em] text-muted-foreground/70 sm:text-[10px] sm:tracking-[0.18em]">
               {title}
             </p>
-            <h3 className={cn("truncate text-[17px] font-display font-bold leading-tight tracking-[-0.02em] tabular-nums min-[380px]:text-xl sm:text-2xl", c.text)}>
+            <h3 className={cn("truncate text-[18px] font-display font-bold leading-tight tracking-[-0.02em] tabular-nums min-[380px]:text-[20px] sm:text-2xl", c.text)}>
               {value}
             </h3>
           </div>
           
-          <div className="flex items-center gap-2 flex-wrap">
+          <div className="flex items-center gap-1.5 flex-wrap">
             {(change || trend !== undefined) && (
               <span className={cn(
-                "inline-flex items-center gap-1 rounded-md px-1.5 py-0.5 text-[10px] font-bold tabular-nums border",
+                "inline-flex items-center gap-0.5 rounded-md px-1.5 py-0.5 text-[10px] font-bold tabular-nums border",
                 changeType === "positive" ? "bg-success/10 text-success border-success/20" : 
                 changeType === "negative" ? "bg-destructive/10 text-destructive border-destructive/20" : 
                 "bg-muted/50 text-muted-foreground border-border/60"
@@ -100,7 +100,7 @@ export function StatCard({
               </span>
             )}
             {description && (
-              <p className="min-w-0 truncate text-[9px] font-semibold leading-tight text-muted-foreground/70 sm:text-[11px]">
+              <p className="min-w-0 truncate text-[10px] font-semibold leading-tight text-muted-foreground/70 sm:text-[11px]">
                 {description}
               </p>
             )}
@@ -109,10 +109,10 @@ export function StatCard({
 
         {Icon && (
           <div className={cn(
-            "flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border transition-all duration-300 group-hover:scale-110 sm:h-9 sm:w-9",
+            "flex h-9 w-9 shrink-0 items-center justify-center rounded-[10px] border transition-all duration-300 group-hover:scale-110 sm:h-10 sm:w-10",
             c.iconBg
           )}>
-            <Icon className="h-3.5 w-3.5 sm:h-4 sm:w-4" strokeWidth={2.5} />
+            <Icon className="h-[15px] w-[15px] sm:h-[17px] sm:w-[17px]" strokeWidth={2.5} />
           </div>
         )}
       </div>
