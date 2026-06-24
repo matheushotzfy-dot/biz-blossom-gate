@@ -407,7 +407,7 @@ export function AppSidebar() {
       </SidebarHeader>
 
 
-      <SidebarContent className="relative gap-0 overflow-y-auto px-2.5 py-3">
+      <SidebarContent className="relative gap-0 overflow-y-auto px-2.5 py-3 group-data-[collapsible=icon]:justify-between group-data-[collapsible=icon]:py-4">
         {sections.map((section, idx) => (
           <SidebarSectionNav
             key={section.label}
@@ -417,6 +417,7 @@ export function AppSidebar() {
           />
         ))}
       </SidebarContent>
+
 
       <SidebarFooter className="relative gap-2 border-t border-sidebar-border/60 p-3">
         {/* Solicitar Suporte — featured card */}
