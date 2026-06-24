@@ -184,9 +184,13 @@ export default function Taxas() {
         </div>
         <div className="divide-y divide-border/40">
           {deadlines.map((p) => (
-            <div key={p.label} className="flex items-center justify-between gap-4 px-5 py-3.5">
+            <div
+              key={p.label}
+              className="group/row relative flex items-center justify-between gap-4 px-5 py-3.5 transition-[background-color,padding] duration-300 hover:bg-primary/[0.03] hover:pl-6"
+            >
+              <span className="pointer-events-none absolute left-0 top-2 bottom-2 w-[2px] origin-center scale-y-0 rounded-r-full bg-primary opacity-0 transition-[opacity,transform] duration-300 group-hover/row:scale-y-100 group-hover/row:opacity-100" />
               <div className="flex items-center gap-3 min-w-0">
-                <div className={cn("h-9 w-9 rounded-md flex items-center justify-center shrink-0", toneCls[p.tone])}>
+                <div className={cn("h-9 w-9 rounded-md flex items-center justify-center shrink-0 transition-transform duration-300 group-hover/row:scale-110 group-hover/row:-rotate-6", toneCls[p.tone])}>
                   <Clock className="h-3.5 w-3.5" strokeWidth={2.25} />
                 </div>
                 <div className="min-w-0">
@@ -194,7 +198,7 @@ export default function Taxas() {
                   <p className="text-[11px] text-muted-foreground/70 font-medium truncate">{p.sub}</p>
                 </div>
               </div>
-              <span className="text-[13px] font-display font-black text-foreground tabular-nums tracking-tight shrink-0">
+              <span className="text-[13px] font-display font-black text-foreground tabular-nums tracking-tight shrink-0 transition-colors duration-300 group-hover/row:text-primary">
                 {p.value}
               </span>
             </div>
