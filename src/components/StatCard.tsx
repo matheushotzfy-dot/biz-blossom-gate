@@ -40,24 +40,24 @@ export function StatCard({
       border: "border-primary/30"
     },
     success: {
-      text: "text-emerald-500",
-      iconBg: "bg-emerald-500/10 text-emerald-500 border-emerald-500/20",
-      border: "border-emerald-500/30"
+      text: "text-success",
+      iconBg: "bg-success/10 text-success border-success/20",
+      border: "border-success/30"
     },
     warning: {
-      text: "text-amber-500",
-      iconBg: "bg-amber-500/10 text-amber-500 border-amber-500/20",
-      border: "border-amber-500/30"
+      text: "text-warning",
+      iconBg: "bg-warning/10 text-warning border-warning/20",
+      border: "border-warning/30"
     },
     destructive: {
-      text: "text-red-500",
-      iconBg: "bg-red-500/10 text-red-500 border-red-500/20",
-      border: "border-red-500/30"
+      text: "text-destructive",
+      iconBg: "bg-destructive/10 text-destructive border-destructive/20",
+      border: "border-destructive/30"
     },
     info: {
-      text: "text-blue-500",
-      iconBg: "bg-blue-500/10 text-blue-500 border-blue-500/20",
-      border: "border-blue-500/30"
+      text: "text-info",
+      iconBg: "bg-info/10 text-info border-info/20",
+      border: "border-info/30"
     },
     neutral: {
       text: "text-foreground",
@@ -71,18 +71,18 @@ export function StatCard({
   return (
     <div 
       className={cn(
-        "seller-hover-card platform-card group relative overflow-hidden rounded-2xl border border-border bg-card p-3 sm:p-5 animate-in fade-in slide-in-from-bottom-2",
+        "seller-hover-card platform-card group relative flex h-full min-h-[116px] flex-col justify-between overflow-hidden rounded-[1.05rem] border border-border bg-card p-3 animate-in fade-in slide-in-from-bottom-2 sm:min-h-[148px] sm:rounded-2xl sm:p-5",
         className
       )}
       style={{ animationDelay: `${delay}ms` }}
     >
       <div className="flex items-start justify-between gap-2 sm:gap-4">
-        <div className="space-y-2 sm:space-y-3 flex-1 min-w-0">
+        <div className="min-w-0 flex-1 space-y-2 sm:space-y-3">
           <div className="space-y-1">
-            <p className="text-[9px] sm:text-[10px] font-bold uppercase tracking-[0.16em] sm:tracking-[0.2em] text-muted-foreground/60 leading-tight break-words">
+            <p className="truncate text-[8px] font-bold uppercase leading-tight tracking-[0.12em] text-muted-foreground/60 sm:text-[10px] sm:tracking-[0.18em]">
               {title}
             </p>
-            <h3 className="text-lg sm:text-2xl font-display font-bold text-foreground tracking-[-0.02em] tabular-nums break-all leading-tight">
+            <h3 className={cn("truncate text-[17px] font-display font-bold leading-tight tracking-[-0.02em] tabular-nums min-[380px]:text-xl sm:text-2xl", c.text)}>
               {value}
             </h3>
           </div>
@@ -91,8 +91,8 @@ export function StatCard({
             {(change || trend !== undefined) && (
               <span className={cn(
                 "inline-flex items-center gap-1 rounded-md px-1.5 py-0.5 text-[10px] font-bold tabular-nums border",
-                changeType === "positive" ? "bg-emerald-500/10 text-emerald-500 border-emerald-500/20" : 
-                changeType === "negative" ? "bg-red-500/10 text-red-500 border-red-500/20" : 
+                changeType === "positive" ? "bg-success/10 text-success border-success/20" : 
+                changeType === "negative" ? "bg-destructive/10 text-destructive border-destructive/20" : 
                 "bg-muted/50 text-muted-foreground border-border/60"
               )}>
                 {changeType === "positive" ? <TrendingUp className="h-2.5 w-2.5" /> : changeType === "negative" ? <TrendingDown className="h-2.5 w-2.5" /> : null}
@@ -100,7 +100,7 @@ export function StatCard({
               </span>
             )}
             {description && (
-              <p className="text-[10px] sm:text-[11px] font-medium text-muted-foreground/70 leading-tight">
+              <p className="min-w-0 truncate text-[9px] font-semibold leading-tight text-muted-foreground/70 sm:text-[11px]">
                 {description}
               </p>
             )}
@@ -109,7 +109,7 @@ export function StatCard({
 
         {Icon && (
           <div className={cn(
-            "h-7 w-7 sm:h-8 sm:w-8 rounded-lg flex items-center justify-center border transition-all duration-300 group-hover:scale-110 group-hover:shadow-sm shrink-0",
+            "flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border transition-all duration-300 group-hover:scale-110 sm:h-9 sm:w-9",
             c.iconBg
           )}>
             <Icon className="h-3.5 w-3.5 sm:h-4 sm:w-4" strokeWidth={2.5} />

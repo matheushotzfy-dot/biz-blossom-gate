@@ -313,7 +313,7 @@ export default function Dashboard() {
 
 
   return (
-    <div className="px-4 md:px-6 pt-2 pb-6 space-y-4 max-w-[1600px] mx-auto animate-in fade-in duration-500 overflow-x-hidden">
+    <div className="dashboard-page px-3 pt-2 pb-24 space-y-3 max-w-[1600px] mx-auto animate-in fade-in duration-500 overflow-x-hidden sm:px-4 sm:pb-6 md:px-6 sm:space-y-4">
       <Seo title="Dashboard | Hotzfy" description="Painel de controle com vendas, saldo, transações e KPIs em tempo real." path="/dashboard" noindex />
       {(txError || productsError) && (
         <div className="flex items-center justify-between gap-3 rounded-lg border border-destructive/30 bg-destructive/5 px-4 py-3 text-[12px] text-destructive">
@@ -322,20 +322,20 @@ export default function Dashboard() {
         </div>
       )}
       {/* Header */}
-      <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-2">
-        <div className="space-y-1">
+      <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-3">
+        <div className="min-w-0 space-y-1">
           <div className="flex items-center gap-2">
              <div className="h-2 w-2 rounded-full bg-success animate-pulse" />
-             <h1 className="text-xl md:text-2xl font-bold tracking-tight text-foreground">{greeting}, {nickname}</h1>
+              <h1 className="max-w-[310px] truncate text-lg font-bold tracking-tight text-foreground sm:text-xl md:text-2xl">{greeting}, {nickname}</h1>
           </div>
         </div>
 
         {/* Period selector — institutional, dense, Bloomberg-style */}
-        <div className="inline-flex items-stretch h-11 rounded-xl border border-border bg-card overflow-hidden">
+        <div className="flex h-11 w-full items-stretch overflow-hidden rounded-2xl border border-border bg-card lg:w-auto lg:rounded-xl">
 
 
           {/* Segments */}
-          <div className="flex items-stretch divide-x divide-border">
+          <div className="grid flex-1 grid-cols-4 divide-x divide-border lg:flex lg:flex-none lg:items-stretch">
             {PERIOD_PRESETS.map((p) => {
               const isActive = !isCustom && selectedPeriod.label === p.label;
               const shortLabel = p.label === "Hoje" ? "Hoje" : `${p.days}D`;
@@ -344,7 +344,7 @@ export default function Dashboard() {
                   key={p.label}
                   onClick={() => { setSelectedPeriod(p); setIsCustom(false); }}
                   className={cn(
-                    "seller-segment relative px-4 flex items-center justify-center text-[11px] font-display font-black uppercase tracking-[0.14em] tabular-nums min-w-[58px]",
+                    "seller-segment relative flex min-w-0 items-center justify-center px-2 text-[10px] font-display font-black uppercase tracking-[0.12em] tabular-nums lg:min-w-[58px] lg:px-4 lg:text-[11px] lg:tracking-[0.14em]",
                     isActive
                       ? "text-primary bg-primary/[0.08]"
                       : "text-muted-foreground/60 hover:text-foreground hover:bg-secondary/40"
@@ -363,7 +363,7 @@ export default function Dashboard() {
           <Popover open={datePickerOpen} onOpenChange={setDatePickerOpen}>
             <PopoverTrigger asChild>
               <button className={cn(
-                "seller-segment relative border-l border-border px-4 flex items-center gap-2 text-[11px] font-display font-black uppercase tracking-[0.14em]",
+                "seller-segment relative flex min-w-[92px] items-center justify-center gap-1.5 border-l border-border px-2 text-[10px] font-display font-black uppercase tracking-[0.12em] lg:min-w-[112px] lg:px-4 lg:text-[11px] lg:tracking-[0.14em]",
                 isCustom
                   ? "text-primary bg-primary/[0.08]"
                   : "text-muted-foreground/60 hover:text-foreground hover:bg-secondary/40"
@@ -380,7 +380,7 @@ export default function Dashboard() {
             <PopoverContent
               align="end"
               sideOffset={8}
-              className="p-0 border border-border rounded-xl overflow-hidden bg-card w-auto"
+              className="w-[calc(100vw-1.5rem)] max-w-[380px] overflow-hidden rounded-xl border border-border bg-card p-0 sm:w-auto"
             >
               {/* Header */}
               <div className="flex items-center justify-between gap-4 px-4 py-3 border-b border-border bg-secondary/30">
@@ -494,7 +494,7 @@ export default function Dashboard() {
 
       {/* Hero Financial Row */}
       <div className="contents lg:grid lg:grid-cols-4 lg:gap-6">
-        <Card className="order-1 lg:order-none seller-hover-card lg:col-span-2 relative overflow-hidden group border-primary/20 bg-gradient-to-br from-primary/[0.04] via-card to-card shadow-xl shadow-primary/5 rounded-3xl min-h-[220px]">
+        <Card className="order-1 lg:order-none seller-hover-card lg:col-span-2 relative overflow-hidden group border-primary/20 bg-gradient-to-br from-primary/[0.04] via-card to-card rounded-[1.35rem] min-h-0 sm:rounded-3xl lg:min-h-[220px]">
           {/* Main card inner glow */}
           <div className="absolute inset-px rounded-[1.45rem] bg-gradient-to-br from-primary/[0.01] to-transparent pointer-events-none" />
           
@@ -502,41 +502,41 @@ export default function Dashboard() {
             <Wallet className="h-40 w-40 -rotate-12" />
           </div>
 
-          <CardHeader className="pb-1 pt-5 px-4 sm:px-6 md:px-8">
-             <div className="flex items-center gap-2 text-primary font-bold uppercase tracking-widest text-[10px] bg-primary/10 w-fit px-3 py-1 rounded-full border border-primary/10 transition-all">
+          <CardHeader className="px-4 pb-1 pt-4 sm:px-6 sm:pt-5 md:px-8">
+             <div className="flex w-fit items-center gap-2 rounded-full border border-primary/10 bg-primary/10 px-3 py-1 text-[9px] font-bold uppercase tracking-[0.16em] text-primary transition-all sm:text-[10px] sm:tracking-widest">
                 <BarChart3 className="h-3 w-3" />
                 Faturamento do Dia
              </div>
           </CardHeader>
           
-          <CardContent className="pt-2 pb-5 px-4 sm:px-6 md:px-8">
-            <div className="flex flex-col gap-4 sm:gap-5">
-              <div className="flex items-baseline gap-2 sm:gap-3 flex-wrap">
-                <p className="text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight text-foreground leading-none break-all">
+          <CardContent className="px-4 pb-4 pt-2 sm:px-6 sm:pb-5 md:px-8">
+            <div className="flex flex-col gap-3.5 sm:gap-5">
+              <div className="flex min-w-0 items-baseline gap-2 sm:gap-3">
+                <p className="min-w-0 max-w-full truncate text-[28px] font-numbers font-bold leading-none tracking-tight text-foreground min-[380px]:text-[32px] sm:text-4xl md:text-5xl">
                   {privacy.hidden ? CENSORED : fmt(revenue)}
                 </p>
-                <span className="text-muted-foreground/30 font-bold text-sm sm:text-base">BRL</span>
+                <span className="shrink-0 text-xs font-bold text-muted-foreground/30 sm:text-base">BRL</span>
               </div>
 
-              <div className="flex flex-wrap items-center gap-3 sm:gap-4 md:gap-6 p-3 sm:p-4 rounded-2xl bg-background/40 border border-border/40 backdrop-blur-sm w-full sm:w-fit group-hover:border-primary/20 transition-all">
-                <div className="space-y-1 min-w-0">
+              <div className="grid w-full grid-cols-2 gap-3 rounded-2xl border border-border/40 bg-background/40 p-3 transition-all group-hover:border-primary/20 sm:flex sm:w-fit sm:flex-wrap sm:items-center sm:gap-4 sm:p-4 md:gap-6">
+                <div className="min-w-0 space-y-1">
                   <div className="flex items-center gap-2">
                     <Wallet className="h-3 w-3 text-muted-foreground/60" />
-                    <p className="text-[9px] font-bold uppercase tracking-wider text-muted-foreground/60">Saldo Disponível</p>
+                    <p className="truncate text-[8px] font-bold uppercase tracking-[0.12em] text-muted-foreground/60 sm:text-[9px] sm:tracking-wider">Saldo Disponível</p>
                   </div>
-                  <p className="text-base sm:text-lg font-bold text-success tracking-tight leading-none break-all">{privacy.hidden ? CENSORED : fmt(balance)}</p>
+                  <p className="truncate text-sm font-bold leading-none tracking-tight text-success min-[380px]:text-base sm:text-lg">{privacy.hidden ? CENSORED : fmt(balance)}</p>
                 </div>
                 <div className="hidden sm:block h-8 w-px bg-border/40" />
-                <div className="space-y-1 min-w-0">
-                  <p className="text-[9px] font-bold uppercase tracking-wider text-muted-foreground/60">Conversão</p>
-                  <p className="text-base sm:text-lg font-bold text-primary tracking-tight leading-none">{conversion.toFixed(1)}%</p>
+                <div className="min-w-0 space-y-1">
+                  <p className="truncate text-[8px] font-bold uppercase tracking-[0.12em] text-muted-foreground/60 sm:text-[9px] sm:tracking-wider">Conversão</p>
+                  <p className="truncate text-sm font-bold leading-none tracking-tight text-primary min-[380px]:text-base sm:text-lg">{conversion.toFixed(1)}%</p>
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3 pt-1">
+              <div className="grid grid-cols-2 gap-2 pt-1 sm:gap-3">
                 <Link
                   to="/financeiro/saques"
-                  className="seller-action bg-primary text-primary-foreground h-11 px-4 rounded-xl font-bold text-[12px] flex items-center justify-center gap-2 whitespace-nowrap"
+                  className="seller-action flex h-11 items-center justify-center gap-2 whitespace-nowrap rounded-xl bg-primary px-3 text-[11px] font-bold text-primary-foreground sm:px-4 sm:text-[12px]"
                 >
                   <ArrowDownRight className="h-4 w-4 shrink-0" />
                   <span>Solicitar Saque</span>
@@ -544,7 +544,7 @@ export default function Dashboard() {
                 <button
                   type="button"
                   onClick={() => setPixDialogOpen(true)}
-                  className="seller-action bg-background/60 text-foreground h-11 px-4 rounded-xl font-bold text-[12px] flex items-center justify-center gap-2 hover:bg-accent whitespace-nowrap"
+                  className="seller-action flex h-11 items-center justify-center gap-2 whitespace-nowrap rounded-xl bg-background/60 px-3 text-[11px] font-bold text-foreground hover:bg-accent sm:px-4 sm:text-[12px]"
                 >
                   <Zap className="h-4 w-4 text-success shrink-0" />
                   <span>Gerar Pix</span>
@@ -554,7 +554,7 @@ export default function Dashboard() {
           </CardContent>
         </Card>
 
-        <div className="order-3 lg:order-none lg:col-span-2 grid grid-cols-2 gap-3 sm:gap-4 md:gap-5">
+        <div className="order-3 grid grid-cols-2 gap-2.5 lg:order-none lg:col-span-2 sm:gap-4 md:gap-5">
           {financialCards.map((card) => (
             <StatCard 
               key={card.label}
@@ -571,7 +571,7 @@ export default function Dashboard() {
       </div>
 
       {/* Integration shortcuts row */}
-      <div className="order-4 lg:order-none grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-2.5 sm:gap-3 md:gap-4">
+      <div className="order-4 grid grid-cols-2 gap-2.5 lg:order-none sm:grid-cols-4 sm:gap-3 md:gap-4">
         {[
           { label: "Credenciais API", sub: "Gerencie suas chaves", icon: KeyRound, to: "/integracoes/credenciais" },
           { label: "Documentação", sub: "Guia de integração", icon: BookOpen, to: "/integracoes/documentacao" },
@@ -581,16 +581,16 @@ export default function Dashboard() {
           <Link
             key={item.label}
             to={item.to}
-            className="group relative isolate flex min-h-[78px] sm:min-h-[88px] w-full min-w-0 items-center gap-2 sm:gap-2.5 overflow-hidden rounded-2xl border border-border/70 bg-card px-3 py-3 sm:px-3.5 outline-none transition-[transform,border-color,background-color,box-shadow] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] hover:-translate-y-1 hover:border-primary/70 hover:bg-primary/[0.045] hover:shadow-[0_18px_40px_-22px_hsl(var(--primary)/0.55)] focus-visible:ring-2 focus-visible:ring-primary/40 active:translate-y-0 active:scale-[0.99] [&::after]:!hidden"
+            className="group relative isolate flex min-h-[102px] w-full min-w-0 flex-col items-start justify-between gap-2 overflow-hidden rounded-[1.05rem] border border-border/70 bg-card p-3 outline-none transition-[transform,border-color,background-color] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] hover:-translate-y-1 hover:border-primary/70 hover:bg-primary/[0.045] focus-visible:ring-2 focus-visible:ring-primary/40 active:translate-y-0 active:scale-[0.99] sm:min-h-[86px] sm:flex-row sm:items-center sm:justify-start sm:gap-2.5 sm:rounded-2xl sm:px-3.5"
           >
-            <div className="relative z-10 flex h-9 w-9 sm:h-10 sm:w-10 shrink-0 items-center justify-center rounded-xl border border-border/70 bg-background/70 text-foreground/75 transition-[border-color,background-color,color,transform] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:scale-105 group-hover:-rotate-3 group-hover:border-primary/55 group-hover:bg-primary/12 group-hover:text-primary">
+            <div className="relative z-10 flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-border/70 bg-background/70 text-foreground/75 transition-[border-color,background-color,color,transform] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:scale-105 group-hover:-rotate-3 group-hover:border-primary/55 group-hover:bg-primary/12 group-hover:text-primary">
               <item.icon className="h-4 w-4 sm:h-[18px] sm:w-[18px] transition-transform duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:scale-110" />
             </div>
             <div className="relative z-10 min-w-0 flex-1 pr-0.5">
-              <p className="truncate text-[12px] sm:text-[13px] font-black leading-[1.15] text-foreground transition-colors duration-300 group-hover:text-primary">
+              <p className="truncate text-[12px] font-black leading-[1.15] text-foreground transition-colors duration-300 group-hover:text-primary sm:text-[13px]">
                 {item.label}
               </p>
-              <p className="mt-1 truncate text-[9px] sm:text-[10px] font-bold uppercase leading-[1.25] tracking-[0.08em] text-muted-foreground/60 transition-colors duration-300 group-hover:text-muted-foreground/90">
+              <p className="mt-1 truncate text-[8px] font-bold uppercase leading-[1.25] tracking-[0.08em] text-muted-foreground/60 transition-colors duration-300 group-hover:text-muted-foreground/90 sm:text-[10px]">
                 {item.sub}
               </p>
             </div>
@@ -607,24 +607,24 @@ export default function Dashboard() {
 
       {/* Main Operations Grid */}
       <div className="contents lg:grid lg:grid-cols-3 lg:gap-6 lg:items-stretch">
-        <Card className="order-2 lg:order-none seller-hover-card lg:col-span-2 border-border/40 overflow-hidden shadow-lg shadow-black/5 rounded-3xl flex flex-col h-full">
-          <CardHeader className="flex flex-row items-center justify-between border-b border-border/40 px-6 py-5 md:px-8">
+        <Card className="order-2 lg:order-none seller-hover-card lg:col-span-2 flex h-full flex-col overflow-hidden rounded-[1.35rem] border-border/40 sm:rounded-3xl">
+          <CardHeader className="flex flex-col gap-3 border-b border-border/40 px-4 py-4 min-[520px]:flex-row min-[520px]:items-center min-[520px]:justify-between sm:px-6 sm:py-5 md:px-8">
             <div>
-              <CardTitle className="text-lg font-bold">Fluxo de Vendas</CardTitle>
+              <CardTitle className="text-base font-bold sm:text-lg">Fluxo de Vendas</CardTitle>
               <CardDescription className="text-[10px] font-bold uppercase tracking-wider opacity-50">Desempenho financeiro</CardDescription>
             </div>
-            <div className="flex items-center gap-4 text-xs font-bold">
+            <div className="flex w-full items-center justify-between gap-3 text-xs font-bold min-[520px]:w-auto min-[520px]:justify-start min-[520px]:gap-4">
                <div className="flex items-center gap-2">
                   <div className="h-2 w-2 rounded-full bg-primary" />
                   <span className="opacity-60">Aprovadas</span>
                </div>
-               <div className="text-primary font-bold">{fmt(revenue)}</div>
+               <div className="max-w-[150px] truncate font-bold text-primary sm:max-w-none">{fmt(revenue)}</div>
             </div>
           </CardHeader>
           <CardContent className="p-0 flex-1 flex flex-col">
-            <div className="w-full h-[320px] pt-6 pb-4 pr-6 pl-2">
+            <div className="h-[246px] w-full pt-5 pb-3 pl-0 pr-2 min-[390px]:h-[264px] sm:h-[320px] sm:pr-6 sm:pl-2">
               <ResponsiveContainer width="100%" height="100%">
-                <AreaChart data={chartData} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
+                <AreaChart data={chartData} margin={{ top: 10, right: 8, left: 0, bottom: 0 }}>
                   <defs>
                     <linearGradient id="colorVendas" x1="0" y1="0" x2="0" y2="1">
                       <stop offset="5%" stopColor="hsl(var(--primary))" stopOpacity={0.15}/>
@@ -632,8 +632,8 @@ export default function Dashboard() {
                     </linearGradient>
                   </defs>
                   <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="hsl(var(--border)/0.3)" />
-                  <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{fill: 'hsl(var(--muted-foreground)/0.5)', fontSize: 10, fontWeight: 700}} dy={10} />
-                  <YAxis axisLine={false} tickLine={false} tick={{fill: 'hsl(var(--muted-foreground)/0.5)', fontSize: 10, fontWeight: 700}} tickFormatter={(v) => `R$${v}`} />
+                  <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{fill: 'hsl(var(--muted-foreground)/0.5)', fontSize: 10, fontWeight: 700}} dy={10} interval="preserveStartEnd" />
+                  <YAxis width={42} axisLine={false} tickLine={false} tick={{fill: 'hsl(var(--muted-foreground)/0.5)', fontSize: 10, fontWeight: 700}} tickFormatter={(v) => Number(v) >= 1000 ? `R$${Math.round(Number(v) / 1000)}k` : `R$${v}`} />
                   <Tooltip 
                     cursor={{ stroke: 'hsl(var(--primary))', strokeWidth: 1, strokeDasharray: '4 4' }}
                     content={({ active, payload }) => {
@@ -659,7 +659,7 @@ export default function Dashboard() {
                     type="monotone" 
                     dataKey="vendas" 
                     stroke="hsl(var(--primary))" 
-                    strokeWidth={4} 
+                      strokeWidth={3} 
                     fillOpacity={1} 
                     fill="url(#colorVendas)"
                     activeDot={{ 
@@ -676,20 +676,20 @@ export default function Dashboard() {
           </CardContent>
         </Card>
 
-        <Card className="order-5 lg:order-none seller-hover-card border-border/40 overflow-hidden bg-gradient-to-b from-card to-background/20 shadow-xl shadow-black/5 rounded-3xl flex flex-col h-full">
-          <CardHeader className="border-b border-border/40 px-6 py-5">
+        <Card className="order-5 lg:order-none seller-hover-card flex h-full flex-col overflow-hidden rounded-[1.35rem] border-border/40 bg-gradient-to-b from-card to-background/20 sm:rounded-3xl">
+          <CardHeader className="border-b border-border/40 px-4 py-4 sm:px-6 sm:py-5">
             <div className="flex items-center justify-between">
               <div>
-                <CardTitle className="text-lg font-bold">Conversão Geral</CardTitle>
+                <CardTitle className="text-base font-bold sm:text-lg">Conversão Geral</CardTitle>
                 <CardDescription className="text-[10px] font-bold uppercase tracking-wider opacity-50">Desempenho por método</CardDescription>
               </div>
               <div className="bg-primary/10 text-primary px-3 py-1.5 rounded-xl border border-primary/20">
-                <span className="text-xl font-bold">{conversion.toFixed(1)}%</span>
+                <span className="text-lg font-bold sm:text-xl">{conversion.toFixed(1)}%</span>
               </div>
             </div>
           </CardHeader>
-          <CardContent className="px-6 py-5 flex-1 flex flex-col justify-center">
-            <div className="space-y-5">
+          <CardContent className="flex flex-1 flex-col justify-center px-4 py-4 sm:px-6 sm:py-5">
+            <div className="space-y-4 sm:space-y-5">
               {/* PIX */}
               <div className="group space-y-2.5">
                 <div className="flex justify-between items-center">
@@ -732,7 +732,7 @@ export default function Dashboard() {
               <div className="group space-y-2.5">
                 <div className="flex justify-between items-center">
                   <div className="flex items-center gap-3">
-                    <div className="h-9 w-9 rounded-xl bg-orange-500/10 border border-orange-500/20 flex items-center justify-center text-orange-500">
+                    <div className="h-9 w-9 rounded-xl bg-warning/10 border border-warning/20 flex items-center justify-center text-warning">
                       <Barcode className="h-4.5 w-4.5" />
                     </div>
                     <div>
@@ -740,10 +740,10 @@ export default function Dashboard() {
                       <p className="text-[10px] font-bold text-muted-foreground/50">{boletoApprovedCount} de {boletoTotalCount} pagos</p>
                     </div>
                   </div>
-                  <span className="text-lg font-bold text-orange-500">{boletoConversion.toFixed(0)}%</span>
+                  <span className="text-lg font-bold text-warning">{boletoConversion.toFixed(0)}%</span>
                 </div>
                 <div className="h-2 w-full bg-muted/30 rounded-full overflow-hidden border border-border/20">
-                  <div className="h-full bg-gradient-to-r from-orange-500/40 to-orange-500 rounded-full transition-all duration-1000" style={{ width: `${boletoConversion}%` }} />
+                  <div className="h-full bg-gradient-to-r from-warning/40 to-warning rounded-full transition-all duration-1000" style={{ width: `${boletoConversion}%` }} />
                 </div>
               </div>
             </div>
@@ -754,13 +754,13 @@ export default function Dashboard() {
       {/* /Reorderable section */}
 
       {/* Recent Activity */}
-      <Card className="seller-hover-card border-border/40 overflow-hidden shadow-lg shadow-black/5 rounded-3xl">
-        <CardHeader className="flex flex-row items-center justify-between border-b border-border/40 px-6 py-6 md:px-8">
+      <Card className="seller-hover-card overflow-hidden rounded-[1.35rem] border-border/40 sm:rounded-3xl">
+        <CardHeader className="flex flex-col gap-3 border-b border-border/40 px-4 py-4 min-[430px]:flex-row min-[430px]:items-center min-[430px]:justify-between sm:px-6 sm:py-6 md:px-8">
           <div>
-            <CardTitle className="text-lg font-bold">Últimas Transações</CardTitle>
+            <CardTitle className="text-base font-bold sm:text-lg">Últimas Transações</CardTitle>
             <CardDescription className="text-[10px] font-bold uppercase tracking-wider opacity-50">Acompanhamento em tempo real</CardDescription>
           </div>
-          <Link to="/vendas" className="seller-link-action text-xs font-bold text-primary hover:underline underline-offset-4 flex items-center gap-1">
+          <Link to="/vendas" className="seller-link-action flex w-fit items-center gap-1 text-[11px] font-bold text-primary underline-offset-4 hover:underline sm:text-xs">
              Ver Histórico Completo
              <ChevronRight className="h-3 w-3" />
           </Link>
@@ -772,10 +772,10 @@ export default function Dashboard() {
                 key={item.id}
                 type="button"
                 onClick={() => setDetailTx(item.tx)}
-                className="seller-row-action group w-full text-left flex items-center justify-between px-8 py-6 cursor-pointer"
+                className="seller-row-action group flex w-full cursor-pointer items-center justify-between gap-3 px-4 py-3.5 text-left sm:px-8 sm:py-6"
               >
-                <div className="flex items-center gap-4">
-                  <div className={cn("h-11 w-11 rounded-2xl flex items-center justify-center transition-transform group-hover:scale-110", statusBg(item.status))}>
+                <div className="flex min-w-0 items-center gap-3 sm:gap-4">
+                  <div className={cn("flex h-10 w-10 shrink-0 items-center justify-center rounded-xl transition-transform group-hover:scale-110 sm:h-11 sm:w-11 sm:rounded-2xl", statusBg(item.status))}>
                     {item.label === "pix" ? (
                       <PixLogoMark className="h-5 w-5" />
                     ) : item.label === "boleto" ? (
@@ -784,13 +784,13 @@ export default function Dashboard() {
                       <CreditCard className={cn("h-5 w-5", statusColor(item.status))} />
                     )}
                   </div>
-                  <div>
-                    <p className="text-sm font-bold">{item.label === "pix" ? "Pagamento via PIX" : item.label === "credit_card" ? "Pagamento via Cartão" : item.label === "boleto" ? "Pagamento via Boleto" : "Transação"}</p>
+                  <div className="min-w-0">
+                    <p className="truncate text-[13px] font-bold sm:text-sm">{item.label === "pix" ? "Pagamento via PIX" : item.label === "credit_card" ? "Pagamento via Cartão" : item.label === "boleto" ? "Pagamento via Boleto" : "Transação"}</p>
                     <p className="text-[10px] font-bold text-muted-foreground/50 uppercase tracking-widest">{timeAgo(item.createdAt)}</p>
                   </div>
                 </div>
-                <div className="text-right">
-                  <p className="text-sm font-bold">{fmt(item.amount)}</p>
+                <div className="max-w-[128px] shrink-0 text-right sm:max-w-none">
+                  <p className="truncate text-[13px] font-bold sm:text-sm">{fmt(item.amount)}</p>
                   <p className={cn("text-[10px] font-bold uppercase tracking-widest", statusColor(item.status))}>{statusLabel(item.status)}</p>
                 </div>
               </button>
