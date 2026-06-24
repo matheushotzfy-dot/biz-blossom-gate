@@ -313,7 +313,7 @@ export default function Dashboard() {
 
 
   return (
-    <div className="p-4 md:p-6 pt-2 md:pt-4 space-y-6 max-w-[1600px] mx-auto animate-in fade-in duration-500 overflow-x-hidden">
+    <div className="px-4 md:px-6 pt-2 pb-6 space-y-4 max-w-[1600px] mx-auto animate-in fade-in duration-500 overflow-x-hidden">
       <Seo title="Dashboard | Hotzfy" description="Painel de controle com vendas, saldo, transações e KPIs em tempo real." path="/dashboard" noindex />
       {(txError || productsError) && (
         <div className="flex items-center justify-between gap-3 rounded-lg border border-destructive/30 bg-destructive/5 px-4 py-3 text-[12px] text-destructive">
@@ -322,7 +322,7 @@ export default function Dashboard() {
         </div>
       )}
       {/* Header */}
-      <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4">
+      <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-2">
         <div className="space-y-1">
           <div className="flex items-center gap-2">
              <div className="h-2 w-2 rounded-full bg-success animate-pulse" />
