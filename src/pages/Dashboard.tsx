@@ -723,11 +723,9 @@ export default function Dashboard() {
                 <Link
                   key={item.label}
                   to={item.to}
-                  className="seller-hover-card group flex flex-col items-center justify-center gap-2 rounded-2xl border border-border/40 bg-card/50 px-3 py-4 text-center transition-all hover:border-primary/40"
+                  className="group flex flex-col items-center justify-center gap-2 rounded-2xl border border-border/40 bg-card/50 px-3 py-4 text-center transition-colors hover:border-primary/40 hover:bg-card"
                 >
-                  <div className="h-9 w-9 rounded-xl border border-border/40 bg-muted/30 flex items-center justify-center text-foreground/70 group-hover:text-primary group-hover:border-primary/40 transition-colors">
-                    <item.icon className="h-4.5 w-4.5" />
-                  </div>
+                  <item.icon className="h-5 w-5 text-foreground/70 group-hover:text-primary transition-colors" />
                   <span className="text-[11px] font-bold uppercase tracking-wider leading-tight">{item.label}</span>
                 </Link>
               ))}
