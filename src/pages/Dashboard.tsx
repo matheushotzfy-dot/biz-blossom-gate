@@ -596,8 +596,8 @@ export default function Dashboard() {
       </div>
 
       {/* Main Operations Grid */}
-      <div className="grid lg:grid-cols-3 gap-6">
-        <Card className="seller-hover-card lg:col-span-2 border-border/40 overflow-hidden shadow-lg shadow-black/5 rounded-3xl">
+      <div className="grid lg:grid-cols-3 gap-6 items-stretch">
+        <Card className="seller-hover-card lg:col-span-2 border-border/40 overflow-hidden shadow-lg shadow-black/5 rounded-3xl flex flex-col h-full">
           <CardHeader className="flex flex-row items-center justify-between border-b border-border/40 px-6 py-5 md:px-8">
             <div>
               <CardTitle className="text-lg font-bold">Fluxo de Vendas</CardTitle>
@@ -611,8 +611,8 @@ export default function Dashboard() {
                <div className="text-primary font-bold">{fmt(revenue)}</div>
             </div>
           </CardHeader>
-          <CardContent className="p-0">
-            <div className="h-[320px] w-full pt-6 pb-4 pr-6 pl-2">
+          <CardContent className="p-0 flex-1 flex flex-col">
+            <div className="flex-1 min-h-[280px] w-full pt-6 pb-4 pr-6 pl-2">
               <ResponsiveContainer width="100%" height="100%">
                 <AreaChart data={chartData} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
                   <defs>
