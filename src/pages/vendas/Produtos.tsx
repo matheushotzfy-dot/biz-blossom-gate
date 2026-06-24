@@ -163,7 +163,7 @@ export default function Produtos() {
   };
 
   return (
-    <div className="mx-auto w-full max-w-[1440px] space-y-6 px-5 pb-24 pt-1 sm:px-7 md:pb-10">
+    <div className="mx-auto w-full max-w-[1440px] space-y-4 sm:space-y-6 px-3 pb-24 pt-1 sm:px-7 md:pb-10">
       {/* ── Hero (Financeiro pattern) ── */}
       <FinanceiroHero
         eyebrow={`${products.length} ${products.length === 1 ? "produto" : "produtos"} no catálogo`}
