@@ -569,7 +569,7 @@ export default function Dashboard() {
       </div>
 
       {/* Integration shortcuts row */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 2xl:grid-cols-4 gap-3 md:gap-4">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
         {[
           { label: "Credenciais API", sub: "Gerencie suas chaves", icon: KeyRound, to: "/integracoes/credenciais" },
           { label: "Documentação", sub: "Guia de integração", icon: BookOpen, to: "/integracoes/documentacao" },
@@ -579,23 +579,18 @@ export default function Dashboard() {
           <Link
             key={item.label}
             to={item.to}
-            className="group relative flex min-h-[86px] items-center justify-between gap-4 overflow-hidden rounded-2xl border border-border/60 bg-card px-4 py-4 outline-none transition-[transform,border-color,background-color] duration-300 ease-out hover:-translate-y-0.5 hover:border-primary/70 hover:bg-primary/[0.035] focus-visible:ring-2 focus-visible:ring-primary/40 [&::after]:!hidden"
+            className="group relative flex min-h-[84px] items-center gap-3 overflow-hidden rounded-2xl border border-border/60 bg-card pl-5 pr-3 py-3.5 outline-none transition-[transform,border-color,background-color] duration-300 ease-out hover:-translate-y-0.5 hover:border-primary/60 hover:bg-primary/[0.04] focus-visible:ring-2 focus-visible:ring-primary/40 [&::after]:!hidden"
           >
-            <span className="pointer-events-none absolute left-0 top-3 bottom-3 w-1.5 rounded-r-full bg-primary/70 transition-all duration-300 ease-out group-hover:top-2 group-hover:bottom-2 group-hover:bg-primary" />
-            <span className="pointer-events-none absolute inset-y-0 left-0 w-28 bg-gradient-to-r from-primary/[0.075] to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
+            <span className="pointer-events-none absolute left-0 top-2.5 bottom-2.5 w-[3px] rounded-r-full bg-primary/0 transition-all duration-300 ease-out group-hover:bg-primary" />
 
-            <div className="relative flex items-center gap-3 min-w-0">
-              <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-border/60 bg-muted/25 text-foreground/75 transition-[border-color,background-color,color] duration-300 group-hover:border-primary/60 group-hover:bg-primary/10 group-hover:text-primary">
-                <item.icon className="h-[18px] w-[18px]" />
-              </div>
-              <div className="min-w-0">
-                <p className="text-sm font-bold leading-tight truncate transition-colors duration-300 group-hover:text-primary">{item.label}</p>
-                <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground/60 truncate mt-0.5">{item.sub}</p>
-              </div>
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-border/60 bg-muted/30 text-foreground/75 transition-[border-color,background-color,color] duration-300 group-hover:border-primary/50 group-hover:bg-primary/10 group-hover:text-primary">
+              <item.icon className="h-[17px] w-[17px]" />
             </div>
-            <div className="relative flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-transparent text-muted-foreground/45 transition-[transform,border-color,background-color,color] duration-300 group-hover:translate-x-0.5 group-hover:border-primary/35 group-hover:bg-primary/10 group-hover:text-primary">
-              <ChevronRight className="h-4 w-4" />
+            <div className="min-w-0 flex-1">
+              <p className="text-[13px] font-bold leading-tight transition-colors duration-300 group-hover:text-primary">{item.label}</p>
+              <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground/60 truncate mt-0.5">{item.sub}</p>
             </div>
+            <ChevronRight className="h-4 w-4 shrink-0 text-muted-foreground/40 transition-[transform,color] duration-300 group-hover:translate-x-0.5 group-hover:text-primary" />
           </Link>
         ))}
       </div>
