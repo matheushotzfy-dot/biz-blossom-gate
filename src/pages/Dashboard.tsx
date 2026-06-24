@@ -579,18 +579,27 @@ export default function Dashboard() {
           <Link
             key={item.label}
             to={item.to}
-            className="group relative flex min-h-[84px] items-center gap-3 overflow-hidden rounded-2xl border border-border/60 bg-card pl-5 pr-3 py-3.5 outline-none transition-[transform,border-color,background-color] duration-300 ease-out hover:-translate-y-0.5 hover:border-primary/60 hover:bg-primary/[0.04] focus-visible:ring-2 focus-visible:ring-primary/40 [&::after]:!hidden"
+            className="group relative flex min-h-[84px] items-center gap-3 overflow-hidden rounded-2xl border border-border/60 bg-card pl-5 pr-3 py-3.5 outline-none transition-[transform,border-color,background-color,box-shadow] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] hover:-translate-y-1 hover:border-primary/70 hover:bg-primary/[0.05] hover:shadow-[0_18px_40px_-20px_hsl(var(--primary)/0.55)] focus-visible:ring-2 focus-visible:ring-primary/40 [&::after]:!hidden"
           >
-            <span className="pointer-events-none absolute left-0 top-2.5 bottom-2.5 w-[3px] rounded-r-full bg-primary/0 transition-all duration-300 ease-out group-hover:bg-primary" />
+            {/* Animated left rail */}
+            <span className="pointer-events-none absolute left-0 top-1/2 -translate-y-1/2 h-0 w-[3px] rounded-r-full bg-gradient-to-b from-primary via-primary to-primary/40 transition-[height,opacity] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] opacity-0 group-hover:h-[72%] group-hover:opacity-100" />
 
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-border/60 bg-muted/30 text-foreground/75 transition-[border-color,background-color,color] duration-300 group-hover:border-primary/50 group-hover:bg-primary/10 group-hover:text-primary">
-              <item.icon className="h-[17px] w-[17px]" />
+            {/* Diagonal sheen sweep */}
+            <span className="pointer-events-none absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-primary/15 to-transparent skew-x-[-20deg] transition-transform duration-[900ms] ease-out group-hover:translate-x-full" />
+
+            {/* Soft glow wash */}
+            <span className="pointer-events-none absolute -inset-px rounded-2xl bg-[radial-gradient(circle_at_top_left,hsl(var(--primary)/0.18),transparent_60%)] opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
+
+            <div className="relative flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-border/60 bg-muted/30 text-foreground/75 transition-[border-color,background-color,color,transform,box-shadow] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:border-primary/60 group-hover:bg-primary/15 group-hover:text-primary group-hover:scale-[1.08] group-hover:shadow-[0_0_0_4px_hsl(var(--primary)/0.08),0_8px_20px_-8px_hsl(var(--primary)/0.5)]">
+              <item.icon className="h-[17px] w-[17px] transition-transform duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:rotate-[-6deg]" />
             </div>
-            <div className="min-w-0 flex-1">
+            <div className="relative min-w-0 flex-1">
               <p className="text-[13px] font-bold leading-tight transition-colors duration-300 group-hover:text-primary">{item.label}</p>
-              <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground/60 truncate mt-0.5">{item.sub}</p>
+              <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground/60 truncate mt-0.5 transition-colors duration-300 group-hover:text-muted-foreground/90">{item.sub}</p>
             </div>
-            <ChevronRight className="h-4 w-4 shrink-0 text-muted-foreground/40 transition-[transform,color] duration-300 group-hover:translate-x-0.5 group-hover:text-primary" />
+            <div className="relative flex h-7 w-7 shrink-0 items-center justify-center rounded-lg border border-transparent text-muted-foreground/40 transition-[transform,border-color,background-color,color] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:translate-x-1 group-hover:border-primary/40 group-hover:bg-primary/10 group-hover:text-primary">
+              <ChevronRight className="h-4 w-4" />
+            </div>
           </Link>
         ))}
       </div>
