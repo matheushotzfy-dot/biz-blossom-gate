@@ -17,44 +17,45 @@ input[type="number"]::-webkit-inner-spin-button {
 
 @layer base {
   :root {
-    --background: 210 40% 97%;
-    --foreground: 222 47% 11%;
+    /* Pure White Minimal — Linear/Stripe inspired */
+    --background: 0 0% 100%;
+    --foreground: 0 0% 4%;
     --card: 0 0% 100%;
     --card-elevated: 0 0% 100%;
-    --card-inset: 210 40% 94%;
-    --card-foreground: 222 47% 11%;
+    --card-inset: 220 14% 98%;
+    --card-foreground: 0 0% 4%;
     --popover: 0 0% 100%;
-    --popover-foreground: 222 47% 11%;
-    --primary: 212 100% 48%;
-    --primary-foreground: 210 40% 99%;
-    --secondary: 210 40% 95%;
-    --secondary-foreground: 222 47% 11%;
-    --muted: 210 40% 94%;
-    --muted-foreground: 215 25% 32%;
-    --accent: 210 40% 93%;
-    --accent-foreground: 222 47% 11%;
+    --popover-foreground: 0 0% 4%;
+    --primary: 217 91% 60%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 220 14% 97%;
+    --secondary-foreground: 0 0% 9%;
+    --muted: 220 14% 97%;
+    --muted-foreground: 220 9% 46%;
+    --accent: 220 14% 96%;
+    --accent-foreground: 0 0% 9%;
     --destructive: 0 84% 60%;
-    --destructive-foreground: 210 40% 99%;
-    --border: 214 32% 85%;
-    --input: 214 32% 85%;
-    --ring: 212 100% 48%;
-    --radius: 1rem;
+    --destructive-foreground: 0 0% 100%;
+    --border: 220 13% 93%;
+    --input: 220 13% 91%;
+    --ring: 217 91% 60%;
+    --radius: 0.75rem;
 
     --sidebar-background: 0 0% 100%;
-    --sidebar-foreground: 215 25% 32%;
-    --sidebar-primary: 212 100% 48%;
-    --sidebar-primary-foreground: 210 40% 99%;
-    --sidebar-accent: 210 40% 94%;
-    --sidebar-accent-foreground: 222 47% 11%;
-    --sidebar-border: 214 32% 85%;
-    --sidebar-ring: 212 100% 48%;
+    --sidebar-foreground: 220 9% 38%;
+    --sidebar-primary: 217 91% 60%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 220 14% 96%;
+    --sidebar-accent-foreground: 0 0% 9%;
+    --sidebar-border: 220 13% 93%;
+    --sidebar-ring: 217 91% 60%;
 
-    --success: 142 71% 40%;
-    --success-foreground: 210 40% 99%;
-    --warning: 38 92% 45%;
-    --warning-foreground: 210 40% 99%;
-    --info: 212 100% 48%;
-    --info-foreground: 210 40% 99%;
+    --success: 142 71% 38%;
+    --success-foreground: 0 0% 100%;
+    --warning: 32 95% 44%;
+    --warning-foreground: 0 0% 100%;
+    --info: 217 91% 60%;
+    --info-foreground: 0 0% 100%;
   }
 
   .dark {
