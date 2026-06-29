@@ -10,9 +10,9 @@ export function initAntiTamper() {
   if (import.meta.env.DEV) return;
   const big = 'color:#ef4444;font-size:28px;font-weight:800;';
   const txt = 'color:#fff;font-size:13px;';
-  // eslint-disable-next-line no-console
+   
   console.log('%c⛔ PARE!', big);
-  // eslint-disable-next-line no-console
+   
   console.log(
     '%cSe alguém mandou você colar algo aqui, isso é FRAUDE e pode roubar sua conta. Nunca cole código no console.',
     txt

@@ -289,7 +289,7 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
         if (event.data?.type !== "IMPERSONATE_READY") return;
         if (delivered) return;
         delivered = true;
-        try { target.postMessage({ type: "IMPERSONATE_TOKENS", access_token, refresh_token }, expectedOrigin); } catch { }
+        try { target.postMessage({ type: "IMPERSONATE_TOKENS", access_token, refresh_token }, expectedOrigin); } catch { /* noop */ }
         window.removeEventListener("message", onMessage);
       };
       window.addEventListener("message", onMessage);

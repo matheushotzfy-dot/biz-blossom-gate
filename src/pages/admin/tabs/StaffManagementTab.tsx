@@ -115,7 +115,7 @@ export default function StaffManagementTab({ profiles, onReload, role }: Props) 
     setLoading(false);
   };
 
-  useEffect(() => { load(); /* eslint-disable-next-line */ }, [role, profiles]);
+  useEffect(() => { load();   }, [role, profiles]);
 
   const filtered = useMemo(() => {
     let out = rows;
@@ -587,6 +587,13 @@ function PermissionsDialog({ row, onClose, onSaved }: {
 }) {
   const [perms, setPerms] = useState<Set<string>>(new Set());
   useEffect(() => { setPerms(new Set(row?.permissions ?? [])); }, [row]);
+
+  const grouped = useMemo(() => {
+    const g: Record<string, typeof STAFF_PERMISSIONS> = {};
+    STAFF_PERMISSIONS.forEach((p) => { (g[p.group] ??= []).push(p); });
+    return g;
+  }, []);
+
   if (!row) return null;
 
   const save = async () => {
@@ -600,12 +607,6 @@ function PermissionsDialog({ row, onClose, onSaved }: {
     onSaved();
     onClose();
   };
-
-  const grouped = useMemo(() => {
-    const g: Record<string, typeof STAFF_PERMISSIONS> = {};
-    STAFF_PERMISSIONS.forEach((p) => { (g[p.group] ??= []).push(p); });
-    return g;
-  }, []);
 
   return (
     <Dialog open={!!row} onOpenChange={(v) => !v && onClose()}>

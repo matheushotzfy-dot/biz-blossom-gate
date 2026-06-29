@@ -32,7 +32,7 @@ const loadedScripts = new Set<string>();
 
 // FIX #64: Sanitize pixel IDs to prevent script injection
 function sanitizePixelId(id: string): string {
-  return id.replace(/[^a-zA-Z0-9_\-\.]/g, '');
+  return id.replace(/[^a-zA-Z0-9_\-.]/g, '');
 }
 
 function loadFacebookPixel(pixelId: string) {
@@ -51,7 +51,8 @@ function loadFacebookPixel(pixelId: string) {
       version: string;
     };
     const n = function (...args: unknown[]) {
-      n.callMethod ? n.callMethod.apply(n, args) : n.queue.push(args);
+      if (n.callMethod) n.callMethod(...args);
+      else n.queue.push(args);
     } as FbqFn;
     w.fbq = n;
     if (!w._fbq) w._fbq = n;
@@ -342,7 +343,7 @@ export function firePixelEvent(
     const events = Array.isArray(px.events) ? px.events : [];
     if (!events.includes(eventName)) continue;
 
-    let eventParams: Record<string, unknown> = { ...params, currency: params?.currency || 'BRL', event_id: eventId };
+    const eventParams: Record<string, unknown> = { ...params, currency: params?.currency || 'BRL', event_id: eventId };
     // Remove internal keys
     delete eventParams.session_key;
 

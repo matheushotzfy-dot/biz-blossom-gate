@@ -114,7 +114,7 @@ export default function AdminStaffCommissionsTab({ profiles }: Props) {
     setLoading(false);
   };
 
-  useEffect(() => { load(); /* eslint-disable-next-line */ }, [profiles]);
+  useEffect(() => { load();   }, [profiles]);
 
   const filtered = useMemo(() => {
     let out = rows;

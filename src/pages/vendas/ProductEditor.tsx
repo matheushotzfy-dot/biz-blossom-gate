@@ -213,7 +213,7 @@ export default function ProductEditor() {
 
  // Completion percentage
  const completionPercent = (() => {
- let score = 0, total = 8;
+ let score = 0; const total = 8;
  if (name.trim()) score++;
  if (price && parseFloat(price) > 0) score++;
  if (description.trim().length >= 50) score++;
@@ -837,6 +837,7 @@ export default function ProductEditor() {
   </div>
 
   {/* Quick info — temporariamente desativado, voltaremos depois */}
+  {/* eslint-disable-next-line no-constant-binary-expression */}
   {false && !tabsLocked && product?.checkout_url && (
   <div className="rounded-2xl border border-border bg-card p-3.5 space-y-2.5">
   <p className="text-[9px] font-display font-bold uppercase tracking-[0.15em] text-muted-foreground">Ações Rápidas</p>
@@ -1311,6 +1312,7 @@ function TabConfiguracoes({ price, pixEnabled, setPixEnabled, boletoEnabled, set
  </div>
 
  {/* Simulação de taxas — temporariamente desativada, voltaremos depois */}
+ {/* eslint-disable-next-line no-constant-binary-expression */}
  {false && price && parseFloat(price) > 0 && (
  <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="rounded-xl bg-muted/5 border border-border p-3 space-y-2">
  <p className="text-[9px] font-display font-black uppercase tracking-[0.15em] text-muted-foreground/40">Simulação de taxas (R$ {Number(price).toFixed(2)})</p>
@@ -2572,7 +2574,7 @@ function TabConteudo({ productId, isNew }: { productId?: string; isNew: boolean 
         const { data: mods } = await supabase.from("modules").select("id, course_id").in("course_id", courseIds);
         const modsData = mods || [];
         const modIds = modsData.map(m => m.id);
-        let lessonsCount: Record<string, number> = {};
+        const lessonsCount: Record<string, number> = {};
         if (modIds.length > 0) {
           const { data: lessons } = await supabase.from("lessons").select("id, module_id").in("module_id", modIds);
           (lessons || []).forEach(l => { lessonsCount[l.module_id] = (lessonsCount[l.module_id] || 0) + 1; });
