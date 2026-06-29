@@ -161,7 +161,7 @@ export default function AdminRiskComplianceTab({ profiles, transactions, fmtCurr
  const { error } = await supabase.from("profiles").update({ balance_frozen: true }).eq("user_id", userId);
  if (error) { toast.error("Erro ao congelar"); return; }
  toast.success("Saldo congelado!");
- await logAdminAction("freeze_balance", "profile", userId, { reason: "chargeback_radar" } as any);
+ await logAdminAction("freeze_balance", "profile", userId, { reason: "chargeback_radar" });
  };
 
  /* ── KPIs ── */
