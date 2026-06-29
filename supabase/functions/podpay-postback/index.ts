@@ -64,172 +64,9 @@ function safeLog(message: string, context: Record<string, unknown> = {}) {
   console.log(`[podpay-postback] ${message}`, JSON.stringify(safe));
 }
 
-/**
- * Auto-split: when a transaction completes, check if the product has an active
- * co-production and credit the co-producer's ledger with their share.
- */
-async function processCoProductionSplit(supabase: any, transactionId: string) {
-  try {
-    const { data: tx } = await supabase
-      .from('transactions')
-      .select('id, product_id, net_amount, user_id')
-      .eq('id', transactionId)
-      .single();
-
-    if (!tx?.product_id) return;
-
-    // Check for active co-production on this product
-    const { data: coProd } = await supabase
-      .from('co_productions')
-      .select('id, co_producer_user_id, split_percentage, owner_user_id')
-      .eq('product_id', tx.product_id)
-      .eq('status', 'accepted')
-      .maybeSingle();
-
-    if (!coProd || !coProd.co_producer_user_id) return;
-
-    const splitAmount = Math.round(tx.net_amount * coProd.split_percentage) / 100;
-    if (splitAmount <= 0) return;
-
-    const idemKey = `split_${transactionId}_${coProd.id}`;
-
-    const { data: existing } = await supabase
-      .from('financial_ledger')
-      .select('id')
-      .eq('idempotency_key', idemKey)
-      .maybeSingle();
-
-    if (existing) return;
-
-    const { data: balanceResult } = await supabase.rpc('get_ledger_balance', { _user_id: coProd.co_producer_user_id });
-    const coProducerBalance = Number(balanceResult) || 0;
-
-    await supabase.from('financial_ledger').insert({
-      user_id: coProd.co_producer_user_id,
-      transaction_id: transactionId,
-      entry_type: 'credit',
-      amount: splitAmount,
-      balance_after: coProducerBalance + splitAmount,
-      description: `Coprodução: ${coProd.split_percentage}% da venda`,
-      idempotency_key: idemKey,
-    });
-
-    const { data: ownerBalance } = await supabase.rpc('get_ledger_balance', { _user_id: coProd.owner_user_id });
-    const ownerBal = Number(ownerBalance) || 0;
-
-    await supabase.from('financial_ledger').insert({
-      user_id: coProd.owner_user_id,
-      transaction_id: transactionId,
-      entry_type: 'split_debit',
-      amount: splitAmount,
-      balance_after: ownerBal - splitAmount,
-      description: `Split coprodução: ${coProd.split_percentage}% para co-produtor`,
-      idempotency_key: `split_debit_${transactionId}_${coProd.id}`,
-    });
-
-    safeLog('Co-production split processed', { transactionId, status: `split ${coProd.split_percentage}%` });
-  } catch (err) {
-    safeLog('Co-production split error', { error: err instanceof Error ? err.message : 'unknown' });
-  }
-}
-
-/**
- * Auto-split: when a transaction completes, check if the sale came through
- * an affiliate link and credit the affiliate's ledger with their commission.
- */
-async function processAffiliateSplit(supabase: any, transactionId: string) {
-  try {
-    const { data: tx } = await supabase
-      .from('transactions')
-      .select('id, product_id, net_amount, user_id, amount, checkout_session_id')
-      .eq('id', transactionId)
-      .single();
-
-    if (!tx?.product_id) return;
-
-    // Check if an affiliate sale was already recorded for this transaction
-    const { data: existingSale } = await supabase
-      .from('affiliate_sales')
-      .select('id')
-      .eq('transaction_id', transactionId)
-      .maybeSingle();
-
-    if (existingSale) return; // Already processed
-
-    // Find active affiliate links for this product
-    const { data: affiliateLinks } = await supabase
-      .from('affiliate_links')
-      .select('id, affiliate_user_id, commission_pct, owner_user_id')
-      .eq('product_id', tx.product_id)
-      .eq('is_active', true);
-
-    if (!affiliateLinks || affiliateLinks.length === 0) return;
-
-    // For now, match the first active affiliate link for this product
-    // In production, match via checkout_session_id or UTM tracking
-    const link = affiliateLinks[0];
-    if (link.owner_user_id !== tx.user_id) return; // Link must belong to the product owner
-
-    // Commission is calculated on net_amount (after platform fees), not gross
-    const commissionAmount = Math.round(tx.net_amount * link.commission_pct) / 100;
-    if (commissionAmount <= 0) return;
-
-    const idemKey = `affiliate_${transactionId}_${link.id}`;
-
-    const { data: existingLedger } = await supabase
-      .from('financial_ledger')
-      .select('id')
-      .eq('idempotency_key', idemKey)
-      .maybeSingle();
-
-    if (existingLedger) return;
-
-    // Record affiliate sale
-    await supabase.from('affiliate_sales').insert({
-      affiliate_link_id: link.id,
-      affiliate_user_id: link.affiliate_user_id,
-      seller_user_id: tx.user_id,
-      product_id: tx.product_id,
-      transaction_id: transactionId,
-      sale_amount: tx.amount,
-      commission_pct: link.commission_pct,
-      commission_amount: commissionAmount,
-      status: 'approved',
-    });
-
-    // Credit affiliate's ledger
-    const { data: affBalance } = await supabase.rpc('get_ledger_balance', { _user_id: link.affiliate_user_id });
-    const affiliateBalance = Number(affBalance) || 0;
-
-    await supabase.from('financial_ledger').insert({
-      user_id: link.affiliate_user_id,
-      transaction_id: transactionId,
-      entry_type: 'credit',
-      amount: commissionAmount,
-      balance_after: affiliateBalance + commissionAmount,
-      description: `Comissão de afiliado: ${link.commission_pct}% da venda`,
-      idempotency_key: idemKey,
-    });
-
-    // Debit seller
-    const { data: sellerBal } = await supabase.rpc('get_ledger_balance', { _user_id: tx.user_id });
-    const sellerBalance = Number(sellerBal) || 0;
-
-    await supabase.from('financial_ledger').insert({
-      user_id: tx.user_id,
-      transaction_id: transactionId,
-      entry_type: 'affiliate_debit',
-      amount: commissionAmount,
-      balance_after: sellerBalance - commissionAmount,
-      description: `Comissão afiliado: ${link.commission_pct}%`,
-      idempotency_key: `affiliate_debit_${transactionId}_${link.id}`,
-    });
-
-    safeLog('Affiliate split processed', { transactionId, status: `commission ${link.commission_pct}%` });
-  } catch (err) {
-    safeLog('Affiliate split error', { error: err instanceof Error ? err.message : 'unknown' });
-  }
-}
+// NOTE: Splits (coprodução + afiliado) são aplicados automaticamente pelo trigger
+// public.ledger_on_transaction_change → apply_transaction_splits(tx.id) no banco.
+// Não duplicar essa lógica aqui — risco de débito/crédito em dobro.
 
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') {
@@ -287,6 +124,22 @@ Deno.serve(async (req) => {
       );
     }
 
+    // === Replay protection: reject events older than 5 min based on PodPay timestamp ===
+    const tsHeader = req.headers.get('x-podpay-timestamp') || req.headers.get('x-timestamp');
+    if (tsHeader) {
+      const tsSec = Number(tsHeader);
+      if (Number.isFinite(tsSec)) {
+        const ageSec = Math.abs(Math.floor(Date.now() / 1000) - tsSec);
+        if (ageSec > 300) {
+          safeLog('Webhook rejected: stale timestamp', { eventId: String(payload.event_id ?? '') });
+          return new Response(
+            JSON.stringify({ success: false, error: 'Stale event' }),
+            { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+          );
+        }
+      }
+    }
+
     const eventId = payload.event_id ? String(payload.event_id) : null;
     safeLog('Postback received', { eventId });
 
@@ -317,22 +170,7 @@ Deno.serve(async (req) => {
       }
     }
 
-    // Map PodPay status to our status
-    const statusMap: Record<string, string> = {
-      'waiting_payment': 'pending',
-      'pending': 'pending',
-      'authorized': 'pending',
-      'approved': 'completed',
-      'paid': 'completed',
-      'refused': 'failed',
-      'failed': 'failed',
-      'cancelled': 'cancelled',
-      'refunded': 'refunded',
-      'chargeback': 'chargeback',
-      'in_protest': 'dispute',
-    };
-
-    const ourStatus = statusMap[podpayStatus] || 'pending';
+    const ourStatus = STATUS_MAP[podpayStatus] || 'pending';
 
     // === Find transaction by podpay_payment_id first, then fallback to product_id ===
     let transactionId: string | null = null;
