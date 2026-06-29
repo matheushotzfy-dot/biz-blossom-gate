@@ -1,4 +1,8 @@
 import { useState, useMemo } from "react";
+import type { Tables } from "@/integrations/supabase/types";
+
+type Tx = Tables<"transactions">;
+type EligibleTx = Tx & { daysLeft: number; inWindow: boolean; fee: number; net: number };
 import { useAuth } from "@/hooks/useAuth";
 import { useTransactions } from "@/hooks/useQueryData";
 import {
