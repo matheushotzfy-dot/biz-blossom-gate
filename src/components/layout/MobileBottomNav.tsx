@@ -19,7 +19,7 @@ const tabs = [
 
 const moreGroups: Array<{
   label: string;
-  items: Array<{ title: string; subtitle?: string; url: string; icon: any; accent?: string }>;
+  items: Array<{ title: string; subtitle?: string; url: string; icon: LucideIcon; accent?: string }>;
 }> = [
   {
     label: "Conta",
