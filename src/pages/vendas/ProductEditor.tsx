@@ -2045,7 +2045,7 @@ type TabCoProducaoProps = {
   coProductionSplit: string; setCoProductionSplit: StrS;
   coProductionDuration: string; setCoProductionDuration: StrS;
   coProductionSalesType: string; setCoProductionSalesType: StrS;
-  coProductionsList?: AnyObj[];
+  coProductionsList?: Tables<"co_productions">[];
   inviteCoProducer: () => void | Promise<void>;
   removeCoProducer: (id: string) => void | Promise<void>;
   invitingCoProducer: boolean;
