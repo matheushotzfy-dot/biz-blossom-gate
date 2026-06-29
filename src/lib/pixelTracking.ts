@@ -51,7 +51,8 @@ function loadFacebookPixel(pixelId: string) {
       version: string;
     };
     const n = function (...args: unknown[]) {
-      n.callMethod ? n.callMethod.apply(n, args) : n.queue.push(args);
+      if (n.callMethod) n.callMethod(...args);
+      else n.queue.push(args);
     } as FbqFn;
     w.fbq = n;
     if (!w._fbq) w._fbq = n;
