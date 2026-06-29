@@ -756,49 +756,66 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
 
       {/* ═══ Seller Detail Dialog ═══ */}
       <Dialog open={!!selectedUser} onOpenChange={v => { if (!v) setSelectedUser(null); }}>
-        <DialogContent className="max-w-5xl max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle className="text-lg font-bold flex items-center gap-3">
-              <div className="h-12 w-12 rounded-2xl bg-primary/10 flex items-center justify-center text-sm font-bold text-primary">
-                {(selectedUser?.full_name || "U")[0].toUpperCase()}
-              </div>
-              <div>
-                <div className="flex items-center gap-2">
-                  <span>{selectedUser?.full_name || "Sem nome"}</span>
-                  <SellerTypeBadge type={(selectedUser as any)?.seller_type} />
+        <DialogContent className="max-w-5xl w-[96vw] max-h-[92vh] overflow-y-auto p-0 gap-0 rounded-2xl border border-border">
+          <DialogHeader className="sticky top-0 z-10 bg-card/95 backdrop-blur border-b border-border px-6 pt-5 pb-4 space-y-0">
+            <DialogTitle className="sr-only">
+              Detalhes do seller {selectedUser?.full_name || selectedUser?.email || ""}
+            </DialogTitle>
+            <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
+              <div className="flex items-start gap-3 min-w-0">
+                <div className="relative shrink-0">
+                  <div className="h-12 w-12 rounded-2xl bg-gradient-to-br from-primary/20 to-primary/5 ring-1 ring-primary/25 flex items-center justify-center text-[15px] font-black text-primary">
+                    {(selectedUser?.full_name || "U")[0].toUpperCase()}
+                  </div>
                   {selectedUser && isFrozen(selectedUser) && (
-                    <span className="px-2 py-0.5 rounded-full text-[9px] font-bold uppercase bg-info/10 text-info border border-info/20 flex items-center gap-1">
-                      <Snowflake className="h-2.5 w-2.5" /> Congelado
+                    <span className="absolute -bottom-1 -right-1 h-4 w-4 rounded-full bg-info text-background flex items-center justify-center ring-2 ring-card">
+                      <Snowflake className="h-2.5 w-2.5" />
                     </span>
                   )}
                 </div>
-                <p className="text-xs text-muted-foreground font-normal mt-0.5">{selectedUser?.email} • {selectedUser?.phone || "Sem telefone"}</p>
-                <p className="text-[10px] text-muted-foreground/50 font-mono mt-0.5">ID: {selectedUser?.user_id} • IP: {(selectedUser as any)?.last_ip || "N/A"}</p>
+                <div className="min-w-0">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <span className="text-[15px] font-black tracking-tight text-foreground truncate">{selectedUser?.full_name || "Sem nome"}</span>
+                    <SellerTypeBadge type={(selectedUser as any)?.seller_type} />
+                    {selectedUser && (
+                      <StatusBadge status={selectedUser.account_status || "pending_review"} />
+                    )}
+                  </div>
+                  <p className="text-[11.5px] text-muted-foreground mt-0.5 truncate">
+                    {selectedUser?.email}{selectedUser?.phone ? <> · <span className="font-mono">{selectedUser.phone}</span></> : null}
+                  </p>
+                  <p className="text-[10px] text-muted-foreground/60 font-mono mt-0.5 truncate">
+                    ID {selectedUser?.user_id?.slice(0, 8)}…{selectedUser?.user_id?.slice(-4)} · IP {(selectedUser as any)?.last_ip || "—"}
+                  </p>
+                </div>
               </div>
-              <div className="ml-auto flex gap-2 flex-wrap">
-                <Button size="sm" variant="outline" className="rounded-xl text-xs" onClick={() => selectedUser && handleImpersonate(selectedUser.user_id)} disabled={impersonating}>
-                  <LogIn className="h-3 w-3 mr-1" /> Login as User
+              <div className="flex flex-wrap gap-1.5 lg:justify-end shrink-0">
+                <Button size="sm" variant="outline" className="h-8 rounded-lg text-[11px] gap-1.5" onClick={() => selectedUser && handleImpersonate(selectedUser.user_id)} disabled={impersonating}>
+                  <LogIn className="h-3 w-3" /> Login as
                 </Button>
                 {selectedUser && !isFrozen(selectedUser) ? (
-                  <Button size="sm" variant="outline" className="rounded-xl text-xs border-info/30 text-info" onClick={() => handleFreezeBalance(selectedUser.user_id, true)}>
-                    <Snowflake className="h-3 w-3 mr-1" /> Congelar
+                  <Button size="sm" variant="outline" className="h-8 rounded-lg text-[11px] gap-1.5 border-info/30 text-info hover:bg-info/10" onClick={() => handleFreezeBalance(selectedUser.user_id, true)}>
+                    <Snowflake className="h-3 w-3" /> Congelar
                   </Button>
                 ) : selectedUser && (
-                  <Button size="sm" variant="outline" className="rounded-xl text-xs border-primary/30 text-primary" onClick={() => handleFreezeBalance(selectedUser.user_id, false)}>
-                    <Unlock className="h-3 w-3 mr-1" /> Descongelar
+                  <Button size="sm" variant="outline" className="h-8 rounded-lg text-[11px] gap-1.5 border-primary/30 text-primary hover:bg-primary/10" onClick={() => handleFreezeBalance(selectedUser.user_id, false)}>
+                    <Unlock className="h-3 w-3" /> Descongelar
                   </Button>
                 )}
                 {selectedUser?.account_status !== "approved" && (
-                  <Button size="sm" variant="outline" className="rounded-xl text-xs border-primary/30 text-primary" onClick={() => handleApproveKyc(selectedUser!.user_id)}>
-                    <CheckCircle2 className="h-3 w-3 mr-1" /> Aprovar
+                  <Button size="sm" variant="outline" className="h-8 rounded-lg text-[11px] gap-1.5 border-success/30 text-success hover:bg-success/10" onClick={() => handleApproveKyc(selectedUser!.user_id)}>
+                    <CheckCircle2 className="h-3 w-3" /> Aprovar
                   </Button>
                 )}
-                <Button size="sm" variant="outline" className="rounded-xl text-xs border-destructive/30 text-destructive" onClick={() => selectedUser && handleBanSeller(selectedUser.user_id)}>
-                  <UserX className="h-3 w-3 mr-1" /> Banir
+                <Button size="sm" variant="outline" className="h-8 rounded-lg text-[11px] gap-1.5 border-destructive/30 text-destructive hover:bg-destructive/10" onClick={() => selectedUser && handleBanSeller(selectedUser.user_id)}>
+                  <UserX className="h-3 w-3" /> Banir
                 </Button>
               </div>
-            </DialogTitle>
+            </div>
           </DialogHeader>
+
+          <div className="px-6 pb-6 pt-4">
+
 
           {loading ? (
             <div className="text-center py-12 text-muted-foreground">Carregando...</div>
