@@ -80,7 +80,7 @@ export default function AdminNotificationsTab({ profiles }: Props) {
   setShowSendDialog(false);
   setSendTitle(""); setSendMessage(""); setSendType("info"); setSelectedUserId("");
   loadNotifications();
-  } catch (e: any) { toast.error("Erro ao enviar: " + (e?.message || "desconhecido")); } finally { setSending(false); }
+  } catch (e: unknown) { toast.error("Erro ao enviar: " + (e instanceof Error ? e.message : "desconhecido")); } finally { setSending(false); }
   };
 
   const handlePurgeOrphans = async () => {
