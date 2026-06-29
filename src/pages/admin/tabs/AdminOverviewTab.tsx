@@ -143,7 +143,7 @@ export default function AdminOverviewTab({
   const handleKycReject = async (userId: string, reason: string) => {
     const { error } = await supabase.from("profiles").update({
       account_status: "rejected", kyc_rejection_reason: reason,
-    } as any).eq("user_id", userId);
+    }).eq("user_id", userId);
     if (error) { toast.error("Erro ao recusar KYC"); return; }
     toast.success("KYC recusado");
     onUserStatus(userId, "rejected");
