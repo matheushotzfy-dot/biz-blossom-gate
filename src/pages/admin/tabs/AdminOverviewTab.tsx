@@ -86,7 +86,13 @@ function Pill({ tone = "neutral", children, className }: {
 }
 
 /* Tooltip — solid card, rounded, no glow */
-function ChartTip({ active, payload, label, fmtCurrency }: any) {
+type ChartTipProps = {
+  active?: boolean;
+  payload?: Array<{ name?: string; value?: number | string; color?: string }>;
+  label?: string | number;
+  fmtCurrency: (n: number) => string;
+};
+function ChartTip({ active, payload, label, fmtCurrency }: ChartTipProps) {
   if (!active || !payload?.length) return null;
   return (
     <div className="rounded-xl border border-border/60 bg-card px-3 py-2 shadow-sm pointer-events-none">
@@ -94,7 +100,7 @@ function ChartTip({ active, payload, label, fmtCurrency }: any) {
         <p className="mb-1 text-[10px] font-black uppercase tracking-[0.18em] text-muted-foreground/70">{label}</p>
       )}
       <div className="space-y-1">
-        {payload.map((p: any, i: number) => (
+        {payload.map((p, i) => (
           <div key={i} className="flex items-center justify-between gap-4 text-[11px]">
             <span className="flex items-center gap-1.5">
               <span className="h-2 w-2 rounded-full" style={{ background: p.color }} />
