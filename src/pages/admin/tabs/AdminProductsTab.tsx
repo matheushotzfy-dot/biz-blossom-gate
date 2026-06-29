@@ -5,6 +5,7 @@ import {
   ExternalLink, Image as ImageIcon, Clock, Layers, Trash2, CircleDollarSign,
   TrendingDown, AlertTriangle, FileText, ShoppingBag, ShieldCheck, ShieldX,
   ShieldQuestion, Receipt, User as UserIcon, Mail, RefreshCw, X, Tag,
+  type LucideIcon,
 } from "lucide-react";
 import { StatusBadge } from "@/components/StatusBadge";
 import { Button } from "@/components/ui/button";
@@ -35,11 +36,17 @@ interface Props {
 
 type Classification = "white" | "gray" | "black";
 
-const CLASSIFICATION_META: Record<Classification, { label: string; icon: any; color: string; ring: string }> = {
+const CLASSIFICATION_META: Record<Classification, { label: string; icon: LucideIcon; color: string; ring: string }> = {
   white: { label: "White", icon: ShieldCheck, color: "text-emerald-400", ring: "border-emerald-500/30 bg-emerald-500/10" },
   gray:  { label: "Gray",  icon: ShieldQuestion, color: "text-amber-400", ring: "border-amber-500/30 bg-amber-500/10" },
   black: { label: "Black", icon: ShieldX, color: "text-red-400", ring: "border-red-500/30 bg-red-500/10" },
 };
+
+type OrderBumpRow = Tables<"order_bumps"> & {
+  bump_product: { id: string; name: string; price: number } | null;
+};
+type DisputeRow = Tables<"disputes">;
+type AffiliateSaleRow = Tables<"affiliate_sales">;
 
 export default function AdminProductsTab({ products, profiles, transactions, fmtCurrency, onReload }: Props) {
   const [search, setSearch] = useState("");
@@ -60,9 +67,9 @@ export default function AdminProductsTab({ products, profiles, transactions, fmt
   const [deleteTarget, setDeleteTarget] = useState<Tables<"products"> | null>(null);
 
   // X-Ray data
-  const [orderBumps, setOrderBumps] = useState<any[]>([]);
-  const [disputes, setDisputes] = useState<any[]>([]);
-  const [affiliateSales, setAffiliateSales] = useState<any[]>([]);
+  const [orderBumps, setOrderBumps] = useState<OrderBumpRow[]>([]);
+  const [disputes, setDisputes] = useState<DisputeRow[]>([]);
+  const [affiliateSales, setAffiliateSales] = useState<AffiliateSaleRow[]>([]);
 
   const profileMap = useMemo(() => {
     const m = new Map<string, Tables<"profiles">>();
@@ -113,7 +120,7 @@ export default function AdminProductsTab({ products, profiles, transactions, fmt
     const txIds = (txByProduct.get(pid) || []).map(t => t.id);
     Promise.all([
       supabase.from("order_bumps").select("*, bump_product:products!order_bumps_bump_product_id_fkey(id,name,price)").eq("product_id", pid),
-      txIds.length ? supabase.from("disputes").select("*").in("transaction_id", txIds) : Promise.resolve({ data: [] } as any),
+      txIds.length ? supabase.from("disputes").select("*").in("transaction_id", txIds) : Promise.resolve({ data: [] as DisputeRow[] }),
       supabase.from("affiliate_sales").select("*").eq("product_id", pid),
     ]).then(([obRes, dRes, asRes]) => {
       setOrderBumps(obRes.data || []);
@@ -139,7 +146,7 @@ export default function AdminProductsTab({ products, profiles, transactions, fmt
       toast.error(`Não é possível mudar de "${currentStatus}" para "${status}"`);
       return;
     }
-    const updateData: any = { status };
+    const updateData: Partial<Tables<"products">> = { status };
     if (status === "active") updateData.rejection_reason = null;
     else if (reason) updateData.rejection_reason = reason.replace(/[<>]/g, "").trim().slice(0, 1000);
     const { error } = await supabase.from("products").update(updateData).eq("id", productId);
@@ -151,7 +158,7 @@ export default function AdminProductsTab({ products, profiles, transactions, fmt
   };
 
   const setClassification = async (productId: string, classification: Classification) => {
-    const { error } = await supabase.from("products").update({ classification } as any).eq("id", productId);
+    const { error } = await supabase.from("products").update({ classification }).eq("id", productId);
     if (error) { toast.error("Erro ao classificar"); return; }
     toast.success(`Produto classificado como ${CLASSIFICATION_META[classification].label}`);
     await logAdminAction("product_classified", "product", productId, { classification });
@@ -160,7 +167,7 @@ export default function AdminProductsTab({ products, profiles, transactions, fmt
 
   const handleSoftDelete = async () => {
     if (!deleteTarget) return;
-    const { error } = await supabase.from("products").update({ deleted_at: new Date().toISOString() } as any).eq("id", deleteTarget.id);
+    const { error } = await supabase.from("products").update({ deleted_at: new Date().toISOString() }).eq("id", deleteTarget.id);
     if (error) { toast.error("Erro ao excluir"); return; }
     toast.success("Produto excluído (soft-delete)");
     await logAdminAction("product_deleted", "product", deleteTarget.id, {});
@@ -171,7 +178,7 @@ export default function AdminProductsTab({ products, profiles, transactions, fmt
 
   const filtered = useMemo(() => {
     return products.filter(p => {
-      const isDeleted = !!(p as any).deleted_at;
+      const isDeleted = !!p.deleted_at;
       if (statusFilter === "deleted") {
         if (!isDeleted) return false;
       } else if (statusFilter === "all") {
@@ -180,18 +187,18 @@ export default function AdminProductsTab({ products, profiles, transactions, fmt
         if (isDeleted) return false;
         if (p.status !== statusFilter) return false;
       }
-      if (classFilter !== "all" && ((p as any).classification || "white") !== classFilter) return false;
+      if (classFilter !== "all" && (p.classification || "white") !== classFilter) return false;
       if (!search) return true;
       const s = search.toLowerCase();
       return p.name.toLowerCase().includes(s) || p.description?.toLowerCase().includes(s) || getSellerName(p.user_id).toLowerCase().includes(s);
     });
   }, [products, statusFilter, classFilter, search, profileMap]);
 
-  const pendingReview = useMemo(() => products.filter(p => p.status === "pending_review" && !(p as any).deleted_at), [products]);
-  const activeCount = products.filter(p => p.status === "active" && !(p as any).deleted_at).length;
-  const blockedCount = products.filter(p => (p.status === "inactive" || p.status === "suspended") && !(p as any).deleted_at).length;
-  const deletedCount = products.filter(p => !!(p as any).deleted_at).length;
-  const blackCount = products.filter(p => (p as any).classification === "black" && !(p as any).deleted_at).length;
+  const pendingReview = useMemo(() => products.filter(p => p.status === "pending_review" && !p.deleted_at), [products]);
+  const activeCount = products.filter(p => p.status === "active" && !p.deleted_at).length;
+  const blockedCount = products.filter(p => (p.status === "inactive" || p.status === "suspended") && !p.deleted_at).length;
+  const deletedCount = products.filter(p => !!p.deleted_at).length;
+  const blackCount = products.filter(p => p.classification === "black" && !p.deleted_at).length;
 
   return (
     <div className="space-y-6 animate-fade-in">
@@ -286,7 +293,7 @@ export default function AdminProductsTab({ products, profiles, transactions, fmt
           ] as const).map(opt => {
             const active = classFilter === opt.v;
             return (
-              <button key={opt.v} onClick={() => setClassFilter(opt.v as any)}
+              <button key={opt.v} onClick={() => setClassFilter(opt.v)}
                 className={cn(
                   "inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-[11px] font-black uppercase tracking-wider transition-colors",
                   active ? "bg-card text-foreground shadow-sm border border-border" : "text-muted-foreground hover:text-foreground"
@@ -313,8 +320,8 @@ export default function AdminProductsTab({ products, profiles, transactions, fmt
             <tbody>
               {filtered.map(p => {
                 const stats = getProductStats(p.id);
-                const cls = ((p as any).classification || "white") as Classification;
-                const isDeleted = !!(p as any).deleted_at;
+                const cls = (p.classification || "white") as Classification;
+                const isDeleted = !!p.deleted_at;
                 return (
                   <tr key={p.id} className={cn(
                     premiumTable.row, "cursor-pointer",
@@ -381,7 +388,7 @@ export default function AdminProductsTab({ products, profiles, transactions, fmt
         <DialogContent className="max-w-5xl max-h-[92vh] overflow-y-auto p-0">
           {selectedProduct && (() => {
             const stats = getProductStats(selectedProduct.id);
-            const cls = ((selectedProduct as any).classification || "white") as Classification;
+            const cls = (selectedProduct.classification || "white") as Classification;
             const ClsIcon = CLASSIFICATION_META[cls].icon;
             const commissionsTotal = affiliateSales.reduce((a, s) => a + Number(s.commission_amount || 0), 0);
             const disputeAmt = disputes.reduce((a, d) => a + Number(d.amount || 0), 0);
@@ -477,7 +484,7 @@ export default function AdminProductsTab({ products, profiles, transactions, fmt
                     <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground mb-3 flex items-center gap-1"><Layers className="h-3 w-3" /> Order Bumps ({orderBumps.length})</p>
                     {orderBumps.length > 0 ? (
                       <div className="space-y-1.5">
-                        {orderBumps.map((ob: any) => (
+                        {orderBumps.map((ob: OrderBumpRow) => (
                           <div key={ob.id} className="flex items-center justify-between text-xs rounded-lg bg-background/50 p-2 border border-border/50">
                             <span className="font-medium text-foreground">{ob.bump_product?.name || "—"}</span>
                             <span className="text-primary font-bold">{fmtCurrency(Number(ob.bump_product?.price || 0))}</span>
@@ -606,7 +613,7 @@ export default function AdminProductsTab({ products, profiles, transactions, fmt
 }
 
 function ClassPicker({ value, onChange }: { value: Classification; onChange: (v: Classification) => void }) {
-  const opts: { v: Classification; label: string; Icon: any; on: string; off: string }[] = [
+  const opts: { v: Classification; label: string; Icon: LucideIcon; on: string; off: string }[] = [
     { v: "white", label: "W", Icon: ShieldCheck,    on: "bg-emerald-500/15 text-emerald-500 border-emerald-500/40",  off: "text-muted-foreground/60 hover:text-emerald-500" },
     { v: "gray",  label: "G", Icon: ShieldQuestion, on: "bg-amber-500/15 text-amber-500 border-amber-500/40",        off: "text-muted-foreground/60 hover:text-amber-500" },
     { v: "black", label: "B", Icon: ShieldX,        on: "bg-destructive/15 text-destructive border-destructive/40",  off: "text-muted-foreground/60 hover:text-destructive" },
@@ -644,7 +651,7 @@ function KV({ label, value }: { label: string; value: string }) {
   );
 }
 
-function MetricCard({ icon: Icon, label, value, sub, tone }: { icon: any; label: string; value: string; sub?: string; tone: "success" | "warning" | "destructive" | "primary" | "muted" | "neutral" }) {
+function MetricCard({ icon: Icon, label, value, sub, tone }: { icon: LucideIcon; label: string; value: string; sub?: string; tone: "success" | "warning" | "destructive" | "primary" | "muted" | "neutral" }) {
   const toneClasses = {
     success: "border-emerald-500/20 bg-emerald-500/[0.04] text-emerald-400",
     warning: "border-amber-500/20 bg-amber-500/[0.04] text-amber-400",
@@ -690,7 +697,7 @@ function PaymentMethodBreakdown({ txs, fmtCurrency }: { txs: Tables<"transaction
   );
 }
 
-function TxHistory({ title, icon: Icon, color, txs, fmtCurrency }: { title: string; icon: any; color: string; txs: Tables<"transactions">[]; fmtCurrency: (v: number) => string }) {
+function TxHistory({ title, icon: Icon, color, txs, fmtCurrency }: { title: string; icon: LucideIcon; color: string; txs: Tables<"transactions">[]; fmtCurrency: (v: number) => string }) {
   const colorClass: Record<string, string> = {
     emerald: "text-emerald-400 border-emerald-500/20",
     amber: "text-amber-400 border-amber-500/20",
@@ -732,4 +739,4 @@ function TxHistory({ title, icon: Icon, color, txs, fmtCurrency }: { title: stri
 }
 
 // Local users icon
-function Users(props: any) { return <UserIcon {...props} />; }
+function Users(props: React.ComponentProps<typeof UserIcon>) { return <UserIcon {...props} />; }
