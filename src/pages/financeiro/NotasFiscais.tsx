@@ -66,7 +66,12 @@ export default function NotasFiscais() {
         .eq("app_name", "notazz")
         .order("created_at", { ascending: false })
         .limit(200);
-      return (data ?? []) as any[];
+      type DeliveryRow = {
+        id: string; status: string; event: string | null; error: string | null;
+        created_at: string; delivered_at: string | null; transaction_id: string | null;
+        transactions: { amount: number | null; customer_name: string | null; customer_email: string | null } | null;
+      };
+      return (data ?? []) as unknown as DeliveryRow[];
     },
   });
 
