@@ -1,4 +1,5 @@
 import { Copy, Crosshair, ExternalLink, Link2, Palette, Pencil, Settings2, Sparkles, Check, BookOpen, ArrowUpRight, AlertTriangle, Trash2, FileEdit, Info } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import { ProductActionsMenu, type ProductMenuHandlers } from "./ProductActionsMenu";
 import { DELIVERY_LABELS, formatCurrency, type Product, getCheckoutLink, getEffectiveStatus, getProductRequirements } from "./productPresentation";
 import { cn } from "@/lib/utils";
@@ -64,6 +65,7 @@ const shortenLink = (url: string) => {
 };
 
 export function ProductGridView({ products, copiedId, toolbar, ...handlers }: ProductGridViewProps) {
+  const navigate = useNavigate();
   return (
     <div className="mx-auto w-full max-w-[1280px]">
       {toolbar && <div className="mb-5">{toolbar}</div>}
@@ -279,52 +281,52 @@ export function ProductGridView({ products, copiedId, toolbar, ...handlers }: Pr
                       </button>
                     )}
 
-                    {/* Action Bar — Premium: primary CTA + icon cluster */}
+                    {/* Action Bar — Clean premium: primary CTA + tactile icon cluster */}
                     <div className="mt-auto flex items-stretch gap-1.5 pt-1">
                       <button
                         type="button"
                         onClick={(e) => { e.stopPropagation(); handlers.onEditProduct(product); }}
-                        className="group/edit flex h-10 flex-1 items-center justify-center gap-2 rounded-lg border border-primary/30 bg-primary/[0.06] text-[11.5px] font-bold tracking-tight text-foreground transition-colors hover:border-primary/50 hover:bg-primary/[0.10] hover:text-primary"
+                        className="group/edit relative flex h-10 flex-1 items-center justify-center gap-2 rounded-lg border border-primary/25 bg-primary/[0.05] text-[11.5px] font-bold tracking-tight text-foreground transition-all duration-200 hover:border-primary/50 hover:bg-primary/[0.10] hover:text-primary hover:-translate-y-px active:translate-y-0 active:scale-[0.99]"
                       >
-                        <Pencil className="h-3.5 w-3.5 text-primary/80 transition-colors group-hover/edit:text-primary" strokeWidth={2.25} />
+                        <Pencil className="h-3.5 w-3.5 text-primary/80 transition-all duration-200 group-hover/edit:text-primary group-hover/edit:scale-110 group-hover/edit:-rotate-6" strokeWidth={2.25} />
                         <span className="font-display">Editar produto</span>
                       </button>
 
                       <div className="flex items-stretch rounded-lg border border-border/40 bg-card divide-x divide-border/40 overflow-hidden">
                         <button
                           type="button"
-                          onClick={(e) => { e.stopPropagation(); window.location.assign(`/vendas/produtos/${product.id}/checkout-builder`); }}
-                          className="flex h-10 w-10 items-center justify-center text-muted-foreground/70 transition-colors hover:bg-muted/40 hover:text-primary"
+                          onClick={(e) => { e.stopPropagation(); navigate(`/vendas/produtos/${product.id}/checkout-builder`); }}
+                          className="group/icn flex h-10 w-10 items-center justify-center text-muted-foreground/70 transition-all duration-200 hover:bg-primary/[0.08] hover:text-primary"
                           title="Checkout builder"
                           aria-label="Checkout builder"
                         >
-                          <Palette className="h-3.5 w-3.5" strokeWidth={2} />
+                          <Palette className="h-3.5 w-3.5 transition-transform duration-200 group-hover/icn:scale-125" strokeWidth={2} />
                         </button>
                         <button
                           type="button"
                           onClick={(e) => { e.stopPropagation(); handlers.onOpenPixels(product); }}
-                          className="flex h-10 w-10 items-center justify-center text-muted-foreground/70 transition-colors hover:bg-muted/40 hover:text-primary"
+                          className="group/icn flex h-10 w-10 items-center justify-center text-muted-foreground/70 transition-all duration-200 hover:bg-primary/[0.08] hover:text-primary"
                           title="Pixels & tracking"
                           aria-label="Pixels & tracking"
                         >
-                          <Crosshair className="h-3.5 w-3.5" strokeWidth={2} />
+                          <Crosshair className="h-3.5 w-3.5 transition-transform duration-200 group-hover/icn:scale-125 group-hover/icn:rotate-90" strokeWidth={2} />
                         </button>
                         {product.checkout_url && (
                           <button
                             type="button"
                             onClick={(e) => { e.stopPropagation(); handlers.onOpenCheckout(product); }}
-                            className="flex h-10 w-10 items-center justify-center text-muted-foreground/70 transition-colors hover:bg-muted/40 hover:text-primary"
+                            className="group/icn flex h-10 w-10 items-center justify-center text-muted-foreground/70 transition-all duration-200 hover:bg-primary/[0.08] hover:text-primary"
                             title="Abrir checkout"
                             aria-label="Abrir checkout"
                           >
-                            <ExternalLink className="h-3.5 w-3.5" strokeWidth={2} />
+                            <ExternalLink className="h-3.5 w-3.5 transition-transform duration-200 group-hover/icn:scale-125 group-hover/icn:-translate-y-0.5 group-hover/icn:translate-x-0.5" strokeWidth={2} />
                           </button>
                         )}
                         <div onClick={(e) => e.stopPropagation()} className="flex">
                           <ProductActionsMenu
                             copied={isCopied}
                             product={product}
-                            triggerClassName="flex h-10 w-10 items-center justify-center text-muted-foreground/70 hover:bg-muted/40 hover:text-primary data-[state=open]:bg-muted/40 data-[state=open]:text-primary transition-colors border-0 rounded-none bg-transparent"
+                            triggerClassName="flex h-10 w-10 items-center justify-center text-muted-foreground/70 hover:bg-primary/[0.08] hover:text-primary data-[state=open]:bg-primary/[0.08] data-[state=open]:text-primary transition-all border-0 rounded-none bg-transparent"
                             {...handlers}
                           />
                         </div>
