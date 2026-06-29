@@ -183,17 +183,22 @@ export default function Vendas() {
     toast.success(`${rows.length} transações exportadas (CSV)`);
   };
 
-  const exportXLSX = () => {
+  const exportXLSX = async () => {
     if (!filtered.length) return toast.error("Nenhuma transação para exportar");
     const rows = buildRows();
-    const wb = XLSX.utils.book_new();
-    const ws = XLSX.utils.json_to_sheet(rows);
     const headers = Object.keys(rows[0]);
-    ws["!cols"] = headers.map((h) => ({
-      wch: Math.min(40, Math.max(h.length + 2, ...rows.map((r) => String(r[h as keyof typeof r] ?? "").length + 2))),
+    const wb = new ExcelJS.Workbook();
+    wb.creator = "Hotzfy";
+    wb.created = new Date();
+    const ws = wb.addWorksheet("Vendas");
+    ws.columns = headers.map((h) => ({
+      header: h,
+      key: h,
+      width: Math.min(40, Math.max(h.length + 2, ...rows.map((r) => String(r[h as keyof typeof r] ?? "").length + 2))),
     }));
-    XLSX.utils.book_append_sheet(wb, ws, "Vendas");
-    const buf = XLSX.write(wb, { bookType: "xlsx", type: "array" });
+    ws.getRow(1).font = { bold: true };
+    rows.forEach((r) => ws.addRow(r));
+    const buf = await wb.xlsx.writeBuffer();
     download(new Blob([buf], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" }), fileName("xlsx"));
     toast.success(`${rows.length} transações exportadas (Excel)`);
   };
