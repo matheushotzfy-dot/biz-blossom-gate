@@ -1395,7 +1395,17 @@ function TabConfiguracoes({ price, pixEnabled, setPixEnabled, boletoEnabled, set
  );
 }
 
-function TabOrderBump({ isNew, orderBumps, allProducts, availableForBump, selectedBumpProduct, setSelectedBumpProduct, addBump, removeBump }: any) {
+type TabOrderBumpProps = {
+  isNew: boolean;
+  orderBumps: AnyObj[];
+  allProducts: AnyObj[];
+  availableForBump: AnyObj[];
+  selectedBumpProduct: string; setSelectedBumpProduct: StrS;
+  addBump: () => void | Promise<void>;
+  removeBump: (id: string) => void | Promise<void>;
+};
+
+function TabOrderBump({ isNew, orderBumps, allProducts, availableForBump, selectedBumpProduct, setSelectedBumpProduct, addBump, removeBump }: TabOrderBumpProps) {
  return (
  <div className="space-y-6">
  <SectionHeader icon={Layers} title="Order Bump" subtitle="Adicione produtos complementares que aparecem como oferta no checkout." />
@@ -1760,7 +1770,20 @@ function TabUpsell({ isNew, name, price, imagePreview, hasCustomThankYou, setHas
 
 
 /* ───── Funnel sub-primitives ───── */
-function FunnelStep({ step, status, label, title, price, thumb, badge, icon: Icon, anchor, muted }: any) {
+type FunnelStepProps = {
+  step: number | string;
+  status: string;
+  label: string;
+  title: string;
+  price?: string | number;
+  thumb?: string | null;
+  badge?: string;
+  icon: React.ComponentType<{ className?: string }>;
+  anchor?: string;
+  muted?: boolean;
+};
+
+function FunnelStep({ step, status, label, title, price, thumb, badge, icon: Icon, anchor, muted }: FunnelStepProps) {
  const isEmpty = status === "empty";
  return (
  <div className={cn(
@@ -1808,7 +1831,30 @@ function FunnelArrow() {
  );
 }
 
-function TabCheckout({ isNew, name, price, productId, buttonColor, setButtonColor, timerEnabled, setTimerEnabled, timerMinutes, setTimerMinutes, socialProof, setSocialProof, guaranteeEnabled, setGuaranteeEnabled, warrantyDays, bannerDesktopPreview, bannerMobilePreview, desktopBannerRef, mobileBannerRef, handleBannerFile, setBannerDesktopFile, setBannerDesktopPreview, setBannerMobileFile, setBannerMobilePreview, getCheckoutLink, copyLink, navigate, pixEnabled, boletoEnabled, creditCardEnabled }: any) {
+type TabCheckoutProps = {
+  isNew: boolean;
+  name: string; price: string; productId?: string;
+  buttonColor: string; setButtonColor: StrS;
+  timerEnabled: boolean; setTimerEnabled: BoolS;
+  timerMinutes: string; setTimerMinutes: StrS;
+  socialProof: boolean; setSocialProof: BoolS;
+  guaranteeEnabled: boolean; setGuaranteeEnabled: BoolS;
+  warrantyDays: string;
+  bannerDesktopPreview: string; bannerMobilePreview: string;
+  desktopBannerRef: RefObject<HTMLInputElement>;
+  mobileBannerRef: RefObject<HTMLInputElement>;
+  handleBannerFile: (e: ChangeEvent<HTMLInputElement>, kind: "desktop" | "mobile") => void;
+  setBannerDesktopFile: S<File | null>;
+  setBannerDesktopPreview: StrS;
+  setBannerMobileFile: S<File | null>;
+  setBannerMobilePreview: StrS;
+  getCheckoutLink: () => string;
+  copyLink: (text: string) => void;
+  navigate: (path: string) => void;
+  pixEnabled: boolean; boletoEnabled: boolean; creditCardEnabled: boolean;
+};
+
+function TabCheckout({ isNew, name, price, productId, buttonColor, setButtonColor, timerEnabled, setTimerEnabled, timerMinutes, setTimerMinutes, socialProof, setSocialProof, guaranteeEnabled, setGuaranteeEnabled, warrantyDays, bannerDesktopPreview, bannerMobilePreview, desktopBannerRef, mobileBannerRef, handleBannerFile, setBannerDesktopFile, setBannerDesktopPreview, setBannerMobileFile, setBannerMobilePreview, getCheckoutLink, copyLink, navigate, pixEnabled, boletoEnabled, creditCardEnabled }: TabCheckoutProps) {
  const [previewDevice, setPreviewDevice] = useState<"desktop" | "mobile">("desktop");
 
  return (
@@ -1993,7 +2039,19 @@ function TabCheckout({ isNew, name, price, productId, buttonColor, setButtonColo
  );
 }
 
-function TabCoProducao({ isNew, coProducerEmail, setCoProducerEmail, coProductionSplit, setCoProductionSplit, coProductionDuration, setCoProductionDuration, coProductionSalesType, setCoProductionSalesType, coProductionsList = [], inviteCoProducer, removeCoProducer, invitingCoProducer }: any) {
+type TabCoProducaoProps = {
+  isNew: boolean;
+  coProducerEmail: string; setCoProducerEmail: StrS;
+  coProductionSplit: string; setCoProductionSplit: StrS;
+  coProductionDuration: string; setCoProductionDuration: StrS;
+  coProductionSalesType: string; setCoProductionSalesType: StrS;
+  coProductionsList?: AnyObj[];
+  inviteCoProducer: () => void | Promise<void>;
+  removeCoProducer: (id: string) => void | Promise<void>;
+  invitingCoProducer: boolean;
+};
+
+function TabCoProducao({ isNew, coProducerEmail, setCoProducerEmail, coProductionSplit, setCoProductionSplit, coProductionDuration, setCoProductionDuration, coProductionSalesType, setCoProductionSalesType, coProductionsList = [], inviteCoProducer, removeCoProducer, invitingCoProducer }: TabCoProducaoProps) {
  return (
  <div className="space-y-6">
  <SectionHeader icon={Handshake} title="Co-Produção" subtitle="Divida receitas com parceiros de produção." />
@@ -2108,7 +2166,20 @@ function TabCoProducao({ isNew, coProducerEmail, setCoProducerEmail, coProductio
  );
 }
 
-function TabCupons({ isNew, coupons, newCouponCode, setNewCouponCode, newCouponType, setNewCouponType, newCouponValue, setNewCouponValue, newCouponMaxUses, setNewCouponMaxUses, creatingCoupon, createCoupon, toggleCoupon, deleteCoupon }: any) {
+type TabCuponsProps = {
+  isNew: boolean;
+  coupons: AnyObj[];
+  newCouponCode: string; setNewCouponCode: StrS;
+  newCouponType: string; setNewCouponType: StrS;
+  newCouponValue: string; setNewCouponValue: StrS;
+  newCouponMaxUses: string; setNewCouponMaxUses: StrS;
+  creatingCoupon: boolean;
+  createCoupon: () => void | Promise<void>;
+  toggleCoupon: (id: string, active: boolean) => void | Promise<void>;
+  deleteCoupon: (id: string) => void | Promise<void>;
+};
+
+function TabCupons({ isNew, coupons, newCouponCode, setNewCouponCode, newCouponType, setNewCouponType, newCouponValue, setNewCouponValue, newCouponMaxUses, setNewCouponMaxUses, creatingCoupon, createCoupon, toggleCoupon, deleteCoupon }: TabCuponsProps) {
  return (
  <div className="space-y-6">
  <SectionHeader icon={Tag} title="Cupons de Desconto" subtitle="Crie cupons exclusivos para este produto." />
@@ -2193,7 +2264,22 @@ function TabCupons({ isNew, coupons, newCouponCode, setNewCouponCode, newCouponT
  );
 }
 
-function TabAfiliados({ isNew, productId, affiliateEnabled, setAffiliateEnabled, affiliateCommission, setAffiliateCommission, affiliateAttribution, setAffiliateAttribution, affiliateCookieDays, setAffiliateCookieDays, affiliateApprovalManual, setAffiliateApprovalManual, affiliateUpsellCommission, setAffiliateUpsellCommission, affiliateMarketplace, setAffiliateMarketplace, affiliateSupportEmail, setAffiliateSupportEmail, affiliateDescription, setAffiliateDescription, copyLink }: any) {
+type TabAfiliadosProps = {
+  isNew: boolean;
+  productId?: string;
+  affiliateEnabled: boolean; setAffiliateEnabled: BoolS;
+  affiliateCommission: string; setAffiliateCommission: StrS;
+  affiliateAttribution: string; setAffiliateAttribution: StrS;
+  affiliateCookieDays: string; setAffiliateCookieDays: StrS;
+  affiliateApprovalManual: boolean; setAffiliateApprovalManual: BoolS;
+  affiliateUpsellCommission: string; setAffiliateUpsellCommission: StrS;
+  affiliateMarketplace: boolean; setAffiliateMarketplace: BoolS;
+  affiliateSupportEmail: string; setAffiliateSupportEmail: StrS;
+  affiliateDescription: string; setAffiliateDescription: StrS;
+  copyLink: (text: string) => void;
+};
+
+function TabAfiliados({ isNew, productId, affiliateEnabled, setAffiliateEnabled, affiliateCommission, setAffiliateCommission, affiliateAttribution, setAffiliateAttribution, affiliateCookieDays, setAffiliateCookieDays, affiliateApprovalManual, setAffiliateApprovalManual, affiliateUpsellCommission, setAffiliateUpsellCommission, affiliateMarketplace, setAffiliateMarketplace, affiliateSupportEmail, setAffiliateSupportEmail, affiliateDescription, setAffiliateDescription, copyLink }: TabAfiliadosProps) {
  return (
  <div className="space-y-6">
  <SectionHeader icon={Users} title="Programa de Afiliados" subtitle="Configure comissões e regras para afiliados." />
@@ -2280,7 +2366,19 @@ function TabAfiliados({ isNew, productId, affiliateEnabled, setAffiliateEnabled,
  );
 }
 
-function TabLinks({ isNew, product, pageUrl, affiliateEnabled, productId, getCheckoutLink, copyLink, name, price }: any) {
+type TabLinksProps = {
+  isNew: boolean;
+  product: AnyObj | null;
+  pageUrl: string;
+  affiliateEnabled: boolean;
+  productId?: string;
+  getCheckoutLink: () => string;
+  copyLink: (text: string) => void;
+  name: string;
+  price: string;
+};
+
+function TabLinks({ isNew, product, pageUrl, affiliateEnabled, productId, getCheckoutLink, copyLink, name, price }: TabLinksProps) {
    const [showQR, setShowQR] = useState(false);
    const checkoutLink = getCheckoutLink();
    const affiliateInviteLink = `${window.location.origin}/vendas/afiliados?product=${productId || ""}`;
