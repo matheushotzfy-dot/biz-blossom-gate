@@ -1070,7 +1070,7 @@ function TabGeral({ name, setName, description, setDescription, price, setPrice,
             <div className="p-5 space-y-5">
               <div className="space-y-1.5">
                 <label className="text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">Nome do produto</label>
-                <Input value={name} onChange={(e: any) => setName(e.target.value)} placeholder="Ex: Curso Completo de Marketing Digital" className="h-12 bg-secondary border-border text-lg font-display font-bold tracking-[-0.01em]" required maxLength={200} />
+                <Input value={name} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setName(e.target.value)} placeholder="Ex: Curso Completo de Marketing Digital" className="h-12 bg-secondary border-border text-lg font-display font-bold tracking-[-0.01em]" required maxLength={200} />
                 <div className="flex items-center justify-between text-[10px] text-muted-foreground/60">
                   <span>{name.length > 0 ? "Visível no checkout e área de membros" : "Obrigatório"}</span>
                   <span className="tabular-nums">{name.length}/200</span>
@@ -1078,7 +1078,7 @@ function TabGeral({ name, setName, description, setDescription, price, setPrice,
               </div>
               <div className="space-y-1.5">
                 <label className="text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">Descrição</label>
-                <Textarea value={description} onChange={(e: any) => setDescription(e.target.value)} rows={4} placeholder="Descreva o que o aluno vai receber, principais benefícios e diferenciais (mínimo 50 caracteres)..." className={cn("resize-none bg-secondary border-border text-sm leading-relaxed", description.length > 0 && !descValid && "border-destructive/50")} maxLength={2000} />
+                <Textarea value={description} onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setDescription(e.target.value)} rows={4} placeholder="Descreva o que o aluno vai receber, principais benefícios e diferenciais (mínimo 50 caracteres)..." className={cn("resize-none bg-secondary border-border text-sm leading-relaxed", description.length > 0 && !descValid && "border-destructive/50")} maxLength={2000} />
                 <div className="flex items-center justify-between text-[10px]">
                   <span className={cn(descValid ? "text-success" : description.length > 0 ? "text-destructive" : "text-muted-foreground/60")}>
                     {descValid ? "Descrição válida" : description.length > 0 ? `Faltam ${50 - description.length} caracteres` : "Mínimo 50 caracteres"}
@@ -1166,7 +1166,7 @@ function TabGeral({ name, setName, description, setDescription, price, setPrice,
                     type="text"
                     inputMode="decimal"
                     value={price}
-                    onChange={(e: any) => handlePriceChange(e.target.value)}
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => handlePriceChange(e.target.value)}
                     className="h-14 pl-12 text-3xl font-numbers font-black tracking-[-0.03em] bg-secondary border-border text-success"
                     placeholder="0,00"
                   />
@@ -1205,14 +1205,14 @@ function TabGeral({ name, setName, description, setDescription, price, setPrice,
               <label className="text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground flex items-center gap-1.5">
                 <ExternalLink className="h-3 w-3" /> Página de vendas
               </label>
-              <Input value={pageUrl} onChange={(e: any) => setPageUrl(e.target.value)} placeholder="seuproduto.com" type="text" className={cn("h-11 bg-secondary border-border", pageUrl && !urlValid && "border-destructive/50")} required />
+              <Input value={pageUrl} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setPageUrl(e.target.value)} placeholder="seuproduto.com" type="text" className={cn("h-11 bg-secondary border-border", pageUrl && !urlValid && "border-destructive/50")} required />
               <p className={cn("text-[10px]", urlValid ? "text-success" : "text-muted-foreground/60")}>{urlValid ? "URL válida — o https:// é adicionado automaticamente" : "Insira o domínio (ex: seusite.com.br) — o https:// é opcional"}</p>
             </div>
             <div className="space-y-1.5">
               <label className="text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground flex items-center gap-1.5">
                 <Mail className="h-3 w-3" /> E-mail de suporte
               </label>
-              <Input value={supportEmail} onChange={(e: any) => setSupportEmail(e.target.value)} placeholder="suporte@seuproduto.com" type="email" className={cn("h-11 bg-secondary border-border", supportEmail && !emailValid && "border-destructive/50")} required />
+              <Input value={supportEmail} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSupportEmail(e.target.value)} placeholder="suporte@seuproduto.com" type="email" className={cn("h-11 bg-secondary border-border", supportEmail && !emailValid && "border-destructive/50")} required />
               <p className={cn("text-[10px]", emailValid ? "text-success" : "text-muted-foreground/60")}>{emailValid ? "E-mail válido" : "Insira um e-mail válido"}</p>
             </div>
           </div>
@@ -1223,7 +1223,7 @@ function TabGeral({ name, setName, description, setDescription, price, setPrice,
               </label>
               <Input
                 value={supportPhone}
-                onChange={(e: any) => setSupportPhone(formatPhone(e.target.value))}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSupportPhone(formatPhone(e.target.value))}
                 placeholder="(11) 91234-5678"
                 inputMode="tel"
                 className={cn("h-11 bg-secondary border-border", supportPhone && !phoneValid && "border-destructive/50")}
@@ -1235,7 +1235,7 @@ function TabGeral({ name, setName, description, setDescription, price, setPrice,
               <label className="text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground flex items-center gap-1.5">
                 <Users className="h-3 w-3" /> Nome de exibição do produtor
               </label>
-              <Input value={displayName} onChange={(e: any) => setDisplayName(e.target.value)} placeholder="Nome que aparecerá no checkout" className="h-11 bg-secondary border-border" required />
+              <Input value={displayName} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setDisplayName(e.target.value)} placeholder="Nome que aparecerá no checkout" className="h-11 bg-secondary border-border" required />
               <p className="text-[10px] text-muted-foreground/60">Aparecerá no rodapé do checkout</p>
             </div>
           </div>
@@ -1588,15 +1588,15 @@ function TabUpsell({ isNew, name, price, imagePreview, hasCustomThankYou, setHas
  <div className="grid grid-cols-1 sm:grid-cols-[1.4fr_1fr_1fr] gap-3 pt-1">
  <div className="space-y-1.5">
  <EditorLabel>Nome da oferta</EditorLabel>
- <Input value={upsellName} onChange={(e: any) => setUpsellName(e.target.value)} placeholder="Ex: Mentoria 1:1 com 30% OFF" className="h-10 bg-secondary border-border" />
+ <Input value={upsellName} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setUpsellName(e.target.value)} placeholder="Ex: Mentoria 1:1 com 30% OFF" className="h-10 bg-secondary border-border" />
  </div>
  <div className="space-y-1.5">
  <EditorLabel>Preço (R$)</EditorLabel>
- <Input type="number" value={upsellPrice} onChange={(e: any) => setUpsellPrice(e.target.value)} placeholder="0,00" className="h-10 bg-secondary border-border font-numbers tabular-nums" />
+ <Input type="number" value={upsellPrice} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setUpsellPrice(e.target.value)} placeholder="0,00" className="h-10 bg-secondary border-border font-numbers tabular-nums" />
  </div>
  <div className="space-y-1.5">
  <EditorLabel>Desconto (%)</EditorLabel>
- <Input type="number" min="0" max="90" value={upsellDiscount} onChange={(e: any) => setUpsellDiscount(e.target.value)} className="h-10 bg-secondary border-border font-numbers tabular-nums" />
+ <Input type="number" min="0" max="90" value={upsellDiscount} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setUpsellDiscount(e.target.value)} className="h-10 bg-secondary border-border font-numbers tabular-nums" />
  </div>
  </div>
  </motion.div>
@@ -1605,7 +1605,7 @@ function TabUpsell({ isNew, name, price, imagePreview, hasCustomThankYou, setHas
  <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} exit={{ opacity: 0, height: 0 }} className="overflow-hidden">
  <div className="space-y-1.5 pt-1">
  <EditorLabel>URL da página de upsell</EditorLabel>
- <Input value={thankYouUrl} onChange={(e: any) => setThankYouUrl(e.target.value)} placeholder="https://seusite.com/oferta-especial" type="url" className="h-10 bg-secondary border-border" />
+ <Input value={thankYouUrl} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setThankYouUrl(e.target.value)} placeholder="https://seusite.com/oferta-especial" type="url" className="h-10 bg-secondary border-border" />
  <p className="text-[11px] text-muted-foreground/60">O comprador será redirecionado após pagamento aprovado.</p>
  </div>
  </motion.div>
@@ -1631,15 +1631,15 @@ function TabUpsell({ isNew, name, price, imagePreview, hasCustomThankYou, setHas
  <div className="p-5 grid grid-cols-1 sm:grid-cols-[2fr_1fr_1fr] gap-3">
  <div className="space-y-1.5">
  <EditorLabel>URL ou identificador da oferta</EditorLabel>
- <Input value={downsellUrl} onChange={(e: any) => setDownsellUrl(e.target.value)} placeholder="https://..." type="url" className="h-10 bg-secondary border-border" />
+ <Input value={downsellUrl} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setDownsellUrl(e.target.value)} placeholder="https://..." type="url" className="h-10 bg-secondary border-border" />
  </div>
  <div className="space-y-1.5">
  <EditorLabel>Preço reduzido (R$)</EditorLabel>
- <Input type="number" value={downsellPrice} onChange={(e: any) => setDownsellPrice(e.target.value)} placeholder="0,00" className="h-10 bg-secondary border-border font-numbers tabular-nums" />
+ <Input type="number" value={downsellPrice} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setDownsellPrice(e.target.value)} placeholder="0,00" className="h-10 bg-secondary border-border font-numbers tabular-nums" />
  </div>
  <div className="space-y-1.5">
  <EditorLabel>Delay (s)</EditorLabel>
- <Input type="number" min="0" max="30" value={downsellDelay} onChange={(e: any) => setDownsellDelay(e.target.value)} className="h-10 bg-secondary border-border font-numbers tabular-nums text-center" />
+ <Input type="number" min="0" max="30" value={downsellDelay} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setDownsellDelay(e.target.value)} className="h-10 bg-secondary border-border font-numbers tabular-nums text-center" />
  </div>
  </div>
  </motion.div>
@@ -1877,9 +1877,9 @@ function TabCheckout({ isNew, name, price, productId, buttonColor, setButtonColo
  <EditorLabel icon={Palette}>Cor do botão de compra</EditorLabel>
  <div className="flex items-center gap-3">
  <div className="relative">
- <input type="color" value={buttonColor} onChange={(e: any) => setButtonColor(e.target.value)} className="w-12 h-12 rounded-xl border border-border cursor-pointer" />
+ <input type="color" value={buttonColor} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setButtonColor(e.target.value)} className="w-12 h-12 rounded-xl border border-border cursor-pointer" />
  </div>
- <Input value={buttonColor} onChange={(e: any) => setButtonColor(e.target.value)} className="flex-1 font-mono text-sm bg-secondary border-border h-11" />
+ <Input value={buttonColor} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setButtonColor(e.target.value)} className="flex-1 font-mono text-sm bg-secondary border-border h-11" />
  <motion.div whileHover={{ scale: 1.02 }} className="h-11 px-8 rounded-xl flex items-center justify-center text-sm font-display font-black text-primary-foreground cursor-default" style={{ backgroundColor: buttonColor }}>
  Comprar Agora
  </motion.div>
@@ -1907,7 +1907,7 @@ function TabCheckout({ isNew, name, price, productId, buttonColor, setButtonColo
  <ToggleRow icon={Timer} label="Timer de urgência" sublabel="Contador regressivo no checkout" checked={timerEnabled} onChange={setTimerEnabled}>
  {timerEnabled && (
  <div className="flex items-center gap-1.5">
- <Input type="number" min="1" max="60" value={timerMinutes} onChange={(e: any) => setTimerMinutes(e.target.value)} className="w-16 h-8 text-center text-xs bg-secondary border-border" />
+ <Input type="number" min="1" max="60" value={timerMinutes} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setTimerMinutes(e.target.value)} className="w-16 h-8 text-center text-xs bg-secondary border-border" />
  <span className="text-[10px] text-muted-foreground">min</span>
  </div>
  )}
@@ -1923,8 +1923,8 @@ function TabCheckout({ isNew, name, price, productId, buttonColor, setButtonColo
  <ImagePlus className="h-4 w-4 text-success" /> Banners do Checkout
  </h3>
  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
- <BannerUpload label="Banner Desktop" sublabel="Recomendado: 1200×200px" preview={bannerDesktopPreview} inputRef={desktopBannerRef} onFile={(e: any) => handleBannerFile(e, "desktop")} onClear={() => { setBannerDesktopFile(null); setBannerDesktopPreview(""); }} />
- <BannerUpload label="Banner Mobile" sublabel="Recomendado: 600×200px" preview={bannerMobilePreview} inputRef={mobileBannerRef} onFile={(e: any) => handleBannerFile(e, "mobile")} onClear={() => { setBannerMobileFile(null); setBannerMobilePreview(""); }} />
+ <BannerUpload label="Banner Desktop" sublabel="Recomendado: 1200×200px" preview={bannerDesktopPreview} inputRef={desktopBannerRef} onFile={(e: React.ChangeEvent<HTMLInputElement>) => handleBannerFile(e, "desktop")} onClear={() => { setBannerDesktopFile(null); setBannerDesktopPreview(""); }} />
+ <BannerUpload label="Banner Mobile" sublabel="Recomendado: 600×200px" preview={bannerMobilePreview} inputRef={mobileBannerRef} onFile={(e: React.ChangeEvent<HTMLInputElement>) => handleBannerFile(e, "mobile")} onClear={() => { setBannerMobileFile(null); setBannerMobilePreview(""); }} />
  </div>
  </EditorCard>
  </>
@@ -1961,7 +1961,7 @@ function TabCoProducao({ isNew, coProducerEmail, setCoProducerEmail, coProductio
  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
  <div className="space-y-2">
  <EditorLabel icon={Mail}>E-mail do co-produtor</EditorLabel>
- <Input value={coProducerEmail} onChange={(e: any) => setCoProducerEmail(e.target.value)} placeholder="email@coprodutor.com" type="email" className="h-11 bg-secondary border-border" />
+ <Input value={coProducerEmail} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setCoProducerEmail(e.target.value)} placeholder="email@coprodutor.com" type="email" className="h-11 bg-secondary border-border" />
  </div>
  <div className="space-y-2">
  <EditorLabel icon={Clock}>Tempo de duração</EditorLabel>
@@ -1983,7 +1983,7 @@ function TabCoProducao({ isNew, coProducerEmail, setCoProducerEmail, coProductio
  <EditorCard accentColor="bg-primary">
  <EditorLabel icon={Percent}>Comissão do co-produtor</EditorLabel>
  <div className="flex items-center gap-3">
- <Input type="number" min="1" max="99" value={coProductionSplit} onChange={(e: any) => setCoProductionSplit(e.target.value)} className="w-24 h-11 text-center font-numbers font-black text-lg bg-secondary border-border" />
+ <Input type="number" min="1" max="99" value={coProductionSplit} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setCoProductionSplit(e.target.value)} className="w-24 h-11 text-center font-numbers font-black text-lg bg-secondary border-border" />
  <span className="text-lg font-display font-black text-muted-foreground">%</span>
  <div className="flex-1">
  <div className="h-3 rounded-full bg-muted/20 overflow-hidden flex">
@@ -2061,7 +2061,7 @@ function TabCupons({ isNew, coupons, newCouponCode, setNewCouponCode, newCouponT
  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
  <div className="space-y-2">
  <EditorLabel>Código do cupom</EditorLabel>
- <Input value={newCouponCode} onChange={(e: any) => setNewCouponCode(e.target.value.toUpperCase())} placeholder="EX: DESCONTO20" className="h-11 bg-secondary border-border font-mono uppercase" maxLength={30} />
+ <Input value={newCouponCode} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setNewCouponCode(e.target.value.toUpperCase())} placeholder="EX: DESCONTO20" className="h-11 bg-secondary border-border font-mono uppercase" maxLength={30} />
  </div>
  <div className="space-y-2">
  <EditorLabel>Tipo de desconto</EditorLabel>
@@ -2077,11 +2077,11 @@ function TabCupons({ isNew, coupons, newCouponCode, setNewCouponCode, newCouponT
  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
  <div className="space-y-2">
  <EditorLabel>{newCouponType === "percentage" ? "Percentual (%)" : "Valor (R$)"}</EditorLabel>
- <Input type="number" min="0.01" max={newCouponType === "percentage" ? "100" : "99999"} step="0.01" value={newCouponValue} onChange={(e: any) => setNewCouponValue(e.target.value)} className="h-11 bg-secondary border-border font-numbers font-black" placeholder="0" />
+ <Input type="number" min="0.01" max={newCouponType === "percentage" ? "100" : "99999"} step="0.01" value={newCouponValue} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setNewCouponValue(e.target.value)} className="h-11 bg-secondary border-border font-numbers font-black" placeholder="0" />
  </div>
  <div className="space-y-2">
  <EditorLabel>Usos máximos</EditorLabel>
- <Input type="number" min="1" value={newCouponMaxUses} onChange={(e: any) => setNewCouponMaxUses(e.target.value)} className="h-11 bg-secondary border-border font-numbers" placeholder="Ilimitado" />
+ <Input type="number" min="1" value={newCouponMaxUses} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setNewCouponMaxUses(e.target.value)} className="h-11 bg-secondary border-border font-numbers" placeholder="Ilimitado" />
  </div>
  </div>
  <Button onClick={createCoupon} disabled={creatingCoupon || !newCouponCode.trim()} className="gap-2 rounded-xl font-display font-bold w-full sm:w-auto">
@@ -2146,7 +2146,7 @@ function TabAfiliados({ isNew, productId, affiliateEnabled, setAffiliateEnabled,
  <div className="space-y-2">
  <EditorLabel icon={Percent}>Comissão (%)</EditorLabel>
  <div className="flex items-center gap-2">
- <Input type="number" min="1" max="80" value={affiliateCommission} onChange={(e: any) => setAffiliateCommission(e.target.value)} className="w-24 h-11 text-center font-numbers font-black text-lg bg-secondary border-border" />
+ <Input type="number" min="1" max="80" value={affiliateCommission} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setAffiliateCommission(e.target.value)} className="w-24 h-11 text-center font-numbers font-black text-lg bg-secondary border-border" />
  <span className="text-lg font-display font-black text-muted-foreground">%</span>
  </div>
  </div>
@@ -2191,11 +2191,11 @@ function TabAfiliados({ isNew, productId, affiliateEnabled, setAffiliateEnabled,
  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
  <div className="space-y-2">
  <EditorLabel icon={Mail}>E-mail de suporte para afiliados</EditorLabel>
- <Input value={affiliateSupportEmail} onChange={(e: any) => setAffiliateSupportEmail(e.target.value)} placeholder="suporte@..." type="email" className="h-11 bg-secondary border-border" />
+ <Input value={affiliateSupportEmail} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setAffiliateSupportEmail(e.target.value)} placeholder="suporte@..." type="email" className="h-11 bg-secondary border-border" />
  </div>
  <div className="space-y-2">
  <EditorLabel>Descrição para afiliados</EditorLabel>
- <Textarea value={affiliateDescription} onChange={(e: any) => setAffiliateDescription(e.target.value)} rows={2} placeholder="Descreva os benefícios..." className="resize-none bg-secondary border-border" />
+ <Textarea value={affiliateDescription} onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setAffiliateDescription(e.target.value)} rows={2} placeholder="Descreva os benefícios..." className="resize-none bg-secondary border-border" />
  </div>
  </div>
  </EditorCard>
