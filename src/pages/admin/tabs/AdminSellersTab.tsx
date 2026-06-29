@@ -643,19 +643,23 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
                     <tr
                       key={p.id}
                       onClick={() => openUserDetail(p)}
-                      className={cn(premiumTable.row, "cursor-pointer transition-colors hover:bg-muted/30")}
+                      className={cn(premiumTable.row, "cursor-pointer")}
                     >
                       <td className={premiumTable.td}>
-                        <div className="flex items-center gap-2">
-                          <div className="h-8 w-8 rounded-xl bg-primary/10 flex items-center justify-center text-xs font-bold text-primary shrink-0">
-                            {(p.full_name || "U")[0].toUpperCase()}
-                          </div>
-                          <div>
-                            <div className="flex items-center gap-1.5">
-                              <p className="text-[12px] font-bold text-foreground">{p.full_name || "Sem nome"}</p>
-                              {frozen && <Snowflake className="h-3 w-3 text-info" aria-label="Saldo Congelado" />}
+                        <div className="flex items-center gap-3">
+                          <div className="relative shrink-0">
+                            <div className="h-9 w-9 rounded-xl bg-gradient-to-br from-primary/15 to-primary/5 ring-1 ring-primary/20 flex items-center justify-center text-[12px] font-black text-primary transition-transform duration-300 group-hover:scale-[1.06]">
+                              {(p.full_name || "U")[0].toUpperCase()}
                             </div>
-                            <p className="text-[10px] text-muted-foreground">{p.email}</p>
+                            {frozen && (
+                              <span className="absolute -bottom-0.5 -right-0.5 h-3.5 w-3.5 rounded-full bg-info text-background flex items-center justify-center ring-2 ring-background">
+                                <Snowflake className="h-2 w-2" />
+                              </span>
+                            )}
+                          </div>
+                          <div className="min-w-0">
+                            <p className="text-[12.5px] font-bold text-foreground truncate max-w-[220px]">{p.full_name || "Sem nome"}</p>
+                            <p className="text-[10.5px] text-muted-foreground truncate max-w-[220px]">{p.email}</p>
                           </div>
                         </div>
                       </td>
@@ -665,17 +669,31 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
                         <span className="font-display text-[13px] font-black tabular-nums text-primary">{fmtCurrency(stats.totalNet - stats.totalWithdrawn)}</span>
                       </td>
                       <td className={premiumTable.td}>
-                        <span className="text-[11px] text-muted-foreground">{stats.completedCount}/{stats.txCount}</span>
+                        <span className="text-[11px] tabular-nums text-muted-foreground">
+                          <span className="text-foreground font-bold">{stats.completedCount}</span>
+                          <span className="text-muted-foreground/50">/{stats.txCount}</span>
+                        </span>
                       </td>
                       <td className={premiumTable.td}>
-                        <span className={`text-[12px] font-bold ${stats.conversionRate >= 50 ? "text-success" : stats.conversionRate >= 20 ? "text-warning" : "text-destructive"}`}>
+                        <span className={cn(
+                          "inline-flex items-center rounded-md px-1.5 py-0.5 text-[11px] font-black tabular-nums border",
+                          stats.conversionRate >= 50 ? "text-success bg-success/10 border-success/25"
+                            : stats.conversionRate >= 20 ? "text-warning bg-warning/10 border-warning/25"
+                            : "text-destructive bg-destructive/10 border-destructive/25"
+                        )}>
                           {stats.conversionRate.toFixed(1)}%
                         </span>
                       </td>
                       <td className={premiumTable.td} onClick={(e) => e.stopPropagation()}>
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" size="sm" className="h-7 w-7 p-0"><MoreHorizontal className="h-4 w-4" /></Button>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="h-8 w-8 p-0 rounded-lg opacity-60 group-hover:opacity-100 hover:bg-muted hover:text-foreground transition-all"
+                            >
+                              <MoreHorizontal className="h-4 w-4" />
+                            </Button>
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end" className="w-56">
                             <DropdownMenuItem className="gap-2" onClick={() => openUserDetail(p)}><Eye className="h-3.5 w-3.5" /> Ver detalhes</DropdownMenuItem>
@@ -702,6 +720,7 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
                       </td>
                     </tr>
                   );
+
                 })}
                 {filtered.length === 0 && (
                   <tr><td colSpan={7} className="p-10 text-center text-muted-foreground text-xs">Nenhum vendedor encontrado</td></tr>
