@@ -6,6 +6,7 @@ import {
   CreditCard, Package, Activity, Percent, ShieldAlert, RotateCcw, Lock,
   Eye, Radio, AlertCircle, UserCheck, Flame, Wallet, CalendarDays,
   Clock3, Hourglass, UserPlus, ArrowUpRight,
+  type LucideIcon,
 } from "lucide-react";
 import {
   AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
