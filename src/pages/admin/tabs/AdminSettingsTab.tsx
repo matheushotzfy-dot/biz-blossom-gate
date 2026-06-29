@@ -51,12 +51,12 @@ export default function AdminSettingsTab() {
 
  // Retention settings
  const [globalRetention, setGlobalRetention] = useState({ pix_retention_pct: "0", card_retention_pct: "0", retention_days: "14", card_release_days: "7", id: "" });
- const [sellerRetentions, setSellerRetentions] = useState<any[]>([]);
+ const [sellerRetentions, setSellerRetentions] = useState<RetentionSetting[]>([]);
  const [profiles, setProfiles] = useState<{ user_id: string; full_name: string | null; email: string | null }[]>([]);
  const [newRetentionSeller, setNewRetentionSeller] = useState("");
 
  // Notifications
- const [notifications, setNotifications] = useState<any[]>([]);
+ const [notifications, setNotifications] = useState<NotificationRow[]>([]);
  const [notifTitle, setNotifTitle] = useState("");
  const [notifMessage, setNotifMessage] = useState("");
  const [notifType, setNotifType] = useState("info");
