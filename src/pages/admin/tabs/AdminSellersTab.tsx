@@ -1174,7 +1174,7 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
                             </div>
                             <div className="flex-1">
                               <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">{pk.key_type}</p>
-                              <p className="text-sm font-mono text-foreground mt-0.5">{(pk as any).key_value_masked ?? pk.key_value ?? "•••"}</p>
+                              <p className="text-sm font-mono text-foreground mt-0.5">{pk.key_value ?? (pk as any).key_value_masked ?? "•••"}</p>
                             </div>
                             <p className="text-[10px] text-muted-foreground">{new Date(pk.created_at).toLocaleDateString("pt-BR")}</p>
                             <Button size="sm" variant="ghost" className="h-8 w-8 p-0 text-destructive hover:bg-destructive/10" onClick={() => handleDeletePixKey(pk.id)} title="Remover chave">
