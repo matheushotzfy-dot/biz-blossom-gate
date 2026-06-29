@@ -5,10 +5,11 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
 import {
-  Plus, Search, Shield, Snowflake, Sun, KeyRound, Trash2, History, Settings2,
+  Plus, Search, Shield, Snowflake, Sun, KeyRound, Trash2, History, ArrowUpDown,
   UserCog, Users, RefreshCw, Copy, Eye, EyeOff, Activity, Percent, UsersRound,
+  X, CheckCircle2, Briefcase, Loader2,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { Tables } from "@/integrations/supabase/types";
@@ -48,6 +49,8 @@ interface StaffRow {
   assignedCount: number;
 }
 
+type SortKey = "name" | "pct" | "permissions" | "assigned" | "status";
+
 function genPassword(len = 14) {
   const chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789@#$%";
   const arr = crypto.getRandomValues(new Uint8Array(len));
@@ -58,6 +61,8 @@ export default function StaffManagementTab({ profiles, onReload, role }: Props) 
   const [rows, setRows] = useState<StaffRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState("");
+  const [sort, setSort] = useState<SortKey>("name");
+  const [statusFilter, setStatusFilter] = useState<"all" | "active" | "frozen">("all");
   const [showCreate, setShowCreate] = useState(false);
   const [showAudit, setShowAudit] = useState<StaffRow | null>(null);
   const [showPerm, setShowPerm] = useState<StaffRow | null>(null);
@@ -65,7 +70,6 @@ export default function StaffManagementTab({ profiles, onReload, role }: Props) 
 
   const isManager = role === "manager";
   const heading = isManager ? "Gerentes de Contas" : "Staff / Funcionários";
-  const accent = isManager ? "emerald" : "indigo";
 
   const load = async () => {
     setLoading(true);
@@ -113,13 +117,23 @@ export default function StaffManagementTab({ profiles, onReload, role }: Props) 
   useEffect(() => { load(); /* eslint-disable-next-line */ }, [role, profiles]);
 
   const filtered = useMemo(() => {
-    if (!filter) return rows;
-    const q = filter.toLowerCase();
-    return rows.filter((r) =>
-      (r.full_name ?? "").toLowerCase().includes(q) ||
-      (r.email ?? "").toLowerCase().includes(q)
-    );
-  }, [rows, filter]);
+    let out = rows;
+    if (statusFilter !== "all") out = out.filter(r => (statusFilter === "frozen" ? r.frozen : !r.frozen));
+    if (filter.trim()) {
+      const q = filter.toLowerCase();
+      out = out.filter(r => (r.full_name ?? "").toLowerCase().includes(q) || (r.email ?? "").toLowerCase().includes(q));
+    }
+    const sorted = [...out].sort((a, b) => {
+      switch (sort) {
+        case "pct": return b.pct - a.pct;
+        case "permissions": return b.permissions.length - a.permissions.length;
+        case "assigned": return b.assignedCount - a.assignedCount;
+        case "status": return Number(a.frozen) - Number(b.frozen);
+        default: return (a.full_name || a.email || "").localeCompare(b.full_name || b.email || "");
+      }
+    });
+    return sorted;
+  }, [rows, filter, sort, statusFilter]);
 
   const openAudit = async (row: StaffRow) => {
     setShowAudit(row);
@@ -188,8 +202,16 @@ export default function StaffManagementTab({ profiles, onReload, role }: Props) 
   const avgPct = rows.length ? rows.reduce((s, r) => s + r.pct, 0) / rows.length : 0;
   const totalAssigned = rows.reduce((s, r) => s + r.assignedCount, 0);
 
+  const SortBtn = ({ k, label }: { k: SortKey; label: string }) => (
+    <button onClick={() => setSort(k)}
+      className={cn("inline-flex h-7 items-center gap-1 rounded-md border px-2 text-[10px] font-black uppercase tracking-wider transition-colors",
+        sort === k ? "border-primary bg-primary/10 text-primary" : "border-border bg-card text-muted-foreground hover:text-foreground hover:border-primary/40")}>
+      <ArrowUpDown className="h-3 w-3" /> {label}
+    </button>
+  );
+
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 animate-fade-in">
       <FinanceiroHero
         eyebrow={isManager ? "Admin · Gerentes" : "Admin · Staff"}
         title={heading}
@@ -199,10 +221,10 @@ export default function StaffManagementTab({ profiles, onReload, role }: Props) 
         status={{ tone: rows.length ? "success" : "neutral", label: `${rows.length} conta${rows.length !== 1 ? "s" : ""}`, pulse: rows.length > 0 }}
         actions={
           <div className="flex gap-2">
-            <Button variant="outline" size="sm" onClick={load} className="rounded-md gap-1.5">
+            <Button variant="outline" size="sm" onClick={load} className="h-9 gap-1.5 rounded-md">
               <RefreshCw className="h-3.5 w-3.5" /> Atualizar
             </Button>
-            <Button onClick={() => setShowCreate(true)} size="sm" className="rounded-md gap-1.5">
+            <Button onClick={() => setShowCreate(true)} size="sm" className="h-9 gap-1.5 rounded-md">
               <Plus className="h-3.5 w-3.5" /> Criar conta
             </Button>
           </div>
@@ -218,21 +240,50 @@ export default function StaffManagementTab({ profiles, onReload, role }: Props) 
         )}
       </PremiumMetricGrid>
 
+      {/* Toolbar unificada */}
+      <div className="flex flex-col gap-3 rounded-xl border border-border bg-card p-3 lg:flex-row lg:items-center lg:justify-between">
+        <div className="flex flex-1 flex-wrap items-center gap-3">
+          <div className="relative flex-1 min-w-[240px] max-w-sm group">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground transition-colors group-focus-within:text-primary" />
+            <input value={filter} onChange={(e) => setFilter(e.target.value)} placeholder="Buscar por nome ou email..."
+              className="h-9 w-full rounded-lg border border-border bg-card pl-10 pr-3 text-sm text-foreground placeholder:text-muted-foreground transition-all focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20" />
+          </div>
+          <div className="flex items-center gap-1 rounded-lg border border-border bg-muted/30 p-0.5">
+            {(["all", "active", "frozen"] as const).map(s => (
+              <button key={s} onClick={() => setStatusFilter(s)}
+                className={cn("h-7 rounded-md px-3 text-[10px] font-black uppercase tracking-wider transition-all duration-150",
+                  statusFilter === s ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:bg-muted/60 hover:text-foreground")}>
+                {s === "all" ? "Todas" : s === "active" ? "Ativas" : "Congeladas"}
+              </button>
+            ))}
+          </div>
+        </div>
+        <div className="flex items-center gap-2">
+          <span className="text-[9px] font-black uppercase tracking-wider text-muted-foreground">Ordenar</span>
+          <SortBtn k="name" label="Nome" />
+          <SortBtn k="pct" label="%" />
+          <SortBtn k="permissions" label="Permissões" />
+          {isManager && <SortBtn k="assigned" label="Sellers" />}
+        </div>
+      </div>
+
       <PremiumPanel
         eyebrow="Diretório"
-        title={isManager ? "Gerentes" : "Funcionários"}
+        title={`${isManager ? "Gerentes" : "Funcionários"} (${filtered.length})`}
         icon={isManager ? Users : UserCog}
-        action={
-          <div className="relative w-full sm:w-72">
-            <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground group-focus-within:text-primary" />
-            <Input
-              value={filter} onChange={(e) => setFilter(e.target.value)}
-              placeholder="Filtrar por nome ou e-mail..."
-              className="pl-8 h-9 text-sm rounded-md focus-visible:ring-primary/30"
-            />
-          </div>
-        }
       >
+        {loading ? (
+          <div className="flex items-center justify-center py-20 text-muted-foreground">
+            <Loader2 className="h-5 w-5 animate-spin" />
+            <span className="ml-2 text-xs font-bold">Carregando contas…</span>
+          </div>
+        ) : filtered.length === 0 ? (
+          <PremiumEmpty
+            icon={isManager ? Users : UserCog}
+            title="Nenhuma conta encontrada"
+            subtitle='Use "Criar conta" para adicionar um novo membro'
+          />
+        ) : (
         <div className={premiumTable.wrapper}>
           <table className={premiumTable.table}>
             <thead>
@@ -246,45 +297,32 @@ export default function StaffManagementTab({ profiles, onReload, role }: Props) 
               </tr>
             </thead>
             <tbody>
-              {loading ? (
-                <tr><td colSpan={6} className="p-10 text-center text-sm text-muted-foreground">Carregando...</td></tr>
-              ) : filtered.length === 0 ? (
-                <tr><td colSpan={6}>
-                  <PremiumEmpty
-                    icon={isManager ? Users : UserCog}
-                    title="Nenhuma conta encontrada"
-                    subtitle='Use "Criar conta" para adicionar um novo membro.'
-                  />
-                </td></tr>
-              ) : filtered.map((row) => (
-                <tr key={row.user_id} className={premiumTable.row}>
+              {filtered.map((row) => (
+                <tr key={row.user_id} className={cn(premiumTable.row, "transition-colors duration-150 hover:bg-muted/40")}>
                   <td className={premiumTable.td}>
                     <div className="flex items-center gap-3">
-                      <div className={cn(
-                        "flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border text-[11px] font-black uppercase",
-                        isManager ? "bg-success/10 border-success/20 text-success" : "bg-primary/10 border-primary/20 text-primary"
-                      )}>
+                      <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md border border-border bg-muted/30 text-[11px] font-black uppercase text-foreground">
                         {(row.full_name || row.email || "?").slice(0, 2).toUpperCase()}
                       </div>
                       <div className="min-w-0">
-                        <div className="font-bold text-foreground truncate">{row.full_name || "—"}</div>
-                        <div className="text-[11px] text-muted-foreground truncate">{row.email}</div>
+                        <div className="truncate text-xs font-black text-foreground">{row.full_name || "—"}</div>
+                        <div className="truncate text-[10px] font-bold text-muted-foreground">{row.email}</div>
                       </div>
                     </div>
                   </td>
                   <td className={premiumTable.td}>
                     {row.frozen ? (
-                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-black uppercase tracking-wider bg-info/10 text-info border border-info/20">
+                      <span className="inline-flex items-center gap-1 rounded border border-info/40 bg-info/10 px-2 py-0.5 text-[10px] font-black uppercase tracking-wider text-info">
                         <Snowflake className="h-3 w-3" /> Congelada
                       </span>
                     ) : (
-                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-black uppercase tracking-wider bg-success/10 text-success border border-success/20">
-                        <span className="h-1.5 w-1.5 rounded-full bg-success animate-pulse" /> Ativa
+                      <span className="inline-flex items-center gap-1 rounded border border-success/40 bg-success/10 px-2 py-0.5 text-[10px] font-black uppercase tracking-wider text-success">
+                        <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-success" /> Ativa
                       </span>
                     )}
                   </td>
                   <td className={cn(premiumTable.td, "text-right")}>
-                    <div className="inline-flex items-center gap-1">
+                    <div className="inline-flex items-center gap-1 rounded-md border border-border bg-muted/30 px-1.5 py-0.5 focus-within:border-primary">
                       <input
                         type="number" step="0.01" min="0" max="100"
                         defaultValue={row.pct}
@@ -292,16 +330,16 @@ export default function StaffManagementTab({ profiles, onReload, role }: Props) 
                           const v = parseFloat(e.target.value);
                           if (v !== row.pct) setPct(row, v);
                         }}
-                        className="w-20 text-right bg-muted/30 border border-border/60 rounded-md px-2 py-1 font-mono text-xs focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary/40"
+                        className="w-16 bg-transparent text-right font-mono text-xs font-black tabular-nums text-foreground focus:outline-none"
                       />
-                      <span className="text-muted-foreground text-xs">%</span>
+                      <Percent className="h-3 w-3 text-muted-foreground" />
                     </div>
                   </td>
                   {isManager && (
-                    <td className={cn(premiumTable.td, "text-right tabular-nums font-mono text-xs")}>
+                    <td className={cn(premiumTable.td, "text-right")}>
                       <span className={cn(
-                        "inline-flex items-center justify-center min-w-[2rem] px-2 py-0.5 rounded-md border",
-                        row.assignedCount > 0 ? "bg-primary/10 text-primary border-primary/20" : "bg-muted/30 text-muted-foreground border-border/60"
+                        "inline-flex min-w-[2rem] items-center justify-center rounded border px-2 py-0.5 text-[10px] font-black tabular-nums",
+                        row.assignedCount > 0 ? "border-primary/40 bg-primary/10 text-primary" : "border-border bg-muted/30 text-muted-foreground"
                       )}>
                         {row.assignedCount}
                       </span>
@@ -310,31 +348,24 @@ export default function StaffManagementTab({ profiles, onReload, role }: Props) 
                   <td className={premiumTable.td}>
                     <button
                       onClick={() => setShowPerm(row)}
-                      className="inline-flex items-center gap-1.5 text-[11px] font-bold text-muted-foreground hover:text-primary transition-colors"
+                      className={cn(
+                        "inline-flex items-center gap-1.5 rounded border px-2 py-0.5 text-[10px] font-black uppercase tracking-wider transition-colors",
+                        row.permissions.length > 0
+                          ? "border-border bg-card text-foreground hover:border-primary hover:text-primary"
+                          : "border-border bg-muted/30 text-muted-foreground hover:border-primary/40 hover:text-foreground"
+                      )}
                     >
                       <Shield className="h-3 w-3" />
-                      {row.permissions.length} ativa{row.permissions.length !== 1 ? "s" : ""}
+                      {row.permissions.length}<span className="text-muted-foreground">/{STAFF_PERMISSIONS.length}</span>
                     </button>
                   </td>
                   <td className={cn(premiumTable.td, "text-right")}>
-                    <div className="flex items-center justify-end gap-1 opacity-60 group-hover:opacity-100 transition-opacity">
-                      <Button size="sm" variant="ghost" onClick={() => setShowPerm(row)} title="Permissões" className="h-7 w-7 p-0 hover:bg-primary/10 hover:text-primary">
-                        <Shield className="h-3.5 w-3.5" />
-                      </Button>
-                      <Button size="sm" variant="ghost" onClick={() => openAudit(row)} title="Auditoria" className="h-7 w-7 p-0 hover:bg-primary/10 hover:text-primary">
-                        <History className="h-3.5 w-3.5" />
-                      </Button>
-                      <Button size="sm" variant="ghost" onClick={() => resetPassword(row)} title="Resetar senha" className="h-7 w-7 p-0 hover:bg-warning/10 hover:text-warning">
-                        <KeyRound className="h-3.5 w-3.5" />
-                      </Button>
-                      <Button size="sm" variant="ghost" onClick={() => toggleFreeze(row)}
-                        title={row.frozen ? "Descongelar" : "Congelar"} className="h-7 w-7 p-0 hover:bg-info/10 hover:text-info">
-                        {row.frozen ? <Sun className="h-3.5 w-3.5" /> : <Snowflake className="h-3.5 w-3.5" />}
-                      </Button>
-                      <Button size="sm" variant="ghost" onClick={() => removeStaff(row)} title="Excluir"
-                        className="h-7 w-7 p-0 text-destructive hover:bg-destructive/10 hover:text-destructive">
-                        <Trash2 className="h-3.5 w-3.5" />
-                      </Button>
+                    <div className="flex items-center justify-end gap-1">
+                      <ActionBtn icon={Shield} label="Permissões" onClick={() => setShowPerm(row)} hoverTone="primary" />
+                      <ActionBtn icon={History} label="Auditoria" onClick={() => openAudit(row)} hoverTone="primary" />
+                      <ActionBtn icon={KeyRound} label="Resetar senha" onClick={() => resetPassword(row)} hoverTone="warning" />
+                      <ActionBtn icon={row.frozen ? Sun : Snowflake} label={row.frozen ? "Descongelar" : "Congelar"} onClick={() => toggleFreeze(row)} hoverTone="info" />
+                      <ActionBtn icon={Trash2} label="Excluir" onClick={() => removeStaff(row)} hoverTone="destructive" />
                     </div>
                   </td>
                 </tr>
@@ -342,6 +373,7 @@ export default function StaffManagementTab({ profiles, onReload, role }: Props) 
             </tbody>
           </table>
         </div>
+        )}
       </PremiumPanel>
 
       <CreateStaffDialog
@@ -363,6 +395,55 @@ export default function StaffManagementTab({ profiles, onReload, role }: Props) 
         onClose={() => { setShowAudit(null); setAuditRows([]); }}
       />
     </div>
+  );
+}
+
+function ActionBtn({ icon: Icon, label, onClick, hoverTone }: {
+  icon: any; label: string; onClick: () => void;
+  hoverTone: "primary" | "warning" | "info" | "destructive";
+}) {
+  const hoverCls = {
+    primary: "hover:border-primary hover:text-primary",
+    warning: "hover:border-warning hover:text-warning",
+    info: "hover:border-info hover:text-info",
+    destructive: "hover:border-destructive hover:text-destructive",
+  }[hoverTone];
+  return (
+    <button onClick={onClick} title={label}
+      className={cn(
+        "flex h-7 w-7 items-center justify-center rounded-md border border-border bg-card text-muted-foreground transition-all duration-150 active:scale-[0.95]",
+        hoverCls
+      )}>
+      <Icon className="h-3.5 w-3.5" />
+    </button>
+  );
+}
+
+// ---------------- Dialog header (shared) ----------------
+function DetailDialogHeader({ title, subtitle, icon: Icon, onClose, tone = "primary" }: {
+  title: string; subtitle?: string; icon: any; onClose: () => void;
+  tone?: "primary" | "success" | "warning";
+}) {
+  const toneCls = {
+    primary: "border-primary/40 bg-primary/10 text-primary",
+    success: "border-success/40 bg-success/10 text-success",
+    warning: "border-warning/40 bg-warning/10 text-warning",
+  }[tone];
+  return (
+    <header className="flex items-center justify-between border-b border-border bg-card p-5">
+      <div className="flex min-w-0 items-center gap-3">
+        <div className={cn("flex h-11 w-11 shrink-0 items-center justify-center rounded-lg border", toneCls)}>
+          <Icon className="h-5 w-5" />
+        </div>
+        <div className="min-w-0">
+          <p className="font-display text-base font-black tracking-tight text-foreground">{title}</p>
+          {subtitle && <p className="truncate text-[11px] font-bold text-muted-foreground">{subtitle}</p>}
+        </div>
+      </div>
+      <Button variant="ghost" size="sm" onClick={onClose} className="h-8 w-8 shrink-0 p-0">
+        <X className="h-4 w-4" />
+      </Button>
+    </header>
   );
 }
 
@@ -420,71 +501,78 @@ function CreateStaffDialog({ open, onOpenChange, role, onCreated }: {
     return g;
   }, []);
 
+  const Icon = role === "manager" ? Briefcase : Shield;
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl">
-        <DialogHeader>
-          <DialogTitle>Criar conta de {role === "manager" ? "Gerente" : "Staff"}</DialogTitle>
-        </DialogHeader>
-        <div className="space-y-3 pt-2 max-h-[70vh] overflow-y-auto pr-1">
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <Label className="text-xs">Nome completo</Label>
-              <Input value={name} onChange={(e) => setName(e.target.value)} className="h-9 text-sm mt-1" />
-            </div>
-            <div>
-              <Label className="text-xs">E-mail</Label>
-              <Input value={email} onChange={(e) => setEmail(e.target.value)} className="h-9 text-sm mt-1" type="email" />
-            </div>
-          </div>
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <Label className="text-xs">Senha inicial</Label>
-              <div className="flex gap-1 mt-1">
-                <Input value={password} onChange={(e) => setPassword(e.target.value)} className="h-9 text-sm font-mono"
-                  type={showPw ? "text" : "password"} />
-                <Button type="button" size="sm" variant="outline" onClick={() => setShowPw((v) => !v)} className="h-9 w-9 p-0">
-                  {showPw ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
-                </Button>
-                <Button type="button" size="sm" variant="outline" onClick={() => setPassword(genPassword())} className="h-9 w-9 p-0">
-                  <RefreshCw className="h-3.5 w-3.5" />
-                </Button>
-                <Button type="button" size="sm" variant="outline" onClick={() => { navigator.clipboard.writeText(password); toast.success("Copiada"); }} className="h-9 w-9 p-0">
-                  <Copy className="h-3.5 w-3.5" />
-                </Button>
+      <DialogContent className="max-w-2xl gap-0 overflow-hidden p-0 border-border [&>button]:hidden">
+        <DetailDialogHeader
+          title={`Nova conta de ${role === "manager" ? "Gerente" : "Staff"}`}
+          subtitle="Defina credenciais, comissão e permissões iniciais"
+          icon={Icon} onClose={() => onOpenChange(false)}
+          tone={role === "manager" ? "success" : "primary"}
+        />
+
+        <div className="max-h-[65vh] space-y-4 overflow-y-auto bg-card p-5">
+          <div className="rounded-lg border border-border bg-muted/20 p-4">
+            <p className="mb-3 text-[10px] font-black uppercase tracking-wider text-muted-foreground">Identificação</p>
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <Label className="text-[10px] font-black uppercase tracking-wider text-muted-foreground">Nome completo</Label>
+                <Input value={name} onChange={(e) => setName(e.target.value)} className="mt-1 h-9 text-sm" />
               </div>
-            </div>
-            <div>
-              <Label className="text-xs">% comissão (sobre net)</Label>
-              <Input type="number" step="0.01" min="0" max="100" value={pct}
-                onChange={(e) => setPct(parseFloat(e.target.value) || 0)}
-                className="h-9 text-sm mt-1 font-mono" />
+              <div>
+                <Label className="text-[10px] font-black uppercase tracking-wider text-muted-foreground">E-mail</Label>
+                <Input value={email} onChange={(e) => setEmail(e.target.value)} className="mt-1 h-9 text-sm" type="email" />
+              </div>
             </div>
           </div>
 
-          <div className="border border-border rounded-md p-3">
-            <div className="text-xs font-semibold mb-2 flex items-center gap-1.5">
-              <Shield className="h-3.5 w-3.5" /> Permissões
-            </div>
-            {Object.entries(grouped).map(([group, items]) => (
-              <div key={group} className="mb-2">
-                <div className="text-[10px] uppercase tracking-wider text-muted-foreground mb-1">{group}</div>
-                <div className="grid grid-cols-2 gap-2">
-                  {items.map((p) => (
-                    <label key={p.key} className="flex items-center gap-2 text-xs cursor-pointer hover:text-foreground">
-                      <Switch checked={perms.has(p.key)} onCheckedChange={() => toggle(p.key)} />
-                      {p.label}
-                    </label>
-                  ))}
+          <div className="rounded-lg border border-border bg-muted/20 p-4">
+            <p className="mb-3 text-[10px] font-black uppercase tracking-wider text-muted-foreground">Acesso & Comissão</p>
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <Label className="text-[10px] font-black uppercase tracking-wider text-muted-foreground">Senha inicial</Label>
+                <div className="mt-1 flex gap-1">
+                  <Input value={password} onChange={(e) => setPassword(e.target.value)} className="h-9 font-mono text-sm"
+                    type={showPw ? "text" : "password"} />
+                  <Button type="button" size="sm" variant="outline" onClick={() => setShowPw((v) => !v)} className="h-9 w-9 p-0">
+                    {showPw ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
+                  </Button>
+                  <Button type="button" size="sm" variant="outline" onClick={() => setPassword(genPassword())} className="h-9 w-9 p-0">
+                    <RefreshCw className="h-3.5 w-3.5" />
+                  </Button>
+                  <Button type="button" size="sm" variant="outline" onClick={() => { navigator.clipboard.writeText(password); toast.success("Copiada"); }} className="h-9 w-9 p-0">
+                    <Copy className="h-3.5 w-3.5" />
+                  </Button>
                 </div>
               </div>
-            ))}
+              <div>
+                <Label className="text-[10px] font-black uppercase tracking-wider text-muted-foreground">% comissão (sobre net)</Label>
+                <div className="mt-1 flex items-center gap-1 rounded-md border border-border bg-card px-3 focus-within:border-primary">
+                  <Input type="number" step="0.01" min="0" max="100" value={pct}
+                    onChange={(e) => setPct(parseFloat(e.target.value) || 0)}
+                    className="h-9 border-0 bg-transparent px-0 font-mono text-sm focus-visible:ring-0" />
+                  <Percent className="h-3.5 w-3.5 text-muted-foreground" />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="rounded-lg border border-border bg-muted/20 p-4">
+            <div className="mb-3 flex items-center justify-between">
+              <p className="inline-flex items-center gap-1.5 text-[10px] font-black uppercase tracking-wider text-muted-foreground">
+                <Shield className="h-3 w-3" /> Permissões iniciais
+              </p>
+              <span className="text-[10px] font-black tabular-nums text-foreground">{perms.size}/{STAFF_PERMISSIONS.length}</span>
+            </div>
+            <PermissionsGrid grouped={grouped} perms={perms} onToggle={toggle} />
           </div>
         </div>
-        <div className="flex justify-end gap-2 pt-2 border-t border-border">
+
+        <div className="flex justify-end gap-2 border-t border-border bg-card p-4">
           <Button variant="outline" size="sm" onClick={() => onOpenChange(false)}>Cancelar</Button>
-          <Button size="sm" onClick={submit} disabled={submitting}>
-            {submitting ? "Criando..." : "Criar conta"}
+          <Button size="sm" onClick={submit} disabled={submitting} className="gap-1.5">
+            {submitting ? <><Loader2 className="h-3.5 w-3.5 animate-spin" /> Criando…</> : <><Plus className="h-3.5 w-3.5" /> Criar conta</>}
           </Button>
         </div>
       </DialogContent>
@@ -520,33 +608,62 @@ function PermissionsDialog({ row, onClose, onSaved }: {
 
   return (
     <Dialog open={!!row} onOpenChange={(v) => !v && onClose()}>
-      <DialogContent className="max-w-xl">
-        <DialogHeader><DialogTitle>Permissões — {row.full_name}</DialogTitle></DialogHeader>
-        <div className="space-y-3 max-h-[70vh] overflow-y-auto">
-          {Object.entries(grouped).map(([group, items]) => (
-            <div key={group}>
-              <div className="text-[10px] uppercase tracking-wider text-muted-foreground mb-1">{group}</div>
-              <div className="grid grid-cols-2 gap-2">
-                {items.map((p) => (
-                  <label key={p.key} className="flex items-center gap-2 text-xs cursor-pointer">
-                    <Switch checked={perms.has(p.key)} onCheckedChange={(v) => {
-                      const n = new Set(perms);
-                      v ? n.add(p.key) : n.delete(p.key);
-                      setPerms(n);
-                    }} />
-                    {p.label}
-                  </label>
-                ))}
-              </div>
-            </div>
-          ))}
+      <DialogContent className="max-w-xl gap-0 overflow-hidden p-0 border-border [&>button]:hidden">
+        <DetailDialogHeader
+          title={row.full_name || row.email || "Conta"}
+          subtitle={row.email || undefined}
+          icon={Shield} onClose={onClose}
+        />
+        <div className="bg-card p-5">
+          <div className="mb-3 flex items-center justify-between">
+            <p className="text-[10px] font-black uppercase tracking-wider text-muted-foreground">Permissões</p>
+            <span className="text-[10px] font-black tabular-nums text-foreground">{perms.size}/{STAFF_PERMISSIONS.length} ativas</span>
+          </div>
+          <div className="max-h-[60vh] overflow-y-auto">
+            <PermissionsGrid grouped={grouped} perms={perms} onToggle={(k) => {
+              const n = new Set(perms);
+              if (n.has(k)) n.delete(k); else n.add(k);
+              setPerms(n);
+            }} />
+          </div>
         </div>
-        <div className="flex justify-end gap-2 pt-2">
+        <div className="flex justify-end gap-2 border-t border-border bg-card p-4">
           <Button size="sm" variant="outline" onClick={onClose}>Cancelar</Button>
-          <Button size="sm" onClick={save}>Salvar</Button>
+          <Button size="sm" onClick={save} className="gap-1.5">
+            <CheckCircle2 className="h-3.5 w-3.5" /> Salvar permissões
+          </Button>
         </div>
       </DialogContent>
     </Dialog>
+  );
+}
+
+function PermissionsGrid({ grouped, perms, onToggle }: {
+  grouped: Record<string, typeof STAFF_PERMISSIONS>;
+  perms: Set<string>;
+  onToggle: (k: string) => void;
+}) {
+  return (
+    <div className="space-y-3">
+      {Object.entries(grouped).map(([group, items]) => (
+        <div key={group} className="rounded-lg border border-border bg-card p-3">
+          <p className="mb-2 text-[10px] font-black uppercase tracking-wider text-muted-foreground">{group}</p>
+          <div className="grid grid-cols-1 gap-1.5 sm:grid-cols-2">
+            {items.map((p) => {
+              const active = perms.has(p.key);
+              return (
+                <label key={p.key}
+                  className={cn("flex cursor-pointer items-center gap-2 rounded-md border px-2.5 py-2 text-xs font-bold transition-all duration-150",
+                    active ? "border-primary/40 bg-primary/5 text-foreground" : "border-border bg-muted/20 text-muted-foreground hover:border-primary/30 hover:text-foreground")}>
+                  <Switch checked={active} onCheckedChange={() => onToggle(p.key)} />
+                  <span className="flex-1">{p.label}</span>
+                </label>
+              );
+            })}
+          </div>
+        </div>
+      ))}
+    </div>
   );
 }
 
@@ -557,32 +674,38 @@ function AuditDialog({ row, rows, onClose }: {
   if (!row) return null;
   return (
     <Dialog open={!!row} onOpenChange={(v) => !v && onClose()}>
-      <DialogContent className="max-w-3xl">
-        <DialogHeader>
-          <DialogTitle>Auditoria — {row.full_name}</DialogTitle>
-        </DialogHeader>
-        <div className="max-h-[70vh] overflow-y-auto">
+      <DialogContent className="max-w-3xl gap-0 overflow-hidden p-0 border-border [&>button]:hidden">
+        <DetailDialogHeader
+          title={`Auditoria · ${row.full_name || row.email}`}
+          subtitle={row.email || undefined}
+          icon={History} onClose={onClose}
+        />
+        <div className="max-h-[65vh] overflow-y-auto bg-card">
           {rows.length === 0 ? (
-            <div className="text-center py-8 text-sm text-muted-foreground">Nenhuma ação registrada ainda.</div>
+            <PremiumEmpty icon={History} title="Nenhuma ação registrada" subtitle="As ações desta conta aparecem aqui" />
           ) : (
             <table className="w-full text-xs">
-              <thead className="text-[10px] uppercase tracking-wider text-muted-foreground bg-muted/20">
+              <thead className={cn(premiumTable.headRow, "bg-muted/30")}>
                 <tr>
-                  <th className="text-left p-2">Quando</th>
-                  <th className="text-left p-2">Ação</th>
-                  <th className="text-left p-2">Entidade</th>
-                  <th className="text-left p-2">ID</th>
+                  <th className={premiumTable.th}>Quando</th>
+                  <th className={premiumTable.th}>Ação</th>
+                  <th className={premiumTable.th}>Entidade</th>
+                  <th className={premiumTable.th}>ID</th>
                 </tr>
               </thead>
               <tbody>
                 {rows.map((r) => (
-                  <tr key={r.id} className="border-t border-border hover:bg-muted/20">
-                    <td className="p-2 font-mono text-[11px] text-muted-foreground">
+                  <tr key={r.id} className="border-t border-border transition-colors hover:bg-muted/30">
+                    <td className="px-5 py-3 font-mono text-[11px] text-muted-foreground">
                       {new Date(r.created_at).toLocaleString("pt-BR")}
                     </td>
-                    <td className="p-2 font-medium">{r.action}</td>
-                    <td className="p-2 text-muted-foreground">{r.entity_type}</td>
-                    <td className="p-2 font-mono text-[10px] text-muted-foreground truncate max-w-[180px]">{r.entity_id}</td>
+                    <td className="px-5 py-3">
+                      <span className="inline-flex items-center rounded border border-border bg-muted/30 px-2 py-0.5 text-[10px] font-black uppercase tracking-wider text-foreground">
+                        {r.action}
+                      </span>
+                    </td>
+                    <td className="px-5 py-3 text-muted-foreground">{r.entity_type}</td>
+                    <td className="px-5 py-3 truncate max-w-[180px] font-mono text-[10px] text-muted-foreground">{r.entity_id}</td>
                   </tr>
                 ))}
               </tbody>
