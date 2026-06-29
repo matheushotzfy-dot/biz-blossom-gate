@@ -285,9 +285,19 @@ export default function Dashboard() {
   const hour = new Date().getHours();
   const greeting = hour < 12 ? "Bom dia" : hour < 18 ? "Boa tarde" : "Boa noite";
   const nickname = profile?.nickname || profile?.full_name?.split(" ")[0] || "Vendedor";
-  const statusLabel = (s: string) => s === 'completed' ? 'Aprovado' : s === 'pending' ? 'Pendente' : s === 'refunded' ? 'Reembolso' : 'Chargeback';
-  const statusBg = (s: string) => s === 'completed' ? 'bg-success/10' : s === 'pending' ? 'bg-warning/10' : 'bg-destructive/10';
-  const statusColor = (s: string) => s === 'completed' ? 'text-success' : s === 'pending' ? 'text-warning' : 'text-destructive';
+  const statusLabel = (s: string) => s === 'completed' ? 'Aprovado' : s === 'pending' ? 'Pendente' : s === 'refunded' ? 'Reembolso' : s === 'chargeback' ? 'Chargeback' : s === 'failed' || s === 'refused' ? 'Falhou' : 'Chargeback';
+  const statusBg = (s: string) =>
+    s === 'completed' ? 'bg-emerald-500/20 ring-1 ring-emerald-500/40'
+    : s === 'pending' ? 'bg-amber-400/25 ring-1 ring-amber-400/50'
+    : s === 'chargeback' ? 'bg-red-600/25 ring-1 ring-red-600/50'
+    : s === 'refunded' ? 'bg-muted/40 ring-1 ring-border/40'
+    : 'bg-red-500/20 ring-1 ring-red-500/40';
+  const statusColor = (s: string) =>
+    s === 'completed' ? 'text-emerald-500'
+    : s === 'pending' ? 'text-amber-500'
+    : s === 'chargeback' ? 'text-red-600'
+    : s === 'refunded' ? 'text-muted-foreground'
+    : 'text-red-500';
 
   const pendingBalance = useMemo(() => {
     return transactions
