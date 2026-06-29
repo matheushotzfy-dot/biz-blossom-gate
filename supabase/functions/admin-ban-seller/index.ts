@@ -55,7 +55,7 @@ Deno.serve(async (req) => {
     const token = authHeader.replace("Bearer ", "");
     const { data: claimsData, error: claimsError } = await userClient.auth.getClaims(token);
     if (claimsError || !claimsData?.claims?.sub) {
-      return json({ success: false, error: "Unauthorized" }, 401);
+      return json({ success: false, error: "Unauthorized" }, corsHeaders, 401);
     }
     const callerId = claimsData.claims.sub as string;
 
@@ -65,16 +65,16 @@ Deno.serve(async (req) => {
       _role: "admin",
     });
     if (roleErr || isAdmin !== true) {
-      return json({ success: false, error: "Forbidden" }, 403);
+      return json({ success: false, error: "Forbidden" }, corsHeaders, 403);
     }
 
     const body = await req.json().catch(() => ({}));
     const targetUserId = String(body?.targetUserId || "").trim();
     if (!/^[0-9a-f-]{36}$/i.test(targetUserId)) {
-      return json({ success: false, error: "Invalid targetUserId" }, 400);
+      return json({ success: false, error: "Invalid targetUserId" }, corsHeaders, 400);
     }
     if (targetUserId === callerId) {
-      return json({ success: false, error: "Cannot ban yourself" }, 400);
+      return json({ success: false, error: "Cannot ban yourself" }, corsHeaders, 400);
     }
 
     // Atomic: block profile + freeze balance + suspend products.
@@ -84,7 +84,7 @@ Deno.serve(async (req) => {
       .update({ account_status: "blocked", balance_frozen: true })
       .eq("user_id", targetUserId);
     if (profileErr) {
-      return json({ success: false, error: "Failed to block profile" }, 500);
+      return json({ success: false, error: "Failed to block profile" }, corsHeaders, 500);
     }
 
     const { error: productsErr } = await admin
@@ -98,13 +98,13 @@ Deno.serve(async (req) => {
         .from("profiles")
         .update({ account_status: "active", balance_frozen: false })
         .eq("user_id", targetUserId);
-      return json({ success: false, error: "Failed to suspend products — rolled back" }, 500);
+      return json({ success: false, error: "Failed to suspend products — rolled back" }, corsHeaders, 500);
     }
 
-    return json({ success: true });
+    return json({ success: true }, corsHeaders);
   } catch (e) {
     const msg = e instanceof Error ? e.message : "Internal error";
     console.error("[admin-ban-seller]", msg);
-    return json({ success: false, error: "Internal error" }, 500);
+    return json({ success: false, error: "Internal error" }, corsHeaders, 500);
   }
 });
