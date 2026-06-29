@@ -7,7 +7,7 @@ export interface SeoProps {
   description: string;
   path: string;
   ogType?: "website" | "article" | "product";
-  jsonLd?: Record<string, any> | Record<string, any>[];
+  jsonLd?: Record<string, unknown> | Record<string, unknown>[];
   noindex?: boolean;
 }
 
