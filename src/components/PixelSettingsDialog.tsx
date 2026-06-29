@@ -10,6 +10,7 @@ import {
   Crosshair, Plus, Trash2, Radio, Settings2, Zap,
   ChevronDown, Sparkles, CircleCheck, Hash, Key, Globe2,
   X, ShieldCheck, Activity, BookOpen, ExternalLink,
+  type LucideIcon,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
