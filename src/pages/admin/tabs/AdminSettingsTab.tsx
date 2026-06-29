@@ -18,7 +18,12 @@ import type { Tables, Json } from "@/integrations/supabase/types";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 type PlatformSetting = Tables<"platform_settings">;
-type RetentionSetting = Tables<"retention_settings">;
+type RetentionSetting = Omit<Tables<"retention_settings">, "pix_retention_pct" | "card_retention_pct" | "retention_days" | "card_release_days"> & {
+  pix_retention_pct: number | string;
+  card_retention_pct: number | string;
+  retention_days: number | string;
+  card_release_days: number | string | null;
+};
 type NotificationRow = Tables<"notifications">;
 
 type JsonObj = { [key: string]: Json | undefined };
