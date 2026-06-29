@@ -332,7 +332,7 @@ export default function DadosBancarios() {
           </div>
         ) : (
           <div className="divide-y divide-border/40">
-            {accounts.map((acc: any) => (
+            {accounts.map((acc) => (
               <div key={acc.id} className="px-5 py-4 flex items-center justify-between gap-3">
                 <div className="min-w-0">
                   <p className="text-sm font-black text-foreground truncate">
