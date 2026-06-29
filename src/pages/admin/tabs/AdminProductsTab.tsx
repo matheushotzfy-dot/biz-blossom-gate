@@ -193,6 +193,7 @@ export default function AdminProductsTab({ products, profiles, transactions, fmt
   const deletedCount = products.filter(p => !!(p as any).deleted_at).length;
   const blackCount = products.filter(p => (p as any).classification === "black" && !(p as any).deleted_at).length;
 
+  return (
     <div className="space-y-6 animate-fade-in">
       <FinanceiroHero
         eyebrow="Catálogo · Produtos"
