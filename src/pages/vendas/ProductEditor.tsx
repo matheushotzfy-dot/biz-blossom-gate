@@ -1490,9 +1490,28 @@ function TabOrderBump({ isNew, orderBumps, allProducts, availableForBump, select
  );
 }
 
+type TabUpsellProps = {
+  isNew: boolean;
+  name: string; price: string; imagePreview: string | null;
+  hasCustomThankYou: boolean; setHasCustomThankYou: BoolS;
+  thankYouUrl: string; setThankYouUrl: StrS;
+  sendConfirmationEmail: boolean; setSendConfirmationEmail: BoolS;
+  emailTiming: string; setEmailTiming: StrS;
+  upsellEnabled: boolean; setUpsellEnabled: BoolS;
+  upsellType: string; setUpsellType: StrS;
+  upsellName: string; setUpsellName: StrS;
+  upsellPrice: string; setUpsellPrice: StrS;
+  upsellDiscount: string; setUpsellDiscount: StrS;
+  upsellUrl: string; setUpsellUrl: StrS;
+  downsellEnabled: boolean; setDownsellEnabled: BoolS;
+  downsellUrl: string; setDownsellUrl: StrS;
+  downsellPrice: string; setDownsellPrice: StrS;
+  downsellDelay: string; setDownsellDelay: StrS;
+};
+
 function TabUpsell({ isNew, name, price, imagePreview, hasCustomThankYou, setHasCustomThankYou, thankYouUrl, setThankYouUrl, sendConfirmationEmail, setSendConfirmationEmail, emailTiming, setEmailTiming,
   upsellEnabled, setUpsellEnabled, upsellType, setUpsellType, upsellName, setUpsellName, upsellPrice, setUpsellPrice, upsellDiscount, setUpsellDiscount, upsellUrl, setUpsellUrl,
-  downsellEnabled, setDownsellEnabled, downsellUrl, setDownsellUrl, downsellPrice, setDownsellPrice, downsellDelay, setDownsellDelay }: any) {
+  downsellEnabled, setDownsellEnabled, downsellUrl, setDownsellUrl, downsellPrice, setDownsellPrice, downsellDelay, setDownsellDelay }: TabUpsellProps) {
 
  const mainPrice = Number(price || 0);
  const upPrice = Number(upsellPrice || 0);
