@@ -365,7 +365,7 @@ export default function CourseBuilder() {
 
  const saveCourseSettings = async () => {
  if (!course || !user) return;
- const updates: Record<string, any> = {};
+ const updates: TablesUpdate<"courses"> = {};
  if (courseTitle.trim() && courseTitle !== course.title) updates.title = courseTitle.trim();
  if (courseDescription !== (course.description || "")) updates.description = courseDescription || null;
  if (Object.keys(updates).length === 0) { setCourseSettingsOpen(false); return; }
