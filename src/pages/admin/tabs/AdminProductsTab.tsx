@@ -604,6 +604,36 @@ export default function AdminProductsTab({ products, profiles, transactions, fmt
   );
 }
 
+function ClassPicker({ value, onChange }: { value: Classification; onChange: (v: Classification) => void }) {
+  const opts: { v: Classification; label: string; Icon: any; on: string; off: string }[] = [
+    { v: "white", label: "W", Icon: ShieldCheck,    on: "bg-emerald-500/15 text-emerald-500 border-emerald-500/40",  off: "text-muted-foreground/60 hover:text-emerald-500" },
+    { v: "gray",  label: "G", Icon: ShieldQuestion, on: "bg-amber-500/15 text-amber-500 border-amber-500/40",        off: "text-muted-foreground/60 hover:text-amber-500" },
+    { v: "black", label: "B", Icon: ShieldX,        on: "bg-destructive/15 text-destructive border-destructive/40",  off: "text-muted-foreground/60 hover:text-destructive" },
+  ];
+  return (
+    <div className="inline-flex items-center gap-0.5 rounded-lg border border-border bg-muted/20 p-0.5">
+      {opts.map(o => {
+        const active = value === o.v;
+        return (
+          <button
+            key={o.v}
+            type="button"
+            title={`Classificar como ${o.label === "W" ? "White" : o.label === "G" ? "Gray" : "Black"}`}
+            onClick={() => !active && onChange(o.v)}
+            className={cn(
+              "inline-flex h-6 items-center justify-center gap-1 rounded-md border px-2 text-[10px] font-black uppercase tracking-wider transition-all",
+              active ? `${o.on}` : `border-transparent ${o.off}`
+            )}
+          >
+            <o.Icon className="h-3 w-3" />
+            {active && <span>{o.label === "W" ? "White" : o.label === "G" ? "Gray" : "Black"}</span>}
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
 function KV({ label, value }: { label: string; value: string }) {
   return (
     <div className="min-w-0">
