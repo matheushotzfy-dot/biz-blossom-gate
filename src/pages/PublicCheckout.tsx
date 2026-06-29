@@ -313,7 +313,7 @@ export default function PublicCheckout() {
  if (cancelled) return;
 
  if (pixelsRes.data && pixelsRes.data.length > 0) {
- const configs: PixelConfig[] = pixelsRes.data.map((d) => ({ ...d, events: Array.isArray(d.events) ? d.events : [] } as PixelConfig));
+ const configs: PixelConfig[] = pixelsRes.data.map((d) => ({ ...d, events: Array.isArray(d.events) ? d.events : [] }) as unknown as PixelConfig);
  setProductPixels(configs);
  if (!pixelsInitialized.current) {
  initPixels(configs); pixelsInitialized.current = true;
