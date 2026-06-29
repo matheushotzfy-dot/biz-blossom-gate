@@ -37,7 +37,7 @@ import ABTesting from "./pages/vendas/ABTesting";
 
 import AutoCupons from "./pages/vendas/AutoCupons";
 import CalculadoraLucro from "./pages/vendas/CalculadoraLucro";
-import CentralAjuda from "./pages/vendas/CentralAjuda";
+
 import CheckoutWhatsApp from "./pages/vendas/CheckoutWhatsApp";
 import FunilVendas from "./pages/vendas/FunilVendas";
 import LinkPagamento from "./pages/vendas/LinkPagamento";
@@ -180,7 +180,7 @@ const App = () => (
                 
                 <Route path="/vendas/auto-cupons" element={<AutoCupons />} />
                 <Route path="/vendas/calculadora-lucro" element={<CalculadoraLucro />} />
-                <Route path="/vendas/central-ajuda" element={<CentralAjuda />} />
+                <Route path="/vendas/central-ajuda" element={<Navigate to="/suporte" replace />} />
                 <Route path="/vendas/checkout-whatsapp" element={<CheckoutWhatsApp />} />
                 <Route path="/vendas/funil" element={<FunilVendas />} />
                 <Route path="/vendas/link-pagamento" element={<LinkPagamento />} />
