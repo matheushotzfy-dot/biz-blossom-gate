@@ -8,6 +8,7 @@ import {
   FileText, Globe, DollarSign, XCircle, Save, CreditCard, Shield, Landmark,
   Key, TrendingUp, Percent, BarChart3, MessageSquareText, AlertTriangle,
   Snowflake, LogIn, Lock, Unlock, UserX, Send,
+  type LucideIcon,
 } from "lucide-react";
 import { StatusBadge } from "@/components/StatusBadge";
 import { Button } from "@/components/ui/button";
@@ -21,11 +22,15 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
-import type { Tables } from "@/integrations/supabase/types";
+import type { Tables, TablesInsert, TablesUpdate } from "@/integrations/supabase/types";
 import { FinanceiroHero, FinanceiroKpi, FinanceiroKpiGrid } from "@/components/financeiro/FinanceiroHero";
 import { PremiumPanel, PremiumEmpty, premiumTable } from "./AdminPremium";
 import { logAdminAction } from "@/lib/auditLog";
 import { cn } from "@/lib/utils";
+
+type Dispute = Tables<"disputes"> & { buyer_name?: string | null };
+type BalanceAdjustment = Tables<"balance_adjustments">;
+type IpLog = { ip: string; user_agent: string | null; country: string | null; source: string | null; created_at: string };
 
 interface ActivityLog {
   id: string; user_id: string; action: string; entity_type: string;
@@ -45,7 +50,7 @@ interface RetentionSettings {
   id?: string; user_id: string | null; pix_retention_pct: number; card_retention_pct: number; retention_days: number; card_release_days?: number;
 }
 
-const ACTION_LABELS: Record<string, { label: string; color: string; icon: any }> = {
+const ACTION_LABELS: Record<string, { label: string; color: string; icon: LucideIcon }> = {
   product_created: { label: "Produto Criado", color: "text-success", icon: Plus },
   product_updated: { label: "Produto Editado", color: "text-info", icon: Edit },
   product_deleted: { label: "Produto Excluído", color: "text-destructive", icon: Trash2 },
@@ -102,20 +107,20 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
   const [adjustAmount, setAdjustAmount] = useState("");
   const [adjustType, setAdjustType] = useState<"credit" | "debit">("credit");
   const [adjustReason, setAdjustReason] = useState("");
-  const [balanceAdjustments, setBalanceAdjustments] = useState<any[]>([]);
+  const [balanceAdjustments, setBalanceAdjustments] = useState<BalanceAdjustment[]>([]);
   const [loading, setLoading] = useState(false);
   const [kycImages, setKycImages] = useState<string[]>([]);
   const [acquirers, setAcquirers] = useState<Acquirer[]>([]);
   const [selectedAcquirerId, setSelectedAcquirerId] = useState<string>("");
   const [adminNotes, setAdminNotes] = useState("");
-  const [userDisputes, setUserDisputes] = useState<any[]>([]);
+  const [userDisputes, setUserDisputes] = useState<Dispute[]>([]);
   const [kycRejectReason, setKycRejectReason] = useState("");
   const [showRejectDialog, setShowRejectDialog] = useState(false);
   const [rejectTargetUserId, setRejectTargetUserId] = useState<string>("");
   const [userRetention, setUserRetention] = useState<RetentionSettings | null>(null);
   const [retentionForm, setRetentionForm] = useState({ pix_pct: "", card_pct: "", days: "", card_release_days: "7" });
   const [impersonating, setImpersonating] = useState(false);
-  const [ipHistory, setIpHistory] = useState<Array<{ ip: string; user_agent: string | null; country: string | null; source: string | null; created_at: string }>>([]);
+  const [ipHistory, setIpHistory] = useState<IpLog[]>([]);
 
 
   useEffect(() => {
@@ -136,35 +141,35 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
     try {
       const [logsRes, productsRes, wdRes, txRes, feesRes, adjRes, pixRes, disputesRes, retRes, ipRes] = await Promise.all([
         supabase.from("activity_logs").select("id, user_id, action, entity_type, entity_id, old_data, new_data, created_at").eq("user_id", profile.user_id).order("created_at", { ascending: false }).limit(100),
-        supabase.from("products").select("id, user_id, name, price, status, created_at, image_url").eq("user_id", profile.user_id).order("created_at", { ascending: false }).limit(100) as any,
-        supabase.from("withdrawals").select("id, user_id, amount, fee_amount, net_amount, status, created_at, withdrawal_type").eq("user_id", profile.user_id).order("created_at", { ascending: false }).limit(100) as any,
-        supabase.from("transactions").select("id, user_id, product_id, amount, fee_amount, net_amount, status, payment_method, customer_name, customer_email, customer_phone, customer_document, created_at").eq("user_id", profile.user_id).order("created_at", { ascending: false }).limit(200) as any,
+        supabase.from("products").select("id, user_id, name, price, status, created_at, image_url").eq("user_id", profile.user_id).order("created_at", { ascending: false }).limit(100),
+        supabase.from("withdrawals").select("id, user_id, amount, fee_amount, net_amount, status, created_at, withdrawal_type").eq("user_id", profile.user_id).order("created_at", { ascending: false }).limit(100),
+        supabase.from("transactions").select("id, user_id, product_id, amount, fee_amount, net_amount, status, payment_method, customer_name, customer_email, customer_phone, customer_document, created_at").eq("user_id", profile.user_id).order("created_at", { ascending: false }).limit(200),
         supabase.from("custom_user_fees").select("id, user_id, pix_percentage, pix_fixed, card_percentage, card_fixed, boleto_percentage, boleto_fixed, withdrawal_fee, max_ticket, admin_user_id").eq("user_id", profile.user_id).maybeSingle(),
         supabase.from("balance_adjustments").select("id, user_id, amount, type, reason, admin_user_id, created_at").eq("user_id", profile.user_id).order("created_at", { ascending: false }).limit(50),
         supabase.from("pix_keys").select("id, key_type, key_value, created_at").eq("user_id", profile.user_id),
-        supabase.from("disputes").select("id, seller_user_id, transaction_id, amount, type, status, reason, created_at").eq("seller_user_id", profile.user_id).order("created_at", { ascending: false }).limit(50) as any,
+        supabase.from("disputes").select("id, seller_user_id, transaction_id, amount, type, status, reason, created_at").eq("seller_user_id", profile.user_id).order("created_at", { ascending: false }).limit(50),
         supabase.from("retention_settings").select("id, user_id, pix_retention_pct, card_retention_pct, retention_days, card_release_days").eq("user_id", profile.user_id).maybeSingle(),
         supabase.from("ip_logs").select("ip, user_agent, country, source, created_at").eq("user_id", profile.user_id).order("created_at", { ascending: false }).limit(50),
       ]);
-      if (logsRes.data) setUserLogs(logsRes.data as any);
+      if (logsRes.data) setUserLogs(logsRes.data as ActivityLog[]);
 
-      if (productsRes.data) setUserProducts(productsRes.data);
-      if (wdRes.data) setUserWithdrawals(wdRes.data);
-      if (txRes.data) setUserTransactions(txRes.data);
+      if (productsRes.data) setUserProducts(productsRes.data as Tables<"products">[]);
+      if (wdRes.data) setUserWithdrawals(wdRes.data as Tables<"withdrawals">[]);
+      if (txRes.data) setUserTransactions(txRes.data as Tables<"transactions">[]);
       if (adjRes.data) setBalanceAdjustments(adjRes.data);
       if (pixRes.data) setUserPixKeys(pixRes.data as PixKey[]);
-      if (disputesRes.data) setUserDisputes(disputesRes.data as any[]);
-      if (ipRes.data) setIpHistory(ipRes.data as any);
+      if (disputesRes.data) setUserDisputes(disputesRes.data as Dispute[]);
+      if (ipRes.data) setIpHistory(ipRes.data as IpLog[]);
 
       setSelectedAcquirerId(profile.acquirer_id || "");
-      setAdminNotes((profile as any).admin_notes || "");
+      setAdminNotes(profile.admin_notes || "");
       if (retRes.data) {
-        setUserRetention(retRes.data as any);
+        setUserRetention(retRes.data as RetentionSettings);
         setRetentionForm({
           pix_pct: String(retRes.data.pix_retention_pct ?? ""),
           card_pct: String(retRes.data.card_retention_pct ?? ""),
           days: String(retRes.data.retention_days ?? ""),
-          card_release_days: String((retRes.data as any).card_release_days ?? 7),
+          card_release_days: String(retRes.data.card_release_days ?? 7),
         });
       } else {
         setUserRetention(null);
@@ -172,14 +177,14 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
       }
       if (feesRes.data) {
         setCustomFees({
-          pix_percentage:    (feesRes.data as any).pix_percentage?.toString()    || "",
-          pix_fixed:         (feesRes.data as any).pix_fixed?.toString()         || "",
-          card_percentage:   (feesRes.data as any).card_percentage?.toString()   || "",
-          card_fixed:        (feesRes.data as any).card_fixed?.toString()        || "",
-          boleto_percentage: (feesRes.data as any).boleto_percentage?.toString() || "",
-          boleto_fixed:      (feesRes.data as any).boleto_fixed?.toString()      || "",
-          withdrawal_fee:    feesRes.data.withdrawal_fee?.toString()             || "",
-          max_ticket:        (feesRes.data as any).max_ticket?.toString()        || "",
+          pix_percentage:    feesRes.data.pix_percentage?.toString()    || "",
+          pix_fixed:         feesRes.data.pix_fixed?.toString()         || "",
+          card_percentage:   feesRes.data.card_percentage?.toString()   || "",
+          card_fixed:        feesRes.data.card_fixed?.toString()        || "",
+          boleto_percentage: feesRes.data.boleto_percentage?.toString() || "",
+          boleto_fixed:      feesRes.data.boleto_fixed?.toString()      || "",
+          withdrawal_fee:    feesRes.data.withdrawal_fee?.toString()    || "",
+          max_ticket:        feesRes.data.max_ticket?.toString()        || "",
         });
       } else {
         setCustomFees({ pix_percentage: "", pix_fixed: "", card_percentage: "", card_fixed: "", boleto_percentage: "", boleto_fixed: "", withdrawal_fee: "", max_ticket: "" });
@@ -200,15 +205,16 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
           setKycImages(signedUrls.filter(Boolean) as string[]);
         } else setKycImages([]);
       } catch { setKycImages([]); }
-    } catch (e: any) {
-      toast.error("Erro ao carregar dados do seller: " + (e?.message ?? "desconhecido"));
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : "desconhecido";
+      toast.error("Erro ao carregar dados do seller: " + msg);
     } finally {
       setLoading(false);
     }
   };
 
   const handleApproveKyc = async (userId: string) => {
-    const { error } = await supabase.from("profiles").update({ account_status: "approved", kyc_rejection_reason: null } as any).eq("user_id", userId);
+    const { error } = await supabase.from("profiles").update({ account_status: "approved", kyc_rejection_reason: null }).eq("user_id", userId);
     if (error) { toast.error("Erro ao aprovar KYC"); return; }
     toast.success("KYC aprovado! Seller liberado.");
     await logAdminAction("approve_kyc", "profile", userId);
@@ -221,7 +227,7 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
     const { error } = await supabase.from("profiles").update({
       account_status: "rejected",
       kyc_rejection_reason: kycRejectReason.trim(),
-    } as any).eq("user_id", rejectTargetUserId);
+    }).eq("user_id", rejectTargetUserId);
     if (error) { toast.error("Erro ao recusar KYC"); return; }
     toast.success("KYC recusado. Motivo registrado.");
     await logAdminAction("reject_kyc", "profile", rejectTargetUserId, { reason: kycRejectReason });
@@ -232,7 +238,7 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
   };
 
   const handleFreezeBalance = async (userId: string, freeze: boolean) => {
-    const { error } = await supabase.from("profiles").update({ balance_frozen: freeze } as any).eq("user_id", userId);
+    const { error } = await supabase.from("profiles").update({ balance_frozen: freeze }).eq("user_id", userId);
     if (error) { toast.error("Erro ao alterar status"); return; }
     toast.success(freeze ? "Saldo congelado! Saques bloqueados." : "Saldo descongelado! Saques liberados.");
     await logAdminAction(freeze ? "freeze_balance" : "unfreeze_balance", "profile", userId);
@@ -299,7 +305,7 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
   const handleSaveAdminNotes = async () => {
     if (!selectedUser) return;
     const sanitized = adminNotes.replace(/[<>]/g, "").replace(/javascript:/gi, "").trim().slice(0, 5000);
-    const { error } = await supabase.from("profiles").update({ admin_notes: sanitized } as any).eq("user_id", selectedUser.user_id);
+    const { error } = await supabase.from("profiles").update({ admin_notes: sanitized }).eq("user_id", selectedUser.user_id);
     if (error) { toast.error("Erro ao salvar notas"); return; }
     toast.success("Observações salvas!");
     await logAdminAction("update_admin_notes", "profile", selectedUser.user_id, { notes: sanitized });
@@ -315,7 +321,7 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
   };
 
   const handleSetSellerType = async (userId: string, sellerType: string | null) => {
-    const { error } = await supabase.from("profiles").update({ seller_type: sellerType } as any).eq("user_id", userId);
+    const { error } = await supabase.from("profiles").update({ seller_type: sellerType }).eq("user_id", userId);
     if (error) { toast.error("Erro ao classificar seller"); return; }
     toast.success(`Seller classificado como ${sellerType || "sem classificação"}!`);
     await logAdminAction("set_seller_type", "profile", userId, { seller_type: sellerType });
@@ -323,7 +329,7 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
   };
 
   const handleSetAcquirer = async (userId: string, acquirerId: string | null) => {
-    const { error } = await supabase.from("profiles").update({ acquirer_id: acquirerId } as any).eq("user_id", userId);
+    const { error } = await supabase.from("profiles").update({ acquirer_id: acquirerId }).eq("user_id", userId);
     if (error) { toast.error("Erro ao definir adquirente"); return; }
     const acqName = acquirers.find(a => a.id === acquirerId)?.name || "Padrão";
     toast.success(`Adquirente definida: ${acqName}`);
@@ -333,7 +339,7 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
 
   const handleSaveCustomFees = async () => {
     if (!selectedUser || !user) return;
-    const payload: any = {
+    const payload: TablesInsert<"custom_user_fees"> = {
       user_id: selectedUser.user_id, admin_user_id: user.id,
       pix_percentage:    customFees.pix_percentage    ? Number(customFees.pix_percentage)    : null,
       pix_fixed:         customFees.pix_fixed         ? Number(customFees.pix_fixed)         : null,
@@ -355,13 +361,13 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
     const status = side === "seller" ? "resolved_seller" : "resolved_buyer";
     const label = side === "seller" ? "Vitória do seller — saldo devolvido." : "Vitória do comprador — débito mantido.";
     if (!window.confirm(side === "seller" ? "Confirmar vitória do seller? O saldo retido será devolvido." : "Confirmar vitória do comprador? O débito será mantido e a transação marcada como chargeback.")) return;
-    const { error } = await supabase.from("disputes").update({ status, resolved_at: new Date().toISOString() } as any).eq("id", disputeId);
+    const { error } = await supabase.from("disputes").update({ status, resolved_at: new Date().toISOString() }).eq("id", disputeId);
     if (error) { toast.error("Erro ao resolver disputa: " + error.message); return; }
     toast.success(label);
     await logAdminAction(`resolve_dispute_${side}`, "dispute", disputeId, { status });
     if (selectedUser) {
-      const { data } = await supabase.from("disputes").select("id, seller_user_id, transaction_id, amount, type, status, reason, created_at").eq("seller_user_id", selectedUser.user_id).order("created_at", { ascending: false }).limit(50) as any;
-      if (data) setUserDisputes(data);
+      const { data } = await supabase.from("disputes").select("id, seller_user_id, transaction_id, amount, type, status, reason, created_at").eq("seller_user_id", selectedUser.user_id).order("created_at", { ascending: false }).limit(50);
+      if (data) setUserDisputes(data as Dispute[]);
     }
     onReload();
   };
@@ -399,7 +405,7 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
   // ── Filtering ──
   const kycPendingProfiles = profiles.filter(p => p.account_status === "pending_review" || p.account_status === "pending");
   const filtered = profiles.filter((p) => {
-    const st = (p as any).seller_type;
+    const st = p.seller_type;
     if (sellerFilter === "kyc") return p.account_status === "pending_review" || p.account_status === "pending";
     if (sellerFilter === "white" && st !== "white") return false;
     if (sellerFilter === "black" && st !== "black") return false;
@@ -409,10 +415,10 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
     return (p.full_name?.toLowerCase().includes(s)) || (p.email?.toLowerCase().includes(s)) || (p.document_number?.includes(s));
   });
 
-  const whiteCount = profiles.filter(p => (p as any).seller_type === "white").length;
-  const blackCount = profiles.filter(p => (p as any).seller_type === "black").length;
-  const unsetCount = profiles.filter(p => (p as any).seller_type == null).length;
-  const frozenCount = profiles.filter(p => (p as any).balance_frozen === true).length;
+  const whiteCount = profiles.filter(p => p.seller_type === "white").length;
+  const blackCount = profiles.filter(p => p.seller_type === "black").length;
+  const unsetCount = profiles.filter(p => p.seller_type == null).length;
+  const frozenCount = profiles.filter(p => p.balance_frozen === true).length;
 
   // Top movers do dia (sellers que mais movimentaram hoje)
   const todayStart = new Date(); todayStart.setHours(0, 0, 0, 0);
@@ -463,13 +469,14 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
   const userMedTotal = userDisputes.length;
   const userMedOpen = userDisputes.filter(d => d.status === "open" || d.status === "in_review").length;
   const userMedResolved = userDisputes.filter(d => d.status.startsWith("resolved") || d.status === "closed").length;
-  const userMedAmount = userDisputes.reduce((a: number, d: any) => a + Number(d.amount || 0), 0);
+  const userMedAmount = userDisputes.reduce((a, d) => a + Number(d.amount || 0), 0);
   const userMedRate = userApproved.length > 0 ? ((userMedTotal / userApproved.length) * 100).toFixed(2) : "0.00";
 
-  const buyersMap = new Map<string, { name: string; email: string; phone: string; document: string; total: number; count: number; txs: any[]; lastAt: string }>();
+  type BuyerEntry = { name: string; email: string; phone: string; document: string; total: number; count: number; txs: Tables<"transactions">[]; lastAt: string };
+  const buyersMap = new Map<string, BuyerEntry>();
   userTransactions.forEach(t => {
     const key = t.customer_email || t.customer_document || t.customer_name || "unknown";
-    const existing = buyersMap.get(key) || { name: t.customer_name || "", email: t.customer_email || "", phone: (t as any).customer_phone || "", document: (t as any).customer_document || "", total: 0, count: 0, txs: [] as any[], lastAt: "" };
+    const existing: BuyerEntry = buyersMap.get(key) || { name: t.customer_name || "", email: t.customer_email || "", phone: t.customer_phone || "", document: t.customer_document || "", total: 0, count: 0, txs: [], lastAt: "" };
     existing.total += Number(t.amount); existing.count += 1;
     existing.txs.push(t);
     if (!existing.lastAt || new Date(t.created_at) > new Date(existing.lastAt)) existing.lastAt = t.created_at;
@@ -478,7 +485,7 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
   const buyers = Array.from(buyersMap.values()).sort((a, b) => b.total - a.total);
 
 
-  const isFrozen = (p: Tables<"profiles">) => (p as any).balance_frozen === true;
+  const isFrozen = (p: Tables<"profiles">) => p.balance_frozen === true;
 
   const SellerTypeBadge = ({ type }: { type: string | null }) => {
     if (type === "black") return <span className="px-2 py-0.5 rounded-full text-[9px] font-bold uppercase bg-muted text-muted-foreground border border-border">Black</span>;
@@ -663,7 +670,7 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
                           </div>
                         </div>
                       </td>
-                      <td className={premiumTable.td}><SellerTypeBadge type={(p as any).seller_type} /></td>
+                      <td className={premiumTable.td}><SellerTypeBadge type={p.seller_type} /></td>
                       <td className={premiumTable.td}><StatusBadge status={p.account_status || "pending_review"} /></td>
                       <td className={premiumTable.td}>
                         <span className="font-display text-[13px] font-black tabular-nums text-primary">{fmtCurrency(stats.totalNet - stats.totalWithdrawn)}</span>
@@ -776,7 +783,7 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
                 <div className="min-w-0">
                   <div className="flex items-center gap-2 flex-wrap">
                     <span className="text-[15px] font-black tracking-tight text-foreground truncate">{selectedUser?.full_name || "Sem nome"}</span>
-                    <SellerTypeBadge type={(selectedUser as any)?.seller_type} />
+                    <SellerTypeBadge type={selectedUser?.seller_type ?? null} />
                     {selectedUser && (
                       <StatusBadge status={selectedUser.account_status || "pending_review"} />
                     )}
@@ -785,7 +792,7 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
                     {selectedUser?.email}{selectedUser?.phone ? <> · <span className="font-mono">{selectedUser.phone}</span></> : null}
                   </p>
                   <p className="text-[10px] text-muted-foreground/60 font-mono mt-0.5 truncate">
-                    ID {selectedUser?.user_id?.slice(0, 8)}…{selectedUser?.user_id?.slice(-4)} · IP {(selectedUser as any)?.last_ip || "—"}
+                    ID {selectedUser?.user_id?.slice(0, 8)}…{selectedUser?.user_id?.slice(-4)} · IP {selectedUser?.last_ip || "—"}
                   </p>
                 </div>
               </div>
@@ -867,8 +874,8 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
                     <InfoRow label="Documento" value={selectedUser?.document_number} mono />
                     <InfoRow label="Tipo documento" value={selectedUser?.document_type} />
                     <InfoRow label="Status conta" value={selectedUser?.account_status} />
-                    <InfoRow label="Tipo Seller" value={(selectedUser as any)?.seller_type || "Não classificado"} />
-                    <InfoRow label="Último IP" value={(selectedUser as any)?.last_ip} mono />
+                    <InfoRow label="Tipo Seller" value={selectedUser?.seller_type || "Não classificado"} />
+                    <InfoRow label="Último IP" value={selectedUser?.last_ip} mono />
                     <InfoRow label="Cadastro" value={selectedUser ? new Date(selectedUser.created_at).toLocaleString("pt-BR") : ""} />
                     <InfoRow label="Saldo Congelado" value={selectedUser && isFrozen(selectedUser) ? "SIM" : "NÃO"} />
                   </div>
@@ -896,10 +903,10 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
                   </div>
 
 
-                  {(selectedUser as any)?.kyc_rejection_reason && (
+                  {selectedUser?.kyc_rejection_reason && (
                     <div className="rounded-xl border border-destructive/20 bg-destructive/5 p-4">
                       <p className="text-xs font-bold text-destructive mb-1">Motivo da última recusa KYC:</p>
-                      <p className="text-sm text-foreground">{(selectedUser as any).kyc_rejection_reason}</p>
+                      <p className="text-sm text-foreground">{selectedUser.kyc_rejection_reason}</p>
                     </div>
                   )}
                   <div className="rounded-xl border border-border bg-muted/20 p-4">
@@ -926,7 +933,7 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
                         { key: "boleto_enabled", label: "Boleto" },
                         { key: "credit_card_enabled", label: "Cartão de Crédito" },
                       ] as const).map(opt => {
-                        const enabled = (selectedUser as any)?.[opt.key] !== false;
+                        const enabled = selectedUser?.[opt.key] !== false;
                         return (
                           <button
                             key={opt.key}
@@ -936,10 +943,10 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
                               const next = !enabled;
                               const { error } = await supabase
                                 .from("profiles")
-                                .update({ [opt.key]: next } as any)
+                                .update({ [opt.key]: next })
                                 .eq("user_id", selectedUser.user_id);
                               if (error) { toast.error("Erro ao atualizar"); return; }
-                              setSelectedUser({ ...selectedUser, [opt.key]: next } as any);
+                              setSelectedUser({ ...selectedUser, [opt.key]: next });
                               toast.success(`${opt.label} ${next ? "ativado" : "desativado"}`);
                               await logAdminAction(`toggle_${opt.key}`, "profile", selectedUser.user_id, { enabled: next });
                             }}
@@ -1063,9 +1070,9 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
                   </div>
                   <div className="grid grid-cols-3 gap-3">
                     {[
-                      { label: "MedPix", count: userDisputes.filter((d: any) => d.type === "medpix").length, amount: userDisputes.filter((d: any) => d.type === "medpix").reduce((a: number, d: any) => a + Number(d.amount || 0), 0), tone: "text-warning" },
-                      { label: "Pre-Med PIX", count: userDisputes.filter((d: any) => d.type === "pre_med_pix").length, amount: userDisputes.filter((d: any) => d.type === "pre_med_pix").reduce((a: number, d: any) => a + Number(d.amount || 0), 0), tone: "text-warning" },
-                      { label: "Reembolso", count: userDisputes.filter((d: any) => d.type === "refund").length, amount: userDisputes.filter((d: any) => d.type === "refund").reduce((a: number, d: any) => a + Number(d.amount || 0), 0), tone: "text-destructive" },
+                      { label: "MedPix", count: userDisputes.filter(d => d.type === "medpix").length, amount: userDisputes.filter(d => d.type === "medpix").reduce((a, d) => a + Number(d.amount || 0), 0), tone: "text-warning" },
+                      { label: "Pre-Med PIX", count: userDisputes.filter(d => d.type === "pre_med_pix").length, amount: userDisputes.filter(d => d.type === "pre_med_pix").reduce((a, d) => a + Number(d.amount || 0), 0), tone: "text-warning" },
+                      { label: "Reembolso", count: userDisputes.filter(d => d.type === "refund").length, amount: userDisputes.filter(d => d.type === "refund").reduce((a, d) => a + Number(d.amount || 0), 0), tone: "text-destructive" },
                     ].map(dt => (
                       <div key={dt.label} className="rounded-xl border border-border bg-muted/20 p-4 text-center">
                         <p className="text-[10px] font-black uppercase tracking-wider text-muted-foreground">{dt.label}</p>
@@ -1083,7 +1090,7 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
                           </tr>
                         </thead>
                         <tbody>
-                          {userDisputes.map((d: any) => {
+                          {userDisputes.map(d => {
                             const isOpen = d.status === "open" || d.status === "in_review" || d.status === "pending_recorrer";
                             return (
                               <tr key={d.id} className={premiumTable.row}>
@@ -1206,7 +1213,7 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
                   {balanceAdjustments.length > 0 && (
                     <PremiumPanel title="Histórico de Ajustes" icon={DollarSign}>
                       <div className="space-y-2 max-h-[200px] overflow-y-auto">
-                        {balanceAdjustments.map((adj: any) => (
+                        {balanceAdjustments.map(adj => (
                           <div key={adj.id} className="flex items-center justify-between text-[11px] py-2 border-b border-border/50">
                             <div>
                               <span className={adj.type === "credit" ? "text-success font-bold" : "text-destructive font-bold"}>
@@ -1319,7 +1326,7 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
                       <tbody>
                         {buyers.map((b, i) => {
                           const lastTx = b.txs[0];
-                          const lastCompleted = b.txs.find((t: any) => t.status === "completed" || t.status === "approved");
+                          const lastCompleted = b.txs.find(t => t.status === "completed" || t.status === "approved");
                           return (
                             <tr key={i} className={premiumTable.row}>
                               <td className={premiumTable.td}>
@@ -1344,7 +1351,7 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
                                       onClick={async () => {
                                         if (!lastCompleted || !selectedUser) return;
                                         if (!window.confirm(`Estornar a última transação aprovada (${fmtCurrency(Number(lastCompleted.amount))}) deste cliente?`)) return;
-                                        const { error } = await supabase.from("transactions").update({ status: "refunded" } as any).eq("id", lastCompleted.id);
+                                        const { error } = await supabase.from("transactions").update({ status: "refunded" }).eq("id", lastCompleted.id);
                                         if (error) { toast.error("Erro ao estornar: " + error.message); return; }
                                         toast.success("Transação estornada.");
                                         await logAdminAction("manual_refund", "transaction", lastCompleted.id, { amount: lastCompleted.amount, buyer: b.email });
@@ -1367,7 +1374,7 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
                                           amount: lastCompleted.amount,
                                           reason: "Aberto manualmente pelo admin",
                                           admin_user_id: user.id,
-                                        } as any);
+                                        });
                                         if (error) { toast.error("Erro ao abrir MED: " + error.message); return; }
                                         toast.success("MED aberto. Saldo retido até resolução.");
                                         await logAdminAction("open_dispute", "transaction", lastCompleted.id, { amount: lastCompleted.amount });
@@ -1610,7 +1617,7 @@ function MiniKpi({ label, value, tone = "neutral" }: { label: string; value: str
 /* ── SellerKpi: 1px-divider clickable KPI in seller hero strip ── */
 type SellerKpiTone = "neutral" | "primary" | "success" | "warning" | "info" | "destructive";
 function SellerKpi({ icon: Icon, label, value, sub, tone = "neutral", active, onClick }: {
-  icon: any; label: string; value: string; sub?: string; tone?: SellerKpiTone;
+  icon: LucideIcon; label: string; value: string; sub?: string; tone?: SellerKpiTone;
   active?: boolean; onClick?: () => void;
 }) {
   const valueCls: Record<SellerKpiTone, string> = {
@@ -1627,7 +1634,7 @@ function SellerKpi({ icon: Icon, label, value, sub, tone = "neutral", active, on
     warning: "bg-warning", info: "bg-info", destructive: "bg-destructive",
   };
   const isInteractive = typeof onClick === "function";
-  const Tag: any = isInteractive ? "button" : "div";
+  const Tag = (isInteractive ? "button" : "div") as "button" | "div";
   return (
     <Tag
       type={isInteractive ? "button" : undefined}
