@@ -51,7 +51,7 @@ import AdminRewardsTab from "./tabs/AdminRewardsTab";
 
 const EMPLOYEE_ALLOWED_TABS = new Set(["god-mode", "sellers", "products", "transactions"] as string[]);
 
-const NAV_SECTIONS: { id: string; label: string; items: { id: string; label: string; icon: any; employeeAccess: boolean }[] }[] = [
+const NAV_SECTIONS: { id: string; label: string; items: { id: string; label: string; icon: LucideIcon; employeeAccess: boolean }[] }[] = [
   {
     id: "core", label: "Operacional",
     items: [
