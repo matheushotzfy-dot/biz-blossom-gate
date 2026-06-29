@@ -335,10 +335,10 @@ export default function AdminDisputesTab({ type, title, profiles, transactions, 
      </label>
    </div>
    <div className="space-y-1">
-     {(((editing as any).evidence_urls as any[]) || []).length === 0 && (
+     {(editing.evidence_urls || []).length === 0 && (
        <p className="text-[10px] text-muted-foreground italic">Sem evidências anexadas</p>
      )}
-     {(((editing as any).evidence_urls as any[]) || []).map((ev: any, i: number) => (
+     {(editing.evidence_urls || []).map((ev, i) => (
        <button key={i} onClick={() => handleViewEvidence(ev.path)}
          className="w-full text-left flex items-center gap-2 px-2 py-1.5 rounded-lg bg-background/50 border border-border hover:bg-muted/30 text-[11px]">
          <Package className="h-3 w-3 text-primary" />
