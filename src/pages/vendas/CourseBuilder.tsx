@@ -195,7 +195,7 @@ export default function CourseBuilder() {
  }, []);
 
  // ─── Auto-save ──────────────────────────────────────────────────
- const autoSave = useCallback(async (field: string, value: any) => {
+ const autoSave = useCallback(async (field: string, value: unknown) => {
  if (!selectedLesson) return;
  setSaveStatus("saving");
  const { error } = await supabase.from("lessons").update({ [field]: value }).eq("id", selectedLesson.id);
