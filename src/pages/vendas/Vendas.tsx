@@ -4,6 +4,7 @@ import {
   Search, EyeOff, Eye, Check, Download, FileText,
   CreditCard, ShoppingCart, Zap, History, BarChart3, TrendingUp, Wallet,
   CalendarIcon, ChevronLeft, ChevronRight,
+  type LucideIcon,
 } from "lucide-react";
 import { TransactionDetailPanel } from "@/components/transactions/TransactionDetailPanel";
 import { PixLogoMark } from "@/components/icons/PixLogoMark";
