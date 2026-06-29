@@ -3444,14 +3444,17 @@ export type Database = {
       }
       withdrawals: {
         Row: {
+          acquirer_response: Json | null
           amount: number
           bank_account_id: string | null
           created_at: string
           crypto_address: string | null
           crypto_currency: string | null
           crypto_network: string | null
+          failure_code: string | null
           fee_amount: number
           id: string
+          last_attempt_at: string | null
           net_amount: number
           payment_proof_url: string | null
           processed_at: string | null
@@ -3462,14 +3465,17 @@ export type Database = {
           withdrawal_type: string
         }
         Insert: {
+          acquirer_response?: Json | null
           amount: number
           bank_account_id?: string | null
           created_at?: string
           crypto_address?: string | null
           crypto_currency?: string | null
           crypto_network?: string | null
+          failure_code?: string | null
           fee_amount?: number
           id?: string
+          last_attempt_at?: string | null
           net_amount?: number
           payment_proof_url?: string | null
           processed_at?: string | null
@@ -3480,14 +3486,17 @@ export type Database = {
           withdrawal_type?: string
         }
         Update: {
+          acquirer_response?: Json | null
           amount?: number
           bank_account_id?: string | null
           created_at?: string
           crypto_address?: string | null
           crypto_currency?: string | null
           crypto_network?: string | null
+          failure_code?: string | null
           fee_amount?: number
           id?: string
+          last_attempt_at?: string | null
           net_amount?: number
           payment_proof_url?: string | null
           processed_at?: string | null
@@ -3896,7 +3905,42 @@ export type Database = {
           success: boolean
         }[]
       }
+      admin_decrypt_field: { Args: { _cipher: string }; Returns: string }
       admin_purge_orphan_notifications: { Args: never; Returns: number }
+      admin_reveal_bank_accounts: {
+        Args: { _user_id: string }
+        Returns: {
+          account_number: string
+          account_type: string
+          agency: string
+          bank_code: string
+          bank_name: string
+          created_at: string
+          holder_document: string
+          holder_name: string
+          id: string
+          is_default: boolean
+        }[]
+      }
+      admin_reveal_pix_keys: {
+        Args: { _user_id: string }
+        Returns: {
+          created_at: string
+          id: string
+          is_default: boolean
+          key_type: string
+          key_value: string
+        }[]
+      }
+      admin_reveal_profile: {
+        Args: { _user_id: string }
+        Returns: {
+          document_number: string
+          pix_key: string
+          pix_key_type: string
+          user_id: string
+        }[]
+      }
       bump_rate_limit: {
         Args: {
           _bucket_key: string
