@@ -1561,8 +1561,10 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
               </Tabs>
             </>
           )}
+          </div>
         </DialogContent>
       </Dialog>
+
     </div>
   );
 }
