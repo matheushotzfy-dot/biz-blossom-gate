@@ -156,9 +156,9 @@ export default function AdminWithdrawalsTab({ withdrawals, profiles, onWithdrawa
   let ok = 0, fail = 0;
   for (const id of selectedIds) {
   const { error } = await supabase.from("withdrawals")
-    .update({ status: "rejected", rejection_reason: reason.trim(), processed_by: user?.id } as any)
+    .update({ status: "rejected", rejection_reason: reason.trim(), processed_by: user?.id })
     .eq("id", id).eq("status", "pending");
-  if (!error) { await logAdminAction("reject_withdrawal", "withdrawal", id, { method: "batch", reason: reason.trim() } as any); ok++; }
+  if (!error) { await logAdminAction("reject_withdrawal", "withdrawal", id, { method: "batch", reason: reason.trim() }); ok++; }
   else { fail++; }
   }
   let msg = `${ok} saques recusados em lote`;
@@ -174,10 +174,10 @@ export default function AdminWithdrawalsTab({ withdrawals, profiles, onWithdrawa
  if (!rejectDialog || !rejectReason.trim()) { toast.error("Informe o motivo da rejeição"); return; }
  if (rejectReason.trim().length < 3) { toast.error("Motivo muito curto"); return; }
  const { error } = await supabase.from("withdrawals")
-   .update({ status: "rejected", rejection_reason: rejectReason.trim(), processed_by: user?.id } as any)
+   .update({ status: "rejected", rejection_reason: rejectReason.trim(), processed_by: user?.id })
    .eq("id", rejectDialog).eq("status", "pending");
  if (error) { toast.error(error.message || "Erro ao recusar"); return; }
- await logAdminAction("reject_withdrawal", "withdrawal", rejectDialog, { reason: rejectReason.trim() } as any);
+ await logAdminAction("reject_withdrawal", "withdrawal", rejectDialog, { reason: rejectReason.trim() });
  toast.success("Saque recusado com motivo registrado");
  setRejectDialog(null);
  setRejectReason("");
@@ -191,7 +191,7 @@ export default function AdminWithdrawalsTab({ withdrawals, profiles, onWithdrawa
    const path = `${withdrawalId}/${Date.now()}-${file.name.replace(/[^\w.-]/g, "_")}`;
    const { error: upErr } = await supabase.storage.from("withdrawal-proofs").upload(path, file, { upsert: true });
    if (upErr) { toast.error("Erro ao enviar: " + upErr.message); return; }
-   const { error } = await supabase.from("withdrawals").update({ payment_proof_url: path } as any).eq("id", withdrawalId);
+   const { error } = await supabase.from("withdrawals").update({ payment_proof_url: path }).eq("id", withdrawalId);
    if (error) { toast.error("Erro ao salvar"); return; }
    await logAdminAction("upload_withdrawal_proof", "withdrawal", withdrawalId, { path });
    toast.success("Comprovante anexado");
@@ -227,10 +227,10 @@ export default function AdminWithdrawalsTab({ withdrawals, profiles, onWithdrawa
  const saveAutoConfig = async () => {
  if (!autoConfigDialog || !user) return;
  const payload = { user_id: autoConfigDialog, enabled: autoEnabled, max_amount: Number(autoMaxAmount), admin_user_id: user.id, updated_at: new Date().toISOString() };
- const { error } = await supabase.from("seller_auto_withdraw").upsert(payload as any, { onConflict: "user_id" });
+ const { error } = await supabase.from("seller_auto_withdraw").upsert(payload, { onConflict: "user_id" });
  if (error) { toast.error("Erro ao salvar"); return; }
  toast.success("Config salva!");
- await logAdminAction("update_seller_auto_withdraw", "seller_auto_withdraw", autoConfigDialog, payload as any);
+ await logAdminAction("update_seller_auto_withdraw", "seller_auto_withdraw", autoConfigDialog, payload);
  setAutoConfigDialog(null);
  const { data } = await supabase.from("seller_auto_withdraw").select("*");
  if (data) setAutoConfigs(data as AutoWithdrawConfig[]);
@@ -251,7 +251,7 @@ export default function AdminWithdrawalsTab({ withdrawals, profiles, onWithdrawa
  });
  if (error) { toast.error("Erro ao salvar ajuste"); return; }
  toast.success(`Ajuste de ${adjustType === "credit" ? "+" : "-"}R$ ${amount.toFixed(2)} aplicado`);
- await logAdminAction("balance_adjustment", "balance_adjustments", adjustUserId, { amount, type: adjustType, reason: adjustReason.trim() } as any);
+ await logAdminAction("balance_adjustment", "balance_adjustments", adjustUserId, { amount, type: adjustType, reason: adjustReason.trim() });
  setAdjustDialog(false);
  setAdjustUserId(""); setAdjustAmount(""); setAdjustReason("");
  const { data } = await supabase.from("balance_adjustments").select("*").order("created_at", { ascending: false }).limit(300);
@@ -416,9 +416,9 @@ export default function AdminWithdrawalsTab({ withdrawals, profiles, onWithdrawa
                   <td className={premiumTable.td}>
                     <div className="flex items-center gap-1">
                       <SellerTypeBadge type={getSellerType(w.user_id)} />
-                      {(w as any).withdrawal_type === "crypto" && (
+                      {w.withdrawal_type === "crypto" && (
                         <span className="rounded border border-amber-500/20 bg-amber-500/10 px-1.5 py-0.5 text-[8px] font-bold uppercase text-amber-500">
-                          {(w as any).crypto_currency || "CRYPTO"}
+                          {w.crypto_currency || "CRYPTO"}
                         </span>
                       )}
                     </div>
@@ -463,9 +463,9 @@ export default function AdminWithdrawalsTab({ withdrawals, profiles, onWithdrawa
                       </div>
                     )}
                     {w.status === "approved" && (
-                      (w as any).payment_proof_url ? (
+                      w.payment_proof_url ? (
                         <div className="flex items-center gap-1">
-                          <Button size="sm" variant="ghost" className="h-7 gap-1 text-[10px]" onClick={() => handleViewProof((w as any).payment_proof_url)}>
+                          <Button size="sm" variant="ghost" className="h-7 gap-1 text-[10px]" onClick={() => handleViewProof(w.payment_proof_url)}>
                             <FileText className="h-3 w-3" /> Ver comprovante
                           </Button>
                           <label className="cursor-pointer text-[10px] text-muted-foreground underline">
@@ -480,10 +480,10 @@ export default function AdminWithdrawalsTab({ withdrawals, profiles, onWithdrawa
                         </label>
                       )
                     )}
-                    {w.status === "rejected" && (w as any).rejection_reason && (
+                    {w.status === "rejected" && w.rejection_reason && (
                       <div className="max-w-[200px]">
                         <p className="text-[10px] font-bold uppercase text-destructive">Motivo</p>
-                        <p className="line-clamp-2 text-[10px] text-muted-foreground">{(w as any).rejection_reason}</p>
+                        <p className="line-clamp-2 text-[10px] text-muted-foreground">{w.rejection_reason}</p>
                       </div>
                     )}
                   </td>
