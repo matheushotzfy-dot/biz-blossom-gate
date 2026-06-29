@@ -212,7 +212,7 @@ export default function AdminAcquirersTab() {
 
   const handleSave = async () => {
     if (!form.name || !form.slug) { toast.error("Nome e slug obrigatórios"); return; }
-    const payload: any = {
+    const payload: Partial<Tables<"acquirers">> = {
       name: form.name, slug: form.slug, type: form.type,
       api_endpoint: form.api_endpoint || null, description: form.description || null,
       conversion_rate: form.conversion_rate || 0, seller_visible: form.seller_visible || false,
@@ -239,7 +239,7 @@ export default function AdminAcquirersTab() {
   };
 
   const toggleField = async (acq: Acquirer, field: "is_active" | "seller_visible" | "allow_failover") => {
-    const newVal = !(acq as any)[field];
+    const newVal = !acq[field];
     const { error } = await supabase.from("acquirers").update({ [field]: newVal }).eq("id", acq.id);
     if (error) { toast.error("Erro"); return; }
     toast.success("Atualizada");
@@ -815,7 +815,7 @@ export default function AdminAcquirersTab() {
 
 // ============== Detail Drawer ==============
 function AcquirerDetail({ acq, stats, healthEvents, failovers, sellersOfAcq, txsOfAcq, onEdit, onSetHealth, onToggle }: {
-  acq: Acquirer; stats?: any; healthEvents: HealthEvent[]; failovers: FailoverEvent[];
+  acq: Acquirer; stats?: { sales: number; volume: number; refused: number; refunded: number; medpix: number; sellers: number; fees: number; net: number }; healthEvents: HealthEvent[]; failovers: FailoverEvent[];
   sellersOfAcq: SellerLite[]; txsOfAcq: TxLite[];
   onEdit: () => void; onSetHealth: (s: Health) => void; onToggle: (f: "is_active" | "seller_visible" | "allow_failover") => void;
 }) {
@@ -1040,7 +1040,7 @@ function AcquirerDetail({ acq, stats, healthEvents, failovers, sellersOfAcq, txs
   );
 }
 
-function Metric({ label, value, icon: Icon, tone }: { label: string; value: string; icon: any; tone: string }) {
+function Metric({ label, value, icon: Icon, tone }: { label: string; value: string; icon: LucideIcon; tone: string }) {
   const toneCls: Record<string, string> = {
     success: "text-success", primary: "text-primary", info: "text-info",
     warning: "text-warning", danger: "text-destructive", neutral: "text-muted-foreground",
@@ -1240,13 +1240,13 @@ function BulkAssign({ acquirers, onDone }: { acquirers: Acquirer[]; onDone: () =
     if (!targetAcq) { toast.error("Selecione a adquirente destino"); return; }
     if (selected.size === 0) { toast.error("Selecione ao menos 1 seller"); return; }
     setRunning(true);
-    const { data, error } = await (supabase as any).rpc("admin_bulk_assign_acquirer", {
+    const { data, error } = await supabase.rpc("admin_bulk_assign_acquirer", {
       _seller_ids: Array.from(selected), _new_acquirer_id: targetAcq, _reason: reason,
     });
     setRunning(false);
     if (error) { toast.error("Erro: " + error.message); return; }
-    const successCount = (data || []).filter((r: any) => r.success).length;
-    const failCount = (data || []).filter((r: any) => !r.success).length;
+    const successCount = (data || []).filter(r => r.success).length;
+    const failCount = (data || []).filter(r => !r.success).length;
     toast.success(`${successCount} alterados${failCount ? `, ${failCount} falharam` : ""}`);
     await logAdminAction("bulk_assign_acquirer", "acquirer", targetAcq, { count: successCount, reason });
     onDone();
