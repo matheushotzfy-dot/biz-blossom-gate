@@ -1,7 +1,7 @@
 import { Gift, Hammer } from "lucide-react";
 import { FinanceiroHero } from "@/components/financeiro/FinanceiroHero";
 
-export default function AdminReferralsTab(_props: any) {
+export default function AdminReferralsTab(_props: Record<string, unknown>) {
   return (
     <div className="space-y-6 animate-fade-in">
       <FinanceiroHero

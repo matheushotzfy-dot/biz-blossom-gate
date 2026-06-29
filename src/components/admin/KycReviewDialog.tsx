@@ -7,6 +7,7 @@ import {
   CheckCircle2, XCircle, ExternalLink, Loader2, ShieldCheck,
   User, Mail, Phone, FileDigit, MapPin, Building2, Calendar, Globe,
   Image as ImageIcon, Camera, X, Copy, FileText,
+  type LucideIcon,
 } from "lucide-react";
 import type { Tables } from "@/integrations/supabase/types";
 import { cn } from "@/lib/utils";
@@ -358,7 +359,7 @@ function Section({ title, children }: { title: string; children: React.ReactNode
 
 function InfoRow({
   icon: Icon, label, value, mono, onCopy,
-}: { icon: any; label: string; value?: string | null; mono?: boolean; onCopy?: (v?: string | null) => void }) {
+}: { icon: LucideIcon; label: string; value?: string | null; mono?: boolean; onCopy?: (v?: string | null) => void }) {
   const canCopy = !!onCopy && !!value;
   return (
     <div className="group/row flex items-start gap-2.5">

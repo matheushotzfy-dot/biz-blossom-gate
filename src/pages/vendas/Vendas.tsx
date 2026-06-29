@@ -4,6 +4,7 @@ import {
   Search, EyeOff, Eye, Check, Download, FileText,
   CreditCard, ShoppingCart, Zap, History, BarChart3, TrendingUp, Wallet,
   CalendarIcon, ChevronLeft, ChevronRight,
+  type LucideIcon,
 } from "lucide-react";
 import { TransactionDetailPanel } from "@/components/transactions/TransactionDetailPanel";
 import { PixLogoMark } from "@/components/icons/PixLogoMark";
@@ -34,7 +35,7 @@ const STATUS_MAP: Record<string, { label: string; cls: string; dot: string }> = 
   chargeback: { label: "Chargeback", cls: "bg-red-500/10 text-red-500 border-red-500/20", dot: "bg-red-500" },
 };
 
-const METHODS_MAP: Record<string, { label: string; icon: any }> = {
+const METHODS_MAP: Record<string, { label: string; icon: LucideIcon }> = {
   pix: { label: "Pix", icon: Zap },
   credit_card: { label: "Cartão", icon: CreditCard },
   card: { label: "Cartão", icon: CreditCard },
@@ -170,7 +171,7 @@ export default function Vendas() {
     if (!filtered.length) return toast.error("Nenhuma transação para exportar");
     const rows = buildRows();
     const headers = Object.keys(rows[0]);
-    const esc = (v: any) => {
+    const esc = (v: unknown) => {
       const s = v == null ? "" : String(v);
       return /[",\n;]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
     };

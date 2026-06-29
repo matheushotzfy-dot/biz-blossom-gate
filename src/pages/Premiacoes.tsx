@@ -118,7 +118,7 @@ export default function Premiacoes() {
   const [focusId, setFocusId] = useState<string | null>(null);
   const [claimOpen, setClaimOpen] = useState(false);
   const [submittingClaim, setSubmittingClaim] = useState(false);
-  const [existingClaims, setExistingClaims] = useState<any[]>([]);
+  const [existingClaims, setExistingClaims] = useState<Array<{ id: string; tier_id: string; status: string }>>([]);
   const [claimForm, setClaimForm] = useState({
     recipient_name: "", phone: "", document: "",
     shipping_street: "", shipping_number: "", shipping_complement: "",

@@ -373,7 +373,7 @@ export default function MemberCourse() {
                 ].map(tab => (
                   <button
                     key={tab.id}
-                    onClick={() => setActiveTab(tab.id as any)}
+                    onClick={() => setActiveTab(tab.id as "aula" | "materiais" | "comentarios" | "anotacoes")}
                     className={cn(
                       "pb-6 text-[11px] font-bold uppercase tracking-[0.2em] relative transition-colors",
                       activeTab === tab.id ? "text-white" : "text-zinc-600 hover:text-zinc-400"

@@ -3,6 +3,7 @@ import {
   LayoutDashboard, ShoppingCart, Package, Wallet, MoreHorizontal,
   Trophy, Ticket, Building2, User, LogOut, X, Blocks,
   MessageSquare, ChevronRight,
+  type LucideIcon,
 } from "lucide-react";
 import { NavLink, useLocation, useNavigate } from "react-router-dom";
 import { cn } from "@/lib/utils";
@@ -18,7 +19,7 @@ const tabs = [
 
 const moreGroups: Array<{
   label: string;
-  items: Array<{ title: string; subtitle?: string; url: string; icon: any; accent?: string }>;
+  items: Array<{ title: string; subtitle?: string; url: string; icon: LucideIcon; accent?: string }>;
 }> = [
   {
     label: "Conta",

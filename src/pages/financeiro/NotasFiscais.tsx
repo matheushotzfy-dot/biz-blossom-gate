@@ -66,18 +66,23 @@ export default function NotasFiscais() {
         .eq("app_name", "notazz")
         .order("created_at", { ascending: false })
         .limit(200);
-      return (data ?? []) as any[];
+      type DeliveryRow = {
+        id: string; status: string; event: string | null; error: string | null;
+        created_at: string; delivered_at: string | null; transaction_id: string | null;
+        transactions: { amount: number | null; customer_name: string | null; customer_email: string | null } | null;
+      };
+      return (data ?? []) as unknown as DeliveryRow[];
     },
   });
 
   const invoices = useMemo<InvoiceRow[]>(() => {
     const rows = rawDeliveries.map((d, i) => {
-      const tx = d.transactions || {};
+      const tx = d.transactions;
       return {
         id: d.id,
         number: `NF-${String(rawDeliveries.length - i).padStart(6, "0")}`,
-        customer: tx.customer_name || tx.customer_email || "Cliente",
-        amount: Number(tx.amount || 0),
+        customer: tx?.customer_name || tx?.customer_email || "Cliente",
+        amount: Number(tx?.amount || 0),
         date: d.delivered_at || d.created_at,
         status: (d.status as DeliveryStatus) ?? "pending",
         error: d.error ?? null,

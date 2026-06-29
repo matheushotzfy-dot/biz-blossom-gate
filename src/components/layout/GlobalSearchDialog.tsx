@@ -20,6 +20,7 @@ import {
   Ticket,
   Shield,
   ArrowRight,
+  type LucideIcon,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
@@ -47,7 +48,7 @@ interface SearchResult {
   label: string;
   sub: string;
   href: string;
-  icon: any;
+  icon: LucideIcon;
   type: "product" | "transaction" | "page";
 }
 

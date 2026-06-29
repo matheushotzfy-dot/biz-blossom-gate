@@ -195,10 +195,10 @@ export default function CourseBuilder() {
  }, []);
 
  // ─── Auto-save ──────────────────────────────────────────────────
- const autoSave = useCallback(async (field: string, value: any) => {
+ const autoSave = useCallback(async (field: string, value: unknown) => {
  if (!selectedLesson) return;
  setSaveStatus("saving");
- const { error } = await supabase.from("lessons").update({ [field]: value }).eq("id", selectedLesson.id);
+ const { error } = await supabase.from("lessons").update({ [field]: value } as never).eq("id", selectedLesson.id);
  if (error) { setSaveStatus("error"); return; }
  setSaveStatus("saved");
  setModules(prev => prev.map(m => ({
@@ -208,7 +208,7 @@ export default function CourseBuilder() {
  setTimeout(() => setSaveStatus("idle"), 2000);
  }, [selectedLesson]);
 
- const debouncedSave = useCallback((field: string, value: any) => {
+ const debouncedSave = useCallback((field: string, value: unknown) => {
  if (saveTimerRef.current) clearTimeout(saveTimerRef.current);
  setSaveStatus("saving");
  saveTimerRef.current = setTimeout(() => autoSave(field, value), 1200);

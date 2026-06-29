@@ -134,8 +134,8 @@ export default function Auth() {
  setRecoveryEmail(targetEmail);
  setRecoveryMode("code");
  toast.success("Código enviado para seu e-mail!");
- } catch (err: any) {
- toast.error(err?.message || "Erro ao enviar código. Tente novamente.");
+ } catch (err: unknown) {
+ toast.error((err instanceof Error && err.message) || "Erro ao enviar código. Tente novamente.");
  } finally {
  setRecoveryLoading(false);
  }
@@ -171,8 +171,8 @@ export default function Auth() {
  setConfirmNewPassword("");
  setRecoveryEmail("");
  }, 3000);
- } catch (err: any) {
- setRecoveryError(err?.message || "Erro ao alterar senha.");
+ } catch (err: unknown) {
+ setRecoveryError((err instanceof Error && err.message) || "Erro ao alterar senha.");
  } finally {
  setRecoveryLoading(false);
  }
