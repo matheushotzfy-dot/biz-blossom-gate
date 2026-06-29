@@ -41,7 +41,7 @@ Deno.serve(async (req) => {
   try {
     const authHeader = req.headers.get("Authorization");
     if (!authHeader?.startsWith("Bearer ")) {
-      return json({ success: false, error: "Unauthorized" }, 401);
+      return json({ success: false, error: "Unauthorized" }, corsHeaders, 401);
     }
 
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
