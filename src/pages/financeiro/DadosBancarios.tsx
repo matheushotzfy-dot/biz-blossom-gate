@@ -202,7 +202,7 @@ export default function DadosBancarios() {
             {pixKeys.map((pk) => (
               <div key={pk.id} className="px-5 py-4 flex items-center justify-between gap-3">
                 <div className="min-w-0">
-                  <p className="text-sm font-black text-foreground truncate">{pk.key_value}</p>
+                  <p className="text-sm font-black text-foreground truncate">{(pk as any).key_value_masked ?? pk.key_value ?? "•••"}</p>
                   <p className="text-[10px] font-bold text-muted-foreground/70 uppercase tracking-widest mt-0.5">
                     {PIX_TYPES.find(t => t.value === pk.key_type)?.label || pk.key_type}
                   </p>
@@ -339,7 +339,7 @@ export default function DadosBancarios() {
                     {acc.bank_name} {acc.is_primary && <CheckCircle2 size={12} className="inline text-emerald-500 ml-1" />}
                   </p>
                   <p className="text-[10px] font-bold text-muted-foreground/70 uppercase tracking-widest mt-0.5 tabular-nums">
-                    Ag {acc.agency} · {acc.account_type === "poupanca" ? "Poup" : "CC"} {acc.account_number} · {acc.holder_name}
+                    Ag {acc.agency} · {acc.account_type === "poupanca" ? "Poup" : "CC"} {(acc as any).account_number_masked ?? acc.account_number ?? "••••"} · {acc.holder_name}
                   </p>
                 </div>
                 <Button variant="ghost" size="icon" onClick={() => handleDeleteBank(acc.id)} className="text-muted-foreground hover:text-destructive">

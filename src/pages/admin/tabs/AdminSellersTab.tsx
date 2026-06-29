@@ -1160,7 +1160,7 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
                             </div>
                             <div className="flex-1">
                               <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">{pk.key_type}</p>
-                              <p className="text-sm font-mono text-foreground mt-0.5">{pk.key_value}</p>
+                              <p className="text-sm font-mono text-foreground mt-0.5">{(pk as any).key_value_masked ?? pk.key_value ?? "•••"}</p>
                             </div>
                             <p className="text-[10px] text-muted-foreground">{new Date(pk.created_at).toLocaleDateString("pt-BR")}</p>
                             <Button size="sm" variant="ghost" className="h-8 w-8 p-0 text-destructive hover:bg-destructive/10" onClick={() => handleDeletePixKey(pk.id)} title="Remover chave">
@@ -1173,7 +1173,7 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
                     {selectedUser?.pix_key && (
                       <div className="mt-4 rounded-xl border border-warning/15 bg-warning/5 p-3">
                         <p className="text-[10px] text-warning font-bold mb-1">PIX Legado (perfil)</p>
-                        <p className="text-xs font-mono text-muted-foreground">{selectedUser.pix_key_type}: {selectedUser.pix_key}</p>
+                        <p className="text-xs font-mono text-muted-foreground">{selectedUser.pix_key_type}: {(selectedUser as any).pix_key_masked ?? selectedUser.pix_key ?? "•••"}</p>
                       </div>
                     )}
                   </PremiumPanel>

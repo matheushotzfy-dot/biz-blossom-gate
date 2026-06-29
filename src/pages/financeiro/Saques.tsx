@@ -319,7 +319,7 @@ export default function Saques() {
                     {pixKeys.slice(0, 2).map((pk) => (
                       <div key={pk.id} className="p-3 rounded-xl bg-muted/30 border border-border/60 flex items-center justify-between group">
                         <div className="min-w-0">
-                          <p className="text-[11px] font-black text-foreground truncate">{pk.key_value}</p>
+                          <p className="text-[11px] font-black text-foreground truncate">{(pk as any).key_value_masked ?? pk.key_value ?? "•••"}</p>
                           <p className="text-[9px] font-bold text-muted-foreground/60 uppercase">{pk.key_type}</p>
                         </div>
                         <CheckCircle2 size={12} className="text-emerald-500" />
@@ -346,7 +346,7 @@ export default function Saques() {
                     {bankAccounts.slice(0, 1).map((acc) => (
                       <div key={acc.id} className="p-3 rounded-xl bg-muted/30 border border-border/60 group">
                         <p className="text-[11px] font-black text-foreground truncate uppercase">{acc.bank_name}</p>
-                        <p className="text-[9px] font-bold text-muted-foreground/60 uppercase mt-0.5">Ag {acc.agency} · CC {acc.account_number}</p>
+                        <p className="text-[9px] font-bold text-muted-foreground/60 uppercase mt-0.5">Ag {acc.agency} · CC {(acc as any).account_number_masked ?? acc.account_number ?? "••••"}</p>
                       </div>
                     ))}
                   </div>
