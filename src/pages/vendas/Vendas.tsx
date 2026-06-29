@@ -285,16 +285,16 @@ export default function Vendas() {
                     </span>
                   </button>
                 </PopoverTrigger>
-                <PopoverContent align="end" sideOffset={8} className="w-auto p-0 overflow-hidden">
-                  <div className="flex items-center justify-between gap-4 px-4 py-2.5 border-b border-border bg-secondary/30">
-                    <span className="text-[10px] font-black uppercase tracking-[0.18em] text-muted-foreground/70">
+                <PopoverContent align="end" sideOffset={8} className="w-[320px] p-0 overflow-hidden rounded-xl border border-border bg-card">
+                  <div className="flex items-center justify-between gap-3 px-3.5 py-2.5 border-b border-border">
+                    <span className="text-[10px] font-black uppercase tracking-[0.16em] text-muted-foreground/80">
                       {tempRange?.from
                         ? format(tempRange.from, "dd MMM", { locale: ptBR }) +
-                          (tempRange.to ? " — " + format(tempRange.to, "dd MMM yyyy", { locale: ptBR }) : " — selecione fim")
+                          (tempRange.to ? " — " + format(tempRange.to, "dd MMM", { locale: ptBR }) : " — fim?")
                         : "Selecione o intervalo"}
                     </span>
                     {tempRange?.from && tempRange?.to && (
-                      <span className="text-[10px] font-black uppercase tracking-[0.14em] text-primary tabular-nums px-2 py-0.5 rounded-md bg-primary/10 border border-primary/20">
+                      <span className="text-[10px] font-black uppercase tracking-[0.14em] text-primary tabular-nums px-1.5 py-0.5 rounded-md bg-primary/10 border border-primary/20">
                         {differenceInDays(tempRange.to, tempRange.from) + 1}d
                       </span>
                     )}
@@ -303,15 +303,17 @@ export default function Vendas() {
                     mode="range"
                     selected={tempRange}
                     onSelect={(r) => { setTempRange(r); setPreset("custom"); }}
-                    numberOfMonths={2}
+                    numberOfMonths={1}
                     locale={ptBR}
-                    className="pointer-events-auto p-3"
+                    defaultMonth={tempRange?.from ?? new Date()}
+                    className="pointer-events-auto p-2"
                   />
-                  <div className="flex justify-end gap-2 px-4 py-2.5 border-t border-border bg-secondary/20">
-                    <Button variant="ghost" size="sm" className="h-8 text-[10px] font-black uppercase tracking-[0.14em]" onClick={() => setDateOpen(false)}>Cancelar</Button>
-                    <Button size="sm" className="h-8 text-[10px] font-black uppercase tracking-[0.14em]" onClick={applyCustom} disabled={!tempRange?.from || !tempRange?.to}>Aplicar</Button>
+                  <div className="flex items-center justify-between gap-2 px-3.5 py-2 border-t border-border">
+                    <button onClick={() => setDateOpen(false)} className="text-[10px] font-black uppercase tracking-[0.14em] text-muted-foreground/60 hover:text-foreground transition-colors">Cancelar</button>
+                    <button onClick={applyCustom} disabled={!tempRange?.from || !tempRange?.to} className="px-3 py-1.5 rounded-md text-[10px] font-black uppercase tracking-[0.14em] bg-primary text-primary-foreground hover:bg-primary/90 disabled:opacity-40 disabled:cursor-not-allowed transition-all">Aplicar</button>
                   </div>
                 </PopoverContent>
+
               </Popover>
             </div>
           </div>
