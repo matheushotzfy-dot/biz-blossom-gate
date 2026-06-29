@@ -400,7 +400,7 @@ export default function StaffManagementTab({ profiles, onReload, role }: Props) 
 }
 
 function ActionBtn({ icon: Icon, label, onClick, hoverTone }: {
-  icon: any; label: string; onClick: () => void;
+  icon: LucideIcon; label: string; onClick: () => void;
   hoverTone: "primary" | "warning" | "info" | "destructive";
 }) {
   const hoverCls = {
