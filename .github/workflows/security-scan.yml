@@ -1,0 +1,57 @@
+name: Security Scan (SAST + Audit)
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  schedule:
+    - cron: "0 4 * * 1" # Weekly Monday 04:00 UTC
+
+permissions:
+  contents: read
+  security-events: write
+  actions: read
+
+jobs:
+  codeql:
+    name: CodeQL Analysis
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        language: [javascript-typescript]
+    steps:
+      - uses: actions/checkout@v4
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v3
+        with:
+          languages: ${{ matrix.language }}
+          queries: security-and-quality
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v3
+
+  npm-audit:
+    name: npm audit (high+critical)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: "20" }
+      - name: Install
+        run: npm ci || npm install
+      - name: Audit
+        run: |
+          npm audit --audit-level=high --json > audit.json || true
+          echo "## npm audit report" >> $GITHUB_STEP_SUMMARY
+          node -e "const r=require('./audit.json');const m=r.metadata?.vulnerabilities||{};console.log('Critical: '+m.critical+' High: '+m.high+' Moderate: '+m.moderate+' Low: '+m.low);process.exit((m.critical||0)>0?1:0)" | tee -a $GITHUB_STEP_SUMMARY
+
+  secret-scan:
+    name: Secret scan (gitleaks)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with: { fetch-depth: 0 }
+      - uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

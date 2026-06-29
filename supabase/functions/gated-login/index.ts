@@ -4,6 +4,7 @@
 // the only goal here is to stop brute-force / credential stuffing.
 
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { SECURITY_HEADERS, logAbuseEvent } from "../_shared/security.ts";
 
 const ALLOWED_ORIGINS = new Set([
   "https://hotzfy.com.br",
@@ -14,6 +15,7 @@ const ALLOWED_ORIGINS = new Set([
 ]);
 const LOVABLE_PREVIEW_RE = /^https:\/\/[a-z0-9-]+\.(lovable\.app|lovableproject\.com|lovable\.dev)$/i;
 const CORS_BASE_HEADERS: Record<string, string> = {
+  ...SECURITY_HEADERS,
   "Access-Control-Allow-Headers":
     "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
   "Access-Control-Allow-Methods": "POST, OPTIONS",
@@ -88,6 +90,12 @@ Deno.serve(async (req) => {
       await adminClient.from("admin_login_attempts").insert({
         email: trimmedEmail, success: false, scope,
       });
+      await logAbuseEvent({
+        supabaseUrl, serviceKey: serviceRoleKey,
+        event_type: "login_rate_limited", endpoint: "gated-login",
+        status_code: 429, identifier: trimmedEmail, req,
+        metadata: { scope, attempts: recentAttempts.length },
+      });
       return new Response(
         JSON.stringify({
           success: false,
@@ -107,6 +115,12 @@ Deno.serve(async (req) => {
     if (authError || !authData.user || !authData.session) {
       await adminClient.from("admin_login_attempts").insert({
         email: trimmedEmail, success: false, scope,
+      });
+      await logAbuseEvent({
+        supabaseUrl, serviceKey: serviceRoleKey,
+        event_type: "login_failed", endpoint: "gated-login",
+        status_code: 401, identifier: trimmedEmail, req,
+        metadata: { scope },
       });
       return new Response(
         JSON.stringify({ success: false, error: "E-mail ou senha incorretos." }),
