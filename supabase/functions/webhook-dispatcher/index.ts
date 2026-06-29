@@ -124,7 +124,8 @@ async function deliverOne(
       next_retry_at: null,
     }).eq("id", d.id);
   } else {
-    const delay = RETRY_DELAYS_SECONDS[nextAttempt];
+    // RETRY_DELAYS_SECONDS[d.attempt] = wait time after this failed attempt
+    const delay = RETRY_DELAYS_SECONDS[d.attempt] ?? RETRY_DELAYS_SECONDS[RETRY_DELAYS_SECONDS.length - 1];
     await admin.from("webhook_deliveries").update({
       status: "pending",
       attempt: nextAttempt,
@@ -137,21 +138,16 @@ async function deliverOne(
 }
 
 async function processQueue(admin: ReturnType<typeof createClient>) {
-  const { data, error } = await admin
-    .from("webhook_deliveries")
-    .select("id, webhook_config_id, user_id, transaction_id, event, payload, attempt")
-    .eq("status", "pending")
-    .lte("next_retry_at", new Date().toISOString())
-    .order("next_retry_at", { ascending: true })
-    .limit(BATCH_SIZE);
+  // Atomically claim a batch via RPC (FOR UPDATE SKIP LOCKED) so parallel cron runs
+  // never pick the same row twice.
+  const { data, error } = await admin.rpc("claim_webhook_deliveries", { _limit: BATCH_SIZE });
 
-  if (error || !data || data.length === 0) {
+  if (error || !data || (data as Delivery[]).length === 0) {
     return { processed: 0 };
   }
 
-  // Process in parallel but capped
   await Promise.all((data as Delivery[]).map((d) => deliverOne(admin, d).catch(() => {})));
-  return { processed: data.length };
+  return { processed: (data as Delivery[]).length };
 }
 
 Deno.serve(async (req) => {
