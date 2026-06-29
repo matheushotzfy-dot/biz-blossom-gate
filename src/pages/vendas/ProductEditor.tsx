@@ -565,7 +565,7 @@ export default function ProductEditor() {
    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { toast.error("E-mail inválido"); return; }
    const split = Number(coProductionSplit);
    if (isNaN(split) || split < 1 || split > 99) { toast.error("Percentual deve ser entre 1 e 99%"); return; }
-   if (coProductionsList.some((c: Record<string, any>) => c.co_producer_email?.toLowerCase() === email && c.status !== "rejected")) {
+   if (coProductionsList.some((c) => c.co_producer_email?.toLowerCase() === email && c.status !== "rejected")) {
      toast.error("Este co-produtor já foi convidado");
      return;
    }
