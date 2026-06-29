@@ -228,6 +228,9 @@ function StepIndicator({ current, total, color }: { current: number; total: numb
 
 export default function PublicCheckout() {
  const { slug } = useParams();
+ const affiliateSlug = (typeof window !== "undefined")
+   ? new URLSearchParams(window.location.search).get("aff") || new URLSearchParams(window.location.search).get("ref") || null
+   : null;
  const [product, setProduct] = useState<Product | null>(null);
  const [loading, setLoading] = useState(true);
  const [method, setMethod] = useState<PaymentMethod>("credit_card");
