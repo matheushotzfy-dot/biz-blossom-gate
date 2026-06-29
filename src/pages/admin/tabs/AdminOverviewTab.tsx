@@ -807,10 +807,10 @@ function CommandMini({ label, value }: { label: string; value: string }) {
 }
 
 function DashboardKpi({ icon: Icon, label, value, sub, tone, onClick }: {
-  icon: any; label: string; value: string; sub?: string; tone: Tone; onClick?: () => void;
+  icon: LucideIcon; label: string; value: string; sub?: string; tone: Tone; onClick?: () => void;
 }) {
   const isInteractive = typeof onClick === "function";
-  const Tag: any = isInteractive ? "button" : "div";
+  const Tag = (isInteractive ? "button" : "div") as React.ElementType;
   return (
     <Tag
       type={isInteractive ? "button" : undefined}
