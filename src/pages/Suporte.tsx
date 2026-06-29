@@ -10,8 +10,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import {
   MessageSquare, Plus, Clock, CheckCircle2, AlertCircle, Send,
-  ChevronRight, Inbox, Search, X, Headphones, BookOpen, CreditCard,
-  Shield, Package, Zap, ArrowUpRight, Activity, Loader2,
+  ChevronRight, ChevronDown, ChevronUp, Inbox, Search, X, Headphones, BookOpen, CreditCard,
+  Shield, Package, Zap, ArrowUpRight, Activity, Loader2, HelpCircle,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
@@ -50,6 +50,42 @@ const HELP_CATEGORIES = [
   { icon: Package,    label: "Produtos & Checkout", desc: "Configuração e vendas",            subject: "Dúvida sobre produtos e checkout" },
   { icon: Shield,     label: "Conta & Segurança",   desc: "Acesso, KYC, identidade",          subject: "Problema com conta ou segurança" },
   { icon: Zap,        label: "Integrações & API",   desc: "Webhooks, apps, automação",        subject: "Dúvida sobre integrações ou API" },
+];
+
+type FaqItem = { q: string; a: string };
+type FaqGroup = { id: string; label: string; icon: typeof CreditCard; faqs: FaqItem[] };
+
+const FAQ_GROUPS: FaqGroup[] = [
+  {
+    id: "start", label: "Primeiros Passos", icon: BookOpen,
+    faqs: [
+      { q: "Como criar meu primeiro produto?", a: "Acesse Produtos > clique no botão '+' > preencha as informações básicas (nome, preço, descrição) > salve. Depois configure o checkout e o conteúdo de entrega." },
+      { q: "Como configurar meu checkout?", a: "No editor do produto, vá até a aba 'Checkout' ou use o Checkout Builder para personalizar cores, banners, timer de urgência e métodos de pagamento aceitos." },
+      { q: "Quanto tempo leva para receber meus pagamentos?", a: "Pagamentos via PIX são processados em até 1 dia útil. Cartão de crédito em até 30 dias (período de retenção padrão)." },
+    ],
+  },
+  {
+    id: "payments", label: "Pagamentos e Saques", icon: CreditCard,
+    faqs: [
+      { q: "Como solicitar um saque?", a: "Vá em Financeiro > Saques > escolha PIX ou Cripto > informe o valor > confirme. O processamento ocorre em até 24h úteis." },
+      { q: "Quais são as taxas da plataforma?", a: "A taxa padrão é de 4,99% + R$ 2,50 por transação aprovada. Taxa de saque: R$ 5,00." },
+      { q: "Como funciona a retenção?", a: "Uma porcentagem do valor é retida por um período configurável (padrão: 14 dias) como proteção contra chargebacks." },
+    ],
+  },
+  {
+    id: "security", label: "Segurança", icon: Shield,
+    faqs: [
+      { q: "Meus dados estão seguros?", a: "Sim. Utilizamos criptografia SSL, tokens de acesso seguros e políticas de isolamento de dados (RLS)." },
+      { q: "Como ativar o 2FA?", a: "O 2FA é ativado automaticamente para contas administrativas. Para vendedores, use senha forte e mantenha o e-mail de recuperação atualizado." },
+    ],
+  },
+  {
+    id: "tips", label: "Dicas de Vendas", icon: Zap,
+    faqs: [
+      { q: "Como aumentar minha taxa de conversão?", a: "Ative timer de urgência, use prova social, configure Order Bumps, teste com A/B Testing e use cupons para carrinhos abandonados." },
+      { q: "Vale a pena usar afiliados?", a: "Sim — afiliados multiplicam vendas sem custo inicial. Configure comissão competitiva (20-50%) e ative o Marketplace." },
+    ],
+  },
 ];
 
 const MAX_SUBJECT = 100;
