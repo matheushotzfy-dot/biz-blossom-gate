@@ -176,7 +176,7 @@ export default function ManagerDashboard() {
   };
 
   const handleApproveKYC = async (seller: Profile) => {
-    const { error } = await supabase.rpc("manager_update_seller_kyc" as any, {
+    const { error } = await managerKycRpc("manager_update_seller_kyc", {
       _seller_user_id: seller.user_id,
       _status: "approved",
     });
