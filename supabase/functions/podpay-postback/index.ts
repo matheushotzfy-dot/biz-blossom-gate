@@ -124,6 +124,22 @@ Deno.serve(async (req) => {
       );
     }
 
+    // === Replay protection: reject events older than 5 min based on PodPay timestamp ===
+    const tsHeader = req.headers.get('x-podpay-timestamp') || req.headers.get('x-timestamp');
+    if (tsHeader) {
+      const tsSec = Number(tsHeader);
+      if (Number.isFinite(tsSec)) {
+        const ageSec = Math.abs(Math.floor(Date.now() / 1000) - tsSec);
+        if (ageSec > 300) {
+          safeLog('Webhook rejected: stale timestamp', { eventId: String(payload.event_id ?? '') });
+          return new Response(
+            JSON.stringify({ success: false, error: 'Stale event' }),
+            { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+          );
+        }
+      }
+    }
+
     const eventId = payload.event_id ? String(payload.event_id) : null;
     safeLog('Postback received', { eventId });
 
