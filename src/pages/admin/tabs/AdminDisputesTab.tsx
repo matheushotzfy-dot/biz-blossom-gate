@@ -14,13 +14,15 @@ import { FinanceiroHero } from "@/components/financeiro/FinanceiroHero";
 import { PremiumMetric, PremiumMetricGrid } from "./AdminPremium";
 import { logAdminAction } from "@/lib/auditLog";
 
+interface EvidenceUrl { path: string; name: string; uploaded_at: string; }
+
 interface Dispute {
  id: string; transaction_id: string | null; seller_user_id: string;
  buyer_name: string | null; buyer_email: string | null; buyer_phone: string | null;
  type: string; status: string; reason: string | null; admin_notes: string | null;
  amount: number; resolved_at: string | null; admin_user_id: string | null;
  created_at: string; updated_at: string;
- evidence_urls?: any[]; won_by_seller?: boolean | null;
+ evidence_urls?: EvidenceUrl[]; won_by_seller?: boolean | null;
 }
 
 interface Props {
