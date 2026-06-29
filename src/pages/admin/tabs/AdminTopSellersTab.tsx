@@ -145,8 +145,8 @@ export default function AdminTopSellersTab({ fmtCurrency }: Props) {
         <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
           {ranked.slice(0, 3).map((s, i) => {
             const share = totals.gross > 0 ? (s.gross / totals.gross) * 100 : 0;
-            const accent = i === 0 ? "warning" : i === 1 ? "muted-foreground" : "primary";
             const accentText = i === 0 ? "text-warning" : i === 1 ? "text-muted-foreground" : "text-primary";
+            const accentBg = i === 0 ? "bg-warning" : i === 1 ? "bg-muted-foreground" : "bg-primary";
             const accentBorderHover = i === 0 ? "hover:border-warning" : i === 1 ? "hover:border-muted-foreground" : "hover:border-primary";
             return (
               <button
