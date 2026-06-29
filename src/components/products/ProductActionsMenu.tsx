@@ -9,8 +9,10 @@ import {
   GraduationCap,
   Trash2,
   Package,
+  ChevronRight,
   type LucideIcon,
 } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 import {
   DropdownMenu,
