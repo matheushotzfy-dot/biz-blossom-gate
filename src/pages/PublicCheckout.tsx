@@ -301,7 +301,7 @@ export default function PublicCheckout() {
 
  if (cancelled) return;
  if (!prod) { setLoading(false); return; }
-  const productWithTheme = { ...prod, checkout_theme: (prod as any).checkout_theme || "gray" };
+  const productWithTheme = { ...prod, checkout_theme: prod.checkout_theme || "gray" };
  if (cancelled) return;
  setProduct(productWithTheme as unknown as Product);
 
