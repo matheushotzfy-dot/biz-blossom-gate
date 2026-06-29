@@ -425,11 +425,11 @@ export default function ProductEditor() {
  title: name.trim(),
  description: description.trim() || null,
  is_published: false,
- } as any);
+ } satisfies TablesInsert<"courses">);
  }
 
  setCreatedProductId(newProduct.id);
- setProduct(newProduct as any);
+ setProduct(newProduct);
  toast.success("Produto criado com sucesso! Continue configurando.");
  invalidateAll(["products", "courses"]);
  setActiveTab("configuracoes");
