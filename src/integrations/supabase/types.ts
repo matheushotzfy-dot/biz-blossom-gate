@@ -3085,6 +3085,7 @@ export type Database = {
           podpay_event_id: string | null
           podpay_payment_id: string | null
           product_id: string | null
+          refunded_amount: number
           retained_amount: number
           retained_until: string | null
           retention_released: boolean
@@ -3118,6 +3119,7 @@ export type Database = {
           podpay_event_id?: string | null
           podpay_payment_id?: string | null
           product_id?: string | null
+          refunded_amount?: number
           retained_amount?: number
           retained_until?: string | null
           retention_released?: boolean
@@ -3151,6 +3153,7 @@ export type Database = {
           podpay_event_id?: string | null
           podpay_payment_id?: string | null
           product_id?: string | null
+          refunded_amount?: number
           retained_amount?: number
           retained_until?: string | null
           retention_released?: boolean
