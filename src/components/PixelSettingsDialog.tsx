@@ -131,9 +131,9 @@ export default function PixelSettingsDialog({ product, open, onOpenChange }: Pro
       .select("*")
       .eq("product_id", product.id)
       .eq("user_id", user!.id);
-    if (data) setPixels(data.map((d: any) => ({
-      ...d,
-      events: Array.isArray(d.events) ? d.events : ALL_EVENTS,
+    if (data) setPixels(data.map((d) => ({
+      ...(d as unknown as Pixel),
+      events: Array.isArray(d.events) ? (d.events as string[]) : ALL_EVENTS,
     })));
     setLoading(false);
   };
