@@ -249,7 +249,7 @@ export default function AdminNotificationsTab({ profiles }: Props) {
  </div>
  <DialogFooter>
  <Button onClick={handleSend} disabled={sending || !sendTitle.trim() || !sendMessage.trim()} className="w-full h-11 bg-gradient-to-r from-primary to-emerald-600 text-white font-semibold rounded-xl shadow-lg shadow-primary/20 text-[13px]">
- <Send className="h-4 w-4 mr-2" />{sending ? "Enviando..." : sendTarget === "all" ? "Enviar para Todos" : "Enviar para Seller"}
+ <Send className="h-4 w-4 mr-2" />{sending ? "Enviando..." : sendTarget === "specific" ? "Enviar para Seller" : sendTarget === "active_sellers" ? "Enviar para Ativos" : "Enviar para Todos"}
  </Button>
  </DialogFooter>
  </DialogContent>
