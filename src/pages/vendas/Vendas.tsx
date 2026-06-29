@@ -171,7 +171,7 @@ export default function Vendas() {
     if (!filtered.length) return toast.error("Nenhuma transação para exportar");
     const rows = buildRows();
     const headers = Object.keys(rows[0]);
-    const esc = (v: any) => {
+    const esc = (v: unknown) => {
       const s = v == null ? "" : String(v);
       return /[",\n;]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
     };
