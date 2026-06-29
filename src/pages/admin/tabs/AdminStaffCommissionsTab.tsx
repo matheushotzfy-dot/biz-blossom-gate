@@ -8,6 +8,7 @@ import {
   Coins, Search, ArrowDownToLine, X, Plus, Trash2, Loader2, Download, Wallet,
   TrendingDown, CheckCircle2, Percent, User as UserIcon, Mail, Copy, ChevronRight,
   ArrowUpDown, Activity, Settings2, Receipt, Briefcase, Shield, Calendar,
+  type LucideIcon,
 } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
