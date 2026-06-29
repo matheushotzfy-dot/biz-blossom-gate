@@ -984,7 +984,35 @@ export default function ProductEditor() {
  TAB COMPONENTS
  ═══════════════════════════════════════════════ */
 
-function TabGeral({ name, setName, description, setDescription, price, setPrice, status, setStatus, pageUrl, setPageUrl, imagePreview, setImagePreview, imageFile, setImageFile, fileInputRef, handleFileChange, category, setCategory, paymentType, setPaymentType, displayName, setDisplayName, supportEmail, setSupportEmail, supportPhone, setSupportPhone, warrantyDays, setWarrantyDays, isDragging, setIsDragging, handleDrop, onNext }: any) {
+import type { Dispatch, SetStateAction, RefObject } from "react";
+
+type S<T> = Dispatch<SetStateAction<T>>;
+type StrS = S<string>;
+type BoolS = S<boolean>;
+type AnyObj = Record<string, unknown>;
+
+type TabGeralProps = {
+  name: string; setName: StrS;
+  description: string; setDescription: StrS;
+  price: string; setPrice: StrS;
+  status: string; setStatus: StrS;
+  pageUrl: string; setPageUrl: StrS;
+  imagePreview: string | null; setImagePreview: S<string | null>;
+  imageFile: File | null; setImageFile: S<File | null>;
+  fileInputRef: RefObject<HTMLInputElement>;
+  handleFileChange: (e: ChangeEvent<HTMLInputElement>) => void;
+  category: string; setCategory: StrS;
+  paymentType: string; setPaymentType: StrS;
+  displayName: string; setDisplayName: StrS;
+  supportEmail: string; setSupportEmail: StrS;
+  supportPhone: string; setSupportPhone: StrS;
+  warrantyDays: string; setWarrantyDays: StrS;
+  isDragging: boolean; setIsDragging: BoolS;
+  handleDrop: (e: React.DragEvent) => void;
+  onNext: () => void;
+};
+
+function TabGeral({ name, setName, description, setDescription, price, setPrice, status, setStatus, pageUrl, setPageUrl, imagePreview, setImagePreview, imageFile, setImageFile, fileInputRef, handleFileChange, category, setCategory, paymentType, setPaymentType, displayName, setDisplayName, supportEmail, setSupportEmail, supportPhone, setSupportPhone, warrantyDays, setWarrantyDays, isDragging, setIsDragging, handleDrop, onNext }: TabGeralProps) {
   const descValid = description.length >= 50;
   // Aceita URL sem https://
   const urlValid = pageUrl.trim().length > 3 && /\.[a-z]{2,}/i.test(pageUrl.trim());
