@@ -457,7 +457,7 @@ export default function ProductEditor() {
  title: name.trim(),
  description: description.trim() || null,
  is_published: false,
- } as any);
+ } satisfies TablesInsert<"courses">);
  }
  }
 
