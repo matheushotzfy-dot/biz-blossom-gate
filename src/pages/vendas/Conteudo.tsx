@@ -112,11 +112,11 @@ export default function AdminConteudo() {
   const courseStats = useMemo(() => {
     const stats: Record<string, ContentCourseStats> = {};
 
-    coursesRaw.forEach((course: any) => {
+    coursesRaw.forEach((course) => {
       const modules = course.modules || [];
       stats[course.id] = {
         modules: modules.length,
-        lessons: modules.reduce((acc: number, module: any) => acc + (module.lessons?.length || 0), 0),
+        lessons: modules.reduce((acc, module) => acc + (module.lessons?.length || 0), 0),
       };
     });
 
