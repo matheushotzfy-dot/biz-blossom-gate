@@ -192,12 +192,12 @@ export default function ManagerDashboard() {
 
   const handleAddNote = async () => {
     if (!selectedSeller || !noteContent.trim()) return;
-    const { error } = await supabase.from("seller_notes" as any).insert({
+    const { error } = await supabase.from("seller_notes").insert({
       seller_user_id: selectedSeller.user_id,
       author_user_id: user!.id,
       author_role: "manager",
       content: noteContent.trim(),
-    } as any);
+    });
     if (error) { toast.error("Erro ao adicionar nota"); return; }
     toast.success("Nota adicionada!");
     setNoteContent("");
