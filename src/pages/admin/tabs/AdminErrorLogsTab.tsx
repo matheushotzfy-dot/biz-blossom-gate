@@ -61,8 +61,8 @@ function deriveCategory(e: ErrorLog): Category {
   const t = (e.error_type || "").toLowerCase();
   const m = (e.message || "").toLowerCase();
   const meta = e.metadata || {};
-  const route = String((meta as any).route || (meta as any).path || (meta as any).url || "").toLowerCase();
-  const source = String((meta as any).source || (meta as any).component || "").toLowerCase();
+  const route = String(meta.route || meta.path || meta.url || "").toLowerCase();
+  const source = String(meta.source || meta.component || "").toLowerCase();
   const hay = `${t} ${m} ${route} ${source}`;
 
   if (/(webhook|hmac|signature)/.test(hay)) return "webhook";
