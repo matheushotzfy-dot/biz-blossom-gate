@@ -72,9 +72,9 @@ export function ProductActionsMenu({
     {
       title: "Gerenciar",
       rows: [
-        { icon: Pencil,        label: "Editar produto",   action: () => onEditProduct(product) },
-        { icon: Palette,       label: "Checkout builder", action: () => navigate(`/vendas/produtos/${product.id}/checkout-builder`, { state: { product } }) },
-        { icon: GraduationCap, label: "Área de membros",  action: () => onOpenMembers(product) },
+        { icon: Pencil,        label: "Editar produto", hint: "Nome, preço e entrega", action: () => onEditProduct(product) },
+        { icon: Palette,       label: "Checkout builder", hint: "Layout e conversão", action: () => navigate(`/vendas/produtos/${product.id}/checkout-builder`, { state: { product } }) },
+        { icon: GraduationCap, label: "Área de membros", hint: "Curso, aulas e acesso", action: () => onOpenMembers(product) },
       ],
     },
     {
@@ -85,12 +85,13 @@ export function ProductActionsMenu({
               {
                 icon: copied ? CheckCircle2 : Copy,
                 label: copied ? "Link copiado" : "Copiar checkout",
+                hint: "URL pública do produto",
                 action: () => onCopyLink(product),
               },
-              { icon: ExternalLink, label: "Abrir checkout", action: () => onOpenCheckout(product) },
+              { icon: ExternalLink, label: "Abrir checkout", hint: "Visualizar página final", action: () => onOpenCheckout(product) },
             ]
           : []),
-        { icon: Crosshair, label: "Pixels & tracking", action: () => onOpenPixels(product) },
+        { icon: Crosshair, label: "Pixels & tracking", hint: "Eventos e rastreamento", action: () => onOpenPixels(product) },
       ],
     },
   ];
@@ -104,7 +105,7 @@ export function ProductActionsMenu({
         key={row.label}
         onClick={row.action}
         className={cn(
-           "group/row relative flex h-11 cursor-pointer items-center gap-3 overflow-hidden rounded-lg px-2.5 outline-none transition-all duration-300 active:scale-[0.99]",
+           "group/row relative flex min-h-[52px] cursor-pointer items-center gap-3 overflow-hidden rounded-lg px-2.5 outline-none transition-all duration-300 active:scale-[0.99]",
           isDestructive
             ? "focus:bg-destructive/[0.08] data-[highlighted]:bg-destructive/[0.08] hover:bg-destructive/[0.06]"
             : "focus:bg-primary/[0.08] data-[highlighted]:bg-primary/[0.08] hover:translate-x-0.5 hover:bg-primary/[0.06]",
@@ -122,13 +123,20 @@ export function ProductActionsMenu({
           <row.icon className="h-3.5 w-3.5 transition-transform duration-300 group-hover/row:scale-110" strokeWidth={2.25} />
         </div>
 
-        <span
-          className={cn(
-            "min-w-0 flex-1 truncate text-[12px] font-bold tracking-tight",
-            isDestructive ? "text-destructive" : "text-foreground/90 group-hover/row:text-foreground",
+        <span className="min-w-0 flex-1">
+          <span
+            className={cn(
+              "block truncate text-[12.5px] font-black tracking-tight",
+              isDestructive ? "text-destructive" : "text-foreground/90 group-hover/row:text-foreground",
+            )}
+          >
+            {row.label}
+          </span>
+          {row.hint && (
+            <span className="mt-0.5 block truncate text-[10px] font-bold uppercase tracking-[0.08em] text-muted-foreground/55 group-hover/row:text-muted-foreground/80">
+              {row.hint}
+            </span>
           )}
-        >
-          {row.label}
         </span>
 
         <ChevronRight
@@ -165,10 +173,11 @@ export function ProductActionsMenu({
         align="end"
         side="bottom"
         sideOffset={8}
-        className="w-[292px] max-h-none overflow-visible rounded-2xl border border-border/60 bg-card p-0 shadow-none"
+        className="w-[324px] max-h-none overflow-visible rounded-2xl border border-border/70 bg-card p-0 shadow-none"
       >
         {/* Identity Header */}
-        <div className="flex items-center gap-3 border-b border-border/40 bg-card px-4 py-3.5">
+        <div className="relative flex items-center gap-3 border-b border-border/50 bg-card px-4 py-4">
+          <span className="absolute left-0 top-4 bottom-4 w-[3px] rounded-r-full bg-primary/80" />
           <div className="flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-xl border border-border/60 bg-card-inset">
             {product.image_url ? (
               <img src={product.image_url} alt="" className="h-full w-full object-cover" />
@@ -201,6 +210,7 @@ export function ProductActionsMenu({
           {renderRow({
             icon: Trash2,
             label: "Excluir produto",
+            hint: "Remover do catálogo",
             variant: "destructive",
             action: () => onDeleteProduct(product),
           })}

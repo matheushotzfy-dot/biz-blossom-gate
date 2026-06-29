@@ -179,9 +179,10 @@ export default function QuickPixDialog({ open, onOpenChange }: Props) {
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-[440px] p-0 overflow-hidden border border-border bg-card rounded-2xl">
+      <DialogContent className="max-w-[440px] p-0 overflow-hidden border border-primary/25 bg-card rounded-2xl">
         {/* Header — solid, no gradients/blur */}
-        <div className="px-6 pt-6 pb-5 border-b border-border bg-card">
+        <div className="relative px-6 pt-6 pb-5 border-b border-border bg-card">
+          <span className="absolute left-0 top-6 bottom-6 w-[3px] rounded-r-full bg-primary/80" />
           <DialogHeader>
             <div className="flex items-center gap-3">
               <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 border border-primary/20">
@@ -223,7 +224,7 @@ export default function QuickPixDialog({ open, onOpenChange }: Props) {
                   }}
                   inputMode="numeric"
                   className={cn(
-                    "h-14 pl-12 font-display text-[28px] font-black tabular-nums tracking-[-0.02em] rounded-xl border border-border bg-background",
+                    "h-14 pl-12 font-display text-[28px] font-black tabular-nums tracking-[-0.02em] rounded-xl border border-primary/20 bg-background",
                     ease,
                     "focus-visible:ring-1 focus-visible:ring-primary/30 focus-visible:border-primary/50",
                   )}
@@ -427,7 +428,7 @@ export default function QuickPixDialog({ open, onOpenChange }: Props) {
                   className={cn(
                     "w-full h-12 rounded-xl font-display font-black text-[12px] uppercase tracking-[0.14em] flex items-center justify-center gap-2",
                     "bg-primary text-primary-foreground border border-primary/40",
-                    "hover:bg-primary/90 active:scale-[0.985]",
+                    "hover:bg-primary/90 hover:-translate-y-px active:translate-y-0 active:scale-[0.985]",
                     ease,
                   )}
                 >

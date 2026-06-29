@@ -5,6 +5,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { EmptyState, PageSkeleton } from "@/components/PageShell";
+import { isApprovedTransaction } from "@/lib/utils";
 
 interface FunnelStage {
  stage: string;
@@ -43,7 +44,7 @@ export default function FunilVendas() {
  if (data) {
  const total = data.length;
  const pending = data.filter(t => t.status === "pending").length;
- const approved = data.filter(t => t.status === "approved").length;
+  const approved = data.filter(t => isApprovedTransaction(t.status)).length;
  const failed = data.filter(t => t.status === "failed" || t.status === "refused").length;
  const refunded = data.filter(t => t.status === "refunded" || t.status === "chargeback").length;
  setStats({ total, pending, approved, failed, refunded });

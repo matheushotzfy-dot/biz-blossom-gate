@@ -194,9 +194,10 @@ input[type="number"]::-webkit-inner-spin-button {
     background-color: hsl(var(--card)) !important;
     background-image: none !important;
     box-shadow: none !important;
-    transition: transform 500ms cubic-bezier(0.16, 1, 0.3, 1),
-                border-color 400ms cubic-bezier(0.16, 1, 0.3, 1),
-                background-color 400ms cubic-bezier(0.16, 1, 0.3, 1);
+    transition: transform 420ms cubic-bezier(0.22, 1, 0.36, 1),
+                border-color 360ms cubic-bezier(0.22, 1, 0.36, 1),
+                background-color 360ms cubic-bezier(0.22, 1, 0.36, 1),
+                filter 360ms cubic-bezier(0.22, 1, 0.36, 1);
   }
 
   .platform-card:hover,
@@ -206,8 +207,8 @@ input[type="number"]::-webkit-inner-spin-button {
   .dashboard-tile:hover,
   .seller-panel:hover,
   .seller-shell:hover {
-    transform: translateY(-2px);
-    border-color: hsl(var(--primary) / 0.4) !important;
+    transform: translateY(-3px);
+    border-color: hsl(var(--primary) / 0.5) !important;
     background-color: hsl(var(--card-elevated)) !important;
   }
 
@@ -361,6 +362,65 @@ input[type="number"]::-webkit-inner-spin-button {
     background: hsl(var(--card));
     transition: transform 300ms cubic-bezier(0.16, 1, 0.3, 1),
                 border-color 300ms cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .dashboard-stat-card {
+    border-color: hsl(var(--border) / 0.72) !important;
+  }
+
+  .dashboard-stat-card:hover {
+    border-color: hsl(var(--primary) / 0.62) !important;
+    filter: saturate(1.06);
+  }
+
+  .dashboard-hero-card {
+    border-color: hsl(var(--primary) / 0.26) !important;
+  }
+
+  .dashboard-hero-card::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 24px;
+    bottom: 24px;
+    width: 4px;
+    border-radius: 0 999px 999px 0;
+    background: hsl(var(--primary) / 0.82);
+    pointer-events: none;
+    z-index: 2;
+  }
+
+  .dashboard-quick-pix {
+    border-color: hsl(var(--primary) / 0.22);
+  }
+
+  .dashboard-sales-flow-card {
+    border-color: hsl(var(--border) / 0.66) !important;
+  }
+
+  .dashboard-sales-flow-card:hover {
+    border-color: hsl(var(--primary) / 0.58) !important;
+  }
+
+  .dashboard-chart-tooltip {
+    position: relative;
+    min-width: 156px;
+    overflow: hidden;
+    border-radius: 14px;
+    border: 1px solid hsl(var(--primary) / 0.32);
+    background: hsl(var(--card));
+    padding: 12px 14px 12px 16px;
+  }
+
+  .dashboard-chart-tooltip::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 10px;
+    bottom: 10px;
+    width: 3px;
+    border-radius: 0 999px 999px 0;
+    background: hsl(var(--primary));
   }
 
   *:hover > .dashboard-icon-shell,
@@ -1058,14 +1118,15 @@ input[type="number"]::-webkit-inner-spin-button {
   transform: scaleY(1);
 }
 .seller-nav-option:not([aria-current="page"]):hover svg { transform: translate3d(2px, 0, 0) scale(1.18) rotate(-4deg); }
-.seller-hover-card {
+  .seller-hover-card {
   cursor: default;
-  transition: transform 260ms cubic-bezier(0.22, 1, 0.36, 1), border-color 260ms cubic-bezier(0.22, 1, 0.36, 1), background-color 260ms cubic-bezier(0.22, 1, 0.36, 1) !important;
+    transition: transform 420ms cubic-bezier(0.22, 1, 0.36, 1), border-color 360ms cubic-bezier(0.22, 1, 0.36, 1), background-color 360ms cubic-bezier(0.22, 1, 0.36, 1), filter 360ms cubic-bezier(0.22, 1, 0.36, 1) !important;
 }
 .seller-hover-card:hover {
-  transform: translate3d(0, -5px, 0) scale(1.012);
-  border-color: hsl(var(--primary) / 0.58) !important;
+    transform: translate3d(0, -4px, 0) scale(1.006);
+    border-color: hsl(var(--primary) / 0.62) !important;
   background-color: hsl(var(--card) / 1) !important;
+    filter: saturate(1.04);
 }
 .seller-hover-card:hover h3 { color: hsl(var(--primary)); }
 .seller-hover-card:active {
