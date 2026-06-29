@@ -12,6 +12,7 @@ import {
   Package2, BarChart3, Calendar,
   PanelLeftClose, PanelLeft,
   Trophy, Search, ChevronDown, Sun, Moon,
+  type LucideIcon,
 } from "lucide-react";
 import { toast } from "sonner";
 import type { Tables } from "@/integrations/supabase/types";
