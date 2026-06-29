@@ -15,21 +15,42 @@ type Stats = {
   generated_at: string;
 };
 
+type ActiveBlock = {
+  id: string;
+  ip_hash: string;
+  endpoint: string;
+  reason: string;
+  blocked_until: string;
+  created_at: string;
+};
+
 export default function AdminAbuseMetricsTab() {
   const [stats, setStats] = useState<Stats | null>(null);
+  const [blocks, setBlocks] = useState<ActiveBlock[]>([]);
   const [hours, setHours] = useState(24);
   const [loading, setLoading] = useState(false);
 
   const load = async () => {
     setLoading(true);
-    const { data, error } = await supabase.rpc("get_auth_abuse_stats", { _hours: hours });
-    if (!error && data) setStats(data as unknown as Stats);
+    const [statsRes, blocksRes] = await Promise.all([
+      supabase.rpc("get_auth_abuse_stats", { _hours: hours }),
+      supabase
+        .from("abuse_blocks")
+        .select("id, ip_hash, endpoint, reason, blocked_until, created_at")
+        .gt("blocked_until", new Date().toISOString())
+        .order("blocked_until", { ascending: false })
+        .limit(50),
+    ]);
+    if (!statsRes.error && statsRes.data) setStats(statsRes.data as unknown as Stats);
+    if (!blocksRes.error && blocksRes.data) setBlocks(blocksRes.data as ActiveBlock[]);
     setLoading(false);
   };
 
   useEffect(() => { load(); /* eslint-disable-next-line */ }, [hours]);
 
   const peak = stats?.hourly.reduce((m, h) => Math.max(m, h.count), 0) ?? 0;
+  const activeBlocksCount = blocks.length;
+
 
   return (
     <div className="space-y-6">
@@ -59,8 +80,42 @@ export default function AdminAbuseMetricsTab() {
         <Stat label={`Eventos (${hours}h)`} value={stats?.total ?? 0} />
         <Stat label="Tipos distintos" value={Object.keys(stats?.by_type ?? {}).length} />
         <Stat label="Endpoints atingidos" value={Object.keys(stats?.by_endpoint ?? {}).length} />
-        <Stat label="Pico horário" value={peak} />
+        <Stat
+          label="Bloqueios ativos"
+          value={activeBlocksCount}
+          alert={activeBlocksCount > 0}
+        />
       </div>
+
+      <Card className={`p-4 ${activeBlocksCount > 0 ? "border-amber-500/50" : ""}`}>
+        <h3 className="font-semibold mb-3 flex items-center gap-2">
+          <ShieldAlert className="h-4 w-4 text-amber-500" />
+          Bloqueios ativos agora ({activeBlocksCount})
+        </h3>
+        {activeBlocksCount === 0 ? (
+          <div className="text-sm text-muted-foreground">Nenhum IP bloqueado no momento.</div>
+        ) : (
+          <div className="space-y-1 max-h-80 overflow-y-auto">
+            <div className="grid grid-cols-12 gap-2 text-xs uppercase tracking-wide text-muted-foreground border-b border-border/40 pb-1">
+              <span className="col-span-3">IP (hash)</span>
+              <span className="col-span-3">Endpoint</span>
+              <span className="col-span-3">Motivo</span>
+              <span className="col-span-3">Expira em</span>
+            </div>
+            {blocks.map((b) => {
+              const expiresMin = Math.max(0, Math.round((new Date(b.blocked_until).getTime() - Date.now()) / 60000));
+              return (
+                <div key={b.id} className="grid grid-cols-12 gap-2 text-sm border-b border-border/40 py-1 font-mono">
+                  <span className="col-span-3 truncate" title={b.ip_hash}>{b.ip_hash.slice(0, 12)}…</span>
+                  <span className="col-span-3 truncate" title={b.endpoint}>{b.endpoint}</span>
+                  <span className="col-span-3 truncate text-amber-500" title={b.reason}>{b.reason}</span>
+                  <span className="col-span-3 tabular-nums">{expiresMin}min</span>
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </Card>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <Card className="p-4">
@@ -80,18 +135,20 @@ export default function AdminAbuseMetricsTab() {
           <Table rows={(stats?.top_identifiers ?? []).map((r) => [r.identifier_hash, r.count])} />
         </Card>
       </div>
+
     </div>
   );
 }
 
-function Stat({ label, value }: { label: string; value: number | string }) {
+function Stat({ label, value, alert }: { label: string; value: number | string; alert?: boolean }) {
   return (
-    <Card className="p-4">
+    <Card className={`p-4 ${alert ? "border-amber-500/50" : ""}`}>
       <div className="text-xs uppercase tracking-wide text-muted-foreground">{label}</div>
-      <div className="text-3xl font-mono mt-1">{value}</div>
+      <div className={`text-3xl font-mono mt-1 ${alert ? "text-amber-500" : ""}`}>{value}</div>
     </Card>
   );
 }
+
 
 function Table({ rows }: { rows: Array<[string, number]> }) {
   if (!rows.length) return <div className="text-sm text-muted-foreground">Sem dados na janela.</div>;
