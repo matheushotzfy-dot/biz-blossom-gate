@@ -285,7 +285,7 @@ export default function Antecipacao() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {enrichedEligible.slice(0, 50).map((tx: any) => (
+                {enrichedEligible.slice(0, 50).map((tx) => (
                   <TableRow key={tx.id} className="border-border/30 hover:bg-secondary/30 transition-colors">
                     <TableCell className="font-mono text-[12px] font-bold text-foreground tabular-nums">{tx.daysLeft}d</TableCell>
                     <TableCell>
