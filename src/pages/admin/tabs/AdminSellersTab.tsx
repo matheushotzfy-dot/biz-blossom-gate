@@ -179,6 +179,20 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
       if (disputesRes.data) setUserDisputes(disputesRes.data as Dispute[]);
       if (ipRes.data) setIpHistory(ipRes.data as IpLog[]);
 
+      // Admin reveals plaintext sensitive fields for the selected seller
+      try {
+        const { data: revealed } = await supabase.rpc("admin_reveal_profile", { _user_id: profile.user_id });
+        const r = Array.isArray(revealed) ? revealed[0] : revealed;
+        if (r) {
+          setSelectedUser(prev => prev ? ({
+            ...prev,
+            document_number: r.document_number ?? prev.document_number,
+            pix_key: r.pix_key ?? prev.pix_key,
+            pix_key_type: r.pix_key_type ?? prev.pix_key_type,
+          }) : prev);
+        }
+      } catch (e) { /* admin reveal optional */ }
+
       setSelectedAcquirerId(profile.acquirer_id || "");
       setAdminNotes(profile.admin_notes || "");
       if (retRes.data) {
