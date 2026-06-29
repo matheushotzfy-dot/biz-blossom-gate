@@ -865,39 +865,51 @@ export type Database = {
       }
       bank_accounts: {
         Row: {
-          account_number: string
+          account_number: string | null
+          account_number_enc: string | null
+          account_number_masked: string | null
           account_type: string
           agency: string
           bank_code: string | null
           bank_name: string
           created_at: string
-          holder_document: string
+          holder_document: string | null
+          holder_document_enc: string | null
+          holder_document_masked: string | null
           holder_name: string
           id: string
           is_primary: boolean | null
           user_id: string
         }
         Insert: {
-          account_number: string
+          account_number?: string | null
+          account_number_enc?: string | null
+          account_number_masked?: string | null
           account_type?: string
           agency: string
           bank_code?: string | null
           bank_name: string
           created_at?: string
-          holder_document: string
+          holder_document?: string | null
+          holder_document_enc?: string | null
+          holder_document_masked?: string | null
           holder_name: string
           id?: string
           is_primary?: boolean | null
           user_id: string
         }
         Update: {
-          account_number?: string
+          account_number?: string | null
+          account_number_enc?: string | null
+          account_number_masked?: string | null
           account_type?: string
           agency?: string
           bank_code?: string | null
           bank_name?: string
           created_at?: string
-          holder_document?: string
+          holder_document?: string | null
+          holder_document_enc?: string | null
+          holder_document_masked?: string | null
           holder_name?: string
           id?: string
           is_primary?: boolean | null
@@ -1888,21 +1900,27 @@ export type Database = {
           created_at: string
           id: string
           key_type: string
-          key_value: string
+          key_value: string | null
+          key_value_enc: string | null
+          key_value_masked: string | null
           user_id: string
         }
         Insert: {
           created_at?: string
           id?: string
           key_type: string
-          key_value: string
+          key_value?: string | null
+          key_value_enc?: string | null
+          key_value_masked?: string | null
           user_id: string
         }
         Update: {
           created_at?: string
           id?: string
           key_type?: string
-          key_value?: string
+          key_value?: string | null
+          key_value_enc?: string | null
+          key_value_masked?: string | null
           user_id?: string
         }
         Relationships: []
@@ -2178,6 +2196,8 @@ export type Database = {
           nickname: string | null
           phone: string | null
           pix_key: string | null
+          pix_key_enc: string | null
+          pix_key_masked: string | null
           pix_key_type: string | null
           seller_type: string | null
           staff_role_type: string | null
@@ -2215,6 +2235,8 @@ export type Database = {
           nickname?: string | null
           phone?: string | null
           pix_key?: string | null
+          pix_key_enc?: string | null
+          pix_key_masked?: string | null
           pix_key_type?: string | null
           seller_type?: string | null
           staff_role_type?: string | null
@@ -2252,6 +2274,8 @@ export type Database = {
           nickname?: string | null
           phone?: string | null
           pix_key?: string | null
+          pix_key_enc?: string | null
+          pix_key_masked?: string | null
           pix_key_type?: string | null
           seller_type?: string | null
           staff_role_type?: string | null
@@ -3925,6 +3949,8 @@ export type Database = {
         Args: { _role: Database["public"]["Enums"]["app_role"] }
         Returns: boolean
       }
+      decrypt_field: { Args: { _cipher: string }; Returns: string }
+      encrypt_field: { Args: { _plain: string }; Returns: string }
       get_admin_analytics: { Args: { _period_days?: number }; Returns: Json }
       get_admin_dashboard_data: {
         Args: {
@@ -4015,6 +4041,8 @@ export type Database = {
         }
         Returns: string
       }
+      mask_pix: { Args: { _kind: string; _v: string }; Returns: string }
+      mask_tail: { Args: { _keep?: number; _v: string }; Returns: string }
       pick_failover_acquirer: {
         Args: { _current_acquirer_id: string }
         Returns: string
