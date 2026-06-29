@@ -577,10 +577,10 @@ export default function ProductEditor() {
        co_producer_email: email,
        split_percentage: split,
        status: "pending",
-     } as any).select().maybeSingle();
-     if (error || !data) { toast.error("Erro ao convidar co-produtor"); return; }
-     setCoProductionsList(prev => [data, ...prev]);
-     await supabase.from("products").update({ co_production_enabled: true, co_producer_email: email, co_production_split: split } as any).eq("id", effectiveProductId).eq("user_id", user.id);
+      } satisfies TablesInsert<"co_productions">).select().maybeSingle();
+      if (error || !data) { toast.error("Erro ao convidar co-produtor"); return; }
+      setCoProductionsList(prev => [data, ...prev]);
+      await supabase.from("products").update({ co_production_enabled: true, co_producer_email: email, co_production_split: split } satisfies TablesUpdate<"products">).eq("id", effectiveProductId).eq("user_id", user.id);
      setCoProductionEnabled(true);
      toast.success("Convite enviado!");
    } finally {
