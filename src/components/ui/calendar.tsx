@@ -22,6 +22,15 @@ function Calendar({ className, classNames, showOutsideDays = true, ...props }: C
         caption: "flex justify-center pt-1 pb-2 relative items-center",
         caption_label:
           "font-display font-black text-[13px] tracking-tight text-foreground capitalize",
+        caption_dropdowns: "flex items-center justify-center gap-2",
+        dropdown_month: "relative",
+        dropdown_year: "relative",
+        dropdown: cn(
+          "h-8 rounded-md border border-border bg-background px-2 pr-7",
+          "font-display text-[11px] font-black capitalize text-foreground",
+          "outline-none transition-colors hover:bg-secondary/60 focus:border-primary/50"
+        ),
+        dropdown_icon: "ml-1 text-muted-foreground/70",
         nav: "flex items-center",
         nav_button: cn(
           "h-7 w-7 rounded-md border border-border bg-card text-muted-foreground/80",
