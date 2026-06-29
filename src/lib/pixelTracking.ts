@@ -20,8 +20,7 @@ export interface PixelConfig {
 }
 
 // Window augmented with arbitrary pixel SDK globals (fbq, gtag, ttq, kwaiq, dataLayer, ...)
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-type PixelWindow = Window & typeof globalThis & Record<string, any>;
+type PixelWindow = Window & typeof globalThis & Record<string, unknown>;
 
 // Track which scripts have been loaded
 const loadedScripts = new Set<string>();
