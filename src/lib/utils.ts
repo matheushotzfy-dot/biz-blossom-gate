@@ -22,3 +22,7 @@ export function formatCurrency(
     maximumFractionDigits: fractionDigits,
   }).format(n);
 }
+
+export function isApprovedTransaction(status: string | null | undefined): boolean {
+  return status === "completed" || status === "approved";
+}

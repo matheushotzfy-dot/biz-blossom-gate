@@ -17,7 +17,7 @@ const SelectTrigger = React.forwardRef<
  <SelectPrimitive.Trigger
  ref={ref}
  className={cn(
- "flex h-11 w-full items-center justify-between gap-2 rounded-xl border border-border bg-card px-4 py-2.5 text-sm font-medium ring-offset-background placeholder:text-muted-foreground/60 transition-all duration-[250ms] ease-[cubic-bezier(0.16,1,0.3,1)] focus:outline-none focus:ring-2 focus:ring-primary/25 focus:border-primary/40 disabled:cursor-not-allowed disabled:opacity-50 [&>span]:line-clamp-1 hover:border-primary/25 hover:shadow-[0_2px_8px_hsl(var(--primary)/0.06)] data-[state=open]:border-primary/35 data-[state=open]:ring-2 data-[state=open]:ring-primary/15",
+ "group/select flex h-11 w-full items-center justify-between gap-2 rounded-xl border border-border/70 bg-card px-4 py-2.5 text-sm font-bold ring-offset-background placeholder:text-muted-foreground/60 transition-all duration-[280ms] ease-[cubic-bezier(0.16,1,0.3,1)] focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/50 disabled:cursor-not-allowed disabled:opacity-50 [&>span]:line-clamp-1 hover:-translate-y-px hover:border-primary/45 hover:bg-primary/[0.035] data-[state=open]:border-primary/55 data-[state=open]:bg-primary/[0.055] data-[state=open]:ring-2 data-[state=open]:ring-primary/15",
  className,
  )}
  {...props}
@@ -66,7 +66,7 @@ const SelectContent = React.forwardRef<
  <SelectPrimitive.Content
  ref={ref}
  className={cn(
- "relative z-50 max-h-[min(var(--radix-select-content-available-height),22rem)] min-w-[8rem] overflow-hidden rounded-2xl border border-border bg-popover text-popover-foreground shadow-2xl data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-[0.97] data-[state=open]:zoom-in-[0.97] data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 duration-[220ms] ease-[cubic-bezier(0.16,1,0.3,1)]",
+  "relative z-50 max-h-[min(var(--radix-select-content-available-height),18rem)] min-w-[8rem] overflow-hidden rounded-xl border border-border/70 bg-popover p-1 text-popover-foreground shadow-none data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-[0.97] data-[state=open]:zoom-in-[0.97] data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 duration-[220ms] ease-[cubic-bezier(0.16,1,0.3,1)]",
  position === "popper" &&
  "data-[side=bottom]:translate-y-1.5 data-[side=left]:-translate-x-1.5 data-[side=right]:translate-x-1.5 data-[side=top]:-translate-y-1.5",
  className,
@@ -74,7 +74,6 @@ const SelectContent = React.forwardRef<
  position={position}
  {...props}
  >
-  <SelectScrollUpButton />
  <SelectScrollUpButton />
  <SelectPrimitive.Viewport
  className={cn(
@@ -106,10 +105,10 @@ const SelectItem = React.forwardRef<
  <SelectPrimitive.Item
  ref={ref}
  className={cn(
- "relative flex w-full cursor-pointer select-none items-center rounded-xl py-2.5 pl-9 pr-3.5 text-sm font-medium outline-none transition-all duration-200 data-[disabled]:pointer-events-none data-[disabled]:opacity-50",
- "hover:bg-primary/8 focus:bg-primary/10 focus:text-foreground",
- "data-[highlighted]:bg-primary/8 data-[highlighted]:shadow-[inset_0_0_0_1px_hsl(var(--primary)/0.12)]",
- "data-[state=checked]:text-primary data-[state=checked]:bg-primary/10 data-[state=checked]:font-bold data-[state=checked]:shadow-[inset_0_0_0_1px_hsl(var(--primary)/0.15)]",
+  "relative flex w-full cursor-pointer select-none items-center rounded-lg py-2.5 pl-9 pr-3.5 text-sm font-bold outline-none transition-all duration-200 data-[disabled]:pointer-events-none data-[disabled]:opacity-50",
+  "before:absolute before:left-1 before:top-2 before:bottom-2 before:w-[3px] before:origin-center before:scale-y-50 before:rounded-r-full before:bg-primary before:opacity-0 before:transition-all before:duration-200",
+  "hover:bg-primary/[0.06] focus:bg-primary/[0.08] focus:text-foreground data-[highlighted]:bg-primary/[0.08] data-[highlighted]:before:scale-y-100 data-[highlighted]:before:opacity-100",
+  "data-[state=checked]:text-primary data-[state=checked]:bg-primary/[0.10] data-[state=checked]:font-black data-[state=checked]:before:scale-y-100 data-[state=checked]:before:opacity-100 data-[state=checked]:shadow-[inset_0_0_0_1px_hsl(var(--primary)/0.15)]",
  className,
  )}
  {...props}

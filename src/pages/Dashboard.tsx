@@ -38,7 +38,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Calendar } from "@/components/ui/calendar";
 import { format, differenceInDays } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { cn, formatCurrency } from "@/lib/utils";
+import { cn, formatCurrency, isApprovedTransaction } from "@/lib/utils";
 
 import type { DateRange } from "react-day-picker";
 import { Seo } from "@/components/Seo";
@@ -156,20 +156,20 @@ export default function Dashboard() {
   }, [transactions, selectedPeriod, isCustom, customRange]);
 
   const { approved, revenue, conversion, uniqueCustomers, pixConversion, cardConversion, boletoConversion, chargebackRate, pixApprovedCount, pixTotalCount, cardApprovedCount, cardTotalCount, boletoApprovedCount, boletoTotalCount } = useMemo(() => {
-    const _approved = filteredTx.filter((t) => t.status === "completed");
+    const _approved = filteredTx.filter((t) => isApprovedTransaction(t.status));
     const _revenue = _approved.reduce((acc, t) => acc + Number(t.net_amount), 0);
     const _conversion = filteredTx.length > 0 ? (_approved.length / filteredTx.length) * 100 : 0;
     
     const pixTx = filteredTx.filter(t => t.payment_method === "pix");
-    const pixApproved = pixTx.filter(t => t.status === "completed");
+    const pixApproved = pixTx.filter(t => isApprovedTransaction(t.status));
     const _pixConversion = pixTx.length > 0 ? (pixApproved.length / pixTx.length) * 100 : 0;
 
     const cardTx = filteredTx.filter(t => t.payment_method === "credit_card" || t.payment_method === "card");
-    const cardApproved = cardTx.filter(t => t.status === "completed");
+    const cardApproved = cardTx.filter(t => isApprovedTransaction(t.status));
     const _cardConversion = cardTx.length > 0 ? (cardApproved.length / cardTx.length) * 100 : 0;
 
     const boletoTx = filteredTx.filter(t => t.payment_method === "boleto");
-    const boletoApproved = boletoTx.filter(t => t.status === "completed");
+    const boletoApproved = boletoTx.filter(t => isApprovedTransaction(t.status));
     const _boletoConversion = boletoTx.length > 0 ? (boletoApproved.length / boletoTx.length) * 100 : 0;
 
     const _chargebackRate = filteredTx.length > 0 ? (filteredTx.filter(t => t.status === "chargeback").length / filteredTx.length) * 100 : 0;
@@ -224,7 +224,7 @@ export default function Dashboard() {
     if (isSingleDay) {
       const salesByHour = new Map<number, number>();
       filteredTx.forEach(t => {
-        if (t.status !== "completed") return;
+        if (!isApprovedTransaction(t.status)) return;
         const hour = new Date(t.created_at).getHours();
         salesByHour.set(hour, (salesByHour.get(hour) || 0) + Number(t.net_amount));
       });
@@ -245,7 +245,7 @@ export default function Dashboard() {
     if (spanDays > 60) {
       const byMonth = new Map<string, number>();
       filteredTx.forEach(t => {
-        if (t.status !== "completed") return;
+        if (!isApprovedTransaction(t.status)) return;
         const d = new Date(t.created_at);
         const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
         byMonth.set(key, (byMonth.get(key) || 0) + Number(t.net_amount));
@@ -270,7 +270,7 @@ export default function Dashboard() {
     // 3) DAILY (default)
     const revenueByDate = new Map<string, number>();
     filteredTx.forEach(t => {
-      if (t.status !== "completed") return;
+      if (!isApprovedTransaction(t.status)) return;
       const dateKey = toBrasiliaDate(t.created_at);
       revenueByDate.set(dateKey, (revenueByDate.get(dateKey) || 0) + Number(t.net_amount));
     });
@@ -334,15 +334,15 @@ export default function Dashboard() {
   const hour = new Date().getHours();
   const greeting = hour < 12 ? "Bom dia" : hour < 18 ? "Boa tarde" : "Boa noite";
   const nickname = profile?.nickname || profile?.full_name?.split(" ")[0] || "Vendedor";
-  const statusLabel = (s: string) => s === 'completed' ? 'Aprovado' : s === 'pending' ? 'Pendente' : s === 'refunded' ? 'Reembolso' : s === 'chargeback' ? 'Chargeback' : s === 'failed' || s === 'refused' ? 'Falhou' : 'Chargeback';
+  const statusLabel = (s: string) => isApprovedTransaction(s) ? 'Aprovado' : s === 'pending' ? 'Pendente' : s === 'refunded' ? 'Reembolso' : s === 'chargeback' ? 'Chargeback' : s === 'failed' || s === 'refused' ? 'Falhou' : 'Chargeback';
   const statusBg = (s: string) =>
-    s === 'completed' ? 'bg-emerald-500/20 ring-1 ring-emerald-500/40'
+    isApprovedTransaction(s) ? 'bg-emerald-500/20 ring-1 ring-emerald-500/40'
     : s === 'pending' ? 'bg-amber-400/25 ring-1 ring-amber-400/50'
     : s === 'chargeback' ? 'bg-red-600/25 ring-1 ring-red-600/50'
     : s === 'refunded' ? 'bg-muted/40 ring-1 ring-border/40'
     : 'bg-red-500/20 ring-1 ring-red-500/40';
   const statusColor = (s: string) =>
-    s === 'completed' ? 'text-emerald-500'
+    isApprovedTransaction(s) ? 'text-emerald-500'
     : s === 'pending' ? 'text-amber-500'
     : s === 'chargeback' ? 'text-red-600'
     : s === 'refunded' ? 'text-muted-foreground'
@@ -350,7 +350,7 @@ export default function Dashboard() {
 
   const pendingBalance = useMemo(() => {
     return transactions
-      .filter(t => t.status === "completed" && t.retained_until && new Date(t.retained_until) > new Date())
+      .filter(t => isApprovedTransaction(t.status) && t.retained_until && new Date(t.retained_until) > new Date())
       .reduce((acc, t) => acc + Number(t.retained_amount || 0), 0);
   }, [transactions]);
 
@@ -382,7 +382,7 @@ export default function Dashboard() {
       const d = new Date(t.created_at);
       return d >= prevStart && d <= prevEnd;
     });
-    const prevApp = prevTx.filter(t => t.status === "completed");
+    const prevApp = prevTx.filter(t => isApprovedTransaction(t.status));
     return {
       prevApprovedCount: prevApp.length,
       prevRevenue: prevApp.reduce((acc, t) => acc + Number(t.net_amount), 0),
@@ -573,7 +573,7 @@ export default function Dashboard() {
 
       {/* Hero Financial Row */}
       <div className="contents lg:grid lg:grid-cols-4 lg:gap-6">
-        <Card className="order-1 lg:order-none seller-hover-card lg:col-span-2 relative overflow-hidden group border-primary/20 bg-gradient-to-br from-primary/[0.04] via-card to-card rounded-[1.35rem] min-h-0 sm:rounded-3xl lg:min-h-[220px]">
+        <Card className="order-1 lg:order-none seller-hover-card dashboard-hero-card lg:col-span-2 relative overflow-hidden group border-primary/25 bg-card rounded-[1.35rem] min-h-0 sm:rounded-3xl lg:min-h-[220px]">
           {/* Main card inner glow */}
           <div className="absolute inset-px rounded-[1.45rem] bg-gradient-to-br from-primary/[0.01] to-transparent pointer-events-none" />
           
@@ -623,7 +623,7 @@ export default function Dashboard() {
                 <button
                   type="button"
                   onClick={() => setPixDialogOpen(true)}
-                  className="seller-action flex h-11 items-center justify-center gap-2 whitespace-nowrap rounded-xl bg-background/60 px-3 text-[11px] font-bold text-foreground hover:bg-accent sm:px-4 sm:text-[12px]"
+                  className="seller-action dashboard-quick-pix flex h-11 items-center justify-center gap-2 whitespace-nowrap rounded-xl bg-card px-3 text-[11px] font-bold text-foreground hover:bg-primary/[0.06] sm:px-4 sm:text-[12px]"
                 >
                   <Zap className="h-4 w-4 text-success shrink-0" />
                   <span>Gerar Pix</span>
@@ -686,7 +686,7 @@ export default function Dashboard() {
 
       {/* Main Operations Grid */}
       <div className="contents lg:grid lg:grid-cols-3 lg:gap-6 lg:items-stretch">
-        <Card className="order-2 lg:order-none seller-hover-card lg:col-span-2 flex h-full flex-col overflow-hidden rounded-[1.35rem] border-border/40 sm:rounded-3xl">
+        <Card className="order-2 lg:order-none seller-hover-card dashboard-sales-flow-card lg:col-span-2 flex h-full flex-col overflow-hidden rounded-[1.35rem] border-border/50 sm:rounded-3xl">
           <CardHeader className="flex flex-col gap-3 border-b border-border/40 px-4 py-4 min-[520px]:flex-row min-[520px]:items-center min-[520px]:justify-between sm:px-6 sm:py-5 md:px-8">
             <div>
               <CardTitle className="text-base font-bold sm:text-lg">Fluxo de Vendas</CardTitle>
@@ -732,11 +732,11 @@ export default function Dashboard() {
                     content={({ active, payload }) => {
                       if (active && payload && payload.length) {
                         return (
-                          <div className="bg-card/95 backdrop-blur-md border border-border/50 p-4 rounded-2xl shadow-2xl animate-in fade-in zoom-in duration-200">
-                            <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground mb-1">
+                          <div className="dashboard-chart-tooltip animate-in fade-in zoom-in-95 duration-200">
+                            <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/70 mb-1">
                               {payload[0].payload.fullLabel || payload[0].payload.name}
                             </p>
-                            <p className="text-xl font-black text-primary tracking-tight">
+                            <p className="text-[22px] font-black text-primary tracking-tight tabular-nums leading-none">
                               {fmt(payload[0].value as number)}
                             </p>
                           </div>
@@ -767,7 +767,7 @@ export default function Dashboard() {
           </CardContent>
         </Card>
 
-        <Card className="order-5 lg:order-none seller-hover-card flex h-full flex-col overflow-hidden rounded-[1.35rem] border-border/40 bg-gradient-to-b from-card to-background/20 sm:rounded-3xl">
+        <Card className="order-5 lg:order-none seller-hover-card flex h-full flex-col overflow-hidden rounded-[1.35rem] border-border/50 bg-card sm:rounded-3xl">
           <CardHeader className="border-b border-border/40 px-4 py-4 sm:px-6 sm:py-5">
             <div className="flex items-center justify-between">
               <div>

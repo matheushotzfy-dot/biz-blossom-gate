@@ -9,7 +9,7 @@ import { TransactionDetailPanel } from "@/components/transactions/TransactionDet
 import { PixLogoMark } from "@/components/icons/PixLogoMark";
 import type { Tables } from "@/integrations/supabase/types";
 import { Button } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
+import { cn, isApprovedTransaction } from "@/lib/utils";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
@@ -197,7 +197,7 @@ export default function Vendas() {
   };
 
   const stats = useMemo(() => {
-    const approved = filteredByDate.filter(t => t.status === "completed");
+    const approved = filteredByDate.filter(t => isApprovedTransaction(t.status));
     const revenue = approved.reduce((acc, t) => acc + Number(t.net_amount), 0);
     const gross = approved.reduce((acc, t) => acc + Number(t.amount), 0);
     return {
