@@ -27,16 +27,31 @@ import { FinanceiroHero, FinanceiroKpi, FinanceiroKpiGrid } from "@/components/f
 import { PremiumPanel, PremiumEmpty, premiumTable } from "./AdminPremium";
 import { logAdminAction } from "@/lib/auditLog";
 import { cn } from "@/lib/utils";
+import { z } from "zod";
 
 type Dispute = Tables<"disputes"> & { buyer_name?: string | null };
 type BalanceAdjustment = Tables<"balance_adjustments">;
 type IpLog = { ip: string; user_agent: string | null; country: string | null; source: string | null; created_at: string };
 
-interface ActivityLog {
-  id: string; user_id: string; action: string; entity_type: string;
-  entity_id: string | null; old_data: Record<string, unknown> | null;
-  new_data: Record<string, unknown> | null; created_at: string;
-}
+// Zod schema to safely parse jsonb columns from activity_logs.
+// Falls back to null when the payload doesn't match the expected shape,
+// preventing fragile reads of missing fields.
+const jsonRecordSchema = z.record(z.unknown()).nullable();
+const activityLogSchema = z.object({
+  id: z.string(),
+  user_id: z.string(),
+  action: z.string(),
+  entity_type: z.string(),
+  entity_id: z.string().nullable(),
+  old_data: jsonRecordSchema.catch(null),
+  new_data: jsonRecordSchema.catch(null),
+  created_at: z.string(),
+});
+const deletedProductDataSchema = z
+  .object({ name: z.string().optional(), price: z.coerce.number().optional() })
+  .partial();
+
+type ActivityLog = z.infer<typeof activityLogSchema>;
 
 interface Acquirer {
   id: string; name: string; slug: string; type: string; is_active: boolean;
@@ -151,7 +166,10 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
         supabase.from("retention_settings").select("id, user_id, pix_retention_pct, card_retention_pct, retention_days, card_release_days").eq("user_id", profile.user_id).maybeSingle(),
         supabase.from("ip_logs").select("ip, user_agent, country, source, created_at").eq("user_id", profile.user_id).order("created_at", { ascending: false }).limit(50),
       ]);
-      if (logsRes.data) setUserLogs(logsRes.data as ActivityLog[]);
+      if (logsRes.data) {
+        const parsed = z.array(activityLogSchema).safeParse(logsRes.data);
+        setUserLogs(parsed.success ? parsed.data : []);
+      }
 
       if (productsRes.data) setUserProducts(productsRes.data as Tables<"products">[]);
       if (wdRes.data) setUserWithdrawals(wdRes.data as Tables<"withdrawals">[]);
@@ -451,9 +469,10 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
   };
 
   const deletedProducts = userLogs.filter(l => l.action === "product_deleted").map(l => {
-    const od = (l.old_data as { name?: string; price?: number } | null) ?? null;
+    const od = deletedProductDataSchema.safeParse(l.old_data ?? {});
+    const data = od.success ? od.data : {};
     return {
-      id: l.entity_id, name: od?.name || "Desconhecido", price: od?.price ?? 0,
+      id: l.entity_id, name: data.name || "Desconhecido", price: data.price ?? 0,
       deletedAt: l.created_at, data: l.old_data,
     };
   });
