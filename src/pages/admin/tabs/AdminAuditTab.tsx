@@ -70,7 +70,7 @@ export default function AdminAuditTab({ profiles }: Props) {
         }));
       }
       if (source === "all" || source === "activity") {
-        (lRes.data || []).forEach((r: any) => merged.push({
+        (lRes.data || []).forEach((r) => merged.push({
           id: `l-${r.id}`, source: "activity", actor_id: r.user_id,
           actor_role: "user", action: r.action, entity_type: r.entity_type,
           entity_id: r.entity_id, details: { old: r.old_data, new: r.new_data },
