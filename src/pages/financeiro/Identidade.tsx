@@ -305,7 +305,7 @@ export default function Identidade() {
                       </div>
                       <div className="min-w-0 flex-1">
                         <p className="text-[9px] font-black text-primary uppercase tracking-widest">{pixKeyLabels[pk.key_type] || pk.key_type}</p>
-                        <p className="font-mono text-[11px] text-foreground truncate font-bold">{pk.key_value}</p>
+                        <p className="font-mono text-[11px] text-foreground truncate font-bold">{(pk as any).key_value_masked ?? pk.key_value ?? "•••"}</p>
                       </div>
                     </div>
                   ))}
@@ -345,7 +345,7 @@ export default function Identidade() {
                       </div>
                       <div className="min-w-0">
                         <p className="text-[12px] font-black text-foreground tracking-tight">{acc.bank_name}</p>
-                        <p className="text-[10px] font-bold font-mono text-muted-foreground/70">Ag. {acc.agency} · Cc. {acc.account_number}</p>
+                        <p className="text-[10px] font-bold font-mono text-muted-foreground/70">Ag. {acc.agency} · Cc. {(acc as any).account_number_masked ?? acc.account_number ?? "••••"}</p>
                       </div>
                     </div>
                   ))}
