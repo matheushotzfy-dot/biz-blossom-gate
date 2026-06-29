@@ -591,7 +591,7 @@ export default function ProductEditor() {
  const removeCoProducer = async (id: string) => {
    const { error } = await supabase.from("co_productions").delete().eq("id", id);
    if (error) { toast.error("Erro ao remover"); return; }
-   setCoProductionsList(prev => prev.filter((c: Record<string, any>) => c.id !== id));
+   setCoProductionsList(prev => prev.filter((c) => c.id !== id));
    toast.success("Co-produtor removido");
  };
 
