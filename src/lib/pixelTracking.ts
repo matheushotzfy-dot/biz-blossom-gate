@@ -111,12 +111,13 @@ function loadTikTokPixel(pixelId: string) {
 
   const w = window as PixelWindow;
   if (!w.ttq) {
-    const ttq: any = (w.ttq = w.ttq || []);
+    type TtqShim = unknown[] & Record<string, unknown>;
+    const ttq = (w.ttq = (w.ttq || []) as TtqShim);
     ttq.methods = ['page', 'track', 'identify', 'instances', 'debug', 'on', 'off', 'once', 'ready', 'alias', 'group', 'enableCookie', 'disableCookie'];
-    ttq.setAndDefer = function (t: any, e: string) {
-      t[e] = function (...args: any[]) { t.push([e].concat(args)); };
+    ttq.setAndDefer = function (t: Record<string, unknown> & { push?: (v: unknown[]) => void }, e: string) {
+      t[e] = function (...args: unknown[]) { (t.push as (v: unknown[]) => void)([e, ...args]); };
     };
-    for (const method of ttq.methods) ttq.setAndDefer(ttq, method);
+    for (const method of ttq.methods as string[]) (ttq.setAndDefer as (t: unknown, e: string) => void)(ttq, method);
     ttq.instance = function (t: string) {
       const e = ttq._i[t] || [];
       for (const method of ttq.methods) ttq.setAndDefer(e, method);
