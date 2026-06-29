@@ -109,10 +109,10 @@ export default function AdminRewardsTab({ profiles }: { profiles: { user_id: str
   };
   const getEmail = (uid: string) => profiles.find(pr => pr.user_id === uid)?.email || "";
 
-  const updateStatus = async (c: Claim, status: string, extra: any = {}) => {
-    const payload: any = { status, ...extra };
+  const updateStatus = async (c: Claim, status: string, extra: Partial<Claim> = {}) => {
+    const payload: Partial<Claim> = { status, ...extra };
     if (status === "delivered" && !c.delivered_at) payload.delivered_at = new Date().toISOString();
-    const { error } = await (supabase as any).from("reward_claims").update(payload).eq("id", c.id);
+    const { error } = await supabase.from("reward_claims").update(payload).eq("id", c.id);
     if (error) { toast.error("Erro ao atualizar status"); return; }
     await logAdminAction("update_reward_claim_status", "reward_claim", c.id, { status });
     toast.success(`Status atualizado: ${STATUS_META[status]?.label || status}`);
@@ -122,7 +122,7 @@ export default function AdminRewardsTab({ profiles }: { profiles: { user_id: str
   const saveClaim = async () => {
     if (!selected) return;
     setSaving(true);
-    const payload: any = {
+    const payload: Partial<Claim> = {
       status: editStatus,
       tracking_carrier: editCarrier.trim() || null,
       tracking_code: editCode.trim() || null,
@@ -135,7 +135,7 @@ export default function AdminRewardsTab({ profiles }: { profiles: { user_id: str
     if (editStatus !== "delivered" && selected.delivered_at) {
       payload.delivered_at = null;
     }
-    const { error } = await (supabase as any).from("reward_claims").update(payload).eq("id", selected.id);
+    const { error } = await supabase.from("reward_claims").update(payload).eq("id", selected.id);
     setSaving(false);
     if (error) { toast.error("Erro ao atualizar"); return; }
     await logAdminAction("update_reward_claim", "reward_claim", selected.id, { status: editStatus });
