@@ -197,14 +197,17 @@ export default function AdminNotificationsTab({ profiles }: Props) {
  <div className="space-y-5 mt-2">
  <div>
  <Label className="text-[11px] text-muted-foreground uppercase tracking-wider font-semibold">Destinatário</Label>
- <div className="flex gap-2 mt-2">
- <button onClick={() => setSendTarget("all")} className={cn("flex-1 py-3 rounded-xl border text-[12px] font-semibold transition-all flex items-center justify-center gap-2", sendTarget === "all" ? "bg-primary/10 border-primary/30 text-primary" : "bg-muted/30 border-border text-muted-foreground hover:text-foreground")}>
- <Users className="h-4 w-4" /> Todos os Sellers
- </button>
- <button onClick={() => setSendTarget("specific")} className={cn("flex-1 py-3 rounded-xl border text-[12px] font-semibold transition-all flex items-center justify-center gap-2", sendTarget === "specific" ? "bg-primary/10 border-primary/30 text-primary" : "bg-muted/30 border-border text-muted-foreground hover:text-foreground")}>
- <User className="h-4 w-4" /> Seller Específico
- </button>
- </div>
+  <div className="grid grid-cols-3 gap-2 mt-2">
+  <button onClick={() => setSendTarget("all_sellers")} className={cn("py-3 rounded-xl border text-[11px] font-semibold transition-all flex items-center justify-center gap-1.5", sendTarget === "all_sellers" ? "bg-primary/10 border-primary/30 text-primary" : "bg-muted/30 border-border text-muted-foreground hover:text-foreground")}>
+  <Users className="h-4 w-4" /> Todos
+  </button>
+  <button onClick={() => setSendTarget("active_sellers")} className={cn("py-3 rounded-xl border text-[11px] font-semibold transition-all flex items-center justify-center gap-1.5", sendTarget === "active_sellers" ? "bg-primary/10 border-primary/30 text-primary" : "bg-muted/30 border-border text-muted-foreground hover:text-foreground")}>
+  <CheckCircle2 className="h-4 w-4" /> Só ativos
+  </button>
+  <button onClick={() => setSendTarget("specific")} className={cn("py-3 rounded-xl border text-[11px] font-semibold transition-all flex items-center justify-center gap-1.5", sendTarget === "specific" ? "bg-primary/10 border-primary/30 text-primary" : "bg-muted/30 border-border text-muted-foreground hover:text-foreground")}>
+  <User className="h-4 w-4" /> Específico
+  </button>
+  </div>
  </div>
  {sendTarget === "specific" && (
  <div>
