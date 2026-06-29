@@ -77,12 +77,12 @@ export default function NotasFiscais() {
 
   const invoices = useMemo<InvoiceRow[]>(() => {
     const rows = rawDeliveries.map((d, i) => {
-      const tx = d.transactions || {};
+      const tx = d.transactions;
       return {
         id: d.id,
         number: `NF-${String(rawDeliveries.length - i).padStart(6, "0")}`,
-        customer: tx.customer_name || tx.customer_email || "Cliente",
-        amount: Number(tx.amount || 0),
+        customer: tx?.customer_name || tx?.customer_email || "Cliente",
+        amount: Number(tx?.amount || 0),
         date: d.delivered_at || d.created_at,
         status: (d.status as DeliveryStatus) ?? "pending",
         error: d.error ?? null,
