@@ -86,7 +86,7 @@ export default function AdminNotificationsTab({ profiles }: Props) {
   const handlePurgeOrphans = async () => {
     if (!window.confirm("Remover notificações antigas que nenhum seller conseguia ler (user_id nulo)?")) return;
     setPurging(true);
-    const { data, error } = await (supabase as any).rpc("admin_purge_orphan_notifications");
+    const { data, error } = await supabase.rpc("admin_purge_orphan_notifications");
     setPurging(false);
     if (error) { toast.error("Erro: " + error.message); return; }
     toast.success(`${Number(data || 0)} notificação(ões) órfã(s) removida(s)`);
