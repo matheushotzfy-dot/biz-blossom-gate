@@ -41,13 +41,19 @@ type AnalyticsPayload = {
 };
 
 /* ── Sigma Tooltip ── */
-function SigmaTooltip({ active, payload, label, fmtCurrency }: any) {
+type TooltipEntry = { dataKey: string; name?: string; value: number | string; color?: string };
+function SigmaTooltip({ active, payload, label, fmtCurrency }: {
+  active?: boolean;
+  payload?: TooltipEntry[];
+  label?: string | number;
+  fmtCurrency: (v: number) => string;
+}) {
   if (!active || !payload?.length) return null;
   return (
     <div className="rounded-md border border-border bg-card px-3 py-2 font-mono shadow-lg">
-      {label && <p className="mb-1.5 text-[9px] font-bold uppercase tracking-[0.18em] text-muted-foreground">{label}</p>}
+      {label !== undefined && <p className="mb-1.5 text-[9px] font-bold uppercase tracking-[0.18em] text-muted-foreground">{label}</p>}
       <div className="space-y-1">
-        {payload.map((p: any) => (
+        {payload.map((p) => (
           <div key={p.dataKey} className="flex items-center justify-between gap-6 text-[11px]">
             <div className="flex items-center gap-1.5">
               <span className="h-2 w-2 rounded-sm" style={{ background: p.color }} />
