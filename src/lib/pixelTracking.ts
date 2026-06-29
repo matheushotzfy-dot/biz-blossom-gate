@@ -20,6 +20,7 @@ export interface PixelConfig {
 }
 
 // Window augmented with arbitrary pixel SDK globals (fbq, gtag, ttq, kwaiq, dataLayer, ...)
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 type PixelWindow = Window & typeof globalThis & Record<string, any>;
 
 // Track which scripts have been loaded
@@ -40,9 +41,16 @@ function loadFacebookPixel(pixelId: string) {
 
   const w = window as PixelWindow;
   if (!w.fbq) {
-    const n: any = function (...args: any[]) {
-      n.callMethod ? n.callMethod.apply(n, args) : n.queue.push(args);
+    type FbqFn = ((...args: unknown[]) => void) & {
+      callMethod?: (...args: unknown[]) => void;
+      queue: unknown[];
+      push: unknown;
+      loaded: boolean;
+      version: string;
     };
+    const n = function (...args: unknown[]) {
+      n.callMethod ? n.callMethod.apply(n, args) : n.queue.push(args);
+    } as FbqFn;
     w.fbq = n;
     if (!w._fbq) w._fbq = n;
     n.push = n;
@@ -67,7 +75,7 @@ function loadGoogleAds(conversionId: string) {
 
   const w = window as PixelWindow;
   w.dataLayer = w.dataLayer || [];
-  w.gtag = function (...args: any[]) { w.dataLayer.push(args); };
+  w.gtag = function (...args: unknown[]) { w.dataLayer.push(args); };
   w.gtag('js', new Date());
   w.gtag('config', conversionId);
 
@@ -85,7 +93,7 @@ function loadGoogleAnalytics(measurementId: string) {
 
   const w = window as PixelWindow;
   w.dataLayer = w.dataLayer || [];
-  w.gtag = function (...args: any[]) { w.dataLayer.push(args); };
+  w.gtag = function (...args: unknown[]) { w.dataLayer.push(args); };
   w.gtag('js', new Date());
   w.gtag('config', safeId);
 
@@ -149,7 +157,7 @@ function loadKwaiPixel(pixelId: string) {
       document.head.appendChild(s);
     };
     kwaiq.page = function () { kwaiq.queue.push(['page']); };
-    kwaiq.track = function (...args: any[]) { kwaiq.queue.push(['track', ...args]); };
+    kwaiq.track = function (...args: unknown[]) { kwaiq.queue.push(['track', ...args]); };
   }
   w.kwaiq.load(safeId);
 }
@@ -200,7 +208,7 @@ const TIKTOK_EVENT_MAP: Record<string, string> = {
 
 // ============ FIRE EVENTS ============
 
-function fireFacebookEvent(pixelId: string, eventName: string, params?: Record<string, any>) {
+function fireFacebookEvent(pixelId: string, eventName: string, params?: Record<string, unknown>) {
   const w = window as PixelWindow;
   if (!w.fbq) return;
   const fbEvent = FB_EVENT_MAP[eventName] || eventName;
@@ -211,7 +219,7 @@ function fireFacebookEvent(pixelId: string, eventName: string, params?: Record<s
   w.fbq('trackSingle', pixelId, fbEvent, fbParams, eventId ? { eventID: eventId } : undefined);
 }
 
-function fireGoogleAdsEvent(conversionId: string, eventName: string, params?: Record<string, any>) {
+function fireGoogleAdsEvent(conversionId: string, eventName: string, params?: Record<string, unknown>) {
   const w = window as PixelWindow;
   if (!w.gtag) return;
   const gaEvent = GA_EVENT_MAP[eventName] || eventName;
@@ -226,14 +234,14 @@ function fireGoogleAdsEvent(conversionId: string, eventName: string, params?: Re
   }
 }
 
-function fireGoogleAnalyticsEvent(measurementId: string, eventName: string, params?: Record<string, any>) {
+function fireGoogleAnalyticsEvent(measurementId: string, eventName: string, params?: Record<string, unknown>) {
   const w = window as PixelWindow;
   if (!w.gtag) return;
   const gaEvent = GA_EVENT_MAP[eventName] || eventName;
   w.gtag('event', gaEvent, { send_to: measurementId, ...params });
 }
 
-function fireTikTokEvent(pixelId: string, eventName: string, params?: Record<string, any>) {
+function fireTikTokEvent(pixelId: string, eventName: string, params?: Record<string, unknown>) {
   const w = window as PixelWindow;
   if (!w.ttq) return;
   const ttEvent = TIKTOK_EVENT_MAP[eventName] || eventName;
@@ -244,7 +252,7 @@ function fireTikTokEvent(pixelId: string, eventName: string, params?: Record<str
   }
 }
 
-function fireKwaiEvent(pixelId: string, eventName: string, params?: Record<string, any>) {
+function fireKwaiEvent(pixelId: string, eventName: string, params?: Record<string, unknown>) {
   const w = window as PixelWindow;
   if (!w.kwaiq) return;
   if (eventName === 'PageView') {
@@ -314,7 +322,7 @@ export function firePixelEvent(
     const events = Array.isArray(px.events) ? px.events : [];
     if (!events.includes(eventName)) continue;
 
-    let eventParams: Record<string, any> = { ...params, currency: params?.currency || 'BRL', event_id: eventId };
+    let eventParams: Record<string, unknown> = { ...params, currency: params?.currency || 'BRL', event_id: eventId };
     // Remove internal keys
     delete eventParams.session_key;
 

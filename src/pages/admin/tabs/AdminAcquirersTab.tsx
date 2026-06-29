@@ -6,7 +6,11 @@ import {
   Users, ArrowRightLeft, KeyRound, Webhook, History, RefreshCw,
   CheckCircle2, XCircle, Copy, ChevronRight, Search, ShieldCheck,
   FileCheck2, DollarSign, Network, Lock, Building2, Receipt,
+  type LucideIcon,
 } from "lucide-react";
+import type { Tables, TablesInsert } from "@/integrations/supabase/types";
+
+type BulkSeller = { user_id: string; full_name: string | null; email: string | null; nickname: string | null; acquirer_id: string | null; account_status: string | null };
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
@@ -158,10 +162,10 @@ export default function AdminAcquirersTab() {
       if (["failed", "refused"].includes(t.status)) stats[aid].refused++;
       if (t.status === "refunded") stats[aid].refunded++;
     });
-    const medTxIds = new Set((dispRes.data || []).filter((d: any) => d.type === "medpix" || d.type === "med").map((d: any) => d.transaction_id));
+    const medTxIds = new Set((dispRes.data || []).filter(d => d.type === "medpix" || d.type === "med").map(d => d.transaction_id));
     if (medTxIds.size > 0) {
       const { data: medTx } = await supabase.from("transactions").select("user_id").in("id", Array.from(medTxIds) as string[]);
-      (medTx || []).forEach((t: any) => {
+      (medTx || []).forEach(t => {
         const aid = sellerAcq.get(t.user_id); if (aid && stats[aid]) stats[aid].medpix++;
       });
     }
@@ -212,7 +216,7 @@ export default function AdminAcquirersTab() {
 
   const handleSave = async () => {
     if (!form.name || !form.slug) { toast.error("Nome e slug obrigatórios"); return; }
-    const payload: any = {
+    const payload: TablesInsert<"acquirers"> = {
       name: form.name, slug: form.slug, type: form.type,
       api_endpoint: form.api_endpoint || null, description: form.description || null,
       conversion_rate: form.conversion_rate || 0, seller_visible: form.seller_visible || false,
@@ -239,7 +243,7 @@ export default function AdminAcquirersTab() {
   };
 
   const toggleField = async (acq: Acquirer, field: "is_active" | "seller_visible" | "allow_failover") => {
-    const newVal = !(acq as any)[field];
+    const newVal = !acq[field];
     const { error } = await supabase.from("acquirers").update({ [field]: newVal }).eq("id", acq.id);
     if (error) { toast.error("Erro"); return; }
     toast.success("Atualizada");
@@ -815,7 +819,7 @@ export default function AdminAcquirersTab() {
 
 // ============== Detail Drawer ==============
 function AcquirerDetail({ acq, stats, healthEvents, failovers, sellersOfAcq, txsOfAcq, onEdit, onSetHealth, onToggle }: {
-  acq: Acquirer; stats?: any; healthEvents: HealthEvent[]; failovers: FailoverEvent[];
+  acq: Acquirer; stats?: { sales: number; volume: number; refused: number; refunded: number; medpix: number; sellers: number; fees: number; net: number }; healthEvents: HealthEvent[]; failovers: FailoverEvent[];
   sellersOfAcq: SellerLite[]; txsOfAcq: TxLite[];
   onEdit: () => void; onSetHealth: (s: Health) => void; onToggle: (f: "is_active" | "seller_visible" | "allow_failover") => void;
 }) {
@@ -1040,7 +1044,7 @@ function AcquirerDetail({ acq, stats, healthEvents, failovers, sellersOfAcq, txs
   );
 }
 
-function Metric({ label, value, icon: Icon, tone }: { label: string; value: string; icon: any; tone: string }) {
+function Metric({ label, value, icon: Icon, tone }: { label: string; value: string; icon: LucideIcon; tone: string }) {
   const toneCls: Record<string, string> = {
     success: "text-success", primary: "text-primary", info: "text-info",
     warning: "text-warning", danger: "text-destructive", neutral: "text-muted-foreground",
@@ -1056,7 +1060,7 @@ function Metric({ label, value, icon: Icon, tone }: { label: string; value: stri
   );
 }
 
-function ToggleRow({ label, desc, checked, onChange }: any) {
+function ToggleRow({ label, desc, checked, onChange }: { label: string; desc: string; checked: boolean; onChange: (v: boolean) => void }) {
   return (
     <div className="flex items-center justify-between">
       <div>
@@ -1085,16 +1089,17 @@ function KV({ k, v, mono, copy }: { k: string; v: string; mono?: boolean; copy?:
 }
 
 // ============== Form ==============
-function AcquirerForm({ form, setForm, onSave, onCancel }: any) {
+type AcquirerFormShape = Partial<Acquirer> & { supported_methods?: string[] };
+function AcquirerForm({ form, setForm, onSave, onCancel }: { form: AcquirerFormShape; setForm: (f: AcquirerFormShape) => void; onSave: () => void; onCancel: () => void }) {
   const toggleMethod = (m: string) => {
     const cur = form.supported_methods || [];
     setForm({ ...form, supported_methods: cur.includes(m) ? cur.filter((x: string) => x !== m) : [...cur, m] });
   };
-  const set = (k: string, v: any) => setForm({ ...form, [k]: v });
-  const Input = ({ label, k, type = "text", placeholder = "", mono = false, hint = "" }: any) => (
+  const set = (k: keyof AcquirerFormShape, v: unknown) => setForm({ ...form, [k]: v });
+  const Input = ({ label, k, type = "text", placeholder = "", mono = false, hint = "" }: { label: string; k: keyof AcquirerFormShape; type?: string; placeholder?: string; mono?: boolean; hint?: string }) => (
     <div>
       <Label className="text-[10px] text-muted-foreground">{label}</Label>
-      <input type={type} value={form[k] ?? ""} onChange={e => set(k, type === "number" ? parseFloat(e.target.value) || 0 : e.target.value)}
+      <input type={type} value={String(form[k] ?? "")} onChange={e => set(k, type === "number" ? parseFloat(e.target.value) || 0 : e.target.value)}
         placeholder={placeholder}
         className={cn("w-full h-9 px-3 bg-muted/30 border border-border rounded-lg text-xs text-foreground mt-1", mono && "font-mono")} />
       {hint && <p className="text-[9px] text-muted-foreground mt-1">{hint}</p>}
@@ -1203,7 +1208,7 @@ function AcquirerForm({ form, setForm, onSave, onCancel }: any) {
 
 // ============== Bulk Assignment ==============
 function BulkAssign({ acquirers, onDone }: { acquirers: Acquirer[]; onDone: () => void }) {
-  const [sellers, setSellers] = useState<any[]>([]);
+  const [sellers, setSellers] = useState<BulkSeller[]>([]);
   const [filter, setFilter] = useState<"all" | "white" | "black" | "none">("all");
   const [search, setSearch] = useState("");
   const [selected, setSelected] = useState<Set<string>>(new Set());
@@ -1240,13 +1245,13 @@ function BulkAssign({ acquirers, onDone }: { acquirers: Acquirer[]; onDone: () =
     if (!targetAcq) { toast.error("Selecione a adquirente destino"); return; }
     if (selected.size === 0) { toast.error("Selecione ao menos 1 seller"); return; }
     setRunning(true);
-    const { data, error } = await (supabase as any).rpc("admin_bulk_assign_acquirer", {
+    const { data, error } = await supabase.rpc("admin_bulk_assign_acquirer", {
       _seller_ids: Array.from(selected), _new_acquirer_id: targetAcq, _reason: reason,
     });
     setRunning(false);
     if (error) { toast.error("Erro: " + error.message); return; }
-    const successCount = (data || []).filter((r: any) => r.success).length;
-    const failCount = (data || []).filter((r: any) => !r.success).length;
+    const successCount = (data || []).filter(r => r.success).length;
+    const failCount = (data || []).filter(r => !r.success).length;
     toast.success(`${successCount} alterados${failCount ? `, ${failCount} falharam` : ""}`);
     await logAdminAction("bulk_assign_acquirer", "acquirer", targetAcq, { count: successCount, reason });
     onDone();
