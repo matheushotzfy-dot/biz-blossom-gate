@@ -437,8 +437,8 @@ export default function ProductEditor() {
   } else {
   // Auto-promove de 'draft' para 'active' quando todos os campos essenciais foram preenchidos.
   // Não toca em status definidos pelo admin (pending_review/inactive).
-  const updatePayload: any = { ...productData };
-  const currentStatus = (product as any)?.status;
+  const updatePayload: TablesUpdate<"products"> = { ...productData };
+  const currentStatus = product?.status;
   const hasAllEssentials = name.trim().length > 1 && priceNum >= 1 && (description.trim().length >= 10) && !!imageUrl;
   if (currentStatus === "draft" && hasAllEssentials) {
     updatePayload.status = "active";
