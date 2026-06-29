@@ -3944,6 +3944,7 @@ export type Database = {
           user_id: string
         }[]
       }
+      apply_transaction_splits: { Args: { _tx_id: string }; Returns: undefined }
       bump_rate_limit: {
         Args: {
           _bucket_key: string
@@ -4100,6 +4101,10 @@ export type Database = {
         Returns: number
       }
       resolve_commission_staff: { Args: { _seller: string }; Returns: string }
+      reverse_transaction_splits: {
+        Args: { _tx_id: string }
+        Returns: undefined
+      }
       set_max_ticket_for_all: { Args: { _new_value: number }; Returns: Json }
       set_max_ticket_new_users_only: {
         Args: { _new_value: number }

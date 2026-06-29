@@ -369,11 +369,8 @@ Deno.serve(async (req) => {
           safeLog('Error updating transaction', { transactionId: tx.id, error: error.message });
         } else {
           safeLog('Transaction updated', { transactionId: tx.id, status: ourStatus });
-          // === AUTO SPLIT: process co-production split on completed payment ===
-          if (ourStatus === 'completed') {
-            await processCoProductionSplit(supabase, tx.id);
-            await processAffiliateSplit(supabase, tx.id);
-          }
+          // Splits (coprodução + afiliado) são aplicados automaticamente pelo trigger
+          // ledger_on_transaction_change → apply_transaction_splits(tx.id) no banco.
         }
       }
     }
