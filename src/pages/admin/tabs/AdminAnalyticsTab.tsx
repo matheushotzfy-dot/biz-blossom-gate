@@ -389,7 +389,7 @@ export default function AdminAnalyticsTab({ fmtCurrency }: Props) {
 }
 
 function FunnelStep({ label, value, icon: Icon, tone = "neutral", pct, sub }: {
-  label: string; value: string; icon: any;
+  label: string; value: string; icon: LucideIcon;
   tone?: "neutral" | "success" | "destructive" | "warning" | "primary";
   pct?: number; sub?: string;
 }) {
