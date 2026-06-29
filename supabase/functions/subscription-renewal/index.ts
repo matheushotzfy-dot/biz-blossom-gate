@@ -128,18 +128,31 @@ Deno.serve(async (req) => {
       const feeAmount = Math.round((plan.price * pctFee + fixedFee) * 100) / 100;
       const netAmount = Math.max(0, Math.round((plan.price - feeAmount) * 100) / 100);
 
-      // Create a renewal transaction
-      const { error: txError } = await supabase.from("transactions").insert({
-        user_id: sub.seller_user_id,
-        amount: plan.price,
-        fee_amount: feeAmount,
-        net_amount: netAmount,
-        status: "completed",
-        payment_method: "subscription",
-        customer_email: sub.subscriber_email,
-        customer_name: sub.subscriber_name,
-        is_simulated: false,
-      });
+      // Idempotency: one renewal tx per (subscription, period_end) via podpay_event_id
+      const periodKey = `sub_${sub.id}_${periodEnd.toISOString()}`;
+      const { data: existing } = await supabase
+        .from("transactions")
+        .select("id")
+        .eq("podpay_event_id", periodKey)
+        .maybeSingle();
+
+      let txError: { message: string } | null = null;
+      if (!existing) {
+        const result = await supabase.from("transactions").insert({
+          user_id: sub.seller_user_id,
+          amount: plan.price,
+          fee_amount: feeAmount,
+          net_amount: netAmount,
+          status: "completed",
+          payment_method: "subscription",
+          customer_email: sub.subscriber_email,
+          customer_name: sub.subscriber_name,
+          is_simulated: false,
+          podpay_event_id: periodKey,
+          metadata: { subscription_id: sub.id, plan_id: plan.id, period_end: periodEnd.toISOString() },
+        });
+        txError = result.error;
+      }
 
       if (txError) {
         console.error(`[subscription-renewal] TX error for sub ${sub.id}:`, txError.message);
