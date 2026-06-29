@@ -114,7 +114,7 @@ function loadTikTokPixel(pixelId: string) {
     const ttq: any = (w.ttq = w.ttq || []);
     ttq.methods = ['page', 'track', 'identify', 'instances', 'debug', 'on', 'off', 'once', 'ready', 'alias', 'group', 'enableCookie', 'disableCookie'];
     ttq.setAndDefer = function (t: any, e: string) {
-      t[e] = function (...args: unknown[]) { t.push([e].concat(args)); };
+      t[e] = function (...args: any[]) { t.push([e].concat(args)); };
     };
     for (const method of ttq.methods) ttq.setAndDefer(ttq, method);
     ttq.instance = function (t: string) {
