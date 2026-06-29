@@ -199,13 +199,21 @@ export default function MemberAuth() {
  toast.success("Conta criada! Redirecionando...");
  navigate("/membros-area", { replace: true });
  } else {
- const { error } = await supabase.auth.signInWithPassword({ email, password });
- if (error) {
- if (error.message.includes("Invalid login")) {
- toast.error("Email ou senha incorretos");
- } else {
- toast.error(error.message);
+ // Server-side rate-limited login (5 fails / 15min / email).
+ const { data, error } = await supabase.functions.invoke("gated-login", {
+ body: { email: email.toLowerCase().trim(), password, scope: "member" },
+ });
+ if (error || !data?.success) {
+ toast.error(data?.error || "Email ou senha incorretos");
+ setLoading(false);
+ return;
  }
+ const { error: sessionError } = await supabase.auth.setSession({
+ access_token: data.access_token,
+ refresh_token: data.refresh_token,
+ });
+ if (sessionError) {
+ toast.error(sessionError.message);
  setLoading(false);
  return;
  }
