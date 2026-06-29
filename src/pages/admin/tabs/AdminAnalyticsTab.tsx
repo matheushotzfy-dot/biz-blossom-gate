@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import {
   TrendingDown, Users, Activity, Target, ArrowUpRight, ArrowDownRight, Loader2,
+  type LucideIcon,
 } from "lucide-react";
 import {
   AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
