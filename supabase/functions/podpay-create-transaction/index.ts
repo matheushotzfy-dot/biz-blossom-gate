@@ -369,6 +369,23 @@ Deno.serve(async (req) => {
     const podpayId = podpayData.data?.id || podpayData.id;
     safeLog('PodPay transaction created', { podpayId, status: podpayData.data?.status || podpayData.status });
 
+    // Resolve afiliado (se houver) — só aceita link ativo do mesmo produto/vendedor
+    let resolvedAffiliateLinkId: string | null = null;
+    if (affiliateSlug && typeof affiliateSlug === 'string') {
+      const cleanSlug = affiliateSlug.trim().slice(0, 64);
+      if (cleanSlug) {
+        const { data: affLink } = await supabase
+          .from('affiliate_links')
+          .select('id')
+          .eq('slug', cleanSlug)
+          .eq('product_id', product.id)
+          .eq('owner_user_id', product.user_id)
+          .eq('is_active', true)
+          .maybeSingle();
+        if (affLink?.id) resolvedAffiliateLinkId = affLink.id;
+      }
+    }
+
     // === Save transaction ===
     const { data: transaction, error: txError } = await supabase.from('transactions').insert({
       user_id: product.user_id,
@@ -386,6 +403,7 @@ Deno.serve(async (req) => {
       checkout_session_id: checkoutSessionId || null,
       coupon_id: couponId,
       discount_amount: discountAmount,
+      affiliate_link_id: resolvedAffiliateLinkId,
     }).select().single();
 
 
