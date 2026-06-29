@@ -61,8 +61,8 @@ export default function AdminInactiveSellersTab({ fmtCurrency }: Props) {
         if (!active) return;
         if (error) { console.error(error); setData({ totals: { count: 0, gross: 0, fees: 0, avg_days: 0, critical: 0 }, sellers: [] }); }
         else {
-          const p = (data as any) ?? {};
-          const sellers: SellerRow[] = (p.sellers ?? []).map((s: any) => ({
+          const p = (data as unknown as Partial<Payload>) ?? {};
+          const sellers: SellerRow[] = (p.sellers ?? []).map((s) => ({
             ...s,
             gross: Number(s.gross) || 0, net: Number(s.net) || 0, fees: Number(s.fees) || 0,
             refunded: Number(s.refunded) || 0, chargeback: Number(s.chargeback) || 0,

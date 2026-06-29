@@ -106,7 +106,7 @@ export default function CoursePage() {
  }
 
  // Load progress
- const allLessonIds = lessonsData.map((l: any) => l.id);
+ const allLessonIds = lessonsData.map((l) => l.id);
  if (allLessonIds.length > 0) {
  const { data: progressData } = await supabase
  .from("user_progress").select("lesson_id, completed, progress_seconds").eq("user_id", user!.id).in("lesson_id", allLessonIds);
@@ -116,7 +116,7 @@ export default function CoursePage() {
 
  const lastWatched = progressData?.filter(p => !p.completed).sort((a, b) => b.progress_seconds - a.progress_seconds)[0];
  const targetId = lastWatched?.lesson_id || allLessonIds[0];
- const targetLesson = lessonsData.find((l: any) => l.id === targetId) as Lesson | undefined;
+ const targetLesson = lessonsData.find((l) => l.id === targetId) as Lesson | undefined;
  if (targetLesson) setActiveLesson(targetLesson);
  } else if (enrichedModules.length > 0 && enrichedModules[0].lessons.length > 0) {
  setActiveLesson(enrichedModules[0].lessons[0]);

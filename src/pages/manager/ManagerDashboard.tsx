@@ -17,6 +17,12 @@ import { Label } from "@/components/ui/label";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 
+type ManagerKycRpc = (
+  fn: "manager_update_seller_kyc",
+  args: { _seller_user_id: string; _status: "approved" | "rejected" }
+) => Promise<{ error: { message: string } | null }>;
+const managerKycRpc = supabase.rpc as unknown as ManagerKycRpc;
+
 type Profile = {
   id: string;
   user_id: string;
@@ -170,7 +176,7 @@ export default function ManagerDashboard() {
   };
 
   const handleApproveKYC = async (seller: Profile) => {
-    const { error } = await supabase.rpc("manager_update_seller_kyc" as any, {
+    const { error } = await managerKycRpc("manager_update_seller_kyc", {
       _seller_user_id: seller.user_id,
       _status: "approved",
     });
@@ -181,7 +187,7 @@ export default function ManagerDashboard() {
 
   const handleRejectKYC = async (seller: Profile) => {
     if (!window.confirm(`Tem certeza que deseja rejeitar a conta de ${seller.full_name || seller.email}?`)) return;
-    const { error } = await supabase.rpc("manager_update_seller_kyc" as any, {
+    const { error } = await managerKycRpc("manager_update_seller_kyc", {
       _seller_user_id: seller.user_id,
       _status: "rejected",
     });

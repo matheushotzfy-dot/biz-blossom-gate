@@ -15,12 +15,13 @@ import {
   Upload, Camera, Image as ImageIcon, Loader2, Lock, Info, Fingerprint,
   Wallet, BadgeCheck, Building2, CreditCard, Edit3,
   AlertTriangle,
+  type LucideIcon,
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 
-const STATUS_MAP: Record<string, { label: string; color: string; bg: string; icon: any }> = {
+const STATUS_MAP: Record<string, { label: string; color: string; bg: string; icon: LucideIcon }> = {
   approved:       { label: "Conta Verificada", color: "text-emerald-500", bg: "bg-emerald-500/10", icon: BadgeCheck },
   pending_review: { label: "Em Análise",       color: "text-amber-500",   bg: "bg-amber-500/10",   icon: Shield },
   rejected:       { label: "Reprovada",        color: "text-red-500",     bg: "bg-red-500/10",     icon: Shield },
@@ -418,7 +419,7 @@ function LockedField({ label, value, mono = false }: { label: string; value: str
 }
 
 function DocSlot({ type, label, desc, icon: Icon, preview, uploading, onUpload }: {
-  type: string; label: string; desc: string; icon: any; preview: string | null;
+  type: string; label: string; desc: string; icon: LucideIcon; preview: string | null;
   uploading: boolean; onUpload: (file: File) => void;
 }) {
   const ref = useRef<HTMLInputElement>(null);

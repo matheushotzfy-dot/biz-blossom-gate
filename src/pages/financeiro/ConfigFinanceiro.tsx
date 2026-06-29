@@ -2,10 +2,10 @@ import { lazy, Suspense, ComponentType } from "react";
 import { Loader2 } from "lucide-react";
 import { Seo } from "@/components/Seo";
 
-function lazyRetry(importFn: () => Promise<{ default: ComponentType<any> }>) {
+function lazyRetry<T extends ComponentType<unknown>>(importFn: () => Promise<{ default: T }>) {
   return lazy(() =>
     importFn().catch(() =>
-      new Promise<{ default: ComponentType<any> }>((resolve) => {
+      new Promise<{ default: T }>((resolve) => {
         setTimeout(() => resolve(importFn()), 1500);
       })
     )
