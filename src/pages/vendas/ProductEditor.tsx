@@ -2572,7 +2572,7 @@ function TabConteudo({ productId, isNew }: { productId?: string; isNew: boolean 
         const { data: mods } = await supabase.from("modules").select("id, course_id").in("course_id", courseIds);
         const modsData = mods || [];
         const modIds = modsData.map(m => m.id);
-        let lessonsCount: Record<string, number> = {};
+        const lessonsCount: Record<string, number> = {};
         if (modIds.length > 0) {
           const { data: lessons } = await supabase.from("lessons").select("id, module_id").in("module_id", modIds);
           (lessons || []).forEach(l => { lessonsCount[l.module_id] = (lessonsCount[l.module_id] || 0) + 1; });

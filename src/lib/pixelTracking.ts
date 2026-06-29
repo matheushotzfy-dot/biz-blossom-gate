@@ -342,7 +342,7 @@ export function firePixelEvent(
     const events = Array.isArray(px.events) ? px.events : [];
     if (!events.includes(eventName)) continue;
 
-    let eventParams: Record<string, unknown> = { ...params, currency: params?.currency || 'BRL', event_id: eventId };
+    const eventParams: Record<string, unknown> = { ...params, currency: params?.currency || 'BRL', event_id: eventId };
     // Remove internal keys
     delete eventParams.session_key;
 

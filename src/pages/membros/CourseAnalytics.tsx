@@ -25,7 +25,7 @@ export default function CourseAnalytics() {
   const [students, setStudents] = useState<StudentRow[]>([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => { if (courseId) load(); /* eslint-disable-next-line */ }, [courseId]);
+  useEffect(() => { if (courseId) load();   }, [courseId]);
 
   async function load() {
     setLoading(true);

@@ -25,7 +25,7 @@ export function LessonNotes({ lessonId, userId }: Props) {
   const [ts, setTs] = useState(0);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => { load(); /* eslint-disable-next-line */ }, [lessonId]);
+  useEffect(() => { load();   }, [lessonId]);
 
   async function load() {
     setLoading(true);

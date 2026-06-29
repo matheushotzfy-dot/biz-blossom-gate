@@ -115,7 +115,7 @@ export default function StaffManagementTab({ profiles, onReload, role }: Props) 
     setLoading(false);
   };
 
-  useEffect(() => { load(); /* eslint-disable-next-line */ }, [role, profiles]);
+  useEffect(() => { load();   }, [role, profiles]);
 
   const filtered = useMemo(() => {
     let out = rows;

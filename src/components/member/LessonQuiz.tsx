@@ -28,7 +28,7 @@ export function LessonQuiz({ lessonId, userId }: Props) {
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
 
-  useEffect(() => { load(); /* eslint-disable-next-line */ }, [lessonId]);
+  useEffect(() => { load();   }, [lessonId]);
 
   async function load() {
     setLoading(true);
