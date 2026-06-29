@@ -1431,8 +1431,8 @@ function TabOrderBump({ isNew, orderBumps, allProducts, availableForBump, select
  <>
  {orderBumps.length > 0 ? (
  <div className="space-y-2">
- {orderBumps.map((bump: Record<string, any>, i: number) => {
- const prod = allProducts.find((p: Record<string, any>) => p.id === bump.bump_product_id) as Record<string, any> | undefined;
+ {orderBumps.map((bump, i: number) => {
+ const prod = allProducts.find((p) => p.id === bump.bump_product_id);
  return (
  <motion.div
  key={bump.id}
