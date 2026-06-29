@@ -128,12 +128,12 @@ Deno.serve(async (req) => {
       const feeAmount = Math.round((plan.price * pctFee + fixedFee) * 100) / 100;
       const netAmount = Math.max(0, Math.round((plan.price - feeAmount) * 100) / 100);
 
-      // Idempotency: one renewal tx per (subscription, period_end)
+      // Idempotency: one renewal tx per (subscription, period_end) via podpay_event_id
       const periodKey = `sub_${sub.id}_${periodEnd.toISOString()}`;
       const { data: existing } = await supabase
         .from("transactions")
         .select("id")
-        .eq("idempotency_key", periodKey)
+        .eq("podpay_event_id", periodKey)
         .maybeSingle();
 
       let txError: { message: string } | null = null;
@@ -148,7 +148,7 @@ Deno.serve(async (req) => {
           customer_email: sub.subscriber_email,
           customer_name: sub.subscriber_name,
           is_simulated: false,
-          idempotency_key: periodKey,
+          podpay_event_id: periodKey,
           metadata: { subscription_id: sub.id, plan_id: plan.id, period_end: periodEnd.toISOString() },
         });
         txError = result.error;
