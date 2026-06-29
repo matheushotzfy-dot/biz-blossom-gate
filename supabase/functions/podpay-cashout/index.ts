@@ -118,8 +118,13 @@ Deno.serve(async (req) => {
     }
 
     if (!decryptedPixKey || !profile?.pix_key_type) {
+      await supabase.from('withdrawals').update({
+        failure_code: 'pix_key_missing',
+        rejection_reason: 'Usuário não possui chave PIX cadastrada',
+        last_attempt_at: new Date().toISOString(),
+      }).eq('id', withdrawalId);
       return new Response(
-        JSON.stringify({ success: false, error: 'User has no PIX key configured' }),
+        JSON.stringify({ success: false, error: 'User has no PIX key configured', failure_code: 'pix_key_missing' }),
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
