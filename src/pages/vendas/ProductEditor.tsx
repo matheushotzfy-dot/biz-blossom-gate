@@ -837,6 +837,7 @@ export default function ProductEditor() {
   </div>
 
   {/* Quick info — temporariamente desativado, voltaremos depois */}
+  {/* eslint-disable-next-line no-constant-binary-expression */}
   {false && !tabsLocked && product?.checkout_url && (
   <div className="rounded-2xl border border-border bg-card p-3.5 space-y-2.5">
   <p className="text-[9px] font-display font-bold uppercase tracking-[0.15em] text-muted-foreground">Ações Rápidas</p>
