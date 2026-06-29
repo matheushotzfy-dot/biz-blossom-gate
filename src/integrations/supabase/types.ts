@@ -3061,6 +3061,7 @@ export type Database = {
       }
       transactions: {
         Row: {
+          affiliate_link_id: string | null
           amount: number
           api_key_id: string | null
           checkout_session_id: string | null
@@ -3095,6 +3096,7 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          affiliate_link_id?: string | null
           amount: number
           api_key_id?: string | null
           checkout_session_id?: string | null
@@ -3129,6 +3131,7 @@ export type Database = {
           user_id: string
         }
         Update: {
+          affiliate_link_id?: string | null
           amount?: number
           api_key_id?: string | null
           checkout_session_id?: string | null
@@ -3163,6 +3166,13 @@ export type Database = {
           user_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "transactions_affiliate_link_id_fkey"
+            columns: ["affiliate_link_id"]
+            isOneToOne: false
+            referencedRelation: "affiliate_links"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "transactions_api_key_id_fkey"
             columns: ["api_key_id"]
