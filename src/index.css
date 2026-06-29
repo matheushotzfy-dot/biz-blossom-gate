@@ -190,64 +190,78 @@ input[type="number"]::-webkit-inner-spin-button {
   .seller-shell {
     position: relative;
     isolation: isolate;
-    border-color: hsl(var(--border)) !important;
+    border: 1px solid hsl(var(--border) / 0.6) !important;
     background-color: hsl(var(--card)) !important;
-    background-image:
-      linear-gradient(180deg, hsl(var(--foreground) / 0.035), transparent 92%),
-      linear-gradient(90deg, hsl(var(--primary) / 0.06), transparent 36%) !important;
+    background-image: none !important;
     box-shadow: none !important;
+    transition: transform 500ms cubic-bezier(0.16, 1, 0.3, 1),
+                border-color 400ms cubic-bezier(0.16, 1, 0.3, 1),
+                background-color 400ms cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .platform-card:hover,
+  .dashboard-panel:hover,
+  .dashboard-hero-surface:hover,
+  .dashboard-surface:hover,
+  .dashboard-tile:hover,
+  .seller-panel:hover,
+  .seller-shell:hover {
+    transform: translateY(-2px);
+    border-color: hsl(var(--primary) / 0.4) !important;
+    background-color: hsl(var(--card-elevated)) !important;
+  }
+
+  .platform-card:active,
+  .dashboard-panel:active,
+  .dashboard-tile:active,
+  .seller-panel:active {
+    transform: translateY(0) scale(0.995);
+    transition-duration: 120ms;
   }
 
   .platform-shell section[class*="border"],
   .platform-shell article[class*="border"],
   .platform-shell [data-card],
   .platform-shell [class*="dashboard-"][class*="border"] {
-    border-color: hsl(var(--border)) !important;
+    border-color: hsl(var(--border) / 0.6) !important;
   }
 
   .platform-shell [class*="bg-muted"][class*="border"][class*="rounded"]:not(button):not(input):not(textarea):not(select),
   .platform-shell [class*="bg-background"][class*="border"][class*="rounded"]:not(button):not(input):not(textarea):not(select) {
     background-color: hsl(var(--card-inset)) !important;
-    border-color: hsl(var(--border)) !important;
+    border-color: hsl(var(--border) / 0.6) !important;
   }
 
+  /* Crisp top-edge accent on hover — same trick used on product cards */
   .platform-card::before,
   .dashboard-panel::before,
   .dashboard-hero-surface::before,
   .dashboard-surface::before,
   .dashboard-tile::before,
-  .mesh-gradient-hero::before,
   .seller-panel::before,
   .seller-shell::before {
     content: '';
     position: absolute;
-    inset: 0;
-    z-index: 0;
+    left: 1.25rem;
+    right: 1.25rem;
+    top: 0;
+    height: 1px;
+    background: hsl(var(--primary) / 0.7);
+    transform: scaleX(0);
+    transform-origin: left center;
+    transition: transform 500ms cubic-bezier(0.16, 1, 0.3, 1);
+    z-index: 2;
     pointer-events: none;
-    border-left: 4px solid hsl(var(--primary));
-    border-top: 1px solid hsl(var(--foreground) / 0.08);
-    opacity: 1;
   }
 
-  .platform-card::after,
-  .dashboard-panel::after,
-  .dashboard-hero-surface::after,
-  .dashboard-surface::after,
-  .dashboard-tile::after {
-    content: '';
-    position: absolute;
-    top: 0;
-    right: 0;
-    z-index: 0;
-    width: 76px;
-    height: 76px;
-    pointer-events: none;
-    background:
-      linear-gradient(135deg, transparent 49%, hsl(var(--border) / 0.72) 50%, transparent 51%),
-      linear-gradient(45deg, transparent 49%, hsl(var(--border) / 0.46) 50%, transparent 51%);
-    background-size: 12px 12px;
-    opacity: 0.55;
-    mask-image: linear-gradient(135deg, black, transparent 72%);
+  .platform-card:hover::before,
+  .dashboard-panel:hover::before,
+  .dashboard-hero-surface:hover::before,
+  .dashboard-surface:hover::before,
+  .dashboard-tile:hover::before,
+  .seller-panel:hover::before,
+  .seller-shell:hover::before {
+    transform: scaleX(1);
   }
 
   .platform-card > *,
@@ -261,6 +275,7 @@ input[type="number"]::-webkit-inner-spin-button {
     position: relative;
     z-index: 1;
   }
+
 
   .dashboard-page {
     position: relative;
@@ -324,12 +339,8 @@ input[type="number"]::-webkit-inner-spin-button {
   }
 
   .dashboard-tile {
-    border: 1px solid hsl(var(--border) / 0.4);
+    border: 1px solid hsl(var(--border) / 0.6);
     background: hsl(var(--card));
-  }
-
-  .dashboard-tile:hover {
-    border-color: hsl(var(--border) / 0.7);
   }
 
   .dashboard-tile > * {
@@ -342,13 +353,21 @@ input[type="number"]::-webkit-inner-spin-button {
   }
 
   .dashboard-action-link {
-    border: 1px solid hsl(var(--border) / 0.3);
+    border: 1px solid hsl(var(--border) / 0.5);
     background: hsl(var(--card));
+    transition: transform 300ms cubic-bezier(0.16, 1, 0.3, 1),
+                border-color 300ms cubic-bezier(0.16, 1, 0.3, 1),
+                background-color 300ms cubic-bezier(0.16, 1, 0.3, 1);
   }
 
   .dashboard-action-link:hover {
-    border-color: hsl(var(--border) / 0.5);
-    background: hsl(var(--accent));
+    border-color: hsl(var(--primary) / 0.45);
+    background: hsl(var(--card-elevated));
+    transform: translateY(-1px);
+  }
+
+  .dashboard-action-link:active {
+    transform: translateY(0) scale(0.99);
   }
 
   .dashboard-action-link > * {
@@ -356,14 +375,28 @@ input[type="number"]::-webkit-inner-spin-button {
     z-index: 1;
   }
 
+  .dashboard-activity-row {
+    transition: background-color 250ms cubic-bezier(0.16, 1, 0.3, 1),
+                transform 250ms cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
   .dashboard-activity-row:hover {
     background: hsl(var(--accent) / 0.5);
+    transform: translateX(2px);
   }
 
   .dashboard-icon-shell {
-    border: 1px solid hsl(var(--border) / 0.35);
+    border: 1px solid hsl(var(--border) / 0.4);
     background: hsl(var(--card));
+    transition: transform 300ms cubic-bezier(0.16, 1, 0.3, 1),
+                border-color 300ms cubic-bezier(0.16, 1, 0.3, 1);
   }
+
+  *:hover > .dashboard-icon-shell,
+  *:hover .dashboard-icon-shell {
+    border-color: hsl(var(--primary) / 0.35);
+  }
+
 
   .dashboard-meta-pill {
     border: 1px solid hsl(var(--border) / 0.3);
