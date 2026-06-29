@@ -289,7 +289,7 @@ export default function AdminSupportTab({
                         <p className="text-[10px] font-black text-emerald-500 uppercase tracking-widest mb-2 flex items-center gap-2">
                           <span>
                             {(() => {
-                              const aid = (ticket as any).admin_user_id as string | null;
+                              const aid = ticket.admin_user_id;
                               const r = aid ? responders[aid] : null;
                               return r ? `${r.role} - ${r.name}` : "EQUIPE DE SUPORTE";
                             })()}
