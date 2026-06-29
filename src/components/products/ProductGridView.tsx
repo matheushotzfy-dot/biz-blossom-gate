@@ -1,4 +1,5 @@
 import { Copy, Crosshair, ExternalLink, Link2, Palette, Pencil, Settings2, Sparkles, Check, BookOpen, ArrowUpRight, AlertTriangle, Trash2, FileEdit, Info } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import { ProductActionsMenu, type ProductMenuHandlers } from "./ProductActionsMenu";
 import { DELIVERY_LABELS, formatCurrency, type Product, getCheckoutLink, getEffectiveStatus, getProductRequirements } from "./productPresentation";
 import { cn } from "@/lib/utils";
