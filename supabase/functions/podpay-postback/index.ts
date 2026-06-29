@@ -170,22 +170,7 @@ Deno.serve(async (req) => {
       }
     }
 
-    // Map PodPay status to our status
-    const statusMap: Record<string, string> = {
-      'waiting_payment': 'pending',
-      'pending': 'pending',
-      'authorized': 'pending',
-      'approved': 'completed',
-      'paid': 'completed',
-      'refused': 'failed',
-      'failed': 'failed',
-      'cancelled': 'cancelled',
-      'refunded': 'refunded',
-      'chargeback': 'chargeback',
-      'in_protest': 'dispute',
-    };
-
-    const ourStatus = statusMap[podpayStatus] || 'pending';
+    const ourStatus = STATUS_MAP[podpayStatus] || 'pending';
 
     // === Find transaction by podpay_payment_id first, then fallback to product_id ===
     let transactionId: string | null = null;
