@@ -643,19 +643,23 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
                     <tr
                       key={p.id}
                       onClick={() => openUserDetail(p)}
-                      className={cn(premiumTable.row, "cursor-pointer transition-colors hover:bg-muted/30")}
+                      className={cn(premiumTable.row, "cursor-pointer")}
                     >
                       <td className={premiumTable.td}>
-                        <div className="flex items-center gap-2">
-                          <div className="h-8 w-8 rounded-xl bg-primary/10 flex items-center justify-center text-xs font-bold text-primary shrink-0">
-                            {(p.full_name || "U")[0].toUpperCase()}
-                          </div>
-                          <div>
-                            <div className="flex items-center gap-1.5">
-                              <p className="text-[12px] font-bold text-foreground">{p.full_name || "Sem nome"}</p>
-                              {frozen && <Snowflake className="h-3 w-3 text-info" aria-label="Saldo Congelado" />}
+                        <div className="flex items-center gap-3">
+                          <div className="relative shrink-0">
+                            <div className="h-9 w-9 rounded-xl bg-gradient-to-br from-primary/15 to-primary/5 ring-1 ring-primary/20 flex items-center justify-center text-[12px] font-black text-primary transition-transform duration-300 group-hover:scale-[1.06]">
+                              {(p.full_name || "U")[0].toUpperCase()}
                             </div>
-                            <p className="text-[10px] text-muted-foreground">{p.email}</p>
+                            {frozen && (
+                              <span className="absolute -bottom-0.5 -right-0.5 h-3.5 w-3.5 rounded-full bg-info text-background flex items-center justify-center ring-2 ring-background">
+                                <Snowflake className="h-2 w-2" />
+                              </span>
+                            )}
+                          </div>
+                          <div className="min-w-0">
+                            <p className="text-[12.5px] font-bold text-foreground truncate max-w-[220px]">{p.full_name || "Sem nome"}</p>
+                            <p className="text-[10.5px] text-muted-foreground truncate max-w-[220px]">{p.email}</p>
                           </div>
                         </div>
                       </td>
@@ -665,17 +669,31 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
                         <span className="font-display text-[13px] font-black tabular-nums text-primary">{fmtCurrency(stats.totalNet - stats.totalWithdrawn)}</span>
                       </td>
                       <td className={premiumTable.td}>
-                        <span className="text-[11px] text-muted-foreground">{stats.completedCount}/{stats.txCount}</span>
+                        <span className="text-[11px] tabular-nums text-muted-foreground">
+                          <span className="text-foreground font-bold">{stats.completedCount}</span>
+                          <span className="text-muted-foreground/50">/{stats.txCount}</span>
+                        </span>
                       </td>
                       <td className={premiumTable.td}>
-                        <span className={`text-[12px] font-bold ${stats.conversionRate >= 50 ? "text-success" : stats.conversionRate >= 20 ? "text-warning" : "text-destructive"}`}>
+                        <span className={cn(
+                          "inline-flex items-center rounded-md px-1.5 py-0.5 text-[11px] font-black tabular-nums border",
+                          stats.conversionRate >= 50 ? "text-success bg-success/10 border-success/25"
+                            : stats.conversionRate >= 20 ? "text-warning bg-warning/10 border-warning/25"
+                            : "text-destructive bg-destructive/10 border-destructive/25"
+                        )}>
                           {stats.conversionRate.toFixed(1)}%
                         </span>
                       </td>
                       <td className={premiumTable.td} onClick={(e) => e.stopPropagation()}>
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" size="sm" className="h-7 w-7 p-0"><MoreHorizontal className="h-4 w-4" /></Button>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="h-8 w-8 p-0 rounded-lg opacity-60 group-hover:opacity-100 hover:bg-muted hover:text-foreground transition-all"
+                            >
+                              <MoreHorizontal className="h-4 w-4" />
+                            </Button>
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end" className="w-56">
                             <DropdownMenuItem className="gap-2" onClick={() => openUserDetail(p)}><Eye className="h-3.5 w-3.5" /> Ver detalhes</DropdownMenuItem>
@@ -702,6 +720,7 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
                       </td>
                     </tr>
                   );
+
                 })}
                 {filtered.length === 0 && (
                   <tr><td colSpan={7} className="p-10 text-center text-muted-foreground text-xs">Nenhum vendedor encontrado</td></tr>
@@ -737,49 +756,66 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
 
       {/* ═══ Seller Detail Dialog ═══ */}
       <Dialog open={!!selectedUser} onOpenChange={v => { if (!v) setSelectedUser(null); }}>
-        <DialogContent className="max-w-5xl max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle className="text-lg font-bold flex items-center gap-3">
-              <div className="h-12 w-12 rounded-2xl bg-primary/10 flex items-center justify-center text-sm font-bold text-primary">
-                {(selectedUser?.full_name || "U")[0].toUpperCase()}
-              </div>
-              <div>
-                <div className="flex items-center gap-2">
-                  <span>{selectedUser?.full_name || "Sem nome"}</span>
-                  <SellerTypeBadge type={(selectedUser as any)?.seller_type} />
+        <DialogContent className="max-w-5xl w-[96vw] max-h-[92vh] overflow-y-auto p-0 gap-0 rounded-2xl border border-border">
+          <DialogHeader className="sticky top-0 z-10 bg-card/95 backdrop-blur border-b border-border px-6 pt-5 pb-4 space-y-0">
+            <DialogTitle className="sr-only">
+              Detalhes do seller {selectedUser?.full_name || selectedUser?.email || ""}
+            </DialogTitle>
+            <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
+              <div className="flex items-start gap-3 min-w-0">
+                <div className="relative shrink-0">
+                  <div className="h-12 w-12 rounded-2xl bg-gradient-to-br from-primary/20 to-primary/5 ring-1 ring-primary/25 flex items-center justify-center text-[15px] font-black text-primary">
+                    {(selectedUser?.full_name || "U")[0].toUpperCase()}
+                  </div>
                   {selectedUser && isFrozen(selectedUser) && (
-                    <span className="px-2 py-0.5 rounded-full text-[9px] font-bold uppercase bg-info/10 text-info border border-info/20 flex items-center gap-1">
-                      <Snowflake className="h-2.5 w-2.5" /> Congelado
+                    <span className="absolute -bottom-1 -right-1 h-4 w-4 rounded-full bg-info text-background flex items-center justify-center ring-2 ring-card">
+                      <Snowflake className="h-2.5 w-2.5" />
                     </span>
                   )}
                 </div>
-                <p className="text-xs text-muted-foreground font-normal mt-0.5">{selectedUser?.email} • {selectedUser?.phone || "Sem telefone"}</p>
-                <p className="text-[10px] text-muted-foreground/50 font-mono mt-0.5">ID: {selectedUser?.user_id} • IP: {(selectedUser as any)?.last_ip || "N/A"}</p>
+                <div className="min-w-0">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <span className="text-[15px] font-black tracking-tight text-foreground truncate">{selectedUser?.full_name || "Sem nome"}</span>
+                    <SellerTypeBadge type={(selectedUser as any)?.seller_type} />
+                    {selectedUser && (
+                      <StatusBadge status={selectedUser.account_status || "pending_review"} />
+                    )}
+                  </div>
+                  <p className="text-[11.5px] text-muted-foreground mt-0.5 truncate">
+                    {selectedUser?.email}{selectedUser?.phone ? <> · <span className="font-mono">{selectedUser.phone}</span></> : null}
+                  </p>
+                  <p className="text-[10px] text-muted-foreground/60 font-mono mt-0.5 truncate">
+                    ID {selectedUser?.user_id?.slice(0, 8)}…{selectedUser?.user_id?.slice(-4)} · IP {(selectedUser as any)?.last_ip || "—"}
+                  </p>
+                </div>
               </div>
-              <div className="ml-auto flex gap-2 flex-wrap">
-                <Button size="sm" variant="outline" className="rounded-xl text-xs" onClick={() => selectedUser && handleImpersonate(selectedUser.user_id)} disabled={impersonating}>
-                  <LogIn className="h-3 w-3 mr-1" /> Login as User
+              <div className="flex flex-wrap gap-1.5 lg:justify-end shrink-0">
+                <Button size="sm" variant="outline" className="h-8 rounded-lg text-[11px] gap-1.5" onClick={() => selectedUser && handleImpersonate(selectedUser.user_id)} disabled={impersonating}>
+                  <LogIn className="h-3 w-3" /> Login as
                 </Button>
                 {selectedUser && !isFrozen(selectedUser) ? (
-                  <Button size="sm" variant="outline" className="rounded-xl text-xs border-info/30 text-info" onClick={() => handleFreezeBalance(selectedUser.user_id, true)}>
-                    <Snowflake className="h-3 w-3 mr-1" /> Congelar
+                  <Button size="sm" variant="outline" className="h-8 rounded-lg text-[11px] gap-1.5 border-info/30 text-info hover:bg-info/10" onClick={() => handleFreezeBalance(selectedUser.user_id, true)}>
+                    <Snowflake className="h-3 w-3" /> Congelar
                   </Button>
                 ) : selectedUser && (
-                  <Button size="sm" variant="outline" className="rounded-xl text-xs border-primary/30 text-primary" onClick={() => handleFreezeBalance(selectedUser.user_id, false)}>
-                    <Unlock className="h-3 w-3 mr-1" /> Descongelar
+                  <Button size="sm" variant="outline" className="h-8 rounded-lg text-[11px] gap-1.5 border-primary/30 text-primary hover:bg-primary/10" onClick={() => handleFreezeBalance(selectedUser.user_id, false)}>
+                    <Unlock className="h-3 w-3" /> Descongelar
                   </Button>
                 )}
                 {selectedUser?.account_status !== "approved" && (
-                  <Button size="sm" variant="outline" className="rounded-xl text-xs border-primary/30 text-primary" onClick={() => handleApproveKyc(selectedUser!.user_id)}>
-                    <CheckCircle2 className="h-3 w-3 mr-1" /> Aprovar
+                  <Button size="sm" variant="outline" className="h-8 rounded-lg text-[11px] gap-1.5 border-success/30 text-success hover:bg-success/10" onClick={() => handleApproveKyc(selectedUser!.user_id)}>
+                    <CheckCircle2 className="h-3 w-3" /> Aprovar
                   </Button>
                 )}
-                <Button size="sm" variant="outline" className="rounded-xl text-xs border-destructive/30 text-destructive" onClick={() => selectedUser && handleBanSeller(selectedUser.user_id)}>
-                  <UserX className="h-3 w-3 mr-1" /> Banir
+                <Button size="sm" variant="outline" className="h-8 rounded-lg text-[11px] gap-1.5 border-destructive/30 text-destructive hover:bg-destructive/10" onClick={() => selectedUser && handleBanSeller(selectedUser.user_id)}>
+                  <UserX className="h-3 w-3" /> Banir
                 </Button>
               </div>
-            </DialogTitle>
+            </div>
           </DialogHeader>
+
+          <div className="px-6 pb-6 pt-4">
+
 
           {loading ? (
             <div className="text-center py-12 text-muted-foreground">Carregando...</div>
@@ -1525,17 +1561,20 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
               </Tabs>
             </>
           )}
+          </div>
         </DialogContent>
       </Dialog>
+
     </div>
   );
 }
 
 function InfoRow({ label, value, mono }: { label: string; value?: string | null; mono?: boolean }) {
   return (
-    <div className="rounded-xl border border-border bg-muted/20 p-3">
-      <p className="text-[10px] font-black uppercase tracking-wider text-muted-foreground mb-1">{label}</p>
-      <p className={`text-xs font-medium ${mono ? "font-mono" : ""} ${value ? "text-foreground" : "text-muted-foreground"}`}>{value || "—"}</p>
+    <div className="group/info relative overflow-hidden rounded-xl border border-border bg-card p-3 transition-all duration-200 hover:border-primary/40 hover:-translate-y-px hover:bg-muted/20">
+      <span className="absolute inset-y-0 left-0 w-0.5 bg-primary scale-y-0 group-hover/info:scale-y-100 transition-transform duration-300 origin-top" />
+      <p className="text-[10px] font-black uppercase tracking-wider text-muted-foreground/80 mb-1">{label}</p>
+      <p className={`text-[12px] font-semibold ${mono ? "font-mono" : ""} ${value ? "text-foreground" : "text-muted-foreground/50 italic"}`}>{value || "Não informado"}</p>
     </div>
   );
 }
@@ -1550,13 +1589,23 @@ function MiniKpi({ label, value, tone = "neutral" }: { label: string; value: str
     destructive: "text-destructive",
     neutral: "text-foreground",
   };
+  const barCls: Record<MiniTone, string> = {
+    success: "bg-success",
+    warning: "bg-warning",
+    info: "bg-info",
+    primary: "bg-primary",
+    destructive: "bg-destructive",
+    neutral: "bg-foreground/40",
+  };
   return (
-    <div className="rounded-xl border border-border bg-muted/20 p-4">
-      <p className="text-[10px] font-black uppercase tracking-wider text-muted-foreground">{label}</p>
-      <p className={`font-display text-lg font-black mt-1 tabular-nums ${valueCls[tone]}`}>{value}</p>
+    <div className="group/kpi relative overflow-hidden rounded-xl border border-border bg-card p-4 transition-all duration-200 hover:-translate-y-0.5 hover:border-primary/40 hover:bg-muted/20">
+      <p className="text-[10px] font-black uppercase tracking-wider text-muted-foreground/80">{label}</p>
+      <p className={`font-display text-[19px] font-black mt-1 tabular-nums leading-tight ${valueCls[tone]}`}>{value}</p>
+      <span className={cn("absolute inset-x-0 bottom-0 h-[2px] origin-left scale-x-0 transition-transform duration-300 group-hover/kpi:scale-x-100", barCls[tone])} />
     </div>
   );
 }
+
 
 /* ── SellerKpi: 1px-divider clickable KPI in seller hero strip ── */
 type SellerKpiTone = "neutral" | "primary" | "success" | "warning" | "info" | "destructive";

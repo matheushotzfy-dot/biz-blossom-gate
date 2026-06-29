@@ -120,10 +120,10 @@ export function PremiumEmpty({ icon: Icon, title, subtitle }: { icon: LucideIcon
 }
 
 export const premiumTable = {
-  wrapper: "overflow-x-auto",
-  table: "w-full text-left",
-  headRow: "border-b border-border/40 bg-muted/30 text-[10px] font-black uppercase tracking-[0.18em] text-muted-foreground/70",
-  th: "px-5 py-4",
-  row: "group border-b border-border/40 transition-colors hover:bg-muted/20",
-  td: "px-5 py-4 align-middle",
+  wrapper: "overflow-x-auto rounded-xl border border-border/60",
+  table: "w-full text-left border-collapse",
+  headRow: "border-b border-border bg-muted/40 text-[10px] font-black uppercase tracking-[0.18em] text-muted-foreground/80 sticky top-0 z-[1]",
+  th: "px-5 py-3.5 whitespace-nowrap",
+  row: "group relative border-b border-border/40 last:border-b-0 transition-[background-color,box-shadow,transform] duration-200 hover:bg-muted/30 hover:shadow-[inset_3px_0_0_0_hsl(var(--primary))]",
+  td: "px-5 py-3.5 align-middle",
 };
