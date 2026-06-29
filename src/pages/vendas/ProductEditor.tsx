@@ -984,7 +984,7 @@ export default function ProductEditor() {
  TAB COMPONENTS
  ═══════════════════════════════════════════════ */
 
-import type { Dispatch, SetStateAction, RefObject } from "react";
+
 
 type S<T> = Dispatch<SetStateAction<T>>;
 type StrS = S<string>;
