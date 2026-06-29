@@ -83,7 +83,7 @@ export default function AdminConteudo() {
   );
 
   const products = useMemo(
-    () => productsRaw.map((product: any) => ({ id: product.id, name: product.name, price: Number(product.price) })) as ContentProduct[],
+    () => productsRaw.map((product) => ({ id: product.id, name: product.name, price: Number(product.price) })) as ContentProduct[],
     [productsRaw],
   );
 
