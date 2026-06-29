@@ -136,25 +136,6 @@ export default function AdminAbuseMetricsTab() {
         </Card>
       </div>
 
-
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <Card className="p-4">
-          <h3 className="font-semibold mb-3">Por tipo de evento</h3>
-          <Table rows={Object.entries(stats?.by_type ?? {}).sort((a, b) => b[1] - a[1])} />
-        </Card>
-        <Card className="p-4">
-          <h3 className="font-semibold mb-3">Por endpoint</h3>
-          <Table rows={Object.entries(stats?.by_endpoint ?? {}).sort((a, b) => b[1] - a[1])} />
-        </Card>
-        <Card className="p-4">
-          <h3 className="font-semibold mb-3">Top IPs (hash)</h3>
-          <Table rows={(stats?.top_ips ?? []).map((r) => [r.ip_hash, r.count])} />
-        </Card>
-        <Card className="p-4">
-          <h3 className="font-semibold mb-3">Top identificadores (hash)</h3>
-          <Table rows={(stats?.top_identifiers ?? []).map((r) => [r.identifier_hash, r.count])} />
-        </Card>
-      </div>
     </div>
   );
 }
