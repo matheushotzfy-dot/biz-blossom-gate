@@ -191,7 +191,7 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
             pix_key_type: r.pix_key_type ?? prev.pix_key_type,
           }) : prev);
         }
-      } catch (e) { /* admin reveal optional */ }
+      } catch (e) { console.warn("[AdminSellersTab] admin reveal failed (non-fatal)", e); }
 
       setSelectedAcquirerId(profile.acquirer_id || "");
       setAdminNotes(profile.admin_notes || "");
