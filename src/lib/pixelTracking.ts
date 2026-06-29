@@ -40,9 +40,16 @@ function loadFacebookPixel(pixelId: string) {
 
   const w = window as PixelWindow;
   if (!w.fbq) {
-    const n: Record<string, unknown> const n: any = ((...a: unknown[]) => void) = function (...args: unknown[]) {
-      n.callMethod ? n.callMethod.apply(n, args) : n.queue.push(args);
+    type FbqFn = ((...args: unknown[]) => void) & {
+      callMethod?: (...args: unknown[]) => void;
+      queue: unknown[];
+      push: unknown;
+      loaded: boolean;
+      version: string;
     };
+    const n = function (...args: unknown[]) {
+      n.callMethod ? n.callMethod.apply(n, args) : n.queue.push(args);
+    } as FbqFn;
     w.fbq = n;
     if (!w._fbq) w._fbq = n;
     n.push = n;
