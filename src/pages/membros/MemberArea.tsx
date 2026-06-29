@@ -71,9 +71,12 @@ export default function MemberArea() {
       .from("user_progress").select("lesson_id, completed").eq("user_id", user.id);
     const completedSet = new Set(progress?.filter(p => p.completed).map(p => p.lesson_id) || []);
 
-    const enriched: PurchaseRow[] = coursesData.map((c: any) => {
-      const allLessons = c.modules?.flatMap((m: any) => m.lessons?.map((l: any) => l.id) || []) || [];
-      const completed = allLessons.filter((id: string) => completedSet.has(id)).length;
+    type LessonLite = { id: string };
+    type ModuleLite = { lessons: LessonLite[] | null };
+    type CourseLite = { id: string; title: string; description: string | null; thumbnail_url: string | null; category: string | null; created_at: string; modules: ModuleLite[] | null };
+    const enriched: PurchaseRow[] = (coursesData as CourseLite[]).map((c) => {
+      const allLessons: string[] = c.modules?.flatMap((m) => m.lessons?.map((l) => l.id) || []) || [];
+      const completed = allLessons.filter((id) => completedSet.has(id)).length;
       const accessRow = accessList.find(a => a.course_id === c.id);
       const tx = accessRow?.transaction_id ? txMap.get(accessRow.transaction_id) : null;
       return {
