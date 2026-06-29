@@ -111,9 +111,9 @@ function loadTikTokPixel(pixelId: string) {
 
   const w = window as PixelWindow;
   if (!w.ttq) {
-    const ttq: Record<string, unknown> = (w.ttq = w.ttq || []);
+    const ttq: any = (w.ttq = w.ttq || []);
     ttq.methods = ['page', 'track', 'identify', 'instances', 'debug', 'on', 'off', 'once', 'ready', 'alias', 'group', 'enableCookie', 'disableCookie'];
-    ttq.setAndDefer = function (t: Record<string, unknown>, e: string) {
+    ttq.setAndDefer = function (t: any, e: string) {
       t[e] = function (...args: unknown[]) { t.push([e].concat(args)); };
     };
     for (const method of ttq.methods) ttq.setAndDefer(ttq, method);
@@ -148,7 +148,7 @@ function loadKwaiPixel(pixelId: string) {
 
   const w = window as PixelWindow;
   if (!w.kwaiq) {
-    const kwaiq: Record<string, unknown> = (w.kwaiq = w.kwaiq || { callMethod: undefined, queue: [] });
+    const kwaiq: any = (w.kwaiq = w.kwaiq || { callMethod: undefined, queue: [] });
     kwaiq.load = function (id: string) {
       kwaiq._pixelId = id;
       const s = document.createElement('script');
