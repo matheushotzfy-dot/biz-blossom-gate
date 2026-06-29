@@ -271,22 +271,22 @@ export default function ProductEditor() {
  setCoProductionEnabled(data.co_production_enabled || false);
  setCoProducerEmail(data.co_producer_email || "");
   setCoProductionSplit(String(data.co_production_split || 50));
-   setSupportEmail((data as any).support_email || "");
-   setSupportPhone((data as any).support_phone || "");
-   setDisplayName((data as any).display_name || "");
- setDeliveryType((data as any).delivery_type || "digital");
+    setSupportEmail(data.support_email || "");
+    setSupportPhone(data.support_phone || "");
+    setDisplayName(data.display_name || "");
+ setDeliveryType(data.delivery_type || "digital");
  // Upsell
- setUpsellEnabled((data as any).upsell_enabled || false);
- setUpsellType(((data as any).upsell_type as any) || "none");
- setUpsellName((data as any).upsell_name || "");
- setUpsellPrice((data as any).upsell_price != null ? String((data as any).upsell_price) : "");
- setUpsellDiscount(String((data as any).upsell_discount ?? 30));
- setUpsellUrl((data as any).upsell_url || "");
- setDownsellEnabled((data as any).downsell_enabled || false);
- setDownsellUrl((data as any).downsell_url || "");
- setDownsellPrice((data as any).downsell_price != null ? String((data as any).downsell_price) : "");
- setDownsellDelay(String((data as any).downsell_delay ?? 5));
- setEmailTiming((data as any).email_timing || "immediate");
+ setUpsellEnabled(data.upsell_enabled || false);
+ setUpsellType((data.upsell_type as typeof upsellType) || "none");
+ setUpsellName(data.upsell_name || "");
+ setUpsellPrice(data.upsell_price != null ? String(data.upsell_price) : "");
+ setUpsellDiscount(String(data.upsell_discount ?? 30));
+ setUpsellUrl(data.upsell_url || "");
+ setDownsellEnabled(data.downsell_enabled || false);
+ setDownsellUrl(data.downsell_url || "");
+ setDownsellPrice(data.downsell_price != null ? String(data.downsell_price) : "");
+ setDownsellDelay(String(data.downsell_delay ?? 5));
+ setEmailTiming(data.email_timing || "immediate");
  setLoading(false);
  })();
    }, [productId, user?.id, isNew]);
@@ -295,8 +295,8 @@ export default function ProductEditor() {
   // Carrega gates de pagamento definidos pelo admin no perfil do seller
   useEffect(() => {
     if (!user?.id) return;
-    supabase.from("profiles").select("boleto_enabled, credit_card_enabled" as any).eq("user_id", user.id).maybeSingle()
-      .then(({ data }: any) => {
+    supabase.from("profiles").select("boleto_enabled, credit_card_enabled").eq("user_id", user.id).maybeSingle()
+      .then(({ data }) => {
         if (!data) return;
         if (data.boleto_enabled === false) { setAdminBoletoEnabled(false); setBoletoEnabled(false); }
         if (data.credit_card_enabled === false) { setAdminCardEnabled(false); setCreditCardEnabled(false); }
