@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect, useCallback, type ChangeEvent } from "react";
+import { useState, useRef, useEffect, useCallback, type ChangeEvent, type Dispatch, type SetStateAction, type RefObject, type DragEvent } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
@@ -565,7 +565,7 @@ export default function ProductEditor() {
    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { toast.error("E-mail inválido"); return; }
    const split = Number(coProductionSplit);
    if (isNaN(split) || split < 1 || split > 99) { toast.error("Percentual deve ser entre 1 e 99%"); return; }
-   if (coProductionsList.some((c: any) => c.co_producer_email?.toLowerCase() === email && c.status !== "rejected")) {
+   if (coProductionsList.some((c: Record<string, any>) => c.co_producer_email?.toLowerCase() === email && c.status !== "rejected")) {
      toast.error("Este co-produtor já foi convidado");
      return;
    }
@@ -591,7 +591,7 @@ export default function ProductEditor() {
  const removeCoProducer = async (id: string) => {
    const { error } = await supabase.from("co_productions").delete().eq("id", id);
    if (error) { toast.error("Erro ao remover"); return; }
-   setCoProductionsList(prev => prev.filter((c: any) => c.id !== id));
+   setCoProductionsList(prev => prev.filter((c: Record<string, any>) => c.id !== id));
    toast.success("Co-produtor removido");
  };
 
@@ -984,7 +984,35 @@ export default function ProductEditor() {
  TAB COMPONENTS
  ═══════════════════════════════════════════════ */
 
-function TabGeral({ name, setName, description, setDescription, price, setPrice, status, setStatus, pageUrl, setPageUrl, imagePreview, setImagePreview, imageFile, setImageFile, fileInputRef, handleFileChange, category, setCategory, paymentType, setPaymentType, displayName, setDisplayName, supportEmail, setSupportEmail, supportPhone, setSupportPhone, warrantyDays, setWarrantyDays, isDragging, setIsDragging, handleDrop, onNext }: any) {
+
+
+type S<T> = Dispatch<SetStateAction<T>>;
+type StrS = S<string>;
+type BoolS = S<boolean>;
+type AnyObj = Record<string, unknown>;
+
+type TabGeralProps = {
+  name: string; setName: StrS;
+  description: string; setDescription: StrS;
+  price: string; setPrice: StrS;
+  status: string; setStatus: StrS;
+  pageUrl: string; setPageUrl: StrS;
+  imagePreview: string | null; setImagePreview: S<string | null>;
+  imageFile: File | null; setImageFile: S<File | null>;
+  fileInputRef: RefObject<HTMLInputElement>;
+  handleFileChange: (e: ChangeEvent<HTMLInputElement>) => void;
+  category: string; setCategory: StrS;
+  paymentType: string; setPaymentType: StrS;
+  displayName: string; setDisplayName: StrS;
+  supportEmail: string; setSupportEmail: StrS;
+  supportPhone: string; setSupportPhone: StrS;
+  warrantyDays: string; setWarrantyDays: StrS;
+  isDragging: boolean; setIsDragging: BoolS;
+  handleDrop: (e: React.DragEvent) => void;
+  onNext: () => void;
+};
+
+function TabGeral({ name, setName, description, setDescription, price, setPrice, status, setStatus, pageUrl, setPageUrl, imagePreview, setImagePreview, imageFile, setImageFile, fileInputRef, handleFileChange, category, setCategory, paymentType, setPaymentType, displayName, setDisplayName, supportEmail, setSupportEmail, supportPhone, setSupportPhone, warrantyDays, setWarrantyDays, isDragging, setIsDragging, handleDrop, onNext }: TabGeralProps) {
   const descValid = description.length >= 50;
   // Aceita URL sem https://
   const urlValid = pageUrl.trim().length > 3 && /\.[a-z]{2,}/i.test(pageUrl.trim());
@@ -1254,7 +1282,20 @@ function TabGeral({ name, setName, description, setDescription, price, setPrice,
   );
 }
 
-function TabConfiguracoes({ price, pixEnabled, setPixEnabled, boletoEnabled, setBoletoEnabled, creditCardEnabled, setCreditCardEnabled, emailConfirm, setEmailConfirm, showCouponField, setShowCouponField, addressRequired, setAddressRequired, deliveryType, setDeliveryType, adminBoletoEnabled = true, adminCardEnabled = true }: any) {
+type TabConfiguracoesProps = {
+  price: string;
+  pixEnabled: boolean; setPixEnabled: BoolS;
+  boletoEnabled: boolean; setBoletoEnabled: BoolS;
+  creditCardEnabled: boolean; setCreditCardEnabled: BoolS;
+  emailConfirm: boolean; setEmailConfirm: BoolS;
+  showCouponField: boolean; setShowCouponField: BoolS;
+  addressRequired: boolean; setAddressRequired: BoolS;
+  deliveryType: string; setDeliveryType: StrS;
+  adminBoletoEnabled?: boolean;
+  adminCardEnabled?: boolean;
+};
+
+function TabConfiguracoes({ price, pixEnabled, setPixEnabled, boletoEnabled, setBoletoEnabled, creditCardEnabled, setCreditCardEnabled, emailConfirm, setEmailConfirm, showCouponField, setShowCouponField, addressRequired, setAddressRequired, deliveryType, setDeliveryType, adminBoletoEnabled = true, adminCardEnabled = true }: TabConfiguracoesProps) {
  return (
  <div className="space-y-6">
  <SectionHeader icon={Settings} title="Configurações" subtitle="Métodos de pagamento, formulário e entrega de conteúdo." />
@@ -1354,7 +1395,17 @@ function TabConfiguracoes({ price, pixEnabled, setPixEnabled, boletoEnabled, set
  );
 }
 
-function TabOrderBump({ isNew, orderBumps, allProducts, availableForBump, selectedBumpProduct, setSelectedBumpProduct, addBump, removeBump }: any) {
+type TabOrderBumpProps = {
+  isNew: boolean;
+  orderBumps: AnyObj[];
+  allProducts: AnyObj[];
+  availableForBump: AnyObj[];
+  selectedBumpProduct: string; setSelectedBumpProduct: StrS;
+  addBump: () => void | Promise<void>;
+  removeBump: (id: string) => void | Promise<void>;
+};
+
+function TabOrderBump({ isNew, orderBumps, allProducts, availableForBump, selectedBumpProduct, setSelectedBumpProduct, addBump, removeBump }: TabOrderBumpProps) {
  return (
  <div className="space-y-6">
  <SectionHeader icon={Layers} title="Order Bump" subtitle="Adicione produtos complementares que aparecem como oferta no checkout." />
@@ -1380,8 +1431,8 @@ function TabOrderBump({ isNew, orderBumps, allProducts, availableForBump, select
  <>
  {orderBumps.length > 0 ? (
  <div className="space-y-2">
- {orderBumps.map((bump: any, i: number) => {
- const prod = allProducts.find((p: any) => p.id === bump.bump_product_id);
+ {orderBumps.map((bump: Record<string, any>, i: number) => {
+ const prod = allProducts.find((p: Record<string, any>) => p.id === bump.bump_product_id);
  return (
  <motion.div
  key={bump.id}
@@ -1433,7 +1484,7 @@ function TabOrderBump({ isNew, orderBumps, allProducts, availableForBump, select
  <Select value={selectedBumpProduct} onValueChange={setSelectedBumpProduct}>
  <SelectTrigger className="flex-1 h-10 bg-secondary border-border"><SelectValue placeholder="Selecione um produto..." /></SelectTrigger>
  <SelectContent>
- {availableForBump.map((p: any) => (
+ {availableForBump.map((p: Record<string, any>) => (
  <SelectItem key={p.id} value={p.id}>{p.name} — R$ {Number(p.price).toFixed(2)}</SelectItem>
  ))}
  </SelectContent>
@@ -1449,9 +1500,28 @@ function TabOrderBump({ isNew, orderBumps, allProducts, availableForBump, select
  );
 }
 
+type TabUpsellProps = {
+  isNew: boolean;
+  name: string; price: string; imagePreview: string | null;
+  hasCustomThankYou: boolean; setHasCustomThankYou: BoolS;
+  thankYouUrl: string; setThankYouUrl: StrS;
+  sendConfirmationEmail: boolean; setSendConfirmationEmail: BoolS;
+  emailTiming: string; setEmailTiming: StrS;
+  upsellEnabled: boolean; setUpsellEnabled: BoolS;
+  upsellType: string; setUpsellType: StrS;
+  upsellName: string; setUpsellName: StrS;
+  upsellPrice: string; setUpsellPrice: StrS;
+  upsellDiscount: string; setUpsellDiscount: StrS;
+  upsellUrl: string; setUpsellUrl: StrS;
+  downsellEnabled: boolean; setDownsellEnabled: BoolS;
+  downsellUrl: string; setDownsellUrl: StrS;
+  downsellPrice: string; setDownsellPrice: StrS;
+  downsellDelay: string; setDownsellDelay: StrS;
+};
+
 function TabUpsell({ isNew, name, price, imagePreview, hasCustomThankYou, setHasCustomThankYou, thankYouUrl, setThankYouUrl, sendConfirmationEmail, setSendConfirmationEmail, emailTiming, setEmailTiming,
   upsellEnabled, setUpsellEnabled, upsellType, setUpsellType, upsellName, setUpsellName, upsellPrice, setUpsellPrice, upsellDiscount, setUpsellDiscount, upsellUrl, setUpsellUrl,
-  downsellEnabled, setDownsellEnabled, downsellUrl, setDownsellUrl, downsellPrice, setDownsellPrice, downsellDelay, setDownsellDelay }: any) {
+  downsellEnabled, setDownsellEnabled, downsellUrl, setDownsellUrl, downsellPrice, setDownsellPrice, downsellDelay, setDownsellDelay }: TabUpsellProps) {
 
  const mainPrice = Number(price || 0);
  const upPrice = Number(upsellPrice || 0);
@@ -1700,7 +1770,20 @@ function TabUpsell({ isNew, name, price, imagePreview, hasCustomThankYou, setHas
 
 
 /* ───── Funnel sub-primitives ───── */
-function FunnelStep({ step, status, label, title, price, thumb, badge, icon: Icon, anchor, muted }: any) {
+type FunnelStepProps = {
+  step: number | string;
+  status: string;
+  label: string;
+  title: string;
+  price?: string | number;
+  thumb?: string | null;
+  badge?: string;
+  icon?: React.ComponentType<{ className?: string }>;
+  anchor?: boolean | string;
+  muted?: boolean;
+};
+
+function FunnelStep({ step, status, label, title, price, thumb, badge, icon: Icon, anchor, muted }: FunnelStepProps) {
  const isEmpty = status === "empty";
  return (
  <div className={cn(
@@ -1748,7 +1831,30 @@ function FunnelArrow() {
  );
 }
 
-function TabCheckout({ isNew, name, price, productId, buttonColor, setButtonColor, timerEnabled, setTimerEnabled, timerMinutes, setTimerMinutes, socialProof, setSocialProof, guaranteeEnabled, setGuaranteeEnabled, warrantyDays, bannerDesktopPreview, bannerMobilePreview, desktopBannerRef, mobileBannerRef, handleBannerFile, setBannerDesktopFile, setBannerDesktopPreview, setBannerMobileFile, setBannerMobilePreview, getCheckoutLink, copyLink, navigate, pixEnabled, boletoEnabled, creditCardEnabled }: any) {
+type TabCheckoutProps = {
+  isNew: boolean;
+  name: string; price: string; productId?: string;
+  buttonColor: string; setButtonColor: StrS;
+  timerEnabled: boolean; setTimerEnabled: BoolS;
+  timerMinutes: string; setTimerMinutes: StrS;
+  socialProof: boolean; setSocialProof: BoolS;
+  guaranteeEnabled: boolean; setGuaranteeEnabled: BoolS;
+  warrantyDays: string;
+  bannerDesktopPreview: string; bannerMobilePreview: string;
+  desktopBannerRef: RefObject<HTMLInputElement>;
+  mobileBannerRef: RefObject<HTMLInputElement>;
+  handleBannerFile: (e: ChangeEvent<HTMLInputElement>, kind: "desktop" | "mobile") => void;
+  setBannerDesktopFile: S<File | null>;
+  setBannerDesktopPreview: StrS;
+  setBannerMobileFile: S<File | null>;
+  setBannerMobilePreview: StrS;
+  getCheckoutLink: () => string;
+  copyLink: (text: string) => void;
+  navigate: (path: string) => void;
+  pixEnabled: boolean; boletoEnabled: boolean; creditCardEnabled: boolean;
+};
+
+function TabCheckout({ isNew, name, price, productId, buttonColor, setButtonColor, timerEnabled, setTimerEnabled, timerMinutes, setTimerMinutes, socialProof, setSocialProof, guaranteeEnabled, setGuaranteeEnabled, warrantyDays, bannerDesktopPreview, bannerMobilePreview, desktopBannerRef, mobileBannerRef, handleBannerFile, setBannerDesktopFile, setBannerDesktopPreview, setBannerMobileFile, setBannerMobilePreview, getCheckoutLink, copyLink, navigate, pixEnabled, boletoEnabled, creditCardEnabled }: TabCheckoutProps) {
  const [previewDevice, setPreviewDevice] = useState<"desktop" | "mobile">("desktop");
 
  return (
@@ -1933,7 +2039,19 @@ function TabCheckout({ isNew, name, price, productId, buttonColor, setButtonColo
  );
 }
 
-function TabCoProducao({ isNew, coProducerEmail, setCoProducerEmail, coProductionSplit, setCoProductionSplit, coProductionDuration, setCoProductionDuration, coProductionSalesType, setCoProductionSalesType, coProductionsList = [], inviteCoProducer, removeCoProducer, invitingCoProducer }: any) {
+type TabCoProducaoProps = {
+  isNew: boolean;
+  coProducerEmail: string; setCoProducerEmail: StrS;
+  coProductionSplit: string; setCoProductionSplit: StrS;
+  coProductionDuration: string; setCoProductionDuration: StrS;
+  coProductionSalesType: string; setCoProductionSalesType: StrS;
+  coProductionsList?: AnyObj[];
+  inviteCoProducer: () => void | Promise<void>;
+  removeCoProducer: (id: string) => void | Promise<void>;
+  invitingCoProducer: boolean;
+};
+
+function TabCoProducao({ isNew, coProducerEmail, setCoProducerEmail, coProductionSplit, setCoProductionSplit, coProductionDuration, setCoProductionDuration, coProductionSalesType, setCoProductionSalesType, coProductionsList = [], inviteCoProducer, removeCoProducer, invitingCoProducer }: TabCoProducaoProps) {
  return (
  <div className="space-y-6">
  <SectionHeader icon={Handshake} title="Co-Produção" subtitle="Divida receitas com parceiros de produção." />
@@ -2016,7 +2134,7 @@ function TabCoProducao({ isNew, coProducerEmail, setCoProducerEmail, coProductio
 
  {coProductionsList.length > 0 ? (
    <div className="space-y-2">
-     {coProductionsList.map((cp: any) => (
+     {coProductionsList.map((cp: Record<string, any>) => (
        <div key={cp.id} className="flex items-center justify-between rounded-2xl border border-border bg-card p-4 relative overflow-hidden">
          <div className={cn("absolute left-0 top-0 bottom-0 w-[3px] rounded-full",
            cp.status === "accepted" ? "bg-success" : cp.status === "rejected" ? "bg-destructive" : "bg-warning")} />
@@ -2048,7 +2166,20 @@ function TabCoProducao({ isNew, coProducerEmail, setCoProducerEmail, coProductio
  );
 }
 
-function TabCupons({ isNew, coupons, newCouponCode, setNewCouponCode, newCouponType, setNewCouponType, newCouponValue, setNewCouponValue, newCouponMaxUses, setNewCouponMaxUses, creatingCoupon, createCoupon, toggleCoupon, deleteCoupon }: any) {
+type TabCuponsProps = {
+  isNew: boolean;
+  coupons: AnyObj[];
+  newCouponCode: string; setNewCouponCode: StrS;
+  newCouponType: string; setNewCouponType: StrS;
+  newCouponValue: string; setNewCouponValue: StrS;
+  newCouponMaxUses: string; setNewCouponMaxUses: StrS;
+  creatingCoupon: boolean;
+  createCoupon: () => void | Promise<void>;
+  toggleCoupon: (coupon: Record<string, any>) => void | Promise<void>;
+  deleteCoupon: (id: string) => void | Promise<void>;
+};
+
+function TabCupons({ isNew, coupons, newCouponCode, setNewCouponCode, newCouponType, setNewCouponType, newCouponValue, setNewCouponValue, newCouponMaxUses, setNewCouponMaxUses, creatingCoupon, createCoupon, toggleCoupon, deleteCoupon }: TabCuponsProps) {
  return (
  <div className="space-y-6">
  <SectionHeader icon={Tag} title="Cupons de Desconto" subtitle="Crie cupons exclusivos para este produto." />
@@ -2091,7 +2222,7 @@ function TabCupons({ isNew, coupons, newCouponCode, setNewCouponCode, newCouponT
 
  {coupons.length > 0 ? (
  <div className="space-y-2">
- {coupons.map((coupon: any, i: number) => (
+ {coupons.map((coupon: Record<string, any>, i: number) => (
  <motion.div
  key={coupon.id}
  initial={{ opacity: 0, y: 8 }}
@@ -2133,7 +2264,22 @@ function TabCupons({ isNew, coupons, newCouponCode, setNewCouponCode, newCouponT
  );
 }
 
-function TabAfiliados({ isNew, productId, affiliateEnabled, setAffiliateEnabled, affiliateCommission, setAffiliateCommission, affiliateAttribution, setAffiliateAttribution, affiliateCookieDays, setAffiliateCookieDays, affiliateApprovalManual, setAffiliateApprovalManual, affiliateUpsellCommission, setAffiliateUpsellCommission, affiliateMarketplace, setAffiliateMarketplace, affiliateSupportEmail, setAffiliateSupportEmail, affiliateDescription, setAffiliateDescription, copyLink }: any) {
+type TabAfiliadosProps = {
+  isNew: boolean;
+  productId?: string;
+  affiliateEnabled: boolean; setAffiliateEnabled: BoolS;
+  affiliateCommission: string; setAffiliateCommission: StrS;
+  affiliateAttribution: string; setAffiliateAttribution: StrS;
+  affiliateCookieDays: string; setAffiliateCookieDays: StrS;
+  affiliateApprovalManual: boolean; setAffiliateApprovalManual: BoolS;
+  affiliateUpsellCommission: boolean; setAffiliateUpsellCommission: BoolS;
+  affiliateMarketplace: boolean; setAffiliateMarketplace: BoolS;
+  affiliateSupportEmail: string; setAffiliateSupportEmail: StrS;
+  affiliateDescription: string; setAffiliateDescription: StrS;
+  copyLink: (text: string) => void;
+};
+
+function TabAfiliados({ isNew, productId, affiliateEnabled, setAffiliateEnabled, affiliateCommission, setAffiliateCommission, affiliateAttribution, setAffiliateAttribution, affiliateCookieDays, setAffiliateCookieDays, affiliateApprovalManual, setAffiliateApprovalManual, affiliateUpsellCommission, setAffiliateUpsellCommission, affiliateMarketplace, setAffiliateMarketplace, affiliateSupportEmail, setAffiliateSupportEmail, affiliateDescription, setAffiliateDescription, copyLink }: TabAfiliadosProps) {
  return (
  <div className="space-y-6">
  <SectionHeader icon={Users} title="Programa de Afiliados" subtitle="Configure comissões e regras para afiliados." />
@@ -2220,7 +2366,19 @@ function TabAfiliados({ isNew, productId, affiliateEnabled, setAffiliateEnabled,
  );
 }
 
-function TabLinks({ isNew, product, pageUrl, affiliateEnabled, productId, getCheckoutLink, copyLink, name, price }: any) {
+type TabLinksProps = {
+  isNew: boolean;
+  product: AnyObj | null;
+  pageUrl: string;
+  affiliateEnabled: boolean;
+  productId?: string;
+  getCheckoutLink: () => string;
+  copyLink: (text: string) => void;
+  name: string;
+  price: string;
+};
+
+function TabLinks({ isNew, product, pageUrl, affiliateEnabled, productId, getCheckoutLink, copyLink, name, price }: TabLinksProps) {
    const [showQR, setShowQR] = useState(false);
    const checkoutLink = getCheckoutLink();
    const affiliateInviteLink = `${window.location.origin}/vendas/afiliados?product=${productId || ""}`;
@@ -2526,7 +2684,7 @@ function TabConteudo({ productId, isNew }: { productId?: string; isNew: boolean 
               <p className="text-[10px] text-muted-foreground tabular-nums">{courses.length} {courses.length === 1 ? "item" : "itens"}</p>
             </div>
             <div className="divide-y divide-border">
-              {courses.map((c: any) => {
+              {courses.map((c: Record<string, any>) => {
                 const stats = moduleStats[c.id] || { modules: 0, lessons: 0 };
                 return (
                   <button
