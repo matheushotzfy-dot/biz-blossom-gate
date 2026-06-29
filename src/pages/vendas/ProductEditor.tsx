@@ -2592,8 +2592,8 @@ function TabConteudo({ productId, isNew }: { productId?: string; isNew: boolean 
     if (!user || creating) return;
     setCreating(true);
     const { data, error } = await supabase.from("courses").insert({
-      user_id: user.id, product_id: productId, title: "Novo Curso", is_published: false
-    } as any).select().maybeSingle();
+      user_id: user.id, product_id: productId!, title: "Novo Curso", is_published: false
+    } satisfies TablesInsert<"courses">).select().maybeSingle();
     setCreating(false);
     if (error || !data) { toast.error("Erro ao criar curso"); return; }
     navigate(`/vendas/conteudo/${data.id}/builder`);
