@@ -134,7 +134,7 @@ export default function AdminOverviewTab({
   const handleKycApprove = async (userId: string) => {
     const { error } = await supabase.from("profiles").update({
       account_status: "approved", kyc_rejection_reason: null,
-    } as any).eq("user_id", userId);
+    }).eq("user_id", userId);
     if (error) { toast.error("Erro ao aprovar KYC"); return; }
     toast.success("KYC aprovado!");
     onUserStatus(userId, "approved");
