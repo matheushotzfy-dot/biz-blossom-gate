@@ -35,6 +35,7 @@ Deno.serve(async (req) => {
       checkoutSessionId,
       idempotencyKey,
       couponCode,
+      affiliateSlug,
     } = body;
 
 
