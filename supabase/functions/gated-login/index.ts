@@ -159,6 +159,11 @@ Deno.serve(async (req) => {
     await adminClient.from("admin_login_attempts").insert({
       email: trimmedEmail, success: true, scope,
     });
+    await logSecurityEvent({
+      supabaseUrl, serviceKey: serviceRoleKey, req,
+      event_type: "login_success", endpoint: "gated-login",
+      user_id: authData.user.id, actor_role: scope, status_code: 200,
+    });
 
     return new Response(
       JSON.stringify({
