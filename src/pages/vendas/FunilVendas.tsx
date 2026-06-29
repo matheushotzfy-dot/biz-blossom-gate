@@ -19,7 +19,7 @@ export default function FunilVendas() {
  const { user } = useAuth();
  const [period, setPeriod] = useState("today");
  const [loading, setLoading] = useState(true);
- const [stats, setStats] = useState({ total: 0, pending: 0, approved: 0, failed: 0, refunded: 0 });
+ const [stats, setStats] = useState({ total: 0, pending: 0, approved: 0, failed: 0, refunded: 0, conversionRate: 0 });
 
  useEffect(() => {
  if (user?.id) loadFunnel();
@@ -42,12 +42,13 @@ export default function FunilVendas() {
  .gte("created_at", since.toISOString());
 
  if (data) {
+  const conversions = calculateTransactionConversions(data);
  const total = data.length;
  const pending = data.filter(t => t.status === "pending").length;
   const approved = data.filter(t => isApprovedTransaction(t.status)).length;
  const failed = data.filter(t => t.status === "failed" || t.status === "refused").length;
  const refunded = data.filter(t => t.status === "refunded" || t.status === "chargeback").length;
- setStats({ total, pending, approved, failed, refunded });
+  setStats({ total, pending, approved, failed, refunded, conversionRate: conversions.overall.rate });
  }
  setLoading(false);
  };
@@ -83,10 +84,7 @@ export default function FunilVendas() {
  },
  ];
 
-  const conversionRate = calculateTransactionConversions([
-  ...Array.from({ length: stats.approved }, () => ({ status: "approved" as const })),
-  ...Array.from({ length: Math.max(0, stats.total - stats.approved) }, () => ({ status: "pending" as const })),
-  ]).overall.rate.toFixed(1);
+  const conversionRate = stats.conversionRate.toFixed(1);
 
  if (loading) {
  return (
