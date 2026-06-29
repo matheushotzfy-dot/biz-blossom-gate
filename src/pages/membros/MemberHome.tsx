@@ -73,13 +73,24 @@ export default function MemberHome() {
       .eq("user_id", user.id);
     const progressMap = new Map(progress?.map(p => [p.lesson_id, p]) || []);
 
-    const enriched: Course[] = (coursesData || []).map((c: any) => {
-      const modules = (c.modules || []).sort((a: any, b: any) => a.sort_order - b.sort_order);
+    type LessonRow = { id: string; title: string; sort_order: number | null };
+    type ModuleRow = { id: string; title: string; sort_order: number | null; lessons: LessonRow[] | null };
+    type CourseRow = {
+      id: string;
+      title: string;
+      description: string | null;
+      thumbnail_url: string | null;
+      category: string | null;
+      modules: ModuleRow[] | null;
+    };
+    const enriched: Course[] = ((coursesData || []) as CourseRow[]).map((c) => {
+      const modules = (c.modules || []).slice().sort((a, b) => (a.sort_order ?? 0) - (b.sort_order ?? 0));
       const allLessons: { id: string; title: string; moduleTitle: string }[] = [];
-      modules.forEach((m: any) => {
+      modules.forEach((m) => {
         (m.lessons || [])
-          .sort((a: any, b: any) => a.sort_order - b.sort_order)
-          .forEach((l: any) => allLessons.push({ id: l.id, title: l.title, moduleTitle: m.title }));
+          .slice()
+          .sort((a, b) => (a.sort_order ?? 0) - (b.sort_order ?? 0))
+          .forEach((l) => allLessons.push({ id: l.id, title: l.title, moduleTitle: m.title }));
       });
       const completed = allLessons.filter(l => progressMap.get(l.id)?.completed).length;
 

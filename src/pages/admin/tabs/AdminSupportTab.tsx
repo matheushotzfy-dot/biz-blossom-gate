@@ -57,17 +57,17 @@ export default function AdminSupportTab({
     if (data) {
       setTickets(data);
       const ids = Array.from(new Set(
-        (data as any[]).map(t => t.admin_user_id).filter(Boolean)
-      )) as string[];
+        data.map((t) => t.admin_user_id).filter((x): x is string => !!x)
+      ));
       if (ids.length > 0) {
         const [profilesRes, rolesRes] = await Promise.all([
           supabase.from("profiles").select("user_id, full_name, email").in("user_id", ids),
           supabase.from("user_roles").select("user_id, role").in("user_id", ids),
         ]);
         const roleByUser: Record<string, string[]> = {};
-        (rolesRes.data || []).forEach((r: any) => { (roleByUser[r.user_id] ||= []).push(r.role); });
+        (rolesRes.data || []).forEach((r) => { (roleByUser[r.user_id] ||= []).push(r.role); });
         const map: Record<string, { name: string; role: string }> = {};
-        (profilesRes.data || []).forEach((p: any) => {
+        (profilesRes.data || []).forEach((p) => {
           const roles = roleByUser[p.user_id] || [];
           const top = roles.includes("admin") ? "ADMIN"
             : roles.includes("manager") ? "GERENTE"
@@ -95,7 +95,7 @@ export default function AdminSupportTab({
       admin_user_id: user?.id ?? null,
       status: "answered",
       replied_at: new Date().toISOString(),
-    } as any).eq("id", ticket.id);
+    }).eq("id", ticket.id);
     if (error) { toast.error("Erro ao responder"); setSending(false); return; }
     toast.success("Resposta enviada — o cliente foi notificado.");
     await logAdminAction("reply_ticket", "support_ticket", ticket.id);
@@ -289,7 +289,7 @@ export default function AdminSupportTab({
                         <p className="text-[10px] font-black text-emerald-500 uppercase tracking-widest mb-2 flex items-center gap-2">
                           <span>
                             {(() => {
-                              const aid = (ticket as any).admin_user_id as string | null;
+                              const aid = ticket.admin_user_id;
                               const r = aid ? responders[aid] : null;
                               return r ? `${r.role} - ${r.name}` : "EQUIPE DE SUPORTE";
                             })()}

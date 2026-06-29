@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import {
   TrendingDown, Users, Activity, Target, ArrowUpRight, ArrowDownRight, Loader2,
+  type LucideIcon,
 } from "lucide-react";
 import {
   AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
@@ -40,13 +41,19 @@ type AnalyticsPayload = {
 };
 
 /* ── Sigma Tooltip ── */
-function SigmaTooltip({ active, payload, label, fmtCurrency }: any) {
+type TooltipEntry = { dataKey: string; name?: string; value: number | string; color?: string };
+function SigmaTooltip({ active, payload, label, fmtCurrency }: {
+  active?: boolean;
+  payload?: TooltipEntry[];
+  label?: string | number;
+  fmtCurrency: (v: number) => string;
+}) {
   if (!active || !payload?.length) return null;
   return (
     <div className="rounded-md border border-border bg-card px-3 py-2 font-mono shadow-lg">
-      {label && <p className="mb-1.5 text-[9px] font-bold uppercase tracking-[0.18em] text-muted-foreground">{label}</p>}
+      {label !== undefined && <p className="mb-1.5 text-[9px] font-bold uppercase tracking-[0.18em] text-muted-foreground">{label}</p>}
       <div className="space-y-1">
-        {payload.map((p: any) => (
+        {payload.map((p) => (
           <div key={p.dataKey} className="flex items-center justify-between gap-6 text-[11px]">
             <div className="flex items-center gap-1.5">
               <span className="h-2 w-2 rounded-sm" style={{ background: p.color }} />
@@ -102,13 +109,14 @@ export default function AdminAnalyticsTab({ fmtCurrency }: Props) {
     setLoading(true);
     (async () => {
       try {
-        const { data: res, error } = await (supabase as any).rpc("get_admin_analytics", {
+        const { data: res, error } = await supabase.rpc("get_admin_analytics", {
           _period_days: PERIOD_DAYS[period],
         });
         if (error) throw error;
-        if (!cancelled) setData(res as AnalyticsPayload);
-      } catch (e: any) {
-        toast.error("Erro ao carregar analytics: " + (e?.message ?? "desconhecido"));
+        if (!cancelled) setData(res as unknown as AnalyticsPayload);
+      } catch (e: unknown) {
+        const msg = e instanceof Error ? e.message : "desconhecido";
+        toast.error("Erro ao carregar analytics: " + msg);
       } finally {
         if (!cancelled) setLoading(false);
       }
@@ -381,7 +389,7 @@ export default function AdminAnalyticsTab({ fmtCurrency }: Props) {
 }
 
 function FunnelStep({ label, value, icon: Icon, tone = "neutral", pct, sub }: {
-  label: string; value: string; icon: any;
+  label: string; value: string; icon: LucideIcon;
   tone?: "neutral" | "success" | "destructive" | "warning" | "primary";
   pct?: number; sub?: string;
 }) {

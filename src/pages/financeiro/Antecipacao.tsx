@@ -1,4 +1,8 @@
 import { useState, useMemo } from "react";
+import type { Tables } from "@/integrations/supabase/types";
+
+type Tx = Tables<"transactions">;
+type EligibleTx = Tx & { daysLeft: number; inWindow: boolean; fee: number; net: number };
 import { useAuth } from "@/hooks/useAuth";
 import { useTransactions } from "@/hooks/useQueryData";
 import {
@@ -21,7 +25,7 @@ export default function Antecipacao() {
   const [antecipationDays, setAntecipationDays] = useState(15);
 
   const stats = useMemo(() => {
-    if (!transactions || !user) return { retainedTotal: 0, eligibleCount: 0, eligible: [] as any[] };
+    if (!transactions || !user) return { retainedTotal: 0, eligibleCount: 0, eligible: [] as Tx[] };
     const now = new Date();
     const retained = transactions.filter(t =>
       t.user_id === user.id &&
@@ -41,7 +45,7 @@ export default function Antecipacao() {
     let totalOriginal = 0;
     let totalFee = 0;
     let count = 0;
-    stats.eligible.forEach((tx: any) => {
+    stats.eligible.forEach((tx) => {
       if (!tx.retained_until) return;
       const daysRemaining = Math.max(0, Math.ceil((new Date(tx.retained_until).getTime() - now.getTime()) / (1000 * 60 * 60 * 24)));
       if (daysRemaining <= antecipationDays) {
@@ -62,14 +66,14 @@ export default function Antecipacao() {
 
   const enrichedEligible = useMemo(() => {
     const now = Date.now();
-    return stats.eligible.map((tx: any) => {
+    return stats.eligible.map<EligibleTx>((tx) => {
       const daysLeft = tx.retained_until
         ? Math.max(0, Math.ceil((new Date(tx.retained_until).getTime() - now) / 86400000))
         : 0;
       const inWindow = daysLeft <= antecipationDays;
       const fee = inWindow ? tx.retained_amount * antecipationFeeRate * (daysLeft / 15) : 0;
       return { ...tx, daysLeft, inWindow, fee, net: tx.retained_amount - fee };
-    }).sort((a: any, b: any) => a.daysLeft - b.daysLeft);
+    }).sort((a, b) => a.daysLeft - b.daysLeft);
   }, [stats.eligible, antecipationDays]);
 
   return (
@@ -281,7 +285,7 @@ export default function Antecipacao() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {enrichedEligible.slice(0, 50).map((tx: any) => (
+                {enrichedEligible.slice(0, 50).map((tx) => (
                   <TableRow key={tx.id} className="border-border/30 hover:bg-secondary/30 transition-colors">
                     <TableCell className="font-mono text-[12px] font-bold text-foreground tabular-nums">{tx.daysLeft}d</TableCell>
                     <TableCell>

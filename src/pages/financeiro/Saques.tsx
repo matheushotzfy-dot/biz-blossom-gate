@@ -40,8 +40,8 @@ export default function Saques() {
   const [search, setSearch] = useState("");
   const invalidateAll = useInvalidateAll();
 
-  const hasAddress = !!(profile as any)?.zip_code && !!(profile as any)?.street
-    && !!(profile as any)?.street_number && !!(profile as any)?.city && !!(profile as any)?.state;
+  const hasAddress = !!profile?.zip_code && !!profile?.street
+    && !!profile?.street_number && !!profile?.city && !!profile?.state;
 
   useEffect(() => {
     if (!user?.id) return;
@@ -316,7 +316,7 @@ export default function Saques() {
                   </div>
                 ) : (
                   <div className="space-y-2">
-                    {pixKeys.slice(0, 2).map((pk: any) => (
+                    {pixKeys.slice(0, 2).map((pk) => (
                       <div key={pk.id} className="p-3 rounded-xl bg-muted/30 border border-border/60 flex items-center justify-between group">
                         <div className="min-w-0">
                           <p className="text-[11px] font-black text-foreground truncate">{pk.key_value}</p>
@@ -343,7 +343,7 @@ export default function Saques() {
                   </div>
                 ) : (
                   <div className="space-y-2">
-                    {bankAccounts.slice(0, 1).map((acc: any) => (
+                    {bankAccounts.slice(0, 1).map((acc) => (
                       <div key={acc.id} className="p-3 rounded-xl bg-muted/30 border border-border/60 group">
                         <p className="text-[11px] font-black text-foreground truncate uppercase">{acc.bank_name}</p>
                         <p className="text-[9px] font-bold text-muted-foreground/60 uppercase mt-0.5">Ag {acc.agency} · CC {acc.account_number}</p>
