@@ -506,7 +506,7 @@ export default function Afiliados() {
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {affiliateProducts.filter(p => !search || p.name.toLowerCase().includes(search.toLowerCase())).map((p) => {
-              const pct = (p as any).affiliate_commission || 30;
+              const pct = p.affiliate_commission || 30;
               const earnPerSale = (Number(p.price) * pct) / 100;
               return (
                 <Card key={p.id} className="p-6 group hover:scale-[1.01]">
