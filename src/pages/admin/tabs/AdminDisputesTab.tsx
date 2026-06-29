@@ -53,7 +53,7 @@ export default function AdminDisputesTab({ type, title, profiles, transactions, 
         .order("created_at", { ascending: false })
         .limit(500);
       if (error) throw error;
-      setDisputes((data || []) as any);
+      setDisputes((data || []) as unknown as Dispute[]);
     } catch (e) {
       console.error("[AdminDisputesTab] load error:", e);
       toast.error("Erro ao carregar disputas");
