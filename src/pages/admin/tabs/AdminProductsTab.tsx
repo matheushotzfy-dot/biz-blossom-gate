@@ -194,11 +194,11 @@ export default function AdminProductsTab({ products, profiles, transactions, fmt
     });
   }, [products, statusFilter, classFilter, search, profileMap]);
 
-  const pendingReview = useMemo(() => products.filter(p => p.status === "pending_review" && !(p as any).deleted_at), [products]);
-  const activeCount = products.filter(p => p.status === "active" && !(p as any).deleted_at).length;
-  const blockedCount = products.filter(p => (p.status === "inactive" || p.status === "suspended") && !(p as any).deleted_at).length;
+  const pendingReview = useMemo(() => products.filter(p => p.status === "pending_review" && !p.deleted_at), [products]);
+  const activeCount = products.filter(p => p.status === "active" && !p.deleted_at).length;
+  const blockedCount = products.filter(p => (p.status === "inactive" || p.status === "suspended") && !p.deleted_at).length;
   const deletedCount = products.filter(p => !!p.deleted_at).length;
-  const blackCount = products.filter(p => p.classification === "black" && !(p as any).deleted_at).length;
+  const blackCount = products.filter(p => p.classification === "black" && !p.deleted_at).length;
 
   return (
     <div className="space-y-6 animate-fade-in">
@@ -613,7 +613,7 @@ export default function AdminProductsTab({ products, profiles, transactions, fmt
 }
 
 function ClassPicker({ value, onChange }: { value: Classification; onChange: (v: Classification) => void }) {
-  const opts: { v: Classification; label: string; Icon: any; on: string; off: string }[] = [
+  const opts: { v: Classification; label: string; Icon: LucideIcon; on: string; off: string }[] = [
     { v: "white", label: "W", Icon: ShieldCheck,    on: "bg-emerald-500/15 text-emerald-500 border-emerald-500/40",  off: "text-muted-foreground/60 hover:text-emerald-500" },
     { v: "gray",  label: "G", Icon: ShieldQuestion, on: "bg-amber-500/15 text-amber-500 border-amber-500/40",        off: "text-muted-foreground/60 hover:text-amber-500" },
     { v: "black", label: "B", Icon: ShieldX,        on: "bg-destructive/15 text-destructive border-destructive/40",  off: "text-muted-foreground/60 hover:text-destructive" },
