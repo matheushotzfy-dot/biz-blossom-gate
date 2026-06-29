@@ -108,10 +108,10 @@ export default function AdminRiskComplianceTab({ profiles, transactions, fmtCurr
  return;
  }
  toast.success(`${newType.toUpperCase()} adicionado à Blacklist`);
- await logAdminAction("add_blacklist", "global_blacklist", clean, { entry_type: newType, reason: sanitizedReason } as any);
+ await logAdminAction("add_blacklist", "global_blacklist", clean, { entry_type: newType, reason: sanitizedReason });
  setAddDialog(false); setNewValue(""); setNewReason("");
  const { data } = await supabase.from("global_blacklist").select("*").order("created_at", { ascending: false }).limit(500);
- if (data) setBlacklist(data as any[]);
+ if (data) setBlacklist(data as BlacklistEntry[]);
  };
 
  const handleRemoveBlacklist = async (id: string, value: string) => {
