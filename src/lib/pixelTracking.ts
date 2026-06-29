@@ -20,6 +20,8 @@ export interface PixelConfig {
 }
 
 // Window augmented with arbitrary pixel SDK globals (fbq, gtag, ttq, kwaiq, dataLayer, ...)
+// Justified: third-party pixel SDKs (Meta/FB, Google Analytics, TikTok, Kwai)
+// attach callable globals at runtime that cannot be statically typed.
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type PixelWindow = Window & typeof globalThis & Record<string, any>;
 

@@ -34,8 +34,8 @@ type IpLog = { ip: string; user_agent: string | null; country: string | null; so
 
 interface ActivityLog {
   id: string; user_id: string; action: string; entity_type: string;
-  entity_id: string | null; old_data: Record<string, any> | null;
-  new_data: Record<string, any> | null; created_at: string;
+  entity_id: string | null; old_data: Record<string, unknown> | null;
+  new_data: Record<string, unknown> | null; created_at: string;
 }
 
 interface Acquirer {
@@ -450,10 +450,13 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
     return { totalGross, totalNet, totalFees, totalWithdrawn, txCount: txs.length, completedCount: completed.length, conversionRate };
   };
 
-  const deletedProducts = userLogs.filter(l => l.action === "product_deleted").map(l => ({
-    id: l.entity_id, name: l.old_data?.name || "Desconhecido", price: l.old_data?.price || 0,
-    deletedAt: l.created_at, data: l.old_data,
-  }));
+  const deletedProducts = userLogs.filter(l => l.action === "product_deleted").map(l => {
+    const od = (l.old_data as { name?: string; price?: number } | null) ?? null;
+    return {
+      id: l.entity_id, name: od?.name || "Desconhecido", price: od?.price ?? 0,
+      deletedAt: l.created_at, data: l.old_data,
+    };
+  });
 
   const userApproved = userTransactions.filter(t => t.status === "approved" || t.status === "completed");
   const userTotalGross = userApproved.reduce((a, t) => a + Number(t.amount), 0);

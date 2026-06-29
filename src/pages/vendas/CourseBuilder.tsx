@@ -2,6 +2,7 @@ import { useEffect, useState, useRef, useCallback } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import type { TablesUpdate } from "@/integrations/supabase/types";
 import {
  Plus, BookOpen, Layers, Play, PlayCircle, Trash2, GripVertical, X,
  ChevronRight, Clock, Video, FileText,
@@ -365,7 +366,7 @@ export default function CourseBuilder() {
 
  const saveCourseSettings = async () => {
  if (!course || !user) return;
- const updates: Record<string, any> = {};
+ const updates: TablesUpdate<"courses"> = {};
  if (courseTitle.trim() && courseTitle !== course.title) updates.title = courseTitle.trim();
  if (courseDescription !== (course.description || "")) updates.description = courseDescription || null;
  if (Object.keys(updates).length === 0) { setCourseSettingsOpen(false); return; }
