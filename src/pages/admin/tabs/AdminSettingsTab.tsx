@@ -85,50 +85,52 @@ export default function AdminSettingsTab() {
  setEditingFees(feeMap);
  }
  if (settingsRes.data) {
- setSettings(settingsRes.data as PlatformSetting[]);
- const autoApprove = settingsRes.data.find((s: any) => s.key === "auto_approve_withdrawals");
+ const data = settingsRes.data as PlatformSetting[];
+ setSettings(data);
+ const autoApprove = data.find(s => s.key === "auto_approve_withdrawals");
  if (autoApprove) {
- const val = (autoApprove as any).value;
- setAutoApproveEnabled(val.enabled ?? false);
+ const val = asObj(autoApprove.value);
+ setAutoApproveEnabled((val.enabled as boolean) ?? false);
  setAutoApproveMaxAmount(String(val.max_amount ?? 100));
  }
- const whiteSettings = settingsRes.data.find((s: any) => s.key === "fees_white");
+ const whiteSettings = data.find(s => s.key === "fees_white");
  if (whiteSettings) {
- const v = (whiteSettings as any).value;
+ const v = asObj(whiteSettings.value);
  setWhitePercentage(String(v.percentage ?? 4.99));
  setWhiteFixed(String(v.fixed ?? 2.50));
  setWhiteWithdrawal(String(v.withdrawal ?? 5.00));
  }
- const blackSettings = settingsRes.data.find((s: any) => s.key === "fees_black");
+ const blackSettings = data.find(s => s.key === "fees_black");
  if (blackSettings) {
- const v = (blackSettings as any).value;
+ const v = asObj(blackSettings.value);
  setBlackPercentage(String(v.percentage ?? 4.99));
  setBlackFixed(String(v.fixed ?? 2.50));
  setBlackWithdrawal(String(v.withdrawal ?? 5.00));
  }
-   const maxTicketSet = settingsRes.data.find((s: any) => s.key === "max_ticket_default");
+   const maxTicketSet = data.find(s => s.key === "max_ticket_default");
  if (maxTicketSet) {
-    const v = (maxTicketSet as any).value?.value ?? 10000;
+    const v = asObj(maxTicketSet.value).value ?? 10000;
     setMaxTicketGlobal(String(v));
     setMaxTicketInput(String(v));
   }
-  const emailVerif = settingsRes.data.find((s: any) => s.key === "require_email_verification");
+  const emailVerif = data.find(s => s.key === "require_email_verification");
   if (emailVerif) {
-    setRequireEmailVerification(((emailVerif as any).value?.enabled ?? true) === true);
+    setRequireEmailVerification((asObj(emailVerif.value).enabled ?? true) === true);
   }
  }
  if (retentionRes.data) {
- const global = retentionRes.data.find((r: any) => r.user_id === null);
+ const rdata = retentionRes.data as RetentionSetting[];
+ const global = rdata.find(r => r.user_id === null);
  if (global) {
           setGlobalRetention({
             id: global.id,
             pix_retention_pct: String(global.pix_retention_pct),
             card_retention_pct: String(global.card_retention_pct),
             retention_days: String(global.retention_days),
-            card_release_days: String((global as any).card_release_days ?? 7),
+            card_release_days: String(global.card_release_days ?? 7),
           });
  }
- setSellerRetentions(retentionRes.data.filter((r: any) => r.user_id !== null));
+ setSellerRetentions(rdata.filter(r => r.user_id !== null));
  }
  if (profilesRes.data) setProfiles(profilesRes.data);
  if (notifsRes.data) setNotifications(notifsRes.data);
