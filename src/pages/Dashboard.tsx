@@ -38,7 +38,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Calendar } from "@/components/ui/calendar";
 import { format, differenceInDays } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { cn, formatCurrency, isApprovedTransaction } from "@/lib/utils";
+import { cn, isApprovedTransaction } from "@/lib/utils";
 
 import type { DateRange } from "react-day-picker";
 import { Seo } from "@/components/Seo";
