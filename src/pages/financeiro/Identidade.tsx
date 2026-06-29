@@ -15,6 +15,7 @@ import {
   Upload, Camera, Image as ImageIcon, Loader2, Lock, Info, Fingerprint,
   Wallet, BadgeCheck, Building2, CreditCard, Edit3,
   AlertTriangle,
+  type LucideIcon,
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
