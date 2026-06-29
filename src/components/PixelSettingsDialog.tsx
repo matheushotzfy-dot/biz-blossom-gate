@@ -706,7 +706,7 @@ function Dot() {
   return <span className="h-0.5 w-0.5 rounded-full bg-muted-foreground/60" />;
 }
 
-function SectionLabel({ icon: Icon, children }: { icon: any; children: React.ReactNode }) {
+function SectionLabel({ icon: Icon, children }: { icon: LucideIcon; children: React.ReactNode }) {
   return (
     <p className="text-[10px] font-display font-black uppercase tracking-[0.16em] text-muted-foreground mb-2.5 flex items-center gap-1.5">
       <Icon className="h-3 w-3" /> {children}
