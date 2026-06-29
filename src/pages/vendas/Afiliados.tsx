@@ -96,15 +96,17 @@ export default function Afiliados() {
 
   const handleCreateLink = async () => {
     if (!user || !selectedProduct) return;
-    const product = [...affiliateProducts, ...marketProducts].find(p => p.id === selectedProduct);
+    const product = [...affiliateProducts, ...marketProducts].find(p => p.id === selectedProduct) as
+      (Tables<"products"> | Tables<"products_public">) | undefined;
     if (!product) { toast.error("Produto não encontrado"); return; }
     const slug = `aff-${crypto.randomUUID().slice(0, 10)}`;
+    const ownerId = ("user_id" in product && product.user_id) ? product.user_id : user.id;
     const { error } = await supabase.from("affiliate_links").insert({
       product_id: selectedProduct,
       affiliate_user_id: user.id,
-      owner_user_id: (product as any).user_id || user.id,
+      owner_user_id: ownerId,
       slug,
-      commission_pct: (product as any).affiliate_commission || 30,
+      commission_pct: product.affiliate_commission || 30,
     });
     if (error) { toast.error("Erro ao criar link de afiliado"); return; }
     toast.success("Link de afiliado criado!");
