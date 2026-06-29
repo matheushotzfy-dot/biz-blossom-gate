@@ -474,116 +474,92 @@ export default function Dashboard() {
             <PopoverContent
               align="end"
               sideOffset={8}
-              className="w-[calc(100vw-1rem)] max-w-[760px] overflow-hidden rounded-xl border border-border bg-card p-0 sm:w-auto"
+              className="w-[320px] overflow-hidden rounded-xl border border-border bg-card p-0"
             >
-              {/* Header */}
-              <div className="flex items-center justify-between gap-4 px-4 py-3 border-b border-border bg-secondary/30">
-                <div className="flex items-center gap-2">
-                  <div className="h-6 w-6 rounded-md bg-primary/10 text-primary flex items-center justify-center">
-                    <CalendarDays className="h-3 w-3" strokeWidth={2.25} />
-                  </div>
-                  <div className="flex flex-col leading-tight">
-                    <span className="text-[9px] font-display font-black uppercase tracking-[0.18em] text-muted-foreground/70">
-                      Período personalizado
-                    </span>
-                    <span className="text-[11px] font-display font-bold text-foreground tabular-nums">
-                      {customRange?.from
-                        ? format(customRange.from, "dd MMM", { locale: ptBR }) +
-                          (customRange.to
-                            ? " — " + format(customRange.to, "dd MMM yyyy", { locale: ptBR })
-                            : " — selecione fim")
-                        : "Selecione o intervalo"}
-                    </span>
-                  </div>
-                </div>
+              {/* Compact header */}
+              <div className="flex items-center justify-between gap-3 px-3.5 py-2.5 border-b border-border">
+                <span className="text-[10px] font-display font-black uppercase tracking-[0.16em] text-muted-foreground/80">
+                  {customRange?.from
+                    ? format(customRange.from, "dd MMM", { locale: ptBR }) +
+                      (customRange.to
+                        ? " — " + format(customRange.to, "dd MMM", { locale: ptBR })
+                        : " — fim?")
+                    : "Selecione o intervalo"}
+                </span>
                 {customRange?.from && customRange?.to && (
-                  <span className="text-[10px] font-display font-black uppercase tracking-[0.16em] text-primary tabular-nums px-2 py-1 rounded-md bg-primary/10 border border-primary/20">
+                  <span className="text-[10px] font-display font-black uppercase tracking-[0.14em] text-primary tabular-nums px-1.5 py-0.5 rounded-md bg-primary/10 border border-primary/20">
                     {differenceInDays(customRange.to, customRange.from) + 1}d
                   </span>
                 )}
               </div>
 
-              <div className="flex flex-col sm:flex-row">
-                {/* Quick presets rail */}
-                <div className="sm:w-[148px] sm:border-r border-b sm:border-b-0 border-border bg-secondary/15 p-2 flex sm:flex-col gap-0.5 overflow-x-auto sm:overflow-visible">
-                  {([
-                    { label: "Hoje", days: 0 },
-                    { label: "Ontem", days: 1, offset: 1 },
-                    { label: "Últimos 7 dias", days: 6 },
-                    { label: "Últimos 15 dias", days: 14 },
-                    { label: "Últimos 30 dias", days: 29 },
-                    { label: "Este mês", monthMode: "current" },
-                    { label: "Mês passado", monthMode: "previous" },
-                  ] as { label: string; days?: number; offset?: number; monthMode?: "current" | "previous" }[]).map((preset) => {
-                    const apply = () => {
-                      const today = brasiliaToday();
-                      let from: Date, to: Date;
-                      if (preset.monthMode === "current") {
-                        from = new Date(today.getFullYear(), today.getMonth(), 1);
-                        to = today;
-                      } else if (preset.monthMode === "previous") {
-                        from = new Date(today.getFullYear(), today.getMonth() - 1, 1);
-                        to = new Date(today.getFullYear(), today.getMonth(), 0);
-                      } else if (preset.offset) {
-                        from = new Date(today);
-                        from.setDate(today.getDate() - preset.offset);
-                        to = new Date(from);
-                      } else {
-                        from = new Date(today);
-                        from.setDate(today.getDate() - (preset.days || 0));
-                        to = new Date(today);
-                      }
-                      from.setHours(0, 0, 0, 0);
-                      to.setHours(23, 59, 59, 999);
-                      setCustomRange({ from, to });
-                      setIsCustom(true);
-                    };
-                    return (
-                      <button
-                        key={preset.label}
-                        onClick={apply}
-                        className="seller-menu-item text-left px-2.5 py-2 rounded-md text-[11px] font-display font-bold text-muted-foreground/80 hover:text-foreground hover:bg-secondary/60 whitespace-nowrap"
-                      >
-                        {preset.label}
-                      </button>
-                    );
-                  })}
-                </div>
-
-                {/* Calendar */}
-                <Calendar
-                  mode="range"
-                  selected={customRange}
-                  onSelect={(r) => { setCustomRange(r); setIsCustom(true); }}
-                  locale={ptBR}
-                  numberOfMonths={2}
-                  pagedNavigation
-                  captionLayout="dropdown-buttons"
-                  fromYear={new Date().getFullYear() - 5}
-                  toYear={new Date().getFullYear()}
-                  toDate={new Date()}
-                  defaultMonth={customRange?.from ?? new Date(new Date().getFullYear(), new Date().getMonth() - 1, 1)}
-                  className="pointer-events-auto"
-                />
+              {/* Compact preset chips */}
+              <div className="flex flex-wrap gap-1 px-3 py-2 border-b border-border bg-secondary/20">
+                {([
+                  { label: "Hoje", days: 0 },
+                  { label: "7d", days: 6 },
+                  { label: "15d", days: 14 },
+                  { label: "30d", days: 29 },
+                  { label: "Mês", monthMode: "current" as const },
+                ]).map((preset) => {
+                  const apply = () => {
+                    const today = brasiliaToday();
+                    let from: Date, to: Date;
+                    if ((preset as any).monthMode === "current") {
+                      from = new Date(today.getFullYear(), today.getMonth(), 1);
+                      to = today;
+                    } else {
+                      from = new Date(today);
+                      from.setDate(today.getDate() - ((preset as any).days || 0));
+                      to = new Date(today);
+                    }
+                    from.setHours(0, 0, 0, 0);
+                    to.setHours(23, 59, 59, 999);
+                    setCustomRange({ from, to });
+                    setIsCustom(true);
+                  };
+                  return (
+                    <button
+                      key={preset.label}
+                      onClick={apply}
+                      className="px-2.5 py-1 rounded-md text-[10px] font-display font-black uppercase tracking-[0.12em] text-muted-foreground/70 border border-border/50 bg-card hover:text-primary hover:border-primary/40 hover:bg-primary/[0.06] transition-all"
+                    >
+                      {preset.label}
+                    </button>
+                  );
+                })}
               </div>
 
+              {/* Single-month calendar with arrow navigation */}
+              <Calendar
+                mode="range"
+                selected={customRange}
+                onSelect={(r) => { setCustomRange(r); setIsCustom(true); }}
+                locale={ptBR}
+                numberOfMonths={1}
+                toDate={new Date()}
+                defaultMonth={customRange?.from ?? new Date()}
+                className="pointer-events-auto p-2"
+              />
+
               {/* Footer */}
-              <div className="flex items-center justify-between gap-2 px-4 py-2.5 border-t border-border bg-secondary/20">
+              <div className="flex items-center justify-between gap-2 px-3.5 py-2 border-t border-border">
                 <button
                   onClick={() => { setCustomRange(undefined); setIsCustom(false); setSelectedPeriod(PERIOD_PRESETS[0]); }}
-                  className="seller-text-action text-[10px] font-display font-black uppercase tracking-[0.14em] text-muted-foreground/60 hover:text-foreground"
+                  className="text-[10px] font-display font-black uppercase tracking-[0.14em] text-muted-foreground/60 hover:text-foreground transition-colors"
                 >
                   Limpar
                 </button>
                 <button
                   onClick={() => setDatePickerOpen(false)}
                   disabled={!customRange?.from || !customRange?.to}
-                  className="seller-action px-3 py-1.5 rounded-md text-[10px] font-display font-black uppercase tracking-[0.14em] bg-primary text-primary-foreground hover:bg-primary/90 disabled:opacity-40 disabled:cursor-not-allowed"
+                  className="px-3 py-1.5 rounded-md text-[10px] font-display font-black uppercase tracking-[0.14em] bg-primary text-primary-foreground hover:bg-primary/90 disabled:opacity-40 disabled:cursor-not-allowed transition-all"
                 >
                   Aplicar
                 </button>
               </div>
             </PopoverContent>
+
 
           </Popover>
         </div>
