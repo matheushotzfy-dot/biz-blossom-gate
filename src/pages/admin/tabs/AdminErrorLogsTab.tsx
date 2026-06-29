@@ -45,7 +45,7 @@ const CATEGORIES: { value: Category | "all"; label: string; icon: LucideIcon; to
   { value: "other", label: "Outros", icon: Bug, tone: "neutral" },
 ];
 
-const CAT_META: Record<Category, { icon: any; cls: string; label: string }> = {
+const CAT_META: Record<Category, { icon: LucideIcon; cls: string; label: string }> = {
   platform: { icon: Server, cls: "bg-primary/10 text-primary border-primary/30", label: "Plataforma" },
   checkout: { icon: ShoppingCart, cls: "bg-info/10 text-info border-info/30", label: "Checkout" },
   payment: { icon: CreditCard, cls: "bg-destructive/10 text-destructive border-destructive/30", label: "Pagamento" },
