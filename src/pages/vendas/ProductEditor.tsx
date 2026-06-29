@@ -507,7 +507,7 @@ export default function ProductEditor() {
  checkout_email_confirm: product.checkout_email_confirm,
  affiliate_enabled: product.affiliate_enabled,
  affiliate_commission: product.affiliate_commission,
- } as any).select("id").maybeSingle();
+ } satisfies TablesInsert<"products">).select("id").maybeSingle();
  if (error) { toast.error("Erro ao duplicar"); return; }
  toast.success("Produto duplicado com sucesso!");
  invalidateAll(["products"]);
