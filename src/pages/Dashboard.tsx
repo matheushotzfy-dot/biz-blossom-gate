@@ -484,22 +484,22 @@ export default function Dashboard() {
 
               {/* Compact preset chips */}
               <div className="flex flex-wrap gap-1 px-3 py-2 border-b border-border bg-secondary/20">
-                {([
+                {(([
                   { label: "Hoje", days: 0 },
                   { label: "7d", days: 6 },
                   { label: "15d", days: 14 },
                   { label: "30d", days: 29 },
-                  { label: "Mês", monthMode: "current" as const },
-                ]).map((preset) => {
+                  { label: "Mês", monthMode: "current" },
+                ]) as Array<{ label: string; days?: number; monthMode?: "current" }>).map((preset) => {
                   const apply = () => {
                     const today = brasiliaToday();
                     let from: Date, to: Date;
-                    if ((preset as any).monthMode === "current") {
+                    if (preset.monthMode === "current") {
                       from = new Date(today.getFullYear(), today.getMonth(), 1);
                       to = today;
                     } else {
                       from = new Date(today);
-                      from.setDate(today.getDate() - ((preset as any).days || 0));
+                      from.setDate(today.getDate() - (preset.days || 0));
                       to = new Date(today);
                     }
                     from.setHours(0, 0, 0, 0);
