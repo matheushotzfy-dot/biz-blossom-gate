@@ -32,7 +32,7 @@ interface Props {
 
 type Category = "platform" | "checkout" | "payment" | "webhook" | "auth" | "withdrawal" | "api" | "database" | "other";
 
-const CATEGORIES: { value: Category | "all"; label: string; icon: any; tone: "primary" | "warning" | "destructive" | "info" | "success" | "neutral" }[] = [
+const CATEGORIES: { value: Category | "all"; label: string; icon: LucideIcon; tone: "primary" | "warning" | "destructive" | "info" | "success" | "neutral" }[] = [
   { value: "all", label: "Todos", icon: Layers, tone: "neutral" },
   { value: "platform", label: "Plataforma", icon: Server, tone: "primary" },
   { value: "checkout", label: "Checkout", icon: ShoppingCart, tone: "info" },
