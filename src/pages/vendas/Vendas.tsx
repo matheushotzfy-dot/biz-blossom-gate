@@ -9,7 +9,7 @@ import { TransactionDetailPanel } from "@/components/transactions/TransactionDet
 import { PixLogoMark } from "@/components/icons/PixLogoMark";
 import type { Tables } from "@/integrations/supabase/types";
 import { Button } from "@/components/ui/button";
-import { cn, isApprovedTransaction } from "@/lib/utils";
+import { calculateTransactionConversions, cn, isApprovedTransaction } from "@/lib/utils";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
@@ -201,13 +201,17 @@ export default function Vendas() {
     const approved = filteredByDate.filter(t => isApprovedTransaction(t.status));
     const revenue = approved.reduce((acc, t) => acc + Number(t.net_amount), 0);
     const gross = approved.reduce((acc, t) => acc + Number(t.amount), 0);
+    const conversions = calculateTransactionConversions(transactions);
     return {
       count: approved.length,
       revenue,
       gross,
-      avg: approved.length > 0 ? revenue / approved.length : 0
+      avg: approved.length > 0 ? revenue / approved.length : 0,
+      pixConversion: conversions.pix.rate,
+      pixApproved: conversions.pix.approved,
+      pixTotal: conversions.pix.total,
     };
-  }, [filteredByDate]);
+  }, [filteredByDate, transactions]);
 
   const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
   const currentPage = Math.min(page, totalPages);
@@ -370,7 +374,7 @@ export default function Vendas() {
         <StatCard title="Faturamento Líquido" value={privacyHidden ? CENSORED : fmt(stats.revenue)} icon={Wallet} color="success" description="Total após taxas" />
         <StatCard title="Vendas Aprovadas" value={stats.count} icon={Check} color="primary" description="Pedidos concluídos" />
         <StatCard title="Ticket Médio" value={privacyHidden ? CENSORED : fmt(stats.avg)} icon={BarChart3} color="info" description="Média por venda" />
-        <StatCard title="Volume Bruto" value={privacyHidden ? CENSORED : fmt(stats.gross)} icon={TrendingUp} color="neutral" description="Total processado" />
+        <StatCard title="Conversão Pix" value={`${stats.pixConversion.toFixed(0)}%`} icon={Zap} color="info" description={`${stats.pixApproved} de ${stats.pixTotal} pagos`} />
       </div>
 
       {/* Table Section */}

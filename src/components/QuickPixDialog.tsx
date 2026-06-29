@@ -179,7 +179,7 @@ export default function QuickPixDialog({ open, onOpenChange }: Props) {
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-[440px] p-0 overflow-hidden border border-primary/25 bg-card rounded-2xl">
+      <DialogContent className="max-w-[440px] p-0 overflow-hidden rounded-2xl border border-primary/35 bg-card shadow-2xl">
         {/* Header — solid, no gradients/blur */}
         <div className="relative px-6 pt-6 pb-5 border-b border-border bg-card">
           <span className="absolute left-0 top-6 bottom-6 w-[3px] rounded-r-full bg-primary/80" />
@@ -224,7 +224,7 @@ export default function QuickPixDialog({ open, onOpenChange }: Props) {
                   }}
                   inputMode="numeric"
                   className={cn(
-                    "h-14 pl-12 font-display text-[28px] font-black tabular-nums tracking-[-0.02em] rounded-xl border border-primary/20 bg-background",
+                    "h-14 pl-12 font-display text-[28px] font-black tabular-nums tracking-tight rounded-xl border border-primary/30 bg-primary/[0.035] shadow-[inset_0_0_0_1px_hsl(var(--primary)/0.06)]",
                     ease,
                     "focus-visible:ring-1 focus-visible:ring-primary/30 focus-visible:border-primary/50",
                   )}
@@ -249,7 +249,7 @@ export default function QuickPixDialog({ open, onOpenChange }: Props) {
                 <Input
                   value={name}
                   onChange={(e) => setName(e.target.value)}
-                  className={cn("h-11 pl-10 rounded-xl border border-border bg-background text-[13px] font-medium", ease)}
+                  className={cn("h-11 pl-10 rounded-xl border border-border/80 bg-card-inset text-[13px] font-bold focus-visible:border-primary/45 focus-visible:ring-primary/20", ease)}
                   placeholder="Nome completo"
                 />
               </div>
@@ -270,7 +270,7 @@ export default function QuickPixDialog({ open, onOpenChange }: Props) {
                       setDoc(d.length <= 11 ? fmtCpf(d) : d);
                     }}
                     inputMode="numeric"
-                    className={cn("h-11 pl-10 rounded-xl border border-border bg-background font-mono text-[12.5px] font-bold tabular-nums", ease)}
+                    className={cn("h-11 pl-10 rounded-xl border border-border/80 bg-card-inset font-mono text-[12.5px] font-bold tabular-nums focus-visible:border-primary/45 focus-visible:ring-primary/20", ease)}
                     placeholder="000.000.000-00"
                   />
                 </div>
@@ -284,7 +284,7 @@ export default function QuickPixDialog({ open, onOpenChange }: Props) {
                   <Input
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    className={cn("h-11 pl-10 rounded-xl border border-border bg-background text-[13px]", ease)}
+                    className={cn("h-11 pl-10 rounded-xl border border-border/80 bg-card-inset text-[13px] font-bold focus-visible:border-primary/45 focus-visible:ring-primary/20", ease)}
                     placeholder="email@exemplo.com"
                     type="email"
                   />
@@ -300,7 +300,7 @@ export default function QuickPixDialog({ open, onOpenChange }: Props) {
               <Input
                 value={desc}
                 onChange={(e) => setDesc(e.target.value.slice(0, 100))}
-                className={cn("h-11 rounded-xl border border-border bg-background text-[13px]", ease)}
+                className={cn("h-11 rounded-xl border border-border/80 bg-card-inset text-[13px] font-bold focus-visible:border-primary/45 focus-visible:ring-primary/20", ease)}
                 placeholder="Ex: Consultoria, Mentoria..."
               />
             </div>
@@ -319,7 +319,7 @@ export default function QuickPixDialog({ open, onOpenChange }: Props) {
               className={cn(
                 "w-full h-12 rounded-xl font-display font-black text-[12px] uppercase tracking-[0.14em] flex items-center justify-center gap-2",
                 "bg-primary text-primary-foreground border border-primary/40",
-                "hover:bg-primary/90 active:scale-[0.985]",
+                "shadow-[0_14px_34px_hsl(var(--primary)/0.18)] hover:-translate-y-px hover:bg-primary/90 hover:shadow-[0_18px_44px_hsl(var(--primary)/0.24)] active:translate-y-0 active:scale-[0.985]",
                 ease,
                 "disabled:opacity-40 disabled:cursor-not-allowed disabled:active:scale-100",
               )}

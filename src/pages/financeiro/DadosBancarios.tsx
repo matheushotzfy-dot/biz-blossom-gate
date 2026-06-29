@@ -167,9 +167,9 @@ export default function DadosBancarios() {
                     value={pixForm.key_type}
                     onValueChange={(v) => { setPixForm({ ...pixForm, key_type: v as PixForm["key_type"] }); clearPixError("key_value"); }}
                   >
-                    <SelectTrigger className="border-primary/20 bg-primary/[0.035]"><SelectValue /></SelectTrigger>
+                    <SelectTrigger className="finance-select-trigger h-11 border-primary/25 bg-primary/[0.045] font-black"><SelectValue /></SelectTrigger>
                     <SelectContent className="w-[var(--radix-select-trigger-width)]">
-                      {PIX_TYPES.map(t => <SelectItem key={t.value} value={t.value} className="text-[13px]">{t.label}</SelectItem>)}
+                      {PIX_TYPES.map(t => <SelectItem key={t.value} value={t.value} className="text-[13px] font-black">{t.label}</SelectItem>)}
                     </SelectContent>
                   </Select>
                 </div>
@@ -291,9 +291,9 @@ export default function DadosBancarios() {
                     value={bankForm.account_type}
                     onValueChange={(v) => setBankForm({ ...bankForm, account_type: v as BankForm["account_type"] })}
                   >
-                    <SelectTrigger className="border-primary/20 bg-primary/[0.035]"><SelectValue /></SelectTrigger>
+                    <SelectTrigger className="finance-select-trigger h-11 border-primary/25 bg-primary/[0.045] font-black"><SelectValue /></SelectTrigger>
                     <SelectContent className="w-[var(--radix-select-trigger-width)]">
-                      {ACCOUNT_TYPES.map(t => <SelectItem key={t.value} value={t.value} className="text-[13px]">{t.label}</SelectItem>)}
+                      {ACCOUNT_TYPES.map(t => <SelectItem key={t.value} value={t.value} className="text-[13px] font-black">{t.label}</SelectItem>)}
                     </SelectContent>
                   </Select>
                 </div>

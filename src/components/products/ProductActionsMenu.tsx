@@ -173,10 +173,10 @@ export function ProductActionsMenu({
         align="end"
         side="bottom"
         sideOffset={8}
-        className="w-[324px] max-h-none overflow-visible rounded-2xl border border-border/70 bg-card p-0 shadow-none"
+          className="w-[324px] max-h-none overflow-visible rounded-2xl border border-border/80 bg-popover/95 p-0 shadow-2xl backdrop-blur-md"
       >
         {/* Identity Header */}
-        <div className="relative flex items-center gap-3 border-b border-border/50 bg-card px-4 py-4">
+        <div className="relative flex items-center gap-3 border-b border-border/60 bg-card px-4 py-4">
           <span className="absolute left-0 top-4 bottom-4 w-[3px] rounded-r-full bg-primary/80" />
           <div className="flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-xl border border-border/60 bg-card-inset">
             {product.image_url ? (
@@ -196,7 +196,7 @@ export function ProductActionsMenu({
         </div>
 
         {sections.map((section, idx) => (
-           <div key={section.title} className={cn("px-2 py-2", idx > 0 && "border-t border-border/40")}>
+           <div key={section.title} className={cn("px-2.5 py-2.5", idx > 0 && "border-t border-border/50")}>
             <div className="px-2.5 pb-1.5 pt-1 text-[9px] font-black uppercase tracking-[0.22em] text-muted-foreground/40">
               {section.title}
             </div>
@@ -206,7 +206,7 @@ export function ProductActionsMenu({
           </div>
         ))}
 
-        <div className="border-t border-border/40 px-2 py-2">
+        <div className="border-t border-destructive/20 bg-destructive/[0.025] px-2.5 py-2.5">
           {renderRow({
             icon: Trash2,
             label: "Excluir produto",
