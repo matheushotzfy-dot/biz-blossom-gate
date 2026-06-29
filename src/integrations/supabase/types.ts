@@ -3796,6 +3796,7 @@ export type Database = {
         Args: { _role: Database["public"]["Enums"]["app_role"] }
         Returns: boolean
       }
+      get_admin_analytics: { Args: { _period_days?: number }; Returns: Json }
       get_admin_dashboard_data: {
         Args: {
           _from: string
