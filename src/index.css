@@ -339,12 +339,8 @@ input[type="number"]::-webkit-inner-spin-button {
   }
 
   .dashboard-tile {
-    border: 1px solid hsl(var(--border) / 0.4);
+    border: 1px solid hsl(var(--border) / 0.6);
     background: hsl(var(--card));
-  }
-
-  .dashboard-tile:hover {
-    border-color: hsl(var(--border) / 0.7);
   }
 
   .dashboard-tile > * {
@@ -357,13 +353,21 @@ input[type="number"]::-webkit-inner-spin-button {
   }
 
   .dashboard-action-link {
-    border: 1px solid hsl(var(--border) / 0.3);
+    border: 1px solid hsl(var(--border) / 0.5);
     background: hsl(var(--card));
+    transition: transform 300ms cubic-bezier(0.16, 1, 0.3, 1),
+                border-color 300ms cubic-bezier(0.16, 1, 0.3, 1),
+                background-color 300ms cubic-bezier(0.16, 1, 0.3, 1);
   }
 
   .dashboard-action-link:hover {
-    border-color: hsl(var(--border) / 0.5);
-    background: hsl(var(--accent));
+    border-color: hsl(var(--primary) / 0.45);
+    background: hsl(var(--card-elevated));
+    transform: translateY(-1px);
+  }
+
+  .dashboard-action-link:active {
+    transform: translateY(0) scale(0.99);
   }
 
   .dashboard-action-link > * {
@@ -371,14 +375,28 @@ input[type="number"]::-webkit-inner-spin-button {
     z-index: 1;
   }
 
+  .dashboard-activity-row {
+    transition: background-color 250ms cubic-bezier(0.16, 1, 0.3, 1),
+                transform 250ms cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
   .dashboard-activity-row:hover {
     background: hsl(var(--accent) / 0.5);
+    transform: translateX(2px);
   }
 
   .dashboard-icon-shell {
-    border: 1px solid hsl(var(--border) / 0.35);
+    border: 1px solid hsl(var(--border) / 0.4);
     background: hsl(var(--card));
+    transition: transform 300ms cubic-bezier(0.16, 1, 0.3, 1),
+                border-color 300ms cubic-bezier(0.16, 1, 0.3, 1);
   }
+
+  *:hover > .dashboard-icon-shell,
+  *:hover .dashboard-icon-shell {
+    border-color: hsl(var(--primary) / 0.35);
+  }
+
 
   .dashboard-meta-pill {
     border: 1px solid hsl(var(--border) / 0.3);
