@@ -104,14 +104,20 @@ Deno.serve(async (req) => {
       );
     }
 
-    // Get user's PIX key from profile
+    // Get user's PIX key from profile (encrypted at rest — decrypt via RPC)
     const { data: profile } = await supabase
       .from('profiles')
-      .select('pix_key, pix_key_type, full_name')
+      .select('pix_key_enc, pix_key_type, full_name')
       .eq('user_id', withdrawal.user_id)
       .single();
 
-    if (!profile?.pix_key || !profile?.pix_key_type) {
+    let decryptedPixKey: string | null = null;
+    if (profile?.pix_key_enc) {
+      const { data: decrypted } = await supabase.rpc('decrypt_field', { _cipher: profile.pix_key_enc });
+      decryptedPixKey = decrypted as string | null;
+    }
+
+    if (!decryptedPixKey || !profile?.pix_key_type) {
       return new Response(
         JSON.stringify({ success: false, error: 'User has no PIX key configured' }),
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
@@ -154,7 +160,7 @@ Deno.serve(async (req) => {
           method: 'pix',
           amount: amountInCents,
           netPayout: false,
-          pixKey: profile.pix_key,
+          pixKey: decryptedPixKey,
           pixKeyType: pixKeyTypeMap[profile.pix_key_type.toLowerCase()] || 'cpf',
           postbackUrl: `${supabaseUrl}/functions/v1/podpay-postback`,
         }),
