@@ -66,7 +66,7 @@ export default function StaffManagementTab({ profiles, onReload, role }: Props) 
   const [showCreate, setShowCreate] = useState(false);
   const [showAudit, setShowAudit] = useState<StaffRow | null>(null);
   const [showPerm, setShowPerm] = useState<StaffRow | null>(null);
-  const [auditRows, setAuditRows] = useState<any[]>([]);
+  const [auditRows, setAuditRows] = useState<Tables<"staff_audit_log">[]>([]);
 
   const isManager = role === "manager";
   const heading = isManager ? "Gerentes de Contas" : "Staff / Funcionários";
@@ -74,7 +74,7 @@ export default function StaffManagementTab({ profiles, onReload, role }: Props) 
   const load = async () => {
     setLoading(true);
     const { data: ur } = await supabase.from("user_roles").select("user_id").eq("role", role);
-    const ids = (ur ?? []).map((r: any) => r.user_id);
+    const ids = (ur ?? []).map((r) => r.user_id);
     if (ids.length === 0) { setRows([]); setLoading(false); return; }
 
     const [{ data: cfg }, { data: perms }, { data: assigns }] = await Promise.all([
@@ -82,28 +82,28 @@ export default function StaffManagementTab({ profiles, onReload, role }: Props) 
       supabase.from("staff_permissions").select("user_id, permission_key").in("user_id", ids),
       isManager
         ? supabase.from("manager_seller_assignments").select("manager_user_id").in("manager_user_id", ids)
-        : Promise.resolve({ data: [] as any[] }),
+        : Promise.resolve({ data: [] as { manager_user_id: string }[] }),
     ]);
 
-    const cfgMap = new Map((cfg ?? []).map((c: any) => [c.user_id, Number(c.base_pct)]));
+    const cfgMap = new Map((cfg ?? []).map((c) => [c.user_id, Number(c.base_pct)]));
     const permMap = new Map<string, string[]>();
-    (perms ?? []).forEach((p: any) => {
+    (perms ?? []).forEach((p) => {
       const arr = permMap.get(p.user_id) ?? [];
       arr.push(p.permission_key);
       permMap.set(p.user_id, arr);
     });
     const assignMap = new Map<string, number>();
-    (assigns ?? []).forEach((a: any) => {
+    (assigns ?? []).forEach((a) => {
       assignMap.set(a.manager_user_id, (assignMap.get(a.manager_user_id) ?? 0) + 1);
     });
 
     const list: StaffRow[] = ids.map((uid) => {
-      const p = profiles.find((x) => x.user_id === uid);
+      const p = profiles.find((x) => x.user_id === uid) as (Tables<"profiles"> & { frozen?: boolean }) | undefined;
       return {
         user_id: uid,
         email: p?.email ?? null,
         full_name: p?.full_name ?? null,
-        frozen: !!(p as any)?.frozen,
+        frozen: !!p?.frozen,
         created_at: p?.created_at ?? new Date().toISOString(),
         pct: cfgMap.get(uid) ?? 0,
         permissions: permMap.get(uid) ?? [],
