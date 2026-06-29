@@ -208,15 +208,23 @@ export default function Auth() {
  setLoading(true);
  try {
  if (isLogin) {
- const { error } = await supabase.auth.signInWithPassword({ email, password });
- if (error) {
+ // Server-side rate-limited login (5 fails / 15min / email).
+ const { data, error: fnError } = await supabase.functions.invoke("gated-login", {
+ body: { email: email.toLowerCase().trim(), password, scope: "seller" },
+ });
+ if (fnError || !data?.success) {
  setLoginAttempts((prev) => {
  const next = prev + 1;
  if (next >= 5) setLockoutUntil(Date.now() + 60000);
  return next;
  });
- throw error;
+ throw new Error(data?.error || fnError?.message || "Erro ao entrar.");
  }
+ const { error: sessionError } = await supabase.auth.setSession({
+ access_token: data.access_token,
+ refresh_token: data.refresh_token,
+ });
+ if (sessionError) throw sessionError;
  setLoginAttempts(0);
  navigate("/dashboard");
  } else {

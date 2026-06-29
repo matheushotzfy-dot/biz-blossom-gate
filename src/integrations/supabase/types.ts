@@ -291,18 +291,21 @@ export type Database = {
           created_at: string
           email: string
           id: string
+          scope: string
           success: boolean
         }
         Insert: {
           created_at?: string
           email: string
           id?: string
+          scope?: string
           success?: boolean
         }
         Update: {
           created_at?: string
           email?: string
           id?: string
+          scope?: string
           success?: boolean
         }
         Relationships: []
