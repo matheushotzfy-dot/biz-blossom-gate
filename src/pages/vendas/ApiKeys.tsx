@@ -34,7 +34,7 @@ export default function ApiKeys() {
   const [query, setQuery] = useState("");
   const [showCreateDialog, setShowCreateDialog] = useState(false);
   const [newKeyName, setNewKeyName] = useState("Produção");
-  const [newKeyData, setNewKeyData] = useState<any | null>(null);
+  const [newKeyData, setNewKeyData] = useState<{ secret_key?: string } | null>(null);
   const [creating, setCreating] = useState(false);
   const [editingKey, setEditingKey] = useState<ApiKey | null>(null);
   const [editName, setEditName] = useState("");
