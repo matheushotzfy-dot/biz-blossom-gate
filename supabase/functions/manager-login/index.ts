@@ -68,6 +68,7 @@ Deno.serve(async (req) => {
       .from("admin_login_attempts")
       .select("id, success")
       .eq("email", trimmedEmail)
+      .eq("scope", "manager")
       .gte("created_at", fifteenMinAgo)
       .eq("success", false);
 
