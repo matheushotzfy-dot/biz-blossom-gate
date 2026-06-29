@@ -106,7 +106,7 @@ export default function CoursePage() {
  }
 
  // Load progress
- const allLessonIds = lessonsData.map((l: any) => l.id);
+ const allLessonIds = lessonsData.map((l) => l.id);
  if (allLessonIds.length > 0) {
  const { data: progressData } = await supabase
  .from("user_progress").select("lesson_id, completed, progress_seconds").eq("user_id", user!.id).in("lesson_id", allLessonIds);
