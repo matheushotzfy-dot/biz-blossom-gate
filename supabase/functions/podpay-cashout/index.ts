@@ -214,7 +214,7 @@ Deno.serve(async (req) => {
     // Update withdrawal status atomically (only if still pending)
     const { data: updatedW } = await supabase
       .from('withdrawals')
-      .update({ status: 'approved', processed_at: new Date().toISOString() })
+      .update({ status: 'approved', processed_at: new Date().toISOString(), last_attempt_at: new Date().toISOString(), acquirer_response: { http_status: response.status, body: podpayData } })
       .eq('id', withdrawalId)
       .eq('status', 'pending')
       .select('id')
