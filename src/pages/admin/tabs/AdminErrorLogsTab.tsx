@@ -102,7 +102,7 @@ export default function AdminErrorLogsTab({ profiles }: Props) {
   const enriched = useMemo(() => errors.map(e => ({ ...e, _cat: deriveCategory(e) })), [errors]);
 
   const toggleResolved = async (id: string, resolved: boolean) => {
-    const { error } = await supabase.from("error_logs").update({ resolved } as any).eq("id", id);
+    const { error } = await supabase.from("error_logs").update({ resolved }).eq("id", id);
     if (error) { toast.error("Erro"); return; }
     setErrors(prev => prev.map(e => e.id === id ? { ...e, resolved } : e));
   };
