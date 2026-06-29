@@ -105,11 +105,11 @@ export default function AdminDisputesTab({ type, title, profiles, transactions, 
    const path = `${editing.id}/${Date.now()}-${file.name.replace(/[^\w.-]/g, "_")}`;
    const { error: upErr } = await supabase.storage.from("dispute-evidence").upload(path, file);
    if (upErr) { toast.error("Erro ao enviar: " + upErr.message); return; }
-   const next = [ ...((editing as any).evidence_urls || []), { path, name: file.name, uploaded_at: new Date().toISOString() } ];
-   const { error } = await supabase.from("disputes").update({ evidence_urls: next } as any).eq("id", editing.id);
+   const next: EvidenceUrl[] = [ ...(editing.evidence_urls || []), { path, name: file.name, uploaded_at: new Date().toISOString() } ];
+   const { error } = await supabase.from("disputes").update({ evidence_urls: next as unknown as Json }).eq("id", editing.id);
    if (error) { toast.error("Erro ao salvar"); return; }
    toast.success("Evidência anexada");
-   setEditing({ ...editing, evidence_urls: next } as any);
+   setEditing({ ...editing, evidence_urls: next });
    load();
  };
 
