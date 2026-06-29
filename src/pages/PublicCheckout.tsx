@@ -306,7 +306,7 @@ export default function PublicCheckout() {
  setProduct(productWithTheme as unknown as Product);
 
  const [pixelsRes, bumpsRes] = await Promise.all([
- supabase.from("product_pixels_public" as any).select("*").eq("product_id", prod.id).eq("is_active", true),
+ supabase.from("product_pixels_public").select("*").eq("product_id", prod.id!).eq("is_active", true),
  supabase.from("order_bumps").select("id, bump_product_id").eq("product_id", prod.id).eq("is_active", true).order("sort_order"),
  ]);
 
