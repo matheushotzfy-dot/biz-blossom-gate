@@ -106,6 +106,16 @@ export default function Suporte() {
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
+  const [faqSearch, setFaqSearch] = useState("");
+  const [openFaqGroup, setOpenFaqGroup] = useState<string | null>("start");
+  const [openFaqItem, setOpenFaqItem] = useState<string | null>(null);
+
+  const filteredFaqs = useMemo(() => {
+    const q = faqSearch.trim().toLowerCase();
+    return FAQ_GROUPS
+      .map(g => ({ ...g, faqs: q ? g.faqs.filter(f => f.q.toLowerCase().includes(q) || f.a.toLowerCase().includes(q)) : g.faqs }))
+      .filter(g => g.faqs.length > 0);
+  }, [faqSearch]);
 
   const loadTickets = async () => {
     if (!user?.id) return;
@@ -364,6 +374,81 @@ export default function Suporte() {
           </div>
         </div>
       )}
+
+      {/* Central de Ajuda — FAQs */}
+      <div className="bg-card rounded-[24px] border border-border/60 shadow-sm overflow-hidden">
+        <div className="p-6 border-b border-border/40 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+          <div className="flex items-center gap-3">
+            <div className="h-10 w-10 bg-primary/10 border border-primary/10 rounded-xl flex items-center justify-center text-primary">
+              <HelpCircle size={20} strokeWidth={2.5} />
+            </div>
+            <div>
+              <h2 className="font-black text-foreground tracking-tight leading-none uppercase">Central de Ajuda</h2>
+              <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mt-1">Perguntas frequentes</p>
+            </div>
+          </div>
+          <div className="relative w-full md:w-64">
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground/50" size={16} />
+            <input
+              value={faqSearch}
+              onChange={(e) => setFaqSearch(e.target.value)}
+              placeholder="Buscar nas FAQs..."
+              className="w-full h-11 pl-11 pr-4 bg-muted/30 border border-border/60 rounded-xl text-sm font-bold focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all"
+            />
+          </div>
+        </div>
+        <div className="p-4 space-y-2">
+          {filteredFaqs.length === 0 ? (
+            <p className="text-center py-8 text-[11px] font-black text-muted-foreground uppercase tracking-widest">Nenhuma pergunta encontrada</p>
+          ) : filteredFaqs.map(group => {
+            const GIcon = group.icon;
+            const groupOpen = openFaqGroup === group.id || !!faqSearch;
+            return (
+              <div key={group.id} className="rounded-xl border border-border/40 overflow-hidden">
+                <button
+                  type="button"
+                  onClick={() => setOpenFaqGroup(openFaqGroup === group.id ? null : group.id)}
+                  className="flex w-full items-center justify-between p-4 text-left hover:bg-muted/20 transition-colors"
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="h-9 w-9 rounded-lg bg-primary/10 border border-primary/10 flex items-center justify-center text-primary">
+                      <GIcon className="h-4 w-4" strokeWidth={2.5} />
+                    </div>
+                    <div>
+                      <p className="text-sm font-black text-foreground tracking-tight uppercase">{group.label}</p>
+                      <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">{group.faqs.length} perguntas</p>
+                    </div>
+                  </div>
+                  {groupOpen ? <ChevronUp className="h-4 w-4 text-muted-foreground" /> : <ChevronDown className="h-4 w-4 text-muted-foreground" />}
+                </button>
+                {groupOpen && (
+                  <div className="border-t border-border/40 p-3 space-y-1.5 bg-muted/10">
+                    {group.faqs.map((f, i) => {
+                      const key = `${group.id}-${i}`;
+                      const itemOpen = openFaqItem === key;
+                      return (
+                        <div key={key} className="rounded-lg bg-card border border-border/40">
+                          <button
+                            type="button"
+                            onClick={() => setOpenFaqItem(itemOpen ? null : key)}
+                            className="flex w-full items-center justify-between gap-3 px-4 py-3 text-left text-[13px] font-bold text-foreground hover:text-primary transition-colors"
+                          >
+                            <span>{f.q}</span>
+                            {itemOpen ? <ChevronUp className="h-3.5 w-3.5 text-muted-foreground shrink-0" /> : <ChevronDown className="h-3.5 w-3.5 text-muted-foreground shrink-0" />}
+                          </button>
+                          {itemOpen && (
+                            <p className="px-4 pb-3 text-[12px] leading-relaxed text-muted-foreground">{f.a}</p>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+            );
+          })}
+        </div>
+      </div>
 
       {/* Lista de tickets — formato tabela Saques */}
       <div className="bg-card rounded-[24px] border border-border/60 shadow-sm overflow-hidden">
