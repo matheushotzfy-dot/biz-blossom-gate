@@ -33,47 +33,65 @@ export default function AdminNotificationsTab({ profiles }: Props) {
  const { user } = useAuth();
  const [notifications, setNotifications] = useState<Notification[]>([]);
  const [loading, setLoading] = useState(true);
- const [showSendDialog, setShowSendDialog] = useState(false);
- const [search, setSearch] = useState("");
- const [sendTarget, setSendTarget] = useState<"all" | "specific">("all");
- const [selectedUserId, setSelectedUserId] = useState("");
- const [sendTitle, setSendTitle] = useState("");
- const [sendMessage, setSendMessage] = useState("");
- const [sendType, setSendType] = useState("info");
- const [sending, setSending] = useState(false);
- const [sellerSearch, setSellerSearch] = useState("");
+  const [showSendDialog, setShowSendDialog] = useState(false);
+  const [search, setSearch] = useState("");
+  const [sendTarget, setSendTarget] = useState<"all_sellers" | "active_sellers" | "specific">("all_sellers");
+  const [selectedUserId, setSelectedUserId] = useState("");
+  const [sendTitle, setSendTitle] = useState("");
+  const [sendMessage, setSendMessage] = useState("");
+  const [sendType, setSendType] = useState("info");
+  const [sending, setSending] = useState(false);
+  const [sellerSearch, setSellerSearch] = useState("");
+  const [purging, setPurging] = useState(false);
 
- useEffect(() => { loadNotifications(); }, []);
+  useEffect(() => { loadNotifications(); }, []);
 
- const loadNotifications = async () => {
- setLoading(true);
- const { data } = await supabase.from("notifications").select("*").order("created_at", { ascending: false }).limit(100);
- setNotifications((data || []) as Notification[]);
- setLoading(false);
- };
+  const loadNotifications = async () => {
+  setLoading(true);
+  const { data, error } = await supabase.from("notifications").select("*").order("created_at", { ascending: false }).limit(200);
+  if (error) toast.error("Erro ao carregar: " + error.message);
+  setNotifications((data || []) as Notification[]);
+  setLoading(false);
+  };
 
- const handleSend = async () => {
- if (!sendTitle.trim() || !sendMessage.trim()) { toast.error("Preencha título e mensagem"); return; }
- setSending(true);
- try {
- if (sendTarget === "all") {
- const { error } = await supabase.from("notifications").insert({ title: sendTitle.trim(), message: sendMessage.trim(), type: sendType, user_id: null, created_by: user!.id });
- if (error) throw error;
- await logAdminAction("send_global_notification", "notification", null, { title: sendTitle.trim(), type: sendType });
- toast.success("Notificação global enviada para todos os sellers!");
- } else {
- if (!selectedUserId) { toast.error("Selecione um seller"); setSending(false); return; }
- const { error } = await supabase.from("notifications").insert({ title: sendTitle.trim(), message: sendMessage.trim(), type: sendType, user_id: selectedUserId, created_by: user!.id });
- if (error) throw error;
- const sellerName = profiles.find(p => p.user_id === selectedUserId)?.full_name || "Seller";
- await logAdminAction("send_notification", "notification", selectedUserId, { title: sendTitle.trim(), type: sendType, target: sellerName });
- toast.success(`Notificação enviada para ${sellerName}!`);
- }
- setShowSendDialog(false);
- setSendTitle(""); setSendMessage(""); setSendType("info"); setSelectedUserId("");
- loadNotifications();
- } catch { toast.error("Erro ao enviar notificação"); } finally { setSending(false); }
- };
+  const handleSend = async () => {
+  if (!sendTitle.trim() || !sendMessage.trim()) { toast.error("Preencha título e mensagem"); return; }
+  setSending(true);
+  try {
+  if (sendTarget === "specific") {
+    if (!selectedUserId) { toast.error("Selecione um seller"); setSending(false); return; }
+    const { error } = await supabase.from("notifications").insert({ title: sendTitle.trim(), message: sendMessage.trim(), type: sendType, user_id: selectedUserId, created_by: user!.id });
+    if (error) throw error;
+    const sellerName = profiles.find(p => p.user_id === selectedUserId)?.full_name || "Seller";
+    await logAdminAction("send_notification", "notification", selectedUserId, { title: sendTitle.trim(), type: sendType, target: sellerName });
+    toast.success(`Notificação enviada para ${sellerName}!`);
+  } else {
+    const { data, error } = await (supabase as any).rpc("admin_broadcast_notification", {
+      _title: sendTitle.trim(),
+      _message: sendMessage.trim(),
+      _type: sendType,
+      _target: sendTarget, // 'all_sellers' | 'active_sellers'
+    });
+    if (error) throw error;
+    const count = Number(data || 0);
+    await logAdminAction("send_global_notification", "notification", null, { title: sendTitle.trim(), type: sendType, target: sendTarget, delivered: count });
+    toast.success(`Notificação entregue a ${count} ${count === 1 ? "seller" : "sellers"}!`);
+  }
+  setShowSendDialog(false);
+  setSendTitle(""); setSendMessage(""); setSendType("info"); setSelectedUserId("");
+  loadNotifications();
+  } catch (e: any) { toast.error("Erro ao enviar: " + (e?.message || "desconhecido")); } finally { setSending(false); }
+  };
+
+  const handlePurgeOrphans = async () => {
+    if (!window.confirm("Remover notificações antigas que nenhum seller conseguia ler (user_id nulo)?")) return;
+    setPurging(true);
+    const { data, error } = await (supabase as any).rpc("admin_purge_orphan_notifications");
+    setPurging(false);
+    if (error) { toast.error("Erro: " + error.message); return; }
+    toast.success(`${Number(data || 0)} notificação(ões) órfã(s) removida(s)`);
+    loadNotifications();
+  };
 
  const handleDelete = async (id: string) => {
  if (!window.confirm("Excluir esta notificação?")) return;
@@ -112,9 +130,14 @@ export default function AdminNotificationsTab({ profiles }: Props) {
  <h2 className="text-[18px] font-bold text-foreground flex items-center gap-2"><Bell className="h-5 w-5 text-primary" /> Central de Notificações</h2>
  <p className="text-[11px] text-muted-foreground mt-1">{notifications.length} notificações enviadas</p>
  </div>
- <Button onClick={() => setShowSendDialog(true)} className="h-9 bg-gradient-to-r from-primary to-emerald-600 text-white text-[12px] font-semibold rounded-xl shadow-lg shadow-primary/20">
- <Send className="h-3.5 w-3.5 mr-1.5" /> Nova Notificação
- </Button>
+  <div className="flex items-center gap-2">
+  <Button variant="outline" onClick={handlePurgeOrphans} disabled={purging} className="h-9 text-[12px] rounded-xl gap-1.5">
+    <Trash2 className="h-3.5 w-3.5" /> {purging ? "Limpando..." : "Limpar órfãs"}
+  </Button>
+  <Button onClick={() => setShowSendDialog(true)} className="h-9 bg-gradient-to-r from-primary to-emerald-600 text-white text-[12px] font-semibold rounded-xl shadow-lg shadow-primary/20">
+    <Send className="h-3.5 w-3.5 mr-1.5" /> Nova Notificação
+  </Button>
+  </div>
  </div>
 
  <div className="relative">
@@ -174,14 +197,17 @@ export default function AdminNotificationsTab({ profiles }: Props) {
  <div className="space-y-5 mt-2">
  <div>
  <Label className="text-[11px] text-muted-foreground uppercase tracking-wider font-semibold">Destinatário</Label>
- <div className="flex gap-2 mt-2">
- <button onClick={() => setSendTarget("all")} className={cn("flex-1 py-3 rounded-xl border text-[12px] font-semibold transition-all flex items-center justify-center gap-2", sendTarget === "all" ? "bg-primary/10 border-primary/30 text-primary" : "bg-muted/30 border-border text-muted-foreground hover:text-foreground")}>
- <Users className="h-4 w-4" /> Todos os Sellers
- </button>
- <button onClick={() => setSendTarget("specific")} className={cn("flex-1 py-3 rounded-xl border text-[12px] font-semibold transition-all flex items-center justify-center gap-2", sendTarget === "specific" ? "bg-primary/10 border-primary/30 text-primary" : "bg-muted/30 border-border text-muted-foreground hover:text-foreground")}>
- <User className="h-4 w-4" /> Seller Específico
- </button>
- </div>
+  <div className="grid grid-cols-3 gap-2 mt-2">
+  <button onClick={() => setSendTarget("all_sellers")} className={cn("py-3 rounded-xl border text-[11px] font-semibold transition-all flex items-center justify-center gap-1.5", sendTarget === "all_sellers" ? "bg-primary/10 border-primary/30 text-primary" : "bg-muted/30 border-border text-muted-foreground hover:text-foreground")}>
+  <Users className="h-4 w-4" /> Todos
+  </button>
+  <button onClick={() => setSendTarget("active_sellers")} className={cn("py-3 rounded-xl border text-[11px] font-semibold transition-all flex items-center justify-center gap-1.5", sendTarget === "active_sellers" ? "bg-primary/10 border-primary/30 text-primary" : "bg-muted/30 border-border text-muted-foreground hover:text-foreground")}>
+  <CheckCircle2 className="h-4 w-4" /> Só ativos
+  </button>
+  <button onClick={() => setSendTarget("specific")} className={cn("py-3 rounded-xl border text-[11px] font-semibold transition-all flex items-center justify-center gap-1.5", sendTarget === "specific" ? "bg-primary/10 border-primary/30 text-primary" : "bg-muted/30 border-border text-muted-foreground hover:text-foreground")}>
+  <User className="h-4 w-4" /> Específico
+  </button>
+  </div>
  </div>
  {sendTarget === "specific" && (
  <div>
@@ -223,7 +249,7 @@ export default function AdminNotificationsTab({ profiles }: Props) {
  </div>
  <DialogFooter>
  <Button onClick={handleSend} disabled={sending || !sendTitle.trim() || !sendMessage.trim()} className="w-full h-11 bg-gradient-to-r from-primary to-emerald-600 text-white font-semibold rounded-xl shadow-lg shadow-primary/20 text-[13px]">
- <Send className="h-4 w-4 mr-2" />{sending ? "Enviando..." : sendTarget === "all" ? "Enviar para Todos" : "Enviar para Seller"}
+ <Send className="h-4 w-4 mr-2" />{sending ? "Enviando..." : sendTarget === "specific" ? "Enviar para Seller" : sendTarget === "active_sellers" ? "Enviar para Ativos" : "Enviar para Todos"}
  </Button>
  </DialogFooter>
  </DialogContent>
