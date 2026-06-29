@@ -71,6 +71,15 @@ function usePrivacyMode() {
 const fmt = (v: number) =>
   v === 0 ? "R$ 0,00" : `R$ ${v.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 
+type ChartGranularity = "hour" | "day" | "month";
+type ChartPoint = {
+  name: string;
+  vendas: number;
+  fullLabel: string;
+  timestamp: number;
+  granularity: ChartGranularity;
+};
+
 const _brasiliaDateCache = new Map<string, string>();
 function toBrasiliaDate(dateStr: string) {
   let cached = _brasiliaDateCache.get(dateStr);
@@ -140,7 +149,7 @@ export default function Dashboard() {
     }
     
     const start = new Date(today);
-    start.setDate(start.getDate() - selectedPeriod.days);
+    start.setDate(start.getDate() - (selectedPeriod.days - 1));
     start.setHours(0, 0, 0, 0);
 
     return transactions.filter((t) => new Date(t.created_at) >= start);
@@ -219,11 +228,17 @@ export default function Dashboard() {
         const hour = new Date(t.created_at).getHours();
         salesByHour.set(hour, (salesByHour.get(hour) || 0) + Number(t.net_amount));
       });
-      return Array.from({ length: 24 }, (_, i) => ({
-        name: `${i}h`,
-        vendas: salesByHour.get(i) || 0,
-        fullLabel: `${i}:00`,
-      }));
+      return Array.from({ length: 24 }, (_, i): ChartPoint => {
+        const point = new Date(start);
+        point.setHours(i, 0, 0, 0);
+        return {
+          name: `${i}h`,
+          vendas: salesByHour.get(i) || 0,
+          fullLabel: `${i}:00`,
+          timestamp: point.getTime(),
+          granularity: "hour",
+        };
+      });
     }
 
     // 2) MONTHLY (span > 60 days)
@@ -235,7 +250,7 @@ export default function Dashboard() {
         const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
         byMonth.set(key, (byMonth.get(key) || 0) + Number(t.net_amount));
       });
-      const result: Array<{ name: string; vendas: number; fullLabel: string }> = [];
+      const result: ChartPoint[] = [];
       const cursor = new Date(start.getFullYear(), start.getMonth(), 1);
       const last = new Date(end.getFullYear(), end.getMonth(), 1);
       while (cursor <= last) {
@@ -244,6 +259,8 @@ export default function Dashboard() {
           name: cursor.toLocaleDateString("pt-BR", { month: "short" }).replace(".", ""),
           vendas: byMonth.get(key) || 0,
           fullLabel: cursor.toLocaleDateString("pt-BR", { month: "long", year: "numeric" }),
+          timestamp: cursor.getTime(),
+          granularity: "month",
         });
         cursor.setMonth(cursor.getMonth() + 1);
       }
@@ -257,7 +274,7 @@ export default function Dashboard() {
       const dateKey = toBrasiliaDate(t.created_at);
       revenueByDate.set(dateKey, (revenueByDate.get(dateKey) || 0) + Number(t.net_amount));
     });
-    return Array.from({ length: spanDays }, (_, i) => {
+    return Array.from({ length: spanDays }, (_, i): ChartPoint => {
       const d = new Date(start);
       d.setDate(d.getDate() + i);
       const dateStr = d.toLocaleDateString("pt-BR", { timeZone: "America/Sao_Paulo" });
@@ -265,9 +282,42 @@ export default function Dashboard() {
         name: d.toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit" }),
         vendas: revenueByDate.get(dateStr) || 0,
         fullLabel: d.toLocaleDateString("pt-BR", { day: "2-digit", month: "long" }),
+        timestamp: d.getTime(),
+        granularity: "day",
       };
     });
   }, [filteredTx, selectedPeriod.days, isCustom, customRange]);
+
+  const chartTicks = useMemo(() => {
+    if (chartData.length <= 1) return chartData.map((p) => p.timestamp);
+
+    const granularity = chartData[0]?.granularity;
+    const maxTicks = granularity === "hour"
+      ? 7
+      : granularity === "month"
+        ? Math.min(chartData.length, 8)
+        : chartData.length <= 15
+          ? chartData.length
+          : chartData.length <= 31
+            ? 7
+            : 8;
+
+    const indexes = new Set<number>();
+    for (let i = 0; i < maxTicks; i++) {
+      indexes.add(Math.round((i * (chartData.length - 1)) / (maxTicks - 1)));
+    }
+    return Array.from(indexes)
+      .sort((a, b) => a - b)
+      .map((index) => chartData[index].timestamp);
+  }, [chartData]);
+
+  const chartTickFormatter = useCallback((value: number) => {
+    const d = new Date(value);
+    const granularity = chartData[0]?.granularity;
+    if (granularity === "hour") return `${d.getHours()}h`;
+    if (granularity === "month") return d.toLocaleDateString("pt-BR", { month: "short" }).replace(".", "");
+    return d.toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit" });
+  }, [chartData]);
 
   const activity = useMemo(() => {
     const tx = transactions.slice(0, 10).map((t) => ({
@@ -319,7 +369,7 @@ export default function Dashboard() {
       end = new Date(today);
     } else {
       start = new Date(today);
-      start.setDate(start.getDate() - selectedPeriod.days);
+      start.setDate(start.getDate() - (selectedPeriod.days - 1));
       end = new Date(today);
     }
     start.setHours(0, 0, 0, 0);
@@ -425,7 +475,7 @@ export default function Dashboard() {
             <PopoverContent
               align="end"
               sideOffset={8}
-              className="w-[calc(100vw-1.5rem)] max-w-[380px] overflow-hidden rounded-xl border border-border bg-card p-0 sm:w-auto"
+              className="w-[calc(100vw-1rem)] max-w-[760px] overflow-hidden rounded-xl border border-border bg-card p-0 sm:w-auto"
             >
               {/* Header */}
               <div className="flex items-center justify-between gap-4 px-4 py-3 border-b border-border bg-secondary/30">
@@ -505,7 +555,14 @@ export default function Dashboard() {
                   selected={customRange}
                   onSelect={(r) => { setCustomRange(r); setIsCustom(true); }}
                   locale={ptBR}
-                  numberOfMonths={1}
+                  numberOfMonths={2}
+                  pagedNavigation
+                  captionLayout="dropdown-buttons"
+                  fromYear={new Date().getFullYear() - 5}
+                  toYear={new Date().getFullYear()}
+                  toDate={new Date()}
+                  defaultMonth={customRange?.from ?? new Date(new Date().getFullYear(), new Date().getMonth() - 1, 1)}
+                  className="pointer-events-auto"
                 />
               </div>
 
@@ -677,7 +734,20 @@ export default function Dashboard() {
                     </linearGradient>
                   </defs>
                   <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="hsl(var(--border)/0.3)" />
-                  <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{fill: 'hsl(var(--muted-foreground)/0.5)', fontSize: 10, fontWeight: 700}} dy={10} interval="preserveStartEnd" />
+                  <XAxis
+                    dataKey="timestamp"
+                    type="number"
+                    scale="time"
+                    domain={[chartData[0]?.timestamp ?? 0, chartData[chartData.length - 1]?.timestamp ?? 0]}
+                    ticks={chartTicks}
+                    tickFormatter={chartTickFormatter}
+                    axisLine={false}
+                    tickLine={false}
+                    tick={{fill: 'hsl(var(--muted-foreground)/0.5)', fontSize: 10, fontWeight: 700}}
+                    dy={10}
+                    interval={0}
+                    minTickGap={0}
+                  />
                   <YAxis width={42} axisLine={false} tickLine={false} tick={{fill: 'hsl(var(--muted-foreground)/0.5)', fontSize: 10, fontWeight: 700}} tickFormatter={(v) => Number(v) >= 1000 ? `R$${Math.round(Number(v) / 1000)}k` : `R$${v}`} />
                   <Tooltip 
                     cursor={{ stroke: 'hsl(var(--primary))', strokeWidth: 1, strokeDasharray: '4 4' }}
