@@ -213,7 +213,7 @@ export default function ProductEditor() {
 
  // Completion percentage
  const completionPercent = (() => {
- let score = 0, total = 8;
+ let score = 0; const total = 8;
  if (name.trim()) score++;
  if (price && parseFloat(price) > 0) score++;
  if (description.trim().length >= 50) score++;
