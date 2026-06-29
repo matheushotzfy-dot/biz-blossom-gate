@@ -286,7 +286,7 @@ export default function AdminErrorLogsTab({ profiles }: Props) {
                   const Icon = meta.icon;
                   const seller = getSeller(err.user_id);
                   const md = (err.metadata || {}) as Record<string, unknown>;
-                  const route = md["route"] || md["path"] || md["url"] || md["source"] || "—";
+                  const route = String(md["route"] || md["path"] || md["url"] || md["source"] || "—");
                   return (
                     <tr key={err.id} className={cn(premiumTable.row, !err.resolved && "bg-destructive/[0.03]")}>
                       <td className={cn(premiumTable.td, "text-[10px] text-muted-foreground tabular-nums whitespace-nowrap")}>{fmtDate(err.created_at)}</td>
