@@ -36,11 +36,17 @@ interface Props {
 
 type Classification = "white" | "gray" | "black";
 
-const CLASSIFICATION_META: Record<Classification, { label: string; icon: any; color: string; ring: string }> = {
+const CLASSIFICATION_META: Record<Classification, { label: string; icon: LucideIcon; color: string; ring: string }> = {
   white: { label: "White", icon: ShieldCheck, color: "text-emerald-400", ring: "border-emerald-500/30 bg-emerald-500/10" },
   gray:  { label: "Gray",  icon: ShieldQuestion, color: "text-amber-400", ring: "border-amber-500/30 bg-amber-500/10" },
   black: { label: "Black", icon: ShieldX, color: "text-red-400", ring: "border-red-500/30 bg-red-500/10" },
 };
+
+type OrderBumpRow = Tables<"order_bumps"> & {
+  bump_product: { id: string; name: string; price: number } | null;
+};
+type DisputeRow = Tables<"disputes">;
+type AffiliateSaleRow = Tables<"affiliate_sales">;
 
 export default function AdminProductsTab({ products, profiles, transactions, fmtCurrency, onReload }: Props) {
   const [search, setSearch] = useState("");
