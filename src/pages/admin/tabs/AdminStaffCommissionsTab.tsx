@@ -635,7 +635,7 @@ function StaffCommissionPanel({ selected, onClose, onChanged, profiles, onCopy }
 }
 
 function MiniKpi({ icon: Icon, label, value, tone }: {
-  icon: any; label: string; value: string; tone: "success" | "primary" | "destructive" | "info";
+  icon: LucideIcon; label: string; value: string; tone: "success" | "primary" | "destructive" | "info";
 }) {
   const toneText = {
     success: "text-success", primary: "text-primary", destructive: "text-destructive", info: "text-info",
