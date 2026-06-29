@@ -21,7 +21,7 @@ import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 
-const STATUS_MAP: Record<string, { label: string; color: string; bg: string; icon: any }> = {
+const STATUS_MAP: Record<string, { label: string; color: string; bg: string; icon: LucideIcon }> = {
   approved:       { label: "Conta Verificada", color: "text-emerald-500", bg: "bg-emerald-500/10", icon: BadgeCheck },
   pending_review: { label: "Em Análise",       color: "text-amber-500",   bg: "bg-amber-500/10",   icon: Shield },
   rejected:       { label: "Reprovada",        color: "text-red-500",     bg: "bg-red-500/10",     icon: Shield },
