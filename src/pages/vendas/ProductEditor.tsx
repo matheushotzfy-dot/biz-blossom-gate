@@ -1778,8 +1778,8 @@ type FunnelStepProps = {
   price?: string | number;
   thumb?: string | null;
   badge?: string;
-  icon: React.ComponentType<{ className?: string }>;
-  anchor?: string;
+  icon?: React.ComponentType<{ className?: string }>;
+  anchor?: boolean | string;
   muted?: boolean;
 };
 
@@ -2175,7 +2175,7 @@ type TabCuponsProps = {
   newCouponMaxUses: string; setNewCouponMaxUses: StrS;
   creatingCoupon: boolean;
   createCoupon: () => void | Promise<void>;
-  toggleCoupon: (id: string, active: boolean) => void | Promise<void>;
+  toggleCoupon: (coupon: Record<string, any>) => void | Promise<void>;
   deleteCoupon: (id: string) => void | Promise<void>;
 };
 
@@ -2272,7 +2272,7 @@ type TabAfiliadosProps = {
   affiliateAttribution: string; setAffiliateAttribution: StrS;
   affiliateCookieDays: string; setAffiliateCookieDays: StrS;
   affiliateApprovalManual: boolean; setAffiliateApprovalManual: BoolS;
-  affiliateUpsellCommission: string; setAffiliateUpsellCommission: StrS;
+  affiliateUpsellCommission: boolean; setAffiliateUpsellCommission: BoolS;
   affiliateMarketplace: boolean; setAffiliateMarketplace: BoolS;
   affiliateSupportEmail: string; setAffiliateSupportEmail: StrS;
   affiliateDescription: string; setAffiliateDescription: StrS;
