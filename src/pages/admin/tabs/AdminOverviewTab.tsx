@@ -167,7 +167,7 @@ export default function AdminOverviewTab({
         setRealtimeTx(prev => [payload.new as Tables<"transactions">, ...prev].slice(0, 25));
       })
       .on("postgres_changes", { event: "UPDATE", schema: "public", table: "transactions" }, (payload) => {
-        setRealtimeTx(prev => prev.map(t => t.id === (payload.new as any).id ? payload.new as Tables<"transactions"> : t));
+        setRealtimeTx(prev => prev.map(t => t.id === (payload.new as Tables<"transactions">).id ? payload.new as Tables<"transactions"> : t));
       })
       .subscribe();
     return () => { supabase.removeChannel(channel); };
