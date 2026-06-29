@@ -419,7 +419,7 @@ function LockedField({ label, value, mono = false }: { label: string; value: str
 }
 
 function DocSlot({ type, label, desc, icon: Icon, preview, uploading, onUpload }: {
-  type: string; label: string; desc: string; icon: any; preview: string | null;
+  type: string; label: string; desc: string; icon: LucideIcon; preview: string | null;
   uploading: boolean; onUpload: (file: File) => void;
 }) {
   const ref = useRef<HTMLInputElement>(null);
