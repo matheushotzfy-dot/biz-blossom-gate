@@ -2134,7 +2134,7 @@ function TabCoProducao({ isNew, coProducerEmail, setCoProducerEmail, coProductio
 
  {coProductionsList.length > 0 ? (
    <div className="space-y-2">
-     {coProductionsList.map((cp: Record<string, any>) => (
+     {coProductionsList.map((cp) => (
        <div key={cp.id} className="flex items-center justify-between rounded-2xl border border-border bg-card p-4 relative overflow-hidden">
          <div className={cn("absolute left-0 top-0 bottom-0 w-[3px] rounded-full",
            cp.status === "accepted" ? "bg-success" : cp.status === "rejected" ? "bg-destructive" : "bg-warning")} />
