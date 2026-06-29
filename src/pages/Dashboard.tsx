@@ -296,11 +296,9 @@ export default function Dashboard() {
       ? 7
       : granularity === "month"
         ? Math.min(chartData.length, 8)
-        : chartData.length <= 15
+        : chartData.length <= 31
           ? chartData.length
-          : chartData.length <= 31
-            ? 7
-            : 8;
+          : 8;
 
     const indexes = new Set<number>();
     for (let i = 0; i < maxTicks; i++) {
@@ -316,6 +314,7 @@ export default function Dashboard() {
     const granularity = chartData[0]?.granularity;
     if (granularity === "hour") return `${d.getHours()}h`;
     if (granularity === "month") return d.toLocaleDateString("pt-BR", { month: "short" }).replace(".", "");
+    if (chartData.length > 15 && chartData.length <= 31) return d.toLocaleDateString("pt-BR", { day: "2-digit" });
     return d.toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit" });
   }, [chartData]);
 
@@ -517,7 +516,7 @@ export default function Dashboard() {
                     { label: "Mês passado", monthMode: "previous" },
                   ] as { label: string; days?: number; offset?: number; monthMode?: "current" | "previous" }[]).map((preset) => {
                     const apply = () => {
-                      const today = new Date();
+                      const today = brasiliaToday();
                       let from: Date, to: Date;
                       if (preset.monthMode === "current") {
                         from = new Date(today.getFullYear(), today.getMonth(), 1);
@@ -534,6 +533,8 @@ export default function Dashboard() {
                         from.setDate(today.getDate() - (preset.days || 0));
                         to = new Date(today);
                       }
+                      from.setHours(0, 0, 0, 0);
+                      to.setHours(23, 59, 59, 999);
                       setCustomRange({ from, to });
                       setIsCustom(true);
                     };
