@@ -3808,6 +3808,10 @@ export type Database = {
         }
         Returns: Json
       }
+      get_admin_inactive_sellers: {
+        Args: { _days_threshold?: number }
+        Returns: Json
+      }
       get_admin_top_sellers: { Args: { _period_days?: number }; Returns: Json }
       get_affiliate_product_owner: {
         Args: { _product_id: string }
