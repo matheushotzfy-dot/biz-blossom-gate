@@ -4,7 +4,7 @@
 // the only goal here is to stop brute-force / credential stuffing.
 
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
-import { SECURITY_HEADERS, logAbuseEvent } from "../_shared/security.ts";
+import { SECURITY_HEADERS, logAbuseEvent, abuseGuard, logSecurityEvent } from "../_shared/security.ts";
 
 const ALLOWED_ORIGINS = new Set([
   "https://hotzfy.com.br",
@@ -47,6 +47,18 @@ Deno.serve(async (req) => {
     const adminClient = createClient(supabaseUrl, serviceRoleKey, {
       auth: { persistSession: false, autoRefreshToken: false },
     });
+
+    // ===== Abuse guard (very high threshold: 100 events in 10s → 15min block) =====
+    const guard = await abuseGuard({
+      supabaseUrl, serviceKey: serviceRoleKey, req,
+      endpoint: "gated-login",
+    });
+    if (guard.blocked) {
+      return new Response(
+        JSON.stringify({ success: false, error: "Atividade suspeita detectada. Tente novamente em alguns minutos.", locked: true }),
+        { status: 429, headers: { ...corsHeaders, "Content-Type": "application/json", "Retry-After": "900" } },
+      );
+    }
 
     const { email, password, scope } = await req.json();
 
@@ -146,6 +158,11 @@ Deno.serve(async (req) => {
 
     await adminClient.from("admin_login_attempts").insert({
       email: trimmedEmail, success: true, scope,
+    });
+    await logSecurityEvent({
+      supabaseUrl, serviceKey: serviceRoleKey, req,
+      event_type: "login_success", endpoint: "gated-login",
+      user_id: authData.user.id, actor_role: scope, status_code: 200,
     });
 
     return new Response(
