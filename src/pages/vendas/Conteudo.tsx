@@ -31,6 +31,7 @@ import {
   type ContentCourseStats,
   type ContentFilterId,
   type ContentProduct,
+  type EditableCoursePayload,
 } from "@/components/course/contentPresentation";
 import {
   AlertDialog,
