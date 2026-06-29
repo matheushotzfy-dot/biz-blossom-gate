@@ -770,6 +770,42 @@ export type Database = {
         }
         Relationships: []
       }
+      auth_abuse_events: {
+        Row: {
+          created_at: string
+          endpoint: string | null
+          event_type: string
+          id: string
+          identifier_hash: string | null
+          ip_hash: string | null
+          metadata: Json
+          status_code: number | null
+          user_agent: string | null
+        }
+        Insert: {
+          created_at?: string
+          endpoint?: string | null
+          event_type: string
+          id?: string
+          identifier_hash?: string | null
+          ip_hash?: string | null
+          metadata?: Json
+          status_code?: number | null
+          user_agent?: string | null
+        }
+        Update: {
+          created_at?: string
+          endpoint?: string | null
+          event_type?: string
+          id?: string
+          identifier_hash?: string | null
+          ip_hash?: string | null
+          metadata?: Json
+          status_code?: number | null
+          user_agent?: string | null
+        }
+        Relationships: []
+      }
       balance_adjustments: {
         Row: {
           admin_user_id: string
@@ -3830,6 +3866,7 @@ export type Database = {
         Args: { _product_id: string }
         Returns: string
       }
+      get_auth_abuse_stats: { Args: { _hours?: number }; Returns: Json }
       get_card_release_days: { Args: { _user_id: string }; Returns: number }
       get_checkout_status: {
         Args: { _transaction_id: string }
