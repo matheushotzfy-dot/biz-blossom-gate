@@ -1060,7 +1060,7 @@ function Metric({ label, value, icon: Icon, tone }: { label: string; value: stri
   );
 }
 
-function ToggleRow({ label, desc, checked, onChange }: any) {
+function ToggleRow({ label, desc, checked, onChange }: { label: string; desc: string; checked: boolean; onChange: (v: boolean) => void }) {
   return (
     <div className="flex items-center justify-between">
       <div>
