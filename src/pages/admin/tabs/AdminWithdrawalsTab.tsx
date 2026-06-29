@@ -319,269 +319,275 @@ export default function AdminWithdrawalsTab({ withdrawals, profiles, onWithdrawa
   </PremiumMetricGrid>
 
  {/* Sub-Tabs */}
- <div className="flex items-center gap-1 p-1 rounded-xl bg-muted/30 border border-border w-fit">
- {([
- { id: "queue" as SubTab, label: "Fila de Saques", icon: ArrowDownToLine, count: pending.length },
- { id: "adjustments" as SubTab, label: "Ajustes de Saldo", icon: ArrowUpDown },
- { id: "statement" as SubTab, label: "Extrato Global", icon: FileText },
- ]).map(tab => (
- <button key={tab.id} onClick={() => setSubTab(tab.id)}
- className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
- subTab === tab.id ? "bg-primary/10 text-primary border border-primary/20" : "text-muted-foreground hover:text-foreground"
- }`}>
- <tab.icon className="h-3.5 w-3.5" />
- {tab.label}
- {tab.count !== undefined && tab.count > 0 && (
- <span className="h-4 min-w-[16px] px-1 rounded-full bg-destructive text-[9px] font-bold text-destructive-foreground flex items-center justify-center">{tab.count}</span>
- )}
- </button>
- ))}
- </div>
+  {/* Sub-Tabs */}
+  <div className="flex flex-wrap items-center justify-between gap-3">
+    <PremiumSegmented<SubTab>
+      value={subTab}
+      onChange={setSubTab}
+      options={[
+        { value: "queue", label: `Fila${pending.length > 0 ? ` · ${pending.length}` : ""}` },
+        { value: "adjustments", label: "Ajustes de Saldo" },
+        { value: "statement", label: "Extrato Global" },
+      ]}
+    />
+    {subTab === "adjustments" && (
+      <Button size="sm" className="gap-1.5 rounded-xl" onClick={() => setAdjustDialog(true)}>
+        <DollarSign className="h-3.5 w-3.5" /> Novo Ajuste
+      </Button>
+    )}
+  </div>
 
- {/* ═══ SUB-TAB: QUEUE ═══ */}
- {subTab === "queue" && (
- <>
- {/* Filters + Actions */}
- <div className="flex flex-wrap items-center gap-3">
- <div className="relative flex-1 max-w-sm">
- <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
- <input placeholder="Buscar vendedor ou ID..." value={search} onChange={e => setSearch(e.target.value)}
- className="w-full h-10 pl-10 pr-4 bg-muted/30 border border-border rounded-xl text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary/30" />
- </div>
- <Select value={statusFilter} onValueChange={setStatusFilter}>
- <SelectTrigger className="w-[130px] h-10 text-xs rounded-xl"><SelectValue placeholder="Status" /></SelectTrigger>
- <SelectContent>
- <SelectItem value="all">Todos</SelectItem>
- <SelectItem value="pending">Pendentes</SelectItem>
- <SelectItem value="approved">Aprovados</SelectItem>
- <SelectItem value="rejected">Recusados</SelectItem>
- </SelectContent>
- </Select>
- <Select value={riskFilter} onValueChange={setRiskFilter}>
- <SelectTrigger className="w-[160px] h-10 text-xs rounded-xl"><SelectValue placeholder="Filtro de Risco" /></SelectTrigger>
- <SelectContent>
- <SelectItem value="all">Todos</SelectItem>
- <SelectItem value="flagged">Com Flag</SelectItem>
- <SelectItem value="new_seller">Sellers Novos</SelectItem>
- <SelectItem value="high_value">Acima R$ 50k</SelectItem>
- </SelectContent>
- </Select>
+  {/* ═══ SUB-TAB: QUEUE ═══ */}
+  {subTab === "queue" && (
+    <PremiumPanel
+      eyebrow="Operações"
+      title={`Fila de Saques · ${filtered.length}`}
+      icon={ArrowDownToLine}
+      action={
+        selectedIds.size > 0 ? (
+          <div className="flex items-center gap-2">
+            <span className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">{selectedIds.size} selecionados</span>
+            <Button size="sm" disabled={batchProcessing} onClick={handleBatchApprove}
+              className="h-8 gap-1 rounded-xl border border-primary/20 bg-primary/10 text-[11px] text-primary shadow-none hover:bg-primary/20">
+              <CheckCircle2 className="h-3 w-3" /> Aprovar lote
+            </Button>
+            <Button size="sm" disabled={batchProcessing} onClick={handleBatchReject}
+              className="h-8 gap-1 rounded-xl border border-destructive/20 bg-destructive/10 text-[11px] text-destructive shadow-none hover:bg-destructive/20">
+              <XCircle className="h-3 w-3" /> Recusar lote
+            </Button>
+          </div>
+        ) : null
+      }
+    >
+      {/* Toolbar */}
+      <div className="mb-5 flex flex-wrap items-center gap-3">
+        <div className="relative flex-1 min-w-[220px] max-w-sm">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <input placeholder="Buscar vendedor ou ID..." value={search} onChange={e => setSearch(e.target.value)}
+            className="h-10 w-full rounded-xl border border-border bg-muted/30 pl-10 pr-4 text-sm text-foreground placeholder:text-muted-foreground focus:border-primary/40 focus:outline-none" />
+        </div>
+        <Select value={statusFilter} onValueChange={setStatusFilter}>
+          <SelectTrigger className="h-10 w-[140px] rounded-xl text-xs"><SelectValue placeholder="Status" /></SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">Todos status</SelectItem>
+            <SelectItem value="pending">Pendentes</SelectItem>
+            <SelectItem value="approved">Aprovados</SelectItem>
+            <SelectItem value="rejected">Recusados</SelectItem>
+          </SelectContent>
+        </Select>
+        <Select value={riskFilter} onValueChange={setRiskFilter}>
+          <SelectTrigger className="h-10 w-[170px] rounded-xl text-xs"><SelectValue placeholder="Risco" /></SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">Todos riscos</SelectItem>
+            <SelectItem value="flagged">Com flag</SelectItem>
+            <SelectItem value="new_seller">Sellers novos</SelectItem>
+            <SelectItem value="high_value">Acima R$ 50k</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
 
- {/* Batch Actions */}
- {selectedIds.size > 0 && (
- <div className="flex items-center gap-2 ml-auto">
- <span className="text-xs text-muted-foreground font-medium">{selectedIds.size} selecionados</span>
- <Button size="sm" disabled={batchProcessing} onClick={handleBatchApprove}
- className="h-8 text-[11px] bg-primary/10 text-primary hover:bg-primary/20 border border-primary/20 gap-1 rounded-xl shadow-none">
- <CheckCircle2 className="h-3 w-3" /> Aprovar Lote
- </Button>
- <Button size="sm" disabled={batchProcessing} onClick={handleBatchReject}
- className="h-8 text-[11px] bg-destructive/10 text-destructive hover:bg-destructive/20 border border-destructive/20 gap-1 rounded-xl shadow-none">
- <XCircle className="h-3 w-3" /> Recusar Lote
- </Button>
- </div>
- )}
- </div>
+      {/* Table */}
+      <div className={premiumTable.wrapper}>
+        <table className={premiumTable.table}>
+          <thead><tr className={premiumTable.headRow}>
+            <th className={`${premiumTable.th} w-10`}>
+              <Checkbox checked={pendingFiltered.length > 0 && selectedIds.size === pendingFiltered.length} onCheckedChange={toggleSelectAll} />
+            </th>
+            {["ID", "Vendedor", "Tipo", "Risco", "Bruto", "Taxa", "Líquido", "Status", "Admin", "Auto", "Data", "Ações"].map(h => (
+              <th key={h} className={premiumTable.th}>{h}</th>
+            ))}
+          </tr></thead>
+          <tbody>
+            {filtered.map(w => {
+              const audit = getWithdrawalAudit(w.id);
+              const autoConfig = getAutoConfig(w.user_id);
+              const isPending = w.status === "pending";
+              const isOver10k = Number(w.amount) > 10000;
+              return (
+                <tr key={w.id} className={`${premiumTable.row} ${isPending ? "bg-warning/[0.025]" : ""} ${isOver10k && isPending ? "ring-1 ring-destructive/30" : ""}`}>
+                  <td className={premiumTable.td}>
+                    {isPending && <Checkbox checked={selectedIds.has(w.id)} onCheckedChange={() => toggleSelect(w.id)} />}
+                  </td>
+                  <td className={`${premiumTable.td} font-mono text-[10px] text-muted-foreground`}>{w.id.slice(0, 8)}</td>
+                  <td className={premiumTable.td}>
+                    <p className="text-xs font-bold text-foreground">{getSellerName(w.user_id)}</p>
+                    <p className="text-[10px] text-muted-foreground">{getSellerEmail(w.user_id)}</p>
+                  </td>
+                  <td className={premiumTable.td}>
+                    <div className="flex items-center gap-1">
+                      <SellerTypeBadge type={getSellerType(w.user_id)} />
+                      {(w as any).withdrawal_type === "crypto" && (
+                        <span className="rounded border border-amber-500/20 bg-amber-500/10 px-1.5 py-0.5 text-[8px] font-bold uppercase text-amber-500">
+                          {(w as any).crypto_currency || "CRYPTO"}
+                        </span>
+                      )}
+                    </div>
+                  </td>
+                  <td className={premiumTable.td}><RiskBadge withdrawal={w} /></td>
+                  <td className={`${premiumTable.td} text-xs font-extrabold tabular-nums ${isOver10k ? "text-destructive" : "text-foreground"}`}>
+                    R$ {Number(w.amount).toFixed(2)}
+                    {isOver10k && <span className="ml-1 text-[8px] font-bold text-destructive">!</span>}
+                  </td>
+                  <td className={`${premiumTable.td} text-xs tabular-nums text-warning`}>R$ {Number(w.fee_amount).toFixed(2)}</td>
+                  <td className={`${premiumTable.td} text-xs font-bold tabular-nums text-primary`}>R$ {Number(w.net_amount).toFixed(2)}</td>
+                  <td className={premiumTable.td}><StatusBadge status={w.status} /></td>
+                  <td className={premiumTable.td}>
+                    {audit ? (
+                      <div>
+                        <p className="flex items-center gap-1 text-xs font-semibold text-foreground/80">
+                          <UserCog className="h-3 w-3 text-primary" />{getAdminName(audit.admin_user_id)}
+                        </p>
+                        <p className="text-[9px] text-muted-foreground">{new Date(audit.created_at).toLocaleString("pt-BR")}</p>
+                      </div>
+                    ) : <span className="text-[10px] text-muted-foreground">—</span>}
+                  </td>
+                  <td className={premiumTable.td}>
+                    {autoConfig?.enabled ? (
+                      <button onClick={() => openAutoConfigDialog(w.user_id)} className="rounded-full border border-primary/20 bg-primary/10 px-2 py-0.5 text-[9px] font-bold text-primary hover:bg-primary/20">
+                        Até R$ {autoConfig.max_amount}
+                      </button>
+                    ) : (
+                      <button onClick={() => openAutoConfigDialog(w.user_id)} className="text-[9px] text-muted-foreground underline hover:text-foreground">Configurar</button>
+                    )}
+                  </td>
+                  <td className={`${premiumTable.td} text-[10px] text-muted-foreground`}>{new Date(w.created_at).toLocaleString("pt-BR")}</td>
+                  <td className={premiumTable.td}>
+                    {isPending && (
+                      <div className="flex gap-2">
+                        <Button size="sm" className="h-7 gap-1 rounded-xl border border-primary/20 bg-primary/10 text-[11px] text-primary shadow-none hover:bg-primary/20" onClick={() => onWithdrawalAction(w.id, "approved")}>
+                          <CheckCircle2 className="h-3 w-3" /> Aprovar
+                        </Button>
+                        <Button size="sm" className="h-7 gap-1 rounded-xl border border-destructive/20 bg-destructive/10 text-[11px] text-destructive shadow-none hover:bg-destructive/20" onClick={() => { setRejectDialog(w.id); setRejectReason(""); }}>
+                          <XCircle className="h-3 w-3" /> Recusar
+                        </Button>
+                      </div>
+                    )}
+                    {w.status === "approved" && (
+                      (w as any).payment_proof_url ? (
+                        <div className="flex items-center gap-1">
+                          <Button size="sm" variant="ghost" className="h-7 gap-1 text-[10px]" onClick={() => handleViewProof((w as any).payment_proof_url)}>
+                            <FileText className="h-3 w-3" /> Ver comprovante
+                          </Button>
+                          <label className="cursor-pointer text-[10px] text-muted-foreground underline">
+                            Trocar
+                            <input type="file" hidden accept="image/*,application/pdf" onChange={e => e.target.files?.[0] && handleProofUpload(w.id, e.target.files[0])} />
+                          </label>
+                        </div>
+                      ) : (
+                        <label className="inline-flex h-7 cursor-pointer items-center gap-1 rounded-xl border border-primary/20 bg-primary/10 px-2 text-[10px] text-primary hover:bg-primary/20">
+                          <FileText className="h-3 w-3" /> Anexar comprovante
+                          <input type="file" hidden accept="image/*,application/pdf" onChange={e => e.target.files?.[0] && handleProofUpload(w.id, e.target.files[0])} />
+                        </label>
+                      )
+                    )}
+                    {w.status === "rejected" && (w as any).rejection_reason && (
+                      <div className="max-w-[200px]">
+                        <p className="text-[10px] font-bold uppercase text-destructive">Motivo</p>
+                        <p className="line-clamp-2 text-[10px] text-muted-foreground">{(w as any).rejection_reason}</p>
+                      </div>
+                    )}
+                  </td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+        {filtered.length === 0 && (
+          <PremiumEmpty icon={ArrowDownToLine} title="Nenhum saque encontrado" subtitle="Ajuste filtros ou aguarde novas solicitações" />
+        )}
+      </div>
+    </PremiumPanel>
+  )}
 
- {/* Table */}
- <AdminPanel>
- <PanelTitle color="amber" icon={<ArrowDownToLine className="h-4 w-4" />}>Saques ({filtered.length})</PanelTitle>
- <div className="overflow-x-auto mt-4">
- <table className="w-full text-sm">
- <thead><tr className="border-b border-border">
- <th className="p-3 w-8">
- <Checkbox checked={pendingFiltered.length > 0 && selectedIds.size === pendingFiltered.length} onCheckedChange={toggleSelectAll} />
- </th>
- {["ID", "Vendedor", "Tipo", "Risco", "Bruto", "Taxa", "Líquido", "Status", "Admin", "Auto", "Data", "Ações"].map(h => (
- <th key={h} className="text-left p-3 text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">{h}</th>
- ))}
- </tr></thead>
- <tbody>
- {filtered.map(w => {
- const audit = getWithdrawalAudit(w.id);
- const autoConfig = getAutoConfig(w.user_id);
- const isPending = w.status === "pending";
- const isOver10k = Number(w.amount) > 10000;
- return (
- <tr key={w.id} className={`border-b border-border/50 hover:bg-muted/20 transition-colors ${isPending ? "bg-warning/[0.03]" : ""} ${isOver10k && isPending ? "ring-1 ring-destructive/30 bg-destructive/[0.04]" : ""}`}>
- <td className="p-3">
- {isPending && <Checkbox checked={selectedIds.has(w.id)} onCheckedChange={() => toggleSelect(w.id)} />}
- </td>
- <td className="p-3 font-mono text-[10px] text-muted-foreground">{w.id.slice(0, 8)}</td>
- <td className="p-3">
- <div>
- <p className="text-xs font-bold text-foreground">{getSellerName(w.user_id)}</p>
- <p className="text-[10px] text-muted-foreground">{getSellerEmail(w.user_id)}</p>
- </div>
- </td>
- <td className="p-3">
- <SellerTypeBadge type={getSellerType(w.user_id)} />
- {(w as any).withdrawal_type === "crypto" && (
- <span className="ml-1 px-1.5 py-0.5 rounded text-[8px] font-bold uppercase bg-amber-500/10 text-amber-500 border border-amber-500/20">
- {(w as any).crypto_currency || "CRYPTO"}
- </span>
- )}
- </td>
- <td className="p-3"><RiskBadge withdrawal={w} /></td>
- <td className={`p-3 text-xs font-extrabold ${isOver10k ? "text-destructive" : "text-foreground"}`}>
- R$ {Number(w.amount).toFixed(2)}
- {isOver10k && <span className="ml-1 text-[8px] text-destructive font-bold">!</span>}
- </td>
- <td className="p-3 text-xs text-warning">R$ {Number(w.fee_amount).toFixed(2)}</td>
- <td className="p-3 text-xs text-primary font-bold">R$ {Number(w.net_amount).toFixed(2)}</td>
- <td className="p-3"><StatusBadge status={w.status} /></td>
- <td className="p-3">
- {audit ? (
- <div>
- <p className="text-xs font-semibold text-foreground/80 flex items-center gap-1">
- <UserCog className="h-3 w-3 text-primary" />{getAdminName(audit.admin_user_id)}
- </p>
- <p className="text-[9px] text-muted-foreground">{new Date(audit.created_at).toLocaleString("pt-BR")}</p>
- </div>
- ) : <span className="text-[10px] text-muted-foreground">—</span>}
- </td>
- <td className="p-3">
- {autoConfig?.enabled ? (
- <span className="text-[9px] font-bold px-2 py-0.5 rounded-full bg-primary/10 text-primary border border-primary/20">Até R$ {autoConfig.max_amount}</span>
- ) : (
- <button onClick={() => openAutoConfigDialog(w.user_id)} className="text-[9px] text-muted-foreground hover:text-foreground underline">Configurar</button>
- )}
- </td>
- <td className="p-3 text-[10px] text-muted-foreground">{new Date(w.created_at).toLocaleString("pt-BR")}</td>
- <td className="p-3">
- {isPending && (
- <div className="flex gap-2">
- <Button size="sm" className="h-7 text-[11px] bg-primary/10 text-primary hover:bg-primary/20 border border-primary/20 gap-1 rounded-xl shadow-none" onClick={() => onWithdrawalAction(w.id, "approved")}>
- <CheckCircle2 className="h-3 w-3" /> Aprovar
- </Button>
- <Button size="sm" className="h-7 text-[11px] bg-destructive/10 text-destructive hover:bg-destructive/20 border border-destructive/20 gap-1 rounded-xl shadow-none" onClick={() => { setRejectDialog(w.id); setRejectReason(""); }}>
- <XCircle className="h-3 w-3" /> Recusar
- </Button>
- </div>
- )}
- {w.status === "approved" && (
-   (w as any).payment_proof_url ? (
-     <div className="flex items-center gap-1">
-       <Button size="sm" variant="ghost" className="h-7 text-[10px] gap-1" onClick={() => handleViewProof((w as any).payment_proof_url)}>
-         <FileText className="h-3 w-3" /> Ver comprovante
-       </Button>
-       <label className="text-[10px] text-muted-foreground underline cursor-pointer">
-         Trocar
-         <input type="file" hidden accept="image/*,application/pdf" onChange={e => e.target.files?.[0] && handleProofUpload(w.id, e.target.files[0])} />
-       </label>
-     </div>
-   ) : (
-     <label className="inline-flex items-center gap-1 h-7 px-2 text-[10px] bg-primary/10 text-primary border border-primary/20 rounded-xl cursor-pointer hover:bg-primary/20">
-       <FileText className="h-3 w-3" /> Anexar comprovante
-       <input type="file" hidden accept="image/*,application/pdf" onChange={e => e.target.files?.[0] && handleProofUpload(w.id, e.target.files[0])} />
-     </label>
-   )
- )}
- {w.status === "rejected" && (w as any).rejection_reason && (
-   <div className="max-w-[200px]">
-     <p className="text-[10px] font-bold text-destructive uppercase">Motivo</p>
-     <p className="text-[10px] text-muted-foreground line-clamp-2">{(w as any).rejection_reason}</p>
-   </div>
- )}
- </td>
- </tr>
- );
- })}
- {filtered.length === 0 && <tr><td colSpan={13} className="p-10 text-center text-muted-foreground text-xs">Nenhum saque encontrado</td></tr>}
- </tbody>
- </table>
- </div>
- </AdminPanel>
- </>
- )}
+  {/* ═══ SUB-TAB: ADJUSTMENTS ═══ */}
+  {subTab === "adjustments" && (
+    <PremiumPanel
+      eyebrow="Manual"
+      title={`Histórico de Ajustes · ${adjustments.length}`}
+      icon={ArrowUpDown}
+    >
+      <p className="mb-4 text-xs text-muted-foreground">Ajuste manual de saldo de vendedores. Toda movimentação é auditada.</p>
+      <div className={premiumTable.wrapper}>
+        <table className={premiumTable.table}>
+          <thead><tr className={premiumTable.headRow}>
+            {["Data", "Vendedor", "Tipo", "Valor", "Motivo", "Admin"].map(h => (
+              <th key={h} className={premiumTable.th}>{h}</th>
+            ))}
+          </tr></thead>
+          <tbody>
+            {adjustments.map(a => (
+              <tr key={a.id} className={premiumTable.row}>
+                <td className={`${premiumTable.td} text-[10px] text-muted-foreground`}>{new Date(a.created_at).toLocaleString("pt-BR")}</td>
+                <td className={premiumTable.td}>
+                  <p className="text-xs font-bold text-foreground">{getSellerName(a.user_id)}</p>
+                  <p className="font-mono text-[10px] text-muted-foreground">{a.user_id.slice(0, 8)}</p>
+                </td>
+                <td className={premiumTable.td}>
+                  {a.type === "credit" ? (
+                    <span className="flex w-fit items-center gap-1 rounded-full border border-emerald-500/20 bg-emerald-500/10 px-2 py-0.5 text-[10px] font-bold text-emerald-500">
+                      <Plus className="h-2.5 w-2.5" /> Crédito
+                    </span>
+                  ) : (
+                    <span className="flex w-fit items-center gap-1 rounded-full border border-destructive/20 bg-destructive/10 px-2 py-0.5 text-[10px] font-bold text-destructive">
+                      <Minus className="h-2.5 w-2.5" /> Débito
+                    </span>
+                  )}
+                </td>
+                <td className={`${premiumTable.td} text-xs font-extrabold tabular-nums ${a.type === "credit" ? "text-emerald-500" : "text-destructive"}`}>
+                  {a.type === "credit" ? "+" : "-"}R$ {Number(a.amount).toFixed(2)}
+                </td>
+                <td className={`${premiumTable.td} max-w-[260px] truncate text-xs text-foreground`}>{a.reason}</td>
+                <td className={`${premiumTable.td} text-xs text-muted-foreground`}>
+                  <span className="flex items-center gap-1"><UserCog className="h-3 w-3 text-primary" />{getAdminName(a.admin_user_id)}</span>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+        {adjustments.length === 0 && (
+          <PremiumEmpty icon={ArrowUpDown} title="Nenhum ajuste" subtitle="Use 'Novo Ajuste' para registrar crédito ou débito" />
+        )}
+      </div>
+    </PremiumPanel>
+  )}
 
- {/* ═══ SUB-TAB: ADJUSTMENTS ═══ */}
- {subTab === "adjustments" && (
- <>
- <div className="flex items-center justify-between">
- <p className="text-sm text-muted-foreground">Ajuste manual de saldo de vendedores. Toda movimentação é auditada.</p>
- <Button size="sm" className="gap-1.5 rounded-xl" onClick={() => setAdjustDialog(true)}>
- <DollarSign className="h-3.5 w-3.5" /> Novo Ajuste
- </Button>
- </div>
- <AdminPanel>
- <PanelTitle color="teal" icon={<ArrowUpDown className="h-4 w-4" />}>Histórico de Ajustes ({adjustments.length})</PanelTitle>
- <div className="overflow-x-auto mt-4">
- <table className="w-full text-sm">
- <thead><tr className="border-b border-border">
- {["Data", "Vendedor", "Tipo", "Valor", "Motivo", "Admin"].map(h => (
- <th key={h} className="text-left p-3 text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">{h}</th>
- ))}
- </tr></thead>
- <tbody>
- {adjustments.map(a => (
- <tr key={a.id} className="border-b border-border/50 hover:bg-muted/20 transition-colors">
- <td className="p-3 text-[10px] text-muted-foreground">{new Date(a.created_at).toLocaleString("pt-BR")}</td>
- <td className="p-3">
- <p className="text-xs font-bold text-foreground">{getSellerName(a.user_id)}</p>
- <p className="text-[10px] text-muted-foreground font-mono">{a.user_id.slice(0, 8)}</p>
- </td>
- <td className="p-3">
- {a.type === "credit" ? (
- <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 flex items-center gap-1 w-fit">
- <Plus className="h-2.5 w-2.5" /> Crédito
- </span>
- ) : (
- <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-destructive/10 text-destructive border border-destructive/20 flex items-center gap-1 w-fit">
- <Minus className="h-2.5 w-2.5" /> Débito
- </span>
- )}
- </td>
- <td className={`p-3 text-xs font-extrabold ${a.type === "credit" ? "text-emerald-500" : "text-destructive"}`}>
- {a.type === "credit" ? "+" : "-"}R$ {Number(a.amount).toFixed(2)}
- </td>
- <td className="p-3 text-xs text-foreground max-w-[200px] truncate">{a.reason}</td>
- <td className="p-3 text-xs text-muted-foreground flex items-center gap-1">
- <UserCog className="h-3 w-3 text-primary" />{getAdminName(a.admin_user_id)}
- </td>
- </tr>
- ))}
- {adjustments.length === 0 && <tr><td colSpan={6} className="p-10 text-center text-muted-foreground text-xs">Nenhum ajuste</td></tr>}
- </tbody>
- </table>
- </div>
- </AdminPanel>
- </>
- )}
+  {/* ═══ SUB-TAB: STATEMENT ═══ */}
+  {subTab === "statement" && (
+    <PremiumPanel
+      eyebrow="Conta Mãe"
+      title="Extrato Global"
+      icon={FileText}
+    >
+      <p className="mb-4 text-xs text-muted-foreground">Movimentação consolidada de saques e ajustes da plataforma (últimos 100 lançamentos).</p>
+      <div className={premiumTable.wrapper}>
+        <table className={premiumTable.table}>
+          <thead><tr className={premiumTable.headRow}>
+            {["Data", "Tipo", "Descrição", "Valor"].map(h => (
+              <th key={h} className={premiumTable.th}>{h}</th>
+            ))}
+          </tr></thead>
+          <tbody>
+            {statementEntries.map((e, i) => (
+              <tr key={i} className={premiumTable.row}>
+                <td className={`${premiumTable.td} text-[10px] text-muted-foreground`}>{new Date(e.date).toLocaleString("pt-BR")}</td>
+                <td className={premiumTable.td}>
+                  <span className={`rounded-full px-2 py-0.5 text-[10px] font-bold ${e.positive ? "border border-emerald-500/20 bg-emerald-500/10 text-emerald-500" : "border border-destructive/20 bg-destructive/10 text-destructive"}`}>{e.type}</span>
+                </td>
+                <td className={`${premiumTable.td} max-w-[360px] truncate text-xs text-foreground`}>{e.description}</td>
+                <td className={`${premiumTable.td} text-xs font-extrabold tabular-nums ${e.positive ? "text-emerald-500" : "text-destructive"}`}>
+                  {e.positive ? "+" : "-"}R$ {Math.abs(e.amount).toFixed(2)}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+        {statementEntries.length === 0 && (
+          <PremiumEmpty icon={FileText} title="Sem movimentações" subtitle="As movimentações aparecerão aqui assim que houver atividade" />
+        )}
+      </div>
+    </PremiumPanel>
+  )}
 
- {/* ═══ SUB-TAB: STATEMENT ═══ */}
- {subTab === "statement" && (
- <AdminPanel>
- <PanelTitle color="blue" icon={<FileText className="h-4 w-4" />}>Extrato Global — Conta Mãe</PanelTitle>
- <p className="text-xs text-muted-foreground mt-1 mb-4">Movimentação de saques e ajustes da plataforma.</p>
- <div className="overflow-x-auto">
- <table className="w-full text-sm">
- <thead><tr className="border-b border-border">
- {["Data", "Tipo", "Descrição", "Valor"].map(h => (
- <th key={h} className="text-left p-3 text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">{h}</th>
- ))}
- </tr></thead>
- <tbody>
- {statementEntries.map((e, i) => (
- <tr key={i} className="border-b border-border/50 hover:bg-muted/20 transition-colors">
- <td className="p-3 text-[10px] text-muted-foreground">{new Date(e.date).toLocaleString("pt-BR")}</td>
- <td className="p-3">
- <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
- e.positive ? "bg-emerald-500/10 text-emerald-500 border border-emerald-500/20" : "bg-destructive/10 text-destructive border border-destructive/20"
- }`}>{e.type}</span>
- </td>
- <td className="p-3 text-xs text-foreground max-w-[300px] truncate">{e.description}</td>
- <td className={`p-3 text-xs font-extrabold ${e.positive ? "text-emerald-500" : "text-destructive"}`}>
- {e.positive ? "+" : "-"}R$ {Math.abs(e.amount).toFixed(2)}
- </td>
- </tr>
- ))}
- {statementEntries.length === 0 && <tr><td colSpan={4} className="p-10 text-center text-muted-foreground text-xs">Sem movimentações</td></tr>}
- </tbody>
- </table>
- </div>
- </AdminPanel>
- )}
 
  {/* ═══ AUTO-WITHDRAW DIALOG ═══ */}
  <Dialog open={!!autoConfigDialog} onOpenChange={() => setAutoConfigDialog(null)}>
