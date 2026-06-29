@@ -41,7 +41,7 @@ export default function CourseAnalytics() {
       .from("lessons")
       .select("id, modules!inner(course_id)")
       .eq("modules.course_id", courseId!);
-    const ids = (lessonIds || []).map((l: any) => l.id);
+    const ids = (lessonIds || []).map((l) => l.id);
     if (ids.length > 0) {
       const { data: prog } = await supabase
         .from("user_progress")
