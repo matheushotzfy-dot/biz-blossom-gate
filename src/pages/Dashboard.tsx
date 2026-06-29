@@ -721,11 +721,11 @@ export default function Dashboard() {
                     content={({ active, payload }) => {
                       if (active && payload && payload.length) {
                         return (
-                          <div className="dashboard-chart-tooltip rounded-lg backdrop-blur-md shadow-2xl animate-in fade-in zoom-in-95 duration-200">
-                            <p className="tooltip-label mb-1 text-[10px] font-black uppercase tracking-widest">
+                          <div className="dashboard-chart-tooltip animate-in fade-in zoom-in-95 duration-150">
+                            <p className="tooltip-label mb-1.5 text-[10px] font-black uppercase tracking-[0.18em]">
                               {payload[0].payload.fullLabel || payload[0].payload.name}
                             </p>
-                            <p className="tooltip-value text-[22px] font-black tracking-tight tabular-nums leading-none">
+                            <p className="tooltip-value text-[24px] font-black tracking-tight tabular-nums leading-none">
                               {fmt(payload[0].value as number)}
                             </p>
                           </div>
