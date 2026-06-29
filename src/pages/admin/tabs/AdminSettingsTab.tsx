@@ -270,7 +270,7 @@ export default function AdminSettingsTab() {
  setSaving(false);
  };
 
- const saveSellerRetention = async (r: any) => {
+ const saveSellerRetention = async (r: RetentionSetting) => {
  if (!user) return;
     const { error } = await supabase.from("retention_settings").update({
       pix_retention_pct: Number(r.pix_retention_pct),
@@ -577,7 +577,7 @@ export default function AdminSettingsTab() {
  <SelectValue placeholder="Selecionar seller..." />
  </SelectTrigger>
  <SelectContent>
- {profiles.filter(p => !sellerRetentions.some((r: any) => r.user_id === p.user_id)).map(p => (
+ {profiles.filter(p => !sellerRetentions.some((r: RetentionSetting) => r.user_id === p.user_id)).map(p => (
  <SelectItem key={p.user_id} value={p.user_id}>{p.full_name || p.email || p.user_id.slice(0, 8)}</SelectItem>
  ))}
  </SelectContent>
@@ -591,7 +591,7 @@ export default function AdminSettingsTab() {
  <p className="text-xs text-muted-foreground py-4 text-center">Nenhuma retenção individual configurada.</p>
  ) : (
  <div className="space-y-3 max-h-[400px] overflow-y-auto">
- {sellerRetentions.map((r: any) => (
+ {sellerRetentions.map((r: RetentionSetting) => (
  <div key={r.id} className="rounded-xl border border-border bg-muted/20 p-3 space-y-3">
  <div className="flex items-center justify-between">
  <p className="text-sm font-semibold text-foreground">{getSellerName(r.user_id)}</p>
@@ -701,7 +701,7 @@ export default function AdminSettingsTab() {
  <div className="space-y-2 mt-4 max-h-[500px] overflow-y-auto">
  {notifications.length === 0 ? (
  <p className="text-xs text-muted-foreground py-4 text-center">Nenhuma notificação enviada</p>
- ) : notifications.map((n: any) => (
+ ) : notifications.map((n: NotificationRow) => (
  <div key={n.id} className="flex items-start gap-3 p-3 rounded-xl border border-border bg-muted/20">
  <div className="flex-1 min-w-0">
  <div className="flex items-center gap-2 mb-1">
