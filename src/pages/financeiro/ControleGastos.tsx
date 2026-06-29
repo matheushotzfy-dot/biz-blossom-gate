@@ -119,7 +119,7 @@ export default function ControleGastos() {
     const { error } = await supabase.from("expenses").insert({
       user_id: user.id, category: form.category, description: form.description || null,
       amount, expense_date: form.expense_date,
-    } as any);
+    });
     if (error) { toast.error("Erro ao registrar gasto"); return; }
     toast.success("Gasto registrado!");
     setDialogOpen(false);
