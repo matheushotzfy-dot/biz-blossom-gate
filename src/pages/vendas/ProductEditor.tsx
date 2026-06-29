@@ -2222,7 +2222,7 @@ function TabCupons({ isNew, coupons, newCouponCode, setNewCouponCode, newCouponT
 
  {coupons.length > 0 ? (
  <div className="space-y-2">
- {coupons.map((coupon: Record<string, any>, i: number) => (
+ {coupons.map((coupon, i: number) => (
  <motion.div
  key={coupon.id}
  initial={{ opacity: 0, y: 8 }}
