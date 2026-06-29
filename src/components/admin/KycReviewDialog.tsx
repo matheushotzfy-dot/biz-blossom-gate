@@ -7,6 +7,7 @@ import {
   CheckCircle2, XCircle, ExternalLink, Loader2, ShieldCheck,
   User, Mail, Phone, FileDigit, MapPin, Building2, Calendar, Globe,
   Image as ImageIcon, Camera, X, Copy, FileText,
+  type LucideIcon,
 } from "lucide-react";
 import type { Tables } from "@/integrations/supabase/types";
 import { cn } from "@/lib/utils";
