@@ -20,8 +20,8 @@ import {
 } from "@/components/ui/dialog";
 import { toast } from "sonner";
 import type { Tables } from "@/integrations/supabase/types";
-import { GlassPanel as AdminPanel, GlassPanelTitle as PanelTitle } from "./AdminOverviewTab";
-import { LinearHero, LinearStat, LinearStatRow } from "@/components/admin/LinearKit";
+import { FinanceiroHero } from "@/components/financeiro/FinanceiroHero";
+import { PremiumMetric, PremiumMetricGrid, PremiumPanel, PremiumEmpty, premiumTable } from "./AdminPremium";
 import { logAdminAction } from "@/lib/auditLog";
 import { cn } from "@/lib/utils";
 
@@ -195,57 +195,54 @@ export default function AdminProductsTab({ products, profiles, transactions, fmt
 
   return (
     <div className="space-y-6 animate-fade-in">
-      <LinearHero
+      <FinanceiroHero
         eyebrow="Catálogo · Produtos"
-        title="Curadoria de produtos"
-        subtitle="Revise pendentes, classifique risco, suspenda violações e investigue cada produto em profundidade."
+        title="Curadoria de Produtos"
+        subtitle="Revise pendentes, classifique risco (White / Gray / Black), suspenda violações e investigue cada produto em profundidade."
         status={{ tone: pendingReview.length > 0 ? "warning" : "success", label: pendingReview.length > 0 ? `${pendingReview.length} em revisão` : "Sem pendências", pulse: pendingReview.length > 0 }}
       />
 
-      <LinearStatRow>
-        <LinearStat icon={Package} label="Total" value={String(products.length - deletedCount)} sub="Ativos no catálogo" tone="neutral" />
-        <LinearStat icon={Clock} label="Em Revisão" value={String(pendingReview.length)} sub="Aguardando" tone="warning" />
-        <LinearStat icon={CheckCircle2} label="Ativos" value={String(activeCount)} sub={`${((activeCount / Math.max(products.length - deletedCount, 1)) * 100).toFixed(0)}% publicados`} tone="success" />
-        <LinearStat icon={Ban} label="Suspensos" value={String(blockedCount)} sub="Checkout inativo" tone="destructive" />
-        <LinearStat icon={ShieldX} label="Black-list" value={String(blackCount)} sub="Risco crítico" tone="destructive" />
-      </LinearStatRow>
+      <PremiumMetricGrid cols={5}>
+        <PremiumMetric icon={Package} label="Catálogo" value={String(products.length - deletedCount)} sub={`${deletedCount} apagados`} tone="neutral" />
+        <PremiumMetric icon={Clock} label="Em Revisão" value={String(pendingReview.length)} sub="Aguardando aprovação" tone="warning" />
+        <PremiumMetric icon={CheckCircle2} label="Ativos" value={String(activeCount)} sub={`${((activeCount / Math.max(products.length - deletedCount, 1)) * 100).toFixed(0)}% publicados`} tone="success" />
+        <PremiumMetric icon={Ban} label="Suspensos" value={String(blockedCount)} sub="Checkout inativo" tone="destructive" />
+        <PremiumMetric icon={ShieldX} label="Black-list" value={String(blackCount)} sub="Risco crítico" tone="destructive" />
+      </PremiumMetricGrid>
 
       {pendingReview.length > 0 && (
-        <AdminPanel className="ring-1 ring-warning/20">
-          <PanelTitle color="amber" icon={<Clock className="h-4 w-4" />}>
-            Fila de Revisão ({pendingReview.length})
-          </PanelTitle>
-          <div className="overflow-x-auto mt-4">
-            <table className="w-full text-sm">
-              <thead><tr className="border-b border-border">
+        <PremiumPanel eyebrow="Curadoria" title={`Fila de Revisão · ${pendingReview.length}`} icon={Clock} className="ring-1 ring-warning/20">
+          <div className={premiumTable.wrapper}>
+            <table className={premiumTable.table}>
+              <thead><tr className={premiumTable.headRow}>
                 {["Produto", "Seller", "Preço", "Criado em", "Ações"].map(h => (
-                  <th key={h} className="text-left p-3 text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">{h}</th>
+                  <th key={h} className={premiumTable.th}>{h}</th>
                 ))}
               </tr></thead>
               <tbody>
                 {pendingReview.map(p => (
-                  <tr key={p.id} className="border-b border-border/50 hover:bg-warning/[0.03] transition-colors">
-                    <td className="p-3">
+                  <tr key={p.id} className={cn(premiumTable.row, "hover:bg-warning/[0.03]")}>
+                    <td className={premiumTable.td}>
                       <div className="flex items-center gap-2">
                         {p.image_url ? (
-                          <img src={p.image_url} alt="" className="h-8 w-8 rounded-lg object-cover border border-border" />
-                        ) : <div className="h-8 w-8 rounded-lg bg-muted/30 flex items-center justify-center"><ImageIcon className="h-3.5 w-3.5 text-muted-foreground" /></div>}
-                        <span className="text-xs font-medium text-foreground">{p.name}</span>
+                          <img src={p.image_url} alt="" className="h-9 w-9 rounded-lg object-cover border border-border" />
+                        ) : <div className="h-9 w-9 rounded-lg bg-muted/30 flex items-center justify-center"><ImageIcon className="h-3.5 w-3.5 text-muted-foreground" /></div>}
+                        <span className="text-xs font-bold text-foreground">{p.name}</span>
                       </div>
                     </td>
-                    <td className="p-3">
-                      <p className="text-xs font-medium text-foreground">{getSellerName(p.user_id)}</p>
+                    <td className={premiumTable.td}>
+                      <p className="text-xs font-bold text-foreground">{getSellerName(p.user_id)}</p>
                       <p className="text-[10px] text-muted-foreground">{getSellerEmail(p.user_id)}</p>
                     </td>
-                    <td className="p-3 text-xs font-bold text-primary">{fmtCurrency(Number(p.price))}</td>
-                    <td className="p-3 text-[10px] text-muted-foreground">{new Date(p.created_at).toLocaleDateString("pt-BR")}</td>
-                    <td className="p-3">
+                    <td className={cn(premiumTable.td, "text-xs font-bold tabular-nums text-primary")}>{fmtCurrency(Number(p.price))}</td>
+                    <td className={cn(premiumTable.td, "text-[10px] text-muted-foreground")}>{new Date(p.created_at).toLocaleDateString("pt-BR")}</td>
+                    <td className={premiumTable.td}>
                       <div className="flex items-center gap-1.5">
-                        <Button size="sm" variant="outline" className="h-7 text-[10px] gap-1 border-primary/30 text-primary hover:bg-primary/10"
+                        <Button size="sm" variant="outline" className="h-7 text-[10px] gap-1 rounded-xl border-primary/30 text-primary hover:bg-primary/10"
                           onClick={() => handleProductStatus(p.id, "active", p.user_id)}>
                           <CheckCircle2 className="h-3 w-3" /> Aprovar
                         </Button>
-                        <Button size="sm" variant="outline" className="h-7 text-[10px] gap-1 border-destructive/30 text-destructive hover:bg-destructive/10"
+                        <Button size="sm" variant="outline" className="h-7 text-[10px] gap-1 rounded-xl border-destructive/30 text-destructive hover:bg-destructive/10"
                           onClick={() => { setRejectTarget(p); setRejectReason(""); setRejectOpen(true); }}>
                           <ShieldAlert className="h-3 w-3" /> Reprovar
                         </Button>
@@ -259,88 +256,99 @@ export default function AdminProductsTab({ products, profiles, transactions, fmt
               </tbody>
             </table>
           </div>
-        </AdminPanel>
+        </PremiumPanel>
       )}
 
       <div className="flex flex-wrap items-center gap-3">
-        <div className="relative flex-1 max-w-sm">
+        <div className="relative flex-1 min-w-[220px] max-w-sm">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <input placeholder="Buscar produto ou vendedor..." value={search} onChange={e => setSearch(e.target.value)}
-            className="w-full h-10 pl-10 pr-4 bg-muted/30 border border-border rounded-xl text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary/30" />
+            className="h-10 w-full rounded-xl border border-border bg-muted/30 pl-10 pr-4 text-sm text-foreground placeholder:text-muted-foreground focus:border-primary/40 focus:outline-none" />
         </div>
         <Select value={statusFilter} onValueChange={setStatusFilter}>
-          <SelectTrigger className="w-[180px] h-10 text-xs rounded-xl"><SelectValue placeholder="Status" /></SelectTrigger>
+          <SelectTrigger className="h-10 w-[200px] rounded-xl text-xs"><SelectValue placeholder="Status" /></SelectTrigger>
           <SelectContent>
             <SelectItem value="all">Ativos (todos status)</SelectItem>
             <SelectItem value="draft">Rascunho</SelectItem>
             <SelectItem value="active">Ativos</SelectItem>
             <SelectItem value="pending_review">Em Revisão</SelectItem>
             <SelectItem value="inactive">Inativos</SelectItem>
-            <SelectItem value="deleted">🗑️ Apagados (histórico)</SelectItem>
+            <SelectItem value="deleted">Apagados (histórico)</SelectItem>
           </SelectContent>
         </Select>
-        <Select value={classFilter} onValueChange={(v: any) => setClassFilter(v)}>
-          <SelectTrigger className="w-[160px] h-10 text-xs rounded-xl"><SelectValue placeholder="Classificação" /></SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">Todas classes</SelectItem>
-            <SelectItem value="white">⚪ White</SelectItem>
-            <SelectItem value="gray">🟡 Gray</SelectItem>
-            <SelectItem value="black">⚫ Black</SelectItem>
-          </SelectContent>
-        </Select>
+        {/* Classification segmented */}
+        <div className="inline-flex items-center gap-1 rounded-xl border border-border bg-muted/30 p-1">
+          {([
+            { v: "all", label: "Todas", Icon: Layers, color: "text-muted-foreground" },
+            { v: "white", label: "White", Icon: ShieldCheck, color: "text-emerald-500" },
+            { v: "gray",  label: "Gray",  Icon: ShieldQuestion, color: "text-amber-500" },
+            { v: "black", label: "Black", Icon: ShieldX, color: "text-destructive" },
+          ] as const).map(opt => {
+            const active = classFilter === opt.v;
+            return (
+              <button key={opt.v} onClick={() => setClassFilter(opt.v as any)}
+                className={cn(
+                  "inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-[11px] font-black uppercase tracking-wider transition-colors",
+                  active ? "bg-card text-foreground shadow-sm border border-border" : "text-muted-foreground hover:text-foreground"
+                )}>
+                <opt.Icon className={cn("h-3 w-3", active ? opt.color : "")} /> {opt.label}
+              </button>
+            );
+          })}
+        </div>
       </div>
 
-      <AdminPanel>
-        <PanelTitle color={statusFilter === "deleted" ? "amber" : "violet"} icon={<Package className="h-4 w-4" />}>
-          {statusFilter === "deleted" ? `🗑️ Produtos Apagados (${filtered.length})` : `Todos os Produtos (${filtered.length})`}
-        </PanelTitle>
-        <div className="overflow-x-auto mt-4">
-          <table className="w-full text-sm">
-            <thead><tr className="border-b border-border">
-              {["Produto", "Vendedor", "Classe", "Preço", "Vendas", "Receita", "Reemb.", "CB", "Status", ""].map(h => (
-                <th key={h} className="text-left p-3 text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">{h}</th>
+      <PremiumPanel
+        eyebrow="Catálogo"
+        title={statusFilter === "deleted" ? `Produtos Apagados · ${filtered.length}` : `Todos os Produtos · ${filtered.length}`}
+        icon={Package}
+      >
+        <div className={premiumTable.wrapper}>
+          <table className={premiumTable.table}>
+            <thead><tr className={premiumTable.headRow}>
+              {["Produto", "Vendedor", "Classificação", "Preço", "Vendas", "Receita", "Reemb.", "CB", "Status", ""].map(h => (
+                <th key={h} className={premiumTable.th}>{h}</th>
               ))}
             </tr></thead>
             <tbody>
               {filtered.map(p => {
                 const stats = getProductStats(p.id);
                 const cls = ((p as any).classification || "white") as Classification;
-                const ClsIcon = CLASSIFICATION_META[cls].icon;
                 const isDeleted = !!(p as any).deleted_at;
                 return (
                   <tr key={p.id} className={cn(
-                    "border-b border-border/50 hover:bg-muted/20 transition-colors cursor-pointer",
-                    cls === "black" && "bg-red-500/[0.03]",
+                    premiumTable.row, "cursor-pointer",
+                    cls === "black" && "bg-destructive/[0.03]",
                     cls === "gray" && "bg-amber-500/[0.03]",
                     isDeleted && "opacity-70",
                   )} onClick={() => openXRay(p)}>
-                    <td className="p-3">
+                    <td className={premiumTable.td}>
                       <div className="flex items-center gap-3">
                         {p.image_url ? (
-                          <img src={p.image_url} alt="" className="h-10 w-10 rounded-xl object-cover border border-border" />
-                        ) : <div className="h-10 w-10 rounded-xl bg-muted/30 flex items-center justify-center"><ImageIcon className="h-4 w-4 text-muted-foreground" /></div>}
-                        <div>
-                          <p className="text-xs font-bold text-foreground">{p.name}</p>
-                          <p className="text-[10px] text-muted-foreground max-w-[200px] truncate">{p.description || "—"}</p>
+                          <img src={p.image_url} alt="" className="h-11 w-11 rounded-xl object-cover border border-border" />
+                        ) : <div className="h-11 w-11 rounded-xl bg-muted/30 flex items-center justify-center"><ImageIcon className="h-4 w-4 text-muted-foreground" /></div>}
+                        <div className="min-w-0">
+                          <p className="text-xs font-bold text-foreground truncate">{p.name}</p>
+                          <p className="text-[10px] text-muted-foreground max-w-[220px] truncate">{p.description || "—"}</p>
                         </div>
                       </div>
                     </td>
-                    <td className="p-3">
-                      <p className="text-xs font-medium text-muted-foreground">{getSellerName(p.user_id)}</p>
-                      <p className="text-[10px] text-muted-foreground/60">{getSellerEmail(p.user_id)}</p>
+                    <td className={premiumTable.td}>
+                      <p className="text-xs font-bold text-foreground">{getSellerName(p.user_id)}</p>
+                      <p className="text-[10px] text-muted-foreground/70">{getSellerEmail(p.user_id)}</p>
                     </td>
-                    <td className="p-3">
-                      <span className={cn("inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold border", CLASSIFICATION_META[cls].ring, CLASSIFICATION_META[cls].color)}>
-                        <ClsIcon className="h-3 w-3" /> {CLASSIFICATION_META[cls].label}
-                      </span>
+                    <td className={premiumTable.td} onClick={e => e.stopPropagation()}>
+                      <ClassPicker value={cls} onChange={(v) => setClassification(p.id, v)} />
                     </td>
-                    <td className="p-3 text-xs font-bold text-primary">{fmtCurrency(Number(p.price))}</td>
-                    <td className="p-3"><span className="text-xs font-bold bg-muted/30 px-2 py-0.5 rounded text-foreground">{stats.completed}/{stats.total}</span></td>
-                    <td className="p-3 text-xs font-bold text-foreground">{fmtCurrency(stats.gross)}</td>
-                    <td className="p-3"><span className={cn("text-xs font-bold", stats.refunded > 0 ? "text-warning" : "text-muted-foreground/50")}>{stats.refunded}</span></td>
-                    <td className="p-3"><span className={cn("text-xs font-bold", stats.chargebacks > 0 ? "text-destructive" : "text-muted-foreground/50")}>{stats.chargebacks}</span></td>
-                    <td className="p-3">{isDeleted ? <span className="px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-destructive/15 text-destructive border border-destructive/30">Apagado</span> : <StatusBadge status={p.status} />}</td>
-                    <td className="p-3" onClick={e => e.stopPropagation()}>
+                    <td className={cn(premiumTable.td, "text-xs font-bold tabular-nums text-primary")}>{fmtCurrency(Number(p.price))}</td>
+                    <td className={premiumTable.td}>
+                      <span className="text-xs font-bold tabular-nums text-foreground">{stats.completed}<span className="text-muted-foreground/60">/{stats.total}</span></span>
+                    </td>
+                    <td className={cn(premiumTable.td, "text-xs font-bold tabular-nums text-foreground")}>{fmtCurrency(stats.gross)}</td>
+                    <td className={premiumTable.td}><span className={cn("text-xs font-bold tabular-nums", stats.refunded > 0 ? "text-warning" : "text-muted-foreground/40")}>{stats.refunded}</span></td>
+                    <td className={premiumTable.td}><span className={cn("text-xs font-bold tabular-nums", stats.chargebacks > 0 ? "text-destructive" : "text-muted-foreground/40")}>{stats.chargebacks}</span></td>
+                    <td className={premiumTable.td}>{isDeleted ? <span className="rounded border border-destructive/30 bg-destructive/15 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-destructive">Apagado</span> : <StatusBadge status={p.status} />}</td>
+                    <td className={premiumTable.td} onClick={e => e.stopPropagation()}>
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
                           <Button variant="ghost" size="sm" className="h-7 w-7 p-0"><MoreHorizontal className="h-4 w-4 text-muted-foreground" /></Button>
@@ -349,13 +357,9 @@ export default function AdminProductsTab({ products, profiles, transactions, fmt
                           <DropdownMenuItem className="gap-2" onClick={() => openXRay(p)}><Eye className="h-3.5 w-3.5" /> Raio-X completo</DropdownMenuItem>
                           {p.checkout_url && <DropdownMenuItem className="gap-2" onClick={() => window.open(p.checkout_url!, "_blank")}><ExternalLink className="h-3.5 w-3.5" /> Abrir Checkout</DropdownMenuItem>}
                           <DropdownMenuSeparator />
-                          <DropdownMenuItem className="gap-2 text-emerald-400" onClick={() => setClassification(p.id, "white")}><ShieldCheck className="h-3.5 w-3.5" /> Classificar White</DropdownMenuItem>
-                          <DropdownMenuItem className="gap-2 text-amber-400" onClick={() => setClassification(p.id, "gray")}><ShieldQuestion className="h-3.5 w-3.5" /> Classificar Gray</DropdownMenuItem>
-                          <DropdownMenuItem className="gap-2 text-red-400" onClick={() => setClassification(p.id, "black")}><ShieldX className="h-3.5 w-3.5" /> Classificar Black</DropdownMenuItem>
-                          <DropdownMenuSeparator />
                           {p.status !== "active" && <DropdownMenuItem className="gap-2 text-primary" onClick={() => handleProductStatus(p.id, "active", p.user_id)}><CheckCircle2 className="h-3.5 w-3.5" /> Aprovar</DropdownMenuItem>}
                           {p.status === "active" && <DropdownMenuItem className="gap-2 text-warning" onClick={() => { setRejectTarget(p); setRejectReason(""); setRejectOpen(true); }}><ShieldAlert className="h-3.5 w-3.5" /> Em Revisão</DropdownMenuItem>}
-                          {p.status !== "inactive" && <DropdownMenuItem className="gap-2 text-orange-400" onClick={() => { setSuspendTarget(p); setSuspendReason(""); setSuspendOpen(true); }}><Ban className="h-3.5 w-3.5" /> Desativar</DropdownMenuItem>}
+                          {p.status !== "inactive" && <DropdownMenuItem className="gap-2 text-orange-500" onClick={() => { setSuspendTarget(p); setSuspendReason(""); setSuspendOpen(true); }}><Ban className="h-3.5 w-3.5" /> Desativar</DropdownMenuItem>}
                           {!isDeleted && <DropdownMenuItem className="gap-2 text-destructive" onClick={() => { setDeleteTarget(p); setDeleteOpen(true); }}><Trash2 className="h-3.5 w-3.5" /> Excluir (soft)</DropdownMenuItem>}
                         </DropdownMenuContent>
                       </DropdownMenu>
@@ -363,11 +367,14 @@ export default function AdminProductsTab({ products, profiles, transactions, fmt
                   </tr>
                 );
               })}
-              {filtered.length === 0 && <tr><td colSpan={10} className="p-10 text-center text-muted-foreground text-xs">Nenhum produto encontrado</td></tr>}
             </tbody>
           </table>
+          {filtered.length === 0 && (
+            <PremiumEmpty icon={Package} title="Nenhum produto encontrado" subtitle="Ajuste filtros ou aguarde novos cadastros" />
+          )}
         </div>
-      </AdminPanel>
+      </PremiumPanel>
+
 
       {/* ═══ RAIO-X DIALOG ═══ */}
       <Dialog open={xrayOpen} onOpenChange={setXrayOpen}>
@@ -393,12 +400,13 @@ export default function AdminProductsTab({ products, profiles, transactions, fmt
                           </DialogTitle>
                         </DialogHeader>
                         <p className="text-sm font-black text-foreground mt-1 truncate">{selectedProduct.name}</p>
-                        <div className="flex items-center gap-3 mt-1.5 flex-wrap">
+                        <div className="flex items-center gap-3 mt-2 flex-wrap">
                           <StatusBadge status={selectedProduct.status} />
-                          <span className={cn("inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold border", CLASSIFICATION_META[cls].ring, CLASSIFICATION_META[cls].color)}>
-                            <ClsIcon className="h-3 w-3" /> {CLASSIFICATION_META[cls].label}
-                          </span>
-                          <span className="text-xs font-bold text-primary">{fmtCurrency(Number(selectedProduct.price))}</span>
+                          <div className="flex items-center gap-1.5">
+                            <span className="text-[9px] font-black uppercase tracking-[0.18em] text-muted-foreground/70">Classificar</span>
+                            <ClassPicker value={cls} onChange={(v) => setClassification(selectedProduct.id, v)} />
+                          </div>
+                          <span className="text-xs font-bold tabular-nums text-primary">{fmtCurrency(Number(selectedProduct.price))}</span>
                           <span className="text-[10px] text-muted-foreground font-mono">{selectedProduct.id.slice(0, 8)}</span>
                         </div>
                       </div>
@@ -593,6 +601,36 @@ export default function AdminProductsTab({ products, profiles, transactions, fmt
           </DialogFooter>
         </DialogContent>
       </Dialog>
+    </div>
+  );
+}
+
+function ClassPicker({ value, onChange }: { value: Classification; onChange: (v: Classification) => void }) {
+  const opts: { v: Classification; label: string; Icon: any; on: string; off: string }[] = [
+    { v: "white", label: "W", Icon: ShieldCheck,    on: "bg-emerald-500/15 text-emerald-500 border-emerald-500/40",  off: "text-muted-foreground/60 hover:text-emerald-500" },
+    { v: "gray",  label: "G", Icon: ShieldQuestion, on: "bg-amber-500/15 text-amber-500 border-amber-500/40",        off: "text-muted-foreground/60 hover:text-amber-500" },
+    { v: "black", label: "B", Icon: ShieldX,        on: "bg-destructive/15 text-destructive border-destructive/40",  off: "text-muted-foreground/60 hover:text-destructive" },
+  ];
+  return (
+    <div className="inline-flex items-center gap-0.5 rounded-lg border border-border bg-muted/20 p-0.5">
+      {opts.map(o => {
+        const active = value === o.v;
+        return (
+          <button
+            key={o.v}
+            type="button"
+            title={`Classificar como ${o.label === "W" ? "White" : o.label === "G" ? "Gray" : "Black"}`}
+            onClick={() => !active && onChange(o.v)}
+            className={cn(
+              "inline-flex h-6 items-center justify-center gap-1 rounded-md border px-2 text-[10px] font-black uppercase tracking-wider transition-all",
+              active ? `${o.on}` : `border-transparent ${o.off}`
+            )}
+          >
+            <o.Icon className="h-3 w-3" />
+            {active && <span>{o.label === "W" ? "White" : o.label === "G" ? "Gray" : "Black"}</span>}
+          </button>
+        );
+      })}
     </div>
   );
 }
