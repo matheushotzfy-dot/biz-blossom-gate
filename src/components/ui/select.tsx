@@ -17,14 +17,14 @@ const SelectTrigger = React.forwardRef<
  <SelectPrimitive.Trigger
  ref={ref}
  className={cn(
- "group/select flex h-11 w-full items-center justify-between gap-2 rounded-xl border border-border/70 bg-card px-4 py-2.5 text-sm font-bold ring-offset-background placeholder:text-muted-foreground/60 transition-all duration-[280ms] ease-[cubic-bezier(0.16,1,0.3,1)] focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/50 disabled:cursor-not-allowed disabled:opacity-50 [&>span]:line-clamp-1 hover:-translate-y-px hover:border-primary/45 hover:bg-primary/[0.035] data-[state=open]:border-primary/55 data-[state=open]:bg-primary/[0.055] data-[state=open]:ring-2 data-[state=open]:ring-primary/15",
+ "group/select flex h-11 w-full appearance-none items-center justify-between gap-2 rounded-xl border border-border/75 bg-card px-4 py-2.5 text-sm font-bold text-foreground ring-offset-background placeholder:text-muted-foreground/60 transition-all duration-300 ease-out focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/55 disabled:cursor-not-allowed disabled:opacity-50 [&>span]:line-clamp-1 hover:-translate-y-px hover:border-primary/50 hover:bg-primary/[0.04] data-[state=open]:border-primary/65 data-[state=open]:bg-primary/[0.065] data-[state=open]:ring-2 data-[state=open]:ring-primary/15",
  className,
  )}
  {...props}
  >
  {children}
  <SelectPrimitive.Icon asChild>
- <ChevronDown className="h-3.5 w-3.5 shrink-0 text-muted-foreground/50 transition-transform duration-300 data-[state=open]:rotate-180" />
+  <ChevronDown className="h-3.5 w-3.5 shrink-0 text-muted-foreground/60 transition-transform duration-300 group-data-[state=open]/select:rotate-180 group-data-[state=open]/select:text-primary" />
  </SelectPrimitive.Icon>
  </SelectPrimitive.Trigger>
 ));
@@ -66,7 +66,7 @@ const SelectContent = React.forwardRef<
  <SelectPrimitive.Content
  ref={ref}
  className={cn(
-  "relative z-50 max-h-[min(var(--radix-select-content-available-height),18rem)] min-w-[8rem] overflow-hidden rounded-xl border border-border/70 bg-popover p-1 text-popover-foreground shadow-none data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-[0.97] data-[state=open]:zoom-in-[0.97] data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 duration-[220ms] ease-[cubic-bezier(0.16,1,0.3,1)]",
+   "relative z-50 max-h-[min(var(--radix-select-content-available-height),18rem)] min-w-[8rem] overflow-hidden rounded-xl border border-border/80 bg-popover/95 p-1 text-popover-foreground shadow-2xl backdrop-blur-md data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-[0.97] data-[state=open]:zoom-in-[0.97] data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 duration-[220ms] ease-[cubic-bezier(0.16,1,0.3,1)]",
  position === "popper" &&
  "data-[side=bottom]:translate-y-1.5 data-[side=left]:-translate-x-1.5 data-[side=right]:translate-x-1.5 data-[side=top]:-translate-y-1.5",
  className,
@@ -74,7 +74,6 @@ const SelectContent = React.forwardRef<
  position={position}
  {...props}
  >
- <SelectScrollUpButton />
  <SelectPrimitive.Viewport
  className={cn(
  "p-1.5",
@@ -84,7 +83,6 @@ const SelectContent = React.forwardRef<
  >
  {children}
  </SelectPrimitive.Viewport>
-  <SelectScrollDownButton />
  </SelectPrimitive.Content>
  </SelectPrimitive.Portal>
 ));

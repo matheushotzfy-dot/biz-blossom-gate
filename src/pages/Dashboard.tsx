@@ -38,7 +38,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Calendar } from "@/components/ui/calendar";
 import { format, differenceInDays } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { cn, isApprovedTransaction } from "@/lib/utils";
+import { calculateTransactionConversions, cn, isApprovedTransaction } from "@/lib/utils";
 
 import type { DateRange } from "react-day-picker";
 import { Seo } from "@/components/Seo";
@@ -158,19 +158,8 @@ export default function Dashboard() {
   const { approved, revenue, conversion, uniqueCustomers, pixConversion, cardConversion, boletoConversion, chargebackRate, pixApprovedCount, pixTotalCount, cardApprovedCount, cardTotalCount, boletoApprovedCount, boletoTotalCount } = useMemo(() => {
     const _approved = filteredTx.filter((t) => isApprovedTransaction(t.status));
     const _revenue = _approved.reduce((acc, t) => acc + Number(t.net_amount), 0);
-    const _conversion = filteredTx.length > 0 ? (_approved.length / filteredTx.length) * 100 : 0;
-    
-    const pixTx = filteredTx.filter(t => t.payment_method === "pix");
-    const pixApproved = pixTx.filter(t => isApprovedTransaction(t.status));
-    const _pixConversion = pixTx.length > 0 ? (pixApproved.length / pixTx.length) * 100 : 0;
-
-    const cardTx = filteredTx.filter(t => t.payment_method === "credit_card" || t.payment_method === "card");
-    const cardApproved = cardTx.filter(t => isApprovedTransaction(t.status));
-    const _cardConversion = cardTx.length > 0 ? (cardApproved.length / cardTx.length) * 100 : 0;
-
-    const boletoTx = filteredTx.filter(t => t.payment_method === "boleto");
-    const boletoApproved = boletoTx.filter(t => isApprovedTransaction(t.status));
-    const _boletoConversion = boletoTx.length > 0 ? (boletoApproved.length / boletoTx.length) * 100 : 0;
+    const conversions = calculateTransactionConversions(filteredTx);
+    const globalPixConversion = calculateTransactionConversions(transactions).pix;
 
     const _chargebackRate = filteredTx.length > 0 ? (filteredTx.filter(t => t.status === "chargeback").length / filteredTx.length) * 100 : 0;
     const _uniqueCustomers = new Set(filteredTx.map(t => t.customer_email).filter(Boolean)).size;
@@ -178,17 +167,17 @@ export default function Dashboard() {
     return {
       approved: _approved,
       revenue: _revenue,
-      conversion: _conversion,
+      conversion: conversions.overall.rate,
       uniqueCustomers: _uniqueCustomers,
-      pixConversion: _pixConversion,
-      cardConversion: _cardConversion,
-      boletoConversion: _boletoConversion,
+      pixConversion: globalPixConversion.rate,
+      cardConversion: conversions.card.rate,
+      boletoConversion: conversions.boleto.rate,
       chargebackRate: _chargebackRate,
-      pixApprovedCount: pixApproved.length, pixTotalCount: pixTx.length,
-      cardApprovedCount: cardApproved.length, cardTotalCount: cardTx.length,
-      boletoApprovedCount: boletoApproved.length, boletoTotalCount: boletoTx.length,
+      pixApprovedCount: globalPixConversion.approved, pixTotalCount: globalPixConversion.total,
+      cardApprovedCount: conversions.card.approved, cardTotalCount: conversions.card.total,
+      boletoApprovedCount: conversions.boleto.approved, boletoTotalCount: conversions.boleto.total,
     };
-  }, [filteredTx]);
+  }, [filteredTx, transactions]);
 
   // Using availableBalance from RPC now
   const balance = availableBalance;
@@ -732,11 +721,11 @@ export default function Dashboard() {
                     content={({ active, payload }) => {
                       if (active && payload && payload.length) {
                         return (
-                          <div className="dashboard-chart-tooltip animate-in fade-in zoom-in-95 duration-200">
-                            <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/70 mb-1">
+                          <div className="dashboard-chart-tooltip rounded-lg backdrop-blur-md shadow-2xl animate-in fade-in zoom-in-95 duration-200">
+                            <p className="tooltip-label mb-1 text-[10px] font-black uppercase tracking-widest">
                               {payload[0].payload.fullLabel || payload[0].payload.name}
                             </p>
-                            <p className="text-[22px] font-black text-primary tracking-tight tabular-nums leading-none">
+                            <p className="tooltip-value text-[22px] font-black tracking-tight tabular-nums leading-none">
                               {fmt(payload[0].value as number)}
                             </p>
                           </div>

@@ -5,7 +5,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { EmptyState, PageSkeleton } from "@/components/PageShell";
-import { isApprovedTransaction } from "@/lib/utils";
+import { calculateTransactionConversions, isApprovedTransaction } from "@/lib/utils";
 
 interface FunnelStage {
  stage: string;
@@ -83,7 +83,10 @@ export default function FunilVendas() {
  },
  ];
 
- const conversionRate = stats.total > 0 ? ((stats.approved / stats.total) * 100).toFixed(1) : "0";
+  const conversionRate = calculateTransactionConversions([
+  ...Array.from({ length: stats.approved }, () => ({ status: "approved" as const })),
+  ...Array.from({ length: Math.max(0, stats.total - stats.approved) }, () => ({ status: "pending" as const })),
+  ]).overall.rate.toFixed(1);
 
  if (loading) {
  return (

@@ -85,12 +85,17 @@ export function StatCard({
   return (
     <div 
       className={cn(
-        "seller-hover-card dashboard-stat-card platform-card group relative flex h-full min-h-[108px] flex-col justify-between overflow-hidden rounded-[16px] border border-border bg-card p-3.5 animate-in fade-in slide-in-from-bottom-2 active:scale-[0.985] sm:min-h-[148px] sm:rounded-2xl sm:p-5",
+        "seller-hover-card dashboard-stat-card platform-card group relative flex h-full min-h-[108px] flex-col justify-between overflow-hidden rounded-[16px] border !border-l-4 border-border !border-l-info bg-card p-3.5 animate-in fade-in slide-in-from-bottom-2 transition-all duration-300 ease-out hover:-translate-y-0.5 active:scale-[0.985] sm:min-h-[148px] sm:rounded-2xl sm:p-5",
         className
       )}
-      style={{ animationDelay: `${delay}ms` }}
+      style={{
+        animationDelay: `${delay}ms`,
+        borderLeftWidth: "4px",
+        borderLeftStyle: "solid",
+        borderLeftColor: "hsl(var(--info))",
+      }}
     >
-      <span className={cn("pointer-events-none absolute left-0 top-3 bottom-3 w-[3px] rounded-r-full opacity-80 transition-all duration-500 group-hover:top-2 group-hover:bottom-2 group-hover:w-1", c.accent)} />
+      <span className={cn("pointer-events-none absolute left-0 top-3 bottom-3 w-[2px] rounded-r-full opacity-70 transition-all duration-500 group-hover:top-2 group-hover:bottom-2 group-hover:w-1", c.accent)} />
       <span className={cn("pointer-events-none absolute inset-y-0 left-0 w-24 opacity-0 transition-opacity duration-500 group-hover:opacity-100", c.glow)} />
       <div className="flex items-start justify-between gap-2 sm:gap-4">
         <div className="min-w-0 flex-1 space-y-1.5 sm:space-y-3">
