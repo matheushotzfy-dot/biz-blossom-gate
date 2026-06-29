@@ -343,7 +343,7 @@ export default function Saques() {
                   </div>
                 ) : (
                   <div className="space-y-2">
-                    {bankAccounts.slice(0, 1).map((acc: any) => (
+                    {bankAccounts.slice(0, 1).map((acc) => (
                       <div key={acc.id} className="p-3 rounded-xl bg-muted/30 border border-border/60 group">
                         <p className="text-[11px] font-black text-foreground truncate uppercase">{acc.bank_name}</p>
                         <p className="text-[9px] font-bold text-muted-foreground/60 uppercase mt-0.5">Ag {acc.agency} · CC {acc.account_number}</p>
