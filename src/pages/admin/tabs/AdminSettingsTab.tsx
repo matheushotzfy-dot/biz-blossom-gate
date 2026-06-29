@@ -14,16 +14,16 @@ import { toast } from "sonner";
 import { logAdminAction } from "@/lib/auditLog";
 import { GlassPanel as AdminPanel, GlassPanelTitle as PanelTitle } from "./AdminOverviewTab";
 import { LinearHero, LinearStat, LinearStatRow } from "@/components/admin/LinearKit";
-import type { Tables } from "@/integrations/supabase/types";
+import type { Tables, Json } from "@/integrations/supabase/types";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
-interface PlatformSetting {
- id: string;
- key: string;
- value: any;
- updated_at: string;
- updated_by: string | null;
-}
+type PlatformSetting = Tables<"platform_settings">;
+type RetentionSetting = Tables<"retention_settings">;
+type NotificationRow = Tables<"notifications">;
+
+type JsonObj = { [key: string]: Json | undefined };
+const asObj = (v: Json | null | undefined): JsonObj =>
+  v && typeof v === "object" && !Array.isArray(v) ? (v as JsonObj) : {};
 
 export default function AdminSettingsTab() {
  const { user } = useAuth();
