@@ -142,10 +142,10 @@ export default function ManagerDashboard() {
 
   const loadNotes = async (sellerId: string) => {
     const { data } = await supabase
-      .from("seller_notes" as any)
+      .from("seller_notes")
       .select("*")
       .eq("seller_user_id", sellerId)
-      .order("created_at", { ascending: false }) as any;
+      .order("created_at", { ascending: false });
     setSellerNotes(prev => ({ ...prev, [sellerId]: (data || []) as SellerNote[] }));
   };
 
