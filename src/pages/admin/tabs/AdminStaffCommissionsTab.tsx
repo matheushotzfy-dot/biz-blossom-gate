@@ -306,9 +306,9 @@ function StaffCommissionPanel({ selected, onClose, onChanged, profiles, onCopy }
   profiles: Tables<"profiles">[];
   onCopy: (text: string, label: string) => void;
 }) {
-  const [ledger, setLedger] = useState<any[]>([]);
-  const [overrides, setOverrides] = useState<any[]>([]);
-  const [payouts, setPayouts] = useState<any[]>([]);
+  const [ledger, setLedger] = useState<Tables<"staff_commissions_ledger">[]>([]);
+  const [overrides, setOverrides] = useState<Tables<"staff_commission_overrides">[]>([]);
+  const [payouts, setPayouts] = useState<Tables<"staff_commission_payouts">[]>([]);
   const [tab, setTab] = useState<"ledger" | "overrides" | "payouts">("ledger");
   const [payoutAmount, setPayoutAmount] = useState("");
   const [payoutMethod, setPayoutMethod] = useState("PIX");
