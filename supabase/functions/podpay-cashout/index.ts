@@ -175,8 +175,14 @@ Deno.serve(async (req) => {
       clearTimeout(timeout);
       if (fetchError instanceof Error && fetchError.name === 'AbortError') {
         console.error('PodPay cashout timeout after 15s');
+        await supabase.from('withdrawals').update({
+          failure_code: 'acquirer_timeout',
+          rejection_reason: 'Timeout (15s) ao contatar a adquirente PodPay',
+          acquirer_response: { error: 'timeout', timeout_ms: 15000 },
+          last_attempt_at: new Date().toISOString(),
+        }).eq('id', withdrawalId);
         return new Response(
-          JSON.stringify({ success: false, error: 'Timeout ao processar saque. Tente novamente.' }),
+          JSON.stringify({ success: false, error: 'Timeout ao processar saque. Tente novamente.', failure_code: 'acquirer_timeout' }),
           { status: 504, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
         );
       }
@@ -185,13 +191,22 @@ Deno.serve(async (req) => {
       clearTimeout(timeout);
     }
 
-    const podpayData = await response.json();
+    const podpayData = await response.json().catch(() => ({}));
 
     if (!response.ok) {
-      console.error('PodPay cashout error:', JSON.stringify({ status: response.status }));
-      // FIX #52: Never leak raw PodPay error messages
+      // Capture full acquirer diagnostics so admin can see exactly why the bank/adquirente refused
+      const acquirerMsg = (podpayData?.message || podpayData?.error || podpayData?.errors?.[0]?.message || `HTTP ${response.status}`) as string;
+      const failureCode = (podpayData?.code || podpayData?.error_code || `podpay_${response.status}`) as string;
+      console.error('PodPay cashout error:', JSON.stringify({ status: response.status, code: failureCode, message: acquirerMsg }));
+      await supabase.from('withdrawals').update({
+        failure_code: failureCode,
+        rejection_reason: acquirerMsg,
+        acquirer_response: { http_status: response.status, body: podpayData },
+        last_attempt_at: new Date().toISOString(),
+      }).eq('id', withdrawalId);
+      // Return safe message to the public, but include code so admin UI can show it
       return new Response(
-        JSON.stringify({ success: false, error: 'Erro ao processar saque. Tente novamente.' }),
+        JSON.stringify({ success: false, error: 'Saque recusado pela adquirente', failure_code: failureCode, acquirer_message: acquirerMsg }),
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
