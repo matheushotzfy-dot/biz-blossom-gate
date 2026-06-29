@@ -8,7 +8,7 @@ import {
   FileCheck2, DollarSign, Network, Lock, Building2, Receipt,
   type LucideIcon,
 } from "lucide-react";
-import type { Tables } from "@/integrations/supabase/types";
+import type { Tables, TablesInsert } from "@/integrations/supabase/types";
 
 type BulkSeller = { user_id: string; full_name: string | null; email: string | null; nickname: string | null; acquirer_id: string | null; account_status: string | null };
 import { Button } from "@/components/ui/button";
@@ -216,7 +216,7 @@ export default function AdminAcquirersTab() {
 
   const handleSave = async () => {
     if (!form.name || !form.slug) { toast.error("Nome e slug obrigatórios"); return; }
-    const payload: Partial<Tables<"acquirers">> = {
+    const payload: TablesInsert<"acquirers"> = {
       name: form.name, slug: form.slug, type: form.type,
       api_endpoint: form.api_endpoint || null, description: form.description || null,
       conversion_rate: form.conversion_rate || 0, seller_visible: form.seller_visible || false,
