@@ -85,7 +85,7 @@ export default function AdminDisputesTab({ type, title, profiles, transactions, 
 
  const handleUpdate = async () => {
  if (!editing || !user) return;
- const update: any = { status: editStatus, admin_notes: editNotes, updated_at: new Date().toISOString() };
+ const update: { status: string; admin_notes: string; updated_at: string; resolved_at?: string; admin_user_id?: string; won_by_seller?: boolean } = { status: editStatus, admin_notes: editNotes, updated_at: new Date().toISOString() };
  if (editStatus === "resolved_seller" || editStatus === "resolved_buyer" || editStatus === "closed") {
  update.resolved_at = new Date().toISOString();
  update.admin_user_id = user.id;
