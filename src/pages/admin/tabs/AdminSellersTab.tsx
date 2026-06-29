@@ -1552,9 +1552,10 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
 
 function InfoRow({ label, value, mono }: { label: string; value?: string | null; mono?: boolean }) {
   return (
-    <div className="rounded-xl border border-border bg-muted/20 p-3">
-      <p className="text-[10px] font-black uppercase tracking-wider text-muted-foreground mb-1">{label}</p>
-      <p className={`text-xs font-medium ${mono ? "font-mono" : ""} ${value ? "text-foreground" : "text-muted-foreground"}`}>{value || "—"}</p>
+    <div className="group/info relative overflow-hidden rounded-xl border border-border bg-card p-3 transition-all duration-200 hover:border-primary/40 hover:-translate-y-px hover:bg-muted/20">
+      <span className="absolute inset-y-0 left-0 w-0.5 bg-primary scale-y-0 group-hover/info:scale-y-100 transition-transform duration-300 origin-top" />
+      <p className="text-[10px] font-black uppercase tracking-wider text-muted-foreground/80 mb-1">{label}</p>
+      <p className={`text-[12px] font-semibold ${mono ? "font-mono" : ""} ${value ? "text-foreground" : "text-muted-foreground/50 italic"}`}>{value || "Não informado"}</p>
     </div>
   );
 }
@@ -1569,13 +1570,23 @@ function MiniKpi({ label, value, tone = "neutral" }: { label: string; value: str
     destructive: "text-destructive",
     neutral: "text-foreground",
   };
+  const barCls: Record<MiniTone, string> = {
+    success: "bg-success",
+    warning: "bg-warning",
+    info: "bg-info",
+    primary: "bg-primary",
+    destructive: "bg-destructive",
+    neutral: "bg-foreground/40",
+  };
   return (
-    <div className="rounded-xl border border-border bg-muted/20 p-4">
-      <p className="text-[10px] font-black uppercase tracking-wider text-muted-foreground">{label}</p>
-      <p className={`font-display text-lg font-black mt-1 tabular-nums ${valueCls[tone]}`}>{value}</p>
+    <div className="group/kpi relative overflow-hidden rounded-xl border border-border bg-card p-4 transition-all duration-200 hover:-translate-y-0.5 hover:border-primary/40 hover:bg-muted/20">
+      <p className="text-[10px] font-black uppercase tracking-wider text-muted-foreground/80">{label}</p>
+      <p className={`font-display text-[19px] font-black mt-1 tabular-nums leading-tight ${valueCls[tone]}`}>{value}</p>
+      <span className={cn("absolute inset-x-0 bottom-0 h-[2px] origin-left scale-x-0 transition-transform duration-300 group-hover/kpi:scale-x-100", barCls[tone])} />
     </div>
   );
 }
+
 
 /* ── SellerKpi: 1px-divider clickable KPI in seller hero strip ── */
 type SellerKpiTone = "neutral" | "primary" | "success" | "warning" | "info" | "destructive";
