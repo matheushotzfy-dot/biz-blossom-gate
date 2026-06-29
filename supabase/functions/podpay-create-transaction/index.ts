@@ -229,6 +229,41 @@ Deno.serve(async (req) => {
         finalPrice = Math.round((Number(product.price) - discountAmount) * 100) / 100;
       }
     }
+
+    // === Order bumps (server-authoritative) ===
+    // Cliente só envia IDs; preço é SEMPRE buscado no banco e validado contra order_bumps ativas do produto.
+    const validBumpIds: string[] = [];
+    let bumpsTotal = 0;
+    if (Array.isArray(selectedBumpIds) && selectedBumpIds.length > 0) {
+      const cleanIds = Array.from(new Set(
+        selectedBumpIds.filter((v: unknown) => typeof v === 'string' && /^[0-9a-f-]{36}$/i.test(v))
+      )) as string[];
+      if (cleanIds.length > 0) {
+        // Confirmar que cada bump_product_id pertence a uma order_bump ativa deste produto
+        const { data: activeBumps } = await supabase
+          .from('order_bumps')
+          .select('bump_product_id')
+          .eq('product_id', product.id)
+          .eq('is_active', true)
+          .in('bump_product_id', cleanIds);
+        const allowedSet = new Set((activeBumps || []).map(b => b.bump_product_id));
+        const allowedIds = cleanIds.filter(id => allowedSet.has(id));
+        if (allowedIds.length > 0) {
+          const { data: bumpProducts } = await supabase
+            .from('products')
+            .select('id, price')
+            .in('id', allowedIds)
+            .eq('status', 'active');
+          for (const bp of bumpProducts || []) {
+            validBumpIds.push(bp.id);
+            bumpsTotal += Number(bp.price);
+          }
+        }
+      }
+    }
+    bumpsTotal = Math.round(bumpsTotal * 100) / 100;
+    finalPrice = Math.round((finalPrice + bumpsTotal) * 100) / 100;
+
     const amountInCents = Math.round(finalPrice * 100);
 
 
