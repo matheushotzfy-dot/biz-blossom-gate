@@ -415,7 +415,7 @@ export default function ProductEditor() {
  if (isNew && !createdProductId) {
  const slug = crypto.randomUUID().slice(0, 8);
  const checkoutUrl = `${window.location.origin}/pay/${slug}`;
- const { data: newProduct, error } = await supabase.from("products").insert({ ...productData, status: "draft", user_id: user.id, checkout_url: checkoutUrl } as any).select("*").maybeSingle();
+ const { data: newProduct, error } = await supabase.from("products").insert({ ...productData, status: "draft", user_id: user.id, checkout_url: checkoutUrl } as TablesInsert<"products">).select("*").maybeSingle();
  if (error || !newProduct) { toast.error("Erro ao criar produto"); return; }
 
  if (deliveryType === "digital") {
