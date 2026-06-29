@@ -171,8 +171,8 @@ export default function Auth() {
  setConfirmNewPassword("");
  setRecoveryEmail("");
  }, 3000);
- } catch (err: any) {
- setRecoveryError(err?.message || "Erro ao alterar senha.");
+ } catch (err: unknown) {
+ setRecoveryError((err instanceof Error && err.message) || "Erro ao alterar senha.");
  } finally {
  setRecoveryLoading(false);
  }
