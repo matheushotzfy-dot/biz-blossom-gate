@@ -3746,6 +3746,15 @@ export type Database = {
       }
     }
     Functions: {
+      admin_broadcast_notification: {
+        Args: {
+          _message: string
+          _target?: string
+          _title: string
+          _type?: string
+        }
+        Returns: number
+      }
       admin_bulk_assign_acquirer: {
         Args: {
           _new_acquirer_id: string
@@ -3758,6 +3767,7 @@ export type Database = {
           success: boolean
         }[]
       }
+      admin_purge_orphan_notifications: { Args: never; Returns: number }
       bump_rate_limit: {
         Args: {
           _bucket_key: string
