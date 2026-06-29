@@ -47,7 +47,7 @@ type Claim = {
   created_at: string;
 };
 
-const STATUS_META: Record<string, { label: string; pill: string; icon: any }> = {
+const STATUS_META: Record<string, { label: string; pill: string; icon: LucideIcon }> = {
   pending:    { label: "Aguardando",    pill: "bg-amber-500/10 text-amber-400 border-amber-500/30",     icon: Clock },
   preparing:  { label: "Preparando",    pill: "bg-blue-500/10 text-blue-400 border-blue-500/30",       icon: Package },
   shipped:    { label: "Postado",       pill: "bg-violet-500/10 text-violet-400 border-violet-500/30", icon: Truck },
