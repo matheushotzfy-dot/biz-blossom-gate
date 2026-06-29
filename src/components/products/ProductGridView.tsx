@@ -65,6 +65,7 @@ const shortenLink = (url: string) => {
 };
 
 export function ProductGridView({ products, copiedId, toolbar, ...handlers }: ProductGridViewProps) {
+  const navigate = useNavigate();
   return (
     <div className="mx-auto w-full max-w-[1280px]">
       {toolbar && <div className="mb-5">{toolbar}</div>}
