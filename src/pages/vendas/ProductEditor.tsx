@@ -194,7 +194,7 @@ export default function ProductEditor() {
  const [downsellDelay, setDownsellDelay] = useState("5");
 
  // Co-produções existentes
- const [coProductionsList, setCoProductionsList] = useState<any[]>([]);
+ const [coProductionsList, setCoProductionsList] = useState<Tables<"co_productions">[]>([]);
  const [invitingCoProducer, setInvitingCoProducer] = useState(false);
 
 
