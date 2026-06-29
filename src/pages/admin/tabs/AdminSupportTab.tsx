@@ -57,17 +57,17 @@ export default function AdminSupportTab({
     if (data) {
       setTickets(data);
       const ids = Array.from(new Set(
-        (data as any[]).map(t => t.admin_user_id).filter(Boolean)
-      )) as string[];
+        data.map((t) => t.admin_user_id).filter((x): x is string => !!x)
+      ));
       if (ids.length > 0) {
         const [profilesRes, rolesRes] = await Promise.all([
           supabase.from("profiles").select("user_id, full_name, email").in("user_id", ids),
           supabase.from("user_roles").select("user_id, role").in("user_id", ids),
         ]);
         const roleByUser: Record<string, string[]> = {};
-        (rolesRes.data || []).forEach((r: any) => { (roleByUser[r.user_id] ||= []).push(r.role); });
+        (rolesRes.data || []).forEach((r) => { (roleByUser[r.user_id] ||= []).push(r.role); });
         const map: Record<string, { name: string; role: string }> = {};
-        (profilesRes.data || []).forEach((p: any) => {
+        (profilesRes.data || []).forEach((p) => {
           const roles = roleByUser[p.user_id] || [];
           const top = roles.includes("admin") ? "ADMIN"
             : roles.includes("manager") ? "GERENTE"
