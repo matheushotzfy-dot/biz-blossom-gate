@@ -49,7 +49,7 @@ export default function CourseAnalytics() {
         .in("lesson_id", ids)
         .eq("completed", true);
       const map = new Map<string, StudentRow>();
-      (prog || []).forEach((p: any) => {
+      (prog || []).forEach((p) => {
         const r = map.get(p.user_id) || { user_id: p.user_id, lessons_completed: 0, last_activity: p.updated_at };
         r.lessons_completed += 1;
         if (p.updated_at > r.last_activity) r.last_activity = p.updated_at;
