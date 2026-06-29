@@ -353,7 +353,7 @@ export default function ApiKeys() {
               <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground mb-2">Secret Key</p>
               <div className="flex items-center gap-3">
                  <code className="flex-1 font-mono text-xs text-foreground font-bold truncate">{newKeyData?.secret_key}</code>
-                 <button onClick={() => { navigator.clipboard.writeText(newKeyData?.secret_key); toast.success("Copiado!"); }} className="p-2 rounded-lg bg-primary/10 text-primary border border-primary/10">
+                 <button onClick={() => { navigator.clipboard.writeText(newKeyData?.secret_key ?? ""); toast.success("Copiado!"); }} className="p-2 rounded-lg bg-primary/10 text-primary border border-primary/10">
                     <Copy size={16} />
                  </button>
               </div>
