@@ -48,7 +48,7 @@ interface SearchResult {
   label: string;
   sub: string;
   href: string;
-  icon: any;
+  icon: LucideIcon;
   type: "product" | "transaction" | "page";
 }
 
