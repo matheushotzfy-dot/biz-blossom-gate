@@ -400,12 +400,13 @@ export default function AdminProductsTab({ products, profiles, transactions, fmt
                           </DialogTitle>
                         </DialogHeader>
                         <p className="text-sm font-black text-foreground mt-1 truncate">{selectedProduct.name}</p>
-                        <div className="flex items-center gap-3 mt-1.5 flex-wrap">
+                        <div className="flex items-center gap-3 mt-2 flex-wrap">
                           <StatusBadge status={selectedProduct.status} />
-                          <span className={cn("inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold border", CLASSIFICATION_META[cls].ring, CLASSIFICATION_META[cls].color)}>
-                            <ClsIcon className="h-3 w-3" /> {CLASSIFICATION_META[cls].label}
-                          </span>
-                          <span className="text-xs font-bold text-primary">{fmtCurrency(Number(selectedProduct.price))}</span>
+                          <div className="flex items-center gap-1.5">
+                            <span className="text-[9px] font-black uppercase tracking-[0.18em] text-muted-foreground/70">Classificar</span>
+                            <ClassPicker value={cls} onChange={(v) => setClassification(selectedProduct.id, v)} />
+                          </div>
+                          <span className="text-xs font-bold tabular-nums text-primary">{fmtCurrency(Number(selectedProduct.price))}</span>
                           <span className="text-[10px] text-muted-foreground font-mono">{selectedProduct.id.slice(0, 8)}</span>
                         </div>
                       </div>
