@@ -677,7 +677,7 @@ function AuditDialog({ row, rows, onClose }: {
       <DialogContent className="max-w-3xl gap-0 overflow-hidden p-0 border-border [&>button]:hidden">
         <DetailDialogHeader
           title={`Auditoria · ${row.full_name || row.email}`}
-          subtitle={row.email ? <span className="inline-flex items-center gap-1"><Mail className="h-3 w-3" />{row.email}</span> as any : undefined}
+          subtitle={row.email || undefined}
           icon={History} onClose={onClose}
         />
         <div className="max-h-[65vh] overflow-y-auto bg-card">
