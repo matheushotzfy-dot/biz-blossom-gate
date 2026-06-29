@@ -5,7 +5,7 @@
  */
 
 import { useState, useRef, useEffect, useCallback } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, useLocation } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import {
@@ -177,30 +177,33 @@ function PreviewField({ label, theme }: { label: string; theme?: string }) {
 export default function CheckoutBuilder() {
  const { productId } = useParams<{ productId: string }>();
  const navigate = useNavigate();
+ const location = useLocation();
  const { user } = useAuth();
- const [product, setProduct] = useState<Tables<"products"> | null>(null);
- const [loading, setLoading] = useState(true);
+ const initialProduct = (location.state as { product?: Tables<"products"> } | null)?.product ?? null;
+ const [product, setProduct] = useState<Tables<"products"> | null>(initialProduct);
+ const [loading, setLoading] = useState(!initialProduct);
  const [activeTab, setActiveTab] = useState<TabId>("visual");
  const [previewMode, setPreviewMode] = useState<"desktop" | "mobile">("desktop");
  const [saving, setSaving] = useState(false);
  const [changeCount, setChangeCount] = useState(0);
  const [lastSavedAt, setLastSavedAt] = useState<Date | null>(null);
  const saveTimeout = useRef<ReturnType<typeof setTimeout>>();
+ const initializedRef = useRef(false);
 
  // Settings state
- const [buttonColor, setButtonColor] = useState("#10b981");
- const [checkoutTheme, setCheckoutTheme] = useState<"gray" | "white" | "dark">("gray");
- const [timerEnabled, setTimerEnabled] = useState(true);
- const [timerMinutes, setTimerMinutes] = useState("15");
- const [socialProof, setSocialProof] = useState(false);
- const [guaranteeEnabled, setGuaranteeEnabled] = useState(true);
- const [pixEnabled, setPixEnabled] = useState(true);
- const [boletoEnabled, setBoletoEnabled] = useState(true);
- const [creditCardEnabled, setCreditCardEnabled] = useState(true);
- const [addressRequired, setAddressRequired] = useState(false);
- const [emailConfirm, setEmailConfirm] = useState(true);
- const [bannerDesktopPreview, setBannerDesktopPreview] = useState("");
- const [bannerMobilePreview, setBannerMobilePreview] = useState("");
+ const [buttonColor, setButtonColor] = useState(initialProduct?.checkout_button_color || "#10b981");
+ const [checkoutTheme, setCheckoutTheme] = useState<"gray" | "white" | "dark">((initialProduct as any)?.checkout_theme === "white" ? "white" : (initialProduct as any)?.checkout_theme === "dark" ? "dark" : "gray");
+ const [timerEnabled, setTimerEnabled] = useState(initialProduct?.checkout_timer_enabled ?? true);
+ const [timerMinutes, setTimerMinutes] = useState(String(initialProduct?.checkout_timer_minutes ?? 15));
+ const [socialProof, setSocialProof] = useState(initialProduct?.checkout_social_proof ?? false);
+ const [guaranteeEnabled, setGuaranteeEnabled] = useState(initialProduct?.checkout_guarantee_enabled ?? true);
+ const [pixEnabled, setPixEnabled] = useState(initialProduct?.checkout_pix_enabled ?? true);
+ const [boletoEnabled, setBoletoEnabled] = useState(initialProduct?.checkout_boleto_enabled ?? true);
+ const [creditCardEnabled, setCreditCardEnabled] = useState(initialProduct?.checkout_credit_card_enabled ?? true);
+ const [addressRequired, setAddressRequired] = useState(initialProduct?.checkout_address_required ?? false);
+ const [emailConfirm, setEmailConfirm] = useState(initialProduct?.checkout_email_confirm ?? true);
+ const [bannerDesktopPreview, setBannerDesktopPreview] = useState(initialProduct?.checkout_banner_desktop_url || "");
+ const [bannerMobilePreview, setBannerMobilePreview] = useState(initialProduct?.checkout_banner_mobile_url || "");
  const [bannerDesktopFile, setBannerDesktopFile] = useState<File | null>(null);
  const [bannerMobileFile, setBannerMobileFile] = useState<File | null>(null);
  const desktopRef = useRef<HTMLInputElement>(null);
@@ -264,7 +267,7 @@ export default function CheckoutBuilder() {
  // Load product
  useEffect(() => {
  if (!user?.id || !productId) return;
- setLoading(true);
+ if (!product) setLoading(true);
  supabase.from("products").select("*").eq("id", productId).eq("user_id", user.id).maybeSingle()
  .then(({ data, error }) => {
  if (error || !data) { toast.error("Produto não encontrado"); navigate("/vendas/produtos"); return; }
@@ -339,6 +342,7 @@ export default function CheckoutBuilder() {
 
  useEffect(() => {
  if (loading || !product) return;
+  if (!initializedRef.current) { initializedRef.current = true; return; }
  setChangeCount(prev => prev + 1);
  if (saveTimeout.current) clearTimeout(saveTimeout.current);
  saveTimeout.current = setTimeout(autoSave, 1200);

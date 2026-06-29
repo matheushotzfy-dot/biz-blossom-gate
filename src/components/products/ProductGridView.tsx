@@ -90,41 +90,41 @@ export function ProductGridView({ products, copiedId, toolbar, ...handlers }: Pr
             <article
               key={product.id}
               className={cn(
-                "group relative flex flex-col overflow-hidden rounded-[24px] border border-border/40 bg-card/60 backdrop-blur-sm",
+                "group relative flex flex-col overflow-hidden rounded-[18px] border border-border/60 bg-card",
                 "transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)]",
-                "hover:border-primary/30 hover:shadow-[0_20px_40px_-12px_rgba(0,0,0,0.12)] hover:-translate-y-1",
+                "hover:-translate-y-1 hover:border-primary/45 hover:bg-card-elevated active:translate-y-0 active:scale-[0.995]",
                 isInactive && "border-destructive/30",
                 isPending && "border-warning/30",
                 isDraft && "border-dashed border-border/60",
               )}
             >
+              <span className="pointer-events-none absolute inset-x-5 top-0 z-20 h-px origin-left scale-x-0 bg-primary/70 transition-transform duration-500 group-hover:scale-x-100" />
               {/* Top Image Section */}
-              <div className="relative aspect-[16/10] w-full overflow-hidden bg-card-inset after:pointer-events-none after:absolute after:inset-x-0 after:bottom-[-1px] after:z-[5] after:h-[3px] after:bg-card">
+              <div className="relative aspect-[16/10] w-full overflow-hidden border-b border-border/40 bg-card-inset">
                 {product.image_url ? (
                   <>
                     <img
                       src={product.image_url}
                       alt={product.name}
                       loading="lazy"
-                      className="h-full w-full object-cover transition-transform duration-1000 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:scale-110"
+                      className="h-full w-full object-cover transition-transform duration-1000 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:scale-105"
                     />
-                    <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent opacity-60 transition-opacity duration-500 group-hover:opacity-40" />
-                    <div className="pointer-events-none absolute inset-0 ring-1 ring-inset ring-white/10" />
+                    <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-background/80 via-background/10 to-transparent opacity-70 transition-opacity duration-500 group-hover:opacity-45" />
                     
-                    <div className="absolute inset-x-0 bottom-0 z-[2] flex items-end justify-between p-4 backdrop-blur-md bg-black/40">
+                    <div className="absolute inset-x-0 bottom-0 z-[2] flex items-end justify-between p-4">
                       <div>
-                        <p className="text-[9px] font-black uppercase tracking-[0.2em] text-white/60">Valor</p>
-                        <span className="mt-0.5 block font-display text-2xl font-black leading-none tracking-tight text-white tabular-nums">
+                        <p className="text-[9px] font-black uppercase tracking-[0.2em] text-foreground/55">Valor</p>
+                        <span className="mt-0.5 block font-display text-2xl font-black leading-none tracking-tight text-foreground tabular-nums">
                           {formatCurrency(Number(product.price))}
                         </span>
                       </div>
-                      <span className="rounded-full bg-white/10 border border-white/20 px-3 py-1 text-[10px] font-bold text-white uppercase tracking-wider">{deliveryLabel}</span>
+                      <span className="rounded-full border border-border/70 bg-card/95 px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-foreground">{deliveryLabel}</span>
                     </div>
                   </>
                 ) : (
                   <div className={cn("relative flex h-full w-full items-center justify-between px-6 py-4", surface)}>
-                    <div className="flex h-14 w-14 items-center justify-center rounded-2xl border border-border/60 bg-card/80 backdrop-blur-xl shadow-lg">
-                      <BookOpen className="h-6 w-6 text-primary/60" strokeWidth={1.5} />
+                    <div className="flex h-14 w-14 items-center justify-center rounded-2xl border border-border/60 bg-card transition-all duration-500 group-hover:scale-105 group-hover:border-primary/35 group-hover:text-primary">
+                      <BookOpen className="h-6 w-6 text-primary/70" strokeWidth={1.5} />
                     </div>
                     <div className="min-w-0 flex-1 px-4 text-right">
                       <p className="text-[9px] font-black uppercase tracking-[0.2em] text-muted-foreground/40">Valor de Venda</p>
@@ -226,18 +226,18 @@ export function ProductGridView({ products, copiedId, toolbar, ...handlers }: Pr
                       <button
                         type="button"
                         onClick={(e) => { e.stopPropagation(); handlers.onEditProduct(product); }}
-                        className="flex h-12 items-center justify-center gap-2 rounded-xl bg-primary text-[12.5px] font-black uppercase tracking-wider text-primary-foreground transition-all hover:bg-primary/90 hover:-translate-y-px"
+                        className="group/continue flex h-12 items-center justify-center gap-2 rounded-xl bg-primary text-[12.5px] font-black uppercase tracking-wider text-primary-foreground transition-all duration-300 hover:-translate-y-px hover:bg-primary/90 active:translate-y-0 active:scale-[0.98]"
                       >
-                        <Pencil className="h-4 w-4" strokeWidth={2.5} />
+                        <Pencil className="h-4 w-4 transition-transform duration-300 group-hover/continue:-rotate-6 group-hover/continue:scale-110" strokeWidth={2.5} />
                         Continuar
                       </button>
                       <button
                         type="button"
                         onClick={(e) => { e.stopPropagation(); handlers.onDeleteProduct(product); }}
-                        className="flex h-12 items-center justify-center gap-2 rounded-xl border border-destructive/40 bg-destructive/[0.06] px-4 text-[12px] font-black uppercase tracking-wider text-destructive transition-all hover:bg-destructive hover:text-destructive-foreground"
+                        className="group/delete flex h-12 items-center justify-center gap-2 rounded-xl border border-destructive/40 bg-destructive/[0.06] px-4 text-[12px] font-black uppercase tracking-wider text-destructive transition-all duration-300 hover:-translate-y-px hover:bg-destructive hover:text-destructive-foreground active:translate-y-0 active:scale-[0.98]"
                         title="Excluir rascunho"
                       >
-                        <Trash2 className="h-4 w-4" strokeWidth={2.5} />
+                        <Trash2 className="h-4 w-4 transition-transform duration-300 group-hover/delete:scale-110" strokeWidth={2.5} />
                         Excluir
                       </button>
                     </div>
@@ -246,14 +246,14 @@ export function ProductGridView({ products, copiedId, toolbar, ...handlers }: Pr
                   <>
                     {/* Quick Info Grid */}
                     <div className="grid grid-cols-2 gap-2">
-                      <div className="rounded-xl border border-border/20 bg-muted/5 p-3 transition-colors group-hover:bg-muted/10">
+                      <div className="rounded-xl border border-border/40 bg-card-inset p-3 transition-all duration-300 group-hover:-translate-y-0.5 group-hover:border-primary/25 group-hover:bg-secondary/70">
                         <p className="text-[9px] font-black uppercase tracking-widest text-muted-foreground/30">Checkout</p>
                         <div className="mt-1 flex items-center gap-1.5">
                            <Check className={cn("h-3 w-3", product.checkout_url ? "text-success" : "text-muted-foreground/30")} />
                            <p className="text-[12px] font-bold text-foreground/80">{product.checkout_url ? "Publicado" : "Pendente"}</p>
                         </div>
                       </div>
-                      <div className="rounded-xl border border-border/20 bg-muted/5 p-3 transition-colors group-hover:bg-muted/10">
+                      <div className="rounded-xl border border-border/40 bg-card-inset p-3 transition-all duration-300 group-hover:-translate-y-0.5 group-hover:border-primary/25 group-hover:bg-secondary/70">
                         <p className="text-[9px] font-black uppercase tracking-widest text-muted-foreground/30">Layout</p>
                         <div className="mt-1 flex items-center gap-1.5">
                            <Palette className="h-3 w-3 text-primary/60" />
@@ -267,7 +267,7 @@ export function ProductGridView({ products, copiedId, toolbar, ...handlers }: Pr
                       <button
                         type="button"
                         onClick={(e) => { e.stopPropagation(); handlers.onCopyLink(product); }}
-                        className="group/link flex items-center gap-2.5 rounded-xl border border-dashed border-border/40 bg-muted/5 px-3 py-2.5 text-left transition-all hover:border-primary/40 hover:bg-primary/[0.02]"
+                        className="group/link flex items-center gap-2.5 rounded-xl border border-dashed border-border/50 bg-card-inset px-3 py-2.5 text-left transition-all duration-300 hover:-translate-y-0.5 hover:border-primary/40 hover:bg-secondary/70 active:translate-y-0 active:scale-[0.99]"
                       >
                         <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-lg bg-primary/10 transition-transform group-hover/link:scale-110">
                           <Link2 className="h-3.5 w-3.5 text-primary" strokeWidth={2.5} />
@@ -282,21 +282,22 @@ export function ProductGridView({ products, copiedId, toolbar, ...handlers }: Pr
                     )}
 
                     {/* Action Bar — Clean premium: primary CTA + tactile icon cluster */}
-                    <div className="mt-auto flex items-stretch gap-1.5 pt-1">
+                     <div className="mt-auto flex items-stretch gap-1.5 pt-1">
                       <button
                         type="button"
                         onClick={(e) => { e.stopPropagation(); handlers.onEditProduct(product); }}
-                        className="group/edit relative flex h-10 flex-1 items-center justify-center gap-2 rounded-lg border border-primary/25 bg-primary/[0.05] text-[11.5px] font-bold tracking-tight text-foreground transition-all duration-200 hover:border-primary/50 hover:bg-primary/[0.10] hover:text-primary hover:-translate-y-px active:translate-y-0 active:scale-[0.99]"
+                         className="group/edit relative flex h-10 flex-1 items-center justify-center gap-2 overflow-hidden rounded-lg border border-primary/25 bg-primary/[0.06] text-[11.5px] font-bold tracking-tight text-foreground transition-all duration-300 hover:-translate-y-px hover:border-primary/55 hover:bg-primary/[0.12] hover:text-primary active:translate-y-0 active:scale-[0.99]"
                       >
+                        <span className="pointer-events-none absolute inset-y-2 left-0 w-[3px] rounded-r-full bg-primary opacity-0 transition-opacity duration-300 group-hover/edit:opacity-100" />
                         <Pencil className="h-3.5 w-3.5 text-primary/80 transition-all duration-200 group-hover/edit:text-primary group-hover/edit:scale-110 group-hover/edit:-rotate-6" strokeWidth={2.25} />
                         <span className="font-display">Editar produto</span>
                       </button>
 
-                      <div className="flex items-stretch rounded-lg border border-border/40 bg-card divide-x divide-border/40 overflow-hidden">
+                      <div className="flex items-stretch overflow-hidden rounded-lg border border-border/50 bg-card divide-x divide-border/40">
                         <button
                           type="button"
-                          onClick={(e) => { e.stopPropagation(); navigate(`/vendas/produtos/${product.id}/checkout-builder`); }}
-                          className="group/icn flex h-10 w-10 items-center justify-center text-muted-foreground/70 transition-all duration-200 hover:bg-primary/[0.08] hover:text-primary"
+                          onClick={(e) => { e.stopPropagation(); navigate(`/vendas/produtos/${product.id}/checkout-builder`, { state: { product } }); }}
+                          className="group/icn flex h-10 w-10 items-center justify-center text-muted-foreground/70 transition-all duration-300 hover:bg-primary/[0.10] hover:text-primary active:scale-95"
                           title="Checkout builder"
                           aria-label="Checkout builder"
                         >
@@ -305,7 +306,7 @@ export function ProductGridView({ products, copiedId, toolbar, ...handlers }: Pr
                         <button
                           type="button"
                           onClick={(e) => { e.stopPropagation(); handlers.onOpenPixels(product); }}
-                          className="group/icn flex h-10 w-10 items-center justify-center text-muted-foreground/70 transition-all duration-200 hover:bg-primary/[0.08] hover:text-primary"
+                          className="group/icn flex h-10 w-10 items-center justify-center text-muted-foreground/70 transition-all duration-300 hover:bg-primary/[0.10] hover:text-primary active:scale-95"
                           title="Pixels & tracking"
                           aria-label="Pixels & tracking"
                         >
@@ -315,7 +316,7 @@ export function ProductGridView({ products, copiedId, toolbar, ...handlers }: Pr
                           <button
                             type="button"
                             onClick={(e) => { e.stopPropagation(); handlers.onOpenCheckout(product); }}
-                            className="group/icn flex h-10 w-10 items-center justify-center text-muted-foreground/70 transition-all duration-200 hover:bg-primary/[0.08] hover:text-primary"
+                             className="group/icn flex h-10 w-10 items-center justify-center text-muted-foreground/70 transition-all duration-300 hover:bg-primary/[0.10] hover:text-primary active:scale-95"
                             title="Abrir checkout"
                             aria-label="Abrir checkout"
                           >
