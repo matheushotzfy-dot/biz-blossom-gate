@@ -4,6 +4,7 @@ import {
   AlertTriangle, Search, CheckCircle2, Clock, Bug, RefreshCw, XCircle,
   Trash2, ShoppingCart, CreditCard, Webhook, KeyRound, Banknote, Server,
   Database, Code2, Eye, Copy, Layers, Filter, FileDown,
+  type LucideIcon,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/ui/dialog";
