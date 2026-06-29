@@ -127,12 +127,12 @@ export default function AdminRiskComplianceTab({ profiles, transactions, fmtCurr
  const { error } = await supabase.from("velocity_rules").update({ is_enabled: !rule.is_enabled, updated_by: user?.id }).eq("id", rule.id);
  if (error) { toast.error("Erro"); return; }
  toast.success(`Regra ${!rule.is_enabled ? "ativada" : "desativada"}`);
- await logAdminAction("toggle_velocity_rule", "velocity_rules", rule.id, { rule_name: rule.rule_name, enabled: !rule.is_enabled } as any);
+ await logAdminAction("toggle_velocity_rule", "velocity_rules", rule.id, { rule_name: rule.rule_name, enabled: !rule.is_enabled });
  setVelocityRules(prev => prev.map(r => r.id === rule.id ? { ...r, is_enabled: !r.is_enabled } : r));
  };
 
  const handleUpdateRule = async (rule: VelocityRule, field: string, value: number) => {
- const { error } = await supabase.from("velocity_rules").update({ [field]: value, updated_by: user?.id } as any).eq("id", rule.id);
+ const { error } = await supabase.from("velocity_rules").update({ [field]: value, updated_by: user?.id }).eq("id", rule.id);
  if (error) { toast.error("Erro"); return; }
  toast.success("Regra atualizada");
  setVelocityRules(prev => prev.map(r => r.id === rule.id ? { ...r, [field]: value } : r));
