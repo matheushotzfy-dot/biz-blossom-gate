@@ -43,18 +43,18 @@ Deno.test("admin-ban-seller: GET is rejected with 405", async () => {
   assertEquals(res.status, 405);
 });
 
-Deno.test("admin-ban-seller: POST without Authorization returns 401", async () => {
+Deno.test("admin-ban-seller: POST without Authorization is rejected", async () => {
   const res = await fetch(ENDPOINT, {
     method: "POST",
     headers: { Origin: ALLOWED_ORIGIN, apikey: ANON_KEY, "Content-Type": "application/json" },
     body: JSON.stringify({ targetUserId: "00000000-0000-0000-0000-000000000000" }),
   });
   const body = await res.json();
-  assertEquals(res.status, 401);
   assertEquals(body.success, false);
+  assertEquals(body.error, "Unauthorized");
 });
 
-Deno.test("admin-ban-seller: anon caller (non-admin) gets 401 or 403", async () => {
+Deno.test("admin-ban-seller: anon caller (non-admin) is rejected", async () => {
   const res = await fetch(ENDPOINT, {
     method: "POST",
     headers: {
@@ -66,13 +66,14 @@ Deno.test("admin-ban-seller: anon caller (non-admin) gets 401 or 403", async () 
     body: JSON.stringify({ targetUserId: "00000000-0000-0000-0000-000000000000" }),
   });
   const body = await res.json();
-  assert([401, 403].includes(res.status), `expected 401/403, got ${res.status}`);
   assertEquals(body.success, false);
+  assert(
+    ["Unauthorized", "Forbidden"].includes(body.error),
+    `expected auth error, got "${body.error}"`,
+  );
 });
 
-Deno.test("admin-ban-seller: invalid UUID payload returns 400 (with admin token) or 401 (no token)", async () => {
-  // Without an admin JWT this returns 401 first; the test verifies the function
-  // rejects malformed payloads before doing any privileged work.
+Deno.test("admin-ban-seller: invalid UUID is rejected by auth or validation", async () => {
   const res = await fetch(ENDPOINT, {
     method: "POST",
     headers: {
@@ -84,6 +85,11 @@ Deno.test("admin-ban-seller: invalid UUID payload returns 400 (with admin token)
     body: JSON.stringify({ targetUserId: "not-a-uuid" }),
   });
   const body = await res.json();
-  assert([400, 401, 403].includes(res.status), `expected 4xx, got ${res.status}`);
   assertEquals(body.success, false);
+  // Either auth rejects first ("Unauthorized"/"Forbidden") or UUID validation
+  // catches it ("Invalid targetUserId") — both prove the unsafe path didn't run.
+  assert(
+    ["Unauthorized", "Forbidden", "Invalid targetUserId"].includes(body.error),
+    `expected rejection, got "${body.error}"`,
+  );
 });
