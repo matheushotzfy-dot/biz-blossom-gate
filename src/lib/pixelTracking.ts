@@ -158,7 +158,15 @@ function loadKwaiPixel(pixelId: string) {
 
   const w = window as PixelWindow;
   if (!w.kwaiq) {
-    const kwaiq: any = (w.kwaiq = w.kwaiq || { callMethod: undefined, queue: [] });
+    interface KwaiqShim {
+      callMethod?: (...args: unknown[]) => void;
+      queue: unknown[][];
+      load: (id: string) => void;
+      page: () => void;
+      track: (...args: unknown[]) => void;
+      _pixelId?: string;
+    }
+    const kwaiq = (w.kwaiq = (w.kwaiq || { callMethod: undefined, queue: [] }) as unknown as KwaiqShim);
     kwaiq.load = function (id: string) {
       kwaiq._pixelId = id;
       const s = document.createElement('script');
@@ -169,7 +177,7 @@ function loadKwaiPixel(pixelId: string) {
     kwaiq.page = function () { kwaiq.queue.push(['page']); };
     kwaiq.track = function (...args: unknown[]) { kwaiq.queue.push(['track', ...args]); };
   }
-  w.kwaiq.load(safeId);
+  (w.kwaiq as { load: (id: string) => void }).load(safeId);
 }
 
 // ============ EVENT MAPPERS ============
