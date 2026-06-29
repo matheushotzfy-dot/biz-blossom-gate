@@ -158,7 +158,7 @@ export default function AdminTopSellersTab({ fmtCurrency }: Props) {
                   accentBorderHover
                 )}
               >
-                <span className={cn("absolute inset-x-0 top-0 h-[2px]", `bg-${accent}`)} />
+                <span className={cn("absolute inset-x-0 top-0 h-[2px]", accentBg)} />
                 <div className="flex items-start justify-between">
                   <div className="flex items-center gap-3">
                     <div className={cn("flex h-11 w-11 items-center justify-center rounded-lg border border-border bg-muted/30 text-base font-black text-foreground transition-colors duration-200 group-hover:border-current", accentText)}>
@@ -198,7 +198,7 @@ export default function AdminTopSellersTab({ fmtCurrency }: Props) {
                     <span>Share TPV</span><span className={accentText}>{share.toFixed(1)}%</span>
                   </div>
                   <div className="h-1.5 overflow-hidden rounded-full bg-muted">
-                    <div className={cn("h-full rounded-full transition-all duration-700", `bg-${accent}`)} style={{ width: `${Math.max(share, 2)}%` }} />
+                    <div className={cn("h-full rounded-full transition-all duration-700", accentBg)} style={{ width: `${Math.max(share, 2)}%` }} />
                   </div>
                 </div>
               </button>
