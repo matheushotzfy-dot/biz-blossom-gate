@@ -330,7 +330,7 @@ export default function PublicCheckout() {
  if (!cancelled && bumpProducts) {
  setOrderBumps(bumpsRes.data.map(b => ({
  id: b.id, bump_product_id: b.bump_product_id,
- bump_product: bumpProducts.find(p => p.id === b.bump_product_id) as any,
+ bump_product: bumpProducts.find(p => p.id === b.bump_product_id) as OrderBump["bump_product"],
  })).filter(b => b.bump_product));
  }
  }
