@@ -45,7 +45,7 @@ export default function Antecipacao() {
     let totalOriginal = 0;
     let totalFee = 0;
     let count = 0;
-    stats.eligible.forEach((tx: any) => {
+    stats.eligible.forEach((tx) => {
       if (!tx.retained_until) return;
       const daysRemaining = Math.max(0, Math.ceil((new Date(tx.retained_until).getTime() - now.getTime()) / (1000 * 60 * 60 * 24)));
       if (daysRemaining <= antecipationDays) {
