@@ -6,6 +6,7 @@ import {
   CreditCard, Package, Activity, Percent, ShieldAlert, RotateCcw, Lock,
   Eye, Radio, AlertCircle, UserCheck, Flame, Wallet, CalendarDays,
   Clock3, Hourglass, UserPlus, ArrowUpRight,
+  type LucideIcon,
 } from "lucide-react";
 import {
   AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
@@ -85,7 +86,13 @@ function Pill({ tone = "neutral", children, className }: {
 }
 
 /* Tooltip — solid card, rounded, no glow */
-function ChartTip({ active, payload, label, fmtCurrency }: any) {
+type ChartTipProps = {
+  active?: boolean;
+  payload?: Array<{ name?: string; value?: number | string; color?: string }>;
+  label?: string | number;
+  fmtCurrency: (n: number) => string;
+};
+function ChartTip({ active, payload, label, fmtCurrency }: ChartTipProps) {
   if (!active || !payload?.length) return null;
   return (
     <div className="rounded-xl border border-border/60 bg-card px-3 py-2 shadow-sm pointer-events-none">
@@ -93,7 +100,7 @@ function ChartTip({ active, payload, label, fmtCurrency }: any) {
         <p className="mb-1 text-[10px] font-black uppercase tracking-[0.18em] text-muted-foreground/70">{label}</p>
       )}
       <div className="space-y-1">
-        {payload.map((p: any, i: number) => (
+        {payload.map((p, i) => (
           <div key={i} className="flex items-center justify-between gap-4 text-[11px]">
             <span className="flex items-center gap-1.5">
               <span className="h-2 w-2 rounded-full" style={{ background: p.color }} />
@@ -121,13 +128,13 @@ export default function AdminOverviewTab({
   const [disputes, setDisputes] = useState<Dispute[]>([]);
   const [realtimeTx, setRealtimeTx] = useState<Tables<"transactions">[]>([]);
   const [chartPeriod, setChartPeriod] = useState<"7d" | "30d">("7d");
-  const [fraudLogs, setFraudLogs] = useState<any[]>([]);
+  const [fraudLogs, setFraudLogs] = useState<Tables<"fraud_logs">[]>([]);
   const [kycReview, setKycReview] = useState<Tables<"profiles"> | null>(null);
 
   const handleKycApprove = async (userId: string) => {
     const { error } = await supabase.from("profiles").update({
       account_status: "approved", kyc_rejection_reason: null,
-    } as any).eq("user_id", userId);
+    }).eq("user_id", userId);
     if (error) { toast.error("Erro ao aprovar KYC"); return; }
     toast.success("KYC aprovado!");
     onUserStatus(userId, "approved");
@@ -136,7 +143,7 @@ export default function AdminOverviewTab({
   const handleKycReject = async (userId: string, reason: string) => {
     const { error } = await supabase.from("profiles").update({
       account_status: "rejected", kyc_rejection_reason: reason,
-    } as any).eq("user_id", userId);
+    }).eq("user_id", userId);
     if (error) { toast.error("Erro ao recusar KYC"); return; }
     toast.success("KYC recusado");
     onUserStatus(userId, "rejected");
@@ -160,7 +167,7 @@ export default function AdminOverviewTab({
         setRealtimeTx(prev => [payload.new as Tables<"transactions">, ...prev].slice(0, 25));
       })
       .on("postgres_changes", { event: "UPDATE", schema: "public", table: "transactions" }, (payload) => {
-        setRealtimeTx(prev => prev.map(t => t.id === (payload.new as any).id ? payload.new as Tables<"transactions"> : t));
+        setRealtimeTx(prev => prev.map(t => t.id === (payload.new as Tables<"transactions">).id ? payload.new as Tables<"transactions"> : t));
       })
       .subscribe();
     return () => { supabase.removeChannel(channel); };
@@ -702,7 +709,7 @@ export default function AdminOverviewTab({
       <PremiumPanel title="Bloqueios Anti-Fraude" icon={ShieldAlert}>
         {fraudLogs.length > 0 ? (
           <div className="grid max-h-[320px] grid-cols-1 gap-2.5 overflow-y-auto md:grid-cols-2">
-            {fraudLogs.slice(0, 20).map((f: any) => (
+            {fraudLogs.slice(0, 20).map((f) => (
               <div key={f.id} className="rounded-xl border border-destructive/20 bg-destructive/5 px-3.5 py-2.5">
                 <div className="mb-1.5 flex items-center gap-2">
                   <span className="h-1.5 w-1.5 rounded-full bg-destructive" />
@@ -777,7 +784,7 @@ function HeroBigStat({ label, value, sub, tone, wide }: {
 }
 
 function PulseStat({ icon: Icon, label, value, tone }: {
-  icon: any; label: string; value: string; tone: Tone;
+  icon: LucideIcon; label: string; value: string; tone: Tone;
 }) {
   return (
     <div className="flex items-center justify-between gap-2 rounded-lg border border-border/60 bg-muted/20 px-3 py-2">
@@ -800,10 +807,10 @@ function CommandMini({ label, value }: { label: string; value: string }) {
 }
 
 function DashboardKpi({ icon: Icon, label, value, sub, tone, onClick }: {
-  icon: any; label: string; value: string; sub?: string; tone: Tone; onClick?: () => void;
+  icon: LucideIcon; label: string; value: string; sub?: string; tone: Tone; onClick?: () => void;
 }) {
   const isInteractive = typeof onClick === "function";
-  const Tag: any = isInteractive ? "button" : "div";
+  const Tag = (isInteractive ? "button" : "div") as React.ElementType;
   return (
     <Tag
       type={isInteractive ? "button" : undefined}

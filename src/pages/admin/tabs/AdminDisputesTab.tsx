@@ -8,11 +8,13 @@ import { StatusBadge } from "@/components/StatusBadge";
 import { toast } from "sonner";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import type { Tables } from "@/integrations/supabase/types";
+import type { Tables, Json } from "@/integrations/supabase/types";
 import { GlassPanel as AdminPanel, GlassPanelTitle as PanelTitle } from "./AdminOverviewTab";
 import { FinanceiroHero } from "@/components/financeiro/FinanceiroHero";
 import { PremiumMetric, PremiumMetricGrid } from "./AdminPremium";
 import { logAdminAction } from "@/lib/auditLog";
+
+interface EvidenceUrl { path: string; name: string; uploaded_at: string; }
 
 interface Dispute {
  id: string; transaction_id: string | null; seller_user_id: string;
@@ -20,7 +22,7 @@ interface Dispute {
  type: string; status: string; reason: string | null; admin_notes: string | null;
  amount: number; resolved_at: string | null; admin_user_id: string | null;
  created_at: string; updated_at: string;
- evidence_urls?: any[]; won_by_seller?: boolean | null;
+ evidence_urls?: EvidenceUrl[]; won_by_seller?: boolean | null;
 }
 
 interface Props {
@@ -51,7 +53,7 @@ export default function AdminDisputesTab({ type, title, profiles, transactions, 
         .order("created_at", { ascending: false })
         .limit(500);
       if (error) throw error;
-      setDisputes((data || []) as any);
+      setDisputes((data || []) as unknown as Dispute[]);
     } catch (e) {
       console.error("[AdminDisputesTab] load error:", e);
       toast.error("Erro ao carregar disputas");
@@ -72,7 +74,7 @@ export default function AdminDisputesTab({ type, title, profiles, transactions, 
       amount: Number(form.amount),
       transaction_id: form.transaction_id || null,
       admin_user_id: user.id,
-    } as any).select("id").maybeSingle();
+    }).select("id").maybeSingle();
     if (error) { toast.error("Erro ao criar"); return; }
     toast.success("Disputa criada!");
     await logAdminAction(`create_${type}`, "dispute", inserted?.id ?? form.seller_user_id, { amount: form.amount, reason: form.reason, seller_user_id: form.seller_user_id });
@@ -83,7 +85,7 @@ export default function AdminDisputesTab({ type, title, profiles, transactions, 
 
  const handleUpdate = async () => {
  if (!editing || !user) return;
- const update: any = { status: editStatus, admin_notes: editNotes, updated_at: new Date().toISOString() };
+ const update: { status: string; admin_notes: string; updated_at: string; resolved_at?: string; admin_user_id?: string; won_by_seller?: boolean } = { status: editStatus, admin_notes: editNotes, updated_at: new Date().toISOString() };
  if (editStatus === "resolved_seller" || editStatus === "resolved_buyer" || editStatus === "closed") {
  update.resolved_at = new Date().toISOString();
  update.admin_user_id = user.id;
@@ -103,11 +105,11 @@ export default function AdminDisputesTab({ type, title, profiles, transactions, 
    const path = `${editing.id}/${Date.now()}-${file.name.replace(/[^\w.-]/g, "_")}`;
    const { error: upErr } = await supabase.storage.from("dispute-evidence").upload(path, file);
    if (upErr) { toast.error("Erro ao enviar: " + upErr.message); return; }
-   const next = [ ...((editing as any).evidence_urls || []), { path, name: file.name, uploaded_at: new Date().toISOString() } ];
-   const { error } = await supabase.from("disputes").update({ evidence_urls: next } as any).eq("id", editing.id);
+   const next: EvidenceUrl[] = [ ...(editing.evidence_urls || []), { path, name: file.name, uploaded_at: new Date().toISOString() } ];
+   const { error } = await supabase.from("disputes").update({ evidence_urls: next as unknown as Json }).eq("id", editing.id);
    if (error) { toast.error("Erro ao salvar"); return; }
    toast.success("Evidência anexada");
-   setEditing({ ...editing, evidence_urls: next } as any);
+   setEditing({ ...editing, evidence_urls: next });
    load();
  };
 
@@ -333,10 +335,10 @@ export default function AdminDisputesTab({ type, title, profiles, transactions, 
      </label>
    </div>
    <div className="space-y-1">
-     {(((editing as any).evidence_urls as any[]) || []).length === 0 && (
+     {(editing.evidence_urls || []).length === 0 && (
        <p className="text-[10px] text-muted-foreground italic">Sem evidências anexadas</p>
      )}
-     {(((editing as any).evidence_urls as any[]) || []).map((ev: any, i: number) => (
+     {(editing.evidence_urls || []).map((ev, i) => (
        <button key={i} onClick={() => handleViewEvidence(ev.path)}
          className="w-full text-left flex items-center gap-2 px-2 py-1.5 rounded-lg bg-background/50 border border-border hover:bg-muted/30 text-[11px]">
          <Package className="h-3 w-3 text-primary" />

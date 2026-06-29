@@ -12,6 +12,7 @@ import {
   Package2, BarChart3, Calendar,
   PanelLeftClose, PanelLeft,
   Trophy, Search, ChevronDown, Sun, Moon,
+  type LucideIcon,
 } from "lucide-react";
 import { toast } from "sonner";
 import type { Tables } from "@/integrations/supabase/types";
@@ -50,7 +51,7 @@ import AdminRewardsTab from "./tabs/AdminRewardsTab";
 
 const EMPLOYEE_ALLOWED_TABS = new Set(["god-mode", "sellers", "products", "transactions"] as string[]);
 
-const NAV_SECTIONS: { id: string; label: string; items: { id: string; label: string; icon: any; employeeAccess: boolean }[] }[] = [
+const NAV_SECTIONS: { id: string; label: string; items: { id: string; label: string; icon: LucideIcon; employeeAccess: boolean }[] }[] = [
   {
     id: "core", label: "Operacional",
     items: [
@@ -147,18 +148,24 @@ export default function AdminDashboard() {
     try {
       const fromIso = dateRange.from.toISOString();
       const toIso = dateRange.to.toISOString();
-      const { data, error } = await (supabase as any).rpc("get_admin_dashboard_data", {
+      const { data, error } = await supabase.rpc("get_admin_dashboard_data" as never, {
         _from: fromIso, _to: toIso,
         _tx_limit: 2000, _profile_limit: 1000, _product_limit: 1000, _withdrawal_limit: 2000,
-      });
+      } as never);
       if (error) throw error;
-      const payload = data ?? {};
-      setTransactions((payload.transactions ?? []) as any);
-      setProfiles((payload.profiles ?? []) as any);
-      setProducts((payload.products ?? []) as any);
-      setWithdrawals((payload.withdrawals ?? []) as any);
-    } catch (e: any) {
-      toast.error("Erro ao carregar dados: " + (e?.message ?? "desconhecido"));
+      const payload = (data ?? {}) as {
+        transactions?: Tables<"transactions">[];
+        profiles?: Tables<"profiles">[];
+        products?: Tables<"products">[];
+        withdrawals?: Tables<"withdrawals">[];
+      };
+      setTransactions(payload.transactions ?? []);
+      setProfiles(payload.profiles ?? []);
+      setProducts(payload.products ?? []);
+      setWithdrawals(payload.withdrawals ?? []);
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : "desconhecido";
+      toast.error("Erro ao carregar dados: " + msg);
     } finally {
       setSyncing(false);
     }
@@ -173,7 +180,7 @@ export default function AdminDashboard() {
       try {
         const [adminRes, employeeRes] = await Promise.all([
           supabase.rpc("current_user_has_role", { _role: "admin" }),
-          supabase.rpc("current_user_has_role", { _role: "employee" as any }),
+          supabase.rpc("current_user_has_role", { _role: "employee" }),
         ]);
         if (cancelled) return;
         const hasAdmin = adminRes.data === true;
@@ -453,7 +460,7 @@ export default function AdminDashboard() {
                 <CalendarComponent
                   mode="range"
                   selected={{ from: dateRange.from, to: dateRange.to }}
-                  onSelect={(range: any) => {
+                  onSelect={(range) => {
                     if (range?.from && range?.to) {
                       setDateRange({ from: range.from, to: range.to });
                       setDatePreset("custom");

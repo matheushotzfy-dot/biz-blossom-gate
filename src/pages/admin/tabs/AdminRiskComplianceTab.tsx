@@ -16,7 +16,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { toast } from "sonner";
 import { logAdminAction } from "@/lib/auditLog";
 import { useAuth } from "@/hooks/useAuth";
-import type { Tables } from "@/integrations/supabase/types";
+import type { Tables, Json } from "@/integrations/supabase/types";
 import { GlassPanel as Panel, GlassPanelTitle } from "./AdminOverviewTab";
 import { FinanceiroHero } from "@/components/financeiro/FinanceiroHero";
 import { PremiumMetric, PremiumMetricGrid } from "./AdminPremium";
@@ -24,7 +24,7 @@ import { PremiumMetric, PremiumMetricGrid } from "./AdminPremium";
 /* ── Types ── */
 interface BlacklistEntry { id: string; entry_type: string; entry_value: string; reason: string; added_by: string; is_active: boolean; created_at: string; }
 interface VelocityRule { id: string; rule_name: string; rule_type: string; is_enabled: boolean; max_attempts: number; time_window_minutes: number; threshold_amount: number | null; action: string; updated_by: string | null; }
-interface FraudLog { id: string; block_type: string; block_reason: string; matched_value: string | null; matched_type: string | null; customer_email: string | null; customer_document: string | null; customer_ip: string | null; product_id: string | null; seller_user_id: string | null; metadata: any; created_at: string; }
+interface FraudLog { id: string; block_type: string; block_reason: string; matched_value: string | null; matched_type: string | null; customer_email: string | null; customer_document: string | null; customer_ip: string | null; product_id: string | null; seller_user_id: string | null; metadata: Json; created_at: string; }
 
 type SubTab = "blacklist" | "chargeback-radar" | "velocity" | "fraud-trail";
 
@@ -62,9 +62,9 @@ export default function AdminRiskComplianceTab({ profiles, transactions, fmtCurr
  supabase.from("velocity_rules").select("*").order("created_at", { ascending: true }),
  supabase.from("fraud_logs").select("*").order("created_at", { ascending: false }).limit(500),
  ]).then(([blRes, vrRes, flRes]) => {
- if (blRes.data) setBlacklist(blRes.data as any[]);
- if (vrRes.data) setVelocityRules(vrRes.data as any[]);
- if (flRes.data) setFraudLogs(flRes.data as any[]);
+ if (blRes.data) setBlacklist(blRes.data as BlacklistEntry[]);
+ if (vrRes.data) setVelocityRules(vrRes.data as VelocityRule[]);
+ if (flRes.data) setFraudLogs(flRes.data as FraudLog[]);
  });
  }, []);
 
@@ -108,10 +108,10 @@ export default function AdminRiskComplianceTab({ profiles, transactions, fmtCurr
  return;
  }
  toast.success(`${newType.toUpperCase()} adicionado à Blacklist`);
- await logAdminAction("add_blacklist", "global_blacklist", clean, { entry_type: newType, reason: sanitizedReason } as any);
+ await logAdminAction("add_blacklist", "global_blacklist", clean, { entry_type: newType, reason: sanitizedReason });
  setAddDialog(false); setNewValue(""); setNewReason("");
  const { data } = await supabase.from("global_blacklist").select("*").order("created_at", { ascending: false }).limit(500);
- if (data) setBlacklist(data as any[]);
+ if (data) setBlacklist(data as BlacklistEntry[]);
  };
 
  const handleRemoveBlacklist = async (id: string, value: string) => {
@@ -127,12 +127,12 @@ export default function AdminRiskComplianceTab({ profiles, transactions, fmtCurr
  const { error } = await supabase.from("velocity_rules").update({ is_enabled: !rule.is_enabled, updated_by: user?.id }).eq("id", rule.id);
  if (error) { toast.error("Erro"); return; }
  toast.success(`Regra ${!rule.is_enabled ? "ativada" : "desativada"}`);
- await logAdminAction("toggle_velocity_rule", "velocity_rules", rule.id, { rule_name: rule.rule_name, enabled: !rule.is_enabled } as any);
+ await logAdminAction("toggle_velocity_rule", "velocity_rules", rule.id, { rule_name: rule.rule_name, enabled: !rule.is_enabled });
  setVelocityRules(prev => prev.map(r => r.id === rule.id ? { ...r, is_enabled: !r.is_enabled } : r));
  };
 
  const handleUpdateRule = async (rule: VelocityRule, field: string, value: number) => {
- const { error } = await supabase.from("velocity_rules").update({ [field]: value, updated_by: user?.id } as any).eq("id", rule.id);
+ const { error } = await supabase.from("velocity_rules").update({ [field]: value, updated_by: user?.id }).eq("id", rule.id);
  if (error) { toast.error("Erro"); return; }
  toast.success("Regra atualizada");
  setVelocityRules(prev => prev.map(r => r.id === rule.id ? { ...r, [field]: value } : r));
@@ -161,7 +161,7 @@ export default function AdminRiskComplianceTab({ profiles, transactions, fmtCurr
  const { error } = await supabase.from("profiles").update({ balance_frozen: true }).eq("user_id", userId);
  if (error) { toast.error("Erro ao congelar"); return; }
  toast.success("Saldo congelado!");
- await logAdminAction("freeze_balance", "profile", userId, { reason: "chargeback_radar" } as any);
+ await logAdminAction("freeze_balance", "profile", userId, { reason: "chargeback_radar" });
  };
 
  /* ── KPIs ── */
