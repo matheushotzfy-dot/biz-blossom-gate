@@ -9,8 +9,10 @@ import {
   GraduationCap,
   Trash2,
   Package,
+  ChevronRight,
   type LucideIcon,
 } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 import {
   DropdownMenu,
@@ -64,30 +66,31 @@ export function ProductActionsMenu({
   onOpenMembers,
   onOpenPixels,
 }: ProductActionsMenuProps) {
+  const navigate = useNavigate();
+
   const sections: Section[] = [
     {
-      title: "\u200B",
+      title: "Gerenciar",
       rows: [
-        { icon: Pencil,         label: "Editar produto",   hint: "\u200B", action: () => onEditProduct(product) },
-        { icon: Palette,        label: "Checkout builder", hint: "\u200B", action: () => window.location.assign(`/vendas/produtos/${product.id}/checkout-builder`) },
-        { icon: GraduationCap,  label: "Área de membros",  hint: "\u200B",   action: () => onOpenMembers(product) },
+        { icon: Pencil,        label: "Editar produto",   action: () => onEditProduct(product) },
+        { icon: Palette,       label: "Checkout builder", action: () => navigate(`/vendas/produtos/${product.id}/checkout-builder`) },
+        { icon: GraduationCap, label: "Área de membros",  action: () => onOpenMembers(product) },
       ],
     },
     {
-      title: "\u200B",
+      title: "Distribuir",
       rows: [
         ...(product.checkout_url
           ? [
               {
                 icon: copied ? CheckCircle2 : Copy,
                 label: copied ? "Link copiado" : "Copiar checkout",
-                hint: copied ? "Pronto para colar" : "\u200B",
                 action: () => onCopyLink(product),
               },
-              { icon: ExternalLink, label: "Abrir checkout", hint: "\u200B", action: () => onOpenCheckout(product) },
+              { icon: ExternalLink, label: "Abrir checkout", action: () => onOpenCheckout(product) },
             ]
           : []),
-        { icon: Crosshair, label: "Pixels & tracking", hint: "\u200B", action: () => onOpenPixels(product) },
+        { icon: Crosshair, label: "Pixels & tracking", action: () => onOpenPixels(product) },
       ],
     },
   ];
@@ -101,43 +104,39 @@ export function ProductActionsMenu({
         key={row.label}
         onClick={row.action}
         className={cn(
-          "group/row relative flex h-12 cursor-pointer items-center gap-3 rounded-xl px-2.5 outline-none transition-colors duration-150",
+          "group/row relative flex h-11 cursor-pointer items-center gap-3 rounded-lg px-2.5 outline-none transition-all duration-200",
           isDestructive
             ? "focus:bg-destructive/[0.08] data-[highlighted]:bg-destructive/[0.08]"
-            : "focus:bg-muted/40 data-[highlighted]:bg-muted/40",
+            : "focus:bg-muted/50 data-[highlighted]:bg-muted/50 hover:translate-x-0.5",
         )}
       >
         <div
           className={cn(
-            "flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border transition-colors",
+            "flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border transition-all duration-200",
             isDestructive
-              ? "border-destructive/15 bg-destructive/[0.06] text-destructive"
-              : "border-border/60 bg-muted/30 text-muted-foreground group-hover/row:border-primary/30 group-hover/row:bg-primary/[0.08] group-hover/row:text-primary group-data-[highlighted]/row:border-primary/30 group-data-[highlighted]/row:bg-primary/[0.08] group-data-[highlighted]/row:text-primary",
+              ? "border-destructive/15 bg-destructive/[0.06] text-destructive group-hover/row:scale-110 group-hover/row:border-destructive/40 group-hover/row:bg-destructive/[0.12]"
+              : "border-border/50 bg-muted/20 text-muted-foreground group-hover/row:scale-110 group-hover/row:border-primary/40 group-hover/row:bg-primary/[0.10] group-hover/row:text-primary group-data-[highlighted]/row:border-primary/40 group-data-[highlighted]/row:bg-primary/[0.10] group-data-[highlighted]/row:text-primary",
           )}
         >
           <row.icon className="h-3.5 w-3.5" strokeWidth={2.25} />
         </div>
 
-        <div className="flex min-w-0 flex-1 flex-col">
-          <span
-            className={cn(
-              "truncate text-[12px] font-black uppercase tracking-[0.08em] leading-none",
-              isDestructive ? "text-destructive" : "text-foreground",
-            )}
-          >
-            {row.label}
-          </span>
-          {row.hint && (
-            <span
-              className={cn(
-                "mt-1 truncate text-[10px] font-bold uppercase tracking-[0.14em] leading-none",
-                isDestructive ? "text-destructive/60" : "text-muted-foreground/50",
-              )}
-            >
-              {row.hint}
-            </span>
+        <span
+          className={cn(
+            "min-w-0 flex-1 truncate text-[12px] font-bold tracking-tight",
+            isDestructive ? "text-destructive" : "text-foreground/90 group-hover/row:text-foreground",
           )}
-        </div>
+        >
+          {row.label}
+        </span>
+
+        <ChevronRight
+          className={cn(
+            "h-3.5 w-3.5 shrink-0 -translate-x-1 opacity-0 transition-all duration-200 group-hover/row:translate-x-0 group-hover/row:opacity-60",
+            isDestructive ? "text-destructive" : "text-foreground",
+          )}
+          strokeWidth={2.5}
+        />
       </DropdownMenuItem>
     );
   };
@@ -165,10 +164,10 @@ export function ProductActionsMenu({
         align="end"
         side="bottom"
         sideOffset={8}
-        className="w-[280px] overflow-hidden rounded-2xl border border-border/60 bg-card p-0 shadow-sm"
+        className="w-[280px] overflow-hidden rounded-2xl border border-border/60 bg-card p-0 shadow-lg shadow-black/5"
       >
         {/* Identity Header */}
-        <div className="flex items-center gap-3 border-b border-border/40 bg-muted/20 px-4 py-3.5">
+        <div className="flex items-center gap-3 border-b border-border/40 bg-gradient-to-br from-muted/30 to-transparent px-4 py-3.5">
           <div className="flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-xl border border-border/60 bg-card">
             {product.image_url ? (
               <img src={product.image_url} alt="" className="h-full w-full object-cover" />
@@ -186,9 +185,9 @@ export function ProductActionsMenu({
           </div>
         </div>
 
-        {sections.map((section) => (
-          <div key={section.title} className="border-b border-border/40 px-2 py-2.5 last:border-b-0">
-            <div className="px-2.5 pb-1.5 text-[9px] font-black uppercase tracking-[0.22em] text-muted-foreground/50">
+        {sections.map((section, idx) => (
+          <div key={section.title} className={cn("px-2 py-2", idx > 0 && "border-t border-border/40")}>
+            <div className="px-2.5 pb-1.5 pt-1 text-[9px] font-black uppercase tracking-[0.22em] text-muted-foreground/40">
               {section.title}
             </div>
             <div className="space-y-0.5">
@@ -197,11 +196,10 @@ export function ProductActionsMenu({
           </div>
         ))}
 
-        <div className="border-t border-border/40 bg-destructive/[0.02] px-2 py-2">
+        <div className="border-t border-border/40 px-2 py-2">
           {renderRow({
             icon: Trash2,
             label: "Excluir produto",
-            hint: "Ação irreversível",
             variant: "destructive",
             action: () => onDeleteProduct(product),
           })}

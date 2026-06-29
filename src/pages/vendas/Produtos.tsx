@@ -187,7 +187,7 @@ export default function Produtos() {
 
       {/* ── Tabs + Search row ── */}
       <div className="flex flex-col gap-3 animate-fade-in stagger-2 sm:flex-row sm:items-center sm:justify-between">
-        <div className="inline-flex w-fit items-center gap-0.5 rounded-xl border border-border/50 bg-card/60 p-1 overflow-x-auto">
+        <div className="inline-flex w-fit items-center gap-0.5 rounded-xl border border-border/50 bg-card/60 p-1">
           {tabs.map((item) => {
             const active = tab === item.value;
             return (
