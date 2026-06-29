@@ -2168,7 +2168,7 @@ function TabCoProducao({ isNew, coProducerEmail, setCoProducerEmail, coProductio
 
 type TabCuponsProps = {
   isNew: boolean;
-  coupons: AnyObj[];
+  coupons: Tables<"coupons">[];
   newCouponCode: string; setNewCouponCode: StrS;
   newCouponType: string; setNewCouponType: StrS;
   newCouponValue: string; setNewCouponValue: StrS;
