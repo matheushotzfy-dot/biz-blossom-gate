@@ -72,7 +72,7 @@ export default function AdminConteudo() {
 
   const courses = useMemo(
     () =>
-      coursesRaw.map((course: any) => {
+      coursesRaw.map((course) => {
         const { modules: _modules, ...rest } = course;
         return {
           ...rest,
