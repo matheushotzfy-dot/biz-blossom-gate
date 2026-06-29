@@ -17,6 +17,12 @@ import { Label } from "@/components/ui/label";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 
+type ManagerKycRpc = (
+  fn: "manager_update_seller_kyc",
+  args: { _seller_user_id: string; _status: "approved" | "rejected" }
+) => Promise<{ error: { message: string } | null }>;
+const managerKycRpc = supabase.rpc as unknown as ManagerKycRpc;
+
 type Profile = {
   id: string;
   user_id: string;
