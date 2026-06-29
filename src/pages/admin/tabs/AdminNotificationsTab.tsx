@@ -66,11 +66,11 @@ export default function AdminNotificationsTab({ profiles }: Props) {
     await logAdminAction("send_notification", "notification", selectedUserId, { title: sendTitle.trim(), type: sendType, target: sellerName });
     toast.success(`Notificação enviada para ${sellerName}!`);
   } else {
-    const { data, error } = await (supabase as any).rpc("admin_broadcast_notification", {
+    const { data, error } = await supabase.rpc("admin_broadcast_notification", {
       _title: sendTitle.trim(),
       _message: sendMessage.trim(),
       _type: sendType,
-      _target: sendTarget, // 'all_sellers' | 'active_sellers'
+      _target: sendTarget,
     });
     if (error) throw error;
     const count = Number(data || 0);
@@ -80,13 +80,13 @@ export default function AdminNotificationsTab({ profiles }: Props) {
   setShowSendDialog(false);
   setSendTitle(""); setSendMessage(""); setSendType("info"); setSelectedUserId("");
   loadNotifications();
-  } catch (e: any) { toast.error("Erro ao enviar: " + (e?.message || "desconhecido")); } finally { setSending(false); }
+  } catch (e: unknown) { toast.error("Erro ao enviar: " + (e instanceof Error ? e.message : "desconhecido")); } finally { setSending(false); }
   };
 
   const handlePurgeOrphans = async () => {
     if (!window.confirm("Remover notificações antigas que nenhum seller conseguia ler (user_id nulo)?")) return;
     setPurging(true);
-    const { data, error } = await (supabase as any).rpc("admin_purge_orphan_notifications");
+    const { data, error } = await supabase.rpc("admin_purge_orphan_notifications");
     setPurging(false);
     if (error) { toast.error("Erro: " + error.message); return; }
     toast.success(`${Number(data || 0)} notificação(ões) órfã(s) removida(s)`);

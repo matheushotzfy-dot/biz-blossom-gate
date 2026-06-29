@@ -55,22 +55,22 @@ export default function AdminAuditTab({ profiles }: Props) {
 
       const merged: UnifiedLog[] = [];
       if (source === "all" || source === "admin") {
-        (aRes.data || []).forEach((r: any) => merged.push({
+        (aRes.data || []).forEach((r) => merged.push({
           id: `a-${r.id}`, source: "admin", actor_id: r.admin_user_id,
           actor_role: "admin", action: r.action, entity_type: r.entity_type,
-          entity_id: r.entity_id, details: r.details || {}, created_at: r.created_at,
+          entity_id: r.entity_id, details: (r.details as Record<string, unknown>) || {}, created_at: r.created_at,
         }));
       }
       if (source === "all" || source === "staff") {
-        (sRes.data || []).forEach((r: any) => merged.push({
+        (sRes.data || []).forEach((r) => merged.push({
           id: `s-${r.id}`, source: "staff", actor_id: r.staff_user_id,
           actor_role: "staff", action: r.action, entity_type: r.entity_type,
-          entity_id: r.entity_id, details: { before: r.before, after: r.after, ...(r.metadata || {}) },
+          entity_id: r.entity_id, details: { before: r.before, after: r.after, ...((r.metadata as Record<string, unknown>) || {}) },
           created_at: r.created_at,
         }));
       }
       if (source === "all" || source === "activity") {
-        (lRes.data || []).forEach((r: any) => merged.push({
+        (lRes.data || []).forEach((r) => merged.push({
           id: `l-${r.id}`, source: "activity", actor_id: r.user_id,
           actor_role: "user", action: r.action, entity_type: r.entity_type,
           entity_id: r.entity_id, details: { old: r.old_data, new: r.new_data },
@@ -85,7 +85,7 @@ export default function AdminAuditTab({ profiles }: Props) {
       if (ids.length > 0) {
         const { data: rolesData } = await supabase.from("user_roles").select("user_id, role").in("user_id", ids);
         const map: Record<string, string[]> = {};
-        (rolesData || []).forEach((r: any) => { (map[r.user_id] ||= []).push(r.role); });
+        (rolesData || []).forEach((r) => { (map[r.user_id] ||= []).push(r.role); });
         const top: Record<string, string> = {};
         Object.entries(map).forEach(([uid, list]) => {
           top[uid] = list.includes("admin") ? "admin"

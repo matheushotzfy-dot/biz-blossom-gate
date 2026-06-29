@@ -10,6 +10,7 @@ import {
   Crosshair, Plus, Trash2, Radio, Settings2, Zap,
   ChevronDown, Sparkles, CircleCheck, Hash, Key, Globe2,
   X, ShieldCheck, Activity, BookOpen, ExternalLink,
+  type LucideIcon,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -130,9 +131,9 @@ export default function PixelSettingsDialog({ product, open, onOpenChange }: Pro
       .select("*")
       .eq("product_id", product.id)
       .eq("user_id", user!.id);
-    if (data) setPixels(data.map((d: any) => ({
-      ...d,
-      events: Array.isArray(d.events) ? d.events : ALL_EVENTS,
+    if (data) setPixels(data.map((d) => ({
+      ...(d as unknown as Pixel),
+      events: Array.isArray(d.events) ? (d.events as string[]) : ALL_EVENTS,
     })));
     setLoading(false);
   };
@@ -705,7 +706,7 @@ function Dot() {
   return <span className="h-0.5 w-0.5 rounded-full bg-muted-foreground/60" />;
 }
 
-function SectionLabel({ icon: Icon, children }: { icon: any; children: React.ReactNode }) {
+function SectionLabel({ icon: Icon, children }: { icon: LucideIcon; children: React.ReactNode }) {
   return (
     <p className="text-[10px] font-display font-black uppercase tracking-[0.16em] text-muted-foreground mb-2.5 flex items-center gap-1.5">
       <Icon className="h-3 w-3" /> {children}
@@ -713,7 +714,7 @@ function SectionLabel({ icon: Icon, children }: { icon: any; children: React.Rea
   );
 }
 
-function Field({ label, icon: Icon, hint, children }: { label: string; icon: any; hint?: string; children: React.ReactNode }) {
+function Field({ label, icon: Icon, hint, children }: { label: string; icon: LucideIcon; hint?: string; children: React.ReactNode }) {
   return (
     <div>
       <Label className="text-[10px] font-display font-black uppercase tracking-[0.14em] text-muted-foreground mb-1.5 flex items-center gap-1.5">

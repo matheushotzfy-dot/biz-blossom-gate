@@ -111,15 +111,25 @@ function loadTikTokPixel(pixelId: string) {
 
   const w = window as PixelWindow;
   if (!w.ttq) {
-    const ttq: any = (w.ttq = w.ttq || []);
+    interface TtqShim extends Array<unknown> {
+      methods: string[];
+      setAndDefer: (t: Record<string, unknown>, e: string) => void;
+      instance: (t: string) => unknown[];
+      load: (e: string) => void;
+      _i?: Record<string, unknown[]>;
+      _t?: Record<string, number>;
+      _o?: Record<string, unknown>;
+      [k: string]: unknown;
+    }
+    const ttq = (w.ttq = (w.ttq || []) as unknown as TtqShim);
     ttq.methods = ['page', 'track', 'identify', 'instances', 'debug', 'on', 'off', 'once', 'ready', 'alias', 'group', 'enableCookie', 'disableCookie'];
-    ttq.setAndDefer = function (t: any, e: string) {
-      t[e] = function (...args: any[]) { t.push([e].concat(args)); };
+    ttq.setAndDefer = function (t: Record<string, unknown>, e: string) {
+      t[e] = function (...args: unknown[]) { (t as { push: (v: unknown[]) => void }).push([e, ...args]); };
     };
-    for (const method of ttq.methods) ttq.setAndDefer(ttq, method);
+    for (const method of ttq.methods) ttq.setAndDefer(ttq as unknown as Record<string, unknown>, method);
     ttq.instance = function (t: string) {
-      const e = ttq._i[t] || [];
-      for (const method of ttq.methods) ttq.setAndDefer(e, method);
+      const e = (ttq._i?.[t] || []) as unknown[];
+      for (const method of ttq.methods) ttq.setAndDefer(e as unknown as Record<string, unknown>, method);
       return e;
     };
     ttq.load = function (e: string) {
@@ -137,7 +147,7 @@ function loadTikTokPixel(pixelId: string) {
       document.head.appendChild(s);
     };
   }
-  w.ttq.load(safeId);
+  (w.ttq as { load: (id: string) => void }).load(safeId);
 }
 
 function loadKwaiPixel(pixelId: string) {
@@ -148,7 +158,15 @@ function loadKwaiPixel(pixelId: string) {
 
   const w = window as PixelWindow;
   if (!w.kwaiq) {
-    const kwaiq: any = (w.kwaiq = w.kwaiq || { callMethod: undefined, queue: [] });
+    interface KwaiqShim {
+      callMethod?: (...args: unknown[]) => void;
+      queue: unknown[][];
+      load: (id: string) => void;
+      page: () => void;
+      track: (...args: unknown[]) => void;
+      _pixelId?: string;
+    }
+    const kwaiq = (w.kwaiq = (w.kwaiq || { callMethod: undefined, queue: [] }) as unknown as KwaiqShim);
     kwaiq.load = function (id: string) {
       kwaiq._pixelId = id;
       const s = document.createElement('script');
@@ -159,7 +177,7 @@ function loadKwaiPixel(pixelId: string) {
     kwaiq.page = function () { kwaiq.queue.push(['page']); };
     kwaiq.track = function (...args: unknown[]) { kwaiq.queue.push(['track', ...args]); };
   }
-  w.kwaiq.load(safeId);
+  (w.kwaiq as { load: (id: string) => void }).load(safeId);
 }
 
 // ============ EVENT MAPPERS ============
