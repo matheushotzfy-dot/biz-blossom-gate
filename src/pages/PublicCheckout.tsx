@@ -443,6 +443,7 @@ export default function PublicCheckout() {
   customerEmail: email, customerDocument: docDigits, customerPhone: phoneDigits,
   checkoutSessionId: sessionId,
   couponCode: appliedCoupon?.code || null,
+  affiliateSlug: affiliateSlug || null,
   };
 
  if (method === "credit_card") { payload.installments = parseInt(installments); payload.cardToken = null; }
