@@ -47,13 +47,13 @@ export default function AdminTopSellersTab({ fmtCurrency }: Props) {
     setLoading(true);
     const days = PERIOD_DAYS[period];
     supabase
-      .rpc("get_admin_top_sellers", { _period_days: days as any })
+      .rpc("get_admin_top_sellers", { _period_days: days })
       .then(({ data, error }) => {
         if (!active) return;
         if (error) { console.error(error); setData({ totals: { gross: 0, net: 0, fees: 0, tx: 0 }, sellers: [] }); }
         else {
-          const p = (data as any) ?? {};
-          const sellers: SellerRow[] = (p.sellers ?? []).map((s: any) => ({
+          const p = (data as unknown as Partial<Payload>) ?? {};
+          const sellers: SellerRow[] = (p.sellers ?? []).map((s) => ({
             ...s,
             gross: Number(s.gross) || 0, net: Number(s.net) || 0, fees: Number(s.fees) || 0,
             refunded: Number(s.refunded) || 0, chargeback: Number(s.chargeback) || 0,
