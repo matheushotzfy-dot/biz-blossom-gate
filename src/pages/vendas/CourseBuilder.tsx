@@ -2,6 +2,7 @@ import { useEffect, useState, useRef, useCallback } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import type { TablesUpdate } from "@/integrations/supabase/types";
 import {
  Plus, BookOpen, Layers, Play, PlayCircle, Trash2, GripVertical, X,
  ChevronRight, Clock, Video, FileText,
