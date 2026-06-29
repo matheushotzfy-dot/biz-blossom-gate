@@ -1282,7 +1282,20 @@ function TabGeral({ name, setName, description, setDescription, price, setPrice,
   );
 }
 
-function TabConfiguracoes({ price, pixEnabled, setPixEnabled, boletoEnabled, setBoletoEnabled, creditCardEnabled, setCreditCardEnabled, emailConfirm, setEmailConfirm, showCouponField, setShowCouponField, addressRequired, setAddressRequired, deliveryType, setDeliveryType, adminBoletoEnabled = true, adminCardEnabled = true }: any) {
+type TabConfiguracoesProps = {
+  price: string;
+  pixEnabled: boolean; setPixEnabled: BoolS;
+  boletoEnabled: boolean; setBoletoEnabled: BoolS;
+  creditCardEnabled: boolean; setCreditCardEnabled: BoolS;
+  emailConfirm: boolean; setEmailConfirm: BoolS;
+  showCouponField: boolean; setShowCouponField: BoolS;
+  addressRequired: boolean; setAddressRequired: BoolS;
+  deliveryType: string; setDeliveryType: StrS;
+  adminBoletoEnabled?: boolean;
+  adminCardEnabled?: boolean;
+};
+
+function TabConfiguracoes({ price, pixEnabled, setPixEnabled, boletoEnabled, setBoletoEnabled, creditCardEnabled, setCreditCardEnabled, emailConfirm, setEmailConfirm, showCouponField, setShowCouponField, addressRequired, setAddressRequired, deliveryType, setDeliveryType, adminBoletoEnabled = true, adminCardEnabled = true }: TabConfiguracoesProps) {
  return (
  <div className="space-y-6">
  <SectionHeader icon={Settings} title="Configurações" subtitle="Métodos de pagamento, formulário e entrega de conteúdo." />
