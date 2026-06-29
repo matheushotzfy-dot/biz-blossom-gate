@@ -3,6 +3,7 @@ import {
   LayoutDashboard, ShoppingCart, Package, Wallet, MoreHorizontal,
   Trophy, Ticket, Building2, User, LogOut, X, Blocks,
   MessageSquare, ChevronRight,
+  type LucideIcon,
 } from "lucide-react";
 import { NavLink, useLocation, useNavigate } from "react-router-dom";
 import { cn } from "@/lib/utils";
