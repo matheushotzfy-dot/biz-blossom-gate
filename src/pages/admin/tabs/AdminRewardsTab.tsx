@@ -215,7 +215,7 @@ export default function AdminRewardsTab({ profiles }: { profiles: { user_id: str
                 : "bg-card border-border text-muted-foreground hover:text-foreground hover:border-foreground/30"
             )}
           >
-            {f.label} <span className="opacity-50 ml-1 tabular-nums">{(counts as any)[f.id] ?? "—"}</span>
+            {f.label} <span className="opacity-50 ml-1 tabular-nums">{(counts as Record<string, number>)[f.id] ?? "—"}</span>
           </button>
         ))}
       </div>
