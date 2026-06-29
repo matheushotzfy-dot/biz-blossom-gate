@@ -25,7 +25,7 @@ export default function Antecipacao() {
   const [antecipationDays, setAntecipationDays] = useState(15);
 
   const stats = useMemo(() => {
-    if (!transactions || !user) return { retainedTotal: 0, eligibleCount: 0, eligible: [] as any[] };
+    if (!transactions || !user) return { retainedTotal: 0, eligibleCount: 0, eligible: [] as Tx[] };
     const now = new Date();
     const retained = transactions.filter(t =>
       t.user_id === user.id &&
