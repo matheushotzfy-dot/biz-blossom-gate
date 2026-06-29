@@ -69,10 +69,10 @@ export default function Afiliados() {
   const [openCreate, setOpenCreate] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState("");
   const [copiedSlug, setCopiedSlug] = useState<string | null>(null);
-  const [marketProducts, setMarketProducts] = useState<any[]>([]);
+  const [marketProducts, setMarketProducts] = useState<Tables<"products_public">[]>([]);
 
   const affiliateProducts = useMemo(
-    () => products.filter((p: any) => p.affiliate_enabled),
+    () => products.filter((p) => p.affiliate_enabled),
     [products]
   );
 
