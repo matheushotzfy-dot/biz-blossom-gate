@@ -8,6 +8,7 @@ import {
   Coins, Search, ArrowDownToLine, X, Plus, Trash2, Loader2, Download, Wallet,
   TrendingDown, CheckCircle2, Percent, User as UserIcon, Mail, Copy, ChevronRight,
   ArrowUpDown, Activity, Settings2, Receipt, Briefcase, Shield, Calendar,
+  type LucideIcon,
 } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
@@ -49,8 +50,10 @@ export default function AdminStaffCommissionsTab({ profiles }: Props) {
     setLoading(true);
     const { data: ur } = await supabase
       .from("user_roles").select("user_id, role")
-      .in("role", ["manager", "employee"] as any);
-    const roleMap = new Map((ur ?? []).map((r: any) => [r.user_id, r.role]));
+      .in("role", ["manager", "employee"]);
+    const roleMap = new Map<string, "manager" | "employee">(
+      (ur ?? []).map((r) => [r.user_id, r.role as "manager" | "employee"])
+    );
     const ids = Array.from(roleMap.keys());
     if (ids.length === 0) { setRows([]); setLoading(false); return; }
 
@@ -60,13 +63,13 @@ export default function AdminStaffCommissionsTab({ profiles }: Props) {
       supabase.from("staff_commission_payouts").select("staff_user_id, status, processed_at").in("staff_user_id", ids).eq("status", "paid"),
     ]);
 
-    const cfgMap = new Map((cfg ?? []).map((c: any) => [c.user_id, Number(c.base_pct)]));
+    const cfgMap = new Map((cfg ?? []).map((c) => [c.user_id, Number(c.base_pct)]));
     const sums = new Map<string, {
       accrued: number; clawbacks: number; paid: number; balance: number;
       lastBalanceTime: string; lastActivity: string; count: number;
     }>();
 
-    (ledger ?? []).forEach((e: any) => {
+    (ledger ?? []).forEach((e) => {
       const cur = sums.get(e.staff_user_id) ?? { accrued: 0, clawbacks: 0, paid: 0, balance: 0, lastBalanceTime: "", lastActivity: "", count: 0 };
       const amt = Number(e.amount);
       if (e.type === "accrual") cur.accrued += amt;
@@ -82,10 +85,10 @@ export default function AdminStaffCommissionsTab({ profiles }: Props) {
     });
 
     const lastPayout = new Map<string, string>();
-    (payouts ?? []).forEach((p: any) => {
+    (payouts ?? []).forEach((p) => {
       const prev = lastPayout.get(p.staff_user_id);
       if (!prev || (p.processed_at && p.processed_at > prev)) {
-        lastPayout.set(p.staff_user_id, p.processed_at);
+        lastPayout.set(p.staff_user_id, p.processed_at!);
       }
     });
 
@@ -96,7 +99,7 @@ export default function AdminStaffCommissionsTab({ profiles }: Props) {
         user_id: uid,
         full_name: p?.full_name ?? "—",
         email: p?.email ?? "—",
-        role: (roleMap.get(uid) as any) ?? "employee",
+        role: roleMap.get(uid) ?? "employee",
         base_pct: cfgMap.get(uid) ?? 0,
         accrued: s.accrued,
         clawbacks: s.clawbacks,
@@ -304,9 +307,9 @@ function StaffCommissionPanel({ selected, onClose, onChanged, profiles, onCopy }
   profiles: Tables<"profiles">[];
   onCopy: (text: string, label: string) => void;
 }) {
-  const [ledger, setLedger] = useState<any[]>([]);
-  const [overrides, setOverrides] = useState<any[]>([]);
-  const [payouts, setPayouts] = useState<any[]>([]);
+  const [ledger, setLedger] = useState<Tables<"staff_commissions_ledger">[]>([]);
+  const [overrides, setOverrides] = useState<Tables<"staff_commission_overrides">[]>([]);
+  const [payouts, setPayouts] = useState<Tables<"staff_commission_payouts">[]>([]);
   const [tab, setTab] = useState<"ledger" | "overrides" | "payouts">("ledger");
   const [payoutAmount, setPayoutAmount] = useState("");
   const [payoutMethod, setPayoutMethod] = useState("PIX");
@@ -633,7 +636,7 @@ function StaffCommissionPanel({ selected, onClose, onChanged, profiles, onCopy }
 }
 
 function MiniKpi({ icon: Icon, label, value, tone }: {
-  icon: any; label: string; value: string; tone: "success" | "primary" | "destructive" | "info";
+  icon: LucideIcon; label: string; value: string; tone: "success" | "primary" | "destructive" | "info";
 }) {
   const toneText = {
     success: "text-success", primary: "text-primary", destructive: "text-destructive", info: "text-info",
