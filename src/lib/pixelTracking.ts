@@ -32,7 +32,7 @@ const loadedScripts = new Set<string>();
 
 // FIX #64: Sanitize pixel IDs to prevent script injection
 function sanitizePixelId(id: string): string {
-  return id.replace(/[^a-zA-Z0-9_\-\.]/g, '');
+  return id.replace(/[^a-zA-Z0-9_\-.]/g, '');
 }
 
 function loadFacebookPixel(pixelId: string) {
