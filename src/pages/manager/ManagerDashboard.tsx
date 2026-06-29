@@ -93,7 +93,7 @@ export default function ManagerDashboard() {
     try {
       // Load assigned sellers via assignments → profiles
       const { data: assignments } = await supabase
-        .from("manager_seller_assignments" as any)
+        .from("manager_seller_assignments")
         .select("seller_user_id, notes")
         .eq("manager_user_id", user!.id);
 
@@ -103,19 +103,19 @@ export default function ManagerDashboard() {
         return;
       }
 
-      const sellerIds = (assignments as any[]).map((a: any) => a.seller_user_id);
+      const sellerIds = assignments.map((a) => a.seller_user_id);
 
       const [profilesRes, txRes, feeLimitsRes] = await Promise.all([
         supabase.from("profiles").select("*").in("user_id", sellerIds),
         supabase.from("transactions").select("*").in("user_id", sellerIds).order("created_at", { ascending: false }).limit(200),
-        supabase.from("manager_fee_limits" as any).select("*").limit(1),
+        supabase.from("manager_fee_limits").select("*").limit(1),
       ]);
 
       setSellers((profilesRes.data || []) as Profile[]);
       setTransactions((txRes.data || []) as Transaction[]);
 
-      if (feeLimitsRes.data && (feeLimitsRes.data as any[]).length > 0) {
-        const fl = (feeLimitsRes.data as any[])[0];
+      if (feeLimitsRes.data && feeLimitsRes.data.length > 0) {
+        const fl = feeLimitsRes.data[0];
         setFeeLimits({
           min_transaction_percentage: fl.min_transaction_percentage,
           min_transaction_fixed: fl.min_transaction_fixed,
@@ -130,7 +130,7 @@ export default function ManagerDashboard() {
         .in("user_id", sellerIds);
 
       const feesMap: Record<string, CustomFee> = {};
-      (feesData || []).forEach((f: any) => { feesMap[f.user_id] = f; });
+      (feesData || []).forEach((f) => { feesMap[f.user_id] = f as CustomFee; });
       setCustomFees(feesMap);
 
     } catch (err) {
