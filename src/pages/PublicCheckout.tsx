@@ -235,8 +235,8 @@ export default function PublicCheckout() {
  const [checkoutState, setCheckoutState] = useState<CheckoutState>("form");
  const processingRef = useRef(false);
 
- const [pixData, setPixData] = useState<any>(null);
- const [boletoData, setBoletoData] = useState<any>(null);
+ const [pixData, setPixData] = useState<{ qrcode?: string; qrCode?: string; qrCodeText?: string } | null>(null);
+ const [boletoData, setBoletoData] = useState<{ url?: string; barCode?: string } | null>(null);
  const [transactionId, setTransactionId] = useState<string | null>(null);
  const [orderBumps, setOrderBumps] = useState<OrderBump[]>([]);
  const [selectedBumps, setSelectedBumps] = useState<Set<string>>(new Set());
