@@ -445,7 +445,7 @@ export default function AdminProductsTab({ products, profiles, transactions, fmt
                       <MetricCard icon={AlertTriangle} label="Chargebacks" value={fmtCurrency(stats.cbAmt)} tone="destructive" />
                       <MetricCard icon={ShoppingBag} label="Vendas" value={`${stats.completed}/${stats.total}`} sub={`${stats.conversion.toFixed(1)}% conv.`} tone="neutral" />
                       <MetricCard icon={Clock} label="Pendentes" value={String(stats.pending)} tone="warning" />
-                      <MetricCard icon={Users} label="Comissões Afiliados" value={fmtCurrency(commissionsTotal)} sub={`${affiliateSales.length} vendas`} tone="primary" />
+                      <MetricCard icon={UserIcon} label="Comissões Afiliados" value={fmtCurrency(commissionsTotal)} sub={`${affiliateSales.length} vendas`} tone="primary" />
                     </div>
                   </div>
 
@@ -738,5 +738,3 @@ function TxHistory({ title, icon: Icon, color, txs, fmtCurrency }: { title: stri
   );
 }
 
-// Local users icon
-function Users(props: React.ComponentProps<typeof UserIcon>) { return <UserIcon {...props} />; }
