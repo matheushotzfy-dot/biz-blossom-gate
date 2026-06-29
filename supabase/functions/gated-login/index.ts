@@ -48,6 +48,18 @@ Deno.serve(async (req) => {
       auth: { persistSession: false, autoRefreshToken: false },
     });
 
+    // ===== Abuse guard (very high threshold: 100 events in 10s → 15min block) =====
+    const guard = await abuseGuard({
+      supabaseUrl, serviceKey: serviceRoleKey, req,
+      endpoint: "gated-login",
+    });
+    if (guard.blocked) {
+      return new Response(
+        JSON.stringify({ success: false, error: "Atividade suspeita detectada. Tente novamente em alguns minutos.", locked: true }),
+        { status: 429, headers: { ...corsHeaders, "Content-Type": "application/json", "Retry-After": "900" } },
+      );
+    }
+
     const { email, password, scope } = await req.json();
 
     if (
