@@ -145,7 +145,7 @@ export default function AdminConteudo() {
   };
 
   const openEdit = (course: ContentCourse) => {
-    const sourceCourse = coursesRaw.find((item: any) => item.id === course.id);
+    const sourceCourse = coursesRaw.find((item) => item.id === course.id);
     setEditCourseData(buildEditableCoursePayload(course, sourceCourse));
     setWizardOpen(true);
   };
