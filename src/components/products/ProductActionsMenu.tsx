@@ -73,7 +73,7 @@ export function ProductActionsMenu({
       title: "Gerenciar",
       rows: [
         { icon: Pencil,        label: "Editar produto",   action: () => onEditProduct(product) },
-        { icon: Palette,       label: "Checkout builder", action: () => navigate(`/vendas/produtos/${product.id}/checkout-builder`) },
+        { icon: Palette,       label: "Checkout builder", action: () => navigate(`/vendas/produtos/${product.id}/checkout-builder`, { state: { product } }) },
         { icon: GraduationCap, label: "Área de membros",  action: () => onOpenMembers(product) },
       ],
     },
@@ -104,21 +104,22 @@ export function ProductActionsMenu({
         key={row.label}
         onClick={row.action}
         className={cn(
-          "group/row relative flex h-11 cursor-pointer items-center gap-3 rounded-lg px-2.5 outline-none transition-all duration-200",
+           "group/row relative flex h-11 cursor-pointer items-center gap-3 overflow-hidden rounded-lg px-2.5 outline-none transition-all duration-300 active:scale-[0.99]",
           isDestructive
-            ? "focus:bg-destructive/[0.08] data-[highlighted]:bg-destructive/[0.08]"
-            : "focus:bg-muted/50 data-[highlighted]:bg-muted/50 hover:translate-x-0.5",
+            ? "focus:bg-destructive/[0.08] data-[highlighted]:bg-destructive/[0.08] hover:bg-destructive/[0.06]"
+            : "focus:bg-primary/[0.08] data-[highlighted]:bg-primary/[0.08] hover:translate-x-0.5 hover:bg-primary/[0.06]",
         )}
       >
+        {!isDestructive && <span className="pointer-events-none absolute inset-y-2 left-0 w-[3px] rounded-r-full bg-primary opacity-0 transition-opacity duration-300 group-hover/row:opacity-100 group-data-[highlighted]/row:opacity-100" />}
         <div
           className={cn(
-            "flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border transition-all duration-200",
+             "flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border transition-all duration-300",
             isDestructive
               ? "border-destructive/15 bg-destructive/[0.06] text-destructive group-hover/row:scale-110 group-hover/row:border-destructive/40 group-hover/row:bg-destructive/[0.12]"
               : "border-border/50 bg-muted/20 text-muted-foreground group-hover/row:scale-110 group-hover/row:border-primary/40 group-hover/row:bg-primary/[0.10] group-hover/row:text-primary group-data-[highlighted]/row:border-primary/40 group-data-[highlighted]/row:bg-primary/[0.10] group-data-[highlighted]/row:text-primary",
           )}
         >
-          <row.icon className="h-3.5 w-3.5" strokeWidth={2.25} />
+          <row.icon className="h-3.5 w-3.5 transition-transform duration-300 group-hover/row:scale-110" strokeWidth={2.25} />
         </div>
 
         <span
@@ -164,11 +165,11 @@ export function ProductActionsMenu({
         align="end"
         side="bottom"
         sideOffset={8}
-        className="w-[280px] overflow-hidden rounded-2xl border border-border/60 bg-card p-0 shadow-lg shadow-black/5"
+        className="w-[292px] max-h-none overflow-visible rounded-2xl border border-border/60 bg-card p-0 shadow-none"
       >
         {/* Identity Header */}
-        <div className="flex items-center gap-3 border-b border-border/40 bg-gradient-to-br from-muted/30 to-transparent px-4 py-3.5">
-          <div className="flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-xl border border-border/60 bg-card">
+        <div className="flex items-center gap-3 border-b border-border/40 bg-card px-4 py-3.5">
+          <div className="flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-xl border border-border/60 bg-card-inset">
             {product.image_url ? (
               <img src={product.image_url} alt="" className="h-full w-full object-cover" />
             ) : (
@@ -186,7 +187,7 @@ export function ProductActionsMenu({
         </div>
 
         {sections.map((section, idx) => (
-          <div key={section.title} className={cn("px-2 py-2", idx > 0 && "border-t border-border/40")}>
+           <div key={section.title} className={cn("px-2 py-2", idx > 0 && "border-t border-border/40")}>
             <div className="px-2.5 pb-1.5 pt-1 text-[9px] font-black uppercase tracking-[0.22em] text-muted-foreground/40">
               {section.title}
             </div>

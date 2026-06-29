@@ -5,7 +5,7 @@
  */
 
 import { useState, useRef, useEffect, useCallback } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, useLocation } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import {
@@ -35,6 +35,14 @@ const TABS = [
  { id: "cro", label: "Conversão", icon: Zap },
 ] as const;
 type TabId = typeof TABS[number]["id"];
+
+type ProductWithCheckoutTheme = Tables<"products"> & { checkout_theme?: unknown };
+
+const normalizeCheckoutTheme = (value: unknown): "gray" | "white" | "dark" =>
+ value === "white" ? "white" : value === "dark" ? "dark" : "gray";
+
+const getCheckoutTheme = (value: Tables<"products"> | null) =>
+ normalizeCheckoutTheme((value as ProductWithCheckoutTheme | null)?.checkout_theme);
 
 const PRESET_COLORS = [
  { name: "Esmeralda", hex: "#10b981" },
@@ -177,30 +185,32 @@ function PreviewField({ label, theme }: { label: string; theme?: string }) {
 export default function CheckoutBuilder() {
  const { productId } = useParams<{ productId: string }>();
  const navigate = useNavigate();
+ const location = useLocation();
  const { user } = useAuth();
- const [product, setProduct] = useState<Tables<"products"> | null>(null);
- const [loading, setLoading] = useState(true);
+ const initialProduct = (location.state as { product?: Tables<"products"> } | null)?.product ?? null;
+ const [product, setProduct] = useState<Tables<"products"> | null>(initialProduct);
+ const [loading, setLoading] = useState(!initialProduct);
  const [activeTab, setActiveTab] = useState<TabId>("visual");
  const [previewMode, setPreviewMode] = useState<"desktop" | "mobile">("desktop");
  const [saving, setSaving] = useState(false);
- const [changeCount, setChangeCount] = useState(0);
  const [lastSavedAt, setLastSavedAt] = useState<Date | null>(null);
  const saveTimeout = useRef<ReturnType<typeof setTimeout>>();
+ const initializedRef = useRef(false);
 
  // Settings state
- const [buttonColor, setButtonColor] = useState("#10b981");
- const [checkoutTheme, setCheckoutTheme] = useState<"gray" | "white" | "dark">("gray");
- const [timerEnabled, setTimerEnabled] = useState(true);
- const [timerMinutes, setTimerMinutes] = useState("15");
- const [socialProof, setSocialProof] = useState(false);
- const [guaranteeEnabled, setGuaranteeEnabled] = useState(true);
- const [pixEnabled, setPixEnabled] = useState(true);
- const [boletoEnabled, setBoletoEnabled] = useState(true);
- const [creditCardEnabled, setCreditCardEnabled] = useState(true);
- const [addressRequired, setAddressRequired] = useState(false);
- const [emailConfirm, setEmailConfirm] = useState(true);
- const [bannerDesktopPreview, setBannerDesktopPreview] = useState("");
- const [bannerMobilePreview, setBannerMobilePreview] = useState("");
+ const [buttonColor, setButtonColor] = useState(initialProduct?.checkout_button_color || "#10b981");
+ const [checkoutTheme, setCheckoutTheme] = useState<"gray" | "white" | "dark">(getCheckoutTheme(initialProduct));
+ const [timerEnabled, setTimerEnabled] = useState(initialProduct?.checkout_timer_enabled ?? true);
+ const [timerMinutes, setTimerMinutes] = useState(String(initialProduct?.checkout_timer_minutes ?? 15));
+ const [socialProof, setSocialProof] = useState(initialProduct?.checkout_social_proof ?? false);
+ const [guaranteeEnabled, setGuaranteeEnabled] = useState(initialProduct?.checkout_guarantee_enabled ?? true);
+ const [pixEnabled, setPixEnabled] = useState(initialProduct?.checkout_pix_enabled ?? true);
+ const [boletoEnabled, setBoletoEnabled] = useState(initialProduct?.checkout_boleto_enabled ?? true);
+ const [creditCardEnabled, setCreditCardEnabled] = useState(initialProduct?.checkout_credit_card_enabled ?? true);
+ const [addressRequired, setAddressRequired] = useState(initialProduct?.checkout_address_required ?? false);
+ const [emailConfirm, setEmailConfirm] = useState(initialProduct?.checkout_email_confirm ?? true);
+ const [bannerDesktopPreview, setBannerDesktopPreview] = useState(initialProduct?.checkout_banner_desktop_url || "");
+ const [bannerMobilePreview, setBannerMobilePreview] = useState(initialProduct?.checkout_banner_mobile_url || "");
  const [bannerDesktopFile, setBannerDesktopFile] = useState<File | null>(null);
  const [bannerMobileFile, setBannerMobileFile] = useState<File | null>(null);
  const desktopRef = useRef<HTMLInputElement>(null);
@@ -233,7 +243,8 @@ export default function CheckoutBuilder() {
 
  // Optimization score
  const optimizationScore = (() => {
- let s = 0, max = 12;
+ let s = 0;
+ const max = 12;
  if (pixEnabled) s++;
  if (creditCardEnabled) s++;
  if (boletoEnabled) s++;
@@ -264,13 +275,13 @@ export default function CheckoutBuilder() {
  // Load product
  useEffect(() => {
  if (!user?.id || !productId) return;
- setLoading(true);
+ if (!product) setLoading(true);
  supabase.from("products").select("*").eq("id", productId).eq("user_id", user.id).maybeSingle()
  .then(({ data, error }) => {
  if (error || !data) { toast.error("Produto não encontrado"); navigate("/vendas/produtos"); return; }
  setProduct(data);
  setButtonColor(data.checkout_button_color || "#10b981");
- setCheckoutTheme((data as any).checkout_theme === "white" ? "white" : (data as any).checkout_theme === "dark" ? "dark" : "gray");
+ setCheckoutTheme(getCheckoutTheme(data));
  setTimerEnabled(data.checkout_timer_enabled ?? true);
  setTimerMinutes(String(data.checkout_timer_minutes ?? 15));
  setSocialProof(data.checkout_social_proof ?? false);
@@ -288,7 +299,7 @@ export default function CheckoutBuilder() {
  .then(({ data }) => { if (data) setAllProducts(data); });
  supabase.from("order_bumps").select("id, bump_product_id").eq("product_id", productId)
  .then(({ data }) => { if (data) setOrderBumps(data); });
- }, [user?.id, productId, navigate]);
+ }, [user?.id, productId, navigate, product]);
 
  // Auto-save
  const autoSave = useCallback(async () => {
@@ -333,17 +344,16 @@ export default function CheckoutBuilder() {
  }).eq("id", productId).eq("user_id", user.id);
  setSaving(false);
  setLastSavedAt(new Date());
- setChangeCount(0);
  if (!error) toast.success("Alterações salvas", { duration: 1500 });
  }, [user?.id, productId, buttonColor, checkoutTheme, timerEnabled, timerMinutes, socialProof, guaranteeEnabled, pixEnabled, boletoEnabled, creditCardEnabled, addressRequired, emailConfirm, bannerDesktopPreview, bannerMobilePreview, bannerDesktopFile, bannerMobileFile]);
 
  useEffect(() => {
  if (loading || !product) return;
- setChangeCount(prev => prev + 1);
+  if (!initializedRef.current) { initializedRef.current = true; return; }
  if (saveTimeout.current) clearTimeout(saveTimeout.current);
  saveTimeout.current = setTimeout(autoSave, 1200);
  return () => { if (saveTimeout.current) clearTimeout(saveTimeout.current); };
- }, [buttonColor, checkoutTheme, timerEnabled, timerMinutes, socialProof, guaranteeEnabled, pixEnabled, boletoEnabled, creditCardEnabled, addressRequired, emailConfirm]);
+ }, [buttonColor, checkoutTheme, timerEnabled, timerMinutes, socialProof, guaranteeEnabled, pixEnabled, boletoEnabled, creditCardEnabled, addressRequired, emailConfirm, autoSave, loading, product]);
 
  const handleFile = (e: React.ChangeEvent<HTMLInputElement>, type: "desktop" | "mobile") => {
  const file = e.target.files?.[0];

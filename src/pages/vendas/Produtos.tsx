@@ -187,7 +187,7 @@ export default function Produtos() {
 
       {/* ── Tabs + Search row ── */}
       <div className="flex flex-col gap-3 animate-fade-in stagger-2 sm:flex-row sm:items-center sm:justify-between">
-        <div className="inline-flex w-fit items-center gap-0.5 rounded-xl border border-border/50 bg-card/60 p-1">
+        <div className="flex w-full flex-wrap items-center gap-1 rounded-xl border border-border/50 bg-card p-1 sm:w-fit">
           {tabs.map((item) => {
             const active = tab === item.value;
             return (
@@ -195,15 +195,16 @@ export default function Produtos() {
                 key={item.value}
                 onClick={() => setTab(item.value)}
                 className={cn(
-                  "group/tab relative inline-flex shrink-0 items-center gap-2 rounded-lg h-8 px-3 text-[12px] font-bold tracking-tight transition-colors duration-200",
+                  "group/tab relative inline-flex h-8 shrink-0 items-center gap-2 overflow-hidden rounded-lg px-3 text-[12px] font-bold tracking-tight transition-all duration-300 hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.98]",
                   active
-                    ? "bg-secondary text-foreground"
-                    : "text-muted-foreground/80 hover:text-foreground"
+                    ? "bg-secondary text-foreground ring-1 ring-border/60"
+                    : "text-muted-foreground/80 hover:bg-secondary/70 hover:text-foreground"
                 )}
               >
+                <span className="pointer-events-none absolute inset-x-2 top-0 h-px bg-primary/50 opacity-0 transition-opacity duration-300 group-hover/tab:opacity-100" />
                 <span className={cn(
-                  "flex h-4 w-4 items-center justify-center transition-colors",
-                  active ? tabAccent[item.value] : "text-muted-foreground/50 group-hover/tab:text-foreground/70"
+                  "flex h-4 w-4 items-center justify-center transition-all duration-300",
+                  active ? tabAccent[item.value] : "text-muted-foreground/50 group-hover/tab:scale-110 group-hover/tab:text-primary"
                 )}>
                   {tabIcon[item.value]}
                 </span>
