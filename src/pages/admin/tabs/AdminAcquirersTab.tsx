@@ -1089,13 +1089,14 @@ function KV({ k, v, mono, copy }: { k: string; v: string; mono?: boolean; copy?:
 }
 
 // ============== Form ==============
-function AcquirerForm({ form, setForm, onSave, onCancel }: any) {
+type AcquirerFormShape = Partial<Acquirer> & { supported_methods?: string[] };
+function AcquirerForm({ form, setForm, onSave, onCancel }: { form: AcquirerFormShape; setForm: (f: AcquirerFormShape) => void; onSave: () => void; onCancel: () => void }) {
   const toggleMethod = (m: string) => {
     const cur = form.supported_methods || [];
     setForm({ ...form, supported_methods: cur.includes(m) ? cur.filter((x: string) => x !== m) : [...cur, m] });
   };
-  const set = (k: string, v: any) => setForm({ ...form, [k]: v });
-  const Input = ({ label, k, type = "text", placeholder = "", mono = false, hint = "" }: any) => (
+  const set = (k: keyof AcquirerFormShape, v: unknown) => setForm({ ...form, [k]: v });
+  const Input = ({ label, k, type = "text", placeholder = "", mono = false, hint = "" }: { label: string; k: keyof AcquirerFormShape; type?: string; placeholder?: string; mono?: boolean; hint?: string }) => (
     <div>
       <Label className="text-[10px] text-muted-foreground">{label}</Label>
       <input type={type} value={form[k] ?? ""} onChange={e => set(k, type === "number" ? parseFloat(e.target.value) || 0 : e.target.value)}
