@@ -359,7 +359,7 @@ function Section({ title, children }: { title: string; children: React.ReactNode
 
 function InfoRow({
   icon: Icon, label, value, mono, onCopy,
-}: { icon: any; label: string; value?: string | null; mono?: boolean; onCopy?: (v?: string | null) => void }) {
+}: { icon: LucideIcon; label: string; value?: string | null; mono?: boolean; onCopy?: (v?: string | null) => void }) {
   const canCopy = !!onCopy && !!value;
   return (
     <div className="group/row flex items-start gap-2.5">
