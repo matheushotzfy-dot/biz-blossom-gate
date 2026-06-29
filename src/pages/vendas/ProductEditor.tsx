@@ -1484,7 +1484,7 @@ function TabOrderBump({ isNew, orderBumps, allProducts, availableForBump, select
  <Select value={selectedBumpProduct} onValueChange={setSelectedBumpProduct}>
  <SelectTrigger className="flex-1 h-10 bg-secondary border-border"><SelectValue placeholder="Selecione um produto..." /></SelectTrigger>
  <SelectContent>
- {availableForBump.map((p: Record<string, any>) => (
+ {availableForBump.map((p) => (
  <SelectItem key={p.id} value={p.id}>{p.name} — R$ {Number(p.price).toFixed(2)}</SelectItem>
  ))}
  </SelectContent>
