@@ -1397,9 +1397,9 @@ function TabConfiguracoes({ price, pixEnabled, setPixEnabled, boletoEnabled, set
 
 type TabOrderBumpProps = {
   isNew: boolean;
-  orderBumps: AnyObj[];
-  allProducts: AnyObj[];
-  availableForBump: AnyObj[];
+  orderBumps: { id: string; bump_product_id: string }[];
+  allProducts: Tables<"products">[];
+  availableForBump: Tables<"products">[];
   selectedBumpProduct: string; setSelectedBumpProduct: StrS;
   addBump: () => void | Promise<void>;
   removeBump: (id: string) => void | Promise<void>;
