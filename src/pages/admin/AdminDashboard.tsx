@@ -460,7 +460,7 @@ export default function AdminDashboard() {
                 <CalendarComponent
                   mode="range"
                   selected={{ from: dateRange.from, to: dateRange.to }}
-                  onSelect={(range: any) => {
+                  onSelect={(range) => {
                     if (range?.from && range?.to) {
                       setDateRange({ from: range.from, to: range.to });
                       setDatePreset("custom");
