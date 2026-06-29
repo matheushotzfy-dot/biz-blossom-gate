@@ -756,11 +756,11 @@ export default function Dashboard() {
                     content={({ active, payload }) => {
                       if (active && payload && payload.length) {
                         return (
-                          <div className="rounded-2xl border border-border/50 bg-card/95 p-4 animate-in fade-in zoom-in duration-200">
-                            <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-1">
+                          <div className="bg-card/95 backdrop-blur-md border border-border/50 p-4 rounded-2xl shadow-2xl animate-in fade-in zoom-in duration-200">
+                            <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground mb-1">
                               {payload[0].payload.fullLabel || payload[0].payload.name}
                             </p>
-                            <p className="text-xl font-bold text-primary tracking-tight">
+                            <p className="text-xl font-black text-primary tracking-tight">
                               {fmt(payload[0].value as number)}
                             </p>
                           </div>
@@ -769,6 +769,7 @@ export default function Dashboard() {
                       return null;
                     }}
                   />
+
                   <Area 
                     type="monotone" 
                     dataKey="vendas" 
