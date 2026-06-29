@@ -130,9 +130,14 @@ export default function AdminNotificationsTab({ profiles }: Props) {
  <h2 className="text-[18px] font-bold text-foreground flex items-center gap-2"><Bell className="h-5 w-5 text-primary" /> Central de Notificações</h2>
  <p className="text-[11px] text-muted-foreground mt-1">{notifications.length} notificações enviadas</p>
  </div>
- <Button onClick={() => setShowSendDialog(true)} className="h-9 bg-gradient-to-r from-primary to-emerald-600 text-white text-[12px] font-semibold rounded-xl shadow-lg shadow-primary/20">
- <Send className="h-3.5 w-3.5 mr-1.5" /> Nova Notificação
- </Button>
+  <div className="flex items-center gap-2">
+  <Button variant="outline" onClick={handlePurgeOrphans} disabled={purging} className="h-9 text-[12px] rounded-xl gap-1.5">
+    <Trash2 className="h-3.5 w-3.5" /> {purging ? "Limpando..." : "Limpar órfãs"}
+  </Button>
+  <Button onClick={() => setShowSendDialog(true)} className="h-9 bg-gradient-to-r from-primary to-emerald-600 text-white text-[12px] font-semibold rounded-xl shadow-lg shadow-primary/20">
+    <Send className="h-3.5 w-3.5 mr-1.5" /> Nova Notificação
+  </Button>
+  </div>
  </div>
 
  <div className="relative">
