@@ -33,47 +33,65 @@ export default function AdminNotificationsTab({ profiles }: Props) {
  const { user } = useAuth();
  const [notifications, setNotifications] = useState<Notification[]>([]);
  const [loading, setLoading] = useState(true);
- const [showSendDialog, setShowSendDialog] = useState(false);
- const [search, setSearch] = useState("");
- const [sendTarget, setSendTarget] = useState<"all" | "specific">("all");
- const [selectedUserId, setSelectedUserId] = useState("");
- const [sendTitle, setSendTitle] = useState("");
- const [sendMessage, setSendMessage] = useState("");
- const [sendType, setSendType] = useState("info");
- const [sending, setSending] = useState(false);
- const [sellerSearch, setSellerSearch] = useState("");
+  const [showSendDialog, setShowSendDialog] = useState(false);
+  const [search, setSearch] = useState("");
+  const [sendTarget, setSendTarget] = useState<"all_sellers" | "active_sellers" | "specific">("all_sellers");
+  const [selectedUserId, setSelectedUserId] = useState("");
+  const [sendTitle, setSendTitle] = useState("");
+  const [sendMessage, setSendMessage] = useState("");
+  const [sendType, setSendType] = useState("info");
+  const [sending, setSending] = useState(false);
+  const [sellerSearch, setSellerSearch] = useState("");
+  const [purging, setPurging] = useState(false);
 
- useEffect(() => { loadNotifications(); }, []);
+  useEffect(() => { loadNotifications(); }, []);
 
- const loadNotifications = async () => {
- setLoading(true);
- const { data } = await supabase.from("notifications").select("*").order("created_at", { ascending: false }).limit(100);
- setNotifications((data || []) as Notification[]);
- setLoading(false);
- };
+  const loadNotifications = async () => {
+  setLoading(true);
+  const { data, error } = await supabase.from("notifications").select("*").order("created_at", { ascending: false }).limit(200);
+  if (error) toast.error("Erro ao carregar: " + error.message);
+  setNotifications((data || []) as Notification[]);
+  setLoading(false);
+  };
 
- const handleSend = async () => {
- if (!sendTitle.trim() || !sendMessage.trim()) { toast.error("Preencha título e mensagem"); return; }
- setSending(true);
- try {
- if (sendTarget === "all") {
- const { error } = await supabase.from("notifications").insert({ title: sendTitle.trim(), message: sendMessage.trim(), type: sendType, user_id: null, created_by: user!.id });
- if (error) throw error;
- await logAdminAction("send_global_notification", "notification", null, { title: sendTitle.trim(), type: sendType });
- toast.success("Notificação global enviada para todos os sellers!");
- } else {
- if (!selectedUserId) { toast.error("Selecione um seller"); setSending(false); return; }
- const { error } = await supabase.from("notifications").insert({ title: sendTitle.trim(), message: sendMessage.trim(), type: sendType, user_id: selectedUserId, created_by: user!.id });
- if (error) throw error;
- const sellerName = profiles.find(p => p.user_id === selectedUserId)?.full_name || "Seller";
- await logAdminAction("send_notification", "notification", selectedUserId, { title: sendTitle.trim(), type: sendType, target: sellerName });
- toast.success(`Notificação enviada para ${sellerName}!`);
- }
- setShowSendDialog(false);
- setSendTitle(""); setSendMessage(""); setSendType("info"); setSelectedUserId("");
- loadNotifications();
- } catch { toast.error("Erro ao enviar notificação"); } finally { setSending(false); }
- };
+  const handleSend = async () => {
+  if (!sendTitle.trim() || !sendMessage.trim()) { toast.error("Preencha título e mensagem"); return; }
+  setSending(true);
+  try {
+  if (sendTarget === "specific") {
+    if (!selectedUserId) { toast.error("Selecione um seller"); setSending(false); return; }
+    const { error } = await supabase.from("notifications").insert({ title: sendTitle.trim(), message: sendMessage.trim(), type: sendType, user_id: selectedUserId, created_by: user!.id });
+    if (error) throw error;
+    const sellerName = profiles.find(p => p.user_id === selectedUserId)?.full_name || "Seller";
+    await logAdminAction("send_notification", "notification", selectedUserId, { title: sendTitle.trim(), type: sendType, target: sellerName });
+    toast.success(`Notificação enviada para ${sellerName}!`);
+  } else {
+    const { data, error } = await (supabase as any).rpc("admin_broadcast_notification", {
+      _title: sendTitle.trim(),
+      _message: sendMessage.trim(),
+      _type: sendType,
+      _target: sendTarget, // 'all_sellers' | 'active_sellers'
+    });
+    if (error) throw error;
+    const count = Number(data || 0);
+    await logAdminAction("send_global_notification", "notification", null, { title: sendTitle.trim(), type: sendType, target: sendTarget, delivered: count });
+    toast.success(`Notificação entregue a ${count} ${count === 1 ? "seller" : "sellers"}!`);
+  }
+  setShowSendDialog(false);
+  setSendTitle(""); setSendMessage(""); setSendType("info"); setSelectedUserId("");
+  loadNotifications();
+  } catch (e: any) { toast.error("Erro ao enviar: " + (e?.message || "desconhecido")); } finally { setSending(false); }
+  };
+
+  const handlePurgeOrphans = async () => {
+    if (!window.confirm("Remover notificações antigas que nenhum seller conseguia ler (user_id nulo)?")) return;
+    setPurging(true);
+    const { data, error } = await (supabase as any).rpc("admin_purge_orphan_notifications");
+    setPurging(false);
+    if (error) { toast.error("Erro: " + error.message); return; }
+    toast.success(`${Number(data || 0)} notificação(ões) órfã(s) removida(s)`);
+    loadNotifications();
+  };
 
  const handleDelete = async (id: string) => {
  if (!window.confirm("Excluir esta notificação?")) return;
