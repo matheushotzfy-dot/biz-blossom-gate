@@ -15,7 +15,11 @@ const statusStyles: Record<string, string> = {
  blocked: "bg-destructive/8 text-destructive border-destructive/15",
  chargeback: "bg-destructive/8 text-destructive border-destructive/15",
  refunded: "bg-info/8 text-info border-info/15",
+ partially_refunded: "bg-info/8 text-info border-info/15",
+ disputed: "bg-warning/8 text-warning border-warning/15",
+ expired: "bg-muted/60 text-muted-foreground border-border/40",
  cancelled: "bg-muted/60 text-muted-foreground border-border/40",
+ canceled: "bg-muted/60 text-muted-foreground border-border/40",
  inactive: "bg-muted/60 text-muted-foreground border-border/40",
 };
 
@@ -34,7 +38,11 @@ const statusLabels: Record<string, string> = {
  blocked: "Bloqueado",
  chargeback: "Chargeback",
  refunded: "Reembolsado",
+ partially_refunded: "Reemb. Parcial",
+ disputed: "Disputado",
+ expired: "Expirado",
  cancelled: "Cancelado",
+ canceled: "Cancelado",
  inactive: "Inativo",
 };
 
