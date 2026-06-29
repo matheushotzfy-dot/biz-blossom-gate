@@ -306,7 +306,7 @@ export default function AdminErrorLogsTab({ profiles }: Props) {
                         <p className="font-bold truncate max-w-[160px]">{seller.name}</p>
                         <p className="text-[10px] text-muted-foreground truncate max-w-[160px]">{seller.email}</p>
                       </td>
-                      <td className={cn(premiumTable.td, "font-mono text-[10px] text-muted-foreground truncate max-w-[180px]")} title={String(route)}>{String(route)}</td>
+                      <td className={cn(premiumTable.td, "font-mono text-[10px] text-muted-foreground truncate max-w-[180px]")} title={route}>{route}</td>
                       <td className={premiumTable.td}>
                         {err.resolved ? (
                           <span className="text-[10px] font-black px-2 py-1 rounded-lg bg-success/10 text-success border border-success/30 uppercase">Resolvido</span>
