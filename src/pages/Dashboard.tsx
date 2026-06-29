@@ -752,6 +752,7 @@ export default function Dashboard() {
                   <YAxis width={42} axisLine={false} tickLine={false} tick={{fill: 'hsl(var(--muted-foreground)/0.5)', fontSize: 10, fontWeight: 700}} tickFormatter={(v) => Number(v) >= 1000 ? `R$${Math.round(Number(v) / 1000)}k` : `R$${v}`} />
                   <Tooltip 
                     cursor={{ stroke: 'hsl(var(--primary))', strokeWidth: 1, strokeDasharray: '4 4' }}
+                    wrapperStyle={{ outline: 'none' }}
                     content={({ active, payload }) => {
                       if (active && payload && payload.length) {
                         return (
@@ -762,9 +763,6 @@ export default function Dashboard() {
                             <p className="text-xl font-bold text-primary tracking-tight">
                               {fmt(payload[0].value as number)}
                             </p>
-                            <div className="mt-2 h-1 w-full bg-primary/10 rounded-full overflow-hidden">
-                              <div className="h-full bg-primary animate-out slide-in-from-left-full duration-1000" style={{ width: '100%' }} />
-                            </div>
                           </div>
                         );
                       }
