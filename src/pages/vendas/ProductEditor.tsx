@@ -565,7 +565,7 @@ export default function ProductEditor() {
    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { toast.error("E-mail inválido"); return; }
    const split = Number(coProductionSplit);
    if (isNaN(split) || split < 1 || split > 99) { toast.error("Percentual deve ser entre 1 e 99%"); return; }
-   if (coProductionsList.some((c: any) => c.co_producer_email?.toLowerCase() === email && c.status !== "rejected")) {
+   if (coProductionsList.some((c: Record<string, any>) => c.co_producer_email?.toLowerCase() === email && c.status !== "rejected")) {
      toast.error("Este co-produtor já foi convidado");
      return;
    }
@@ -591,7 +591,7 @@ export default function ProductEditor() {
  const removeCoProducer = async (id: string) => {
    const { error } = await supabase.from("co_productions").delete().eq("id", id);
    if (error) { toast.error("Erro ao remover"); return; }
-   setCoProductionsList(prev => prev.filter((c: any) => c.id !== id));
+   setCoProductionsList(prev => prev.filter((c: Record<string, any>) => c.id !== id));
    toast.success("Co-produtor removido");
  };
 
@@ -1431,8 +1431,8 @@ function TabOrderBump({ isNew, orderBumps, allProducts, availableForBump, select
  <>
  {orderBumps.length > 0 ? (
  <div className="space-y-2">
- {orderBumps.map((bump: any, i: number) => {
- const prod = allProducts.find((p: any) => p.id === bump.bump_product_id);
+ {orderBumps.map((bump: Record<string, any>, i: number) => {
+ const prod = allProducts.find((p: Record<string, any>) => p.id === bump.bump_product_id);
  return (
  <motion.div
  key={bump.id}
@@ -1484,7 +1484,7 @@ function TabOrderBump({ isNew, orderBumps, allProducts, availableForBump, select
  <Select value={selectedBumpProduct} onValueChange={setSelectedBumpProduct}>
  <SelectTrigger className="flex-1 h-10 bg-secondary border-border"><SelectValue placeholder="Selecione um produto..." /></SelectTrigger>
  <SelectContent>
- {availableForBump.map((p: any) => (
+ {availableForBump.map((p: Record<string, any>) => (
  <SelectItem key={p.id} value={p.id}>{p.name} — R$ {Number(p.price).toFixed(2)}</SelectItem>
  ))}
  </SelectContent>
@@ -2134,7 +2134,7 @@ function TabCoProducao({ isNew, coProducerEmail, setCoProducerEmail, coProductio
 
  {coProductionsList.length > 0 ? (
    <div className="space-y-2">
-     {coProductionsList.map((cp: any) => (
+     {coProductionsList.map((cp: Record<string, any>) => (
        <div key={cp.id} className="flex items-center justify-between rounded-2xl border border-border bg-card p-4 relative overflow-hidden">
          <div className={cn("absolute left-0 top-0 bottom-0 w-[3px] rounded-full",
            cp.status === "accepted" ? "bg-success" : cp.status === "rejected" ? "bg-destructive" : "bg-warning")} />
@@ -2222,7 +2222,7 @@ function TabCupons({ isNew, coupons, newCouponCode, setNewCouponCode, newCouponT
 
  {coupons.length > 0 ? (
  <div className="space-y-2">
- {coupons.map((coupon: any, i: number) => (
+ {coupons.map((coupon: Record<string, any>, i: number) => (
  <motion.div
  key={coupon.id}
  initial={{ opacity: 0, y: 8 }}
@@ -2684,7 +2684,7 @@ function TabConteudo({ productId, isNew }: { productId?: string; isNew: boolean 
               <p className="text-[10px] text-muted-foreground tabular-nums">{courses.length} {courses.length === 1 ? "item" : "itens"}</p>
             </div>
             <div className="divide-y divide-border">
-              {courses.map((c: any) => {
+              {courses.map((c: Record<string, any>) => {
                 const stats = moduleStats[c.id] || { modules: 0, lessons: 0 };
                 return (
                   <button
