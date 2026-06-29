@@ -440,6 +440,9 @@ Deno.serve(async (req) => {
       coupon_id: couponId,
       discount_amount: discountAmount,
       affiliate_link_id: resolvedAffiliateLinkId,
+      metadata: validBumpIds.length > 0
+        ? { bump_product_ids: validBumpIds, bumps_total: bumpsTotal }
+        : {},
     }).select().single();
 
 
