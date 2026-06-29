@@ -14,6 +14,33 @@ export type Database = {
   }
   public: {
     Tables: {
+      abuse_blocks: {
+        Row: {
+          blocked_until: string
+          created_at: string
+          endpoint: string | null
+          id: string
+          ip_hash: string
+          reason: string | null
+        }
+        Insert: {
+          blocked_until: string
+          created_at?: string
+          endpoint?: string | null
+          id?: string
+          ip_hash: string
+          reason?: string | null
+        }
+        Update: {
+          blocked_until?: string
+          created_at?: string
+          endpoint?: string | null
+          id?: string
+          ip_hash?: string
+          reason?: string | null
+        }
+        Relationships: []
+      }
       acquirer_failover_events: {
         Row: {
           created_at: string
@@ -2515,6 +2542,45 @@ export type Database = {
         }
         Relationships: []
       }
+      security_audit_log: {
+        Row: {
+          actor_role: string | null
+          created_at: string
+          endpoint: string | null
+          event_type: string
+          id: string
+          ip_hash: string | null
+          metadata: Json
+          status_code: number | null
+          user_agent: string | null
+          user_id: string | null
+        }
+        Insert: {
+          actor_role?: string | null
+          created_at?: string
+          endpoint?: string | null
+          event_type: string
+          id?: string
+          ip_hash?: string | null
+          metadata?: Json
+          status_code?: number | null
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          actor_role?: string | null
+          created_at?: string
+          endpoint?: string | null
+          event_type?: string
+          id?: string
+          ip_hash?: string | null
+          metadata?: Json
+          status_code?: number | null
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       seller_acquirer_config: {
         Row: {
           acquirer_id: string
@@ -3819,6 +3885,20 @@ export type Database = {
           reset_at: string
         }[]
       }
+      check_and_block_abuse: {
+        Args: {
+          _block_minutes?: number
+          _endpoint: string
+          _ip_hash: string
+          _max_events?: number
+          _window_seconds?: number
+        }
+        Returns: {
+          blocked: boolean
+          blocked_until: string
+          count_in_window: number
+        }[]
+      }
       check_blacklist: {
         Args: { _document?: string; _email?: string; _ip?: string }
         Returns: {
@@ -3906,6 +3986,7 @@ export type Database = {
         Args: { _key: string; _user_id: string }
         Returns: boolean
       }
+      is_ip_blocked: { Args: { _ip_hash: string }; Returns: boolean }
       is_product_active: { Args: { _product_id: string }; Returns: boolean }
       list_visible_acquirers: {
         Args: never
@@ -3920,6 +4001,19 @@ export type Database = {
           slug: string
           type: string
         }[]
+      }
+      log_security_event: {
+        Args: {
+          _actor_role?: string
+          _endpoint: string
+          _event_type: string
+          _ip_hash?: string
+          _metadata?: Json
+          _status_code?: number
+          _user_agent?: string
+          _user_id?: string
+        }
+        Returns: string
       }
       pick_failover_acquirer: {
         Args: { _current_acquirer_id: string }
