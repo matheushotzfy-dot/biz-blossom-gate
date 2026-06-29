@@ -3808,6 +3808,7 @@ export type Database = {
         }
         Returns: Json
       }
+      get_admin_top_sellers: { Args: { _period_days?: number }; Returns: Json }
       get_affiliate_product_owner: {
         Args: { _product_id: string }
         Returns: string
