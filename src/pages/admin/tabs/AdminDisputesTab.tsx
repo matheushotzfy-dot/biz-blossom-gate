@@ -74,7 +74,7 @@ export default function AdminDisputesTab({ type, title, profiles, transactions, 
       amount: Number(form.amount),
       transaction_id: form.transaction_id || null,
       admin_user_id: user.id,
-    } as any).select("id").maybeSingle();
+    }).select("id").maybeSingle();
     if (error) { toast.error("Erro ao criar"); return; }
     toast.success("Disputa criada!");
     await logAdminAction(`create_${type}`, "dispute", inserted?.id ?? form.seller_user_id, { amount: form.amount, reason: form.reason, seller_user_id: form.seller_user_id });
