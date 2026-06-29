@@ -2556,7 +2556,7 @@ function TabLinks({ isNew, product, pageUrl, affiliateEnabled, productId, getChe
 function TabConteudo({ productId, isNew }: { productId?: string; isNew: boolean }) {
   const navigate = useNavigate();
   const { user } = useAuth();
-  const [courses, setCourses] = useState<any[]>([]);
+  const [courses, setCourses] = useState<Tables<"courses">[]>([]);
   const [loading, setLoading] = useState(true);
   const [moduleStats, setModuleStats] = useState<Record<string, { modules: number; lessons: number }>>({});
   const [creating, setCreating] = useState(false);
