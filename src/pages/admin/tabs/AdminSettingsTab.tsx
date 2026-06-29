@@ -145,10 +145,10 @@ export default function AdminSettingsTab() {
  ? { percentage: Number(whitePercentage), fixed: Number(whiteFixed), withdrawal: Number(whiteWithdrawal) }
  : { percentage: Number(blackPercentage), fixed: Number(blackFixed), withdrawal: Number(blackWithdrawal) };
  const { error } = await supabase.from("platform_settings")
- .upsert({ key, value: val as any, updated_at: new Date().toISOString(), updated_by: user.id }, { onConflict: "key" });
+ .upsert({ key, value: val as unknown as Json, updated_at: new Date().toISOString(), updated_by: user.id }, { onConflict: "key" });
  if (error) { toast.error("Erro ao salvar"); setSaving(false); return; }
  toast.success(`Taxas ${tier.toUpperCase()} salvas!`);
- await logAdminAction(`update_fees_${tier}`, "platform_settings", key, val as any);
+ await logAdminAction(`update_fees_${tier}`, "platform_settings", key, val as unknown as Record<string, Json>);
  setSaving(false);
  };
 
@@ -157,10 +157,10 @@ export default function AdminSettingsTab() {
  setSaving(true);
  const val = { enabled: autoApproveEnabled, max_amount: Number(autoApproveMaxAmount) };
  const { error } = await supabase.from("platform_settings")
- .upsert({ key: "auto_approve_withdrawals", value: val as any, updated_at: new Date().toISOString(), updated_by: user.id }, { onConflict: "key" });
+ .upsert({ key: "auto_approve_withdrawals", value: val as unknown as Json, updated_at: new Date().toISOString(), updated_by: user.id }, { onConflict: "key" });
  if (error) { toast.error("Erro ao salvar"); setSaving(false); return; }
  toast.success("Configuração de auto-aprovação salva!");
- await logAdminAction("update_auto_approve", "platform_settings", "auto_approve_withdrawals", val as any);
+ await logAdminAction("update_auto_approve", "platform_settings", "auto_approve_withdrawals", val as unknown as Record<string, Json>);
  setSaving(false);
  };
 
@@ -169,7 +169,7 @@ export default function AdminSettingsTab() {
    setSavingEmailVerif(true);
    setRequireEmailVerification(enabled);
    const { error } = await supabase.from("platform_settings")
-     .upsert({ key: "require_email_verification", value: { enabled } as any, updated_at: new Date().toISOString(), updated_by: user.id }, { onConflict: "key" });
+     .upsert({ key: "require_email_verification", value: { enabled } as unknown as Json, updated_at: new Date().toISOString(), updated_by: user.id }, { onConflict: "key" });
    if (error) {
      toast.error("Erro ao salvar");
      setRequireEmailVerification(!enabled);
@@ -177,7 +177,7 @@ export default function AdminSettingsTab() {
      return;
    }
    toast.success(enabled ? "Verificação de e-mail ATIVADA" : "Verificação de e-mail DESATIVADA — contas serão criadas já confirmadas");
-   await logAdminAction("update_require_email_verification", "platform_settings", "require_email_verification", { enabled } as any);
+   await logAdminAction("update_require_email_verification", "platform_settings", "require_email_verification", { enabled } as Record<string, Json>);
    setSavingEmailVerif(false);
  };
 
@@ -191,7 +191,7 @@ export default function AdminSettingsTab() {
     const { error } = await supabase.from("fees").update({ value: newValue }).eq("id", feeId);
     if (error) { toast.error("Erro ao atualizar taxa"); return; }
     toast.success(`Taxa "${fee.name}" atualizada!`);
-    await logAdminAction("update_global_fee", "fees", feeId, { name: fee.name, old_value: fee.value, new_value: newValue } as any);
+    await logAdminAction("update_global_fee", "fees", feeId, { name: fee.name, old_value: fee.value, new_value: newValue } as Record<string, Json>);
     loadAll();
   };
 
@@ -206,7 +206,7 @@ export default function AdminSettingsTab() {
       .not("user_id", "is", null);
     if (error) { toast.error("Erro ao aplicar global: " + error.message); setSaving(false); return; }
     toast.success(`Taxas globais aplicadas. ${count ?? 0} overrides removidos.`);
-    await logAdminAction("apply_global_fees_to_all", "custom_user_fees", "bulk", { removed: count } as any);
+    await logAdminAction("apply_global_fees_to_all", "custom_user_fees", "bulk", { removed: count } as Record<string, Json>);
     setSaving(false);
   };
 
@@ -219,7 +219,7 @@ export default function AdminSettingsTab() {
     const { data, error } = await supabase.rpc("set_max_ticket_new_users_only", { _new_value: val });
     if (error) { toast.error("Erro: " + error.message); setSavingMaxTicket(false); return; }
     toast.success(`Novo limite global: R$ ${val.toLocaleString("pt-BR")}. Limite anterior preservado nos usuários existentes.`);
-    await logAdminAction("set_max_ticket_new_only", "platform_settings", "max_ticket_default", data as any);
+    await logAdminAction("set_max_ticket_new_only", "platform_settings", "max_ticket_default", data as unknown as Record<string, Json>);
     setMaxTicketGlobal(String(val));
     setSavingMaxTicket(false);
   };
@@ -233,7 +233,7 @@ export default function AdminSettingsTab() {
     const { data, error } = await supabase.rpc("set_max_ticket_for_all", { _new_value: val });
     if (error) { toast.error("Erro: " + error.message); setSavingMaxTicket(false); return; }
     toast.success(`Limite R$ ${val.toLocaleString("pt-BR")} aplicado a todos os sellers.`);
-    await logAdminAction("set_max_ticket_for_all", "platform_settings", "max_ticket_default", data as any);
+    await logAdminAction("set_max_ticket_for_all", "platform_settings", "max_ticket_default", data as unknown as Record<string, Json>);
     setMaxTicketGlobal(String(val));
     setSavingMaxTicket(false);
   };
@@ -259,14 +259,14 @@ export default function AdminSettingsTab() {
  if (error) { toast.error("Erro ao salvar retenção"); setSaving(false); return; }
  } else {
  const { data, error } = await supabase.from("retention_settings")
- .insert({ ...payload, user_id: null } as any)
+ .insert({ ...payload, user_id: null })
  .select("id").maybeSingle();
  if (error || !data) { toast.error("Erro ao criar retenção global"); setSaving(false); return; }
  savedId = data.id;
  setGlobalRetention(prev => ({ ...prev, id: data.id }));
  }
  toast.success("Retenção global salva!");
- await logAdminAction("update_global_retention", "retention_settings", savedId, payload as any);
+ await logAdminAction("update_global_retention", "retention_settings", savedId, payload as unknown as Record<string, Json>);
  setSaving(false);
  };
 
