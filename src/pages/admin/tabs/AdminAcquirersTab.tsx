@@ -6,7 +6,11 @@ import {
   Users, ArrowRightLeft, KeyRound, Webhook, History, RefreshCw,
   CheckCircle2, XCircle, Copy, ChevronRight, Search, ShieldCheck,
   FileCheck2, DollarSign, Network, Lock, Building2, Receipt,
+  type LucideIcon,
 } from "lucide-react";
+import type { Tables } from "@/integrations/supabase/types";
+
+type BulkSeller = { user_id: string; full_name: string | null; email: string | null; nickname: string | null; acquirer_id: string | null; account_status: string | null };
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
