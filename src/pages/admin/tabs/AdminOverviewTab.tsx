@@ -709,7 +709,7 @@ export default function AdminOverviewTab({
       <PremiumPanel title="Bloqueios Anti-Fraude" icon={ShieldAlert}>
         {fraudLogs.length > 0 ? (
           <div className="grid max-h-[320px] grid-cols-1 gap-2.5 overflow-y-auto md:grid-cols-2">
-            {fraudLogs.slice(0, 20).map((f: any) => (
+            {fraudLogs.slice(0, 20).map((f) => (
               <div key={f.id} className="rounded-xl border border-destructive/20 bg-destructive/5 px-3.5 py-2.5">
                 <div className="mb-1.5 flex items-center gap-2">
                   <span className="h-1.5 w-1.5 rounded-full bg-destructive" />
