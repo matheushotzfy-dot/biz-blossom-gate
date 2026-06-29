@@ -128,7 +128,7 @@ export default function AdminOverviewTab({
   const [disputes, setDisputes] = useState<Dispute[]>([]);
   const [realtimeTx, setRealtimeTx] = useState<Tables<"transactions">[]>([]);
   const [chartPeriod, setChartPeriod] = useState<"7d" | "30d">("7d");
-  const [fraudLogs, setFraudLogs] = useState<any[]>([]);
+  const [fraudLogs, setFraudLogs] = useState<Tables<"fraud_logs">[]>([]);
   const [kycReview, setKycReview] = useState<Tables<"profiles"> | null>(null);
 
   const handleKycApprove = async (userId: string) => {
