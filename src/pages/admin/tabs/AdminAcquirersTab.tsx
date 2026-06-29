@@ -1099,7 +1099,7 @@ function AcquirerForm({ form, setForm, onSave, onCancel }: { form: AcquirerFormS
   const Input = ({ label, k, type = "text", placeholder = "", mono = false, hint = "" }: { label: string; k: keyof AcquirerFormShape; type?: string; placeholder?: string; mono?: boolean; hint?: string }) => (
     <div>
       <Label className="text-[10px] text-muted-foreground">{label}</Label>
-      <input type={type} value={form[k] ?? ""} onChange={e => set(k, type === "number" ? parseFloat(e.target.value) || 0 : e.target.value)}
+      <input type={type} value={String(form[k] ?? "")} onChange={e => set(k, type === "number" ? parseFloat(e.target.value) || 0 : e.target.value)}
         placeholder={placeholder}
         className={cn("w-full h-9 px-3 bg-muted/30 border border-border rounded-lg text-xs text-foreground mt-1", mono && "font-mono")} />
       {hint && <p className="text-[9px] text-muted-foreground mt-1">{hint}</p>}
