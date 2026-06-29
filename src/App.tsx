@@ -59,8 +59,6 @@ import MemberArea from "./pages/membros/MemberArea";
 import CoursePage from "./pages/membros/CoursePage";
 import AdminLogin from "./pages/admin/AdminLogin";
 import AdminDashboard from "./pages/admin/AdminDashboard";
-
-import AdminConfiguracoes from "./pages/admin/AdminConfiguracoes";
 import PublicCheckout from "./pages/PublicCheckout";
 import ImpersonateReceiver from "./pages/ImpersonateReceiver";
 import NotFound from "./pages/NotFound";
@@ -137,8 +135,7 @@ const App = () => (
 
               <Route path="/admin-matheus" element={<AdminLogin />} />
               <Route path="/admin-matheus/dashboard" element={<RequireAdmin><AdminDashboard /></RequireAdmin>} />
-              
-              <Route path="/admin-matheus/configuracoes" element={<RequireAdmin><AdminConfiguracoes /></RequireAdmin>} />
+              <Route path="/admin-matheus/configuracoes" element={<Navigate to="/admin-matheus/dashboard?tab=settings" replace />} />
 
               <Route path="/gerentes" element={<ManagerLogin />} />
               <Route path="/gerentes/dashboard" element={<RequireManager><ManagerDashboard /></RequireManager>} />
@@ -170,10 +167,10 @@ const App = () => (
 
                 <Route path="/vendas/conteudo" element={<Conteudo />} />
                 <Route path="/integracoes" element={<IntegracoesHub />} />
-                <Route path="/integracoes/apps" element={<IntegracoesHub />} />
-                <Route path="/integracoes/webhooks" element={<IntegracoesHub />} />
-                <Route path="/integracoes/documentacao" element={<IntegracoesHub />} />
-                <Route path="/integracoes/credenciais" element={<IntegracoesHub />} />
+                <Route path="/integracoes/apps" element={<Navigate to="/integracoes?tab=apps" replace />} />
+                <Route path="/integracoes/webhooks" element={<Navigate to="/integracoes?tab=webhooks" replace />} />
+                <Route path="/integracoes/documentacao" element={<Navigate to="/integracoes?tab=documentacao" replace />} />
+                <Route path="/integracoes/credenciais" element={<Navigate to="/integracoes?tab=credenciais" replace />} />
                 <Route path="/vendas/afiliados" element={<Afiliados />} />
                 <Route path="/vendas/cupons" element={<Cupons />} />
                 <Route path="/vendas/coproducoes" element={<Coproducoes />} />

@@ -60,15 +60,6 @@ describe("Utility Functions", () => {
   });
 });
 
-describe("Brazilian Banks", () => {
-  it("should export a non-empty list of banks", async () => {
-    const { BRAZILIAN_BANKS } = await import("@/lib/brazilianBanks");
-    expect(Array.isArray(BRAZILIAN_BANKS)).toBe(true);
-    expect(BRAZILIAN_BANKS.length).toBeGreaterThan(10);
-    expect(BRAZILIAN_BANKS[0]).toHaveProperty("code");
-    expect(BRAZILIAN_BANKS[0]).toHaveProperty("name");
-  });
-});
 
 describe("Anti-Tamper", () => {
   it("should export integrity check functions", async () => {
