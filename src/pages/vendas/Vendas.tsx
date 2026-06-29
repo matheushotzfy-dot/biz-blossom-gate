@@ -35,7 +35,7 @@ const STATUS_MAP: Record<string, { label: string; cls: string; dot: string }> = 
   chargeback: { label: "Chargeback", cls: "bg-red-500/10 text-red-500 border-red-500/20", dot: "bg-red-500" },
 };
 
-const METHODS_MAP: Record<string, { label: string; icon: any }> = {
+const METHODS_MAP: Record<string, { label: string; icon: LucideIcon }> = {
   pix: { label: "Pix", icon: Zap },
   credit_card: { label: "Cartão", icon: CreditCard },
   card: { label: "Cartão", icon: CreditCard },
