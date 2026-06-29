@@ -72,7 +72,7 @@ Deno.serve(async (req) => {
       .eq("success", false);
 
     if (recentAttempts && recentAttempts.length >= 5) {
-      await adminClient.from("admin_login_attempts").insert({ email: trimmedEmail, success: false });
+      await adminClient.from("admin_login_attempts").insert({ email: trimmedEmail, success: false, scope: "manager" });
       return new Response(
         JSON.stringify({ success: false, error: "Muitas tentativas. Aguarde 15 minutos.", locked: true }),
         { status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" } }
@@ -86,7 +86,7 @@ Deno.serve(async (req) => {
     });
 
     if (authError || !authData.user || !authData.session) {
-      await adminClient.from("admin_login_attempts").insert({ email: trimmedEmail, success: false });
+      await adminClient.from("admin_login_attempts").insert({ email: trimmedEmail, success: false, scope: "manager" });
       return new Response(
         JSON.stringify({ success: false, error: "Credenciais inválidas ou acesso não autorizado." }),
         { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
@@ -103,7 +103,7 @@ Deno.serve(async (req) => {
     const isManager = roles.includes("manager") || roles.includes("employee");
 
     if (!isManager) {
-      await adminClient.from("admin_login_attempts").insert({ email: trimmedEmail, success: false });
+      await adminClient.from("admin_login_attempts").insert({ email: trimmedEmail, success: false, scope: "manager" });
       return new Response(
         JSON.stringify({ success: false, error: "Credenciais inválidas ou acesso não autorizado." }),
         { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } }
@@ -117,7 +117,7 @@ Deno.serve(async (req) => {
       .eq("user_id", userId)
       .maybeSingle();
     if (profileRow?.frozen) {
-      await adminClient.from("admin_login_attempts").insert({ email: trimmedEmail, success: false });
+      await adminClient.from("admin_login_attempts").insert({ email: trimmedEmail, success: false, scope: "manager" });
       return new Response(
         JSON.stringify({ success: false, error: "Conta congelada. Contate o administrador." }),
         { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } }
@@ -125,7 +125,7 @@ Deno.serve(async (req) => {
     }
 
 
-    await adminClient.from("admin_login_attempts").insert({ email: trimmedEmail, success: true });
+    await adminClient.from("admin_login_attempts").insert({ email: trimmedEmail, success: true, scope: "manager" });
 
     await adminClient.from("audit_logs").insert({
       admin_user_id: userId,
