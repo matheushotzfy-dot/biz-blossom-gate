@@ -2,6 +2,7 @@ import { useEffect, useState, useMemo } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useProducts } from "@/hooks/useQueryData";
+import type { Tables } from "@/integrations/supabase/types";
 import {
   Users, Link2, TrendingUp, DollarSign, Copy, Plus,
   CheckCircle2, Clock, Search, Percent, Shield,
