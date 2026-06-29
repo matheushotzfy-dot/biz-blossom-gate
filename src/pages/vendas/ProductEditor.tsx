@@ -1312,6 +1312,7 @@ function TabConfiguracoes({ price, pixEnabled, setPixEnabled, boletoEnabled, set
  </div>
 
  {/* Simulação de taxas — temporariamente desativada, voltaremos depois */}
+ {/* eslint-disable-next-line no-constant-binary-expression */}
  {false && price && parseFloat(price) > 0 && (
  <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="rounded-xl bg-muted/5 border border-border p-3 space-y-2">
  <p className="text-[9px] font-display font-black uppercase tracking-[0.15em] text-muted-foreground/40">Simulação de taxas (R$ {Number(price).toFixed(2)})</p>
