@@ -4047,6 +4047,19 @@ export type Database = {
           blocked: boolean
         }[]
       }
+      claim_app_deliveries: {
+        Args: { _limit?: number }
+        Returns: {
+          app_name: string
+          attempt: number
+          event: string
+          id: string
+          integration_id: string
+          payload: Json
+          transaction_id: string
+          user_id: string
+        }[]
+      }
       claim_webhook_deliveries: {
         Args: { _limit?: number }
         Returns: {
@@ -4162,6 +4175,7 @@ export type Database = {
         Args: { _current_acquirer_id: string }
         Returns: string
       }
+      reap_stuck_app_deliveries: { Args: never; Returns: number }
       reap_stuck_webhook_deliveries: { Args: never; Returns: number }
       release_due_card_holds: { Args: never; Returns: number }
       request_anticipation: {
