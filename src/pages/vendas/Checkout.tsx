@@ -82,7 +82,7 @@ export default function Checkout() {
  if (couponForm.product_id && couponForm.product_id !== "all") {
  insertData.product_id = couponForm.product_id;
  }
- const { error } = await supabase.from("coupons").insert(insertData as any);
+ const { error } = await supabase.from("coupons").insert(insertData as never);
  if (error) {
  if (error.code === '23505') { toast.error("Cupom com este código já existe"); }
  else { toast.error("Erro ao criar cupom"); }
