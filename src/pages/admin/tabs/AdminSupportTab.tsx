@@ -95,7 +95,7 @@ export default function AdminSupportTab({
       admin_user_id: user?.id ?? null,
       status: "answered",
       replied_at: new Date().toISOString(),
-    } as any).eq("id", ticket.id);
+    }).eq("id", ticket.id);
     if (error) { toast.error("Erro ao responder"); setSending(false); return; }
     toast.success("Resposta enviada — o cliente foi notificado.");
     await logAdminAction("reply_ticket", "support_ticket", ticket.id);
