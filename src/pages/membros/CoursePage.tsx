@@ -116,7 +116,7 @@ export default function CoursePage() {
 
  const lastWatched = progressData?.filter(p => !p.completed).sort((a, b) => b.progress_seconds - a.progress_seconds)[0];
  const targetId = lastWatched?.lesson_id || allLessonIds[0];
- const targetLesson = lessonsData.find((l: any) => l.id === targetId) as Lesson | undefined;
+ const targetLesson = lessonsData.find((l) => l.id === targetId) as Lesson | undefined;
  if (targetLesson) setActiveLesson(targetLesson);
  } else if (enrichedModules.length > 0 && enrichedModules[0].lessons.length > 0) {
  setActiveLesson(enrichedModules[0].lessons[0]);
