@@ -316,7 +316,7 @@ export default function Saques() {
                   </div>
                 ) : (
                   <div className="space-y-2">
-                    {pixKeys.slice(0, 2).map((pk: any) => (
+                    {pixKeys.slice(0, 2).map((pk) => (
                       <div key={pk.id} className="p-3 rounded-xl bg-muted/30 border border-border/60 flex items-center justify-between group">
                         <div className="min-w-0">
                           <p className="text-[11px] font-black text-foreground truncate">{pk.key_value}</p>
