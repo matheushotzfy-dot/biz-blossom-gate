@@ -756,14 +756,9 @@ Deno.serve(async (req) => {
       { status: ok ? 200 : 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
   }
 
-  // Drain pending queue
-  const { data: pending, error } = await admin
-    .from("app_deliveries")
-    .select("id, integration_id, user_id, transaction_id, app_name, event, payload, attempt")
-    .eq("status", "pending")
-    .lte("next_retry_at", new Date().toISOString())
-    .order("created_at", { ascending: true })
-    .limit(BATCH_SIZE);
+  // Atomically claim a batch via RPC (FOR UPDATE SKIP LOCKED) so parallel cron
+  // runs never pick the same delivery twice.
+  const { data: pending, error } = await admin.rpc("claim_app_deliveries", { _limit: BATCH_SIZE });
 
   if (error) {
     return new Response(JSON.stringify({ ok: false, error: error.message }),
