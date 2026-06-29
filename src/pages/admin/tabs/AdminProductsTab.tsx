@@ -5,6 +5,7 @@ import {
   ExternalLink, Image as ImageIcon, Clock, Layers, Trash2, CircleDollarSign,
   TrendingDown, AlertTriangle, FileText, ShoppingBag, ShieldCheck, ShieldX,
   ShieldQuestion, Receipt, User as UserIcon, Mail, RefreshCw, X, Tag,
+  type LucideIcon,
 } from "lucide-react";
 import { StatusBadge } from "@/components/StatusBadge";
 import { Button } from "@/components/ui/button";
