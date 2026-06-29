@@ -61,7 +61,7 @@ function usePrivacyMode() {
   const toggle = useCallback(() => {
     setHidden(prev => {
       const next = !prev;
-      try { localStorage.setItem("privacy_mode", String(next)); } catch {}
+      try { localStorage.setItem("privacy_mode", String(next)); } catch { /* noop */ }
       return next;
     });
   }, []);

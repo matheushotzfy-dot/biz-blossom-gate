@@ -227,7 +227,7 @@ export default function Perfil() {
           state: data.uf || prev.state,
         }));
       }
-    } catch {}
+    } catch { /* noop */ }
     setLoadingCep(false);
   };
 

@@ -102,7 +102,7 @@ export default function SaquesCrypto() {
   const [lastUpdate, setLastUpdate] = useState<Date | null>(null);
 
   const toggleHidden = useCallback(() => {
-    setHidden(p => { const n = !p; try { localStorage.setItem("privacy_mode", String(n)); } catch {} return n; });
+    setHidden(p => { const n = !p; try { localStorage.setItem("privacy_mode", String(n)); } catch { /* noop */ } return n; });
   }, []);
 
   useEffect(() => {
