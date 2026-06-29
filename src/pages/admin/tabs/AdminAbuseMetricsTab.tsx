@@ -80,8 +80,62 @@ export default function AdminAbuseMetricsTab() {
         <Stat label={`Eventos (${hours}h)`} value={stats?.total ?? 0} />
         <Stat label="Tipos distintos" value={Object.keys(stats?.by_type ?? {}).length} />
         <Stat label="Endpoints atingidos" value={Object.keys(stats?.by_endpoint ?? {}).length} />
-        <Stat label="Pico horário" value={peak} />
+        <Stat
+          label="Bloqueios ativos"
+          value={activeBlocksCount}
+          alert={activeBlocksCount > 0}
+        />
       </div>
+
+      <Card className={`p-4 ${activeBlocksCount > 0 ? "border-amber-500/50" : ""}`}>
+        <h3 className="font-semibold mb-3 flex items-center gap-2">
+          <ShieldAlert className="h-4 w-4 text-amber-500" />
+          Bloqueios ativos agora ({activeBlocksCount})
+        </h3>
+        {activeBlocksCount === 0 ? (
+          <div className="text-sm text-muted-foreground">Nenhum IP bloqueado no momento.</div>
+        ) : (
+          <div className="space-y-1 max-h-80 overflow-y-auto">
+            <div className="grid grid-cols-12 gap-2 text-xs uppercase tracking-wide text-muted-foreground border-b border-border/40 pb-1">
+              <span className="col-span-3">IP (hash)</span>
+              <span className="col-span-3">Endpoint</span>
+              <span className="col-span-3">Motivo</span>
+              <span className="col-span-3">Expira em</span>
+            </div>
+            {blocks.map((b) => {
+              const expiresMin = Math.max(0, Math.round((new Date(b.blocked_until).getTime() - Date.now()) / 60000));
+              return (
+                <div key={b.id} className="grid grid-cols-12 gap-2 text-sm border-b border-border/40 py-1 font-mono">
+                  <span className="col-span-3 truncate" title={b.ip_hash}>{b.ip_hash.slice(0, 12)}…</span>
+                  <span className="col-span-3 truncate" title={b.endpoint}>{b.endpoint}</span>
+                  <span className="col-span-3 truncate text-amber-500" title={b.reason}>{b.reason}</span>
+                  <span className="col-span-3 tabular-nums">{expiresMin}min</span>
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </Card>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <Card className="p-4">
+          <h3 className="font-semibold mb-3">Por tipo de evento</h3>
+          <Table rows={Object.entries(stats?.by_type ?? {}).sort((a, b) => b[1] - a[1])} />
+        </Card>
+        <Card className="p-4">
+          <h3 className="font-semibold mb-3">Por endpoint</h3>
+          <Table rows={Object.entries(stats?.by_endpoint ?? {}).sort((a, b) => b[1] - a[1])} />
+        </Card>
+        <Card className="p-4">
+          <h3 className="font-semibold mb-3">Top IPs (hash)</h3>
+          <Table rows={(stats?.top_ips ?? []).map((r) => [r.ip_hash, r.count])} />
+        </Card>
+        <Card className="p-4">
+          <h3 className="font-semibold mb-3">Top identificadores (hash)</h3>
+          <Table rows={(stats?.top_identifiers ?? []).map((r) => [r.identifier_hash, r.count])} />
+        </Card>
+      </div>
+
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <Card className="p-4">
