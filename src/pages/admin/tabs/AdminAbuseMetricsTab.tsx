@@ -15,21 +15,42 @@ type Stats = {
   generated_at: string;
 };
 
+type ActiveBlock = {
+  id: string;
+  ip_hash: string;
+  endpoint: string;
+  reason: string;
+  blocked_until: string;
+  created_at: string;
+};
+
 export default function AdminAbuseMetricsTab() {
   const [stats, setStats] = useState<Stats | null>(null);
+  const [blocks, setBlocks] = useState<ActiveBlock[]>([]);
   const [hours, setHours] = useState(24);
   const [loading, setLoading] = useState(false);
 
   const load = async () => {
     setLoading(true);
-    const { data, error } = await supabase.rpc("get_auth_abuse_stats", { _hours: hours });
-    if (!error && data) setStats(data as unknown as Stats);
+    const [statsRes, blocksRes] = await Promise.all([
+      supabase.rpc("get_auth_abuse_stats", { _hours: hours }),
+      supabase
+        .from("abuse_blocks")
+        .select("id, ip_hash, endpoint, reason, blocked_until, created_at")
+        .gt("blocked_until", new Date().toISOString())
+        .order("blocked_until", { ascending: false })
+        .limit(50),
+    ]);
+    if (!statsRes.error && statsRes.data) setStats(statsRes.data as unknown as Stats);
+    if (!blocksRes.error && blocksRes.data) setBlocks(blocksRes.data as ActiveBlock[]);
     setLoading(false);
   };
 
   useEffect(() => { load(); /* eslint-disable-next-line */ }, [hours]);
 
   const peak = stats?.hourly.reduce((m, h) => Math.max(m, h.count), 0) ?? 0;
+  const activeBlocksCount = blocks.length;
+
 
   return (
     <div className="space-y-6">
