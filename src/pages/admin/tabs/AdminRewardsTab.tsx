@@ -17,6 +17,7 @@ import {
 import {
   Trophy, MapPin, Package, Truck, CheckCircle2, XCircle, Clock, Copy, ExternalLink,
   Eye, Search, Map as MapIcon, Phone, Hash,
+  type LucideIcon,
 } from "lucide-react";
 import { logAdminAction } from "@/lib/auditLog";
 import { cn } from "@/lib/utils";
