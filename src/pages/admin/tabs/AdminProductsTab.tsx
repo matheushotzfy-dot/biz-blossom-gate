@@ -67,9 +67,9 @@ export default function AdminProductsTab({ products, profiles, transactions, fmt
   const [deleteTarget, setDeleteTarget] = useState<Tables<"products"> | null>(null);
 
   // X-Ray data
-  const [orderBumps, setOrderBumps] = useState<any[]>([]);
-  const [disputes, setDisputes] = useState<any[]>([]);
-  const [affiliateSales, setAffiliateSales] = useState<any[]>([]);
+  const [orderBumps, setOrderBumps] = useState<OrderBumpRow[]>([]);
+  const [disputes, setDisputes] = useState<DisputeRow[]>([]);
+  const [affiliateSales, setAffiliateSales] = useState<AffiliateSaleRow[]>([]);
 
   const profileMap = useMemo(() => {
     const m = new Map<string, Tables<"profiles">>();
