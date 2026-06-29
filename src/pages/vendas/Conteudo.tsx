@@ -65,7 +65,7 @@ export default function AdminConteudo() {
   const [filter, setFilter] = useState<ContentFilterId>("all");
   const [viewMode, setViewMode] = useState<ViewMode>("grid");
   const [wizardOpen, setWizardOpen] = useState(false);
-  const [editCourseData, setEditCourseData] = useState<any>(null);
+  const [editCourseData, setEditCourseData] = useState<EditableCoursePayload | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<string | null>(null);
   const [deletingCourse, setDeletingCourse] = useState(false);
   const [copiedId, setCopiedId] = useState<string | null>(null);
