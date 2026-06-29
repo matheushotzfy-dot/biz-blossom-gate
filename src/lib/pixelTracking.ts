@@ -111,16 +111,25 @@ function loadTikTokPixel(pixelId: string) {
 
   const w = window as PixelWindow;
   if (!w.ttq) {
-    type TtqShim = unknown[] & Record<string, unknown>;
-    const ttq = (w.ttq = (w.ttq || []) as TtqShim);
+    interface TtqShim extends Array<unknown> {
+      methods: string[];
+      setAndDefer: (t: Record<string, unknown>, e: string) => void;
+      instance: (t: string) => unknown[];
+      load: (e: string) => void;
+      _i?: Record<string, unknown[]>;
+      _t?: Record<string, number>;
+      _o?: Record<string, unknown>;
+      [k: string]: unknown;
+    }
+    const ttq = (w.ttq = (w.ttq || []) as unknown as TtqShim);
     ttq.methods = ['page', 'track', 'identify', 'instances', 'debug', 'on', 'off', 'once', 'ready', 'alias', 'group', 'enableCookie', 'disableCookie'];
-    ttq.setAndDefer = function (t: Record<string, unknown> & { push?: (v: unknown[]) => void }, e: string) {
-      t[e] = function (...args: unknown[]) { (t.push as (v: unknown[]) => void)([e, ...args]); };
+    ttq.setAndDefer = function (t: Record<string, unknown>, e: string) {
+      t[e] = function (...args: unknown[]) { (t as { push: (v: unknown[]) => void }).push([e, ...args]); };
     };
-    for (const method of ttq.methods as string[]) (ttq.setAndDefer as (t: unknown, e: string) => void)(ttq, method);
+    for (const method of ttq.methods) ttq.setAndDefer(ttq as unknown as Record<string, unknown>, method);
     ttq.instance = function (t: string) {
-      const e = ttq._i[t] || [];
-      for (const method of ttq.methods) ttq.setAndDefer(e, method);
+      const e = (ttq._i?.[t] || []) as unknown[];
+      for (const method of ttq.methods) ttq.setAndDefer(e as unknown as Record<string, unknown>, method);
       return e;
     };
     ttq.load = function (e: string) {
@@ -138,7 +147,7 @@ function loadTikTokPixel(pixelId: string) {
       document.head.appendChild(s);
     };
   }
-  w.ttq.load(safeId);
+  (w.ttq as { load: (id: string) => void }).load(safeId);
 }
 
 function loadKwaiPixel(pixelId: string) {
