@@ -140,14 +140,15 @@ export default function AdminAbuseMetricsTab() {
   );
 }
 
-function Stat({ label, value }: { label: string; value: number | string }) {
+function Stat({ label, value, alert }: { label: string; value: number | string; alert?: boolean }) {
   return (
-    <Card className="p-4">
+    <Card className={`p-4 ${alert ? "border-amber-500/50" : ""}`}>
       <div className="text-xs uppercase tracking-wide text-muted-foreground">{label}</div>
-      <div className="text-3xl font-mono mt-1">{value}</div>
+      <div className={`text-3xl font-mono mt-1 ${alert ? "text-amber-500" : ""}`}>{value}</div>
     </Card>
   );
 }
+
 
 function Table({ rows }: { rows: Array<[string, number]> }) {
   if (!rows.length) return <div className="text-sm text-muted-foreground">Sem dados na janela.</div>;
