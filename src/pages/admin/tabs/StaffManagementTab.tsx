@@ -10,6 +10,7 @@ import {
   Plus, Search, Shield, Snowflake, Sun, KeyRound, Trash2, History, ArrowUpDown,
   UserCog, Users, RefreshCw, Copy, Eye, EyeOff, Activity, Percent, UsersRound,
   X, CheckCircle2, Briefcase, Loader2,
+  type LucideIcon,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { Tables } from "@/integrations/supabase/types";
