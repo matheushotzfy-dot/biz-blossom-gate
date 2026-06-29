@@ -784,7 +784,7 @@ function HeroBigStat({ label, value, sub, tone, wide }: {
 }
 
 function PulseStat({ icon: Icon, label, value, tone }: {
-  icon: any; label: string; value: string; tone: Tone;
+  icon: LucideIcon; label: string; value: string; tone: Tone;
 }) {
   return (
     <div className="flex items-center justify-between gap-2 rounded-lg border border-border/60 bg-muted/20 px-3 py-2">
