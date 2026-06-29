@@ -39,6 +39,7 @@ import AdminTopProductsTab from "./tabs/AdminTopProductsTab";
 import AdminErrorLogsTab from "./tabs/AdminErrorLogsTab";
 import AdminInactiveSellersTab from "./tabs/AdminInactiveSellersTab";
 import AdminRiskComplianceTab from "./tabs/AdminRiskComplianceTab";
+import AdminAbuseMetricsTab from "./tabs/AdminAbuseMetricsTab";
 import AdminAnalyticsTab from "./tabs/AdminAnalyticsTab";
 import AdminManagersTab from "./tabs/AdminManagersTab";
 import AdminStaffCommissionsTab from "./tabs/AdminStaffCommissionsTab";
@@ -76,6 +77,7 @@ const NAV_SECTIONS: { id: string; label: string; items: { id: string; label: str
     id: "risk", label: "Risco & Compliance",
     items: [
       { id: "risk-compliance", label: "Anti-Fraude", icon: ShieldCheck, employeeAccess: false },
+      { id: "abuse-metrics", label: "Abuso & Auth", icon: ShieldAlert, employeeAccess: false },
       { id: "medpix", label: "MedPix", icon: AlertTriangle, employeeAccess: false },
       { id: "chargeback", label: "Chargeback", icon: CreditCard, employeeAccess: false },
       { id: "refunds", label: "Reembolsos", icon: RotateCcw, employeeAccess: false },
@@ -555,6 +557,7 @@ export default function AdminDashboard() {
               {activeTab === "risk-compliance" && isAdmin && (
                 <AdminRiskComplianceTab profiles={profiles} transactions={transactions} fmtCurrency={fmtCurrency} />
               )}
+              {activeTab === "abuse-metrics" && isAdmin && <AdminAbuseMetricsTab />}
               {activeTab === "medpix" && isAdmin && (
                 <AdminDisputesTab type="medpix" title="MedPix" profiles={profiles} transactions={transactions} products={products} fmtCurrency={fmtCurrency} />
               )}
