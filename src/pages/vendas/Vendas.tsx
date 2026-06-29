@@ -25,6 +25,7 @@ import { Seo } from "@/components/Seo";
 const fmt = (v: number) => v === 0 ? "R$ 0,00" : `R$ ${v.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 
 const STATUS_MAP: Record<string, { label: string; cls: string; dot: string }> = {
+  approved: { label: "Aprovada", cls: "bg-emerald-500/10 text-emerald-500 border-emerald-500/20", dot: "bg-emerald-500" },
   completed: { label: "Aprovada", cls: "bg-emerald-500/10 text-emerald-500 border-emerald-500/20", dot: "bg-emerald-500" },
   pending: { label: "Pendente", cls: "bg-amber-500/10 text-amber-500 border-amber-500/20", dot: "bg-amber-500" },
   failed: { label: "Falha", cls: "bg-red-500/10 text-red-500 border-red-500/20", dot: "bg-red-500" },
