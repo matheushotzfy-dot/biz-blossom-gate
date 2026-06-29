@@ -285,7 +285,8 @@ export default function AdminErrorLogsTab({ profiles }: Props) {
                   const meta = CAT_META[err._cat];
                   const Icon = meta.icon;
                   const seller = getSeller(err.user_id);
-                  const route = (err.metadata as any)?.route || (err.metadata as any)?.path || (err.metadata as any)?.url || (err.metadata as any)?.source || "—";
+                  const md = (err.metadata || {}) as Record<string, unknown>;
+                  const route = md["route"] || md["path"] || md["url"] || md["source"] || "—";
                   return (
                     <tr key={err.id} className={cn(premiumTable.row, !err.resolved && "bg-destructive/[0.03]")}>
                       <td className={cn(premiumTable.td, "text-[10px] text-muted-foreground tabular-nums whitespace-nowrap")}>{fmtDate(err.created_at)}</td>
