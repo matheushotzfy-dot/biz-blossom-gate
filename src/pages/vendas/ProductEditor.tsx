@@ -2684,7 +2684,7 @@ function TabConteudo({ productId, isNew }: { productId?: string; isNew: boolean 
               <p className="text-[10px] text-muted-foreground tabular-nums">{courses.length} {courses.length === 1 ? "item" : "itens"}</p>
             </div>
             <div className="divide-y divide-border">
-              {courses.map((c: Record<string, any>) => {
+              {courses.map((c) => {
                 const stats = moduleStats[c.id] || { modules: 0, lessons: 0 };
                 return (
                   <button
