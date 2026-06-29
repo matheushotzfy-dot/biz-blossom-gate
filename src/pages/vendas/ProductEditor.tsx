@@ -2175,7 +2175,7 @@ type TabCuponsProps = {
   newCouponMaxUses: string; setNewCouponMaxUses: StrS;
   creatingCoupon: boolean;
   createCoupon: () => void | Promise<void>;
-  toggleCoupon: (coupon: Record<string, any>) => void | Promise<void>;
+  toggleCoupon: (coupon: Tables<"coupons">) => void | Promise<void>;
   deleteCoupon: (id: string) => void | Promise<void>;
 };
 
