@@ -444,6 +444,9 @@ export default function PublicCheckout() {
   checkoutSessionId: sessionId,
   couponCode: appliedCoupon?.code || null,
   affiliateSlug: affiliateSlug || null,
+  selectedBumpIds: orderBumps
+    .filter(b => selectedBumps.has(b.id))
+    .map(b => b.bump_product_id),
   };
 
  if (method === "credit_card") { payload.installments = parseInt(installments); payload.cardToken = null; }
