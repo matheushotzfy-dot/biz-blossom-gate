@@ -34,8 +34,8 @@ type IpLog = { ip: string; user_agent: string | null; country: string | null; so
 
 interface ActivityLog {
   id: string; user_id: string; action: string; entity_type: string;
-  entity_id: string | null; old_data: Record<string, any> | null;
-  new_data: Record<string, any> | null; created_at: string;
+  entity_id: string | null; old_data: Record<string, unknown> | null;
+  new_data: Record<string, unknown> | null; created_at: string;
 }
 
 interface Acquirer {
