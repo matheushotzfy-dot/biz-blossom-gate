@@ -469,9 +469,10 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
   };
 
   const deletedProducts = userLogs.filter(l => l.action === "product_deleted").map(l => {
-    const od = (l.old_data as { name?: string; price?: number } | null) ?? null;
+    const od = deletedProductDataSchema.safeParse(l.old_data ?? {});
+    const data = od.success ? od.data : {};
     return {
-      id: l.entity_id, name: od?.name || "Desconhecido", price: od?.price ?? 0,
+      id: l.entity_id, name: data.name || "Desconhecido", price: data.price ?? 0,
       deletedAt: l.created_at, data: l.old_data,
     };
   });
