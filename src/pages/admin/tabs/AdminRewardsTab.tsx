@@ -83,12 +83,12 @@ export default function AdminRewardsTab({ profiles }: { profiles: { user_id: str
   const [editNotes, setEditNotes] = useState("");
 
   const load = async () => {
-    const { data, error } = await (supabase as any)
+    const { data, error } = await supabase
       .from("reward_claims")
       .select("*")
       .order("created_at", { ascending: false });
     if (error) { toast.error("Erro ao carregar premiações"); setLoading(false); return; }
-    setClaims(data || []);
+    setClaims((data || []) as Claim[]);
     setLoading(false);
   };
 
