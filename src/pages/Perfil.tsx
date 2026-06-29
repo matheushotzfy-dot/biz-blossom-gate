@@ -473,7 +473,7 @@ export default function Perfil() {
             />
             <InfoRow
               label="Chave PIX"
-              value={profile?.pix_key ? `***${profile.pix_key.slice(-4)}` : <span className="text-muted-foreground/50 font-medium">Não cadastrada</span>}
+              value={((profile as any)?.pix_key_masked ?? profile?.pix_key) ? ((profile as any)?.pix_key_masked ?? `***${profile!.pix_key!.slice(-4)}`) : <span className="text-muted-foreground/50 font-medium">Não cadastrada</span>}
             />
             <InfoRow
               label="Membro desde"
