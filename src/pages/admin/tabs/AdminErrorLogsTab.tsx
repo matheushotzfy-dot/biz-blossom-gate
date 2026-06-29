@@ -111,7 +111,7 @@ export default function AdminErrorLogsTab({ profiles }: Props) {
     setBusy(true);
     const openIds = errors.filter(e => !e.resolved).map(e => e.id);
     if (openIds.length === 0) { setBusy(false); setConfirmAction(null); return; }
-    const { error } = await supabase.from("error_logs").update({ resolved: true } as any).in("id", openIds);
+    const { error } = await supabase.from("error_logs").update({ resolved: true }).in("id", openIds);
     setBusy(false); setConfirmAction(null);
     if (error) { toast.error("Erro: " + error.message); return; }
     toast.success(`${openIds.length} erro(s) resolvido(s)`);
