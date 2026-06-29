@@ -670,7 +670,7 @@ function PermissionsGrid({ grouped, perms, onToggle }: {
 
 // ---------------- Audit dialog ----------------
 function AuditDialog({ row, rows, onClose }: {
-  row: StaffRow | null; rows: any[]; onClose: () => void;
+  row: StaffRow | null; rows: Tables<"staff_audit_log">[]; onClose: () => void;
 }) {
   if (!row) return null;
   return (
