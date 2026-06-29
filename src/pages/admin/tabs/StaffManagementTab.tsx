@@ -422,7 +422,7 @@ function ActionBtn({ icon: Icon, label, onClick, hoverTone }: {
 
 // ---------------- Dialog header (shared) ----------------
 function DetailDialogHeader({ title, subtitle, icon: Icon, onClose, tone = "primary" }: {
-  title: string; subtitle?: string; icon: any; onClose: () => void;
+  title: string; subtitle?: string; icon: LucideIcon; onClose: () => void;
   tone?: "primary" | "success" | "warning";
 }) {
   const toneCls = {
