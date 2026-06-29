@@ -161,7 +161,7 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
         supabase.from("transactions").select("id, user_id, product_id, amount, fee_amount, net_amount, status, payment_method, customer_name, customer_email, customer_phone, customer_document, created_at").eq("user_id", profile.user_id).order("created_at", { ascending: false }).limit(200),
         supabase.from("custom_user_fees").select("id, user_id, pix_percentage, pix_fixed, card_percentage, card_fixed, boleto_percentage, boleto_fixed, withdrawal_fee, max_ticket, admin_user_id").eq("user_id", profile.user_id).maybeSingle(),
         supabase.from("balance_adjustments").select("id, user_id, amount, type, reason, admin_user_id, created_at").eq("user_id", profile.user_id).order("created_at", { ascending: false }).limit(50),
-        supabase.from("pix_keys").select("id, key_type, key_value, created_at").eq("user_id", profile.user_id),
+        supabase.rpc("admin_reveal_pix_keys", { _user_id: profile.user_id }),
         supabase.from("disputes").select("id, seller_user_id, transaction_id, amount, type, status, reason, created_at").eq("seller_user_id", profile.user_id).order("created_at", { ascending: false }).limit(50),
         supabase.from("retention_settings").select("id, user_id, pix_retention_pct, card_retention_pct, retention_days, card_release_days").eq("user_id", profile.user_id).maybeSingle(),
         supabase.from("ip_logs").select("ip, user_agent, country, source, created_at").eq("user_id", profile.user_id).order("created_at", { ascending: false }).limit(50),
@@ -178,6 +178,20 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
       if (pixRes.data) setUserPixKeys(pixRes.data as PixKey[]);
       if (disputesRes.data) setUserDisputes(disputesRes.data as Dispute[]);
       if (ipRes.data) setIpHistory(ipRes.data as IpLog[]);
+
+      // Admin reveals plaintext sensitive fields for the selected seller
+      try {
+        const { data: revealed } = await supabase.rpc("admin_reveal_profile", { _user_id: profile.user_id });
+        const r = Array.isArray(revealed) ? revealed[0] : revealed;
+        if (r) {
+          setSelectedUser(prev => prev ? ({
+            ...prev,
+            document_number: r.document_number ?? prev.document_number,
+            pix_key: r.pix_key ?? prev.pix_key,
+            pix_key_type: r.pix_key_type ?? prev.pix_key_type,
+          }) : prev);
+        }
+      } catch (e) { /* admin reveal optional */ }
 
       setSelectedAcquirerId(profile.acquirer_id || "");
       setAdminNotes(profile.admin_notes || "");
@@ -1160,7 +1174,7 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
                             </div>
                             <div className="flex-1">
                               <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">{pk.key_type}</p>
-                              <p className="text-sm font-mono text-foreground mt-0.5">{(pk as any).key_value_masked ?? pk.key_value ?? "•••"}</p>
+                              <p className="text-sm font-mono text-foreground mt-0.5">{pk.key_value ?? (pk as any).key_value_masked ?? "•••"}</p>
                             </div>
                             <p className="text-[10px] text-muted-foreground">{new Date(pk.created_at).toLocaleDateString("pt-BR")}</p>
                             <Button size="sm" variant="ghost" className="h-8 w-8 p-0 text-destructive hover:bg-destructive/10" onClick={() => handleDeletePixKey(pk.id)} title="Remover chave">
@@ -1173,7 +1187,7 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
                     {selectedUser?.pix_key && (
                       <div className="mt-4 rounded-xl border border-warning/15 bg-warning/5 p-3">
                         <p className="text-[10px] text-warning font-bold mb-1">PIX Legado (perfil)</p>
-                        <p className="text-xs font-mono text-muted-foreground">{selectedUser.pix_key_type}: {(selectedUser as any).pix_key_masked ?? selectedUser.pix_key ?? "•••"}</p>
+                        <p className="text-xs font-mono text-muted-foreground">{selectedUser.pix_key_type}: {selectedUser.pix_key ?? (selectedUser as any).pix_key_masked ?? "•••"}</p>
                       </div>
                     )}
                   </PremiumPanel>
