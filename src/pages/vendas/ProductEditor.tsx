@@ -6,7 +6,7 @@ import { useInvalidateAll } from "@/hooks/useQueryData";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { motion, AnimatePresence } from "framer-motion";
-import type { Tables } from "@/integrations/supabase/types";
+import type { Tables, TablesInsert, TablesUpdate } from "@/integrations/supabase/types";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -415,7 +415,7 @@ export default function ProductEditor() {
  if (isNew && !createdProductId) {
  const slug = crypto.randomUUID().slice(0, 8);
  const checkoutUrl = `${window.location.origin}/pay/${slug}`;
- const { data: newProduct, error } = await supabase.from("products").insert({ ...productData, status: "draft", user_id: user.id, checkout_url: checkoutUrl } as any).select("*").maybeSingle();
+ const { data: newProduct, error } = await supabase.from("products").insert({ ...productData, status: "draft", user_id: user.id, checkout_url: checkoutUrl } as TablesInsert<"products">).select("*").maybeSingle();
  if (error || !newProduct) { toast.error("Erro ao criar produto"); return; }
 
  if (deliveryType === "digital") {
@@ -425,11 +425,11 @@ export default function ProductEditor() {
  title: name.trim(),
  description: description.trim() || null,
  is_published: false,
- } as any);
+ } satisfies TablesInsert<"courses">);
  }
 
  setCreatedProductId(newProduct.id);
- setProduct(newProduct as any);
+ setProduct(newProduct);
  toast.success("Produto criado com sucesso! Continue configurando.");
  invalidateAll(["products", "courses"]);
  setActiveTab("configuracoes");
@@ -437,8 +437,8 @@ export default function ProductEditor() {
   } else {
   // Auto-promove de 'draft' para 'active' quando todos os campos essenciais foram preenchidos.
   // Não toca em status definidos pelo admin (pending_review/inactive).
-  const updatePayload: any = { ...productData };
-  const currentStatus = (product as any)?.status;
+  const updatePayload: TablesUpdate<"products"> = { ...productData };
+  const currentStatus = product?.status;
   const hasAllEssentials = name.trim().length > 1 && priceNum >= 1 && (description.trim().length >= 10) && !!imageUrl;
   if (currentStatus === "draft" && hasAllEssentials) {
     updatePayload.status = "active";
@@ -457,7 +457,7 @@ export default function ProductEditor() {
  title: name.trim(),
  description: description.trim() || null,
  is_published: false,
- } as any);
+ } satisfies TablesInsert<"courses">);
  }
  }
 
@@ -507,7 +507,7 @@ export default function ProductEditor() {
  checkout_email_confirm: product.checkout_email_confirm,
  affiliate_enabled: product.affiliate_enabled,
  affiliate_commission: product.affiliate_commission,
- } as any).select("id").maybeSingle();
+ } satisfies TablesInsert<"products">).select("id").maybeSingle();
  if (error) { toast.error("Erro ao duplicar"); return; }
  toast.success("Produto duplicado com sucesso!");
  invalidateAll(["products"]);
@@ -577,10 +577,10 @@ export default function ProductEditor() {
        co_producer_email: email,
        split_percentage: split,
        status: "pending",
-     } as any).select().maybeSingle();
-     if (error || !data) { toast.error("Erro ao convidar co-produtor"); return; }
-     setCoProductionsList(prev => [data, ...prev]);
-     await supabase.from("products").update({ co_production_enabled: true, co_producer_email: email, co_production_split: split } as any).eq("id", effectiveProductId).eq("user_id", user.id);
+      } satisfies TablesInsert<"co_productions">).select().maybeSingle();
+      if (error || !data) { toast.error("Erro ao convidar co-produtor"); return; }
+      setCoProductionsList(prev => [data, ...prev]);
+      await supabase.from("products").update({ co_production_enabled: true, co_producer_email: email, co_production_split: split } satisfies TablesUpdate<"products">).eq("id", effectiveProductId).eq("user_id", user.id);
      setCoProductionEnabled(true);
      toast.success("Convite enviado!");
    } finally {
@@ -1432,7 +1432,7 @@ function TabOrderBump({ isNew, orderBumps, allProducts, availableForBump, select
  {orderBumps.length > 0 ? (
  <div className="space-y-2">
  {orderBumps.map((bump: Record<string, any>, i: number) => {
- const prod = allProducts.find((p: Record<string, any>) => p.id === bump.bump_product_id);
+ const prod = allProducts.find((p: Record<string, any>) => p.id === bump.bump_product_id) as Record<string, any> | undefined;
  return (
  <motion.div
  key={bump.id}
@@ -2592,8 +2592,8 @@ function TabConteudo({ productId, isNew }: { productId?: string; isNew: boolean 
     if (!user || creating) return;
     setCreating(true);
     const { data, error } = await supabase.from("courses").insert({
-      user_id: user.id, product_id: productId, title: "Novo Curso", is_published: false
-    } as any).select().maybeSingle();
+      user_id: user.id, product_id: productId!, title: "Novo Curso", is_published: false
+    } satisfies TablesInsert<"courses">).select().maybeSingle();
     setCreating(false);
     if (error || !data) { toast.error("Erro ao criar curso"); return; }
     navigate(`/vendas/conteudo/${data.id}/builder`);
