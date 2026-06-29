@@ -462,6 +462,51 @@ export type Database = {
           },
         ]
       }
+      anticipations: {
+        Row: {
+          created_at: string
+          fee_amount: number
+          gross_amount: number
+          id: string
+          idempotency_key: string
+          max_days: number
+          net_amount: number
+          status: string
+          transaction_ids: string[]
+          tx_count: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          fee_amount?: number
+          gross_amount?: number
+          id?: string
+          idempotency_key: string
+          max_days: number
+          net_amount?: number
+          status?: string
+          transaction_ids?: string[]
+          tx_count?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          fee_amount?: number
+          gross_amount?: number
+          id?: string
+          idempotency_key?: string
+          max_days?: number
+          net_amount?: number
+          status?: string
+          transaction_ids?: string[]
+          tx_count?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       api_idempotency_keys: {
         Row: {
           api_key_id: string
@@ -4106,6 +4151,29 @@ export type Database = {
         Returns: string
       }
       release_due_card_holds: { Args: never; Returns: number }
+      request_anticipation: {
+        Args: { _idempotency_key: string; _max_days: number; _user_id: string }
+        Returns: {
+          created_at: string
+          fee_amount: number
+          gross_amount: number
+          id: string
+          idempotency_key: string
+          max_days: number
+          net_amount: number
+          status: string
+          transaction_ids: string[]
+          tx_count: number
+          updated_at: string
+          user_id: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "anticipations"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       resolve_commission_pct: {
         Args: { _seller: string; _staff: string }
         Returns: number
