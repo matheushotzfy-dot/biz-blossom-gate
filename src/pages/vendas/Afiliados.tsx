@@ -327,7 +327,7 @@ export default function Afiliados() {
                             <td className="px-8 py-4 text-right text-sm font-bold text-muted-foreground tabular-nums">{fmt(Number(p.price))}</td>
                             <td className="px-8 py-4 text-right">
                               <span className="text-[10px] font-black text-success bg-success/10 px-2.5 py-1 rounded-lg border border-success/20 tabular-nums uppercase">
-                                {(p as any).affiliate_commission || 30}%
+                                {p.affiliate_commission || 30}%
                               </span>
                             </td>
                             <td className="px-8 py-4 text-right text-sm font-black text-foreground tabular-nums">{pLinks}</td>
