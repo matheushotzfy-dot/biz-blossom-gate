@@ -158,10 +158,10 @@ export default function AdminAcquirersTab() {
       if (["failed", "refused"].includes(t.status)) stats[aid].refused++;
       if (t.status === "refunded") stats[aid].refunded++;
     });
-    const medTxIds = new Set((dispRes.data || []).filter((d: any) => d.type === "medpix" || d.type === "med").map((d: any) => d.transaction_id));
+    const medTxIds = new Set((dispRes.data || []).filter(d => d.type === "medpix" || d.type === "med").map(d => d.transaction_id));
     if (medTxIds.size > 0) {
       const { data: medTx } = await supabase.from("transactions").select("user_id").in("id", Array.from(medTxIds) as string[]);
-      (medTx || []).forEach((t: any) => {
+      (medTx || []).forEach(t => {
         const aid = sellerAcq.get(t.user_id); if (aid && stats[aid]) stats[aid].medpix++;
       });
     }
