@@ -185,21 +185,40 @@ export default function Dashboard() {
   const balance = availableBalance;
 
   const chartData = useMemo(() => {
-    const isSingleDay = (isCustom && customRange?.from && (!customRange.to || differenceInDays(customRange.to, customRange.from) === 0)) || (!isCustom && selectedPeriod.days === 0);
-    
-    if (isSingleDay) {
-      // Logic for hourly sales
-      const salesByHour = new Map<number, number>();
-      const targetDate = isCustom ? new Date(customRange!.from!) : brasiliaToday();
-      const targetDateStr = targetDate.toLocaleDateString("pt-BR", { timeZone: "America/Sao_Paulo" });
+    // Resolve the actual window (start/end) for the selected period or custom range
+    let start: Date;
+    let end: Date;
+    const today = brasiliaToday();
 
+    if (isCustom && customRange?.from) {
+      start = new Date(customRange.from);
+      start.setHours(0, 0, 0, 0);
+      end = new Date(customRange.to ?? customRange.from);
+      end.setHours(23, 59, 59, 999);
+    } else if (selectedPeriod.days === 0) {
+      start = new Date(today);
+      start.setHours(0, 0, 0, 0);
+      end = new Date(today);
+      end.setHours(23, 59, 59, 999);
+    } else {
+      end = new Date(today);
+      end.setHours(23, 59, 59, 999);
+      start = new Date(today);
+      start.setDate(start.getDate() - (selectedPeriod.days - 1));
+      start.setHours(0, 0, 0, 0);
+    }
+
+    const spanDays = differenceInDays(end, start) + 1;
+    const isSingleDay = spanDays <= 1;
+
+    // 1) HOURLY (single day)
+    if (isSingleDay) {
+      const salesByHour = new Map<number, number>();
       filteredTx.forEach(t => {
         if (t.status !== "completed") return;
-        const date = new Date(t.created_at);
-        const hour = date.getHours();
+        const hour = new Date(t.created_at).getHours();
         salesByHour.set(hour, (salesByHour.get(hour) || 0) + Number(t.net_amount));
       });
-
       return Array.from({ length: 24 }, (_, i) => ({
         name: `${i}h`,
         vendas: salesByHour.get(i) || 0,
@@ -207,32 +226,48 @@ export default function Dashboard() {
       }));
     }
 
-    const days = Math.max(selectedPeriod.days, 1);
-    const startDate = new Date(brasiliaToday());
-    startDate.setDate(startDate.getDate() - (days - 1));
-    const revenueByDate = new Map<string, number>();
-    
-    // Use transactions for overall history or filteredTx for specific range
-    const txSource = isCustom ? filteredTx : transactions;
-    
-    for (const t of txSource) {
-      if (t.status !== "completed") continue;
-      const dateKey = toBrasiliaDate(t.created_at);
-      revenueByDate.set(dateKey, (revenueByDate.get(dateKey) || 0) + Number(t.net_amount));
+    // 2) MONTHLY (span > 60 days)
+    if (spanDays > 60) {
+      const byMonth = new Map<string, number>();
+      filteredTx.forEach(t => {
+        if (t.status !== "completed") return;
+        const d = new Date(t.created_at);
+        const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
+        byMonth.set(key, (byMonth.get(key) || 0) + Number(t.net_amount));
+      });
+      const result: Array<{ name: string; vendas: number; fullLabel: string }> = [];
+      const cursor = new Date(start.getFullYear(), start.getMonth(), 1);
+      const last = new Date(end.getFullYear(), end.getMonth(), 1);
+      while (cursor <= last) {
+        const key = `${cursor.getFullYear()}-${String(cursor.getMonth() + 1).padStart(2, "0")}`;
+        result.push({
+          name: cursor.toLocaleDateString("pt-BR", { month: "short" }).replace(".", ""),
+          vendas: byMonth.get(key) || 0,
+          fullLabel: cursor.toLocaleDateString("pt-BR", { month: "long", year: "numeric" }),
+        });
+        cursor.setMonth(cursor.getMonth() + 1);
+      }
+      return result;
     }
 
-    return Array.from({ length: days }, (_, i) => {
-      const d = new Date(startDate);
+    // 3) DAILY (default)
+    const revenueByDate = new Map<string, number>();
+    filteredTx.forEach(t => {
+      if (t.status !== "completed") return;
+      const dateKey = toBrasiliaDate(t.created_at);
+      revenueByDate.set(dateKey, (revenueByDate.get(dateKey) || 0) + Number(t.net_amount));
+    });
+    return Array.from({ length: spanDays }, (_, i) => {
+      const d = new Date(start);
       d.setDate(d.getDate() + i);
       const dateStr = d.toLocaleDateString("pt-BR", { timeZone: "America/Sao_Paulo" });
-      const label = d.toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit" });
-      return { 
-        name: label, 
+      return {
+        name: d.toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit" }),
         vendas: revenueByDate.get(dateStr) || 0,
-        fullLabel: d.toLocaleDateString("pt-BR", { day: "2-digit", month: "long" })
+        fullLabel: d.toLocaleDateString("pt-BR", { day: "2-digit", month: "long" }),
       };
     });
-  }, [transactions, filteredTx, selectedPeriod.days, isCustom, customRange]);
+  }, [filteredTx, selectedPeriod.days, isCustom, customRange]);
 
   const activity = useMemo(() => {
     const tx = transactions.slice(0, 10).map((t) => ({
@@ -250,9 +285,19 @@ export default function Dashboard() {
   const hour = new Date().getHours();
   const greeting = hour < 12 ? "Bom dia" : hour < 18 ? "Boa tarde" : "Boa noite";
   const nickname = profile?.nickname || profile?.full_name?.split(" ")[0] || "Vendedor";
-  const statusLabel = (s: string) => s === 'completed' ? 'Aprovado' : s === 'pending' ? 'Pendente' : s === 'refunded' ? 'Reembolso' : 'Chargeback';
-  const statusBg = (s: string) => s === 'completed' ? 'bg-success/10' : s === 'pending' ? 'bg-warning/10' : 'bg-destructive/10';
-  const statusColor = (s: string) => s === 'completed' ? 'text-success' : s === 'pending' ? 'text-warning' : 'text-destructive';
+  const statusLabel = (s: string) => s === 'completed' ? 'Aprovado' : s === 'pending' ? 'Pendente' : s === 'refunded' ? 'Reembolso' : s === 'chargeback' ? 'Chargeback' : s === 'failed' || s === 'refused' ? 'Falhou' : 'Chargeback';
+  const statusBg = (s: string) =>
+    s === 'completed' ? 'bg-emerald-500/20 ring-1 ring-emerald-500/40'
+    : s === 'pending' ? 'bg-amber-400/25 ring-1 ring-amber-400/50'
+    : s === 'chargeback' ? 'bg-red-600/25 ring-1 ring-red-600/50'
+    : s === 'refunded' ? 'bg-muted/40 ring-1 ring-border/40'
+    : 'bg-red-500/20 ring-1 ring-red-500/40';
+  const statusColor = (s: string) =>
+    s === 'completed' ? 'text-emerald-500'
+    : s === 'pending' ? 'text-amber-500'
+    : s === 'chargeback' ? 'text-red-600'
+    : s === 'refunded' ? 'text-muted-foreground'
+    : 'text-red-500';
 
   const pendingBalance = useMemo(() => {
     return transactions
