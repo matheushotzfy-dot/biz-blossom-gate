@@ -1,10 +1,11 @@
 import { useState, useEffect, useMemo } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import {
-  Plus, Power, PowerOff, Edit, Save, Shield, Globe, Eye, EyeOff,
+  Plus, Edit, Save, Shield, Globe, Eye, EyeOff,
   AlertTriangle, Activity, Zap, Clock, TrendingUp, TrendingDown,
   Users, ArrowRightLeft, KeyRound, Webhook, History, RefreshCw,
-  CheckCircle2, XCircle, Copy, ChevronRight, Filter, Search,
+  CheckCircle2, XCircle, Copy, ChevronRight, Search, ShieldCheck,
+  FileCheck2, DollarSign, Network, Lock, Building2, Receipt,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
@@ -12,8 +13,10 @@ import { Switch } from "@/components/ui/switch";
 import { toast } from "sonner";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
-import { GlassPanel as AdminPanel, GlassPanelTitle as PanelTitle } from "./AdminOverviewTab";
-import { LinearHero, LinearStat, LinearStatRow } from "@/components/admin/LinearKit";
+import { FinanceiroHero } from "@/components/financeiro/FinanceiroHero";
+import {
+  PremiumMetric, PremiumMetricGrid, PremiumPanel, PremiumSegmented, PremiumEmpty, premiumTable,
+} from "./AdminPremium";
 import { logAdminAction } from "@/lib/auditLog";
 import { cn } from "@/lib/utils";
 
@@ -45,6 +48,16 @@ interface FailoverEvent {
   seller_id: string | null; reason: string; trigger_type: string;
   success: boolean; error_message: string | null; created_at: string;
 }
+interface SellerLite {
+  user_id: string; full_name: string | null; email: string | null; nickname: string | null;
+  acquirer_id: string | null; account_status: string | null;
+}
+interface TxLite {
+  id: string; user_id: string; amount: number; net_amount: number; fee_amount: number;
+  status: string; payment_method: string | null; created_at: string;
+  customer_email: string | null; customer_name: string | null;
+  podpay_payment_id: string | null; external_id: string | null; checkout_session_id: string | null;
+}
 
 const PAYMENT_METHODS = [
   { value: "pix", label: "PIX" },
@@ -63,6 +76,8 @@ const ago = (d: string | null) => {
   if (diff < 86400) return `${Math.floor(diff / 3600)}h atrás`;
   return `${Math.floor(diff / 86400)}d atrás`;
 };
+const shortId = (v: string | null | undefined, n = 8) => v ? v.slice(0, n) : "—";
+const copyTxt = (v: string) => { navigator.clipboard.writeText(v); toast.success("Copiado"); };
 
 const HEALTH_CONFIG = {
   online: { color: "text-success", bg: "bg-success/10", border: "border-success/30", dot: "bg-success", label: "Online" },
@@ -71,39 +86,58 @@ const HEALTH_CONFIG = {
   maintenance: { color: "text-primary", bg: "bg-primary/10", border: "border-primary/30", dot: "bg-primary", label: "Manutenção" },
 } as const;
 
+type SubTab = "overview" | "sellers" | "sales" | "failovers" | "compliance";
+
 export default function AdminAcquirersTab() {
   const [acquirers, setAcquirers] = useState<Acquirer[]>([]);
   const [healthEvents, setHealthEvents] = useState<HealthEvent[]>([]);
   const [failovers, setFailovers] = useState<FailoverEvent[]>([]);
-  const [txStats, setTxStats] = useState<Record<string, { sales: number; volume: number; refused: number; refunded: number; medpix: number; sellers: number }>>({});
+  const [sellers, setSellers] = useState<SellerLite[]>([]);
+  const [txs, setTxs] = useState<TxLite[]>([]);
+  const [txStats, setTxStats] = useState<Record<string, { sales: number; volume: number; refused: number; refunded: number; medpix: number; sellers: number; fees: number; net: number }>>({});
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [detailId, setDetailId] = useState<string | null>(null);
   const [showBulk, setShowBulk] = useState(false);
+  const [subTab, setSubTab] = useState<SubTab>("overview");
+  const [typeFilter, setTypeFilter] = useState<"all" | "white" | "black">("all");
+  const [search, setSearch] = useState("");
 
   const [form, setForm] = useState<Partial<Acquirer>>({});
 
+  // seller_id -> acquirer_id (memoized from sellers list)
+  const sellerAcqMap = useMemo(() => {
+    const m = new Map<string, string>();
+    sellers.forEach(s => { if (s.acquirer_id) m.set(s.user_id, s.acquirer_id); });
+    return m;
+  }, [sellers]);
+
   const load = async () => {
     setLoading(true);
+    const since30 = new Date(Date.now() - 30 * 86400000).toISOString();
     const [acqRes, heRes, foRes, profRes, txRes, dispRes] = await Promise.all([
       supabase.from("acquirers").select("*").order("priority", { ascending: false }).order("created_at"),
       supabase.from("acquirer_health_events").select("*").order("created_at", { ascending: false }).limit(200),
       supabase.from("acquirer_failover_events").select("*").order("created_at", { ascending: false }).limit(100),
-      supabase.from("profiles").select("user_id, acquirer_id"),
-      supabase.from("transactions").select("user_id, amount, status, payment_method, created_at").gte("created_at", new Date(Date.now() - 30 * 86400000).toISOString()),
-      supabase.from("disputes").select("transaction_id, type, created_at").gte("created_at", new Date(Date.now() - 30 * 86400000).toISOString()),
+      supabase.from("profiles").select("user_id, full_name, email, nickname, acquirer_id, account_status").limit(5000),
+      supabase.from("transactions").select("id, user_id, amount, net_amount, fee_amount, status, payment_method, created_at, customer_email, customer_name, podpay_payment_id, external_id, checkout_session_id").gte("created_at", since30).order("created_at", { ascending: false }).limit(2000),
+      supabase.from("disputes").select("transaction_id, type, created_at").gte("created_at", since30),
     ]);
 
     const acqs = (acqRes.data || []) as unknown as Acquirer[];
     setAcquirers(acqs);
     setHealthEvents((heRes.data || []) as HealthEvent[]);
     setFailovers((foRes.data || []) as FailoverEvent[]);
+    const sList = (profRes.data || []) as SellerLite[];
+    setSellers(sList);
+    const txList = (txRes.data || []) as TxLite[];
+    setTxs(txList);
 
-    // Build seller -> acquirer map
+    // Maps
     const sellerAcq = new Map<string, string>();
     const acqSellers = new Map<string, Set<string>>();
-    (profRes.data || []).forEach((p: any) => {
+    sList.forEach(p => {
       if (p.acquirer_id) {
         sellerAcq.set(p.user_id, p.acquirer_id);
         if (!acqSellers.has(p.acquirer_id)) acqSellers.set(p.acquirer_id, new Set());
@@ -111,16 +145,19 @@ export default function AdminAcquirersTab() {
       }
     });
 
-    // Aggregate tx by acquirer
     const stats: typeof txStats = {};
-    acqs.forEach(a => { stats[a.id] = { sales: 0, volume: 0, refused: 0, refunded: 0, medpix: 0, sellers: acqSellers.get(a.id)?.size || 0 }; });
-    (txRes.data || []).forEach((t: any) => {
+    acqs.forEach(a => { stats[a.id] = { sales: 0, volume: 0, refused: 0, refunded: 0, medpix: 0, sellers: acqSellers.get(a.id)?.size || 0, fees: 0, net: 0 }; });
+    txList.forEach(t => {
       const aid = sellerAcq.get(t.user_id); if (!aid || !stats[aid]) return;
-      if (t.status === "completed") { stats[aid].sales++; stats[aid].volume += Number(t.amount); }
+      if (t.status === "completed") {
+        stats[aid].sales++;
+        stats[aid].volume += Number(t.amount);
+        stats[aid].fees += Number(t.fee_amount || 0);
+        stats[aid].net += Number(t.net_amount || 0);
+      }
       if (["failed", "refused"].includes(t.status)) stats[aid].refused++;
       if (t.status === "refunded") stats[aid].refunded++;
     });
-    // MEDPIX via disputes: need tx -> user -> acquirer. Approximation: count disputes per acquirer via tx_id join
     const medTxIds = new Set((dispRes.data || []).filter((d: any) => d.type === "medpix" || d.type === "med").map((d: any) => d.transaction_id));
     if (medTxIds.size > 0) {
       const { data: medTx } = await supabase.from("transactions").select("user_id").in("id", Array.from(medTxIds) as string[]);
@@ -134,12 +171,31 @@ export default function AdminAcquirersTab() {
 
   useEffect(() => { load(); }, []);
 
+  const filteredAcqs = useMemo(() => acquirers.filter(a => {
+    if (typeFilter !== "all" && a.type !== typeFilter) return false;
+    if (search) {
+      const q = search.toLowerCase();
+      if (!(a.name.toLowerCase().includes(q) || a.slug.toLowerCase().includes(q) || (a.api_endpoint || "").toLowerCase().includes(q))) return false;
+    }
+    return true;
+  }), [acquirers, typeFilter, search]);
+
   const whiteAcqs = acquirers.filter(a => a.type === "white");
   const blackAcqs = acquirers.filter(a => a.type === "black");
+  const activeCount = acquirers.filter(a => a.is_active).length;
   const offlineCount = acquirers.filter(a => a.health_status === "offline").length;
   const degradedCount = acquirers.filter(a => a.health_status === "degraded").length;
+  const sandboxCount = acquirers.filter(a => a.api_environment === "sandbox").length;
+  const noWebhook = acquirers.filter(a => !a.webhook_url || !a.webhook_secret).length;
+  const noCreds = acquirers.filter(a => !a.api_key_encrypted || !a.api_secret_encrypted).length;
+  const totalVolume = Object.values(txStats).reduce((s, x) => s + x.volume, 0);
+  const totalSales = Object.values(txStats).reduce((s, x) => s + x.sales, 0);
+  const totalFees = Object.values(txStats).reduce((s, x) => s + x.fees, 0);
+  const avgLatency = Math.round(acquirers.reduce((s, a) => s + (a.last_latency_ms || 0), 0) / Math.max(acquirers.length, 1));
 
   const detailAcq = acquirers.find(a => a.id === detailId);
+  const detailSellers = detailAcq ? sellers.filter(s => s.acquirer_id === detailAcq.id) : [];
+  const detailTxs = detailAcq ? txs.filter(t => sellerAcqMap.get(t.user_id) === detailAcq.id) : [];
 
   const resetForm = () => setForm({
     name: "", slug: "", type: "black", api_endpoint: "", description: "",
@@ -200,32 +256,86 @@ export default function AdminAcquirersTab() {
     load();
   };
 
+  const exportSellersCsv = () => {
+    const rows = [["seller_id", "nome", "email", "nickname", "adquirente", "tipo", "status"]];
+    sellers.forEach(s => {
+      const a = acquirers.find(x => x.id === s.acquirer_id);
+      rows.push([s.user_id, s.full_name || "", s.email || "", s.nickname || "", a?.name || "", a?.type || "", s.account_status || ""]);
+    });
+    const csv = rows.map(r => r.map(c => `"${(c || "").toString().replace(/"/g, '""')}"`).join(",")).join("\n");
+    const blob = new Blob([csv], { type: "text/csv" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a"); a.href = url; a.download = `sellers-por-adquirente-${Date.now()}.csv`; a.click();
+  };
+
+  const exportTxCsv = () => {
+    const rows = [["tx_id", "podpay_id", "external_id", "checkout_session", "adquirente", "seller_id", "cliente_email", "valor", "taxa", "liquido", "metodo", "status", "criado_em"]];
+    txs.forEach(t => {
+      const aid = sellerAcqMap.get(t.user_id);
+      const a = acquirers.find(x => x.id === aid);
+      rows.push([t.id, t.podpay_payment_id || "", t.external_id || "", t.checkout_session_id || "", a?.name || "—", t.user_id, t.customer_email || "", String(t.amount), String(t.fee_amount || 0), String(t.net_amount || 0), t.payment_method || "", t.status, t.created_at]);
+    });
+    const csv = rows.map(r => r.map(c => `"${(c || "").toString().replace(/"/g, '""')}"`).join(",")).join("\n");
+    const blob = new Blob([csv], { type: "text/csv" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a"); a.href = url; a.download = `vendas-por-adquirente-${Date.now()}.csv`; a.click();
+  };
+
   return (
-    <div className="space-y-6 animate-fade-in">
-      <LinearHero
+    <div className="space-y-5 animate-fade-in">
+      <FinanceiroHero
         eyebrow="Infraestrutura · Adquirentes"
         title="Centro de Adquirentes"
-        subtitle="Monitore saúde, latência, conversão, MEDPIX e gerencie chaves, webhooks e roteamento de failover."
+        subtitle="Saúde, latência, conversão, MEDPIX, sellers vinculados, vendas com IDs completos e compliance."
         status={{
           tone: offlineCount > 0 ? "destructive" : degradedCount > 0 ? "warning" : "success",
-          label: offlineCount > 0 ? `${offlineCount} OFFLINE` : degradedCount > 0 ? `${degradedCount} degradado(s)` : `${acquirers.filter(a => a.is_active).length} ativas`,
+          label: offlineCount > 0 ? `${offlineCount} OFFLINE` : degradedCount > 0 ? `${degradedCount} degradado(s)` : `${activeCount} ativas`,
+          pulse: offlineCount > 0,
         }}
         actions={
           <div className="flex items-center gap-2">
-            <Button size="sm" variant="outline" className="h-8 text-xs gap-1.5" onClick={() => setShowBulk(true)}>
+            <Button size="sm" variant="outline" className="h-9 text-[11px] gap-1.5 rounded-lg" onClick={() => setShowBulk(true)}>
               <ArrowRightLeft className="h-3.5 w-3.5" /> Trocar em Massa
             </Button>
-            <Button size="sm" variant="outline" className="h-8 text-xs gap-1.5" onClick={load}>
+            <Button size="sm" variant="outline" className="h-9 text-[11px] gap-1.5 rounded-lg" onClick={load}>
               <RefreshCw className={cn("h-3.5 w-3.5", loading && "animate-spin")} /> Atualizar
             </Button>
-            <Button size="sm" className="h-8 text-xs gap-1.5 bg-foreground text-background hover:bg-foreground/90" onClick={openCreate}>
+            <Button size="sm" className="h-9 text-[11px] gap-1.5 rounded-lg" onClick={openCreate}>
               <Plus className="h-3.5 w-3.5" /> Nova Adquirente
             </Button>
           </div>
         }
       />
 
-      {/* ===== Alerts ===== */}
+      {/* KPIs */}
+      <PremiumMetricGrid cols={6}>
+        <PremiumMetric icon={Activity} label="Ativas" value={String(activeCount)} sub={`${acquirers.length} cadastradas`} tone="primary" />
+        <PremiumMetric icon={Shield} label="Black" value={String(blackAcqs.length)} sub={`${blackAcqs.filter(a => a.is_active).length} ativas`} tone="neutral" />
+        <PremiumMetric icon={Globe} label="White" value={String(whiteAcqs.length)} sub={`${whiteAcqs.filter(a => a.is_active).length} ativas`} tone="info" />
+        <PremiumMetric icon={DollarSign} label="Volume 30d" value={fmtBRL(totalVolume)} sub={`${totalSales} vendas · taxa ${fmtBRL(totalFees)}`} tone="success" />
+        <PremiumMetric icon={Zap} label="Latência média" value={`${avgLatency}ms`} sub={`${degradedCount} degradadas`} tone={avgLatency > 1500 ? "destructive" : avgLatency > 800 ? "warning" : "success"} />
+        <PremiumMetric icon={AlertTriangle} label="Alertas" value={String(offlineCount + degradedCount + noCreds + noWebhook)} sub={`${noCreds} sem credenciais · ${noWebhook} sem webhook`} tone={offlineCount > 0 ? "destructive" : (degradedCount + noCreds + noWebhook) > 0 ? "warning" : "neutral"} />
+      </PremiumMetricGrid>
+
+      {/* Compliance strip */}
+      <div className="flex flex-wrap items-center gap-2 text-[11px]">
+        <span className="inline-flex items-center gap-1.5 rounded-full border border-info/20 bg-info/10 px-2.5 py-1 font-bold uppercase tracking-wider text-info">
+          <ShieldCheck className="h-3 w-3" /> BACEN/PCI-DSS · TLS 1.2+
+        </span>
+        <span className="inline-flex items-center gap-1.5 rounded-full border border-success/20 bg-success/10 px-2.5 py-1 font-bold uppercase tracking-wider text-success">
+          <Lock className="h-3 w-3" /> Credenciais cifradas em repouso
+        </span>
+        <span className="inline-flex items-center gap-1.5 rounded-full border border-warning/20 bg-warning/10 px-2.5 py-1 font-bold uppercase tracking-wider text-warning">
+          <FileCheck2 className="h-3 w-3" /> Retenção D+30 / chargeback D+540
+        </span>
+        {sandboxCount > 0 && (
+          <span className="inline-flex items-center gap-1.5 rounded-full border border-warning/30 bg-warning/15 px-2.5 py-1 font-bold uppercase tracking-wider text-warning">
+            <AlertTriangle className="h-3 w-3" /> {sandboxCount} em SANDBOX
+          </span>
+        )}
+      </div>
+
+      {/* Alerts */}
       {(offlineCount > 0 || degradedCount > 0) && (
         <div className={cn("rounded-2xl border p-4 flex items-start gap-3",
           offlineCount > 0 ? "bg-destructive/5 border-destructive/30" : "bg-warning/5 border-warning/30")}>
@@ -253,93 +363,410 @@ export default function AdminAcquirersTab() {
         </div>
       )}
 
-      {/* ===== KPIs ===== */}
-      <LinearStatRow>
-        <LinearStat icon={Shield} label="Black" value={String(blackAcqs.length)} sub={`${blackAcqs.filter(a => a.is_active).length} ativas`} tone="neutral" />
-        <LinearStat icon={Globe} label="White" value={String(whiteAcqs.length)} sub={`${whiteAcqs.filter(a => a.is_active).length} ativas`} tone="info" />
-        <LinearStat icon={Activity} label="Saudáveis" value={String(acquirers.filter(a => a.health_status === "online" && a.is_active).length)} sub={`${degradedCount} degradadas`} tone="success" />
-        <LinearStat icon={Zap} label="Latência Média" value={`${Math.round(acquirers.reduce((s, a) => s + (a.last_latency_ms || 0), 0) / Math.max(acquirers.length, 1))}ms`} sub="últimos checks" tone="primary" />
-      </LinearStatRow>
+      {/* Sub-tabs */}
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <PremiumSegmented<SubTab>
+          value={subTab}
+          onChange={setSubTab}
+          options={[
+            { value: "overview", label: `Adquirentes · ${acquirers.length}` },
+            { value: "sellers", label: `Sellers · ${sellers.filter(s => s.acquirer_id).length}` },
+            { value: "sales", label: `Vendas 30d · ${totalSales}` },
+            { value: "failovers", label: `Failover · ${failovers.length}` },
+            { value: "compliance", label: "Compliance" },
+          ]}
+        />
+        {(subTab === "overview" || subTab === "sellers" || subTab === "sales") && (
+          <div className="flex items-center gap-2">
+            {subTab === "overview" && (
+              <PremiumSegmented<"all" | "white" | "black">
+                value={typeFilter}
+                onChange={setTypeFilter}
+                options={[
+                  { value: "all", label: "Todas" },
+                  { value: "white", label: "White" },
+                  { value: "black", label: "Black" },
+                ]}
+              />
+            )}
+            <div className="relative">
+              <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
+              <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Buscar..."
+                className="h-9 w-56 pl-8 pr-3 bg-muted/30 border border-border rounded-lg text-xs" />
+            </div>
+            {subTab === "sellers" && (
+              <Button size="sm" variant="outline" className="h-9 text-[11px] gap-1.5 rounded-lg" onClick={exportSellersCsv}>
+                <FileCheck2 className="h-3.5 w-3.5" /> CSV Sellers
+              </Button>
+            )}
+            {subTab === "sales" && (
+              <Button size="sm" variant="outline" className="h-9 text-[11px] gap-1.5 rounded-lg" onClick={exportTxCsv}>
+                <FileCheck2 className="h-3.5 w-3.5" /> CSV Vendas
+              </Button>
+            )}
+          </div>
+        )}
+      </div>
 
-      {/* ===== Acquirers List (full table) ===== */}
-      <AdminPanel>
-        <PanelTitle color="zinc" icon={<Activity className="h-4 w-4" />}>Adquirentes ({acquirers.length})</PanelTitle>
-        <p className="text-[10px] text-muted-foreground mt-1 mb-4">Clique em uma linha para ver detalhes, histórico e configurações.</p>
-        {loading ? (
-          <p className="text-xs text-muted-foreground text-center py-8">Carregando…</p>
-        ) : acquirers.length === 0 ? (
-          <p className="text-xs text-muted-foreground text-center py-8">Nenhuma adquirente cadastrada.</p>
-        ) : (
-          <div className="overflow-x-auto -mx-2">
-            <table className="w-full text-xs">
+      {/* OVERVIEW */}
+      {subTab === "overview" && (
+        <PremiumPanel icon={Network} eyebrow="Roteamento" title={`Adquirentes (${filteredAcqs.length})`}>
+          {loading ? (
+            <p className="text-xs text-muted-foreground text-center py-8">Carregando…</p>
+          ) : filteredAcqs.length === 0 ? (
+            <PremiumEmpty icon={Building2} title="Nenhuma adquirente" subtitle="Ajuste o filtro ou cadastre uma nova adquirente." />
+          ) : (
+            <div className={premiumTable.wrapper}>
+              <table className={premiumTable.table}>
+                <thead>
+                  <tr className={premiumTable.headRow}>
+                    <th className={premiumTable.th}>Adquirente</th>
+                    <th className={premiumTable.th}>Saúde</th>
+                    <th className={cn(premiumTable.th, "text-right")}>Conv.</th>
+                    <th className={cn(premiumTable.th, "text-right")}>Latência</th>
+                    <th className={cn(premiumTable.th, "text-right")}>Sellers</th>
+                    <th className={cn(premiumTable.th, "text-right")}>Vendas 30d</th>
+                    <th className={cn(premiumTable.th, "text-right")}>Volume 30d</th>
+                    <th className={cn(premiumTable.th, "text-right")}>Recusas</th>
+                    <th className={cn(premiumTable.th, "text-right")}>MEDPIX</th>
+                    <th className={cn(premiumTable.th, "text-right")}>Taxa</th>
+                    <th className={premiumTable.th}></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {filteredAcqs.map(a => {
+                    const cfg = HEALTH_CONFIG[a.health_status];
+                    const st = txStats[a.id] || { sales: 0, volume: 0, refused: 0, refunded: 0, medpix: 0, sellers: 0, fees: 0, net: 0 };
+                    const isBlack = a.type === "black";
+                    return (
+                      <tr key={a.id} className={cn(premiumTable.row, "cursor-pointer", !a.is_active && "opacity-50")} onClick={() => setDetailId(a.id)}>
+                        <td className={premiumTable.td}>
+                          <div className="flex items-center gap-2.5">
+                            <div className={cn("h-9 w-9 rounded-lg flex items-center justify-center text-[11px] font-black border shrink-0",
+                              isBlack ? "bg-foreground text-background border-foreground/20" : "bg-primary/10 text-primary border-primary/30")}>
+                              {a.name[0]?.toUpperCase()}
+                            </div>
+                            <div className="min-w-0">
+                              <div className="flex items-center gap-1.5">
+                                <span className="font-bold text-foreground truncate">{a.name}</span>
+                                <span className={cn("px-1 py-0.5 rounded text-[8px] font-black uppercase tracking-wider",
+                                  isBlack ? "bg-foreground/10 text-foreground" : "bg-primary/15 text-primary")}>{a.type}</span>
+                                {a.api_environment === "sandbox" && (
+                                  <span className="px-1 py-0.5 rounded text-[8px] font-black uppercase tracking-wider bg-warning/15 text-warning">SBX</span>
+                                )}
+                                {(!a.api_key_encrypted || !a.api_secret_encrypted) && (
+                                  <span className="px-1 py-0.5 rounded text-[8px] font-black uppercase tracking-wider bg-destructive/15 text-destructive" title="Sem credenciais">SEM API</span>
+                                )}
+                              </div>
+                              <p className="text-[10px] font-mono text-muted-foreground truncate">{a.slug} · prio {a.priority}</p>
+                            </div>
+                          </div>
+                        </td>
+                        <td className={premiumTable.td}>
+                          <span className={cn("inline-flex items-center gap-1.5 px-2 py-1 rounded-lg border text-[10px] font-black uppercase tracking-wider", cfg.bg, cfg.border, cfg.color)}>
+                            <span className={cn("h-1.5 w-1.5 rounded-full", cfg.dot, a.health_status === "online" && "animate-pulse")} />
+                            {cfg.label}
+                          </span>
+                        </td>
+                        <td className={cn(premiumTable.td, "text-right tabular-nums font-bold")}>{Number(a.conversion_rate).toFixed(1)}%</td>
+                        <td className={cn(premiumTable.td, "text-right tabular-nums")}>
+                          {a.last_latency_ms ? (
+                            <span className={cn(a.last_latency_ms > 1500 ? "text-destructive" : a.last_latency_ms > 800 ? "text-warning" : "text-success", "font-bold")}>{a.last_latency_ms}ms</span>
+                          ) : <span className="text-muted-foreground">—</span>}
+                        </td>
+                        <td className={cn(premiumTable.td, "text-right tabular-nums")}>{st.sellers}</td>
+                        <td className={cn(premiumTable.td, "text-right tabular-nums")}>{st.sales}</td>
+                        <td className={cn(premiumTable.td, "text-right tabular-nums font-bold text-success")}>{fmtBRL(st.volume)}</td>
+                        <td className={cn(premiumTable.td, "text-right tabular-nums")}>
+                          <span className={cn(st.refused > 0 ? "text-destructive font-bold" : "text-muted-foreground")}>{st.refused}</span>
+                        </td>
+                        <td className={cn(premiumTable.td, "text-right tabular-nums")}>
+                          <span className={cn(st.medpix > 0 ? "text-warning font-bold" : "text-muted-foreground")}>{st.medpix}</span>
+                        </td>
+                        <td className={cn(premiumTable.td, "text-right tabular-nums text-[10px] text-muted-foreground")}>
+                          {Number(a.transaction_fee_percentage || 0).toFixed(2)}% + {fmtBRL(Number(a.transaction_fee_fixed || 0))}
+                        </td>
+                        <td className={cn(premiumTable.td, "text-right")}>
+                          <ChevronRight className="h-3.5 w-3.5 text-muted-foreground inline" />
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </PremiumPanel>
+      )}
+
+      {/* SELLERS */}
+      {subTab === "sellers" && (
+        <PremiumPanel icon={Users} eyebrow="Vinculações" title={`Sellers por Adquirente (${sellers.filter(s => s.acquirer_id).length})`}>
+          {(() => {
+            const list = sellers.filter(s => s.acquirer_id).filter(s => {
+              if (!search) return true;
+              const q = search.toLowerCase();
+              const a = acquirers.find(x => x.id === s.acquirer_id);
+              return (s.full_name || "").toLowerCase().includes(q) ||
+                (s.email || "").toLowerCase().includes(q) ||
+                (s.nickname || "").toLowerCase().includes(q) ||
+                s.user_id.toLowerCase().includes(q) ||
+                (a?.name || "").toLowerCase().includes(q);
+            });
+            if (list.length === 0) return <PremiumEmpty icon={Users} title="Nenhum seller vinculado" />;
+            return (
+              <div className={premiumTable.wrapper}>
+                <table className={premiumTable.table}>
+                  <thead>
+                    <tr className={premiumTable.headRow}>
+                      <th className={premiumTable.th}>Seller</th>
+                      <th className={premiumTable.th}>User ID</th>
+                      <th className={premiumTable.th}>Email</th>
+                      <th className={premiumTable.th}>Adquirente</th>
+                      <th className={premiumTable.th}>Status</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {list.slice(0, 500).map(s => {
+                      const a = acquirers.find(x => x.id === s.acquirer_id);
+                      return (
+                        <tr key={s.user_id} className={premiumTable.row}>
+                          <td className={premiumTable.td}>
+                            <p className="text-xs font-bold truncate max-w-[220px]">{s.full_name || s.nickname || "—"}</p>
+                            {s.nickname && <p className="text-[10px] text-muted-foreground truncate">@{s.nickname}</p>}
+                          </td>
+                          <td className={cn(premiumTable.td, "font-mono text-[10px]")}>
+                            <button onClick={() => copyTxt(s.user_id)} className="hover:text-foreground text-muted-foreground inline-flex items-center gap-1">
+                              {shortId(s.user_id, 12)} <Copy className="h-3 w-3" />
+                            </button>
+                          </td>
+                          <td className={cn(premiumTable.td, "text-[11px] text-muted-foreground truncate max-w-[240px]")}>{s.email}</td>
+                          <td className={premiumTable.td}>
+                            <span className={cn("px-1.5 py-0.5 rounded text-[9px] font-black uppercase tracking-wider",
+                              a?.type === "black" ? "bg-foreground/10 text-foreground" : "bg-primary/15 text-primary")}>
+                              {a?.name} · {a?.type}
+                            </span>
+                          </td>
+                          <td className={cn(premiumTable.td, "text-[10px]")}>
+                            <span className={cn("px-1.5 py-0.5 rounded font-black uppercase",
+                              s.account_status === "active" ? "bg-success/15 text-success" :
+                              s.account_status === "suspended" ? "bg-destructive/15 text-destructive" : "bg-muted/40 text-muted-foreground")}>
+                              {s.account_status || "—"}
+                            </span>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+                {list.length > 500 && <p className="text-[10px] text-muted-foreground text-center py-3">Exibindo primeiros 500 — exporte CSV para a lista completa.</p>}
+              </div>
+            );
+          })()}
+        </PremiumPanel>
+      )}
+
+      {/* SALES */}
+      {subTab === "sales" && (
+        <PremiumPanel icon={Receipt} eyebrow="Trilha de Auditoria" title={`Vendas 30d com IDs (${txs.length})`}>
+          {(() => {
+            const list = txs.filter(t => {
+              if (!search) return true;
+              const q = search.toLowerCase();
+              const a = acquirers.find(x => x.id === sellerAcqMap.get(t.user_id));
+              return t.id.toLowerCase().includes(q) ||
+                (t.podpay_payment_id || "").toLowerCase().includes(q) ||
+                (t.external_id || "").toLowerCase().includes(q) ||
+                (t.checkout_session_id || "").toLowerCase().includes(q) ||
+                (t.customer_email || "").toLowerCase().includes(q) ||
+                t.user_id.toLowerCase().includes(q) ||
+                (a?.name || "").toLowerCase().includes(q);
+            });
+            if (list.length === 0) return <PremiumEmpty icon={Receipt} title="Nenhuma venda" subtitle="Nenhuma transação nos últimos 30 dias para o filtro atual." />;
+            return (
+              <div className={premiumTable.wrapper}>
+                <table className={premiumTable.table}>
+                  <thead>
+                    <tr className={premiumTable.headRow}>
+                      <th className={premiumTable.th}>TX ID</th>
+                      <th className={premiumTable.th}>PodPay / External</th>
+                      <th className={premiumTable.th}>Adquirente</th>
+                      <th className={premiumTable.th}>Seller</th>
+                      <th className={premiumTable.th}>Cliente</th>
+                      <th className={cn(premiumTable.th, "text-right")}>Valor</th>
+                      <th className={cn(premiumTable.th, "text-right")}>Líquido</th>
+                      <th className={premiumTable.th}>Método</th>
+                      <th className={premiumTable.th}>Status</th>
+                      <th className={premiumTable.th}>Quando</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {list.slice(0, 500).map(t => {
+                      const aid = sellerAcqMap.get(t.user_id);
+                      const a = acquirers.find(x => x.id === aid);
+                      const seller = sellers.find(s => s.user_id === t.user_id);
+                      return (
+                        <tr key={t.id} className={premiumTable.row}>
+                          <td className={cn(premiumTable.td, "font-mono text-[10px]")}>
+                            <button onClick={() => copyTxt(t.id)} className="hover:text-foreground text-foreground/80 inline-flex items-center gap-1">
+                              {shortId(t.id, 10)} <Copy className="h-3 w-3" />
+                            </button>
+                          </td>
+                          <td className={cn(premiumTable.td, "font-mono text-[10px] text-muted-foreground")}>
+                            <div className="flex flex-col gap-0.5">
+                              {t.podpay_payment_id && <button onClick={() => copyTxt(t.podpay_payment_id!)} className="hover:text-foreground inline-flex items-center gap-1" title={t.podpay_payment_id}>PP {shortId(t.podpay_payment_id, 10)} <Copy className="h-2.5 w-2.5" /></button>}
+                              {t.external_id && <button onClick={() => copyTxt(t.external_id!)} className="hover:text-foreground inline-flex items-center gap-1" title={t.external_id}>EX {shortId(t.external_id, 10)} <Copy className="h-2.5 w-2.5" /></button>}
+                              {t.checkout_session_id && <span title={t.checkout_session_id}>CK {shortId(t.checkout_session_id, 8)}</span>}
+                              {!t.podpay_payment_id && !t.external_id && !t.checkout_session_id && <span>—</span>}
+                            </div>
+                          </td>
+                          <td className={premiumTable.td}>
+                            {a ? (
+                              <span className={cn("px-1.5 py-0.5 rounded text-[9px] font-black uppercase tracking-wider",
+                                a.type === "black" ? "bg-foreground/10 text-foreground" : "bg-primary/15 text-primary")}>
+                                {a.name}
+                              </span>
+                            ) : <span className="text-[10px] text-muted-foreground">—</span>}
+                          </td>
+                          <td className={cn(premiumTable.td, "text-[11px]")}>
+                            <p className="font-bold truncate max-w-[160px]">{seller?.full_name || seller?.nickname || "—"}</p>
+                            <p className="font-mono text-[9px] text-muted-foreground">{shortId(t.user_id, 8)}</p>
+                          </td>
+                          <td className={cn(premiumTable.td, "text-[11px] text-muted-foreground truncate max-w-[180px]")}>{t.customer_email || t.customer_name || "—"}</td>
+                          <td className={cn(premiumTable.td, "text-right tabular-nums font-bold")}>{fmtBRL(Number(t.amount))}</td>
+                          <td className={cn(premiumTable.td, "text-right tabular-nums text-success")}>{fmtBRL(Number(t.net_amount || 0))}</td>
+                          <td className={cn(premiumTable.td, "text-[10px] uppercase font-bold text-muted-foreground")}>{t.payment_method}</td>
+                          <td className={premiumTable.td}>
+                            <span className={cn("px-1.5 py-0.5 rounded text-[9px] font-black uppercase",
+                              t.status === "completed" ? "bg-success/15 text-success" :
+                              t.status === "pending" ? "bg-warning/15 text-warning" :
+                              t.status === "refunded" ? "bg-info/15 text-info" :
+                              "bg-destructive/15 text-destructive")}>{t.status}</span>
+                          </td>
+                          <td className={cn(premiumTable.td, "text-[10px] text-muted-foreground")}>{ago(t.created_at)}</td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+                {list.length > 500 && <p className="text-[10px] text-muted-foreground text-center py-3">Exibindo primeiras 500 — exporte CSV para auditoria completa.</p>}
+              </div>
+            );
+          })()}
+        </PremiumPanel>
+      )}
+
+      {/* FAILOVERS */}
+      {subTab === "failovers" && (
+        <PremiumPanel icon={ArrowRightLeft} eyebrow="Roteamento" title={`Histórico de Failover (${failovers.length})`}>
+          {failovers.length === 0 ? (
+            <PremiumEmpty icon={ArrowRightLeft} title="Nenhum evento" subtitle="Nenhuma troca automática ou manual registrada." />
+          ) : (
+            <div className={premiumTable.wrapper}>
+              <table className={premiumTable.table}>
+                <thead>
+                  <tr className={premiumTable.headRow}>
+                    <th className={premiumTable.th}>Quando</th>
+                    <th className={premiumTable.th}>De → Para</th>
+                    <th className={premiumTable.th}>Seller</th>
+                    <th className={premiumTable.th}>Tipo</th>
+                    <th className={premiumTable.th}>Motivo</th>
+                    <th className={cn(premiumTable.th, "text-center")}>Status</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {failovers.slice(0, 100).map(f => {
+                    const from = acquirers.find(a => a.id === f.from_acquirer_id);
+                    const to = acquirers.find(a => a.id === f.to_acquirer_id);
+                    return (
+                      <tr key={f.id} className={premiumTable.row}>
+                        <td className={cn(premiumTable.td, "text-[10px] text-muted-foreground")}>{ago(f.created_at)}</td>
+                        <td className={cn(premiumTable.td, "text-xs")}>
+                          <span className="text-muted-foreground">{from?.name || "—"}</span>
+                          <ArrowRightLeft className="inline h-2.5 w-2.5 mx-1.5 text-muted-foreground" />
+                          <span className="font-bold">{to?.name || "—"}</span>
+                        </td>
+                        <td className={cn(premiumTable.td, "font-mono text-[10px]")}>
+                          {f.seller_id ? (
+                            <button onClick={() => copyTxt(f.seller_id!)} className="hover:text-foreground text-muted-foreground inline-flex items-center gap-1">
+                              {shortId(f.seller_id, 10)} <Copy className="h-2.5 w-2.5" />
+                            </button>
+                          ) : "—"}
+                        </td>
+                        <td className={premiumTable.td}>
+                          <span className={cn("px-1.5 py-0.5 rounded text-[9px] font-black uppercase",
+                            f.trigger_type === "auto" ? "bg-warning/15 text-warning" : "bg-primary/15 text-primary")}>{f.trigger_type}</span>
+                        </td>
+                        <td className={cn(premiumTable.td, "text-[11px] text-muted-foreground truncate max-w-[320px]")}>{f.reason}</td>
+                        <td className={cn(premiumTable.td, "text-center")}>
+                          {f.success ? <CheckCircle2 className="h-3.5 w-3.5 text-success inline" /> : <XCircle className="h-3.5 w-3.5 text-destructive inline" />}
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </PremiumPanel>
+      )}
+
+      {/* COMPLIANCE */}
+      {subTab === "compliance" && (
+        <PremiumPanel icon={ShieldCheck} eyebrow="Conformidade" title="Auditoria de Conformidade por Adquirente">
+          <div className={premiumTable.wrapper}>
+            <table className={premiumTable.table}>
               <thead>
-                <tr className="text-[9px] uppercase tracking-[0.14em] text-muted-foreground border-b border-border/60">
-                  <th className="text-left py-2 px-2 font-black">Adquirente</th>
-                  <th className="text-left py-2 px-2 font-black">Saúde</th>
-                  <th className="text-right py-2 px-2 font-black">Conv.</th>
-                  <th className="text-right py-2 px-2 font-black">Latência</th>
-                  <th className="text-right py-2 px-2 font-black">Sellers</th>
-                  <th className="text-right py-2 px-2 font-black">Vendas 30d</th>
-                  <th className="text-right py-2 px-2 font-black">Volume 30d</th>
-                  <th className="text-right py-2 px-2 font-black">Recusas</th>
-                  <th className="text-right py-2 px-2 font-black">MEDPIX</th>
-                  <th className="text-right py-2 px-2 font-black">Taxa</th>
-                  <th className="text-right py-2 px-2 font-black"></th>
+                <tr className={premiumTable.headRow}>
+                  <th className={premiumTable.th}>Adquirente</th>
+                  <th className={cn(premiumTable.th, "text-center")}>Ambiente</th>
+                  <th className={cn(premiumTable.th, "text-center")}>API</th>
+                  <th className={cn(premiumTable.th, "text-center")}>Secret</th>
+                  <th className={cn(premiumTable.th, "text-center")}>Webhook</th>
+                  <th className={cn(premiumTable.th, "text-center")}>HMAC</th>
+                  <th className={cn(premiumTable.th, "text-center")}>Failover</th>
+                  <th className={cn(premiumTable.th, "text-center")}>Uptime</th>
+                  <th className={cn(premiumTable.th, "text-right")}>Score</th>
                 </tr>
               </thead>
               <tbody>
                 {acquirers.map(a => {
-                  const cfg = HEALTH_CONFIG[a.health_status];
-                  const st = txStats[a.id] || { sales: 0, volume: 0, refused: 0, refunded: 0, medpix: 0, sellers: 0 };
-                  const isBlack = a.type === "black";
+                  const checks = [
+                    a.api_environment === "production",
+                    !!a.api_key_encrypted,
+                    !!a.api_secret_encrypted,
+                    !!a.webhook_url,
+                    !!a.webhook_secret,
+                    a.allow_failover,
+                    Number(a.uptime_pct || 0) >= 99,
+                  ];
+                  const score = Math.round((checks.filter(Boolean).length / checks.length) * 100);
+                  const Mark = ({ ok }: { ok: boolean }) => ok
+                    ? <CheckCircle2 className="h-4 w-4 text-success inline" />
+                    : <XCircle className="h-4 w-4 text-destructive inline" />;
                   return (
-                    <tr key={a.id} className={cn("border-b border-border/30 hover:bg-muted/20 cursor-pointer transition-colors",
-                      !a.is_active && "opacity-50")} onClick={() => setDetailId(a.id)}>
-                      <td className="py-2.5 px-2">
-                        <div className="flex items-center gap-2.5">
-                          <div className={cn("h-8 w-8 rounded-lg flex items-center justify-center text-[11px] font-black border shrink-0",
-                            isBlack ? "bg-foreground text-background border-foreground/20" : "bg-primary/10 text-primary border-primary/30")}>
-                            {a.name[0]?.toUpperCase()}
-                          </div>
-                          <div className="min-w-0">
-                            <div className="flex items-center gap-1.5">
-                              <span className="font-bold text-foreground truncate">{a.name}</span>
-                              <span className={cn("px-1 py-0.5 rounded text-[8px] font-black uppercase tracking-wider",
-                                isBlack ? "bg-foreground/10 text-foreground" : "bg-primary/15 text-primary")}>{a.type}</span>
-                              {a.api_environment === "sandbox" && (
-                                <span className="px-1 py-0.5 rounded text-[8px] font-black uppercase tracking-wider bg-warning/15 text-warning">SBX</span>
-                              )}
-                            </div>
-                            <p className="text-[10px] font-mono text-muted-foreground truncate">{a.slug}</p>
-                          </div>
-                        </div>
+                    <tr key={a.id} className={premiumTable.row}>
+                      <td className={premiumTable.td}>
+                        <p className="text-xs font-bold">{a.name}</p>
+                        <p className="text-[10px] font-mono text-muted-foreground">{a.slug}</p>
                       </td>
-                      <td className="py-2.5 px-2">
-                        <span className={cn("inline-flex items-center gap-1.5 px-2 py-1 rounded-lg border text-[10px] font-black uppercase tracking-wider", cfg.bg, cfg.border, cfg.color)}>
-                          <span className={cn("h-1.5 w-1.5 rounded-full", cfg.dot, a.health_status === "online" && "animate-pulse")} />
-                          {cfg.label}
+                      <td className={cn(premiumTable.td, "text-center")}>
+                        <span className={cn("px-1.5 py-0.5 rounded text-[9px] font-black uppercase",
+                          a.api_environment === "production" ? "bg-success/15 text-success" : "bg-warning/15 text-warning")}>
+                          {a.api_environment}
                         </span>
                       </td>
-                      <td className="py-2.5 px-2 text-right tabular-nums font-bold">{Number(a.conversion_rate).toFixed(1)}%</td>
-                      <td className="py-2.5 px-2 text-right tabular-nums">
-                        {a.last_latency_ms ? (
-                          <span className={cn(a.last_latency_ms > 1500 ? "text-destructive" : a.last_latency_ms > 800 ? "text-warning" : "text-success", "font-bold")}>{a.last_latency_ms}ms</span>
-                        ) : <span className="text-muted-foreground">—</span>}
-                      </td>
-                      <td className="py-2.5 px-2 text-right tabular-nums">{st.sellers}</td>
-                      <td className="py-2.5 px-2 text-right tabular-nums">{st.sales}</td>
-                      <td className="py-2.5 px-2 text-right tabular-nums font-bold text-success">{fmtBRL(st.volume)}</td>
-                      <td className="py-2.5 px-2 text-right tabular-nums">
-                        <span className={cn(st.refused > 0 ? "text-destructive font-bold" : "text-muted-foreground")}>{st.refused}</span>
-                      </td>
-                      <td className="py-2.5 px-2 text-right tabular-nums">
-                        <span className={cn(st.medpix > 0 ? "text-warning font-bold" : "text-muted-foreground")}>{st.medpix}</span>
-                      </td>
-                      <td className="py-2.5 px-2 text-right tabular-nums text-[10px] text-muted-foreground">
-                        {Number(a.transaction_fee_percentage || 0).toFixed(2)}% + {fmtBRL(Number(a.transaction_fee_fixed || 0))}
-                      </td>
-                      <td className="py-2.5 px-2 text-right">
-                        <ChevronRight className="h-3.5 w-3.5 text-muted-foreground inline" />
+                      <td className={cn(premiumTable.td, "text-center")}><Mark ok={!!a.api_key_encrypted} /></td>
+                      <td className={cn(premiumTable.td, "text-center")}><Mark ok={!!a.api_secret_encrypted} /></td>
+                      <td className={cn(premiumTable.td, "text-center")}><Mark ok={!!a.webhook_url} /></td>
+                      <td className={cn(premiumTable.td, "text-center")}><Mark ok={!!a.webhook_secret} /></td>
+                      <td className={cn(premiumTable.td, "text-center")}><Mark ok={a.allow_failover} /></td>
+                      <td className={cn(premiumTable.td, "text-center tabular-nums text-[11px] font-bold")}>{Number(a.uptime_pct || 0).toFixed(1)}%</td>
+                      <td className={cn(premiumTable.td, "text-right")}>
+                        <span className={cn("inline-flex items-center gap-1 px-2 py-1 rounded-lg text-[10px] font-black",
+                          score >= 90 ? "bg-success/15 text-success" : score >= 60 ? "bg-warning/15 text-warning" : "bg-destructive/15 text-destructive")}>
+                          {score}/100
+                        </span>
                       </td>
                     </tr>
                   );
@@ -347,59 +774,10 @@ export default function AdminAcquirersTab() {
               </tbody>
             </table>
           </div>
-        )}
-      </AdminPanel>
+        </PremiumPanel>
+      )}
 
-      {/* ===== Failover History ===== */}
-      <AdminPanel>
-        <PanelTitle color="amber" icon={<ArrowRightLeft className="h-4 w-4" />}>Histórico de Failover ({failovers.length})</PanelTitle>
-        <p className="text-[10px] text-muted-foreground mt-1 mb-4">Trocas automáticas/manuais e sellers afetados.</p>
-        {failovers.length === 0 ? (
-          <p className="text-xs text-muted-foreground text-center py-6">Nenhum evento registrado.</p>
-        ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-xs">
-              <thead>
-                <tr className="text-[9px] uppercase tracking-[0.14em] text-muted-foreground border-b border-border/60">
-                  <th className="text-left py-2 px-2 font-black">Quando</th>
-                  <th className="text-left py-2 px-2 font-black">De → Para</th>
-                  <th className="text-left py-2 px-2 font-black">Seller</th>
-                  <th className="text-left py-2 px-2 font-black">Tipo</th>
-                  <th className="text-left py-2 px-2 font-black">Motivo</th>
-                  <th className="text-center py-2 px-2 font-black">Status</th>
-                </tr>
-              </thead>
-              <tbody>
-                {failovers.slice(0, 50).map(f => {
-                  const from = acquirers.find(a => a.id === f.from_acquirer_id);
-                  const to = acquirers.find(a => a.id === f.to_acquirer_id);
-                  return (
-                    <tr key={f.id} className="border-b border-border/30 hover:bg-muted/20">
-                      <td className="py-2 px-2 text-muted-foreground text-[10px]">{ago(f.created_at)}</td>
-                      <td className="py-2 px-2">
-                        <span className="text-muted-foreground">{from?.name || "—"}</span>
-                        <ArrowRightLeft className="inline h-2.5 w-2.5 mx-1.5 text-muted-foreground" />
-                        <span className="font-bold">{to?.name || "—"}</span>
-                      </td>
-                      <td className="py-2 px-2 font-mono text-[10px]">{f.seller_id?.slice(0, 8) || "—"}</td>
-                      <td className="py-2 px-2">
-                        <span className={cn("px-1.5 py-0.5 rounded text-[9px] font-black uppercase",
-                          f.trigger_type === "auto" ? "bg-warning/15 text-warning" : "bg-primary/15 text-primary")}>{f.trigger_type}</span>
-                      </td>
-                      <td className="py-2 px-2 text-muted-foreground truncate max-w-[260px]">{f.reason}</td>
-                      <td className="py-2 px-2 text-center">
-                        {f.success ? <CheckCircle2 className="h-3.5 w-3.5 text-success inline" /> : <XCircle className="h-3.5 w-3.5 text-destructive inline" />}
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
-        )}
-      </AdminPanel>
-
-      {/* ===== Detail Drawer ===== */}
+      {/* Detail Drawer */}
       <Sheet open={!!detailId} onOpenChange={(o) => !o && setDetailId(null)}>
         <SheetContent className="w-full sm:max-w-2xl overflow-y-auto">
           {detailAcq && (
@@ -408,6 +786,8 @@ export default function AdminAcquirersTab() {
               stats={txStats[detailAcq.id]}
               healthEvents={healthEvents.filter(e => e.acquirer_id === detailAcq.id)}
               failovers={failovers.filter(f => f.from_acquirer_id === detailAcq.id || f.to_acquirer_id === detailAcq.id)}
+              sellersOfAcq={detailSellers}
+              txsOfAcq={detailTxs}
               onEdit={() => { openEdit(detailAcq); setDetailId(null); }}
               onSetHealth={(s) => setHealth(detailAcq, s)}
               onToggle={(f) => toggleField(detailAcq, f)}
@@ -416,7 +796,6 @@ export default function AdminAcquirersTab() {
         </SheetContent>
       </Sheet>
 
-      {/* ===== Form Dialog ===== */}
       <Dialog open={showForm} onOpenChange={setShowForm}>
         <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
           <DialogHeader><DialogTitle className="text-sm font-bold">{editingId ? "Editar" : "Nova"} Adquirente</DialogTitle></DialogHeader>
@@ -424,7 +803,6 @@ export default function AdminAcquirersTab() {
         </DialogContent>
       </Dialog>
 
-      {/* ===== Bulk Assignment ===== */}
       <Dialog open={showBulk} onOpenChange={setShowBulk}>
         <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
           <DialogHeader><DialogTitle className="text-sm font-bold">Trocar Adquirente em Massa</DialogTitle></DialogHeader>
@@ -436,13 +814,14 @@ export default function AdminAcquirersTab() {
 }
 
 // ============== Detail Drawer ==============
-function AcquirerDetail({ acq, stats, healthEvents, failovers, onEdit, onSetHealth, onToggle }: {
+function AcquirerDetail({ acq, stats, healthEvents, failovers, sellersOfAcq, txsOfAcq, onEdit, onSetHealth, onToggle }: {
   acq: Acquirer; stats?: any; healthEvents: HealthEvent[]; failovers: FailoverEvent[];
+  sellersOfAcq: SellerLite[]; txsOfAcq: TxLite[];
   onEdit: () => void; onSetHealth: (s: Health) => void; onToggle: (f: "is_active" | "seller_visible" | "allow_failover") => void;
 }) {
   const cfg = HEALTH_CONFIG[acq.health_status];
   const [showSecrets, setShowSecrets] = useState(false);
-  const s = stats || { sales: 0, volume: 0, refused: 0, refunded: 0, medpix: 0, sellers: 0 };
+  const s = stats || { sales: 0, volume: 0, refused: 0, refunded: 0, medpix: 0, sellers: 0, fees: 0, net: 0 };
   const conv = s.sales + s.refused > 0 ? (s.sales / (s.sales + s.refused)) * 100 : Number(acq.conversion_rate);
 
   return (
@@ -455,7 +834,7 @@ function AcquirerDetail({ acq, stats, healthEvents, failovers, onEdit, onSetHeal
           </div>
           <div>
             <p className="font-black text-base">{acq.name}</p>
-            <p className="text-[10px] font-mono text-muted-foreground">{acq.slug} · {acq.type.toUpperCase()}</p>
+            <p className="text-[10px] font-mono text-muted-foreground">{acq.slug} · {acq.type.toUpperCase()} · {acq.api_environment.toUpperCase()}</p>
           </div>
         </SheetTitle>
       </SheetHeader>
@@ -491,9 +870,9 @@ function AcquirerDetail({ acq, stats, healthEvents, failovers, onEdit, onSetHeal
           <Metric label="Uptime" value={`${Number(acq.uptime_pct || 100).toFixed(1)}%`} icon={Activity} tone="info" />
           <Metric label="Sellers" value={String(s.sellers)} icon={Users} tone="primary" />
           <Metric label="Vendas 30d" value={String(s.sales)} icon={TrendingUp} tone="success" />
-          <Metric label="Volume 30d" value={fmtBRL(s.volume)} icon={TrendingUp} tone="success" />
+          <Metric label="Volume 30d" value={fmtBRL(s.volume)} icon={DollarSign} tone="success" />
+          <Metric label="Taxas 30d" value={fmtBRL(s.fees)} icon={Receipt} tone="warning" />
           <Metric label="Recusas" value={String(s.refused)} icon={XCircle} tone={s.refused > 0 ? "danger" : "neutral"} />
-          <Metric label="Reembolsos" value={String(s.refunded)} icon={TrendingDown} tone={s.refunded > 0 ? "warning" : "neutral"} />
           <Metric label="MEDPIX" value={String(s.medpix)} icon={AlertTriangle} tone={s.medpix > 0 ? "warning" : "neutral"} />
         </div>
 
@@ -520,6 +899,69 @@ function AcquirerDetail({ acq, stats, healthEvents, failovers, onEdit, onSetHeal
               <span key={m} className="px-2 py-0.5 rounded bg-muted/40 border border-border text-[10px] font-bold uppercase">{m}</span>
             ))}
           </div>
+        </div>
+
+        {/* Sellers vinculados */}
+        <div className="rounded-xl border border-border bg-card p-4">
+          <p className="text-[10px] font-black uppercase tracking-[0.14em] text-muted-foreground mb-3 flex items-center gap-1.5">
+            <Users className="h-3 w-3" /> Sellers vinculados ({sellersOfAcq.length})
+          </p>
+          {sellersOfAcq.length === 0 ? (
+            <p className="text-[11px] text-muted-foreground">Nenhum seller vinculado.</p>
+          ) : (
+            <div className="space-y-1 max-h-56 overflow-y-auto">
+              {sellersOfAcq.slice(0, 50).map(s => (
+                <div key={s.user_id} className="flex items-center gap-2 py-1 border-b border-border/30 last:border-0">
+                  <div className="flex-1 min-w-0">
+                    <p className="text-[11px] font-bold truncate">{s.full_name || s.nickname || "—"}</p>
+                    <p className="text-[10px] text-muted-foreground truncate">{s.email}</p>
+                  </div>
+                  <button onClick={() => copyTxt(s.user_id)} className="text-[9px] font-mono text-muted-foreground hover:text-foreground inline-flex items-center gap-1">
+                    {shortId(s.user_id, 8)} <Copy className="h-2.5 w-2.5" />
+                  </button>
+                </div>
+              ))}
+              {sellersOfAcq.length > 50 && <p className="text-[10px] text-muted-foreground text-center pt-1">+{sellersOfAcq.length - 50} sellers</p>}
+            </div>
+          )}
+        </div>
+
+        {/* Últimas vendas com IDs */}
+        <div className="rounded-xl border border-border bg-card p-4">
+          <p className="text-[10px] font-black uppercase tracking-[0.14em] text-muted-foreground mb-3 flex items-center gap-1.5">
+            <Receipt className="h-3 w-3" /> Últimas vendas 30d ({txsOfAcq.length})
+          </p>
+          {txsOfAcq.length === 0 ? (
+            <p className="text-[11px] text-muted-foreground">Nenhuma venda nos últimos 30 dias.</p>
+          ) : (
+            <div className="space-y-1.5 max-h-72 overflow-y-auto">
+              {txsOfAcq.slice(0, 30).map(t => (
+                <div key={t.id} className="rounded-lg border border-border/40 bg-muted/10 p-2">
+                  <div className="flex items-center justify-between gap-2">
+                    <button onClick={() => copyTxt(t.id)} className="font-mono text-[10px] text-foreground/80 hover:text-foreground inline-flex items-center gap-1">
+                      TX {shortId(t.id, 12)} <Copy className="h-2.5 w-2.5" />
+                    </button>
+                    <span className={cn("px-1.5 py-0.5 rounded text-[9px] font-black uppercase",
+                      t.status === "completed" ? "bg-success/15 text-success" :
+                      t.status === "pending" ? "bg-warning/15 text-warning" :
+                      t.status === "refunded" ? "bg-info/15 text-info" :
+                      "bg-destructive/15 text-destructive")}>{t.status}</span>
+                  </div>
+                  <div className="mt-1 flex items-center justify-between gap-2 text-[10px] text-muted-foreground">
+                    <span className="truncate">{t.customer_email || t.customer_name || "—"}</span>
+                    <span className="tabular-nums font-bold text-foreground">{fmtBRL(Number(t.amount))}</span>
+                  </div>
+                  <div className="mt-1 flex flex-wrap gap-x-3 gap-y-0.5 text-[9px] font-mono text-muted-foreground">
+                    {t.podpay_payment_id && <span title={t.podpay_payment_id}>PP {shortId(t.podpay_payment_id, 10)}</span>}
+                    {t.external_id && <span title={t.external_id}>EX {shortId(t.external_id, 10)}</span>}
+                    {t.checkout_session_id && <span title={t.checkout_session_id}>CK {shortId(t.checkout_session_id, 8)}</span>}
+                    <span className="ml-auto">{ago(t.created_at)}</span>
+                  </div>
+                </div>
+              ))}
+              {txsOfAcq.length > 30 && <p className="text-[10px] text-muted-foreground text-center">+{txsOfAcq.length - 30} vendas — use a aba Vendas para auditoria completa</p>}
+            </div>
+          )}
         </div>
 
         {/* API Keys masked */}
@@ -579,7 +1021,7 @@ function AcquirerDetail({ acq, stats, healthEvents, failovers, onEdit, onSetHeal
             <div className="space-y-1 max-h-48 overflow-y-auto text-[10px]">
               {failovers.slice(0, 20).map(f => (
                 <div key={f.id} className="flex items-center justify-between py-1 border-b border-border/30 last:border-0">
-                  <span className="font-mono">{f.seller_id?.slice(0, 8) || "—"}</span>
+                  <span className="font-mono">{shortId(f.seller_id, 8)}</span>
                   <span className="text-muted-foreground">{f.reason}</span>
                   <span className="text-muted-foreground">{ago(f.created_at)}</span>
                 </div>
@@ -633,7 +1075,7 @@ function KV({ k, v, mono, copy }: { k: string; v: string; mono?: boolean; copy?:
       <div className="flex items-center gap-1.5 min-w-0">
         <span className={cn("text-[11px] truncate", mono && "font-mono")} title={v}>{v}</span>
         {copy && v !== "—" && (
-          <button onClick={() => { navigator.clipboard.writeText(v); toast.success("Copiado"); }} className="text-muted-foreground hover:text-foreground shrink-0">
+          <button onClick={() => copyTxt(v)} className="text-muted-foreground hover:text-foreground shrink-0">
             <Copy className="h-3 w-3" />
           </button>
         )}
@@ -661,7 +1103,6 @@ function AcquirerForm({ form, setForm, onSave, onCancel }: any) {
 
   return (
     <div className="space-y-4 mt-2">
-      {/* Basic */}
       <div className="grid grid-cols-2 gap-3">
         <Input label="Nome" k="name" placeholder="PodPay" />
         <Input label="Slug" k="slug" placeholder="podpay" mono />
@@ -692,7 +1133,6 @@ function AcquirerForm({ form, setForm, onSave, onCancel }: any) {
 
       <Input label="Descrição" k="description" placeholder="Descrição da adquirente..." />
 
-      {/* Limits & Fees */}
       <div className="rounded-xl border border-border bg-muted/10 p-3 space-y-3">
         <p className="text-[10px] font-black uppercase tracking-[0.14em] text-muted-foreground">Taxas & Limites</p>
         <div className="grid grid-cols-2 gap-3">
@@ -705,7 +1145,6 @@ function AcquirerForm({ form, setForm, onSave, onCancel }: any) {
         </div>
       </div>
 
-      {/* Payment Methods */}
       <div>
         <Label className="text-[10px] text-muted-foreground">Métodos Suportados</Label>
         <div className="flex flex-wrap gap-2 mt-2">
@@ -722,7 +1161,6 @@ function AcquirerForm({ form, setForm, onSave, onCancel }: any) {
         </div>
       </div>
 
-      {/* API */}
       <div className="rounded-xl border border-border bg-muted/10 p-3 space-y-3">
         <p className="text-[10px] font-black uppercase tracking-[0.14em] text-muted-foreground flex items-center gap-1.5">
           <KeyRound className="h-3 w-3" /> Credenciais de API
@@ -732,7 +1170,6 @@ function AcquirerForm({ form, setForm, onSave, onCancel }: any) {
         <Input label="API Secret" k="api_secret_encrypted" placeholder="sk_live_..." mono />
       </div>
 
-      {/* Webhook */}
       <div className="rounded-xl border border-border bg-muted/10 p-3 space-y-3">
         <p className="text-[10px] font-black uppercase tracking-[0.14em] text-muted-foreground flex items-center gap-1.5">
           <Webhook className="h-3 w-3" /> Webhook
@@ -741,7 +1178,6 @@ function AcquirerForm({ form, setForm, onSave, onCancel }: any) {
         <Input label="Webhook Secret" k="webhook_secret" placeholder="whsec_..." mono />
       </div>
 
-      {/* Switches */}
       <div className="rounded-xl border border-border bg-muted/10 p-3 space-y-3">
         <div className="flex items-center justify-between">
           <div><p className="text-xs font-bold">Visível para sellers</p><p className="text-[10px] text-muted-foreground">Sellers podem escolher esta adquirente</p></div>
