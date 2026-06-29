@@ -62,10 +62,10 @@ export default function AdminAuditTab({ profiles }: Props) {
         }));
       }
       if (source === "all" || source === "staff") {
-        (sRes.data || []).forEach((r: any) => merged.push({
+        (sRes.data || []).forEach((r) => merged.push({
           id: `s-${r.id}`, source: "staff", actor_id: r.staff_user_id,
           actor_role: "staff", action: r.action, entity_type: r.entity_type,
-          entity_id: r.entity_id, details: { before: r.before, after: r.after, ...(r.metadata || {}) },
+          entity_id: r.entity_id, details: { before: r.before, after: r.after, ...((r.metadata as Record<string, unknown>) || {}) },
           created_at: r.created_at,
         }));
       }
