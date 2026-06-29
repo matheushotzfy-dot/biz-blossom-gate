@@ -66,14 +66,14 @@ export default function Antecipacao() {
 
   const enrichedEligible = useMemo(() => {
     const now = Date.now();
-    return stats.eligible.map((tx: any) => {
+    return stats.eligible.map<EligibleTx>((tx) => {
       const daysLeft = tx.retained_until
         ? Math.max(0, Math.ceil((new Date(tx.retained_until).getTime() - now) / 86400000))
         : 0;
       const inWindow = daysLeft <= antecipationDays;
       const fee = inWindow ? tx.retained_amount * antecipationFeeRate * (daysLeft / 15) : 0;
       return { ...tx, daysLeft, inWindow, fee, net: tx.retained_amount - fee };
-    }).sort((a: any, b: any) => a.daysLeft - b.daysLeft);
+    }).sort((a, b) => a.daysLeft - b.daysLeft);
   }, [stats.eligible, antecipationDays]);
 
   return (
