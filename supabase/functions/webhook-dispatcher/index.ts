@@ -124,7 +124,8 @@ async function deliverOne(
       next_retry_at: null,
     }).eq("id", d.id);
   } else {
-    const delay = RETRY_DELAYS_SECONDS[nextAttempt];
+    // RETRY_DELAYS_SECONDS[d.attempt] = wait time after this failed attempt
+    const delay = RETRY_DELAYS_SECONDS[d.attempt] ?? RETRY_DELAYS_SECONDS[RETRY_DELAYS_SECONDS.length - 1];
     await admin.from("webhook_deliveries").update({
       status: "pending",
       attempt: nextAttempt,
