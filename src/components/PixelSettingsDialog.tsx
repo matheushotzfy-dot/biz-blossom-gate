@@ -714,7 +714,7 @@ function SectionLabel({ icon: Icon, children }: { icon: LucideIcon; children: Re
   );
 }
 
-function Field({ label, icon: Icon, hint, children }: { label: string; icon: any; hint?: string; children: React.ReactNode }) {
+function Field({ label, icon: Icon, hint, children }: { label: string; icon: LucideIcon; hint?: string; children: React.ReactNode }) {
   return (
     <div>
       <Label className="text-[10px] font-display font-black uppercase tracking-[0.14em] text-muted-foreground mb-1.5 flex items-center gap-1.5">
