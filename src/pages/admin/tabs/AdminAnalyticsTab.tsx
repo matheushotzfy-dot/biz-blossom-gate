@@ -109,13 +109,14 @@ export default function AdminAnalyticsTab({ fmtCurrency }: Props) {
     setLoading(true);
     (async () => {
       try {
-        const { data: res, error } = await (supabase as any).rpc("get_admin_analytics", {
+        const { data: res, error } = await supabase.rpc("get_admin_analytics", {
           _period_days: PERIOD_DAYS[period],
         });
         if (error) throw error;
-        if (!cancelled) setData(res as AnalyticsPayload);
-      } catch (e: any) {
-        toast.error("Erro ao carregar analytics: " + (e?.message ?? "desconhecido"));
+        if (!cancelled) setData(res as unknown as AnalyticsPayload);
+      } catch (e: unknown) {
+        const msg = e instanceof Error ? e.message : "desconhecido";
+        toast.error("Erro ao carregar analytics: " + msg);
       } finally {
         if (!cancelled) setLoading(false);
       }
