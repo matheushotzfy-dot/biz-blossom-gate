@@ -4047,6 +4047,18 @@ export type Database = {
           blocked: boolean
         }[]
       }
+      claim_webhook_deliveries: {
+        Args: { _limit?: number }
+        Returns: {
+          attempt: number
+          event: string
+          id: string
+          payload: Json
+          transaction_id: string
+          user_id: string
+          webhook_config_id: string
+        }[]
+      }
       current_user_email: { Args: never; Returns: string }
       current_user_has_role: {
         Args: { _role: Database["public"]["Enums"]["app_role"] }
@@ -4150,6 +4162,7 @@ export type Database = {
         Args: { _current_acquirer_id: string }
         Returns: string
       }
+      reap_stuck_webhook_deliveries: { Args: never; Returns: number }
       release_due_card_holds: { Args: never; Returns: number }
       request_anticipation: {
         Args: { _idempotency_key: string; _max_days: number; _user_id: string }
