@@ -344,14 +344,12 @@ export default function CheckoutBuilder() {
  }).eq("id", productId).eq("user_id", user.id);
  setSaving(false);
  setLastSavedAt(new Date());
- setChangeCount(0);
  if (!error) toast.success("Alterações salvas", { duration: 1500 });
  }, [user?.id, productId, buttonColor, checkoutTheme, timerEnabled, timerMinutes, socialProof, guaranteeEnabled, pixEnabled, boletoEnabled, creditCardEnabled, addressRequired, emailConfirm, bannerDesktopPreview, bannerMobilePreview, bannerDesktopFile, bannerMobileFile]);
 
  useEffect(() => {
  if (loading || !product) return;
   if (!initializedRef.current) { initializedRef.current = true; return; }
- setChangeCount(prev => prev + 1);
  if (saveTimeout.current) clearTimeout(saveTimeout.current);
  saveTimeout.current = setTimeout(autoSave, 1200);
  return () => { if (saveTimeout.current) clearTimeout(saveTimeout.current); };
