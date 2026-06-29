@@ -89,7 +89,7 @@ export default function Afiliados() {
   const loadMarketplace = async () => {
     if (!user) return;
     const { data } = await supabase.from("products_public").select("*").eq("status", "active");
-    if (data) setMarketProducts(data.filter((p: any) => p.id));
+    if (data) setMarketProducts(data.filter((p) => p.id) as Tables<"products_public">[]);
   };
 
   useEffect(() => { loadData(); loadMarketplace(); }, [user?.id]);
