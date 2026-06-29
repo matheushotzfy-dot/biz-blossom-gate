@@ -73,6 +73,7 @@ Deno.serve(async (req) => {
       .from("admin_login_attempts")
       .select("id, success")
       .eq("email", trimmedEmail)
+      .eq("scope", "admin")
       .gte("created_at", fifteenMinAgo)
       .eq("success", false);
 
@@ -80,6 +81,7 @@ Deno.serve(async (req) => {
       await adminClient.from("admin_login_attempts").insert({
         email: trimmedEmail,
         success: false,
+        scope: "admin",
       });
 
       return new Response(
@@ -102,6 +104,7 @@ Deno.serve(async (req) => {
       await adminClient.from("admin_login_attempts").insert({
         email: trimmedEmail,
         success: false,
+        scope: "admin",
       });
 
       return new Response(
@@ -130,6 +133,7 @@ Deno.serve(async (req) => {
       await adminClient.from("admin_login_attempts").insert({
         email: trimmedEmail,
         success: false,
+        scope: "admin",
       });
 
       return new Response(
@@ -140,9 +144,10 @@ Deno.serve(async (req) => {
 
     // Log successful login
     await adminClient.from("admin_login_attempts").insert({
-      email: trimmedEmail,
-      success: true,
-    });
+        email: trimmedEmail,
+        success: true,
+        scope: "admin",
+      });
 
     const role = isAdmin ? "admin" : "employee";
 
