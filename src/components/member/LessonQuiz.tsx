@@ -42,10 +42,10 @@ export function LessonQuiz({ lessonId, userId }: Props) {
       supabase.rpc("get_quiz_questions_for_student", { _quiz_id: q.id }),
       supabase.from("quiz_attempts").select("id, score, passed, created_at").eq("quiz_id", q.id).eq("user_id", userId).order("created_at", { ascending: false }),
     ]);
-    const list = ((qs || []) as any[]).map((row) => ({
+    const list = ((qs || []) as Array<Record<string, unknown>>).map((row) => ({
       ...row,
       options: Array.isArray(row.options) ? row.options : (typeof row.options === "string" ? JSON.parse(row.options) : []),
-    })) as Question[];
+    })) as unknown as Question[];
     setQuestions(list);
     setAttempts((at || []) as Attempt[]);
     setLoading(false);
