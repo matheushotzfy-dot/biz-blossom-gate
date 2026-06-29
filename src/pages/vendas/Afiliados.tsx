@@ -2,6 +2,7 @@ import { useEffect, useState, useMemo } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useProducts } from "@/hooks/useQueryData";
+import type { Tables } from "@/integrations/supabase/types";
 import {
   Users, Link2, TrendingUp, DollarSign, Copy, Plus,
   CheckCircle2, Clock, Search, Percent, Shield,
@@ -68,10 +69,10 @@ export default function Afiliados() {
   const [openCreate, setOpenCreate] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState("");
   const [copiedSlug, setCopiedSlug] = useState<string | null>(null);
-  const [marketProducts, setMarketProducts] = useState<any[]>([]);
+  const [marketProducts, setMarketProducts] = useState<Tables<"products_public">[]>([]);
 
   const affiliateProducts = useMemo(
-    () => products.filter((p: any) => p.affiliate_enabled),
+    () => products.filter((p) => p.affiliate_enabled),
     [products]
   );
 
@@ -88,22 +89,24 @@ export default function Afiliados() {
   const loadMarketplace = async () => {
     if (!user) return;
     const { data } = await supabase.from("products_public").select("*").eq("status", "active");
-    if (data) setMarketProducts(data.filter((p: any) => p.id));
+    if (data) setMarketProducts(data.filter((p) => p.id) as Tables<"products_public">[]);
   };
 
   useEffect(() => { loadData(); loadMarketplace(); }, [user?.id]);
 
   const handleCreateLink = async () => {
     if (!user || !selectedProduct) return;
-    const product = [...affiliateProducts, ...marketProducts].find(p => p.id === selectedProduct);
+    const product = [...affiliateProducts, ...marketProducts].find(p => p.id === selectedProduct) as
+      (Tables<"products"> | Tables<"products_public">) | undefined;
     if (!product) { toast.error("Produto não encontrado"); return; }
     const slug = `aff-${crypto.randomUUID().slice(0, 10)}`;
+    const ownerId = ("user_id" in product && product.user_id) ? product.user_id : user.id;
     const { error } = await supabase.from("affiliate_links").insert({
       product_id: selectedProduct,
       affiliate_user_id: user.id,
-      owner_user_id: (product as any).user_id || user.id,
+      owner_user_id: ownerId,
       slug,
-      commission_pct: (product as any).affiliate_commission || 30,
+      commission_pct: product.affiliate_commission || 30,
     });
     if (error) { toast.error("Erro ao criar link de afiliado"); return; }
     toast.success("Link de afiliado criado!");
@@ -324,7 +327,7 @@ export default function Afiliados() {
                             <td className="px-8 py-4 text-right text-sm font-bold text-muted-foreground tabular-nums">{fmt(Number(p.price))}</td>
                             <td className="px-8 py-4 text-right">
                               <span className="text-[10px] font-black text-success bg-success/10 px-2.5 py-1 rounded-lg border border-success/20 tabular-nums uppercase">
-                                {(p as any).affiliate_commission || 30}%
+                                {p.affiliate_commission || 30}%
                               </span>
                             </td>
                             <td className="px-8 py-4 text-right text-sm font-black text-foreground tabular-nums">{pLinks}</td>
@@ -503,7 +506,7 @@ export default function Afiliados() {
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {affiliateProducts.filter(p => !search || p.name.toLowerCase().includes(search.toLowerCase())).map((p) => {
-              const pct = (p as any).affiliate_commission || 30;
+              const pct = p.affiliate_commission || 30;
               const earnPerSale = (Number(p.price) * pct) / 100;
               return (
                 <Card key={p.id} className="p-6 group hover:scale-[1.01]">

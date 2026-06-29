@@ -17,6 +17,7 @@ import {
 import {
   Trophy, MapPin, Package, Truck, CheckCircle2, XCircle, Clock, Copy, ExternalLink,
   Eye, Search, Map as MapIcon, Phone, Hash,
+  type LucideIcon,
 } from "lucide-react";
 import { logAdminAction } from "@/lib/auditLog";
 import { cn } from "@/lib/utils";
@@ -46,7 +47,7 @@ type Claim = {
   created_at: string;
 };
 
-const STATUS_META: Record<string, { label: string; pill: string; icon: any }> = {
+const STATUS_META: Record<string, { label: string; pill: string; icon: LucideIcon }> = {
   pending:    { label: "Aguardando",    pill: "bg-amber-500/10 text-amber-400 border-amber-500/30",     icon: Clock },
   preparing:  { label: "Preparando",    pill: "bg-blue-500/10 text-blue-400 border-blue-500/30",       icon: Package },
   shipped:    { label: "Postado",       pill: "bg-violet-500/10 text-violet-400 border-violet-500/30", icon: Truck },
@@ -82,12 +83,12 @@ export default function AdminRewardsTab({ profiles }: { profiles: { user_id: str
   const [editNotes, setEditNotes] = useState("");
 
   const load = async () => {
-    const { data, error } = await (supabase as any)
+    const { data, error } = await supabase
       .from("reward_claims")
       .select("*")
       .order("created_at", { ascending: false });
     if (error) { toast.error("Erro ao carregar premiações"); setLoading(false); return; }
-    setClaims(data || []);
+    setClaims((data || []) as Claim[]);
     setLoading(false);
   };
 
@@ -108,10 +109,10 @@ export default function AdminRewardsTab({ profiles }: { profiles: { user_id: str
   };
   const getEmail = (uid: string) => profiles.find(pr => pr.user_id === uid)?.email || "";
 
-  const updateStatus = async (c: Claim, status: string, extra: any = {}) => {
-    const payload: any = { status, ...extra };
+  const updateStatus = async (c: Claim, status: string, extra: Partial<Claim> = {}) => {
+    const payload: Partial<Claim> = { status, ...extra };
     if (status === "delivered" && !c.delivered_at) payload.delivered_at = new Date().toISOString();
-    const { error } = await (supabase as any).from("reward_claims").update(payload).eq("id", c.id);
+    const { error } = await supabase.from("reward_claims").update(payload).eq("id", c.id);
     if (error) { toast.error("Erro ao atualizar status"); return; }
     await logAdminAction("update_reward_claim_status", "reward_claim", c.id, { status });
     toast.success(`Status atualizado: ${STATUS_META[status]?.label || status}`);
@@ -121,7 +122,7 @@ export default function AdminRewardsTab({ profiles }: { profiles: { user_id: str
   const saveClaim = async () => {
     if (!selected) return;
     setSaving(true);
-    const payload: any = {
+    const payload: Partial<Claim> = {
       status: editStatus,
       tracking_carrier: editCarrier.trim() || null,
       tracking_code: editCode.trim() || null,
@@ -134,7 +135,7 @@ export default function AdminRewardsTab({ profiles }: { profiles: { user_id: str
     if (editStatus !== "delivered" && selected.delivered_at) {
       payload.delivered_at = null;
     }
-    const { error } = await (supabase as any).from("reward_claims").update(payload).eq("id", selected.id);
+    const { error } = await supabase.from("reward_claims").update(payload).eq("id", selected.id);
     setSaving(false);
     if (error) { toast.error("Erro ao atualizar"); return; }
     await logAdminAction("update_reward_claim", "reward_claim", selected.id, { status: editStatus });
@@ -214,7 +215,7 @@ export default function AdminRewardsTab({ profiles }: { profiles: { user_id: str
                 : "bg-card border-border text-muted-foreground hover:text-foreground hover:border-foreground/30"
             )}
           >
-            {f.label} <span className="opacity-50 ml-1 tabular-nums">{(counts as any)[f.id] ?? "—"}</span>
+            {f.label} <span className="opacity-50 ml-1 tabular-nums">{(counts as Record<string, number>)[f.id] ?? "—"}</span>
           </button>
         ))}
       </div>

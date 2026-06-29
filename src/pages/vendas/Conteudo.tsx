@@ -31,6 +31,7 @@ import {
   type ContentCourseStats,
   type ContentFilterId,
   type ContentProduct,
+  type EditableCoursePayload,
 } from "@/components/course/contentPresentation";
 import {
   AlertDialog,
@@ -64,14 +65,14 @@ export default function AdminConteudo() {
   const [filter, setFilter] = useState<ContentFilterId>("all");
   const [viewMode, setViewMode] = useState<ViewMode>("grid");
   const [wizardOpen, setWizardOpen] = useState(false);
-  const [editCourseData, setEditCourseData] = useState<any>(null);
+  const [editCourseData, setEditCourseData] = useState<EditableCoursePayload | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<string | null>(null);
   const [deletingCourse, setDeletingCourse] = useState(false);
   const [copiedId, setCopiedId] = useState<string | null>(null);
 
   const courses = useMemo(
     () =>
-      coursesRaw.map((course: any) => {
+      coursesRaw.map((course) => {
         const { modules: _modules, ...rest } = course;
         return {
           ...rest,
@@ -82,7 +83,7 @@ export default function AdminConteudo() {
   );
 
   const products = useMemo(
-    () => productsRaw.map((product: any) => ({ id: product.id, name: product.name, price: Number(product.price) })) as ContentProduct[],
+    () => productsRaw.map((product) => ({ id: product.id, name: product.name, price: Number(product.price) })) as ContentProduct[],
     [productsRaw],
   );
 
@@ -111,11 +112,11 @@ export default function AdminConteudo() {
   const courseStats = useMemo(() => {
     const stats: Record<string, ContentCourseStats> = {};
 
-    coursesRaw.forEach((course: any) => {
+    coursesRaw.forEach((course) => {
       const modules = course.modules || [];
       stats[course.id] = {
         modules: modules.length,
-        lessons: modules.reduce((acc: number, module: any) => acc + (module.lessons?.length || 0), 0),
+        lessons: modules.reduce((acc, module) => acc + (module.lessons?.length || 0), 0),
       };
     });
 
@@ -144,7 +145,7 @@ export default function AdminConteudo() {
   };
 
   const openEdit = (course: ContentCourse) => {
-    const sourceCourse = coursesRaw.find((item: any) => item.id === course.id);
+    const sourceCourse = coursesRaw.find((item) => item.id === course.id);
     setEditCourseData(buildEditableCoursePayload(course, sourceCourse));
     setWizardOpen(true);
   };

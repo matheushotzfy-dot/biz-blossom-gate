@@ -4,6 +4,7 @@ import {
   AlertTriangle, Search, CheckCircle2, Clock, Bug, RefreshCw, XCircle,
   Trash2, ShoppingCart, CreditCard, Webhook, KeyRound, Banknote, Server,
   Database, Code2, Eye, Copy, Layers, Filter, FileDown,
+  type LucideIcon,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/ui/dialog";
@@ -31,7 +32,7 @@ interface Props {
 
 type Category = "platform" | "checkout" | "payment" | "webhook" | "auth" | "withdrawal" | "api" | "database" | "other";
 
-const CATEGORIES: { value: Category | "all"; label: string; icon: any; tone: "primary" | "warning" | "destructive" | "info" | "success" | "neutral" }[] = [
+const CATEGORIES: { value: Category | "all"; label: string; icon: LucideIcon; tone: "primary" | "warning" | "destructive" | "info" | "success" | "neutral" }[] = [
   { value: "all", label: "Todos", icon: Layers, tone: "neutral" },
   { value: "platform", label: "Plataforma", icon: Server, tone: "primary" },
   { value: "checkout", label: "Checkout", icon: ShoppingCart, tone: "info" },
@@ -44,7 +45,7 @@ const CATEGORIES: { value: Category | "all"; label: string; icon: any; tone: "pr
   { value: "other", label: "Outros", icon: Bug, tone: "neutral" },
 ];
 
-const CAT_META: Record<Category, { icon: any; cls: string; label: string }> = {
+const CAT_META: Record<Category, { icon: LucideIcon; cls: string; label: string }> = {
   platform: { icon: Server, cls: "bg-primary/10 text-primary border-primary/30", label: "Plataforma" },
   checkout: { icon: ShoppingCart, cls: "bg-info/10 text-info border-info/30", label: "Checkout" },
   payment: { icon: CreditCard, cls: "bg-destructive/10 text-destructive border-destructive/30", label: "Pagamento" },
@@ -60,8 +61,8 @@ function deriveCategory(e: ErrorLog): Category {
   const t = (e.error_type || "").toLowerCase();
   const m = (e.message || "").toLowerCase();
   const meta = e.metadata || {};
-  const route = String((meta as any).route || (meta as any).path || (meta as any).url || "").toLowerCase();
-  const source = String((meta as any).source || (meta as any).component || "").toLowerCase();
+  const route = String(meta["route"] || meta["path"] || meta["url"] || "").toLowerCase();
+  const source = String(meta["source"] || meta["component"] || "").toLowerCase();
   const hay = `${t} ${m} ${route} ${source}`;
 
   if (/(webhook|hmac|signature)/.test(hay)) return "webhook";
@@ -101,7 +102,7 @@ export default function AdminErrorLogsTab({ profiles }: Props) {
   const enriched = useMemo(() => errors.map(e => ({ ...e, _cat: deriveCategory(e) })), [errors]);
 
   const toggleResolved = async (id: string, resolved: boolean) => {
-    const { error } = await supabase.from("error_logs").update({ resolved } as any).eq("id", id);
+    const { error } = await supabase.from("error_logs").update({ resolved }).eq("id", id);
     if (error) { toast.error("Erro"); return; }
     setErrors(prev => prev.map(e => e.id === id ? { ...e, resolved } : e));
   };
@@ -110,7 +111,7 @@ export default function AdminErrorLogsTab({ profiles }: Props) {
     setBusy(true);
     const openIds = errors.filter(e => !e.resolved).map(e => e.id);
     if (openIds.length === 0) { setBusy(false); setConfirmAction(null); return; }
-    const { error } = await supabase.from("error_logs").update({ resolved: true } as any).in("id", openIds);
+    const { error } = await supabase.from("error_logs").update({ resolved: true }).in("id", openIds);
     setBusy(false); setConfirmAction(null);
     if (error) { toast.error("Erro: " + error.message); return; }
     toast.success(`${openIds.length} erro(s) resolvido(s)`);
@@ -284,7 +285,8 @@ export default function AdminErrorLogsTab({ profiles }: Props) {
                   const meta = CAT_META[err._cat];
                   const Icon = meta.icon;
                   const seller = getSeller(err.user_id);
-                  const route = (err.metadata as any)?.route || (err.metadata as any)?.path || (err.metadata as any)?.url || (err.metadata as any)?.source || "—";
+                  const md = (err.metadata || {}) as Record<string, unknown>;
+                  const route = String(md["route"] || md["path"] || md["url"] || md["source"] || "—");
                   return (
                     <tr key={err.id} className={cn(premiumTable.row, !err.resolved && "bg-destructive/[0.03]")}>
                       <td className={cn(premiumTable.td, "text-[10px] text-muted-foreground tabular-nums whitespace-nowrap")}>{fmtDate(err.created_at)}</td>
@@ -304,7 +306,7 @@ export default function AdminErrorLogsTab({ profiles }: Props) {
                         <p className="font-bold truncate max-w-[160px]">{seller.name}</p>
                         <p className="text-[10px] text-muted-foreground truncate max-w-[160px]">{seller.email}</p>
                       </td>
-                      <td className={cn(premiumTable.td, "font-mono text-[10px] text-muted-foreground truncate max-w-[180px]")} title={String(route)}>{String(route)}</td>
+                      <td className={cn(premiumTable.td, "font-mono text-[10px] text-muted-foreground truncate max-w-[180px]")} title={route}>{route}</td>
                       <td className={premiumTable.td}>
                         {err.resolved ? (
                           <span className="text-[10px] font-black px-2 py-1 rounded-lg bg-success/10 text-success border border-success/30 uppercase">Resolvido</span>

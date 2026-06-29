@@ -6,6 +6,7 @@ import {
  RefreshCw, ShieldCheck, ChevronDown, User, Mail, FileDigit, Phone,
  Sparkles, Plus, Package, Lock, Eye, Zap, Star, TrendingUp,
  ArrowRight, Check, AlertCircle, Users, Timer, Heart, Ticket,
+ type LucideIcon,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -234,8 +235,8 @@ export default function PublicCheckout() {
  const [checkoutState, setCheckoutState] = useState<CheckoutState>("form");
  const processingRef = useRef(false);
 
- const [pixData, setPixData] = useState<any>(null);
- const [boletoData, setBoletoData] = useState<any>(null);
+ const [pixData, setPixData] = useState<{ qrcode?: string; qrCode?: string; qrCodeText?: string } | null>(null);
+ const [boletoData, setBoletoData] = useState<{ url?: string; barCode?: string } | null>(null);
  const [transactionId, setTransactionId] = useState<string | null>(null);
  const [orderBumps, setOrderBumps] = useState<OrderBump[]>([]);
  const [selectedBumps, setSelectedBumps] = useState<Set<string>>(new Set());
@@ -300,19 +301,19 @@ export default function PublicCheckout() {
 
  if (cancelled) return;
  if (!prod) { setLoading(false); return; }
-  const productWithTheme = { ...prod, checkout_theme: (prod as any).checkout_theme || "gray" };
+  const productWithTheme = { ...prod, checkout_theme: prod.checkout_theme || "gray" };
  if (cancelled) return;
  setProduct(productWithTheme as unknown as Product);
 
  const [pixelsRes, bumpsRes] = await Promise.all([
- supabase.from("product_pixels_public" as any).select("*").eq("product_id", prod.id).eq("is_active", true),
+ supabase.from("product_pixels_public").select("*").eq("product_id", prod.id!).eq("is_active", true),
  supabase.from("order_bumps").select("id, bump_product_id").eq("product_id", prod.id).eq("is_active", true).order("sort_order"),
  ]);
 
  if (cancelled) return;
 
  if (pixelsRes.data && pixelsRes.data.length > 0) {
- const configs: PixelConfig[] = pixelsRes.data.map((d: any) => ({ ...d, events: Array.isArray(d.events) ? d.events : [] }));
+ const configs: PixelConfig[] = pixelsRes.data.map((d) => ({ ...d, events: Array.isArray(d.events) ? d.events : [] }) as unknown as PixelConfig);
  setProductPixels(configs);
  if (!pixelsInitialized.current) {
  initPixels(configs); pixelsInitialized.current = true;
@@ -329,7 +330,7 @@ export default function PublicCheckout() {
  if (!cancelled && bumpProducts) {
  setOrderBumps(bumpsRes.data.map(b => ({
  id: b.id, bump_product_id: b.bump_product_id,
- bump_product: bumpProducts.find(p => p.id === b.bump_product_id) as any,
+ bump_product: bumpProducts.find(p => p.id === b.bump_product_id) as OrderBump["bump_product"],
  })).filter(b => b.bump_product));
  }
  }
@@ -590,7 +591,7 @@ export default function PublicCheckout() {
  const installmentOptions = Array.from({ length: 12 }, (_, i) => { const n = i + 1; const val = n === 1 ? totalPrice : totalPrice * (1 + 0.0199 * (n - 1)) / n; return { n, val, total: n === 1 ? totalPrice : val * n }; });
  const selectedInstallment = installmentOptions[parseInt(installments) - 1];
 
- const availableMethods: { id: PaymentMethod; icon: any; label: string; badge?: string }[] = [];
+ const availableMethods: { id: PaymentMethod; icon: LucideIcon; label: string; badge?: string }[] = [];
  if (product.checkout_pix_enabled) availableMethods.push({ id: "pix", icon: QrCode, label: "PIX", badge: "Instantâneo" });
  if (product.checkout_credit_card_enabled) availableMethods.push({ id: "credit_card", icon: CreditCard, label: "Cartão", badge: "Até 12x" });
  if (product.checkout_boleto_enabled) availableMethods.push({ id: "boleto", icon: FileText, label: "Boleto", badge: "1-3 dias" });
