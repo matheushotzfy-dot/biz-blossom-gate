@@ -4,7 +4,7 @@
 // the only goal here is to stop brute-force / credential stuffing.
 
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
-import { SECURITY_HEADERS, logAbuseEvent } from "../_shared/security.ts";
+import { SECURITY_HEADERS, logAbuseEvent, abuseGuard, logSecurityEvent } from "../_shared/security.ts";
 
 const ALLOWED_ORIGINS = new Set([
   "https://hotzfy.com.br",
