@@ -1208,7 +1208,7 @@ function AcquirerForm({ form, setForm, onSave, onCancel }: { form: AcquirerFormS
 
 // ============== Bulk Assignment ==============
 function BulkAssign({ acquirers, onDone }: { acquirers: Acquirer[]; onDone: () => void }) {
-  const [sellers, setSellers] = useState<any[]>([]);
+  const [sellers, setSellers] = useState<BulkSeller[]>([]);
   const [filter, setFilter] = useState<"all" | "white" | "black" | "none">("all");
   const [search, setSearch] = useState("");
   const [selected, setSelected] = useState<Set<string>>(new Set());
