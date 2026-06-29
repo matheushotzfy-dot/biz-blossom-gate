@@ -166,7 +166,10 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
         supabase.from("retention_settings").select("id, user_id, pix_retention_pct, card_retention_pct, retention_days, card_release_days").eq("user_id", profile.user_id).maybeSingle(),
         supabase.from("ip_logs").select("ip, user_agent, country, source, created_at").eq("user_id", profile.user_id).order("created_at", { ascending: false }).limit(50),
       ]);
-      if (logsRes.data) setUserLogs(logsRes.data as ActivityLog[]);
+      if (logsRes.data) {
+        const parsed = z.array(activityLogSchema).safeParse(logsRes.data);
+        setUserLogs(parsed.success ? parsed.data : []);
+      }
 
       if (productsRes.data) setUserProducts(productsRes.data as Tables<"products">[]);
       if (wdRes.data) setUserWithdrawals(wdRes.data as Tables<"withdrawals">[]);
