@@ -40,8 +40,8 @@ export default function Saques() {
   const [search, setSearch] = useState("");
   const invalidateAll = useInvalidateAll();
 
-  const hasAddress = !!(profile as any)?.zip_code && !!(profile as any)?.street
-    && !!(profile as any)?.street_number && !!(profile as any)?.city && !!(profile as any)?.state;
+  const hasAddress = !!profile?.zip_code && !!profile?.street
+    && !!profile?.street_number && !!profile?.city && !!profile?.state;
 
   useEffect(() => {
     if (!user?.id) return;
