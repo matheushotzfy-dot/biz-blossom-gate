@@ -208,7 +208,7 @@ export default function CourseBuilder() {
  setTimeout(() => setSaveStatus("idle"), 2000);
  }, [selectedLesson]);
 
- const debouncedSave = useCallback((field: string, value: any) => {
+ const debouncedSave = useCallback((field: string, value: unknown) => {
  if (saveTimerRef.current) clearTimeout(saveTimerRef.current);
  setSaveStatus("saving");
  saveTimerRef.current = setTimeout(() => autoSave(field, value), 1200);
