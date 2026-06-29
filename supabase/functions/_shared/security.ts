@@ -186,3 +186,81 @@ export async function logAbuseEvent(opts: {
     safeError("logAbuseEvent", e);
   }
 }
+
+// ---------- Abuse guard (very conservative thresholds) ----------
+// Returns { blocked, until } if the IP is already blocked OR just crossed the
+// surreal threshold (default 100 events / 10s → 15 min block). Innocent users
+// are mathematically safe: 10 req/s sustained is not human behavior.
+export async function abuseGuard(opts: {
+  supabaseUrl: string;
+  serviceKey: string;
+  req: Request;
+  endpoint: string;
+  windowSeconds?: number;
+  maxEvents?: number;
+  blockMinutes?: number;
+}): Promise<{ blocked: boolean; until?: string }> {
+  try {
+    const ip_hash = await sha256Hex(clientIp(opts.req));
+    const res = await fetch(`${opts.supabaseUrl}/rest/v1/rpc/check_and_block_abuse`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        apikey: opts.serviceKey,
+        Authorization: `Bearer ${opts.serviceKey}`,
+      },
+      body: JSON.stringify({
+        _ip_hash: ip_hash,
+        _endpoint: opts.endpoint,
+        _window_seconds: opts.windowSeconds ?? 10,
+        _max_events: opts.maxEvents ?? 100,
+        _block_minutes: opts.blockMinutes ?? 15,
+      }),
+    });
+    if (!res.ok) return { blocked: false };
+    const rows = await res.json();
+    const row = Array.isArray(rows) ? rows[0] : rows;
+    return { blocked: !!row?.blocked, until: row?.blocked_until ?? undefined };
+  } catch (e) {
+    safeError("abuseGuard", e);
+    return { blocked: false };
+  }
+}
+
+// Immutable audit log helper — writes via RPC (service_role only).
+export async function logSecurityEvent(opts: {
+  supabaseUrl: string;
+  serviceKey: string;
+  req?: Request;
+  event_type: string;
+  endpoint: string;
+  user_id?: string | null;
+  actor_role?: string | null;
+  status_code?: number;
+  metadata?: Record<string, unknown>;
+}) {
+  try {
+    const ip_hash = opts.req ? await sha256Hex(clientIp(opts.req)) : null;
+    const ua = opts.req?.headers.get("user-agent")?.slice(0, 200) ?? null;
+    await fetch(`${opts.supabaseUrl}/rest/v1/rpc/log_security_event`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        apikey: opts.serviceKey,
+        Authorization: `Bearer ${opts.serviceKey}`,
+      },
+      body: JSON.stringify({
+        _event_type: opts.event_type,
+        _endpoint: opts.endpoint,
+        _user_id: opts.user_id ?? null,
+        _actor_role: opts.actor_role ?? null,
+        _ip_hash: ip_hash,
+        _user_agent: ua,
+        _status_code: opts.status_code ?? null,
+        _metadata: maskObject(opts.metadata ?? {}),
+      }),
+    });
+  } catch (e) {
+    safeError("logSecurityEvent", e);
+  }
+}
