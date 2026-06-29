@@ -12,8 +12,6 @@ function lazyRetry(importFn: () => Promise<{ default: ComponentType<any> }>) {
   );
 }
 
-// NOTE: Aba "Adquirente" temporariamente desativada — voltaremos a ativar.
-// const Adquirente = lazyRetry(() => import("./Adquirente"));
 const Taxas = lazyRetry(() => import("./Taxas"));
 
 const Loading = () => (
