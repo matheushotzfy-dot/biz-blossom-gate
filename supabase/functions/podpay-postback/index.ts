@@ -277,8 +277,9 @@ Deno.serve(async (req) => {
       // fire-and-forget both dispatchers (webhooks + apps like Z-API/UTMify)
       fetch(`${supabaseUrl}/functions/v1/webhook-dispatcher`, { method: 'POST', headers, body: '{}' }).catch(() => {});
       fetch(`${supabaseUrl}/functions/v1/apps-dispatcher`, { method: 'POST', headers, body: '{}' }).catch(() => {});
-    } catch (_e) {
-      // never break postback on dispatcher hiccup
+    } catch (e) {
+      // never break postback on dispatcher hiccup — cron fallback will catch up
+      safeLog('Dispatcher nudge failed (non-fatal)', { error: e instanceof Error ? e.message : 'unknown' });
     }
 
 
