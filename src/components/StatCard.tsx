@@ -83,58 +83,57 @@ export function StatCard({
   const c = colors[color];
 
   return (
-    <div 
+    <div
       className={cn(
-        "seller-hover-card dashboard-stat-card platform-card group relative flex h-full min-h-[108px] flex-col justify-between overflow-hidden rounded-[16px] border !border-l-4 border-border !border-l-info bg-card p-3.5 animate-in fade-in slide-in-from-bottom-2 transition-all duration-300 ease-out hover:-translate-y-0.5 active:scale-[0.985] sm:min-h-[148px] sm:rounded-2xl sm:p-5",
+        "seller-hover-card dashboard-stat-card platform-card group relative flex h-full min-h-[120px] flex-col overflow-hidden rounded-[14px] border border-border bg-card p-4 animate-in fade-in slide-in-from-bottom-2 transition-all duration-300 ease-out hover:-translate-y-[2px] hover:border-info/60 active:scale-[0.99] sm:min-h-[152px] sm:p-5",
         className
       )}
       style={{
         animationDelay: `${delay}ms`,
-        borderLeftWidth: "4px",
-        borderLeftStyle: "solid",
-        borderLeftColor: "hsl(var(--info))",
+        borderLeft: "3px solid hsl(var(--info))",
       }}
     >
-      <span className={cn("pointer-events-none absolute left-0 top-3 bottom-3 w-[2px] rounded-r-full opacity-70 transition-all duration-500 group-hover:top-2 group-hover:bottom-2 group-hover:w-1", c.accent)} />
-      <span className={cn("pointer-events-none absolute inset-y-0 left-0 w-24 opacity-0 transition-opacity duration-500 group-hover:opacity-100", c.glow)} />
-      <div className="flex items-start justify-between gap-2 sm:gap-4">
-        <div className="min-w-0 flex-1 space-y-1.5 sm:space-y-3">
-          <div className="space-y-1">
-            <p className="truncate text-[9px] font-bold uppercase leading-tight tracking-[0.14em] text-muted-foreground/70 sm:text-[10px] sm:tracking-[0.18em]">
-              {title}
-            </p>
-            <h3 className={cn("truncate text-[18px] font-display font-bold leading-tight tracking-[-0.02em] tabular-nums min-[380px]:text-[20px] sm:text-2xl", c.text)}>
-              {value}
-            </h3>
-          </div>
-          
-          <div className="flex items-center gap-1.5 flex-wrap">
-            {(change || trend !== undefined) && (
-              <span className={cn(
-                "inline-flex items-center gap-0.5 rounded-md px-1.5 py-0.5 text-[10px] font-bold tabular-nums border",
-                changeType === "positive" ? "bg-success/10 text-success border-success/20" : 
-                changeType === "negative" ? "bg-destructive/10 text-destructive border-destructive/20" : 
-                "bg-muted/50 text-muted-foreground border-border/60"
-              )}>
-                {changeType === "positive" ? <TrendingUp className="h-2.5 w-2.5" /> : changeType === "negative" ? <TrendingDown className="h-2.5 w-2.5" /> : null}
-                {change || (trend !== undefined ? `${trend > 0 ? "+" : ""}${trend}%` : "")}
-              </span>
-            )}
-            {description && (
-              <p className="min-w-0 truncate text-[10px] font-semibold leading-tight text-muted-foreground/70 sm:text-[11px]">
-                {description}
-              </p>
-            )}
-          </div>
-        </div>
+      <span className={cn("pointer-events-none absolute inset-y-0 left-0 w-32 opacity-0 transition-opacity duration-500 group-hover:opacity-100", c.glow)} />
 
+      {/* Header: title + icon */}
+      <div className="relative flex items-center justify-between gap-3">
+        <p className="truncate text-[10px] font-bold uppercase leading-none tracking-[0.18em] text-muted-foreground/80 sm:text-[11px]">
+          {title}
+        </p>
         {Icon && (
           <div className={cn(
-            "flex h-9 w-9 shrink-0 items-center justify-center rounded-[10px] border transition-all duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:-translate-y-0.5 group-hover:scale-110 sm:h-10 sm:w-10",
+            "flex h-8 w-8 shrink-0 items-center justify-center rounded-[8px] border transition-all duration-300 ease-out group-hover:scale-[1.08] sm:h-9 sm:w-9",
             c.iconBg
           )}>
-            <Icon className="h-[15px] w-[15px] sm:h-[17px] sm:w-[17px]" strokeWidth={2.5} />
+            <Icon className="h-[14px] w-[14px] sm:h-[15px] sm:w-[15px]" strokeWidth={2.5} />
           </div>
+        )}
+      </div>
+
+      {/* Value */}
+      <div className="relative mt-3 sm:mt-4">
+        <h3 className={cn("truncate text-[22px] font-display font-bold leading-none tracking-[-0.025em] tabular-nums sm:text-[28px]", c.text)}>
+          {value}
+        </h3>
+      </div>
+
+      {/* Footer: trend + description */}
+      <div className="relative mt-auto flex items-center gap-2 pt-3 sm:pt-4">
+        {(change || trend !== undefined) && (
+          <span className={cn(
+            "inline-flex items-center gap-1 rounded-md px-1.5 py-0.5 text-[10px] font-bold tabular-nums border",
+            changeType === "positive" ? "bg-success/10 text-success border-success/25" :
+            changeType === "negative" ? "bg-destructive/10 text-destructive border-destructive/25" :
+            "bg-muted/50 text-muted-foreground border-border/60"
+          )}>
+            {changeType === "positive" ? <TrendingUp className="h-2.5 w-2.5" /> : changeType === "negative" ? <TrendingDown className="h-2.5 w-2.5" /> : null}
+            {change || (trend !== undefined ? `${trend > 0 ? "+" : ""}${trend}%` : "")}
+          </span>
+        )}
+        {description && (
+          <p className="min-w-0 truncate text-[11px] font-medium leading-tight text-muted-foreground/75">
+            {description}
+          </p>
         )}
       </div>
     </div>
