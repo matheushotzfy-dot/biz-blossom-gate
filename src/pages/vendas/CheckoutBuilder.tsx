@@ -36,6 +36,14 @@ const TABS = [
 ] as const;
 type TabId = typeof TABS[number]["id"];
 
+type ProductWithCheckoutTheme = Tables<"products"> & { checkout_theme?: unknown };
+
+const normalizeCheckoutTheme = (value: unknown): "gray" | "white" | "dark" =>
+ value === "white" ? "white" : value === "dark" ? "dark" : "gray";
+
+const getCheckoutTheme = (value: Tables<"products"> | null) =>
+ normalizeCheckoutTheme((value as ProductWithCheckoutTheme | null)?.checkout_theme);
+
 const PRESET_COLORS = [
  { name: "Esmeralda", hex: "#10b981" },
  { name: "Laranja", hex: "#f97316" },
@@ -191,7 +199,7 @@ export default function CheckoutBuilder() {
 
  // Settings state
  const [buttonColor, setButtonColor] = useState(initialProduct?.checkout_button_color || "#10b981");
- const [checkoutTheme, setCheckoutTheme] = useState<"gray" | "white" | "dark">((initialProduct as any)?.checkout_theme === "white" ? "white" : (initialProduct as any)?.checkout_theme === "dark" ? "dark" : "gray");
+ const [checkoutTheme, setCheckoutTheme] = useState<"gray" | "white" | "dark">(getCheckoutTheme(initialProduct));
  const [timerEnabled, setTimerEnabled] = useState(initialProduct?.checkout_timer_enabled ?? true);
  const [timerMinutes, setTimerMinutes] = useState(String(initialProduct?.checkout_timer_minutes ?? 15));
  const [socialProof, setSocialProof] = useState(initialProduct?.checkout_social_proof ?? false);
@@ -235,7 +243,8 @@ export default function CheckoutBuilder() {
 
  // Optimization score
  const optimizationScore = (() => {
- let s = 0, max = 12;
+ let s = 0;
+ const max = 12;
  if (pixEnabled) s++;
  if (creditCardEnabled) s++;
  if (boletoEnabled) s++;
@@ -272,7 +281,7 @@ export default function CheckoutBuilder() {
  if (error || !data) { toast.error("Produto não encontrado"); navigate("/vendas/produtos"); return; }
  setProduct(data);
  setButtonColor(data.checkout_button_color || "#10b981");
- setCheckoutTheme((data as any).checkout_theme === "white" ? "white" : (data as any).checkout_theme === "dark" ? "dark" : "gray");
+ setCheckoutTheme(getCheckoutTheme(data));
  setTimerEnabled(data.checkout_timer_enabled ?? true);
  setTimerMinutes(String(data.checkout_timer_minutes ?? 15));
  setSocialProof(data.checkout_social_proof ?? false);
@@ -290,7 +299,7 @@ export default function CheckoutBuilder() {
  .then(({ data }) => { if (data) setAllProducts(data); });
  supabase.from("order_bumps").select("id, bump_product_id").eq("product_id", productId)
  .then(({ data }) => { if (data) setOrderBumps(data); });
- }, [user?.id, productId, navigate]);
+ }, [user?.id, productId, navigate, product]);
 
  // Auto-save
  const autoSave = useCallback(async () => {
@@ -346,7 +355,7 @@ export default function CheckoutBuilder() {
  if (saveTimeout.current) clearTimeout(saveTimeout.current);
  saveTimeout.current = setTimeout(autoSave, 1200);
  return () => { if (saveTimeout.current) clearTimeout(saveTimeout.current); };
- }, [buttonColor, checkoutTheme, timerEnabled, timerMinutes, socialProof, guaranteeEnabled, pixEnabled, boletoEnabled, creditCardEnabled, addressRequired, emailConfirm]);
+ }, [buttonColor, checkoutTheme, timerEnabled, timerMinutes, socialProof, guaranteeEnabled, pixEnabled, boletoEnabled, creditCardEnabled, addressRequired, emailConfirm, autoSave, loading, product]);
 
  const handleFile = (e: React.ChangeEvent<HTMLInputElement>, type: "desktop" | "mobile") => {
  const file = e.target.files?.[0];
