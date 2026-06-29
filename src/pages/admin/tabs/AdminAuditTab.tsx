@@ -85,7 +85,7 @@ export default function AdminAuditTab({ profiles }: Props) {
       if (ids.length > 0) {
         const { data: rolesData } = await supabase.from("user_roles").select("user_id, role").in("user_id", ids);
         const map: Record<string, string[]> = {};
-        (rolesData || []).forEach((r: any) => { (map[r.user_id] ||= []).push(r.role); });
+        (rolesData || []).forEach((r) => { (map[r.user_id] ||= []).push(r.role); });
         const top: Record<string, string> = {};
         Object.entries(map).forEach(([uid, list]) => {
           top[uid] = list.includes("admin") ? "admin"
