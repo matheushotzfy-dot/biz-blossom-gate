@@ -38,18 +38,37 @@ Deno.serve(async (req) => {
       return new Response(JSON.stringify({ error: "Apenas admin pode criar staff." }), { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
 
-    const body = await req.json();
-    const email = String(body.email ?? "").trim().toLowerCase();
-    const password = String(body.password ?? "");
-    const full_name = String(body.full_name ?? "").trim();
-    const role = body.role === "manager" ? "manager" : "employee";
-    const permissions: string[] = Array.isArray(body.permissions) ? body.permissions : [];
-    const commission_pct = Number(body.commission_pct ?? 0.1);
+    // Whitelist de permissões aceitas (qualquer chave fora disso é descartada)
+    const ALLOWED_PERMISSIONS = new Set([
+      "sellers.view", "sellers.edit", "sellers.freeze", "sellers.ban",
+      "products.view", "products.review", "products.suspend",
+      "transactions.view", "transactions.refund",
+      "withdrawals.view", "withdrawals.approve", "withdrawals.reject",
+      "kyc.review", "kyc.approve", "kyc.reject",
+      "support.view", "support.reply",
+      "fees.edit", "rewards.manage", "rewards.ship",
+      "disputes.view", "disputes.manage",
+      "analytics.view",
+    ]);
 
-    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))
+    const body = await req.json().catch(() => ({}));
+    const email = String(body?.email ?? "").trim().toLowerCase();
+    const password = String(body?.password ?? "");
+    const full_name = String(body?.full_name ?? "").trim().slice(0, 120);
+    const role = body?.role === "manager" ? "manager" : "employee";
+    const rawPerms: unknown[] = Array.isArray(body?.permissions) ? body.permissions : [];
+    const permissions = Array.from(new Set(
+      rawPerms.map((p) => String(p)).filter((p) => ALLOWED_PERMISSIONS.has(p))
+    )).slice(0, 50);
+    const commissionRaw = Number(body?.commission_pct ?? 0.1);
+    const commission_pct = Number.isFinite(commissionRaw)
+      ? Math.min(Math.max(commissionRaw, 0), 50)
+      : 0.1;
+
+    if (!email || email.length > 254 || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))
       return new Response(JSON.stringify({ error: "E-mail inválido." }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
-    if (password.length < 8)
-      return new Response(JSON.stringify({ error: "Senha deve ter ao menos 8 caracteres." }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    if (password.length < 8 || password.length > 128)
+      return new Response(JSON.stringify({ error: "Senha deve ter entre 8 e 128 caracteres." }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
     if (!full_name || full_name.length < 2)
       return new Response(JSON.stringify({ error: "Nome obrigatório." }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
 
