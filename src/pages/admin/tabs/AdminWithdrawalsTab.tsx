@@ -21,6 +21,7 @@ import { useAuth } from "@/hooks/useAuth";
 import type { Tables } from "@/integrations/supabase/types";
 import { FinanceiroHero } from "@/components/financeiro/FinanceiroHero";
 import { PremiumMetric, PremiumMetricGrid, PremiumPanel, PremiumSegmented, PremiumEmpty, premiumTable } from "./AdminPremium";
+import { formatCurrency } from "@/lib/utils";
 
 /* ── Types ── */
 interface AuditLog { id: string; admin_user_id: string; action: string; entity_id: string | null; created_at: string; }
@@ -250,7 +251,7 @@ export default function AdminWithdrawalsTab({ withdrawals, profiles, onWithdrawa
  admin_user_id: user.id,
  });
  if (error) { toast.error("Erro ao salvar ajuste"); return; }
- toast.success(`Ajuste de ${adjustType === "credit" ? "+" : "-"}R$ ${amount.toFixed(2)} aplicado`);
+ toast.success(`Ajuste de ${adjustType === "credit" ? "+" : "-"}${formatCurrency(amount)} aplicado`);
  await logAdminAction("balance_adjustment", "balance_adjustments", adjustUserId, { amount, type: adjustType, reason: adjustReason.trim() });
  setAdjustDialog(false);
  setAdjustUserId(""); setAdjustAmount(""); setAdjustReason("");
@@ -425,11 +426,11 @@ export default function AdminWithdrawalsTab({ withdrawals, profiles, onWithdrawa
                   </td>
                   <td className={premiumTable.td}><RiskBadge withdrawal={w} /></td>
                   <td className={`${premiumTable.td} text-xs font-extrabold tabular-nums ${isOver10k ? "text-destructive" : "text-foreground"}`}>
-                    R$ {Number(w.amount).toFixed(2)}
+                    {formatCurrency(Number(w.amount))}
                     {isOver10k && <span className="ml-1 text-[8px] font-bold text-destructive">!</span>}
                   </td>
-                  <td className={`${premiumTable.td} text-xs tabular-nums text-warning`}>R$ {Number(w.fee_amount).toFixed(2)}</td>
-                  <td className={`${premiumTable.td} text-xs font-bold tabular-nums text-primary`}>R$ {Number(w.net_amount).toFixed(2)}</td>
+                  <td className={`${premiumTable.td} text-xs tabular-nums text-warning`}>{formatCurrency(Number(w.fee_amount))}</td>
+                  <td className={`${premiumTable.td} text-xs font-bold tabular-nums text-primary`}>{formatCurrency(Number(w.net_amount))}</td>
                   <td className={premiumTable.td}><StatusBadge status={w.status} /></td>
                   <td className={premiumTable.td}>
                     {audit ? (
@@ -444,7 +445,7 @@ export default function AdminWithdrawalsTab({ withdrawals, profiles, onWithdrawa
                   <td className={premiumTable.td}>
                     {autoConfig?.enabled ? (
                       <button onClick={() => openAutoConfigDialog(w.user_id)} className="rounded-full border border-primary/20 bg-primary/10 px-2 py-0.5 text-[9px] font-bold text-primary hover:bg-primary/20">
-                        Até R$ {autoConfig.max_amount}
+                        Até {formatCurrency(Number(autoConfig.max_amount))}
                       </button>
                     ) : (
                       <button onClick={() => openAutoConfigDialog(w.user_id)} className="text-[9px] text-muted-foreground underline hover:text-foreground">Configurar</button>
@@ -537,7 +538,7 @@ export default function AdminWithdrawalsTab({ withdrawals, profiles, onWithdrawa
                   )}
                 </td>
                 <td className={`${premiumTable.td} text-xs font-extrabold tabular-nums ${a.type === "credit" ? "text-emerald-500" : "text-destructive"}`}>
-                  {a.type === "credit" ? "+" : "-"}R$ {Number(a.amount).toFixed(2)}
+                  {a.type === "credit" ? "+" : "-"}{formatCurrency(Number(a.amount))}
                 </td>
                 <td className={`${premiumTable.td} max-w-[260px] truncate text-xs text-foreground`}>{a.reason}</td>
                 <td className={`${premiumTable.td} text-xs text-muted-foreground`}>
@@ -578,7 +579,7 @@ export default function AdminWithdrawalsTab({ withdrawals, profiles, onWithdrawa
                 </td>
                 <td className={`${premiumTable.td} max-w-[360px] truncate text-xs text-foreground`}>{e.description}</td>
                 <td className={`${premiumTable.td} text-xs font-extrabold tabular-nums ${e.positive ? "text-emerald-500" : "text-destructive"}`}>
-                  {e.positive ? "+" : "-"}R$ {Math.abs(e.amount).toFixed(2)}
+                  {e.positive ? "+" : "-"}{formatCurrency(Math.abs(Number(e.amount)))}
                 </td>
               </tr>
             ))}
