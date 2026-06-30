@@ -21,6 +21,7 @@ import { useAuth } from "@/hooks/useAuth";
 import type { Tables } from "@/integrations/supabase/types";
 import { FinanceiroHero } from "@/components/financeiro/FinanceiroHero";
 import { PremiumMetric, PremiumMetricGrid, PremiumPanel, PremiumSegmented, PremiumEmpty, premiumTable } from "./AdminPremium";
+import { formatCurrency } from "@/lib/utils";
 
 /* ── Types ── */
 interface AuditLog { id: string; admin_user_id: string; action: string; entity_id: string | null; created_at: string; }
