@@ -158,10 +158,9 @@ export default function AdminRiskComplianceTab({ profiles, transactions, fmtCurr
  }, [transactions, profiles]);
 
  const handleFreezeSeller = async (userId: string) => {
- const { error } = await supabase.from("profiles").update({ balance_frozen: true }).eq("user_id", userId);
+ const { error } = await supabase.rpc("admin_freeze_account", { _user_id: userId, _freeze: true, _reason: "chargeback_radar" });
  if (error) { toast.error("Erro ao congelar"); return; }
  toast.success("Saldo congelado!");
- await logAdminAction("freeze_balance", "profile", userId, { reason: "chargeback_radar" });
  };
 
  /* ── KPIs ── */
