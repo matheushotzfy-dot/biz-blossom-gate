@@ -426,11 +426,11 @@ export default function AdminWithdrawalsTab({ withdrawals, profiles, onWithdrawa
                   </td>
                   <td className={premiumTable.td}><RiskBadge withdrawal={w} /></td>
                   <td className={`${premiumTable.td} text-xs font-extrabold tabular-nums ${isOver10k ? "text-destructive" : "text-foreground"}`}>
-                    R$ {Number(w.amount).toFixed(2)}
+                    {formatCurrency(Number(w.amount))}
                     {isOver10k && <span className="ml-1 text-[8px] font-bold text-destructive">!</span>}
                   </td>
-                  <td className={`${premiumTable.td} text-xs tabular-nums text-warning`}>R$ {Number(w.fee_amount).toFixed(2)}</td>
-                  <td className={`${premiumTable.td} text-xs font-bold tabular-nums text-primary`}>R$ {Number(w.net_amount).toFixed(2)}</td>
+                  <td className={`${premiumTable.td} text-xs tabular-nums text-warning`}>{formatCurrency(Number(w.fee_amount))}</td>
+                  <td className={`${premiumTable.td} text-xs font-bold tabular-nums text-primary`}>{formatCurrency(Number(w.net_amount))}</td>
                   <td className={premiumTable.td}><StatusBadge status={w.status} /></td>
                   <td className={premiumTable.td}>
                     {audit ? (
