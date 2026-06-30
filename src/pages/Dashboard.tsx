@@ -169,7 +169,6 @@ export default function Dashboard() {
     const _approved = filteredTx.filter((t) => isApprovedTransaction(t.status));
     const _revenue = _approved.reduce((acc, t) => acc + Number(t.net_amount), 0);
     const conversions = calculateTransactionConversions(filteredTx);
-    const globalPixConversion = calculateTransactionConversions(transactions).pix;
 
     const _chargebackRate = filteredTx.length > 0 ? (filteredTx.filter(t => t.status === "chargeback").length / filteredTx.length) * 100 : 0;
     const _uniqueCustomers = new Set(filteredTx.map(t => t.customer_email).filter(Boolean)).size;
@@ -179,15 +178,15 @@ export default function Dashboard() {
       revenue: _revenue,
       conversion: conversions.overall.rate,
       uniqueCustomers: _uniqueCustomers,
-      pixConversion: globalPixConversion.rate,
+      pixConversion: conversions.pix.rate,
       cardConversion: conversions.card.rate,
       boletoConversion: conversions.boleto.rate,
       chargebackRate: _chargebackRate,
-      pixApprovedCount: globalPixConversion.approved, pixTotalCount: globalPixConversion.total,
+      pixApprovedCount: conversions.pix.approved, pixTotalCount: conversions.pix.total,
       cardApprovedCount: conversions.card.approved, cardTotalCount: conversions.card.total,
       boletoApprovedCount: conversions.boleto.approved, boletoTotalCount: conversions.boleto.total,
     };
-  }, [filteredTx, transactions]);
+  }, [filteredTx]);
 
   // Using availableBalance from RPC now
   const balance = availableBalance;
