@@ -1212,7 +1212,7 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
                   <PremiumPanel
                     title={`Chaves PIX${piiRevealed && revealedPixKeys ? ` (${revealedPixKeys.length})` : ""}`}
                     icon={Key}
-                    headerRight={!piiRevealed ? (
+                    action={!piiRevealed ? (
                       <Button size="sm" variant="outline" className="rounded-xl text-xs" onClick={revealPii}>
                         <Eye className="h-3.5 w-3.5 mr-1" /> Revelar PIX
                       </Button>
