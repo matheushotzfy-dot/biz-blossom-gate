@@ -243,6 +243,12 @@ export default function AdminOverviewTab({
     const d = new Date(); d.setDate(d.getDate() - (days - 1 - i));
     const dayStr = d.toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit" });
     const dayTx = approved.filter(t => new Date(t.created_at).toDateString() === d.toDateString());
+  const days = chartPeriod === "7d" ? 7 : 30;
+  const chartData = useMemo(() => Array.from({ length: days }, (_, i) => {
+    const d = new Date(); d.setDate(d.getDate() - (days - 1 - i));
+    const key = spDayKey(d);
+    const dayStr = d.toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit", timeZone: "America/Sao_Paulo" });
+    const dayTx = approved.filter(t => spDayKey(new Date(t.created_at)) === key);
     return {
       name: dayStr,
       tpv: dayTx.reduce((a, t) => a + Number(t.amount), 0),
@@ -253,8 +259,9 @@ export default function AdminOverviewTab({
 
   const refundTrend = useMemo(() => Array.from({ length: 7 }, (_, i) => {
     const d = new Date(); d.setDate(d.getDate() - (6 - i));
-    const dayStr = d.toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit" });
-    const dayTx = allTx.filter(t => new Date(t.created_at).toDateString() === d.toDateString());
+    const key = spDayKey(d);
+    const dayStr = d.toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit", timeZone: "America/Sao_Paulo" });
+    const dayTx = allTx.filter(t => spDayKey(new Date(t.created_at)) === key);
     return {
       name: dayStr,
       chargebacks: dayTx.filter(t => t.status === "chargeback").length,
@@ -265,7 +272,7 @@ export default function AdminOverviewTab({
   const kycPending = profiles.filter(p => p.account_status === "pending_review" || p.account_status === "pending");
   const highValueWd = pendingWd.filter(w => Number(w.amount) >= 5000);
   const newUsersInRange = useMemo(() => profiles.filter(p => {
-    if (!dateRange) return new Date(p.created_at).toDateString() === todayStr;
+    if (!dateRange) return spDayKey(new Date(p.created_at)) === todayStr;
     const d = new Date(p.created_at); return d >= dateRange.from && d <= dateRange.to;
   }), [profiles, dateRange, todayStr]);
   const rangeLabel = useMemo(() => {
