@@ -579,7 +579,7 @@ export default function AdminWithdrawalsTab({ withdrawals, profiles, onWithdrawa
                 </td>
                 <td className={`${premiumTable.td} max-w-[360px] truncate text-xs text-foreground`}>{e.description}</td>
                 <td className={`${premiumTable.td} text-xs font-extrabold tabular-nums ${e.positive ? "text-emerald-500" : "text-destructive"}`}>
-                  {e.positive ? "+" : "-"}R$ {Math.abs(e.amount).toFixed(2)}
+                  {e.positive ? "+" : "-"}{formatCurrency(Math.abs(Number(e.amount)))}
                 </td>
               </tr>
             ))}
