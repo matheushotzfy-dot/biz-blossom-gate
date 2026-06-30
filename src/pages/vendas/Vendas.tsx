@@ -22,8 +22,24 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel,
 import ExcelJS from "exceljs";
 import { toast } from "sonner";
 import { Seo } from "@/components/Seo";
+import { supabase } from "@/integrations/supabase/client";
 
 const fmt = (v: number) => v === 0 ? "R$ 0,00" : `R$ ${v.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+
+const SP_TZ = "America/Sao_Paulo";
+const spDateTime = (iso: string) => new Intl.DateTimeFormat("pt-BR", {
+  timeZone: SP_TZ, day: "2-digit", month: "2-digit", year: "numeric",
+  hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: false,
+}).format(new Date(iso));
+const spDate = (iso: string) => new Intl.DateTimeFormat("pt-BR", {
+  timeZone: SP_TZ, day: "2-digit", month: "2-digit", year: "numeric",
+}).format(new Date(iso));
+const spShort = (iso: string) => new Intl.DateTimeFormat("pt-BR", {
+  timeZone: SP_TZ, day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit", hour12: false,
+}).format(new Date(iso));
+const spHour = (iso: string) => new Intl.DateTimeFormat("pt-BR", {
+  timeZone: SP_TZ, hour: "2-digit", minute: "2-digit", hour12: false,
+}).format(new Date(iso)) + "h";
 
 const STATUS_MAP: Record<string, { label: string; cls: string; dot: string }> = {
   approved: { label: "Aprovada", cls: "bg-emerald-500/10 text-emerald-500 border-emerald-500/20", dot: "bg-emerald-500" },
@@ -33,7 +49,10 @@ const STATUS_MAP: Record<string, { label: string; cls: string; dot: string }> = 
   expired: { label: "Expirada", cls: "bg-muted text-muted-foreground border-border/60", dot: "bg-muted-foreground/50" },
   refunded: { label: "Reembolso", cls: "bg-blue-500/10 text-blue-500 border-blue-500/20", dot: "bg-blue-500" },
   chargeback: { label: "Chargeback", cls: "bg-red-500/10 text-red-500 border-red-500/20", dot: "bg-red-500" },
+  cancelled: { label: "Cancelada", cls: "bg-muted text-muted-foreground border-border/60", dot: "bg-muted-foreground/50" },
+  canceled: { label: "Cancelada", cls: "bg-muted text-muted-foreground border-border/60", dot: "bg-muted-foreground/50" },
 };
+
 
 const METHODS_MAP: Record<string, { label: string; icon: LucideIcon }> = {
   pix: { label: "Pix", icon: Zap },
