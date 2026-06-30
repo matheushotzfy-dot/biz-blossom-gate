@@ -224,7 +224,7 @@ export default function Dashboard() {
       filteredTx.forEach(t => {
         if (!isApprovedTransaction(t.status)) return;
         const hour = brasiliaParts(t.created_at).hour;
-        salesByHour.set(hour, (salesByHour.get(hour) || 0) + Number(t.net_amount));
+        salesByHour.set(hour, (salesByHour.get(hour) || 0) + Number(t.amount));
       });
       return Array.from({ length: 24 }, (_, i): ChartPoint => {
         const point = new Date(start);
@@ -246,7 +246,7 @@ export default function Dashboard() {
         if (!isApprovedTransaction(t.status)) return;
         const p = brasiliaParts(t.created_at);
         const key = `${p.year}-${String(p.month).padStart(2, "0")}`;
-        byMonth.set(key, (byMonth.get(key) || 0) + Number(t.net_amount));
+        byMonth.set(key, (byMonth.get(key) || 0) + Number(t.amount));
       });
       const result: ChartPoint[] = [];
       const cursor = new Date(start.getFullYear(), start.getMonth(), 1);
@@ -270,7 +270,7 @@ export default function Dashboard() {
     filteredTx.forEach(t => {
       if (!isApprovedTransaction(t.status)) return;
       const dateKey = toBrasiliaDate(t.created_at);
-      revenueByDate.set(dateKey, (revenueByDate.get(dateKey) || 0) + Number(t.net_amount));
+      revenueByDate.set(dateKey, (revenueByDate.get(dateKey) || 0) + Number(t.amount));
     });
     return Array.from({ length: spanDays }, (_, i): ChartPoint => {
       const d = new Date(start);
