@@ -1209,19 +1209,29 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
 
                 {/* ── Chaves PIX ── */}
                 <TabsContent value="pix" className="mt-4 space-y-4">
-                  <PremiumPanel title={`Chaves PIX (${userPixKeys.length})`} icon={Key}>
-                    {userPixKeys.length === 0 ? (
+                  <PremiumPanel
+                    title={`Chaves PIX${piiRevealed && revealedPixKeys ? ` (${revealedPixKeys.length})` : ""}`}
+                    icon={Key}
+                    headerRight={!piiRevealed ? (
+                      <Button size="sm" variant="outline" className="rounded-xl text-xs" onClick={revealPii}>
+                        <Eye className="h-3.5 w-3.5 mr-1" /> Revelar PIX
+                      </Button>
+                    ) : null}
+                  >
+                    {!piiRevealed ? (
+                      <PremiumEmpty icon={Lock} title="Chaves PIX ocultas" subtitle="Clique em 'Revelar PIX' para visualizar. A ação é registrada no audit log." />
+                    ) : !revealedPixKeys || revealedPixKeys.length === 0 ? (
                       <PremiumEmpty icon={Key} title="Nenhuma chave PIX cadastrada" />
                     ) : (
                       <div className="space-y-3">
-                        {userPixKeys.map(pk => (
+                        {revealedPixKeys.map(pk => (
                           <div key={pk.id} className="rounded-xl border border-border bg-muted/10 p-4 flex items-center gap-4">
                             <div className="h-10 w-10 rounded-xl bg-primary/10 flex items-center justify-center">
                               <Key className="h-4 w-4 text-primary" />
                             </div>
                             <div className="flex-1">
                               <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">{pk.key_type}</p>
-                              <p className="text-sm font-mono text-foreground mt-0.5">{pk.key_value ?? (pk as any).key_value_masked ?? "•••"}</p>
+                              <p className="text-sm font-mono text-foreground mt-0.5">{pk.key_value ?? "•••"}</p>
                             </div>
                             <p className="text-[10px] text-muted-foreground">{new Date(pk.created_at).toLocaleDateString("pt-BR")}</p>
                             <Button size="sm" variant="ghost" className="h-8 w-8 p-0 text-destructive hover:bg-destructive/10" onClick={() => handleDeletePixKey(pk.id)} title="Remover chave">
@@ -1234,11 +1244,14 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
                     {selectedUser?.pix_key && (
                       <div className="mt-4 rounded-xl border border-warning/15 bg-warning/5 p-3">
                         <p className="text-[10px] text-warning font-bold mb-1">PIX Legado (perfil)</p>
-                        <p className="text-xs font-mono text-muted-foreground">{selectedUser.pix_key_type}: {selectedUser.pix_key ?? (selectedUser as any).pix_key_masked ?? "•••"}</p>
+                        <p className="text-xs font-mono text-muted-foreground">
+                          {selectedUser.pix_key_type}: {piiRevealed ? (revealedLegacyPix ?? selectedUser.pix_key) : maskPixValue(selectedUser.pix_key)}
+                        </p>
                       </div>
                     )}
                   </PremiumPanel>
                 </TabsContent>
+
 
                 {/* ── Adquirente ── */}
                 <TabsContent value="acquirer" className="mt-4 space-y-4">
