@@ -473,10 +473,14 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
   const kycPendingProfiles = profiles.filter(p => p.account_status === "pending_review" || p.account_status === "pending");
   const filtered = profiles.filter((p) => {
     const st = p.seller_type;
-    if (sellerFilter === "kyc") return p.account_status === "pending_review" || p.account_status === "pending";
+    if (sellerFilter === "kyc" && !(p.account_status === "pending_review" || p.account_status === "pending")) return false;
     if (sellerFilter === "white" && st !== "white") return false;
     if (sellerFilter === "black" && st !== "black") return false;
     if (sellerFilter === "unset" && st != null) return false;
+    if (sellerFilter === "frozen" && p.balance_frozen !== true) return false;
+    if (sellerFilter === "blocked" && p.account_status !== "blocked") return false;
+    if (sellerFilter === "rejected" && p.account_status !== "rejected") return false;
+    if (sellerFilter === "approved" && p.account_status !== "approved") return false;
     if (!search) return true;
     const s = search.toLowerCase();
     return (p.full_name?.toLowerCase().includes(s)) || (p.email?.toLowerCase().includes(s)) || (p.document_number?.includes(s));
@@ -486,6 +490,9 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
   const blackCount = profiles.filter(p => p.seller_type === "black").length;
   const unsetCount = profiles.filter(p => p.seller_type == null).length;
   const frozenCount = profiles.filter(p => p.balance_frozen === true).length;
+  const blockedCount = profiles.filter(p => p.account_status === "blocked").length;
+  const rejectedCount = profiles.filter(p => p.account_status === "rejected").length;
+  const approvedCount = profiles.filter(p => p.account_status === "approved").length;
 
   // Top movers do dia (sellers que mais movimentaram hoje)
   const todayStart = new Date(); todayStart.setHours(0, 0, 0, 0);
