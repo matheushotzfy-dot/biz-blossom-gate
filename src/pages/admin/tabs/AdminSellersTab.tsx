@@ -209,17 +209,16 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
     setPiiRevealed(false); setRevealedDoc(null); setRevealedPixKeys(null); setRevealedLegacyPix(null);
 
     try {
-      const [logsRes, productsRes, wdRes, txRes, feesRes, adjRes, pixRes, disputesRes, retRes, ipRes] = await Promise.all([
-        supabase.from("activity_logs").select("id, user_id, action, entity_type, entity_id, old_data, new_data, created_at").eq("user_id", profile.user_id).order("created_at", { ascending: false }).limit(100),
-        supabase.from("products").select("id, user_id, name, price, status, created_at, image_url").eq("user_id", profile.user_id).order("created_at", { ascending: false }).limit(100),
-        supabase.from("withdrawals").select("id, user_id, amount, fee_amount, net_amount, status, created_at, withdrawal_type").eq("user_id", profile.user_id).order("created_at", { ascending: false }).limit(100),
-        supabase.from("transactions").select("id, user_id, product_id, amount, fee_amount, net_amount, status, payment_method, customer_name, customer_email, customer_phone, customer_document, created_at").eq("user_id", profile.user_id).order("created_at", { ascending: false }).limit(200),
+      const [logsRes, productsRes, wdRes, txRes, feesRes, adjRes, disputesRes, retRes, ipRes] = await Promise.all([
+        supabase.from("activity_logs").select("id, user_id, action, entity_type, entity_id, old_data, new_data, created_at").eq("user_id", profile.user_id).order("created_at", { ascending: false }).limit(300),
+        supabase.from("products").select("id, user_id, name, price, status, created_at, image_url").eq("user_id", profile.user_id).order("created_at", { ascending: false }).limit(200),
+        supabase.from("withdrawals").select("id, user_id, amount, fee_amount, net_amount, status, created_at, withdrawal_type").eq("user_id", profile.user_id).order("created_at", { ascending: false }).limit(500),
+        supabase.from("transactions").select("id, user_id, product_id, amount, fee_amount, net_amount, status, payment_method, customer_name, customer_email, customer_phone, customer_document, created_at").eq("user_id", profile.user_id).order("created_at", { ascending: false }).limit(1000),
         supabase.from("custom_user_fees").select("id, user_id, pix_percentage, pix_fixed, card_percentage, card_fixed, boleto_percentage, boleto_fixed, withdrawal_fee, max_ticket, admin_user_id").eq("user_id", profile.user_id).maybeSingle(),
-        supabase.from("balance_adjustments").select("id, user_id, amount, type, reason, admin_user_id, created_at").eq("user_id", profile.user_id).order("created_at", { ascending: false }).limit(50),
-        supabase.rpc("admin_reveal_pix_keys", { _user_id: profile.user_id }),
-        supabase.from("disputes").select("id, seller_user_id, transaction_id, amount, type, status, reason, created_at").eq("seller_user_id", profile.user_id).order("created_at", { ascending: false }).limit(50),
+        supabase.from("balance_adjustments").select("id, user_id, amount, type, reason, admin_user_id, created_at").eq("user_id", profile.user_id).order("created_at", { ascending: false }).limit(200),
+        supabase.from("disputes").select("id, seller_user_id, transaction_id, amount, type, status, reason, created_at").eq("seller_user_id", profile.user_id).order("created_at", { ascending: false }).limit(200),
         supabase.from("retention_settings").select("id, user_id, pix_retention_pct, card_retention_pct, retention_days, card_release_days").eq("user_id", profile.user_id).maybeSingle(),
-        supabase.from("ip_logs").select("ip, user_agent, country, source, created_at").eq("user_id", profile.user_id).order("created_at", { ascending: false }).limit(50),
+        supabase.from("ip_logs").select("ip, user_agent, country, source, created_at").eq("user_id", profile.user_id).order("created_at", { ascending: false }).limit(100),
       ]);
       if (logsRes.data) {
         const parsed = z.array(activityLogSchema).safeParse(logsRes.data);
@@ -230,23 +229,10 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
       if (wdRes.data) setUserWithdrawals(wdRes.data as Tables<"withdrawals">[]);
       if (txRes.data) setUserTransactions(txRes.data as Tables<"transactions">[]);
       if (adjRes.data) setBalanceAdjustments(adjRes.data);
-      if (pixRes.data) setUserPixKeys(pixRes.data as PixKey[]);
       if (disputesRes.data) setUserDisputes(disputesRes.data as Dispute[]);
       if (ipRes.data) setIpHistory(ipRes.data as IpLog[]);
-
-      // Admin reveals plaintext sensitive fields for the selected seller
-      try {
-        const { data: revealed } = await supabase.rpc("admin_reveal_profile", { _user_id: profile.user_id });
-        const r = Array.isArray(revealed) ? revealed[0] : revealed;
-        if (r) {
-          setSelectedUser(prev => prev ? ({
-            ...prev,
-            document_number: r.document_number ?? prev.document_number,
-            pix_key: r.pix_key ?? prev.pix_key,
-            pix_key_type: r.pix_key_type ?? prev.pix_key_type,
-          }) : prev);
-        }
-      } catch (e) { console.warn("[AdminSellersTab] admin reveal failed (non-fatal)", e); }
+      // Sensitive PIX keys are NOT auto-revealed; admin must click "Revelar dados".
+      setUserPixKeys([]);
 
       setSelectedAcquirerId(profile.acquirer_id || "");
       setAdminNotes(profile.admin_notes || "");
