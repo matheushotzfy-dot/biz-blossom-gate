@@ -690,7 +690,7 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
                   <p className="text-sm font-bold text-foreground">{p.full_name || "Sem nome"}</p>
                   <p className="text-xs text-muted-foreground">{p.email} • {p.phone || "Sem tel"}</p>
                   <div className="flex items-center gap-2 mt-1">
-                    <span className="text-[10px] text-muted-foreground font-mono">{p.document_type?.toUpperCase()}: {p.document_number || "N/A"}</span>
+                    <span className="text-[10px] text-muted-foreground font-mono">{p.document_type?.toUpperCase()}: {maskDoc(p.document_number)}</span>
                     <span className="text-[10px] text-muted-foreground">• {new Date(p.created_at).toLocaleDateString("pt-BR")}</span>
                   </div>
                 </div>
