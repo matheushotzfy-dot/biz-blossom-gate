@@ -201,7 +201,7 @@ Deno.serve(async (req) => {
     // === Get product ===
     const { data: product, error: productError } = await supabase
       .from('products')
-      .select('id, name, price, user_id, status')
+      .select('id, name, price, user_id, status, checkout_pix_enabled, checkout_boleto_enabled, checkout_credit_card_enabled')
       .eq('id', productId)
       .eq('status', 'active')
       .single();
@@ -212,6 +212,19 @@ Deno.serve(async (req) => {
         { status: 404, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
+
+    // Enforce per-product payment method toggles (server-side authority)
+    const methodAllowed =
+      (paymentMethod === 'pix'         && product.checkout_pix_enabled !== false) ||
+      (paymentMethod === 'credit_card' && product.checkout_credit_card_enabled !== false) ||
+      (paymentMethod === 'boleto'      && product.checkout_boleto_enabled !== false);
+    if (!methodAllowed) {
+      return new Response(
+        JSON.stringify({ success: false, error: 'Método de pagamento desabilitado para este produto' }),
+        { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
 
     // === Validate & apply coupon (server-authoritative) ===
     let couponId: string | null = null;
