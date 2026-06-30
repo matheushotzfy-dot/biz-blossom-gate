@@ -246,23 +246,18 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
   };
 
   const handleApproveKyc = async (userId: string) => {
-    const { error } = await supabase.from("profiles").update({ account_status: "approved", kyc_rejection_reason: null }).eq("user_id", userId);
+    const { error } = await supabase.rpc("admin_approve_kyc", { _user_id: userId });
     if (error) { toast.error("Erro ao aprovar KYC"); return; }
     toast.success("KYC aprovado! Seller liberado.");
-    await logAdminAction("approve_kyc", "profile", userId);
     onReload();
     if (selectedUser?.user_id === userId) setSelectedUser(null);
   };
 
   const handleRejectKyc = async () => {
     if (!kycRejectReason.trim()) { toast.error("Informe o motivo da recusa"); return; }
-    const { error } = await supabase.from("profiles").update({
-      account_status: "rejected",
-      kyc_rejection_reason: kycRejectReason.trim(),
-    }).eq("user_id", rejectTargetUserId);
+    const { error } = await supabase.rpc("admin_reject_kyc", { _user_id: rejectTargetUserId, _reason: kycRejectReason.trim() });
     if (error) { toast.error("Erro ao recusar KYC"); return; }
     toast.success("KYC recusado. Motivo registrado.");
-    await logAdminAction("reject_kyc", "profile", rejectTargetUserId, { reason: kycRejectReason });
     setShowRejectDialog(false);
     setKycRejectReason("");
     onReload();
@@ -270,10 +265,9 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
   };
 
   const handleFreezeBalance = async (userId: string, freeze: boolean) => {
-    const { error } = await supabase.from("profiles").update({ balance_frozen: freeze }).eq("user_id", userId);
+    const { error } = await supabase.rpc("admin_freeze_account", { _user_id: userId, _freeze: freeze, _reason: null });
     if (error) { toast.error("Erro ao alterar status"); return; }
     toast.success(freeze ? "Saldo congelado! Saques bloqueados." : "Saldo descongelado! Saques liberados.");
-    await logAdminAction(freeze ? "freeze_balance" : "unfreeze_balance", "profile", userId);
     onReload();
   };
 
