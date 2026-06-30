@@ -251,7 +251,7 @@ export default function AdminWithdrawalsTab({ withdrawals, profiles, onWithdrawa
  admin_user_id: user.id,
  });
  if (error) { toast.error("Erro ao salvar ajuste"); return; }
- toast.success(`Ajuste de ${adjustType === "credit" ? "+" : "-"}R$ ${amount.toFixed(2)} aplicado`);
+ toast.success(`Ajuste de ${adjustType === "credit" ? "+" : "-"}${formatCurrency(amount)} aplicado`);
  await logAdminAction("balance_adjustment", "balance_adjustments", adjustUserId, { amount, type: adjustType, reason: adjustReason.trim() });
  setAdjustDialog(false);
  setAdjustUserId(""); setAdjustAmount(""); setAdjustReason("");
