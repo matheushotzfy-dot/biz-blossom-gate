@@ -587,7 +587,8 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
         <SellerKpi icon={Shield}         label="Black"          value={String(blackCount)}                 sub="High-volume"          tone="neutral"     active={sellerFilter === "black"} onClick={() => setSellerFilter("black")} />
         <SellerKpi icon={CheckCircle2}   label="White"          value={String(whiteCount)}                 sub="Tier regulado"        tone="info"        active={sellerFilter === "white"} onClick={() => setSellerFilter("white")} />
         <SellerKpi icon={AlertTriangle}  label="Sem Tier"       value={String(unsetCount)}                 sub="Não classificados"    tone="warning"     active={sellerFilter === "unset"} onClick={() => setSellerFilter("unset")} />
-        <SellerKpi icon={Snowflake}      label="Congelados"     value={String(frozenCount)}                sub="Saldo bloqueado"      tone="destructive" />
+        <SellerKpi icon={Snowflake}      label="Congelados"     value={String(frozenCount)}                sub="Saldo bloqueado"      tone="destructive" active={sellerFilter === "frozen"}  onClick={() => setSellerFilter("frozen")} />
+        <SellerKpi icon={Ban}            label="Bloqueados"     value={String(blockedCount)}               sub="Conta banida"         tone="destructive" active={sellerFilter === "blocked"} onClick={() => setSellerFilter("blocked")} />
         <SellerKpi icon={TrendingUp}     label="Transações"     value={String(transactions.length)}        sub="Total registrado"     tone="primary" />
         <SellerKpi icon={ArrowDownToLine} label="Saques"        value={String(withdrawals.length)}         sub="Total registrado"     tone="neutral" />
       </div>
