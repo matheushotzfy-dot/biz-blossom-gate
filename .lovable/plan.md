@@ -19,3 +19,9 @@
 - Auth flow: session hydration OK
 - `.maybeSingle()` em todo o src OK
 - 70 warnings do linter sobre SECURITY DEFINER → **falso positivo esperado**, não aplicar revogação
+
+## Bloco 3 (fluxo seller) — JÁ APLICADO ✅
+- **Crítico:** trigger `enforce_kyc_on_withdrawal` adicionado → bloqueia saque se KYC não aprovado ou conta congelada.
+
+## Bloco 3 — opcional pendente
+- [ ] Scaffold de auth email templates customizados com branding (signup, recovery, magic-link). Hoje usa templates default da Lovable — funciona, mas sem branding.
