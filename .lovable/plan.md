@@ -25,3 +25,12 @@
 
 ## Bloco 3 — opcional pendente
 - [ ] Scaffold de auth email templates customizados com branding (signup, recovery, magic-link). Hoje usa templates default da Lovable — funciona, mas sem branding.
+
+## Bloco 4 (checkout) — JÁ VERIFICADO ✅
+- Checkout, validação, PIX, expiração, order bumps, cupons, grant access: tudo OK
+- Preço/desconto recalculado server-side (cliente é só preview)
+
+## Bloco 4 — pendente de aprovação do usuário
+- [ ] **Email de confirmação ao comprador após pagamento.**
+  Requer: (1) configurar domínio de email + DNS, (2) `setup_email_infra`, (3) `scaffold_transactional_email`, (4) template `purchase-confirmation.tsx`, (5) chamar `send-transactional-email` do `podpay-postback/index.ts` quando status vira `paid`.
+  Impacto: alto valor — reduz dúvida do comprador, melhora confiança, reduz suporte.
