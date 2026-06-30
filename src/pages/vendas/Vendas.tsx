@@ -155,7 +155,7 @@ export default function Vendas() {
 
   const buildRows = () => filtered.map((t) => ({
     "ID da Transação": t.id,
-    "Data": new Date(t.created_at).toLocaleString("pt-BR"),
+    "Data": spDateTime(t.created_at),
     "Cliente": t.customer_name ?? "",
     "Email": t.customer_email ?? "",
     "Documento": t.customer_document ?? "",
