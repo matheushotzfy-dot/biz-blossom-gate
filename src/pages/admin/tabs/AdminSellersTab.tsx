@@ -483,7 +483,11 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
     if (sellerFilter === "approved" && p.account_status !== "approved") return false;
     if (!search) return true;
     const s = search.toLowerCase();
-    return (p.full_name?.toLowerCase().includes(s)) || (p.email?.toLowerCase().includes(s)) || (p.document_number?.includes(s));
+    const digits = search.replace(/\D/g, "");
+    const docDigits = (p.document_number || "").replace(/\D/g, "");
+    return (p.full_name?.toLowerCase().includes(s))
+      || (p.email?.toLowerCase().includes(s))
+      || (digits.length > 0 && docDigits.includes(digits));
   });
 
   const whiteCount = profiles.filter(p => p.seller_type === "white").length;
