@@ -186,6 +186,28 @@ export default function Vendas() {
     URL.revokeObjectURL(url);
   };
 
+  const logExport = async (format: "csv" | "xlsx", count: number) => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+      await supabase.from("activity_logs").insert([{
+        user_id: user.id,
+        action: "export_sales",
+        entity_type: "transactions",
+        new_data: {
+          format,
+          count,
+          range_from: range?.from?.toISOString() ?? null,
+          range_to: range?.to?.toISOString() ?? null,
+          search: search || null,
+          privacy_mode: privacyHidden,
+        },
+      }]);
+    } catch (err) {
+      console.error("[Vendas] export audit log failed:", err);
+    }
+  };
+
   const exportCSV = () => {
     if (!filtered.length) return toast.error("Nenhuma transação para exportar");
     const rows = buildRows();
@@ -199,6 +221,7 @@ export default function Vendas() {
       ...rows.map((r) => headers.map((h) => esc(r[h as keyof typeof r])).join(";")),
     ].join("\n");
     download(new Blob([csv], { type: "text/csv;charset=utf-8;" }), fileName("csv"));
+    void logExport("csv", rows.length);
     toast.success(`${rows.length} transações exportadas (CSV)`);
   };
 
@@ -219,8 +242,10 @@ export default function Vendas() {
     rows.forEach((r) => ws.addRow(r));
     const buf = await wb.xlsx.writeBuffer();
     download(new Blob([buf], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" }), fileName("xlsx"));
+    void logExport("xlsx", rows.length);
     toast.success(`${rows.length} transações exportadas (Excel)`);
   };
+
 
   const stats = useMemo(() => {
     const approved = filteredByDate.filter(t => isApprovedTransaction(t.status));
