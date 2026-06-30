@@ -101,6 +101,15 @@ Deno.serve(async (req) => {
       return json({ success: false, error: "Failed to suspend products — rolled back" }, corsHeaders, 500);
     }
 
+    // Audit trail (best-effort; ban already succeeded)
+    await admin.from("audit_logs").insert({
+      admin_user_id: callerId,
+      action: "ban_seller",
+      entity_type: "profile",
+      entity_id: targetUserId,
+      details: { action: "atomic_block+freeze+suspend" },
+    });
+
     return json({ success: true }, corsHeaders);
   } catch (e) {
     const msg = e instanceof Error ? e.message : "Internal error";
