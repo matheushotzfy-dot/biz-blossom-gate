@@ -525,7 +525,7 @@ export default function Vendas() {
                         {prodsMap[t.product_id || ""] || "Sem produto"}
                       </p>
                       <p className="text-[10px] font-bold text-muted-foreground/60 tabular-nums shrink-0">
-                        {format(new Date(t.created_at), "dd/MM HH:mm", { locale: ptBR })}
+                        {spShort(t.created_at)}
                       </p>
                     </div>
                     <div className="flex items-center gap-1.5 mt-2">
