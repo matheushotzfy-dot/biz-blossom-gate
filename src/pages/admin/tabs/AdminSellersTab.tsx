@@ -96,6 +96,22 @@ const ACTION_LABELS: Record<string, { label: string; color: string; icon: Lucide
   blacklist_cpf: { label: "CPF Blacklist", color: "text-destructive", icon: UserX },
   blacklist_cnpj: { label: "CNPJ Blacklist", color: "text-destructive", icon: UserX },
 
+  reveal_pii: { label: "Dados Sensíveis Revelados", color: "text-warning", icon: Eye },
+};
+
+// Mask PII fields for default display; admin reveals on demand and the
+// reveal click is audited via logAdminAction("reveal_pii", ...).
+const maskDoc = (v?: string | null) => {
+  if (!v) return "—";
+  const clean = String(v).replace(/\D/g, "");
+  if (clean.length < 4) return "•••";
+  return `•••.•••.${clean.slice(-3)}`;
+};
+const maskPixValue = (v?: string | null) => {
+  if (!v) return "—";
+  const s = String(v);
+  if (s.length <= 4) return "•••";
+  return `${s.slice(0, 2)}••••${s.slice(-2)}`;
 };
 
 interface Props {
