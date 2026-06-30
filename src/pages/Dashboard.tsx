@@ -362,7 +362,7 @@ export default function Dashboard() {
     return retained + Math.max(0, toRelease);
   }, [transactions]);
 
-  // Compare to previous period (same length) for trend deltas
+  // Compare to previous period (same length) for trend deltas — anchored in America/Sao_Paulo
   const { prevApprovedCount, prevRevenue } = useMemo(() => {
     const today = brasiliaToday();
     let start: Date;
@@ -386,14 +386,21 @@ export default function Dashboard() {
     const prevEnd = new Date(start.getTime() - 1);
     const prevStart = new Date(prevEnd.getTime() - lenMs);
 
+    // Compare using SP calendar date to avoid browser-tz drift
+    const spDay = (iso: string) => toBrasiliaDate(iso);
+    const prevStartKey = prevStart.toLocaleDateString("pt-BR", { timeZone: "America/Sao_Paulo" });
+    const prevEndKey = prevEnd.toLocaleDateString("pt-BR", { timeZone: "America/Sao_Paulo" });
+    const toKey = (k: string) => { const [d, m, y] = k.split("/"); return `${y}-${m}-${d}`; };
+    const lo = toKey(prevStartKey), hi = toKey(prevEndKey);
+
     const prevTx = transactions.filter(t => {
-      const d = new Date(t.created_at);
-      return d >= prevStart && d <= prevEnd;
+      const k = toKey(spDay(t.created_at));
+      return k >= lo && k <= hi;
     });
     const prevApp = prevTx.filter(t => isApprovedTransaction(t.status));
     return {
       prevApprovedCount: prevApp.length,
-      prevRevenue: prevApp.reduce((acc, t) => acc + Number(t.net_amount), 0),
+      prevRevenue: prevApp.reduce((acc, t) => acc + Number(t.amount), 0),
     };
   }, [transactions, selectedPeriod, isCustom, customRange]);
 
