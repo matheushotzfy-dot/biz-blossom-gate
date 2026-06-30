@@ -657,6 +657,10 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
             { id: "black" as const, label: "Black", count: blackCount },
             { id: "white" as const, label: "White", count: whiteCount },
             { id: "unset" as const, label: "Sem tipo", count: unsetCount },
+            { id: "approved" as const, label: "Aprovados", count: approvedCount },
+            { id: "frozen" as const, label: "Congelados", count: frozenCount },
+            { id: "blocked" as const, label: "Bloqueados", count: blockedCount },
+            { id: "rejected" as const, label: "Rejeitados", count: rejectedCount },
           ].map(f => (
             <button key={f.id} onClick={() => setSellerFilter(f.id)}
               className={`px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-wider transition-colors ${
