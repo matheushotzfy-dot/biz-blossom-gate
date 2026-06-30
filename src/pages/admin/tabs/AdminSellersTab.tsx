@@ -954,7 +954,7 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
                     <InfoRow label="Nome completo" value={selectedUser?.full_name} />
                     <InfoRow label="E-mail" value={selectedUser?.email} />
                     <InfoRow label="Telefone" value={selectedUser?.phone} />
-                    <InfoRow label="Documento" value={selectedUser?.document_number} mono />
+                    <InfoRow label="Documento" value={piiRevealed ? (revealedDoc ?? selectedUser?.document_number) : maskDoc(selectedUser?.document_number)} mono />
                     <InfoRow label="Tipo documento" value={selectedUser?.document_type} />
                     <InfoRow label="Status conta" value={selectedUser?.account_status} />
                     <InfoRow label="Tipo Seller" value={selectedUser?.seller_type || "Não classificado"} />
