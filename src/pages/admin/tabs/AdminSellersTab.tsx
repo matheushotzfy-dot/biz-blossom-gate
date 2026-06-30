@@ -96,6 +96,22 @@ const ACTION_LABELS: Record<string, { label: string; color: string; icon: Lucide
   blacklist_cpf: { label: "CPF Blacklist", color: "text-destructive", icon: UserX },
   blacklist_cnpj: { label: "CNPJ Blacklist", color: "text-destructive", icon: UserX },
 
+  reveal_pii: { label: "Dados Sensíveis Revelados", color: "text-warning", icon: Eye },
+};
+
+// Mask PII fields for default display; admin reveals on demand and the
+// reveal click is audited via logAdminAction("reveal_pii", ...).
+const maskDoc = (v?: string | null) => {
+  if (!v) return "—";
+  const clean = String(v).replace(/\D/g, "");
+  if (clean.length < 4) return "•••";
+  return `•••.•••.${clean.slice(-3)}`;
+};
+const maskPixValue = (v?: string | null) => {
+  if (!v) return "—";
+  const s = String(v);
+  if (s.length <= 4) return "•••";
+  return `${s.slice(0, 2)}••••${s.slice(-2)}`;
 };
 
 interface Props {
@@ -110,8 +126,13 @@ interface Props {
 export default function AdminSellersTab({ profiles, transactions, withdrawals, onReload, fmtCurrency, isAdmin = false }: Props) {
   const { user } = useAuth();
   const [search, setSearch] = useState("");
-  const [sellerFilter, setSellerFilter] = useState<"all" | "white" | "black" | "unset" | "kyc">("all");
+  const [sellerFilter, setSellerFilter] = useState<"all" | "white" | "black" | "unset" | "kyc" | "frozen" | "blocked" | "rejected" | "approved">("all");
   const [selectedUser, setSelectedUser] = useState<Tables<"profiles"> | null>(null);
+  const [piiRevealed, setPiiRevealed] = useState(false);
+  const [revealedDoc, setRevealedDoc] = useState<string | null>(null);
+  const [revealedPixKeys, setRevealedPixKeys] = useState<PixKey[] | null>(null);
+  const [revealedLegacyPix, setRevealedLegacyPix] = useState<string | null>(null);
+  const [sellerBalances, setSellerBalances] = useState<Map<string, number>>(new Map());
   const [userLogs, setUserLogs] = useState<ActivityLog[]>([]);
   const [userProducts, setUserProducts] = useState<Tables<"products">[]>([]);
   const [userWithdrawals, setUserWithdrawals] = useState<Tables<"withdrawals">[]>([]);
@@ -142,7 +163,40 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
     supabase.from("acquirers").select("id, name, slug, type, is_active").eq("is_active", true).then(({ data }) => {
       if (data) setAcquirers(data as Acquirer[]);
     });
+    // Canonical seller balances (same fórmula do painel do vendedor)
+    supabase.rpc("admin_get_seller_balances").then(({ data, error }) => {
+      if (error) { console.warn("[AdminSellersTab] balances RPC failed", error.message); return; }
+      const m = new Map<string, number>();
+      (data || []).forEach((row: { user_id: string; balance: number | string }) =>
+        m.set(row.user_id, Number(row.balance) || 0)
+      );
+      setSellerBalances(m);
+    });
   }, []);
+
+  const revealPii = async () => {
+    if (!selectedUser) return;
+    try {
+      const [{ data: revealed }, { data: pixData }] = await Promise.all([
+        supabase.rpc("admin_reveal_profile", { _user_id: selectedUser.user_id }),
+        supabase.rpc("admin_reveal_pix_keys", { _user_id: selectedUser.user_id }),
+      ]);
+      const r = Array.isArray(revealed) ? revealed[0] : revealed;
+      if (r) {
+        setRevealedDoc(r.document_number ?? null);
+        setRevealedLegacyPix(r.pix_key ?? null);
+      }
+      if (pixData) setRevealedPixKeys(pixData as PixKey[]);
+      setPiiRevealed(true);
+      await logAdminAction("reveal_pii", "profile", selectedUser.user_id, {
+        revealed_fields: ["document_number", "pix_key", "pix_keys"],
+      });
+      toast.success("Dados sensíveis revelados — ação auditada");
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : "desconhecido";
+      toast.error("Erro ao revelar dados: " + msg);
+    }
+  };
 
   const openUserDetail = async (profile: Tables<"profiles">) => {
     setSelectedUser(profile);
@@ -152,19 +206,19 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
     setBalanceAdjustments([]); setKycImages([]); setIpHistory([]);
     setUserRetention(null); setRetentionForm({ pix_pct: "", card_pct: "", days: "", card_release_days: "7" });
     setAdminNotes(""); setSelectedAcquirerId("");
+    setPiiRevealed(false); setRevealedDoc(null); setRevealedPixKeys(null); setRevealedLegacyPix(null);
 
     try {
-      const [logsRes, productsRes, wdRes, txRes, feesRes, adjRes, pixRes, disputesRes, retRes, ipRes] = await Promise.all([
-        supabase.from("activity_logs").select("id, user_id, action, entity_type, entity_id, old_data, new_data, created_at").eq("user_id", profile.user_id).order("created_at", { ascending: false }).limit(100),
-        supabase.from("products").select("id, user_id, name, price, status, created_at, image_url").eq("user_id", profile.user_id).order("created_at", { ascending: false }).limit(100),
-        supabase.from("withdrawals").select("id, user_id, amount, fee_amount, net_amount, status, created_at, withdrawal_type").eq("user_id", profile.user_id).order("created_at", { ascending: false }).limit(100),
-        supabase.from("transactions").select("id, user_id, product_id, amount, fee_amount, net_amount, status, payment_method, customer_name, customer_email, customer_phone, customer_document, created_at").eq("user_id", profile.user_id).order("created_at", { ascending: false }).limit(200),
+      const [logsRes, productsRes, wdRes, txRes, feesRes, adjRes, disputesRes, retRes, ipRes] = await Promise.all([
+        supabase.from("activity_logs").select("id, user_id, action, entity_type, entity_id, old_data, new_data, created_at").eq("user_id", profile.user_id).order("created_at", { ascending: false }).limit(300),
+        supabase.from("products").select("id, user_id, name, price, status, created_at, image_url").eq("user_id", profile.user_id).order("created_at", { ascending: false }).limit(200),
+        supabase.from("withdrawals").select("id, user_id, amount, fee_amount, net_amount, status, created_at, withdrawal_type").eq("user_id", profile.user_id).order("created_at", { ascending: false }).limit(500),
+        supabase.from("transactions").select("id, user_id, product_id, amount, fee_amount, net_amount, status, payment_method, customer_name, customer_email, customer_phone, customer_document, created_at").eq("user_id", profile.user_id).order("created_at", { ascending: false }).limit(1000),
         supabase.from("custom_user_fees").select("id, user_id, pix_percentage, pix_fixed, card_percentage, card_fixed, boleto_percentage, boleto_fixed, withdrawal_fee, max_ticket, admin_user_id").eq("user_id", profile.user_id).maybeSingle(),
-        supabase.from("balance_adjustments").select("id, user_id, amount, type, reason, admin_user_id, created_at").eq("user_id", profile.user_id).order("created_at", { ascending: false }).limit(50),
-        supabase.rpc("admin_reveal_pix_keys", { _user_id: profile.user_id }),
-        supabase.from("disputes").select("id, seller_user_id, transaction_id, amount, type, status, reason, created_at").eq("seller_user_id", profile.user_id).order("created_at", { ascending: false }).limit(50),
+        supabase.from("balance_adjustments").select("id, user_id, amount, type, reason, admin_user_id, created_at").eq("user_id", profile.user_id).order("created_at", { ascending: false }).limit(200),
+        supabase.from("disputes").select("id, seller_user_id, transaction_id, amount, type, status, reason, created_at").eq("seller_user_id", profile.user_id).order("created_at", { ascending: false }).limit(200),
         supabase.from("retention_settings").select("id, user_id, pix_retention_pct, card_retention_pct, retention_days, card_release_days").eq("user_id", profile.user_id).maybeSingle(),
-        supabase.from("ip_logs").select("ip, user_agent, country, source, created_at").eq("user_id", profile.user_id).order("created_at", { ascending: false }).limit(50),
+        supabase.from("ip_logs").select("ip, user_agent, country, source, created_at").eq("user_id", profile.user_id).order("created_at", { ascending: false }).limit(100),
       ]);
       if (logsRes.data) {
         const parsed = z.array(activityLogSchema).safeParse(logsRes.data);
@@ -175,23 +229,10 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
       if (wdRes.data) setUserWithdrawals(wdRes.data as Tables<"withdrawals">[]);
       if (txRes.data) setUserTransactions(txRes.data as Tables<"transactions">[]);
       if (adjRes.data) setBalanceAdjustments(adjRes.data);
-      if (pixRes.data) setUserPixKeys(pixRes.data as PixKey[]);
       if (disputesRes.data) setUserDisputes(disputesRes.data as Dispute[]);
       if (ipRes.data) setIpHistory(ipRes.data as IpLog[]);
-
-      // Admin reveals plaintext sensitive fields for the selected seller
-      try {
-        const { data: revealed } = await supabase.rpc("admin_reveal_profile", { _user_id: profile.user_id });
-        const r = Array.isArray(revealed) ? revealed[0] : revealed;
-        if (r) {
-          setSelectedUser(prev => prev ? ({
-            ...prev,
-            document_number: r.document_number ?? prev.document_number,
-            pix_key: r.pix_key ?? prev.pix_key,
-            pix_key_type: r.pix_key_type ?? prev.pix_key_type,
-          }) : prev);
-        }
-      } catch (e) { console.warn("[AdminSellersTab] admin reveal failed (non-fatal)", e); }
+      // Sensitive PIX keys are NOT auto-revealed; admin must click "Revelar dados".
+      setUserPixKeys([]);
 
       setSelectedAcquirerId(profile.acquirer_id || "");
       setAdminNotes(profile.admin_notes || "");
@@ -432,10 +473,14 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
   const kycPendingProfiles = profiles.filter(p => p.account_status === "pending_review" || p.account_status === "pending");
   const filtered = profiles.filter((p) => {
     const st = p.seller_type;
-    if (sellerFilter === "kyc") return p.account_status === "pending_review" || p.account_status === "pending";
+    if (sellerFilter === "kyc" && !(p.account_status === "pending_review" || p.account_status === "pending")) return false;
     if (sellerFilter === "white" && st !== "white") return false;
     if (sellerFilter === "black" && st !== "black") return false;
     if (sellerFilter === "unset" && st != null) return false;
+    if (sellerFilter === "frozen" && p.balance_frozen !== true) return false;
+    if (sellerFilter === "blocked" && p.account_status !== "blocked") return false;
+    if (sellerFilter === "rejected" && p.account_status !== "rejected") return false;
+    if (sellerFilter === "approved" && p.account_status !== "approved") return false;
     if (!search) return true;
     const s = search.toLowerCase();
     return (p.full_name?.toLowerCase().includes(s)) || (p.email?.toLowerCase().includes(s)) || (p.document_number?.includes(s));
@@ -445,6 +490,9 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
   const blackCount = profiles.filter(p => p.seller_type === "black").length;
   const unsetCount = profiles.filter(p => p.seller_type == null).length;
   const frozenCount = profiles.filter(p => p.balance_frozen === true).length;
+  const blockedCount = profiles.filter(p => p.account_status === "blocked").length;
+  const rejectedCount = profiles.filter(p => p.account_status === "rejected").length;
+  const approvedCount = profiles.filter(p => p.account_status === "approved").length;
 
   // Top movers do dia (sellers que mais movimentaram hoje)
   const todayStart = new Date(); todayStart.setHours(0, 0, 0, 0);
@@ -539,7 +587,8 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
         <SellerKpi icon={Shield}         label="Black"          value={String(blackCount)}                 sub="High-volume"          tone="neutral"     active={sellerFilter === "black"} onClick={() => setSellerFilter("black")} />
         <SellerKpi icon={CheckCircle2}   label="White"          value={String(whiteCount)}                 sub="Tier regulado"        tone="info"        active={sellerFilter === "white"} onClick={() => setSellerFilter("white")} />
         <SellerKpi icon={AlertTriangle}  label="Sem Tier"       value={String(unsetCount)}                 sub="Não classificados"    tone="warning"     active={sellerFilter === "unset"} onClick={() => setSellerFilter("unset")} />
-        <SellerKpi icon={Snowflake}      label="Congelados"     value={String(frozenCount)}                sub="Saldo bloqueado"      tone="destructive" />
+        <SellerKpi icon={Snowflake}      label="Congelados"     value={String(frozenCount)}                sub="Saldo bloqueado"      tone="destructive" active={sellerFilter === "frozen"}  onClick={() => setSellerFilter("frozen")} />
+        <SellerKpi icon={Ban}            label="Bloqueados"     value={String(blockedCount)}               sub="Conta banida"         tone="destructive" active={sellerFilter === "blocked"} onClick={() => setSellerFilter("blocked")} />
         <SellerKpi icon={TrendingUp}     label="Transações"     value={String(transactions.length)}        sub="Total registrado"     tone="primary" />
         <SellerKpi icon={ArrowDownToLine} label="Saques"        value={String(withdrawals.length)}         sub="Total registrado"     tone="neutral" />
       </div>
@@ -608,6 +657,10 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
             { id: "black" as const, label: "Black", count: blackCount },
             { id: "white" as const, label: "White", count: whiteCount },
             { id: "unset" as const, label: "Sem tipo", count: unsetCount },
+            { id: "approved" as const, label: "Aprovados", count: approvedCount },
+            { id: "frozen" as const, label: "Congelados", count: frozenCount },
+            { id: "blocked" as const, label: "Bloqueados", count: blockedCount },
+            { id: "rejected" as const, label: "Rejeitados", count: rejectedCount },
           ].map(f => (
             <button key={f.id} onClick={() => setSellerFilter(f.id)}
               className={`px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-wider transition-colors ${
@@ -637,7 +690,7 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
                   <p className="text-sm font-bold text-foreground">{p.full_name || "Sem nome"}</p>
                   <p className="text-xs text-muted-foreground">{p.email} • {p.phone || "Sem tel"}</p>
                   <div className="flex items-center gap-2 mt-1">
-                    <span className="text-[10px] text-muted-foreground font-mono">{p.document_type?.toUpperCase()}: {p.document_number || "N/A"}</span>
+                    <span className="text-[10px] text-muted-foreground font-mono">{p.document_type?.toUpperCase()}: {maskDoc(p.document_number)}</span>
                     <span className="text-[10px] text-muted-foreground">• {new Date(p.created_at).toLocaleDateString("pt-BR")}</span>
                   </div>
                 </div>
@@ -703,7 +756,7 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
                       <td className={premiumTable.td}><SellerTypeBadge type={p.seller_type} /></td>
                       <td className={premiumTable.td}><StatusBadge status={p.account_status || "pending_review"} /></td>
                       <td className={premiumTable.td}>
-                        <span className="font-display text-[13px] font-black tabular-nums text-primary">{fmtCurrency(stats.totalNet - stats.totalWithdrawn)}</span>
+                        <span className="font-display text-[13px] font-black tabular-nums text-primary">{fmtCurrency(sellerBalances.get(p.user_id) ?? (stats.totalNet - stats.totalWithdrawn))}</span>
                       </td>
                       <td className={premiumTable.td}>
                         <span className="text-[11px] tabular-nums text-muted-foreground">
@@ -901,7 +954,7 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
                     <InfoRow label="Nome completo" value={selectedUser?.full_name} />
                     <InfoRow label="E-mail" value={selectedUser?.email} />
                     <InfoRow label="Telefone" value={selectedUser?.phone} />
-                    <InfoRow label="Documento" value={selectedUser?.document_number} mono />
+                    <InfoRow label="Documento" value={piiRevealed ? (revealedDoc ?? selectedUser?.document_number) : maskDoc(selectedUser?.document_number)} mono />
                     <InfoRow label="Tipo documento" value={selectedUser?.document_type} />
                     <InfoRow label="Status conta" value={selectedUser?.account_status} />
                     <InfoRow label="Tipo Seller" value={selectedUser?.seller_type || "Não classificado"} />
@@ -1156,19 +1209,29 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
 
                 {/* ── Chaves PIX ── */}
                 <TabsContent value="pix" className="mt-4 space-y-4">
-                  <PremiumPanel title={`Chaves PIX (${userPixKeys.length})`} icon={Key}>
-                    {userPixKeys.length === 0 ? (
+                  <PremiumPanel
+                    title={`Chaves PIX${piiRevealed && revealedPixKeys ? ` (${revealedPixKeys.length})` : ""}`}
+                    icon={Key}
+                    action={!piiRevealed ? (
+                      <Button size="sm" variant="outline" className="rounded-xl text-xs" onClick={revealPii}>
+                        <Eye className="h-3.5 w-3.5 mr-1" /> Revelar PIX
+                      </Button>
+                    ) : null}
+                  >
+                    {!piiRevealed ? (
+                      <PremiumEmpty icon={Lock} title="Chaves PIX ocultas" subtitle="Clique em 'Revelar PIX' para visualizar. A ação é registrada no audit log." />
+                    ) : !revealedPixKeys || revealedPixKeys.length === 0 ? (
                       <PremiumEmpty icon={Key} title="Nenhuma chave PIX cadastrada" />
                     ) : (
                       <div className="space-y-3">
-                        {userPixKeys.map(pk => (
+                        {revealedPixKeys.map(pk => (
                           <div key={pk.id} className="rounded-xl border border-border bg-muted/10 p-4 flex items-center gap-4">
                             <div className="h-10 w-10 rounded-xl bg-primary/10 flex items-center justify-center">
                               <Key className="h-4 w-4 text-primary" />
                             </div>
                             <div className="flex-1">
                               <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">{pk.key_type}</p>
-                              <p className="text-sm font-mono text-foreground mt-0.5">{pk.key_value ?? (pk as any).key_value_masked ?? "•••"}</p>
+                              <p className="text-sm font-mono text-foreground mt-0.5">{pk.key_value ?? "•••"}</p>
                             </div>
                             <p className="text-[10px] text-muted-foreground">{new Date(pk.created_at).toLocaleDateString("pt-BR")}</p>
                             <Button size="sm" variant="ghost" className="h-8 w-8 p-0 text-destructive hover:bg-destructive/10" onClick={() => handleDeletePixKey(pk.id)} title="Remover chave">
@@ -1181,11 +1244,14 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
                     {selectedUser?.pix_key && (
                       <div className="mt-4 rounded-xl border border-warning/15 bg-warning/5 p-3">
                         <p className="text-[10px] text-warning font-bold mb-1">PIX Legado (perfil)</p>
-                        <p className="text-xs font-mono text-muted-foreground">{selectedUser.pix_key_type}: {selectedUser.pix_key ?? (selectedUser as any).pix_key_masked ?? "•••"}</p>
+                        <p className="text-xs font-mono text-muted-foreground">
+                          {selectedUser.pix_key_type}: {piiRevealed ? (revealedLegacyPix ?? selectedUser.pix_key) : maskPixValue(selectedUser.pix_key)}
+                        </p>
                       </div>
                     )}
                   </PremiumPanel>
                 </TabsContent>
+
 
                 {/* ── Adquirente ── */}
                 <TabsContent value="acquirer" className="mt-4 space-y-4">

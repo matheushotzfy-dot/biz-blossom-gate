@@ -3969,6 +3969,13 @@ export type Database = {
         Args: { _freeze: boolean; _reason?: string; _user_id: string }
         Returns: undefined
       }
+      admin_get_seller_balances: {
+        Args: never
+        Returns: {
+          balance: number
+          user_id: string
+        }[]
+      }
       admin_purge_orphan_notifications: { Args: never; Returns: number }
       admin_reject_kyc: {
         Args: { _reason: string; _user_id: string }

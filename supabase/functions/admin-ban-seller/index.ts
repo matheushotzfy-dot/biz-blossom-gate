@@ -101,13 +101,30 @@ Deno.serve(async (req) => {
       return json({ success: false, error: "Failed to suspend products — rolled back" }, corsHeaders, 500);
     }
 
+    // Revoke any active sessions so the banned seller cannot keep using the app
+    // until the JWT expires. Best-effort: failures here don't undo the ban.
+    try {
+      await admin.auth.admin.signOut(targetUserId, "global");
+    } catch (e) {
+      console.warn("[admin-ban-seller] signOut failed", e instanceof Error ? e.message : e);
+    }
+
+    // Notify the seller in-app (best-effort)
+    await admin.from("notifications").insert({
+      user_id: targetUserId,
+      title: "Conta bloqueada",
+      message: "Sua conta foi bloqueada pelo time de risco. Acesso e checkouts foram suspensos. Entre em contato com o suporte.",
+      type: "error",
+      created_by: callerId,
+    });
+
     // Audit trail (best-effort; ban already succeeded)
     await admin.from("audit_logs").insert({
       admin_user_id: callerId,
       action: "ban_seller",
       entity_type: "profile",
       entity_id: targetUserId,
-      details: { action: "atomic_block+freeze+suspend" },
+      details: { action: "atomic_block+freeze+suspend+revoke_session" },
     });
 
     return json({ success: true }, corsHeaders);
