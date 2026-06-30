@@ -126,8 +126,13 @@ interface Props {
 export default function AdminSellersTab({ profiles, transactions, withdrawals, onReload, fmtCurrency, isAdmin = false }: Props) {
   const { user } = useAuth();
   const [search, setSearch] = useState("");
-  const [sellerFilter, setSellerFilter] = useState<"all" | "white" | "black" | "unset" | "kyc">("all");
+  const [sellerFilter, setSellerFilter] = useState<"all" | "white" | "black" | "unset" | "kyc" | "frozen" | "blocked" | "rejected" | "approved">("all");
   const [selectedUser, setSelectedUser] = useState<Tables<"profiles"> | null>(null);
+  const [piiRevealed, setPiiRevealed] = useState(false);
+  const [revealedDoc, setRevealedDoc] = useState<string | null>(null);
+  const [revealedPixKeys, setRevealedPixKeys] = useState<PixKey[] | null>(null);
+  const [revealedLegacyPix, setRevealedLegacyPix] = useState<string | null>(null);
+  const [sellerBalances, setSellerBalances] = useState<Map<string, number>>(new Map());
   const [userLogs, setUserLogs] = useState<ActivityLog[]>([]);
   const [userProducts, setUserProducts] = useState<Tables<"products">[]>([]);
   const [userWithdrawals, setUserWithdrawals] = useState<Tables<"withdrawals">[]>([]);
