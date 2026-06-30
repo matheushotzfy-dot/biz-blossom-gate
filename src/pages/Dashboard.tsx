@@ -103,6 +103,16 @@ function brasiliaToday() {
   return new Date(Number(y), Number(m) - 1, Number(d));
 }
 
+const _spPartsFmt = new Intl.DateTimeFormat("en-US", {
+  timeZone: "America/Sao_Paulo", year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", hourCycle: "h23",
+});
+function brasiliaParts(dateStr: string) {
+  const parts = _spPartsFmt.formatToParts(new Date(dateStr));
+  const get = (t: string) => Number(parts.find(p => p.type === t)!.value);
+  return { year: get("year"), month: get("month"), day: get("day"), hour: get("hour") };
+}
+
+
 function timeAgo(dateStr: string) {
   const diff = Date.now() - new Date(dateStr).getTime();
   const mins = Math.floor(diff / 60000);
@@ -159,7 +169,6 @@ export default function Dashboard() {
     const _approved = filteredTx.filter((t) => isApprovedTransaction(t.status));
     const _revenue = _approved.reduce((acc, t) => acc + Number(t.net_amount), 0);
     const conversions = calculateTransactionConversions(filteredTx);
-    const globalPixConversion = calculateTransactionConversions(transactions).pix;
 
     const _chargebackRate = filteredTx.length > 0 ? (filteredTx.filter(t => t.status === "chargeback").length / filteredTx.length) * 100 : 0;
     const _uniqueCustomers = new Set(filteredTx.map(t => t.customer_email).filter(Boolean)).size;
@@ -169,15 +178,15 @@ export default function Dashboard() {
       revenue: _revenue,
       conversion: conversions.overall.rate,
       uniqueCustomers: _uniqueCustomers,
-      pixConversion: globalPixConversion.rate,
+      pixConversion: conversions.pix.rate,
       cardConversion: conversions.card.rate,
       boletoConversion: conversions.boleto.rate,
       chargebackRate: _chargebackRate,
-      pixApprovedCount: globalPixConversion.approved, pixTotalCount: globalPixConversion.total,
+      pixApprovedCount: conversions.pix.approved, pixTotalCount: conversions.pix.total,
       cardApprovedCount: conversions.card.approved, cardTotalCount: conversions.card.total,
       boletoApprovedCount: conversions.boleto.approved, boletoTotalCount: conversions.boleto.total,
     };
-  }, [filteredTx, transactions]);
+  }, [filteredTx]);
 
   // Using availableBalance from RPC now
   const balance = availableBalance;
@@ -214,7 +223,7 @@ export default function Dashboard() {
       const salesByHour = new Map<number, number>();
       filteredTx.forEach(t => {
         if (!isApprovedTransaction(t.status)) return;
-        const hour = new Date(t.created_at).getHours();
+        const hour = brasiliaParts(t.created_at).hour;
         salesByHour.set(hour, (salesByHour.get(hour) || 0) + Number(t.net_amount));
       });
       return Array.from({ length: 24 }, (_, i): ChartPoint => {
@@ -235,8 +244,8 @@ export default function Dashboard() {
       const byMonth = new Map<string, number>();
       filteredTx.forEach(t => {
         if (!isApprovedTransaction(t.status)) return;
-        const d = new Date(t.created_at);
-        const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
+        const p = brasiliaParts(t.created_at);
+        const key = `${p.year}-${String(p.month).padStart(2, "0")}`;
         byMonth.set(key, (byMonth.get(key) || 0) + Number(t.net_amount));
       });
       const result: ChartPoint[] = [];
@@ -388,10 +397,10 @@ export default function Dashboard() {
   const compareLabel = (!isCustom && selectedPeriod.days === 0) ? "vs ontem" : "vs período anterior";
 
   const financialCards: Array<{ label: string; value: string | number; icon: typeof BarChart3; color: "neutral" | "success" | "warning" | "destructive"; sub: string; trend?: number }> = [
-    { label: "Ticket Médio", value: privacy.hidden ? CENSORED : fmt(approved.length > 0 ? revenue / approved.length : 0), icon: BarChart3, color: "neutral", sub: "Média por venda" },
+    { label: "Ticket Médio (líquido)", value: privacy.hidden ? CENSORED : fmt(approved.length > 0 ? revenue / approved.length : 0), icon: BarChart3, color: "neutral", sub: "Média líquida por venda" },
     { label: "Pedidos Pagos", value: approved.length, icon: Zap, color: "success", sub: "Vendas concluídas" },
-    { label: "Saldo Pendente", value: privacy.hidden ? CENSORED : fmt(pendingBalance), icon: Clock3, color: "warning", sub: "Aguardando liberação" },
-    { label: "Faturamento Total", value: privacy.hidden ? CENSORED : fmt(revenue), icon: TrendingUp, color: "success", sub: `Valor total de vendas · ${compareLabel}`, trend: revenueTrend },
+    { label: "Reserva de Segurança", value: privacy.hidden ? CENSORED : fmt(pendingBalance), icon: Clock3, color: "warning", sub: "Retido até a liberação (D+N)" },
+    { label: "Faturamento Líquido", value: privacy.hidden ? CENSORED : fmt(revenue), icon: TrendingUp, color: "success", sub: `Após taxas · ${compareLabel}`, trend: revenueTrend },
   ];
 
 
