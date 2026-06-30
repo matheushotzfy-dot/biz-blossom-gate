@@ -9,6 +9,9 @@ import {
   GraduationCap,
   Trash2,
   Package,
+  Files,
+  Pause,
+  Play,
   ChevronRight,
   type LucideIcon,
 } from "lucide-react";
@@ -32,6 +35,8 @@ export type ProductMenuHandlers = {
   onEditProduct: (product: Product) => void;
   onOpenMembers: (product: Product) => void;
   onDeleteProduct: (product: Product) => void;
+  onDuplicateProduct: (product: Product) => void;
+  onToggleStatus: (product: Product) => void;
 };
 
 type ProductActionsMenuProps = ProductMenuHandlers & {
@@ -65,14 +70,19 @@ export function ProductActionsMenu({
   onOpenCheckout,
   onOpenMembers,
   onOpenPixels,
+  onDuplicateProduct,
+  onToggleStatus,
 }: ProductActionsMenuProps) {
   const navigate = useNavigate();
+  const isActive = product.status === "active";
 
   const sections: Section[] = [
     {
       title: "Gerenciar",
       rows: [
         { icon: Pencil,        label: "Editar produto", hint: "Nome, preço e entrega", action: () => onEditProduct(product) },
+        { icon: Files,         label: "Duplicar produto", hint: "Criar cópia em revisão", action: () => onDuplicateProduct(product) },
+        { icon: isActive ? Pause : Play, label: isActive ? "Pausar vendas" : "Reativar vendas", hint: isActive ? "Some do checkout público" : "Volta a aceitar pedidos", action: () => onToggleStatus(product) },
         { icon: Palette,       label: "Checkout builder", hint: "Layout e conversão", action: () => navigate(`/vendas/produtos/${product.id}/checkout-builder`, { state: { product } }) },
         { icon: GraduationCap, label: "Área de membros", hint: "Curso, aulas e acesso", action: () => onOpenMembers(product) },
       ],

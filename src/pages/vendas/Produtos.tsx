@@ -135,6 +135,39 @@ export default function Produtos() {
     await loadProducts();
   };
 
+  const handleDuplicate = async (product: Product) => {
+    if (!user) return;
+    const slug = crypto.randomUUID().slice(0, 8);
+    const checkoutUrl = `${window.location.origin}/pay/${slug}`;
+    const { error } = await supabase.from("products").insert({
+      user_id: user.id,
+      name: `${product.name} (cópia)`,
+      description: product.description,
+      price: product.price,
+      status: "pending_review",
+      image_url: product.image_url,
+      display_name: product.display_name,
+      delivery_type: product.delivery_type,
+      checkout_url: checkoutUrl,
+    });
+    if (error) { toast.error("Erro ao duplicar produto"); return; }
+    toast.success("Produto duplicado! Aguardando revisão.");
+    await loadProducts();
+  };
+
+  const handleToggleStatus = async (product: Product) => {
+    if (!user) return;
+    const next = product.status === "active" ? "inactive" : "active";
+    const { error } = await supabase
+      .from("products")
+      .update({ status: next })
+      .eq("id", product.id)
+      .eq("user_id", user.id);
+    if (error) { toast.error("Erro ao alterar status"); return; }
+    toast.success(next === "active" ? "Vendas reativadas!" : "Vendas pausadas. Produto fora do checkout público.");
+    await loadProducts();
+  };
+
   const menuHandlers = {
     onCopyLink: handleCopyLink,
     onDeleteProduct: (product: Product) => setDeleteTarget(product.id),
@@ -142,6 +175,8 @@ export default function Produtos() {
     onOpenCheckout: handleOpenCheckout,
     onOpenMembers: handleOpenMembers,
     onOpenPixels: (product: Product) => setPixelProduct(product),
+    onDuplicateProduct: handleDuplicate,
+    onToggleStatus: handleToggleStatus,
   };
 
   const showClearDraftsBtn = tab === "draft" && draftIds.length > 0;
