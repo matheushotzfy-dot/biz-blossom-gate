@@ -182,11 +182,16 @@ export default function AdminOverviewTab({
   }, [allTx, dateRange]);
   const filteredApproved = useMemo(() => filteredTx.filter(t => t.status === "approved" || t.status === "completed"), [filteredTx]);
 
+  // Fuso São Paulo (America/Sao_Paulo) — normaliza "hoje" para o dia comercial brasileiro
+  const spDayKey = (d: Date) =>
+    new Intl.DateTimeFormat("en-CA", { timeZone: "America/Sao_Paulo", year: "numeric", month: "2-digit", day: "2-digit" }).format(d);
+  const spMonthKey = (d: Date) =>
+    new Intl.DateTimeFormat("en-CA", { timeZone: "America/Sao_Paulo", year: "numeric", month: "2-digit" }).format(d);
   const today = new Date();
-  const todayStr = today.toDateString();
-  const thisMonthStart = new Date(today.getFullYear(), today.getMonth(), 1);
-  const todayTx = useMemo(() => approved.filter(t => new Date(t.created_at).toDateString() === todayStr), [approved, todayStr]);
-  const monthTx = useMemo(() => approved.filter(t => new Date(t.created_at) >= thisMonthStart), [approved, thisMonthStart]);
+  const todayStr = spDayKey(today);
+  const thisMonthKey = spMonthKey(today);
+  const todayTx = useMemo(() => approved.filter(t => spDayKey(new Date(t.created_at)) === todayStr), [approved, todayStr]);
+  const monthTx = useMemo(() => approved.filter(t => spMonthKey(new Date(t.created_at)) === thisMonthKey), [approved, thisMonthKey]);
 
   const tpvToday = todayTx.reduce((a, t) => a + Number(t.amount), 0);
   const tpvMonth = monthTx.reduce((a, t) => a + Number(t.amount), 0);
