@@ -167,7 +167,7 @@ export default function Dashboard() {
 
   const { approved, revenue, conversion, uniqueCustomers, pixConversion, cardConversion, boletoConversion, chargebackRate, pixApprovedCount, pixTotalCount, cardApprovedCount, cardTotalCount, boletoApprovedCount, boletoTotalCount } = useMemo(() => {
     const _approved = filteredTx.filter((t) => isApprovedTransaction(t.status));
-    const _revenue = _approved.reduce((acc, t) => acc + Number(t.net_amount), 0);
+    const _revenue = _approved.reduce((acc, t) => acc + Number(t.amount), 0);
     const conversions = calculateTransactionConversions(filteredTx);
 
     const _chargebackRate = filteredTx.length > 0 ? (filteredTx.filter(t => t.status === "chargeback").length / filteredTx.length) * 100 : 0;
