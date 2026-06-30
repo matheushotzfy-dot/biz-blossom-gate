@@ -22,8 +22,24 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel,
 import ExcelJS from "exceljs";
 import { toast } from "sonner";
 import { Seo } from "@/components/Seo";
+import { supabase } from "@/integrations/supabase/client";
 
 const fmt = (v: number) => v === 0 ? "R$ 0,00" : `R$ ${v.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+
+const SP_TZ = "America/Sao_Paulo";
+const spDateTime = (iso: string) => new Intl.DateTimeFormat("pt-BR", {
+  timeZone: SP_TZ, day: "2-digit", month: "2-digit", year: "numeric",
+  hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: false,
+}).format(new Date(iso));
+const spDate = (iso: string) => new Intl.DateTimeFormat("pt-BR", {
+  timeZone: SP_TZ, day: "2-digit", month: "2-digit", year: "numeric",
+}).format(new Date(iso));
+const spShort = (iso: string) => new Intl.DateTimeFormat("pt-BR", {
+  timeZone: SP_TZ, day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit", hour12: false,
+}).format(new Date(iso));
+const spHour = (iso: string) => new Intl.DateTimeFormat("pt-BR", {
+  timeZone: SP_TZ, hour: "2-digit", minute: "2-digit", hour12: false,
+}).format(new Date(iso)) + "h";
 
 const STATUS_MAP: Record<string, { label: string; cls: string; dot: string }> = {
   approved: { label: "Aprovada", cls: "bg-emerald-500/10 text-emerald-500 border-emerald-500/20", dot: "bg-emerald-500" },
@@ -33,7 +49,10 @@ const STATUS_MAP: Record<string, { label: string; cls: string; dot: string }> = 
   expired: { label: "Expirada", cls: "bg-muted text-muted-foreground border-border/60", dot: "bg-muted-foreground/50" },
   refunded: { label: "Reembolso", cls: "bg-blue-500/10 text-blue-500 border-blue-500/20", dot: "bg-blue-500" },
   chargeback: { label: "Chargeback", cls: "bg-red-500/10 text-red-500 border-red-500/20", dot: "bg-red-500" },
+  cancelled: { label: "Cancelada", cls: "bg-muted text-muted-foreground border-border/60", dot: "bg-muted-foreground/50" },
+  canceled: { label: "Cancelada", cls: "bg-muted text-muted-foreground border-border/60", dot: "bg-muted-foreground/50" },
 };
+
 
 const METHODS_MAP: Record<string, { label: string; icon: LucideIcon }> = {
   pix: { label: "Pix", icon: Zap },
@@ -136,7 +155,7 @@ export default function Vendas() {
 
   const buildRows = () => filtered.map((t) => ({
     "ID da Transação": t.id,
-    "Data": new Date(t.created_at).toLocaleString("pt-BR"),
+    "Data": spDateTime(t.created_at),
     "Cliente": t.customer_name ?? "",
     "Email": t.customer_email ?? "",
     "Documento": t.customer_document ?? "",
@@ -167,6 +186,28 @@ export default function Vendas() {
     URL.revokeObjectURL(url);
   };
 
+  const logExport = async (format: "csv" | "xlsx", count: number) => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+      await supabase.from("activity_logs").insert([{
+        user_id: user.id,
+        action: "export_sales",
+        entity_type: "transactions",
+        new_data: {
+          format,
+          count,
+          range_from: range?.from?.toISOString() ?? null,
+          range_to: range?.to?.toISOString() ?? null,
+          search: search || null,
+          privacy_mode: privacyHidden,
+        },
+      }]);
+    } catch (err) {
+      console.error("[Vendas] export audit log failed:", err);
+    }
+  };
+
   const exportCSV = () => {
     if (!filtered.length) return toast.error("Nenhuma transação para exportar");
     const rows = buildRows();
@@ -180,6 +221,7 @@ export default function Vendas() {
       ...rows.map((r) => headers.map((h) => esc(r[h as keyof typeof r])).join(";")),
     ].join("\n");
     download(new Blob([csv], { type: "text/csv;charset=utf-8;" }), fileName("csv"));
+    void logExport("csv", rows.length);
     toast.success(`${rows.length} transações exportadas (CSV)`);
   };
 
@@ -200,8 +242,10 @@ export default function Vendas() {
     rows.forEach((r) => ws.addRow(r));
     const buf = await wb.xlsx.writeBuffer();
     download(new Blob([buf], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" }), fileName("xlsx"));
+    void logExport("xlsx", rows.length);
     toast.success(`${rows.length} transações exportadas (Excel)`);
   };
+
 
   const stats = useMemo(() => {
     const approved = filteredByDate.filter(t => isApprovedTransaction(t.status));
@@ -481,7 +525,7 @@ export default function Vendas() {
                         {prodsMap[t.product_id || ""] || "Sem produto"}
                       </p>
                       <p className="text-[10px] font-bold text-muted-foreground/60 tabular-nums shrink-0">
-                        {format(new Date(t.created_at), "dd/MM HH:mm", { locale: ptBR })}
+                        {spShort(t.created_at)}
                       </p>
                     </div>
                     <div className="flex items-center gap-1.5 mt-2">
@@ -578,10 +622,10 @@ export default function Vendas() {
                       </td>
                       <td className="px-8 py-5 text-right leading-tight">
                         <div className="text-[11px] font-bold text-foreground">
-                          {format(new Date(t.created_at), "dd/MM/yyyy", { locale: ptBR })}
+                          {spDate(t.created_at)}
                         </div>
                         <div className="text-[10px] font-medium text-muted-foreground/50 mt-1 uppercase">
-                          {format(new Date(t.created_at), "HH:mm'h'", { locale: ptBR })}
+                          {spHour(t.created_at)}
                         </div>
                       </td>
                     </tr>
