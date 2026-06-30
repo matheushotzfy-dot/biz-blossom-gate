@@ -9,6 +9,9 @@ import {
   GraduationCap,
   Trash2,
   Package,
+  Files,
+  Pause,
+  Play,
   ChevronRight,
   type LucideIcon,
 } from "lucide-react";
@@ -32,6 +35,8 @@ export type ProductMenuHandlers = {
   onEditProduct: (product: Product) => void;
   onOpenMembers: (product: Product) => void;
   onDeleteProduct: (product: Product) => void;
+  onDuplicateProduct: (product: Product) => void;
+  onToggleStatus: (product: Product) => void;
 };
 
 type ProductActionsMenuProps = ProductMenuHandlers & {
