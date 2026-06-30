@@ -241,11 +241,6 @@ export default function AdminOverviewTab({
   const days = chartPeriod === "7d" ? 7 : 30;
   const chartData = useMemo(() => Array.from({ length: days }, (_, i) => {
     const d = new Date(); d.setDate(d.getDate() - (days - 1 - i));
-    const dayStr = d.toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit" });
-    const dayTx = approved.filter(t => new Date(t.created_at).toDateString() === d.toDateString());
-  const days = chartPeriod === "7d" ? 7 : 30;
-  const chartData = useMemo(() => Array.from({ length: days }, (_, i) => {
-    const d = new Date(); d.setDate(d.getDate() - (days - 1 - i));
     const key = spDayKey(d);
     const dayStr = d.toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit", timeZone: "America/Sao_Paulo" });
     const dayTx = approved.filter(t => spDayKey(new Date(t.created_at)) === key);
