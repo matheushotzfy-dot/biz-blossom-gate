@@ -346,10 +346,20 @@ export default function Dashboard() {
     : s === 'refunded' ? 'text-muted-foreground'
     : 'text-red-500';
 
+  // Saldo Pendente = (1) reserva ainda retida (D+N) + (2) líquido aprovado mas ainda não disponível para saque
   const pendingBalance = useMemo(() => {
-    return transactions
-      .filter(t => isApprovedTransaction(t.status) && t.retained_until && new Date(t.retained_until) > new Date())
-      .reduce((acc, t) => acc + Number(t.retained_amount || 0), 0);
+    const now = Date.now();
+    let retained = 0;
+    let toRelease = 0;
+    for (const t of transactions) {
+      if (!isApprovedTransaction(t.status)) continue;
+      const retUntil = t.retained_until ? new Date(t.retained_until).getTime() : 0;
+      if (retUntil > now) {
+        retained += Number(t.retained_amount || 0);
+        toRelease += Number(t.net_amount || 0) - Number(t.retained_amount || 0);
+      }
+    }
+    return retained + Math.max(0, toRelease);
   }, [transactions]);
 
   // Compare to previous period (same length) for trend deltas
