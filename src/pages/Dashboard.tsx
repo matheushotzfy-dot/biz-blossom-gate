@@ -167,7 +167,7 @@ export default function Dashboard() {
 
   const { approved, revenue, conversion, uniqueCustomers, pixConversion, cardConversion, boletoConversion, chargebackRate, pixApprovedCount, pixTotalCount, cardApprovedCount, cardTotalCount, boletoApprovedCount, boletoTotalCount } = useMemo(() => {
     const _approved = filteredTx.filter((t) => isApprovedTransaction(t.status));
-    const _revenue = _approved.reduce((acc, t) => acc + Number(t.net_amount), 0);
+    const _revenue = _approved.reduce((acc, t) => acc + Number(t.amount), 0);
     const conversions = calculateTransactionConversions(filteredTx);
 
     const _chargebackRate = filteredTx.length > 0 ? (filteredTx.filter(t => t.status === "chargeback").length / filteredTx.length) * 100 : 0;
@@ -224,7 +224,7 @@ export default function Dashboard() {
       filteredTx.forEach(t => {
         if (!isApprovedTransaction(t.status)) return;
         const hour = brasiliaParts(t.created_at).hour;
-        salesByHour.set(hour, (salesByHour.get(hour) || 0) + Number(t.net_amount));
+        salesByHour.set(hour, (salesByHour.get(hour) || 0) + Number(t.amount));
       });
       return Array.from({ length: 24 }, (_, i): ChartPoint => {
         const point = new Date(start);
@@ -246,7 +246,7 @@ export default function Dashboard() {
         if (!isApprovedTransaction(t.status)) return;
         const p = brasiliaParts(t.created_at);
         const key = `${p.year}-${String(p.month).padStart(2, "0")}`;
-        byMonth.set(key, (byMonth.get(key) || 0) + Number(t.net_amount));
+        byMonth.set(key, (byMonth.get(key) || 0) + Number(t.amount));
       });
       const result: ChartPoint[] = [];
       const cursor = new Date(start.getFullYear(), start.getMonth(), 1);
@@ -270,7 +270,7 @@ export default function Dashboard() {
     filteredTx.forEach(t => {
       if (!isApprovedTransaction(t.status)) return;
       const dateKey = toBrasiliaDate(t.created_at);
-      revenueByDate.set(dateKey, (revenueByDate.get(dateKey) || 0) + Number(t.net_amount));
+      revenueByDate.set(dateKey, (revenueByDate.get(dateKey) || 0) + Number(t.amount));
     });
     return Array.from({ length: spanDays }, (_, i): ChartPoint => {
       const d = new Date(start);
@@ -346,13 +346,23 @@ export default function Dashboard() {
     : s === 'refunded' ? 'text-muted-foreground'
     : 'text-red-500';
 
+  // Saldo Pendente = (1) reserva ainda retida (D+N) + (2) líquido aprovado mas ainda não disponível para saque
   const pendingBalance = useMemo(() => {
-    return transactions
-      .filter(t => isApprovedTransaction(t.status) && t.retained_until && new Date(t.retained_until) > new Date())
-      .reduce((acc, t) => acc + Number(t.retained_amount || 0), 0);
+    const now = Date.now();
+    let retained = 0;
+    let toRelease = 0;
+    for (const t of transactions) {
+      if (!isApprovedTransaction(t.status)) continue;
+      const retUntil = t.retained_until ? new Date(t.retained_until).getTime() : 0;
+      if (retUntil > now) {
+        retained += Number(t.retained_amount || 0);
+        toRelease += Number(t.net_amount || 0) - Number(t.retained_amount || 0);
+      }
+    }
+    return retained + Math.max(0, toRelease);
   }, [transactions]);
 
-  // Compare to previous period (same length) for trend deltas
+  // Compare to previous period (same length) for trend deltas — anchored in America/Sao_Paulo
   const { prevApprovedCount, prevRevenue } = useMemo(() => {
     const today = brasiliaToday();
     let start: Date;
@@ -376,14 +386,21 @@ export default function Dashboard() {
     const prevEnd = new Date(start.getTime() - 1);
     const prevStart = new Date(prevEnd.getTime() - lenMs);
 
+    // Compare using SP calendar date to avoid browser-tz drift
+    const spDay = (iso: string) => toBrasiliaDate(iso);
+    const prevStartKey = prevStart.toLocaleDateString("pt-BR", { timeZone: "America/Sao_Paulo" });
+    const prevEndKey = prevEnd.toLocaleDateString("pt-BR", { timeZone: "America/Sao_Paulo" });
+    const toKey = (k: string) => { const [d, m, y] = k.split("/"); return `${y}-${m}-${d}`; };
+    const lo = toKey(prevStartKey), hi = toKey(prevEndKey);
+
     const prevTx = transactions.filter(t => {
-      const d = new Date(t.created_at);
-      return d >= prevStart && d <= prevEnd;
+      const k = toKey(spDay(t.created_at));
+      return k >= lo && k <= hi;
     });
     const prevApp = prevTx.filter(t => isApprovedTransaction(t.status));
     return {
       prevApprovedCount: prevApp.length,
-      prevRevenue: prevApp.reduce((acc, t) => acc + Number(t.net_amount), 0),
+      prevRevenue: prevApp.reduce((acc, t) => acc + Number(t.amount), 0),
     };
   }, [transactions, selectedPeriod, isCustom, customRange]);
 
@@ -397,10 +414,10 @@ export default function Dashboard() {
   const compareLabel = (!isCustom && selectedPeriod.days === 0) ? "vs ontem" : "vs período anterior";
 
   const financialCards: Array<{ label: string; value: string | number; icon: typeof BarChart3; color: "neutral" | "success" | "warning" | "destructive"; sub: string; trend?: number }> = [
-    { label: "Ticket Médio (líquido)", value: privacy.hidden ? CENSORED : fmt(approved.length > 0 ? revenue / approved.length : 0), icon: BarChart3, color: "neutral", sub: "Média líquida por venda" },
+    { label: "Ticket Médio", value: privacy.hidden ? CENSORED : fmt(approved.length > 0 ? revenue / approved.length : 0), icon: BarChart3, color: "neutral", sub: "Média bruta por venda" },
     { label: "Pedidos Pagos", value: approved.length, icon: Zap, color: "success", sub: "Vendas concluídas" },
-    { label: "Reserva de Segurança", value: privacy.hidden ? CENSORED : fmt(pendingBalance), icon: Clock3, color: "warning", sub: "Retido até a liberação (D+N)" },
-    { label: "Faturamento Líquido", value: privacy.hidden ? CENSORED : fmt(revenue), icon: TrendingUp, color: "success", sub: `Após taxas · ${compareLabel}`, trend: revenueTrend },
+    { label: "Saldo Pendente", value: privacy.hidden ? CENSORED : fmt(pendingBalance), icon: Clock3, color: "warning", sub: "Reserva + a liberar (D+N)" },
+    { label: "Faturamento Total", value: privacy.hidden ? CENSORED : fmt(revenue), icon: TrendingUp, color: "success", sub: `Valor bruto · ${compareLabel}`, trend: revenueTrend },
   ];
 
 
