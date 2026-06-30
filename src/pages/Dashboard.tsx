@@ -223,7 +223,7 @@ export default function Dashboard() {
       const salesByHour = new Map<number, number>();
       filteredTx.forEach(t => {
         if (!isApprovedTransaction(t.status)) return;
-        const hour = new Date(t.created_at).getHours();
+        const hour = brasiliaParts(t.created_at).hour;
         salesByHour.set(hour, (salesByHour.get(hour) || 0) + Number(t.net_amount));
       });
       return Array.from({ length: 24 }, (_, i): ChartPoint => {
