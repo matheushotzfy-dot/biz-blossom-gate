@@ -538,7 +538,7 @@ export default function AdminWithdrawalsTab({ withdrawals, profiles, onWithdrawa
                   )}
                 </td>
                 <td className={`${premiumTable.td} text-xs font-extrabold tabular-nums ${a.type === "credit" ? "text-emerald-500" : "text-destructive"}`}>
-                  {a.type === "credit" ? "+" : "-"}R$ {Number(a.amount).toFixed(2)}
+                  {a.type === "credit" ? "+" : "-"}{formatCurrency(Number(a.amount))}
                 </td>
                 <td className={`${premiumTable.td} max-w-[260px] truncate text-xs text-foreground`}>{a.reason}</td>
                 <td className={`${premiumTable.td} text-xs text-muted-foreground`}>
