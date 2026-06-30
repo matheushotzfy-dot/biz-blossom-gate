@@ -251,7 +251,7 @@ export default function Vendas() {
     const approved = filteredByDate.filter(t => isApprovedTransaction(t.status));
     const revenue = approved.reduce((acc, t) => acc + Number(t.net_amount), 0);
     const gross = approved.reduce((acc, t) => acc + Number(t.amount), 0);
-    const conversions = calculateTransactionConversions(transactions);
+    const conversions = calculateTransactionConversions(filteredByDate);
     return {
       count: approved.length,
       revenue,
@@ -261,7 +261,7 @@ export default function Vendas() {
       pixApproved: conversions.pix.approved,
       pixTotal: conversions.pix.total,
     };
-  }, [filteredByDate, transactions]);
+  }, [filteredByDate]);
 
   const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
   const currentPage = Math.min(page, totalPages);
