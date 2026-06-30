@@ -445,7 +445,7 @@ export default function AdminWithdrawalsTab({ withdrawals, profiles, onWithdrawa
                   <td className={premiumTable.td}>
                     {autoConfig?.enabled ? (
                       <button onClick={() => openAutoConfigDialog(w.user_id)} className="rounded-full border border-primary/20 bg-primary/10 px-2 py-0.5 text-[9px] font-bold text-primary hover:bg-primary/20">
-                        Até R$ {autoConfig.max_amount}
+                        Até {formatCurrency(Number(autoConfig.max_amount))}
                       </button>
                     ) : (
                       <button onClick={() => openAutoConfigDialog(w.user_id)} className="text-[9px] text-muted-foreground underline hover:text-foreground">Configurar</button>
