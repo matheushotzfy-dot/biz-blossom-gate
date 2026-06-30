@@ -3942,6 +3942,7 @@ export type Database = {
       }
     }
     Functions: {
+      admin_approve_kyc: { Args: { _user_id: string }; Returns: undefined }
       admin_broadcast_notification: {
         Args: {
           _message: string
@@ -3964,7 +3965,15 @@ export type Database = {
         }[]
       }
       admin_decrypt_field: { Args: { _cipher: string }; Returns: string }
+      admin_freeze_account: {
+        Args: { _freeze: boolean; _reason?: string; _user_id: string }
+        Returns: undefined
+      }
       admin_purge_orphan_notifications: { Args: never; Returns: number }
+      admin_reject_kyc: {
+        Args: { _reason: string; _user_id: string }
+        Returns: undefined
+      }
       admin_reveal_bank_accounts: {
         Args: { _user_id: string }
         Returns: {
