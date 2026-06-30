@@ -103,6 +103,16 @@ function brasiliaToday() {
   return new Date(Number(y), Number(m) - 1, Number(d));
 }
 
+const _spPartsFmt = new Intl.DateTimeFormat("en-US", {
+  timeZone: "America/Sao_Paulo", year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", hourCycle: "h23",
+});
+function brasiliaParts(dateStr: string) {
+  const parts = _spPartsFmt.formatToParts(new Date(dateStr));
+  const get = (t: string) => Number(parts.find(p => p.type === t)!.value);
+  return { year: get("year"), month: get("month"), day: get("day"), hour: get("hour") };
+}
+
+
 function timeAgo(dateStr: string) {
   const diff = Date.now() - new Date(dateStr).getTime();
   const mins = Math.floor(diff / 60000);
