@@ -622,10 +622,10 @@ export default function Vendas() {
                       </td>
                       <td className="px-8 py-5 text-right leading-tight">
                         <div className="text-[11px] font-bold text-foreground">
-                          {format(new Date(t.created_at), "dd/MM/yyyy", { locale: ptBR })}
+                          {spDate(t.created_at)}
                         </div>
                         <div className="text-[10px] font-medium text-muted-foreground/50 mt-1 uppercase">
-                          {format(new Date(t.created_at), "HH:mm'h'", { locale: ptBR })}
+                          {spHour(t.created_at)}
                         </div>
                       </td>
                     </tr>
