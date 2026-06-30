@@ -244,8 +244,8 @@ export default function Dashboard() {
       const byMonth = new Map<string, number>();
       filteredTx.forEach(t => {
         if (!isApprovedTransaction(t.status)) return;
-        const d = new Date(t.created_at);
-        const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
+        const p = brasiliaParts(t.created_at);
+        const key = `${p.year}-${String(p.month).padStart(2, "0")}`;
         byMonth.set(key, (byMonth.get(key) || 0) + Number(t.net_amount));
       });
       const result: ChartPoint[] = [];
