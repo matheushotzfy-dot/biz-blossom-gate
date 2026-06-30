@@ -756,7 +756,7 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
                       <td className={premiumTable.td}><SellerTypeBadge type={p.seller_type} /></td>
                       <td className={premiumTable.td}><StatusBadge status={p.account_status || "pending_review"} /></td>
                       <td className={premiumTable.td}>
-                        <span className="font-display text-[13px] font-black tabular-nums text-primary">{fmtCurrency(stats.totalNet - stats.totalWithdrawn)}</span>
+                        <span className="font-display text-[13px] font-black tabular-nums text-primary">{fmtCurrency(sellerBalances.get(p.user_id) ?? (stats.totalNet - stats.totalWithdrawn))}</span>
                       </td>
                       <td className={premiumTable.td}>
                         <span className="text-[11px] tabular-nums text-muted-foreground">
