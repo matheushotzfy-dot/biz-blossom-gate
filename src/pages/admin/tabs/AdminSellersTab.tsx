@@ -163,7 +163,40 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
     supabase.from("acquirers").select("id, name, slug, type, is_active").eq("is_active", true).then(({ data }) => {
       if (data) setAcquirers(data as Acquirer[]);
     });
+    // Canonical seller balances (same fórmula do painel do vendedor)
+    supabase.rpc("admin_get_seller_balances").then(({ data, error }) => {
+      if (error) { console.warn("[AdminSellersTab] balances RPC failed", error.message); return; }
+      const m = new Map<string, number>();
+      (data || []).forEach((row: { user_id: string; balance: number | string }) =>
+        m.set(row.user_id, Number(row.balance) || 0)
+      );
+      setSellerBalances(m);
+    });
   }, []);
+
+  const revealPii = async () => {
+    if (!selectedUser) return;
+    try {
+      const [{ data: revealed }, { data: pixData }] = await Promise.all([
+        supabase.rpc("admin_reveal_profile", { _user_id: selectedUser.user_id }),
+        supabase.rpc("admin_reveal_pix_keys", { _user_id: selectedUser.user_id }),
+      ]);
+      const r = Array.isArray(revealed) ? revealed[0] : revealed;
+      if (r) {
+        setRevealedDoc(r.document_number ?? null);
+        setRevealedLegacyPix(r.pix_key ?? null);
+      }
+      if (pixData) setRevealedPixKeys(pixData as PixKey[]);
+      setPiiRevealed(true);
+      await logAdminAction("reveal_pii", "profile", selectedUser.user_id, {
+        revealed_fields: ["document_number", "pix_key", "pix_keys"],
+      });
+      toast.success("Dados sensíveis revelados — ação auditada");
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : "desconhecido";
+      toast.error("Erro ao revelar dados: " + msg);
+    }
+  };
 
   const openUserDetail = async (profile: Tables<"profiles">) => {
     setSelectedUser(profile);
@@ -173,6 +206,7 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
     setBalanceAdjustments([]); setKycImages([]); setIpHistory([]);
     setUserRetention(null); setRetentionForm({ pix_pct: "", card_pct: "", days: "", card_release_days: "7" });
     setAdminNotes(""); setSelectedAcquirerId("");
+    setPiiRevealed(false); setRevealedDoc(null); setRevealedPixKeys(null); setRevealedLegacyPix(null);
 
     try {
       const [logsRes, productsRes, wdRes, txRes, feesRes, adjRes, pixRes, disputesRes, retRes, ipRes] = await Promise.all([
