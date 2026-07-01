@@ -411,7 +411,7 @@ export default function AdminTransactionsTab({ transactions, profiles, products,
                   <button onClick={() => copy(selectedTx.id)} className="inline-flex items-center gap-1 font-mono text-xs text-foreground/80 hover:text-foreground">
                     {selectedTx.id.slice(0, 12)}… <Copy className="h-3 w-3" />
                   </button>
-                  <StatusBadge status={selectedTx.status} />
+                  <StatusBadge status={deriveTransactionStatus(selectedTx)} />
                   {selectedTx.is_simulated && (
                     <span className="inline-flex items-center gap-1 rounded border border-info/20 bg-info/10 px-1.5 py-0.5 text-[9px] font-bold uppercase text-info">
                       <Beaker className="h-2.5 w-2.5" /> Simulada
