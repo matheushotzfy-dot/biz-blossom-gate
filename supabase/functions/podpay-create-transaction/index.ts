@@ -477,6 +477,20 @@ Deno.serve(async (req) => {
     }
 
     // === Save transaction ===
+    // Resolve pix_expires_at — prefer PodPay response, fallback to now()+30min for PIX
+    let pixExpiresAt: string | null = null;
+    if (paymentMethod === 'pix') {
+      const podpayPixExp =
+        podpayData.data?.pix?.expiresAt ||
+        podpayData.pix?.expiresAt ||
+        podpayData.data?.pix?.expires_at ||
+        podpayData.pix?.expires_at ||
+        null;
+      pixExpiresAt = podpayPixExp
+        ? new Date(podpayPixExp).toISOString()
+        : new Date(Date.now() + 30 * 60 * 1000).toISOString();
+    }
+
     const { data: transaction, error: txError } = await supabase.from('transactions').insert({
       user_id: product.user_id,
       product_id: product.id,
@@ -494,6 +508,7 @@ Deno.serve(async (req) => {
       coupon_id: couponId,
       discount_amount: discountAmount,
       affiliate_link_id: resolvedAffiliateLinkId,
+      pix_expires_at: pixExpiresAt,
       metadata: validBumpIds.length > 0
         ? { bump_product_ids: validBumpIds, bumps_total: bumpsTotal }
         : {},
