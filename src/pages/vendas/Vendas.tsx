@@ -44,14 +44,62 @@ const spHour = (iso: string) => new Intl.DateTimeFormat("pt-BR", {
 const STATUS_MAP: Record<string, { label: string; cls: string; dot: string }> = {
   approved: { label: "Aprovada", cls: "bg-emerald-500/10 text-emerald-500 border-emerald-500/20", dot: "bg-emerald-500" },
   completed: { label: "Aprovada", cls: "bg-emerald-500/10 text-emerald-500 border-emerald-500/20", dot: "bg-emerald-500" },
+  paid: { label: "Aprovada", cls: "bg-emerald-500/10 text-emerald-500 border-emerald-500/20", dot: "bg-emerald-500" },
   pending: { label: "Pendente", cls: "bg-amber-500/10 text-amber-500 border-amber-500/20", dot: "bg-amber-500" },
-  failed: { label: "Falha", cls: "bg-red-500/10 text-red-500 border-red-500/20", dot: "bg-red-500" },
+  processing: { label: "Pendente", cls: "bg-amber-500/10 text-amber-500 border-amber-500/20", dot: "bg-amber-500" },
   expired: { label: "Expirada", cls: "bg-muted text-muted-foreground border-border/60", dot: "bg-muted-foreground/50" },
   refunded: { label: "Reembolso", cls: "bg-blue-500/10 text-blue-500 border-blue-500/20", dot: "bg-blue-500" },
+  partially_refunded: { label: "Reembolso", cls: "bg-blue-500/10 text-blue-500 border-blue-500/20", dot: "bg-blue-500" },
   chargeback: { label: "Chargeback", cls: "bg-red-500/10 text-red-500 border-red-500/20", dot: "bg-red-500" },
+  med: { label: "MED", cls: "bg-orange-500/10 text-orange-500 border-orange-500/20", dot: "bg-orange-500" },
+  error: { label: "Erro", cls: "bg-red-500/10 text-red-500 border-red-500/20", dot: "bg-red-500" },
+  failed: { label: "Erro", cls: "bg-red-500/10 text-red-500 border-red-500/20", dot: "bg-red-500" },
   cancelled: { label: "Cancelada", cls: "bg-muted text-muted-foreground border-border/60", dot: "bg-muted-foreground/50" },
   canceled: { label: "Cancelada", cls: "bg-muted text-muted-foreground border-border/60", dot: "bg-muted-foreground/50" },
 };
+
+/**
+ * Regras de negócio de status para o seller:
+ * - approved: pago (pix/boleto/cartão)
+ * - chargeback: SOMENTE cartão
+ * - med: SOMENTE pix (mediação bancária)
+ * - refunded: reembolso manual
+ * - pending: aguardando pagamento (até 24h)
+ * - expired: pending há mais de 24h ou pix_expires_at vencido
+ * - error: falha técnica com mensagem sanitizada (sem expor erro de código)
+ */
+function deriveTxStatus(t: { status: string; payment_method?: string | null; created_at: string; pix_expires_at?: string | null }): string {
+  const raw = (t.status || "").toLowerCase();
+  const method = (t.payment_method || "").toLowerCase();
+  const isCard = method === "credit_card" || method === "card";
+  const isPix = method === "pix";
+
+  if (raw === "approved" || raw === "completed" || raw === "paid") return "approved";
+  if (raw === "refunded" || raw === "partially_refunded") return "refunded";
+
+  if (raw === "chargeback" || raw === "chargedback" || raw === "charged_back") {
+    if (isCard) return "chargeback";
+    if (isPix) return "med";
+    return "error";
+  }
+
+  if (raw === "med" || raw === "mediation" || raw === "disputed") {
+    return isPix ? "med" : (isCard ? "chargeback" : "error");
+  }
+
+  if (raw === "cancelled" || raw === "canceled") return "cancelled";
+  if (raw === "expired") return "expired";
+
+  if (raw === "pending" || raw === "processing" || raw === "waiting_payment") {
+    const ageH = (Date.now() - new Date(t.created_at).getTime()) / 3_600_000;
+    const pixVenc = t.pix_expires_at ? new Date(t.pix_expires_at).getTime() < Date.now() : false;
+    if (ageH >= 24 || pixVenc) return "expired";
+    return "pending";
+  }
+
+  if (raw === "failed" || raw === "error" || raw === "rejected") return "error";
+  return raw || "pending";
+}
 
 
 const METHODS_MAP: Record<string, { label: string; icon: LucideIcon }> = {
