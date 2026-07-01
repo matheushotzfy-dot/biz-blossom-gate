@@ -14,6 +14,7 @@ import { PremiumMetric, PremiumMetricGrid, PremiumPanel, PremiumSegmented, Premi
 import { logAdminAction } from "@/lib/auditLog";
 import { cn } from "@/lib/utils";
 import type { Tables } from "@/integrations/supabase/types";
+import { friendlyError } from "@/lib/friendlyError";
 
 interface ErrorLog {
   id: string;
@@ -92,7 +93,7 @@ export default function AdminErrorLogsTab({ profiles }: Props) {
   const load = async () => {
     setLoading(true);
     const { data, error } = await supabase.from("error_logs").select("*").order("created_at", { ascending: false }).limit(1000);
-    if (error) toast.error("Erro ao carregar: " + error.message);
+    if (error) toast.error("Erro ao carregar: " + friendlyError(error));
     if (data) setErrors(data as ErrorLog[]);
     setLoading(false);
   };
@@ -113,7 +114,7 @@ export default function AdminErrorLogsTab({ profiles }: Props) {
     if (openIds.length === 0) { setBusy(false); setConfirmAction(null); return; }
     const { error } = await supabase.from("error_logs").update({ resolved: true }).in("id", openIds);
     setBusy(false); setConfirmAction(null);
-    if (error) { toast.error("Erro: " + error.message); return; }
+    if (error) { toast.error("Erro: " + friendlyError(error)); return; }
     toast.success(`${openIds.length} erro(s) resolvido(s)`);
     await logAdminAction("error_logs_resolve_all", "error_logs", null, { count: openIds.length });
     load();
@@ -125,7 +126,7 @@ export default function AdminErrorLogsTab({ profiles }: Props) {
     if (ids.length === 0) { setBusy(false); setConfirmAction(null); return; }
     const { error } = await supabase.from("error_logs").delete().in("id", ids);
     setBusy(false); setConfirmAction(null);
-    if (error) { toast.error("Erro: " + error.message); return; }
+    if (error) { toast.error("Erro: " + friendlyError(error)); return; }
     toast.success(`${ids.length} resolvido(s) apagado(s)`);
     await logAdminAction("error_logs_clear_resolved", "error_logs", null, { count: ids.length });
     load();
@@ -136,7 +137,7 @@ export default function AdminErrorLogsTab({ profiles }: Props) {
     // delete-all needs a where clause
     const { error } = await supabase.from("error_logs").delete().gte("created_at", "1970-01-01");
     setBusy(false); setConfirmAction(null);
-    if (error) { toast.error("Erro: " + error.message); return; }
+    if (error) { toast.error("Erro: " + friendlyError(error)); return; }
     toast.success("Todos os logs foram apagados");
     await logAdminAction("error_logs_clear_all", "error_logs", null, { count: errors.length });
     load();

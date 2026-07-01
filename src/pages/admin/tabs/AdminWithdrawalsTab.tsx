@@ -22,6 +22,7 @@ import type { Tables } from "@/integrations/supabase/types";
 import { FinanceiroHero } from "@/components/financeiro/FinanceiroHero";
 import { PremiumMetric, PremiumMetricGrid, PremiumPanel, PremiumSegmented, PremiumEmpty, premiumTable } from "./AdminPremium";
 import { formatCurrency } from "@/lib/utils";
+import { friendlyError } from "@/lib/friendlyError";
 
 /* ── Types ── */
 interface AuditLog { id: string; admin_user_id: string; action: string; entity_id: string | null; created_at: string; }
@@ -177,7 +178,7 @@ export default function AdminWithdrawalsTab({ withdrawals, profiles, onWithdrawa
  const { error } = await supabase.from("withdrawals")
    .update({ status: "rejected", rejection_reason: rejectReason.trim(), processed_by: user?.id })
    .eq("id", rejectDialog).eq("status", "pending");
- if (error) { toast.error(error.message || "Erro ao recusar"); return; }
+ if (error) { toast.error(friendlyError(error, "Erro ao recusar")); return; }
  await logAdminAction("reject_withdrawal", "withdrawal", rejectDialog, { reason: rejectReason.trim() });
  toast.success("Saque recusado com motivo registrado");
  setRejectDialog(null);
@@ -191,7 +192,7 @@ export default function AdminWithdrawalsTab({ withdrawals, profiles, onWithdrawa
    if (file.size > 5 * 1024 * 1024) { toast.error("Arquivo > 5MB"); return; }
    const path = `${withdrawalId}/${Date.now()}-${file.name.replace(/[^\w.-]/g, "_")}`;
    const { error: upErr } = await supabase.storage.from("withdrawal-proofs").upload(path, file, { upsert: true });
-   if (upErr) { toast.error("Erro ao enviar: " + upErr.message); return; }
+   if (upErr) { toast.error("Erro ao enviar: " + friendlyError(upErr)); return; }
    const { error } = await supabase.from("withdrawals").update({ payment_proof_url: path }).eq("id", withdrawalId);
    if (error) { toast.error("Erro ao salvar"); return; }
    await logAdminAction("upload_withdrawal_proof", "withdrawal", withdrawalId, { path });

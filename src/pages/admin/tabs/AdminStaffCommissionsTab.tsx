@@ -15,6 +15,7 @@ import { cn } from "@/lib/utils";
 import type { Tables } from "@/integrations/supabase/types";
 import { FinanceiroHero } from "@/components/financeiro/FinanceiroHero";
 import { PremiumMetric, PremiumMetricGrid, PremiumPanel, premiumTable, PremiumEmpty } from "./AdminPremium";
+import { friendlyError } from "@/lib/friendlyError";
 
 const fmt = (v: number) => v.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
 
@@ -340,7 +341,7 @@ function StaffCommissionPanel({ selected, onClose, onChanged, profiles, onCopy }
     const { error } = await supabase.from("staff_commission_config").upsert({
       user_id: selected.user_id, base_pct: v, base: "net_amount", is_active: true,
     });
-    if (error) { toast.error(error.message); return; }
+    if (error) { toast.error(friendlyError(error)); return; }
     toast.success("Percentual padrão atualizado");
     onChanged();
   };
@@ -350,7 +351,7 @@ function StaffCommissionPanel({ selected, onClose, onChanged, profiles, onCopy }
     const { error } = await supabase.from("staff_commission_overrides").insert({
       staff_user_id: selected.user_id, seller_user_id: newOverrideSeller, pct: parseFloat(newOverridePct),
     });
-    if (error) { toast.error(error.message); return; }
+    if (error) { toast.error(friendlyError(error)); return; }
     setNewOverrideSeller(""); setNewOverridePct("");
     toast.success("Override adicionado");
     const { data } = await supabase.from("staff_commission_overrides").select("*").eq("staff_user_id", selected.user_id);
@@ -369,7 +370,7 @@ function StaffCommissionPanel({ selected, onClose, onChanged, profiles, onCopy }
     const { error } = await supabase.from("staff_commission_payouts").insert({
       staff_user_id: selected.user_id, amount: v, method: payoutMethod, notes: payoutNotes, status: "pending",
     });
-    if (error) { toast.error(error.message); return; }
+    if (error) { toast.error(friendlyError(error)); return; }
     setPayoutAmount(""); setPayoutNotes("");
     toast.success("Pagamento criado como pendente");
     const { data } = await supabase.from("staff_commission_payouts").select("*").eq("staff_user_id", selected.user_id).order("created_at", { ascending: false });
@@ -378,7 +379,7 @@ function StaffCommissionPanel({ selected, onClose, onChanged, profiles, onCopy }
 
   const markPaid = async (id: string) => {
     const { error } = await supabase.from("staff_commission_payouts").update({ status: "paid" }).eq("id", id);
-    if (error) { toast.error(error.message); return; }
+    if (error) { toast.error(friendlyError(error)); return; }
     toast.success("Pagamento efetivado");
     const { data } = await supabase.from("staff_commission_payouts").select("*").eq("staff_user_id", selected.user_id).order("created_at", { ascending: false });
     setPayouts(data ?? []);

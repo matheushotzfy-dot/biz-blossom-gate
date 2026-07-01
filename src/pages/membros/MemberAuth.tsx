@@ -12,6 +12,7 @@ import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { motion, AnimatePresence, useMotionValue, useSpring, useTransform } from "framer-motion";
 import { Seo } from "@/components/Seo";
+import { friendlyError } from "@/lib/friendlyError";
 
 /* ─── Floating particles ─── */
 function FloatingParticles() {
@@ -213,7 +214,7 @@ export default function MemberAuth() {
  refresh_token: data.refresh_token,
  });
  if (sessionError) {
- toast.error(sessionError.message);
+ toast.error(friendlyError(sessionError));
  setLoading(false);
  return;
  }

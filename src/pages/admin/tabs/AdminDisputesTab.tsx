@@ -13,6 +13,7 @@ import { GlassPanel as AdminPanel, GlassPanelTitle as PanelTitle } from "./Admin
 import { FinanceiroHero } from "@/components/financeiro/FinanceiroHero";
 import { PremiumMetric, PremiumMetricGrid } from "./AdminPremium";
 import { logAdminAction } from "@/lib/auditLog";
+import { friendlyError } from "@/lib/friendlyError";
 
 interface EvidenceUrl { path: string; name: string; uploaded_at: string; }
 
@@ -104,7 +105,7 @@ export default function AdminDisputesTab({ type, title, profiles, transactions, 
    if (file.size > 10 * 1024 * 1024) { toast.error("Arquivo > 10MB"); return; }
    const path = `${editing.id}/${Date.now()}-${file.name.replace(/[^\w.-]/g, "_")}`;
    const { error: upErr } = await supabase.storage.from("dispute-evidence").upload(path, file);
-   if (upErr) { toast.error("Erro ao enviar: " + upErr.message); return; }
+   if (upErr) { toast.error("Erro ao enviar: " + friendlyError(upErr)); return; }
    const next: EvidenceUrl[] = [ ...(editing.evidence_urls || []), { path, name: file.name, uploaded_at: new Date().toISOString() } ];
    const { error } = await supabase.from("disputes").update({ evidence_urls: next as unknown as Json }).eq("id", editing.id);
    if (error) { toast.error("Erro ao salvar"); return; }

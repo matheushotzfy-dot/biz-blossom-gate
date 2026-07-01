@@ -16,6 +16,7 @@ import {
   type FieldErrors,
 } from "@/lib/validation";
 import { InlineError, errorInputClass } from "@/components/ui/inline-error";
+import { friendlyError } from "@/lib/friendlyError";
 
 const PIX_TYPES = [
   { value: "cpf", label: "CPF" },
@@ -73,7 +74,7 @@ export default function DadosBancarios() {
       key_value: parsed.data.key_value.trim(),
     });
     setBusy(false);
-    if (error) { toast.error(error.message || "Erro ao adicionar chave"); return; }
+    if (error) { toast.error(friendlyError(error, "Erro ao adicionar chave")); return; }
     toast.success("Chave PIX adicionada");
     setPixForm({ key_type: "cpf", key_value: "" });
     setPixOpen(false);
@@ -111,7 +112,7 @@ export default function DadosBancarios() {
       holder_document: parsed.data.holder_document.replace(/\D/g, ""),
     });
     setBusy(false);
-    if (error) { toast.error(error.message || "Erro ao adicionar conta"); return; }
+    if (error) { toast.error(friendlyError(error, "Erro ao adicionar conta")); return; }
     toast.success("Conta bancária adicionada");
     setBankForm({ bank_name: "", bank_code: "", agency: "", account_number: "", account_type: "corrente", holder_name: "", holder_document: "" });
     setBankOpen(false);

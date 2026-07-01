@@ -14,6 +14,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
+import { friendlyError } from "@/lib/friendlyError";
 
 const fmt = (v: number) => `R$ ${v.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}`;
 
@@ -125,7 +126,7 @@ export default function Assinaturas() {
       trial_days: parseInt(fTrial) || 0,
       product_id: fProduct && fProduct !== "none" ? fProduct : null,
     });
-    if (error) { toast.error(error.message); return; }
+    if (error) { toast.error(friendlyError(error)); return; }
     toast.success("Plano criado!");
     setShowCreate(false);
     setFName(""); setFDesc(""); setFPrice(""); setFInterval("monthly"); setFTrial("0"); setFProduct("");

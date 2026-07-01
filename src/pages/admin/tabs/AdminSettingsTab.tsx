@@ -16,6 +16,7 @@ import { GlassPanel as AdminPanel, GlassPanelTitle as PanelTitle } from "./Admin
 import { LinearHero, LinearStat, LinearStatRow } from "@/components/admin/LinearKit";
 import type { Tables, Json } from "@/integrations/supabase/types";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { friendlyError } from "@/lib/friendlyError";
 
 type PlatformSetting = Tables<"platform_settings">;
 type RetentionSetting = Omit<Tables<"retention_settings">, "pix_retention_pct" | "card_retention_pct" | "retention_days" | "card_release_days"> & {
@@ -204,7 +205,7 @@ export default function AdminSettingsTab() {
       .from("custom_user_fees")
       .delete({ count: "exact" })
       .not("user_id", "is", null);
-    if (error) { toast.error("Erro ao aplicar global: " + error.message); setSaving(false); return; }
+    if (error) { toast.error("Erro ao aplicar global: " + friendlyError(error)); setSaving(false); return; }
     toast.success(`Taxas globais aplicadas. ${count ?? 0} overrides removidos.`);
     await logAdminAction("apply_global_fees_to_all", "custom_user_fees", "bulk", { removed: count } as Record<string, Json>);
     setSaving(false);
@@ -217,7 +218,7 @@ export default function AdminSettingsTab() {
     if (!window.confirm(`Definir limite de R$ ${val.toLocaleString("pt-BR")} para novos usuários? Os usuários existentes mantêm o limite atual.`)) return;
     setSavingMaxTicket(true);
     const { data, error } = await supabase.rpc("set_max_ticket_new_users_only", { _new_value: val });
-    if (error) { toast.error("Erro: " + error.message); setSavingMaxTicket(false); return; }
+    if (error) { toast.error("Erro: " + friendlyError(error)); setSavingMaxTicket(false); return; }
     toast.success(`Novo limite global: R$ ${val.toLocaleString("pt-BR")}. Limite anterior preservado nos usuários existentes.`);
     await logAdminAction("set_max_ticket_new_only", "platform_settings", "max_ticket_default", data as unknown as Record<string, Json>);
     setMaxTicketGlobal(String(val));
@@ -231,7 +232,7 @@ export default function AdminSettingsTab() {
     if (!window.confirm(`Aplicar R$ ${val.toLocaleString("pt-BR")} a TODOS os sellers (novos e antigos)? Isso APAGA todos os limites individuais de ticket.`)) return;
     setSavingMaxTicket(true);
     const { data, error } = await supabase.rpc("set_max_ticket_for_all", { _new_value: val });
-    if (error) { toast.error("Erro: " + error.message); setSavingMaxTicket(false); return; }
+    if (error) { toast.error("Erro: " + friendlyError(error)); setSavingMaxTicket(false); return; }
     toast.success(`Limite R$ ${val.toLocaleString("pt-BR")} aplicado a todos os sellers.`);
     await logAdminAction("set_max_ticket_for_all", "platform_settings", "max_ticket_default", data as unknown as Record<string, Json>);
     setMaxTicketGlobal(String(val));

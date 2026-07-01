@@ -9,6 +9,7 @@ import { ShieldAlert, Save, Percent, Banknote, ArrowDownToLine } from "lucide-re
 import { toast } from "sonner";
 import type { Tables } from "@/integrations/supabase/types";
 import { PremiumPanel } from "./AdminPremium";
+import { friendlyError } from "@/lib/friendlyError";
 
 interface Props {
   profiles: Tables<"profiles">[];
@@ -48,7 +49,7 @@ export default function AdminManagersTab({ profiles, onReload }: Props) {
       ? await supabase.from("manager_fee_limits").update(payload).eq("id", limitsId)
       : await supabase.from("manager_fee_limits").insert(payload);
     setSaving(false);
-    if (error) { toast.error(error.message); return; }
+    if (error) { toast.error(friendlyError(error)); return; }
     toast.success("Limites salvos.");
   };
 

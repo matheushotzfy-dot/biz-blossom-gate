@@ -15,6 +15,7 @@ import { cn } from "@/lib/utils";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import DadosBancarios from "./DadosBancarios";
+import { friendlyError } from "@/lib/friendlyError";
 
 const fmt = (v: number) => v === 0 ? "R$ 0,00" : `R$ ${v.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}`;
 const DEFAULT_WITHDRAW_FEE = 5;
@@ -97,7 +98,7 @@ export default function Saques() {
     if (pixKeys.length === 0 && bankAccounts.length === 0) { toast.error("Cadastre uma chave PIX ou conta bancária"); return; }
 
     const { error } = await supabase.from("withdrawals").insert({ user_id: user.id, amount: numAmount });
-    if (error) { toast.error(error.message); return; }
+    if (error) { toast.error(friendlyError(error)); return; }
     toast.success("Solicitação enviada!"); setOpen(false); setAmount(""); invalidateAll(["withdrawals"]);
   };
 

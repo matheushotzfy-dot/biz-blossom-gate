@@ -16,6 +16,7 @@ import { cn } from "@/lib/utils";
 import type { Tables } from "@/integrations/supabase/types";
 import { FinanceiroHero } from "@/components/financeiro/FinanceiroHero";
 import { PremiumPanel, PremiumMetric, PremiumMetricGrid, PremiumEmpty, premiumTable } from "./AdminPremium";
+import { friendlyError } from "@/lib/friendlyError";
 
 export const STAFF_PERMISSIONS: { key: string; label: string; group: string }[] = [
   { key: "view_sellers", label: "Ver vendedores", group: "Visualização" },
@@ -193,7 +194,7 @@ export default function StaffManagementTab({ profiles, onReload, role }: Props) 
     const { error } = await supabase.from("staff_commission_config").upsert({
       user_id: row.user_id, base_pct: value, base: "net_amount", is_active: true,
     });
-    if (error) { toast.error(error.message); return; }
+    if (error) { toast.error(friendlyError(error)); return; }
     toast.success("% atualizada.");
     load();
   };
