@@ -140,18 +140,25 @@ Deno.serve(async (req) => {
       );
     }
 
-    // ===== Block frozen accounts (sellers / members) =====
+    // ===== Block frozen / banned / suspended accounts =====
     const { data: profileRow } = await adminClient
       .from("profiles")
-      .select("frozen")
+      .select("frozen, account_status")
       .eq("user_id", authData.user.id)
       .maybeSingle();
-    if (profileRow?.frozen) {
+    const blockedStatuses = ["blocked", "banned", "suspended"];
+    const isBlocked = blockedStatuses.includes(String(profileRow?.account_status ?? "").toLowerCase());
+    if (profileRow?.frozen || isBlocked) {
       await adminClient.from("admin_login_attempts").insert({
         email: trimmedEmail, success: false, scope,
       });
+      // Revoke any leftover sessions so a banned user can't reuse an old refresh token
+      try { await adminClient.auth.admin.signOut(authData.user.id, "global"); } catch (_) {}
+      const msg = isBlocked
+        ? "Conta bloqueada. Contate o suporte."
+        : "Conta congelada. Contate o suporte.";
       return new Response(
-        JSON.stringify({ success: false, error: "Conta congelada. Contate o suporte." }),
+        JSON.stringify({ success: false, error: msg }),
         { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } },
       );
     }
