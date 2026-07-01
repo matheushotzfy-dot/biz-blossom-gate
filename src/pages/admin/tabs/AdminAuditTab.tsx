@@ -2,7 +2,7 @@ import { useState, useEffect, useMemo } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import {
   Activity, Search, Clock, FileText, Shield, Users, UserCog,
-  ChevronLeft, ChevronRight, Briefcase, User as UserIcon,
+  ChevronLeft, ChevronRight, Briefcase, User as UserIcon, Download,
 } from "lucide-react";
 import { GlassPanel as AdminPanel, GlassPanelTitle as PanelTitle, AdminKpi } from "./AdminOverviewTab";
 import type { Tables } from "@/integrations/supabase/types";
