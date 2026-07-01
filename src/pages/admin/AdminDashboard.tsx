@@ -3,6 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useNavigate } from "react-router-dom";
 import { useTheme } from "@/hooks/useTheme";
+import { useIdleLogout } from "@/hooks/useIdleLogout";
 import {
   Shield, LogOut, Zap, LayoutDashboard, Users, Package, AlertTriangle,
   RotateCcw, ShieldAlert, CreditCard, ArrowDownToLine, Tag, GraduationCap,
@@ -123,6 +124,7 @@ const DATE_PRESETS: { id: DatePresetId; label: string }[] = [
 
 export default function AdminDashboard() {
   const { user, loading: authLoading } = useAuth();
+  useIdleLogout(15);
   const navigate = useNavigate();
   const { theme, toggleTheme } = useTheme();
   const [transactions, setTransactions] = useState<Tables<"transactions">[]>([]);
@@ -152,7 +154,7 @@ export default function AdminDashboard() {
       const toIso = dateRange.to.toISOString();
       const { data, error } = await supabase.rpc("get_admin_dashboard_data" as never, {
         _from: fromIso, _to: toIso,
-        _tx_limit: 2000, _profile_limit: 1000, _product_limit: 1000, _withdrawal_limit: 2000,
+        _tx_limit: 5000, _profile_limit: 2000, _product_limit: 2000, _withdrawal_limit: 5000,
       } as never);
       if (error) throw error;
       const payload = (data ?? {}) as {

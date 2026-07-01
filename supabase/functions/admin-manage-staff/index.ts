@@ -43,6 +43,10 @@ Deno.serve(async (req) => {
     if (action === "freeze" || action === "unfreeze") {
       const frozen = action === "freeze";
       await admin.from("profiles").update({ frozen }).eq("user_id", target_user_id);
+      // Force-invalidate all active sessions when freezing so revocation is immediate
+      if (frozen) {
+        try { await admin.auth.admin.signOut(target_user_id, "global"); } catch (_) {}
+      }
       await admin.from("staff_audit_log").insert({
         staff_user_id: callerId,
         action: action === "freeze" ? "freeze_staff" : "unfreeze_staff",
@@ -61,6 +65,8 @@ Deno.serve(async (req) => {
       if (error) {
         return new Response(JSON.stringify({ error: error.message }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
       }
+      // Kill existing sessions so old JWT can't linger with the previous password
+      try { await admin.auth.admin.signOut(target_user_id, "global"); } catch (_) {}
       await admin.from("staff_audit_log").insert({
         staff_user_id: callerId,
         action: "reset_staff_password",
