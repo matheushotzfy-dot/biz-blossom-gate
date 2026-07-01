@@ -24,12 +24,15 @@ export async function logAdminAction(
     const sanitizedEntityType = entityType.replace(/[<>'"]/g, "").slice(0, 50);
     const sanitizedEntityId = entityId ? entityId.replace(/[<>'"]/g, "").slice(0, 255) : null;
 
+    const userAgent = typeof navigator !== "undefined" ? navigator.userAgent.slice(0, 500) : null;
+
     const { error } = await supabase.from("audit_logs").insert([{
       admin_user_id: user.id,
       action: sanitizedAction,
       entity_type: sanitizedEntityType,
       entity_id: sanitizedEntityId,
       details: details || {},
+      user_agent: userAgent,
     }]);
 
     if (error) {

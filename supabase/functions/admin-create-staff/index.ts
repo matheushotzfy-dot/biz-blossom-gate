@@ -54,6 +54,7 @@ Deno.serve(async (req) => {
     const body = await req.json().catch(() => ({}));
     const email = String(body?.email ?? "").trim().toLowerCase();
     const password = String(body?.password ?? "");
+    const sendInvite = body?.send_invite === true || !password;
     const full_name = String(body?.full_name ?? "").trim().slice(0, 120);
     const role = body?.role === "manager" ? "manager" : "employee";
     const rawPerms: unknown[] = Array.isArray(body?.permissions) ? body.permissions : [];
@@ -67,21 +68,34 @@ Deno.serve(async (req) => {
 
     if (!email || email.length > 254 || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))
       return new Response(JSON.stringify({ error: "E-mail inválido." }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
-    if (password.length < 8 || password.length > 128)
+    if (!sendInvite && (password.length < 8 || password.length > 128))
       return new Response(JSON.stringify({ error: "Senha deve ter entre 8 e 128 caracteres." }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
     if (!full_name || full_name.length < 2)
       return new Response(JSON.stringify({ error: "Nome obrigatório." }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
 
-    const { data: created, error: createErr } = await admin.auth.admin.createUser({
-      email,
-      password,
-      email_confirm: true,
-      user_metadata: { full_name, created_by_admin: true },
-    });
-    if (createErr || !created.user) {
-      return new Response(JSON.stringify({ error: createErr?.message ?? "Falha ao criar conta." }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    let newId: string;
+    if (sendInvite) {
+      // Sends the standard "You've been invited" email with a magic link.
+      // The user sets their own password on first login — no manual password copying.
+      const { data: invited, error: inviteErr } = await admin.auth.admin.inviteUserByEmail(email, {
+        data: { full_name, created_by_admin: true, staff_role: role },
+      });
+      if (inviteErr || !invited.user) {
+        return new Response(JSON.stringify({ error: inviteErr?.message ?? "Falha ao enviar convite." }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+      }
+      newId = invited.user.id;
+    } else {
+      const { data: created, error: createErr } = await admin.auth.admin.createUser({
+        email,
+        password,
+        email_confirm: true,
+        user_metadata: { full_name, created_by_admin: true },
+      });
+      if (createErr || !created.user) {
+        return new Response(JSON.stringify({ error: createErr?.message ?? "Falha ao criar conta." }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+      }
+      newId = created.user.id;
     }
-    const newId = created.user.id;
 
     // Profile (criado por trigger handle_new_user; complementamos)
     await admin.from("profiles").update({
@@ -115,10 +129,10 @@ Deno.serve(async (req) => {
       action: "create_staff",
       entity_type: "user",
       entity_id: newId,
-      after: { email, full_name, role, permissions, commission_pct },
+      after: { email, full_name, role, permissions, commission_pct, invited: sendInvite },
     });
 
-    return new Response(JSON.stringify({ success: true, user_id: newId }), {
+    return new Response(JSON.stringify({ success: true, user_id: newId, invited: sendInvite }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (e) {
