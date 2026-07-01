@@ -142,7 +142,7 @@ Deno.serve(async (req) => {
       );
     }
 
-    // Log successful login
+    // Log successful password validation
     await adminClient.from("admin_login_attempts").insert({
         email: trimmedEmail,
         success: true,
@@ -151,6 +151,76 @@ Deno.serve(async (req) => {
 
     const role = isAdmin ? "admin" : "employee";
 
+    // ===== 2FA GATE (admins only) =====
+    // Employees skip 2FA and get session tokens directly.
+    // Admins MUST complete a 6-digit email OTP before tokens are released.
+    if (isAdmin) {
+      // Sign the just-authenticated session out immediately — tokens are held
+      // server-side inside admin_2fa_codes and only released after code verification.
+      const code = String(Math.floor(100000 + Math.random() * 900000));
+      const codeHashBuf = await crypto.subtle.digest(
+        "SHA-256", new TextEncoder().encode(code + trimmedEmail),
+      );
+      const codeHash = Array.from(new Uint8Array(codeHashBuf))
+        .map((b) => b.toString(16).padStart(2, "0")).join("");
+      const tempToken = crypto.randomUUID();
+      const expiresAt = new Date(Date.now() + 10 * 60 * 1000).toISOString();
+
+      // Purge any pending challenges for this email
+      await adminClient.from("admin_2fa_codes").delete().eq("email", trimmedEmail);
+
+      const { error: insertErr } = await adminClient.from("admin_2fa_codes").insert({
+        email: trimmedEmail,
+        code_hash: codeHash,
+        temp_token: tempToken,
+        access_token: authData.session.access_token,
+        refresh_token: authData.session.refresh_token,
+        role,
+        expires_at: expiresAt,
+        attempts: 0,
+      });
+      if (insertErr) {
+        console.error("[admin-login] 2fa insert error:", insertErr.message);
+        return new Response(
+          JSON.stringify({ success: false, error: "Erro ao iniciar verificação 2FA." }),
+          { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+        );
+      }
+
+      // Deliver the code — Resend if configured, otherwise log to edge fn logs.
+      const resendKey = Deno.env.get("RESEND_API_KEY");
+      if (resendKey) {
+        try {
+          await fetch("https://api.resend.com/emails", {
+            method: "POST",
+            headers: { Authorization: `Bearer ${resendKey}`, "Content-Type": "application/json" },
+            body: JSON.stringify({
+              from: "HOTZFY Admin <admin@hotzfy.com.br>",
+              to: [trimmedEmail],
+              subject: `Código de verificação HOTZFY: ${code}`,
+              html: `<p>Seu código de acesso ao painel admin é: <b style="font-size:22px;letter-spacing:4px">${code}</b></p><p>Expira em 10 minutos.</p>`,
+            }),
+          });
+        } catch (e) {
+          console.error("[admin-login] resend error:", e instanceof Error ? e.message : e);
+        }
+      }
+      console.log(`[admin-login] 2FA code for ${trimmedEmail}: ${code}`);
+
+      const devEcho = Deno.env.get("ADMIN_2FA_DEV_ECHO") === "true";
+      return new Response(
+        JSON.stringify({
+          success: true,
+          requires2FA: true,
+          temp_token: tempToken,
+          email: trimmedEmail,
+          ...(devEcho ? { dev_code: code } : {}),
+        }),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" } },
+      );
+    }
+
+    // Employees: direct login (no 2FA required)
     console.log(`[admin-login] Direct login for ${trimmedEmail} (${role})`);
 
     return new Response(
