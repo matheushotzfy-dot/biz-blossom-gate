@@ -17,7 +17,7 @@ import type { Tables } from "@/integrations/supabase/types";
 import { supabase } from "@/integrations/supabase/client";
 import { logAdminAction } from "@/lib/auditLog";
 import { toast } from "sonner";
-import { cn } from "@/lib/utils";
+import { cn, deriveTransactionStatus } from "@/lib/utils";
 import { FinanceiroHero } from "@/components/financeiro/FinanceiroHero";
 import { PremiumMetric, PremiumMetricGrid, PremiumPanel, PremiumSegmented, PremiumEmpty, premiumTable } from "./AdminPremium";
 
