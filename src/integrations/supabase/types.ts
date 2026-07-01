@@ -4061,6 +4061,14 @@ export type Database = {
         }[]
       }
       apply_transaction_splits: { Args: { _tx_id: string }; Returns: undefined }
+      backfill_financial_ledger_for_completed_tx: {
+        Args: { _limit?: number }
+        Returns: {
+          credited: number
+          feed: number
+          processed: number
+        }[]
+      }
       bump_rate_limit: {
         Args: {
           _bucket_key: string
@@ -4177,6 +4185,7 @@ export type Database = {
         }[]
       }
       get_ledger_balance: { Args: { _user_id: string }; Returns: number }
+      get_ledger_integrity_report: { Args: never; Returns: Json }
       get_my_max_ticket: { Args: never; Returns: number }
       get_quiz_questions_for_student: {
         Args: { _quiz_id: string }
