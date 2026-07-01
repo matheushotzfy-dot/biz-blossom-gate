@@ -38,7 +38,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Calendar } from "@/components/ui/calendar";
 import { format, differenceInDays } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { calculateTransactionConversions, cn, isApprovedTransaction } from "@/lib/utils";
+import { calculateTransactionConversions, cn, deriveTransactionStatus, isApprovedTransaction } from "@/lib/utils";
 
 import type { DateRange } from "react-day-picker";
 import { Seo } from "@/components/Seo";
@@ -322,7 +322,7 @@ export default function Dashboard() {
       kind: "transaction" as const,
       createdAt: t.created_at,
       amount: Number(t.amount),
-      status: t.status,
+      status: deriveTransactionStatus(t),
       label: t.payment_method || "Venda",
       tx: t,
     }));
@@ -332,16 +332,20 @@ export default function Dashboard() {
   const hour = new Date().getHours();
   const greeting = hour < 12 ? "Bom dia" : hour < 18 ? "Boa tarde" : "Boa noite";
   const nickname = profile?.nickname || profile?.full_name?.split(" ")[0] || "Vendedor";
-  const statusLabel = (s: string) => isApprovedTransaction(s) ? 'Aprovado' : s === 'pending' || s === 'processing' ? 'Pendente' : s === 'expired' ? 'Expirada' : s === 'refunded' || s === 'partially_refunded' ? 'Reembolso' : s === 'chargeback' ? 'Chargeback' : s === 'med' || s === 'mediation' || s === 'disputed' ? 'MED' : s === 'cancelled' || s === 'canceled' ? 'Cancelada' : s === 'failed' || s === 'refused' || s === 'rejected' || s === 'error' ? 'Erro' : s;
+  const statusLabel = (s: string) => isApprovedTransaction(s) ? 'Aprovado' : s === 'pending' || s === 'processing' ? 'Pendente' : s === 'expired' ? 'Expirada' : s === 'refunded' || s === 'partially_refunded' ? 'Reembolso' : s === 'chargeback' ? 'Chargeback' : s === 'med' || s === 'mediation' || s === 'dispute' || s === 'disputed' ? 'MED' : s === 'cancelled' || s === 'canceled' ? 'Cancelada' : s === 'failed' || s === 'refused' || s === 'rejected' || s === 'error' ? 'Erro' : s;
   const statusBg = (s: string) =>
     isApprovedTransaction(s) ? 'bg-emerald-500/20 ring-1 ring-emerald-500/40'
     : s === 'pending' ? 'bg-amber-400/25 ring-1 ring-amber-400/50'
+    : s === 'expired' || s === 'cancelled' || s === 'canceled' ? 'bg-muted/40 ring-1 ring-border/40'
+    : s === 'med' || s === 'dispute' || s === 'disputed' ? 'bg-orange-500/20 ring-1 ring-orange-500/40'
     : s === 'chargeback' ? 'bg-red-600/25 ring-1 ring-red-600/50'
     : s === 'refunded' ? 'bg-muted/40 ring-1 ring-border/40'
     : 'bg-red-500/20 ring-1 ring-red-500/40';
   const statusColor = (s: string) =>
     isApprovedTransaction(s) ? 'text-emerald-500'
     : s === 'pending' ? 'text-amber-500'
+    : s === 'expired' || s === 'cancelled' || s === 'canceled' ? 'text-muted-foreground'
+    : s === 'med' || s === 'dispute' || s === 'disputed' ? 'text-orange-500'
     : s === 'chargeback' ? 'text-red-600'
     : s === 'refunded' ? 'text-muted-foreground'
     : 'text-red-500';
@@ -913,7 +917,7 @@ export default function Dashboard() {
               <div>
                 <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/60">Detalhes da venda</p>
                 <h3 className="text-xl font-bold mt-1">{fmt(Number(detailTx.amount))}</h3>
-                <p className={cn("text-xs font-bold uppercase tracking-widest mt-1", statusColor(detailTx.status))}>{statusLabel(detailTx.status)}</p>
+                <p className={cn("text-xs font-bold uppercase tracking-widest mt-1", statusColor(deriveTransactionStatus(detailTx)))}>{statusLabel(deriveTransactionStatus(detailTx))}</p>
               </div>
               <div className="grid grid-cols-2 gap-3 text-xs">
                 <div className="rounded-xl border border-border/40 p-3">

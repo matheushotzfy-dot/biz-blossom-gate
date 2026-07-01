@@ -10,7 +10,7 @@ import { TransactionDetailPanel } from "@/components/transactions/TransactionDet
 import { PixLogoMark } from "@/components/icons/PixLogoMark";
 import type { Tables } from "@/integrations/supabase/types";
 import { Button } from "@/components/ui/button";
-import { calculateTransactionConversions, cn, isApprovedTransaction } from "@/lib/utils";
+import { calculateTransactionConversions, cn, deriveTransactionStatus, isApprovedTransaction } from "@/lib/utils";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
@@ -57,50 +57,6 @@ const STATUS_MAP: Record<string, { label: string; cls: string; dot: string }> = 
   cancelled: { label: "Cancelada", cls: "bg-muted text-muted-foreground border-border/60", dot: "bg-muted-foreground/50" },
   canceled: { label: "Cancelada", cls: "bg-muted text-muted-foreground border-border/60", dot: "bg-muted-foreground/50" },
 };
-
-/**
- * Regras de negócio de status para o seller:
- * - approved: pago (pix/boleto/cartão)
- * - chargeback: SOMENTE cartão
- * - med: SOMENTE pix (mediação bancária)
- * - refunded: reembolso manual
- * - pending: aguardando pagamento (até 24h)
- * - expired: pending há mais de 24h ou pix_expires_at vencido
- * - error: falha técnica com mensagem sanitizada (sem expor erro de código)
- */
-function deriveTxStatus(t: { status: string; payment_method?: string | null; created_at: string; pix_expires_at?: string | null }): string {
-  const raw = (t.status || "").toLowerCase();
-  const method = (t.payment_method || "").toLowerCase();
-  const isCard = method === "credit_card" || method === "card";
-  const isPix = method === "pix";
-
-  if (raw === "approved" || raw === "completed" || raw === "paid") return "approved";
-  if (raw === "refunded" || raw === "partially_refunded") return "refunded";
-
-  if (raw === "chargeback" || raw === "chargedback" || raw === "charged_back") {
-    if (isCard) return "chargeback";
-    if (isPix) return "med";
-    return "error";
-  }
-
-  if (raw === "med" || raw === "mediation" || raw === "disputed") {
-    return isPix ? "med" : (isCard ? "chargeback" : "error");
-  }
-
-  if (raw === "cancelled" || raw === "canceled") return "cancelled";
-  if (raw === "expired") return "expired";
-
-  if (raw === "pending" || raw === "processing" || raw === "waiting_payment") {
-    const ageH = (Date.now() - new Date(t.created_at).getTime()) / 3_600_000;
-    const pixVenc = t.pix_expires_at ? new Date(t.pix_expires_at).getTime() < Date.now() : false;
-    if (ageH >= 24 || pixVenc) return "expired";
-    return "pending";
-  }
-
-  if (raw === "failed" || raw === "error" || raw === "rejected") return "error";
-  return raw || "pending";
-}
-
 
 const METHODS_MAP: Record<string, { label: string; icon: LucideIcon }> = {
   pix: { label: "Pix", icon: Zap },
@@ -210,7 +166,7 @@ export default function Vendas() {
     "Telefone": t.customer_phone ?? "",
     "Produto": prodsMap[t.product_id ?? ""] ?? "",
     "Método": t.payment_method ?? "",
-    "Status": STATUS_MAP[deriveTxStatus(t)]?.label ?? t.status ?? "",
+    "Status": STATUS_MAP[deriveTransactionStatus(t)]?.label ?? t.status ?? "",
     "Valor Bruto (R$)": Number(t.amount),
     "Taxa (R$)": Number(t.fee_amount ?? 0),
     "Valor Líquido (R$)": Number(t.net_amount ?? 0),
@@ -547,7 +503,7 @@ export default function Vendas() {
             </div>
           ) : (
             paged.map((t) => {
-              const status = STATUS_MAP[deriveTxStatus(t)] || STATUS_MAP.pending;
+              const status = STATUS_MAP[deriveTransactionStatus(t)] || STATUS_MAP.pending;
               const method = METHODS_MAP[t.payment_method || ""] || { label: t.payment_method, icon: FileText };
               const MethodIcon = method.icon;
               return (
@@ -617,7 +573,7 @@ export default function Vendas() {
                 </tr>
               ) : (
                 paged.map((t) => {
-                  const status = STATUS_MAP[deriveTxStatus(t)] || STATUS_MAP.pending;
+                  const status = STATUS_MAP[deriveTransactionStatus(t)] || STATUS_MAP.pending;
                   const method = METHODS_MAP[t.payment_method || ""] || { label: t.payment_method, icon: FileText };
                   const MethodIcon = method.icon;
                   return (
