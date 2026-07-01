@@ -154,7 +154,7 @@ export default function AdminDashboard() {
       const toIso = dateRange.to.toISOString();
       const { data, error } = await supabase.rpc("get_admin_dashboard_data" as never, {
         _from: fromIso, _to: toIso,
-        _tx_limit: 2000, _profile_limit: 1000, _product_limit: 1000, _withdrawal_limit: 2000,
+        _tx_limit: 5000, _profile_limit: 2000, _product_limit: 2000, _withdrawal_limit: 5000,
       } as never);
       if (error) throw error;
       const payload = (data ?? {}) as {
