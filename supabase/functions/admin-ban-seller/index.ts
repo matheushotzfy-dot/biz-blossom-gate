@@ -64,8 +64,15 @@ Deno.serve(async (req) => {
       _user_id: callerId,
       _role: "admin",
     });
-    if (roleErr || isAdmin !== true) {
-      return json({ success: false, error: "Forbidden" }, corsHeaders, 403);
+    if (roleErr) return json({ success: false, error: "Forbidden" }, corsHeaders, 403);
+    if (isAdmin !== true) {
+      // Non-admins need the explicit `sellers.ban` permission
+      const { data: canBan } = await admin.rpc("has_staff_permission", {
+        _user_id: callerId, _key: "sellers.ban",
+      });
+      if (canBan !== true) {
+        return json({ success: false, error: "Forbidden" }, corsHeaders, 403);
+      }
     }
 
     const body = await req.json().catch(() => ({}));
