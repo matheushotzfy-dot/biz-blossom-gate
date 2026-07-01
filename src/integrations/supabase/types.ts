@@ -313,6 +313,36 @@ export type Database = {
         }
         Relationships: []
       }
+      admin_alerts: {
+        Row: {
+          created_at: string
+          id: string
+          kind: string
+          message: string
+          metadata: Json
+          resolved_at: string | null
+          severity: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          kind: string
+          message: string
+          metadata?: Json
+          resolved_at?: string | null
+          severity?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          kind?: string
+          message?: string
+          metadata?: Json
+          resolved_at?: string | null
+          severity?: string
+        }
+        Relationships: []
+      }
       admin_login_attempts: {
         Row: {
           created_at: string
@@ -4104,6 +4134,9 @@ export type Database = {
           matched_value: string
         }[]
       }
+      check_db_connections: { Args: never; Returns: number }
+      check_error_rate: { Args: never; Returns: number }
+      check_failed_crons: { Args: never; Returns: number }
       check_signup_conflicts: {
         Args: { _document_number: string; _email: string; _phone: string }
         Returns: string
@@ -4254,8 +4287,19 @@ export type Database = {
         Args: { _current_acquirer_id: string }
         Returns: string
       }
+      raise_admin_alert: {
+        Args: {
+          _kind: string
+          _message: string
+          _metadata: Json
+          _severity: string
+        }
+        Returns: undefined
+      }
       reap_stuck_app_deliveries: { Args: never; Returns: number }
       reap_stuck_webhook_deliveries: { Args: never; Returns: number }
+      reconcile_stuck_transactions: { Args: never; Returns: number }
+      reconcile_stuck_withdrawals: { Args: never; Returns: number }
       release_due_card_holds: { Args: never; Returns: number }
       request_anticipation: {
         Args: { _idempotency_key: string; _max_days: number; _user_id: string }
@@ -4289,6 +4333,7 @@ export type Database = {
         Args: { _tx_id: string }
         Returns: undefined
       }
+      run_monitoring_checks: { Args: never; Returns: Json }
       set_max_ticket_for_all: { Args: { _new_value: number }; Returns: Json }
       set_max_ticket_new_users_only: {
         Args: { _new_value: number }
