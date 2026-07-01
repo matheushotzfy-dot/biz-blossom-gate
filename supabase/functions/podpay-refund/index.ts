@@ -51,11 +51,17 @@ Deno.serve(async (req) => {
       });
     }
 
+    // Admins bypass permission checks; managers/employees need `transactions.refund`
     const { data: hasAdmin } = await supabase.rpc('has_role', { _user_id: user.id, _role: 'admin' });
     if (!hasAdmin) {
-      return new Response(JSON.stringify({ success: false, error: 'Forbidden' }), {
-        status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      const { data: canRefund } = await supabase.rpc('has_staff_permission', {
+        _user_id: user.id, _key: 'transactions.refund',
       });
+      if (!canRefund) {
+        return new Response(JSON.stringify({ success: false, error: 'Forbidden' }), {
+          status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
+      }
     }
 
     const { transactionId, amount, reason } = await req.json();
