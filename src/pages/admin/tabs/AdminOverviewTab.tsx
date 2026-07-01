@@ -331,6 +331,11 @@ export default function AdminOverviewTab({
         status={{ tone: chargebackAlert ? "destructive" : "success", label: chargebackAlert ? "Alerta de risco" : "Tudo sob controle", pulse: true }}
       />
 
+      {/* ── Alertas críticos abertos ── */}
+      <AdminAlertsBanner isAdmin={!isEmployee} />
+
+
+
       {/* ── Hero KPI strip · 1px divider grid ── */}
       <div className="grid grid-cols-2 gap-px overflow-hidden rounded-2xl border border-border/60 bg-border/60 lg:grid-cols-6">
         <HeroBigStat label="Volume no período" value={fmtCurrency(totalVolume)} sub={`${filteredApproved.length}/${filteredTx.length} tx`} tone="primary" wide />
