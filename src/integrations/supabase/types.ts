@@ -819,6 +819,7 @@ export type Database = {
           entity_type: string
           id: string
           ip_address: string | null
+          user_agent: string | null
         }
         Insert: {
           action: string
@@ -829,6 +830,7 @@ export type Database = {
           entity_type: string
           id?: string
           ip_address?: string | null
+          user_agent?: string | null
         }
         Update: {
           action?: string
@@ -839,6 +841,7 @@ export type Database = {
           entity_type?: string
           id?: string
           ip_address?: string | null
+          user_agent?: string | null
         }
         Relationships: []
       }
@@ -4123,6 +4126,14 @@ export type Database = {
         Returns: string
       }
       get_course_analytics: { Args: { _course_id: string }; Returns: Json }
+      get_global_payment_toggles: {
+        Args: never
+        Returns: {
+          boleto: boolean
+          credit_card: boolean
+          pix: boolean
+        }[]
+      }
       get_ledger_balance: { Args: { _user_id: string }; Returns: number }
       get_my_max_ticket: { Args: never; Returns: number }
       get_quiz_questions_for_student: {
