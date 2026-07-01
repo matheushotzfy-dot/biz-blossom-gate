@@ -3,9 +3,11 @@ import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-import { Eye, EyeOff, ShieldCheck, AlertCircle, Lock, Sun, Moon } from "lucide-react";
+import { Eye, EyeOff, ShieldCheck, AlertCircle, Lock, Sun, Moon, KeyRound } from "lucide-react";
 import { toast } from "sonner";
 import { useTheme } from "@/hooks/useTheme";
+
+type Step = "credentials" | "2fa";
 
 export default function AdminLogin() {
   const [email, setEmail] = useState("");
@@ -13,8 +15,18 @@ export default function AdminLogin() {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [step, setStep] = useState<Step>("credentials");
+  const [tempToken, setTempToken] = useState("");
+  const [code, setCode] = useState("");
   const navigate = useNavigate();
   const { theme, toggleTheme } = useTheme();
+
+  const finishLogin = async (access_token: string, refresh_token: string) => {
+    const { error: sessionError } = await supabase.auth.setSession({ access_token, refresh_token });
+    if (sessionError) throw sessionError;
+    toast.success("Bem-vindo ao painel administrativo!");
+    navigate("/admin-matheus/dashboard");
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -33,19 +45,49 @@ export default function AdminLogin() {
         setError(data?.locked ? "Muitas tentativas. Aguarde 15 minutos." : data?.error || "Credenciais inválidas ou acesso não autorizado.");
         return;
       }
-      const { error: sessionError } = await supabase.auth.setSession({
-        access_token: data.access_token,
-        refresh_token: data.refresh_token,
-      });
-      if (sessionError) throw sessionError;
-      toast.success("Bem-vindo ao painel administrativo!");
-      navigate("/admin-matheus/dashboard");
+      if (data.requires2FA) {
+        setTempToken(data.temp_token);
+        setStep("2fa");
+        setPassword("");
+        toast.info("Código enviado para o seu e-mail.");
+        return;
+      }
+      await finishLogin(data.access_token, data.refresh_token);
     } catch {
       setError("Credenciais inválidas ou acesso não autorizado.");
     } finally {
       setLoading(false);
-      setPassword("");
     }
+  };
+
+  const handleVerify = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!/^\d{6}$/.test(code)) { setError("Digite os 6 dígitos."); return; }
+    setLoading(true);
+    setError("");
+    try {
+      const { data, error: fnError } = await supabase.functions.invoke("admin-2fa-verify", {
+        body: { temp_token: tempToken, code },
+      });
+      if (fnError) throw new Error("Erro de conexão.");
+      if (!data?.success) {
+        setError(data?.error || "Código incorreto.");
+        return;
+      }
+      await finishLogin(data.access_token, data.refresh_token);
+    } catch {
+      setError("Não foi possível verificar o código.");
+    } finally {
+      setLoading(false);
+      setCode("");
+    }
+  };
+
+  const resetToStep1 = () => {
+    setStep("credentials");
+    setTempToken("");
+    setCode("");
+    setError("");
   };
 
   return (
