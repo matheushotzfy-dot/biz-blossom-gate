@@ -129,10 +129,10 @@ Deno.serve(async (req) => {
       action: "create_staff",
       entity_type: "user",
       entity_id: newId,
-      after: { email, full_name, role, permissions, commission_pct },
+      after: { email, full_name, role, permissions, commission_pct, invited: sendInvite },
     });
 
-    return new Response(JSON.stringify({ success: true, user_id: newId }), {
+    return new Response(JSON.stringify({ success: true, user_id: newId, invited: sendInvite }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (e) {
