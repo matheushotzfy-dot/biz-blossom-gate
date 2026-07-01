@@ -20,6 +20,7 @@ import { FinanceiroHero } from "@/components/financeiro/FinanceiroHero";
 import {
   PremiumPanel, PremiumMetric, PremiumMetricGrid, PremiumSegmented, premiumTable,
 } from "./AdminPremium";
+import { AdminAlertsBanner } from "@/components/admin/AdminAlertsBanner";
 
 interface Dispute {
   id: string; type: string; status: string; seller_user_id: string;
@@ -329,6 +330,11 @@ export default function AdminOverviewTab({
         subtitle={`Operação em tempo real · ${rangeLabel}`}
         status={{ tone: chargebackAlert ? "destructive" : "success", label: chargebackAlert ? "Alerta de risco" : "Tudo sob controle", pulse: true }}
       />
+
+      {/* ── Alertas críticos abertos ── */}
+      <AdminAlertsBanner isAdmin={!isEmployee} />
+
+
 
       {/* ── Hero KPI strip · 1px divider grid ── */}
       <div className="grid grid-cols-2 gap-px overflow-hidden rounded-2xl border border-border/60 bg-border/60 lg:grid-cols-6">
