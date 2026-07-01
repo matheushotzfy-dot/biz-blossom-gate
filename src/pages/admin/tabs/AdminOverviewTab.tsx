@@ -20,6 +20,7 @@ import { FinanceiroHero } from "@/components/financeiro/FinanceiroHero";
 import {
   PremiumPanel, PremiumMetric, PremiumMetricGrid, PremiumSegmented, premiumTable,
 } from "./AdminPremium";
+import { AdminAlertsBanner } from "@/components/admin/AdminAlertsBanner";
 
 interface Dispute {
   id: string; type: string; status: string; seller_user_id: string;
