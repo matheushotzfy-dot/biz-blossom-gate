@@ -547,7 +547,7 @@ export default function Vendas() {
             </div>
           ) : (
             paged.map((t) => {
-              const status = STATUS_MAP[t.status] || STATUS_MAP.pending;
+              const status = STATUS_MAP[deriveTxStatus(t)] || STATUS_MAP.pending;
               const method = METHODS_MAP[t.payment_method || ""] || { label: t.payment_method, icon: FileText };
               const MethodIcon = method.icon;
               return (
