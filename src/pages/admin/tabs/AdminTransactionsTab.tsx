@@ -375,7 +375,7 @@ export default function AdminTransactionsTab({ transactions, profiles, products,
                     <td className={cn(premiumTable.td, "text-right tabular-nums text-xs font-semibold text-foreground")}>{fmtCurrency(Number(t.amount))}</td>
                     <td className={cn(premiumTable.td, "text-right tabular-nums text-[11px] text-warning")}>−{fmtCurrency(Number(t.fee_amount))}</td>
                     <td className={cn(premiumTable.td, "text-right tabular-nums text-xs font-bold text-emerald-500")}>{fmtCurrency(Number(t.net_amount))}</td>
-                    <td className={premiumTable.td}><StatusBadge status={t.status} /></td>
+                    <td className={premiumTable.td}><StatusBadge status={deriveTransactionStatus(t)} /></td>
                     <td className={cn(premiumTable.td, "text-[10px] text-muted-foreground whitespace-nowrap")}>{fmtDateCached(t.created_at)}</td>
                     <td className={premiumTable.td}>
                       <Button variant="ghost" size="icon" className="h-7 w-7" onClick={e => { e.stopPropagation(); openXRay(t); }}>
