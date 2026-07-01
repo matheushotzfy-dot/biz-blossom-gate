@@ -215,7 +215,7 @@ Deno.serve(async (req) => {
 
     // Enforce GLOBAL payment-method toggles (platform-wide kill switch)
     try {
-      const { data: toggles } = await supabaseClient.rpc('get_global_payment_toggles');
+      const { data: toggles } = await supabase.rpc('get_global_payment_toggles');
       const g = Array.isArray(toggles) ? toggles[0] : toggles;
       const globallyOff =
         (paymentMethod === 'pix'         && g?.pix === false) ||
