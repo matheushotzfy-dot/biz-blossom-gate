@@ -20,6 +20,39 @@ export const STATUS_MAP: Record<string, string> = {
   'in_protest': 'dispute',
 };
 
+/** Enforce platform business rules by payment method. Exported for tests. */
+export function normalizeTransactionStatus(status: string, paymentMethod?: string | null, createdAt?: string | null, pixExpiresAt?: string | null): string {
+  const raw = String(status || '').trim().toLowerCase();
+  const method = String(paymentMethod || '').trim().toLowerCase();
+  const isPix = method === 'pix';
+  const isCard = method === 'credit_card' || method === 'card';
+  const createdMs = createdAt ? new Date(createdAt).getTime() : NaN;
+  const ageHours = Number.isFinite(createdMs) ? (Date.now() - createdMs) / 3_600_000 : 0;
+  const pixExpiresMs = pixExpiresAt ? new Date(pixExpiresAt).getTime() : NaN;
+  const expiredByTime = ageHours >= 24 || (Number.isFinite(pixExpiresMs) && pixExpiresMs < Date.now());
+
+  if (raw === 'completed' || raw === 'approved' || raw === 'paid') return 'completed';
+  if (raw === 'refunded' || raw === 'partially_refunded') return 'refunded';
+  if (raw === 'expired') return 'expired';
+  if (raw === 'pending' || raw === 'processing' || raw === 'waiting_payment' || raw === 'authorized') {
+    return expiredByTime ? 'expired' : 'pending';
+  }
+  if (raw === 'chargeback' || raw === 'chargedback' || raw === 'charged_back') {
+    if (isCard) return 'chargeback';
+    if (isPix && expiredByTime) return 'expired';
+    if (isPix) return 'dispute';
+    return 'failed';
+  }
+  if (raw === 'med' || raw === 'mediation' || raw === 'dispute' || raw === 'disputed' || raw === 'in_protest') {
+    if (isPix) return 'dispute';
+    if (isCard) return 'chargeback';
+    return 'failed';
+  }
+  if (raw === 'cancelled' || raw === 'canceled') return 'cancelled';
+  if (raw === 'failed' || raw === 'error' || raw === 'rejected' || raw === 'refused') return 'failed';
+  return raw || 'pending';
+}
+
 /** Compute HMAC-SHA256 signature as lowercase hex. Exported for tests. */
 export async function computeHmacHex(rawBody: string, secret: string): Promise<string> {
   const encoder = new TextEncoder();
@@ -197,7 +230,7 @@ Deno.serve(async (req) => {
       }
     }
 
-    const ourStatus = STATUS_MAP[podpayStatus] || 'pending';
+    const mappedStatus = STATUS_MAP[podpayStatus] || 'pending';
 
     // Helper: extract normalized amount from payload (reais)
     const extractAmount = (): number | null => {
@@ -216,7 +249,7 @@ Deno.serve(async (req) => {
     if (podpayPaymentId) {
       const { data: tx } = await supabase
         .from('transactions')
-        .select('id, status, amount, expires_at')
+        .select('id, status, amount, payment_method, created_at, pix_expires_at')
         .eq('podpay_payment_id', podpayPaymentId)
         .maybeSingle();
 
@@ -224,7 +257,9 @@ Deno.serve(async (req) => {
         transactionId = tx.id;
 
         // Don't downgrade completed status (idempotency)
-        const finalStatuses = ['completed', 'refunded', 'chargeback'];
+        const ourStatus = normalizeTransactionStatus(mappedStatus, tx.payment_method, tx.created_at, tx.pix_expires_at);
+
+        const finalStatuses = ['completed', 'refunded', 'chargeback', 'expired'];
         if (finalStatuses.includes(tx.status) && !finalStatuses.includes(ourStatus)) {
           safeLog('Skipping status downgrade', { transactionId: tx.id, status: `${tx.status} -> ${ourStatus}` });
           await finishLog('skipped_downgrade', tx.id);
@@ -247,8 +282,8 @@ Deno.serve(async (req) => {
           }
 
           // ===== Expiration guard (only for pending → completed transitions) =====
-          if (tx.status === 'pending' && tx.expires_at) {
-            const expiresAt = new Date(tx.expires_at as unknown as string).getTime();
+          if (tx.status === 'pending' && tx.pix_expires_at) {
+            const expiresAt = new Date(tx.pix_expires_at as unknown as string).getTime();
             if (Number.isFinite(expiresAt) && Date.now() > expiresAt) {
               safeLog('Transaction expired — rejecting late payment', { transactionId: tx.id });
               await finishLog('rejected_expired', tx.id);
@@ -299,7 +334,7 @@ Deno.serve(async (req) => {
       if (fallbackEmail && Number.isFinite(fallbackAmount) && fallbackAmount > 0) {
         const { data: pendingTx } = await supabase
           .from('transactions')
-          .select('id')
+          .select('id, payment_method, created_at, pix_expires_at')
           .eq('product_id', externalRef)
           .eq('status', 'pending')
           .eq('customer_email', fallbackEmail)
@@ -309,7 +344,8 @@ Deno.serve(async (req) => {
           .maybeSingle();
 
         if (pendingTx) {
-          const updateData: Record<string, unknown> = { status: ourStatus };
+          const fallbackStatus = normalizeTransactionStatus(mappedStatus, pendingTx.payment_method, pendingTx.created_at, pendingTx.pix_expires_at);
+          const updateData: Record<string, unknown> = { status: fallbackStatus };
           if (podpayPaymentId) updateData.podpay_payment_id = podpayPaymentId;
           if (podpayEventId) updateData.podpay_event_id = podpayEventId;
 
@@ -322,7 +358,7 @@ Deno.serve(async (req) => {
             safeLog('Error updating transaction by strict fallback', { productId: externalRef, error: error.message });
           } else {
             transactionId = pendingTx.id;
-            safeLog('Transaction updated via strict fallback (product+email+amount)', { transactionId: pendingTx.id, status: ourStatus });
+            safeLog('Transaction updated via strict fallback (product+email+amount)', { transactionId: pendingTx.id, status: fallbackStatus });
           }
         } else {
           safeLog('Strict fallback found no match — postback ignored to prevent wrong-customer credit', { productId: externalRef });

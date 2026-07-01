@@ -4,6 +4,7 @@ import {
   computeHmacHex,
   verifySignature,
   computeSplitAmount,
+  normalizeTransactionStatus,
 } from "./index.ts";
 
 const SECRET = "test_secret_key_123";
@@ -25,6 +26,15 @@ Deno.test("STATUS_MAP maps PodPay statuses correctly", () => {
 
 Deno.test("STATUS_MAP returns undefined for unknown status", () => {
   assertEquals(STATUS_MAP["nonexistent_status"], undefined);
+});
+
+Deno.test("normalizeTransactionStatus never keeps chargeback for PIX", () => {
+  assertEquals(normalizeTransactionStatus("chargeback", "pix", new Date(Date.now() - 25 * 60 * 60 * 1000).toISOString()), "expired");
+  assertEquals(normalizeTransactionStatus("chargeback", "pix", new Date().toISOString()), "dispute");
+});
+
+Deno.test("normalizeTransactionStatus keeps chargeback only for card", () => {
+  assertEquals(normalizeTransactionStatus("chargeback", "credit_card", new Date().toISOString()), "chargeback");
 });
 
 Deno.test("computeHmacHex produces deterministic 64-char hex (SHA-256)", async () => {

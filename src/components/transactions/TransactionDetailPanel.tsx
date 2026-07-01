@@ -25,7 +25,7 @@ import { StatusBadge } from "@/components/StatusBadge";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import type { Tables } from "@/integrations/supabase/types";
-import { cn } from "@/lib/utils";
+import { cn, deriveTransactionStatus, isApprovedTransaction } from "@/lib/utils";
 import { toast } from "sonner";
 
 type Transaction = Tables<"transactions">;
@@ -127,6 +127,7 @@ export function TransactionDetailPanel({ tx, products, onClose, onRefund }: Tran
  const methodTone = methodTones[tx.payment_method || ""] || "bg-muted text-muted-foreground border-border";
  const avatarTone = getAvatarTone(customerName);
  const whatsappHref = tx.customer_phone ? `https://wa.me/55${tx.customer_phone.replace(/\D/g, "")}` : null;
+  const derivedStatus = deriveTransactionStatus(tx);
 
  const trackingItems = useMemo(() => {
  if (!tx.checkout_session_id?.startsWith("http")) return [] as Array<[string, string]>;
@@ -186,7 +187,7 @@ export function TransactionDetailPanel({ tx, products, onClose, onRefund }: Tran
  <p className="truncate text-[15px] font-bold text-foreground">{customerName}</p>
  <p className="truncate text-[12px] text-muted-foreground">{customerEmail}</p>
  <div className="mt-3 flex flex-wrap items-center gap-2">
- <StatusBadge status={tx.status} />
+  <StatusBadge status={derivedStatus} />
  <span className={cn("inline-flex items-center gap-1 rounded-full border px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.18em]", methodTone)}>
  {tx.payment_method === "pix" && <PixLogoMark className="h-3 w-3" />}
  {tx.payment_method === "credit_card" && <CreditCard className="h-3 w-3" />}
@@ -271,7 +272,7 @@ export function TransactionDetailPanel({ tx, products, onClose, onRefund }: Tran
  <Receipt className="h-3.5 w-3.5" /> Status atual
  </div>
  <div className="mt-2">
- <StatusBadge status={tx.status} />
+  <StatusBadge status={derivedStatus} />
  </div>
  </div>
 
@@ -298,7 +299,7 @@ export function TransactionDetailPanel({ tx, products, onClose, onRefund }: Tran
  </div>
  </div>
 
- {(whatsappHref || (onRefund && tx.status === "completed")) && (
+  {(whatsappHref || (onRefund && isApprovedTransaction(derivedStatus))) && (
  <div className="flex shrink-0 flex-col gap-2 border-t border-border/40 bg-card px-5 py-4 sm:flex-row sm:px-6">
  {whatsappHref && (
  <a href={whatsappHref} target="_blank" rel="noopener noreferrer" className="flex-1">
@@ -307,7 +308,7 @@ export function TransactionDetailPanel({ tx, products, onClose, onRefund }: Tran
  </Button>
  </a>
  )}
- {onRefund && tx.status === "completed" && (
+  {onRefund && isApprovedTransaction(derivedStatus) && (
  <Button
  variant="outline"
  className="h-11 flex-1 gap-2 rounded-2xl border-destructive/20 text-destructive hover:bg-destructive/5"

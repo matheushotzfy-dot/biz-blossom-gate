@@ -24,7 +24,51 @@ export function formatCurrency(
 }
 
 export function isApprovedTransaction(status: string | null | undefined): boolean {
-  return status === "completed" || status === "approved";
+  return status === "completed" || status === "approved" || status === "paid";
+}
+
+type TransactionStatusInput = {
+  status?: string | null;
+  payment_method?: string | null;
+  created_at?: string | null;
+  pix_expires_at?: string | null;
+};
+
+export function deriveTransactionStatus(transaction: TransactionStatusInput): string {
+  const raw = String(transaction.status || "").trim().toLowerCase();
+  const method = String(transaction.payment_method || "").trim().toLowerCase();
+  const isPix = method === "pix";
+  const isCard = method === "credit_card" || method === "card";
+
+  const createdAt = transaction.created_at ? new Date(transaction.created_at).getTime() : NaN;
+  const ageHours = Number.isFinite(createdAt) ? (Date.now() - createdAt) / 3_600_000 : 0;
+  const pixExpiresAt = transaction.pix_expires_at ? new Date(transaction.pix_expires_at).getTime() : NaN;
+  const isExpiredByTime = ageHours >= 24 || (Number.isFinite(pixExpiresAt) && pixExpiresAt < Date.now());
+
+  if (raw === "approved" || raw === "completed" || raw === "paid") return "approved";
+  if (raw === "refunded" || raw === "partially_refunded") return "refunded";
+  if (raw === "expired") return "expired";
+
+  if (raw === "pending" || raw === "processing" || raw === "waiting_payment" || raw === "authorized") {
+    return isExpiredByTime ? "expired" : "pending";
+  }
+
+  if (raw === "chargeback" || raw === "chargedback" || raw === "charged_back") {
+    if (isCard) return "chargeback";
+    if (isPix && isExpiredByTime) return "expired";
+    if (isPix) return "med";
+    return "error";
+  }
+
+  if (raw === "med" || raw === "mediation" || raw === "dispute" || raw === "disputed" || raw === "in_protest") {
+    if (isPix) return "med";
+    if (isCard) return "chargeback";
+    return "error";
+  }
+
+  if (raw === "cancelled" || raw === "canceled") return "cancelled";
+  if (raw === "failed" || raw === "error" || raw === "rejected" || raw === "refused") return "error";
+  return raw || "pending";
 }
 
 type TransactionConversionInput = {
