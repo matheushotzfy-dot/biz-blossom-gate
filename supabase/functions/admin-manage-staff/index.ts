@@ -43,6 +43,10 @@ Deno.serve(async (req) => {
     if (action === "freeze" || action === "unfreeze") {
       const frozen = action === "freeze";
       await admin.from("profiles").update({ frozen }).eq("user_id", target_user_id);
+      // Force-invalidate all active sessions when freezing so revocation is immediate
+      if (frozen) {
+        try { await admin.auth.admin.signOut(target_user_id, "global"); } catch (_) {}
+      }
       await admin.from("staff_audit_log").insert({
         staff_user_id: callerId,
         action: action === "freeze" ? "freeze_staff" : "unfreeze_staff",
