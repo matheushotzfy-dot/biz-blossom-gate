@@ -124,6 +124,7 @@ const DATE_PRESETS: { id: DatePresetId; label: string }[] = [
 
 export default function AdminDashboard() {
   const { user, loading: authLoading } = useAuth();
+  useIdleLogout(15);
   const navigate = useNavigate();
   const { theme, toggleTheme } = useTheme();
   const [transactions, setTransactions] = useState<Tables<"transactions">[]>([]);
