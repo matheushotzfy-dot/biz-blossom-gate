@@ -170,7 +170,7 @@ export default function Dashboard() {
     const _revenue = _approved.reduce((acc, t) => acc + Number(t.amount), 0);
     const conversions = calculateTransactionConversions(filteredTx);
 
-    const _chargebackRate = filteredTx.length > 0 ? (filteredTx.filter(t => t.status === "chargeback").length / filteredTx.length) * 100 : 0;
+    const _chargebackRate = filteredTx.length > 0 ? (filteredTx.filter(t => deriveTransactionStatus(t) === "chargeback").length / filteredTx.length) * 100 : 0;
     const _uniqueCustomers = new Set(filteredTx.map(t => t.customer_email).filter(Boolean)).size;
 
     return {
