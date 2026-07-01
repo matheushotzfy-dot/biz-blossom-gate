@@ -17,7 +17,7 @@ import type { Tables } from "@/integrations/supabase/types";
 import { supabase } from "@/integrations/supabase/client";
 import { logAdminAction } from "@/lib/auditLog";
 import { toast } from "sonner";
-import { cn } from "@/lib/utils";
+import { cn, deriveTransactionStatus } from "@/lib/utils";
 import { FinanceiroHero } from "@/components/financeiro/FinanceiroHero";
 import { PremiumMetric, PremiumMetricGrid, PremiumPanel, PremiumSegmented, PremiumEmpty, premiumTable } from "./AdminPremium";
 
@@ -375,7 +375,7 @@ export default function AdminTransactionsTab({ transactions, profiles, products,
                     <td className={cn(premiumTable.td, "text-right tabular-nums text-xs font-semibold text-foreground")}>{fmtCurrency(Number(t.amount))}</td>
                     <td className={cn(premiumTable.td, "text-right tabular-nums text-[11px] text-warning")}>−{fmtCurrency(Number(t.fee_amount))}</td>
                     <td className={cn(premiumTable.td, "text-right tabular-nums text-xs font-bold text-emerald-500")}>{fmtCurrency(Number(t.net_amount))}</td>
-                    <td className={premiumTable.td}><StatusBadge status={t.status} /></td>
+                    <td className={premiumTable.td}><StatusBadge status={deriveTransactionStatus(t)} /></td>
                     <td className={cn(premiumTable.td, "text-[10px] text-muted-foreground whitespace-nowrap")}>{fmtDateCached(t.created_at)}</td>
                     <td className={premiumTable.td}>
                       <Button variant="ghost" size="icon" className="h-7 w-7" onClick={e => { e.stopPropagation(); openXRay(t); }}>
@@ -411,7 +411,7 @@ export default function AdminTransactionsTab({ transactions, profiles, products,
                   <button onClick={() => copy(selectedTx.id)} className="inline-flex items-center gap-1 font-mono text-xs text-foreground/80 hover:text-foreground">
                     {selectedTx.id.slice(0, 12)}… <Copy className="h-3 w-3" />
                   </button>
-                  <StatusBadge status={selectedTx.status} />
+                  <StatusBadge status={deriveTransactionStatus(selectedTx)} />
                   {selectedTx.is_simulated && (
                     <span className="inline-flex items-center gap-1 rounded border border-info/20 bg-info/10 px-1.5 py-0.5 text-[9px] font-bold uppercase text-info">
                       <Beaker className="h-2.5 w-2.5" /> Simulada
