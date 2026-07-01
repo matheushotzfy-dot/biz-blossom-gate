@@ -213,6 +213,22 @@ Deno.serve(async (req) => {
       );
     }
 
+    // Enforce GLOBAL payment-method toggles (platform-wide kill switch)
+    try {
+      const { data: toggles } = await supabaseClient.rpc('get_global_payment_toggles');
+      const g = Array.isArray(toggles) ? toggles[0] : toggles;
+      const globallyOff =
+        (paymentMethod === 'pix'         && g?.pix === false) ||
+        (paymentMethod === 'credit_card' && g?.credit_card === false) ||
+        (paymentMethod === 'boleto'      && g?.boleto === false);
+      if (globallyOff) {
+        return new Response(
+          JSON.stringify({ success: false, error: 'Este método de pagamento está temporariamente indisponível.' }),
+          { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+    } catch (_) { /* fail-open if RPC is missing so checkout doesn't break */ }
+
     // Enforce per-product payment method toggles (server-side authority)
     const methodAllowed =
       (paymentMethod === 'pix'         && product.checkout_pix_enabled !== false) ||
