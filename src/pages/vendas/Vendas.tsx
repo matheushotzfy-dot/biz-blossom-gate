@@ -210,7 +210,7 @@ export default function Vendas() {
     "Telefone": t.customer_phone ?? "",
     "Produto": prodsMap[t.product_id ?? ""] ?? "",
     "Método": t.payment_method ?? "",
-    "Status": STATUS_MAP[t.status ?? ""]?.label ?? t.status ?? "",
+    "Status": STATUS_MAP[deriveTxStatus(t)]?.label ?? t.status ?? "",
     "Valor Bruto (R$)": Number(t.amount),
     "Taxa (R$)": Number(t.fee_amount ?? 0),
     "Valor Líquido (R$)": Number(t.net_amount ?? 0),
