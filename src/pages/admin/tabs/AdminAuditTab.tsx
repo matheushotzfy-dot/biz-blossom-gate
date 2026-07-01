@@ -188,6 +188,31 @@ export default function AdminAuditTab({ profiles }: Props) {
           <PanelTitle color="blue" icon={<Activity className="h-4 w-4" />}>Trilha unificada ({filtered.length})</PanelTitle>
           <div className="flex items-center gap-2">
             <button
+              onClick={() => {
+                const headers = ["data_hora","origem","actor_id","actor","papel","acao","entidade","entity_id","detalhes"];
+                const rows = filtered.map(l => [
+                  new Date(l.created_at).toISOString(),
+                  l.source,
+                  l.actor_id || "",
+                  getActorName(l.actor_id),
+                  getActorRole(l.actor_id, l.actor_role),
+                  l.action,
+                  l.entity_type,
+                  l.entity_id || "",
+                  Object.keys(l.details).length ? JSON.stringify(l.details) : "",
+                ].map(v => `"${String(v).replace(/"/g, '""')}"`).join(","));
+                const csv = [headers.join(","), ...rows].join("\n");
+                const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement("a");
+                a.href = url; a.download = `audit-log-${new Date().toISOString().slice(0,10)}.csv`; a.click();
+                URL.revokeObjectURL(url);
+              }}
+              disabled={loading || filtered.length === 0}
+              className="h-8 px-3 flex items-center gap-1.5 rounded-lg border border-border text-[11px] font-semibold text-foreground/80 hover:bg-muted/40 disabled:opacity-40 transition-colors"
+              aria-label="Exportar CSV"
+            ><Download className="h-3.5 w-3.5" /> Exportar CSV</button>
+            <button
               onClick={() => setPage(p => Math.max(0, p - 1))}
               disabled={page === 0 || loading}
               className="h-8 w-8 flex items-center justify-center rounded-lg border border-border text-foreground/70 hover:bg-muted/40 disabled:opacity-40 transition-colors"
