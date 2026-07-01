@@ -163,8 +163,10 @@ export default function Auth() {
  }
  const { error: updateError } = await supabase.auth.updateUser({ password: newPassword });
  if (updateError) throw updateError;
+ // Revoke sessions on other devices after password change
+ try { await supabase.auth.signOut({ scope: "others" }); } catch (_) {}
  setRecoveryMode("done");
- toast.success("Senha alterada com sucesso!");
+ toast.success("Senha alterada com sucesso! Outros dispositivos foram desconectados.");
  setTimeout(() => {
  setRecoveryMode("idle");
  setRecoveryCode("");

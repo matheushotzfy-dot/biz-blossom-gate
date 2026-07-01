@@ -153,6 +153,32 @@ Deno.serve(async (req) => {
     const podpayEventId = eventId;
     const externalRef = data.externalRef as string | undefined;
 
+    // === Persist raw webhook payload for audit (fire-and-forget bookkeeping) ===
+    const webhookLogId = crypto.randomUUID();
+    const relevantHeaders: Record<string, string> = {};
+    for (const h of ['x-podpay-signature', 'x-signature', 'x-podpay-timestamp', 'x-timestamp', 'user-agent', 'content-type']) {
+      const v = req.headers.get(h);
+      if (v) relevantHeaders[h] = v;
+    }
+    await supabase.from('podpay_webhook_events').insert({
+      id: webhookLogId,
+      event_id: podpayEventId,
+      podpay_payment_id: podpayPaymentId,
+      signature: signature,
+      signature_valid: true,
+      raw_payload: payload,
+      headers: relevantHeaders,
+      processing_result: 'received',
+    });
+
+    const finishLog = async (result: string, txId: string | null, error?: string) => {
+      try {
+        await supabase.from('podpay_webhook_events')
+          .update({ processing_result: result, transaction_id: txId, error: error ?? null })
+          .eq('id', webhookLogId);
+      } catch (_) {}
+    };
+
     // === IDEMPOTENCY: Check if this event was already processed ===
     if (podpayEventId) {
       const { data: existingEvent } = await supabase
@@ -163,6 +189,7 @@ Deno.serve(async (req) => {
 
       if (existingEvent) {
         safeLog('Event already processed, skipping', { eventId: podpayEventId });
+        await finishLog('duplicate_event', existingEvent.id);
         return new Response(
           JSON.stringify({ success: true, message: 'Already processed' }),
           { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
@@ -172,27 +199,65 @@ Deno.serve(async (req) => {
 
     const ourStatus = STATUS_MAP[podpayStatus] || 'pending';
 
+    // Helper: extract normalized amount from payload (reais)
+    const extractAmount = (): number | null => {
+      const pAny = payload as any;
+      const dAny = data as any;
+      const raw = dAny?.amount ?? pAny?.amount ?? pAny?.value ?? pAny?.transaction?.amount;
+      let n = Number(raw);
+      if (!Number.isFinite(n)) return null;
+      if (Number.isInteger(n) && n >= 100) n = n / 100;
+      return n;
+    };
+
     // === Find transaction by podpay_payment_id first, then fallback to product_id ===
     let transactionId: string | null = null;
 
     if (podpayPaymentId) {
       const { data: tx } = await supabase
         .from('transactions')
-        .select('id, status')
+        .select('id, status, amount, expires_at')
         .eq('podpay_payment_id', podpayPaymentId)
         .maybeSingle();
 
       if (tx) {
         transactionId = tx.id;
-        
+
         // Don't downgrade completed status (idempotency)
         const finalStatuses = ['completed', 'refunded', 'chargeback'];
         if (finalStatuses.includes(tx.status) && !finalStatuses.includes(ourStatus)) {
           safeLog('Skipping status downgrade', { transactionId: tx.id, status: `${tx.status} -> ${ourStatus}` });
+          await finishLog('skipped_downgrade', tx.id);
           return new Response(
             JSON.stringify({ success: true, message: 'Status not downgraded' }),
             { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
           );
+        }
+
+        // ===== Amount validation (only when marking as paid) =====
+        if (ourStatus === 'completed') {
+          const payloadAmount = extractAmount();
+          if (payloadAmount != null && Math.abs(payloadAmount - Number(tx.amount)) > 0.01) {
+            safeLog('Amount mismatch — rejecting', { transactionId: tx.id, error: `payload=${payloadAmount} tx=${tx.amount}` });
+            await finishLog('rejected_amount_mismatch', tx.id, `payload=${payloadAmount} tx=${tx.amount}`);
+            return new Response(
+              JSON.stringify({ success: false, error: 'Amount mismatch' }),
+              { status: 409, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+            );
+          }
+
+          // ===== Expiration guard (only for pending → completed transitions) =====
+          if (tx.status === 'pending' && tx.expires_at) {
+            const expiresAt = new Date(tx.expires_at as unknown as string).getTime();
+            if (Number.isFinite(expiresAt) && Date.now() > expiresAt) {
+              safeLog('Transaction expired — rejecting late payment', { transactionId: tx.id });
+              await finishLog('rejected_expired', tx.id);
+              return new Response(
+                JSON.stringify({ success: false, error: 'Transaction expired' }),
+                { status: 409, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+              );
+            }
+          }
         }
 
         const updateData: Record<string, unknown> = { status: ourStatus };
@@ -205,8 +270,10 @@ Deno.serve(async (req) => {
 
         if (error) {
           safeLog('Error updating transaction', { transactionId: tx.id, error: error.message });
+          await finishLog('update_error', tx.id, error.message);
         } else {
           safeLog('Transaction updated', { transactionId: tx.id, status: ourStatus });
+          await finishLog('updated', tx.id);
           // Splits (coprodução + afiliado) são aplicados automaticamente pelo trigger
           // ledger_on_transaction_change → apply_transaction_splits(tx.id) no banco.
         }

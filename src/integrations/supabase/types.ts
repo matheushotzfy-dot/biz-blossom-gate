@@ -1997,6 +1997,48 @@ export type Database = {
         }
         Relationships: []
       }
+      podpay_webhook_events: {
+        Row: {
+          created_at: string
+          error: string | null
+          event_id: string | null
+          headers: Json | null
+          id: string
+          podpay_payment_id: string | null
+          processing_result: string
+          raw_payload: Json
+          signature: string | null
+          signature_valid: boolean
+          transaction_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          error?: string | null
+          event_id?: string | null
+          headers?: Json | null
+          id?: string
+          podpay_payment_id?: string | null
+          processing_result?: string
+          raw_payload: Json
+          signature?: string | null
+          signature_valid?: boolean
+          transaction_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          error?: string | null
+          event_id?: string | null
+          headers?: Json | null
+          id?: string
+          podpay_payment_id?: string | null
+          processing_result?: string
+          raw_payload?: Json
+          signature?: string | null
+          signature_valid?: boolean
+          transaction_id?: string | null
+        }
+        Relationships: []
+      }
       product_pixels: {
         Row: {
           api_token: string | null
