@@ -4148,6 +4148,7 @@ export type Database = {
       }
       decrypt_field: { Args: { _cipher: string }; Returns: string }
       encrypt_field: { Args: { _plain: string }; Returns: string }
+      expire_stale_pix_transactions: { Args: never; Returns: number }
       get_admin_analytics: { Args: { _period_days?: number }; Returns: Json }
       get_admin_dashboard_data: {
         Args: {
