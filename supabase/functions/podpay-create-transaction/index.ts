@@ -4,6 +4,7 @@ const corsHeaders = {
 };
 
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { clientIp } from "../_shared/security.ts";
 
 /** Log only safe fields — never PII, card data, or full payloads */
 function safeLog(message: string, context: Record<string, unknown> = {}) {
@@ -21,7 +22,31 @@ Deno.serve(async (req) => {
   }
 
   try {
-    const body = await req.json();
+    // ===== Rate limit: 20 tx/min por IP + 60 tx/min por email =====
+    // Bloqueia bots que tentam gerar PIX em loop no checkout.
+    const supabaseUrlRL = Deno.env.get("SUPABASE_URL")!;
+    const serviceKeyRL = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+    const rlAdmin = createClient(supabaseUrlRL, serviceKeyRL, {
+      auth: { persistSession: false, autoRefreshToken: false },
+    });
+    const ip = clientIp(req);
+    const bodyPreview = await req.clone().json().catch(() => ({}));
+    const emailKey = String((bodyPreview as any)?.customerEmail ?? "").trim().toLowerCase() || "anon";
+    const [ipRl, emailRl] = await Promise.all([
+      rlAdmin.rpc("bump_rate_limit", { _bucket_key: `podpay_tx_ip:${ip}`, _window_seconds: 60, _max_count: 20 }),
+      rlAdmin.rpc("bump_rate_limit", { _bucket_key: `podpay_tx_email:${emailKey}`, _window_seconds: 60, _max_count: 60 }),
+    ]);
+    const ipAllowed = Array.isArray(ipRl.data) ? (ipRl.data[0]?.allowed ?? true) : true;
+    const emailAllowed = Array.isArray(emailRl.data) ? (emailRl.data[0]?.allowed ?? true) : true;
+    if (!ipAllowed || !emailAllowed) {
+      safeLog("Rate limited", { error: !ipAllowed ? "ip" : "email" });
+      return new Response(
+        JSON.stringify({ success: false, error: "Muitas tentativas. Aguarde um instante." }),
+        { status: 429, headers: { ...corsHeaders, "Content-Type": "application/json", "Retry-After": "60" } }
+      );
+    }
+
+    const body = bodyPreview as Record<string, unknown>;
     const {
       productId,
       paymentMethod,
