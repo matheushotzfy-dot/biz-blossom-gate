@@ -16,6 +16,7 @@ import { cn } from "@/lib/utils";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { logAdminAction } from "@/lib/auditLog";
+import { friendlyError } from "@/lib/friendlyError";
 
 type Profile = { user_id: string; full_name: string | null; email: string | null; };
 type Notification = { id: string; title: string; message: string; type: string; user_id: string | null; is_read: boolean; created_at: string; created_by: string | null; };
@@ -49,7 +50,7 @@ export default function AdminNotificationsTab({ profiles }: Props) {
   const loadNotifications = async () => {
   setLoading(true);
   const { data, error } = await supabase.from("notifications").select("*").order("created_at", { ascending: false }).limit(200);
-  if (error) toast.error("Erro ao carregar: " + error.message);
+  if (error) toast.error("Erro ao carregar: " + friendlyError(error));
   setNotifications((data || []) as Notification[]);
   setLoading(false);
   };
@@ -80,7 +81,7 @@ export default function AdminNotificationsTab({ profiles }: Props) {
   setShowSendDialog(false);
   setSendTitle(""); setSendMessage(""); setSendType("info"); setSelectedUserId("");
   loadNotifications();
-  } catch (e: unknown) { toast.error("Erro ao enviar: " + (e instanceof Error ? e.message : "desconhecido")); } finally { setSending(false); }
+  } catch (e: unknown) { toast.error("Erro ao enviar: " + (e instanceof Error ? friendlyError(e) : "desconhecido")); } finally { setSending(false); }
   };
 
   const handlePurgeOrphans = async () => {
@@ -88,7 +89,7 @@ export default function AdminNotificationsTab({ profiles }: Props) {
     setPurging(true);
     const { data, error } = await supabase.rpc("admin_purge_orphan_notifications");
     setPurging(false);
-    if (error) { toast.error("Erro: " + error.message); return; }
+    if (error) { toast.error("Erro: " + friendlyError(error)); return; }
     toast.success(`${Number(data || 0)} notificação(ões) órfã(s) removida(s)`);
     loadNotifications();
   };

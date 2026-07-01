@@ -23,6 +23,7 @@ import {
 } from "./AdminPremium";
 import { logAdminAction } from "@/lib/auditLog";
 import { cn } from "@/lib/utils";
+import { friendlyError } from "@/lib/friendlyError";
 
 // ============== Types ==============
 type Health = "online" | "degraded" | "offline" | "maintenance";
@@ -236,7 +237,7 @@ export default function AdminAcquirersTab() {
     const { error } = editingId
       ? await supabase.from("acquirers").update(payload).eq("id", editingId)
       : await supabase.from("acquirers").insert(payload);
-    if (error) { toast.error("Erro: " + error.message); return; }
+    if (error) { toast.error("Erro: " + friendlyError(error)); return; }
     toast.success(editingId ? "Atualizada!" : "Criada!");
     await logAdminAction(editingId ? "update_acquirer" : "create_acquirer", "acquirer", editingId, payload);
     setShowForm(false); setEditingId(null); resetForm(); load();
@@ -1249,7 +1250,7 @@ function BulkAssign({ acquirers, onDone }: { acquirers: Acquirer[]; onDone: () =
       _seller_ids: Array.from(selected), _new_acquirer_id: targetAcq, _reason: reason,
     });
     setRunning(false);
-    if (error) { toast.error("Erro: " + error.message); return; }
+    if (error) { toast.error("Erro: " + friendlyError(error)); return; }
     const successCount = (data || []).filter(r => r.success).length;
     const failCount = (data || []).filter(r => !r.success).length;
     toast.success(`${successCount} alterados${failCount ? `, ${failCount} falharam` : ""}`);

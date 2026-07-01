@@ -21,6 +21,7 @@ import { cn } from "@/lib/utils";
 import { motion, AnimatePresence } from "framer-motion";
 import authHeroImg from "@/assets/auth-hero.jpg";
 import { Seo } from "@/components/Seo";
+import { friendlyError } from "@/lib/friendlyError";
 
 /* ─────────────────── Document helpers ─────────────────── */
 function formatDocument(value: string): string {
@@ -135,7 +136,7 @@ export default function Auth() {
  setRecoveryMode("code");
  toast.success("Código enviado para seu e-mail!");
  } catch (err: unknown) {
- toast.error((err instanceof Error && err.message) || "Erro ao enviar código. Tente novamente.");
+ toast.error((err instanceof Error && friendlyError(err)) || "Erro ao enviar código. Tente novamente.");
  } finally {
  setRecoveryLoading(false);
  }

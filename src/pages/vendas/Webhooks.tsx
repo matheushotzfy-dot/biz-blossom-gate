@@ -18,6 +18,7 @@ import {
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { StatCard } from "@/components/StatCard";
+import { friendlyError } from "@/lib/friendlyError";
 
 const EVENT_GROUPS = [
   {
@@ -83,7 +84,7 @@ export default function Webhooks() {
           .update({ url, events: selectedEvents })
           .eq("id", editingId)
           .eq("user_id", user.id);
-        if (error) { toast.error(error.message || "Erro ao atualizar"); return; }
+        if (error) { toast.error(friendlyError(error, "Erro ao atualizar")); return; }
         toast.success("Webhook atualizado");
       } else {
         const secret = "whsec_" + crypto.randomUUID().replace(/-/g, "") +
@@ -91,7 +92,7 @@ export default function Webhooks() {
         const { error } = await supabase
           .from("webhook_configs")
           .insert({ user_id: user.id, url, events: selectedEvents, secret, is_active: true });
-        if (error) { toast.error(error.message || "Erro ao criar webhook"); return; }
+        if (error) { toast.error(friendlyError(error, "Erro ao criar webhook")); return; }
         toast.success("Webhook adicionado");
       }
       setCreateOpen(false);
@@ -105,7 +106,7 @@ export default function Webhooks() {
   const toggleActive = async (id: string, current: boolean) => {
     if (!user) return;
     const { error } = await supabase.from("webhook_configs").update({ is_active: !current }).eq("id", id);
-    if (error) { toast.error(error.message); return; }
+    if (error) { toast.error(friendlyError(error)); return; }
     invalidateAll(["webhooks"]);
     toast.success(current ? "Pausado" : "Ativado");
   };
@@ -113,7 +114,7 @@ export default function Webhooks() {
   const deleteWebhook = async (id: string) => {
     if (!confirm("Excluir este endpoint? Os eventos pendentes serão cancelados.")) return;
     const { error } = await supabase.from("webhook_configs").delete().eq("id", id);
-    if (error) { toast.error(error.message); return; }
+    if (error) { toast.error(friendlyError(error)); return; }
     toast.success("Removido");
     invalidateAll(["webhooks"]);
   };

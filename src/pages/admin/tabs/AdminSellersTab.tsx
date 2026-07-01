@@ -28,6 +28,7 @@ import { PremiumPanel, PremiumEmpty, premiumTable } from "./AdminPremium";
 import { logAdminAction } from "@/lib/auditLog";
 import { cn } from "@/lib/utils";
 import { z } from "zod";
+import { friendlyError } from "@/lib/friendlyError";
 
 type Dispute = Tables<"disputes"> & { buyer_name?: string | null };
 type BalanceAdjustment = Tables<"balance_adjustments">;
@@ -419,7 +420,7 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
       updated_at: new Date().toISOString(),
     };
     const { error } = await supabase.from("custom_user_fees").upsert(payload, { onConflict: "user_id" });
-    if (error) { toast.error("Erro ao salvar taxas: " + error.message); return; }
+    if (error) { toast.error("Erro ao salvar taxas: " + friendlyError(error)); return; }
     toast.success("Taxas personalizadas salvas!");
     await logAdminAction("update_custom_fees", "custom_user_fees", selectedUser.user_id, payload);
   };
@@ -429,7 +430,7 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
     const label = side === "seller" ? "Vitória do seller — saldo devolvido." : "Vitória do comprador — débito mantido.";
     if (!window.confirm(side === "seller" ? "Confirmar vitória do seller? O saldo retido será devolvido." : "Confirmar vitória do comprador? O débito será mantido e a transação marcada como chargeback.")) return;
     const { error } = await supabase.from("disputes").update({ status, resolved_at: new Date().toISOString() }).eq("id", disputeId);
-    if (error) { toast.error("Erro ao resolver disputa: " + error.message); return; }
+    if (error) { toast.error("Erro ao resolver disputa: " + friendlyError(error)); return; }
     toast.success(label);
     await logAdminAction(`resolve_dispute_${side}`, "dispute", disputeId, { status });
     if (selectedUser) {
@@ -442,7 +443,7 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
   const handleDeletePixKey = async (pixKeyId: string) => {
     if (!window.confirm("Remover esta chave PIX do seller?")) return;
     const { error } = await supabase.from("pix_keys").delete().eq("id", pixKeyId);
-    if (error) { toast.error("Erro ao remover chave: " + error.message); return; }
+    if (error) { toast.error("Erro ao remover chave: " + friendlyError(error)); return; }
     toast.success("Chave PIX removida.");
     await logAdminAction("delete_pix_key", "pix_key", pixKeyId);
     setUserPixKeys(prev => prev.filter(k => k.id !== pixKeyId));
@@ -1452,7 +1453,7 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
                                         if (!lastCompleted || !selectedUser) return;
                                         if (!window.confirm(`Estornar a última transação aprovada (${fmtCurrency(Number(lastCompleted.amount))}) deste cliente?`)) return;
                                         const { error } = await supabase.from("transactions").update({ status: "refunded" }).eq("id", lastCompleted.id);
-                                        if (error) { toast.error("Erro ao estornar: " + error.message); return; }
+                                        if (error) { toast.error("Erro ao estornar: " + friendlyError(error)); return; }
                                         toast.success("Transação estornada.");
                                         await logAdminAction("manual_refund", "transaction", lastCompleted.id, { amount: lastCompleted.amount, buyer: b.email });
                                         openUserDetail(selectedUser);
@@ -1475,7 +1476,7 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
                                           reason: "Aberto manualmente pelo admin",
                                           admin_user_id: user.id,
                                         });
-                                        if (error) { toast.error("Erro ao abrir MED: " + error.message); return; }
+                                        if (error) { toast.error("Erro ao abrir MED: " + friendlyError(error)); return; }
                                         toast.success("MED aberto. Saldo retido até resolução.");
                                         await logAdminAction("open_dispute", "transaction", lastCompleted.id, { amount: lastCompleted.amount });
                                         openUserDetail(selectedUser);
@@ -1494,7 +1495,7 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
                                           entry_type: "email", entry_value: b.email.toLowerCase(),
                                           reason: reason.slice(0, 500), added_by: user.id, is_active: true,
                                         }, { onConflict: "entry_type,entry_value" });
-                                        if (error) { toast.error("Erro: " + error.message); return; }
+                                        if (error) { toast.error("Erro: " + friendlyError(error)); return; }
                                         toast.success(`E-mail ${b.email} adicionado à blacklist global.`);
                                         await logAdminAction("blacklist_email", "global_blacklist", b.email, { reason });
                                       }}
@@ -1514,7 +1515,7 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
                                           entry_type: type, entry_value: doc,
                                           reason: reason.slice(0, 500), added_by: user.id, is_active: true,
                                         }, { onConflict: "entry_type,entry_value" });
-                                        if (error) { toast.error("Erro: " + error.message); return; }
+                                        if (error) { toast.error("Erro: " + friendlyError(error)); return; }
                                         toast.success(`${type.toUpperCase()} adicionado à blacklist.`);
                                         await logAdminAction(`blacklist_${type}`, "global_blacklist", doc, { reason });
                                       }}
