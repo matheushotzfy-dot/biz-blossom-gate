@@ -289,8 +289,8 @@ export default function Saques() {
 
         {/* Account Settings Column */}
         <div className="space-y-4">
-          <AutoWithdrawalSettings />
           <div className="bg-card rounded-[24px] border border-border/60 shadow-sm overflow-hidden">
+
 
             <div className="p-6 border-b border-border/40">
               <div className="flex items-center gap-3">
