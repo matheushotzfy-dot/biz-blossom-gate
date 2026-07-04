@@ -364,16 +364,17 @@ export default function Identidade() {
       </div>
 
       {/* KYC Documentos */}
-      <div ref={kycRef} className="bg-card rounded-[24px] border border-border/60 shadow-sm overflow-hidden">
+      <div ref={kycRef} className="group premium-hover-card bg-card rounded-[24px] border border-border/60 overflow-hidden">
         <div className="p-6 border-b border-border/40 flex items-center gap-3">
-          <div className="h-10 w-10 bg-primary/10 border border-primary/10 rounded-xl flex items-center justify-center text-primary">
-            <FileCheck size={20} strokeWidth={2.5} />
+          <div className="premium-icon-shell info h-11 w-11 rounded-2xl flex items-center justify-center">
+            <FileCheck size={18} strokeWidth={2.5} className="relative" />
           </div>
           <div>
             <h2 className="font-black text-foreground tracking-tight leading-none uppercase">Documentos KYC</h2>
             <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mt-1">Envie para liberar saques</p>
           </div>
         </div>
+
 
         <div className="p-6">
           {(!kycDocs.front || !kycDocs.back || !kycDocs.selfie || (isCnpj && !kycDocs.cnpj_card)) && !isApproved && (
