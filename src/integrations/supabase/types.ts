@@ -2776,6 +2776,8 @@ export type Database = {
           enabled: boolean
           id: string
           max_amount: number
+          pix_key_id: string | null
+          target_amount: number | null
           updated_at: string
           user_id: string
         }
@@ -2785,6 +2787,8 @@ export type Database = {
           enabled?: boolean
           id?: string
           max_amount?: number
+          pix_key_id?: string | null
+          target_amount?: number | null
           updated_at?: string
           user_id: string
         }
@@ -2794,10 +2798,20 @@ export type Database = {
           enabled?: boolean
           id?: string
           max_amount?: number
+          pix_key_id?: string | null
+          target_amount?: number | null
           updated_at?: string
           user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "seller_auto_withdraw_pix_key_id_fkey"
+            columns: ["pix_key_id"]
+            isOneToOne: false
+            referencedRelation: "pix_keys"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       seller_notes: {
         Row: {
@@ -3589,6 +3603,7 @@ export type Database = {
           id: string
           last_attempt_at: string | null
           net_amount: number
+          origin: string
           payment_proof_url: string | null
           processed_at: string | null
           processed_by: string | null
@@ -3610,6 +3625,7 @@ export type Database = {
           id?: string
           last_attempt_at?: string | null
           net_amount?: number
+          origin?: string
           payment_proof_url?: string | null
           processed_at?: string | null
           processed_by?: string | null
@@ -3631,6 +3647,7 @@ export type Database = {
           id?: string
           last_attempt_at?: string | null
           net_amount?: number
+          origin?: string
           payment_proof_url?: string | null
           processed_at?: string | null
           processed_by?: string | null
