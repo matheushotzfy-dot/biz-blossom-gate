@@ -108,27 +108,27 @@ export default function AutoWithdrawalSettings() {
         type="button"
         onClick={() => setOpen(true)}
         disabled={loading}
-        className="w-full group relative overflow-hidden rounded-2xl border border-border/60 bg-card hover:border-primary/40 hover:bg-muted/30 transition-all p-5 flex items-center gap-4 text-left disabled:opacity-60"
+        className="w-full group relative overflow-hidden rounded-xl border border-border/60 bg-card hover:border-primary/40 hover:bg-muted/30 transition-all px-4 py-3 flex items-center gap-3 text-left disabled:opacity-60"
       >
-        <div className="h-11 w-11 shrink-0 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center text-primary">
-          <Zap size={18} strokeWidth={2.5} />
+        <div className="h-9 w-9 shrink-0 rounded-lg bg-primary/10 border border-primary/20 flex items-center justify-center text-primary">
+          <Zap size={16} strokeWidth={2.5} />
         </div>
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2">
-            <p className="text-sm font-black text-foreground uppercase tracking-tight">Saque Automatizado</p>
+            <p className="text-xs font-black text-foreground uppercase tracking-tight leading-none">Saque Automatizado</p>
             {isActive && (
               <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-widest bg-emerald-500/10 text-emerald-500 border border-emerald-500/20">
                 <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" /> Ativo
               </span>
             )}
           </div>
-          <p className="text-[11px] font-bold text-muted-foreground/80 mt-0.5 truncate">
+          <p className="text-[10px] font-bold text-muted-foreground/80 mt-1 truncate leading-none">
             {isActive
               ? `${fmt(Number(config?.target_amount || 0))} para ${(selectedKey?.key_type || "chave").toUpperCase()} · ${maskedKey(selectedKey)}`
               : "Solicita saque sozinho ao atingir o valor alvo"}
           </p>
         </div>
-        <ChevronRight size={18} className="text-muted-foreground/60 group-hover:text-primary transition-colors shrink-0" />
+        <ChevronRight size={16} className="text-muted-foreground/60 group-hover:text-primary transition-colors shrink-0" />
       </button>
 
       <Dialog open={open} onOpenChange={setOpen}>
