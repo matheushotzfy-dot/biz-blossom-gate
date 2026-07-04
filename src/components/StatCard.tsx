@@ -85,15 +85,16 @@ export function StatCard({
   return (
     <div
       className={cn(
-        "seller-hover-card dashboard-stat-card platform-card group relative flex h-full min-h-[120px] flex-col overflow-hidden rounded-[14px] border border-border bg-card p-4 animate-in fade-in slide-in-from-bottom-2 transition-all duration-300 ease-out hover:-translate-y-[2px] hover:border-info/60 active:scale-[0.99] sm:min-h-[152px] sm:p-5",
+        "seller-hover-card dashboard-stat-card platform-card group relative flex h-full min-h-[120px] flex-col overflow-hidden rounded-[14px] border border-border bg-card p-4 animate-in fade-in slide-in-from-bottom-2 transition-[transform,border-color,background-color] duration-300 ease-out hover:-translate-y-[2px] hover:border-border/90 hover:bg-card/80 active:scale-[0.99] sm:min-h-[152px] sm:p-5",
         className
       )}
       style={{
         animationDelay: `${delay}ms`,
-        borderLeft: "3px solid hsl(var(--info))",
       }}
     >
-      <span className={cn("pointer-events-none absolute inset-y-0 left-0 w-32 opacity-0 transition-opacity duration-500 group-hover:opacity-100", c.glow)} />
+      {/* Subtle top hairline on hover — clean, tech */}
+      <span className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-foreground/20 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
+
 
       {/* Header: title + icon */}
       <div className="relative flex items-center justify-between gap-3">
