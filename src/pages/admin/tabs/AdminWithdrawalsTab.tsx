@@ -53,6 +53,7 @@ export default function AdminWithdrawalsTab({ withdrawals, profiles, onWithdrawa
  const [search, setSearch] = useState("");
  const [statusFilter, setStatusFilter] = useState("all");
  const [riskFilter, setRiskFilter] = useState("all");
+ const [originFilter, setOriginFilter] = useState("all");
  const [auditLogs, setAuditLogs] = useState<AuditLog[]>([]);
  const [autoConfigs, setAutoConfigs] = useState<AutoWithdrawConfig[]>([]);
  const [adjustments, setAdjustments] = useState<BalanceAdjustment[]>([]);
@@ -112,6 +113,7 @@ export default function AdminWithdrawalsTab({ withdrawals, profiles, onWithdrawa
  const filtered = useMemo(() => {
  return withdrawals.filter(w => {
  if (statusFilter !== "all" && w.status !== statusFilter) return false;
+ if (originFilter !== "all" && ((w as any).origin || "manual") !== originFilter) return false;
  if (riskFilter === "new_seller" && !isNewSeller(getProfile(w.user_id))) return false;
  if (riskFilter === "high_value" && !isHighValue(Number(w.amount))) return false;
  if (riskFilter === "flagged" && !isNewSeller(getProfile(w.user_id)) && !isHighValue(Number(w.amount))) return false;
@@ -119,7 +121,7 @@ export default function AdminWithdrawalsTab({ withdrawals, profiles, onWithdrawa
  const s = search.toLowerCase();
  return getSellerName(w.user_id).toLowerCase().includes(s) || w.id.includes(s);
  });
- }, [withdrawals, statusFilter, riskFilter, search, profiles]);
+ }, [withdrawals, statusFilter, riskFilter, originFilter, search, profiles]);
 
  /* ── Batch Approval ── */
  const handleBatchApprove = async () => {
@@ -386,7 +388,16 @@ export default function AdminWithdrawalsTab({ withdrawals, profiles, onWithdrawa
             <SelectItem value="high_value">Acima R$ 50k</SelectItem>
           </SelectContent>
         </Select>
+        <Select value={originFilter} onValueChange={setOriginFilter}>
+          <SelectTrigger className="h-10 w-[150px] rounded-xl text-xs"><SelectValue placeholder="Origem" /></SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">Toda origem</SelectItem>
+            <SelectItem value="manual">Manual</SelectItem>
+            <SelectItem value="auto">Automático</SelectItem>
+          </SelectContent>
+        </Select>
       </div>
+
 
       {/* Table */}
       <div className={premiumTable.wrapper}>
@@ -410,7 +421,14 @@ export default function AdminWithdrawalsTab({ withdrawals, profiles, onWithdrawa
                   <td className={premiumTable.td}>
                     {isPending && <Checkbox checked={selectedIds.has(w.id)} onCheckedChange={() => toggleSelect(w.id)} />}
                   </td>
-                  <td className={`${premiumTable.td} font-mono text-[10px] text-muted-foreground`}>{w.id.slice(0, 8)}</td>
+                  <td className={`${premiumTable.td} font-mono text-[10px] text-muted-foreground`}>
+                    <div className="flex items-center gap-1.5">
+                      <span>{w.id.slice(0, 8)}</span>
+                      {(w as any).origin === "auto" && (
+                        <span className="rounded border border-primary/20 bg-primary/10 px-1 py-0.5 text-[8px] font-black uppercase text-primary">AUTO</span>
+                      )}
+                    </div>
+                  </td>
                   <td className={premiumTable.td}>
                     <p className="text-xs font-bold text-foreground">{getSellerName(w.user_id)}</p>
                     <p className="text-[10px] text-muted-foreground">{getSellerEmail(w.user_id)}</p>
