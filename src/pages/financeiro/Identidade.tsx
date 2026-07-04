@@ -170,25 +170,28 @@ export default function Identidade() {
 
       {/* KPIs */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        {KPIS.map((k) => {
+        {KPIS.map((k, i) => {
           const Icon = k.icon;
+          const tones: Array<"primary" | "success" | "warning" | "info"> = ["primary", "success", "info", "warning"];
+          const tone = tones[i % tones.length];
           return (
-            <div key={k.label} className="bg-card p-8 rounded-[24px] border border-border/60 shadow-sm relative overflow-hidden group">
-              <div className="relative z-10">
-                <div className="flex items-center gap-2 text-muted-foreground/60 mb-3">
-                  <Icon size={16} />
-                  <span className="text-[10px] font-black uppercase tracking-[0.15em]">{k.label}</span>
+            <div key={k.label} className="group premium-hover-card bg-card p-6 rounded-[24px] border border-border/60 relative">
+              <div className="flex items-center justify-between mb-4">
+                <div className={cn(
+                  "premium-icon-shell h-11 w-11 rounded-2xl flex items-center justify-center",
+                  tone !== "primary" && tone
+                )}>
+                  <Icon size={16} strokeWidth={2.25} className="relative" />
                 </div>
-                <p className="text-3xl font-black text-foreground tabular-nums tracking-tighter">{k.value}</p>
-                <p className="text-[10px] font-bold text-muted-foreground/70 uppercase mt-2 truncate tracking-widest">{k.sub}</p>
+                <span className="text-[10px] font-black uppercase tracking-[0.15em] text-muted-foreground/60">{k.label}</span>
               </div>
-              <div className="absolute right-[-20px] bottom-[-20px] opacity-[0.03] rotate-[-15deg] group-hover:scale-110 transition-transform duration-500">
-                <Icon size={160} />
-              </div>
+              <p className="text-3xl font-black text-foreground tabular-nums tracking-tighter">{k.value}</p>
+              <p className="text-[10px] font-bold text-muted-foreground/70 uppercase mt-2 truncate tracking-widest">{k.sub}</p>
             </div>
           );
         })}
       </div>
+
 
       {/* Progress bar + steps */}
       <div className="bg-card rounded-[24px] border border-border/60 shadow-sm overflow-hidden">
