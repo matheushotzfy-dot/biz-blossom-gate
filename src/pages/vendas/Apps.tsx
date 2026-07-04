@@ -247,65 +247,65 @@ export default function Apps() {
  const active = Boolean(integration?.is_active);
  const isComingSoon = Boolean(app.comingSoon);
 
- return (
- <button
- key={app.id}
- onClick={() => openDialog(app, integration || undefined)}
- disabled={isComingSoon}
- className={cn(
- "group relative flex h-32 items-center overflow-hidden rounded-[26px] border px-7 text-left backdrop-blur-xl transition-all duration-300 ease-out animate-fade-in md:h-[8.5rem] md:px-8",
- isComingSoon
- ? "border-border/40 bg-card/50 cursor-not-allowed"
- : active
- ? "border-primary/30 bg-card shadow-[0_18px_40px_hsl(var(--primary)/0.10)] hover:border-primary/40 hover:shadow-[0_24px_52px_hsl(var(--primary)/0.14)] active:scale-[0.985]"
- : "border-border/50 bg-card/95 shadow-[0_14px_32px_hsl(var(--foreground)/0.06)] hover:-translate-y-0.5 hover:border-border/70 hover:shadow-[0_22px_46px_hsl(var(--foreground)/0.10)] active:scale-[0.985]"
- )}
- style={{ animationDelay: `${idx * 35}ms`, animationFillMode: "backwards" }}
- >
- <div className="pointer-events-none absolute inset-0">
- <div className="absolute inset-0 bg-gradient-to-br from-background/35 via-transparent to-background/20" />
- <div className={cn(
- "absolute inset-y-0 left-0 w-[3px] transition-opacity duration-300",
- active ? "bg-primary opacity-100" : "bg-border opacity-0 group-hover:opacity-100",
- isComingSoon && "opacity-0"
- )} />
- <div className={cn(
- "absolute -right-10 top-1/2 h-28 w-28 -translate-y-1/2 rounded-full blur-3xl transition-opacity duration-300",
- active ? "bg-primary/15 opacity-100" : "bg-muted opacity-0 group-hover:opacity-60",
- isComingSoon && "opacity-0"
- )} />
- </div>
+  return (
+  <button
+  key={app.id}
+  onClick={() => openDialog(app, integration || undefined)}
+  disabled={isComingSoon}
+  className={cn(
+    "group relative isolate flex h-32 items-center overflow-hidden rounded-[22px] border bg-card px-7 text-left transition-[transform,border-color,background-color,box-shadow] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] animate-fade-in md:h-[8.5rem] md:px-8",
+    isComingSoon
+      ? "border-border/40 bg-card/50 cursor-not-allowed opacity-90"
+      : active
+      ? "border-primary/40 bg-card hover:-translate-y-1 hover:border-primary/70 hover:bg-primary/[0.045] hover:shadow-[0_22px_50px_-22px_hsl(var(--primary)/0.45)] active:scale-[0.985]"
+      : "border-border/70 hover:-translate-y-1 hover:border-primary/60 hover:bg-primary/[0.035] hover:shadow-[0_22px_50px_-22px_hsl(var(--primary)/0.35)] active:scale-[0.985]"
+  )}
+  style={{ animationDelay: `${idx * 35}ms`, animationFillMode: "backwards" }}
+  >
+  {!isComingSoon && (
+    <>
+      {/* Accent left rail */}
+      <span className={cn(
+        "pointer-events-none absolute left-0 top-5 bottom-5 z-0 w-[3px] origin-center rounded-r-full bg-primary transition-[opacity,transform] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)]",
+        active ? "scale-y-100 opacity-100" : "scale-y-50 opacity-0 group-hover:scale-y-100 group-hover:opacity-100"
+      )} />
+      {/* Top hairline on hover */}
+      <span className="pointer-events-none absolute inset-x-6 top-0 z-0 h-px bg-gradient-to-r from-transparent via-primary/70 to-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
+      {/* Diagonal sheen sweep */}
+      <span className="pointer-events-none absolute inset-0 z-0 -translate-x-[120%] bg-[linear-gradient(115deg,transparent_0%,hsl(var(--primary)/0.10)_44%,transparent_72%)] opacity-0 transition-[transform,opacity] duration-700 ease-out group-hover:translate-x-[120%] group-hover:opacity-100" />
+    </>
+  )}
 
-              <div className="relative z-[1] flex h-full w-full items-center justify-center">
-                <div className={cn(
-                  "flex h-20 w-32 items-center justify-center md:h-24 md:w-40 transition-all",
-                  isComingSoon && "grayscale opacity-40"
-                )}>
-                  <img
-                    src={app.logo}
-                    alt={app.name}
-                    className={cn(
-                      "max-h-full max-w-full object-contain transition-transform duration-300",
-                      !isComingSoon && "group-hover:scale-[1.06]"
-                    )}
-                  />
-                </div>
-              </div>
+               <div className="relative z-[1] flex h-full w-full items-center justify-center">
+                 <div className={cn(
+                   "flex h-20 w-32 items-center justify-center md:h-24 md:w-40 transition-all",
+                   isComingSoon && "grayscale opacity-40"
+                 )}>
+                   <img
+                     src={app.logo}
+                     alt={app.name}
+                     className={cn(
+                       "max-h-full max-w-full object-contain transition-transform duration-500 ease-[cubic-bezier(0.22,1,0.36,1)]",
+                       !isComingSoon && "group-hover:scale-[1.08]"
+                     )}
+                   />
+                 </div>
+               </div>
 
-              {isComingSoon && (
-                <span className="absolute right-3 top-3 z-[2] inline-flex items-center gap-1 rounded-md border border-border/60 bg-background/80 px-1.5 py-0.5 text-[8.5px] font-bold uppercase tracking-[0.16em] text-muted-foreground">
-                  <Clock className="h-2.5 w-2.5" strokeWidth={2.5} />
-                  Em breve
-                </span>
-              )}
-              {active && !isComingSoon && (
-                <span className="absolute right-3 top-3 z-[2] inline-flex items-center gap-1 rounded-md border border-success/30 bg-success/10 px-1.5 py-0.5 text-[8.5px] font-bold uppercase tracking-[0.16em] text-success">
-                  <CheckCircle2 className="h-2.5 w-2.5" strokeWidth={2.5} />
-                  Ativo
-                </span>
-              )}
- </button>
- );
+               {isComingSoon && (
+                 <span className="absolute right-3 top-3 z-[2] inline-flex items-center gap-1 rounded-md border border-border/60 bg-background/80 px-1.5 py-0.5 text-[8.5px] font-bold uppercase tracking-[0.16em] text-muted-foreground">
+                   <Clock className="h-2.5 w-2.5" strokeWidth={2.5} />
+                   Em breve
+                 </span>
+               )}
+               {active && !isComingSoon && (
+                 <span className="absolute right-3 top-3 z-[2] inline-flex items-center gap-1 rounded-md border border-success/30 bg-success/10 px-1.5 py-0.5 text-[8.5px] font-bold uppercase tracking-[0.16em] text-success">
+                   <CheckCircle2 className="h-2.5 w-2.5" strokeWidth={2.5} />
+                   Ativo
+                 </span>
+               )}
+  </button>
+  );
  })}
 
  </div>

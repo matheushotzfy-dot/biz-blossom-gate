@@ -32,48 +32,55 @@ export function StatCard({
   const colors: Record<StatCardColor, {
     text: string;
     iconBg: string;
+    iconGlow: string;
     border: string;
     accent: string;
     glow: string;
   }> = {
     primary: {
       text: "text-primary",
-      iconBg: "bg-primary/10 text-primary border-primary/20",
+      iconBg: "bg-gradient-to-br from-primary/[0.18] to-primary/[0.05] text-primary border-primary/25 shadow-[inset_0_1px_0_hsl(var(--primary)/0.25),inset_0_0_0_1px_hsl(var(--primary)/0.10)]",
+      iconGlow: "shadow-[0_6px_18px_-6px_hsl(var(--primary)/0.55)]",
       border: "border-primary/30",
       accent: "bg-primary",
       glow: "bg-primary/[0.07]",
     },
     success: {
       text: "text-success",
-      iconBg: "bg-success/10 text-success border-success/20",
+      iconBg: "bg-gradient-to-br from-success/[0.20] to-success/[0.05] text-success border-success/25 shadow-[inset_0_1px_0_hsl(var(--success)/0.28),inset_0_0_0_1px_hsl(var(--success)/0.10)]",
+      iconGlow: "shadow-[0_6px_18px_-6px_hsl(var(--success)/0.55)]",
       border: "border-success/30",
       accent: "bg-primary",
       glow: "bg-success/[0.07]",
     },
     warning: {
       text: "text-warning",
-      iconBg: "bg-warning/10 text-warning border-warning/20",
+      iconBg: "bg-gradient-to-br from-warning/[0.22] to-warning/[0.05] text-warning border-warning/25 shadow-[inset_0_1px_0_hsl(var(--warning)/0.30),inset_0_0_0_1px_hsl(var(--warning)/0.12)]",
+      iconGlow: "shadow-[0_6px_18px_-6px_hsl(var(--warning)/0.55)]",
       border: "border-warning/30",
       accent: "bg-primary",
       glow: "bg-warning/[0.07]",
     },
     destructive: {
       text: "text-destructive",
-      iconBg: "bg-destructive/10 text-destructive border-destructive/20",
+      iconBg: "bg-gradient-to-br from-destructive/[0.20] to-destructive/[0.05] text-destructive border-destructive/25 shadow-[inset_0_1px_0_hsl(var(--destructive)/0.28),inset_0_0_0_1px_hsl(var(--destructive)/0.10)]",
+      iconGlow: "shadow-[0_6px_18px_-6px_hsl(var(--destructive)/0.55)]",
       border: "border-destructive/30",
       accent: "bg-primary",
       glow: "bg-destructive/[0.06]",
     },
     info: {
       text: "text-info",
-      iconBg: "bg-info/10 text-info border-info/20",
+      iconBg: "bg-gradient-to-br from-info/[0.20] to-info/[0.05] text-info border-info/25 shadow-[inset_0_1px_0_hsl(var(--info)/0.28),inset_0_0_0_1px_hsl(var(--info)/0.10)]",
+      iconGlow: "shadow-[0_6px_18px_-6px_hsl(var(--info)/0.55)]",
       border: "border-info/30",
       accent: "bg-primary",
       glow: "bg-info/[0.07]",
     },
     neutral: {
       text: "text-foreground",
-      iconBg: "bg-muted/50 text-muted-foreground border-border/60",
+      iconBg: "bg-gradient-to-br from-foreground/[0.10] to-foreground/[0.02] text-foreground border-border shadow-[inset_0_1px_0_hsl(var(--foreground)/0.08),inset_0_0_0_1px_hsl(var(--border)/0.4)]",
+      iconGlow: "shadow-[0_6px_18px_-6px_hsl(var(--foreground)/0.35)]",
       border: "border-border/60",
       accent: "bg-primary/80",
       glow: "bg-primary/[0.05]",
@@ -108,10 +115,11 @@ export function StatCard({
         </p>
         {Icon && (
           <div className={cn(
-            "flex h-8 w-8 shrink-0 items-center justify-center rounded-[8px] border transition-all duration-300 ease-out group-hover:scale-[1.08] sm:h-9 sm:w-9",
-            c.iconBg
+            "relative flex h-9 w-9 shrink-0 items-center justify-center rounded-[10px] border transition-transform duration-300 ease-out group-hover:scale-[1.08] group-hover:-rotate-3 sm:h-10 sm:w-10",
+            c.iconBg,
           )}>
-            <Icon className="h-[14px] w-[14px] sm:h-[15px] sm:w-[15px]" strokeWidth={2.5} />
+            <span className="pointer-events-none absolute inset-x-1 top-0.5 h-1/2 rounded-t-[8px] bg-gradient-to-b from-white/12 to-transparent opacity-80" />
+            <Icon className="relative h-[15px] w-[15px] sm:h-4 sm:w-4" strokeWidth={2.5} />
           </div>
         )}
       </div>

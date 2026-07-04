@@ -66,7 +66,7 @@ const SelectContent = React.forwardRef<
  <SelectPrimitive.Content
  ref={ref}
  className={cn(
-   "relative z-50 max-h-[min(var(--radix-select-content-available-height),18rem)] min-w-[8rem] overflow-hidden rounded-xl border border-border/80 bg-popover/95 p-1 text-popover-foreground shadow-2xl backdrop-blur-md data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-[0.97] data-[state=open]:zoom-in-[0.97] data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 duration-[220ms] ease-[cubic-bezier(0.16,1,0.3,1)]",
+   "relative z-50 max-h-[min(var(--radix-select-content-available-height),20rem)] min-w-[8rem] overflow-hidden rounded-2xl border border-primary/20 bg-popover/98 text-popover-foreground backdrop-blur-2xl shadow-[0_24px_60px_-20px_hsl(var(--primary)/0.35),0_8px_24px_-12px_hsl(0_0%_0%/0.55),inset_0_1px_0_hsl(var(--primary)/0.10)] data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-[0.97] data-[state=open]:zoom-in-[0.97] data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 duration-[220ms] ease-[cubic-bezier(0.16,1,0.3,1)]",
  position === "popper" &&
  "data-[side=bottom]:translate-y-1.5 data-[side=left]:-translate-x-1.5 data-[side=right]:translate-x-1.5 data-[side=top]:-translate-y-1.5",
  className,
@@ -103,18 +103,18 @@ const SelectItem = React.forwardRef<
  <SelectPrimitive.Item
  ref={ref}
  className={cn(
-  "relative flex w-full cursor-pointer select-none items-center rounded-lg py-2.5 pl-9 pr-3.5 text-sm font-bold outline-none transition-all duration-200 data-[disabled]:pointer-events-none data-[disabled]:opacity-50",
-  "before:absolute before:left-1 before:top-2 before:bottom-2 before:w-[3px] before:origin-center before:scale-y-50 before:rounded-r-full before:bg-primary before:opacity-0 before:transition-all before:duration-200",
-  "hover:bg-primary/[0.06] focus:bg-primary/[0.08] focus:text-foreground data-[highlighted]:bg-primary/[0.08] data-[highlighted]:before:scale-y-100 data-[highlighted]:before:opacity-100",
-  "data-[state=checked]:text-primary data-[state=checked]:bg-primary/[0.10] data-[state=checked]:font-black data-[state=checked]:before:scale-y-100 data-[state=checked]:before:opacity-100 data-[state=checked]:shadow-[inset_0_0_0_1px_hsl(var(--primary)/0.15)]",
+   "group/item relative flex w-full cursor-pointer select-none items-center rounded-xl py-2.5 pl-10 pr-3.5 text-sm font-bold outline-none transition-[background-color,color,padding-left,transform] duration-200 ease-out data-[disabled]:pointer-events-none data-[disabled]:opacity-50",
+   "before:absolute before:left-1.5 before:top-2 before:bottom-2 before:w-[3px] before:origin-center before:scale-y-50 before:rounded-r-full before:bg-primary before:opacity-0 before:transition-all before:duration-200",
+   "hover:bg-gradient-to-r hover:from-primary/[0.10] hover:to-primary/[0.02] hover:pl-[2.75rem] focus:bg-primary/[0.08] focus:text-foreground data-[highlighted]:bg-gradient-to-r data-[highlighted]:from-primary/[0.10] data-[highlighted]:to-primary/[0.02] data-[highlighted]:pl-[2.75rem] data-[highlighted]:before:scale-y-100 data-[highlighted]:before:opacity-100",
+   "data-[state=checked]:text-primary data-[state=checked]:bg-gradient-to-r data-[state=checked]:from-primary/[0.14] data-[state=checked]:to-primary/[0.04] data-[state=checked]:font-black data-[state=checked]:before:scale-y-100 data-[state=checked]:before:opacity-100 data-[state=checked]:shadow-[inset_0_0_0_1px_hsl(var(--primary)/0.18)]",
  className,
  )}
  {...props}
  >
  <span className="absolute left-2.5 flex h-[18px] w-[18px] items-center justify-center">
  <SelectPrimitive.ItemIndicator>
- <div className="h-[18px] w-[18px] rounded-md bg-primary/15 flex items-center justify-center">
- <Check className="h-3 w-3 text-primary" />
+ <div className="h-[18px] w-[18px] rounded-md bg-primary/20 border border-primary/25 flex items-center justify-center shadow-[inset_0_1px_0_hsl(var(--primary)/0.25)]">
+ <Check className="h-3 w-3 text-primary" strokeWidth={3} />
  </div>
  </SelectPrimitive.ItemIndicator>
  </span>
