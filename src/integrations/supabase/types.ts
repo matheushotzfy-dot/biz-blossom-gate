@@ -3605,6 +3605,7 @@ export type Database = {
           net_amount: number
           origin: string
           payment_proof_url: string | null
+          pix_key_id: string | null
           processed_at: string | null
           processed_by: string | null
           rejection_reason: string | null
@@ -3627,6 +3628,7 @@ export type Database = {
           net_amount?: number
           origin?: string
           payment_proof_url?: string | null
+          pix_key_id?: string | null
           processed_at?: string | null
           processed_by?: string | null
           rejection_reason?: string | null
@@ -3649,6 +3651,7 @@ export type Database = {
           net_amount?: number
           origin?: string
           payment_proof_url?: string | null
+          pix_key_id?: string | null
           processed_at?: string | null
           processed_by?: string | null
           rejection_reason?: string | null
@@ -3662,6 +3665,13 @@ export type Database = {
             columns: ["bank_account_id"]
             isOneToOne: false
             referencedRelation: "bank_accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "withdrawals_pix_key_id_fkey"
+            columns: ["pix_key_id"]
+            isOneToOne: false
+            referencedRelation: "pix_keys"
             referencedColumns: ["id"]
           },
         ]
@@ -4142,6 +4152,7 @@ export type Database = {
           count_in_window: number
         }[]
       }
+      check_auto_withdrawal: { Args: { p_user_id: string }; Returns: undefined }
       check_blacklist: {
         Args: { _document?: string; _email?: string; _ip?: string }
         Returns: {
