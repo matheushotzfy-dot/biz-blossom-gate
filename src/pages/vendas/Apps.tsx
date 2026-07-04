@@ -493,24 +493,27 @@ export default function Apps() {
 
 
             {/* Footer */}
-            <div className="border-t border-border bg-card px-6 py-4 space-y-2.5">
+            <div className="relative border-t border-border/70 bg-gradient-to-t from-primary/[0.03] to-transparent px-6 py-4 space-y-2.5">
+              <span className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-primary/40 to-transparent" />
               <Button
                 onClick={handleSave}
                 disabled={saving}
-                className="w-full h-11 rounded-xl font-bold text-[13px] bg-primary text-primary-foreground hover:bg-primary/90"
+                className="group/btn relative w-full h-12 rounded-xl font-black uppercase tracking-[0.08em] text-[12.5px] bg-primary text-primary-foreground hover:bg-primary/90 shadow-[0_10px_30px_-12px_hsl(var(--primary)/0.65)] transition-[transform,box-shadow] duration-300 hover:-translate-y-0.5 active:scale-[0.98] overflow-hidden"
               >
+                <span className="pointer-events-none absolute inset-0 -translate-x-[120%] bg-[linear-gradient(115deg,transparent_0%,hsl(0_0%_100%/0.18)_44%,transparent_72%)] transition-transform duration-700 ease-out group-hover/btn:translate-x-[120%]" />
                 {saving ? (
-                  <span className="flex items-center gap-2">
+                  <span className="relative flex items-center gap-2">
                     <div className="h-3.5 w-3.5 border-2 border-primary-foreground/30 border-t-primary-foreground rounded-full animate-spin" />
                     Salvando...
                   </span>
                 ) : (
-                  <span className="flex items-center gap-2">
-                    {editId ? <Settings2 className="h-4 w-4" /> : <Zap className="h-4 w-4" />}
+                  <span className="relative flex items-center gap-2">
+                    {editId ? <Settings2 className="h-4 w-4" strokeWidth={2.5} /> : <Zap className="h-4 w-4" strokeWidth={2.5} />}
                     {editId ? "Salvar alterações" : "Ativar integração"}
                   </span>
                 )}
               </Button>
+
 
               {editId && ["zapi","utmify","activecampaign","notazz","themembers","spedy","astron","memberkit","smsfunnel","voxuy","cademi"].includes(dialogApp.id) && (
                 <Button
