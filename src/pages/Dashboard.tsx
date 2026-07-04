@@ -457,14 +457,19 @@ export default function Dashboard() {
                   key={p.label}
                   onClick={() => { setSelectedPeriod(p); setIsCustom(false); }}
                   className={cn(
-                    "seller-segment relative flex min-w-0 items-center justify-center px-2 text-[10px] font-display font-black uppercase tracking-[0.12em] tabular-nums lg:min-w-[58px] lg:px-4 lg:text-[11px] lg:tracking-[0.14em]",
+                    "seller-segment group/seg relative flex min-w-0 items-center justify-center px-2 text-[10px] font-display font-black uppercase tracking-[0.12em] tabular-nums transition-[color,background-color,transform] duration-300 ease-out active:scale-[0.96] lg:min-w-[58px] lg:px-4 lg:text-[11px] lg:tracking-[0.14em]",
                     isActive
-                      ? "text-primary bg-primary/[0.08]"
-                      : "text-muted-foreground/60 hover:text-foreground hover:bg-secondary/40"
+                      ? "text-primary bg-primary/[0.10]"
+                      : "text-muted-foreground/60 hover:text-primary hover:bg-primary/[0.06]"
                   )}
                 >
+                  {/* Active underline */}
                   {isActive && (
-                    <span className="absolute inset-x-0 bottom-0 h-[2px] bg-primary" />
+                    <span className="absolute inset-x-2 bottom-0 h-[2px] rounded-t-full bg-primary shadow-[0_0_10px_hsl(var(--primary)/0.55)]" />
+                  )}
+                  {/* Inactive hover underline (thin) */}
+                  {!isActive && (
+                    <span className="pointer-events-none absolute inset-x-3 bottom-0 h-[2px] origin-center scale-x-0 rounded-t-full bg-primary/60 opacity-0 transition-[transform,opacity] duration-300 ease-out group-hover/seg:scale-x-100 group-hover/seg:opacity-100" />
                   )}
                   {shortLabel}
                 </button>
