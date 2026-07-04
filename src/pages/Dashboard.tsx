@@ -486,7 +486,7 @@ export default function Dashboard() {
                 <span className="tabular-nums">
                   {isCustom && customRange?.from
                     ? format(customRange.from, "dd/MM") + (customRange.to ? " – " + format(customRange.to, "dd/MM") : "")
-                    : "Custom"}
+                    : "\n"}
                 </span>
               </button>
             </PopoverTrigger>
