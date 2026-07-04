@@ -314,43 +314,45 @@ export default function Apps() {
       {/* ─── Integration Dialog · Billion-Dollar SaaS ─── */}
       {dialogApp && dialogApp.id !== "webhooks" && (
         <Dialog open={!!dialogApp} onOpenChange={(v) => { if (!v) closeDialog(); }}>
-          <DialogContent className="max-w-[560px] rounded-2xl border border-border bg-card p-0 overflow-hidden max-h-[92vh] flex flex-col gap-0">
-            {/* Header */}
-            <div className="flex items-center gap-4 border-b border-border bg-card px-6 py-5">
-              <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-xl border border-border bg-secondary p-2.5">
-                <img src={dialogApp.logo} alt={dialogApp.name} className="h-full w-full object-contain" />
+          <DialogContent className="max-w-[580px] rounded-2xl border border-border bg-card p-0 overflow-hidden max-h-[92vh] flex flex-col gap-0">
+            {/* Header — premium */}
+            <div className="relative flex items-center gap-4 border-b border-border/70 bg-gradient-to-b from-primary/[0.04] to-transparent px-6 py-5">
+              <span className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-primary/50 to-transparent" />
+              <div className="premium-icon-shell relative flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl p-2.5">
+                <img src={dialogApp.logo} alt={dialogApp.name} className="relative h-full w-full object-contain" />
               </div>
               <div className="min-w-0 flex-1">
-                <div className="flex items-center gap-2">
-                  <DialogTitle className="font-display text-[15px] font-black tracking-tight text-foreground">
+                <div className="flex items-center gap-2 flex-wrap">
+                  <DialogTitle className="font-display text-[16px] font-black tracking-[-0.01em] text-foreground">
                     {editId ? `Editar ${dialogApp.name}` : `Conectar ${dialogApp.name}`}
                   </DialogTitle>
-                  <span className="inline-flex h-5 items-center rounded-md border border-border bg-secondary px-1.5 text-[9px] font-bold uppercase tracking-[0.14em] text-muted-foreground">
+                  <span className="inline-flex h-5 items-center rounded-md border border-primary/25 bg-primary/[0.08] px-1.5 text-[9px] font-black uppercase tracking-[0.16em] text-primary">
                     {dialogApp.category}
                   </span>
                 </div>
-                <p className="mt-1 text-xs text-muted-foreground">{dialogApp.desc}</p>
+                <p className="mt-1 text-[12px] font-medium text-muted-foreground">{dialogApp.desc}</p>
               </div>
             </div>
 
             {/* Body */}
             <div className="flex-1 overflow-y-auto px-6 py-5 space-y-5">
               {dialogApp.helpText && (
-                <div className="flex items-start gap-2.5 rounded-xl border border-primary/20 bg-primary/[0.04] px-3.5 py-3">
-                  <Sparkles className="mt-0.5 h-3.5 w-3.5 shrink-0 text-primary" strokeWidth={2.2} />
-                  <p className="text-[12px] leading-relaxed text-foreground/80">{dialogApp.helpText}</p>
+                <div className="group relative flex items-start gap-2.5 rounded-xl border border-primary/25 bg-primary/[0.05] px-3.5 py-3 overflow-hidden">
+                  <span className="pointer-events-none absolute inset-y-2 left-0 w-[3px] rounded-r-full bg-primary/70" />
+                  <Sparkles className="mt-0.5 h-4 w-4 shrink-0 text-primary" strokeWidth={2.2} />
+                  <p className="text-[12px] leading-relaxed text-foreground/85 font-medium">{dialogApp.helpText}</p>
                 </div>
               )}
 
               {/* Produto vinculado */}
               {dialogApp.events.length > 0 && (
                 <div className="space-y-2">
-                  <Label className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-[0.16em] text-muted-foreground">
-                    <span className="h-1.5 w-1.5 rounded-full bg-primary" />
+                  <Label className="flex items-center gap-1.5 text-[10px] font-black uppercase tracking-[0.16em] text-muted-foreground">
+                    <span className="h-1.5 w-1.5 rounded-full bg-primary shadow-[0_0_8px_hsl(var(--primary)/0.6)]" />
                     Produto vinculado
                   </Label>
                   <Select value={formProductId} onValueChange={setFormProductId}>
-                    <SelectTrigger className="h-11 rounded-xl border border-border bg-secondary">
+                    <SelectTrigger className="h-12 rounded-xl border border-border/70 bg-secondary/50 px-4 font-semibold transition-[border-color,background-color,transform] duration-300 hover:border-primary/50 hover:bg-primary/[0.04] focus:border-primary/60 data-[state=open]:border-primary/60">
                       <SelectValue placeholder="Selecione o produto para esta integração" />
                     </SelectTrigger>
                     <SelectContent>
@@ -369,14 +371,15 @@ export default function Apps() {
               {/* Credenciais */}
               {dialogApp.fields.length > 0 && (
                 <div className="space-y-2">
-                  <Label className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-[0.16em] text-muted-foreground">
-                    <Shield className="h-3 w-3 text-primary" strokeWidth={2.2} />
+                  <Label className="flex items-center gap-1.5 text-[10px] font-black uppercase tracking-[0.16em] text-muted-foreground">
+                    <Shield className="h-3 w-3 text-primary" strokeWidth={2.4} />
                     Credenciais
                   </Label>
-                  <div className="rounded-xl border border-border bg-secondary divide-y divide-border">
+                  <div className="relative rounded-xl border border-border/70 bg-secondary/50 divide-y divide-border/60 overflow-hidden">
+                    <span className="pointer-events-none absolute inset-y-3 left-0 w-[3px] rounded-r-full bg-primary/60" />
                     {dialogApp.fields.map(field => (
                       <div key={field.key} className="px-4 py-3.5 space-y-1.5">
-                        <label className="flex items-center justify-between text-[11px] font-semibold text-foreground">
+                        <label className="flex items-center justify-between text-[11px] font-black uppercase tracking-[0.08em] text-foreground">
                           <span>
                             {field.label}
                             {field.required && <span className="ml-1 text-primary">*</span>}
@@ -391,10 +394,10 @@ export default function Apps() {
                           placeholder={field.placeholder}
                           value={formFields[field.key] || ""}
                           onChange={(e) => setFormFields({ ...formFields, [field.key]: e.target.value })}
-                          className="h-10 rounded-lg border border-border bg-card font-mono text-xs"
+                          className="h-11 rounded-lg border border-border/70 bg-card font-mono text-[12px] transition-[border-color,background-color] duration-300 focus:border-primary/60"
                         />
                         {field.help && (
-                          <p className="text-[10px] leading-relaxed text-muted-foreground/70">{field.help}</p>
+                          <p className="text-[10px] leading-relaxed text-muted-foreground/70 font-medium">{field.help}</p>
                         )}
                       </div>
                     ))}
@@ -405,33 +408,33 @@ export default function Apps() {
               {/* Eventos */}
               {dialogApp.events.length > 0 && (
                 <div className="space-y-2">
-                  <Label className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-[0.16em] text-muted-foreground">
-                    <Zap className="h-3 w-3 text-primary" strokeWidth={2.2} />
+                  <Label className="flex items-center gap-1.5 text-[10px] font-black uppercase tracking-[0.16em] text-muted-foreground">
+                    <Zap className="h-3 w-3 text-primary" strokeWidth={2.4} />
                     Eventos de disparo
                   </Label>
 
-                  <div className="inline-flex h-10 w-full items-center rounded-xl border border-border bg-secondary p-1">
+                  <div className="inline-flex h-11 w-full items-center rounded-xl border border-border/70 bg-secondary/50 p-1">
                     {(["all", "custom"] as const).map(mode => (
                       <button
                         key={mode}
                         type="button"
                         onClick={() => setFormEventMode(mode)}
                         className={cn(
-                          "flex-1 h-full rounded-lg text-[11.5px] font-bold transition-colors flex items-center justify-center gap-1.5",
+                          "flex-1 h-full rounded-lg text-[11.5px] font-black uppercase tracking-[0.08em] transition-[color,background-color,box-shadow,transform] duration-300 flex items-center justify-center gap-1.5 active:scale-[0.98]",
                           formEventMode === mode
-                            ? "bg-card border border-border text-foreground"
-                            : "text-muted-foreground hover:text-foreground"
+                            ? "bg-card border border-primary/40 text-foreground shadow-[0_2px_10px_-4px_hsl(var(--primary)/0.4)]"
+                            : "text-muted-foreground hover:text-foreground hover:bg-card/50"
                         )}
                       >
-                        {formEventMode === mode && <CheckCircle2 className="h-3 w-3 text-primary" strokeWidth={2.4} />}
+                        {formEventMode === mode && <CheckCircle2 className="h-3.5 w-3.5 text-primary" strokeWidth={2.6} />}
                         {mode === "all" ? `Todos (${dialogApp.events.length})` : "Personalizado"}
                       </button>
                     ))}
                   </div>
 
                   {formEventMode === "custom" && (
-                    <div className="rounded-xl border border-border bg-secondary overflow-hidden">
-                      <div className="max-h-56 overflow-y-auto divide-y divide-border">
+                    <div className="rounded-xl border border-border/70 bg-secondary/50 overflow-hidden">
+                      <div className="max-h-56 overflow-y-auto divide-y divide-border/60">
                         {dialogApp.events.map(event => {
                           const selected = formSelectedEvents.includes(event);
                           const isReversal = event.includes("Refund") || event.includes("Chargeback");
@@ -448,33 +451,46 @@ export default function Apps() {
                             <label
                               key={event}
                               className={cn(
-                                "flex items-center gap-3 px-3.5 py-2.5 text-xs cursor-pointer transition-colors",
-                                selected ? "bg-card text-foreground" : "text-muted-foreground hover:bg-card/60 hover:text-foreground"
+                                "group/evt relative flex items-center gap-3 px-3.5 py-3 text-xs cursor-pointer transition-[background-color,padding] duration-300 hover:pl-5",
+                                selected ? "bg-primary/[0.05] text-foreground" : "text-muted-foreground hover:bg-card/60 hover:text-foreground"
                               )}
                             >
+                              <span className={cn(
+                                "pointer-events-none absolute left-0 top-2 bottom-2 w-[2px] rounded-r-full bg-primary transition-opacity duration-300",
+                                selected ? "opacity-100" : "opacity-0 group-hover/evt:opacity-40"
+                              )} />
                               <Checkbox
                                 checked={selected}
                                 onCheckedChange={() => toggleEvent(event)}
-                                className="data-[state=checked]:bg-primary data-[state=checked]:border-primary"
+                                className="h-4 w-4 rounded-[5px] border-border/80 data-[state=checked]:bg-primary data-[state=checked]:border-primary data-[state=checked]:shadow-[0_0_0_3px_hsl(var(--primary)/0.15)]"
                               />
-                              <span className="flex-1 font-semibold">{event}</span>
-                              <span className={cn("rounded-md border px-1.5 py-0.5 text-[8.5px] font-bold uppercase tracking-[0.12em]", tone)}>
+                              <span className="flex-1 font-bold">{event}</span>
+                              <span className={cn("rounded-md border px-1.5 py-0.5 text-[8.5px] font-black uppercase tracking-[0.12em]", tone)}>
                                 {isReversal ? "reversal" : isPending ? "pending" : "trigger"}
                               </span>
                             </label>
                           );
                         })}
                       </div>
-                      <div className="border-t border-border bg-card px-3.5 py-2">
-                        <span className="text-[10px] font-semibold text-muted-foreground">
-                          {formSelectedEvents.length} de {dialogApp.events.length} eventos selecionados
+                      <div className="border-t border-border/70 bg-card px-3.5 py-2 flex items-center justify-between">
+                        <span className="text-[10px] font-bold uppercase tracking-[0.12em] text-muted-foreground">
+                          {formSelectedEvents.length} de {dialogApp.events.length} selecionados
                         </span>
+                        {formSelectedEvents.length > 0 && (
+                          <span className="inline-flex h-1.5 w-16 overflow-hidden rounded-full bg-secondary">
+                            <span
+                              className="h-full bg-primary transition-[width] duration-500"
+                              style={{ width: `${(formSelectedEvents.length / dialogApp.events.length) * 100}%` }}
+                            />
+                          </span>
+                        )}
                       </div>
                     </div>
                   )}
                 </div>
               )}
             </div>
+
 
             {/* Footer */}
             <div className="border-t border-border bg-card px-6 py-4 space-y-2.5">
