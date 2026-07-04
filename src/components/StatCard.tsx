@@ -64,7 +64,7 @@ export function StatCard({
   return (
     <div
       className={cn(
-        "seller-hover-card dashboard-hero-card group relative flex h-full min-h-[120px] flex-col overflow-hidden rounded-[1.35rem] border border-primary/25 bg-card p-4 animate-in fade-in slide-in-from-bottom-2 sm:min-h-[152px] sm:rounded-3xl sm:p-5",
+        "stat-hero-card group relative flex h-full min-h-[120px] flex-col overflow-hidden rounded-[1.35rem] border border-border bg-card p-4 animate-in fade-in slide-in-from-bottom-2 sm:min-h-[152px] sm:rounded-3xl sm:p-5",
         className
       )}
       style={{
