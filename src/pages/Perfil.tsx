@@ -467,7 +467,7 @@ export default function Perfil() {
         </Panel>
 
         {/* DETALHES DA CONTA */}
-        <Panel icon={Shield} title="Detalhes da conta" subtitle="Identificação e segurança">
+        <Panel icon={Shield} title="Detalhes da conta" subtitle="Identificação e segurança" tone="info">
           <div className="px-5 pb-5">
             <InfoRow
               label="Tipo de conta"
