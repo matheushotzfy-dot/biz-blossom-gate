@@ -500,7 +500,7 @@ export default function Perfil() {
         </Panel>
 
         {/* LIMITES OPERACIONAIS */}
-        <Panel icon={Wallet} title="Limites operacionais" subtitle="Parâmetros vigentes da sua conta">
+        <Panel icon={Wallet} title="Limites operacionais" subtitle="Parâmetros vigentes da sua conta" tone="success">
           <div className="px-5 pb-5">
             {[
               {
