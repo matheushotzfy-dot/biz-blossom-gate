@@ -255,9 +255,16 @@ export default function Saques() {
                       return (
                         <tr key={w.id} className="hover:bg-muted/20 transition-colors group">
                           <td className="px-8 py-6">
-                            <p className="font-mono text-[11px] font-bold text-muted-foreground group-hover:text-primary transition-colors">
-                              #{w.id.slice(0, 8).toUpperCase()}
-                            </p>
+                            <div className="flex items-center gap-2">
+                              <p className="font-mono text-[11px] font-bold text-muted-foreground group-hover:text-primary transition-colors">
+                                #{w.id.slice(0, 8).toUpperCase()}
+                              </p>
+                              {(w as any).origin === "auto" && (
+                                <span className="inline-flex items-center px-1.5 py-0.5 rounded-md text-[8px] font-black uppercase tracking-widest bg-primary/10 text-primary border border-primary/20">
+                                  Auto
+                                </span>
+                              )}
+                            </div>
                             <p className="text-[10px] font-bold text-muted-foreground/50 mt-1 uppercase">
                               {format(new Date(w.created_at), "dd/MM/yyyy 'às' HH:mm", { locale: ptBR })}
                             </p>
