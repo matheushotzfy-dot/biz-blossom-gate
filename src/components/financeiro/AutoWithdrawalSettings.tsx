@@ -8,7 +8,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useProfile } from "@/hooks/useProfile";
 import { usePixKeys } from "@/hooks/useQueryData";
 import { toast } from "sonner";
-import { Zap, Loader2, ShieldAlert, ChevronRight, CheckCircle2, X } from "lucide-react";
+import { Zap, Loader2, ShieldAlert, ChevronRight, CheckCircle2, X, Mail, Phone, Hash, Fingerprint, Sparkles, PlusCircle } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 
