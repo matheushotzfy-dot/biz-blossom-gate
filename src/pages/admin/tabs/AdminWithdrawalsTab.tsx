@@ -387,8 +387,16 @@ export default function AdminWithdrawalsTab({ withdrawals, profiles, onWithdrawa
             <SelectItem value="new_seller">Sellers novos</SelectItem>
             <SelectItem value="high_value">Acima R$ 50k</SelectItem>
           </SelectContent>
+        <Select value={originFilter} onValueChange={setOriginFilter}>
+          <SelectTrigger className="h-10 w-[150px] rounded-xl text-xs"><SelectValue placeholder="Origem" /></SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">Toda origem</SelectItem>
+            <SelectItem value="manual">Manual</SelectItem>
+            <SelectItem value="auto">Automático</SelectItem>
+          </SelectContent>
         </Select>
       </div>
+
 
       {/* Table */}
       <div className={premiumTable.wrapper}>
