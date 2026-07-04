@@ -53,6 +53,7 @@ export default function AdminWithdrawalsTab({ withdrawals, profiles, onWithdrawa
  const [search, setSearch] = useState("");
  const [statusFilter, setStatusFilter] = useState("all");
  const [riskFilter, setRiskFilter] = useState("all");
+ const [originFilter, setOriginFilter] = useState("all");
  const [auditLogs, setAuditLogs] = useState<AuditLog[]>([]);
  const [autoConfigs, setAutoConfigs] = useState<AutoWithdrawConfig[]>([]);
  const [adjustments, setAdjustments] = useState<BalanceAdjustment[]>([]);
