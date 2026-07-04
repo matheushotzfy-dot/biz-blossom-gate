@@ -91,17 +91,21 @@ function InfoRow({ label, value, copyable, locked, valueClass }: {
 }
 
 function Panel({
-  icon: Icon, title, subtitle, action, children, className,
+  icon: Icon, title, subtitle, action, children, className, tone = "primary",
 }: {
   icon: LucideIcon; title: string; subtitle?: string; action?: React.ReactNode;
   children: React.ReactNode; className?: string;
+  tone?: "primary" | "success" | "warning" | "info" | "destructive";
 }) {
   return (
-    <div className={cn("rounded-xl border border-border/50 bg-card overflow-hidden", className)}>
+    <div className={cn("group premium-hover-card rounded-xl border border-border/50 bg-card overflow-hidden", className)}>
       <div className="flex items-center justify-between px-5 pt-5 pb-4 border-b border-border/40">
-        <div className="flex items-center gap-2.5 min-w-0">
-          <div className="h-7 w-7 rounded-md bg-secondary flex items-center justify-center shrink-0">
-            <Icon className="h-3.5 w-3.5 text-muted-foreground" strokeWidth={2.25} />
+        <div className="flex items-center gap-3 min-w-0">
+          <div className={cn(
+            "premium-icon-shell relative h-10 w-10 rounded-xl flex items-center justify-center shrink-0",
+            tone !== "primary" && tone
+          )}>
+            <Icon className="relative h-[15px] w-[15px]" strokeWidth={2.25} />
           </div>
           <div className="min-w-0">
             <h3 className="text-sm font-display font-black text-foreground tracking-[-0.01em]">{title}</h3>
@@ -114,6 +118,7 @@ function Panel({
     </div>
   );
 }
+
 
 function FieldLabel({ children, locked }: { children: React.ReactNode; locked?: boolean }) {
   return (
