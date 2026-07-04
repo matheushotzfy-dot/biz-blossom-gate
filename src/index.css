@@ -1196,6 +1196,133 @@ input[type="number"]::-webkit-inner-spin-button {
   transform: translate3d(0, 0, 0) scale(0.985);
 }
 
+/* ─────────── Premium hover card (Perfil, KYC, and any surface that opts in) ─────────── */
+.premium-hover-card {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  transition: transform 500ms cubic-bezier(0.22, 1, 0.36, 1),
+              border-color 500ms cubic-bezier(0.22, 1, 0.36, 1),
+              background-color 500ms cubic-bezier(0.22, 1, 0.36, 1),
+              box-shadow 500ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+.premium-hover-card::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 16px;
+  bottom: 16px;
+  width: 3px;
+  border-radius: 0 3px 3px 0;
+  background: hsl(var(--primary));
+  opacity: 0;
+  transform: scaleY(0.5);
+  transform-origin: center;
+  transition: opacity 500ms cubic-bezier(0.22, 1, 0.36, 1),
+              transform 500ms cubic-bezier(0.22, 1, 0.36, 1);
+  pointer-events: none;
+  z-index: 0;
+}
+.premium-hover-card::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(115deg, transparent 0%, hsl(var(--primary) / 0.10) 44%, transparent 72%);
+  opacity: 0;
+  transform: translateX(-120%);
+  transition: transform 700ms ease-out, opacity 700ms ease-out;
+  pointer-events: none;
+  z-index: 0;
+}
+.premium-hover-card:hover {
+  transform: translateY(-3px);
+  border-color: hsl(var(--primary) / 0.55) !important;
+  background-color: hsl(var(--primary) / 0.035) !important;
+  box-shadow: 0 22px 50px -22px hsl(var(--primary) / 0.35);
+}
+.premium-hover-card:hover::before {
+  opacity: 1;
+  transform: scaleY(1);
+}
+.premium-hover-card:hover::after {
+  opacity: 1;
+  transform: translateX(120%);
+}
+.premium-hover-card:active {
+  transform: translateY(-1px) scale(0.995);
+  transition-duration: 140ms;
+}
+.premium-hover-card > * {
+  position: relative;
+  z-index: 1;
+}
+
+/* Premium icon shells — dual-tone gradient + inset ring + glass highlight */
+.premium-icon-shell {
+  position: relative;
+  border: 1px solid hsl(var(--primary) / 0.25);
+  background: linear-gradient(135deg, hsl(var(--primary) / 0.22) 0%, hsl(var(--primary) / 0.05) 100%);
+  color: hsl(var(--primary));
+  box-shadow:
+    inset 0 1px 0 hsl(var(--primary) / 0.30),
+    inset 0 0 0 1px hsl(var(--primary) / 0.10),
+    0 6px 20px -8px hsl(var(--primary) / 0.55);
+  transition: transform 500ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+.premium-icon-shell::before {
+  content: "";
+  position: absolute;
+  left: 6px;
+  right: 6px;
+  top: 4px;
+  height: 45%;
+  border-radius: inherit;
+  background: linear-gradient(to bottom, hsl(0 0% 100% / 0.12), transparent);
+  opacity: 0.8;
+  pointer-events: none;
+}
+.group:hover .premium-icon-shell,
+.premium-hover-card:hover .premium-icon-shell {
+  transform: scale(1.08) rotate(-6deg);
+}
+.premium-icon-shell.success {
+  border-color: hsl(var(--success) / 0.25);
+  background: linear-gradient(135deg, hsl(var(--success) / 0.22) 0%, hsl(var(--success) / 0.05) 100%);
+  color: hsl(var(--success));
+  box-shadow:
+    inset 0 1px 0 hsl(var(--success) / 0.30),
+    inset 0 0 0 1px hsl(var(--success) / 0.10),
+    0 6px 20px -8px hsl(var(--success) / 0.55);
+}
+.premium-icon-shell.warning {
+  border-color: hsl(var(--warning) / 0.28);
+  background: linear-gradient(135deg, hsl(var(--warning) / 0.24) 0%, hsl(var(--warning) / 0.05) 100%);
+  color: hsl(var(--warning));
+  box-shadow:
+    inset 0 1px 0 hsl(var(--warning) / 0.32),
+    inset 0 0 0 1px hsl(var(--warning) / 0.12),
+    0 6px 20px -8px hsl(var(--warning) / 0.55);
+}
+.premium-icon-shell.info {
+  border-color: hsl(var(--info) / 0.25);
+  background: linear-gradient(135deg, hsl(var(--info) / 0.22) 0%, hsl(var(--info) / 0.05) 100%);
+  color: hsl(var(--info));
+  box-shadow:
+    inset 0 1px 0 hsl(var(--info) / 0.30),
+    inset 0 0 0 1px hsl(var(--info) / 0.10),
+    0 6px 20px -8px hsl(var(--info) / 0.55);
+}
+.premium-icon-shell.destructive {
+  border-color: hsl(var(--destructive) / 0.25);
+  background: linear-gradient(135deg, hsl(var(--destructive) / 0.22) 0%, hsl(var(--destructive) / 0.05) 100%);
+  color: hsl(var(--destructive));
+  box-shadow:
+    inset 0 1px 0 hsl(var(--destructive) / 0.30),
+    inset 0 0 0 1px hsl(var(--destructive) / 0.10),
+    0 6px 20px -8px hsl(var(--destructive) / 0.55);
+}
+
+
 /* Unified hover effect for all dashboard cards — accent bar + sheen sweep */
 .dashboard-page .platform-card,
 .dashboard-page .dashboard-panel,

@@ -91,17 +91,21 @@ function InfoRow({ label, value, copyable, locked, valueClass }: {
 }
 
 function Panel({
-  icon: Icon, title, subtitle, action, children, className,
+  icon: Icon, title, subtitle, action, children, className, tone = "primary",
 }: {
   icon: LucideIcon; title: string; subtitle?: string; action?: React.ReactNode;
   children: React.ReactNode; className?: string;
+  tone?: "primary" | "success" | "warning" | "info" | "destructive";
 }) {
   return (
-    <div className={cn("rounded-xl border border-border/50 bg-card overflow-hidden", className)}>
+    <div className={cn("group premium-hover-card rounded-xl border border-border/50 bg-card overflow-hidden", className)}>
       <div className="flex items-center justify-between px-5 pt-5 pb-4 border-b border-border/40">
-        <div className="flex items-center gap-2.5 min-w-0">
-          <div className="h-7 w-7 rounded-md bg-secondary flex items-center justify-center shrink-0">
-            <Icon className="h-3.5 w-3.5 text-muted-foreground" strokeWidth={2.25} />
+        <div className="flex items-center gap-3 min-w-0">
+          <div className={cn(
+            "premium-icon-shell relative h-10 w-10 rounded-xl flex items-center justify-center shrink-0",
+            tone !== "primary" && tone
+          )}>
+            <Icon className="relative h-[15px] w-[15px]" strokeWidth={2.25} />
           </div>
           <div className="min-w-0">
             <h3 className="text-sm font-display font-black text-foreground tracking-[-0.01em]">{title}</h3>
@@ -114,6 +118,7 @@ function Panel({
     </div>
   );
 }
+
 
 function FieldLabel({ children, locked }: { children: React.ReactNode; locked?: boolean }) {
   return (
@@ -313,24 +318,24 @@ export default function Perfil() {
 
       {/* Quick info strip */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-        <div className="rounded-xl border border-border/50 bg-card p-4">
+        <div className="group premium-hover-card rounded-xl border border-border/50 bg-card p-4">
           <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.14em]">Membro há</p>
           <p className="text-lg font-display font-black text-foreground tabular-nums mt-1">{memberDays}d</p>
           <p className="text-[10px] text-muted-foreground/70 mt-0.5">
             {profile?.created_at ? new Date(profile.created_at).toLocaleDateString("pt-BR") : "—"}
           </p>
         </div>
-        <div className="rounded-xl border border-border/50 bg-card p-4">
+        <div className="group premium-hover-card rounded-xl border border-border/50 bg-card p-4">
           <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.14em]">Vendas</p>
           <p className="text-lg font-display font-black text-foreground tabular-nums mt-1">{totalSales.toLocaleString("pt-BR")}</p>
           <p className="text-[10px] text-muted-foreground/70 mt-0.5">{last30Sales} nos últimos 30d</p>
         </div>
-        <div className="rounded-xl border border-border/50 bg-card p-4">
+        <div className="group premium-hover-card rounded-xl border border-border/50 bg-card p-4">
           <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.14em]">Tier</p>
           <p className="text-lg font-display font-black text-foreground mt-1">{tierLabel}</p>
           <p className="text-[10px] text-muted-foreground/70 mt-0.5">{milestone.pct.toFixed(0)}% até {milestone.next.label}</p>
         </div>
-        <div className="rounded-xl border border-border/50 bg-card p-4">
+        <div className="group premium-hover-card rounded-xl border border-border/50 bg-card p-4">
           <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.14em]">Status</p>
           <p className={cn("text-lg font-display font-black mt-1",
             accStatus.tone === "success" && "text-success",
@@ -342,7 +347,8 @@ export default function Perfil() {
       </div>
 
       {/* IDENTITY CARD */}
-      <div className="rounded-xl border border-border/50 bg-card overflow-hidden animate-fade-in stagger-2">
+      <div className="group premium-hover-card rounded-xl border border-border/50 bg-card overflow-hidden animate-fade-in stagger-2">
+
         <div className="p-5 md:p-6 flex flex-col md:flex-row md:items-center gap-5">
           {/* Avatar */}
           <div className="relative shrink-0">
@@ -461,7 +467,7 @@ export default function Perfil() {
         </Panel>
 
         {/* DETALHES DA CONTA */}
-        <Panel icon={Shield} title="Detalhes da conta" subtitle="Identificação e segurança">
+        <Panel icon={Shield} title="Detalhes da conta" subtitle="Identificação e segurança" tone="info">
           <div className="px-5 pb-5">
             <InfoRow
               label="Tipo de conta"
@@ -494,7 +500,7 @@ export default function Perfil() {
         </Panel>
 
         {/* LIMITES OPERACIONAIS */}
-        <Panel icon={Wallet} title="Limites operacionais" subtitle="Parâmetros vigentes da sua conta">
+        <Panel icon={Wallet} title="Limites operacionais" subtitle="Parâmetros vigentes da sua conta" tone="success">
           <div className="px-5 pb-5">
             {[
               {
@@ -610,8 +616,10 @@ export default function Perfil() {
         )}
       <Panel
         icon={MapPin}
+        tone={isAddressLocked ? "success" : "warning"}
         title="Endereço do vendedor"
         subtitle={isAddressLocked ? "Bloqueado — contate seu gerente para alterações" : "Obrigatório para realizar saques"}
+
         action={isAddressLocked ? (
           <span className="inline-flex items-center gap-1.5 px-2 py-1 rounded-md text-[10px] font-bold bg-success/10 border border-success/20 text-success uppercase tracking-[0.1em]">
             <Lock className="h-3 w-3" /> Bloqueado
