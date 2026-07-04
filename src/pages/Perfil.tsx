@@ -616,8 +616,10 @@ export default function Perfil() {
         )}
       <Panel
         icon={MapPin}
+        tone={isAddressLocked ? "success" : "warning"}
         title="Endereço do vendedor"
         subtitle={isAddressLocked ? "Bloqueado — contate seu gerente para alterações" : "Obrigatório para realizar saques"}
+
         action={isAddressLocked ? (
           <span className="inline-flex items-center gap-1.5 px-2 py-1 rounded-md text-[10px] font-bold bg-success/10 border border-success/20 text-success uppercase tracking-[0.1em]">
             <Lock className="h-3 w-3" /> Bloqueado
