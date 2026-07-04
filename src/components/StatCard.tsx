@@ -85,15 +85,20 @@ export function StatCard({
   return (
     <div
       className={cn(
-        "seller-hover-card dashboard-stat-card platform-card group relative flex h-full min-h-[120px] flex-col overflow-hidden rounded-[14px] border border-border bg-card p-4 animate-in fade-in slide-in-from-bottom-2 transition-[transform,border-color,background-color] duration-300 ease-out hover:-translate-y-[2px] hover:border-border/90 hover:bg-card/80 active:scale-[0.99] sm:min-h-[152px] sm:p-5",
+        "seller-hover-card dashboard-stat-card platform-card group relative flex h-full min-h-[120px] flex-col overflow-hidden rounded-[14px] border border-border bg-card p-4 animate-in fade-in slide-in-from-bottom-2 transition-[transform,border-color,background-color] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] hover:-translate-y-1 hover:border-primary/70 hover:bg-primary/[0.045] active:translate-y-0 active:scale-[0.99] sm:min-h-[152px] sm:p-5",
         className
       )}
       style={{
         animationDelay: `${delay}ms`,
       }}
     >
-      {/* Subtle top hairline on hover — clean, tech */}
-      <span className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-foreground/20 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
+      {/* Left primary accent bar on hover — matches integration cards */}
+      <span className="pointer-events-none absolute left-0 top-3 bottom-3 z-0 w-[3px] origin-center scale-y-50 rounded-r-full bg-primary opacity-0 transition-[opacity,transform] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:scale-y-100 group-hover:opacity-100" />
+      {/* Sheen sweep */}
+      <span className="pointer-events-none absolute inset-0 z-0 -translate-x-[120%] bg-[linear-gradient(115deg,transparent_0%,hsl(var(--primary)/0.10)_44%,transparent_72%)] opacity-0 transition-[transform,opacity] duration-700 ease-out group-hover:translate-x-[120%] group-hover:opacity-100" />
+      {/* Faint primary wash */}
+      <span className="pointer-events-none absolute inset-0 z-0 bg-primary/[0.025] opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
+
 
 
       {/* Header: title + icon */}
