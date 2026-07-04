@@ -64,7 +64,7 @@ export function StatCard({
   return (
     <div
       className={cn(
-        "dashboard-stat-card premium-hover-card platform-card group relative flex h-full min-h-[120px] flex-col rounded-[14px] border border-border bg-card p-4 animate-in fade-in slide-in-from-bottom-2 sm:min-h-[152px] sm:p-5",
+        "seller-hover-card dashboard-hero-card group relative flex h-full min-h-[120px] flex-col overflow-hidden rounded-[1.35rem] border border-primary/25 bg-card p-4 animate-in fade-in slide-in-from-bottom-2 sm:min-h-[152px] sm:rounded-3xl sm:p-5",
         className
       )}
       style={{
@@ -73,13 +73,13 @@ export function StatCard({
     >
       {/* Header: title + icon */}
       <div className="relative z-[2] flex items-center justify-between gap-3">
-        <p className="truncate text-[10px] font-bold uppercase leading-none tracking-[0.18em] text-muted-foreground/80 transition-colors duration-300 group-hover:text-primary/80 sm:text-[11px]">
+        <p className="truncate text-[10px] font-bold uppercase leading-none tracking-[0.18em] text-muted-foreground/80 transition-colors duration-300 sm:text-[11px]">
           {title}
         </p>
         {Icon && (
           <div className={cn(
-            "premium-icon-shell flex h-10 w-10 shrink-0 items-center justify-center rounded-[11px] sm:h-11 sm:w-11",
-            c.iconVariant,
+            "flex h-10 w-10 shrink-0 items-center justify-center rounded-[11px] border border-border/60 bg-background/40 transition-colors duration-300 sm:h-11 sm:w-11",
+            c.text,
           )}>
             <Icon className="relative h-[16px] w-[16px] sm:h-[17px] sm:w-[17px]" strokeWidth={2.5} />
           </div>
