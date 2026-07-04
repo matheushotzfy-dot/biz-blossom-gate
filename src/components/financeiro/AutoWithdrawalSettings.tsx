@@ -79,7 +79,7 @@ export default function AutoWithdrawalSettings() {
       user_id: user.id,
       admin_user_id: user.id, // legacy NOT NULL column — self-reference for seller-owned config
       enabled: nextEnabled,
-      target_amount: nextEnabled ? amountNum : (config?.target_amount ?? amountNum || MIN),
+      target_amount: nextEnabled ? amountNum : (config?.target_amount ?? (amountNum || MIN)),
       pix_key_id: pixKeyId || null,
       max_amount: nextEnabled ? amountNum : (config?.target_amount ?? MIN), // legacy NOT NULL
     };
