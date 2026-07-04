@@ -103,18 +103,18 @@ const SelectItem = React.forwardRef<
  <SelectPrimitive.Item
  ref={ref}
  className={cn(
-  "relative flex w-full cursor-pointer select-none items-center rounded-lg py-2.5 pl-9 pr-3.5 text-sm font-bold outline-none transition-all duration-200 data-[disabled]:pointer-events-none data-[disabled]:opacity-50",
-  "before:absolute before:left-1 before:top-2 before:bottom-2 before:w-[3px] before:origin-center before:scale-y-50 before:rounded-r-full before:bg-primary before:opacity-0 before:transition-all before:duration-200",
-  "hover:bg-primary/[0.06] focus:bg-primary/[0.08] focus:text-foreground data-[highlighted]:bg-primary/[0.08] data-[highlighted]:before:scale-y-100 data-[highlighted]:before:opacity-100",
-  "data-[state=checked]:text-primary data-[state=checked]:bg-primary/[0.10] data-[state=checked]:font-black data-[state=checked]:before:scale-y-100 data-[state=checked]:before:opacity-100 data-[state=checked]:shadow-[inset_0_0_0_1px_hsl(var(--primary)/0.15)]",
+   "group/item relative flex w-full cursor-pointer select-none items-center rounded-xl py-2.5 pl-10 pr-3.5 text-sm font-bold outline-none transition-[background-color,color,padding-left,transform] duration-200 ease-out data-[disabled]:pointer-events-none data-[disabled]:opacity-50",
+   "before:absolute before:left-1.5 before:top-2 before:bottom-2 before:w-[3px] before:origin-center before:scale-y-50 before:rounded-r-full before:bg-primary before:opacity-0 before:transition-all before:duration-200",
+   "hover:bg-gradient-to-r hover:from-primary/[0.10] hover:to-primary/[0.02] hover:pl-[2.75rem] focus:bg-primary/[0.08] focus:text-foreground data-[highlighted]:bg-gradient-to-r data-[highlighted]:from-primary/[0.10] data-[highlighted]:to-primary/[0.02] data-[highlighted]:pl-[2.75rem] data-[highlighted]:before:scale-y-100 data-[highlighted]:before:opacity-100",
+   "data-[state=checked]:text-primary data-[state=checked]:bg-gradient-to-r data-[state=checked]:from-primary/[0.14] data-[state=checked]:to-primary/[0.04] data-[state=checked]:font-black data-[state=checked]:before:scale-y-100 data-[state=checked]:before:opacity-100 data-[state=checked]:shadow-[inset_0_0_0_1px_hsl(var(--primary)/0.18)]",
  className,
  )}
  {...props}
  >
  <span className="absolute left-2.5 flex h-[18px] w-[18px] items-center justify-center">
  <SelectPrimitive.ItemIndicator>
- <div className="h-[18px] w-[18px] rounded-md bg-primary/15 flex items-center justify-center">
- <Check className="h-3 w-3 text-primary" />
+ <div className="h-[18px] w-[18px] rounded-md bg-primary/20 border border-primary/25 flex items-center justify-center shadow-[inset_0_1px_0_hsl(var(--primary)/0.25)]">
+ <Check className="h-3 w-3 text-primary" strokeWidth={3} />
  </div>
  </SelectPrimitive.ItemIndicator>
  </span>
