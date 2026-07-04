@@ -194,11 +194,11 @@ export default function Identidade() {
 
 
       {/* Progress bar + steps */}
-      <div className="bg-card rounded-[24px] border border-border/60 shadow-sm overflow-hidden">
+      <div className="group premium-hover-card bg-card rounded-[24px] border border-border/60 overflow-hidden">
         <div className="p-6 border-b border-border/40 flex items-center justify-between gap-3">
           <div className="flex items-center gap-3">
-            <div className="h-10 w-10 bg-primary/10 border border-primary/10 rounded-xl flex items-center justify-center text-primary">
-              <CheckCircle2 size={20} strokeWidth={2.5} />
+            <div className="premium-icon-shell h-11 w-11 rounded-2xl flex items-center justify-center">
+              <CheckCircle2 size={18} strokeWidth={2.5} className="relative" />
             </div>
             <div>
               <h2 className="font-black text-foreground tracking-tight leading-none uppercase">Progresso</h2>
@@ -207,6 +207,7 @@ export default function Identidade() {
           </div>
           <span className="text-3xl font-black text-foreground tabular-nums tracking-tighter">{pct}%</span>
         </div>
+
         <div className="p-6">
           <div className="h-2 rounded-full bg-muted/40 border border-border/40 overflow-hidden">
             <div className="h-full rounded-full bg-primary transition-[width] duration-700"
