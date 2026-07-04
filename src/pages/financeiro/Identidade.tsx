@@ -232,16 +232,17 @@ export default function Identidade() {
 
       {/* Dados Pessoais + PIX/Bancos */}
       <div className="grid grid-cols-1 lg:grid-cols-[1.2fr_1fr] gap-6">
-        <div className="bg-card rounded-[24px] border border-border/60 shadow-sm overflow-hidden">
+        <div className="group premium-hover-card bg-card rounded-[24px] border border-border/60 overflow-hidden">
           <div className="p-6 border-b border-border/40 flex items-center gap-3">
-            <div className="h-10 w-10 bg-primary/10 border border-primary/10 rounded-xl flex items-center justify-center text-primary">
-              <UserCircle size={20} strokeWidth={2.5} />
+            <div className="premium-icon-shell info h-11 w-11 rounded-2xl flex items-center justify-center">
+              <UserCircle size={18} strokeWidth={2.5} className="relative" />
             </div>
             <div>
               <h2 className="font-black text-foreground tracking-tight leading-none uppercase">Dados Pessoais</h2>
               <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mt-1">Imutáveis após cadastro</p>
             </div>
           </div>
+
           <div className="p-6 space-y-4">
             <div className="flex items-center gap-2 p-3 rounded-xl bg-muted/20 border border-border/40">
               <Lock className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
