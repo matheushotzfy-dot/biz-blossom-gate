@@ -437,25 +437,24 @@ function DocSlot({ type, label, desc, icon: Icon, preview, uploading, onUpload }
     <div
       onClick={() => canUpload && ref.current?.click()}
       className={cn(
-        "relative flex flex-col items-center gap-3 p-6 rounded-2xl border transition-all group",
+        "group premium-hover-card relative flex flex-col items-center gap-3 p-6 rounded-2xl border",
         locked
-          ? "bg-emerald-500/5 border-emerald-500/20 cursor-default"
-          : "bg-muted/20 border-border/60 cursor-pointer hover:border-primary/40 hover:bg-muted/30"
+          ? "bg-success/5 border-success/25 cursor-default"
+          : "bg-muted/20 border-border/60 cursor-pointer"
       )}
     >
       <input ref={ref} type="file" accept="image/*" className="hidden"
         onChange={(e) => e.target.files?.[0] && onUpload(e.target.files[0])} />
 
       <div className={cn(
-        "h-14 w-14 rounded-2xl border flex items-center justify-center",
-        locked
-          ? "bg-emerald-500/10 border-emerald-500/20 text-emerald-500"
-          : "bg-card border-border/60 text-muted-foreground/60 group-hover:text-primary group-hover:border-primary/40"
+        "premium-icon-shell h-14 w-14 rounded-2xl flex items-center justify-center",
+        locked && "success"
       )}>
-        {uploading ? <Loader2 className="h-5 w-5 animate-spin" />
-                   : locked ? <CheckCircle2 className="h-6 w-6" strokeWidth={2.5} />
-                            : <Icon className="h-5 w-5" />}
+        {uploading ? <Loader2 className="h-5 w-5 animate-spin relative" />
+                   : locked ? <CheckCircle2 className="h-6 w-6 relative" strokeWidth={2.5} />
+                            : <Icon className="h-5 w-5 relative" />}
       </div>
+
 
       <div className="text-center">
         <p className={cn("text-[12px] font-black tracking-tight",
