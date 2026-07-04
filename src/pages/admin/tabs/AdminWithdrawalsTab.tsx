@@ -421,7 +421,14 @@ export default function AdminWithdrawalsTab({ withdrawals, profiles, onWithdrawa
                   <td className={premiumTable.td}>
                     {isPending && <Checkbox checked={selectedIds.has(w.id)} onCheckedChange={() => toggleSelect(w.id)} />}
                   </td>
-                  <td className={`${premiumTable.td} font-mono text-[10px] text-muted-foreground`}>{w.id.slice(0, 8)}</td>
+                  <td className={`${premiumTable.td} font-mono text-[10px] text-muted-foreground`}>
+                    <div className="flex items-center gap-1.5">
+                      <span>{w.id.slice(0, 8)}</span>
+                      {(w as any).origin === "auto" && (
+                        <span className="rounded border border-primary/20 bg-primary/10 px-1 py-0.5 text-[8px] font-black uppercase text-primary">AUTO</span>
+                      )}
+                    </div>
+                  </td>
                   <td className={premiumTable.td}>
                     <p className="text-xs font-bold text-foreground">{getSellerName(w.user_id)}</p>
                     <p className="text-[10px] text-muted-foreground">{getSellerEmail(w.user_id)}</p>
