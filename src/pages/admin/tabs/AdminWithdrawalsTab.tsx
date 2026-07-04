@@ -113,6 +113,7 @@ export default function AdminWithdrawalsTab({ withdrawals, profiles, onWithdrawa
  const filtered = useMemo(() => {
  return withdrawals.filter(w => {
  if (statusFilter !== "all" && w.status !== statusFilter) return false;
+ if (originFilter !== "all" && ((w as any).origin || "manual") !== originFilter) return false;
  if (riskFilter === "new_seller" && !isNewSeller(getProfile(w.user_id))) return false;
  if (riskFilter === "high_value" && !isHighValue(Number(w.amount))) return false;
  if (riskFilter === "flagged" && !isNewSeller(getProfile(w.user_id)) && !isHighValue(Number(w.amount))) return false;
@@ -120,7 +121,7 @@ export default function AdminWithdrawalsTab({ withdrawals, profiles, onWithdrawa
  const s = search.toLowerCase();
  return getSellerName(w.user_id).toLowerCase().includes(s) || w.id.includes(s);
  });
- }, [withdrawals, statusFilter, riskFilter, search, profiles]);
+ }, [withdrawals, statusFilter, riskFilter, originFilter, search, profiles]);
 
  /* ── Batch Approval ── */
  const handleBatchApprove = async () => {
