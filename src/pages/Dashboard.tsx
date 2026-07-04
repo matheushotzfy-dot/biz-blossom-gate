@@ -481,13 +481,16 @@ export default function Dashboard() {
           <Popover open={datePickerOpen} onOpenChange={setDatePickerOpen}>
             <PopoverTrigger asChild>
               <button className={cn(
-                "seller-segment relative flex min-w-[92px] items-center justify-center gap-1.5 border-l border-border px-2 text-[10px] font-display font-black uppercase tracking-[0.12em] lg:min-w-[112px] lg:px-4 lg:text-[11px] lg:tracking-[0.14em]",
+                "seller-segment group/seg relative flex min-w-[92px] items-center justify-center gap-1.5 border-l border-border px-2 text-[10px] font-display font-black uppercase tracking-[0.12em] transition-[color,background-color,transform] duration-300 ease-out active:scale-[0.96] lg:min-w-[112px] lg:px-4 lg:text-[11px] lg:tracking-[0.14em]",
                 isCustom
-                  ? "text-primary bg-primary/[0.08]"
-                  : "text-muted-foreground/60 hover:text-foreground hover:bg-secondary/40"
+                  ? "text-primary bg-primary/[0.10]"
+                  : "text-muted-foreground/60 hover:text-primary hover:bg-primary/[0.06]"
               )}>
-                {isCustom && <span className="absolute inset-x-0 bottom-0 h-[2px] bg-primary" />}
-                <CalendarDays className="h-3.5 w-3.5" strokeWidth={2.25} />
+                {isCustom && <span className="absolute inset-x-2 bottom-0 h-[2px] rounded-t-full bg-primary shadow-[0_0_10px_hsl(var(--primary)/0.55)]" />}
+                {!isCustom && (
+                  <span className="pointer-events-none absolute inset-x-3 bottom-0 h-[2px] origin-center scale-x-0 rounded-t-full bg-primary/60 opacity-0 transition-[transform,opacity] duration-300 ease-out group-hover/seg:scale-x-100 group-hover/seg:opacity-100" />
+                )}
+                <CalendarDays className="h-3.5 w-3.5 transition-transform duration-300 group-hover/seg:scale-110" strokeWidth={2.25} />
                 <span className="tabular-nums">
                   {isCustom && customRange?.from
                     ? format(customRange.from, "dd/MM") + (customRange.to ? " – " + format(customRange.to, "dd/MM") : "")
