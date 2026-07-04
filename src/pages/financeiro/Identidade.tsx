@@ -280,11 +280,11 @@ export default function Identidade() {
 
         <div className="space-y-6">
           {/* PIX */}
-          <div className="bg-card rounded-[24px] border border-border/60 shadow-sm overflow-hidden">
+          <div className="group premium-hover-card bg-card rounded-[24px] border border-border/60 overflow-hidden">
             <div className="p-6 border-b border-border/40 flex items-center justify-between gap-3">
               <div className="flex items-center gap-3">
-                <div className="h-10 w-10 bg-primary/10 border border-primary/10 rounded-xl flex items-center justify-center text-primary">
-                  <Wallet size={20} strokeWidth={2.5} />
+                <div className="premium-icon-shell success h-11 w-11 rounded-2xl flex items-center justify-center">
+                  <Wallet size={18} strokeWidth={2.5} className="relative" />
                 </div>
                 <div>
                   <h2 className="font-black text-foreground tracking-tight leading-none uppercase">Chaves PIX</h2>
@@ -295,6 +295,7 @@ export default function Identidade() {
                 {pixKeys.length}/3
               </span>
             </div>
+
             <div className="p-4">
               {pixKeys.length === 0 ? (
                 <div className="text-center py-6 opacity-40">
