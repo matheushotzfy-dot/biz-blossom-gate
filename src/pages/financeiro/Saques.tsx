@@ -288,7 +288,7 @@ export default function Saques() {
         </div>
 
         {/* Account Settings Column */}
-        <div className="space-y-4">
+        <div className="flex flex-col gap-4 h-full">
           <div className="bg-card rounded-[24px] border border-border/60 shadow-sm overflow-hidden">
 
 
