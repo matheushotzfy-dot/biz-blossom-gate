@@ -3610,6 +3610,7 @@ export type Database = {
           processed_by: string | null
           rejection_reason: string | null
           status: string
+          updated_at: string
           user_id: string
           withdrawal_type: string
         }
@@ -3633,6 +3634,7 @@ export type Database = {
           processed_by?: string | null
           rejection_reason?: string | null
           status?: string
+          updated_at?: string
           user_id: string
           withdrawal_type?: string
         }
@@ -3656,6 +3658,7 @@ export type Database = {
           processed_by?: string | null
           rejection_reason?: string | null
           status?: string
+          updated_at?: string
           user_id?: string
           withdrawal_type?: string
         }
