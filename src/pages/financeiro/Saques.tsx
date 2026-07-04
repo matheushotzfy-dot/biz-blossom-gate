@@ -371,6 +371,8 @@ export default function Saques() {
               </Dialog>
             </div>
           </div>
+
+          <AutoWithdrawalSettings />
         </div>
       </div>
     </div>
