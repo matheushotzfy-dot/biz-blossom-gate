@@ -115,12 +115,10 @@ export function StatCard({
         </p>
         {Icon && (
           <div className={cn(
-            "relative flex h-9 w-9 shrink-0 items-center justify-center rounded-[10px] border transition-all duration-300 ease-out group-hover:scale-[1.08] group-hover:-rotate-3 sm:h-10 sm:w-10",
+            "relative flex h-9 w-9 shrink-0 items-center justify-center rounded-[10px] border transition-transform duration-300 ease-out group-hover:scale-[1.08] group-hover:-rotate-3 sm:h-10 sm:w-10",
             c.iconBg,
-            "group-hover:" + c.iconGlow.replace("shadow-", "shadow-")
           )}>
-            {/* Inner highlight — glassy */}
-            <span className="pointer-events-none absolute inset-x-1 top-0.5 h-1/2 rounded-t-[8px] bg-gradient-to-b from-white/10 to-transparent opacity-70" />
+            <span className="pointer-events-none absolute inset-x-1 top-0.5 h-1/2 rounded-t-[8px] bg-gradient-to-b from-white/12 to-transparent opacity-80" />
             <Icon className="relative h-[15px] w-[15px] sm:h-4 sm:w-4" strokeWidth={2.5} />
           </div>
         )}
