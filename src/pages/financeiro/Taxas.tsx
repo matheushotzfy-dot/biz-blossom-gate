@@ -80,7 +80,7 @@ export default function Taxas() {
 
   const deadlines: Array<{ label: string; value: string; sub: string; tone: "success" | "info" | "warning"; icon: LucideIcon }> = [
     { label: "Pix", value: "Instantâneo", sub: "Disponível após aprovação", tone: "success", icon: Zap },
-    { label: "Cartão (D+1)", value: "24 horas", sub: "Padrão da plataforma", tone: "info", icon: CreditCard },
+    { label: "Cartão (D+7)", value: "24 horas", sub: "Padrão da plataforma", tone: "info", icon: CreditCard },
     { label: "Boleto", value: "D+1", sub: "Após a compensação", tone: "warning", icon: Barcode },
   ];
 
