@@ -321,11 +321,11 @@ export default function Identidade() {
           </div>
 
           {/* Bancos */}
-          <div className="bg-card rounded-[24px] border border-border/60 shadow-sm overflow-hidden">
+          <div className="group premium-hover-card bg-card rounded-[24px] border border-border/60 overflow-hidden">
             <div className="p-6 border-b border-border/40 flex items-center justify-between gap-3">
               <div className="flex items-center gap-3">
-                <div className="h-10 w-10 bg-primary/10 border border-primary/10 rounded-xl flex items-center justify-center text-primary">
-                  <Building2 size={20} strokeWidth={2.5} />
+                <div className="premium-icon-shell warning h-11 w-11 rounded-2xl flex items-center justify-center">
+                  <Building2 size={18} strokeWidth={2.5} className="relative" />
                 </div>
                 <div>
                   <h2 className="font-black text-foreground tracking-tight leading-none uppercase">Contas Bancárias</h2>
@@ -336,6 +336,7 @@ export default function Identidade() {
                 {bankAccounts.length}
               </span>
             </div>
+
             <div className="p-4">
               {bankAccounts.length === 0 ? (
                 <div className="text-center py-6 opacity-40">
