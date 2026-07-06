@@ -671,6 +671,7 @@ export default function Dashboard() {
               description={card.sub}
               trend={card.trend}
               changeType={card.trend === undefined ? "neutral" : card.trend > 0 ? "positive" : card.trend < 0 ? "negative" : "neutral"}
+              hideable
             />
           ))}
         </div>
