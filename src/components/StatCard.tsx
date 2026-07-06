@@ -1,4 +1,5 @@
-import { LucideIcon, TrendingUp, TrendingDown } from "lucide-react";
+import { LucideIcon, TrendingUp, TrendingDown, Eye, EyeOff } from "lucide-react";
+import { useState, useEffect } from "react";
 import { cn } from "@/lib/utils";
 
 export type StatCardColor = "primary" | "success" | "warning" | "destructive" | "info" | "neutral";
