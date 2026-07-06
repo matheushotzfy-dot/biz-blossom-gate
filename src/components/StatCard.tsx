@@ -88,31 +88,38 @@ export function StatCard({
         animationDelay: `${delay}ms`,
       }}
     >
+      {/* Middle-right absolute eye toggle */}
+      {hideable && (
+        <button
+          type="button"
+          onClick={() => setSelfHidden((v) => !v)}
+          aria-label={selfHidden ? "Mostrar valor" : "Ocultar valor"}
+          className={cn(
+            "group/eye absolute right-3 top-1/2 z-[3] -translate-y-1/2 flex h-8 w-8 items-center justify-center rounded-full border bg-background/70 backdrop-blur-sm transition-all duration-300 ease-out hover:scale-110 hover:bg-background active:scale-95 sm:right-4 sm:h-9 sm:w-9",
+            selfHidden
+              ? "border-primary/40 text-primary shadow-[0_0_0_1px_hsl(var(--primary)/0.15)]"
+              : "border-border/70 text-muted-foreground/70 hover:text-foreground hover:border-border"
+          )}
+        >
+          {selfHidden
+            ? <EyeOff className="h-[15px] w-[15px] transition-transform duration-300 group-hover/eye:scale-110" strokeWidth={2.25} />
+            : <Eye className="h-[15px] w-[15px] transition-transform duration-300 group-hover/eye:scale-110" strokeWidth={2.25} />}
+        </button>
+      )}
+
       {/* Header: title + icon */}
-      <div className="relative z-[2] flex items-center justify-between gap-3">
+      <div className={cn("relative z-[2] flex items-center justify-between gap-3", hideable && "pr-10 sm:pr-12")}>
         <p className="truncate text-[10px] font-bold uppercase leading-none tracking-[0.18em] text-muted-foreground/80 transition-colors duration-300 sm:text-[11px]">
           {title}
         </p>
-        <div className="flex items-center gap-1.5">
-          {hideable && (
-            <button
-              type="button"
-              onClick={() => setSelfHidden((v) => !v)}
-              aria-label={selfHidden ? "Mostrar valor" : "Ocultar valor"}
-              className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md border border-border/60 bg-background/40 text-muted-foreground/70 transition-colors hover:text-foreground hover:border-border"
-            >
-              {selfHidden ? <EyeOff className="h-3.5 w-3.5" strokeWidth={2.25} /> : <Eye className="h-3.5 w-3.5" strokeWidth={2.25} />}
-            </button>
-          )}
-          {Icon && (
-            <div className={cn(
-              "flex h-10 w-10 shrink-0 items-center justify-center rounded-[11px] border border-border/60 bg-background/40 transition-colors duration-300 sm:h-11 sm:w-11",
-              c.text,
-            )}>
-              <Icon className="relative h-[16px] w-[16px] sm:h-[17px] sm:w-[17px]" strokeWidth={2.5} />
-            </div>
-          )}
-        </div>
+        {Icon && (
+          <div className={cn(
+            "flex h-10 w-10 shrink-0 items-center justify-center rounded-[11px] border border-border/60 bg-background/40 transition-colors duration-300 sm:h-11 sm:w-11",
+            c.text,
+          )}>
+            <Icon className="relative h-[16px] w-[16px] sm:h-[17px] sm:w-[17px]" strokeWidth={2.5} />
+          </div>
+        )}
       </div>
 
 
