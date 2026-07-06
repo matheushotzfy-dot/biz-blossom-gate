@@ -383,7 +383,7 @@ export default function Vendas() {
             className="h-10 px-3 sm:px-4 rounded-xl border-border/60 hover:bg-muted/50 font-bold text-xs uppercase tracking-wider gap-2"
           >
             {privacyHidden ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-            <span className="hidden sm:inline">Privacidade</span>
+            <span className="hidden sm:inline"></span>
           </Button>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
