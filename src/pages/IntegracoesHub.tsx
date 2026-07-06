@@ -22,6 +22,12 @@ const COMPONENTS: Record<string, React.FC> = {
  keys: ApiKeys,
 };
 
+// Aliases para nomes usados em links antigos
+const TAB_ALIASES: Record<string, string> = {
+ documentacao: "api",
+ credenciais: "keys",
+};
+
 const PATH_TABS: Record<string, string> = {
  "/integracoes/apps": "apps",
  "/integracoes/webhooks": "webhooks",
@@ -41,7 +47,8 @@ export default function IntegracoesHub() {
  const navigate = useNavigate();
  const [searchParams, setSearchParams] = useSearchParams();
  const routeTab = PATH_TABS[location.pathname];
- const initialTab = routeTab || searchParams.get("tab");
+ const rawInitial = routeTab || searchParams.get("tab") || "";
+ const initialTab = TAB_ALIASES[rawInitial] || rawInitial;
  const [tab, setTab] = useState(initialTab && COMPONENTS[initialTab] ? initialTab : "apps");
 
  useEffect(() => {
@@ -51,7 +58,8 @@ export default function IntegracoesHub() {
    return;
   }
 
- const paramTab = searchParams.get("tab");
+ const rawParam = searchParams.get("tab") || "";
+ const paramTab = TAB_ALIASES[rawParam] || rawParam;
  if (paramTab && COMPONENTS[paramTab]) {
    setTab(paramTab);
  }

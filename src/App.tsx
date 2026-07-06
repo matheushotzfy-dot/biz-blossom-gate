@@ -169,8 +169,8 @@ const App = () => (
                 <Route path="/integracoes" element={<IntegracoesHub />} />
                 <Route path="/integracoes/apps" element={<Navigate to="/integracoes?tab=apps" replace />} />
                 <Route path="/integracoes/webhooks" element={<Navigate to="/integracoes?tab=webhooks" replace />} />
-                <Route path="/integracoes/documentacao" element={<Navigate to="/integracoes?tab=documentacao" replace />} />
-                <Route path="/integracoes/credenciais" element={<Navigate to="/integracoes?tab=credenciais" replace />} />
+                <Route path="/integracoes/documentacao" element={<Navigate to="/integracoes?tab=api" replace />} />
+                <Route path="/integracoes/credenciais" element={<Navigate to="/integracoes?tab=keys" replace />} />
                 <Route path="/vendas/afiliados" element={<Afiliados />} />
                 <Route path="/vendas/cupons" element={<Cupons />} />
                 <Route path="/vendas/coproducoes" element={<Coproducoes />} />
