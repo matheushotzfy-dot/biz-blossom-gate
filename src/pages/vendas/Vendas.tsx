@@ -426,9 +426,9 @@ export default function Vendas() {
       {/* KPI Row */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <StatCard title="Faturamento Líquido" value={privacyHidden ? CENSORED : fmt(stats.revenue)} icon={Wallet} color="success" description="Total após taxas" />
-        <StatCard title="Vendas Aprovadas" value={stats.count} icon={Check} color="primary" description="Pedidos concluídos" />
+        <StatCard title="Vendas Aprovadas" value={privacyHidden ? CENSORED : stats.count} icon={Check} color="primary" description={privacyHidden ? "•••" : "Pedidos concluídos"} />
         <StatCard title="Ticket Médio" value={privacyHidden ? CENSORED : fmt(stats.avg)} icon={BarChart3} color="info" description="Média por venda" />
-        <StatCard title="Conversão Pix" value={`${stats.pixConversion.toFixed(0)}%`} icon={Zap} color="info" description={`${stats.pixApproved} de ${stats.pixTotal} pagos`} />
+        <StatCard title="Conversão Pix" value={privacyHidden ? CENSORED : `${stats.pixConversion.toFixed(0)}%`} icon={Zap} color="info" description={privacyHidden ? "•••" : `${stats.pixApproved} de ${stats.pixTotal} pagos`} />
       </div>
 
       {/* Table Section */}
