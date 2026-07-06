@@ -617,16 +617,20 @@ export default function Dashboard() {
             <Wallet className="h-40 w-40 -rotate-12" />
           </div>
 
-          {/* Middle-right eye toggle */}
+          {/* Middle-right eye toggle — premium pill */}
           <button
             type="button"
             onClick={() => setHeroHidden((v) => !v)}
             aria-label={heroHidden ? "Mostrar valores" : "Ocultar valores"}
-            className={`group/eye absolute right-3 top-1/2 z-[4] -translate-y-1/2 flex h-9 w-9 items-center justify-center rounded-full border bg-background/70 backdrop-blur-sm transition-all duration-300 ease-out hover:scale-110 hover:bg-background active:scale-95 sm:right-5 sm:h-10 sm:w-10 ${heroHidden ? "border-primary/40 text-primary shadow-[0_0_0_1px_hsl(var(--primary)/0.15)]" : "border-border/70 text-muted-foreground/70 hover:text-foreground hover:border-border"}`}
+            className={`group/eye absolute right-4 top-1/2 z-[10] -translate-y-1/2 flex h-11 w-11 items-center justify-center rounded-2xl border transition-all duration-300 ease-out hover:scale-110 active:scale-95 sm:right-6 sm:h-12 sm:w-12 ${
+              heroHidden
+                ? "border-primary/50 bg-primary/15 text-primary shadow-[0_0_0_1px_hsl(var(--primary)/0.2),0_8px_24px_-8px_hsl(var(--primary)/0.35)]"
+                : "border-border/70 bg-card/80 text-foreground/70 backdrop-blur-md hover:border-primary/40 hover:bg-primary/10 hover:text-primary"
+            }`}
           >
             {heroHidden
-              ? <EyeOff className="h-4 w-4 transition-transform duration-300 group-hover/eye:scale-110" strokeWidth={2.25} />
-              : <Eye className="h-4 w-4 transition-transform duration-300 group-hover/eye:scale-110" strokeWidth={2.25} />}
+              ? <EyeOff className="h-[18px] w-[18px] transition-transform duration-300 group-hover/eye:scale-110" strokeWidth={2.2} />
+              : <Eye className="h-[18px] w-[18px] transition-transform duration-300 group-hover/eye:scale-110" strokeWidth={2.2} />}
           </button>
 
           <CardHeader className="px-4 pb-1 pt-4 sm:px-6 sm:pt-5 md:px-8">
