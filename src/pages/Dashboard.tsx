@@ -25,6 +25,8 @@ import {
   BookOpen,
   Webhook,
   Puzzle,
+  Eye,
+  EyeOff,
 } from "lucide-react";
 import { Area, AreaChart, ResponsiveContainer, Tooltip, XAxis, YAxis, CartesianGrid } from "recharts";
 import type { Tables } from "@/integrations/supabase/types";
