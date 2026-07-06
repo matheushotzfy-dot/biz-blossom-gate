@@ -299,7 +299,8 @@ export default function CheckoutBuilder() {
  .then(({ data }) => { if (data) setAllProducts(data); });
  supabase.from("order_bumps").select("id, bump_product_id").eq("product_id", productId)
  .then(({ data }) => { if (data) setOrderBumps(data); });
- }, [user?.id, productId, navigate, product]);
+ // eslint-disable-next-line react-hooks/exhaustive-deps
+ }, [user?.id, productId]);
 
  // Auto-save
  const autoSave = useCallback(async () => {
