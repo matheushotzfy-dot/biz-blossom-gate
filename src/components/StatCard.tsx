@@ -15,6 +15,8 @@ interface StatCardProps {
   color?: StatCardColor;
   description?: string;
   delay?: number;
+  hideable?: boolean;
+  hiddenPlaceholder?: string;
 }
 
 export function StatCard({ 
