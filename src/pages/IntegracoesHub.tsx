@@ -22,6 +22,12 @@ const COMPONENTS: Record<string, React.FC> = {
  keys: ApiKeys,
 };
 
+// Aliases para nomes usados em links antigos
+const TAB_ALIASES: Record<string, string> = {
+ documentacao: "api",
+ credenciais: "keys",
+};
+
 const PATH_TABS: Record<string, string> = {
  "/integracoes/apps": "apps",
  "/integracoes/webhooks": "webhooks",
