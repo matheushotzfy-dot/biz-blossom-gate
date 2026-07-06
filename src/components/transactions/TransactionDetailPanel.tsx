@@ -122,7 +122,7 @@ export function TransactionDetailPanel({ tx, products, onClose, onRefund }: Tran
 
  const customerName = tx.customer_name || "Cliente";
  const customerEmail = tx.customer_email || "—";
- const productName = tx.product_id ? products[tx.product_id] || tx.product_id : "—";
+ const productName = tx.product_id ? products[tx.product_id] || tx.product_id : "Transação Interna";
  const methodLabel = methodLabels[tx.payment_method || ""] || tx.payment_method || "—";
  const methodTone = methodTones[tx.payment_method || ""] || "bg-muted text-muted-foreground border-border";
  const avatarTone = getAvatarTone(customerName);

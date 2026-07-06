@@ -75,7 +75,7 @@ export default function AdminTransactionsTab({ transactions, profiles, products,
   }, [products]);
 
   const getSellerName = (userId: string) => profileNameMap.get(userId) || "—";
-  const getProductName = (productId: string | null) => (productId && productMap.get(productId)) || "—";
+  const getProductName = (productId: string | null) => (productId && productMap.get(productId)) || "Transação Interna";
 
   const methodLabel = (m: string | null) =>
     m === "pix" ? "PIX" : m === "credit_card" ? "Cartão" : m === "boleto" ? "Boleto" : (m || "—");
