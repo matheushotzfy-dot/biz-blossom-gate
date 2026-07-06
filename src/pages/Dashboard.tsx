@@ -617,6 +617,18 @@ export default function Dashboard() {
             <Wallet className="h-40 w-40 -rotate-12" />
           </div>
 
+          {/* Middle-right eye toggle */}
+          <button
+            type="button"
+            onClick={() => setHeroHidden((v) => !v)}
+            aria-label={heroHidden ? "Mostrar valores" : "Ocultar valores"}
+            className={`group/eye absolute right-3 top-1/2 z-[4] -translate-y-1/2 flex h-9 w-9 items-center justify-center rounded-full border bg-background/70 backdrop-blur-sm transition-all duration-300 ease-out hover:scale-110 hover:bg-background active:scale-95 sm:right-5 sm:h-10 sm:w-10 ${heroHidden ? "border-primary/40 text-primary shadow-[0_0_0_1px_hsl(var(--primary)/0.15)]" : "border-border/70 text-muted-foreground/70 hover:text-foreground hover:border-border"}`}
+          >
+            {heroHidden
+              ? <EyeOff className="h-4 w-4 transition-transform duration-300 group-hover/eye:scale-110" strokeWidth={2.25} />
+              : <Eye className="h-4 w-4 transition-transform duration-300 group-hover/eye:scale-110" strokeWidth={2.25} />}
+          </button>
+
           <CardHeader className="px-4 pb-1 pt-4 sm:px-6 sm:pt-5 md:px-8">
              <div className="flex w-fit items-center gap-2 rounded-full border border-primary/10 bg-primary/10 px-3 py-1 text-[9px] font-bold uppercase tracking-[0.16em] text-primary transition-all sm:text-[10px] sm:tracking-widest">
                 <BarChart3 className="h-3 w-3" />
@@ -626,9 +638,9 @@ export default function Dashboard() {
           
           <CardContent className="px-4 pb-4 pt-2 sm:px-6 sm:pb-5 md:px-8">
             <div className="flex flex-col gap-3.5 sm:gap-5">
-              <div className="flex min-w-0 items-baseline gap-2 sm:gap-3">
+              <div className="flex min-w-0 items-baseline gap-2 pr-12 sm:gap-3 sm:pr-14">
                 <p className="min-w-0 max-w-full truncate text-[28px] font-numbers font-bold leading-none tracking-tight text-foreground min-[380px]:text-[32px] sm:text-4xl md:text-5xl">
-                  {privacy.hidden ? CENSORED : fmt(revenue)}
+                  {hideHero ? CENSORED : fmt(revenue)}
                 </p>
                 <span className="shrink-0 text-xs font-bold text-muted-foreground/30 sm:text-base">BRL</span>
               </div>
@@ -639,12 +651,12 @@ export default function Dashboard() {
                     <Wallet className="h-3 w-3 text-muted-foreground/60" />
                     <p className="truncate text-[8px] font-bold uppercase tracking-[0.12em] text-muted-foreground/60 sm:text-[9px] sm:tracking-wider">Saldo Disponível</p>
                   </div>
-                  <p className="truncate text-sm font-bold leading-none tracking-tight text-success min-[380px]:text-base sm:text-lg">{privacy.hidden ? CENSORED : fmt(balance)}</p>
+                  <p className="truncate text-sm font-bold leading-none tracking-tight text-success min-[380px]:text-base sm:text-lg">{hideHero ? CENSORED : fmt(balance)}</p>
                 </div>
                 <div className="hidden sm:block h-8 w-px bg-border/40" />
                 <div className="min-w-0 space-y-1">
                   <p className="truncate text-[8px] font-bold uppercase tracking-[0.12em] text-muted-foreground/60 sm:text-[9px] sm:tracking-wider">Conversão</p>
-                  <p className="truncate text-sm font-bold leading-none tracking-tight text-primary min-[380px]:text-base sm:text-lg">{conversion.toFixed(1)}%</p>
+                  <p className="truncate text-sm font-bold leading-none tracking-tight text-primary min-[380px]:text-base sm:text-lg">{hideHero ? CENSORED : `${conversion.toFixed(1)}%`}</p>
                 </div>
               </div>
 
