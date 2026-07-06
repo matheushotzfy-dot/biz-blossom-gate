@@ -113,18 +113,19 @@ export function StatCard({
             </div>
           )}
         </div>
+      </div>
 
 
       {/* Value */}
       <div className="relative mt-3 sm:mt-4">
         <h3 className={cn("truncate text-[22px] font-display font-bold leading-none tracking-[-0.025em] tabular-nums sm:text-[28px]", c.text)}>
-          {value}
+          {displayValue}
         </h3>
       </div>
 
       {/* Footer: trend + description */}
       <div className="relative mt-auto flex items-center gap-2 pt-3 sm:pt-4">
-        {(change || trend !== undefined) && (
+        {(change || trend !== undefined) && !(hideable && selfHidden) && (
           <span className={cn(
             "inline-flex items-center gap-1 rounded-md px-1.5 py-0.5 text-[10px] font-bold tabular-nums border",
             changeType === "positive" ? "bg-success/10 text-success border-success/25" :
@@ -135,9 +136,9 @@ export function StatCard({
             {change || (trend !== undefined ? `${trend > 0 ? "+" : ""}${trend}%` : "")}
           </span>
         )}
-        {description && (
+        {displayDescription && (
           <p className="min-w-0 truncate text-[11px] font-medium leading-tight text-muted-foreground/75">
-            {description}
+            {displayDescription}
           </p>
         )}
       </div>
