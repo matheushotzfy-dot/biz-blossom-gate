@@ -25,8 +25,6 @@ import {
   BookOpen,
   Webhook,
   Puzzle,
-  Eye,
-  EyeOff,
 } from "lucide-react";
 import { Area, AreaChart, ResponsiveContainer, Tooltip, XAxis, YAxis, CartesianGrid } from "recharts";
 import type { Tables } from "@/integrations/supabase/types";
@@ -138,13 +136,6 @@ export default function Dashboard() {
   const [isCustom, setIsCustom] = useState(false);
   const [datePickerOpen, setDatePickerOpen] = useState(false);
   const privacy = usePrivacyMode();
-  const [heroHidden, setHeroHidden] = useState<boolean>(() => {
-    try { return localStorage.getItem("statcard_hidden::hero_faturamento_dia") === "true"; } catch { return false; }
-  });
-  useEffect(() => {
-    try { localStorage.setItem("statcard_hidden::hero_faturamento_dia", String(heroHidden)); } catch { /* noop */ }
-  }, [heroHidden]);
-  const hideHero = privacy.hidden || heroHidden;
   const [detailTx, setDetailTx] = useState<Tables<"transactions"> | null>(null);
   const [pixDialogOpen, setPixDialogOpen] = useState(false);
   const { data: availableBalance = 0 } = useLedgerBalance();
@@ -617,22 +608,6 @@ export default function Dashboard() {
             <Wallet className="h-40 w-40 -rotate-12" />
           </div>
 
-          {/* Middle-right eye toggle — premium pill */}
-          <button
-            type="button"
-            onClick={() => setHeroHidden((v) => !v)}
-            aria-label={heroHidden ? "Mostrar valores" : "Ocultar valores"}
-            className={`group/eye absolute right-4 top-1/2 z-[10] -translate-y-1/2 flex h-11 w-11 items-center justify-center rounded-2xl border transition-all duration-300 ease-out hover:scale-110 active:scale-95 sm:right-6 sm:h-12 sm:w-12 ${
-              heroHidden
-                ? "border-primary/50 bg-primary/15 text-primary shadow-[0_0_0_1px_hsl(var(--primary)/0.2),0_8px_24px_-8px_hsl(var(--primary)/0.35)]"
-                : "border-border/70 bg-card/80 text-foreground/70 backdrop-blur-md hover:border-primary/40 hover:bg-primary/10 hover:text-primary"
-            }`}
-          >
-            {heroHidden
-              ? <EyeOff className="h-[18px] w-[18px] transition-transform duration-300 group-hover/eye:scale-110" strokeWidth={2.2} />
-              : <Eye className="h-[18px] w-[18px] transition-transform duration-300 group-hover/eye:scale-110" strokeWidth={2.2} />}
-          </button>
-
           <CardHeader className="px-4 pb-1 pt-4 sm:px-6 sm:pt-5 md:px-8">
              <div className="flex w-fit items-center gap-2 rounded-full border border-primary/10 bg-primary/10 px-3 py-1 text-[9px] font-bold uppercase tracking-[0.16em] text-primary transition-all sm:text-[10px] sm:tracking-widest">
                 <BarChart3 className="h-3 w-3" />
@@ -642,9 +617,9 @@ export default function Dashboard() {
           
           <CardContent className="px-4 pb-4 pt-2 sm:px-6 sm:pb-5 md:px-8">
             <div className="flex flex-col gap-3.5 sm:gap-5">
-              <div className="flex min-w-0 items-baseline gap-2 pr-12 sm:gap-3 sm:pr-14">
+              <div className="flex min-w-0 items-baseline gap-2 sm:gap-3">
                 <p className="min-w-0 max-w-full truncate text-[28px] font-numbers font-bold leading-none tracking-tight text-foreground min-[380px]:text-[32px] sm:text-4xl md:text-5xl">
-                  {hideHero ? CENSORED : fmt(revenue)}
+                  {privacy.hidden ? CENSORED : fmt(revenue)}
                 </p>
                 <span className="shrink-0 text-xs font-bold text-muted-foreground/30 sm:text-base">BRL</span>
               </div>
@@ -655,12 +630,12 @@ export default function Dashboard() {
                     <Wallet className="h-3 w-3 text-muted-foreground/60" />
                     <p className="truncate text-[8px] font-bold uppercase tracking-[0.12em] text-muted-foreground/60 sm:text-[9px] sm:tracking-wider">Saldo Disponível</p>
                   </div>
-                  <p className="truncate text-sm font-bold leading-none tracking-tight text-success min-[380px]:text-base sm:text-lg">{hideHero ? CENSORED : fmt(balance)}</p>
+                  <p className="truncate text-sm font-bold leading-none tracking-tight text-success min-[380px]:text-base sm:text-lg">{privacy.hidden ? CENSORED : fmt(balance)}</p>
                 </div>
                 <div className="hidden sm:block h-8 w-px bg-border/40" />
                 <div className="min-w-0 space-y-1">
                   <p className="truncate text-[8px] font-bold uppercase tracking-[0.12em] text-muted-foreground/60 sm:text-[9px] sm:tracking-wider">Conversão</p>
-                  <p className="truncate text-sm font-bold leading-none tracking-tight text-primary min-[380px]:text-base sm:text-lg">{hideHero ? CENSORED : `${conversion.toFixed(1)}%`}</p>
+                  <p className="truncate text-sm font-bold leading-none tracking-tight text-primary min-[380px]:text-base sm:text-lg">{conversion.toFixed(1)}%</p>
                 </div>
               </div>
 

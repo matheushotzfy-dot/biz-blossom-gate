@@ -88,38 +88,31 @@ export function StatCard({
         animationDelay: `${delay}ms`,
       }}
     >
-      {/* Middle-right premium eye toggle */}
-      {hideable && (
-        <button
-          type="button"
-          onClick={() => setSelfHidden((v) => !v)}
-          aria-label={selfHidden ? "Mostrar valor" : "Ocultar valor"}
-          className={cn(
-            "group/eye absolute right-3 top-1/2 z-[10] -translate-y-1/2 flex h-9 w-9 items-center justify-center rounded-xl border transition-all duration-300 ease-out hover:scale-110 active:scale-95 sm:right-4 sm:h-10 sm:w-10",
-            selfHidden
-              ? "border-primary/50 bg-primary/15 text-primary shadow-[0_0_0_1px_hsl(var(--primary)/0.2),0_6px_18px_-8px_hsl(var(--primary)/0.4)]"
-              : "border-border/70 bg-card/80 text-foreground/70 backdrop-blur-md hover:border-primary/40 hover:bg-primary/10 hover:text-primary"
-          )}
-        >
-          {selfHidden
-            ? <EyeOff className="h-[15px] w-[15px] transition-transform duration-300 group-hover/eye:scale-110 sm:h-4 sm:w-4" strokeWidth={2.2} />
-            : <Eye className="h-[15px] w-[15px] transition-transform duration-300 group-hover/eye:scale-110 sm:h-4 sm:w-4" strokeWidth={2.2} />}
-        </button>
-      )}
-
       {/* Header: title + icon */}
-      <div className={cn("relative z-[2] flex items-center justify-between gap-3", hideable && "pr-11 sm:pr-12")}>
+      <div className="relative z-[2] flex items-center justify-between gap-3">
         <p className="truncate text-[10px] font-bold uppercase leading-none tracking-[0.18em] text-muted-foreground/80 transition-colors duration-300 sm:text-[11px]">
           {title}
         </p>
-        {Icon && (
-          <div className={cn(
-            "flex h-10 w-10 shrink-0 items-center justify-center rounded-[11px] border border-border/60 bg-background/40 transition-colors duration-300 sm:h-11 sm:w-11",
-            c.text,
-          )}>
-            <Icon className="relative h-[16px] w-[16px] sm:h-[17px] sm:w-[17px]" strokeWidth={2.5} />
-          </div>
-        )}
+        <div className="flex items-center gap-1.5">
+          {hideable && (
+            <button
+              type="button"
+              onClick={() => setSelfHidden((v) => !v)}
+              aria-label={selfHidden ? "Mostrar valor" : "Ocultar valor"}
+              className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md border border-border/60 bg-background/40 text-muted-foreground/70 transition-colors hover:text-foreground hover:border-border"
+            >
+              {selfHidden ? <EyeOff className="h-3.5 w-3.5" strokeWidth={2.25} /> : <Eye className="h-3.5 w-3.5" strokeWidth={2.25} />}
+            </button>
+          )}
+          {Icon && (
+            <div className={cn(
+              "flex h-10 w-10 shrink-0 items-center justify-center rounded-[11px] border border-border/60 bg-background/40 transition-colors duration-300 sm:h-11 sm:w-11",
+              c.text,
+            )}>
+              <Icon className="relative h-[16px] w-[16px] sm:h-[17px] sm:w-[17px]" strokeWidth={2.5} />
+            </div>
+          )}
+        </div>
       </div>
 
 
