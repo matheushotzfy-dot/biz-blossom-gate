@@ -138,6 +138,13 @@ export default function Dashboard() {
   const [isCustom, setIsCustom] = useState(false);
   const [datePickerOpen, setDatePickerOpen] = useState(false);
   const privacy = usePrivacyMode();
+  const [heroHidden, setHeroHidden] = useState<boolean>(() => {
+    try { return localStorage.getItem("statcard_hidden::hero_faturamento_dia") === "true"; } catch { return false; }
+  });
+  useEffect(() => {
+    try { localStorage.setItem("statcard_hidden::hero_faturamento_dia", String(heroHidden)); } catch { /* noop */ }
+  }, [heroHidden]);
+  const hideHero = privacy.hidden || heroHidden;
   const [detailTx, setDetailTx] = useState<Tables<"transactions"> | null>(null);
   const [pixDialogOpen, setPixDialogOpen] = useState(false);
   const { data: availableBalance = 0 } = useLedgerBalance();
