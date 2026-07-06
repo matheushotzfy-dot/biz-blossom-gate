@@ -88,27 +88,27 @@ export function StatCard({
         animationDelay: `${delay}ms`,
       }}
     >
-      {/* Middle-right absolute eye toggle */}
+      {/* Middle-right premium eye toggle */}
       {hideable && (
         <button
           type="button"
           onClick={() => setSelfHidden((v) => !v)}
           aria-label={selfHidden ? "Mostrar valor" : "Ocultar valor"}
           className={cn(
-            "group/eye absolute right-3 top-1/2 z-[3] -translate-y-1/2 flex h-8 w-8 items-center justify-center rounded-full border bg-background/70 backdrop-blur-sm transition-all duration-300 ease-out hover:scale-110 hover:bg-background active:scale-95 sm:right-4 sm:h-9 sm:w-9",
+            "group/eye absolute right-3 top-1/2 z-[10] -translate-y-1/2 flex h-9 w-9 items-center justify-center rounded-xl border transition-all duration-300 ease-out hover:scale-110 active:scale-95 sm:right-4 sm:h-10 sm:w-10",
             selfHidden
-              ? "border-primary/40 text-primary shadow-[0_0_0_1px_hsl(var(--primary)/0.15)]"
-              : "border-border/70 text-muted-foreground/70 hover:text-foreground hover:border-border"
+              ? "border-primary/50 bg-primary/15 text-primary shadow-[0_0_0_1px_hsl(var(--primary)/0.2),0_6px_18px_-8px_hsl(var(--primary)/0.4)]"
+              : "border-border/70 bg-card/80 text-foreground/70 backdrop-blur-md hover:border-primary/40 hover:bg-primary/10 hover:text-primary"
           )}
         >
           {selfHidden
-            ? <EyeOff className="h-[15px] w-[15px] transition-transform duration-300 group-hover/eye:scale-110" strokeWidth={2.25} />
-            : <Eye className="h-[15px] w-[15px] transition-transform duration-300 group-hover/eye:scale-110" strokeWidth={2.25} />}
+            ? <EyeOff className="h-[15px] w-[15px] transition-transform duration-300 group-hover/eye:scale-110 sm:h-4 sm:w-4" strokeWidth={2.2} />
+            : <Eye className="h-[15px] w-[15px] transition-transform duration-300 group-hover/eye:scale-110 sm:h-4 sm:w-4" strokeWidth={2.2} />}
         </button>
       )}
 
       {/* Header: title + icon */}
-      <div className={cn("relative z-[2] flex items-center justify-between gap-3", hideable && "pr-10 sm:pr-12")}>
+      <div className={cn("relative z-[2] flex items-center justify-between gap-3", hideable && "pr-11 sm:pr-12")}>
         <p className="truncate text-[10px] font-bold uppercase leading-none tracking-[0.18em] text-muted-foreground/80 transition-colors duration-300 sm:text-[11px]">
           {title}
         </p>
