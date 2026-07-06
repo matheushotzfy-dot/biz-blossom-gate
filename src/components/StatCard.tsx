@@ -30,7 +30,21 @@ export function StatCard({
   color = "primary",
   description,
   delay = 0,
+  hideable = false,
+  hiddenPlaceholder = "••••••",
 }: StatCardProps) {
+  const storageKey = `statcard_hidden::${title}`;
+  const [selfHidden, setSelfHidden] = useState<boolean>(() => {
+    if (!hideable) return false;
+    try { return localStorage.getItem(storageKey) === "true"; } catch { return false; }
+  });
+  useEffect(() => {
+    if (!hideable) return;
+    try { localStorage.setItem(storageKey, String(selfHidden)); } catch { /* noop */ }
+  }, [selfHidden, hideable, storageKey]);
+  const displayValue = hideable && selfHidden ? hiddenPlaceholder : value;
+  const displayDescription = hideable && selfHidden ? "•••" : description;
+  
   
   const colors: Record<StatCardColor, {
     text: string;
