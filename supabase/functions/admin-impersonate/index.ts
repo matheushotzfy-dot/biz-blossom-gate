@@ -154,13 +154,36 @@ Deno.serve(async (req) => {
       );
     }
 
-    // Audit log
+    // Capture caller IP for audit trail
+    const callerIp = req.headers.get("cf-connecting-ip")
+      || req.headers.get("x-forwarded-for")?.split(",")[0]?.trim()
+      || req.headers.get("x-real-ip")
+      || null;
+    const callerUa = req.headers.get("user-agent") || null;
+
+    // Fetch target profile display info
+    const { data: targetProfile } = await adminClient
+      .from("profiles")
+      .select("full_name, email")
+      .eq("user_id", targetUserId)
+      .maybeSingle();
+
+    const targetEmail = targetProfile?.email || targetUser.user.email || null;
+    const targetName = targetProfile?.full_name || targetEmail || targetUserId.slice(0, 8);
+
+    // Mandatory audit log
     await adminClient.from("audit_logs").insert({
       admin_user_id: caller.id,
       action: "impersonate_user",
       entity_type: "profile",
       entity_id: targetUserId,
-      details: { timestamp: new Date().toISOString() },
+      details: {
+        timestamp: new Date().toISOString(),
+        target_email: targetEmail,
+        target_name: targetName,
+        caller_ip: callerIp,
+        user_agent: callerUa,
+      },
     });
 
     return new Response(
@@ -168,9 +191,13 @@ Deno.serve(async (req) => {
         success: true,
         access_token: verifyData.session.access_token,
         refresh_token: verifyData.session.refresh_token,
+        target_user_id: targetUserId,
+        target_email: targetEmail,
+        target_name: targetName,
       }),
       { headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
+
   } catch (error) {
     console.error("[admin-impersonate] Error:", error instanceof Error ? error.message : "unknown");
     // NEVER leak internal error details to client
