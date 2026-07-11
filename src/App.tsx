@@ -75,6 +75,8 @@ import MemberLayout from "./pages/membros/MemberLayout";
 import MemberHome from "./pages/membros/MemberHome";
 import MemberCourse from "./pages/membros/MemberCourse";
 import CourseAnalytics from "./pages/membros/CourseAnalytics";
+import ImpersonationBanner from "./components/ImpersonationBanner";
+
 
 const queryClient = new QueryClient({
   defaultOptions: {
