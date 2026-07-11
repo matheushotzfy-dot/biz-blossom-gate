@@ -82,21 +82,37 @@ Deno.serve(async (req) => {
 
     const supabase = createClient(supabaseUrl, serviceKey);
 
-    // === Fees (PIX) ===
-    const { data: fees } = await supabase.from("fees").select("*");
-    let feeAmount = 0;
-    const pixFee = fees?.find((f) => f.name === "Taxa PIX");
-    const fixedFee = fees?.find((f) =>
-      f.name === "Taxa Fixa por Transação" && f.fee_type === "fixed"
-    );
-    if (pixFee) {
-      feeAmount += pixFee.fee_type === "percentage"
-        ? (amt * Number(pixFee.value)) / 100
-        : Number(pixFee.value);
+    // === Fees (PIX) — same source of truth as podpay-create-transaction + Taxas.tsx ===
+    const { data: fees, error: feesError } = await supabase.from("fees").select("*");
+    if (feesError || !fees || fees.length === 0) {
+      safeLog("Fee configuration missing", { error: feesError?.message || "no fees" });
+      return new Response(
+        JSON.stringify({ success: false, error: "Configuração de taxas indisponível. Contate o suporte." }),
+        { status: 503, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+      );
     }
-    if (fixedFee) feeAmount += Number(fixedFee.value);
-    feeAmount = Math.round(feeAmount * 100) / 100;
-    if (feeAmount < 0 || feeAmount >= amt) feeAmount = 0;
+    const getFee = (name: string) => Number(fees.find((f) => f.name === name)?.value ?? 0);
+    const platformPixPct   = getFee("Taxa PIX");
+    const platformPixFixed = getFee("Taxa Fixa PIX");
+    const platformExtraFx  = getFee("Taxa Fixa por Transação");
+
+    const { data: cuf } = await supabase
+      .from("custom_user_fees")
+      .select("pix_percentage, pix_fixed, transaction_percentage, transaction_fixed")
+      .eq("user_id", userId)
+      .maybeSingle();
+
+    const pct   = Number(cuf?.pix_percentage ?? cuf?.transaction_percentage ?? platformPixPct);
+    const fixed = Number(cuf?.pix_fixed      ?? platformPixFixed) + platformExtraFx;
+
+    let feeAmount = Math.round(((amt * pct) / 100 + fixed) * 100) / 100;
+    if (feeAmount < 0 || feeAmount >= amt) {
+      safeLog("Fee out of safe range", { feeAmount, amt });
+      return new Response(
+        JSON.stringify({ success: false, error: "Erro na configuração de taxas. Contate o suporte." }),
+        { status: 503, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+      );
+    }
     const netAmount = Math.round((amt - feeAmount) * 100) / 100;
     const amountInCents = Math.round(amt * 100);
 
