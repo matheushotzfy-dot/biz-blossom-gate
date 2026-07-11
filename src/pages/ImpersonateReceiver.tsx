@@ -49,8 +49,19 @@ export default function ImpersonateReceiver() {
         return;
       }
 
+      // Mark this tab as an impersonation session so the banner renders.
+      try {
+        sessionStorage.setItem("impersonation_session", JSON.stringify({
+          target_email: data.target_email || null,
+          target_name: data.target_name || null,
+          target_user_id: data.target_user_id || null,
+          started_at: new Date().toISOString(),
+        }));
+      } catch { /* noop */ }
+
       window.location.replace("/dashboard");
     };
+
 
     window.addEventListener("message", onMessage);
 
