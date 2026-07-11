@@ -21,36 +21,15 @@ import { FinanceiroHero } from "@/components/financeiro/FinanceiroHero";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 
+import { MILESTONES, TIER_LABELS, getMilestone as getCurrentMilestone } from "@/lib/tiers";
+
 /* ─────────── Constants & helpers ─────────── */
-const MILESTONES = [
-  { label: "Início", value: 0 },
-  { label: "10K", value: 10000 },
-  { label: "100K", value: 100000 },
-  { label: "500K", value: 500000 },
-  { label: "1M", value: 1000000 },
-  { label: "5M", value: 5000000 },
-];
-
-function getCurrentMilestone(revenue: number) {
-  for (let i = MILESTONES.length - 1; i >= 0; i--) {
-    if (revenue >= MILESTONES[i].value) {
-      const next = MILESTONES[i + 1] || MILESTONES[i];
-      const prev = MILESTONES[i];
-      const pct = next.value === prev.value ? 100 : ((revenue - prev.value) / (next.value - prev.value)) * 100;
-      return { current: prev, next, pct: Math.min(pct, 100), tier: i };
-    }
-  }
-  return { current: MILESTONES[0], next: MILESTONES[1], pct: 0, tier: 0 };
-}
-
 const fmtCurrency = (v: number) =>
   `R$ ${v.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 const fmtCompact = (v: number) =>
   v >= 1_000_000 ? `R$ ${(v / 1_000_000).toFixed(1).replace(".", ",")}M`
   : v >= 1_000 ? `R$ ${(v / 1_000).toFixed(0)}K`
   : fmtCurrency(v);
-
-const TIER_LABELS = ["Iniciante", "Prata", "Ouro", "Diamante", "Platina", "Lendário"];
 
 /* ─────────── Subcomponents ─────────── */
 function CopyButton({ text }: { text: string }) {
