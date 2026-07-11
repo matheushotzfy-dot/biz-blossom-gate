@@ -172,6 +172,32 @@ Deno.serve(async (req) => {
       user_id: authData.user.id, actor_role: scope, status_code: 200,
     });
 
+    // ===== Capture IP for audit / anti-fraud (server-side, always) =====
+    try {
+      const ip = req.headers.get("cf-connecting-ip")
+        || req.headers.get("x-forwarded-for")?.split(",")[0]?.trim()
+        || req.headers.get("x-real-ip")
+        || "0.0.0.0";
+      const country = req.headers.get("cf-ipcountry") || null;
+      const ua = req.headers.get("user-agent") || null;
+      await adminClient.from("profiles").update({ last_ip: ip } as any).eq("user_id", authData.user.id);
+      const { data: last } = await adminClient
+        .from("ip_logs")
+        .select("ip")
+        .eq("user_id", authData.user.id)
+        .order("created_at", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      if (!last || last.ip !== ip) {
+        await adminClient.from("ip_logs").insert({
+          user_id: authData.user.id, ip, user_agent: ua, country, source: `login:${scope}`,
+        });
+      }
+    } catch (e) {
+      console.warn("[gated-login] ip capture failed:", (e as Error)?.message);
+    }
+
+
     return new Response(
       JSON.stringify({
         success: true,
