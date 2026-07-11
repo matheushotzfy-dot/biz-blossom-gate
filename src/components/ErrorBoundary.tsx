@@ -7,15 +7,44 @@ interface State {
   error: Error | null;
 }
 
+// Strip tokens, JWTs, and sensitive query params from any string before logging.
+const SENSITIVE_PARAMS = /(__lovable_token|access_token|refresh_token|token|apikey|api_key|key|password|secret|code|authorization|auth)/i;
+function sanitize(input: string | null | undefined): string {
+  if (!input) return "";
+  let out = String(input);
+  // Redact JWT-like tokens
+  out = out.replace(/\bey[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}\b/g, "[JWT_REDACTED]");
+  out = out.replace(/(Bearer\s+)[A-Za-z0-9._-]+/gi, "$1[REDACTED]");
+  out = out.replace(/\b(sk|pk|whsec|sbp)_[A-Za-z0-9]{16,}\b/g, "[SECRET_REDACTED]");
+  // Redact sensitive query params in any URL-like substring
+  out = out.replace(/([?&#])([^=&#\s]+)=([^&#\s]+)/g, (m, sep, k, _v) =>
+    SENSITIVE_PARAMS.test(k) ? `${sep}${k}=[REDACTED]` : m
+  );
+  return out;
+}
+function sanitizedUrl(): string {
+  try {
+    const u = new URL(window.location.href);
+    for (const k of Array.from(u.searchParams.keys())) {
+      if (SENSITIVE_PARAMS.test(k)) u.searchParams.set(k, "[REDACTED]");
+    }
+    // Clear hash if it contains sensitive tokens
+    if (u.hash && SENSITIVE_PARAMS.test(u.hash)) u.hash = "[REDACTED]";
+    return u.toString();
+  } catch {
+    return sanitize(window.location.href);
+  }
+}
+
 async function logErrorToDb(error: Error, context: string) {
   try {
     const { data: { session } } = await supabase.auth.getSession();
     await supabase.from("error_logs").insert({
       error_type: "client_error",
-      message: error.message?.slice(0, 500) || "Unknown error",
-      stack_trace: error.stack?.slice(0, 2000) || null,
+      message: sanitize(error.message).slice(0, 500) || "Unknown error",
+      stack_trace: sanitize(error.stack).slice(0, 2000) || null,
       user_id: session?.user?.id || null,
-      metadata: { context, url: window.location.href, ua: navigator.userAgent },
+      metadata: { context: sanitize(context).slice(0, 500), url: sanitizedUrl(), ua: navigator.userAgent },
     });
   } catch {
     // Silent fail — don't break the app for logging
