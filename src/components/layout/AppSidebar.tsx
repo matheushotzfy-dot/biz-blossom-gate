@@ -45,6 +45,21 @@ import {
 
 import { MILESTONES, getMilestone } from "@/lib/tiers";
 
+type SidebarItem = {
+  title: string;
+  url: string;
+  icon: LucideIcon;
+  badge?: string;
+  count?: number;
+  exact?: boolean;
+};
+
+type SidebarSection = {
+  label: string;
+  items: SidebarItem[];
+};
+
+
 
 function formatRevenue(revenue: number) {
   if (revenue >= 1000000) return `R$ ${(revenue / 1000000).toFixed(2).replace(",", ".")}M`;
