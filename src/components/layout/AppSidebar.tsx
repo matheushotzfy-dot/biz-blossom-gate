@@ -43,14 +43,7 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar";
 
-const MILESTONES = [
-  { label: "R$ 0", value: 0, tier: "Iniciante" },
-  { label: "R$ 10K", value: 10000, tier: "Bronze" },
-  { label: "R$ 100K", value: 100000, tier: "Prata" },
-  { label: "R$ 500K", value: 500000, tier: "Ouro" },
-  { label: "R$ 1M", value: 1000000, tier: "Platina" },
-  { label: "R$ 5M", value: 5000000, tier: "Diamante" },
-];
+import { MILESTONES, getMilestone } from "@/lib/tiers";
 
 type SidebarItem = {
   title: string;
@@ -66,24 +59,7 @@ type SidebarSection = {
   items: SidebarItem[];
 };
 
-function getMilestone(revenue: number) {
-  const lastMilestone = MILESTONES[MILESTONES.length - 1];
-  if (revenue >= lastMilestone.value) {
-    return { current: lastMilestone, next: lastMilestone, pct: 100, tier: MILESTONES.length - 1 };
-  }
-  let current = MILESTONES[0];
-  let next = MILESTONES[1];
-  for (let i = 0; i < MILESTONES.length - 1; i++) {
-    if (revenue >= MILESTONES[i].value && revenue < MILESTONES[i + 1].value) {
-      current = MILESTONES[i];
-      next = MILESTONES[i + 1];
-      break;
-    }
-  }
-  const range = next.value - current.value;
-  const pct = range > 0 ? Math.min(((revenue - current.value) / range) * 100, 100) : 100;
-  return { current, next, pct, tier: MILESTONES.indexOf(current) };
-}
+
 
 function formatRevenue(revenue: number) {
   if (revenue >= 1000000) return `R$ ${(revenue / 1000000).toFixed(2).replace(",", ".")}M`;
