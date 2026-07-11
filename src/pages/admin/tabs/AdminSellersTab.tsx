@@ -327,7 +327,7 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
     try {
       const { data, error } = await supabase.functions.invoke("admin-impersonate", { body: { targetUserId: userId } });
       if (error || !data?.success) { toast.error(data?.error || "Erro ao acessar como usuário"); return; }
-      const { access_token, refresh_token } = data;
+      const { access_token, refresh_token, target_email, target_name, target_user_id } = data;
       if (!access_token || !refresh_token) { toast.error("Tokens de impersonação não disponíveis"); return; }
       const expectedOrigin = window.location.origin;
       const target = window.open(expectedOrigin + "/impersonate-receiver", "_blank");
@@ -339,13 +339,22 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
         if (event.data?.type !== "IMPERSONATE_READY") return;
         if (delivered) return;
         delivered = true;
-        try { target.postMessage({ type: "IMPERSONATE_TOKENS", access_token, refresh_token }, expectedOrigin); } catch { /* noop */ }
+        try {
+          target.postMessage({
+            type: "IMPERSONATE_TOKENS",
+            access_token,
+            refresh_token,
+            target_email,
+            target_name,
+            target_user_id,
+          }, expectedOrigin);
+        } catch { /* noop */ }
         window.removeEventListener("message", onMessage);
       };
       window.addEventListener("message", onMessage);
       setTimeout(() => { window.removeEventListener("message", onMessage); }, 15_000);
-      const targetEmail = profiles.find(p => p.user_id === userId)?.email || userId.slice(0, 8);
-      toast.success(`Abrindo dashboard como ${targetEmail}`);
+      toast.success(`Abrindo dashboard como ${target_email || target_name || userId.slice(0, 8)}`);
+
     } catch {
       toast.error("Erro na impersonação");
     } finally {
