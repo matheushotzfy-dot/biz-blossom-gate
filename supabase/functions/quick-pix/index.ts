@@ -228,16 +228,24 @@ Deno.serve(async (req) => {
 
     safeLog("Quick PIX created", { transactionId: transaction?.id, podpayId });
 
+    const responsePayload = {
+      success: true,
+      data: {
+        transactionId: transaction?.id,
+        podpayId,
+        amount: amt,
+        pix,
+      },
+    };
+
+    // Persistir resposta idempotente para retries subsequentes
+    if (rawIdem) {
+      const scopedKey = `qpix:${userId}:${rawIdem}`;
+      await supabase.from("idempotency_keys").update({ response: responsePayload }).eq("key", scopedKey);
+    }
+
     return new Response(
-      JSON.stringify({
-        success: true,
-        data: {
-          transactionId: transaction?.id,
-          podpayId,
-          amount: amt,
-          pix,
-        },
-      }),
+      JSON.stringify(responsePayload),
       { headers: { ...corsHeaders, "Content-Type": "application/json" } },
     );
   } catch (error) {
