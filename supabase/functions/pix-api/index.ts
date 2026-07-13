@@ -464,6 +464,7 @@ async function createPixViaVeopag(
   amountReais: number,
   customer: { name: string; document: string; phone?: string },
   transactionId: string,
+  expiresInMinutes: number,
 ): Promise<
   | { ok: true; gatewayId: string; qrCode: string; copyPaste: string; expiresAt: string }
   | { ok: false; status: number; message: string }
@@ -482,7 +483,7 @@ async function createPixViaVeopag(
       gatewayId: veo.transactionId,
       qrCode: veo.qrcode,
       copyPaste: veo.qrcode,
-      expiresAt: new Date(Date.now() + 30 * 60_000).toISOString(),
+      expiresAt: new Date(Date.now() + expiresInMinutes * 60_000).toISOString(),
     };
   } catch (e) {
     return {
@@ -598,6 +599,7 @@ async function handleCreateCharge(
         phone: input.customer_phone,
       },
       preTxId,
+      input.expires_in_minutes!,
     )
     : await createPixViaPodpay(
       input.amount_cents,
