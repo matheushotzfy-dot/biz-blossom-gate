@@ -3162,7 +3162,9 @@ export type Database = {
       }
       support_tickets: {
         Row: {
+          admin_name: string | null
           admin_reply: string | null
+          admin_role: string | null
           admin_user_id: string | null
           created_at: string
           id: string
@@ -3175,7 +3177,9 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          admin_name?: string | null
           admin_reply?: string | null
+          admin_role?: string | null
           admin_user_id?: string | null
           created_at?: string
           id?: string
@@ -3188,7 +3192,9 @@ export type Database = {
           user_id: string
         }
         Update: {
+          admin_name?: string | null
           admin_reply?: string | null
+          admin_role?: string | null
           admin_user_id?: string | null
           created_at?: string
           id?: string
@@ -4292,6 +4298,7 @@ export type Database = {
         Args: { _key: string; _user_id: string }
         Returns: boolean
       }
+      has_support_access: { Args: { _user_id: string }; Returns: boolean }
       is_ip_blocked: { Args: { _ip_hash: string }; Returns: boolean }
       is_product_active: { Args: { _product_id: string }; Returns: boolean }
       list_visible_acquirers: {
