@@ -129,6 +129,8 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
   const [search, setSearch] = useState("");
   const [sellerFilter, setSellerFilter] = useState<"all" | "white" | "black" | "unset" | "kyc" | "frozen" | "blocked" | "rejected" | "approved">("all");
   const [selectedUser, setSelectedUser] = useState<Tables<"profiles"> | null>(null);
+  const [emailVerified, setEmailVerified] = useState<boolean | null>(null);
+  const [emailVerifyLoading, setEmailVerifyLoading] = useState(false);
   const [piiRevealed, setPiiRevealed] = useState(false);
   const [revealedDoc, setRevealedDoc] = useState<string | null>(null);
   const [revealedPixKeys, setRevealedPixKeys] = useState<PixKey[] | null>(null);
@@ -202,6 +204,13 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
   const openUserDetail = async (profile: Tables<"profiles">) => {
     setSelectedUser(profile);
     setLoading(true);
+    setEmailVerified(null);
+    supabase.functions
+      .invoke("admin-set-email-verified", { body: { targetUserId: profile.user_id, action: "status" } })
+      .then(({ data }) => {
+        if (data?.success) setEmailVerified(!!data.verified);
+      })
+      .catch(() => { /* silent */ });
     setUserLogs([]); setUserProducts([]); setUserWithdrawals([]);
     setUserTransactions([]); setUserPixKeys([]); setUserDisputes([]);
     setBalanceAdjustments([]); setKycImages([]); setIpHistory([]);
@@ -311,6 +320,21 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
     if (error) { toast.error("Erro ao alterar status"); return; }
     toast.success(freeze ? "Saldo congelado! Saques bloqueados." : "Saldo descongelado! Saques liberados.");
     onReload();
+  };
+
+  const handleSetEmailVerified = async (userId: string, verified: boolean) => {
+    setEmailVerifyLoading(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("admin-set-email-verified", {
+        body: { targetUserId: userId, action: "set", verified },
+      });
+      if (error || !data?.success) { toast.error(data?.error || "Erro ao alterar verificação"); return; }
+      setEmailVerified(verified);
+      toast.success(verified ? "E-mail marcado como verificado." : "Verificação de e-mail removida.");
+      await logAdminAction(verified ? "email_verify" : "email_unverify", "auth.user", userId, { verified });
+    } finally {
+      setEmailVerifyLoading(false);
+    }
   };
 
   const handleBanSeller = async (userId: string) => {
@@ -911,6 +935,16 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
                     <CheckCircle2 className="h-3 w-3" /> Aprovar
                   </Button>
                 )}
+                {selectedUser && emailVerified === false && (
+                  <Button size="sm" variant="outline" disabled={emailVerifyLoading} className="h-8 rounded-lg text-[11px] gap-1.5 border-success/30 text-success hover:bg-success/10" onClick={() => handleSetEmailVerified(selectedUser.user_id, true)}>
+                    <CheckCircle2 className="h-3 w-3" /> Verificar e-mail
+                  </Button>
+                )}
+                {selectedUser && emailVerified === true && (
+                  <Button size="sm" variant="outline" disabled={emailVerifyLoading} className="h-8 rounded-lg text-[11px] gap-1.5 border-warning/30 text-warning hover:bg-warning/10" onClick={() => handleSetEmailVerified(selectedUser.user_id, false)}>
+                    <AlertTriangle className="h-3 w-3" /> Remover verificação
+                  </Button>
+                )}
                 <Button size="sm" variant="outline" className="h-8 rounded-lg text-[11px] gap-1.5 border-destructive/30 text-destructive hover:bg-destructive/10" onClick={() => selectedUser && handleBanSeller(selectedUser.user_id)}>
                   <UserX className="h-3 w-3" /> Banir
                 </Button>
@@ -975,6 +1009,7 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
                     <InfoRow label="Último IP" value={selectedUser?.last_ip} mono />
                     <InfoRow label="Cadastro" value={selectedUser ? new Date(selectedUser.created_at).toLocaleString("pt-BR") : ""} />
                     <InfoRow label="Saldo Congelado" value={selectedUser && isFrozen(selectedUser) ? "SIM" : "NÃO"} />
+                    <InfoRow label="E-mail verificado" value={emailVerified === null ? "—" : emailVerified ? "SIM" : "NÃO"} />
                   </div>
 
                   {/* ── Histórico de IP ── */}
