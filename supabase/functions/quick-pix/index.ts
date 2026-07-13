@@ -1,6 +1,7 @@
 // Quick PIX generation — creates a standalone PIX cobrança without a product
 // Auth required: user_id is derived from the JWT
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { createVeopagDeposit, resolveAcquirerSlug } from "../_shared/veopag.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -142,7 +143,81 @@ Deno.serve(async (req) => {
     const netAmount = Math.round((amt - feeAmount) * 100) / 100;
     const amountInCents = Math.round(amt * 100);
 
-    // === PodPay ===
+    // ===================================================================
+    // === ACQUIRER ROUTING: VeoPag (PIX only) ============================
+    // ===================================================================
+    // Se o vendedor está roteado para VeoPag, gera na VeoPag em vez do
+    // PodPay. Anonimização: sem nome/email da plataforma, email aleatório.
+    const acquirerSlug = await resolveAcquirerSlug(supabase, userId);
+    if (acquirerSlug === "veopag") {
+      const preTxId = crypto.randomUUID();
+
+      let veo;
+      try {
+        veo = await createVeopagDeposit({
+          amount: amt,
+          externalId: preTxId,
+          payerName: safeName,
+          payerDocument: cleanDoc,
+        });
+      } catch (e) {
+        safeLog("VeoPag error", { error: e instanceof Error ? e.message : "unknown" });
+        return new Response(
+          JSON.stringify({ success: false, error: "Não foi possível gerar o PIX. Tente novamente." }),
+          { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+        );
+      }
+
+      const pixExpiresAt = new Date(Date.now() + 30 * 60 * 1000).toISOString();
+
+      const { data: transaction } = await supabase
+        .from("transactions")
+        .insert({
+          id: preTxId,
+          user_id: userId,
+          product_id: null,
+          amount: amt,
+          fee_amount: feeAmount,
+          net_amount: netAmount,
+          status: "pending",
+          payment_method: "pix",
+          customer_name: safeName,
+          customer_email: safeEmail,
+          customer_document: cleanDoc,
+          podpay_payment_id: veo.transactionId,
+          external_id: preTxId,
+          pix_expires_at: pixExpiresAt,
+          pix_copy_paste: veo.qrcode,
+          pix_qrcode: veo.qrcode,
+          metadata: { acquirer: "veopag" },
+        })
+        .select()
+        .single();
+
+      const responsePayload = {
+        success: true,
+        data: {
+          transactionId: transaction?.id ?? preTxId,
+          podpayId: veo.transactionId,
+          amount: amt,
+          pix: { qrcode: veo.qrcode, expiresAt: pixExpiresAt },
+        },
+      };
+
+      if (rawIdem) {
+        const scopedKey = `qpix:${userId}:${rawIdem}`;
+        await supabase.from("idempotency_keys").update({ response: responsePayload }).eq("key", scopedKey);
+      }
+
+      safeLog("VeoPag quick PIX created", { transactionId: transaction?.id });
+      return new Response(
+        JSON.stringify(responsePayload),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" } },
+      );
+    }
+    // ===================================================================
+    // === Fim do desvio VeoPag — abaixo segue o fluxo PodPay normal =====
+    // ===================================================================
     const publicKey = Deno.env.get("PODPAY_PUBLIC_KEY")!;
     const secretKey = Deno.env.get("PODPAY_SECRET_KEY")!;
     const auth = "Basic " + btoa(publicKey + ":" + secretKey);
