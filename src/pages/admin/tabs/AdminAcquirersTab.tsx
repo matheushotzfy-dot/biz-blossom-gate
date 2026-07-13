@@ -1256,10 +1256,16 @@ function BulkAssign({ acquirers, onDone }: { acquirers: Acquirer[]; onDone: () =
   const apply = async () => {
     if (!targetAcq) { toast.error("Selecione a adquirente destino"); return; }
     if (selected.size === 0) { toast.error("Selecione ao menos 1 seller"); return; }
+    const acqName = /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
+      (window as any).__acqNameCache?.[targetAcq] || "a adquirente selecionada";
+    if (!window.confirm(
+      `Trocar a adquirente de ${selected.size} seller(s) para "${acqName}"?\n\nEsta ação afeta o processamento de todas as próximas transações destes sellers e será registrada no audit log.`
+    )) return;
     setRunning(true);
     const { data, error } = await supabase.rpc("admin_bulk_assign_acquirer", {
       _seller_ids: Array.from(selected), _new_acquirer_id: targetAcq, _reason: reason,
     });
+
     setRunning(false);
     if (error) { toast.error("Erro: " + friendlyError(error)); return; }
     const successCount = (data || []).filter(r => r.success).length;
