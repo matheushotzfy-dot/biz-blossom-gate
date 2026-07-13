@@ -13,6 +13,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { SegmentedChoice } from "@/components/ui/segmented-choice";
 import * as SelectPrimitive from "@radix-ui/react-select";
 import { QRCodeSVG } from "qrcode.react";
 import {
