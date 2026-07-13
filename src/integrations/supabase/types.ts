@@ -4197,6 +4197,7 @@ export type Database = {
           user_id: string
         }[]
       }
+      admin_unverify_email: { Args: { _user_id: string }; Returns: undefined }
       apply_transaction_splits: { Args: { _tx_id: string }; Returns: undefined }
       backfill_financial_ledger_for_completed_tx: {
         Args: { _limit?: number }
