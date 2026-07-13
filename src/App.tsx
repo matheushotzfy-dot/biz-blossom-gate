@@ -26,6 +26,7 @@ import Checkout from "./pages/vendas/Checkout";
 import CheckoutBuilder from "./pages/vendas/CheckoutBuilder";
 import ProductEditor from "./pages/vendas/ProductEditor";
 import IntegracoesHub from "./pages/IntegracoesHub";
+import Webhooks from "./pages/vendas/Webhooks";
 import Conteudo from "./pages/vendas/Conteudo";
 import CourseBuilder from "./pages/vendas/CourseBuilder";
 import Afiliados from "./pages/vendas/Afiliados";
@@ -175,6 +176,7 @@ const App = () => (
                 <Route path="/integracoes/webhooks" element={<Navigate to="/integracoes?tab=webhooks" replace />} />
                 <Route path="/integracoes/documentacao" element={<Navigate to="/integracoes?tab=api" replace />} />
                 <Route path="/integracoes/credenciais" element={<Navigate to="/integracoes?tab=keys" replace />} />
+                <Route path="/vendas/webhooks" element={<Webhooks />} />
                 <Route path="/vendas/afiliados" element={<Afiliados />} />
                 <Route path="/vendas/cupons" element={<Cupons />} />
                 <Route path="/vendas/coproducoes" element={<Coproducoes />} />

@@ -246,7 +246,7 @@ Deno.serve(async (req) => {
           await supabase
             .from('transactions')
             .update({
-              status: 'expired',
+              checkout_session_id: null,
               metadata: {
                 ...existingMetadata,
                 superseded_by_acquirer: acquirerSlug,
@@ -254,7 +254,7 @@ Deno.serve(async (req) => {
               },
             })
             .eq('id', existing.id);
-          safeLog('Expired stale checkout session', {
+          safeLog('Detached stale checkout session', {
             transactionId: existing.id,
             previousAcquirer: existingAcquirer,
             acquirer: acquirerSlug,

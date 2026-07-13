@@ -8,8 +8,8 @@ const corsHeaders: Record<string, string> = {
 
 /**
  * Abandoned Cart Recovery
- * Finds transactions that have been "pending" for more than 30 minutes (PIX/boleto expired)
- * and marks them as "expired". Also collects data for recovery campaigns.
+ * Finds transactions whose payment window is actually expired and marks them
+ * as "expired". Also collects data for recovery campaigns.
  *
  * Run via pg_cron every 15 minutes.
  */
@@ -34,18 +34,21 @@ Deno.serve(async (req) => {
     const supabase = createClient(supabaseUrl, serviceKey);
 
     const now = new Date();
-    // PIX QR codes typically expire in 30 minutes
-    const pixExpiry = new Date(now.getTime() - 30 * 60 * 1000).toISOString();
+    // Safety fallback for old PIX rows without explicit expiry. New rows must
+    // respect pix_expires_at, not created_at, otherwise valid gateway charges
+    // get hidden as expired before the gateway/webhook finishes processing.
+    const legacyPixExpiry = new Date(now.getTime() - 24 * 60 * 60 * 1000).toISOString();
     // Boletos expire in 1-3 days — we mark after 3 days
     const boletoExpiry = new Date(now.getTime() - 3 * 24 * 60 * 60 * 1000).toISOString();
 
-    // 1. Expire PIX pending transactions older than 30 min
+    // 1. Expire PIX pending transactions only when their explicit PIX expiry
+    // has passed. Legacy rows without pix_expires_at expire after 24h.
     const { data: expiredPix, error: pixErr } = await supabase
       .from("transactions")
       .update({ status: "expired" })
       .eq("status", "pending")
       .eq("payment_method", "pix")
-      .lt("created_at", pixExpiry)
+      .or(`pix_expires_at.lt.${now.toISOString()},and(pix_expires_at.is.null,created_at.lt.${legacyPixExpiry})`)
       .select("id, customer_email, customer_name, product_id, amount, user_id");
 
     if (pixErr) {
