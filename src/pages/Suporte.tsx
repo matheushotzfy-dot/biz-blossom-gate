@@ -670,6 +670,16 @@ export default function Suporte() {
                   );
                 })}
                 <div ref={threadEndRef} />
+                {typingOthers.length > 0 && (
+                  <div className="flex items-center gap-2 text-[11px] font-bold text-emerald-500 animate-in fade-in duration-150">
+                    <span className="flex gap-0.5">
+                      <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-bounce [animation-delay:-0.3s]" />
+                      <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-bounce [animation-delay:-0.15s]" />
+                      <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-bounce" />
+                    </span>
+                    {typingOthers[0].name || "Suporte"} está digitando…
+                  </div>
+                )}
               </div>
 
               {/* Reply composer */}
