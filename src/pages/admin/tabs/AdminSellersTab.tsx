@@ -204,6 +204,13 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
   const openUserDetail = async (profile: Tables<"profiles">) => {
     setSelectedUser(profile);
     setLoading(true);
+    setEmailVerified(null);
+    supabase.functions
+      .invoke("admin-set-email-verified", { body: { targetUserId: profile.user_id, action: "status" } })
+      .then(({ data }) => {
+        if (data?.success) setEmailVerified(!!data.verified);
+      })
+      .catch(() => { /* silent */ });
     setUserLogs([]); setUserProducts([]); setUserWithdrawals([]);
     setUserTransactions([]); setUserPixKeys([]); setUserDisputes([]);
     setBalanceAdjustments([]); setKycImages([]); setIpHistory([]);
