@@ -11,7 +11,7 @@ const corsHeaders = {
 
 function safeLog(message: string, context: Record<string, unknown> = {}) {
   const safe: Record<string, unknown> = {};
-  const ALLOWED = ["transactionId", "status", "amount", "podpayId", "error", "code"];
+  const ALLOWED = ["transactionId", "status", "amount", "podpayId", "error", "code", "acquirer"];
   for (const k of ALLOWED) if (k in context) safe[k] = context[k];
   console.log(`[quick-pix] ${message}`, JSON.stringify(safe));
 }
@@ -199,6 +199,8 @@ Deno.serve(async (req) => {
         data: {
           transactionId: transaction?.id ?? preTxId,
           podpayId: veo.transactionId,
+          gatewayId: veo.transactionId,
+          acquirer: "veopag",
           amount: amt,
           pix: { qrcode: veo.qrcode, expiresAt: pixExpiresAt },
         },
@@ -299,6 +301,7 @@ Deno.serve(async (req) => {
       customer_email: safeEmail,
       customer_document: cleanDoc,
       podpay_payment_id: podpayId ? String(podpayId) : null,
+      metadata: { acquirer: "podpay" },
     }).select().single();
 
     safeLog("Quick PIX created", { transactionId: transaction?.id, podpayId });
@@ -308,6 +311,8 @@ Deno.serve(async (req) => {
       data: {
         transactionId: transaction?.id,
         podpayId,
+        gatewayId: podpayId,
+        acquirer: "podpay",
         amount: amt,
         pix,
       },
