@@ -163,9 +163,19 @@ Deno.serve(async (req) => {
       const url = Deno.env.get("SUPABASE_URL")!;
       const svc = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
       const h = { "Content-Type": "application/json", Authorization: `Bearer ${svc}` };
-      fetch(`${url}/functions/v1/webhook-dispatcher`, { method: "POST", headers: h, body: "{}" }).catch(() => {});
-      fetch(`${url}/functions/v1/apps-dispatcher`, { method: "POST", headers: h, body: "{}" }).catch(() => {});
-    } catch (_) { /* never break postback */ }
+      const [webhookNudge, appsNudge] = await Promise.allSettled([
+        fetch(`${url}/functions/v1/webhook-dispatcher`, { method: "POST", headers: h, body: "{}" }),
+        fetch(`${url}/functions/v1/apps-dispatcher`, { method: "POST", headers: h, body: "{}" }),
+      ]);
+      if (webhookNudge.status === "rejected") {
+        safeLog("webhook dispatcher nudge failed", { error: webhookNudge.reason instanceof Error ? webhookNudge.reason.message : "unknown" });
+      }
+      if (appsNudge.status === "rejected") {
+        safeLog("apps dispatcher nudge failed", { error: appsNudge.reason instanceof Error ? appsNudge.reason.message : "unknown" });
+      }
+    } catch (error) {
+      safeLog("dispatcher nudge failed", { error: error instanceof Error ? error.message : "unknown" });
+    }
 
     return new Response(
       JSON.stringify({ success: true }),

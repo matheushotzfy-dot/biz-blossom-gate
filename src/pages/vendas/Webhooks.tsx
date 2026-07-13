@@ -46,7 +46,7 @@ type WebhookConfig = Tables<"webhook_configs_safe">;
 
 export default function Webhooks() {
   const { user } = useAuth();
-  const { data: webhooks = [] } = useWebhooks();
+  const { data: webhooks = [], refetch: refetchWebhooks } = useWebhooks();
   const invalidateAll = useInvalidateAll();
   const [createOpen, setCreateOpen] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -98,6 +98,7 @@ export default function Webhooks() {
       setCreateOpen(false);
       resetForm();
       invalidateAll(["webhooks"]);
+      await refetchWebhooks();
     } finally {
       setIsSubmitting(false);
     }
@@ -108,6 +109,7 @@ export default function Webhooks() {
     const { error } = await supabase.from("webhook_configs").update({ is_active: !current }).eq("id", id);
     if (error) { toast.error(friendlyError(error)); return; }
     invalidateAll(["webhooks"]);
+    await refetchWebhooks();
     toast.success(current ? "Pausado" : "Ativado");
   };
 
@@ -117,6 +119,7 @@ export default function Webhooks() {
     if (error) { toast.error(friendlyError(error)); return; }
     toast.success("Removido");
     invalidateAll(["webhooks"]);
+    await refetchWebhooks();
   };
 
 
