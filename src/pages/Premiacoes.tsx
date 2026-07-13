@@ -157,12 +157,12 @@ function UnlockCelebration({ tier, onClose, onClaim }: { tier: AwardItem; onClos
               background: p.color,
               transform: "translate(-50%, -50%)",
               animation: `hotzfyBurst ${p.duration}ms cubic-bezier(0.2, 0.7, 0.3, 1) ${p.delay}ms forwards`,
-              // @ts-expect-error custom vars
-              "--dx": `${p.dx}px`,
-              "--dy": `${p.dy}px`,
-              "--rot": `${p.rotate}deg`,
+              ["--dx" as any]: `${p.dx}px`,
+              ["--dy" as any]: `${p.dy}px`,
+              ["--rot" as any]: `${p.rotate}deg`,
             } as React.CSSProperties}
           />
+
         ))}
       </div>
 
