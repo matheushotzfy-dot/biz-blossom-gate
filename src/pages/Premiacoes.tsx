@@ -782,6 +782,16 @@ export default function Premiacoes() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* =============== UNLOCK CELEBRATION =============== */}
+      {celebrateTier && (
+        <UnlockCelebration
+          tier={celebrateTier}
+          onClose={() => setCelebrateTier(null)}
+          onClaim={() => { setFocusId(celebrateTier.id); setCelebrateTier(null); setClaimOpen(true); }}
+        />
+      )}
     </div>
+
   );
 }
