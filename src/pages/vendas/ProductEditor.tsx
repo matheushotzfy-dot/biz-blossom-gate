@@ -1198,16 +1198,19 @@ function TabGeral({ name, setName, description, setDescription, price, setPrice,
                   </p>
                 )}
               </div>
-              <div className="w-32 space-y-1.5">
+              <div className="w-[300px] space-y-1.5">
                 <label className="text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">Garantia</label>
-                <Select value={warrantyDays} onValueChange={setWarrantyDays}>
-                  <SelectTrigger className="h-14 bg-secondary border-border text-sm font-semibold"><SelectValue /></SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="7">7 dias</SelectItem>
-                    <SelectItem value="14">14 dias</SelectItem>
-                    <SelectItem value="30">30 dias</SelectItem>
-                  </SelectContent>
-                </Select>
+                <SegmentedChoice
+                  value={warrantyDays}
+                  onValueChange={setWarrantyDays}
+                  columns={3}
+                  size="sm"
+                  options={[
+                    { value: "7", label: "7 dias" },
+                    { value: "14", label: "14 dias" },
+                    { value: "30", label: "30 dias" },
+                  ]}
+                />
               </div>
             </div>
           </div>
