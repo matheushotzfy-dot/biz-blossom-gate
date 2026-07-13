@@ -133,6 +133,7 @@ export default function AdminDashboard() {
   const [withdrawals, setWithdrawals] = useState<Tables<"withdrawals">[]>([]);
   const [isAdmin, setIsAdmin] = useState(false);
   const [isEmployee, setIsEmployee] = useState(false);
+  const [hasSupportPerm, setHasSupportPerm] = useState(false);
   const [roleChecked, setRoleChecked] = useState(false);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<TabId>("god-mode");
@@ -182,16 +183,19 @@ export default function AdminDashboard() {
     let cancelled = false;
     (async () => {
       try {
-        const [adminRes, employeeRes] = await Promise.all([
+        const [adminRes, employeeRes, permRes] = await Promise.all([
           supabase.rpc("current_user_has_role", { _role: "admin" }),
           supabase.rpc("current_user_has_role", { _role: "employee" }),
+          supabase.from("staff_permissions").select("permission_key").eq("user_id", user.id).eq("permission_key", "view_support"),
         ]);
         if (cancelled) return;
         const hasAdmin = adminRes.data === true;
         const hasEmployee = employeeRes.data === true;
+        const hasSupport = (permRes.data?.length ?? 0) > 0;
         if (!hasAdmin && !hasEmployee) { navigate("/admin-matheus"); return; }
         if (hasAdmin) setIsAdmin(true);
         else if (hasEmployee) setIsEmployee(true);
+        setHasSupportPerm(hasSupport);
         setRoleChecked(true);
       } catch {
         if (!cancelled) toast.error("Falha ao verificar permissões");
@@ -273,7 +277,10 @@ export default function AdminDashboard() {
   };
 
   const visibleSections = isEmployee
-    ? NAV_SECTIONS.map(s => ({ ...s, items: s.items.filter(i => i.employeeAccess) })).filter(s => s.items.length > 0)
+    ? NAV_SECTIONS.map(s => ({
+        ...s,
+        items: s.items.filter(i => i.employeeAccess || (i.id === "support" && hasSupportPerm)),
+      })).filter(s => s.items.length > 0)
     : NAV_SECTIONS;
 
   const filteredSections = navQuery.trim()
@@ -581,7 +588,7 @@ export default function AdminDashboard() {
               {activeTab === "affiliates" && isAdmin && <AdminAffiliateSalesTab profiles={profiles} products={products} fmtCurrency={fmtCurrency} />}
               {activeTab === "subscriptions" && isAdmin && <AdminSubscriptionsTab profiles={profiles} fmtCurrency={fmtCurrency} />}
               {activeTab === "referrals" && isAdmin && <AdminReferralsTab profiles={profiles} fmtCurrency={fmtCurrency} />}
-              {activeTab === "support" && isAdmin && <AdminSupportTab profiles={profiles} />}
+              {activeTab === "support" && (isAdmin || hasSupportPerm) && <AdminSupportTab profiles={profiles} />}
               {activeTab === "rewards" && isAdmin && <AdminRewardsTab profiles={profiles} />}
               {activeTab === "audit" && isAdmin && <AdminAuditTab profiles={profiles} />}
               {activeTab === "error-logs" && isAdmin && <AdminErrorLogsTab profiles={profiles} />}

@@ -90,9 +90,26 @@ export default function AdminSupportTab({
     if (!replyText.trim()) return;
     setSending(true);
     const { data: { user } } = await supabase.auth.getUser();
+    // Resolve responder name/role for the client to see
+    let adminName: string | null = null;
+    let adminRole: string | null = null;
+    if (user?.id) {
+      const [profRes, rolesRes] = await Promise.all([
+        supabase.from("profiles").select("full_name, email").eq("user_id", user.id).maybeSingle(),
+        supabase.from("user_roles").select("role").eq("user_id", user.id),
+      ]);
+      adminName = profRes.data?.full_name || profRes.data?.email || null;
+      const roles = (rolesRes.data || []).map((r) => r.role);
+      adminRole = roles.includes("admin") ? "admin"
+        : roles.includes("manager") ? "manager"
+        : roles.includes("employee") ? "employee"
+        : "staff";
+    }
     const { error } = await supabase.from("support_tickets").update({
       admin_reply: replyText.trim(),
       admin_user_id: user?.id ?? null,
+      admin_name: adminName,
+      admin_role: adminRole,
       status: "answered",
       replied_at: new Date().toISOString(),
     }).eq("id", ticket.id);

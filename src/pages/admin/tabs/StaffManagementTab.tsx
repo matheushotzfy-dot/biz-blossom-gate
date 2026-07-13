@@ -32,6 +32,8 @@ export const STAFF_PERMISSIONS: { key: string; label: string; group: string }[] 
   { key: "manage_med", label: "Trabalhar MED (admin finaliza)", group: "Operações" },
   { key: "login_as_user", label: "Login as user (impersonate)", group: "Operações" },
   { key: "freeze_seller_balance", label: "Congelar saldo de seller", group: "Operações" },
+  { key: "view_support", label: "Ver aba de Suporte / Tickets", group: "Suporte" },
+  { key: "respond_support", label: "Responder tickets de clientes", group: "Suporte" },
 ];
 
 interface Props {
