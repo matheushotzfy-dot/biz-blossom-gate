@@ -147,9 +147,11 @@ Deno.serve(async (req) => {
 
     if (authError || !authData.user || !authData.session) {
       const failure = getLoginFailure(authError);
-      await adminClient.from("admin_login_attempts").insert({
-        email: trimmedEmail, success: false, scope,
-      });
+      if (failure.code !== "email_not_confirmed") {
+        await adminClient.from("admin_login_attempts").insert({
+          email: trimmedEmail, success: false, scope,
+        });
+      }
       await logAbuseEvent({
         supabaseUrl, serviceKey: serviceRoleKey,
         event_type: "login_failed", endpoint: "gated-login",
