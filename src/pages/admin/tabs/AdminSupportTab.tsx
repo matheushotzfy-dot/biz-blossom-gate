@@ -90,10 +90,12 @@ export default function AdminSupportTab({
   const [loadingThread, setLoadingThread] = useState(false);
   const [reply, setReply] = useState("");
   const [sending, setSending] = useState(false);
+  const [replyFiles, setReplyFiles] = useState<File[]>([]);
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("pending_admin");
   const [me, setMe] = useState<{ id: string; name: string; role: string } | null>(null);
   const threadEndRef = useRef<HTMLDivElement>(null);
+  const replyFileInputRef = useRef<HTMLInputElement>(null);
 
   const getProfile = (uid: string) => profiles.find(p => p.user_id === uid);
 
