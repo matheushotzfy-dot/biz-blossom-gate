@@ -115,10 +115,12 @@ function Ring({ value, size = 168, stroke = 5 }: { value: number; size?: number;
 export default function Premiacoes() {
   const { user } = useAuth();
   const [revenue, setRevenue] = useState(0);
+  const [dailyAvg, setDailyAvg] = useState(0);
   const [focusId, setFocusId] = useState<string | null>(null);
   const [claimOpen, setClaimOpen] = useState(false);
   const [submittingClaim, setSubmittingClaim] = useState(false);
-  const [existingClaims, setExistingClaims] = useState<Array<{ id: string; tier_id: string; status: string }>>([]);
+  const [existingClaims, setExistingClaims] = useState<Array<{ id: string; tier_id: string; tier_label?: string | null; status: string; created_at?: string }>>([]);
+  const [gridFilter, setGridFilter] = useState<"all" | "unlocked" | "locked">("all");
   const [claimForm, setClaimForm] = useState({
     recipient_name: "", phone: "", document: "",
     shipping_street: "", shipping_number: "", shipping_complement: "",
@@ -127,11 +129,20 @@ export default function Premiacoes() {
 
   useEffect(() => {
     if (!user?.id) return;
-    supabase.from("transactions").select("net_amount")
+    supabase.from("transactions").select("net_amount, created_at")
       .eq("user_id", user.id).eq("status", "completed")
-      .then(({ data }) => { if (data) setRevenue(data.reduce((s, t) => s + Number(t.net_amount), 0)); });
-    supabase.from("reward_claims").select("id, tier_id, status").eq("user_id", user.id)
-      .then(({ data }) => { if (data) setExistingClaims(data); });
+      .then(({ data }) => {
+        if (!data) return;
+        const total = data.reduce((s, t) => s + Number(t.net_amount), 0);
+        setRevenue(total);
+        // Compute avg daily revenue from last 30 days
+        const cutoff = Date.now() - 30 * 24 * 60 * 60 * 1000;
+        const recent = data.filter((t) => t.created_at && new Date(t.created_at).getTime() >= cutoff);
+        const recentSum = recent.reduce((s, t) => s + Number(t.net_amount), 0);
+        setDailyAvg(recentSum / 30);
+      });
+    supabase.from("reward_claims").select("id, tier_id, tier_label, status, created_at").eq("user_id", user.id).order("created_at", { ascending: false })
+      .then(({ data }) => { if (data) setExistingClaims(data as any); });
   }, [user?.id]);
 
   const { unlockedCount, nextAward, currentTier, overallProgress, remaining } = useMemo(() => {
@@ -148,6 +159,32 @@ export default function Premiacoes() {
     if (focusId) return AWARDS.find((a) => a.id === focusId) ?? nextAward ?? AWARDS[AWARDS.length - 1];
     return nextAward ?? AWARDS[AWARDS.length - 1];
   }, [focusId, nextAward]);
+
+  // ETA calculation for focused tier
+  const focusedETA = useMemo(() => {
+    if (revenue >= focused.value) return null;
+    if (dailyAvg <= 0) return null;
+    const days = Math.ceil((focused.value - revenue) / dailyAvg);
+    if (days > 3650) return null;
+    if (days <= 1) return "Menos de 1 dia";
+    if (days < 30) return `~${days} dias`;
+    if (days < 365) return `~${Math.round(days / 30)} meses`;
+    return `~${(days / 365).toFixed(1)} anos`;
+  }, [revenue, focused, dailyAvg]);
+
+  const handleShare = async () => {
+    const text = revenue >= focused.value
+      ? `🏆 Conquistei o troféu ${focused.title} (${focused.label}) na HOTZFY! ${focused.phrase}`
+      : `🎯 Faltam ${fmtFull(Math.max(focused.value - revenue, 0))} para desbloquear ${focused.title} na HOTZFY.`;
+    try {
+      if (navigator.share) {
+        await navigator.share({ title: `HOTZFY · ${focused.tier}`, text });
+      } else {
+        await navigator.clipboard.writeText(text);
+        toast.success("Copiado! Cole onde quiser compartilhar.");
+      }
+    } catch { /* user cancelled */ }
+  };
 
   const focusedIdx = AWARDS.findIndex((a) => a.id === focused.id);
   const focusedDone = revenue >= focused.value;
