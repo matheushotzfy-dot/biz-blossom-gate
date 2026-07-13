@@ -82,6 +82,32 @@ Deno.serve(async (req) => {
 
     const supabase = createClient(supabaseUrl, serviceKey);
 
+    // === Idempotency — opcional, evita dupla-cobrança em retry de rede ===
+    const rawIdem = String(body?.idempotencyKey || "").slice(0, 200).trim();
+    if (rawIdem) {
+      // Escopar por usuário para evitar colisão global cross-tenant
+      const scopedKey = `qpix:${userId}:${rawIdem}`;
+      const { data: cached } = await supabase
+        .from("idempotency_keys")
+        .select("response")
+        .eq("key", scopedKey)
+        .maybeSingle();
+      if (cached?.response) {
+        return new Response(JSON.stringify(cached.response), {
+          status: 200,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+      // Marcar chave "em uso" — se falhar por conflito, outro request já está processando
+      const { error: claimErr } = await supabase
+        .from("idempotency_keys")
+        .insert({ key: scopedKey, response: null });
+      if (claimErr && !String(claimErr.message).includes("duplicate")) {
+        safeLog("Idempotency claim error", { error: claimErr.message });
+      }
+    }
+
+
     // === Fees (PIX) — same source of truth as podpay-create-transaction + Taxas.tsx ===
     const { data: fees, error: feesError } = await supabase.from("fees").select("*");
     if (feesError || !fees || fees.length === 0) {
