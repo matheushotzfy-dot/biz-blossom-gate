@@ -2,12 +2,13 @@ import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useBankAccounts, usePixKeys, useInvalidateAll } from "@/hooks/useQueryData";
-import { Building2, Plus, Trash2, Key, CheckCircle2 } from "lucide-react";
+import { Building2, Plus, Trash2, Key, CheckCircle2, User, Mail, Phone, Hash, Shuffle, Landmark, PiggyBank } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { SegmentedChoice } from "@/components/ui/segmented-choice";
+import { BankCombobox } from "@/components/ui/bank-combobox";
 import { toast } from "sonner";
 import {
   bankAccountSchema,
@@ -19,17 +20,19 @@ import { InlineError, errorInputClass } from "@/components/ui/inline-error";
 import { friendlyError } from "@/lib/friendlyError";
 
 const PIX_TYPES = [
-  { value: "cpf", label: "CPF" },
-  { value: "cnpj", label: "CNPJ" },
-  { value: "email", label: "E-mail" },
-  { value: "phone", label: "Telefone" },
-  { value: "random", label: "Chave Aleatória" },
+  { value: "cpf" as const, label: "CPF", description: "Documento pessoal", icon: User },
+  { value: "cnpj" as const, label: "CNPJ", description: "Documento empresarial", icon: Hash },
+  { value: "email" as const, label: "E-mail", description: "Endereço cadastrado", icon: Mail },
+  { value: "phone" as const, label: "Telefone", description: "Celular com DDD", icon: Phone },
+  { value: "random" as const, label: "Aleatória", description: "Chave gerada", icon: Shuffle },
 ];
 
 const ACCOUNT_TYPES = [
-  { value: "corrente", label: "Conta Corrente" },
-  { value: "poupanca", label: "Poupança" },
+  { value: "corrente" as const, label: "Conta Corrente", description: "Movimentação diária", icon: Landmark },
+  { value: "poupanca" as const, label: "Poupança", description: "Conta de rendimento", icon: PiggyBank },
 ];
+
+const PIX_LABEL: Record<string, string> = Object.fromEntries(PIX_TYPES.map((t) => [t.value, t.label]));
 
 type PixForm = { key_type: "cpf" | "cnpj" | "email" | "phone" | "random"; key_value: string };
 type BankForm = {
