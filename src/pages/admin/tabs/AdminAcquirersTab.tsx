@@ -837,7 +837,7 @@ function AcquirerDetail({ acq, stats, healthEvents, failovers, sellersOfAcq, txs
   onEdit: () => void; onSetHealth: (s: Health) => void; onToggle: (f: "is_active" | "seller_visible" | "allow_failover") => void;
 }) {
   const cfg = HEALTH_CONFIG[acq.health_status];
-  const [showSecrets, setShowSecrets] = useState(false);
+  // (removed showSecrets state — credenciais nunca são reveladas no client após fix A1)
   const s = stats || { sales: 0, volume: 0, refused: 0, refunded: 0, medpix: 0, sellers: 0, fees: 0, net: 0 };
   const conv = s.sales + s.refused > 0 ? (s.sales / (s.sales + s.refused)) * 100 : Number(acq.conversion_rate);
 
