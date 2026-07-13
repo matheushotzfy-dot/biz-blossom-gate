@@ -714,7 +714,7 @@ export default function Suporte() {
                   </button>
                   <textarea
                     value={reply}
-                    onChange={e => setReply(e.target.value)}
+                    onChange={e => { setReply(e.target.value); notifyTyping(); }}
                     onKeyDown={e => { if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) handleReply(); }}
                     placeholder="Escreva uma resposta... (Ctrl+Enter envia)"
                     rows={2}
