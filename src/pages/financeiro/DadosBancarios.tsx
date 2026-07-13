@@ -167,15 +167,13 @@ export default function DadosBancarios() {
               <form onSubmit={handleAddPix} className="space-y-4 pt-2" noValidate>
                 <div className="space-y-2">
                   <Label>Tipo de chave</Label>
-                  <Select
+                  <SegmentedChoice
                     value={pixForm.key_type}
-                    onValueChange={(v) => { setPixForm({ ...pixForm, key_type: v as PixForm["key_type"] }); clearPixError("key_value"); }}
-                  >
-                    <SelectTrigger className="finance-select-trigger h-11 border-primary/25 bg-primary/[0.045] font-black"><SelectValue /></SelectTrigger>
-                    <SelectContent className="w-[var(--radix-select-trigger-width)]">
-                      {PIX_TYPES.map(t => <SelectItem key={t.value} value={t.value} className="text-[13px] font-black">{t.label}</SelectItem>)}
-                    </SelectContent>
-                  </Select>
+                    onValueChange={(v) => { setPixForm({ ...pixForm, key_type: v }); clearPixError("key_value"); }}
+                    options={PIX_TYPES}
+                    columns={2}
+                    size="sm"
+                  />
                 </div>
                 <div className="space-y-2">
                   <Label>Chave</Label>
