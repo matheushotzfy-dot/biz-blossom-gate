@@ -172,16 +172,9 @@ Deno.serve(async (req) => {
           );
         }
       }
-      if (tx.status === "pending" && tx.pix_expires_at) {
-        const exp = new Date(tx.pix_expires_at as string).getTime();
-        if (Number.isFinite(exp) && Date.now() > exp) {
-          safeLog("expired — rejecting late payment", { transactionId: tx.id });
-          return new Response(
-            JSON.stringify({ success: false, error: "Transaction expired" }),
-            { status: 409, headers: { ...corsHeaders, "Content-Type": "application/json" } },
-          );
-        }
-      }
+      // Gateway-confirmed payment is the source of truth. Do not reject a paid
+      // webhook only because the local PIX timer already passed; that creates
+      // orphaned paid charges and keeps seller/admin balances wrong.
     }
 
     const patch: Record<string, unknown> = {
