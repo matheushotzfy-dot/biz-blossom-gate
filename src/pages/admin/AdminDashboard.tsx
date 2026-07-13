@@ -183,16 +183,19 @@ export default function AdminDashboard() {
     let cancelled = false;
     (async () => {
       try {
-        const [adminRes, employeeRes] = await Promise.all([
+        const [adminRes, employeeRes, permRes] = await Promise.all([
           supabase.rpc("current_user_has_role", { _role: "admin" }),
           supabase.rpc("current_user_has_role", { _role: "employee" }),
+          supabase.from("staff_permissions").select("permission_key").eq("user_id", user.id).eq("permission_key", "view_support"),
         ]);
         if (cancelled) return;
         const hasAdmin = adminRes.data === true;
         const hasEmployee = employeeRes.data === true;
+        const hasSupport = (permRes.data?.length ?? 0) > 0;
         if (!hasAdmin && !hasEmployee) { navigate("/admin-matheus"); return; }
         if (hasAdmin) setIsAdmin(true);
         else if (hasEmployee) setIsEmployee(true);
+        setHasSupportPerm(hasSupport);
         setRoleChecked(true);
       } catch {
         if (!cancelled) toast.error("Falha ao verificar permissões");
