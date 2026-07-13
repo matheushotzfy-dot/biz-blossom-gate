@@ -33,6 +33,25 @@ const RATE_LIMIT_WINDOW_MS = 15 * 60 * 1000; // 15 minutes
 const RATE_LIMIT_MAX_FAILS = 5;
 const ALLOWED_SCOPES = new Set(["seller", "member"]);
 
+function getLoginFailure(authError: { code?: string; message?: string } | null) {
+  const code = String(authError?.code ?? "").toLowerCase();
+  const message = String(authError?.message ?? "").toLowerCase();
+
+  if (code === "email_not_confirmed" || message.includes("email not confirmed")) {
+    return {
+      status: 403,
+      code: "email_not_confirmed",
+      error: "Confirme seu e-mail antes de acessar.",
+    };
+  }
+
+  return {
+    status: 401,
+    code: "invalid_credentials",
+    error: "E-mail ou senha incorretos.",
+  };
+}
+
 Deno.serve(async (req) => {
   const corsHeaders = buildCors(req);
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
@@ -125,18 +144,19 @@ Deno.serve(async (req) => {
     });
 
     if (authError || !authData.user || !authData.session) {
+      const failure = getLoginFailure(authError);
       await adminClient.from("admin_login_attempts").insert({
         email: trimmedEmail, success: false, scope,
       });
       await logAbuseEvent({
         supabaseUrl, serviceKey: serviceRoleKey,
         event_type: "login_failed", endpoint: "gated-login",
-        status_code: 401, identifier: trimmedEmail, req,
-        metadata: { scope },
+        status_code: failure.status, identifier: trimmedEmail, req,
+        metadata: { scope, code: failure.code },
       });
       return new Response(
-        JSON.stringify({ success: false, error: "E-mail ou senha incorretos." }),
-        { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+        JSON.stringify({ success: false, error: failure.error, code: failure.code }),
+        { status: failure.status, headers: { ...corsHeaders, "Content-Type": "application/json" } },
       );
     }
 
