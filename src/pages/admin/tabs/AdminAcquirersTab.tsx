@@ -64,6 +64,7 @@ interface TxLite {
   status: string; payment_method: string | null; created_at: string;
   customer_email: string | null; customer_name: string | null;
   podpay_payment_id: string | null; external_id: string | null; checkout_session_id: string | null;
+  metadata: Record<string, unknown> | null;
 }
 
 const PAYMENT_METHODS = [
@@ -127,8 +128,8 @@ export default function AdminAcquirersTab() {
       supabase.from("acquirers").select("id,name,slug,type,is_active,api_endpoint,description,conversion_rate,seller_visible,health_status,last_health_check_at,last_failure_at,last_latency_ms,avg_latency_ms,uptime_pct,min_transaction_amount,max_transaction_amount,supported_methods,transaction_fee_percentage,transaction_fee_fixed,webhook_url,api_environment,priority,allow_failover,notes,created_at,updated_at,has_api_key,has_api_secret,has_webhook_secret").order("priority", { ascending: false }).order("created_at"),
       supabase.from("acquirer_health_events").select("*").order("created_at", { ascending: false }).limit(200),
       supabase.from("acquirer_failover_events").select("*").order("created_at", { ascending: false }).limit(100),
-      supabase.from("profiles").select("user_id, full_name, email, nickname, acquirer_id, account_status").eq("account_status", "active").order("full_name").limit(1000),
-      supabase.from("transactions").select("id, user_id, amount, net_amount, fee_amount, status, payment_method, created_at, customer_email, customer_name, podpay_payment_id, external_id, checkout_session_id").gte("created_at", since30).order("created_at", { ascending: false }).limit(500),
+      supabase.from("profiles").select("user_id, full_name, email, nickname, acquirer_id, account_status").in("account_status", ["active", "approved"]).order("full_name").limit(1000),
+      supabase.from("transactions").select("id, user_id, amount, net_amount, fee_amount, status, payment_method, created_at, customer_email, customer_name, podpay_payment_id, external_id, checkout_session_id, metadata").gte("created_at", since30).order("created_at", { ascending: false }).limit(500),
       supabase.from("disputes").select("transaction_id, type, created_at").gte("created_at", since30),
     ]);
 
@@ -286,9 +287,14 @@ export default function AdminAcquirersTab() {
   };
 
   const exportTxCsv = () => {
-    const rows = [["tx_id", "podpay_id", "external_id", "checkout_session", "adquirente", "seller_id", "cliente_email", "valor", "taxa", "liquido", "metodo", "status", "criado_em"]];
+    const rows = [["tx_id", "gateway_id", "external_id", "checkout_session", "adquirente", "seller_id", "cliente_email", "valor", "taxa", "liquido", "metodo", "status", "criado_em"]];
     txs.forEach(t => {
-      const aid = sellerAcqMap.get(t.user_id);
+      const txAcquirer = String(t.metadata?.acquirer || "").toLowerCase();
+      const aid = txAcquirer === "podpay"
+        ? acquirers.find(x => x.slug === "podpay")?.id
+        : txAcquirer === "veopag"
+          ? acquirers.find(x => x.slug === "veopag")?.id
+          : sellerAcqMap.get(t.user_id);
       const a = acquirers.find(x => x.id === aid);
       rows.push([t.id, t.podpay_payment_id || "", t.external_id || "", t.checkout_session_id || "", a?.name || "—", t.user_id, t.customer_email || "", String(t.amount), String(t.fee_amount || 0), String(t.net_amount || 0), t.payment_method || "", t.status, t.created_at]);
     });
@@ -606,7 +612,7 @@ export default function AdminAcquirersTab() {
                   <thead>
                     <tr className={premiumTable.headRow}>
                       <th className={premiumTable.th}>TX ID</th>
-                      <th className={premiumTable.th}>PodPay / External</th>
+                      <th className={premiumTable.th}>Gateway / External</th>
                       <th className={premiumTable.th}>Adquirente</th>
                       <th className={premiumTable.th}>Seller</th>
                       <th className={premiumTable.th}>Cliente</th>
@@ -619,8 +625,14 @@ export default function AdminAcquirersTab() {
                   </thead>
                   <tbody>
                     {list.slice(0, 500).map(t => {
-                      const aid = sellerAcqMap.get(t.user_id);
+                      const txAcquirer = String(t.metadata?.acquirer || "").toLowerCase();
+                      const aid = txAcquirer === "podpay"
+                        ? acquirers.find(x => x.slug === "podpay")?.id
+                        : txAcquirer === "veopag"
+                          ? acquirers.find(x => x.slug === "veopag")?.id
+                          : sellerAcqMap.get(t.user_id);
                       const a = acquirers.find(x => x.id === aid);
+                      const gatewayPrefix = (txAcquirer || a?.slug) === "veopag" ? "VP" : "GW";
                       const seller = sellers.find(s => s.user_id === t.user_id);
                       return (
                         <tr key={t.id} className={premiumTable.row}>
@@ -631,7 +643,7 @@ export default function AdminAcquirersTab() {
                           </td>
                           <td className={cn(premiumTable.td, "font-mono text-[10px] text-muted-foreground")}>
                             <div className="flex flex-col gap-0.5">
-                              {t.podpay_payment_id && <button onClick={() => copyTxt(t.podpay_payment_id!)} className="hover:text-foreground inline-flex items-center gap-1" title={t.podpay_payment_id}>PP {shortId(t.podpay_payment_id, 10)} <Copy className="h-2.5 w-2.5" /></button>}
+                              {t.podpay_payment_id && <button onClick={() => copyTxt(t.podpay_payment_id!)} className="hover:text-foreground inline-flex items-center gap-1" title={t.podpay_payment_id}>{gatewayPrefix} {shortId(t.podpay_payment_id, 10)} <Copy className="h-2.5 w-2.5" /></button>}
                               {t.external_id && <button onClick={() => copyTxt(t.external_id!)} className="hover:text-foreground inline-flex items-center gap-1" title={t.external_id}>EX {shortId(t.external_id, 10)} <Copy className="h-2.5 w-2.5" /></button>}
                               {t.checkout_session_id && <span title={t.checkout_session_id}>CK {shortId(t.checkout_session_id, 8)}</span>}
                               {!t.podpay_payment_id && !t.external_id && !t.checkout_session_id && <span>—</span>}
@@ -969,7 +981,7 @@ function AcquirerDetail({ acq, stats, healthEvents, failovers, sellersOfAcq, txs
                     <span className="tabular-nums font-bold text-foreground">{fmtBRL(Number(t.amount))}</span>
                   </div>
                   <div className="mt-1 flex flex-wrap gap-x-3 gap-y-0.5 text-[9px] font-mono text-muted-foreground">
-                    {t.podpay_payment_id && <span title={t.podpay_payment_id}>PP {shortId(t.podpay_payment_id, 10)}</span>}
+                    {t.podpay_payment_id && <span title={t.podpay_payment_id}>{String(t.metadata?.acquirer || "").toLowerCase() === "veopag" ? "VP" : "GW"} {shortId(t.podpay_payment_id, 10)}</span>}
                     {t.external_id && <span title={t.external_id}>EX {shortId(t.external_id, 10)}</span>}
                     {t.checkout_session_id && <span title={t.checkout_session_id}>CK {shortId(t.checkout_session_id, 8)}</span>}
                     <span className="ml-auto">{ago(t.created_at)}</span>
@@ -1229,7 +1241,7 @@ function BulkAssign({ acquirers, onDone }: { acquirers: Acquirer[]; onDone: () =
   const [running, setRunning] = useState(false);
 
   useEffect(() => {
-    supabase.from("profiles").select("user_id, full_name, email, nickname, acquirer_id, account_status").eq("account_status", "active").order("full_name").limit(1000)
+    supabase.from("profiles").select("user_id, full_name, email, nickname, acquirer_id, account_status").in("account_status", ["active", "approved"]).order("full_name").limit(1000)
       .then(({ data }) => setSellers(data || []));
   }, []);
 

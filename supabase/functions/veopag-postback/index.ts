@@ -22,10 +22,34 @@ const STATUS_MAP: Record<string, string> = {
   PENDING: "pending",
   PROCESSING: "pending",
   COMPLETED: "completed",
+  COMPLETE: "completed",
+  PAID: "completed",
+  APPROVED: "completed",
+  SUCCESS: "completed",
   FAILED: "failed",
+  FAIL: "failed",
+  CANCELED: "failed",
+  CANCELLED: "failed",
+  EXPIRED: "expired",
   REFUNDED: "refunded",
   PARTIALLY_REFUNDED: "refunded",
 };
+
+function firstString(...values: unknown[]): string | null {
+  for (const value of values) {
+    if (typeof value === "string" && value.trim()) return value.trim();
+    if (typeof value === "number" && Number.isFinite(value)) return String(value);
+  }
+  return null;
+}
+
+function normalizeAmount(raw: unknown, txAmount: number): number | null {
+  const parsed = typeof raw === "string" ? Number(raw.replace(",", ".")) : Number(raw);
+  if (!Number.isFinite(parsed)) return null;
+  // VeoPag/webhook bridges may send cents; local transactions store BRL.
+  if (parsed > txAmount * 10 && Math.abs(parsed / 100 - txAmount) <= 0.01) return parsed / 100;
+  return parsed;
+}
 
 function safeLog(message: string, context: Record<string, unknown> = {}) {
   const safe: Record<string, unknown> = {};
@@ -54,10 +78,29 @@ Deno.serve(async (req) => {
       );
     }
 
-    const type = String(payload.type ?? "").toLowerCase();
-    const veoTxId = payload.transaction_id ? String(payload.transaction_id) : null;
-    const externalId = payload.external_id ? String(payload.external_id) : null;
-    const rawStatus = String(payload.status ?? "").toUpperCase();
+    const nested = payload.transaction ?? payload.data ?? payload.payment ?? payload.qrCodeResponse ?? {};
+    const type = String(payload.type ?? payload.event ?? nested.type ?? "").toLowerCase();
+    const veoTxId = firstString(
+      payload.transaction_id,
+      payload.transactionId,
+      payload.transactionID,
+      payload.id,
+      nested.transaction_id,
+      nested.transactionId,
+      nested.transactionID,
+      nested.id,
+    );
+    const externalId = firstString(
+      payload.external_id,
+      payload.externalId,
+      payload.external_ref,
+      payload.externalRef,
+      nested.external_id,
+      nested.externalId,
+      nested.external_ref,
+      nested.externalRef,
+    );
+    const rawStatus = String(payload.status ?? nested.status ?? "").toUpperCase();
     const mapped = STATUS_MAP[rawStatus] ?? "pending";
 
     safeLog("received", { type, veopagId: veoTxId, externalId, status: rawStatus });
@@ -115,9 +158,10 @@ Deno.serve(async (req) => {
 
     // Amount + expiration guard only when marking as paid.
     if (mapped === "completed") {
-      if (payload.amount != null) {
-        const payloadAmt = Number(payload.amount);
-        if (Number.isFinite(payloadAmt) && Math.abs(payloadAmt - Number(tx.amount)) > 0.01) {
+      const amountRaw = payload.amount ?? payload.value ?? nested.amount ?? nested.value;
+      if (amountRaw != null) {
+        const payloadAmt = normalizeAmount(amountRaw, Number(tx.amount));
+        if (payloadAmt !== null && Math.abs(payloadAmt - Number(tx.amount)) > 0.01) {
           safeLog("amount mismatch — rejecting", {
             transactionId: tx.id,
             error: `payload=${payloadAmt} tx=${tx.amount}`,
@@ -140,7 +184,15 @@ Deno.serve(async (req) => {
       }
     }
 
-    const patch: Record<string, unknown> = { status: mapped };
+    const patch: Record<string, unknown> = {
+      status: mapped,
+      metadata: {
+        ...((tx.metadata as Record<string, unknown> | null) || {}),
+        acquirer: "veopag",
+        last_veopag_status: rawStatus,
+        last_veopag_event_at: new Date().toISOString(),
+      },
+    };
     if (veoTxId && !tx.podpay_payment_id) patch.podpay_payment_id = veoTxId;
 
     const { error: updErr } = await supabase

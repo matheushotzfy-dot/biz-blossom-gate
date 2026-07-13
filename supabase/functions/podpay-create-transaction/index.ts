@@ -10,7 +10,7 @@ import { createVeopagDeposit, resolveAcquirerSlug } from "../_shared/veopag.ts";
 /** Log only safe fields — never PII, card data, or full payloads */
 function safeLog(message: string, context: Record<string, unknown> = {}) {
   const safe: Record<string, unknown> = {};
-  const ALLOWED_KEYS = ['transactionId', 'productId', 'status', 'amount', 'paymentMethod', 'podpayId', 'error', 'code', 'resumed'];
+  const ALLOWED_KEYS = ['transactionId', 'productId', 'status', 'amount', 'paymentMethod', 'podpayId', 'error', 'code', 'resumed', 'acquirer', 'previousAcquirer'];
   for (const key of ALLOWED_KEYS) {
     if (key in context) safe[key] = context[key];
   }
@@ -178,52 +178,6 @@ Deno.serve(async (req) => {
       }
     }
 
-    // === IDEMPOTENCY: Check for existing pending transaction with same session ===
-    if (checkoutSessionId) {
-      const { data: existing } = await supabase
-        .from('transactions')
-        .select('*')
-        .eq('checkout_session_id', checkoutSessionId)
-        .eq('status', 'pending')
-        .maybeSingle();
-
-      if (existing && existing.podpay_payment_id) {
-        safeLog('Resuming existing pending transaction', { transactionId: existing.id, resumed: true });
-        let pixData = null;
-        let boletoData = null;
-        try {
-          const publicKey = Deno.env.get('PODPAY_PUBLIC_KEY')!;
-          const secretKey = Deno.env.get('PODPAY_SECRET_KEY')!;
-          const auth = 'Basic ' + btoa(publicKey + ':' + secretKey);
-          const txResp = await fetch(`https://api.podpay.co/v1/transactions/${existing.podpay_payment_id}`, {
-            headers: { 'Authorization': auth, 'Accept': 'application/json' },
-          });
-          if (txResp.ok) {
-            const txData = await txResp.json();
-            pixData = txData.data?.pix || txData.pix || null;
-            boletoData = txData.data?.boleto || txData.boleto || null;
-          }
-        } catch (e) {
-          safeLog('Error fetching PodPay transaction', { error: e instanceof Error ? e.message : 'unknown' });
-        }
-
-        return new Response(
-          JSON.stringify({
-            success: true,
-            resumed: true,
-            data: {
-              transactionId: existing.id,
-              podpayId: existing.podpay_payment_id,
-              status: 'pending',
-              pix: pixData,
-              boleto: boletoData,
-            },
-          }),
-          { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-        );
-      }
-    }
-
     // === Get product ===
     const { data: product, error: productError } = await supabase
       .from('products')
@@ -265,6 +219,105 @@ Deno.serve(async (req) => {
         JSON.stringify({ success: false, error: 'Método de pagamento desabilitado para este produto' }),
         { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
+    }
+
+    const acquirerSlug = await resolveAcquirerSlug(supabase, product.user_id);
+
+    // === IDEMPOTENCY: Check for existing pending transaction with same session ===
+    // Must run after resolving the seller's current acquirer; otherwise an old
+    // browser session created on PodPay keeps returning a stale PodPay charge
+    // after the seller is moved to VeoPag.
+    if (checkoutSessionId) {
+      const { data: existing } = await supabase
+        .from('transactions')
+        .select('*')
+        .eq('checkout_session_id', checkoutSessionId)
+        .eq('status', 'pending')
+        .maybeSingle();
+
+      if (existing) {
+        const existingMetadata = (existing.metadata && typeof existing.metadata === 'object')
+          ? existing.metadata as Record<string, unknown>
+          : {};
+        const existingAcquirer = String(existingMetadata.acquirer || 'podpay');
+        const sameProduct = !existing.product_id || existing.product_id === product.id;
+
+        if (!sameProduct || existingAcquirer !== acquirerSlug) {
+          await supabase
+            .from('transactions')
+            .update({
+              status: 'expired',
+              metadata: {
+                ...existingMetadata,
+                superseded_by_acquirer: acquirerSlug,
+                superseded_at: new Date().toISOString(),
+              },
+            })
+            .eq('id', existing.id);
+          safeLog('Expired stale checkout session', {
+            transactionId: existing.id,
+            previousAcquirer: existingAcquirer,
+            acquirer: acquirerSlug,
+          });
+        } else if (existing.podpay_payment_id) {
+          safeLog('Resuming existing pending transaction', { transactionId: existing.id, resumed: true, acquirer: existingAcquirer });
+
+          if (existingAcquirer === 'veopag') {
+            const pixCode = existing.pix_copy_paste || existing.pix_qrcode || null;
+            return new Response(
+              JSON.stringify({
+                success: true,
+                resumed: true,
+                data: {
+                  transactionId: existing.id,
+                  podpayId: existing.podpay_payment_id,
+                  gatewayId: existing.podpay_payment_id,
+                  acquirer: 'veopag',
+                  status: 'pending',
+                  pix: pixCode ? { qrcode: pixCode, expiresAt: existing.pix_expires_at || null } : null,
+                  boleto: null,
+                },
+              }),
+              { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+            );
+          }
+
+          let pixData = null;
+          let boletoData = null;
+          try {
+            const publicKey = Deno.env.get('PODPAY_PUBLIC_KEY')!;
+            const secretKey = Deno.env.get('PODPAY_SECRET_KEY')!;
+            const auth = 'Basic ' + btoa(publicKey + ':' + secretKey);
+            const txResp = await fetch(`https://api.podpay.co/v1/transactions/${existing.podpay_payment_id}`, {
+              headers: { 'Authorization': auth, 'Accept': 'application/json' },
+            });
+            if (txResp.ok) {
+              const txData = await txResp.json();
+              pixData = txData.data?.pix || txData.pix || null;
+              boletoData = txData.data?.boleto || txData.boleto || null;
+            }
+          } catch (e) {
+            safeLog('Error fetching PodPay transaction', { error: e instanceof Error ? e.message : 'unknown' });
+          }
+
+          return new Response(
+            JSON.stringify({
+              success: true,
+              resumed: true,
+              data: {
+                transactionId: existing.id,
+                podpayId: existing.podpay_payment_id,
+                gatewayId: existing.podpay_payment_id,
+                acquirer: 'podpay',
+                status: 'pending',
+                pix: pixData,
+                boleto: boletoData,
+              },
+            }),
+            { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+          );
+        }
+      }
     }
 
 
@@ -377,7 +430,6 @@ Deno.serve(async (req) => {
     // Se o vendedor está roteado para VeoPag em seller_acquirer_config,
     // e o método é PIX, cria a cobrança lá em vez do PodPay. Nunca envia
     // nome/email/URL da plataforma — apenas nome + CPF reais do pagador.
-    const acquirerSlug = await resolveAcquirerSlug(supabase, product.user_id);
     if (acquirerSlug === "veopag" && paymentMethod === "pix") {
       const preTxId = crypto.randomUUID();
 
@@ -468,6 +520,8 @@ Deno.serve(async (req) => {
         data: {
           transactionId: transaction.id,
           podpayId: veo.transactionId, // reusa o campo esperado pelo frontend
+          gatewayId: veo.transactionId,
+          acquirer: "veopag",
           status: "pending",
           pix: { qrcode: veo.qrcode, expiresAt: pixExpiresAt },
           boleto: null,
@@ -634,8 +688,8 @@ Deno.serve(async (req) => {
       affiliate_link_id: resolvedAffiliateLinkId,
       pix_expires_at: pixExpiresAt,
       metadata: validBumpIds.length > 0
-        ? { bump_product_ids: validBumpIds, bumps_total: bumpsTotal }
-        : {},
+        ? { acquirer: 'podpay', bump_product_ids: validBumpIds, bumps_total: bumpsTotal }
+        : { acquirer: 'podpay' },
     }).select().single();
 
 
@@ -665,6 +719,8 @@ Deno.serve(async (req) => {
       data: {
         transactionId: transaction?.id,
         podpayId,
+        gatewayId: podpayId,
+        acquirer: 'podpay',
         status: podpayData.data?.status || podpayData.status,
         pix: podpayData.data?.pix || podpayData.pix || null,
         boleto: podpayData.data?.boleto || podpayData.boleto || null,

@@ -3,6 +3,7 @@
 // Versioned: /v1/*
 
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { createVeopagDeposit, resolveAcquirerSlug } from "../_shared/veopag.ts";
 
 // ---- Public API: restrictive CORS (server-to-server). We allow * because
 // integrators call from servers; preflight still validated below.
@@ -388,7 +389,7 @@ async function createPixViaPodpay(
   supabaseUrl: string,
   expiresInMinutes: number,
 ): Promise<
-  | { ok: true; podpayId: string; qrCode: string; copyPaste: string; expiresAt: string }
+  | { ok: true; gatewayId: string; qrCode: string; copyPaste: string; expiresAt: string }
   | { ok: false; status: number; message: string }
 > {
   const publicKey = Deno.env.get("PODPAY_PUBLIC_KEY")!;
@@ -439,7 +440,7 @@ async function createPixViaPodpay(
     const pix = inner.pix ?? {};
     return {
       ok: true,
-      podpayId: String(inner.id ?? ""),
+      gatewayId: String(inner.id ?? ""),
       qrCode: String(pix.qrcode ?? pix.qrCode ?? ""),
       copyPaste: String(pix.copyPaste ?? pix.copy_paste ?? pix.qrcode ?? ""),
       expiresAt: pix.expiresAt ?? pix.expires_at ?? new Date(Date.now() + expiresInMinutes * 60_000).toISOString(),
@@ -453,6 +454,45 @@ async function createPixViaPodpay(
     };
   } finally {
     clearTimeout(t);
+  }
+}
+
+// ---- PIX creation via VeoPag ----------------------------------------------
+
+async function createPixViaVeopag(
+  admin: ReturnType<typeof createClient>,
+  amountReais: number,
+  customer: { name: string; document: string; phone?: string },
+  transactionId: string,
+  expiresInMinutes: number,
+): Promise<
+  | { ok: true; gatewayId: string; qrCode: string; copyPaste: string; expiresAt: string }
+  | { ok: false; status: number; message: string }
+> {
+  try {
+    const veo = await createVeopagDeposit({
+      amount: amountReais,
+      externalId: transactionId,
+      payerName: customer.name,
+      payerDocument: customer.document,
+      payerPhone: customer.phone ?? null,
+    }, admin);
+
+    return {
+      ok: true,
+      gatewayId: veo.transactionId,
+      qrCode: veo.qrcode,
+      copyPaste: veo.qrcode,
+      expiresAt: new Date(Date.now() + expiresInMinutes * 60_000).toISOString(),
+    };
+  } catch (e) {
+    return {
+      ok: false,
+      status: 502,
+      message: e instanceof Error && e.name === "AbortError"
+        ? "Payment provider timed out."
+        : "Payment provider rejected the charge.",
+    };
   }
 }
 
@@ -545,26 +585,41 @@ async function handleCreateCharge(
     productId = product.id;
   }
 
-  // Create Podpay PIX
+  // Create PIX in the seller's configured acquirer.
+  const acquirerSlug = await resolveAcquirerSlug(admin, key.userId);
+  const preTxId = crypto.randomUUID();
   const externalRef = `api_${crypto.randomUUID()}`;
-  const podpay = await createPixViaPodpay(
-    input.amount_cents,
-    {
-      name: input.customer_name,
-      email: input.customer_email,
-      document: input.customer_document,
-    },
-    externalRef,
-    Deno.env.get("SUPABASE_URL")!,
-    input.expires_in_minutes!,
-  );
+  const gateway = acquirerSlug === "veopag"
+    ? await createPixViaVeopag(
+      admin,
+      amountReais,
+      {
+        name: input.customer_name,
+        document: input.customer_document,
+        phone: input.customer_phone,
+      },
+      preTxId,
+      input.expires_in_minutes!,
+    )
+    : await createPixViaPodpay(
+      input.amount_cents,
+      {
+        name: input.customer_name,
+        email: input.customer_email,
+        document: input.customer_document,
+      },
+      externalRef,
+      Deno.env.get("SUPABASE_URL")!,
+      input.expires_in_minutes!,
+    );
 
-  if (!podpay.ok) {
-    return errorResponse(podpay.status, "provider_error", podpay.message, requestId);
+  if (!gateway.ok) {
+    return errorResponse(gateway.status, "provider_error", gateway.message, requestId);
   }
 
   // Persist transaction
   const insertPayload = {
+    id: preTxId,
     user_id: key.userId,
     product_id: productId,
     api_key_id: key.apiKeyId,
@@ -577,13 +632,13 @@ async function handleCreateCharge(
     customer_email: input.customer_email,
     customer_document: input.customer_document,
     customer_phone: input.customer_phone ?? null,
-    podpay_payment_id: podpay.podpayId || null,
+    podpay_payment_id: gateway.gatewayId || null,
     external_id: input.external_id ?? null,
-    metadata: input.metadata ?? {},
+    metadata: { ...(input.metadata ?? {}), acquirer: acquirerSlug },
     source: "api",
-    pix_qrcode: podpay.qrCode,
-    pix_copy_paste: podpay.copyPaste,
-    pix_expires_at: podpay.expiresAt,
+    pix_qrcode: gateway.qrCode,
+    pix_copy_paste: gateway.copyPaste,
+    pix_expires_at: gateway.expiresAt,
   };
 
   const { data: tx, error: txErr } = await admin
