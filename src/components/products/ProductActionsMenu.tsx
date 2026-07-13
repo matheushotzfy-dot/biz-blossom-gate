@@ -8,11 +8,9 @@ import {
   Pencil,
   GraduationCap,
   Trash2,
-  Package,
   Files,
   Pause,
   Play,
-  ChevronRight,
   type LucideIcon,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
@@ -21,12 +19,12 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { cn } from "@/lib/utils";
 
 import type { Product } from "./productPresentation";
-import { formatCurrency } from "./productPresentation";
 
 export type ProductMenuHandlers = {
   onCopyLink: (product: Product) => void;
@@ -49,14 +47,8 @@ type ProductActionsMenuProps = ProductMenuHandlers & {
 type Row = {
   icon: LucideIcon;
   label: string;
-  hint?: string;
   action: () => void;
   variant?: "default" | "destructive";
-};
-
-type Section = {
-  title: string;
-  rows: Row[];
 };
 
 export function ProductActionsMenu({
@@ -76,34 +68,22 @@ export function ProductActionsMenu({
   const navigate = useNavigate();
   const isActive = product.status === "active";
 
-  const sections: Section[] = [
-    {
-      title: "Gerenciar",
-      rows: [
-        { icon: Pencil,        label: "Editar produto", hint: "Nome, preço e entrega", action: () => onEditProduct(product) },
-        { icon: Files,         label: "Duplicar produto", hint: "Criar cópia em revisão", action: () => onDuplicateProduct(product) },
-        { icon: isActive ? Pause : Play, label: isActive ? "Pausar vendas" : "Reativar vendas", hint: isActive ? "Some do checkout público" : "Volta a aceitar pedidos", action: () => onToggleStatus(product) },
-        { icon: Palette,       label: "Checkout builder", hint: "Layout e conversão", action: () => navigate(`/vendas/produtos/${product.id}/checkout-builder`, { state: { product } }) },
-        { icon: GraduationCap, label: "Área de membros", hint: "Curso, aulas e acesso", action: () => onOpenMembers(product) },
-      ],
-    },
-    {
-      title: "Distribuir",
-      rows: [
-        ...(product.checkout_url
-          ? [
-              {
-                icon: copied ? CheckCircle2 : Copy,
-                label: copied ? "Link copiado" : "Copiar checkout",
-                hint: "URL pública do produto",
-                action: () => onCopyLink(product),
-              },
-              { icon: ExternalLink, label: "Abrir checkout", hint: "Visualizar página final", action: () => onOpenCheckout(product) },
-            ]
-          : []),
-        { icon: Crosshair, label: "Pixels & tracking", hint: "Eventos e rastreamento", action: () => onOpenPixels(product) },
-      ],
-    },
+  const manage: Row[] = [
+    { icon: Pencil, label: "Editar produto", action: () => onEditProduct(product) },
+    { icon: Files, label: "Duplicar", action: () => onDuplicateProduct(product) },
+    { icon: isActive ? Pause : Play, label: isActive ? "Pausar vendas" : "Reativar vendas", action: () => onToggleStatus(product) },
+    { icon: Palette, label: "Checkout builder", action: () => navigate(`/vendas/produtos/${product.id}/checkout-builder`, { state: { product } }) },
+    { icon: GraduationCap, label: "Área de membros", action: () => onOpenMembers(product) },
+  ];
+
+  const distribute: Row[] = [
+    ...(product.checkout_url
+      ? [
+          { icon: copied ? CheckCircle2 : Copy, label: copied ? "Link copiado" : "Copiar checkout", action: () => onCopyLink(product) },
+          { icon: ExternalLink, label: "Abrir checkout", action: () => onOpenCheckout(product) },
+        ]
+      : []),
+    { icon: Crosshair, label: "Pixels & tracking", action: () => onOpenPixels(product) },
   ];
 
   const labeledTrigger = Boolean(triggerLabel);
@@ -115,47 +95,20 @@ export function ProductActionsMenu({
         key={row.label}
         onClick={row.action}
         className={cn(
-           "group/row relative flex min-h-[52px] cursor-pointer items-center gap-3 overflow-hidden rounded-lg px-2.5 outline-none transition-all duration-300 active:scale-[0.99]",
+          "group flex h-9 cursor-pointer items-center gap-3 rounded-md px-2.5 text-[13px] font-medium outline-none transition-colors",
           isDestructive
-            ? "focus:bg-destructive/[0.08] data-[highlighted]:bg-destructive/[0.08] hover:bg-destructive/[0.06]"
-            : "focus:bg-primary/[0.08] data-[highlighted]:bg-primary/[0.08] hover:translate-x-0.5 hover:bg-primary/[0.06]",
+            ? "text-destructive focus:bg-destructive/10 data-[highlighted]:bg-destructive/10"
+            : "text-foreground/85 focus:bg-muted data-[highlighted]:bg-muted focus:text-foreground",
         )}
       >
-        {!isDestructive && <span className="pointer-events-none absolute inset-y-2 left-0 w-[3px] rounded-r-full bg-primary opacity-0 transition-opacity duration-300 group-hover/row:opacity-100 group-data-[highlighted]/row:opacity-100" />}
-        <div
+        <row.icon
           className={cn(
-             "flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border transition-all duration-300",
-            isDestructive
-              ? "border-destructive/15 bg-destructive/[0.06] text-destructive group-hover/row:scale-110 group-hover/row:border-destructive/40 group-hover/row:bg-destructive/[0.12]"
-              : "border-border/50 bg-muted/20 text-muted-foreground group-hover/row:scale-110 group-hover/row:border-primary/40 group-hover/row:bg-primary/[0.10] group-hover/row:text-primary group-data-[highlighted]/row:border-primary/40 group-data-[highlighted]/row:bg-primary/[0.10] group-data-[highlighted]/row:text-primary",
+            "h-4 w-4 shrink-0 transition-colors",
+            isDestructive ? "text-destructive/80" : "text-muted-foreground group-data-[highlighted]:text-foreground",
           )}
-        >
-          <row.icon className="h-3.5 w-3.5 transition-transform duration-300 group-hover/row:scale-110" strokeWidth={2.25} />
-        </div>
-
-        <span className="min-w-0 flex-1">
-          <span
-            className={cn(
-              "block truncate text-[12.5px] font-black tracking-tight",
-              isDestructive ? "text-destructive" : "text-foreground/90 group-hover/row:text-foreground",
-            )}
-          >
-            {row.label}
-          </span>
-          {row.hint && (
-            <span className="mt-0.5 block truncate text-[10px] font-bold uppercase tracking-[0.08em] text-muted-foreground/55 group-hover/row:text-muted-foreground/80">
-              {row.hint}
-            </span>
-          )}
-        </span>
-
-        <ChevronRight
-          className={cn(
-            "h-3.5 w-3.5 shrink-0 -translate-x-1 opacity-0 transition-all duration-200 group-hover/row:translate-x-0 group-hover/row:opacity-60",
-            isDestructive ? "text-destructive" : "text-foreground",
-          )}
-          strokeWidth={2.5}
+          strokeWidth={2}
         />
+        <span className="truncate">{row.label}</span>
       </DropdownMenuItem>
     );
   };
@@ -182,49 +135,32 @@ export function ProductActionsMenu({
       <DropdownMenuContent
         align="end"
         side="bottom"
-        sideOffset={8}
-          className="w-[324px] max-h-none overflow-visible rounded-2xl border border-border/80 bg-popover/95 p-0 shadow-2xl backdrop-blur-md"
+        sideOffset={6}
+        className="w-56 rounded-xl border border-border/70 bg-popover p-1.5 shadow-lg"
       >
-        {/* Identity Header */}
-        <div className="relative flex items-center gap-3 border-b border-border/60 bg-card px-4 py-4">
-          <span className="absolute left-0 top-4 bottom-4 w-[3px] rounded-r-full bg-primary/80" />
-          <div className="flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-xl border border-border/60 bg-card-inset">
-            {product.image_url ? (
-              <img src={product.image_url} alt="" className="h-full w-full object-cover" />
-            ) : (
-              <Package className="h-4 w-4 text-muted-foreground/50" strokeWidth={2} />
-            )}
-          </div>
-          <div className="flex min-w-0 flex-1 flex-col gap-1">
-            <span className="truncate text-[13px] font-black tracking-tight text-foreground leading-none">
-              {product.name || "Sem nome"}
-            </span>
-            <span className="text-[10px] font-black uppercase tracking-[0.18em] text-primary tabular-nums leading-none">
-              {formatCurrency(Number(product.price || 0))}
-            </span>
-          </div>
+        <div className="px-2 pb-1.5 pt-1">
+          <p className="truncate text-[12px] font-semibold text-foreground/90">
+            {product.name || "Sem nome"}
+          </p>
         </div>
+        <DropdownMenuSeparator className="my-1 bg-border/60" />
 
-        {sections.map((section, idx) => (
-           <div key={section.title} className={cn("px-2.5 py-2.5", idx > 0 && "border-t border-border/50")}>
-            <div className="px-2.5 pb-1.5 pt-1 text-[9px] font-black uppercase tracking-[0.22em] text-muted-foreground/40">
-              {section.title}
-            </div>
-            <div className="space-y-0.5">
-              {section.rows.map(renderRow)}
-            </div>
-          </div>
-        ))}
+        {manage.map(renderRow)}
 
-        <div className="border-t border-destructive/20 bg-destructive/[0.025] px-2.5 py-2.5">
-          {renderRow({
-            icon: Trash2,
-            label: "Excluir produto",
-            hint: "Remover do catálogo",
-            variant: "destructive",
-            action: () => onDeleteProduct(product),
-          })}
-        </div>
+        {distribute.length > 0 && (
+          <>
+            <DropdownMenuSeparator className="my-1 bg-border/60" />
+            {distribute.map(renderRow)}
+          </>
+        )}
+
+        <DropdownMenuSeparator className="my-1 bg-border/60" />
+        {renderRow({
+          icon: Trash2,
+          label: "Excluir produto",
+          variant: "destructive",
+          action: () => onDeleteProduct(product),
+        })}
       </DropdownMenuContent>
     </DropdownMenu>
   );
