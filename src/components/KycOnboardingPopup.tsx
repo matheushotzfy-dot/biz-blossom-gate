@@ -277,19 +277,19 @@ export function KycOnboardingPopup() {
 
  {/* Progress bar */}
  <div className="mb-5">
- <div className="flex items-center justify-between mb-2">
- <span className="text-[9px] font-display font-bold text-muted-foreground/40 uppercase tracking-[0.15em]">Progresso</span>
- <span className="text-[11px] font-display font-bold text-foreground/50 tabular-nums">{uploadedCount}/3</span>
- </div>
- <div className="h-2.5 rounded-full bg-muted/10 ring-1 ring-border/8 overflow-hidden">
- <motion.div
- animate={{ width: `${(uploadedCount / 3) * 100}%` }}
- transition={{ duration: 0.6, ease }}
- className="h-full rounded-full bg-gradient-to-r from-warning via-primary to-success"
- style={{ boxShadow: "0 0 12px hsl(var(--primary) / 0.3)" }}
- />
- </div>
- </div>
+  <div className="flex items-center justify-between mb-2">
+  <span className="text-[9px] font-display font-bold text-muted-foreground/40 uppercase tracking-[0.15em]">Progresso</span>
+  <span className="text-[11px] font-display font-bold text-foreground/50 tabular-nums">{uploadedCount}/{STEPS.length}</span>
+  </div>
+  <div className="h-2.5 rounded-full bg-muted/10 ring-1 ring-border/8 overflow-hidden">
+  <motion.div
+  animate={{ width: `${Math.min(100, (uploadedCount / STEPS.length) * 100)}%` }}
+  transition={{ duration: 0.6, ease }}
+  className="h-full rounded-full bg-gradient-to-r from-warning via-primary to-success"
+  style={{ boxShadow: "0 0 12px hsl(var(--primary) / 0.3)" }}
+  />
+  </div>
+  </div>
 
  {/* Navigation */}
  <div className="flex items-center gap-3">

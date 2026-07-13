@@ -221,8 +221,8 @@ export function useNotificationCount() {
  ]).then(([a, b]) => setCount((a.count || 0) + (b.count || 0)));
  };
  load();
- const channel = supabase
- .channel("notif-count")
+    const channel = supabase
+      .channel(`notif-count-${user.id}-${Math.random().toString(36).slice(2, 8)}`)
  .on("postgres_changes", { event: "INSERT", schema: "public", table: "notifications" }, () => load())
  .subscribe();
  return () => { supabase.removeChannel(channel); };

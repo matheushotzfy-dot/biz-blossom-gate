@@ -169,12 +169,19 @@ Deno.serve(async (req) => {
         continue;
       }
 
-      // Extend subscription period
-      const { error: updateError } = await supabase.from("subscriptions").update({
+      // Extend subscription period — optimistic lock via eq on current_period_end,
+      // evita corrida entre duas execuções sobrepostas do cron.
+      const { error: updateError, data: updated } = await supabase.from("subscriptions").update({
         current_period_start: periodStart.toISOString(),
         current_period_end: periodEnd.toISOString(),
         status: "active",
-      }).eq("id", sub.id);
+      }).eq("id", sub.id).eq("current_period_end", sub.current_period_end).select("id");
+
+      if (updated && updated.length === 0) {
+        // Outra execução já estendeu — pula sem contar como sucesso nem erro.
+        continue;
+      }
+
 
       if (updateError) {
         console.error(`[subscription-renewal] Update error for sub ${sub.id}:`, updateError.message);
