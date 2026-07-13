@@ -120,12 +120,14 @@ export default function Suporte() {
   const [loadingThread, setLoadingThread] = useState(false);
   const [reply, setReply] = useState("");
   const [sending, setSending] = useState(false);
+  const [replyFiles, setReplyFiles] = useState<File[]>([]);
 
   const [showComposer, setShowComposer] = useState(false);
   const [subject, setSubject] = useState("");
   const [message, setMessage] = useState("");
   const [priority, setPriority] = useState("normal");
   const [submitting, setSubmitting] = useState(false);
+  const [composerFiles, setComposerFiles] = useState<File[]>([]);
 
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState<"all" | "open" | "answered" | "closed">("all");
@@ -133,6 +135,8 @@ export default function Suporte() {
   const [openFaq, setOpenFaq] = useState<number | null>(null);
 
   const threadEndRef = useRef<HTMLDivElement>(null);
+  const replyFileInputRef = useRef<HTMLInputElement>(null);
+  const composerFileInputRef = useRef<HTMLInputElement>(null);
 
   const loadTickets = async () => {
     if (!user?.id) return;
