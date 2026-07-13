@@ -133,6 +133,7 @@ export default function AdminDashboard() {
   const [withdrawals, setWithdrawals] = useState<Tables<"withdrawals">[]>([]);
   const [isAdmin, setIsAdmin] = useState(false);
   const [isEmployee, setIsEmployee] = useState(false);
+  const [hasSupportPerm, setHasSupportPerm] = useState(false);
   const [roleChecked, setRoleChecked] = useState(false);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<TabId>("god-mode");
