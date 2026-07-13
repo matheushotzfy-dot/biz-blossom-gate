@@ -6,7 +6,7 @@ import { useProfile } from "@/hooks/useProfile";
 import { useWithdrawals, usePixKeys, useBankAccounts, useInvalidateAll } from "@/hooks/useQueryData";
 import {
   Plus, Wallet, Clock, History, Search, ArrowDownToLine, Info,
-  CheckCircle2, Key, Building2, MapPin, ClipboardPaste,
+  CheckCircle2, Key, Building2, MapPin, ClipboardPaste, QrCode,
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
@@ -188,78 +188,113 @@ export default function Saques() {
 
               <div className="space-y-2">
                 <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Chave de recebimento</label>
-                <div className="space-y-1.5">
-                  {pixKeys.map((pk) => {
-                    const active = pickedKey === pk.id;
-                    const label = (pk as any).key_value_masked ?? pk.key_value ?? "•••";
-                    const typeLabel = ({ cpf: "CPF", cnpj: "CNPJ", email: "E-mail", phone: "Telefone", random: "Aleatória" } as Record<string, string>)[pk.key_type] || pk.key_type;
-                    return (
-                      <button
-                        key={pk.id}
-                        type="button"
-                        onClick={() => setPickedKey(pk.id)}
-                        className={cn(
-                          "flex w-full items-center gap-3 rounded-xl border px-3.5 py-2.5 text-left transition-all",
-                          active
-                            ? "border-primary/60 bg-primary/[0.08] shadow-[0_0_0_1px_hsl(var(--primary)/0.35)_inset]"
-                            : "border-border/60 bg-card/40 hover:-translate-y-[1px] hover:border-primary/35 hover:bg-card",
-                        )}
-                      >
-                        <span className={cn(
-                          "flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border",
-                          active ? "border-primary/50 bg-primary/15 text-primary" : "border-border/60 bg-muted/40 text-muted-foreground",
-                        )}>
-                          <Key className="h-3.5 w-3.5" strokeWidth={2.5} />
-                        </span>
-                        <div className="min-w-0 flex-1">
-                          <p className="truncate text-[13px] font-black tracking-tight text-foreground">{label}</p>
-                          <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground/70">{typeLabel}</p>
-                        </div>
-                        {active && <CheckCircle2 className="h-4 w-4 shrink-0 text-primary" strokeWidth={2.5} />}
-                      </button>
-                    );
-                  })}
+                <div className="overflow-hidden rounded-2xl border border-border/60 bg-background">
+                  <div className="grid grid-cols-2 border-b border-border/40 p-1.5">
+                    <button
+                      type="button"
+                      onClick={() => setPickedKey(pixKeys[0]?.id ?? "")}
+                      className={cn(
+                        "flex h-10 items-center justify-center gap-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all duration-200",
+                        pickedKey !== "copy_paste"
+                          ? "bg-primary text-primary-foreground"
+                          : "text-muted-foreground hover:bg-primary/[0.06] hover:text-foreground",
+                      )}
+                    >
+                      <Key className="h-3.5 w-3.5" strokeWidth={2.5} /> Minhas Chaves
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setPickedKey("copy_paste")}
+                      className={cn(
+                        "flex h-10 items-center justify-center gap-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all duration-200",
+                        pickedKey === "copy_paste"
+                          ? "bg-primary text-primary-foreground"
+                          : "text-muted-foreground hover:bg-primary/[0.06] hover:text-foreground",
+                      )}
+                    >
+                      <ClipboardPaste className="h-3.5 w-3.5" strokeWidth={2.5} /> Copia e Cola
+                    </button>
+                  </div>
 
-                  <button
-                    type="button"
-                    onClick={() => setPickedKey("copy_paste")}
-                    className={cn(
-                      "flex w-full items-center gap-3 rounded-xl border border-dashed px-3.5 py-2.5 text-left transition-all",
-                      pickedKey === "copy_paste"
-                        ? "border-primary/60 bg-primary/[0.08] shadow-[0_0_0_1px_hsl(var(--primary)/0.35)_inset]"
-                        : "border-border/60 bg-card/40 hover:-translate-y-[1px] hover:border-primary/35 hover:bg-card",
-                    )}
-                  >
-                    <span className={cn(
-                      "flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border",
-                      pickedKey === "copy_paste" ? "border-primary/50 bg-primary/15 text-primary" : "border-border/60 bg-muted/40 text-muted-foreground",
-                    )}>
-                      <ClipboardPaste className="h-3.5 w-3.5" strokeWidth={2.5} />
-                    </span>
-                    <div className="min-w-0 flex-1">
-                      <p className="truncate text-[13px] font-black tracking-tight text-foreground">PIX Copia e Cola</p>
-                      <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground/70">Cobrança única · sem cadastro</p>
+                  {pickedKey === "copy_paste" ? (
+                    <div className="space-y-3 p-4 animate-in fade-in slide-in-from-top-1 duration-200">
+                      <div className="flex items-start gap-3 rounded-xl border border-primary/20 bg-primary/[0.04] p-3">
+                        <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-primary/25 bg-primary/10 text-primary">
+                          <QrCode className="h-4 w-4" strokeWidth={2.5} />
+                        </span>
+                        <div className="min-w-0">
+                          <p className="text-[12px] font-black text-foreground">PIX Copia e Cola avulso</p>
+                          <p className="mt-0.5 text-[10px] font-semibold leading-relaxed text-muted-foreground">
+                            Use para um código de cobrança única. Ele vai apenas nesta solicitação e não será cadastrado como chave.
+                          </p>
+                        </div>
+                      </div>
+                      <div className="space-y-2">
+                        <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Código BR Code</label>
+                        <textarea
+                          value={copyPasteCode}
+                          onChange={(e) => setCopyPasteCode(e.target.value)}
+                          rows={5}
+                          placeholder="Cole aqui o código completo do PIX Copia e Cola"
+                          className="w-full resize-none rounded-xl border border-border/60 bg-card px-3.5 py-3 font-mono text-[12px] leading-relaxed text-foreground placeholder:text-muted-foreground/50 transition-all focus:border-primary/50 focus:outline-none focus:ring-2 focus:ring-primary/20"
+                        />
+                        <div className="flex items-center justify-between gap-3 text-[10px] font-bold text-muted-foreground/70">
+                          <span className="flex items-center gap-1.5">
+                            <Info className="h-3 w-3" /> Não fica salvo no perfil
+                          </span>
+                          <span className="tabular-nums">{copyPasteCode.trim().length} caracteres</span>
+                        </div>
+                      </div>
                     </div>
-                    {pickedKey === "copy_paste" && <CheckCircle2 className="h-4 w-4 shrink-0 text-primary" strokeWidth={2.5} />}
-                  </button>
+                  ) : (
+                    <div className="space-y-2 p-3">
+                      {pixKeys.length === 0 ? (
+                        <div className="rounded-xl border border-dashed border-border/70 p-5 text-center">
+                          <p className="text-[11px] font-black uppercase tracking-widest text-muted-foreground">Nenhuma chave PIX cadastrada</p>
+                        </div>
+                      ) : (
+                        pixKeys.map((pk) => {
+                          const active = pickedKey === pk.id;
+                          const label = pk.key_value || (pk as any).key_value_masked || "Chave indisponível";
+                          const typeLabel = ({ cpf: "CPF", cnpj: "CNPJ", email: "E-mail", phone: "Telefone", random: "Aleatória" } as Record<string, string>)[pk.key_type] || pk.key_type;
+                          return (
+                            <button
+                              key={pk.id}
+                              type="button"
+                              onClick={() => setPickedKey(pk.id)}
+                              className={cn(
+                                "group flex w-full items-start gap-3 rounded-xl border p-3 text-left transition-all duration-200",
+                                active
+                                  ? "border-primary/60 bg-primary/[0.07]"
+                                  : "border-border/60 bg-card hover:-translate-y-[1px] hover:border-primary/35 hover:bg-primary/[0.03]",
+                              )}
+                            >
+                              <span className={cn(
+                                "mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border transition-all duration-200",
+                                active ? "border-primary/45 bg-primary/12 text-primary" : "border-border/60 bg-background text-muted-foreground group-hover:border-primary/30 group-hover:text-primary",
+                              )}>
+                                <Key className="h-4 w-4" strokeWidth={2.5} />
+                              </span>
+                              <div className="min-w-0 flex-1 space-y-1">
+                                <div className="flex items-center gap-2">
+                                  <span className="rounded-md border border-primary/20 bg-primary/[0.06] px-2 py-0.5 text-[9px] font-black uppercase tracking-widest text-primary">
+                                    {typeLabel}
+                                  </span>
+                                  {active && <span className="text-[9px] font-black uppercase tracking-widest text-primary">Selecionada</span>}
+                                </div>
+                                <p className="break-all font-mono text-[12px] font-black leading-relaxed text-foreground">
+                                  {label}
+                                </p>
+                              </div>
+                              {active && <CheckCircle2 className="mt-2 h-4 w-4 shrink-0 text-primary" strokeWidth={2.5} />}
+                            </button>
+                          );
+                        })
+                      )}
+                    </div>
+                  )}
                 </div>
               </div>
-
-              {pickedKey === "copy_paste" && (
-                <div className="space-y-2 animate-in fade-in slide-in-from-top-1 duration-200">
-                  <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Código PIX Copia e Cola</label>
-                  <textarea
-                    value={copyPasteCode}
-                    onChange={(e) => setCopyPasteCode(e.target.value)}
-                    rows={4}
-                    placeholder="Cole aqui o código do QR Code PIX (BR Code)"
-                    className="w-full rounded-xl border border-border/60 bg-background px-3.5 py-3 text-[12px] font-mono tracking-tight text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:ring-2 focus:ring-primary/40"
-                  />
-                  <p className="text-[10px] text-muted-foreground/70 font-medium flex items-center gap-1.5">
-                    <Info className="h-3 w-3" /> Cobrança única · não fica salva no seu perfil.
-                  </p>
-                </div>
-              )}
 
               <div className="bg-muted/30 p-5 rounded-2xl border border-border/60 space-y-3">
                 <div className="flex justify-between text-xs font-bold">
