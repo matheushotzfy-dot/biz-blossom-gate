@@ -187,6 +187,12 @@ export async function resolveAcquirerSlug(
   supabase: any,
   userId: string,
 ): Promise<string> {
+  const normalizeActiveSlug = (slug?: string, active?: boolean): string | null => {
+    const normalized = String(slug ?? "").trim().toLowerCase();
+    if (!normalized || active !== true) return null;
+    return normalized;
+  };
+
   try {
     const { data } = await supabase
       .from("seller_acquirer_config")
@@ -196,9 +202,8 @@ export async function resolveAcquirerSlug(
       .order("priority", { ascending: false });
 
     for (const row of (data ?? []) as any[]) {
-      const slug = row?.acquirers?.slug as string | undefined;
-      const acqActive = row?.acquirers?.is_active as boolean | undefined;
-      if (slug && acqActive) return slug;
+      const slug = normalizeActiveSlug(row?.acquirers?.slug, row?.acquirers?.is_active);
+      if (slug) return slug;
     }
   } catch (_) {
     // fall through to profile-level assignment
@@ -210,12 +215,26 @@ export async function resolveAcquirerSlug(
       .select("acquirer_id, acquirers:acquirer_id(slug, is_active)")
       .eq("user_id", userId)
       .maybeSingle();
-    const slug = prof?.acquirers?.slug as string | undefined;
-    const acqActive = prof?.acquirers?.is_active as boolean | undefined;
-    if (slug && acqActive) return slug;
+    const slug = normalizeActiveSlug(prof?.acquirers?.slug, prof?.acquirers?.is_active);
+    if (slug) return slug;
   } catch (_) {
     // fail-open to platform default
   }
 
-  return "veopag";
+  try {
+    const { data: platformDefault } = await supabase
+      .from("acquirers")
+      .select("slug, is_active")
+      .eq("is_active", true)
+      .order("priority", { ascending: false })
+      .order("created_at", { ascending: true })
+      .limit(1)
+      .maybeSingle();
+    const slug = normalizeActiveSlug(platformDefault?.slug, platformDefault?.is_active);
+    if (slug) return slug;
+  } catch (_) {
+    // fail closed below
+  }
+
+  throw new Error("No active payment acquirer configured");
 }

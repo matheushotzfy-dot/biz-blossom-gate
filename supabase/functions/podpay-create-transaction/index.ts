@@ -543,6 +543,14 @@ Deno.serve(async (req) => {
         { headers: { ...corsHeaders, "Content-Type": "application/json" } },
       );
     }
+    if (acquirerSlug !== "podpay") {
+      safeLog("Unsupported acquirer/payment method combination", { acquirer: acquirerSlug, paymentMethod });
+      return new Response(
+        JSON.stringify({ success: false, error: "Método de pagamento indisponível para a adquirente configurada." }),
+        { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+      );
+    }
+
     // ===================================================================
     // === Fim do desvio VeoPag — abaixo segue o fluxo PodPay normal =====
     // ===================================================================

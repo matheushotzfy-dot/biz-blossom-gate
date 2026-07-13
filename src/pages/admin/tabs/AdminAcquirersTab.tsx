@@ -258,8 +258,24 @@ export default function AdminAcquirersTab() {
 
   const toggleField = async (acq: Acquirer, field: "is_active" | "seller_visible" | "allow_failover") => {
     const newVal = !acq[field];
+    if (field === "is_active") {
+      const { data, error } = await supabase.rpc("admin_set_acquirer_active", {
+        _acquirer_id: acq.id,
+        _active: newVal,
+        _reason: newVal ? "Ativação manual no painel" : "Desativação manual no painel",
+      });
+      if (error) { toast.error("Erro: " + friendlyError(error)); return; }
+      const result = data as { moved_sellers?: number; disabled_configs?: number } | null;
+      const moved = Number(result?.moved_sellers ?? 0);
+      const disabled = Number(result?.disabled_configs ?? 0);
+      toast.success(newVal ? "Adquirente ativada" : `Adquirente desativada · ${moved} seller(s) movidos · ${disabled} vínculo(s) limpos`);
+      await logAdminAction(newVal ? "activate_acquirer" : "deactivate_acquirer", "acquirer", acq.id, { moved_sellers: moved, disabled_configs: disabled });
+      load();
+      return;
+    }
+
     const { error } = await supabase.from("acquirers").update({ [field]: newVal }).eq("id", acq.id);
-    if (error) { toast.error("Erro"); return; }
+    if (error) { toast.error("Erro: " + friendlyError(error)); return; }
     toast.success("Atualizada");
     load();
   };
