@@ -652,6 +652,62 @@ export default function Premiacoes() {
         </div>
       </section>
 
+      {/* =================== CLAIM HISTORY =================== */}
+      {existingClaims.length > 0 && (
+        <section className="relative overflow-hidden rounded-[24px] border border-border bg-card">
+          <header className="flex items-center justify-between border-b border-border px-6 py-5">
+            <div className="flex items-center gap-3.5">
+              <div className="relative h-11 w-11 rounded-xl border border-border bg-background flex items-center justify-center text-primary">
+                <Package className="h-5 w-5" strokeWidth={2.25} />
+              </div>
+              <div>
+                <h2 className="font-display font-black text-foreground text-xl tracking-[-0.025em] leading-none">Meus Resgates</h2>
+                <p className="font-mono text-[10px] uppercase tracking-[0.26em] text-muted-foreground mt-1.5">
+                  {existingClaims.length} solicitaç{existingClaims.length === 1 ? "ão" : "ões"} · acompanhe o envio
+                </p>
+              </div>
+            </div>
+          </header>
+          <ul className="divide-y divide-border">
+            {existingClaims.map((claim) => {
+              const tier = AWARDS.find((a) => a.id === claim.tier_id);
+              const statusMap: Record<string, { label: string; icon: typeof Clock; tone: string }> = {
+                pending: { label: "Em análise", icon: Clock, tone: "text-warning bg-warning/10 border-warning/20" },
+                approved: { label: "Aprovado", icon: CheckCircle2, tone: "text-info bg-info/10 border-info/20" },
+                shipped: { label: "Enviado", icon: Truck, tone: "text-primary bg-primary/10 border-primary/20" },
+                delivered: { label: "Entregue", icon: CheckCircle2, tone: "text-success bg-success/10 border-success/20" },
+                cancelled: { label: "Cancelado", icon: XCircle, tone: "text-destructive bg-destructive/10 border-destructive/20" },
+              };
+              const st = statusMap[claim.status] ?? statusMap.pending;
+              const StIcon = st.icon;
+              return (
+                <li key={claim.id} className="flex items-center gap-4 px-6 py-4 hover:bg-muted/30 transition-colors">
+                  {tier && (
+                    <img src={tier.image} alt="" className="h-12 w-12 object-contain shrink-0" />
+                  )}
+                  <div className="min-w-0 flex-1">
+                    <p className="font-display font-bold text-foreground text-sm truncate">
+                      {claim.tier_label ?? tier?.title ?? claim.tier_id}
+                    </p>
+                    <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground mt-1">
+                      {claim.created_at ? new Date(claim.created_at).toLocaleDateString("pt-BR", { day: "2-digit", month: "short", year: "numeric" }) : ""}
+                      {tier && ` · ${tier.tier}`}
+                    </p>
+                  </div>
+                  <span className={cn(
+                    "inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border font-mono text-[10px] uppercase tracking-[0.2em]",
+                    st.tone
+                  )}>
+                    <StIcon className="h-3 w-3" strokeWidth={2.5} />
+                    {st.label}
+                  </span>
+                </li>
+              );
+            })}
+          </ul>
+        </section>
+      )}
+
       {/* =================== Claim dialog =================== */}
       <Dialog open={claimOpen} onOpenChange={setClaimOpen}>
         <DialogContent className="max-w-xl max-h-[90vh] overflow-y-auto">
