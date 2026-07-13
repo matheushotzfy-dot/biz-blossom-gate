@@ -294,16 +294,23 @@ export default function PublicCheckout() {
  if (!slug) return;
  let cancelled = false;
 
- async function loadCheckoutData() {
- const { data: prod } = await supabase
- .from("products_public")
- .select("*")
- .or(`checkout_url.like.%/pay/${slug},checkout_url.like.%/checkout/${slug},checkout_url.eq.${slug},checkout_url.eq./${slug}`)
- .limit(1)
- .maybeSingle();
+    async function loadCheckoutData() {
+      // Slug arrives from the URL — restrict to safe chars before interpolating
+      // into a PostgREST `.or(...)` filter. This blocks injection of extra filter
+      // clauses (comma, dot, parentheses) that would otherwise let a crafted URL
+      // match unrelated products or break the query.
+      const safeSlug = (slug || "").replace(/[^a-zA-Z0-9_-]/g, "");
+      if (!safeSlug) { setLoading(false); return; }
 
- if (cancelled) return;
- if (!prod) { setLoading(false); return; }
+      const { data: prod } = await supabase
+        .from("products_public")
+        .select("*")
+        .or(`checkout_url.like.%/pay/${safeSlug},checkout_url.like.%/checkout/${safeSlug},checkout_url.eq.${safeSlug},checkout_url.eq./${safeSlug}`)
+        .limit(1)
+        .maybeSingle();
+
+      if (cancelled) return;
+      if (!prod) { setLoading(false); return; }
   const productWithTheme = { ...prod, checkout_theme: prod.checkout_theme || "gray" };
  if (cancelled) return;
  setProduct(productWithTheme as unknown as Product);
