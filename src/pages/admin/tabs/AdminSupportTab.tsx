@@ -8,11 +8,16 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import {
   MessageSquare, Send, Clock, CheckCircle2, AlertCircle, Inbox, Search,
-  User as UserIcon, Mail, ChevronLeft, RotateCcw, Zap, Filter,
+  User as UserIcon, Mail, ChevronLeft, RotateCcw, Zap, Filter, Paperclip, X,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { logAdminAction } from "@/lib/auditLog";
 import type { Tables } from "@/integrations/supabase/types";
+import {
+  uploadTicketAttachments, purgeTicketAttachments, playIncomingBeep, humanSize,
+  MAX_FILE_SIZE_MB, MAX_FILES_PER_MESSAGE, ACCEPTED_MIME, type Attachment,
+} from "@/lib/ticketAttachments";
+import { AttachmentChips } from "@/components/support/AttachmentChips";
 
 type Ticket = Tables<"support_tickets"> & {
   last_message_at?: string | null;
@@ -28,6 +33,7 @@ type TicketMessage = {
   sender_role: string | null;
   body: string;
   created_at: string;
+  attachments?: Attachment[] | null;
 };
 
 const STATUS_MAP: Record<string, { label: string; dot: string; text: string; bg: string }> = {
