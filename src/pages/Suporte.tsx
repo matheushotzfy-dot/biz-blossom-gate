@@ -623,6 +623,23 @@ export default function Suporte() {
                                 </p>
                                 {ticket.admin_reply ? (
                                   <div className="rounded-xl border border-primary/20 bg-primary/5 border-l-2 border-l-primary p-4">
+                                    {(ticket.admin_name || ticket.admin_role) && (
+                                      <div className="flex items-center gap-2 mb-2.5 pb-2.5 border-b border-primary/10">
+                                        <div className="h-7 w-7 rounded-full bg-primary/15 border border-primary/25 flex items-center justify-center shrink-0">
+                                          <span className="text-[11px] font-black text-primary">
+                                            {(ticket.admin_name || "H").slice(0, 1).toUpperCase()}
+                                          </span>
+                                        </div>
+                                        <div className="min-w-0">
+                                          <p className="text-[12px] font-black text-foreground truncate leading-none">
+                                            {ticket.admin_name || "Equipe Hotzfy"}
+                                          </p>
+                                          <p className="text-[9px] uppercase tracking-[0.18em] text-primary/80 font-black mt-0.5">
+                                            {ROLE_LABEL[(ticket.admin_role || "").toLowerCase()] || ticket.admin_role || "Equipe de Suporte"}
+                                          </p>
+                                        </div>
+                                      </div>
+                                    )}
                                     <p className="text-[13px] text-foreground/90 whitespace-pre-wrap leading-relaxed">{ticket.admin_reply}</p>
                                     {ticket.replied_at && (
                                       <p className="text-[10px] text-primary/80 mt-3 tabular-nums font-black uppercase tracking-widest">
