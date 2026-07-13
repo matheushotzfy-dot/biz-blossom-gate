@@ -188,9 +188,11 @@ export default function Dashboard() {
     };
   }, [filteredTx]);
 
+  // Using availableBalance from RPC now
   const balance = availableBalance;
 
   const chartData = useMemo(() => {
+    // Resolve the actual window (start/end) for the selected period or custom range
     let start: Date;
     let end: Date;
     const today = brasiliaToday();
@@ -216,6 +218,7 @@ export default function Dashboard() {
     const spanDays = differenceInDays(end, start) + 1;
     const isSingleDay = spanDays <= 1;
 
+    // 1) HOURLY (single day)
     if (isSingleDay) {
       const salesByHour = new Map<number, number>();
       filteredTx.forEach(t => {
@@ -236,6 +239,7 @@ export default function Dashboard() {
       });
     }
 
+    // 2) MONTHLY (span > 60 days)
     if (spanDays > 60) {
       const byMonth = new Map<string, number>();
       filteredTx.forEach(t => {
@@ -261,6 +265,7 @@ export default function Dashboard() {
       return result;
     }
 
+    // 3) DAILY (default)
     const revenueByDate = new Map<string, number>();
     filteredTx.forEach(t => {
       if (!isApprovedTransaction(t.status)) return;
@@ -345,6 +350,7 @@ export default function Dashboard() {
     : s === 'refunded' ? 'text-muted-foreground'
     : 'text-red-500';
 
+  // Saldo Pendente = (1) reserva ainda retida (D+N) + (2) líquido aprovado mas ainda não disponível para saque
   const pendingBalance = useMemo(() => {
     const now = Date.now();
     let retained = 0;
@@ -360,6 +366,7 @@ export default function Dashboard() {
     return retained + Math.max(0, toRelease);
   }, [transactions]);
 
+  // Compare to previous period (same length) for trend deltas — anchored in America/Sao_Paulo
   const { prevApprovedCount, prevRevenue } = useMemo(() => {
     const today = brasiliaToday();
     let start: Date;
@@ -383,6 +390,7 @@ export default function Dashboard() {
     const prevEnd = new Date(start.getTime() - 1);
     const prevStart = new Date(prevEnd.getTime() - lenMs);
 
+    // Compare using SP calendar date to avoid browser-tz drift
     const spDay = (iso: string) => toBrasiliaDate(iso);
     const prevStartKey = prevStart.toLocaleDateString("pt-BR", { timeZone: "America/Sao_Paulo" });
     const prevEndKey = prevEnd.toLocaleDateString("pt-BR", { timeZone: "America/Sao_Paulo" });
@@ -435,8 +443,11 @@ export default function Dashboard() {
           </div>
         </div>
 
-        {/* Period selector */}
+        {/* Period selector — institutional, dense, Bloomberg-style */}
         <div className="flex h-11 w-full items-stretch overflow-hidden rounded-2xl border border-border bg-card lg:w-auto lg:rounded-xl">
+
+
+          {/* Segments */}
           <div className="grid flex-1 grid-cols-4 divide-x divide-border lg:flex lg:flex-none lg:items-stretch">
             {PERIOD_PRESETS.map((p) => {
               const isActive = !isCustom && selectedPeriod.label === p.label;
@@ -452,9 +463,11 @@ export default function Dashboard() {
                       : "text-muted-foreground/60 hover:text-primary hover:bg-primary/[0.06]"
                   )}
                 >
+                  {/* Active underline */}
                   {isActive && (
                     <span className="absolute inset-x-2 bottom-0 h-[2px] rounded-t-full bg-primary shadow-[0_0_10px_hsl(var(--primary)/0.55)]" />
                   )}
+                  {/* Inactive hover underline (thin) */}
                   {!isActive && (
                     <span className="pointer-events-none absolute inset-x-3 bottom-0 h-[2px] origin-center scale-x-0 rounded-t-full bg-primary/60 opacity-0 transition-[transform,opacity] duration-300 ease-out group-hover/seg:scale-x-100 group-hover/seg:opacity-100" />
                   )}
@@ -464,6 +477,7 @@ export default function Dashboard() {
             })}
           </div>
 
+          {/* Custom range trigger — integrated */}
           <Popover open={datePickerOpen} onOpenChange={setDatePickerOpen}>
             <PopoverTrigger asChild>
               <button className={cn(
@@ -489,6 +503,7 @@ export default function Dashboard() {
               sideOffset={8}
               className="w-[320px] overflow-hidden rounded-xl border border-border bg-card p-0"
             >
+              {/* Compact header */}
               <div className="flex items-center justify-between gap-3 px-3.5 py-2.5 border-b border-border">
                 <span className="text-[10px] font-display font-black uppercase tracking-[0.16em] text-muted-foreground/80">
                   {customRange?.from
@@ -505,6 +520,7 @@ export default function Dashboard() {
                 )}
               </div>
 
+              {/* Compact preset chips */}
               <div className="flex flex-wrap gap-1 px-3 py-2 border-b border-border bg-secondary/20">
                 {(([
                   { label: "Hoje", days: 0 },
@@ -541,6 +557,7 @@ export default function Dashboard() {
                 })}
               </div>
 
+              {/* Single-month calendar with arrow navigation */}
               <Calendar
                 mode="range"
                 selected={customRange}
@@ -552,6 +569,7 @@ export default function Dashboard() {
                 className="pointer-events-auto p-2"
               />
 
+              {/* Footer */}
               <div className="flex items-center justify-between gap-2 px-3.5 py-2 border-t border-border">
                 <button
                   onClick={() => { setCustomRange(undefined); setIsCustom(false); setSelectedPeriod(PERIOD_PRESETS[0]); }}
@@ -568,16 +586,22 @@ export default function Dashboard() {
                 </button>
               </div>
             </PopoverContent>
+
+
           </Popover>
         </div>
+
       </div>
 
-      {/* Reorderable section */}
+
+
+      {/* Reorderable section — mobile: hero → chart → stats → shortcuts → conversion */}
       <div className="flex flex-col gap-4 lg:block lg:space-y-4">
 
       {/* Hero Financial Row */}
       <div className="contents lg:grid lg:grid-cols-4 lg:gap-6">
         <Card className="order-1 lg:order-none seller-hover-card dashboard-hero-card lg:col-span-2 relative overflow-hidden group border-primary/25 bg-card rounded-[1.35rem] min-h-0 sm:rounded-3xl lg:min-h-[220px]">
+          {/* Main card inner glow */}
           <div className="absolute inset-px rounded-[1.45rem] bg-gradient-to-br from-primary/[0.01] to-transparent pointer-events-none" />
           
           <div className="absolute top-0 right-0 p-8 opacity-[0.03] transition-all duration-700 group-hover:opacity-[0.08] group-hover:scale-110 hidden sm:block">
@@ -846,6 +870,7 @@ export default function Dashboard() {
         </Card>
       </div>
       </div>
+      {/* /Reorderable section */}
 
       {/* Recent Activity */}
       <Card className="seller-hover-card overflow-hidden rounded-[1.35rem] border-border/40 sm:rounded-3xl">
