@@ -501,8 +501,9 @@ export default function Dashboard() {
             <PopoverContent
               align="end"
               sideOffset={8}
-              className="w-[320px] overflow-hidden rounded-xl border border-border bg-card p-0"
+              className="w-[min(320px,calc(100vw-24px))] overflow-hidden rounded-xl border border-border bg-card p-0"
             >
+
               {/* Compact header */}
               <div className="flex items-center justify-between gap-3 px-3.5 py-2.5 border-b border-border">
                 <span className="text-[10px] font-display font-black uppercase tracking-[0.16em] text-muted-foreground/80">
