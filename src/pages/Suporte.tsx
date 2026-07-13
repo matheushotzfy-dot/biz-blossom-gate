@@ -428,8 +428,51 @@ export default function Suporte() {
                 <span className="text-[10px] tabular-nums font-black text-muted-foreground/60">{message.length}/{MAX_MESSAGE}</span>
               </div>
             </div>
+            {/* Attachments */}
+            <div>
+              <input
+                ref={composerFileInputRef}
+                type="file"
+                multiple
+                accept={ACCEPTED_MIME}
+                className="hidden"
+                onChange={e => { addFiles(e.target.files, composerFiles, setComposerFiles); e.target.value = ""; }}
+              />
+              <div className="flex items-center flex-wrap gap-2">
+                <button
+                  type="button"
+                  onClick={() => composerFileInputRef.current?.click()}
+                  disabled={composerFiles.length >= MAX_FILES_PER_MESSAGE}
+                  className="h-8 px-3 rounded-lg border border-border/60 bg-muted/20 text-[10px] font-black uppercase tracking-widest text-muted-foreground hover:text-primary hover:border-primary/40 flex items-center gap-1.5 disabled:opacity-50"
+                >
+                  <Paperclip className="h-3 w-3" /> Anexar
+                </button>
+                <span className="text-[10px] font-bold text-muted-foreground/70">
+                  Até {MAX_FILES_PER_MESSAGE} arquivos · {MAX_FILE_SIZE_MB}MB cada
+                </span>
+              </div>
+              {composerFiles.length > 0 && (
+                <div className="mt-2 flex flex-wrap gap-1.5">
+                  {composerFiles.map((f, i) => (
+                    <span key={i} className="inline-flex items-center gap-1.5 rounded-lg border border-border/60 bg-muted/30 px-2.5 py-1 text-[11px] font-bold max-w-[220px]">
+                      <Paperclip className="h-3 w-3 shrink-0" />
+                      <span className="truncate">{f.name}</span>
+                      <span className="opacity-60 tabular-nums">{humanSize(f.size)}</span>
+                      <button
+                        type="button"
+                        onClick={() => setComposerFiles(composerFiles.filter((_, j) => j !== i))}
+                        className="text-muted-foreground hover:text-destructive"
+                        aria-label="Remover"
+                      >
+                        <X className="h-3 w-3" />
+                      </button>
+                    </span>
+                  ))}
+                </div>
+              )}
+            </div>
             <div className="flex justify-end gap-2">
-              <button onClick={() => setShowComposer(false)} className="h-10 px-4 rounded-xl border border-border/60 bg-card text-[11px] font-black uppercase tracking-widest text-muted-foreground hover:text-foreground">
+              <button onClick={() => { setShowComposer(false); setComposerFiles([]); }} className="h-10 px-4 rounded-xl border border-border/60 bg-card text-[11px] font-black uppercase tracking-widest text-muted-foreground hover:text-foreground">
                 Cancelar
               </button>
               <button
