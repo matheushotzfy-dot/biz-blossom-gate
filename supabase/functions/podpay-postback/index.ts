@@ -389,9 +389,18 @@ Deno.serve(async (req) => {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${serviceKey}`,
       };
-      // fire-and-forget both dispatchers (webhooks + apps like Z-API/UTMify)
-      fetch(`${supabaseUrl}/functions/v1/webhook-dispatcher`, { method: 'POST', headers, body: '{}' }).catch(() => {});
-      fetch(`${supabaseUrl}/functions/v1/apps-dispatcher`, { method: 'POST', headers, body: '{}' }).catch(() => {});
+      // Await both nudges: serverless runtimes may cancel fire-and-forget fetches
+      // as soon as the response is returned, leaving delivery rows pending.
+      const [webhookNudge, appsNudge] = await Promise.allSettled([
+        fetch(`${supabaseUrl}/functions/v1/webhook-dispatcher`, { method: 'POST', headers, body: '{}' }),
+        fetch(`${supabaseUrl}/functions/v1/apps-dispatcher`, { method: 'POST', headers, body: '{}' }),
+      ]);
+      if (webhookNudge.status === 'rejected') {
+        safeLog('Webhook dispatcher nudge failed (non-fatal)', { error: webhookNudge.reason instanceof Error ? webhookNudge.reason.message : 'unknown' });
+      }
+      if (appsNudge.status === 'rejected') {
+        safeLog('Apps dispatcher nudge failed (non-fatal)', { error: appsNudge.reason instanceof Error ? appsNudge.reason.message : 'unknown' });
+      }
     } catch (e) {
       // never break postback on dispatcher hiccup — cron fallback will catch up
       safeLog('Dispatcher nudge failed (non-fatal)', { error: e instanceof Error ? e.message : 'unknown' });

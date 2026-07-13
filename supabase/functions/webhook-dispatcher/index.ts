@@ -138,6 +138,8 @@ async function deliverOne(
 }
 
 async function processQueue(admin: ReturnType<typeof createClient>) {
+  await admin.rpc("reap_stuck_webhook_deliveries").catch(() => null);
+
   // Atomically claim a batch via RPC (FOR UPDATE SKIP LOCKED) so parallel cron runs
   // never pick the same row twice.
   const { data, error } = await admin.rpc("claim_webhook_deliveries", { _limit: BATCH_SIZE });

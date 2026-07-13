@@ -5,7 +5,7 @@ import { useWebhooks, useInvalidateAll } from "@/hooks/useQueryData";
 import type { Tables } from "@/integrations/supabase/types";
 import {
   Plus, Trash2, Globe, Shield, Search, Pencil,
-  Power, PowerOff, CircleDot, Code2, Zap, LayoutGrid, ShieldCheck
+  Power, PowerOff, CircleDot, Code2, Zap, LayoutGrid, ShieldCheck, Copy
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -46,7 +46,7 @@ type WebhookConfig = Tables<"webhook_configs_safe">;
 
 export default function Webhooks() {
   const { user } = useAuth();
-  const { data: webhooks = [] } = useWebhooks();
+  const { data: webhooks = [], refetch: refetchWebhooks } = useWebhooks();
   const invalidateAll = useInvalidateAll();
   const [createOpen, setCreateOpen] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -54,11 +54,13 @@ export default function Webhooks() {
   const [url, setUrl] = useState("");
   const [selectedEvents, setSelectedEvents] = useState<string[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [createdSecret, setCreatedSecret] = useState<string | null>(null);
 
   const resetForm = () => {
     setUrl("");
     setSelectedEvents([]);
     setEditingId(null);
+    setCreatedSecret(null);
   };
 
   const openCreate = () => { resetForm(); setCreateOpen(true); };
@@ -93,11 +95,18 @@ export default function Webhooks() {
           .from("webhook_configs")
           .insert({ user_id: user.id, url, events: selectedEvents, secret, is_active: true });
         if (error) { toast.error(friendlyError(error, "Erro ao criar webhook")); return; }
+        setCreatedSecret(secret);
         toast.success("Webhook adicionado");
       }
-      setCreateOpen(false);
-      resetForm();
       invalidateAll(["webhooks"]);
+      await refetchWebhooks();
+      if (editingId) {
+        setCreateOpen(false);
+        resetForm();
+      } else {
+        setUrl("");
+        setSelectedEvents([]);
+      }
     } finally {
       setIsSubmitting(false);
     }
@@ -108,6 +117,7 @@ export default function Webhooks() {
     const { error } = await supabase.from("webhook_configs").update({ is_active: !current }).eq("id", id);
     if (error) { toast.error(friendlyError(error)); return; }
     invalidateAll(["webhooks"]);
+    await refetchWebhooks();
     toast.success(current ? "Pausado" : "Ativado");
   };
 
@@ -117,6 +127,13 @@ export default function Webhooks() {
     if (error) { toast.error(friendlyError(error)); return; }
     toast.success("Removido");
     invalidateAll(["webhooks"]);
+    await refetchWebhooks();
+  };
+
+  const copyCreatedSecret = async () => {
+    if (!createdSecret) return;
+    await navigator.clipboard.writeText(createdSecret);
+    toast.success("Secret copiado");
   };
 
 
@@ -150,6 +167,21 @@ export default function Webhooks() {
               </DialogDescription>
             </DialogHeader>
             <form onSubmit={handleSubmit} className="space-y-6 pt-2">
+              {createdSecret && (
+                <div className="space-y-2 rounded-xl border border-border/60 bg-muted/30 p-4">
+                  <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Secret do Webhook</Label>
+                  <div className="flex gap-2">
+                    <Input
+                      value={createdSecret}
+                      readOnly
+                      className="h-11 font-mono text-xs border-border/60 rounded-xl"
+                    />
+                    <Button type="button" onClick={copyCreatedSecret} className="h-11 rounded-xl px-4" aria-label="Copiar secret do webhook">
+                      <Copy className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </div>
+              )}
 
               <div className="space-y-2">
                 <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">URL de Destino</Label>
