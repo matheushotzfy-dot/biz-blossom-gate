@@ -37,8 +37,10 @@ interface Acquirer {
   min_transaction_amount: number | null; max_transaction_amount: number | null;
   supported_methods: string[];
   transaction_fee_percentage: number | null; transaction_fee_fixed: number | null;
-  webhook_url: string | null; webhook_secret: string | null;
-  api_key_encrypted: string | null; api_secret_encrypted: string | null;
+  webhook_url: string | null; webhook_secret?: string | null;
+  api_key_encrypted?: string | null; api_secret_encrypted?: string | null;
+  // Presence booleans (server-generated) — used instead of raw secrets on read path (fix A1)
+  has_api_key: boolean; has_api_secret: boolean; has_webhook_secret: boolean;
   api_environment: "production" | "sandbox";
   priority: number; allow_failover: boolean; notes: string | null;
   created_at: string; updated_at: string;
@@ -122,7 +124,7 @@ export default function AdminAcquirersTab() {
     setLoading(true);
     const since30 = new Date(Date.now() - 30 * 86400000).toISOString();
     const [acqRes, heRes, foRes, profRes, txRes, dispRes] = await Promise.all([
-      supabase.from("acquirers").select("*").order("priority", { ascending: false }).order("created_at"),
+      supabase.from("acquirers").select("id,name,slug,type,is_active,api_endpoint,description,conversion_rate,seller_visible,health_status,last_health_check_at,last_failure_at,last_latency_ms,avg_latency_ms,uptime_pct,min_transaction_amount,max_transaction_amount,supported_methods,transaction_fee_percentage,transaction_fee_fixed,webhook_url,api_environment,priority,allow_failover,notes,created_at,updated_at,has_api_key,has_api_secret,has_webhook_secret").order("priority", { ascending: false }).order("created_at"),
       supabase.from("acquirer_health_events").select("*").order("created_at", { ascending: false }).limit(200),
       supabase.from("acquirer_failover_events").select("*").order("created_at", { ascending: false }).limit(100),
       supabase.from("profiles").select("user_id, full_name, email, nickname, acquirer_id, account_status").limit(5000),
@@ -191,8 +193,8 @@ export default function AdminAcquirersTab() {
   const offlineCount = acquirers.filter(a => a.health_status === "offline").length;
   const degradedCount = acquirers.filter(a => a.health_status === "degraded").length;
   const sandboxCount = acquirers.filter(a => a.api_environment === "sandbox").length;
-  const noWebhook = acquirers.filter(a => !a.webhook_url || !a.webhook_secret).length;
-  const noCreds = acquirers.filter(a => !a.api_key_encrypted || !a.api_secret_encrypted).length;
+  const noWebhook = acquirers.filter(a => !a.webhook_url || !a.has_webhook_secret).length;
+  const noCreds = acquirers.filter(a => !a.has_api_key || !a.has_api_secret).length;
   const totalVolume = Object.values(txStats).reduce((s, x) => s + x.volume, 0);
   const totalSales = Object.values(txStats).reduce((s, x) => s + x.sales, 0);
   const totalFees = Object.values(txStats).reduce((s, x) => s + x.fees, 0);
@@ -213,7 +215,13 @@ export default function AdminAcquirersTab() {
   });
 
   const openCreate = () => { resetForm(); setEditingId(null); setShowForm(true); };
-  const openEdit = (a: Acquirer) => { setForm({ ...a }); setEditingId(a.id); setShowForm(true); };
+  const openEdit = (a: Acquirer) => {
+    // Never populate the form with existing secrets — they are never returned
+    // from the server (fix A1). Empty inputs mean "keep current value" on save.
+    setForm({ ...a, api_key_encrypted: "", api_secret_encrypted: "", webhook_secret: "" });
+    setEditingId(a.id);
+    setShowForm(true);
+  };
 
   const handleSave = async () => {
     if (!form.name || !form.slug) { toast.error("Nome e slug obrigatórios"); return; }
@@ -227,19 +235,23 @@ export default function AdminAcquirersTab() {
       supported_methods: form.supported_methods || ["pix"],
       transaction_fee_percentage: form.transaction_fee_percentage || 0,
       transaction_fee_fixed: form.transaction_fee_fixed || 0,
-      webhook_url: form.webhook_url || null, webhook_secret: form.webhook_secret || null,
-      api_key_encrypted: form.api_key_encrypted || null,
-      api_secret_encrypted: form.api_secret_encrypted || null,
+      webhook_url: form.webhook_url || null,
       api_environment: form.api_environment || "production",
       priority: form.priority || 0, allow_failover: form.allow_failover !== false,
       notes: form.notes || null,
     };
+    // Secrets: only include when the admin explicitly typed a new value.
+    // Empty on edit => preserve existing secret (fix A1).
+    if (form.api_key_encrypted) payload.api_key_encrypted = form.api_key_encrypted;
+    if (form.api_secret_encrypted) payload.api_secret_encrypted = form.api_secret_encrypted;
+    if (form.webhook_secret) payload.webhook_secret = form.webhook_secret;
+
     const { error } = editingId
       ? await supabase.from("acquirers").update(payload).eq("id", editingId)
       : await supabase.from("acquirers").insert(payload);
     if (error) { toast.error("Erro: " + friendlyError(error)); return; }
     toast.success(editingId ? "Atualizada!" : "Criada!");
-    await logAdminAction(editingId ? "update_acquirer" : "create_acquirer", "acquirer", editingId, payload);
+    await logAdminAction(editingId ? "update_acquirer" : "create_acquirer", "acquirer", editingId, { ...payload, api_key_encrypted: payload.api_key_encrypted ? "[REDACTED]" : undefined, api_secret_encrypted: payload.api_secret_encrypted ? "[REDACTED]" : undefined, webhook_secret: payload.webhook_secret ? "[REDACTED]" : undefined });
     setShowForm(false); setEditingId(null); resetForm(); load();
   };
 
@@ -459,7 +471,7 @@ export default function AdminAcquirersTab() {
                                 {a.api_environment === "sandbox" && (
                                   <span className="px-1 py-0.5 rounded text-[8px] font-black uppercase tracking-wider bg-warning/15 text-warning">SBX</span>
                                 )}
-                                {(!a.api_key_encrypted || !a.api_secret_encrypted) && (
+                                {(!a.has_api_key || !a.has_api_secret) && (
                                   <span className="px-1 py-0.5 rounded text-[8px] font-black uppercase tracking-wider bg-destructive/15 text-destructive" title="Sem credenciais">SEM API</span>
                                 )}
                               </div>
@@ -738,10 +750,10 @@ export default function AdminAcquirersTab() {
                 {acquirers.map(a => {
                   const checks = [
                     a.api_environment === "production",
-                    !!a.api_key_encrypted,
-                    !!a.api_secret_encrypted,
+                    a.has_api_key,
+                    a.has_api_secret,
                     !!a.webhook_url,
-                    !!a.webhook_secret,
+                    a.has_webhook_secret,
                     a.allow_failover,
                     Number(a.uptime_pct || 0) >= 99,
                   ];
@@ -761,10 +773,10 @@ export default function AdminAcquirersTab() {
                           {a.api_environment}
                         </span>
                       </td>
-                      <td className={cn(premiumTable.td, "text-center")}><Mark ok={!!a.api_key_encrypted} /></td>
-                      <td className={cn(premiumTable.td, "text-center")}><Mark ok={!!a.api_secret_encrypted} /></td>
+                      <td className={cn(premiumTable.td, "text-center")}><Mark ok={a.has_api_key} /></td>
+                      <td className={cn(premiumTable.td, "text-center")}><Mark ok={a.has_api_secret} /></td>
                       <td className={cn(premiumTable.td, "text-center")}><Mark ok={!!a.webhook_url} /></td>
-                      <td className={cn(premiumTable.td, "text-center")}><Mark ok={!!a.webhook_secret} /></td>
+                      <td className={cn(premiumTable.td, "text-center")}><Mark ok={a.has_webhook_secret} /></td>
                       <td className={cn(premiumTable.td, "text-center")}><Mark ok={a.allow_failover} /></td>
                       <td className={cn(premiumTable.td, "text-center tabular-nums text-[11px] font-bold")}>{Number(a.uptime_pct || 0).toFixed(1)}%</td>
                       <td className={cn(premiumTable.td, "text-right")}>
@@ -969,19 +981,18 @@ function AcquirerDetail({ acq, stats, healthEvents, failovers, sellersOfAcq, txs
           )}
         </div>
 
-        {/* API Keys masked */}
+        {/* API Keys — write-only for security (fix A1). Real values never leave the server. */}
         <div className="rounded-xl border border-border bg-card p-4">
           <div className="flex items-center justify-between mb-3">
             <p className="text-[10px] font-black uppercase tracking-[0.14em] text-muted-foreground flex items-center gap-1.5">
               <KeyRound className="h-3 w-3" /> Credenciais
             </p>
-            <Button size="sm" variant="ghost" className="h-6 text-[10px]" onClick={() => setShowSecrets(s => !s)}>
-              {showSecrets ? <><EyeOff className="h-3 w-3 mr-1" /> Ocultar</> : <><Eye className="h-3 w-3 mr-1" /> Revelar</>}
-            </Button>
+            <span className="text-[9px] font-mono text-muted-foreground uppercase tracking-wider">Write-only</span>
           </div>
           <KV k="Endpoint" v={acq.api_endpoint || "—"} mono />
-          <KV k="API Key" v={showSecrets ? (acq.api_key_encrypted || "—") : mask(acq.api_key_encrypted)} mono copy />
-          <KV k="API Secret" v={showSecrets ? (acq.api_secret_encrypted || "—") : mask(acq.api_secret_encrypted)} mono copy />
+          <KV k="API Key" v={acq.has_api_key ? "•••••••••••• (configurada)" : "— (não configurada)"} mono />
+          <KV k="API Secret" v={acq.has_api_secret ? "•••••••••••• (configurada)" : "— (não configurada)"} mono />
+          <p className="text-[10px] text-muted-foreground mt-2 italic">Para trocar, edite o cadastro e digite os novos valores.</p>
         </div>
 
         {/* Webhook */}
@@ -990,7 +1001,7 @@ function AcquirerDetail({ acq, stats, healthEvents, failovers, sellersOfAcq, txs
             <Webhook className="h-3 w-3" /> Webhook
           </p>
           <KV k="URL" v={acq.webhook_url || "—"} mono copy />
-          <KV k="Secret" v={showSecrets ? (acq.webhook_secret || "—") : mask(acq.webhook_secret)} mono copy />
+          <KV k="Secret" v={acq.has_webhook_secret ? "•••••••••••• (configurado)" : "— (não configurado)"} mono />
         </div>
 
         {/* Health Events */}
