@@ -88,7 +88,16 @@ export default function Afiliados() {
 
   const loadMarketplace = async () => {
     if (!user) return;
-    const { data } = await supabase.from("products_public").select("*").eq("status", "active");
+    // Only surface products whose owners explicitly opted-in to affiliation.
+    // Previously we loaded every active product, which let users try to affiliate
+    // on products with affiliate_enabled=false → RPC returned null owner → FK error.
+    const { data } = await supabase
+      .from("products_public")
+      .select("id, name, price, image_url, affiliate_commission, affiliate_enabled, status, checkout_url")
+      .eq("status", "active")
+      .eq("affiliate_enabled", true)
+      .order("created_at", { ascending: false })
+      .limit(200);
     if (data) setMarketProducts(data.filter((p) => p.id) as Tables<"products_public">[]);
   };
 
