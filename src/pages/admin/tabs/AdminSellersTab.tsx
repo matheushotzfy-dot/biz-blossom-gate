@@ -861,7 +861,7 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
       {/* ═══ Seller Detail Dialog ═══ */}
       <Dialog open={!!selectedUser} onOpenChange={v => { if (!v) setSelectedUser(null); }}>
         <DialogContent className="max-w-5xl w-[96vw] max-h-[92vh] overflow-y-auto p-0 gap-0 rounded-2xl border border-border">
-          <DialogHeader className="sticky top-0 z-10 bg-card/95 backdrop-blur border-b border-border px-6 pt-5 pb-4 space-y-0">
+          <DialogHeader className="sticky top-0 z-10 bg-card/95 backdrop-blur border-b border-border pl-4 pr-14 sm:pl-6 sm:pr-16 pt-5 pb-4 space-y-0">
             <DialogTitle className="sr-only">
               Detalhes do seller {selectedUser?.full_name || selectedUser?.email || ""}
             </DialogTitle>
