@@ -375,35 +375,57 @@ export default function Premiacoes() {
               </div>
             </div>
 
-            <button
-              type="button"
-              onClick={() => focusedDone && !alreadyClaimed && setClaimOpen(true)}
-              disabled={!focusedDone || alreadyClaimed}
-              className={cn(
-                "mt-6 group relative overflow-hidden inline-flex items-center justify-between gap-3 px-6 h-14 rounded-full transition-all duration-300",
-                focusedDone && !alreadyClaimed
-                  ? "bg-gradient-to-r from-[hsl(var(--primary))] via-[hsl(var(--primary))] to-[hsl(var(--tier))] text-primary-foreground hover:scale-[1.02] shadow-[0_10px_40px_-10px_hsl(var(--primary)/0.6)]"
-                  : alreadyClaimed
-                    ? "border border-white/15 bg-white/[0.04] text-white/60 cursor-default"
-                    : "border border-white/10 bg-white/[0.02] text-white/45 cursor-default"
-              )}
-            >
-              <span className="relative font-display font-bold text-[14px] tracking-[0.04em] uppercase">
-                {alreadyClaimed ? "Solicitação registrada"
-                  : focusedDone ? "Solicitar resgate"
-                  : "Continue faturando para desbloquear"}
-              </span>
-              <span className="relative flex items-center justify-center h-9 w-9 rounded-full bg-black/15">
-                {focusedDone && !alreadyClaimed
-                  ? <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" strokeWidth={2.25} />
-                  : alreadyClaimed
-                    ? <CheckCircle2 className="h-4 w-4" strokeWidth={2.25} />
-                    : <Lock className="h-4 w-4" strokeWidth={2.25} />}
-              </span>
-              {focusedDone && !alreadyClaimed && (
-                <span className="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/25 to-transparent group-hover:translate-x-full transition-transform duration-1000" />
-              )}
-            </button>
+            {/* ETA row */}
+            {!focusedDone && focusedETA && (
+              <div className="mt-4 inline-flex items-center gap-2 px-3.5 py-2 rounded-full border border-white/10 bg-white/[0.03] backdrop-blur-md">
+                <CalendarClock className="h-3.5 w-3.5 text-[hsl(var(--primary))]" strokeWidth={2.25} />
+                <span className="font-mono text-[10px] uppercase tracking-[0.22em] text-white/55">Estimativa</span>
+                <span className="font-display font-bold text-[12px] text-white tabular-nums">{focusedETA}</span>
+                <span className="font-mono text-[9px] uppercase tracking-[0.2em] text-white/40">no ritmo atual</span>
+              </div>
+            )}
+
+            <div className="mt-6 flex flex-wrap items-center gap-3">
+              <button
+                type="button"
+                onClick={() => focusedDone && !alreadyClaimed && setClaimOpen(true)}
+                disabled={!focusedDone || alreadyClaimed}
+                className={cn(
+                  "group relative overflow-hidden inline-flex items-center justify-between gap-3 px-6 h-14 rounded-full transition-all duration-300 flex-1 min-w-[240px]",
+                  focusedDone && !alreadyClaimed
+                    ? "bg-gradient-to-r from-[hsl(var(--primary))] via-[hsl(var(--primary))] to-[hsl(var(--tier))] text-primary-foreground hover:scale-[1.02] shadow-[0_10px_40px_-10px_hsl(var(--primary)/0.6)]"
+                    : alreadyClaimed
+                      ? "border border-white/15 bg-white/[0.04] text-white/60 cursor-default"
+                      : "border border-white/10 bg-white/[0.02] text-white/45 cursor-default"
+                )}
+              >
+                <span className="relative font-display font-bold text-[14px] tracking-[0.04em] uppercase">
+                  {alreadyClaimed ? "Solicitação registrada"
+                    : focusedDone ? "Solicitar resgate"
+                    : "Continue faturando para desbloquear"}
+                </span>
+                <span className="relative flex items-center justify-center h-9 w-9 rounded-full bg-black/15">
+                  {focusedDone && !alreadyClaimed
+                    ? <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" strokeWidth={2.25} />
+                    : alreadyClaimed
+                      ? <CheckCircle2 className="h-4 w-4" strokeWidth={2.25} />
+                      : <Lock className="h-4 w-4" strokeWidth={2.25} />}
+                </span>
+                {focusedDone && !alreadyClaimed && (
+                  <span className="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/25 to-transparent group-hover:translate-x-full transition-transform duration-1000" />
+                )}
+              </button>
+
+              <button
+                type="button"
+                onClick={handleShare}
+                title="Compartilhar conquista"
+                className="inline-flex items-center gap-2 h-14 px-5 rounded-full border border-white/15 bg-white/[0.04] backdrop-blur-md text-white/85 hover:border-[hsl(var(--primary)/0.5)] hover:bg-[hsl(var(--primary)/0.1)] hover:text-white transition-all"
+              >
+                <Share2 className="h-4 w-4" strokeWidth={2.25} />
+                <span className="font-display font-bold text-[12px] uppercase tracking-[0.08em]">Compartilhar</span>
+              </button>
+            </div>
           </div>
         </div>
 
