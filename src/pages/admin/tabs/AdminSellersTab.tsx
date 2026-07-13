@@ -129,6 +129,8 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
   const [search, setSearch] = useState("");
   const [sellerFilter, setSellerFilter] = useState<"all" | "white" | "black" | "unset" | "kyc" | "frozen" | "blocked" | "rejected" | "approved">("all");
   const [selectedUser, setSelectedUser] = useState<Tables<"profiles"> | null>(null);
+  const [emailVerified, setEmailVerified] = useState<boolean | null>(null);
+  const [emailVerifyLoading, setEmailVerifyLoading] = useState(false);
   const [piiRevealed, setPiiRevealed] = useState(false);
   const [revealedDoc, setRevealedDoc] = useState<string | null>(null);
   const [revealedPixKeys, setRevealedPixKeys] = useState<PixKey[] | null>(null);
