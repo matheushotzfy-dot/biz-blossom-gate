@@ -322,6 +322,21 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
     onReload();
   };
 
+  const handleSetEmailVerified = async (userId: string, verified: boolean) => {
+    setEmailVerifyLoading(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("admin-set-email-verified", {
+        body: { targetUserId: userId, action: "set", verified },
+      });
+      if (error || !data?.success) { toast.error(data?.error || "Erro ao alterar verificação"); return; }
+      setEmailVerified(verified);
+      toast.success(verified ? "E-mail marcado como verificado." : "Verificação de e-mail removida.");
+      await logAdminAction(verified ? "email_verify" : "email_unverify", "auth.user", userId, { verified });
+    } finally {
+      setEmailVerifyLoading(false);
+    }
+  };
+
   const handleBanSeller = async (userId: string) => {
     const { data, error } = await supabase.functions.invoke("admin-ban-seller", { body: { targetUserId: userId } });
     if (error || !data?.success) { toast.error(data?.error || "Erro ao banir seller"); return; }
