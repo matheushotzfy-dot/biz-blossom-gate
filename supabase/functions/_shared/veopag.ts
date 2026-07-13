@@ -20,16 +20,47 @@ const TOKEN_TTL_MS = 55 * 60 * 1000;
 
 let cachedToken: { token: string; expiresAt: number } | null = null;
 
-/** Fetch a fresh Bearer token, respecting the ~55min cache window. */
-export async function getVeopagToken(): Promise<string> {
-  const now = Date.now();
-  if (cachedToken && cachedToken.expiresAt > now + 60_000) return cachedToken.token;
-
+/**
+ * Load VeoPag credentials.
+ * Priority:
+ *   1. `acquirers` row (slug='veopag') — `api_key_encrypted` (client_id) + `api_secret_encrypted` (client_secret).
+ *      These are the values the admin fills in Admin → Adquirentes.
+ *   2. Env vars VEOPAG_CLIENT_ID / VEOPAG_CLIENT_SECRET (fallback for legacy setups).
+ */
+async function loadVeopagCredentials(
+  supabase?: any,
+): Promise<{ clientId: string; clientSecret: string }> {
+  if (supabase) {
+    try {
+      const { data } = await supabase
+        .from("acquirers")
+        .select("api_key_encrypted, api_secret_encrypted, is_active")
+        .eq("slug", "veopag")
+        .maybeSingle();
+      if (data?.is_active && data.api_key_encrypted && data.api_secret_encrypted) {
+        return {
+          clientId: String(data.api_key_encrypted),
+          clientSecret: String(data.api_secret_encrypted),
+        };
+      }
+    } catch (_) {
+      // fall through to env
+    }
+  }
   const clientId = Deno.env.get("VEOPAG_CLIENT_ID");
   const clientSecret = Deno.env.get("VEOPAG_CLIENT_SECRET");
   if (!clientId || !clientSecret) {
-    throw new Error("VeoPag credentials not configured");
+    throw new Error("VeoPag credentials not configured (neither in acquirers nor env)");
   }
+  return { clientId, clientSecret };
+}
+
+/** Fetch a fresh Bearer token, respecting the ~55min cache window. */
+export async function getVeopagToken(supabase?: any): Promise<string> {
+  const now = Date.now();
+  if (cachedToken && cachedToken.expiresAt > now + 60_000) return cachedToken.token;
+
+  const { clientId, clientSecret } = await loadVeopagCredentials(supabase);
 
   const resp = await fetch(`${VEOPAG_BASE}/api/auth/login`, {
     method: "POST",
@@ -47,6 +78,11 @@ export async function getVeopagToken(): Promise<string> {
   }
   cachedToken = { token, expiresAt: now + TOKEN_TTL_MS };
   return token;
+}
+
+/** Force-reset the in-memory token cache. Call after credentials change in admin. */
+export function invalidateVeopagTokenCache(): void {
+  cachedToken = null;
 }
 
 /**
