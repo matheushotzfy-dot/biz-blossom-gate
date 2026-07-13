@@ -108,8 +108,8 @@ export default function Saques() {
       setOpen(false);
       return;
     }
-    const numAmount = parseFloat(amount);
-    if (!user || isNaN(numAmount) || numAmount <= withdrawFee) { toast.error("Valor inválido"); return; }
+    const numAmount = parseBRL(amount);
+    if (!user || !numAmount || numAmount <= withdrawFee) { toast.error("Valor inválido"); return; }
     if (numAmount > availableBalance) { toast.error("Saldo insuficiente"); return; }
     if (pixKeys.length === 0 && bankAccounts.length === 0) { toast.error("Cadastre uma chave PIX ou conta bancária"); return; }
 
@@ -118,7 +118,8 @@ export default function Saques() {
     toast.success("Solicitação enviada!"); setOpen(false); setAmount(""); invalidateAll(["withdrawals"]);
   };
 
-  const netPreview = parseFloat(amount) > withdrawFee ? parseFloat(amount) - withdrawFee : 0;
+  const parsedAmount = parseBRL(amount);
+  const netPreview = parsedAmount > withdrawFee ? parsedAmount - withdrawFee : 0;
 
   return (
     <div className="space-y-6 animate-in fade-in duration-500">
