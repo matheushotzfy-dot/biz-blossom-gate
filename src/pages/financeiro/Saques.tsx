@@ -271,7 +271,7 @@ export default function Saques() {
                             >
                               <span className={cn(
                                 "mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border transition-all duration-200",
-                                active ? "border-primary/45 bg-primary/12 text-primary" : "border-border/60 bg-background text-muted-foreground group-hover:border-primary/30 group-hover:text-primary",
+                                active ? "border-primary/45 bg-primary/[0.12] text-primary" : "border-border/60 bg-background text-muted-foreground group-hover:border-primary/30 group-hover:text-primary",
                               )}>
                                 <Key className="h-4 w-4" strokeWidth={2.5} />
                               </span>
