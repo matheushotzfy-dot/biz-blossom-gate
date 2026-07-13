@@ -125,8 +125,8 @@ export interface VeopagDepositResult {
  * Create a PIX deposit on VeoPag.
  * Throws on any non-2xx response. Never logs payer info or full payload.
  */
-export async function createVeopagDeposit(input: VeopagDepositInput): Promise<VeopagDepositResult> {
-  const token = await getVeopagToken();
+export async function createVeopagDeposit(input: VeopagDepositInput, supabase?: any): Promise<VeopagDepositResult> {
+  const token = await getVeopagToken(supabase);
 
   const body: Record<string, unknown> = {
     amount: Number(input.amount),
