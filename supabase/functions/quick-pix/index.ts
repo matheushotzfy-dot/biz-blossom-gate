@@ -159,7 +159,7 @@ Deno.serve(async (req) => {
           externalId: preTxId,
           payerName: safeName,
           payerDocument: cleanDoc,
-        });
+        }, supabase);
       } catch (e) {
         safeLog("VeoPag error", { error: e instanceof Error ? e.message : "unknown" });
         return new Response(

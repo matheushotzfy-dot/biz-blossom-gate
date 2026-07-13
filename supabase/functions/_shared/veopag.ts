@@ -20,16 +20,47 @@ const TOKEN_TTL_MS = 55 * 60 * 1000;
 
 let cachedToken: { token: string; expiresAt: number } | null = null;
 
-/** Fetch a fresh Bearer token, respecting the ~55min cache window. */
-export async function getVeopagToken(): Promise<string> {
-  const now = Date.now();
-  if (cachedToken && cachedToken.expiresAt > now + 60_000) return cachedToken.token;
-
+/**
+ * Load VeoPag credentials.
+ * Priority:
+ *   1. `acquirers` row (slug='veopag') — `api_key_encrypted` (client_id) + `api_secret_encrypted` (client_secret).
+ *      These are the values the admin fills in Admin → Adquirentes.
+ *   2. Env vars VEOPAG_CLIENT_ID / VEOPAG_CLIENT_SECRET (fallback for legacy setups).
+ */
+async function loadVeopagCredentials(
+  supabase?: any,
+): Promise<{ clientId: string; clientSecret: string }> {
+  if (supabase) {
+    try {
+      const { data } = await supabase
+        .from("acquirers")
+        .select("api_key_encrypted, api_secret_encrypted, is_active")
+        .eq("slug", "veopag")
+        .maybeSingle();
+      if (data?.is_active && data.api_key_encrypted && data.api_secret_encrypted) {
+        return {
+          clientId: String(data.api_key_encrypted),
+          clientSecret: String(data.api_secret_encrypted),
+        };
+      }
+    } catch (_) {
+      // fall through to env
+    }
+  }
   const clientId = Deno.env.get("VEOPAG_CLIENT_ID");
   const clientSecret = Deno.env.get("VEOPAG_CLIENT_SECRET");
   if (!clientId || !clientSecret) {
-    throw new Error("VeoPag credentials not configured");
+    throw new Error("VeoPag credentials not configured (neither in acquirers nor env)");
   }
+  return { clientId, clientSecret };
+}
+
+/** Fetch a fresh Bearer token, respecting the ~55min cache window. */
+export async function getVeopagToken(supabase?: any): Promise<string> {
+  const now = Date.now();
+  if (cachedToken && cachedToken.expiresAt > now + 60_000) return cachedToken.token;
+
+  const { clientId, clientSecret } = await loadVeopagCredentials(supabase);
 
   const resp = await fetch(`${VEOPAG_BASE}/api/auth/login`, {
     method: "POST",
@@ -47,6 +78,11 @@ export async function getVeopagToken(): Promise<string> {
   }
   cachedToken = { token, expiresAt: now + TOKEN_TTL_MS };
   return token;
+}
+
+/** Force-reset the in-memory token cache. Call after credentials change in admin. */
+export function invalidateVeopagTokenCache(): void {
+  cachedToken = null;
 }
 
 /**
@@ -89,8 +125,8 @@ export interface VeopagDepositResult {
  * Create a PIX deposit on VeoPag.
  * Throws on any non-2xx response. Never logs payer info or full payload.
  */
-export async function createVeopagDeposit(input: VeopagDepositInput): Promise<VeopagDepositResult> {
-  const token = await getVeopagToken();
+export async function createVeopagDeposit(input: VeopagDepositInput, supabase?: any): Promise<VeopagDepositResult> {
+  const token = await getVeopagToken(supabase);
 
   const body: Record<string, unknown> = {
     amount: Number(input.amount),
@@ -142,8 +178,10 @@ export async function createVeopagDeposit(input: VeopagDepositInput): Promise<Ve
 
 /**
  * Resolve the active acquirer slug for a seller.
- * Returns 'veopag' when the seller has that acquirer active in seller_acquirer_config
- * (with the highest priority). Falls back to 'podpay' when nothing is configured.
+ * Priority order:
+ *   1. `seller_acquirer_config` (highest priority row with active acquirer).
+ *   2. `profiles.acquirer_id` → `acquirers.slug` (admin-assigned per seller).
+ *   3. Platform default: 'veopag'.
  */
 export async function resolveAcquirerSlug(
   supabase: any,
@@ -163,7 +201,21 @@ export async function resolveAcquirerSlug(
       if (slug && acqActive) return slug;
     }
   } catch (_) {
-    // fail-open to the platform default
+    // fall through to profile-level assignment
   }
-  return "podpay";
+
+  try {
+    const { data: prof } = await supabase
+      .from("profiles")
+      .select("acquirer_id, acquirers:acquirer_id(slug, is_active)")
+      .eq("user_id", userId)
+      .maybeSingle();
+    const slug = prof?.acquirers?.slug as string | undefined;
+    const acqActive = prof?.acquirers?.is_active as boolean | undefined;
+    if (slug && acqActive) return slug;
+  } catch (_) {
+    // fail-open to platform default
+  }
+
+  return "veopag";
 }

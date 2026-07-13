@@ -406,7 +406,7 @@ Deno.serve(async (req) => {
           payerName: safeName,
           payerDocument: cleanDoc,
           payerPhone: safePhone,
-        });
+        }, supabase);
       } catch (e) {
         safeLog("VeoPag error", { error: e instanceof Error ? e.message : "unknown" });
         return new Response(
