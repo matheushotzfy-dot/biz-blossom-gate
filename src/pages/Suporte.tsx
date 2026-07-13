@@ -197,12 +197,19 @@ export default function Suporte() {
       .insert({ user_id: user.id, subject: s, message: m, priority })
       .select().single();
     if (error || !data) { setSubmitting(false); return toast.error("Não foi possível abrir o ticket."); }
+    let attachments: Attachment[] = [];
+    try {
+      attachments = await uploadTicketAttachments(data.id, composerFiles);
+    } catch (e: any) {
+      toast.error(e?.message || "Falha ao enviar anexos.");
+    }
     // Backfill the initial message into the thread so it lives in ticket_messages too
     await (supabase as any).from("ticket_messages").insert({
-      ticket_id: data.id, sender_id: user.id, sender_type: "customer", body: m,
+      ticket_id: data.id, sender_id: user.id, sender_type: "customer", body: m, attachments,
     });
     toast.success("Ticket aberto — responderemos em breve.");
     setSubject(""); setMessage(""); setPriority("normal"); setShowComposer(false);
+    setComposerFiles([]);
     setSubmitting(false);
     await loadTickets();
     setSelectedId(data.id);
@@ -211,15 +218,45 @@ export default function Suporte() {
   const handleReply = async () => {
     if (!user?.id || !selectedId) return;
     const body = reply.trim();
-    if (body.length < 2) return;
+    if (body.length < 2 && replyFiles.length === 0) return;
     setSending(true);
+    let attachments: Attachment[] = [];
+    try {
+      attachments = await uploadTicketAttachments(selectedId, replyFiles);
+    } catch (e: any) {
+      setSending(false);
+      return toast.error(e?.message || "Falha ao enviar anexos.");
+    }
     const { error } = await (supabase as any).from("ticket_messages").insert({
-      ticket_id: selectedId, sender_id: user.id, sender_type: "customer", body,
+      ticket_id: selectedId, sender_id: user.id, sender_type: "customer",
+      body: body || "(anexo)", attachments,
     });
     setSending(false);
     if (error) return toast.error("Falha ao enviar. Tente novamente.");
     setReply("");
+    setReplyFiles([]);
     loadTickets();
+  };
+
+  const addFiles = (
+    incoming: FileList | null,
+    current: File[],
+    setter: (f: File[]) => void,
+  ) => {
+    if (!incoming || incoming.length === 0) return;
+    const merged = [...current];
+    for (const f of Array.from(incoming)) {
+      if (merged.length >= MAX_FILES_PER_MESSAGE) {
+        toast.error(`Máximo de ${MAX_FILES_PER_MESSAGE} arquivos.`);
+        break;
+      }
+      if (f.size > MAX_FILE_SIZE_MB * 1024 * 1024) {
+        toast.error(`"${f.name}" excede ${MAX_FILE_SIZE_MB}MB.`);
+        continue;
+      }
+      merged.push(f);
+    }
+    setter(merged);
   };
 
   const stats = useMemo(() => ({
