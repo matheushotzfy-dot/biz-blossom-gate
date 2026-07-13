@@ -554,7 +554,10 @@ export default function ProductEditor() {
  };
 
  const removeBump = async (id: string) => {
- await supabase.from("order_bumps").delete().eq("id", id);
+ if (!user) return;
+ // Defense-in-depth: only delete bumps whose parent product belongs to the caller
+ const { error } = await supabase.from("order_bumps").delete().eq("id", id).eq("product_id", effectiveProductId ?? "");
+ if (error) { toast.error("Erro ao remover order bump"); return; }
  setOrderBumps(prev => prev.filter(b => b.id !== id));
  toast.success("Order bump removido");
  };
@@ -589,7 +592,9 @@ export default function ProductEditor() {
  };
 
  const removeCoProducer = async (id: string) => {
-   const { error } = await supabase.from("co_productions").delete().eq("id", id);
+   if (!user) return;
+   // Defense-in-depth: only owner can remove
+   const { error } = await supabase.from("co_productions").delete().eq("id", id).eq("owner_user_id", user.id);
    if (error) { toast.error("Erro ao remover"); return; }
    setCoProductionsList(prev => prev.filter((c) => c.id !== id));
    toast.success("Co-produtor removido");
@@ -624,13 +629,15 @@ export default function ProductEditor() {
  };
 
  const toggleCoupon = async (coupon: Tables<"coupons">) => {
- const { error } = await supabase.from("coupons").update({ is_active: !coupon.is_active }).eq("id", coupon.id);
+ if (!user) return;
+ const { error } = await supabase.from("coupons").update({ is_active: !coupon.is_active }).eq("id", coupon.id).eq("user_id", user.id);
  if (error) { toast.error("Erro ao atualizar"); return; }
  setCoupons(prev => prev.map(c => c.id === coupon.id ? { ...c, is_active: !c.is_active } : c));
  };
 
  const deleteCoupon = async (id: string) => {
- const { error } = await supabase.from("coupons").delete().eq("id", id);
+ if (!user) return;
+ const { error } = await supabase.from("coupons").delete().eq("id", id).eq("user_id", user.id);
  if (error) { toast.error("Erro ao excluir"); return; }
  setCoupons(prev => prev.filter(c => c.id !== id));
  toast.success("Cupom excluído");
