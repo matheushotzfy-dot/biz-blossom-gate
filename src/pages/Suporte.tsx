@@ -7,6 +7,7 @@ import { useEffect, useState, useMemo, useRef } from "react";
 import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import { useTicketTyping } from "@/hooks/useTicketTyping";
 import {
   MessageSquare, Plus, Clock, CheckCircle2, AlertCircle, Send, ChevronLeft,
   Inbox, Search, X, Headphones, BookOpen, CreditCard, Shield, Package, Zap,
@@ -137,6 +138,13 @@ export default function Suporte() {
   const threadEndRef = useRef<HTMLDivElement>(null);
   const replyFileInputRef = useRef<HTMLInputElement>(null);
   const composerFileInputRef = useRef<HTMLInputElement>(null);
+
+  const meIdentity = useMemo(
+    () => (user ? { role: "customer" as const, name: (user.email?.split("@")[0]) || "Cliente" } : null),
+    [user?.email],
+  );
+  const { others: typingOthers, notifyTyping } = useTicketTyping(selectedId, meIdentity);
+
 
   const loadTickets = async () => {
     if (!user?.id) return;
@@ -662,6 +670,16 @@ export default function Suporte() {
                   );
                 })}
                 <div ref={threadEndRef} />
+                {typingOthers.length > 0 && (
+                  <div className="flex items-center gap-2 text-[11px] font-bold text-emerald-500 animate-in fade-in duration-150">
+                    <span className="flex gap-0.5">
+                      <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-bounce [animation-delay:-0.3s]" />
+                      <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-bounce [animation-delay:-0.15s]" />
+                      <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-bounce" />
+                    </span>
+                    {typingOthers[0].name || "Suporte"} está digitando…
+                  </div>
+                )}
               </div>
 
               {/* Reply composer */}
@@ -706,7 +724,7 @@ export default function Suporte() {
                   </button>
                   <textarea
                     value={reply}
-                    onChange={e => setReply(e.target.value)}
+                    onChange={e => { setReply(e.target.value); notifyTyping(); }}
                     onKeyDown={e => { if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) handleReply(); }}
                     placeholder="Escreva uma resposta... (Ctrl+Enter envia)"
                     rows={2}

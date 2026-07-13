@@ -13,6 +13,7 @@ import {
 import { cn } from "@/lib/utils";
 import { logAdminAction } from "@/lib/auditLog";
 import type { Tables } from "@/integrations/supabase/types";
+import { useTicketTyping } from "@/hooks/useTicketTyping";
 import {
   uploadTicketAttachments, purgeTicketAttachments, playIncomingBeep, humanSize,
   MAX_FILE_SIZE_MB, MAX_FILES_PER_MESSAGE, ACCEPTED_MIME, type Attachment,
@@ -96,6 +97,12 @@ export default function AdminSupportTab({
   const [me, setMe] = useState<{ id: string; name: string; role: string } | null>(null);
   const threadEndRef = useRef<HTMLDivElement>(null);
   const replyFileInputRef = useRef<HTMLInputElement>(null);
+
+  const meIdentity = useMemo(
+    () => (me ? { role: "staff" as const, name: me.name } : null),
+    [me?.name],
+  );
+  const { others: typingOthers, notifyTyping } = useTicketTyping(selectedId, meIdentity);
 
   const getProfile = (uid: string) => profiles.find(p => p.user_id === uid);
 
@@ -487,6 +494,16 @@ export default function AdminSupportTab({
                     );
                   })}
                   <div ref={threadEndRef} />
+                  {typingOthers.length > 0 && (
+                    <div className="flex items-center gap-2 text-[11px] font-bold text-primary animate-in fade-in duration-150">
+                      <span className="flex gap-0.5">
+                        <span className="h-1.5 w-1.5 rounded-full bg-primary animate-bounce [animation-delay:-0.3s]" />
+                        <span className="h-1.5 w-1.5 rounded-full bg-primary animate-bounce [animation-delay:-0.15s]" />
+                        <span className="h-1.5 w-1.5 rounded-full bg-primary animate-bounce" />
+                      </span>
+                      Cliente está digitando…
+                    </div>
+                  )}
                 </div>
 
                 {/* Reply composer with quick replies */}
@@ -545,7 +562,7 @@ export default function AdminSupportTab({
                     </button>
                     <textarea
                       value={reply}
-                      onChange={e => setReply(e.target.value)}
+                      onChange={e => { setReply(e.target.value); notifyTyping(); }}
                       onKeyDown={e => { if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) handleSendReply(); }}
                       placeholder="Responder ao cliente... (Ctrl+Enter envia)"
                       rows={2}
