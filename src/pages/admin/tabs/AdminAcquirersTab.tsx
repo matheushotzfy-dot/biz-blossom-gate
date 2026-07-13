@@ -1229,7 +1229,7 @@ function BulkAssign({ acquirers, onDone }: { acquirers: Acquirer[]; onDone: () =
   const [running, setRunning] = useState(false);
 
   useEffect(() => {
-    supabase.from("profiles").select("user_id, full_name, email, nickname, acquirer_id, account_status").limit(2000)
+    supabase.from("profiles").select("user_id, full_name, email, nickname, acquirer_id, account_status").eq("account_status", "active").order("full_name").limit(1000)
       .then(({ data }) => setSellers(data || []));
   }, []);
 
