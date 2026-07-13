@@ -277,7 +277,10 @@ export default function AdminDashboard() {
   };
 
   const visibleSections = isEmployee
-    ? NAV_SECTIONS.map(s => ({ ...s, items: s.items.filter(i => i.employeeAccess) })).filter(s => s.items.length > 0)
+    ? NAV_SECTIONS.map(s => ({
+        ...s,
+        items: s.items.filter(i => i.employeeAccess || (i.id === "support" && hasSupportPerm)),
+      })).filter(s => s.items.length > 0)
     : NAV_SECTIONS;
 
   const filteredSections = navQuery.trim()
