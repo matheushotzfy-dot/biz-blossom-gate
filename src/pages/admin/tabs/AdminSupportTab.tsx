@@ -13,6 +13,7 @@ import {
 import { cn } from "@/lib/utils";
 import { logAdminAction } from "@/lib/auditLog";
 import type { Tables } from "@/integrations/supabase/types";
+import { useTicketTyping } from "@/hooks/useTicketTyping";
 import {
   uploadTicketAttachments, purgeTicketAttachments, playIncomingBeep, humanSize,
   MAX_FILE_SIZE_MB, MAX_FILES_PER_MESSAGE, ACCEPTED_MIME, type Attachment,
