@@ -28,6 +28,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { NavLink } from "@/components/NavLink";
 import hotzfyLogo from "@/assets/hotzfy-logo.png";
 import { useAuth } from "@/hooks/useAuth";
+import { useSupportUnread } from "@/hooks/useSupportUnread";
 import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
 import {
@@ -266,6 +267,7 @@ export function AppSidebar() {
   const [todayRevenue, setTodayRevenue] = useState(0);
   const [salesToday, setSalesToday] = useState(0);
   const [counts, setCounts] = useState({ products: 0, courses: 0, subscriptions: 0, coupons: 0 });
+  const supportUnread = useSupportUnread();
 
   useEffect(() => {
     let ignore = false;
@@ -345,10 +347,10 @@ export function AppSidebar() {
       items: [
         { title: "Meu Perfil & KYC", url: "/perfil", icon: User },
         { title: "Premiações", url: "/premiacoes", icon: Trophy },
-        { title: "Suporte", url: "/suporte", icon: MessageSquare },
+        { title: "Suporte", url: "/suporte", icon: MessageSquare, count: supportUnread },
       ],
     },
-  ], [counts]);
+  ], [counts, supportUnread]);
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
