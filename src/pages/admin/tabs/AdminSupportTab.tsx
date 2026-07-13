@@ -477,6 +477,10 @@ export default function AdminSupportTab({
                               : "bg-card border border-border/60 text-foreground rounded-tl-sm"
                           )}>
                             {m.body}
+                            <AttachmentChips
+                              attachments={m.attachments as Attachment[] | null}
+                              tone={isStaff ? "emerald" : "muted"}
+                            />
                           </div>
                         </div>
                       </div>
@@ -501,7 +505,44 @@ export default function AdminSupportTab({
                       </button>
                     ))}
                   </div>
+                  {replyFiles.length > 0 && (
+                    <div className="px-4 pt-2 flex flex-wrap gap-1.5">
+                      {replyFiles.map((f, i) => (
+                        <span key={i} className="inline-flex items-center gap-1.5 rounded-lg border border-border/60 bg-muted/30 px-2.5 py-1 text-[11px] font-bold max-w-[220px]">
+                          <Paperclip className="h-3 w-3 shrink-0" />
+                          <span className="truncate">{f.name}</span>
+                          <span className="opacity-60 tabular-nums">{humanSize(f.size)}</span>
+                          <button
+                            type="button"
+                            onClick={() => setReplyFiles(replyFiles.filter((_, j) => j !== i))}
+                            className="text-muted-foreground hover:text-destructive"
+                            aria-label="Remover"
+                          >
+                            <X className="h-3 w-3" />
+                          </button>
+                        </span>
+                      ))}
+                    </div>
+                  )}
+                  <input
+                    ref={replyFileInputRef}
+                    type="file"
+                    multiple
+                    accept={ACCEPTED_MIME}
+                    className="hidden"
+                    onChange={e => { addReplyFiles(e.target.files); e.target.value = ""; }}
+                  />
                   <div className="p-4 flex items-end gap-2">
+                    <button
+                      type="button"
+                      onClick={() => replyFileInputRef.current?.click()}
+                      disabled={replyFiles.length >= MAX_FILES_PER_MESSAGE}
+                      className="h-11 w-11 rounded-xl border border-border/60 bg-muted/20 flex items-center justify-center text-muted-foreground hover:text-primary hover:border-primary/40 shrink-0 disabled:opacity-50"
+                      aria-label={`Anexar (até ${MAX_FILES_PER_MESSAGE}, ${MAX_FILE_SIZE_MB}MB cada)`}
+                      title={`Anexar arquivos (até ${MAX_FILES_PER_MESSAGE} · ${MAX_FILE_SIZE_MB}MB cada)`}
+                    >
+                      <Paperclip className="h-4 w-4" />
+                    </button>
                     <textarea
                       value={reply}
                       onChange={e => setReply(e.target.value)}
@@ -512,7 +553,7 @@ export default function AdminSupportTab({
                     />
                     <button
                       onClick={handleSendReply}
-                      disabled={sending || reply.trim().length < 2}
+                      disabled={sending || (reply.trim().length < 2 && replyFiles.length === 0)}
                       className="h-11 px-4 rounded-xl bg-primary text-primary-foreground flex items-center justify-center gap-2 hover:opacity-90 disabled:opacity-50 shrink-0 text-[11px] font-black uppercase tracking-widest"
                     >
                       <Send className="h-4 w-4" /> {sending ? "..." : "Enviar"}
