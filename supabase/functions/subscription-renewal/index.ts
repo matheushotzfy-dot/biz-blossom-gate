@@ -103,23 +103,18 @@ Deno.serve(async (req) => {
         default: periodEnd.setMonth(periodEnd.getMonth() + 1);
       }
 
-      // Resolve fees dynamically: custom_user_fees override → fees table → safe default
-      let pctFee = 0.0199;
-      let fixedFee = 2.5;
-      const { data: defaultPct } = await supabase
+      // Resolve fees — SAME source of truth as podpay-create-transaction / quick-pix.
+      // Subscriptions renovam via PIX por padrão, então usamos: Taxa PIX + Taxa Fixa PIX
+      // + Taxa Fixa por Transação (extra global). custom_user_fees continua sobrescrevendo.
+      const { data: feeRows } = await supabase
         .from("fees")
-        .select("value")
-        .eq("name", "Taxa de Transação")
-        .eq("fee_type", "percentage")
-        .maybeSingle();
-      if (defaultPct?.value != null) pctFee = Number(defaultPct.value) / 100;
-      const { data: defaultFixed } = await supabase
-        .from("fees")
-        .select("value")
-        .eq("name", "Taxa de Transação")
-        .eq("fee_type", "fixed")
-        .maybeSingle();
-      if (defaultFixed?.value != null) fixedFee = Number(defaultFixed.value);
+        .select("name, value")
+        .in("name", ["Taxa PIX", "Taxa Fixa PIX", "Taxa Fixa por Transação"]);
+      const getFee = (n: string) =>
+        Number((feeRows || []).find((f: { name: string; value: number | string }) => f.name === n)?.value ?? 0);
+
+      let pctFee = getFee("Taxa PIX");                       // percentual (ex.: 1.99)
+      let fixedFee = getFee("Taxa Fixa PIX") + getFee("Taxa Fixa por Transação"); // R$
 
       const { data: customFee } = await supabase
         .from("custom_user_fees")
@@ -127,11 +122,18 @@ Deno.serve(async (req) => {
         .eq("user_id", sub.seller_user_id)
         .maybeSingle();
       if (customFee) {
-        if (customFee.transaction_percentage != null) pctFee = Number(customFee.transaction_percentage) / 100;
+        if (customFee.transaction_percentage != null) pctFee = Number(customFee.transaction_percentage);
         if (customFee.transaction_fixed != null) fixedFee = Number(customFee.transaction_fixed);
       }
-      const feeAmount = Math.round((plan.price * pctFee + fixedFee) * 100) / 100;
+
+      let feeAmount = Math.round(((plan.price * pctFee) / 100 + fixedFee) * 100) / 100;
+      // Safety clamp — nunca cobrar >= valor da assinatura.
+      if (feeAmount < 0 || feeAmount >= plan.price) {
+        console.error(`[subscription-renewal] Fee out of range for sub ${sub.id}`, { feeAmount, price: plan.price });
+        feeAmount = Math.min(Math.max(feeAmount, 0), Math.max(0, plan.price - 0.01));
+      }
       const netAmount = Math.max(0, Math.round((plan.price - feeAmount) * 100) / 100);
+
 
       // Idempotency: one renewal tx per (subscription, period_end) via podpay_event_id
       const periodKey = `sub_${sub.id}_${periodEnd.toISOString()}`;
