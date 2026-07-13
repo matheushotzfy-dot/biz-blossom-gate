@@ -121,11 +121,30 @@ export default function Premiacoes() {
   const [submittingClaim, setSubmittingClaim] = useState(false);
   const [existingClaims, setExistingClaims] = useState<Array<{ id: string; tier_id: string; tier_label?: string | null; status: string; created_at?: string }>>([]);
   const [gridFilter, setGridFilter] = useState<"all" | "unlocked" | "locked">("all");
+  const [celebrateTier, setCelebrateTier] = useState<AwardItem | null>(null);
   const [claimForm, setClaimForm] = useState({
     recipient_name: "", phone: "", document: "",
     shipping_street: "", shipping_number: "", shipping_complement: "",
     shipping_neighborhood: "", shipping_city: "", shipping_state: "", shipping_zip: "",
   });
+
+  // Fire celebration once per newly-unlocked tier (per user, persisted in localStorage)
+  useEffect(() => {
+    if (!user?.id || revenue <= 0) return;
+    const key = `hotzfy_celebrated_tiers_${user.id}`;
+    const seen: string[] = (() => {
+      try { return JSON.parse(localStorage.getItem(key) || "[]"); } catch { return []; }
+    })();
+    const unlocked = AWARDS.filter(a => revenue >= a.value);
+    const fresh = unlocked.filter(a => !seen.includes(a.id));
+    if (fresh.length > 0) {
+      // Show the HIGHEST newly-unlocked tier — the biggest achievement
+      const top = fresh[fresh.length - 1];
+      setCelebrateTier(top);
+      localStorage.setItem(key, JSON.stringify(unlocked.map(a => a.id)));
+    }
+  }, [user?.id, revenue]);
+
 
   useEffect(() => {
     if (!user?.id) return;
