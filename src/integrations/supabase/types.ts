@@ -4197,6 +4197,18 @@ export type Database = {
           user_id: string
         }[]
       }
+      admin_set_acquirer_active: {
+        Args: { _acquirer_id: string; _active: boolean; _reason?: string }
+        Returns: Json
+      }
+      admin_set_seller_acquirer: {
+        Args: {
+          _new_acquirer_id?: string
+          _reason?: string
+          _seller_id: string
+        }
+        Returns: Json
+      }
       admin_unverify_email: { Args: { _user_id: string }; Returns: undefined }
       apply_transaction_splits: { Args: { _tx_id: string }; Returns: undefined }
       backfill_financial_ledger_for_completed_tx: {
