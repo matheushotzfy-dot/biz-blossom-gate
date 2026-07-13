@@ -11,10 +11,16 @@ import {
   MessageSquare, Plus, Clock, CheckCircle2, AlertCircle, Send, ChevronLeft,
   Inbox, Search, X, Headphones, BookOpen, CreditCard, Shield, Package, Zap,
   ArrowUpRight, HelpCircle, ChevronDown, ChevronUp, User as UserIcon, Sparkles,
+  Paperclip,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { Seo } from "@/components/Seo";
+import {
+  uploadTicketAttachments, playIncomingBeep, humanSize,
+  MAX_FILE_SIZE_MB, MAX_FILES_PER_MESSAGE, ACCEPTED_MIME, type Attachment,
+} from "@/lib/ticketAttachments";
+import { AttachmentChips } from "@/components/support/AttachmentChips";
 
 type Ticket = {
   id: string;
@@ -40,6 +46,7 @@ type TicketMessage = {
   sender_role: string | null;
   body: string;
   created_at: string;
+  attachments?: Attachment[] | null;
 };
 
 const ROLE_LABEL: Record<string, string> = {
@@ -113,12 +120,14 @@ export default function Suporte() {
   const [loadingThread, setLoadingThread] = useState(false);
   const [reply, setReply] = useState("");
   const [sending, setSending] = useState(false);
+  const [replyFiles, setReplyFiles] = useState<File[]>([]);
 
   const [showComposer, setShowComposer] = useState(false);
   const [subject, setSubject] = useState("");
   const [message, setMessage] = useState("");
   const [priority, setPriority] = useState("normal");
   const [submitting, setSubmitting] = useState(false);
+  const [composerFiles, setComposerFiles] = useState<File[]>([]);
 
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState<"all" | "open" | "answered" | "closed">("all");
@@ -126,6 +135,8 @@ export default function Suporte() {
   const [openFaq, setOpenFaq] = useState<number | null>(null);
 
   const threadEndRef = useRef<HTMLDivElement>(null);
+  const replyFileInputRef = useRef<HTMLInputElement>(null);
+  const composerFileInputRef = useRef<HTMLInputElement>(null);
 
   const loadTickets = async () => {
     if (!user?.id) return;
@@ -169,6 +180,7 @@ export default function Suporte() {
       .on("postgres_changes", { event: "INSERT", schema: "public", table: "ticket_messages", filter: `ticket_id=eq.${selectedId}` },
         (payload: any) => {
           setMessages(prev => prev.some(m => m.id === payload.new.id) ? prev : [...prev, payload.new]);
+          if (payload.new.sender_type === "staff") playIncomingBeep();
           setTimeout(() => threadEndRef.current?.scrollIntoView({ behavior: "smooth" }), 50);
         })
       .subscribe();
@@ -185,12 +197,19 @@ export default function Suporte() {
       .insert({ user_id: user.id, subject: s, message: m, priority })
       .select().single();
     if (error || !data) { setSubmitting(false); return toast.error("Não foi possível abrir o ticket."); }
+    let attachments: Attachment[] = [];
+    try {
+      attachments = await uploadTicketAttachments(data.id, composerFiles);
+    } catch (e: any) {
+      toast.error(e?.message || "Falha ao enviar anexos.");
+    }
     // Backfill the initial message into the thread so it lives in ticket_messages too
     await (supabase as any).from("ticket_messages").insert({
-      ticket_id: data.id, sender_id: user.id, sender_type: "customer", body: m,
+      ticket_id: data.id, sender_id: user.id, sender_type: "customer", body: m, attachments,
     });
     toast.success("Ticket aberto — responderemos em breve.");
     setSubject(""); setMessage(""); setPriority("normal"); setShowComposer(false);
+    setComposerFiles([]);
     setSubmitting(false);
     await loadTickets();
     setSelectedId(data.id);
@@ -199,15 +218,45 @@ export default function Suporte() {
   const handleReply = async () => {
     if (!user?.id || !selectedId) return;
     const body = reply.trim();
-    if (body.length < 2) return;
+    if (body.length < 2 && replyFiles.length === 0) return;
     setSending(true);
+    let attachments: Attachment[] = [];
+    try {
+      attachments = await uploadTicketAttachments(selectedId, replyFiles);
+    } catch (e: any) {
+      setSending(false);
+      return toast.error(e?.message || "Falha ao enviar anexos.");
+    }
     const { error } = await (supabase as any).from("ticket_messages").insert({
-      ticket_id: selectedId, sender_id: user.id, sender_type: "customer", body,
+      ticket_id: selectedId, sender_id: user.id, sender_type: "customer",
+      body: body || "(anexo)", attachments,
     });
     setSending(false);
     if (error) return toast.error("Falha ao enviar. Tente novamente.");
     setReply("");
+    setReplyFiles([]);
     loadTickets();
+  };
+
+  const addFiles = (
+    incoming: FileList | null,
+    current: File[],
+    setter: (f: File[]) => void,
+  ) => {
+    if (!incoming || incoming.length === 0) return;
+    const merged = [...current];
+    for (const f of Array.from(incoming)) {
+      if (merged.length >= MAX_FILES_PER_MESSAGE) {
+        toast.error(`Máximo de ${MAX_FILES_PER_MESSAGE} arquivos.`);
+        break;
+      }
+      if (f.size > MAX_FILE_SIZE_MB * 1024 * 1024) {
+        toast.error(`"${f.name}" excede ${MAX_FILE_SIZE_MB}MB.`);
+        continue;
+      }
+      merged.push(f);
+    }
+    setter(merged);
   };
 
   const stats = useMemo(() => ({
@@ -379,8 +428,51 @@ export default function Suporte() {
                 <span className="text-[10px] tabular-nums font-black text-muted-foreground/60">{message.length}/{MAX_MESSAGE}</span>
               </div>
             </div>
+            {/* Attachments */}
+            <div>
+              <input
+                ref={composerFileInputRef}
+                type="file"
+                multiple
+                accept={ACCEPTED_MIME}
+                className="hidden"
+                onChange={e => { addFiles(e.target.files, composerFiles, setComposerFiles); e.target.value = ""; }}
+              />
+              <div className="flex items-center flex-wrap gap-2">
+                <button
+                  type="button"
+                  onClick={() => composerFileInputRef.current?.click()}
+                  disabled={composerFiles.length >= MAX_FILES_PER_MESSAGE}
+                  className="h-8 px-3 rounded-lg border border-border/60 bg-muted/20 text-[10px] font-black uppercase tracking-widest text-muted-foreground hover:text-primary hover:border-primary/40 flex items-center gap-1.5 disabled:opacity-50"
+                >
+                  <Paperclip className="h-3 w-3" /> Anexar
+                </button>
+                <span className="text-[10px] font-bold text-muted-foreground/70">
+                  Até {MAX_FILES_PER_MESSAGE} arquivos · {MAX_FILE_SIZE_MB}MB cada
+                </span>
+              </div>
+              {composerFiles.length > 0 && (
+                <div className="mt-2 flex flex-wrap gap-1.5">
+                  {composerFiles.map((f, i) => (
+                    <span key={i} className="inline-flex items-center gap-1.5 rounded-lg border border-border/60 bg-muted/30 px-2.5 py-1 text-[11px] font-bold max-w-[220px]">
+                      <Paperclip className="h-3 w-3 shrink-0" />
+                      <span className="truncate">{f.name}</span>
+                      <span className="opacity-60 tabular-nums">{humanSize(f.size)}</span>
+                      <button
+                        type="button"
+                        onClick={() => setComposerFiles(composerFiles.filter((_, j) => j !== i))}
+                        className="text-muted-foreground hover:text-destructive"
+                        aria-label="Remover"
+                      >
+                        <X className="h-3 w-3" />
+                      </button>
+                    </span>
+                  ))}
+                </div>
+              )}
+            </div>
             <div className="flex justify-end gap-2">
-              <button onClick={() => setShowComposer(false)} className="h-10 px-4 rounded-xl border border-border/60 bg-card text-[11px] font-black uppercase tracking-widest text-muted-foreground hover:text-foreground">
+              <button onClick={() => { setShowComposer(false); setComposerFiles([]); }} className="h-10 px-4 rounded-xl border border-border/60 bg-card text-[11px] font-black uppercase tracking-widest text-muted-foreground hover:text-foreground">
                 Cancelar
               </button>
               <button
@@ -560,6 +652,10 @@ export default function Suporte() {
                             : "bg-card border border-border/60 text-foreground rounded-tl-sm"
                         )}>
                           {m.body}
+                          <AttachmentChips
+                            attachments={m.attachments as Attachment[] | null}
+                            tone={isMe ? "primary" : "muted"}
+                          />
                         </div>
                       </div>
                     </div>
@@ -569,8 +665,45 @@ export default function Suporte() {
               </div>
 
               {/* Reply composer */}
-              <div className="p-4 border-t border-border/40 bg-card">
+              <div className="p-4 border-t border-border/40 bg-card space-y-2">
+                {replyFiles.length > 0 && (
+                  <div className="flex flex-wrap gap-1.5">
+                    {replyFiles.map((f, i) => (
+                      <span key={i} className="inline-flex items-center gap-1.5 rounded-lg border border-border/60 bg-muted/30 px-2.5 py-1 text-[11px] font-bold max-w-[220px]">
+                        <Paperclip className="h-3 w-3 shrink-0" />
+                        <span className="truncate">{f.name}</span>
+                        <span className="opacity-60 tabular-nums">{humanSize(f.size)}</span>
+                        <button
+                          type="button"
+                          onClick={() => setReplyFiles(replyFiles.filter((_, j) => j !== i))}
+                          className="text-muted-foreground hover:text-destructive"
+                          aria-label="Remover"
+                        >
+                          <X className="h-3 w-3" />
+                        </button>
+                      </span>
+                    ))}
+                  </div>
+                )}
+                <input
+                  ref={replyFileInputRef}
+                  type="file"
+                  multiple
+                  accept={ACCEPTED_MIME}
+                  className="hidden"
+                  onChange={e => { addFiles(e.target.files, replyFiles, setReplyFiles); e.target.value = ""; }}
+                />
                 <div className="flex items-end gap-2">
+                  <button
+                    type="button"
+                    onClick={() => replyFileInputRef.current?.click()}
+                    disabled={replyFiles.length >= MAX_FILES_PER_MESSAGE}
+                    className="h-11 w-11 rounded-xl border border-border/60 bg-muted/20 flex items-center justify-center text-muted-foreground hover:text-primary hover:border-primary/40 shrink-0 disabled:opacity-50"
+                    aria-label={`Anexar (até ${MAX_FILES_PER_MESSAGE}, ${MAX_FILE_SIZE_MB}MB cada)`}
+                    title={`Anexar arquivos (até ${MAX_FILES_PER_MESSAGE} · ${MAX_FILE_SIZE_MB}MB cada)`}
+                  >
+                    <Paperclip className="h-4 w-4" />
+                  </button>
                   <textarea
                     value={reply}
                     onChange={e => setReply(e.target.value)}
@@ -581,7 +714,7 @@ export default function Suporte() {
                   />
                   <button
                     onClick={handleReply}
-                    disabled={sending || reply.trim().length < 2}
+                    disabled={sending || (reply.trim().length < 2 && replyFiles.length === 0)}
                     className="h-11 w-11 rounded-xl bg-primary text-primary-foreground flex items-center justify-center hover:opacity-90 disabled:opacity-50 shrink-0"
                     aria-label="Enviar"
                   >
