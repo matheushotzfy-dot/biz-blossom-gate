@@ -8,7 +8,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import {
   Trophy, Lock, CheckCircle2, ChevronLeft, ChevronRight, Gift, Sparkles, Crown,
-  Flame, Award, Star, Gem, ArrowRight,
+  Flame, Award, Star, Gem, ArrowRight, Share2, CalendarClock, Package, Truck, Clock, XCircle,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
