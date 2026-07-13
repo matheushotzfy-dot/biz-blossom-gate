@@ -111,7 +111,152 @@ function Ring({ value, size = 168, stroke = 5 }: { value: number; size?: number;
   );
 }
 
+/* ---------- Unlock celebration ---------- */
+function UnlockCelebration({ tier, onClose, onClaim }: { tier: AwardItem; onClose: () => void; onClaim: () => void }) {
+  const TierIcon = tier.icon;
+  // Deterministic confetti pieces (60 particles)
+  const pieces = useMemo(() => Array.from({ length: 60 }, (_, i) => {
+    const angle = (i / 60) * Math.PI * 2;
+    const distance = 240 + Math.random() * 260;
+    const dx = Math.cos(angle) * distance;
+    const dy = Math.sin(angle) * distance - 120;
+    const rotate = (Math.random() - 0.5) * 900;
+    const delay = Math.random() * 200;
+    const duration = 1400 + Math.random() * 1400;
+    const size = 6 + Math.random() * 10;
+    const colors = ["hsl(var(--primary))", `hsl(${tier.accent})`, "#fbbf24", "#ffffff", "#10b981"];
+    const color = colors[i % colors.length];
+    return { dx, dy, rotate, delay, duration, size, color, id: i };
+  }), [tier.id]);
+
+  return (
+    <div
+      className="fixed inset-0 z-[100] flex items-center justify-center p-4 animate-in fade-in duration-300"
+      style={{ ['--tier' as string]: tier.accent } as React.CSSProperties}
+      onClick={onClose}
+      role="dialog"
+      aria-modal="true"
+    >
+      {/* Backdrop */}
+      <div className="absolute inset-0 bg-black/85 backdrop-blur-md" />
+      {/* Radial spotlight */}
+      <div
+        className="absolute inset-0 pointer-events-none"
+        style={{ background: `radial-gradient(circle at 50% 45%, hsl(var(--tier)/0.35), transparent 55%)` }}
+      />
+
+      {/* Confetti burst */}
+      <div className="absolute top-1/2 left-1/2 pointer-events-none" aria-hidden>
+        {pieces.map(p => (
+          <span
+            key={p.id}
+            className="absolute rounded-sm"
+            style={{
+              left: 0, top: 0,
+              width: `${p.size}px`, height: `${p.size * 0.4}px`,
+              background: p.color,
+              transform: "translate(-50%, -50%)",
+              animation: `hotzfyBurst ${p.duration}ms cubic-bezier(0.2, 0.7, 0.3, 1) ${p.delay}ms forwards`,
+              // @ts-expect-error custom vars
+              "--dx": `${p.dx}px`,
+              "--dy": `${p.dy}px`,
+              "--rot": `${p.rotate}deg`,
+            } as React.CSSProperties}
+          />
+        ))}
+      </div>
+
+      {/* Card */}
+      <div
+        onClick={(e) => e.stopPropagation()}
+        className="relative w-full max-w-md rounded-[32px] border border-white/15 bg-gradient-to-b from-white/[0.08] to-white/[0.02] backdrop-blur-2xl overflow-hidden animate-in zoom-in-95 slide-in-from-bottom-4 duration-500"
+      >
+        <button
+          onClick={onClose}
+          className="absolute top-4 right-4 z-20 h-8 w-8 rounded-full border border-white/15 bg-black/40 flex items-center justify-center text-white/70 hover:text-white transition-colors"
+          aria-label="Fechar"
+        >
+          <span className="text-lg leading-none">×</span>
+        </button>
+
+        {/* Halo */}
+        <div
+          className="absolute -inset-16 rounded-full blur-3xl opacity-70 pointer-events-none"
+          style={{ background: `radial-gradient(circle at 50% 30%, hsl(var(--tier)/0.6), transparent 65%)` }}
+        />
+
+        {/* Header ribbon */}
+        <div className="relative pt-10 px-8 text-center">
+          <p className="font-mono text-[10px] uppercase tracking-[0.36em] text-[hsl(var(--tier))] flex items-center justify-center gap-2">
+            <Sparkles className="h-3 w-3 animate-pulse" /> Conquista desbloqueada · {tier.roman}
+          </p>
+          <div className="mt-4 flex items-center justify-center">
+            <div
+              className="h-24 w-24 rounded-3xl border border-white/20 bg-white/[0.06] backdrop-blur-md flex items-center justify-center"
+              style={{ boxShadow: `0 20px 60px -10px hsl(var(--tier)/0.6), inset 0 1px 0 rgba(255,255,255,0.15)` }}
+            >
+              <TierIcon className="h-11 w-11 text-white" strokeWidth={1.75} style={{ filter: `drop-shadow(0 0 12px hsl(var(--tier)/0.9))` }} />
+            </div>
+          </div>
+          <h2 className="mt-6 font-display font-black text-white text-[36px] leading-[0.95] tracking-[-0.035em]">
+            {tier.title}
+          </h2>
+          <p className="mt-2 font-mono text-[11px] uppercase tracking-[0.28em] text-white/60">
+            {tier.tier} · {tier.label}
+          </p>
+        </div>
+
+        {/* Phrase */}
+        <div className="relative px-8 mt-6">
+          <blockquote className="text-center text-white/85 text-[15px] leading-snug italic">
+            "{tier.phrase}"
+          </blockquote>
+        </div>
+
+        {/* Rewards */}
+        <div className="relative px-8 mt-6">
+          <p className="font-mono text-[10px] uppercase tracking-[0.28em] text-white/45 mb-3 text-center">Você recebe</p>
+          <div className="flex flex-wrap gap-2 justify-center">
+            {tier.rewards.map(r => (
+              <span key={r} className="inline-flex items-center gap-2 pl-2.5 pr-3.5 py-1.5 rounded-full border border-white/15 bg-white/[0.04] text-[12px] text-white/85">
+                <Gift className="h-3 w-3 text-[hsl(var(--tier))]" strokeWidth={2.5} />
+                {r}
+              </span>
+            ))}
+          </div>
+        </div>
+
+        {/* CTA */}
+        <div className="relative px-8 pt-8 pb-8 flex flex-col gap-2">
+          <button
+            onClick={onClaim}
+            className="relative overflow-hidden inline-flex items-center justify-center gap-2 h-13 py-3.5 rounded-full bg-gradient-to-r from-[hsl(var(--primary))] to-[hsl(var(--tier))] text-white font-display font-bold text-[13px] uppercase tracking-[0.14em] hover:scale-[1.02] transition-transform"
+            style={{ boxShadow: `0 12px 40px -8px hsl(var(--tier)/0.5)` }}
+          >
+            <Gift className="h-4 w-4" /> Solicitar meu troféu
+          </button>
+          <button
+            onClick={onClose}
+            className="h-11 rounded-full text-white/60 hover:text-white text-[11px] font-mono uppercase tracking-[0.24em] transition-colors"
+          >
+            Ver depois
+          </button>
+        </div>
+      </div>
+
+      {/* Keyframes */}
+      <style>{`
+        @keyframes hotzfyBurst {
+          0%   { opacity: 1; transform: translate(-50%, -50%) rotate(0deg); }
+          100% { opacity: 0; transform: translate(calc(-50% + var(--dx)), calc(-50% + var(--dy))) rotate(var(--rot)); }
+        }
+      `}</style>
+    </div>
+  );
+}
+
 /* ---------- Page ---------- */
+
 export default function Premiacoes() {
   const { user } = useAuth();
   const [revenue, setRevenue] = useState(0);
