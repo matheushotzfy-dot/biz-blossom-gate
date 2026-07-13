@@ -221,62 +221,64 @@ export default function Produtos() {
       />
 
       {/* ── Tabs + Search row ── */}
-      <div className="flex flex-col gap-3 animate-fade-in stagger-2 sm:flex-row sm:items-center sm:justify-between">
-        <div className="flex w-full flex-wrap items-center gap-1 rounded-xl border border-border/50 bg-card p-1 sm:w-fit">
-          {tabs.map((item) => {
-            const active = tab === item.value;
-            return (
-              <button
-                key={item.value}
-                onClick={() => setTab(item.value)}
-                className={cn(
-                  "group/tab relative inline-flex h-8 shrink-0 items-center gap-2 overflow-hidden rounded-lg px-3 text-[12px] font-bold tracking-tight transition-all duration-300 hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.98]",
-                  active
-                    ? "bg-secondary text-foreground ring-1 ring-border/60"
-                    : "text-muted-foreground/80 hover:bg-secondary/70 hover:text-foreground"
-                )}
-              >
-                <span className="pointer-events-none absolute inset-x-2 top-0 h-px bg-primary/50 opacity-0 transition-opacity duration-300 group-hover/tab:opacity-100" />
-                <span className={cn(
-                  "flex h-4 w-4 items-center justify-center transition-all duration-300",
-                  active ? tabAccent[item.value] : "text-muted-foreground/50 group-hover/tab:scale-110 group-hover/tab:text-primary"
-                )}>
-                  {tabIcon[item.value]}
-                </span>
-                <span className="font-display">{item.label}</span>
-                {item.count > 0 && (
-                  <span className={cn(
-                    "inline-flex h-[18px] min-w-[20px] items-center justify-center rounded-md px-1.5 text-[10px] font-black tabular-nums tracking-tight border transition-colors",
+      <div className="flex flex-col gap-3 animate-fade-in stagger-2 lg:flex-row lg:items-center lg:justify-between">
+        <div className="-mx-3 sm:mx-0 overflow-x-auto scrollbar-none">
+          <div className="inline-flex min-w-full lg:min-w-0 lg:w-fit items-center gap-1 rounded-xl border border-border/50 bg-card p-1 mx-3 sm:mx-0">
+            {tabs.map((item) => {
+              const active = tab === item.value;
+              return (
+                <button
+                  key={item.value}
+                  onClick={() => setTab(item.value)}
+                  className={cn(
+                    "group/tab relative inline-flex h-8 shrink-0 items-center gap-2 overflow-hidden rounded-lg px-3 text-[12px] font-bold tracking-tight transition-all duration-300 hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.98] whitespace-nowrap",
                     active
-                      ? "bg-background/80 text-foreground border-border/40"
-                      : "bg-muted/30 text-muted-foreground/60 border-transparent"
+                      ? "bg-secondary text-foreground ring-1 ring-border/60"
+                      : "text-muted-foreground/80 hover:bg-secondary/70 hover:text-foreground"
+                  )}
+                >
+                  <span className="pointer-events-none absolute inset-x-2 top-0 h-px bg-primary/50 opacity-0 transition-opacity duration-300 group-hover/tab:opacity-100" />
+                  <span className={cn(
+                    "flex h-4 w-4 items-center justify-center transition-all duration-300",
+                    active ? tabAccent[item.value] : "text-muted-foreground/50 group-hover/tab:scale-110 group-hover/tab:text-primary"
                   )}>
-                    {item.count}
+                    {tabIcon[item.value]}
                   </span>
-                )}
-              </button>
-            );
-          })}
+                  <span className="font-display">{item.label}</span>
+                  {item.count > 0 && (
+                    <span className={cn(
+                      "inline-flex h-[18px] min-w-[20px] items-center justify-center rounded-md px-1.5 text-[10px] font-black tabular-nums tracking-tight border transition-colors",
+                      active
+                        ? "bg-background/80 text-foreground border-border/40"
+                        : "bg-muted/30 text-muted-foreground/60 border-transparent"
+                    )}>
+                      {item.count}
+                    </span>
+                  )}
+                </button>
+              );
+            })}
+          </div>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 w-full lg:w-auto">
           {showClearDraftsBtn && (
             <button
               onClick={() => setClearDraftsOpen(true)}
-              className="inline-flex h-9 items-center gap-1.5 rounded-lg border border-destructive/40 bg-destructive/[0.06] px-3 text-[11px] font-bold uppercase tracking-wider text-destructive transition-all duration-200 hover:bg-destructive hover:text-destructive-foreground"
+              className="inline-flex h-9 shrink-0 items-center gap-1.5 rounded-lg border border-destructive/40 bg-destructive/[0.06] px-3 text-[11px] font-bold uppercase tracking-wider text-destructive transition-all duration-200 hover:bg-destructive hover:text-destructive-foreground"
             >
               <Trash2 className="h-3.5 w-3.5" strokeWidth={2.5} />
-              Limpar rascunhos
+              <span className="hidden sm:inline">Limpar rascunhos</span>
               <span className="rounded bg-destructive/20 px-1.5 py-px text-[10px] tabular-nums">{draftIds.length}</span>
             </button>
           )}
-          <div className="relative group">
+          <div className="relative group flex-1 lg:flex-none">
             <Search className="absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground/50 transition-colors group-focus-within:text-primary" />
             <input
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Buscar produto..."
-              className="h-9 w-full rounded-lg border border-border/60 bg-secondary/40 pl-9 pr-8 text-xs font-medium text-foreground placeholder:text-muted-foreground/60 transition-all focus:border-primary/50 focus:bg-card focus:outline-none focus:ring-2 focus:ring-primary/15 sm:w-72"
+              className="h-9 w-full rounded-lg border border-border/60 bg-secondary/40 pl-9 pr-8 text-xs font-medium text-foreground placeholder:text-muted-foreground/60 transition-all focus:border-primary/50 focus:bg-card focus:outline-none focus:ring-2 focus:ring-primary/15 lg:w-72"
             />
             {search && (
               <button onClick={() => setSearch("")} className="absolute right-2.5 top-1/2 -translate-y-1/2 rounded p-0.5 text-muted-foreground/50 transition-colors hover:bg-secondary hover:text-foreground">
@@ -286,6 +288,7 @@ export default function Produtos() {
           </div>
         </div>
       </div>
+
 
 
       {/* ── Product workspace ── */}
