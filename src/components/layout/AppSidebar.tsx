@@ -347,10 +347,10 @@ export function AppSidebar() {
       items: [
         { title: "Meu Perfil & KYC", url: "/perfil", icon: User },
         { title: "Premiações", url: "/premiacoes", icon: Trophy },
-        { title: "Suporte", url: "/suporte", icon: MessageSquare },
+        { title: "Suporte", url: "/suporte", icon: MessageSquare, count: supportUnread },
       ],
     },
-  ], [counts]);
+  ], [counts, supportUnread]);
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
