@@ -153,6 +153,9 @@ export type Database = {
           conversion_rate: number
           created_at: string
           description: string | null
+          has_api_key: boolean | null
+          has_api_secret: boolean | null
+          has_webhook_secret: boolean | null
           health_status: string
           id: string
           is_active: boolean
@@ -185,6 +188,9 @@ export type Database = {
           conversion_rate?: number
           created_at?: string
           description?: string | null
+          has_api_key?: boolean | null
+          has_api_secret?: boolean | null
+          has_webhook_secret?: boolean | null
           health_status?: string
           id?: string
           is_active?: boolean
@@ -217,6 +223,9 @@ export type Database = {
           conversion_rate?: number
           created_at?: string
           description?: string | null
+          has_api_key?: boolean | null
+          has_api_secret?: boolean | null
+          has_webhook_secret?: boolean | null
           health_status?: string
           id?: string
           is_active?: boolean
