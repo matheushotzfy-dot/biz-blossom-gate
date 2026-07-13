@@ -508,14 +508,35 @@ export default function Premiacoes() {
               </p>
             </div>
           </div>
-          <div className="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-full border border-border bg-background font-mono text-[10px] uppercase tracking-[0.24em] text-muted-foreground">
-            <span className="h-1.5 w-1.5 rounded-full bg-primary animate-pulse" />
-            {AWARDS.length} níveis
+          <div className="flex items-center gap-1 p-1 rounded-full border border-border bg-background">
+            {([
+              { id: "all", label: `Todas · ${AWARDS.length}` },
+              { id: "unlocked", label: `Conquistadas · ${unlockedCount}` },
+              { id: "locked", label: `Bloqueadas · ${AWARDS.length - unlockedCount}` },
+            ] as const).map((opt) => (
+              <button
+                key={opt.id}
+                onClick={() => setGridFilter(opt.id)}
+                className={cn(
+                  "px-3 py-1.5 rounded-full font-mono text-[10px] uppercase tracking-[0.2em] transition-colors",
+                  gridFilter === opt.id
+                    ? "bg-primary text-primary-foreground"
+                    : "text-muted-foreground hover:text-foreground"
+                )}
+              >
+                {opt.label}
+              </button>
+            ))}
           </div>
         </header>
 
         <ul className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-7 p-3 gap-3">
-          {AWARDS.map((a) => {
+          {AWARDS.filter((a) => {
+            const done = revenue >= a.value;
+            if (gridFilter === "unlocked") return done;
+            if (gridFilter === "locked") return !done;
+            return true;
+          }).map((a) => {
             const done = revenue >= a.value;
             const isFocused = focused.id === a.id;
             const progress = Math.min((revenue / a.value) * 100, 100);
