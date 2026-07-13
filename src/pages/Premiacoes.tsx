@@ -8,7 +8,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import {
   Trophy, Lock, CheckCircle2, ChevronLeft, ChevronRight, Gift, Sparkles, Crown,
-  Flame, Award, Star, Gem, ArrowRight,
+  Flame, Award, Star, Gem, ArrowRight, Share2, CalendarClock, Package, Truck, Clock, XCircle,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
@@ -115,10 +115,12 @@ function Ring({ value, size = 168, stroke = 5 }: { value: number; size?: number;
 export default function Premiacoes() {
   const { user } = useAuth();
   const [revenue, setRevenue] = useState(0);
+  const [dailyAvg, setDailyAvg] = useState(0);
   const [focusId, setFocusId] = useState<string | null>(null);
   const [claimOpen, setClaimOpen] = useState(false);
   const [submittingClaim, setSubmittingClaim] = useState(false);
-  const [existingClaims, setExistingClaims] = useState<Array<{ id: string; tier_id: string; status: string }>>([]);
+  const [existingClaims, setExistingClaims] = useState<Array<{ id: string; tier_id: string; tier_label?: string | null; status: string; created_at?: string }>>([]);
+  const [gridFilter, setGridFilter] = useState<"all" | "unlocked" | "locked">("all");
   const [claimForm, setClaimForm] = useState({
     recipient_name: "", phone: "", document: "",
     shipping_street: "", shipping_number: "", shipping_complement: "",
@@ -127,11 +129,20 @@ export default function Premiacoes() {
 
   useEffect(() => {
     if (!user?.id) return;
-    supabase.from("transactions").select("net_amount")
+    supabase.from("transactions").select("net_amount, created_at")
       .eq("user_id", user.id).eq("status", "completed")
-      .then(({ data }) => { if (data) setRevenue(data.reduce((s, t) => s + Number(t.net_amount), 0)); });
-    supabase.from("reward_claims").select("id, tier_id, status").eq("user_id", user.id)
-      .then(({ data }) => { if (data) setExistingClaims(data); });
+      .then(({ data }) => {
+        if (!data) return;
+        const total = data.reduce((s, t) => s + Number(t.net_amount), 0);
+        setRevenue(total);
+        // Compute avg daily revenue from last 30 days
+        const cutoff = Date.now() - 30 * 24 * 60 * 60 * 1000;
+        const recent = data.filter((t) => t.created_at && new Date(t.created_at).getTime() >= cutoff);
+        const recentSum = recent.reduce((s, t) => s + Number(t.net_amount), 0);
+        setDailyAvg(recentSum / 30);
+      });
+    supabase.from("reward_claims").select("id, tier_id, tier_label, status, created_at").eq("user_id", user.id).order("created_at", { ascending: false })
+      .then(({ data }) => { if (data) setExistingClaims(data as any); });
   }, [user?.id]);
 
   const { unlockedCount, nextAward, currentTier, overallProgress, remaining } = useMemo(() => {
@@ -148,6 +159,32 @@ export default function Premiacoes() {
     if (focusId) return AWARDS.find((a) => a.id === focusId) ?? nextAward ?? AWARDS[AWARDS.length - 1];
     return nextAward ?? AWARDS[AWARDS.length - 1];
   }, [focusId, nextAward]);
+
+  // ETA calculation for focused tier
+  const focusedETA = useMemo(() => {
+    if (revenue >= focused.value) return null;
+    if (dailyAvg <= 0) return null;
+    const days = Math.ceil((focused.value - revenue) / dailyAvg);
+    if (days > 3650) return null;
+    if (days <= 1) return "Menos de 1 dia";
+    if (days < 30) return `~${days} dias`;
+    if (days < 365) return `~${Math.round(days / 30)} meses`;
+    return `~${(days / 365).toFixed(1)} anos`;
+  }, [revenue, focused, dailyAvg]);
+
+  const handleShare = async () => {
+    const text = revenue >= focused.value
+      ? `🏆 Conquistei o troféu ${focused.title} (${focused.label}) na HOTZFY! ${focused.phrase}`
+      : `🎯 Faltam ${fmtFull(Math.max(focused.value - revenue, 0))} para desbloquear ${focused.title} na HOTZFY.`;
+    try {
+      if (navigator.share) {
+        await navigator.share({ title: `HOTZFY · ${focused.tier}`, text });
+      } else {
+        await navigator.clipboard.writeText(text);
+        toast.success("Copiado! Cole onde quiser compartilhar.");
+      }
+    } catch { /* user cancelled */ }
+  };
 
   const focusedIdx = AWARDS.findIndex((a) => a.id === focused.id);
   const focusedDone = revenue >= focused.value;
@@ -338,35 +375,57 @@ export default function Premiacoes() {
               </div>
             </div>
 
-            <button
-              type="button"
-              onClick={() => focusedDone && !alreadyClaimed && setClaimOpen(true)}
-              disabled={!focusedDone || alreadyClaimed}
-              className={cn(
-                "mt-6 group relative overflow-hidden inline-flex items-center justify-between gap-3 px-6 h-14 rounded-full transition-all duration-300",
-                focusedDone && !alreadyClaimed
-                  ? "bg-gradient-to-r from-[hsl(var(--primary))] via-[hsl(var(--primary))] to-[hsl(var(--tier))] text-primary-foreground hover:scale-[1.02] shadow-[0_10px_40px_-10px_hsl(var(--primary)/0.6)]"
-                  : alreadyClaimed
-                    ? "border border-white/15 bg-white/[0.04] text-white/60 cursor-default"
-                    : "border border-white/10 bg-white/[0.02] text-white/45 cursor-default"
-              )}
-            >
-              <span className="relative font-display font-bold text-[14px] tracking-[0.04em] uppercase">
-                {alreadyClaimed ? "Solicitação registrada"
-                  : focusedDone ? "Solicitar resgate"
-                  : "Continue faturando para desbloquear"}
-              </span>
-              <span className="relative flex items-center justify-center h-9 w-9 rounded-full bg-black/15">
-                {focusedDone && !alreadyClaimed
-                  ? <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" strokeWidth={2.25} />
-                  : alreadyClaimed
-                    ? <CheckCircle2 className="h-4 w-4" strokeWidth={2.25} />
-                    : <Lock className="h-4 w-4" strokeWidth={2.25} />}
-              </span>
-              {focusedDone && !alreadyClaimed && (
-                <span className="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/25 to-transparent group-hover:translate-x-full transition-transform duration-1000" />
-              )}
-            </button>
+            {/* ETA row */}
+            {!focusedDone && focusedETA && (
+              <div className="mt-4 inline-flex items-center gap-2 px-3.5 py-2 rounded-full border border-white/10 bg-white/[0.03] backdrop-blur-md">
+                <CalendarClock className="h-3.5 w-3.5 text-[hsl(var(--primary))]" strokeWidth={2.25} />
+                <span className="font-mono text-[10px] uppercase tracking-[0.22em] text-white/55">Estimativa</span>
+                <span className="font-display font-bold text-[12px] text-white tabular-nums">{focusedETA}</span>
+                <span className="font-mono text-[9px] uppercase tracking-[0.2em] text-white/40">no ritmo atual</span>
+              </div>
+            )}
+
+            <div className="mt-6 flex flex-wrap items-center gap-3">
+              <button
+                type="button"
+                onClick={() => focusedDone && !alreadyClaimed && setClaimOpen(true)}
+                disabled={!focusedDone || alreadyClaimed}
+                className={cn(
+                  "group relative overflow-hidden inline-flex items-center justify-between gap-3 px-6 h-14 rounded-full transition-all duration-300 flex-1 min-w-[240px]",
+                  focusedDone && !alreadyClaimed
+                    ? "bg-gradient-to-r from-[hsl(var(--primary))] via-[hsl(var(--primary))] to-[hsl(var(--tier))] text-primary-foreground hover:scale-[1.02] shadow-[0_10px_40px_-10px_hsl(var(--primary)/0.6)]"
+                    : alreadyClaimed
+                      ? "border border-white/15 bg-white/[0.04] text-white/60 cursor-default"
+                      : "border border-white/10 bg-white/[0.02] text-white/45 cursor-default"
+                )}
+              >
+                <span className="relative font-display font-bold text-[14px] tracking-[0.04em] uppercase">
+                  {alreadyClaimed ? "Solicitação registrada"
+                    : focusedDone ? "Solicitar resgate"
+                    : "Continue faturando para desbloquear"}
+                </span>
+                <span className="relative flex items-center justify-center h-9 w-9 rounded-full bg-black/15">
+                  {focusedDone && !alreadyClaimed
+                    ? <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" strokeWidth={2.25} />
+                    : alreadyClaimed
+                      ? <CheckCircle2 className="h-4 w-4" strokeWidth={2.25} />
+                      : <Lock className="h-4 w-4" strokeWidth={2.25} />}
+                </span>
+                {focusedDone && !alreadyClaimed && (
+                  <span className="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/25 to-transparent group-hover:translate-x-full transition-transform duration-1000" />
+                )}
+              </button>
+
+              <button
+                type="button"
+                onClick={handleShare}
+                title="Compartilhar conquista"
+                className="inline-flex items-center gap-2 h-14 px-5 rounded-full border border-white/15 bg-white/[0.04] backdrop-blur-md text-white/85 hover:border-[hsl(var(--primary)/0.5)] hover:bg-[hsl(var(--primary)/0.1)] hover:text-white transition-all"
+              >
+                <Share2 className="h-4 w-4" strokeWidth={2.25} />
+                <span className="font-display font-bold text-[12px] uppercase tracking-[0.08em]">Compartilhar</span>
+              </button>
+            </div>
           </div>
         </div>
 
@@ -449,14 +508,35 @@ export default function Premiacoes() {
               </p>
             </div>
           </div>
-          <div className="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-full border border-border bg-background font-mono text-[10px] uppercase tracking-[0.24em] text-muted-foreground">
-            <span className="h-1.5 w-1.5 rounded-full bg-primary animate-pulse" />
-            {AWARDS.length} níveis
+          <div className="flex items-center gap-1 p-1 rounded-full border border-border bg-background">
+            {([
+              { id: "all", label: `Todas · ${AWARDS.length}` },
+              { id: "unlocked", label: `Conquistadas · ${unlockedCount}` },
+              { id: "locked", label: `Bloqueadas · ${AWARDS.length - unlockedCount}` },
+            ] as const).map((opt) => (
+              <button
+                key={opt.id}
+                onClick={() => setGridFilter(opt.id)}
+                className={cn(
+                  "px-3 py-1.5 rounded-full font-mono text-[10px] uppercase tracking-[0.2em] transition-colors",
+                  gridFilter === opt.id
+                    ? "bg-primary text-primary-foreground"
+                    : "text-muted-foreground hover:text-foreground"
+                )}
+              >
+                {opt.label}
+              </button>
+            ))}
           </div>
         </header>
 
         <ul className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-7 p-3 gap-3">
-          {AWARDS.map((a) => {
+          {AWARDS.filter((a) => {
+            const done = revenue >= a.value;
+            if (gridFilter === "unlocked") return done;
+            if (gridFilter === "locked") return !done;
+            return true;
+          }).map((a) => {
             const done = revenue >= a.value;
             const isFocused = focused.id === a.id;
             const progress = Math.min((revenue / a.value) * 100, 100);
@@ -571,6 +651,62 @@ export default function Premiacoes() {
           <Sparkles className="hidden sm:block h-5 w-5 text-primary/60" strokeWidth={2} />
         </div>
       </section>
+
+      {/* =================== CLAIM HISTORY =================== */}
+      {existingClaims.length > 0 && (
+        <section className="relative overflow-hidden rounded-[24px] border border-border bg-card">
+          <header className="flex items-center justify-between border-b border-border px-6 py-5">
+            <div className="flex items-center gap-3.5">
+              <div className="relative h-11 w-11 rounded-xl border border-border bg-background flex items-center justify-center text-primary">
+                <Package className="h-5 w-5" strokeWidth={2.25} />
+              </div>
+              <div>
+                <h2 className="font-display font-black text-foreground text-xl tracking-[-0.025em] leading-none">Meus Resgates</h2>
+                <p className="font-mono text-[10px] uppercase tracking-[0.26em] text-muted-foreground mt-1.5">
+                  {existingClaims.length} solicitaç{existingClaims.length === 1 ? "ão" : "ões"} · acompanhe o envio
+                </p>
+              </div>
+            </div>
+          </header>
+          <ul className="divide-y divide-border">
+            {existingClaims.map((claim) => {
+              const tier = AWARDS.find((a) => a.id === claim.tier_id);
+              const statusMap: Record<string, { label: string; icon: typeof Clock; tone: string }> = {
+                pending: { label: "Em análise", icon: Clock, tone: "text-warning bg-warning/10 border-warning/20" },
+                approved: { label: "Aprovado", icon: CheckCircle2, tone: "text-info bg-info/10 border-info/20" },
+                shipped: { label: "Enviado", icon: Truck, tone: "text-primary bg-primary/10 border-primary/20" },
+                delivered: { label: "Entregue", icon: CheckCircle2, tone: "text-success bg-success/10 border-success/20" },
+                cancelled: { label: "Cancelado", icon: XCircle, tone: "text-destructive bg-destructive/10 border-destructive/20" },
+              };
+              const st = statusMap[claim.status] ?? statusMap.pending;
+              const StIcon = st.icon;
+              return (
+                <li key={claim.id} className="flex items-center gap-4 px-6 py-4 hover:bg-muted/30 transition-colors">
+                  {tier && (
+                    <img src={tier.image} alt="" className="h-12 w-12 object-contain shrink-0" />
+                  )}
+                  <div className="min-w-0 flex-1">
+                    <p className="font-display font-bold text-foreground text-sm truncate">
+                      {claim.tier_label ?? tier?.title ?? claim.tier_id}
+                    </p>
+                    <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground mt-1">
+                      {claim.created_at ? new Date(claim.created_at).toLocaleDateString("pt-BR", { day: "2-digit", month: "short", year: "numeric" }) : ""}
+                      {tier && ` · ${tier.tier}`}
+                    </p>
+                  </div>
+                  <span className={cn(
+                    "inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border font-mono text-[10px] uppercase tracking-[0.2em]",
+                    st.tone
+                  )}>
+                    <StIcon className="h-3 w-3" strokeWidth={2.5} />
+                    {st.label}
+                  </span>
+                </li>
+              );
+            })}
+          </ul>
+        </section>
+      )}
 
       {/* =================== Claim dialog =================== */}
       <Dialog open={claimOpen} onOpenChange={setClaimOpen}>
