@@ -54,6 +54,8 @@ export default function Saques() {
   const { data: bankAccounts = [] } = useBankAccounts();
   const [open, setOpen] = useState(false);
   const [amount, setAmount] = useState("");
+  const [destination, setDestination] = useState<Destination>("pix_key");
+  const [copyPasteCode, setCopyPasteCode] = useState("");
   const [availableBalance, setAvailableBalance] = useState<number>(0);
   const [retainedAmount, setRetainedAmount] = useState<number>(0);
   const [withdrawFee, setWithdrawFee] = useState<number>(DEFAULT_WITHDRAW_FEE);
