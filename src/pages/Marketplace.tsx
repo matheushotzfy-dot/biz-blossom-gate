@@ -91,7 +91,7 @@ export default function Marketplace() {
  };
 
  return (
- <div className="mx-auto w-full max-w-[1440px] pb-20 px-1 relative">
+ <div className="mx-auto w-full max-w-[1440px] pb-20 px-1 relative overflow-x-hidden">
  <Seo title="Marketplace de Afiliados | Hotzfy" description="Descubra produtos para promover, ganhe comissões e amplie seu portfólio de afiliado." path="/marketplace" noindex />
  {/* ════════════════════════════════════════════════════════════════ */}
  {/* HERO */}
@@ -100,7 +100,7 @@ export default function Marketplace() {
  initial={{ opacity: 0 }}
  animate={{ opacity: 1 }}
  transition={{ duration: 0.6 }}
- className="relative mb-10 rounded-3xl p-6 sm:p-8 lg:p-10 border border-border/60 bg-card shadow-sm"
+ className="relative mb-10 rounded-3xl p-6 sm:p-8 lg:p-10 border border-border/60 bg-card shadow-sm overflow-hidden"
  >
  <div className="absolute -inset-16 pointer-events-none">
  <motion.div animate={{ x: [0, 30, 0], y: [0, -20, 0] }} transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }} className="absolute top-0 -left-16 w-[600px] h-[600px] bg-primary/8 rounded-full blur-[180px]" />
