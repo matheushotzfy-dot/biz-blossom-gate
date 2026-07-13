@@ -3168,11 +3168,14 @@ export type Database = {
           admin_user_id: string | null
           created_at: string
           id: string
+          last_message_at: string | null
           message: string
           priority: string
           replied_at: string | null
           status: string
           subject: string
+          unread_by_customer: number
+          unread_by_staff: number
           updated_at: string
           user_id: string
         }
@@ -3183,11 +3186,14 @@ export type Database = {
           admin_user_id?: string | null
           created_at?: string
           id?: string
+          last_message_at?: string | null
           message: string
           priority?: string
           replied_at?: string | null
           status?: string
           subject: string
+          unread_by_customer?: number
+          unread_by_staff?: number
           updated_at?: string
           user_id: string
         }
@@ -3198,15 +3204,65 @@ export type Database = {
           admin_user_id?: string | null
           created_at?: string
           id?: string
+          last_message_at?: string | null
           message?: string
           priority?: string
           replied_at?: string | null
           status?: string
           subject?: string
+          unread_by_customer?: number
+          unread_by_staff?: number
           updated_at?: string
           user_id?: string
         }
         Relationships: []
+      }
+      ticket_messages: {
+        Row: {
+          body: string
+          created_at: string
+          id: string
+          read_by_customer: boolean
+          read_by_staff: boolean
+          sender_id: string
+          sender_name: string | null
+          sender_role: string | null
+          sender_type: string
+          ticket_id: string
+        }
+        Insert: {
+          body: string
+          created_at?: string
+          id?: string
+          read_by_customer?: boolean
+          read_by_staff?: boolean
+          sender_id: string
+          sender_name?: string | null
+          sender_role?: string | null
+          sender_type: string
+          ticket_id: string
+        }
+        Update: {
+          body?: string
+          created_at?: string
+          id?: string
+          read_by_customer?: boolean
+          read_by_staff?: boolean
+          sender_id?: string
+          sender_name?: string | null
+          sender_role?: string | null
+          sender_type?: string
+          ticket_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ticket_messages_ticket_id_fkey"
+            columns: ["ticket_id"]
+            isOneToOne: false
+            referencedRelation: "support_tickets"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       transactions: {
         Row: {

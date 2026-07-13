@@ -1,21 +1,19 @@
 /**
- * Suporte — alinhado ao padrão visual de Saques
- * @module Suporte
- * @version 9.0.0
+ * Suporte — Central de Ajuda com conversa em thread
+ * Layout inbox estilo Intercom: lista + conversa. Mobile empilha.
  */
 
-import React, { useEffect, useState, useMemo } from "react";
+import { useEffect, useState, useMemo, useRef } from "react";
 import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import {
-  MessageSquare, Plus, Clock, CheckCircle2, AlertCircle, Send,
-  ChevronRight, ChevronDown, ChevronUp, Inbox, Search, X, Headphones, BookOpen, CreditCard,
-  Shield, Package, Zap, ArrowUpRight, Activity, Loader2, HelpCircle,
+  MessageSquare, Plus, Clock, CheckCircle2, AlertCircle, Send, ChevronLeft,
+  Inbox, Search, X, Headphones, BookOpen, CreditCard, Shield, Package, Zap,
+  ArrowUpRight, HelpCircle, ChevronDown, ChevronUp, User as UserIcon, Sparkles,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
-import { EmptyState, TableSkeleton } from "@/components/PageShell";
 import { Seo } from "@/components/Seo";
 
 type Ticket = {
@@ -29,102 +27,105 @@ type Ticket = {
   admin_role: string | null;
   replied_at: string | null;
   created_at: string;
+  last_message_at?: string | null;
+  unread_by_customer?: number | null;
+};
+
+type TicketMessage = {
+  id: string;
+  ticket_id: string;
+  sender_id: string;
+  sender_type: "customer" | "staff";
+  sender_name: string | null;
+  sender_role: string | null;
+  body: string;
+  created_at: string;
 };
 
 const ROLE_LABEL: Record<string, string> = {
   admin: "Equipe Hotzfy",
   manager: "Gerente de Suporte",
   employee: "Atendente",
-  staff: "Equipe de Suporte",
+  staff: "Suporte",
 };
 
-const STATUS_MAP: Record<string, { label: string; color: string; bg: string; icon: typeof Clock }> = {
-  open:        { label: "Aberto",       color: "text-amber-500",   bg: "bg-amber-500/10",   icon: Clock },
-  pending:     { label: "Aguardando",   color: "text-amber-500",   bg: "bg-amber-500/10",   icon: Clock },
-  in_progress: { label: "Em andamento", color: "text-blue-500",    bg: "bg-blue-500/10",    icon: AlertCircle },
-  answered:    { label: "Respondido",   color: "text-emerald-500", bg: "bg-emerald-500/10", icon: CheckCircle2 },
-  resolved:    { label: "Resolvido",    color: "text-emerald-500", bg: "bg-emerald-500/10", icon: CheckCircle2 },
-  closed:      { label: "Fechado",      color: "text-muted-foreground", bg: "bg-muted/40",  icon: CheckCircle2 },
+const STATUS_MAP: Record<string, { label: string; dot: string; text: string }> = {
+  open:        { label: "Aberto",       dot: "bg-amber-500",   text: "text-amber-500" },
+  pending:     { label: "Aguardando",   dot: "bg-amber-500",   text: "text-amber-500" },
+  in_progress: { label: "Em andamento", dot: "bg-blue-500",    text: "text-blue-500" },
+  answered:    { label: "Respondido",   dot: "bg-emerald-500", text: "text-emerald-500" },
+  resolved:    { label: "Resolvido",    dot: "bg-emerald-500", text: "text-emerald-500" },
+  closed:      { label: "Fechado",      dot: "bg-muted-foreground/50", text: "text-muted-foreground" },
 };
 
-const PRIORITY_MAP: Record<string, { label: string; color: string; bg: string }> = {
-  low:    { label: "Baixa",   color: "text-muted-foreground", bg: "bg-muted/40" },
-  normal: { label: "Normal",  color: "text-blue-500",         bg: "bg-blue-500/10" },
-  high:   { label: "Alta",    color: "text-amber-500",        bg: "bg-amber-500/10" },
-  urgent: { label: "Urgente", color: "text-red-500",          bg: "bg-red-500/10" },
+const PRIORITY_MAP: Record<string, { label: string; color: string }> = {
+  low:    { label: "Baixa",   color: "text-muted-foreground" },
+  normal: { label: "Normal",  color: "text-blue-500" },
+  high:   { label: "Alta",    color: "text-amber-500" },
+  urgent: { label: "Urgente", color: "text-red-500" },
 };
 
 const HELP_CATEGORIES = [
-  { icon: CreditCard, label: "Saques & Financeiro", desc: "Saques, taxas, antecipação",       subject: "Dúvida sobre saques e financeiro" },
-  { icon: Package,    label: "Produtos & Checkout", desc: "Configuração e vendas",            subject: "Dúvida sobre produtos e checkout" },
-  { icon: Shield,     label: "Conta & Segurança",   desc: "Acesso, KYC, identidade",          subject: "Problema com conta ou segurança" },
-  { icon: Zap,        label: "Integrações & API",   desc: "Webhooks, apps, automação",        subject: "Dúvida sobre integrações ou API" },
+  { icon: CreditCard, label: "Saques & Financeiro", subject: "Dúvida sobre saques e financeiro" },
+  { icon: Package,    label: "Produtos & Checkout", subject: "Dúvida sobre produtos e checkout" },
+  { icon: Shield,     label: "Conta & Segurança",   subject: "Problema com conta ou segurança" },
+  { icon: Zap,        label: "Integrações & API",   subject: "Dúvida sobre integrações ou API" },
 ];
 
-type FaqItem = { q: string; a: string };
-type FaqGroup = { id: string; label: string; icon: typeof CreditCard; faqs: FaqItem[] };
-
-const FAQ_GROUPS: FaqGroup[] = [
-  {
-    id: "start", label: "Primeiros Passos", icon: BookOpen,
-    faqs: [
-      { q: "Como criar meu primeiro produto?", a: "Acesse Produtos > clique no botão '+' > preencha as informações básicas (nome, preço, descrição) > salve. Depois configure o checkout e o conteúdo de entrega." },
-      { q: "Como configurar meu checkout?", a: "No editor do produto, vá até a aba 'Checkout' ou use o Checkout Builder para personalizar cores, banners, timer de urgência e métodos de pagamento aceitos." },
-      { q: "Quanto tempo leva para receber meus pagamentos?", a: "Pagamentos via PIX são processados em até 1 dia útil. Cartão de crédito em até 30 dias (período de retenção padrão)." },
-    ],
-  },
-  {
-    id: "payments", label: "Pagamentos e Saques", icon: CreditCard,
-    faqs: [
-      { q: "Como solicitar um saque?", a: "Vá em Financeiro > Saques > escolha PIX ou Cripto > informe o valor > confirme. O processamento ocorre em até 24h úteis." },
-      { q: "Quais são as taxas da plataforma?", a: "A taxa padrão é de 4,99% + R$ 2,50 por transação aprovada. Taxa de saque: R$ 5,00." },
-      { q: "Como funciona a retenção?", a: "Uma porcentagem do valor é retida por um período configurável (padrão: 14 dias) como proteção contra chargebacks." },
-    ],
-  },
-  {
-    id: "security", label: "Segurança", icon: Shield,
-    faqs: [
-      { q: "Meus dados estão seguros?", a: "Sim. Utilizamos criptografia SSL, tokens de acesso seguros e políticas de isolamento de dados (RLS)." },
-      { q: "Como ativar o 2FA?", a: "O 2FA é ativado automaticamente para contas administrativas. Para vendedores, use senha forte e mantenha o e-mail de recuperação atualizado." },
-    ],
-  },
-  {
-    id: "tips", label: "Dicas de Vendas", icon: Zap,
-    faqs: [
-      { q: "Como aumentar minha taxa de conversão?", a: "Ative timer de urgência, use prova social, configure Order Bumps, teste com A/B Testing e use cupons para carrinhos abandonados." },
-      { q: "Vale a pena usar afiliados?", a: "Sim — afiliados multiplicam vendas sem custo inicial. Configure comissão competitiva (20-50%) e ative o Marketplace." },
-    ],
-  },
+const FAQ_ITEMS = [
+  { q: "Como criar meu primeiro produto?", a: "Acesse Produtos > clique em '+' > preencha nome, preço e descrição > salve. Depois configure o checkout e o conteúdo." },
+  { q: "Como solicitar um saque?", a: "Financeiro > Saques > PIX ou Cripto > informe o valor > confirme. Processamento em até 24h úteis." },
+  { q: "Quais são as taxas da plataforma?", a: "4,99% + R$ 2,50 por transação aprovada. Saque: R$ 5,00." },
+  { q: "Meus dados estão seguros?", a: "Sim. Usamos criptografia SSL, tokens seguros e isolamento por linha (RLS)." },
+  { q: "Como aumentar minha conversão?", a: "Ative timer de urgência, use prova social, configure Order Bumps e teste variações via A/B Testing." },
 ];
 
 const MAX_SUBJECT = 100;
 const MAX_MESSAGE = 2000;
 
-const formatDate = (iso: string) =>
+const formatTime = (iso: string) => {
+  const d = new Date(iso);
+  const now = new Date();
+  const diffMs = now.getTime() - d.getTime();
+  const diffMin = Math.floor(diffMs / 60000);
+  if (diffMin < 1) return "agora";
+  if (diffMin < 60) return `${diffMin}m`;
+  if (diffMin < 1440) return `${Math.floor(diffMin / 60)}h`;
+  if (diffMin < 43200) return `${Math.floor(diffMin / 1440)}d`;
+  return new Intl.DateTimeFormat("pt-BR", { day: "2-digit", month: "short" }).format(d);
+};
+
+const formatFull = (iso: string) =>
   new Intl.DateTimeFormat("pt-BR", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" }).format(new Date(iso));
+
+const initials = (name: string | null | undefined) => {
+  if (!name) return "H";
+  const parts = name.trim().split(/\s+/);
+  return ((parts[0]?.[0] ?? "") + (parts[1]?.[0] ?? "")).toUpperCase() || "H";
+};
 
 export default function Suporte() {
   const { user } = useAuth();
   const [tickets, setTickets] = useState<Ticket[]>([]);
   const [loading, setLoading] = useState(true);
-  const [showForm, setShowForm] = useState(false);
+  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [messages, setMessages] = useState<TicketMessage[]>([]);
+  const [loadingThread, setLoadingThread] = useState(false);
+  const [reply, setReply] = useState("");
+  const [sending, setSending] = useState(false);
+
+  const [showComposer, setShowComposer] = useState(false);
   const [subject, setSubject] = useState("");
   const [message, setMessage] = useState("");
   const [priority, setPriority] = useState("normal");
   const [submitting, setSubmitting] = useState(false);
-  const [expandedId, setExpandedId] = useState<string | null>(null);
-  const [search, setSearch] = useState("");
-  const [statusFilter, setStatusFilter] = useState<string>("all");
-  const [faqSearch, setFaqSearch] = useState("");
-  const [openFaqGroup, setOpenFaqGroup] = useState<string | null>("start");
-  const [openFaqItem, setOpenFaqItem] = useState<string | null>(null);
 
-  const filteredFaqs = useMemo(() => {
-    const q = faqSearch.trim().toLowerCase();
-    return FAQ_GROUPS
-      .map(g => ({ ...g, faqs: q ? g.faqs.filter(f => f.q.toLowerCase().includes(q) || f.a.toLowerCase().includes(q)) : g.faqs }))
-      .filter(g => g.faqs.length > 0);
-  }, [faqSearch]);
+  const [search, setSearch] = useState("");
+  const [filter, setFilter] = useState<"all" | "open" | "answered" | "closed">("all");
+  const [showFaq, setShowFaq] = useState(false);
+  const [openFaq, setOpenFaq] = useState<number | null>(null);
+
+  const threadEndRef = useRef<HTMLDivElement>(null);
 
   const loadTickets = async () => {
     if (!user?.id) return;
@@ -132,537 +133,463 @@ export default function Suporte() {
       .from("support_tickets")
       .select("*")
       .eq("user_id", user.id)
+      .order("last_message_at", { ascending: false, nullsFirst: false })
       .order("created_at", { ascending: false });
-    if (data) setTickets(data as Ticket[]);
+    if (data) setTickets(data as any);
     setLoading(false);
   };
 
   useEffect(() => { loadTickets(); }, [user?.id]);
 
-  const handleSubmit = async () => {
+  // Load thread when ticket selected + realtime subscribe
+  useEffect(() => {
+    if (!selectedId) { setMessages([]); return; }
+    setLoadingThread(true);
+    (supabase as any)
+      .from("ticket_messages")
+      .select("*")
+      .eq("ticket_id", selectedId)
+      .order("created_at", { ascending: true })
+      .then(({ data }: any) => {
+        setMessages((data as TicketMessage[]) ?? []);
+        setLoadingThread(false);
+        setTimeout(() => threadEndRef.current?.scrollIntoView({ behavior: "smooth" }), 100);
+      });
+
+    // Mark unread as read
+    supabase.from("support_tickets" as any)
+      .update({ unread_by_customer: 0 } as any)
+      .eq("id", selectedId)
+      .then(() => {
+        setTickets(prev => prev.map(t => t.id === selectedId ? { ...t, unread_by_customer: 0 } : t));
+      });
+
+    const channel = (supabase as any)
+      .channel(`ticket_${selectedId}`)
+      .on("postgres_changes", { event: "INSERT", schema: "public", table: "ticket_messages", filter: `ticket_id=eq.${selectedId}` },
+        (payload: any) => {
+          setMessages(prev => prev.some(m => m.id === payload.new.id) ? prev : [...prev, payload.new]);
+          setTimeout(() => threadEndRef.current?.scrollIntoView({ behavior: "smooth" }), 50);
+        })
+      .subscribe();
+    return () => { (supabase as any).removeChannel(channel); };
+  }, [selectedId]);
+
+  const handleCreateTicket = async () => {
     if (!user?.id) return;
-    const trimSubject = subject.trim();
-    const trimMessage = message.trim();
-    if (!trimSubject || trimSubject.length < 3) { toast.error("O assunto deve ter no mínimo 3 caracteres."); return; }
-    if (trimSubject.length > MAX_SUBJECT) { toast.error(`O assunto deve ter no máximo ${MAX_SUBJECT} caracteres.`); return; }
-    if (!trimMessage || trimMessage.length < 10) { toast.error("A mensagem deve ter no mínimo 10 caracteres."); return; }
-    if (trimMessage.length > MAX_MESSAGE) { toast.error(`A mensagem deve ter no máximo ${MAX_MESSAGE} caracteres.`); return; }
+    const s = subject.trim(), m = message.trim();
+    if (s.length < 3) return toast.error("O assunto deve ter no mínimo 3 caracteres.");
+    if (m.length < 10) return toast.error("A mensagem deve ter no mínimo 10 caracteres.");
     setSubmitting(true);
-    const { error } = await supabase.from("support_tickets").insert({
-      user_id: user.id, subject: trimSubject, message: trimMessage, priority,
+    const { data, error } = await supabase.from("support_tickets")
+      .insert({ user_id: user.id, subject: s, message: m, priority })
+      .select().single();
+    if (error || !data) { setSubmitting(false); return toast.error("Não foi possível abrir o ticket."); }
+    // Backfill the initial message into the thread so it lives in ticket_messages too
+    await (supabase as any).from("ticket_messages").insert({
+      ticket_id: data.id, sender_id: user.id, sender_type: "customer", body: m,
     });
+    toast.success("Ticket aberto — responderemos em breve.");
+    setSubject(""); setMessage(""); setPriority("normal"); setShowComposer(false);
     setSubmitting(false);
-    if (error) { toast.error("Não foi possível criar o ticket."); }
-    else {
-      toast.success("Ticket criado. Responderemos em breve.");
-      setSubject(""); setMessage(""); setPriority("normal"); setShowForm(false);
-      loadTickets();
-    }
+    await loadTickets();
+    setSelectedId(data.id);
   };
 
-  const openCategory = (presetSubject: string) => {
-    setSubject(presetSubject);
-    setShowForm(true);
-    setTimeout(() => document.getElementById("support-form")?.scrollIntoView({ behavior: "smooth", block: "start" }), 50);
+  const handleReply = async () => {
+    if (!user?.id || !selectedId) return;
+    const body = reply.trim();
+    if (body.length < 2) return;
+    setSending(true);
+    const { error } = await (supabase as any).from("ticket_messages").insert({
+      ticket_id: selectedId, sender_id: user.id, sender_type: "customer", body,
+    });
+    setSending(false);
+    if (error) return toast.error("Falha ao enviar. Tente novamente.");
+    setReply("");
+    loadTickets();
   };
 
   const stats = useMemo(() => ({
-    total:    tickets.length,
-    open:     tickets.filter(t => ["open","pending","in_progress"].includes(t.status)).length,
-    resolved: tickets.filter(t => ["answered","resolved","closed"].includes(t.status)).length,
-    awaiting: tickets.filter(t => ["open","pending"].includes(t.status) && !t.admin_reply).length,
+    total: tickets.length,
+    open: tickets.filter(t => ["open","pending","in_progress"].includes(t.status)).length,
+    answered: tickets.filter(t => t.status === "answered").length,
+    closed: tickets.filter(t => ["closed","resolved"].includes(t.status)).length,
   }), [tickets]);
 
   const filtered = useMemo(() => {
-    let result = tickets;
-    if (statusFilter !== "all") result = result.filter(t => t.status === statusFilter);
+    let r = tickets;
+    if (filter === "open") r = r.filter(t => ["open","pending","in_progress"].includes(t.status));
+    else if (filter === "answered") r = r.filter(t => t.status === "answered");
+    else if (filter === "closed") r = r.filter(t => ["closed","resolved"].includes(t.status));
     if (search) {
       const q = search.toLowerCase();
-      result = result.filter(t => t.subject.toLowerCase().includes(q) || t.message.toLowerCase().includes(q));
+      r = r.filter(t => t.subject.toLowerCase().includes(q) || t.message.toLowerCase().includes(q));
     }
-    return result;
-  }, [tickets, search, statusFilter]);
+    return r;
+  }, [tickets, filter, search]);
 
-  const STATUS_FILTERS: { value: string; label: string; count: number }[] = [
-    { value: "all",      label: "Todos",      count: tickets.length },
-    { value: "open",     label: "Abertos",    count: tickets.filter(t => t.status === "open" || t.status === "pending").length },
-    { value: "answered", label: "Respondidos",count: tickets.filter(t => t.status === "answered").length },
-    { value: "closed",   label: "Fechados",   count: tickets.filter(t => t.status === "closed" || t.status === "resolved").length },
-  ];
+  const selected = selectedId ? tickets.find(t => t.id === selectedId) : null;
 
-  const KPI_CARDS = [
-    { icon: Inbox,        label: "Total de Tickets",     value: stats.total },
-    { icon: Clock,        label: "Em Aberto",            value: stats.open },
-    { icon: Activity,     label: "Aguardando Resposta",  value: stats.awaiting },
-    { icon: CheckCircle2, label: "Resolvidos",           value: stats.resolved },
-  ];
+  const openCategory = (subj: string) => {
+    setSubject(subj);
+    setShowComposer(true);
+    setSelectedId(null);
+    setTimeout(() => document.getElementById("support-composer")?.scrollIntoView({ behavior: "smooth", block: "start" }), 50);
+  };
 
   return (
-    <div className="space-y-6 animate-in fade-in duration-500">
-      <Seo title="Suporte | Hotzfy" description="Abra tickets e fale com nosso time de suporte. Resposta em até 24h úteis." path="/suporte" noindex />
-      {/* Header — padrão Saques */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+    <div className="space-y-4 animate-in fade-in duration-300 pb-8">
+      <Seo title="Suporte | Hotzfy" description="Central de ajuda — abra tickets e converse com o time de suporte." path="/suporte" noindex />
+
+      {/* Header */}
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-3">
         <div className="space-y-1">
-          <h1 className="text-2xl font-black text-foreground tracking-tight uppercase">Suporte</h1>
+          <h1 className="text-2xl font-black text-foreground tracking-tight uppercase flex items-center gap-3">
+            <Headphones className="h-6 w-6 text-primary" />
+            Central de Suporte
+          </h1>
           <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.2em] flex items-center gap-2">
-            <Headphones className="h-3.5 w-3.5 text-primary" />
-            Equipe online · Resposta em até 24h úteis
+            <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
+            Equipe online · Resposta em até 24h úteis · {stats.answered} respondidos
           </p>
         </div>
-        <button
-          onClick={() => setShowForm(!showForm)}
-          className="bg-primary text-primary-foreground h-11 px-6 rounded-xl font-black text-sm hover:opacity-90 transition-all flex items-center gap-2 shadow-sm uppercase tracking-widest"
-        >
-          {showForm ? <X size={18} strokeWidth={3} /> : <Plus size={18} strokeWidth={3} />}
-          {showForm ? "Cancelar" : "Novo Ticket"}
-        </button>
-      </div>
-
-      {/* KPI cards — Saques style */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        {KPI_CARDS.map((card) => {
-          const Icon = card.icon;
-          return (
-            <div key={card.label} className="bg-card p-8 rounded-[24px] border border-border/60 shadow-sm relative overflow-hidden group">
-              <div className="relative z-10">
-                <div className="flex items-center gap-2 text-muted-foreground/60 mb-3">
-                  <Icon size={16} />
-                  <span className="text-[10px] font-black uppercase tracking-[0.15em]">{card.label}</span>
-                </div>
-                <p className="text-4xl font-black text-foreground tabular-nums tracking-tighter">
-                  {card.value.toLocaleString("pt-BR")}
-                </p>
-              </div>
-              <div className="absolute right-[-20px] bottom-[-20px] opacity-[0.03] rotate-[-15deg] group-hover:scale-110 transition-transform duration-500">
-                <Icon size={160} />
-              </div>
-            </div>
-          );
-        })}
-      </div>
-
-      {/* Categorias rápidas + Docs */}
-      <div className="bg-card rounded-[24px] border border-border/60 shadow-sm overflow-hidden">
-        <div className="p-6 border-b border-border/40 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-          <div className="flex items-center gap-3">
-            <div className="h-10 w-10 bg-primary/10 border border-primary/10 rounded-xl flex items-center justify-center text-primary">
-              <Headphones size={20} strokeWidth={2.5} />
-            </div>
-            <div>
-              <h2 className="font-black text-foreground tracking-tight leading-none uppercase">Como podemos ajudar?</h2>
-              <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mt-1">Selecione uma categoria</p>
-            </div>
-          </div>
-          <Link
-            to="/vendas/documentacao"
-            className="inline-flex items-center gap-2 h-10 px-4 rounded-xl bg-muted/30 border border-border/60 text-[11px] font-black uppercase tracking-widest text-muted-foreground hover:text-primary hover:border-primary/30 transition-colors"
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => setShowFaq(v => !v)}
+            className="h-11 px-4 rounded-xl border border-border/60 bg-card text-[11px] font-black uppercase tracking-widest text-muted-foreground hover:text-foreground transition-colors flex items-center gap-2"
           >
-            <BookOpen className="h-3.5 w-3.5" /> Documentação <ArrowUpRight className="h-3 w-3" />
-          </Link>
-        </div>
-        <div className="p-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-          {HELP_CATEGORIES.map(cat => {
-            const Icon = cat.icon;
-            return (
-              <button
-                key={cat.label}
-                onClick={() => openCategory(cat.subject)}
-                className="group flex items-start gap-3 rounded-xl border border-border/60 bg-card p-4 text-left hover:border-primary/40 hover:bg-muted/30 transition-colors"
-              >
-                <div className="h-10 w-10 rounded-xl bg-primary/10 border border-primary/10 flex items-center justify-center shrink-0">
-                  <Icon className="h-4 w-4 text-primary" strokeWidth={2.5} />
-                </div>
-                <div className="min-w-0 flex-1">
-                  <p className="text-sm font-black text-foreground tracking-tight">{cat.label}</p>
-                  <p className="text-[11px] text-muted-foreground/80 mt-0.5 leading-snug font-medium">{cat.desc}</p>
-                </div>
-                <ArrowUpRight className="h-3.5 w-3.5 text-muted-foreground/40 group-hover:text-primary transition-colors shrink-0 mt-1" />
-              </button>
-            );
-          })}
+            <HelpCircle className="h-4 w-4" /> FAQ
+          </button>
+          <button
+            onClick={() => { setShowComposer(true); setSelectedId(null); }}
+            className="bg-primary text-primary-foreground h-11 px-5 rounded-xl font-black text-sm hover:opacity-90 transition-all flex items-center gap-2 uppercase tracking-widest"
+          >
+            <Plus size={18} strokeWidth={3} /> Novo Ticket
+          </button>
         </div>
       </div>
 
-      {/* Formulário */}
-      {showForm && (
-        <div id="support-form" className="bg-card rounded-[24px] border border-border/60 shadow-sm overflow-hidden">
-          <div className="p-6 border-b border-border/40 flex items-center justify-between gap-3">
+      {/* FAQ (collapsible) */}
+      {showFaq && (
+        <div className="bg-card rounded-2xl border border-border/60 p-5 animate-in fade-in slide-in-from-top-2 duration-200">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-sm font-black uppercase tracking-tight flex items-center gap-2">
+              <Sparkles className="h-4 w-4 text-primary" /> Perguntas Frequentes
+            </h2>
+            <Link to="/vendas/documentacao" className="text-[10px] font-black uppercase tracking-widest text-muted-foreground hover:text-primary flex items-center gap-1">
+              Documentação completa <ArrowUpRight className="h-3 w-3" />
+            </Link>
+          </div>
+          <div className="space-y-1.5">
+            {FAQ_ITEMS.map((f, i) => (
+              <button
+                key={i}
+                onClick={() => setOpenFaq(openFaq === i ? null : i)}
+                className="w-full text-left rounded-lg border border-border/40 hover:border-border/80 bg-muted/10 transition-colors"
+              >
+                <div className="flex items-center justify-between px-4 py-3">
+                  <span className="text-[13px] font-bold text-foreground">{f.q}</span>
+                  {openFaq === i ? <ChevronUp className="h-4 w-4 text-muted-foreground" /> : <ChevronDown className="h-4 w-4 text-muted-foreground" />}
+                </div>
+                {openFaq === i && (
+                  <div className="px-4 pb-4 pt-1 text-[12px] text-muted-foreground leading-relaxed border-t border-border/40">
+                    {f.a}
+                  </div>
+                )}
+              </button>
+            ))}
+          </div>
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 mt-4 pt-4 border-t border-border/40">
+            {HELP_CATEGORIES.map(c => {
+              const Icon = c.icon;
+              return (
+                <button
+                  key={c.label}
+                  onClick={() => openCategory(c.subject)}
+                  className="flex items-center gap-2 rounded-lg border border-border/60 bg-card hover:bg-muted/30 hover:border-primary/40 px-3 py-2.5 text-left transition-colors"
+                >
+                  <Icon className="h-4 w-4 text-primary shrink-0" />
+                  <span className="text-[11px] font-bold text-foreground truncate">{c.label}</span>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      {/* Composer (novo ticket) */}
+      {showComposer && (
+        <div id="support-composer" className="bg-card rounded-2xl border border-border/60 overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200">
+          <div className="p-5 border-b border-border/40 flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className="h-10 w-10 bg-primary/10 border border-primary/10 rounded-xl flex items-center justify-center text-primary">
-                <Send size={20} strokeWidth={2.5} />
+              <div className="h-10 w-10 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center text-primary">
+                <Send className="h-5 w-5" strokeWidth={2.5} />
               </div>
               <div>
-                <h2 className="font-black text-foreground tracking-tight leading-none uppercase">Abrir Novo Ticket</h2>
-                <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mt-1">Quanto mais detalhes, mais rápido</p>
+                <h2 className="text-sm font-black uppercase tracking-tight">Abrir Novo Ticket</h2>
+                <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mt-0.5">
+                  Detalhes ajudam a resolver mais rápido
+                </p>
               </div>
             </div>
             <button
-              onClick={() => setShowForm(false)}
-              className="h-9 w-9 rounded-xl bg-muted/30 border border-border/60 flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors"
+              onClick={() => setShowComposer(false)}
+              className="h-9 w-9 rounded-lg bg-muted/30 border border-border/60 flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors"
             >
               <X className="h-4 w-4" />
             </button>
           </div>
-
-          <div className="p-6 space-y-5">
-            <div>
-              <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground mb-2 block">
-                Assunto <span className="text-red-500">*</span>
-              </label>
-              <input
-                value={subject}
-                onChange={(e) => setSubject(e.target.value.slice(0, MAX_SUBJECT))}
-                placeholder="Ex: Problema com saque pendente"
-                className="w-full h-11 rounded-xl border border-border/60 bg-muted/20 px-4 text-sm font-bold text-foreground placeholder:text-muted-foreground/50 focus:border-primary focus:ring-2 focus:ring-primary/20 focus:outline-none transition-all"
-              />
-              <div className="flex justify-between mt-2">
-                <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Mínimo 3 caracteres</span>
-                <span className={cn("text-[10px] tabular-nums font-black",
-                  subject.length > MAX_SUBJECT * 0.9 ? "text-amber-500" : "text-muted-foreground/60")}>
-                  {subject.length}/{MAX_SUBJECT}
-                </span>
+          <div className="p-5 space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-[1fr_auto] gap-3">
+              <div>
+                <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground mb-1.5 block">Assunto</label>
+                <input
+                  value={subject}
+                  onChange={e => setSubject(e.target.value.slice(0, MAX_SUBJECT))}
+                  placeholder="Ex: Saque pendente há 3 dias"
+                  className="w-full h-11 rounded-xl border border-border/60 bg-muted/20 px-4 text-sm font-bold focus:border-primary focus:ring-2 focus:ring-primary/20 focus:outline-none"
+                />
+              </div>
+              <div>
+                <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground mb-1.5 block">Prioridade</label>
+                <select
+                  value={priority}
+                  onChange={e => setPriority(e.target.value)}
+                  className="h-11 w-full md:w-40 rounded-xl border border-border/60 bg-muted/20 px-3 text-sm font-bold focus:border-primary focus:ring-2 focus:ring-primary/20 focus:outline-none"
+                >
+                  <option value="low">Baixa</option>
+                  <option value="normal">Normal</option>
+                  <option value="high">Alta</option>
+                  <option value="urgent">Urgente</option>
+                </select>
               </div>
             </div>
-
             <div>
-              <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground mb-2 block">
-                Mensagem <span className="text-red-500">*</span>
-              </label>
+              <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground mb-1.5 block">Mensagem</label>
               <textarea
                 value={message}
-                onChange={(e) => setMessage(e.target.value.slice(0, MAX_MESSAGE))}
-                placeholder="Descreva seu problema com o máximo de detalhes — IDs de transação, prints, passos para reproduzir."
-                rows={6}
-                className="w-full rounded-xl border border-border/60 bg-muted/20 px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground/50 focus:border-primary focus:ring-2 focus:ring-primary/20 focus:outline-none transition-all resize-none"
+                onChange={e => setMessage(e.target.value.slice(0, MAX_MESSAGE))}
+                placeholder="Descreva com detalhes — IDs de transação, prints, passos para reproduzir..."
+                rows={5}
+                className="w-full rounded-xl border border-border/60 bg-muted/20 px-4 py-3 text-sm focus:border-primary focus:ring-2 focus:ring-primary/20 focus:outline-none resize-none"
               />
-              <div className="flex justify-between mt-2">
+              <div className="flex justify-between mt-1.5">
                 <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Mínimo 10 caracteres</span>
-                <span className={cn("text-[10px] tabular-nums font-black",
-                  message.length > MAX_MESSAGE * 0.9 ? "text-amber-500" : "text-muted-foreground/60")}>
-                  {message.length}/{MAX_MESSAGE}
-                </span>
+                <span className="text-[10px] tabular-nums font-black text-muted-foreground/60">{message.length}/{MAX_MESSAGE}</span>
               </div>
             </div>
-
-            <div className="flex items-end gap-4 flex-wrap pt-4 border-t border-border/40">
-              <div>
-                <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground mb-2 block">
-                  Prioridade
-                </label>
-                <div className="flex gap-1.5 flex-wrap">
-                  {(["low", "normal", "high", "urgent"] as const).map(p => {
-                    const cfg = PRIORITY_MAP[p];
-                    const active = priority === p;
-                    return (
-                      <button
-                        key={p}
-                        onClick={() => setPriority(p)}
-                        className={cn(
-                          "h-9 px-3.5 rounded-lg text-[11px] font-black uppercase tracking-widest border transition-colors",
-                          active
-                            ? cn(cfg.bg, cfg.color, "border-current/20")
-                            : "bg-muted/20 text-muted-foreground border-border/60 hover:bg-muted/40"
-                        )}
-                      >
-                        {cfg.label}
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-              <div className="flex-1" />
+            <div className="flex justify-end gap-2">
+              <button onClick={() => setShowComposer(false)} className="h-10 px-4 rounded-xl border border-border/60 bg-card text-[11px] font-black uppercase tracking-widest text-muted-foreground hover:text-foreground">
+                Cancelar
+              </button>
               <button
-                onClick={handleSubmit}
-                disabled={submitting || subject.trim().length < 3 || message.trim().length < 10}
-                className="bg-primary text-primary-foreground h-11 px-6 rounded-xl font-black text-sm hover:opacity-90 transition-all flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed uppercase tracking-widest"
+                onClick={handleCreateTicket}
+                disabled={submitting}
+                className="h-10 px-5 rounded-xl bg-primary text-primary-foreground font-black text-[11px] uppercase tracking-widest hover:opacity-90 disabled:opacity-50 flex items-center gap-2"
               >
-                {submitting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" strokeWidth={3} />}
-                {submitting ? "Enviando…" : "Enviar Ticket"}
+                <Send className="h-3.5 w-3.5" /> {submitting ? "Enviando..." : "Abrir Ticket"}
               </button>
             </div>
           </div>
         </div>
       )}
 
-      {/* Central de Ajuda — FAQs */}
-      <div className="bg-card rounded-[24px] border border-border/60 shadow-sm overflow-hidden">
-        <div className="p-6 border-b border-border/40 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-          <div className="flex items-center gap-3">
-            <div className="h-10 w-10 bg-primary/10 border border-primary/10 rounded-xl flex items-center justify-center text-primary">
-              <HelpCircle size={20} strokeWidth={2.5} />
-            </div>
-            <div>
-              <h2 className="font-black text-foreground tracking-tight leading-none uppercase">Central de Ajuda</h2>
-              <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mt-1">Perguntas frequentes</p>
-            </div>
-          </div>
-          <div className="relative w-full md:w-64">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground/50" size={16} />
-            <input
-              value={faqSearch}
-              onChange={(e) => setFaqSearch(e.target.value)}
-              placeholder="Buscar nas FAQs..."
-              className="w-full h-11 pl-11 pr-4 bg-muted/30 border border-border/60 rounded-xl text-sm font-bold focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all"
-            />
-          </div>
-        </div>
-        <div className="p-4 space-y-2">
-          {filteredFaqs.length === 0 ? (
-            <p className="text-center py-8 text-[11px] font-black text-muted-foreground uppercase tracking-widest">Nenhuma pergunta encontrada</p>
-          ) : filteredFaqs.map(group => {
-            const GIcon = group.icon;
-            const groupOpen = openFaqGroup === group.id || !!faqSearch;
-            return (
-              <div key={group.id} className="rounded-xl border border-border/40 overflow-hidden">
-                <button
-                  type="button"
-                  onClick={() => setOpenFaqGroup(openFaqGroup === group.id ? null : group.id)}
-                  className="flex w-full items-center justify-between p-4 text-left hover:bg-muted/20 transition-colors"
-                >
-                  <div className="flex items-center gap-3">
-                    <div className="h-9 w-9 rounded-lg bg-primary/10 border border-primary/10 flex items-center justify-center text-primary">
-                      <GIcon className="h-4 w-4" strokeWidth={2.5} />
-                    </div>
-                    <div>
-                      <p className="text-sm font-black text-foreground tracking-tight uppercase">{group.label}</p>
-                      <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">{group.faqs.length} perguntas</p>
-                    </div>
-                  </div>
-                  {groupOpen ? <ChevronUp className="h-4 w-4 text-muted-foreground" /> : <ChevronDown className="h-4 w-4 text-muted-foreground" />}
-                </button>
-                {groupOpen && (
-                  <div className="border-t border-border/40 p-3 space-y-1.5 bg-muted/10">
-                    {group.faqs.map((f, i) => {
-                      const key = `${group.id}-${i}`;
-                      const itemOpen = openFaqItem === key;
-                      return (
-                        <div key={key} className="rounded-lg bg-card border border-border/40">
-                          <button
-                            type="button"
-                            onClick={() => setOpenFaqItem(itemOpen ? null : key)}
-                            className="flex w-full items-center justify-between gap-3 px-4 py-3 text-left text-[13px] font-bold text-foreground hover:text-primary transition-colors"
-                          >
-                            <span>{f.q}</span>
-                            {itemOpen ? <ChevronUp className="h-3.5 w-3.5 text-muted-foreground shrink-0" /> : <ChevronDown className="h-3.5 w-3.5 text-muted-foreground shrink-0" />}
-                          </button>
-                          {itemOpen && (
-                            <p className="px-4 pb-3 text-[12px] leading-relaxed text-muted-foreground">{f.a}</p>
-                          )}
-                        </div>
-                      );
-                    })}
-                  </div>
-                )}
-              </div>
-            );
-          })}
-        </div>
-      </div>
-
-      {/* Lista de tickets — formato tabela Saques */}
-      <div className="bg-card rounded-[24px] border border-border/60 shadow-sm overflow-hidden">
-        <div className="p-6 border-b border-border/40 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-          <div className="flex items-center gap-3">
-            <div className="h-10 w-10 bg-primary/10 border border-primary/10 rounded-xl flex items-center justify-center text-primary">
-              <MessageSquare size={20} strokeWidth={2.5} />
-            </div>
-            <div>
-              <h2 className="font-black text-foreground tracking-tight leading-none uppercase">Meus Tickets</h2>
-              <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mt-1">
-                {filtered.length} {filtered.length === 1 ? "ticket" : "tickets"}
-              </p>
-            </div>
-          </div>
-          {tickets.length > 0 && (
-            <div className="relative w-full md:w-64">
-              <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground/50" size={16} />
+      {/* Inbox split */}
+      <div className="grid grid-cols-1 lg:grid-cols-[380px_1fr] gap-4 min-h-[600px]">
+        {/* LIST */}
+        <div className={cn(
+          "bg-card rounded-2xl border border-border/60 overflow-hidden flex flex-col",
+          selectedId && "hidden lg:flex"
+        )}>
+          <div className="p-3 border-b border-border/40 space-y-3">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground/50" />
               <input
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
+                value={search} onChange={e => setSearch(e.target.value)}
                 placeholder="Buscar tickets..."
-                className="w-full h-11 pl-11 pr-4 bg-muted/30 border border-border/60 rounded-xl text-sm font-bold focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all"
+                className="w-full h-9 pl-9 pr-3 bg-muted/20 border border-border/60 rounded-lg text-xs font-bold focus:outline-none focus:ring-2 focus:ring-primary/20"
               />
             </div>
-          )}
-        </div>
-
-        {tickets.length > 0 && (
-          <div className="px-6 py-3 border-b border-border/40 bg-muted/20 flex items-center gap-2 overflow-x-auto">
-            {STATUS_FILTERS.map(f => {
-              const active = statusFilter === f.value;
-              return (
+            <div className="flex gap-1">
+              {([
+                { v: "all", l: "Todos", c: stats.total },
+                { v: "open", l: "Abertos", c: stats.open },
+                { v: "answered", l: "Respondidos", c: stats.answered },
+                { v: "closed", l: "Fechados", c: stats.closed },
+              ] as const).map(f => (
                 <button
-                  key={f.value}
-                  onClick={() => setStatusFilter(f.value)}
+                  key={f.v}
+                  onClick={() => setFilter(f.v as any)}
                   className={cn(
-                    "inline-flex items-center gap-2 h-8 px-3.5 rounded-lg text-[10px] font-black uppercase tracking-widest border transition-colors shrink-0",
-                    active
-                      ? "bg-card text-foreground border-border"
-                      : "bg-transparent text-muted-foreground border-transparent hover:bg-card/60 hover:text-foreground"
+                    "flex-1 h-7 px-2 rounded-md text-[9px] font-black uppercase tracking-widest transition-colors",
+                    filter === f.v
+                      ? "bg-primary text-primary-foreground"
+                      : "bg-muted/20 text-muted-foreground hover:text-foreground"
                   )}
                 >
-                  {f.label}
-                  <span className="tabular-nums text-muted-foreground/70">{f.count}</span>
+                  {f.l} <span className="tabular-nums opacity-70">{f.c}</span>
                 </button>
-              );
-            })}
+              ))}
+            </div>
           </div>
-        )}
-
-        <div className="overflow-x-auto">
-          {loading ? (
-            <TableSkeleton rows={5} columns={4} />
-          ) : tickets.length === 0 ? (
-            <EmptyState
-              icon={<Inbox className="h-7 w-7" />}
-              title="Nenhum ticket aberto"
-              subtitle="Quando precisar de ajuda, abra um ticket e nossa equipe responde rapidamente."
-              action={
-                <button
-                  onClick={() => setShowForm(true)}
-                  className="inline-flex items-center gap-2 h-10 px-5 rounded-xl bg-primary text-primary-foreground text-xs font-black uppercase tracking-widest hover:opacity-90 transition-opacity"
-                >
-                  <Plus className="h-3.5 w-3.5" strokeWidth={3} /> Abrir Ticket
-                </button>
-              }
-            />
-          ) : filtered.length === 0 ? (
-            <EmptyState
-              icon={<Search className="h-7 w-7" />}
-              title="Nenhum ticket encontrado"
-              subtitle="Tente ajustar os filtros ou termo de busca."
-              action={
-                <button
-                  onClick={() => { setSearch(""); setStatusFilter("all"); }}
-                  className="text-[11px] text-primary hover:underline font-black uppercase tracking-widest"
-                >
-                  Limpar filtros
-                </button>
-              }
-            />
-          ) : (
-            <table className="w-full text-left">
-              <thead>
-                <tr className="bg-muted/30 text-[10px] uppercase font-black tracking-[0.2em] text-muted-foreground/60 border-b border-border/40">
-                  <th className="px-8 py-5">ID / Assunto</th>
-                  <th className="px-8 py-5 text-center">Prioridade</th>
-                  <th className="px-8 py-5 text-center">Status</th>
-                  <th className="px-8 py-5 text-right">Atualizado</th>
-                  <th className="px-4 py-5" />
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-border/40">
-                {filtered.map(ticket => {
-                  const status = STATUS_MAP[ticket.status] || STATUS_MAP.open;
-                  const StatusIcon = status.icon;
-                  const isExpanded = expandedId === ticket.id;
-                  const priorityCfg = PRIORITY_MAP[ticket.priority] || PRIORITY_MAP.normal;
+          <div className="flex-1 overflow-y-auto">
+            {loading ? (
+              <div className="p-8 flex justify-center"><div className="h-5 w-5 border-2 border-primary border-t-transparent rounded-full animate-spin" /></div>
+            ) : filtered.length === 0 ? (
+              <div className="p-10 text-center">
+                <Inbox className="h-8 w-8 text-muted-foreground/30 mx-auto mb-2" />
+                <p className="text-xs font-bold text-muted-foreground">
+                  {tickets.length === 0 ? "Você ainda não abriu tickets." : "Nenhum ticket nessa categoria."}
+                </p>
+              </div>
+            ) : (
+              <div className="divide-y divide-border/40">
+                {filtered.map(t => {
+                  const st = STATUS_MAP[t.status] || STATUS_MAP.open;
+                  const isSelected = selectedId === t.id;
+                  const hasUnread = (t.unread_by_customer ?? 0) > 0;
                   return (
-                    <React.Fragment key={ticket.id}>
-                      <tr
-                        className="hover:bg-muted/20 transition-colors cursor-pointer group"
-                        onClick={() => setExpandedId(isExpanded ? null : ticket.id)}
-                      >
-                        <td className="px-8 py-5">
-                          <p className="font-mono text-[11px] font-bold text-muted-foreground group-hover:text-primary transition-colors">
-                            #{ticket.id.slice(0, 8).toUpperCase()}
-                          </p>
-                          <div className="flex items-center gap-2 mt-1 min-w-0">
-                            <p className="text-sm font-black text-foreground truncate tracking-tight">{ticket.subject}</p>
-                            {ticket.admin_reply && (
-                              <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md text-[9px] font-black uppercase tracking-widest bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 shrink-0">
-                                <MessageSquare className="h-2.5 w-2.5" /> Respondido
-                              </span>
-                            )}
-                          </div>
-                        </td>
-                        <td className="px-8 py-5">
-                          <div className="flex justify-center">
-                            <span className={cn("inline-flex items-center px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest border border-current/10", priorityCfg.bg, priorityCfg.color)}>
-                              {priorityCfg.label}
-                            </span>
-                          </div>
-                        </td>
-                        <td className="px-8 py-5">
-                          <div className="flex justify-center">
-                            <span className={cn("inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest border border-current/10", status.bg, status.color)}>
-                              <StatusIcon className="h-2.5 w-2.5" /> {status.label}
-                            </span>
-                          </div>
-                        </td>
-                        <td className="px-8 py-5 text-right">
-                          <span className="text-[11px] font-bold text-muted-foreground tabular-nums uppercase">
-                            {formatDate(ticket.replied_at || ticket.created_at)}
-                          </span>
-                        </td>
-                        <td className="px-4 py-5">
-                          <ChevronRight className={cn(
-                            "h-4 w-4 text-muted-foreground/50 transition-transform",
-                            isExpanded && "rotate-90"
-                          )} />
-                        </td>
-                      </tr>
-                      {isExpanded && (
-                        <tr className="bg-muted/10 border-t border-border/40">
-                          <td colSpan={5} className="px-8 py-6">
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                              <div>
-                                <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest mb-2">
-                                  Sua mensagem
-                                </p>
-                                <div className="rounded-xl border border-border/60 bg-card p-4">
-                                  <p className="text-[13px] text-foreground/90 whitespace-pre-wrap leading-relaxed">{ticket.message}</p>
-                                  <p className="text-[10px] text-muted-foreground mt-3 tabular-nums font-black uppercase tracking-widest">
-                                    Enviado em {formatDate(ticket.created_at)}
-                                  </p>
-                                </div>
-                              </div>
-                              <div>
-                                <p className="text-[10px] font-black text-primary uppercase tracking-widest mb-2">
-                                  Resposta do suporte
-                                </p>
-                                {ticket.admin_reply ? (
-                                  <div className="rounded-xl border border-primary/20 bg-primary/5 border-l-2 border-l-primary p-4">
-                                    {(ticket.admin_name || ticket.admin_role) && (
-                                      <div className="flex items-center gap-2 mb-2.5 pb-2.5 border-b border-primary/10">
-                                        <div className="h-7 w-7 rounded-full bg-primary/15 border border-primary/25 flex items-center justify-center shrink-0">
-                                          <span className="text-[11px] font-black text-primary">
-                                            {(ticket.admin_name || "H").slice(0, 1).toUpperCase()}
-                                          </span>
-                                        </div>
-                                        <div className="min-w-0">
-                                          <p className="text-[12px] font-black text-foreground truncate leading-none">
-                                            {ticket.admin_name || "Equipe Hotzfy"}
-                                          </p>
-                                          <p className="text-[9px] uppercase tracking-[0.18em] text-primary/80 font-black mt-0.5">
-                                            {ROLE_LABEL[(ticket.admin_role || "").toLowerCase()] || ticket.admin_role || "Equipe de Suporte"}
-                                          </p>
-                                        </div>
-                                      </div>
-                                    )}
-                                    <p className="text-[13px] text-foreground/90 whitespace-pre-wrap leading-relaxed">{ticket.admin_reply}</p>
-                                    {ticket.replied_at && (
-                                      <p className="text-[10px] text-primary/80 mt-3 tabular-nums font-black uppercase tracking-widest">
-                                        Respondido em {formatDate(ticket.replied_at)}
-                                      </p>
-                                    )}
-                                  </div>
-                                ) : (
-                                  <div className="rounded-xl border border-dashed border-border/60 bg-muted/20 p-5 text-center">
-                                    <Clock className="h-4 w-4 text-muted-foreground/60 mx-auto mb-1.5" />
-                                    <p className="text-[11px] text-muted-foreground font-black uppercase tracking-widest">Aguardando resposta</p>
-                                  </div>
-                                )}
-                              </div>
-                            </div>
-                          </td>
-                        </tr>
+                    <button
+                      key={t.id}
+                      onClick={() => setSelectedId(t.id)}
+                      className={cn(
+                        "w-full text-left px-4 py-3 hover:bg-muted/20 transition-colors relative",
+                        isSelected && "bg-primary/5 border-l-2 border-l-primary"
                       )}
-                    </React.Fragment>
+                    >
+                      <div className="flex items-center gap-2 mb-1">
+                        <span className={cn("h-1.5 w-1.5 rounded-full", st.dot)} />
+                        <span className={cn("text-[9px] font-black uppercase tracking-widest", st.text)}>{st.label}</span>
+                        <span className="ml-auto text-[10px] font-bold text-muted-foreground/60 tabular-nums">
+                          {formatTime(t.last_message_at || t.created_at)}
+                        </span>
+                      </div>
+                      <p className={cn("text-[13px] truncate leading-tight", hasUnread ? "font-black text-foreground" : "font-bold text-foreground/85")}>
+                        {t.subject}
+                      </p>
+                      <p className="text-[11px] text-muted-foreground truncate mt-0.5">
+                        {t.admin_reply || t.message}
+                      </p>
+                      {hasUnread && (
+                        <span className="absolute top-3 right-3 h-2 w-2 rounded-full bg-primary" />
+                      )}
+                    </button>
                   );
                 })}
-              </tbody>
-            </table>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* THREAD */}
+        <div className={cn(
+          "bg-card rounded-2xl border border-border/60 overflow-hidden flex flex-col",
+          !selectedId && "hidden lg:flex"
+        )}>
+          {!selected ? (
+            <div className="flex-1 flex flex-col items-center justify-center p-10 text-center">
+              <div className="h-16 w-16 rounded-2xl bg-primary/10 border border-primary/20 flex items-center justify-center mb-4">
+                <MessageSquare className="h-7 w-7 text-primary" />
+              </div>
+              <h3 className="text-sm font-black uppercase tracking-tight">Selecione um ticket</h3>
+              <p className="text-xs text-muted-foreground mt-1 max-w-xs">
+                Escolha uma conversa na lista ao lado para ver o histórico e responder ao time de suporte.
+              </p>
+            </div>
+          ) : (
+            <>
+              {/* Thread header */}
+              <div className="px-5 py-4 border-b border-border/40 flex items-center gap-3">
+                <button
+                  onClick={() => setSelectedId(null)}
+                  className="lg:hidden h-9 w-9 rounded-lg bg-muted/30 border border-border/60 flex items-center justify-center text-muted-foreground shrink-0"
+                >
+                  <ChevronLeft className="h-4 w-4" />
+                </button>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2 mb-1 flex-wrap">
+                    <span className={cn("inline-flex items-center gap-1.5 text-[9px] font-black uppercase tracking-widest", STATUS_MAP[selected.status]?.text || "text-muted-foreground")}>
+                      <span className={cn("h-1.5 w-1.5 rounded-full", STATUS_MAP[selected.status]?.dot || "bg-muted-foreground/50")} />
+                      {STATUS_MAP[selected.status]?.label || selected.status}
+                    </span>
+                    <span className={cn("text-[9px] font-black uppercase tracking-widest", PRIORITY_MAP[selected.priority]?.color)}>
+                      · {PRIORITY_MAP[selected.priority]?.label}
+                    </span>
+                    <span className="font-mono text-[10px] text-muted-foreground/60">#{selected.id.slice(0, 8).toUpperCase()}</span>
+                  </div>
+                  <h2 className="text-sm font-black text-foreground truncate">{selected.subject}</h2>
+                </div>
+              </div>
+
+              {/* Messages */}
+              <div className="flex-1 overflow-y-auto p-5 space-y-4 bg-muted/5">
+                {loadingThread ? (
+                  <div className="flex justify-center py-10">
+                    <div className="h-5 w-5 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+                  </div>
+                ) : messages.map(m => {
+                  const isMe = m.sender_type === "customer";
+                  const roleLabel = m.sender_role ? (ROLE_LABEL[m.sender_role] || "Equipe") : "Equipe Hotzfy";
+                  return (
+                    <div key={m.id} className={cn("flex gap-3 animate-in fade-in slide-in-from-bottom-2 duration-200", isMe && "flex-row-reverse")}>
+                      <div className={cn(
+                        "h-9 w-9 rounded-full flex items-center justify-center text-[10px] font-black shrink-0 border",
+                        isMe
+                          ? "bg-primary/15 border-primary/30 text-primary"
+                          : "bg-emerald-500/15 border-emerald-500/30 text-emerald-500"
+                      )}>
+                        {isMe ? <UserIcon className="h-4 w-4" /> : initials(m.sender_name)}
+                      </div>
+                      <div className={cn("max-w-[75%] flex flex-col", isMe && "items-end")}>
+                        <div className="flex items-center gap-2 mb-1 text-[10px] font-black uppercase tracking-widest">
+                          {isMe ? (
+                            <span className="text-primary">Você</span>
+                          ) : (
+                            <>
+                              <span className="text-emerald-500">{roleLabel}</span>
+                              {m.sender_name && <span className="text-muted-foreground/70 normal-case tracking-normal font-bold">· {m.sender_name}</span>}
+                            </>
+                          )}
+                          <span className="text-muted-foreground/50 normal-case tracking-normal font-bold">{formatFull(m.created_at)}</span>
+                        </div>
+                        <div className={cn(
+                          "rounded-2xl px-4 py-2.5 text-[13px] leading-relaxed whitespace-pre-wrap",
+                          isMe
+                            ? "bg-primary text-primary-foreground rounded-tr-sm"
+                            : "bg-card border border-border/60 text-foreground rounded-tl-sm"
+                        )}>
+                          {m.body}
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+                <div ref={threadEndRef} />
+              </div>
+
+              {/* Reply composer */}
+              <div className="p-4 border-t border-border/40 bg-card">
+                <div className="flex items-end gap-2">
+                  <textarea
+                    value={reply}
+                    onChange={e => setReply(e.target.value)}
+                    onKeyDown={e => { if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) handleReply(); }}
+                    placeholder="Escreva uma resposta... (Ctrl+Enter envia)"
+                    rows={2}
+                    className="flex-1 rounded-xl border border-border/60 bg-muted/20 px-4 py-2.5 text-sm focus:border-primary focus:ring-2 focus:ring-primary/20 focus:outline-none resize-none min-h-[44px] max-h-32"
+                  />
+                  <button
+                    onClick={handleReply}
+                    disabled={sending || reply.trim().length < 2}
+                    className="h-11 w-11 rounded-xl bg-primary text-primary-foreground flex items-center justify-center hover:opacity-90 disabled:opacity-50 shrink-0"
+                    aria-label="Enviar"
+                  >
+                    <Send className="h-4 w-4" />
+                  </button>
+                </div>
+              </div>
+            </>
           )}
         </div>
       </div>
