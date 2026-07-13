@@ -430,12 +430,18 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
   };
 
   const handleSetAcquirer = async (userId: string, acquirerId: string | null) => {
-    const { error } = await supabase.from("profiles").update({ acquirer_id: acquirerId }).eq("user_id", userId);
-    if (error) { toast.error("Erro ao definir adquirente"); return; }
-    const acqName = acquirers.find(a => a.id === acquirerId)?.name || "Padrão";
+    const { data, error } = await supabase.rpc("admin_set_seller_acquirer", {
+      _seller_id: userId,
+      _new_acquirer_id: acquirerId,
+      _reason: "Troca individual no painel de sellers",
+    });
+    if (error) { toast.error("Erro ao definir adquirente: " + friendlyError(error)); return; }
+    const result = data as { new_acquirer_name?: string } | null;
+    const acqName = result?.new_acquirer_name || acquirers.find(a => a.id === acquirerId)?.name || "Padrão";
     toast.success(`Adquirente definida: ${acqName}`);
     await logAdminAction("set_seller_acquirer", "profile", userId, { acquirer_id: acquirerId });
     setSelectedAcquirerId(acquirerId || "");
+    if (selectedUser?.user_id === userId) setSelectedUser({ ...selectedUser, acquirer_id: acquirerId });
   };
 
   const handleSaveCustomFees = async () => {

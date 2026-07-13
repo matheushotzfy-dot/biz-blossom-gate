@@ -589,8 +589,12 @@ async function handleCreateCharge(
   const acquirerSlug = await resolveAcquirerSlug(admin, key.userId);
   const preTxId = crypto.randomUUID();
   const externalRef = `api_${crypto.randomUUID()}`;
-  const gateway = acquirerSlug === "veopag"
-    ? await createPixViaVeopag(
+  let gateway:
+    | { ok: true; gatewayId: string; qrCode: string; copyPaste: string; expiresAt: string }
+    | { ok: false; status: number; message: string };
+
+  if (acquirerSlug === "veopag") {
+    gateway = await createPixViaVeopag(
       admin,
       amountReais,
       {
@@ -600,8 +604,9 @@ async function handleCreateCharge(
       },
       preTxId,
       input.expires_in_minutes!,
-    )
-    : await createPixViaPodpay(
+    );
+  } else if (acquirerSlug === "podpay") {
+    gateway = await createPixViaPodpay(
       input.amount_cents,
       {
         name: input.customer_name,
@@ -612,6 +617,9 @@ async function handleCreateCharge(
       Deno.env.get("SUPABASE_URL")!,
       input.expires_in_minutes!,
     );
+  } else {
+    gateway = { ok: false, status: 403, message: "No supported PIX provider is active for this seller." };
+  }
 
   if (!gateway.ok) {
     return errorResponse(gateway.status, "provider_error", gateway.message, requestId);
