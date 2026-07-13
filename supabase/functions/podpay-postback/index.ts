@@ -212,22 +212,34 @@ Deno.serve(async (req) => {
       } catch (_) {}
     };
 
-    // === IDEMPOTENCY: Check if this event was already processed ===
+    // === IDEMPOTENCY ===
+    // Primary key: podpay event_id (when provided).
+    // Fallback: (payment_id + mapped_status) — prevents replay when PodPay omits event_id
+    // (previous code did .eq('podpay_event_id', null) which never matches, allowing double-credit).
+    const dedupeMappedStatus = STATUS_MAP[podpayStatus] || 'pending';
+    let dedupeQuery = supabase.from('transactions').select('id, status').limit(1);
     if (podpayEventId) {
-      const { data: existingEvent } = await supabase
-        .from('transactions')
-        .select('id')
-        .eq('podpay_event_id', podpayEventId)
-        .maybeSingle();
-
-      if (existingEvent) {
-        safeLog('Event already processed, skipping', { eventId: podpayEventId });
-        await finishLog('duplicate_event', existingEvent.id);
-        return new Response(
-          JSON.stringify({ success: true, message: 'Already processed' }),
-          { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-        );
-      }
+      dedupeQuery = dedupeQuery.eq('podpay_event_id', podpayEventId);
+    } else if (podpayPaymentId) {
+      dedupeQuery = dedupeQuery
+        .eq('podpay_payment_id', podpayPaymentId)
+        .eq('status', dedupeMappedStatus);
+    } else {
+      // No event_id AND no payment_id => cannot dedupe safely; reject to avoid double-credit.
+      await finishLog('rejected_no_identifier', null, 'Missing event_id and payment_id');
+      return new Response(
+        JSON.stringify({ success: false, error: 'Missing event_id and payment_id' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+    const { data: existingEvent } = await dedupeQuery.maybeSingle();
+    if (existingEvent) {
+      safeLog('Event already processed, skipping', { eventId: podpayEventId, paymentId: podpayPaymentId });
+      await finishLog('duplicate_event', existingEvent.id);
+      return new Response(
+        JSON.stringify({ success: true, message: 'Already processed' }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
     }
 
     const mappedStatus = STATUS_MAP[podpayStatus] || 'pending';
