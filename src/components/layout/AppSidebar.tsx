@@ -28,6 +28,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { NavLink } from "@/components/NavLink";
 import hotzfyLogo from "@/assets/hotzfy-logo.png";
 import { useAuth } from "@/hooks/useAuth";
+import { useSupportUnread } from "@/hooks/useSupportUnread";
 import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
 import {
