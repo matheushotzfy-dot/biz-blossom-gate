@@ -160,23 +160,53 @@ export default function AdminSupportTab({
   const handleSendReply = async () => {
     if (!selectedId || !me) return;
     const body = reply.trim();
-    if (body.length < 2) return;
+    if (body.length < 2 && replyFiles.length === 0) return;
     setSending(true);
+    let attachments: Attachment[] = [];
+    try {
+      attachments = await uploadTicketAttachments(selectedId, replyFiles);
+    } catch (e: any) {
+      setSending(false);
+      return toast.error(e?.message || "Falha ao enviar anexos.");
+    }
     const { error } = await (supabase as any).from("ticket_messages").insert({
       ticket_id: selectedId, sender_id: me.id, sender_type: "staff",
-      sender_name: me.name, sender_role: me.role, body,
+      sender_name: me.name, sender_role: me.role,
+      body: body || "(anexo)", attachments,
     });
     setSending(false);
     if (error) return toast.error("Falha ao enviar resposta.");
     toast.success("Resposta enviada.");
     await logAdminAction("reply_ticket", "support_ticket", selectedId);
     setReply("");
+    setReplyFiles([]);
     load();
+  };
+
+  const addReplyFiles = (incoming: FileList | null) => {
+    if (!incoming || incoming.length === 0) return;
+    const merged = [...replyFiles];
+    for (const f of Array.from(incoming)) {
+      if (merged.length >= MAX_FILES_PER_MESSAGE) {
+        toast.error(`Máximo de ${MAX_FILES_PER_MESSAGE} arquivos.`);
+        break;
+      }
+      if (f.size > MAX_FILE_SIZE_MB * 1024 * 1024) {
+        toast.error(`"${f.name}" excede ${MAX_FILE_SIZE_MB}MB.`);
+        continue;
+      }
+      merged.push(f);
+    }
+    setReplyFiles(merged);
   };
 
   const handleStatusChange = async (id: string, status: string, label: string) => {
     const { error } = await supabase.from("support_tickets").update({ status }).eq("id", id);
     if (error) return toast.error("Erro ao atualizar status");
+    // When closing/resolving a ticket, purge every stored attachment to free space.
+    if (status === "closed" || status === "resolved") {
+      purgeTicketAttachments(id).catch(() => {});
+    }
     toast.success(label);
     await logAdminAction(`set_ticket_${status}`, "support_ticket", id);
     load();
