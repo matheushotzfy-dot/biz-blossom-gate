@@ -10,7 +10,6 @@ import {
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { SegmentedChoice } from "@/components/ui/segmented-choice";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
@@ -18,8 +17,6 @@ import { ptBR } from "date-fns/locale";
 import DadosBancarios from "./DadosBancarios";
 import AutoWithdrawalSettings from "@/components/financeiro/AutoWithdrawalSettings";
 import { friendlyError } from "@/lib/friendlyError";
-
-type Destination = "pix_key" | "pix_copy_paste" | "bank";
 
 const fmt = (v: number) =>
   `R$ ${(Number.isFinite(v) ? v : 0).toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
@@ -54,7 +51,8 @@ export default function Saques() {
   const { data: bankAccounts = [] } = useBankAccounts();
   const [open, setOpen] = useState(false);
   const [amount, setAmount] = useState("");
-  const [destination, setDestination] = useState<Destination>("pix_key");
+  // pickedKey: id of a saved pix key, "copy_paste" for one-off, or "" for none
+  const [pickedKey, setPickedKey] = useState<string>("");
   const [copyPasteCode, setCopyPasteCode] = useState("");
   const [availableBalance, setAvailableBalance] = useState<number>(0);
   const [retainedAmount, setRetainedAmount] = useState<number>(0);
@@ -117,23 +115,22 @@ export default function Saques() {
     if (!user || !numAmount || numAmount <= withdrawFee) { toast.error("Valor inválido"); return; }
     if (numAmount > availableBalance) { toast.error("Saldo insuficiente"); return; }
 
-    if (destination === "pix_key" && pixKeys.length === 0) { toast.error("Cadastre uma chave PIX ou use Copia e Cola"); return; }
-    if (destination === "bank" && bankAccounts.length === 0) { toast.error("Cadastre uma conta bancária"); return; }
-    if (destination === "pix_copy_paste" && copyPasteCode.trim().length < 20) {
+    if (!pickedKey) {
+      toast.error("Selecione uma chave PIX ou use Copia e Cola");
+      return;
+    }
+    if (pickedKey === "copy_paste" && copyPasteCode.trim().length < 20) {
       toast.error("Cole o código PIX Copia e Cola completo");
       return;
     }
 
     const payload: Record<string, unknown> = { user_id: user.id, amount: numAmount };
-    if (destination === "pix_copy_paste") {
+    if (pickedKey === "copy_paste") {
       payload.withdrawal_type = "pix_copy_paste";
       payload.pix_copy_paste_code = copyPasteCode.trim();
-    } else if (destination === "bank") {
-      payload.withdrawal_type = "pix";
-      payload.bank_account_id = bankAccounts[0]?.id;
     } else {
       payload.withdrawal_type = "pix";
-      payload.pix_key_id = pixKeys[0]?.id;
+      payload.pix_key_id = pickedKey;
     }
 
     const { error } = await supabase.from("withdrawals").insert(payload as any);
@@ -142,7 +139,7 @@ export default function Saques() {
     setOpen(false);
     setAmount("");
     setCopyPasteCode("");
-    setDestination("pix_key");
+    setPickedKey("");
     invalidateAll(["withdrawals"]);
   };
 
@@ -190,20 +187,65 @@ export default function Saques() {
               </div>
 
               <div className="space-y-2">
-                <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Destino</label>
-                <SegmentedChoice<Destination>
-                  value={destination}
-                  onValueChange={setDestination}
-                  columns={1}
-                  options={[
-                    { value: "pix_key", label: "Chave PIX cadastrada", description: pixKeys.length > 0 ? `${pixKeys.length} chave(s) disponível(is)` : "Nenhuma chave cadastrada", icon: Key, disabled: pixKeys.length === 0 },
-                    { value: "pix_copy_paste", label: "PIX Copia e Cola", description: "Cobrança única, sem cadastro", icon: ClipboardPaste },
-                    { value: "bank", label: "Conta bancária", description: bankAccounts.length > 0 ? bankAccounts[0].bank_name : "Nenhuma conta cadastrada", icon: Building2, disabled: bankAccounts.length === 0 },
-                  ]}
-                />
+                <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Chave de recebimento</label>
+                <div className="space-y-1.5">
+                  {pixKeys.map((pk) => {
+                    const active = pickedKey === pk.id;
+                    const label = (pk as any).key_value_masked ?? pk.key_value ?? "•••";
+                    const typeLabel = ({ cpf: "CPF", cnpj: "CNPJ", email: "E-mail", phone: "Telefone", random: "Aleatória" } as Record<string, string>)[pk.key_type] || pk.key_type;
+                    return (
+                      <button
+                        key={pk.id}
+                        type="button"
+                        onClick={() => setPickedKey(pk.id)}
+                        className={cn(
+                          "flex w-full items-center gap-3 rounded-xl border px-3.5 py-2.5 text-left transition-all",
+                          active
+                            ? "border-primary/60 bg-primary/[0.08] shadow-[0_0_0_1px_hsl(var(--primary)/0.35)_inset]"
+                            : "border-border/60 bg-card/40 hover:-translate-y-[1px] hover:border-primary/35 hover:bg-card",
+                        )}
+                      >
+                        <span className={cn(
+                          "flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border",
+                          active ? "border-primary/50 bg-primary/15 text-primary" : "border-border/60 bg-muted/40 text-muted-foreground",
+                        )}>
+                          <Key className="h-3.5 w-3.5" strokeWidth={2.5} />
+                        </span>
+                        <div className="min-w-0 flex-1">
+                          <p className="truncate text-[13px] font-black tracking-tight text-foreground">{label}</p>
+                          <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground/70">{typeLabel}</p>
+                        </div>
+                        {active && <CheckCircle2 className="h-4 w-4 shrink-0 text-primary" strokeWidth={2.5} />}
+                      </button>
+                    );
+                  })}
+
+                  <button
+                    type="button"
+                    onClick={() => setPickedKey("copy_paste")}
+                    className={cn(
+                      "flex w-full items-center gap-3 rounded-xl border border-dashed px-3.5 py-2.5 text-left transition-all",
+                      pickedKey === "copy_paste"
+                        ? "border-primary/60 bg-primary/[0.08] shadow-[0_0_0_1px_hsl(var(--primary)/0.35)_inset]"
+                        : "border-border/60 bg-card/40 hover:-translate-y-[1px] hover:border-primary/35 hover:bg-card",
+                    )}
+                  >
+                    <span className={cn(
+                      "flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border",
+                      pickedKey === "copy_paste" ? "border-primary/50 bg-primary/15 text-primary" : "border-border/60 bg-muted/40 text-muted-foreground",
+                    )}>
+                      <ClipboardPaste className="h-3.5 w-3.5" strokeWidth={2.5} />
+                    </span>
+                    <div className="min-w-0 flex-1">
+                      <p className="truncate text-[13px] font-black tracking-tight text-foreground">PIX Copia e Cola</p>
+                      <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground/70">Cobrança única · sem cadastro</p>
+                    </div>
+                    {pickedKey === "copy_paste" && <CheckCircle2 className="h-4 w-4 shrink-0 text-primary" strokeWidth={2.5} />}
+                  </button>
+                </div>
               </div>
 
-              {destination === "pix_copy_paste" && (
+              {pickedKey === "copy_paste" && (
                 <div className="space-y-2 animate-in fade-in slide-in-from-top-1 duration-200">
                   <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Código PIX Copia e Cola</label>
                   <textarea
