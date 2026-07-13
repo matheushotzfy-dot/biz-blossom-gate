@@ -243,27 +243,23 @@ export default function DadosBancarios() {
               <form onSubmit={handleAddBank} className="space-y-3 pt-2" noValidate>
                 <div className="space-y-1.5">
                   <Label>Banco</Label>
-                  <Input
-                    value={bankForm.bank_name}
-                    onChange={(e) => { setBankForm({ ...bankForm, bank_name: e.target.value }); clearBankError("bank_name"); }}
-                    placeholder="Ex: Nubank, Itaú..."
-                    aria-invalid={!!bankErrors.bank_name}
-                    className={errorInputClass(!!bankErrors.bank_name)}
+                  <BankCombobox
+                    bankName={bankForm.bank_name}
+                    bankCode={bankForm.bank_code}
+                    onSelect={(b) => {
+                      setBankForm({ ...bankForm, bank_name: b.name, bank_code: b.code });
+                      clearBankError("bank_name");
+                      clearBankError("bank_code");
+                    }}
+                    onBankNameChange={(name) => {
+                      setBankForm((f) => ({ ...f, bank_name: name }));
+                      clearBankError("bank_name");
+                    }}
+                    invalid={!!bankErrors.bank_name}
                   />
                   <InlineError message={bankErrors.bank_name} />
                 </div>
-                <div className="grid grid-cols-3 gap-3">
-                  <div className="space-y-1.5">
-                    <Label>Cód. Banco</Label>
-                    <Input
-                      value={bankForm.bank_code}
-                      onChange={(e) => { setBankForm({ ...bankForm, bank_code: e.target.value }); clearBankError("bank_code"); }}
-                      placeholder="260"
-                      aria-invalid={!!bankErrors.bank_code}
-                      className={errorInputClass(!!bankErrors.bank_code)}
-                    />
-                    <InlineError message={bankErrors.bank_code} />
-                  </div>
+                <div className="grid grid-cols-2 gap-3">
                   <div className="space-y-1.5">
                     <Label>Agência</Label>
                     <Input
@@ -289,15 +285,12 @@ export default function DadosBancarios() {
                 </div>
                 <div className="space-y-1.5">
                   <Label>Tipo de conta</Label>
-                  <Select
+                  <SegmentedChoice
                     value={bankForm.account_type}
-                    onValueChange={(v) => setBankForm({ ...bankForm, account_type: v as BankForm["account_type"] })}
-                  >
-                    <SelectTrigger className="finance-select-trigger h-11 border-primary/25 bg-primary/[0.045] font-black"><SelectValue /></SelectTrigger>
-                    <SelectContent className="w-[var(--radix-select-trigger-width)]">
-                      {ACCOUNT_TYPES.map(t => <SelectItem key={t.value} value={t.value} className="text-[13px] font-black">{t.label}</SelectItem>)}
-                    </SelectContent>
-                  </Select>
+                    onValueChange={(v) => setBankForm({ ...bankForm, account_type: v })}
+                    options={ACCOUNT_TYPES}
+                    columns={2}
+                  />
                 </div>
                 <div className="space-y-1.5">
                   <Label>Nome do titular</Label>
