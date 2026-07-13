@@ -311,7 +311,7 @@ export default function Identidade() {
                       </div>
                       <div className="min-w-0 flex-1">
                         <p className="text-[9px] font-black text-primary uppercase tracking-widest">{pixKeyLabels[pk.key_type] || pk.key_type}</p>
-                        <p className="font-mono text-[11px] text-foreground truncate font-bold">{(pk as any).key_value_masked ?? pk.key_value ?? "•••"}</p>
+                        <p className="font-mono text-[11px] text-foreground truncate font-bold">{pk.key_value ?? (pk as any).key_value_masked ?? "•••"}</p>
                       </div>
                     </div>
                   ))}

@@ -204,7 +204,7 @@ export default function DadosBancarios() {
             {pixKeys.map((pk) => (
               <div key={pk.id} className="px-5 py-4 flex items-center justify-between gap-3">
                 <div className="min-w-0">
-                  <p className="text-sm font-black text-foreground truncate">{(pk as any).key_value_masked ?? pk.key_value ?? "•••"}</p>
+                  <p className="text-sm font-black text-foreground truncate">{pk.key_value ?? (pk as any).key_value_masked ?? "•••"}</p>
                   <p className="text-[10px] font-bold text-muted-foreground/70 uppercase tracking-widest mt-0.5">
                     {PIX_TYPES.find(t => t.value === pk.key_type)?.label || pk.key_type}
                   </p>
