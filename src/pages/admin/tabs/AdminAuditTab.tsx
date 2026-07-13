@@ -45,11 +45,17 @@ export default function AdminAuditTab({ profiles }: Props) {
     let cancelled = false;
     setLoading(true);
     (async () => {
-      // Pull a fat slab from each source in parallel, merge, sort, paginate client-side
+      // Only query the sources actually rendered — previously we always pulled
+      // 1500 rows even when filtered to a single source. Skipped sources return
+      // an empty result to keep the merge logic below unchanged.
+      const wantAdmin = source === "all" || source === "admin";
+      const wantStaff = source === "all" || source === "staff";
+      const wantActivity = source === "all" || source === "activity";
+      const empty = Promise.resolve({ data: [] as any[] });
       const [aRes, sRes, lRes] = await Promise.all([
-        supabase.from("audit_logs").select("*").order("created_at", { ascending: false }).limit(500),
-        supabase.from("staff_audit_log").select("*").order("created_at", { ascending: false }).limit(500),
-        supabase.from("activity_logs").select("*").order("created_at", { ascending: false }).limit(500),
+        wantAdmin ? supabase.from("audit_logs").select("*").order("created_at", { ascending: false }).limit(500) : empty,
+        wantStaff ? supabase.from("staff_audit_log").select("*").order("created_at", { ascending: false }).limit(500) : empty,
+        wantActivity ? supabase.from("activity_logs").select("*").order("created_at", { ascending: false }).limit(500) : empty,
       ]);
       if (cancelled) return;
 
