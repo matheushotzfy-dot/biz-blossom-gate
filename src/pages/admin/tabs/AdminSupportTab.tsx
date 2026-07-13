@@ -98,6 +98,12 @@ export default function AdminSupportTab({
   const threadEndRef = useRef<HTMLDivElement>(null);
   const replyFileInputRef = useRef<HTMLInputElement>(null);
 
+  const meIdentity = useMemo(
+    () => (me ? { role: "staff" as const, name: me.name } : null),
+    [me?.name],
+  );
+  const { others: typingOthers, notifyTyping } = useTicketTyping(selectedId, meIdentity);
+
   const getProfile = (uid: string) => profiles.find(p => p.user_id === uid);
 
   const load = async () => {
