@@ -46,6 +46,7 @@ type TicketMessage = {
   sender_role: string | null;
   body: string;
   created_at: string;
+  attachments?: Attachment[] | null;
 };
 
 const ROLE_LABEL: Record<string, string> = {
