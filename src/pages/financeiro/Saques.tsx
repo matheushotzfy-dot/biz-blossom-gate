@@ -147,10 +147,11 @@ export default function Saques() {
                 <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Valor do Saque</label>
                 <div className="relative">
                   <span className="absolute left-4 top-1/2 -translate-y-1/2 font-black text-muted-foreground">R$</span>
-                  <Input 
-                    type="number" 
-                    value={amount} 
-                    onChange={(e) => setAmount(e.target.value)}
+                  <Input
+                    type="text"
+                    inputMode="numeric"
+                    value={amount}
+                    onChange={(e) => setAmount(maskBRL(e.target.value))}
                     className="pl-11 h-14 text-xl font-black tabular-nums bg-background border-border/60 rounded-xl"
                     placeholder="0,00"
                   />
