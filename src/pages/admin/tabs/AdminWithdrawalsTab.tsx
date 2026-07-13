@@ -434,12 +434,32 @@ export default function AdminWithdrawalsTab({ withdrawals, profiles, onWithdrawa
                     <p className="text-[10px] text-muted-foreground">{getSellerEmail(w.user_id)}</p>
                   </td>
                   <td className={premiumTable.td}>
-                    <div className="flex items-center gap-1">
-                      <SellerTypeBadge type={getSellerType(w.user_id)} />
-                      {w.withdrawal_type === "crypto" && (
-                        <span className="rounded border border-amber-500/20 bg-amber-500/10 px-1.5 py-0.5 text-[8px] font-bold uppercase text-amber-500">
-                          {w.crypto_currency || "CRYPTO"}
-                        </span>
+                    <div className="flex flex-col gap-1">
+                      <div className="flex items-center gap-1">
+                        <SellerTypeBadge type={getSellerType(w.user_id)} />
+                        {w.withdrawal_type === "crypto" && (
+                          <span className="rounded border border-amber-500/20 bg-amber-500/10 px-1.5 py-0.5 text-[8px] font-bold uppercase text-amber-500">
+                            {w.crypto_currency || "CRYPTO"}
+                          </span>
+                        )}
+                        {w.withdrawal_type === "pix_copy_paste" && (
+                          <span className="rounded border border-primary/25 bg-primary/10 px-1.5 py-0.5 text-[8px] font-bold uppercase text-primary" title="PIX Copia e Cola (cobrança única)">
+                            Copia&nbsp;Cola
+                          </span>
+                        )}
+                      </div>
+                      {(w as any).pix_copy_paste_code && (
+                        <button
+                          type="button"
+                          onClick={() => {
+                            navigator.clipboard.writeText((w as any).pix_copy_paste_code);
+                            toast.success("Código PIX copiado");
+                          }}
+                          className="max-w-[180px] truncate rounded-md border border-border/60 bg-muted/40 px-1.5 py-0.5 font-mono text-[9px] text-foreground/80 hover:bg-muted"
+                          title={(w as any).pix_copy_paste_code}
+                        >
+                          {(w as any).pix_copy_paste_code}
+                        </button>
                       )}
                     </div>
                   </td>

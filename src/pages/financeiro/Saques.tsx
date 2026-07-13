@@ -6,10 +6,11 @@ import { useProfile } from "@/hooks/useProfile";
 import { useWithdrawals, usePixKeys, useBankAccounts, useInvalidateAll } from "@/hooks/useQueryData";
 import {
   Plus, Wallet, Clock, History, Search, ArrowDownToLine, Info,
-  CheckCircle2, Key, Building2, MapPin,
+  CheckCircle2, Key, Building2, MapPin, ClipboardPaste,
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { SegmentedChoice } from "@/components/ui/segmented-choice";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
@@ -17,6 +18,8 @@ import { ptBR } from "date-fns/locale";
 import DadosBancarios from "./DadosBancarios";
 import AutoWithdrawalSettings from "@/components/financeiro/AutoWithdrawalSettings";
 import { friendlyError } from "@/lib/friendlyError";
+
+type Destination = "pix_key" | "pix_copy_paste" | "bank";
 
 const fmt = (v: number) =>
   `R$ ${(Number.isFinite(v) ? v : 0).toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
@@ -51,6 +54,8 @@ export default function Saques() {
   const { data: bankAccounts = [] } = useBankAccounts();
   const [open, setOpen] = useState(false);
   const [amount, setAmount] = useState("");
+  const [destination, setDestination] = useState<Destination>("pix_key");
+  const [copyPasteCode, setCopyPasteCode] = useState("");
   const [availableBalance, setAvailableBalance] = useState<number>(0);
   const [retainedAmount, setRetainedAmount] = useState<number>(0);
   const [withdrawFee, setWithdrawFee] = useState<number>(DEFAULT_WITHDRAW_FEE);
@@ -111,11 +116,34 @@ export default function Saques() {
     const numAmount = parseBRL(amount);
     if (!user || !numAmount || numAmount <= withdrawFee) { toast.error("Valor inválido"); return; }
     if (numAmount > availableBalance) { toast.error("Saldo insuficiente"); return; }
-    if (pixKeys.length === 0 && bankAccounts.length === 0) { toast.error("Cadastre uma chave PIX ou conta bancária"); return; }
 
-    const { error } = await supabase.from("withdrawals").insert({ user_id: user.id, amount: numAmount });
+    if (destination === "pix_key" && pixKeys.length === 0) { toast.error("Cadastre uma chave PIX ou use Copia e Cola"); return; }
+    if (destination === "bank" && bankAccounts.length === 0) { toast.error("Cadastre uma conta bancária"); return; }
+    if (destination === "pix_copy_paste" && copyPasteCode.trim().length < 20) {
+      toast.error("Cole o código PIX Copia e Cola completo");
+      return;
+    }
+
+    const payload: Record<string, unknown> = { user_id: user.id, amount: numAmount };
+    if (destination === "pix_copy_paste") {
+      payload.withdrawal_type = "pix_copy_paste";
+      payload.pix_copy_paste_code = copyPasteCode.trim();
+    } else if (destination === "bank") {
+      payload.withdrawal_type = "pix";
+      payload.bank_account_id = bankAccounts[0]?.id;
+    } else {
+      payload.withdrawal_type = "pix";
+      payload.pix_key_id = pixKeys[0]?.id;
+    }
+
+    const { error } = await supabase.from("withdrawals").insert(payload as any);
     if (error) { toast.error(friendlyError(error)); return; }
-    toast.success("Solicitação enviada!"); setOpen(false); setAmount(""); invalidateAll(["withdrawals"]);
+    toast.success("Solicitação enviada!");
+    setOpen(false);
+    setAmount("");
+    setCopyPasteCode("");
+    setDestination("pix_key");
+    invalidateAll(["withdrawals"]);
   };
 
   const parsedAmount = parseBRL(amount);
@@ -142,7 +170,7 @@ export default function Saques() {
             <DialogHeader>
               <DialogTitle className="text-xl font-black uppercase tracking-tight">Solicitar Saque</DialogTitle>
             </DialogHeader>
-            <form onSubmit={handleSubmit} className="space-y-6 pt-4">
+            <form onSubmit={handleSubmit} className="space-y-5 pt-4">
               <div className="space-y-2">
                 <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Valor do Saque</label>
                 <div className="relative">
@@ -160,6 +188,37 @@ export default function Saques() {
                   <Info className="h-3 w-3" /> Taxa fixa de {fmt(withdrawFee)} por transação.
                 </p>
               </div>
+
+              <div className="space-y-2">
+                <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Destino</label>
+                <SegmentedChoice<Destination>
+                  value={destination}
+                  onValueChange={setDestination}
+                  columns={1}
+                  options={[
+                    { value: "pix_key", label: "Chave PIX cadastrada", description: pixKeys.length > 0 ? `${pixKeys.length} chave(s) disponível(is)` : "Nenhuma chave cadastrada", icon: Key, disabled: pixKeys.length === 0 },
+                    { value: "pix_copy_paste", label: "PIX Copia e Cola", description: "Cobrança única, sem cadastro", icon: ClipboardPaste },
+                    { value: "bank", label: "Conta bancária", description: bankAccounts.length > 0 ? bankAccounts[0].bank_name : "Nenhuma conta cadastrada", icon: Building2, disabled: bankAccounts.length === 0 },
+                  ]}
+                />
+              </div>
+
+              {destination === "pix_copy_paste" && (
+                <div className="space-y-2 animate-in fade-in slide-in-from-top-1 duration-200">
+                  <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Código PIX Copia e Cola</label>
+                  <textarea
+                    value={copyPasteCode}
+                    onChange={(e) => setCopyPasteCode(e.target.value)}
+                    rows={4}
+                    placeholder="Cole aqui o código do QR Code PIX (BR Code)"
+                    className="w-full rounded-xl border border-border/60 bg-background px-3.5 py-3 text-[12px] font-mono tracking-tight text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:ring-2 focus:ring-primary/40"
+                  />
+                  <p className="text-[10px] text-muted-foreground/70 font-medium flex items-center gap-1.5">
+                    <Info className="h-3 w-3" /> Cobrança única · não fica salva no seu perfil.
+                  </p>
+                </div>
+              )}
+
               <div className="bg-muted/30 p-5 rounded-2xl border border-border/60 space-y-3">
                 <div className="flex justify-between text-xs font-bold">
                   <span className="text-muted-foreground uppercase tracking-widest">Taxa Administrativa</span>

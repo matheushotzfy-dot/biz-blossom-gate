@@ -3679,6 +3679,7 @@ export type Database = {
           net_amount: number
           origin: string
           payment_proof_url: string | null
+          pix_copy_paste_code: string | null
           pix_key_id: string | null
           processed_at: string | null
           processed_by: string | null
@@ -3703,6 +3704,7 @@ export type Database = {
           net_amount?: number
           origin?: string
           payment_proof_url?: string | null
+          pix_copy_paste_code?: string | null
           pix_key_id?: string | null
           processed_at?: string | null
           processed_by?: string | null
@@ -3727,6 +3729,7 @@ export type Database = {
           net_amount?: number
           origin?: string
           payment_proof_url?: string | null
+          pix_copy_paste_code?: string | null
           pix_key_id?: string | null
           processed_at?: string | null
           processed_by?: string | null
