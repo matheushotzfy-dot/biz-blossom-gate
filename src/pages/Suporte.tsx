@@ -11,10 +11,16 @@ import {
   MessageSquare, Plus, Clock, CheckCircle2, AlertCircle, Send, ChevronLeft,
   Inbox, Search, X, Headphones, BookOpen, CreditCard, Shield, Package, Zap,
   ArrowUpRight, HelpCircle, ChevronDown, ChevronUp, User as UserIcon, Sparkles,
+  Paperclip,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { Seo } from "@/components/Seo";
+import {
+  uploadTicketAttachments, playIncomingBeep, humanSize,
+  MAX_FILE_SIZE_MB, MAX_FILES_PER_MESSAGE, ACCEPTED_MIME, type Attachment,
+} from "@/lib/ticketAttachments";
+import { AttachmentChips } from "@/components/support/AttachmentChips";
 
 type Ticket = {
   id: string;
