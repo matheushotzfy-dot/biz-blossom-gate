@@ -7,6 +7,7 @@ import { useEffect, useState, useMemo, useRef } from "react";
 import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import { useTicketTyping } from "@/hooks/useTicketTyping";
 import {
   MessageSquare, Plus, Clock, CheckCircle2, AlertCircle, Send, ChevronLeft,
   Inbox, Search, X, Headphones, BookOpen, CreditCard, Shield, Package, Zap,
