@@ -116,11 +116,34 @@ export default function Saques() {
     const numAmount = parseBRL(amount);
     if (!user || !numAmount || numAmount <= withdrawFee) { toast.error("Valor inválido"); return; }
     if (numAmount > availableBalance) { toast.error("Saldo insuficiente"); return; }
-    if (pixKeys.length === 0 && bankAccounts.length === 0) { toast.error("Cadastre uma chave PIX ou conta bancária"); return; }
 
-    const { error } = await supabase.from("withdrawals").insert({ user_id: user.id, amount: numAmount });
+    if (destination === "pix_key" && pixKeys.length === 0) { toast.error("Cadastre uma chave PIX ou use Copia e Cola"); return; }
+    if (destination === "bank" && bankAccounts.length === 0) { toast.error("Cadastre uma conta bancária"); return; }
+    if (destination === "pix_copy_paste" && copyPasteCode.trim().length < 20) {
+      toast.error("Cole o código PIX Copia e Cola completo");
+      return;
+    }
+
+    const payload: Record<string, unknown> = { user_id: user.id, amount: numAmount };
+    if (destination === "pix_copy_paste") {
+      payload.withdrawal_type = "pix_copy_paste";
+      payload.pix_copy_paste_code = copyPasteCode.trim();
+    } else if (destination === "bank") {
+      payload.withdrawal_type = "pix";
+      payload.bank_account_id = bankAccounts[0]?.id;
+    } else {
+      payload.withdrawal_type = "pix";
+      payload.pix_key_id = pixKeys[0]?.id;
+    }
+
+    const { error } = await supabase.from("withdrawals").insert(payload as any);
     if (error) { toast.error(friendlyError(error)); return; }
-    toast.success("Solicitação enviada!"); setOpen(false); setAmount(""); invalidateAll(["withdrawals"]);
+    toast.success("Solicitação enviada!");
+    setOpen(false);
+    setAmount("");
+    setCopyPasteCode("");
+    setDestination("pix_key");
+    invalidateAll(["withdrawals"]);
   };
 
   const parsedAmount = parseBRL(amount);
