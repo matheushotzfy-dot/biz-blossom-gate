@@ -4438,6 +4438,15 @@ export type Database = {
         Returns: number
       }
       resolve_commission_staff: { Args: { _seller: string }; Returns: string }
+      reveal_own_pix_keys: {
+        Args: never
+        Returns: {
+          created_at: string
+          id: string
+          key_type: string
+          key_value: string
+        }[]
+      }
       reverse_transaction_splits: {
         Args: { _tx_id: string }
         Returns: undefined

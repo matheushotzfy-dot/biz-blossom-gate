@@ -75,7 +75,7 @@ export default function AutoWithdrawalSettings() {
   const canSave = !saving && (enabled ? formValid : true);
 
   const selectedKey = activeKeys.find(k => k.id === (config?.pix_key_id || ""));
-  const maskedKey = (k?: typeof selectedKey) => k ? (k.key_value_masked ?? k.key_value ?? "•••") : "";
+  const maskedKey = (k?: typeof selectedKey) => k ? (k.key_value ?? k.key_value_masked ?? "•••") : "";
 
   async function handleSave() {
     if (!user?.id || !canSave) return;
@@ -259,7 +259,7 @@ export default function AutoWithdrawalSettings() {
                         : k.key_type === "telefone" || k.key_type === "phone" ? Phone
                         : k.key_type === "cpf" || k.key_type === "cnpj" ? Hash
                         : Fingerprint;
-                      const val = k.key_value_masked ?? k.key_value ?? "•••";
+                      const val = k.key_value ?? k.key_value_masked ?? "•••";
                       return (
                         <button
                           key={k.id}

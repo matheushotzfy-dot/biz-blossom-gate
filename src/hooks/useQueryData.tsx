@@ -26,7 +26,14 @@ export function useLedgerBalance() {
   });
 }
 
-type PixKey = { id: string; key_type: string; key_value: string; created_at: string; user_id: string };
+type PixKey = {
+  id: string;
+  key_type: string;
+  key_value: string;
+  created_at: string;
+  user_id?: string;
+  key_value_masked?: string | null;
+};
 type CourseWithModules = Tables<"courses"> & {
   modules: Array<{ id: string; title: string; banner_url: string | null; lessons: Array<{ id: string }> }> | null;
 };
@@ -93,11 +100,7 @@ export function usePixKeys() {
   return useQuery({
     queryKey: ["pix_keys", user?.id],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from("pix_keys")
-        .select("*")
-        .eq("user_id", user!.id)
-        .order("created_at");
+      const { data, error } = await supabase.rpc("reveal_own_pix_keys");
       if (error) throw error;
       return (data || []) as PixKey[];
     },
