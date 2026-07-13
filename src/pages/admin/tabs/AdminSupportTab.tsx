@@ -562,7 +562,7 @@ export default function AdminSupportTab({
                     </button>
                     <textarea
                       value={reply}
-                      onChange={e => setReply(e.target.value)}
+                      onChange={e => { setReply(e.target.value); notifyTyping(); }}
                       onKeyDown={e => { if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) handleSendReply(); }}
                       placeholder="Responder ao cliente... (Ctrl+Enter envia)"
                       rows={2}
