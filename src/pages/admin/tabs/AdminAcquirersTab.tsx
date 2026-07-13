@@ -127,8 +127,8 @@ export default function AdminAcquirersTab() {
       supabase.from("acquirers").select("id,name,slug,type,is_active,api_endpoint,description,conversion_rate,seller_visible,health_status,last_health_check_at,last_failure_at,last_latency_ms,avg_latency_ms,uptime_pct,min_transaction_amount,max_transaction_amount,supported_methods,transaction_fee_percentage,transaction_fee_fixed,webhook_url,api_environment,priority,allow_failover,notes,created_at,updated_at,has_api_key,has_api_secret,has_webhook_secret").order("priority", { ascending: false }).order("created_at"),
       supabase.from("acquirer_health_events").select("*").order("created_at", { ascending: false }).limit(200),
       supabase.from("acquirer_failover_events").select("*").order("created_at", { ascending: false }).limit(100),
-      supabase.from("profiles").select("user_id, full_name, email, nickname, acquirer_id, account_status").limit(5000),
-      supabase.from("transactions").select("id, user_id, amount, net_amount, fee_amount, status, payment_method, created_at, customer_email, customer_name, podpay_payment_id, external_id, checkout_session_id").gte("created_at", since30).order("created_at", { ascending: false }).limit(2000),
+      supabase.from("profiles").select("user_id, full_name, email, nickname, acquirer_id, account_status").eq("account_status", "active").order("full_name").limit(1000),
+      supabase.from("transactions").select("id, user_id, amount, net_amount, fee_amount, status, payment_method, created_at, customer_email, customer_name, podpay_payment_id, external_id, checkout_session_id").gte("created_at", since30).order("created_at", { ascending: false }).limit(500),
       supabase.from("disputes").select("transaction_id, type, created_at").gte("created_at", since30),
     ]);
 
