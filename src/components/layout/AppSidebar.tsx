@@ -267,6 +267,7 @@ export function AppSidebar() {
   const [todayRevenue, setTodayRevenue] = useState(0);
   const [salesToday, setSalesToday] = useState(0);
   const [counts, setCounts] = useState({ products: 0, courses: 0, subscriptions: 0, coupons: 0 });
+  const supportUnread = useSupportUnread();
 
   useEffect(() => {
     let ignore = false;
