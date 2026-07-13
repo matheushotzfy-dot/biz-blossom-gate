@@ -91,6 +91,17 @@ Deno.serve(async (req) => {
     if (verified) {
       const { error } = await admin.auth.admin.updateUserById(targetUserId, { email_confirm: true });
       if (error) return json({ success: false, error: error.message }, corsHeaders, 500);
+
+      const { data: userData } = await admin.auth.admin.getUserById(targetUserId);
+      const verifiedEmail = userData?.user?.email?.trim().toLowerCase();
+      if (verifiedEmail) {
+        await admin
+          .from("admin_login_attempts")
+          .delete()
+          .eq("email", verifiedEmail)
+          .eq("scope", "seller")
+          .eq("success", false);
+      }
     } else {
       // updateUserById cannot un-confirm; use privileged SQL via RPC helper.
       const { error } = await admin.rpc("admin_unverify_email", { _user_id: targetUserId });
@@ -105,7 +116,7 @@ Deno.serve(async (req) => {
       details: { verified },
     });
 
-    return json({ success: true, verified }, corsHeaders);
+    return json({ success: true, verified, cleared_login_lock: verified }, corsHeaders);
   } catch (e) {
     const msg = e instanceof Error ? e.message : "Internal error";
     console.error("[admin-set-email-verified]", msg);
