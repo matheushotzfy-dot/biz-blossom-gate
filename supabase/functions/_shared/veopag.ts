@@ -178,8 +178,10 @@ export async function createVeopagDeposit(input: VeopagDepositInput, supabase?: 
 
 /**
  * Resolve the active acquirer slug for a seller.
- * Returns 'veopag' when the seller has that acquirer active in seller_acquirer_config
- * (with the highest priority). Falls back to 'podpay' when nothing is configured.
+ * Priority order:
+ *   1. `seller_acquirer_config` (highest priority row with active acquirer).
+ *   2. `profiles.acquirer_id` → `acquirers.slug` (admin-assigned per seller).
+ *   3. Platform default: 'veopag'.
  */
 export async function resolveAcquirerSlug(
   supabase: any,
@@ -199,7 +201,21 @@ export async function resolveAcquirerSlug(
       if (slug && acqActive) return slug;
     }
   } catch (_) {
-    // fail-open to the platform default
+    // fall through to profile-level assignment
   }
-  return "podpay";
+
+  try {
+    const { data: prof } = await supabase
+      .from("profiles")
+      .select("acquirer_id, acquirers:acquirer_id(slug, is_active)")
+      .eq("user_id", userId)
+      .maybeSingle();
+    const slug = prof?.acquirers?.slug as string | undefined;
+    const acqActive = prof?.acquirers?.is_active as boolean | undefined;
+    if (slug && acqActive) return slug;
+  } catch (_) {
+    // fail-open to platform default
+  }
+
+  return "veopag";
 }
