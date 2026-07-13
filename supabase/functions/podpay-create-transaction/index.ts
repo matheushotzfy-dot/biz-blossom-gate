@@ -5,6 +5,7 @@ const corsHeaders = {
 
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { clientIp } from "../_shared/security.ts";
+import { createVeopagDeposit, resolveAcquirerSlug } from "../_shared/veopag.ts";
 
 /** Log only safe fields — never PII, card data, or full payloads */
 function safeLog(message: string, context: Record<string, unknown> = {}) {
@@ -368,6 +369,129 @@ Deno.serve(async (req) => {
       );
     }
     const netAmount = Math.round((finalPrice - feeAmount) * 100) / 100;
+
+
+    // ===================================================================
+    // === ACQUIRER ROUTING: VeoPag (PIX only) ============================
+    // ===================================================================
+    // Se o vendedor está roteado para VeoPag em seller_acquirer_config,
+    // e o método é PIX, cria a cobrança lá em vez do PodPay. Nunca envia
+    // nome/email/URL da plataforma — apenas nome + CPF reais do pagador.
+    const acquirerSlug = await resolveAcquirerSlug(supabase, product.user_id);
+    if (acquirerSlug === "veopag" && paymentMethod === "pix") {
+      const preTxId = crypto.randomUUID();
+
+      // Resolve afiliado (mesma regra do fluxo PodPay).
+      let resolvedAffiliateLinkId: string | null = null;
+      if (affiliateSlug && typeof affiliateSlug === "string") {
+        const cleanSlug = affiliateSlug.trim().slice(0, 64);
+        if (cleanSlug) {
+          const { data: affLink } = await supabase
+            .from("affiliate_links")
+            .select("id")
+            .eq("slug", cleanSlug)
+            .eq("product_id", product.id)
+            .eq("owner_user_id", product.user_id)
+            .eq("is_active", true)
+            .maybeSingle();
+          if (affLink?.id) resolvedAffiliateLinkId = affLink.id;
+        }
+      }
+
+      let veo;
+      try {
+        veo = await createVeopagDeposit({
+          amount: finalPrice,
+          externalId: preTxId,
+          payerName: safeName,
+          payerDocument: cleanDoc,
+          payerPhone: safePhone,
+        });
+      } catch (e) {
+        safeLog("VeoPag error", { error: e instanceof Error ? e.message : "unknown" });
+        return new Response(
+          JSON.stringify({ success: false, error: "Não foi possível processar o pagamento. Tente novamente." }),
+          { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+        );
+      }
+
+      const pixExpiresAt = new Date(Date.now() + 30 * 60 * 1000).toISOString();
+
+      const { data: transaction, error: txError } = await supabase
+        .from("transactions")
+        .insert({
+          id: preTxId,
+          user_id: product.user_id,
+          product_id: product.id,
+          amount: finalPrice,
+          fee_amount: feeAmount,
+          net_amount: netAmount,
+          status: "pending",
+          payment_method: "pix",
+          customer_name: safeName,
+          customer_email: safeEmail,
+          customer_document: cleanDoc,
+          customer_phone: safePhone,
+          podpay_payment_id: veo.transactionId,
+          external_id: preTxId,
+          checkout_session_id: checkoutSessionId || null,
+          coupon_id: couponId,
+          discount_amount: discountAmount,
+          affiliate_link_id: resolvedAffiliateLinkId,
+          pix_expires_at: pixExpiresAt,
+          pix_copy_paste: veo.qrcode,
+          pix_qrcode: veo.qrcode,
+          metadata: {
+            acquirer: "veopag",
+            ...(validBumpIds.length > 0
+              ? { bump_product_ids: validBumpIds, bumps_total: bumpsTotal }
+              : {}),
+          },
+        })
+        .select()
+        .single();
+
+      if (txError || !transaction) {
+        safeLog("DB error saving veopag tx", { error: txError?.message, code: txError?.code });
+        return new Response(
+          JSON.stringify({
+            success: false,
+            error: "Falha ao registrar a transação. Se o pagamento foi debitado, contate o suporte.",
+            reconciliation: { veopagId: veo.transactionId, needs_manual_review: true },
+          }),
+          { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+        );
+      }
+
+      const responseBody = {
+        success: true,
+        data: {
+          transactionId: transaction.id,
+          podpayId: veo.transactionId, // reusa o campo esperado pelo frontend
+          status: "pending",
+          pix: { qrcode: veo.qrcode, expiresAt: pixExpiresAt },
+          boleto: null,
+          secureUrl: null,
+        },
+      };
+
+      if (idempotencyKey) {
+        await supabase.from("idempotency_keys").upsert({
+          key: String(idempotencyKey).slice(0, 255),
+          response: responseBody,
+          expires_at: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
+        }, { onConflict: "key" });
+      }
+
+      safeLog("VeoPag PIX created", { transactionId: transaction.id });
+      return new Response(
+        JSON.stringify(responseBody),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" } },
+      );
+    }
+    // ===================================================================
+    // === Fim do desvio VeoPag — abaixo segue o fluxo PodPay normal =====
+    // ===================================================================
 
 
     // === Build PodPay payload ===
