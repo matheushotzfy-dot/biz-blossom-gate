@@ -515,14 +515,25 @@ Deno.serve(async (req) => {
     }).select().single();
 
 
-    if (txError) {
-      safeLog('DB error saving transaction', { error: txError.message, code: txError.code });
-      if (txError.code === '23505') {
+    if (txError || !transaction) {
+      safeLog('DB error saving transaction', { error: txError?.message, code: txError?.code, podpayId });
+      if (txError?.code === '23505') {
         return new Response(
           JSON.stringify({ success: false, error: 'Payment already exists for this session' }),
           { status: 409, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
         );
       }
+      // CRITICAL: PodPay charge already created but we failed to persist locally.
+      // Fail loud so the customer/admin knows to reconcile; do NOT return success
+      // (previously fell through with transactionId: undefined => unreconcilable funds).
+      return new Response(
+        JSON.stringify({
+          success: false,
+          error: 'Falha ao registrar a transação. Se o pagamento foi debitado, entre em contato com o suporte.',
+          reconciliation: { podpayId, needs_manual_review: true },
+        }),
+        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
     }
 
     const responseBody = {

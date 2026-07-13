@@ -129,6 +129,26 @@ Deno.serve(async (req) => {
       );
     }
 
+    // ATOMIC CLAIM (prevents double-payout race): only one caller can grab the
+    // withdrawal within a 90s lease window. If two invocations reach this point
+    // concurrently, only the first update returns a row.
+    const leaseThresholdIso = new Date(Date.now() - 90 * 1000).toISOString();
+    const { data: claimed } = await supabase
+      .from('withdrawals')
+      .update({ last_attempt_at: new Date().toISOString() })
+      .eq('id', withdrawalId)
+      .eq('status', 'pending')
+      .or(`last_attempt_at.is.null,last_attempt_at.lt.${leaseThresholdIso}`)
+      .select('id')
+      .maybeSingle();
+
+    if (!claimed) {
+      return new Response(
+        JSON.stringify({ success: false, error: 'Withdrawal is already being processed or was completed', failure_code: 'concurrent_processing' }),
+        { status: 409, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
     const amountInCents = Math.round(Number(withdrawal.net_amount) * 100);
 
     const publicKey = Deno.env.get('PODPAY_PUBLIC_KEY')!;
