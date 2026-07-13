@@ -139,6 +139,13 @@ export default function Suporte() {
   const replyFileInputRef = useRef<HTMLInputElement>(null);
   const composerFileInputRef = useRef<HTMLInputElement>(null);
 
+  const meIdentity = useMemo(
+    () => (user ? { role: "customer" as const, name: (user.email?.split("@")[0]) || "Cliente" } : null),
+    [user?.email],
+  );
+  const { others: typingOthers, notifyTyping } = useTicketTyping(selectedId, meIdentity);
+
+
   const loadTickets = async () => {
     if (!user?.id) return;
     const { data } = await supabase
