@@ -599,7 +599,7 @@ export default function SaquesCrypto() {
           {/* Desktop table */}
           <div className="hidden md:block">
             <div className="overflow-x-auto">
-              <table className="w-full text-sm">
+              <table className="w-full min-w-[640px] text-sm">
                 <thead className="bg-muted/30">
                   <tr className="border-b border-border">
                     <th className="py-3 px-4 text-[10px] font-bold text-muted-foreground uppercase tracking-[0.14em] text-left w-[14%]">Identificador</th>

@@ -185,7 +185,7 @@ export default function NotasFiscais() {
         </div>
 
         <div className="overflow-x-auto">
-          <table className="w-full text-left">
+          <table className="w-full min-w-[640px] text-left">
             <thead>
               <tr className="bg-muted/30 text-[10px] uppercase font-black tracking-[0.2em] text-muted-foreground/60 border-b border-border/40">
                 <th className="px-8 py-5">Nº / Cliente</th>
