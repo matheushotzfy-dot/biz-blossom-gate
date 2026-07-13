@@ -1009,6 +1009,7 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
                     <InfoRow label="Último IP" value={selectedUser?.last_ip} mono />
                     <InfoRow label="Cadastro" value={selectedUser ? new Date(selectedUser.created_at).toLocaleString("pt-BR") : ""} />
                     <InfoRow label="Saldo Congelado" value={selectedUser && isFrozen(selectedUser) ? "SIM" : "NÃO"} />
+                    <InfoRow label="E-mail verificado" value={emailVerified === null ? "—" : emailVerified ? "SIM" : "NÃO"} />
                   </div>
 
                   {/* ── Histórico de IP ── */}
