@@ -32,6 +32,26 @@ function buildCors(req: Request): Record<string, string> {
 const RATE_LIMIT_WINDOW_MS = 15 * 60 * 1000; // 15 minutes
 const RATE_LIMIT_MAX_FAILS = 5;
 const ALLOWED_SCOPES = new Set(["seller", "member"]);
+const OK_JSON_STATUS = 200;
+
+function getLoginFailure(authError: { code?: string; message?: string } | null) {
+  const code = String(authError?.code ?? "").toLowerCase();
+  const message = String(authError?.message ?? "").toLowerCase();
+
+  if (code === "email_not_confirmed" || message.includes("email not confirmed")) {
+    return {
+      status: 403,
+      code: "email_not_confirmed",
+      error: "Confirme seu e-mail antes de acessar.",
+    };
+  }
+
+  return {
+    status: 401,
+    code: "invalid_credentials",
+    error: "E-mail ou senha incorretos.",
+  };
+}
 
 Deno.serve(async (req) => {
   const corsHeaders = buildCors(req);
@@ -55,8 +75,8 @@ Deno.serve(async (req) => {
     });
     if (guard.blocked) {
       return new Response(
-        JSON.stringify({ success: false, error: "Atividade suspeita detectada. Tente novamente em alguns minutos.", locked: true }),
-        { status: 429, headers: { ...corsHeaders, "Content-Type": "application/json", "Retry-After": "900" } },
+        JSON.stringify({ success: false, error: "Atividade suspeita detectada. Tente novamente em alguns minutos.", locked: true, code: "temporarily_blocked" }),
+        { status: OK_JSON_STATUS, headers: { ...corsHeaders, "Content-Type": "application/json", "Retry-After": "900" } },
       );
     }
 
@@ -68,23 +88,23 @@ Deno.serve(async (req) => {
       !scope || typeof scope !== "string" || !ALLOWED_SCOPES.has(scope)
     ) {
       return new Response(
-        JSON.stringify({ success: false, error: "Credenciais inválidas." }),
-        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+        JSON.stringify({ success: false, error: "Credenciais inválidas.", code: "invalid_payload" }),
+        { status: OK_JSON_STATUS, headers: { ...corsHeaders, "Content-Type": "application/json" } },
       );
     }
 
     const trimmedEmail = email.trim().toLowerCase();
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmedEmail)) {
       return new Response(
-        JSON.stringify({ success: false, error: "E-mail inválido." }),
-        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+        JSON.stringify({ success: false, error: "E-mail inválido.", code: "invalid_email" }),
+        { status: OK_JSON_STATUS, headers: { ...corsHeaders, "Content-Type": "application/json" } },
       );
     }
 
     if (password.length < 6 || password.length > 128) {
       return new Response(
-        JSON.stringify({ success: false, error: "Senha inválida." }),
-        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+        JSON.stringify({ success: false, error: "Senha inválida.", code: "invalid_password" }),
+        { status: OK_JSON_STATUS, headers: { ...corsHeaders, "Content-Type": "application/json" } },
       );
     }
 
@@ -113,8 +133,9 @@ Deno.serve(async (req) => {
           success: false,
           error: "Muitas tentativas. Aguarde 15 minutos.",
           locked: true,
+          code: "rate_limited",
         }),
-        { status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+        { status: OK_JSON_STATUS, headers: { ...corsHeaders, "Content-Type": "application/json" } },
       );
     }
 
@@ -125,18 +146,19 @@ Deno.serve(async (req) => {
     });
 
     if (authError || !authData.user || !authData.session) {
+      const failure = getLoginFailure(authError);
       await adminClient.from("admin_login_attempts").insert({
         email: trimmedEmail, success: false, scope,
       });
       await logAbuseEvent({
         supabaseUrl, serviceKey: serviceRoleKey,
         event_type: "login_failed", endpoint: "gated-login",
-        status_code: 401, identifier: trimmedEmail, req,
-        metadata: { scope },
+        status_code: failure.status, identifier: trimmedEmail, req,
+        metadata: { scope, code: failure.code },
       });
       return new Response(
-        JSON.stringify({ success: false, error: "E-mail ou senha incorretos." }),
-        { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+        JSON.stringify({ success: false, error: failure.error, code: failure.code }),
+        { status: OK_JSON_STATUS, headers: { ...corsHeaders, "Content-Type": "application/json" } },
       );
     }
 
@@ -158,8 +180,8 @@ Deno.serve(async (req) => {
         ? "Conta bloqueada. Contate o suporte."
         : "Conta congelada. Contate o suporte.";
       return new Response(
-        JSON.stringify({ success: false, error: msg }),
-        { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+        JSON.stringify({ success: false, error: msg, code: isBlocked ? "account_blocked" : "account_frozen" }),
+        { status: OK_JSON_STATUS, headers: { ...corsHeaders, "Content-Type": "application/json" } },
       );
     }
 
