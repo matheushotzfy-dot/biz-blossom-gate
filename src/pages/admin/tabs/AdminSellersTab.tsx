@@ -935,12 +935,12 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
                     <CheckCircle2 className="h-3 w-3" /> Aprovar
                   </Button>
                 )}
-                {selectedUser && emailVerified === false && (
+                {selectedUser && emailVerified !== true && (
                   <Button size="sm" variant="outline" disabled={emailVerifyLoading} className="h-8 rounded-lg text-[11px] gap-1.5 border-success/30 text-success hover:bg-success/10" onClick={() => handleSetEmailVerified(selectedUser.user_id, true)}>
                     <CheckCircle2 className="h-3 w-3" /> Verificar e-mail
                   </Button>
                 )}
-                {selectedUser && emailVerified === true && (
+                {selectedUser && emailVerified !== false && (
                   <Button size="sm" variant="outline" disabled={emailVerifyLoading} className="h-8 rounded-lg text-[11px] gap-1.5 border-warning/30 text-warning hover:bg-warning/10" onClick={() => handleSetEmailVerified(selectedUser.user_id, false)}>
                     <AlertTriangle className="h-3 w-3" /> Remover verificação
                   </Button>
