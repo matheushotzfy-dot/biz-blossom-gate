@@ -389,7 +389,7 @@ async function createPixViaPodpay(
   supabaseUrl: string,
   expiresInMinutes: number,
 ): Promise<
-  | { ok: true; podpayId: string; qrCode: string; copyPaste: string; expiresAt: string }
+  | { ok: true; gatewayId: string; qrCode: string; copyPaste: string; expiresAt: string }
   | { ok: false; status: number; message: string }
 > {
   const publicKey = Deno.env.get("PODPAY_PUBLIC_KEY")!;
@@ -440,7 +440,7 @@ async function createPixViaPodpay(
     const pix = inner.pix ?? {};
     return {
       ok: true,
-      podpayId: String(inner.id ?? ""),
+      gatewayId: String(inner.id ?? ""),
       qrCode: String(pix.qrcode ?? pix.qrCode ?? ""),
       copyPaste: String(pix.copyPaste ?? pix.copy_paste ?? pix.qrcode ?? ""),
       expiresAt: pix.expiresAt ?? pix.expires_at ?? new Date(Date.now() + expiresInMinutes * 60_000).toISOString(),
