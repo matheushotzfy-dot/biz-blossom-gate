@@ -494,6 +494,16 @@ export default function AdminSupportTab({
                     );
                   })}
                   <div ref={threadEndRef} />
+                  {typingOthers.length > 0 && (
+                    <div className="flex items-center gap-2 text-[11px] font-bold text-primary animate-in fade-in duration-150">
+                      <span className="flex gap-0.5">
+                        <span className="h-1.5 w-1.5 rounded-full bg-primary animate-bounce [animation-delay:-0.3s]" />
+                        <span className="h-1.5 w-1.5 rounded-full bg-primary animate-bounce [animation-delay:-0.15s]" />
+                        <span className="h-1.5 w-1.5 rounded-full bg-primary animate-bounce" />
+                      </span>
+                      Cliente está digitando…
+                    </div>
+                  )}
                 </div>
 
                 {/* Reply composer with quick replies */}
