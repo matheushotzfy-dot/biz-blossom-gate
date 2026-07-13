@@ -12,7 +12,8 @@ Deno.serve(async (req) => {
   try {
     const authHeader = req.headers.get("Authorization");
     if (!authHeader) {
-      return new Response(JSON.stringify({ error: "unauthorized" }), { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+      // No session (e.g. admin/manager custom auth) — silently skip tracking.
+      return new Response(JSON.stringify({ ok: true, skipped: "no_auth" }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
 
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
@@ -22,7 +23,8 @@ Deno.serve(async (req) => {
     const userClient = createClient(supabaseUrl, anonKey, { global: { headers: { Authorization: authHeader } } });
     const { data: { user }, error: userErr } = await userClient.auth.getUser();
     if (userErr || !user) {
-      return new Response(JSON.stringify({ error: "unauthorized" }), { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+      // Invalid/expired token — skip silently instead of surfacing a 401.
+      return new Response(JSON.stringify({ ok: true, skipped: "invalid_session" }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
 
     const ip = req.headers.get("cf-connecting-ip")
