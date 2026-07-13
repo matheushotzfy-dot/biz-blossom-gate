@@ -150,6 +150,7 @@ export default function AdminSupportTab({
       .on("postgres_changes", { event: "INSERT", schema: "public", table: "ticket_messages", filter: `ticket_id=eq.${selectedId}` },
         (payload: any) => {
           setMessages(prev => prev.some(m => m.id === payload.new.id) ? prev : [...prev, payload.new]);
+          if (payload.new.sender_type === "customer") playIncomingBeep();
           setTimeout(() => threadEndRef.current?.scrollIntoView({ behavior: "smooth" }), 50);
         })
       .subscribe();
