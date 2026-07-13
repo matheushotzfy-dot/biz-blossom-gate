@@ -170,7 +170,7 @@ export default function Saques() {
             <DialogHeader>
               <DialogTitle className="text-xl font-black uppercase tracking-tight">Solicitar Saque</DialogTitle>
             </DialogHeader>
-            <form onSubmit={handleSubmit} className="space-y-6 pt-4">
+            <form onSubmit={handleSubmit} className="space-y-5 pt-4">
               <div className="space-y-2">
                 <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Valor do Saque</label>
                 <div className="relative">
@@ -188,6 +188,37 @@ export default function Saques() {
                   <Info className="h-3 w-3" /> Taxa fixa de {fmt(withdrawFee)} por transação.
                 </p>
               </div>
+
+              <div className="space-y-2">
+                <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Destino</label>
+                <SegmentedChoice<Destination>
+                  value={destination}
+                  onValueChange={setDestination}
+                  columns={1}
+                  options={[
+                    { value: "pix_key", label: "Chave PIX cadastrada", description: pixKeys.length > 0 ? `${pixKeys.length} chave(s) disponível(is)` : "Nenhuma chave cadastrada", icon: Key, disabled: pixKeys.length === 0 },
+                    { value: "pix_copy_paste", label: "PIX Copia e Cola", description: "Cobrança única, sem cadastro", icon: ClipboardPaste },
+                    { value: "bank", label: "Conta bancária", description: bankAccounts.length > 0 ? bankAccounts[0].bank_name : "Nenhuma conta cadastrada", icon: Building2, disabled: bankAccounts.length === 0 },
+                  ]}
+                />
+              </div>
+
+              {destination === "pix_copy_paste" && (
+                <div className="space-y-2 animate-in fade-in slide-in-from-top-1 duration-200">
+                  <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Código PIX Copia e Cola</label>
+                  <textarea
+                    value={copyPasteCode}
+                    onChange={(e) => setCopyPasteCode(e.target.value)}
+                    rows={4}
+                    placeholder="Cole aqui o código do QR Code PIX (BR Code)"
+                    className="w-full rounded-xl border border-border/60 bg-background px-3.5 py-3 text-[12px] font-mono tracking-tight text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:ring-2 focus:ring-primary/40"
+                  />
+                  <p className="text-[10px] text-muted-foreground/70 font-medium flex items-center gap-1.5">
+                    <Info className="h-3 w-3" /> Cobrança única · não fica salva no seu perfil.
+                  </p>
+                </div>
+              )}
+
               <div className="bg-muted/30 p-5 rounded-2xl border border-border/60 space-y-3">
                 <div className="flex justify-between text-xs font-bold">
                   <span className="text-muted-foreground uppercase tracking-widest">Taxa Administrativa</span>
