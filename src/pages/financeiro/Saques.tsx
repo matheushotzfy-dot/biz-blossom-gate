@@ -118,23 +118,22 @@ export default function Saques() {
     if (!user || !numAmount || numAmount <= withdrawFee) { toast.error("Valor inválido"); return; }
     if (numAmount > availableBalance) { toast.error("Saldo insuficiente"); return; }
 
-    if (destination === "pix_key" && pixKeys.length === 0) { toast.error("Cadastre uma chave PIX ou use Copia e Cola"); return; }
-    if (destination === "bank" && bankAccounts.length === 0) { toast.error("Cadastre uma conta bancária"); return; }
-    if (destination === "pix_copy_paste" && copyPasteCode.trim().length < 20) {
+    if (!pickedKey) {
+      toast.error("Selecione uma chave PIX ou use Copia e Cola");
+      return;
+    }
+    if (pickedKey === "copy_paste" && copyPasteCode.trim().length < 20) {
       toast.error("Cole o código PIX Copia e Cola completo");
       return;
     }
 
     const payload: Record<string, unknown> = { user_id: user.id, amount: numAmount };
-    if (destination === "pix_copy_paste") {
+    if (pickedKey === "copy_paste") {
       payload.withdrawal_type = "pix_copy_paste";
       payload.pix_copy_paste_code = copyPasteCode.trim();
-    } else if (destination === "bank") {
-      payload.withdrawal_type = "pix";
-      payload.bank_account_id = bankAccounts[0]?.id;
     } else {
       payload.withdrawal_type = "pix";
-      payload.pix_key_id = pixKeys[0]?.id;
+      payload.pix_key_id = pickedKey;
     }
 
     const { error } = await supabase.from("withdrawals").insert(payload as any);
@@ -143,7 +142,7 @@ export default function Saques() {
     setOpen(false);
     setAmount("");
     setCopyPasteCode("");
-    setDestination("pix_key");
+    setPickedKey("");
     invalidateAll(["withdrawals"]);
   };
 
