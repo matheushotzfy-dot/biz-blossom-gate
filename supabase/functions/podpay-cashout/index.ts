@@ -151,6 +151,24 @@ Deno.serve(async (req) => {
 
     const amountInCents = Math.round(Number(withdrawal.net_amount) * 100);
 
+    const { data: podpayAcquirer } = await supabase
+      .from('acquirers')
+      .select('is_active')
+      .eq('slug', 'podpay')
+      .maybeSingle();
+
+    if (podpayAcquirer?.is_active !== true) {
+      await supabase.from('withdrawals').update({
+        failure_code: 'acquirer_disabled',
+        rejection_reason: 'PodPay está desativada no painel de adquirentes',
+        last_attempt_at: new Date().toISOString(),
+      }).eq('id', withdrawalId);
+      return new Response(
+        JSON.stringify({ success: false, error: 'Adquirente de saque desativada. Configure uma adquirente ativa para cash-out.', failure_code: 'acquirer_disabled' }),
+        { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
     const publicKey = Deno.env.get('PODPAY_PUBLIC_KEY')!;
     const secretKey = Deno.env.get('PODPAY_SECRET_KEY')!;
     const withdrawKey = Deno.env.get('PODPAY_WITHDRAW_KEY')!;

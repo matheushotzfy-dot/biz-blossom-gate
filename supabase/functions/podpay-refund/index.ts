@@ -111,7 +111,7 @@ Deno.serve(async (req) => {
     // Get transaction with explicit columns (no select *)
     const { data: tx, error: txError } = await supabase
       .from('transactions')
-      .select('id, user_id, amount, status, podpay_payment_id, is_simulated')
+      .select('id, user_id, amount, status, podpay_payment_id, is_simulated, metadata')
       .eq('id', transactionId)
       .single();
 
@@ -132,6 +132,33 @@ Deno.serve(async (req) => {
       return new Response(JSON.stringify({ success: false, error: 'Refund amount exceeds transaction' }), {
         status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
+    }
+
+    const txMetadata = tx.metadata && typeof tx.metadata === 'object'
+      ? tx.metadata as Record<string, unknown>
+      : {};
+    const acquirer = String(txMetadata.acquirer || 'podpay').toLowerCase();
+
+    if (tx.podpay_payment_id && !tx.is_simulated) {
+      if (acquirer !== 'podpay') {
+        return new Response(
+          JSON.stringify({ success: false, error: 'Estorno automático ainda não está disponível para esta adquirente.' }),
+          { status: 501, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+
+      const { data: podpayAcquirer } = await supabase
+        .from('acquirers')
+        .select('is_active')
+        .eq('slug', 'podpay')
+        .maybeSingle();
+
+      if (podpayAcquirer?.is_active !== true) {
+        return new Response(
+          JSON.stringify({ success: false, error: 'PodPay está desativada no painel de adquirentes.' }),
+          { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
     }
 
     // === ATOMIC STATUS UPDATE (only if still completed/approved) ===

@@ -32,7 +32,7 @@ type Product = {
 };
 type OrderBump = { id: string; bump_product_id: string; bump_product: { id: string; name: string; description: string | null; price: number; image_url: string | null; }; };
 type PaymentMethod = "pix" | "credit_card" | "boleto";
-type CheckoutState = "form" | "pending" | "approved" | "failed";
+type CheckoutState = "form" | "pending" | "approved" | "failed" | "expired";
 
 /* ─── Utils ─── */
 function getCheckoutSessionId(slug: string): string {
@@ -380,6 +380,9 @@ export default function PublicCheckout() {
  setCheckoutState("approved"); clearCheckoutSession(slug || "");
  if (product) firePixelEvent(productPixels, "Purchase", { content_name: product.name, content_id: product.id, value: Number(product.price), session_key: slug || "default" });
  return;
+ } else if (status === "expired") {
+ setCheckoutState("expired"); clearCheckoutSession(slug || "");
+ return;
  } else if (status === "failed" || status === "cancelled") {
  setCheckoutState("failed"); clearCheckoutSession(slug || "");
  return;
@@ -458,7 +461,7 @@ export default function PublicCheckout() {
 
  if (method === "credit_card") { payload.installments = parseInt(installments); payload.cardToken = null; }
  const { data, error } = await supabase.functions.invoke("podpay-create-transaction", { body: payload });
- if (error || !data?.success) { toast.error("Não foi possível processar. Tente novamente."); setCheckoutState("failed"); return; }
+  if (error || !data?.success) { toast.error(data?.error || "Não foi possível processar. Tente novamente."); setCheckoutState("failed"); return; }
  const result = data.data;
  setTransactionId(result.transactionId);
  if (data.resumed) { if (result.pix) setPixData(result.pix); if (result.boleto) setBoletoData(result.boleto); setCheckoutState("pending"); return; }
@@ -668,7 +671,7 @@ export default function PublicCheckout() {
  /* ══════════════════════════════════════════════════════ */
  /* ═══ TELA: FALHA ══════════════════════════════════════ */
  /* ══════════════════════════════════════════════════════ */
- if (checkoutState === "failed") return (
+ if (checkoutState === "failed" || checkoutState === "expired") return (
  <div data-checkout-theme={themeMode} style={checkoutThemeStyle} className={`min-h-screen flex items-center justify-center p-4 ${isDark ? "bg-[hsl(220_18%_11%)] text-[hsl(210_20%_96%)]" : "bg-[hsl(210_20%_98%)] text-gray-900"}`}>
  <div className="text-center animate-fade-in max-w-md w-full">
  <div className="relative mx-auto mb-8 w-28 h-28">
@@ -677,8 +680,8 @@ export default function PublicCheckout() {
  <AlertCircle className="h-14 w-14 text-white" />
  </div>
  </div>
- <h1 className="text-2xl font-extrabold mb-3 tracking-tight">Pagamento não aprovado</h1>
- <p className="text-gray-400 mb-8 text-sm max-w-xs mx-auto">Verifique seus dados ou tente outro método de pagamento.</p>
+  <h1 className="text-2xl font-extrabold mb-3 tracking-tight">{checkoutState === "expired" ? "Pagamento expirado" : "Pagamento não aprovado"}</h1>
+  <p className="text-gray-400 mb-8 text-sm max-w-xs mx-auto">{checkoutState === "expired" ? "Este código de pagamento venceu. Gere uma nova cobrança para continuar." : "Verifique seus dados ou tente outro método de pagamento."}</p>
  <Button onClick={retryPayment} className="h-14 px-10 rounded-2xl text-white font-bold text-base gap-2 hover:opacity-90 hover:scale-[1.02] active:scale-[0.98] transition-all shadow-xl" style={{ backgroundColor: btnColor, boxShadow: `0 10px 40px -10px ${btnColor}50` }}>
  <RefreshCw className="h-4 w-4" /> Tentar novamente
  </Button>
