@@ -2,12 +2,13 @@ import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useBankAccounts, usePixKeys, useInvalidateAll } from "@/hooks/useQueryData";
-import { Building2, Plus, Trash2, Key, CheckCircle2 } from "lucide-react";
+import { Building2, Plus, Trash2, Key, CheckCircle2, User, Mail, Phone, Hash, Shuffle, Landmark, PiggyBank } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { SegmentedChoice } from "@/components/ui/segmented-choice";
+import { BankCombobox } from "@/components/ui/bank-combobox";
 import { toast } from "sonner";
 import {
   bankAccountSchema,
@@ -19,17 +20,19 @@ import { InlineError, errorInputClass } from "@/components/ui/inline-error";
 import { friendlyError } from "@/lib/friendlyError";
 
 const PIX_TYPES = [
-  { value: "cpf", label: "CPF" },
-  { value: "cnpj", label: "CNPJ" },
-  { value: "email", label: "E-mail" },
-  { value: "phone", label: "Telefone" },
-  { value: "random", label: "Chave Aleatória" },
+  { value: "cpf" as const, label: "CPF", description: "Documento pessoal", icon: User },
+  { value: "cnpj" as const, label: "CNPJ", description: "Documento empresarial", icon: Hash },
+  { value: "email" as const, label: "E-mail", description: "Endereço cadastrado", icon: Mail },
+  { value: "phone" as const, label: "Telefone", description: "Celular com DDD", icon: Phone },
+  { value: "random" as const, label: "Aleatória", description: "Chave gerada", icon: Shuffle },
 ];
 
 const ACCOUNT_TYPES = [
-  { value: "corrente", label: "Conta Corrente" },
-  { value: "poupanca", label: "Poupança" },
+  { value: "corrente" as const, label: "Conta Corrente", description: "Movimentação diária", icon: Landmark },
+  { value: "poupanca" as const, label: "Poupança", description: "Conta de rendimento", icon: PiggyBank },
 ];
+
+const PIX_LABEL: Record<string, string> = Object.fromEntries(PIX_TYPES.map((t) => [t.value, t.label]));
 
 type PixForm = { key_type: "cpf" | "cnpj" | "email" | "phone" | "random"; key_value: string };
 type BankForm = {
@@ -164,15 +167,13 @@ export default function DadosBancarios() {
               <form onSubmit={handleAddPix} className="space-y-4 pt-2" noValidate>
                 <div className="space-y-2">
                   <Label>Tipo de chave</Label>
-                  <Select
+                  <SegmentedChoice
                     value={pixForm.key_type}
-                    onValueChange={(v) => { setPixForm({ ...pixForm, key_type: v as PixForm["key_type"] }); clearPixError("key_value"); }}
-                  >
-                    <SelectTrigger className="finance-select-trigger h-11 border-primary/25 bg-primary/[0.045] font-black"><SelectValue /></SelectTrigger>
-                    <SelectContent className="w-[var(--radix-select-trigger-width)]">
-                      {PIX_TYPES.map(t => <SelectItem key={t.value} value={t.value} className="text-[13px] font-black">{t.label}</SelectItem>)}
-                    </SelectContent>
-                  </Select>
+                    onValueChange={(v) => { setPixForm({ ...pixForm, key_type: v }); clearPixError("key_value"); }}
+                    options={PIX_TYPES}
+                    columns={2}
+                    size="sm"
+                  />
                 </div>
                 <div className="space-y-2">
                   <Label>Chave</Label>
@@ -242,27 +243,23 @@ export default function DadosBancarios() {
               <form onSubmit={handleAddBank} className="space-y-3 pt-2" noValidate>
                 <div className="space-y-1.5">
                   <Label>Banco</Label>
-                  <Input
-                    value={bankForm.bank_name}
-                    onChange={(e) => { setBankForm({ ...bankForm, bank_name: e.target.value }); clearBankError("bank_name"); }}
-                    placeholder="Ex: Nubank, Itaú..."
-                    aria-invalid={!!bankErrors.bank_name}
-                    className={errorInputClass(!!bankErrors.bank_name)}
+                  <BankCombobox
+                    bankName={bankForm.bank_name}
+                    bankCode={bankForm.bank_code}
+                    onSelect={(b) => {
+                      setBankForm({ ...bankForm, bank_name: b.name, bank_code: b.code });
+                      clearBankError("bank_name");
+                      clearBankError("bank_code");
+                    }}
+                    onBankNameChange={(name) => {
+                      setBankForm((f) => ({ ...f, bank_name: name }));
+                      clearBankError("bank_name");
+                    }}
+                    invalid={!!bankErrors.bank_name}
                   />
                   <InlineError message={bankErrors.bank_name} />
                 </div>
-                <div className="grid grid-cols-3 gap-3">
-                  <div className="space-y-1.5">
-                    <Label>Cód. Banco</Label>
-                    <Input
-                      value={bankForm.bank_code}
-                      onChange={(e) => { setBankForm({ ...bankForm, bank_code: e.target.value }); clearBankError("bank_code"); }}
-                      placeholder="260"
-                      aria-invalid={!!bankErrors.bank_code}
-                      className={errorInputClass(!!bankErrors.bank_code)}
-                    />
-                    <InlineError message={bankErrors.bank_code} />
-                  </div>
+                <div className="grid grid-cols-2 gap-3">
                   <div className="space-y-1.5">
                     <Label>Agência</Label>
                     <Input
@@ -288,15 +285,12 @@ export default function DadosBancarios() {
                 </div>
                 <div className="space-y-1.5">
                   <Label>Tipo de conta</Label>
-                  <Select
+                  <SegmentedChoice
                     value={bankForm.account_type}
-                    onValueChange={(v) => setBankForm({ ...bankForm, account_type: v as BankForm["account_type"] })}
-                  >
-                    <SelectTrigger className="finance-select-trigger h-11 border-primary/25 bg-primary/[0.045] font-black"><SelectValue /></SelectTrigger>
-                    <SelectContent className="w-[var(--radix-select-trigger-width)]">
-                      {ACCOUNT_TYPES.map(t => <SelectItem key={t.value} value={t.value} className="text-[13px] font-black">{t.label}</SelectItem>)}
-                    </SelectContent>
-                  </Select>
+                    onValueChange={(v) => setBankForm({ ...bankForm, account_type: v })}
+                    options={ACCOUNT_TYPES}
+                    columns={2}
+                  />
                 </div>
                 <div className="space-y-1.5">
                   <Label>Nome do titular</Label>

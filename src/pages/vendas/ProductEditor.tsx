@@ -13,6 +13,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { SegmentedChoice } from "@/components/ui/segmented-choice";
 import * as SelectPrimitive from "@radix-ui/react-select";
 import { QRCodeSVG } from "qrcode.react";
 import {
@@ -1165,32 +1166,17 @@ function TabGeral({ name, setName, description, setDescription, price, setPrice,
               })}
             </div>
           </div>
-          <div className="p-5 space-y-1.5">
+          <div className="p-5 space-y-2">
             <label className="text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">Tipo de pagamento</label>
-            <Select value={paymentType} onValueChange={setPaymentType}>
-              <SelectTrigger className="h-12 bg-card border-border font-display font-bold text-[13px] tracking-tight">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent className="w-[var(--radix-select-trigger-width)] max-w-none p-1.5">
-                <RichSelectItem value="unico" icon={DollarSign} label="Pagamento único" desc="Cobrança única (uma vez)" />
-                <SelectPrimitive.Item
-                  value="assinatura"
-                  disabled
-                  className="relative flex w-full cursor-not-allowed select-none items-center gap-3 rounded-xl px-2.5 py-2.5 outline-none opacity-50"
-                >
-                  <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-border bg-secondary text-muted-foreground">
-                    <RefreshCw className="h-3.5 w-3.5" strokeWidth={2} />
-                  </span>
-                  <span className="flex-1 min-w-0">
-                    <SelectPrimitive.ItemText asChild>
-                      <span className="block font-display text-[12.5px] font-bold tracking-tight text-foreground">Assinatura recorrente</span>
-                    </SelectPrimitive.ItemText>
-                    <span className="mt-0.5 block text-[10.5px] text-muted-foreground">Cobrança automática mensal</span>
-                  </span>
-                  <span className="ml-auto text-[9px] font-bold uppercase tracking-[0.12em] text-warning px-1.5 py-0.5 rounded border border-warning/40 bg-warning/10">Em breve</span>
-                </SelectPrimitive.Item>
-              </SelectContent>
-            </Select>
+            <SegmentedChoice
+              value={paymentType}
+              onValueChange={setPaymentType}
+              columns={2}
+              options={[
+                { value: "unico", label: "Pagamento único", description: "Cobrança única", icon: DollarSign },
+                { value: "assinatura", label: "Assinatura recorrente", description: "Cobrança automática mensal", icon: RefreshCw, disabled: true, badge: "Em breve" },
+              ]}
+            />
           </div>
           <div className="p-5">
             <div className="flex items-end justify-between gap-6">
@@ -1213,16 +1199,19 @@ function TabGeral({ name, setName, description, setDescription, price, setPrice,
                   </p>
                 )}
               </div>
-              <div className="w-32 space-y-1.5">
+              <div className="w-[300px] space-y-1.5">
                 <label className="text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">Garantia</label>
-                <Select value={warrantyDays} onValueChange={setWarrantyDays}>
-                  <SelectTrigger className="h-14 bg-secondary border-border text-sm font-semibold"><SelectValue /></SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="7">7 dias</SelectItem>
-                    <SelectItem value="14">14 dias</SelectItem>
-                    <SelectItem value="30">30 dias</SelectItem>
-                  </SelectContent>
-                </Select>
+                <SegmentedChoice
+                  value={warrantyDays}
+                  onValueChange={setWarrantyDays}
+                  columns={3}
+                  size="sm"
+                  options={[
+                    { value: "7", label: "7 dias" },
+                    { value: "14", label: "14 dias" },
+                    { value: "30", label: "30 dias" },
+                  ]}
+                />
               </div>
             </div>
           </div>
