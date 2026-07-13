@@ -25,8 +25,17 @@ type Ticket = {
   status: string;
   priority: string;
   admin_reply: string | null;
+  admin_name: string | null;
+  admin_role: string | null;
   replied_at: string | null;
   created_at: string;
+};
+
+const ROLE_LABEL: Record<string, string> = {
+  admin: "Equipe Hotzfy",
+  manager: "Gerente de Suporte",
+  employee: "Atendente",
+  staff: "Equipe de Suporte",
 };
 
 const STATUS_MAP: Record<string, { label: string; color: string; bg: string; icon: typeof Clock }> = {
