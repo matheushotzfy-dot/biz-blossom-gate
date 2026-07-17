@@ -434,7 +434,7 @@ function MetricsStrip() {
                   <span className="text-[10px] font-mono uppercase tracking-wider">{m.label}</span>
                 </div>
                 <div className="text-3xl md:text-4xl font-black font-display bg-gradient-to-br from-white to-white/60 bg-clip-text text-transparent">
-                  {m.value}
+                  <CountUp to={m.to} decimals={m.decimals} prefix={m.prefix} suffix={m.suffix} />
                 </div>
               </motion.div>
             ))}
