@@ -6,6 +6,7 @@ import {
   MapPin, Tag, Globe, Key, Beaker, Timer, ShieldCheck, Zap,
 } from "lucide-react";
 import { StatusBadge } from "@/components/StatusBadge";
+import { TransactionTimeline } from "@/components/transactions/TransactionTimeline";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
