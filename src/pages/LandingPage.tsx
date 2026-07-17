@@ -849,6 +849,19 @@ function Footer() {
    ═══════════════════════════════════════════════════════════════ */
 
 export default function LandingPage() {
+  // Global body has overflow:hidden for the app shell; the landing page needs
+  // window scroll for parallax + IntersectionObserver reveals, so unlock while mounted.
+  useEffect(() => {
+    const prevBody = document.body.style.overflow;
+    const prevHtml = document.documentElement.style.overflow;
+    document.body.style.overflow = "auto";
+    document.documentElement.style.overflow = "auto";
+    return () => {
+      document.body.style.overflow = prevBody;
+      document.documentElement.style.overflow = prevHtml;
+    };
+  }, []);
+
   return (
     <div className="relative min-h-screen bg-background text-foreground overflow-x-hidden">
       <Seo
