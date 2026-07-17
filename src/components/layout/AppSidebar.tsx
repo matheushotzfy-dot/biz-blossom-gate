@@ -365,8 +365,8 @@ export function AppSidebar() {
       <SidebarHeader className="relative border-b border-sidebar-border/70 px-4 pb-4 pt-4">
         {/* Brand */}
         <div className={cn("flex items-center gap-3", collapsed && "justify-center")}>
-          <div className="relative h-10 w-10 shrink-0 overflow-hidden rounded-[10px] border border-sidebar-border bg-gradient-to-br from-sidebar-accent to-sidebar-accent/40 ring-1 ring-inset ring-sidebar-primary/10">
-            <img src={hotzfyLogo} alt="HOTZFY" className="h-full w-full object-contain p-[3px]" />
+          <div className="relative h-10 w-10 shrink-0 flex items-center justify-center overflow-hidden rounded-[10px] border border-sidebar-border bg-gradient-to-br from-sidebar-accent to-sidebar-accent/40 ring-1 ring-inset ring-sidebar-primary/10">
+            <HotzfyLogo size={30} />
             <span className="pointer-events-none absolute inset-0 rounded-[10px] bg-gradient-to-br from-sidebar-primary/0 via-transparent to-sidebar-primary/10" />
           </div>
           <div className="min-w-0 flex-1 group-data-[collapsible=icon]:hidden">
