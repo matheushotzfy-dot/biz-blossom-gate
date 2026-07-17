@@ -4,7 +4,8 @@ import {
   Activity, Search, Clock, FileText, Shield, Users, UserCog,
   ChevronLeft, ChevronRight, Briefcase, User as UserIcon, Download,
 } from "lucide-react";
-import { GlassPanel as AdminPanel, GlassPanelTitle as PanelTitle, AdminKpi } from "./AdminOverviewTab";
+import { GlassPanel as AdminPanel, GlassPanelTitle as PanelTitle } from "./AdminOverviewTab";
+import { FinanceiroHero, FinanceiroKpi, FinanceiroKpiGrid } from "@/components/financeiro/FinanceiroHero";
 import type { Tables } from "@/integrations/supabase/types";
 
 type Source = "all" | "admin" | "staff" | "activity";
