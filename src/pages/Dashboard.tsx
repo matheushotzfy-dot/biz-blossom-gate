@@ -525,7 +525,7 @@ export default function Dashboard() {
               <p className="text-muted-foreground text-sm max-w-md">
                 Os resultados estão definidos. Conheça os vencedores da Corrida de Faturamento e prepare-se para a próxima temporada.
               </p>
-              <Link to="/premiacoes" className="inline-flex items-center gap-2 rounded-xl bg-primary px-4 py-2.5 text-primary-foreground text-[13px] font-bold hover:bg-primary/90 transition-all active:scale-[0.98]">
+            <Link to="/premiacoes?tab=corrida" className="inline-flex items-center gap-2 rounded-xl bg-primary px-4 py-2.5 text-primary-foreground text-[13px] font-bold hover:bg-primary/90 transition-all active:scale-[0.98]">
                 Ver ranking completo <ArrowRight className="h-4 w-4" />
               </Link>
             </div>
