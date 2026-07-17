@@ -137,7 +137,7 @@ function DashboardLayoutInner() {
               <button
                 onClick={togglePrivacy}
                 aria-label={privacyHidden ? "Mostrar saldo" : "Ocultar saldo"}
-                className="seller-clickable h-9 w-9 rounded-xl border border-border/60 bg-muted/40 hover:bg-primary/10 hover:border-primary/40 text-muted-foreground hover:text-primary flex items-center justify-center transition-colors"
+                className="seller-clickable icon-only h-9 w-9 rounded-xl border border-border/60 bg-muted/40 hover:bg-primary/10 hover:border-primary/40 text-muted-foreground hover:text-primary flex items-center justify-center transition-colors"
               >
                 {privacyHidden ? <EyeOff className="h-4 w-4" strokeWidth={2} /> : <Eye className="h-4 w-4" strokeWidth={2} />}
               </button>
@@ -145,7 +145,7 @@ function DashboardLayoutInner() {
               <button
                 onClick={toggleTheme}
                 aria-label="Alternar tema"
-                className="seller-clickable h-9 w-9 rounded-xl border border-border/60 bg-muted/40 hover:bg-primary/10 hover:border-primary/40 text-muted-foreground hover:text-primary flex items-center justify-center transition-colors"
+                className="seller-clickable icon-only h-9 w-9 rounded-xl border border-border/60 bg-muted/40 hover:bg-primary/10 hover:border-primary/40 text-muted-foreground hover:text-primary flex items-center justify-center transition-colors"
               >
                 {theme === "dark" ? <Sun className="h-4 w-4" strokeWidth={2} /> : <Moon className="h-4 w-4" strokeWidth={2} />}
               </button>
@@ -153,13 +153,14 @@ function DashboardLayoutInner() {
               <button
                 onClick={() => setNotifOpen(!notifOpen)}
                 aria-label="Notificações"
-                className="seller-clickable relative h-9 w-9 rounded-xl border border-border/60 bg-muted/40 hover:bg-primary/10 hover:border-primary/40 text-muted-foreground hover:text-primary flex items-center justify-center transition-colors"
+                className="seller-clickable icon-only relative h-9 w-9 rounded-xl border border-border/60 bg-muted/40 hover:bg-primary/10 hover:border-primary/40 text-muted-foreground hover:text-primary flex items-center justify-center transition-colors"
               >
                 <Bell className="h-4 w-4" strokeWidth={2} />
                 {unreadCount > 0 && (
                   <span className="absolute -top-0.5 -right-0.5 h-2 w-2 rounded-full bg-primary ring-2 ring-card" />
                 )}
               </button>
+
             </div>
 
             <div className="mx-2 h-6 w-px bg-border/60" />
