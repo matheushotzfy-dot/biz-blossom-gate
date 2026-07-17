@@ -8,7 +8,7 @@ import { Sun, Moon, Bell, Search } from "lucide-react";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { useNavigate } from "react-router-dom";
 import { GlobalSearchDialog } from "./GlobalSearchDialog";
-import hotzfyLogo from "@/assets/hotzfy-logo.png";
+import { HotzfyLogo } from "@/components/HotzfyLogo";
 
 const fmtCompact = (v: number) => {
  if (v >= 1000000) return `R$ ${(v / 1000000).toFixed(1)}M`;
