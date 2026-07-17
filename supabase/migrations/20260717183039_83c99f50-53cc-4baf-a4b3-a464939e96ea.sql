@@ -1,0 +1,1 @@
+DELETE FROM public.admin_alerts WHERE kind='stuck_transactions'; DELETE FROM public.transactions WHERE status='expired';
