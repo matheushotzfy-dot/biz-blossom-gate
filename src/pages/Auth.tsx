@@ -20,6 +20,7 @@ import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { motion, AnimatePresence } from "framer-motion";
 import authHeroImg from "@/assets/auth-hero.jpg";
+import { HotzfyLogo } from "@/components/HotzfyLogo";
 import { Seo } from "@/components/Seo";
 import { friendlyError } from "@/lib/friendlyError";
 
