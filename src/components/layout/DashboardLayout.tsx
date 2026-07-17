@@ -108,15 +108,13 @@ function DashboardLayoutInner() {
               <span className="pointer-events-none absolute -inset-1 rounded-2xl ring-1 ring-primary/0 group-hover/trg:ring-primary/30 transition" />
             </SidebarTrigger>
 
-            {/* ─── SEARCH BUTTON (icon only) ─── */}
+            {/* ─── SEARCH BUTTON ─── */}
             <button
               onClick={() => setSearchOpen(true)}
               aria-label="Pesquisar"
-              className="group/search seller-clickable relative h-10 w-10 rounded-xl border border-border/60 bg-muted/40 hover:bg-primary/10 hover:border-primary/50 flex items-center justify-center text-muted-foreground hover:text-primary transition-all duration-300 overflow-hidden ml-1 mr-auto"
+              className="seller-clickable h-9 w-9 rounded-xl border border-border/60 bg-muted/40 hover:bg-primary/10 hover:border-primary/40 text-muted-foreground hover:text-primary flex items-center justify-center transition-colors ml-1 mr-auto"
             >
-              <span className="pointer-events-none absolute inset-0 bg-gradient-to-br from-primary/20 via-transparent to-transparent opacity-0 group-hover/search:opacity-100 transition-opacity duration-300" />
-              <Search className="relative h-[16px] w-[16px] transition-transform duration-300 group-hover/search:scale-110 group-hover/search:rotate-[-8deg]" strokeWidth={2.5} />
-              <span className="pointer-events-none absolute -inset-1 rounded-2xl ring-1 ring-primary/0 group-hover/search:ring-primary/30 transition" />
+              <Search className="h-4 w-4" strokeWidth={2} />
             </button>
 
 
@@ -133,38 +131,43 @@ function DashboardLayoutInner() {
                 <span className="text-[16px] font-display font-bold text-foreground tabular-nums tracking-[-0.03em] relative z-10">
                   {privacyHidden ? "••••••" : formatBRL(Math.max(balance, 0))}
                 </span>
-                <button 
-                  onClick={togglePrivacy}
-                  className="seller-clickable relative z-10 ml-1 h-8 w-8 rounded-xl flex items-center justify-center hover:bg-background/80 text-muted-foreground/30 hover:text-foreground active:scale-90"
-                >
-                  {privacyHidden ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                </button>
               </div>
             </div>
 
-            <div className="flex items-center gap-0.5 ml-auto md:ml-0">
+            {/* ─── ACTION CLUSTER — perfectly aligned ─── */}
+            <div className="flex items-center gap-1.5 ml-auto md:ml-0">
+              <button
+                onClick={togglePrivacy}
+                aria-label={privacyHidden ? "Mostrar saldo" : "Ocultar saldo"}
+                className="seller-clickable h-9 w-9 rounded-xl border border-border/60 bg-muted/40 hover:bg-primary/10 hover:border-primary/40 text-muted-foreground hover:text-primary flex items-center justify-center transition-colors"
+              >
+                {privacyHidden ? <EyeOff className="h-4 w-4" strokeWidth={2} /> : <Eye className="h-4 w-4" strokeWidth={2} />}
+              </button>
+
               <button
                 onClick={toggleTheme}
-                className="seller-clickable h-8 w-8 rounded-md hover:bg-muted/60 flex items-center justify-center text-muted-foreground/70 hover:text-foreground"
+                aria-label="Alternar tema"
+                className="seller-clickable h-9 w-9 rounded-xl border border-border/60 bg-muted/40 hover:bg-primary/10 hover:border-primary/40 text-muted-foreground hover:text-primary flex items-center justify-center transition-colors"
               >
-                {theme === "dark" ? <Sun className="h-[15px] w-[15px]" strokeWidth={1.85} /> : <Moon className="h-[15px] w-[15px]" strokeWidth={1.85} />}
+                {theme === "dark" ? <Sun className="h-4 w-4" strokeWidth={2} /> : <Moon className="h-4 w-4" strokeWidth={2} />}
               </button>
 
               <button
                 onClick={() => setNotifOpen(!notifOpen)}
-                className="seller-clickable relative h-8 w-8 rounded-md hover:bg-muted/60 flex items-center justify-center text-muted-foreground/70 hover:text-foreground"
+                aria-label="Notificações"
+                className="seller-clickable relative h-9 w-9 rounded-xl border border-border/60 bg-muted/40 hover:bg-primary/10 hover:border-primary/40 text-muted-foreground hover:text-primary flex items-center justify-center transition-colors"
               >
-                <Bell className="h-[15px] w-[15px]" strokeWidth={1.85} />
+                <Bell className="h-4 w-4" strokeWidth={2} />
                 {unreadCount > 0 && (
-                  <span className="absolute top-1 right-1 h-1.5 w-1.5 bg-primary rounded-full ring-2 ring-background" />
+                  <span className="absolute -top-0.5 -right-0.5 h-2 w-2 rounded-full bg-primary ring-2 ring-card" />
                 )}
               </button>
             </div>
 
-            <div className="mx-2 h-5 w-px bg-border/60" />
+            <div className="mx-2 h-6 w-px bg-border/60" />
 
             <button onClick={() => navigate("/perfil")} className="seller-clickable flex items-center rounded-xl border-transparent p-0.5">
-              <Avatar className="h-7 w-7 ring-1 ring-border/60 hover:ring-primary/40 transition-all cursor-pointer">
+              <Avatar className="h-8 w-8 ring-1 ring-border/60 hover:ring-primary/40 transition-all cursor-pointer">
                 <AvatarImage src={profile?.avatar_url || undefined} className="object-cover" />
                 <AvatarFallback className="bg-muted text-foreground text-[11px] font-semibold">
                   {(profile?.full_name || "U").charAt(0).toUpperCase()}
@@ -172,6 +175,7 @@ function DashboardLayoutInner() {
               </Avatar>
             </button>
           </header>
+
 
  {/* ─── VERIFICATION BANNER ─── */}
  {profile && profile.account_status !== "approved" && (
