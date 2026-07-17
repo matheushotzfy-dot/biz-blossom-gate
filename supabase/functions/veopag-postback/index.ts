@@ -193,6 +193,24 @@ Deno.serve(async (req) => {
       .update(patch)
       .eq("id", tx.id);
 
+    // Audit log — postback received (admin-only; keeps raw gateway status for debugging)
+    try {
+      await supabase.rpc("log_transaction_event", {
+        _transaction_id: tx.id,
+        _event_type: "postback_received",
+        _description: `Postback VeoPag: ${rawStatus} → ${mapped}`,
+        _actor: "veopag",
+        _acquirer_slug: "veopag",
+        _visibility: "admin",
+        _metadata: {
+          gateway_status: rawStatus,
+          mapped_status: mapped,
+          event_id: veoTxId,
+          external_id: externalId,
+        },
+      });
+    } catch (_e) { /* non-blocking */ }
+
     if (updErr) {
       safeLog("update error", { transactionId: tx.id, error: updErr.message });
       return new Response(
