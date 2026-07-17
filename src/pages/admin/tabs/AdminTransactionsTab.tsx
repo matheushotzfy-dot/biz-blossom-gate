@@ -500,25 +500,9 @@ export default function AdminTransactionsTab({ transactions, profiles, products,
                   </dl>
                 </PremiumPanel>
 
-                {/* Timeline */}
-                <PremiumPanel eyebrow="Auditoria" title="Linha do tempo" icon={Clock}>
-                  <ol className="space-y-3">
-                    {buildTimeline(selectedTx).map((ev, i, arr) => {
-                      const dot = ev.tone === "success" ? "bg-emerald-500" : ev.tone === "danger" ? "bg-destructive" : ev.tone === "warning" ? "bg-warning" : "bg-muted-foreground/40";
-                      return (
-                        <li key={i} className="flex gap-3">
-                          <div className="flex flex-col items-center">
-                            <span className={cn("mt-1.5 h-2 w-2 rounded-full", dot)} />
-                            {i < arr.length - 1 && <span className="mt-1 w-px flex-1 bg-border" />}
-                          </div>
-                          <div className="pb-1">
-                            <div className="text-xs font-bold text-foreground">{ev.label}</div>
-                            <div className="text-[10px] text-muted-foreground tabular-nums">{_fullDateFmt.format(new Date(ev.time))}</div>
-                          </div>
-                        </li>
-                      );
-                    })}
-                  </ol>
+                {/* Timeline — real audit events (creation, acquirer switches, postbacks, polling, expiration) */}
+                <PremiumPanel eyebrow="Auditoria completa" title="Timeline da transação" icon={Clock}>
+                  <TransactionTimeline transactionId={selectedTx.id} variant="admin" />
                 </PremiumPanel>
 
                 {/* Raw */}
