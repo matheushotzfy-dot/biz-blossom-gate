@@ -48,6 +48,7 @@ export default function AdminCorridasTab() {
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [prizes, setPrizes] = useState<Prize[]>([]);
   const [leaderboard, setLeaderboard] = useState<any[]>([]);
+  const [overrides, setOverrides] = useState<Override[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
 
@@ -62,16 +63,63 @@ export default function AdminCorridasTab() {
   };
 
   const loadPrizes = async (raceId: string) => {
-    const [{ data: pr }, { data: lb }] = await Promise.all([
+    const [{ data: pr }, { data: lb }, { data: ov }] = await Promise.all([
       supabase.from("revenue_race_prizes").select("*").eq("race_id", raceId).order("sort_order", { ascending: true }),
       supabase.rpc("race_leaderboard", { _race_id: raceId }),
+      supabase.from("revenue_race_overrides").select("*").eq("race_id", raceId).order("revenue_cents", { ascending: false }),
     ]);
     setPrizes((pr || []) as Prize[]);
     setLeaderboard(lb || []);
+    setOverrides((ov || []) as Override[]);
   };
 
   useEffect(() => { loadRaces(); }, []);
   useEffect(() => { if (selectedId) loadPrizes(selectedId); }, [selectedId]);
+
+  const addOverride = async () => {
+    if (!selected) return;
+    const { data, error } = await supabase.from("revenue_race_overrides").insert({
+      race_id: selected.id,
+      display_name: "Novo participante",
+      revenue_cents: 0,
+      sales_count: 0,
+    }).select().single();
+    if (error) { toast.error(error.message); return; }
+    setOverrides(prev => [data as Override, ...prev]);
+    loadPrizes(selected.id);
+  };
+
+  const updateOverride = async (id: string, patch: Partial<Override>) => {
+    const { error } = await supabase.from("revenue_race_overrides").update(patch).eq("id", id);
+    if (error) { toast.error(error.message); return; }
+    setOverrides(prev => prev.map(o => o.id === id ? { ...o, ...patch } as Override : o));
+    if (selected) loadPrizes(selected.id);
+  };
+
+  const deleteOverride = async (id: string) => {
+    if (!confirm("Remover esta entrada do ranking?")) return;
+    const { error } = await supabase.from("revenue_race_overrides").delete().eq("id", id);
+    if (error) { toast.error(error.message); return; }
+    setOverrides(prev => prev.filter(o => o.id !== id));
+    if (selected) loadPrizes(selected.id);
+  };
+
+  const seedDemoRanking = async () => {
+    if (!selected) return;
+    if (!confirm("Preencher com 5 participantes de exemplo? Isso NÃO remove os existentes.")) return;
+    const demo = [
+      { display_name: "Bryan G.",    revenue_cents: 87500000, sales_count: 342 },
+      { display_name: "Airis F.",    revenue_cents: 64200000, sales_count: 258 },
+      { display_name: "Wdzin",       revenue_cents: 41800000, sales_count: 197 },
+      { display_name: "Marina S.",   revenue_cents: 28900000, sales_count: 134 },
+      { display_name: "Lucas P.",    revenue_cents: 19700000, sales_count: 88 },
+    ].map(d => ({ ...d, race_id: selected.id }));
+    const { error } = await supabase.from("revenue_race_overrides").insert(demo);
+    if (error) { toast.error(error.message); return; }
+    toast.success("Ranking de demonstração inserido");
+    loadPrizes(selected.id);
+  };
+
 
   const createRace = async () => {
     const now = new Date();
