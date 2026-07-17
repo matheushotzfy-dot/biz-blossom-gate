@@ -2617,6 +2617,95 @@ export type Database = {
         }
         Relationships: []
       }
+      revenue_race_prizes: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          image_url: string | null
+          min_revenue_cents: number
+          race_id: string
+          sort_order: number
+          target_position: number | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          image_url?: string | null
+          min_revenue_cents?: number
+          race_id: string
+          sort_order?: number
+          target_position?: number | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          image_url?: string | null
+          min_revenue_cents?: number
+          race_id?: string
+          sort_order?: number
+          target_position?: number | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "revenue_race_prizes_race_id_fkey"
+            columns: ["race_id"]
+            isOneToOne: false
+            referencedRelation: "revenue_races"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      revenue_races: {
+        Row: {
+          banner_url: string | null
+          created_at: string
+          created_by: string | null
+          description: string | null
+          ends_at: string
+          id: string
+          is_active: boolean
+          logo_url: string | null
+          starts_at: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          banner_url?: string | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          ends_at: string
+          id?: string
+          is_active?: boolean
+          logo_url?: string | null
+          starts_at: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          banner_url?: string | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          ends_at?: string
+          id?: string
+          is_active?: boolean
+          logo_url?: string | null
+          starts_at?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       reward_claims: {
         Row: {
           admin_notes: string | null
@@ -4408,6 +4497,17 @@ export type Database = {
       pick_failover_acquirer: {
         Args: { _current_acquirer_id: string }
         Returns: string
+      }
+      race_leaderboard: {
+        Args: { _race_id: string }
+        Returns: {
+          rank_position: number
+          revenue_cents: number
+          sales_count: number
+          seller_avatar: string
+          seller_id: string
+          seller_name: string
+        }[]
       }
       raise_admin_alert: {
         Args: {
