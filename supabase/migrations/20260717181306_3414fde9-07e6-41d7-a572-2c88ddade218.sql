@@ -1,0 +1,1 @@
+REVOKE EXECUTE ON FUNCTION public.race_leaderboard(UUID) FROM PUBLIC, anon;
