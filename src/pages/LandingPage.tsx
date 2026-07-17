@@ -44,11 +44,39 @@ const FEATURES = [
 ];
 
 const METRICS = [
-  { label: "TPV processado", value: "R$ 2.4B+", icon: Activity },
-  { label: "Taxa de aprovação", value: "98.7%", icon: CheckCircle2 },
-  { label: "Uptime", value: "99.99%", icon: Radio },
-  { label: "Latência PIX", value: "1.2s", icon: Zap },
+  { label: "TPV processado", prefix: "R$ ", to: 2.4, suffix: "B+", decimals: 1, icon: Activity },
+  { label: "Taxa de aprovação", prefix: "", to: 98.7, suffix: "%", decimals: 1, icon: CheckCircle2 },
+  { label: "Uptime", prefix: "", to: 99.99, suffix: "%", decimals: 2, icon: Radio },
+  { label: "Latência PIX", prefix: "", to: 1.2, suffix: "s", decimals: 1, icon: Zap },
 ];
+
+/* Animated count-up that fires when scrolled into view */
+function CountUp({ to, decimals = 0, prefix = "", suffix = "", duration = 2 }: {
+  to: number; decimals?: number; prefix?: string; suffix?: string; duration?: number;
+}) {
+  const ref = useRef<HTMLSpanElement>(null);
+  const started = useRef(false);
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const io = new IntersectionObserver((entries) => {
+      entries.forEach((e) => {
+        if (e.isIntersecting && !started.current) {
+          started.current = true;
+          const controls = animate(0, to, {
+            duration,
+            ease: [0.16, 1, 0.3, 1],
+            onUpdate: (v) => { if (el) el.textContent = prefix + v.toFixed(decimals) + suffix; },
+          });
+          return () => controls.stop();
+        }
+      });
+    }, { threshold: 0.35 });
+    io.observe(el);
+    return () => io.disconnect();
+  }, [to, decimals, prefix, suffix, duration]);
+  return <span ref={ref}>{prefix}0{decimals ? "." + "0".repeat(decimals) : ""}{suffix}</span>;
+}
 
 /* ═══════════════════════════════════════════════════════════════
    BACKGROUND FX
