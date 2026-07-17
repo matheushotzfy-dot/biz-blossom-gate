@@ -335,10 +335,15 @@ function HolographicDashboard() {
 
 function Hero() {
   const navigate = useNavigate();
+  const sectionRef = useRef<HTMLElement>(null);
+  const { scrollYProgress } = useScroll({ target: sectionRef, offset: ["start start", "end start"] });
+  const heroY = useTransform(scrollYProgress, [0, 1], [0, -120]);
+  const heroOpacity = useTransform(scrollYProgress, [0, 0.8], [1, 0.2]);
+  const dashY = useTransform(scrollYProgress, [0, 1], [0, 80]);
   return (
-    <section className="relative min-h-screen flex items-center justify-center pt-28 pb-20 px-4 md:px-8 overflow-hidden">
+    <section ref={sectionRef} className="relative min-h-screen flex items-center justify-center pt-28 pb-20 px-4 md:px-8 overflow-hidden">
       <Particles />
-      <div className="max-w-7xl w-full mx-auto text-center relative z-10">
+      <motion.div style={{ y: heroY, opacity: heroOpacity }} className="max-w-7xl w-full mx-auto text-center relative z-10">
         <motion.div
           initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8 }}
           className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-emerald-400/25 bg-emerald-500/5 backdrop-blur-md text-[10px] font-display font-black uppercase tracking-[0.2em] text-emerald-300 mb-8"
