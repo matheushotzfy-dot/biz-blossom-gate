@@ -26,6 +26,16 @@ type Prize = {
   sort_order: number;
 };
 
+type Override = {
+  id: string;
+  race_id: string;
+  seller_id: string | null;
+  display_name: string;
+  avatar_url: string | null;
+  revenue_cents: number;
+  sales_count: number;
+};
+
 const toDateInput = (iso: string) => {
   try { return new Date(iso).toISOString().slice(0, 16); } catch { return ""; }
 };
