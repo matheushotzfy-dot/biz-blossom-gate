@@ -254,6 +254,17 @@ Deno.serve(async (req) => {
               },
             })
             .eq('id', existing.id);
+          try {
+            await supabase.rpc('log_transaction_event', {
+              _transaction_id: existing.id,
+              _event_type: 'acquirer_switched',
+              _description: `Adquirente alterada: ${String(existingAcquirer).toUpperCase()} → ${acquirerSlug.toUpperCase()}`,
+              _actor: 'system',
+              _acquirer_slug: acquirerSlug,
+              _visibility: 'public',
+              _metadata: { from: existingAcquirer, to: acquirerSlug, reason: sameProduct ? 'acquirer_config_changed' : 'different_product' },
+            });
+          } catch (_e) { /* non-blocking */ }
           safeLog('Detached stale checkout session', {
             transactionId: existing.id,
             previousAcquirer: existingAcquirer,

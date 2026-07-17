@@ -3,9 +3,10 @@ import {
   Search, Download, CreditCard, Smartphone, FileText, ChevronDown, Eye,
   RotateCcw, Upload, Clock, CheckCircle2, AlertTriangle, ShieldAlert,
   Code2, DollarSign, User, Mail, Hash, ArrowUpDown, Filter, X, Copy,
-  MapPin, Tag, Globe, Key, Beaker, Timer, ShieldCheck,
+  MapPin, Tag, Globe, Key, Beaker, Timer, ShieldCheck, Zap,
 } from "lucide-react";
 import { StatusBadge } from "@/components/StatusBadge";
+import { TransactionTimeline } from "@/components/transactions/TransactionTimeline";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -480,6 +481,15 @@ export default function AdminTransactionsTab({ transactions, profiles, products,
                     <Row icon={<User className="h-3 w-3" />} label="Vendedor" value={getSellerName(selectedTx.user_id)} />
                     <Row icon={<FileText className="h-3 w-3" />} label="Produto" value={getProductName(selectedTx.product_id)} />
                     <Row icon={<Globe className="h-3 w-3" />} label="Origem" value={selectedTx.source || "checkout"} />
+                    <Row
+                      icon={<Zap className="h-3 w-3" />}
+                      label="Adquirente"
+                      value={(() => {
+                        const meta = (selectedTx.metadata as Record<string, unknown> | null) || {};
+                        const acq = (meta.acquirer_slug as string) || (meta.acquirer as string) || selectedTx.source || "—";
+                        return String(acq).toUpperCase();
+                      })()}
+                    />
                     {selectedTx.api_key_id && <Row icon={<Key className="h-3 w-3" />} label="API Key" value={selectedTx.api_key_id} mono />}
                     {selectedTx.coupon_id && <Row icon={<Tag className="h-3 w-3" />} label="Cupom" value={`${selectedTx.coupon_id.slice(0, 8)} · −${fmtCurrency(Number(selectedTx.discount_amount || 0))}`} mono />}
                     {selectedTx.podpay_payment_id && <Row icon={<Hash className="h-3 w-3" />} label="PodPay" value={selectedTx.podpay_payment_id} mono />}
@@ -491,25 +501,9 @@ export default function AdminTransactionsTab({ transactions, profiles, products,
                   </dl>
                 </PremiumPanel>
 
-                {/* Timeline */}
-                <PremiumPanel eyebrow="Auditoria" title="Linha do tempo" icon={Clock}>
-                  <ol className="space-y-3">
-                    {buildTimeline(selectedTx).map((ev, i, arr) => {
-                      const dot = ev.tone === "success" ? "bg-emerald-500" : ev.tone === "danger" ? "bg-destructive" : ev.tone === "warning" ? "bg-warning" : "bg-muted-foreground/40";
-                      return (
-                        <li key={i} className="flex gap-3">
-                          <div className="flex flex-col items-center">
-                            <span className={cn("mt-1.5 h-2 w-2 rounded-full", dot)} />
-                            {i < arr.length - 1 && <span className="mt-1 w-px flex-1 bg-border" />}
-                          </div>
-                          <div className="pb-1">
-                            <div className="text-xs font-bold text-foreground">{ev.label}</div>
-                            <div className="text-[10px] text-muted-foreground tabular-nums">{_fullDateFmt.format(new Date(ev.time))}</div>
-                          </div>
-                        </li>
-                      );
-                    })}
-                  </ol>
+                {/* Timeline — real audit events (creation, acquirer switches, postbacks, polling, expiration) */}
+                <PremiumPanel eyebrow="Auditoria completa" title="Timeline da transação" icon={Clock}>
+                  <TransactionTimeline transactionId={selectedTx.id} variant="admin" />
                 </PremiumPanel>
 
                 {/* Raw */}

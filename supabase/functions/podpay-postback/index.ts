@@ -306,6 +306,18 @@ Deno.serve(async (req) => {
           .update(updateData)
           .eq('id', tx.id);
 
+        try {
+          await supabase.rpc('log_transaction_event', {
+            _transaction_id: tx.id,
+            _event_type: 'postback_received',
+            _description: `Postback PodPay: ${mappedStatus} → ${ourStatus}`,
+            _actor: 'podpay',
+            _acquirer_slug: 'podpay',
+            _visibility: 'admin',
+            _metadata: { gateway_status: mappedStatus, mapped_status: ourStatus, event_id: podpayEventId },
+          });
+        } catch (_e) { /* non-blocking */ }
+
         if (error) {
           safeLog('Error updating transaction', { transactionId: tx.id, error: error.message });
           await finishLog('update_error', tx.id, error.message);

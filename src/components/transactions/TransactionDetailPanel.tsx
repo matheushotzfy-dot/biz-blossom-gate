@@ -20,6 +20,7 @@ import {
  Zap,
 } from "lucide-react";
 import { PixLogoMark } from "@/components/icons/PixLogoMark";
+import { TransactionTimeline } from "@/components/transactions/TransactionTimeline";
 
 import { StatusBadge } from "@/components/StatusBadge";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
@@ -35,6 +36,7 @@ interface TransactionDetailPanelProps {
  products: Record<string, string>;
  onClose: () => void;
  onRefund?: (tx: Transaction) => void;
+ variant?: "seller" | "admin";
 }
 
 const currencyFormatter = new Intl.NumberFormat("pt-BR", {
@@ -117,7 +119,7 @@ function DataRow({
  );
 }
 
-export function TransactionDetailPanel({ tx, products, onClose, onRefund }: TransactionDetailPanelProps) {
+export function TransactionDetailPanel({ tx, products, onClose, onRefund, variant = "seller" }: TransactionDetailPanelProps) {
  const [copiedId, setCopiedId] = useState(false);
 
  const customerName = tx.customer_name || "Cliente";
@@ -234,6 +236,19 @@ export function TransactionDetailPanel({ tx, products, onClose, onRefund }: Tran
  <SectionCard title="Transação">
  <DataRow label="Produto" value={<span className="block break-words text-right">{productName}</span>} icon={<Package className="h-3.5 w-3.5 shrink-0" />} />
  <DataRow label="Método" value={methodLabel} icon={<CreditCard className="h-3.5 w-3.5 shrink-0" />} />
+ <DataRow
+   label="Adquirente"
+   icon={<Zap className="h-3.5 w-3.5 shrink-0" />}
+   value={
+     <span className="inline-flex items-center gap-1.5 rounded-full border border-primary/25 bg-primary/10 px-2 py-0.5 text-[10.5px] font-black uppercase tracking-[0.14em] text-primary">
+       {(() => {
+         const meta = (tx.metadata as Record<string, unknown> | null) || {};
+         const acq = (meta.acquirer_slug as string) || (meta.acquirer as string) || tx.source || "—";
+         return String(acq).toUpperCase();
+       })()}
+     </span>
+   }
+ />
  <DataRow label="Data" value={formatDateTime(tx.created_at)} icon={<Zap className="h-3.5 w-3.5 shrink-0" />} />
  {Number(tx.retained_amount) > 0 && (
  <DataRow
@@ -296,6 +311,12 @@ export function TransactionDetailPanel({ tx, products, onClose, onRefund }: Tran
  </SectionCard>
  )}
  </div>
+ </div>
+
+ <div className="px-5 pb-6 sm:px-6">
+   <SectionCard title={variant === "admin" ? "Auditoria completa" : "Timeline"}>
+     <TransactionTimeline transactionId={tx.id} variant={variant} />
+   </SectionCard>
  </div>
  </div>
 
