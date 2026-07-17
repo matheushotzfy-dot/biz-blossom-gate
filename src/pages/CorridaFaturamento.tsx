@@ -30,12 +30,13 @@ type Prize = {
 };
 
 type LeaderRow = {
-  seller_id: string;
+  seller_id: string | null;
   seller_name: string;
   seller_avatar: string | null;
   revenue_cents: number;
   sales_count: number;
   rank_position: number;
+  is_manual?: boolean;
 };
 
 const fmtBRL = (cents: number) =>
