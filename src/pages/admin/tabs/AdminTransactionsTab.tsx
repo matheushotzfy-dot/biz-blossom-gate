@@ -3,7 +3,7 @@ import {
   Search, Download, CreditCard, Smartphone, FileText, ChevronDown, Eye,
   RotateCcw, Upload, Clock, CheckCircle2, AlertTriangle, ShieldAlert,
   Code2, DollarSign, User, Mail, Hash, ArrowUpDown, Filter, X, Copy,
-  MapPin, Tag, Globe, Key, Beaker, Timer, ShieldCheck,
+  MapPin, Tag, Globe, Key, Beaker, Timer, ShieldCheck, Zap,
 } from "lucide-react";
 import { StatusBadge } from "@/components/StatusBadge";
 import { Button } from "@/components/ui/button";
