@@ -236,6 +236,19 @@ export function TransactionDetailPanel({ tx, products, onClose, onRefund, varian
  <SectionCard title="Transação">
  <DataRow label="Produto" value={<span className="block break-words text-right">{productName}</span>} icon={<Package className="h-3.5 w-3.5 shrink-0" />} />
  <DataRow label="Método" value={methodLabel} icon={<CreditCard className="h-3.5 w-3.5 shrink-0" />} />
+ <DataRow
+   label="Adquirente"
+   icon={<Zap className="h-3.5 w-3.5 shrink-0" />}
+   value={
+     <span className="inline-flex items-center gap-1.5 rounded-full border border-primary/25 bg-primary/10 px-2 py-0.5 text-[10.5px] font-black uppercase tracking-[0.14em] text-primary">
+       {(() => {
+         const meta = (tx.metadata as Record<string, unknown> | null) || {};
+         const acq = (meta.acquirer_slug as string) || (meta.acquirer as string) || tx.source || "—";
+         return String(acq).toUpperCase();
+       })()}
+     </span>
+   }
+ />
  <DataRow label="Data" value={formatDateTime(tx.created_at)} icon={<Zap className="h-3.5 w-3.5 shrink-0" />} />
  {Number(tx.retained_amount) > 0 && (
  <DataRow
