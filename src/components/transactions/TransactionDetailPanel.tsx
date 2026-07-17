@@ -312,6 +312,12 @@ export function TransactionDetailPanel({ tx, products, onClose, onRefund, varian
  )}
  </div>
  </div>
+
+ <div className="px-5 pb-6 sm:px-6">
+   <SectionCard title={variant === "admin" ? "Auditoria completa" : "Timeline"}>
+     <TransactionTimeline transactionId={tx.id} variant={variant} />
+   </SectionCard>
+ </div>
  </div>
 
   {(whatsappHref || (onRefund && isApprovedTransaction(derivedStatus))) && (
