@@ -20,6 +20,7 @@ import {
  Zap,
 } from "lucide-react";
 import { PixLogoMark } from "@/components/icons/PixLogoMark";
+import { TransactionTimeline } from "@/components/transactions/TransactionTimeline";
 
 import { StatusBadge } from "@/components/StatusBadge";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
