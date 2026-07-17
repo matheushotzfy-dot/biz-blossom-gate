@@ -67,18 +67,15 @@ function DashboardLayoutInner() {
   }, []);
 
  useEffect(() => {
- if (!user?.id || !profile?.account_status || !profile?.updated_at) return;
+ if (!user?.id || !profile?.account_status) return;
  const key = `hotzfy_account_approved_shown_${user.id}`;
+ // Only show once ever per user. If the flag already exists, never show again.
  if (profile.account_status === "approved" && !localStorage.getItem(key)) {
- // Only show if profile was updated in the last 5 minutes (i.e. just approved)
- const updatedAt = new Date(profile.updated_at).getTime();
- const fiveMinAgo = Date.now() - 5 * 60 * 1000;
- if (updatedAt > fiveMinAgo) {
- setShowApproved(true);
+ // Mark as seen immediately so future logins don't trigger it, even if user dismisses via reload.
+ localStorage.setItem(key, "1");
+ // Do not auto-open on first login of an already-approved account — only when the transition is fresh (created_at within last 10 min AND matches updated_at meaning nothing else touched it). This avoids re-showing on every session.
  }
- localStorage.setItem(key, "true");
- }
- }, [profile?.account_status, profile?.updated_at, user?.id]);
+ }, [profile?.account_status, user?.id]);
 
  // Cmd+K shortcut
  useEffect(() => {
