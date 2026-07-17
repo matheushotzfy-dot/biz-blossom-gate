@@ -3403,6 +3403,53 @@ export type Database = {
           },
         ]
       }
+      transaction_events: {
+        Row: {
+          acquirer_slug: string | null
+          actor: string
+          created_at: string
+          description: string
+          event_type: string
+          id: string
+          metadata: Json
+          seller_id: string | null
+          transaction_id: string
+          visibility: string
+        }
+        Insert: {
+          acquirer_slug?: string | null
+          actor?: string
+          created_at?: string
+          description: string
+          event_type: string
+          id?: string
+          metadata?: Json
+          seller_id?: string | null
+          transaction_id: string
+          visibility?: string
+        }
+        Update: {
+          acquirer_slug?: string | null
+          actor?: string
+          created_at?: string
+          description?: string
+          event_type?: string
+          id?: string
+          metadata?: Json
+          seller_id?: string | null
+          transaction_id?: string
+          visibility?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "transaction_events_transaction_id_fkey"
+            columns: ["transaction_id"]
+            isOneToOne: false
+            referencedRelation: "transactions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       transactions: {
         Row: {
           affiliate_link_id: string | null
@@ -4536,6 +4583,18 @@ export type Database = {
           _status_code?: number
           _user_agent?: string
           _user_id?: string
+        }
+        Returns: string
+      }
+      log_transaction_event: {
+        Args: {
+          _acquirer_slug?: string
+          _actor?: string
+          _description: string
+          _event_type: string
+          _metadata?: Json
+          _transaction_id: string
+          _visibility?: string
         }
         Returns: string
       }
