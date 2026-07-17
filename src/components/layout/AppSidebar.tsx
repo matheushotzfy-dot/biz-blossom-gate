@@ -26,7 +26,7 @@ import {
 import { useEffect, useMemo, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { NavLink } from "@/components/NavLink";
-import hotzfyLogo from "@/assets/hotzfy-logo.png";
+import { HotzfyLogo } from "@/components/HotzfyLogo";
 import { useAuth } from "@/hooks/useAuth";
 import { useSupportUnread } from "@/hooks/useSupportUnread";
 import { supabase } from "@/integrations/supabase/client";
