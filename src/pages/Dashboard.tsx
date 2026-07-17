@@ -567,26 +567,35 @@ export default function Dashboard() {
             return (
               <div key={k.label} className={cn(
                 "group relative overflow-hidden rounded-2xl border border-border/60 bg-card/80 backdrop-blur transition-all hover:border-primary/40 hover:shadow-[0_4px_24px_-8px_hsl(var(--primary)/0.3)]",
-                isRevenue ? "p-4" : "p-5"
+                isRevenue ? "p-3" : "p-5"
               )}>
                 <div className="flex items-start justify-between gap-3">
                   <div className="min-w-0 flex-1">
-                    <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-muted-foreground/80">{k.label}</p>
                     <p className={cn(
-                      "mt-2 font-display font-black tabular-nums tracking-[-0.02em] truncate",
-                      isRevenue ? "text-xl md:text-2xl" : "text-2xl md:text-[26px]"
+                      "font-bold uppercase tracking-[0.14em] text-muted-foreground/80",
+                      isRevenue ? "text-[10px]" : "text-[11px]"
+                    )}>{k.label}</p>
+                    <p className={cn(
+                      "font-display font-black tabular-nums tracking-[-0.02em] truncate",
+                      isRevenue ? "mt-1 text-base md:text-lg" : "mt-2 text-2xl md:text-[26px]"
                     )}>
                       {privacy.hidden ? CENSORED : k.value}
                     </p>
-                    <p className="mt-1 text-[11px] text-muted-foreground/60 truncate">{k.sub}</p>
+                    <p className={cn(
+                      "mt-1 text-muted-foreground/60 truncate",
+                      isRevenue ? "text-[10px]" : "text-[11px]"
+                    )}>{k.sub}</p>
                     {k.trend !== undefined && (
                       <p className={cn("mt-1 text-[10px] font-bold", k.trend >= 0 ? "text-primary" : "text-destructive")}>
                         {k.trend >= 0 ? "▲" : "▼"} {Math.abs(k.trend)}% {compareLabel}
                       </p>
                     )}
                   </div>
-                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary group-hover:scale-110 transition-transform">
-                    <Icon className="h-5 w-5" strokeWidth={2.25} />
+                  <div className={cn(
+                    "shrink-0 flex items-center justify-center rounded-xl bg-primary/10 text-primary group-hover:scale-110 transition-transform",
+                    isRevenue ? "h-8 w-8" : "h-10 w-10"
+                  )}>
+                    <Icon className={isRevenue ? "h-4 w-4" : "h-5 w-5"} strokeWidth={2.25} />
                   </div>
                 </div>
                 {k.spark && sparkData.length > 1 && (
