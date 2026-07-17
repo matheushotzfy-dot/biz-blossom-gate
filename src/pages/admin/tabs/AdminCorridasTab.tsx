@@ -203,22 +203,32 @@ export default function AdminCorridasTab() {
 
   if (loading) return <div className="p-6 text-sm text-muted-foreground">Carregando corridas...</div>;
 
+  const activeCount = races.filter(r => r.is_active).length;
+  const prizeCount = prizes.length;
+  const overrideCount = overrides.length;
+  const leaderCount = Array.isArray(leaderboard) ? leaderboard.length : 0;
+
   return (
-    <div className="space-y-5">
-      <div className="flex items-center justify-between gap-3">
-        <div className="flex items-center gap-3">
-          <div className="h-11 w-11 rounded-2xl bg-primary/10 border border-primary/20 flex items-center justify-center">
-            <Flag className="h-5 w-5 text-primary" />
-          </div>
-          <div>
-            <h2 className="font-display font-black text-xl">Corridas de Faturamento</h2>
-            <p className="text-xs text-muted-foreground">Gerencie torneios, prêmios e o ranking em tempo real.</p>
-          </div>
-        </div>
-        <button onClick={createRace} className="inline-flex items-center gap-2 rounded-xl bg-primary text-primary-foreground px-4 py-2.5 text-sm font-bold hover:bg-primary/90">
-          <Plus className="h-4 w-4" /> Nova corrida
-        </button>
-      </div>
+    <div className="space-y-6">
+      <FinanceiroHero
+        eyebrow="Torneios & prêmios"
+        title="Corridas de Faturamento"
+        subtitle="Gerencie torneios, prêmios e o ranking em tempo real dos sellers."
+        status={{ tone: activeCount > 0 ? "success" : "neutral", label: `${races.length} corridas · ${activeCount} ativa(s)`, pulse: activeCount > 0 }}
+        actions={
+          <button onClick={createRace} className="inline-flex items-center gap-2 rounded-xl bg-primary text-primary-foreground px-4 h-10 text-[11px] font-black uppercase tracking-wider hover:bg-primary/90">
+            <Plus className="h-4 w-4" /> Nova corrida
+          </button>
+        }
+      />
+
+      <FinanceiroKpiGrid cols={4}>
+        <FinanceiroKpi label="Corridas totais" value={String(races.length)} sub={`${activeCount} ativa(s)`} icon={Flag} tone="primary" />
+        <FinanceiroKpi label="Prêmios (atual)" value={String(prizeCount)} sub="Da corrida selecionada" icon={Gift} tone="info" />
+        <FinanceiroKpi label="Líderes no ranking" value={String(leaderCount)} sub="Top posições calculadas" icon={Trophy} tone="warning" />
+        <FinanceiroKpi label="Overrides manuais" value={String(overrideCount)} sub="Sellers fictícios/injetados" icon={Sparkles} tone="neutral" />
+      </FinanceiroKpiGrid>
+
 
       <div className="grid grid-cols-1 lg:grid-cols-[240px,1fr] gap-4">
         {/* Race list */}
