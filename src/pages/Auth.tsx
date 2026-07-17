@@ -326,7 +326,7 @@ export default function Auth() {
  ];
 
  return (
- <div className="h-screen overflow-hidden bg-background text-foreground">
+ <div className="min-h-screen bg-background text-foreground">
  <Seo
    title={isLogin ? "Entrar — HOTZFY" : "Criar conta grátis — HOTZFY"}
    description={isLogin ? "Acesse seu painel HOTZFY: produtos, vendas, saques e área de membros em um só lugar." : "Crie sua conta HOTZFY gratuitamente e comece a vender infoprodutos com checkout de alta conversão."}
@@ -334,18 +334,17 @@ export default function Auth() {
  />
  <div className="fixed inset-0 pointer-events-none overflow-hidden">
  <div className="absolute bottom-0 left-1/3 h-80 w-80 rounded-full bg-primary/8 blur-3xl" />
+ <div className="absolute -top-24 -right-24 h-96 w-96 rounded-full bg-cyan-500/10 blur-3xl" />
  </div>
 
- <div className="relative h-full lg:grid lg:grid-cols-[70%_30%]">
+ <div className="relative min-h-screen lg:grid lg:grid-cols-[minmax(0,1fr)_360px] xl:lg:grid-cols-[minmax(0,1fr)_420px]">
  {/* ═══ LEFT: Auth Panel ═══ */}
- <div className="relative flex flex-col h-full border-r border-border/40 bg-background/80 backdrop-blur-xl overflow-hidden">
- <div className="shrink-0 z-20 flex h-14 items-center justify-between border-b border-border/40 bg-background/80 px-5 backdrop-blur-xl md:px-8">
- <a href="/" className="flex items-center gap-3 hover:opacity-90">
- <div className="flex h-10 w-10 items-center justify-center rounded-2xl border border-primary/20 bg-primary/12 text-primary">
- <Rocket className="h-4.5 w-4.5" />
- </div>
+ <div className="relative flex flex-col min-h-screen border-r border-border/40 bg-background/80 backdrop-blur-xl">
+ <div className="shrink-0 z-20 flex h-16 items-center justify-between border-b border-border/40 bg-background/80 px-5 backdrop-blur-xl md:px-10">
+ <a href="/" className="flex items-center gap-3 hover:opacity-90 transition-opacity">
+ <HotzfyLogo size={38} />
  <div>
- <span className="block text-[14px] font-heading uppercase tracking-[0.08em] text-foreground">HOTZFY</span>
+ <span className="block text-[15px] font-heading uppercase tracking-[0.08em] text-foreground">HOTZFY</span>
  <span className="block text-[9px] font-medium uppercase tracking-[0.18em] text-muted-foreground">Plataforma de Infoprodutos</span>
  </div>
  </a>
@@ -359,8 +358,9 @@ export default function Auth() {
  </div>
  </div>
 
- <div className="flex-1 overflow-y-auto overscroll-contain" style={{ WebkitOverflowScrolling: 'touch' }}>
- <div className="mx-auto w-full max-w-[470px] px-4 pt-1 pb-2 md:px-8 md:pt-1 md:pb-3">
+ <div className="flex-1 flex items-start lg:items-center justify-center py-6 md:py-10">
+ <div className="mx-auto w-full max-w-[600px] px-5 md:px-10">
+
  <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.45 }} className="w-full">
  <div className={cn("mb-2", !isLogin && "mb-0.5")}>
  <AnimatePresence mode="wait">
