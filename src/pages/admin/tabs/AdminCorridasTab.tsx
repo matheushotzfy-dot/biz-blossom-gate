@@ -1,8 +1,9 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { Flag, Plus, Trash2, Upload, Gift, Save, Eye, EyeOff, RefreshCw, Users, Sparkles } from "lucide-react";
+import { Flag, Plus, Trash2, Upload, Gift, Save, Eye, EyeOff, RefreshCw, Users, Sparkles, Trophy, Zap } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { FinanceiroHero, FinanceiroKpi, FinanceiroKpiGrid } from "@/components/financeiro/FinanceiroHero";
 
 type Race = {
   id: string;
