@@ -835,6 +835,7 @@ export default function LandingPage() {
         @keyframes hzScan { 0% { top: -2px; opacity: 0; } 10% { opacity: 1; } 90% { opacity: 1; } 100% { top: 100vh; opacity: 0; } }
         @keyframes hzFloat { 0%, 100% { transform: translate(0,0) scale(1); } 50% { transform: translate(30px,-40px) scale(1.05); } }
         @keyframes hzSweep { 0%, 100% { transform: translateX(-100%); } 50% { transform: translateX(100%); } }
+        @keyframes hzMarquee { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
       `}</style>
 
       <HoloGrid />
@@ -842,10 +843,13 @@ export default function LandingPage() {
       <main className="relative z-10">
         <Hero />
         <MetricsStrip />
+        <LiveFeed />
         <Features />
+        <Testimonials />
         <Pricing />
         <FaqSection />
         <FinalCTA />
+
       </main>
       <Footer />
     </div>
