@@ -119,7 +119,7 @@ function DataRow({
  );
 }
 
-export function TransactionDetailPanel({ tx, products, onClose, onRefund }: TransactionDetailPanelProps) {
+export function TransactionDetailPanel({ tx, products, onClose, onRefund, variant = "seller" }: TransactionDetailPanelProps) {
  const [copiedId, setCopiedId] = useState(false);
 
  const customerName = tx.customer_name || "Cliente";
