@@ -180,21 +180,32 @@ export default function AdminRewardsTab({ profiles }: { profiles: { user_id: str
 
   return (
     <div className="space-y-6">
-      <div className="flex items-start justify-between flex-wrap gap-3">
-        <div>
-          <h2 className="text-lg font-bold flex items-center gap-2 text-foreground"><Trophy className="h-5 w-5 text-amber-400" /> Premiações</h2>
-          <p className="text-xs text-muted-foreground mt-1">{claims.length} solicitações · {counts.pending} aguardando · {counts.preparing} preparando · {counts.shipped} em trânsito · {counts.delivered} entregues</p>
-        </div>
-        <div className="relative">
-          <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
-          <Input
-            value={search}
-            onChange={e => setSearch(e.target.value)}
-            placeholder="Buscar nome, cidade, rastreio, seller..."
-            className="h-8 pl-8 w-72 text-xs"
-          />
-        </div>
-      </div>
+      <FinanceiroHero
+        eyebrow="Programa de premiações"
+        title="Premiações"
+        subtitle="Aprove, prepare e acompanhe as entregas de brindes conquistados pelos sellers."
+        status={{ tone: counts.pending > 0 ? "warning" : "success", label: `${claims.length} solicitações · ${counts.pending} pendente(s)`, pulse: counts.pending > 0 }}
+        actions={
+          <div className="relative">
+            <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
+            <Input
+              value={search}
+              onChange={e => setSearch(e.target.value)}
+              placeholder="Buscar nome, cidade, rastreio..."
+              className="h-10 pl-8 w-72 text-xs rounded-xl"
+            />
+          </div>
+        }
+      />
+
+      <FinanceiroKpiGrid cols={5}>
+        <FinanceiroKpi label="Aguardando" value={String(counts.pending || 0)} sub="Novas solicitações" icon={Clock} tone="warning" />
+        <FinanceiroKpi label="Preparando" value={String(counts.preparing || 0)} sub="Em separação" icon={Package} tone="info" />
+        <FinanceiroKpi label="Postadas" value={String(counts.shipped || 0)} sub="Em trânsito" icon={Truck} tone="primary" />
+        <FinanceiroKpi label="Entregues" value={String(counts.delivered || 0)} sub="Concluídas" icon={CheckCircle2} tone="success" />
+        <FinanceiroKpi label="Canceladas" value={String(counts.cancelled || 0)} sub="Recusadas / desistidas" icon={XCircle} tone="destructive" />
+      </FinanceiroKpiGrid>
+
 
       {/* Status filters */}
       <div className="flex flex-wrap gap-1.5">
