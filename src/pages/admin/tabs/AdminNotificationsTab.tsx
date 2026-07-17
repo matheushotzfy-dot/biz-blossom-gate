@@ -9,7 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import {
  Bell, Send, Users, User, Megaphone, Info, AlertTriangle,
- CheckCircle2, Clock, Plus, Trash2, Search,
+ CheckCircle2, Clock, Plus, Trash2, Search, Radio, Eye,
 } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
@@ -17,6 +17,7 @@ import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { logAdminAction } from "@/lib/auditLog";
 import { friendlyError } from "@/lib/friendlyError";
+import { FinanceiroHero, FinanceiroKpi, FinanceiroKpiGrid } from "@/components/financeiro/FinanceiroHero";
 
 type Profile = { user_id: string; full_name: string | null; email: string | null; };
 type Notification = { id: string; title: string; message: string; type: string; user_id: string | null; is_read: boolean; created_at: string; created_by: string | null; };
@@ -124,27 +125,44 @@ export default function AdminNotificationsTab({ profiles }: Props) {
  };
  const typeLabels: Record<string, string> = { info: "Info", announcement: "Anúncio", warning: "Alerta", success: "Sucesso", alert: "Alerta", withdrawal: "Saque" };
 
+ const totalCount = notifications.length;
+ const globalCount = notifications.filter(n => n.user_id === null).length;
+ const individualCount = totalCount - globalCount;
+ const readCount = notifications.filter(n => n.is_read).length;
+
  return (
  <div className="space-y-6">
- <div className="flex items-center justify-between">
- <div>
- <h2 className="text-[18px] font-bold text-foreground flex items-center gap-2"><Bell className="h-5 w-5 text-primary" /> Central de Notificações</h2>
- <p className="text-[11px] text-muted-foreground mt-1">{notifications.length} notificações enviadas</p>
- </div>
-  <div className="flex items-center gap-2">
-  <Button variant="outline" onClick={handlePurgeOrphans} disabled={purging} className="h-9 text-[12px] rounded-xl gap-1.5">
-    <Trash2 className="h-3.5 w-3.5" /> {purging ? "Limpando..." : "Limpar órfãs"}
-  </Button>
-  <Button onClick={() => setShowSendDialog(true)} className="h-9 bg-gradient-to-r from-primary to-emerald-600 text-white text-[12px] font-semibold rounded-xl shadow-lg shadow-primary/20">
-    <Send className="h-3.5 w-3.5 mr-1.5" /> Nova Notificação
-  </Button>
-  </div>
- </div>
+  {/* Premium Hero */}
+  <FinanceiroHero
+    eyebrow="Central de notificações"
+    title="Notificações"
+    subtitle="Envie comunicados globais ou individuais para sellers em tempo real."
+    status={{ tone: "info", label: `${totalCount} enviadas · ${readCount} lidas`, pulse: true }}
+    actions={
+      <>
+        <Button variant="outline" onClick={handlePurgeOrphans} disabled={purging} className="h-10 rounded-xl gap-1.5 text-[11px] font-black uppercase tracking-wider">
+          <Trash2 className="h-3.5 w-3.5" /> {purging ? "Limpando..." : "Limpar órfãs"}
+        </Button>
+        <Button onClick={() => setShowSendDialog(true)} className="h-10 rounded-xl text-[11px] font-black uppercase tracking-wider gap-1.5">
+          <Send className="h-3.5 w-3.5" /> Nova Notificação
+        </Button>
+      </>
+    }
+  />
 
- <div className="relative">
- <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
- <Input value={search} onChange={e => setSearch(e.target.value)} placeholder="Buscar notificações..." className="pl-11 h-11 rounded-xl" />
- </div>
+  {/* Premium KPI Grid */}
+  <FinanceiroKpiGrid cols={4}>
+    <FinanceiroKpi label="Total enviadas" value={String(totalCount)} sub="Últimas 200 entradas" icon={Bell} tone="primary" />
+    <FinanceiroKpi label="Broadcasts globais" value={String(globalCount)} sub="Enviadas a todos" icon={Radio} tone="info" />
+    <FinanceiroKpi label="Individuais" value={String(individualCount)} sub="Direcionadas a sellers" icon={User} tone="neutral" />
+    <FinanceiroKpi label="Já lidas" value={String(readCount)} sub={`${totalCount > 0 ? Math.round((readCount / totalCount) * 100) : 0}% do total`} icon={Eye} tone="success" />
+  </FinanceiroKpiGrid>
+
+  <div className="relative">
+    <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+    <Input value={search} onChange={e => setSearch(e.target.value)} placeholder="Buscar notificações..." className="pl-11 h-11 rounded-xl" />
+  </div>
+
 
  {loading ? (
  <div className="py-12 text-center"><div className="h-6 w-6 mx-auto border-2 border-primary/30 border-t-primary rounded-full animate-spin" /></div>
