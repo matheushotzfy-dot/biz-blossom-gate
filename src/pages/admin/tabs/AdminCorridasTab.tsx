@@ -351,16 +351,60 @@ export default function AdminCorridasTab() {
               )}
             </div>
 
+            {/* Manual ranking manipulation */}
+            <div className="rounded-2xl border border-border/60 bg-card p-5">
+              <div className="flex items-center justify-between mb-3 flex-wrap gap-2">
+                <div>
+                  <h3 className="font-bold text-sm flex items-center gap-2"><Users className="h-4 w-4 text-primary" /> Manipular Ranking</h3>
+                  <p className="text-[11px] text-muted-foreground mt-0.5">
+                    Adicione entradas manuais ao ranking. Valores manuais substituem os reais para o mesmo vendedor.
+                  </p>
+                </div>
+                <div className="flex items-center gap-2">
+                  <button onClick={seedDemoRanking} className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold bg-muted text-foreground border border-border hover:bg-muted/70">
+                    <Sparkles className="h-3.5 w-3.5" /> Preencher demo
+                  </button>
+                  <button onClick={addOverride} className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold bg-primary/10 text-primary border border-primary/30 hover:bg-primary/20">
+                    <Plus className="h-3.5 w-3.5" /> Adicionar
+                  </button>
+                </div>
+              </div>
+              {overrides.length === 0 ? (
+                <p className="text-xs text-muted-foreground text-center py-6">Nenhuma entrada manual. Use "Preencher demo" para ver o pódio em ação.</p>
+              ) : (
+                <div className="space-y-2">
+                  {overrides.map(o => (
+                    <div key={o.id} className="grid grid-cols-1 md:grid-cols-[1fr,140px,90px,40px] gap-2 items-center border border-border/40 rounded-xl p-2">
+                      <input defaultValue={o.display_name} placeholder="Nome exibido"
+                        onBlur={e => updateOverride(o.id, { display_name: e.target.value })}
+                        className="h-9 rounded-lg border border-border bg-background px-3 text-sm font-medium" />
+                      <input type="number" step="0.01" defaultValue={(o.revenue_cents / 100).toFixed(2)}
+                        onBlur={e => updateOverride(o.id, { revenue_cents: Math.round(parseFloat(e.target.value || "0") * 100) })}
+                        className="h-9 rounded-lg border border-border bg-background px-3 text-sm tabular-nums text-right"
+                        placeholder="Faturamento R$" />
+                      <input type="number" defaultValue={o.sales_count}
+                        onBlur={e => updateOverride(o.id, { sales_count: parseInt(e.target.value || "0", 10) })}
+                        className="h-9 rounded-lg border border-border bg-background px-3 text-sm tabular-nums text-right"
+                        placeholder="Vendas" />
+                      <button onClick={() => deleteOverride(o.id)} className="h-9 w-9 rounded-lg text-destructive hover:bg-destructive/10 flex items-center justify-center">
+                        <Trash2 className="h-4 w-4" />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
             {/* Live leaderboard preview */}
             <div className="rounded-2xl border border-border/60 bg-card p-5">
               <div className="flex items-center justify-between mb-3">
-                <h3 className="font-bold text-sm">Ranking (preview)</h3>
+                <h3 className="font-bold text-sm">Ranking (preview · Top 5)</h3>
                 <button onClick={() => selectedId && loadPrizes(selectedId)} className="inline-flex items-center gap-1.5 text-xs font-bold text-primary hover:underline">
                   <RefreshCw className="h-3.5 w-3.5" /> Atualizar
                 </button>
               </div>
               {leaderboard.length === 0 ? (
-                <p className="text-xs text-muted-foreground text-center py-6">Nenhuma venda no período.</p>
+                <p className="text-xs text-muted-foreground text-center py-6">Nenhuma entrada no ranking ainda.</p>
               ) : (
                 <div className="overflow-x-auto">
                   <table className="w-full text-sm">
@@ -370,15 +414,22 @@ export default function AdminCorridasTab() {
                         <th className="text-left py-2 px-2">Seller</th>
                         <th className="text-right py-2 px-2">Faturamento</th>
                         <th className="text-right py-2 px-2">Vendas</th>
+                        <th className="text-right py-2 px-2 w-20">Origem</th>
                       </tr>
                     </thead>
                     <tbody>
-                      {leaderboard.slice(0, 20).map((l: any) => (
-                        <tr key={l.seller_id} className="border-b border-border/10">
+                      {leaderboard.slice(0, 5).map((l: any, idx: number) => (
+                        <tr key={(l.seller_id ?? "manual") + "-" + idx} className="border-b border-border/10">
                           <td className="py-2 px-2 font-bold tabular-nums">{l.rank_position}</td>
                           <td className="py-2 px-2">{l.seller_name}</td>
                           <td className="py-2 px-2 text-right font-bold tabular-nums">{brl(Number(l.revenue_cents))}</td>
                           <td className="py-2 px-2 text-right tabular-nums text-muted-foreground">{l.sales_count}</td>
+                          <td className="py-2 px-2 text-right">
+                            <span className={cn("text-[10px] font-bold uppercase tracking-widest px-1.5 py-0.5 rounded",
+                              l.is_manual ? "bg-primary/15 text-primary" : "bg-muted text-muted-foreground")}>
+                              {l.is_manual ? "Manual" : "Real"}
+                            </span>
+                          </td>
                         </tr>
                       ))}
                     </tbody>
