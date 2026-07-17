@@ -9,7 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import {
  Bell, Send, Users, User, Megaphone, Info, AlertTriangle,
- CheckCircle2, Clock, Plus, Trash2, Search,
+ CheckCircle2, Clock, Plus, Trash2, Search, Radio, Eye,
 } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
@@ -17,6 +17,7 @@ import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { logAdminAction } from "@/lib/auditLog";
 import { friendlyError } from "@/lib/friendlyError";
+import { FinanceiroHero, FinanceiroKpi, FinanceiroKpiGrid } from "@/components/financeiro/FinanceiroHero";
 
 type Profile = { user_id: string; full_name: string | null; email: string | null; };
 type Notification = { id: string; title: string; message: string; type: string; user_id: string | null; is_read: boolean; created_at: string; created_by: string | null; };
