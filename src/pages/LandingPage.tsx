@@ -403,10 +403,10 @@ function Hero() {
           <span className="flex items-center gap-1.5"><CheckCircle2 className="h-3 w-3 text-emerald-400" /> Saque em 1 dia útil</span>
         </motion.div>
 
-        <div className="mt-24 md:mt-32">
+        <motion.div style={{ y: dashY }} className="mt-24 md:mt-32">
           <HolographicDashboard />
-        </div>
-      </div>
+        </motion.div>
+      </motion.div>
     </section>
   );
 }
