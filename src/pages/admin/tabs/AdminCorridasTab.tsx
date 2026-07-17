@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { Flag, Plus, Trash2, Upload, Gift, Save, Eye, EyeOff, RefreshCw } from "lucide-react";
+import { Flag, Plus, Trash2, Upload, Gift, Save, Eye, EyeOff, RefreshCw, Users, Sparkles } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 type Race = {
