@@ -36,6 +36,7 @@ interface TransactionDetailPanelProps {
  products: Record<string, string>;
  onClose: () => void;
  onRefund?: (tx: Transaction) => void;
+ variant?: "seller" | "admin";
 }
 
 const currencyFormatter = new Intl.NumberFormat("pt-BR", {
