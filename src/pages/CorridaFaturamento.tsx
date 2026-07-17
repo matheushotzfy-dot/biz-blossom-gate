@@ -30,12 +30,13 @@ type Prize = {
 };
 
 type LeaderRow = {
-  seller_id: string;
+  seller_id: string | null;
   seller_name: string;
   seller_avatar: string | null;
   revenue_cents: number;
   sales_count: number;
   rank_position: number;
+  is_manual?: boolean;
 };
 
 const fmtBRL = (cents: number) =>
@@ -114,8 +115,11 @@ export default function CorridaFaturamento() {
     );
   }
 
-  const top3 = leaders.slice(0, 3);
+  const top5 = leaders.slice(0, 5);
+  const top3 = top5.slice(0, 3);
   const topRevenue = leaders[0]?.revenue_cents || 0;
+  // Podium visual order: 2nd, 1st, 3rd
+  const podiumOrder = [top3[1], top3[0], top3[2]].filter(Boolean) as LeaderRow[];
 
   return (
     <PageShell>
@@ -188,78 +192,112 @@ export default function CorridaFaturamento() {
         </Panel>
       )}
 
-      {/* ─── TOP 3 PODIUM ─── */}
+      {/* ─── TOP 3 CINEMATIC PODIUM ─── */}
       {top3.length > 0 && (
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-6">
-          {top3.map((l, i) => {
-            const Icon = i === 0 ? Crown : i === 1 ? Medal : Award;
-            const tone = i === 0
-              ? "from-yellow-400/20 to-amber-500/5 border-yellow-500/30"
-              : i === 1
-              ? "from-slate-300/20 to-slate-400/5 border-slate-400/30"
-              : "from-orange-400/20 to-orange-600/5 border-orange-500/30";
-            const iconTone = i === 0 ? "text-yellow-500" : i === 1 ? "text-slate-400" : "text-orange-500";
-            return (
-              <div key={l.seller_id} className={cn("rounded-2xl border p-5 bg-gradient-to-br", tone)}>
-                <div className="flex items-center gap-3">
-                  <Icon className={cn("h-6 w-6", iconTone)} />
-                  <span className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground">
-                    {i + 1}º Lugar
-                  </span>
-                </div>
-                <p className="mt-3 font-bold text-base truncate">{l.seller_name}</p>
-                <p className="font-display font-black text-2xl mt-1 tabular-nums">{fmtBRL(l.revenue_cents)}</p>
-                <p className="text-[11px] text-muted-foreground mt-0.5">{l.sales_count} vendas</p>
-              </div>
-            );
-          })}
-        </div>
+        <section className="relative overflow-hidden rounded-3xl border border-border/60 bg-gradient-to-b from-background via-card to-primary/[0.05] p-6 md:p-10 mb-6">
+          <div aria-hidden className="pointer-events-none absolute inset-0 opacity-60"
+            style={{ backgroundImage: "radial-gradient(60% 50% at 50% 0%, hsl(var(--primary)/0.18), transparent 70%)" }} />
+          <div className="relative">
+            <div className="text-center mb-8">
+              <p className="inline-flex items-center gap-1.5 text-[10px] font-black uppercase tracking-[0.3em] text-primary">
+                <Crown className="h-3.5 w-3.5" /> Top 3 · Campeões da Temporada
+              </p>
+              <h3 className="font-display font-black text-2xl md:text-3xl tracking-[-0.02em] mt-2">Pódio</h3>
+            </div>
+
+            <div className="grid grid-cols-3 gap-3 md:gap-6 items-end max-w-3xl mx-auto">
+              {podiumOrder.map((l) => {
+                const pos = l.rank_position;
+                const isFirst = pos === 1;
+                const isSecond = pos === 2;
+                const Icon = isFirst ? Crown : isSecond ? Medal : Award;
+                const height = isFirst ? "h-44 md:h-56" : isSecond ? "h-32 md:h-40" : "h-24 md:h-32";
+                const iconTone = isFirst ? "text-yellow-400" : isSecond ? "text-slate-300" : "text-orange-400";
+                const ringTone = isFirst ? "ring-yellow-400/60 shadow-[0_0_40px_-8px_rgba(250,204,21,0.5)]" : isSecond ? "ring-slate-300/40" : "ring-orange-400/40";
+                const pedestalTone = isFirst
+                  ? "bg-gradient-to-b from-yellow-400/25 via-yellow-500/10 to-yellow-600/5 border-yellow-400/40"
+                  : isSecond
+                  ? "bg-gradient-to-b from-slate-300/20 via-slate-400/10 to-slate-500/5 border-slate-300/30"
+                  : "bg-gradient-to-b from-orange-400/20 via-orange-500/10 to-orange-600/5 border-orange-400/30";
+                return (
+                  <div key={String(l.seller_id) + pos} className="flex flex-col items-center">
+                    <div className={cn(
+                      "relative h-16 w-16 md:h-20 md:w-20 rounded-full ring-4 overflow-hidden bg-muted flex items-center justify-center mb-3",
+                      ringTone
+                    )}>
+                      {l.seller_avatar
+                        ? <img src={l.seller_avatar} alt="" className="h-full w-full object-cover" />
+                        : <span className="font-display font-black text-2xl">{l.seller_name.charAt(0).toUpperCase()}</span>}
+                      <div className={cn("absolute -top-1 -right-1 h-7 w-7 rounded-full bg-background border border-border flex items-center justify-center", iconTone)}>
+                        <Icon className="h-4 w-4" />
+                      </div>
+                    </div>
+                    <p className="font-bold text-sm md:text-base text-center truncate max-w-full">{l.seller_name}</p>
+                    <p className="font-display font-black text-base md:text-lg tabular-nums text-primary mt-0.5">{fmtBRL(l.revenue_cents)}</p>
+                    <p className="text-[10px] text-muted-foreground">{l.sales_count} vendas</p>
+                    <div className={cn(
+                      "mt-3 w-full rounded-t-2xl border border-b-0 flex items-start justify-center pt-4",
+                      pedestalTone,
+                      height
+                    )}>
+                      <span className="font-display font-black text-3xl md:text-5xl tabular-nums opacity-90">{pos}</span>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        </section>
       )}
 
-      {/* ─── LEADERBOARD ─── */}
+      {/* ─── LEADERBOARD (Top 5) ─── */}
       <Panel className="mb-6">
-        <h3 className="text-sm font-bold text-foreground mb-4 flex items-center gap-2">
-          <Trophy className="h-4 w-4 text-primary" /> Ranking Completo
-        </h3>
-        {leaders.length === 0 ? (
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="text-sm font-bold text-foreground flex items-center gap-2">
+            <Trophy className="h-4 w-4 text-primary" /> Top 5 do Ranking
+          </h3>
+          <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">{leaders.length} participantes</span>
+        </div>
+        {top5.length === 0 ? (
           <p className="text-sm text-muted-foreground text-center py-8">Nenhuma venda registrada ainda nesta corrida.</p>
         ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="border-b border-border/20 text-xs text-muted-foreground">
-                  <th className="text-left py-3 px-3 font-medium w-16">#</th>
-                  <th className="text-left py-3 px-3 font-medium">Seller</th>
-                  <th className="text-right py-3 px-3 font-medium">Faturamento</th>
-                  <th className="text-right py-3 px-3 font-medium hidden sm:table-cell">Vendas</th>
-                  <th className="text-right py-3 px-3 font-medium hidden md:table-cell">% do 1º</th>
-                </tr>
-              </thead>
-              <tbody>
-                {leaders.map(l => {
-                  const isMe = l.seller_id === user?.id;
-                  const pct = topRevenue > 0 ? (l.revenue_cents / topRevenue) * 100 : 0;
-                  return (
-                    <tr key={l.seller_id} className={cn("border-b border-border/10 hover:bg-muted/5", isMe && "bg-primary/[0.04]")}>
-                      <td className="py-3 px-3 font-bold tabular-nums">{l.rank_position}</td>
-                      <td className="py-3 px-3">
-                        <div className="flex items-center gap-2">
-                          {l.seller_avatar
-                            ? <img src={l.seller_avatar} alt="" className="h-7 w-7 rounded-full object-cover" />
-                            : <div className="h-7 w-7 rounded-full bg-muted text-[11px] font-bold flex items-center justify-center">{l.seller_name.charAt(0).toUpperCase()}</div>}
-                          <span className={cn("font-medium truncate max-w-[180px]", isMe && "text-primary font-bold")}>
-                            {l.seller_name}{isMe && " (você)"}
-                          </span>
-                        </div>
-                      </td>
-                      <td className="py-3 px-3 text-right font-bold text-foreground tabular-nums">{fmtBRL(l.revenue_cents)}</td>
-                      <td className="py-3 px-3 text-right text-muted-foreground tabular-nums hidden sm:table-cell">{l.sales_count}</td>
-                      <td className="py-3 px-3 text-right text-muted-foreground tabular-nums hidden md:table-cell">{pct.toFixed(1)}%</td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
+          <div className="space-y-2">
+            {top5.map(l => {
+              const isMe = l.seller_id && l.seller_id === user?.id;
+              const pct = topRevenue > 0 ? (l.revenue_cents / topRevenue) * 100 : 0;
+              const isTop3 = l.rank_position <= 3;
+              const posTone = l.rank_position === 1 ? "bg-yellow-400/15 text-yellow-500 border-yellow-400/40"
+                : l.rank_position === 2 ? "bg-slate-300/15 text-slate-300 border-slate-300/40"
+                : l.rank_position === 3 ? "bg-orange-400/15 text-orange-400 border-orange-400/40"
+                : "bg-muted/60 text-muted-foreground border-border/40";
+              return (
+                <div key={String(l.seller_id) + l.rank_position} className={cn(
+                  "relative overflow-hidden rounded-2xl border border-border/50 p-4 flex items-center gap-4 transition-colors",
+                  isTop3 && "bg-gradient-to-r from-primary/[0.04] to-transparent",
+                  isMe && "border-primary/50 bg-primary/[0.06]"
+                )}>
+                  <div className={cn("h-11 w-11 shrink-0 rounded-xl border flex items-center justify-center font-display font-black text-lg tabular-nums", posTone)}>
+                    {l.rank_position}
+                  </div>
+                  {l.seller_avatar
+                    ? <img src={l.seller_avatar} alt="" className="h-10 w-10 rounded-full object-cover shrink-0" />
+                    : <div className="h-10 w-10 rounded-full bg-muted text-sm font-bold flex items-center justify-center shrink-0">{l.seller_name.charAt(0).toUpperCase()}</div>}
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2">
+                      <p className={cn("font-bold text-sm truncate", isMe && "text-primary")}>{l.seller_name}{isMe && " (você)"}</p>
+                    </div>
+                    <div className="mt-1.5 h-1.5 w-full rounded-full bg-muted/60 overflow-hidden">
+                      <div className="h-full rounded-full bg-gradient-to-r from-primary to-primary/60" style={{ width: `${Math.max(6, pct)}%` }} />
+                    </div>
+                    <p className="text-[10px] text-muted-foreground mt-1 tabular-nums">{l.sales_count} vendas · {pct.toFixed(1)}% do 1º</p>
+                  </div>
+                  <div className="text-right shrink-0">
+                    <p className="font-display font-black text-base md:text-lg tabular-nums">{fmtBRL(l.revenue_cents)}</p>
+                    <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Faturamento</p>
+                  </div>
+                </div>
+              );
+            })}
           </div>
         )}
       </Panel>

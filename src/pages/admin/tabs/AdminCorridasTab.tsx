@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { Flag, Plus, Trash2, Upload, Gift, Save, Eye, EyeOff, RefreshCw } from "lucide-react";
+import { Flag, Plus, Trash2, Upload, Gift, Save, Eye, EyeOff, RefreshCw, Users, Sparkles } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 type Race = {
@@ -26,6 +26,16 @@ type Prize = {
   sort_order: number;
 };
 
+type Override = {
+  id: string;
+  race_id: string;
+  seller_id: string | null;
+  display_name: string;
+  avatar_url: string | null;
+  revenue_cents: number;
+  sales_count: number;
+};
+
 const toDateInput = (iso: string) => {
   try { return new Date(iso).toISOString().slice(0, 16); } catch { return ""; }
 };
@@ -38,6 +48,7 @@ export default function AdminCorridasTab() {
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [prizes, setPrizes] = useState<Prize[]>([]);
   const [leaderboard, setLeaderboard] = useState<any[]>([]);
+  const [overrides, setOverrides] = useState<Override[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
 
@@ -52,16 +63,63 @@ export default function AdminCorridasTab() {
   };
 
   const loadPrizes = async (raceId: string) => {
-    const [{ data: pr }, { data: lb }] = await Promise.all([
+    const [{ data: pr }, { data: lb }, { data: ov }] = await Promise.all([
       supabase.from("revenue_race_prizes").select("*").eq("race_id", raceId).order("sort_order", { ascending: true }),
       supabase.rpc("race_leaderboard", { _race_id: raceId }),
+      supabase.from("revenue_race_overrides").select("*").eq("race_id", raceId).order("revenue_cents", { ascending: false }),
     ]);
     setPrizes((pr || []) as Prize[]);
     setLeaderboard(lb || []);
+    setOverrides((ov || []) as Override[]);
   };
 
   useEffect(() => { loadRaces(); }, []);
   useEffect(() => { if (selectedId) loadPrizes(selectedId); }, [selectedId]);
+
+  const addOverride = async () => {
+    if (!selected) return;
+    const { data, error } = await supabase.from("revenue_race_overrides").insert({
+      race_id: selected.id,
+      display_name: "Novo participante",
+      revenue_cents: 0,
+      sales_count: 0,
+    }).select().single();
+    if (error) { toast.error(error.message); return; }
+    setOverrides(prev => [data as Override, ...prev]);
+    loadPrizes(selected.id);
+  };
+
+  const updateOverride = async (id: string, patch: Partial<Override>) => {
+    const { error } = await supabase.from("revenue_race_overrides").update(patch).eq("id", id);
+    if (error) { toast.error(error.message); return; }
+    setOverrides(prev => prev.map(o => o.id === id ? { ...o, ...patch } as Override : o));
+    if (selected) loadPrizes(selected.id);
+  };
+
+  const deleteOverride = async (id: string) => {
+    if (!confirm("Remover esta entrada do ranking?")) return;
+    const { error } = await supabase.from("revenue_race_overrides").delete().eq("id", id);
+    if (error) { toast.error(error.message); return; }
+    setOverrides(prev => prev.filter(o => o.id !== id));
+    if (selected) loadPrizes(selected.id);
+  };
+
+  const seedDemoRanking = async () => {
+    if (!selected) return;
+    if (!confirm("Preencher com 5 participantes de exemplo? Isso NÃO remove os existentes.")) return;
+    const demo = [
+      { display_name: "Bryan G.",    revenue_cents: 87500000, sales_count: 342 },
+      { display_name: "Airis F.",    revenue_cents: 64200000, sales_count: 258 },
+      { display_name: "Wdzin",       revenue_cents: 41800000, sales_count: 197 },
+      { display_name: "Marina S.",   revenue_cents: 28900000, sales_count: 134 },
+      { display_name: "Lucas P.",    revenue_cents: 19700000, sales_count: 88 },
+    ].map(d => ({ ...d, race_id: selected.id }));
+    const { error } = await supabase.from("revenue_race_overrides").insert(demo);
+    if (error) { toast.error(error.message); return; }
+    toast.success("Ranking de demonstração inserido");
+    loadPrizes(selected.id);
+  };
+
 
   const createRace = async () => {
     const now = new Date();
@@ -293,16 +351,60 @@ export default function AdminCorridasTab() {
               )}
             </div>
 
+            {/* Manual ranking manipulation */}
+            <div className="rounded-2xl border border-border/60 bg-card p-5">
+              <div className="flex items-center justify-between mb-3 flex-wrap gap-2">
+                <div>
+                  <h3 className="font-bold text-sm flex items-center gap-2"><Users className="h-4 w-4 text-primary" /> Manipular Ranking</h3>
+                  <p className="text-[11px] text-muted-foreground mt-0.5">
+                    Adicione entradas manuais ao ranking. Valores manuais substituem os reais para o mesmo vendedor.
+                  </p>
+                </div>
+                <div className="flex items-center gap-2">
+                  <button onClick={seedDemoRanking} className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold bg-muted text-foreground border border-border hover:bg-muted/70">
+                    <Sparkles className="h-3.5 w-3.5" /> Preencher demo
+                  </button>
+                  <button onClick={addOverride} className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold bg-primary/10 text-primary border border-primary/30 hover:bg-primary/20">
+                    <Plus className="h-3.5 w-3.5" /> Adicionar
+                  </button>
+                </div>
+              </div>
+              {overrides.length === 0 ? (
+                <p className="text-xs text-muted-foreground text-center py-6">Nenhuma entrada manual. Use "Preencher demo" para ver o pódio em ação.</p>
+              ) : (
+                <div className="space-y-2">
+                  {overrides.map(o => (
+                    <div key={o.id} className="grid grid-cols-1 md:grid-cols-[1fr,140px,90px,40px] gap-2 items-center border border-border/40 rounded-xl p-2">
+                      <input defaultValue={o.display_name} placeholder="Nome exibido"
+                        onBlur={e => updateOverride(o.id, { display_name: e.target.value })}
+                        className="h-9 rounded-lg border border-border bg-background px-3 text-sm font-medium" />
+                      <input type="number" step="0.01" defaultValue={(o.revenue_cents / 100).toFixed(2)}
+                        onBlur={e => updateOverride(o.id, { revenue_cents: Math.round(parseFloat(e.target.value || "0") * 100) })}
+                        className="h-9 rounded-lg border border-border bg-background px-3 text-sm tabular-nums text-right"
+                        placeholder="Faturamento R$" />
+                      <input type="number" defaultValue={o.sales_count}
+                        onBlur={e => updateOverride(o.id, { sales_count: parseInt(e.target.value || "0", 10) })}
+                        className="h-9 rounded-lg border border-border bg-background px-3 text-sm tabular-nums text-right"
+                        placeholder="Vendas" />
+                      <button onClick={() => deleteOverride(o.id)} className="h-9 w-9 rounded-lg text-destructive hover:bg-destructive/10 flex items-center justify-center">
+                        <Trash2 className="h-4 w-4" />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
             {/* Live leaderboard preview */}
             <div className="rounded-2xl border border-border/60 bg-card p-5">
               <div className="flex items-center justify-between mb-3">
-                <h3 className="font-bold text-sm">Ranking (preview)</h3>
+                <h3 className="font-bold text-sm">Ranking (preview · Top 5)</h3>
                 <button onClick={() => selectedId && loadPrizes(selectedId)} className="inline-flex items-center gap-1.5 text-xs font-bold text-primary hover:underline">
                   <RefreshCw className="h-3.5 w-3.5" /> Atualizar
                 </button>
               </div>
               {leaderboard.length === 0 ? (
-                <p className="text-xs text-muted-foreground text-center py-6">Nenhuma venda no período.</p>
+                <p className="text-xs text-muted-foreground text-center py-6">Nenhuma entrada no ranking ainda.</p>
               ) : (
                 <div className="overflow-x-auto">
                   <table className="w-full text-sm">
@@ -312,15 +414,22 @@ export default function AdminCorridasTab() {
                         <th className="text-left py-2 px-2">Seller</th>
                         <th className="text-right py-2 px-2">Faturamento</th>
                         <th className="text-right py-2 px-2">Vendas</th>
+                        <th className="text-right py-2 px-2 w-20">Origem</th>
                       </tr>
                     </thead>
                     <tbody>
-                      {leaderboard.slice(0, 20).map((l: any) => (
-                        <tr key={l.seller_id} className="border-b border-border/10">
+                      {leaderboard.slice(0, 5).map((l: any, idx: number) => (
+                        <tr key={(l.seller_id ?? "manual") + "-" + idx} className="border-b border-border/10">
                           <td className="py-2 px-2 font-bold tabular-nums">{l.rank_position}</td>
                           <td className="py-2 px-2">{l.seller_name}</td>
                           <td className="py-2 px-2 text-right font-bold tabular-nums">{brl(Number(l.revenue_cents))}</td>
                           <td className="py-2 px-2 text-right tabular-nums text-muted-foreground">{l.sales_count}</td>
+                          <td className="py-2 px-2 text-right">
+                            <span className={cn("text-[10px] font-bold uppercase tracking-widest px-1.5 py-0.5 rounded",
+                              l.is_manual ? "bg-primary/15 text-primary" : "bg-muted text-muted-foreground")}>
+                              {l.is_manual ? "Manual" : "Real"}
+                            </span>
+                          </td>
                         </tr>
                       ))}
                     </tbody>
