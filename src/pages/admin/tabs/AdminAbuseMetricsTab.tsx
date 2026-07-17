@@ -1,8 +1,11 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { Card } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { ShieldAlert, RefreshCw } from "lucide-react";
+import { ShieldAlert, RefreshCw, Activity, Network, Fingerprint, Ban } from "lucide-react";
+import { FinanceiroHero } from "@/components/financeiro/FinanceiroHero";
+import {
+  PremiumPanel, PremiumMetric, PremiumMetricGrid, PremiumSegmented, PremiumEmpty, premiumTable,
+} from "./AdminPremium";
+import { cn } from "@/lib/utils";
 
 type Stats = {
   total: number;
@@ -24,16 +27,22 @@ type ActiveBlock = {
   created_at: string;
 };
 
+type WindowH = "1" | "6" | "24" | "72" | "168";
+const WINDOW_OPTS: { value: WindowH; label: string }[] = [
+  { value: "1", label: "1h" }, { value: "6", label: "6h" },
+  { value: "24", label: "24h" }, { value: "72", label: "72h" }, { value: "168", label: "7d" },
+];
+
 export default function AdminAbuseMetricsTab() {
   const [stats, setStats] = useState<Stats | null>(null);
   const [blocks, setBlocks] = useState<ActiveBlock[]>([]);
-  const [hours, setHours] = useState(24);
+  const [win, setWin] = useState<WindowH>("24");
   const [loading, setLoading] = useState(false);
 
   const load = async () => {
     setLoading(true);
     const [statsRes, blocksRes] = await Promise.all([
-      supabase.rpc("get_auth_abuse_stats", { _hours: hours }),
+      supabase.rpc("get_auth_abuse_stats", { _hours: Number(win) }),
       supabase
         .from("abuse_blocks")
         .select("id, ip_hash, endpoint, reason, blocked_until, created_at")
@@ -46,118 +55,101 @@ export default function AdminAbuseMetricsTab() {
     setLoading(false);
   };
 
-  useEffect(() => { load(); /* eslint-disable-next-line */ }, [hours]);
+  useEffect(() => { load(); /* eslint-disable-next-line */ }, [win]);
 
-  const peak = stats?.hourly.reduce((m, h) => Math.max(m, h.count), 0) ?? 0;
   const activeBlocksCount = blocks.length;
-
+  const typesCount = Object.keys(stats?.by_type ?? {}).length;
+  const endpointsCount = Object.keys(stats?.by_endpoint ?? {}).length;
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h2 className="text-2xl font-bold tracking-tight flex items-center gap-2">
-            <ShieldAlert className="h-6 w-6 text-amber-500" />
-            Métricas de Abuso & Auth
-          </h2>
-          <p className="text-sm text-muted-foreground">
-            Tentativas suspeitas em endpoints públicos e logins — identificadores e IPs estão hash-eados (SHA-256).
-          </p>
-        </div>
-        <div className="flex items-center gap-2">
-          {[1, 6, 24, 72, 168].map((h) => (
-            <Button key={h} size="sm" variant={hours === h ? "default" : "outline"} onClick={() => setHours(h)}>
-              {h}h
-            </Button>
-          ))}
-          <Button size="sm" variant="ghost" onClick={load} disabled={loading}>
-            <RefreshCw className={`h-4 w-4 ${loading ? "animate-spin" : ""}`} />
-          </Button>
-        </div>
+    <div className="space-y-6 animate-fade-in">
+      <FinanceiroHero
+        eyebrow="Segurança · Auth"
+        title="Métricas de Abuso"
+        subtitle="Tentativas suspeitas em endpoints públicos · IPs e identificadores hash-eados (SHA-256)"
+        status={{ tone: activeBlocksCount > 0 ? "warning" : "success", label: activeBlocksCount > 0 ? `${activeBlocksCount} IPs bloqueados` : "Sem bloqueios ativos", pulse: activeBlocksCount > 0 }}
+      />
+
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <PremiumSegmented<WindowH> value={win} onChange={setWin} options={WINDOW_OPTS} />
+        <button
+          onClick={load} disabled={loading}
+          className="inline-flex items-center gap-2 rounded-xl border border-border/60 bg-card px-3 py-1.5 text-[11px] font-black uppercase tracking-wider text-foreground/80 transition-colors hover:bg-muted/40 disabled:opacity-50"
+        >
+          <RefreshCw className={cn("h-3.5 w-3.5", loading && "animate-spin")} />
+          Atualizar
+        </button>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <Stat label={`Eventos (${hours}h)`} value={stats?.total ?? 0} />
-        <Stat label="Tipos distintos" value={Object.keys(stats?.by_type ?? {}).length} />
-        <Stat label="Endpoints atingidos" value={Object.keys(stats?.by_endpoint ?? {}).length} />
-        <Stat
-          label="Bloqueios ativos"
-          value={activeBlocksCount}
-          alert={activeBlocksCount > 0}
-        />
-      </div>
+      <PremiumMetricGrid cols={4}>
+        <PremiumMetric icon={Activity} label={`Eventos (${win}h)`} value={String(stats?.total ?? 0)} sub="tentativas registradas" tone="primary" />
+        <PremiumMetric icon={Fingerprint} label="Tipos distintos" value={String(typesCount)} sub="categorias de evento" tone="info" />
+        <PremiumMetric icon={Network} label="Endpoints atingidos" value={String(endpointsCount)} sub="rotas com abuso" tone="warning" />
+        <PremiumMetric icon={Ban} label="Bloqueios ativos" value={String(activeBlocksCount)} sub="IPs em quarentena" tone={activeBlocksCount > 0 ? "destructive" : "neutral"} />
+      </PremiumMetricGrid>
 
-      <Card className={`p-4 ${activeBlocksCount > 0 ? "border-amber-500/50" : ""}`}>
-        <h3 className="font-semibold mb-3 flex items-center gap-2">
-          <ShieldAlert className="h-4 w-4 text-amber-500" />
-          Bloqueios ativos agora ({activeBlocksCount})
-        </h3>
+      <PremiumPanel icon={ShieldAlert} eyebrow="Quarentena" title={`Bloqueios ativos (${activeBlocksCount})`}>
         {activeBlocksCount === 0 ? (
-          <div className="text-sm text-muted-foreground">Nenhum IP bloqueado no momento.</div>
+          <PremiumEmpty icon={ShieldAlert} title="Nenhum IP bloqueado" subtitle="Todos os endpoints estão respondendo normalmente" />
         ) : (
-          <div className="space-y-1 max-h-80 overflow-y-auto">
-            <div className="grid grid-cols-12 gap-2 text-xs uppercase tracking-wide text-muted-foreground border-b border-border/40 pb-1">
-              <span className="col-span-3">IP (hash)</span>
-              <span className="col-span-3">Endpoint</span>
-              <span className="col-span-3">Motivo</span>
-              <span className="col-span-3">Expira em</span>
-            </div>
-            {blocks.map((b) => {
-              const expiresMin = Math.max(0, Math.round((new Date(b.blocked_until).getTime() - Date.now()) / 60000));
-              return (
-                <div key={b.id} className="grid grid-cols-12 gap-2 text-sm border-b border-border/40 py-1 font-mono">
-                  <span className="col-span-3 truncate" title={b.ip_hash}>{b.ip_hash.slice(0, 12)}…</span>
-                  <span className="col-span-3 truncate" title={b.endpoint}>{b.endpoint}</span>
-                  <span className="col-span-3 truncate text-amber-500" title={b.reason}>{b.reason}</span>
-                  <span className="col-span-3 tabular-nums">{expiresMin}min</span>
-                </div>
-              );
-            })}
+          <div className={premiumTable.wrapper}>
+            <table className={premiumTable.table}>
+              <thead>
+                <tr className={premiumTable.headRow}>
+                  <th className={premiumTable.th}>IP (hash)</th>
+                  <th className={premiumTable.th}>Endpoint</th>
+                  <th className={premiumTable.th}>Motivo</th>
+                  <th className={cn(premiumTable.th, "text-right")}>Expira em</th>
+                </tr>
+              </thead>
+              <tbody>
+                {blocks.map((b) => {
+                  const expiresMin = Math.max(0, Math.round((new Date(b.blocked_until).getTime() - Date.now()) / 60000));
+                  return (
+                    <tr key={b.id} className={premiumTable.row}>
+                      <td className={cn(premiumTable.td, "font-mono text-[11px] text-foreground/80")} title={b.ip_hash}>{b.ip_hash.slice(0, 14)}…</td>
+                      <td className={cn(premiumTable.td, "text-[11px] font-bold text-foreground")}>{b.endpoint}</td>
+                      <td className={cn(premiumTable.td, "text-[11px] font-bold text-warning")}>{b.reason}</td>
+                      <td className={cn(premiumTable.td, "text-right text-[11px] font-black tabular-nums text-foreground")}>{expiresMin} min</td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
           </div>
         )}
-      </Card>
+      </PremiumPanel>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <Card className="p-4">
-          <h3 className="font-semibold mb-3">Por tipo de evento</h3>
-          <Table rows={Object.entries(stats?.by_type ?? {}).sort((a, b) => b[1] - a[1])} />
-        </Card>
-        <Card className="p-4">
-          <h3 className="font-semibold mb-3">Por endpoint</h3>
-          <Table rows={Object.entries(stats?.by_endpoint ?? {}).sort((a, b) => b[1] - a[1])} />
-        </Card>
-        <Card className="p-4">
-          <h3 className="font-semibold mb-3">Top IPs (hash)</h3>
-          <Table rows={(stats?.top_ips ?? []).map((r) => [r.ip_hash, r.count])} />
-        </Card>
-        <Card className="p-4">
-          <h3 className="font-semibold mb-3">Top identificadores (hash)</h3>
-          <Table rows={(stats?.top_identifiers ?? []).map((r) => [r.identifier_hash, r.count])} />
-        </Card>
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+        <PremiumPanel icon={Activity} eyebrow="Distribuição" title="Por tipo de evento">
+          <BreakdownTable rows={Object.entries(stats?.by_type ?? {}).sort((a, b) => b[1] - a[1])} />
+        </PremiumPanel>
+        <PremiumPanel icon={Network} eyebrow="Distribuição" title="Por endpoint">
+          <BreakdownTable rows={Object.entries(stats?.by_endpoint ?? {}).sort((a, b) => b[1] - a[1])} />
+        </PremiumPanel>
+        <PremiumPanel icon={Fingerprint} eyebrow="Ranking" title="Top IPs (hash)">
+          <BreakdownTable rows={(stats?.top_ips ?? []).map((r) => [r.ip_hash, r.count])} mono />
+        </PremiumPanel>
+        <PremiumPanel icon={Fingerprint} eyebrow="Ranking" title="Top identificadores (hash)">
+          <BreakdownTable rows={(stats?.top_identifiers ?? []).map((r) => [r.identifier_hash, r.count])} mono />
+        </PremiumPanel>
       </div>
-
     </div>
   );
 }
 
-function Stat({ label, value, alert }: { label: string; value: number | string; alert?: boolean }) {
+function BreakdownTable({ rows, mono }: { rows: Array<[string, number]>; mono?: boolean }) {
+  if (!rows.length) {
+    return <p className="py-6 text-center text-[11px] font-bold text-muted-foreground/70">Sem dados na janela.</p>;
+  }
+  const max = Math.max(...rows.map((r) => r[1]));
   return (
-    <Card className={`p-4 ${alert ? "border-amber-500/50" : ""}`}>
-      <div className="text-xs uppercase tracking-wide text-muted-foreground">{label}</div>
-      <div className={`text-3xl font-mono mt-1 ${alert ? "text-amber-500" : ""}`}>{value}</div>
-    </Card>
-  );
-}
-
-
-function Table({ rows }: { rows: Array<[string, number]> }) {
-  if (!rows.length) return <div className="text-sm text-muted-foreground">Sem dados na janela.</div>;
-  return (
-    <div className="space-y-1">
+    <div className="space-y-1.5">
       {rows.slice(0, 10).map(([k, v]) => (
-        <div key={k} className="flex justify-between text-sm border-b border-border/40 py-1">
-          <span className="font-mono truncate max-w-[70%]" title={k}>{k}</span>
-          <span className="font-mono tabular-nums">{v}</span>
+        <div key={k} className="group relative flex items-center justify-between gap-3 rounded-lg border border-border/40 bg-muted/20 px-3 py-2 transition-colors hover:border-primary/25">
+          <div className="pointer-events-none absolute inset-y-0 left-0 rounded-l-lg bg-primary/10" style={{ width: `${(v / max) * 100}%` }} />
+          <span className={cn("relative truncate text-[11px] font-bold text-foreground", mono && "font-mono")} title={k}>{k}</span>
+          <span className="relative shrink-0 text-[11px] font-black tabular-nums text-primary">{v}</span>
         </div>
       ))}
     </div>

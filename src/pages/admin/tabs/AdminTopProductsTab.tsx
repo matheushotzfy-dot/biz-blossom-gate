@@ -1,10 +1,13 @@
 import { useState, useMemo } from "react";
 import {
   Package, TrendingUp, ShoppingCart, DollarSign, Crown, Medal, Award,
-  RefreshCw, AlertTriangle, ShieldX, Percent, Eye,
+  RefreshCw, AlertTriangle, ShieldX,
 } from "lucide-react";
 import type { Tables } from "@/integrations/supabase/types";
-import { GlassPanel as AdminPanel, GlassPanelTitle as PanelTitle, AdminKpi } from "./AdminOverviewTab";
+import { FinanceiroHero } from "@/components/financeiro/FinanceiroHero";
+import {
+  PremiumPanel, PremiumMetric, PremiumMetricGrid, PremiumSegmented, PremiumEmpty, premiumTable,
+} from "./AdminPremium";
 import { cn } from "@/lib/utils";
 
 interface Props {
