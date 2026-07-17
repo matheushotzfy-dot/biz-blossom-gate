@@ -670,12 +670,27 @@ export default function AdminTransactionsTab({ transactions, profiles, products,
 
 /* ── Row helper ─────────────────────────────────────────────── */
 function Row({ icon, label, value, mono }: { icon: React.ReactNode; label: string; value: string; mono?: boolean }) {
+  const handleCopy = () => {
+    navigator.clipboard.writeText(value).then(() => toast.success("Copiado"));
+  };
   return (
     <>
       <dt className="flex items-center gap-1.5 border-b border-border/40 py-1.5 text-[11px] text-muted-foreground">
         <span className="text-muted-foreground/60">{icon}</span> {label}
       </dt>
-      <dd className={cn("truncate border-b border-border/40 py-1.5 text-xs text-foreground", mono && "font-mono text-[11px]")}>{value}</dd>
+      <dd className={cn("group flex items-start gap-1.5 border-b border-border/40 py-1.5 text-xs text-foreground", mono ? "font-mono text-[11px] break-all" : "truncate")}>
+        <span className="flex-1 min-w-0">{value}</span>
+        {mono && value !== "—" && (
+          <button
+            onClick={handleCopy}
+            className="opacity-0 group-hover:opacity-100 transition-opacity shrink-0 h-5 w-5 rounded-md hover:bg-muted/60 flex items-center justify-center text-muted-foreground hover:text-foreground"
+            title="Copiar"
+          >
+            <Copy className="h-3 w-3" />
+          </button>
+        )}
+      </dd>
     </>
   );
 }
+

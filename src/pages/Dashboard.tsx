@@ -461,15 +461,21 @@ export default function Dashboard() {
 
 
   return (
-    <div className="relative min-h-screen text-foreground animate-in fade-in duration-500">
+    <div className="relative min-h-screen w-full text-foreground animate-in fade-in duration-500 overflow-hidden">
       <Seo title="Dashboard | Hotzfy" description="Painel operacional Hotzfy — saldos, ranking, aprovação e liquidações em tempo real." path="/dashboard" noindex />
 
-      {/* Ambient gradient backdrop */}
-      <div aria-hidden className="pointer-events-none fixed inset-0 z-0 opacity-60"
-        style={{ backgroundImage: "radial-gradient(60% 40% at 80% 0%, hsl(var(--primary)/0.10), transparent 70%), radial-gradient(50% 40% at 10% 100%, hsl(var(--primary)/0.06), transparent 70%)" }}
+      {/* Ambient gradient backdrop — spans full scrollable dashboard */}
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-0 z-0"
+        style={{
+          backgroundImage:
+            "radial-gradient(60% 40% at 80% 0%, hsl(var(--primary)/0.12), transparent 70%), radial-gradient(50% 40% at 10% 100%, hsl(var(--primary)/0.08), transparent 70%), linear-gradient(to bottom, hsl(var(--background)) 0%, hsl(var(--background)) 100%)",
+        }}
       />
 
       <div className="relative z-10 px-2 sm:px-4 md:px-6 pt-4 pb-24 max-w-[1600px] mx-auto space-y-5">
+
 
         {(txError || productsError) && (
           <div className="flex items-center justify-between gap-3 rounded-2xl border border-destructive/40 bg-destructive/5 px-4 py-2.5 text-[12px] text-destructive">

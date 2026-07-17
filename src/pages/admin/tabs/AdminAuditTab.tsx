@@ -4,7 +4,8 @@ import {
   Activity, Search, Clock, FileText, Shield, Users, UserCog,
   ChevronLeft, ChevronRight, Briefcase, User as UserIcon, Download,
 } from "lucide-react";
-import { GlassPanel as AdminPanel, GlassPanelTitle as PanelTitle, AdminKpi } from "./AdminOverviewTab";
+import { GlassPanel as AdminPanel, GlassPanelTitle as PanelTitle } from "./AdminOverviewTab";
+import { FinanceiroHero, FinanceiroKpi, FinanceiroKpiGrid } from "@/components/financeiro/FinanceiroHero";
 import type { Tables } from "@/integrations/supabase/types";
 
 type Source = "all" | "admin" | "staff" | "activity";
@@ -160,13 +161,21 @@ export default function AdminAuditTab({ profiles }: Props) {
   };
 
   return (
-    <div className="space-y-5 animate-fade-in">
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-        <AdminKpi icon={<Shield className="h-5 w-5" />} label="Admin Audit" value={String(counts.admin)} sub="Ações privilegiadas" gradient="from-violet-500 to-purple-600" glowColor="rgba(139,92,246,0.15)" />
-        <AdminKpi icon={<Briefcase className="h-5 w-5" />} label="Staff Log" value={String(counts.staff)} sub="Gerentes/Func." gradient="from-blue-500 to-indigo-600" glowColor="rgba(59,130,246,0.15)" />
-        <AdminKpi icon={<UserIcon className="h-5 w-5" />} label="Atividade" value={String(counts.activity)} sub="Usuários" gradient="from-amber-500 to-orange-600" glowColor="rgba(245,158,11,0.15)" />
-        <AdminKpi icon={<Clock className="h-5 w-5" />} label="Hoje" value={String(counts.today)} sub="Eventos hoje" gradient="from-emerald-500 to-emerald-600" glowColor="rgba(52,211,153,0.15)" />
-      </div>
+    <div className="space-y-6 animate-fade-in">
+      <FinanceiroHero
+        eyebrow="Trilha de auditoria"
+        title="Auditoria Unificada"
+        subtitle="Trilha imutável de ações admin, staff e atividade dos usuários."
+        status={{ tone: "info", label: `${counts.today} eventos hoje`, pulse: counts.today > 0 }}
+      />
+
+      <FinanceiroKpiGrid cols={4}>
+        <FinanceiroKpi label="Admin Audit" value={String(counts.admin)} sub="Ações privilegiadas" icon={Shield} tone="primary" />
+        <FinanceiroKpi label="Staff Log" value={String(counts.staff)} sub="Gerentes / Funcionários" icon={Briefcase} tone="info" />
+        <FinanceiroKpi label="Atividade" value={String(counts.activity)} sub="Usuários finais" icon={UserIcon} tone="warning" />
+        <FinanceiroKpi label="Hoje" value={String(counts.today)} sub="Eventos nas últimas 24h" icon={Clock} tone="success" />
+      </FinanceiroKpiGrid>
+
 
       <div className="flex flex-wrap items-center gap-3">
         <div className="flex gap-1 bg-muted/30 border border-border rounded-xl p-1">

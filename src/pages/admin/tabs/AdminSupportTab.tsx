@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { logAdminAction } from "@/lib/auditLog";
+import { FinanceiroHero, FinanceiroKpi, FinanceiroKpiGrid } from "@/components/financeiro/FinanceiroHero";
 import type { Tables } from "@/integrations/supabase/types";
 import { useTicketTyping } from "@/hooks/useTicketTyping";
 import {
@@ -261,42 +262,26 @@ export default function AdminSupportTab({
   ];
 
   return (
-    <div className="space-y-4">
-      {/* Header */}
-      <div className="flex items-center justify-between gap-3 flex-wrap">
-        <div>
-          <h2 className="text-lg font-black flex items-center gap-2 uppercase tracking-tight">
-            <MessageSquare className="h-5 w-5 text-primary" /> Central de Suporte
-          </h2>
-          <p className="text-[10px] text-muted-foreground mt-1 uppercase tracking-widest font-bold">
-            {counts.pending_admin} pendentes · {counts.unread} não lidas · {counts.all} no total
-          </p>
-        </div>
-      </div>
+    <div className="space-y-6">
+      <FinanceiroHero
+        eyebrow="Inbox de suporte"
+        title="Central de Suporte"
+        subtitle="Atenda tickets em tempo real com contexto do seller e histórico completo."
+        status={{
+          tone: counts.pending_admin > 0 ? "warning" : "success",
+          label: `${counts.pending_admin} pendente(s) · ${counts.unread} não lida(s)`,
+          pulse: counts.pending_admin > 0 || counts.unread > 0,
+        }}
+      />
 
-      {/* KPIs (compactos) */}
-      <div className="grid grid-cols-2 lg:grid-cols-5 gap-3">
-        {[
-          { icon: Inbox, label: "Total", value: counts.all, color: "text-foreground" },
-          { icon: Zap, label: "Não lidas", value: counts.unread, color: "text-primary" },
-          { icon: Clock, label: "Pendentes", value: counts.pending_admin, color: "text-amber-500" },
-          { icon: AlertCircle, label: "Urgentes", value: counts.urgent, color: "text-red-500" },
-          { icon: CheckCircle2, label: "Respondidos", value: counts.answered, color: "text-emerald-500" },
-        ].map(k => {
-          const Icon = k.icon;
-          return (
-            <div key={k.label} className="bg-card p-4 rounded-xl border border-border/60">
-              <div className="flex items-center gap-2 text-muted-foreground/70 mb-1.5">
-                <Icon size={13} className={k.color} />
-                <span className="text-[9px] font-black uppercase tracking-[0.15em]">{k.label}</span>
-              </div>
-              <p className={cn("text-2xl font-black tabular-nums tracking-tighter", k.color)}>
-                {k.value.toLocaleString("pt-BR")}
-              </p>
-            </div>
-          );
-        })}
-      </div>
+      <FinanceiroKpiGrid cols={5}>
+        <FinanceiroKpi label="Total" value={counts.all.toLocaleString("pt-BR")} sub="Tickets abertos + fechados" icon={Inbox} tone="neutral" />
+        <FinanceiroKpi label="Não lidas" value={counts.unread.toLocaleString("pt-BR")} sub="Sem visualização admin" icon={Zap} tone="primary" />
+        <FinanceiroKpi label="Pendentes" value={counts.pending_admin.toLocaleString("pt-BR")} sub="Aguardando resposta" icon={Clock} tone="warning" />
+        <FinanceiroKpi label="Urgentes" value={counts.urgent.toLocaleString("pt-BR")} sub="Prioridade alta" icon={AlertCircle} tone="destructive" />
+        <FinanceiroKpi label="Respondidos" value={counts.answered.toLocaleString("pt-BR")} sub="Fluxo saudável" icon={CheckCircle2} tone="success" />
+      </FinanceiroKpiGrid>
+
 
       {loading ? (
         <div className="flex justify-center py-20"><div className="h-6 w-6 border-2 border-primary border-t-transparent rounded-full animate-spin" /></div>

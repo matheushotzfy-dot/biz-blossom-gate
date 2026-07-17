@@ -918,9 +918,17 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
                   <p className="text-[11.5px] text-muted-foreground mt-0.5 truncate">
                     {selectedUser?.email}{selectedUser?.phone ? <> · <span className="font-mono">{selectedUser.phone}</span></> : null}
                   </p>
-                  <p className="text-[10px] text-muted-foreground/60 font-mono mt-0.5 truncate">
-                    ID {selectedUser?.user_id?.slice(0, 8)}…{selectedUser?.user_id?.slice(-4)} · IP {selectedUser?.last_ip || "—"}
+                  <p className="text-[10px] text-muted-foreground/60 font-mono mt-0.5 break-all">
+                    <button
+                      onClick={() => { if (selectedUser?.user_id) { navigator.clipboard.writeText(selectedUser.user_id); toast.success("ID copiado"); } }}
+                      className="hover:text-foreground transition-colors"
+                      title="Clique para copiar o ID completo"
+                    >
+                      ID {selectedUser?.user_id || "—"}
+                    </button>
+                    <span className="text-muted-foreground/40"> · IP {selectedUser?.last_ip || "—"}</span>
                   </p>
+
                 </div>
               </div>
               <div className="flex flex-wrap gap-1.5 lg:justify-end shrink-0">
