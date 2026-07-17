@@ -8,7 +8,7 @@ import { Sun, Moon, Bell, Search } from "lucide-react";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { useNavigate } from "react-router-dom";
 import { GlobalSearchDialog } from "./GlobalSearchDialog";
-import hotzfyLogo from "@/assets/hotzfy-logo.png";
+import { HotzfyLogo } from "@/components/HotzfyLogo";
 
 const fmtCompact = (v: number) => {
  if (v >= 1000000) return `R$ ${(v / 1000000).toFixed(1)}M`;
@@ -42,7 +42,7 @@ export function MobileRevenueBar() {
  <div className="flex items-center gap-2 px-3 py-2.5">
  {/* Logo */}
  <div className="flex items-center gap-2 shrink-0">
- <img src={hotzfyLogo} alt="HOTZFY" className="h-7 w-7 rounded-lg object-contain" />
+ <HotzfyLogo size={28} />
  <span className="text-sm font-display font-bold text-foreground tracking-tight">HOTZFY</span>
  </div>
 
