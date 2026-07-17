@@ -677,10 +677,127 @@ function FinalCTA() {
 }
 
 /* ═══════════════════════════════════════════════════════════════
+   LIVE FEED — animated sales ticker
+   ═══════════════════════════════════════════════════════════════ */
+
+const LIVE_FEED = [
+  { name: "Rafaela M.", product: "Método Renda Digital", value: "R$ 497", city: "SP" },
+  { name: "Carlos H.", product: "Curso Trader Pro", value: "R$ 1.997", city: "RJ" },
+  { name: "Juliana P.", product: "Mentoria E-commerce", value: "R$ 2.497", city: "MG" },
+  { name: "Diego S.", product: "Combo Marketing", value: "R$ 897", city: "PR" },
+  { name: "Ana C.", product: "Fórmula Instagram", value: "R$ 397", city: "BA" },
+  { name: "Pedro L.", product: "Master Copywriter", value: "R$ 1.497", city: "SC" },
+  { name: "Isabela F.", product: "Kit Designer 360", value: "R$ 697", city: "DF" },
+  { name: "Thiago A.", product: "Curso IA Aplicada", value: "R$ 1.297", city: "CE" },
+];
+
+function LiveFeed() {
+  const loop = [...LIVE_FEED, ...LIVE_FEED];
+  return (
+    <section className="relative py-24 md:py-28 px-4 md:px-8 overflow-hidden">
+      <div className="max-w-7xl mx-auto text-center mb-12">
+        <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-emerald-400/20 bg-emerald-500/5 text-[10px] font-black uppercase tracking-[0.2em] text-emerald-300 mb-6">
+          <span className="relative flex h-2 w-2">
+            <span className="absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75 animate-ping" />
+            <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-400" />
+          </span>
+          Ao vivo · agora
+        </div>
+        <h2 className="text-4xl md:text-6xl font-display font-black tracking-[-0.04em] leading-[1.05]">
+          Vendas acontecendo <br />
+          <span className="bg-gradient-to-r from-emerald-400 via-cyan-400 to-violet-400 bg-clip-text text-transparent">enquanto você lê isso.</span>
+        </h2>
+      </div>
+
+      <div className="relative">
+        <div className="absolute left-0 top-0 bottom-0 w-24 md:w-48 z-10 bg-gradient-to-r from-background to-transparent pointer-events-none" />
+        <div className="absolute right-0 top-0 bottom-0 w-24 md:w-48 z-10 bg-gradient-to-l from-background to-transparent pointer-events-none" />
+        <div className="flex gap-4 py-2" style={{ width: "max-content", animation: "hzMarquee 40s linear infinite" }}>
+          {loop.map((item, i) => (
+            <div
+              key={`${item.name}-${i}`}
+              className="min-w-[300px] rounded-2xl border border-white/[0.06] bg-white/[0.02] backdrop-blur-xl px-5 py-4 flex items-center gap-3"
+            >
+              <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-emerald-500/30 to-cyan-500/20 border border-emerald-400/20 flex items-center justify-center text-emerald-300 font-black font-display">
+                {item.name[0]}
+              </div>
+              <div className="flex-1 text-left">
+                <p className="text-[13px] font-semibold text-foreground/90 truncate">{item.name} · <span className="text-muted-foreground/70 font-normal">{item.city}</span></p>
+                <p className="text-[11px] text-muted-foreground/60 truncate">{item.product}</p>
+              </div>
+              <div className="font-mono text-emerald-300 font-black text-sm">{item.value}</div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   TESTIMONIALS
+   ═══════════════════════════════════════════════════════════════ */
+
+const TESTIMONIALS = [
+  { name: "Marina Ribeiro", role: "CEO · Método Ascensão", quote: "Migrei do concorrente e faturei 3x no primeiro mês. Checkout com conversão absurda e o saque em 1 dia mudou meu fluxo de caixa.", metric: "+312% conversão" },
+  { name: "Rodrigo Vasques", role: "Fundador · Trader Elite", quote: "A antifraude neural bloqueou 98% dos chargebacks que eu tinha. Nunca vi um gateway tão preciso. Suporte responde em minutos.", metric: "−98% chargeback" },
+  { name: "Camila Nogueira", role: "Producer · Escola Digital", quote: "API brutal, docs impecáveis. Integrei em 2 horas o que na outra plataforma levou 3 semanas. Splits automáticos por coprodutor.", metric: "2h integração" },
+];
+
+function Testimonials() {
+  return (
+    <section className="relative py-24 md:py-32 px-4 md:px-8">
+      <div className="max-w-7xl mx-auto">
+        <div className="text-center mb-16">
+          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-violet-400/20 bg-violet-500/5 text-[10px] font-black uppercase tracking-[0.2em] text-violet-300 mb-6">
+            <Users className="h-3 w-3" /> Prova social
+          </div>
+          <h2 className="text-4xl md:text-6xl font-display font-black tracking-[-0.04em] leading-[1.05]">
+            Quem opera com a HOTZFY <br />
+            <span className="bg-gradient-to-r from-emerald-400 via-cyan-400 to-violet-400 bg-clip-text text-transparent">não volta atrás.</span>
+          </h2>
+        </div>
+
+        <div className="grid md:grid-cols-3 gap-6">
+          {TESTIMONIALS.map((t, i) => (
+            <motion.div
+              key={t.name}
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, margin: "-60px" }}
+              transition={{ duration: 0.6, delay: i * 0.1 }}
+              className="relative rounded-[28px] p-8 border border-white/[0.06] bg-white/[0.015] backdrop-blur-xl overflow-hidden group hover:border-white/15 transition-colors"
+            >
+              <div className="absolute -top-24 -right-24 h-48 w-48 rounded-full bg-gradient-to-br from-emerald-500/20 to-transparent opacity-0 group-hover:opacity-100 blur-3xl transition-opacity duration-700" />
+              <div className="relative">
+                <div className="flex gap-0.5 mb-4 text-emerald-400">
+                  {[0,1,2,3,4].map((s) => <span key={s} className="text-lg leading-none">★</span>)}
+                </div>
+                <p className="text-[15px] leading-relaxed text-foreground/85 mb-6">"{t.quote}"</p>
+                <div className="flex items-center justify-between pt-5 border-t border-white/5">
+                  <div>
+                    <p className="text-sm font-black font-display text-foreground">{t.name}</p>
+                    <p className="text-[11px] text-muted-foreground/60">{t.role}</p>
+                  </div>
+                  <div className="rounded-full border border-emerald-400/20 bg-emerald-500/5 px-3 py-1 text-[10px] font-mono font-bold text-emerald-300">
+                    {t.metric}
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+/* ═══════════════════════════════════════════════════════════════
    FOOTER
    ═══════════════════════════════════════════════════════════════ */
 
 function Footer() {
+
   return (
     <footer className="relative border-t border-white/5 py-12 px-4 md:px-8">
       <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6">
