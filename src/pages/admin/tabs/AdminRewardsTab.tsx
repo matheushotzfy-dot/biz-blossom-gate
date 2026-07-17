@@ -21,6 +21,7 @@ import {
 } from "lucide-react";
 import { logAdminAction } from "@/lib/auditLog";
 import { cn } from "@/lib/utils";
+import { FinanceiroHero, FinanceiroKpi, FinanceiroKpiGrid } from "@/components/financeiro/FinanceiroHero";
 
 type Claim = {
   id: string;
