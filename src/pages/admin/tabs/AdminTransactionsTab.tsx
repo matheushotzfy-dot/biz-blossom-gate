@@ -480,6 +480,15 @@ export default function AdminTransactionsTab({ transactions, profiles, products,
                     <Row icon={<User className="h-3 w-3" />} label="Vendedor" value={getSellerName(selectedTx.user_id)} />
                     <Row icon={<FileText className="h-3 w-3" />} label="Produto" value={getProductName(selectedTx.product_id)} />
                     <Row icon={<Globe className="h-3 w-3" />} label="Origem" value={selectedTx.source || "checkout"} />
+                    <Row
+                      icon={<Zap className="h-3 w-3" />}
+                      label="Adquirente"
+                      value={(() => {
+                        const meta = (selectedTx.metadata as Record<string, unknown> | null) || {};
+                        const acq = (meta.acquirer_slug as string) || (meta.acquirer as string) || selectedTx.source || "—";
+                        return String(acq).toUpperCase();
+                      })()}
+                    />
                     {selectedTx.api_key_id && <Row icon={<Key className="h-3 w-3" />} label="API Key" value={selectedTx.api_key_id} mono />}
                     {selectedTx.coupon_id && <Row icon={<Tag className="h-3 w-3" />} label="Cupom" value={`${selectedTx.coupon_id.slice(0, 8)} · −${fmtCurrency(Number(selectedTx.discount_amount || 0))}`} mono />}
                     {selectedTx.podpay_payment_id && <Row icon={<Hash className="h-3 w-3" />} label="PodPay" value={selectedTx.podpay_payment_id} mono />}
