@@ -3,6 +3,7 @@
  * "Year 3000" holographic aesthetic. All motion is CSS/Framer, no external assets.
  */
 import { useEffect, useMemo, useRef, useState } from "react";
+import { animate } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import { motion, useScroll, useTransform, useSpring, useInView, AnimatePresence } from "framer-motion";
 import {
