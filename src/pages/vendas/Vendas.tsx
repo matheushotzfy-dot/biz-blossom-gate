@@ -288,148 +288,147 @@ export default function Vendas() {
   return (
     <div className="space-y-6 animate-in fade-in duration-500">
       <Seo title="Vendas | Hotzfy" description="Histórico completo de transações, filtros avançados e exportação de relatórios." path="/vendas" noindex />
-      {/* Header */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-        <div className="space-y-1">
-          <h1 className="text-2xl font-black text-foreground tracking-tight">Minhas Vendas</h1>
-          <p className="text-[11px] font-bold text-muted-foreground uppercase tracking-widest flex items-center gap-2">
-            <History className="h-3.5 w-3.5 text-primary" />
-            Gestão completa de transações e recebíveis
-          </p>
-        </div>
-        <div className="flex items-center gap-2 flex-wrap w-full md:w-auto">
-          {/* Period selector — institutional, segmented */}
-          <div className="inline-flex items-stretch h-10 rounded-xl border border-border bg-card overflow-hidden">
-            <div className="flex items-stretch divide-x divide-border">
-              {PRESETS.filter(p => p.id !== "custom").map((p) => {
-                const isActive = preset === p.id;
-                const short =
-                  p.id === "today" ? "Hoje" :
-                  p.id === "7d" ? "7D" :
-                  p.id === "15d" ? "15D" :
-                  "30D";
-                return (
-                  <button
-                    key={p.id}
-                    onClick={() => selectPreset(p.id)}
-                    className={cn(
-                      "relative px-3.5 flex items-center justify-center text-[11px] font-black uppercase tracking-[0.14em] tabular-nums transition-colors duration-200 min-w-[54px]",
-                      isActive
-                        ? "text-primary bg-primary/[0.08]"
-                        : "text-muted-foreground/60 hover:text-foreground hover:bg-secondary/40"
-                    )}
-                  >
-                    {isActive && <span className="absolute inset-x-0 bottom-0 h-[2px] bg-primary" />}
-                    {short}
-                  </button>
-                );
-              })}
 
-              <Popover open={dateOpen} onOpenChange={setDateOpen}>
-                <PopoverTrigger asChild>
-                  <button
-                    className={cn(
-                      "relative px-3.5 flex items-center gap-1.5 text-[11px] font-black uppercase tracking-[0.14em] transition-colors duration-200",
-                      preset === "custom"
-                        ? "text-primary bg-primary/[0.08]"
-                        : "text-muted-foreground/60 hover:text-foreground hover:bg-secondary/40"
-                    )}
-                  >
-                    {preset === "custom" && <span className="absolute inset-x-0 bottom-0 h-[2px] bg-primary" />}
-                    <CalendarIcon className="h-3.5 w-3.5" strokeWidth={2.25} />
-                    <span className="tabular-nums">
-                      {preset === "custom" && range?.from
-                        ? format(range.from, "dd/MM") + (range.to ? " – " + format(range.to, "dd/MM") : "")
-                        : ""}
-                    </span>
-                  </button>
-                </PopoverTrigger>
-                <PopoverContent align="end" sideOffset={8} className="w-[320px] p-0 overflow-hidden rounded-xl border border-border bg-card">
-                  <div className="flex items-center justify-between gap-3 px-3.5 py-2.5 border-b border-border">
-                    <span className="text-[10px] font-black uppercase tracking-[0.16em] text-muted-foreground/80">
-                      {tempRange?.from
-                        ? format(tempRange.from, "dd MMM", { locale: ptBR }) +
-                          (tempRange.to ? " — " + format(tempRange.to, "dd MMM", { locale: ptBR }) : " — fim?")
-                        : "Selecione o intervalo"}
-                    </span>
-                    {tempRange?.from && tempRange?.to && (
-                      <span className="text-[10px] font-black uppercase tracking-[0.14em] text-primary tabular-nums px-1.5 py-0.5 rounded-md bg-primary/10 border border-primary/20">
-                        {differenceInDays(tempRange.to, tempRange.from) + 1}d
+      {/* Premium Hero */}
+      <FinanceiroHero
+        eyebrow="Minhas vendas"
+        title="Vendas & Recebíveis"
+        subtitle="Histórico completo de transações, filtros avançados e exportação de relatórios financeiros."
+        status={{ tone: "success", label: `${filtered.length} transações · ${rangeLabel}`, pulse: true }}
+        actions={
+          <div className="flex items-center gap-2 flex-wrap">
+            {/* Period selector — institutional, segmented */}
+            <div className="inline-flex items-stretch h-10 rounded-xl border border-border bg-card overflow-hidden">
+              <div className="flex items-stretch divide-x divide-border">
+                {PRESETS.filter(p => p.id !== "custom").map((p) => {
+                  const isActive = preset === p.id;
+                  const short =
+                    p.id === "today" ? "Hoje" :
+                    p.id === "7d" ? "7D" :
+                    p.id === "15d" ? "15D" :
+                    "30D";
+                  return (
+                    <button
+                      key={p.id}
+                      onClick={() => selectPreset(p.id)}
+                      className={cn(
+                        "relative px-3.5 flex items-center justify-center text-[11px] font-black uppercase tracking-[0.14em] tabular-nums transition-colors duration-200 min-w-[54px]",
+                        isActive
+                          ? "text-primary bg-primary/[0.08]"
+                          : "text-muted-foreground/60 hover:text-foreground hover:bg-secondary/40"
+                      )}
+                    >
+                      {isActive && <span className="absolute inset-x-0 bottom-0 h-[2px] bg-primary" />}
+                      {short}
+                    </button>
+                  );
+                })}
+
+                <Popover open={dateOpen} onOpenChange={setDateOpen}>
+                  <PopoverTrigger asChild>
+                    <button
+                      className={cn(
+                        "relative px-3.5 flex items-center gap-1.5 text-[11px] font-black uppercase tracking-[0.14em] transition-colors duration-200",
+                        preset === "custom"
+                          ? "text-primary bg-primary/[0.08]"
+                          : "text-muted-foreground/60 hover:text-foreground hover:bg-secondary/40"
+                      )}
+                    >
+                      {preset === "custom" && <span className="absolute inset-x-0 bottom-0 h-[2px] bg-primary" />}
+                      <CalendarIcon className="h-3.5 w-3.5" strokeWidth={2.25} />
+                      <span className="tabular-nums">
+                        {preset === "custom" && range?.from
+                          ? format(range.from, "dd/MM") + (range.to ? " – " + format(range.to, "dd/MM") : "")
+                          : ""}
                       </span>
-                    )}
-                  </div>
-                  <Calendar
-                    mode="range"
-                    selected={tempRange}
-                    onSelect={(r) => { setTempRange(r); setPreset("custom"); }}
-                    numberOfMonths={1}
-                    locale={ptBR}
-                    defaultMonth={tempRange?.from ?? new Date()}
-                    className="pointer-events-auto p-2"
-                  />
-                  <div className="flex items-center justify-between gap-2 px-3.5 py-2 border-t border-border">
-                    <button onClick={() => setDateOpen(false)} className="text-[10px] font-black uppercase tracking-[0.14em] text-muted-foreground/60 hover:text-foreground transition-colors">Cancelar</button>
-                    <button onClick={applyCustom} disabled={!tempRange?.from || !tempRange?.to} className="px-3 py-1.5 rounded-md text-[10px] font-black uppercase tracking-[0.14em] bg-primary text-primary-foreground hover:bg-primary/90 disabled:opacity-40 disabled:cursor-not-allowed transition-all">Aplicar</button>
-                  </div>
-                </PopoverContent>
-
-              </Popover>
-            </div>
-          </div>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={togglePrivacy}
-            className="h-10 px-3 sm:px-4 rounded-xl border-border/60 hover:bg-muted/50 font-bold text-xs uppercase tracking-wider gap-2"
-          >
-            {privacyHidden ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-            <span className="hidden sm:inline"></span>
-          </Button>
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button disabled={!filtered.length} className="h-10 px-4 sm:px-6 rounded-xl font-black text-xs uppercase tracking-widest gap-2">
-                <Download className="h-4 w-4" /> Exportar
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-64">
-              <DropdownMenuLabel className="text-[10px] font-black uppercase tracking-[0.14em] text-muted-foreground">
-                Exportar dados da tabela
-              </DropdownMenuLabel>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={exportXLSX} className="gap-3 py-2.5 cursor-pointer">
-                <div className="h-8 w-8 rounded-md bg-success/10 border border-success/20 flex items-center justify-center text-success font-black text-[10px]">
-                  XLSX
-                </div>
-                <div className="flex-1 min-w-0">
-                  <div className="text-xs font-bold">Excel (.xlsx)</div>
-                  <div className="text-[10px] text-muted-foreground">Planilha formatada</div>
-                </div>
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={exportCSV} className="gap-3 py-2.5 cursor-pointer">
-                <div className="h-8 w-8 rounded-md bg-info/10 border border-info/20 flex items-center justify-center text-info font-black text-[10px]">
-                  CSV
-                </div>
-                <div className="flex-1 min-w-0">
-                  <div className="text-xs font-bold">CSV (.csv)</div>
-                  <div className="text-[10px] text-muted-foreground">Compatível com qualquer ferramenta</div>
-                </div>
-              </DropdownMenuItem>
-              <DropdownMenuSeparator />
-              <div className="px-2 py-1.5 text-[10px] text-muted-foreground">
-                {filtered.length} {filtered.length === 1 ? "linha" : "linhas"} • Período atual
+                    </button>
+                  </PopoverTrigger>
+                  <PopoverContent align="end" sideOffset={8} className="w-[320px] p-0 overflow-hidden rounded-xl border border-border bg-card">
+                    <div className="flex items-center justify-between gap-3 px-3.5 py-2.5 border-b border-border">
+                      <span className="text-[10px] font-black uppercase tracking-[0.16em] text-muted-foreground/80">
+                        {tempRange?.from
+                          ? format(tempRange.from, "dd MMM", { locale: ptBR }) +
+                            (tempRange.to ? " — " + format(tempRange.to, "dd MMM", { locale: ptBR }) : " — fim?")
+                          : "Selecione o intervalo"}
+                      </span>
+                      {tempRange?.from && tempRange?.to && (
+                        <span className="text-[10px] font-black uppercase tracking-[0.14em] text-primary tabular-nums px-1.5 py-0.5 rounded-md bg-primary/10 border border-primary/20">
+                          {differenceInDays(tempRange.to, tempRange.from) + 1}d
+                        </span>
+                      )}
+                    </div>
+                    <Calendar
+                      mode="range"
+                      selected={tempRange}
+                      onSelect={(r) => { setTempRange(r); setPreset("custom"); }}
+                      numberOfMonths={1}
+                      locale={ptBR}
+                      defaultMonth={tempRange?.from ?? new Date()}
+                      className="pointer-events-auto p-2"
+                    />
+                    <div className="flex items-center justify-between gap-2 px-3.5 py-2 border-t border-border">
+                      <button onClick={() => setDateOpen(false)} className="text-[10px] font-black uppercase tracking-[0.14em] text-muted-foreground/60 hover:text-foreground transition-colors">Cancelar</button>
+                      <button onClick={applyCustom} disabled={!tempRange?.from || !tempRange?.to} className="px-3 py-1.5 rounded-md text-[10px] font-black uppercase tracking-[0.14em] bg-primary text-primary-foreground hover:bg-primary/90 disabled:opacity-40 disabled:cursor-not-allowed transition-all">Aplicar</button>
+                    </div>
+                  </PopoverContent>
+                </Popover>
               </div>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </div>
-      </div>
+            </div>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={togglePrivacy}
+              className="h-10 px-3 rounded-xl border-border/60 hover:bg-muted/50 font-bold text-xs uppercase tracking-wider gap-2"
+            >
+              {privacyHidden ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+            </Button>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button disabled={!filtered.length} className="h-10 px-4 rounded-xl font-black text-xs uppercase tracking-widest gap-2">
+                  <Download className="h-4 w-4" /> Exportar
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-64">
+                <DropdownMenuLabel className="text-[10px] font-black uppercase tracking-[0.14em] text-muted-foreground">
+                  Exportar dados da tabela
+                </DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={exportXLSX} className="gap-3 py-2.5 cursor-pointer">
+                  <div className="h-8 w-8 rounded-md bg-success/10 border border-success/20 flex items-center justify-center text-success font-black text-[10px]">
+                    XLSX
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="text-xs font-bold">Excel (.xlsx)</div>
+                    <div className="text-[10px] text-muted-foreground">Planilha formatada</div>
+                  </div>
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={exportCSV} className="gap-3 py-2.5 cursor-pointer">
+                  <div className="h-8 w-8 rounded-md bg-info/10 border border-info/20 flex items-center justify-center text-info font-black text-[10px]">
+                    CSV
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="text-xs font-bold">CSV (.csv)</div>
+                    <div className="text-[10px] text-muted-foreground">Compatível com qualquer ferramenta</div>
+                  </div>
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <div className="px-2 py-1.5 text-[10px] text-muted-foreground">
+                  {filtered.length} {filtered.length === 1 ? "linha" : "linhas"} • Período atual
+                </div>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
+        }
+      />
 
-      {/* KPI Row */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <StatCard title="Faturamento Líquido" value={privacyHidden ? CENSORED : fmt(stats.revenue)} icon={Wallet} color="success" description="Total após taxas" />
-        <StatCard title="Vendas Aprovadas" value={privacyHidden ? CENSORED : stats.count} icon={Check} color="primary" description={privacyHidden ? "•••" : "Pedidos concluídos"} />
-        <StatCard title="Ticket Médio" value={privacyHidden ? CENSORED : fmt(stats.avg)} icon={BarChart3} color="info" description="Média por venda" />
-        <StatCard title="Conversão Pix" value={privacyHidden ? CENSORED : `${stats.pixConversion.toFixed(0)}%`} icon={Zap} color="info" description={privacyHidden ? "•••" : `${stats.pixApproved} de ${stats.pixTotal} pagos`} />
-      </div>
+      {/* Premium KPI Grid */}
+      <FinanceiroKpiGrid cols={4}>
+        <FinanceiroKpi label="Faturamento Líquido" value={privacyHidden ? CENSORED : fmt(stats.revenue)} sub="Total após taxas" icon={Wallet} tone="success" />
+        <FinanceiroKpi label="Vendas Aprovadas" value={privacyHidden ? CENSORED : String(stats.count)} sub={privacyHidden ? "•••" : "Pedidos concluídos"} icon={Check} tone="primary" />
+        <FinanceiroKpi label="Ticket Médio" value={privacyHidden ? CENSORED : fmt(stats.avg)} sub="Média por venda" icon={BarChart3} tone="info" />
+        <FinanceiroKpi label="Conversão Pix" value={privacyHidden ? CENSORED : `${stats.pixConversion.toFixed(0)}%`} sub={privacyHidden ? "•••" : `${stats.pixApproved} de ${stats.pixTotal} pagos`} icon={Zap} tone="info" />
+      </FinanceiroKpiGrid>
+
 
       {/* Table Section */}
       <div className="bg-card rounded-[24px] border border-border/60 shadow-sm overflow-hidden">
