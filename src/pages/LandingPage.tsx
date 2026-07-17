@@ -3,6 +3,7 @@
  * "Year 3000" holographic aesthetic. All motion is CSS/Framer, no external assets.
  */
 import { useEffect, useMemo, useRef, useState } from "react";
+import { animate } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import { motion, useScroll, useTransform, useSpring, useInView, AnimatePresence } from "framer-motion";
 import {
@@ -43,11 +44,39 @@ const FEATURES = [
 ];
 
 const METRICS = [
-  { label: "TPV processado", value: "R$ 2.4B+", icon: Activity },
-  { label: "Taxa de aprovação", value: "98.7%", icon: CheckCircle2 },
-  { label: "Uptime", value: "99.99%", icon: Radio },
-  { label: "Latência PIX", value: "1.2s", icon: Zap },
+  { label: "TPV processado", prefix: "R$ ", to: 2.4, suffix: "B+", decimals: 1, icon: Activity },
+  { label: "Taxa de aprovação", prefix: "", to: 98.7, suffix: "%", decimals: 1, icon: CheckCircle2 },
+  { label: "Uptime", prefix: "", to: 99.99, suffix: "%", decimals: 2, icon: Radio },
+  { label: "Latência PIX", prefix: "", to: 1.2, suffix: "s", decimals: 1, icon: Zap },
 ];
+
+/* Animated count-up that fires when scrolled into view */
+function CountUp({ to, decimals = 0, prefix = "", suffix = "", duration = 2 }: {
+  to: number; decimals?: number; prefix?: string; suffix?: string; duration?: number;
+}) {
+  const ref = useRef<HTMLSpanElement>(null);
+  const started = useRef(false);
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const io = new IntersectionObserver((entries) => {
+      entries.forEach((e) => {
+        if (e.isIntersecting && !started.current) {
+          started.current = true;
+          const controls = animate(0, to, {
+            duration,
+            ease: [0.16, 1, 0.3, 1],
+            onUpdate: (v) => { if (el) el.textContent = prefix + v.toFixed(decimals) + suffix; },
+          });
+          return () => controls.stop();
+        }
+      });
+    }, { threshold: 0.35 });
+    io.observe(el);
+    return () => io.disconnect();
+  }, [to, decimals, prefix, suffix, duration]);
+  return <span ref={ref}>{prefix}0{decimals ? "." + "0".repeat(decimals) : ""}{suffix}</span>;
+}
 
 /* ═══════════════════════════════════════════════════════════════
    BACKGROUND FX
@@ -306,10 +335,15 @@ function HolographicDashboard() {
 
 function Hero() {
   const navigate = useNavigate();
+  const sectionRef = useRef<HTMLElement>(null);
+  const { scrollYProgress } = useScroll({ target: sectionRef, offset: ["start start", "end start"] });
+  const heroY = useTransform(scrollYProgress, [0, 1], [0, -120]);
+  const heroOpacity = useTransform(scrollYProgress, [0, 0.8], [1, 0.2]);
+  const dashY = useTransform(scrollYProgress, [0, 1], [0, 80]);
   return (
-    <section className="relative min-h-screen flex items-center justify-center pt-28 pb-20 px-4 md:px-8 overflow-hidden">
+    <section ref={sectionRef} className="relative min-h-screen flex items-center justify-center pt-28 pb-20 px-4 md:px-8 overflow-hidden">
       <Particles />
-      <div className="max-w-7xl w-full mx-auto text-center relative z-10">
+      <motion.div style={{ y: heroY, opacity: heroOpacity }} className="max-w-7xl w-full mx-auto text-center relative z-10">
         <motion.div
           initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8 }}
           className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-emerald-400/25 bg-emerald-500/5 backdrop-blur-md text-[10px] font-display font-black uppercase tracking-[0.2em] text-emerald-300 mb-8"
@@ -369,10 +403,10 @@ function Hero() {
           <span className="flex items-center gap-1.5"><CheckCircle2 className="h-3 w-3 text-emerald-400" /> Saque em 1 dia útil</span>
         </motion.div>
 
-        <div className="mt-24 md:mt-32">
+        <motion.div style={{ y: dashY }} className="mt-24 md:mt-32">
           <HolographicDashboard />
-        </div>
-      </div>
+        </motion.div>
+      </motion.div>
     </section>
   );
 }
@@ -405,7 +439,7 @@ function MetricsStrip() {
                   <span className="text-[10px] font-mono uppercase tracking-wider">{m.label}</span>
                 </div>
                 <div className="text-3xl md:text-4xl font-black font-display bg-gradient-to-br from-white to-white/60 bg-clip-text text-transparent">
-                  {m.value}
+                  <CountUp to={m.to} decimals={m.decimals} prefix={m.prefix} suffix={m.suffix} />
                 </div>
               </motion.div>
             ))}
@@ -820,6 +854,19 @@ function Footer() {
    ═══════════════════════════════════════════════════════════════ */
 
 export default function LandingPage() {
+  // Global body has overflow:hidden for the app shell; the landing page needs
+  // window scroll for parallax + IntersectionObserver reveals, so unlock while mounted.
+  useEffect(() => {
+    const prevBody = document.body.style.overflow;
+    const prevHtml = document.documentElement.style.overflow;
+    document.body.style.overflow = "auto";
+    document.documentElement.style.overflow = "auto";
+    return () => {
+      document.body.style.overflow = prevBody;
+      document.documentElement.style.overflow = prevHtml;
+    };
+  }, []);
+
   return (
     <div className="relative min-h-screen bg-background text-foreground overflow-x-hidden">
       <Seo
