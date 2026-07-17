@@ -50,6 +50,7 @@ import AdminSupportTab from "./tabs/AdminSupportTab";
 import AdminSubscriptionsTab from "./tabs/AdminSubscriptionsTab";
 import AdminReferralsTab from "./tabs/AdminReferralsTab";
 import AdminRewardsTab from "./tabs/AdminRewardsTab";
+import AdminCorridasTab from "./tabs/AdminCorridasTab";
 
 const EMPLOYEE_ALLOWED_TABS = new Set(["god-mode", "sellers", "products", "transactions"] as string[]);
 
@@ -106,6 +107,7 @@ const NAV_SECTIONS: { id: string; label: string; items: { id: string; label: str
       { id: "notifications", label: "Notificações", icon: Bell, employeeAccess: false },
       { id: "support", label: "Suporte", icon: MessageSquare, employeeAccess: false },
       { id: "rewards", label: "Premiações", icon: Trophy, employeeAccess: false },
+      { id: "corridas", label: "Corridas Faturamento", icon: Trophy, employeeAccess: false },
       { id: "audit", label: "Auditoria", icon: Activity, employeeAccess: false },
     ],
   },
@@ -590,6 +592,7 @@ export default function AdminDashboard() {
               {activeTab === "referrals" && isAdmin && <AdminReferralsTab profiles={profiles} fmtCurrency={fmtCurrency} />}
               {activeTab === "support" && (isAdmin || hasSupportPerm) && <AdminSupportTab profiles={profiles} />}
               {activeTab === "rewards" && isAdmin && <AdminRewardsTab profiles={profiles} />}
+              {activeTab === "corridas" && isAdmin && <AdminCorridasTab />}
               {activeTab === "audit" && isAdmin && <AdminAuditTab profiles={profiles} />}
               {activeTab === "error-logs" && isAdmin && <AdminErrorLogsTab profiles={profiles} />}
               {activeTab === "inactive-sellers" && isAdmin && (
