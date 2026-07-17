@@ -2617,6 +2617,53 @@ export type Database = {
         }
         Relationships: []
       }
+      revenue_race_overrides: {
+        Row: {
+          avatar_url: string | null
+          created_at: string
+          display_name: string
+          id: string
+          race_id: string
+          revenue_cents: number
+          sales_count: number
+          seller_id: string | null
+          sort_hint: number | null
+          updated_at: string
+        }
+        Insert: {
+          avatar_url?: string | null
+          created_at?: string
+          display_name: string
+          id?: string
+          race_id: string
+          revenue_cents?: number
+          sales_count?: number
+          seller_id?: string | null
+          sort_hint?: number | null
+          updated_at?: string
+        }
+        Update: {
+          avatar_url?: string | null
+          created_at?: string
+          display_name?: string
+          id?: string
+          race_id?: string
+          revenue_cents?: number
+          sales_count?: number
+          seller_id?: string | null
+          sort_hint?: number | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "revenue_race_overrides_race_id_fkey"
+            columns: ["race_id"]
+            isOneToOne: false
+            referencedRelation: "revenue_races"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       revenue_race_prizes: {
         Row: {
           created_at: string
@@ -4501,6 +4548,7 @@ export type Database = {
       race_leaderboard: {
         Args: { _race_id: string }
         Returns: {
+          is_manual: boolean
           rank_position: number
           revenue_cents: number
           sales_count: number
