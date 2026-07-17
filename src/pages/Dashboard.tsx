@@ -519,16 +519,16 @@ export default function Dashboard() {
           <div aria-hidden className="pointer-events-none absolute inset-0 opacity-40"
             style={{ backgroundImage: "radial-gradient(50% 80% at 90% 50%, hsl(var(--primary)/0.25), transparent 60%), radial-gradient(40% 60% at 10% 10%, hsl(var(--primary)/0.15), transparent 60%)" }}
           />
-          <div className="relative flex flex-col md:flex-row items-center gap-6 p-6 md:p-8">
+          <div className="relative flex flex-col lg:flex-row items-center gap-6 p-5 md:p-6 lg:p-8">
             {/* Left copy */}
-            <div className="flex-1 min-w-0 space-y-3">
+            <div className="flex-1 min-w-0 space-y-3 text-center lg:text-left">
               <div className="inline-flex items-center gap-2 rounded-full border border-primary/30 bg-primary/10 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.28em] text-primary">
                 <Trophy className="h-3.5 w-3.5" /> Ranking · Corrida de Faturamento
               </div>
-              <h2 className="font-display font-black text-3xl md:text-5xl tracking-[-0.03em] leading-[0.95]">
+              <h2 className="font-display font-black text-2xl sm:text-3xl lg:text-5xl tracking-[-0.03em] leading-[1.05]">
                 Conheça os <span className="text-primary">CAMPEÕES</span>
               </h2>
-              <p className="text-muted-foreground text-sm max-w-md">
+              <p className="text-muted-foreground text-sm max-w-md mx-auto lg:mx-0">
                 Os resultados estão definidos. Conheça os vencedores da Corrida de Faturamento e prepare-se para a próxima temporada.
               </p>
             <Link to="/premiacoes?tab=corrida" className="inline-flex items-center gap-2 rounded-xl bg-primary px-4 py-2.5 text-primary-foreground text-[13px] font-bold hover:bg-primary/90 transition-all active:scale-[0.98]">
@@ -537,21 +537,22 @@ export default function Dashboard() {
             </div>
 
             {/* Podium visual */}
-            <div className="flex items-end gap-3 shrink-0">
+            <div className="flex items-end gap-2 sm:gap-3 shrink-0">
               {[
-                { pos: "02", name: "Airis F.", h: "h-24", tone: "from-slate-300 to-slate-500" },
-                { pos: "01", name: "Bryan G.", h: "h-32", tone: "from-yellow-300 to-amber-500" },
-                { pos: "03", name: "Wdzin", h: "h-20", tone: "from-orange-400 to-orange-700" },
+                { pos: "02", name: "Airis F.", h: "h-20 sm:h-24", tone: "from-slate-300 to-slate-500" },
+                { pos: "01", name: "Bryan G.", h: "h-28 sm:h-32", tone: "from-yellow-300 to-amber-500" },
+                { pos: "03", name: "Wdzin", h: "h-16 sm:h-20", tone: "from-orange-400 to-orange-700" },
               ].map((p) => (
                 <div key={p.pos} className="flex flex-col items-center gap-2">
                   <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">{p.name}</span>
-                  <div className={cn("w-16 md:w-20 rounded-t-xl bg-gradient-to-b flex items-start justify-center pt-2 shadow-lg", p.h, p.tone)}>
+                  <div className={cn("w-14 sm:w-16 lg:w-20 rounded-t-xl bg-gradient-to-b flex items-start justify-center pt-2 shadow-lg", p.h, p.tone)}>
                     <span className="font-display font-black text-lg text-background/90">{p.pos}</span>
                   </div>
                 </div>
               ))}
             </div>
           </div>
+
         </section>
 
         {/* ═══════════ 4 KPI CARDS ═══════════ */}

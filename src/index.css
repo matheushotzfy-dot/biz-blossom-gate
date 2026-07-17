@@ -1209,6 +1209,12 @@ input[type="number"]::-webkit-inner-spin-button {
 }
 .seller-action:hover svg,
 .seller-clickable:hover svg { transform: translate3d(3px, 0, 0) scale(1.12); }
+/* Icon-only square buttons: keep icon perfectly centered on hover */
+.seller-clickable.icon-only:hover svg,
+.seller-action.icon-only:hover svg { transform: none; }
+.seller-clickable.icon-only:hover,
+.seller-action.icon-only:hover { transform: translate3d(0, -1px, 0); outline: none; }
+
 .seller-nav-option {
   position: relative;
   overflow: hidden;
