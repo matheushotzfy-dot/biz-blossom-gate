@@ -294,140 +294,394 @@ function Nav() {
    HERO
    ═══════════════════════════════════════════════════════════════ */
 
-function HolographicDashboard() {
+/* Live PIX feed row — realistic streaming transactions */
+const LIVE_TX = [
+  { name: "Rafael M.", city: "SP", product: "Método Trader Elite", value: "R$ 1.997,00", ms: "0.18s" },
+  { name: "Beatriz S.", city: "RJ", product: "Mentoria Growth 360", value: "R$ 497,00", ms: "0.21s" },
+  { name: "Lucas P.", city: "MG", product: "Curso Copywriting Pro", value: "R$ 297,00", ms: "0.19s" },
+  { name: "Amanda R.", city: "PR", product: "Formação Dropshipping", value: "R$ 1.297,00", ms: "0.22s" },
+  { name: "Diego F.", city: "SC", product: "Método Emagrecer 30d", value: "R$ 197,00", ms: "0.17s" },
+  { name: "Camila O.", city: "BA", product: "Consultoria Tráfego", value: "R$ 2.497,00", ms: "0.24s" },
+  { name: "Thiago N.", city: "DF", product: "Bootcamp Full Stack", value: "R$ 897,00", ms: "0.20s" },
+  { name: "Juliana V.", city: "GO", product: "Ebook Confeitaria Fit", value: "R$ 47,00", ms: "0.16s" },
+];
+
+function LiveTransactionRow({ tx, idx }: { tx: typeof LIVE_TX[number]; idx: number }) {
   return (
-    <div className="relative w-full max-w-[720px] mx-auto perspective-[1400px]">
+    <motion.div
+      layout
+      initial={{ opacity: 0, y: -12, height: 0 }}
+      animate={{ opacity: 1, y: 0, height: "auto" }}
+      exit={{ opacity: 0, y: 12, height: 0 }}
+      transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
+      className="flex items-center gap-3 px-3 py-2 border-b border-white/[0.04] last:border-b-0"
+    >
+      <div className="relative">
+        <div className="h-7 w-7 rounded-lg bg-gradient-to-br from-emerald-500/25 to-cyan-500/15 border border-emerald-400/25 flex items-center justify-center text-[10px] font-black text-emerald-300 font-display">
+          {tx.name[0]}
+        </div>
+        {idx === 0 && (
+          <span className="absolute -top-0.5 -right-0.5 h-2 w-2 rounded-full bg-emerald-400 ring-2 ring-[#0b0f14] animate-pulse" />
+        )}
+      </div>
+      <div className="flex-1 min-w-0">
+        <div className="flex items-center gap-1.5 text-[10.5px] font-semibold text-white/90 truncate">
+          {tx.name} <span className="text-white/30 font-mono text-[9px]">· {tx.city}</span>
+        </div>
+        <div className="text-[9.5px] text-white/40 truncate font-mono">{tx.product}</div>
+      </div>
+      <div className="text-right">
+        <div className="text-[11px] font-mono font-black text-emerald-300 tabular-nums">{tx.value}</div>
+        <div className="text-[8.5px] font-mono text-white/35">PIX · {tx.ms}</div>
+      </div>
+    </motion.div>
+  );
+}
+
+function HolographicDashboard() {
+  const reduce = useReducedMotion();
+  const [feed, setFeed] = useState(LIVE_TX.slice(0, 5));
+  const [cursor, setCursor] = useState(0);
+
+  useEffect(() => {
+    if (reduce) return;
+    let i = 5;
+    const id = setInterval(() => {
+      setFeed((prev) => [LIVE_TX[i % LIVE_TX.length], ...prev].slice(0, 5));
+      i++;
+    }, 2600);
+    return () => clearInterval(id);
+  }, [reduce]);
+
+  useEffect(() => {
+    if (reduce) return;
+    const id = setInterval(() => setCursor((c) => (c + 1) % 3), 3200);
+    return () => clearInterval(id);
+  }, [reduce]);
+
+  return (
+    <div className="relative w-full max-w-[820px] mx-auto perspective-[1600px]">
       <motion.div
-        initial={{ opacity: 0, rotateX: 20, y: 60 }}
-        animate={{ opacity: 1, rotateX: 12, y: 0 }}
+        initial={{ opacity: 0, rotateX: 18, y: 60 }}
+        animate={{ opacity: 1, rotateX: 8, y: 0 }}
         transition={{ duration: 1.4, ease: [0.16, 1, 0.3, 1], delay: 0.3 }}
-        className="relative rounded-[28px] overflow-hidden border border-emerald-400/25"
+        className="relative rounded-[22px] overflow-hidden"
         style={{
           transformStyle: "preserve-3d",
-          background: "linear-gradient(180deg, rgba(11,15,20,0.85), rgba(11,15,20,0.7))",
-          backdropFilter: "blur(20px)",
+          background: "linear-gradient(180deg, #0b0f14 0%, #070a0e 100%)",
           boxShadow:
-            "0 0 0 1px rgba(52,211,153,0.15), 0 40px 120px -20px rgba(52,211,153,0.35), 0 20px 60px -20px rgba(34,211,238,0.25), inset 0 1px 0 rgba(255,255,255,0.06)",
+            "0 0 0 1px rgba(52,211,153,0.18), 0 60px 140px -30px rgba(52,211,153,0.45), 0 30px 80px -20px rgba(34,211,238,0.25), inset 0 1px 0 rgba(255,255,255,0.05)",
         }}
       >
         {/* window chrome */}
-        <div className="flex items-center gap-2 px-4 py-3 border-b border-emerald-400/10">
-          <span className="h-2.5 w-2.5 rounded-full bg-red-500/70" />
-          <span className="h-2.5 w-2.5 rounded-full bg-amber-400/70" />
-          <span className="h-2.5 w-2.5 rounded-full bg-emerald-500/70" />
-          <div className="ml-4 h-6 flex-1 rounded-md bg-white/[0.03] border border-white/5 flex items-center px-3 text-[10px] font-mono text-emerald-300/70">
-            <Lock className="h-3 w-3 mr-2" /> hotzfy.com.br/dashboard
+        <div className="flex items-center gap-2 px-4 py-2.5 border-b border-white/[0.05] bg-gradient-to-b from-white/[0.02] to-transparent">
+          <span className="h-2.5 w-2.5 rounded-full bg-[#ff5f57]" />
+          <span className="h-2.5 w-2.5 rounded-full bg-[#febc2e]" />
+          <span className="h-2.5 w-2.5 rounded-full bg-[#28c840]" />
+          <div className="ml-4 h-6 flex-1 max-w-[340px] rounded-md bg-black/40 border border-white/[0.04] flex items-center px-2.5 text-[10px] font-mono text-white/50">
+            <Lock className="h-3 w-3 mr-1.5 text-emerald-400/70" /> hotzfy.com.br/dashboard
+          </div>
+          <div className="ml-auto flex items-center gap-2">
+            <div className="hidden sm:flex items-center gap-1 rounded-md border border-emerald-400/20 bg-emerald-500/[0.06] px-1.5 py-0.5">
+              <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" />
+              <span className="text-[8.5px] font-mono font-bold text-emerald-300 uppercase tracking-wider">Live</span>
+            </div>
           </div>
         </div>
 
-        {/* content */}
-        <div className="p-6 grid grid-cols-3 gap-3">
-          {[
-            { l: "Faturamento hoje", pre: "R$ ", to: 47892, dec: 0, c: "+18.4%", tone: "emerald" },
-            { l: "Vendas aprovadas", pre: "", to: 312, dec: 0, c: "+27", tone: "cyan" },
-            { l: "Ticket médio", pre: "R$ ", to: 153, dec: 0, c: "+4.1%", tone: "violet" },
-          ].map((k, i) => (
-            <motion.div
-              key={i}
-              initial={{ opacity: 0, y: 12 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.8 + i * 0.15 }}
-              className="rounded-2xl p-4 bg-white/[0.02] border border-white/5"
-            >
-              <div className="text-[9px] uppercase tracking-wider text-white/40 font-bold">{k.l}</div>
-              <div className="mt-1 text-xl font-black text-white font-display tabular-nums">
-                <CountUp to={k.to} decimals={k.dec} prefix={k.pre} duration={1.8} />
+        {/* app body: sidebar + main */}
+        <div className="grid grid-cols-[168px_1fr] min-h-[440px]">
+          {/* sidebar */}
+          <aside className="border-r border-white/[0.04] bg-gradient-to-b from-white/[0.015] to-transparent p-3 flex flex-col gap-1">
+            <div className="flex items-center gap-2 px-2 py-2 mb-2">
+              <div className="h-6 w-6 rounded-md bg-gradient-to-br from-emerald-400 to-cyan-500 flex items-center justify-center text-[11px] font-black text-black font-display">H</div>
+              <span className="text-[11px] font-display font-black text-white tracking-tight">HOTZFY</span>
+            </div>
+            {[
+              { icon: BarChart3, label: "Dashboard", active: true },
+              { icon: CreditCard, label: "Vendas" },
+              { icon: Wallet, label: "Saques" },
+              { icon: Users, label: "Afiliados" },
+              { icon: Code2, label: "API" },
+              { icon: Shield, label: "Antifraude" },
+              { icon: Layers, label: "Produtos" },
+            ].map((item, i) => (
+              <div
+                key={i}
+                className={cn(
+                  "flex items-center gap-2 rounded-lg px-2.5 py-1.5 text-[10.5px] font-semibold transition",
+                  item.active
+                    ? "bg-emerald-500/[0.08] text-emerald-300 border border-emerald-400/15"
+                    : "text-white/45 hover:text-white/70"
+                )}
+              >
+                <item.icon className="h-3.5 w-3.5" />
+                {item.label}
+                {item.active && <span className="ml-auto h-1 w-1 rounded-full bg-emerald-400" />}
               </div>
-              <div className={cn(
-                "text-[10px] mt-1 font-mono",
-                k.tone === "emerald" && "text-emerald-400",
-                k.tone === "cyan" && "text-cyan-400",
-                k.tone === "violet" && "text-violet-400",
-              )}>▲ {k.c}</div>
-            </motion.div>
-          ))}
-
-
-          {/* chart */}
-          <motion.div
-            initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 1.2 }}
-            className="col-span-3 rounded-2xl p-5 bg-white/[0.02] border border-white/5 h-52 relative overflow-hidden"
-          >
-            <div className="flex items-center justify-between mb-3">
-              <div className="text-[10px] uppercase tracking-wider text-white/50 font-bold">Faturamento — 24h</div>
-              <div className="flex items-center gap-1.5 text-[10px] text-emerald-400 font-mono">
-                <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" /> AO VIVO
+            ))}
+            <div className="mt-auto pt-3 border-t border-white/[0.04]">
+              <div className="rounded-lg bg-gradient-to-br from-emerald-500/10 to-cyan-500/5 border border-emerald-400/15 p-2.5">
+                <div className="text-[8.5px] font-mono uppercase tracking-widest text-emerald-300/70 font-bold">Saldo disponível</div>
+                <div className="mt-0.5 text-sm font-black text-white font-display tabular-nums">R$ 84.219</div>
+                <div className="mt-1.5 text-[9px] rounded-md bg-emerald-500/20 text-emerald-300 font-bold uppercase text-center py-1 tracking-wider">Sacar PIX</div>
               </div>
             </div>
-            <svg viewBox="0 0 400 130" className="w-full h-[calc(100%-28px)]">
-              <defs>
-                <linearGradient id="lchart" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="#34d399" stopOpacity="0.5" />
-                  <stop offset="100%" stopColor="#34d399" stopOpacity="0" />
-                </linearGradient>
-              </defs>
-              <motion.path
-                d="M0,90 C40,80 60,60 100,55 C140,50 160,80 200,65 C240,50 260,25 300,30 C340,35 360,15 400,10 L400,130 L0,130 Z"
-                fill="url(#lchart)"
-                initial={{ pathLength: 0, opacity: 0 }} animate={{ pathLength: 1, opacity: 1 }}
-                transition={{ duration: 1.6, delay: 1.4 }}
-              />
-              <motion.path
-                d="M0,90 C40,80 60,60 100,55 C140,50 160,80 200,65 C240,50 260,25 300,30 C340,35 360,15 400,10"
-                fill="none" stroke="#34d399" strokeWidth="2"
-                initial={{ pathLength: 0 }} animate={{ pathLength: 1 }} transition={{ duration: 1.8, delay: 1.4 }}
-              />
-              {[100, 200, 300, 400].map((x, i) => (
-                <motion.circle
-                  key={i} cx={x} cy={[55, 65, 30, 10][i]} r="3" fill="#34d399"
-                  initial={{ scale: 0 }} animate={{ scale: [0, 1.4, 1] }}
-                  transition={{ delay: 2 + i * 0.15, duration: 0.5 }}
-                  style={{ filter: "drop-shadow(0 0 6px #34d399)" }}
-                />
+          </aside>
+
+          {/* main content */}
+          <main className="p-4 space-y-3">
+            {/* KPIs */}
+            <div className="grid grid-cols-3 gap-2.5">
+              {[
+                { l: "Faturamento hoje", pre: "R$ ", to: 47892, dec: 0, c: "+18.4%", tone: "emerald" },
+                { l: "Vendas aprovadas", pre: "", to: 312, dec: 0, c: "+27", tone: "cyan" },
+                { l: "Ticket médio", pre: "R$ ", to: 153, dec: 0, c: "+4.1%", tone: "violet" },
+              ].map((k, i) => (
+                <motion.div
+                  key={i}
+                  initial={{ opacity: 0, y: 12 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.8 + i * 0.12 }}
+                  className="relative rounded-xl p-3 bg-white/[0.02] border border-white/[0.05] overflow-hidden"
+                >
+                  <div className="text-[9px] uppercase tracking-wider text-white/40 font-bold">{k.l}</div>
+                  <div className="mt-0.5 text-lg font-black text-white font-display tabular-nums leading-tight">
+                    <CountUp to={k.to} decimals={k.dec} prefix={k.pre} duration={1.8} />
+                  </div>
+                  <div className="flex items-center gap-1 mt-0.5">
+                    <span className={cn(
+                      "text-[9.5px] font-mono font-bold",
+                      k.tone === "emerald" && "text-emerald-400",
+                      k.tone === "cyan" && "text-cyan-400",
+                      k.tone === "violet" && "text-violet-400",
+                    )}>▲ {k.c}</span>
+                    <span className="text-[8.5px] text-white/25 font-mono">vs ontem</span>
+                  </div>
+                  {/* mini sparkline */}
+                  <svg viewBox="0 0 80 20" className="absolute right-2 bottom-2 w-14 h-4 opacity-70">
+                    <path
+                      d={`M0,${15 - i * 2} L15,${12 - i} L30,${14 + i} L45,${8 - i} L60,${10 - i * 2} L80,${5 - i}`}
+                      fill="none"
+                      stroke={k.tone === "emerald" ? "#34d399" : k.tone === "cyan" ? "#22d3ee" : "#a78bfa"}
+                      strokeWidth="1.4"
+                      strokeLinecap="round"
+                    />
+                  </svg>
+                </motion.div>
               ))}
-            </svg>
-          </motion.div>
+            </div>
+
+            {/* chart + feed side by side */}
+            <div className="grid grid-cols-[1.35fr_1fr] gap-2.5">
+              {/* chart */}
+              <motion.div
+                initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 1.2 }}
+                className="rounded-xl p-3 bg-white/[0.02] border border-white/[0.05] relative overflow-hidden"
+              >
+                <div className="flex items-center justify-between mb-1.5">
+                  <div>
+                    <div className="text-[10px] font-bold text-white/85 font-display">Faturamento</div>
+                    <div className="text-[8.5px] font-mono text-white/35 uppercase tracking-wider">Últimas 24h · UTC-3</div>
+                  </div>
+                  <div className="flex gap-1">
+                    {["24h", "7d", "30d"].map((t, i) => (
+                      <span key={t} className={cn(
+                        "text-[8.5px] font-mono font-bold px-1.5 py-0.5 rounded",
+                        i === 0 ? "bg-emerald-500/15 text-emerald-300" : "text-white/30"
+                      )}>{t}</span>
+                    ))}
+                  </div>
+                </div>
+                <svg viewBox="0 0 400 130" className="w-full h-[150px]">
+                  <defs>
+                    <linearGradient id="lchart" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0%" stopColor="#34d399" stopOpacity="0.4" />
+                      <stop offset="100%" stopColor="#34d399" stopOpacity="0" />
+                    </linearGradient>
+                    <pattern id="chartgrid" width="50" height="26" patternUnits="userSpaceOnUse">
+                      <path d="M 50 0 L 0 0 0 26" fill="none" stroke="rgba(255,255,255,0.03)" strokeWidth="1" />
+                    </pattern>
+                  </defs>
+                  <rect width="400" height="130" fill="url(#chartgrid)" />
+                  <motion.path
+                    d="M0,90 C40,80 60,60 100,55 C140,50 160,80 200,65 C240,50 260,25 300,30 C340,35 360,15 400,10 L400,130 L0,130 Z"
+                    fill="url(#lchart)"
+                    initial={{ pathLength: 0, opacity: 0 }} animate={{ pathLength: 1, opacity: 1 }}
+                    transition={{ duration: 1.6, delay: 1.4 }}
+                  />
+                  <motion.path
+                    d="M0,90 C40,80 60,60 100,55 C140,50 160,80 200,65 C240,50 260,25 300,30 C340,35 360,15 400,10"
+                    fill="none" stroke="#34d399" strokeWidth="2"
+                    initial={{ pathLength: 0 }} animate={{ pathLength: 1 }} transition={{ duration: 1.8, delay: 1.4 }}
+                    style={{ filter: "drop-shadow(0 0 6px rgba(52,211,153,0.6))" }}
+                  />
+                  {[100, 200, 300, 400].map((x, i) => (
+                    <motion.circle
+                      key={i} cx={x} cy={[55, 65, 30, 10][i]} r="2.5" fill="#0b0f14" stroke="#34d399" strokeWidth="1.5"
+                      initial={{ scale: 0 }} animate={{ scale: [0, 1.4, 1] }}
+                      transition={{ delay: 2 + i * 0.15, duration: 0.5 }}
+                    />
+                  ))}
+                  {/* tooltip */}
+                  <motion.g
+                    initial={{ opacity: 0 }} animate={{ opacity: [0, 1, 1, 0] }}
+                    transition={{ delay: 3, duration: 4, repeat: Infinity, repeatDelay: 2 }}
+                  >
+                    <line x1="300" y1="30" x2="300" y2="130" stroke="rgba(52,211,153,0.3)" strokeDasharray="3 3" />
+                    <rect x="248" y="6" width="104" height="22" rx="4" fill="#0b0f14" stroke="rgba(52,211,153,0.4)" />
+                    <text x="256" y="20" fill="#34d399" fontSize="9" fontFamily="ui-monospace" fontWeight="700">14h · R$ 6.284</text>
+                  </motion.g>
+                </svg>
+              </motion.div>
+
+              {/* live feed */}
+              <motion.div
+                initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 1.4 }}
+                className="rounded-xl bg-white/[0.02] border border-white/[0.05] overflow-hidden flex flex-col"
+              >
+                <div className="flex items-center justify-between px-3 py-2 border-b border-white/[0.04]">
+                  <div className="text-[10px] font-bold text-white/85 font-display">Vendas ao vivo</div>
+                  <div className="flex items-center gap-1">
+                    <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                    <span className="text-[8.5px] font-mono font-bold text-emerald-300 uppercase tracking-wider">Stream</span>
+                  </div>
+                </div>
+                <div className="flex-1 relative">
+                  <AnimatePresence initial={false}>
+                    {feed.map((tx, i) => (
+                      <LiveTransactionRow key={`${tx.name}-${tx.product}-${i}`} tx={tx} idx={i} />
+                    ))}
+                  </AnimatePresence>
+                </div>
+              </motion.div>
+            </div>
+
+            {/* bottom: mini funnel */}
+            <motion.div
+              initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 1.6 }}
+              className="rounded-xl bg-white/[0.02] border border-white/[0.05] px-3 py-2 flex items-center gap-3"
+            >
+              <div className="text-[9px] font-mono font-bold uppercase tracking-widest text-white/40">Funil hoje</div>
+              {[
+                { l: "Visitas", v: "12.847", w: "100%" },
+                { l: "Checkout", v: "3.492", w: "58%" },
+                { l: "PIX gerado", v: "1.104", w: "34%" },
+                { l: "Aprovado", v: "312", w: "22%" },
+              ].map((s, i) => (
+                <div key={i} className="flex-1 min-w-0">
+                  <div className="flex items-baseline justify-between">
+                    <span className="text-[9px] text-white/50 font-mono">{s.l}</span>
+                    <span className="text-[10px] font-mono font-black text-white tabular-nums">{s.v}</span>
+                  </div>
+                  <div className="mt-1 h-1 rounded-full bg-white/[0.05] overflow-hidden">
+                    <motion.div
+                      initial={{ width: 0 }} animate={{ width: s.w }}
+                      transition={{ delay: 1.8 + i * 0.15, duration: 1, ease: [0.16, 1, 0.3, 1] }}
+                      className={cn(
+                        "h-full rounded-full",
+                        i === 0 && "bg-gradient-to-r from-emerald-400 to-emerald-500",
+                        i === 1 && "bg-gradient-to-r from-cyan-400 to-cyan-500",
+                        i === 2 && "bg-gradient-to-r from-violet-400 to-violet-500",
+                        i === 3 && "bg-gradient-to-r from-fuchsia-400 to-fuchsia-500",
+                      )}
+                    />
+                  </div>
+                </div>
+              ))}
+            </motion.div>
+          </main>
         </div>
 
+        {/* animated cursor */}
+        {!reduce && (
+          <motion.div
+            className="absolute pointer-events-none z-20"
+            initial={{ opacity: 0 }}
+            animate={{
+              opacity: [0, 1, 1, 1, 0],
+              left: ["58%", "58%", "72%", "72%", "72%"],
+              top: ["55%", "55%", "42%", "42%", "42%"],
+            }}
+            transition={{ duration: 5, repeat: Infinity, repeatDelay: 3, times: [0, 0.15, 0.55, 0.85, 1] }}
+          >
+            <svg width="18" height="22" viewBox="0 0 18 22" fill="none">
+              <path d="M1 1L1 17L5.5 13.5L8.5 21L11 20L8 12.5L14 12.5L1 1Z" fill="white" stroke="black" strokeWidth="1" />
+            </svg>
+          </motion.div>
+        )}
+
         {/* holographic sweep */}
-        <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(115deg,transparent_40%,rgba(255,255,255,0.05)_50%,transparent_60%)] animate-[hzSweep_6s_ease-in-out_infinite]" />
+        <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(115deg,transparent_40%,rgba(255,255,255,0.04)_50%,transparent_60%)] animate-[hzSweep_8s_ease-in-out_infinite]" />
+
+        {/* subtle noise overlay for realism */}
+        <div
+          className="pointer-events-none absolute inset-0 opacity-[0.03] mix-blend-overlay"
+          style={{
+            backgroundImage:
+              "url(\"data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='120' height='120'><filter id='n'><feTurbulence baseFrequency='0.9'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>\")",
+          }}
+        />
       </motion.div>
 
-      {/* floating badges — infinite float */}
+      {/* floating notification: PIX aprovado */}
       <motion.div
         initial={{ opacity: 0, x: -30, y: 20 }} animate={{ opacity: 1, x: 0, y: 0 }}
         transition={{ delay: 1.6 }}
-        className="absolute -left-4 md:-left-16 top-1/3 rounded-2xl border border-emerald-400/30 bg-background/70 backdrop-blur-xl px-4 py-3 shadow-[0_20px_60px_-10px_rgba(52,211,153,0.4)] animate-[hzFloatY_6s_ease-in-out_infinite]"
+        className="absolute -left-4 md:-left-14 top-[38%] rounded-2xl border border-emerald-400/25 bg-[#0b0f14]/95 backdrop-blur-xl px-3.5 py-2.5 shadow-[0_20px_60px_-10px_rgba(52,211,153,0.5)] animate-[hzFloatY_6s_ease-in-out_infinite]"
       >
-        <div className="flex items-center gap-3">
-          <div className="h-9 w-9 rounded-xl bg-emerald-500/20 flex items-center justify-center">
-            <QrCode className="h-4 w-4 text-emerald-400" />
+        <div className="flex items-center gap-2.5">
+          <div className="relative h-9 w-9 rounded-xl bg-gradient-to-br from-emerald-500/30 to-emerald-600/10 border border-emerald-400/30 flex items-center justify-center">
+            <QrCode className="h-4 w-4 text-emerald-300" />
+            <span className="absolute -top-1 -right-1 h-2.5 w-2.5 rounded-full bg-emerald-400 ring-2 ring-[#0b0f14] animate-pulse" />
           </div>
           <div>
-            <div className="text-[9px] uppercase tracking-wider text-white/50 font-bold">PIX aprovado</div>
-            <div className="text-sm font-black text-white font-display">R$ 297,00</div>
+            <div className="text-[8.5px] uppercase tracking-widest text-emerald-300/80 font-black font-mono">PIX aprovado · agora</div>
+            <div className="text-sm font-black text-white font-display tabular-nums leading-tight">+ R$ 1.297,00</div>
+            <div className="text-[9px] text-white/40 font-mono">Rafael M. · 0.18s</div>
           </div>
         </div>
       </motion.div>
 
+      {/* floating notification: antifraude */}
       <motion.div
         initial={{ opacity: 0, x: 30, y: -10 }} animate={{ opacity: 1, x: 0, y: 0 }}
         transition={{ delay: 1.9 }}
-        className="absolute -right-4 md:-right-12 -top-4 rounded-2xl border border-cyan-400/30 bg-background/70 backdrop-blur-xl px-4 py-3 shadow-[0_20px_60px_-10px_rgba(34,211,238,0.4)] animate-[hzFloatY_7s_ease-in-out_infinite_reverse]"
+        className="absolute -right-4 md:-right-10 -top-6 rounded-2xl border border-cyan-400/25 bg-[#0b0f14]/95 backdrop-blur-xl px-3.5 py-2.5 shadow-[0_20px_60px_-10px_rgba(34,211,238,0.45)] animate-[hzFloatY_7s_ease-in-out_infinite_reverse]"
       >
-        <div className="flex items-center gap-3">
-          <div className="h-9 w-9 rounded-xl bg-cyan-500/20 flex items-center justify-center">
-            <Shield className="h-4 w-4 text-cyan-400" />
+        <div className="flex items-center gap-2.5">
+          <div className="h-9 w-9 rounded-xl bg-gradient-to-br from-cyan-500/30 to-cyan-600/10 border border-cyan-400/30 flex items-center justify-center">
+            <Shield className="h-4 w-4 text-cyan-300" />
           </div>
           <div>
-            <div className="text-[9px] uppercase tracking-wider text-white/50 font-bold">Antifraude</div>
-            <div className="text-sm font-black text-white font-display">Score 0.02</div>
+            <div className="text-[8.5px] uppercase tracking-widest text-cyan-300/80 font-black font-mono">Antifraude · Bloqueado</div>
+            <div className="text-sm font-black text-white font-display leading-tight">Risk score 0.94</div>
+            <div className="text-[9px] text-white/40 font-mono">IP flagged · Manaus/AM</div>
+          </div>
+        </div>
+      </motion.div>
+
+      {/* floating notification: saque instantâneo */}
+      <motion.div
+        initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 2.2 }}
+        className="absolute -right-2 md:-right-8 bottom-8 rounded-2xl border border-violet-400/25 bg-[#0b0f14]/95 backdrop-blur-xl px-3.5 py-2.5 shadow-[0_20px_60px_-10px_rgba(167,139,250,0.4)] animate-[hzFloatY_8s_ease-in-out_infinite]"
+      >
+        <div className="flex items-center gap-2.5">
+          <div className="h-9 w-9 rounded-xl bg-gradient-to-br from-violet-500/30 to-violet-600/10 border border-violet-400/30 flex items-center justify-center">
+            <Wallet className="h-4 w-4 text-violet-300" />
+          </div>
+          <div>
+            <div className="text-[8.5px] uppercase tracking-widest text-violet-300/80 font-black font-mono">Saque PIX · D+0</div>
+            <div className="text-sm font-black text-white font-display tabular-nums leading-tight">R$ 12.480,00</div>
+            <div className="text-[9px] text-white/40 font-mono">Processado em 3.2s</div>
           </div>
         </div>
       </motion.div>
     </div>
   );
 }
+
 
 function Hero() {
   const navigate = useNavigate();
