@@ -601,8 +601,16 @@ function FeatureCard({ f, i }: { f: typeof FEATURES[0]; i: number }) {
 }
 
 function Features() {
+  const ref = useRef<HTMLElement>(null);
+  const reduce = useReducedMotion();
+  const { scrollYProgress } = useScroll({ target: ref, offset: ["start end", "end start"] });
+  // Layered 3D reveal: cards drift at different speeds like separating planes
+  const yA = useTransform(scrollYProgress, [0, 1], [60, -60]);
+  const yB = useTransform(scrollYProgress, [0, 1], [30, -30]);
+  const yC = useTransform(scrollYProgress, [0, 1], [90, -90]);
+  const lanes = [yA, yB, yC];
   return (
-    <section id="features" className="relative py-24 md:py-32 px-4 md:px-8">
+    <section id="features" ref={ref} className="relative py-24 md:py-32 px-4 md:px-8">
       <div className="max-w-7xl mx-auto">
         <div className="text-center mb-16">
           <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-emerald-400/20 bg-emerald-500/5 text-[10px] font-black uppercase tracking-[0.2em] text-emerald-300 mb-6">
@@ -617,8 +625,12 @@ function Features() {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {FEATURES.map((f, i) => <FeatureCard key={f.title} f={f} i={i} />)}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 [perspective:1400px]">
+          {FEATURES.map((f, i) => (
+            <motion.div key={f.title} style={reduce ? undefined : { y: lanes[i % 3] }} className="will-change-transform">
+              <FeatureCard f={f} i={i} />
+            </motion.div>
+          ))}
         </div>
       </div>
     </section>
