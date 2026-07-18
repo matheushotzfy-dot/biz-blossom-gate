@@ -12,7 +12,7 @@ import {
   Bug, UserX, Banknote, ShieldCheck,
   Package2, BarChart3, Calendar,
   PanelLeftClose, PanelLeft,
-  Trophy, Search, ChevronDown, Sun, Moon,
+  Trophy, Search, ChevronDown, Sun, Moon, Target,
   type LucideIcon,
 } from "lucide-react";
 import { toast } from "sonner";
@@ -51,6 +51,7 @@ import AdminSubscriptionsTab from "./tabs/AdminSubscriptionsTab";
 import AdminReferralsTab from "./tabs/AdminReferralsTab";
 import AdminRewardsTab from "./tabs/AdminRewardsTab";
 import AdminCorridasTab from "./tabs/AdminCorridasTab";
+import AdminGoalsTab from "./tabs/AdminGoalsTab";
 
 const EMPLOYEE_ALLOWED_TABS = new Set(["god-mode", "sellers", "products", "transactions"] as string[]);
 
@@ -108,6 +109,7 @@ const NAV_SECTIONS: { id: string; label: string; items: { id: string; label: str
       { id: "support", label: "Suporte", icon: MessageSquare, employeeAccess: false },
       { id: "rewards", label: "Premiações", icon: Trophy, employeeAccess: false },
       { id: "corridas", label: "Corridas Faturamento", icon: Trophy, employeeAccess: false },
+      { id: "goals", label: "Metas de Faturamento", icon: Target, employeeAccess: false },
       { id: "audit", label: "Auditoria", icon: Activity, employeeAccess: false },
     ],
   },
@@ -593,6 +595,7 @@ export default function AdminDashboard() {
               {activeTab === "support" && (isAdmin || hasSupportPerm) && <AdminSupportTab profiles={profiles} />}
               {activeTab === "rewards" && isAdmin && <AdminRewardsTab profiles={profiles} />}
               {activeTab === "corridas" && isAdmin && <AdminCorridasTab />}
+              {activeTab === "goals" && isAdmin && <AdminGoalsTab />}
               {activeTab === "audit" && isAdmin && <AdminAuditTab profiles={profiles} />}
               {activeTab === "error-logs" && isAdmin && <AdminErrorLogsTab profiles={profiles} />}
               {activeTab === "inactive-sellers" && isAdmin && (
