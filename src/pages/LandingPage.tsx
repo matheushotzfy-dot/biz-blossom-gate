@@ -318,9 +318,9 @@ function HolographicDashboard() {
         {/* content */}
         <div className="p-6 grid grid-cols-3 gap-3">
           {[
-            { l: "Faturamento hoje", v: "R$ 47.892", c: "+18.4%", tone: "emerald" },
-            { l: "Vendas aprovadas", v: "312", c: "+27", tone: "cyan" },
-            { l: "Ticket médio", v: "R$ 153", c: "+4.1%", tone: "violet" },
+            { l: "Faturamento hoje", pre: "R$ ", to: 47892, dec: 0, c: "+18.4%", tone: "emerald" },
+            { l: "Vendas aprovadas", pre: "", to: 312, dec: 0, c: "+27", tone: "cyan" },
+            { l: "Ticket médio", pre: "R$ ", to: 153, dec: 0, c: "+4.1%", tone: "violet" },
           ].map((k, i) => (
             <motion.div
               key={i}
@@ -330,7 +330,9 @@ function HolographicDashboard() {
               className="rounded-2xl p-4 bg-white/[0.02] border border-white/5"
             >
               <div className="text-[9px] uppercase tracking-wider text-white/40 font-bold">{k.l}</div>
-              <div className="mt-1 text-xl font-black text-white font-display">{k.v}</div>
+              <div className="mt-1 text-xl font-black text-white font-display tabular-nums">
+                <CountUp to={k.to} decimals={k.dec} prefix={k.pre} duration={1.8} />
+              </div>
               <div className={cn(
                 "text-[10px] mt-1 font-mono",
                 k.tone === "emerald" && "text-emerald-400",
@@ -339,6 +341,7 @@ function HolographicDashboard() {
               )}>▲ {k.c}</div>
             </motion.div>
           ))}
+
 
           {/* chart */}
           <motion.div
