@@ -233,9 +233,9 @@ export function TransactionTimeline({ transactionId, variant = "seller", classNa
                 <span className={cn("text-[12px] font-black uppercase tracking-[0.14em]", tone.text)}>
                   {v.label}
                 </span>
-                {ev.acquirer_slug && (
+                {(variant === "admin" ? ev.acquirer_slug : true) && (
                   <span className="inline-flex items-center rounded-full border border-border/50 bg-background/60 px-2 py-0.5 text-[9.5px] font-black uppercase tracking-wider text-foreground/80">
-                    {ev.acquirer_slug}
+                    {variant === "admin" ? ev.acquirer_slug : BRAND_LABEL}
                   </span>
                 )}
                 {isAdminOnly && variant === "admin" && (
@@ -247,7 +247,7 @@ export function TransactionTimeline({ transactionId, variant = "seller", classNa
                   {dt.format(new Date(ev.created_at))}
                 </span>
               </div>
-              <p className="mt-1 text-[12.5px] text-foreground/90 break-words">{ev.description}</p>
+              <p className="mt-1 text-[12.5px] text-foreground/90 break-words">{maskAcquirer(ev.description, variant)}</p>
               {summary && (
                 <p className="mt-0.5 text-[11px] text-muted-foreground/80 break-words">{summary}</p>
               )}
