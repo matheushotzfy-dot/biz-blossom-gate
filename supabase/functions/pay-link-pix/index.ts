@@ -2,6 +2,7 @@
 // Derives seller from payment_link.user_id
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { createVeopagDeposit, resolveAcquirerSlug } from "../_shared/veopag.ts";
+import { createPodpayAppPix } from "../_shared/podpay-app.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
