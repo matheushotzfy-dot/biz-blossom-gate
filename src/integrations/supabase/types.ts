@@ -1982,6 +1982,69 @@ export type Database = {
           },
         ]
       }
+      payment_links: {
+        Row: {
+          accept_boleto: boolean
+          accept_card: boolean
+          accept_pix: boolean
+          amount: number
+          clicks: number
+          created_at: string
+          current_uses: number
+          description: string | null
+          expires_at: string | null
+          id: string
+          image_url: string | null
+          is_active: boolean
+          max_uses: number | null
+          slug: string
+          title: string
+          total_revenue: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          accept_boleto?: boolean
+          accept_card?: boolean
+          accept_pix?: boolean
+          amount: number
+          clicks?: number
+          created_at?: string
+          current_uses?: number
+          description?: string | null
+          expires_at?: string | null
+          id?: string
+          image_url?: string | null
+          is_active?: boolean
+          max_uses?: number | null
+          slug: string
+          title: string
+          total_revenue?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          accept_boleto?: boolean
+          accept_card?: boolean
+          accept_pix?: boolean
+          amount?: number
+          clicks?: number
+          created_at?: string
+          current_uses?: number
+          description?: string | null
+          expires_at?: string | null
+          id?: string
+          image_url?: string | null
+          is_active?: boolean
+          max_uses?: number | null
+          slug?: string
+          title?: string
+          total_revenue?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       pix_keys: {
         Row: {
           created_at: string
@@ -2614,6 +2677,95 @@ export type Database = {
           updated_at?: string
           updated_by?: string | null
           user_id?: string | null
+        }
+        Relationships: []
+      }
+      revenue_goal_achievements: {
+        Row: {
+          achieved_amount: number
+          achieved_at: string
+          goal_id: string
+          id: string
+          notes: string | null
+          paid_at: string | null
+          reward_status: string
+          seller_id: string
+        }
+        Insert: {
+          achieved_amount: number
+          achieved_at?: string
+          goal_id: string
+          id?: string
+          notes?: string | null
+          paid_at?: string | null
+          reward_status?: string
+          seller_id: string
+        }
+        Update: {
+          achieved_amount?: number
+          achieved_at?: string
+          goal_id?: string
+          id?: string
+          notes?: string | null
+          paid_at?: string | null
+          reward_status?: string
+          seller_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "revenue_goal_achievements_goal_id_fkey"
+            columns: ["goal_id"]
+            isOneToOne: false
+            referencedRelation: "revenue_goals"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      revenue_goals: {
+        Row: {
+          created_at: string
+          description: string | null
+          ends_at: string
+          id: string
+          is_active: boolean
+          period_type: string
+          reward_description: string | null
+          reward_image_url: string | null
+          reward_title: string
+          starts_at: string
+          target_amount: number
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          ends_at: string
+          id?: string
+          is_active?: boolean
+          period_type?: string
+          reward_description?: string | null
+          reward_image_url?: string | null
+          reward_title: string
+          starts_at: string
+          target_amount: number
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          ends_at?: string
+          id?: string
+          is_active?: boolean
+          period_type?: string
+          reward_description?: string | null
+          reward_image_url?: string | null
+          reward_title?: string
+          starts_at?: string
+          target_amount?: number
+          title?: string
+          updated_at?: string
         }
         Relationships: []
       }
@@ -3470,6 +3622,7 @@ export type Database = {
           is_simulated: boolean
           metadata: Json
           net_amount: number
+          payment_link_id: string | null
           payment_method: string | null
           pix_copy_paste: string | null
           pix_expires_at: string | null
@@ -3505,6 +3658,7 @@ export type Database = {
           is_simulated?: boolean
           metadata?: Json
           net_amount?: number
+          payment_link_id?: string | null
           payment_method?: string | null
           pix_copy_paste?: string | null
           pix_expires_at?: string | null
@@ -3540,6 +3694,7 @@ export type Database = {
           is_simulated?: boolean
           metadata?: Json
           net_amount?: number
+          payment_link_id?: string | null
           payment_method?: string | null
           pix_copy_paste?: string | null
           pix_expires_at?: string | null
@@ -3576,6 +3731,13 @@ export type Database = {
             columns: ["coupon_id"]
             isOneToOne: false
             referencedRelation: "coupons"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "transactions_payment_link_id_fkey"
+            columns: ["payment_link_id"]
+            isOneToOne: false
+            referencedRelation: "payment_links"
             referencedColumns: ["id"]
           },
           {
@@ -4522,8 +4684,18 @@ export type Database = {
           pix: boolean
         }[]
       }
+      get_goal_progress: {
+        Args: { _goal_id: string }
+        Returns: {
+          achieved: boolean
+          revenue: number
+          seller_id: string
+          seller_name: string
+        }[]
+      }
       get_ledger_balance: { Args: { _user_id: string }; Returns: number }
       get_ledger_integrity_report: { Args: never; Returns: Json }
+      get_my_goal_progress: { Args: { _goal_id: string }; Returns: number }
       get_my_max_ticket: { Args: never; Returns: number }
       get_quiz_questions_for_student: {
         Args: { _quiz_id: string }
