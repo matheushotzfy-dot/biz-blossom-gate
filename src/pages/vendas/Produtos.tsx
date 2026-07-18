@@ -245,6 +245,15 @@ export default function Produtos() {
         }
       />
 
+      {/* ── KPI grid (Dashboard-style) ── */}
+      <FinanceiroKpiGrid cols={4}>
+        <FinanceiroKpi label="Produtos no catálogo" value={String(products.length)} sub={`${counts.active} ativos`} icon={Package} tone="primary" />
+        <FinanceiroKpi label="Vendas · 30 dias" value={String(kpi.salesCount)} sub="pedidos aprovados" icon={ShoppingCart} tone="info" />
+        <FinanceiroKpi label="Receita · 30 dias" value={fmtBRL(kpi.revenue)} sub={`Ticket médio ${fmtBRL(kpi.avgTicket)}`} icon={TrendingUp} tone="success" />
+        <FinanceiroKpi label="Top do período" value={kpi.bestProduct ? (kpi.bestProduct.length > 18 ? kpi.bestProduct.slice(0, 18) + "…" : kpi.bestProduct) : "—"} sub="Produto mais vendido" icon={DollarSign} tone="warning" />
+      </FinanceiroKpiGrid>
+
+
       {/* ── Tabs + Search row ── */}
       <div className="flex flex-col gap-3 animate-fade-in stagger-2 lg:flex-row lg:items-center lg:justify-between">
         <div className="-mx-3 sm:mx-0 overflow-x-auto scrollbar-none">
