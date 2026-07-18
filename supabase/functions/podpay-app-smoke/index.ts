@@ -1,61 +1,70 @@
-// Diagnostic smoke test — remove after validation.
 import { corsHeaders } from "npm:@supabase/supabase-js@2/cors";
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
-  const out: any = {};
-  const key = Deno.env.get("PODPAY_APP_API_KEY");
-  out.hasKey = !!key;
-  out.keyPrefix = key ? key.slice(0, 8) : null;
-  if (!key) {
-    return new Response(JSON.stringify(out, null, 2), {
-      status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
-    });
+  const key = Deno.env.get("PODPAY_APP_API_KEY")!;
+  const results: any[] = [];
+
+  const attempts: Array<{ name: string; body: any }> = [
+    { name: "A_flat_items", body: {
+      amount: 100, paymentMethod: "pix", externalId: crypto.randomUUID(),
+      customer: { name: "Teste", email: "u@a.com", document: { number: "11144477735", type: "cpf" } },
+      items: [{ title: "X", quantity: 1, unitPrice: 100, tangible: false }],
+      pix: { expiresInMinutes: 30 },
+    }},
+    { name: "B_items_unitAmount", body: {
+      amount: 100, paymentMethod: "pix", externalId: crypto.randomUUID(),
+      customer: { name: "Teste", email: "u@a.com", document: { number: "11144477735", type: "cpf" } },
+      items: [{ title: "X", quantity: 1, unitAmount: 100 }],
+      pix: { expiresInMinutes: 30 },
+    }},
+    { name: "C_items_name", body: {
+      amount: 100, paymentMethod: "pix", externalId: crypto.randomUUID(),
+      customer: { name: "Teste", email: "u@a.com", document: { number: "11144477735", type: "cpf" } },
+      items: [{ name: "X", quantity: 1, price: 100 }],
+      pix: { expiresInMinutes: 30 },
+    }},
+    { name: "D_items_amount", body: {
+      amount: 100, paymentMethod: "pix", externalId: crypto.randomUUID(),
+      customer: { name: "Teste", email: "u@a.com", document: { number: "11144477735", type: "cpf" } },
+      items: [{ title: "X", quantity: 1, amount: 100, tangible: false }],
+      pix: { expiresInMinutes: 30 },
+    }},
+    { name: "E_items_only_top", body: {
+      externalId: crypto.randomUUID(),
+      paymentMethod: "pix",
+      customer: { name: "Teste", email: "u@a.com", document: { number: "11144477735", type: "cpf" } },
+      items: [{ title: "X", quantity: 1, unitPrice: 100, tangible: false }],
+      pix: { expiresInMinutes: 30 },
+    }},
+    { name: "F_customer_documentString", body: {
+      amount: 100, paymentMethod: "pix", externalId: crypto.randomUUID(),
+      customer: { name: "Teste", email: "u@a.com", document: "11144477735", documentType: "cpf" },
+      items: [{ title: "X", quantity: 1, unitPrice: 100, tangible: false }],
+      pix: { expiresInMinutes: 30 },
+    }},
+  ];
+
+  for (const a of attempts) {
+    try {
+      const r = await fetch("https://api.podpay.app/v1/transactions", {
+        method: "POST",
+        headers: {
+          "x-api-key": key,
+          "X-Idempotency-Key": a.body.externalId,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(a.body),
+      });
+      const txt = (await r.text()).slice(0, 600);
+      results.push({ name: a.name, status: r.status, body: txt });
+      if (r.ok) break;
+    } catch (e) {
+      results.push({ name: a.name, error: e instanceof Error ? e.message : "?" });
+    }
   }
 
-  // 1. Auth smoke: /v1/balance/available
-  try {
-    const bal = await fetch("https://api.podpay.app/v1/balance/available", {
-      headers: { "x-api-key": key, "Accept": "application/json" },
-    });
-    out.balance = { status: bal.status, body: (await bal.text()).slice(0, 500) };
-  } catch (e) {
-    out.balance = { error: e instanceof Error ? e.message : "unknown" };
-  }
-
-  // 2. Criar PIX de R$1
-  const extId = crypto.randomUUID();
-  const body = {
-    amount: 100,
-    paymentMethod: "pix",
-    externalId: extId,
-    description: "Smoke test Hotzfy",
-    customer: {
-      name: "Cliente Teste",
-      email: `user${Math.floor(Math.random()*1e8)}@gmail.com`,
-      document: { number: "11144477735", type: "cpf" },
-    },
-    items: [{ title: "Smoke test", quantity: 1, unitPrice: 100, tangible: false }],
-    pix: { expiresInMinutes: 30 },
-  };
-
-  try {
-    const r = await fetch("https://api.podpay.app/v1/transactions", {
-      method: "POST",
-      headers: {
-        "x-api-key": key,
-        "X-Idempotency-Key": extId,
-        "Content-Type": "application/json",
-        "Accept": "application/json",
-      },
-      body: JSON.stringify(body),
-    });
-    out.createPix = { status: r.status, body: (await r.text()).slice(0, 1500) };
-  } catch (e) {
-    out.createPix = { error: e instanceof Error ? e.message : "unknown" };
-  }
-
-  return new Response(JSON.stringify(out, null, 2), {
+  return new Response(JSON.stringify(results, null, 2), {
     headers: { ...corsHeaders, "Content-Type": "application/json" },
   });
 });
