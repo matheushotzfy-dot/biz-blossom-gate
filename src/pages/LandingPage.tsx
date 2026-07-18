@@ -316,7 +316,7 @@ function HolographicDashboard() {
           <span className="h-2.5 w-2.5 rounded-full bg-amber-400/70" />
           <span className="h-2.5 w-2.5 rounded-full bg-emerald-500/70" />
           <div className="ml-4 h-6 flex-1 rounded-md bg-white/[0.03] border border-white/5 flex items-center px-3 text-[10px] font-mono text-emerald-300/70">
-            <Lock className="h-3 w-3 mr-2" /> ahotzfy.com.br/dashboard
+            <Lock className="h-3 w-3 mr-2" /> hotzfy.com.br/dashboard
           </div>
         </div>
 
