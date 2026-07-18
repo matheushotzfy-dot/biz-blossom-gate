@@ -78,14 +78,27 @@ function visualFor(type: string): EventVisual {
   return EVENT_MAP[type] || { icon: Clock, tone: "muted", label: type };
 }
 
+/** Sellers never see real acquirer names — everything is branded HOTZFY. */
+const BRAND_LABEL = "HOTZFY";
+const ACQUIRER_MASK_RE = /\b(veopag|podpay)\b/gi;
+function maskAcquirer(text: string | null | undefined, variant: "admin" | "seller"): string {
+  if (!text) return "";
+  if (variant === "admin") return text;
+  return text.replace(ACQUIRER_MASK_RE, BRAND_LABEL);
+}
+
 function metaSummary(ev: TxEvent, variant: "admin" | "seller"): string | null {
   const m = ev.metadata || {};
   const parts: string[] = [];
   if (ev.event_type === "acquirer_switched") {
     const from = m["from"] as string | undefined;
     const to = m["to"] as string | undefined;
-    if (from && to) parts.push(`${from.toUpperCase()} → ${to.toUpperCase()}`);
-    if (m["reason"]) parts.push(String(m["reason"]));
+    if (variant === "admin" && from && to) {
+      parts.push(`${from.toUpperCase()} → ${to.toUpperCase()}`);
+    } else if (variant === "seller") {
+      parts.push("Roteamento atualizado");
+    }
+    if (m["reason"] && variant === "admin") parts.push(String(m["reason"]));
   } else if (ev.event_type === "expired") {
     const reason = (m["reason"] as string) || "Prazo do PIX vencido";
     parts.push(reason);
@@ -103,7 +116,8 @@ function metaSummary(ev: TxEvent, variant: "admin" | "seller"): string | null {
       }
     }
   } else if (ev.event_type === "created" || ev.event_type === "acquirer_routed") {
-    if (ev.acquirer_slug) parts.push(ev.acquirer_slug.toUpperCase());
+    if (variant === "admin" && ev.acquirer_slug) parts.push(ev.acquirer_slug.toUpperCase());
+    else if (variant === "seller") parts.push(BRAND_LABEL);
   }
   return parts.length ? parts.join(" · ") : null;
 }
