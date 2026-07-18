@@ -995,17 +995,35 @@ export default function LandingPage() {
         jsonLd={JSONLD}
       />
 
-      {/* keyframes injected once */}
+      {/* keyframes + reduced-motion guard */}
       <style>{`
         @keyframes hzGridDrift { 0% { transform: translate(0,0); } 100% { transform: translate(56px,56px); } }
         @keyframes hzScan { 0% { top: -2px; opacity: 0; } 10% { opacity: 1; } 90% { opacity: 1; } 100% { top: 100vh; opacity: 0; } }
         @keyframes hzFloat { 0%, 100% { transform: translate(0,0) scale(1); } 50% { transform: translate(30px,-40px) scale(1.05); } }
         @keyframes hzSweep { 0%, 100% { transform: translateX(-100%); } 50% { transform: translateX(100%); } }
         @keyframes hzMarquee { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
+        @keyframes hzFloatY { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
+        @keyframes hzGlitchA { 0%, 92%, 100% { transform: translate(0,0); opacity: 0; } 93% { transform: translate(-2px,1px); opacity: .9; } 96% { transform: translate(2px,-1px); opacity: .7; } 99% { transform: translate(-1px,0); opacity: .5; } }
+        @keyframes hzGlitchB { 0%, 92%, 100% { transform: translate(0,0); opacity: 0; } 94% { transform: translate(2px,-1px); opacity: .8; } 97% { transform: translate(-2px,1px); opacity: .6; } }
+        .hz-glitch { position: relative; }
+        .hz-glitch::before, .hz-glitch::after {
+          content: attr(data-text);
+          position: absolute; inset: 0;
+          background: inherit; -webkit-background-clip: text; background-clip: text; color: transparent;
+          pointer-events: none;
+        }
+        .hz-glitch::before { text-shadow: 2px 0 rgba(34,211,238,.9); animation: hzGlitchA 5.5s infinite steps(1); mix-blend-mode: screen; }
+        .hz-glitch::after { text-shadow: -2px 0 rgba(167,139,250,.9); animation: hzGlitchB 5.5s infinite steps(1); mix-blend-mode: screen; }
+        @media (prefers-reduced-motion: reduce) {
+          .hz-glitch::before, .hz-glitch::after { display: none; }
+          *, *::before, *::after { animation-duration: .001ms !important; animation-iteration-count: 1 !important; transition-duration: .001ms !important; }
+        }
       `}</style>
 
       <HoloGrid />
+      <NeuralNet />
       <Nav />
+
       <main className="relative z-10">
         <Hero />
         <MetricsStrip />
