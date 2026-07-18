@@ -5,7 +5,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { animate } from "framer-motion";
 import { useNavigate } from "react-router-dom";
-import { motion, useScroll, useTransform, useSpring, useInView, AnimatePresence } from "framer-motion";
+import { motion, useScroll, useTransform, useSpring, useInView, useMotionValue, useReducedMotion, AnimatePresence } from "framer-motion";
 import {
   ArrowRight, Shield, Zap, BarChart3, CreditCard, Users, CheckCircle2,
   Sparkles, Activity, QrCode, Wallet, Radio, Code2, Layers, Cpu,
@@ -14,6 +14,76 @@ import {
 import { cn } from "@/lib/utils";
 import { Seo } from "@/components/Seo";
 import { HotzfyLogo } from "@/components/HotzfyLogo";
+
+/* Glitch text — used on the "de outra era" hero accent */
+function GlitchText({ children, className }: { children: React.ReactNode; className?: string }) {
+  const reduce = useReducedMotion();
+  if (reduce) return <span className={className}>{children}</span>;
+  return (
+    <span className={cn("relative inline-block hz-glitch", className)} data-text={typeof children === "string" ? children : undefined}>
+      {children}
+    </span>
+  );
+}
+
+/* Neural-net connected nodes — canvas, subtle, respects reduced motion */
+function NeuralNet() {
+  const reduce = useReducedMotion();
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  useEffect(() => {
+    if (reduce) return;
+    const canvas = canvasRef.current; if (!canvas) return;
+    const ctx = canvas.getContext("2d"); if (!ctx) return;
+    let raf = 0; let w = 0; let h = 0; let dpr = Math.min(window.devicePixelRatio || 1, 2);
+    const resize = () => {
+      w = canvas.clientWidth; h = canvas.clientHeight;
+      canvas.width = w * dpr; canvas.height = h * dpr;
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    };
+    resize();
+    const onResize = () => resize();
+    window.addEventListener("resize", onResize);
+    const count = Math.min(46, Math.floor((w * h) / 32000));
+    const nodes = Array.from({ length: count }, () => ({
+      x: Math.random() * w, y: Math.random() * h,
+      vx: (Math.random() - 0.5) * 0.18, vy: (Math.random() - 0.5) * 0.18,
+    }));
+    const step = () => {
+      ctx.clearRect(0, 0, w, h);
+      for (const n of nodes) {
+        n.x += n.vx; n.y += n.vy;
+        if (n.x < 0 || n.x > w) n.vx *= -1;
+        if (n.y < 0 || n.y > h) n.vy *= -1;
+      }
+      for (let i = 0; i < nodes.length; i++) {
+        for (let j = i + 1; j < nodes.length; j++) {
+          const a = nodes[i], b = nodes[j];
+          const dx = a.x - b.x, dy = a.y - b.y;
+          const d2 = dx * dx + dy * dy;
+          if (d2 < 140 * 140) {
+            const alpha = (1 - Math.sqrt(d2) / 140) * 0.28;
+            ctx.strokeStyle = `rgba(52,211,153,${alpha.toFixed(3)})`;
+            ctx.lineWidth = 0.6;
+            ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y); ctx.stroke();
+          }
+        }
+      }
+      ctx.fillStyle = "rgba(52,211,153,0.55)";
+      for (const n of nodes) { ctx.beginPath(); ctx.arc(n.x, n.y, 1.2, 0, Math.PI * 2); ctx.fill(); }
+      raf = requestAnimationFrame(step);
+    };
+    raf = requestAnimationFrame(step);
+    return () => { cancelAnimationFrame(raf); window.removeEventListener("resize", onResize); };
+  }, [reduce]);
+  if (reduce) return null;
+  return (
+    <canvas
+      ref={canvasRef}
+      className="pointer-events-none fixed inset-0 z-0 h-full w-full opacity-[0.35] mix-blend-screen"
+      aria-hidden
+    />
+  );
+}
 
 /* ═══════════════════════════════════════════════════════════════
    DATA
