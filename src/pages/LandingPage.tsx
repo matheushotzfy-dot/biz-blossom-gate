@@ -449,9 +449,9 @@ function Hero() {
           className="font-display font-black tracking-[-0.05em] leading-[0.95] text-5xl md:text-7xl lg:text-8xl"
         >
           <span className="block text-foreground">Pagamentos</span>
-          <span className="block bg-gradient-to-r from-emerald-400 via-cyan-400 to-violet-400 bg-clip-text text-transparent">
+          <GlitchText className="block bg-gradient-to-r from-emerald-400 via-cyan-400 to-violet-400 bg-clip-text text-transparent">
             de outra era.
-          </span>
+          </GlitchText>
         </motion.h1>
 
         <motion.p
