@@ -105,19 +105,19 @@ const JSONLD = [
 ];
 
 const FEATURES = [
-  { icon: QrCode, title: "Checkout Holográfico", desc: "PIX em 1.2s, cartão em 12x, boleto. UI que converte 3x mais.", tone: "emerald" },
+  { icon: QrCode, title: "Checkout Holográfico", desc: "PIX em 0.2s, cartão em 12x, boleto. Interface que converte 3x mais.", tone: "emerald" },
   { icon: Shield, title: "Antifraude Neural", desc: "Blacklist global, velocity checks e tokenização em tempo real.", tone: "cyan" },
   { icon: BarChart3, title: "Analytics em Tempo Real", desc: "Dashboard cinematográfico com métricas ao vivo, sem delay.", tone: "violet" },
   { icon: Users, title: "Área de Membros Netflix", desc: "Player profissional, liberação automática, gamificação embutida.", tone: "emerald" },
-  { icon: Wallet, title: "Saques em 1 dia útil", desc: "PIX direto, sem burocracia. Antecipação disponível.", tone: "cyan" },
+  { icon: Wallet, title: "Saques instantâneol", desc: "PIX direto, sem burocracia. Antecipação disponível.", tone: "cyan" },
   { icon: Code2, title: "API REST + Webhooks", desc: "sk_live_ + HMAC-SHA256. Integração em minutos.", tone: "violet" },
 ];
 
 const METRICS = [
-  { label: "TPV processado", prefix: "R$ ", to: 2.4, suffix: "B+", decimals: 1, icon: Activity },
+  { label: "TPV processado", prefix: "R$ ", to: 200, suffix: "M+", decimals: 0, icon: Activity },
   { label: "Taxa de aprovação", prefix: "", to: 98.7, suffix: "%", decimals: 1, icon: CheckCircle2 },
   { label: "Uptime", prefix: "", to: 99.99, suffix: "%", decimals: 2, icon: Radio },
-  { label: "Latência PIX", prefix: "", to: 1.2, suffix: "s", decimals: 1, icon: Zap },
+  { label: "Latência PIX", prefix: "", to: 0.2, suffix: "s", decimals: 1, icon: Zap },
 ];
 
 /* Animated count-up that fires when scrolled into view */
@@ -440,7 +440,7 @@ function Hero() {
           className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-emerald-400/25 bg-emerald-500/5 backdrop-blur-md text-[10px] font-display font-black uppercase tracking-[0.2em] text-emerald-300 mb-8"
         >
           <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" />
-          Gateway do Futuro · Ao vivo
+          FOCADO EM QUEM QUER ESCALAR DE VERDADE!
         </motion.div>
 
         <motion.h1
@@ -459,7 +459,7 @@ function Hero() {
           className="mt-8 max-w-2xl mx-auto text-base md:text-xl text-muted-foreground/80 font-display leading-relaxed"
         >
           Checkout holográfico, antifraude neural e saques em 1 dia útil.
-          A infraestrutura que os infoprodutores do <span className="text-emerald-300 font-bold">ano 3000</span> já usam — hoje.
+          A infraestrutura que os infoprodutores do <span className="text-emerald-300 font-bold">futuro</span> já usam — hoje.
         </motion.p>
 
         <motion.div
@@ -489,9 +489,9 @@ function Hero() {
           initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 1 }}
           className="mt-8 flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-[11px] font-mono text-muted-foreground/60"
         >
-          <span className="flex items-center gap-1.5"><CheckCircle2 className="h-3 w-3 text-emerald-400" /> Zero mensalidade</span>
-          <span className="flex items-center gap-1.5"><CheckCircle2 className="h-3 w-3 text-emerald-400" /> PIX em 1.2s</span>
-          <span className="flex items-center gap-1.5"><CheckCircle2 className="h-3 w-3 text-emerald-400" /> Saque em 1 dia útil</span>
+          <span className="flex items-center gap-1.5"><CheckCircle2 className="h-3 w-3 text-emerald-400" /> Alta Aprovação</span>
+          <span className="flex items-center gap-1.5"><CheckCircle2 className="h-3 w-3 text-emerald-400" /> PIX em 0.2s</span>
+          <span className="flex items-center gap-1.5"><CheckCircle2 className="h-3 w-3 text-emerald-400" /> Saque em D+0</span>
         </motion.div>
 
         <motion.div style={{ y: dashY }} className="mt-24 md:mt-32">
