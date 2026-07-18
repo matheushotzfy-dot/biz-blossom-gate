@@ -136,7 +136,12 @@ function CountUp({ to, decimals = 0, prefix = "", suffix = "", duration = 2 }: {
           const controls = animate(0, to, {
             duration,
             ease: [0.16, 1, 0.3, 1],
-            onUpdate: (v) => { if (el) el.textContent = prefix + v.toFixed(decimals) + suffix; },
+            onUpdate: (v) => { 
+              if (el) {
+                const formatted = v.toFixed(decimals).replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+                el.textContent = prefix + formatted + suffix; 
+              }
+            },
           });
           return () => controls.stop();
         }
