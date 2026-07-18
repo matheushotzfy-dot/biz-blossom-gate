@@ -109,7 +109,7 @@ const FEATURES = [
   { icon: Shield, title: "Antifraude Neural", desc: "Blacklist global, velocity checks e tokenização em tempo real.", tone: "cyan" },
   { icon: BarChart3, title: "Analytics em Tempo Real", desc: "Dashboard cinematográfico com métricas ao vivo, sem delay.", tone: "violet" },
   { icon: Users, title: "Área de Membros Netflix", desc: "Player profissional, liberação automática, gamificação embutida.", tone: "emerald" },
-  { icon: Wallet, title: "Saques instantâneol", desc: "PIX direto, sem burocracia. Antecipação disponível.", tone: "cyan" },
+  { icon: Wallet, title: "Saques instantâneos", desc: "PIX direto, sem burocracia. Antecipação disponível.", tone: "cyan" },
   { icon: Code2, title: "API REST + Webhooks", desc: "sk_live_ + HMAC-SHA256. Integração em minutos.", tone: "violet" },
 ];
 
