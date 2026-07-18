@@ -91,7 +91,7 @@ function NeuralNet() {
 
 const FAQ = [
   { q: "Preciso pagar mensalidade?", a: "Não. Zero mensalidade. Você paga apenas uma taxa por transação aprovada." },
-  { q: "Quanto tempo para receber?", a: "Saques via PIX processados em até 1 dia útil, direto no seu painel." },
+  { q: "Quanto tempo para receber?", a: "Saques via PIX processados em D+0" },
   { q: "Quais métodos de pagamento?", a: "PIX instantâneo, cartão em até 12x, boleto. Tudo no mesmo checkout." },
   { q: "Tem área de membros?", a: "Sim, com player profissional, liberação automática e experiência Netflix-style." },
   { q: "Sistema de afiliados?", a: "Integrado, com comissões configuráveis e pagamento automático." },
