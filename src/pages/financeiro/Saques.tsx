@@ -163,7 +163,7 @@ export default function Saques() {
               <Plus size={18} strokeWidth={3} /> Solicitar Saque
             </button>
           </DialogTrigger>
-          <DialogContent className="max-w-md bg-card border-border/60">
+          <DialogContent className="max-w-md bg-card border-border/60 max-h-[92vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle className="text-xl font-black uppercase tracking-tight">Solicitar Saque</DialogTitle>
             </DialogHeader>

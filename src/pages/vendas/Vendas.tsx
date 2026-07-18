@@ -95,8 +95,8 @@ export default function Vendas() {
   const [search, setSearch] = useState("");
   const [detailTx, setDetailTx] = useState<Tables<"transactions"> | null>(null);
   const [privacyHidden, setPrivacyHidden] = useState(() => localStorage.getItem("privacy_mode") === "true");
-  const [preset, setPreset] = useState<PresetId>("30d");
-  const [range, setRange] = useState<DateRange | undefined>(() => buildPreset("30d"));
+  const [preset, setPreset] = useState<PresetId>("today");
+  const [range, setRange] = useState<DateRange | undefined>(() => buildPreset("today"));
   const [tempRange, setTempRange] = useState<DateRange | undefined>(range);
   const [dateOpen, setDateOpen] = useState(false);
   const [page, setPage] = useState(1);

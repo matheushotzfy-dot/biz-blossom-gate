@@ -30,7 +30,10 @@ export function BankCombobox({
   React.useEffect(() => {
     if (open) {
       setQuery("");
-      setTimeout(() => inputRef.current?.focus(), 40);
+      // Não auto-focar em touch devices — evita abrir teclado ao selecionar banco no mobile
+      const isTouch = typeof window !== "undefined"
+        && (window.matchMedia?.("(pointer: coarse)").matches || "ontouchstart" in window);
+      if (!isTouch) setTimeout(() => inputRef.current?.focus(), 40);
     }
   }, [open]);
 
