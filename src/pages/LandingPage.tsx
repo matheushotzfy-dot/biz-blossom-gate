@@ -881,9 +881,9 @@ function LiveFeed() {
    ═══════════════════════════════════════════════════════════════ */
 
 const TESTIMONIALS = [
-  { name: "Marina Ribeiro", role: "CEO · Método Ascensão", quote: "Migrei do concorrente e faturei 3x no primeiro mês. Checkout com conversão absurda e o saque em 1 dia mudou meu fluxo de caixa.", metric: "+312% conversão" },
-  { name: "Rodrigo Vasques", role: "Fundador · Trader Elite", quote: "A antifraude neural bloqueou 98% dos chargebacks que eu tinha. Nunca vi um gateway tão preciso. Suporte responde em minutos.", metric: "−98% chargeback" },
-  { name: "Camila Nogueira", role: "Producer · Escola Digital", quote: "API brutal, docs impecáveis. Integrei em 2 horas o que na outra plataforma levou 3 semanas. Splits automáticos por coprodutor.", metric: "2h integração" },
+  { name: "Marina Ribeiro", role: "CEO · Método Ascensão", quote: "Migrei do concorrente e faturei 3x no primeiro mês. Checkout com conversão absurda e o saque instantâneo mudou meu fluxo de caixa.", metric: "+312% conversão" },
+  { name: "Rodrigo Vasques", role: "Fundador · Trader Elite", quote: "Adquirencia HOTZFY  reduziu 98% dos chargebacks/MEDS que eu tinha. Nunca vi um gateway tão preciso.", metric: "−98% chargeback" },
+  { name: "Camila Nogueira", role: "Producer · Escola Digital", quote: "API brutal, docs impecáveis. Integrei em 5 minutos o que na outra plataforma levou 2 horas. Splits automáticos por coprodutor.", metric: "5m integração" },
 ];
 
 function Testimonials() {
