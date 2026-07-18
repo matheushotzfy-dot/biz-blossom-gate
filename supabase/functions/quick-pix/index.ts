@@ -2,6 +2,7 @@
 // Auth required: user_id is derived from the JWT
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { createVeopagDeposit, resolveAcquirerSlug } from "../_shared/veopag.ts";
+import { createPodpayAppPix } from "../_shared/podpay-app.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -217,6 +218,79 @@ Deno.serve(async (req) => {
         { headers: { ...corsHeaders, "Content-Type": "application/json" } },
       );
     }
+    // ===================================================================
+    // === ACQUIRER ROUTING: PodPay (nova - api.podpay.app) ==============
+    // ===================================================================
+    if (acquirerSlug === "podpay_app") {
+      const preTxId = crypto.randomUUID();
+
+      let pod;
+      try {
+        pod = await createPodpayAppPix({
+          amount: amt,
+          externalId: preTxId,
+          payerName: safeName,
+          payerDocument: cleanDoc,
+          description: String(description || "Cobrança PIX"),
+        }, supabase);
+      } catch (e) {
+        safeLog("PodPay error", { error: e instanceof Error ? e.message : "unknown" });
+        return new Response(
+          JSON.stringify({ success: false, error: "Não foi possível gerar o PIX. Tente novamente." }),
+          { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+        );
+      }
+
+      const pixExpiresAt = pod.expiresAt ?? new Date(Date.now() + 30 * 60 * 1000).toISOString();
+
+      const { data: transaction } = await supabase
+        .from("transactions")
+        .insert({
+          id: preTxId,
+          user_id: userId,
+          product_id: null,
+          amount: amt,
+          fee_amount: feeAmount,
+          net_amount: netAmount,
+          status: "pending",
+          payment_method: "pix",
+          customer_name: safeName,
+          customer_email: safeEmail,
+          customer_document: cleanDoc,
+          podpay_payment_id: pod.transactionId,
+          external_id: preTxId,
+          pix_expires_at: pixExpiresAt,
+          pix_copy_paste: pod.qrcode,
+          pix_qrcode: pod.qrcode,
+          metadata: { acquirer: "podpay_app" },
+        })
+        .select()
+        .single();
+
+      const responsePayload = {
+        success: true,
+        data: {
+          transactionId: transaction?.id ?? preTxId,
+          podpayId: pod.transactionId,
+          gatewayId: pod.transactionId,
+          acquirer: "podpay_app",
+          amount: amt,
+          pix: { qrcode: pod.qrcode, expiresAt: pixExpiresAt },
+        },
+      };
+
+      if (rawIdem) {
+        const scopedKey = `qpix:${userId}:${rawIdem}`;
+        await supabase.from("idempotency_keys").update({ response: responsePayload }).eq("key", scopedKey);
+      }
+
+      safeLog("PodPay quick PIX created", { transactionId: transaction?.id });
+      return new Response(
+        JSON.stringify(responsePayload),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" } },
+      );
+    }
+
     if (acquirerSlug !== "podpay") {
       safeLog("Unsupported acquirer for quick PIX", { acquirer: acquirerSlug });
       return new Response(
@@ -224,6 +298,7 @@ Deno.serve(async (req) => {
         { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } },
       );
     }
+
 
     // ===================================================================
     // === Fim do desvio VeoPag — abaixo segue o fluxo PodPay normal =====
