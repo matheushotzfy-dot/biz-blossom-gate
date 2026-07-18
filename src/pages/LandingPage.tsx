@@ -953,7 +953,7 @@ function Footer() {
       />
       <div className="relative max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6">
         <HotzfyLogo size={24} withWordmark />
-        <div className="inline-flex items-center gap-2 rounded-full border border-emerald-400/25 bg-emerald-500/[0.06] px-3 py-1.5 text-[10px] font-mono font-bold uppercase tracking-widest text-emerald-300">
+        <div className="hidden">
           <span className="relative flex h-2 w-2">
             <span className="absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-70 animate-ping" />
             <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-400" />
