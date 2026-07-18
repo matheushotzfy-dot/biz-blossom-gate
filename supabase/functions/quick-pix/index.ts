@@ -2,6 +2,7 @@
 // Auth required: user_id is derived from the JWT
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { createVeopagDeposit, resolveAcquirerSlug } from "../_shared/veopag.ts";
+import { createPodpayAppPix } from "../_shared/podpay-app.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
