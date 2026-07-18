@@ -61,6 +61,7 @@ import CoursePage from "./pages/membros/CoursePage";
 import AdminLogin from "./pages/admin/AdminLogin";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import PublicCheckout from "./pages/PublicCheckout";
+import PublicPaymentLink from "./pages/PublicPaymentLink";
 import ImpersonateReceiver from "./pages/ImpersonateReceiver";
 import NotFound from "./pages/NotFound";
 import ManagerLogin from "./pages/manager/ManagerLogin";
@@ -124,6 +125,7 @@ const App = () => (
               <Route path="/impersonate-receiver" element={<ImpersonateReceiver />} />
               <Route path="/pay/:slug" element={<PublicCheckout />} />
               <Route path="/checkout/:slug" element={<PublicCheckout />} />
+              <Route path="/pl/:slug" element={<PublicPaymentLink />} />
               <Route path="/obrigado" element={<ThankYou />} />
               <Route path="/termos-de-uso" element={<TermosDeUso />} />
               <Route path="/politica-de-privacidade" element={<PoliticaDePrivacidade />} />
