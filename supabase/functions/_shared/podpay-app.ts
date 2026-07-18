@@ -86,8 +86,15 @@ export async function createPodpayAppPix(
       },
       ...(input.payerPhone ? { phone: input.payerPhone } : {}),
     },
+    items: [{
+      title: (input.description ?? "Cobrança PIX").slice(0, 100),
+      quantity: 1,
+      unitPrice: amountCents,
+      tangible: false,
+    }],
     pix: { expiresInMinutes: 30 },
   };
+
 
   const controller = new AbortController();
   const t = setTimeout(() => controller.abort(), 15_000);
