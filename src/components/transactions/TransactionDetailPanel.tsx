@@ -242,6 +242,7 @@ export function TransactionDetailPanel({ tx, products, onClose, onRefund, varian
    value={
      <span className="inline-flex items-center gap-1.5 rounded-full border border-primary/25 bg-primary/10 px-2 py-0.5 text-[10.5px] font-black uppercase tracking-[0.14em] text-primary">
        {(() => {
+         if (variant !== "admin") return "HOTZFY";
          const meta = (tx.metadata as Record<string, unknown> | null) || {};
          const acq = (meta.acquirer_slug as string) || (meta.acquirer as string) || tx.source || "—";
          return String(acq).toUpperCase();
