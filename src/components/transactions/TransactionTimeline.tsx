@@ -78,14 +78,27 @@ function visualFor(type: string): EventVisual {
   return EVENT_MAP[type] || { icon: Clock, tone: "muted", label: type };
 }
 
+/** Sellers never see real acquirer names — everything is branded HOTZFY. */
+const BRAND_LABEL = "HOTZFY";
+const ACQUIRER_MASK_RE = /\b(veopag|podpay)\b/gi;
+function maskAcquirer(text: string | null | undefined, variant: "admin" | "seller"): string {
+  if (!text) return "";
+  if (variant === "admin") return text;
+  return text.replace(ACQUIRER_MASK_RE, BRAND_LABEL);
+}
+
 function metaSummary(ev: TxEvent, variant: "admin" | "seller"): string | null {
   const m = ev.metadata || {};
   const parts: string[] = [];
   if (ev.event_type === "acquirer_switched") {
     const from = m["from"] as string | undefined;
     const to = m["to"] as string | undefined;
-    if (from && to) parts.push(`${from.toUpperCase()} → ${to.toUpperCase()}`);
-    if (m["reason"]) parts.push(String(m["reason"]));
+    if (variant === "admin" && from && to) {
+      parts.push(`${from.toUpperCase()} → ${to.toUpperCase()}`);
+    } else if (variant === "seller") {
+      parts.push("Roteamento atualizado");
+    }
+    if (m["reason"] && variant === "admin") parts.push(String(m["reason"]));
   } else if (ev.event_type === "expired") {
     const reason = (m["reason"] as string) || "Prazo do PIX vencido";
     parts.push(reason);
@@ -103,7 +116,8 @@ function metaSummary(ev: TxEvent, variant: "admin" | "seller"): string | null {
       }
     }
   } else if (ev.event_type === "created" || ev.event_type === "acquirer_routed") {
-    if (ev.acquirer_slug) parts.push(ev.acquirer_slug.toUpperCase());
+    if (variant === "admin" && ev.acquirer_slug) parts.push(ev.acquirer_slug.toUpperCase());
+    else if (variant === "seller") parts.push(BRAND_LABEL);
   }
   return parts.length ? parts.join(" · ") : null;
 }
@@ -219,9 +233,9 @@ export function TransactionTimeline({ transactionId, variant = "seller", classNa
                 <span className={cn("text-[12px] font-black uppercase tracking-[0.14em]", tone.text)}>
                   {v.label}
                 </span>
-                {ev.acquirer_slug && (
+                {(variant === "admin" ? ev.acquirer_slug : true) && (
                   <span className="inline-flex items-center rounded-full border border-border/50 bg-background/60 px-2 py-0.5 text-[9.5px] font-black uppercase tracking-wider text-foreground/80">
-                    {ev.acquirer_slug}
+                    {variant === "admin" ? ev.acquirer_slug : BRAND_LABEL}
                   </span>
                 )}
                 {isAdminOnly && variant === "admin" && (
@@ -233,7 +247,7 @@ export function TransactionTimeline({ transactionId, variant = "seller", classNa
                   {dt.format(new Date(ev.created_at))}
                 </span>
               </div>
-              <p className="mt-1 text-[12.5px] text-foreground/90 break-words">{ev.description}</p>
+              <p className="mt-1 text-[12.5px] text-foreground/90 break-words">{maskAcquirer(ev.description, variant)}</p>
               {summary && (
                 <p className="mt-0.5 text-[11px] text-muted-foreground/80 break-words">{summary}</p>
               )}
