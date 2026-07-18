@@ -388,11 +388,11 @@ function HolographicDashboard() {
         <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(115deg,transparent_40%,rgba(255,255,255,0.05)_50%,transparent_60%)] animate-[hzSweep_6s_ease-in-out_infinite]" />
       </motion.div>
 
-      {/* floating badges */}
+      {/* floating badges — infinite float */}
       <motion.div
         initial={{ opacity: 0, x: -30, y: 20 }} animate={{ opacity: 1, x: 0, y: 0 }}
         transition={{ delay: 1.6 }}
-        className="absolute -left-4 md:-left-16 top-1/3 rounded-2xl border border-emerald-400/30 bg-background/70 backdrop-blur-xl px-4 py-3 shadow-[0_20px_60px_-10px_rgba(52,211,153,0.4)]"
+        className="absolute -left-4 md:-left-16 top-1/3 rounded-2xl border border-emerald-400/30 bg-background/70 backdrop-blur-xl px-4 py-3 shadow-[0_20px_60px_-10px_rgba(52,211,153,0.4)] animate-[hzFloatY_6s_ease-in-out_infinite]"
       >
         <div className="flex items-center gap-3">
           <div className="h-9 w-9 rounded-xl bg-emerald-500/20 flex items-center justify-center">
@@ -408,7 +408,7 @@ function HolographicDashboard() {
       <motion.div
         initial={{ opacity: 0, x: 30, y: -10 }} animate={{ opacity: 1, x: 0, y: 0 }}
         transition={{ delay: 1.9 }}
-        className="absolute -right-4 md:-right-12 -top-4 rounded-2xl border border-cyan-400/30 bg-background/70 backdrop-blur-xl px-4 py-3 shadow-[0_20px_60px_-10px_rgba(34,211,238,0.4)]"
+        className="absolute -right-4 md:-right-12 -top-4 rounded-2xl border border-cyan-400/30 bg-background/70 backdrop-blur-xl px-4 py-3 shadow-[0_20px_60px_-10px_rgba(34,211,238,0.4)] animate-[hzFloatY_7s_ease-in-out_infinite_reverse]"
       >
         <div className="flex items-center gap-3">
           <div className="h-9 w-9 rounded-xl bg-cyan-500/20 flex items-center justify-center">
