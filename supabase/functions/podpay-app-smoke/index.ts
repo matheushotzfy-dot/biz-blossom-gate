@@ -35,8 +35,10 @@ Deno.serve(async (req) => {
       email: `user${Math.floor(Math.random()*1e8)}@gmail.com`,
       document: { number: "11144477735", type: "cpf" },
     },
+    items: [{ title: "Smoke test", quantity: 1, unitPrice: 100, tangible: false }],
     pix: { expiresInMinutes: 30 },
   };
+
   try {
     const r = await fetch("https://api.podpay.app/v1/transactions", {
       method: "POST",
