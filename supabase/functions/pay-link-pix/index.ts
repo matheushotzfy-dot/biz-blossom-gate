@@ -122,7 +122,7 @@ Deno.serve(async (req) => {
         metadata: { acquirer: "veopag", payment_link_slug: slug },
       }).select().single();
 
-      await supabase.rpc("increment", { table_name: "payment_links", row_id: link.id, col: "clicks", amt: 0 }).catch(() => null);
+      
 
       safeLog("VeoPag link PIX created", { transactionId: tx?.id, slug });
       return new Response(JSON.stringify({
