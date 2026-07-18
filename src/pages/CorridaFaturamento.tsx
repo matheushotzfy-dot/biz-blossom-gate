@@ -88,10 +88,6 @@ export default function CorridaFaturamento() {
   const cd = useCountdown(race?.ends_at || new Date().toISOString());
 
   const mine = useMemo(() => leaders.find(l => l.seller_id === user?.id), [leaders, user?.id]);
-  const nextPrize = useMemo(() => {
-    if (!mine) return prizes[0];
-    return prizes.find(p => p.min_revenue_cents > mine.revenue_cents) || null;
-  }, [mine, prizes]);
 
   if (loading) {
     return (
@@ -164,30 +160,18 @@ export default function CorridaFaturamento() {
         </div>
       </section>
 
-      {/* ─── MY POSITION ─── */}
+      {/* ─── MY POSITION (só ranking, sem barra de meta) ─── */}
       {mine && (
         <Panel className="mb-6 border-primary/30 bg-primary/[0.03]">
-          <div className="flex flex-col md:flex-row items-start md:items-center gap-4">
+          <div className="flex items-center gap-4">
             <div className="h-14 w-14 rounded-2xl bg-primary/10 border border-primary/20 flex items-center justify-center shrink-0">
               <span className="font-display font-black text-2xl text-primary tabular-nums">#{mine.rank_position}</span>
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-[10px] font-black uppercase tracking-[0.2em] text-primary/70">Sua posição</p>
+              <p className="text-[10px] font-black uppercase tracking-[0.2em] text-primary/70">Sua posição no ranking</p>
               <p className="font-display font-bold text-xl mt-0.5 tabular-nums">{fmtBRL(mine.revenue_cents)}</p>
-              <p className="text-xs text-muted-foreground mt-0.5">{mine.sales_count} vendas aprovadas</p>
+              <p className="text-xs text-muted-foreground mt-0.5">{mine.sales_count} vendas aprovadas · {mine.rank_position <= 5 ? "Concorrendo aos prêmios!" : "Suba pro Top 5 pra concorrer"}</p>
             </div>
-            {nextPrize && (
-              <div className="flex-1 min-w-0 md:border-l md:border-border/40 md:pl-4 w-full">
-                <p className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground">Próximo prêmio</p>
-                <p className="font-bold text-sm mt-0.5 truncate">{nextPrize.title}</p>
-                <div className="mt-1.5 h-1.5 w-full rounded-full bg-muted/60 overflow-hidden">
-                  <div className="h-full rounded-full bg-gradient-to-r from-primary to-primary/60" style={{ width: `${Math.min(100, (mine.revenue_cents / nextPrize.min_revenue_cents) * 100)}%` }} />
-                </div>
-                <p className="text-[10px] text-muted-foreground mt-1 tabular-nums">
-                  Faltam {fmtBRL(Math.max(0, nextPrize.min_revenue_cents - mine.revenue_cents))}
-                </p>
-              </div>
-            )}
           </div>
         </Panel>
       )}
