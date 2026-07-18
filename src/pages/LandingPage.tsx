@@ -934,11 +934,27 @@ function Testimonials() {
    ═══════════════════════════════════════════════════════════════ */
 
 function Footer() {
-
   return (
-    <footer className="relative border-t border-white/5 py-12 px-4 md:px-8">
-      <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6">
+    <footer className="relative border-t border-white/5 py-12 px-4 md:px-8 overflow-hidden">
+      <div
+        className="pointer-events-none absolute inset-0 opacity-[0.05]"
+        style={{
+          backgroundImage:
+            "linear-gradient(rgba(52,211,153,0.6) 1px, transparent 1px), linear-gradient(90deg, rgba(52,211,153,0.6) 1px, transparent 1px)",
+          backgroundSize: "40px 40px",
+          maskImage: "radial-gradient(ellipse at center, black 30%, transparent 80%)",
+          WebkitMaskImage: "radial-gradient(ellipse at center, black 30%, transparent 80%)",
+        }}
+      />
+      <div className="relative max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6">
         <HotzfyLogo size={24} withWordmark />
+        <div className="inline-flex items-center gap-2 rounded-full border border-emerald-400/25 bg-emerald-500/[0.06] px-3 py-1.5 text-[10px] font-mono font-bold uppercase tracking-widest text-emerald-300">
+          <span className="relative flex h-2 w-2">
+            <span className="absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-70 animate-ping" />
+            <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-400" />
+          </span>
+          Uptime 99.99% · ao vivo
+        </div>
         <div className="flex items-center gap-6 text-[11px] font-mono text-muted-foreground/60">
           <a href="/termos-de-uso" className="hover:text-foreground transition">Termos</a>
           <a href="/politica-de-privacidade" className="hover:text-foreground transition">Privacidade</a>
