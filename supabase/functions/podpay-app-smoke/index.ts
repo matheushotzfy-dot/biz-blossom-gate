@@ -5,45 +5,26 @@ Deno.serve(async (req) => {
   const key = Deno.env.get("PODPAY_APP_API_KEY")!;
   const results: any[] = [];
 
+  const base = {
+    amount: 100,
+    externalId: crypto.randomUUID(),
+    customer: { name: "Teste Silva", email: "teste@exemplo.com", document: { number: "11144477735", type: "cpf" } },
+    items: [{ title: "Cobrança", quantity: 1, unitPrice: 100, tangible: false }],
+  };
+
   const attempts: Array<{ name: string; body: any }> = [
-    { name: "A_flat_items", body: {
-      amount: 100, paymentMethod: "pix", externalId: crypto.randomUUID(),
-      customer: { name: "Teste", email: "u@a.com", document: { number: "11144477735", type: "cpf" } },
-      items: [{ title: "X", quantity: 1, unitPrice: 100, tangible: false }],
-      pix: { expiresInMinutes: 30 },
-    }},
-    { name: "B_items_unitAmount", body: {
-      amount: 100, paymentMethod: "pix", externalId: crypto.randomUUID(),
-      customer: { name: "Teste", email: "u@a.com", document: { number: "11144477735", type: "cpf" } },
-      items: [{ title: "X", quantity: 1, unitAmount: 100 }],
-      pix: { expiresInMinutes: 30 },
-    }},
-    { name: "C_items_name", body: {
-      amount: 100, paymentMethod: "pix", externalId: crypto.randomUUID(),
-      customer: { name: "Teste", email: "u@a.com", document: { number: "11144477735", type: "cpf" } },
-      items: [{ name: "X", quantity: 1, price: 100 }],
-      pix: { expiresInMinutes: 30 },
-    }},
-    { name: "D_items_amount", body: {
-      amount: 100, paymentMethod: "pix", externalId: crypto.randomUUID(),
-      customer: { name: "Teste", email: "u@a.com", document: { number: "11144477735", type: "cpf" } },
-      items: [{ title: "X", quantity: 1, amount: 100, tangible: false }],
-      pix: { expiresInMinutes: 30 },
-    }},
-    { name: "E_items_only_top", body: {
-      externalId: crypto.randomUUID(),
-      paymentMethod: "pix",
-      customer: { name: "Teste", email: "u@a.com", document: { number: "11144477735", type: "cpf" } },
-      items: [{ title: "X", quantity: 1, unitPrice: 100, tangible: false }],
-      pix: { expiresInMinutes: 30 },
-    }},
-    { name: "F_customer_documentString", body: {
-      amount: 100, paymentMethod: "pix", externalId: crypto.randomUUID(),
-      customer: { name: "Teste", email: "u@a.com", document: "11144477735", documentType: "cpf" },
-      items: [{ title: "X", quantity: 1, unitPrice: 100, tangible: false }],
-      pix: { expiresInMinutes: 30 },
-    }},
+    { name: "A_PIX_upper", body: { ...base, paymentMethod: "PIX", pix: { expiresInMinutes: 30 } } },
+    { name: "B_method_pix", body: { ...base, method: "pix", pix: { expiresInMinutes: 30 } } },
+    { name: "C_type_pix", body: { ...base, type: "pix", pix: { expiresInMinutes: 30 } } },
+    { name: "D_no_pix_block", body: { ...base, paymentMethod: "pix" } },
+    { name: "E_pix_expires_seconds", body: { ...base, paymentMethod: "pix", pix: { expiresInSeconds: 1800 } } },
+    { name: "F_document_upper_CPF", body: { ...base, customer: {...base.customer, document: { number: "11144477735", type: "CPF" }}, paymentMethod: "pix", pix: { expiresInMinutes: 30 } } },
+    { name: "G_customer_phone", body: { ...base, customer: {...base.customer, phone: "11999999999"}, paymentMethod: "pix", pix: { expiresInMinutes: 30 } } },
+    { name: "H_postbackUrl", body: { ...base, paymentMethod: "pix", pix: { expiresInMinutes: 30 }, postbackUrl: "https://example.com/wh" } },
+    { name: "I_currency", body: { ...base, currency: "BRL", paymentMethod: "pix", pix: { expiresInMinutes: 30 } } },
+    { name: "J_all", body: { ...base, currency: "BRL", customer: {...base.customer, phone: "11999999999", document: { number: "11144477735", type: "cpf"}}, paymentMethod: "pix", pix: { expiresInMinutes: 30 }, postbackUrl: "https://example.com/wh" } },
   ];
+
 
   for (const a of attempts) {
     try {
