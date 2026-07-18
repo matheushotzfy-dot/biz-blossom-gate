@@ -153,26 +153,44 @@ function CountUp({ to, decimals = 0, prefix = "", suffix = "", duration = 2 }: {
    ═══════════════════════════════════════════════════════════════ */
 
 function HoloGrid() {
+  const reduce = useReducedMotion();
+  const mx = useMotionValue(0);
+  const my = useMotionValue(0);
+  const gridX = useSpring(useTransform(mx, [-0.5, 0.5], [-20, 20]), { stiffness: 40, damping: 20 });
+  const gridY = useSpring(useTransform(my, [-0.5, 0.5], [-20, 20]), { stiffness: 40, damping: 20 });
+  const { scrollY } = useScroll();
+  const scrollDrift = useTransform(scrollY, [0, 2000], [0, 80]);
+  useEffect(() => {
+    if (reduce) return;
+    const onMove = (e: MouseEvent) => {
+      mx.set(e.clientX / window.innerWidth - 0.5);
+      my.set(e.clientY / window.innerHeight - 0.5);
+    };
+    window.addEventListener("mousemove", onMove, { passive: true });
+    return () => window.removeEventListener("mousemove", onMove);
+  }, [mx, my, reduce]);
   return (
     <div className="pointer-events-none fixed inset-0 z-0 overflow-hidden">
       {/* base gradient */}
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,hsl(160_84%_39%/0.10),transparent_55%),radial-gradient(ellipse_at_bottom_right,hsl(190_95%_55%/0.08),transparent_50%),radial-gradient(ellipse_at_bottom_left,hsl(265_90%_65%/0.06),transparent_50%)]" />
-      {/* animated grid */}
-      <div
-        className="absolute inset-0 opacity-[0.14]"
+      {/* animated grid — parallax by mouse + scroll */}
+      <motion.div
+        className="absolute -inset-10 opacity-[0.14] will-change-transform"
         style={{
+          x: gridX, y: useTransform([gridY, scrollDrift], ([a, b]: number[]) => a + b),
           backgroundImage:
             "linear-gradient(rgba(52,211,153,0.35) 1px, transparent 1px), linear-gradient(90deg, rgba(52,211,153,0.35) 1px, transparent 1px)",
           backgroundSize: "56px 56px",
           maskImage: "radial-gradient(ellipse at center, black 40%, transparent 80%)",
           WebkitMaskImage: "radial-gradient(ellipse at center, black 40%, transparent 80%)",
-          animation: "hzGridDrift 32s linear infinite",
+          animation: reduce ? undefined : "hzGridDrift 32s linear infinite",
+          transform: "perspective(1200px) rotateX(1deg)",
         }}
       />
       {/* scan line */}
       <div
         className="absolute inset-x-0 h-[2px] bg-gradient-to-r from-transparent via-emerald-400/60 to-transparent"
-        style={{ animation: "hzScan 8s linear infinite", boxShadow: "0 0 24px rgba(52,211,153,0.6)" }}
+        style={{ animation: reduce ? undefined : "hzScan 8s linear infinite", boxShadow: "0 0 24px rgba(52,211,153,0.6)" }}
       />
       {/* orbs */}
       <div className="absolute -top-40 -left-40 h-[500px] w-[500px] rounded-full bg-emerald-500/10 blur-[120px] animate-[hzFloat_18s_ease-in-out_infinite]" />
