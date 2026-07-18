@@ -432,17 +432,17 @@ function HolographicDashboard() {
   const slots = useAntiCollide(3);
 
   return (
-    <div className="relative w-full max-w-[960px] mx-auto perspective-[1600px]">
+    <div className="relative w-full max-w-[1080px] mx-auto">
+      {/* ═══ MAIN APP WINDOW — flat, stable, no 3D tilt ═══ */}
       <motion.div
-        initial={{ opacity: 0, rotateX: 14, y: 60 }}
-        animate={{ opacity: 1, rotateX: 6, y: 0 }}
-        transition={{ duration: 1.4, ease: [0.16, 1, 0.3, 1], delay: 0.3 }}
-        className="relative rounded-[22px] overflow-hidden"
+        initial={{ opacity: 0, y: 40 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 1.1, ease: [0.16, 1, 0.3, 1], delay: 0.2 }}
+        className="relative rounded-[20px] overflow-hidden"
         style={{
-          transformStyle: "preserve-3d",
           background: "linear-gradient(180deg, #0b0f14 0%, #070a0e 100%)",
           boxShadow:
-            "0 0 0 1px rgba(52,211,153,0.18), 0 60px 140px -30px rgba(52,211,153,0.45), 0 30px 80px -20px rgba(34,211,238,0.22), inset 0 1px 0 rgba(255,255,255,0.05)",
+            "0 0 0 1px rgba(255,255,255,0.06), 0 40px 120px -30px rgba(52,211,153,0.28), 0 20px 60px -20px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.04)",
         }}
       >
         {/* window chrome */}
@@ -468,7 +468,7 @@ function HolographicDashboard() {
           </button>
         </div>
 
-        {/* app body: sidebar + main — mirrors real seller dashboard */}
+        {/* app body: sidebar + main */}
         <div className="grid grid-cols-[184px_1fr] min-h-[520px]">
           {/* sidebar */}
           <aside className="border-r border-white/[0.04] bg-gradient-to-b from-white/[0.015] to-transparent p-3 flex flex-col gap-1">
@@ -500,7 +500,7 @@ function HolographicDashboard() {
             </div>
           </aside>
 
-          {/* main content — replica of seller Dashboard.tsx */}
+          {/* main content */}
           <main className="p-4 space-y-3">
             {/* greeting header */}
             <div className="flex items-center justify-between gap-3">
@@ -523,7 +523,7 @@ function HolographicDashboard() {
               </div>
             </div>
 
-            {/* mini ranking hero — matches seller "CAMPEÕES" */}
+            {/* mini ranking hero */}
             <div className="relative overflow-hidden rounded-2xl border border-emerald-400/15 bg-gradient-to-br from-emerald-500/[0.06] via-transparent to-cyan-500/[0.04] p-3 flex items-center gap-4">
               <div className="flex-1">
                 <div className="inline-flex items-center gap-1.5 rounded-full border border-emerald-400/30 bg-emerald-500/10 px-2 py-0.5 text-[8px] font-bold uppercase tracking-[0.2em] text-emerald-300">
@@ -546,7 +546,7 @@ function HolographicDashboard() {
               </div>
             </div>
 
-            {/* 4 KPI cards — replica */}
+            {/* 4 KPI cards */}
             <div className="grid grid-cols-4 gap-2">
               {[
                 { l: "Ticket Médio", pre: "R$ ", to: 153, dec: 0, icon: BarChart3, tone: "emerald" as const, sub: "Média bruta" },
@@ -558,7 +558,7 @@ function HolographicDashboard() {
                   key={i}
                   initial={{ opacity: 0, y: 12 }}
                   animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.8 + i * 0.08 }}
+                  transition={{ delay: 0.6 + i * 0.06 }}
                   className="relative rounded-xl p-2.5 bg-white/[0.02] border border-white/[0.05] overflow-hidden"
                 >
                   <div className="flex items-center justify-between">
@@ -576,7 +576,7 @@ function HolographicDashboard() {
             {/* chart + feed */}
             <div className="grid grid-cols-[1.35fr_1fr] gap-2">
               <motion.div
-                initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 1.2 }}
+                initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 1 }}
                 className="rounded-xl p-3 bg-white/[0.02] border border-white/[0.05] relative overflow-hidden"
               >
                 <div className="flex items-center justify-between mb-1.5">
@@ -608,19 +608,19 @@ function HolographicDashboard() {
                     d="M0,90 C40,80 60,60 100,55 C140,50 160,80 200,65 C240,50 260,25 300,30 C340,35 360,15 400,10 L400,130 L0,130 Z"
                     fill="url(#lchart)"
                     initial={{ pathLength: 0, opacity: 0 }} animate={{ pathLength: 1, opacity: 1 }}
-                    transition={{ duration: 1.6, delay: 1.4 }}
+                    transition={{ duration: 1.6, delay: 1.2 }}
                   />
                   <motion.path
                     d="M0,90 C40,80 60,60 100,55 C140,50 160,80 200,65 C240,50 260,25 300,30 C340,35 360,15 400,10"
                     fill="none" stroke="#34d399" strokeWidth="2"
-                    initial={{ pathLength: 0 }} animate={{ pathLength: 1 }} transition={{ duration: 1.8, delay: 1.4 }}
+                    initial={{ pathLength: 0 }} animate={{ pathLength: 1 }} transition={{ duration: 1.8, delay: 1.2 }}
                     style={{ filter: "drop-shadow(0 0 6px rgba(52,211,153,0.6))" }}
                   />
                 </svg>
               </motion.div>
 
               <motion.div
-                initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 1.4 }}
+                initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 1.2 }}
                 className="rounded-xl bg-white/[0.02] border border-white/[0.05] overflow-hidden flex flex-col"
               >
                 <div className="flex items-center justify-between px-3 py-2 border-b border-white/[0.04]">
@@ -641,91 +641,66 @@ function HolographicDashboard() {
             </div>
           </main>
         </div>
-
-        {/* holographic sweep */}
-        <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(115deg,transparent_40%,rgba(255,255,255,0.04)_50%,transparent_60%)] animate-[hzSweep_8s_ease-in-out_infinite]" />
-        {/* subtle noise */}
-        <div
-          className="pointer-events-none absolute inset-0 opacity-[0.03] mix-blend-overlay"
-          style={{
-            backgroundImage:
-              "url(\"data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='120' height='120'><filter id='n'><feTurbulence baseFrequency='0.9'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>\")",
-          }}
-        />
       </motion.div>
 
-      {/* ═══ SIDE NOTIFICATIONS — vendas entrando em tempo real ═══ */}
-      <div className="pointer-events-none absolute -right-4 md:-right-16 top-0 bottom-0 hidden md:block w-[280px]">
-        <AnimatePresence>
+      {/* ═══ iOS-STYLE NOTIFICATION STACK — with HOTZFY logo as app icon ═══ */}
+      <div className="pointer-events-none absolute right-0 md:-right-8 lg:-right-16 top-16 hidden md:flex flex-col gap-2.5 w-[300px] z-20">
+        <AnimatePresence initial={false}>
           {notifs.map((n, idx) => (
             <motion.div
               key={n.id}
-              initial={{ opacity: 0, x: 60, scale: 0.9 }}
-              animate={{ opacity: 1, x: 0, scale: 1, top: slots[idx] }}
-              exit={{ opacity: 0, x: 40, scale: 0.95 }}
-              transition={{ type: "spring", stiffness: 260, damping: 26 }}
-              className="absolute right-0 w-[260px] rounded-2xl border border-emerald-400/25 bg-[#0b0f14]/95 backdrop-blur-xl px-3.5 py-2.5 shadow-[0_20px_60px_-10px_rgba(52,211,153,0.5)]"
-              style={{ top: slots[idx] }}
+              layout
+              initial={{ opacity: 0, y: -30, scale: 0.85, filter: "blur(8px)" }}
+              animate={{
+                opacity: idx === 0 ? 1 : idx === 1 ? 0.78 : 0.55,
+                y: 0,
+                scale: idx === 0 ? 1 : idx === 1 ? 0.96 : 0.92,
+                filter: "blur(0px)",
+              }}
+              exit={{ opacity: 0, x: 320, scale: 0.9, transition: { duration: 0.35 } }}
+              transition={{ type: "spring", stiffness: 380, damping: 32, mass: 0.7 }}
+              className="relative rounded-[22px] overflow-hidden"
+              style={{
+                background: "rgba(28, 28, 30, 0.72)",
+                backdropFilter: "blur(40px) saturate(180%)",
+                WebkitBackdropFilter: "blur(40px) saturate(180%)",
+                boxShadow:
+                  "0 1px 0 rgba(255,255,255,0.08) inset, 0 0 0 0.5px rgba(255,255,255,0.12), 0 20px 40px -12px rgba(0,0,0,0.55)",
+              }}
             >
-              <div className="flex items-center gap-2.5">
-                <div className="relative h-9 w-9 rounded-xl bg-gradient-to-br from-emerald-500/30 to-emerald-600/10 border border-emerald-400/30 flex items-center justify-center">
-                  <QrCode className="h-4 w-4 text-emerald-300" />
-                  <span className="absolute -top-1 -right-1 h-2.5 w-2.5 rounded-full bg-emerald-400 ring-2 ring-[#0b0f14] animate-pulse" />
+              <div className="flex items-start gap-2.5 px-3.5 py-3">
+                {/* app icon — HOTZFY logo in rounded-square (iOS app icon style) */}
+                <div
+                  className="shrink-0 h-[38px] w-[38px] rounded-[10px] flex items-center justify-center relative overflow-hidden"
+                  style={{
+                    background: "linear-gradient(135deg, #052e2b 0%, #0b0f14 100%)",
+                    boxShadow: "0 0 0 0.5px rgba(52,211,153,0.35), 0 4px 10px -2px rgba(0,0,0,0.4)",
+                  }}
+                >
+                  <HotzfyLogo size={26} animated={false} />
                 </div>
-                <div className="min-w-0 flex-1">
-                  <div className="text-[8.5px] uppercase tracking-widest text-emerald-300/80 font-black font-mono">Nova venda · agora</div>
-                  <div className="text-sm font-black text-white font-display tabular-nums leading-tight">+ {n.tx.value}</div>
-                  <div className="text-[9px] text-white/40 font-mono truncate">{n.tx.name} · {n.tx.city} · PIX {n.tx.ms}</div>
+                <div className="min-w-0 flex-1 pt-[1px]">
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="text-[11px] font-semibold text-white/95 tracking-tight leading-none">HOTZFY</span>
+                    <span className="text-[10px] font-medium text-white/45 tracking-tight leading-none">agora</span>
+                  </div>
+                  <div className="mt-1 text-[12.5px] font-semibold text-white leading-snug tracking-[-0.01em]">
+                    Nova venda aprovada
+                  </div>
+                  <div className="text-[11.5px] text-white/70 leading-snug tracking-[-0.005em]">
+                    <span className="tabular-nums font-semibold text-emerald-300">+ {n.tx.value}</span>
+                    <span className="text-white/50"> · {n.tx.name} · {n.tx.city}</span>
+                  </div>
                 </div>
               </div>
-              {/* progress bar for auto-dismiss */}
-              <motion.div
-                initial={{ width: "100%" }} animate={{ width: "0%" }}
-                transition={{ duration: 5.2, ease: "linear" }}
-                className="mt-2 h-0.5 rounded-full bg-emerald-400/60"
-              />
             </motion.div>
           ))}
         </AnimatePresence>
       </div>
-
-      {/* Left side — antifraude + saque D+0 */}
-      <motion.div
-        initial={{ opacity: 0, x: -30, y: -10 }} animate={{ opacity: 1, x: 0, y: 0 }}
-        transition={{ delay: 1.9 }}
-        className="hidden md:flex absolute -left-4 md:-left-14 top-[18%] rounded-2xl border border-cyan-400/25 bg-[#0b0f14]/95 backdrop-blur-xl px-3.5 py-2.5 shadow-[0_20px_60px_-10px_rgba(34,211,238,0.45)] animate-[hzFloatY_7s_ease-in-out_infinite]"
-      >
-        <div className="flex items-center gap-2.5">
-          <div className="h-9 w-9 rounded-xl bg-gradient-to-br from-cyan-500/30 to-cyan-600/10 border border-cyan-400/30 flex items-center justify-center">
-            <Shield className="h-4 w-4 text-cyan-300" />
-          </div>
-          <div>
-            <div className="text-[8.5px] uppercase tracking-widest text-cyan-300/80 font-black font-mono">Antifraude · bloqueado</div>
-            <div className="text-sm font-black text-white font-display leading-tight">Risk score 0.94</div>
-            <div className="text-[9px] text-white/40 font-mono">IP flagged · Manaus/AM</div>
-          </div>
-        </div>
-      </motion.div>
-
-      <motion.div
-        initial={{ opacity: 0, x: -20, y: 20 }} animate={{ opacity: 1, x: 0, y: 0 }}
-        transition={{ delay: 2.2 }}
-        className="hidden md:flex absolute -left-2 md:-left-10 bottom-10 rounded-2xl border border-violet-400/25 bg-[#0b0f14]/95 backdrop-blur-xl px-3.5 py-2.5 shadow-[0_20px_60px_-10px_rgba(167,139,250,0.4)] animate-[hzFloatY_8s_ease-in-out_infinite]"
-      >
-        <div className="flex items-center gap-2.5">
-          <div className="h-9 w-9 rounded-xl bg-gradient-to-br from-violet-500/30 to-violet-600/10 border border-violet-400/30 flex items-center justify-center">
-            <Wallet className="h-4 w-4 text-violet-300" />
-          </div>
-          <div>
-            <div className="text-[8.5px] uppercase tracking-widest text-violet-300/80 font-black font-mono">Saque PIX · D+0</div>
-            <div className="text-sm font-black text-white font-display tabular-nums leading-tight">R$ 12.480,00</div>
-            <div className="text-[9px] text-white/40 font-mono">Processado em 3.2s</div>
-          </div>
-        </div>
-      </motion.div>
     </div>
   );
 }
+
 
 
 function Hero() {
