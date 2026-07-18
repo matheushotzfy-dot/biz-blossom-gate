@@ -496,19 +496,31 @@ export default function Dashboard() {
             <p className="text-muted-foreground text-sm mt-1">Que essa jornada seja leve, produtiva e cheia de conquistas!</p>
           </div>
 
-          {/* Faturamento progress chip */}
-          <div className="flex items-center gap-3 rounded-2xl border border-border/60 bg-card/80 backdrop-blur px-4 py-3 min-w-[280px]">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 text-primary">
-              <CalendarDays className="h-5 w-5" strokeWidth={2.25} />
-            </div>
-            <div className="flex-1 min-w-0">
-              <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/70">Faturamento · Hoje</p>
-              <div className="flex items-baseline gap-2 mt-0.5">
-                <span className="font-display font-black text-base tabular-nums">{privacy.hidden ? CENSORED : fmt(receivedToday)}</span>
-                <span className="text-[11px] text-muted-foreground/60 tabular-nums">/ {fmt(goalTarget)}</span>
+          {/* Date filter + faturamento chip */}
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-3">
+            <DashboardPeriodFilter
+              selectedPeriod={selectedPeriod}
+              setSelectedPeriod={setSelectedPeriod}
+              isCustom={isCustom}
+              setIsCustom={setIsCustom}
+              customRange={customRange}
+              setCustomRange={setCustomRange}
+              open={datePickerOpen}
+              setOpen={setDatePickerOpen}
+            />
+            <div className="flex items-center gap-3 rounded-2xl border border-border/60 bg-card/80 backdrop-blur px-4 py-3 min-w-[240px]">
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 text-primary">
+                <CalendarDays className="h-5 w-5" strokeWidth={2.25} />
               </div>
-              <div className="mt-1.5 h-1 w-full rounded-full bg-muted/60 overflow-hidden">
-                <div className="h-full rounded-full bg-gradient-to-r from-primary to-primary/60 transition-all" style={{ width: `${Math.min(100, (receivedToday/goalTarget)*100)}%` }} />
+              <div className="flex-1 min-w-0">
+                <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/70">Faturamento · Hoje</p>
+                <div className="flex items-baseline gap-2 mt-0.5">
+                  <span className="font-display font-black text-base tabular-nums">{privacy.hidden ? CENSORED : fmt(receivedToday)}</span>
+                  <span className="text-[11px] text-muted-foreground/60 tabular-nums">/ {fmt(goalTarget)}</span>
+                </div>
+                <div className="mt-1.5 h-1 w-full rounded-full bg-muted/60 overflow-hidden">
+                  <div className="h-full rounded-full bg-gradient-to-r from-primary to-primary/60 transition-all" style={{ width: `${Math.min(100, (receivedToday/goalTarget)*100)}%` }} />
+                </div>
               </div>
             </div>
           </div>
