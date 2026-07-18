@@ -72,19 +72,24 @@ export async function createPodpayAppPix(
     throw new Error("Invalid amount");
   }
 
+  // Phone é obrigatório na PodPay v1 — cai em fallback determinístico se ausente.
+  const phoneDigits = (input.payerPhone ?? "").replace(/\D/g, "");
+  const phone = phoneDigits.length >= 10 ? phoneDigits : "11900000000";
+
   const body = {
     amount: amountCents,
+    currency: "BRL",
     paymentMethod: "pix",
     externalId: input.externalId,
     description: (input.description ?? "Cobrança PIX").slice(0, 100),
     customer: {
       name: input.payerName,
       email: anonymizedEmail(input.externalId + input.payerDocument),
+      phone,
       document: {
         number: input.payerDocument,
         type: input.payerDocument.length > 11 ? "cnpj" : "cpf",
       },
-      ...(input.payerPhone ? { phone: input.payerPhone } : {}),
     },
     items: [{
       title: (input.description ?? "Cobrança PIX").slice(0, 100),
@@ -93,6 +98,7 @@ export async function createPodpayAppPix(
       tangible: false,
     }],
     pix: { expiresInMinutes: 30 },
+    postbackUrl: `${Deno.env.get("SUPABASE_URL")}/functions/v1/podpay-app-webhook`,
   };
 
 
@@ -119,24 +125,25 @@ export async function createPodpayAppPix(
   const raw = await resp.json().catch(() => ({} as any));
   if (!resp.ok || raw?.success === false) {
     const code = raw?.error?.code ?? "UNKNOWN";
-    throw new Error(`PodPay create failed: HTTP ${resp.status} (${code})`);
+    const msg = raw?.error?.message ?? "";
+    throw new Error(`PodPay create failed: HTTP ${resp.status} (${code}) ${msg}`.trim());
   }
 
   const data = (raw?.data ?? raw) as any;
-  const pixNode = data?.pix ?? data?.paymentMethod ?? data ?? {};
   const transactionId = String(data?.id ?? data?.transactionId ?? "");
   const qrcode = String(
-    pixNode?.qrCode ?? pixNode?.qrcode ?? pixNode?.copyPaste ?? pixNode?.emv ?? data?.qrCode ?? "",
+    data?.pixQrCode ?? data?.pix?.qrCode ?? data?.pix?.qrcode ?? data?.qrCode ?? "",
   );
-  const qrcodeImage = pixNode?.qrCodeImage ?? pixNode?.qrcodeImage ?? undefined;
+  const qrcodeImage = data?.pixQrCodeImage ?? data?.pix?.qrCodeImage ?? undefined;
   const status = String(data?.status ?? "pending");
-  const expiresAt = pixNode?.expiresAt ?? pixNode?.expires_at ?? data?.expiresAt ?? null;
+  const expiresAt = data?.pixExpiresAt ?? data?.pix?.expiresAt ?? data?.expiresAt ?? null;
 
   if (!transactionId || !qrcode) {
     throw new Error("PodPay response missing id or qrcode");
   }
   return { transactionId, qrcode, qrcodeImage, status, expiresAt };
 }
+
 
 /** Consulta status de uma transação PodPay v1 (usado pelo poll). */
 export async function fetchPodpayAppTransaction(
