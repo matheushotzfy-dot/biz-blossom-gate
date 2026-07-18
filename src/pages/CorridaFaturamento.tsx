@@ -88,10 +88,6 @@ export default function CorridaFaturamento() {
   const cd = useCountdown(race?.ends_at || new Date().toISOString());
 
   const mine = useMemo(() => leaders.find(l => l.seller_id === user?.id), [leaders, user?.id]);
-  const nextPrize = useMemo(() => {
-    if (!mine) return prizes[0];
-    return prizes.find(p => p.min_revenue_cents > mine.revenue_cents) || null;
-  }, [mine, prizes]);
 
   if (loading) {
     return (
