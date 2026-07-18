@@ -5,7 +5,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { animate } from "framer-motion";
 import { useNavigate } from "react-router-dom";
-import { motion, useScroll, useTransform, useSpring, useInView, AnimatePresence } from "framer-motion";
+import { motion, useScroll, useTransform, useSpring, useInView, useMotionValue, useReducedMotion, AnimatePresence } from "framer-motion";
 import {
   ArrowRight, Shield, Zap, BarChart3, CreditCard, Users, CheckCircle2,
   Sparkles, Activity, QrCode, Wallet, Radio, Code2, Layers, Cpu,
@@ -14,6 +14,76 @@ import {
 import { cn } from "@/lib/utils";
 import { Seo } from "@/components/Seo";
 import { HotzfyLogo } from "@/components/HotzfyLogo";
+
+/* Glitch text — used on the "de outra era" hero accent */
+function GlitchText({ children, className }: { children: React.ReactNode; className?: string }) {
+  const reduce = useReducedMotion();
+  if (reduce) return <span className={className}>{children}</span>;
+  return (
+    <span className={cn("relative inline-block hz-glitch", className)} data-text={typeof children === "string" ? children : undefined}>
+      {children}
+    </span>
+  );
+}
+
+/* Neural-net connected nodes — canvas, subtle, respects reduced motion */
+function NeuralNet() {
+  const reduce = useReducedMotion();
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  useEffect(() => {
+    if (reduce) return;
+    const canvas = canvasRef.current; if (!canvas) return;
+    const ctx = canvas.getContext("2d"); if (!ctx) return;
+    let raf = 0; let w = 0; let h = 0; let dpr = Math.min(window.devicePixelRatio || 1, 2);
+    const resize = () => {
+      w = canvas.clientWidth; h = canvas.clientHeight;
+      canvas.width = w * dpr; canvas.height = h * dpr;
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    };
+    resize();
+    const onResize = () => resize();
+    window.addEventListener("resize", onResize);
+    const count = Math.min(46, Math.floor((w * h) / 32000));
+    const nodes = Array.from({ length: count }, () => ({
+      x: Math.random() * w, y: Math.random() * h,
+      vx: (Math.random() - 0.5) * 0.18, vy: (Math.random() - 0.5) * 0.18,
+    }));
+    const step = () => {
+      ctx.clearRect(0, 0, w, h);
+      for (const n of nodes) {
+        n.x += n.vx; n.y += n.vy;
+        if (n.x < 0 || n.x > w) n.vx *= -1;
+        if (n.y < 0 || n.y > h) n.vy *= -1;
+      }
+      for (let i = 0; i < nodes.length; i++) {
+        for (let j = i + 1; j < nodes.length; j++) {
+          const a = nodes[i], b = nodes[j];
+          const dx = a.x - b.x, dy = a.y - b.y;
+          const d2 = dx * dx + dy * dy;
+          if (d2 < 140 * 140) {
+            const alpha = (1 - Math.sqrt(d2) / 140) * 0.28;
+            ctx.strokeStyle = `rgba(52,211,153,${alpha.toFixed(3)})`;
+            ctx.lineWidth = 0.6;
+            ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y); ctx.stroke();
+          }
+        }
+      }
+      ctx.fillStyle = "rgba(52,211,153,0.55)";
+      for (const n of nodes) { ctx.beginPath(); ctx.arc(n.x, n.y, 1.2, 0, Math.PI * 2); ctx.fill(); }
+      raf = requestAnimationFrame(step);
+    };
+    raf = requestAnimationFrame(step);
+    return () => { cancelAnimationFrame(raf); window.removeEventListener("resize", onResize); };
+  }, [reduce]);
+  if (reduce) return null;
+  return (
+    <canvas
+      ref={canvasRef}
+      className="pointer-events-none fixed inset-0 z-0 h-full w-full opacity-[0.35] mix-blend-screen"
+      aria-hidden
+    />
+  );
+}
 
 /* ═══════════════════════════════════════════════════════════════
    DATA
@@ -83,26 +153,44 @@ function CountUp({ to, decimals = 0, prefix = "", suffix = "", duration = 2 }: {
    ═══════════════════════════════════════════════════════════════ */
 
 function HoloGrid() {
+  const reduce = useReducedMotion();
+  const mx = useMotionValue(0);
+  const my = useMotionValue(0);
+  const gridX = useSpring(useTransform(mx, [-0.5, 0.5], [-20, 20]), { stiffness: 40, damping: 20 });
+  const gridY = useSpring(useTransform(my, [-0.5, 0.5], [-20, 20]), { stiffness: 40, damping: 20 });
+  const { scrollY } = useScroll();
+  const scrollDrift = useTransform(scrollY, [0, 2000], [0, 80]);
+  useEffect(() => {
+    if (reduce) return;
+    const onMove = (e: MouseEvent) => {
+      mx.set(e.clientX / window.innerWidth - 0.5);
+      my.set(e.clientY / window.innerHeight - 0.5);
+    };
+    window.addEventListener("mousemove", onMove, { passive: true });
+    return () => window.removeEventListener("mousemove", onMove);
+  }, [mx, my, reduce]);
   return (
     <div className="pointer-events-none fixed inset-0 z-0 overflow-hidden">
       {/* base gradient */}
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,hsl(160_84%_39%/0.10),transparent_55%),radial-gradient(ellipse_at_bottom_right,hsl(190_95%_55%/0.08),transparent_50%),radial-gradient(ellipse_at_bottom_left,hsl(265_90%_65%/0.06),transparent_50%)]" />
-      {/* animated grid */}
-      <div
-        className="absolute inset-0 opacity-[0.14]"
+      {/* animated grid — parallax by mouse + scroll */}
+      <motion.div
+        className="absolute -inset-10 opacity-[0.14] will-change-transform"
         style={{
+          x: gridX, y: useTransform([gridY, scrollDrift], ([a, b]: number[]) => a + b),
           backgroundImage:
             "linear-gradient(rgba(52,211,153,0.35) 1px, transparent 1px), linear-gradient(90deg, rgba(52,211,153,0.35) 1px, transparent 1px)",
           backgroundSize: "56px 56px",
           maskImage: "radial-gradient(ellipse at center, black 40%, transparent 80%)",
           WebkitMaskImage: "radial-gradient(ellipse at center, black 40%, transparent 80%)",
-          animation: "hzGridDrift 32s linear infinite",
+          animation: reduce ? undefined : "hzGridDrift 32s linear infinite",
+          transform: "perspective(1200px) rotateX(1deg)",
         }}
       />
       {/* scan line */}
       <div
         className="absolute inset-x-0 h-[2px] bg-gradient-to-r from-transparent via-emerald-400/60 to-transparent"
-        style={{ animation: "hzScan 8s linear infinite", boxShadow: "0 0 24px rgba(52,211,153,0.6)" }}
+        style={{ animation: reduce ? undefined : "hzScan 8s linear infinite", boxShadow: "0 0 24px rgba(52,211,153,0.6)" }}
       />
       {/* orbs */}
       <div className="absolute -top-40 -left-40 h-[500px] w-[500px] rounded-full bg-emerald-500/10 blur-[120px] animate-[hzFloat_18s_ease-in-out_infinite]" />
@@ -230,9 +318,9 @@ function HolographicDashboard() {
         {/* content */}
         <div className="p-6 grid grid-cols-3 gap-3">
           {[
-            { l: "Faturamento hoje", v: "R$ 47.892", c: "+18.4%", tone: "emerald" },
-            { l: "Vendas aprovadas", v: "312", c: "+27", tone: "cyan" },
-            { l: "Ticket médio", v: "R$ 153", c: "+4.1%", tone: "violet" },
+            { l: "Faturamento hoje", pre: "R$ ", to: 47892, dec: 0, c: "+18.4%", tone: "emerald" },
+            { l: "Vendas aprovadas", pre: "", to: 312, dec: 0, c: "+27", tone: "cyan" },
+            { l: "Ticket médio", pre: "R$ ", to: 153, dec: 0, c: "+4.1%", tone: "violet" },
           ].map((k, i) => (
             <motion.div
               key={i}
@@ -242,7 +330,9 @@ function HolographicDashboard() {
               className="rounded-2xl p-4 bg-white/[0.02] border border-white/5"
             >
               <div className="text-[9px] uppercase tracking-wider text-white/40 font-bold">{k.l}</div>
-              <div className="mt-1 text-xl font-black text-white font-display">{k.v}</div>
+              <div className="mt-1 text-xl font-black text-white font-display tabular-nums">
+                <CountUp to={k.to} decimals={k.dec} prefix={k.pre} duration={1.8} />
+              </div>
               <div className={cn(
                 "text-[10px] mt-1 font-mono",
                 k.tone === "emerald" && "text-emerald-400",
@@ -251,6 +341,7 @@ function HolographicDashboard() {
               )}>▲ {k.c}</div>
             </motion.div>
           ))}
+
 
           {/* chart */}
           <motion.div
@@ -297,11 +388,11 @@ function HolographicDashboard() {
         <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(115deg,transparent_40%,rgba(255,255,255,0.05)_50%,transparent_60%)] animate-[hzSweep_6s_ease-in-out_infinite]" />
       </motion.div>
 
-      {/* floating badges */}
+      {/* floating badges — infinite float */}
       <motion.div
         initial={{ opacity: 0, x: -30, y: 20 }} animate={{ opacity: 1, x: 0, y: 0 }}
         transition={{ delay: 1.6 }}
-        className="absolute -left-4 md:-left-16 top-1/3 rounded-2xl border border-emerald-400/30 bg-background/70 backdrop-blur-xl px-4 py-3 shadow-[0_20px_60px_-10px_rgba(52,211,153,0.4)]"
+        className="absolute -left-4 md:-left-16 top-1/3 rounded-2xl border border-emerald-400/30 bg-background/70 backdrop-blur-xl px-4 py-3 shadow-[0_20px_60px_-10px_rgba(52,211,153,0.4)] animate-[hzFloatY_6s_ease-in-out_infinite]"
       >
         <div className="flex items-center gap-3">
           <div className="h-9 w-9 rounded-xl bg-emerald-500/20 flex items-center justify-center">
@@ -317,7 +408,7 @@ function HolographicDashboard() {
       <motion.div
         initial={{ opacity: 0, x: 30, y: -10 }} animate={{ opacity: 1, x: 0, y: 0 }}
         transition={{ delay: 1.9 }}
-        className="absolute -right-4 md:-right-12 -top-4 rounded-2xl border border-cyan-400/30 bg-background/70 backdrop-blur-xl px-4 py-3 shadow-[0_20px_60px_-10px_rgba(34,211,238,0.4)]"
+        className="absolute -right-4 md:-right-12 -top-4 rounded-2xl border border-cyan-400/30 bg-background/70 backdrop-blur-xl px-4 py-3 shadow-[0_20px_60px_-10px_rgba(34,211,238,0.4)] animate-[hzFloatY_7s_ease-in-out_infinite_reverse]"
       >
         <div className="flex items-center gap-3">
           <div className="h-9 w-9 rounded-xl bg-cyan-500/20 flex items-center justify-center">
@@ -358,9 +449,9 @@ function Hero() {
           className="font-display font-black tracking-[-0.05em] leading-[0.95] text-5xl md:text-7xl lg:text-8xl"
         >
           <span className="block text-foreground">Pagamentos</span>
-          <span className="block bg-gradient-to-r from-emerald-400 via-cyan-400 to-violet-400 bg-clip-text text-transparent">
+          <GlitchText className="block bg-gradient-to-r from-emerald-400 via-cyan-400 to-violet-400 bg-clip-text text-transparent">
             de outra era.
-          </span>
+          </GlitchText>
         </motion.h1>
 
         <motion.p
@@ -510,8 +601,16 @@ function FeatureCard({ f, i }: { f: typeof FEATURES[0]; i: number }) {
 }
 
 function Features() {
+  const ref = useRef<HTMLElement>(null);
+  const reduce = useReducedMotion();
+  const { scrollYProgress } = useScroll({ target: ref, offset: ["start end", "end start"] });
+  // Layered 3D reveal: cards drift at different speeds like separating planes
+  const yA = useTransform(scrollYProgress, [0, 1], [60, -60]);
+  const yB = useTransform(scrollYProgress, [0, 1], [30, -30]);
+  const yC = useTransform(scrollYProgress, [0, 1], [90, -90]);
+  const lanes = [yA, yB, yC];
   return (
-    <section id="features" className="relative py-24 md:py-32 px-4 md:px-8">
+    <section id="features" ref={ref} className="relative py-24 md:py-32 px-4 md:px-8">
       <div className="max-w-7xl mx-auto">
         <div className="text-center mb-16">
           <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-emerald-400/20 bg-emerald-500/5 text-[10px] font-black uppercase tracking-[0.2em] text-emerald-300 mb-6">
@@ -526,8 +625,12 @@ function Features() {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {FEATURES.map((f, i) => <FeatureCard key={f.title} f={f} i={i} />)}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 [perspective:1400px]">
+          {FEATURES.map((f, i) => (
+            <motion.div key={f.title} style={reduce ? undefined : { y: lanes[i % 3] }} className="will-change-transform">
+              <FeatureCard f={f} i={i} />
+            </motion.div>
+          ))}
         </div>
       </div>
     </section>
@@ -831,11 +934,27 @@ function Testimonials() {
    ═══════════════════════════════════════════════════════════════ */
 
 function Footer() {
-
   return (
-    <footer className="relative border-t border-white/5 py-12 px-4 md:px-8">
-      <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6">
+    <footer className="relative border-t border-white/5 py-12 px-4 md:px-8 overflow-hidden">
+      <div
+        className="pointer-events-none absolute inset-0 opacity-[0.05]"
+        style={{
+          backgroundImage:
+            "linear-gradient(rgba(52,211,153,0.6) 1px, transparent 1px), linear-gradient(90deg, rgba(52,211,153,0.6) 1px, transparent 1px)",
+          backgroundSize: "40px 40px",
+          maskImage: "radial-gradient(ellipse at center, black 30%, transparent 80%)",
+          WebkitMaskImage: "radial-gradient(ellipse at center, black 30%, transparent 80%)",
+        }}
+      />
+      <div className="relative max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6">
         <HotzfyLogo size={24} withWordmark />
+        <div className="inline-flex items-center gap-2 rounded-full border border-emerald-400/25 bg-emerald-500/[0.06] px-3 py-1.5 text-[10px] font-mono font-bold uppercase tracking-widest text-emerald-300">
+          <span className="relative flex h-2 w-2">
+            <span className="absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-70 animate-ping" />
+            <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-400" />
+          </span>
+          Uptime 99.99% · ao vivo
+        </div>
         <div className="flex items-center gap-6 text-[11px] font-mono text-muted-foreground/60">
           <a href="/termos-de-uso" className="hover:text-foreground transition">Termos</a>
           <a href="/politica-de-privacidade" className="hover:text-foreground transition">Privacidade</a>
@@ -876,17 +995,35 @@ export default function LandingPage() {
         jsonLd={JSONLD}
       />
 
-      {/* keyframes injected once */}
+      {/* keyframes + reduced-motion guard */}
       <style>{`
         @keyframes hzGridDrift { 0% { transform: translate(0,0); } 100% { transform: translate(56px,56px); } }
         @keyframes hzScan { 0% { top: -2px; opacity: 0; } 10% { opacity: 1; } 90% { opacity: 1; } 100% { top: 100vh; opacity: 0; } }
         @keyframes hzFloat { 0%, 100% { transform: translate(0,0) scale(1); } 50% { transform: translate(30px,-40px) scale(1.05); } }
         @keyframes hzSweep { 0%, 100% { transform: translateX(-100%); } 50% { transform: translateX(100%); } }
         @keyframes hzMarquee { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
+        @keyframes hzFloatY { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
+        @keyframes hzGlitchA { 0%, 92%, 100% { transform: translate(0,0); opacity: 0; } 93% { transform: translate(-2px,1px); opacity: .9; } 96% { transform: translate(2px,-1px); opacity: .7; } 99% { transform: translate(-1px,0); opacity: .5; } }
+        @keyframes hzGlitchB { 0%, 92%, 100% { transform: translate(0,0); opacity: 0; } 94% { transform: translate(2px,-1px); opacity: .8; } 97% { transform: translate(-2px,1px); opacity: .6; } }
+        .hz-glitch { position: relative; }
+        .hz-glitch::before, .hz-glitch::after {
+          content: attr(data-text);
+          position: absolute; inset: 0;
+          background: inherit; -webkit-background-clip: text; background-clip: text; color: transparent;
+          pointer-events: none;
+        }
+        .hz-glitch::before { text-shadow: 2px 0 rgba(34,211,238,.9); animation: hzGlitchA 5.5s infinite steps(1); mix-blend-mode: screen; }
+        .hz-glitch::after { text-shadow: -2px 0 rgba(167,139,250,.9); animation: hzGlitchB 5.5s infinite steps(1); mix-blend-mode: screen; }
+        @media (prefers-reduced-motion: reduce) {
+          .hz-glitch::before, .hz-glitch::after { display: none; }
+          *, *::before, *::after { animation-duration: .001ms !important; animation-iteration-count: 1 !important; transition-duration: .001ms !important; }
+        }
       `}</style>
 
       <HoloGrid />
+      <NeuralNet />
       <Nav />
+
       <main className="relative z-10">
         <Hero />
         <MetricsStrip />
