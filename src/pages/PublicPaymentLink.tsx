@@ -45,11 +45,12 @@ export default function PublicPaymentLink() {
     if (!slug) return;
     (async () => {
       setLoading(true);
-      const { data } = await supabase.from("payment_links").select("*").eq("slug", slug).maybeSingle();
-      if (!data || !data.is_active) { setNotFound(true); setLoading(false); return; }
-      setLink(data as PayLink);
-      // increment clicks (non-blocking)
-      supabase.from("payment_links").update({ clicks: (data.clicks || 0) + 1 }).eq("id", data.id).then(() => null);
+      const { data } = await supabase.rpc("get_public_payment_link", { _slug: slug });
+      const row = Array.isArray(data) ? data[0] : data;
+      if (!row || !row.is_active) { setNotFound(true); setLoading(false); return; }
+      setLink(row as PayLink);
+      // increment clicks (non-blocking) via safe RPC
+      supabase.rpc("increment_payment_link_clicks", { _slug: slug }).then(() => null);
       setLoading(false);
     })();
   }, [slug]);

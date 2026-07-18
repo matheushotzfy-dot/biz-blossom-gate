@@ -4697,6 +4697,22 @@ export type Database = {
       get_ledger_integrity_report: { Args: never; Returns: Json }
       get_my_goal_progress: { Args: { _goal_id: string }; Returns: number }
       get_my_max_ticket: { Args: never; Returns: number }
+      get_public_payment_link: {
+        Args: { _slug: string }
+        Returns: {
+          accept_card: boolean
+          accept_pix: boolean
+          amount: number
+          current_uses: number
+          description: string
+          expires_at: string
+          id: string
+          is_active: boolean
+          max_uses: number
+          slug: string
+          title: string
+        }[]
+      }
       get_quiz_questions_for_student: {
         Args: { _quiz_id: string }
         Returns: {
@@ -4729,6 +4745,10 @@ export type Database = {
         Returns: boolean
       }
       has_support_access: { Args: { _user_id: string }; Returns: boolean }
+      increment_payment_link_clicks: {
+        Args: { _slug: string }
+        Returns: undefined
+      }
       is_ip_blocked: { Args: { _ip_hash: string }; Returns: boolean }
       is_product_active: { Args: { _product_id: string }; Returns: boolean }
       list_visible_acquirers: {
