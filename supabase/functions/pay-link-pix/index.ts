@@ -138,11 +138,52 @@ Deno.serve(async (req) => {
       }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
 
-    // PodPay fallback
+    // PodPay v1 (nova - api.podpay.app)
+    if (acquirerSlug === "podpay_app") {
+      let pod;
+      try {
+        pod = await createPodpayAppPix({
+          amount: amt, externalId: preTxId, payerName: safeName, payerDocument: cleanDoc,
+          description: link.title ?? "Cobrança PIX",
+        }, supabase);
+      } catch (e) {
+        safeLog("PodPay error", { error: e instanceof Error ? e.message : "unknown" });
+        return new Response(JSON.stringify({ success: false, error: "Falha ao gerar PIX" }),
+          { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+      }
+      const pixExpiresAt = pod.expiresAt ?? new Date(Date.now() + 30 * 60 * 1000).toISOString();
+      const { data: tx } = await supabase.from("transactions").insert({
+        id: preTxId,
+        user_id: userId,
+        product_id: null,
+        payment_link_id: link.id,
+        amount: amt, fee_amount: feeAmount, net_amount: netAmount,
+        status: "pending", payment_method: "pix",
+        customer_name: safeName, customer_email: safeEmail, customer_document: cleanDoc,
+        podpay_payment_id: pod.transactionId, external_id: preTxId,
+        pix_expires_at: pixExpiresAt, pix_copy_paste: pod.qrcode, pix_qrcode: pod.qrcode,
+        metadata: { acquirer: "podpay_app", payment_link_slug: slug },
+      }).select().single();
+
+      safeLog("PodPay link PIX created", { transactionId: tx?.id, slug });
+      return new Response(JSON.stringify({
+        success: true,
+        data: {
+          transactionId: tx?.id ?? preTxId,
+          gatewayId: pod.transactionId,
+          acquirer: "podpay_app",
+          amount: amt,
+          pix: { qrcode: pod.qrcode, expiresAt: pixExpiresAt },
+        },
+      }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    }
+
+    // PodPay (versão antiga - deprecated, mantida só pra compatibilidade)
     if (acquirerSlug !== "podpay") {
       return new Response(JSON.stringify({ success: false, error: "PIX indisponível para este vendedor" }),
         { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
+
 
     const publicKey = Deno.env.get("PODPAY_PUBLIC_KEY")!;
     const secretKey = Deno.env.get("PODPAY_SECRET_KEY")!;
