@@ -2,7 +2,7 @@
  * HOTZFY — Futuristic Landing Page
  * "Year 3000" holographic aesthetic. All motion is CSS/Framer, no external assets.
  */
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { animate } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import { motion, useScroll, useTransform, useSpring, useInView, useMotionValue, useReducedMotion, AnimatePresence } from "framer-motion";
@@ -338,39 +338,111 @@ function LiveTransactionRow({ tx, idx }: { tx: typeof LIVE_TX[number]; idx: numb
   );
 }
 
+/* Tiny "cha-ching" synth — no assets, WebAudio only. Gated behind user click. */
+function useCoinSound() {
+  const ctxRef = useRef<AudioContext | null>(null);
+  const [enabled, setEnabled] = useState(false);
+  const enable = useCallback(() => {
+    if (ctxRef.current) { setEnabled(true); return; }
+    try {
+      const Ctx = (window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext);
+      ctxRef.current = new Ctx();
+      setEnabled(true);
+    } catch { /* ignore */ }
+  }, []);
+  const play = useCallback(() => {
+    const ctx = ctxRef.current; if (!ctx || !enabled) return;
+    const now = ctx.currentTime;
+    // two-note bell + shimmer = "cha-ching"
+    const notes = [
+      { f: 1320, t: 0.00, d: 0.18, g: 0.14 },
+      { f: 1760, t: 0.08, d: 0.35, g: 0.16 },
+      { f: 2640, t: 0.10, d: 0.30, g: 0.08 },
+    ];
+    for (const n of notes) {
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = "triangle";
+      osc.frequency.setValueAtTime(n.f, now + n.t);
+      gain.gain.setValueAtTime(0.0001, now + n.t);
+      gain.gain.exponentialRampToValueAtTime(n.g, now + n.t + 0.01);
+      gain.gain.exponentialRampToValueAtTime(0.0001, now + n.t + n.d);
+      osc.connect(gain).connect(ctx.destination);
+      osc.start(now + n.t); osc.stop(now + n.t + n.d + 0.02);
+    }
+  }, [enabled]);
+  const toggle = useCallback(() => {
+    if (!ctxRef.current) { enable(); return; }
+    setEnabled(v => !v);
+  }, [enable]);
+  return { enabled, toggle, play };
+}
+
+const SELLER_NAV = [
+  { icon: BarChart3, label: "Dashboard", active: true },
+  { icon: CreditCard, label: "Vendas" },
+  { icon: Wallet, label: "Saques" },
+  { icon: Users, label: "Afiliados" },
+  { icon: Layers, label: "Produtos" },
+  { icon: Shield, label: "Antifraude" },
+  { icon: Code2, label: "API" },
+];
+
+function useAntiCollide(count: number) {
+  // deterministic vertical stagger so notifications don't overlap
+  return Array.from({ length: count }, (_, i) => 24 + i * 92);
+}
+
 function HolographicDashboard() {
   const reduce = useReducedMotion();
   const [feed, setFeed] = useState(LIVE_TX.slice(0, 5));
-  const [cursor, setCursor] = useState(0);
+  const [notifs, setNotifs] = useState<Array<{ id: number; tx: typeof LIVE_TX[number] }>>([]);
+  const [revenue, setRevenue] = useState(47892);
+  const coin = useCoinSound();
+  const nextIdRef = useRef(0);
 
+  // Rotate live feed inside the dashboard
   useEffect(() => {
     if (reduce) return;
     let i = 5;
     const id = setInterval(() => {
-      setFeed((prev) => [LIVE_TX[i % LIVE_TX.length], ...prev].slice(0, 5));
+      setFeed(prev => [LIVE_TX[i % LIVE_TX.length], ...prev].slice(0, 5));
       i++;
     }, 2600);
     return () => clearInterval(id);
   }, [reduce]);
 
+  // Push side notifications + play coin
   useEffect(() => {
     if (reduce) return;
-    const id = setInterval(() => setCursor((c) => (c + 1) % 3), 3200);
-    return () => clearInterval(id);
-  }, [reduce]);
+    let i = 0;
+    const push = () => {
+      const tx = LIVE_TX[i % LIVE_TX.length]; i++;
+      const id = ++nextIdRef.current;
+      setNotifs(prev => [{ id, tx }, ...prev].slice(0, 3));
+      setRevenue(r => r + Number(tx.value.replace(/[^\d,]/g, "").replace(",", ".")));
+      coin.play();
+      setTimeout(() => setNotifs(prev => prev.filter(n => n.id !== id)), 5200);
+    };
+    const id = setInterval(push, 3400);
+    const kick = setTimeout(push, 1200);
+    return () => { clearInterval(id); clearTimeout(kick); };
+  }, [reduce, coin]);
+
+  const slots = useAntiCollide(3);
 
   return (
-    <div className="relative w-full max-w-[820px] mx-auto perspective-[1600px]">
+    <div className="relative w-full max-w-[960px] mx-auto perspective-[1600px]">
       <motion.div
-        initial={{ opacity: 0, rotateX: 18, y: 60 }}
-        animate={{ opacity: 1, rotateX: 8, y: 0 }}
+        initial={{ opacity: 0, rotateX: 14, y: 60 }}
+        animate={{ opacity: 1, rotateX: 6, y: 0 }}
         transition={{ duration: 1.4, ease: [0.16, 1, 0.3, 1], delay: 0.3 }}
         className="relative rounded-[22px] overflow-hidden"
         style={{
           transformStyle: "preserve-3d",
           background: "linear-gradient(180deg, #0b0f14 0%, #070a0e 100%)",
           boxShadow:
-            "0 0 0 1px rgba(52,211,153,0.18), 0 60px 140px -30px rgba(52,211,153,0.45), 0 30px 80px -20px rgba(34,211,238,0.25), inset 0 1px 0 rgba(255,255,255,0.05)",
+            "0 0 0 1px rgba(52,211,153,0.18), 0 60px 140px -30px rgba(52,211,153,0.45), 0 30px 80px -20px rgba(34,211,238,0.22), inset 0 1px 0 rgba(255,255,255,0.05)",
         }}
       >
         {/* window chrome */}
@@ -378,41 +450,40 @@ function HolographicDashboard() {
           <span className="h-2.5 w-2.5 rounded-full bg-[#ff5f57]" />
           <span className="h-2.5 w-2.5 rounded-full bg-[#febc2e]" />
           <span className="h-2.5 w-2.5 rounded-full bg-[#28c840]" />
-          <div className="ml-4 h-6 flex-1 max-w-[340px] rounded-md bg-black/40 border border-white/[0.04] flex items-center px-2.5 text-[10px] font-mono text-white/50">
+          <div className="ml-4 h-6 flex-1 max-w-[360px] rounded-md bg-black/40 border border-white/[0.04] flex items-center px-2.5 text-[10px] font-mono text-white/50">
             <Lock className="h-3 w-3 mr-1.5 text-emerald-400/70" /> hotzfy.com.br/dashboard
           </div>
-          <div className="ml-auto flex items-center gap-2">
-            <div className="hidden sm:flex items-center gap-1 rounded-md border border-emerald-400/20 bg-emerald-500/[0.06] px-1.5 py-0.5">
-              <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" />
-              <span className="text-[8.5px] font-mono font-bold text-emerald-300 uppercase tracking-wider">Live</span>
-            </div>
-          </div>
+          <button
+            onClick={coin.toggle}
+            className={cn(
+              "ml-auto flex items-center gap-1.5 rounded-md border px-2 py-0.5 text-[9px] font-mono font-bold uppercase tracking-wider transition",
+              coin.enabled
+                ? "border-emerald-400/40 bg-emerald-500/10 text-emerald-300"
+                : "border-white/10 bg-white/[0.03] text-white/50 hover:text-white/80"
+            )}
+            aria-label="Ativar som de venda"
+          >
+            <span className={cn("h-1.5 w-1.5 rounded-full", coin.enabled ? "bg-emerald-400 animate-pulse" : "bg-white/30")} />
+            {coin.enabled ? "Som ligado" : "Ativar som 🔔"}
+          </button>
         </div>
 
-        {/* app body: sidebar + main */}
-        <div className="grid grid-cols-[168px_1fr] min-h-[440px]">
+        {/* app body: sidebar + main — mirrors real seller dashboard */}
+        <div className="grid grid-cols-[184px_1fr] min-h-[520px]">
           {/* sidebar */}
           <aside className="border-r border-white/[0.04] bg-gradient-to-b from-white/[0.015] to-transparent p-3 flex flex-col gap-1">
             <div className="flex items-center gap-2 px-2 py-2 mb-2">
-              <div className="h-6 w-6 rounded-md bg-gradient-to-br from-emerald-400 to-cyan-500 flex items-center justify-center text-[11px] font-black text-black font-display">H</div>
-              <span className="text-[11px] font-display font-black text-white tracking-tight">HOTZFY</span>
+              <HotzfyLogo size={22} animated={false} />
+              <span className="text-[12px] font-display font-black text-white tracking-tight">HOTZFY</span>
             </div>
-            {[
-              { icon: BarChart3, label: "Dashboard", active: true },
-              { icon: CreditCard, label: "Vendas" },
-              { icon: Wallet, label: "Saques" },
-              { icon: Users, label: "Afiliados" },
-              { icon: Code2, label: "API" },
-              { icon: Shield, label: "Antifraude" },
-              { icon: Layers, label: "Produtos" },
-            ].map((item, i) => (
+            {SELLER_NAV.map((item, i) => (
               <div
                 key={i}
                 className={cn(
                   "flex items-center gap-2 rounded-lg px-2.5 py-1.5 text-[10.5px] font-semibold transition",
                   item.active
-                    ? "bg-emerald-500/[0.08] text-emerald-300 border border-emerald-400/15"
-                    : "text-white/45 hover:text-white/70"
+                    ? "bg-emerald-500/[0.10] text-emerald-300 border border-emerald-400/20"
+                    : "text-white/45 border border-transparent"
                 )}
               >
                 <item.icon className="h-3.5 w-3.5" />
@@ -429,52 +500,81 @@ function HolographicDashboard() {
             </div>
           </aside>
 
-          {/* main content */}
+          {/* main content — replica of seller Dashboard.tsx */}
           <main className="p-4 space-y-3">
-            {/* KPIs */}
-            <div className="grid grid-cols-3 gap-2.5">
+            {/* greeting header */}
+            <div className="flex items-center justify-between gap-3">
+              <div className="min-w-0">
+                <div className="font-display font-black tracking-[-0.02em] text-[15px] text-white leading-tight truncate">
+                  Seja bem-vindo, <span className="text-emerald-300">Rafael</span>
+                </div>
+                <div className="text-[9.5px] text-white/40 mt-0.5">Que essa jornada seja leve, produtiva e cheia de conquistas!</div>
+              </div>
+              <div className="flex items-center gap-2 rounded-xl border border-white/[0.06] bg-white/[0.02] px-2.5 py-1.5">
+                <div className="h-6 w-6 rounded-md bg-emerald-500/15 border border-emerald-400/20 flex items-center justify-center">
+                  <Activity className="h-3 w-3 text-emerald-300" />
+                </div>
+                <div>
+                  <div className="text-[8px] font-mono uppercase tracking-widest text-white/40 font-bold">Faturamento · hoje</div>
+                  <div className="text-[11px] font-black text-white font-display tabular-nums">
+                    R$ <CountUp to={revenue} decimals={0} duration={0.8} />
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* mini ranking hero — matches seller "CAMPEÕES" */}
+            <div className="relative overflow-hidden rounded-2xl border border-emerald-400/15 bg-gradient-to-br from-emerald-500/[0.06] via-transparent to-cyan-500/[0.04] p-3 flex items-center gap-4">
+              <div className="flex-1">
+                <div className="inline-flex items-center gap-1.5 rounded-full border border-emerald-400/30 bg-emerald-500/10 px-2 py-0.5 text-[8px] font-bold uppercase tracking-[0.2em] text-emerald-300">
+                  <Sparkles className="h-2.5 w-2.5" /> Corrida de Faturamento
+                </div>
+                <div className="mt-1 font-display font-black text-[15px] text-white tracking-[-0.02em] leading-tight">
+                  Conheça os <span className="text-emerald-300">CAMPEÕES</span>
+                </div>
+              </div>
+              <div className="flex items-end gap-1.5">
+                {[
+                  { pos: "2", h: "h-8", tone: "from-slate-300 to-slate-500" },
+                  { pos: "1", h: "h-11", tone: "from-yellow-300 to-amber-500" },
+                  { pos: "3", h: "h-6", tone: "from-orange-400 to-orange-700" },
+                ].map((p) => (
+                  <div key={p.pos} className={cn("w-5 rounded-t-md bg-gradient-to-b flex items-start justify-center pt-0.5", p.h, p.tone)}>
+                    <span className="font-display font-black text-[8px] text-black/70">{p.pos}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* 4 KPI cards — replica */}
+            <div className="grid grid-cols-4 gap-2">
               {[
-                { l: "Faturamento hoje", pre: "R$ ", to: 47892, dec: 0, c: "+18.4%", tone: "emerald" },
-                { l: "Vendas aprovadas", pre: "", to: 312, dec: 0, c: "+27", tone: "cyan" },
-                { l: "Ticket médio", pre: "R$ ", to: 153, dec: 0, c: "+4.1%", tone: "violet" },
+                { l: "Ticket Médio", pre: "R$ ", to: 153, dec: 0, icon: BarChart3, tone: "emerald" as const, sub: "Média bruta" },
+                { l: "Pedidos Pagos", pre: "", to: 312, dec: 0, icon: Zap, tone: "emerald" as const, sub: "Concluídas" },
+                { l: "Saldo Pendente", pre: "R$ ", to: 8420, dec: 0, icon: Activity, tone: "cyan" as const, sub: "D+N liberar" },
+                { l: "Faturamento", pre: "R$ ", to: revenue, dec: 0, icon: Wallet, tone: "emerald" as const, sub: "vs ontem +18%" },
               ].map((k, i) => (
                 <motion.div
                   key={i}
                   initial={{ opacity: 0, y: 12 }}
                   animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.8 + i * 0.12 }}
-                  className="relative rounded-xl p-3 bg-white/[0.02] border border-white/[0.05] overflow-hidden"
+                  transition={{ delay: 0.8 + i * 0.08 }}
+                  className="relative rounded-xl p-2.5 bg-white/[0.02] border border-white/[0.05] overflow-hidden"
                 >
-                  <div className="text-[9px] uppercase tracking-wider text-white/40 font-bold">{k.l}</div>
-                  <div className="mt-0.5 text-lg font-black text-white font-display tabular-nums leading-tight">
-                    <CountUp to={k.to} decimals={k.dec} prefix={k.pre} duration={1.8} />
+                  <div className="flex items-center justify-between">
+                    <div className="text-[8.5px] uppercase tracking-wider text-white/40 font-bold">{k.l}</div>
+                    <k.icon className={cn("h-3 w-3", k.tone === "emerald" ? "text-emerald-300" : "text-cyan-300")} />
                   </div>
-                  <div className="flex items-center gap-1 mt-0.5">
-                    <span className={cn(
-                      "text-[9.5px] font-mono font-bold",
-                      k.tone === "emerald" && "text-emerald-400",
-                      k.tone === "cyan" && "text-cyan-400",
-                      k.tone === "violet" && "text-violet-400",
-                    )}>▲ {k.c}</span>
-                    <span className="text-[8.5px] text-white/25 font-mono">vs ontem</span>
+                  <div className="mt-1 text-[13px] font-black text-white font-display tabular-nums leading-tight">
+                    <CountUp to={k.to} decimals={k.dec} prefix={k.pre} duration={1.4} />
                   </div>
-                  {/* mini sparkline */}
-                  <svg viewBox="0 0 80 20" className="absolute right-2 bottom-2 w-14 h-4 opacity-70">
-                    <path
-                      d={`M0,${15 - i * 2} L15,${12 - i} L30,${14 + i} L45,${8 - i} L60,${10 - i * 2} L80,${5 - i}`}
-                      fill="none"
-                      stroke={k.tone === "emerald" ? "#34d399" : k.tone === "cyan" ? "#22d3ee" : "#a78bfa"}
-                      strokeWidth="1.4"
-                      strokeLinecap="round"
-                    />
-                  </svg>
+                  <div className="text-[8px] text-white/30 font-mono mt-0.5">{k.sub}</div>
                 </motion.div>
               ))}
             </div>
 
-            {/* chart + feed side by side */}
-            <div className="grid grid-cols-[1.35fr_1fr] gap-2.5">
-              {/* chart */}
+            {/* chart + feed */}
+            <div className="grid grid-cols-[1.35fr_1fr] gap-2">
               <motion.div
                 initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 1.2 }}
                 className="rounded-xl p-3 bg-white/[0.02] border border-white/[0.05] relative overflow-hidden"
@@ -493,7 +593,7 @@ function HolographicDashboard() {
                     ))}
                   </div>
                 </div>
-                <svg viewBox="0 0 400 130" className="w-full h-[150px]">
+                <svg viewBox="0 0 400 130" className="w-full h-[140px]">
                   <defs>
                     <linearGradient id="lchart" x1="0" y1="0" x2="0" y2="1">
                       <stop offset="0%" stopColor="#34d399" stopOpacity="0.4" />
@@ -516,26 +616,9 @@ function HolographicDashboard() {
                     initial={{ pathLength: 0 }} animate={{ pathLength: 1 }} transition={{ duration: 1.8, delay: 1.4 }}
                     style={{ filter: "drop-shadow(0 0 6px rgba(52,211,153,0.6))" }}
                   />
-                  {[100, 200, 300, 400].map((x, i) => (
-                    <motion.circle
-                      key={i} cx={x} cy={[55, 65, 30, 10][i]} r="2.5" fill="#0b0f14" stroke="#34d399" strokeWidth="1.5"
-                      initial={{ scale: 0 }} animate={{ scale: [0, 1.4, 1] }}
-                      transition={{ delay: 2 + i * 0.15, duration: 0.5 }}
-                    />
-                  ))}
-                  {/* tooltip */}
-                  <motion.g
-                    initial={{ opacity: 0 }} animate={{ opacity: [0, 1, 1, 0] }}
-                    transition={{ delay: 3, duration: 4, repeat: Infinity, repeatDelay: 2 }}
-                  >
-                    <line x1="300" y1="30" x2="300" y2="130" stroke="rgba(52,211,153,0.3)" strokeDasharray="3 3" />
-                    <rect x="248" y="6" width="104" height="22" rx="4" fill="#0b0f14" stroke="rgba(52,211,153,0.4)" />
-                    <text x="256" y="20" fill="#34d399" fontSize="9" fontFamily="ui-monospace" fontWeight="700">14h · R$ 6.284</text>
-                  </motion.g>
                 </svg>
               </motion.div>
 
-              {/* live feed */}
               <motion.div
                 initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 1.4 }}
                 className="rounded-xl bg-white/[0.02] border border-white/[0.05] overflow-hidden flex flex-col"
@@ -556,65 +639,12 @@ function HolographicDashboard() {
                 </div>
               </motion.div>
             </div>
-
-            {/* bottom: mini funnel */}
-            <motion.div
-              initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 1.6 }}
-              className="rounded-xl bg-white/[0.02] border border-white/[0.05] px-3 py-2 flex items-center gap-3"
-            >
-              <div className="text-[9px] font-mono font-bold uppercase tracking-widest text-white/40">Funil hoje</div>
-              {[
-                { l: "Visitas", v: "12.847", w: "100%" },
-                { l: "Checkout", v: "3.492", w: "58%" },
-                { l: "PIX gerado", v: "1.104", w: "34%" },
-                { l: "Aprovado", v: "312", w: "22%" },
-              ].map((s, i) => (
-                <div key={i} className="flex-1 min-w-0">
-                  <div className="flex items-baseline justify-between">
-                    <span className="text-[9px] text-white/50 font-mono">{s.l}</span>
-                    <span className="text-[10px] font-mono font-black text-white tabular-nums">{s.v}</span>
-                  </div>
-                  <div className="mt-1 h-1 rounded-full bg-white/[0.05] overflow-hidden">
-                    <motion.div
-                      initial={{ width: 0 }} animate={{ width: s.w }}
-                      transition={{ delay: 1.8 + i * 0.15, duration: 1, ease: [0.16, 1, 0.3, 1] }}
-                      className={cn(
-                        "h-full rounded-full",
-                        i === 0 && "bg-gradient-to-r from-emerald-400 to-emerald-500",
-                        i === 1 && "bg-gradient-to-r from-cyan-400 to-cyan-500",
-                        i === 2 && "bg-gradient-to-r from-violet-400 to-violet-500",
-                        i === 3 && "bg-gradient-to-r from-fuchsia-400 to-fuchsia-500",
-                      )}
-                    />
-                  </div>
-                </div>
-              ))}
-            </motion.div>
           </main>
         </div>
 
-        {/* animated cursor */}
-        {!reduce && (
-          <motion.div
-            className="absolute pointer-events-none z-20"
-            initial={{ opacity: 0 }}
-            animate={{
-              opacity: [0, 1, 1, 1, 0],
-              left: ["58%", "58%", "72%", "72%", "72%"],
-              top: ["55%", "55%", "42%", "42%", "42%"],
-            }}
-            transition={{ duration: 5, repeat: Infinity, repeatDelay: 3, times: [0, 0.15, 0.55, 0.85, 1] }}
-          >
-            <svg width="18" height="22" viewBox="0 0 18 22" fill="none">
-              <path d="M1 1L1 17L5.5 13.5L8.5 21L11 20L8 12.5L14 12.5L1 1Z" fill="white" stroke="black" strokeWidth="1" />
-            </svg>
-          </motion.div>
-        )}
-
         {/* holographic sweep */}
         <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(115deg,transparent_40%,rgba(255,255,255,0.04)_50%,transparent_60%)] animate-[hzSweep_8s_ease-in-out_infinite]" />
-
-        {/* subtle noise overlay for realism */}
+        {/* subtle noise */}
         <div
           className="pointer-events-none absolute inset-0 opacity-[0.03] mix-blend-overlay"
           style={{
@@ -624,48 +654,63 @@ function HolographicDashboard() {
         />
       </motion.div>
 
-      {/* floating notification: PIX aprovado */}
-      <motion.div
-        initial={{ opacity: 0, x: -30, y: 20 }} animate={{ opacity: 1, x: 0, y: 0 }}
-        transition={{ delay: 1.6 }}
-        className="absolute -left-4 md:-left-14 top-[38%] rounded-2xl border border-emerald-400/25 bg-[#0b0f14]/95 backdrop-blur-xl px-3.5 py-2.5 shadow-[0_20px_60px_-10px_rgba(52,211,153,0.5)] animate-[hzFloatY_6s_ease-in-out_infinite]"
-      >
-        <div className="flex items-center gap-2.5">
-          <div className="relative h-9 w-9 rounded-xl bg-gradient-to-br from-emerald-500/30 to-emerald-600/10 border border-emerald-400/30 flex items-center justify-center">
-            <QrCode className="h-4 w-4 text-emerald-300" />
-            <span className="absolute -top-1 -right-1 h-2.5 w-2.5 rounded-full bg-emerald-400 ring-2 ring-[#0b0f14] animate-pulse" />
-          </div>
-          <div>
-            <div className="text-[8.5px] uppercase tracking-widest text-emerald-300/80 font-black font-mono">PIX aprovado · agora</div>
-            <div className="text-sm font-black text-white font-display tabular-nums leading-tight">+ R$ 1.297,00</div>
-            <div className="text-[9px] text-white/40 font-mono">Rafael M. · 0.18s</div>
-          </div>
-        </div>
-      </motion.div>
+      {/* ═══ SIDE NOTIFICATIONS — vendas entrando em tempo real ═══ */}
+      <div className="pointer-events-none absolute -right-4 md:-right-16 top-0 bottom-0 hidden md:block w-[280px]">
+        <AnimatePresence>
+          {notifs.map((n, idx) => (
+            <motion.div
+              key={n.id}
+              initial={{ opacity: 0, x: 60, scale: 0.9 }}
+              animate={{ opacity: 1, x: 0, scale: 1, top: slots[idx] }}
+              exit={{ opacity: 0, x: 40, scale: 0.95 }}
+              transition={{ type: "spring", stiffness: 260, damping: 26 }}
+              className="absolute right-0 w-[260px] rounded-2xl border border-emerald-400/25 bg-[#0b0f14]/95 backdrop-blur-xl px-3.5 py-2.5 shadow-[0_20px_60px_-10px_rgba(52,211,153,0.5)]"
+              style={{ top: slots[idx] }}
+            >
+              <div className="flex items-center gap-2.5">
+                <div className="relative h-9 w-9 rounded-xl bg-gradient-to-br from-emerald-500/30 to-emerald-600/10 border border-emerald-400/30 flex items-center justify-center">
+                  <QrCode className="h-4 w-4 text-emerald-300" />
+                  <span className="absolute -top-1 -right-1 h-2.5 w-2.5 rounded-full bg-emerald-400 ring-2 ring-[#0b0f14] animate-pulse" />
+                </div>
+                <div className="min-w-0 flex-1">
+                  <div className="text-[8.5px] uppercase tracking-widest text-emerald-300/80 font-black font-mono">Nova venda · agora</div>
+                  <div className="text-sm font-black text-white font-display tabular-nums leading-tight">+ {n.tx.value}</div>
+                  <div className="text-[9px] text-white/40 font-mono truncate">{n.tx.name} · {n.tx.city} · PIX {n.tx.ms}</div>
+                </div>
+              </div>
+              {/* progress bar for auto-dismiss */}
+              <motion.div
+                initial={{ width: "100%" }} animate={{ width: "0%" }}
+                transition={{ duration: 5.2, ease: "linear" }}
+                className="mt-2 h-0.5 rounded-full bg-emerald-400/60"
+              />
+            </motion.div>
+          ))}
+        </AnimatePresence>
+      </div>
 
-      {/* floating notification: antifraude */}
+      {/* Left side — antifraude + saque D+0 */}
       <motion.div
-        initial={{ opacity: 0, x: 30, y: -10 }} animate={{ opacity: 1, x: 0, y: 0 }}
+        initial={{ opacity: 0, x: -30, y: -10 }} animate={{ opacity: 1, x: 0, y: 0 }}
         transition={{ delay: 1.9 }}
-        className="absolute -right-4 md:-right-10 -top-6 rounded-2xl border border-cyan-400/25 bg-[#0b0f14]/95 backdrop-blur-xl px-3.5 py-2.5 shadow-[0_20px_60px_-10px_rgba(34,211,238,0.45)] animate-[hzFloatY_7s_ease-in-out_infinite_reverse]"
+        className="hidden md:flex absolute -left-4 md:-left-14 top-[18%] rounded-2xl border border-cyan-400/25 bg-[#0b0f14]/95 backdrop-blur-xl px-3.5 py-2.5 shadow-[0_20px_60px_-10px_rgba(34,211,238,0.45)] animate-[hzFloatY_7s_ease-in-out_infinite]"
       >
         <div className="flex items-center gap-2.5">
           <div className="h-9 w-9 rounded-xl bg-gradient-to-br from-cyan-500/30 to-cyan-600/10 border border-cyan-400/30 flex items-center justify-center">
             <Shield className="h-4 w-4 text-cyan-300" />
           </div>
           <div>
-            <div className="text-[8.5px] uppercase tracking-widest text-cyan-300/80 font-black font-mono">Antifraude · Bloqueado</div>
+            <div className="text-[8.5px] uppercase tracking-widest text-cyan-300/80 font-black font-mono">Antifraude · bloqueado</div>
             <div className="text-sm font-black text-white font-display leading-tight">Risk score 0.94</div>
             <div className="text-[9px] text-white/40 font-mono">IP flagged · Manaus/AM</div>
           </div>
         </div>
       </motion.div>
 
-      {/* floating notification: saque instantâneo */}
       <motion.div
-        initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }}
+        initial={{ opacity: 0, x: -20, y: 20 }} animate={{ opacity: 1, x: 0, y: 0 }}
         transition={{ delay: 2.2 }}
-        className="absolute -right-2 md:-right-8 bottom-8 rounded-2xl border border-violet-400/25 bg-[#0b0f14]/95 backdrop-blur-xl px-3.5 py-2.5 shadow-[0_20px_60px_-10px_rgba(167,139,250,0.4)] animate-[hzFloatY_8s_ease-in-out_infinite]"
+        className="hidden md:flex absolute -left-2 md:-left-10 bottom-10 rounded-2xl border border-violet-400/25 bg-[#0b0f14]/95 backdrop-blur-xl px-3.5 py-2.5 shadow-[0_20px_60px_-10px_rgba(167,139,250,0.4)] animate-[hzFloatY_8s_ease-in-out_infinite]"
       >
         <div className="flex items-center gap-2.5">
           <div className="h-9 w-9 rounded-xl bg-gradient-to-br from-violet-500/30 to-violet-600/10 border border-violet-400/30 flex items-center justify-center">
