@@ -186,7 +186,6 @@ Deno.serve(async (req) => {
           customer_name: safeName,
           customer_email: safeEmail,
           customer_document: cleanDoc,
-      buyer_ip: requestIp,
           buyer_ip: requestIp,
           podpay_payment_id: veo.transactionId,
           external_id: preTxId,
@@ -260,7 +259,6 @@ Deno.serve(async (req) => {
           customer_name: safeName,
           customer_email: safeEmail,
           customer_document: cleanDoc,
-      buyer_ip: requestIp,
           buyer_ip: requestIp,
           podpay_payment_id: pod.transactionId,
           external_id: preTxId,
@@ -388,7 +386,6 @@ Deno.serve(async (req) => {
       customer_name: safeName,
       customer_email: safeEmail,
       customer_document: cleanDoc,
-      buyer_ip: requestIp,
       podpay_payment_id: podpayId ? String(podpayId) : null,
       metadata: { acquirer: "podpay" },
     }).select().single();
