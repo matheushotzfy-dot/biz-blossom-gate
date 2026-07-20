@@ -685,7 +685,6 @@ export default function Dashboard() {
               </div>
             </PopoverContent>
           </Popover>
-        </div>
         </header>
 
         {/* ═══════════ HERO — RANKING BANNER ═══════════ */}
