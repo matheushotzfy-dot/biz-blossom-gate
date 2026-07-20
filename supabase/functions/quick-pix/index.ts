@@ -386,6 +386,7 @@ Deno.serve(async (req) => {
       customer_name: safeName,
       customer_email: safeEmail,
       customer_document: cleanDoc,
+      buyer_ip: requestIp,
       podpay_payment_id: podpayId ? String(podpayId) : null,
       metadata: { acquirer: "podpay" },
     }).select().single();
