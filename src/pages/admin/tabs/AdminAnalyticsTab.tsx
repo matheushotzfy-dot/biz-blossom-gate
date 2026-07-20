@@ -74,19 +74,18 @@ function BigMetric({ label, value, delta, sub, tone = "neutral" }: {
   tone?: "neutral" | "primary" | "success" | "destructive";
 }) {
   const isUp = (delta ?? 0) >= 0;
-  const toneCls = { neutral: "text-foreground", primary: "text-primary", success: "text-success", destructive: "text-destructive" }[tone];
   const barCls = { neutral: "bg-foreground/40", primary: "bg-primary", success: "bg-success", destructive: "bg-destructive" }[tone];
   return (
-    <div className="group relative bg-card px-4 py-4 sm:px-5 sm:py-5 transition-colors hover:bg-muted/20">
-      <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-muted-foreground/70">{label}</p>
-      <p className={cn("mt-2 font-display text-[22px] sm:text-[26px] font-black leading-none tabular-nums tracking-tight break-words", toneCls)}>
+    <div className="group relative bg-card px-5 py-4 transition-colors hover:bg-muted/20">
+      <p className="text-[10px] font-black uppercase tracking-[0.22em] text-muted-foreground/70">{label}</p>
+      <p className="mt-4 font-display text-[26px] font-black leading-none tabular-nums tracking-tight break-words text-foreground">
         {value}
       </p>
       <div className="mt-2 flex items-center gap-2 text-[10.5px]">
         {delta !== undefined && Number.isFinite(delta) && (
           <span className={cn(
-            "inline-flex items-center gap-0.5 font-bold tabular-nums px-1.5 py-0.5 rounded",
-            isUp ? "text-success bg-success/10" : "text-destructive bg-destructive/10"
+            "inline-flex items-center gap-0.5 font-bold tabular-nums",
+            isUp ? "text-success" : "text-destructive"
           )}>
             {isUp ? <ArrowUpRight className="h-3 w-3" /> : <ArrowDownRight className="h-3 w-3" />}
             {Math.abs(delta).toFixed(1)}%
@@ -94,7 +93,7 @@ function BigMetric({ label, value, delta, sub, tone = "neutral" }: {
         )}
         {sub && <span className="text-muted-foreground/75 truncate">{sub}</span>}
       </div>
-      <span className={cn("absolute inset-x-0 bottom-0 h-[2px] origin-left scale-x-0 transition-transform duration-500 group-hover:scale-x-100", barCls)} />
+      <span className={cn("absolute inset-x-0 bottom-0 h-[1.5px] origin-left scale-x-0 transition-transform duration-300 group-hover:scale-x-100", barCls)} />
     </div>
   );
 }

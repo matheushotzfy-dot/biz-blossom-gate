@@ -13,13 +13,13 @@ const toneText: Record<Tone, string> = {
   neutral: "text-foreground",
 };
 
-const toneSurface: Record<Tone, string> = {
-  primary: "bg-primary/10 text-primary border-primary/15",
-  success: "bg-success/10 text-success border-success/15",
-  warning: "bg-warning/10 text-warning border-warning/15",
-  destructive: "bg-destructive/10 text-destructive border-destructive/15",
-  info: "bg-info/10 text-info border-info/15",
-  neutral: "bg-secondary text-muted-foreground border-border/60",
+const toneBar: Record<Tone, string> = {
+  primary: "bg-primary",
+  success: "bg-success",
+  warning: "bg-warning",
+  destructive: "bg-destructive",
+  info: "bg-info",
+  neutral: "bg-foreground/40",
 };
 
 export function PremiumPanel({ children, className, title, eyebrow, icon: Icon, action }: {
@@ -31,14 +31,14 @@ export function PremiumPanel({ children, className, title, eyebrow, icon: Icon, 
   action?: ReactNode;
 }) {
   return (
-    <section className={cn("overflow-hidden rounded-[24px] border border-border/60 bg-card", className)}>
+    <section className={cn("overflow-hidden rounded-2xl border border-border/60 bg-card", className)}>
       {(title || eyebrow || Icon || action) && (
-        <header className="flex flex-col gap-3 border-b border-border/40 p-5 sm:flex-row sm:items-center sm:justify-between">
-          <div className="flex items-center gap-3 min-w-0">
-            {Icon && <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-primary/10 bg-primary/10 text-primary"><Icon className="h-5 w-5" strokeWidth={2.4} /></div>}
+        <header className="flex flex-col gap-3 border-b border-border/40 px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex items-center gap-2.5 min-w-0">
+            {Icon && <Icon className="h-4 w-4 shrink-0 text-muted-foreground" strokeWidth={2.2} />}
             <div className="min-w-0">
               {eyebrow && <p className="text-[9px] font-black uppercase tracking-[0.22em] text-muted-foreground/70">{eyebrow}</p>}
-              {title && <h2 className="font-display text-sm font-black uppercase tracking-tight text-foreground sm:text-base">{title}</h2>}
+              {title && <h2 className="font-display text-sm font-black uppercase tracking-tight text-foreground">{title}</h2>}
             </div>
           </div>
           {action && <div className="shrink-0">{action}</div>}
@@ -58,18 +58,16 @@ export function PremiumMetric({ label, value, sub, icon: Icon, tone = "neutral",
   className?: string;
 }) {
   return (
-    <div className={cn("group relative overflow-hidden rounded-[24px] border border-border/60 bg-card p-5 transition-colors hover:border-primary/25", className)}>
-      <div className="relative z-10 flex items-start justify-between gap-3">
-        <div className="min-w-0">
-          <p className="text-[9px] font-black uppercase tracking-[0.18em] text-muted-foreground/70">{label}</p>
-          <p className={cn("mt-3 break-words font-display text-2xl font-black leading-none tracking-tight tabular-nums", toneText[tone])}>{value}</p>
-          {sub && <p className="mt-2 truncate text-[11px] font-bold text-muted-foreground/70">{sub}</p>}
-        </div>
-        <div className={cn("flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border", toneSurface[tone])}>
-          <Icon className="h-5 w-5" strokeWidth={2.35} />
-        </div>
+    <div className={cn("group relative overflow-hidden rounded-xl border border-border/60 bg-card px-5 py-4 transition-colors hover:border-border", className)}>
+      <div className="flex items-center justify-between">
+        <p className="text-[10px] font-black uppercase tracking-[0.22em] text-muted-foreground/70">{label}</p>
+        <Icon className={cn("h-3.5 w-3.5 shrink-0 opacity-40 transition-opacity group-hover:opacity-90", toneText[tone])} strokeWidth={2.2} />
       </div>
-      <Icon className="pointer-events-none absolute -bottom-7 -right-5 h-28 w-28 rotate-[-12deg] text-foreground/[0.035] transition-transform duration-500 group-hover:scale-110" strokeWidth={1.4} />
+      <p className="mt-4 break-words font-display text-[26px] font-black leading-none tracking-tight tabular-nums text-foreground">
+        {value}
+      </p>
+      {sub && <p className="mt-2 truncate text-[11px] font-medium text-muted-foreground/75">{sub}</p>}
+      <span className={cn("pointer-events-none absolute inset-x-0 bottom-0 h-[1.5px] origin-left scale-x-0 transition-transform duration-300 group-hover:scale-x-100", toneBar[tone])} />
     </div>
   );
 }
