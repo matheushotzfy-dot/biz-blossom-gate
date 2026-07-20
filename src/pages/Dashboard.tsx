@@ -752,7 +752,7 @@ export default function Dashboard() {
             { label: "Saldo Disponível", value: fmt(Math.max(0, balance)), sub: "Saldo disponível", icon: Wallet, spark: true, isRevenue: false },
             { label: "Recebido Hoje", value: fmt(receivedToday), sub: "Total faturado no dia", icon: RefreshCw, spark: true, isRevenue: false },
             { label: "Bloqueio Cautelar", value: fmt(disputedAmount), sub: "MEDs em disputa", icon: Lock, spark: false, isRevenue: false },
-            { label: "Faturamento Total", value: fmt(revenue), sub: `${compareLabel}`, icon: TrendingUp, spark: true, isRevenue: true, trend: revenueTrend },
+            { label: "Faturamento Total", value: fmt(revenue), sub: "Valor bruto de vendas", icon: TrendingUp, spark: true, isRevenue: true },
           ].map((k) => {
             const Icon = k.icon;
             const isRevenue = k.isRevenue;
