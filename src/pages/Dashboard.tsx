@@ -829,94 +829,67 @@ export default function Dashboard() {
         {/* ═══════════ CHART + SIDE PANEL ═══════════ */}
         <section className="grid grid-cols-1 xl:grid-cols-3 gap-3">
 
-          {/* Faturamento — Area chart premium */}
-          <div className="xl:col-span-2 rounded-3xl border border-border/60 bg-card/80 backdrop-blur overflow-hidden">
-            {/* Header with KPI trio + toggle */}
-            <div className="flex flex-col gap-4 px-5 md:px-6 pt-5 pb-4 border-b border-border/40">
-              <div className="flex flex-wrap items-start justify-between gap-3">
-                <div className="min-w-0">
-                  <p className="text-[10px] font-black uppercase tracking-[0.24em] text-muted-foreground/70">Fluxo · {isCustom ? "Personalizado" : selectedPeriod.label}</p>
-                  <h3 className="font-display font-black text-xl tracking-[-0.02em] mt-1">Faturamento</h3>
-                </div>
-                <div className="flex items-center rounded-full border border-border/60 bg-muted/20 p-1">
-                  {PERIOD_PRESETS.filter(p => ["Hoje", "7 dias", "30 dias"].includes(p.label)).map((p) => {
-                    const isActive = !isCustom && selectedPeriod.label === p.label;
-                    const short = p.label === "Hoje" ? "Hoje" : p.label === "7 dias" ? "Semana" : "Mês";
-                    return (
-                      <button key={p.label} onClick={() => { setSelectedPeriod(p); setIsCustom(false); }}
-                        className={cn("px-3.5 py-1.5 rounded-full text-[11px] font-black uppercase tracking-[0.1em] transition-all",
-                          isActive ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground"
-                        )}>
-                        {short}
-                      </button>
-                    );
-                  })}
-                </div>
+          {/* Faturamento — Clean line chart (Cakto-style) */}
+          <div className="xl:col-span-2 rounded-2xl border border-border/60 bg-card/80 backdrop-blur overflow-hidden">
+            <div className="flex items-center justify-between gap-3 px-5 md:px-6 pt-5 pb-4">
+              <div className="min-w-0">
+                <h3 className="font-display font-bold text-[15px] tracking-[-0.01em] text-foreground">Faturamento</h3>
+                <p className="text-[11px] text-muted-foreground/60 mt-0.5">{isCustom ? "Período personalizado" : selectedPeriod.label}</p>
               </div>
-              {/* KPI trio */}
-              {(() => {
-                const total = chartData.reduce((a, d) => a + d.vendas, 0);
-                const active = chartData.filter(d => d.vendas > 0);
-                const avg = active.length ? total / active.length : 0;
-                const best = chartData.reduce<{ label: string; v: number }>((m, d) => d.vendas > m.v ? { label: d.fullLabel, v: d.vendas } : m, { label: "—", v: 0 });
-                const trio = [
-                  { k: "Total", v: privacy.hidden ? CENSORED : fmt(total) },
-                  { k: "Ticket médio", v: privacy.hidden ? CENSORED : fmt(avg) },
-                  { k: "Melhor dia", v: best.v > 0 ? (privacy.hidden ? CENSORED : fmt(best.v)) : "—", sub: best.v > 0 ? best.label : undefined },
-                ];
-                return (
-                  <div className="grid grid-cols-3 gap-2">
-                    {trio.map(t => (
-                      <div key={t.k} className="rounded-2xl border border-border/40 bg-background/40 px-3 py-2.5">
-                        <p className="text-[9px] font-black uppercase tracking-[0.2em] text-muted-foreground/70">{t.k}</p>
-                        <p className="mt-1 font-display font-black text-[14px] md:text-[15px] tabular-nums tracking-[-0.02em] truncate">{t.v}</p>
-                        {t.sub && <p className="text-[10px] text-muted-foreground/50 mt-0.5 truncate">{t.sub}</p>}
-                      </div>
-                    ))}
-                  </div>
-                );
-              })()}
+              <div className="flex items-center rounded-lg border border-border/60 bg-background/40 p-0.5">
+                {PERIOD_PRESETS.filter(p => ["Hoje", "7 dias", "30 dias"].includes(p.label)).map((p) => {
+                  const isActive = !isCustom && selectedPeriod.label === p.label;
+                  const short = p.label === "Hoje" ? "Hoje" : p.label === "7 dias" ? "7d" : "30d";
+                  return (
+                    <button key={p.label} onClick={() => { setSelectedPeriod(p); setIsCustom(false); }}
+                      className={cn("px-3 py-1 rounded-md text-[11px] font-semibold transition-colors",
+                        isActive ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground"
+                      )}>
+                      {short}
+                    </button>
+                  );
+                })}
+              </div>
             </div>
 
-            <div className="h-[300px] w-full px-2 pb-4 pt-2">
+            <div className="h-[300px] w-full pr-4 pb-4">
               <ResponsiveContainer width="100%" height="100%">
-                <AreaChart data={chartData} margin={{ top: 20, right: 20, left: 6, bottom: 4 }}>
+                <AreaChart data={chartData} margin={{ top: 10, right: 8, left: 8, bottom: 8 }}>
                   <defs>
                     <linearGradient id="revGrad" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="0%" stopColor="hsl(var(--primary))" stopOpacity={0.35} />
-                      <stop offset="60%" stopColor="hsl(var(--primary))" stopOpacity={0.08} />
+                      <stop offset="0%" stopColor="hsl(var(--primary))" stopOpacity={0.18} />
                       <stop offset="100%" stopColor="hsl(var(--primary))" stopOpacity={0} />
                     </linearGradient>
                   </defs>
-                  <CartesianGrid strokeDasharray="2 5" vertical={false} stroke="hsl(var(--border)/0.5)" />
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="hsl(var(--border)/0.35)" />
                   <XAxis dataKey="timestamp" type="number" scale="time"
                     domain={[chartData[0]?.timestamp ?? 0, chartData[chartData.length - 1]?.timestamp ?? 0]}
                     ticks={chartTicks} tickFormatter={chartTickFormatter}
                     axisLine={false} tickLine={false}
-                    tick={{ fill: "hsl(var(--muted-foreground)/0.55)", fontSize: 10, fontWeight: 700 }}
-                    dy={10} interval="preserveStartEnd" minTickGap={12}
+                    tick={{ fill: "hsl(var(--muted-foreground)/0.6)", fontSize: 11 }}
+                    dy={8} interval="preserveStartEnd" minTickGap={20}
                   />
-                  <YAxis hide domain={[0, "dataMax + 100"]} />
-                  <Tooltip cursor={{ stroke: "hsl(var(--primary))", strokeWidth: 1, strokeDasharray: "3 3" }} wrapperStyle={{ outline: "none" }}
+                  <YAxis width={48} axisLine={false} tickLine={false}
+                    tick={{ fill: "hsl(var(--muted-foreground)/0.55)", fontSize: 10 }}
+                    tickFormatter={(v) => Number(v) >= 1000 ? `${Math.round(Number(v) / 1000)}k` : `${v}`}
+                  />
+                  <Tooltip cursor={{ stroke: "hsl(var(--primary)/0.4)", strokeWidth: 1, strokeDasharray: "3 3" }} wrapperStyle={{ outline: "none" }}
                     content={({ active, payload }) => {
                       if (active && payload && payload.length) {
                         const p = payload[0];
                         return (
-                          <div className="rounded-2xl border border-border/60 bg-card/95 backdrop-blur-xl px-3.5 py-2.5 shadow-2xl min-w-[160px]">
-                            <p className="text-[9px] font-black uppercase tracking-[0.2em] text-muted-foreground/70 mb-1.5">{p.payload.fullLabel}</p>
-                            <div className="flex items-center gap-2">
-                              <span className="h-2 w-2 rounded-full bg-primary" />
-                              <p className="text-primary font-display font-black text-[15px] tabular-nums leading-none">{fmt(p.value as number)}</p>
-                            </div>
+                          <div className="rounded-lg border border-border bg-card px-3 py-2 shadow-lg">
+                            <p className="text-[10px] text-muted-foreground/70 mb-1">{p.payload.fullLabel}</p>
+                            <p className="text-foreground font-display font-bold text-[13px] tabular-nums">{fmt(p.value as number)}</p>
                           </div>
                         );
                       }
                       return null;
                     }}
                   />
-                  <Area type="monotone" dataKey="vendas" stroke="hsl(var(--primary))" strokeWidth={2.25} fill="url(#revGrad)"
+                  <Area type="monotone" dataKey="vendas" stroke="hsl(var(--primary))" strokeWidth={2} fill="url(#revGrad)"
                     dot={false}
-                    activeDot={{ r: 5, fill: "hsl(var(--primary))", stroke: "hsl(var(--background))", strokeWidth: 2.5 }}
+                    activeDot={{ r: 4, fill: "hsl(var(--primary))", stroke: "hsl(var(--background))", strokeWidth: 2 }}
                     isAnimationActive={false}
                   />
                 </AreaChart>
