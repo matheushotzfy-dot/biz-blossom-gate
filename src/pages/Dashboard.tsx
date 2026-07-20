@@ -737,53 +737,72 @@ export default function Dashboard() {
         {/* ═══════════ 4 KPI CARDS ═══════════ */}
         <section className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-3">
           {[
-            { label: "Saldo Disponível", value: fmt(Math.max(0, balance)), sub: "Saldo disponível", icon: Wallet, tone: "primary", spark: true },
-            { label: "Recebido Hoje", value: fmt(receivedToday), sub: "Total faturado no dia", icon: RefreshCw, tone: "success", spark: true },
-            { label: "Bloqueio Cautelar", value: fmt(disputedAmount), sub: "MEDs em disputa", icon: Lock, tone: "warning", spark: false },
-            { label: "Faturamento Total", value: fmt(revenue), sub: "Valor total de vendas", icon: TrendingUp, tone: "primary", spark: true },
+            { label: "Saldo Disponível", value: fmt(Math.max(0, balance)), sub: "Saldo disponível", icon: Wallet, spark: true, isRevenue: false },
+            { label: "Recebido Hoje", value: fmt(receivedToday), sub: "Total faturado no dia", icon: RefreshCw, spark: true, isRevenue: false },
+            { label: "Bloqueio Cautelar", value: fmt(disputedAmount), sub: "MEDs em disputa", icon: Lock, spark: false, isRevenue: false },
+            { label: "Faturamento Total", value: fmt(revenue), sub: `${compareLabel}`, icon: TrendingUp, spark: true, isRevenue: true, trend: revenueTrend },
           ].map((k) => {
             const Icon = k.icon;
-            const isRevenue = k.label === "Faturamento Total";
+            const isRevenue = k.isRevenue;
+            const trend = (k as { trend?: number }).trend;
             return (
               <div key={k.label} className={cn(
-                "group relative overflow-hidden rounded-2xl border border-border/60 bg-card/80 backdrop-blur transition-all hover:border-primary/40 hover:shadow-[0_4px_24px_-8px_hsl(var(--primary)/0.3)]",
-                isRevenue ? "p-3" : "p-5"
+                "group relative overflow-hidden rounded-3xl border p-5 transition-all",
+                isRevenue
+                  ? "border-primary/25 bg-gradient-to-br from-primary/[0.08] via-card to-card hover:border-primary/50 hover:shadow-[0_10px_40px_-12px_hsl(var(--primary)/0.35)]"
+                  : "border-border/60 bg-card/80 backdrop-blur hover:border-primary/40 hover:shadow-[0_4px_24px_-8px_hsl(var(--primary)/0.2)]"
               )}>
-                <div className="flex items-start justify-between gap-3">
+                {/* Ornamental corner glow for revenue */}
+                {isRevenue && (
+                  <div aria-hidden className="pointer-events-none absolute -right-10 -top-10 h-32 w-32 rounded-full bg-primary/15 blur-2xl" />
+                )}
+
+                <div className="relative flex items-start justify-between gap-3">
                   <div className="min-w-0 flex-1">
                     <p className={cn(
-                      "font-bold uppercase tracking-[0.14em] text-muted-foreground/80",
-                      isRevenue ? "text-[10px]" : "text-[11px]"
+                      "font-black uppercase tracking-[0.18em]",
+                      isRevenue ? "text-[10px] text-primary/90" : "text-[10px] text-muted-foreground/70"
                     )}>{k.label}</p>
                     <p className={cn(
-                      "font-display font-black tabular-nums tracking-[-0.02em] truncate",
-                      isRevenue ? "mt-1 text-base md:text-lg" : "mt-2 text-2xl md:text-[26px]"
+                      "mt-2 font-display font-black tabular-nums tracking-[-0.03em] truncate",
+                      isRevenue ? "text-[26px] md:text-[28px] text-foreground" : "text-2xl md:text-[26px] text-foreground"
                     )}>
                       {privacy.hidden ? CENSORED : k.value}
                     </p>
-                    <p className={cn(
-                      "mt-1 text-muted-foreground/60 truncate",
-                      isRevenue ? "text-[10px]" : "text-[11px]"
-                    )}>{k.sub}</p>
+                    <div className="mt-1.5 flex items-center gap-1.5">
+                      {isRevenue && typeof trend === "number" && (
+                        <span className={cn(
+                          "inline-flex items-center gap-0.5 rounded-md border px-1.5 py-0.5 text-[9px] font-black uppercase tracking-[0.1em] tabular-nums",
+                          trend > 0 ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-500"
+                          : trend < 0 ? "border-red-500/30 bg-red-500/10 text-red-500"
+                          : "border-border/60 bg-muted/40 text-muted-foreground"
+                        )}>
+                          {trend > 0 ? <ArrowUpRight className="h-2.5 w-2.5" /> : trend < 0 ? <ArrowDownRight className="h-2.5 w-2.5" /> : null}
+                          {trend > 0 ? "+" : ""}{trend}%
+                        </span>
+                      )}
+                      <p className="text-[11px] text-muted-foreground/60 truncate">{k.sub}</p>
+                    </div>
                   </div>
                   <div className={cn(
-                    "shrink-0 flex items-center justify-center rounded-xl bg-primary/10 text-primary group-hover:scale-110 transition-transform",
-                    isRevenue ? "h-8 w-8" : "h-10 w-10"
+                    "shrink-0 flex h-11 w-11 items-center justify-center rounded-2xl transition-transform group-hover:scale-110",
+                    isRevenue ? "border border-primary/30 bg-primary/15 text-primary" : "bg-primary/10 text-primary"
                   )}>
-                    <Icon className={isRevenue ? "h-4 w-4" : "h-5 w-5"} strokeWidth={2.25} />
+                    <Icon className="h-5 w-5" strokeWidth={2.25} />
                   </div>
                 </div>
+
                 {k.spark && sparkData.length > 1 && (
-                  <div className="absolute bottom-0 left-0 right-0 h-10 opacity-70">
+                  <div className={cn("absolute bottom-0 left-0 right-0 pointer-events-none", isRevenue ? "h-14 opacity-90" : "h-10 opacity-70")}>
                     <ResponsiveContainer width="100%" height="100%">
                       <AreaChart data={sparkData} margin={{ top: 4, right: 0, left: 0, bottom: 0 }}>
                         <defs>
                           <linearGradient id={`sp-${k.label}`} x1="0" y1="0" x2="0" y2="1">
-                            <stop offset="0%" stopColor="hsl(var(--primary))" stopOpacity={0.4} />
+                            <stop offset="0%" stopColor="hsl(var(--primary))" stopOpacity={isRevenue ? 0.55 : 0.4} />
                             <stop offset="100%" stopColor="hsl(var(--primary))" stopOpacity={0} />
                           </linearGradient>
                         </defs>
-                        <Area type="monotone" dataKey="v" stroke="hsl(var(--primary))" strokeWidth={1.5} fill={`url(#sp-${k.label})`} isAnimationActive={false} />
+                        <Area type="monotone" dataKey="v" stroke="hsl(var(--primary))" strokeWidth={isRevenue ? 2 : 1.5} fill={`url(#sp-${k.label})`} isAnimationActive={false} />
                       </AreaChart>
                     </ResponsiveContainer>
                   </div>
