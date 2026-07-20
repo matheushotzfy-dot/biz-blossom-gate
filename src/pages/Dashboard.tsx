@@ -582,6 +582,11 @@ export default function Dashboard() {
 
   // Sparkline data from chart
   const sparkData = useMemo(() => chartData.map(d => ({ v: d.vendas })), [chartData]);
+  const productsMap = useMemo(() => {
+    const map: Record<string, string> = {};
+    (productsData || []).forEach((p: { id: string; name: string | null }) => { map[p.id] = p.name || p.id; });
+    return map;
+  }, [productsData]);
 
   const donutPix = [{ name: "on", value: pixConversion }, { name: "off", value: Math.max(0, 100 - pixConversion) }];
   const donutChb = [{ name: "on", value: chargebackRate }, { name: "off", value: Math.max(0, 100 - chargebackRate) }];
