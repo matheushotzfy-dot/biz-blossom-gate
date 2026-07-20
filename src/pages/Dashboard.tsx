@@ -33,6 +33,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import QuickPixDialog from "@/components/QuickPixDialog";
 import { PixLogoMark } from "@/components/icons/PixLogoMark";
+import { TransactionDetailPanel } from "@/components/transactions/TransactionDetailPanel";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { StatCard } from "@/components/StatCard";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
