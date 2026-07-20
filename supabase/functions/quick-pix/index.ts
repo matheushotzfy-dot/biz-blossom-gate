@@ -83,6 +83,7 @@ Deno.serve(async (req) => {
       : `pix+${cleanDoc}@hotzfy.com.br`;
 
     const supabase = createClient(supabaseUrl, serviceKey);
+    const requestIp = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "0.0.0.0";
 
     // === Idempotency — opcional, evita dupla-cobrança em retry de rede ===
     const rawIdem = String(body?.idempotencyKey || "").slice(0, 200).trim();
