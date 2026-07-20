@@ -623,34 +623,69 @@ export default function Dashboard() {
             <p className="text-muted-foreground text-sm mt-1">Que essa jornada seja leve, produtiva e cheia de conquistas!</p>
           </div>
 
-          {/* Date filter + faturamento chip */}
-          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-3">
-            <DashboardPeriodFilter
-              selectedPeriod={selectedPeriod}
-              setSelectedPeriod={setSelectedPeriod}
-              isCustom={isCustom}
-              setIsCustom={setIsCustom}
-              customRange={customRange}
-              setCustomRange={setCustomRange}
-              open={datePickerOpen}
-              setOpen={setDatePickerOpen}
-            />
-            <div className="flex items-center gap-3 rounded-2xl border border-border/60 bg-card/80 backdrop-blur px-4 py-3 min-w-[240px]">
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 text-primary">
-                <CalendarDays className="h-5 w-5" strokeWidth={2.25} />
-              </div>
-              <div className="flex-1 min-w-0">
-                <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/70">Faturamento · Hoje</p>
-                <div className="flex items-baseline gap-2 mt-0.5">
-                  <span className="font-display font-black text-base tabular-nums">{privacy.hidden ? CENSORED : fmt(receivedToday)}</span>
-                  <span className="text-[11px] text-muted-foreground/60 tabular-nums">/ {fmt(goalTarget)}</span>
+          {/* Combined: Faturamento hoje chip AS the date-filter trigger (click opens filter) */}
+          <Popover open={datePickerOpen} onOpenChange={setDatePickerOpen}>
+            <PopoverTrigger asChild>
+              <button className="flex items-center gap-3 rounded-2xl border border-border/60 bg-card/80 backdrop-blur px-4 py-3 min-w-[260px] hover:border-primary/40 transition-all text-left">
+                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 text-primary shrink-0">
+                  <CalendarDays className="h-5 w-5" strokeWidth={2.25} />
                 </div>
-                <div className="mt-1.5 h-1 w-full rounded-full bg-muted/60 overflow-hidden">
-                  <div className="h-full rounded-full bg-gradient-to-r from-primary to-primary/60 transition-all" style={{ width: `${Math.min(100, (receivedToday/goalTarget)*100)}%` }} />
+                <div className="flex-1 min-w-0">
+                  <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/70">
+                    Faturamento · {isCustom ? "Período" : selectedPeriod.label}
+                  </p>
+                  <div className="flex items-baseline gap-2 mt-0.5">
+                    <span className="font-display font-black text-base tabular-nums">
+                      {privacy.hidden ? CENSORED : fmt(revenue)}
+                    </span>
+                    <span className="text-[11px] text-muted-foreground/60 tabular-nums">/ meta {fmt(goalTarget)}</span>
+                  </div>
+                  <div className="mt-1.5 h-1 w-full rounded-full bg-muted/60 overflow-hidden">
+                    <div className="h-full rounded-full bg-gradient-to-r from-primary to-primary/60 transition-all" style={{ width: `${Math.min(100, (revenue/goalTarget)*100)}%` }} />
+                  </div>
                 </div>
+              </button>
+            </PopoverTrigger>
+            <PopoverContent align="end" className="w-[320px] p-3 rounded-2xl border-border/60">
+              <div className="grid grid-cols-2 gap-1.5 mb-3">
+                {PERIOD_PRESETS.map((p) => (
+                  <button key={p.label}
+                    onClick={() => { setSelectedPeriod(p); setIsCustom(false); setCustomRange(undefined); setDatePickerOpen(false); }}
+                    className={cn("h-9 rounded-xl text-[12px] font-bold transition-all",
+                      !isCustom && selectedPeriod.label === p.label ? "bg-primary text-primary-foreground" : "bg-muted/40 text-muted-foreground hover:bg-muted")}>
+                    {p.label}
+                  </button>
+                ))}
+                <button
+                  onClick={() => {
+                    const now = brasiliaToday();
+                    const from = new Date(now.getFullYear(), now.getMonth(), 1, 0, 0, 0, 0);
+                    const to = new Date(now); to.setHours(23,59,59,999);
+                    setCustomRange({ from, to }); setIsCustom(true); setDatePickerOpen(false);
+                  }}
+                  className={cn("h-9 rounded-xl text-[12px] font-bold transition-all col-span-2",
+                    isCustom ? "bg-primary text-primary-foreground" : "bg-muted/40 text-muted-foreground hover:bg-muted")}>
+                  Este mês
+                </button>
               </div>
-            </div>
-          </div>
+              <div className="border-t border-border/40 pt-3">
+                <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-2">Personalizado</p>
+                <Calendar
+                  mode="range"
+                  selected={customRange}
+                  onSelect={(r) => {
+                    if (r?.from) {
+                      setCustomRange(r); setIsCustom(true);
+                      if (r.from && r.to) setDatePickerOpen(false);
+                    }
+                  }}
+                  locale={ptBR}
+                  className="p-0 pointer-events-auto"
+                />
+              </div>
+            </PopoverContent>
+          </Popover>
+        </div>
         </header>
 
         {/* ═══════════ HERO — RANKING BANNER ═══════════ */}
@@ -700,7 +735,7 @@ export default function Dashboard() {
             { label: "Saldo Disponível", value: fmt(Math.max(0, balance)), sub: "Saldo disponível", icon: Wallet, tone: "primary", spark: true },
             { label: "Recebido Hoje", value: fmt(receivedToday), sub: "Total faturado no dia", icon: RefreshCw, tone: "success", spark: true },
             { label: "Bloqueio Cautelar", value: fmt(disputedAmount), sub: "MEDs em disputa", icon: Lock, tone: "warning", spark: false },
-            { label: "Faturamento Total", value: fmt(revenue), sub: "Valor total de vendas", icon: TrendingUp, tone: "primary", spark: true, trend: revenueTrend },
+            { label: "Faturamento Total", value: fmt(revenue), sub: "Valor total de vendas", icon: TrendingUp, tone: "primary", spark: true },
           ].map((k) => {
             const Icon = k.icon;
             const isRevenue = k.label === "Faturamento Total";
