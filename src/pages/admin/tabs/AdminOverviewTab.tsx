@@ -216,8 +216,11 @@ export default function AdminOverviewTab({
   const tpvToday = todayTx.reduce((a, t) => a + Number(t.amount), 0);
   const tpvMonth = monthTx.reduce((a, t) => a + Number(t.amount), 0);
   const totalVolume = filteredApproved.reduce((a, t) => a + Number(t.amount), 0);
-  const takeRateToday = todayTx.reduce((a, t) => a + Number(t.fee_amount), 0);
-  const takeRateTotal = filteredApproved.reduce((a, t) => a + Number(t.fee_amount), 0);
+  // Lucro real = taxa cobrada do seller − custo da adquirente configurada
+  const netProfit = (t: Tables<"transactions">) =>
+    Number(t.fee_amount || 0) - Number((t as any).acquirer_fee_amount || 0);
+  const takeRateToday = todayTx.reduce((a, t) => a + netProfit(t), 0);
+  const takeRateTotal = filteredApproved.reduce((a, t) => a + netProfit(t), 0);
   const takeRatePct = totalVolume > 0 ? ((takeRateTotal / totalVolume) * 100).toFixed(2) : "0.00";
 
   const pendingWd = withdrawals.filter(w => w.status === "pending");
@@ -236,7 +239,7 @@ export default function AdminOverviewTab({
 
   const last30Start = useMemo(() => { const d = new Date(); d.setDate(d.getDate() - 30); return d; }, []);
   const last30Tx = useMemo(() => approved.filter(t => new Date(t.created_at) >= last30Start), [approved, last30Start]);
-  const profit30d = last30Tx.reduce((a, t) => a + Number(t.fee_amount), 0);
+  const profit30d = last30Tx.reduce((a, t) => a + netProfit(t), 0);
 
   const pendingMeds = useMemo(() => disputes.filter(d => d.status === "open" || d.status === "in_review"), [disputes]);
   const pendingMedsAmount = pendingMeds.reduce((a, d) => a + Number(d.amount), 0);
@@ -267,7 +270,7 @@ export default function AdminOverviewTab({
     return {
       name: dayStr,
       tpv: dayTx.reduce((a, t) => a + Number(t.amount), 0),
-      takeRate: dayTx.reduce((a, t) => a + Number(t.fee_amount), 0),
+      takeRate: dayTx.reduce((a, t) => a + netProfit(t), 0),
       vendas: dayTx.length,
     };
   }), [approved, days]);
@@ -301,7 +304,7 @@ export default function AdminOverviewTab({
     return {
       hour: `${String(hour).padStart(2, "0")}h`,
       tpv: txs.reduce((a, t) => a + Number(t.amount), 0),
-      lucro: txs.reduce((a, t) => a + Number(t.fee_amount), 0),
+      lucro: txs.reduce((a, t) => a + netProfit(t), 0),
       vendas: txs.length,
     };
   }), [filteredApproved]);
