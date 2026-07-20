@@ -759,11 +759,6 @@ export default function Dashboard() {
                       "mt-1 text-muted-foreground/60 truncate",
                       isRevenue ? "text-[10px]" : "text-[11px]"
                     )}>{k.sub}</p>
-                    {k.trend !== undefined && (
-                      <p className={cn("mt-1 text-[10px] font-bold", k.trend >= 0 ? "text-primary" : "text-destructive")}>
-                        {k.trend >= 0 ? "▲" : "▼"} {Math.abs(k.trend)}% {compareLabel}
-                      </p>
-                    )}
                   </div>
                   <div className={cn(
                     "shrink-0 flex items-center justify-center rounded-xl bg-primary/10 text-primary group-hover:scale-110 transition-transform",
