@@ -167,9 +167,15 @@ export default function AdminOverviewTab({
     Promise.all([
       supabase.from("disputes").select("id,type,status,seller_user_id,amount,created_at,transaction_id"),
       supabase.from("fraud_logs").select("*").order("created_at", { ascending: false }).limit(20),
-    ]).then(([dRes, fRes]) => {
+      supabase.from("acquirers").select("id,name"),
+    ]).then(([dRes, fRes, aRes]) => {
       if (dRes.data) setDisputes(dRes.data as Dispute[]);
       if (fRes.data) setFraudLogs(fRes.data);
+      if (aRes.data) {
+        const m: Record<string, string> = {};
+        aRes.data.forEach((a: { id: string; name: string }) => { m[a.id] = a.name; });
+        setAcquirersMap(m);
+      }
     });
   }, []);
 
