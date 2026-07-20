@@ -299,33 +299,40 @@ export default function Suporte() {
     <div className="space-y-4 animate-in fade-in duration-300 pb-8">
       <Seo title="Suporte | Hotzfy" description="Central de ajuda — abra tickets e converse com o time de suporte." path="/suporte" noindex />
 
-      {/* Header */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-3">
-        <div className="space-y-1">
-          <h1 className="text-2xl font-black text-foreground tracking-tight uppercase flex items-center gap-3">
-            <Headphones className="h-6 w-6 text-primary" />
-            Central de Suporte
-          </h1>
-          <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.2em] flex items-center gap-2">
-            <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
-            Equipe online · Resposta em até 24h úteis · {stats.answered} respondidos
-          </p>
+      {/* Premium Hero */}
+      <section className="relative overflow-hidden rounded-3xl border border-border/60 bg-gradient-to-br from-card via-card to-primary/[0.08] p-6 md:p-7">
+        <div aria-hidden className="pointer-events-none absolute inset-0 opacity-40"
+          style={{ backgroundImage: "radial-gradient(40% 60% at 90% 20%, hsl(var(--primary)/0.25), transparent 60%), radial-gradient(35% 55% at 10% 100%, hsl(var(--primary)/0.15), transparent 60%)" }}
+        />
+        <div className="relative flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+          <div className="min-w-0 space-y-2">
+            <div className="inline-flex items-center gap-2 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.28em] text-emerald-500">
+              <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" /> Equipe online agora
+            </div>
+            <h1 className="font-display font-black text-2xl md:text-4xl tracking-[-0.02em] leading-tight flex items-center gap-3">
+              <Headphones className="h-8 w-8 text-primary shrink-0" />
+              Central de Suporte
+            </h1>
+            <p className="text-sm text-muted-foreground max-w-lg">
+              Resposta em até 24h úteis · {stats.total} tickets · {stats.answered} respondidos · {stats.open} em andamento
+            </p>
+          </div>
+          <div className="flex items-center gap-2 shrink-0">
+            <button
+              onClick={() => setShowFaq(v => !v)}
+              className="h-12 px-4 rounded-xl border border-border/60 bg-card text-[11px] font-black uppercase tracking-widest text-muted-foreground hover:text-foreground transition-colors flex items-center gap-2"
+            >
+              <HelpCircle className="h-4 w-4" /> FAQ
+            </button>
+            <button
+              onClick={() => { setShowComposer(true); setSelectedId(null); }}
+              className="bg-primary text-primary-foreground h-12 px-5 rounded-xl font-black text-xs uppercase tracking-widest hover:opacity-90 transition-all flex items-center gap-2 shadow-lg shadow-primary/20"
+            >
+              <Plus size={16} strokeWidth={3} /> Novo Ticket
+            </button>
+          </div>
         </div>
-        <div className="flex items-center gap-2">
-          <button
-            onClick={() => setShowFaq(v => !v)}
-            className="h-11 px-4 rounded-xl border border-border/60 bg-card text-[11px] font-black uppercase tracking-widest text-muted-foreground hover:text-foreground transition-colors flex items-center gap-2"
-          >
-            <HelpCircle className="h-4 w-4" /> FAQ
-          </button>
-          <button
-            onClick={() => { setShowComposer(true); setSelectedId(null); }}
-            className="bg-primary text-primary-foreground h-11 px-5 rounded-xl font-black text-sm hover:opacity-90 transition-all flex items-center gap-2 uppercase tracking-widest"
-          >
-            <Plus size={18} strokeWidth={3} /> Novo Ticket
-          </button>
-        </div>
-      </div>
+      </section>
 
       {/* FAQ (collapsible) */}
       {showFaq && (

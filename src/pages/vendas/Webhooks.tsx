@@ -144,118 +144,90 @@ export default function Webhooks() {
 
   return (
     <div className="space-y-6 animate-in fade-in duration-500">
-      {/* Header */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-        <div className="space-y-1">
-          <h1 className="text-2xl font-black text-foreground tracking-tight uppercase">Webhooks</h1>
-          <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.2em] flex items-center gap-2">
-            <Zap className="h-3.5 w-3.5 text-primary" />
-            Notificações HTTP em tempo real para seu servidor
-          </p>
-        </div>
-        <Dialog open={createOpen} onOpenChange={(o) => { setCreateOpen(o); if (!o) resetForm(); }}>
-          <DialogTrigger asChild>
-            <Button onClick={openCreate} className="h-11 px-6 rounded-xl font-black text-xs uppercase tracking-widest gap-2">
-              <Plus className="h-4 w-4" /> Novo Endpoint
-            </Button>
-          </DialogTrigger>
-          <DialogContent className="max-w-lg bg-card border-border/60">
-            <DialogHeader>
-              <DialogTitle className="text-xl font-black uppercase tracking-tight">{editingId ? "Editar Webhook" : "Adicionar Webhook"}</DialogTitle>
-              <DialogDescription className="text-xs">
-                Receba eventos da plataforma via POST HTTPS. Cada evento é assinado com HMAC-SHA256 e isolado por conta.
-              </DialogDescription>
-            </DialogHeader>
-            <form onSubmit={handleSubmit} className="space-y-6 pt-2">
-              {createdSecret && (
-                <div className="space-y-2 rounded-xl border border-border/60 bg-muted/30 p-4">
-                  <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Secret do Webhook</Label>
-                  <div className="flex gap-2">
-                    <Input
-                      value={createdSecret}
-                      readOnly
-                      className="h-11 font-mono text-xs border-border/60 rounded-xl"
-                    />
-                    <Button type="button" onClick={copyCreatedSecret} className="h-11 rounded-xl px-4" aria-label="Copiar secret do webhook">
-                      <Copy className="h-4 w-4" />
-                    </Button>
+      {/* Premium Hero */}
+      <section className="relative overflow-hidden rounded-3xl border border-border/60 bg-gradient-to-br from-card via-card to-primary/[0.08] p-6 md:p-8">
+        <div aria-hidden className="pointer-events-none absolute inset-0 opacity-40"
+          style={{ backgroundImage: "radial-gradient(40% 60% at 90% 20%, hsl(var(--primary)/0.25), transparent 60%), radial-gradient(35% 55% at 10% 100%, hsl(var(--primary)/0.15), transparent 60%)" }}
+        />
+        <div className="relative flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+          <div className="min-w-0 space-y-2">
+            <div className="inline-flex items-center gap-2 rounded-full border border-primary/30 bg-primary/10 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.28em] text-primary">
+              <Zap className="h-3.5 w-3.5" /> Webhooks · Tempo real
+            </div>
+            <h1 className="font-display font-black text-2xl md:text-4xl tracking-[-0.02em] leading-tight">
+              Notificações <span className="text-primary">HTTP</span> instantâneas
+            </h1>
+            <p className="text-sm text-muted-foreground max-w-lg">
+              Receba eventos assinados com HMAC-SHA256 direto no seu servidor. Cada endpoint é isolado por conta.
+            </p>
+          </div>
+          <Dialog open={createOpen} onOpenChange={(o) => { setCreateOpen(o); if (!o) resetForm(); }}>
+            <DialogTrigger asChild>
+              <Button onClick={openCreate} className="h-12 px-6 rounded-xl font-black text-xs uppercase tracking-widest gap-2 shrink-0 shadow-lg shadow-primary/20">
+                <Plus className="h-4 w-4" /> Novo Endpoint
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="max-w-lg bg-card border-border/60">
+              <DialogHeader>
+                <DialogTitle className="text-xl font-black uppercase tracking-tight">{editingId ? "Editar Webhook" : "Adicionar Webhook"}</DialogTitle>
+                <DialogDescription className="text-xs">
+                  Receba eventos da plataforma via POST HTTPS. Cada evento é assinado com HMAC-SHA256 e isolado por conta.
+                </DialogDescription>
+              </DialogHeader>
+              <form onSubmit={handleSubmit} className="space-y-6 pt-2">
+                {createdSecret && (
+                  <div className="space-y-2 rounded-xl border border-border/60 bg-muted/30 p-4">
+                    <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Secret do Webhook</Label>
+                    <div className="flex gap-2">
+                      <Input value={createdSecret} readOnly className="h-11 font-mono text-xs border-border/60 rounded-xl" />
+                      <Button type="button" onClick={copyCreatedSecret} className="h-11 rounded-xl px-4" aria-label="Copiar secret do webhook">
+                        <Copy className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </div>
+                )}
+
+                <div className="space-y-2">
+                  <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">URL de Destino</Label>
+                  <div className="relative">
+                    <Globe className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/40" />
+                    <Input value={url} onChange={(e) => setUrl(e.target.value)} placeholder="https://sua-api.com/webhook" className="h-12 pl-10 font-mono text-xs border-border/60 rounded-xl" required />
                   </div>
                 </div>
-              )}
 
-              <div className="space-y-2">
-                <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">URL de Destino</Label>
-                <div className="relative">
-                  <Globe className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/40" />
-                  <Input
-                    value={url}
-                    onChange={(e) => setUrl(e.target.value)}
-                    placeholder="https://sua-api.com/webhook"
-                    className="h-12 pl-10 font-mono text-xs border-border/60 rounded-xl"
-                    required
-                  />
+                <div className="space-y-3">
+                  <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Eventos</Label>
+                  <div className="grid grid-cols-2 gap-3">
+                    {EVENT_GROUPS.map((g) => (
+                      <div key={g.label} className="space-y-2">
+                        <p className="text-[9px] font-black text-primary uppercase tracking-widest">{g.label}</p>
+                        {g.events.map((ev) => (
+                          <label key={ev.key} className="flex items-center gap-2 p-2.5 rounded-xl bg-muted/30 border border-border/60 cursor-pointer hover:bg-muted/50 transition-all">
+                            <Checkbox checked={selectedEvents.includes(ev.key)}
+                              onCheckedChange={(c) => setSelectedEvents(c ? [...selectedEvents, ev.key] : selectedEvents.filter(e => e !== ev.key))} />
+                            <span className="text-[11px] font-bold text-foreground truncate">{ev.label}</span>
+                          </label>
+                        ))}
+                      </div>
+                    ))}
+                  </div>
                 </div>
-              </div>
 
-              <div className="space-y-3">
-                <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Eventos</Label>
-                <div className="grid grid-cols-2 gap-3">
-                  {EVENT_GROUPS.map((g) => (
-                    <div key={g.label} className="space-y-2">
-                      <p className="text-[9px] font-black text-primary uppercase tracking-widest">{g.label}</p>
-                      {g.events.map((ev) => (
-                        <label key={ev.key} className="flex items-center gap-2 p-2.5 rounded-xl bg-muted/30 border border-border/60 cursor-pointer hover:bg-muted/50 transition-all">
-                          <Checkbox
-                            checked={selectedEvents.includes(ev.key)}
-                            onCheckedChange={(c) => setSelectedEvents(c ? [...selectedEvents, ev.key] : selectedEvents.filter(e => e !== ev.key))}
-                          />
-                          <span className="text-[11px] font-bold text-foreground truncate">{ev.label}</span>
-                        </label>
-                      ))}
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              <Button type="submit" disabled={isSubmitting || !url} className="w-full h-12 rounded-xl font-black uppercase tracking-widest text-xs">
-                {isSubmitting ? "Salvando..." : editingId ? "Atualizar Webhook" : "Salvar Configuração"}
-              </Button>
-
-            </form>
-          </DialogContent>
-        </Dialog>
-      </div>
+                <Button type="submit" disabled={isSubmitting || !url} className="w-full h-12 rounded-xl font-black uppercase tracking-widest text-xs">
+                  {isSubmitting ? "Salvando..." : editingId ? "Atualizar Webhook" : "Salvar Configuração"}
+                </Button>
+              </form>
+            </DialogContent>
+          </Dialog>
+        </div>
+      </section>
 
       {/* KPI Row */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <StatCard 
-          title="Endpoints" 
-          value={webhooks.length} 
-          icon={LayoutGrid} 
-          color="primary" 
-          description="Total cadastrados"
-        />
-        <StatCard 
-          title="Status" 
-          value={webhooks.filter((w) => w.is_active).length + " Ativos"} 
-          icon={CircleDot} 
-          color="success" 
-          description="Processando agora"
-        />
-        <StatCard 
-          title="Protocolo" 
-          value="HTTPS" 
-          icon={ShieldCheck} 
-          color="info" 
-          description="Conexão segura"
-        />
-        <StatCard 
-          title="Segurança" 
-          value="HMAC" 
-          icon={Shield} 
-          color="neutral" 
-          description="Assinatura SHA256"
-        />
+        <StatCard title="Endpoints" value={webhooks.length} icon={LayoutGrid} color="primary" description="Total cadastrados" />
+        <StatCard title="Ativos" value={webhooks.filter((w) => w.is_active).length} icon={CircleDot} color="success" description="Processando agora" />
+        <StatCard title="Protocolo" value="HTTPS" icon={ShieldCheck} color="info" description="Conexão segura" />
+        <StatCard title="Assinatura" value="HMAC" icon={Shield} color="neutral" description="SHA256 por evento" />
       </div>
 
       {/* Table Section */}
