@@ -315,37 +315,18 @@ export default function Saques() {
             </form>
           </DialogContent>
         </Dialog>
-      </div>
+        }
+      />
+
+      {/* KPIs (clean idiom) */}
+      <FinanceiroKpiGrid cols={2}>
+        <FinanceiroKpi label="Saldo disponível" value={fmt(availableBalance)} sub="Pronto para saque" icon={Wallet} tone="success" />
+        <FinanceiroKpi label="Aguardando liberação" value={fmt(retainedAmount)} sub="Retenção em curso" icon={Clock} tone="warning" />
+      </FinanceiroKpiGrid>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Balances Column */}
         <div className="lg:col-span-2 space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="bg-card p-8 rounded-[24px] border border-border/60 shadow-sm relative overflow-hidden group">
-              <div className="relative z-10">
-                <div className="flex items-center gap-2 text-muted-foreground/60 mb-3">
-                  <Wallet size={16} />
-                  <span className="text-[10px] font-black uppercase tracking-[0.15em]">Saldo Disponível</span>
-                </div>
-                <p className="text-4xl font-black text-foreground tabular-nums tracking-tighter">{fmt(availableBalance)}</p>
-              </div>
-              <div className="absolute right-[-20px] bottom-[-20px] opacity-[0.03] rotate-[-15deg] group-hover:scale-110 transition-transform duration-500">
-                <Wallet size={160} />
-              </div>
-            </div>
-            <div className="bg-card p-8 rounded-[24px] border border-border/60 shadow-sm relative overflow-hidden group">
-              <div className="relative z-10">
-                <div className="flex items-center gap-2 text-muted-foreground/60 mb-3">
-                  <Clock size={16} />
-                  <span className="text-[10px] font-black uppercase tracking-[0.15em]">Aguardando Liberação</span>
-                </div>
-                <p className="text-4xl font-black text-foreground tabular-nums tracking-tighter">{fmt(retainedAmount)}</p>
-              </div>
-              <div className="absolute right-[-20px] bottom-[-20px] opacity-[0.03] rotate-[-15deg] group-hover:scale-110 transition-transform duration-500">
-                <Clock size={160} />
-              </div>
-            </div>
-          </div>
+
 
           {/* History Table */}
           <div className="bg-card rounded-[24px] border border-border/60 shadow-sm overflow-hidden">
