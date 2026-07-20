@@ -75,34 +75,33 @@ export function FinanceiroKpi({
   icon: LucideIcon;
   tone?: KpiTone;
 }) {
-  const toneCls: Record<KpiTone, string> = {
+  const iconTint: Record<KpiTone, string> = {
     success: "text-success",
     info: "text-info",
     warning: "text-warning",
-    neutral: "text-foreground",
+    neutral: "text-muted-foreground",
     destructive: "text-destructive",
     primary: "text-primary",
   };
-  const iconBg: Record<KpiTone, string> = {
-    success: "bg-success/10 text-success",
-    info: "bg-info/10 text-info",
-    warning: "bg-warning/10 text-warning",
-    neutral: "bg-secondary text-muted-foreground",
-    destructive: "bg-destructive/10 text-destructive",
-    primary: "bg-primary/10 text-primary",
+  const barCls: Record<KpiTone, string> = {
+    success: "bg-success",
+    info: "bg-info",
+    warning: "bg-warning",
+    neutral: "bg-foreground/40",
+    destructive: "bg-destructive",
+    primary: "bg-primary",
   };
   return (
-    <div className="bg-card px-3 py-3 sm:px-5 sm:py-4 flex flex-col gap-2 sm:gap-2.5">
+    <div className="group relative bg-card px-4 py-4 flex flex-col gap-2 transition-colors hover:bg-muted/20">
       <div className="flex items-center justify-between gap-2">
-        <span className="text-[9px] sm:text-[10px] font-bold uppercase tracking-[0.14em] sm:tracking-[0.18em] text-muted-foreground/70 leading-tight break-words">{label}</span>
-        <div className={cn("h-6 w-6 sm:h-7 sm:w-7 rounded-md flex items-center justify-center shrink-0", iconBg[tone])}>
-          <Icon className="h-3 w-3 sm:h-3.5 sm:w-3.5" strokeWidth={2.25} />
-        </div>
+        <span className="text-[10px] font-black uppercase tracking-[0.22em] text-muted-foreground/70 leading-tight break-words">{label}</span>
+        <Icon className={cn("h-3.5 w-3.5 shrink-0 opacity-40 transition-opacity group-hover:opacity-90", iconTint[tone])} strokeWidth={2.2} />
       </div>
-      <div className={cn("font-display text-[18px] sm:text-[24px] font-black leading-none tabular-nums tracking-tight break-all", toneCls[tone])}>
+      <div className="font-display text-[20px] sm:text-[24px] font-black leading-none tabular-nums tracking-tight break-all text-foreground">
         {value}
       </div>
-      {sub && <div className="text-[10px] sm:text-[11px] text-muted-foreground/70 font-medium truncate">{sub}</div>}
+      {sub && <div className="text-[11px] text-muted-foreground/75 font-medium truncate">{sub}</div>}
+      <span className={cn("pointer-events-none absolute inset-x-0 bottom-0 h-[1.5px] origin-left scale-x-0 transition-transform duration-300 group-hover:scale-x-100", barCls[tone])} />
     </div>
   );
 }
@@ -115,7 +114,7 @@ export function FinanceiroKpiGrid({ children, cols = 4 }: { children: ReactNode;
     5: "grid-cols-2 lg:grid-cols-5",
   };
   return (
-    <div className={cn("grid gap-px overflow-hidden rounded-xl border border-border/50 bg-border/40 animate-fade-in stagger-1", colCls[cols])}>
+    <div className={cn("grid gap-px overflow-hidden rounded-xl border border-border/60 bg-border/60 animate-fade-in stagger-1", colCls[cols])}>
       {children}
     </div>
   );
