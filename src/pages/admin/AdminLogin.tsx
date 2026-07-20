@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-import { Eye, EyeOff, ShieldCheck, AlertCircle, Lock, Sun, Moon, KeyRound } from "lucide-react";
+import { Eye, EyeOff, ShieldCheck, AlertCircle, Lock, Sun, Moon, KeyRound, Activity, Fingerprint, Radio } from "lucide-react";
 import { toast } from "sonner";
 import { useTheme } from "@/hooks/useTheme";
 
@@ -91,41 +91,106 @@ export default function AdminLogin() {
   };
 
   return (
-    <div className="admin-frame min-h-screen flex items-center justify-center af-bg-soft px-4 py-10 relative">
-      {/* Theme toggle (top-right) */}
+    <div className="admin-frame min-h-screen af-bg grid lg:grid-cols-[1.15fr_1fr] relative">
+      {/* Theme toggle (top-right, always visible) */}
       <button
         type="button"
         onClick={toggleTheme}
-        className="absolute top-4 right-4 h-9 w-9 rounded-md af-surface af-border af-text-2 border inline-flex items-center justify-center hover:opacity-80 transition-opacity"
+        className="absolute top-4 right-4 z-30 h-9 w-9 rounded-md af-surface af-border af-text-2 border inline-flex items-center justify-center hover:opacity-80 transition-opacity"
         title={theme === "dark" ? "Tema claro" : "Tema escuro"}
       >
         {theme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
       </button>
 
-      <div className="w-full max-w-[400px]">
-        {/* Brand */}
-        <div className="flex items-center justify-center gap-2 mb-6">
-          <div className="h-9 w-9 rounded-md af-accent-bg flex items-center justify-center">
-            <ShieldCheck className="h-5 w-5" strokeWidth={2.25} />
+      {/* ── LEFT · Brand / editorial panel ── */}
+      <aside className="relative hidden lg:flex flex-col justify-between overflow-hidden border-r af-border af-bg-soft px-14 py-12">
+        {/* Subtle grid + gradient wash — no glow, no glass */}
+        <div
+          aria-hidden
+          className="pointer-events-none absolute inset-0 opacity-[0.35]"
+          style={{
+            backgroundImage:
+              "linear-gradient(to right, hsl(var(--border) / 0.35) 1px, transparent 1px), linear-gradient(to bottom, hsl(var(--border) / 0.35) 1px, transparent 1px)",
+            backgroundSize: "48px 48px",
+            maskImage:
+              "radial-gradient(ellipse at top left, hsl(0 0% 0%) 25%, transparent 75%)",
+          }}
+        />
+
+        <div className="relative">
+          <div className="flex items-center gap-2.5">
+            <div className="h-9 w-9 rounded-md af-accent-bg flex items-center justify-center">
+              <ShieldCheck className="h-5 w-5" strokeWidth={2.25} />
+            </div>
+            <span className="text-[15px] font-semibold af-text tracking-tight">HOTZFY</span>
+            <span className="ml-1 text-[10px] font-black uppercase tracking-[0.22em] af-muted-2 border af-border rounded px-1.5 py-0.5">Admin</span>
           </div>
-          <span className="text-[18px] font-semibold af-text tracking-tight">HOTZFY Admin</span>
         </div>
 
-        {/* Card */}
-        <div className="af-surface af-border border rounded-md shadow-sm">
-          <div className="px-7 pt-7 pb-5 af-border-soft border-b">
-            <h1 className="text-[17px] font-semibold af-text">
-              {step === "credentials" ? "Acesso restrito" : "Verificação 2FA"}
+        <div className="relative max-w-[440px]">
+          <p className="text-[11px] font-black uppercase tracking-[0.22em] af-muted-2 mb-4">Command Center</p>
+          <h2 className="font-display text-[38px] leading-[1.05] font-black tracking-tight af-text">
+            Operação em<br />tempo real,<br />
+            <span className="af-text-2">sob controle absoluto.</span>
+          </h2>
+          <p className="mt-5 text-[13.5px] leading-relaxed af-muted max-w-[380px]">
+            Painel restrito para gestão de sellers, transações, adquirentes e disputas.
+            Cada acesso é auditado. Cada ação é imutável.
+          </p>
+
+          <ul className="mt-8 space-y-3">
+            {[
+              { icon: Activity, label: "Métricas ao vivo · TPV / take rate / chargeback" },
+              { icon: Fingerprint, label: "2FA obrigatório para admins e staff" },
+              { icon: Radio, label: "Sessão isolada · rate limit no backend" },
+            ].map((item) => (
+              <li key={item.label} className="flex items-start gap-3 text-[12.5px] af-text-2">
+                <span className="mt-0.5 h-6 w-6 shrink-0 rounded-md af-surface af-border border inline-flex items-center justify-center">
+                  <item.icon className="h-3.5 w-3.5 af-muted" />
+                </span>
+                <span>{item.label}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+
+        <div className="relative flex items-center gap-3 text-[10.5px] af-muted-2">
+          <span className="inline-flex items-center gap-1.5">
+            <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 shadow-[0_0_6px_rgba(16,185,129,0.5)]" />
+            Sistema operacional
+          </span>
+          <span className="af-muted-2">·</span>
+          <span>Uptime 99.98% · 30d</span>
+        </div>
+      </aside>
+
+      {/* ── RIGHT · Auth ── */}
+      <main className="relative flex items-center justify-center px-6 py-10 sm:px-10">
+        <div className="w-full max-w-[400px]">
+          {/* Mobile-only brand */}
+          <div className="flex lg:hidden items-center justify-center gap-2 mb-6">
+            <div className="h-9 w-9 rounded-md af-accent-bg flex items-center justify-center">
+              <ShieldCheck className="h-5 w-5" strokeWidth={2.25} />
+            </div>
+            <span className="text-[16px] font-semibold af-text tracking-tight">HOTZFY Admin</span>
+          </div>
+
+          <div className="mb-6">
+            <p className="text-[10.5px] font-black uppercase tracking-[0.22em] af-muted-2 mb-2">
+              {step === "credentials" ? "Autenticação" : "Verificação em duas etapas"}
+            </p>
+            <h1 className="font-display text-[26px] leading-[1.15] font-black tracking-tight af-text">
+              {step === "credentials" ? "Entrar no painel" : "Confirme sua identidade"}
             </h1>
-            <p className="text-[13px] af-muted mt-1">
+            <p className="mt-2 text-[13px] af-muted">
               {step === "credentials"
-                ? "Entre com suas credenciais administrativas."
-                : `Enviamos um código de 6 dígitos para ${email}.`}
+                ? "Use as credenciais administrativas emitidas pelo owner."
+                : <>Enviamos um código de 6 dígitos para <span className="af-text-2 font-semibold">{email}</span>.</>}
             </p>
           </div>
 
           {step === "credentials" ? (
-            <form onSubmit={handleSubmit} className="px-7 py-6 space-y-4">
+            <form onSubmit={handleSubmit} className="space-y-4">
               {error && (
                 <div className="flex items-start gap-2 rounded-md px-3 py-2.5 text-[12.5px]"
                   style={{ background: "rgba(220,38,38,0.08)", border: "1px solid rgba(220,38,38,0.30)", color: "var(--as-danger)" }}>
@@ -135,7 +200,7 @@ export default function AdminLogin() {
               )}
 
               <div className="space-y-1.5">
-                <Label htmlFor="admin-email" className="text-[12.5px] af-text-2 font-medium">E-mail</Label>
+                <Label htmlFor="admin-email" className="text-[11px] af-text-2 font-semibold uppercase tracking-wider">E-mail</Label>
                 <input
                   id="admin-email"
                   value={email}
@@ -144,12 +209,12 @@ export default function AdminLogin() {
                   required
                   autoComplete="username"
                   placeholder="admin@empresa.com"
-                  className="af-input w-full h-10 rounded-md px-3 text-[13.5px] focus:outline-none"
+                  className="af-input w-full h-11 rounded-md px-3 text-[14px] focus:outline-none"
                 />
               </div>
 
               <div className="space-y-1.5">
-                <Label htmlFor="admin-password" className="text-[12.5px] af-text-2 font-medium">Senha</Label>
+                <Label htmlFor="admin-password" className="text-[11px] af-text-2 font-semibold uppercase tracking-wider">Senha</Label>
                 <div className="relative">
                   <input
                     id="admin-password"
@@ -160,7 +225,7 @@ export default function AdminLogin() {
                     minLength={6}
                     autoComplete="current-password"
                     placeholder="••••••••"
-                    className="af-input w-full h-10 rounded-md px-3 pr-10 text-[13.5px] focus:outline-none"
+                    className="af-input w-full h-11 rounded-md px-3 pr-10 text-[14px] focus:outline-none"
                   />
                   <button
                     type="button"
@@ -176,14 +241,18 @@ export default function AdminLogin() {
               <Button
                 type="submit"
                 disabled={loading}
-                className="af-accent-bg w-full h-10 text-[13.5px] font-semibold rounded-md shadow-none active:scale-100 transition-colors"
+                className="af-accent-bg w-full h-11 text-[13.5px] font-semibold rounded-md shadow-none active:scale-100 transition-colors mt-2"
               >
                 <Lock className="h-3.5 w-3.5 mr-2" />
                 {loading ? "Autenticando..." : "Entrar no painel"}
               </Button>
+
+              <p className="pt-3 text-center text-[11px] af-muted-2">
+                Acesso restrito · Tentativas registradas · 2FA obrigatório
+              </p>
             </form>
           ) : (
-            <form onSubmit={handleVerify} className="px-7 py-6 space-y-4">
+            <form onSubmit={handleVerify} className="space-y-4">
               {error && (
                 <div className="flex items-start gap-2 rounded-md px-3 py-2.5 text-[12.5px]"
                   style={{ background: "rgba(220,38,38,0.08)", border: "1px solid rgba(220,38,38,0.30)", color: "var(--as-danger)" }}>
@@ -193,7 +262,7 @@ export default function AdminLogin() {
               )}
 
               <div className="space-y-1.5">
-                <Label htmlFor="admin-2fa-code" className="text-[12.5px] af-text-2 font-medium">Código de 6 dígitos</Label>
+                <Label htmlFor="admin-2fa-code" className="text-[11px] af-text-2 font-semibold uppercase tracking-wider">Código de 6 dígitos</Label>
                 <input
                   id="admin-2fa-code"
                   value={code}
@@ -204,7 +273,7 @@ export default function AdminLogin() {
                   required
                   placeholder="000000"
                   autoFocus
-                  className="af-input w-full h-11 rounded-md px-3 text-center text-[18px] font-mono tracking-[0.5em] focus:outline-none"
+                  className="af-input w-full h-14 rounded-md px-3 text-center text-[22px] font-mono tracking-[0.55em] focus:outline-none"
                 />
                 <p className="text-[11px] af-muted-2">Válido por 10 minutos · 5 tentativas.</p>
               </div>
@@ -212,7 +281,7 @@ export default function AdminLogin() {
               <Button
                 type="submit"
                 disabled={loading || code.length !== 6}
-                className="af-accent-bg w-full h-10 text-[13.5px] font-semibold rounded-md shadow-none active:scale-100 transition-colors"
+                className="af-accent-bg w-full h-11 text-[13.5px] font-semibold rounded-md shadow-none active:scale-100 transition-colors"
               >
                 <KeyRound className="h-3.5 w-3.5 mr-2" />
                 {loading ? "Verificando..." : "Confirmar código"}
@@ -227,23 +296,8 @@ export default function AdminLogin() {
               </button>
             </form>
           )}
-
-          <div className="px-7 py-3.5 af-border-soft border-t af-bg-soft rounded-b-md">
-            <p className="text-[11.5px] af-muted text-center">Sessão protegida · Tentativas monitoradas · 2FA obrigatório</p>
-          </div>
         </div>
-
-        <div className="flex items-center justify-center gap-3 mt-5 text-[11px] af-muted-2">
-          <span className="flex items-center gap-1.5">
-            <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
-            SSL ativo
-          </span>
-          <span>·</span>
-          <span>Rate limit no backend</span>
-          <span>·</span>
-          <span>v1.0</span>
-        </div>
-      </div>
+      </main>
     </div>
   );
 }
