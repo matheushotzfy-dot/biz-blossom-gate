@@ -211,8 +211,8 @@ export default function AutoWithdrawalSettings() {
                   />
                 </div>
                 {/* Quick presets */}
-                <div className="flex flex-wrap gap-1.5 pt-1">
-                  {[500, 1000, 2500, 5000].map((v) => (
+                <div className="flex flex-wrap justify-center gap-1.5 pt-1">
+                  {[500, 1000, 2500, 5000, 10000].map((v) => (
                     <button
                       key={v}
                       type="button"

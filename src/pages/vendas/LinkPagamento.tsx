@@ -1,10 +1,11 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
-import { Link2, Copy, ExternalLink, Plus, TrendingUp, Eye, Trash2, Power } from "lucide-react";
+import { Link2, Copy, ExternalLink, Plus, TrendingUp, Eye, Trash2, Power, Image as ImageIcon, X, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { toast } from "sonner";
@@ -15,6 +16,7 @@ type PayLink = {
   slug: string;
   title: string;
   description: string | null;
+  cover_url: string | null;
   amount: number;
   clicks: number;
   current_uses: number;
@@ -26,7 +28,7 @@ type PayLink = {
   created_at: string;
 };
 
-const fmt = (v: number) => `R$ ${Number(v).toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+const fmt = (v: number) => Number(v).toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
 
 const slugify = (s: string) =>
   s.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "")
@@ -37,14 +39,21 @@ export default function LinkPagamento() {
   const [links, setLinks] = useState<PayLink[]>([]);
   const [loading, setLoading] = useState(true);
   const [open, setOpen] = useState(false);
-  const [form, setForm] = useState({ title: "", description: "", amount: "", slug: "", accept_pix: true, accept_card: false, accept_boleto: false });
+  const [form, setForm] = useState({
+    title: "", description: "", amount: "", slug: "",
+    accept_pix: true, accept_card: false, accept_boleto: false,
+  });
+  const [coverFile, setCoverFile] = useState<File | null>(null);
+  const [coverPreview, setCoverPreview] = useState<string | null>(null);
+  const [uploading, setUploading] = useState(false);
+  const fileRef = useRef<HTMLInputElement>(null);
 
   const load = async () => {
     if (!user) return;
     setLoading(true);
     const { data, error } = await supabase.from("payment_links").select("*").eq("user_id", user.id).order("created_at", { ascending: false });
     if (error) toast.error("Erro ao carregar links");
-    setLinks((data as PayLink[]) || []);
+    setLinks((data as unknown as PayLink[]) || []);
     setLoading(false);
   };
 
@@ -54,11 +63,38 @@ export default function LinkPagamento() {
   const totalClicks = links.reduce((s, l) => s + (l.clicks || 0), 0);
   const totalUses = links.reduce((s, l) => s + (l.current_uses || 0), 0);
 
-  const linkUrl = (slug: string) => `${window.location.origin}/pay/${slug}`;
+  const linkUrl = (slug: string) => `${window.location.origin}/pl/${slug}`;
 
   const copyLink = (slug: string) => {
     navigator.clipboard.writeText(linkUrl(slug));
     toast.success("Link copiado!");
+  };
+
+  const resetForm = () => {
+    setForm({ title: "", description: "", amount: "", slug: "", accept_pix: true, accept_card: false, accept_boleto: false });
+    setCoverFile(null);
+    setCoverPreview(null);
+  };
+
+  const onPickFile = (f: File | null) => {
+    if (!f) return;
+    if (!f.type.startsWith("image/")) { toast.error("Arquivo deve ser imagem"); return; }
+    if (f.size > 4 * 1024 * 1024) { toast.error("Imagem até 4MB"); return; }
+    setCoverFile(f);
+    const url = URL.createObjectURL(f);
+    setCoverPreview(url);
+  };
+
+  const uploadCover = async (uid: string): Promise<string | null> => {
+    if (!coverFile) return null;
+    const ext = coverFile.name.split(".").pop()?.toLowerCase() || "jpg";
+    const path = `${uid}/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
+    const { error } = await supabase.storage.from("payment-link-covers").upload(path, coverFile, {
+      contentType: coverFile.type, upsert: false,
+    });
+    if (error) { toast.error("Falha ao enviar capa"); return null; }
+    const { data } = supabase.storage.from("payment-link-covers").getPublicUrl(path);
+    return data.publicUrl;
   };
 
   const handleCreate = async (e: React.FormEvent) => {
@@ -67,24 +103,31 @@ export default function LinkPagamento() {
     const amount = Number(String(form.amount).replace(",", "."));
     if (!amount || amount <= 0) { toast.error("Valor inválido"); return; }
     if (!form.title.trim()) { toast.error("Título obrigatório"); return; }
-    const baseSlug = form.slug.trim() ? slugify(form.slug) : slugify(form.title);
-    const slug = `${baseSlug}-${Math.random().toString(36).slice(2, 6)}`;
 
-    const { error } = await supabase.from("payment_links").insert({
-      user_id: user.id,
-      slug,
-      title: form.title.trim().slice(0, 120),
-      description: form.description.trim().slice(0, 500) || null,
-      amount,
-      accept_pix: form.accept_pix,
-      accept_card: form.accept_card,
-      accept_boleto: form.accept_boleto,
-    } as never);
-    if (error) { toast.error(error.message || "Erro ao criar link"); return; }
-    toast.success("Link criado!");
-    setOpen(false);
-    setForm({ title: "", description: "", amount: "", slug: "", accept_pix: true, accept_card: false, accept_boleto: false });
-    load();
+    setUploading(true);
+    try {
+      const baseSlug = form.slug.trim() ? slugify(form.slug) : slugify(form.title);
+      const slug = `${baseSlug}-${Math.random().toString(36).slice(2, 6)}`;
+
+      const cover_url = await uploadCover(user.id);
+
+      const { error } = await supabase.from("payment_links").insert({
+        user_id: user.id,
+        slug,
+        title: form.title.trim().slice(0, 120),
+        description: form.description.trim().slice(0, 500) || null,
+        cover_url,
+        amount,
+        accept_pix: form.accept_pix,
+        accept_card: form.accept_card,
+        accept_boleto: form.accept_boleto,
+      } as never);
+      if (error) { toast.error(error.message || "Erro ao criar link"); return; }
+      toast.success("Link criado!");
+      setOpen(false);
+      resetForm();
+      load();
+    } finally { setUploading(false); }
   };
 
   const toggleActive = async (id: string, current: boolean) => {
@@ -126,20 +169,46 @@ export default function LinkPagamento() {
 
       <div className="flex items-center justify-between pt-2">
         <h2 className="font-display font-bold text-base">Meus Links</h2>
-        <Dialog open={open} onOpenChange={setOpen}>
+        <Dialog open={open} onOpenChange={(o) => { setOpen(o); if (!o) resetForm(); }}>
           <DialogTrigger asChild>
             <Button className="gap-2 rounded-xl gradient-primary text-primary-foreground font-bold"><Plus className="h-4 w-4" /> Novo Link</Button>
           </DialogTrigger>
-          <DialogContent className="max-w-md max-h-[92vh] overflow-y-auto">
+          <DialogContent className="max-w-lg max-h-[92vh] overflow-y-auto">
             <DialogHeader><DialogTitle>Novo Link de Pagamento</DialogTitle></DialogHeader>
             <form onSubmit={handleCreate} className="space-y-4 pt-2">
+              {/* Cover upload */}
+              <div>
+                <Label>Capa (opcional)</Label>
+                <input ref={fileRef} type="file" accept="image/*" className="hidden"
+                  onChange={(e) => onPickFile(e.target.files?.[0] || null)} />
+                {coverPreview ? (
+                  <div className="relative mt-1.5 aspect-[16/9] rounded-xl overflow-hidden border border-border/60 group">
+                    <img src={coverPreview} alt="preview" className="w-full h-full object-cover" />
+                    <button type="button" onClick={() => { setCoverFile(null); setCoverPreview(null); if (fileRef.current) fileRef.current.value=""; }}
+                      className="absolute top-2 right-2 h-8 w-8 rounded-lg bg-background/90 border border-border flex items-center justify-center hover:bg-destructive hover:text-destructive-foreground transition-colors">
+                      <X className="h-4 w-4" />
+                    </button>
+                  </div>
+                ) : (
+                  <button type="button" onClick={() => fileRef.current?.click()}
+                    className="mt-1.5 w-full aspect-[16/9] rounded-xl border-2 border-dashed border-border/60 hover:border-primary/50 hover:bg-muted/30 flex flex-col items-center justify-center gap-2 text-muted-foreground transition-colors">
+                    <ImageIcon className="h-6 w-6" />
+                    <span className="text-xs font-bold">Adicionar imagem de capa</span>
+                    <span className="text-[10px]">JPG, PNG · até 4MB</span>
+                  </button>
+                )}
+              </div>
+
               <div>
                 <Label>Título</Label>
                 <Input value={form.title} onChange={e => setForm({ ...form, title: e.target.value })} placeholder="Ex: Consultoria Premium" required maxLength={120} className="mt-1.5" />
               </div>
               <div>
                 <Label>Descrição (opcional)</Label>
-                <Input value={form.description} onChange={e => setForm({ ...form, description: e.target.value })} placeholder="Breve descrição" maxLength={500} className="mt-1.5" />
+                <Textarea value={form.description} onChange={e => setForm({ ...form, description: e.target.value })}
+                  placeholder="Detalhes do produto, o que está incluído, prazos..." rows={4} maxLength={500}
+                  className="mt-1.5 resize-none" />
+                <p className="text-[10px] text-muted-foreground text-right mt-1 tabular-nums">{form.description.length}/500</p>
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div>
@@ -164,7 +233,9 @@ export default function LinkPagamento() {
                   </div>
                 ))}
               </div>
-              <Button type="submit" className="w-full gradient-primary text-primary-foreground font-bold h-11 rounded-xl">Criar Link</Button>
+              <Button type="submit" disabled={uploading} className="w-full gradient-primary text-primary-foreground font-bold h-11 rounded-xl">
+                {uploading ? <><Loader2 className="h-4 w-4 animate-spin mr-2" /> Criando...</> : "Criar Link"}
+              </Button>
             </form>
           </DialogContent>
         </Dialog>
@@ -180,9 +251,15 @@ export default function LinkPagamento() {
             <Panel key={l.id} className="p-4">
               <div className="flex flex-col md:flex-row md:items-center gap-4">
                 <div className="flex items-start gap-3 flex-1 min-w-0">
-                  <div className="h-11 w-11 rounded-2xl bg-primary/10 flex items-center justify-center shrink-0">
-                    <Link2 className="h-5 w-5 text-primary" />
-                  </div>
+                  {l.cover_url ? (
+                    <div className="h-14 w-14 rounded-2xl overflow-hidden border border-border/60 shrink-0">
+                      <img src={l.cover_url} alt={l.title} className="w-full h-full object-cover" />
+                    </div>
+                  ) : (
+                    <div className="h-14 w-14 rounded-2xl bg-primary/10 flex items-center justify-center shrink-0">
+                      <Link2 className="h-6 w-6 text-primary" />
+                    </div>
+                  )}
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center gap-2 flex-wrap">
                       <h3 className="font-bold truncate">{l.title}</h3>
@@ -190,6 +267,7 @@ export default function LinkPagamento() {
                         {l.is_active ? "Ativo" : "Inativo"}
                       </span>
                     </div>
+                    {l.description && <p className="text-[12px] text-muted-foreground mt-0.5 truncate">{l.description}</p>}
                     <p className="text-[12px] text-muted-foreground mt-0.5">
                       {fmt(l.amount)} · {l.clicks} cliques · {l.current_uses} vendas
                     </p>

@@ -1989,6 +1989,7 @@ export type Database = {
           accept_pix: boolean
           amount: number
           clicks: number
+          cover_url: string | null
           created_at: string
           current_uses: number
           description: string | null
@@ -2009,6 +2010,7 @@ export type Database = {
           accept_pix?: boolean
           amount: number
           clicks?: number
+          cover_url?: string | null
           created_at?: string
           current_uses?: number
           description?: string | null
@@ -2029,6 +2031,7 @@ export type Database = {
           accept_pix?: boolean
           amount?: number
           clicks?: number
+          cover_url?: string | null
           created_at?: string
           current_uses?: number
           description?: string | null
@@ -4703,6 +4706,7 @@ export type Database = {
           accept_card: boolean
           accept_pix: boolean
           amount: number
+          cover_url: string
           current_uses: number
           description: string
           expires_at: string

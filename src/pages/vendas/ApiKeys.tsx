@@ -95,46 +95,55 @@ export default function ApiKeys() {
 
   return (
     <div className="space-y-6 animate-in fade-in duration-500">
-      {/* Header */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-        <div className="space-y-1">
-          <h1 className="text-2xl font-black text-foreground tracking-tight uppercase">Credenciais API</h1>
-          <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.2em] flex items-center gap-2">
-            <Lock className="h-3.5 w-3.5 text-primary" />
-            Acesse nossa infraestrutura via integração direta
-          </p>
+      {/* Premium Hero */}
+      <section className="relative overflow-hidden rounded-3xl border border-border/60 bg-gradient-to-br from-card via-card to-primary/[0.08] p-6 md:p-8">
+        <div aria-hidden className="pointer-events-none absolute inset-0 opacity-40"
+          style={{ backgroundImage: "radial-gradient(40% 60% at 90% 20%, hsl(var(--primary)/0.25), transparent 60%), radial-gradient(35% 55% at 10% 100%, hsl(var(--primary)/0.15), transparent 60%)" }}
+        />
+        <div className="relative flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+          <div className="min-w-0 space-y-2">
+            <div className="inline-flex items-center gap-2 rounded-full border border-primary/30 bg-primary/10 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.28em] text-primary">
+              <Lock className="h-3.5 w-3.5" /> Credenciais API
+            </div>
+            <h1 className="font-display font-black text-2xl md:text-4xl tracking-[-0.02em] leading-tight">
+              Integre a <span className="text-primary">Hotzfy</span> ao seu stack
+            </h1>
+            <p className="text-sm text-muted-foreground max-w-lg">
+              Chaves publishable e secretas para acessar toda a API REST · autenticação Bearer · assinaturas SHA-256.
+            </p>
+          </div>
+          <div className="flex items-center gap-2 shrink-0">
+            <Link to="/vendas/documentacao" className="h-12 px-4 rounded-xl border border-border/60 bg-card text-muted-foreground hover:text-foreground inline-flex items-center gap-2 text-[10px] font-black uppercase tracking-widest">
+              <BookOpen className="h-4 w-4" /> Docs
+            </Link>
+            <Button onClick={() => setShowCreateDialog(true)} className="h-12 px-6 rounded-xl font-black text-xs uppercase tracking-widest gap-2 shadow-lg shadow-primary/20">
+              <Plus className="h-4 w-4" /> Nova Chave
+            </Button>
+          </div>
         </div>
-        <div className="flex items-center gap-2">
-          <Link to="/vendas/documentacao" className="h-11 px-4 rounded-xl border border-border/60 bg-card text-muted-foreground hover:text-foreground inline-flex items-center gap-2 text-[10px] font-black uppercase tracking-widest">
-            <BookOpen className="h-4 w-4" /> Docs
-          </Link>
-          <Button onClick={() => setShowCreateDialog(true)} className="h-11 px-6 rounded-xl font-black text-xs uppercase tracking-widest gap-2">
-            <Plus className="h-4 w-4" /> Gerar Nova Chave
-          </Button>
-        </div>
-      </div>
+      </section>
 
       {/* KPI Row */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         {[
           { icon: Shield, label: "Credenciais", value: String(keys.length), sub: "Sem limite" },
-          { icon: Globe,  label: "Total Geradas", value: String(keys.length),                          sub: "Histórico completo" },
-          { icon: Lock,   label: "Criptografia",  value: "SHA-256",                                    sub: "Secrets hasheadas" },
-          { icon: Code2,  label: "Padrão",        value: "REST",                                       sub: "JSON · Bearer Auth" },
+          { icon: Globe,  label: "Ativas",       value: String(keys.filter(k => k.is_active).length), sub: "Em uso" },
+          { icon: Lock,   label: "Criptografia", value: "SHA-256", sub: "Secrets hasheadas" },
+          { icon: Code2,  label: "Padrão",       value: "REST",    sub: "JSON · Bearer" },
         ].map((card) => {
           const Icon = card.icon;
           return (
-            <div key={card.label} className="bg-card p-8 rounded-[24px] border border-border/60 shadow-sm relative overflow-hidden group">
+            <div key={card.label} className="bg-card p-6 rounded-2xl border border-border/60 relative overflow-hidden group hover:border-primary/40 transition-all">
               <div className="relative z-10">
                 <div className="flex items-center gap-2 text-muted-foreground/60 mb-3">
                   <Icon size={16} />
                   <span className="text-[10px] font-black uppercase tracking-[0.15em]">{card.label}</span>
                 </div>
-                <p className="text-3xl font-black text-foreground tabular-nums tracking-tighter">{card.value}</p>
+                <p className="text-2xl md:text-3xl font-black text-foreground tabular-nums tracking-tighter">{card.value}</p>
                 <p className="text-[10px] font-bold text-muted-foreground/70 uppercase mt-2 tracking-widest">{card.sub}</p>
               </div>
               <div className="absolute right-[-20px] bottom-[-20px] opacity-[0.03] rotate-[-15deg] group-hover:scale-110 transition-transform duration-500">
-                <Icon size={160} />
+                <Icon size={140} />
               </div>
             </div>
           );
