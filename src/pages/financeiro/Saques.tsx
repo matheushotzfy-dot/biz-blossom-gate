@@ -17,7 +17,7 @@ import { ptBR } from "date-fns/locale";
 import DadosBancarios from "./DadosBancarios";
 import AutoWithdrawalSettings from "@/components/financeiro/AutoWithdrawalSettings";
 import { friendlyError } from "@/lib/friendlyError";
-import { FinanceiroHero, FinanceiroKpi, FinanceiroKpiGrid } from "@/components/financeiro/FinanceiroHero";
+
 
 const fmt = (v: number) =>
   `R$ ${(Number.isFinite(v) ? v : 0).toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
