@@ -18,7 +18,6 @@ import DadosBancarios from "./DadosBancarios";
 import AutoWithdrawalSettings from "@/components/financeiro/AutoWithdrawalSettings";
 import { friendlyError } from "@/lib/friendlyError";
 
-
 const fmt = (v: number) =>
   `R$ ${(Number.isFinite(v) ? v : 0).toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 
@@ -149,24 +148,19 @@ export default function Saques() {
 
   return (
     <div className="space-y-6 animate-in fade-in duration-500">
-      {/* Compact header (old style) */}
-      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-        <div className="flex items-start gap-3">
-          <div className="h-10 w-10 rounded-xl bg-primary/10 border border-primary/10 flex items-center justify-center text-primary shrink-0">
-            <ArrowDownToLine size={18} strokeWidth={2.5} />
-          </div>
-          <div>
-            <h1 className="font-black text-foreground tracking-tight leading-none uppercase text-2xl">Saques</h1>
-            <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mt-2">
-              Solicite a transferência dos seus lucros
-            </p>
-          </div>
+      {/* Header */}
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+        <div className="space-y-1">
+          <h1 className="text-2xl font-black text-foreground tracking-tight uppercase tracking-tight">Saques</h1>
+          <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.2em] flex items-center gap-2">
+            <ArrowDownToLine className="h-3.5 w-3.5 text-primary" />
+            Solicite a transferência dos seus lucros
+          </p>
         </div>
-
         <Dialog open={open} onOpenChange={handleOpenChange}>
           <DialogTrigger asChild>
-            <button className="bg-primary text-primary-foreground h-11 px-5 rounded-xl font-black text-[11px] uppercase tracking-widest hover:opacity-90 transition-all flex items-center gap-2 shadow-lg shadow-primary/10">
-              <Plus size={16} strokeWidth={3} /> Solicitar Saque
+            <button className="bg-primary text-primary-foreground h-11 px-6 rounded-xl font-black text-sm hover:opacity-90 transition-all flex items-center gap-2 shadow-sm uppercase tracking-widest">
+              <Plus size={18} strokeWidth={3} /> Solicitar Saque
             </button>
           </DialogTrigger>
           <DialogContent className="max-w-md bg-card border-border/60 max-h-[92vh] overflow-y-auto">
@@ -320,35 +314,35 @@ export default function Saques() {
         </Dialog>
       </div>
 
-      {/* Dark balance cards with watermark icons (old style) */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div className="relative overflow-hidden bg-card rounded-[24px] border border-border/60 shadow-sm p-6">
-          <Wallet size={140} strokeWidth={1} className="absolute -right-6 -bottom-6 text-foreground/[0.03] pointer-events-none" />
-          <div className="relative">
-            <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-muted-foreground">
-              <Wallet size={12} strokeWidth={2.5} /> Saldo disponível
-            </div>
-            <p className="mt-4 text-3xl md:text-4xl font-black text-foreground tabular-nums tracking-tight">
-              {fmt(availableBalance)}
-            </p>
-          </div>
-        </div>
-        <div className="relative overflow-hidden bg-card rounded-[24px] border border-border/60 shadow-sm p-6">
-          <Clock size={140} strokeWidth={1} className="absolute -right-6 -bottom-6 text-foreground/[0.03] pointer-events-none" />
-          <div className="relative">
-            <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-muted-foreground">
-              <Clock size={12} strokeWidth={2.5} /> Aguardando liberação
-            </div>
-            <p className="mt-4 text-3xl md:text-4xl font-black text-foreground tabular-nums tracking-tight">
-              {fmt(retainedAmount)}
-            </p>
-          </div>
-        </div>
-      </div>
-
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Balances Column */}
         <div className="lg:col-span-2 space-y-6">
-
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="bg-card p-8 rounded-[24px] border border-border/60 shadow-sm relative overflow-hidden group">
+              <div className="relative z-10">
+                <div className="flex items-center gap-2 text-muted-foreground/60 mb-3">
+                  <Wallet size={16} />
+                  <span className="text-[10px] font-black uppercase tracking-[0.15em]">Saldo Disponível</span>
+                </div>
+                <p className="text-4xl font-black text-foreground tabular-nums tracking-tighter">{fmt(availableBalance)}</p>
+              </div>
+              <div className="absolute right-[-20px] bottom-[-20px] opacity-[0.03] rotate-[-15deg] group-hover:scale-110 transition-transform duration-500">
+                <Wallet size={160} />
+              </div>
+            </div>
+            <div className="bg-card p-8 rounded-[24px] border border-border/60 shadow-sm relative overflow-hidden group">
+              <div className="relative z-10">
+                <div className="flex items-center gap-2 text-muted-foreground/60 mb-3">
+                  <Clock size={16} />
+                  <span className="text-[10px] font-black uppercase tracking-[0.15em]">Aguardando Liberação</span>
+                </div>
+                <p className="text-4xl font-black text-foreground tabular-nums tracking-tighter">{fmt(retainedAmount)}</p>
+              </div>
+              <div className="absolute right-[-20px] bottom-[-20px] opacity-[0.03] rotate-[-15deg] group-hover:scale-110 transition-transform duration-500">
+                <Clock size={160} />
+              </div>
+            </div>
+          </div>
 
           {/* History Table */}
           <div className="bg-card rounded-[24px] border border-border/60 shadow-sm overflow-hidden">
