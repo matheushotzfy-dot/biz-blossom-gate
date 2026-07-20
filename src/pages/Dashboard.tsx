@@ -1064,50 +1064,15 @@ export default function Dashboard() {
           </ul>
         </section>
 
-        {/* Detail dialog */}
-        <Dialog open={!!detailTx} onOpenChange={(v) => !v && setDetailTx(null)}>
-          <DialogContent className="max-w-md rounded-2xl border border-border bg-card">
-            {detailTx && (
-              <div className="space-y-4">
-                <div>
-                  <p className="text-[10px] uppercase tracking-widest text-muted-foreground/60">Transação</p>
-                  <h3 className="font-display font-black text-2xl mt-1 tabular-nums">{fmt(Number(detailTx.amount))}</h3>
-                  <p className={cn("text-[11px] font-bold uppercase tracking-widest mt-1", statusColor(deriveTransactionStatus(detailTx)))}>{statusLabel(deriveTransactionStatus(detailTx))}</p>
-                </div>
-                <div className="grid grid-cols-2 gap-2 text-[12px]">
-                  <div className="rounded-xl border border-border p-3">
-                    <p className="text-muted-foreground/60 text-[9px] uppercase tracking-widest mb-1">Método</p>
-                    <p className="font-bold flex items-center gap-1.5 uppercase">
-                      {detailTx.payment_method === "pix" ? <><PixLogoMark className="h-3.5 w-3.5" /> PIX</>
-                        : detailTx.payment_method === "credit_card" ? <><CreditCard className="h-3.5 w-3.5" /> Cartão</>
-                        : detailTx.payment_method === "boleto" ? <><Barcode className="h-3.5 w-3.5" /> Boleto</>
-                        : "—"}
-                    </p>
-                  </div>
-                  <div className="rounded-xl border border-border p-3">
-                    <p className="text-muted-foreground/60 text-[9px] uppercase tracking-widest mb-1">Líquido</p>
-                    <p className="font-bold tabular-nums">{fmt(Number(detailTx.net_amount || 0))}</p>
-                  </div>
-                  <div className="rounded-xl border border-border p-3 col-span-2">
-                    <p className="text-muted-foreground/60 text-[9px] uppercase tracking-widest mb-1 flex items-center gap-1"><User className="h-3 w-3" /> Cliente</p>
-                    <p className="font-bold truncate">{detailTx.customer_name || "—"}</p>
-                    {detailTx.customer_email && <p className="text-muted-foreground text-[11px] truncate flex items-center gap-1 mt-0.5"><Mail className="h-3 w-3" />{detailTx.customer_email}</p>}
-                  </div>
-                  <div className="rounded-xl border border-border p-3 col-span-2">
-                    <p className="text-muted-foreground/60 text-[9px] uppercase tracking-widest mb-1 flex items-center gap-1"><Hash className="h-3 w-3" /> ID</p>
-                    <p className="text-[11px] truncate font-mono">{detailTx.id}</p>
-                  </div>
-                </div>
-                <button
-                  onClick={() => { const id = detailTx.id; setDetailTx(null); navigate(`/vendas?tx=${id}`); }}
-                  className="w-full h-11 rounded-xl bg-primary text-primary-foreground font-bold text-[13px] flex items-center justify-center gap-2 hover:bg-primary/90"
-                >
-                  Abrir na aba Vendas <ChevronRight className="h-4 w-4" />
-                </button>
-              </div>
-            )}
-          </DialogContent>
-        </Dialog>
+        {/* Detail panel — premium layout */}
+        {detailTx && (
+          <TransactionDetailPanel
+            tx={detailTx}
+            products={productsMap}
+            onClose={() => setDetailTx(null)}
+            variant="seller"
+          />
+        )}
 
         <QuickPixDialog open={pixDialogOpen} onOpenChange={setPixDialogOpen} />
       </div>
