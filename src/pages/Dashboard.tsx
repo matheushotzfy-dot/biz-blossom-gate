@@ -947,83 +947,121 @@ export default function Dashboard() {
           </div>
         </section>
 
-        {/* ═══════════ LIVE TRANSACTION STREAM ═══════════ */}
-        <section className="rounded-2xl border border-border/60 bg-card/80 backdrop-blur">
-          <div className="flex flex-wrap items-center justify-between gap-2 px-5 py-4 border-b border-border/40">
-            <div className="flex items-center gap-3">
-              <div>
-                <h3 className="font-display font-black text-lg tracking-[-0.02em]">Últimas transações</h3>
-                <p className="text-[11px] text-muted-foreground/70">Atualizando em tempo real</p>
+        {/* ═══════════ ÚLTIMAS TRANSAÇÕES — Editorial Stream ═══════════ */}
+        <section className="relative overflow-hidden rounded-3xl border border-border/60 bg-card/80 backdrop-blur">
+          {/* Header */}
+          <div className="flex flex-wrap items-center justify-between gap-3 px-5 md:px-6 pt-5 pb-4 border-b border-border/40">
+            <div className="flex items-center gap-3 min-w-0">
+              <div className="relative flex h-11 w-11 items-center justify-center rounded-2xl border border-primary/20 bg-primary/10 text-primary shrink-0">
+                <Receipt className="h-5 w-5" strokeWidth={2.25} />
+                <span className="absolute -top-0.5 -right-0.5 flex h-2.5 w-2.5">
+                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-primary opacity-70" />
+                  <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-primary ring-2 ring-card" />
+                </span>
               </div>
-              <span className="relative flex h-2 w-2 ml-1">
-                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-primary opacity-75" />
-                <span className="relative inline-flex h-2 w-2 rounded-full bg-primary" />
-              </span>
+              <div className="min-w-0">
+                <h3 className="font-display font-black text-lg tracking-[-0.02em] leading-none">Últimas transações</h3>
+                <p className="text-[11px] text-muted-foreground/70 mt-1">
+                  <span className="tabular-nums font-bold text-foreground/80">{activity.length}</span>
+                  <span className="mx-1.5 text-muted-foreground/40">·</span>
+                  Aprovação <span className="tabular-nums font-bold text-primary">{conversion.toFixed(0)}%</span>
+                  <span className="mx-1.5 text-muted-foreground/40">·</span>
+                  <span className="tabular-nums font-bold text-foreground/80">{privacy.hidden ? CENSORED : fmt(revenue)}</span>
+                </p>
+              </div>
             </div>
-            <div className="flex items-center gap-3 text-[11px] font-bold text-muted-foreground/70">
-              <span className="rounded-lg bg-primary/10 text-primary px-2 py-1">PIX · {pixTotalCount}</span>
-              <span className="rounded-lg bg-muted/50 px-2 py-1">CARD · {cardTotalCount}</span>
-              <span className="rounded-lg bg-warning/10 text-warning px-2 py-1">BOL · {boletoTotalCount}</span>
-              <button type="button" onClick={() => { if (!requireApprovedAccount()) navigate("/vendas"); }} className="text-primary hover:underline">ver todas →</button>
-            </div>
+            <button type="button" onClick={() => { if (!requireApprovedAccount()) navigate("/vendas"); }} className="inline-flex items-center gap-1.5 rounded-xl border border-border/60 bg-background/40 px-3 py-2 text-[11px] font-bold uppercase tracking-[0.14em] text-muted-foreground hover:border-primary/40 hover:text-primary transition-colors">
+              Ver todas <ArrowRight className="h-3.5 w-3.5" />
+            </button>
           </div>
 
-          <div className="overflow-x-auto">
-            <table className="w-full text-left border-collapse min-w-[720px]">
-              <thead>
-                <tr className="border-b border-border/30 text-[10px] font-bold uppercase tracking-widest text-muted-foreground/60">
-                  <th className="px-5 py-3 font-bold">Hash</th>
-                  <th className="px-3 py-3 font-bold">Hora</th>
-                  <th className="px-3 py-3 font-bold">Método</th>
-                  <th className="px-3 py-3 font-bold">Cliente</th>
-                  <th className="px-3 py-3 font-bold text-right">Valor</th>
-                  <th className="px-5 py-3 font-bold text-right">Status</th>
-                </tr>
-              </thead>
-              <tbody className="text-[13px]">
-                {activity.length === 0 && (
-                  <tr>
-                    <td colSpan={6} className="px-5 py-14 text-center text-muted-foreground/50">
-                      <Sparkles className="h-6 w-6 mx-auto mb-2 opacity-40" />
-                      <p className="text-[12px] font-bold uppercase tracking-widest">Aguardando primeira transação</p>
-                      <p className="text-[11px] mt-1">Sistema pronto para receber vendas</p>
-                    </td>
-                  </tr>
-                )}
-                {activity.map((item) => {
-                  const isApproved = isApprovedTransaction(item.status);
-                  const methodLabel = item.label === "pix" ? "PIX" : item.label === "credit_card" ? "CARD" : item.label === "boleto" ? "BOL" : "TX";
-                  const methodColor = item.label === "pix" ? "text-primary bg-primary/10" : item.label === "boleto" ? "text-warning bg-warning/10" : "text-foreground/80 bg-muted/50";
-                  return (
-                    <tr key={item.id} onClick={() => setDetailTx(item.tx)}
-                      className="group border-b border-border/20 cursor-pointer transition-colors hover:bg-primary/[0.04]">
-                      <td className="px-5 py-3.5 text-muted-foreground/70 font-mono text-[11px]">
-                        {item.id.replace(/-/g, "").slice(0, 4).toUpperCase()}···{item.id.replace(/-/g, "").slice(-4).toUpperCase()}
-                      </td>
-                      <td className="px-3 py-3.5 text-muted-foreground/60 tabular-nums font-mono text-[11px]">
-                        {new Date(item.createdAt).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })}
-                      </td>
-                      <td className="px-3 py-3.5">
-                        <span className={cn("inline-flex items-center rounded-md px-2 py-0.5 text-[10px] font-bold", methodColor)}>{methodLabel}</span>
-                      </td>
-                      <td className="px-3 py-3.5 text-foreground/90">
-                        <span className="truncate inline-block max-w-[180px] align-middle">{item.tx.customer_name || item.tx.customer_email || "—"}</span>
-                      </td>
-                      <td className="px-3 py-3.5 text-right text-foreground font-bold tabular-nums">
-                        {privacy.hidden ? CENSORED : fmt(item.amount)}
-                      </td>
-                      <td className="px-5 py-3.5 text-right">
-                        <span className={cn("inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider", statusBg(item.status), statusColor(item.status))}>
-                          <span className={cn("h-1.5 w-1.5 rounded-full", isApproved ? "bg-emerald-500" : item.status === "pending" ? "bg-amber-500 animate-pulse" : "bg-destructive")} />
-                          {statusLabel(item.status)}
+          {/* Rows */}
+          <ul className="divide-y divide-border/30">
+            {activity.length === 0 && (
+              <li className="px-6 py-16 text-center">
+                <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl border border-primary/20 bg-primary/5 text-primary">
+                  <Receipt className="h-6 w-6" strokeWidth={2} />
+                </div>
+                <p className="text-[12px] font-black uppercase tracking-[0.24em] text-foreground/70">Aguardando primeira venda</p>
+                <p className="text-[12px] text-muted-foreground/70 mt-1.5">Suas transações aparecem aqui em tempo real</p>
+              </li>
+            )}
+            {activity.map((item) => {
+              const isApproved = isApprovedTransaction(item.status);
+              const method = item.label;
+              const methodLabel = method === "pix" ? "PIX" : method === "credit_card" ? "Cartão" : method === "boleto" ? "Boleto" : "Venda";
+              const MethodIcon = method === "pix" ? PixLogoMark : method === "credit_card" ? CreditCard : method === "boleto" ? Barcode : Receipt;
+              const custName = item.tx.customer_name || item.tx.customer_email || "Cliente";
+              const initials = custName.trim().split(/\s+/).map(p => p[0]).slice(0, 2).join("").toUpperCase() || "?";
+              const haloTone =
+                isApproved ? "ring-emerald-500/40 bg-emerald-500/[0.08] text-emerald-500"
+                : item.status === "pending" ? "ring-amber-400/40 bg-amber-400/[0.08] text-amber-500"
+                : item.status === "expired" || item.status === "cancelled" || item.status === "canceled" ? "ring-border/60 bg-muted/40 text-muted-foreground"
+                : item.status === "chargeback" || item.status === "med" || item.status === "dispute" || item.status === "disputed" ? "ring-red-500/40 bg-red-500/[0.08] text-red-500"
+                : "ring-border/60 bg-muted/40 text-muted-foreground";
+              return (
+                <li key={item.id}>
+                  <button
+                    type="button"
+                    onClick={() => setDetailTx(item.tx)}
+                    className="group relative w-full flex items-center gap-3 md:gap-4 px-5 md:px-6 py-3.5 text-left hover:bg-primary/[0.03] transition-colors"
+                  >
+                    {/* Left accent bar */}
+                    <span
+                      aria-hidden
+                      className={cn(
+                        "absolute left-0 top-2 bottom-2 w-[3px] rounded-r-full opacity-0 group-hover:opacity-100 transition-opacity",
+                        isApproved ? "bg-emerald-500" : item.status === "pending" ? "bg-amber-400" : item.status === "chargeback" ? "bg-red-500" : "bg-muted-foreground/40"
+                      )}
+                    />
+
+                    {/* Avatar with status halo */}
+                    <div className={cn("relative h-11 w-11 shrink-0 rounded-2xl flex items-center justify-center ring-1 font-display font-black text-[13px] tabular-nums", haloTone)}>
+                      {initials}
+                    </div>
+
+                    {/* Main */}
+                    <div className="min-w-0 flex-1">
+                      <p className="font-display font-bold text-[14px] text-foreground truncate leading-tight">{custName}</p>
+                      <p className="mt-1 text-[11px] text-muted-foreground/80 flex items-center gap-1.5 truncate">
+                        <span className="inline-flex items-center gap-1 rounded-md border border-border/60 bg-muted/30 px-1.5 py-0.5 font-bold uppercase tracking-[0.08em] text-[10px] text-foreground/70">
+                          <MethodIcon className="h-3 w-3" />
+                          {methodLabel}
                         </span>
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
+                        <span className="text-muted-foreground/40">·</span>
+                        <span className="font-mono tabular-nums">
+                          {new Date(item.createdAt).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })}
+                        </span>
+                        <span className="text-muted-foreground/40 hidden sm:inline">·</span>
+                        <span className="hidden sm:inline text-muted-foreground/60">há {timeAgo(item.createdAt)}</span>
+                      </p>
+                    </div>
+
+                    {/* Value + status */}
+                    <div className="flex flex-col items-end gap-1.5 shrink-0">
+                      <span className="font-display font-black text-[15px] tabular-nums tracking-[-0.02em] text-foreground">
+                        {privacy.hidden ? CENSORED : fmt(item.amount)}
+                      </span>
+                      <span className={cn("inline-flex items-center gap-1.5 rounded-full border px-2 py-0.5 text-[9px] font-black uppercase tracking-[0.16em]",
+                        isApproved ? "border-emerald-500/25 bg-emerald-500/10 text-emerald-500"
+                        : item.status === "pending" ? "border-amber-400/30 bg-amber-400/10 text-amber-500"
+                        : item.status === "expired" || item.status === "cancelled" || item.status === "canceled" ? "border-border/60 bg-muted/40 text-muted-foreground"
+                        : item.status === "chargeback" || item.status === "med" || item.status === "dispute" || item.status === "disputed" ? "border-red-500/25 bg-red-500/10 text-red-500"
+                        : "border-border/60 bg-muted/40 text-muted-foreground"
+                      )}>
+                        <span className={cn("h-1.5 w-1.5 rounded-full",
+                          isApproved ? "bg-emerald-500" : item.status === "pending" ? "bg-amber-500 animate-pulse" : item.status === "chargeback" ? "bg-red-500" : "bg-muted-foreground/60"
+                        )} />
+                        {statusLabel(item.status)}
+                      </span>
+                    </div>
+
+                    <ChevronRight className="hidden sm:block h-4 w-4 text-muted-foreground/30 group-hover:text-primary group-hover:translate-x-0.5 transition-all shrink-0" />
+                  </button>
+                </li>
+              );
+            })}
+          </ul>
         </section>
 
         {/* Detail dialog */}
