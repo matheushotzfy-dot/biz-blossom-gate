@@ -84,12 +84,17 @@ export default function Taxas() {
     { label: "Boleto", value: "D+1", sub: "Após a compensação", tone: "warning", icon: Barcode },
   ];
 
-  // Premium icon shell classes with dual-tone gradient + inset ring + subtle glow
-  const iconShell: Record<string, string> = {
-    success: "bg-gradient-to-br from-success/[0.22] to-success/[0.05] text-success border border-success/25 shadow-[inset_0_1px_0_hsl(var(--success)/0.30),inset_0_0_0_1px_hsl(var(--success)/0.10),0_6px_20px_-8px_hsl(var(--success)/0.55)]",
-    info:    "bg-gradient-to-br from-info/[0.22] to-info/[0.05] text-info border border-info/25 shadow-[inset_0_1px_0_hsl(var(--info)/0.30),inset_0_0_0_1px_hsl(var(--info)/0.10),0_6px_20px_-8px_hsl(var(--info)/0.55)]",
-    warning: "bg-gradient-to-br from-warning/[0.24] to-warning/[0.05] text-warning border border-warning/25 shadow-[inset_0_1px_0_hsl(var(--warning)/0.32),inset_0_0_0_1px_hsl(var(--warning)/0.12),0_6px_20px_-8px_hsl(var(--warning)/0.55)]",
-    primary: "bg-gradient-to-br from-primary/[0.22] to-primary/[0.05] text-primary border border-primary/25 shadow-[inset_0_1px_0_hsl(var(--primary)/0.30),inset_0_0_0_1px_hsl(var(--primary)/0.10),0_6px_20px_-8px_hsl(var(--primary)/0.55)]",
+  const toneIcon: Record<string, string> = {
+    success: "text-success",
+    info: "text-info",
+    warning: "text-warning",
+    primary: "text-primary",
+  };
+  const toneBar: Record<string, string> = {
+    success: "bg-success",
+    info: "bg-info",
+    warning: "bg-warning",
+    primary: "bg-primary",
   };
 
   return (
@@ -101,88 +106,57 @@ export default function Taxas() {
         status={{ tone: "info", label: custom ? "Plano personalizado" : "Plano vigente" }}
       />
 
-      {/* Method cards */}
-      <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 animate-fade-in stagger-1">
+      {/* Method cards — clean strip */}
+      <section className="grid grid-cols-1 gap-px overflow-hidden rounded-xl border border-border/60 bg-border/60 sm:grid-cols-3 animate-fade-in stagger-1">
         {methodCards.map((m) => {
           const Icon = m.icon;
           return (
-            <div
-              key={m.label}
-              className="group relative isolate bg-card rounded-[20px] border border-border/70 overflow-hidden p-5 transition-[transform,border-color,box-shadow,background-color] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] hover:-translate-y-1 hover:border-primary/55 hover:bg-primary/[0.035] hover:shadow-[0_22px_50px_-22px_hsl(var(--primary)/0.45)] active:scale-[0.99]"
-            >
-              <span className="pointer-events-none absolute inset-x-4 top-0 z-0 h-px bg-gradient-to-r from-transparent via-primary/70 to-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
-              <span className="pointer-events-none absolute left-0 top-5 bottom-5 z-0 w-[3px] origin-center scale-y-50 rounded-r-full bg-primary opacity-0 transition-[opacity,transform] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:scale-y-100 group-hover:opacity-100" />
-              <span className="pointer-events-none absolute inset-0 z-0 -translate-x-[120%] bg-[linear-gradient(115deg,transparent_0%,hsl(var(--primary)/0.10)_44%,transparent_72%)] opacity-0 transition-[transform,opacity] duration-700 ease-out group-hover:translate-x-[120%] group-hover:opacity-100" />
-
-              <div className="relative z-10 flex items-center justify-between mb-4">
-                <div className={cn(
-                  "relative h-11 w-11 rounded-2xl flex items-center justify-center transition-transform duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:scale-110 group-hover:-rotate-6",
-                  iconShell[m.tone],
-                )}>
-                  <span className="pointer-events-none absolute inset-x-1.5 top-1 h-1/2 rounded-t-xl bg-gradient-to-b from-white/12 to-transparent opacity-80" />
-                  <Icon className="relative h-[18px] w-[18px]" strokeWidth={2.25} />
-                </div>
-                <span className="text-[10px] font-black uppercase tracking-[0.18em] text-muted-foreground/60">
-                  por transação
-                </span>
+            <div key={m.label} className="group relative bg-card px-5 py-4 transition-colors hover:bg-muted/20">
+              <div className="flex items-center justify-between">
+                <p className="text-[10px] font-black uppercase tracking-[0.22em] text-muted-foreground/70">Taxa {m.label}</p>
+                <Icon className={cn("h-3.5 w-3.5 shrink-0 opacity-40 transition-opacity group-hover:opacity-90", toneIcon[m.tone])} strokeWidth={2.2} />
               </div>
-
-              <p className="relative z-10 text-[11px] font-bold text-muted-foreground uppercase tracking-wider mb-1.5">
-                Taxa {m.label}
-              </p>
-
-              <div className="relative z-10 flex items-baseline gap-1.5 flex-wrap">
-                <span className="font-display text-[26px] sm:text-[28px] font-black text-foreground tabular-nums leading-none tracking-[-0.02em] transition-colors duration-300 group-hover:text-primary">
+              <div className="mt-4 flex items-baseline gap-1.5 flex-wrap">
+                <span className="font-display text-[26px] font-black text-foreground tabular-nums leading-none tracking-tight">
                   {pct(m.percent)}
                 </span>
-                <span className="text-base font-black text-muted-foreground/70 leading-none">+</span>
-                <span className="font-display text-[20px] sm:text-[22px] font-black text-foreground tabular-nums leading-none tracking-[-0.02em]">
+                <span className="text-sm font-bold text-muted-foreground/60 leading-none">+</span>
+                <span className="font-display text-[20px] font-black text-foreground tabular-nums leading-none tracking-tight">
                   {fmt(m.fixed)}
                 </span>
               </div>
-
-              <div className="relative z-10 mt-3 pt-3 border-t border-border/40 flex items-center justify-between">
-                <span className="text-[11px] font-medium text-muted-foreground">{m.sub}</span>
-                <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground/50">
-                  % + fixa
-                </span>
-              </div>
+              <p className="mt-2 truncate text-[11px] font-medium text-muted-foreground/75">{m.sub}</p>
+              <span className={cn("pointer-events-none absolute inset-x-0 bottom-0 h-[1.5px] origin-left scale-x-0 transition-transform duration-300 group-hover:scale-x-100", toneBar[m.tone])} />
             </div>
           );
         })}
       </section>
 
-      {/* Withdrawal fee */}
-      <section className="group relative isolate bg-card rounded-[20px] border border-border/70 overflow-hidden p-5 flex items-center gap-3 sm:gap-4 animate-fade-in transition-[transform,border-color,box-shadow] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] hover:-translate-y-0.5 hover:border-primary/55 hover:shadow-[0_18px_44px_-22px_hsl(var(--primary)/0.45)]">
-        <span className="pointer-events-none absolute inset-0 z-0 -translate-x-[120%] bg-[linear-gradient(115deg,transparent_0%,hsl(var(--primary)/0.08)_44%,transparent_72%)] opacity-0 transition-[transform,opacity] duration-700 ease-out group-hover:translate-x-[120%] group-hover:opacity-100" />
-        <div className={cn("relative z-10 h-12 w-12 rounded-2xl flex items-center justify-center shrink-0 transition-transform duration-500 group-hover:scale-110 group-hover:-rotate-6", iconShell.primary)}>
-          <span className="pointer-events-none absolute inset-x-1.5 top-1 h-1/2 rounded-t-xl bg-gradient-to-b from-white/12 to-transparent opacity-80" />
-          <DollarSign className="relative h-[19px] w-[19px]" strokeWidth={2.25} />
+      {/* Withdrawal fee — clean row */}
+      <section className="group relative overflow-hidden rounded-xl border border-border/60 bg-card px-5 py-4 flex items-center gap-3 transition-colors hover:bg-muted/20">
+        <DollarSign className={cn("h-3.5 w-3.5 shrink-0 opacity-40 transition-opacity group-hover:opacity-90", toneIcon.primary)} strokeWidth={2.2} />
+        <div className="flex-1 min-w-0">
+          <p className="text-[10px] font-black uppercase tracking-[0.22em] text-muted-foreground/70">Tarifa de Saque</p>
+          <p className="mt-1 text-[11px] font-medium text-muted-foreground/75 truncate">Fixo por solicitação de saque (Pix)</p>
         </div>
-        <div className="relative z-10 flex-1 min-w-0">
-          <p className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider">Tarifa de Saque</p>
-          <p className="text-[11px] text-muted-foreground/70 font-medium truncate">Fixo por solicitação de saque (Pix)</p>
-        </div>
-        <span className="relative z-10 font-display text-[22px] sm:text-[26px] font-black text-foreground tabular-nums leading-none tracking-[-0.02em] transition-colors duration-300 group-hover:text-primary">
+        <span className="font-display text-[24px] font-black text-foreground tabular-nums leading-none tracking-tight">
           {fmt(withdrawFee)}
         </span>
+        <span className={cn("pointer-events-none absolute inset-x-0 bottom-0 h-[1.5px] origin-left scale-x-0 transition-transform duration-300 group-hover:scale-x-100", toneBar.primary)} />
       </section>
 
-      {/* Prazos de liberação — collapsible compact card */}
-      <section className="bg-card rounded-[20px] border border-border/70 overflow-hidden animate-fade-in stagger-2">
+      {/* Prazos de liberação — collapsible */}
+      <section className="overflow-hidden rounded-xl border border-border/60 bg-card animate-fade-in stagger-2">
         <button
           type="button"
           onClick={() => setDeadlinesOpen((v) => !v)}
           aria-expanded={deadlinesOpen}
-          className="group relative w-full flex items-center gap-3 px-5 py-4 text-left transition-[background-color,padding] duration-300 hover:bg-primary/[0.035] active:scale-[0.995]"
+          className="group w-full flex items-center gap-3 px-5 py-4 text-left transition-colors hover:bg-muted/20"
         >
-          <div className={cn("relative h-11 w-11 rounded-2xl flex items-center justify-center shrink-0 transition-transform duration-300 group-hover:scale-110 group-hover:-rotate-6", iconShell.warning)}>
-            <span className="pointer-events-none absolute inset-x-1.5 top-1 h-1/2 rounded-t-xl bg-gradient-to-b from-white/12 to-transparent opacity-80" />
-            <Clock className="relative h-[17px] w-[17px]" strokeWidth={2.25} />
-          </div>
+          <Clock className={cn("h-3.5 w-3.5 shrink-0 opacity-40 transition-opacity group-hover:opacity-90", toneIcon.warning)} strokeWidth={2.2} />
           <div className="flex-1 min-w-0">
-            <h2 className="text-[14px] font-display font-black text-foreground tracking-[-0.01em]">Prazos de liberação</h2>
-            <p className="text-[11px] text-muted-foreground/70 font-medium truncate">Quando seu saldo fica disponível para saque.</p>
+            <p className="text-[10px] font-black uppercase tracking-[0.22em] text-muted-foreground/70">Prazos de liberação</p>
+            <p className="mt-1 text-[11px] font-medium text-muted-foreground/75 truncate">Quando seu saldo fica disponível para saque</p>
           </div>
           <span className="hidden sm:inline-flex items-center rounded-md border border-border/60 bg-secondary/40 px-2 py-1 text-[10px] font-black uppercase tracking-[0.14em] text-muted-foreground/80">
             {deadlines.length} métodos
@@ -197,26 +171,22 @@ export default function Taxas() {
           )}
         >
           <div className="overflow-hidden">
-            <div className="border-t border-border/50 divide-y divide-border/40">
+            <div className="border-t border-border/40 divide-y divide-border/40">
               {deadlines.map((p) => {
                 const Icon = p.icon;
                 return (
                   <div
                     key={p.label}
-                    className="group/row relative flex items-center justify-between gap-4 px-5 py-3.5 transition-[background-color,padding] duration-300 hover:bg-primary/[0.03] hover:pl-6"
+                    className="group/row flex items-center justify-between gap-4 px-5 py-3.5 transition-colors hover:bg-muted/20"
                   >
-                    <span className="pointer-events-none absolute left-0 top-2 bottom-2 w-[2px] origin-center scale-y-0 rounded-r-full bg-primary opacity-0 transition-[opacity,transform] duration-300 group-hover/row:scale-y-100 group-hover/row:opacity-100" />
                     <div className="flex items-center gap-3 min-w-0">
-                      <div className={cn("relative h-10 w-10 rounded-xl flex items-center justify-center shrink-0 transition-transform duration-300 group-hover/row:scale-110 group-hover/row:-rotate-6", iconShell[p.tone])}>
-                        <span className="pointer-events-none absolute inset-x-1.5 top-1 h-1/2 rounded-t-lg bg-gradient-to-b from-white/12 to-transparent opacity-80" />
-                        <Icon className="relative h-[15px] w-[15px]" strokeWidth={2.25} />
-                      </div>
+                      <Icon className={cn("h-3.5 w-3.5 shrink-0 opacity-50", toneIcon[p.tone])} strokeWidth={2.2} />
                       <div className="min-w-0">
                         <p className="text-[13px] font-display font-black text-foreground tracking-tight">{p.label}</p>
-                        <p className="text-[11px] text-muted-foreground/70 font-medium truncate">{p.sub}</p>
+                        <p className="text-[11px] text-muted-foreground/75 font-medium truncate">{p.sub}</p>
                       </div>
                     </div>
-                    <span className="text-[13px] font-display font-black text-foreground tabular-nums tracking-tight shrink-0 transition-colors duration-300 group-hover/row:text-primary">
+                    <span className="text-[13px] font-display font-black text-foreground tabular-nums tracking-tight shrink-0">
                       {p.value}
                     </span>
                   </div>
@@ -228,19 +198,14 @@ export default function Taxas() {
       </section>
 
       {/* Info footer */}
-      <section className="bg-card rounded-[20px] border border-border/70 overflow-hidden animate-fade-in stagger-3">
-        <div className="flex items-start gap-3 px-5 py-4">
-          <div className={cn("relative h-9 w-9 rounded-xl flex items-center justify-center shrink-0", iconShell.info)}>
-            <span className="pointer-events-none absolute inset-x-1.5 top-1 h-1/2 rounded-t-lg bg-gradient-to-b from-white/12 to-transparent opacity-80" />
-            <Info className="relative h-[14px] w-[14px]" strokeWidth={2.25} />
-          </div>
-          <p className="text-[12px] text-muted-foreground leading-relaxed font-medium">
-            O custo total de cada venda é <span className="font-black text-foreground">percentual + taxa fixa</span> sobre o valor da transação.
-            As taxas exibidas refletem o seu plano atual. Para volumes superiores a{" "}
-            <span className="font-black text-foreground tabular-nums">R$ 100.000/mês</span>, fale com seu gerente de conta
-            para uma proposta personalizada.
-          </p>
-        </div>
+      <section className="rounded-xl border border-border/60 bg-card px-5 py-4 flex items-start gap-3 animate-fade-in stagger-3">
+        <Info className="h-3.5 w-3.5 shrink-0 mt-0.5 opacity-50 text-info" strokeWidth={2.2} />
+        <p className="text-[12px] text-muted-foreground leading-relaxed font-medium">
+          O custo total de cada venda é <span className="font-black text-foreground">percentual + taxa fixa</span> sobre o valor da transação.
+          As taxas exibidas refletem o seu plano atual. Para volumes superiores a{" "}
+          <span className="font-black text-foreground tabular-nums">R$ 100.000/mês</span>, fale com seu gerente de conta
+          para uma proposta personalizada.
+        </p>
       </section>
     </div>
   );
