@@ -247,6 +247,7 @@ export function TransactionDetailPanel({ tx, products, onClose, onRefund, varian
      <span className="inline-flex items-center gap-1.5 rounded-full border border-primary/25 bg-primary/10 px-2 py-0.5 text-[10.5px] font-black uppercase tracking-[0.14em] text-primary">
        {(() => {
          if (variant !== "admin") return "HOTZFY";
+         if (acquirerName) return acquirerName.toUpperCase();
          const meta = (tx.metadata as Record<string, unknown> | null) || {};
          const acq = (meta.acquirer_slug as string) || (meta.acquirer as string) || tx.source || "—";
          return String(acq).toUpperCase();
@@ -254,6 +255,22 @@ export function TransactionDetailPanel({ tx, products, onClose, onRefund, varian
      </span>
    }
  />
+ {variant === "admin" && Number(tx.acquirer_fee_amount || 0) > 0 && (
+   <DataRow
+     label="Custo da adquirente"
+     icon={<ArrowDownRight className="h-3.5 w-3.5 shrink-0" />}
+     value={`- ${formatCurrency(Number(tx.acquirer_fee_amount))}`}
+     valueClassName="text-warning"
+   />
+ )}
+ {variant === "admin" && (
+   <DataRow
+     label="Lucro plataforma"
+     icon={<TrendingUp className="h-3.5 w-3.5 shrink-0" />}
+     value={formatCurrency(Number(tx.fee_amount || 0) - Number(tx.acquirer_fee_amount || 0))}
+     valueClassName="text-success"
+   />
+ )}
  <DataRow label="Data" value={formatDateTime(tx.created_at)} icon={<Zap className="h-3.5 w-3.5 shrink-0" />} />
  {Number(tx.retained_amount) > 0 && (
  <DataRow
@@ -283,7 +300,16 @@ export function TransactionDetailPanel({ tx, products, onClose, onRefund, varian
  <DataRow label="Email" value={tx.customer_email || "—"} icon={<Mail className="h-3.5 w-3.5 shrink-0" />} />
  <DataRow label="Telefone" value={tx.customer_phone || "—"} icon={<Phone className="h-3.5 w-3.5 shrink-0" />} />
  {tx.customer_document && <DataRow label="CPF/CNPJ" value={tx.customer_document} icon={<Hash className="h-3.5 w-3.5 shrink-0" />} />}
+ {variant === "admin" && tx.buyer_ip && <DataRow label="IP" value={<span className="font-mono">{tx.buyer_ip}</span>} icon={<Globe className="h-3.5 w-3.5 shrink-0" />} />}
  </SectionCard>
+
+ {variant === "admin" && seller && (
+   <SectionCard title="Seller">
+     <DataRow label="Nome" value={seller.full_name || seller.nickname || "—"} icon={<Users className="h-3.5 w-3.5 shrink-0" />} />
+     <DataRow label="Email" value={seller.email || "—"} icon={<Mail className="h-3.5 w-3.5 shrink-0" />} />
+     <DataRow label="ID" value={<span className="font-mono text-[11px]">{tx.user_id}</span>} icon={<Hash className="h-3.5 w-3.5 shrink-0" />} />
+   </SectionCard>
+ )}
 
  <SectionCard title="Resumo rápido">
  <div className="space-y-3">
