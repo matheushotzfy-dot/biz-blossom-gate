@@ -33,6 +33,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import QuickPixDialog from "@/components/QuickPixDialog";
 import { PixLogoMark } from "@/components/icons/PixLogoMark";
+import { TransactionDetailPanel } from "@/components/transactions/TransactionDetailPanel";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { StatCard } from "@/components/StatCard";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
@@ -581,6 +582,11 @@ export default function Dashboard() {
 
   // Sparkline data from chart
   const sparkData = useMemo(() => chartData.map(d => ({ v: d.vendas })), [chartData]);
+  const productsMap = useMemo(() => {
+    const map: Record<string, string> = {};
+    (productsData || []).forEach((p: { id: string; name: string | null }) => { map[p.id] = p.name || p.id; });
+    return map;
+  }, [productsData]);
 
   const donutPix = [{ name: "on", value: pixConversion }, { name: "off", value: Math.max(0, 100 - pixConversion) }];
   const donutChb = [{ name: "on", value: chargebackRate }, { name: "off", value: Math.max(0, 100 - chargebackRate) }];
@@ -623,25 +629,37 @@ export default function Dashboard() {
             <p className="text-muted-foreground text-sm mt-1">Que essa jornada seja leve, produtiva e cheia de conquistas!</p>
           </div>
 
-          {/* Combined: Faturamento hoje chip AS the date-filter trigger (click opens filter) */}
+          {/* Faturamento / Meta hero chip — richer, clickable to open period filter */}
           <Popover open={datePickerOpen} onOpenChange={setDatePickerOpen}>
             <PopoverTrigger asChild>
-              <button className="flex items-center gap-3 rounded-2xl border border-border/60 bg-card/80 backdrop-blur px-4 py-3 min-w-[260px] hover:border-primary/40 transition-all text-left">
-                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 text-primary shrink-0">
-                  <CalendarDays className="h-5 w-5" strokeWidth={2.25} />
+              <button className="group relative overflow-hidden flex items-center gap-4 rounded-2xl border border-primary/25 bg-gradient-to-br from-primary/[0.08] via-card/90 to-card px-4 py-3 min-w-[300px] hover:border-primary/50 hover:shadow-[0_8px_28px_-10px_hsl(var(--primary)/0.4)] transition-all text-left">
+                <div aria-hidden className="pointer-events-none absolute -right-8 -top-8 h-24 w-24 rounded-full bg-primary/15 blur-2xl" />
+                <div className="relative flex h-11 w-11 items-center justify-center rounded-2xl border border-primary/30 bg-primary/15 text-primary shrink-0">
+                  <TrendingUp className="h-5 w-5" strokeWidth={2.5} />
                 </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/70">
-                    Faturamento · {isCustom ? "Período" : selectedPeriod.label}
-                  </p>
-                  <div className="flex items-baseline gap-2 mt-0.5">
-                    <span className="font-display font-black text-base tabular-nums">
+                <div className="relative flex-1 min-w-0">
+                  <div className="flex items-center gap-2">
+                    <p className="text-[9px] font-black uppercase tracking-[0.24em] text-primary/90">
+                      Faturamento · {isCustom ? "Período" : selectedPeriod.label}
+                    </p>
+                    <CalendarDays className="h-3 w-3 text-muted-foreground/50 group-hover:text-primary transition-colors" />
+                  </div>
+                  <div className="flex items-baseline gap-2 mt-1">
+                    <span className="font-display font-black text-[18px] tabular-nums tracking-[-0.02em] text-foreground">
                       {privacy.hidden ? CENSORED : fmt(revenue)}
                     </span>
-                    <span className="text-[11px] text-muted-foreground/60 tabular-nums">/ meta {fmt(goalTarget)}</span>
+                    <span className="text-[10px] font-bold uppercase tracking-[0.14em] text-muted-foreground/60 tabular-nums">
+                      / meta {privacy.hidden ? CENSORED : fmt(goalTarget)}
+                    </span>
                   </div>
-                  <div className="mt-1.5 h-1 w-full rounded-full bg-muted/60 overflow-hidden">
-                    <div className="h-full rounded-full bg-gradient-to-r from-primary to-primary/60 transition-all" style={{ width: `${Math.min(100, (revenue/goalTarget)*100)}%` }} />
+                  <div className="mt-2 flex items-center gap-2">
+                    <div className="relative flex-1 h-1.5 rounded-full bg-muted/50 overflow-hidden">
+                      <div
+                        className="absolute inset-y-0 left-0 rounded-full bg-gradient-to-r from-primary to-primary/70"
+                        style={{ width: `${Math.min(100, (revenue/goalTarget)*100)}%` }}
+                      />
+                    </div>
+                    <span className="text-[10px] font-black tabular-nums text-primary shrink-0">{Math.min(100, (revenue/goalTarget)*100).toFixed(0)}%</span>
                   </div>
                 </div>
               </button>
@@ -731,53 +749,60 @@ export default function Dashboard() {
         {/* ═══════════ 4 KPI CARDS ═══════════ */}
         <section className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-3">
           {[
-            { label: "Saldo Disponível", value: fmt(Math.max(0, balance)), sub: "Saldo disponível", icon: Wallet, tone: "primary", spark: true },
-            { label: "Recebido Hoje", value: fmt(receivedToday), sub: "Total faturado no dia", icon: RefreshCw, tone: "success", spark: true },
-            { label: "Bloqueio Cautelar", value: fmt(disputedAmount), sub: "MEDs em disputa", icon: Lock, tone: "warning", spark: false },
-            { label: "Faturamento Total", value: fmt(revenue), sub: "Valor total de vendas", icon: TrendingUp, tone: "primary", spark: true },
+            { label: "Saldo Disponível", value: fmt(Math.max(0, balance)), sub: "Saldo disponível", icon: Wallet, spark: true, isRevenue: false },
+            { label: "Recebido Hoje", value: fmt(receivedToday), sub: "Total faturado no dia", icon: RefreshCw, spark: true, isRevenue: false },
+            { label: "Bloqueio Cautelar", value: fmt(disputedAmount), sub: "MEDs em disputa", icon: Lock, spark: false, isRevenue: false },
+            { label: "Faturamento Total", value: fmt(revenue), sub: "Valor bruto de vendas", icon: TrendingUp, spark: true, isRevenue: true },
           ].map((k) => {
             const Icon = k.icon;
-            const isRevenue = k.label === "Faturamento Total";
+            const isRevenue = k.isRevenue;
             return (
               <div key={k.label} className={cn(
-                "group relative overflow-hidden rounded-2xl border border-border/60 bg-card/80 backdrop-blur transition-all hover:border-primary/40 hover:shadow-[0_4px_24px_-8px_hsl(var(--primary)/0.3)]",
-                isRevenue ? "p-3" : "p-5"
+                "group relative overflow-hidden rounded-3xl border p-5 transition-all",
+                isRevenue
+                  ? "border-primary/25 bg-gradient-to-br from-primary/[0.08] via-card to-card hover:border-primary/50 hover:shadow-[0_10px_40px_-12px_hsl(var(--primary)/0.35)]"
+                  : "border-border/60 bg-card/80 backdrop-blur hover:border-primary/40 hover:shadow-[0_4px_24px_-8px_hsl(var(--primary)/0.2)]"
               )}>
-                <div className="flex items-start justify-between gap-3">
+                {/* Ornamental corner glow for revenue */}
+                {isRevenue && (
+                  <div aria-hidden className="pointer-events-none absolute -right-10 -top-10 h-32 w-32 rounded-full bg-primary/15 blur-2xl" />
+                )}
+
+                <div className="relative flex items-start justify-between gap-3">
                   <div className="min-w-0 flex-1">
                     <p className={cn(
-                      "font-bold uppercase tracking-[0.14em] text-muted-foreground/80",
-                      isRevenue ? "text-[10px]" : "text-[11px]"
+                      "font-black uppercase tracking-[0.18em]",
+                      isRevenue ? "text-[10px] text-primary/90" : "text-[10px] text-muted-foreground/70"
                     )}>{k.label}</p>
                     <p className={cn(
-                      "font-display font-black tabular-nums tracking-[-0.02em] truncate",
-                      isRevenue ? "mt-1 text-base md:text-lg" : "mt-2 text-2xl md:text-[26px]"
+                      "mt-2 font-display font-black tabular-nums tracking-[-0.03em] truncate",
+                      isRevenue ? "text-[26px] md:text-[28px] text-foreground" : "text-2xl md:text-[26px] text-foreground"
                     )}>
                       {privacy.hidden ? CENSORED : k.value}
                     </p>
-                    <p className={cn(
-                      "mt-1 text-muted-foreground/60 truncate",
-                      isRevenue ? "text-[10px]" : "text-[11px]"
-                    )}>{k.sub}</p>
+                    <div className="mt-1.5 flex items-center gap-1.5">
+                      <p className="text-[11px] text-muted-foreground/60 truncate">{k.sub}</p>
+                    </div>
                   </div>
                   <div className={cn(
-                    "shrink-0 flex items-center justify-center rounded-xl bg-primary/10 text-primary group-hover:scale-110 transition-transform",
-                    isRevenue ? "h-8 w-8" : "h-10 w-10"
+                    "shrink-0 flex h-11 w-11 items-center justify-center rounded-2xl transition-transform group-hover:scale-110",
+                    isRevenue ? "border border-primary/30 bg-primary/15 text-primary" : "bg-primary/10 text-primary"
                   )}>
-                    <Icon className={isRevenue ? "h-4 w-4" : "h-5 w-5"} strokeWidth={2.25} />
+                    <Icon className="h-5 w-5" strokeWidth={2.25} />
                   </div>
                 </div>
+
                 {k.spark && sparkData.length > 1 && (
-                  <div className="absolute bottom-0 left-0 right-0 h-10 opacity-70">
+                  <div className={cn("absolute bottom-0 left-0 right-0 pointer-events-none", isRevenue ? "h-14 opacity-90" : "h-10 opacity-70")}>
                     <ResponsiveContainer width="100%" height="100%">
                       <AreaChart data={sparkData} margin={{ top: 4, right: 0, left: 0, bottom: 0 }}>
                         <defs>
                           <linearGradient id={`sp-${k.label}`} x1="0" y1="0" x2="0" y2="1">
-                            <stop offset="0%" stopColor="hsl(var(--primary))" stopOpacity={0.4} />
+                            <stop offset="0%" stopColor="hsl(var(--primary))" stopOpacity={isRevenue ? 0.55 : 0.4} />
                             <stop offset="100%" stopColor="hsl(var(--primary))" stopOpacity={0} />
                           </linearGradient>
                         </defs>
-                        <Area type="monotone" dataKey="v" stroke="hsl(var(--primary))" strokeWidth={1.5} fill={`url(#sp-${k.label})`} isAnimationActive={false} />
+                        <Area type="monotone" dataKey="v" stroke="hsl(var(--primary))" strokeWidth={isRevenue ? 2 : 1.5} fill={`url(#sp-${k.label})`} isAnimationActive={false} />
                       </AreaChart>
                     </ResponsiveContainer>
                   </div>
@@ -816,67 +841,97 @@ export default function Dashboard() {
         {/* ═══════════ CHART + SIDE PANEL ═══════════ */}
         <section className="grid grid-cols-1 xl:grid-cols-3 gap-3">
 
-          {/* Faturamento — Bar chart */}
-          <div className="xl:col-span-2 rounded-2xl border border-border/60 bg-card/80 backdrop-blur">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 px-5 pt-5 pb-3 border-b border-border/40">
-              <div>
-                <h3 className="font-display font-black text-lg tracking-[-0.02em]">Faturamento</h3>
-                <p className="text-[12px] text-muted-foreground/70">Compara entradas e saídas diárias para acompanhamento do fluxo de caixa.</p>
+          {/* Faturamento — Area chart premium */}
+          <div className="xl:col-span-2 rounded-3xl border border-border/60 bg-card/80 backdrop-blur overflow-hidden">
+            {/* Header with KPI trio + toggle */}
+            <div className="flex flex-col gap-4 px-5 md:px-6 pt-5 pb-4 border-b border-border/40">
+              <div className="flex flex-wrap items-start justify-between gap-3">
+                <div className="min-w-0">
+                  <p className="text-[10px] font-black uppercase tracking-[0.24em] text-muted-foreground/70">Fluxo · {isCustom ? "Personalizado" : selectedPeriod.label}</p>
+                  <h3 className="font-display font-black text-xl tracking-[-0.02em] mt-1">Faturamento</h3>
+                </div>
+                <div className="flex items-center rounded-full border border-border/60 bg-muted/20 p-1">
+                  {PERIOD_PRESETS.filter(p => ["Hoje", "7 dias", "30 dias"].includes(p.label)).map((p) => {
+                    const isActive = !isCustom && selectedPeriod.label === p.label;
+                    const short = p.label === "Hoje" ? "Hoje" : p.label === "7 dias" ? "Semana" : "Mês";
+                    return (
+                      <button key={p.label} onClick={() => { setSelectedPeriod(p); setIsCustom(false); }}
+                        className={cn("px-3.5 py-1.5 rounded-full text-[11px] font-black uppercase tracking-[0.1em] transition-all",
+                          isActive ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground"
+                        )}>
+                        {short}
+                      </button>
+                    );
+                  })}
+                </div>
               </div>
-              <div className="flex items-center rounded-xl border border-border/60 bg-muted/30 p-1">
-                {PERIOD_PRESETS.slice(0, 4).filter(p => ["Hoje", "7 dias", "30 dias"].includes(p.label)).map((p) => {
-                  const isActive = !isCustom && selectedPeriod.label === p.label;
-                  const short = p.label === "Hoje" ? "Hoje" : p.label === "7 dias" ? "Semana" : "Mês";
-                  return (
-                    <button key={p.label} onClick={() => { setSelectedPeriod(p); setIsCustom(false); }}
-                      className={cn("px-3 py-1.5 rounded-lg text-[11px] font-bold transition-all",
-                        isActive ? "bg-primary text-primary-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"
-                      )}>
-                      {short}
-                    </button>
-                  );
-                })}
-              </div>
+              {/* KPI trio */}
+              {(() => {
+                const total = chartData.reduce((a, d) => a + d.vendas, 0);
+                const active = chartData.filter(d => d.vendas > 0);
+                const avg = active.length ? total / active.length : 0;
+                const best = chartData.reduce<{ label: string; v: number }>((m, d) => d.vendas > m.v ? { label: d.fullLabel, v: d.vendas } : m, { label: "—", v: 0 });
+                const trio = [
+                  { k: "Total", v: privacy.hidden ? CENSORED : fmt(total) },
+                  { k: "Ticket médio", v: privacy.hidden ? CENSORED : fmt(avg) },
+                  { k: "Melhor dia", v: best.v > 0 ? (privacy.hidden ? CENSORED : fmt(best.v)) : "—", sub: best.v > 0 ? best.label : undefined },
+                ];
+                return (
+                  <div className="grid grid-cols-3 gap-2">
+                    {trio.map(t => (
+                      <div key={t.k} className="rounded-2xl border border-border/40 bg-background/40 px-3 py-2.5">
+                        <p className="text-[9px] font-black uppercase tracking-[0.2em] text-muted-foreground/70">{t.k}</p>
+                        <p className="mt-1 font-display font-black text-[14px] md:text-[15px] tabular-nums tracking-[-0.02em] truncate">{t.v}</p>
+                        {t.sub && <p className="text-[10px] text-muted-foreground/50 mt-0.5 truncate">{t.sub}</p>}
+                      </div>
+                    ))}
+                  </div>
+                );
+              })()}
             </div>
-            <div className="flex items-center gap-4 px-5 py-2 text-[11px] font-bold text-muted-foreground/70">
-              <span className="flex items-center gap-1.5"><span className="h-2 w-2 rounded-full bg-primary" /> Entradas</span>
-              <span className="flex items-center gap-1.5"><span className="h-2 w-2 rounded-full bg-orange-400" /> Saídas</span>
-              <span className="flex items-center gap-1.5"><span className="h-2 w-2 rounded-full bg-muted-foreground/40" /> Infração</span>
-            </div>
-            <div className="h-[280px] w-full px-2 pb-4">
+
+            <div className="h-[300px] w-full px-2 pb-4 pt-2">
               <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={chartData} margin={{ top: 10, right: 16, left: 4, bottom: 4 }}>
-                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="hsl(var(--border)/0.4)" />
+                <AreaChart data={chartData} margin={{ top: 20, right: 20, left: 6, bottom: 4 }}>
+                  <defs>
+                    <linearGradient id="revGrad" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0%" stopColor="hsl(var(--primary))" stopOpacity={0.35} />
+                      <stop offset="60%" stopColor="hsl(var(--primary))" stopOpacity={0.08} />
+                      <stop offset="100%" stopColor="hsl(var(--primary))" stopOpacity={0} />
+                    </linearGradient>
+                  </defs>
+                  <CartesianGrid strokeDasharray="2 5" vertical={false} stroke="hsl(var(--border)/0.5)" />
                   <XAxis dataKey="timestamp" type="number" scale="time"
                     domain={[chartData[0]?.timestamp ?? 0, chartData[chartData.length - 1]?.timestamp ?? 0]}
                     ticks={chartTicks} tickFormatter={chartTickFormatter}
                     axisLine={false} tickLine={false}
-                    tick={{ fill: "hsl(var(--muted-foreground)/0.6)", fontSize: 11 }}
-                    dy={8} interval={0} minTickGap={0}
+                    tick={{ fill: "hsl(var(--muted-foreground)/0.55)", fontSize: 10, fontWeight: 700 }}
+                    dy={10} interval="preserveStartEnd" minTickGap={12}
                   />
-                  <YAxis width={56} axisLine={false} tickLine={false}
-                    tick={{ fill: "hsl(var(--muted-foreground)/0.6)", fontSize: 11 }}
-                    tickFormatter={(v) => Number(v) >= 1000 ? `R$ ${Math.round(Number(v) / 1000)}k` : `R$ ${v}`}
-                  />
-                  <Tooltip cursor={{ fill: "hsl(var(--primary)/0.06)" }} wrapperStyle={{ outline: "none" }}
+                  <YAxis hide domain={[0, "dataMax + 100"]} />
+                  <Tooltip cursor={{ stroke: "hsl(var(--primary))", strokeWidth: 1, strokeDasharray: "3 3" }} wrapperStyle={{ outline: "none" }}
                     content={({ active, payload }) => {
                       if (active && payload && payload.length) {
+                        const p = payload[0];
                         return (
-                          <div className="rounded-xl border border-border bg-background/95 backdrop-blur px-3 py-2 shadow-lg">
-                            <p className="text-[10px] uppercase tracking-widest text-muted-foreground/70 mb-1">{payload[0].payload.fullLabel}</p>
-                            <p className="text-primary text-sm font-bold tabular-nums">{fmt(payload[0].value as number)}</p>
+                          <div className="rounded-2xl border border-border/60 bg-card/95 backdrop-blur-xl px-3.5 py-2.5 shadow-2xl min-w-[160px]">
+                            <p className="text-[9px] font-black uppercase tracking-[0.2em] text-muted-foreground/70 mb-1.5">{p.payload.fullLabel}</p>
+                            <div className="flex items-center gap-2">
+                              <span className="h-2 w-2 rounded-full bg-primary" />
+                              <p className="text-primary font-display font-black text-[15px] tabular-nums leading-none">{fmt(p.value as number)}</p>
+                            </div>
                           </div>
                         );
                       }
                       return null;
                     }}
                   />
-                  <Bar dataKey="vendas" radius={[6, 6, 0, 0]} maxBarSize={28}>
-                    {chartData.map((entry, index) => (
-                      <Cell key={`c-${index}`} fill={entry.vendas > 0 ? "hsl(var(--primary))" : "hsl(var(--muted-foreground)/0.25)"} />
-                    ))}
-                  </Bar>
-                </BarChart>
+                  <Area type="monotone" dataKey="vendas" stroke="hsl(var(--primary))" strokeWidth={2.25} fill="url(#revGrad)"
+                    dot={false}
+                    activeDot={{ r: 5, fill: "hsl(var(--primary))", stroke: "hsl(var(--background))", strokeWidth: 2.5 }}
+                    isAnimationActive={false}
+                  />
+                </AreaChart>
               </ResponsiveContainer>
             </div>
           </div>
@@ -947,129 +1002,132 @@ export default function Dashboard() {
           </div>
         </section>
 
-        {/* ═══════════ LIVE TRANSACTION STREAM ═══════════ */}
-        <section className="rounded-2xl border border-border/60 bg-card/80 backdrop-blur">
-          <div className="flex flex-wrap items-center justify-between gap-2 px-5 py-4 border-b border-border/40">
-            <div className="flex items-center gap-3">
-              <div>
-                <h3 className="font-display font-black text-lg tracking-[-0.02em]">Últimas transações</h3>
-                <p className="text-[11px] text-muted-foreground/70">Atualizando em tempo real</p>
+        {/* ═══════════ ÚLTIMAS TRANSAÇÕES — Editorial Stream ═══════════ */}
+        <section className="relative overflow-hidden rounded-3xl border border-border/60 bg-card/80 backdrop-blur">
+          {/* Header */}
+          <div className="flex flex-wrap items-center justify-between gap-3 px-5 md:px-6 pt-5 pb-4 border-b border-border/40">
+            <div className="flex items-center gap-3 min-w-0">
+              <div className="relative flex h-11 w-11 items-center justify-center rounded-2xl border border-primary/20 bg-primary/10 text-primary shrink-0">
+                <Receipt className="h-5 w-5" strokeWidth={2.25} />
+                <span className="absolute -top-0.5 -right-0.5 flex h-2.5 w-2.5">
+                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-primary opacity-70" />
+                  <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-primary ring-2 ring-card" />
+                </span>
               </div>
-              <span className="relative flex h-2 w-2 ml-1">
-                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-primary opacity-75" />
-                <span className="relative inline-flex h-2 w-2 rounded-full bg-primary" />
-              </span>
+              <div className="min-w-0">
+                <h3 className="font-display font-black text-lg tracking-[-0.02em] leading-none">Últimas transações</h3>
+                <p className="text-[11px] text-muted-foreground/70 mt-1">
+                  <span className="tabular-nums font-bold text-foreground/80">{activity.length}</span>
+                  <span className="mx-1.5 text-muted-foreground/40">·</span>
+                  Aprovação <span className="tabular-nums font-bold text-primary">{conversion.toFixed(0)}%</span>
+                  <span className="mx-1.5 text-muted-foreground/40">·</span>
+                  <span className="tabular-nums font-bold text-foreground/80">{privacy.hidden ? CENSORED : fmt(revenue)}</span>
+                </p>
+              </div>
             </div>
-            <div className="flex items-center gap-3 text-[11px] font-bold text-muted-foreground/70">
-              <span className="rounded-lg bg-primary/10 text-primary px-2 py-1">PIX · {pixTotalCount}</span>
-              <span className="rounded-lg bg-muted/50 px-2 py-1">CARD · {cardTotalCount}</span>
-              <span className="rounded-lg bg-warning/10 text-warning px-2 py-1">BOL · {boletoTotalCount}</span>
-              <button type="button" onClick={() => { if (!requireApprovedAccount()) navigate("/vendas"); }} className="text-primary hover:underline">ver todas →</button>
-            </div>
+            <button type="button" onClick={() => { if (!requireApprovedAccount()) navigate("/vendas"); }} className="inline-flex items-center gap-1.5 rounded-xl border border-border/60 bg-background/40 px-3 py-2 text-[11px] font-bold uppercase tracking-[0.14em] text-muted-foreground hover:border-primary/40 hover:text-primary transition-colors">
+              Ver todas <ArrowRight className="h-3.5 w-3.5" />
+            </button>
           </div>
 
-          <div className="overflow-x-auto">
-            <table className="w-full text-left border-collapse min-w-[720px]">
-              <thead>
-                <tr className="border-b border-border/30 text-[10px] font-bold uppercase tracking-widest text-muted-foreground/60">
-                  <th className="px-5 py-3 font-bold">Hash</th>
-                  <th className="px-3 py-3 font-bold">Hora</th>
-                  <th className="px-3 py-3 font-bold">Método</th>
-                  <th className="px-3 py-3 font-bold">Cliente</th>
-                  <th className="px-3 py-3 font-bold text-right">Valor</th>
-                  <th className="px-5 py-3 font-bold text-right">Status</th>
-                </tr>
-              </thead>
-              <tbody className="text-[13px]">
-                {activity.length === 0 && (
-                  <tr>
-                    <td colSpan={6} className="px-5 py-14 text-center text-muted-foreground/50">
-                      <Sparkles className="h-6 w-6 mx-auto mb-2 opacity-40" />
-                      <p className="text-[12px] font-bold uppercase tracking-widest">Aguardando primeira transação</p>
-                      <p className="text-[11px] mt-1">Sistema pronto para receber vendas</p>
-                    </td>
-                  </tr>
-                )}
-                {activity.map((item) => {
-                  const isApproved = isApprovedTransaction(item.status);
-                  const methodLabel = item.label === "pix" ? "PIX" : item.label === "credit_card" ? "CARD" : item.label === "boleto" ? "BOL" : "TX";
-                  const methodColor = item.label === "pix" ? "text-primary bg-primary/10" : item.label === "boleto" ? "text-warning bg-warning/10" : "text-foreground/80 bg-muted/50";
-                  return (
-                    <tr key={item.id} onClick={() => setDetailTx(item.tx)}
-                      className="group border-b border-border/20 cursor-pointer transition-colors hover:bg-primary/[0.04]">
-                      <td className="px-5 py-3.5 text-muted-foreground/70 font-mono text-[11px]">
-                        {item.id.replace(/-/g, "").slice(0, 4).toUpperCase()}···{item.id.replace(/-/g, "").slice(-4).toUpperCase()}
-                      </td>
-                      <td className="px-3 py-3.5 text-muted-foreground/60 tabular-nums font-mono text-[11px]">
-                        {new Date(item.createdAt).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })}
-                      </td>
-                      <td className="px-3 py-3.5">
-                        <span className={cn("inline-flex items-center rounded-md px-2 py-0.5 text-[10px] font-bold", methodColor)}>{methodLabel}</span>
-                      </td>
-                      <td className="px-3 py-3.5 text-foreground/90">
-                        <span className="truncate inline-block max-w-[180px] align-middle">{item.tx.customer_name || item.tx.customer_email || "—"}</span>
-                      </td>
-                      <td className="px-3 py-3.5 text-right text-foreground font-bold tabular-nums">
-                        {privacy.hidden ? CENSORED : fmt(item.amount)}
-                      </td>
-                      <td className="px-5 py-3.5 text-right">
-                        <span className={cn("inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider", statusBg(item.status), statusColor(item.status))}>
-                          <span className={cn("h-1.5 w-1.5 rounded-full", isApproved ? "bg-emerald-500" : item.status === "pending" ? "bg-amber-500 animate-pulse" : "bg-destructive")} />
-                          {statusLabel(item.status)}
+          {/* Rows */}
+          <ul className="divide-y divide-border/30">
+            {activity.length === 0 && (
+              <li className="px-6 py-16 text-center">
+                <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl border border-primary/20 bg-primary/5 text-primary">
+                  <Receipt className="h-6 w-6" strokeWidth={2} />
+                </div>
+                <p className="text-[12px] font-black uppercase tracking-[0.24em] text-foreground/70">Aguardando primeira venda</p>
+                <p className="text-[12px] text-muted-foreground/70 mt-1.5">Suas transações aparecem aqui em tempo real</p>
+              </li>
+            )}
+            {activity.map((item) => {
+              const isApproved = isApprovedTransaction(item.status);
+              const method = item.label;
+              const methodLabel = method === "pix" ? "PIX" : method === "credit_card" ? "Cartão" : method === "boleto" ? "Boleto" : "Venda";
+              const MethodIcon = method === "pix" ? PixLogoMark : method === "credit_card" ? CreditCard : method === "boleto" ? Barcode : Receipt;
+              const custName = item.tx.customer_name || item.tx.customer_email || "Cliente";
+              const initials = custName.trim().split(/\s+/).map(p => p[0]).slice(0, 2).join("").toUpperCase() || "?";
+              const haloTone =
+                isApproved ? "ring-emerald-500/40 bg-emerald-500/[0.08] text-emerald-500"
+                : item.status === "pending" ? "ring-amber-400/40 bg-amber-400/[0.08] text-amber-500"
+                : item.status === "expired" || item.status === "cancelled" || item.status === "canceled" ? "ring-border/60 bg-muted/40 text-muted-foreground"
+                : item.status === "chargeback" || item.status === "med" || item.status === "dispute" || item.status === "disputed" ? "ring-red-500/40 bg-red-500/[0.08] text-red-500"
+                : "ring-border/60 bg-muted/40 text-muted-foreground";
+              return (
+                <li key={item.id}>
+                  <button
+                    type="button"
+                    onClick={() => setDetailTx(item.tx)}
+                    className="group relative w-full flex items-center gap-3 md:gap-4 px-5 md:px-6 py-3.5 text-left hover:bg-primary/[0.03] transition-colors"
+                  >
+                    {/* Left accent bar */}
+                    <span
+                      aria-hidden
+                      className={cn(
+                        "absolute left-0 top-2 bottom-2 w-[3px] rounded-r-full opacity-0 group-hover:opacity-100 transition-opacity",
+                        isApproved ? "bg-emerald-500" : item.status === "pending" ? "bg-amber-400" : item.status === "chargeback" ? "bg-red-500" : "bg-muted-foreground/40"
+                      )}
+                    />
+
+                    {/* Avatar with status halo */}
+                    <div className={cn("relative h-11 w-11 shrink-0 rounded-2xl flex items-center justify-center ring-1 font-display font-black text-[13px] tabular-nums", haloTone)}>
+                      {initials}
+                    </div>
+
+                    {/* Main */}
+                    <div className="min-w-0 flex-1">
+                      <p className="font-display font-bold text-[14px] text-foreground truncate leading-tight">{custName}</p>
+                      <p className="mt-1 text-[11px] text-muted-foreground/80 flex items-center gap-1.5 truncate">
+                        <span className="inline-flex items-center gap-1 rounded-md border border-border/60 bg-muted/30 px-1.5 py-0.5 font-bold uppercase tracking-[0.08em] text-[10px] text-foreground/70">
+                          <MethodIcon className="h-3 w-3" />
+                          {methodLabel}
                         </span>
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
+                        <span className="text-muted-foreground/40">·</span>
+                        <span className="font-mono tabular-nums">
+                          {new Date(item.createdAt).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })}
+                        </span>
+                        <span className="text-muted-foreground/40 hidden sm:inline">·</span>
+                        <span className="hidden sm:inline text-muted-foreground/60">há {timeAgo(item.createdAt)}</span>
+                      </p>
+                    </div>
+
+                    {/* Value + status */}
+                    <div className="flex flex-col items-end gap-1.5 shrink-0">
+                      <span className="font-display font-black text-[15px] tabular-nums tracking-[-0.02em] text-foreground">
+                        {privacy.hidden ? CENSORED : fmt(item.amount)}
+                      </span>
+                      <span className={cn("inline-flex items-center gap-1.5 rounded-full border px-2 py-0.5 text-[9px] font-black uppercase tracking-[0.16em]",
+                        isApproved ? "border-emerald-500/25 bg-emerald-500/10 text-emerald-500"
+                        : item.status === "pending" ? "border-amber-400/30 bg-amber-400/10 text-amber-500"
+                        : item.status === "expired" || item.status === "cancelled" || item.status === "canceled" ? "border-border/60 bg-muted/40 text-muted-foreground"
+                        : item.status === "chargeback" || item.status === "med" || item.status === "dispute" || item.status === "disputed" ? "border-red-500/25 bg-red-500/10 text-red-500"
+                        : "border-border/60 bg-muted/40 text-muted-foreground"
+                      )}>
+                        <span className={cn("h-1.5 w-1.5 rounded-full",
+                          isApproved ? "bg-emerald-500" : item.status === "pending" ? "bg-amber-500 animate-pulse" : item.status === "chargeback" ? "bg-red-500" : "bg-muted-foreground/60"
+                        )} />
+                        {statusLabel(item.status)}
+                      </span>
+                    </div>
+
+                    <ChevronRight className="hidden sm:block h-4 w-4 text-muted-foreground/30 group-hover:text-primary group-hover:translate-x-0.5 transition-all shrink-0" />
+                  </button>
+                </li>
+              );
+            })}
+          </ul>
         </section>
 
-        {/* Detail dialog */}
-        <Dialog open={!!detailTx} onOpenChange={(v) => !v && setDetailTx(null)}>
-          <DialogContent className="max-w-md rounded-2xl border border-border bg-card">
-            {detailTx && (
-              <div className="space-y-4">
-                <div>
-                  <p className="text-[10px] uppercase tracking-widest text-muted-foreground/60">Transação</p>
-                  <h3 className="font-display font-black text-2xl mt-1 tabular-nums">{fmt(Number(detailTx.amount))}</h3>
-                  <p className={cn("text-[11px] font-bold uppercase tracking-widest mt-1", statusColor(deriveTransactionStatus(detailTx)))}>{statusLabel(deriveTransactionStatus(detailTx))}</p>
-                </div>
-                <div className="grid grid-cols-2 gap-2 text-[12px]">
-                  <div className="rounded-xl border border-border p-3">
-                    <p className="text-muted-foreground/60 text-[9px] uppercase tracking-widest mb-1">Método</p>
-                    <p className="font-bold flex items-center gap-1.5 uppercase">
-                      {detailTx.payment_method === "pix" ? <><PixLogoMark className="h-3.5 w-3.5" /> PIX</>
-                        : detailTx.payment_method === "credit_card" ? <><CreditCard className="h-3.5 w-3.5" /> Cartão</>
-                        : detailTx.payment_method === "boleto" ? <><Barcode className="h-3.5 w-3.5" /> Boleto</>
-                        : "—"}
-                    </p>
-                  </div>
-                  <div className="rounded-xl border border-border p-3">
-                    <p className="text-muted-foreground/60 text-[9px] uppercase tracking-widest mb-1">Líquido</p>
-                    <p className="font-bold tabular-nums">{fmt(Number(detailTx.net_amount || 0))}</p>
-                  </div>
-                  <div className="rounded-xl border border-border p-3 col-span-2">
-                    <p className="text-muted-foreground/60 text-[9px] uppercase tracking-widest mb-1 flex items-center gap-1"><User className="h-3 w-3" /> Cliente</p>
-                    <p className="font-bold truncate">{detailTx.customer_name || "—"}</p>
-                    {detailTx.customer_email && <p className="text-muted-foreground text-[11px] truncate flex items-center gap-1 mt-0.5"><Mail className="h-3 w-3" />{detailTx.customer_email}</p>}
-                  </div>
-                  <div className="rounded-xl border border-border p-3 col-span-2">
-                    <p className="text-muted-foreground/60 text-[9px] uppercase tracking-widest mb-1 flex items-center gap-1"><Hash className="h-3 w-3" /> ID</p>
-                    <p className="text-[11px] truncate font-mono">{detailTx.id}</p>
-                  </div>
-                </div>
-                <button
-                  onClick={() => { const id = detailTx.id; setDetailTx(null); navigate(`/vendas?tx=${id}`); }}
-                  className="w-full h-11 rounded-xl bg-primary text-primary-foreground font-bold text-[13px] flex items-center justify-center gap-2 hover:bg-primary/90"
-                >
-                  Abrir na aba Vendas <ChevronRight className="h-4 w-4" />
-                </button>
-              </div>
-            )}
-          </DialogContent>
-        </Dialog>
+        {/* Detail panel — premium layout */}
+        {detailTx && (
+          <TransactionDetailPanel
+            tx={detailTx}
+            products={productsMap}
+            onClose={() => setDetailTx(null)}
+            variant="seller"
+          />
+        )}
 
         <QuickPixDialog open={pixDialogOpen} onOpenChange={setPixDialogOpen} />
       </div>
