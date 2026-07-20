@@ -542,7 +542,7 @@ export default function AdminOverviewTab({
                   {realtimeTx.slice(0, 8).map(t => {
                     const tone = statusToneMap[t.status] || "neutral";
                     return (
-                      <tr key={t.id} className={premiumTable.row}>
+                      <tr key={t.id} className={cn(premiumTable.row, "cursor-pointer")} onClick={() => setSelectedTx(t)}>
                         <td className={premiumTable.td}><Pill tone={tone}>{statusLabelMap[t.status] || t.status}</Pill></td>
                         <td className={cn(premiumTable.td, "max-w-[180px] truncate text-xs font-bold text-foreground")}>
                           {t.customer_name || "Anônimo"}
