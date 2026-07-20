@@ -781,17 +781,6 @@ export default function Dashboard() {
                       {privacy.hidden ? CENSORED : k.value}
                     </p>
                     <div className="mt-1.5 flex items-center gap-1.5">
-                      {isRevenue && typeof trend === "number" && (
-                        <span className={cn(
-                          "inline-flex items-center gap-0.5 rounded-md border px-1.5 py-0.5 text-[9px] font-black uppercase tracking-[0.1em] tabular-nums",
-                          trend > 0 ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-500"
-                          : trend < 0 ? "border-red-500/30 bg-red-500/10 text-red-500"
-                          : "border-border/60 bg-muted/40 text-muted-foreground"
-                        )}>
-                          {trend > 0 ? <ArrowUpRight className="h-2.5 w-2.5" /> : trend < 0 ? <ArrowDownRight className="h-2.5 w-2.5" /> : null}
-                          {trend > 0 ? "+" : ""}{trend}%
-                        </span>
-                      )}
                       <p className="text-[11px] text-muted-foreground/60 truncate">{k.sub}</p>
                     </div>
                   </div>
