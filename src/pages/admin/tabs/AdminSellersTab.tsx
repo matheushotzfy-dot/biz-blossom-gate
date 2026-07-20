@@ -223,7 +223,7 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
         supabase.from("activity_logs").select("id, user_id, action, entity_type, entity_id, old_data, new_data, created_at").eq("user_id", profile.user_id).order("created_at", { ascending: false }).limit(300),
         supabase.from("products").select("id, user_id, name, price, status, created_at, image_url").eq("user_id", profile.user_id).order("created_at", { ascending: false }).limit(200),
         supabase.from("withdrawals").select("id, user_id, amount, fee_amount, net_amount, status, created_at, withdrawal_type").eq("user_id", profile.user_id).order("created_at", { ascending: false }).limit(500),
-        supabase.from("transactions").select("id, user_id, product_id, amount, fee_amount, net_amount, status, payment_method, customer_name, customer_email, customer_phone, customer_document, created_at").eq("user_id", profile.user_id).order("created_at", { ascending: false }).limit(1000),
+        supabase.from("transactions").select("id, user_id, product_id, amount, fee_amount, acquirer_fee_amount, net_amount, status, payment_method, customer_name, customer_email, customer_phone, customer_document, created_at").eq("user_id", profile.user_id).order("created_at", { ascending: false }).limit(1000),
         supabase.from("custom_user_fees").select("id, user_id, pix_percentage, pix_fixed, card_percentage, card_fixed, boleto_percentage, boleto_fixed, withdrawal_fee, max_ticket, admin_user_id").eq("user_id", profile.user_id).maybeSingle(),
         supabase.from("balance_adjustments").select("id, user_id, amount, type, reason, admin_user_id, created_at").eq("user_id", profile.user_id).order("created_at", { ascending: false }).limit(200),
         supabase.from("disputes").select("id, seller_user_id, transaction_id, amount, type, status, reason, created_at").eq("seller_user_id", profile.user_id).order("created_at", { ascending: false }).limit(200),
@@ -561,7 +561,7 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
     const completed = txs.filter(t => t.status === "completed" || t.status === "approved");
     const totalGross = completed.reduce((a, t) => a + Number(t.amount), 0);
     const totalNet = completed.reduce((a, t) => a + Number(t.net_amount), 0);
-    const totalFees = completed.reduce((a, t) => a + Number(t.fee_amount), 0);
+    const totalFees = completed.reduce((a, t) => a + (Number(t.fee_amount) - Number((t as any).acquirer_fee_amount || 0)), 0);
     const wds = withdrawals.filter(w => w.user_id === userId);
     const totalWithdrawn = wds.filter(w => w.status === "approved").reduce((a, w) => a + Number(w.amount), 0);
     const conversionRate = txs.length > 0 ? (completed.length / txs.length) * 100 : 0;
@@ -580,7 +580,7 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
   const userApproved = userTransactions.filter(t => t.status === "approved" || t.status === "completed");
   const userTotalGross = userApproved.reduce((a, t) => a + Number(t.amount), 0);
   const userTotalNet = userApproved.reduce((a, t) => a + Number(t.net_amount), 0);
-  const userTotalFees = userApproved.reduce((a, t) => a + Number(t.fee_amount), 0);
+  const userTotalFees = userApproved.reduce((a, t) => a + (Number(t.fee_amount) - Number((t as any).acquirer_fee_amount || 0)), 0);
   const userTotalWithdrawn = userWithdrawals.filter(w => w.status === "approved").reduce((a, w) => a + Number(w.amount), 0);
   const userTotalWdFees = userWithdrawals.reduce((a, w) => a + Number(w.fee_amount), 0);
   const userPendingWd = userWithdrawals.filter(w => w.status === "pending").reduce((a, w) => a + Number(w.amount), 0);

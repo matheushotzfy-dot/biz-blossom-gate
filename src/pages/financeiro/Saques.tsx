@@ -17,6 +17,7 @@ import { ptBR } from "date-fns/locale";
 import DadosBancarios from "./DadosBancarios";
 import AutoWithdrawalSettings from "@/components/financeiro/AutoWithdrawalSettings";
 import { friendlyError } from "@/lib/friendlyError";
+import { FinanceiroHero, FinanceiroKpi, FinanceiroKpiGrid } from "@/components/financeiro/FinanceiroHero";
 
 const fmt = (v: number) =>
   `R$ ${(Number.isFinite(v) ? v : 0).toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
@@ -148,21 +149,23 @@ export default function Saques() {
 
   return (
     <div className="space-y-6 animate-in fade-in duration-500">
-      {/* Header */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-        <div className="space-y-1">
-          <h1 className="text-2xl font-black text-foreground tracking-tight uppercase tracking-tight">Saques</h1>
-          <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.2em] flex items-center gap-2">
-            <ArrowDownToLine className="h-3.5 w-3.5 text-primary" />
-            Solicite a transferência dos seus lucros
-          </p>
-        </div>
-        <Dialog open={open} onOpenChange={handleOpenChange}>
-          <DialogTrigger asChild>
-            <button className="bg-primary text-primary-foreground h-11 px-6 rounded-xl font-black text-sm hover:opacity-90 transition-all flex items-center gap-2 shadow-sm uppercase tracking-widest">
-              <Plus size={18} strokeWidth={3} /> Solicitar Saque
-            </button>
-          </DialogTrigger>
+      {/* Clean Hero */}
+      <FinanceiroHero
+        eyebrow="Financeiro · Saques"
+        title="Saques"
+        subtitle="Solicite a transferência dos seus lucros com liquidação em até 24h úteis."
+        status={{
+          tone: availableBalance > 0 ? "success" : "neutral",
+          label: availableBalance > 0 ? "Saldo disponível" : "Sem saldo",
+          pulse: availableBalance > 0,
+        }}
+        actions={
+          <Dialog open={open} onOpenChange={handleOpenChange}>
+            <DialogTrigger asChild>
+              <button className="bg-primary text-primary-foreground h-11 px-5 rounded-xl font-black text-[11px] uppercase tracking-widest hover:opacity-90 transition-all flex items-center gap-2">
+                <Plus size={16} strokeWidth={3} /> Solicitar Saque
+              </button>
+            </DialogTrigger>
           <DialogContent className="max-w-md bg-card border-border/60 max-h-[92vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle className="text-xl font-black uppercase tracking-tight">Solicitar Saque</DialogTitle>
@@ -312,37 +315,18 @@ export default function Saques() {
             </form>
           </DialogContent>
         </Dialog>
-      </div>
+        }
+      />
+
+      {/* KPIs (clean idiom) */}
+      <FinanceiroKpiGrid cols={2}>
+        <FinanceiroKpi label="Saldo disponível" value={fmt(availableBalance)} sub="Pronto para saque" icon={Wallet} tone="success" />
+        <FinanceiroKpi label="Aguardando liberação" value={fmt(retainedAmount)} sub="Retenção em curso" icon={Clock} tone="warning" />
+      </FinanceiroKpiGrid>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Balances Column */}
         <div className="lg:col-span-2 space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="bg-card p-8 rounded-[24px] border border-border/60 shadow-sm relative overflow-hidden group">
-              <div className="relative z-10">
-                <div className="flex items-center gap-2 text-muted-foreground/60 mb-3">
-                  <Wallet size={16} />
-                  <span className="text-[10px] font-black uppercase tracking-[0.15em]">Saldo Disponível</span>
-                </div>
-                <p className="text-4xl font-black text-foreground tabular-nums tracking-tighter">{fmt(availableBalance)}</p>
-              </div>
-              <div className="absolute right-[-20px] bottom-[-20px] opacity-[0.03] rotate-[-15deg] group-hover:scale-110 transition-transform duration-500">
-                <Wallet size={160} />
-              </div>
-            </div>
-            <div className="bg-card p-8 rounded-[24px] border border-border/60 shadow-sm relative overflow-hidden group">
-              <div className="relative z-10">
-                <div className="flex items-center gap-2 text-muted-foreground/60 mb-3">
-                  <Clock size={16} />
-                  <span className="text-[10px] font-black uppercase tracking-[0.15em]">Aguardando Liberação</span>
-                </div>
-                <p className="text-4xl font-black text-foreground tabular-nums tracking-tighter">{fmt(retainedAmount)}</p>
-              </div>
-              <div className="absolute right-[-20px] bottom-[-20px] opacity-[0.03] rotate-[-15deg] group-hover:scale-110 transition-transform duration-500">
-                <Clock size={160} />
-              </div>
-            </div>
-          </div>
+
 
           {/* History Table */}
           <div className="bg-card rounded-[24px] border border-border/60 shadow-sm overflow-hidden">

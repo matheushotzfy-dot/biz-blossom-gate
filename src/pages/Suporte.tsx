@@ -22,6 +22,8 @@ import {
   MAX_FILE_SIZE_MB, MAX_FILES_PER_MESSAGE, ACCEPTED_MIME, type Attachment,
 } from "@/lib/ticketAttachments";
 import { AttachmentChips } from "@/components/support/AttachmentChips";
+import { FinanceiroHero, FinanceiroKpi, FinanceiroKpiGrid } from "@/components/financeiro/FinanceiroHero";
+import { MessagesSquare, MailCheck, MailX, CircleDot } from "lucide-react";
 
 type Ticket = {
   id: string;
@@ -299,40 +301,37 @@ export default function Suporte() {
     <div className="space-y-4 animate-in fade-in duration-300 pb-8">
       <Seo title="Suporte | Hotzfy" description="Central de ajuda — abra tickets e converse com o time de suporte." path="/suporte" noindex />
 
-      {/* Premium Hero */}
-      <section className="relative overflow-hidden rounded-3xl border border-border/60 bg-gradient-to-br from-card via-card to-primary/[0.08] p-6 md:p-7">
-        <div aria-hidden className="pointer-events-none absolute inset-0 opacity-40"
-          style={{ backgroundImage: "radial-gradient(40% 60% at 90% 20%, hsl(var(--primary)/0.25), transparent 60%), radial-gradient(35% 55% at 10% 100%, hsl(var(--primary)/0.15), transparent 60%)" }}
-        />
-        <div className="relative flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-          <div className="min-w-0 space-y-2">
-            <div className="inline-flex items-center gap-2 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.28em] text-emerald-500">
-              <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" /> Equipe online agora
-            </div>
-            <h1 className="font-display font-black text-2xl md:text-4xl tracking-[-0.02em] leading-tight flex items-center gap-3">
-              <Headphones className="h-8 w-8 text-primary shrink-0" />
-              Central de Suporte
-            </h1>
-            <p className="text-sm text-muted-foreground max-w-lg">
-              Resposta em até 24h úteis · {stats.total} tickets · {stats.answered} respondidos · {stats.open} em andamento
-            </p>
-          </div>
-          <div className="flex items-center gap-2 shrink-0">
+      {/* Clean Hero */}
+      <FinanceiroHero
+        eyebrow="Central de Suporte"
+        title="Suporte"
+        subtitle="Resposta em até 24h úteis. Abra um ticket, converse com o time e acompanhe cada atualização."
+        status={{ tone: "success", label: "Equipe online agora", pulse: true }}
+        actions={
+          <div className="flex items-center gap-2">
             <button
               onClick={() => setShowFaq(v => !v)}
-              className="h-12 px-4 rounded-xl border border-border/60 bg-card text-[11px] font-black uppercase tracking-widest text-muted-foreground hover:text-foreground transition-colors flex items-center gap-2"
+              className="h-11 px-4 rounded-xl border border-border/60 bg-card text-[11px] font-black uppercase tracking-widest text-muted-foreground hover:text-foreground transition-colors flex items-center gap-2"
             >
               <HelpCircle className="h-4 w-4" /> FAQ
             </button>
             <button
               onClick={() => { setShowComposer(true); setSelectedId(null); }}
-              className="bg-primary text-primary-foreground h-12 px-5 rounded-xl font-black text-xs uppercase tracking-widest hover:opacity-90 transition-all flex items-center gap-2 shadow-lg shadow-primary/20"
+              className="bg-primary text-primary-foreground h-11 px-5 rounded-xl font-black text-[11px] uppercase tracking-widest hover:opacity-90 transition-all flex items-center gap-2"
             >
               <Plus size={16} strokeWidth={3} /> Novo Ticket
             </button>
           </div>
-        </div>
-      </section>
+        }
+      />
+
+      {/* KPI strip */}
+      <FinanceiroKpiGrid cols={4}>
+        <FinanceiroKpi label="Total de tickets" value={String(stats.total)} sub="Histórico completo" icon={MessagesSquare} tone="neutral" />
+        <FinanceiroKpi label="Em andamento" value={String(stats.open)} sub="Aguardando retorno do time" icon={CircleDot} tone={stats.open > 0 ? "warning" : "neutral"} />
+        <FinanceiroKpi label="Respondidos" value={String(stats.answered)} sub="Prontos para revisar" icon={MailCheck} tone={stats.answered > 0 ? "success" : "neutral"} />
+        <FinanceiroKpi label="Fechados" value={String(stats.closed)} sub="Resolvidos" icon={MailX} tone="info" />
+      </FinanceiroKpiGrid>
 
       {/* FAQ (collapsible) */}
       {showFaq && (
