@@ -16,6 +16,7 @@ import KycReviewDialog from "@/components/admin/KycReviewDialog";
 import type { Tables } from "@/integrations/supabase/types";
 import { cn } from "@/lib/utils";
 import React from "react";
+import { TransactionDetailPanel } from "@/components/transactions/TransactionDetailPanel";
 import { FinanceiroHero } from "@/components/financeiro/FinanceiroHero";
 import {
   PremiumPanel, PremiumMetric, PremiumMetricGrid, PremiumSegmented, premiumTable,
@@ -131,6 +132,18 @@ export default function AdminOverviewTab({
   const [chartPeriod, setChartPeriod] = useState<"7d" | "30d">("7d");
   const [fraudLogs, setFraudLogs] = useState<Tables<"fraud_logs">[]>([]);
   const [kycReview, setKycReview] = useState<Tables<"profiles"> | null>(null);
+  const [selectedTx, setSelectedTx] = useState<Tables<"transactions"> | null>(null);
+  const [acquirersMap, setAcquirersMap] = useState<Record<string, string>>({});
+
+  const productsMap = useMemo(() => {
+    const m: Record<string, string> = {};
+    products.forEach(p => { m[p.id] = p.name; });
+    return m;
+  }, [products]);
+  const sellerFor = (uid: string) => {
+    const p = profiles.find(pr => pr.user_id === uid);
+    return p ? { full_name: p.full_name, email: p.email, nickname: p.nickname } : null;
+  };
 
   const handleKycApprove = async (userId: string) => {
     const { error } = await supabase.from("profiles").update({
