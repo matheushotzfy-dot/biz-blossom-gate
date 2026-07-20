@@ -561,7 +561,7 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
     const completed = txs.filter(t => t.status === "completed" || t.status === "approved");
     const totalGross = completed.reduce((a, t) => a + Number(t.amount), 0);
     const totalNet = completed.reduce((a, t) => a + Number(t.net_amount), 0);
-    const totalFees = completed.reduce((a, t) => a + Number(t.fee_amount), 0);
+    const totalFees = completed.reduce((a, t) => a + (Number(t.fee_amount) - Number((t as any).acquirer_fee_amount || 0)), 0);
     const wds = withdrawals.filter(w => w.user_id === userId);
     const totalWithdrawn = wds.filter(w => w.status === "approved").reduce((a, w) => a + Number(w.amount), 0);
     const conversionRate = txs.length > 0 ? (completed.length / txs.length) * 100 : 0;
@@ -580,7 +580,7 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
   const userApproved = userTransactions.filter(t => t.status === "approved" || t.status === "completed");
   const userTotalGross = userApproved.reduce((a, t) => a + Number(t.amount), 0);
   const userTotalNet = userApproved.reduce((a, t) => a + Number(t.net_amount), 0);
-  const userTotalFees = userApproved.reduce((a, t) => a + Number(t.fee_amount), 0);
+  const userTotalFees = userApproved.reduce((a, t) => a + (Number(t.fee_amount) - Number((t as any).acquirer_fee_amount || 0)), 0);
   const userTotalWithdrawn = userWithdrawals.filter(w => w.status === "approved").reduce((a, w) => a + Number(w.amount), 0);
   const userTotalWdFees = userWithdrawals.reduce((a, w) => a + Number(w.fee_amount), 0);
   const userPendingWd = userWithdrawals.filter(w => w.status === "pending").reduce((a, w) => a + Number(w.amount), 0);
