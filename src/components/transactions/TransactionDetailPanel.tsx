@@ -7,6 +7,7 @@ import {
  Copy,
  CreditCard,
  ExternalLink,
+ Globe,
  Hash,
  Mail,
  MessageCircle,
@@ -15,6 +16,7 @@ import {
  Receipt,
  RefreshCw,
  Smartphone,
+ TrendingUp,
  Users,
  X,
  Zap,
@@ -32,11 +34,13 @@ import { toast } from "sonner";
 type Transaction = Tables<"transactions">;
 
 interface TransactionDetailPanelProps {
- tx: Transaction;
+ tx: Transaction & { acquirer_id?: string | null; acquirer_fee_amount?: number | null; buyer_ip?: string | null };
  products: Record<string, string>;
  onClose: () => void;
  onRefund?: (tx: Transaction) => void;
  variant?: "seller" | "admin";
+ seller?: { full_name?: string | null; email?: string | null; nickname?: string | null } | null;
+ acquirerName?: string | null;
 }
 
 const currencyFormatter = new Intl.NumberFormat("pt-BR", {
@@ -119,7 +123,7 @@ function DataRow({
  );
 }
 
-export function TransactionDetailPanel({ tx, products, onClose, onRefund, variant = "seller" }: TransactionDetailPanelProps) {
+export function TransactionDetailPanel({ tx, products, onClose, onRefund, variant = "seller", seller, acquirerName }: TransactionDetailPanelProps) {
  const [copiedId, setCopiedId] = useState(false);
 
  const customerName = tx.customer_name || "Cliente";
