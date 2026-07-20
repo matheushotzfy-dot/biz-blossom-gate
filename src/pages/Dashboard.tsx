@@ -629,37 +629,25 @@ export default function Dashboard() {
             <p className="text-muted-foreground text-sm mt-1">Que essa jornada seja leve, produtiva e cheia de conquistas!</p>
           </div>
 
-          {/* Faturamento / Meta hero chip — richer, clickable to open period filter */}
+          {/* Faturamento / Meta chip — clean, calendar icon opens filter */}
           <Popover open={datePickerOpen} onOpenChange={setDatePickerOpen}>
             <PopoverTrigger asChild>
-              <button className="group relative overflow-hidden flex items-center gap-4 rounded-2xl border border-primary/25 bg-gradient-to-br from-primary/[0.08] via-card/90 to-card px-4 py-3 min-w-[300px] hover:border-primary/50 hover:shadow-[0_8px_28px_-10px_hsl(var(--primary)/0.4)] transition-all text-left">
-                <div aria-hidden className="pointer-events-none absolute -right-8 -top-8 h-24 w-24 rounded-full bg-primary/15 blur-2xl" />
-                <div className="relative flex h-11 w-11 items-center justify-center rounded-2xl border border-primary/30 bg-primary/15 text-primary shrink-0">
-                  <TrendingUp className="h-5 w-5" strokeWidth={2.5} />
+              <button className="flex items-center gap-3 rounded-2xl border border-border/60 bg-card/80 backdrop-blur px-4 py-3 min-w-[280px] hover:border-primary/40 hover:bg-card transition-colors text-left">
+                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-muted/50 text-muted-foreground shrink-0">
+                  <CalendarDays className="h-4.5 w-4.5" strokeWidth={2} />
                 </div>
-                <div className="relative flex-1 min-w-0">
-                  <div className="flex items-center gap-2">
-                    <p className="text-[9px] font-black uppercase tracking-[0.24em] text-primary/90">
-                      Faturamento · {isCustom ? "Período" : selectedPeriod.label}
-                    </p>
-                    <CalendarDays className="h-3 w-3 text-muted-foreground/50 group-hover:text-primary transition-colors" />
-                  </div>
-                  <div className="flex items-baseline gap-2 mt-1">
-                    <span className="font-display font-black text-[18px] tabular-nums tracking-[-0.02em] text-foreground">
+                <div className="flex-1 min-w-0">
+                  <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-muted-foreground/70">
+                    Faturamento · {isCustom ? "Período" : selectedPeriod.label}
+                  </p>
+                  <div className="flex items-baseline gap-1.5 mt-0.5">
+                    <span className="font-display font-bold text-[17px] tabular-nums tracking-[-0.02em] text-foreground">
                       {privacy.hidden ? CENSORED : fmt(revenue)}
                     </span>
-                    <span className="text-[10px] font-bold uppercase tracking-[0.14em] text-muted-foreground/60 tabular-nums">
-                      / meta {privacy.hidden ? CENSORED : fmt(goalTarget)}
-                    </span>
+                    <span className="text-[11px] text-muted-foreground/60 tabular-nums">/ {privacy.hidden ? CENSORED : fmt(goalTarget)}</span>
                   </div>
-                  <div className="mt-2 flex items-center gap-2">
-                    <div className="relative flex-1 h-1.5 rounded-full bg-muted/50 overflow-hidden">
-                      <div
-                        className="absolute inset-y-0 left-0 rounded-full bg-gradient-to-r from-primary to-primary/70"
-                        style={{ width: `${Math.min(100, (revenue/goalTarget)*100)}%` }}
-                      />
-                    </div>
-                    <span className="text-[10px] font-black tabular-nums text-primary shrink-0">{Math.min(100, (revenue/goalTarget)*100).toFixed(0)}%</span>
+                  <div className="mt-1.5 h-1 w-full rounded-full bg-muted/50 overflow-hidden">
+                    <div className="h-full rounded-full bg-primary" style={{ width: `${Math.min(100, (revenue/goalTarget)*100)}%` }} />
                   </div>
                 </div>
               </button>
