@@ -756,6 +756,7 @@ export default function Dashboard() {
           ].map((k) => {
             const Icon = k.icon;
             const isRevenue = k.isRevenue;
+            return (
               <div key={k.label} className={cn(
                 "group relative overflow-hidden rounded-3xl border p-5 transition-all",
                 isRevenue
