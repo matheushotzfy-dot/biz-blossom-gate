@@ -16,6 +16,7 @@ import KycReviewDialog from "@/components/admin/KycReviewDialog";
 import type { Tables } from "@/integrations/supabase/types";
 import { cn } from "@/lib/utils";
 import React from "react";
+import { TransactionDetailPanel } from "@/components/transactions/TransactionDetailPanel";
 import { FinanceiroHero } from "@/components/financeiro/FinanceiroHero";
 import {
   PremiumPanel, PremiumMetric, PremiumMetricGrid, PremiumSegmented, premiumTable,
@@ -131,6 +132,18 @@ export default function AdminOverviewTab({
   const [chartPeriod, setChartPeriod] = useState<"7d" | "30d">("7d");
   const [fraudLogs, setFraudLogs] = useState<Tables<"fraud_logs">[]>([]);
   const [kycReview, setKycReview] = useState<Tables<"profiles"> | null>(null);
+  const [selectedTx, setSelectedTx] = useState<Tables<"transactions"> | null>(null);
+  const [acquirersMap, setAcquirersMap] = useState<Record<string, string>>({});
+
+  const productsMap = useMemo(() => {
+    const m: Record<string, string> = {};
+    products.forEach(p => { m[p.id] = p.name; });
+    return m;
+  }, [products]);
+  const sellerFor = (uid: string) => {
+    const p = profiles.find(pr => pr.user_id === uid);
+    return p ? { full_name: p.full_name, email: p.email, nickname: p.nickname } : null;
+  };
 
   const handleKycApprove = async (userId: string) => {
     const { error } = await supabase.from("profiles").update({
@@ -154,9 +167,15 @@ export default function AdminOverviewTab({
     Promise.all([
       supabase.from("disputes").select("id,type,status,seller_user_id,amount,created_at,transaction_id"),
       supabase.from("fraud_logs").select("*").order("created_at", { ascending: false }).limit(20),
-    ]).then(([dRes, fRes]) => {
+      supabase.from("acquirers").select("id,name"),
+    ]).then(([dRes, fRes, aRes]) => {
       if (dRes.data) setDisputes(dRes.data as Dispute[]);
       if (fRes.data) setFraudLogs(fRes.data);
+      if (aRes.data) {
+        const m: Record<string, string> = {};
+        aRes.data.forEach((a: { id: string; name: string }) => { m[a.id] = a.name; });
+        setAcquirersMap(m);
+      }
     });
   }, []);
 
@@ -523,7 +542,7 @@ export default function AdminOverviewTab({
                   {realtimeTx.slice(0, 8).map(t => {
                     const tone = statusToneMap[t.status] || "neutral";
                     return (
-                      <tr key={t.id} className={premiumTable.row}>
+                      <tr key={t.id} className={cn(premiumTable.row, "cursor-pointer")} onClick={() => setSelectedTx(t)}>
                         <td className={premiumTable.td}><Pill tone={tone}>{statusLabelMap[t.status] || t.status}</Pill></td>
                         <td className={cn(premiumTable.td, "max-w-[180px] truncate text-xs font-bold text-foreground")}>
                           {t.customer_name || "Anônimo"}
@@ -757,6 +776,16 @@ export default function AdminOverviewTab({
         onApprove={handleKycApprove}
         onReject={handleKycReject}
       />
+      {selectedTx && (
+        <TransactionDetailPanel
+          tx={selectedTx}
+          products={productsMap}
+          onClose={() => setSelectedTx(null)}
+          variant="admin"
+          seller={sellerFor(selectedTx.user_id)}
+          acquirerName={selectedTx.acquirer_id ? acquirersMap[selectedTx.acquirer_id] : null}
+        />
+      )}
     </div>
   );
 }

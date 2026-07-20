@@ -83,6 +83,7 @@ Deno.serve(async (req) => {
       : `pix+${cleanDoc}@hotzfy.com.br`;
 
     const supabase = createClient(supabaseUrl, serviceKey);
+    const requestIp = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "0.0.0.0";
 
     // === Idempotency — opcional, evita dupla-cobrança em retry de rede ===
     const rawIdem = String(body?.idempotencyKey || "").slice(0, 200).trim();
@@ -185,6 +186,7 @@ Deno.serve(async (req) => {
           customer_name: safeName,
           customer_email: safeEmail,
           customer_document: cleanDoc,
+          buyer_ip: requestIp,
           podpay_payment_id: veo.transactionId,
           external_id: preTxId,
           pix_expires_at: pixExpiresAt,
@@ -257,6 +259,7 @@ Deno.serve(async (req) => {
           customer_name: safeName,
           customer_email: safeEmail,
           customer_document: cleanDoc,
+          buyer_ip: requestIp,
           podpay_payment_id: pod.transactionId,
           external_id: preTxId,
           pix_expires_at: pixExpiresAt,
@@ -383,6 +386,7 @@ Deno.serve(async (req) => {
       customer_name: safeName,
       customer_email: safeEmail,
       customer_document: cleanDoc,
+      buyer_ip: requestIp,
       podpay_payment_id: podpayId ? String(podpayId) : null,
       metadata: { acquirer: "podpay" },
     }).select().single();
