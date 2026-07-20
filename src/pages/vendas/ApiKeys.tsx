@@ -1,7 +1,5 @@
 import { useState, useEffect, useMemo } from "react";
-import {
-  KeyRound, Plus, Copy, Shield, Search, Globe, Lock, Code2, Pencil, Trash2, BookOpen,
-} from "lucide-react";
+import { KeyRound, Plus, Copy, Search, Pencil, Trash2, BookOpen } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -38,7 +36,6 @@ export default function ApiKeys() {
   const [creating, setCreating] = useState(false);
   const [editingKey, setEditingKey] = useState<ApiKey | null>(null);
   const [editName, setEditName] = useState("");
-
 
   const fetchKeys = async () => {
     if (!user) return;
@@ -87,145 +84,115 @@ export default function ApiKeys() {
     fetchKeys();
   };
 
-
-  const filtered = useMemo(() => 
+  const filtered = useMemo(() =>
     keys.filter(k => !query || k.name.toLowerCase().includes(query.toLowerCase())),
     [keys, query]
   );
 
-  return (
-    <div className="space-y-6 animate-in fade-in duration-500">
-      {/* Premium Hero */}
-      <section className="relative overflow-hidden rounded-3xl border border-border/60 bg-gradient-to-br from-card via-card to-primary/[0.08] p-6 md:p-8">
-        <div aria-hidden className="pointer-events-none absolute inset-0 opacity-40"
-          style={{ backgroundImage: "radial-gradient(40% 60% at 90% 20%, hsl(var(--primary)/0.25), transparent 60%), radial-gradient(35% 55% at 10% 100%, hsl(var(--primary)/0.15), transparent 60%)" }}
-        />
-        <div className="relative flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-          <div className="min-w-0 space-y-2">
-            <div className="inline-flex items-center gap-2 rounded-full border border-primary/30 bg-primary/10 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.28em] text-primary">
-              <Lock className="h-3.5 w-3.5" /> Credenciais API
-            </div>
-            <h1 className="font-display font-black text-2xl md:text-4xl tracking-[-0.02em] leading-tight">
-              Integre a <span className="text-primary">Hotzfy</span> ao seu stack
-            </h1>
-            <p className="text-sm text-muted-foreground max-w-lg">
-              Chaves publishable e secretas para acessar toda a API REST · autenticação Bearer · assinaturas SHA-256.
-            </p>
-          </div>
-          <div className="flex items-center gap-2 shrink-0">
-            <Link to="/vendas/documentacao" className="h-12 px-4 rounded-xl border border-border/60 bg-card text-muted-foreground hover:text-foreground inline-flex items-center gap-2 text-[10px] font-black uppercase tracking-widest">
-              <BookOpen className="h-4 w-4" /> Docs
-            </Link>
-            <Button onClick={() => setShowCreateDialog(true)} className="h-12 px-6 rounded-xl font-black text-xs uppercase tracking-widest gap-2 shadow-lg shadow-primary/20">
-              <Plus className="h-4 w-4" /> Nova Chave
-            </Button>
-          </div>
-        </div>
-      </section>
+  const activeCount = keys.filter(k => k.is_active).length;
 
-      {/* KPI Row */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+  return (
+    <div className="space-y-6 animate-in fade-in duration-300">
+      {/* Header — clean */}
+      <header className="flex flex-col md:flex-row md:items-end md:justify-between gap-4">
+        <div className="space-y-1">
+          <h1 className="text-2xl md:text-[28px] font-semibold tracking-tight text-foreground">
+            Credenciais API
+          </h1>
+          <p className="text-sm text-muted-foreground">
+            Chaves publishable e secretas para autenticar requisições na API Hotzfy.
+          </p>
+        </div>
+        <div className="flex items-center gap-2">
+          <Link
+            to="/vendas/documentacao"
+            className="h-10 px-3.5 rounded-lg border border-border/60 bg-card text-sm text-muted-foreground hover:text-foreground hover:bg-muted/40 inline-flex items-center gap-2 transition-colors"
+          >
+            <BookOpen className="h-4 w-4" /> Documentação
+          </Link>
+          <Button
+            onClick={() => setShowCreateDialog(true)}
+            className="h-10 px-4 rounded-lg text-sm font-medium gap-2"
+          >
+            <Plus className="h-4 w-4" /> Nova chave
+          </Button>
+        </div>
+      </header>
+
+      {/* Minimal metric strip */}
+      <div className="grid grid-cols-2 md:grid-cols-4 rounded-2xl border border-border/60 bg-card divide-x divide-border/60">
         {[
-          { icon: Shield, label: "Credenciais", value: String(keys.length), sub: "Sem limite" },
-          { icon: Globe,  label: "Ativas",       value: String(keys.filter(k => k.is_active).length), sub: "Em uso" },
-          { icon: Lock,   label: "Criptografia", value: "SHA-256", sub: "Secrets hasheadas" },
-          { icon: Code2,  label: "Padrão",       value: "REST",    sub: "JSON · Bearer" },
-        ].map((card) => {
-          const Icon = card.icon;
-          return (
-            <div key={card.label} className="bg-card p-6 rounded-2xl border border-border/60 relative overflow-hidden group hover:border-primary/40 transition-all">
-              <div className="relative z-10">
-                <div className="flex items-center gap-2 text-muted-foreground/60 mb-3">
-                  <Icon size={16} />
-                  <span className="text-[10px] font-black uppercase tracking-[0.15em]">{card.label}</span>
-                </div>
-                <p className="text-2xl md:text-3xl font-black text-foreground tabular-nums tracking-tighter">{card.value}</p>
-                <p className="text-[10px] font-bold text-muted-foreground/70 uppercase mt-2 tracking-widest">{card.sub}</p>
-              </div>
-              <div className="absolute right-[-20px] bottom-[-20px] opacity-[0.03] rotate-[-15deg] group-hover:scale-110 transition-transform duration-500">
-                <Icon size={140} />
-              </div>
-            </div>
-          );
-        })}
+          { label: "Credenciais", value: String(keys.length) },
+          { label: "Ativas", value: String(activeCount) },
+          { label: "Criptografia", value: "SHA-256" },
+          { label: "Autenticação", value: "Bearer" },
+        ].map((item, i) => (
+          <div key={item.label} className={cn("px-5 py-4", i >= 2 && "hidden md:block")}>
+            <p className="text-[11px] text-muted-foreground">{item.label}</p>
+            <p className="mt-1 text-lg font-semibold text-foreground tabular-nums tracking-tight">{item.value}</p>
+          </div>
+        ))}
       </div>
 
-      {/* Table Section */}
-      <div className="bg-card rounded-[24px] border border-border/60 shadow-sm overflow-hidden">
-        <div className="p-6 border-b border-border/40 flex flex-col md:flex-row justify-between items-center gap-4">
-          <div className="flex items-center gap-3">
-            <div className="h-10 w-10 bg-primary/10 border border-primary/10 rounded-xl flex items-center justify-center text-primary">
-              <KeyRound size={20} strokeWidth={2.5} />
-            </div>
-            <div>
-              <h2 className="font-black text-foreground tracking-tight leading-none uppercase">Minhas Credenciais</h2>
-              <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mt-1">Sua ponte com a Hotzfy</p>
-            </div>
+      {/* Table */}
+      <div className="bg-card rounded-2xl border border-border/60 overflow-hidden">
+        <div className="px-5 py-4 border-b border-border/60 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+          <div>
+            <h2 className="text-sm font-semibold text-foreground">Suas credenciais</h2>
+            <p className="text-xs text-muted-foreground mt-0.5">
+              {keys.length === 0 ? "Nenhuma chave gerada" : `${keys.length} ${keys.length === 1 ? "chave" : "chaves"}`}
+            </p>
           </div>
-          <div className="relative w-full md:w-64">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground/50" size={16} />
-            <input 
-              type="text" 
-              placeholder="Buscar por nome..." 
+          <div className="relative w-full sm:w-64">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground/60" size={14} />
+            <input
+              type="text"
+              placeholder="Buscar por nome…"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              className="w-full h-11 pl-11 pr-4 bg-muted/30 border border-border/60 rounded-xl text-sm font-bold focus:outline-none"
+              className="w-full h-9 pl-9 pr-3 bg-background border border-border/60 rounded-lg text-sm focus:outline-none focus:border-border"
             />
           </div>
         </div>
 
         {/* Mobile cards */}
-        <div className="md:hidden divide-y divide-border/40">
+        <div className="md:hidden divide-y divide-border/60">
           {loading ? (
             Array.from({ length: 3 }).map((_, i) => (
-              <div key={i} className="px-4 py-3.5 space-y-2.5 animate-pulse">
-                <div className="flex justify-between gap-2">
-                  <div className="h-4 w-32 rounded bg-muted/60" />
-                  <div className="h-4 w-16 rounded-full bg-muted/60" />
-                </div>
-                <div className="h-9 rounded-lg bg-muted/30" />
-                <div className="flex gap-2">
-                  <div className="h-9 flex-1 rounded-lg bg-muted/40" />
-                  <div className="h-9 flex-1 rounded-lg bg-muted/40" />
-                </div>
+              <div key={i} className="px-4 py-4 space-y-2 animate-pulse">
+                <div className="h-4 w-32 rounded bg-muted/60" />
+                <div className="h-8 rounded bg-muted/30" />
               </div>
             ))
           ) : filtered.length === 0 ? (
-            <div className="px-6 py-14 text-center flex flex-col items-center gap-3">
-              <div className="h-14 w-14 rounded-2xl bg-primary/10 border border-primary/20 flex items-center justify-center">
-                <KeyRound size={22} className="text-primary" strokeWidth={1.75} />
-              </div>
-              <div>
-                <p className="text-[13px] font-black text-foreground">Nenhuma credencial gerada</p>
-                <p className="text-[11px] text-muted-foreground/70 mt-1">Crie uma chave para integrar via API.</p>
-              </div>
-              <button onClick={() => setShowCreateDialog(true)} className="h-9 px-4 rounded-xl bg-primary text-primary-foreground text-[11px] font-black uppercase tracking-wider inline-flex items-center gap-1.5">
-                <Plus className="h-3.5 w-3.5" /> Gerar Chave
-              </button>
+            <div className="px-6 py-12 text-center">
+              <KeyRound size={20} className="mx-auto text-muted-foreground/40" />
+              <p className="mt-3 text-sm text-foreground">Nenhuma credencial ainda</p>
+              <p className="text-xs text-muted-foreground mt-1">Gere uma chave para integrar via API.</p>
             </div>
           ) : (
             filtered.map((k) => (
-              <div key={k.id} className="px-4 py-3.5 space-y-2.5">
-                <div className="flex items-start justify-between gap-2">
-                  <div className="min-w-0 flex-1">
-                    <p className="text-[14px] font-black text-foreground truncate">{k.name}</p>
-                    <p className="text-[10px] font-bold text-muted-foreground/60 uppercase tracking-wider mt-0.5">
+              <div key={k.id} className="px-4 py-4 space-y-3">
+                <div className="flex items-start justify-between gap-3">
+                  <div className="min-w-0">
+                    <p className="text-sm font-medium text-foreground truncate">{k.name}</p>
+                    <p className="text-[11px] text-muted-foreground mt-0.5">
                       {k.last_used_at ? `Usada ${format(new Date(k.last_used_at), "dd MMM HH:mm", { locale: ptBR })}` : "Nunca utilizada"}
                     </p>
                   </div>
                   <span className={cn(
-                    "inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider border shrink-0",
-                    k.is_active ? "bg-emerald-500/10 text-emerald-500 border-emerald-500/20" : "bg-muted text-muted-foreground border-border/60"
+                    "inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-medium",
+                    k.is_active ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400" : "bg-muted text-muted-foreground"
                   )}>
-                    <span className={cn("h-1 w-1 rounded-full", k.is_active ? "bg-emerald-500" : "bg-muted-foreground/50")} />
+                    <span className={cn("h-1.5 w-1.5 rounded-full", k.is_active ? "bg-emerald-500" : "bg-muted-foreground/40")} />
                     {k.is_active ? "Ativa" : "Revogada"}
                   </span>
                 </div>
-                <div className="flex items-center gap-2 rounded-lg bg-muted/30 border border-border/40 px-2.5 py-2">
-                  <code className="flex-1 text-[10px] font-mono text-muted-foreground/80 truncate">{k.public_key}</code>
+                <div className="flex items-center gap-2 rounded-lg bg-muted/40 border border-border/60 px-2.5 py-1.5">
+                  <code className="flex-1 text-[11px] font-mono text-muted-foreground truncate">{k.public_key}</code>
                   <button
                     onClick={() => { navigator.clipboard.writeText(k.public_key); toast.success("Chave pública copiada"); }}
-                    className="h-7 w-7 rounded-md bg-card border border-border/60 inline-flex items-center justify-center text-muted-foreground/70 active:bg-muted"
+                    className="h-6 w-6 rounded-md hover:bg-background inline-flex items-center justify-center text-muted-foreground"
                   >
                     <Copy size={12} />
                   </button>
@@ -233,15 +200,15 @@ export default function ApiKeys() {
                 <div className="flex items-center gap-2">
                   <button
                     onClick={() => { setEditingKey(k); setEditName(k.name); }}
-                    className="flex-1 h-9 rounded-lg bg-muted/40 border border-border/60 text-[11px] font-bold uppercase tracking-wider inline-flex items-center justify-center gap-1.5"
+                    className="flex-1 h-8 rounded-lg border border-border/60 text-xs text-foreground inline-flex items-center justify-center gap-1.5 hover:bg-muted/40"
                   >
                     <Pencil size={12} /> Renomear
                   </button>
                   <button
                     onClick={() => handleDelete(k.id, k.name)}
-                    className="flex-1 h-9 rounded-lg bg-destructive/10 border border-destructive/20 text-destructive text-[11px] font-bold uppercase tracking-wider inline-flex items-center justify-center gap-1.5"
+                    className="h-8 w-8 rounded-lg border border-border/60 text-muted-foreground hover:text-destructive hover:border-destructive/40 inline-flex items-center justify-center"
                   >
-                    <Trash2 size={12} /> Excluir
+                    <Trash2 size={12} />
                   </button>
                 </div>
               </div>
@@ -249,151 +216,167 @@ export default function ApiKeys() {
           )}
         </div>
 
+        {/* Desktop table */}
         <div className="hidden md:block overflow-x-auto">
-          <table className="w-full text-left">
+          <table className="w-full text-left text-sm">
             <thead>
-              <tr className="bg-muted/30 text-[10px] uppercase font-black tracking-[0.2em] text-muted-foreground/60 border-b border-border/40">
-                <th className="px-8 py-5">Nome / Chave Pública</th>
-                <th className="px-8 py-5">Último Uso</th>
-                <th className="px-8 py-5 text-center">Status</th>
-                <th className="px-8 py-5 text-right">Ações</th>
+              <tr className="text-xs text-muted-foreground border-b border-border/60">
+                <th className="px-5 py-3 font-medium">Nome / Chave pública</th>
+                <th className="px-5 py-3 font-medium">Último uso</th>
+                <th className="px-5 py-3 font-medium">Status</th>
+                <th className="px-5 py-3 font-medium text-right">Ações</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-border/40">
-              {filtered.length === 0 ? (
+            <tbody className="divide-y divide-border/60">
+              {loading ? (
+                Array.from({ length: 3 }).map((_, i) => (
+                  <tr key={i} className="animate-pulse">
+                    <td className="px-5 py-4"><div className="h-4 w-40 rounded bg-muted/60" /></td>
+                    <td className="px-5 py-4"><div className="h-4 w-20 rounded bg-muted/60" /></td>
+                    <td className="px-5 py-4"><div className="h-4 w-14 rounded bg-muted/60" /></td>
+                    <td className="px-5 py-4"><div className="h-4 w-16 ml-auto rounded bg-muted/60" /></td>
+                  </tr>
+                ))
+              ) : filtered.length === 0 ? (
                 <tr>
-                  <td colSpan={4} className="px-8 py-20 text-center text-[11px] font-black uppercase tracking-widest opacity-30">
-                    Nenhuma credencial gerada
+                  <td colSpan={4} className="px-5 py-16 text-center">
+                    <KeyRound size={20} className="mx-auto text-muted-foreground/40" />
+                    <p className="mt-3 text-sm text-foreground">Nenhuma credencial gerada</p>
+                    <p className="text-xs text-muted-foreground mt-1">Clique em "Nova chave" para começar.</p>
                   </td>
                 </tr>
               ) : (
                 filtered.map((k) => (
-                  <tr key={k.id} className="hover:bg-muted/20 transition-colors">
-                    <td className="px-8 py-5">
-                      <p className="text-sm font-black text-foreground">{k.name}</p>
-                      <div className="flex items-center gap-2 mt-1.5">
-                        <code className="text-[10px] font-mono text-muted-foreground/70 truncate max-w-[280px]">{k.public_key}</code>
+                  <tr key={k.id} className="hover:bg-muted/30 transition-colors">
+                    <td className="px-5 py-4">
+                      <p className="font-medium text-foreground">{k.name}</p>
+                      <div className="flex items-center gap-2 mt-1">
+                        <code className="text-[11px] font-mono text-muted-foreground truncate max-w-[300px]">{k.public_key}</code>
                         <button
                           onClick={() => { navigator.clipboard.writeText(k.public_key); toast.success("Chave pública copiada"); }}
-                          className="p-1 rounded-md hover:bg-muted text-muted-foreground/60 hover:text-foreground transition-colors"
+                          className="p-1 rounded hover:bg-muted text-muted-foreground/70 hover:text-foreground transition-colors"
                           title="Copiar chave pública"
                         >
                           <Copy size={11} />
                         </button>
                       </div>
                     </td>
-                    <td className="px-8 py-5">
-                      <p className="text-xs font-bold text-foreground tabular-nums">
-                        {k.last_used_at ? format(new Date(k.last_used_at), "dd MMM yyyy", { locale: ptBR }) : "—"}
-                      </p>
-                      <p className="text-[10px] font-bold text-muted-foreground/60 uppercase tracking-widest mt-0.5">
-                        {k.last_used_at ? format(new Date(k.last_used_at), "HH:mm", { locale: ptBR }) : "Nunca utilizada"}
-                      </p>
+                    <td className="px-5 py-4 text-muted-foreground tabular-nums">
+                      {k.last_used_at
+                        ? format(new Date(k.last_used_at), "dd MMM yyyy 'às' HH:mm", { locale: ptBR })
+                        : "—"}
                     </td>
-                    <td className="px-8 py-5">
-                      <div className="flex justify-center">
-                        <span className={cn(
-                          "inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest border",
-                          k.is_active ? "bg-emerald-500/10 text-emerald-500 border-emerald-500/20" : "bg-muted text-muted-foreground border-border/60"
-                        )}>
-                          <span className={cn("h-1.5 w-1.5 rounded-full", k.is_active ? "bg-emerald-500" : "bg-muted-foreground/50")} />
-                          {k.is_active ? "Ativa" : "Revogada"}
-                        </span>
+                    <td className="px-5 py-4">
+                      <span className={cn(
+                        "inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[11px] font-medium",
+                        k.is_active ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400" : "bg-muted text-muted-foreground"
+                      )}>
+                        <span className={cn("h-1.5 w-1.5 rounded-full", k.is_active ? "bg-emerald-500" : "bg-muted-foreground/40")} />
+                        {k.is_active ? "Ativa" : "Revogada"}
+                      </span>
+                    </td>
+                    <td className="px-5 py-4 text-right">
+                      <div className="inline-flex items-center gap-1">
+                        <button
+                          onClick={() => { setEditingKey(k); setEditName(k.name); }}
+                          className="h-8 w-8 rounded-lg inline-flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
+                          title="Renomear"
+                        >
+                          <Pencil size={14} />
+                        </button>
+                        <button
+                          onClick={() => handleDelete(k.id, k.name)}
+                          className="h-8 w-8 rounded-lg inline-flex items-center justify-center text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors"
+                          title="Excluir"
+                        >
+                          <Trash2 size={14} />
+                        </button>
                       </div>
                     </td>
-                    <td className="px-8 py-5 text-right space-x-2">
-                      <button
-                        onClick={() => { setEditingKey(k); setEditName(k.name); }}
-                        className="h-8 w-8 rounded-lg bg-muted/40 border border-border/60 inline-flex items-center justify-center hover:bg-muted transition-all"
-                        title="Renomear"
-                      >
-                        <Pencil size={14} />
-                      </button>
-                      <button
-                        onClick={() => handleDelete(k.id, k.name)}
-                        className="h-8 w-8 rounded-lg bg-destructive/10 border border-destructive/20 text-destructive inline-flex items-center justify-center hover:bg-destructive hover:text-destructive-foreground transition-all"
-                        title="Excluir"
-                      >
-                        <Trash2 size={14} />
-                      </button>
-                    </td>
-
                   </tr>
                 ))
               )}
             </tbody>
           </table>
         </div>
-
       </div>
 
+      {/* Create dialog */}
       <Dialog open={showCreateDialog} onOpenChange={setShowCreateDialog}>
-        <DialogContent className="max-w-md bg-card border-border/60 rounded-[32px]">
+        <DialogContent className="max-w-md bg-card border-border/60 rounded-2xl">
           <DialogHeader>
-            <DialogTitle className="text-xl font-black uppercase tracking-tight">Nova Credencial</DialogTitle>
+            <DialogTitle className="text-lg font-semibold">Nova credencial</DialogTitle>
+            <DialogDescription className="text-sm text-muted-foreground">
+              Escolha um nome para identificar essa chave.
+            </DialogDescription>
           </DialogHeader>
-          <div className="py-4 space-y-4">
+          <div className="py-2 space-y-4">
             <div className="space-y-2">
-              <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Nome da Chave</Label>
-              <Input 
-                value={newKeyName} 
+              <Label className="text-xs text-muted-foreground">Nome da chave</Label>
+              <Input
+                value={newKeyName}
                 onChange={(e) => setNewKeyName(e.target.value)}
                 placeholder="Ex: App Produção"
-                className="h-12 border-border/60 rounded-xl font-bold"
+                className="h-10 rounded-lg"
               />
             </div>
-            <Button onClick={handleCreate} disabled={creating} className="w-full h-12 rounded-xl font-black uppercase tracking-widest text-xs">
-              {creating ? "Gerando..." : "Gerar Credencial"}
+            <Button onClick={handleCreate} disabled={creating} className="w-full h-10 rounded-lg">
+              {creating ? "Gerando…" : "Gerar credencial"}
             </Button>
           </div>
         </DialogContent>
       </Dialog>
 
+      {/* Secret reveal dialog */}
       <Dialog open={!!newKeyData} onOpenChange={() => setNewKeyData(null)}>
-        <DialogContent className="max-w-lg bg-card border-border/60 rounded-[32px]">
+        <DialogContent className="max-w-lg bg-card border-border/60 rounded-2xl">
           <DialogHeader>
-            <DialogTitle className="text-xl font-black uppercase tracking-tight text-emerald-500">Credencial Gerada</DialogTitle>
-            <DialogDescription className="text-xs">
-              Copie sua <code className="font-bold">Secret Key</code> agora. Ela não será exibida novamente por segurança.
+            <DialogTitle className="text-lg font-semibold">Credencial gerada</DialogTitle>
+            <DialogDescription className="text-sm text-muted-foreground">
+              Copie a <code className="font-mono text-foreground">secret key</code> agora. Por segurança, ela não será exibida novamente.
             </DialogDescription>
           </DialogHeader>
-          <div className="py-4 space-y-4">
-            <div className="p-4 rounded-2xl bg-muted/30 border border-border/60">
-              <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground mb-2">Secret Key</p>
-              <div className="flex items-center gap-3">
-                 <code className="flex-1 font-mono text-xs text-foreground font-bold truncate">{newKeyData?.secret_key}</code>
-                 <button onClick={() => { navigator.clipboard.writeText(newKeyData?.secret_key ?? ""); toast.success("Copiado!"); }} className="p-2 rounded-lg bg-primary/10 text-primary border border-primary/10">
-                    <Copy size={16} />
-                 </button>
+          <div className="py-2 space-y-4">
+            <div className="p-4 rounded-xl bg-muted/40 border border-border/60">
+              <p className="text-[11px] text-muted-foreground mb-2">Secret key</p>
+              <div className="flex items-center gap-2">
+                <code className="flex-1 font-mono text-xs text-foreground truncate">{newKeyData?.secret_key}</code>
+                <button
+                  onClick={() => { navigator.clipboard.writeText(newKeyData?.secret_key ?? ""); toast.success("Copiado!"); }}
+                  className="h-8 w-8 rounded-lg bg-background border border-border/60 inline-flex items-center justify-center text-muted-foreground hover:text-foreground"
+                >
+                  <Copy size={14} />
+                </button>
               </div>
             </div>
-            <Button onClick={() => setNewKeyData(null)} className="w-full h-12 rounded-xl font-black uppercase tracking-widest text-xs">
+            <Button onClick={() => setNewKeyData(null)} className="w-full h-10 rounded-lg">
               Já salvei minha chave
             </Button>
           </div>
         </DialogContent>
       </Dialog>
 
+      {/* Rename dialog */}
       <Dialog open={!!editingKey} onOpenChange={(o) => !o && setEditingKey(null)}>
-        <DialogContent className="max-w-md bg-card border-border/60 rounded-[32px]">
+        <DialogContent className="max-w-md bg-card border-border/60 rounded-2xl">
           <DialogHeader>
-            <DialogTitle className="text-xl font-black uppercase tracking-tight">Renomear Credencial</DialogTitle>
-            <DialogDescription className="text-xs">
+            <DialogTitle className="text-lg font-semibold">Renomear credencial</DialogTitle>
+            <DialogDescription className="text-sm text-muted-foreground">
               Apenas o nome de exibição é alterado. As chaves continuam as mesmas.
             </DialogDescription>
           </DialogHeader>
-          <div className="py-4 space-y-4">
+          <div className="py-2 space-y-4">
             <div className="space-y-2">
-              <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Novo Nome</Label>
+              <Label className="text-xs text-muted-foreground">Novo nome</Label>
               <Input
                 value={editName}
                 onChange={(e) => setEditName(e.target.value)}
                 placeholder="Ex: Produção"
-                className="h-12 border-border/60 rounded-xl font-bold"
+                className="h-10 rounded-lg"
                 autoFocus
               />
             </div>
-            <Button onClick={handleRename} disabled={!editName.trim()} className="w-full h-12 rounded-xl font-black uppercase tracking-widest text-xs">
+            <Button onClick={handleRename} disabled={!editName.trim()} className="w-full h-10 rounded-lg">
               Salvar
             </Button>
           </div>
