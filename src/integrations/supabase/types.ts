@@ -3607,9 +3607,12 @@ export type Database = {
       }
       transactions: {
         Row: {
+          acquirer_fee_amount: number
+          acquirer_id: string | null
           affiliate_link_id: string | null
           amount: number
           api_key_id: string | null
+          buyer_ip: string | null
           checkout_session_id: string | null
           coupon_id: string | null
           created_at: string
@@ -3643,9 +3646,12 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          acquirer_fee_amount?: number
+          acquirer_id?: string | null
           affiliate_link_id?: string | null
           amount: number
           api_key_id?: string | null
+          buyer_ip?: string | null
           checkout_session_id?: string | null
           coupon_id?: string | null
           created_at?: string
@@ -3679,9 +3685,12 @@ export type Database = {
           user_id: string
         }
         Update: {
+          acquirer_fee_amount?: number
+          acquirer_id?: string | null
           affiliate_link_id?: string | null
           amount?: number
           api_key_id?: string | null
+          buyer_ip?: string | null
           checkout_session_id?: string | null
           coupon_id?: string | null
           created_at?: string
@@ -3715,6 +3724,13 @@ export type Database = {
           user_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "transactions_acquirer_id_fkey"
+            columns: ["acquirer_id"]
+            isOneToOne: false
+            referencedRelation: "acquirers"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "transactions_affiliate_link_id_fkey"
             columns: ["affiliate_link_id"]
