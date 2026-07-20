@@ -17,6 +17,7 @@ import { ptBR } from "date-fns/locale";
 import DadosBancarios from "./DadosBancarios";
 import AutoWithdrawalSettings from "@/components/financeiro/AutoWithdrawalSettings";
 import { friendlyError } from "@/lib/friendlyError";
+import { FinanceiroHero, FinanceiroKpi, FinanceiroKpiGrid } from "@/components/financeiro/FinanceiroHero";
 
 const fmt = (v: number) =>
   `R$ ${(Number.isFinite(v) ? v : 0).toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
@@ -148,21 +149,23 @@ export default function Saques() {
 
   return (
     <div className="space-y-6 animate-in fade-in duration-500">
-      {/* Header */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-        <div className="space-y-1">
-          <h1 className="text-2xl font-black text-foreground tracking-tight uppercase tracking-tight">Saques</h1>
-          <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.2em] flex items-center gap-2">
-            <ArrowDownToLine className="h-3.5 w-3.5 text-primary" />
-            Solicite a transferência dos seus lucros
-          </p>
-        </div>
-        <Dialog open={open} onOpenChange={handleOpenChange}>
-          <DialogTrigger asChild>
-            <button className="bg-primary text-primary-foreground h-11 px-6 rounded-xl font-black text-sm hover:opacity-90 transition-all flex items-center gap-2 shadow-sm uppercase tracking-widest">
-              <Plus size={18} strokeWidth={3} /> Solicitar Saque
-            </button>
-          </DialogTrigger>
+      {/* Clean Hero */}
+      <FinanceiroHero
+        eyebrow="Financeiro · Saques"
+        title="Saques"
+        subtitle="Solicite a transferência dos seus lucros com liquidação em até 24h úteis."
+        status={{
+          tone: availableBalance > 0 ? "success" : "neutral",
+          label: availableBalance > 0 ? "Saldo disponível" : "Sem saldo",
+          pulse: availableBalance > 0,
+        }}
+        actions={
+          <Dialog open={open} onOpenChange={handleOpenChange}>
+            <DialogTrigger asChild>
+              <button className="bg-primary text-primary-foreground h-11 px-5 rounded-xl font-black text-[11px] uppercase tracking-widest hover:opacity-90 transition-all flex items-center gap-2">
+                <Plus size={16} strokeWidth={3} /> Solicitar Saque
+              </button>
+            </DialogTrigger>
           <DialogContent className="max-w-md bg-card border-border/60 max-h-[92vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle className="text-xl font-black uppercase tracking-tight">Solicitar Saque</DialogTitle>
