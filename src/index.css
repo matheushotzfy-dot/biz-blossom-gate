@@ -1171,93 +1171,68 @@ input[type="number"]::-webkit-inner-spin-button {
   .page-fluid, .page-fluid > * { animation: none !important; }
 }
 
-/* ─── Seller dashboard tactile buttons ─── */
+/* ─── Seller dashboard tactile buttons — dry, flat, clean ─── */
 .seller-action,
 .seller-clickable {
   position: relative;
-  isolation: isolate;
-  overflow: hidden;
   cursor: pointer;
   border: 1px solid hsl(var(--border) / 0.52);
-  transition: transform 240ms cubic-bezier(0.22, 1, 0.36, 1), outline-color 240ms cubic-bezier(0.22, 1, 0.36, 1), border-color 240ms cubic-bezier(0.22, 1, 0.36, 1), background-color 240ms cubic-bezier(0.22, 1, 0.36, 1), opacity 240ms cubic-bezier(0.22, 1, 0.36, 1);
+  transition: border-color 180ms ease, background-color 180ms ease, color 180ms ease, opacity 180ms ease;
 }
 .seller-action::before,
-.seller-clickable::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  z-index: -1;
-  background: linear-gradient(100deg, transparent 0%, hsl(var(--primary) / 0.22) 45%, transparent 76%);
-  transform: translate3d(-125%, 0, 0);
-  transition: transform 560ms cubic-bezier(0.22, 1, 0.36, 1), opacity 240ms ease;
-  opacity: 0.85;
-}
+.seller-clickable::before { content: none; }
 .seller-action:hover,
 .seller-clickable:hover {
-  transform: translate3d(0, -3px, 0) scale(1.015);
-  border-color: hsl(var(--primary) / 0.72);
-  outline: 2px solid hsl(var(--primary) / 0.18);
-  outline-offset: 2px;
+  border-color: hsl(var(--primary) / 0.55);
+  background-color: hsl(var(--muted) / 0.35);
 }
-.seller-action:hover::before,
-.seller-clickable:hover::before { transform: translate3d(125%, 0, 0); }
 .seller-action:active,
-.seller-clickable:active { transform: translate3d(0, 0, 0) scale(0.975); }
+.seller-clickable:active { opacity: 0.9; }
 .seller-action svg,
 .seller-clickable svg {
-  transition: transform 260ms cubic-bezier(0.22, 1, 0.36, 1), color 260ms cubic-bezier(0.22, 1, 0.36, 1);
+  transition: color 180ms ease;
 }
 .seller-action:hover svg,
-.seller-clickable:hover svg { transform: translate3d(3px, 0, 0) scale(1.12); }
-/* Icon-only square buttons: keep icon perfectly centered on hover */
-.seller-clickable.icon-only:hover svg,
-.seller-action.icon-only:hover svg { transform: none; }
+.seller-clickable:hover svg { transform: none; }
 .seller-clickable.icon-only:hover,
-.seller-action.icon-only:hover { transform: translate3d(0, -1px, 0); outline: none; }
+.seller-action.icon-only:hover { transform: none; outline: none; }
 
 .seller-nav-option {
   position: relative;
-  overflow: hidden;
   cursor: pointer;
+  transition: background-color 160ms ease, color 160ms ease, border-color 160ms ease;
 }
 .seller-nav-option::after {
   content: "";
   position: absolute;
-  left: 8px;
-  top: 9px;
-  bottom: 9px;
-  width: 3px;
+  left: 0;
+  top: 50%;
+  height: 18px;
+  width: 2px;
   border-radius: 999px;
   background: hsl(var(--sidebar-primary));
   opacity: 0;
-  transform: scaleY(0.3);
-  transition: opacity 220ms cubic-bezier(0.22, 1, 0.36, 1), transform 220ms cubic-bezier(0.22, 1, 0.36, 1);
+  transform: translateY(-50%);
+  transition: opacity 160ms ease;
 }
 .seller-nav-option:not([aria-current="page"]):hover {
-  transform: translate3d(6px, 0, 0) scale(1.018);
-  background-color: hsl(var(--sidebar-accent) / 0.86) !important;
+  background-color: hsl(var(--sidebar-accent) / 0.55) !important;
   color: hsl(var(--sidebar-accent-foreground)) !important;
-  border-color: hsl(var(--sidebar-primary) / 0.35);
 }
-.seller-nav-option:hover::after {
-  opacity: 1;
-  transform: scaleY(1);
-}
-.seller-nav-option:not([aria-current="page"]):hover svg { transform: translate3d(2px, 0, 0) scale(1.18) rotate(-4deg); }
-  .seller-hover-card {
+.seller-nav-option:hover::after { opacity: 1; }
+.seller-nav-option:not([aria-current="page"]):hover svg { transform: none; }
+
+.seller-hover-card {
   cursor: default;
-    transition: transform 420ms cubic-bezier(0.22, 1, 0.36, 1), border-color 360ms cubic-bezier(0.22, 1, 0.36, 1), background-color 360ms cubic-bezier(0.22, 1, 0.36, 1), filter 360ms cubic-bezier(0.22, 1, 0.36, 1) !important;
+  transition: border-color 200ms ease, background-color 200ms ease !important;
 }
 .seller-hover-card:hover {
-    transform: translate3d(0, -4px, 0) scale(1.006);
-    border-color: hsl(var(--primary) / 0.62) !important;
-  background-color: hsl(var(--card) / 1) !important;
-    filter: saturate(1.04);
+  border-color: hsl(var(--primary) / 0.45) !important;
+  background-color: hsl(var(--card)) !important;
 }
 .seller-hover-card:hover h3 { color: hsl(var(--primary)); }
-.seller-hover-card:active {
-  transform: translate3d(0, 0, 0) scale(0.985);
-}
+.seller-hover-card:active { opacity: 0.95; }
+
 
 /* ─────────── Premium hover card (Perfil, KYC, and any surface that opts in) ─────────── */
 .premium-hover-card {
