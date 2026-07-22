@@ -190,32 +190,32 @@ function SidebarSectionNav({ section, pathname, isFirst }: SidebarSectionNavProp
                     end={item.exact}
                     activeClassName=""
                     className={cn(
-                      "seller-nav-option group/nav relative flex h-[46px] w-full items-center gap-3 rounded-xl border border-transparent px-3 text-[13px] font-bold",
-                      "transition-all duration-[260ms] ease-[cubic-bezier(0.32,0.72,0,1)]",
-                      "active:scale-[0.98]",
-                      "group-data-[collapsible=icon]:h-12 group-data-[collapsible=icon]:w-12 group-data-[collapsible=icon]:mx-auto group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0 group-data-[collapsible=icon]:gap-0",
+                      "seller-nav-option group/nav relative flex h-[44px] w-full items-center gap-3 rounded-lg border border-transparent px-3 text-[13px] font-semibold",
+                      "transition-colors duration-150 ease-out",
+                      "group-data-[collapsible=icon]:h-11 group-data-[collapsible=icon]:w-11 group-data-[collapsible=icon]:mx-auto group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0 group-data-[collapsible=icon]:gap-0",
                       isActive
-                        ? "bg-sidebar-primary text-sidebar-primary-foreground group-data-[collapsible=icon]:shadow-[0_6px_20px_-8px_hsl(var(--sidebar-primary)/0.65)]"
-                        : "text-sidebar-foreground/65 hover:bg-sidebar-accent/45 hover:text-sidebar-accent-foreground group-data-[collapsible=icon]:hover:bg-sidebar-accent/60 group-data-[collapsible=icon]:hover:border-sidebar-primary/40",
+                        ? "bg-sidebar-primary text-sidebar-primary-foreground"
+                        : "text-sidebar-foreground/70 hover:bg-sidebar-accent/50 hover:text-sidebar-accent-foreground",
                     )}
                   >
                     {/* Active indicator rail */}
                     {isActive && (
-                      <span className="absolute left-0 top-1/2 h-5 w-[3px] -translate-y-1/2 rounded-r-full bg-sidebar-primary-foreground group-data-[collapsible=icon]:hidden" />
+                      <span className="absolute left-0 top-1/2 h-5 w-[2px] -translate-y-1/2 rounded-r-full bg-sidebar-primary-foreground group-data-[collapsible=icon]:hidden" />
                     )}
-                    {/* Collapsed active glow dot */}
+                    {/* Collapsed active dot */}
                     {isActive && (
                       <span className="hidden group-data-[collapsible=icon]:block absolute -bottom-1 left-1/2 -translate-x-1/2 h-1 w-1 rounded-full bg-sidebar-primary-foreground" />
                     )}
                     <item.icon
                       className={cn(
-                        "h-5 w-5 transition-transform duration-[260ms] ease-[cubic-bezier(0.32,0.72,0,1)] group-data-[collapsible=icon]:h-[22px] group-data-[collapsible=icon]:w-[22px]",
+                        "h-[18px] w-[18px] transition-colors duration-150 ease-out group-data-[collapsible=icon]:h-5 group-data-[collapsible=icon]:w-5",
                         isActive
                           ? "text-primary-foreground"
-                          : "text-muted-foreground/50 group-hover/nav:text-foreground group-hover/nav:scale-[1.12]",
+                          : "text-muted-foreground/60 group-hover/nav:text-foreground",
                       )}
-                      strokeWidth={isActive ? 2.5 : 2}
+                      strokeWidth={isActive ? 2.25 : 1.9}
                     />
+
                     <span className="truncate group-data-[collapsible=icon]:hidden">
                       {item.title}
                     </span>
