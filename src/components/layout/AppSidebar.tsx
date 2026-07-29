@@ -169,43 +169,43 @@ function SidebarSectionNav({ section, pathname, isFirst }: SidebarSectionNavProp
             const isActive = isItemActive(pathname, item);
             return (
               <SidebarMenuItem key={item.url}>
-                <SidebarMenuButton asChild className="h-auto rounded-2xl p-0 hover:bg-transparent active:bg-transparent group-data-[collapsible=icon]:!size-auto group-data-[collapsible=icon]:!p-0">
+                <SidebarMenuButton asChild className="h-auto rounded-lg p-0 hover:bg-transparent active:bg-transparent group-data-[collapsible=icon]:!size-auto group-data-[collapsible=icon]:!p-0">
                   <NavLink
                     to={item.url}
                     end={item.exact}
                     activeClassName=""
                     className={cn(
-                      "seller-nav-option group/nav relative flex h-[44px] w-full items-center gap-3 rounded-lg border border-transparent px-3 text-[13px] font-semibold",
+                      "group/nav relative flex h-[38px] w-full items-center gap-2.5 rounded-lg px-2.5 text-[12.5px] font-medium",
                       "transition-colors duration-150 ease-out",
-                      "group-data-[collapsible=icon]:h-11 group-data-[collapsible=icon]:w-11 group-data-[collapsible=icon]:mx-auto group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0 group-data-[collapsible=icon]:gap-0",
+                      "group-data-[collapsible=icon]:h-10 group-data-[collapsible=icon]:w-10 group-data-[collapsible=icon]:mx-auto group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0 group-data-[collapsible=icon]:gap-0",
                       isActive
-                        ? "bg-sidebar-primary text-sidebar-primary-foreground"
-                        : "text-sidebar-foreground/70 hover:bg-sidebar-accent/50 hover:text-sidebar-accent-foreground",
+                        ? "bg-sidebar-primary/12 text-sidebar-primary"
+                        : "text-sidebar-foreground/65 hover:bg-sidebar-accent/30 hover:text-sidebar-accent-foreground",
                     )}
                   >
                     {/* Active indicator rail */}
                     {isActive && (
-                      <span className="absolute left-0 top-1/2 h-5 w-[2px] -translate-y-1/2 rounded-r-full bg-sidebar-primary-foreground group-data-[collapsible=icon]:hidden" />
+                      <span className="absolute left-0 top-1/2 h-4 w-[2px] -translate-y-1/2 rounded-r-full bg-sidebar-primary group-data-[collapsible=icon]:hidden" />
                     )}
                     {/* Collapsed active dot */}
                     {isActive && (
-                      <span className="hidden group-data-[collapsible=icon]:block absolute -bottom-1 left-1/2 -translate-x-1/2 h-1 w-1 rounded-full bg-sidebar-primary-foreground" />
+                      <span className="hidden group-data-[collapsible=icon]:block absolute -bottom-1 left-1/2 -translate-x-1/2 h-1 w-1 rounded-full bg-sidebar-primary" />
                     )}
                     <item.icon
                       className={cn(
-                        "h-[18px] w-[18px] transition-colors duration-150 ease-out group-data-[collapsible=icon]:h-5 group-data-[collapsible=icon]:w-5",
+                        "h-[16px] w-[16px] transition-colors duration-150 ease-out group-data-[collapsible=icon]:h-[18px] group-data-[collapsible=icon]:w-[18px]",
                         isActive
-                          ? "text-primary-foreground"
-                          : "text-muted-foreground/60 group-hover/nav:text-foreground",
+                          ? "text-sidebar-primary"
+                          : "text-sidebar-foreground/45 group-hover/nav:text-sidebar-accent-foreground",
                       )}
-                      strokeWidth={isActive ? 2.25 : 1.9}
+                      strokeWidth={1.75}
                     />
 
                     <span className="truncate group-data-[collapsible=icon]:hidden">
                       {item.title}
                     </span>
                     {item.badge && (
-                      <span className="ml-auto inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-[0.15em] text-sidebar-primary group-data-[collapsible=icon]:hidden">
+                      <span className="ml-auto inline-flex items-center gap-1 text-[9.5px] font-bold uppercase tracking-[0.16em] text-sidebar-primary group-data-[collapsible=icon]:hidden">
                         <span className="relative flex h-1.5 w-1.5">
                           <span className="absolute inset-0 animate-ping rounded-full bg-sidebar-primary opacity-70" />
                           <span className="relative h-1.5 w-1.5 rounded-full bg-sidebar-primary" />
