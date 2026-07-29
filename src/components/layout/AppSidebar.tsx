@@ -443,6 +443,14 @@ export function AppSidebar() {
           <LogOut className="h-4 w-4 shrink-0" strokeWidth={2} />
           <span className="group-data-[collapsible=icon]:hidden">Sair da conta</span>
         </button>
+
+        <button
+          type="button"
+          onClick={() => window.dispatchEvent(new Event("hotzfy:open-cookie-settings"))}
+          className="mt-1 text-[10.5px] font-semibold uppercase tracking-[0.14em] text-sidebar-foreground/40 transition-colors hover:text-sidebar-foreground/70 group-data-[collapsible=icon]:hidden"
+        >
+          Preferências de cookies
+        </button>
       </SidebarFooter>
     </Sidebar>
   );
