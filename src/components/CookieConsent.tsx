@@ -147,11 +147,11 @@ export function CookieConsent() {
             animate={{ y: 0, opacity: 1 }}
             exit={{ y: 40, opacity: 0 }}
             transition={{ duration: 0.28, ease: [0.32, 0.72, 0, 1] }}
+            style={{ left: "50%", transform: "translateX(-50%)" }}
             className={cn(
-              "fixed z-[100] left-1/2 -translate-x-1/2",
-              "bottom-4 sm:bottom-6",
+              "fixed z-[100] bottom-4 sm:bottom-6",
               "w-[calc(100vw-1.5rem)]",
-              managing ? "max-w-2xl" : "max-w-4xl",
+              managing ? "max-w-2xl" : "max-w-3xl",
             )}
           >
             <div className="relative overflow-hidden rounded-2xl border border-sidebar-border/80 bg-background/95 backdrop-blur-2xl shadow-[0_20px_60px_-15px_rgba(0,0,0,0.5)]">
