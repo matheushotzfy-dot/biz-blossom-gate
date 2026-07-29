@@ -159,10 +159,10 @@ function SidebarSectionNav({ section, pathname, isFirst }: SidebarSectionNavProp
   return (
     <SidebarGroup className="px-0 py-0">
       {!isFirst && (
-        <div className="mx-4 my-2.5 h-px bg-sidebar-border/50 group-data-[collapsible=icon]:mx-3 group-data-[collapsible=icon]:my-2.5" />
+        <div className="mx-3 my-2 h-px bg-sidebar-border/30 group-data-[collapsible=icon]:mx-3" />
       )}
       <SidebarGroupContent>
-        <SidebarMenu className="gap-1 px-0 group-data-[collapsible=icon]:gap-2">
+        <SidebarMenu className="gap-0.5 px-0 group-data-[collapsible=icon]:gap-1.5">
 
 
           {section.items.map((item) => {
