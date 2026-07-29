@@ -78,6 +78,7 @@ import MemberHome from "./pages/membros/MemberHome";
 import MemberCourse from "./pages/membros/MemberCourse";
 import CourseAnalytics from "./pages/membros/CourseAnalytics";
 import ImpersonationBanner from "./components/ImpersonationBanner";
+import CookieConsent from "./components/CookieConsent";
 
 
 const queryClient = new QueryClient({
@@ -118,6 +119,7 @@ const App = () => (
           <BrowserRouter>
             <ImpersonationBanner />
             <ScrollToTop />
+            <CookieConsent />
 
             <Routes>
               <Route path="/auth" element={<Auth />} />

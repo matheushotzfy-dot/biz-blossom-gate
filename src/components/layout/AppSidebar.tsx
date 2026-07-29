@@ -393,25 +393,27 @@ export function AppSidebar() {
 
 
       <SidebarFooter className="relative gap-2 border-t border-sidebar-border/60 p-3">
-        {/* Solicitar Suporte — featured card */}
+        {/* Fale conosco — filled emerald primary CTA */}
         <button
           type="button"
           onClick={() => window.open("https://wa.me/5511999999999?text=Preciso%20de%20suporte%20para%20escalar!", "_blank")}
-          className="seller-clickable group/sup relative flex w-full items-center gap-3 overflow-hidden rounded-xl border-sidebar-border/70 bg-sidebar-accent/45 px-3 py-3 text-left hover:border-sidebar-primary/60 hover:bg-sidebar-accent/75 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0"
+          className="group/sup relative flex h-11 w-full items-center justify-center gap-2.5 overflow-hidden rounded-xl bg-sidebar-primary px-4 text-[13px] font-bold text-sidebar-primary-foreground transition-colors duration-150 hover:bg-sidebar-primary/90 group-data-[collapsible=icon]:h-11 group-data-[collapsible=icon]:w-11 group-data-[collapsible=icon]:px-0"
         >
-          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-sidebar-primary/25 bg-sidebar-primary/10 text-sidebar-primary">
-            <Headphones className="h-4 w-4" strokeWidth={2.5} />
-          </div>
-          <div className="min-w-0 flex-1 group-data-[collapsible=icon]:hidden">
-            <p className="text-[13.5px] font-bold leading-tight text-sidebar-accent-foreground">
-              Solicitar Suporte
-            </p>
-            <p className="mt-1 text-[11px] leading-tight text-sidebar-foreground/60">
-              Time premium • 24/7 ao vivo
-            </p>
-          </div>
-          <ChevronRight className="ml-auto h-4 w-4 text-sidebar-primary/70 transition-transform group-hover/sup:translate-x-0.5 group-data-[collapsible=icon]:hidden" strokeWidth={2.5} />
+          <Headphones className="h-4 w-4 shrink-0" strokeWidth={2.5} />
+          <span className="group-data-[collapsible=icon]:hidden">Fale conosco</span>
         </button>
+
+        {/* Central de ajuda — secondary ghost */}
+        <button
+          type="button"
+          onClick={() => navigate("/suporte")}
+          className="flex h-10 w-full items-center justify-center gap-2 rounded-xl border border-sidebar-border/70 bg-transparent px-3 text-[12.5px] font-semibold text-sidebar-foreground/75 transition-colors duration-150 hover:border-sidebar-primary/40 hover:bg-sidebar-accent/40 hover:text-sidebar-accent-foreground group-data-[collapsible=icon]:h-11 group-data-[collapsible=icon]:w-11 group-data-[collapsible=icon]:px-0"
+        >
+          <MessageSquare className="h-4 w-4 shrink-0" strokeWidth={2} />
+          <span className="group-data-[collapsible=icon]:hidden">Central de ajuda</span>
+        </button>
+
+        <div className="my-1 h-px w-full bg-sidebar-border/50" />
 
         {/* User chip */}
         <button
@@ -440,6 +442,14 @@ export function AppSidebar() {
         >
           <LogOut className="h-4 w-4 shrink-0" strokeWidth={2} />
           <span className="group-data-[collapsible=icon]:hidden">Sair da conta</span>
+        </button>
+
+        <button
+          type="button"
+          onClick={() => window.dispatchEvent(new Event("hotzfy:open-cookie-settings"))}
+          className="mt-1 text-[10.5px] font-semibold uppercase tracking-[0.14em] text-sidebar-foreground/40 transition-colors hover:text-sidebar-foreground/70 group-data-[collapsible=icon]:hidden"
+        >
+          Preferências de cookies
         </button>
       </SidebarFooter>
     </Sidebar>
