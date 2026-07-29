@@ -139,21 +139,22 @@ export function CookieConsent() {
             />
           )}
 
-          <motion.div
-            role="dialog"
-            aria-modal={managing ? "true" : "false"}
-            aria-labelledby="cookie-consent-title"
-            initial={{ y: 40, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            exit={{ y: 40, opacity: 0 }}
-            transition={{ duration: 0.28, ease: [0.32, 0.72, 0, 1] }}
-            style={{ left: "50%", transform: "translateX(-50%)" }}
+          <div
             className={cn(
-              "fixed z-[100] bottom-4 sm:bottom-6",
-              "w-[calc(100vw-1.5rem)]",
+              "fixed z-[100] left-0 right-0 mx-auto bottom-4 sm:bottom-6 px-3 sm:px-4 pointer-events-none",
               managing ? "max-w-2xl" : "max-w-3xl",
             )}
           >
+            <motion.div
+              role="dialog"
+              aria-modal={managing ? "true" : "false"}
+              aria-labelledby="cookie-consent-title"
+              initial={{ y: 40, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              exit={{ y: 40, opacity: 0 }}
+              transition={{ duration: 0.28, ease: [0.32, 0.72, 0, 1] }}
+              className="pointer-events-auto w-full"
+            >
             <div className="relative overflow-hidden rounded-2xl border border-sidebar-border/80 bg-background/95 backdrop-blur-2xl shadow-[0_20px_60px_-15px_rgba(0,0,0,0.5)]">
               {/* subtle emerald accent */}
               <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-sidebar-primary/60 to-transparent" />
