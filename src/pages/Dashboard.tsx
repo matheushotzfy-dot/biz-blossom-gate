@@ -994,26 +994,26 @@ export default function Dashboard() {
         </section>
 
 
-        {/* ═══════════ ÚLTIMAS TRANSAÇÕES — clean table ═══════════ */}
-        <section className="rounded-2xl border border-border/60 bg-card/80 backdrop-blur overflow-hidden">
-          <div className="flex items-center justify-between gap-3 px-5 md:px-6 pt-5 pb-4">
+        {/* ═══════════ ÚLTIMAS TRANSAÇÕES ═══════════ */}
+        <section className="overflow-hidden rounded-lg border border-border/60 bg-card">
+          <div className="flex items-center justify-between gap-3 border-b border-border/60 px-5 py-3 md:px-6">
             <div className="min-w-0">
-              <h3 className="font-display font-bold text-[15px] tracking-[-0.01em] text-foreground">Últimas transações</h3>
-              <p className="text-[11px] text-muted-foreground/60 mt-0.5">
-                {activity.length} {activity.length === 1 ? "transação" : "transações"} · {conversion.toFixed(0)}% aprovadas
+              <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground/60">Últimas transações</p>
+              <p className="mt-1 font-mono text-[11px] tabular-nums text-muted-foreground/45">
+                {activity.length} {activity.length === 1 ? "registro" : "registros"} · {conversion.toFixed(0)}% aprovadas
               </p>
             </div>
             <button
               type="button"
               onClick={() => { if (!requireApprovedAccount()) navigate("/vendas"); }}
-              className="text-[12px] font-semibold text-muted-foreground hover:text-primary transition-colors"
+              className="rounded-md border border-border/60 px-2.5 py-1.5 font-mono text-[10px] uppercase tracking-[0.14em] text-muted-foreground/60 transition-colors hover:border-border hover:text-foreground"
             >
               Ver todas
             </button>
           </div>
 
           {activity.length > 0 && (
-            <div className="hidden md:grid grid-cols-[1fr_100px_120px_110px_20px] gap-4 px-5 md:px-6 py-2 border-y border-border/40 bg-muted/20 text-[10px] font-semibold uppercase tracking-[0.1em] text-muted-foreground/60">
+            <div className="hidden grid-cols-[1fr_100px_120px_110px_20px] gap-4 border-b border-border/60 bg-muted/15 px-5 py-2 font-mono text-[9px] uppercase tracking-[0.18em] text-muted-foreground/45 md:grid md:px-6">
               <span>Cliente</span>
               <span>Método</span>
               <span className="text-right">Valor</span>
@@ -1022,12 +1022,13 @@ export default function Dashboard() {
             </div>
           )}
 
-          <ul className="divide-y divide-border/30">
+          <ul className="divide-y divide-border/40">
             {activity.length === 0 && (
-              <li className="px-6 py-14 text-center">
-                <p className="text-[13px] text-muted-foreground">Nenhuma transação ainda.</p>
-                <p className="text-[11px] text-muted-foreground/60 mt-1">Suas vendas aparecerão aqui em tempo real.</p>
+              <li className="px-6 py-16 text-center">
+                <p className="font-mono text-[11px] uppercase tracking-[0.18em] text-muted-foreground/50">Sem registros no período</p>
+                <p className="mt-2 text-[12px] text-muted-foreground/45">Suas vendas aparecerão aqui em tempo real.</p>
               </li>
+
             )}
             {activity.map((item) => {
               const isApproved = isApprovedTransaction(item.status);
