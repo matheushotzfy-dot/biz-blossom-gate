@@ -200,7 +200,7 @@ function SidebarSectionNav({ section, pathname, isFirst }: SidebarSectionNavProp
                     )}
                     <item.icon
                       className={cn(
-                        "h-[18px] w-[18px] transition-colors duration-150 ease-out group-data-[collapsible=icon]:h-5 group-data-[collapsible=icon]:w-5",
+                        "h-[21px] w-[21px] shrink-0 transition-colors duration-150 ease-out group-data-[collapsible=icon]:h-5 group-data-[collapsible=icon]:w-5",
                         isActive
                           ? "text-primary-foreground"
                           : "text-muted-foreground/60 group-hover/nav:text-foreground",
