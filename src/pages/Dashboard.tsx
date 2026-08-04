@@ -772,104 +772,102 @@ export default function Dashboard() {
 
 
         {/* ═══════════ METRICS RAIL ═══════════ */}
-        <section className="overflow-hidden rounded-2xl border border-border/60 bg-card">
-          <div className="grid grid-cols-1 divide-y divide-border/50 sm:grid-cols-2 sm:divide-y-0 xl:grid-cols-4">
+        <section className="overflow-hidden rounded-lg border border-border/60 bg-card">
+          <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4">
             {[
-              { label: "Saldo disponível", value: fmt(Math.max(0, balance)), sub: "Livre para saque", icon: Wallet, accent: false, spark: false },
-              { label: "Recebido hoje", value: fmt(receivedToday), sub: "Liquidado no dia", icon: RefreshCw, accent: false, spark: false },
-              { label: "Bloqueio cautelar", value: fmt(disputedAmount), sub: "MEDs em disputa", icon: Lock, accent: false, spark: false },
-              { label: "Faturamento total", value: fmt(revenue), sub: "Volume bruto no período", icon: TrendingUp, accent: true, spark: true },
-            ].map((k, i) => {
-              const Icon = k.icon;
-              return (
-                <div
-                  key={k.label}
-                  className={cn(
-                    "relative flex flex-col justify-between px-5 py-5 sm:border-b sm:border-border/50 xl:border-b-0",
-                    i % 2 === 1 && "sm:border-l sm:border-l-border/50",
-                    i >= 2 && "sm:border-b-0",
-                    "xl:border-l xl:border-l-border/50 xl:first:border-l-0",
-                    k.accent && "bg-primary/[0.04]",
-                  )}
-                >
-                  {k.accent && (
-                    <span aria-hidden className="absolute inset-x-0 top-0 h-px bg-primary/50 xl:inset-y-0 xl:left-0 xl:right-auto xl:h-auto xl:w-px" />
-                  )}
+              { code: "01", label: "Saldo disponível", value: fmt(Math.max(0, balance)), sub: "Livre para saque", accent: false, spark: false },
+              { code: "02", label: "Recebido hoje", value: fmt(receivedToday), sub: "Liquidado no dia", accent: false, spark: false },
+              { code: "03", label: "Bloqueio cautelar", value: fmt(disputedAmount), sub: "MEDs em disputa", accent: false, spark: false },
+              { code: "04", label: "Faturamento total", value: fmt(revenue), sub: "Volume bruto no período", accent: true, spark: true },
+            ].map((k, i) => (
+              <div
+                key={k.label}
+                className={cn(
+                  "relative flex flex-col justify-between border-border/50 px-5 py-5",
+                  i > 0 && "border-t sm:border-t-0",
+                  i % 2 === 1 && "sm:border-l",
+                  i === 2 && "sm:border-t xl:border-t-0",
+                  i > 0 && "xl:border-l",
+                  k.accent && "bg-muted/20",
+                )}
+              >
+                {k.accent && <span aria-hidden className="absolute inset-x-0 top-0 h-[2px] bg-primary xl:inset-y-0 xl:left-0 xl:right-auto xl:h-auto xl:w-[2px]" />}
 
-                  <div className="flex items-center gap-2">
-                    <Icon
-                      className={cn("h-3.5 w-3.5 shrink-0", k.accent ? "text-primary" : "text-muted-foreground/50")}
-                      strokeWidth={2}
-                    />
-                    <p
-                      className={cn(
-                        "truncate text-[10px] font-semibold uppercase tracking-[0.16em]",
-                        k.accent ? "text-primary/90" : "text-muted-foreground/60",
-                      )}
-                    >
-                      {k.label}
-                    </p>
-                  </div>
-
-                  <p className="mt-3 truncate font-display text-[27px] font-bold leading-none tracking-[-0.035em] tabular-nums text-foreground">
-                    {privacy.hidden ? CENSORED : k.value}
+                <div className="flex items-center gap-2">
+                  <span className={cn(
+                    "font-mono text-[10px] tabular-nums",
+                    k.accent ? "text-primary/80" : "text-muted-foreground/35",
+                  )}>
+                    {k.code}
+                  </span>
+                  <span aria-hidden className="h-px w-3 bg-border" />
+                  <p className={cn(
+                    "truncate font-mono text-[10px] uppercase tracking-[0.18em]",
+                    k.accent ? "text-primary/90" : "text-muted-foreground/55",
+                  )}>
+                    {k.label}
                   </p>
-
-                  <p className="mt-2 truncate text-[11px] text-muted-foreground/55">{k.sub}</p>
-
-                  {k.spark && sparkData.length > 1 && (
-                    <div aria-hidden className="pointer-events-none absolute bottom-0 left-0 right-0 h-9 opacity-40">
-                      <ResponsiveContainer width="100%" height="100%">
-                        <AreaChart data={sparkData} margin={{ top: 2, right: 0, left: 0, bottom: 0 }}>
-                          <defs>
-                            <linearGradient id="sp-rail" x1="0" y1="0" x2="0" y2="1">
-                              <stop offset="0%" stopColor="hsl(var(--primary))" stopOpacity={0.35} />
-                              <stop offset="100%" stopColor="hsl(var(--primary))" stopOpacity={0} />
-                            </linearGradient>
-                          </defs>
-                          <Area type="monotone" dataKey="v" stroke="hsl(var(--primary))" strokeWidth={1.25} fill="url(#sp-rail)" isAnimationActive={false} />
-                        </AreaChart>
-                      </ResponsiveContainer>
-                    </div>
-                  )}
                 </div>
-              );
-            })}
+
+                <p className="mt-3 truncate font-display text-[27px] font-bold leading-none tracking-[-0.04em] tabular-nums text-foreground">
+                  {privacy.hidden ? CENSORED : k.value}
+                </p>
+
+                <p className="mt-2 truncate text-[11px] text-muted-foreground/50">{k.sub}</p>
+
+                {k.spark && sparkData.length > 1 && (
+                  <div aria-hidden className="pointer-events-none absolute bottom-0 left-0 right-0 h-8 opacity-30">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <AreaChart data={sparkData} margin={{ top: 2, right: 0, left: 0, bottom: 0 }}>
+                        <defs>
+                          <linearGradient id="sp-rail" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="0%" stopColor="hsl(var(--primary))" stopOpacity={0.3} />
+                            <stop offset="100%" stopColor="hsl(var(--primary))" stopOpacity={0} />
+                          </linearGradient>
+                        </defs>
+                        <Area type="monotone" dataKey="v" stroke="hsl(var(--primary))" strokeWidth={1} fill="url(#sp-rail)" isAnimationActive={false} />
+                      </AreaChart>
+                    </ResponsiveContainer>
+                  </div>
+                )}
+              </div>
+            ))}
           </div>
         </section>
 
         {/* ═══════════ QUICK ACTIONS ═══════════ */}
-        <section className="overflow-hidden rounded-2xl border border-border/60 bg-card">
-          <div className="grid grid-cols-2 xl:grid-cols-4">
+        <section className="overflow-hidden rounded-lg border border-border/60 bg-card">
+          <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4">
             {[
-              { label: "Gerar PIX", sub: "Cobrança instantânea", icon: QrCode, onClick: () => { if (!requireApprovedAccount()) setPixDialogOpen(true); } },
-              { label: "Solicitar saque", sub: "Transferir saldo", icon: ArrowDownRight, onClick: () => { if (!requireApprovedAccount()) navigate("/financeiro/saques"); } },
-              { label: "Transações", sub: "Extrato de vendas", icon: Receipt, onClick: () => { if (!requireApprovedAccount()) navigate("/vendas"); } },
-              { label: "Credenciais API", sub: "Chaves e webhooks", icon: KeyRound, onClick: () => { if (!requireApprovedAccount()) navigate("/integracoes/credenciais"); } },
-            ].map((a, i) => {
-              const Icon = a.icon;
-              return (
-                <button
-                  key={a.label}
-                  onClick={a.onClick}
-                  className={cn(
-                    "group relative flex items-center gap-3 px-4 py-4 text-left transition-colors hover:bg-muted/25",
-                    i % 2 === 1 && "border-l border-border/50",
-                    i < 2 && "border-b border-border/50 xl:border-b-0",
-                    "xl:border-l xl:border-border/50 xl:first:border-l-0",
-                  )}
-                >
-                  <Icon className="h-4 w-4 shrink-0 text-muted-foreground/60 transition-colors group-hover:text-primary" strokeWidth={2} />
-                  <div className="min-w-0 flex-1">
-                    <p className="truncate text-[13px] font-semibold text-foreground">{a.label}</p>
-                    <p className="truncate text-[11px] text-muted-foreground/55">{a.sub}</p>
-                  </div>
-                  <ChevronRight className="h-3.5 w-3.5 shrink-0 text-muted-foreground/30 transition-colors group-hover:text-muted-foreground/60" />
-                </button>
-              );
-            })}
+              { key: "PIX", label: "Gerar cobrança", sub: "QR Code e copia-e-cola", onClick: () => { if (!requireApprovedAccount()) setPixDialogOpen(true); } },
+              { key: "OUT", label: "Solicitar saque", sub: "Transferir saldo disponível", onClick: () => { if (!requireApprovedAccount()) navigate("/financeiro/saques"); } },
+              { key: "TXN", label: "Transações", sub: "Extrato completo de vendas", onClick: () => { if (!requireApprovedAccount()) navigate("/vendas"); } },
+              { key: "API", label: "Credenciais", sub: "Chaves, webhooks e docs", onClick: () => { if (!requireApprovedAccount()) navigate("/integracoes/credenciais"); } },
+            ].map((a, i) => (
+              <button
+                key={a.key}
+                onClick={a.onClick}
+                className={cn(
+                  "group flex items-center gap-3.5 border-border/50 px-5 py-4 text-left transition-colors hover:bg-muted/25",
+                  i > 0 && "border-t sm:border-t-0",
+                  i % 2 === 1 && "sm:border-l",
+                  i === 2 && "sm:border-t xl:border-t-0",
+                  i > 0 && "xl:border-l",
+                )}
+              >
+                <span className="shrink-0 rounded-sm border border-border/70 px-1.5 py-0.5 font-mono text-[9px] uppercase tracking-[0.14em] text-muted-foreground/50 transition-colors group-hover:border-primary/50 group-hover:text-primary">
+                  {a.key}
+                </span>
+                <span className="min-w-0 flex-1">
+                  <span className="block truncate text-[13px] font-semibold text-foreground">{a.label}</span>
+                  <span className="block truncate text-[11px] text-muted-foreground/50">{a.sub}</span>
+                </span>
+                <ChevronRight className="h-3.5 w-3.5 shrink-0 text-muted-foreground/25 transition-transform group-hover:translate-x-0.5 group-hover:text-muted-foreground/60" />
+              </button>
+            ))}
           </div>
         </section>
+
 
 
         {/* ═══════════ CHART + SIDE PANEL ═══════════ */}
