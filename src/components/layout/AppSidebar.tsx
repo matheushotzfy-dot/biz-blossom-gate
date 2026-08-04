@@ -384,69 +384,101 @@ export function AppSidebar() {
       </SidebarContent>
 
 
-      <SidebarFooter className="relative border-t border-sidebar-border/60 p-2">
+      <SidebarFooter className="relative border-t border-sidebar-border/60 p-2.5">
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <button
               type="button"
               aria-label="Menu da conta"
               className={cn(
-                "seller-clickable flex w-full items-center gap-2.5 rounded-xl px-2 py-1.5 text-left transition-colors hover:bg-sidebar-accent/55",
-                collapsed && "justify-center px-0",
+                "seller-clickable group/acc flex w-full items-center gap-3 rounded-xl border border-sidebar-border/60 bg-sidebar-accent/20 px-2.5 py-2 text-left transition-colors",
+                "hover:border-sidebar-primary/40 hover:bg-sidebar-accent/45",
+                "data-[state=open]:border-sidebar-primary/60 data-[state=open]:bg-sidebar-accent/55",
+                collapsed && "justify-center border-transparent bg-transparent px-0",
               )}
             >
-              <div className="relative flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-sidebar-primary/15 text-[12px] font-bold text-sidebar-primary ring-1 ring-sidebar-primary/25">
+              <div className="relative flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-sidebar-primary/15 text-[13px] font-black text-sidebar-primary ring-1 ring-inset ring-sidebar-primary/25">
                 {userInitial}
-                <span className="absolute -bottom-0.5 -right-0.5 h-2 w-2 rounded-full border-2 border-sidebar bg-success" />
+                <span className="absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 rounded-full border-2 border-sidebar bg-success" />
               </div>
               <div className="min-w-0 flex-1 group-data-[collapsible=icon]:hidden">
-                <p className="truncate text-[12px] font-bold leading-tight text-sidebar-accent-foreground">
+                <p className="truncate text-[13px] font-bold leading-tight text-sidebar-accent-foreground">
                   {userName}
                 </p>
-                <p className="truncate text-[10px] leading-tight text-sidebar-foreground/50">
+                <p className="truncate text-[10.5px] leading-tight text-sidebar-foreground/50">
                   {user?.email}
                 </p>
               </div>
-              <MoreHorizontal className="h-4 w-4 shrink-0 text-sidebar-foreground/40 group-data-[collapsible=icon]:hidden" />
+              <MoreHorizontal className="h-4 w-4 shrink-0 text-sidebar-foreground/40 transition-colors group-hover/acc:text-sidebar-primary group-data-[collapsible=icon]:hidden" />
             </button>
           </DropdownMenuTrigger>
 
-          <DropdownMenuContent side="top" align="start" className="w-60 rounded-xl">
-            <DropdownMenuLabel className="text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">
+          <DropdownMenuContent
+            side="top"
+            align="start"
+            sideOffset={10}
+            className="w-[248px] rounded-2xl border-sidebar-border/80 bg-sidebar p-1.5 shadow-2xl"
+          >
+            <div className="flex items-center gap-2.5 rounded-xl bg-sidebar-accent/25 px-2.5 py-2.5">
+              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-sidebar-primary/15 text-[12px] font-black text-sidebar-primary ring-1 ring-inset ring-sidebar-primary/25">
+                {userInitial}
+              </div>
+              <div className="min-w-0">
+                <p className="truncate text-[12.5px] font-bold leading-tight text-sidebar-accent-foreground">
+                  {userName}
+                </p>
+                <p className="truncate text-[10.5px] leading-tight text-sidebar-foreground/50">
+                  {user?.email}
+                </p>
+              </div>
+            </div>
+
+            <DropdownMenuLabel className="px-2.5 pb-1 pt-3 text-[9.5px] font-black uppercase tracking-[0.18em] text-sidebar-foreground/40">
               Conta
             </DropdownMenuLabel>
-            <DropdownMenuItem onSelect={() => navigate("/perfil")}>
-              <User className="mr-2 h-4 w-4" /> Meu perfil & KYC
+            <DropdownMenuItem
+              onSelect={() => navigate("/perfil")}
+              className="gap-2.5 rounded-lg px-2.5 py-2 text-[13px] font-semibold text-sidebar-foreground/80 focus:bg-sidebar-accent/60 focus:text-sidebar-accent-foreground"
+            >
+              <User className="h-[17px] w-[17px] text-sidebar-foreground/50" /> Meu perfil & KYC
             </DropdownMenuItem>
-            <DropdownMenuSeparator />
-            <DropdownMenuLabel className="text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">
+
+            <DropdownMenuSeparator className="my-1.5 bg-sidebar-border/60" />
+            <DropdownMenuLabel className="px-2.5 pb-1 pt-0.5 text-[9.5px] font-black uppercase tracking-[0.18em] text-sidebar-foreground/40">
               Ajuda
             </DropdownMenuLabel>
             <DropdownMenuItem
               onSelect={() =>
                 window.open("https://wa.me/5511999999999?text=Preciso%20de%20suporte%20para%20escalar!", "_blank")
               }
+              className="gap-2.5 rounded-lg px-2.5 py-2 text-[13px] font-semibold text-sidebar-foreground/80 focus:bg-sidebar-accent/60 focus:text-sidebar-accent-foreground"
             >
-              <Headphones className="mr-2 h-4 w-4" /> Fale conosco
+              <Headphones className="h-[17px] w-[17px] text-sidebar-foreground/50" /> Fale conosco
             </DropdownMenuItem>
-            <DropdownMenuItem onSelect={() => navigate("/suporte")}>
-              <MessageSquare className="mr-2 h-4 w-4" /> Central de ajuda
+            <DropdownMenuItem
+              onSelect={() => navigate("/suporte")}
+              className="gap-2.5 rounded-lg px-2.5 py-2 text-[13px] font-semibold text-sidebar-foreground/80 focus:bg-sidebar-accent/60 focus:text-sidebar-accent-foreground"
+            >
+              <MessageSquare className="h-[17px] w-[17px] text-sidebar-foreground/50" /> Central de ajuda
             </DropdownMenuItem>
             <DropdownMenuItem
               onSelect={() => window.dispatchEvent(new Event("hotzfy:open-cookie-settings"))}
+              className="gap-2.5 rounded-lg px-2.5 py-2 text-[13px] font-semibold text-sidebar-foreground/80 focus:bg-sidebar-accent/60 focus:text-sidebar-accent-foreground"
             >
-              <Cookie className="mr-2 h-4 w-4" /> Preferências de cookies
+              <Cookie className="h-[17px] w-[17px] text-sidebar-foreground/50" /> Preferências de cookies
             </DropdownMenuItem>
-            <DropdownMenuSeparator />
+
+            <DropdownMenuSeparator className="my-1.5 bg-sidebar-border/60" />
             <DropdownMenuItem
               onSelect={handleLogout}
-              className="text-destructive focus:bg-destructive/10 focus:text-destructive"
+              className="gap-2.5 rounded-lg px-2.5 py-2 text-[13px] font-semibold text-destructive focus:bg-destructive/12 focus:text-destructive"
             >
-              <LogOut className="mr-2 h-4 w-4" /> Sair da conta
+              <LogOut className="h-[17px] w-[17px]" /> Sair da conta
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       </SidebarFooter>
+
 
     </Sidebar>
   );
