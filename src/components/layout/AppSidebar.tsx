@@ -109,69 +109,51 @@ function RevenueCard({ collapsed, revenue, milestone, onOpenRewards }: RevenueCa
     <button
       type="button"
       onClick={onOpenRewards}
-      className="seller-clickable group/rev relative mt-3 block w-full overflow-hidden rounded-[10px] border-sidebar-border bg-sidebar-accent/15 px-2.5 py-2 text-left hover:border-sidebar-primary/60 hover:bg-sidebar-accent/35"
+      className="seller-clickable group/rev relative mt-3 block w-full overflow-hidden rounded-2xl border border-sidebar-border/80 bg-sidebar-accent/20 px-3.5 py-3.5 text-left transition-colors hover:border-sidebar-primary/50 hover:bg-sidebar-accent/35"
     >
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-1">
-          <TrendingUp className="h-2.5 w-2.5 text-sidebar-foreground/40" strokeWidth={2.5} />
-          <span className="font-display text-[8px] font-bold uppercase tracking-[0.18em] text-sidebar-foreground/50">
-            Faturamento
-          </span>
-        </div>
-        <span className="rounded border border-sidebar-primary/25 bg-sidebar-primary/10 px-1 py-[1px] font-display text-[7.5px] font-black uppercase tracking-[0.16em] text-sidebar-primary">
-          {tierName}
+      <div className="flex items-center gap-2.5">
+        <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-sidebar-primary/15 ring-1 ring-inset ring-sidebar-primary/25">
+          <Trophy className="h-4 w-4 text-sidebar-primary" strokeWidth={2.2} />
+        </span>
+        <span className="font-display text-[13px] font-bold tracking-[-0.01em] text-sidebar-accent-foreground">
+          Faturamento
         </span>
       </div>
 
       {/* Main figure */}
-      <div className="mt-1.5 flex items-baseline gap-1">
-        <span className="font-numbers text-[11px] font-bold leading-none text-sidebar-foreground/45 tabular-nums">
-          {parts.prefix}
-        </span>
-        <p className="font-numbers text-[19px] font-black leading-none tracking-[-0.045em] text-sidebar-accent-foreground tabular-nums">
-          {parts.value}
-          <span className="ml-0.5 text-[13px] font-black text-sidebar-foreground/55">{parts.suffix}</span>
+      <div className="mt-3 flex items-baseline gap-1.5">
+        <p className="font-numbers text-[26px] font-black leading-none tracking-[-0.05em] text-sidebar-accent-foreground tabular-nums">
+          {parts.prefix} {parts.value}
+          {parts.suffix && <span className="text-[19px]">{parts.suffix}</span>}
         </p>
-        <span className="ml-auto font-display text-[7.5px] font-bold uppercase tracking-[0.16em] text-sidebar-foreground/35">
-          total
+        <span className="font-numbers text-[13px] font-bold leading-none tabular-nums text-sidebar-foreground/45">
+          / {milestone.next.label.replace(",", ".")}
         </span>
       </div>
 
       {/* Progress bar */}
-      <div className="relative mt-2">
-        <div className="h-[3px] w-full overflow-hidden rounded-full bg-sidebar-border/50">
-          <div
-            className="h-full rounded-full bg-sidebar-primary transition-[width] duration-700 ease-out"
-            style={{ width: `${pct}%` }}
-          />
-        </div>
-      </div>
-
-      {/* Scale */}
-      <div className="mt-1 flex items-center justify-between font-numbers text-[8px] font-semibold tabular-nums text-sidebar-foreground/40">
-        <span>{milestone.current.label.replace(",", ".")}</span>
-        <span>{milestone.next.label.replace(",", ".")}</span>
+      <div className="mt-3 h-2 w-full overflow-hidden rounded-full bg-sidebar-border/60">
+        <div
+          className="h-full rounded-full bg-sidebar-primary transition-[width] duration-700 ease-out"
+          style={{ width: `${pct}%` }}
+        />
       </div>
 
       {/* Footer */}
-      <div className="mt-1.5 flex items-center justify-between border-t border-sidebar-border/40 pt-1.5">
-        <div className="flex items-baseline gap-1">
-          <span className="font-numbers text-[10px] font-black tabular-nums text-sidebar-accent-foreground">
-            {pctDisplay}%
-          </span>
-          <span className="font-display text-[7.5px] font-bold uppercase tracking-[0.14em] text-sidebar-foreground/40">
-            da meta
-          </span>
-        </div>
-        <span className="inline-flex items-center gap-0.5 font-display text-[8px] font-black uppercase tracking-[0.18em] text-sidebar-primary transition-transform group-hover/rev:translate-x-0.5">
-          PREMIAÇÕES
-          <ChevronRight className="h-2 w-2" strokeWidth={3} />
+      <div className="mt-2.5 flex items-center justify-between gap-2">
+        <span className="font-numbers text-[12px] font-black tabular-nums text-sidebar-primary">
+          {pctDisplay}%
+        </span>
+        <span className="truncate font-display text-[9px] font-bold uppercase tracking-[0.14em] text-sidebar-foreground/45">
+          Próxima:{" "}
+          <span className="text-sidebar-primary">{milestone.next.tier ?? milestone.next.label}</span>
         </span>
       </div>
     </button>
   );
 }
+
 
 
 type SidebarSectionNavProps = {
