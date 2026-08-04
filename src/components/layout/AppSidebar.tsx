@@ -101,7 +101,7 @@ function RevenueCard({ collapsed, revenue, milestone, onOpenRewards }: RevenueCa
   const pct = Math.max(0, Math.min(100, milestone.pct));
   const pctDisplay = Math.round(pct);
   
-  const tierName = milestone.current.tier;
+  const nextLabel = `${milestone.next.tier} ${milestone.next.label.replace("R$ ", "")}`;
 
   const parts = splitRevenue(revenue);
 
