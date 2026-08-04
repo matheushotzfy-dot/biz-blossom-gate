@@ -597,13 +597,16 @@ export default function Dashboard() {
     <div className="relative min-h-screen w-full text-foreground animate-in fade-in duration-500 overflow-hidden">
       <Seo title="Dashboard | Hotzfy" description="Painel operacional Hotzfy — saldos, ranking, aprovação e liquidações em tempo real." path="/dashboard" noindex />
 
-      {/* Ambient gradient backdrop — spans full scrollable dashboard */}
+      {/* Blueprint grid backdrop — flat, no glow */}
       <div
         aria-hidden
-        className="pointer-events-none absolute inset-0 z-0"
+        className="pointer-events-none absolute inset-0 z-0 opacity-[0.35]"
         style={{
           backgroundImage:
-            "radial-gradient(60% 40% at 80% 0%, hsl(var(--primary)/0.12), transparent 70%), radial-gradient(50% 40% at 10% 100%, hsl(var(--primary)/0.08), transparent 70%), linear-gradient(to bottom, hsl(var(--background)) 0%, hsl(var(--background)) 100%)",
+            "linear-gradient(to right, hsl(var(--border)/0.4) 1px, transparent 1px), linear-gradient(to bottom, hsl(var(--border)/0.4) 1px, transparent 1px)",
+          backgroundSize: "72px 72px",
+          maskImage: "linear-gradient(to bottom, black, transparent 55%)",
+          WebkitMaskImage: "linear-gradient(to bottom, black, transparent 55%)",
         }}
       />
 
