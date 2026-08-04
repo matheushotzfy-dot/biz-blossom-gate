@@ -146,9 +146,9 @@ function RevenueCard({ collapsed, revenue, milestone, onOpenRewards }: RevenueCa
           {pctDisplay}%
         </span>
         <span className="truncate font-display text-[9px] font-bold uppercase tracking-[0.14em] text-sidebar-foreground/45">
-          Próxima:{" "}
-          <span className="text-sidebar-primary">{milestone.next.tier ?? milestone.next.label}</span>
+          Próxima: <span className="text-sidebar-primary">{nextLabel}</span>
         </span>
+
       </div>
     </button>
   );
