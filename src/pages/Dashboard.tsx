@@ -871,23 +871,25 @@ export default function Dashboard() {
 
 
         {/* ═══════════ CHART + SIDE PANEL ═══════════ */}
-        <section className="grid grid-cols-1 xl:grid-cols-3 gap-3">
+        <section className="grid grid-cols-1 gap-4 xl:grid-cols-3">
 
-          {/* Faturamento — Clean line chart (Cakto-style) */}
-          <div className="xl:col-span-2 rounded-2xl border border-border/60 bg-card/80 backdrop-blur overflow-hidden">
-            <div className="flex items-center justify-between gap-3 px-5 md:px-6 pt-5 pb-4">
+          {/* Faturamento */}
+          <div className="overflow-hidden rounded-lg border border-border/60 bg-card xl:col-span-2">
+            <div className="flex items-center justify-between gap-3 border-b border-border/60 px-5 py-3">
               <div className="min-w-0">
-                <h3 className="font-display font-bold text-[15px] tracking-[-0.01em] text-foreground">Faturamento</h3>
-                <p className="text-[11px] text-muted-foreground/60 mt-0.5">{isCustom ? "Período personalizado" : selectedPeriod.label}</p>
+                <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground/60">Faturamento</p>
+                <p className="mt-1 text-[13px] font-semibold text-foreground">
+                  {isCustom ? "Período personalizado" : selectedPeriod.label}
+                </p>
               </div>
-              <div className="flex items-center rounded-lg border border-border/60 bg-background/40 p-0.5">
+              <div className="flex items-center rounded-md border border-border/60 p-0.5">
                 {PERIOD_PRESETS.filter(p => ["Hoje", "7 dias", "30 dias"].includes(p.label)).map((p) => {
                   const isActive = !isCustom && selectedPeriod.label === p.label;
                   const short = p.label === "Hoje" ? "Hoje" : p.label === "7 dias" ? "7d" : "30d";
                   return (
                     <button key={p.label} onClick={() => { setSelectedPeriod(p); setIsCustom(false); }}
-                      className={cn("px-3 py-1 rounded-md text-[11px] font-semibold transition-colors",
-                        isActive ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground"
+                      className={cn("rounded-sm px-2.5 py-1 font-mono text-[10px] uppercase tracking-[0.12em] transition-colors",
+                        isActive ? "bg-foreground text-background" : "text-muted-foreground/60 hover:text-foreground"
                       )}>
                       {short}
                     </button>
@@ -896,44 +898,44 @@ export default function Dashboard() {
               </div>
             </div>
 
-            <div className="h-[300px] w-full pr-4 pb-4">
+            <div className="h-[300px] w-full pb-4 pr-4 pt-4">
               <ResponsiveContainer width="100%" height="100%">
                 <AreaChart data={chartData} margin={{ top: 10, right: 8, left: 8, bottom: 8 }}>
                   <defs>
                     <linearGradient id="revGrad" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="0%" stopColor="hsl(var(--primary))" stopOpacity={0.18} />
+                      <stop offset="0%" stopColor="hsl(var(--primary))" stopOpacity={0.16} />
                       <stop offset="100%" stopColor="hsl(var(--primary))" stopOpacity={0} />
                     </linearGradient>
                   </defs>
-                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="hsl(var(--border)/0.35)" />
+                  <CartesianGrid strokeDasharray="0" vertical={false} stroke="hsl(var(--border)/0.35)" />
                   <XAxis dataKey="timestamp" type="number" scale="time"
                     domain={[chartData[0]?.timestamp ?? 0, chartData[chartData.length - 1]?.timestamp ?? 0]}
                     ticks={chartTicks} tickFormatter={chartTickFormatter}
                     axisLine={false} tickLine={false}
-                    tick={{ fill: "hsl(var(--muted-foreground)/0.6)", fontSize: 11 }}
+                    tick={{ fill: "hsl(var(--muted-foreground)/0.5)", fontSize: 10, fontFamily: "ui-monospace, monospace" }}
                     dy={8} interval="preserveStartEnd" minTickGap={20}
                   />
                   <YAxis width={48} axisLine={false} tickLine={false}
-                    tick={{ fill: "hsl(var(--muted-foreground)/0.55)", fontSize: 10 }}
+                    tick={{ fill: "hsl(var(--muted-foreground)/0.45)", fontSize: 10, fontFamily: "ui-monospace, monospace" }}
                     tickFormatter={(v) => Number(v) >= 1000 ? `${Math.round(Number(v) / 1000)}k` : `${v}`}
                   />
-                  <Tooltip cursor={{ stroke: "hsl(var(--primary)/0.4)", strokeWidth: 1, strokeDasharray: "3 3" }} wrapperStyle={{ outline: "none" }}
+                  <Tooltip cursor={{ stroke: "hsl(var(--foreground)/0.35)", strokeWidth: 1 }} wrapperStyle={{ outline: "none" }}
                     content={({ active, payload }) => {
                       if (active && payload && payload.length) {
                         const p = payload[0];
                         return (
-                          <div className="rounded-lg border border-border bg-card px-3 py-2 shadow-lg">
-                            <p className="text-[10px] text-muted-foreground/70 mb-1">{p.payload.fullLabel}</p>
-                            <p className="text-foreground font-display font-bold text-[13px] tabular-nums">{fmt(p.value as number)}</p>
+                          <div className="rounded-md border border-border bg-card px-3 py-2">
+                            <p className="font-mono text-[10px] uppercase tracking-[0.14em] text-muted-foreground/60">{p.payload.fullLabel}</p>
+                            <p className="mt-1 font-display text-[14px] font-bold tabular-nums text-foreground">{fmt(p.value as number)}</p>
                           </div>
                         );
                       }
                       return null;
                     }}
                   />
-                  <Area type="monotone" dataKey="vendas" stroke="hsl(var(--primary))" strokeWidth={2} fill="url(#revGrad)"
+                  <Area type="monotone" dataKey="vendas" stroke="hsl(var(--primary))" strokeWidth={1.75} fill="url(#revGrad)"
                     dot={false}
-                    activeDot={{ r: 4, fill: "hsl(var(--primary))", stroke: "hsl(var(--background))", strokeWidth: 2 }}
+                    activeDot={{ r: 3, fill: "hsl(var(--primary))", stroke: "hsl(var(--background))", strokeWidth: 2 }}
                     isAnimationActive={false}
                   />
                 </AreaChart>
@@ -941,71 +943,56 @@ export default function Dashboard() {
             </div>
           </div>
 
-          {/* Right side: donuts + links */}
-          <div className="space-y-3">
-            {/* Donuts card */}
-            <div className="rounded-2xl border border-border/60 bg-card/80 backdrop-blur p-5">
-              <div className="mb-3">
-                <h3 className="font-display font-black text-base tracking-[-0.01em]">Índices</h3>
-                <p className="text-[11px] text-muted-foreground/70">Boleto, pix e chargeback</p>
+          {/* Right column */}
+          <div className="flex flex-col gap-4">
+            {/* Índices — barras horizontais */}
+            <div className="overflow-hidden rounded-lg border border-border/60 bg-card">
+              <div className="border-b border-border/60 px-5 py-3">
+                <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground/60">Índices operacionais</p>
               </div>
-              <div className="space-y-4">
-                {/* Pix */}
-                <div className="flex items-center gap-4">
-                  <div className="relative h-16 w-16 shrink-0">
-                    <ResponsiveContainer width="100%" height="100%">
-                      <PieChart>
-                        <Pie data={donutPix} dataKey="value" innerRadius={22} outerRadius={30} startAngle={90} endAngle={-270} stroke="none" isAnimationActive={false}>
-                          <Cell fill="hsl(var(--primary))" />
-                          <Cell fill="hsl(var(--muted)/0.6)" />
-                        </Pie>
-                      </PieChart>
-                    </ResponsiveContainer>
-                    <div className="absolute inset-0 flex items-center justify-center font-display font-black text-[12px] tabular-nums">{pixConversion.toFixed(0)}%</div>
+              <div className="divide-y divide-border/50">
+                {[
+                  { label: "Conversão Pix", value: pixConversion, suffix: "%", ok: true, note: "Pedidos pagos / gerados" },
+                  { label: "Taxa de estorno", value: chargebackRate, suffix: "%", ok: chargebackRate < 1, note: chargebackRate < 1 ? "Dentro do limite" : "Acima do limite" },
+                ].map((m) => (
+                  <div key={m.label} className="px-5 py-4">
+                    <div className="flex items-baseline justify-between gap-3">
+                      <p className="text-[13px] font-semibold text-foreground">{m.label}</p>
+                      <p className={cn("font-display text-[17px] font-bold tabular-nums leading-none tracking-[-0.03em]", m.ok ? "text-foreground" : "text-destructive")}>
+                        {m.value.toFixed(1)}{m.suffix}
+                      </p>
+                    </div>
+                    <div className="mt-2.5 h-[3px] w-full overflow-hidden rounded-sm bg-muted/60">
+                      <div className={cn("h-full", m.ok ? "bg-primary" : "bg-destructive")} style={{ width: `${Math.min(100, m.value)}%` }} />
+                    </div>
+                    <p className="mt-2 font-mono text-[10px] uppercase tracking-[0.14em] text-muted-foreground/45">{m.note}</p>
                   </div>
-                  <div className="min-w-0 flex-1">
-                    <p className="font-bold text-[14px]">Pix</p>
-                    <p className="text-[11px] text-muted-foreground/70">Conversão</p>
-                  </div>
-                </div>
-                {/* Chargeback */}
-                <div className="flex items-center gap-4">
-                  <div className="relative h-16 w-16 shrink-0">
-                    <ResponsiveContainer width="100%" height="100%">
-                      <PieChart>
-                        <Pie data={donutChb} dataKey="value" innerRadius={22} outerRadius={30} startAngle={90} endAngle={-270} stroke="none" isAnimationActive={false}>
-                          <Cell fill={chargebackRate < 1 ? "hsl(var(--primary))" : "hsl(var(--destructive))"} />
-                          <Cell fill="hsl(var(--muted)/0.6)" />
-                        </Pie>
-                      </PieChart>
-                    </ResponsiveContainer>
-                    <div className="absolute inset-0 flex items-center justify-center font-display font-black text-[12px] tabular-nums">{chargebackRate.toFixed(1)}%</div>
-                  </div>
-                  <div className="min-w-0 flex-1">
-                    <p className="font-bold text-[14px]">Taxa de estorno</p>
-                    <p className="text-[11px] text-muted-foreground/70">Saúde da conta{" "}
-                      <span className={cn("ml-1 rounded-md px-1.5 py-0.5 text-[10px] font-bold", chargebackRate < 1 ? "bg-primary/15 text-primary" : "bg-destructive/15 text-destructive")}>
-                        {chargebackRate < 1 ? "Excelente" : "Atenção"}
-                      </span>
-                    </p>
-                  </div>
-                </div>
+                ))}
               </div>
             </div>
 
             {/* Payment links */}
-            <button type="button" onClick={() => { if (!requireApprovedAccount()) navigate("/vendas/link-pagamento"); }} className="group block w-full rounded-2xl border border-border/60 bg-card/80 backdrop-blur p-5 text-left hover:border-primary/40 transition-all">
-              <div className="flex items-start justify-between gap-3">
-                <div className="min-w-0">
-                  <h3 className="font-display font-black text-base tracking-[-0.01em] flex items-center gap-2"><Link2 className="h-4 w-4 text-primary" /> Links de pagamentos</h3>
-                  <p className="text-[11px] text-muted-foreground/70 mt-1">Relação entre faturamento e vendas por meio do link de pagamentos</p>
-                </div>
-                <ChevronRight className="h-4 w-4 text-muted-foreground/40 group-hover:text-primary group-hover:translate-x-0.5 transition-all" />
+            <button
+              type="button"
+              onClick={() => { if (!requireApprovedAccount()) navigate("/vendas/link-pagamento"); }}
+              className="group flex flex-1 flex-col overflow-hidden rounded-lg border border-border/60 bg-card text-left transition-colors hover:border-border"
+            >
+              <div className="flex items-center justify-between gap-3 border-b border-border/60 px-5 py-3">
+                <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground/60">Links de pagamento</p>
+                <ChevronRight className="h-3.5 w-3.5 text-muted-foreground/30 transition-transform group-hover:translate-x-0.5 group-hover:text-muted-foreground/60" />
               </div>
-              <p className="mt-3 text-[12px] text-muted-foreground/60 italic">Nenhum link de pagamento criado.</p>
+              <div className="flex flex-1 flex-col justify-center px-5 py-5">
+                <p className="text-[13px] text-muted-foreground/70">
+                  Nenhum link de pagamento criado.
+                </p>
+                <p className="mt-1.5 font-mono text-[10px] uppercase tracking-[0.14em] text-primary/80">
+                  Criar primeiro link
+                </p>
+              </div>
             </button>
           </div>
         </section>
+
 
         {/* ═══════════ ÚLTIMAS TRANSAÇÕES — clean table ═══════════ */}
         <section className="rounded-2xl border border-border/60 bg-card/80 backdrop-blur overflow-hidden">
