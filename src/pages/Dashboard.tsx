@@ -777,8 +777,8 @@ export default function Dashboard() {
             {[
               { code: "01", label: "Saldo disponível", value: fmt(Math.max(0, balance)), sub: "Livre para saque", accent: false, spark: false },
               { code: "02", label: "Recebido hoje", value: fmt(receivedToday), sub: "Liquidado no dia", accent: false, spark: false },
-              { code: "03", label: "Bloqueio cautelar", value: fmt(disputedAmount), sub: "MEDs em disputa", accent: false, spark: false },
-              { code: "04", label: "Faturamento total", value: fmt(revenue), sub: "Volume bruto no período", accent: true, spark: true },
+              { code: "03", label: "Bloqueio", value: fmt(disputedAmount), sub: "MEDs em disputa", accent: false, spark: false },
+              { code: "04", label: "Faturamento", value: fmt(revenue), sub: "Volume bruto no período", accent: true, spark: true },
             ].map((k, i) => (
               <div
                 key={k.label}
@@ -839,10 +839,10 @@ export default function Dashboard() {
         <section className="overflow-hidden rounded-lg border border-border/60 bg-card">
           <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4">
             {[
-              { key: "PIX", label: "Gerar cobrança", sub: "QR Code e copia-e-cola", onClick: () => { if (!requireApprovedAccount()) setPixDialogOpen(true); } },
-              { key: "OUT", label: "Solicitar saque", sub: "Transferir saldo disponível", onClick: () => { if (!requireApprovedAccount()) navigate("/financeiro/saques"); } },
-              { key: "TXN", label: "Transações", sub: "Extrato completo de vendas", onClick: () => { if (!requireApprovedAccount()) navigate("/vendas"); } },
-              { key: "API", label: "Credenciais", sub: "Chaves, webhooks e docs", onClick: () => { if (!requireApprovedAccount()) navigate("/integracoes/credenciais"); } },
+              { key: "PIX", label: "Gerar PIX", sub: "QR Code e copia-e-cola", onClick: () => { if (!requireApprovedAccount()) setPixDialogOpen(true); } },
+              { key: "OUT", label: "Solicitar saque", sub: "Transferir saldo", onClick: () => { if (!requireApprovedAccount()) navigate("/financeiro/saques"); } },
+              { key: "TXN", label: "Transações", sub: "Extrato de vendas", onClick: () => { if (!requireApprovedAccount()) navigate("/vendas"); } },
+              { key: "API", label: "Credenciais", sub: "Chaves e webhooks", onClick: () => { if (!requireApprovedAccount()) navigate("/integracoes/credenciais"); } },
             ].map((a, i) => (
               <button
                 key={a.key}
