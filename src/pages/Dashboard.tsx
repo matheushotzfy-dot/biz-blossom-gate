@@ -734,97 +734,106 @@ export default function Dashboard() {
 
         </section>
 
-        {/* ═══════════ 4 KPI CARDS ═══════════ */}
-        <section className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-3">
-          {[
-            { label: "Saldo Disponível", value: fmt(Math.max(0, balance)), sub: "Saldo disponível", icon: Wallet, spark: true, isRevenue: false },
-            { label: "Recebido Hoje", value: fmt(receivedToday), sub: "Total faturado no dia", icon: RefreshCw, spark: true, isRevenue: false },
-            { label: "Bloqueio Cautelar", value: fmt(disputedAmount), sub: "MEDs em disputa", icon: Lock, spark: false, isRevenue: false },
-            { label: "Faturamento Total", value: fmt(revenue), sub: "Valor bruto de vendas", icon: TrendingUp, spark: true, isRevenue: true },
-          ].map((k) => {
-            const Icon = k.icon;
-            const isRevenue = k.isRevenue;
-            return (
-              <div key={k.label} className={cn(
-                "group relative overflow-hidden rounded-3xl border p-5 transition-all",
-                isRevenue
-                  ? "border-primary/25 bg-gradient-to-br from-primary/[0.08] via-card to-card hover:border-primary/50 hover:shadow-[0_10px_40px_-12px_hsl(var(--primary)/0.35)]"
-                  : "border-border/60 bg-card/80 backdrop-blur hover:border-primary/40 hover:shadow-[0_4px_24px_-8px_hsl(var(--primary)/0.2)]"
-              )}>
-                {/* Ornamental corner glow for revenue */}
-                {isRevenue && (
-                  <div aria-hidden className="pointer-events-none absolute -right-10 -top-10 h-32 w-32 rounded-full bg-primary/15 blur-2xl" />
-                )}
+        {/* ═══════════ METRICS RAIL ═══════════ */}
+        <section className="overflow-hidden rounded-2xl border border-border/60 bg-card">
+          <div className="grid grid-cols-1 divide-y divide-border/50 sm:grid-cols-2 sm:divide-y-0 xl:grid-cols-4">
+            {[
+              { label: "Saldo disponível", value: fmt(Math.max(0, balance)), sub: "Livre para saque", icon: Wallet, accent: false, spark: false },
+              { label: "Recebido hoje", value: fmt(receivedToday), sub: "Liquidado no dia", icon: RefreshCw, accent: false, spark: false },
+              { label: "Bloqueio cautelar", value: fmt(disputedAmount), sub: "MEDs em disputa", icon: Lock, accent: false, spark: false },
+              { label: "Faturamento total", value: fmt(revenue), sub: "Volume bruto no período", icon: TrendingUp, accent: true, spark: true },
+            ].map((k, i) => {
+              const Icon = k.icon;
+              return (
+                <div
+                  key={k.label}
+                  className={cn(
+                    "relative flex flex-col justify-between px-5 py-5 sm:border-b sm:border-border/50 xl:border-b-0",
+                    i % 2 === 1 && "sm:border-l sm:border-l-border/50",
+                    i >= 2 && "sm:border-b-0",
+                    "xl:border-l xl:border-l-border/50 xl:first:border-l-0",
+                    k.accent && "bg-primary/[0.04]",
+                  )}
+                >
+                  {k.accent && (
+                    <span aria-hidden className="absolute inset-x-0 top-0 h-px bg-primary/50 xl:inset-y-0 xl:left-0 xl:right-auto xl:h-auto xl:w-px" />
+                  )}
 
-                <div className="relative flex items-start justify-between gap-3">
-                  <div className="min-w-0 flex-1">
-                    <p className={cn(
-                      "font-black uppercase tracking-[0.18em]",
-                      isRevenue ? "text-[10px] text-primary/90" : "text-[10px] text-muted-foreground/70"
-                    )}>{k.label}</p>
-                    <p className={cn(
-                      "mt-2 font-display font-black tabular-nums tracking-[-0.03em] truncate",
-                      isRevenue ? "text-[26px] md:text-[28px] text-foreground" : "text-2xl md:text-[26px] text-foreground"
-                    )}>
-                      {privacy.hidden ? CENSORED : k.value}
+                  <div className="flex items-center gap-2">
+                    <Icon
+                      className={cn("h-3.5 w-3.5 shrink-0", k.accent ? "text-primary" : "text-muted-foreground/50")}
+                      strokeWidth={2}
+                    />
+                    <p
+                      className={cn(
+                        "truncate text-[10px] font-semibold uppercase tracking-[0.16em]",
+                        k.accent ? "text-primary/90" : "text-muted-foreground/60",
+                      )}
+                    >
+                      {k.label}
                     </p>
-                    <div className="mt-1.5 flex items-center gap-1.5">
-                      <p className="text-[11px] text-muted-foreground/60 truncate">{k.sub}</p>
+                  </div>
+
+                  <p className="mt-3 truncate font-display text-[27px] font-bold leading-none tracking-[-0.035em] tabular-nums text-foreground">
+                    {privacy.hidden ? CENSORED : k.value}
+                  </p>
+
+                  <p className="mt-2 truncate text-[11px] text-muted-foreground/55">{k.sub}</p>
+
+                  {k.spark && sparkData.length > 1 && (
+                    <div aria-hidden className="pointer-events-none absolute bottom-0 left-0 right-0 h-9 opacity-40">
+                      <ResponsiveContainer width="100%" height="100%">
+                        <AreaChart data={sparkData} margin={{ top: 2, right: 0, left: 0, bottom: 0 }}>
+                          <defs>
+                            <linearGradient id="sp-rail" x1="0" y1="0" x2="0" y2="1">
+                              <stop offset="0%" stopColor="hsl(var(--primary))" stopOpacity={0.35} />
+                              <stop offset="100%" stopColor="hsl(var(--primary))" stopOpacity={0} />
+                            </linearGradient>
+                          </defs>
+                          <Area type="monotone" dataKey="v" stroke="hsl(var(--primary))" strokeWidth={1.25} fill="url(#sp-rail)" isAnimationActive={false} />
+                        </AreaChart>
+                      </ResponsiveContainer>
                     </div>
-                  </div>
-                  <div className={cn(
-                    "shrink-0 flex h-11 w-11 items-center justify-center rounded-2xl transition-transform group-hover:scale-110",
-                    isRevenue ? "border border-primary/30 bg-primary/15 text-primary" : "bg-primary/10 text-primary"
-                  )}>
-                    <Icon className="h-5 w-5" strokeWidth={2.25} />
-                  </div>
+                  )}
                 </div>
-
-                {k.spark && sparkData.length > 1 && (
-                  <div className={cn("absolute bottom-0 left-0 right-0 pointer-events-none", isRevenue ? "h-14 opacity-90" : "h-10 opacity-70")}>
-                    <ResponsiveContainer width="100%" height="100%">
-                      <AreaChart data={sparkData} margin={{ top: 4, right: 0, left: 0, bottom: 0 }}>
-                        <defs>
-                          <linearGradient id={`sp-${k.label}`} x1="0" y1="0" x2="0" y2="1">
-                            <stop offset="0%" stopColor="hsl(var(--primary))" stopOpacity={isRevenue ? 0.55 : 0.4} />
-                            <stop offset="100%" stopColor="hsl(var(--primary))" stopOpacity={0} />
-                          </linearGradient>
-                        </defs>
-                        <Area type="monotone" dataKey="v" stroke="hsl(var(--primary))" strokeWidth={isRevenue ? 2 : 1.5} fill={`url(#sp-${k.label})`} isAnimationActive={false} />
-                      </AreaChart>
-                    </ResponsiveContainer>
-                  </div>
-                )}
-              </div>
-            );
-          })}
+              );
+            })}
+          </div>
         </section>
 
-        {/* ═══════════ 4 QUICK ACTIONS ═══════════ */}
-        <section className="grid grid-cols-2 xl:grid-cols-4 gap-3">
-          {[
-            { label: "Gerar PIX", sub: "Exige KYC aprovado", icon: QrCode, onClick: () => { if (!requireApprovedAccount()) setPixDialogOpen(true); } },
-            { label: "Solicitar Saque", sub: "Exige KYC aprovado", icon: ArrowDownRight, onClick: () => { if (!requireApprovedAccount()) navigate("/financeiro/saques"); } },
-            { label: "Transações", sub: "Exige KYC aprovado", icon: Receipt, onClick: () => { if (!requireApprovedAccount()) navigate("/vendas"); } },
-            { label: "Credenciais API", sub: "Exige KYC aprovado", icon: KeyRound, onClick: () => { if (!requireApprovedAccount()) navigate("/integracoes/credenciais"); } },
-          ].map((a) => {
-            const Icon = a.icon;
-            const inner = (
-              <>
-                <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-border/60 bg-muted/40 text-foreground group-hover:border-primary/50 group-hover:bg-primary/10 group-hover:text-primary transition-all">
-                  <Icon className="h-4.5 w-4.5" strokeWidth={2.25} />
-                </div>
-                <div className="min-w-0 flex-1">
-                  <p className="font-display font-bold text-[14px] text-foreground truncate">{a.label}</p>
-                  <p className="text-[11px] text-muted-foreground/70 truncate">{a.sub}</p>
-                </div>
-                <ChevronRight className="h-4 w-4 text-muted-foreground/40 group-hover:text-primary group-hover:translate-x-0.5 transition-all" />
-              </>
-            );
-            const cls = "group flex items-center gap-3 rounded-2xl border border-border/60 bg-card/80 backdrop-blur px-4 py-3.5 transition-all hover:border-primary/40 hover:bg-card active:scale-[0.98]";
-            return <button key={a.label} onClick={a.onClick} className={cn(cls, "text-left")}>{inner}</button>;
-          })}
+        {/* ═══════════ QUICK ACTIONS ═══════════ */}
+        <section className="overflow-hidden rounded-2xl border border-border/60 bg-card">
+          <div className="grid grid-cols-2 xl:grid-cols-4">
+            {[
+              { label: "Gerar PIX", sub: "Cobrança instantânea", icon: QrCode, onClick: () => { if (!requireApprovedAccount()) setPixDialogOpen(true); } },
+              { label: "Solicitar saque", sub: "Transferir saldo", icon: ArrowDownRight, onClick: () => { if (!requireApprovedAccount()) navigate("/financeiro/saques"); } },
+              { label: "Transações", sub: "Extrato de vendas", icon: Receipt, onClick: () => { if (!requireApprovedAccount()) navigate("/vendas"); } },
+              { label: "Credenciais API", sub: "Chaves e webhooks", icon: KeyRound, onClick: () => { if (!requireApprovedAccount()) navigate("/integracoes/credenciais"); } },
+            ].map((a, i) => {
+              const Icon = a.icon;
+              return (
+                <button
+                  key={a.label}
+                  onClick={a.onClick}
+                  className={cn(
+                    "group relative flex items-center gap-3 px-4 py-4 text-left transition-colors hover:bg-muted/25",
+                    i % 2 === 1 && "border-l border-border/50",
+                    i < 2 && "border-b border-border/50 xl:border-b-0",
+                    "xl:border-l xl:border-border/50 xl:first:border-l-0",
+                  )}
+                >
+                  <Icon className="h-4 w-4 shrink-0 text-muted-foreground/60 transition-colors group-hover:text-primary" strokeWidth={2} />
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate text-[13px] font-semibold text-foreground">{a.label}</p>
+                    <p className="truncate text-[11px] text-muted-foreground/55">{a.sub}</p>
+                  </div>
+                  <ChevronRight className="h-3.5 w-3.5 shrink-0 text-muted-foreground/30 transition-colors group-hover:text-muted-foreground/60" />
+                </button>
+              );
+            })}
+          </div>
         </section>
+
 
         {/* ═══════════ CHART + SIDE PANEL ═══════════ */}
         <section className="grid grid-cols-1 xl:grid-cols-3 gap-3">
