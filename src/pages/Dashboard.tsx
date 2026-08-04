@@ -620,47 +620,67 @@ export default function Dashboard() {
           </div>
         )}
 
-        {/* ═══════════ TOP GREETING ROW ═══════════ */}
-        <header className="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+        {/* ═══════════ HEADER ═══════════ */}
+        <header className="flex flex-col gap-4 border-b border-border/60 pb-5 md:flex-row md:items-end md:justify-between">
           <div className="min-w-0">
-            <h1 className="font-display font-black tracking-[-0.02em] text-2xl md:text-[32px] leading-tight truncate">
-              Seja bem-vindo, <span className="text-foreground/90">{nickname}</span>
-              <button onClick={privacy.toggle} className="ml-2 inline-flex align-middle text-muted-foreground/60 hover:text-primary transition-colors">
-                {privacy.hidden ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+            <div className="flex items-center gap-2.5 font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground/60">
+              <span className="relative flex h-1.5 w-1.5">
+                <span className="absolute inline-flex h-full w-full rounded-full bg-primary/60" />
+                <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-primary" />
+              </span>
+              <span>Painel operacional</span>
+              <span className="text-border">/</span>
+              <span className="tabular-nums">{format(new Date(), "dd MMM yyyy", { locale: ptBR }).toUpperCase()}</span>
+            </div>
+
+            <h1 className="mt-2 flex items-center gap-2.5 font-display text-[26px] font-bold leading-none tracking-[-0.035em] md:text-[34px]">
+              <span className="truncate">{nickname}</span>
+              <button
+                onClick={privacy.toggle}
+                aria-label={privacy.hidden ? "Mostrar valores" : "Ocultar valores"}
+                className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md border border-border/60 text-muted-foreground/60 transition-colors hover:border-border hover:text-foreground"
+              >
+                {privacy.hidden ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
               </button>
             </h1>
-            <p className="text-muted-foreground text-sm mt-1">Que essa jornada seja leve, produtiva e cheia de conquistas!</p>
           </div>
 
-          {/* Faturamento / Meta chip — clean, calendar icon opens filter */}
+          {/* Período + meta — bloco técnico */}
           <Popover open={datePickerOpen} onOpenChange={setDatePickerOpen}>
             <PopoverTrigger asChild>
-              <button className="flex items-center gap-3 rounded-2xl border border-border/60 bg-card/80 backdrop-blur px-4 py-3 min-w-[280px] hover:border-primary/40 hover:bg-card transition-colors text-left">
-                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-muted/50 text-muted-foreground shrink-0">
-                  <CalendarDays className="h-4.5 w-4.5" strokeWidth={2} />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-muted-foreground/70">
+              <button className="group w-full min-w-[300px] rounded-lg border border-border/60 bg-card px-4 py-3 text-left transition-colors hover:border-border md:w-auto">
+                <div className="flex items-center justify-between gap-6">
+                  <span className="font-mono text-[10px] uppercase tracking-[0.2em] text-muted-foreground/60">
                     Faturamento · {isCustom ? "Período" : selectedPeriod.label}
-                  </p>
-                  <div className="flex items-baseline gap-1.5 mt-0.5">
-                    <span className="font-display font-bold text-[17px] tabular-nums tracking-[-0.02em] text-foreground">
-                      {privacy.hidden ? CENSORED : fmt(revenue)}
-                    </span>
-                    <span className="text-[11px] text-muted-foreground/60 tabular-nums">/ {privacy.hidden ? CENSORED : fmt(goalTarget)}</span>
+                  </span>
+                  <span className="flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-[0.16em] text-muted-foreground/50 transition-colors group-hover:text-foreground">
+                    Alterar <ChevronRight className="h-3 w-3" />
+                  </span>
+                </div>
+                <div className="mt-1.5 flex items-baseline gap-2">
+                  <span className="font-display text-[20px] font-bold tabular-nums leading-none tracking-[-0.03em] text-foreground">
+                    {privacy.hidden ? CENSORED : fmt(revenue)}
+                  </span>
+                  <span className="font-mono text-[11px] tabular-nums text-muted-foreground/50">
+                    / {privacy.hidden ? CENSORED : fmt(goalTarget)}
+                  </span>
+                </div>
+                <div className="mt-2.5 flex items-center gap-2">
+                  <div className="h-[3px] flex-1 overflow-hidden rounded-sm bg-muted/60">
+                    <div className="h-full bg-primary" style={{ width: `${Math.min(100, (revenue / goalTarget) * 100)}%` }} />
                   </div>
-                  <div className="mt-1.5 h-1 w-full rounded-full bg-muted/50 overflow-hidden">
-                    <div className="h-full rounded-full bg-primary" style={{ width: `${Math.min(100, (revenue/goalTarget)*100)}%` }} />
-                  </div>
+                  <span className="font-mono text-[10px] tabular-nums text-muted-foreground/50">
+                    {Math.min(100, (revenue / goalTarget) * 100).toFixed(0)}%
+                  </span>
                 </div>
               </button>
             </PopoverTrigger>
-            <PopoverContent align="end" className="w-[320px] p-3 rounded-2xl border-border/60">
-              <div className="grid grid-cols-2 gap-1.5 mb-3">
+            <PopoverContent align="end" className="w-[320px] rounded-lg border-border/60 p-3">
+              <div className="mb-3 grid grid-cols-2 gap-1.5">
                 {PERIOD_PRESETS.map((p) => (
                   <button key={p.label}
                     onClick={() => { setSelectedPeriod(p); setIsCustom(false); setCustomRange(undefined); setDatePickerOpen(false); }}
-                    className={cn("h-9 rounded-xl text-[12px] font-bold transition-all",
+                    className={cn("h-9 rounded-md text-[12px] font-semibold transition-colors",
                       !isCustom && selectedPeriod.label === p.label ? "bg-primary text-primary-foreground" : "bg-muted/40 text-muted-foreground hover:bg-muted")}>
                     {p.label}
                   </button>
@@ -672,13 +692,13 @@ export default function Dashboard() {
                     const to = new Date(now); to.setHours(23,59,59,999);
                     setCustomRange({ from, to }); setIsCustom(true); setDatePickerOpen(false);
                   }}
-                  className={cn("h-9 rounded-xl text-[12px] font-bold transition-all col-span-2",
+                  className={cn("col-span-2 h-9 rounded-md text-[12px] font-semibold transition-colors",
                     isCustom ? "bg-primary text-primary-foreground" : "bg-muted/40 text-muted-foreground hover:bg-muted")}>
                   Este mês
                 </button>
               </div>
               <div className="border-t border-border/40 pt-3">
-                <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-2">Personalizado</p>
+                <p className="mb-2 font-mono text-[10px] uppercase tracking-[0.2em] text-muted-foreground/60">Personalizado</p>
                 <Calendar
                   mode="range"
                   selected={customRange}
@@ -689,53 +709,67 @@ export default function Dashboard() {
                     }
                   }}
                   locale={ptBR}
-                  className="p-0 pointer-events-auto"
+                  className="pointer-events-auto p-0"
                 />
               </div>
             </PopoverContent>
           </Popover>
         </header>
 
-        {/* ═══════════ HERO — RANKING BANNER ═══════════ */}
-        <section className="relative overflow-hidden rounded-3xl border border-border/60 bg-gradient-to-br from-card via-card to-primary/[0.08]">
-          <div aria-hidden className="pointer-events-none absolute inset-0 opacity-40"
-            style={{ backgroundImage: "radial-gradient(50% 80% at 90% 50%, hsl(var(--primary)/0.25), transparent 60%), radial-gradient(40% 60% at 10% 10%, hsl(var(--primary)/0.15), transparent 60%)" }}
-          />
-          <div className="relative flex flex-col lg:flex-row items-center gap-6 p-5 md:p-6 lg:p-8">
-            {/* Left copy */}
-            <div className="flex-1 min-w-0 space-y-3 text-center lg:text-left">
-              <div className="inline-flex items-center gap-2 rounded-full border border-primary/30 bg-primary/10 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.28em] text-primary">
-                <Trophy className="h-3.5 w-3.5" /> Ranking · Corrida de Faturamento
-              </div>
-              <h2 className="font-display font-black text-2xl sm:text-3xl lg:text-5xl tracking-[-0.03em] leading-[1.05]">
-                Conheça os <span className="text-primary">CAMPEÕES</span>
+        {/* ═══════════ RANKING BLOCK ═══════════ */}
+        <section className="overflow-hidden rounded-lg border border-border/60 bg-card">
+          <div className="flex items-center justify-between gap-4 border-b border-border/60 px-5 py-3">
+            <span className="font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground/60">
+              Corrida de faturamento
+            </span>
+            <span className="rounded-sm border border-primary/30 bg-primary/10 px-2 py-0.5 font-mono text-[9px] uppercase tracking-[0.18em] text-primary">
+              Temporada encerrada
+            </span>
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-[1fr_1.1fr]">
+            <div className="flex flex-col justify-center gap-3 px-5 py-6 lg:border-r lg:border-border/60">
+              <h2 className="font-display text-[28px] font-bold leading-[1.05] tracking-[-0.04em] lg:text-[36px]">
+                Os campeões<br />estão definidos.
               </h2>
-              <p className="text-muted-foreground text-sm max-w-md mx-auto lg:mx-0">
-                Os resultados estão definidos. Conheça os vencedores da Corrida de Faturamento e prepare-se para a próxima temporada.
+              <p className="max-w-sm text-[13px] leading-relaxed text-muted-foreground/70">
+                Confira o resultado consolidado da temporada e as premiações liberadas para os primeiros colocados.
               </p>
-            <Link to="/premiacoes?tab=corrida" className="inline-flex items-center gap-2 rounded-xl bg-primary px-4 py-2.5 text-primary-foreground text-[13px] font-bold hover:bg-primary/90 transition-all active:scale-[0.98]">
-                Ver ranking completo <ArrowRight className="h-4 w-4" />
+              <Link
+                to="/premiacoes?tab=corrida"
+                className="mt-1 inline-flex w-fit items-center gap-2 rounded-md border border-border bg-foreground px-3.5 py-2 font-mono text-[11px] uppercase tracking-[0.14em] text-background transition-opacity hover:opacity-85"
+              >
+                Ver ranking completo <ArrowRight className="h-3.5 w-3.5" />
               </Link>
             </div>
 
-            {/* Podium visual */}
-            <div className="flex items-end gap-2 sm:gap-3 shrink-0">
+            <ul className="divide-y divide-border/50 border-t border-border/60 lg:border-t-0">
               {[
-                { pos: "02", name: "Airis F.", h: "h-20 sm:h-24", tone: "from-slate-300 to-slate-500" },
-                { pos: "01", name: "Bryan G.", h: "h-28 sm:h-32", tone: "from-yellow-300 to-amber-500" },
-                { pos: "03", name: "Wdzin", h: "h-16 sm:h-20", tone: "from-orange-400 to-orange-700" },
-              ].map((p) => (
-                <div key={p.pos} className="flex flex-col items-center gap-2">
-                  <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">{p.name}</span>
-                  <div className={cn("w-14 sm:w-16 lg:w-20 rounded-t-xl bg-gradient-to-b flex items-start justify-center pt-2 shadow-lg", p.h, p.tone)}>
-                    <span className="font-display font-black text-lg text-background/90">{p.pos}</span>
+                { pos: "01", name: "Bryan G.", note: "Campeão da temporada", pct: 100 },
+                { pos: "02", name: "Airis F.", note: "Vice-campeão", pct: 72 },
+                { pos: "03", name: "Wdzin", note: "Terceiro colocado", pct: 48 },
+              ].map((p, i) => (
+                <li key={p.pos} className="relative flex items-center gap-4 px-5 py-4">
+                  {i === 0 && <span aria-hidden className="absolute inset-y-0 left-0 w-[2px] bg-primary" />}
+                  <span className={cn(
+                    "font-display text-[22px] font-bold tabular-nums leading-none tracking-[-0.04em]",
+                    i === 0 ? "text-primary" : "text-muted-foreground/35",
+                  )}>
+                    {p.pos}
+                  </span>
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate text-[14px] font-semibold text-foreground">{p.name}</p>
+                    <p className="truncate font-mono text-[10px] uppercase tracking-[0.14em] text-muted-foreground/50">{p.note}</p>
                   </div>
-                </div>
+                  <div className="hidden h-[3px] w-24 overflow-hidden rounded-sm bg-muted/60 sm:block">
+                    <div className={cn("h-full", i === 0 ? "bg-primary" : "bg-muted-foreground/35")} style={{ width: `${p.pct}%` }} />
+                  </div>
+                </li>
               ))}
-            </div>
+            </ul>
           </div>
-
         </section>
+
 
         {/* ═══════════ METRICS RAIL ═══════════ */}
         <section className="overflow-hidden rounded-2xl border border-border/60 bg-card">
