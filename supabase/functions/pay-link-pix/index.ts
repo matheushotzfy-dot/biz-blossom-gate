@@ -38,11 +38,15 @@ Deno.serve(async (req) => {
       supabase.rpc("bump_rate_limit", { _bucket_key: `pay_link_ip:${ip}`, _window_seconds: 60, _max_count: 15 }),
       supabase.rpc("bump_rate_limit", { _bucket_key: `pay_link_slug:${slug}`, _window_seconds: 60, _max_count: 30 }),
     ]);
-    // fail-open só em erro de infraestrutura do rate limit; bloqueia quando estourou.
-    if (limits.some((r) => !r.error && r.data === false)) {
+    // bump_rate_limit devolve TABLE(allowed, ...) → array. Fail-open só em erro de infra.
+    const blocked = limits.some((r) =>
+      Array.isArray(r.data) ? (r.data[0] as { allowed?: boolean } | undefined)?.allowed === false : false
+    );
+    if (blocked) {
       return new Response(JSON.stringify({ success: false, error: "Muitas tentativas. Aguarde um instante." }),
         { status: 429, headers: { ...corsHeaders, "Content-Type": "application/json", "Retry-After": "60" } });
     }
+
 
     // Validação básica do e-mail (a sanitização completa acontece abaixo).
     const emailInput = typeof customerEmail === "string" ? customerEmail.trim() : "";
