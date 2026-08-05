@@ -27,10 +27,33 @@ Deno.serve(async (req) => {
     const body = await req.json().catch(() => ({}));
     const { slug, customerName, customerEmail, customerDocument } = body ?? {};
 
-    if (!slug || typeof slug !== "string") {
+    if (!slug || typeof slug !== "string" || slug.length > 120) {
       return new Response(JSON.stringify({ success: false, error: "Link inválido" }),
         { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
+
+    // Endpoint público: limita abuso por IP e por link (criação em massa de cobranças).
+    const ip = (req.headers.get("x-forwarded-for") ?? "").split(",")[0].trim() || "unknown";
+    const limits = await Promise.all([
+      supabase.rpc("bump_rate_limit", { _bucket_key: `pay_link_ip:${ip}`, _window_seconds: 60, _max_count: 15 }),
+      supabase.rpc("bump_rate_limit", { _bucket_key: `pay_link_slug:${slug}`, _window_seconds: 60, _max_count: 30 }),
+    ]);
+    // fail-open só em erro de infraestrutura do rate limit; bloqueia quando estourou.
+    if (limits.some((r) => !r.error && r.data === false)) {
+      return new Response(JSON.stringify({ success: false, error: "Muitas tentativas. Aguarde um instante." }),
+        { status: 429, headers: { ...corsHeaders, "Content-Type": "application/json", "Retry-After": "60" } });
+    }
+
+    // Validação básica dos dados do comprador (evita payloads gigantes / lixo).
+    const str = (v: unknown, max: number) => (typeof v === "string" ? v.trim().slice(0, max) : "");
+    const safeName = str(customerName, 120);
+    const safeEmail = str(customerEmail, 160);
+    const safeDocument = str(customerDocument, 20).replace(/\D/g, "");
+    if (safeEmail && !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(safeEmail)) {
+      return new Response(JSON.stringify({ success: false, error: "E-mail inválido" }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    }
+
 
     const { data: link } = await supabase
       .from("payment_links")
