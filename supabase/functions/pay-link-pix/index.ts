@@ -27,10 +27,35 @@ Deno.serve(async (req) => {
     const body = await req.json().catch(() => ({}));
     const { slug, customerName, customerEmail, customerDocument } = body ?? {};
 
-    if (!slug || typeof slug !== "string") {
+    if (!slug || typeof slug !== "string" || slug.length > 120) {
       return new Response(JSON.stringify({ success: false, error: "Link inválido" }),
         { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
+
+    // Endpoint público: limita abuso por IP e por link (criação em massa de cobranças).
+    const ip = (req.headers.get("x-forwarded-for") ?? "").split(",")[0].trim() || "unknown";
+    const limits = await Promise.all([
+      supabase.rpc("bump_rate_limit", { _bucket_key: `pay_link_ip:${ip}`, _window_seconds: 60, _max_count: 15 }),
+      supabase.rpc("bump_rate_limit", { _bucket_key: `pay_link_slug:${slug}`, _window_seconds: 60, _max_count: 30 }),
+    ]);
+    // bump_rate_limit devolve TABLE(allowed, ...) → array. Fail-open só em erro de infra.
+    const blocked = limits.some((r) =>
+      Array.isArray(r.data) ? (r.data[0] as { allowed?: boolean } | undefined)?.allowed === false : false
+    );
+    if (blocked) {
+      return new Response(JSON.stringify({ success: false, error: "Muitas tentativas. Aguarde um instante." }),
+        { status: 429, headers: { ...corsHeaders, "Content-Type": "application/json", "Retry-After": "60" } });
+    }
+
+
+    // Validação básica do e-mail (a sanitização completa acontece abaixo).
+    const emailInput = typeof customerEmail === "string" ? customerEmail.trim() : "";
+    if (emailInput && !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(emailInput)) {
+      return new Response(JSON.stringify({ success: false, error: "E-mail inválido" }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    }
+
+
 
     const { data: link } = await supabase
       .from("payment_links")

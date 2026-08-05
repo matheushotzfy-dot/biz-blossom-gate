@@ -12,6 +12,7 @@
  */
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { getVeopagToken } from "../_shared/veopag.ts";
+import { isInternalCall, unauthorizedResponse } from "../_shared/cron-auth.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -69,6 +70,9 @@ async function fetchVeopagStatus(token: string, txId: string): Promise<{ status:
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
+
+  // Job interno: só pg_cron (x-cron-secret) ou chamadas com service role.
+  if (!isInternalCall(req)) return unauthorizedResponse(corsHeaders);
 
   const started = Date.now();
   const supabase = createClient(
