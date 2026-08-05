@@ -5,6 +5,8 @@ import { QueryClient } from "@tanstack/react-query";
 import { PersistQueryClientProvider } from "@tanstack/react-query-persist-client";
 import { createSyncStoragePersister } from "@tanstack/query-sync-storage-persister";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { Suspense, lazy } from "react";
+import { Loader2 } from "lucide-react";
 import Index from "./pages/Index";
 import ScrollToTop from "@/components/ScrollToTop";
 import { RequireAuth } from "@/hooks/useAuth";
@@ -13,73 +15,72 @@ import { RequireManager } from "@/hooks/useManagerGuard";
 import { ThemeProvider } from "@/hooks/useTheme";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import Auth from "./pages/Auth";
-import AuthCallback from "./pages/AuthCallback";
 import Dashboard from "./pages/Dashboard";
-import PerfilHub from "./pages/PerfilHub";
-import PremiacoesHub from "./pages/PremiacoesHub";
-// Extrato removido — consolidado em /vendas
-import SaquesHub from "./pages/financeiro/SaquesHub";
-import ConfigFinanceiro from "./pages/financeiro/ConfigFinanceiro";
-import Vendas from "./pages/vendas/Vendas";
-import Produtos from "./pages/vendas/Produtos";
-import Checkout from "./pages/vendas/Checkout";
-import CheckoutBuilder from "./pages/vendas/CheckoutBuilder";
-import ProductEditor from "./pages/vendas/ProductEditor";
-import IntegracoesHub from "./pages/IntegracoesHub";
-import Webhooks from "./pages/vendas/Webhooks";
-import Conteudo from "./pages/vendas/Conteudo";
-import CourseBuilder from "./pages/vendas/CourseBuilder";
-import Afiliados from "./pages/vendas/Afiliados";
-import Coproducoes from "./pages/vendas/Coproducoes";
-import Cupons from "./pages/vendas/Cupons";
-import Assinaturas from "./pages/vendas/Assinaturas";
-import DashboardAfiliado from "./pages/vendas/DashboardAfiliado";
-import ABTesting from "./pages/vendas/ABTesting";
-
-import AutoCupons from "./pages/vendas/AutoCupons";
-import CalculadoraLucro from "./pages/vendas/CalculadoraLucro";
-
-import CheckoutWhatsApp from "./pages/vendas/CheckoutWhatsApp";
-import FunilVendas from "./pages/vendas/FunilVendas";
-import LinkPagamento from "./pages/vendas/LinkPagamento";
-import ProofPopup from "./pages/vendas/ProofPopup";
-import RecuperacaoWhatsApp from "./pages/vendas/RecuperacaoWhatsApp";
-import RelatorioChurn from "./pages/vendas/RelatorioChurn";
-import SmartCheckout from "./pages/vendas/SmartCheckout";
-import UpsellPosPagamento from "./pages/vendas/UpsellPosPagamento";
-
-import Antecipacao from "./pages/financeiro/Antecipacao";
-import ControleGastos from "./pages/financeiro/ControleGastos";
-import NotasFiscais from "./pages/financeiro/NotasFiscais";
-import Taxas from "./pages/financeiro/Taxas";
-import Suporte from "./pages/Suporte";
-// VendasHub deprecated — removed from routes/imports
-import Gamificacao from "./pages/Gamificacao";
-import Marketplace from "./pages/Marketplace";
-import MemberArea from "./pages/membros/MemberArea";
-import CoursePage from "./pages/membros/CoursePage";
-import AdminLogin from "./pages/admin/AdminLogin";
-import AdminDashboard from "./pages/admin/AdminDashboard";
-import PublicCheckout from "./pages/PublicCheckout";
-import PublicPaymentLink from "./pages/PublicPaymentLink";
-import ImpersonateReceiver from "./pages/ImpersonateReceiver";
-import NotFound from "./pages/NotFound";
-import ManagerLogin from "./pages/manager/ManagerLogin";
-import ManagerDashboard from "./pages/manager/ManagerDashboard";
-import TermosDeUso from "./pages/TermosDeUso";
-import PoliticaDePrivacidade from "./pages/PoliticaDePrivacidade";
-import ThankYou from "./pages/ThankYou";
-import StatusPage from "./pages/StatusPage";
-import Certificado from "./pages/Certificado";
-
-import MemberAuth from "./pages/membros/MemberAuth";
-import MemberLayout from "./pages/membros/MemberLayout";
-import MemberHome from "./pages/membros/MemberHome";
-import MemberCourse from "./pages/membros/MemberCourse";
-import CourseAnalytics from "./pages/membros/CourseAnalytics";
 import ImpersonationBanner from "./components/ImpersonationBanner";
 import CookieConsent from "./components/CookieConsent";
 
+/**
+ * Route-level code splitting.
+ * Only the landing page, auth and the seller dashboard ship in the main bundle;
+ * every other route is fetched on demand, which keeps the initial payload small.
+ */
+const AuthCallback = lazy(() => import("./pages/AuthCallback"));
+const PerfilHub = lazy(() => import("./pages/PerfilHub"));
+const PremiacoesHub = lazy(() => import("./pages/PremiacoesHub"));
+const SaquesHub = lazy(() => import("./pages/financeiro/SaquesHub"));
+const ConfigFinanceiro = lazy(() => import("./pages/financeiro/ConfigFinanceiro"));
+const Vendas = lazy(() => import("./pages/vendas/Vendas"));
+const Produtos = lazy(() => import("./pages/vendas/Produtos"));
+const Checkout = lazy(() => import("./pages/vendas/Checkout"));
+const CheckoutBuilder = lazy(() => import("./pages/vendas/CheckoutBuilder"));
+const ProductEditor = lazy(() => import("./pages/vendas/ProductEditor"));
+const IntegracoesHub = lazy(() => import("./pages/IntegracoesHub"));
+const Webhooks = lazy(() => import("./pages/vendas/Webhooks"));
+const Conteudo = lazy(() => import("./pages/vendas/Conteudo"));
+const CourseBuilder = lazy(() => import("./pages/vendas/CourseBuilder"));
+const Afiliados = lazy(() => import("./pages/vendas/Afiliados"));
+const Coproducoes = lazy(() => import("./pages/vendas/Coproducoes"));
+const Cupons = lazy(() => import("./pages/vendas/Cupons"));
+const Assinaturas = lazy(() => import("./pages/vendas/Assinaturas"));
+const DashboardAfiliado = lazy(() => import("./pages/vendas/DashboardAfiliado"));
+const ABTesting = lazy(() => import("./pages/vendas/ABTesting"));
+const AutoCupons = lazy(() => import("./pages/vendas/AutoCupons"));
+const CalculadoraLucro = lazy(() => import("./pages/vendas/CalculadoraLucro"));
+const CheckoutWhatsApp = lazy(() => import("./pages/vendas/CheckoutWhatsApp"));
+const FunilVendas = lazy(() => import("./pages/vendas/FunilVendas"));
+const LinkPagamento = lazy(() => import("./pages/vendas/LinkPagamento"));
+const ProofPopup = lazy(() => import("./pages/vendas/ProofPopup"));
+const RecuperacaoWhatsApp = lazy(() => import("./pages/vendas/RecuperacaoWhatsApp"));
+const RelatorioChurn = lazy(() => import("./pages/vendas/RelatorioChurn"));
+const SmartCheckout = lazy(() => import("./pages/vendas/SmartCheckout"));
+const UpsellPosPagamento = lazy(() => import("./pages/vendas/UpsellPosPagamento"));
+const Antecipacao = lazy(() => import("./pages/financeiro/Antecipacao"));
+const ControleGastos = lazy(() => import("./pages/financeiro/ControleGastos"));
+const NotasFiscais = lazy(() => import("./pages/financeiro/NotasFiscais"));
+const Taxas = lazy(() => import("./pages/financeiro/Taxas"));
+const Suporte = lazy(() => import("./pages/Suporte"));
+const Gamificacao = lazy(() => import("./pages/Gamificacao"));
+const Marketplace = lazy(() => import("./pages/Marketplace"));
+const MemberArea = lazy(() => import("./pages/membros/MemberArea"));
+const CoursePage = lazy(() => import("./pages/membros/CoursePage"));
+const AdminLogin = lazy(() => import("./pages/admin/AdminLogin"));
+const AdminDashboard = lazy(() => import("./pages/admin/AdminDashboard"));
+const PublicCheckout = lazy(() => import("./pages/PublicCheckout"));
+const PublicPaymentLink = lazy(() => import("./pages/PublicPaymentLink"));
+const ImpersonateReceiver = lazy(() => import("./pages/ImpersonateReceiver"));
+const NotFound = lazy(() => import("./pages/NotFound"));
+const ManagerLogin = lazy(() => import("./pages/manager/ManagerLogin"));
+const ManagerDashboard = lazy(() => import("./pages/manager/ManagerDashboard"));
+const TermosDeUso = lazy(() => import("./pages/TermosDeUso"));
+const PoliticaDePrivacidade = lazy(() => import("./pages/PoliticaDePrivacidade"));
+const ThankYou = lazy(() => import("./pages/ThankYou"));
+const StatusPage = lazy(() => import("./pages/StatusPage"));
+const Certificado = lazy(() => import("./pages/Certificado"));
+const MemberAuth = lazy(() => import("./pages/membros/MemberAuth"));
+const MemberLayout = lazy(() => import("./pages/membros/MemberLayout"));
+const MemberHome = lazy(() => import("./pages/membros/MemberHome"));
+const MemberCourse = lazy(() => import("./pages/membros/MemberCourse"));
+const CourseAnalytics = lazy(() => import("./pages/membros/CourseAnalytics"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -103,6 +104,12 @@ const persister = typeof window !== "undefined"
     })
   : undefined;
 
+const RouteFallback = () => (
+  <div className="flex min-h-[60vh] w-full items-center justify-center bg-background">
+    <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" aria-label="Carregando" />
+  </div>
+);
+
 const App = () => (
   <ErrorBoundary>
     <PersistQueryClientProvider
@@ -121,97 +128,99 @@ const App = () => (
             <ScrollToTop />
             <CookieConsent />
 
-            <Routes>
-              <Route path="/auth" element={<Auth />} />
-              <Route path="/auth/callback" element={<AuthCallback />} />
-              <Route path="/impersonate-receiver" element={<ImpersonateReceiver />} />
-              <Route path="/pay/:slug" element={<PublicCheckout />} />
-              <Route path="/checkout/:slug" element={<PublicCheckout />} />
-              <Route path="/pl/:slug" element={<PublicPaymentLink />} />
-              <Route path="/obrigado" element={<ThankYou />} />
-              <Route path="/termos-de-uso" element={<TermosDeUso />} />
-              <Route path="/politica-de-privacidade" element={<PoliticaDePrivacidade />} />
-              <Route path="/status" element={<StatusPage />} />
-              <Route path="/certificado/:code" element={<Certificado />} />
-              <Route path="/financeiro/identidade" element={<Navigate to="/perfil?tab=identidade" replace />} />
-              <Route path="/" element={<Index />} />
+            <Suspense fallback={<RouteFallback />}>
+              <Routes>
+                <Route path="/auth" element={<Auth />} />
+                <Route path="/auth/callback" element={<AuthCallback />} />
+                <Route path="/impersonate-receiver" element={<ImpersonateReceiver />} />
+                <Route path="/pay/:slug" element={<PublicCheckout />} />
+                <Route path="/checkout/:slug" element={<PublicCheckout />} />
+                <Route path="/pl/:slug" element={<PublicPaymentLink />} />
+                <Route path="/obrigado" element={<ThankYou />} />
+                <Route path="/termos-de-uso" element={<TermosDeUso />} />
+                <Route path="/politica-de-privacidade" element={<PoliticaDePrivacidade />} />
+                <Route path="/status" element={<StatusPage />} />
+                <Route path="/certificado/:code" element={<Certificado />} />
+                <Route path="/financeiro/identidade" element={<Navigate to="/perfil?tab=identidade" replace />} />
+                <Route path="/" element={<Index />} />
 
-              <Route path="/membros-area/login" element={<MemberAuth />} />
-              <Route path="/membros-area" element={<MemberLayout />}>
-                <Route index element={<MemberHome />} />
-                <Route path="curso/:courseId" element={<MemberCourse />} />
-              </Route>
+                <Route path="/membros-area/login" element={<MemberAuth />} />
+                <Route path="/membros-area" element={<MemberLayout />}>
+                  <Route index element={<MemberHome />} />
+                  <Route path="curso/:courseId" element={<MemberCourse />} />
+                </Route>
 
-              <Route path="/admin-matheus" element={<AdminLogin />} />
-              <Route path="/admin-matheus/dashboard" element={<RequireAdmin><AdminDashboard /></RequireAdmin>} />
-              <Route path="/admin-matheus/configuracoes" element={<Navigate to="/admin-matheus/dashboard?tab=settings" replace />} />
+                <Route path="/admin-matheus" element={<AdminLogin />} />
+                <Route path="/admin-matheus/dashboard" element={<RequireAdmin><AdminDashboard /></RequireAdmin>} />
+                <Route path="/admin-matheus/configuracoes" element={<Navigate to="/admin-matheus/dashboard?tab=settings" replace />} />
 
-              <Route path="/gerentes" element={<ManagerLogin />} />
-              <Route path="/gerentes/dashboard" element={<RequireManager><ManagerDashboard /></RequireManager>} />
+                <Route path="/gerentes" element={<ManagerLogin />} />
+                <Route path="/gerentes/dashboard" element={<RequireManager><ManagerDashboard /></RequireManager>} />
 
-              <Route path="/vendas/conteudo/:courseId/analytics" element={<RequireAuth><CourseAnalytics /></RequireAuth>} />
-              <Route path="/vendas/conteudo/:courseId/builder" element={<RequireAuth><CourseBuilder /></RequireAuth>} />
-              <Route path="/vendas/produtos/:productId/editar" element={<RequireAuth><ProductEditor /></RequireAuth>} />
-              <Route path="/vendas/produtos/:productId/checkout-builder" element={<RequireAuth><CheckoutBuilder /></RequireAuth>} />
+                <Route path="/vendas/conteudo/:courseId/analytics" element={<RequireAuth><CourseAnalytics /></RequireAuth>} />
+                <Route path="/vendas/conteudo/:courseId/builder" element={<RequireAuth><CourseBuilder /></RequireAuth>} />
+                <Route path="/vendas/produtos/:productId/editar" element={<RequireAuth><ProductEditor /></RequireAuth>} />
+                <Route path="/vendas/produtos/:productId/checkout-builder" element={<RequireAuth><CheckoutBuilder /></RequireAuth>} />
 
-              <Route
-                element={
-                  <RequireAuth>
-                    <DashboardLayout />
-                  </RequireAuth>
-                }
-              >
-                <Route path="/dashboard" element={<Dashboard />} />
-                <Route path="/perfil" element={<PerfilHub />} />
-                {/* /financeiro/identidade já redirecionado na rota pública acima */}
-                <Route path="/premiacoes" element={<PremiacoesHub />} />
-                <Route path="/gamificacao" element={<Gamificacao />} />
-                <Route path="/suporte" element={<Suporte />} />
-                <Route path="/financeiro/extrato" element={<Navigate to="/vendas" replace />} />
-                <Route path="/financeiro/saques" element={<SaquesHub />} />
-                <Route path="/financeiro/config" element={<ConfigFinanceiro />} />
-                <Route path="/vendas" element={<Vendas />} />
-                <Route path="/vendas/produtos" element={<Produtos />} />
-                <Route path="/vendas/checkout" element={<Checkout />} />
+                <Route
+                  element={
+                    <RequireAuth>
+                      <DashboardLayout />
+                    </RequireAuth>
+                  }
+                >
+                  <Route path="/dashboard" element={<Dashboard />} />
+                  <Route path="/perfil" element={<PerfilHub />} />
+                  {/* /financeiro/identidade já redirecionado na rota pública acima */}
+                  <Route path="/premiacoes" element={<PremiacoesHub />} />
+                  <Route path="/gamificacao" element={<Gamificacao />} />
+                  <Route path="/suporte" element={<Suporte />} />
+                  <Route path="/financeiro/extrato" element={<Navigate to="/vendas" replace />} />
+                  <Route path="/financeiro/saques" element={<SaquesHub />} />
+                  <Route path="/financeiro/config" element={<ConfigFinanceiro />} />
+                  <Route path="/vendas" element={<Vendas />} />
+                  <Route path="/vendas/produtos" element={<Produtos />} />
+                  <Route path="/vendas/checkout" element={<Checkout />} />
 
-                <Route path="/vendas/conteudo" element={<Conteudo />} />
-                <Route path="/integracoes" element={<IntegracoesHub />} />
-                <Route path="/integracoes/apps" element={<Navigate to="/integracoes?tab=apps" replace />} />
-                <Route path="/integracoes/webhooks" element={<Navigate to="/integracoes?tab=webhooks" replace />} />
-                <Route path="/integracoes/documentacao" element={<Navigate to="/integracoes?tab=api" replace />} />
-                <Route path="/integracoes/credenciais" element={<Navigate to="/integracoes?tab=keys" replace />} />
-                <Route path="/vendas/webhooks" element={<Webhooks />} />
-                <Route path="/vendas/afiliados" element={<Afiliados />} />
-                <Route path="/vendas/cupons" element={<Cupons />} />
-                <Route path="/vendas/coproducoes" element={<Coproducoes />} />
-                <Route path="/vendas/assinaturas" element={<Assinaturas />} />
-                <Route path="/vendas/dashboard-afiliado" element={<DashboardAfiliado />} />
-                <Route path="/vendas/ab-testing" element={<ABTesting />} />
-                
-                <Route path="/vendas/auto-cupons" element={<AutoCupons />} />
-                <Route path="/vendas/calculadora-lucro" element={<CalculadoraLucro />} />
-                <Route path="/vendas/central-ajuda" element={<Navigate to="/suporte" replace />} />
-                <Route path="/vendas/checkout-whatsapp" element={<CheckoutWhatsApp />} />
-                <Route path="/vendas/funil" element={<FunilVendas />} />
-                <Route path="/vendas/link-pagamento" element={<LinkPagamento />} />
-                <Route path="/vendas/prova-social" element={<ProofPopup />} />
-                <Route path="/vendas/recuperacao-whatsapp" element={<RecuperacaoWhatsApp />} />
-                <Route path="/vendas/churn" element={<RelatorioChurn />} />
-                <Route path="/vendas/smart-checkout" element={<SmartCheckout />} />
-                <Route path="/vendas/upsell" element={<UpsellPosPagamento />} />
+                  <Route path="/vendas/conteudo" element={<Conteudo />} />
+                  <Route path="/integracoes" element={<IntegracoesHub />} />
+                  <Route path="/integracoes/apps" element={<Navigate to="/integracoes?tab=apps" replace />} />
+                  <Route path="/integracoes/webhooks" element={<Navigate to="/integracoes?tab=webhooks" replace />} />
+                  <Route path="/integracoes/documentacao" element={<Navigate to="/integracoes?tab=api" replace />} />
+                  <Route path="/integracoes/credenciais" element={<Navigate to="/integracoes?tab=keys" replace />} />
+                  <Route path="/vendas/webhooks" element={<Webhooks />} />
+                  <Route path="/vendas/afiliados" element={<Afiliados />} />
+                  <Route path="/vendas/cupons" element={<Cupons />} />
+                  <Route path="/vendas/coproducoes" element={<Coproducoes />} />
+                  <Route path="/vendas/assinaturas" element={<Assinaturas />} />
+                  <Route path="/vendas/dashboard-afiliado" element={<DashboardAfiliado />} />
+                  <Route path="/vendas/ab-testing" element={<ABTesting />} />
 
-                
-                <Route path="/financeiro/antecipacao" element={<Antecipacao />} />
-                <Route path="/financeiro/gastos" element={<ControleGastos />} />
-                <Route path="/financeiro/notas" element={<NotasFiscais />} />
-                <Route path="/financeiro/taxas" element={<Taxas />} />
+                  <Route path="/vendas/auto-cupons" element={<AutoCupons />} />
+                  <Route path="/vendas/calculadora-lucro" element={<CalculadoraLucro />} />
+                  <Route path="/vendas/central-ajuda" element={<Navigate to="/suporte" replace />} />
+                  <Route path="/vendas/checkout-whatsapp" element={<CheckoutWhatsApp />} />
+                  <Route path="/vendas/funil" element={<FunilVendas />} />
+                  <Route path="/vendas/link-pagamento" element={<LinkPagamento />} />
+                  <Route path="/vendas/prova-social" element={<ProofPopup />} />
+                  <Route path="/vendas/recuperacao-whatsapp" element={<RecuperacaoWhatsApp />} />
+                  <Route path="/vendas/churn" element={<RelatorioChurn />} />
+                  <Route path="/vendas/smart-checkout" element={<SmartCheckout />} />
+                  <Route path="/vendas/upsell" element={<UpsellPosPagamento />} />
 
-                <Route path="/marketplace" element={<Marketplace />} />
-                <Route path="/membros" element={<MemberArea />} />
-                <Route path="/membros/curso/:courseId" element={<CoursePage />} />
-              </Route>
-              <Route path="*" element={<NotFound />} />
-            </Routes>
+
+                  <Route path="/financeiro/antecipacao" element={<Antecipacao />} />
+                  <Route path="/financeiro/gastos" element={<ControleGastos />} />
+                  <Route path="/financeiro/notas" element={<NotasFiscais />} />
+                  <Route path="/financeiro/taxas" element={<Taxas />} />
+
+                  <Route path="/marketplace" element={<Marketplace />} />
+                  <Route path="/membros" element={<MemberArea />} />
+                  <Route path="/membros/curso/:courseId" element={<CoursePage />} />
+                </Route>
+                <Route path="*" element={<NotFound />} />
+              </Routes>
+            </Suspense>
           </BrowserRouter>
         </TooltipProvider>
       </ThemeProvider>
