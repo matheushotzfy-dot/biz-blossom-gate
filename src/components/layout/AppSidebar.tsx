@@ -21,18 +21,8 @@ import {
   TrendingUp,
   Activity,
   Crown,
-  MoreHorizontal,
-  Cookie,
   type LucideIcon,
 } from "lucide-react";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import { useEffect, useMemo, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { NavLink } from "@/components/NavLink";
@@ -101,7 +91,7 @@ function RevenueCard({ collapsed, revenue, milestone, onOpenRewards }: RevenueCa
   const pct = Math.max(0, Math.min(100, milestone.pct));
   const pctDisplay = Math.round(pct);
   
-  const nextLabel = `${milestone.next.tier} ${milestone.next.label.replace("R$ ", "")}`;
+  const tierName = milestone.current.tier;
 
   const parts = splitRevenue(revenue);
 
@@ -109,51 +99,69 @@ function RevenueCard({ collapsed, revenue, milestone, onOpenRewards }: RevenueCa
     <button
       type="button"
       onClick={onOpenRewards}
-      className="seller-clickable group/rev relative mt-3 block w-full overflow-hidden rounded-2xl border border-sidebar-border/80 bg-sidebar-accent/20 px-3.5 py-3.5 text-left transition-colors hover:border-sidebar-primary/50 hover:bg-sidebar-accent/35"
+      className="seller-clickable group/rev relative mt-3 block w-full overflow-hidden rounded-[10px] border-sidebar-border bg-sidebar-accent/15 px-2.5 py-2 text-left hover:border-sidebar-primary/60 hover:bg-sidebar-accent/35"
     >
       {/* Header */}
-      <div className="flex items-center gap-2.5">
-        <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-sidebar-primary/15 ring-1 ring-inset ring-sidebar-primary/25">
-          <Trophy className="h-4 w-4 text-sidebar-primary" strokeWidth={2.2} />
-        </span>
-        <span className="font-display text-[13px] font-bold tracking-[-0.01em] text-sidebar-accent-foreground">
-          Faturamento
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-1">
+          <TrendingUp className="h-2.5 w-2.5 text-sidebar-foreground/40" strokeWidth={2.5} />
+          <span className="font-display text-[8px] font-bold uppercase tracking-[0.18em] text-sidebar-foreground/50">
+            Faturamento
+          </span>
+        </div>
+        <span className="rounded border border-sidebar-primary/25 bg-sidebar-primary/10 px-1 py-[1px] font-display text-[7.5px] font-black uppercase tracking-[0.16em] text-sidebar-primary">
+          {tierName}
         </span>
       </div>
 
       {/* Main figure */}
-      <div className="mt-3 flex items-baseline gap-1.5">
-        <p className="font-numbers text-[26px] font-black leading-none tracking-[-0.05em] text-sidebar-accent-foreground tabular-nums">
-          {parts.prefix} {parts.value}
-          {parts.suffix && <span className="text-[19px]">{parts.suffix}</span>}
+      <div className="mt-1.5 flex items-baseline gap-1">
+        <span className="font-numbers text-[11px] font-bold leading-none text-sidebar-foreground/45 tabular-nums">
+          {parts.prefix}
+        </span>
+        <p className="font-numbers text-[19px] font-black leading-none tracking-[-0.045em] text-sidebar-accent-foreground tabular-nums">
+          {parts.value}
+          <span className="ml-0.5 text-[13px] font-black text-sidebar-foreground/55">{parts.suffix}</span>
         </p>
-        <span className="font-numbers text-[13px] font-bold leading-none tabular-nums text-sidebar-foreground/45">
-          / {milestone.next.label.replace(",", ".")}
+        <span className="ml-auto font-display text-[7.5px] font-bold uppercase tracking-[0.16em] text-sidebar-foreground/35">
+          total
         </span>
       </div>
 
       {/* Progress bar */}
-      <div className="mt-3 h-2 w-full overflow-hidden rounded-full bg-sidebar-border/60">
-        <div
-          className="h-full rounded-full bg-sidebar-primary transition-[width] duration-700 ease-out"
-          style={{ width: `${pct}%` }}
-        />
+      <div className="relative mt-2">
+        <div className="h-[3px] w-full overflow-hidden rounded-full bg-sidebar-border/50">
+          <div
+            className="h-full rounded-full bg-sidebar-primary transition-[width] duration-700 ease-out"
+            style={{ width: `${pct}%` }}
+          />
+        </div>
+      </div>
+
+      {/* Scale */}
+      <div className="mt-1 flex items-center justify-between font-numbers text-[8px] font-semibold tabular-nums text-sidebar-foreground/40">
+        <span>{milestone.current.label.replace(",", ".")}</span>
+        <span>{milestone.next.label.replace(",", ".")}</span>
       </div>
 
       {/* Footer */}
-      <div className="mt-2.5 flex items-center justify-between gap-2">
-        <span className="font-numbers text-[12px] font-black tabular-nums text-sidebar-primary">
-          {pctDisplay}%
+      <div className="mt-1.5 flex items-center justify-between border-t border-sidebar-border/40 pt-1.5">
+        <div className="flex items-baseline gap-1">
+          <span className="font-numbers text-[10px] font-black tabular-nums text-sidebar-accent-foreground">
+            {pctDisplay}%
+          </span>
+          <span className="font-display text-[7.5px] font-bold uppercase tracking-[0.14em] text-sidebar-foreground/40">
+            da meta
+          </span>
+        </div>
+        <span className="inline-flex items-center gap-0.5 font-display text-[8px] font-black uppercase tracking-[0.18em] text-sidebar-primary transition-transform group-hover/rev:translate-x-0.5">
+          PREMIAÇÕES
+          <ChevronRight className="h-2 w-2" strokeWidth={3} />
         </span>
-        <span className="truncate font-display text-[9px] font-bold uppercase tracking-[0.14em] text-sidebar-foreground/45">
-          Próxima: <span className="text-sidebar-primary">{nextLabel}</span>
-        </span>
-
       </div>
     </button>
   );
 }
-
 
 
 type SidebarSectionNavProps = {
@@ -182,7 +190,7 @@ function SidebarSectionNav({ section, pathname, isFirst }: SidebarSectionNavProp
                     end={item.exact}
                     activeClassName=""
                     className={cn(
-                      "seller-nav-option group/nav relative flex h-[52px] w-full items-center gap-3.5 rounded-xl border border-transparent px-3.5 text-[14.5px] font-semibold tracking-[-0.01em]",
+                      "seller-nav-option group/nav relative flex h-[44px] w-full items-center gap-3 rounded-lg border border-transparent px-3 text-[13px] font-semibold",
                       "transition-colors duration-150 ease-out",
                       "group-data-[collapsible=icon]:h-11 group-data-[collapsible=icon]:w-11 group-data-[collapsible=icon]:mx-auto group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0 group-data-[collapsible=icon]:gap-0",
                       isActive
@@ -200,7 +208,7 @@ function SidebarSectionNav({ section, pathname, isFirst }: SidebarSectionNavProp
                     )}
                     <item.icon
                       className={cn(
-                        "h-[21px] w-[21px] shrink-0 transition-colors duration-150 ease-out group-data-[collapsible=icon]:h-5 group-data-[collapsible=icon]:w-5",
+                        "h-[18px] w-[18px] transition-colors duration-150 ease-out group-data-[collapsible=icon]:h-5 group-data-[collapsible=icon]:w-5",
                         isActive
                           ? "text-primary-foreground"
                           : "text-muted-foreground/60 group-hover/nav:text-foreground",
@@ -384,102 +392,105 @@ export function AppSidebar() {
       </SidebarContent>
 
 
-      <SidebarFooter className="relative border-t border-sidebar-border/60 p-2.5">
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
+      <SidebarFooter className="relative border-t border-sidebar-border/60 p-2.5 pb-3">
+        {/* Expanded footer */}
+        <div className="group-data-[collapsible=icon]:hidden flex flex-col gap-2">
+          {/* User row: avatar + info + logout */}
+          <div className="flex items-center gap-2">
             <button
               type="button"
-              aria-label="Menu da conta"
-              className={cn(
-                "seller-clickable group/acc flex w-full items-center gap-3 rounded-xl border border-sidebar-border/60 bg-sidebar-accent/20 px-2.5 py-2 text-left transition-colors",
-                "hover:border-sidebar-primary/40 hover:bg-sidebar-accent/45",
-                "data-[state=open]:border-sidebar-primary/60 data-[state=open]:bg-sidebar-accent/55",
-                collapsed && "justify-center border-transparent bg-transparent px-0",
-              )}
+              onClick={() => navigate("/perfil")}
+              className="seller-clickable flex items-center gap-2.5 rounded-xl p-1.5 text-left hover:bg-sidebar-accent/55"
             >
-              <div className="relative flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-sidebar-primary/15 text-[13px] font-black text-sidebar-primary ring-1 ring-inset ring-sidebar-primary/25">
+              <div className="relative flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-sidebar-primary/15 text-[12px] font-bold text-sidebar-primary ring-1 ring-sidebar-primary/25">
                 {userInitial}
-                <span className="absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 rounded-full border-2 border-sidebar bg-success" />
+                <span className="absolute -bottom-0.5 -right-0.5 h-2 w-2 rounded-full border-2 border-sidebar bg-success" />
               </div>
-              <div className="min-w-0 flex-1 group-data-[collapsible=icon]:hidden">
-                <p className="truncate text-[13px] font-bold leading-tight text-sidebar-accent-foreground">
+              <div className="min-w-0 flex-1">
+                <p className="truncate text-[12px] font-bold leading-tight text-sidebar-accent-foreground">
                   {userName}
                 </p>
-                <p className="truncate text-[10.5px] leading-tight text-sidebar-foreground/50">
+                <p className="truncate text-[10px] leading-tight text-sidebar-foreground/50">
                   {user?.email}
                 </p>
               </div>
-              <MoreHorizontal className="h-4 w-4 shrink-0 text-sidebar-foreground/40 transition-colors group-hover/acc:text-sidebar-primary group-data-[collapsible=icon]:hidden" />
             </button>
-          </DropdownMenuTrigger>
+            <button
+              type="button"
+              onClick={handleLogout}
+              aria-label="Sair da conta"
+              className="seller-clickable ml-auto flex h-8 w-8 items-center justify-center rounded-lg text-sidebar-foreground/50 hover:bg-destructive/10 hover:text-destructive transition-colors"
+            >
+              <LogOut className="h-4 w-4" strokeWidth={2} />
+            </button>
+          </div>
 
-          <DropdownMenuContent
-            side="top"
-            align="start"
-            sideOffset={10}
-            className="w-[248px] rounded-2xl border-sidebar-border/80 bg-sidebar p-1.5 shadow-2xl"
+          {/* Compact help row */}
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={() => window.open("https://wa.me/5511999999999?text=Preciso%20de%20suporte%20para%20escalar!", "_blank")}
+              className="flex flex-1 items-center justify-center gap-1.5 h-8 rounded-lg bg-sidebar-primary/10 px-2 text-[11px] font-semibold text-sidebar-primary transition-colors hover:bg-sidebar-primary/20"
+            >
+              <Headphones className="h-3.5 w-3.5" strokeWidth={2.5} />
+              Fale conosco
+            </button>
+            <button
+              type="button"
+              onClick={() => navigate("/suporte")}
+              className="flex flex-1 items-center justify-center gap-1.5 h-8 rounded-lg border border-sidebar-border/60 px-2 text-[11px] font-semibold text-sidebar-foreground/70 transition-colors hover:border-sidebar-primary/40 hover:bg-sidebar-accent/40 hover:text-sidebar-accent-foreground"
+            >
+              <MessageSquare className="h-3.5 w-3.5" strokeWidth={2} />
+              Central de ajuda
+            </button>
+          </div>
+
+          <button
+            type="button"
+            onClick={() => window.dispatchEvent(new Event("hotzfy:open-cookie-settings"))}
+            className="text-[10px] font-medium uppercase tracking-[0.12em] text-sidebar-foreground/40 transition-colors hover:text-sidebar-foreground/70"
           >
-            <div className="flex items-center gap-2.5 rounded-xl bg-sidebar-accent/25 px-2.5 py-2.5">
-              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-sidebar-primary/15 text-[12px] font-black text-sidebar-primary ring-1 ring-inset ring-sidebar-primary/25">
-                {userInitial}
-              </div>
-              <div className="min-w-0">
-                <p className="truncate text-[12.5px] font-bold leading-tight text-sidebar-accent-foreground">
-                  {userName}
-                </p>
-                <p className="truncate text-[10.5px] leading-tight text-sidebar-foreground/50">
-                  {user?.email}
-                </p>
-              </div>
-            </div>
+            Preferências de cookies
+          </button>
+        </div>
 
-            <DropdownMenuLabel className="px-2.5 pb-1 pt-3 text-[9.5px] font-black uppercase tracking-[0.18em] text-sidebar-foreground/40">
-              Conta
-            </DropdownMenuLabel>
-            <DropdownMenuItem
-              onSelect={() => navigate("/perfil")}
-              className="gap-2.5 rounded-lg px-2.5 py-2 text-[13px] font-semibold text-sidebar-foreground/80 focus:bg-sidebar-accent/60 focus:text-sidebar-accent-foreground"
-            >
-              <User className="h-[17px] w-[17px] text-sidebar-foreground/50" /> Meu perfil & KYC
-            </DropdownMenuItem>
-
-            <DropdownMenuSeparator className="my-1.5 bg-sidebar-border/60" />
-            <DropdownMenuLabel className="px-2.5 pb-1 pt-0.5 text-[9.5px] font-black uppercase tracking-[0.18em] text-sidebar-foreground/40">
-              Ajuda
-            </DropdownMenuLabel>
-            <DropdownMenuItem
-              onSelect={() =>
-                window.open("https://wa.me/5511999999999?text=Preciso%20de%20suporte%20para%20escalar!", "_blank")
-              }
-              className="gap-2.5 rounded-lg px-2.5 py-2 text-[13px] font-semibold text-sidebar-foreground/80 focus:bg-sidebar-accent/60 focus:text-sidebar-accent-foreground"
-            >
-              <Headphones className="h-[17px] w-[17px] text-sidebar-foreground/50" /> Fale conosco
-            </DropdownMenuItem>
-            <DropdownMenuItem
-              onSelect={() => navigate("/suporte")}
-              className="gap-2.5 rounded-lg px-2.5 py-2 text-[13px] font-semibold text-sidebar-foreground/80 focus:bg-sidebar-accent/60 focus:text-sidebar-accent-foreground"
-            >
-              <MessageSquare className="h-[17px] w-[17px] text-sidebar-foreground/50" /> Central de ajuda
-            </DropdownMenuItem>
-            <DropdownMenuItem
-              onSelect={() => window.dispatchEvent(new Event("hotzfy:open-cookie-settings"))}
-              className="gap-2.5 rounded-lg px-2.5 py-2 text-[13px] font-semibold text-sidebar-foreground/80 focus:bg-sidebar-accent/60 focus:text-sidebar-accent-foreground"
-            >
-              <Cookie className="h-[17px] w-[17px] text-sidebar-foreground/50" /> Preferências de cookies
-            </DropdownMenuItem>
-
-            <DropdownMenuSeparator className="my-1.5 bg-sidebar-border/60" />
-            <DropdownMenuItem
-              onSelect={handleLogout}
-              className="gap-2.5 rounded-lg px-2.5 py-2 text-[13px] font-semibold text-destructive focus:bg-destructive/12 focus:text-destructive"
-            >
-              <LogOut className="h-[17px] w-[17px]" /> Sair da conta
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
+        {/* Collapsed footer */}
+        <div className="hidden group-data-[collapsible=icon]:flex flex-col items-center gap-2">
+          <button
+            type="button"
+            onClick={() => navigate("/perfil")}
+            aria-label="Meu perfil"
+            className="relative flex h-9 w-9 items-center justify-center rounded-xl bg-sidebar-primary/15 text-[12px] font-bold text-sidebar-primary ring-1 ring-sidebar-primary/25 hover:bg-sidebar-accent/55"
+          >
+            {userInitial}
+            <span className="absolute -bottom-0.5 -right-0.5 h-2 w-2 rounded-full border-2 border-sidebar bg-success" />
+          </button>
+          <button
+            type="button"
+            onClick={() => window.open("https://wa.me/5511999999999?text=Preciso%20de%20suporte%20para%20escalar!", "_blank")}
+            aria-label="Fale conosco"
+            className="flex h-9 w-9 items-center justify-center rounded-xl bg-sidebar-primary/10 text-sidebar-primary hover:bg-sidebar-primary/20"
+          >
+            <Headphones className="h-4 w-4" strokeWidth={2.5} />
+          </button>
+          <button
+            type="button"
+            onClick={() => navigate("/suporte")}
+            aria-label="Central de ajuda"
+            className="flex h-9 w-9 items-center justify-center rounded-xl border border-sidebar-border/60 text-sidebar-foreground/70 hover:border-sidebar-primary/40 hover:bg-sidebar-accent/40 hover:text-sidebar-accent-foreground"
+          >
+            <MessageSquare className="h-4 w-4" strokeWidth={2} />
+          </button>
+          <button
+            type="button"
+            onClick={handleLogout}
+            aria-label="Sair da conta"
+            className="flex h-9 w-9 items-center justify-center rounded-xl text-sidebar-foreground/50 hover:bg-destructive/10 hover:text-destructive"
+          >
+            <LogOut className="h-4 w-4" strokeWidth={2} />
+          </button>
+        </div>
       </SidebarFooter>
-
-
     </Sidebar>
   );
 }
