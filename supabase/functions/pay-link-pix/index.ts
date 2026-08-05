@@ -44,15 +44,13 @@ Deno.serve(async (req) => {
         { status: 429, headers: { ...corsHeaders, "Content-Type": "application/json", "Retry-After": "60" } });
     }
 
-    // Validação básica dos dados do comprador (evita payloads gigantes / lixo).
-    const str = (v: unknown, max: number) => (typeof v === "string" ? v.trim().slice(0, max) : "");
-    const safeName = str(customerName, 120);
-    const safeEmail = str(customerEmail, 160);
-    const safeDocument = str(customerDocument, 20).replace(/\D/g, "");
-    if (safeEmail && !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(safeEmail)) {
+    // Validação básica do e-mail (a sanitização completa acontece abaixo).
+    const emailInput = typeof customerEmail === "string" ? customerEmail.trim() : "";
+    if (emailInput && !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(emailInput)) {
       return new Response(JSON.stringify({ success: false, error: "E-mail inválido" }),
         { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
+
 
 
     const { data: link } = await supabase
