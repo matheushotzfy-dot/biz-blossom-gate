@@ -56,8 +56,10 @@ export default function PublicPaymentLink() {
   useEffect(() => {
     if (!pix?.transactionId) return;
     const interval = setInterval(async () => {
-      const { data } = await supabase.from("transactions").select("status").eq("id", pix.transactionId).maybeSingle();
-      if (data?.status === "approved" || data?.status === "completed" || data?.status === "paid") {
+      // Visitante anônimo não lê `transactions` (RLS). Usamos a função pública
+      // que devolve somente o status da cobrança — nada além disso.
+      const { data } = await supabase.rpc("get_checkout_status", { _transaction_id: pix.transactionId });
+      if (data === "approved" || data === "completed" || data === "paid") {
         setStatus("paid"); clearInterval(interval);
       }
     }, 3500);
