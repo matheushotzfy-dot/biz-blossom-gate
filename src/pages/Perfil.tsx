@@ -294,7 +294,7 @@ export default function Perfil() {
         subtitle="Dados cadastrais, limites operacionais, progresso de faturamento e endereço fiscal."
         actions={
           <span className={cn(
-            "inline-flex items-center rounded-xl border border-border/60 bg-card/80 px-3 py-2 text-[10px] font-bold uppercase tracking-[0.18em]",
+            "inline-flex items-center rounded-xl border border-border/50 bg-card px-3.5 py-2 text-[12px] font-medium",
             accStatus.tone === "success" && "text-success",
             accStatus.tone === "warning" && "text-warning",
             accStatus.tone === "destructive" && "text-destructive",
