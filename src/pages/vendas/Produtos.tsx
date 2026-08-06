@@ -246,12 +246,12 @@ export default function Produtos() {
       />
 
       {/* ── KPI grid (Dashboard-style) ── */}
-      <FinanceiroKpiGrid cols={4}>
-        <FinanceiroKpi label="Produtos no catálogo" value={String(products.length)} sub={`${counts.active} ativos`} icon={Package} tone="primary" />
-        <FinanceiroKpi label="Vendas · 30 dias" value={String(kpi.salesCount)} sub="pedidos aprovados" icon={ShoppingCart} tone="info" />
-        <FinanceiroKpi label="Receita · 30 dias" value={fmtBRL(kpi.revenue)} sub={`Ticket médio ${fmtBRL(kpi.avgTicket)}`} icon={TrendingUp} tone="success" />
-        <FinanceiroKpi label="Top do período" value={kpi.bestProduct ? (kpi.bestProduct.length > 18 ? kpi.bestProduct.slice(0, 18) + "…" : kpi.bestProduct) : "—"} sub="Produto mais vendido" icon={DollarSign} tone="warning" />
-      </FinanceiroKpiGrid>
+      <HDStatGrid>
+        <HDStat label="Produtos no catálogo" value={String(products.length)} sub={`${counts.active} ativos`} icon={Package} tone="primary" />
+        <HDStat label="Vendas · 30 dias" value={String(kpi.salesCount)} sub="pedidos aprovados" icon={ShoppingCart} tone="neutral" />
+        <HDStat label="Receita · 30 dias" value={fmtBRL(kpi.revenue)} sub={`Ticket médio ${fmtBRL(kpi.avgTicket)}`} icon={TrendingUp} tone="success" />
+        <HDStat label="Top do período" value={kpi.bestProduct ? (kpi.bestProduct.length > 18 ? kpi.bestProduct.slice(0, 18) + "…" : kpi.bestProduct) : "—"} sub="Produto mais vendido" icon={DollarSign} tone="warning" />
+      </HDStatGrid>
 
 
       {/* ── Tabs + Search row ── */}
