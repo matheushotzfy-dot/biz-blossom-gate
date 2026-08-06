@@ -422,12 +422,13 @@ export default function Vendas() {
       />
 
       {/* Premium KPI Grid */}
-      <FinanceiroKpiGrid cols={4}>
-        <FinanceiroKpi label="Faturamento Líquido" value={privacyHidden ? CENSORED : fmt(stats.revenue)} sub="Total após taxas" icon={Wallet} tone="success" />
-        <FinanceiroKpi label="Vendas Aprovadas" value={privacyHidden ? CENSORED : String(stats.count)} sub={privacyHidden ? "•••" : "Pedidos concluídos"} icon={Check} tone="primary" />
-        <FinanceiroKpi label="Ticket Médio" value={privacyHidden ? CENSORED : fmt(stats.avg)} sub="Média por venda" icon={BarChart3} tone="info" />
-        <FinanceiroKpi label="Conversão Pix" value={privacyHidden ? CENSORED : `${stats.pixConversion.toFixed(0)}%`} sub={privacyHidden ? "•••" : `${stats.pixApproved} de ${stats.pixTotal} pagos`} icon={Zap} tone="info" />
-      </FinanceiroKpiGrid>
+      <HDStatGrid>
+        <HDStat label="Faturamento Líquido" value={privacyHidden ? CENSORED : fmt(stats.revenue)} sub="Total após taxas" icon={Wallet} tone="success" />
+        <HDStat label="Vendas Aprovadas" value={privacyHidden ? CENSORED : String(stats.count)} sub={privacyHidden ? "•••" : "Pedidos concluídos"} icon={Check} tone="primary" />
+        <HDStat label="Ticket Médio" value={privacyHidden ? CENSORED : fmt(stats.avg)} sub="Média por venda" icon={BarChart3} tone="neutral" />
+        <HDStat label="Conversão Pix" value={privacyHidden ? CENSORED : `${stats.pixConversion.toFixed(0)}%`} sub={privacyHidden ? "•••" : `${stats.pixApproved} de ${stats.pixTotal} pagos`} icon={Zap} tone="info" />
+      </HDStatGrid>
+
 
 
       {/* Table Section */}
