@@ -206,6 +206,6 @@ export default function Taxas() {
           para uma proposta personalizada.
         </p>
       </section>
-    </div>
+    </HDShell>
   );
 }
