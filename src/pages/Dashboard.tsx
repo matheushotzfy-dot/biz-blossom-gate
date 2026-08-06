@@ -825,22 +825,22 @@ export default function Dashboard() {
 
 
         {/* ═══════════ CHART + SIDE PANEL ═══════════ */}
-        <section className="grid grid-cols-1 xl:grid-cols-3 gap-3">
+        <section className="grid grid-cols-1 xl:grid-cols-3 gap-4">
 
           {/* Faturamento — Clean line chart (Cakto-style) */}
-          <div className="xl:col-span-2 rounded-2xl border border-border/60 bg-card/80 backdrop-blur overflow-hidden">
-            <div className="flex items-center justify-between gap-3 px-5 md:px-6 pt-5 pb-4">
+          <div className="xl:col-span-2 rounded-[2rem] border border-border/60 bg-card overflow-hidden">
+            <div className="flex items-center justify-between gap-3 px-6 md:px-8 pt-7 pb-6">
               <div className="min-w-0">
-                <h3 className="font-display font-bold text-[15px] tracking-[-0.01em] text-foreground">Faturamento</h3>
-                <p className="text-[11px] text-muted-foreground/60 mt-0.5">{isCustom ? "Período personalizado" : selectedPeriod.label}</p>
+                <h4 className="font-display font-bold text-xl tracking-[-0.02em] text-foreground">Faturamento</h4>
+                <p className="text-[11px] text-muted-foreground/60 mt-1">Comparativo de entradas e saídas</p>
               </div>
-              <div className="flex items-center rounded-lg border border-border/60 bg-background/40 p-0.5">
+              <div className="flex items-center rounded-2xl border border-border/60 bg-background p-1.5">
                 {PERIOD_PRESETS.filter(p => ["Hoje", "7 dias", "30 dias"].includes(p.label)).map((p) => {
                   const isActive = !isCustom && selectedPeriod.label === p.label;
                   const short = p.label === "Hoje" ? "Hoje" : p.label === "7 dias" ? "7d" : "30d";
                   return (
                     <button key={p.label} onClick={() => { setSelectedPeriod(p); setIsCustom(false); }}
-                      className={cn("px-3 py-1 rounded-md text-[11px] font-semibold transition-colors",
+                      className={cn("px-4 py-1.5 rounded-xl text-[11px] font-bold transition-colors",
                         isActive ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground"
                       )}>
                       {short}
@@ -849,6 +849,7 @@ export default function Dashboard() {
                 })}
               </div>
             </div>
+
 
             <div className="h-[300px] w-full pr-4 pb-4">
               <ResponsiveContainer width="100%" height="100%">
