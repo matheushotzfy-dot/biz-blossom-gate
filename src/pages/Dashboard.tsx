@@ -695,38 +695,43 @@ export default function Dashboard() {
         </header>
 
         {/* ═══════════ HERO — RANKING BANNER ═══════════ */}
-        <section className="relative overflow-hidden rounded-3xl border border-border/60 bg-gradient-to-br from-card via-card to-primary/[0.08]">
-          <div aria-hidden className="pointer-events-none absolute inset-0 opacity-40"
-            style={{ backgroundImage: "radial-gradient(50% 80% at 90% 50%, hsl(var(--primary)/0.25), transparent 60%), radial-gradient(40% 60% at 10% 10%, hsl(var(--primary)/0.15), transparent 60%)" }}
+        <section className="relative overflow-hidden rounded-[2rem] md:rounded-[2.5rem] border border-border/60 bg-gradient-to-r from-card to-background">
+          <div aria-hidden className="pointer-events-none absolute inset-0 opacity-30"
+            style={{ backgroundImage: "radial-gradient(45% 70% at 88% 60%, hsl(var(--primary)/0.22), transparent 65%)" }}
           />
-          <div className="relative flex flex-col lg:flex-row items-center gap-6 p-5 md:p-6 lg:p-8">
+          <div className="relative flex flex-col lg:flex-row items-center justify-between gap-6 p-6 md:p-8 lg:px-12">
             {/* Left copy */}
-            <div className="flex-1 min-w-0 space-y-3 text-center lg:text-left">
-              <div className="inline-flex items-center gap-2 rounded-full border border-primary/30 bg-primary/10 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.28em] text-primary">
-                <Trophy className="h-3.5 w-3.5" /> Ranking · Corrida de Faturamento
-              </div>
-              <h2 className="font-display font-black text-2xl sm:text-3xl lg:text-5xl tracking-[-0.03em] leading-[1.05]">
-                Conheça os <span className="text-primary">CAMPEÕES</span>
+            <div className="flex-1 min-w-0 max-w-md space-y-3 text-center lg:text-left">
+              <span className="block text-[10px] font-bold uppercase tracking-[0.3em] text-primary">
+                Ranking Final
+              </span>
+              <h2 className="font-display font-extrabold italic uppercase text-3xl sm:text-4xl lg:text-5xl tracking-[-0.045em] leading-[0.9]">
+                Conheça os<br /><span className="text-primary">Campeões</span>
               </h2>
-              <p className="text-muted-foreground text-sm max-w-md mx-auto lg:mx-0">
-                Os resultados estão definidos. Conheça os vencedores da Corrida de Faturamento e prepare-se para a próxima temporada.
+              <p className="text-muted-foreground text-[13px] font-medium leading-relaxed">
+                Os resultados estão definidos. Conheça os vencedores da Corrida de Faturamento.
               </p>
-            <Link to="/premiacoes?tab=corrida" className="inline-flex items-center gap-2 rounded-xl bg-primary px-4 py-2.5 text-primary-foreground text-[13px] font-bold hover:bg-primary/90 transition-all active:scale-[0.98]">
+              <Link to="/premiacoes?tab=corrida" className="inline-flex items-center gap-2 rounded-xl bg-primary px-4 py-2.5 text-primary-foreground text-[13px] font-bold hover:bg-primary/90 transition-colors">
                 Ver ranking completo <ArrowRight className="h-4 w-4" />
               </Link>
             </div>
 
             {/* Podium visual */}
-            <div className="flex items-end gap-2 sm:gap-3 shrink-0">
+            <div className="flex items-end gap-2 shrink-0">
               {[
-                { pos: "02", name: "Airis F.", h: "h-20 sm:h-24", tone: "from-slate-300 to-slate-500" },
-                { pos: "01", name: "Bryan G.", h: "h-28 sm:h-32", tone: "from-yellow-300 to-amber-500" },
-                { pos: "03", name: "Wdzin", h: "h-16 sm:h-20", tone: "from-orange-400 to-orange-700" },
+                { pos: "02", name: "Airis Ferreira", h: "h-20 sm:h-24", w: "w-20 sm:w-24", num: "text-2xl sm:text-3xl text-muted-foreground/60", box: "bg-muted/40 border-x border-t border-border/70", leader: false },
+                { pos: "01", name: "Bryan Gonzaga", h: "h-32 sm:h-40", w: "w-24 sm:w-32", num: "text-4xl sm:text-5xl text-foreground/60", box: "bg-gradient-to-b from-muted to-muted/30 border-x border-t border-border", leader: true },
+                { pos: "03", name: "Wdzin", h: "h-16 sm:h-20", w: "w-20 sm:w-24", num: "text-xl sm:text-2xl text-muted-foreground/40", box: "bg-card border-x border-t border-border/60", leader: false },
               ].map((p) => (
-                <div key={p.pos} className="flex flex-col items-center gap-2">
-                  <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">{p.name}</span>
-                  <div className={cn("w-14 sm:w-16 lg:w-20 rounded-t-xl bg-gradient-to-b flex items-start justify-center pt-2 shadow-lg", p.h, p.tone)}>
-                    <span className="font-display font-black text-lg text-background/90">{p.pos}</span>
+                <div key={p.pos} className="flex flex-col items-center">
+                  {p.leader && (
+                    <span className="mb-2 rounded-full border border-primary/30 bg-primary/15 px-3 py-1 text-[10px] font-black uppercase tracking-wide text-primary">
+                      Líder
+                    </span>
+                  )}
+                  <span className={cn("mb-2 text-[11px] font-bold", p.leader ? "text-foreground" : "text-muted-foreground/70")}>{p.name}</span>
+                  <div className={cn("rounded-t-2xl flex items-center justify-center", p.h, p.w, p.box)}>
+                    <span className={cn("font-display font-black tabular-nums", p.num)}>{p.pos}</span>
                   </div>
                 </div>
               ))}
@@ -734,6 +739,7 @@ export default function Dashboard() {
           </div>
 
         </section>
+
 
         {/* ═══════════ 4 KPI CARDS ═══════════ */}
         <section className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-3">
