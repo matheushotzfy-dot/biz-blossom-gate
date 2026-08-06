@@ -225,15 +225,10 @@ export default function Produtos() {
   return (
     <div className="mx-auto w-full max-w-[1440px] space-y-4 sm:space-y-6 px-3 pb-24 pt-1 sm:px-7 md:pb-10">
       {/* ── Hero (Financeiro pattern) ── */}
-      <FinanceiroHero
+      <HDHeader
         eyebrow={`${products.length} ${products.length === 1 ? "produto" : "produtos"} no catálogo`}
         title="Produtos"
         subtitle="Gerencie seu catálogo, checkout e área de membros em um só lugar."
-        status={counts.pending_review > 0
-          ? { tone: "warning", label: `${counts.pending_review} em revisão`, pulse: true }
-          : counts.active > 0
-            ? { tone: "success", label: `${counts.active} ativos` }
-            : undefined}
         actions={
           <button
             onClick={() => navigate("/vendas/produtos/novo/editar")}
