@@ -12,7 +12,7 @@ import { useProfile } from "@/hooks/useProfile";
 import {
   User, Camera, Trophy, Wallet, Shield, BadgeCheck,
   Calendar, Fingerprint, Copy, Check, MapPin, Loader2,
-  AlertTriangle, Lock, Activity, Sparkles, type LucideIcon,
+  AlertTriangle, Lock, Activity, Sparkles, CalendarDays, TrendingUp, Award, ShieldCheck, type LucideIcon,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
