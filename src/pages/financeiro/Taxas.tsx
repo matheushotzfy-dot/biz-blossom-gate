@@ -125,7 +125,7 @@ export default function Taxas() {
             }
             sub={m.sub}
             icon={m.icon}
-            tone={m.tone === "primary" ? "primary" : m.tone === "warning" ? "warning" : "info"}
+            tone={m.tone === "success" ? "success" : m.tone === "warning" ? "warning" : "info"}
           />
         ))}
       </HDStatGrid>
