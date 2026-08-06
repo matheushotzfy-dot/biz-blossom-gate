@@ -694,6 +694,6 @@ export default function Vendas() {
       {detailTx && (
         <TransactionDetailPanel tx={detailTx} products={prodsMap} onClose={() => setDetailTx(null)} />
       )}
-    </div>
+    </HDShell>
   );
 }
