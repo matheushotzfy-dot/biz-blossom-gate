@@ -620,13 +620,14 @@ export default function Dashboard() {
         {/* ═══════════ TOP GREETING ROW ═══════════ */}
         <header className="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
           <div className="min-w-0">
-            <h1 className="font-display font-black tracking-[-0.02em] text-2xl md:text-[32px] leading-tight truncate">
-              Seja bem-vindo, <span className="text-foreground/90">{nickname}</span>
-              <button onClick={privacy.toggle} className="ml-2 inline-flex align-middle text-muted-foreground/60 hover:text-primary transition-colors">
+            <h1 className="font-display font-extrabold tracking-[-0.035em] text-[28px] md:text-[40px] leading-[1.05] truncate">
+              Seja bem-vindo, {nickname}
+              <button onClick={privacy.toggle} className="ml-2 inline-flex align-middle text-muted-foreground/50 hover:text-primary transition-colors">
                 {privacy.hidden ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
               </button>
             </h1>
-            <p className="text-muted-foreground text-sm mt-1">Que essa jornada seja leve, produtiva e cheia de conquistas!</p>
+            <p className="text-muted-foreground/80 text-[13px] font-medium mt-1">Que essa jornada seja leve, produtiva e cheia de conquistas!</p>
+
           </div>
 
           {/* Faturamento / Meta chip — clean, calendar icon opens filter */}
