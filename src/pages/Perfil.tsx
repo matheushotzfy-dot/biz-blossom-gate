@@ -17,7 +17,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { FinanceiroHero } from "@/components/financeiro/FinanceiroHero";
+import { HDShell, HDHeader, HDStat, HDStatGrid } from "@/components/hd/HDPage";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 
@@ -741,6 +741,6 @@ export default function Perfil() {
         </div>
       </Panel>
       </div>
-    </div>
+    </HDShell>
   );
 }
