@@ -56,7 +56,7 @@ export function HDShell({ children, className, ...rest }: ComponentProps<"div">)
 }
 
 export interface HDHeaderProps {
-  /** Micro-caps kicker rendered above the title. */
+  /** Small kicker rendered above the title. */
   eyebrow?: ReactNode;
   title: ReactNode;
   subtitle?: ReactNode;
@@ -65,21 +65,19 @@ export interface HDHeaderProps {
   className?: string;
 }
 
-/** Oversized display heading row, matching the dashboard greeting. */
+/** Display heading row, matching the dashboard greeting. */
 export function HDHeader({ eyebrow, title, subtitle, actions, className }: HDHeaderProps) {
   return (
     <header className={cn("flex flex-col md:flex-row md:items-center md:justify-between gap-3", className)}>
       <div className="min-w-0">
         {eyebrow ? (
-          <span className="block text-[10px] font-bold uppercase tracking-[0.28em] text-primary mb-1.5">
-            {eyebrow}
-          </span>
+          <span className="block text-[12px] font-medium text-muted-foreground/70 mb-1">{eyebrow}</span>
         ) : null}
-        <h1 className="font-display font-extrabold tracking-[-0.035em] text-[26px] md:text-[38px] leading-[1.05]">
+        <h1 className="font-display font-bold tracking-[-0.03em] text-[26px] md:text-[34px] leading-[1.05]">
           {title}
         </h1>
         {subtitle ? (
-          <p className="text-muted-foreground/80 text-[13px] font-medium mt-1">{subtitle}</p>
+          <p className="text-muted-foreground/60 text-[13px] mt-1.5">{subtitle}</p>
         ) : null}
       </div>
       {actions ? <div className="flex items-center gap-2 flex-wrap shrink-0">{actions}</div> : null}
@@ -96,34 +94,41 @@ export interface HDStatProps {
   className?: string;
 }
 
-/** Dense KPI card: micro-caps label, 28px black numerals, muted footnote. */
+/**
+ * Dense KPI card, dashboard language:
+ * sentence-case label, large white numerals, oversized ghost icon on the right.
+ */
 export function HDStat({ label, value, sub, icon: Icon, tone = "neutral", className }: HDStatProps) {
+  const isDanger = tone === "danger";
   return (
     <div
       className={cn(
-        "group relative overflow-hidden rounded-[1.5rem] border border-border/60 bg-card/80 px-5 py-4 transition-colors hover:border-primary/30",
+        "group relative overflow-hidden rounded-2xl border border-border/50 bg-card px-5 pt-5 pb-6 transition-colors hover:border-border",
         className,
       )}
     >
-      <div className="flex items-start justify-between gap-3">
-        <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-muted-foreground/70">{label}</p>
-        {Icon ? (
-          <span className={cn("flex h-8 w-8 items-center justify-center rounded-xl shrink-0", TONE_SHELL[tone])}>
-            <Icon className="h-4 w-4" strokeWidth={2.2} />
-          </span>
-        ) : null}
-      </div>
+      {Icon ? (
+        <Icon
+          aria-hidden
+          strokeWidth={1.5}
+          className={cn(
+            "pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 h-16 w-16 transition-opacity group-hover:opacity-80",
+            isDanger ? "text-destructive/15" : "text-foreground/[0.07]",
+          )}
+        />
+      ) : null}
+      <p className={cn("relative text-[13px] font-medium", isDanger ? "text-destructive/90" : "text-muted-foreground")}>
+        {label}
+      </p>
       <p
         className={cn(
-          "mt-3 font-display text-[28px] font-black leading-none tracking-[-0.03em] tabular-nums truncate",
-          tone === "neutral" ? "text-foreground" : TONE_TEXT[tone],
+          "relative mt-4 font-display font-bold tabular-nums tracking-[-0.03em] text-[30px] leading-none truncate",
+          isDanger ? "text-destructive" : "text-foreground",
         )}
       >
         {value}
       </p>
-      {sub ? (
-        <p className="mt-2 truncate text-[11px] font-medium text-muted-foreground/70">{sub}</p>
-      ) : null}
+      {sub ? <p className="relative mt-2 truncate text-[12px] text-muted-foreground/55">{sub}</p> : null}
     </div>
   );
 }
@@ -131,13 +136,13 @@ export function HDStat({ label, value, sub, icon: Icon, tone = "neutral", classN
 /** Responsive grid for HDStat cards. */
 export function HDStatGrid({ children, className, ...rest }: ComponentProps<"div">) {
   return (
-    <div className={cn("grid grid-cols-2 lg:grid-cols-4 gap-3", className)} {...rest}>
+    <div className={cn("grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4", className)} {...rest}>
       {children}
     </div>
   );
 }
 
-/** Solid section card with optional micro-caps header. */
+/** Solid section card with optional header. */
 export function HDCard({
   title,
   description,
@@ -152,15 +157,15 @@ export function HDCard({
   className?: string;
 }) {
   return (
-    <section className={cn("overflow-hidden rounded-[2rem] border border-border/60 bg-card/80", className)}>
+    <section className={cn("overflow-hidden rounded-2xl border border-border/60 bg-card", className)}>
       {(title || actions) && (
-        <div className="flex items-center justify-between gap-3 border-b border-border/40 px-5 py-4">
+        <div className="flex items-center justify-between gap-3 border-b border-border/40 px-6 py-5">
           <div className="min-w-0">
             {title ? (
-              <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-muted-foreground/80">{title}</p>
+              <h4 className="font-display font-bold text-[17px] tracking-[-0.02em] text-foreground truncate">{title}</h4>
             ) : null}
             {description ? (
-              <p className="mt-1 truncate text-[12px] font-medium text-muted-foreground/60">{description}</p>
+              <p className="mt-1 truncate text-[12px] text-muted-foreground/60">{description}</p>
             ) : null}
           </div>
           {actions ? <div className="flex items-center gap-2 shrink-0">{actions}</div> : null}
@@ -170,3 +175,4 @@ export function HDCard({
     </section>
   );
 }
+
