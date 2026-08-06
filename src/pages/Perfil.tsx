@@ -12,12 +12,12 @@ import { useProfile } from "@/hooks/useProfile";
 import {
   User, Camera, Trophy, Wallet, Shield, BadgeCheck,
   Calendar, Fingerprint, Copy, Check, MapPin, Loader2,
-  AlertTriangle, Lock, Activity, Sparkles, type LucideIcon,
+  AlertTriangle, Lock, Activity, Sparkles, CalendarDays, TrendingUp, Award, ShieldCheck, type LucideIcon,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { FinanceiroHero } from "@/components/financeiro/FinanceiroHero";
+import { HDShell, HDHeader, HDStat, HDStatGrid } from "@/components/hd/HDPage";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 
@@ -286,44 +286,56 @@ export default function Perfil() {
   const initials = (profile?.full_name || "U").trim().split(/\s+/).slice(0, 2).map(w => w[0]).join("").toUpperCase();
 
   return (
-    <div className="container mx-auto max-w-[1400px] px-4 sm:px-6 lg:px-8 py-6 space-y-6">
+    <HDShell>
       {/* HERO */}
-      <FinanceiroHero
-        eyebrow="MEU PERFIL & KYC"
+      <HDHeader
+        eyebrow="Meu perfil & KYC"
         title="Identidade & Conta"
         subtitle="Dados cadastrais, limites operacionais, progresso de faturamento e endereço fiscal."
-        status={{ tone: accStatus.tone === "destructive" ? "destructive" : accStatus.tone, label: `Conta ${accStatus.label}`, pulse: accStatus.tone === "warning" }}
-      />
-
-      {/* Quick info strip */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-        <div className="group premium-hover-card rounded-xl border border-border/50 bg-card p-4">
-          <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.14em]">Membro há</p>
-          <p className="text-lg font-display font-black text-foreground tabular-nums mt-1">{memberDays}d</p>
-          <p className="text-[10px] text-muted-foreground/70 mt-0.5">
-            {profile?.created_at ? new Date(profile.created_at).toLocaleDateString("pt-BR") : "—"}
-          </p>
-        </div>
-        <div className="group premium-hover-card rounded-xl border border-border/50 bg-card p-4">
-          <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.14em]">Vendas</p>
-          <p className="text-lg font-display font-black text-foreground tabular-nums mt-1">{totalSales.toLocaleString("pt-BR")}</p>
-          <p className="text-[10px] text-muted-foreground/70 mt-0.5">{last30Sales} nos últimos 30d</p>
-        </div>
-        <div className="group premium-hover-card rounded-xl border border-border/50 bg-card p-4">
-          <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.14em]">Tier</p>
-          <p className="text-lg font-display font-black text-foreground mt-1">{tierLabel}</p>
-          <p className="text-[10px] text-muted-foreground/70 mt-0.5">{milestone.pct.toFixed(0)}% até {milestone.next.label}</p>
-        </div>
-        <div className="group premium-hover-card rounded-xl border border-border/50 bg-card p-4">
-          <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.14em]">Status</p>
-          <p className={cn("text-lg font-display font-black mt-1",
+        actions={
+          <span className={cn(
+            "inline-flex items-center rounded-xl border border-border/60 bg-card/80 px-3 py-2 text-[10px] font-bold uppercase tracking-[0.18em]",
             accStatus.tone === "success" && "text-success",
             accStatus.tone === "warning" && "text-warning",
             accStatus.tone === "destructive" && "text-destructive",
-          )}>{accStatus.label}</p>
-          <p className="text-[10px] text-muted-foreground/70 mt-0.5">Conta verificada via KYC</p>
-        </div>
-      </div>
+          )}>
+            Conta {accStatus.label}
+          </span>
+        }
+      />
+
+      {/* Quick info strip */}
+      <HDStatGrid>
+        <HDStat
+          label="Membro há"
+          value={`${memberDays}d`}
+          sub={profile?.created_at ? new Date(profile.created_at).toLocaleDateString("pt-BR") : "—"}
+          icon={CalendarDays}
+          tone="primary"
+        />
+        <HDStat
+          label="Vendas"
+          value={totalSales.toLocaleString("pt-BR")}
+          sub={`${last30Sales} nos últimos 30d`}
+          icon={TrendingUp}
+          tone="success"
+        />
+        <HDStat
+          label="Tier"
+          value={tierLabel}
+          sub={`${milestone.pct.toFixed(0)}% até ${milestone.next.label}`}
+          icon={Award}
+          tone="warning"
+        />
+        <HDStat
+          label="Status"
+          value={accStatus.label}
+          sub="Conta verificada via KYC"
+          icon={ShieldCheck}
+          tone={accStatus.tone === "success" ? "success" : accStatus.tone === "warning" ? "warning" : "danger"}
+        />
+      </HDStatGrid>
+
 
       {/* IDENTITY CARD */}
       <div className="group premium-hover-card rounded-xl border border-border/50 bg-card overflow-hidden animate-fade-in stagger-2">
@@ -729,6 +741,6 @@ export default function Perfil() {
         </div>
       </Panel>
       </div>
-    </div>
+    </HDShell>
   );
 }

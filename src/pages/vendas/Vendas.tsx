@@ -17,7 +17,7 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { format, startOfDay, endOfDay, subDays, startOfMonth, endOfMonth, subMonths, differenceInDays } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import type { DateRange } from "react-day-picker";
-import { FinanceiroHero, FinanceiroKpi, FinanceiroKpiGrid } from "@/components/financeiro/FinanceiroHero";
+import { HDShell, HDHeader, HDStat, HDStatGrid } from "@/components/hd/HDPage";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import ExcelJS from "exceljs";
 import { toast } from "sonner";
@@ -286,15 +286,14 @@ export default function Vendas() {
   }, [preset, range]);
 
   return (
-    <div className="space-y-6 animate-in fade-in duration-500">
+    <HDShell>
       <Seo title="Vendas | Hotzfy" description="Histórico completo de transações, filtros avançados e exportação de relatórios." path="/vendas" noindex />
 
       {/* Premium Hero */}
-      <FinanceiroHero
+      <HDHeader
         eyebrow="Minhas vendas"
         title="Vendas & Recebíveis"
-        subtitle="Histórico completo de transações, filtros avançados e exportação de relatórios financeiros."
-        status={{ tone: "success", label: `${filtered.length} transações · ${rangeLabel}`, pulse: true }}
+        subtitle={`${filtered.length} transações · ${rangeLabel} — histórico completo, filtros avançados e exportação.`}
         actions={
           <div className="flex items-center gap-2 flex-wrap">
             {/* Period selector — institutional, segmented */}
@@ -422,12 +421,13 @@ export default function Vendas() {
       />
 
       {/* Premium KPI Grid */}
-      <FinanceiroKpiGrid cols={4}>
-        <FinanceiroKpi label="Faturamento Líquido" value={privacyHidden ? CENSORED : fmt(stats.revenue)} sub="Total após taxas" icon={Wallet} tone="success" />
-        <FinanceiroKpi label="Vendas Aprovadas" value={privacyHidden ? CENSORED : String(stats.count)} sub={privacyHidden ? "•••" : "Pedidos concluídos"} icon={Check} tone="primary" />
-        <FinanceiroKpi label="Ticket Médio" value={privacyHidden ? CENSORED : fmt(stats.avg)} sub="Média por venda" icon={BarChart3} tone="info" />
-        <FinanceiroKpi label="Conversão Pix" value={privacyHidden ? CENSORED : `${stats.pixConversion.toFixed(0)}%`} sub={privacyHidden ? "•••" : `${stats.pixApproved} de ${stats.pixTotal} pagos`} icon={Zap} tone="info" />
-      </FinanceiroKpiGrid>
+      <HDStatGrid>
+        <HDStat label="Faturamento Líquido" value={privacyHidden ? CENSORED : fmt(stats.revenue)} sub="Total após taxas" icon={Wallet} tone="success" />
+        <HDStat label="Vendas Aprovadas" value={privacyHidden ? CENSORED : String(stats.count)} sub={privacyHidden ? "•••" : "Pedidos concluídos"} icon={Check} tone="primary" />
+        <HDStat label="Ticket Médio" value={privacyHidden ? CENSORED : fmt(stats.avg)} sub="Média por venda" icon={BarChart3} tone="neutral" />
+        <HDStat label="Conversão Pix" value={privacyHidden ? CENSORED : `${stats.pixConversion.toFixed(0)}%`} sub={privacyHidden ? "•••" : `${stats.pixApproved} de ${stats.pixTotal} pagos`} icon={Zap} tone="info" />
+      </HDStatGrid>
+
 
 
       {/* Table Section */}
@@ -694,6 +694,6 @@ export default function Vendas() {
       {detailTx && (
         <TransactionDetailPanel tx={detailTx} products={prodsMap} onClose={() => setDetailTx(null)} />
       )}
-    </div>
+    </HDShell>
   );
 }

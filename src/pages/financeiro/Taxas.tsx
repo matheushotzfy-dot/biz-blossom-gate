@@ -4,7 +4,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { Info, DollarSign, CreditCard, Clock, ChevronDown, Zap, Barcode, type LucideIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { FinanceiroHero } from "@/components/financeiro/FinanceiroHero";
+import { HDShell, HDHeader, HDStat, HDStatGrid } from "@/components/hd/HDPage";
 import { PixLogoMark } from "@/components/icons/PixLogoMark";
 
 const fmt = (v: number) => `R$ ${v.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}`;
@@ -98,39 +98,38 @@ export default function Taxas() {
   };
 
   return (
-    <div className="space-y-6 animate-fade-in">
-      <FinanceiroHero
+    <HDShell>
+      <HDHeader
         eyebrow="Estrutura de custos transparente"
         title="Taxas e Tarifas"
-        subtitle="Veja o percentual e a taxa fixa aplicados por método de pagamento, e o prazo de liberação dos recebíveis."
-        status={{ tone: "info", label: custom ? "Plano personalizado" : "Plano vigente" }}
+        subtitle="Percentual e taxa fixa por método de pagamento, e o prazo de liberação dos recebíveis."
+        actions={
+          <span className="inline-flex items-center rounded-xl border border-border/60 bg-card/80 px-3 py-2 text-[10px] font-bold uppercase tracking-[0.18em] text-muted-foreground">
+            {custom ? "Plano personalizado" : "Plano vigente"}
+          </span>
+        }
       />
 
-      {/* Method cards — clean strip */}
-      <section className="grid grid-cols-1 gap-px overflow-hidden rounded-xl border border-border/60 bg-border/60 sm:grid-cols-3 animate-fade-in stagger-1">
-        {methodCards.map((m) => {
-          const Icon = m.icon;
-          return (
-            <div key={m.label} className="group relative bg-card px-5 py-4 transition-colors hover:bg-muted/20">
-              <div className="flex items-center justify-between">
-                <p className="text-[10px] font-black uppercase tracking-[0.22em] text-muted-foreground/70">Taxa {m.label}</p>
-                <Icon className={cn("h-3.5 w-3.5 shrink-0 opacity-40 transition-opacity group-hover:opacity-90", toneIcon[m.tone])} strokeWidth={2.2} />
-              </div>
-              <div className="mt-4 flex items-baseline gap-1.5 flex-wrap">
-                <span className="font-display text-[26px] font-black text-foreground tabular-nums leading-none tracking-tight">
-                  {pct(m.percent)}
-                </span>
-                <span className="text-sm font-bold text-muted-foreground/60 leading-none">+</span>
-                <span className="font-display text-[20px] font-black text-foreground tabular-nums leading-none tracking-tight">
-                  {fmt(m.fixed)}
-                </span>
-              </div>
-              <p className="mt-2 truncate text-[11px] font-medium text-muted-foreground/75">{m.sub}</p>
-              <span className={cn("pointer-events-none absolute inset-x-0 bottom-0 h-[1.5px] origin-left scale-x-0 transition-transform duration-300 group-hover:scale-x-100", toneBar[m.tone])} />
-            </div>
-          );
-        })}
-      </section>
+      {/* Method cards — high-density */}
+      <HDStatGrid className="lg:grid-cols-3">
+        {methodCards.map((m) => (
+          <HDStat
+            key={m.label}
+            label={`Taxa ${m.label}`}
+            value={
+              <span className="flex items-baseline gap-1.5 flex-wrap">
+                {pct(m.percent)}
+                <span className="text-sm font-bold text-muted-foreground/60">+</span>
+                <span className="text-[20px]">{fmt(m.fixed)}</span>
+              </span>
+            }
+            sub={m.sub}
+            icon={m.icon}
+            tone={m.tone === "success" ? "success" : m.tone === "warning" ? "warning" : "info"}
+          />
+        ))}
+      </HDStatGrid>
+
 
       {/* Withdrawal fee — clean row */}
       <section className="group relative overflow-hidden rounded-xl border border-border/60 bg-card px-5 py-4 flex items-center gap-3 transition-colors hover:bg-muted/20">
@@ -207,6 +206,6 @@ export default function Taxas() {
           para uma proposta personalizada.
         </p>
       </section>
-    </div>
+    </HDShell>
   );
 }
