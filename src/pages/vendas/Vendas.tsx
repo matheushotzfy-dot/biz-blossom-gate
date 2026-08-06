@@ -286,7 +286,7 @@ export default function Vendas() {
   }, [preset, range]);
 
   return (
-    <div className="space-y-6 animate-in fade-in duration-500">
+    <HDShell>
       <Seo title="Vendas | Hotzfy" description="Histórico completo de transações, filtros avançados e exportação de relatórios." path="/vendas" noindex />
 
       {/* Premium Hero */}
