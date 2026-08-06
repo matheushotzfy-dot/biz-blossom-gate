@@ -531,23 +531,24 @@ export default function Perfil() {
           <div className="p-5">
             <div className="grid grid-cols-3 gap-px bg-border/40 rounded-lg overflow-hidden border border-border/40 mb-5">
               <div className="bg-card px-4 py-3">
-                <p className="text-[10px] uppercase tracking-[0.14em] font-bold text-muted-foreground mb-1">Total</p>
-                <p className="text-base font-display font-black text-foreground tabular-nums tracking-tight">
+                <p className="text-[12px] text-muted-foreground mb-1.5">Total</p>
+                <p className="text-[17px] font-display font-bold text-foreground tabular-nums tracking-[-0.02em]">
                   {fmtCompact(allTimeRevenue)}
                 </p>
               </div>
               <div className="bg-card px-4 py-3">
-                <p className="text-[10px] uppercase tracking-[0.14em] font-bold text-muted-foreground mb-1">Meta</p>
-                <p className="text-base font-display font-black text-primary tabular-nums tracking-tight">
+                <p className="text-[12px] text-muted-foreground mb-1.5">Meta</p>
+                <p className="text-[17px] font-display font-bold text-primary tabular-nums tracking-[-0.02em]">
                   {milestone.next.label}
                 </p>
               </div>
               <div className="bg-card px-4 py-3">
-                <p className="text-[10px] uppercase tracking-[0.14em] font-bold text-muted-foreground mb-1">Falta</p>
-                <p className="text-base font-display font-black text-foreground/70 tabular-nums tracking-tight">
+                <p className="text-[12px] text-muted-foreground mb-1.5">Falta</p>
+                <p className="text-[17px] font-display font-bold text-foreground/70 tabular-nums tracking-[-0.02em]">
                   {fmtCompact(Math.max(0, milestone.next.value - allTimeRevenue))}
                 </p>
               </div>
+
             </div>
 
             <div className="mb-4">
