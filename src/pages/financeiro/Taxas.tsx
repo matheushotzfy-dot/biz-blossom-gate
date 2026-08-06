@@ -104,7 +104,7 @@ export default function Taxas() {
         title="Taxas e Tarifas"
         subtitle="Percentual e taxa fixa por método de pagamento, e o prazo de liberação dos recebíveis."
         actions={
-          <span className="inline-flex items-center rounded-xl border border-border/60 bg-card/80 px-3 py-2 text-[10px] font-bold uppercase tracking-[0.18em] text-muted-foreground">
+          <span className="inline-flex items-center rounded-xl border border-border/50 bg-card px-3.5 py-2 text-[12px] font-medium text-muted-foreground">
             {custom ? "Plano personalizado" : "Plano vigente"}
           </span>
         }
