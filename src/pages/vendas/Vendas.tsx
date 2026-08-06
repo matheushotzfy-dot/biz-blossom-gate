@@ -290,11 +290,10 @@ export default function Vendas() {
       <Seo title="Vendas | Hotzfy" description="Histórico completo de transações, filtros avançados e exportação de relatórios." path="/vendas" noindex />
 
       {/* Premium Hero */}
-      <FinanceiroHero
+      <HDHeader
         eyebrow="Minhas vendas"
         title="Vendas & Recebíveis"
-        subtitle="Histórico completo de transações, filtros avançados e exportação de relatórios financeiros."
-        status={{ tone: "success", label: `${filtered.length} transações · ${rangeLabel}`, pulse: true }}
+        subtitle={`${filtered.length} transações · ${rangeLabel} — histórico completo, filtros avançados e exportação.`}
         actions={
           <div className="flex items-center gap-2 flex-wrap">
             {/* Period selector — institutional, segmented */}
