@@ -620,13 +620,14 @@ export default function Dashboard() {
         {/* ═══════════ TOP GREETING ROW ═══════════ */}
         <header className="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
           <div className="min-w-0">
-            <h1 className="font-display font-black tracking-[-0.02em] text-2xl md:text-[32px] leading-tight truncate">
-              Seja bem-vindo, <span className="text-foreground/90">{nickname}</span>
-              <button onClick={privacy.toggle} className="ml-2 inline-flex align-middle text-muted-foreground/60 hover:text-primary transition-colors">
+            <h1 className="font-display font-extrabold tracking-[-0.035em] text-[28px] md:text-[40px] leading-[1.05] truncate">
+              Seja bem-vindo, {nickname}
+              <button onClick={privacy.toggle} className="ml-2 inline-flex align-middle text-muted-foreground/50 hover:text-primary transition-colors">
                 {privacy.hidden ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
               </button>
             </h1>
-            <p className="text-muted-foreground text-sm mt-1">Que essa jornada seja leve, produtiva e cheia de conquistas!</p>
+            <p className="text-muted-foreground/80 text-[13px] font-medium mt-1">Que essa jornada seja leve, produtiva e cheia de conquistas!</p>
+
           </div>
 
           {/* Faturamento / Meta chip — clean, calendar icon opens filter */}
@@ -694,38 +695,43 @@ export default function Dashboard() {
         </header>
 
         {/* ═══════════ HERO — RANKING BANNER ═══════════ */}
-        <section className="relative overflow-hidden rounded-3xl border border-border/60 bg-gradient-to-br from-card via-card to-primary/[0.08]">
-          <div aria-hidden className="pointer-events-none absolute inset-0 opacity-40"
-            style={{ backgroundImage: "radial-gradient(50% 80% at 90% 50%, hsl(var(--primary)/0.25), transparent 60%), radial-gradient(40% 60% at 10% 10%, hsl(var(--primary)/0.15), transparent 60%)" }}
+        <section className="relative overflow-hidden rounded-[2rem] md:rounded-[2.5rem] border border-border/60 bg-gradient-to-r from-card to-background">
+          <div aria-hidden className="pointer-events-none absolute inset-0 opacity-30"
+            style={{ backgroundImage: "radial-gradient(45% 70% at 88% 60%, hsl(var(--primary)/0.22), transparent 65%)" }}
           />
-          <div className="relative flex flex-col lg:flex-row items-center gap-6 p-5 md:p-6 lg:p-8">
+          <div className="relative flex flex-col lg:flex-row items-center justify-between gap-6 p-6 md:p-8 lg:px-12">
             {/* Left copy */}
-            <div className="flex-1 min-w-0 space-y-3 text-center lg:text-left">
-              <div className="inline-flex items-center gap-2 rounded-full border border-primary/30 bg-primary/10 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.28em] text-primary">
-                <Trophy className="h-3.5 w-3.5" /> Ranking · Corrida de Faturamento
-              </div>
-              <h2 className="font-display font-black text-2xl sm:text-3xl lg:text-5xl tracking-[-0.03em] leading-[1.05]">
-                Conheça os <span className="text-primary">CAMPEÕES</span>
+            <div className="flex-1 min-w-0 max-w-md space-y-3 text-center lg:text-left">
+              <span className="block text-[10px] font-bold uppercase tracking-[0.3em] text-primary">
+                Ranking Final
+              </span>
+              <h2 className="font-display font-extrabold italic uppercase text-3xl sm:text-4xl lg:text-5xl tracking-[-0.045em] leading-[0.9]">
+                Conheça os<br /><span className="text-primary">Campeões</span>
               </h2>
-              <p className="text-muted-foreground text-sm max-w-md mx-auto lg:mx-0">
-                Os resultados estão definidos. Conheça os vencedores da Corrida de Faturamento e prepare-se para a próxima temporada.
+              <p className="text-muted-foreground text-[13px] font-medium leading-relaxed">
+                Os resultados estão definidos. Conheça os vencedores da Corrida de Faturamento.
               </p>
-            <Link to="/premiacoes?tab=corrida" className="inline-flex items-center gap-2 rounded-xl bg-primary px-4 py-2.5 text-primary-foreground text-[13px] font-bold hover:bg-primary/90 transition-all active:scale-[0.98]">
+              <Link to="/premiacoes?tab=corrida" className="inline-flex items-center gap-2 rounded-xl bg-primary px-4 py-2.5 text-primary-foreground text-[13px] font-bold hover:bg-primary/90 transition-colors">
                 Ver ranking completo <ArrowRight className="h-4 w-4" />
               </Link>
             </div>
 
             {/* Podium visual */}
-            <div className="flex items-end gap-2 sm:gap-3 shrink-0">
+            <div className="flex items-end gap-2 shrink-0">
               {[
-                { pos: "02", name: "Airis F.", h: "h-20 sm:h-24", tone: "from-slate-300 to-slate-500" },
-                { pos: "01", name: "Bryan G.", h: "h-28 sm:h-32", tone: "from-yellow-300 to-amber-500" },
-                { pos: "03", name: "Wdzin", h: "h-16 sm:h-20", tone: "from-orange-400 to-orange-700" },
+                { pos: "02", name: "Airis Ferreira", h: "h-20 sm:h-24", w: "w-20 sm:w-24", num: "text-2xl sm:text-3xl text-muted-foreground/60", box: "bg-muted/40 border-x border-t border-border/70", leader: false },
+                { pos: "01", name: "Bryan Gonzaga", h: "h-32 sm:h-40", w: "w-24 sm:w-32", num: "text-4xl sm:text-5xl text-foreground/60", box: "bg-gradient-to-b from-muted to-muted/30 border-x border-t border-border", leader: true },
+                { pos: "03", name: "Wdzin", h: "h-16 sm:h-20", w: "w-20 sm:w-24", num: "text-xl sm:text-2xl text-muted-foreground/40", box: "bg-card border-x border-t border-border/60", leader: false },
               ].map((p) => (
-                <div key={p.pos} className="flex flex-col items-center gap-2">
-                  <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">{p.name}</span>
-                  <div className={cn("w-14 sm:w-16 lg:w-20 rounded-t-xl bg-gradient-to-b flex items-start justify-center pt-2 shadow-lg", p.h, p.tone)}>
-                    <span className="font-display font-black text-lg text-background/90">{p.pos}</span>
+                <div key={p.pos} className="flex flex-col items-center">
+                  {p.leader && (
+                    <span className="mb-2 rounded-full border border-primary/30 bg-primary/15 px-3 py-1 text-[10px] font-black uppercase tracking-wide text-primary">
+                      Líder
+                    </span>
+                  )}
+                  <span className={cn("mb-2 text-[11px] font-bold", p.leader ? "text-foreground" : "text-muted-foreground/70")}>{p.name}</span>
+                  <div className={cn("rounded-t-2xl flex items-center justify-center", p.h, p.w, p.box)}>
+                    <span className={cn("font-display font-black tabular-nums", p.num)}>{p.pos}</span>
                   </div>
                 </div>
               ))}
@@ -734,63 +740,52 @@ export default function Dashboard() {
 
         </section>
 
+
         {/* ═══════════ 4 KPI CARDS ═══════════ */}
-        <section className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-3">
+        <section className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
           {[
-            { label: "Saldo Disponível", value: fmt(Math.max(0, balance)), sub: "Saldo disponível", icon: Wallet, spark: true, isRevenue: false },
-            { label: "Recebido Hoje", value: fmt(receivedToday), sub: "Total faturado no dia", icon: RefreshCw, spark: true, isRevenue: false },
-            { label: "Bloqueio Cautelar", value: fmt(disputedAmount), sub: "MEDs em disputa", icon: Lock, spark: false, isRevenue: false },
-            { label: "Faturamento Total", value: fmt(revenue), sub: "Valor bruto de vendas", icon: TrendingUp, spark: true, isRevenue: true },
+            { label: "Saldo Disponível", value: fmt(Math.max(0, balance)), sub: "Saldo disponível", icon: Wallet, spark: true, tone: "neutral" as const },
+            { label: "Recebido Hoje", value: fmt(receivedToday), sub: "Total faturado no dia", icon: RefreshCw, spark: false, tone: "neutral" as const },
+            { label: "Bloqueio Cautelar", value: fmt(disputedAmount), sub: "MEDs, saques e reservas", icon: Lock, spark: false, tone: "danger" as const },
+            { label: "Faturamento Total", value: fmt(revenue), sub: "Valor bruto de vendas", icon: TrendingUp, spark: true, tone: "revenue" as const },
           ].map((k) => {
             const Icon = k.icon;
-            const isRevenue = k.isRevenue;
+            const isRevenue = k.tone === "revenue";
+            const isDanger = k.tone === "danger";
             return (
-              <div key={k.label} className={cn(
-                "group relative overflow-hidden rounded-3xl border p-5 transition-all",
-                isRevenue
-                  ? "border-primary/25 bg-gradient-to-br from-primary/[0.08] via-card to-card hover:border-primary/50 hover:shadow-[0_10px_40px_-12px_hsl(var(--primary)/0.35)]"
-                  : "border-border/60 bg-card/80 backdrop-blur hover:border-primary/40 hover:shadow-[0_4px_24px_-8px_hsl(var(--primary)/0.2)]"
-              )}>
-                {/* Ornamental corner glow for revenue */}
-                {isRevenue && (
-                  <div aria-hidden className="pointer-events-none absolute -right-10 -top-10 h-32 w-32 rounded-full bg-primary/15 blur-2xl" />
-                )}
-
-                <div className="relative flex items-start justify-between gap-3">
-                  <div className="min-w-0 flex-1">
-                    <p className={cn(
-                      "font-black uppercase tracking-[0.18em]",
-                      isRevenue ? "text-[10px] text-primary/90" : "text-[10px] text-muted-foreground/70"
-                    )}>{k.label}</p>
-                    <p className={cn(
-                      "mt-2 font-display font-black tabular-nums tracking-[-0.03em] truncate",
-                      isRevenue ? "text-[26px] md:text-[28px] text-foreground" : "text-2xl md:text-[26px] text-foreground"
-                    )}>
-                      {privacy.hidden ? CENSORED : k.value}
-                    </p>
-                    <div className="mt-1.5 flex items-center gap-1.5">
-                      <p className="text-[11px] text-muted-foreground/60 truncate">{k.sub}</p>
-                    </div>
-                  </div>
+              <div key={k.label} className="group relative overflow-hidden rounded-3xl border border-border/60 bg-card p-6 transition-colors hover:border-primary/50">
+                <div className="relative flex items-start justify-between gap-3 mb-6">
+                  <span className={cn(
+                    "text-[10px] font-bold uppercase tracking-[0.18em]",
+                    isDanger ? "text-destructive/80" : "text-muted-foreground/70"
+                  )}>{k.label}</span>
                   <div className={cn(
-                    "shrink-0 flex h-11 w-11 items-center justify-center rounded-2xl transition-transform group-hover:scale-110",
-                    isRevenue ? "border border-primary/30 bg-primary/15 text-primary" : "bg-primary/10 text-primary"
+                    "shrink-0 flex h-9 w-9 items-center justify-center rounded-xl",
+                    isDanger ? "bg-destructive/10 text-destructive" : isRevenue ? "bg-primary/10 text-primary" : "bg-muted/60 text-muted-foreground"
                   )}>
-                    <Icon className="h-5 w-5" strokeWidth={2.25} />
+                    <Icon className="h-4.5 w-4.5" strokeWidth={2.25} />
                   </div>
                 </div>
 
+                <p className={cn(
+                  "relative font-display font-black tabular-nums tracking-[-0.035em] text-[28px] leading-none truncate",
+                  isRevenue ? "text-primary" : "text-foreground"
+                )}>
+                  {privacy.hidden ? CENSORED : k.value}
+                </p>
+                <p className="relative mt-2 text-[11px] font-medium text-muted-foreground/60 truncate">{k.sub}</p>
+
                 {k.spark && sparkData.length > 1 && (
-                  <div className={cn("absolute bottom-0 left-0 right-0 pointer-events-none", isRevenue ? "h-14 opacity-90" : "h-10 opacity-70")}>
+                  <div className={cn("absolute bottom-0 left-0 right-0 pointer-events-none h-14 transition-opacity", isRevenue ? "opacity-40 group-hover:opacity-100" : "opacity-25 group-hover:opacity-70")}>
                     <ResponsiveContainer width="100%" height="100%">
                       <AreaChart data={sparkData} margin={{ top: 4, right: 0, left: 0, bottom: 0 }}>
                         <defs>
                           <linearGradient id={`sp-${k.label}`} x1="0" y1="0" x2="0" y2="1">
-                            <stop offset="0%" stopColor="hsl(var(--primary))" stopOpacity={isRevenue ? 0.55 : 0.4} />
+                            <stop offset="0%" stopColor="hsl(var(--primary))" stopOpacity={0.5} />
                             <stop offset="100%" stopColor="hsl(var(--primary))" stopOpacity={0} />
                           </linearGradient>
                         </defs>
-                        <Area type="monotone" dataKey="v" stroke="hsl(var(--primary))" strokeWidth={isRevenue ? 2 : 1.5} fill={`url(#sp-${k.label})`} isAnimationActive={false} />
+                        <Area type="monotone" dataKey="v" stroke="hsl(var(--primary))" strokeWidth={1.5} fill={`url(#sp-${k.label})`} isAnimationActive={false} />
                       </AreaChart>
                     </ResponsiveContainer>
                   </div>
@@ -801,48 +796,51 @@ export default function Dashboard() {
         </section>
 
         {/* ═══════════ 4 QUICK ACTIONS ═══════════ */}
-        <section className="grid grid-cols-2 xl:grid-cols-4 gap-3">
+        <section className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
           {[
-            { label: "Gerar PIX", sub: "Exige KYC aprovado", icon: QrCode, onClick: () => { if (!requireApprovedAccount()) setPixDialogOpen(true); } },
-            { label: "Solicitar Saque", sub: "Exige KYC aprovado", icon: ArrowDownRight, onClick: () => { if (!requireApprovedAccount()) navigate("/financeiro/saques"); } },
-            { label: "Transações", sub: "Exige KYC aprovado", icon: Receipt, onClick: () => { if (!requireApprovedAccount()) navigate("/vendas"); } },
-            { label: "Credenciais API", sub: "Exige KYC aprovado", icon: KeyRound, onClick: () => { if (!requireApprovedAccount()) navigate("/integracoes/credenciais"); } },
+            { label: "Gerar PIX", sub: "Receber na hora", icon: QrCode, onClick: () => { if (!requireApprovedAccount()) setPixDialogOpen(true); } },
+            { label: "Solicitar Saque", sub: "Transferência rápida", icon: ArrowDownRight, onClick: () => { if (!requireApprovedAccount()) navigate("/financeiro/saques"); } },
+            { label: "Transações", sub: "Ver extrato", icon: Receipt, onClick: () => { if (!requireApprovedAccount()) navigate("/vendas"); } },
+            { label: "Credenciais API", sub: "Integrações", icon: KeyRound, onClick: () => { if (!requireApprovedAccount()) navigate("/integracoes/credenciais"); } },
           ].map((a) => {
             const Icon = a.icon;
-            const inner = (
-              <>
-                <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-border/60 bg-muted/40 text-foreground group-hover:border-primary/50 group-hover:bg-primary/10 group-hover:text-primary transition-all">
-                  <Icon className="h-4.5 w-4.5" strokeWidth={2.25} />
+            return (
+              <button
+                key={a.label}
+                onClick={a.onClick}
+                className="group flex items-center gap-4 rounded-2xl border border-border/60 bg-background/40 p-4 text-left transition-colors hover:bg-card"
+              >
+                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-muted/60 text-muted-foreground transition-colors group-hover:bg-primary/15 group-hover:text-primary">
+                  <Icon className="h-5 w-5" strokeWidth={2.25} />
                 </div>
                 <div className="min-w-0 flex-1">
                   <p className="font-display font-bold text-[14px] text-foreground truncate">{a.label}</p>
-                  <p className="text-[11px] text-muted-foreground/70 truncate">{a.sub}</p>
+                  <p className="text-[10px] font-bold uppercase tracking-tight text-muted-foreground/60 truncate">{a.sub}</p>
                 </div>
-                <ChevronRight className="h-4 w-4 text-muted-foreground/40 group-hover:text-primary group-hover:translate-x-0.5 transition-all" />
-              </>
+                <ChevronRight className="h-4 w-4 shrink-0 text-muted-foreground/30 transition-colors group-hover:text-primary" />
+              </button>
             );
-            const cls = "group flex items-center gap-3 rounded-2xl border border-border/60 bg-card/80 backdrop-blur px-4 py-3.5 transition-all hover:border-primary/40 hover:bg-card active:scale-[0.98]";
-            return <button key={a.label} onClick={a.onClick} className={cn(cls, "text-left")}>{inner}</button>;
           })}
         </section>
 
+
         {/* ═══════════ CHART + SIDE PANEL ═══════════ */}
-        <section className="grid grid-cols-1 xl:grid-cols-3 gap-3">
+        <section className="grid grid-cols-1 xl:grid-cols-3 gap-4">
 
           {/* Faturamento — Clean line chart (Cakto-style) */}
-          <div className="xl:col-span-2 rounded-2xl border border-border/60 bg-card/80 backdrop-blur overflow-hidden">
-            <div className="flex items-center justify-between gap-3 px-5 md:px-6 pt-5 pb-4">
+          <div className="xl:col-span-2 rounded-[2rem] border border-border/60 bg-card overflow-hidden">
+            <div className="flex items-center justify-between gap-3 px-6 md:px-8 pt-7 pb-6">
               <div className="min-w-0">
-                <h3 className="font-display font-bold text-[15px] tracking-[-0.01em] text-foreground">Faturamento</h3>
-                <p className="text-[11px] text-muted-foreground/60 mt-0.5">{isCustom ? "Período personalizado" : selectedPeriod.label}</p>
+                <h4 className="font-display font-bold text-xl tracking-[-0.02em] text-foreground">Faturamento</h4>
+                <p className="text-[11px] text-muted-foreground/60 mt-1">Comparativo de entradas e saídas</p>
               </div>
-              <div className="flex items-center rounded-lg border border-border/60 bg-background/40 p-0.5">
+              <div className="flex items-center rounded-2xl border border-border/60 bg-background p-1.5">
                 {PERIOD_PRESETS.filter(p => ["Hoje", "7 dias", "30 dias"].includes(p.label)).map((p) => {
                   const isActive = !isCustom && selectedPeriod.label === p.label;
                   const short = p.label === "Hoje" ? "Hoje" : p.label === "7 dias" ? "7d" : "30d";
                   return (
                     <button key={p.label} onClick={() => { setSelectedPeriod(p); setIsCustom(false); }}
-                      className={cn("px-3 py-1 rounded-md text-[11px] font-semibold transition-colors",
+                      className={cn("px-4 py-1.5 rounded-xl text-[11px] font-bold transition-colors",
                         isActive ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground"
                       )}>
                       {short}
@@ -851,6 +849,7 @@ export default function Dashboard() {
                 })}
               </div>
             </div>
+
 
             <div className="h-[300px] w-full pr-4 pb-4">
               <ResponsiveContainer width="100%" height="100%">
@@ -898,14 +897,15 @@ export default function Dashboard() {
           </div>
 
           {/* Right side: donuts + links */}
-          <div className="space-y-3">
+          <div className="space-y-4">
             {/* Donuts card */}
-            <div className="rounded-2xl border border-border/60 bg-card/80 backdrop-blur p-5">
-              <div className="mb-3">
-                <h3 className="font-display font-black text-base tracking-[-0.01em]">Índices</h3>
-                <p className="text-[11px] text-muted-foreground/70">Boleto, pix e chargeback</p>
+            <div className="rounded-[2rem] border border-border/60 bg-card p-7">
+              <div className="mb-6">
+                <h4 className="font-display font-bold text-xl tracking-[-0.02em]">Índices</h4>
+                <p className="text-[11px] text-muted-foreground/60 mt-1">Conversão por método de pagamento</p>
               </div>
-              <div className="space-y-4">
+              <div className="space-y-5">
+
                 {/* Pix */}
                 <div className="flex items-center gap-4">
                   <div className="relative h-16 w-16 shrink-0">
@@ -950,7 +950,7 @@ export default function Dashboard() {
             </div>
 
             {/* Payment links */}
-            <button type="button" onClick={() => { if (!requireApprovedAccount()) navigate("/vendas/link-pagamento"); }} className="group block w-full rounded-2xl border border-border/60 bg-card/80 backdrop-blur p-5 text-left hover:border-primary/40 transition-all">
+            <button type="button" onClick={() => { if (!requireApprovedAccount()) navigate("/vendas/link-pagamento"); }} className="group block w-full rounded-[2rem] border border-border/60 bg-card p-7 text-left hover:border-primary/40 transition-colors">
               <div className="flex items-start justify-between gap-3">
                 <div className="min-w-0">
                   <h3 className="font-display font-black text-base tracking-[-0.01em] flex items-center gap-2"><Link2 className="h-4 w-4 text-primary" /> Links de pagamentos</h3>
