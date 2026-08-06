@@ -18,7 +18,7 @@ import {
   DollarSign,
 } from "lucide-react";
 import { toast } from "sonner";
-import { FinanceiroHero, FinanceiroKpi, FinanceiroKpiGrid } from "@/components/financeiro/FinanceiroHero";
+import { HDShell, HDHeader, HDStat, HDStatGrid } from "@/components/hd/HDPage";
 import { useTransactions } from "@/hooks/useQueryData";
 import { isApprovedTransaction } from "@/lib/utils";
 
