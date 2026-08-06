@@ -695,7 +695,7 @@ export default function Dashboard() {
         </header>
 
         {/* ═══════════ HERO — RANKING BANNER ═══════════ */}
-        <section className="relative overflow-hidden rounded-[2rem] md:rounded-[2.5rem] border border-border/60 bg-gradient-to-r from-card to-background">
+        <section className="relative overflow-hidden rounded-2xl md:rounded-3xl border border-border/60 bg-gradient-to-r from-card to-background">
           <div aria-hidden className="pointer-events-none absolute inset-0 opacity-30"
             style={{ backgroundImage: "radial-gradient(45% 70% at 88% 60%, hsl(var(--primary)/0.22), transparent 65%)" }}
           />
@@ -822,7 +822,7 @@ export default function Dashboard() {
         <section className="grid grid-cols-1 xl:grid-cols-3 gap-4">
 
           {/* Faturamento — Clean line chart (Cakto-style) */}
-          <div className="xl:col-span-2 rounded-[2rem] border border-border/60 bg-card overflow-hidden">
+          <div className="xl:col-span-2 rounded-2xl border border-border/60 bg-card overflow-hidden">
             <div className="flex items-center justify-between gap-3 px-6 md:px-8 pt-7 pb-6">
               <div className="min-w-0">
                 <h4 className="font-display font-bold text-xl tracking-[-0.02em] text-foreground">Faturamento</h4>
@@ -893,7 +893,7 @@ export default function Dashboard() {
           {/* Right side: donuts + links */}
           <div className="space-y-4">
             {/* Donuts card */}
-            <div className="rounded-[2rem] border border-border/60 bg-card p-7">
+            <div className="rounded-2xl border border-border/60 bg-card p-7">
               <div className="mb-6">
                 <h4 className="font-display font-bold text-xl tracking-[-0.02em]">Índices</h4>
                 <p className="text-[11px] text-muted-foreground/60 mt-1">Conversão por método de pagamento</p>
@@ -944,7 +944,7 @@ export default function Dashboard() {
             </div>
 
             {/* Payment links */}
-            <button type="button" onClick={() => { if (!requireApprovedAccount()) navigate("/vendas/link-pagamento"); }} className="group block w-full rounded-[2rem] border border-border/60 bg-card p-7 text-left hover:border-primary/40 transition-colors">
+            <button type="button" onClick={() => { if (!requireApprovedAccount()) navigate("/vendas/link-pagamento"); }} className="group block w-full rounded-2xl border border-border/60 bg-card p-7 text-left hover:border-primary/40 transition-colors">
               <div className="flex items-start justify-between gap-3">
                 <div className="min-w-0">
                   <h3 className="font-display font-black text-base tracking-[-0.01em] flex items-center gap-2"><Link2 className="h-4 w-4 text-primary" /> Links de pagamentos</h3>
