@@ -20,6 +20,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
+import { HDShell, HDHeader, HDStat, HDStatGrid } from "@/components/hd/HDPage";
 
 const STATUS_MAP: Record<string, { label: string; color: string; bg: string; icon: LucideIcon }> = {
   approved:       { label: "Conta Verificada", color: "text-emerald-500", bg: "bg-emerald-500/10", icon: BadgeCheck },
@@ -397,7 +398,7 @@ export default function Identidade() {
           )}
         </div>
       </div>
-    </div>
+    </HDShell>
   );
 }
 
