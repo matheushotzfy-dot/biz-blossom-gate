@@ -897,14 +897,15 @@ export default function Dashboard() {
           </div>
 
           {/* Right side: donuts + links */}
-          <div className="space-y-3">
+          <div className="space-y-4">
             {/* Donuts card */}
-            <div className="rounded-2xl border border-border/60 bg-card/80 backdrop-blur p-5">
-              <div className="mb-3">
-                <h3 className="font-display font-black text-base tracking-[-0.01em]">Índices</h3>
-                <p className="text-[11px] text-muted-foreground/70">Boleto, pix e chargeback</p>
+            <div className="rounded-[2rem] border border-border/60 bg-card p-7">
+              <div className="mb-6">
+                <h4 className="font-display font-bold text-xl tracking-[-0.02em]">Índices</h4>
+                <p className="text-[11px] text-muted-foreground/60 mt-1">Conversão por método de pagamento</p>
               </div>
-              <div className="space-y-4">
+              <div className="space-y-5">
+
                 {/* Pix */}
                 <div className="flex items-center gap-4">
                   <div className="relative h-16 w-16 shrink-0">
