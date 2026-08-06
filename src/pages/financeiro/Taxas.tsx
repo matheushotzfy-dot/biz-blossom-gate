@@ -104,7 +104,7 @@ export default function Taxas() {
         title="Taxas e Tarifas"
         subtitle="Percentual e taxa fixa por método de pagamento, e o prazo de liberação dos recebíveis."
         actions={
-          <span className="inline-flex items-center rounded-xl border border-border/60 bg-card/80 px-3 py-2 text-[10px] font-bold uppercase tracking-[0.18em] text-muted-foreground">
+          <span className="inline-flex items-center rounded-xl border border-border/50 bg-card px-3.5 py-2 text-[12px] font-medium text-muted-foreground">
             {custom ? "Plano personalizado" : "Plano vigente"}
           </span>
         }
@@ -132,35 +132,32 @@ export default function Taxas() {
 
 
       {/* Withdrawal fee — clean row */}
-      <section className="group relative overflow-hidden rounded-xl border border-border/60 bg-card px-5 py-4 flex items-center gap-3 transition-colors hover:bg-muted/20">
-        <DollarSign className={cn("h-3.5 w-3.5 shrink-0 opacity-40 transition-opacity group-hover:opacity-90", toneIcon.primary)} strokeWidth={2.2} />
+      <section className="group relative overflow-hidden rounded-2xl border border-border/50 bg-card px-6 py-5 flex items-center gap-4 transition-colors hover:border-border">
+        <DollarSign className={cn("h-5 w-5 shrink-0 text-muted-foreground", toneIcon.primary)} strokeWidth={1.75} />
         <div className="flex-1 min-w-0">
-          <p className="text-[10px] font-black uppercase tracking-[0.22em] text-muted-foreground/70">Tarifa de Saque</p>
-          <p className="mt-1 text-[11px] font-medium text-muted-foreground/75 truncate">Fixo por solicitação de saque (Pix)</p>
+          <p className="text-[13px] font-medium text-muted-foreground">Tarifa de saque</p>
+          <p className="mt-1 text-[12px] text-muted-foreground/55 truncate">Fixo por solicitação de saque (Pix)</p>
         </div>
-        <span className="font-display text-[24px] font-black text-foreground tabular-nums leading-none tracking-tight">
+        <span className="font-display text-[26px] font-bold text-foreground tabular-nums leading-none tracking-[-0.03em]">
           {fmt(withdrawFee)}
         </span>
-        <span className={cn("pointer-events-none absolute inset-x-0 bottom-0 h-[1.5px] origin-left scale-x-0 transition-transform duration-300 group-hover:scale-x-100", toneBar.primary)} />
       </section>
 
       {/* Prazos de liberação — collapsible */}
-      <section className="overflow-hidden rounded-xl border border-border/60 bg-card animate-fade-in stagger-2">
+      <section className="overflow-hidden rounded-2xl border border-border/50 bg-card">
         <button
           type="button"
           onClick={() => setDeadlinesOpen((v) => !v)}
           aria-expanded={deadlinesOpen}
-          className="group w-full flex items-center gap-3 px-5 py-4 text-left transition-colors hover:bg-muted/20"
+          className="group w-full flex items-center gap-4 px-6 py-5 text-left transition-colors hover:bg-muted/10"
         >
-          <Clock className={cn("h-3.5 w-3.5 shrink-0 opacity-40 transition-opacity group-hover:opacity-90", toneIcon.warning)} strokeWidth={2.2} />
+          <Clock className="h-5 w-5 shrink-0 text-muted-foreground" strokeWidth={1.75} />
           <div className="flex-1 min-w-0">
-            <p className="text-[10px] font-black uppercase tracking-[0.22em] text-muted-foreground/70">Prazos de liberação</p>
-            <p className="mt-1 text-[11px] font-medium text-muted-foreground/75 truncate">Quando seu saldo fica disponível para saque</p>
+            <p className="font-display font-bold text-[16px] tracking-[-0.01em] text-foreground">Prazos de liberação</p>
+            <p className="mt-1 text-[12px] text-muted-foreground/55 truncate">Quando seu saldo fica disponível para saque</p>
           </div>
-          <span className="hidden sm:inline-flex items-center rounded-md border border-border/60 bg-secondary/40 px-2 py-1 text-[10px] font-black uppercase tracking-[0.14em] text-muted-foreground/80">
-            {deadlines.length} métodos
-          </span>
-          <ChevronDown className={cn("h-4 w-4 text-muted-foreground/70 transition-transform duration-300", deadlinesOpen && "rotate-180 text-primary")} strokeWidth={2.5} />
+          <span className="hidden sm:inline text-[12px] text-muted-foreground/60">{deadlines.length} métodos</span>
+          <ChevronDown className={cn("h-4 w-4 text-muted-foreground/50 transition-transform duration-300", deadlinesOpen && "rotate-180 text-foreground/70")} strokeWidth={2} />
         </button>
 
         <div
@@ -176,16 +173,16 @@ export default function Taxas() {
                 return (
                   <div
                     key={p.label}
-                    className="group/row flex items-center justify-between gap-4 px-5 py-3.5 transition-colors hover:bg-muted/20"
+                    className="flex items-center justify-between gap-4 px-6 py-4 transition-colors hover:bg-muted/10"
                   >
                     <div className="flex items-center gap-3 min-w-0">
-                      <Icon className={cn("h-3.5 w-3.5 shrink-0 opacity-50", toneIcon[p.tone])} strokeWidth={2.2} />
+                      <Icon className={cn("h-4 w-4 shrink-0 text-muted-foreground/70", toneIcon[p.tone])} strokeWidth={1.75} />
                       <div className="min-w-0">
-                        <p className="text-[13px] font-display font-black text-foreground tracking-tight">{p.label}</p>
-                        <p className="text-[11px] text-muted-foreground/75 font-medium truncate">{p.sub}</p>
+                        <p className="text-[14px] font-display font-bold text-foreground tracking-[-0.01em]">{p.label}</p>
+                        <p className="text-[12px] text-muted-foreground/55 truncate">{p.sub}</p>
                       </div>
                     </div>
-                    <span className="text-[13px] font-display font-black text-foreground tabular-nums tracking-tight shrink-0">
+                    <span className="text-[14px] font-display font-bold text-foreground tabular-nums tracking-[-0.01em] shrink-0">
                       {p.value}
                     </span>
                   </div>
@@ -197,15 +194,16 @@ export default function Taxas() {
       </section>
 
       {/* Info footer */}
-      <section className="rounded-xl border border-border/60 bg-card px-5 py-4 flex items-start gap-3 animate-fade-in stagger-3">
-        <Info className="h-3.5 w-3.5 shrink-0 mt-0.5 opacity-50 text-info" strokeWidth={2.2} />
-        <p className="text-[12px] text-muted-foreground leading-relaxed font-medium">
-          O custo total de cada venda é <span className="font-black text-foreground">percentual + taxa fixa</span> sobre o valor da transação.
+      <section className="rounded-2xl border border-border/50 bg-card px-6 py-5 flex items-start gap-3">
+        <Info className="h-4 w-4 shrink-0 mt-0.5 text-muted-foreground/60" strokeWidth={1.75} />
+        <p className="text-[13px] text-muted-foreground/80 leading-relaxed">
+          O custo total de cada venda é <span className="font-semibold text-foreground">percentual + taxa fixa</span> sobre o valor da transação.
           As taxas exibidas refletem o seu plano atual. Para volumes superiores a{" "}
-          <span className="font-black text-foreground tabular-nums">R$ 100.000/mês</span>, fale com seu gerente de conta
+          <span className="font-semibold text-foreground tabular-nums">R$ 100.000/mês</span>, fale com seu gerente de conta
           para uma proposta personalizada.
         </p>
       </section>
+
     </HDShell>
   );
 }
