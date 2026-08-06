@@ -695,7 +695,7 @@ export default function Dashboard() {
         </header>
 
         {/* ═══════════ HERO — RANKING BANNER ═══════════ */}
-        <section className="relative overflow-hidden rounded-[2rem] md:rounded-[2.5rem] border border-border/60 bg-gradient-to-r from-card to-background">
+        <section className="relative overflow-hidden rounded-2xl md:rounded-3xl border border-border/60 bg-gradient-to-r from-card to-background">
           <div aria-hidden className="pointer-events-none absolute inset-0 opacity-30"
             style={{ backgroundImage: "radial-gradient(45% 70% at 88% 60%, hsl(var(--primary)/0.22), transparent 65%)" }}
           />
@@ -744,44 +744,40 @@ export default function Dashboard() {
         {/* ═══════════ 4 KPI CARDS ═══════════ */}
         <section className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
           {[
-            { label: "Saldo Disponível", value: fmt(Math.max(0, balance)), sub: "Saldo disponível", icon: Wallet, spark: true, tone: "neutral" as const },
-            { label: "Recebido Hoje", value: fmt(receivedToday), sub: "Total faturado no dia", icon: RefreshCw, spark: false, tone: "neutral" as const },
-            { label: "Bloqueio Cautelar", value: fmt(disputedAmount), sub: "MEDs, saques e reservas", icon: Lock, spark: false, tone: "danger" as const },
-            { label: "Faturamento Total", value: fmt(revenue), sub: "Valor bruto de vendas", icon: TrendingUp, spark: true, tone: "revenue" as const },
+            { label: "Saldo", value: fmt(Math.max(0, balance)), sub: "Disponível para saque", icon: Wallet, spark: true, tone: "neutral" as const },
+            { label: "Recebido hoje", value: fmt(receivedToday), sub: "Total faturado no dia", icon: RefreshCw, spark: false, tone: "neutral" as const },
+            { label: "Bloqueio cautelar", value: fmt(disputedAmount), sub: "MEDs, saques e reservas", icon: Lock, spark: false, tone: "danger" as const },
+            { label: "Faturamento total", value: fmt(revenue), sub: "Valor total de vendas", icon: TrendingUp, spark: true, tone: "revenue" as const },
           ].map((k) => {
             const Icon = k.icon;
-            const isRevenue = k.tone === "revenue";
             const isDanger = k.tone === "danger";
             return (
-              <div key={k.label} className="group relative overflow-hidden rounded-3xl border border-border/60 bg-card p-6 transition-colors hover:border-primary/50">
-                <div className="relative flex items-start justify-between gap-3 mb-6">
-                  <span className={cn(
-                    "text-[10px] font-bold uppercase tracking-[0.18em]",
-                    isDanger ? "text-destructive/80" : "text-muted-foreground/70"
-                  )}>{k.label}</span>
-                  <div className={cn(
-                    "shrink-0 flex h-9 w-9 items-center justify-center rounded-xl",
-                    isDanger ? "bg-destructive/10 text-destructive" : isRevenue ? "bg-primary/10 text-primary" : "bg-muted/60 text-muted-foreground"
-                  )}>
-                    <Icon className="h-4.5 w-4.5" strokeWidth={2.25} />
-                  </div>
-                </div>
-
-                <p className={cn(
-                  "relative font-display font-black tabular-nums tracking-[-0.035em] text-[28px] leading-none truncate",
-                  isRevenue ? "text-primary" : "text-foreground"
-                )}>
+              <div key={k.label} className="group relative overflow-hidden rounded-2xl border border-border/50 bg-card px-5 pt-5 pb-6 transition-colors hover:border-border">
+                {/* ghost icon */}
+                <Icon
+                  aria-hidden
+                  strokeWidth={1.5}
+                  className={cn(
+                    "pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 h-16 w-16 transition-opacity",
+                    isDanger ? "text-destructive/15" : "text-foreground/[0.07]",
+                    "group-hover:opacity-80"
+                  )}
+                />
+                <p className={cn("relative text-[13px] font-medium", isDanger ? "text-destructive/90" : "text-muted-foreground")}>
+                  {k.label}
+                </p>
+                <p className="relative mt-4 font-display font-bold tabular-nums tracking-[-0.03em] text-[30px] leading-none text-foreground truncate">
                   {privacy.hidden ? CENSORED : k.value}
                 </p>
-                <p className="relative mt-2 text-[11px] font-medium text-muted-foreground/60 truncate">{k.sub}</p>
+                <p className="relative mt-2 text-[12px] text-muted-foreground/55 truncate">{k.sub}</p>
 
                 {k.spark && sparkData.length > 1 && (
-                  <div className={cn("absolute bottom-0 left-0 right-0 pointer-events-none h-14 transition-opacity", isRevenue ? "opacity-40 group-hover:opacity-100" : "opacity-25 group-hover:opacity-70")}>
+                  <div className="absolute bottom-0 left-0 right-0 pointer-events-none h-12 opacity-50 transition-opacity group-hover:opacity-90">
                     <ResponsiveContainer width="100%" height="100%">
                       <AreaChart data={sparkData} margin={{ top: 4, right: 0, left: 0, bottom: 0 }}>
                         <defs>
                           <linearGradient id={`sp-${k.label}`} x1="0" y1="0" x2="0" y2="1">
-                            <stop offset="0%" stopColor="hsl(var(--primary))" stopOpacity={0.5} />
+                            <stop offset="0%" stopColor="hsl(var(--primary))" stopOpacity={0.35} />
                             <stop offset="100%" stopColor="hsl(var(--primary))" stopOpacity={0} />
                           </linearGradient>
                         </defs>
@@ -798,26 +794,24 @@ export default function Dashboard() {
         {/* ═══════════ 4 QUICK ACTIONS ═══════════ */}
         <section className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
           {[
-            { label: "Gerar PIX", sub: "Receber na hora", icon: QrCode, onClick: () => { if (!requireApprovedAccount()) setPixDialogOpen(true); } },
-            { label: "Solicitar Saque", sub: "Transferência rápida", icon: ArrowDownRight, onClick: () => { if (!requireApprovedAccount()) navigate("/financeiro/saques"); } },
-            { label: "Transações", sub: "Ver extrato", icon: Receipt, onClick: () => { if (!requireApprovedAccount()) navigate("/vendas"); } },
-            { label: "Credenciais API", sub: "Integrações", icon: KeyRound, onClick: () => { if (!requireApprovedAccount()) navigate("/integracoes/credenciais"); } },
+            { label: "Gerar PIX", sub: "QR Code para receber", icon: QrCode, onClick: () => { if (!requireApprovedAccount()) setPixDialogOpen(true); } },
+            { label: "Solicitar Saque", sub: "Transferir via PIX", icon: ArrowDownRight, onClick: () => { if (!requireApprovedAccount()) navigate("/financeiro/saques"); } },
+            { label: "Transações", sub: "Ver histórico", icon: Receipt, onClick: () => { if (!requireApprovedAccount()) navigate("/vendas"); } },
+            { label: "Credenciais API", sub: "Gerencie suas credenciais", icon: KeyRound, onClick: () => { if (!requireApprovedAccount()) navigate("/integracoes/credenciais"); } },
           ].map((a) => {
             const Icon = a.icon;
             return (
               <button
                 key={a.label}
                 onClick={a.onClick}
-                className="group flex items-center gap-4 rounded-2xl border border-border/60 bg-background/40 p-4 text-left transition-colors hover:bg-card"
+                className="group flex items-center gap-4 rounded-2xl border border-border/50 bg-card px-5 py-4 text-left transition-colors hover:border-border"
               >
-                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-muted/60 text-muted-foreground transition-colors group-hover:bg-primary/15 group-hover:text-primary">
-                  <Icon className="h-5 w-5" strokeWidth={2.25} />
-                </div>
+                <Icon className="h-6 w-6 shrink-0 text-muted-foreground transition-colors group-hover:text-foreground" strokeWidth={1.75} />
                 <div className="min-w-0 flex-1">
-                  <p className="font-display font-bold text-[14px] text-foreground truncate">{a.label}</p>
-                  <p className="text-[10px] font-bold uppercase tracking-tight text-muted-foreground/60 truncate">{a.sub}</p>
+                  <p className="font-display font-bold text-[16px] tracking-[-0.01em] text-foreground truncate">{a.label}</p>
+                  <p className="text-[12px] text-muted-foreground/60 truncate">{a.sub}</p>
                 </div>
-                <ChevronRight className="h-4 w-4 shrink-0 text-muted-foreground/30 transition-colors group-hover:text-primary" />
+                <ChevronRight className="h-4 w-4 shrink-0 text-muted-foreground/30 transition-colors group-hover:text-foreground/60" />
               </button>
             );
           })}
@@ -828,7 +822,7 @@ export default function Dashboard() {
         <section className="grid grid-cols-1 xl:grid-cols-3 gap-4">
 
           {/* Faturamento — Clean line chart (Cakto-style) */}
-          <div className="xl:col-span-2 rounded-[2rem] border border-border/60 bg-card overflow-hidden">
+          <div className="xl:col-span-2 rounded-2xl border border-border/60 bg-card overflow-hidden">
             <div className="flex items-center justify-between gap-3 px-6 md:px-8 pt-7 pb-6">
               <div className="min-w-0">
                 <h4 className="font-display font-bold text-xl tracking-[-0.02em] text-foreground">Faturamento</h4>
@@ -899,7 +893,7 @@ export default function Dashboard() {
           {/* Right side: donuts + links */}
           <div className="space-y-4">
             {/* Donuts card */}
-            <div className="rounded-[2rem] border border-border/60 bg-card p-7">
+            <div className="rounded-2xl border border-border/60 bg-card p-7">
               <div className="mb-6">
                 <h4 className="font-display font-bold text-xl tracking-[-0.02em]">Índices</h4>
                 <p className="text-[11px] text-muted-foreground/60 mt-1">Conversão por método de pagamento</p>
@@ -950,7 +944,7 @@ export default function Dashboard() {
             </div>
 
             {/* Payment links */}
-            <button type="button" onClick={() => { if (!requireApprovedAccount()) navigate("/vendas/link-pagamento"); }} className="group block w-full rounded-[2rem] border border-border/60 bg-card p-7 text-left hover:border-primary/40 transition-colors">
+            <button type="button" onClick={() => { if (!requireApprovedAccount()) navigate("/vendas/link-pagamento"); }} className="group block w-full rounded-2xl border border-border/60 bg-card p-7 text-left hover:border-primary/40 transition-colors">
               <div className="flex items-start justify-between gap-3">
                 <div className="min-w-0">
                   <h3 className="font-display font-black text-base tracking-[-0.01em] flex items-center gap-2"><Link2 className="h-4 w-4 text-primary" /> Links de pagamentos</h3>
