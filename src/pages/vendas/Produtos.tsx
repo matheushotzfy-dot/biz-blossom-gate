@@ -425,6 +425,6 @@ export default function Produtos() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-    </div>
+    </HDShell>
   );
 }
