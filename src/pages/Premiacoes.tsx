@@ -629,7 +629,7 @@ export default function Premiacoes() {
       </section>
 
       {/* =================== STATS =================== */}
-      <section className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+      <section className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
         {[
           { k: "Faturamento", v: fmtShort(revenue), s: "Total aprovado", icon: Flame },
           { k: "Tier atual", v: currentTier?.tier ?? "—", s: currentTier ? `${currentTier.roman} · ${currentTier.label}` : "Comece sua jornada", icon: Star },
@@ -638,24 +638,25 @@ export default function Premiacoes() {
         ].map((s) => {
           const Icon = s.icon;
           return (
-            <div key={s.k} className="group relative overflow-hidden rounded-2xl border border-border bg-card p-5 hover:border-primary/40 hover:-translate-y-0.5 transition-all duration-300">
-              <div className="absolute -right-8 -top-8 h-28 w-28 rounded-full bg-primary/0 group-hover:bg-primary/[0.08] blur-2xl transition-all duration-500" />
-              <div className="relative flex items-start justify-between">
-                <div className="min-w-0">
-                  <p className="font-mono text-[10px] uppercase tracking-[0.26em] text-muted-foreground">{s.k}</p>
-                  <p className="mt-2.5 font-display font-black text-foreground text-[26px] tabular-nums tracking-[-0.025em] leading-none truncate">
-                    {s.v}
-                  </p>
-                  <p className="mt-2 text-[11px] text-muted-foreground truncate">{s.s}</p>
-                </div>
-                <div className="h-9 w-9 rounded-xl border border-border bg-background flex items-center justify-center text-primary group-hover:bg-primary/10 group-hover:border-primary/40 transition-colors shrink-0">
-                  <Icon className="h-4 w-4" strokeWidth={2.25} />
-                </div>
-              </div>
+            <div
+              key={s.k}
+              className="group relative overflow-hidden rounded-2xl border border-border/50 bg-card px-5 pt-5 pb-6 transition-colors hover:border-border"
+            >
+              <Icon
+                aria-hidden
+                strokeWidth={1.5}
+                className="pointer-events-none absolute right-4 top-1/2 h-16 w-16 -translate-y-1/2 text-foreground/[0.07] transition-opacity group-hover:opacity-80"
+              />
+              <p className="relative text-[13px] font-medium text-muted-foreground">{s.k}</p>
+              <p className="relative mt-4 truncate font-display text-[30px] font-bold leading-none tracking-[-0.03em] tabular-nums text-foreground">
+                {s.v}
+              </p>
+              <p className="relative mt-2 truncate text-[12px] text-muted-foreground/55">{s.s}</p>
             </div>
           );
         })}
       </section>
+
 
       {/* =================== GRID =================== */}
       <section className="relative overflow-hidden rounded-[24px] border border-border bg-card">
