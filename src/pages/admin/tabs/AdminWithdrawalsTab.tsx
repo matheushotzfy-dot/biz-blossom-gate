@@ -4,7 +4,7 @@ import {
  ArrowDownToLine, Search, CheckCircle2, XCircle, Clock, Wallet, UserCog,
  ToggleLeft, AlertTriangle, ShieldAlert, DollarSign, ArrowUpDown, Filter,
  CheckSquare, Plus, Minus, FileText, TrendingUp, TrendingDown, Banknote,
- Eye, ChevronDown, ChevronUp, Users,
+ Eye, ChevronDown, ChevronUp, Users, Copy,
 } from "lucide-react";
 import { StatusBadge } from "@/components/StatusBadge";
 import { Button } from "@/components/ui/button";
