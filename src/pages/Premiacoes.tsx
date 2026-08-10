@@ -629,7 +629,7 @@ export default function Premiacoes() {
       </section>
 
       {/* =================== STATS =================== */}
-      <section className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+      <section className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
         {[
           { k: "Faturamento", v: fmtShort(revenue), s: "Total aprovado", icon: Flame },
           { k: "Tier atual", v: currentTier?.tier ?? "—", s: currentTier ? `${currentTier.roman} · ${currentTier.label}` : "Comece sua jornada", icon: Star },
@@ -638,41 +638,36 @@ export default function Premiacoes() {
         ].map((s) => {
           const Icon = s.icon;
           return (
-            <div key={s.k} className="group relative overflow-hidden rounded-2xl border border-border bg-card p-5 hover:border-primary/40 hover:-translate-y-0.5 transition-all duration-300">
-              <div className="absolute -right-8 -top-8 h-28 w-28 rounded-full bg-primary/0 group-hover:bg-primary/[0.08] blur-2xl transition-all duration-500" />
-              <div className="relative flex items-start justify-between">
-                <div className="min-w-0">
-                  <p className="font-mono text-[10px] uppercase tracking-[0.26em] text-muted-foreground">{s.k}</p>
-                  <p className="mt-2.5 font-display font-black text-foreground text-[26px] tabular-nums tracking-[-0.025em] leading-none truncate">
-                    {s.v}
-                  </p>
-                  <p className="mt-2 text-[11px] text-muted-foreground truncate">{s.s}</p>
-                </div>
-                <div className="h-9 w-9 rounded-xl border border-border bg-background flex items-center justify-center text-primary group-hover:bg-primary/10 group-hover:border-primary/40 transition-colors shrink-0">
-                  <Icon className="h-4 w-4" strokeWidth={2.25} />
-                </div>
-              </div>
+            <div
+              key={s.k}
+              className="group relative overflow-hidden rounded-2xl border border-border/50 bg-card px-5 pt-5 pb-6 transition-colors hover:border-border"
+            >
+              <Icon
+                aria-hidden
+                strokeWidth={1.5}
+                className="pointer-events-none absolute right-4 top-1/2 h-16 w-16 -translate-y-1/2 text-foreground/[0.07] transition-opacity group-hover:opacity-80"
+              />
+              <p className="relative text-[13px] font-medium text-muted-foreground">{s.k}</p>
+              <p className="relative mt-4 truncate font-display text-[30px] font-bold leading-none tracking-[-0.03em] tabular-nums text-foreground">
+                {s.v}
+              </p>
+              <p className="relative mt-2 truncate text-[12px] text-muted-foreground/55">{s.s}</p>
             </div>
           );
         })}
       </section>
 
+
       {/* =================== GRID =================== */}
-      <section className="relative overflow-hidden rounded-[24px] border border-border bg-card">
-        <header className="flex items-center justify-between border-b border-border px-6 py-5">
-          <div className="flex items-center gap-3.5">
-            <div className="relative h-11 w-11 rounded-xl border border-border bg-background flex items-center justify-center text-primary">
-              <Trophy className="h-5 w-5" strokeWidth={2.25} />
-              <span className="absolute inset-0 rounded-xl bg-primary/10 blur-md -z-10" />
-            </div>
-            <div>
-              <h2 className="font-display font-black text-foreground text-xl tracking-[-0.025em] leading-none">Catálogo Completo</h2>
-              <p className="font-mono text-[10px] uppercase tracking-[0.26em] text-muted-foreground mt-1.5">
-                Clique para inspecionar · {unlockedCount}/{AWARDS.length} desbloqueados
-              </p>
-            </div>
+      <section className="relative overflow-hidden rounded-2xl border border-border/60 bg-card">
+        <header className="flex flex-col gap-3 border-b border-border/40 px-5 py-5 sm:flex-row sm:items-center sm:justify-between sm:px-6">
+          <div className="min-w-0">
+            <h2 className="font-display text-[17px] font-bold leading-tight tracking-[-0.02em] text-foreground">Catálogo completo</h2>
+            <p className="mt-1 text-[12px] text-muted-foreground/60">
+              Clique para inspecionar · {unlockedCount} de {AWARDS.length} desbloqueados
+            </p>
           </div>
-          <div className="flex items-center gap-1 p-1 rounded-full border border-border bg-background">
+          <div className="-mx-1 flex items-center gap-1 overflow-x-auto px-1 scrollbar-none sm:mx-0 sm:px-0">
             {([
               { id: "all", label: `Todas · ${AWARDS.length}` },
               { id: "unlocked", label: `Conquistadas · ${unlockedCount}` },
@@ -682,10 +677,10 @@ export default function Premiacoes() {
                 key={opt.id}
                 onClick={() => setGridFilter(opt.id)}
                 className={cn(
-                  "px-3 py-1.5 rounded-full font-mono text-[10px] uppercase tracking-[0.2em] transition-colors",
+                  "shrink-0 rounded-lg border px-3 py-1.5 text-[12.5px] font-medium transition-colors",
                   gridFilter === opt.id
-                    ? "bg-primary text-primary-foreground"
-                    : "text-muted-foreground hover:text-foreground"
+                    ? "border-primary/40 bg-primary/10 text-primary"
+                    : "border-border/50 text-muted-foreground hover:border-border hover:text-foreground"
                 )}
               >
                 {opt.label}
@@ -694,7 +689,8 @@ export default function Premiacoes() {
           </div>
         </header>
 
-        <ul className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-7 p-3 gap-3">
+        <ul className="grid grid-cols-2 gap-3 p-3 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-7">
+
           {AWARDS.filter((a) => {
             const done = revenue >= a.value;
             if (gridFilter === "unlocked") return done;
@@ -712,75 +708,47 @@ export default function Premiacoes() {
                   onClick={() => setFocusId(a.id)}
                   style={{ ['--tier' as string]: a.accent } as React.CSSProperties}
                   className={cn(
-                    "group relative w-full text-left flex flex-col rounded-2xl overflow-hidden transition-all duration-300",
-                    "border bg-background hover:-translate-y-1 hover:shadow-[0_20px_40px_-20px_hsl(var(--tier)/0.5)]",
+                    "group relative flex w-full flex-col overflow-hidden rounded-2xl border bg-background text-left transition-colors duration-200",
                     isFocused
-                      ? "border-primary shadow-[0_0_0_1px_hsl(var(--primary)),0_20px_40px_-20px_hsl(var(--primary)/0.5)]"
-                      : "border-border hover:border-[hsl(var(--tier)/0.5)]"
+                      ? "border-primary/60 bg-primary/[0.04]"
+                      : "border-border/50 hover:border-border"
                   )}
                 >
                   {/* image cell */}
-                  <div className="relative aspect-square flex items-center justify-center p-5 overflow-hidden bg-gradient-to-br from-[hsl(var(--tier)/0.06)] via-transparent to-[hsl(var(--tier)/0.03)]">
-                    {/* halo on hover */}
-                    <div
-                      className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500"
-                      style={{ background: `radial-gradient(circle at 50% 60%, hsl(var(--tier)/0.22), transparent 65%)` }}
-                    />
-                    {/* pedestal glow */}
-                    <div
-                      className="absolute inset-x-8 bottom-3 h-6 pointer-events-none transition-opacity duration-500"
-                      style={{
-                        background: done
-                          ? `radial-gradient(ellipse at center, hsl(var(--tier)/0.6), transparent 70%)`
-                          : "transparent",
-                        filter: "blur(14px)",
-                        opacity: done ? 0.85 : 0,
-                      }}
-                    />
+                  <div className="relative flex aspect-square items-center justify-center overflow-hidden p-5">
                     <img
                       src={a.image} alt={a.title}
                       className={cn(
-                        "relative max-h-[78%] max-w-[78%] object-contain transition-all duration-500 group-hover:scale-110 group-hover:-translate-y-1",
-                        done
-                          ? "drop-shadow-[0_10px_20px_rgba(0,0,0,0.3)]"
-                          : "grayscale opacity-45 group-hover:opacity-60"
+                        "relative max-h-[78%] max-w-[78%] object-contain transition-transform duration-300 group-hover:scale-[1.04]",
+                        !done && "grayscale opacity-40 group-hover:opacity-60"
                       )}
                     />
 
-                    {/* roman index */}
-                    <span className="absolute top-2.5 left-3 font-mono text-[9px] uppercase tracking-[0.24em] text-muted-foreground/80">
+                    <span className="absolute left-3 top-3 text-[12px] font-medium tabular-nums text-muted-foreground/50">
                       {a.roman}
                     </span>
 
-                    {/* stamp */}
                     {done ? (
-                      <span className="absolute top-2.5 right-2.5 inline-flex items-center justify-center h-6 w-6 rounded-full bg-primary text-primary-foreground shadow-[0_4px_12px_hsl(var(--primary)/0.5)]">
-                        <CheckCircle2 className="h-3.5 w-3.5" strokeWidth={3} />
+                      <span className="absolute right-3 top-3 inline-flex h-5 w-5 items-center justify-center rounded-full bg-primary text-primary-foreground">
+                        <CheckCircle2 className="h-3 w-3" strokeWidth={3} />
                       </span>
                     ) : (
-                      <span className="absolute top-2.5 right-2.5 inline-flex items-center justify-center h-6 w-6 rounded-full border border-border bg-background text-muted-foreground/60">
-                        <Lock className="h-3 w-3" strokeWidth={2.25} />
-                      </span>
+                      <Lock className="absolute right-3 top-3 h-3.5 w-3.5 text-muted-foreground/40" strokeWidth={2} />
                     )}
                   </div>
 
                   {/* footer */}
-                  <div className="relative px-4 py-3.5 border-t border-border bg-card/80">
+                  <div className="relative border-t border-border/40 px-4 py-3.5">
                     <div className="flex items-center gap-1.5">
-                      <Icon className={cn("h-3 w-3", done ? "text-primary" : "text-muted-foreground")} strokeWidth={2.5} />
-                      <span className={cn(
-                        "font-mono text-[9px] uppercase tracking-[0.22em] truncate",
-                        done ? "text-foreground" : "text-muted-foreground"
-                      )}>{a.tier}</span>
+                      <Icon className={cn("h-3.5 w-3.5 shrink-0", done ? "text-primary" : "text-muted-foreground/50")} strokeWidth={1.75} />
+                      <span className="truncate text-[12px] text-muted-foreground">{a.tier}</span>
                     </div>
-                    <p className="font-display font-black text-foreground text-[17px] tabular-nums tracking-[-0.025em] mt-1.5 leading-none">
+                    <p className="mt-2 font-display text-[19px] font-bold leading-none tracking-[-0.03em] tabular-nums text-foreground">
                       {a.label}
                     </p>
-                    <div className="mt-3 h-1 rounded-full bg-border overflow-hidden">
+                    <div className="mt-3 h-[3px] overflow-hidden rounded-full bg-border/60">
                       <div
-                        className={cn("h-full rounded-full transition-[width] duration-700",
-                          done ? "bg-gradient-to-r from-primary to-[hsl(var(--tier))]" : "bg-foreground/30"
-                        )}
+                        className={cn("h-full rounded-full transition-[width] duration-700", done ? "bg-primary" : "bg-foreground/25")}
                         style={{ width: `${Math.max(progress, 2)}%` }}
                       />
                     </div>

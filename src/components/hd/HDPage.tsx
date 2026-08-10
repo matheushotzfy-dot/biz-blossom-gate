@@ -68,22 +68,32 @@ export interface HDHeaderProps {
 /** Display heading row, matching the dashboard greeting. */
 export function HDHeader({ eyebrow, title, subtitle, actions, className }: HDHeaderProps) {
   return (
-    <header className={cn("flex flex-col md:flex-row md:items-center md:justify-between gap-3", className)}>
-      <div className="min-w-0">
+    <header
+      className={cn(
+        "flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between",
+        className,
+      )}
+    >
+      <div className="min-w-0 flex-1">
         {eyebrow ? (
           <span className="block text-[12px] font-medium text-muted-foreground/70 mb-1">{eyebrow}</span>
         ) : null}
-        <h1 className="font-display font-bold tracking-[-0.03em] text-[26px] md:text-[34px] leading-[1.05]">
+        <h1 className="font-display font-bold tracking-[-0.03em] text-[22px] sm:text-[26px] md:text-[34px] leading-[1.05]">
           {title}
         </h1>
         {subtitle ? (
-          <p className="text-muted-foreground/60 text-[13px] mt-1.5">{subtitle}</p>
+          <p className="text-muted-foreground/60 text-[12.5px] sm:text-[13px] mt-1.5 max-w-[68ch]">{subtitle}</p>
         ) : null}
       </div>
-      {actions ? <div className="flex items-center gap-2 flex-wrap shrink-0">{actions}</div> : null}
+      {actions ? (
+        <div className="-mx-2 flex items-center gap-2 overflow-x-auto px-2 pb-1 scrollbar-none lg:mx-0 lg:flex-wrap lg:overflow-visible lg:px-0 lg:justify-end lg:shrink-0">
+          {actions}
+        </div>
+      ) : null}
     </header>
   );
 }
+
 
 export interface HDStatProps {
   label: ReactNode;

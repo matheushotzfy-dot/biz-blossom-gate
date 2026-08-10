@@ -4,7 +4,7 @@ import {
  ArrowDownToLine, Search, CheckCircle2, XCircle, Clock, Wallet, UserCog,
  ToggleLeft, AlertTriangle, ShieldAlert, DollarSign, ArrowUpDown, Filter,
  CheckSquare, Plus, Minus, FileText, TrendingUp, TrendingDown, Banknote,
- Eye, ChevronDown, ChevronUp, Users,
+ Eye, ChevronDown, ChevronUp, Users, Copy,
 } from "lucide-react";
 import { StatusBadge } from "@/components/StatusBadge";
 import { Button } from "@/components/ui/button";
@@ -46,7 +46,108 @@ const isNewSeller = (profile: Tables<"profiles"> | undefined) => {
 };
 const isHighValue = (amount: number) => amount >= 50000;
 
+/* ── PIX key labels ── */
+const PIX_KEY_LABEL: Record<string, string> = {
+  email: "E-mail",
+  cpf: "CPF",
+  cnpj: "CNPJ",
+  phone: "Telefone",
+  celular: "Telefone",
+  random: "Aleatória",
+  evp: "Aleatória",
+};
+
+/**
+ * Destino do pagamento — revela sob demanda a chave PIX (ou endereço cripto)
+ * do vendedor, deixando explícito o TIPO da chave e facilitando a cópia.
+ */
+function PayoutTarget({ withdrawal }: { withdrawal: Tables<"withdrawals"> }) {
+  const [revealed, setRevealed] = useState<{ type: string; value: string } | null>(null);
+  const [loading, setLoading] = useState(false);
+
+  const copy = (value: string, label: string) => {
+    navigator.clipboard.writeText(value);
+    toast.success(`${label} copiado`);
+  };
+
+  const chip = (label: string, tone: "primary" | "warning" | "muted" = "muted") => (
+    <span className={
+      tone === "primary" ? "rounded-md border border-primary/25 bg-primary/10 px-1.5 py-0.5 text-[9px] font-bold uppercase text-primary"
+        : tone === "warning" ? "rounded-md border border-warning/25 bg-warning/10 px-1.5 py-0.5 text-[9px] font-bold uppercase text-warning"
+          : "rounded-md border border-border bg-muted/40 px-1.5 py-0.5 text-[9px] font-bold uppercase text-muted-foreground"
+    }>{label}</span>
+  );
+
+  const copyBtn = (value: string, label: string) => (
+    <button
+      type="button"
+      onClick={() => copy(value, label)}
+      title={value}
+      className="flex max-w-[190px] items-center gap-1.5 rounded-lg border border-border/60 bg-muted/30 px-2 py-1 text-left transition-colors hover:border-border hover:bg-muted/60"
+    >
+      <Copy className="h-3 w-3 shrink-0 text-muted-foreground" />
+      <span className="truncate font-mono text-[10px] text-foreground/80">{value}</span>
+    </button>
+  );
+
+  if (withdrawal.withdrawal_type === "crypto") {
+    return (
+      <div className="flex flex-col gap-1">
+        <div className="flex items-center gap-1">
+          {chip(withdrawal.crypto_currency || "Cripto", "warning")}
+          {withdrawal.crypto_network ? chip(withdrawal.crypto_network) : null}
+        </div>
+        {withdrawal.crypto_address ? copyBtn(withdrawal.crypto_address, "Endereço") : <span className="text-[10px] text-muted-foreground">—</span>}
+      </div>
+    );
+  }
+
+  if (withdrawal.pix_copy_paste_code) {
+    return (
+      <div className="flex flex-col gap-1">
+        {chip("Copia e Cola", "primary")}
+        {copyBtn(withdrawal.pix_copy_paste_code, "Código PIX")}
+      </div>
+    );
+  }
+
+  const reveal = async () => {
+    setLoading(true);
+    try {
+      const { data, error } = await supabase.rpc("admin_reveal_pix_keys", { _user_id: withdrawal.user_id });
+      if (error) { toast.error("Sem permissão para revelar a chave"); return; }
+      const rows = (data as { id: string; key_type: string; key_value: string; is_default: boolean }[]) || [];
+      const match = rows.find(r => r.id === withdrawal.pix_key_id) || rows.find(r => r.is_default) || rows[0];
+      if (!match) { toast.error("Vendedor sem chave PIX cadastrada"); return; }
+      setRevealed({ type: match.key_type, value: match.key_value });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (revealed) {
+    return (
+      <div className="flex flex-col gap-1">
+        {chip(PIX_KEY_LABEL[revealed.type?.toLowerCase()] || revealed.type || "PIX", "primary")}
+        {copyBtn(revealed.value, "Chave PIX")}
+      </div>
+    );
+  }
+
+  return (
+    <button
+      type="button"
+      onClick={reveal}
+      disabled={loading}
+      className="inline-flex items-center gap-1.5 rounded-lg border border-border/60 bg-muted/30 px-2 py-1 text-[10px] font-semibold text-muted-foreground transition-colors hover:border-primary/40 hover:text-primary disabled:opacity-60"
+    >
+      <Eye className="h-3 w-3" /> {loading ? "Abrindo..." : "Ver chave PIX"}
+    </button>
+  );
+}
+
 type SubTab = "queue" | "adjustments" | "statement";
+
 
 export default function AdminWithdrawalsTab({ withdrawals, profiles, onWithdrawalAction, onReload, fmtCurrency }: Props) {
  const { user } = useAuth();
@@ -406,7 +507,7 @@ export default function AdminWithdrawalsTab({ withdrawals, profiles, onWithdrawa
             <th className={`${premiumTable.th} w-10`}>
               <Checkbox checked={pendingFiltered.length > 0 && selectedIds.size === pendingFiltered.length} onCheckedChange={toggleSelectAll} />
             </th>
-            {["ID", "Vendedor", "Tipo", "Risco", "Bruto", "Taxa", "Líquido", "Status", "Admin", "Auto", "Data", "Ações"].map(h => (
+            {["ID", "Vendedor", "Tipo", "Destino", "Risco", "Bruto", "Taxa", "Líquido", "Status", "Admin", "Auto", "Data", "Ações"].map(h => (
               <th key={h} className={premiumTable.th}>{h}</th>
             ))}
           </tr></thead>
@@ -463,7 +564,9 @@ export default function AdminWithdrawalsTab({ withdrawals, profiles, onWithdrawa
                       )}
                     </div>
                   </td>
+                  <td className={premiumTable.td}><PayoutTarget withdrawal={w} /></td>
                   <td className={premiumTable.td}><RiskBadge withdrawal={w} /></td>
+
                   <td className={`${premiumTable.td} text-xs font-extrabold tabular-nums ${isOver10k ? "text-destructive" : "text-foreground"}`}>
                     {formatCurrency(Number(w.amount))}
                     {isOver10k && <span className="ml-1 text-[8px] font-bold text-destructive">!</span>}
