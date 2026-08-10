@@ -754,8 +754,6 @@ export default function Premiacoes() {
                     </div>
                   </div>
                 </button>
-
-                </button>
               </li>
             );
           })}
