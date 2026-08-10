@@ -507,7 +507,7 @@ export default function AdminWithdrawalsTab({ withdrawals, profiles, onWithdrawa
             <th className={`${premiumTable.th} w-10`}>
               <Checkbox checked={pendingFiltered.length > 0 && selectedIds.size === pendingFiltered.length} onCheckedChange={toggleSelectAll} />
             </th>
-            {["ID", "Vendedor", "Tipo", "Risco", "Bruto", "Taxa", "Líquido", "Status", "Admin", "Auto", "Data", "Ações"].map(h => (
+            {["ID", "Vendedor", "Tipo", "Destino", "Risco", "Bruto", "Taxa", "Líquido", "Status", "Admin", "Auto", "Data", "Ações"].map(h => (
               <th key={h} className={premiumTable.th}>{h}</th>
             ))}
           </tr></thead>
