@@ -708,79 +708,53 @@ export default function Premiacoes() {
                   onClick={() => setFocusId(a.id)}
                   style={{ ['--tier' as string]: a.accent } as React.CSSProperties}
                   className={cn(
-                    "group relative w-full text-left flex flex-col rounded-2xl overflow-hidden transition-all duration-300",
-                    "border bg-background hover:-translate-y-1 hover:shadow-[0_20px_40px_-20px_hsl(var(--tier)/0.5)]",
+                    "group relative flex w-full flex-col overflow-hidden rounded-2xl border bg-background text-left transition-colors duration-200",
                     isFocused
-                      ? "border-primary shadow-[0_0_0_1px_hsl(var(--primary)),0_20px_40px_-20px_hsl(var(--primary)/0.5)]"
-                      : "border-border hover:border-[hsl(var(--tier)/0.5)]"
+                      ? "border-primary/60 bg-primary/[0.04]"
+                      : "border-border/50 hover:border-border"
                   )}
                 >
                   {/* image cell */}
-                  <div className="relative aspect-square flex items-center justify-center p-5 overflow-hidden bg-gradient-to-br from-[hsl(var(--tier)/0.06)] via-transparent to-[hsl(var(--tier)/0.03)]">
-                    {/* halo on hover */}
-                    <div
-                      className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500"
-                      style={{ background: `radial-gradient(circle at 50% 60%, hsl(var(--tier)/0.22), transparent 65%)` }}
-                    />
-                    {/* pedestal glow */}
-                    <div
-                      className="absolute inset-x-8 bottom-3 h-6 pointer-events-none transition-opacity duration-500"
-                      style={{
-                        background: done
-                          ? `radial-gradient(ellipse at center, hsl(var(--tier)/0.6), transparent 70%)`
-                          : "transparent",
-                        filter: "blur(14px)",
-                        opacity: done ? 0.85 : 0,
-                      }}
-                    />
+                  <div className="relative flex aspect-square items-center justify-center overflow-hidden p-5">
                     <img
                       src={a.image} alt={a.title}
                       className={cn(
-                        "relative max-h-[78%] max-w-[78%] object-contain transition-all duration-500 group-hover:scale-110 group-hover:-translate-y-1",
-                        done
-                          ? "drop-shadow-[0_10px_20px_rgba(0,0,0,0.3)]"
-                          : "grayscale opacity-45 group-hover:opacity-60"
+                        "relative max-h-[78%] max-w-[78%] object-contain transition-transform duration-300 group-hover:scale-[1.04]",
+                        !done && "grayscale opacity-40 group-hover:opacity-60"
                       )}
                     />
 
-                    {/* roman index */}
-                    <span className="absolute top-2.5 left-3 font-mono text-[9px] uppercase tracking-[0.24em] text-muted-foreground/80">
+                    <span className="absolute left-3 top-3 text-[12px] font-medium tabular-nums text-muted-foreground/50">
                       {a.roman}
                     </span>
 
-                    {/* stamp */}
                     {done ? (
-                      <span className="absolute top-2.5 right-2.5 inline-flex items-center justify-center h-6 w-6 rounded-full bg-primary text-primary-foreground shadow-[0_4px_12px_hsl(var(--primary)/0.5)]">
-                        <CheckCircle2 className="h-3.5 w-3.5" strokeWidth={3} />
+                      <span className="absolute right-3 top-3 inline-flex h-5 w-5 items-center justify-center rounded-full bg-primary text-primary-foreground">
+                        <CheckCircle2 className="h-3 w-3" strokeWidth={3} />
                       </span>
                     ) : (
-                      <span className="absolute top-2.5 right-2.5 inline-flex items-center justify-center h-6 w-6 rounded-full border border-border bg-background text-muted-foreground/60">
-                        <Lock className="h-3 w-3" strokeWidth={2.25} />
-                      </span>
+                      <Lock className="absolute right-3 top-3 h-3.5 w-3.5 text-muted-foreground/40" strokeWidth={2} />
                     )}
                   </div>
 
                   {/* footer */}
-                  <div className="relative px-4 py-3.5 border-t border-border bg-card/80">
+                  <div className="relative border-t border-border/40 px-4 py-3.5">
                     <div className="flex items-center gap-1.5">
-                      <Icon className={cn("h-3 w-3", done ? "text-primary" : "text-muted-foreground")} strokeWidth={2.5} />
-                      <span className={cn(
-                        "font-mono text-[9px] uppercase tracking-[0.22em] truncate",
-                        done ? "text-foreground" : "text-muted-foreground"
-                      )}>{a.tier}</span>
+                      <Icon className={cn("h-3.5 w-3.5 shrink-0", done ? "text-primary" : "text-muted-foreground/50")} strokeWidth={1.75} />
+                      <span className="truncate text-[12px] text-muted-foreground">{a.tier}</span>
                     </div>
-                    <p className="font-display font-black text-foreground text-[17px] tabular-nums tracking-[-0.025em] mt-1.5 leading-none">
+                    <p className="mt-2 font-display text-[19px] font-bold leading-none tracking-[-0.03em] tabular-nums text-foreground">
                       {a.label}
                     </p>
-                    <div className="mt-3 h-1 rounded-full bg-border overflow-hidden">
+                    <div className="mt-3 h-[3px] overflow-hidden rounded-full bg-border/60">
                       <div
-                        className={cn("h-full rounded-full transition-[width] duration-700",
-                          done ? "bg-gradient-to-r from-primary to-[hsl(var(--tier))]" : "bg-foreground/30"
-                        )}
+                        className={cn("h-full rounded-full transition-[width] duration-700", done ? "bg-primary" : "bg-foreground/25")}
                         style={{ width: `${Math.max(progress, 2)}%` }}
                       />
                     </div>
                   </div>
+                </button>
+
                 </button>
               </li>
             );
