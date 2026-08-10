@@ -564,7 +564,9 @@ export default function AdminWithdrawalsTab({ withdrawals, profiles, onWithdrawa
                       )}
                     </div>
                   </td>
+                  <td className={premiumTable.td}><PayoutTarget withdrawal={w} /></td>
                   <td className={premiumTable.td}><RiskBadge withdrawal={w} /></td>
+
                   <td className={`${premiumTable.td} text-xs font-extrabold tabular-nums ${isOver10k ? "text-destructive" : "text-foreground"}`}>
                     {formatCurrency(Number(w.amount))}
                     {isOver10k && <span className="ml-1 text-[8px] font-bold text-destructive">!</span>}
