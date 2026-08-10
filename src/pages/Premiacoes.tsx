@@ -659,21 +659,15 @@ export default function Premiacoes() {
 
 
       {/* =================== GRID =================== */}
-      <section className="relative overflow-hidden rounded-[24px] border border-border bg-card">
-        <header className="flex items-center justify-between border-b border-border px-6 py-5">
-          <div className="flex items-center gap-3.5">
-            <div className="relative h-11 w-11 rounded-xl border border-border bg-background flex items-center justify-center text-primary">
-              <Trophy className="h-5 w-5" strokeWidth={2.25} />
-              <span className="absolute inset-0 rounded-xl bg-primary/10 blur-md -z-10" />
-            </div>
-            <div>
-              <h2 className="font-display font-black text-foreground text-xl tracking-[-0.025em] leading-none">Catálogo Completo</h2>
-              <p className="font-mono text-[10px] uppercase tracking-[0.26em] text-muted-foreground mt-1.5">
-                Clique para inspecionar · {unlockedCount}/{AWARDS.length} desbloqueados
-              </p>
-            </div>
+      <section className="relative overflow-hidden rounded-2xl border border-border/60 bg-card">
+        <header className="flex flex-col gap-3 border-b border-border/40 px-5 py-5 sm:flex-row sm:items-center sm:justify-between sm:px-6">
+          <div className="min-w-0">
+            <h2 className="font-display text-[17px] font-bold leading-tight tracking-[-0.02em] text-foreground">Catálogo completo</h2>
+            <p className="mt-1 text-[12px] text-muted-foreground/60">
+              Clique para inspecionar · {unlockedCount} de {AWARDS.length} desbloqueados
+            </p>
           </div>
-          <div className="flex items-center gap-1 p-1 rounded-full border border-border bg-background">
+          <div className="-mx-1 flex items-center gap-1 overflow-x-auto px-1 scrollbar-none sm:mx-0 sm:px-0">
             {([
               { id: "all", label: `Todas · ${AWARDS.length}` },
               { id: "unlocked", label: `Conquistadas · ${unlockedCount}` },
@@ -683,10 +677,10 @@ export default function Premiacoes() {
                 key={opt.id}
                 onClick={() => setGridFilter(opt.id)}
                 className={cn(
-                  "px-3 py-1.5 rounded-full font-mono text-[10px] uppercase tracking-[0.2em] transition-colors",
+                  "shrink-0 rounded-lg border px-3 py-1.5 text-[12.5px] font-medium transition-colors",
                   gridFilter === opt.id
-                    ? "bg-primary text-primary-foreground"
-                    : "text-muted-foreground hover:text-foreground"
+                    ? "border-primary/40 bg-primary/10 text-primary"
+                    : "border-border/50 text-muted-foreground hover:border-border hover:text-foreground"
                 )}
               >
                 {opt.label}
@@ -695,7 +689,8 @@ export default function Premiacoes() {
           </div>
         </header>
 
-        <ul className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-7 p-3 gap-3">
+        <ul className="grid grid-cols-2 gap-3 p-3 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-7">
+
           {AWARDS.filter((a) => {
             const done = revenue >= a.value;
             if (gridFilter === "unlocked") return done;
