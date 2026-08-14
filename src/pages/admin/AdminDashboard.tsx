@@ -495,22 +495,27 @@ export default function AdminDashboard() {
               <h2 className="text-[16px] font-semibold af-text truncate">{activeTabLabel}</h2>
             </div>
 
-            {syncing && (
-              <span className="flex items-center gap-1.5 text-[11.5px] font-medium af-muted af-surface-2 af-border border rounded-md px-2.5 py-1">
+            {syncing ? (
+              <span className="hidden sm:flex items-center gap-1.5 text-[11.5px] font-medium af-muted af-surface-2 af-border border rounded-md px-2.5 py-1">
                 <RefreshCw className="h-3 w-3 animate-spin" />
                 Sincronizando
               </span>
-            )}
+            ) : lastSync ? (
+              <span className="hidden xl:flex items-center gap-1.5 text-[11.5px] font-medium af-muted-2" title="Atualiza automaticamente a cada 60s">
+                <Clock className="h-3 w-3" />
+                {lastSync.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })}
+              </span>
+            ) : null}
           </div>
 
           {/* Date picker */}
-          <div className="hidden md:flex items-center gap-px p-0.5 rounded-md af-surface-2 af-border border">
+          <div className="flex items-center gap-px p-0.5 rounded-md af-surface-2 af-border border max-w-[50vw] overflow-x-auto scrollbar-thin md:max-w-none md:overflow-visible">
             {DATE_PRESETS.map(p => (
               <button
                 key={p.label}
                 onClick={() => handleDatePreset(p.id)}
                 className={cn(
-                   "px-3 py-1.5 rounded text-[12px] font-semibold transition-colors",
+                   "px-2.5 md:px-3 py-1.5 rounded text-[12px] font-semibold transition-colors shrink-0",
                   datePreset === p.id
                     ? "af-surface af-text af-border border"
                     : "af-muted hover:af-text"
