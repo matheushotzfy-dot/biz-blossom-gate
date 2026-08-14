@@ -11,7 +11,7 @@ import { toast } from "sonner";
 import { PremiumPanel, PremiumMetric, PremiumMetricGrid, premiumTable } from "./AdminPremium";
 import { logAdminAction } from "@/lib/auditLog";
 import { friendlyError } from "@/lib/friendlyError";
-import type { Tables } from "@/integrations/supabase/types";
+import type { Json, Tables } from "@/integrations/supabase/types";
 import { cn } from "@/lib/utils";
 
 export interface AdminToolsTabProps {
@@ -91,7 +91,7 @@ export default function AdminToolsTab({ transactions, profiles, withdrawals }: A
     setSwitches(next); // atualização otimista, revertida em caso de erro
     const { error } = await supabase
       .from("platform_settings")
-      .upsert({ key: "kill_switches", value: next }, { onConflict: "key" });
+      .upsert([{ key: "kill_switches", value: next as unknown as Json }], { onConflict: "key" });
     setSaving(false);
     if (error) {
       setSwitches(previous);
@@ -120,23 +120,29 @@ export default function AdminToolsTab({ transactions, profiles, withdrawals }: A
     }
     setNoteSaving(true);
     const { data: auth } = await supabase.auth.getUser();
-    const { error } = await supabase.from("manager_seller_notes").insert({
-      seller_id: noteSeller,
-      manager_id: auth.user?.id ?? null,
-      note: noteText.trim(),
+    if (!auth.user) {
+      setNoteSaving(false);
+      toast.error("Sessão expirada.");
+      return;
+    }
+    const { error } = await supabase.from("seller_notes").insert({
+      seller_user_id: noteSeller,
+      author_user_id: auth.user.id,
+      author_role: "admin",
+      content: noteText.trim(),
     });
     setNoteSaving(false);
     if (error) {
       toast.error(friendlyError(error));
       return;
     }
-    await logAdminAction("seller_note_created", "manager_seller_notes", noteSeller);
+    await logAdminAction("seller_note_created", "seller_notes", noteSeller);
     setNoteText("");
     toast.success("Nota registrada.");
   };
 
   const nameOf = (id: string | null) =>
-    profiles.find((p) => p.id === id)?.full_name || profiles.find((p) => p.id === id)?.email || "—";
+    profiles.find((p) => p.user_id === id)?.full_name || profiles.find((p) => p.user_id === id)?.email || "—";
 
   const exportTransactions = () =>
     downloadCsv(
@@ -162,9 +168,9 @@ export default function AdminToolsTab({ transactions, profiles, withdrawals }: A
         id: p.id,
         nome: p.full_name ?? "",
         email: p.email ?? "",
-        documento: p.document ?? "",
+        documento: p.document_number ?? "",
         telefone: p.phone ?? "",
-        status: p.status ?? "",
+        status: p.account_status ?? "",
         criado_em: p.created_at,
       })),
     );
@@ -177,10 +183,10 @@ export default function AdminToolsTab({ transactions, profiles, withdrawals }: A
         criado_em: w.created_at,
         seller: nameOf(w.user_id),
         valor: w.amount,
-        taxa: w.fee ?? "",
+        taxa: w.fee_amount ?? "",
         liquido: w.net_amount ?? "",
         status: w.status,
-        metodo: w.method ?? "",
+        metodo: w.withdrawal_type ?? "",
       })),
     );
 
@@ -194,7 +200,7 @@ export default function AdminToolsTab({ transactions, profiles, withdrawals }: A
           label="Kill switches"
           value={`${Number(switches.payments) + Number(switches.withdrawals)} ativo(s)`}
           icon={Power}
-          tone={switches.payments || switches.withdrawals ? "danger" : "success"}
+          tone={switches.payments || switches.withdrawals ? "destructive" : "success"}
           sub={switches.payments || switches.withdrawals ? "operação restrita" : "tudo liberado"}
         />
       </PremiumMetricGrid>
@@ -274,13 +280,13 @@ export default function AdminToolsTab({ transactions, profiles, withdrawals }: A
                 {sellers.map((p) => (
                   <tr
                     key={p.id}
-                    className={cn(premiumTable.row, "cursor-pointer", noteSeller === p.id && "bg-primary/5")}
-                    onClick={() => setNoteSeller(p.id)}
+                    className={cn(premiumTable.row, "cursor-pointer", noteSeller === p.user_id && "bg-primary/5")}
+                    onClick={() => setNoteSeller(p.user_id)}
                   >
                     <td className="px-5 py-2.5 text-sm text-foreground">{p.full_name || "—"}</td>
                     <td className="px-5 py-2.5 text-[12px] text-muted-foreground">{p.email}</td>
                     <td className="px-5 py-2.5 text-right text-[11px] font-semibold text-primary">
-                      {noteSeller === p.id ? "selecionado" : ""}
+                      {noteSeller === p.user_id ? "selecionado" : ""}
                     </td>
                   </tr>
                 ))}
