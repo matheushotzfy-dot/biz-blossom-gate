@@ -240,12 +240,10 @@ export function useFees() {
   return useQuery({
     queryKey: ["fees"],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from("fees")
-        .select("*")
-        .order("created_at");
+      // `fees` é restrita a admins; sellers leem via RPC segura (nome + valor).
+      const { data, error } = await supabase.rpc("get_platform_fees");
       if (error) throw error;
-      return (data || []) as Tables<"fees">[];
+      return (data || []) as { name: string; value: number }[];
     },
     staleTime: 5 * 60 * 1000, // fees rarely change
   });
