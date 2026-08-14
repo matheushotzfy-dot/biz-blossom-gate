@@ -3319,3 +3319,90 @@ button svg, a svg, [role="button"] svg {
     background-image: none !important;
   }
 }
+
+/* ==========================================================================
+   CLEAN PASS v3 — refino final ("caprichado")
+   Ajustes de densidade, tipografia, tabelas, sidebar, inputs e badges.
+   Continua sendo camada visual: nenhuma mudança de layout/estrutura.
+   ========================================================================== */
+@layer utilities {
+  /* --- Tipografia: hierarquia mais seca e legível --- */
+  h1 { letter-spacing: -0.03em; font-weight: 700; }
+  h2 { letter-spacing: -0.025em; font-weight: 650; }
+  h3, h4 { letter-spacing: -0.018em; font-weight: 600; }
+  p, span, div, li, td { letter-spacing: -0.005em; }
+
+  /* Labels em caixa alta ficam menores e mais discretos */
+  .uppercase.text-\[10px\], .uppercase.text-xs {
+    font-weight: 600 !important;
+    letter-spacing: 0.08em !important;
+    color: hsl(var(--muted-foreground)) !important;
+  }
+
+  /* Números financeiros sempre tabulares (colunas alinhadas) */
+  [class*="tabular-nums"], td, th, [data-amount], .font-mono {
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: 'tnum' 1;
+  }
+
+  /* --- Tabelas: cabeçalho seco, linhas com hairline --- */
+  thead th {
+    font-size: 11px !important;
+    font-weight: 600 !important;
+    letter-spacing: 0.06em !important;
+    text-transform: uppercase;
+    color: hsl(var(--muted-foreground)) !important;
+    background: transparent !important;
+    border-bottom: 1px solid hsl(var(--border)) !important;
+  }
+  tbody tr { border-bottom: 1px solid hsl(var(--border) / 0.6) !important; }
+  tbody tr:last-child { border-bottom: 0 !important; }
+  tbody tr:hover { background-color: hsl(var(--muted) / 0.35) !important; }
+
+  /* --- Sidebar: itens mais compactos e estado ativo sóbrio --- */
+  [data-sidebar] a, [data-sidebar] button,
+  aside nav a, aside nav button {
+    border-radius: 8px !important;
+    font-weight: 500;
+  }
+  aside nav a:hover, [data-sidebar] a:hover {
+    background-color: hsl(var(--sidebar-accent)) !important;
+  }
+
+  /* --- Inputs e selects: altura e foco consistentes --- */
+  input:not([type="checkbox"]):not([type="radio"]):not([type="range"]),
+  select, textarea {
+    border: 1px solid hsl(var(--input)) !important;
+    background-color: hsl(var(--card)) !important;
+  }
+  input:focus-visible, select:focus-visible, textarea:focus-visible {
+    border-color: hsl(var(--ring) / 0.7) !important;
+    box-shadow: 0 0 0 1px hsl(var(--ring) / 0.35) !important;
+  }
+  ::placeholder { color: hsl(var(--muted-foreground) / 0.7) !important; }
+
+  /* --- Badges/chips: plano, hairline, sem gradiente --- */
+  [data-badge], .badge, [class*="rounded-full"][class*="text-[10px]"],
+  [class*="rounded-full"][class*="text-xs"][class*="border"] {
+    background-image: none !important;
+    font-weight: 600 !important;
+  }
+
+  /* --- Botões: alturas coerentes e peso de texto controlado --- */
+  button { font-weight: 600; }
+  button:disabled { opacity: 0.45 !important; }
+
+  /* --- Tabs: sublinhado fino em vez de pílula pesada --- */
+  [role="tablist"] { border-bottom: 1px solid hsl(var(--border)); gap: 2px; }
+  [role="tab"] { font-weight: 600; }
+  [role="tab"][data-state="active"] { background-image: none !important; }
+
+  /* --- Separadores e ícones decorativos mais leves --- */
+  hr, [role="separator"] { border-color: hsl(var(--border)) !important; opacity: 1 !important; }
+  svg { shape-rendering: geometricPrecision; }
+
+  /* --- Scrollbar mais fina no desktop --- */
+  @media (min-width: 641px) {
+    *::-webkit-scrollbar { width: 8px; height: 8px; }
+  }
+}
