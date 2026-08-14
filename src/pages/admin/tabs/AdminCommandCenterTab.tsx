@@ -139,7 +139,7 @@ export default function AdminCommandCenterTab({
       setTicketsOpen(tRes.count ?? 0);
       setErrors((eRes.data ?? []) as ErrorRow[]);
       setFraud((fRes.data ?? []) as FraudRow[]);
-      setAcquirers(((aRes.data ?? []) as unknown as AcquirerHealth[]) ?? []);
+      setAcquirers((aRes.data ?? []) as unknown as AcquirerHealth[]);
 
       const rows = (wRes.data ?? []) as { status: string }[];
       setWebhookStats({
