@@ -1,0 +1,1 @@
+delete from public.coupons where code = 'QATEST10';

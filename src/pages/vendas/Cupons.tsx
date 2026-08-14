@@ -21,6 +21,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { toast } from "sonner";
 import { EmptyState, Panel } from "@/components/PageShell";
+import { HDStat, HDStatGrid } from "@/components/hd/HDPage";
 import { cn } from "@/lib/utils";
 import type { Tables } from "@/integrations/supabase/types";
 
@@ -172,18 +173,10 @@ export default function Cupons() {
       {/* ── Hero header ── */}
       <div className="relative flex flex-col gap-7 px-5 pt-1 sm:px-7 md:pt-1">
         {/* Subtle radial accent behind title */}
-        <div
-          aria-hidden
-          className="pointer-events-none absolute -top-12 left-0 h-48 w-[520px] -z-[1] opacity-60 blur-3xl"
-          style={{
-            background:
-              "radial-gradient(60% 60% at 20% 50%, hsl(var(--primary) / 0.10), transparent 70%)",
-          }}
-        />
 
         <div className="flex flex-wrap items-end justify-between gap-4 animate-fade-in">
           <div>
-            <h1 className="font-display text-[40px] font-black leading-[0.9] tracking-[-0.055em] text-foreground sm:text-[52px]">
+            <h1 className="font-display text-[30px] font-bold leading-[1.05] tracking-[-0.03em] text-foreground sm:text-[34px]">
               Cupons
             </h1>
             <p className="mt-2 text-[13px] font-medium text-muted-foreground/80">
@@ -193,12 +186,12 @@ export default function Cupons() {
 
           <Dialog open={openCreate} onOpenChange={setOpenCreate}>
             <DialogTrigger asChild>
-              <button className="group inline-flex h-11 items-center gap-2 rounded-xl bg-primary px-5 text-[13px] font-black uppercase tracking-wider text-primary-foreground transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] hover:bg-primary/90 hover:-translate-y-0.5 hover:shadow-[0_10px_30px_-10px_hsl(var(--primary)/0.5)]">
-                <Plus className="h-4 w-4 transition-transform duration-300 group-hover:rotate-90" strokeWidth={2.75} />
+              <button className="inline-flex h-10 items-center gap-2 rounded-lg bg-primary px-4 text-[12.5px] font-semibold text-primary-foreground hover:bg-primary/90">
+                <Plus className="h-4 w-4" strokeWidth={2.5} />
                 Novo cupom
               </button>
             </DialogTrigger>
-          <DialogContent className="max-w-lg rounded-2xl border border-border/40 bg-card/95 backdrop-blur-xl p-0 overflow-hidden">
+          <DialogContent className="max-w-lg rounded-2xl border border-border/40 bg-card p-0 overflow-hidden">
             <div className="px-6 pt-6 pb-4 border-b border-border/20">
               <DialogHeader>
                 <DialogTitle className="font-display text-lg flex items-center gap-2.5">
@@ -334,7 +327,7 @@ export default function Cupons() {
                 Cancelar
               </Button>
               <Button
-                className="flex-1 rounded-xl h-10 font-display font-bold shadow-lg shadow-primary/20"
+                className="flex-1 rounded-lg h-10 font-semibold"
                 onClick={handleCreate}
                 disabled={saving || !form.code.trim() || !form.discount_value}
               >
@@ -345,35 +338,14 @@ export default function Cupons() {
         </Dialog>
       </div>
 
-        {/* ── KPIs ── */}
-        <div className="grid grid-cols-2 gap-px overflow-hidden rounded-xl border border-border/50 bg-border/40 lg:grid-cols-4 animate-fade-in stagger-1">
-          {[
-            { label: "Total de cupons", value: String(coupons.length), sub: `${coupons.length} ${coupons.length === 1 ? "cupom" : "cupons"} criados`, icon: Ticket, tone: "default" as const },
-            { label: "Cupons ativos", value: String(activeCoupons.length), sub: `${coupons.filter(c => !c.is_active).length} pausados`, icon: Zap, tone: "success" as const },
-            { label: "Utilizações", value: String(totalUses), sub: totalUses === 1 ? "1 resgate no checkout" : `${totalUses} resgates no checkout`, icon: MousePointerClick, tone: "info" as const },
-            { label: "Desconto concedido", value: fmt(totalDiscount), sub: totalDiscount > 0 ? "valor aplicado" : "nenhum aplicado", icon: TrendingDown, tone: totalDiscount > 0 ? "warning" as const : "default" as const },
-          ].map((k) => {
-            const Icon = k.icon;
-            const toneCls = {
-              default: "text-foreground",
-              success: "text-success",
-              warning: "text-warning",
-              info: "text-info",
-            }[k.tone];
-            return (
-              <div key={k.label} className="bg-card px-5 py-4">
-                <div className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-[0.18em] text-muted-foreground/60">
-                  <Icon className="h-3 w-3" strokeWidth={2.5} />
-                  {k.label}
-                </div>
-                <p className={cn("mt-2 font-display text-[22px] font-black leading-none tracking-tight tabular-nums", toneCls)}>
-                  {k.value}
-                </p>
-                <p className="mt-1.5 text-[11px] font-medium text-muted-foreground/60 tabular-nums">{k.sub}</p>
-              </div>
-            );
-          })}
-        </div>
+        {/* ── KPIs (High-density) ── */}
+        <HDStatGrid>
+          <HDStat label="Total de cupons" value={String(coupons.length)} sub={`${coupons.length === 1 ? "1 cupom criado" : `${coupons.length} cupons criados`}`} icon={Ticket} />
+          <HDStat label="Cupons ativos" value={String(activeCoupons.length)} sub={`${coupons.filter(c => !c.is_active).length} pausados`} icon={Zap} />
+          <HDStat label="Utilizações" value={String(totalUses)} sub={totalUses === 1 ? "1 resgate no checkout" : `${totalUses} resgates no checkout`} icon={MousePointerClick} />
+          <HDStat label="Desconto concedido" value={fmt(totalDiscount)} sub={totalDiscount > 0 ? "valor aplicado" : "nenhum aplicado"} icon={TrendingDown} />
+        </HDStatGrid>
+
 
         {/* ── Tabs + Search row ── */}
         <div className="flex flex-col gap-3 pb-1 animate-fade-in stagger-2 sm:flex-row sm:items-center sm:justify-between">
@@ -454,7 +426,7 @@ export default function Cupons() {
             title={coupons.length === 0 ? "Nenhum cupom ainda" : "Nenhum resultado"}
             subtitle={coupons.length === 0 ? "Crie seu primeiro cupom para começar a oferecer descontos" : "Tente ajustar a busca ou os filtros"}
             action={coupons.length === 0 ? (
-              <Button onClick={() => setOpenCreate(true)} className="gap-2 rounded-xl font-display font-bold shadow-lg shadow-primary/20">
+              <Button onClick={() => setOpenCreate(true)} className="gap-2 rounded-lg font-semibold">
                 <Plus className="h-4 w-4" /> Criar Primeiro Cupom
               </Button>
             ) : undefined}

@@ -25,6 +25,7 @@ import CookieConsent from "./components/CookieConsent";
  * every other route is fetched on demand, which keeps the initial payload small.
  */
 const AuthCallback = lazy(() => import("./pages/AuthCallback"));
+const DocumentacaoPublica = lazy(() => import("./pages/DocumentacaoPublica"));
 const PerfilHub = lazy(() => import("./pages/PerfilHub"));
 const PremiacoesHub = lazy(() => import("./pages/PremiacoesHub"));
 const SaquesHub = lazy(() => import("./pages/financeiro/SaquesHub"));
@@ -140,6 +141,8 @@ const App = () => (
                 <Route path="/termos-de-uso" element={<TermosDeUso />} />
                 <Route path="/politica-de-privacidade" element={<PoliticaDePrivacidade />} />
                 <Route path="/status" element={<StatusPage />} />
+               <Route path="/documentacao" element={<DocumentacaoPublica />} />
+               <Route path="/docs" element={<Navigate to="/documentacao" replace />} />
                 <Route path="/certificado/:code" element={<Certificado />} />
                 <Route path="/financeiro/identidade" element={<Navigate to="/perfil?tab=identidade" replace />} />
                 <Route path="/" element={<Index />} />

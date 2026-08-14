@@ -3171,3 +3171,52 @@ button svg, a svg, [role="button"] svg {
   *::-webkit-scrollbar-thumb:hover { background: hsl(var(--muted-foreground) / 0.4); background-clip: padding-box; border: 2px solid transparent; }
   *::-webkit-scrollbar-track { background: transparent; }
 }
+
+/* ==========================================================================
+   FLAT PASS — "estilo liso / seco"
+   Camada final aplicada por cima do layout existente. Não muda estrutura:
+   apenas remove elevações, brilhos e animações elásticas, encurta transições
+   e padroniza o feedback de hover/press para algo mais sóbrio e profissional.
+   ========================================================================== */
+@layer utilities {
+  /* 1. Transições curtas e apenas nas propriedades que importam. */
+  button, a, [role="button"], [role="tab"], [role="menuitem"], [role="option"],
+  .card, section, li, input, select, textarea {
+    transition-property: color, background-color, border-color, opacity, box-shadow;
+    transition-duration: 120ms;
+    transition-timing-function: cubic-bezier(0.2, 0, 0.2, 1);
+  }
+
+  /* 2. Sem levitação, escala ou rotação em hover — o app fica "seco". */
+  .group:hover [class*="group-hover:scale-"],
+  *:hover {
+    --tw-translate-y: 0;
+  }
+  button:hover, a:hover, [role="button"]:hover, .card:hover, section:hover, li:hover {
+    transform: none !important;
+  }
+
+  /* 3. Sem glow/halo colorido: sombras viram traço de 1px. */
+  button:hover, [role="button"]:hover, .card:hover, section:hover {
+    filter: none !important;
+    text-shadow: none !important;
+  }
+
+  /* 4. Press feedback discreto (desktop): opacidade, não escala. */
+  @media (hover: hover) and (pointer: fine) {
+    button:active, [role="button"]:active, a:active {
+      transform: none !important;
+      opacity: 0.86;
+      transition-duration: 60ms;
+    }
+  }
+
+  /* 5. Backdrop-blur decorativo desligado fora de overlays reais. */
+  :not([data-radix-popper-content-wrapper]):not([role="dialog"]):not(header) >
+  [class*="backdrop-blur"]:not([data-keep-blur]) {
+    backdrop-filter: none;
+  }
+
+  /* 6. Bordas coerentes: 1px sólido, sem duplicar contornos. */
+  .rounded-2xl, .rounded-xl { border-width: 1px; }
+}
