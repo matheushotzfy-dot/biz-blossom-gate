@@ -389,11 +389,14 @@ export default function AdminDashboard() {
             <div className="relative">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 af-muted-2" />
               <input
+                ref={navSearchRef}
                 value={navQuery}
                 onChange={(e) => setNavQuery(e.target.value)}
-                placeholder="Buscar..."
-                className="af-input w-full h-9 pl-9 pr-3 text-[13px] rounded-md focus:outline-none"
+                placeholder="Buscar aba..."
+                aria-label="Buscar aba do painel"
+                className="af-input w-full h-9 pl-9 pr-12 text-[13px] rounded-md focus:outline-none"
               />
+              <kbd className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[10px] font-semibold af-muted-2 pointer-events-none">⌘K</kbd>
             </div>
           </div>
         )}
