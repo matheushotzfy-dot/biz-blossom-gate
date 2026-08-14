@@ -526,8 +526,19 @@ export default function AdminDashboard() {
             ))}
             <Popover open={calOpen} onOpenChange={setCalOpen}>
               <PopoverTrigger asChild>
-                <button className="px-1.5 py-1 rounded af-muted hover:af-text hover:af-surface transition-colors">
+                <button
+                  title="Período personalizado"
+                  className={cn(
+                    "flex items-center gap-1.5 px-2 py-1.5 rounded transition-colors shrink-0",
+                    datePreset === "custom" ? "af-surface af-text af-border border" : "af-muted hover:af-text hover:af-surface"
+                  )}
+                >
                   <Calendar className="h-3.5 w-3.5" />
+                  {datePreset === "custom" && (
+                    <span className="text-[11.5px] font-semibold whitespace-nowrap">
+                      {dateRange.from.toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit" })}–{dateRange.to.toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit" })}
+                    </span>
+                  )}
                 </button>
               </PopoverTrigger>
               <PopoverContent className="w-auto p-0 af-surface af-border border rounded-md shadow-lg" align="end">
