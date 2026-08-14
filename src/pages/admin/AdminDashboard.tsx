@@ -183,6 +183,7 @@ export default function AdminDashboard() {
       setProfiles(payload.profiles ?? []);
       setProducts(payload.products ?? []);
       setWithdrawals(payload.withdrawals ?? []);
+      setLastSync(new Date());
     } catch (e) {
       const msg = e instanceof Error ? e.message : "desconhecido";
       toast.error("Erro ao carregar dados: " + msg);
