@@ -13,12 +13,9 @@ import {
   Trash2,
   X,
   XCircle,
-  TrendingUp,
-  ShoppingCart,
-  DollarSign,
 } from "lucide-react";
 import { toast } from "sonner";
-import { HDShell, HDHeader, HDStat, HDStatGrid } from "@/components/hd/HDPage";
+import { HDShell, HDHeader } from "@/components/hd/HDPage";
 import { useTransactions } from "@/hooks/useQueryData";
 import { isApprovedTransaction } from "@/lib/utils";
 
@@ -87,25 +84,6 @@ export default function Produtos() {
     () => productsWithStatus.filter((p) => p.eff === "draft").map((p) => p.product.id),
     [productsWithStatus]
   );
-
-  // 30-day KPIs (dashboard-style)
-  const kpi = useMemo(() => {
-    const now = Date.now();
-    const cutoff = now - 30 * 86400000;
-    const recent = transactions.filter((t) => new Date(t.created_at).getTime() >= cutoff);
-    const approved = recent.filter((t) => isApprovedTransaction(t.status));
-    const revenue = approved.reduce((s, t) => s + Number(t.amount), 0);
-    const productRevenue = new Map<string, number>();
-    approved.forEach((t) => {
-      if (!t.product_id) return;
-      productRevenue.set(t.product_id, (productRevenue.get(t.product_id) || 0) + Number(t.amount));
-    });
-    const bestProductId = [...productRevenue.entries()].sort((a, b) => b[1] - a[1])[0]?.[0];
-    const bestProduct = bestProductId ? products.find((p) => p.id === bestProductId)?.name : null;
-    return { salesCount: approved.length, revenue, avgTicket: approved.length ? revenue / approved.length : 0, bestProduct };
-  }, [transactions, products]);
-
-  const fmtBRL = (n: number) => n.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
 
   const tabs = [
     { label: "Todos", value: "all" as const, count: products.length },
