@@ -403,6 +403,15 @@ export default function AdminDashboard() {
 
         {/* Navigation */}
         <nav className="flex-1 overflow-y-auto py-3 px-2.5 scrollbar-thin">
+          {filteredSections.length === 0 && !sidebarCollapsed && (
+            <div className="flex flex-col items-center gap-2 py-10 px-3 text-center">
+              <SearchX className="h-5 w-5 af-muted-2" />
+              <p className="text-[12px] af-muted">Nenhuma aba encontrada para "{navQuery}".</p>
+              <button onClick={() => setNavQuery("")} className="text-[11.5px] font-semibold af-text underline underline-offset-2">
+                Limpar busca
+              </button>
+            </div>
+          )}
           {filteredSections.map(section => (
             <div key={section.id} className="mb-4">
               {!sidebarCollapsed && (
