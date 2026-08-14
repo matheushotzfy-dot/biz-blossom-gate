@@ -130,10 +130,13 @@ const DATE_PRESETS: { id: DatePresetId; label: string }[] = [
   { id: "40d", label: "40d" },
 ];
 
+const ALL_TAB_IDS = new Set(NAV_SECTIONS.flatMap((s) => s.items.map((i) => i.id)));
+
 export default function AdminDashboard() {
   const { user, loading: authLoading } = useAuth();
   useIdleLogout(15);
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
   const { theme, toggleTheme } = useTheme();
   const [transactions, setTransactions] = useState<Tables<"transactions">[]>([]);
   const [profiles, setProfiles] = useState<Tables<"profiles">[]>([]);
@@ -144,11 +147,15 @@ export default function AdminDashboard() {
   const [hasSupportPerm, setHasSupportPerm] = useState(false);
   const [roleChecked, setRoleChecked] = useState(false);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState<TabId>("god-mode");
+  // A aba ativa vive na URL (?tab=...) para sobreviver a refresh e voltar/avançar.
+  const urlTab = searchParams.get("tab") ?? "";
+  const activeTab: TabId = ALL_TAB_IDS.has(urlTab) ? urlTab : "god-mode";
   const [syncing, setSyncing] = useState(false);
+  const [lastSync, setLastSync] = useState<Date | null>(null);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [navQuery, setNavQuery] = useState("");
+  const navSearchRef = useRef<HTMLInputElement>(null);
   const [dateRange, setDateRange] = useState<{ from: Date; to: Date }>({
     from: startOfDay(new Date()),
     to: endOfDay(new Date()),
