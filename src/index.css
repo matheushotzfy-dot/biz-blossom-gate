@@ -3303,3 +3303,19 @@ button svg, a svg, [role="button"] svg {
   [role="progressbar"], [role="progressbar"] > * { border-radius: 4px !important; }
   [data-badge], .badge { box-shadow: none !important; }
 }
+
+/* CLEAN PASS v2 — addendum: fundos de página totalmente planos */
+@layer utilities {
+  /* Camadas decorativas fixas (auras/gradientes de fundo) desligadas */
+  .fixed.inset-0[aria-hidden="true"],
+  .fixed.inset-0[class*="bg-gradient"],
+  .absolute.inset-0[class*="bg-gradient"]:not([data-keep-gradient]),
+  [class*="bg-[radial-gradient"], [class*="bg-[conic-gradient"] {
+    background-image: none !important;
+    opacity: 0 !important;
+  }
+  /* Superfícies principais: cor sólida do token */
+  main, [data-page-shell], .platform-card, .dashboard-surface {
+    background-image: none !important;
+  }
+}
