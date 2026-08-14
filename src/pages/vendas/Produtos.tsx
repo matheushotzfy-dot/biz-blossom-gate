@@ -16,8 +16,6 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { HDShell, HDHeader } from "@/components/hd/HDPage";
-import { useTransactions } from "@/hooks/useQueryData";
-import { isApprovedTransaction } from "@/lib/utils";
 
 
 import PixelSettingsDialog from "@/components/PixelSettingsDialog";
@@ -45,7 +43,6 @@ export default function Produtos() {
   const { user } = useAuth();
   const navigate = useNavigate();
   const { data: products = [], refetch: loadProducts, isLoading: productsLoading } = useProducts();
-  const { data: transactions = [] } = useTransactions();
 
   const [pixelProduct, setPixelProduct] = useState<Product | null>(null);
   const [copiedId, setCopiedId] = useState<string | null>(null);
