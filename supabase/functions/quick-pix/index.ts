@@ -47,10 +47,6 @@ Deno.serve(async (req) => {
     }
     const userId = userData.user.id;
 
-    // Kill switch global de pagamentos (admin).
-    const paused = await blockIfPaymentsPaused(supabase as never, corsHeaders);
-    if (paused) return paused;
-
     // === Input ===
     const body = await req.json().catch(() => ({}));
     const {
@@ -88,6 +84,11 @@ Deno.serve(async (req) => {
       : `pix+${cleanDoc}@hotzfy.com.br`;
 
     const supabase = createClient(supabaseUrl, serviceKey);
+
+    // Kill switch global de pagamentos (admin).
+    const paused = await blockIfPaymentsPaused(supabase as never, corsHeaders);
+    if (paused) return paused;
+
     const requestIp = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "0.0.0.0";
 
     // === Idempotency — opcional, evita dupla-cobrança em retry de rede ===
