@@ -53,6 +53,7 @@ import AdminRewardsTab from "./tabs/AdminRewardsTab";
 import AdminCorridasTab from "./tabs/AdminCorridasTab";
 import AdminGoalsTab from "./tabs/AdminGoalsTab";
 import AdminCommandCenterTab from "./tabs/AdminCommandCenterTab";
+import AdminToolsTab from "./tabs/AdminToolsTab";
 
 const EMPLOYEE_ALLOWED_TABS = new Set(["god-mode", "sellers", "products", "transactions"] as string[]);
 
@@ -112,6 +113,7 @@ const NAV_SECTIONS: { id: string; label: string; items: { id: string; label: str
       { id: "rewards", label: "Premiações", icon: Trophy, employeeAccess: false },
       { id: "corridas", label: "Corridas Faturamento", icon: Trophy, employeeAccess: false },
       { id: "goals", label: "Metas de Faturamento", icon: Target, employeeAccess: false },
+      { id: "tools", label: "Ferramentas", icon: Settings, employeeAccess: false },
       { id: "audit", label: "Auditoria", icon: Activity, employeeAccess: false },
     ],
   },
@@ -546,6 +548,9 @@ export default function AdminDashboard() {
                   isEmployee={isEmployee} dateRange={dateRange}
                   onNavigate={setActiveTab}
                 />
+              )}
+              {activeTab === "tools" && isAdmin && (
+                <AdminToolsTab transactions={transactions} profiles={profiles} withdrawals={withdrawals} />
               )}
               {activeTab === "command-center" && isAdmin && (
                 <AdminCommandCenterTab
