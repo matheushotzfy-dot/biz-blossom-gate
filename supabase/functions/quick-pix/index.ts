@@ -3,6 +3,7 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { createVeopagDeposit, resolveAcquirerSlug } from "../_shared/veopag.ts";
 import { createPodpayAppPix } from "../_shared/podpay-app.ts";
+import { blockIfPaymentsPaused } from "../_shared/kill-switch.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -45,6 +46,10 @@ Deno.serve(async (req) => {
       });
     }
     const userId = userData.user.id;
+
+    // Kill switch global de pagamentos (admin).
+    const paused = await blockIfPaymentsPaused(supabase as never, corsHeaders);
+    if (paused) return paused;
 
     // === Input ===
     const body = await req.json().catch(() => ({}));
