@@ -5,10 +5,11 @@
 // - Can be invoked by cron OR manually (admin retry)
 
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { isInternalCall, unauthorizedResponse } from "../_shared/cron-auth.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, content-type",
+  "Access-Control-Allow-Headers": "authorization, content-type, x-cron-secret",
 };
 
 const RETRY_DELAYS_SECONDS = [10, 30, 120, 600, 3600]; // 5 attempts
@@ -159,13 +160,9 @@ Deno.serve(async (req) => {
 
   const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 
-  // Require service-role bearer auth — this endpoint is internal-only (cron + postback).
-  const authHeader = req.headers.get("authorization") ?? "";
-  if (authHeader !== `Bearer ${serviceKey}`) {
-    return new Response(JSON.stringify({ error: "Unauthorized" }), {
-      status: 401,
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-    });
+  // Internal-only endpoint: aceita service-role bearer (postback) ou x-cron-secret (pg_cron).
+  if (!isInternalCall(req)) {
+    return unauthorizedResponse(corsHeaders);
   }
 
   const admin = createClient(Deno.env.get("SUPABASE_URL")!, serviceKey);
