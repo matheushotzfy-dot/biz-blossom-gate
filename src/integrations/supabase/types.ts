@@ -4666,6 +4666,7 @@ export type Database = {
       }
       decrypt_field: { Args: { _cipher: string }; Returns: string }
       encrypt_field: { Args: { _plain: string }; Returns: string }
+      enqueue_test_webhook: { Args: { _config_id: string }; Returns: string }
       expire_stale_pix_transactions: { Args: never; Returns: number }
       get_admin_analytics: { Args: { _period_days?: number }; Returns: Json }
       get_admin_dashboard_data: {
@@ -4716,6 +4717,13 @@ export type Database = {
       get_ledger_integrity_report: { Args: never; Returns: Json }
       get_my_goal_progress: { Args: { _goal_id: string }; Returns: number }
       get_my_max_ticket: { Args: never; Returns: number }
+      get_platform_fees: {
+        Args: never
+        Returns: {
+          name: string
+          value: number
+        }[]
+      }
       get_public_payment_link: {
         Args: { _slug: string }
         Returns: {
