@@ -3220,3 +3220,86 @@ button svg, a svg, [role="button"] svg {
   /* 6. Bordas coerentes: 1px sólido, sem duplicar contornos. */
   .rounded-2xl, .rounded-xl { border-width: 1px; }
 }
+
+/* ==========================================================================
+   CLEAN PASS v2 — "liso, seco e leve"
+   Camada final, puramente visual: achata superfícies, remove sombras,
+   gradientes decorativos e brilhos, unifica raios/bordas e deixa o hover
+   apenas como leve mudança de fundo. Não altera layout nem estrutura.
+   ========================================================================== */
+@layer utilities {
+  /* ---- 1. Superfícies planas: sem sombra em nada que não seja overlay ---- */
+  :where(div, section, article, aside, header, footer, li, nav, form, label,
+         button, a, input, select, textarea, table, tr, td, th):not(
+    [role="dialog"] *):not([role="dialog"]):not([data-radix-popper-content-wrapper] *
+  ) {
+    box-shadow: none !important;
+    text-shadow: none !important;
+  }
+
+  /* Overlays reais mantêm uma sombra discreta (sem halo colorido) */
+  [role="dialog"],
+  [data-radix-popper-content-wrapper] > * {
+    box-shadow: 0 12px 32px -18px rgb(0 0 0 / 0.45) !important;
+  }
+
+  /* ---- 2. Sem gradientes/brilhos decorativos em superfícies ---- */
+  :where(div, section, article, aside, header, footer, li, span):not(button):not(a):not(
+    [role="button"]
+  )[class*="bg-gradient"],
+  :where(div, section, span)[class*="blur-"][class*="bg-"],
+  [class*="drop-shadow"] {
+    background-image: none !important;
+    filter: none !important;
+  }
+
+  /* Elementos puramente decorativos (blobs/auras) somem */
+  :where(div, span)[aria-hidden="true"][class*="blur-3xl"],
+  :where(div, span)[aria-hidden="true"][class*="blur-2xl"],
+  :where(div, span)[aria-hidden="true"][class*="rounded-full"][class*="opacity-"][class*="blur"] {
+    display: none !important;
+  }
+
+  /* ---- 3. Raios menores e coerentes (aspecto mais sóbrio) ---- */
+  .rounded-3xl { border-radius: 14px !important; }
+  .rounded-2xl { border-radius: 12px !important; }
+  .rounded-xl  { border-radius: 10px !important; }
+  .rounded-lg  { border-radius: 8px  !important; }
+  button:not([class*="rounded-full"]),
+  [role="tab"]:not([class*="rounded-full"]),
+  input:not([type="checkbox"]):not([type="radio"]):not([type="range"]),
+  select, textarea {
+    border-radius: 8px !important;
+  }
+
+  /* ---- 4. Bordas hairline uniformes ---- */
+  :where(div, section, article, aside, li, button, input, select, textarea)[class*="border"] {
+    border-color: hsl(var(--border)) !important;
+  }
+  [class*="border-2"], [class*="border-4"] { border-width: 1px !important; }
+
+  /* ---- 5. Hover seco: só o fundo muda, nada se mexe ---- */
+  button:hover, [role="button"]:hover, [role="tab"]:hover,
+  [role="menuitem"]:hover, [role="option"]:hover, a:hover,
+  .card:hover, li:hover, tr:hover {
+    transform: none !important;
+    filter: none !important;
+    opacity: 1;
+  }
+  tbody tr:hover { background-color: hsl(var(--muted) / 0.5) !important; }
+
+  /* ---- 6. Tipografia mais enxuta ---- */
+  h1, h2, h3, h4 { letter-spacing: -0.022em; }
+  .uppercase { letter-spacing: 0.06em; }
+
+  /* ---- 7. Animações decorativas desligadas (mantém spinners) ---- */
+  [class*="animate-pulse"]:not([data-skeleton]):not(.skeleton),
+  [class*="animate-bounce"],
+  [class*="animate-ping"] {
+    animation: none !important;
+  }
+
+  /* ---- 8. Barras de progresso e chips discretos ---- */
+  [role="progressbar"], [role="progressbar"] > * { border-radius: 4px !important; }
+  [data-badge], .badge { box-shadow: none !important; }
+}
