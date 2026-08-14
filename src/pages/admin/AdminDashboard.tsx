@@ -579,8 +579,12 @@ export default function AdminDashboard() {
             </button>
 
             <button
+              onClick={() => {
+                if (pendingWdCount > 0) handleTabChange("withdrawals");
+                else handleTabChange("notifications");
+              }}
               className="relative h-9 w-9 rounded-md flex items-center justify-center af-border border af-text-3 hover:af-surface-2 transition-colors"
-              title="Notificações"
+              title={pendingWdCount > 0 ? `${pendingWdCount} saque(s) pendente(s)` : "Notificações"}
             >
               <Bell className="h-4 w-4" />
               {pendingWdCount > 0 && (
