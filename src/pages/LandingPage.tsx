@@ -259,6 +259,7 @@ export default function LandingPage() {
       <Seo
         title="HOTZFY — Plataforma de pagamentos e infoprodutos"
         description="Checkout PIX, cartão e boleto com aprovação em segundos, área de membros, afiliados, API e saque D+0. Sem mensalidade."
+        path="/"
         jsonLd={JSONLD}
       />
       <Nav />
