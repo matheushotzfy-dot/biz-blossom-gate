@@ -345,35 +345,14 @@ export default function Cupons() {
         </Dialog>
       </div>
 
-        {/* ── KPIs ── */}
-        <div className="grid grid-cols-2 gap-px overflow-hidden rounded-xl border border-border/50 bg-border/40 lg:grid-cols-4 animate-fade-in stagger-1">
-          {[
-            { label: "Total de cupons", value: String(coupons.length), sub: `${coupons.length} ${coupons.length === 1 ? "cupom" : "cupons"} criados`, icon: Ticket, tone: "default" as const },
-            { label: "Cupons ativos", value: String(activeCoupons.length), sub: `${coupons.filter(c => !c.is_active).length} pausados`, icon: Zap, tone: "success" as const },
-            { label: "Utilizações", value: String(totalUses), sub: totalUses === 1 ? "1 resgate no checkout" : `${totalUses} resgates no checkout`, icon: MousePointerClick, tone: "info" as const },
-            { label: "Desconto concedido", value: fmt(totalDiscount), sub: totalDiscount > 0 ? "valor aplicado" : "nenhum aplicado", icon: TrendingDown, tone: totalDiscount > 0 ? "warning" as const : "default" as const },
-          ].map((k) => {
-            const Icon = k.icon;
-            const toneCls = {
-              default: "text-foreground",
-              success: "text-success",
-              warning: "text-warning",
-              info: "text-info",
-            }[k.tone];
-            return (
-              <div key={k.label} className="bg-card px-5 py-4">
-                <div className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-[0.18em] text-muted-foreground/60">
-                  <Icon className="h-3 w-3" strokeWidth={2.5} />
-                  {k.label}
-                </div>
-                <p className={cn("mt-2 font-display text-[22px] font-black leading-none tracking-tight tabular-nums", toneCls)}>
-                  {k.value}
-                </p>
-                <p className="mt-1.5 text-[11px] font-medium text-muted-foreground/60 tabular-nums">{k.sub}</p>
-              </div>
-            );
-          })}
-        </div>
+        {/* ── KPIs (High-density) ── */}
+        <HDStatGrid>
+          <HDStat label="Total de cupons" value={String(coupons.length)} sub={`${coupons.length === 1 ? "1 cupom criado" : `${coupons.length} cupons criados`}`} icon={Ticket} />
+          <HDStat label="Cupons ativos" value={String(activeCoupons.length)} sub={`${coupons.filter(c => !c.is_active).length} pausados`} icon={Zap} />
+          <HDStat label="Utilizações" value={String(totalUses)} sub={totalUses === 1 ? "1 resgate no checkout" : `${totalUses} resgates no checkout`} icon={MousePointerClick} />
+          <HDStat label="Desconto concedido" value={fmt(totalDiscount)} sub={totalDiscount > 0 ? "valor aplicado" : "nenhum aplicado"} icon={TrendingDown} />
+        </HDStatGrid>
+
 
         {/* ── Tabs + Search row ── */}
         <div className="flex flex-col gap-3 pb-1 animate-fade-in stagger-2 sm:flex-row sm:items-center sm:justify-between">
