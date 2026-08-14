@@ -3406,3 +3406,13 @@ button svg, a svg, [role="button"] svg {
     *::-webkit-scrollbar { width: 8px; height: 8px; }
   }
 }
+
+/* CLEAN v3 — addendum: nenhum brilho residual em cabeçalhos/heros */
+@layer utilities {
+  :where(header, section, div)[class*="absolute"][class*="inset"][class*="gradient"],
+  :where(header, section, div)[class*="pointer-events-none"][class*="gradient"],
+  [class*="bg-[linear-gradient"] {
+    background-image: none !important;
+    opacity: 0 !important;
+  }
+}
