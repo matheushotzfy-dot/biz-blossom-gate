@@ -12,7 +12,7 @@ import {
   Bug, UserX, Banknote, ShieldCheck,
   Package2, BarChart3, Calendar,
   PanelLeftClose, PanelLeft,
-  Trophy, Search, ChevronDown, Sun, Moon, Target, Gauge,
+  Trophy, Search, ChevronDown, Sun, Moon, Target, Gauge, Lock, Clock, SearchX,
   type LucideIcon,
 } from "lucide-react";
 import { toast } from "sonner";
