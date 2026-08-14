@@ -263,7 +263,8 @@ export default function AdminDashboard() {
   };
 
   const handleUserStatus = async (userId: string, status: string) => {
-    if (!isAdmin && !isEmployee) { toast.error("Sem permissão"); return; }
+    // Alterar status de conta é ação privilegiada: apenas admin.
+    if (!isAdmin) { toast.error("Sem permissão"); return; }
     const { error } = await supabase.from("profiles").update({ account_status: status }).eq("user_id", userId);
     if (error) { toast.error("Erro ao atualizar"); return; }
     toast.success(`Conta ${status === "approved" ? "aprovada" : "bloqueada"}!`);
@@ -272,6 +273,7 @@ export default function AdminDashboard() {
   };
 
   const handleLogout = async () => {
+    await logAdminAction("admin_logout", "session", user?.id ?? "unknown");
     await supabase.auth.signOut();
     navigate("/admin-matheus");
   };
@@ -281,16 +283,44 @@ export default function AdminDashboard() {
   const allItems = NAV_SECTIONS.flatMap(s => s.items);
   const activeTabLabel = allItems.find(i => i.id === activeTab)?.label || "";
 
-  const handleTabChange = (tabId: TabId) => {
+  const handleTabChange = useCallback((tabId: TabId) => {
     if (isEmployee && !EMPLOYEE_ALLOWED_TABS.has(tabId)) {
       toast.error("Sem permissão para acessar esta área");
       return;
     }
-    setActiveTab(tabId);
+    setSearchParams((prev) => {
+      const next = new URLSearchParams(prev);
+      next.set("tab", tabId);
+      return next;
+    }, { replace: false });
     const scrollable = document.querySelector("[data-admin-content]");
     if (scrollable) scrollable.scrollTop = 0;
     else window.scrollTo(0, 0);
-  };
+  }, [isEmployee, setSearchParams]);
+
+  // ── Auto refresh silencioso a cada 60s (só com a aba do navegador visível) ──
+  useEffect(() => {
+    if (!roleChecked) return;
+    const id = window.setInterval(() => {
+      if (document.visibilityState === "visible") loadData();
+    }, 60_000);
+    return () => window.clearInterval(id);
+  }, [roleChecked, loadData]);
+
+  // ── Atalhos: ⌘K/Ctrl+K foca a busca de abas, Esc fecha o menu mobile ──
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k") {
+        e.preventDefault();
+        setSidebarCollapsed(false);
+        navSearchRef.current?.focus();
+      }
+      if (e.key === "Escape") setMobileMenuOpen(false);
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, []);
+
 
   const visibleSections = isEmployee
     ? NAV_SECTIONS.map(s => ({
