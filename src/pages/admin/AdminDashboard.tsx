@@ -616,7 +616,7 @@ export default function AdminDashboard() {
                   withdrawals={withdrawals} onWithdrawalAction={handleWithdrawalAction}
                   onUserStatus={handleUserStatus} fmtCurrency={fmtCurrency}
                   isEmployee={isEmployee} dateRange={dateRange}
-                  onNavigate={setActiveTab}
+                  onNavigate={(id) => handleTabChange(id as TabId)}
                 />
               )}
               {activeTab === "tools" && isAdmin && (
