@@ -134,7 +134,12 @@ export default function Saques() {
     }
 
     const { error } = await supabase.from("withdrawals").insert(payload as any);
-    if (error) { toast.error(friendlyError(error)); return; }
+    if (error) {
+      // O banco bloqueia solicitações quando o admin ativa o kill switch de saques.
+      const paused = /pausad/i.test(error.message ?? "");
+      toast.error(paused ? "Saques temporariamente pausados. Tente novamente mais tarde." : friendlyError(error));
+      return;
+    }
     toast.success("Solicitação enviada!");
     setOpen(false);
     setAmount("");
