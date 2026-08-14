@@ -12,7 +12,7 @@ import {
   Bug, UserX, Banknote, ShieldCheck,
   Package2, BarChart3, Calendar,
   PanelLeftClose, PanelLeft,
-  Trophy, Search, ChevronDown, Sun, Moon, Target,
+  Trophy, Search, ChevronDown, Sun, Moon, Target, Gauge,
   type LucideIcon,
 } from "lucide-react";
 import { toast } from "sonner";
@@ -52,6 +52,7 @@ import AdminReferralsTab from "./tabs/AdminReferralsTab";
 import AdminRewardsTab from "./tabs/AdminRewardsTab";
 import AdminCorridasTab from "./tabs/AdminCorridasTab";
 import AdminGoalsTab from "./tabs/AdminGoalsTab";
+import AdminCommandCenterTab from "./tabs/AdminCommandCenterTab";
 
 const EMPLOYEE_ALLOWED_TABS = new Set(["god-mode", "sellers", "products", "transactions"] as string[]);
 
@@ -60,6 +61,7 @@ const NAV_SECTIONS: { id: string; label: string; items: { id: string; label: str
     id: "core", label: "Operacional",
     items: [
       { id: "god-mode", label: "Dashboard", icon: LayoutDashboard, employeeAccess: true },
+      { id: "command-center", label: "Centro de Comando", icon: Gauge, employeeAccess: false },
       { id: "analytics", label: "Analytics", icon: BarChart3, employeeAccess: false },
       { id: "sellers", label: "Sellers", icon: Users, employeeAccess: true },
       { id: "top-sellers", label: "Top Sellers", icon: Zap, employeeAccess: false },
@@ -543,6 +545,15 @@ export default function AdminDashboard() {
                   onUserStatus={handleUserStatus} fmtCurrency={fmtCurrency}
                   isEmployee={isEmployee} dateRange={dateRange}
                   onNavigate={setActiveTab}
+                />
+              )}
+              {activeTab === "command-center" && isAdmin && (
+                <AdminCommandCenterTab
+                  transactions={transactions}
+                  profiles={profiles}
+                  withdrawals={withdrawals}
+                  fmtCurrency={fmtCurrency}
+                  onNavigate={(id) => handleTabChange(id as TabId)}
                 />
               )}
               {activeTab === "analytics" && isAdmin && (
