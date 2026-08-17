@@ -633,25 +633,42 @@ export default function Dashboard() {
           {/* Faturamento / Meta chip — clean, calendar icon opens filter */}
           <Popover open={datePickerOpen} onOpenChange={setDatePickerOpen}>
             <PopoverTrigger asChild>
-              <button className="flex items-center gap-3 rounded-2xl border border-border/60 bg-card/80 backdrop-blur px-4 py-3 min-w-[280px] hover:border-primary/40 hover:bg-card transition-colors text-left">
-                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-muted/50 text-muted-foreground shrink-0">
-                  <CalendarDays className="h-4.5 w-4.5" strokeWidth={2} />
+              <button className="group flex items-center gap-3.5 rounded-2xl border border-border/60 bg-card px-4 py-3 min-w-[300px] hover:border-primary/45 transition-colors text-left">
+                <div className="relative flex h-11 w-11 items-center justify-center rounded-xl bg-primary/10 text-primary shrink-0">
+                  <svg viewBox="0 0 44 44" className="absolute inset-0 h-11 w-11 -rotate-90">
+                    <circle cx="22" cy="22" r="19" fill="none" stroke="hsl(var(--border))" strokeWidth="2.5" />
+                    <circle
+                      cx="22" cy="22" r="19" fill="none" stroke="hsl(var(--primary))" strokeWidth="2.5" strokeLinecap="round"
+                      strokeDasharray={`${(goalPct / 100) * 119.4} 119.4`}
+                      className="transition-[stroke-dasharray] duration-700 ease-out"
+                    />
+                  </svg>
+                  <CalendarDays className="relative h-4 w-4" strokeWidth={2} />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-muted-foreground/70">
-                    Faturamento · {isCustom ? "Período" : selectedPeriod.label}
-                  </p>
-                  <div className="flex items-baseline gap-1.5 mt-0.5">
-                    <span className="font-display font-bold text-[17px] tabular-nums tracking-[-0.02em] text-foreground">
+                  <div className="flex items-center gap-2">
+                    <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-muted-foreground/70">
+                      Faturamento · {isCustom ? "Período" : selectedPeriod.label}
+                    </p>
+                    {revenueTrend !== undefined && (
+                      <span className={cn("rounded-md px-1.5 py-[1px] text-[9.5px] font-bold tabular-nums",
+                        revenueTrend >= 0 ? "bg-success/12 text-success" : "bg-destructive/12 text-destructive")}>
+                        {revenueTrend >= 0 ? "+" : ""}{revenueTrend}%
+                      </span>
+                    )}
+                  </div>
+                  <div className="flex items-baseline gap-1.5 mt-1">
+                    <span className="font-display font-bold text-[20px] tabular-nums tracking-[-0.03em] text-foreground">
                       {privacy.hidden ? CENSORED : fmt(revenue)}
                     </span>
                     <span className="text-[11px] text-muted-foreground/60 tabular-nums">/ {privacy.hidden ? CENSORED : fmt(goalTarget)}</span>
                   </div>
-                  <div className="mt-1.5 h-1 w-full rounded-full bg-muted/50 overflow-hidden">
-                    <div className="h-full rounded-full bg-primary" style={{ width: `${Math.min(100, (revenue/goalTarget)*100)}%` }} />
-                  </div>
+                  <p className="mt-1 text-[10.5px] font-medium text-muted-foreground/70 tabular-nums">
+                    {goalPct.toFixed(1)}% da meta · {approved.length} pedidos pagos
+                  </p>
                 </div>
               </button>
+
             </PopoverTrigger>
             <PopoverContent align="end" className="w-[320px] p-3 rounded-2xl border-border/60">
               <div className="grid grid-cols-2 gap-1.5 mb-3">
