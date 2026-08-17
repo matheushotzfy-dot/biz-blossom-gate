@@ -105,32 +105,40 @@ function DashboardLayoutInner() {
               <span className="pointer-events-none absolute -inset-1 rounded-2xl ring-1 ring-primary/0 group-hover/trg:ring-primary/30 transition" />
             </SidebarTrigger>
 
-            {/* ─── SEARCH BUTTON ─── */}
+            {/* ─── COMMAND BAR ─── */}
             <button
               onClick={() => setSearchOpen(true)}
               aria-label="Pesquisar"
-              className="seller-clickable icon-only h-9 w-9 rounded-xl border border-border/60 bg-muted/40 hover:bg-primary/10 hover:border-primary/40 text-muted-foreground hover:text-primary flex items-center justify-center transition-colors ml-1 mr-auto"
+              className="seller-clickable group ml-1 mr-auto flex h-9 items-center gap-2 rounded-xl border border-border/60 bg-muted/30 px-2.5 text-muted-foreground transition-colors hover:border-primary/40 hover:text-primary md:min-w-[220px]"
             >
               <Search className="h-4 w-4" strokeWidth={2} />
+              <span className="hidden md:inline text-[12.5px] font-medium">Buscar em tudo…</span>
+              <kbd className="ml-auto hidden md:inline-flex items-center rounded-md border border-border/70 bg-background/60 px-1.5 py-0.5 text-[10px] font-bold tabular-nums text-muted-foreground/80">
+                ⌘K
+              </kbd>
             </button>
 
-
-
             {/* ─── BALANCE ─── */}
-            <div className="hidden md:flex items-center justify-center px-4">
-              <div className="platform-card group/balance relative flex items-center gap-4 px-6 h-[46px] rounded-xl bg-card border border-border transition-colors hover:border-primary/30 overflow-hidden">
-                <div className="absolute inset-0 bg-gradient-to-br from-primary/[0.03] to-transparent pointer-events-none" />
-                <div className="flex items-center gap-3 relative z-10">
-                  <div className="flex h-7 w-7 items-center justify-center rounded-xl bg-primary/10 text-primary shadow-sm border border-primary/10 group-hover/balance:scale-110 transition-transform duration-500">
-                    <Wallet className="h-4 w-4" strokeWidth={2.5} />
-                  </div>
-                  <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground/40 group-hover/balance:text-muted-foreground/70 transition-colors">Saldo</span>
+            <div className="hidden md:flex items-center justify-center px-3">
+              <div className="group/balance relative flex h-[46px] items-center gap-3 overflow-hidden rounded-xl border border-border bg-card px-4 transition-colors hover:border-primary/40">
+                <div className="cmd-live relative flex h-7 w-7 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                  <Wallet className="h-3.5 w-3.5" strokeWidth={2.5} />
                 </div>
-                <span className="text-[16px] font-display font-bold text-foreground tabular-nums tracking-[-0.03em] relative z-10">
-                  {privacyHidden ? "••••••" : formatBRL(Math.max(balance, 0))}
-                </span>
+                <div className="leading-none">
+                  <p className="text-[9px] font-bold uppercase tracking-[0.2em] text-muted-foreground/60">Saldo disponível</p>
+                  <p className="mt-1 font-display text-[15px] font-bold tabular-nums tracking-[-0.03em] text-foreground">
+                    {privacyHidden ? "••••••" : formatBRL(Math.max(balance, 0))}
+                  </p>
+                </div>
+                <button
+                  onClick={() => navigate("/financeiro/saques")}
+                  className="ml-2 hidden lg:inline-flex h-7 items-center rounded-lg border border-primary/30 bg-primary/10 px-2.5 text-[10.5px] font-bold uppercase tracking-[0.12em] text-primary transition-colors hover:bg-primary/20"
+                >
+                  Sacar
+                </button>
               </div>
             </div>
+
 
             {/* ─── ACTION CLUSTER — perfectly aligned ─── */}
             <div className="flex items-center gap-1.5 ml-auto md:ml-0">
