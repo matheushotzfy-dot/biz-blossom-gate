@@ -3416,3 +3416,153 @@ button svg, a svg, [role="button"] svg {
     opacity: 0 !important;
   }
 }
+
+/* ==========================================================================
+   TECH LAYER — camada "alta tecnologia" (opt-in via .tech-scope)
+   Reativa profundidade, gradientes e movimento APENAS dentro de superfícies
+   marcadas, sem afetar o restante da plataforma (clean pass permanece).
+   Especificidade alta (html body ...) para vencer as camadas !important.
+   ========================================================================== */
+
+html body .tech-scope {
+  --tech-a: 160 84% 45%;   /* emerald */
+  --tech-b: 189 94% 55%;   /* cyan    */
+  --tech-c: 258 90% 70%;   /* violet  */
+  position: relative;
+  isolation: isolate;
+}
+
+/* Malha técnica de fundo */
+html body .tech-scope .tech-grid {
+  background-image:
+    linear-gradient(to right, hsl(var(--foreground) / 0.06) 1px, transparent 1px),
+    linear-gradient(to bottom, hsl(var(--foreground) / 0.06) 1px, transparent 1px) !important;
+  background-size: 56px 56px !important;
+  opacity: 1 !important;
+  mask-image: radial-gradient(90% 70% at 50% 0%, #000 10%, transparent 80%);
+  -webkit-mask-image: radial-gradient(90% 70% at 50% 0%, #000 10%, transparent 80%);
+}
+
+/* Aurora / halo de energia */
+html body .tech-scope .tech-aurora {
+  background-image:
+    radial-gradient(42% 46% at 18% 8%, hsl(var(--tech-a) / 0.30), transparent 70%),
+    radial-gradient(38% 44% at 82% 4%, hsl(var(--tech-b) / 0.24), transparent 72%),
+    radial-gradient(46% 50% at 55% 96%, hsl(var(--tech-c) / 0.18), transparent 74%) !important;
+  opacity: 1 !important;
+  filter: blur(38px) !important;
+  animation: techDrift 22s ease-in-out infinite alternate !important;
+}
+@keyframes techDrift {
+  0%   { transform: translate3d(-2%, -1%, 0) scale(1); }
+  100% { transform: translate3d(3%, 2%, 0) scale(1.08); }
+}
+
+/* Painel de vidro técnico */
+html body .tech-scope .tech-panel {
+  background-image: linear-gradient(160deg, hsl(var(--card) / 0.92), hsl(var(--card) / 0.55)) !important;
+  border: 1px solid hsl(var(--foreground) / 0.10) !important;
+  box-shadow:
+    0 1px 0 hsl(var(--foreground) / 0.06) inset,
+    0 26px 60px -34px hsl(var(--tech-a) / 0.45) !important;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+html body .tech-scope .tech-panel-hover:hover {
+  border-color: hsl(var(--tech-a) / 0.42) !important;
+  box-shadow:
+    0 1px 0 hsl(var(--foreground) / 0.08) inset,
+    0 30px 70px -34px hsl(var(--tech-a) / 0.55) !important;
+}
+
+/* Texto com gradiente técnico */
+html body .tech-scope .tech-text {
+  background-image: linear-gradient(96deg, hsl(var(--tech-a)), hsl(var(--tech-b)) 48%, hsl(var(--tech-c))) !important;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent !important;
+}
+
+/* Borda animada (conic) */
+html body .tech-scope .tech-ring::before {
+  content: "";
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
+  padding: 1px;
+  background-image: conic-gradient(from var(--tech-angle, 0deg),
+    transparent 0deg, hsl(var(--tech-a) / 0.9) 40deg, hsl(var(--tech-b) / 0.9) 80deg, transparent 140deg) !important;
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  animation: techSpin 6s linear infinite;
+  pointer-events: none;
+  opacity: 1 !important;
+}
+@property --tech-angle { syntax: '<angle>'; initial-value: 0deg; inherits: false; }
+@keyframes techSpin { to { --tech-angle: 360deg; } }
+
+/* Linha de varredura (scanline) */
+html body .tech-scope .tech-scan::after {
+  content: "";
+  position: absolute;
+  left: 0; right: 0; top: 0;
+  height: 2px;
+  background-image: linear-gradient(90deg, transparent, hsl(var(--tech-a) / 0.85), transparent) !important;
+  animation: techScan 4.6s ease-in-out infinite;
+  pointer-events: none;
+}
+@keyframes techScan {
+  0% { transform: translateY(0); opacity: 0; }
+  12% { opacity: 1; }
+  88% { opacity: 1; }
+  100% { transform: translateY(280px); opacity: 0; }
+}
+
+/* Chip/status pulsante */
+html body .tech-scope .tech-pulse,
+html body .tech-pulse {
+  animation: techPulse 2.2s ease-in-out infinite !important;
+}
+@keyframes techPulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.45; transform: scale(0.86); }
+}
+
+/* Marquee infinito */
+html body .tech-scope .tech-marquee {
+  animation: techMarquee 26s linear infinite !important;
+}
+@keyframes techMarquee { to { transform: translateX(-50%); } }
+
+/* Botão com brilho técnico */
+html body .tech-scope .tech-cta {
+  background-image: linear-gradient(96deg, hsl(var(--tech-a)), hsl(var(--tech-b))) !important;
+  color: hsl(220 40% 6%) !important;
+  box-shadow: 0 18px 40px -22px hsl(var(--tech-a) / 0.9) !important;
+}
+html body .tech-scope .tech-cta:hover { filter: brightness(1.06) !important; }
+
+/* Números / dados */
+html body .tech-scope .tech-mono {
+  font-family: 'JetBrains Mono', ui-monospace, monospace !important;
+  font-variant-numeric: tabular-nums;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html body .tech-scope *,
+  html body .tech-pulse { animation: none !important; }
+}
+
+/* ── Cluster de comando do topo (dashboard do seller) ── */
+html body .cmd-orb {
+  box-shadow: 0 0 0 1px hsl(var(--border)) inset !important;
+}
+html body .cmd-live::after {
+  content: "";
+  position: absolute;
+  inset: -3px;
+  border-radius: 9999px;
+  border: 1px solid hsl(var(--primary) / 0.5);
+  animation: techPulse 2.4s ease-in-out infinite;
+}
