@@ -191,7 +191,7 @@ export default function Cupons() {
                 Novo cupom
               </button>
             </DialogTrigger>
-          <DialogContent className="max-w-lg rounded-2xl border border-border/40 bg-card p-0 overflow-hidden">
+          <DialogContent className="max-w-lg rounded-[12px] border border-border/40 bg-card p-0 overflow-hidden">
             <div className="px-6 pt-6 pb-4 border-b border-border/20">
               <DialogHeader>
                 <DialogTitle className="font-display text-lg flex items-center gap-2.5">
@@ -208,10 +208,10 @@ export default function Cupons() {
               <div className="space-y-4">
                 <div className="flex items-center gap-2">
                   <span className="h-5 w-5 rounded-md bg-primary/10 text-primary text-[10px] font-black flex items-center justify-center">1</span>
-                  <span className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground/60">Identificação</span>
+                  <span className="text-[11px] font-medium text-muted-foreground/60">Identificação</span>
                 </div>
                 <div>
-                  <Label className="text-[10.5px] font-bold text-muted-foreground/60 uppercase tracking-wider">Código do Cupom</Label>
+                  <Label className="text-[11px] font-medium text-muted-foreground/60 ">Código do Cupom</Label>
                   <Input
                     placeholder="EX: BLACKFRIDAY10"
                     value={form.code}
@@ -226,11 +226,11 @@ export default function Cupons() {
               <div className="space-y-4 pt-4 border-t border-border/20">
                 <div className="flex items-center gap-2">
                   <span className="h-5 w-5 rounded-md bg-primary/10 text-primary text-[10px] font-black flex items-center justify-center">2</span>
-                  <span className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground/60">Valor do Desconto</span>
+                  <span className="text-[11px] font-medium text-muted-foreground/60">Valor do Desconto</span>
                 </div>
                 <div className="grid grid-cols-[1fr_auto] gap-2">
                   <div>
-                    <Label className="text-[10.5px] font-bold text-muted-foreground/60 uppercase tracking-wider">Valor</Label>
+                    <Label className="text-[11px] font-medium text-muted-foreground/60 ">Valor</Label>
                     <Input
                       type="number"
                       placeholder="10"
@@ -240,7 +240,7 @@ export default function Cupons() {
                     />
                   </div>
                   <div>
-                    <Label className="text-[10.5px] font-bold text-muted-foreground/60 uppercase tracking-wider">Tipo</Label>
+                    <Label className="text-[11px] font-medium text-muted-foreground/60 ">Tipo</Label>
                     <Select value={form.discount_type} onValueChange={v => setForm(f => ({ ...f, discount_type: v as "percentage" | "fixed" }))}>
                       <SelectTrigger className="mt-1.5 h-11 w-24 rounded-xl font-bold">
                         <SelectValue />
@@ -266,11 +266,11 @@ export default function Cupons() {
               <div className="space-y-4 pt-4 border-t border-border/20">
                 <div className="flex items-center gap-2">
                   <span className="h-5 w-5 rounded-md bg-primary/10 text-primary text-[10px] font-black flex items-center justify-center">3</span>
-                  <span className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground/60">Restrições <span className="text-muted-foreground/30 font-medium normal-case tracking-normal">(opcional)</span></span>
+                  <span className="text-[11px] font-medium text-muted-foreground/60">Restrições <span className="text-muted-foreground/30 font-medium normal-case tracking-normal">(opcional)</span></span>
                 </div>
 
                 <div>
-                  <Label className="text-[10.5px] font-bold text-muted-foreground/60 uppercase tracking-wider">Aplicar em</Label>
+                  <Label className="text-[11px] font-medium text-muted-foreground/60 ">Aplicar em</Label>
                   <Select value={form.product_id || "all"} onValueChange={v => setForm(f => ({ ...f, product_id: v === "all" ? "" : v }))}>
                     <SelectTrigger className="mt-1.5 h-11 rounded-xl">
                       <SelectValue />
@@ -292,7 +292,7 @@ export default function Cupons() {
 
                 <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <Label className="text-[10.5px] font-bold text-muted-foreground/60 uppercase tracking-wider">Limite de Usos</Label>
+                    <Label className="text-[11px] font-medium text-muted-foreground/60 ">Limite de Usos</Label>
                     <Input
                       type="number"
                       placeholder="Ilimitado"
@@ -302,7 +302,7 @@ export default function Cupons() {
                     />
                   </div>
                   <div>
-                    <Label className="text-[10.5px] font-bold text-muted-foreground/60 uppercase tracking-wider">Expira em</Label>
+                    <Label className="text-[11px] font-medium text-muted-foreground/60 ">Expira em</Label>
                     <Input
                       type="date"
                       value={form.expires_at}
@@ -357,14 +357,14 @@ export default function Cupons() {
                   key={t.id}
                   onClick={() => setStatusFilter(t.id)}
                   className={cn(
-                    "group/tab relative inline-flex shrink-0 items-center gap-2 rounded-lg h-8 px-3 text-[12px] font-bold tracking-tight transition-colors duration-200",
+ "group/tab relative inline-flex shrink-0 items-center gap-2 rounded-lg h-8 px-3 text-[12px] font-bold tracking-tight transition-colors duration-200",
                     active
                       ? "bg-secondary text-foreground"
                       : "text-muted-foreground/80 hover:text-foreground"
                   )}
                 >
                   <span className={cn(
-                    "flex h-4 w-4 items-center justify-center transition-colors",
+ "flex h-4 w-4 items-center justify-center transition-colors",
                     active ? tabAccent[t.id] : "text-muted-foreground/50 group-hover/tab:text-foreground/70"
                   )}>
                     {tabIcon[t.id]}
@@ -372,7 +372,7 @@ export default function Cupons() {
                   <span className="font-display">{t.label}</span>
                   {t.count > 0 && (
                     <span className={cn(
-                      "inline-flex h-[18px] min-w-[20px] items-center justify-center rounded-md px-1.5 text-[10px] font-black tabular-nums tracking-tight border transition-colors",
+ "inline-flex h-[18px] min-w-[20px] items-center justify-center rounded-md px-1.5 text-[10px] font-black tabular-nums tracking-tight border transition-colors",
                       active
                         ? "bg-background/80 text-foreground border-border/40"
                         : "bg-muted/30 text-muted-foreground/60 border-transparent"
@@ -409,13 +409,13 @@ export default function Cupons() {
         {/* Column headers */}
         {filtered.length > 0 && (
           <div className="hidden md:grid grid-cols-[minmax(0,1.5fr)_minmax(0,1.4fr)_minmax(0,0.9fr)_minmax(0,0.9fr)_minmax(0,0.9fr)_auto_auto] items-center gap-4 px-4 py-2.5 border-b border-border/30 bg-muted/10">
-            <span className="text-[9.5px] font-bold uppercase tracking-[0.14em] text-muted-foreground/50">Cupom</span>
-            <span className="text-[9.5px] font-bold uppercase tracking-[0.14em] text-muted-foreground/50">Produto</span>
-            <span className="text-[9.5px] font-bold uppercase tracking-[0.14em] text-muted-foreground/50 text-right">Desconto</span>
-            <span className="text-[9.5px] font-bold uppercase tracking-[0.14em] text-muted-foreground/50 text-right">Uso</span>
-            <span className="text-[9.5px] font-bold uppercase tracking-[0.14em] text-muted-foreground/50">Validade</span>
-            <span className="text-[9.5px] font-bold uppercase tracking-[0.14em] text-muted-foreground/50">Status</span>
-            <span className="text-[9.5px] font-bold uppercase tracking-[0.14em] text-muted-foreground/50 w-[72px] text-right">Ações</span>
+            <span className="text-[11px] font-medium text-muted-foreground/50">Cupom</span>
+            <span className="text-[11px] font-medium text-muted-foreground/50">Produto</span>
+            <span className="text-[11px] font-medium text-muted-foreground/50 text-right">Desconto</span>
+            <span className="text-[11px] font-medium text-muted-foreground/50 text-right">Uso</span>
+            <span className="text-[11px] font-medium text-muted-foreground/50">Validade</span>
+            <span className="text-[11px] font-medium text-muted-foreground/50">Status</span>
+            <span className="text-[11px] font-medium text-muted-foreground/50 w-[72px] text-right">Ações</span>
           </div>
         )}
 
@@ -466,7 +466,7 @@ export default function Cupons() {
                     <p className="text-[14px] font-display font-black text-foreground tabular-nums leading-none">
                       {c.discount_type === "percentage" ? `${Number(c.discount_value)}%` : fmt(Number(c.discount_value))}
                     </p>
-                    <p className="text-[9.5px] text-muted-foreground/40 uppercase tracking-wider font-bold mt-0.5">
+                    <p className="text-[11px] text-muted-foreground/40 font-medium mt-0.5">
                       {c.discount_type === "percentage" ? "percentual" : "fixo"}
                     </p>
                   </div>
@@ -481,14 +481,14 @@ export default function Cupons() {
                       <div className="mt-1.5 h-1 rounded-full bg-muted/15 overflow-hidden ml-auto w-16">
                         <div
                           className={cn(
-                            "h-full rounded-full",
+ "h-full rounded-full",
                             exhausted ? "bg-warning" : usagePct > 75 ? "bg-warning/70" : "bg-success"
                           )}
                           style={{ width: `${usagePct}%` }}
                         />
                       </div>
                     ) : (
-                      <p className="text-[9.5px] text-muted-foreground/40 uppercase tracking-wider font-bold mt-0.5 inline-flex items-center gap-1 justify-end">
+                      <p className="text-[11px] text-muted-foreground/40 font-medium mt-0.5 inline-flex items-center gap-1 justify-end">
                         <InfinityIcon className="h-2.5 w-2.5" /> ilimitado
                       </p>
                     )}
@@ -521,7 +521,7 @@ export default function Cupons() {
                       variant="ghost"
                       size="icon"
                       className={cn(
-                        "h-7 w-7 rounded-md transition-colors",
+ "h-7 w-7 rounded-md transition-colors",
                         c.is_active ? "text-success hover:text-success hover:bg-success/10" : "text-muted-foreground/40 hover:text-foreground hover:bg-muted/10"
                       )}
                       onClick={() => handleToggle(c)}

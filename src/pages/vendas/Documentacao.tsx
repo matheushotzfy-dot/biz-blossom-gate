@@ -48,7 +48,7 @@ function Badge({ children, variant = "default" }: { children: React.ReactNode; v
     error: "bg-destructive/10 text-destructive border-destructive/20",
     warn: "bg-warning/10 text-warning border-warning/20",
   };
-  return <span className={cn("inline-flex px-2 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider border", styles[variant])}>{children}</span>;
+  return <span className={cn("inline-flex px-2 py-0.5 rounded-md text-[11px] font-medium border", styles[variant])}>{children}</span>;
 }
 
 function ParamTable({ params }: { params: { name: string; type: string; required: boolean; desc: string }[] }) {
@@ -57,10 +57,10 @@ function ParamTable({ params }: { params: { name: string; type: string; required
       <table className="w-full text-[12px]">
         <thead>
           <tr className="bg-muted/20 border-b border-border/20">
-            <th className="text-left p-3 font-semibold text-foreground/80 text-[11px] uppercase tracking-wider">Parâmetro</th>
-            <th className="text-left p-3 font-semibold text-foreground/80 text-[11px] uppercase tracking-wider">Tipo</th>
-            <th className="text-left p-3 font-semibold text-foreground/80 text-[11px] uppercase tracking-wider">Obrig.</th>
-            <th className="text-left p-3 font-semibold text-foreground/80 text-[11px] uppercase tracking-wider">Descrição</th>
+            <th className="text-left p-3 font-semibold text-foreground/80 text-[11px] ">Parâmetro</th>
+            <th className="text-left p-3 font-semibold text-foreground/80 text-[11px] ">Tipo</th>
+            <th className="text-left p-3 font-semibold text-foreground/80 text-[11px] ">Obrig.</th>
+            <th className="text-left p-3 font-semibold text-foreground/80 text-[11px] ">Descrição</th>
           </tr>
         </thead>
         <tbody>
@@ -149,7 +149,7 @@ export default function Documentacao() {
         <div>
           <div className="flex items-center gap-2 text-[11px] font-medium text-muted-foreground/70 mb-1.5">
             <BookOpen className="h-3 w-3" />
-            <span className="uppercase tracking-[0.14em]">Integrações</span>
+            <span className="">Integrações</span>
             <span className="text-border">/</span>
             <span className="text-foreground/80">API Docs</span>
           </div>
@@ -172,7 +172,7 @@ export default function Documentacao() {
       <div className="flex gap-6 relative">
         <aside className="hidden lg:block w-[220px] shrink-0">
           <div className="sticky top-24 space-y-0.5">
-            <p className="text-[10px] font-bold uppercase tracking-[0.15em] text-muted-foreground/40 px-3 mb-2">Navegação</p>
+            <p className="text-[11px] font-medium text-muted-foreground/40 px-3 mb-2">Navegação</p>
             {TOC.map((item) => {
               const active = activeSection === item.id;
               return (
@@ -180,7 +180,7 @@ export default function Documentacao() {
                   key={item.id}
                   onClick={() => scrollTo(item.id)}
                   className={cn(
-                    "w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-[12px] font-medium transition-all text-left",
+ "w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-[12px] font-medium transition-all text-left",
                     active
                       ? "bg-primary/10 text-primary border border-primary/15"
                       : "text-muted-foreground/50 hover:text-foreground hover:bg-muted/10 border border-transparent"
@@ -244,10 +244,10 @@ X-API-Key: sk_live_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx`} language="header" />
   -H "Authorization: Bearer sk_live_..."`} language="bash" />
 
             <CopyBlock code={`{
-  "ok": true,
-  "api_version": "v1",
-  "request_id": "req_1a2b3c4d5e6f7g8h9i0j1k2l",
-  "timestamp": "2026-07-13T12:34:56.789Z"
+ "ok": true,
+ "api_version": "v1",
+ "request_id": "req_1a2b3c4d5e6f7g8h9i0j1k2l",
+ "timestamp": "2026-07-13T12:34:56.789Z"
 }`} language="json" />
           </section>
 
@@ -286,41 +286,41 @@ X-API-Key: sk_live_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx`} language="header" />
   -H "Content-Type: application/json" \\
   -H "Idempotency-Key: $(uuidgen)" \\
   -d '{
-    "amount_cents": 4990,
-    "customer": {
-      "name": "João Silva",
-      "email": "joao@email.com",
-      "document": "12345678900",
-      "phone": "11999998888"
+ "amount_cents": 4990,
+ "customer": {
+ "name": "João Silva",
+ "email": "joao@email.com",
+ "document": "12345678900",
+ "phone": "11999998888"
     },
-    "external_id": "pedido-2026-000123",
-    "expires_in_minutes": 30,
-    "metadata": { "pedido": "000123", "origem": "checkout-site" }
+ "external_id": "pedido-2026-000123",
+ "expires_in_minutes": 30,
+ "metadata": { "pedido": "000123", "origem": "checkout-site" }
   }'`} language="bash" />
 
             <h4 className="text-[13px] font-semibold text-foreground mt-6">Response — 201 Created</h4>
             <CopyBlock code={`{
-  "data": {
-    "id": "b4b1c1e0-9f6a-4a2c-8f7f-1e2d3c4b5a6d",
-    "object": "charge",
-    "external_id": "pedido-2026-000123",
-    "status": "pending",
-    "amount_cents": 4990,
-    "net_amount_cents": 4750,
-    "payment_method": "pix",
-    "customer": {
-      "name": "João Silva",
-      "email": "joao@email.com",
-      "document": "12345678900"
+ "data": {
+ "id": "b4b1c1e0-9f6a-4a2c-8f7f-1e2d3c4b5a6d",
+ "object": "charge",
+ "external_id": "pedido-2026-000123",
+ "status": "pending",
+ "amount_cents": 4990,
+ "net_amount_cents": 4750,
+ "payment_method": "pix",
+ "customer": {
+ "name": "João Silva",
+ "email": "joao@email.com",
+ "document": "12345678900"
     },
-    "pix": {
-      "qr_code": "00020126580014br.gov.bcb.pix0136...6304ABCD",
-      "copy_paste": "00020126580014br.gov.bcb.pix0136...6304ABCD",
-      "expires_at": "2026-07-13T13:04:56.000Z"
+ "pix": {
+ "qr_code": "00020126580014br.gov.bcb.pix0136...6304ABCD",
+ "copy_paste": "00020126580014br.gov.bcb.pix0136...6304ABCD",
+ "expires_at": "2026-07-13T13:04:56.000Z"
     },
-    "metadata": { "pedido": "000123", "origem": "checkout-site" },
-    "created_at": "2026-07-13T12:34:56.789Z",
-    "updated_at": "2026-07-13T12:34:56.789Z"
+ "metadata": { "pedido": "000123", "origem": "checkout-site" },
+ "created_at": "2026-07-13T12:34:56.789Z",
+ "updated_at": "2026-07-13T12:34:56.789Z"
   }
 }`} language="json" />
 
@@ -368,9 +368,9 @@ X-API-Key: sk_live_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx`} language="header" />
   -H "Authorization: Bearer sk_live_..."`} language="bash" />
 
             <CopyBlock code={`{
-  "data": [ { "id": "...", "object": "charge", "status": "completed", "...": "..." } ],
-  "has_more": true,
-  "next_cursor": "b4b1c1e0-9f6a-4a2c-8f7f-1e2d3c4b5a6d"
+ "data": [ { "id": "...", "object": "charge", "status": "completed", "...": "..." } ],
+ "has_more": true,
+ "next_cursor": "b4b1c1e0-9f6a-4a2c-8f7f-1e2d3c4b5a6d"
 }`} language="json" />
           </section>
 
@@ -384,10 +384,10 @@ X-API-Key: sk_live_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx`} language="header" />
             <h4 className="text-[13px] font-semibold text-foreground mt-4">Configuração</h4>
             <div className="space-y-2 ml-1">
               {[
-                "Acesse Vendas → Webhooks",
-                "Adicione a URL HTTPS do seu servidor",
-                "Selecione os eventos que quer receber",
-                "Copie o Secret gerado — ele é usado para assinar cada webhook",
+ "Acesse Vendas → Webhooks",
+ "Adicione a URL HTTPS do seu servidor",
+ "Selecione os eventos que quer receber",
+ "Copie o Secret gerado — ele é usado para assinar cada webhook",
               ].map((step, i) => (
                 <div key={i} className="flex items-start gap-3">
                   <div className="h-6 w-6 rounded-lg bg-primary/10 border border-primary/15 flex items-center justify-center shrink-0">
@@ -411,15 +411,15 @@ X-API-Key: sk_live_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx`} language="header" />
 
             <h4 className="text-[13px] font-semibold text-foreground mt-6">Payload do webhook</h4>
             <CopyBlock code={`{
-  "event": "payment.completed",
-  "data": {
-    "transaction_id": "b4b1c1e0-9f6a-4a2c-8f7f-1e2d3c4b5a6d",
-    "external_id": "pedido-2026-000123",
-    "status": "completed",
-    "amount_cents": 4990,
-    "net_amount_cents": 4750
+ "event": "payment.completed",
+ "data": {
+ "transaction_id": "b4b1c1e0-9f6a-4a2c-8f7f-1e2d3c4b5a6d",
+ "external_id": "pedido-2026-000123",
+ "status": "completed",
+ "amount_cents": 4990,
+ "net_amount_cents": 4750
   },
-  "timestamp": "2026-07-13T12:36:12.000Z"
+ "timestamp": "2026-07-13T12:36:12.000Z"
 }`} language="json" />
 
             <h4 className="text-[13px] font-semibold text-foreground mt-6">Headers enviados</h4>
@@ -461,9 +461,9 @@ Content-Type: application/json`} language="header" />
               <table className="w-full text-[12px]">
                 <thead>
                   <tr className="bg-muted/20 border-b border-border/20">
-                    <th className="text-left p-3 font-semibold text-foreground/80 text-[11px] uppercase tracking-wider">Status</th>
-                    <th className="text-left p-3 font-semibold text-foreground/80 text-[11px] uppercase tracking-wider">Significado</th>
-                    <th className="text-left p-3 font-semibold text-foreground/80 text-[11px] uppercase tracking-wider">Final?</th>
+                    <th className="text-left p-3 font-semibold text-foreground/80 text-[11px] ">Status</th>
+                    <th className="text-left p-3 font-semibold text-foreground/80 text-[11px] ">Significado</th>
+                    <th className="text-left p-3 font-semibold text-foreground/80 text-[11px] ">Final?</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -498,11 +498,11 @@ Content-Type: application/json`} language="header" />
               Todos os erros seguem o mesmo envelope. O <code className="mono-inline">request_id</code> ajuda o suporte a rastrear a chamada.
             </p>
             <CopyBlock code={`{
-  "error": {
-    "code": "validation_error",
-    "message": "customer.document must be a valid CPF (11) or CNPJ (14) digit string.",
-    "request_id": "req_1a2b3c4d5e6f7g8h9i0j1k2l",
-    "field": "customer.document"
+ "error": {
+ "code": "validation_error",
+ "message": "customer.document must be a valid CPF (11) or CNPJ (14) digit string.",
+ "request_id": "req_1a2b3c4d5e6f7g8h9i0j1k2l",
+ "field": "customer.document"
   }
 }`} language="json" />
 
@@ -511,9 +511,9 @@ Content-Type: application/json`} language="header" />
               <table className="w-full text-[12px]">
                 <thead>
                   <tr className="bg-muted/20 border-b border-border/20">
-                    <th className="text-left p-3 font-semibold text-foreground/80 text-[11px] uppercase tracking-wider">HTTP</th>
-                    <th className="text-left p-3 font-semibold text-foreground/80 text-[11px] uppercase tracking-wider">code</th>
-                    <th className="text-left p-3 font-semibold text-foreground/80 text-[11px] uppercase tracking-wider">Quando ocorre</th>
+                    <th className="text-left p-3 font-semibold text-foreground/80 text-[11px] ">HTTP</th>
+                    <th className="text-left p-3 font-semibold text-foreground/80 text-[11px] ">code</th>
+                    <th className="text-left p-3 font-semibold text-foreground/80 text-[11px] ">Quando ocorre</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -655,8 +655,8 @@ app.post('/webhook/venxpay', express.raw({ type: 'application/json' }), (req, re
               <table className="w-full text-[12px]">
                 <thead>
                   <tr className="bg-muted/20 border-b border-border/20">
-                    <th className="text-left p-3 font-semibold text-foreground/80 text-[11px] uppercase tracking-wider">Operação</th>
-                    <th className="text-left p-3 font-semibold text-foreground/80 text-[11px] uppercase tracking-wider">Onde ver</th>
+                    <th className="text-left p-3 font-semibold text-foreground/80 text-[11px] ">Operação</th>
+                    <th className="text-left p-3 font-semibold text-foreground/80 text-[11px] ">Onde ver</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -687,7 +687,7 @@ app.post('/webhook/venxpay', express.raw({ type: 'application/json' }), (req, re
 function SectionTitle({ number, title }: { number: string; title: string }) {
   return (
     <div className="flex items-center gap-3 pb-3 border-b border-border/20">
-      <div className="h-8 w-8 rounded-xl gradient-primary flex items-center justify-center shadow-sm">
+      <div className="h-8 w-8 rounded-xl gradient-primary flex items-center justify-center ">
         <span className="text-[12px] font-bold text-primary-foreground">{number}</span>
       </div>
       <h2 className="text-[16px] font-bold text-foreground tracking-tight">{title}</h2>
@@ -698,7 +698,7 @@ function SectionTitle({ number, title }: { number: string; title: string }) {
 function StepBlock({ step, title, children }: { step: number; title: string; children: React.ReactNode }) {
   return (
     <div className="relative pl-10 pb-6 border-l-2 border-border/20 ml-3 last:border-l-0 last:pb-0">
-      <div className="absolute -left-[13px] top-0 h-6 w-6 rounded-full gradient-primary flex items-center justify-center shadow-sm">
+      <div className="absolute -left-[13px] top-0 h-6 w-6 rounded-full gradient-primary flex items-center justify-center ">
         <span className="text-[10px] font-bold text-primary-foreground">{step}</span>
       </div>
       <h4 className="text-[13px] font-semibold text-foreground mb-2">{title}</h4>
@@ -783,8 +783,8 @@ echo json_encode(['received' => true]);`,
               key={t}
               onClick={() => setTab(t)}
               className={cn(
-                "px-3 py-1.5 rounded-md text-[11px] font-semibold transition-all",
-                tab === t ? "bg-primary text-primary-foreground shadow-sm" : "text-muted-foreground/50 hover:text-foreground"
+ "px-3 py-1.5 rounded-md text-[11px] font-semibold transition-all",
+                tab === t ? "bg-primary text-primary-foreground " : "text-muted-foreground/50 hover:text-foreground"
               )}
             >
               {t === "node" ? "Node.js" : t === "python" ? "Python" : "PHP"}

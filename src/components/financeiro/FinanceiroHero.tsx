@@ -39,7 +39,7 @@ export function FinanceiroHero({
               {status && (
                 <span className={cn("h-1.5 w-1.5 rounded-full", dotCls[status.tone], status.pulse && "animate-pulse")} />
               )}
-              <span className="text-[10px] font-bold uppercase tracking-[0.18em] text-muted-foreground">
+              <span className="text-[11px] font-medium text-muted-foreground">
                 {status?.label || eyebrow}
               </span>
             </div>
@@ -94,7 +94,7 @@ export function FinanceiroKpi({
   return (
     <div className="group relative bg-card px-4 py-4 flex flex-col gap-2 transition-colors hover:bg-muted/20">
       <div className="flex items-center justify-between gap-2">
-        <span className="text-[10px] font-black uppercase tracking-[0.22em] text-muted-foreground/70 leading-tight break-words">{label}</span>
+        <span className="text-[11px] font-semibold text-muted-foreground/70 leading-tight break-words">{label}</span>
         <Icon className={cn("h-3.5 w-3.5 shrink-0 opacity-40 transition-opacity group-hover:opacity-90", iconTint[tone])} strokeWidth={2.2} />
       </div>
       <div className="font-display text-[20px] sm:text-[24px] font-black leading-none tabular-nums tracking-tight break-all text-foreground">

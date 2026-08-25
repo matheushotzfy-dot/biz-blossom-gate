@@ -101,14 +101,14 @@ function LiquidityPlate() {
 
 export function PromoBanner() {
   return (
-    <section className="relative isolate overflow-hidden rounded-2xl border border-border/60 bg-[hsl(var(--card))] md:rounded-[28px]">
+    <section className="relative isolate overflow-hidden rounded-[12px] border border-border/60 bg-[hsl(var(--card))] md:rounded-[28px]">
       {/* engraved paper texture */}
       <div
         aria-hidden
         className="pointer-events-none absolute inset-0 opacity-[0.55]"
         style={{
           backgroundImage:
-            "repeating-linear-gradient(115deg, hsl(var(--foreground)/0.028) 0 1px, transparent 1px 9px)",
+ "repeating-linear-gradient(115deg, hsl(var(--foreground)/0.028) 0 1px, transparent 1px 9px)",
         }}
       />
       <div
@@ -116,7 +116,7 @@ export function PromoBanner() {
         className="pointer-events-none absolute inset-0"
         style={{
           backgroundImage:
-            "radial-gradient(70% 130% at 78% 45%, hsl(var(--primary)/0.16), transparent 62%), radial-gradient(50% 90% at 0% 0%, hsl(var(--primary)/0.07), transparent 60%)",
+ "radial-gradient(70% 130% at 78% 45%, hsl(var(--primary)/0.16), transparent 62%), radial-gradient(50% 90% at 0% 0%, hsl(var(--primary)/0.07), transparent 60%)",
         }}
       />
       {/* oversized monogram slab bleeding off the left edge */}
@@ -131,7 +131,7 @@ export function PromoBanner() {
         <div className="min-w-0">
           <div className="flex items-center gap-2.5">
             <span className="h-px w-6 bg-primary/60" />
-            <span className="text-[9px] font-bold uppercase tracking-[0.3em] text-primary">Infraestrutura Venxpay</span>
+            <span className="text-[11px] font-medium tracking-[0.02em] text-primary">Infraestrutura Venxpay</span>
           </div>
 
           <h2 className="mt-2.5 max-w-[16ch] font-display text-[22px] font-extrabold leading-[0.95] tracking-[-0.04em] text-foreground sm:text-[26px] lg:text-[30px]">
@@ -166,7 +166,7 @@ export function PromoBanner() {
               className="group inline-flex items-center gap-2 rounded-xl bg-primary px-4 py-2.5 text-[12.5px] font-bold text-primary-foreground transition-colors hover:bg-primary/90"
             >
               Sacar agora
-              <ArrowUpRight className="h-3.5 w-3.5 transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
+              <ArrowUpRight className="h-3.5 w-3.5 transition-transform group- group-hover:translate-x-0.5" />
             </Link>
             <Link
               to="/taxas"
@@ -183,15 +183,15 @@ export function PromoBanner() {
 
           {/* floating engraved readouts */}
           <div className="absolute left-1 top-1 rounded-lg border border-border/70 bg-background/85 px-2.5 py-1.5">
-            <p className="text-[8.5px] font-bold uppercase tracking-[0.16em] text-muted-foreground/70">Liquidação</p>
+            <p className="text-[10px] font-medium text-muted-foreground/70">Liquidação</p>
             <p className="font-display text-[13px] font-bold tabular-nums leading-none text-foreground">D+0</p>
           </div>
           <div className="absolute bottom-2 left-1 rounded-lg border border-border/70 bg-background/85 px-2.5 py-1.5">
-            <p className="text-[8.5px] font-bold uppercase tracking-[0.16em] text-muted-foreground/70">Reserva</p>
+            <p className="text-[10px] font-medium text-muted-foreground/70">Reserva</p>
             <p className="font-display text-[13px] font-bold tabular-nums leading-none text-primary">0%</p>
           </div>
           <div className="absolute right-1 top-3 rounded-lg border border-primary/25 bg-primary/10 px-2.5 py-1.5">
-            <p className="text-[8.5px] font-bold uppercase tracking-[0.16em] text-primary/80">Autorização</p>
+            <p className="text-[10px] font-medium text-primary/80">Autorização</p>
             <p className="font-display text-[13px] font-bold tabular-nums leading-none text-foreground">118ms</p>
           </div>
         </div>

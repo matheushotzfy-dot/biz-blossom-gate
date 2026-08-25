@@ -40,14 +40,6 @@ export function HDShell({ children, className, ...rest }: ComponentProps<"div">)
       )}
       {...rest}
     >
-      <div
-        aria-hidden
-        className="pointer-events-none absolute inset-0 z-0"
-        style={{
-          backgroundImage:
-            "radial-gradient(60% 40% at 80% 0%, hsl(var(--primary)/0.12), transparent 70%), radial-gradient(50% 40% at 10% 100%, hsl(var(--primary)/0.08), transparent 70%)",
-        }}
-      />
       <div className="relative z-10 px-2 sm:px-4 md:px-6 pt-4 pb-24 max-w-[1600px] mx-auto space-y-5">
         {children}
       </div>
@@ -113,7 +105,7 @@ export function HDStat({ label, value, sub, icon: Icon, tone = "neutral", classN
   return (
     <div
       className={cn(
-        "group relative overflow-hidden rounded-2xl border border-border/50 bg-card px-5 pt-5 pb-6 transition-colors hover:border-border",
+        "group relative overflow-hidden rounded-[12px] border border-border/60 bg-transparent px-5 pt-5 pb-6 transition-colors hover:border-border",
         className,
       )}
     >
@@ -122,7 +114,7 @@ export function HDStat({ label, value, sub, icon: Icon, tone = "neutral", classN
           aria-hidden
           strokeWidth={1.5}
           className={cn(
-            "pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 h-16 w-16 transition-opacity group-hover:opacity-80",
+            "pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 h-14 w-14 transition-opacity group-hover:opacity-80",
             isDanger ? "text-destructive/15" : "text-foreground/[0.07]",
           )}
         />
@@ -167,7 +159,7 @@ export function HDCard({
   className?: string;
 }) {
   return (
-    <section className={cn("overflow-hidden rounded-2xl border border-border/60 bg-card", className)}>
+    <section className={cn("overflow-hidden rounded-[12px] border border-border/60 bg-transparent", className)}>
       {(title || actions) && (
         <div className="flex items-center justify-between gap-3 border-b border-border/40 px-6 py-5">
           <div className="min-w-0">

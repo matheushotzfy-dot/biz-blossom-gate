@@ -116,25 +116,25 @@ export default function FunilVendas() {
  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
  <Card className="border-border/40 bg-card/60">
  <CardContent className="p-4">
- <p className="text-[10px] text-muted-foreground uppercase tracking-wider font-bold">Total</p>
+ <p className="text-[11px] text-muted-foreground font-medium">Total</p>
  <p className="text-2xl font-black mt-1">{stats.total}</p>
  </CardContent>
  </Card>
  <Card className="border-border/40 bg-card/60">
  <CardContent className="p-4">
- <p className="text-[10px] text-muted-foreground uppercase tracking-wider font-bold">Aprovadas</p>
+ <p className="text-[11px] text-muted-foreground font-medium">Aprovadas</p>
  <p className="text-2xl font-black text-emerald-500 mt-1">{stats.approved}</p>
  </CardContent>
  </Card>
  <Card className="border-border/40 bg-card/60">
  <CardContent className="p-4">
- <p className="text-[10px] text-muted-foreground uppercase tracking-wider font-bold">Conversão</p>
+ <p className="text-[11px] text-muted-foreground font-medium">Conversão</p>
  <p className="text-2xl font-black text-primary mt-1">{conversionRate}%</p>
  </CardContent>
  </Card>
  <Card className="border-border/40 bg-card/60">
  <CardContent className="p-4">
- <p className="text-[10px] text-muted-foreground uppercase tracking-wider font-bold">Reembolsos</p>
+ <p className="text-[11px] text-muted-foreground font-medium">Reembolsos</p>
  <p className="text-2xl font-black text-destructive mt-1">{stats.refunded}</p>
  </CardContent>
  </Card>

@@ -193,16 +193,16 @@ function DashboardPeriodFilter({
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
-        <button className="inline-flex items-center gap-2 rounded-2xl border border-border/60 bg-card/80 backdrop-blur px-4 py-3 hover:border-primary/40 transition-all">
+        <button className="inline-flex items-center gap-2 rounded-[12px] border border-border/60 bg-card/80 backdrop-blur px-4 py-3 hover:border-primary/40 transition-all">
           <CalendarDays className="h-4 w-4 text-primary" />
           <div className="text-left">
-            <p className="text-[9px] font-bold uppercase tracking-widest text-muted-foreground/70">Período</p>
+            <p className="text-[11px] font-medium text-muted-foreground/70">Período</p>
             <p className="text-[13px] font-black tabular-nums leading-none mt-0.5">{label}</p>
           </div>
           <ChevronRight className="h-4 w-4 text-muted-foreground/50 rotate-90" />
         </button>
       </PopoverTrigger>
-      <PopoverContent align="end" className="w-[320px] p-3 rounded-2xl border-border/60">
+      <PopoverContent align="end" className="w-[320px] p-3 rounded-[12px] border-border/60">
         <div className="grid grid-cols-2 gap-1.5 mb-3">
           <button onClick={() => applyPreset(PERIOD_PRESETS[0])}
             className={cn("h-9 rounded-xl text-[12px] font-bold transition-all",
@@ -236,7 +236,7 @@ function DashboardPeriodFilter({
           </button>
         </div>
         <div className="border-t border-border/40 pt-3">
-          <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-2">Personalizado</p>
+          <p className="text-[11.5px] font-medium text-muted-foreground mb-2">Personalizado</p>
           <Calendar
             mode="range"
             selected={customRange}
@@ -605,7 +605,7 @@ export default function Dashboard() {
         className="pointer-events-none absolute inset-0 z-0"
         style={{
           backgroundImage:
-            "radial-gradient(60% 40% at 80% 0%, hsl(var(--primary)/0.12), transparent 70%), radial-gradient(50% 40% at 10% 100%, hsl(var(--primary)/0.08), transparent 70%), linear-gradient(to bottom, hsl(var(--background)) 0%, hsl(var(--background)) 100%)",
+ "radial-gradient(60% 40% at 80% 0%, hsl(var(--primary)/0.12), transparent 70%), radial-gradient(50% 40% at 10% 100%, hsl(var(--primary)/0.08), transparent 70%), linear-gradient(to bottom, hsl(var(--background)) 0%, hsl(var(--background)) 100%)",
         }}
       />
 
@@ -613,7 +613,7 @@ export default function Dashboard() {
 
 
         {(txError || productsError) && (
-          <div className="flex items-center justify-between gap-3 rounded-2xl border border-destructive/40 bg-destructive/5 px-4 py-2.5 text-[12px] text-destructive">
+          <div className="flex items-center justify-between gap-3 rounded-[12px] border border-destructive/40 bg-destructive/5 px-4 py-2.5 text-[12px] text-destructive">
             <span className="font-semibold">Falha ao carregar métricas</span>
             <button onClick={() => refetchTx()} className="rounded-lg border border-destructive/50 px-3 py-1 text-[11px] font-bold hover:bg-destructive/10">Tentar novamente</button>
           </div>
@@ -649,7 +649,7 @@ export default function Dashboard() {
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2">
-                    <p className="truncate text-[9.5px] font-bold uppercase tracking-[0.14em] text-muted-foreground/70">
+                    <p className="truncate text-[11px] font-medium text-muted-foreground/70">
                       Faturamento · {isCustom ? "Período" : selectedPeriod.label}
                     </p>
                     {revenueTrend !== undefined && (
@@ -673,7 +673,7 @@ export default function Dashboard() {
 
 
             </PopoverTrigger>
-            <PopoverContent align="end" className="w-[320px] p-3 rounded-2xl border-border/60">
+            <PopoverContent align="end" className="w-[320px] p-3 rounded-[12px] border-border/60">
               <div className="grid grid-cols-2 gap-1.5 mb-3">
                 {PERIOD_PRESETS.map((p) => (
                   <button key={p.label}
@@ -696,7 +696,7 @@ export default function Dashboard() {
                 </button>
               </div>
               <div className="border-t border-border/40 pt-3">
-                <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-2">Personalizado</p>
+                <p className="text-[11.5px] font-medium text-muted-foreground mb-2">Personalizado</p>
                 <Calendar
                   mode="range"
                   selected={customRange}
@@ -730,15 +730,15 @@ export default function Dashboard() {
             const Icon = k.icon;
             const isDanger = k.tone === "danger";
             return (
-              <div key={k.label} className="group relative overflow-hidden rounded-2xl border border-border/50 bg-card px-5 pt-5 pb-6 transition-colors hover:border-border">
+              <div key={k.label} className="group relative overflow-hidden rounded-[12px] border border-border/50 bg-card px-5 pt-5 pb-6 transition-colors hover:border-border">
                 {/* ghost icon */}
                 <Icon
                   aria-hidden
                   strokeWidth={1.5}
                   className={cn(
-                    "pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 h-16 w-16 transition-opacity",
+ "pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 h-16 w-16 transition-opacity",
                     isDanger ? "text-destructive/15" : "text-foreground/[0.07]",
-                    "group-hover:opacity-80"
+ "group-hover:opacity-80"
                   )}
                 />
                 <p className={cn("relative text-[13px] font-medium", isDanger ? "text-destructive/90" : "text-muted-foreground")}>
@@ -782,7 +782,7 @@ export default function Dashboard() {
               <button
                 key={a.label}
                 onClick={a.onClick}
-                className="group flex items-center gap-4 rounded-2xl border border-border/50 bg-card px-5 py-4 text-left transition-colors hover:border-border"
+                className="group flex items-center gap-4 rounded-[12px] border border-border/50 bg-card px-5 py-4 text-left transition-colors hover:border-border"
               >
                 <Icon className="h-6 w-6 shrink-0 text-muted-foreground transition-colors group-hover:text-foreground" strokeWidth={1.75} />
                 <div className="min-w-0 flex-1">
@@ -800,13 +800,13 @@ export default function Dashboard() {
         <section className="grid grid-cols-1 xl:grid-cols-3 gap-4">
 
           {/* Faturamento — Clean line chart (Cakto-style) */}
-          <div className="xl:col-span-2 rounded-2xl border border-border/60 bg-card overflow-hidden">
+          <div className="xl:col-span-2 rounded-[12px] border border-border/60 bg-card overflow-hidden">
             <div className="flex items-center justify-between gap-3 px-6 md:px-8 pt-7 pb-6">
               <div className="min-w-0">
                 <h4 className="font-display font-bold text-xl tracking-[-0.02em] text-foreground">Faturamento</h4>
                 <p className="text-[11px] text-muted-foreground/60 mt-1">Comparativo de entradas e saídas</p>
               </div>
-              <div className="flex items-center rounded-2xl border border-border/60 bg-background p-1.5">
+              <div className="flex items-center rounded-[12px] border border-border/60 bg-background p-1.5">
                 {PERIOD_PRESETS.filter(p => ["Hoje", "7 dias", "30 dias"].includes(p.label)).map((p) => {
                   const isActive = !isCustom && selectedPeriod.label === p.label;
                   const short = p.label === "Hoje" ? "Hoje" : p.label === "7 dias" ? "7d" : "30d";
@@ -849,7 +849,7 @@ export default function Dashboard() {
                       if (active && payload && payload.length) {
                         const p = payload[0];
                         return (
-                          <div className="rounded-lg border border-border bg-card px-3 py-2 shadow-lg">
+                          <div className="rounded-lg border border-border bg-card px-3 py-2 ">
                             <p className="text-[10px] text-muted-foreground/70 mb-1">{p.payload.fullLabel}</p>
                             <p className="text-foreground font-display font-bold text-[13px] tabular-nums">{fmt(p.value as number)}</p>
                           </div>
@@ -871,7 +871,7 @@ export default function Dashboard() {
           {/* Right side: donuts + links */}
           <div className="space-y-4">
             {/* Donuts card */}
-            <div className="rounded-2xl border border-border/60 bg-card p-7">
+            <div className="rounded-[12px] border border-border/60 bg-card p-7">
               <div className="mb-6">
                 <h4 className="font-display font-bold text-xl tracking-[-0.02em]">Índices</h4>
                 <p className="text-[11px] text-muted-foreground/60 mt-1">Conversão por método de pagamento</p>
@@ -922,7 +922,7 @@ export default function Dashboard() {
             </div>
 
             {/* Payment links */}
-            <button type="button" onClick={() => { if (!requireApprovedAccount()) navigate("/vendas/link-pagamento"); }} className="group block w-full rounded-2xl border border-border/60 bg-card p-7 text-left hover:border-primary/40 transition-colors">
+            <button type="button" onClick={() => { if (!requireApprovedAccount()) navigate("/vendas/link-pagamento"); }} className="group block w-full rounded-[12px] border border-border/60 bg-card p-7 text-left hover:border-primary/40 transition-colors">
               <div className="flex items-start justify-between gap-3">
                 <div className="min-w-0">
                   <h3 className="font-display font-black text-base tracking-[-0.01em] flex items-center gap-2"><Link2 className="h-4 w-4 text-primary" /> Links de pagamentos</h3>
@@ -936,7 +936,7 @@ export default function Dashboard() {
         </section>
 
         {/* ═══════════ ÚLTIMAS TRANSAÇÕES — clean table ═══════════ */}
-        <section className="rounded-2xl border border-border/60 bg-card/80 backdrop-blur overflow-hidden">
+        <section className="rounded-[12px] border border-border/60 bg-card/80 backdrop-blur overflow-hidden">
           <div className="flex items-center justify-between gap-3 px-5 md:px-6 pt-5 pb-4">
             <div className="min-w-0">
               <h3 className="font-display font-bold text-[15px] tracking-[-0.01em] text-foreground">Últimas transações</h3>
@@ -954,7 +954,7 @@ export default function Dashboard() {
           </div>
 
           {activity.length > 0 && (
-            <div className="hidden md:grid grid-cols-[1fr_100px_120px_110px_20px] gap-4 px-5 md:px-6 py-2 border-y border-border/40 bg-muted/20 text-[10px] font-semibold uppercase tracking-[0.1em] text-muted-foreground/60">
+            <div className="hidden md:grid grid-cols-[1fr_100px_120px_110px_20px] gap-4 px-5 md:px-6 py-2 border-y border-border/40 bg-muted/20 text-[11px] font-medium text-muted-foreground/60">
               <span>Cliente</span>
               <span>Método</span>
               <span className="text-right">Valor</span>

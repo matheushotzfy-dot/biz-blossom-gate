@@ -81,7 +81,7 @@ export function StatCard({
   return (
     <div
       className={cn(
-        "stat-hero-card group relative flex h-full min-h-[120px] flex-col overflow-hidden rounded-[1.35rem] border border-border bg-card p-4 animate-in fade-in slide-in-from-bottom-2 sm:min-h-[152px] sm:rounded-3xl sm:p-5",
+ "stat-hero-card group relative flex h-full min-h-[120px] flex-col overflow-hidden rounded-[1.35rem] border border-border bg-card p-4 animate-in fade-in slide-in-from-bottom-2 sm:min-h-[152px] sm:rounded-[14px] sm:p-5",
         className
       )}
       style={{
@@ -106,7 +106,7 @@ export function StatCard({
           )}
           {Icon && (
             <div className={cn(
-              "flex h-10 w-10 shrink-0 items-center justify-center rounded-[11px] border border-border/60 bg-background/40 transition-colors duration-300 sm:h-11 sm:w-11",
+ "flex h-10 w-10 shrink-0 items-center justify-center rounded-[11px] border border-border/60 bg-background/40 transition-colors duration-300 sm:h-11 sm:w-11",
               c.text,
             )}>
               <Icon className="relative h-[16px] w-[16px] sm:h-[17px] sm:w-[17px]" strokeWidth={2.5} />
@@ -127,10 +127,10 @@ export function StatCard({
       <div className="relative mt-auto flex items-center gap-2 pt-3 sm:pt-4">
         {(change || trend !== undefined) && !(hideable && selfHidden) && (
           <span className={cn(
-            "inline-flex items-center gap-1 rounded-md px-1.5 py-0.5 text-[10px] font-bold tabular-nums border",
+ "inline-flex items-center gap-1 rounded-md px-1.5 py-0.5 text-[10px] font-bold tabular-nums border",
             changeType === "positive" ? "bg-success/10 text-success border-success/25" :
             changeType === "negative" ? "bg-destructive/10 text-destructive border-destructive/25" :
-            "bg-muted/50 text-muted-foreground border-border/60"
+ "bg-muted/50 text-muted-foreground border-border/60"
           )}>
             {changeType === "positive" ? <TrendingUp className="h-2.5 w-2.5" /> : changeType === "negative" ? <TrendingDown className="h-2.5 w-2.5" /> : null}
             {change || (trend !== undefined ? `${trend > 0 ? "+" : ""}${trend}%` : "")}

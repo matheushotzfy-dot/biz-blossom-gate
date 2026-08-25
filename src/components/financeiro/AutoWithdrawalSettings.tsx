@@ -115,9 +115,9 @@ export default function AutoWithdrawalSettings() {
         </div>
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2">
-            <p className="text-[11px] font-black text-foreground uppercase tracking-tight leading-none">Saque Automatizado</p>
+            <p className="text-[11px] font-semibold text-foreground tracking-tight leading-none">Saque Automatizado</p>
             {isActive && (
-              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-widest bg-emerald-500/10 text-emerald-500 border border-emerald-500/20">
+              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-semibold bg-emerald-500/10 text-emerald-500 border border-emerald-500/20">
                 <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" /> Ativo
               </span>
             )}
@@ -141,10 +141,10 @@ export default function AutoWithdrawalSettings() {
                 <Zap size={18} strokeWidth={2.5} />
               </div>
               <div className="flex-1 min-w-0">
-                <DialogTitle className="text-lg font-black uppercase tracking-tight flex items-center gap-2">
+                <DialogTitle className="text-lg font-semibold tracking-tight flex items-center gap-2">
                   Saque Automatizado
                   {isActive && (
-                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-widest bg-emerald-500/10 text-emerald-500 border border-emerald-500/20">
+                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-semibold bg-emerald-500/10 text-emerald-500 border border-emerald-500/20">
                       <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" /> Ativo
                     </span>
                   )}
@@ -177,7 +177,7 @@ export default function AutoWithdrawalSettings() {
                   <Sparkles size={16} strokeWidth={2.5} />
                 </div>
                 <div>
-                  <p className="text-[11px] font-black text-foreground uppercase tracking-widest">
+                  <p className="text-[11px] font-semibold text-foreground ">
                     {enabled ? "Automação Ativada" : "Automação Desativada"}
                   </p>
                   <p className="text-[10px] font-bold text-muted-foreground/70 mt-0.5">
@@ -192,7 +192,7 @@ export default function AutoWithdrawalSettings() {
               {/* Valor alvo */}
               <div className="space-y-2">
                 <div className="flex items-baseline justify-between">
-                  <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">
+                  <label className="text-[11px] font-semibold text-muted-foreground">
                     Valor alvo
                   </label>
                   <span className="text-[10px] font-bold text-muted-foreground/60">
@@ -217,7 +217,7 @@ export default function AutoWithdrawalSettings() {
                       key={v}
                       type="button"
                       onClick={() => setAmountStr(v.toFixed(2).replace(".", ","))}
-                      className={`px-3 h-8 rounded-lg text-[10px] font-black uppercase tracking-widest border transition-all ${
+                      className={`px-3 h-8 rounded-lg text-[11px] font-semibold border transition-all ${
                         amountNum === v
                           ? "bg-primary/15 border-primary/40 text-primary"
                           : "bg-muted/30 border-border/60 text-muted-foreground hover:border-primary/30 hover:text-foreground"
@@ -233,7 +233,7 @@ export default function AutoWithdrawalSettings() {
               {/* Chave Pix */}
               <div className="space-y-2">
                 <div className="flex items-baseline justify-between">
-                  <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">
+                  <label className="text-[11px] font-semibold text-muted-foreground">
                     Chave Pix de recebimento
                   </label>
                   {activeKeys.length > 0 && (
@@ -277,7 +277,7 @@ export default function AutoWithdrawalSettings() {
                             <Icon size={16} strokeWidth={2.5} />
                           </div>
                           <div className="flex-1 min-w-0">
-                            <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/70">
+                            <p className="text-[11px] font-semibold text-muted-foreground/70">
                               {k.key_type}
                             </p>
                             <p className="text-sm font-black text-foreground truncate mt-0.5">
@@ -299,7 +299,7 @@ export default function AutoWithdrawalSettings() {
               {/* Summary */}
               {enabled && formValid && (
                 <div className="p-4 rounded-2xl bg-emerald-500/5 border border-emerald-500/20">
-                  <p className="text-[10px] font-black uppercase tracking-widest text-emerald-500/90 mb-2">
+                  <p className="text-[11px] font-semibold text-emerald-500/90 mb-2">
                     Como vai funcionar
                   </p>
                   <p className="text-xs text-muted-foreground leading-relaxed">
@@ -315,14 +315,14 @@ export default function AutoWithdrawalSettings() {
           <div className="p-4 border-t border-border/40 bg-muted/20 flex gap-2">
             <button
               onClick={() => setOpen(false)}
-              className="flex-1 h-11 rounded-xl bg-background border border-border/60 text-[10px] font-black uppercase tracking-widest text-foreground hover:bg-muted transition-all flex items-center justify-center gap-1.5"
+              className="flex-1 h-11 rounded-xl bg-background border border-border/60 text-[11px] font-semibold text-foreground hover:bg-muted transition-all flex items-center justify-center gap-1.5"
             >
               <X size={14} /> Cancelar
             </button>
             <button
               onClick={handleSave}
               disabled={!canSave}
-              className="flex-[1.5] h-11 rounded-xl bg-primary text-primary-foreground text-[10px] font-black uppercase tracking-widest hover:opacity-90 transition-all disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-1.5"
+              className="flex-[1.5] h-11 rounded-xl bg-primary text-primary-foreground text-[11px] font-semibold hover:opacity-90 transition-all disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-1.5"
             >
               {saving ? <Loader2 size={14} className="animate-spin" /> : <CheckCircle2 size={14} />}
               {enabled ? "Salvar configuração" : "Salvar"}

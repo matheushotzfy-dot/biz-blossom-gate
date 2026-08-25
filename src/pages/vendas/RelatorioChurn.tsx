@@ -35,7 +35,7 @@ export default function RelatorioChurn() {
         {KPIS.map((kpi) => (
           <Card key={kpi.label} className="border-border/40 bg-card/60 backdrop-blur-xl">
             <CardContent className="flex items-center gap-3 p-4">
-              <div className={`flex h-10 w-10 items-center justify-center rounded-2xl bg-muted/50 ${kpi.color}`}>
+              <div className={`flex h-10 w-10 items-center justify-center rounded-[12px] bg-muted/50 ${kpi.color}`}>
                 <kpi.icon className="h-5 w-5" />
               </div>
               <div>

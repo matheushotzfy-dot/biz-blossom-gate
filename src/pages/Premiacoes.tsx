@@ -187,12 +187,12 @@ function UnlockCelebration({ tier, onClose, onClaim }: { tier: AwardItem; onClos
 
         {/* Header ribbon */}
         <div className="relative pt-10 px-8 text-center">
-          <p className="font-mono text-[10px] uppercase tracking-[0.36em] text-[hsl(var(--tier))] flex items-center justify-center gap-2">
+          <p className="font-mono text-[11px] text-[hsl(var(--tier))] flex items-center justify-center gap-2">
             <Sparkles className="h-3 w-3 animate-pulse" /> Conquista desbloqueada · {tier.roman}
           </p>
           <div className="mt-4 flex items-center justify-center">
             <div
-              className="h-24 w-24 rounded-3xl border border-white/20 bg-white/[0.06] backdrop-blur-md flex items-center justify-center"
+              className="h-24 w-24 rounded-[14px] border border-white/20 bg-white/[0.06] backdrop-blur-md flex items-center justify-center"
               style={{ boxShadow: `0 20px 60px -10px hsl(var(--tier)/0.6), inset 0 1px 0 rgba(255,255,255,0.15)` }}
             >
               <TierIcon className="h-11 w-11 text-white" strokeWidth={1.75} style={{ filter: `drop-shadow(0 0 12px hsl(var(--tier)/0.9))` }} />
@@ -201,7 +201,7 @@ function UnlockCelebration({ tier, onClose, onClaim }: { tier: AwardItem; onClos
           <h2 className="mt-6 font-display font-black text-white text-[36px] leading-[0.95] tracking-[-0.035em]">
             {tier.title}
           </h2>
-          <p className="mt-2 font-mono text-[11px] uppercase tracking-[0.28em] text-white/60">
+          <p className="mt-2 font-mono text-[11px] text-white/60">
             {tier.tier} · {tier.label}
           </p>
         </div>
@@ -209,13 +209,13 @@ function UnlockCelebration({ tier, onClose, onClaim }: { tier: AwardItem; onClos
         {/* Phrase */}
         <div className="relative px-8 mt-6">
           <blockquote className="text-center text-white/85 text-[15px] leading-snug italic">
-            "{tier.phrase}"
+ "{tier.phrase}"
           </blockquote>
         </div>
 
         {/* Rewards */}
         <div className="relative px-8 mt-6">
-          <p className="font-mono text-[10px] uppercase tracking-[0.28em] text-white/45 mb-3 text-center">Você recebe</p>
+          <p className="font-mono text-[11px] text-white/45 mb-3 text-center">Você recebe</p>
           <div className="flex flex-wrap gap-2 justify-center">
             {tier.rewards.map(r => (
               <span key={r} className="inline-flex items-center gap-2 pl-2.5 pr-3.5 py-1.5 rounded-full border border-white/15 bg-white/[0.04] text-[12px] text-white/85">
@@ -230,14 +230,14 @@ function UnlockCelebration({ tier, onClose, onClaim }: { tier: AwardItem; onClos
         <div className="relative px-8 pt-8 pb-8 flex flex-col gap-2">
           <button
             onClick={onClaim}
-            className="relative overflow-hidden inline-flex items-center justify-center gap-2 h-13 py-3.5 rounded-full bg-gradient-to-r from-[hsl(var(--primary))] to-[hsl(var(--tier))] text-white font-display font-bold text-[13px] uppercase tracking-[0.14em] hover:scale-[1.02] transition-transform"
+            className="relative overflow-hidden inline-flex items-center justify-center gap-2 h-13 py-3.5 rounded-full bg-gradient-to-r from-[hsl(var(--primary))] to-[hsl(var(--tier))] text-white font-display font-medium text-[13px] transition-transform"
             style={{ boxShadow: `0 12px 40px -8px hsl(var(--tier)/0.5)` }}
           >
             <Gift className="h-4 w-4" /> Solicitar meu troféu
           </button>
           <button
             onClick={onClose}
-            className="h-11 rounded-full text-white/60 hover:text-white text-[11px] font-mono uppercase tracking-[0.24em] transition-colors"
+            className="h-11 rounded-full text-white/60 hover:text-white text-[11px] font-mono transition-colors"
           >
             Ver depois
           </button>
@@ -384,7 +384,7 @@ export default function Premiacoes() {
         </div>
 
         {/* Top rail */}
-        <div className="relative flex items-center justify-between px-6 sm:px-10 py-4 text-[11px] font-mono uppercase tracking-[0.32em]">
+        <div className="relative flex items-center justify-between px-6 sm:px-10 py-4 text-[11px] font-mono ">
           <span className="flex items-center gap-2 text-white/55">
             <Trophy className="h-3.5 w-3.5 text-[hsl(var(--primary))]" strokeWidth={2.25} />
             VENXPAY · Sala de Conquistas
@@ -426,18 +426,18 @@ export default function Premiacoes() {
                   <div className="absolute inset-0 rounded-[32px] pointer-events-none [box-shadow:inset_0_1px_0_0_rgba(255,255,255,0.18),inset_0_-1px_0_0_rgba(255,255,255,0.04)]" />
 
                   {/* Lot tag */}
-                  <div className="absolute top-5 left-5 px-3 py-1.5 rounded-full border border-white/15 bg-black/30 backdrop-blur-md font-mono text-[10px] uppercase tracking-[0.28em] text-white/70 [transform:translateZ(40px)]">
+                  <div className="absolute top-5 left-5 px-3 py-1.5 rounded-full border border-white/15 bg-black/30 backdrop-blur-md font-mono text-[11px] text-white/70 [transform:translateZ(40px)]">
                     Lote · {focused.ref}
                   </div>
 
                   {/* Status badge */}
                   <div className="absolute top-5 right-5 z-10 [transform:translateZ(40px)]">
                     {focusedDone ? (
-                      <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-[hsl(var(--primary)/0.5)] bg-[hsl(var(--primary)/0.18)] backdrop-blur-md text-[hsl(var(--primary))] font-mono text-[10px] uppercase tracking-[0.24em]">
+                      <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-[hsl(var(--primary)/0.5)] bg-[hsl(var(--primary)/0.18)] backdrop-blur-md text-[hsl(var(--primary))] font-mono text-[11px] ">
                         <CheckCircle2 className="h-3 w-3" strokeWidth={2.75} /> Conquistado
                       </div>
                     ) : (
-                      <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-white/15 bg-black/30 backdrop-blur-md text-white/75 font-mono text-[10px] uppercase tracking-[0.24em]">
+                      <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-white/15 bg-black/30 backdrop-blur-md text-white/75 font-mono text-[11px] ">
                         <Lock className="h-3 w-3" strokeWidth={2.5} /> Selado
                       </div>
                     )}
@@ -456,8 +456,8 @@ export default function Premiacoes() {
                       src={focused.image}
                       alt={focused.title}
                       className={cn(
-                        "max-h-[72%] max-w-[82%] object-contain transition-all duration-700 animate-scale-in",
-                        "drop-shadow-[0_30px_50px_rgba(0,0,0,0.6)] drop-shadow-[0_0_40px_hsl(var(--tier)/0.45)]",
+ "max-h-[72%] max-w-[82%] object-contain transition-all duration-700 animate-scale-in",
+ "drop- drop-",
                         !focusedDone && "grayscale opacity-55"
                       )}
                     />
@@ -467,7 +467,7 @@ export default function Premiacoes() {
                   <div className="absolute bottom-0 inset-x-0 px-6 py-5 backdrop-blur-xl bg-gradient-to-t from-black/70 via-black/40 to-transparent border-t border-white/10 [transform:translateZ(50px)]">
                     <div className="flex items-end justify-between">
                       <div>
-                        <p className="font-mono text-[10px] uppercase tracking-[0.32em] text-[hsl(var(--primary))]">
+                        <p className="font-mono text-[11px] text-[hsl(var(--primary))]">
                           {focused.roman} · {focused.tier}
                         </p>
                         <p className="font-display font-black text-white text-[32px] leading-none mt-2 tracking-[-0.035em] tabular-nums">
@@ -486,7 +486,7 @@ export default function Premiacoes() {
 
           {/* Right — story panel */}
           <div className="relative flex flex-col">
-            <p className="font-mono text-[10px] uppercase tracking-[0.36em] text-[hsl(var(--primary))]">
+            <p className="font-mono text-[11px] text-[hsl(var(--primary))]">
               Conquista {focused.roman} · em destaque
             </p>
             <h1 className="mt-4 font-display font-black text-white text-[42px] sm:text-[56px] leading-[0.95] tracking-[-0.04em]">
@@ -499,13 +499,13 @@ export default function Premiacoes() {
             <figure className="mt-7 relative pl-5">
               <span className="absolute left-0 top-1 bottom-1 w-[2px] rounded-full bg-gradient-to-b from-[hsl(var(--primary))] via-[hsl(var(--tier))] to-transparent" />
               <blockquote className="font-display text-[18px] leading-snug text-white/90 italic tracking-[-0.015em]">
-                "{focused.phrase}"
+ "{focused.phrase}"
               </blockquote>
             </figure>
 
             {/* Rewards chips */}
             <div className="mt-7">
-              <p className="font-mono text-[10px] uppercase tracking-[0.32em] text-white/45 mb-3">Inclui</p>
+              <p className="font-mono text-[11px] text-white/45 mb-3">Inclui</p>
               <div className="flex flex-wrap gap-2">
                 {focused.rewards.map((r) => (
                   <span key={r} className="group inline-flex items-center gap-2 pl-2.5 pr-3.5 py-2 rounded-full border border-white/15 bg-white/[0.04] backdrop-blur-md text-[12px] text-white/85 hover:border-[hsl(var(--primary)/0.4)] hover:bg-[hsl(var(--primary)/0.08)] transition-all">
@@ -526,11 +526,11 @@ export default function Premiacoes() {
                   <span className="font-display font-black text-white text-[18px] tabular-nums leading-none">
                     {focusedProgress.toFixed(0)}%
                   </span>
-                  <span className="font-mono text-[8px] uppercase tracking-[0.24em] text-white/40 mt-0.5">progresso</span>
+                  <span className="font-mono text-[11px] text-white/40 mt-0.5">progresso</span>
                 </div>
               </div>
               <div className="min-w-0 flex-1">
-                <p className="font-mono text-[10px] uppercase tracking-[0.32em] text-white/45">
+                <p className="font-mono text-[11px] text-white/45">
                   {focusedDone ? "Status" : "Faltam para desbloquear"}
                 </p>
                 <p className="font-display font-black text-white text-[26px] tabular-nums tracking-[-0.025em] mt-1 truncate">
@@ -543,9 +543,9 @@ export default function Premiacoes() {
             {!focusedDone && focusedETA && (
               <div className="mt-4 inline-flex items-center gap-2 px-3.5 py-2 rounded-full border border-white/10 bg-white/[0.03] backdrop-blur-md">
                 <CalendarClock className="h-3.5 w-3.5 text-[hsl(var(--primary))]" strokeWidth={2.25} />
-                <span className="font-mono text-[10px] uppercase tracking-[0.22em] text-white/55">Estimativa</span>
+                <span className="font-mono text-[11px] text-white/55">Estimativa</span>
                 <span className="font-display font-bold text-[12px] text-white tabular-nums">{focusedETA}</span>
-                <span className="font-mono text-[9px] uppercase tracking-[0.2em] text-white/40">no ritmo atual</span>
+                <span className="font-mono text-[11px] text-white/40">no ritmo atual</span>
               </div>
             )}
 
@@ -555,15 +555,15 @@ export default function Premiacoes() {
                 onClick={() => focusedDone && !alreadyClaimed && setClaimOpen(true)}
                 disabled={!focusedDone || alreadyClaimed}
                 className={cn(
-                  "group relative overflow-hidden inline-flex items-center justify-between gap-3 px-6 h-14 rounded-full transition-all duration-300 flex-1 min-w-[240px]",
+ "group relative overflow-hidden inline-flex items-center justify-between gap-3 px-6 h-14 rounded-full transition-all duration-300 flex-1 min-w-[240px]",
                   focusedDone && !alreadyClaimed
-                    ? "bg-gradient-to-r from-[hsl(var(--primary))] via-[hsl(var(--primary))] to-[hsl(var(--tier))] text-primary-foreground hover:scale-[1.02] shadow-[0_10px_40px_-10px_hsl(var(--primary)/0.6)]"
+                    ? "bg-gradient-to-r from-[hsl(var(--primary))] via-[hsl(var(--primary))] to-[hsl(var(--tier))] text-primary-foreground "
                     : alreadyClaimed
                       ? "border border-white/15 bg-white/[0.04] text-white/60 cursor-default"
                       : "border border-white/10 bg-white/[0.02] text-white/45 cursor-default"
                 )}
               >
-                <span className="relative font-display font-bold text-[14px] tracking-[0.04em] uppercase">
+                <span className="relative font-display font-medium text-[14px] ">
                   {alreadyClaimed ? "Solicitação registrada"
                     : focusedDone ? "Solicitar resgate"
                     : "Continue faturando para desbloquear"}
@@ -587,7 +587,7 @@ export default function Premiacoes() {
                 className="inline-flex items-center gap-2 h-14 px-5 rounded-full border border-white/15 bg-white/[0.04] backdrop-blur-md text-white/85 hover:border-[hsl(var(--primary)/0.5)] hover:bg-[hsl(var(--primary)/0.1)] hover:text-white transition-all"
               >
                 <Share2 className="h-4 w-4" strokeWidth={2.25} />
-                <span className="font-display font-bold text-[12px] uppercase tracking-[0.08em]">Compartilhar</span>
+                <span className="font-display font-medium text-[12px] ">Compartilhar</span>
               </button>
             </div>
           </div>
@@ -595,7 +595,7 @@ export default function Premiacoes() {
 
         {/* Bottom journey rail */}
         <div className="relative border-t border-white/10 px-6 sm:px-10 py-5 bg-black/40 backdrop-blur-md">
-          <div className="flex items-center justify-between mb-3 font-mono text-[10px] uppercase tracking-[0.28em]">
+          <div className="flex items-center justify-between mb-3 font-mono text-[11px] ">
             <span className="text-white/55">Sua jornada · {unlockedCount}/{AWARDS.length} marcos</span>
             <span className="text-white tabular-nums">{overallProgress.toFixed(0)}%</span>
           </div>
@@ -611,16 +611,16 @@ export default function Premiacoes() {
                 <button
                   key={a.id} onClick={() => setFocusId(a.id)}
                   className={cn(
-                    "group flex flex-col items-center gap-2 py-1 rounded-lg transition-all",
+ "group flex flex-col items-center gap-2 py-1 rounded-lg transition-all",
                     isFocused ? "text-white" : done ? "text-white/75 hover:text-white" : "text-white/35 hover:text-white/70"
                   )}
                 >
                   <span className={cn(
-                    "h-2 w-2 rounded-full transition-all duration-300",
-                    isFocused ? "bg-[hsl(var(--primary))] scale-[1.8] shadow-[0_0_12px_hsl(var(--primary))]"
+ "h-2 w-2 rounded-full transition-all duration-300",
+                    isFocused ? "bg-[hsl(var(--primary))] scale-[1.8] "
                     : done ? "bg-white" : "bg-white/25 group-hover:bg-white/50"
                   )} />
-                  <span className="font-mono text-[9px] uppercase tracking-[0.18em] tabular-nums">{a.label}</span>
+                  <span className="font-mono text-[11px] tabular-nums">{a.label}</span>
                 </button>
               );
             })}
@@ -640,7 +640,7 @@ export default function Premiacoes() {
           return (
             <div
               key={s.k}
-              className="group relative overflow-hidden rounded-2xl border border-border/50 bg-card px-5 pt-5 pb-6 transition-colors hover:border-border"
+              className="group relative overflow-hidden rounded-[12px] border border-border/50 bg-card px-5 pt-5 pb-6 transition-colors hover:border-border"
             >
               <Icon
                 aria-hidden
@@ -659,7 +659,7 @@ export default function Premiacoes() {
 
 
       {/* =================== GRID =================== */}
-      <section className="relative overflow-hidden rounded-2xl border border-border/60 bg-card">
+      <section className="relative overflow-hidden rounded-[12px] border border-border/60 bg-card">
         <header className="flex flex-col gap-3 border-b border-border/40 px-5 py-5 sm:flex-row sm:items-center sm:justify-between sm:px-6">
           <div className="min-w-0">
             <h2 className="font-display text-[17px] font-bold leading-tight tracking-[-0.02em] text-foreground">Catálogo completo</h2>
@@ -677,7 +677,7 @@ export default function Premiacoes() {
                 key={opt.id}
                 onClick={() => setGridFilter(opt.id)}
                 className={cn(
-                  "shrink-0 rounded-lg border px-3 py-1.5 text-[12.5px] font-medium transition-colors",
+ "shrink-0 rounded-lg border px-3 py-1.5 text-[12.5px] font-medium transition-colors",
                   gridFilter === opt.id
                     ? "border-primary/40 bg-primary/10 text-primary"
                     : "border-border/50 text-muted-foreground hover:border-border hover:text-foreground"
@@ -708,7 +708,7 @@ export default function Premiacoes() {
                   onClick={() => setFocusId(a.id)}
                   style={{ ['--tier' as string]: a.accent } as React.CSSProperties}
                   className={cn(
-                    "group relative flex w-full flex-col overflow-hidden rounded-2xl border bg-background text-left transition-colors duration-200",
+ "group relative flex w-full flex-col overflow-hidden rounded-[12px] border bg-background text-left transition-colors duration-200",
                     isFocused
                       ? "border-primary/60 bg-primary/[0.04]"
                       : "border-border/50 hover:border-border"
@@ -719,7 +719,7 @@ export default function Premiacoes() {
                     <img
                       src={a.image} alt={a.title}
                       className={cn(
-                        "relative max-h-[78%] max-w-[78%] object-contain transition-transform duration-300 group-hover:scale-[1.04]",
+ "relative max-h-[78%] max-w-[78%] object-contain transition-transform duration-300 group-",
                         !done && "grayscale opacity-40 group-hover:opacity-60"
                       )}
                     />
@@ -761,19 +761,19 @@ export default function Premiacoes() {
 
         {/* Hall of fame strip */}
         <div className={cn(
-          "relative flex items-center gap-4 border-t border-border px-6 py-5 overflow-hidden",
+ "relative flex items-center gap-4 border-t border-border px-6 py-5 overflow-hidden",
           revenue >= AWARDS[AWARDS.length - 1].value && "bg-gradient-to-r from-primary/[0.08] via-transparent to-primary/[0.05]"
         )}>
           <div className={cn(
-            "h-12 w-12 rounded-2xl border flex items-center justify-center shrink-0 transition-colors",
+ "h-12 w-12 rounded-[12px] border flex items-center justify-center shrink-0 transition-colors",
             revenue >= AWARDS[AWARDS.length - 1].value
-              ? "border-primary bg-primary/15 text-primary shadow-[0_0_24px_hsl(var(--primary)/0.4)]"
+              ? "border-primary bg-primary/15 text-primary "
               : "border-border bg-background text-muted-foreground"
           )}>
             <Crown className="h-5 w-5" strokeWidth={2.25} />
           </div>
           <div className="min-w-0 flex-1">
-            <p className="font-mono text-[10px] uppercase tracking-[0.32em] text-muted-foreground">Hall of Fame VENXPAY</p>
+            <p className="font-mono text-[11px] text-muted-foreground">Hall of Fame VENXPAY</p>
             <p className="font-display font-black text-foreground text-[17px] tracking-[-0.025em] mt-1.5">
               {revenue >= AWARDS[AWARDS.length - 1].value
                 ? "Você é Lenda. Seu nome está gravado."
@@ -794,7 +794,7 @@ export default function Premiacoes() {
               </div>
               <div>
                 <h2 className="font-display font-black text-foreground text-xl tracking-[-0.025em] leading-none">Meus Resgates</h2>
-                <p className="font-mono text-[10px] uppercase tracking-[0.26em] text-muted-foreground mt-1.5">
+                <p className="font-mono text-[11px] text-muted-foreground mt-1.5">
                   {existingClaims.length} solicitaç{existingClaims.length === 1 ? "ão" : "ões"} · acompanhe o envio
                 </p>
               </div>
@@ -821,13 +821,13 @@ export default function Premiacoes() {
                     <p className="font-display font-bold text-foreground text-sm truncate">
                       {claim.tier_label ?? tier?.title ?? claim.tier_id}
                     </p>
-                    <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground mt-1">
+                    <p className="font-mono text-[11px] text-muted-foreground mt-1">
                       {claim.created_at ? new Date(claim.created_at).toLocaleDateString("pt-BR", { day: "2-digit", month: "short", year: "numeric" }) : ""}
                       {tier && ` · ${tier.tier}`}
                     </p>
                   </div>
                   <span className={cn(
-                    "inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border font-mono text-[10px] uppercase tracking-[0.2em]",
+ "inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border font-mono text-[11px] ",
                     st.tone
                   )}>
                     <StIcon className="h-3 w-3" strokeWidth={2.5} />

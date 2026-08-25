@@ -122,26 +122,26 @@ export default function NotasFiscais() {
     <div className="space-y-6 animate-in fade-in duration-500">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div className="space-y-1">
-          <h1 className="text-2xl font-black text-foreground tracking-tight uppercase">Notas Fiscais</h1>
-          <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.2em] flex items-center gap-2">
+          <h1 className="text-2xl font-semibold text-foreground tracking-tight ">Notas Fiscais</h1>
+          <p className="text-[11px] font-medium text-muted-foreground flex items-center gap-2">
             <FileText className="h-3.5 w-3.5 text-primary" />
             Emissão automática de NF-e via Notazz
           </p>
         </div>
         <div className="flex gap-2">
           {stats.falhas > 0 && (
-            <Button onClick={retryFailed} variant="outline" className="h-11 px-4 rounded-xl font-black text-xs uppercase tracking-widest gap-2">
+            <Button onClick={retryFailed} variant="outline" className="h-11 px-4 rounded-xl font-semibold text-xs gap-2">
               <RefreshCw className="h-4 w-4" /> Reprocessar Falhas ({stats.falhas})
             </Button>
           )}
-          <Button onClick={() => navigate("/integracoes?tab=apps")} className="h-11 px-6 rounded-xl font-black text-xs uppercase tracking-widest gap-2">
+          <Button onClick={() => navigate("/integracoes?tab=apps")} className="h-11 px-6 rounded-xl font-semibold text-xs gap-2">
             <Building2 className="h-4 w-4" /> {integrationConnected ? "Configurar Notazz" : "Conectar Notazz"}
           </Button>
         </div>
       </div>
 
       {!integrationConnected && (
-        <div className="bg-amber-500/5 border border-amber-500/20 rounded-2xl p-5 flex items-start gap-3">
+        <div className="bg-amber-500/5 border border-amber-500/20 rounded-[12px] p-5 flex items-start gap-3">
           <AlertCircle className="h-5 w-5 text-amber-500 mt-0.5 shrink-0" />
           <div>
             <p className="text-sm font-black text-foreground">Notazz não está conectado</p>
@@ -159,15 +159,15 @@ export default function NotasFiscais() {
         <StatCard title="Conexão"        value={integrationConnected ? "Ativo" : "Off"} icon={CheckCircle2} color={integrationConnected ? "info" : "warning"} description={integrationConnected ? "Notazz conectado" : "Configure"} />
       </div>
 
-      <div className="bg-card rounded-[24px] border border-border/60 shadow-sm overflow-hidden">
+      <div className="bg-card rounded-[24px] border border-border/60  overflow-hidden">
         <div className="p-6 border-b border-border/40 flex flex-col md:flex-row justify-between items-center gap-4">
           <div className="flex items-center gap-3">
             <div className="h-10 w-10 bg-primary/10 border border-primary/10 rounded-xl flex items-center justify-center text-primary">
               <FileCheck size={20} strokeWidth={2.5} />
             </div>
             <div>
-              <h2 className="font-black text-foreground tracking-tight leading-none uppercase">Histórico Fiscal</h2>
-              <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mt-1">
+              <h2 className="font-semibold text-foreground tracking-tight leading-none ">Histórico Fiscal</h2>
+              <p className="text-[11px] font-medium text-muted-foreground mt-1">
                 {invoices.length} Notas registradas {isFetching && "• atualizando..."}
               </p>
             </div>
@@ -187,7 +187,7 @@ export default function NotasFiscais() {
         <div className="overflow-x-auto">
           <table className="w-full min-w-[640px] text-left">
             <thead>
-              <tr className="bg-muted/30 text-[10px] uppercase font-black tracking-[0.2em] text-muted-foreground/60 border-b border-border/40">
+              <tr className="bg-muted/30 text-[11px] font-semibold text-muted-foreground/60 border-b border-border/40">
                 <th className="px-8 py-5">Nº / Cliente</th>
                 <th className="px-8 py-5 text-center">Status</th>
                 <th className="px-8 py-5 text-right">Valor</th>
@@ -200,7 +200,7 @@ export default function NotasFiscais() {
                   <td colSpan={4} className="px-8 py-20 text-center">
                     <div className="flex flex-col items-center opacity-30">
                       <FileText size={48} strokeWidth={1} />
-                      <p className="mt-4 text-[11px] font-black uppercase tracking-widest">
+                      <p className="mt-4 text-[11px] font-semibold ">
                         {integrationConnected ? "Nenhuma nota emitida ainda" : "Conecte a Notazz para começar"}
                       </p>
                     </div>
@@ -227,7 +227,7 @@ export default function NotasFiscais() {
                       </td>
                       <td className="px-8 py-5">
                         <div className="flex justify-center">
-                          <span className={cn("inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest border", st.cls)}>
+                          <span className={cn("inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-semibold border", st.cls)}>
                             <span className={cn("h-1.5 w-1.5 rounded-full", st.dot)} />
                             {st.label}
                           </span>
@@ -240,7 +240,7 @@ export default function NotasFiscais() {
                         <div className="text-[11px] font-bold text-foreground">
                           {format(new Date(inv.date), "dd/MM/yyyy", { locale: ptBR })}
                         </div>
-                        <div className="text-[10px] font-medium text-muted-foreground/50 mt-1 uppercase">
+                        <div className="text-[11px] font-medium text-muted-foreground/50 mt-1 ">
                           {format(new Date(inv.date), "HH:mm'h'", { locale: ptBR })}
                         </div>
                       </td>

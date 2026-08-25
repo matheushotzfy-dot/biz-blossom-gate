@@ -120,7 +120,7 @@ export default function ApiKeys() {
       </header>
 
       {/* Minimal metric strip */}
-      <div className="grid grid-cols-2 md:grid-cols-4 rounded-2xl border border-border/60 bg-card divide-x divide-border/60">
+      <div className="grid grid-cols-2 md:grid-cols-4 rounded-[12px] border border-border/60 bg-card divide-x divide-border/60">
         {[
           { label: "Credenciais", value: String(keys.length) },
           { label: "Ativas", value: String(activeCount) },
@@ -135,7 +135,7 @@ export default function ApiKeys() {
       </div>
 
       {/* Table */}
-      <div className="bg-card rounded-2xl border border-border/60 overflow-hidden">
+      <div className="bg-card rounded-[12px] border border-border/60 overflow-hidden">
         <div className="px-5 py-4 border-b border-border/60 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
           <div>
             <h2 className="text-sm font-semibold text-foreground">Suas credenciais</h2>
@@ -181,7 +181,7 @@ export default function ApiKeys() {
                     </p>
                   </div>
                   <span className={cn(
-                    "inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-medium",
+ "inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-medium",
                     k.is_active ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400" : "bg-muted text-muted-foreground"
                   )}>
                     <span className={cn("h-1.5 w-1.5 rounded-full", k.is_active ? "bg-emerald-500" : "bg-muted-foreground/40")} />
@@ -268,7 +268,7 @@ export default function ApiKeys() {
                     </td>
                     <td className="px-5 py-4">
                       <span className={cn(
-                        "inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[11px] font-medium",
+ "inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[11px] font-medium",
                         k.is_active ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400" : "bg-muted text-muted-foreground"
                       )}>
                         <span className={cn("h-1.5 w-1.5 rounded-full", k.is_active ? "bg-emerald-500" : "bg-muted-foreground/40")} />
@@ -303,7 +303,7 @@ export default function ApiKeys() {
 
       {/* Create dialog */}
       <Dialog open={showCreateDialog} onOpenChange={setShowCreateDialog}>
-        <DialogContent className="max-w-md bg-card border-border/60 rounded-2xl">
+        <DialogContent className="max-w-md bg-card border-border/60 rounded-[12px]">
           <DialogHeader>
             <DialogTitle className="text-lg font-semibold">Nova credencial</DialogTitle>
             <DialogDescription className="text-sm text-muted-foreground">
@@ -329,7 +329,7 @@ export default function ApiKeys() {
 
       {/* Secret reveal dialog */}
       <Dialog open={!!newKeyData} onOpenChange={() => setNewKeyData(null)}>
-        <DialogContent className="max-w-lg bg-card border-border/60 rounded-2xl">
+        <DialogContent className="max-w-lg bg-card border-border/60 rounded-[12px]">
           <DialogHeader>
             <DialogTitle className="text-lg font-semibold">Credencial gerada</DialogTitle>
             <DialogDescription className="text-sm text-muted-foreground">
@@ -358,7 +358,7 @@ export default function ApiKeys() {
 
       {/* Rename dialog */}
       <Dialog open={!!editingKey} onOpenChange={(o) => !o && setEditingKey(null)}>
-        <DialogContent className="max-w-md bg-card border-border/60 rounded-2xl">
+        <DialogContent className="max-w-md bg-card border-border/60 rounded-[12px]">
           <DialogHeader>
             <DialogTitle className="text-lg font-semibold">Renomear credencial</DialogTitle>
             <DialogDescription className="text-sm text-muted-foreground">

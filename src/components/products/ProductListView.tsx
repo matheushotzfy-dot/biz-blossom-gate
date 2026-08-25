@@ -22,7 +22,7 @@ export function ProductListView({ products, copiedId, ...handlers }: ProductList
     <>
       <div className="hidden md:block p-4 lg:p-5">
         <div className="overflow-hidden rounded-[32px] border border-sidebar-border/70 bg-sidebar-accent/36 shadow-[0_18px_44px_hsl(var(--background)/0.16)]">
-          <div className="grid grid-cols-[minmax(0,2.2fr)_260px_230px_180px_64px] gap-6 bg-sidebar/74 px-7 py-5 text-[11px] font-heading uppercase tracking-[0.22em] text-sidebar-foreground/46 lg:grid-cols-[minmax(0,2.1fr)_270px_240px_190px_64px]">
+          <div className="grid grid-cols-[minmax(0,2.2fr)_260px_230px_180px_64px] gap-6 bg-sidebar/74 px-7 py-5 text-[11px] font-heading text-sidebar-foreground/46 lg:grid-cols-[minmax(0,2.1fr)_270px_240px_190px_64px]">
             <span>Produto</span>
             <span>Publicação</span>
             <span className="text-right">Monetização</span>
@@ -77,7 +77,7 @@ export function ProductListView({ products, copiedId, ...handlers }: ProductList
                       {hasCheckout ? <ExternalLink className="h-3.5 w-3.5" strokeWidth={1.8} /> : <span className="h-2 w-2 rounded-full bg-sidebar-foreground/35" />}
                       {hasCheckout ? "Checkout publicado" : "Sem checkout"}
                     </span>
-                    <p className="text-[11px] font-mono uppercase tracking-[0.14em] text-sidebar-foreground/52">Atualizado {formatCompactDate(product.updated_at)}</p>
+                    <p className="text-[11px] font-mono text-sidebar-foreground/52">Atualizado {formatCompactDate(product.updated_at)}</p>
                   </div>
 
                   <div className="text-right">
@@ -162,14 +162,14 @@ export function ProductListView({ products, copiedId, ...handlers }: ProductList
                 <div className="mt-5 overflow-hidden rounded-[24px] border border-sidebar-border/60 bg-sidebar-border/40">
                   <div className="grid grid-cols-2 gap-px">
                     <div className="bg-sidebar/86 p-4">
-                      <p className="text-[11px] font-heading uppercase tracking-[0.18em] text-sidebar-foreground/42">Monetização</p>
+                      <p className="text-[11px] font-heading text-sidebar-foreground/42">Monetização</p>
                       <p className="mt-2 font-numbers text-[22px] font-black tracking-[-0.05em] text-foreground">{formatCurrency(Number(product.price))}</p>
                       <p className="mt-1.5 text-[12px] leading-6 text-muted-foreground/66">
                         {product.affiliate_enabled ? `${product.affiliate_commission}% afiliado` : "Sem afiliação"}
                       </p>
                     </div>
                     <div className="bg-sidebar/86 p-4 text-right">
-                      <p className="text-[11px] font-heading uppercase tracking-[0.18em] text-sidebar-foreground/42">Publicação</p>
+                      <p className="text-[11px] font-heading text-sidebar-foreground/42">Publicação</p>
                       <p className={cn("mt-2 text-[14px] font-semibold", hasCheckout ? "text-foreground" : "text-sidebar-foreground/68")}>
                         {hasCheckout ? "Checkout publicado" : "Sem checkout"}
                       </p>
@@ -178,7 +178,7 @@ export function ProductListView({ products, copiedId, ...handlers }: ProductList
                   </div>
 
                   <div className="flex items-center justify-between bg-sidebar/84 px-4 py-3.5">
-                    <p className="text-[11px] font-heading uppercase tracking-[0.18em] text-sidebar-foreground/42">Status</p>
+                    <p className="text-[11px] font-heading text-sidebar-foreground/42">Status</p>
                     <p className="text-[13px] font-medium text-muted-foreground/72">{statusHelper}</p>
                   </div>
                 </div>

@@ -162,7 +162,7 @@ export default function LinkPagamento() {
           <Plus className="h-4 w-4" /> Criar novo link
         </Button>
       </DialogTrigger>
-      <DialogContent className="max-w-lg max-h-[92vh] overflow-y-auto rounded-2xl">
+      <DialogContent className="max-w-lg max-h-[92vh] overflow-y-auto rounded-[12px]">
         <DialogHeader><DialogTitle className="font-display tracking-[-0.02em]">Novo link de pagamento</DialogTitle></DialogHeader>
         <form onSubmit={handleCreate} className="space-y-4 pt-2">
           <div>
@@ -283,7 +283,7 @@ export default function LinkPagamento() {
                           <div className="flex items-center gap-2">
                             <h4 className="truncate font-display text-[15px] font-bold tracking-[-0.02em]">{l.title}</h4>
                             <span className={cn(
-                              "shrink-0 rounded-md px-1.5 py-0.5 text-[11px] font-medium",
+ "shrink-0 rounded-md px-1.5 py-0.5 text-[11px] font-medium",
                               l.is_active ? "bg-primary/10 text-primary" : "bg-muted text-muted-foreground",
                             )}>
                               {l.is_active ? "Ativo" : "Pausado"}
@@ -344,9 +344,9 @@ export default function LinkPagamento() {
               </p>
               <ul className="space-y-2.5 pt-1">
                 {[
-                  "Gerencie seus links direto na plataforma.",
-                  "Configure valores e imagens personalizadas.",
-                  "Acompanhe o desempenho de cada link.",
+ "Gerencie seus links direto na plataforma.",
+ "Configure valores e imagens personalizadas.",
+ "Acompanhe o desempenho de cada link.",
                 ].map(t => (
                   <li key={t} className="flex items-start gap-2.5">
                     <Check className="mt-0.5 h-3.5 w-3.5 shrink-0 text-primary" strokeWidth={2.5} />

@@ -43,7 +43,7 @@ export default function UpsellPosPagamento() {
  ].map(kpi => (
  <Card key={kpi.label} className="border-border/40 bg-card/60 backdrop-blur-xl">
  <CardContent className="flex items-center gap-3 p-4">
- <div className={`flex h-10 w-10 items-center justify-center rounded-2xl bg-muted/50 ${kpi.color}`}>
+ <div className={`flex h-10 w-10 items-center justify-center rounded-[12px] bg-muted/50 ${kpi.color}`}>
  <kpi.icon className="h-5 w-5" />
  </div>
  <div>
@@ -70,7 +70,7 @@ export default function UpsellPosPagamento() {
  <Card key={o.id} className="border-border/40 bg-card/60 backdrop-blur-xl transition-all hover:border-border/60">
  <CardContent className="flex flex-col gap-4 p-5 md:flex-row md:items-center md:justify-between">
  <div className="flex items-start gap-4">
- <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-primary/10">
+ <div className="flex h-11 w-11 items-center justify-center rounded-[12px] bg-primary/10">
  <ArrowUpRight className="h-5 w-5 text-primary" />
  </div>
  <div>

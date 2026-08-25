@@ -54,7 +54,7 @@ export default function ABTesting() {
  <PageShell>
  <div className="flex items-center justify-between">
  <PageTitle icon={<FlaskConical className="h-6 w-6" />} title="A/B Testing" subtitle="Teste variações do checkout para otimizar conversões" />
- <button className="flex items-center gap-2 rounded-2xl bg-primary px-5 py-3 text-sm font-bold text-primary-foreground transition hover:bg-primary/90">
+ <button className="flex items-center gap-2 rounded-[12px] bg-primary px-5 py-3 text-sm font-bold text-primary-foreground transition hover:bg-primary/90">
  <Plus className="h-4 w-4" />
  Novo Teste
  </button>
@@ -80,7 +80,7 @@ export default function ABTesting() {
  <div className="flex items-center gap-2 mb-1">
  <h3 className="text-base font-bold text-foreground">{test.name}</h3>
  <span className={cn(
- "rounded-full px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider",
+ "rounded-full px-2.5 py-0.5 text-[11px] font-medium ",
  test.status === "running" ? "bg-success/10 text-success" :
  test.status === "paused" ? "bg-warning/10 text-warning" :
  "bg-muted/30 text-muted-foreground"

@@ -207,7 +207,7 @@ export default function Produtos() {
         actions={
           <button
             onClick={() => navigate("/vendas/produtos/novo/editar")}
-            className="group inline-flex h-10 items-center gap-2 rounded-lg bg-primary px-4 text-[12px] font-bold uppercase tracking-wider text-primary-foreground transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] hover:bg-primary/90"
+            className="group inline-flex h-10 items-center gap-2 rounded-lg bg-primary px-4 text-[12px] font-medium text-primary-foreground transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] hover:bg-primary/90"
           >
             <Plus className="h-4 w-4 transition-transform duration-300 group-hover:rotate-90" strokeWidth={2.5} />
             Novo produto
@@ -230,7 +230,7 @@ export default function Produtos() {
                   key={item.value}
                   onClick={() => setTab(item.value)}
                   className={cn(
-                    "group/tab relative inline-flex h-8 shrink-0 items-center gap-2 overflow-hidden rounded-lg px-3 text-[12px] font-bold tracking-tight transition-all duration-300 hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.98] whitespace-nowrap",
+ "group/tab relative inline-flex h-8 shrink-0 items-center gap-2 overflow-hidden rounded-lg px-3 text-[12px] font-bold tracking-tight transition-all duration-300  active:translate-y-0  whitespace-nowrap",
                     active
                       ? "bg-secondary text-foreground ring-1 ring-border/60"
                       : "text-muted-foreground/80 hover:bg-secondary/70 hover:text-foreground"
@@ -238,7 +238,7 @@ export default function Produtos() {
                 >
                   <span className="pointer-events-none absolute inset-x-2 top-0 h-px bg-primary/50 opacity-0 transition-opacity duration-300 group-hover/tab:opacity-100" />
                   <span className={cn(
-                    "flex h-4 w-4 items-center justify-center transition-all duration-300",
+ "flex h-4 w-4 items-center justify-center transition-all duration-300",
                     active ? tabAccent[item.value] : "text-muted-foreground/50 group-hover/tab:scale-110 group-hover/tab:text-primary"
                   )}>
                     {tabIcon[item.value]}
@@ -246,7 +246,7 @@ export default function Produtos() {
                   <span className="font-display">{item.label}</span>
                   {item.count > 0 && (
                     <span className={cn(
-                      "inline-flex h-[18px] min-w-[20px] items-center justify-center rounded-md px-1.5 text-[10px] font-black tabular-nums tracking-tight border transition-colors",
+ "inline-flex h-[18px] min-w-[20px] items-center justify-center rounded-md px-1.5 text-[10px] font-black tabular-nums tracking-tight border transition-colors",
                       active
                         ? "bg-background/80 text-foreground border-border/40"
                         : "bg-muted/30 text-muted-foreground/60 border-transparent"
@@ -264,7 +264,7 @@ export default function Produtos() {
           {showClearDraftsBtn && (
             <button
               onClick={() => setClearDraftsOpen(true)}
-              className="inline-flex h-9 shrink-0 items-center gap-1.5 rounded-lg border border-destructive/40 bg-destructive/[0.06] px-3 text-[11px] font-bold uppercase tracking-wider text-destructive transition-all duration-200 hover:bg-destructive hover:text-destructive-foreground"
+              className="inline-flex h-9 shrink-0 items-center gap-1.5 rounded-lg border border-destructive/40 bg-destructive/[0.06] px-3 text-[11px] font-medium text-destructive transition-all duration-200 hover:bg-destructive hover:text-destructive-foreground"
             >
               <Trash2 className="h-3.5 w-3.5" strokeWidth={2.5} />
               <span className="hidden sm:inline">Limpar rascunhos</span>
@@ -311,16 +311,16 @@ export default function Produtos() {
             ))}
           </div>
         ) : filtered.length === 0 ? (
-          <div className="relative flex flex-col items-center justify-center overflow-hidden rounded-3xl border border-dashed border-border/60 bg-card/40 px-6 py-24 text-center animate-fade-in stagger-3">
+          <div className="relative flex flex-col items-center justify-center overflow-hidden rounded-[14px] border border-dashed border-border/60 bg-card/40 px-6 py-24 text-center animate-fade-in stagger-3">
             <div
               aria-hidden
               className="pointer-events-none absolute inset-0 -z-[1] opacity-50"
               style={{
                 background:
-                  "radial-gradient(50% 50% at 50% 30%, hsl(var(--primary) / 0.08), transparent 70%)",
+ "radial-gradient(50% 50% at 50% 30%, hsl(var(--primary) / 0.08), transparent 70%)",
               }}
             />
-            <div className="relative flex h-20 w-20 items-center justify-center rounded-2xl border border-border/60 bg-secondary/60 shadow-[0_10px_30px_-10px_hsl(var(--primary)/0.15)]">
+            <div className="relative flex h-20 w-20 items-center justify-center rounded-[12px] border border-border/60 bg-secondary/60 ">
               <Package className="h-8 w-8 text-muted-foreground/80" strokeWidth={1.4} />
               <span className="absolute -right-1.5 -top-1.5 flex h-6 w-6 items-center justify-center rounded-lg border border-primary/30 bg-card">
                 <Sparkles className="h-3 w-3 text-primary" strokeWidth={2.5} />
@@ -337,7 +337,7 @@ export default function Produtos() {
             {!search && tab === "all" && (
               <button
                 onClick={() => navigate("/vendas/produtos/novo/editar")}
-                className="group mt-7 inline-flex h-10 items-center gap-2 rounded-xl bg-primary px-5 text-[12px] font-black uppercase tracking-wider text-primary-foreground transition-all duration-300 hover:bg-primary/90 hover:-translate-y-0.5 hover:shadow-[0_10px_30px_-10px_hsl(var(--primary)/0.5)]"
+                className="group mt-7 inline-flex h-10 items-center gap-2 rounded-xl bg-primary px-5 text-[12px] font-semibold text-primary-foreground transition-all duration-300 hover:bg-primary/90  hover:"
               >
                 <Plus className="h-4 w-4 transition-transform duration-300 group-hover:rotate-90" strokeWidth={2.75} />
                 Criar primeiro produto

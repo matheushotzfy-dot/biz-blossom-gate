@@ -157,7 +157,7 @@ export default function ControleGastos() {
         />
         <Button
           onClick={() => setDialogOpen(true)}
-          className="gap-2 rounded-xl text-sm font-bold h-10 px-5 shadow-lg shadow-primary/20"
+          className="gap-2 rounded-xl text-sm font-bold h-10 px-5 "
         >
           <Plus className="h-4 w-4" /> Registrar Gasto
         </Button>
@@ -199,7 +199,7 @@ export default function ControleGastos() {
       <SharedPanel>
         <div className="grid grid-cols-2 lg:grid-cols-5 divide-y lg:divide-y-0 lg:divide-x divide-border/30">
           <div className="p-5">
-            <p className="text-[10px] uppercase tracking-[0.14em] font-bold text-muted-foreground/60 mb-2">
+            <p className="text-[11px] font-medium text-muted-foreground/60 mb-2">
               Receita do mês
             </p>
             <p className="text-2xl font-display font-black text-foreground font-numbers tracking-tight">
@@ -210,7 +210,7 @@ export default function ControleGastos() {
             </p>
           </div>
           <div className="p-5">
-            <p className="text-[10px] uppercase tracking-[0.14em] font-bold text-muted-foreground/60 mb-2">
+            <p className="text-[11px] font-medium text-muted-foreground/60 mb-2">
               Total de gastos
             </p>
             <p className="text-2xl font-display font-black text-destructive font-numbers tracking-tight">
@@ -221,7 +221,7 @@ export default function ControleGastos() {
             </p>
           </div>
           <div className="p-5">
-            <p className="text-[10px] uppercase tracking-[0.14em] font-bold text-muted-foreground/60 mb-2">
+            <p className="text-[11px] font-medium text-muted-foreground/60 mb-2">
               Lucro líquido
             </p>
             <p className={cn("text-2xl font-display font-black font-numbers tracking-tight", lucroTone)}>
@@ -234,7 +234,7 @@ export default function ControleGastos() {
             </p>
           </div>
           <div className="p-5">
-            <p className="text-[10px] uppercase tracking-[0.14em] font-bold text-muted-foreground/60 mb-2">
+            <p className="text-[11px] font-medium text-muted-foreground/60 mb-2">
               Margem
             </p>
             <p className={cn("text-2xl font-display font-black font-numbers tracking-tight", marginTone)}>
@@ -245,7 +245,7 @@ export default function ControleGastos() {
             </p>
           </div>
           <div className="p-5 col-span-2 lg:col-span-1">
-            <p className="text-[10px] uppercase tracking-[0.14em] font-bold text-muted-foreground/60 mb-2">
+            <p className="text-[11px] font-medium text-muted-foreground/60 mb-2">
               Média por dia
             </p>
             <p className="text-2xl font-display font-black text-foreground font-numbers tracking-tight">
@@ -289,7 +289,7 @@ export default function ControleGastos() {
                 <div
                   key={c.value}
                   className={cn(
-                    "grid grid-cols-12 items-center gap-4 px-5 py-3.5 transition-colors",
+ "grid grid-cols-12 items-center gap-4 px-5 py-3.5 transition-colors",
                     isEmpty ? "opacity-40" : "hover:bg-muted/10"
                   )}
                 >
@@ -441,13 +441,13 @@ export default function ControleGastos() {
 
       {/* ═══ Dialog ═══ */}
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-        <DialogContent className="max-w-md rounded-2xl border-border/40 bg-card/95 backdrop-blur-2xl shadow-2xl">
+        <DialogContent className="max-w-md rounded-[12px] border-border/40 bg-card/95 backdrop-blur-2xl ">
           <DialogHeader>
             <DialogTitle className="text-lg font-display font-black tracking-[-0.02em]">Registrar Gasto</DialogTitle>
           </DialogHeader>
           <form onSubmit={handleSubmit} className="space-y-5 mt-2">
             <div>
-              <Label className="text-[10px] text-muted-foreground/60 uppercase tracking-[0.12em] font-bold">Categoria</Label>
+              <Label className="text-[11px] text-muted-foreground/60 font-medium">Categoria</Label>
               <div className="grid grid-cols-3 gap-2 mt-2.5">
                 {CATEGORIES.map(c => (
                   <button
@@ -455,9 +455,9 @@ export default function ControleGastos() {
                     type="button"
                     onClick={() => setForm(f => ({ ...f, category: c.value }))}
                     className={cn(
-                      "flex flex-col items-center gap-2 py-3.5 px-2 rounded-xl border transition-all duration-200 text-center active:scale-[0.97]",
+ "flex flex-col items-center gap-2 py-3.5 px-2 rounded-xl border transition-all duration-200 text-center ",
                       form.category === c.value
-                        ? "border-primary/30 bg-primary/[0.06] shadow-sm shadow-primary/5"
+                        ? "border-primary/30 bg-primary/[0.06] "
                         : "border-border/20 hover:border-border/40 hover:bg-muted/10"
                     )}
                   >
@@ -468,7 +468,7 @@ export default function ControleGastos() {
                       <c.icon className="h-4 w-4" style={{ color: c.color }} />
                     </div>
                     <span className={cn(
-                      "text-[10px] font-bold",
+ "text-[10px] font-bold",
                       form.category === c.value ? "text-primary" : "text-muted-foreground/60"
                     )}>
                       {c.label}
@@ -479,7 +479,7 @@ export default function ControleGastos() {
             </div>
 
             <div>
-              <Label className="text-[10px] text-muted-foreground/60 uppercase tracking-[0.12em] font-bold">Descrição</Label>
+              <Label className="text-[11px] text-muted-foreground/60 font-medium">Descrição</Label>
               <Input
                 value={form.description}
                 onChange={(e) => setForm({ ...form, description: e.target.value })}
@@ -490,7 +490,7 @@ export default function ControleGastos() {
 
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <Label className="text-[10px] text-muted-foreground/60 uppercase tracking-[0.12em] font-bold">Valor (R$)</Label>
+                <Label className="text-[11px] text-muted-foreground/60 font-medium">Valor (R$)</Label>
                 <Input
                   type="number"
                   step="0.01"
@@ -503,7 +503,7 @@ export default function ControleGastos() {
                 />
               </div>
               <div>
-                <Label className="text-[10px] text-muted-foreground/60 uppercase tracking-[0.12em] font-bold">Data</Label>
+                <Label className="text-[11px] text-muted-foreground/60 font-medium">Data</Label>
                 <Input
                   type="date"
                   value={form.expense_date}
@@ -514,7 +514,7 @@ export default function ControleGastos() {
               </div>
             </div>
 
-            <Button type="submit" className="w-full font-bold h-11 rounded-xl shadow-lg shadow-primary/20">
+            <Button type="submit" className="w-full font-bold h-11 rounded-xl ">
               <Plus className="h-4 w-4 mr-2" />
               Registrar Gasto
             </Button>

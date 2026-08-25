@@ -230,16 +230,16 @@ export function TransactionTimeline({ transactionId, variant = "seller", classNa
             </div>
             <div className="min-w-0 flex-1 pb-1">
               <div className="flex flex-wrap items-center gap-2">
-                <span className={cn("text-[12px] font-black uppercase tracking-[0.14em]", tone.text)}>
+                <span className={cn("text-[12px] font-semibold ", tone.text)}>
                   {v.label}
                 </span>
                 {(variant === "admin" ? ev.acquirer_slug : true) && (
-                  <span className="inline-flex items-center rounded-full border border-border/50 bg-background/60 px-2 py-0.5 text-[9.5px] font-black uppercase tracking-wider text-foreground/80">
+                  <span className="inline-flex items-center rounded-full border border-border/50 bg-background/60 px-2 py-0.5 text-[11px] font-semibold text-foreground/80">
                     {variant === "admin" ? ev.acquirer_slug : BRAND_LABEL}
                   </span>
                 )}
                 {isAdminOnly && variant === "admin" && (
-                  <span className="inline-flex items-center rounded-full border border-warning/30 bg-warning/10 px-2 py-0.5 text-[9px] font-black uppercase tracking-wider text-warning">
+                  <span className="inline-flex items-center rounded-full border border-warning/30 bg-warning/10 px-2 py-0.5 text-[11px] font-semibold text-warning">
                     admin
                   </span>
                 )}
@@ -253,7 +253,7 @@ export function TransactionTimeline({ transactionId, variant = "seller", classNa
               )}
               {variant === "admin" && ev.metadata && Object.keys(ev.metadata).length > 0 && (
                 <details className="mt-1.5">
-                  <summary className="cursor-pointer text-[10px] font-black uppercase tracking-wider text-muted-foreground/60 hover:text-foreground">
+                  <summary className="cursor-pointer text-[11px] font-semibold text-muted-foreground/60 hover:text-foreground">
                     metadata
                   </summary>
                   <pre className="mt-1 max-h-40 overflow-auto rounded-lg border border-border/40 bg-background/50 p-2 text-[10.5px] leading-snug text-foreground/80">

@@ -46,8 +46,8 @@ export function ProductStatusIndicator({
       className={cn(
         "inline-flex items-center gap-1.5",
         tone === "soft"
-          ? ["rounded-full border px-2 py-[3px] text-[9.5px] font-semibold uppercase tracking-[0.06em]", meta.soft, meta.text]
-          : ["text-[9.5px] font-semibold uppercase tracking-[0.06em]", meta.text]
+          ? ["rounded-full border px-2 py-[3px] text-[11px] font-semibold ", meta.soft, meta.text]
+          : ["text-[11px] font-semibold ", meta.text]
       )}
     >
       <span className="relative flex h-[5px] w-[5px]">

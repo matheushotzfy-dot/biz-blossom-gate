@@ -701,7 +701,7 @@ export default function ProductEditor() {
   <div className="shrink-0 z-50 bg-card border-b border-border">
   <div className="max-w-7xl mx-auto px-3 sm:px-6 flex items-center justify-between h-14 sm:h-[60px]">
   <div className="flex items-center gap-3">
-  <button onClick={() => navigate("/vendas/produtos")} className="flex h-9 w-9 items-center justify-center rounded-xl border border-border bg-secondary hover:bg-muted text-muted-foreground hover:text-foreground transition-all duration-200 active:scale-[0.97]">
+  <button onClick={() => navigate("/vendas/produtos")} className="flex h-9 w-9 items-center justify-center rounded-xl border border-border bg-secondary hover:bg-muted text-muted-foreground hover:text-foreground transition-all duration-200 ">
   <ArrowLeft className="h-4 w-4" />
   </button>
 
@@ -740,7 +740,7 @@ export default function ProductEditor() {
   animate={{ width: isActive ? 20 : 6, opacity: locked ? 0.2 : 1 }}
   transition={{ duration: 0.25 }}
   className={cn(
-  "h-1.5 rounded-full transition-colors duration-200",
+ "h-1.5 rounded-full transition-colors duration-200",
   isActive ? "bg-primary" : "bg-muted-foreground/25"
   )}
   title={tab.label}
@@ -753,7 +753,7 @@ export default function ProductEditor() {
   <div className="hidden sm:flex items-center gap-2.5 px-3.5 py-2 rounded-xl bg-secondary border border-border">
   <CompletionRing percent={completionPercent} />
   <div>
-  <p className="text-[8px] font-display font-bold uppercase tracking-[0.15em] text-muted-foreground">Completo</p>
+  <p className="text-[11px] font-display font-medium text-muted-foreground">Completo</p>
   <p className="text-[11px] font-numbers font-bold text-foreground tabular-nums leading-tight">{completionPercent}%</p>
   </div>
   </div>
@@ -773,7 +773,7 @@ export default function ProductEditor() {
   </>
   )}
   <Button onClick={handleSave} disabled={saving} size="sm" className={cn(
-  "gap-1.5 rounded-xl text-xs font-display font-bold h-9 px-5 transition-all duration-250",
+ "gap-1.5 rounded-xl text-xs font-display font-bold h-9 px-5 transition-all duration-250",
   saved ? "bg-success hover:bg-success" : ""
   )}>
   {saved ? (
@@ -797,9 +797,9 @@ export default function ProductEditor() {
 
  {/* ───── Sidebar ───── */}
   <nav className="hidden lg:flex flex-col w-56 shrink-0 overflow-y-auto overscroll-contain pb-6 scrollbar-none space-y-3">
-  <div className="rounded-2xl border border-border bg-card p-2.5 space-y-0.5">
+  <div className="rounded-[12px] border border-border bg-card p-2.5 space-y-0.5">
   <div className="px-3 py-2.5 mb-1">
-  <p className="text-[9px] font-display font-bold uppercase tracking-[0.15em] text-muted-foreground">Navegação</p>
+  <p className="text-[11px] font-display font-medium text-muted-foreground">Navegação</p>
   </div>
   {TABS.map((tab) => {
   const isActive = activeTab === tab.key;
@@ -814,7 +814,7 @@ export default function ProductEditor() {
   }}
   disabled={locked}
   className={cn(
-  "w-full flex items-center gap-2.5 px-3.5 py-2.5 rounded-xl text-[13px] font-display font-bold transition-all duration-200 text-left relative group/tab",
+ "w-full flex items-center gap-2.5 px-3.5 py-2.5 rounded-xl text-[13px] font-display font-bold transition-all duration-200 text-left relative group/tab",
   locked
   ? "opacity-25 cursor-not-allowed text-muted-foreground"
   : isActive
@@ -829,7 +829,7 @@ export default function ProductEditor() {
   <Lock className="h-3.5 w-3.5 shrink-0" />
   ) : (
   <div className={cn(
-  "h-7 w-7 rounded-lg flex items-center justify-center shrink-0 border transition-all duration-200",
+ "h-7 w-7 rounded-lg flex items-center justify-center shrink-0 border transition-all duration-200",
   isActive ? "bg-primary/10 border-primary/20" : "bg-secondary border-border group-hover/tab:border-muted-foreground/20"
   )}>
   <tab.icon className={cn("h-3.5 w-3.5 transition-colors duration-200", isActive ? "text-primary" : "text-muted-foreground/50 group-hover/tab:text-muted-foreground")} />
@@ -847,8 +847,8 @@ export default function ProductEditor() {
   {/* Quick info — temporariamente desativado, voltaremos depois */}
   {/* eslint-disable-next-line no-constant-binary-expression */}
   {false && !tabsLocked && product?.checkout_url && (
-  <div className="rounded-2xl border border-border bg-card p-3.5 space-y-2.5">
-  <p className="text-[9px] font-display font-bold uppercase tracking-[0.15em] text-muted-foreground">Ações Rápidas</p>
+  <div className="rounded-[12px] border border-border bg-card p-3.5 space-y-2.5">
+  <p className="text-[11px] font-display font-medium text-muted-foreground">Ações Rápidas</p>
   <Button
   variant="outline" size="sm"
   onClick={() => copyLink(getCheckoutLink())}
@@ -881,7 +881,7 @@ export default function ProductEditor() {
   }}
   disabled={locked}
   className={cn(
-  "flex flex-col items-center gap-0.5 px-2.5 py-1.5 rounded-lg text-[9px] font-bold whitespace-nowrap transition-colors duration-200 min-w-[50px]",
+ "flex flex-col items-center gap-0.5 px-2.5 py-1.5 rounded-lg text-[9px] font-bold whitespace-nowrap transition-colors duration-200 min-w-[50px]",
   locked ? "opacity-30 text-muted-foreground" :
   activeTab === tab.key ? "bg-primary/10 text-primary" : "text-muted-foreground hover:text-foreground"
   )}
@@ -1070,7 +1070,7 @@ function TabGeral({ name, setName, description, setDescription, price, setPrice,
           <h2 className="text-[15px] font-display font-black tracking-[-0.02em] text-foreground">Identidade do produto</h2>
           <p className="mt-0.5 text-xs text-muted-foreground">Como seu produto aparece para clientes e afiliados.</p>
         </header>
-        <div className="rounded-2xl border border-border bg-card overflow-hidden">
+        <div className="rounded-[12px] border border-border bg-card overflow-hidden">
           <div className="grid grid-cols-1 md:grid-cols-[260px_1fr]">
             <div
               className={cn("relative border-b md:border-b-0 md:border-r border-border transition-colors", isDragging ? "bg-primary/5" : "bg-secondary/40")}
@@ -1106,7 +1106,7 @@ function TabGeral({ name, setName, description, setDescription, price, setPrice,
             </div>
             <div className="p-5 space-y-5">
               <div className="space-y-1.5">
-                <label className="text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">Nome do produto</label>
+                <label className="text-[11px] font-semibold text-muted-foreground">Nome do produto</label>
                 <Input value={name} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setName(e.target.value)} placeholder="Ex: Curso Completo de Marketing Digital" className="h-12 bg-secondary border-border text-lg font-display font-bold tracking-[-0.01em]" required maxLength={200} />
                 <div className="flex items-center justify-between text-[10px] text-muted-foreground/60">
                   <span>{name.length > 0 ? "Visível no checkout e área de membros" : "Obrigatório"}</span>
@@ -1114,7 +1114,7 @@ function TabGeral({ name, setName, description, setDescription, price, setPrice,
                 </div>
               </div>
               <div className="space-y-1.5">
-                <label className="text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">Descrição</label>
+                <label className="text-[11px] font-semibold text-muted-foreground">Descrição</label>
                 <Textarea value={description} onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setDescription(e.target.value)} rows={4} placeholder="Descreva o que o aluno vai receber, principais benefícios e diferenciais (mínimo 50 caracteres)..." className={cn("resize-none bg-secondary border-border text-sm leading-relaxed", description.length > 0 && !descValid && "border-destructive/50")} maxLength={2000} />
                 <div className="flex items-center justify-between text-[10px]">
                   <span className={cn(descValid ? "text-success" : description.length > 0 ? "text-destructive" : "text-muted-foreground/60")}>
@@ -1134,9 +1134,9 @@ function TabGeral({ name, setName, description, setDescription, price, setPrice,
           <h2 className="text-[15px] font-display font-black tracking-[-0.02em] text-foreground">Categoria e preço</h2>
           <p className="mt-0.5 text-xs text-muted-foreground">Como seu produto é classificado e cobrado.</p>
         </header>
-        <div className="rounded-2xl border border-border bg-card divide-y divide-border">
+        <div className="rounded-[12px] border border-border bg-card divide-y divide-border">
           <div className="p-5 space-y-3">
-            <label className="text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">Categoria</label>
+            <label className="text-[11px] font-semibold text-muted-foreground">Categoria</label>
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
               {CATEGORIES.map((opt) => {
                 const Icon = opt.icon;
@@ -1147,7 +1147,7 @@ function TabGeral({ name, setName, description, setDescription, price, setPrice,
                     type="button"
                     onClick={() => setCategory(opt.value)}
                     className={cn(
-                      "relative flex flex-col items-start gap-2 p-3 rounded-xl border text-left transition-colors duration-200",
+ "relative flex flex-col items-start gap-2 p-3 rounded-xl border text-left transition-colors duration-200",
                       active
                         ? "bg-primary/5 border-primary/40"
                         : "bg-secondary/40 border-border hover:border-primary/20"
@@ -1167,7 +1167,7 @@ function TabGeral({ name, setName, description, setDescription, price, setPrice,
             </div>
           </div>
           <div className="p-5 space-y-2">
-            <label className="text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">Tipo de pagamento</label>
+            <label className="text-[11px] font-semibold text-muted-foreground">Tipo de pagamento</label>
             <SegmentedChoice
               value={paymentType}
               onValueChange={setPaymentType}
@@ -1181,7 +1181,7 @@ function TabGeral({ name, setName, description, setDescription, price, setPrice,
           <div className="p-5">
             <div className="flex items-end justify-between gap-6">
               <div className="flex-1 space-y-1.5">
-                <label className="text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">Preço de venda</label>
+                <label className="text-[11px] font-semibold text-muted-foreground">Preço de venda</label>
                 <div className="relative">
                   <span className="absolute left-4 top-1/2 -translate-y-1/2 text-base font-display font-bold text-muted-foreground">R$</span>
                   <Input
@@ -1200,7 +1200,7 @@ function TabGeral({ name, setName, description, setDescription, price, setPrice,
                 )}
               </div>
               <div className="w-[300px] space-y-1.5">
-                <label className="text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">Garantia</label>
+                <label className="text-[11px] font-semibold text-muted-foreground">Garantia</label>
                 <SegmentedChoice
                   value={warrantyDays}
                   onValueChange={setWarrantyDays}
@@ -1224,17 +1224,17 @@ function TabGeral({ name, setName, description, setDescription, price, setPrice,
           <h2 className="text-[15px] font-display font-black tracking-[-0.02em] text-foreground">Informações do produtor</h2>
           <p className="mt-0.5 text-xs text-muted-foreground">Dados obrigatórios exibidos ao comprador no checkout.</p>
         </header>
-        <div className="rounded-2xl border border-border bg-card p-5 space-y-5">
+        <div className="rounded-[12px] border border-border bg-card p-5 space-y-5">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
             <div className="space-y-1.5">
-              <label className="text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground flex items-center gap-1.5">
+              <label className="text-[11px] font-semibold text-muted-foreground flex items-center gap-1.5">
                 <ExternalLink className="h-3 w-3" /> Página de vendas
               </label>
               <Input value={pageUrl} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setPageUrl(e.target.value)} placeholder="seuproduto.com" type="text" className={cn("h-11 bg-secondary border-border", pageUrl && !urlValid && "border-destructive/50")} required />
               <p className={cn("text-[10px]", urlValid ? "text-success" : "text-muted-foreground/60")}>{urlValid ? "URL válida — o https:// é adicionado automaticamente" : "Insira o domínio (ex: seusite.com.br) — o https:// é opcional"}</p>
             </div>
             <div className="space-y-1.5">
-              <label className="text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground flex items-center gap-1.5">
+              <label className="text-[11px] font-semibold text-muted-foreground flex items-center gap-1.5">
                 <Mail className="h-3 w-3" /> E-mail de suporte
               </label>
               <Input value={supportEmail} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSupportEmail(e.target.value)} placeholder="suporte@seuproduto.com" type="email" className={cn("h-11 bg-secondary border-border", supportEmail && !emailValid && "border-destructive/50")} required />
@@ -1243,7 +1243,7 @@ function TabGeral({ name, setName, description, setDescription, price, setPrice,
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
             <div className="space-y-1.5">
-              <label className="text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground flex items-center gap-1.5">
+              <label className="text-[11px] font-semibold text-muted-foreground flex items-center gap-1.5">
                 <Phone className="h-3 w-3" /> Telefone de suporte
               </label>
               <Input
@@ -1257,7 +1257,7 @@ function TabGeral({ name, setName, description, setDescription, price, setPrice,
               <p className={cn("text-[10px]", phoneValid ? "text-success" : "text-muted-foreground/60")}>{phoneValid ? "Telefone válido" : "Insira o DDD + número (10 ou 11 dígitos)"}</p>
             </div>
             <div className="space-y-1.5">
-              <label className="text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground flex items-center gap-1.5">
+              <label className="text-[11px] font-semibold text-muted-foreground flex items-center gap-1.5">
                 <Users className="h-3 w-3" /> Nome de exibição do produtor
               </label>
               <Input value={displayName} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setDisplayName(e.target.value)} placeholder="Nome que aparecerá no checkout" className="h-11 bg-secondary border-border" required />
@@ -1311,7 +1311,7 @@ function TabConfiguracoes({ price, pixEnabled, setPixEnabled, boletoEnabled, set
  {/* eslint-disable-next-line no-constant-binary-expression */}
  {false && price && parseFloat(price) > 0 && (
  <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="rounded-xl bg-muted/5 border border-border p-3 space-y-2">
- <p className="text-[9px] font-display font-black uppercase tracking-[0.15em] text-muted-foreground/40">Simulação de taxas (R$ {Number(price).toFixed(2)})</p>
+ <p className="text-[11px] font-display font-semibold text-muted-foreground/40">Simulação de taxas (R$ {Number(price).toFixed(2)})</p>
  <div className="grid grid-cols-3 gap-3">
  {pixEnabled && (
  <div className="text-center">
@@ -1366,7 +1366,7 @@ function TabConfiguracoes({ price, pixEnabled, setPixEnabled, boletoEnabled, set
  className={cn(
  "flex items-start gap-3 p-4 rounded-xl border text-left transition-all duration-[250ms] ease-[cubic-bezier(0.16,1,0.3,1)] relative overflow-hidden",
  deliveryType === opt.value
- ? "bg-primary/5 border-primary/20 shadow-sm"
+ ? "bg-primary/5 border-primary/20 "
  : "bg-card border-border hover:border-border"
  )}
  >
@@ -1437,7 +1437,7 @@ function TabOrderBump({ isNew, orderBumps, allProducts, availableForBump, select
  initial={{ opacity: 0, x: -10 }}
  animate={{ opacity: 1, x: 0 }}
  transition={{ delay: i * 0.05 }}
- className="flex items-center justify-between rounded-2xl border border-border bg-card p-4 relative overflow-hidden group/bump hover:border-primary/20 transition-all"
+ className="flex items-center justify-between rounded-[12px] border border-border bg-card p-4 relative overflow-hidden group/bump hover:border-primary/20 transition-all"
  >
  <div className="absolute left-0 top-0 bottom-0 w-[3px] rounded-full bg-warning" />
  <div className="flex items-center gap-3 min-w-0 flex-1 pl-1">
@@ -1461,8 +1461,8 @@ function TabOrderBump({ isNew, orderBumps, allProducts, availableForBump, select
  })}
  </div>
  ) : allProducts.length === 0 ? (
-  <div className="rounded-2xl border border-dashed border-border bg-card/50 p-8 text-center space-y-3">
-    <div className="mx-auto h-12 w-12 rounded-2xl bg-warning/10 flex items-center justify-center">
+  <div className="rounded-[12px] border border-dashed border-border bg-card/50 p-8 text-center space-y-3">
+    <div className="mx-auto h-12 w-12 rounded-[12px] bg-warning/10 flex items-center justify-center">
       <Layers className="h-5 w-5 text-warning" />
     </div>
     <p className="text-sm font-display font-bold text-foreground">Sem produtos para oferecer</p>
@@ -1536,7 +1536,7 @@ function TabUpsell({ isNew, name, price, imagePreview, hasCustomThankYou, setHas
  <SectionHeader icon={ArrowUpRight} title="Funil pós-pagamento" subtitle="Defina a sequência de ofertas exibidas após a compra inicial." />
 
  {/* Master toggle */}
- <div className="rounded-2xl border border-border bg-card p-4 flex items-center justify-between gap-4">
+ <div className="rounded-[12px] border border-border bg-card p-4 flex items-center justify-between gap-4">
    <div className="flex items-start gap-3 min-w-0">
      <div className={cn("h-10 w-10 rounded-xl flex items-center justify-center shrink-0", upsellEnabled ? "bg-primary/10 text-primary" : "bg-muted/30 text-muted-foreground/50")}>
        <ArrowUpRight className="h-4 w-4" />
@@ -1555,14 +1555,14 @@ function TabUpsell({ isNew, name, price, imagePreview, hasCustomThankYou, setHas
 
 
  {/* ═══ FUNNEL FLOW VISUAL ═══ */}
- <div className="rounded-2xl border border-border bg-card overflow-hidden">
+ <div className="rounded-[12px] border border-border bg-card overflow-hidden">
  <div className="px-5 py-4 border-b border-border flex items-center justify-between">
  <div>
- <p className="text-[11px] uppercase tracking-[0.12em] text-muted-foreground/70 font-display font-bold">Sequência do funil</p>
+ <p className="text-[11px] text-muted-foreground/70 font-display font-medium">Sequência do funil</p>
  <p className="text-[15px] font-display font-black text-foreground mt-0.5 tracking-[-0.02em]">Jornada do comprador</p>
  </div>
  <div className="text-right">
- <p className="text-[10px] uppercase tracking-wider text-muted-foreground/60 font-medium">Ticket projetado</p>
+ <p className="text-[11px] text-muted-foreground/60 font-medium">Ticket projetado</p>
  <p className="text-base font-numbers font-black text-success tabular-nums">
  R$ {projectedAov.toFixed(2)}
  {upliftPct > 0 && <span className="text-[10px] font-display font-bold text-success/80 ml-1.5">+{upliftPct}%</span>}
@@ -1610,7 +1610,7 @@ function TabUpsell({ isNew, name, price, imagePreview, hasCustomThankYou, setHas
  </div>
 
  {/* ═══ STEP 02 EDITOR — UPSELL TYPE ═══ */}
- <div className="rounded-2xl border border-border bg-card">
+ <div className="rounded-[12px] border border-border bg-card">
  <div className="px-5 py-3.5 border-b border-border flex items-center gap-3">
  <div className="h-6 w-6 rounded-md bg-primary/10 flex items-center justify-center text-[10px] font-numbers font-black text-primary tabular-nums">02</div>
  <div className="flex-1 min-w-0">
@@ -1683,7 +1683,7 @@ function TabUpsell({ isNew, name, price, imagePreview, hasCustomThankYou, setHas
  </div>
 
  {/* ═══ STEP 03 EDITOR — DOWNSELL ═══ */}
- <div className={cn("rounded-2xl border bg-card transition-colors", downsellEnabled ? "border-border" : "border-border/60")}>
+ <div className={cn("rounded-[12px] border bg-card transition-colors", downsellEnabled ? "border-border" : "border-border/60")}>
  <div className="px-5 py-3.5 border-b border-border flex items-center gap-3">
  <div className={cn("h-6 w-6 rounded-md flex items-center justify-center text-[10px] font-numbers font-black tabular-nums", downsellEnabled ? "bg-info/10 text-info" : "bg-muted/40 text-muted-foreground/50")}>03</div>
  <div className="flex-1 min-w-0">
@@ -1716,7 +1716,7 @@ function TabUpsell({ isNew, name, price, imagePreview, hasCustomThankYou, setHas
  </div>
 
  {/* ═══ STEP 04 EDITOR — CONFIRMATION EMAIL ═══ */}
- <div className="rounded-2xl border border-border bg-card">
+ <div className="rounded-[12px] border border-border bg-card">
  <div className="px-5 py-3.5 border-b border-border flex items-center gap-3">
  <div className="h-6 w-6 rounded-md bg-success/10 flex items-center justify-center text-[10px] font-numbers font-black text-success tabular-nums">04</div>
  <div className="flex-1 min-w-0">
@@ -1810,7 +1810,7 @@ function FunnelStep({ step, status, label, title, price, thumb, badge, icon: Ico
  </div>
  )}
  <div className="min-w-0 flex-1">
- <p className={cn("text-[10px] uppercase tracking-wider font-display font-bold leading-tight", isEmpty ? "text-muted-foreground/50" : "text-muted-foreground/70")}>{label}</p>
+ <p className={cn("text-[11px] font-display font-medium leading-tight", isEmpty ? "text-muted-foreground/50" : "text-muted-foreground/70")}>{label}</p>
  <p className={cn("text-[13px] font-display font-bold truncate leading-tight mt-0.5", isEmpty ? "text-muted-foreground/60" : "text-foreground")}>{title}</p>
  </div>
  </div>
@@ -1863,7 +1863,7 @@ function TabCheckout({ isNew, name, price, productId, buttonColor, setButtonColo
  ) : (
  <>
  {/* Checkout Quick Actions Card */}
- <div className="rounded-2xl border border-border bg-card overflow-hidden relative">
+ <div className="rounded-[12px] border border-border bg-card overflow-hidden relative">
  <div className="absolute left-0 top-0 bottom-0 w-[3px] rounded-full bg-primary" />
  <div className="p-5 flex items-center justify-between">
  <div className="flex items-center gap-4">
@@ -1956,7 +1956,7 @@ function TabCheckout({ isNew, name, price, productId, buttonColor, setButtonColo
  )}
 
  {/* CTA Button preview */}
- <div className="rounded-lg py-2.5 text-center text-xs font-display font-black text-primary-foreground shadow-md" style={{ backgroundColor: buttonColor }}>
+ <div className="rounded-lg py-2.5 text-center text-xs font-display font-black text-primary-foreground " style={{ backgroundColor: buttonColor }}>
  Comprar Agora
  </div>
 
@@ -1990,7 +1990,7 @@ function TabCheckout({ isNew, name, price, productId, buttonColor, setButtonColo
  </div>
  {/* Quick color presets */}
  <div className="flex items-center gap-2 mt-2">
- <span className="text-[9px] font-display font-bold text-muted-foreground/40 uppercase tracking-wider mr-1">Cores populares</span>
+ <span className="text-[11px] font-display font-medium text-muted-foreground/40 mr-1">Cores populares</span>
  {["#10b981", "#3b82f6", "#8b5cf6", "#ef4444", "#f59e0b", "#ec4899", "#06b6d4", "#000000"].map(c => (
  <button
  key={c}
@@ -2133,7 +2133,7 @@ function TabCoProducao({ isNew, coProducerEmail, setCoProducerEmail, coProductio
  {coProductionsList.length > 0 ? (
    <div className="space-y-2">
      {coProductionsList.map((cp) => (
-       <div key={cp.id} className="flex items-center justify-between rounded-2xl border border-border bg-card p-4 relative overflow-hidden">
+       <div key={cp.id} className="flex items-center justify-between rounded-[12px] border border-border bg-card p-4 relative overflow-hidden">
          <div className={cn("absolute left-0 top-0 bottom-0 w-[3px] rounded-full",
            cp.status === "accepted" ? "bg-success" : cp.status === "rejected" ? "bg-destructive" : "bg-warning")} />
          <div className="flex items-center gap-3 pl-1 min-w-0">
@@ -2190,7 +2190,7 @@ function TabCupons({ isNew, coupons, newCouponCode, setNewCouponCode, newCouponT
  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
  <div className="space-y-2">
  <EditorLabel>Código do cupom</EditorLabel>
- <Input value={newCouponCode} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setNewCouponCode(e.target.value.toUpperCase())} placeholder="EX: DESCONTO20" className="h-11 bg-secondary border-border font-mono uppercase" maxLength={30} />
+ <Input value={newCouponCode} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setNewCouponCode(e.target.value.toUpperCase())} placeholder="EX: DESCONTO20" className="h-11 bg-secondary border-border font-mono " maxLength={30} />
  </div>
  <div className="space-y-2">
  <EditorLabel>Tipo de desconto</EditorLabel>
@@ -2227,7 +2227,7 @@ function TabCupons({ isNew, coupons, newCouponCode, setNewCouponCode, newCouponT
  animate={{ opacity: 1, y: 0 }}
  transition={{ delay: i * 0.03 }}
  className={cn(
- "rounded-2xl border bg-card p-4 flex items-center justify-between relative overflow-hidden transition-all",
+ "rounded-[12px] border bg-card p-4 flex items-center justify-between relative overflow-hidden transition-all",
  coupon.is_active ? "border-border" : "border-border opacity-60"
  )}
  >
@@ -2443,9 +2443,9 @@ function TabLinks({ isNew, product, pageUrl, affiliateEnabled, productId, getChe
         <div className="rounded-xl border border-border bg-card overflow-hidden">
           {/* Header row */}
           <div className="hidden md:grid grid-cols-[140px_1fr_auto] gap-4 px-4 py-2.5 border-b border-border bg-muted/20">
-            <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Tipo</span>
-            <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Link</span>
-            <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground text-right">Ações</span>
+            <span className="text-[11px] font-medium text-muted-foreground">Tipo</span>
+            <span className="text-[11px] font-medium text-muted-foreground">Link</span>
+            <span className="text-[11px] font-medium text-muted-foreground text-right">Ações</span>
           </div>
 
           {rows.map((row, idx) => (
@@ -2457,7 +2457,7 @@ function TabLinks({ isNew, product, pageUrl, affiliateEnabled, productId, getChe
                     <row.icon className="h-3.5 w-3.5 text-foreground/70" />
                   </div>
                   <div className="min-w-0">
-                    <span className={cn("inline-flex items-center rounded-md px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wider border", row.typeColor)}>
+                    <span className={cn("inline-flex items-center rounded-md px-1.5 py-0.5 text-[11px] font-medium border", row.typeColor)}>
                       {row.type}
                     </span>
                     <p className="text-[11px] text-muted-foreground/70 mt-1 truncate md:hidden">{row.description}</p>
@@ -2525,7 +2525,7 @@ function TabLinks({ isNew, product, pageUrl, affiliateEnabled, productId, getChe
         <div>
           <div className="flex items-center gap-2 mb-2.5">
             <Share2 className="h-3.5 w-3.5 text-muted-foreground" />
-            <h4 className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">Compartilhamento Rápido</h4>
+            <h4 className="text-[11px] font-medium text-muted-foreground">Compartilhamento Rápido</h4>
           </div>
           <div className="grid grid-cols-3 gap-2">
             {shareLinks.map(sl => (
@@ -2604,7 +2604,7 @@ function TabConteudo({ productId, isNew }: { productId?: string; isNew: boolean 
           <h2 className="text-[15px] font-display font-black tracking-[-0.02em] text-foreground">Conteúdo do produto</h2>
           <p className="mt-0.5 text-xs text-muted-foreground">Salve o produto primeiro para gerenciar cursos, módulos e aulas.</p>
         </header>
-        <div className="rounded-2xl border border-border bg-card flex flex-col items-center justify-center py-16 gap-3">
+        <div className="rounded-[12px] border border-border bg-card flex flex-col items-center justify-center py-16 gap-3">
           <div className="h-12 w-12 rounded-xl bg-secondary flex items-center justify-center border border-border">
             <Lock className="h-5 w-5 text-muted-foreground" />
           </div>
@@ -2637,12 +2637,12 @@ function TabConteudo({ productId, isNew }: { productId?: string; isNew: boolean 
       </div>
 
       {loading ? (
-        <div className="flex items-center justify-center py-16 rounded-2xl border border-border bg-card">
+        <div className="flex items-center justify-center py-16 rounded-[12px] border border-border bg-card">
           <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
         </div>
       ) : courses.length === 0 ? (
-        <div className="rounded-2xl border border-border bg-card flex flex-col items-center justify-center py-20 gap-4">
-          <div className="h-14 w-14 rounded-2xl bg-secondary flex items-center justify-center border border-border">
+        <div className="rounded-[12px] border border-border bg-card flex flex-col items-center justify-center py-20 gap-4">
+          <div className="h-14 w-14 rounded-[12px] bg-secondary flex items-center justify-center border border-border">
             <GraduationCap className="h-6 w-6 text-muted-foreground" />
           </div>
           <div className="text-center">
@@ -2657,28 +2657,28 @@ function TabConteudo({ productId, isNew }: { productId?: string; isNew: boolean 
       ) : (
         <>
           {/* Stats strip */}
-          <div className="grid grid-cols-3 rounded-2xl border border-border bg-card divide-x divide-border overflow-hidden">
+          <div className="grid grid-cols-3 rounded-[12px] border border-border bg-card divide-x divide-border overflow-hidden">
             <div className="p-4">
-              <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">Cursos</p>
+              <p className="text-[11px] font-semibold text-muted-foreground">Cursos</p>
               <p className="mt-1.5 text-xl font-display font-black tabular-nums text-foreground">{courses.length}</p>
               <p className="text-[10px] text-muted-foreground mt-0.5">{publishedCount} publicado{publishedCount !== 1 ? "s" : ""}</p>
             </div>
             <div className="p-4">
-              <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">Módulos</p>
+              <p className="text-[11px] font-semibold text-muted-foreground">Módulos</p>
               <p className="mt-1.5 text-xl font-display font-black tabular-nums text-foreground">{totalModules}</p>
               <p className="text-[10px] text-muted-foreground mt-0.5">no total</p>
             </div>
             <div className="p-4">
-              <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">Aulas</p>
+              <p className="text-[11px] font-semibold text-muted-foreground">Aulas</p>
               <p className="mt-1.5 text-xl font-display font-black tabular-nums text-foreground">{totalLessons}</p>
               <p className="text-[10px] text-muted-foreground mt-0.5">disponíveis</p>
             </div>
           </div>
 
           {/* Course list — dense rows */}
-          <div className="rounded-2xl border border-border bg-card overflow-hidden">
+          <div className="rounded-[12px] border border-border bg-card overflow-hidden">
             <div className="flex items-center justify-between px-4 py-2.5 border-b border-border bg-secondary/30">
-              <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">Cursos vinculados</p>
+              <p className="text-[11px] font-semibold text-muted-foreground">Cursos vinculados</p>
               <p className="text-[10px] text-muted-foreground tabular-nums">{courses.length} {courses.length === 1 ? "item" : "itens"}</p>
             </div>
             <div className="divide-y divide-border">
@@ -2706,7 +2706,7 @@ function TabConteudo({ productId, isNew }: { productId?: string; isNew: boolean 
                       <div className="flex items-center gap-2">
                         <h3 className="text-sm font-semibold text-foreground truncate">{c.title}</h3>
                         <span className={cn(
-                          "inline-flex items-center gap-1 rounded-md px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-wider border",
+ "inline-flex items-center gap-1 rounded-md px-1.5 py-0.5 text-[11px] font-semibold border",
                           c.is_published
                             ? "bg-success/10 text-success border-success/20"
                             : "bg-secondary text-muted-foreground border-border"
@@ -2758,7 +2758,7 @@ function SectionHeader({ icon: Icon, title, subtitle }: { icon: React.ComponentT
 
 function EditorCard({ children, accentColor = "bg-primary" }: { children: React.ReactNode; accentColor?: string }) {
   return (
-  <div className="rounded-2xl border border-border bg-card p-5 sm:p-6 space-y-4 relative overflow-hidden hover:border-muted-foreground/20 transition-colors duration-250">
+  <div className="rounded-[12px] border border-border bg-card p-5 sm:p-6 space-y-4 relative overflow-hidden hover:border-muted-foreground/20 transition-colors duration-250">
   <div className={cn("absolute left-0 top-0 bottom-0 w-[3px] rounded-full", accentColor)} />
   {children}
   </div>
@@ -2767,7 +2767,7 @@ function EditorCard({ children, accentColor = "bg-primary" }: { children: React.
 
 function EditorLabel({ icon: Icon, children }: { icon?: React.ComponentType<{ className?: string }>; children: React.ReactNode }) {
   return (
-  <Label className="text-[10px] font-display font-bold uppercase tracking-[0.14em] text-muted-foreground flex items-center gap-1.5">
+  <Label className="text-[11px] font-display font-medium text-muted-foreground flex items-center gap-1.5">
   {Icon && <Icon className="h-3 w-3 text-muted-foreground/60" />}
   {children}
   </Label>
@@ -2776,8 +2776,8 @@ function EditorLabel({ icon: Icon, children }: { icon?: React.ComponentType<{ cl
 
 function EmptyCard({ icon: Icon, message }: { icon: React.ComponentType<{ className?: string }>; message: string }) {
   return (
-  <div className="rounded-2xl border border-border bg-card flex flex-col items-center justify-center py-16 gap-4">
-  <div className="h-16 w-16 rounded-2xl bg-secondary flex items-center justify-center border border-border">
+  <div className="rounded-[12px] border border-border bg-card flex flex-col items-center justify-center py-16 gap-4">
+  <div className="h-16 w-16 rounded-[12px] bg-secondary flex items-center justify-center border border-border">
   <Icon className="h-7 w-7 text-muted-foreground/30" />
   </div>
   <p className="text-sm font-display font-medium text-muted-foreground">{message}</p>
@@ -2790,14 +2790,14 @@ function ToggleRow({ icon: Icon, label, sublabel, checked, onChange, children }:
 }) {
   return (
   <div className={cn(
-  "flex items-center justify-between p-3.5 rounded-xl border transition-colors duration-200 relative",
+ "flex items-center justify-between p-3.5 rounded-xl border transition-colors duration-200 relative",
   checked ? "border-primary/20 bg-primary/5" : "border-border bg-card hover:border-muted-foreground/20"
   )}>
   {checked && <div className="absolute left-0 top-2 bottom-2 w-[3px] rounded-full bg-primary" />}
   <div className="flex items-center gap-3 flex-1">
   {Icon && (
   <div className={cn(
-  "h-8 w-8 rounded-lg flex items-center justify-center shrink-0 border transition-colors duration-200",
+ "h-8 w-8 rounded-lg flex items-center justify-center shrink-0 border transition-colors duration-200",
   checked ? "bg-primary/10 border-primary/20" : "bg-secondary border-border"
   )}>
   <Icon className={cn("h-3.5 w-3.5 transition-colors duration-200", checked ? "text-primary" : "text-muted-foreground/50")} />
@@ -2824,7 +2824,7 @@ function PaymentMethodRow({ icon: Icon, label, sublabel, color, checked, onChang
 
   return (
   <div className={cn(
-  "flex items-center justify-between p-3.5 rounded-xl border transition-colors duration-200 relative",
+ "flex items-center justify-between p-3.5 rounded-xl border transition-colors duration-200 relative",
   checked ? "bg-card border-border" : "bg-card border-border opacity-50"
   )}>
   {checked && <div className={cn("absolute left-0 top-2 bottom-2 w-[3px] rounded-full", accentBg)} />}
@@ -2863,7 +2863,7 @@ function BannerUpload({ label, sublabel, preview, inputRef, onFile, onClear }: {
   </div>
   </div>
   ) : (
-  <button type="button" onClick={() => inputRef.current?.click()} className="w-full h-20 rounded-lg border-2 border-dashed border-border hover:border-primary/40 hover:bg-primary/5 flex items-center justify-center gap-2 text-muted-foreground hover:text-primary text-xs transition-colors duration-200 active:scale-[0.99]">
+  <button type="button" onClick={() => inputRef.current?.click()} className="w-full h-20 rounded-lg border-2 border-dashed border-border hover:border-primary/40 hover:bg-primary/5 flex items-center justify-center gap-2 text-muted-foreground hover:text-primary text-xs transition-colors duration-200 ">
   <Upload className="h-4 w-4" /> Upload {label.toLowerCase()}
   </button>
   )}

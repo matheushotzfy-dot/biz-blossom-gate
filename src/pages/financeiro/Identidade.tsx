@@ -157,11 +157,11 @@ export default function Identidade() {
         subtitle="Verifique sua conta para liberar saques e aumentar limites operacionais."
         actions={
           <div className={cn(
-            "inline-flex items-center gap-2 px-4 h-11 rounded-xl border border-current/15",
+ "inline-flex items-center gap-2 px-4 h-11 rounded-xl border border-current/15",
             status.bg, status.color
           )}>
             <StatusIcon className="h-4 w-4" strokeWidth={2.5} />
-            <span className="text-[11px] font-black uppercase tracking-widest">{status.label}</span>
+            <span className="text-[11px] font-semibold ">{status.label}</span>
           </div>
         }
       />
@@ -189,12 +189,12 @@ export default function Identidade() {
       <div className="group premium-hover-card bg-card rounded-[24px] border border-border/60 overflow-hidden">
         <div className="p-6 border-b border-border/40 flex items-center justify-between gap-3">
           <div className="flex items-center gap-3">
-            <div className="premium-icon-shell h-11 w-11 rounded-2xl flex items-center justify-center">
+            <div className="premium-icon-shell h-11 w-11 rounded-[12px] flex items-center justify-center">
               <CheckCircle2 size={18} strokeWidth={2.5} className="relative" />
             </div>
             <div>
-              <h2 className="font-black text-foreground tracking-tight leading-none uppercase">Progresso</h2>
-              <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mt-1">{doneCount}/{completionSteps.length} etapas concluídas</p>
+              <h2 className="font-semibold text-foreground tracking-tight leading-none ">Progresso</h2>
+              <p className="text-[11px] font-medium text-muted-foreground mt-1">{doneCount}/{completionSteps.length} etapas concluídas</p>
             </div>
           </div>
           <span className="text-3xl font-black text-foreground tabular-nums tracking-tighter">{pct}%</span>
@@ -208,13 +208,13 @@ export default function Identidade() {
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mt-5">
             {completionSteps.map(step => (
               <div key={step.label} className={cn(
-                "flex items-center gap-2 px-3 py-2.5 rounded-xl border",
+ "flex items-center gap-2 px-3 py-2.5 rounded-xl border",
                 step.done ? "bg-emerald-500/5 border-emerald-500/20" : "bg-muted/20 border-border/40"
               )}>
                 {step.done
                   ? <CheckCircle2 className="h-3.5 w-3.5 text-emerald-500 shrink-0" />
                   : <div className="h-3.5 w-3.5 rounded-full border border-border/60 shrink-0" />}
-                <span className={cn("text-[10px] font-black uppercase tracking-widest truncate",
+                <span className={cn("text-[11px] font-semibold truncate",
                   step.done ? "text-emerald-500" : "text-muted-foreground/60")}>{step.label}</span>
               </div>
             ))}
@@ -226,19 +226,19 @@ export default function Identidade() {
       <div className="grid grid-cols-1 lg:grid-cols-[1.2fr_1fr] gap-6">
         <div className="group premium-hover-card bg-card rounded-[24px] border border-border/60 overflow-hidden">
           <div className="p-6 border-b border-border/40 flex items-center gap-3">
-            <div className="premium-icon-shell info h-11 w-11 rounded-2xl flex items-center justify-center">
+            <div className="premium-icon-shell info h-11 w-11 rounded-[12px] flex items-center justify-center">
               <UserCircle size={18} strokeWidth={2.5} className="relative" />
             </div>
             <div>
-              <h2 className="font-black text-foreground tracking-tight leading-none uppercase">Dados Pessoais</h2>
-              <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mt-1">Imutáveis após cadastro</p>
+              <h2 className="font-semibold text-foreground tracking-tight leading-none ">Dados Pessoais</h2>
+              <p className="text-[11px] font-medium text-muted-foreground mt-1">Imutáveis após cadastro</p>
             </div>
           </div>
 
           <div className="p-6 space-y-4">
             <div className="flex items-center gap-2 p-3 rounded-xl bg-muted/20 border border-border/40">
               <Lock className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
-              <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+              <p className="text-[11px] font-medium text-muted-foreground">
                 Campos travados por segurança KYC · Apenas o apelido é editável
               </p>
             </div>
@@ -253,7 +253,7 @@ export default function Identidade() {
             </div>
 
             <div className="pt-4 border-t border-border/40">
-              <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground flex items-center gap-1.5 mb-2">
+              <label className="text-[11px] font-semibold text-muted-foreground flex items-center gap-1.5 mb-2">
                 <Edit3 className="h-3 w-3" /> Apelido (editável)
               </label>
               <div className="flex gap-2">
@@ -261,7 +261,7 @@ export default function Identidade() {
                   className="h-11 rounded-xl flex-1 bg-muted/20 border-border/60 font-bold"
                   placeholder="Como quer ser chamado?" />
                 <button onClick={handleSaveNickname} disabled={saving}
-                  className="h-11 px-5 rounded-xl bg-primary text-primary-foreground font-black text-xs uppercase tracking-widest flex items-center gap-2 hover:opacity-90 disabled:opacity-50">
+                  className="h-11 px-5 rounded-xl bg-primary text-primary-foreground font-semibold text-xs flex items-center gap-2 hover:opacity-90 disabled:opacity-50">
                   {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" strokeWidth={3} />}
                   Salvar
                 </button>
@@ -275,15 +275,15 @@ export default function Identidade() {
           <div className="group premium-hover-card bg-card rounded-[24px] border border-border/60 overflow-hidden">
             <div className="p-6 border-b border-border/40 flex items-center justify-between gap-3">
               <div className="flex items-center gap-3">
-                <div className="premium-icon-shell success h-11 w-11 rounded-2xl flex items-center justify-center">
+                <div className="premium-icon-shell success h-11 w-11 rounded-[12px] flex items-center justify-center">
                   <Wallet size={18} strokeWidth={2.5} className="relative" />
                 </div>
                 <div>
-                  <h2 className="font-black text-foreground tracking-tight leading-none uppercase">Chaves PIX</h2>
-                  <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mt-1">Cadastre em Saques</p>
+                  <h2 className="font-semibold text-foreground tracking-tight leading-none ">Chaves PIX</h2>
+                  <p className="text-[11px] font-medium text-muted-foreground mt-1">Cadastre em Saques</p>
                 </div>
               </div>
-              <span className="text-[10px] font-black uppercase tracking-widest px-2.5 py-1 rounded-md bg-muted/30 border border-border/60 tabular-nums">
+              <span className="text-[11px] font-semibold px-2.5 py-1 rounded-md bg-muted/30 border border-border/60 tabular-nums">
                 {pixKeys.length}/3
               </span>
             </div>
@@ -292,7 +292,7 @@ export default function Identidade() {
               {pixKeys.length === 0 ? (
                 <div className="text-center py-6 opacity-40">
                   <Wallet className="h-7 w-7 mx-auto mb-2" />
-                  <p className="text-[10px] font-black uppercase tracking-widest">Nenhuma chave</p>
+                  <p className="text-[11px] font-semibold ">Nenhuma chave</p>
                 </div>
               ) : (
                 <div className="space-y-2">
@@ -302,7 +302,7 @@ export default function Identidade() {
                         <Fingerprint className="h-3.5 w-3.5 text-primary" />
                       </div>
                       <div className="min-w-0 flex-1">
-                        <p className="text-[9px] font-black text-primary uppercase tracking-widest">{pixKeyLabels[pk.key_type] || pk.key_type}</p>
+                        <p className="text-[11px] font-semibold text-primary ">{pixKeyLabels[pk.key_type] || pk.key_type}</p>
                         <p className="font-mono text-[11px] text-foreground truncate font-bold">{pk.key_value ?? (pk as any).key_value_masked ?? "•••"}</p>
                       </div>
                     </div>
@@ -316,15 +316,15 @@ export default function Identidade() {
           <div className="group premium-hover-card bg-card rounded-[24px] border border-border/60 overflow-hidden">
             <div className="p-6 border-b border-border/40 flex items-center justify-between gap-3">
               <div className="flex items-center gap-3">
-                <div className="premium-icon-shell warning h-11 w-11 rounded-2xl flex items-center justify-center">
+                <div className="premium-icon-shell warning h-11 w-11 rounded-[12px] flex items-center justify-center">
                   <Building2 size={18} strokeWidth={2.5} className="relative" />
                 </div>
                 <div>
-                  <h2 className="font-black text-foreground tracking-tight leading-none uppercase">Contas Bancárias</h2>
-                  <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mt-1">Cadastre em Saques</p>
+                  <h2 className="font-semibold text-foreground tracking-tight leading-none ">Contas Bancárias</h2>
+                  <p className="text-[11px] font-medium text-muted-foreground mt-1">Cadastre em Saques</p>
                 </div>
               </div>
-              <span className="text-[10px] font-black uppercase tracking-widest px-2.5 py-1 rounded-md bg-muted/30 border border-border/60 tabular-nums">
+              <span className="text-[11px] font-semibold px-2.5 py-1 rounded-md bg-muted/30 border border-border/60 tabular-nums">
                 {bankAccounts.length}
               </span>
             </div>
@@ -333,7 +333,7 @@ export default function Identidade() {
               {bankAccounts.length === 0 ? (
                 <div className="text-center py-6 opacity-40">
                   <Building2 className="h-7 w-7 mx-auto mb-2" />
-                  <p className="text-[10px] font-black uppercase tracking-widest">Nenhuma conta</p>
+                  <p className="text-[11px] font-semibold ">Nenhuma conta</p>
                 </div>
               ) : (
                 <div className="space-y-2">
@@ -358,12 +358,12 @@ export default function Identidade() {
       {/* KYC Documentos */}
       <div ref={kycRef} className="group premium-hover-card bg-card rounded-[24px] border border-border/60 overflow-hidden">
         <div className="p-6 border-b border-border/40 flex items-center gap-3">
-          <div className="premium-icon-shell info h-11 w-11 rounded-2xl flex items-center justify-center">
+          <div className="premium-icon-shell info h-11 w-11 rounded-[12px] flex items-center justify-center">
             <FileCheck size={18} strokeWidth={2.5} className="relative" />
           </div>
           <div>
-            <h2 className="font-black text-foreground tracking-tight leading-none uppercase">Documentos KYC</h2>
-            <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mt-1">Envie para liberar saques</p>
+            <h2 className="font-semibold text-foreground tracking-tight leading-none ">Documentos KYC</h2>
+            <p className="text-[11px] font-medium text-muted-foreground mt-1">Envie para liberar saques</p>
           </div>
         </div>
 
@@ -405,11 +405,11 @@ export default function Identidade() {
 function LockedField({ label, value, mono = false }: { label: string; value: string; mono?: boolean }) {
   return (
     <div>
-      <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground flex items-center gap-1.5 mb-2">
+      <label className="text-[11px] font-semibold text-muted-foreground flex items-center gap-1.5 mb-2">
         <Lock className="h-3 w-3" /> {label}
       </label>
       <div className={cn(
-        "h-11 rounded-xl border border-border/60 bg-muted/20 flex items-center px-3.5 text-sm text-foreground/80 font-bold",
+ "h-11 rounded-xl border border-border/60 bg-muted/20 flex items-center px-3.5 text-sm text-foreground/80 font-bold",
         mono && "font-mono"
       )}>
         {value}
@@ -429,7 +429,7 @@ function DocSlot({ type, label, desc, icon: Icon, preview, uploading, onUpload }
     <div
       onClick={() => canUpload && ref.current?.click()}
       className={cn(
-        "group premium-hover-card relative flex flex-col items-center gap-3 p-6 rounded-2xl border",
+ "group premium-hover-card relative flex flex-col items-center gap-3 p-6 rounded-[12px] border",
         locked
           ? "bg-success/5 border-success/25 cursor-default"
           : "bg-muted/20 border-border/60 cursor-pointer"
@@ -439,7 +439,7 @@ function DocSlot({ type, label, desc, icon: Icon, preview, uploading, onUpload }
         onChange={(e) => e.target.files?.[0] && onUpload(e.target.files[0])} />
 
       <div className={cn(
-        "premium-icon-shell h-14 w-14 rounded-2xl flex items-center justify-center",
+ "premium-icon-shell h-14 w-14 rounded-[12px] flex items-center justify-center",
         locked && "success"
       )}>
         {uploading ? <Loader2 className="h-5 w-5 animate-spin relative" />
@@ -451,13 +451,13 @@ function DocSlot({ type, label, desc, icon: Icon, preview, uploading, onUpload }
       <div className="text-center">
         <p className={cn("text-[12px] font-black tracking-tight",
           locked ? "text-emerald-500" : "text-foreground")}>{label}</p>
-        <p className="text-[10px] font-bold text-muted-foreground/70 mt-1 uppercase tracking-widest leading-tight max-w-[180px]">
+        <p className="text-[11px] font-medium text-muted-foreground/70 mt-1 leading-tight max-w-[180px]">
           {locked ? "Enviado" : desc}
         </p>
       </div>
 
       {!locked && !uploading && (
-        <div className="flex items-center gap-1.5 text-[9px] font-black uppercase tracking-widest text-primary opacity-0 group-hover:opacity-100 transition-opacity">
+        <div className="flex items-center gap-1.5 text-[11px] font-semibold text-primary opacity-0 group-hover:opacity-100 transition-opacity">
           <Upload className="h-3 w-3" />
           <span>Clique para enviar</span>
         </div>

@@ -227,7 +227,7 @@ export default function Apps() {
  <section className="space-y-6">
   <div className="flex items-end justify-between gap-4 flex-wrap">
   <div className="space-y-1">
-  <span className="inline-flex items-center gap-1.5 rounded-full border border-primary/25 bg-primary/[0.06] px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.18em] text-primary">
+  <span className="inline-flex items-center gap-1.5 rounded-full border border-primary/25 bg-primary/[0.06] px-2.5 py-1 text-[11px] font-medium text-primary">
   <span className="h-1.5 w-1.5 rounded-full bg-primary" />
   Conectores
   </span>
@@ -235,7 +235,7 @@ export default function Apps() {
   <p className="text-sm text-muted-foreground/70">Clique no logo para configurar a integração.</p>
   </div>
 
-  <div className="inline-flex items-center gap-2 rounded-full border border-border/60 bg-card/80 px-3.5 py-1.5 text-[11px] font-bold uppercase tracking-[0.16em] text-muted-foreground/80 backdrop-blur-xl">
+  <div className="inline-flex items-center gap-2 rounded-full border border-border/60 bg-card/80 px-3.5 py-1.5 text-[11px] font-medium text-muted-foreground/80 backdrop-blur-xl">
   <span className="h-1.5 w-1.5 rounded-full bg-success animate-pulse" />
   {integrations.length} ativas
   </div>
@@ -253,12 +253,12 @@ export default function Apps() {
   onClick={() => openDialog(app, integration || undefined)}
   disabled={isComingSoon}
   className={cn(
-    "group relative isolate flex h-32 items-center overflow-hidden rounded-[22px] border bg-card px-7 text-left transition-[transform,border-color,background-color,box-shadow] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] animate-fade-in md:h-[8.5rem] md:px-8",
+ "group relative isolate flex h-32 items-center overflow-hidden rounded-[22px] border bg-card px-7 text-left transition-[transform,border-color,background-color,box-shadow] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] animate-fade-in md:h-[8.5rem] md:px-8",
     isComingSoon
       ? "border-border/40 bg-card/50 cursor-not-allowed opacity-90"
       : active
-      ? "border-primary/40 bg-card hover:-translate-y-1 hover:border-primary/70 hover:bg-primary/[0.045] hover:shadow-[0_22px_50px_-22px_hsl(var(--primary)/0.45)] active:scale-[0.985]"
-      : "border-border/70 hover:-translate-y-1 hover:border-primary/60 hover:bg-primary/[0.035] hover:shadow-[0_22px_50px_-22px_hsl(var(--primary)/0.35)] active:scale-[0.985]"
+      ? "border-primary/40 bg-card  hover:border-primary/70 hover:bg-primary/[0.045] hover: "
+      : "border-border/70  hover:border-primary/60 hover:bg-primary/[0.035] hover: "
   )}
   style={{ animationDelay: `${idx * 35}ms`, animationFillMode: "backwards" }}
   >
@@ -266,7 +266,7 @@ export default function Apps() {
     <>
       {/* Accent left rail */}
       <span className={cn(
-        "pointer-events-none absolute left-0 top-5 bottom-5 z-0 w-[3px] origin-center rounded-r-full bg-primary transition-[opacity,transform] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)]",
+ "pointer-events-none absolute left-0 top-5 bottom-5 z-0 w-[3px] origin-center rounded-r-full bg-primary transition-[opacity,transform] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)]",
         active ? "scale-y-100 opacity-100" : "scale-y-50 opacity-0 group-hover:scale-y-100 group-hover:opacity-100"
       )} />
       {/* Top hairline on hover */}
@@ -278,28 +278,28 @@ export default function Apps() {
 
                <div className="relative z-[1] flex h-full w-full items-center justify-center">
                  <div className={cn(
-                   "flex h-20 w-32 items-center justify-center md:h-24 md:w-40 transition-all",
+ "flex h-20 w-32 items-center justify-center md:h-24 md:w-40 transition-all",
                    isComingSoon && "grayscale opacity-40"
                  )}>
                    <img
                      src={app.logo}
                      alt={app.name}
                      className={cn(
-                       "max-h-full max-w-full object-contain transition-transform duration-500 ease-[cubic-bezier(0.22,1,0.36,1)]",
-                       !isComingSoon && "group-hover:scale-[1.08]"
+ "max-h-full max-w-full object-contain transition-transform duration-500 ease-[cubic-bezier(0.22,1,0.36,1)]",
+                       !isComingSoon && "group-"
                      )}
                    />
                  </div>
                </div>
 
                {isComingSoon && (
-                 <span className="absolute right-3 top-3 z-[2] inline-flex items-center gap-1 rounded-md border border-border/60 bg-background/80 px-1.5 py-0.5 text-[8.5px] font-bold uppercase tracking-[0.16em] text-muted-foreground">
+                 <span className="absolute right-3 top-3 z-[2] inline-flex items-center gap-1 rounded-md border border-border/60 bg-background/80 px-1.5 py-0.5 text-[11px] font-medium text-muted-foreground">
                    <Clock className="h-2.5 w-2.5" strokeWidth={2.5} />
                    Em breve
                  </span>
                )}
                {active && !isComingSoon && (
-                 <span className="absolute right-3 top-3 z-[2] inline-flex items-center gap-1 rounded-md border border-success/30 bg-success/10 px-1.5 py-0.5 text-[8.5px] font-bold uppercase tracking-[0.16em] text-success">
+                 <span className="absolute right-3 top-3 z-[2] inline-flex items-center gap-1 rounded-md border border-success/30 bg-success/10 px-1.5 py-0.5 text-[11px] font-medium text-success">
                    <CheckCircle2 className="h-2.5 w-2.5" strokeWidth={2.5} />
                    Ativo
                  </span>
@@ -314,11 +314,11 @@ export default function Apps() {
       {/* ─── Integration Dialog · Billion-Dollar SaaS ─── */}
       {dialogApp && dialogApp.id !== "webhooks" && (
         <Dialog open={!!dialogApp} onOpenChange={(v) => { if (!v) closeDialog(); }}>
-          <DialogContent className="max-w-[580px] rounded-2xl border border-border bg-card p-0 overflow-hidden max-h-[92vh] flex flex-col gap-0">
+          <DialogContent className="max-w-[580px] rounded-[12px] border border-border bg-card p-0 overflow-hidden max-h-[92vh] flex flex-col gap-0">
             {/* Header — premium */}
             <div className="relative flex items-center gap-4 border-b border-border/70 bg-gradient-to-b from-primary/[0.04] to-transparent px-6 py-5">
               <span className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-primary/50 to-transparent" />
-              <div className="premium-icon-shell relative flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl p-2.5">
+              <div className="premium-icon-shell relative flex h-14 w-14 shrink-0 items-center justify-center rounded-[12px] p-2.5">
                 <img src={dialogApp.logo} alt={dialogApp.name} className="relative h-full w-full object-contain" />
               </div>
               <div className="min-w-0 flex-1">
@@ -326,7 +326,7 @@ export default function Apps() {
                   <DialogTitle className="font-display text-[16px] font-black tracking-[-0.01em] text-foreground">
                     {editId ? `Editar ${dialogApp.name}` : `Conectar ${dialogApp.name}`}
                   </DialogTitle>
-                  <span className="inline-flex h-5 items-center rounded-md border border-primary/25 bg-primary/[0.08] px-1.5 text-[9px] font-black uppercase tracking-[0.16em] text-primary">
+                  <span className="inline-flex h-5 items-center rounded-md border border-primary/25 bg-primary/[0.08] px-1.5 text-[11px] font-semibold text-primary">
                     {dialogApp.category}
                   </span>
                 </div>
@@ -347,8 +347,8 @@ export default function Apps() {
               {/* Produto vinculado */}
               {dialogApp.events.length > 0 && (
                 <div className="space-y-2">
-                  <Label className="flex items-center gap-1.5 text-[10px] font-black uppercase tracking-[0.16em] text-muted-foreground">
-                    <span className="h-1.5 w-1.5 rounded-full bg-primary shadow-[0_0_8px_hsl(var(--primary)/0.6)]" />
+                  <Label className="flex items-center gap-1.5 text-[11px] font-semibold text-muted-foreground">
+                    <span className="h-1.5 w-1.5 rounded-full bg-primary " />
                     Produto vinculado
                   </Label>
                   <Select value={formProductId} onValueChange={setFormProductId}>
@@ -371,7 +371,7 @@ export default function Apps() {
               {/* Credenciais */}
               {dialogApp.fields.length > 0 && (
                 <div className="space-y-2">
-                  <Label className="flex items-center gap-1.5 text-[10px] font-black uppercase tracking-[0.16em] text-muted-foreground">
+                  <Label className="flex items-center gap-1.5 text-[11px] font-semibold text-muted-foreground">
                     <Shield className="h-3 w-3 text-primary" strokeWidth={2.4} />
                     Credenciais
                   </Label>
@@ -379,13 +379,13 @@ export default function Apps() {
                     <span className="pointer-events-none absolute inset-y-3 left-0 w-[3px] rounded-r-full bg-primary/60" />
                     {dialogApp.fields.map(field => (
                       <div key={field.key} className="px-4 py-3.5 space-y-1.5">
-                        <label className="flex items-center justify-between text-[11px] font-black uppercase tracking-[0.08em] text-foreground">
+                        <label className="flex items-center justify-between text-[11px] font-semibold text-foreground">
                           <span>
                             {field.label}
                             {field.required && <span className="ml-1 text-primary">*</span>}
                           </span>
                           {!field.required && (
-                            <span className="text-[9px] font-bold uppercase tracking-[0.14em] text-muted-foreground/60">
+                            <span className="text-[11px] font-medium text-muted-foreground/60">
                               Opcional
                             </span>
                           )}
@@ -408,7 +408,7 @@ export default function Apps() {
               {/* Eventos */}
               {dialogApp.events.length > 0 && (
                 <div className="space-y-2">
-                  <Label className="flex items-center gap-1.5 text-[10px] font-black uppercase tracking-[0.16em] text-muted-foreground">
+                  <Label className="flex items-center gap-1.5 text-[11px] font-semibold text-muted-foreground">
                     <Zap className="h-3 w-3 text-primary" strokeWidth={2.4} />
                     Eventos de disparo
                   </Label>
@@ -420,9 +420,9 @@ export default function Apps() {
                         type="button"
                         onClick={() => setFormEventMode(mode)}
                         className={cn(
-                          "flex-1 h-full rounded-lg text-[11.5px] font-black uppercase tracking-[0.08em] transition-[color,background-color,box-shadow,transform] duration-300 flex items-center justify-center gap-1.5 active:scale-[0.98]",
+ "flex-1 h-full rounded-lg text-[11.5px] font-semibold transition-[color,background-color,box-shadow,transform] duration-300 flex items-center justify-center gap-1.5 ",
                           formEventMode === mode
-                            ? "bg-card border border-primary/40 text-foreground shadow-[0_2px_10px_-4px_hsl(var(--primary)/0.4)]"
+                            ? "bg-card border border-primary/40 text-foreground "
                             : "text-muted-foreground hover:text-foreground hover:bg-card/50"
                         )}
                       >
@@ -451,21 +451,21 @@ export default function Apps() {
                             <label
                               key={event}
                               className={cn(
-                                "group/evt relative flex items-center gap-3 px-3.5 py-3 text-xs cursor-pointer transition-[background-color,padding] duration-300 hover:pl-5",
+ "group/evt relative flex items-center gap-3 px-3.5 py-3 text-xs cursor-pointer transition-[background-color,padding] duration-300 hover:pl-5",
                                 selected ? "bg-primary/[0.05] text-foreground" : "text-muted-foreground hover:bg-card/60 hover:text-foreground"
                               )}
                             >
                               <span className={cn(
-                                "pointer-events-none absolute left-0 top-2 bottom-2 w-[2px] rounded-r-full bg-primary transition-opacity duration-300",
+ "pointer-events-none absolute left-0 top-2 bottom-2 w-[2px] rounded-r-full bg-primary transition-opacity duration-300",
                                 selected ? "opacity-100" : "opacity-0 group-hover/evt:opacity-40"
                               )} />
                               <Checkbox
                                 checked={selected}
                                 onCheckedChange={() => toggleEvent(event)}
-                                className="h-4 w-4 rounded-[5px] border-border/80 data-[state=checked]:bg-primary data-[state=checked]:border-primary data-[state=checked]:shadow-[0_0_0_3px_hsl(var(--primary)/0.15)]"
+                                className="h-4 w-4 rounded-[5px] border-border/80 data-[state=checked]:bg-primary data-[state=checked]:border-primary data-[state=checked]:"
                               />
                               <span className="flex-1 font-bold">{event}</span>
-                              <span className={cn("rounded-md border px-1.5 py-0.5 text-[8.5px] font-black uppercase tracking-[0.12em]", tone)}>
+                              <span className={cn("rounded-md border px-1.5 py-0.5 text-[11px] font-semibold ", tone)}>
                                 {isReversal ? "reversal" : isPending ? "pending" : "trigger"}
                               </span>
                             </label>
@@ -473,7 +473,7 @@ export default function Apps() {
                         })}
                       </div>
                       <div className="border-t border-border/70 bg-card px-3.5 py-2 flex items-center justify-between">
-                        <span className="text-[10px] font-bold uppercase tracking-[0.12em] text-muted-foreground">
+                        <span className="text-[11px] font-medium text-muted-foreground">
                           {formSelectedEvents.length} de {dialogApp.events.length} selecionados
                         </span>
                         {formSelectedEvents.length > 0 && (
@@ -498,7 +498,7 @@ export default function Apps() {
               <Button
                 onClick={handleSave}
                 disabled={saving}
-                className="group/btn relative w-full h-12 rounded-xl font-black uppercase tracking-[0.08em] text-[12.5px] bg-primary text-primary-foreground hover:bg-primary/90 shadow-[0_10px_30px_-12px_hsl(var(--primary)/0.65)] transition-[transform,box-shadow] duration-300 hover:-translate-y-0.5 active:scale-[0.98] overflow-hidden"
+                className="group/btn relative w-full h-12 rounded-xl font-semibold text-[12.5px] bg-primary text-primary-foreground hover:bg-primary/90  transition-[transform,box-shadow] duration-300   overflow-hidden"
               >
                 <span className="pointer-events-none absolute inset-0 -translate-x-[120%] bg-[linear-gradient(115deg,transparent_0%,hsl(0_0%_100%/0.18)_44%,transparent_72%)] transition-transform duration-700 ease-out group-hover/btn:translate-x-[120%]" />
                 {saving ? (
