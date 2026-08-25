@@ -828,12 +828,12 @@ export default function Dashboard() {
 
 
         {/* ═══════════ KPI CARDS ═══════════ */}
-        <section className="grid grid-cols-1 gap-3 font-dashboard sm:grid-cols-2 xl:grid-cols-12">
+        <section className="grid grid-cols-1 gap-3 font-dashboard sm:grid-cols-2 xl:grid-cols-[1.25fr_1.15fr_1fr_1.1fr]">
           {[
-            { label: "Saldo disponível", value: fmt(Math.max(0, balance)), sub: "Pronto para saque", tone: "neutral" as const, art: "balance" as const, span: "xl:col-span-4" },
-            { label: "Recebido hoje", value: fmt(receivedToday), sub: "Movimento confirmado", tone: "neutral" as const, art: "received" as const, span: "xl:col-span-3" },
-            { label: "Em segurança", value: fmt(disputedAmount), sub: "MEDs e reservas", tone: "danger" as const, art: "secure" as const, span: "xl:col-span-2" },
-            { label: "Volume total", value: fmt(revenue), sub: "Vendas acumuladas", tone: "revenue" as const, art: "volume" as const, span: "xl:col-span-3" },
+            { label: "Saldo disponível", value: fmt(Math.max(0, balance)), sub: "Pronto para saque", tone: "neutral" as const, art: "balance" as const },
+            { label: "Recebido hoje", value: fmt(receivedToday), sub: "Movimento confirmado", tone: "neutral" as const, art: "received" as const },
+            { label: "Em segurança", value: fmt(disputedAmount), sub: "MEDs e reservas", tone: "danger" as const, art: "secure" as const },
+            { label: "Volume total", value: fmt(revenue), sub: "Vendas acumuladas", tone: "revenue" as const, art: "volume" as const },
           ].map((k, index) => {
             const isDanger = k.tone === "danger";
             return (
@@ -841,8 +841,7 @@ export default function Dashboard() {
                 key={k.label}
                 className={cn(
                   "group relative min-h-[158px] overflow-hidden rounded-[12px] border border-border bg-instrument-surface px-5 py-5 text-instrument-foreground transition-colors duration-200 hover:border-instrument-accent/55",
-                  k.span,
-                  index === 0 && "sm:col-span-2 xl:col-span-4",
+                  index === 0 && "sm:col-span-2 xl:col-span-1",
                 )}
               >
                 <div className="pointer-events-none absolute inset-y-0 right-0 w-[42%] min-w-[104px] border-l border-border/70 bg-card-inset/55 p-2 transition-colors duration-200 group-hover:bg-card-inset/80">
