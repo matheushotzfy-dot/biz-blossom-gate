@@ -621,16 +621,21 @@ export default function Auth() {
           />
           <div className="absolute inset-0 bg-gradient-to-t from-black/55 via-transparent to-black/15" />
 
-          <motion.p
+          <motion.div
             initial={{ opacity: 0, y: 14 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.9, delay: 0.25, ease: [0.22, 1, 0.36, 1] }}
-            className="absolute left-0 right-0 top-1/2 -translate-y-1/2 px-14 text-center text-[30px] font-light leading-tight tracking-[-0.02em] text-white/95 xl:text-[38px]"
+            className="absolute bottom-24 left-14 right-14 max-w-[520px]"
           >
-            Suas vendas rodando
-            <span className="mx-3 inline-block w-16 border-t border-white/40 align-middle xl:w-24" />
-            até no fim do mundo.
-          </motion.p>
+            <span className="mb-5 block h-px w-14 bg-white/45" />
+            <p className="text-[30px] font-light leading-[1.15] tracking-[-0.025em] text-white/95 xl:text-[36px]">
+              Suas vendas rodando<br />até no fim do mundo.
+            </p>
+            <p className="mt-3 max-w-[380px] text-[14px] leading-relaxed text-white/55">
+              Checkout, antifraude e liquidação em uma infraestrutura que não dorme.
+            </p>
+          </motion.div>
+
 
           <div className="absolute bottom-10 left-14 right-14 flex items-center justify-between text-[12px] uppercase tracking-[0.24em] text-white/55">
             <span>PIX · Cartão · Boleto</span>
