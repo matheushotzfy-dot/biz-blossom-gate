@@ -280,80 +280,99 @@ function PeriodDial({
   const dayNum = today.getDate();
   const pct = Math.max(0, Math.min(100, goalPct));
 
+  const isMobile = useIsMobile();
+
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
         <button
           aria-label="Selecionar período"
-          className="group flex items-center gap-2.5 rounded-[12px] border border-primary/25 bg-background/85 px-2.5 py-2 text-left backdrop-blur transition-colors hover:border-primary/50"
+          className="group relative flex items-end gap-3 border-b border-primary/30 bg-transparent px-1 pb-1.5 pt-1 text-left transition-colors hover:border-primary/70"
         >
-          {/* futuristic calendar dial */}
-          <span className="relative flex h-9 w-9 items-center justify-center">
-            <svg viewBox="0 0 40 40" className="absolute inset-0 h-9 w-9 -rotate-90" aria-hidden>
-              <circle cx="20" cy="20" r="17.5" fill="none" stroke="hsl(var(--border))" strokeWidth="1.6" />
-              <circle
-                cx="20" cy="20" r="17.5" fill="none" stroke="hsl(var(--primary))" strokeWidth="1.6" strokeLinecap="round"
-                strokeDasharray={`${(pct / 100) * 110} 110`}
-                className="transition-[stroke-dasharray] duration-700 ease-out"
-              />
-              {Array.from({ length: 24 }).map((_, i) => {
-                const a = (i / 24) * Math.PI * 2;
-                const long = i % 6 === 0;
-                return (
-                  <line
-                    key={i}
-                    x1={20 + Math.cos(a) * 13} y1={20 + Math.sin(a) * 13}
-                    x2={20 + Math.cos(a) * (long ? 10 : 11.5)} y2={20 + Math.sin(a) * (long ? 10 : 11.5)}
-                    stroke="hsl(var(--primary))" strokeOpacity={long ? 0.55 : 0.22} strokeWidth={long ? 1.1 : 0.7}
-                  />
-                );
-              })}
-            </svg>
-            <span className="font-display text-[12px] font-extrabold leading-none tabular-nums text-foreground">{dayNum}</span>
+          {/* marcação do dia */}
+          <span className="flex items-baseline gap-[3px] leading-none">
+            <span className="font-display text-[22px] font-extrabold leading-none tracking-[-0.05em] tabular-nums text-foreground">
+              {String(dayNum).padStart(2, "0")}
+            </span>
+            <span className="font-display text-[9px] font-bold uppercase leading-none tracking-[0.14em] text-muted-foreground/60">
+              {today.toLocaleDateString("pt-BR", { month: "short" }).replace(".", "")}
+            </span>
           </span>
 
-          <span className="min-w-0">
-            <span className="flex items-center gap-1.5">
-              <span className="h-1 w-1 rounded-full bg-primary" />
-              <span className="text-[10.5px] font-medium text-muted-foreground/70">{label}</span>
+          <span className="h-6 w-px bg-border/70" />
+
+          <span className="min-w-0 leading-none">
+            <span className="block text-[9.5px] font-medium uppercase tracking-[0.16em] text-muted-foreground/60">
+              {label}
             </span>
-            <span className="mt-0.5 block font-display text-[13.5px] font-bold leading-none tabular-nums tracking-[-0.02em] text-foreground">
+            <span className="mt-1 block font-display text-[14px] font-bold leading-none tabular-nums tracking-[-0.03em] text-foreground">
               {revenueLabel}
             </span>
           </span>
 
-          <ChevronRight className="h-3.5 w-3.5 rotate-90 text-muted-foreground/45 transition-colors group-hover:text-primary" />
+          <ChevronRight className="mb-[3px] h-3.5 w-3.5 text-muted-foreground/40 transition-transform duration-200 group-hover:translate-x-0.5 group-hover:text-primary" />
+
+          {/* filete de progresso da meta */}
+          <span aria-hidden className="pointer-events-none absolute inset-x-0 -bottom-px h-[2px] overflow-hidden">
+            <span
+              className="block h-full bg-primary transition-[width] duration-700 ease-out"
+              style={{ width: `${pct}%` }}
+            />
+          </span>
         </button>
       </PopoverTrigger>
-      <PopoverContent align="end" className="w-[320px] rounded-[12px] border-border/60 p-3">
-        <div className="mb-3 grid grid-cols-2 gap-1.5">
-          {presets.map((p) => (
+      <PopoverContent
+        side={isMobile ? "bottom" : "left"}
+        align={isMobile ? "end" : "start"}
+        sideOffset={10}
+        collisionPadding={12}
+        className="w-[min(94vw,430px)] rounded-[12px] border-border/60 p-3"
+      >
+        <div className="flex flex-col gap-3 sm:flex-row">
+          {/* presets */}
+          <div className="flex shrink-0 flex-row flex-wrap gap-1.5 sm:w-[112px] sm:flex-col">
+            {presets.map((p) => (
+              <button
+                key={p.label}
+                onClick={() => onPreset(p)}
+                className={cn(
+                  "h-8 flex-1 rounded-[9px] border px-2 text-[12px] font-semibold transition-colors sm:flex-none",
+                  selectedLabel === p.label
+                    ? "border-primary bg-primary/10 text-primary"
+                    : "border-transparent text-muted-foreground hover:border-border/70 hover:text-foreground",
+                )}
+              >
+                {p.label}
+              </button>
+            ))}
             <button
-              key={p.label}
-              onClick={() => onPreset(p)}
-              className={cn("h-9 rounded-[10px] text-[12px] font-semibold transition-colors",
-                selectedLabel === p.label ? "bg-primary text-primary-foreground" : "bg-muted/40 text-muted-foreground hover:bg-muted")}
+              onClick={onThisMonth}
+              className={cn(
+                "h-8 flex-1 rounded-[9px] border px-2 text-[12px] font-semibold transition-colors sm:flex-none",
+                isCustom
+                  ? "border-primary bg-primary/10 text-primary"
+                  : "border-transparent text-muted-foreground hover:border-border/70 hover:text-foreground",
+              )}
             >
-              {p.label}
+              Este mês
             </button>
-          ))}
-          <button
-            onClick={onThisMonth}
-            className={cn("col-span-2 h-9 rounded-[10px] text-[12px] font-semibold transition-colors",
-              isCustom ? "bg-primary text-primary-foreground" : "bg-muted/40 text-muted-foreground hover:bg-muted")}
-          >
-            Este mês
-          </button>
-        </div>
-        <div className="border-t border-border/40 pt-3">
-          <p className="mb-2 text-[11.5px] font-medium text-muted-foreground">Personalizado</p>
-          <Calendar
-            mode="range"
-            selected={customRange}
-            onSelect={onRange}
-            locale={ptBR}
-            className="p-0 pointer-events-auto"
-          />
+          </div>
+
+          <div className="hidden w-px bg-border/50 sm:block" />
+
+          {/* calendário compacto */}
+          <div className="min-w-0 flex-1">
+            <p className="mb-1.5 text-[9.5px] font-medium uppercase tracking-[0.16em] text-muted-foreground/55">
+              Personalizado
+            </p>
+            <Calendar
+              mode="range"
+              selected={customRange}
+              onSelect={onRange}
+              locale={ptBR}
+              className="period-calendar p-0 pointer-events-auto"
+            />
+          </div>
         </div>
       </PopoverContent>
     </Popover>
