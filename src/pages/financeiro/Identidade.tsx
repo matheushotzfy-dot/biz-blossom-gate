@@ -157,7 +157,7 @@ export default function Identidade() {
         subtitle="Verifique sua conta para liberar saques e aumentar limites operacionais."
         actions={
           <div className={cn(
-            "inline-flex items-center gap-2 px-4 h-11 rounded-xl border border-current/15",
+ "inline-flex items-center gap-2 px-4 h-11 rounded-xl border border-current/15",
             status.bg, status.color
           )}>
             <StatusIcon className="h-4 w-4" strokeWidth={2.5} />
@@ -189,7 +189,7 @@ export default function Identidade() {
       <div className="group premium-hover-card bg-card rounded-[24px] border border-border/60 overflow-hidden">
         <div className="p-6 border-b border-border/40 flex items-center justify-between gap-3">
           <div className="flex items-center gap-3">
-            <div className="premium-icon-shell h-11 w-11 rounded-2xl flex items-center justify-center">
+            <div className="premium-icon-shell h-11 w-11 rounded-[12px] flex items-center justify-center">
               <CheckCircle2 size={18} strokeWidth={2.5} className="relative" />
             </div>
             <div>
@@ -208,7 +208,7 @@ export default function Identidade() {
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mt-5">
             {completionSteps.map(step => (
               <div key={step.label} className={cn(
-                "flex items-center gap-2 px-3 py-2.5 rounded-xl border",
+ "flex items-center gap-2 px-3 py-2.5 rounded-xl border",
                 step.done ? "bg-emerald-500/5 border-emerald-500/20" : "bg-muted/20 border-border/40"
               )}>
                 {step.done
@@ -226,7 +226,7 @@ export default function Identidade() {
       <div className="grid grid-cols-1 lg:grid-cols-[1.2fr_1fr] gap-6">
         <div className="group premium-hover-card bg-card rounded-[24px] border border-border/60 overflow-hidden">
           <div className="p-6 border-b border-border/40 flex items-center gap-3">
-            <div className="premium-icon-shell info h-11 w-11 rounded-2xl flex items-center justify-center">
+            <div className="premium-icon-shell info h-11 w-11 rounded-[12px] flex items-center justify-center">
               <UserCircle size={18} strokeWidth={2.5} className="relative" />
             </div>
             <div>
@@ -275,7 +275,7 @@ export default function Identidade() {
           <div className="group premium-hover-card bg-card rounded-[24px] border border-border/60 overflow-hidden">
             <div className="p-6 border-b border-border/40 flex items-center justify-between gap-3">
               <div className="flex items-center gap-3">
-                <div className="premium-icon-shell success h-11 w-11 rounded-2xl flex items-center justify-center">
+                <div className="premium-icon-shell success h-11 w-11 rounded-[12px] flex items-center justify-center">
                   <Wallet size={18} strokeWidth={2.5} className="relative" />
                 </div>
                 <div>
@@ -316,7 +316,7 @@ export default function Identidade() {
           <div className="group premium-hover-card bg-card rounded-[24px] border border-border/60 overflow-hidden">
             <div className="p-6 border-b border-border/40 flex items-center justify-between gap-3">
               <div className="flex items-center gap-3">
-                <div className="premium-icon-shell warning h-11 w-11 rounded-2xl flex items-center justify-center">
+                <div className="premium-icon-shell warning h-11 w-11 rounded-[12px] flex items-center justify-center">
                   <Building2 size={18} strokeWidth={2.5} className="relative" />
                 </div>
                 <div>
@@ -358,7 +358,7 @@ export default function Identidade() {
       {/* KYC Documentos */}
       <div ref={kycRef} className="group premium-hover-card bg-card rounded-[24px] border border-border/60 overflow-hidden">
         <div className="p-6 border-b border-border/40 flex items-center gap-3">
-          <div className="premium-icon-shell info h-11 w-11 rounded-2xl flex items-center justify-center">
+          <div className="premium-icon-shell info h-11 w-11 rounded-[12px] flex items-center justify-center">
             <FileCheck size={18} strokeWidth={2.5} className="relative" />
           </div>
           <div>
@@ -409,7 +409,7 @@ function LockedField({ label, value, mono = false }: { label: string; value: str
         <Lock className="h-3 w-3" /> {label}
       </label>
       <div className={cn(
-        "h-11 rounded-xl border border-border/60 bg-muted/20 flex items-center px-3.5 text-sm text-foreground/80 font-bold",
+ "h-11 rounded-xl border border-border/60 bg-muted/20 flex items-center px-3.5 text-sm text-foreground/80 font-bold",
         mono && "font-mono"
       )}>
         {value}
@@ -429,7 +429,7 @@ function DocSlot({ type, label, desc, icon: Icon, preview, uploading, onUpload }
     <div
       onClick={() => canUpload && ref.current?.click()}
       className={cn(
-        "group premium-hover-card relative flex flex-col items-center gap-3 p-6 rounded-2xl border",
+ "group premium-hover-card relative flex flex-col items-center gap-3 p-6 rounded-[12px] border",
         locked
           ? "bg-success/5 border-success/25 cursor-default"
           : "bg-muted/20 border-border/60 cursor-pointer"
@@ -439,7 +439,7 @@ function DocSlot({ type, label, desc, icon: Icon, preview, uploading, onUpload }
         onChange={(e) => e.target.files?.[0] && onUpload(e.target.files[0])} />
 
       <div className={cn(
-        "premium-icon-shell h-14 w-14 rounded-2xl flex items-center justify-center",
+ "premium-icon-shell h-14 w-14 rounded-[12px] flex items-center justify-center",
         locked && "success"
       )}>
         {uploading ? <Loader2 className="h-5 w-5 animate-spin relative" />

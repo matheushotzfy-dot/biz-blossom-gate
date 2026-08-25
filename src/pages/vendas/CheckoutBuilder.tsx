@@ -83,7 +83,7 @@ function ScoreRing({ score, max }: { score: number; max: number }) {
 /* ─── Section Card ─── */
 function SectionCard({ children, className }: { children: React.ReactNode; className?: string }) {
  return (
- <div className={cn("rounded-xl border border-border/40 bg-card/95 p-4 space-y-3 shadow-sm", className)}>
+ <div className={cn("rounded-xl border border-border/40 bg-card/95 p-4 space-y-3 ", className)}>
  {children}
  </div>
  );
@@ -474,7 +474,7 @@ export default function CheckoutBuilder() {
  {isActive && (
  <motion.div
  layoutId="builder-tab"
- className="absolute inset-0 rounded-md bg-card border border-border/50 shadow-sm"
+ className="absolute inset-0 rounded-md bg-card border border-border/50 "
  transition={{ type: "spring", bounce: 0.15, duration: 0.35 }}
  />
  )}
@@ -524,7 +524,7 @@ export default function CheckoutBuilder() {
  className={cn(
  "relative rounded-lg border-2 p-2.5 transition-all text-left group",
  checkoutTheme === theme.key
- ? "border-primary shadow-sm shadow-primary/10"
+ ? "border-primary "
  : "border-border/30 hover:border-border/60"
  )}
  >
@@ -549,7 +549,7 @@ export default function CheckoutBuilder() {
  key={c.hex}
  onClick={() => setButtonColor(c.hex)}
  className={cn(
- "h-8 w-8 rounded-lg transition-all relative shadow-sm",
+ "h-8 w-8 rounded-lg transition-all relative ",
  buttonColor === c.hex ? "ring-2 ring-offset-2 ring-offset-card ring-primary scale-110" : "hover:scale-105"
  )}
  style={{ backgroundColor: c.hex }}
@@ -574,7 +574,7 @@ export default function CheckoutBuilder() {
  </div>
  {/* CTA Preview */}
  <div
- className="h-11 rounded-lg flex items-center justify-center text-white text-sm font-bold gap-2 cursor-pointer transition-transform active:scale-[0.98]"
+ className="h-11 rounded-lg flex items-center justify-center text-white text-sm font-bold gap-2 cursor-pointer transition-transform "
  style={{ backgroundColor: buttonColor, boxShadow: `0 8px 24px -6px ${buttonColor}40` }}
  >
  <Sparkles className="h-4 w-4" /> COMPRAR AGORA — R$ {Number(product?.price || 0).toFixed(2)}
@@ -610,10 +610,10 @@ export default function CheckoutBuilder() {
  <div className="relative rounded-lg overflow-hidden border border-border/30 group">
  <img src={banner.preview} alt={banner.label} className="w-full h-20 object-cover" />
  <div className="absolute inset-0 bg-background/60 backdrop-blur-sm opacity-0 group-hover:opacity-100 transition-all flex items-center justify-center gap-2">
- <button onClick={() => banner.ref.current?.click()} className="h-8 w-8 rounded-lg bg-card border border-border/50 flex items-center justify-center shadow-sm active:scale-95 transition-transform">
+ <button onClick={() => banner.ref.current?.click()} className="h-8 w-8 rounded-lg bg-card border border-border/50 flex items-center justify-center  active:scale-95 transition-transform">
  <RotateCcw className="h-3.5 w-3.5 text-foreground" />
  </button>
- <button onClick={() => { banner.setFile(null); banner.setPreview(""); }} className="h-8 w-8 rounded-lg bg-card border border-border/50 flex items-center justify-center shadow-sm active:scale-95 transition-transform">
+ <button onClick={() => { banner.setFile(null); banner.setPreview(""); }} className="h-8 w-8 rounded-lg bg-card border border-border/50 flex items-center justify-center  active:scale-95 transition-transform">
  <X className="h-3.5 w-3.5 text-destructive" />
  </button>
  </div>
@@ -880,7 +880,7 @@ export default function CheckoutBuilder() {
  {previewMode === m.mode && (
  <motion.div
  layoutId="preview-mode"
- className="absolute inset-0 bg-card shadow-sm border border-border/40 rounded-md"
+ className="absolute inset-0 bg-card  border border-border/40 rounded-md"
  transition={{ type: "spring", bounce: 0.15, duration: 0.3 }}
  />
  )}
@@ -933,7 +933,7 @@ export default function CheckoutBuilder() {
 
  {/* Preview Content */}
  <div data-preview-theme={checkoutTheme} className={cn(
- "rounded-b-xl border border-t-0 border-border/30 shadow-xl overflow-hidden",
+ "rounded-b-xl border border-t-0 border-border/30  overflow-hidden",
  checkoutTheme === "white" ? "bg-[#fafbfc]" : checkoutTheme === "dark" ? "bg-[hsl(220_18%_11%)]" : "bg-[#f0f1f3]"
  )}>
  {/* Banner */}
@@ -1030,7 +1030,7 @@ export default function CheckoutBuilder() {
  { name: "Maria S.", text: "Melhor investimento que fiz!", rating: 5 },
  { name: "João P.", text: "Conteúdo incrível, recomendo!", rating: 5 },
  ].map((t, i) => (
- <div key={i} className="p-3 rounded-lg bg-white border border-gray-100 shadow-sm">
+ <div key={i} className="p-3 rounded-lg bg-white border border-gray-100 ">
  <div className="flex items-center gap-2 mb-1">
  <div className="h-5 w-5 rounded-full bg-amber-400/15 flex items-center justify-center text-[8px] font-bold text-amber-500">{t.name[0]}</div>
  <div className="flex gap-0.5">
@@ -1049,7 +1049,7 @@ export default function CheckoutBuilder() {
  <div className="flex items-center gap-2 text-[11px] text-gray-600">
  <div className="flex -space-x-1.5">
  {[1,2,3,4].map(i => (
- <div key={i} className="h-6 w-6 rounded-full border-2 border-white shadow-sm" style={{ backgroundColor: buttonColor + (20 + i * 10).toString(16) }} />
+ <div key={i} className="h-6 w-6 rounded-full border-2 border-white " style={{ backgroundColor: buttonColor + (20 + i * 10).toString(16) }} />
  ))}
  </div>
  <span className="font-semibold">+127 compraram nas últimas 24h</span>
@@ -1092,15 +1092,15 @@ export default function CheckoutBuilder() {
  {orderBumps.map(bump => {
  const prod = allProducts.find(p => p.id === bump.bump_product_id);
  return (
- <div key={bump.id} className="relative rounded-xl border-2 border-dashed p-3.5 overflow-hidden transition-all hover:shadow-md cursor-pointer" style={{ borderColor: buttonColor + "35", background: `linear-gradient(135deg, ${buttonColor}08, ${buttonColor}03)` }}>
+ <div key={bump.id} className="relative rounded-xl border-2 border-dashed p-3.5 overflow-hidden transition-all hover: cursor-pointer" style={{ borderColor: buttonColor + "35", background: `linear-gradient(135deg, ${buttonColor}08, ${buttonColor}03)` }}>
  <div className="absolute top-0 right-0 text-white text-[7px] font-extrabold px-2.5 py-1 rounded-bl-lg" style={{ backgroundColor: buttonColor }}>
  APROVEITE!
  </div>
  <div className="flex items-center gap-3">
  {prod?.image_url ? (
- <img src={prod.image_url} className="h-12 w-12 rounded-lg object-cover border border-gray-200 shadow-sm" />
+ <img src={prod.image_url} className="h-12 w-12 rounded-lg object-cover border border-gray-200 " />
  ) : (
- <div className="h-12 w-12 rounded-lg border border-gray-200 flex items-center justify-center shadow-sm" style={{ backgroundColor: buttonColor + "10" }}>
+ <div className="h-12 w-12 rounded-lg border border-gray-200 flex items-center justify-center " style={{ backgroundColor: buttonColor + "10" }}>
  <Package className="h-5 w-5" style={{ color: buttonColor + "60" }} />
  </div>
  )}
@@ -1121,7 +1121,7 @@ export default function CheckoutBuilder() {
 
  {/* CTA */}
  <button
- className="w-full py-3.5 rounded-lg text-white font-bold text-sm flex items-center justify-center gap-2 transition-transform active:scale-[0.98]"
+ className="w-full py-3.5 rounded-lg text-white font-bold text-sm flex items-center justify-center gap-2 transition-transform "
  style={{ backgroundColor: buttonColor, boxShadow: `0 8px 24px -6px ${buttonColor}40` }}
  >
  <Lock className="h-4 w-4" /> COMPRAR AGORA

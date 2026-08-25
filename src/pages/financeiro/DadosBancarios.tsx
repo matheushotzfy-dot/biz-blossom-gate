@@ -140,7 +140,7 @@ export default function DadosBancarios() {
   return (
     <div className="space-y-6">
       {/* PIX KEYS */}
-      <div className="bg-card rounded-2xl border border-border/60 overflow-hidden">
+      <div className="bg-card rounded-[12px] border border-border/60 overflow-hidden">
         <div className="p-5 border-b border-border/40 flex items-center justify-between gap-3">
           <div className="flex items-center gap-3 min-w-0">
             <div className="h-10 w-10 rounded-xl bg-primary/10 border border-primary/10 flex items-center justify-center text-primary shrink-0">
@@ -219,7 +219,7 @@ export default function DadosBancarios() {
       </div>
 
       {/* BANK ACCOUNTS */}
-      <div className="bg-card rounded-2xl border border-border/60 overflow-hidden">
+      <div className="bg-card rounded-[12px] border border-border/60 overflow-hidden">
         <div className="p-5 border-b border-border/40 flex items-center justify-between gap-3">
           <div className="flex items-center gap-3 min-w-0">
             <div className="h-10 w-10 rounded-xl bg-primary/10 border border-primary/10 flex items-center justify-center text-primary shrink-0">

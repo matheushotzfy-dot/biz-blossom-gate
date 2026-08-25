@@ -55,13 +55,13 @@ function Kpi({ label, value, sub, icon: Icon, tone = "neutral" }: {
 }) {
   const toneCls: Record<KpiTone, string> = {
     success: "text-success",
-    info:    "text-info",
+    info: "text-info",
     warning: "text-warning",
     neutral: "text-foreground",
   };
   const iconBg: Record<KpiTone, string> = {
     success: "bg-success/10 text-success",
-    info:    "bg-info/10 text-info",
+    info: "bg-info/10 text-info",
     warning: "bg-warning/10 text-warning",
     neutral: "bg-secondary text-muted-foreground",
   };
@@ -189,12 +189,12 @@ export default function Assinaturas() {
 
           <Dialog open={showCreate} onOpenChange={setShowCreate}>
             <DialogTrigger asChild>
-              <button className="group inline-flex h-11 items-center gap-2 rounded-xl bg-primary px-5 text-[12px] font-black uppercase tracking-[0.12em] text-primary-foreground transition-all duration-300 hover:-translate-y-0.5 hover:bg-primary/90">
+              <button className="group inline-flex h-11 items-center gap-2 rounded-xl bg-primary px-5 text-[12px] font-black uppercase tracking-[0.12em] text-primary-foreground transition-all duration-300  hover:bg-primary/90">
                 <Plus className="h-4 w-4 transition-transform duration-300 group-hover:rotate-90" />
                 Novo plano
               </button>
             </DialogTrigger>
-            <DialogContent className="max-w-md rounded-2xl border border-border/50 bg-card p-0 overflow-hidden">
+            <DialogContent className="max-w-md rounded-[12px] border border-border/50 bg-card p-0 overflow-hidden">
               <div className="px-6 pt-6 pb-4 border-b border-border/40">
                 <DialogHeader>
                   <DialogTitle className="font-display text-lg flex items-center gap-2.5">
@@ -299,7 +299,7 @@ export default function Assinaturas() {
                 key={t.id}
                 onClick={() => { setTab(t.id); window.scrollTo({ top: 0, behavior: "instant" }); }}
                 className={cn(
-                  "inline-flex items-center gap-2 rounded-lg h-8 px-3 text-[12px] font-bold tracking-tight transition-colors duration-200",
+ "inline-flex items-center gap-2 rounded-lg h-8 px-3 text-[12px] font-bold tracking-tight transition-colors duration-200",
                   isActive
                     ? "bg-secondary text-foreground"
                     : "text-muted-foreground hover:text-foreground"
@@ -309,7 +309,7 @@ export default function Assinaturas() {
                 <span>{t.label}</span>
                 {count > 0 && (
                   <span className={cn(
-                    "text-[10px] font-black tabular-nums px-1.5 py-0.5 rounded-md transition-colors",
+ "text-[10px] font-black tabular-nums px-1.5 py-0.5 rounded-md transition-colors",
                     isActive ? "bg-card text-foreground" : "bg-secondary/60 text-muted-foreground"
                   )}>
                     {count}
@@ -341,8 +341,8 @@ export default function Assinaturas() {
         {tab === "plans" && (
           <>
             {plans.length === 0 && !loading ? (
-              <div className="rounded-2xl border border-border/50 bg-card p-16 flex flex-col items-center gap-4">
-                <div className="h-16 w-16 rounded-2xl bg-secondary border border-border/50 flex items-center justify-center">
+              <div className="rounded-[12px] border border-border/50 bg-card p-16 flex flex-col items-center gap-4">
+                <div className="h-16 w-16 rounded-[12px] bg-secondary border border-border/50 flex items-center justify-center">
                   <Zap className="h-7 w-7 text-muted-foreground/60" />
                 </div>
                 <p className="text-[14px] text-foreground font-display font-bold">Nenhum plano criado</p>
@@ -360,7 +360,7 @@ export default function Assinaturas() {
                       <div className="flex items-center justify-between gap-4 px-5 py-4">
                         <div className="flex items-center gap-4 min-w-0 flex-1">
                           <div className={cn(
-                            "h-11 w-11 rounded-xl flex items-center justify-center shrink-0 border",
+ "h-11 w-11 rounded-xl flex items-center justify-center shrink-0 border",
                             plan.is_active ? "bg-primary/10 border-primary/20" : "bg-secondary border-border/50"
                           )}>
                             <Zap className={cn("h-5 w-5", plan.is_active ? "text-primary" : "text-muted-foreground/60")} strokeWidth={2.25} />
@@ -369,7 +369,7 @@ export default function Assinaturas() {
                             <div className="flex items-center gap-2 mb-1">
                               <h3 className="text-[14px] font-display font-black text-foreground truncate tracking-tight">{plan.name}</h3>
                               <span className={cn(
-                                "inline-flex items-center gap-1 text-[9px] font-black uppercase tracking-[0.12em] px-1.5 py-0.5 rounded border",
+ "inline-flex items-center gap-1 text-[9px] font-black uppercase tracking-[0.12em] px-1.5 py-0.5 rounded border",
                                 plan.is_active
                                   ? "bg-success/10 text-success border-success/20"
                                   : "bg-muted/10 text-muted-foreground border-border/40"
@@ -406,8 +406,8 @@ export default function Assinaturas() {
         {tab === "subscribers" && (
           <>
             {subs.length === 0 && !loading ? (
-              <div className="rounded-2xl border border-border/50 bg-card p-16 flex flex-col items-center gap-4">
-                <div className="h-16 w-16 rounded-2xl bg-secondary border border-border/50 flex items-center justify-center">
+              <div className="rounded-[12px] border border-border/50 bg-card p-16 flex flex-col items-center gap-4">
+                <div className="h-16 w-16 rounded-[12px] bg-secondary border border-border/50 flex items-center justify-center">
                   <Users className="h-7 w-7 text-muted-foreground/60" />
                 </div>
                 <p className="text-[14px] text-foreground font-display font-bold">Nenhum assinante</p>
@@ -440,7 +440,7 @@ export default function Assinaturas() {
                           <td className="py-3.5 px-4 text-[12px] text-foreground font-display font-bold">{plan?.name || "—"}</td>
                           <td className="py-3.5 px-4">
                             <span className={cn(
-                              "inline-flex items-center gap-1.5 rounded-md px-2 py-0.5 text-[10px] font-black uppercase tracking-[0.12em] border",
+ "inline-flex items-center gap-1.5 rounded-md px-2 py-0.5 text-[10px] font-black uppercase tracking-[0.12em] border",
                               cfg.bg, cfg.text
                             )}>
                               <span className={cn("h-1.5 w-1.5 rounded-full", cfg.dot)} />

@@ -247,11 +247,11 @@ export default function Coproducoes() {
         <PageTitle icon={<Handshake className="h-6 w-6" />} title="Coproduções" subtitle="Gerencie parcerias e splits de receita com outros produtores" />
         <Dialog open={openCreate} onOpenChange={setOpenCreate}>
           <DialogTrigger asChild>
-            <Button className="gap-2 rounded-xl text-sm font-display font-bold h-10 px-5 shadow-lg shadow-primary/20">
+            <Button className="gap-2 rounded-xl text-sm font-display font-bold h-10 px-5 ">
               <Plus className="h-4 w-4" /> Nova Coprodução
             </Button>
           </DialogTrigger>
-          <DialogContent className="max-w-md rounded-2xl border border-border/40 bg-card/95 backdrop-blur-xl p-0 overflow-hidden">
+          <DialogContent className="max-w-md rounded-[12px] border border-border/40 bg-card/95 backdrop-blur-xl p-0 overflow-hidden">
             <div className="px-6 pt-6 pb-4 border-b border-border/20">
               <DialogHeader>
                 <DialogTitle className="font-display text-lg flex items-center gap-2.5">
@@ -305,7 +305,7 @@ export default function Coproducoes() {
                   </div>
                 )}
               </div>
-              <Button onClick={handleCreate} className="w-full rounded-xl font-display font-bold h-11 shadow-lg shadow-primary/20" disabled={!selectedProduct || !coEmail.trim()}>
+              <Button onClick={handleCreate} className="w-full rounded-xl font-display font-bold h-11 " disabled={!selectedProduct || !coEmail.trim()}>
                 <Mail className="h-4 w-4 mr-2" /> Enviar Convite
               </Button>
             </div>
@@ -334,16 +334,16 @@ export default function Coproducoes() {
                   key={t.id}
                   onClick={() => setTab(t.id)}
                   className={cn(
-                    "flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-[11px] font-display font-bold transition-colors",
+ "flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-[11px] font-display font-bold transition-colors",
                     isActive
-                      ? "bg-card text-foreground border border-border/40 shadow-sm"
+                      ? "bg-card text-foreground border border-border/40 "
                       : "text-muted-foreground/50 hover:text-muted-foreground/80"
                   )}
                 >
                   <t.icon className="h-3 w-3" />
                   <span>{t.label}</span>
                   <span className={cn(
-                    "text-[9.5px] font-black px-1 rounded tabular-nums",
+ "text-[9.5px] font-black px-1 rounded tabular-nums",
                     isActive ? "bg-primary/10 text-primary" : "bg-muted/20 text-muted-foreground/40"
                   )}>{t.count}</span>
                 </button>
@@ -394,7 +394,7 @@ export default function Coproducoes() {
             title={coproductions.length === 0 ? "Nenhuma coprodução ainda" : "Nenhum resultado encontrado"}
             subtitle={coproductions.length === 0 ? "Crie sua primeira parceria para dividir receitas com outros produtores" : "Tente ajustar a busca ou os filtros"}
             action={coproductions.length === 0 ? (
-              <Button onClick={() => setOpenCreate(true)} className="gap-2 rounded-xl font-display font-bold shadow-lg shadow-primary/20">
+              <Button onClick={() => setOpenCreate(true)} className="gap-2 rounded-xl font-display font-bold ">
                 <Plus className="h-4 w-4" /> Criar Primeira Coprodução
               </Button>
             ) : undefined}

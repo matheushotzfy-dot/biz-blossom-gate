@@ -101,14 +101,14 @@ function LiquidityPlate() {
 
 export function PromoBanner() {
   return (
-    <section className="relative isolate overflow-hidden rounded-2xl border border-border/60 bg-[hsl(var(--card))] md:rounded-[28px]">
+    <section className="relative isolate overflow-hidden rounded-[12px] border border-border/60 bg-[hsl(var(--card))] md:rounded-[28px]">
       {/* engraved paper texture */}
       <div
         aria-hidden
         className="pointer-events-none absolute inset-0 opacity-[0.55]"
         style={{
           backgroundImage:
-            "repeating-linear-gradient(115deg, hsl(var(--foreground)/0.028) 0 1px, transparent 1px 9px)",
+ "repeating-linear-gradient(115deg, hsl(var(--foreground)/0.028) 0 1px, transparent 1px 9px)",
         }}
       />
       <div
@@ -116,7 +116,7 @@ export function PromoBanner() {
         className="pointer-events-none absolute inset-0"
         style={{
           backgroundImage:
-            "radial-gradient(70% 130% at 78% 45%, hsl(var(--primary)/0.16), transparent 62%), radial-gradient(50% 90% at 0% 0%, hsl(var(--primary)/0.07), transparent 60%)",
+ "radial-gradient(70% 130% at 78% 45%, hsl(var(--primary)/0.16), transparent 62%), radial-gradient(50% 90% at 0% 0%, hsl(var(--primary)/0.07), transparent 60%)",
         }}
       />
       {/* oversized monogram slab bleeding off the left edge */}
@@ -166,7 +166,7 @@ export function PromoBanner() {
               className="group inline-flex items-center gap-2 rounded-xl bg-primary px-4 py-2.5 text-[12.5px] font-bold text-primary-foreground transition-colors hover:bg-primary/90"
             >
               Sacar agora
-              <ArrowUpRight className="h-3.5 w-3.5 transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
+              <ArrowUpRight className="h-3.5 w-3.5 transition-transform group- group-hover:translate-x-0.5" />
             </Link>
             <Link
               to="/taxas"

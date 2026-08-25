@@ -141,7 +141,7 @@ export default function NotasFiscais() {
       </div>
 
       {!integrationConnected && (
-        <div className="bg-amber-500/5 border border-amber-500/20 rounded-2xl p-5 flex items-start gap-3">
+        <div className="bg-amber-500/5 border border-amber-500/20 rounded-[12px] p-5 flex items-start gap-3">
           <AlertCircle className="h-5 w-5 text-amber-500 mt-0.5 shrink-0" />
           <div>
             <p className="text-sm font-black text-foreground">Notazz não está conectado</p>
@@ -159,7 +159,7 @@ export default function NotasFiscais() {
         <StatCard title="Conexão"        value={integrationConnected ? "Ativo" : "Off"} icon={CheckCircle2} color={integrationConnected ? "info" : "warning"} description={integrationConnected ? "Notazz conectado" : "Configure"} />
       </div>
 
-      <div className="bg-card rounded-[24px] border border-border/60 shadow-sm overflow-hidden">
+      <div className="bg-card rounded-[24px] border border-border/60  overflow-hidden">
         <div className="p-6 border-b border-border/40 flex flex-col md:flex-row justify-between items-center gap-4">
           <div className="flex items-center gap-3">
             <div className="h-10 w-10 bg-primary/10 border border-primary/10 rounded-xl flex items-center justify-center text-primary">

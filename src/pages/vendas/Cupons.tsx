@@ -191,7 +191,7 @@ export default function Cupons() {
                 Novo cupom
               </button>
             </DialogTrigger>
-          <DialogContent className="max-w-lg rounded-2xl border border-border/40 bg-card p-0 overflow-hidden">
+          <DialogContent className="max-w-lg rounded-[12px] border border-border/40 bg-card p-0 overflow-hidden">
             <div className="px-6 pt-6 pb-4 border-b border-border/20">
               <DialogHeader>
                 <DialogTitle className="font-display text-lg flex items-center gap-2.5">
@@ -357,14 +357,14 @@ export default function Cupons() {
                   key={t.id}
                   onClick={() => setStatusFilter(t.id)}
                   className={cn(
-                    "group/tab relative inline-flex shrink-0 items-center gap-2 rounded-lg h-8 px-3 text-[12px] font-bold tracking-tight transition-colors duration-200",
+ "group/tab relative inline-flex shrink-0 items-center gap-2 rounded-lg h-8 px-3 text-[12px] font-bold tracking-tight transition-colors duration-200",
                     active
                       ? "bg-secondary text-foreground"
                       : "text-muted-foreground/80 hover:text-foreground"
                   )}
                 >
                   <span className={cn(
-                    "flex h-4 w-4 items-center justify-center transition-colors",
+ "flex h-4 w-4 items-center justify-center transition-colors",
                     active ? tabAccent[t.id] : "text-muted-foreground/50 group-hover/tab:text-foreground/70"
                   )}>
                     {tabIcon[t.id]}
@@ -372,7 +372,7 @@ export default function Cupons() {
                   <span className="font-display">{t.label}</span>
                   {t.count > 0 && (
                     <span className={cn(
-                      "inline-flex h-[18px] min-w-[20px] items-center justify-center rounded-md px-1.5 text-[10px] font-black tabular-nums tracking-tight border transition-colors",
+ "inline-flex h-[18px] min-w-[20px] items-center justify-center rounded-md px-1.5 text-[10px] font-black tabular-nums tracking-tight border transition-colors",
                       active
                         ? "bg-background/80 text-foreground border-border/40"
                         : "bg-muted/30 text-muted-foreground/60 border-transparent"
@@ -481,7 +481,7 @@ export default function Cupons() {
                       <div className="mt-1.5 h-1 rounded-full bg-muted/15 overflow-hidden ml-auto w-16">
                         <div
                           className={cn(
-                            "h-full rounded-full",
+ "h-full rounded-full",
                             exhausted ? "bg-warning" : usagePct > 75 ? "bg-warning/70" : "bg-success"
                           )}
                           style={{ width: `${usagePct}%` }}
@@ -521,7 +521,7 @@ export default function Cupons() {
                       variant="ghost"
                       size="icon"
                       className={cn(
-                        "h-7 w-7 rounded-md transition-colors",
+ "h-7 w-7 rounded-md transition-colors",
                         c.is_active ? "text-success hover:text-success hover:bg-success/10" : "text-muted-foreground/40 hover:text-foreground hover:bg-muted/10"
                       )}
                       onClick={() => handleToggle(c)}

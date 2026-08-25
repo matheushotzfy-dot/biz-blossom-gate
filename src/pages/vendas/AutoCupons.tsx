@@ -14,7 +14,7 @@ export default function AutoCupons() {
     <div className="mx-auto w-full max-w-[1180px] space-y-6 p-4 md:p-6">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-primary/10 text-primary">
+          <div className="flex h-10 w-10 items-center justify-center rounded-[12px] bg-primary/10 text-primary">
             <Ticket className="h-5 w-5" />
           </div>
           <div>

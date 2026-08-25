@@ -45,7 +45,7 @@ const EVENT_GROUPS = [
 type WebhookConfig = Tables<"webhook_configs_safe">;
 type Delivery = Pick<
   Tables<"webhook_deliveries">,
-  "id" | "event" | "status" | "attempt" | "response_status" | "error" | "created_at" | "delivered_at"
+ "id" | "event" | "status" | "attempt" | "response_status" | "error" | "created_at" | "delivered_at"
 >;
 
 /** Recent delivery attempts for the signed-in seller (RLS scoped). */
@@ -215,7 +215,7 @@ export default function Webhooks() {
                   <Plus className="h-4 w-4" /> Novo endpoint
                 </button>
               </DialogTrigger>
-              <DialogContent className="max-w-lg rounded-2xl border-border/60 bg-card">
+              <DialogContent className="max-w-lg rounded-[12px] border-border/60 bg-card">
                 <DialogHeader>
                   <DialogTitle className="font-display text-[19px] font-bold tracking-[-0.02em]">
                     {editingId ? "Editar endpoint" : "Novo endpoint"}

@@ -467,7 +467,7 @@ export default function CourseBuilder() {
           </button>
 
           {/* Brand Logo/Icon */}
-          <div className="hidden sm:flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-emerald-500 to-emerald-600 shadow-[0_0_20px_rgba(16,185,129,0.3)] shrink-0 overflow-hidden relative group">
+          <div className="hidden sm:flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-emerald-500 to-emerald-600  shrink-0 overflow-hidden relative group">
             <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-500" />
             <Sparkles className="h-5 w-5 text-white relative z-10" />
           </div>
@@ -555,7 +555,7 @@ export default function CourseBuilder() {
             <button
               onClick={togglePublish}
               className={cn(
-                "h-10 px-6 rounded-xl text-[11px] font-black uppercase tracking-widest flex items-center gap-2.5 transition-all duration-300 shadow-lg",
+ "h-10 px-6 rounded-xl text-[11px] font-black uppercase tracking-widest flex items-center gap-2.5 transition-all duration-300 ",
                 course.is_published
                   ? "bg-white text-black hover:bg-zinc-200"
                   : "bg-emerald-500 text-white hover:bg-emerald-400 shadow-emerald-500/20"
@@ -609,7 +609,7 @@ export default function CourseBuilder() {
                 <div className="flex items-center gap-2">
                   <button
                     onClick={() => setShowNewModule(true)}
-                    className="h-8 w-8 rounded-lg flex items-center justify-center bg-emerald-500 text-white hover:bg-emerald-400 shadow-lg shadow-emerald-500/10 transition-all"
+                    className="h-8 w-8 rounded-lg flex items-center justify-center bg-emerald-500 text-white hover:bg-emerald-400  shadow-emerald-500/10 transition-all"
                     title="Adicionar Módulo"
                   >
                     <Plus className="h-4 w-4" strokeWidth={3} />
@@ -635,16 +635,16 @@ export default function CourseBuilder() {
                     <div
                       key={mod.id}
                       className={cn(
-                        "group/mod overflow-hidden rounded-2xl border transition-all duration-300",
+ "group/mod overflow-hidden rounded-[12px] border transition-all duration-300",
                         containsActive 
-                          ? "border-emerald-500/40 bg-emerald-500/[0.03] shadow-[0_4px_20px_rgba(0,0,0,0.2)]" 
+                          ? "border-emerald-500/40 bg-emerald-500/[0.03] " 
                           : "border-white/[0.03] bg-white/[0.01] hover:border-white/[0.1] hover:bg-white/[0.02]"
                       )}
                     >
                       {/* Module Header */}
                       <div
                         className={cn(
-                          "flex items-center gap-3 px-4 py-4 cursor-pointer relative",
+ "flex items-center gap-3 px-4 py-4 cursor-pointer relative",
                           isExpanded ? "bg-white/[0.02]" : ""
                         )}
                         onClick={() => toggleExpand(mod.id)}
@@ -656,9 +656,9 @@ export default function CourseBuilder() {
                         </motion.div>
 
                         <div className={cn(
-                          "h-8 w-8 rounded-lg flex items-center justify-center shrink-0 text-[11px] font-black border tabular-nums transition-all duration-300",
+ "h-8 w-8 rounded-lg flex items-center justify-center shrink-0 text-[11px] font-black border tabular-nums transition-all duration-300",
                           containsActive 
-                            ? "bg-emerald-500 text-white border-emerald-400 shadow-lg shadow-emerald-500/20"
+                            ? "bg-emerald-500 text-white border-emerald-400  shadow-emerald-500/20"
                             : isExpanded 
                             ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/30"
                             : "bg-zinc-900 text-zinc-600 border-white/[0.05]"
@@ -742,9 +742,9 @@ export default function CourseBuilder() {
                                       key={lesson.id}
                                       value={lesson}
                                       className={cn(
-                                        "group/lesson flex items-center gap-3 px-3 py-3 rounded-xl cursor-pointer transition-all duration-300",
+ "group/lesson flex items-center gap-3 px-3 py-3 rounded-xl cursor-pointer transition-all duration-300",
                                         isActive
-                                          ? "bg-white/[0.08] border border-white/[0.1] shadow-xl"
+                                          ? "bg-white/[0.08] border border-white/[0.1] "
                                           : "hover:bg-white/[0.03] border border-transparent"
                                       )}
                                       onClick={() => selectLesson(lesson)}
@@ -752,7 +752,7 @@ export default function CourseBuilder() {
                                       <GripVertical className="h-3.5 w-3.5 text-zinc-700 group-hover/lesson:text-zinc-500 opacity-0 group-hover/lesson:opacity-100 transition-all shrink-0" />
                                       
                                       <div className={cn(
-                                        "h-6 w-6 rounded-lg flex items-center justify-center shrink-0 text-[10px] font-black border transition-all duration-300",
+ "h-6 w-6 rounded-lg flex items-center justify-center shrink-0 text-[10px] font-black border transition-all duration-300",
                                         isActive
                                           ? "bg-emerald-500 text-white border-emerald-400 shadow-emerald-500/20"
                                           : hasVideo
@@ -764,7 +764,7 @@ export default function CourseBuilder() {
 
                                       <div className="flex-1 min-w-0">
                                         <p className={cn(
-                                          "text-[13px] font-bold truncate tracking-tight transition-colors",
+ "text-[13px] font-bold truncate tracking-tight transition-colors",
                                           isActive ? "text-white" : "text-zinc-400 group-hover/lesson:text-zinc-200"
                                         )}>
                                           {lesson.title}
@@ -774,7 +774,7 @@ export default function CourseBuilder() {
                                             <span className="text-[8px] font-black uppercase tracking-widest text-emerald-400 bg-emerald-500/10 px-1.5 py-0.5 rounded">FREE</span>
                                           )}
                                           <div className="flex items-center gap-1.5">
-                                            <div className={cn("h-1 w-1 rounded-full", hasVideo ? "bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]" : "bg-zinc-700")} />
+                                            <div className={cn("h-1 w-1 rounded-full", hasVideo ? "bg-emerald-500 " : "bg-zinc-700")} />
                                             <span className="text-[10px] font-bold text-zinc-600 uppercase tracking-widest">
                                               {hasVideo ? "Pronta" : "Vazia"}
                                             </span>
@@ -889,13 +889,13 @@ export default function CourseBuilder() {
                       if (lessonTitle.trim() && lessonTitle !== selectedLesson.title) autoSave("title", lessonTitle.trim()); 
                     }}
                     onKeyDown={e => { if (e.key === "Enter") (e.target as HTMLInputElement).blur(); }}
-                    className="w-full bg-transparent text-[44px] sm:text-[64px] font-display font-black tracking-[-0.05em] leading-[0.9] text-white focus:outline-none border-b-2 border-emerald-500/50 pb-4 shadow-[0_4px_0_rgba(16,185,129,0.1)]"
+                    className="w-full bg-transparent text-[44px] sm:text-[64px] font-display font-black tracking-[-0.05em] leading-[0.9] text-white focus:outline-none border-b-2 border-emerald-500/50 pb-4 "
                     autoFocus
                   />
                 ) : (
                   <h2
                     onClick={() => { setEditingLessonTitle(true); setTimeout(() => titleInputRef.current?.focus(), 50); }}
-                    className="text-[44px] sm:text-[64px] font-display font-black tracking-[-0.05em] leading-[0.9] text-white cursor-text hover:text-white/80 transition-all duration-300 drop-shadow-[0_4px_20px_rgba(0,0,0,0.5)]"
+                    className="text-[44px] sm:text-[64px] font-display font-black tracking-[-0.05em] leading-[0.9] text-white cursor-text hover:text-white/80 transition-all duration-300 drop-"
                   >
                     {lessonTitle || "Sem título"}
                   </h2>
@@ -903,7 +903,7 @@ export default function CourseBuilder() {
               </motion.div>
 
               {/* ── Editor Tabs ── */}
-              <div className="flex items-center gap-1 p-1 rounded-2xl bg-white/[0.02] border border-white/[0.05] w-fit">
+              <div className="flex items-center gap-1 p-1 rounded-[12px] bg-white/[0.02] border border-white/[0.05] w-fit">
                 {editorTabs.map(tab => {
                   const isActive = activeEditorTab === tab.id;
                   return (
@@ -911,9 +911,9 @@ export default function CourseBuilder() {
                       key={tab.id}
                       onClick={() => setActiveEditorTab(tab.id)}
                       className={cn(
-                        "relative flex items-center gap-2.5 px-6 h-11 rounded-xl text-[11px] font-black uppercase tracking-widest transition-all duration-300",
+ "relative flex items-center gap-2.5 px-6 h-11 rounded-xl text-[11px] font-black uppercase tracking-widest transition-all duration-300",
                         isActive
-                          ? "bg-white text-black shadow-[0_4px_15px_rgba(255,255,255,0.1)]"
+                          ? "bg-white text-black "
                           : "text-zinc-500 hover:text-zinc-300 hover:bg-white/[0.03]"
                       )}
                     >
@@ -937,14 +937,14 @@ export default function CourseBuilder() {
                 {/* ─── VIDEO TAB ─── */}
                 {activeEditorTab === "video" && (
                   <div className="space-y-6">
-                    <div className="rounded-3xl border border-white/[0.04] bg-white/[0.01] overflow-hidden group/player">
+                    <div className="rounded-[14px] border border-white/[0.04] bg-white/[0.01] overflow-hidden group/player">
                       {uploadingVideo ? (
                         <div className="aspect-video flex flex-col items-center justify-center gap-8 p-12 bg-white/[0.02]">
                           <div className="relative">
-                            <div className="h-20 w-20 rounded-2xl border border-emerald-500/20 bg-emerald-500/5 flex items-center justify-center">
+                            <div className="h-20 w-20 rounded-[12px] border border-emerald-500/20 bg-emerald-500/5 flex items-center justify-center">
                               <Loader2 className="h-8 w-8 animate-spin text-emerald-400" />
                             </div>
-                            <div className="absolute -inset-2 rounded-2xl border border-emerald-500/20 animate-pulse" />
+                            <div className="absolute -inset-2 rounded-[12px] border border-emerald-500/20 animate-pulse" />
                           </div>
                           <div className="w-full max-w-sm">
                             <div className="flex justify-between text-[12px] mb-3">
@@ -952,13 +952,13 @@ export default function CourseBuilder() {
                               <span className="font-black text-emerald-400 tabular-nums">{Math.round(videoUploadProgress)}%</span>
                             </div>
                             <div className="h-1.5 bg-white/[0.03] rounded-full overflow-hidden border border-white/[0.05]">
-                              <motion.div className="h-full bg-emerald-500 shadow-[0_0_15px_rgba(16,185,129,0.5)]" animate={{ width: `${videoUploadProgress}%` }} transition={{ ease: "easeOut" }} />
+                              <motion.div className="h-full bg-emerald-500 " animate={{ width: `${videoUploadProgress}%` }} transition={{ ease: "easeOut" }} />
                             </div>
                           </div>
                           <p className="text-[10px] text-zinc-500 font-bold uppercase tracking-[0.2em]">Otimizando para 4K • Não feche a aba</p>
                         </div>
                       ) : lessonVideoUrl ? (
-                        <div className="relative aspect-video bg-black shadow-2xl overflow-hidden group">
+                        <div className="relative aspect-video bg-black  overflow-hidden group">
                           {isDirectVideoUrl(lessonVideoUrl) ? (
                             <video controls className="w-full h-full" src={lessonVideoUrl} />
                           ) : getVideoEmbed(lessonVideoUrl) ? (
@@ -990,10 +990,10 @@ export default function CourseBuilder() {
                           onDrop={e => { e.preventDefault(); const f = e.dataTransfer.files[0]; if (f) handleVideoUpload(f); }}
                         >
                           <div className="relative">
-                            <div className="h-24 w-24 rounded-3xl border border-dashed border-white/[0.1] flex items-center justify-center group-hover/upload:border-emerald-500/40 group-hover/upload:bg-emerald-500/[0.03] transition-all duration-500">
+                            <div className="h-24 w-24 rounded-[14px] border border-dashed border-white/[0.1] flex items-center justify-center group-hover/upload:border-emerald-500/40 group-hover/upload:bg-emerald-500/[0.03] transition-all duration-500">
                               <Upload className="h-8 w-8 text-zinc-600 group-hover/upload:text-emerald-400 group-hover/upload:scale-110 transition-all duration-500" />
                             </div>
-                            <div className="absolute -inset-4 rounded-3xl border border-emerald-500/0 group-hover/upload:border-emerald-500/10 transition-all duration-700 animate-[ping_3s_infinite_alternate]" />
+                            <div className="absolute -inset-4 rounded-[14px] border border-emerald-500/0 group-hover/upload:border-emerald-500/10 transition-all duration-700 animate-[ping_3s_infinite_alternate]" />
                           </div>
                           <div className="text-center relative z-10">
                             <h3 className="text-[14px] font-black uppercase tracking-[0.25em] text-white">Upload de Vídeo</h3>
@@ -1011,7 +1011,7 @@ export default function CourseBuilder() {
                         value={lessonVideoUrl}
                         onChange={e => { setLessonVideoUrl(e.target.value); debouncedSave("video_url", e.target.value || null); }}
                         placeholder="Importar via Link (Youtube, Vimeo, Wistia...)"
-                        className="w-full h-14 pl-14 pr-6 rounded-2xl bg-white/[0.02] border border-white/[0.05] text-[14px] font-medium text-white placeholder:text-zinc-600 focus:outline-none focus:border-emerald-500/40 focus:bg-white/[0.04] transition-all"
+                        className="w-full h-14 pl-14 pr-6 rounded-[12px] bg-white/[0.02] border border-white/[0.05] text-[14px] font-medium text-white placeholder:text-zinc-600 focus:outline-none focus:border-emerald-500/40 focus:bg-white/[0.04] transition-all"
                       />
                     </div>
                   </div>
@@ -1021,7 +1021,7 @@ export default function CourseBuilder() {
                 {activeEditorTab === "content" && (
                   <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
                     <div className="lg:col-span-8 space-y-6">
-                      <div className="rounded-3xl border border-white/[0.04] bg-white/[0.01] overflow-hidden">
+                      <div className="rounded-[14px] border border-white/[0.04] bg-white/[0.01] overflow-hidden">
                         <div className="flex items-center gap-3 px-6 py-5 border-b border-white/[0.04] bg-white/[0.02]">
                           <div className="h-10 w-10 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center">
                             <FileText className="h-5 w-5 text-emerald-400" />
@@ -1042,7 +1042,7 @@ export default function CourseBuilder() {
                     </div>
 
                     <div className="lg:col-span-4 space-y-6">
-                      <div className="rounded-3xl border border-white/[0.04] bg-white/[0.01] overflow-hidden">
+                      <div className="rounded-[14px] border border-white/[0.04] bg-white/[0.01] overflow-hidden">
                         <div className="px-6 py-5 border-b border-white/[0.04] bg-white/[0.02] flex items-center justify-between">
                           <div className="flex items-center gap-3">
                             <div className="h-9 w-9 rounded-xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center">
@@ -1063,7 +1063,7 @@ export default function CourseBuilder() {
                           {attachments.length > 0 ? (
                             <div className="space-y-2">
                               {attachments.map(att => (
-                                <div key={att.id} className="group/att flex items-center gap-3 p-3 rounded-2xl border border-white/[0.03] bg-white/[0.01] hover:border-white/[0.1] hover:bg-white/[0.03] transition-all">
+                                <div key={att.id} className="group/att flex items-center gap-3 p-3 rounded-[12px] border border-white/[0.03] bg-white/[0.01] hover:border-white/[0.1] hover:bg-white/[0.03] transition-all">
                                   <div className="h-9 w-9 rounded-lg bg-zinc-900 border border-white/[0.05] flex items-center justify-center shrink-0">
                                     <File className="h-4 w-4 text-zinc-500" />
                                   </div>
@@ -1084,10 +1084,10 @@ export default function CourseBuilder() {
                             </div>
                           ) : (
                             <div
-                              className="border border-dashed border-white/[0.05] rounded-2xl py-12 flex flex-col items-center gap-4 text-zinc-600 hover:text-zinc-400 hover:border-white/[0.1] hover:bg-white/[0.01] transition-all cursor-pointer"
+                              className="border border-dashed border-white/[0.05] rounded-[12px] py-12 flex flex-col items-center gap-4 text-zinc-600 hover:text-zinc-400 hover:border-white/[0.1] hover:bg-white/[0.01] transition-all cursor-pointer"
                               onClick={() => attachmentInputRef.current?.click()}
                             >
-                              <div className="h-12 w-12 rounded-2xl bg-zinc-900 border border-white/[0.05] flex items-center justify-center">
+                              <div className="h-12 w-12 rounded-[12px] bg-zinc-900 border border-white/[0.05] flex items-center justify-center">
                                 <Plus className="h-5 w-5" />
                               </div>
                               <p className="text-[10px] font-black uppercase tracking-[0.2em]">Adicionar Anexos</p>
@@ -1103,10 +1103,10 @@ export default function CourseBuilder() {
                 {activeEditorTab === "settings" && (
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     {/* Duration */}
-                    <div className="rounded-3xl border border-white/[0.04] bg-white/[0.01] p-6 hover:bg-white/[0.02] transition-all group">
+                    <div className="rounded-[14px] border border-white/[0.04] bg-white/[0.01] p-6 hover:bg-white/[0.02] transition-all group">
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-4">
-                          <div className="h-12 w-12 rounded-2xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center group-hover:scale-110 transition-transform">
+                          <div className="h-12 w-12 rounded-[12px] bg-blue-500/10 border border-blue-500/20 flex items-center justify-center group-hover:scale-110 transition-transform">
                             <Clock className="h-5 w-5 text-blue-400" />
                           </div>
                           <div>
@@ -1126,10 +1126,10 @@ export default function CourseBuilder() {
                     </div>
 
                     {/* Free Lesson */}
-                    <div className="rounded-3xl border border-white/[0.04] bg-white/[0.01] p-6 hover:bg-white/[0.02] transition-all group">
+                    <div className="rounded-[14px] border border-white/[0.04] bg-white/[0.01] p-6 hover:bg-white/[0.02] transition-all group">
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-4">
-                          <div className="h-12 w-12 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center group-hover:scale-110 transition-transform">
+                          <div className="h-12 w-12 rounded-[12px] bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center group-hover:scale-110 transition-transform">
                             <Globe className="h-5 w-5 text-emerald-400" />
                           </div>
                           <div>
@@ -1142,10 +1142,10 @@ export default function CourseBuilder() {
                     </div>
 
                     {/* Drip */}
-                    <div className="rounded-3xl border border-white/[0.04] bg-white/[0.01] p-6 hover:bg-white/[0.02] transition-all group md:col-span-2">
+                    <div className="rounded-[14px] border border-white/[0.04] bg-white/[0.01] p-6 hover:bg-white/[0.02] transition-all group md:col-span-2">
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-4">
-                          <div className="h-12 w-12 rounded-2xl bg-orange-500/10 border border-orange-500/20 flex items-center justify-center group-hover:scale-110 transition-transform">
+                          <div className="h-12 w-12 rounded-[12px] bg-orange-500/10 border border-orange-500/20 flex items-center justify-center group-hover:scale-110 transition-transform">
                             <Calendar className="h-5 w-5 text-orange-400" />
                           </div>
                           <div>
@@ -1178,10 +1178,10 @@ export default function CourseBuilder() {
                     </div>
 
                     {/* Danger Zone */}
-                    <div className="rounded-3xl border border-red-500/10 bg-red-500/[0.02] p-6 hover:bg-red-500/[0.04] transition-all group md:col-span-2">
+                    <div className="rounded-[14px] border border-red-500/10 bg-red-500/[0.02] p-6 hover:bg-red-500/[0.04] transition-all group md:col-span-2">
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-4">
-                          <div className="h-12 w-12 rounded-2xl bg-red-500/10 border border-red-500/20 flex items-center justify-center group-hover:scale-110 transition-transform">
+                          <div className="h-12 w-12 rounded-[12px] bg-red-500/10 border border-red-500/20 flex items-center justify-center group-hover:scale-110 transition-transform">
                             <Trash2 className="h-5 w-5 text-red-400" />
                           </div>
                           <div>
@@ -1360,7 +1360,7 @@ export default function CourseBuilder() {
   <SheetContent className="w-full sm:max-w-lg overflow-y-auto bg-[#050505] border-white/[0.05] text-white">
   <SheetHeader className="mb-8">
   <SheetTitle className="font-display font-black text-2xl tracking-tight flex items-center gap-4">
-  <div className="h-12 w-12 rounded-2xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center">
+  <div className="h-12 w-12 rounded-[12px] bg-blue-500/10 border border-blue-500/20 flex items-center justify-center">
   <Settings className="h-6 w-6 text-blue-400" />
   </div>
   Ajustes da Área

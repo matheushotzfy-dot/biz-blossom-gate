@@ -171,12 +171,12 @@ export default function Afiliados() {
 
         <Dialog open={openCreate} onOpenChange={setOpenCreate}>
           <DialogTrigger asChild>
-            <button className="bg-primary text-white px-8 h-12 rounded-2xl font-black text-sm flex items-center gap-2 shadow-lg shadow-primary/20 hover:scale-[1.02] active:scale-[0.98] transition-all">
+            <button className="bg-primary text-white px-8 h-12 rounded-[12px] font-black text-sm flex items-center gap-2     transition-all">
               <Plus className="h-5 w-5" strokeWidth={2.5} />
               Novo link
             </button>
           </DialogTrigger>
-          <DialogContent className="max-w-md rounded-[2.5rem] p-0 overflow-hidden border-border/50 shadow-2xl">
+          <DialogContent className="max-w-md rounded-[2.5rem] p-0 overflow-hidden border-border/50 ">
             <div className="px-8 pt-8 pb-4">
               <DialogHeader>
                 <DialogTitle className="text-xl font-black flex items-center gap-3">
@@ -191,8 +191,8 @@ export default function Afiliados() {
               <div className="space-y-2">
                 <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/60 ml-1">Produto</Label>
                 <Select value={selectedProduct} onValueChange={setSelectedProduct}>
-                  <SelectTrigger className="h-12 rounded-2xl border-border/50 bg-muted/30 px-4 font-bold"><SelectValue placeholder="Selecione um produto" /></SelectTrigger>
-                  <SelectContent className="rounded-2xl border-border/50 shadow-xl p-2">
+                  <SelectTrigger className="h-12 rounded-[12px] border-border/50 bg-muted/30 px-4 font-bold"><SelectValue placeholder="Selecione um produto" /></SelectTrigger>
+                  <SelectContent className="rounded-[12px] border-border/50  p-2">
                     {affiliateProducts.length > 0 && (
                       <>
                         <div className="px-3 py-2 text-[9px] font-black uppercase tracking-widest text-muted-foreground/40">Seus Produtos</div>
@@ -216,7 +216,7 @@ export default function Afiliados() {
                   </SelectContent>
                 </Select>
               </div>
-              <Button onClick={handleCreateLink} className="w-full h-12 rounded-2xl font-black text-sm shadow-lg shadow-primary/20" disabled={!selectedProduct}>
+              <Button onClick={handleCreateLink} className="w-full h-12 rounded-[12px] font-black text-sm " disabled={!selectedProduct}>
                 Gerar Link Operacional
               </Button>
             </div>
@@ -258,14 +258,14 @@ export default function Afiliados() {
 
 
       {/* ─── Tabs ─── */}
-      <div className="flex items-center bg-muted/30 p-1 rounded-2xl border border-border/50 w-fit">
+      <div className="flex items-center bg-muted/30 p-1 rounded-[12px] border border-border/50 w-fit">
         {TABS.map(t => (
           <button
             key={t.id}
             onClick={() => { setTab(t.id); }}
             className={cn(
-              "px-6 py-2.5 rounded-xl text-xs font-black uppercase tracking-wider transition-all flex items-center gap-2",
-              tab === t.id ? "bg-card text-foreground shadow-sm ring-1 ring-border" : "text-muted-foreground hover:text-foreground"
+ "px-6 py-2.5 rounded-xl text-xs font-black uppercase tracking-wider transition-all flex items-center gap-2",
+              tab === t.id ? "bg-card text-foreground  ring-1 ring-border" : "text-muted-foreground hover:text-foreground"
             )}
           >
             <t.icon className="h-3.5 w-3.5" />
@@ -410,7 +410,7 @@ export default function Afiliados() {
                             <td className="px-8 py-4 text-right text-sm font-black text-success tabular-nums">{fmt(linkRevenue)}</td>
                             <td className="px-8 py-4 text-center">
                               <span className={cn(
-                                "inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-[10px] font-black border uppercase",
+ "inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-[10px] font-black border uppercase",
                                 link.is_active
                                   ? "bg-success/10 text-success border-success/20"
                                   : "bg-muted/30 text-muted-foreground border-border/30"
@@ -424,7 +424,7 @@ export default function Afiliados() {
                                 <button
                                   onClick={() => copyLink(link.slug)}
                                   className={cn(
-                                    "h-9 w-9 rounded-xl flex items-center justify-center transition-all border",
+ "h-9 w-9 rounded-xl flex items-center justify-center transition-all border",
                                     copiedSlug === link.slug
                                       ? "bg-success/10 text-success border-success/20"
                                       : "bg-card text-muted-foreground border-border/40 hover:bg-muted/30 hover:text-foreground"
@@ -505,7 +505,7 @@ export default function Afiliados() {
                 value={search}
                 onChange={e => setSearch(e.target.value)}
                 placeholder="Buscar produtos para afiliar..."
-                className="h-12 pl-12 rounded-2xl border-border/50 bg-card font-bold"
+                className="h-12 pl-12 rounded-[12px] border-border/50 bg-card font-bold"
               />
             </div>
             <div className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/40">
@@ -518,12 +518,12 @@ export default function Afiliados() {
               const pct = p.affiliate_commission || 30;
               const earnPerSale = (Number(p.price) * pct) / 100;
               return (
-                <Card key={p.id} className="p-6 group hover:scale-[1.01]">
+                <Card key={p.id} className="p-6 group ">
                    <div className="flex items-start gap-6">
                       {p.image_url ? (
-                        <img src={p.image_url} alt="" className="h-20 w-20 rounded-2xl object-cover ring-1 ring-border/30 shadow-lg" />
+                        <img src={p.image_url} alt="" className="h-20 w-20 rounded-[12px] object-cover ring-1 ring-border/30 " />
                       ) : (
-                        <div className="h-20 w-20 rounded-2xl bg-muted/40 flex items-center justify-center shrink-0">
+                        <div className="h-20 w-20 rounded-[12px] bg-muted/40 flex items-center justify-center shrink-0">
                           <ShoppingCart className="h-8 w-8 text-muted-foreground/30" />
                         </div>
                       )}
@@ -544,7 +544,7 @@ export default function Afiliados() {
                            </div>
                            <Button
                               onClick={() => { setSelectedProduct(p.id); setOpenCreate(true); }}
-                              className="h-10 px-6 rounded-xl font-black text-[11px] uppercase tracking-wider gap-2 shadow-lg shadow-primary/10"
+                              className="h-10 px-6 rounded-xl font-black text-[11px] uppercase tracking-wider gap-2 "
                            >
                               Solicitar Afiliação
                               <ArrowUpRight className="h-4 w-4" />
@@ -561,8 +561,8 @@ export default function Afiliados() {
 
       {/* Footer Info */}
       <div className="pt-8 border-t border-border/40">
-         <div className="bg-primary/[0.02] border border-primary/10 rounded-3xl p-6 flex items-center gap-6">
-            <div className="h-12 w-12 rounded-2xl bg-primary/10 flex items-center justify-center shrink-0">
+         <div className="bg-primary/[0.02] border border-primary/10 rounded-[14px] p-6 flex items-center gap-6">
+            <div className="h-12 w-12 rounded-[12px] bg-primary/10 flex items-center justify-center shrink-0">
                <Shield className="h-6 w-6 text-primary" />
             </div>
             <div>

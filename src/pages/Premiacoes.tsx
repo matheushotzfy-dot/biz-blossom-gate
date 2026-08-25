@@ -192,7 +192,7 @@ function UnlockCelebration({ tier, onClose, onClaim }: { tier: AwardItem; onClos
           </p>
           <div className="mt-4 flex items-center justify-center">
             <div
-              className="h-24 w-24 rounded-3xl border border-white/20 bg-white/[0.06] backdrop-blur-md flex items-center justify-center"
+              className="h-24 w-24 rounded-[14px] border border-white/20 bg-white/[0.06] backdrop-blur-md flex items-center justify-center"
               style={{ boxShadow: `0 20px 60px -10px hsl(var(--tier)/0.6), inset 0 1px 0 rgba(255,255,255,0.15)` }}
             >
               <TierIcon className="h-11 w-11 text-white" strokeWidth={1.75} style={{ filter: `drop-shadow(0 0 12px hsl(var(--tier)/0.9))` }} />
@@ -209,7 +209,7 @@ function UnlockCelebration({ tier, onClose, onClaim }: { tier: AwardItem; onClos
         {/* Phrase */}
         <div className="relative px-8 mt-6">
           <blockquote className="text-center text-white/85 text-[15px] leading-snug italic">
-            "{tier.phrase}"
+ "{tier.phrase}"
           </blockquote>
         </div>
 
@@ -230,7 +230,7 @@ function UnlockCelebration({ tier, onClose, onClaim }: { tier: AwardItem; onClos
         <div className="relative px-8 pt-8 pb-8 flex flex-col gap-2">
           <button
             onClick={onClaim}
-            className="relative overflow-hidden inline-flex items-center justify-center gap-2 h-13 py-3.5 rounded-full bg-gradient-to-r from-[hsl(var(--primary))] to-[hsl(var(--tier))] text-white font-display font-bold text-[13px] uppercase tracking-[0.14em] hover:scale-[1.02] transition-transform"
+            className="relative overflow-hidden inline-flex items-center justify-center gap-2 h-13 py-3.5 rounded-full bg-gradient-to-r from-[hsl(var(--primary))] to-[hsl(var(--tier))] text-white font-display font-bold text-[13px] uppercase tracking-[0.14em]  transition-transform"
             style={{ boxShadow: `0 12px 40px -8px hsl(var(--tier)/0.5)` }}
           >
             <Gift className="h-4 w-4" /> Solicitar meu troféu
@@ -456,8 +456,8 @@ export default function Premiacoes() {
                       src={focused.image}
                       alt={focused.title}
                       className={cn(
-                        "max-h-[72%] max-w-[82%] object-contain transition-all duration-700 animate-scale-in",
-                        "drop-shadow-[0_30px_50px_rgba(0,0,0,0.6)] drop-shadow-[0_0_40px_hsl(var(--tier)/0.45)]",
+ "max-h-[72%] max-w-[82%] object-contain transition-all duration-700 animate-scale-in",
+ "drop- drop-",
                         !focusedDone && "grayscale opacity-55"
                       )}
                     />
@@ -499,7 +499,7 @@ export default function Premiacoes() {
             <figure className="mt-7 relative pl-5">
               <span className="absolute left-0 top-1 bottom-1 w-[2px] rounded-full bg-gradient-to-b from-[hsl(var(--primary))] via-[hsl(var(--tier))] to-transparent" />
               <blockquote className="font-display text-[18px] leading-snug text-white/90 italic tracking-[-0.015em]">
-                "{focused.phrase}"
+ "{focused.phrase}"
               </blockquote>
             </figure>
 
@@ -555,9 +555,9 @@ export default function Premiacoes() {
                 onClick={() => focusedDone && !alreadyClaimed && setClaimOpen(true)}
                 disabled={!focusedDone || alreadyClaimed}
                 className={cn(
-                  "group relative overflow-hidden inline-flex items-center justify-between gap-3 px-6 h-14 rounded-full transition-all duration-300 flex-1 min-w-[240px]",
+ "group relative overflow-hidden inline-flex items-center justify-between gap-3 px-6 h-14 rounded-full transition-all duration-300 flex-1 min-w-[240px]",
                   focusedDone && !alreadyClaimed
-                    ? "bg-gradient-to-r from-[hsl(var(--primary))] via-[hsl(var(--primary))] to-[hsl(var(--tier))] text-primary-foreground hover:scale-[1.02] shadow-[0_10px_40px_-10px_hsl(var(--primary)/0.6)]"
+                    ? "bg-gradient-to-r from-[hsl(var(--primary))] via-[hsl(var(--primary))] to-[hsl(var(--tier))] text-primary-foreground "
                     : alreadyClaimed
                       ? "border border-white/15 bg-white/[0.04] text-white/60 cursor-default"
                       : "border border-white/10 bg-white/[0.02] text-white/45 cursor-default"
@@ -611,13 +611,13 @@ export default function Premiacoes() {
                 <button
                   key={a.id} onClick={() => setFocusId(a.id)}
                   className={cn(
-                    "group flex flex-col items-center gap-2 py-1 rounded-lg transition-all",
+ "group flex flex-col items-center gap-2 py-1 rounded-lg transition-all",
                     isFocused ? "text-white" : done ? "text-white/75 hover:text-white" : "text-white/35 hover:text-white/70"
                   )}
                 >
                   <span className={cn(
-                    "h-2 w-2 rounded-full transition-all duration-300",
-                    isFocused ? "bg-[hsl(var(--primary))] scale-[1.8] shadow-[0_0_12px_hsl(var(--primary))]"
+ "h-2 w-2 rounded-full transition-all duration-300",
+                    isFocused ? "bg-[hsl(var(--primary))] scale-[1.8] "
                     : done ? "bg-white" : "bg-white/25 group-hover:bg-white/50"
                   )} />
                   <span className="font-mono text-[9px] uppercase tracking-[0.18em] tabular-nums">{a.label}</span>
@@ -640,7 +640,7 @@ export default function Premiacoes() {
           return (
             <div
               key={s.k}
-              className="group relative overflow-hidden rounded-2xl border border-border/50 bg-card px-5 pt-5 pb-6 transition-colors hover:border-border"
+              className="group relative overflow-hidden rounded-[12px] border border-border/50 bg-card px-5 pt-5 pb-6 transition-colors hover:border-border"
             >
               <Icon
                 aria-hidden
@@ -659,7 +659,7 @@ export default function Premiacoes() {
 
 
       {/* =================== GRID =================== */}
-      <section className="relative overflow-hidden rounded-2xl border border-border/60 bg-card">
+      <section className="relative overflow-hidden rounded-[12px] border border-border/60 bg-card">
         <header className="flex flex-col gap-3 border-b border-border/40 px-5 py-5 sm:flex-row sm:items-center sm:justify-between sm:px-6">
           <div className="min-w-0">
             <h2 className="font-display text-[17px] font-bold leading-tight tracking-[-0.02em] text-foreground">Catálogo completo</h2>
@@ -677,7 +677,7 @@ export default function Premiacoes() {
                 key={opt.id}
                 onClick={() => setGridFilter(opt.id)}
                 className={cn(
-                  "shrink-0 rounded-lg border px-3 py-1.5 text-[12.5px] font-medium transition-colors",
+ "shrink-0 rounded-lg border px-3 py-1.5 text-[12.5px] font-medium transition-colors",
                   gridFilter === opt.id
                     ? "border-primary/40 bg-primary/10 text-primary"
                     : "border-border/50 text-muted-foreground hover:border-border hover:text-foreground"
@@ -708,7 +708,7 @@ export default function Premiacoes() {
                   onClick={() => setFocusId(a.id)}
                   style={{ ['--tier' as string]: a.accent } as React.CSSProperties}
                   className={cn(
-                    "group relative flex w-full flex-col overflow-hidden rounded-2xl border bg-background text-left transition-colors duration-200",
+ "group relative flex w-full flex-col overflow-hidden rounded-[12px] border bg-background text-left transition-colors duration-200",
                     isFocused
                       ? "border-primary/60 bg-primary/[0.04]"
                       : "border-border/50 hover:border-border"
@@ -719,7 +719,7 @@ export default function Premiacoes() {
                     <img
                       src={a.image} alt={a.title}
                       className={cn(
-                        "relative max-h-[78%] max-w-[78%] object-contain transition-transform duration-300 group-hover:scale-[1.04]",
+ "relative max-h-[78%] max-w-[78%] object-contain transition-transform duration-300 group-",
                         !done && "grayscale opacity-40 group-hover:opacity-60"
                       )}
                     />
@@ -761,13 +761,13 @@ export default function Premiacoes() {
 
         {/* Hall of fame strip */}
         <div className={cn(
-          "relative flex items-center gap-4 border-t border-border px-6 py-5 overflow-hidden",
+ "relative flex items-center gap-4 border-t border-border px-6 py-5 overflow-hidden",
           revenue >= AWARDS[AWARDS.length - 1].value && "bg-gradient-to-r from-primary/[0.08] via-transparent to-primary/[0.05]"
         )}>
           <div className={cn(
-            "h-12 w-12 rounded-2xl border flex items-center justify-center shrink-0 transition-colors",
+ "h-12 w-12 rounded-[12px] border flex items-center justify-center shrink-0 transition-colors",
             revenue >= AWARDS[AWARDS.length - 1].value
-              ? "border-primary bg-primary/15 text-primary shadow-[0_0_24px_hsl(var(--primary)/0.4)]"
+              ? "border-primary bg-primary/15 text-primary "
               : "border-border bg-background text-muted-foreground"
           )}>
             <Crown className="h-5 w-5" strokeWidth={2.25} />
@@ -827,7 +827,7 @@ export default function Premiacoes() {
                     </p>
                   </div>
                   <span className={cn(
-                    "inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border font-mono text-[10px] uppercase tracking-[0.2em]",
+ "inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border font-mono text-[10px] uppercase tracking-[0.2em]",
                     st.tone
                   )}>
                     <StIcon className="h-3 w-3" strokeWidth={2.5} />

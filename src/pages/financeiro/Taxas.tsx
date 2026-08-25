@@ -132,7 +132,7 @@ export default function Taxas() {
 
 
       {/* Withdrawal fee — clean row */}
-      <section className="group relative overflow-hidden rounded-2xl border border-border/50 bg-card px-6 py-5 flex items-center gap-4 transition-colors hover:border-border">
+      <section className="group relative overflow-hidden rounded-[12px] border border-border/50 bg-card px-6 py-5 flex items-center gap-4 transition-colors hover:border-border">
         <DollarSign className={cn("h-5 w-5 shrink-0 text-muted-foreground", toneIcon.primary)} strokeWidth={1.75} />
         <div className="flex-1 min-w-0">
           <p className="text-[13px] font-medium text-muted-foreground">Tarifa de saque</p>
@@ -144,7 +144,7 @@ export default function Taxas() {
       </section>
 
       {/* Prazos de liberação — collapsible */}
-      <section className="overflow-hidden rounded-2xl border border-border/50 bg-card">
+      <section className="overflow-hidden rounded-[12px] border border-border/50 bg-card">
         <button
           type="button"
           onClick={() => setDeadlinesOpen((v) => !v)}
@@ -162,7 +162,7 @@ export default function Taxas() {
 
         <div
           className={cn(
-            "grid transition-[grid-template-rows] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)]",
+ "grid transition-[grid-template-rows] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)]",
             deadlinesOpen ? "grid-rows-[1fr]" : "grid-rows-[0fr]"
           )}
         >
@@ -194,7 +194,7 @@ export default function Taxas() {
       </section>
 
       {/* Info footer */}
-      <section className="rounded-2xl border border-border/50 bg-card px-6 py-5 flex items-start gap-3">
+      <section className="rounded-[12px] border border-border/50 bg-card px-6 py-5 flex items-start gap-3">
         <Info className="h-4 w-4 shrink-0 mt-0.5 text-muted-foreground/60" strokeWidth={1.75} />
         <p className="text-[13px] text-muted-foreground/80 leading-relaxed">
           O custo total de cada venda é <span className="font-semibold text-foreground">percentual + taxa fixa</span> sobre o valor da transação.

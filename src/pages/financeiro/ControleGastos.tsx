@@ -157,7 +157,7 @@ export default function ControleGastos() {
         />
         <Button
           onClick={() => setDialogOpen(true)}
-          className="gap-2 rounded-xl text-sm font-bold h-10 px-5 shadow-lg shadow-primary/20"
+          className="gap-2 rounded-xl text-sm font-bold h-10 px-5 "
         >
           <Plus className="h-4 w-4" /> Registrar Gasto
         </Button>
@@ -289,7 +289,7 @@ export default function ControleGastos() {
                 <div
                   key={c.value}
                   className={cn(
-                    "grid grid-cols-12 items-center gap-4 px-5 py-3.5 transition-colors",
+ "grid grid-cols-12 items-center gap-4 px-5 py-3.5 transition-colors",
                     isEmpty ? "opacity-40" : "hover:bg-muted/10"
                   )}
                 >
@@ -441,7 +441,7 @@ export default function ControleGastos() {
 
       {/* ═══ Dialog ═══ */}
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-        <DialogContent className="max-w-md rounded-2xl border-border/40 bg-card/95 backdrop-blur-2xl shadow-2xl">
+        <DialogContent className="max-w-md rounded-[12px] border-border/40 bg-card/95 backdrop-blur-2xl ">
           <DialogHeader>
             <DialogTitle className="text-lg font-display font-black tracking-[-0.02em]">Registrar Gasto</DialogTitle>
           </DialogHeader>
@@ -455,9 +455,9 @@ export default function ControleGastos() {
                     type="button"
                     onClick={() => setForm(f => ({ ...f, category: c.value }))}
                     className={cn(
-                      "flex flex-col items-center gap-2 py-3.5 px-2 rounded-xl border transition-all duration-200 text-center active:scale-[0.97]",
+ "flex flex-col items-center gap-2 py-3.5 px-2 rounded-xl border transition-all duration-200 text-center ",
                       form.category === c.value
-                        ? "border-primary/30 bg-primary/[0.06] shadow-sm shadow-primary/5"
+                        ? "border-primary/30 bg-primary/[0.06] "
                         : "border-border/20 hover:border-border/40 hover:bg-muted/10"
                     )}
                   >
@@ -468,7 +468,7 @@ export default function ControleGastos() {
                       <c.icon className="h-4 w-4" style={{ color: c.color }} />
                     </div>
                     <span className={cn(
-                      "text-[10px] font-bold",
+ "text-[10px] font-bold",
                       form.category === c.value ? "text-primary" : "text-muted-foreground/60"
                     )}>
                       {c.label}
@@ -514,7 +514,7 @@ export default function ControleGastos() {
               </div>
             </div>
 
-            <Button type="submit" className="w-full font-bold h-11 rounded-xl shadow-lg shadow-primary/20">
+            <Button type="submit" className="w-full font-bold h-11 rounded-xl ">
               <Plus className="h-4 w-4 mr-2" />
               Registrar Gasto
             </Button>

@@ -244,7 +244,7 @@ export default function AdminConteudo() {
         <div className="flex flex-wrap items-end justify-between gap-8 animate-fade-in relative z-10">
           <div className="min-w-0">
             <div className="flex items-center gap-3 text-[11px] font-bold uppercase tracking-[0.3em] text-primary mb-4">
-              <div className="h-6 w-6 rounded-lg bg-primary/10 border border-primary/20 flex items-center justify-center text-[10px] font-bold text-primary shadow-[0_0_20px_rgba(var(--primary),0.1)]">V</div>
+              <div className="h-6 w-6 rounded-lg bg-primary/10 border border-primary/20 flex items-center justify-center text-[10px] font-bold text-primary ">V</div>
               VENXPAY STUDIO
             </div>
             <h1 className="font-display text-[48px] font-bold leading-[0.9] tracking-[-0.05em] text-foreground sm:text-[72px]">
@@ -256,7 +256,7 @@ export default function AdminConteudo() {
           </div>
           <button
             onClick={openNew}
-            className="group relative inline-flex h-12 items-center gap-2.5 overflow-hidden rounded-md bg-primary px-8 text-[12px] font-bold uppercase tracking-[0.18em] text-primary-foreground transition-all duration-300 hover:bg-primary/90 active:scale-[0.97] shadow-[0_4px_20px_rgba(var(--primary),0.2)]"
+            className="group relative inline-flex h-12 items-center gap-2.5 overflow-hidden rounded-md bg-primary px-8 text-[12px] font-bold uppercase tracking-[0.18em] text-primary-foreground transition-all duration-300 hover:bg-primary/90 "
           >
             <Plus className="h-4.5 w-4.5" strokeWidth={3} />
             Novo curso
@@ -268,7 +268,7 @@ export default function AdminConteudo() {
           {metricCards.map((item) => {
             const Icon = item.icon;
             return (
-              <div key={item.label} className="relative overflow-hidden rounded-xl border border-border/40 bg-card p-6 transition-all hover:border-primary/20 hover:shadow-lg hover:shadow-primary/5">
+              <div key={item.label} className="relative overflow-hidden rounded-xl border border-border/40 bg-card p-6 transition-all hover:border-primary/20 hover: ">
                 <div className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.22em] text-muted-foreground">
                   <div className="h-7 w-7 rounded-lg bg-primary/5 flex items-center justify-center text-primary">
                     <Icon className="h-3.5 w-3.5" strokeWidth={2.5} />
@@ -294,9 +294,9 @@ export default function AdminConteudo() {
                   key={tab.value}
                   onClick={() => setFilter(tab.value)}
                   className={cn(
-                    "relative flex items-center gap-2.5 h-10 px-5 text-[11px] font-bold uppercase tracking-[0.16em] rounded-md transition-all duration-200",
+ "relative flex items-center gap-2.5 h-10 px-5 text-[11px] font-bold uppercase tracking-[0.16em] rounded-md transition-all duration-200",
                     active
-                      ? "bg-primary text-primary-foreground shadow-lg"
+                      ? "bg-primary text-primary-foreground "
                       : "text-muted-foreground hover:text-foreground hover:bg-accent"
                   )}
                 >
@@ -306,7 +306,7 @@ export default function AdminConteudo() {
                   <span className="font-display">{tab.label === "published" ? "Live" : tab.label === "draft" ? "Draft" : tab.label}</span>
                   {tab.count > 0 && (
                     <span className={cn(
-                      "inline-flex h-[20px] min-w-[22px] items-center justify-center px-1.5 text-[10px] font-bold tabular-nums tracking-tight rounded",
+ "inline-flex h-[20px] min-w-[22px] items-center justify-center px-1.5 text-[10px] font-bold tabular-nums tracking-tight rounded",
                       active
                         ? "bg-primary-foreground/20 text-primary-foreground"
                         : "bg-muted text-muted-foreground/60"
@@ -339,8 +339,8 @@ export default function AdminConteudo() {
               <button
                 onClick={() => setViewMode("grid")}
                 className={cn(
-                  "flex h-10 w-10 items-center justify-center rounded-lg transition-all",
-                  viewMode === "grid" ? "bg-primary text-primary-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"
+ "flex h-10 w-10 items-center justify-center rounded-lg transition-all",
+                  viewMode === "grid" ? "bg-primary text-primary-foreground " : "text-muted-foreground hover:text-foreground"
                 )}
                 title="Grade"
               >
@@ -349,8 +349,8 @@ export default function AdminConteudo() {
               <button
                 onClick={() => setViewMode("list")}
                 className={cn(
-                  "flex h-10 w-10 items-center justify-center rounded-lg transition-all",
-                  viewMode === "list" ? "bg-primary text-primary-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"
+ "flex h-10 w-10 items-center justify-center rounded-lg transition-all",
+                  viewMode === "list" ? "bg-primary text-primary-foreground " : "text-muted-foreground hover:text-foreground"
                 )}
                 title="Lista"
               >
@@ -376,7 +376,7 @@ export default function AdminConteudo() {
           </div>
         ) : filteredCourses.length === 0 ? (
           <div className="flex min-h-[500px] flex-col items-center justify-center px-6 text-center animate-fade-in">
-            <div className="h-24 w-24 rounded-[32px] bg-card border border-border/40 flex items-center justify-center mb-8 shadow-xl relative group">
+            <div className="h-24 w-24 rounded-[32px] bg-card border border-border/40 flex items-center justify-center mb-8  relative group">
               <div className="absolute inset-0 bg-primary/5 rounded-[32px] blur-2xl group-hover:bg-primary/10 transition-all" />
               <GraduationCap className="h-10 w-10 text-muted-foreground/30 relative z-10" />
             </div>
@@ -389,7 +389,7 @@ export default function AdminConteudo() {
             {!emptyFiltered && (
               <button
                 onClick={openNew}
-                className="inline-flex h-12 items-center gap-3 rounded-md bg-primary px-10 text-[12px] font-bold uppercase tracking-[0.2em] text-primary-foreground hover:bg-primary/90 transition-all active:scale-[0.97] shadow-xl shadow-primary/20"
+                className="inline-flex h-12 items-center gap-3 rounded-md bg-primary px-10 text-[12px] font-bold uppercase tracking-[0.2em] text-primary-foreground hover:bg-primary/90 transition-all "
               >
                 <Plus className="h-5 w-5" strokeWidth={3} />
                 Criar área
@@ -419,7 +419,7 @@ export default function AdminConteudo() {
                 ))}
               </div>
             ) : (
-              <div className="rounded-2xl border border-white/[0.06] bg-zinc-900/10 backdrop-blur-md overflow-hidden">
+              <div className="rounded-[12px] border border-white/[0.06] bg-zinc-900/10 backdrop-blur-md overflow-hidden">
                 <table className="w-full text-left">
                   <thead>
                     <tr className="border-b border-white/[0.06] bg-zinc-900/30">
@@ -463,7 +463,7 @@ export default function AdminConteudo() {
       />
 
       <AlertDialog open={!!deleteTarget} onOpenChange={(open) => !open && setDeleteTarget(null)}>
-        <AlertDialogContent className="max-w-sm rounded-2xl bg-zinc-950 border-white/10">
+        <AlertDialogContent className="max-w-sm rounded-[12px] bg-zinc-950 border-white/10">
           <AlertDialogHeader>
             <AlertDialogTitle className="text-base font-semibold text-white">Excluir área de membros</AlertDialogTitle>
             <AlertDialogDescription className="text-[13px] text-zinc-400">

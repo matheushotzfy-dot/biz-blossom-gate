@@ -102,7 +102,7 @@ function DashboardLayoutInner() {
           <header className="relative z-30 h-16 flex items-center gap-2 border-b border-border bg-card px-4 lg:px-6 sticky top-0 md:flex transition-colors duration-300">
             <SidebarTrigger className="sidebar-toggle-fx group/trg seller-clickable icon-only relative h-10 w-10 rounded-xl border border-border/60 bg-muted/40 hover:bg-primary/10 hover:border-primary/50 flex items-center justify-center text-muted-foreground hover:text-primary transition-all duration-300 overflow-hidden">
               <span className="pointer-events-none absolute inset-0 bg-gradient-to-br from-primary/20 via-transparent to-transparent opacity-0 group-hover/trg:opacity-100 transition-opacity duration-300" />
-              <span className="pointer-events-none absolute -inset-1 rounded-2xl ring-1 ring-primary/0 group-hover/trg:ring-primary/30 transition" />
+              <span className="pointer-events-none absolute -inset-1 rounded-[12px] ring-1 ring-primary/0 group-hover/trg:ring-primary/30 transition" />
             </SidebarTrigger>
 
             {/* ─── COMMAND BAR ─── */}
@@ -221,7 +221,7 @@ function DashboardLayoutInner() {
  {showApproved && (
  <div className="fixed inset-0 z-[80] flex items-center justify-center p-4">
  <div className="absolute inset-0 bg-background/60 backdrop-blur-md" onClick={() => setShowApproved(false)} />
- <div className="relative w-full max-w-sm rounded-2xl border border-primary/30 bg-card shadow-2xl animate-scale-in overflow-hidden">
+ <div className="relative w-full max-w-sm rounded-[12px] border border-primary/30 bg-card  animate-scale-in overflow-hidden">
  <div className="absolute inset-0 bg-gradient-to-b from-primary/5 to-transparent pointer-events-none" />
  <button
  onClick={() => setShowApproved(false)}
@@ -239,7 +239,7 @@ function DashboardLayoutInner() {
  </p>
  <button
  onClick={() => setShowApproved(false)}
- className="w-full h-11 rounded-xl gradient-primary text-primary-foreground font-bold shadow-lg shadow-primary/15"
+ className="w-full h-11 rounded-xl gradient-primary text-primary-foreground font-bold "
  >
  Concluir
  </button>

@@ -151,7 +151,7 @@ export function GlobalSearchDialog({ open, onOpenChange }: { open: boolean; onOp
         <motion.div
           initial={{ opacity: 0, scale: 0.98, y: -10 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
-          className="w-full bg-card/95 backdrop-blur-3xl rounded-2xl border border-border/40 shadow-[0_32px_128px_-16px_rgba(0,0,0,0.5)] overflow-hidden flex flex-col outline-none"
+          className="w-full bg-card/95 backdrop-blur-3xl rounded-[12px] border border-border/40  overflow-hidden flex flex-col outline-none"
           onKeyDown={handleKeyDown}
           tabIndex={-1}
         >
@@ -190,12 +190,12 @@ export function GlobalSearchDialog({ open, onOpenChange }: { open: boolean; onOp
                       onClick={() => go(item.href)}
                       onMouseEnter={() => setSelectedIdx(idx)}
                       className={cn(
-                        "w-full flex items-center gap-3 p-2.5 rounded-lg transition-colors text-left",
+ "w-full flex items-center gap-3 p-2.5 rounded-lg transition-colors text-left",
                         isSelected ? "bg-secondary/80" : "hover:bg-muted/10"
                       )}
                     >
                       <div className={cn(
-                        "h-8 w-8 rounded-md flex items-center justify-center shrink-0 transition-colors",
+ "h-8 w-8 rounded-md flex items-center justify-center shrink-0 transition-colors",
                         isSelected ? "bg-primary/15 text-primary" : "bg-muted/40 text-muted-foreground/60"
                       )}>
                         <Icon className="h-4 w-4" strokeWidth={2.2} />

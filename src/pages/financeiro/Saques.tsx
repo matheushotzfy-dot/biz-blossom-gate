@@ -164,7 +164,7 @@ export default function Saques() {
         </div>
         <Dialog open={open} onOpenChange={handleOpenChange}>
           <DialogTrigger asChild>
-            <button className="bg-primary text-primary-foreground h-11 px-6 rounded-xl font-black text-sm hover:opacity-90 transition-all flex items-center gap-2 shadow-sm uppercase tracking-widest">
+            <button className="bg-primary text-primary-foreground h-11 px-6 rounded-xl font-black text-sm hover:opacity-90 transition-all flex items-center gap-2  uppercase tracking-widest">
               <Plus size={18} strokeWidth={3} /> Solicitar Saque
             </button>
           </DialogTrigger>
@@ -193,13 +193,13 @@ export default function Saques() {
 
               <div className="space-y-2">
                 <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Chave de recebimento</label>
-                <div className="overflow-hidden rounded-2xl border border-border/60 bg-background">
+                <div className="overflow-hidden rounded-[12px] border border-border/60 bg-background">
                   <div className="grid grid-cols-2 border-b border-border/40 p-1.5">
                     <button
                       type="button"
                       onClick={() => setPickedKey(pixKeys[0]?.id ?? "")}
                       className={cn(
-                        "flex h-10 items-center justify-center gap-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all duration-200",
+ "flex h-10 items-center justify-center gap-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all duration-200",
                         pickedKey !== "copy_paste"
                           ? "bg-primary text-primary-foreground"
                           : "text-muted-foreground hover:bg-primary/[0.06] hover:text-foreground",
@@ -211,7 +211,7 @@ export default function Saques() {
                       type="button"
                       onClick={() => setPickedKey("copy_paste")}
                       className={cn(
-                        "flex h-10 items-center justify-center gap-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all duration-200",
+ "flex h-10 items-center justify-center gap-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all duration-200",
                         pickedKey === "copy_paste"
                           ? "bg-primary text-primary-foreground"
                           : "text-muted-foreground hover:bg-primary/[0.06] hover:text-foreground",
@@ -268,14 +268,14 @@ export default function Saques() {
                               type="button"
                               onClick={() => setPickedKey(pk.id)}
                               className={cn(
-                                "group flex w-full items-start gap-3 rounded-xl border p-3 text-left transition-all duration-200",
+ "group flex w-full items-start gap-3 rounded-xl border p-3 text-left transition-all duration-200",
                                 active
                                   ? "border-primary/60 bg-primary/[0.07]"
-                                  : "border-border/60 bg-card hover:-translate-y-[1px] hover:border-primary/35 hover:bg-primary/[0.03]",
+                                  : "border-border/60 bg-card  hover:border-primary/35 hover:bg-primary/[0.03]",
                               )}
                             >
                               <span className={cn(
-                                "mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border transition-all duration-200",
+ "mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border transition-all duration-200",
                                 active ? "border-primary/45 bg-primary/[0.12] text-primary" : "border-border/60 bg-background text-muted-foreground group-hover:border-primary/30 group-hover:text-primary",
                               )}>
                                 <Key className="h-4 w-4" strokeWidth={2.5} />
@@ -301,7 +301,7 @@ export default function Saques() {
                 </div>
               </div>
 
-              <div className="bg-muted/30 p-5 rounded-2xl border border-border/60 space-y-3">
+              <div className="bg-muted/30 p-5 rounded-[12px] border border-border/60 space-y-3">
                 <div className="flex justify-between text-xs font-bold">
                   <span className="text-muted-foreground uppercase tracking-widest">Taxa Administrativa</span>
                   <span className="text-red-500">-{fmt(withdrawFee)}</span>
@@ -311,7 +311,7 @@ export default function Saques() {
                   <span className="text-2xl font-black text-emerald-500 tabular-nums">{fmt(netPreview)}</span>
                 </div>
               </div>
-              <button type="submit" className="w-full bg-primary text-primary-foreground h-14 rounded-2xl font-black uppercase tracking-widest text-xs shadow-lg shadow-primary/10">
+              <button type="submit" className="w-full bg-primary text-primary-foreground h-14 rounded-[12px] font-black uppercase tracking-widest text-xs ">
                 Confirmar Solicitação
               </button>
             </form>
@@ -323,7 +323,7 @@ export default function Saques() {
         {/* Balances Column */}
         <div className="lg:col-span-2 space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="bg-card p-8 rounded-[24px] border border-border/60 shadow-sm relative overflow-hidden group">
+            <div className="bg-card p-8 rounded-[24px] border border-border/60  relative overflow-hidden group">
               <div className="relative z-10">
                 <div className="flex items-center gap-2 text-muted-foreground/60 mb-3">
                   <Wallet size={16} />
@@ -335,7 +335,7 @@ export default function Saques() {
                 <Wallet size={160} />
               </div>
             </div>
-            <div className="bg-card p-8 rounded-[24px] border border-border/60 shadow-sm relative overflow-hidden group">
+            <div className="bg-card p-8 rounded-[24px] border border-border/60  relative overflow-hidden group">
               <div className="relative z-10">
                 <div className="flex items-center gap-2 text-muted-foreground/60 mb-3">
                   <Clock size={16} />
@@ -350,7 +350,7 @@ export default function Saques() {
           </div>
 
           {/* History Table */}
-          <div className="bg-card rounded-[24px] border border-border/60 shadow-sm overflow-hidden">
+          <div className="bg-card rounded-[24px] border border-border/60  overflow-hidden">
             <div className="p-6 border-b border-border/40 flex flex-col md:flex-row justify-between items-center gap-4">
               <div className="flex items-center gap-3">
                 <div className="h-10 w-10 bg-primary/10 border border-primary/10 rounded-xl flex items-center justify-center text-primary">
@@ -454,7 +454,7 @@ export default function Saques() {
 
         {/* Account Settings Column */}
         <div className="flex flex-col gap-4 h-full">
-          <div className="bg-card rounded-[24px] border border-border/60 shadow-sm overflow-hidden">
+          <div className="bg-card rounded-[24px] border border-border/60  overflow-hidden">
 
 
             <div className="p-6 border-b border-border/40">
@@ -480,7 +480,7 @@ export default function Saques() {
                 </div>
                 
                 {pixKeys.length === 0 ? (
-                  <div className="p-4 rounded-2xl bg-muted/30 border border-dashed border-border/60 text-center">
+                  <div className="p-4 rounded-[12px] bg-muted/30 border border-dashed border-border/60 text-center">
                     <p className="text-[10px] font-bold text-muted-foreground/60 uppercase">Nenhuma chave</p>
                   </div>
                 ) : (
@@ -507,7 +507,7 @@ export default function Saques() {
                 </div>
                 
                 {bankAccounts.length === 0 ? (
-                  <div className="p-4 rounded-2xl bg-muted/30 border border-dashed border-border/60 text-center">
+                  <div className="p-4 rounded-[12px] bg-muted/30 border border-dashed border-border/60 text-center">
                     <p className="text-[10px] font-bold text-muted-foreground/60 uppercase">Nenhuma conta</p>
                   </div>
                 ) : (
@@ -528,7 +528,7 @@ export default function Saques() {
                     Gerenciar Dados Bancários
                   </button>
                 </DialogTrigger>
-                <DialogContent className="max-w-2xl bg-background border-border/60 p-0 overflow-hidden rounded-3xl">
+                <DialogContent className="max-w-2xl bg-background border-border/60 p-0 overflow-hidden rounded-[14px]">
                   <div className="p-8">
                     <DadosBancarios />
                   </div>

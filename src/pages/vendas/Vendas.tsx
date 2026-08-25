@@ -158,18 +158,18 @@ export default function Vendas() {
   useEffect(() => { setPage(1); }, [search, range]);
 
   const buildRows = () => filtered.map((t) => ({
-    "ID da Transação": t.id,
-    "Data": spDateTime(t.created_at),
-    "Cliente": t.customer_name ?? "",
-    "Email": t.customer_email ?? "",
-    "Documento": t.customer_document ?? "",
-    "Telefone": t.customer_phone ?? "",
-    "Produto": prodsMap[t.product_id ?? ""] ?? "",
-    "Método": t.payment_method ?? "",
-    "Status": STATUS_MAP[deriveTransactionStatus(t)]?.label ?? t.status ?? "",
-    "Valor Bruto (R$)": Number(t.amount),
-    "Taxa (R$)": Number(t.fee_amount ?? 0),
-    "Valor Líquido (R$)": Number(t.net_amount ?? 0),
+ "ID da Transação": t.id,
+ "Data": spDateTime(t.created_at),
+ "Cliente": t.customer_name ?? "",
+ "Email": t.customer_email ?? "",
+ "Documento": t.customer_document ?? "",
+ "Telefone": t.customer_phone ?? "",
+ "Produto": prodsMap[t.product_id ?? ""] ?? "",
+ "Método": t.payment_method ?? "",
+ "Status": STATUS_MAP[deriveTransactionStatus(t)]?.label ?? t.status ?? "",
+ "Valor Bruto (R$)": Number(t.amount),
+ "Taxa (R$)": Number(t.fee_amount ?? 0),
+ "Valor Líquido (R$)": Number(t.net_amount ?? 0),
   }));
 
   const fileName = (ext: string) => {
@@ -305,13 +305,13 @@ export default function Vendas() {
                     p.id === "today" ? "Hoje" :
                     p.id === "7d" ? "7D" :
                     p.id === "15d" ? "15D" :
-                    "30D";
+ "30D";
                   return (
                     <button
                       key={p.id}
                       onClick={() => selectPreset(p.id)}
                       className={cn(
-                        "relative px-3.5 flex items-center justify-center text-[11px] font-black uppercase tracking-[0.14em] tabular-nums transition-colors duration-200 min-w-[54px]",
+ "relative px-3.5 flex items-center justify-center text-[11px] font-black uppercase tracking-[0.14em] tabular-nums transition-colors duration-200 min-w-[54px]",
                         isActive
                           ? "text-primary bg-primary/[0.08]"
                           : "text-muted-foreground/60 hover:text-foreground hover:bg-secondary/40"
@@ -327,7 +327,7 @@ export default function Vendas() {
                   <PopoverTrigger asChild>
                     <button
                       className={cn(
-                        "relative px-3.5 flex items-center gap-1.5 text-[11px] font-black uppercase tracking-[0.14em] transition-colors duration-200",
+ "relative px-3.5 flex items-center gap-1.5 text-[11px] font-black uppercase tracking-[0.14em] transition-colors duration-200",
                         preset === "custom"
                           ? "text-primary bg-primary/[0.08]"
                           : "text-muted-foreground/60 hover:text-foreground hover:bg-secondary/40"
@@ -431,7 +431,7 @@ export default function Vendas() {
 
 
       {/* Table Section */}
-      <div className="bg-card rounded-[24px] border border-border/60 shadow-sm overflow-hidden">
+      <div className="bg-card rounded-[24px] border border-border/60  overflow-hidden">
         <div className="p-6 border-b border-border/40 flex flex-col md:flex-row justify-between items-center gap-4">
           <div className="flex items-center gap-3">
             <div className="h-10 w-10 bg-primary/10 border border-primary/10 rounded-xl flex items-center justify-center text-primary">
@@ -477,7 +477,7 @@ export default function Vendas() {
             ))
           ) : txError ? (
             <div className="px-6 py-14 text-center flex flex-col items-center gap-3">
-              <div className="h-12 w-12 rounded-2xl bg-destructive/10 border border-destructive/20 flex items-center justify-center">
+              <div className="h-12 w-12 rounded-[12px] bg-destructive/10 border border-destructive/20 flex items-center justify-center">
                 <FileText size={20} className="text-destructive" />
               </div>
               <div>
@@ -490,7 +490,7 @@ export default function Vendas() {
             </div>
           ) : paged.length === 0 ? (
             <div className="px-6 py-14 text-center flex flex-col items-center gap-3">
-              <div className="h-14 w-14 rounded-2xl bg-muted/40 border border-border/60 flex items-center justify-center">
+              <div className="h-14 w-14 rounded-[12px] bg-muted/40 border border-border/60 flex items-center justify-center">
                 <ShoppingCart size={22} strokeWidth={1.5} className="text-muted-foreground/50" />
               </div>
               <div>
@@ -667,7 +667,7 @@ export default function Vendas() {
                     key={pageNum}
                     onClick={() => setPage(pageNum)}
                     className={cn(
-                      "h-8 min-w-8 px-2.5 rounded-md text-[11px] font-black tabular-nums transition-colors border",
+ "h-8 min-w-8 px-2.5 rounded-md text-[11px] font-black tabular-nums transition-colors border",
                       pageNum === currentPage
                         ? "bg-primary text-primary-foreground border-primary"
                         : "bg-card text-foreground/70 border-border/60 hover:bg-muted/50"

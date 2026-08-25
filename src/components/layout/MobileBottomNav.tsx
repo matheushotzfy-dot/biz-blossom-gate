@@ -80,7 +80,7 @@ export function MobileBottomNav() {
             className="absolute inset-0 bg-foreground/40 backdrop-blur-sm animate-in fade-in duration-200"
             onClick={() => setMoreOpen(false)}
           />
-          <div className="absolute bottom-0 left-0 right-0 bg-card border-t border-border rounded-t-[28px] max-h-[88vh] overflow-y-auto shadow-2xl animate-slide-up">
+          <div className="absolute bottom-0 left-0 right-0 bg-card border-t border-border rounded-t-[28px] max-h-[88vh] overflow-y-auto  animate-slide-up">
             {/* Handle */}
             <div className="sticky top-0 z-10 bg-card pt-3 pb-1 rounded-t-[28px]">
               <div className="flex justify-center">
@@ -109,7 +109,7 @@ export function MobileBottomNav() {
                   <p className="text-[10px] uppercase tracking-[0.22em] text-muted-foreground/60 font-black px-2 mb-2">
                     {group.label}
                   </p>
-                  <div className="rounded-2xl border border-border/60 bg-card/60 divide-y divide-border/40 overflow-hidden">
+                  <div className="rounded-[12px] border border-border/60 bg-card/60 divide-y divide-border/40 overflow-hidden">
                     {group.items.map((item) => {
                       const isActive = location.pathname === item.url || location.pathname.startsWith(item.url + "/");
                       const acc = ACCENTS[item.accent || "primary"];
@@ -119,12 +119,12 @@ export function MobileBottomNav() {
                           to={item.url}
                           onClick={() => setMoreOpen(false)}
                           className={cn(
-                            "flex items-center gap-3 px-3.5 py-3 active:bg-muted/40 transition-colors",
+ "flex items-center gap-3 px-3.5 py-3 active:bg-muted/40 transition-colors",
                             isActive && "bg-primary/[0.06]"
                           )}
                         >
                           <div className={cn(
-                            "h-10 w-10 rounded-xl border flex items-center justify-center shrink-0",
+ "h-10 w-10 rounded-xl border flex items-center justify-center shrink-0",
                             acc.wrap
                           )}>
                             <item.icon className={cn("h-[18px] w-[18px]", acc.icon)} strokeWidth={2.25} />
@@ -146,7 +146,7 @@ export function MobileBottomNav() {
               {/* Logout */}
               <button
                 onClick={handleLogout}
-                className="flex items-center justify-center gap-2 w-full py-3.5 rounded-2xl text-destructive bg-destructive/[0.08] border border-destructive/20 text-[12px] font-black uppercase tracking-wider active:scale-[0.98] transition-transform"
+                className="flex items-center justify-center gap-2 w-full py-3.5 rounded-[12px] text-destructive bg-destructive/[0.08] border border-destructive/20 text-[12px] font-black uppercase tracking-wider  transition-transform"
               >
                 <LogOut className="h-4 w-4" /> Sair da conta
               </button>
@@ -173,18 +173,18 @@ export function MobileBottomNav() {
                     else { setMoreOpen(false); navigate(tab.path); }
                   }}
                   className={cn(
-                    "relative flex flex-col items-center gap-0.5 py-1.5 px-2 min-w-[56px] active:scale-[0.92] transition-all duration-150",
+ "relative flex flex-col items-center gap-0.5 py-1.5 px-2 min-w-[56px]  transition-all duration-150",
                     isActive ? "text-primary" : "text-muted-foreground/70"
                   )}
                 >
                   <div className={cn(
-                    "h-8 w-11 rounded-[12px] flex items-center justify-center transition-all duration-200",
+ "h-8 w-11 rounded-[12px] flex items-center justify-center transition-all duration-200",
                     isActive && "bg-primary/[0.12]"
                   )}>
                     <tab.icon className={cn("h-[18px] w-[18px]", isActive && "stroke-[2.5]")} />
                   </div>
                   <span className={cn(
-                    "text-[9.5px] leading-none font-semibold tracking-tight",
+ "text-[9.5px] leading-none font-semibold tracking-tight",
                     isActive && "font-black"
                   )}>
                     {tab.label}

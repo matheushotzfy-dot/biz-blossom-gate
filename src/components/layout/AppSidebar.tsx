@@ -184,15 +184,15 @@ function SidebarSectionNav({ section, pathname, isFirst }: SidebarSectionNavProp
             const isActive = isItemActive(pathname, item);
             return (
               <SidebarMenuItem key={item.url}>
-                <SidebarMenuButton asChild className="h-auto rounded-2xl p-0 hover:bg-transparent active:bg-transparent group-data-[collapsible=icon]:!size-auto group-data-[collapsible=icon]:!p-0">
+                <SidebarMenuButton asChild className="h-auto rounded-[12px] p-0 hover:bg-transparent active:bg-transparent group-data-[collapsible=icon]:!size-auto group-data-[collapsible=icon]:!p-0">
                   <NavLink
                     to={item.url}
                     end={item.exact}
                     activeClassName=""
                     className={cn(
-                      "seller-nav-option group/nav relative flex h-[44px] w-full items-center gap-3 rounded-lg border border-transparent px-3 text-[13px] font-semibold",
-                      "transition-colors duration-150 ease-out",
-                      "group-data-[collapsible=icon]:h-11 group-data-[collapsible=icon]:w-11 group-data-[collapsible=icon]:mx-auto group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0 group-data-[collapsible=icon]:gap-0",
+ "seller-nav-option group/nav relative flex h-[44px] w-full items-center gap-3 rounded-lg border border-transparent px-3 text-[13px] font-semibold",
+ "transition-colors duration-150 ease-out",
+ "group-data-[collapsible=icon]:h-11 group-data-[collapsible=icon]:w-11 group-data-[collapsible=icon]:mx-auto group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0 group-data-[collapsible=icon]:gap-0",
                       isActive
                         ? "bg-sidebar-primary text-sidebar-primary-foreground"
                         : "text-sidebar-foreground/70 hover:bg-sidebar-accent/50 hover:text-sidebar-accent-foreground",
@@ -208,7 +208,7 @@ function SidebarSectionNav({ section, pathname, isFirst }: SidebarSectionNavProp
                     )}
                     <item.icon
                       className={cn(
-                        "h-[18px] w-[18px] transition-colors duration-150 ease-out group-data-[collapsible=icon]:h-5 group-data-[collapsible=icon]:w-5",
+ "h-[18px] w-[18px] transition-colors duration-150 ease-out group-data-[collapsible=icon]:h-5 group-data-[collapsible=icon]:w-5",
                         isActive
                           ? "text-primary-foreground"
                           : "text-muted-foreground/60 group-hover/nav:text-foreground",
@@ -230,8 +230,8 @@ function SidebarSectionNav({ section, pathname, isFirst }: SidebarSectionNavProp
                     )}
                     {item.count !== undefined && item.count > 0 && !item.badge && (
                       <span className={cn(
-                        "ml-auto rounded-md px-2 py-0.5 text-[11px] font-bold tabular-nums group-data-[collapsible=icon]:hidden",
-                        "transition-colors duration-[260ms] ease-[cubic-bezier(0.32,0.72,0,1)]",
+ "ml-auto rounded-md px-2 py-0.5 text-[11px] font-bold tabular-nums group-data-[collapsible=icon]:hidden",
+ "transition-colors duration-[260ms] ease-[cubic-bezier(0.32,0.72,0,1)]",
                         isActive
                           ? "bg-sidebar-primary-foreground/15 text-sidebar-primary-foreground"
                           : "bg-sidebar-border/50 text-sidebar-foreground/65 group-hover/nav:bg-sidebar-border group-hover/nav:text-foreground",

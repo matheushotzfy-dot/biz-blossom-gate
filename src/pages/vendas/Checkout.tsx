@@ -126,7 +126,7 @@ export default function Checkout() {
  {activeProducts.length === 0 ? (
  <Panel className="p-10 flex flex-col items-center text-center">
  <EmptyState icon={<Package className="h-7 w-7" />} title="Nenhum produto ativo" subtitle="Crie um produto para configurar seu checkout" />
- <Button className="mt-4 gap-2 rounded-xl gradient-primary text-primary-foreground font-bold shadow-lg shadow-primary/20" onClick={() => navigate("/vendas/produtos")}>
+ <Button className="mt-4 gap-2 rounded-xl gradient-primary text-primary-foreground font-bold " onClick={() => navigate("/vendas/produtos")}>
  <Plus className="h-4 w-4" /> Criar Produto
  </Button>
  </Panel>
@@ -177,7 +177,7 @@ export default function Checkout() {
  </div>
  )}
  <div className="flex items-center gap-1.5 mt-auto pt-2">
- <Button size="sm" className="gap-1.5 rounded-lg text-[11px] font-bold gradient-primary text-primary-foreground shadow-lg shadow-primary/20 h-8 hover:shadow-xl transition-all" onClick={() => setSettingsProduct(p)}>
+ <Button size="sm" className="gap-1.5 rounded-lg text-[11px] font-bold gradient-primary text-primary-foreground   h-8 hover: transition-all" onClick={() => setSettingsProduct(p)}>
  <Settings className="h-3 w-3" /> Personalizar
  </Button>
  {p.checkout_url && (
@@ -199,16 +199,16 @@ export default function Checkout() {
  action={
  <Dialog open={couponOpen} onOpenChange={setCouponOpen}>
  <DialogTrigger asChild>
- <Button className="gap-2 rounded-xl text-[13px] font-bold gradient-primary text-primary-foreground shadow-lg shadow-primary/20 hover:shadow-xl transition-all">
+ <Button className="gap-2 rounded-xl text-[13px] font-bold gradient-primary text-primary-foreground   hover: transition-all">
  <Plus className="h-4 w-4" /> Novo Cupom
  </Button>
  </DialogTrigger>
- <DialogContent className="max-w-md rounded-2xl border-border/60 bg-card/95 backdrop-blur-xl p-0 overflow-hidden">
- <div className="absolute inset-0 bg-gradient-to-b from-primary/[0.04] to-transparent rounded-2xl pointer-events-none" />
+ <DialogContent className="max-w-md rounded-[12px] border-border/60 bg-card/95 backdrop-blur-xl p-0 overflow-hidden">
+ <div className="absolute inset-0 bg-gradient-to-b from-primary/[0.04] to-transparent rounded-[12px] pointer-events-none" />
  <div className="relative px-6 pt-6 pb-4 border-b border-border/20">
  <DialogHeader>
  <DialogTitle className="font-display text-lg flex items-center gap-2.5">
- <div className="h-9 w-9 rounded-xl gradient-primary flex items-center justify-center shadow-lg shadow-primary/20">
+ <div className="h-9 w-9 rounded-xl gradient-primary flex items-center justify-center ">
  <Ticket className="h-4 w-4 text-primary-foreground" />
  </div>
  Novo Cupom
@@ -250,7 +250,7 @@ export default function Checkout() {
  <Input type="number" min="1" value={couponForm.max_uses} onChange={(e) => setCouponForm({ ...couponForm, max_uses: e.target.value })} placeholder="∞" className="mt-1.5 rounded-xl h-11" />
  </div>
  </div>
- <Button type="submit" className="w-full gradient-primary text-primary-foreground font-bold h-12 rounded-xl shadow-xl shadow-primary/15 text-sm">
+ <Button type="submit" className="w-full gradient-primary text-primary-foreground font-bold h-12 rounded-xl   text-sm">
  <Ticket className="h-4 w-4 mr-2" /> Criar Cupom
  </Button>
  </form>
@@ -312,7 +312,7 @@ export default function Checkout() {
  { n: "4", text: <>Crie cupons promocionais e vincule a produtos específicos.</> },
  ].map((step) => (
  <div key={step.n} className="flex gap-3">
- <span className="h-6 w-6 rounded-lg gradient-primary text-primary-foreground text-[11px] font-black flex items-center justify-center shrink-0 shadow-sm">{step.n}</span>
+ <span className="h-6 w-6 rounded-lg gradient-primary text-primary-foreground text-[11px] font-black flex items-center justify-center shrink-0 ">{step.n}</span>
  <p className="leading-relaxed">{step.text}</p>
  </div>
  ))}
