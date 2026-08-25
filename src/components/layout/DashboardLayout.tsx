@@ -102,7 +102,10 @@ function DashboardLayoutInner() {
    {/* Ambient light is handled by .ambient-backdrop CSS — no extra blobs needed */}
 
           <header className="relative z-30 h-[52px] flex items-center gap-1.5 border-b border-border bg-card px-3 lg:px-5 sticky top-0 md:flex transition-colors duration-300">
-            <SidebarTrigger className="seller-clickable icon-only relative h-8 w-8 rounded-[9px] border border-transparent bg-transparent flex items-center justify-center text-muted-foreground transition-colors duration-200 hover:border-border/70 hover:text-foreground" />
+            <SidebarTrigger className="seller-clickable icon-only relative h-8 w-8 rounded-[9px] border border-transparent bg-transparent flex items-center justify-center text-muted-foreground transition-colors duration-200 hover:border-border/70 hover:text-foreground [&>svg]:hidden">
+              <PanelToggleIcon size={17} />
+              <span className="sr-only">Alternar menu</span>
+            </SidebarTrigger>
 
             {/* ─── SEARCH (ícone apenas) ─── */}
             <button
