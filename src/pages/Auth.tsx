@@ -307,6 +307,8 @@ export default function Auth() {
               company_name: accountType === "cnpj" ? companyName.trim() : null,
               segment,
               monthly_revenue_band: monthlyRevenue,
+            },
+
 
             emailRedirectTo: `${window.location.origin}/auth/callback`,
           },
