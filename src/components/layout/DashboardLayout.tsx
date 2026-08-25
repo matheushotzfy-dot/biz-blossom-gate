@@ -43,7 +43,16 @@ function DashboardLayoutInner() {
    const [sidebarPinned, setSidebarPinned] = useState(() => {
      try { return localStorage.getItem("sidebar_pinned") !== "false"; } catch { return true; }
    });
-   const [sidebarHover, setSidebarHover] = useState(false);
+    const [sidebarHover, setSidebarHover] = useState(false);
+    const sidebarHoverTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+    const handleSidebarHover = (hovering: boolean) => {
+      if (sidebarHoverTimer.current) clearTimeout(sidebarHoverTimer.current);
+      if (hovering) {
+        setSidebarHover(true);
+        return;
+      }
+      sidebarHoverTimer.current = setTimeout(() => setSidebarHover(false), 140);
+    };
    const togglePin = () => {
      setSidebarPinned((prev) => {
        const next = !prev;
@@ -114,10 +123,10 @@ function DashboardLayoutInner() {
  <AppSidebar
    pinned={sidebarPinned}
    onTogglePin={togglePin}
-   onHoverChange={setSidebarHover}
+    onHoverChange={handleSidebarHover}
  />
 
-  <SidebarInset className="ambient-backdrop relative min-w-0 bg-transparent flex flex-col h-full min-h-0 overflow-hidden">
+  <SidebarInset className="ambient-backdrop dashboard-content-field relative min-w-0 bg-transparent flex flex-col h-full min-h-0 overflow-hidden">
 
           <header className="relative z-30 h-[52px] flex items-center gap-1.5 border-b border-border/60 bg-transparent px-3 lg:px-5 sticky top-0 md:flex transition-colors duration-300">
             <SidebarTrigger className="seller-clickable icon-only relative md:hidden h-8 w-8 rounded-[9px] border border-transparent bg-transparent flex items-center justify-center text-muted-foreground transition-colors duration-200 hover:border-border/70 hover:text-foreground [&>svg]:hidden">
