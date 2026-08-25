@@ -1,4 +1,4 @@
-|| "V";/**
+/**
  * Suporte — Central de Ajuda com conversa em thread
  * Layout inbox estilo Intercom: lista + conversa. Mobile empilha.
  */
