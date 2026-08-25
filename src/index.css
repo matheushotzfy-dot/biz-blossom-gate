@@ -56,9 +56,6 @@ input[type="number"]::-webkit-inner-spin-button {
     --warning-foreground: 0 0% 100%;
     --info: 160 84% 45%;
     --info-foreground: 0 0% 100%;
-    --instrument-surface: 210 40% 98%;
-    --instrument-foreground: 216 55% 10%;
-    --instrument-accent: 160 82% 42%;
   }
 
   .dark {
@@ -80,9 +77,6 @@ input[type="number"]::-webkit-inner-spin-button {
     --accent-foreground: 210 40% 98%;
     --destructive: 0 70% 55%;
     --destructive-foreground: 210 40% 99%;
-    --instrument-surface: 216 46% 12%;
-    --instrument-foreground: 211 45% 91%;
-    --instrument-accent: 160 82% 49%;
     --border: 222 47% 18%;
     --input: 222 47% 18%;
     --ring: 160 84% 50%;
