@@ -1,4 +1,4 @@
-/**
+|| "V";/**
  * Suporte — Central de Ajuda com conversa em thread
  * Layout inbox estilo Intercom: lista + conversa. Mobile empilha.
  */
@@ -107,7 +107,7 @@ const formatFull = (iso: string) =>
   new Intl.DateTimeFormat("pt-BR", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" }).format(new Date(iso));
 
 const initials = (name: string | null | undefined) => {
-  if (!name) return "H";
+  if (!name) return "V";
   const parts = name.trim().split(/\s+/);
   return ((parts[0]?.[0] ?? "") + (parts[1]?.[0] ?? "")).toUpperCase() || "H";
 };

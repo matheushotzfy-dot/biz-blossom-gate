@@ -116,7 +116,7 @@ export const ProductMock = memo(function ProductMock({ floats = true }: { floats
           {/* sidebar */}
           <aside className="hidden w-[190px] shrink-0 flex-col gap-1 border-r border-foreground/10 p-3 sm:flex">
             <div className="mb-3 flex items-center gap-2 px-2 py-1">
-              <span className="flex h-6 w-6 items-center justify-center rounded-md bg-emerald-400/15 text-[11px] font-black text-emerald-300">H</span>
+              <span className="flex h-6 w-6 items-center justify-center rounded-md bg-emerald-400/15 text-[11px] font-black text-emerald-300">V</span>
               <span className="text-[12.5px] font-bold tracking-tight text-foreground">VENXPAY</span>
             </div>
             {NAV.map(({ icon: Icon, label, active }) => (

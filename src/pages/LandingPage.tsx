@@ -138,7 +138,7 @@ function Reveal({ children, className, delay = 0 }: { children: ReactNode; class
 function Wordmark({ className }: { className?: string }) {
   return (
     <span className={cn("flex items-center gap-2 text-[15px] font-extrabold tracking-tight text-foreground", className)}>
-      <span className="lp-brand">H</span>
+      <span className="lp-brand">V</span>
       venxpay
     </span>
   );
