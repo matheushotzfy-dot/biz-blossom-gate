@@ -63,50 +63,6 @@ type PeriodPreset = (typeof PERIOD_PRESETS)[number];
 
 const CENSORED = "••••••";
 
-type MetricArtworkKind = "balance" | "received" | "secure" | "volume";
-
-function MetricArtwork({ kind }: { kind: MetricArtworkKind }) {
-  if (kind === "balance") {
-    return (
-      <svg aria-hidden viewBox="0 0 116 112" className="h-full w-full" fill="none">
-        <circle cx="58" cy="56" r="34" className="stroke-instrument-accent/25" />
-        <circle cx="58" cy="56" r="22" className="stroke-instrument-accent/55" strokeDasharray="3 5" />
-        <path d="M58 34v44M36 56h44" className="stroke-instrument-accent/80" strokeWidth="1.5" />
-        <circle cx="58" cy="56" r="4" className="fill-instrument-accent" />
-      </svg>
-    );
-  }
-  if (kind === "received") {
-    return (
-      <svg aria-hidden viewBox="0 0 116 112" className="h-full w-full" fill="none">
-        <path d="M22 72h19V55h18V41h33" className="stroke-instrument-accent/70" strokeWidth="2" />
-        <path d="m79 31 13 10-13 10" className="stroke-instrument-accent" strokeWidth="2" />
-        <path d="M22 83h70" className="stroke-instrument-accent/20" />
-        <circle cx="41" cy="72" r="3" className="fill-instrument-accent" />
-        <circle cx="59" cy="55" r="3" className="fill-instrument-accent" />
-      </svg>
-    );
-  }
-  if (kind === "secure") {
-    return (
-      <svg aria-hidden viewBox="0 0 116 112" className="h-full w-full" fill="none">
-        <path d="M58 22 87 34v23c0 19-11 29-29 35-18-6-29-16-29-35V34l29-12Z" className="stroke-destructive/45" strokeWidth="1.5" />
-        <path d="M46 56h24v19H46zM51 56v-6a7 7 0 0 1 14 0v6" className="stroke-destructive/80" strokeWidth="1.7" />
-        <circle cx="58" cy="65" r="2.5" className="fill-destructive" />
-      </svg>
-    );
-  }
-  return (
-    <svg aria-hidden viewBox="0 0 116 112" className="h-full w-full" fill="none">
-      <path d="M20 79 39 62l15 8 25-31 17 13" className="stroke-instrument-accent" strokeWidth="2" />
-      <path d="M20 88h76M29 25v63" className="stroke-instrument-accent/20" />
-      <path d="m82 39 14 13-18 2" className="fill-instrument-accent/20 stroke-instrument-accent/60" />
-      <circle cx="39" cy="62" r="3" className="fill-instrument-accent" />
-      <circle cx="54" cy="70" r="3" className="fill-instrument-accent" />
-    </svg>
-  );
-}
-
 function usePrivacyMode() {
   const [hidden, setHidden] = useState(() => {
     try { return localStorage.getItem("privacy_mode") === "true"; } catch { return false; }
@@ -828,37 +784,40 @@ export default function Dashboard() {
 
 
         {/* ═══════════ KPI CARDS ═══════════ */}
-        <section className="grid grid-cols-1 gap-3 font-dashboard sm:grid-cols-2 xl:grid-cols-[1.25fr_1.15fr_1fr_1.1fr]">
+        <section className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
           {[
-            { label: "Saldo disponível", value: fmt(Math.max(0, balance)), sub: "Pronto para saque", tone: "neutral" as const, art: "balance" as const },
-            { label: "Recebido hoje", value: fmt(receivedToday), sub: "Movimento confirmado", tone: "neutral" as const, art: "received" as const },
-            { label: "Em segurança", value: fmt(disputedAmount), sub: "MEDs e reservas", tone: "danger" as const, art: "secure" as const },
-            { label: "Volume total", value: fmt(revenue), sub: "Vendas acumuladas", tone: "revenue" as const, art: "volume" as const },
-          ].map((k, index) => {
+            { label: "Saldo disponível", value: fmt(Math.max(0, balance)), sub: "Pronto para saque", tone: "success" as const, icon: Wallet },
+            { label: "Recebido hoje", value: fmt(receivedToday), sub: "Movimento confirmado", tone: "primary" as const, icon: RefreshCw },
+            { label: "Em segurança", value: fmt(disputedAmount), sub: "MEDs e reservas", tone: "danger" as const, icon: ShieldCheck },
+            { label: "Volume total", value: fmt(revenue), sub: "Vendas acumuladas", tone: "success" as const, icon: TrendingUp },
+          ].map((k) => {
             const isDanger = k.tone === "danger";
+            const Icon = k.icon;
             return (
               <div
                 key={k.label}
-                className={cn(
-                  "group relative min-h-[158px] overflow-hidden rounded-[12px] border border-border bg-instrument-surface px-5 py-5 text-instrument-foreground transition-colors duration-200 hover:border-instrument-accent/55",
-                  index === 0 && "sm:col-span-2 xl:col-span-1",
-                )}
+                className="group relative min-h-[154px] overflow-hidden rounded-[12px] border border-border/70 bg-card px-5 py-5 transition-colors duration-200 hover:border-primary/35 hover:bg-card/95"
               >
-                <div className="pointer-events-none absolute inset-y-0 right-0 w-[42%] min-w-[104px] border-l border-border/70 bg-card-inset/55 p-2 transition-colors duration-200 group-hover:bg-card-inset/80">
-                  <MetricArtwork kind={k.art} />
+                <Icon
+                  aria-hidden
+                  strokeWidth={1.25}
+                  className={cn(
+                    "pointer-events-none absolute -bottom-4 -right-3 h-24 w-24 rotate-[-8deg] transition-colors duration-200",
+                    isDanger ? "text-destructive/[0.07] group-hover:text-destructive/[0.11]" : "text-primary/[0.07] group-hover:text-primary/[0.11]",
+                  )}
+                />
+                <div className={cn(
+                  "absolute right-4 top-4 flex h-10 w-10 items-center justify-center rounded-[10px] border bg-background/65 transition-colors duration-200",
+                  isDanger ? "border-destructive/20 text-destructive group-hover:border-destructive/35" : "border-border text-primary group-hover:border-primary/30",
+                )}>
+                  <Icon className="h-[18px] w-[18px]" strokeWidth={1.8} />
                 </div>
-                <div className="relative z-10 flex h-full max-w-[68%] flex-col">
-                  <div className="flex items-center gap-2">
-                    <span className={cn("h-1.5 w-1.5 rounded-full", isDanger ? "bg-destructive" : "bg-instrument-accent")} />
-                    <p className={cn("text-[13px] font-medium", isDanger ? "text-destructive" : "text-muted-foreground")}>{k.label}</p>
-                  </div>
-                  <p className="mt-5 whitespace-nowrap font-instrument text-[25px] leading-none text-instrument-foreground tabular-nums sm:text-[28px]">
+                <div className="relative z-10 flex h-full min-w-0 flex-col pr-11">
+                  <p className={cn("text-[13px] font-medium", isDanger ? "text-destructive/90" : "text-muted-foreground")}>{k.label}</p>
+                  <p className={cn("mt-5 whitespace-nowrap font-display text-[25px] font-bold leading-none tracking-[-0.02em] tabular-nums sm:text-[28px]", isDanger ? "text-destructive" : "text-foreground")}>
                   {privacy.hidden ? CENSORED : k.value}
                   </p>
-                  <div className="mt-auto flex items-center gap-2 pt-4 text-[11px] font-medium text-muted-foreground">
-                    <span className={cn("h-px w-5", isDanger ? "bg-destructive/55" : "bg-instrument-accent/55")} />
-                    <span className="truncate">{k.sub}</span>
-                  </div>
+                  <p className="mt-auto truncate pt-4 text-[11px] font-medium text-muted-foreground/65">{k.sub}</p>
                 </div>
               </div>
             );
@@ -866,7 +825,7 @@ export default function Dashboard() {
         </section>
 
         {/* ═══════════ QUICK ACTIONS ═══════════ */}
-        <section className="grid grid-cols-2 gap-px overflow-hidden rounded-[12px] border border-border bg-border font-dashboard xl:grid-cols-4">
+        <section className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
           {[
             { label: "Gerar PIX", sub: "QR Code para receber", icon: QrCode, onClick: () => { if (!requireApprovedAccount()) setPixDialogOpen(true); } },
             { label: "Solicitar Saque", sub: "Transferir via PIX", icon: ArrowDownRight, onClick: () => { if (!requireApprovedAccount()) navigate("/financeiro/saques"); } },
@@ -880,16 +839,16 @@ export default function Dashboard() {
                 variant="ghost"
                 key={a.label}
                 onClick={a.onClick}
-                className="group relative h-auto min-h-[78px] justify-start gap-3 overflow-hidden rounded-none border-0 bg-instrument-surface px-4 py-3 text-left text-instrument-foreground hover:bg-card-inset"
+                className="group relative h-auto min-h-[78px] justify-start gap-3 overflow-hidden rounded-[12px] border border-border/70 bg-card px-4 py-3 text-left text-foreground transition-colors duration-200 hover:border-primary/30 hover:bg-accent/30"
               >
-                <span className="relative flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-instrument-accent/30 bg-instrument-accent/10 text-instrument-accent transition-colors group-hover:bg-instrument-accent group-hover:text-primary-foreground">
+                <span className="relative flex h-10 w-10 shrink-0 items-center justify-center rounded-[10px] border border-primary/20 bg-primary/8 text-primary transition-colors duration-200 group-hover:border-primary/35 group-hover:bg-primary/12">
                   <Icon className="h-[17px] w-[17px]" strokeWidth={1.8} />
                 </span>
                 <div className="relative min-w-0 flex-1">
-                  <p className="text-[13px] font-semibold leading-tight text-instrument-foreground 2xl:text-[14px]">{a.label}</p>
+                  <p className="text-[13px] font-semibold leading-tight text-foreground 2xl:text-[14px]">{a.label}</p>
                   <p className="truncate text-[11px] font-normal text-muted-foreground">{a.sub}</p>
                 </div>
-                <span className="relative flex h-7 w-7 shrink-0 items-center justify-center rounded-full border border-border text-muted-foreground transition-colors group-hover:border-instrument-accent/35 group-hover:text-instrument-accent">
+                <span className="relative flex h-7 w-7 shrink-0 items-center justify-center rounded-[8px] text-muted-foreground/60 transition-colors duration-200 group-hover:text-primary">
                   <ChevronRight className="h-3.5 w-3.5" />
                 </span>
               </Button>
