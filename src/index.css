@@ -2127,6 +2127,7 @@ button svg, a svg, [role="button"] svg {
 .platform-shell {
   position: relative;
   isolation: isolate;
+  background-image: none !important;
 }
 
 .platform-shell::before {
