@@ -851,11 +851,11 @@ export default function Dashboard() {
                  <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-[9px] border border-border/60 bg-background/50 text-muted-foreground transition-colors group-hover:border-primary/30 group-hover:text-primary">
                    <Icon className="h-[18px] w-[18px]" strokeWidth={1.75} />
                  </span>
-                <div className="min-w-0 flex-1">
-                   <p className="font-display font-bold text-[14px] 2xl:text-[15px] tracking-[-0.01em] text-foreground truncate">{a.label}</p>
+                 <div className="min-w-0 flex-1 pr-2">
+                   <p className="font-display font-bold text-[13px] 2xl:text-[14px] tracking-[-0.01em] leading-tight text-foreground">{a.label}</p>
                   <p className="text-[12px] text-muted-foreground/60 truncate">{a.sub}</p>
                 </div>
-                <ChevronRight className="h-4 w-4 shrink-0 text-muted-foreground/30 transition-colors group-hover:text-foreground/60" />
+                 <ChevronRight className="absolute right-3 h-4 w-4 shrink-0 text-muted-foreground/30 transition-colors group-hover:text-foreground/60" />
               </button>
             );
           })}
