@@ -46,6 +46,8 @@ import type { DateRange } from "react-day-picker";
 import { Seo } from "@/components/Seo";
 import { accountNeedsVerification } from "@/components/AccountVerificationGate";
 import { toast } from "sonner";
+import { ChampionsBanner } from "@/components/dashboard/ChampionsBanner";
+
 
 const PERIOD_PRESETS = [
   { label: "Hoje", days: 0 },
@@ -712,50 +714,8 @@ export default function Dashboard() {
         </header>
 
         {/* ═══════════ HERO — RANKING BANNER ═══════════ */}
-        <section className="relative overflow-hidden rounded-2xl md:rounded-3xl border border-border/60 bg-gradient-to-r from-card to-background">
-          <div aria-hidden className="pointer-events-none absolute inset-0 opacity-30"
-            style={{ backgroundImage: "radial-gradient(45% 70% at 88% 60%, hsl(var(--primary)/0.22), transparent 65%)" }}
-          />
-          <div className="relative flex flex-col lg:flex-row items-center justify-between gap-6 p-6 md:p-8 lg:px-12">
-            {/* Left copy */}
-            <div className="flex-1 min-w-0 max-w-md space-y-3 text-center lg:text-left">
-              <span className="block text-[10px] font-bold uppercase tracking-[0.3em] text-primary">
-                Ranking Final
-              </span>
-              <h2 className="font-display font-extrabold italic uppercase text-3xl sm:text-4xl lg:text-5xl tracking-[-0.045em] leading-[0.9]">
-                Conheça os<br /><span className="text-primary">Campeões</span>
-              </h2>
-              <p className="text-muted-foreground text-[13px] font-medium leading-relaxed">
-                Os resultados estão definidos. Conheça os vencedores da Corrida de Faturamento.
-              </p>
-              <Link to="/premiacoes?tab=corrida" className="inline-flex items-center gap-2 rounded-xl bg-primary px-4 py-2.5 text-primary-foreground text-[13px] font-bold hover:bg-primary/90 transition-colors">
-                Ver ranking completo <ArrowRight className="h-4 w-4" />
-              </Link>
-            </div>
+        <ChampionsBanner hidden={privacy.hidden} />
 
-            {/* Podium visual */}
-            <div className="flex items-end gap-2 shrink-0">
-              {[
-                { pos: "02", name: "Airis Ferreira", h: "h-20 sm:h-24", w: "w-20 sm:w-24", num: "text-2xl sm:text-3xl text-muted-foreground/60", box: "bg-muted/40 border-x border-t border-border/70", leader: false },
-                { pos: "01", name: "Bryan Gonzaga", h: "h-32 sm:h-40", w: "w-24 sm:w-32", num: "text-4xl sm:text-5xl text-foreground/60", box: "bg-gradient-to-b from-muted to-muted/30 border-x border-t border-border", leader: true },
-                { pos: "03", name: "Wdzin", h: "h-16 sm:h-20", w: "w-20 sm:w-24", num: "text-xl sm:text-2xl text-muted-foreground/40", box: "bg-card border-x border-t border-border/60", leader: false },
-              ].map((p) => (
-                <div key={p.pos} className="flex flex-col items-center">
-                  {p.leader && (
-                    <span className="mb-2 rounded-full border border-primary/30 bg-primary/15 px-3 py-1 text-[10px] font-black uppercase tracking-wide text-primary">
-                      Líder
-                    </span>
-                  )}
-                  <span className={cn("mb-2 text-[11px] font-bold", p.leader ? "text-foreground" : "text-muted-foreground/70")}>{p.name}</span>
-                  <div className={cn("rounded-t-2xl flex items-center justify-center", p.h, p.w, p.box)}>
-                    <span className={cn("font-display font-black tabular-nums", p.num)}>{p.pos}</span>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-
-        </section>
 
 
         {/* ═══════════ 4 KPI CARDS ═══════════ */}
