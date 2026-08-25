@@ -2200,29 +2200,6 @@ button svg, a svg, [role="button"] svg {
   -webkit-overflow-scrolling: touch;
 }
 
-/* Mesmo acabamento estrutural da aba Vendas, sem brilho ou elevação artificial. */
-.dashboard-module,
-.dashboard-stat,
-.dashboard-action {
-  background-color: hsl(var(--card));
-  box-shadow: none;
-}
-
-.dashboard-module,
-.dashboard-stat {
-  position: relative;
-}
-
-.dashboard-module::before,
-.dashboard-stat::before {
-  content: '';
-  position: absolute;
-  inset: 0 auto 0 0;
-  width: 1px;
-  background: hsl(var(--primary) / 0.28);
-  pointer-events: none;
-}
-
 /* Quando solta, a lateral mantém uma coluna estável e abre por cima do conteúdo. */
 .sidebar-unpinned [data-sidebar="gap"] {
   width: var(--sidebar-width-icon) !important;
