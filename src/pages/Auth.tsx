@@ -610,38 +610,9 @@ export default function Auth() {
           </div>
         </div>
 
-        {/* ═══ RIGHT — cinematic ═══ */}
-        <div className="relative hidden overflow-hidden lg:block">
-          <img
-            src={authCinematic}
-            alt="Empreendedor operando suas vendas online em pleno deserto ao pôr do sol"
-            className="absolute inset-0 h-full w-full object-cover"
-            width={1280}
-            height={1600}
-          />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/55 via-transparent to-black/15" />
+        {/* ═══ RIGHT — painel autoral (sem fotos de terceiros) ═══ */}
+        <AuthAside className="hidden min-h-screen lg:block" />
 
-          <motion.div
-            initial={{ opacity: 0, y: 14 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.9, delay: 0.25, ease: [0.22, 1, 0.36, 1] }}
-            className="absolute bottom-24 left-14 right-14 max-w-[520px]"
-          >
-            <span className="mb-5 block h-px w-14 bg-white/45" />
-            <p className="text-[30px] font-light leading-[1.15] tracking-[-0.025em] text-white/95 xl:text-[36px]">
-              Suas vendas rodando<br />até no fim do mundo.
-            </p>
-            <p className="mt-3 max-w-[380px] text-[14px] leading-relaxed text-white/55">
-              Checkout, antifraude e liquidação em uma infraestrutura que não dorme.
-            </p>
-          </motion.div>
-
-
-          <div className="absolute bottom-10 left-14 right-14 flex items-center justify-between text-[12px] uppercase tracking-[0.24em] text-white/55">
-            <span>PIX · Cartão · Boleto</span>
-            <span>Saques D+0</span>
-          </div>
-        </div>
       </div>
     </div>
   );
