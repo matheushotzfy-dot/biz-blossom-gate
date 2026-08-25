@@ -3845,11 +3845,7 @@ html body .lp .lp-dot {
 
 /* destaque tipográfico */
 html body .lp .lp-highlight {
-  position: relative;
-  background: linear-gradient(96deg, hsl(152 78% 58%), hsl(170 74% 46%)) !important;
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent !important;
+  color: hsl(152 74% 55%) !important;
 }
 
 /* cartões e ícones */

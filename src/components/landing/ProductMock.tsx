@@ -90,7 +90,7 @@ function FloatCard({
   );
 }
 
-export const ProductMock = memo(function ProductMock() {
+export const ProductMock = memo(function ProductMock({ floats = true }: { floats?: boolean }) {
   return (
     <div className="relative mx-auto w-full max-w-[1100px] text-left">
       {/* halo sob o mockup */}
@@ -211,6 +211,7 @@ export const ProductMock = memo(function ProductMock() {
       </div>
 
       {/* cartões flutuantes */}
+      {floats && (<>
       <FloatCard
         className="-left-12 top-[56%]"
         delay={0.15}
@@ -235,6 +236,7 @@ export const ProductMock = memo(function ProductMock() {
         subtitle="Últimas 24 horas"
         value="+21,3%"
       />
+      </>)}
     </div>
   );
 });

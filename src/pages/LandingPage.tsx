@@ -278,7 +278,7 @@ export default function LandingPage() {
             <Reveal delay={0.1}>
               <div className="grid items-start gap-5 lg:grid-cols-[300px_1fr]">
                 <div className="hidden lg:block"><SalesFeed /></div>
-                <ProductMock />
+                <ProductMock floats={false} />
               </div>
             </Reveal>
           </div>
