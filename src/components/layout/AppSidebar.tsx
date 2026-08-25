@@ -103,60 +103,47 @@ function RevenueCard({ collapsed, revenue, milestone, onOpenRewards }: RevenueCa
     >
       {/* Header */}
       <div className="flex items-center justify-between">
-        <div className="flex items-center gap-1">
-          <TrendingUp className="h-2.5 w-2.5 text-sidebar-foreground/40" strokeWidth={2.5} />
-          <span className="font-display text-[8px] font-bold uppercase tracking-[0.18em] text-sidebar-foreground/50">
-            Faturamento
-          </span>
-        </div>
-        <span className="rounded border border-sidebar-primary/25 bg-sidebar-primary/10 px-1 py-[1px] font-display text-[7.5px] font-black uppercase tracking-[0.16em] text-sidebar-primary">
+        <span className="text-[11.5px] font-medium text-sidebar-foreground/55">Faturamento total</span>
+        <span className="rounded-[6px] border border-primary/30 px-1.5 py-[1px] text-[9.5px] font-semibold uppercase tracking-[0.1em] text-primary">
           {tierName}
         </span>
       </div>
 
       {/* Main figure */}
       <div className="mt-1.5 flex items-baseline gap-1">
-        <span className="font-numbers text-[11px] font-bold leading-none text-sidebar-foreground/45 tabular-nums">
+        <span className="font-numbers text-[12px] font-medium leading-none text-sidebar-foreground/45 tabular-nums">
           {parts.prefix}
         </span>
-        <p className="font-numbers text-[19px] font-black leading-none tracking-[-0.045em] text-sidebar-accent-foreground tabular-nums">
+        <p className="font-numbers text-[21px] font-bold leading-none tracking-[-0.03em] text-sidebar-accent-foreground tabular-nums">
           {parts.value}
-          <span className="ml-0.5 text-[13px] font-black text-sidebar-foreground/55">{parts.suffix}</span>
+          <span className="ml-0.5 text-[14px] font-bold text-sidebar-foreground/55">{parts.suffix}</span>
         </p>
-        <span className="ml-auto font-display text-[7.5px] font-bold uppercase tracking-[0.16em] text-sidebar-foreground/35">
-          total
-        </span>
       </div>
 
       {/* Progress bar */}
-      <div className="relative mt-2">
-        <div className="h-[3px] w-full overflow-hidden rounded-full bg-sidebar-border/50">
+      <div className="relative mt-2.5">
+        <div className="h-[3px] w-full overflow-hidden rounded-full bg-sidebar-border/60">
           <div
-            className="h-full rounded-full bg-sidebar-primary transition-[width] duration-700 ease-out"
+            className="h-full rounded-full bg-primary transition-[width] duration-700 ease-out"
             style={{ width: `${pct}%` }}
           />
         </div>
       </div>
 
       {/* Scale */}
-      <div className="mt-1 flex items-center justify-between font-numbers text-[8px] font-semibold tabular-nums text-sidebar-foreground/40">
+      <div className="mt-1.5 flex items-center justify-between font-numbers text-[10px] font-medium tabular-nums text-sidebar-foreground/40">
         <span>{milestone.current.label.replace(",", ".")}</span>
         <span>{milestone.next.label.replace(",", ".")}</span>
       </div>
 
       {/* Footer */}
-      <div className="mt-1.5 flex items-center justify-between border-t border-sidebar-border/40 pt-1.5">
-        <div className="flex items-baseline gap-1">
-          <span className="font-numbers text-[10px] font-black tabular-nums text-sidebar-accent-foreground">
-            {pctDisplay}%
-          </span>
-          <span className="font-display text-[7.5px] font-bold uppercase tracking-[0.14em] text-sidebar-foreground/40">
-            da meta
-          </span>
-        </div>
-        <span className="inline-flex items-center gap-0.5 font-display text-[8px] font-black uppercase tracking-[0.18em] text-sidebar-primary transition-transform group-hover/rev:translate-x-0.5">
-          PREMIAÇÕES
-          <ChevronRight className="h-2 w-2" strokeWidth={3} />
+      <div className="mt-2 flex items-center justify-between border-t border-sidebar-border/50 pt-2">
+        <span className="text-[11px] font-medium text-sidebar-foreground/50">
+          <span className="font-numbers font-semibold tabular-nums text-sidebar-accent-foreground">{pctDisplay}%</span> da meta
+        </span>
+        <span className="inline-flex items-center gap-0.5 text-[11px] font-medium text-primary">
+          Premiações
+          <ChevronRight className="h-3 w-3" strokeWidth={2.2} />
         </span>
       </div>
     </button>
