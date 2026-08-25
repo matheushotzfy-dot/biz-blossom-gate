@@ -39,6 +39,19 @@ function DashboardLayoutInner() {
    const [privacyHidden, setPrivacyHidden] = useState(() => {
      try { return localStorage.getItem("privacy_mode") === "true"; } catch { return false; }
    });
+   // Sidebar: fixada (pino) ou reduzida com expansão no hover
+   const [sidebarPinned, setSidebarPinned] = useState(() => {
+     try { return localStorage.getItem("sidebar_pinned") !== "false"; } catch { return true; }
+   });
+   const [sidebarHover, setSidebarHover] = useState(false);
+   const togglePin = () => {
+     setSidebarPinned((prev) => {
+       const next = !prev;
+       try { localStorage.setItem("sidebar_pinned", String(next)); } catch { /* noop */ }
+       return next;
+     });
+   };
+
 
    const togglePrivacy = () => {
      setPrivacyHidden(prev => {
