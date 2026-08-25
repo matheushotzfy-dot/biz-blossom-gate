@@ -1,28 +1,10 @@
 import {
-  LayoutDashboard,
-  BarChart3,
-  Package,
-  GraduationCap,
-  Users,
-  Layers,
-  Trophy,
-  FileText,
-  ArrowDownToLine,
-  Building2,
-  Puzzle,
-  User,
   LogOut,
   Headphones,
   MessageSquare,
-  Repeat,
-  Ticket,
-  Zap,
   ChevronRight,
-  Activity,
-  Crown,
-  type LucideIcon,
 } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, type ComponentType, type SVGProps } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { NavLink } from "@/components/NavLink";
 import { VenxpayLogo } from "@/components/VenxpayLogo";
@@ -30,6 +12,19 @@ import { useAuth } from "@/hooks/useAuth";
 import { useSupportUnread } from "@/hooks/useSupportUnread";
 import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
+import {
+  PinIcon,
+  GlyphDashboard,
+  GlyphSales,
+  GlyphProduct,
+  GlyphCoupon,
+  GlyphWithdraw,
+  GlyphFees,
+  GlyphApps,
+  GlyphProfile,
+  GlyphTrophy,
+  GlyphSupport,
+} from "@/components/icons/ShellIcons";
 import {
   Sidebar,
   SidebarContent,
@@ -44,6 +39,9 @@ import {
 } from "@/components/ui/sidebar";
 
 import { MILESTONES, getMilestone } from "@/lib/tiers";
+
+type GlyphIcon = ComponentType<SVGProps<SVGSVGElement> & { size?: number }>;
+
 
 type SidebarItem = {
   title: string;
