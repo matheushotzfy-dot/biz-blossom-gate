@@ -16,6 +16,7 @@ import { usePrefetchDashboardData, useTransactions, useWithdrawals, useLedgerBal
 import { useRealtimeSync } from "@/hooks/useRealtimeSync";
 import { useEffect, useRef, useState } from "react";
 import { useLocation } from "react-router-dom";
+import { cn } from "@/lib/utils";
 
 function DashboardLayoutInner() {
  const { user } = useAuth();
