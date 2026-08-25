@@ -785,10 +785,10 @@ export default function Dashboard() {
         {/* ═══════════ KPI CARDS ═══════════ */}
         <section className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
           {[
-            { label: "Saldo disponível", value: fmt(Math.max(0, balance)), sub: "Pronto para saque", icon: Wallet, tone: "neutral" as const, code: "BAL" },
-            { label: "Recebido hoje", value: fmt(receivedToday), sub: "Movimento confirmado", icon: RefreshCw, tone: "neutral" as const, code: "D+0" },
-            { label: "Em segurança", value: fmt(disputedAmount), sub: "MEDs e reservas", icon: Lock, tone: "danger" as const, code: "RSV" },
-            { label: "Volume total", value: fmt(revenue), sub: "Vendas acumuladas", icon: TrendingUp, tone: "revenue" as const, code: "TPV" },
+            { label: "Saldo disponível", value: fmt(Math.max(0, balance)), sub: "Pronto para saque", icon: Wallet, tone: "neutral" as const, code: "\n" },
+            { label: "Recebido hoje", value: fmt(receivedToday), sub: "Movimento confirmado", icon: RefreshCw, tone: "neutral" as const, code: "\n" },
+            { label: "Em segurança", value: fmt(disputedAmount), sub: "MEDs e reservas", icon: Lock, tone: "danger" as const, code: "\n" },
+            { label: "Volume total", value: fmt(revenue), sub: "Vendas acumuladas", icon: TrendingUp, tone: "revenue" as const, code: "\n" },
           ].map((k) => {
             const Icon = k.icon;
             const isDanger = k.tone === "danger";
