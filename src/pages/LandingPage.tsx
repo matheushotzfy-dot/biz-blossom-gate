@@ -475,7 +475,7 @@ export default function LandingPage() {
                       loading="lazy"
                       width={768}
                       height={960}
-                      className="h-60 w-full object-cover object-center"
+                      className="h-64 w-full object-cover object-top"
                     />
                     <div className="flex flex-1 flex-col p-6">
                       <div className="flex gap-0.5 text-primary">
