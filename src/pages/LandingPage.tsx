@@ -445,7 +445,6 @@ export default function LandingPage() {
               {[...INTEGRATIONS, ...INTEGRATIONS].map((it, i) => (
                 <div key={`${it.name}-${i}`} className="lp-logo">
                   <img src={it.src} alt={`Integração ${it.name}`} loading="lazy" width={120} height={40} />
-                  <span>{it.name}</span>
                 </div>
               ))}
             </div>
