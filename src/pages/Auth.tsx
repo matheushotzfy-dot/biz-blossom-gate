@@ -62,12 +62,43 @@ function getPasswordStrength(pw: string) {
   return { score: 3, label: "Forte", color: "bg-success", text: "text-success" };
 }
 
-const STEP_TITLES = [
-  { title: "Crie sua conta", sub: "Leva menos de um minuto." },
-  { title: "Contato e documento", sub: "Usamos para liberar seus recebimentos." },
-  { title: "Proteja sua conta", sub: "Uma senha forte e você está pronto." },
-  { title: "Tudo certo", sub: "Revise os dados antes de ativar." },
+/** Tipos de conta suportados no cadastro. */
+type AccountType = "cpf" | "cnpj";
+
+const ACCOUNT_TYPES: ReadonlyArray<{ value: AccountType; label: string; hint: string; icon: typeof User }> = [
+  { value: "cpf", label: "Pessoa física", hint: "Recebo com meu CPF", icon: User },
+  { value: "cnpj", label: "Pessoa jurídica", hint: "Tenho empresa aberta", icon: Building2 },
 ];
+
+const SEGMENTS = [
+  { value: "infoproduto", label: "Curso / Infoproduto" },
+  { value: "mentoria", label: "Mentoria ou consultoria" },
+  { value: "comunidade", label: "Comunidade / Assinatura" },
+  { value: "ebook", label: "E-book e materiais digitais" },
+  { value: "software", label: "Software ou SaaS" },
+  { value: "servico", label: "Prestação de serviço" },
+  { value: "fisico", label: "Produto físico" },
+  { value: "outro", label: "Outro" },
+] as const;
+
+const REVENUE_BANDS = [
+  { value: "ate_10k", label: "Até R$ 10 mil" },
+  { value: "10k_50k", label: "R$ 10 a 50 mil" },
+  { value: "50k_200k", label: "R$ 50 a 200 mil" },
+  { value: "acima_200k", label: "Acima de R$ 200 mil" },
+] as const;
+
+const STEP_TITLES = [
+  { tag: "Identificação", title: "Vamos começar", sub: "Escolha como você vai receber e diga seu nome." },
+  { tag: "Contato", title: "Como falamos com você", sub: "Avisos de venda, saque e segurança chegam por aqui." },
+  { tag: "Documento", title: "Confirme seu documento", sub: "Necessário para liberar seus recebimentos." },
+  { tag: "Operação", title: "Sobre o seu negócio", sub: "Isso ajusta limites e taxas ao seu perfil." },
+  { tag: "Segurança", title: "Proteja sua conta", sub: "Uma senha forte e você está pronto." },
+  { tag: "Revisão", title: "Tudo certo", sub: "Confira os dados antes de ativar a conta." },
+];
+
+const TOTAL_STEPS = STEP_TITLES.length;
+
 
 export default function Auth() {
   const [isLogin, setIsLogin] = useState(true);
