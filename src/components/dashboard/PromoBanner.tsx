@@ -225,15 +225,10 @@ export function PromoBanner({ periodControl }: { periodControl?: React.ReactNode
         <div className="relative hidden h-[176px] sm:block md:h-[196px]">
           <LiquidityPlate />
 
-          {/* floating engraved readouts */}
-          <div className="absolute left-1 top-1 rounded-lg border border-border/70 bg-background/85 px-2.5 py-1.5">
-            <p className="text-[10px] font-medium text-muted-foreground/70">Liquidação</p>
-            <p className="font-display text-[13px] font-bold tabular-nums leading-none text-foreground">D+0</p>
-          </div>
-          <div className="absolute bottom-2 left-1 rounded-lg border border-border/70 bg-background/85 px-2.5 py-1.5">
-            <p className="text-[10px] font-medium text-muted-foreground/70">Reserva</p>
-            <p className="font-display text-[13px] font-bold tabular-nums leading-none text-primary">0%</p>
-          </div>
+          {/* instrument readouts — sem caixa, ancorados no plate */}
+          <Readout label="Liquidação" value="D+0" className="absolute left-0 top-2" />
+          <Readout label="Reserva" value="0" unit="%" tone="primary" className="absolute bottom-3 left-0" />
+
 
         </div>
       </div>
