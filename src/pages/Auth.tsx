@@ -316,19 +316,26 @@ export default function Auth() {
 
             {/* Step rail */}
             {!isLogin && (
-              <div className="mt-6 flex items-center gap-2">
-                {[1, 2, 3, 4].map((s) => (
-                  <div
-                    key={s}
-                    className={cn(
-                      "h-[3px] flex-1 rounded-full transition-colors duration-300",
-                      s <= step ? "bg-primary" : "bg-white/10",
-                    )}
-                  />
-                ))}
-                <span className="ml-2 shrink-0 text-[11px] tabular-nums text-muted-foreground">{step}/4</span>
+              <div className="mt-6">
+                <div className="flex items-center gap-1.5">
+                  {Array.from({ length: TOTAL_STEPS }, (_, i) => i + 1).map((s) => (
+                    <div key={s} className="h-[3px] flex-1 overflow-hidden rounded-full bg-white/10">
+                      <motion.div
+                        className="h-full bg-primary"
+                        initial={false}
+                        animate={{ width: s <= step ? "100%" : "0%" }}
+                        transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
+                      />
+                    </div>
+                  ))}
+                </div>
+                <div className="mt-2.5 flex items-center justify-between text-[11px] text-muted-foreground">
+                  <span className="uppercase tracking-[0.18em]">{STEP_TITLES[step - 1].tag}</span>
+                  <span className="tabular-nums">Etapa {step} de {TOTAL_STEPS}</span>
+                </div>
               </div>
             )}
+
 
             <div className="mt-8">
               <AnimatePresence mode="wait">
