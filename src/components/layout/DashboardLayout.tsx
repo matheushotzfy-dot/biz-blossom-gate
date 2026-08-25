@@ -8,7 +8,7 @@ import { NotificationPanel, useNotificationCount } from "@/components/Notificati
 import { KycOnboardingPopup } from "@/components/KycOnboardingPopup";
 import { Outlet, useNavigate } from "react-router-dom";
 import { AlertTriangle, ArrowRight, X as XIcon, CheckCircle2, Wallet } from "lucide-react";
-import { ScanSearchIcon, IrisIcon, SunDialIcon, MoonDialIcon, SignalBellIcon } from "@/components/icons/ShellIcons";
+import { ScanSearchIcon, IrisIcon, SunDialIcon, MoonDialIcon, SignalBellIcon, PanelToggleIcon } from "@/components/icons/ShellIcons";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { useAuth } from "@/hooks/useAuth";
 import { useTheme } from "@/hooks/useTheme";
