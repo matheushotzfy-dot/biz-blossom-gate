@@ -381,7 +381,7 @@ export function AppSidebar({ pinned = true, onTogglePin, onHoverChange }: AppSid
                   : "text-sidebar-foreground/40 hover:text-foreground",
               )}
             >
-              <PinIcon size={15} filled={pinned} />
+              <PinIcon size={15} active={pinned} />
             </button>
           )}
         </div>
