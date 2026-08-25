@@ -455,9 +455,36 @@ export default function Auth() {
                     <div className="space-y-5">
                       {step === 1 && (
                         <>
+                          <div className="grid grid-cols-2 gap-3">
+                            {ACCOUNT_TYPES.map((t) => {
+                              const Icon = t.icon;
+                              const active = accountType === t.value;
+                              return (
+                                <button
+                                  key={t.value}
+                                  type="button"
+                                  onClick={() => { setAccountType(t.value); setDocument(""); setDocumentError(""); }}
+                                  aria-pressed={active}
+                                  className={cn(
+                                    "group relative rounded-[12px] border p-4 text-left transition-colors duration-200",
+                                    active ? "border-primary/70 bg-primary/[0.06]" : "border-border/60 hover:border-border",
+                                  )}
+                                >
+                                  <div className="flex items-center justify-between">
+                                    <Icon className={cn("h-[18px] w-[18px]", active ? "text-primary" : "text-muted-foreground")} />
+                                    <span className={cn("flex h-[18px] w-[18px] items-center justify-center rounded-full border transition-colors", active ? "border-primary bg-primary" : "border-border/70")}>
+                                      {active && <Check className="h-3 w-3 text-primary-foreground" />}
+                                    </span>
+                                  </div>
+                                  <p className="mt-3 text-[14px] font-semibold text-foreground">{t.label}</p>
+                                  <p className="mt-0.5 text-[12px] leading-snug text-muted-foreground">{t.hint}</p>
+                                </button>
+                              );
+                            })}
+                          </div>
                           <div>
                             <Label htmlFor="name" className={labelCls}>Nome completo</Label>
-                            <Input id="name" value={fullName} onChange={(e) => setFullName(e.target.value)} placeholder="Seu nome completo" className={inputCls} required />
+                            <Input id="name" value={fullName} onChange={(e) => setFullName(e.target.value)} placeholder="Como está no documento" className={inputCls} required />
                           </div>
                           <div>
                             <Label htmlFor="nickname" className={labelCls}>Como quer ser chamado?</Label>
@@ -471,11 +498,7 @@ export default function Auth() {
                           <div>
                             <Label htmlFor="signup-email" className={labelCls}>E-mail</Label>
                             <Input id="signup-email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="seu@email.com" className={inputCls} required />
-                          </div>
-                          <div>
-                            <Label htmlFor="document" className={labelCls}>CPF ou CNPJ</Label>
-                            <Input id="document" value={document} onChange={(e) => handleDocumentChange(e.target.value)} placeholder="000.000.000-00" inputMode="numeric" autoComplete="off" className={cn(inputCls, documentError && "border-destructive/60")} required />
-                            {documentError && <p className="mt-1.5 text-[12px] text-destructive">{documentError}</p>}
+                            <p className="mt-1.5 text-[12px] text-muted-foreground">Enviaremos avisos de venda e saque para este endereço.</p>
                           </div>
                           <div>
                             <Label htmlFor="phone" className={labelCls}>WhatsApp</Label>
@@ -500,32 +523,72 @@ export default function Auth() {
 
                       {step === 3 && (
                         <>
-                          <div>
-                            <Label htmlFor="signup-password" className={labelCls}>Senha</Label>
-                            <div className="relative">
-                              <Input id="signup-password" type={showPassword ? "text" : "password"} value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Digite a senha desejada" className={cn(inputCls, "pr-12")} required minLength={8} />
-                              <button type="button" aria-label="Alternar senha" onClick={() => setShowPassword(!showPassword)} className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground">
-                                {showPassword ? <EyeOff className="h-[18px] w-[18px]" /> : <Eye className="h-[18px] w-[18px]" />}
-                              </button>
+                          {accountType === "cnpj" && (
+                            <div>
+                              <Label htmlFor="company" className={labelCls}>Razão social</Label>
+                              <Input id="company" value={companyName} onChange={(e) => setCompanyName(e.target.value)} placeholder="Nome da empresa no CNPJ" className={inputCls} required />
                             </div>
-                            {password.length > 0 && (
-                              <div className="mt-2">
-                                <div className="flex items-center gap-2">
-                                  <div className="flex flex-1 gap-1">
-                                    {[1, 2, 3].map((i) => (
-                                      <div key={i} className={cn("h-[3px] flex-1 rounded-full", i <= pwStrength.score ? pwStrength.color : "bg-white/10")} />
-                                    ))}
-                                  </div>
-                                  <span className={cn("text-[11px] font-medium", pwStrength.text)}>{pwStrength.label}</span>
-                                </div>
-                                <p className="mt-1.5 text-[12px] text-muted-foreground">Use maiúscula, minúscula, número e 8+ caracteres.</p>
-                              </div>
-                            )}
+                          )}
+                          <div>
+                            <Label htmlFor="document" className={labelCls}>{accountType === "cnpj" ? "CNPJ" : "CPF"}</Label>
+                            <div className="relative">
+                              <Input
+                                id="document"
+                                value={document}
+                                onChange={(e) => handleDocumentChange(e.target.value)}
+                                placeholder={accountType === "cnpj" ? "00.000.000/0000-00" : "000.000.000-00"}
+                                inputMode="numeric"
+                                autoComplete="off"
+                                className={cn(inputCls, "pr-11", documentError && "border-destructive/60")}
+                                required
+                              />
+                              {documentValid && (
+                                <CheckCircle2 className="absolute right-4 top-1/2 h-[18px] w-[18px] -translate-y-1/2 text-success" />
+                              )}
+                            </div>
+                            {documentError && <p className="mt-1.5 flex items-center gap-1 text-[12px] text-destructive"><AlertTriangle className="h-3.5 w-3.5" />{documentError}</p>}
+                          </div>
+                          <div className="flex items-start gap-3 rounded-[10px] border border-border/60 px-4 py-3">
+                            <Shield className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
+                            <p className="text-[12.5px] leading-relaxed text-muted-foreground">
+                              O documento é usado apenas para validar seu recebimento e não pode ser alterado depois. Ele fica criptografado e nunca aparece para seus clientes.
+                            </p>
+                          </div>
+                        </>
+                      )}
+
+                      {step === 4 && (
+                        <>
+                          <div>
+                            <Label className={labelCls}>O que você vende?</Label>
+                            <Select value={segment} onValueChange={setSegment}>
+                              <SelectTrigger className={inputCls}><SelectValue placeholder="Selecione o segmento" /></SelectTrigger>
+                              <SelectContent className="rounded-[10px] border-border/70">
+                                {SEGMENTS.map((item) => <SelectItem key={item.value} value={item.value}>{item.label}</SelectItem>)}
+                              </SelectContent>
+                            </Select>
                           </div>
                           <div>
-                            <Label htmlFor="confirmPassword" className={labelCls}>Confirmar senha</Label>
-                            <Input id="confirmPassword" type="password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} placeholder="Digite a senha novamente" className={cn(inputCls, confirmPassword && password !== confirmPassword && "border-destructive/60")} required minLength={8} />
-                            {confirmPassword && password !== confirmPassword && <p className="mt-1.5 text-[12px] text-destructive">As senhas não coincidem</p>}
+                            <Label className={labelCls}>Faturamento mensal estimado</Label>
+                            <div className="grid grid-cols-2 gap-2">
+                              {REVENUE_BANDS.map((band) => {
+                                const active = monthlyRevenue === band.value;
+                                return (
+                                  <button
+                                    key={band.value}
+                                    type="button"
+                                    onClick={() => setMonthlyRevenue(band.value)}
+                                    aria-pressed={active}
+                                    className={cn(
+                                      "rounded-[10px] border px-3 py-3 text-[13px] font-medium tabular-nums transition-colors duration-200",
+                                      active ? "border-primary/70 bg-primary/[0.06] text-foreground" : "border-border/60 text-muted-foreground hover:border-border hover:text-foreground",
+                                    )}
+                                  >
+                                    {band.label}
+                                  </button>
+                                );
+                              })}
+                            </div>
                           </div>
                           <div>
                             <Label className={labelCls}>Onde conheceu a HOTZFY?</Label>
@@ -546,23 +609,56 @@ export default function Auth() {
                         </>
                       )}
 
-                      {step === 4 && (
+                      {step === 5 && (
+                        <>
+                          <div>
+                            <Label htmlFor="signup-password" className={labelCls}>Senha</Label>
+                            <div className="relative">
+                              <Input id="signup-password" type={showPassword ? "text" : "password"} value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Digite a senha desejada" className={cn(inputCls, "pr-12")} required minLength={8} />
+                              <button type="button" aria-label="Alternar senha" onClick={() => setShowPassword(!showPassword)} className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground">
+                                {showPassword ? <EyeOff className="h-[18px] w-[18px]" /> : <Eye className="h-[18px] w-[18px]" />}
+                              </button>
+                            </div>
+                            {password.length > 0 && (
+                              <div className="mt-2.5">
+                                <div className="flex items-center gap-2">
+                                  <div className="flex flex-1 gap-1">
+                                    {[1, 2, 3].map((i) => (
+                                      <div key={i} className={cn("h-[3px] flex-1 rounded-full transition-colors", i <= pwStrength.score ? pwStrength.color : "bg-white/10")} />
+                                    ))}
+                                  </div>
+                                  <span className={cn("text-[11px] font-medium", pwStrength.text)}>{pwStrength.label}</span>
+                                </div>
+                                <div className="mt-2.5 grid grid-cols-2 gap-x-4 gap-y-1.5">
+                                  {passwordRules.map((rule) => (
+                                    <span key={rule.label} className={cn("flex items-center gap-1.5 text-[12px]", rule.ok ? "text-success" : "text-muted-foreground")}>
+                                      <Check className={cn("h-3.5 w-3.5", rule.ok ? "opacity-100" : "opacity-30")} />
+                                      {rule.label}
+                                    </span>
+                                  ))}
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                          <div>
+                            <Label htmlFor="confirmPassword" className={labelCls}>Confirmar senha</Label>
+                            <Input id="confirmPassword" type="password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} placeholder="Digite a senha novamente" className={cn(inputCls, confirmPassword && password !== confirmPassword && "border-destructive/60")} required minLength={8} />
+                            {confirmPassword && password !== confirmPassword && <p className="mt-1.5 text-[12px] text-destructive">As senhas não coincidem</p>}
+                          </div>
+                        </>
+                      )}
+
+                      {step === 6 && (
                         <div className="space-y-4">
-                          <div className="divide-y divide-border/50 overflow-hidden rounded-[10px] border border-border/60">
-                            {[
-                              { label: "Nome", value: fullName },
-                              { label: "Apelido", value: nickname },
-                              { label: "E-mail", value: email },
-                              { label: "Documento", value: document },
-                              { label: "WhatsApp", value: phone },
-                            ].map((item) => (
-                              <div key={item.label} className="flex items-center justify-between px-4 py-3">
+                          <div className="divide-y divide-border/50 overflow-hidden rounded-[12px] border border-border/60">
+                            {summaryRows.map((item) => (
+                              <div key={item.label} className="flex items-center justify-between gap-4 px-4 py-3">
                                 <span className="text-[13px] text-muted-foreground">{item.label}</span>
-                                <span className="max-w-[60%] truncate text-[13px] font-medium text-foreground">{item.value || "—"}</span>
+                                <span className="max-w-[62%] truncate text-[13px] font-medium text-foreground">{item.value || "—"}</span>
                               </div>
                             ))}
                           </div>
-                          <label className="flex cursor-pointer items-start gap-3">
+                          <label className="flex cursor-pointer items-start gap-3 rounded-[10px] border border-border/60 p-4 transition-colors hover:border-border">
                             <input
                               type="checkbox"
                               checked={acceptTerms}
@@ -575,6 +671,7 @@ export default function Auth() {
                           </label>
                         </div>
                       )}
+
 
                       <div className="flex gap-3 pt-1">
                         {step > 1 && (
