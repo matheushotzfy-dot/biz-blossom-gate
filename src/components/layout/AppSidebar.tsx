@@ -190,8 +190,8 @@ function SidebarSectionNav({ section, pathname, isFirst }: SidebarSectionNavProp
                     end={item.exact}
                     activeClassName=""
                     className={cn(
- "seller-nav-option group/nav relative flex h-[44px] w-full items-center gap-3 rounded-lg border border-transparent px-3 text-[13px] font-semibold",
- "transition-colors duration-150 ease-out",
+                      "seller-nav-option group/nav relative flex h-[44px] w-full items-center gap-3 rounded-[10px] border border-transparent px-3 text-[13.5px] font-medium",
+                      "transition-colors duration-200 ease-out",
  "group-data-[collapsible=icon]:h-11 group-data-[collapsible=icon]:w-11 group-data-[collapsible=icon]:mx-auto group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0 group-data-[collapsible=icon]:gap-0",
                       isActive
                         ? "border-primary/60 bg-primary/[0.07] font-semibold text-foreground"
