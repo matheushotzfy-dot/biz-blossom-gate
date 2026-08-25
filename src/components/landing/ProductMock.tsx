@@ -92,7 +92,7 @@ function FloatCard({
 
 export const ProductMock = memo(function ProductMock() {
   return (
-    <div className="relative mx-auto w-full max-w-[1100px]">
+    <div className="relative mx-auto w-full max-w-[1100px] text-left">
       {/* halo sob o mockup */}
       <div aria-hidden className="tech-aurora pointer-events-none absolute -inset-x-16 -top-10 bottom-0 -z-10 rounded-[48px]" />
 
@@ -212,7 +212,7 @@ export const ProductMock = memo(function ProductMock() {
 
       {/* cartões flutuantes */}
       <FloatCard
-        className="-left-10 top-24 xl:-left-20"
+        className="-left-6 top-[38%] xl:-left-24"
         delay={0.15}
         icon={CheckCircle2}
         title="Venda aprovada"
@@ -220,7 +220,7 @@ export const ProductMock = memo(function ProductMock() {
         value="+ R$ 1.469"
       />
       <FloatCard
-        className="-right-8 top-44 xl:-right-16"
+        className="-right-6 top-[18%] xl:-right-24"
         delay={0.3}
         icon={Wallet}
         title="Saque liquidado"
@@ -228,7 +228,7 @@ export const ProductMock = memo(function ProductMock() {
         value="R$ 12.000"
       />
       <FloatCard
-        className="-left-6 bottom-16 xl:-left-14"
+        className="-left-4 bottom-10 xl:-left-20"
         delay={0.45}
         icon={ArrowUpRight}
         title="Conversão do checkout"
