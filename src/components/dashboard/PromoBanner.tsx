@@ -131,7 +131,7 @@ export function PromoBanner() {
         <div className="min-w-0">
           <div className="flex items-center gap-2.5">
             <span className="h-px w-6 bg-primary/60" />
-            <span className="text-[9px] font-bold uppercase tracking-[0.3em] text-primary">Infraestrutura Venxpay</span>
+            <span className="text-[11px] font-medium tracking-[0.02em] text-primary">Infraestrutura Venxpay</span>
           </div>
 
           <h2 className="mt-2.5 max-w-[16ch] font-display text-[22px] font-extrabold leading-[0.95] tracking-[-0.04em] text-foreground sm:text-[26px] lg:text-[30px]">
@@ -183,15 +183,15 @@ export function PromoBanner() {
 
           {/* floating engraved readouts */}
           <div className="absolute left-1 top-1 rounded-lg border border-border/70 bg-background/85 px-2.5 py-1.5">
-            <p className="text-[8.5px] font-bold uppercase tracking-[0.16em] text-muted-foreground/70">Liquidação</p>
+            <p className="text-[10px] font-medium text-muted-foreground/70">Liquidação</p>
             <p className="font-display text-[13px] font-bold tabular-nums leading-none text-foreground">D+0</p>
           </div>
           <div className="absolute bottom-2 left-1 rounded-lg border border-border/70 bg-background/85 px-2.5 py-1.5">
-            <p className="text-[8.5px] font-bold uppercase tracking-[0.16em] text-muted-foreground/70">Reserva</p>
+            <p className="text-[10px] font-medium text-muted-foreground/70">Reserva</p>
             <p className="font-display text-[13px] font-bold tabular-nums leading-none text-primary">0%</p>
           </div>
           <div className="absolute right-1 top-3 rounded-lg border border-primary/25 bg-primary/10 px-2.5 py-1.5">
-            <p className="text-[8.5px] font-bold uppercase tracking-[0.16em] text-primary/80">Autorização</p>
+            <p className="text-[10px] font-medium text-primary/80">Autorização</p>
             <p className="font-display text-[13px] font-bold tabular-nums leading-none text-foreground">118ms</p>
           </div>
         </div>

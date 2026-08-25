@@ -196,7 +196,7 @@ function DashboardPeriodFilter({
         <button className="inline-flex items-center gap-2 rounded-[12px] border border-border/60 bg-card/80 backdrop-blur px-4 py-3 hover:border-primary/40 transition-all">
           <CalendarDays className="h-4 w-4 text-primary" />
           <div className="text-left">
-            <p className="text-[9px] font-bold uppercase tracking-widest text-muted-foreground/70">Período</p>
+            <p className="text-[11px] font-medium text-muted-foreground/70">Período</p>
             <p className="text-[13px] font-black tabular-nums leading-none mt-0.5">{label}</p>
           </div>
           <ChevronRight className="h-4 w-4 text-muted-foreground/50 rotate-90" />
@@ -236,7 +236,7 @@ function DashboardPeriodFilter({
           </button>
         </div>
         <div className="border-t border-border/40 pt-3">
-          <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-2">Personalizado</p>
+          <p className="text-[11.5px] font-medium text-muted-foreground mb-2">Personalizado</p>
           <Calendar
             mode="range"
             selected={customRange}
@@ -649,7 +649,7 @@ export default function Dashboard() {
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2">
-                    <p className="truncate text-[9.5px] font-bold uppercase tracking-[0.14em] text-muted-foreground/70">
+                    <p className="truncate text-[11px] font-medium text-muted-foreground/70">
                       Faturamento · {isCustom ? "Período" : selectedPeriod.label}
                     </p>
                     {revenueTrend !== undefined && (
@@ -696,7 +696,7 @@ export default function Dashboard() {
                 </button>
               </div>
               <div className="border-t border-border/40 pt-3">
-                <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-2">Personalizado</p>
+                <p className="text-[11.5px] font-medium text-muted-foreground mb-2">Personalizado</p>
                 <Calendar
                   mode="range"
                   selected={customRange}
@@ -954,7 +954,7 @@ export default function Dashboard() {
           </div>
 
           {activity.length > 0 && (
-            <div className="hidden md:grid grid-cols-[1fr_100px_120px_110px_20px] gap-4 px-5 md:px-6 py-2 border-y border-border/40 bg-muted/20 text-[10px] font-semibold uppercase tracking-[0.1em] text-muted-foreground/60">
+            <div className="hidden md:grid grid-cols-[1fr_100px_120px_110px_20px] gap-4 px-5 md:px-6 py-2 border-y border-border/40 bg-muted/20 text-[11px] font-medium text-muted-foreground/60">
               <span>Cliente</span>
               <span>Método</span>
               <span className="text-right">Valor</span>
