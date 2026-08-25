@@ -212,7 +212,7 @@ export const ProductMock = memo(function ProductMock() {
 
       {/* cartões flutuantes */}
       <FloatCard
-        className="-left-10 top-[38%]"
+        className="-left-12 top-[56%]"
         delay={0.15}
         icon={CheckCircle2}
         title="Venda aprovada"
@@ -220,7 +220,7 @@ export const ProductMock = memo(function ProductMock() {
         value="+ R$ 1.469"
       />
       <FloatCard
-        className="-right-10 top-[16%]"
+        className="-right-12 top-[4%]"
         delay={0.3}
         icon={Wallet}
         title="Saque liquidado"
@@ -228,7 +228,7 @@ export const ProductMock = memo(function ProductMock() {
         value="R$ 12.000"
       />
       <FloatCard
-        className="-left-8 bottom-12"
+        className="-left-12 -bottom-6"
         delay={0.45}
         icon={ArrowUpRight}
         title="Conversão do checkout"
