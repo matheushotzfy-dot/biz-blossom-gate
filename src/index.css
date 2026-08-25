@@ -3581,3 +3581,123 @@ html body .tech-scope a,
 html body .tech-scope button { letter-spacing: 0 !important; }
 html body .tech-scope .text-balance { text-wrap: balance; }
 html body .tech-scope section { scroll-margin-top: 80px; }
+
+/* ==========================================================================
+   LANDING V4 — campanha fintech autoral
+   ========================================================================== */
+html.landing-scroll,
+html.landing-scroll body {
+  height: auto !important;
+  min-height: 100% !important;
+  overflow-x: hidden !important;
+  overflow-y: auto !important;
+  overscroll-behavior-y: auto !important;
+}
+
+html body .landing-v4 {
+  --background: 190 30% 4%;
+  --foreground: 151 59% 95%;
+  --card: 176 22% 8%;
+  --card-foreground: 151 59% 95%;
+  --muted: 174 17% 12%;
+  --muted-foreground: 164 10% 58%;
+  --border: 170 14% 17%;
+  --primary: 158 80% 51%;
+  --primary-foreground: 180 35% 4%;
+  font-family: 'Manrope', system-ui, sans-serif !important;
+  background: hsl(var(--background)) !important;
+}
+html body .landing-v4 h1,
+html body .landing-v4 h2,
+html body .landing-v4 h3 { font-family: 'Sora', system-ui, sans-serif !important; letter-spacing: 0 !important; }
+html body .landing-v4 p,
+html body .landing-v4 span,
+html body .landing-v4 a,
+html body .landing-v4 button { letter-spacing: 0 !important; }
+
+.brand-mark {
+  display: inline-grid;
+  width: 27px;
+  height: 27px;
+  place-items: center;
+  border: 1px solid hsl(var(--primary) / .45);
+  color: hsl(var(--primary));
+  font-size: 11px;
+}
+.landing-grid {
+  background-image: linear-gradient(hsl(var(--border) / .34) 1px, transparent 1px), linear-gradient(90deg, hsl(var(--border) / .34) 1px, transparent 1px) !important;
+  background-size: 72px 72px !important;
+  mask-image: linear-gradient(to bottom, #000, transparent 88%);
+  opacity: .55 !important;
+}
+.hero-field::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: radial-gradient(circle at 50% 36%, hsl(var(--primary) / .10), transparent 32%) !important;
+}
+.hero-beacon { background: linear-gradient(to bottom, hsl(var(--primary) / .7), transparent) !important; box-shadow: 0 0 70px 24px hsl(var(--primary) / .06) !important; }
+.hero-stroke { color: transparent; -webkit-text-stroke: 1px hsl(var(--foreground) / .68); }
+.hero-instrument { min-height: 560px; perspective: 1200px; }
+.instrument-axis { background: linear-gradient(90deg, transparent, hsl(var(--primary) / .38), transparent) !important; }
+.instrument-ring,
+.orbit,
+.cta-orbit {
+  border: 1px solid hsl(var(--primary) / .22);
+  border-radius: 9999px;
+  background-image: conic-gradient(from 20deg, transparent 0 18%, hsl(var(--primary) / .45) 18.2% 18.5%, transparent 18.7% 56%, hsl(var(--primary) / .25) 56.2% 56.5%, transparent 56.7%) !important;
+}
+.instrument-ring::before,
+.orbit::before {
+  content: "";
+  position: absolute;
+  inset: 9%;
+  border: 1px dashed hsl(var(--foreground) / .12);
+  border-radius: inherit;
+}
+.instrument-ring-inner { border-style: dashed; opacity: .7; }
+.hero-instrument > div:nth-of-type(4) { transform: rotateX(7deg); box-shadow: 0 50px 100px -55px hsl(var(--primary) / .44) !important; }
+.hero-signal {
+  position: absolute;
+  z-index: 20;
+  display: none;
+  align-items: center;
+  gap: 10px;
+  min-width: 190px;
+  border: 1px solid hsl(var(--border));
+  background: hsl(var(--background));
+  padding: 12px;
+  text-align: left;
+}
+.hero-signal b, .hero-signal small { display: block; }
+.hero-signal b { font-size: 10px; color: hsl(var(--foreground)); }
+.hero-signal small { margin-top: 3px; font-size: 8px; color: hsl(var(--muted-foreground)); }
+.engine-shell { background: hsl(var(--background)) !important; box-shadow: 0 45px 100px -70px hsl(var(--primary) / .5) !important; }
+.engine-grid { background-image: linear-gradient(hsl(var(--border) / .3) 1px, transparent 1px), linear-gradient(90deg, hsl(var(--border) / .3) 1px, transparent 1px) !important; background-size: 28px 28px !important; opacity: .5 !important; }
+.engine-status-dot { display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: hsl(var(--primary)); box-shadow: 0 0 0 4px hsl(var(--primary) / .1) !important; animation: enginePulse 2s ease-in-out infinite; }
+.engine-beam { background: hsl(var(--border)) !important; }
+.engine-beam::after { content: ""; position: absolute; top: -1px; width: 18%; height: 3px; background: linear-gradient(90deg, transparent, hsl(var(--primary)), transparent) !important; animation: engineTravel 3.2s linear infinite; }
+.engine-node { border-radius: 50%; }
+.engine-node > span { border-radius: 50%; }
+.conversion-scene { perspective: 1200px; }
+.checkout-device { box-shadow: 0 45px 100px -60px hsl(var(--primary) / .55) !important; transform-style: preserve-3d; }
+.orbit-outer { opacity: .48; }
+.orbit-inner { opacity: .65; border-style: dashed; }
+.scene-ticket { min-width: 142px; box-shadow: 0 22px 44px -28px hsl(var(--primary) / .45) !important; }
+.price-featured { box-shadow: inset 0 3px 0 hsl(var(--primary)) !important; }
+.cta-orbit { opacity: .35; }
+@keyframes enginePulse { 50% { opacity: .35; transform: scale(.75); } }
+@keyframes engineTravel { from { left: -18%; } to { left: 100%; } }
+
+@media (min-width: 1024px) {
+  .hero-signal { display: flex; }
+}
+@media (max-width: 639px) {
+  .hero-instrument { min-height: 470px; }
+  .hero-stroke { -webkit-text-stroke-width: .7px; }
+  .scene-ticket { transform: scale(.86); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .landing-v4 *, .landing-v4 *::before, .landing-v4 *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; scroll-behavior: auto !important; }
+}
