@@ -317,24 +317,27 @@ export default function QuickPixDialog({ open, onOpenChange }: Props) {
               onClick={handleSubmit}
               disabled={!valid || submitting}
               className={cn(
-                "w-full h-12 rounded-xl font-display font-black text-[12px] uppercase tracking-[0.14em] flex items-center justify-center gap-2",
-                "bg-primary text-primary-foreground border border-primary/40",
-                "shadow-[0_14px_34px_hsl(var(--primary)/0.18)] hover:-translate-y-px hover:bg-primary/90 hover:shadow-[0_18px_44px_hsl(var(--primary)/0.24)] active:translate-y-0 active:scale-[0.985]",
-                ease,
-                "disabled:opacity-40 disabled:cursor-not-allowed disabled:active:scale-100",
+                "group relative w-full h-12 overflow-hidden rounded-xl font-display text-[12.5px] font-bold uppercase tracking-[0.12em]",
+                "flex items-center justify-center gap-2 bg-primary text-primary-foreground",
+                "transition-colors duration-200 hover:bg-primary/90",
+                "disabled:opacity-40 disabled:cursor-not-allowed",
               )}
             >
               {submitting ? (
                 <>
                   <Loader2 className="h-4 w-4 animate-spin" />
-                  Gerando PIX...
+                  Gerando PIX…
                 </>
               ) : (
                 <>
-                  Gerar PIX · <span className="tabular-nums">{fmtBrl(amountCents)}</span>
+                  <QrCode className="h-4 w-4" strokeWidth={2.25} />
+                  Gerar PIX
+                  <span className="mx-1 h-3.5 w-px bg-primary-foreground/30" />
+                  <span className="tabular-nums">{fmtBrl(amountCents)}</span>
                 </>
               )}
             </button>
+
           </div>
         )}
 
