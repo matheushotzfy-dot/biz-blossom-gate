@@ -3974,16 +3974,19 @@ html body .lp .lp-mesh {
 @media (min-width: 640px) { html body .lp .lp-mesh { height: 250px; } }
 html body .lp .lp-mesh-svg {
   position: absolute;
-  inset: 20px 40px 34px;
-  width: calc(100% - 80px);
-  height: calc(100% - 54px);
+  inset: 18px 42px 26px;
+  width: calc(100% - 84px);
+  height: calc(100% - 44px);
   overflow: visible;
 }
 html body .lp .lp-mesh-nodes {
   position: absolute;
   inset: 18px 42px 26px;
 }
-@media (max-width: 640px) { html body .lp .lp-mesh-nodes { inset: 18px 30px 22px; } }
+@media (max-width: 640px) {
+  html body .lp .lp-mesh-nodes { inset: 18px 30px 22px; }
+  html body .lp .lp-mesh-svg { inset: 18px 30px 22px; width: calc(100% - 60px); height: calc(100% - 40px); }
+}
 html body .lp .lp-node {
   position: absolute;
   transform: translate(-50%, -50%);
