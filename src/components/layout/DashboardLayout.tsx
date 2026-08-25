@@ -111,7 +111,7 @@ function DashboardLayoutInner() {
               title="Buscar em tudo · ⌘K"
               className="seller-clickable icon-only mr-auto h-8 w-8 rounded-[9px] border border-transparent bg-transparent flex items-center justify-center text-muted-foreground transition-colors duration-200 hover:border-border/70 hover:text-foreground"
             >
-              <Search className="h-[15px] w-[15px]" strokeWidth={1.9} />
+              <ScanSearchIcon size={17} />
             </button>
 
             {/* ─── BALANCE ─── */}
@@ -143,7 +143,7 @@ function DashboardLayoutInner() {
                   privacyHidden ? "text-primary" : "text-muted-foreground",
                 )}
               >
-                {privacyHidden ? <EyeOff className="h-[15px] w-[15px]" strokeWidth={1.9} /> : <Eye className="h-[15px] w-[15px]" strokeWidth={1.9} />}
+                <IrisIcon size={17} off={privacyHidden} />
               </button>
 
               <button
@@ -151,7 +151,7 @@ function DashboardLayoutInner() {
                 aria-label="Alternar tema"
                 className="seller-clickable icon-only h-8 w-8 rounded-[9px] border border-transparent bg-transparent text-muted-foreground hover:border-border/70 hover:text-foreground flex items-center justify-center transition-colors duration-200"
               >
-                {theme === "dark" ? <Sun className="h-[15px] w-[15px]" strokeWidth={1.9} /> : <Moon className="h-[15px] w-[15px]" strokeWidth={1.9} />}
+                {theme === "dark" ? <SunDialIcon size={17} /> : <MoonDialIcon size={17} />}
               </button>
 
               <button
@@ -159,7 +159,7 @@ function DashboardLayoutInner() {
                 aria-label="Notificações"
                 className="seller-clickable icon-only relative h-8 w-8 rounded-[9px] border border-transparent bg-transparent text-muted-foreground hover:border-border/70 hover:text-foreground flex items-center justify-center transition-colors duration-200"
               >
-                <Bell className="h-[15px] w-[15px]" strokeWidth={1.9} />
+                <SignalBellIcon size={17} />
                 {unreadCount > 0 && (
                   <span className="absolute top-1 right-1 h-1.5 w-1.5 rounded-full bg-primary ring-2 ring-card" />
                 )}
