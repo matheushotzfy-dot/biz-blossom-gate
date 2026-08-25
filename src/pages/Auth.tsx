@@ -111,6 +111,10 @@ export default function Auth() {
   const [phone, setPhone] = useState("");
   const [document, setDocument] = useState("");
   const [documentError, setDocumentError] = useState("");
+  const [accountType, setAccountType] = useState<AccountType>("cpf");
+  const [companyName, setCompanyName] = useState("");
+  const [segment, setSegment] = useState("");
+  const [monthlyRevenue, setMonthlyRevenue] = useState("");
   const [referralSource, setReferralSource] = useState("");
   const [acceptTerms, setAcceptTerms] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
@@ -128,6 +132,31 @@ export default function Auth() {
 
   const pwStrength = getPasswordStrength(password);
   const newPwStrength = getPasswordStrength(newPassword);
+
+  const documentDigits = document.replace(/\D/g, "");
+  const documentValid =
+    accountType === "cpf" ? documentDigits.length === 11 && validateCPF(documentDigits)
+      : documentDigits.length === 14 && validateCNPJ(documentDigits);
+
+  const passwordRules = [
+    { label: "8+ caracteres", ok: password.length >= 8 },
+    { label: "1 letra maiúscula", ok: /[A-Z]/.test(password) },
+    { label: "1 letra minúscula", ok: /[a-z]/.test(password) },
+    { label: "1 número", ok: /\d/.test(password) },
+  ];
+
+  const summaryRows = [
+    { label: "Tipo de conta", value: accountType === "cnpj" ? "Pessoa jurídica" : "Pessoa física" },
+    { label: "Nome", value: fullName },
+    ...(accountType === "cnpj" ? [{ label: "Razão social", value: companyName }] : []),
+    { label: "Apelido", value: nickname },
+    { label: "E-mail", value: email },
+    { label: accountType === "cnpj" ? "CNPJ" : "CPF", value: document },
+    { label: "WhatsApp", value: phone },
+    { label: "Segmento", value: SEGMENTS.find((s) => s.value === segment)?.label ?? "" },
+    { label: "Faturamento", value: REVENUE_BANDS.find((b) => b.value === monthlyRevenue)?.label ?? "" },
+  ];
+
 
   useEffect(() => { setStep(1); }, [isLogin]);
   useEffect(() => { if (!isLogin) setRecoveryMode("idle"); }, [isLogin]);
