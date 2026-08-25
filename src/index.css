@@ -3922,3 +3922,154 @@ html body .lp .lp-logo span { font-size: 12.5px; color: hsl(var(--muted-foregrou
     animation-duration: .01ms !important; animation-iteration-count: 1 !important;
   }
 }
+
+/* =================================================================
+   LANDING · HERO STAGE (malha de liquidação)
+   Escopo restrito a `.lp` para não vazar no app interno.
+   ================================================================= */
+html body .lp .lp-stage-wrap {
+  position: relative;
+  perspective: 1600px;
+  transform-style: preserve-3d;
+}
+html body .lp .lp-stage-halo {
+  position: absolute;
+  inset: -8% -6% 6%;
+  z-index: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(58% 60% at 50% 30%, hsl(var(--primary) / 0.22), transparent 70%),
+    radial-gradient(40% 50% at 18% 70%, hsl(var(--primary) / 0.10), transparent 70%);
+  filter: blur(28px);
+}
+html body .lp .lp-stage {
+  position: relative;
+  z-index: 1;
+  overflow: hidden;
+  border: 1px solid hsl(var(--border));
+  border-radius: 22px;
+  background:
+    linear-gradient(180deg, hsl(var(--card) / 0.92), hsl(var(--background) / 0.96)),
+    repeating-linear-gradient(90deg, hsl(var(--primary) / 0.05) 0 1px, transparent 1px 44px),
+    repeating-linear-gradient(0deg, hsl(var(--primary) / 0.05) 0 1px, transparent 1px 44px);
+  box-shadow: 0 40px 90px -50px hsl(var(--primary) / 0.45) !important;
+  transform-style: preserve-3d;
+}
+html body .lp .lp-stage-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 18px;
+  border-bottom: 1px solid hsl(var(--border));
+  background: hsl(var(--background) / 0.6);
+}
+
+/* malha */
+html body .lp .lp-mesh {
+  position: relative;
+  height: 210px;
+  padding: 0 26px;
+}
+@media (min-width: 640px) { html body .lp .lp-mesh { height: 250px; } }
+html body .lp .lp-mesh-svg {
+  position: absolute;
+  inset: 20px 40px 34px;
+  width: calc(100% - 80px);
+  height: calc(100% - 54px);
+  overflow: visible;
+}
+html body .lp .lp-node {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  display: grid;
+  justify-items: center;
+  gap: 7px;
+  z-index: 2;
+}
+html body .lp .lp-node-dot {
+  display: grid;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  border-radius: 12px;
+  color: hsl(var(--primary));
+  border: 1px solid hsl(var(--primary) / 0.35);
+  background: hsl(var(--background));
+  box-shadow: 0 0 0 5px hsl(var(--primary) / 0.06) !important;
+}
+html body .lp .lp-node-label {
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: hsl(var(--muted-foreground));
+  white-space: nowrap;
+}
+@media (max-width: 640px) { html body .lp .lp-node-label { display: none; } }
+
+/* painéis */
+html body .lp .lp-stage-grid {
+  display: grid;
+  gap: 12px;
+  padding: 0 14px 14px;
+}
+@media (min-width: 900px) {
+  html body .lp .lp-stage-grid { grid-template-columns: 1.15fr 1fr; }
+}
+html body .lp .lp-panel {
+  border: 1px solid hsl(var(--border));
+  border-radius: 14px;
+  background: hsl(var(--card) / 0.7);
+  padding: 14px 16px;
+}
+html body .lp .lp-log {
+  display: grid;
+  grid-template-columns: 34px 1fr auto auto;
+  align-items: center;
+  gap: 10px;
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  font-size: 11px;
+}
+html body .lp .lp-log-m { color: hsl(var(--primary)); font-weight: 700; }
+html body .lp .lp-log-p { color: hsl(var(--foreground) / 0.82); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+html body .lp .lp-log-s {
+  color: hsl(var(--primary));
+  border: 1px solid hsl(var(--primary) / 0.3);
+  border-radius: 5px;
+  padding: 1px 5px;
+  font-size: 10px;
+}
+html body .lp .lp-log-t { color: hsl(var(--muted-foreground)); font-size: 10px; }
+
+/* varredura sutil */
+html body .lp .lp-scan {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(180deg, transparent 0%, hsl(var(--primary) / 0.06) 48%, transparent 100%);
+  transform: translateY(-100%);
+  animation: lp-scan 6.5s linear infinite;
+}
+@keyframes lp-scan {
+  0% { transform: translateY(-100%); }
+  100% { transform: translateY(100%); }
+}
+html body .lp .lp-ping { animation: lp-ping 1.8s ease-out infinite; transform-origin: center; }
+@keyframes lp-ping {
+  0%, 100% { opacity: 1; r: 2.6; }
+  50% { opacity: 0.35; r: 4.2; }
+}
+
+/* barra de progresso do scroll */
+html body .lp .lp-progress {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+  transform-origin: 0%;
+  background: linear-gradient(90deg, hsl(var(--primary)), hsl(var(--primary) / 0.35));
+  z-index: 60;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html body .lp .lp-scan, html body .lp .lp-ping { animation: none; }
+}
