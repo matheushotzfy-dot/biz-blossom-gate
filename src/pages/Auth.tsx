@@ -12,12 +12,13 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import {
   Eye, EyeOff, Shield, CheckCircle2, ArrowRight, Lock,
-  KeyRound, RotateCcw, AlertTriangle,
+  KeyRound, RotateCcw, AlertTriangle, User, Building2, Check,
 } from "lucide-react";
+
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { motion, AnimatePresence } from "framer-motion";
-import authCinematic from "@/assets/auth-cinematic.jpg";
+import { AuthAside } from "@/components/auth/AuthAside";
 import { HotzfyLogo } from "@/components/HotzfyLogo";
 import { Seo } from "@/components/Seo";
 import { friendlyError } from "@/lib/friendlyError";
@@ -62,12 +63,43 @@ function getPasswordStrength(pw: string) {
   return { score: 3, label: "Forte", color: "bg-success", text: "text-success" };
 }
 
-const STEP_TITLES = [
-  { title: "Crie sua conta", sub: "Leva menos de um minuto." },
-  { title: "Contato e documento", sub: "Usamos para liberar seus recebimentos." },
-  { title: "Proteja sua conta", sub: "Uma senha forte e você está pronto." },
-  { title: "Tudo certo", sub: "Revise os dados antes de ativar." },
+/** Tipos de conta suportados no cadastro. */
+type AccountType = "cpf" | "cnpj";
+
+const ACCOUNT_TYPES: ReadonlyArray<{ value: AccountType; label: string; hint: string; icon: typeof User }> = [
+  { value: "cpf", label: "Pessoa física", hint: "Recebo com meu CPF", icon: User },
+  { value: "cnpj", label: "Pessoa jurídica", hint: "Tenho empresa aberta", icon: Building2 },
 ];
+
+const SEGMENTS = [
+  { value: "infoproduto", label: "Curso / Infoproduto" },
+  { value: "mentoria", label: "Mentoria ou consultoria" },
+  { value: "comunidade", label: "Comunidade / Assinatura" },
+  { value: "ebook", label: "E-book e materiais digitais" },
+  { value: "software", label: "Software ou SaaS" },
+  { value: "servico", label: "Prestação de serviço" },
+  { value: "fisico", label: "Produto físico" },
+  { value: "outro", label: "Outro" },
+] as const;
+
+const REVENUE_BANDS = [
+  { value: "ate_10k", label: "Até R$ 10 mil" },
+  { value: "10k_50k", label: "R$ 10 a 50 mil" },
+  { value: "50k_200k", label: "R$ 50 a 200 mil" },
+  { value: "acima_200k", label: "Acima de R$ 200 mil" },
+] as const;
+
+const STEP_TITLES = [
+  { tag: "Identificação", title: "Vamos começar", sub: "Escolha como você vai receber e diga seu nome." },
+  { tag: "Contato", title: "Como falamos com você", sub: "Avisos de venda, saque e segurança chegam por aqui." },
+  { tag: "Documento", title: "Confirme seu documento", sub: "Necessário para liberar seus recebimentos." },
+  { tag: "Operação", title: "Sobre o seu negócio", sub: "Isso ajusta limites e taxas ao seu perfil." },
+  { tag: "Segurança", title: "Proteja sua conta", sub: "Uma senha forte e você está pronto." },
+  { tag: "Revisão", title: "Tudo certo", sub: "Confira os dados antes de ativar a conta." },
+];
+
+const TOTAL_STEPS = STEP_TITLES.length;
+
 
 export default function Auth() {
   const [isLogin, setIsLogin] = useState(true);
@@ -80,6 +112,10 @@ export default function Auth() {
   const [phone, setPhone] = useState("");
   const [document, setDocument] = useState("");
   const [documentError, setDocumentError] = useState("");
+  const [accountType, setAccountType] = useState<AccountType>("cpf");
+  const [companyName, setCompanyName] = useState("");
+  const [segment, setSegment] = useState("");
+  const [monthlyRevenue, setMonthlyRevenue] = useState("");
   const [referralSource, setReferralSource] = useState("");
   const [acceptTerms, setAcceptTerms] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
@@ -97,6 +133,31 @@ export default function Auth() {
 
   const pwStrength = getPasswordStrength(password);
   const newPwStrength = getPasswordStrength(newPassword);
+
+  const documentDigits = document.replace(/\D/g, "");
+  const documentValid =
+    accountType === "cpf" ? documentDigits.length === 11 && validateCPF(documentDigits)
+      : documentDigits.length === 14 && validateCNPJ(documentDigits);
+
+  const passwordRules = [
+    { label: "8+ caracteres", ok: password.length >= 8 },
+    { label: "1 letra maiúscula", ok: /[A-Z]/.test(password) },
+    { label: "1 letra minúscula", ok: /[a-z]/.test(password) },
+    { label: "1 número", ok: /\d/.test(password) },
+  ];
+
+  const summaryRows = [
+    { label: "Tipo de conta", value: accountType === "cnpj" ? "Pessoa jurídica" : "Pessoa física" },
+    { label: "Nome", value: fullName },
+    ...(accountType === "cnpj" ? [{ label: "Razão social", value: companyName }] : []),
+    { label: "Apelido", value: nickname },
+    { label: "E-mail", value: email },
+    { label: accountType === "cnpj" ? "CNPJ" : "CPF", value: document },
+    { label: "WhatsApp", value: phone },
+    { label: "Segmento", value: SEGMENTS.find((s) => s.value === segment)?.label ?? "" },
+    { label: "Faturamento", value: REVENUE_BANDS.find((b) => b.value === monthlyRevenue)?.label ?? "" },
+  ];
+
 
   useEffect(() => { setStep(1); }, [isLogin]);
   useEffect(() => { if (!isLogin) setRecoveryMode("idle"); }, [isLogin]);
@@ -160,23 +221,26 @@ export default function Auth() {
   };
 
   const handleDocumentChange = (value: string) => {
-    const formatted = formatDocument(value);
+    const max = accountType === "cnpj" ? 14 : 11;
+    const digits = value.replace(/\D/g, "").slice(0, max);
+    const formatted = formatDocument(digits);
     setDocument(formatted);
-    const digits = formatted.replace(/\D/g, "");
-    if (digits.length === 11) setDocumentError(validateCPF(digits) ? "" : "CPF inválido");
-    else if (digits.length === 14) setDocumentError(validateCNPJ(digits) ? "" : "CNPJ inválido");
-    else setDocumentError("");
+    if (accountType === "cpf") {
+      setDocumentError(digits.length === 11 && !validateCPF(digits) ? "CPF inválido" : "");
+    } else {
+      setDocumentError(digits.length === 14 && !validateCNPJ(digits) ? "CNPJ inválido" : "");
+    }
   };
 
   const canAdvanceStep = (s: number) => {
     if (s === 1) return fullName.trim().length >= 3 && nickname.trim().length >= 2;
-    if (s === 2) {
-      const digits = document.replace(/\D/g, "");
-      return email.includes("@") && phone.replace(/\D/g, "").length >= 10 && (digits.length === 11 || digits.length === 14) && !documentError;
-    }
-    if (s === 3) return password.length >= 8 && password === confirmPassword && !!referralSource;
+    if (s === 2) return email.includes("@") && phone.replace(/\D/g, "").length >= 10;
+    if (s === 3) return documentValid && (accountType === "cpf" || companyName.trim().length >= 2);
+    if (s === 4) return !!segment && !!monthlyRevenue && !!referralSource;
+    if (s === 5) return password.length >= 8 && password === confirmPassword && passwordRules.every((r) => r.ok);
     return acceptTerms;
   };
+
 
   const handleSubmit = async (e?: React.FormEvent) => {
     e?.preventDefault();
@@ -241,7 +305,12 @@ export default function Auth() {
               document_type: digits.length === 11 ? "cpf" : "cnpj",
               phone: cleanPhone,
               referral_source: referralSource,
+              company_name: accountType === "cnpj" ? companyName.trim() : null,
+              segment,
+              monthly_revenue_band: monthlyRevenue,
             },
+
+
             emailRedirectTo: `${window.location.origin}/auth/callback`,
           },
         });
@@ -316,19 +385,26 @@ export default function Auth() {
 
             {/* Step rail */}
             {!isLogin && (
-              <div className="mt-6 flex items-center gap-2">
-                {[1, 2, 3, 4].map((s) => (
-                  <div
-                    key={s}
-                    className={cn(
-                      "h-[3px] flex-1 rounded-full transition-colors duration-300",
-                      s <= step ? "bg-primary" : "bg-white/10",
-                    )}
-                  />
-                ))}
-                <span className="ml-2 shrink-0 text-[11px] tabular-nums text-muted-foreground">{step}/4</span>
+              <div className="mt-6">
+                <div className="flex items-center gap-1.5">
+                  {Array.from({ length: TOTAL_STEPS }, (_, i) => i + 1).map((s) => (
+                    <div key={s} className="h-[3px] flex-1 overflow-hidden rounded-full bg-white/10">
+                      <motion.div
+                        className="h-full bg-primary"
+                        initial={false}
+                        animate={{ width: s <= step ? "100%" : "0%" }}
+                        transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
+                      />
+                    </div>
+                  ))}
+                </div>
+                <div className="mt-2.5 flex items-center justify-between text-[11px] text-muted-foreground">
+                  <span className="uppercase tracking-[0.18em]">{STEP_TITLES[step - 1].tag}</span>
+                  <span className="tabular-nums">Etapa {step} de {TOTAL_STEPS}</span>
+                </div>
               </div>
             )}
+
 
             <div className="mt-8">
               <AnimatePresence mode="wait">
@@ -455,9 +531,36 @@ export default function Auth() {
                     <div className="space-y-5">
                       {step === 1 && (
                         <>
+                          <div className="grid grid-cols-2 gap-3">
+                            {ACCOUNT_TYPES.map((t) => {
+                              const Icon = t.icon;
+                              const active = accountType === t.value;
+                              return (
+                                <button
+                                  key={t.value}
+                                  type="button"
+                                  onClick={() => { setAccountType(t.value); setDocument(""); setDocumentError(""); }}
+                                  aria-pressed={active}
+                                  className={cn(
+                                    "group relative rounded-[12px] border p-4 text-left transition-colors duration-200",
+                                    active ? "border-primary/70 bg-primary/[0.06]" : "border-border/60 hover:border-border",
+                                  )}
+                                >
+                                  <div className="flex items-center justify-between">
+                                    <Icon className={cn("h-[18px] w-[18px]", active ? "text-primary" : "text-muted-foreground")} />
+                                    <span className={cn("flex h-[18px] w-[18px] items-center justify-center rounded-full border transition-colors", active ? "border-primary bg-primary" : "border-border/70")}>
+                                      {active && <Check className="h-3 w-3 text-primary-foreground" />}
+                                    </span>
+                                  </div>
+                                  <p className="mt-3 text-[14px] font-semibold text-foreground">{t.label}</p>
+                                  <p className="mt-0.5 text-[12px] leading-snug text-muted-foreground">{t.hint}</p>
+                                </button>
+                              );
+                            })}
+                          </div>
                           <div>
                             <Label htmlFor="name" className={labelCls}>Nome completo</Label>
-                            <Input id="name" value={fullName} onChange={(e) => setFullName(e.target.value)} placeholder="Seu nome completo" className={inputCls} required />
+                            <Input id="name" value={fullName} onChange={(e) => setFullName(e.target.value)} placeholder="Como está no documento" className={inputCls} required />
                           </div>
                           <div>
                             <Label htmlFor="nickname" className={labelCls}>Como quer ser chamado?</Label>
@@ -471,11 +574,7 @@ export default function Auth() {
                           <div>
                             <Label htmlFor="signup-email" className={labelCls}>E-mail</Label>
                             <Input id="signup-email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="seu@email.com" className={inputCls} required />
-                          </div>
-                          <div>
-                            <Label htmlFor="document" className={labelCls}>CPF ou CNPJ</Label>
-                            <Input id="document" value={document} onChange={(e) => handleDocumentChange(e.target.value)} placeholder="000.000.000-00" inputMode="numeric" autoComplete="off" className={cn(inputCls, documentError && "border-destructive/60")} required />
-                            {documentError && <p className="mt-1.5 text-[12px] text-destructive">{documentError}</p>}
+                            <p className="mt-1.5 text-[12px] text-muted-foreground">Enviaremos avisos de venda e saque para este endereço.</p>
                           </div>
                           <div>
                             <Label htmlFor="phone" className={labelCls}>WhatsApp</Label>
@@ -500,32 +599,72 @@ export default function Auth() {
 
                       {step === 3 && (
                         <>
-                          <div>
-                            <Label htmlFor="signup-password" className={labelCls}>Senha</Label>
-                            <div className="relative">
-                              <Input id="signup-password" type={showPassword ? "text" : "password"} value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Digite a senha desejada" className={cn(inputCls, "pr-12")} required minLength={8} />
-                              <button type="button" aria-label="Alternar senha" onClick={() => setShowPassword(!showPassword)} className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground">
-                                {showPassword ? <EyeOff className="h-[18px] w-[18px]" /> : <Eye className="h-[18px] w-[18px]" />}
-                              </button>
+                          {accountType === "cnpj" && (
+                            <div>
+                              <Label htmlFor="company" className={labelCls}>Razão social</Label>
+                              <Input id="company" value={companyName} onChange={(e) => setCompanyName(e.target.value)} placeholder="Nome da empresa no CNPJ" className={inputCls} required />
                             </div>
-                            {password.length > 0 && (
-                              <div className="mt-2">
-                                <div className="flex items-center gap-2">
-                                  <div className="flex flex-1 gap-1">
-                                    {[1, 2, 3].map((i) => (
-                                      <div key={i} className={cn("h-[3px] flex-1 rounded-full", i <= pwStrength.score ? pwStrength.color : "bg-white/10")} />
-                                    ))}
-                                  </div>
-                                  <span className={cn("text-[11px] font-medium", pwStrength.text)}>{pwStrength.label}</span>
-                                </div>
-                                <p className="mt-1.5 text-[12px] text-muted-foreground">Use maiúscula, minúscula, número e 8+ caracteres.</p>
-                              </div>
-                            )}
+                          )}
+                          <div>
+                            <Label htmlFor="document" className={labelCls}>{accountType === "cnpj" ? "CNPJ" : "CPF"}</Label>
+                            <div className="relative">
+                              <Input
+                                id="document"
+                                value={document}
+                                onChange={(e) => handleDocumentChange(e.target.value)}
+                                placeholder={accountType === "cnpj" ? "00.000.000/0000-00" : "000.000.000-00"}
+                                inputMode="numeric"
+                                autoComplete="off"
+                                className={cn(inputCls, "pr-11", documentError && "border-destructive/60")}
+                                required
+                              />
+                              {documentValid && (
+                                <CheckCircle2 className="absolute right-4 top-1/2 h-[18px] w-[18px] -translate-y-1/2 text-success" />
+                              )}
+                            </div>
+                            {documentError && <p className="mt-1.5 flex items-center gap-1 text-[12px] text-destructive"><AlertTriangle className="h-3.5 w-3.5" />{documentError}</p>}
+                          </div>
+                          <div className="flex items-start gap-3 rounded-[10px] border border-border/60 px-4 py-3">
+                            <Shield className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
+                            <p className="text-[12.5px] leading-relaxed text-muted-foreground">
+                              O documento é usado apenas para validar seu recebimento e não pode ser alterado depois. Ele fica criptografado e nunca aparece para seus clientes.
+                            </p>
+                          </div>
+                        </>
+                      )}
+
+                      {step === 4 && (
+                        <>
+                          <div>
+                            <Label className={labelCls}>O que você vende?</Label>
+                            <Select value={segment} onValueChange={setSegment}>
+                              <SelectTrigger className={inputCls}><SelectValue placeholder="Selecione o segmento" /></SelectTrigger>
+                              <SelectContent className="rounded-[10px] border-border/70">
+                                {SEGMENTS.map((item) => <SelectItem key={item.value} value={item.value}>{item.label}</SelectItem>)}
+                              </SelectContent>
+                            </Select>
                           </div>
                           <div>
-                            <Label htmlFor="confirmPassword" className={labelCls}>Confirmar senha</Label>
-                            <Input id="confirmPassword" type="password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} placeholder="Digite a senha novamente" className={cn(inputCls, confirmPassword && password !== confirmPassword && "border-destructive/60")} required minLength={8} />
-                            {confirmPassword && password !== confirmPassword && <p className="mt-1.5 text-[12px] text-destructive">As senhas não coincidem</p>}
+                            <Label className={labelCls}>Faturamento mensal estimado</Label>
+                            <div className="grid grid-cols-2 gap-2">
+                              {REVENUE_BANDS.map((band) => {
+                                const active = monthlyRevenue === band.value;
+                                return (
+                                  <button
+                                    key={band.value}
+                                    type="button"
+                                    onClick={() => setMonthlyRevenue(band.value)}
+                                    aria-pressed={active}
+                                    className={cn(
+                                      "rounded-[10px] border px-3 py-3 text-[13px] font-medium tabular-nums transition-colors duration-200",
+                                      active ? "border-primary/70 bg-primary/[0.06] text-foreground" : "border-border/60 text-muted-foreground hover:border-border hover:text-foreground",
+                                    )}
+                                  >
+                                    {band.label}
+                                  </button>
+                                );
+                              })}
+                            </div>
                           </div>
                           <div>
                             <Label className={labelCls}>Onde conheceu a HOTZFY?</Label>
@@ -546,23 +685,56 @@ export default function Auth() {
                         </>
                       )}
 
-                      {step === 4 && (
+                      {step === 5 && (
+                        <>
+                          <div>
+                            <Label htmlFor="signup-password" className={labelCls}>Senha</Label>
+                            <div className="relative">
+                              <Input id="signup-password" type={showPassword ? "text" : "password"} value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Digite a senha desejada" className={cn(inputCls, "pr-12")} required minLength={8} />
+                              <button type="button" aria-label="Alternar senha" onClick={() => setShowPassword(!showPassword)} className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground">
+                                {showPassword ? <EyeOff className="h-[18px] w-[18px]" /> : <Eye className="h-[18px] w-[18px]" />}
+                              </button>
+                            </div>
+                            {password.length > 0 && (
+                              <div className="mt-2.5">
+                                <div className="flex items-center gap-2">
+                                  <div className="flex flex-1 gap-1">
+                                    {[1, 2, 3].map((i) => (
+                                      <div key={i} className={cn("h-[3px] flex-1 rounded-full transition-colors", i <= pwStrength.score ? pwStrength.color : "bg-white/10")} />
+                                    ))}
+                                  </div>
+                                  <span className={cn("text-[11px] font-medium", pwStrength.text)}>{pwStrength.label}</span>
+                                </div>
+                                <div className="mt-2.5 grid grid-cols-2 gap-x-4 gap-y-1.5">
+                                  {passwordRules.map((rule) => (
+                                    <span key={rule.label} className={cn("flex items-center gap-1.5 text-[12px]", rule.ok ? "text-success" : "text-muted-foreground")}>
+                                      <Check className={cn("h-3.5 w-3.5", rule.ok ? "opacity-100" : "opacity-30")} />
+                                      {rule.label}
+                                    </span>
+                                  ))}
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                          <div>
+                            <Label htmlFor="confirmPassword" className={labelCls}>Confirmar senha</Label>
+                            <Input id="confirmPassword" type="password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} placeholder="Digite a senha novamente" className={cn(inputCls, confirmPassword && password !== confirmPassword && "border-destructive/60")} required minLength={8} />
+                            {confirmPassword && password !== confirmPassword && <p className="mt-1.5 text-[12px] text-destructive">As senhas não coincidem</p>}
+                          </div>
+                        </>
+                      )}
+
+                      {step === 6 && (
                         <div className="space-y-4">
-                          <div className="divide-y divide-border/50 overflow-hidden rounded-[10px] border border-border/60">
-                            {[
-                              { label: "Nome", value: fullName },
-                              { label: "Apelido", value: nickname },
-                              { label: "E-mail", value: email },
-                              { label: "Documento", value: document },
-                              { label: "WhatsApp", value: phone },
-                            ].map((item) => (
-                              <div key={item.label} className="flex items-center justify-between px-4 py-3">
+                          <div className="divide-y divide-border/50 overflow-hidden rounded-[12px] border border-border/60">
+                            {summaryRows.map((item) => (
+                              <div key={item.label} className="flex items-center justify-between gap-4 px-4 py-3">
                                 <span className="text-[13px] text-muted-foreground">{item.label}</span>
-                                <span className="max-w-[60%] truncate text-[13px] font-medium text-foreground">{item.value || "—"}</span>
+                                <span className="max-w-[62%] truncate text-[13px] font-medium text-foreground">{item.value || "—"}</span>
                               </div>
                             ))}
                           </div>
-                          <label className="flex cursor-pointer items-start gap-3">
+                          <label className="flex cursor-pointer items-start gap-3 rounded-[10px] border border-border/60 p-4 transition-colors hover:border-border">
                             <input
                               type="checkbox"
                               checked={acceptTerms}
@@ -576,16 +748,18 @@ export default function Auth() {
                         </div>
                       )}
 
+
                       <div className="flex gap-3 pt-1">
                         {step > 1 && (
                           <Button type="button" variant="outline" onClick={() => setStep((c) => c - 1)} className="h-[52px] flex-1 rounded-[10px] border-border/70 bg-transparent text-[15px] font-medium text-muted-foreground hover:text-foreground">
                             Voltar
                           </Button>
                         )}
-                        {step < 4 ? (
+                        {step < TOTAL_STEPS ? (
                           <Button type="button" onClick={() => setStep((c) => c + 1)} disabled={!canAdvanceStep(step)} className="h-[52px] flex-[1.6] rounded-[10px] bg-primary text-[15px] font-semibold text-primary-foreground hover:brightness-105">
-                            Continuar
+                            Continuar <ArrowRight className="ml-2 h-4 w-4" />
                           </Button>
+
                         ) : (
                           <Button type="button" onClick={() => handleSubmit()} disabled={loading || !acceptTerms} className="h-[52px] flex-[1.6] rounded-[10px] bg-primary text-[15px] font-semibold text-primary-foreground hover:brightness-105">
                             {loading ? <div className="h-5 w-5 animate-spin rounded-full border-2 border-primary-foreground/30 border-t-primary-foreground" /> : "Criar conta"}
@@ -610,38 +784,9 @@ export default function Auth() {
           </div>
         </div>
 
-        {/* ═══ RIGHT — cinematic ═══ */}
-        <div className="relative hidden overflow-hidden lg:block">
-          <img
-            src={authCinematic}
-            alt="Empreendedor operando suas vendas online em pleno deserto ao pôr do sol"
-            className="absolute inset-0 h-full w-full object-cover"
-            width={1280}
-            height={1600}
-          />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/55 via-transparent to-black/15" />
+        {/* ═══ RIGHT — painel autoral (sem fotos de terceiros) ═══ */}
+        <AuthAside className="hidden min-h-screen lg:block" />
 
-          <motion.div
-            initial={{ opacity: 0, y: 14 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.9, delay: 0.25, ease: [0.22, 1, 0.36, 1] }}
-            className="absolute bottom-24 left-14 right-14 max-w-[520px]"
-          >
-            <span className="mb-5 block h-px w-14 bg-white/45" />
-            <p className="text-[30px] font-light leading-[1.15] tracking-[-0.025em] text-white/95 xl:text-[36px]">
-              Suas vendas rodando<br />até no fim do mundo.
-            </p>
-            <p className="mt-3 max-w-[380px] text-[14px] leading-relaxed text-white/55">
-              Checkout, antifraude e liquidação em uma infraestrutura que não dorme.
-            </p>
-          </motion.div>
-
-
-          <div className="absolute bottom-10 left-14 right-14 flex items-center justify-between text-[12px] uppercase tracking-[0.24em] text-white/55">
-            <span>PIX · Cartão · Boleto</span>
-            <span>Saques D+0</span>
-          </div>
-        </div>
       </div>
     </div>
   );
