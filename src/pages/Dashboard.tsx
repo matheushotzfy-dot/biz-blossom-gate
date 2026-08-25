@@ -846,13 +846,13 @@ export default function Dashboard() {
               <button
                 key={a.label}
                 onClick={a.onClick}
-                 className="dashboard-action group relative flex min-h-[76px] items-center gap-4 overflow-hidden rounded-[12px] border border-border/60 bg-card px-5 py-4 text-left transition-colors hover:border-primary/30 hover:bg-card-elevated"
+                 className="dashboard-action group relative flex min-h-[76px] items-center gap-3 overflow-hidden rounded-[12px] border border-border/60 bg-card px-4 py-4 text-left transition-colors hover:border-primary/30 hover:bg-card-elevated"
               >
                  <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-[9px] border border-border/60 bg-background/50 text-muted-foreground transition-colors group-hover:border-primary/30 group-hover:text-primary">
                    <Icon className="h-[18px] w-[18px]" strokeWidth={1.75} />
                  </span>
                 <div className="min-w-0 flex-1">
-                  <p className="font-display font-bold text-[16px] tracking-[-0.01em] text-foreground truncate">{a.label}</p>
+                   <p className="font-display font-bold text-[14px] 2xl:text-[15px] tracking-[-0.01em] text-foreground truncate">{a.label}</p>
                   <p className="text-[12px] text-muted-foreground/60 truncate">{a.sub}</p>
                 </div>
                 <ChevronRight className="h-4 w-4 shrink-0 text-muted-foreground/30 transition-colors group-hover:text-foreground/60" />
