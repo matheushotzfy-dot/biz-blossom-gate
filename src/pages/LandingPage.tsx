@@ -1,556 +1,144 @@
-/**
- * HOTZFY — Landing page (v3)
- * Direção: fintech de infraestrutura — hero centralizado, mockup real do
- * produto, seções simétricas, tipografia grande e ritmo vertical constante.
- * Toda a página vive sob `.tech-scope` (camada TECH LAYER no index.css) para
- * manter o clean pass do restante da plataforma intacto.
- */
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import { useNavigate } from "react-router-dom";
-import { motion, useInView, useReducedMotion } from "framer-motion";
+import { motion, useInView, useReducedMotion, useScroll, useTransform } from "framer-motion";
 import {
-  ArrowRight, Shield, BarChart3, Users, CheckCircle2, QrCode, Wallet, Code2,
-  Lock, Menu, X, Minus, Plus, Radio, Gauge, Fingerprint, Zap, Star,
+  ArrowRight, BarChart3, Check, ChevronDown, Code2, Fingerprint, Gauge,
+  GitBranch, LockKeyhole, Menu, Network, Play, QrCode, ShieldCheck, Sparkles,
+  TrendingUp, Wallet, X, Zap,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
 import { Seo } from "@/components/Seo";
-import { ProductMock } from "@/components/landing/ProductMock";
+import { ConversionScene } from "@/components/landing/ConversionScene";
+import { PaymentEngine } from "@/components/landing/PaymentEngine";
 
-/* ───────────────────────────── dados ───────────────────────────── */
-
-const NAV_LINKS = [
-  { label: "Plataforma", href: "#plataforma" },
-  { label: "Como funciona", href: "#como-funciona" },
-  { label: "Segurança", href: "#seguranca" },
-  { label: "Preços", href: "#precos" },
-  { label: "FAQ", href: "#faq" },
-];
-
-const METRICS = [
-  { value: "R$ 200M+", label: "TPV processado" },
-  { value: "98,7%", label: "Aprovação no PIX" },
-  { value: "99,99%", label: "Uptime da API" },
-  { value: "D+0", label: "Liquidação de saque" },
-];
-
-const FEATURES = [
-  { icon: QrCode, title: "Checkout de alta conversão", desc: "PIX instantâneo, cartão em até 12x e boleto no mesmo fluxo, com order bump e upsell nativos." },
-  { icon: Shield, title: "Antifraude em tempo real", desc: "Blacklist global, velocity checks, bloqueio por BIN/IP e trilha de decisão por transação." },
-  { icon: BarChart3, title: "Analytics sem atraso", desc: "Faturamento, funil, reembolso e chargeback atualizados ao vivo, com filtros por período." },
-  { icon: Users, title: "Área de membros", desc: "Liberação automática pós-pagamento, player profissional, progresso, quiz e certificado." },
-  { icon: Wallet, title: "Saques e antecipação", desc: "PIX ou cripto, presets rápidos, regras automáticas de saque e histórico auditável." },
-  { icon: Code2, title: "API REST e webhooks", desc: "Chaves sk_live_, assinatura HMAC-SHA256, reentrega automática e logs de entrega." },
-];
-
-const STEPS = [
-  { n: "01", title: "Crie sua conta", desc: "Cadastro em minutos, com verificação de identidade guiada passo a passo." },
-  { n: "02", title: "Publique seu produto", desc: "Checkout pronto, link de pagamento e área de membros já inclusos no plano." },
-  { n: "03", title: "Receba e saque", desc: "Aprovação em segundos e saque via PIX com liquidação no mesmo dia." },
-];
-
-const SECURITY = [
-  { icon: Lock, title: "Criptografia ponta a ponta", desc: "TLS 1.3 em trânsito e AES-256 em repouso, com rotação periódica de chaves." },
-  { icon: Fingerprint, title: "Isolamento por vendedor", desc: "Row Level Security no banco: cada conta acessa somente os próprios dados." },
-  { icon: Radio, title: "Webhooks assinados", desc: "HMAC-SHA256 por evento, reentrega automática e log completo de entrega." },
-  { icon: Gauge, title: "Observabilidade 24/7", desc: "Monitoramento de adquirentes, alertas de anomalia e trilha de auditoria." },
-];
-
-const PLANS = [
-  {
-    name: "Start", price: "4,99%", note: "+ R$ 1,00 por transação aprovada",
-    items: ["Sem mensalidade", "PIX, cartão e boleto", "Área de membros", "Suporte por chat"],
-    featured: false,
-  },
-  {
-    name: "Scale", price: "3,99%", note: "+ R$ 1,00 por transação aprovada",
-    items: ["Tudo do Start", "Afiliados e coprodução", "API REST + webhooks", "Gerente de contas"],
-    featured: true,
-  },
-  {
-    name: "Enterprise", price: "Sob medida", note: "Condições por volume negociado",
-    items: ["Tudo do Scale", "Taxas personalizadas", "Antecipação dedicada", "SLA e suporte prioritário"],
-    featured: false,
-  },
-];
-
-const INTEGRATIONS = [
-  "PIX", "Cartão 12x", "Boleto", "API REST", "Webhooks", "Utmify",
-  "Meta Pixel", "Google Ads", "TikTok Pixel", "Zapier", "Notazz", "Z-API",
-];
+const NAV = [
+  ["Plataforma", "#plataforma"], ["Conversão", "#conversao"],
+  ["Infraestrutura", "#infraestrutura"], ["Preços", "#precos"],
+] as const;
 
 const FAQ = [
-  { q: "Preciso pagar mensalidade?", a: "Não. Você paga apenas uma taxa por transação aprovada, sem custo fixo mensal e sem fidelidade." },
-  { q: "Em quanto tempo recebo o dinheiro?", a: "Vendas no PIX são aprovadas em segundos e os saques são liquidados em D+0, direto na sua chave." },
-  { q: "Quais métodos de pagamento estão disponíveis?", a: "PIX, cartão de crédito em até 12x e boleto bancário — todos no mesmo checkout." },
-  { q: "Tem área de membros inclusa?", a: "Sim, com liberação automática pós-pagamento, player profissional, progresso, quiz e certificado." },
-  { q: "Existe sistema de afiliados?", a: "Sim, com comissões configuráveis, links rastreáveis e divisão automática dos valores na aprovação." },
-  { q: "Como funciona a segurança?", a: "Criptografia em trânsito e em repouso, antifraude com blacklist global, velocity checks e auditoria completa de acessos." },
-];
-
-const TESTIMONIALS = [
-  { name: "Rafael Menezes", role: "Infoprodutor · educação", text: "Migramos 100% do faturamento para a HOTZFY. A aprovação no PIX subiu e o saque no mesmo dia mudou nosso fluxo de caixa." },
-  { name: "Camila Duarte", role: "Head de growth · e-learning", text: "O checkout converte melhor que o anterior e o painel entrega os números sem atraso. Parou de ser planilha." },
-  { name: "Lucas Ferreira", role: "Coprodutor · lançamentos", text: "Split automático entre coprodutores e afiliados sem dor de cabeça. A API e os webhooks resolveram nossa automação." },
-];
+  ["Preciso pagar mensalidade?", "Não. Você paga somente quando uma transação é aprovada, sem custo fixo ou fidelidade."],
+  ["Quando o dinheiro fica disponível?", "Vendas PIX são aprovadas em segundos e podem ser liquidadas no mesmo dia, conforme a análise da conta."],
+  ["A plataforma inclui área de membros?", "Sim. A liberação do conteúdo acontece automaticamente após a aprovação do pagamento."],
+  ["Posso integrar minha própria aplicação?", "Sim. A API REST, os webhooks assinados e a documentação pública cobrem todo o fluxo de cobrança."],
+] as const;
 
 const JSONLD = [
   { "@context": "https://schema.org", "@type": "Organization", name: "HOTZFY", url: "https://hotzfy.com.br" },
-  {
-    "@context": "https://schema.org",
-    "@type": "FAQPage",
-    mainEntity: FAQ.map((f) => ({
-      "@type": "Question",
-      name: f.q,
-      acceptedAnswer: { "@type": "Answer", text: f.a },
-    })),
-  },
+  { "@context": "https://schema.org", "@type": "FAQPage", mainEntity: FAQ.map(([q, a]) => ({ "@type": "Question", name: q, acceptedAnswer: { "@type": "Answer", text: a } })) },
 ];
 
-/* ───────────────────────────── primitivas ───────────────────────────── */
-
-function Reveal({ children, delay = 0, className }: { children: React.ReactNode; delay?: number; className?: string }) {
+function Reveal({ children, className, delay = 0 }: { children: ReactNode; className?: string; delay?: number }) {
   const ref = useRef<HTMLDivElement>(null);
-  const inView = useInView(ref, { once: true, margin: "-70px" });
+  const visible = useInView(ref, { once: true, margin: "-12% 0px" });
+  const reduce = useReducedMotion();
+  return <div ref={ref} className={className}><motion.div initial={reduce ? false : { opacity: 0, y: 42 }} animate={visible ? { opacity: 1, y: 0 } : undefined} transition={{ duration: 0.8, delay, ease: [0.16, 1, 0.3, 1] }}>{children}</motion.div></div>;
+}
+
+function Wordmark() {
+  return <span className="flex items-center gap-2 font-heading text-base font-bold text-foreground"><span className="brand-mark">H</span>HOTZ<span className="text-primary">FY</span></span>;
+}
+
+function Eyebrow({ children }: { children: ReactNode }) {
+  return <span className="inline-flex items-center gap-2 font-mono text-[10px] uppercase text-primary"><span className="h-px w-7 bg-primary" />{children}</span>;
+}
+
+function SectionTitle({ eyebrow, children, copy }: { eyebrow: string; children: ReactNode; copy?: string }) {
+  return <Reveal><Eyebrow>{eyebrow}</Eyebrow><h2 className="mt-5 max-w-4xl font-heading text-3xl font-semibold leading-[1.05] text-foreground sm:text-5xl lg:text-6xl">{children}</h2>{copy && <p className="mt-6 max-w-2xl text-sm leading-7 text-muted-foreground sm:text-base">{copy}</p>}</Reveal>;
+}
+
+function HeroInstrument() {
   const reduce = useReducedMotion();
   return (
-    <div ref={ref} className={className}>
-      <motion.div
-        initial={reduce ? undefined : { opacity: 0, y: 20 }}
-        animate={inView && !reduce ? { opacity: 1, y: 0 } : undefined}
-        transition={{ duration: 0.55, delay, ease: [0.16, 1, 0.3, 1] }}
-      >
-        {children}
-      </motion.div>
+    <div className="hero-instrument relative mx-auto w-full max-w-6xl">
+      <div className="instrument-axis pointer-events-none absolute inset-x-0 top-1/2 h-px" />
+      <motion.div animate={reduce ? undefined : { rotate: 360 }} transition={{ duration: 34, repeat: Infinity, ease: "linear" }} className="instrument-ring absolute left-1/2 top-1/2 aspect-square w-[76%] -translate-x-1/2 -translate-y-1/2 sm:w-[56%]" />
+      <motion.div animate={reduce ? undefined : { rotate: -360 }} transition={{ duration: 22, repeat: Infinity, ease: "linear" }} className="instrument-ring instrument-ring-inner absolute left-1/2 top-1/2 aspect-square w-[55%] -translate-x-1/2 -translate-y-1/2 sm:w-[38%]" />
+      <div className="relative z-10 mx-auto w-[88%] max-w-[780px] border border-border bg-background p-3 sm:p-5">
+        <div className="flex items-center justify-between border-b border-border pb-3 font-mono text-[8px] text-muted-foreground sm:text-[10px]"><span>HOTZFY / COMMAND</span><span className="flex items-center gap-2"><span className="engine-status-dot" /> LIVE</span></div>
+        <div className="grid gap-px bg-border sm:grid-cols-[1.35fr_.65fr]">
+          <div className="bg-card p-4 sm:p-7">
+            <p className="font-mono text-[9px] text-muted-foreground">FATURAMENTO LÍQUIDO / HOJE</p>
+            <p className="mt-3 font-heading text-3xl font-semibold text-foreground sm:text-5xl">R$ 84.290<span className="text-primary">,42</span></p>
+            <div className="mt-7 h-28 sm:h-40"><svg viewBox="0 0 600 180" className="h-full w-full" preserveAspectRatio="none"><defs><linearGradient id="heroChart" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stopColor="hsl(var(--primary))" stopOpacity=".24"/><stop offset="1" stopColor="hsl(var(--primary))" stopOpacity="0"/></linearGradient></defs><path d="M0 154 C70 148 88 110 152 119 S250 82 310 96 S396 35 458 56 S534 25 600 12 L600 180 L0 180Z" fill="url(#heroChart)"/><motion.path initial={{ pathLength: 0 }} whileInView={{ pathLength: 1 }} transition={{ duration: 1.8 }} d="M0 154 C70 148 88 110 152 119 S250 82 310 96 S396 35 458 56 S534 25 600 12" fill="none" stroke="hsl(var(--primary))" strokeWidth="2"/></svg></div>
+          </div>
+          <div className="grid gap-px bg-border">
+            {[["APROVAÇÃO PIX", "98,73%", "+2,4%"], ["VENDAS", "547", "+18,6%"], ["TICKET MÉDIO", "R$ 154", "+4,2%"]].map(([l, v, d]) => <div key={l} className="bg-background p-4 sm:p-5"><p className="font-mono text-[8px] text-muted-foreground">{l}</p><div className="mt-2 flex items-end justify-between"><p className="font-heading text-lg font-semibold text-foreground sm:text-xl">{v}</p><span className="text-[9px] text-primary">{d}</span></div></div>)}
+          </div>
+        </div>
+      </div>
+      <motion.div animate={reduce ? undefined : { y: [0, -8, 0] }} transition={{ duration: 5, repeat: Infinity }} className="hero-signal left-0 top-[22%]"><QrCode className="h-4 w-4 text-primary"/><span><b>PIX aprovado</b><small>R$ 1.497,00 · 412 ms</small></span></motion.div>
+      <motion.div animate={reduce ? undefined : { y: [0, 8, 0] }} transition={{ duration: 6, repeat: Infinity }} className="hero-signal bottom-[12%] right-0"><Wallet className="h-4 w-4 text-primary"/><span><b>Saldo liberado</b><small>Liquidação D+0</small></span></motion.div>
     </div>
   );
 }
-
-function SectionHead({ eyebrow, title, accent, sub }: { eyebrow: string; title: string; accent?: string; sub?: string }) {
-  return (
-    <div className="mx-auto max-w-2xl text-center">
-      <span className="inline-flex items-center gap-2 rounded-full border border-emerald-400/25 bg-emerald-400/[0.06] px-3.5 py-1.5 text-[11px] font-semibold uppercase tracking-[0.14em] text-emerald-300">
-        <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" /> {eyebrow}
-      </span>
-      <h2 className="mt-5 text-balance text-[30px] font-semibold leading-[1.1] tracking-[-0.03em] text-foreground sm:text-[42px]">
-        {title} {accent && <span className="tech-text">{accent}</span>}
-      </h2>
-      {sub && <p className="mx-auto mt-4 max-w-xl text-[15px] leading-relaxed text-muted-foreground">{sub}</p>}
-    </div>
-  );
-}
-
-function Wordmark({ size = 26 }: { size?: number }) {
-  return (
-    <span className="flex items-center gap-2.5">
-      <span
-        className="flex items-center justify-center rounded-lg bg-emerald-400/12 font-black text-emerald-300"
-        style={{ width: size, height: size, fontSize: size * 0.5 }}
-      >
-        H
-      </span>
-      <span className="text-[17px] font-black tracking-[-0.04em] text-foreground">
-        HOTZ<span className="tech-text">FY</span>
-      </span>
-    </span>
-  );
-}
-
-function FaqItem({ q, a, open, onToggle }: { q: string; a: string; open: boolean; onToggle: () => void }) {
-  return (
-    <div className={cn("rounded-2xl border transition-colors", open ? "border-emerald-400/30 bg-foreground/[0.03]" : "border-border/70")}>
-      <button onClick={onToggle} className="flex w-full items-center gap-4 px-5 py-4 text-left" aria-expanded={open}>
-        <span className="flex-1 text-[14.5px] font-semibold text-foreground">{q}</span>
-        {open ? <Minus className="h-4 w-4 shrink-0 text-emerald-300" /> : <Plus className="h-4 w-4 shrink-0 text-muted-foreground" />}
-      </button>
-      {open && <p className="px-5 pb-5 text-[14px] leading-relaxed text-muted-foreground">{a}</p>}
-    </div>
-  );
-}
-
-/* ───────────────────────────── página ───────────────────────────── */
 
 export default function LandingPage() {
   const navigate = useNavigate();
-  const [scrolled, setScrolled] = useState(false);
-  const [menuOpen, setMenuOpen] = useState(false);
-  const [openFaq, setOpenFaq] = useState<number | null>(0);
+  const [menu, setMenu] = useState(false);
+  const [openFaq, setOpenFaq] = useState(0);
+  const heroRef = useRef<HTMLElement>(null);
+  const reduce = useReducedMotion();
+  const { scrollYProgress } = useScroll({ target: heroRef, offset: ["start start", "end start"] });
+  const heroY = useTransform(scrollYProgress, [0, 1], [0, reduce ? 0 : 180]);
+  const heroScale = useTransform(scrollYProgress, [0, 1], [1, reduce ? 1 : 0.9]);
 
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 12);
-    onScroll();
-    window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
+    document.documentElement.classList.add("landing-scroll");
+    document.body.classList.add("landing-scroll");
+    return () => { document.documentElement.classList.remove("landing-scroll"); document.body.classList.remove("landing-scroll"); };
   }, []);
 
-  const goSignup = () => navigate("/auth?mode=signup");
-
+  const signup = () => navigate("/auth?mode=signup");
   return (
-    <div className="tech-scope min-h-screen bg-background text-foreground antialiased">
-      <Seo
-        title="HOTZFY — Infraestrutura de pagamentos para infoprodutos"
-        description="Checkout de alta conversão, antifraude, área de membros, afiliados e saque PIX D+0 em uma única plataforma. Sem mensalidade."
-        path="/"
-        jsonLd={JSONLD}
-      />
+    <div className="tech-scope landing-v4 min-h-screen overflow-x-clip bg-background text-foreground">
+      <Seo title="HOTZFY — Tecnologia para vender e escalar" description="Checkout de alta conversão, pagamentos, antifraude, afiliados e saques em uma infraestrutura completa para produtos digitais." path="/" jsonLd={JSONLD} />
 
-      {/* ═══════════ HEADER ═══════════ */}
-      <header
-        className={cn(
-          "fixed inset-x-0 top-0 z-50 transition-all duration-300",
-          scrolled ? "border-b border-border/70 bg-background/85 backdrop-blur-xl" : "border-b border-transparent",
-        )}
-      >
-        <div className="mx-auto flex h-16 max-w-6xl items-center gap-6 px-5">
-          <button onClick={() => navigate("/")} aria-label="HOTZFY" className="shrink-0">
-            <Wordmark />
-          </button>
-
-          <nav className="mx-auto hidden items-center gap-7 lg:flex">
-            {NAV_LINKS.map((l) => (
-              <a key={l.href} href={l.href} className="text-[13.5px] font-medium text-muted-foreground transition-colors hover:text-foreground">
-                {l.label}
-              </a>
-            ))}
-          </nav>
-
-          <div className="ml-auto hidden items-center gap-2 lg:flex">
-            <button onClick={() => navigate("/auth")} className="rounded-lg border border-border px-4 py-2 text-[13px] font-semibold text-foreground transition-colors hover:bg-muted">
-              Entrar
-            </button>
-            <button onClick={goSignup} className="tech-cta inline-flex items-center gap-1.5 rounded-lg px-4 py-2 text-[13px] font-bold">
-              Criar conta <ArrowRight className="h-3.5 w-3.5" />
-            </button>
-          </div>
-
-          <button
-            onClick={() => setMenuOpen((v) => !v)}
-            aria-label="Menu"
-            className="ml-auto flex h-9 w-9 items-center justify-center rounded-lg border border-border text-foreground lg:hidden"
-          >
-            {menuOpen ? <X className="h-4 w-4" /> : <Menu className="h-4 w-4" />}
-          </button>
-        </div>
-
-        {menuOpen && (
-          <div className="border-t border-border/70 bg-background/95 px-5 py-4 backdrop-blur-xl lg:hidden">
-            <div className="grid gap-1">
-              {NAV_LINKS.map((l) => (
-                <a key={l.href} href={l.href} onClick={() => setMenuOpen(false)} className="rounded-lg px-3 py-2.5 text-[14px] font-medium text-muted-foreground">
-                  {l.label}
-                </a>
-              ))}
-            </div>
-            <div className="mt-3 grid grid-cols-2 gap-2">
-              <button onClick={() => navigate("/auth")} className="rounded-lg border border-border py-2.5 text-[13px] font-semibold">Entrar</button>
-              <button onClick={goSignup} className="tech-cta rounded-lg py-2.5 text-[13px] font-bold">Criar conta</button>
-            </div>
-          </div>
-        )}
+      <header className="fixed inset-x-0 top-0 z-50 border-b border-border/70 bg-background/90 backdrop-blur-md">
+        <div className="mx-auto flex h-16 max-w-7xl items-center px-5 lg:px-8"><button aria-label="HOTZFY" onClick={() => navigate("/")}><Wordmark /></button><nav className="mx-auto hidden items-center gap-8 lg:flex">{NAV.map(([label, href]) => <a key={href} href={href} className="text-xs text-muted-foreground transition-colors hover:text-foreground">{label}</a>)}</nav><div className="ml-auto hidden gap-2 lg:flex"><Button variant="ghost" onClick={() => navigate("/auth")}>Entrar</Button><Button onClick={signup}>Criar conta <ArrowRight /></Button></div><Button variant="outline" size="icon" className="ml-auto lg:hidden" aria-label="Abrir menu" onClick={() => setMenu(!menu)}>{menu ? <X /> : <Menu />}</Button></div>
+        {menu && <div className="border-t border-border bg-background p-5 lg:hidden"><div className="grid gap-1">{NAV.map(([label, href]) => <a key={href} href={href} onClick={() => setMenu(false)} className="py-3 text-sm text-muted-foreground">{label}</a>)}</div><Button onClick={signup} className="mt-4 w-full">Criar conta</Button></div>}
       </header>
 
-      {/* ═══════════ HERO ═══════════ */}
-      <section className="relative overflow-hidden pb-24 pt-32 sm:pt-40">
-        <div aria-hidden className="tech-grid pointer-events-none absolute inset-0" />
-        <div aria-hidden className="tech-aurora pointer-events-none absolute inset-x-0 top-0 h-[620px]" />
+      <main>
+        <section ref={heroRef} className="hero-field relative min-h-[1180px] overflow-hidden pt-32 sm:min-h-[1320px] sm:pt-40">
+          <div className="landing-grid absolute inset-0" /><div className="hero-beacon absolute left-1/2 top-0 h-[680px] w-px" />
+          <motion.div style={{ y: heroY, scale: heroScale }} className="relative mx-auto max-w-7xl px-5 text-center lg:px-8">
+            <Reveal><div className="mx-auto inline-flex items-center gap-2 border border-primary/25 bg-primary/[0.04] px-3 py-2 font-mono text-[9px] uppercase text-primary"><span className="engine-status-dot" /> Infraestrutura ativa · Brasil</div></Reveal>
+            <Reveal delay={0.06}><h1 className="mx-auto mt-8 max-w-5xl font-heading text-[44px] font-semibold leading-[.98] text-foreground sm:text-7xl lg:text-[92px]">Mais que pagamentos.<br/><span className="hero-stroke">Potência para escalar.</span></h1></Reveal>
+            <Reveal delay={0.12}><p className="mx-auto mt-7 max-w-2xl text-sm leading-7 text-muted-foreground sm:text-lg">Do primeiro clique à liquidação: uma operação financeira de alta performance construída para quem vende produtos digitais.</p></Reveal>
+            <Reveal delay={0.18}><div className="mt-9 flex flex-col justify-center gap-3 sm:flex-row"><Button size="lg" onClick={signup} className="h-12 px-7">Começar agora <ArrowRight /></Button><Button size="lg" variant="outline" asChild className="h-12 px-7"><a href="#plataforma"><Play className="h-3.5 w-3.5" /> Ver a plataforma</a></Button></div></Reveal>
+            <Reveal delay={0.25} className="mt-20 sm:mt-28"><HeroInstrument /></Reveal>
+          </motion.div>
+        </section>
 
-        <div className="relative mx-auto max-w-6xl px-5 text-center">
-          <Reveal>
-            <span className="inline-flex items-center gap-2 rounded-full border border-emerald-400/25 bg-emerald-400/[0.06] px-4 py-1.5 text-[12px] font-medium text-emerald-300">
-              <span className="tech-pulse h-1.5 w-1.5 rounded-full bg-emerald-400" />
-              Infraestrutura de pagamentos para o Brasil
-            </span>
-          </Reveal>
+        <section className="border-y border-border bg-card"><div className="mx-auto grid max-w-7xl grid-cols-2 divide-x divide-y divide-border lg:grid-cols-4 lg:divide-y-0">{[["R$ 200M+", "processados"], ["98,7%", "aprovação PIX"], ["420 ms", "tempo de resposta"], ["D+0", "liquidação"]].map(([v,l],i)=><Reveal key={l} delay={i*.05}><div className="px-5 py-9 text-center"><p className="font-heading text-2xl font-semibold text-foreground sm:text-3xl">{v}</p><p className="mt-2 font-mono text-[9px] uppercase text-muted-foreground">{l}</p></div></Reveal>)}</div></section>
 
-          <Reveal delay={0.06}>
-            <h1 className="mx-auto mt-7 max-w-4xl text-balance text-[38px] font-semibold leading-[1.04] tracking-[-0.04em] sm:text-[62px]">
-              Venda, receba e escale com <span className="tech-text">pagamentos de verdade</span>
-            </h1>
-          </Reveal>
+        <section id="plataforma" className="py-28 sm:py-40"><div className="mx-auto max-w-7xl px-5 lg:px-8"><SectionTitle eyebrow="A operação por trás da venda" copy="Cada etapa conversa com a próxima. Sem remendos, sem latência escondida, sem depender de cinco ferramentas diferentes.">Uma venda entra.<br/><span className="text-primary">Toda a estrutura reage.</span></SectionTitle><Reveal className="mt-16 sm:mt-24"><PaymentEngine /></Reveal></div></section>
 
-          <Reveal delay={0.12}>
-            <p className="mx-auto mt-6 max-w-2xl text-[16px] leading-relaxed text-muted-foreground sm:text-[17px]">
-              Checkout de alta conversão, antifraude em tempo real, área de membros, afiliados e
-              saque PIX no mesmo dia — tudo em uma única plataforma, sem mensalidade.
-            </p>
-          </Reveal>
+        <section id="conversao" className="border-y border-border bg-card py-28 sm:py-40"><div className="mx-auto grid max-w-7xl items-center gap-16 px-5 lg:grid-cols-[.9fr_1.1fr] lg:px-8"><div><SectionTitle eyebrow="Checkout que entende intenção" copy="Uma experiência rápida, clara e segura. Order bump, recuperação e pixels trabalham em segundo plano enquanto o comprador vê somente o que importa.">Menos fricção.<br/><span className="text-primary">Mais decisão.</span></SectionTitle><div className="mt-10 grid gap-px border border-border bg-border sm:grid-cols-3">{[["+24,8%", "conversão"], ["-31%", "abandono"], ["12x", "no cartão"]].map(([v,l])=><div key={l} className="bg-background p-4"><p className="font-heading text-xl font-semibold text-foreground">{v}</p><p className="mt-1 text-[10px] text-muted-foreground">{l}</p></div>)}</div></div><ConversionScene /></div></section>
 
-          <Reveal delay={0.18}>
-            <div className="mt-9 flex flex-wrap items-center justify-center gap-3">
-              <button onClick={goSignup} className="tech-cta inline-flex h-12 items-center gap-2 rounded-xl px-7 text-[14.5px] font-bold">
-                Criar conta grátis <ArrowRight className="h-4 w-4" />
-              </button>
-              <a href="#plataforma" className="inline-flex h-12 items-center gap-2 rounded-xl border border-border px-6 text-[14.5px] font-semibold text-foreground transition-colors hover:bg-muted">
-                Conheça a plataforma
-              </a>
-            </div>
-          </Reveal>
+        <section id="infraestrutura" className="relative py-28 sm:py-40"><div className="landing-grid absolute inset-0"/><div className="relative mx-auto max-w-7xl px-5 lg:px-8"><div className="grid gap-14 lg:grid-cols-[.75fr_1.25fr]"><div className="lg:sticky lg:top-28 lg:self-start"><SectionTitle eyebrow="Infraestrutura invisível" copy="A complexidade fica com a gente. Você enxerga uma operação previsível, observável e pronta para volume.">Feita para não<br/><span className="text-primary">virar gargalo.</span></SectionTitle><Button variant="outline" className="mt-8" onClick={() => navigate("/documentacao")}><Code2 /> Explorar documentação</Button></div><div className="grid gap-px border border-border bg-border">{[
+            [Network,"Roteamento inteligente","Disponibilidade monitorada e decisão de rota em tempo real para manter cada cobrança no melhor caminho.","ROUTING / 01"],
+            [Fingerprint,"Antifraude em camadas","Sinais de identidade, dispositivo, IP e velocidade analisados antes da autorização.","RISK / 02"],
+            [GitBranch,"Split automático","Comissões e coproduções calculadas no evento de pagamento, sem planilhas ou repasses manuais.","LEDGER / 03"],
+            [Gauge,"Observabilidade contínua","Latência, aprovação, falhas e reentregas visíveis em uma trilha auditável.","OPS / 04"],
+          ].map(([Icon,title,copy,tag],i)=><Reveal key={String(title)} delay={i*.06}><article className="group bg-background p-7 sm:p-9"><div className="flex items-start gap-5"><span className="flex h-11 w-11 shrink-0 items-center justify-center border border-border text-primary transition-colors group-hover:border-primary"><Icon className="h-4 w-4"/></span><div><p className="font-mono text-[9px] text-primary">{tag as string}</p><h3 className="mt-3 font-heading text-xl font-semibold text-foreground">{title as string}</h3><p className="mt-3 max-w-xl text-sm leading-6 text-muted-foreground">{copy as string}</p></div></div></article></Reveal>)}</div></div></div></section>
 
-          <Reveal delay={0.24}>
-            <div className="mt-8 flex flex-col items-center gap-2">
-              <div className="flex -space-x-2">
-                {["A", "B", "C", "D", "E"].map((c, i) => (
-                  <span
-                    key={c}
-                    className="flex h-8 w-8 items-center justify-center rounded-full border-2 border-background bg-emerald-400/15 text-[11px] font-bold text-emerald-300"
-                    style={{ zIndex: 5 - i }}
-                  >
-                    {c}
-                  </span>
-                ))}
-              </div>
-              <p className="flex items-center gap-1.5 text-[12.5px] text-muted-foreground">
-                <Star className="h-3.5 w-3.5 fill-emerald-400 text-emerald-400" />
-                <span className="font-semibold text-foreground">+12.000</span> produtores digitais já operam na HOTZFY
-              </p>
-            </div>
-          </Reveal>
+        <section className="border-y border-border bg-primary py-20 text-primary-foreground"><div className="mx-auto max-w-7xl overflow-hidden px-5 lg:px-8"><motion.div initial={reduce ? false : { x: "12%" }} whileInView={{ x: 0 }} transition={{ duration: 1.2 }} className="font-heading text-[14vw] font-bold leading-none sm:text-[8vw]">VENDA. APROVA. ESCALA.</motion.div><div className="mt-8 flex flex-wrap items-center justify-between gap-5 border-t border-primary-foreground/25 pt-5 font-mono text-[9px]"><span>HOTZFY PAYMENT INFRASTRUCTURE</span><span>LATÊNCIA BAIXA · DISPONIBILIDADE ALTA · DADOS AO VIVO</span></div></div></section>
 
-          <Reveal delay={0.3} className="mt-16">
-            <ProductMock />
-          </Reveal>
-        </div>
-      </section>
+        <section id="precos" className="py-28 sm:py-40"><div className="mx-auto max-w-7xl px-5 lg:px-8"><SectionTitle eyebrow="Crescimento alinhado" copy="Sem custo fixo para começar. A estrutura acompanha seu volume e as condições evoluem junto com a operação.">Você paga quando vende.<br/><span className="text-primary">Só isso.</span></SectionTitle><div className="mt-16 grid gap-px border border-border bg-border lg:grid-cols-3">{[
+          ["Start","4,99%",["PIX, cartão e boleto","Área de membros","Suporte por chat"]],
+          ["Scale","3,99%",["Tudo do Start","Afiliados e coprodução","API e webhooks assinados"]],
+          ["Enterprise","Sob medida",["Condições por volume","SLA dedicado","Operação personalizada"]],
+        ].map(([name,price,items],i)=><Reveal key={String(name)} delay={i*.07} className="h-full"><div className={cn("flex h-full flex-col bg-background p-7 sm:p-9",i===1&&"price-featured")}><div className="flex items-center justify-between"><p className="font-mono text-[10px] text-muted-foreground">PLANO / 0{i+1}</p>{i===1&&<span className="text-[9px] text-primary">MAIS ESCOLHIDO</span>}</div><h3 className="mt-5 font-heading text-xl font-semibold text-foreground">{name as string}</h3><p className="mt-6 font-heading text-4xl font-semibold text-foreground">{price as string}</p><p className="mt-2 text-xs text-muted-foreground">+ R$ 1,00 por venda aprovada</p><ul className="mt-8 flex-1 space-y-3">{(items as string[]).map(it=><li key={it} className="flex items-center gap-2 text-xs text-muted-foreground"><Check className="h-3.5 w-3.5 text-primary"/>{it}</li>)}</ul><Button variant={i===1?"default":"outline"} className="mt-9 w-full" onClick={signup}>Começar agora <ArrowRight/></Button></div></Reveal>)}</div></div></section>
 
-      {/* ═══════════ MÉTRICAS ═══════════ */}
-      <section className="border-y border-border/70">
-        <div className="mx-auto grid max-w-6xl grid-cols-2 divide-x divide-y divide-border/70 px-5 sm:divide-y-0 lg:grid-cols-4">
-          {METRICS.map((m, i) => (
-            <Reveal key={m.label} delay={i * 0.05} className="px-4 py-9 text-center">
-              <p className="tech-mono text-[26px] font-bold tracking-[-0.03em] text-foreground sm:text-[32px]">{m.value}</p>
-              <p className="mt-1.5 text-[12.5px] text-muted-foreground">{m.label}</p>
-            </Reveal>
-          ))}
-        </div>
-      </section>
+        <section className="border-y border-border bg-card py-28"><div className="mx-auto grid max-w-7xl gap-16 px-5 lg:grid-cols-2 lg:px-8"><SectionTitle eyebrow="Respostas diretas">Antes de começar,<br/><span className="text-primary">tire suas dúvidas.</span></SectionTitle><div className="border-t border-border">{FAQ.map(([q,a],i)=><div key={q} className="border-b border-border"><button className="flex w-full items-center justify-between gap-5 py-5 text-left font-heading text-sm font-semibold text-foreground" onClick={()=>setOpenFaq(openFaq===i?-1:i)} aria-expanded={openFaq===i}>{q}<ChevronDown className={cn("h-4 w-4 shrink-0 transition-transform",openFaq===i&&"rotate-180")}/></button>{openFaq===i&&<motion.p initial={{opacity:0,y:-5}} animate={{opacity:1,y:0}} className="pb-5 text-sm leading-6 text-muted-foreground">{a}</motion.p>}</div>)}</div></div></section>
 
-      {/* ═══════════ INTEGRAÇÕES (marquee) ═══════════ */}
-      <section className="overflow-hidden border-b border-border/70 py-6">
-        <div className="flex w-max tech-marquee items-center gap-10 px-5">
-          {[...INTEGRATIONS, ...INTEGRATIONS].map((t, i) => (
-            <span key={`${t}-${i}`} className="flex items-center gap-2 whitespace-nowrap text-[13px] font-medium text-muted-foreground">
-              <span className="h-1 w-1 rounded-full bg-emerald-400/70" /> {t}
-            </span>
-          ))}
-        </div>
-      </section>
+        <section className="relative overflow-hidden py-32 sm:py-44"><div className="landing-grid absolute inset-0"/><motion.div animate={reduce?undefined:{rotate:360}} transition={{duration:48,repeat:Infinity,ease:"linear"}} className="cta-orbit absolute left-1/2 top-1/2 aspect-square w-[680px] -translate-x-1/2 -translate-y-1/2"/><div className="relative mx-auto max-w-4xl px-5 text-center"><Reveal><Sparkles className="mx-auto h-5 w-5 text-primary"/><h2 className="mt-7 font-heading text-4xl font-semibold leading-[1.02] text-foreground sm:text-6xl lg:text-7xl">Sua próxima venda<br/>começa <span className="text-primary">agora.</span></h2><p className="mx-auto mt-6 max-w-xl text-sm leading-7 text-muted-foreground">Entre em uma infraestrutura criada para transformar ambição em uma operação previsível.</p><Button size="lg" onClick={signup} className="mt-9 h-12 px-8">Criar minha conta <ArrowRight/></Button></Reveal></div></section>
+      </main>
 
-      {/* ═══════════ PLATAFORMA ═══════════ */}
-      <section id="plataforma" className="py-24">
-        <div className="mx-auto max-w-6xl px-5">
-          <Reveal>
-            <SectionHead
-              eyebrow="Plataforma"
-              title="Uma operação completa,"
-              accent="sem peças soltas"
-              sub="Módulos integrados de ponta a ponta: da captura da venda ao repasse do dinheiro."
-            />
-          </Reveal>
-
-          <div className="mt-14 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-            {FEATURES.map((f, i) => (
-              <Reveal key={f.title} delay={i * 0.05}>
-                <div className="tech-panel tech-panel-hover h-full rounded-2xl p-6 transition-colors">
-                  <span className="flex h-11 w-11 items-center justify-center rounded-xl bg-emerald-400/10 text-emerald-300">
-                    <f.icon className="h-5 w-5" strokeWidth={1.9} />
-                  </span>
-                  <h3 className="mt-5 text-[16px] font-semibold tracking-[-0.02em] text-foreground">{f.title}</h3>
-                  <p className="mt-2 text-[13.5px] leading-relaxed text-muted-foreground">{f.desc}</p>
-                </div>
-              </Reveal>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ═══════════ COMO FUNCIONA ═══════════ */}
-      <section id="como-funciona" className="border-y border-border/70 bg-foreground/[0.015] py-24">
-        <div className="mx-auto max-w-6xl px-5">
-          <Reveal><SectionHead eyebrow="Como funciona" title="Da conta criada à" accent="primeira venda" /></Reveal>
-          <div className="mt-14 grid gap-3 md:grid-cols-3">
-            {STEPS.map((s, i) => (
-              <Reveal key={s.n} delay={i * 0.07}>
-                <div className="relative h-full rounded-2xl border border-border/70 p-7">
-                  <span className="tech-mono text-[13px] font-bold text-emerald-300">{s.n}</span>
-                  <h3 className="mt-4 text-[18px] font-semibold tracking-[-0.02em] text-foreground">{s.title}</h3>
-                  <p className="mt-2 text-[13.5px] leading-relaxed text-muted-foreground">{s.desc}</p>
-                </div>
-              </Reveal>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ═══════════ SEGURANÇA ═══════════ */}
-      <section id="seguranca" className="py-24">
-        <div className="mx-auto grid max-w-6xl items-center gap-12 px-5 lg:grid-cols-2">
-          <Reveal>
-            <span className="inline-flex items-center gap-2 rounded-full border border-emerald-400/25 bg-emerald-400/[0.06] px-3.5 py-1.5 text-[11px] font-semibold uppercase tracking-[0.14em] text-emerald-300">
-              <Shield className="h-3.5 w-3.5" /> Segurança
-            </span>
-            <h2 className="mt-5 text-[30px] font-semibold leading-[1.1] tracking-[-0.03em] sm:text-[40px]">
-              Infraestrutura pronta para <span className="tech-text">volume alto</span>
-            </h2>
-            <p className="mt-4 max-w-lg text-[15px] leading-relaxed text-muted-foreground">
-              Cada camada foi construída para operar sob carga: isolamento por vendedor, trilha de
-              auditoria imutável e monitoramento contínuo das adquirentes.
-            </p>
-            <div className="mt-7 flex flex-wrap gap-2">
-              {["LGPD", "TLS 1.3", "AES-256", "HMAC-SHA256", "RLS"].map((t) => (
-                <span key={t} className="tech-mono rounded-lg border border-border/70 px-2.5 py-1 text-[11.5px] text-muted-foreground">{t}</span>
-              ))}
-            </div>
-          </Reveal>
-
-          <div className="grid gap-3 sm:grid-cols-2">
-            {SECURITY.map((s, i) => (
-              <Reveal key={s.title} delay={i * 0.06}>
-                <div className="tech-panel h-full rounded-2xl p-5">
-                  <s.icon className="h-5 w-5 text-emerald-300" strokeWidth={1.9} />
-                  <h3 className="mt-4 text-[14.5px] font-semibold tracking-[-0.02em] text-foreground">{s.title}</h3>
-                  <p className="mt-1.5 text-[12.5px] leading-relaxed text-muted-foreground">{s.desc}</p>
-                </div>
-              </Reveal>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ═══════════ DEPOIMENTOS ═══════════ */}
-      <section className="border-y border-border/70 bg-foreground/[0.015] py-24">
-        <div className="mx-auto max-w-6xl px-5">
-          <Reveal><SectionHead eyebrow="Clientes" title="Quem opera com a" accent="HOTZFY" /></Reveal>
-          <div className="mt-14 grid gap-3 md:grid-cols-3">
-            {TESTIMONIALS.map((t, i) => (
-              <Reveal key={t.name} delay={i * 0.06}>
-                <figure className="h-full rounded-2xl border border-border/70 bg-background/40 p-6">
-                  <div className="flex gap-0.5">
-                    {Array.from({ length: 5 }).map((_, s) => (
-                      <Star key={s} className="h-3.5 w-3.5 fill-emerald-400 text-emerald-400" />
-                    ))}
-                  </div>
-                  <blockquote className="mt-4 text-[14px] leading-relaxed text-foreground">“{t.text}”</blockquote>
-                  <figcaption className="mt-5 flex items-center gap-3 border-t border-border/70 pt-4">
-                    <span className="flex h-9 w-9 items-center justify-center rounded-full bg-emerald-400/12 text-[12px] font-bold text-emerald-300">
-                      {t.name.charAt(0)}
-                    </span>
-                    <span>
-                      <span className="block text-[13px] font-semibold text-foreground">{t.name}</span>
-                      <span className="block text-[11.5px] text-muted-foreground">{t.role}</span>
-                    </span>
-                  </figcaption>
-                </figure>
-              </Reveal>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ═══════════ PREÇOS ═══════════ */}
-      <section id="precos" className="py-24">
-        <div className="mx-auto max-w-6xl px-5">
-          <Reveal>
-            <SectionHead
-              eyebrow="Preços"
-              title="Sem mensalidade."
-              accent="Você paga quando vende"
-              sub="Taxa única por transação aprovada. Sem fidelidade, sem letra miúda."
-            />
-          </Reveal>
-
-          <div className="mt-14 grid items-stretch gap-3 lg:grid-cols-3">
-            {PLANS.map((p, i) => (
-              <Reveal key={p.name} delay={i * 0.06} className="h-full">
-                <div
-                  className={cn(
-                    "flex h-full flex-col rounded-2xl p-7",
-                    p.featured ? "tech-panel tech-ring relative border border-emerald-400/30" : "border border-border/70",
-                  )}
-                >
-                  <div className="flex items-center justify-between">
-                    <h3 className="text-[15px] font-semibold tracking-[-0.02em] text-foreground">{p.name}</h3>
-                    {p.featured && (
-                      <span className="inline-flex items-center gap-1 rounded-full bg-emerald-400/12 px-2.5 py-1 text-[10.5px] font-bold uppercase tracking-[0.1em] text-emerald-300">
-                        <Zap className="h-3 w-3" /> Popular
-                      </span>
-                    )}
-                  </div>
-                  <p className="tech-mono mt-6 text-[38px] font-bold leading-none tracking-[-0.04em] text-foreground">{p.price}</p>
-                  <p className="mt-2 text-[12.5px] text-muted-foreground">{p.note}</p>
-                  <ul className="mt-7 flex-1 space-y-3">
-                    {p.items.map((it) => (
-                      <li key={it} className="flex items-start gap-2.5 text-[13.5px] text-muted-foreground">
-                        <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-emerald-300" strokeWidth={2} />
-                        {it}
-                      </li>
-                    ))}
-                  </ul>
-                  <button
-                    onClick={goSignup}
-                    className={cn(
-                      "mt-8 inline-flex h-11 w-full items-center justify-center gap-2 rounded-xl text-[13.5px] font-bold transition-colors",
-                      p.featured ? "tech-cta" : "border border-border text-foreground hover:bg-muted",
-                    )}
-                  >
-                    Começar agora <ArrowRight className="h-4 w-4" />
-                  </button>
-                </div>
-              </Reveal>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ═══════════ FAQ ═══════════ */}
-      <section id="faq" className="border-t border-border/70 py-24">
-        <div className="mx-auto max-w-3xl px-5">
-          <Reveal><SectionHead eyebrow="Dúvidas" title="Perguntas" accent="frequentes" /></Reveal>
-          <div className="mt-12 grid gap-2.5">
-            {FAQ.map((f, i) => (
-              <Reveal key={f.q} delay={i * 0.04}>
-                <FaqItem q={f.q} a={f.a} open={openFaq === i} onToggle={() => setOpenFaq(openFaq === i ? null : i)} />
-              </Reveal>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ═══════════ CTA FINAL ═══════════ */}
-      <section className="relative overflow-hidden border-t border-border/70 py-28">
-        <div aria-hidden className="tech-grid pointer-events-none absolute inset-0" />
-        <div aria-hidden className="tech-aurora pointer-events-none absolute inset-0" />
-        <div className="relative mx-auto max-w-3xl px-5 text-center">
-          <Reveal>
-            <h2 className="text-balance text-[32px] font-semibold leading-[1.08] tracking-[-0.035em] sm:text-[46px]">
-              Pronto para operar na <span className="tech-text">velocidade do PIX?</span>
-            </h2>
-            <p className="mx-auto mt-5 max-w-xl text-[15.5px] leading-relaxed text-muted-foreground">
-              Crie sua conta, publique seu produto e receba a primeira venda ainda hoje.
-            </p>
-            <div className="mt-9 flex flex-wrap items-center justify-center gap-3">
-              <button onClick={goSignup} className="tech-cta inline-flex h-12 items-center gap-2 rounded-xl px-7 text-[14.5px] font-bold">
-                Criar conta grátis <ArrowRight className="h-4 w-4" />
-              </button>
-              <button onClick={() => navigate("/documentacao")} className="inline-flex h-12 items-center gap-2 rounded-xl border border-border px-6 text-[14.5px] font-semibold text-foreground transition-colors hover:bg-muted">
-                <Code2 className="h-4 w-4" /> Documentação
-              </button>
-            </div>
-          </Reveal>
-        </div>
-      </section>
-
-      {/* ═══════════ RODAPÉ ═══════════ */}
-      <footer className="border-t border-border/70">
-        <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-5 px-5 py-9 sm:flex-row">
-          <Wordmark size={24} />
-          <div className="flex flex-wrap items-center justify-center gap-6 text-[12.5px] text-muted-foreground">
-            <a href="/documentacao" className="transition-colors hover:text-foreground">Documentação</a>
-            <a href="/termos" className="transition-colors hover:text-foreground">Termos</a>
-            <a href="/privacidade" className="transition-colors hover:text-foreground">Privacidade</a>
-            <a href="/status" className="transition-colors hover:text-foreground">Status</a>
-          </div>
-          <p className="tech-mono text-[11.5px] text-muted-foreground">© {new Date().getFullYear()} HOTZFY</p>
-        </div>
-      </footer>
+      <footer className="border-t border-border"><div className="mx-auto flex max-w-7xl flex-col gap-8 px-5 py-10 sm:flex-row sm:items-center lg:px-8"><Wordmark/><div className="flex flex-wrap gap-5 text-xs text-muted-foreground sm:ml-auto"><a href="/documentacao">Documentação</a><a href="/termos-de-uso">Termos</a><a href="/politica-de-privacidade">Privacidade</a><a href="/status">Status</a></div><p className="font-mono text-[9px] text-muted-foreground">© {new Date().getFullYear()} HOTZFY</p></div></footer>
     </div>
   );
 }
