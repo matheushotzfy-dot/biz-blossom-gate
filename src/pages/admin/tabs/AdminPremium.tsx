@@ -31,14 +31,14 @@ export function PremiumPanel({ children, className, title, eyebrow, icon: Icon, 
   action?: ReactNode;
 }) {
   return (
-    <section className={cn("overflow-hidden rounded-2xl border border-border/60 bg-card", className)}>
+    <section className={cn("overflow-hidden rounded-[12px] border border-border/60 bg-card", className)}>
       {(title || eyebrow || Icon || action) && (
         <header className="flex flex-col gap-3 border-b border-border/40 px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex items-center gap-2.5 min-w-0">
             {Icon && <Icon className="h-4 w-4 shrink-0 text-muted-foreground" strokeWidth={2.2} />}
             <div className="min-w-0">
-              {eyebrow && <p className="text-[9px] font-black uppercase tracking-[0.22em] text-muted-foreground/70">{eyebrow}</p>}
-              {title && <h2 className="font-display text-sm font-black uppercase tracking-tight text-foreground">{title}</h2>}
+              {eyebrow && <p className="text-[11px] font-medium text-muted-foreground/70">{eyebrow}</p>}
+              {title && <h2 className="font-display text-[14px] font-semibold tracking-tight text-foreground">{title}</h2>}
             </div>
           </div>
           {action && <div className="shrink-0">{action}</div>}
@@ -58,12 +58,12 @@ export function PremiumMetric({ label, value, sub, icon: Icon, tone = "neutral",
   className?: string;
 }) {
   return (
-    <div className={cn("group relative overflow-hidden rounded-xl border border-border/60 bg-card px-5 py-4 transition-colors hover:border-border", className)}>
+    <div className={cn("group relative overflow-hidden rounded-[12px] border border-border/60 bg-card px-5 py-4 transition-colors hover:border-border", className)}>
       <div className="flex items-center justify-between">
-        <p className="text-[10px] font-black uppercase tracking-[0.22em] text-muted-foreground/70">{label}</p>
+        <p className="text-[11.5px] font-medium text-muted-foreground/70">{label}</p>
         <Icon className={cn("h-3.5 w-3.5 shrink-0 opacity-40 transition-opacity group-hover:opacity-90", toneText[tone])} strokeWidth={2.2} />
       </div>
-      <p className="mt-4 break-words font-display text-[26px] font-black leading-none tracking-tight tabular-nums text-foreground">
+      <p className="mt-4 break-words font-display text-[26px] font-semibold leading-none tracking-[-0.02em] tabular-nums text-foreground">
         {value}
       </p>
       {sub && <p className="mt-2 truncate text-[11px] font-medium text-muted-foreground/75">{sub}</p>}
@@ -88,13 +88,13 @@ export function PremiumSegmented<T extends string>({ value, options, onChange }:
   onChange: (value: T) => void;
 }) {
   return (
-    <div className="inline-flex flex-wrap gap-1 rounded-xl border border-border/60 bg-muted/30 p-1">
+    <div className="inline-flex flex-wrap gap-1 rounded-[10px] border border-border/60 bg-transparent p-1">
       {options.map((option) => (
         <button
           key={option.value}
           onClick={() => onChange(option.value)}
           className={cn(
-            "rounded-lg px-3 py-1.5 text-[10px] font-black uppercase tracking-wider transition-colors",
+            "rounded-[8px] px-3 py-1.5 text-[11.5px] font-medium transition-colors",
             value === option.value ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:bg-card hover:text-foreground"
           )}
         >
@@ -108,20 +108,20 @@ export function PremiumSegmented<T extends string>({ value, options, onChange }:
 export function PremiumEmpty({ icon: Icon, title, subtitle }: { icon: LucideIcon; title: string; subtitle?: string }) {
   return (
     <div className="flex flex-col items-center justify-center py-16 text-center text-muted-foreground">
-      <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-2xl border border-border/60 bg-muted/30">
+      <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-[12px] border border-border/60 bg-transparent">
         <Icon className="h-7 w-7 opacity-40" />
       </div>
-      <p className="text-sm font-black uppercase tracking-tight text-foreground/70">{title}</p>
-      {subtitle && <p className="mt-1 text-[11px] font-bold text-muted-foreground/70">{subtitle}</p>}
+      <p className="text-[13.5px] font-semibold text-foreground/80">{title}</p>
+      {subtitle && <p className="mt-1 text-[12px] font-medium text-muted-foreground/70">{subtitle}</p>}
     </div>
   );
 }
 
 export const premiumTable = {
-  wrapper: "overflow-x-auto rounded-xl border border-border/60",
+  wrapper: "overflow-x-auto rounded-[12px] border border-border/60",
   table: "w-full text-left border-collapse",
-  headRow: "border-b border-border bg-muted/40 text-[10px] font-black uppercase tracking-[0.18em] text-muted-foreground/80 sticky top-0 z-[1]",
+  headRow: "border-b border-border bg-muted/25 text-[11px] font-medium text-muted-foreground/80 sticky top-0 z-[1]",
   th: "px-5 py-3.5 whitespace-nowrap",
-  row: "group relative border-b border-border/40 last:border-b-0 transition-[background-color,box-shadow,transform] duration-200 hover:bg-muted/30 hover:shadow-[inset_3px_0_0_0_hsl(var(--primary))]",
+  row: "group relative border-b border-border/40 last:border-b-0 transition-[background-color,box-shadow,transform] duration-200 hover:bg-muted/25",
   td: "px-5 py-3.5 align-middle",
 };
