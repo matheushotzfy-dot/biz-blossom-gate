@@ -99,7 +99,7 @@ function LiquidityPlate() {
   );
 }
 
-export function PromoBanner() {
+export function PromoBanner({ periodControl }: { periodControl?: React.ReactNode }) {
   return (
     <section className="relative isolate overflow-hidden rounded-[12px] border border-border/60 bg-[hsl(var(--card))] md:rounded-[28px]">
       {/* engraved paper texture */}
@@ -125,6 +125,10 @@ export function PromoBanner() {
       </svg>
       {/* hairline frame */}
       <div aria-hidden className="pointer-events-none absolute inset-3 rounded-[20px] border border-primary/10 md:inset-4" />
+
+      {periodControl && (
+        <div className="absolute right-4 top-4 z-20 md:right-6 md:top-5">{periodControl}</div>
+      )}
 
       <div className="relative grid gap-4 p-5 md:grid-cols-[minmax(0,1.1fr)_minmax(0,0.9fr)] md:items-center md:gap-4 md:p-6 lg:p-7">
         {/* ── Editorial copy ── */}
@@ -190,10 +194,7 @@ export function PromoBanner() {
             <p className="text-[10px] font-medium text-muted-foreground/70">Reserva</p>
             <p className="font-display text-[13px] font-bold tabular-nums leading-none text-primary">0%</p>
           </div>
-          <div className="absolute right-1 top-3 rounded-lg border border-primary/25 bg-primary/10 px-2.5 py-1.5">
-            <p className="text-[10px] font-medium text-primary/80">Autorização</p>
-            <p className="font-display text-[13px] font-bold tabular-nums leading-none text-foreground">118ms</p>
-          </div>
+
         </div>
       </div>
 

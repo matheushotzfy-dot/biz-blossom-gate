@@ -4091,3 +4091,40 @@ html body .lp .lp-progress {
 @media (prefers-reduced-motion: reduce) {
   .pb-spin, .pb-spin-rev, .pb-flow { animation: none; }
 }
+
+/* ════════════════════════════════════════════════════════════
+   ADMIN CLEAN PASS — alinhado ao dashboard do seller
+   (sem lift, sem sombra, sem brilho; só cor + borda)
+   ════════════════════════════════════════════════════════════ */
+.admin-nav-item {
+  border-radius: 10px !important;
+  border: 1px solid transparent !important;
+  transition: background-color 180ms ease, color 180ms ease, border-color 180ms ease !important;
+}
+.admin-nav-item:not([data-active="true"]):hover { transform: none !important; }
+.admin-nav-item:not([data-active="true"]):hover::after { opacity: 0 !important; }
+.admin-nav-item svg { transition: color 180ms ease !important; }
+.admin-nav-item:not([data-active="true"]):hover svg { transform: none !important; }
+.admin-frame aside .af-accent-bg { border: 1px solid var(--as-rail) !important; border-radius: 10px !important; }
+.admin-frame aside .af-accent-bg::before { display: none !important; }
+
+.admin-card { transition: border-color 180ms ease, background-color 180ms ease !important; }
+.admin-card:hover {
+  transform: none !important;
+  box-shadow: none !important;
+  border-color: hsl(var(--primary) / 0.4) !important;
+}
+
+.admin-shell [role="tab"]:not([data-state="active"]):hover,
+.admin-shell [role="menuitem"]:hover,
+.admin-shell [role="option"]:hover,
+.admin-shell [data-radix-collection-item]:hover { transform: none !important; }
+
+.admin-shell button:not(:disabled):hover,
+.admin-shell a[role="button"]:hover { transform: none !important; filter: none !important; }
+.admin-shell button:not(:disabled):active,
+.admin-shell a[role="button"]:active { transform: none !important; filter: none !important; }
+
+.admin-shell section,
+.admin-shell article,
+.admin-shell .admin-card { box-shadow: none !important; }

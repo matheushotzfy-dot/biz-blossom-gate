@@ -47,6 +47,7 @@ import { Seo } from "@/components/Seo";
 import { accountNeedsVerification } from "@/components/AccountVerificationGate";
 import { toast } from "sonner";
 import { PromoBanner } from "@/components/dashboard/PromoBanner";
+import { SellerOnboarding } from "@/components/dashboard/SellerOnboarding";
 
 
 const PERIOD_PRESETS = [
@@ -255,6 +256,110 @@ function DashboardPeriodFilter({
     </Popover>
   );
 }
+
+// ═══════════ PERIOD DIAL — calendário futurista (canto do banner) ═══════════
+type PeriodDialProps = {
+  open: boolean;
+  setOpen: (v: boolean) => void;
+  label: string;
+  goalPct: number;
+  revenueLabel: string;
+  presets: readonly PeriodPreset[];
+  selectedLabel: string | null;
+  onPreset: (p: PeriodPreset) => void;
+  onThisMonth: () => void;
+  isCustom: boolean;
+  customRange: DateRange | undefined;
+  onRange: (r: DateRange | undefined) => void;
+};
+
+function PeriodDial({
+  open, setOpen, label, goalPct, revenueLabel, presets, selectedLabel, onPreset, onThisMonth, isCustom, customRange, onRange,
+}: PeriodDialProps) {
+  const today = new Date();
+  const dayNum = today.getDate();
+  const pct = Math.max(0, Math.min(100, goalPct));
+
+  return (
+    <Popover open={open} onOpenChange={setOpen}>
+      <PopoverTrigger asChild>
+        <button
+          aria-label="Selecionar período"
+          className="group flex items-center gap-2.5 rounded-[12px] border border-primary/25 bg-background/85 px-2.5 py-2 text-left backdrop-blur transition-colors hover:border-primary/50"
+        >
+          {/* futuristic calendar dial */}
+          <span className="relative flex h-9 w-9 items-center justify-center">
+            <svg viewBox="0 0 40 40" className="absolute inset-0 h-9 w-9 -rotate-90" aria-hidden>
+              <circle cx="20" cy="20" r="17.5" fill="none" stroke="hsl(var(--border))" strokeWidth="1.6" />
+              <circle
+                cx="20" cy="20" r="17.5" fill="none" stroke="hsl(var(--primary))" strokeWidth="1.6" strokeLinecap="round"
+                strokeDasharray={`${(pct / 100) * 110} 110`}
+                className="transition-[stroke-dasharray] duration-700 ease-out"
+              />
+              {Array.from({ length: 24 }).map((_, i) => {
+                const a = (i / 24) * Math.PI * 2;
+                const long = i % 6 === 0;
+                return (
+                  <line
+                    key={i}
+                    x1={20 + Math.cos(a) * 13} y1={20 + Math.sin(a) * 13}
+                    x2={20 + Math.cos(a) * (long ? 10 : 11.5)} y2={20 + Math.sin(a) * (long ? 10 : 11.5)}
+                    stroke="hsl(var(--primary))" strokeOpacity={long ? 0.55 : 0.22} strokeWidth={long ? 1.1 : 0.7}
+                  />
+                );
+              })}
+            </svg>
+            <span className="font-display text-[12px] font-extrabold leading-none tabular-nums text-foreground">{dayNum}</span>
+          </span>
+
+          <span className="min-w-0">
+            <span className="flex items-center gap-1.5">
+              <span className="h-1 w-1 rounded-full bg-primary" />
+              <span className="text-[10.5px] font-medium text-muted-foreground/70">{label}</span>
+            </span>
+            <span className="mt-0.5 block font-display text-[13.5px] font-bold leading-none tabular-nums tracking-[-0.02em] text-foreground">
+              {revenueLabel}
+            </span>
+          </span>
+
+          <ChevronRight className="h-3.5 w-3.5 rotate-90 text-muted-foreground/45 transition-colors group-hover:text-primary" />
+        </button>
+      </PopoverTrigger>
+      <PopoverContent align="end" className="w-[320px] rounded-[12px] border-border/60 p-3">
+        <div className="mb-3 grid grid-cols-2 gap-1.5">
+          {presets.map((p) => (
+            <button
+              key={p.label}
+              onClick={() => onPreset(p)}
+              className={cn("h-9 rounded-[10px] text-[12px] font-semibold transition-colors",
+                selectedLabel === p.label ? "bg-primary text-primary-foreground" : "bg-muted/40 text-muted-foreground hover:bg-muted")}
+            >
+              {p.label}
+            </button>
+          ))}
+          <button
+            onClick={onThisMonth}
+            className={cn("col-span-2 h-9 rounded-[10px] text-[12px] font-semibold transition-colors",
+              isCustom ? "bg-primary text-primary-foreground" : "bg-muted/40 text-muted-foreground hover:bg-muted")}
+          >
+            Este mês
+          </button>
+        </div>
+        <div className="border-t border-border/40 pt-3">
+          <p className="mb-2 text-[11.5px] font-medium text-muted-foreground">Personalizado</p>
+          <Calendar
+            mode="range"
+            selected={customRange}
+            onSelect={onRange}
+            locale={ptBR}
+            className="p-0 pointer-events-auto"
+          />
+        </div>
+      </PopoverContent>
+    </Popover>
+  );
+}
+
 
 export default function Dashboard() {
   const navigate = useNavigate();
@@ -609,8 +714,7 @@ export default function Dashboard() {
         }}
       />
 
-      <div className="relative z-10 px-2 sm:px-4 md:px-6 pt-4 pb-24 max-w-[1600px] mx-auto space-y-5">
-
+      <div className="relative z-10 px-2 sm:px-4 md:px-6 pt-2 pb-24 max-w-[1600px] mx-auto space-y-4">
 
         {(txError || productsError) && (
           <div className="flex items-center justify-between gap-3 rounded-[12px] border border-destructive/40 bg-destructive/5 px-4 py-2.5 text-[12px] text-destructive">
@@ -619,103 +723,53 @@ export default function Dashboard() {
           </div>
         )}
 
-        {/* ═══════════ TOP GREETING ROW ═══════════ */}
-        <header className="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
-          <div className="min-w-0">
-            <h1 className="font-display font-extrabold tracking-[-0.035em] text-[22px] md:text-[28px] leading-[1.1] truncate">
-              Seja bem-vindo, {nickname}
-              <button onClick={privacy.toggle} className="ml-2 inline-flex align-middle text-muted-foreground/50 hover:text-primary transition-colors">
-                {privacy.hidden ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-              </button>
-            </h1>
-            <p className="text-muted-foreground/80 text-[12.5px] font-medium mt-0.5">Que essa jornada seja leve, produtiva e cheia de conquistas!</p>
+        <SellerOnboarding />
 
-          </div>
-
-          {/* Faturamento / Meta chip — clean, calendar icon opens filter */}
-          <Popover open={datePickerOpen} onOpenChange={setDatePickerOpen}>
-            <PopoverTrigger asChild>
-              <button className="group flex items-center gap-3 rounded-xl border border-border/60 bg-card px-3.5 py-2.5 w-full md:w-auto md:min-w-[276px] hover:border-primary/45 transition-colors text-left">
-                <div className="relative flex h-9 w-9 items-center justify-center rounded-lg bg-primary/10 text-primary shrink-0">
-                  <svg viewBox="0 0 36 36" className="absolute inset-0 h-9 w-9 -rotate-90">
-                    <circle cx="18" cy="18" r="15.5" fill="none" stroke="hsl(var(--border))" strokeWidth="2.25" />
-                    <circle
-                      cx="18" cy="18" r="15.5" fill="none" stroke="hsl(var(--primary))" strokeWidth="2.25" strokeLinecap="round"
-                      strokeDasharray={`${(goalPct / 100) * 97.4} 97.4`}
-                      className="transition-[stroke-dasharray] duration-700 ease-out"
-                    />
-                  </svg>
-                  <CalendarDays className="relative h-3.5 w-3.5" strokeWidth={2} />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2">
-                    <p className="truncate text-[11px] font-medium text-muted-foreground/70">
-                      Faturamento · {isCustom ? "Período" : selectedPeriod.label}
-                    </p>
-                    {revenueTrend !== undefined && (
-                      <span className={cn("shrink-0 rounded-md px-1.5 py-[1px] text-[9px] font-bold tabular-nums",
-                        revenueTrend >= 0 ? "bg-success/12 text-success" : "bg-destructive/12 text-destructive")}>
-                        {revenueTrend >= 0 ? "+" : ""}{revenueTrend}%
-                      </span>
-                    )}
-                  </div>
-                  <div className="flex items-baseline gap-1.5 mt-0.5">
-                    <span className="font-display font-bold text-[17px] tabular-nums tracking-[-0.03em] text-foreground">
-                      {privacy.hidden ? CENSORED : fmt(revenue)}
-                    </span>
-                    <span className="text-[10.5px] text-muted-foreground/60 tabular-nums">/ {privacy.hidden ? CENSORED : fmt(goalTarget)}</span>
-                  </div>
-                  <p className="mt-0.5 truncate text-[10px] font-medium text-muted-foreground/70 tabular-nums">
-                    {goalPct.toFixed(1)}% da meta · {approved.length} pedidos pagos
-                  </p>
-                </div>
-              </button>
-
-
-            </PopoverTrigger>
-            <PopoverContent align="end" className="w-[320px] p-3 rounded-[12px] border-border/60">
-              <div className="grid grid-cols-2 gap-1.5 mb-3">
-                {PERIOD_PRESETS.map((p) => (
-                  <button key={p.label}
-                    onClick={() => { setSelectedPeriod(p); setIsCustom(false); setCustomRange(undefined); setDatePickerOpen(false); }}
-                    className={cn("h-9 rounded-xl text-[12px] font-bold transition-all",
-                      !isCustom && selectedPeriod.label === p.label ? "bg-primary text-primary-foreground" : "bg-muted/40 text-muted-foreground hover:bg-muted")}>
-                    {p.label}
-                  </button>
-                ))}
-                <button
-                  onClick={() => {
-                    const now = brasiliaToday();
-                    const from = new Date(now.getFullYear(), now.getMonth(), 1, 0, 0, 0, 0);
-                    const to = new Date(now); to.setHours(23,59,59,999);
-                    setCustomRange({ from, to }); setIsCustom(true); setDatePickerOpen(false);
-                  }}
-                  className={cn("h-9 rounded-xl text-[12px] font-bold transition-all col-span-2",
-                    isCustom ? "bg-primary text-primary-foreground" : "bg-muted/40 text-muted-foreground hover:bg-muted")}>
-                  Este mês
-                </button>
-              </div>
-              <div className="border-t border-border/40 pt-3">
-                <p className="text-[11.5px] font-medium text-muted-foreground mb-2">Personalizado</p>
-                <Calendar
-                  mode="range"
-                  selected={customRange}
-                  onSelect={(r) => {
-                    if (r?.from) {
-                      setCustomRange(r); setIsCustom(true);
-                      if (r.from && r.to) setDatePickerOpen(false);
-                    }
-                  }}
-                  locale={ptBR}
-                  className="p-0 pointer-events-auto"
-                />
-              </div>
-            </PopoverContent>
-          </Popover>
+        {/* ═══════════ GREETING ═══════════ */}
+        <header className="min-w-0 pt-1">
+          <h1 className="font-display font-extrabold tracking-[-0.035em] text-[20px] md:text-[25px] leading-[1.1] truncate">
+            Seja bem-vindo, {nickname}
+            <button
+              onClick={privacy.toggle}
+              aria-label={privacy.hidden ? "Mostrar valores" : "Ocultar valores"}
+              className="ml-2 inline-flex h-6 w-6 items-center justify-center rounded-[8px] align-middle text-muted-foreground/45 transition-colors hover:text-primary"
+            >
+              {privacy.hidden ? <EyeOff className="h-3.5 w-3.5" strokeWidth={2} /> : <Eye className="h-3.5 w-3.5" strokeWidth={2} />}
+            </button>
+          </h1>
+          <p className="text-muted-foreground/70 text-[12px] font-medium mt-0.5">Que essa jornada seja leve, produtiva e cheia de conquistas!</p>
         </header>
 
-        {/* ═══════════ HERO — BRAND BANNER ═══════════ */}
-        <PromoBanner />
+        {/* ═══════════ HERO — BRAND BANNER (com dial de período) ═══════════ */}
+        <PromoBanner
+          periodControl={
+            <PeriodDial
+              open={datePickerOpen}
+              setOpen={setDatePickerOpen}
+              label={isCustom ? "Período" : selectedPeriod.label}
+              goalPct={goalPct}
+              revenueLabel={privacy.hidden ? CENSORED : fmt(revenue)}
+              presets={PERIOD_PRESETS}
+              selectedLabel={!isCustom ? selectedPeriod.label : null}
+              onPreset={(p) => { setSelectedPeriod(p); setIsCustom(false); setCustomRange(undefined); setDatePickerOpen(false); }}
+              onThisMonth={() => {
+                const now = brasiliaToday();
+                const from = new Date(now.getFullYear(), now.getMonth(), 1, 0, 0, 0, 0);
+                const to = new Date(now); to.setHours(23, 59, 59, 999);
+                setCustomRange({ from, to }); setIsCustom(true); setDatePickerOpen(false);
+              }}
+              isCustom={isCustom}
+              customRange={customRange}
+              onRange={(r) => {
+                if (r?.from) {
+                  setCustomRange(r); setIsCustom(true);
+                  if (r.from && r.to) setDatePickerOpen(false);
+                }
+              }}
+            />
+          }
+        />
+
 
 
 
