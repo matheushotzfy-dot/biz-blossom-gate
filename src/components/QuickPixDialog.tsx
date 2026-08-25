@@ -429,11 +429,11 @@ export default function QuickPixDialog({ open, onOpenChange }: Props) {
                   onClick={copyCode}
                   disabled={!pixCode}
                   className={cn(
-                    "w-full h-12 rounded-xl font-display font-black text-[12px] uppercase tracking-[0.14em] flex items-center justify-center gap-2",
-                    "bg-primary text-primary-foreground border border-primary/40",
-                    "hover:bg-primary/90 hover:-translate-y-px active:translate-y-0 active:scale-[0.985]",
-                    ease,
+                    "w-full h-12 rounded-xl font-display text-[12.5px] font-bold uppercase tracking-[0.12em] flex items-center justify-center gap-2",
+                    "bg-primary text-primary-foreground transition-colors duration-200 hover:bg-primary/90",
+                    "disabled:opacity-40 disabled:cursor-not-allowed",
                   )}
+
                 >
                   {copied ? (
                     <>
