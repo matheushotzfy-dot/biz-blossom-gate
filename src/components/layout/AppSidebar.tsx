@@ -234,11 +234,19 @@ function SidebarSectionNav({ section, pathname, isFirst }: SidebarSectionNavProp
 }
 
 
-export function AppSidebar() {
+type AppSidebarProps = {
+  pinned?: boolean;
+  onTogglePin?: () => void;
+  onHoverChange?: (hovering: boolean) => void;
+};
+
+export function AppSidebar({ pinned = true, onTogglePin, onHoverChange }: AppSidebarProps) {
   const navigate = useNavigate();
   const location = useLocation();
-  const { state } = useSidebar();
+  const { state, isMobile } = useSidebar();
   const collapsed = state === "collapsed";
+  const overlaying = !pinned && !collapsed && !isMobile;
+
   const { user } = useAuth();
   const [revenue, setRevenue] = useState(0);
   const [todayRevenue, setTodayRevenue] = useState(0);
