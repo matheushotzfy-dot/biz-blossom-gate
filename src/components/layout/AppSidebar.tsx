@@ -347,20 +347,43 @@ export function AppSidebar({ pinned = true, onTogglePin, onHoverChange }: AppSid
   const userName = user?.email?.split("@")[0] ?? "Vendedor";
 
   return (
-    <Sidebar collapsible="icon" className="border-r border-sidebar-border/70 bg-sidebar">
-      <SidebarHeader className="relative border-b border-sidebar-border/70 px-4 pb-4 pt-4">
-        {/* Brand */}
+    <Sidebar
+      collapsible="icon"
+      onMouseEnter={() => onHoverChange?.(true)}
+      onMouseLeave={() => onHoverChange?.(false)}
+      className={cn(
+        "border-r border-sidebar-border/60 transition-colors duration-200",
+        overlaying ? "bg-background" : "bg-transparent",
+      )}
+    >
+      <SidebarHeader className="relative px-4 pb-3 pt-4 group-data-[collapsible=icon]:px-0">
+        {/* Brand + pino */}
         <div className={cn("flex items-center gap-3", collapsed && "justify-center")}>
-          <div className="relative h-10 w-10 shrink-0 flex items-center justify-center overflow-hidden rounded-[10px] border border-sidebar-border/70 bg-transparent">
+          <div className="relative flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden">
             <VenxpayLogo size={30} />
           </div>
           <div className="min-w-0 flex-1 group-data-[collapsible=icon]:hidden">
-            <div className="flex items-center gap-1.5">
-              <h1 className="font-heading text-[16px] leading-none tracking-[-0.02em] text-sidebar-accent-foreground">
-                VENXPAY
-              </h1>
-            </div>
+            <h1 className="font-heading text-[15px] leading-none tracking-[-0.02em] text-sidebar-accent-foreground">
+              VENXPAY
+            </h1>
           </div>
+          {onTogglePin && (
+            <button
+              type="button"
+              onClick={onTogglePin}
+              aria-pressed={pinned}
+              aria-label={pinned ? "Soltar menu (expandir ao passar o mouse)" : "Fixar menu"}
+              title={pinned ? "Soltar menu" : "Fixar menu"}
+              className={cn(
+                "hidden md:flex h-7 w-7 shrink-0 items-center justify-center rounded-[8px] transition-colors group-data-[collapsible=icon]:hidden",
+                pinned
+                  ? "text-primary"
+                  : "text-sidebar-foreground/40 hover:text-foreground",
+              )}
+            >
+              <PinIcon size={15} filled={pinned} />
+            </button>
+          )}
         </div>
         <RevenueCard
           collapsed={collapsed}
@@ -369,6 +392,7 @@ export function AppSidebar({ pinned = true, onTogglePin, onHoverChange }: AppSid
           onOpenRewards={() => navigate("/premiacoes")}
         />
       </SidebarHeader>
+
 
 
       <SidebarContent className="relative gap-0 overflow-y-auto px-2.5 py-3 group-data-[collapsible=icon]:py-4">
