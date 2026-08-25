@@ -708,7 +708,6 @@ export default function Dashboard() {
   const goalPct = Math.min(100, (revenue / goalTarget) * 100);
 
   // Sparkline data from chart
-  const sparkData = useMemo(() => chartData.map(d => ({ v: d.vendas })), [chartData]);
   const productsMap = useMemo(() => {
     const map: Record<string, string> = {};
     (productsData || []).forEach((p: { id: string; name: string | null }) => { map[p.id] = p.name || p.id; });
@@ -783,58 +782,39 @@ export default function Dashboard() {
 
 
 
-        {/* ═══════════ 4 KPI CARDS ═══════════ */}
-        <section className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
+        {/* ═══════════ FINANCIAL INSTRUMENT RAIL ═══════════ */}
+        <section className="overflow-hidden rounded-[14px] border border-border/60 bg-transparent">
+          <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4">
           {[
-            { label: "Saldo", value: fmt(Math.max(0, balance)), sub: "Disponível para saque", icon: Wallet, spark: true, tone: "neutral" as const },
-            { label: "Recebido hoje", value: fmt(receivedToday), sub: "Total faturado no dia", icon: RefreshCw, spark: false, tone: "neutral" as const },
-            { label: "Bloqueio cautelar", value: fmt(disputedAmount), sub: "MEDs, saques e reservas", icon: Lock, spark: false, tone: "danger" as const },
-            { label: "Faturamento total", value: fmt(revenue), sub: "Valor total de vendas", icon: TrendingUp, spark: true, tone: "revenue" as const },
+            { label: "Saldo disponível", value: fmt(Math.max(0, balance)), sub: "Pronto para saque", icon: Wallet, tone: "neutral" as const, code: "BAL" },
+            { label: "Recebido hoje", value: fmt(receivedToday), sub: "Movimento confirmado", icon: RefreshCw, tone: "neutral" as const, code: "D+0" },
+            { label: "Em segurança", value: fmt(disputedAmount), sub: "MEDs e reservas", icon: Lock, tone: "danger" as const, code: "RSV" },
+            { label: "Volume total", value: fmt(revenue), sub: "Vendas acumuladas", icon: TrendingUp, tone: "revenue" as const, code: "TPV" },
           ].map((k) => {
             const Icon = k.icon;
             const isDanger = k.tone === "danger";
             return (
-               <div key={k.label} className="dashboard-stat group relative min-h-[138px] overflow-hidden rounded-[12px] border border-border/60 bg-card px-5 pt-5 pb-6 transition-colors hover:border-primary/30">
-                {/* ghost icon */}
-                <Icon
-                  aria-hidden
-                  strokeWidth={1.5}
-                  className={cn(
- "pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 h-14 w-14 transition-opacity",
-                    isDanger ? "text-destructive/15" : "text-foreground/[0.07]",
- "group-hover:opacity-80"
-                  )}
-                />
-                <p className={cn("relative text-[13px] font-medium", isDanger ? "text-destructive/90" : "text-muted-foreground")}>
-                  {k.label}
-                </p>
-                 <p className="relative mt-4 font-display font-bold tabular-nums tracking-[-0.03em] text-[28px] leading-none text-foreground truncate">
+              <div key={k.label} className="group relative min-h-[148px] border-b border-border/40 bg-card/30 px-5 py-5 last:border-b-0 sm:[&:nth-child(odd)]:border-r sm:[&:nth-last-child(-n+2)]:border-b-0 xl:border-b-0 xl:border-r xl:last:border-r-0">
+                <div className="flex items-center justify-between gap-3">
+                  <p className={cn("text-[12px] font-semibold", isDanger ? "text-destructive" : "text-muted-foreground")}>{k.label}</p>
+                  <span className="font-mono text-[9px] text-muted-foreground/40">{k.code}</span>
+                </div>
+                <p className="mt-5 font-display text-[27px] font-bold leading-none tracking-[-0.03em] text-foreground tabular-nums">
                   {privacy.hidden ? CENSORED : k.value}
                 </p>
-                <p className="relative mt-2 text-[12px] text-muted-foreground/55 truncate">{k.sub}</p>
-
-                {k.spark && sparkData.length > 1 && (
-                  <div className="absolute bottom-0 left-0 right-0 pointer-events-none h-12 opacity-50 transition-opacity group-hover:opacity-90">
-                    <ResponsiveContainer width="100%" height="100%">
-                      <AreaChart data={sparkData} margin={{ top: 4, right: 0, left: 0, bottom: 0 }}>
-                        <defs>
-                          <linearGradient id={`sp-${k.label}`} x1="0" y1="0" x2="0" y2="1">
-                            <stop offset="0%" stopColor="hsl(var(--primary))" stopOpacity={0.35} />
-                            <stop offset="100%" stopColor="hsl(var(--primary))" stopOpacity={0} />
-                          </linearGradient>
-                        </defs>
-                        <Area type="monotone" dataKey="v" stroke="hsl(var(--primary))" strokeWidth={1.5} fill={`url(#sp-${k.label})`} isAnimationActive={false} />
-                      </AreaChart>
-                    </ResponsiveContainer>
-                  </div>
-                )}
+                <div className="mt-3 flex items-center justify-between gap-3">
+                  <p className="text-[11px] text-muted-foreground/55">{k.sub}</p>
+                  <Icon aria-hidden className={cn("h-4 w-4", isDanger ? "text-destructive/55" : "text-primary/55")} strokeWidth={1.7} />
+                </div>
+                <span className={cn("absolute inset-x-5 bottom-0 h-px origin-left scale-x-0 transition-transform duration-300 group-hover:scale-x-100", isDanger ? "bg-destructive" : "bg-primary")} />
               </div>
             );
           })}
+          </div>
         </section>
 
-        {/* ═══════════ 4 QUICK ACTIONS ═══════════ */}
-        <section className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
+        {/* ═══════════ COMMAND STRIP ═══════════ */}
+        <section className="grid grid-cols-2 overflow-hidden rounded-[14px] border border-border/60 bg-transparent xl:grid-cols-4">
           {[
             { label: "Gerar PIX", sub: "QR Code para receber", icon: QrCode, onClick: () => { if (!requireApprovedAccount()) setPixDialogOpen(true); } },
             { label: "Solicitar Saque", sub: "Transferir via PIX", icon: ArrowDownRight, onClick: () => { if (!requireApprovedAccount()) navigate("/financeiro/saques"); } },
@@ -846,9 +826,9 @@ export default function Dashboard() {
               <button
                 key={a.label}
                 onClick={a.onClick}
-                 className="dashboard-action group relative flex min-h-[76px] items-center gap-3 overflow-hidden rounded-[12px] border border-border/60 bg-card px-4 py-4 text-left transition-colors hover:border-primary/30 hover:bg-card-elevated"
+                 className="group relative flex min-h-[78px] items-center gap-3 border-b border-r border-border/40 bg-card/20 px-4 py-4 text-left transition-colors hover:bg-primary/[0.04] [&:nth-child(even)]:border-r-0 [&:nth-last-child(-n+2)]:border-b-0 xl:border-b-0 xl:border-r xl:last:border-r-0"
               >
-                 <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-[9px] border border-border/60 bg-background/50 text-muted-foreground transition-colors group-hover:border-primary/30 group-hover:text-primary">
+                 <span className="flex h-9 w-9 shrink-0 items-center justify-center border-l border-primary/50 text-muted-foreground transition-colors group-hover:text-primary">
                    <Icon className="h-[18px] w-[18px]" strokeWidth={1.75} />
                  </span>
                  <div className="min-w-0 flex-1 pr-2">
@@ -866,8 +846,8 @@ export default function Dashboard() {
         <section className="grid grid-cols-1 xl:grid-cols-3 gap-4">
 
           {/* Faturamento — Clean line chart (Cakto-style) */}
-          <div className="dashboard-module xl:col-span-2 rounded-[12px] border border-border/60 bg-card overflow-hidden">
-            <div className="flex items-center justify-between gap-3 px-6 md:px-8 pt-7 pb-6">
+          <div className="xl:col-span-2 overflow-hidden rounded-[14px] border border-border/60 bg-transparent">
+            <div className="flex items-center justify-between gap-3 border-b border-border/40 px-6 py-5 md:px-8">
               <div className="min-w-0">
                 <h4 className="font-display font-bold text-xl tracking-[-0.02em] text-foreground">Faturamento</h4>
                 <p className="text-[11px] text-muted-foreground/60 mt-1">Comparativo de entradas e saídas</p>
@@ -937,7 +917,7 @@ export default function Dashboard() {
           {/* Right side: donuts + links */}
           <div className="space-y-4">
             {/* Donuts card */}
-            <div className="dashboard-module rounded-[12px] border border-border/60 bg-card p-7">
+             <div className="rounded-[14px] border border-border/60 bg-transparent p-7">
               <div className="mb-6">
                 <h4 className="font-display font-bold text-xl tracking-[-0.02em]">Índices</h4>
                 <p className="text-[11px] text-muted-foreground/60 mt-1">Conversão por método de pagamento</p>
@@ -988,7 +968,7 @@ export default function Dashboard() {
             </div>
 
             {/* Payment links */}
-            <button type="button" onClick={() => { if (!requireApprovedAccount()) navigate("/vendas/link-pagamento"); }} className="dashboard-module group block w-full rounded-[12px] border border-border/60 bg-card p-7 text-left hover:border-primary/40 transition-colors">
+             <button type="button" onClick={() => { if (!requireApprovedAccount()) navigate("/vendas/link-pagamento"); }} className="group block w-full rounded-[14px] border border-border/60 bg-transparent p-7 text-left transition-colors hover:border-primary/40">
               <div className="flex items-start justify-between gap-3">
                 <div className="min-w-0">
                   <h3 className="font-display font-black text-base tracking-[-0.01em] flex items-center gap-2"><Link2 className="h-4 w-4 text-primary" /> Links de pagamentos</h3>
@@ -1002,7 +982,7 @@ export default function Dashboard() {
         </section>
 
         {/* ═══════════ ÚLTIMAS TRANSAÇÕES — clean table ═══════════ */}
-        <section className="dashboard-module rounded-[12px] border border-border/60 bg-card overflow-hidden">
+        <section className="overflow-hidden rounded-[14px] border border-border/60 bg-transparent">
           <div className="flex items-center justify-between gap-3 px-5 md:px-6 pt-5 pb-4">
             <div className="min-w-0">
               <h3 className="font-display font-bold text-[15px] tracking-[-0.01em] text-foreground">Últimas transações</h3>
