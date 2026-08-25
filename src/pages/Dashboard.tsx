@@ -859,7 +859,7 @@ export default function Dashboard() {
         <section className="grid grid-cols-1 xl:grid-cols-3 gap-4">
 
           {/* Faturamento — Clean line chart (Cakto-style) */}
-          <div className="xl:col-span-2 overflow-hidden rounded-[14px] border border-border/60 bg-transparent">
+          <div className="xl:col-span-2 overflow-hidden rounded-[14px] border border-border bg-card">
             <div className="flex items-center justify-between gap-3 border-b border-border/40 px-6 py-5 md:px-8">
               <div className="min-w-0">
                 <h4 className="font-display font-bold text-xl tracking-[-0.02em] text-foreground">Faturamento</h4>
@@ -930,7 +930,7 @@ export default function Dashboard() {
           {/* Right side: donuts + links */}
           <div className="space-y-4">
             {/* Donuts card */}
-             <div className="rounded-[14px] border border-border/60 bg-transparent p-7">
+             <div className="rounded-[14px] border border-border bg-card p-7">
               <div className="mb-6">
                 <h4 className="font-display font-bold text-xl tracking-[-0.02em]">Índices</h4>
                 <p className="text-[11px] text-muted-foreground/60 mt-1">Conversão por método de pagamento</p>
@@ -981,7 +981,7 @@ export default function Dashboard() {
             </div>
 
             {/* Payment links */}
-             <button type="button" onClick={() => { if (!requireApprovedAccount()) navigate("/vendas/link-pagamento"); }} className="group block w-full rounded-[14px] border border-border/60 bg-transparent p-7 text-left transition-colors hover:border-primary/40">
+             <button type="button" onClick={() => { if (!requireApprovedAccount()) navigate("/vendas/link-pagamento"); }} className="group block w-full rounded-[14px] border border-border bg-card p-7 text-left transition-colors hover:border-primary/40">
               <div className="flex items-start justify-between gap-3">
                 <div className="min-w-0">
                   <h3 className="font-display font-black text-base tracking-[-0.01em] flex items-center gap-2"><Link2 className="h-4 w-4 text-primary" /> Links de pagamentos</h3>
@@ -995,7 +995,7 @@ export default function Dashboard() {
         </section>
 
         {/* ═══════════ ÚLTIMAS TRANSAÇÕES — clean table ═══════════ */}
-        <section className="overflow-hidden rounded-[14px] border border-border/60 bg-transparent">
+        <section className="overflow-hidden rounded-[14px] border border-border bg-card">
           <div className="flex items-center justify-between gap-3 px-5 md:px-6 pt-5 pb-4">
             <div className="min-w-0">
               <h3 className="font-display font-bold text-[15px] tracking-[-0.01em] text-foreground">Últimas transações</h3>
