@@ -2123,6 +2123,55 @@ button svg, a svg, [role="button"] svg {
   display: none !important;
 }
 
+/* ─── Fundo contínuo do shell (cobre toda a viewport, sem corte) ─── */
+.platform-shell {
+  position: relative;
+  isolation: isolate;
+  background-image: none !important;
+}
+
+.platform-shell::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background:
+    radial-gradient(circle 900px at 4% -6%, hsl(var(--primary) / 0.13), transparent 58%),
+    radial-gradient(circle 760px at 100% 108%, hsl(var(--primary) / 0.09), transparent 62%),
+    linear-gradient(hsl(var(--border) / 0.30) 1px, transparent 1px),
+    linear-gradient(90deg, hsl(var(--border) / 0.22) 1px, transparent 1px),
+    hsl(var(--background));
+  background-size: auto, auto, 48px 48px, 48px 48px, auto;
+}
+
+/* a área rolável e a sidebar deixam o fundo do shell aparecer */
+.platform-shell .ambient-backdrop,
+.platform-shell [data-sidebar="sidebar"] {
+  background-color: transparent !important;
+}
+
+/* ─── Calendário compacto do seletor de período ─── */
+.period-calendar .rdp-months { margin: 0; }
+.period-calendar .rdp-caption_label { font-size: 12.5px; font-weight: 700; }
+.period-calendar .rdp-head_cell {
+  font-size: 9px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  width: 30px;
+}
+.period-calendar .rdp-cell { padding: 0; }
+.period-calendar .rdp-button,
+.period-calendar .rdp-day {
+  height: 28px;
+  width: 30px;
+  font-size: 11.5px;
+  border-radius: 8px;
+}
+.period-calendar .rdp-nav_button { height: 24px; width: 24px; }
+.period-calendar tr,
+.period-calendar td { border: 0 !important; }
+
 /* ─── Aggressive glow neutralization ─── */
 /* Catches arbitrary box-shadow with colored alpha (shadow-[0_X_Y_hsl(...)]) */
 [class*="shadow-[0_"][class*="hsl("] {

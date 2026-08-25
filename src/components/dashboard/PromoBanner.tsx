@@ -10,9 +10,49 @@ import { ArrowUpRight } from "lucide-react";
 const CHIPS = [
   { label: "PIX D+0" },
   { label: "Sem reserva" },
-  { label: "Taxa a partir de 2,99%" },
   { label: "Saque 24/7" },
 ];
+
+/** Readout técnico: filete + tick + rótulo + número, sem caixa */
+function Readout({
+  label,
+  value,
+  unit,
+  tone = "default",
+  className,
+}: {
+  label: string;
+  value: string;
+  unit?: string;
+  tone?: "default" | "primary";
+  className?: string;
+}) {
+  return (
+    <div className={className}>
+      <div className="flex items-center gap-1.5">
+        <span className="h-[7px] w-px bg-primary/70" />
+        <span className="h-px w-8 bg-gradient-to-r from-primary/70 to-transparent" />
+      </div>
+      <p className="mt-1 text-[9.5px] font-medium uppercase tracking-[0.16em] text-muted-foreground/60">
+        {label}
+      </p>
+      <p className="mt-0.5 flex items-baseline gap-0.5">
+        <span
+          className={
+            tone === "primary"
+              ? "font-display text-[19px] font-extrabold leading-none tracking-[-0.04em] tabular-nums text-primary"
+              : "font-display text-[19px] font-extrabold leading-none tracking-[-0.04em] tabular-nums text-foreground"
+          }
+        >
+          {value}
+        </span>
+        {unit && (
+          <span className="font-display text-[11px] font-bold leading-none text-muted-foreground/70">{unit}</span>
+        )}
+      </p>
+    </div>
+  );
+}
 
 function LiquidityPlate() {
   return (
@@ -185,15 +225,10 @@ export function PromoBanner({ periodControl }: { periodControl?: React.ReactNode
         <div className="relative hidden h-[176px] sm:block md:h-[196px]">
           <LiquidityPlate />
 
-          {/* floating engraved readouts */}
-          <div className="absolute left-1 top-1 rounded-lg border border-border/70 bg-background/85 px-2.5 py-1.5">
-            <p className="text-[10px] font-medium text-muted-foreground/70">Liquidação</p>
-            <p className="font-display text-[13px] font-bold tabular-nums leading-none text-foreground">D+0</p>
-          </div>
-          <div className="absolute bottom-2 left-1 rounded-lg border border-border/70 bg-background/85 px-2.5 py-1.5">
-            <p className="text-[10px] font-medium text-muted-foreground/70">Reserva</p>
-            <p className="font-display text-[13px] font-bold tabular-nums leading-none text-primary">0%</p>
-          </div>
+          {/* instrument readouts — sem caixa, ancorados no plate */}
+          <Readout label="Liquidação" value="D+0" className="absolute left-0 top-2" />
+          <Readout label="Reserva" value="0" unit="%" tone="primary" className="absolute bottom-3 left-0" />
+
 
         </div>
       </div>
