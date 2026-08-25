@@ -68,7 +68,7 @@ function FloatCard({
       whileInView={{ opacity: 1, y: 0, scale: 1 }}
       viewport={{ once: true, margin: "-80px" }}
       transition={{ duration: 0.6, delay, ease: [0.16, 1, 0.3, 1] }}
-      className={cn("absolute hidden lg:block", className)}
+      className={cn("absolute hidden xl:block", className)}
     >
       <motion.div
         animate={reduce ? undefined : { y: [0, -9, 0] }}
@@ -212,7 +212,7 @@ export const ProductMock = memo(function ProductMock() {
 
       {/* cartões flutuantes */}
       <FloatCard
-        className="-left-6 top-[38%] xl:-left-24"
+        className="-left-10 top-[38%]"
         delay={0.15}
         icon={CheckCircle2}
         title="Venda aprovada"
@@ -220,7 +220,7 @@ export const ProductMock = memo(function ProductMock() {
         value="+ R$ 1.469"
       />
       <FloatCard
-        className="-right-6 top-[18%] xl:-right-24"
+        className="-right-10 top-[16%]"
         delay={0.3}
         icon={Wallet}
         title="Saque liquidado"
@@ -228,7 +228,7 @@ export const ProductMock = memo(function ProductMock() {
         value="R$ 12.000"
       />
       <FloatCard
-        className="-left-4 bottom-10 xl:-left-20"
+        className="-left-8 bottom-12"
         delay={0.45}
         icon={ArrowUpRight}
         title="Conversão do checkout"
