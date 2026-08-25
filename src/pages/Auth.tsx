@@ -12,8 +12,9 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import {
   Eye, EyeOff, Shield, CheckCircle2, ArrowRight, Lock,
-  KeyRound, RotateCcw, AlertTriangle,
+  KeyRound, RotateCcw, AlertTriangle, User, Building2, Check,
 } from "lucide-react";
+
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { motion, AnimatePresence } from "framer-motion";
