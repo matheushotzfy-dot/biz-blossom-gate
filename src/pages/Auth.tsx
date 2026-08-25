@@ -220,23 +220,26 @@ export default function Auth() {
   };
 
   const handleDocumentChange = (value: string) => {
-    const formatted = formatDocument(value);
+    const max = accountType === "cnpj" ? 14 : 11;
+    const digits = value.replace(/\D/g, "").slice(0, max);
+    const formatted = formatDocument(digits);
     setDocument(formatted);
-    const digits = formatted.replace(/\D/g, "");
-    if (digits.length === 11) setDocumentError(validateCPF(digits) ? "" : "CPF inválido");
-    else if (digits.length === 14) setDocumentError(validateCNPJ(digits) ? "" : "CNPJ inválido");
-    else setDocumentError("");
+    if (accountType === "cpf") {
+      setDocumentError(digits.length === 11 && !validateCPF(digits) ? "CPF inválido" : "");
+    } else {
+      setDocumentError(digits.length === 14 && !validateCNPJ(digits) ? "CNPJ inválido" : "");
+    }
   };
 
   const canAdvanceStep = (s: number) => {
     if (s === 1) return fullName.trim().length >= 3 && nickname.trim().length >= 2;
-    if (s === 2) {
-      const digits = document.replace(/\D/g, "");
-      return email.includes("@") && phone.replace(/\D/g, "").length >= 10 && (digits.length === 11 || digits.length === 14) && !documentError;
-    }
-    if (s === 3) return password.length >= 8 && password === confirmPassword && !!referralSource;
+    if (s === 2) return email.includes("@") && phone.replace(/\D/g, "").length >= 10;
+    if (s === 3) return documentValid && (accountType === "cpf" || companyName.trim().length >= 2);
+    if (s === 4) return !!segment && !!monthlyRevenue && !!referralSource;
+    if (s === 5) return password.length >= 8 && password === confirmPassword && passwordRules.every((r) => r.ok);
     return acceptTerms;
   };
+
 
   const handleSubmit = async (e?: React.FormEvent) => {
     e?.preventDefault();
