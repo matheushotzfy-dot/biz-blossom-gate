@@ -101,3 +101,101 @@ export function SignalBellIcon(props: IconProps) {
     </svg>
   );
 }
+
+/** Pino — fixar a sidebar */
+export function PinIcon({ active = false, ...props }: IconProps & { active?: boolean }) {
+  return (
+    <svg {...base(props)}>
+      <path d="M9 3.5h6l-.9 5.2 3.1 3.1H6.8l3.1-3.1Z" fill={active ? "currentColor" : "none"} />
+      <path d="M12 11.8V20.5" />
+    </svg>
+  );
+}
+
+/** Glifos de navegação — geometria técnica própria */
+export function GlyphDashboard(props: IconProps) {
+  return (
+    <svg {...base(props)}>
+      <path d="M4 10.5 12 4l8 6.5V19a1 1 0 0 1-1 1h-4v-5.5H9V20H5a1 1 0 0 1-1-1Z" />
+    </svg>
+  );
+}
+export function GlyphSales(props: IconProps) {
+  return (
+    <svg {...base(props)}>
+      <path d="M4 19h16" strokeOpacity="0.5" />
+      <path d="M5 15.5 10 10l3.4 3.2L19 6.5" />
+      <path d="M15.2 6.5H19v3.7" strokeOpacity="0.7" />
+    </svg>
+  );
+}
+export function GlyphProduct(props: IconProps) {
+  return (
+    <svg {...base(props)}>
+      <path d="M12 3.8 20 8v8l-8 4.2L4 16V8Z" />
+      <path d="M4 8l8 4.2L20 8M12 12.2V20.2" strokeOpacity="0.55" />
+    </svg>
+  );
+}
+export function GlyphCoupon(props: IconProps) {
+  return (
+    <svg {...base(props)}>
+      <path d="M3.5 8.5h17v2.2a1.3 1.3 0 0 0 0 2.6v2.2h-17v-2.2a1.3 1.3 0 0 0 0-2.6Z" />
+      <path d="M9.6 11v2" strokeOpacity="0.7" />
+      <path d="M14.4 11v2" strokeOpacity="0.7" />
+    </svg>
+  );
+}
+export function GlyphWithdraw(props: IconProps) {
+  return (
+    <svg {...base(props)}>
+      <path d="M12 4v9.5" />
+      <path d="M8.4 10.4 12 14l3.6-3.6" />
+      <path d="M4.5 17.5h15" strokeOpacity="0.6" />
+    </svg>
+  );
+}
+export function GlyphFees(props: IconProps) {
+  return (
+    <svg {...base(props)}>
+      <path d="M6.5 17.5 17.5 6.5" />
+      <circle cx="8.4" cy="8.4" r="2.2" />
+      <circle cx="15.6" cy="15.6" r="2.2" />
+    </svg>
+  );
+}
+export function GlyphApps(props: IconProps) {
+  return (
+    <svg {...base(props)}>
+      <rect x="4" y="4" width="7" height="7" rx="1.4" />
+      <rect x="13" y="4" width="7" height="7" rx="3.5" strokeOpacity="0.7" />
+      <rect x="4" y="13" width="7" height="7" rx="3.5" strokeOpacity="0.7" />
+      <rect x="13" y="13" width="7" height="7" rx="1.4" />
+    </svg>
+  );
+}
+export function GlyphProfile(props: IconProps) {
+  return (
+    <svg {...base(props)}>
+      <path d="M4.5 20a7.5 7.5 0 0 1 15 0" />
+      <path d="M12 11.4a3.7 3.7 0 1 0 0-7.4 3.7 3.7 0 0 0 0 7.4Z" />
+    </svg>
+  );
+}
+export function GlyphTrophy(props: IconProps) {
+  return (
+    <svg {...base(props)}>
+      <path d="M7.5 4h9v4.5a4.5 4.5 0 0 1-9 0Z" />
+      <path d="M7.5 5.5H5v1.8a2.8 2.8 0 0 0 2.5 2.7M16.5 5.5H19v1.8a2.8 2.8 0 0 1-2.5 2.7" strokeOpacity="0.6" />
+      <path d="M12 13v3.6M8.6 20h6.8" />
+    </svg>
+  );
+}
+export function GlyphSupport(props: IconProps) {
+  return (
+    <svg {...base(props)}>
+      <path d="M4 8.6A3.6 3.6 0 0 1 7.6 5h8.8A3.6 3.6 0 0 1 20 8.6v4.6a3.6 3.6 0 0 1-3.6 3.6H10l-4.6 3.1v-3.3A3.6 3.6 0 0 1 4 13.2Z" />
+      <path d="M8.8 11h6.4" strokeOpacity="0.6" />
+    </svg>
+  );
+}
