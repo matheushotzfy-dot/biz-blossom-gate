@@ -41,7 +41,7 @@ export function KycOnboardingPopup() {
  useEffect(() => {
  if (!user?.id || !profile) return;
  if (profile.account_status === "approved") return;
- const key = `hotzfy_kyc_popup_dismissed_${user.id}`;
+ const key = `venxpay_kyc_popup_dismissed_${user.id}`;
  if (localStorage.getItem(key)) return;
  const timer = setTimeout(() => setOpen(true), 800);
  return () => clearTimeout(timer);
@@ -94,7 +94,7 @@ export function KycOnboardingPopup() {
  }, [user]);
 
  const handleDismiss = useCallback(() => {
- if (user?.id) localStorage.setItem(`hotzfy_kyc_popup_dismissed_${user.id}`, "true");
+ if (user?.id) localStorage.setItem(`venxpay_kyc_popup_dismissed_${user.id}`, "true");
  setOpen(false);
  }, [user?.id]);
 

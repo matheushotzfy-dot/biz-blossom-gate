@@ -1,5 +1,5 @@
 /**
- * ProductMock — réplica fiel (estática) do dashboard HOTZFY para a landing page.
+ * ProductMock — réplica fiel (estática) do dashboard VENXPAY para a landing page.
  * Renderizada dentro de um frame de navegador, com cartões flutuantes de
  * notificação. É puramente apresentacional: nenhum dado real é consultado.
  */
@@ -117,7 +117,7 @@ export const ProductMock = memo(function ProductMock({ floats = true }: { floats
           <aside className="hidden w-[190px] shrink-0 flex-col gap-1 border-r border-foreground/10 p-3 sm:flex">
             <div className="mb-3 flex items-center gap-2 px-2 py-1">
               <span className="flex h-6 w-6 items-center justify-center rounded-md bg-emerald-400/15 text-[11px] font-black text-emerald-300">H</span>
-              <span className="text-[12.5px] font-bold tracking-tight text-foreground">HOTZFY</span>
+              <span className="text-[12.5px] font-bold tracking-tight text-foreground">VENXPAY</span>
             </div>
             {NAV.map(({ icon: Icon, label, active }) => (
               <div

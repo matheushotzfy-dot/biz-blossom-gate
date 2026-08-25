@@ -809,7 +809,7 @@ export default function PublicCheckout() {
  return (
  <div data-checkout-theme={themeMode} className={`min-h-screen selection:bg-emerald-500/20 ${isDark ? "bg-[hsl(220_18%_11%)] text-[hsl(210_20%_96%)]" : isWhite ? "bg-[hsl(210_20%_98%)] text-gray-900" : "bg-[hsl(210_16%_94%)] text-gray-900"}`} style={checkoutThemeStyle}>
  <Seo
-   title={`${product.name} — Checkout HOTZFY`}
+   title={`${product.name} — Checkout VENXPAY`}
    description={(product.description || `Compre ${product.name} com pagamento seguro via PIX, cartão ou boleto.`).slice(0, 155)}
    path={`/pay/${slug || ""}`}
    ogType="product"

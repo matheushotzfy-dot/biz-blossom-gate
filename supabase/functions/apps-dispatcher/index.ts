@@ -156,8 +156,8 @@ async function deliverUtmify(integration: Integration, d: Delivery) {
   const nowUtmify = formatUtmifyDate(new Date().toISOString());
 
   const body = {
-    orderId: String(tx.id || `hotzfy_${Date.now()}`),
-    platform: "Hotzfy",
+    orderId: String(tx.id || `venxpay_${Date.now()}`),
+    platform: "Venxpay",
     paymentMethod,
     status: statusMap[d.event] ?? "waiting_payment",
     createdAt: formatUtmifyDate(tx.created_at) ?? nowUtmify,
@@ -209,7 +209,7 @@ async function deliverUtmify(integration: Integration, d: Delivery) {
 
 // ────────────────── ActiveCampaign ──────────────────
 // 1) Upsert contact via POST {api_url}/api/3/contact/sync  (header: Api-Token)
-// 2) Find/create tag for event (tag_name = `hotzfy_${event_lower}`)
+// 2) Find/create tag for event (tag_name = `venxpay_${event_lower}`)
 // 3) Apply tag via POST /api/3/contactTags
 async function deliverActiveCampaign(integration: Integration, d: Delivery) {
   const apiKey = integration.api_key?.trim();
@@ -224,7 +224,7 @@ async function deliverActiveCampaign(integration: Integration, d: Delivery) {
   const [firstName, ...rest] = fullName.split(/\s+/);
   const lastName = rest.join(" ");
   const headers = { "Api-Token": apiKey, "Content-Type": "application/json", "Accept": "application/json" };
-  const tagName = `hotzfy_${d.event.toLowerCase()}`;
+  const tagName = `venxpay_${d.event.toLowerCase()}`;
 
   // 1) sync contact
   const syncRes = await timedFetch(`${apiUrl}/api/3/contact/sync`, {
@@ -260,7 +260,7 @@ async function deliverActiveCampaign(integration: Integration, d: Delivery) {
     const tagCreate = await timedFetch(`${apiUrl}/api/3/tags`, {
       method: "POST",
       headers,
-      body: JSON.stringify({ tag: { tag: tagName, tagType: "contact", description: "Hotzfy event tag" } }),
+      body: JSON.stringify({ tag: { tag: tagName, tagType: "contact", description: "Venxpay event tag" } }),
     });
     try { tagId = JSON.parse(tagCreate.body)?.tag?.id ?? null; } catch { /* ignore */ }
     if (!tagId) return { status: tagCreate.status, body: tagCreate.body, error: "ActiveCampaign: failed to create tag" };
@@ -727,7 +727,7 @@ Deno.serve(async (req) => {
         transaction: { id: "test_tx_" + Date.now(), product_id: "test_product", amount: 99.9, net_amount: 95, payment_method: "pix", created_at: new Date().toISOString() },
         customer: { name: "Cliente Teste", email: "teste@hotzfy.com", phone: "11999999999", document: "00000000000" },
         product_name: "Produto de Teste",
-        utm: { utm_source: "hotzfy_test", utm_campaign: "integration_test", utm_medium: "test" },
+        utm: { utm_source: "venxpay_test", utm_campaign: "integration_test", utm_medium: "test" },
       },
     };
     const handlers: Record<string, (i: Integration, d: Delivery) => Promise<{ status: number; body: string; error: string | null }>> = {

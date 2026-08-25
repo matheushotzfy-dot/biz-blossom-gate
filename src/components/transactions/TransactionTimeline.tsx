@@ -78,8 +78,8 @@ function visualFor(type: string): EventVisual {
   return EVENT_MAP[type] || { icon: Clock, tone: "muted", label: type };
 }
 
-/** Sellers never see real acquirer names — everything is branded HOTZFY. */
-const BRAND_LABEL = "HOTZFY";
+/** Sellers never see real acquirer names — everything is branded VENXPAY. */
+const BRAND_LABEL = "VENXPAY";
 const ACQUIRER_MASK_RE = /\b(veopag|podpay)\b/gi;
 function maskAcquirer(text: string | null | undefined, variant: "admin" | "seller"): string {
   if (!text) return "";

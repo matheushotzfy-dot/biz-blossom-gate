@@ -16,7 +16,7 @@ const CHIPS = [
 
 function LiquidityPlate() {
   return (
-    <svg viewBox="0 0 420 260" className="h-full w-full" role="img" aria-label="Ilustração do motor de liquidez Hotzfy">
+    <svg viewBox="0 0 420 260" className="h-full w-full" role="img" aria-label="Ilustração do motor de liquidez Venxpay">
       <defs>
         <linearGradient id="pb-arc" x1="0" y1="0" x2="1" y2="1">
           <stop offset="0%" stopColor="hsl(var(--primary))" stopOpacity="0.95" />
@@ -131,7 +131,7 @@ export function PromoBanner() {
         <div className="min-w-0">
           <div className="flex items-center gap-2.5">
             <span className="h-px w-6 bg-primary/60" />
-            <span className="text-[9px] font-bold uppercase tracking-[0.3em] text-primary">Infraestrutura Hotzfy</span>
+            <span className="text-[9px] font-bold uppercase tracking-[0.3em] text-primary">Infraestrutura Venxpay</span>
           </div>
 
           <h2 className="mt-2.5 max-w-[16ch] font-display text-[22px] font-extrabold leading-[0.95] tracking-[-0.04em] text-foreground sm:text-[26px] lg:text-[30px]">

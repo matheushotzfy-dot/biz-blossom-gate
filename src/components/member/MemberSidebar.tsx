@@ -56,7 +56,7 @@ export function MemberSidebar() {
           </div>
           <div>
             <h1 className="font-display font-black tracking-tighter text-white text-lg leading-none">
-              HOTZFY
+              VENXPAY
             </h1>
             <p className="text-[10px] font-black uppercase tracking-[0.2em] text-primary mt-1">
               Members Area

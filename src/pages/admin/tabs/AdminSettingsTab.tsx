@@ -732,7 +732,7 @@ export default function AdminSettingsTab() {
  <AdminPanel>
  <PanelTitle color="cyan" icon={<Globe className="h-4 w-4" />}>Plataforma</PanelTitle>
  <div className="space-y-2 mt-3">
- <ConfigRow label="Nome" value="HOTZFY" />
+ <ConfigRow label="Nome" value="VENXPAY" />
  <ConfigRow label="Versão" value="2.0.0" mono />
  <ConfigRow label="Status" value="Operacional" valueClass="text-primary font-bold" />
  <ConfigRow label="Ambiente" value="Produção" />

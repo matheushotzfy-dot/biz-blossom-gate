@@ -597,7 +597,7 @@ export default function Dashboard() {
 
   return (
     <div className="relative min-h-screen w-full text-foreground animate-in fade-in duration-500 overflow-hidden">
-      <Seo title="Dashboard | Hotzfy" description="Painel operacional Hotzfy — saldos, ranking, aprovação e liquidações em tempo real." path="/dashboard" noindex />
+      <Seo title="Dashboard | Venxpay" description="Painel operacional Venxpay — saldos, ranking, aprovação e liquidações em tempo real." path="/dashboard" noindex />
 
       {/* Ambient gradient backdrop — spans full scrollable dashboard */}
       <div

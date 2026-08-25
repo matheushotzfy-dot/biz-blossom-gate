@@ -41,7 +41,7 @@ export default function PerfilHub() {
 
  return (
  <>
- <Seo title="Perfil & KYC | Hotzfy" description="Gerencie seus dados pessoais, identidade e verificação KYC." path="/perfil" noindex />
+ <Seo title="Perfil & KYC | Venxpay" description="Gerencie seus dados pessoais, identidade e verificação KYC." path="/perfil" noindex />
  <HubTabs tabs={TABS} active={tab} onChange={handleTabChange} />
  {tab === "perfil" ? <Perfil /> : <Identidade />}
  </>

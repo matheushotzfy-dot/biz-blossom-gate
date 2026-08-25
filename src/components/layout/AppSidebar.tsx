@@ -26,7 +26,7 @@ import {
 import { useEffect, useMemo, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { NavLink } from "@/components/NavLink";
-import { HotzfyLogo } from "@/components/HotzfyLogo";
+import { VenxpayLogo } from "@/components/VenxpayLogo";
 import { useAuth } from "@/hooks/useAuth";
 import { useSupportUnread } from "@/hooks/useSupportUnread";
 import { supabase } from "@/integrations/supabase/client";
@@ -360,13 +360,13 @@ export function AppSidebar() {
         {/* Brand */}
         <div className={cn("flex items-center gap-3", collapsed && "justify-center")}>
           <div className="relative h-10 w-10 shrink-0 flex items-center justify-center overflow-hidden rounded-[10px] border border-sidebar-border bg-gradient-to-br from-sidebar-accent to-sidebar-accent/40 ring-1 ring-inset ring-sidebar-primary/10">
-            <HotzfyLogo size={30} />
+            <VenxpayLogo size={30} />
             <span className="pointer-events-none absolute inset-0 rounded-[10px] bg-gradient-to-br from-sidebar-primary/0 via-transparent to-sidebar-primary/10" />
           </div>
           <div className="min-w-0 flex-1 group-data-[collapsible=icon]:hidden">
             <div className="flex items-center gap-1.5">
               <h1 className="font-display text-[15.5px] leading-none font-black tracking-[-0.045em] text-sidebar-accent-foreground">
-                HOTZFY
+                VENXPAY
               </h1>
             </div>
           </div>
@@ -447,7 +447,7 @@ export function AppSidebar() {
 
           <button
             type="button"
-            onClick={() => window.dispatchEvent(new Event("hotzfy:open-cookie-settings"))}
+            onClick={() => window.dispatchEvent(new Event("venxpay:open-cookie-settings"))}
             className="text-[10px] font-medium uppercase tracking-[0.12em] text-sidebar-foreground/40 transition-colors hover:text-sidebar-foreground/70"
           >
             Preferências de cookies

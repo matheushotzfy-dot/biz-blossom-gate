@@ -377,7 +377,7 @@ export default function AdminDashboard() {
           </div>
           {!sidebarCollapsed && (
             <div className="min-w-0">
-              <h1 className="text-[15px] font-semibold tracking-tight af-text leading-tight">HOTZFY</h1>
+              <h1 className="text-[15px] font-semibold tracking-tight af-text leading-tight">VENXPAY</h1>
               <p className="text-[11px] af-muted leading-tight">{isEmployee ? "Staff Panel" : "Admin Panel"}</p>
             </div>
           )}

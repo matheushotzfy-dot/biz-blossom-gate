@@ -1,7 +1,7 @@
 import { cn } from "@/lib/utils";
 
 /**
- * HOTZFY logomark — futuristic "H" built from two vertical rails
+ * VENXPAY logomark — futuristic "H" built from two vertical rails
  * bridged by a diagonal circuit slash and a payment node.
  * Fully inline SVG. Colors adapt via `currentColor` fallback + gradient stops.
  */
@@ -12,7 +12,7 @@ type Props = {
   animated?: boolean;
 };
 
-export function HotzfyLogo({ className, size = 32, withWordmark = false, animated = true }: Props) {
+export function VenxpayLogo({ className, size = 32, withWordmark = false, animated = true }: Props) {
   return (
     <span className={cn("inline-flex items-center gap-2.5 select-none", className)}>
       <svg
@@ -20,7 +20,7 @@ export function HotzfyLogo({ className, size = 32, withWordmark = false, animate
         height={size}
         viewBox="0 0 64 64"
         fill="none"
-        aria-label="HOTZFY"
+        aria-label="VENXPAY"
         className={cn("shrink-0", animated && "drop-shadow-[0_0_12px_rgba(16,185,129,0.35)]")}
       >
         <defs>
@@ -71,11 +71,11 @@ export function HotzfyLogo({ className, size = 32, withWordmark = false, animate
 
       {withWordmark && (
         <span className="font-display font-black tracking-[-0.04em] text-[1.15em] leading-none text-foreground">
-          HOTZ<span className="bg-gradient-to-r from-emerald-400 via-cyan-400 to-violet-400 bg-clip-text text-transparent">FY</span>
+          VENX<span className="bg-gradient-to-r from-emerald-400 via-cyan-400 to-violet-400 bg-clip-text text-transparent">FY</span>
         </span>
       )}
     </span>
   );
 }
 
-export default HotzfyLogo;
+export default VenxpayLogo;

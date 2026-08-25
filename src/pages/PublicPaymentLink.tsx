@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Link2, Loader2, Copy, CheckCircle2, Clock, AlertCircle, QrCode, ShieldCheck } from "lucide-react";
 import { toast } from "sonner";
 import { Seo } from "@/components/Seo";
-import { HotzfyLogo } from "@/components/HotzfyLogo";
+import { VenxpayLogo } from "@/components/VenxpayLogo";
 
 type PayLink = {
   id: string;
@@ -123,7 +123,7 @@ export default function PublicPaymentLink() {
 
       <div className="max-w-lg mx-auto space-y-4">
         <div className="flex items-center justify-center gap-2 mb-6">
-          <HotzfyLogo className="h-8 w-auto" />
+          <VenxpayLogo className="h-8 w-auto" />
         </div>
 
         <div className="rounded-3xl border border-border/60 bg-card overflow-hidden shadow-xl">
@@ -213,7 +213,7 @@ export default function PublicPaymentLink() {
         </div>
 
         <div className="flex items-center justify-center gap-1.5 text-[10px] font-bold uppercase tracking-widest text-muted-foreground/60">
-          <ShieldCheck className="h-3 w-3" /> Pagamento processado por Hotzfy
+          <ShieldCheck className="h-3 w-3" /> Pagamento processado por Venxpay
         </div>
       </div>
     </div>

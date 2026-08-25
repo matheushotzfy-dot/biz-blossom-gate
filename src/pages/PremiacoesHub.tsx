@@ -31,7 +31,7 @@ export default function PremiacoesHub() {
   return (
     <>
       <Seo
-        title={active === "corrida" ? "Corrida de Faturamento | Hotzfy" : "Premiações | Hotzfy"}
+        title={active === "corrida" ? "Corrida de Faturamento | Venxpay" : "Premiações | Venxpay"}
         description="Conquiste prêmios, troféus e marcos de faturamento na sua jornada de vendas."
         path="/premiacoes"
         noindex

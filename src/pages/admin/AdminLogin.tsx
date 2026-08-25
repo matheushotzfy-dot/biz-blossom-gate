@@ -122,7 +122,7 @@ export default function AdminLogin() {
             <div className="h-9 w-9 rounded-md af-accent-bg flex items-center justify-center">
               <ShieldCheck className="h-5 w-5" strokeWidth={2.25} />
             </div>
-            <span className="text-[15px] font-semibold af-text tracking-tight">HOTZFY</span>
+            <span className="text-[15px] font-semibold af-text tracking-tight">VENXPAY</span>
             <span className="ml-1 text-[10px] font-black uppercase tracking-[0.22em] af-muted-2 border af-border rounded px-1.5 py-0.5">Admin</span>
           </div>
         </div>
@@ -172,7 +172,7 @@ export default function AdminLogin() {
             <div className="h-9 w-9 rounded-md af-accent-bg flex items-center justify-center">
               <ShieldCheck className="h-5 w-5" strokeWidth={2.25} />
             </div>
-            <span className="text-[16px] font-semibold af-text tracking-tight">HOTZFY Admin</span>
+            <span className="text-[16px] font-semibold af-text tracking-tight">VENXPAY Admin</span>
           </div>
 
           <div className="mb-6">

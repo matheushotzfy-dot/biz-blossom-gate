@@ -1,5 +1,5 @@
 /**
- * LandingPage — página pública da HOTZFY.
+ * LandingPage — página pública da VENXPAY.
  *
  * Direção: fintech brasileira de infoprodutos. A confiança vem de elementos
  * concretos (produto real, prazos, taxas, integrações, rostos, respostas) e não
@@ -112,7 +112,7 @@ const FAQ = [
 ] as const;
 
 const JSONLD = [
-  { "@context": "https://schema.org", "@type": "Organization", name: "HOTZFY", url: "https://hotzfy.com.br", description: "Plataforma de pagamentos para produtos digitais com checkout de alta conversão e saque no mesmo dia." },
+  { "@context": "https://schema.org", "@type": "Organization", name: "VENXPAY", url: "https://hotzfy.com.br", description: "Plataforma de pagamentos para produtos digitais com checkout de alta conversão e saque no mesmo dia." },
   { "@context": "https://schema.org", "@type": "FAQPage", mainEntity: FAQ.map(([q, a]) => ({ "@type": "Question", name: q, acceptedAnswer: { "@type": "Answer", text: a } })) },
 ];
 
@@ -139,7 +139,7 @@ function Wordmark({ className }: { className?: string }) {
   return (
     <span className={cn("flex items-center gap-2 text-[15px] font-extrabold tracking-tight text-foreground", className)}>
       <span className="lp-brand">H</span>
-      hotzfy
+      venxpay
     </span>
   );
 }
@@ -206,7 +206,7 @@ export default function LandingPage() {
   return (
     <div className="tech-scope lp min-h-screen overflow-x-clip bg-background text-foreground">
       <Seo
-        title="HOTZFY — Plataforma de pagamentos para produtos digitais"
+        title="VENXPAY — Plataforma de pagamentos para produtos digitais"
         description="Checkout de alta conversão, Pix aprovado em segundos e saque no mesmo dia. Afiliados, área de membros, API e antifraude em uma única plataforma."
         path="/"
         jsonLd={JSONLD}
@@ -488,7 +488,7 @@ export default function LandingPage() {
             <SectionHead
               kicker="Quem vende com a gente"
               title={<>Operações reais,<br /><span className="lp-highlight">números reais.</span></>}
-              copy="Produtores de educação, mentoria, comunidade e software rodando o faturamento diário dentro da HOTZFY."
+              copy="Produtores de educação, mentoria, comunidade e software rodando o faturamento diário dentro da VENXPAY."
             />
             <div className="mt-14 grid gap-5 lg:grid-cols-3">
               {TESTIMONIALS.map((t, i) => (
@@ -496,7 +496,7 @@ export default function LandingPage() {
                   <figure className="lp-card flex h-full flex-col overflow-hidden">
                     <img
                       src={t.photo}
-                      alt={`Retrato de ${t.name}, produtor na HOTZFY`}
+                      alt={`Retrato de ${t.name}, produtor na VENXPAY`}
                       loading="lazy"
                       width={768}
                       height={960}
@@ -640,7 +640,7 @@ export default function LandingPage() {
             ))}
           </div>
           <div className="mt-12 flex flex-col gap-3 border-t border-border pt-6 text-[11.5px] text-muted-foreground sm:flex-row sm:items-center sm:justify-between">
-            <p>© {new Date().getFullYear()} HOTZFY Tecnologia e Pagamentos. Todos os direitos reservados.</p>
+            <p>© {new Date().getFullYear()} VENXPAY Tecnologia e Pagamentos. Todos os direitos reservados.</p>
             <p>Feito no Brasil · Suporte todos os dias</p>
           </div>
         </div>

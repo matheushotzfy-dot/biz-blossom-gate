@@ -1,5 +1,5 @@
 /**
- * Premiações — Sala de Conquistas HOTZFY
+ * Premiações — Sala de Conquistas VENXPAY
  * Cinematic. Soft curves, emerald lighting, parallax plaque, Apple-keynote energy.
  */
 
@@ -37,9 +37,9 @@ const AWARDS: AwardItem[] = [
   { id: "100k", roman: "II",  value: 100_000,    label: "R$ 100K", tier: "Bronze",    title: "Placa Bronze Patinado",     description: "Placa em mármore negro com chapa de bronze envelhecido. Numerada, gravada com o seu nome.",     image: plaque100k,   rewards: ["Placa em bronze numerada"], phrase: "Bronze não é metal — é a prova de que você começou.", ref: "HZF-100", icon: Award, accent: "28 70% 55%" },
   { id: "250k", roman: "III", value: 250_000,    label: "R$ 250K", tier: "Prata",     title: "Placa Prata Platinada",     description: "Acabamento prata platinada sobre base em mármore negro. Marco intermediário de prestígio.",       image: plaque250k,   rewards: ["Placa prata platinada"], phrase: "Prata pesa porque foi merecida.", ref: "HZF-250", icon: Star, accent: "210 15% 75%" },
   { id: "500k", roman: "IV",  value: 500_000,    label: "R$ 500K", tier: "Ouro 24K",  title: "Placa Ouro 24K",            description: "Banhada a ouro 24K com detalhes em esmeralda. Para sellers que dominaram seu mercado.",         image: plaque500k,   rewards: ["Placa banhada a ouro 24K", "Acesso ao grupo VIP"], phrase: "Ouro não brilha sozinho. Você fez ele brilhar.", ref: "HZF-500", icon: Crown, accent: "45 95% 60%" },
-  { id: "1m",   roman: "V",   value: 1_000_000,  label: "R$ 1M",   tier: "Diamante",  title: "Placa Diamante",            description: "Cravejada em diamante autêntico. O primeiro milhão registrado em catálogo.",                     image: plaque1m,     rewards: ["Placa cravejada", "Convite Hotzfy Inner Circle"], phrase: "Diamante é carbono que resistiu à pressão.", ref: "HZF-1MM", icon: Gem, accent: "190 90% 65%" },
+  { id: "1m",   roman: "V",   value: 1_000_000,  label: "R$ 1M",   tier: "Diamante",  title: "Placa Diamante",            description: "Cravejada em diamante autêntico. O primeiro milhão registrado em catálogo.",                     image: plaque1m,     rewards: ["Placa cravejada", "Convite Venxpay Inner Circle"], phrase: "Diamante é carbono que resistiu à pressão.", ref: "HZF-1MM", icon: Gem, accent: "190 90% 65%" },
   { id: "5m",   roman: "VI",  value: 5_000_000,  label: "R$ 5M",   tier: "Elite",     title: "Placa Elite Rose Gold",     description: "Rose Gold com diamantes negros. Reservada à elite — menos de 0,5% dos sellers atingem.",         image: plaque5m,     rewards: ["Placa Rose Gold", "Jantar privado com a fundação"], phrase: "Elite não é título — é hábito.", ref: "HZF-5MM", icon: Sparkles, accent: "340 80% 65%" },
-  { id: "10m",  roman: "VII", value: 10_000_000, label: "R$ 10M",  tier: "Lenda",     title: "Placa Lenda",               description: "Gemas preciosas multicoloridas, peça única numerada, assinada pela fundação HOTZFY.",             image: plaque10m,    rewards: ["Placa Lenda numerada", "Hall of Fame HOTZFY", "Bonificação personalizada"], phrase: "Lendas não morrem. Faturam.", ref: "HZF-10M", icon: Trophy, accent: "152 76% 52%" },
+  { id: "10m",  roman: "VII", value: 10_000_000, label: "R$ 10M",  tier: "Lenda",     title: "Placa Lenda",               description: "Gemas preciosas multicoloridas, peça única numerada, assinada pela fundação VENXPAY.",             image: plaque10m,    rewards: ["Placa Lenda numerada", "Hall of Fame VENXPAY", "Bonificação personalizada"], phrase: "Lendas não morrem. Faturam.", ref: "HZF-10M", icon: Trophy, accent: "152 76% 52%" },
 ];
 
 const fmtFull = (v: number) =>
@@ -156,7 +156,7 @@ function UnlockCelebration({ tier, onClose, onClaim }: { tier: AwardItem; onClos
               width: `${p.size}px`, height: `${p.size * 0.4}px`,
               background: p.color,
               transform: "translate(-50%, -50%)",
-              animation: `hotzfyBurst ${p.duration}ms cubic-bezier(0.2, 0.7, 0.3, 1) ${p.delay}ms forwards`,
+              animation: `venxpayBurst ${p.duration}ms cubic-bezier(0.2, 0.7, 0.3, 1) ${p.delay}ms forwards`,
               ["--dx" as any]: `${p.dx}px`,
               ["--dy" as any]: `${p.dy}px`,
               ["--rot" as any]: `${p.rotate}deg`,
@@ -246,7 +246,7 @@ function UnlockCelebration({ tier, onClose, onClaim }: { tier: AwardItem; onClos
 
       {/* Keyframes */}
       <style>{`
-        @keyframes hotzfyBurst {
+        @keyframes venxpayBurst {
           0%   { opacity: 1; transform: translate(-50%, -50%) rotate(0deg); }
           100% { opacity: 0; transform: translate(calc(-50% + var(--dx)), calc(-50% + var(--dy))) rotate(var(--rot)); }
         }
@@ -276,7 +276,7 @@ export default function Premiacoes() {
   // Fire celebration once per newly-unlocked tier (per user, persisted in localStorage)
   useEffect(() => {
     if (!user?.id || revenue <= 0) return;
-    const key = `hotzfy_celebrated_tiers_${user.id}`;
+    const key = `venxpay_celebrated_tiers_${user.id}`;
     const seen: string[] = (() => {
       try { return JSON.parse(localStorage.getItem(key) || "[]"); } catch { return []; }
     })();
@@ -338,11 +338,11 @@ export default function Premiacoes() {
 
   const handleShare = async () => {
     const text = revenue >= focused.value
-      ? `🏆 Conquistei o troféu ${focused.title} (${focused.label}) na HOTZFY! ${focused.phrase}`
-      : `🎯 Faltam ${fmtFull(Math.max(focused.value - revenue, 0))} para desbloquear ${focused.title} na HOTZFY.`;
+      ? `🏆 Conquistei o troféu ${focused.title} (${focused.label}) na VENXPAY! ${focused.phrase}`
+      : `🎯 Faltam ${fmtFull(Math.max(focused.value - revenue, 0))} para desbloquear ${focused.title} na VENXPAY.`;
     try {
       if (navigator.share) {
-        await navigator.share({ title: `HOTZFY · ${focused.tier}`, text });
+        await navigator.share({ title: `VENXPAY · ${focused.tier}`, text });
       } else {
         await navigator.clipboard.writeText(text);
         toast.success("Copiado! Cole onde quiser compartilhar.");
@@ -387,7 +387,7 @@ export default function Premiacoes() {
         <div className="relative flex items-center justify-between px-6 sm:px-10 py-4 text-[11px] font-mono uppercase tracking-[0.32em]">
           <span className="flex items-center gap-2 text-white/55">
             <Trophy className="h-3.5 w-3.5 text-[hsl(var(--primary))]" strokeWidth={2.25} />
-            HOTZFY · Sala de Conquistas
+            VENXPAY · Sala de Conquistas
           </span>
           <span className="hidden md:flex items-center gap-2 text-white/55">
             <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" />
@@ -773,7 +773,7 @@ export default function Premiacoes() {
             <Crown className="h-5 w-5" strokeWidth={2.25} />
           </div>
           <div className="min-w-0 flex-1">
-            <p className="font-mono text-[10px] uppercase tracking-[0.32em] text-muted-foreground">Hall of Fame HOTZFY</p>
+            <p className="font-mono text-[10px] uppercase tracking-[0.32em] text-muted-foreground">Hall of Fame VENXPAY</p>
             <p className="font-display font-black text-foreground text-[17px] tracking-[-0.025em] mt-1.5">
               {revenue >= AWARDS[AWARDS.length - 1].value
                 ? "Você é Lenda. Seu nome está gravado."
@@ -850,7 +850,7 @@ export default function Premiacoes() {
           </DialogHeader>
           <div className="space-y-3">
             <p className="text-xs text-muted-foreground">
-              Preencha os dados de envio. A equipe HOTZFY entrará em contato após a postagem.
+              Preencha os dados de envio. A equipe VENXPAY entrará em contato após a postagem.
             </p>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
               <Input placeholder="Nome do recebedor *" value={claimForm.recipient_name} onChange={e => setClaimForm({ ...claimForm, recipient_name: e.target.value })} />
