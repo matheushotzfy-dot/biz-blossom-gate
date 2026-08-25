@@ -622,54 +622,55 @@ export default function Dashboard() {
         {/* ═══════════ TOP GREETING ROW ═══════════ */}
         <header className="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
           <div className="min-w-0">
-            <h1 className="font-display font-extrabold tracking-[-0.035em] text-[28px] md:text-[40px] leading-[1.05] truncate">
+            <h1 className="font-display font-extrabold tracking-[-0.035em] text-[22px] md:text-[28px] leading-[1.1] truncate">
               Seja bem-vindo, {nickname}
               <button onClick={privacy.toggle} className="ml-2 inline-flex align-middle text-muted-foreground/50 hover:text-primary transition-colors">
-                {privacy.hidden ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                {privacy.hidden ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
               </button>
             </h1>
-            <p className="text-muted-foreground/80 text-[13px] font-medium mt-1">Que essa jornada seja leve, produtiva e cheia de conquistas!</p>
+            <p className="text-muted-foreground/80 text-[12.5px] font-medium mt-0.5">Que essa jornada seja leve, produtiva e cheia de conquistas!</p>
 
           </div>
 
           {/* Faturamento / Meta chip — clean, calendar icon opens filter */}
           <Popover open={datePickerOpen} onOpenChange={setDatePickerOpen}>
             <PopoverTrigger asChild>
-              <button className="group flex items-center gap-3.5 rounded-2xl border border-border/60 bg-card px-4 py-3 min-w-[300px] hover:border-primary/45 transition-colors text-left">
-                <div className="relative flex h-11 w-11 items-center justify-center rounded-xl bg-primary/10 text-primary shrink-0">
-                  <svg viewBox="0 0 44 44" className="absolute inset-0 h-11 w-11 -rotate-90">
-                    <circle cx="22" cy="22" r="19" fill="none" stroke="hsl(var(--border))" strokeWidth="2.5" />
+              <button className="group flex items-center gap-3 rounded-xl border border-border/60 bg-card px-3.5 py-2.5 w-full md:w-auto md:min-w-[276px] hover:border-primary/45 transition-colors text-left">
+                <div className="relative flex h-9 w-9 items-center justify-center rounded-lg bg-primary/10 text-primary shrink-0">
+                  <svg viewBox="0 0 36 36" className="absolute inset-0 h-9 w-9 -rotate-90">
+                    <circle cx="18" cy="18" r="15.5" fill="none" stroke="hsl(var(--border))" strokeWidth="2.25" />
                     <circle
-                      cx="22" cy="22" r="19" fill="none" stroke="hsl(var(--primary))" strokeWidth="2.5" strokeLinecap="round"
-                      strokeDasharray={`${(goalPct / 100) * 119.4} 119.4`}
+                      cx="18" cy="18" r="15.5" fill="none" stroke="hsl(var(--primary))" strokeWidth="2.25" strokeLinecap="round"
+                      strokeDasharray={`${(goalPct / 100) * 97.4} 97.4`}
                       className="transition-[stroke-dasharray] duration-700 ease-out"
                     />
                   </svg>
-                  <CalendarDays className="relative h-4 w-4" strokeWidth={2} />
+                  <CalendarDays className="relative h-3.5 w-3.5" strokeWidth={2} />
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2">
-                    <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-muted-foreground/70">
+                    <p className="truncate text-[9.5px] font-bold uppercase tracking-[0.14em] text-muted-foreground/70">
                       Faturamento · {isCustom ? "Período" : selectedPeriod.label}
                     </p>
                     {revenueTrend !== undefined && (
-                      <span className={cn("rounded-md px-1.5 py-[1px] text-[9.5px] font-bold tabular-nums",
+                      <span className={cn("shrink-0 rounded-md px-1.5 py-[1px] text-[9px] font-bold tabular-nums",
                         revenueTrend >= 0 ? "bg-success/12 text-success" : "bg-destructive/12 text-destructive")}>
                         {revenueTrend >= 0 ? "+" : ""}{revenueTrend}%
                       </span>
                     )}
                   </div>
-                  <div className="flex items-baseline gap-1.5 mt-1">
-                    <span className="font-display font-bold text-[20px] tabular-nums tracking-[-0.03em] text-foreground">
+                  <div className="flex items-baseline gap-1.5 mt-0.5">
+                    <span className="font-display font-bold text-[17px] tabular-nums tracking-[-0.03em] text-foreground">
                       {privacy.hidden ? CENSORED : fmt(revenue)}
                     </span>
-                    <span className="text-[11px] text-muted-foreground/60 tabular-nums">/ {privacy.hidden ? CENSORED : fmt(goalTarget)}</span>
+                    <span className="text-[10.5px] text-muted-foreground/60 tabular-nums">/ {privacy.hidden ? CENSORED : fmt(goalTarget)}</span>
                   </div>
-                  <p className="mt-1 text-[10.5px] font-medium text-muted-foreground/70 tabular-nums">
+                  <p className="mt-0.5 truncate text-[10px] font-medium text-muted-foreground/70 tabular-nums">
                     {goalPct.toFixed(1)}% da meta · {approved.length} pedidos pagos
                   </p>
                 </div>
               </button>
+
 
             </PopoverTrigger>
             <PopoverContent align="end" className="w-[320px] p-3 rounded-2xl border-border/60">

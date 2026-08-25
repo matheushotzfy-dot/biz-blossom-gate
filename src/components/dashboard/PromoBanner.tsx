@@ -126,32 +126,32 @@ export function PromoBanner() {
       {/* hairline frame */}
       <div aria-hidden className="pointer-events-none absolute inset-3 rounded-[20px] border border-primary/10 md:inset-4" />
 
-      <div className="relative grid gap-6 p-6 md:grid-cols-[minmax(0,1.05fr)_minmax(0,0.95fr)] md:items-center md:gap-4 md:p-9 lg:p-11">
+      <div className="relative grid gap-4 p-5 md:grid-cols-[minmax(0,1.1fr)_minmax(0,0.9fr)] md:items-center md:gap-4 md:p-6 lg:p-7">
         {/* ── Editorial copy ── */}
         <div className="min-w-0">
-          <div className="flex items-center gap-3">
-            <span className="h-px w-8 bg-primary/60" />
-            <span className="text-[10px] font-bold uppercase tracking-[0.34em] text-primary">Infraestrutura Hotzfy</span>
+          <div className="flex items-center gap-2.5">
+            <span className="h-px w-6 bg-primary/60" />
+            <span className="text-[9px] font-bold uppercase tracking-[0.3em] text-primary">Infraestrutura Hotzfy</span>
           </div>
 
-          <h2 className="mt-4 max-w-[15ch] font-display text-[30px] font-extrabold leading-[0.92] tracking-[-0.045em] text-foreground sm:text-[40px] lg:text-[46px]">
+          <h2 className="mt-2.5 max-w-[16ch] font-display text-[22px] font-extrabold leading-[0.95] tracking-[-0.04em] text-foreground sm:text-[26px] lg:text-[30px]">
             Taxas baixas e
-            <span className="mt-1 block font-serif text-[34px] font-normal italic tracking-[-0.02em] text-primary sm:text-[46px] lg:text-[54px]">
+            <span className="block font-serif text-[24px] font-normal italic tracking-[-0.02em] text-primary sm:text-[29px] lg:text-[34px]">
               saques instantâneos
             </span>
           </h2>
 
-          <p className="mt-3 max-w-sm text-[13.5px] font-medium leading-relaxed text-muted-foreground">
-            que movem o seu negócio de verdade. Liquidação Pix no mesmo dia, sem reserva financeira e sem burocracia entre a venda e o seu caixa.
+          <p className="mt-2 max-w-sm text-[12.5px] font-medium leading-snug text-muted-foreground">
+            que movem o seu negócio de verdade. Liquidação Pix no mesmo dia, sem reserva financeira e sem burocracia.
           </p>
 
-          <div className="mt-5 flex flex-wrap items-center gap-2">
+          <div className="mt-3 flex flex-wrap items-center gap-1.5">
             {CHIPS.map((c) => (
               <span
                 key={c.label}
-                className="inline-flex items-center gap-1.5 rounded-full border border-border/70 bg-background/70 px-3 py-1.5 text-[11px] font-semibold text-muted-foreground backdrop-blur-sm"
+                className="inline-flex items-center gap-1.5 rounded-full border border-border/70 bg-background/70 px-2.5 py-1 text-[10.5px] font-semibold text-muted-foreground"
               >
-                <svg viewBox="0 0 12 12" className="h-3 w-3 text-primary" aria-hidden>
+                <svg viewBox="0 0 12 12" className="h-2.5 w-2.5 text-primary" aria-hidden>
                   <circle cx="6" cy="6" r="5.2" fill="none" stroke="currentColor" strokeWidth="1.2" />
                   <path d="M3.6 6.2 L5.2 7.8 L8.4 4.4" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
                 </svg>
@@ -160,17 +160,17 @@ export function PromoBanner() {
             ))}
           </div>
 
-          <div className="mt-6 flex flex-wrap items-center gap-3">
+          <div className="mt-4 flex flex-wrap items-center gap-2">
             <Link
               to="/financeiro/saques"
-              className="group inline-flex items-center gap-2 rounded-xl bg-primary px-5 py-3 text-[13px] font-bold text-primary-foreground transition-colors hover:bg-primary/90"
+              className="group inline-flex items-center gap-2 rounded-xl bg-primary px-4 py-2.5 text-[12.5px] font-bold text-primary-foreground transition-colors hover:bg-primary/90"
             >
               Sacar agora
-              <ArrowUpRight className="h-4 w-4 transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
+              <ArrowUpRight className="h-3.5 w-3.5 transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
             </Link>
             <Link
               to="/taxas"
-              className="inline-flex items-center gap-2 rounded-xl border border-border/70 px-5 py-3 text-[13px] font-semibold text-foreground transition-colors hover:border-primary/40 hover:text-primary"
+              className="inline-flex items-center gap-2 rounded-xl border border-border/70 px-4 py-2.5 text-[12.5px] font-semibold text-foreground transition-colors hover:border-primary/40 hover:text-primary"
             >
               Ver minhas taxas
             </Link>
@@ -178,24 +178,25 @@ export function PromoBanner() {
         </div>
 
         {/* ── Plate ── */}
-        <div className="relative h-[190px] sm:h-[230px] md:mx-0 md:h-[260px]">
+        <div className="relative hidden h-[176px] sm:block md:h-[196px]">
           <LiquidityPlate />
 
           {/* floating engraved readouts */}
-          <div className="absolute left-2 top-3 rounded-xl border border-border/70 bg-background/85 px-3 py-2 backdrop-blur-sm">
-            <p className="text-[9px] font-bold uppercase tracking-[0.16em] text-muted-foreground/70">Liquidação</p>
-            <p className="font-display text-[15px] font-bold tabular-nums leading-none text-foreground">D+0</p>
+          <div className="absolute left-1 top-1 rounded-lg border border-border/70 bg-background/85 px-2.5 py-1.5">
+            <p className="text-[8.5px] font-bold uppercase tracking-[0.16em] text-muted-foreground/70">Liquidação</p>
+            <p className="font-display text-[13px] font-bold tabular-nums leading-none text-foreground">D+0</p>
           </div>
-          <div className="absolute bottom-4 left-2 rounded-xl border border-border/70 bg-background/85 px-3 py-2 backdrop-blur-sm">
-            <p className="text-[9px] font-bold uppercase tracking-[0.16em] text-muted-foreground/70">Reserva</p>
-            <p className="font-display text-[15px] font-bold tabular-nums leading-none text-primary">0%</p>
+          <div className="absolute bottom-2 left-1 rounded-lg border border-border/70 bg-background/85 px-2.5 py-1.5">
+            <p className="text-[8.5px] font-bold uppercase tracking-[0.16em] text-muted-foreground/70">Reserva</p>
+            <p className="font-display text-[13px] font-bold tabular-nums leading-none text-primary">0%</p>
           </div>
-          <div className="absolute right-2 top-6 rounded-xl border border-primary/25 bg-primary/10 px-3 py-2 backdrop-blur-sm">
-            <p className="text-[9px] font-bold uppercase tracking-[0.16em] text-primary/80">Autorização</p>
-            <p className="font-display text-[15px] font-bold tabular-nums leading-none text-foreground">118ms</p>
+          <div className="absolute right-1 top-3 rounded-lg border border-primary/25 bg-primary/10 px-2.5 py-1.5">
+            <p className="text-[8.5px] font-bold uppercase tracking-[0.16em] text-primary/80">Autorização</p>
+            <p className="font-display text-[13px] font-bold tabular-nums leading-none text-foreground">118ms</p>
           </div>
         </div>
       </div>
+
     </section>
   );
 }
