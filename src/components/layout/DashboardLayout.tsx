@@ -128,7 +128,7 @@ function DashboardLayoutInner() {
 
   <SidebarInset className="ambient-backdrop dashboard-content-field relative min-w-0 bg-transparent flex flex-col h-full min-h-0 overflow-hidden">
 
-          <header className="relative z-30 h-[52px] flex items-center gap-1.5 border-b border-border/60 bg-transparent px-3 lg:px-5 sticky top-0 md:flex transition-colors duration-300">
+          <header className="technical-topbar relative z-30 h-[52px] flex items-center gap-1.5 border-b border-border/60 px-3 lg:px-5 sticky top-0 md:flex transition-colors duration-300">
             <SidebarTrigger className="seller-clickable icon-only relative md:hidden h-8 w-8 rounded-[9px] border border-transparent bg-transparent flex items-center justify-center text-muted-foreground transition-colors duration-200 hover:border-border/70 hover:text-foreground [&>svg]:hidden">
               <PanelToggleIcon size={17} />
               <span className="sr-only">Alternar menu</span>
@@ -239,7 +239,7 @@ function DashboardLayoutInner() {
 
  <MobileRevenueBar />
 
- <div ref={scrollRef} className="relative z-10 flex-1 overflow-y-auto overscroll-contain px-3 sm:px-4 md:px-7 xl:px-10 pb-20 md:pb-10 min-h-0" style={{ WebkitOverflowScrolling: 'touch' }}>
+ <div ref={scrollRef} className="dashboard-scroll-field relative z-10 flex-1 overflow-y-auto overscroll-contain px-3 sm:px-4 md:px-7 xl:px-10 pb-20 md:pb-10 min-h-0">
   <div className="mx-auto w-full max-w-[1180px] py-2 md:py-4">
   <div key={routeKey} className="page-fluid">
   <Outlet />

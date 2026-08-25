@@ -111,8 +111,8 @@ export function SellerOnboarding() {
   const pct = Math.round((doneCount / steps.length) * 100);
 
   return (
-    <section className="overflow-hidden rounded-[12px] border border-border/60 bg-card">
-      <header className="flex flex-wrap items-center justify-between gap-3 border-b border-border/40 px-4 py-3">
+    <section className="dashboard-module overflow-hidden rounded-[12px] border border-border/60 bg-card">
+      <header className="flex flex-wrap items-center justify-between gap-3 border-b border-border/40 px-5 py-4">
         <div className="min-w-0">
           <p className="font-display text-[14px] font-bold tracking-[-0.02em] text-foreground">
             {complete ? "Conta ativada" : "Ative sua conta para vender e sacar"}
@@ -139,7 +139,7 @@ export function SellerOnboarding() {
         </div>
       </header>
 
-      <div className="grid gap-2 p-3 sm:grid-cols-2 xl:grid-cols-4">
+      <div className="grid sm:grid-cols-2 xl:grid-cols-4">
         {steps.map((s) => {
           const Icon = s.icon;
           const done = s.state === "done";
@@ -148,12 +148,12 @@ export function SellerOnboarding() {
               key={s.id}
               to={s.to}
               className={cn(
-                "flex items-start gap-2.5 rounded-[10px] border px-3 py-2.5 transition-colors",
-                done ? "border-primary/25 bg-primary/[0.05]" : "border-border/60 hover:border-primary/40",
+                "group flex items-start gap-3 border-b border-r border-border/40 px-4 py-3.5 transition-colors last:border-r-0 sm:[&:nth-last-child(-n+2)]:border-b-0 xl:border-b-0",
+                done ? "bg-primary/[0.035]" : "hover:bg-muted/20",
               )}
             >
               <span className={cn(
-                "mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-[8px] border",
+                "mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-[8px] border",
                 done ? "border-primary/30 bg-primary/10 text-primary" : "border-border/70 text-muted-foreground",
               )}>
                 {done ? <Check className="h-3.5 w-3.5" strokeWidth={2.5} /> : <Icon className="h-3.5 w-3.5" strokeWidth={2} />}

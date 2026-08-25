@@ -721,18 +721,8 @@ export default function Dashboard() {
 
 
   return (
-    <div className="relative min-h-screen w-full text-foreground animate-in fade-in duration-500 overflow-hidden">
+    <div className="relative min-h-full w-full text-foreground animate-in fade-in duration-500">
       <Seo title="Dashboard | Venxpay" description="Painel operacional Venxpay — saldos, ranking, aprovação e liquidações em tempo real." path="/dashboard" noindex />
-
-      {/* Ambient gradient backdrop — spans full scrollable dashboard */}
-      <div
-        aria-hidden
-        className="pointer-events-none absolute inset-0 z-0"
-        style={{
-          backgroundImage:
- "radial-gradient(60% 40% at 80% 0%, hsl(var(--primary)/0.12), transparent 70%), radial-gradient(50% 40% at 10% 100%, hsl(var(--primary)/0.08), transparent 70%), linear-gradient(to bottom, hsl(var(--background)) 0%, hsl(var(--background)) 100%)",
-        }}
-      />
 
       <div className="relative z-10 px-2 sm:px-4 md:px-6 pt-2 pb-24 max-w-[1600px] mx-auto space-y-4">
 
@@ -804,13 +794,13 @@ export default function Dashboard() {
             const Icon = k.icon;
             const isDanger = k.tone === "danger";
             return (
-              <div key={k.label} className="group relative overflow-hidden rounded-[12px] border border-border/50 bg-card px-5 pt-5 pb-6 transition-colors hover:border-border">
+               <div key={k.label} className="dashboard-stat group relative min-h-[138px] overflow-hidden rounded-[12px] border border-border/60 bg-card px-5 pt-5 pb-6 transition-colors hover:border-primary/30">
                 {/* ghost icon */}
                 <Icon
                   aria-hidden
                   strokeWidth={1.5}
                   className={cn(
- "pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 h-16 w-16 transition-opacity",
+ "pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 h-14 w-14 transition-opacity",
                     isDanger ? "text-destructive/15" : "text-foreground/[0.07]",
  "group-hover:opacity-80"
                   )}
@@ -818,7 +808,7 @@ export default function Dashboard() {
                 <p className={cn("relative text-[13px] font-medium", isDanger ? "text-destructive/90" : "text-muted-foreground")}>
                   {k.label}
                 </p>
-                <p className="relative mt-4 font-display font-bold tabular-nums tracking-[-0.03em] text-[30px] leading-none text-foreground truncate">
+                 <p className="relative mt-4 font-display font-bold tabular-nums tracking-[-0.03em] text-[28px] leading-none text-foreground truncate">
                   {privacy.hidden ? CENSORED : k.value}
                 </p>
                 <p className="relative mt-2 text-[12px] text-muted-foreground/55 truncate">{k.sub}</p>
@@ -856,9 +846,11 @@ export default function Dashboard() {
               <button
                 key={a.label}
                 onClick={a.onClick}
-                className="group flex items-center gap-4 rounded-[12px] border border-border/50 bg-card px-5 py-4 text-left transition-colors hover:border-border"
+                 className="dashboard-action group relative flex min-h-[76px] items-center gap-4 overflow-hidden rounded-[12px] border border-border/60 bg-card px-5 py-4 text-left transition-colors hover:border-primary/30 hover:bg-card-elevated"
               >
-                <Icon className="h-6 w-6 shrink-0 text-muted-foreground transition-colors group-hover:text-foreground" strokeWidth={1.75} />
+                 <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-[9px] border border-border/60 bg-background/50 text-muted-foreground transition-colors group-hover:border-primary/30 group-hover:text-primary">
+                   <Icon className="h-[18px] w-[18px]" strokeWidth={1.75} />
+                 </span>
                 <div className="min-w-0 flex-1">
                   <p className="font-display font-bold text-[16px] tracking-[-0.01em] text-foreground truncate">{a.label}</p>
                   <p className="text-[12px] text-muted-foreground/60 truncate">{a.sub}</p>
@@ -874,7 +866,7 @@ export default function Dashboard() {
         <section className="grid grid-cols-1 xl:grid-cols-3 gap-4">
 
           {/* Faturamento — Clean line chart (Cakto-style) */}
-          <div className="xl:col-span-2 rounded-[12px] border border-border/60 bg-card overflow-hidden">
+          <div className="dashboard-module xl:col-span-2 rounded-[12px] border border-border/60 bg-card overflow-hidden">
             <div className="flex items-center justify-between gap-3 px-6 md:px-8 pt-7 pb-6">
               <div className="min-w-0">
                 <h4 className="font-display font-bold text-xl tracking-[-0.02em] text-foreground">Faturamento</h4>
@@ -945,7 +937,7 @@ export default function Dashboard() {
           {/* Right side: donuts + links */}
           <div className="space-y-4">
             {/* Donuts card */}
-            <div className="rounded-[12px] border border-border/60 bg-card p-7">
+            <div className="dashboard-module rounded-[12px] border border-border/60 bg-card p-7">
               <div className="mb-6">
                 <h4 className="font-display font-bold text-xl tracking-[-0.02em]">Índices</h4>
                 <p className="text-[11px] text-muted-foreground/60 mt-1">Conversão por método de pagamento</p>
@@ -996,7 +988,7 @@ export default function Dashboard() {
             </div>
 
             {/* Payment links */}
-            <button type="button" onClick={() => { if (!requireApprovedAccount()) navigate("/vendas/link-pagamento"); }} className="group block w-full rounded-[12px] border border-border/60 bg-card p-7 text-left hover:border-primary/40 transition-colors">
+            <button type="button" onClick={() => { if (!requireApprovedAccount()) navigate("/vendas/link-pagamento"); }} className="dashboard-module group block w-full rounded-[12px] border border-border/60 bg-card p-7 text-left hover:border-primary/40 transition-colors">
               <div className="flex items-start justify-between gap-3">
                 <div className="min-w-0">
                   <h3 className="font-display font-black text-base tracking-[-0.01em] flex items-center gap-2"><Link2 className="h-4 w-4 text-primary" /> Links de pagamentos</h3>
@@ -1010,7 +1002,7 @@ export default function Dashboard() {
         </section>
 
         {/* ═══════════ ÚLTIMAS TRANSAÇÕES — clean table ═══════════ */}
-        <section className="rounded-[12px] border border-border/60 bg-card/80 backdrop-blur overflow-hidden">
+        <section className="dashboard-module rounded-[12px] border border-border/60 bg-card overflow-hidden">
           <div className="flex items-center justify-between gap-3 px-5 md:px-6 pt-5 pb-4">
             <div className="min-w-0">
               <h3 className="font-display font-bold text-[15px] tracking-[-0.01em] text-foreground">Últimas transações</h3>
