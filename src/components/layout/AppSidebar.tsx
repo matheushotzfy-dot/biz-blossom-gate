@@ -46,7 +46,7 @@ type GlyphIcon = ComponentType<SVGProps<SVGSVGElement> & { size?: number }>;
 type SidebarItem = {
   title: string;
   url: string;
-  icon: LucideIcon;
+  icon: GlyphIcon;
   badge?: string;
   count?: number;
   exact?: boolean;
