@@ -47,6 +47,7 @@ import { Seo } from "@/components/Seo";
 import { accountNeedsVerification } from "@/components/AccountVerificationGate";
 import { toast } from "sonner";
 import { PromoBanner } from "@/components/dashboard/PromoBanner";
+import { SellerOnboarding } from "@/components/dashboard/SellerOnboarding";
 
 
 const PERIOD_PRESETS = [
