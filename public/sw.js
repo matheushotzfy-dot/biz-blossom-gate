@@ -1,4 +1,4 @@
-const CACHE_NAME = 'venxpay-v2';
+const CACHE_NAME = 'venxpay-v3';
 const STATIC_ASSETS = ['/'];
 
 self.addEventListener('install', (event) => {
