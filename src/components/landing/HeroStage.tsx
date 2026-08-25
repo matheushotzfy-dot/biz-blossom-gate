@@ -219,6 +219,7 @@ export const HeroStage = memo(function HeroStage() {
             })}
           </svg>
 
+          <div className="lp-mesh-nodes">
           {NODES.map(({ id, label, x, y, icon: Icon }, i) => (
             <motion.span
               key={id}
@@ -235,6 +236,7 @@ export const HeroStage = memo(function HeroStage() {
               <span className="lp-node-label">{label}</span>
             </motion.span>
           ))}
+          </div>
         </div>
 
         {/* --- painéis inferiores --- */}

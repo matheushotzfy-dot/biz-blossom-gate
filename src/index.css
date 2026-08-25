@@ -3979,6 +3979,11 @@ html body .lp .lp-mesh-svg {
   height: calc(100% - 54px);
   overflow: visible;
 }
+html body .lp .lp-mesh-nodes {
+  position: absolute;
+  inset: 18px 42px 26px;
+}
+@media (max-width: 640px) { html body .lp .lp-mesh-nodes { inset: 18px 30px 22px; } }
 html body .lp .lp-node {
   position: absolute;
   transform: translate(-50%, -50%);
