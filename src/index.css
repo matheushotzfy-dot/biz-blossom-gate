@@ -4081,3 +4081,13 @@ html body .lp .lp-progress {
 @media (prefers-reduced-motion: reduce) {
   html body .lp .lp-scan, html body .lp .lp-ping { animation: none; }
 }
+
+/* ── Dashboard promo banner (code-drawn plate) ── */
+@keyframes pb-rotate { to { transform: rotate(360deg); } }
+@keyframes pb-travel { 0% { offset-distance: 0%; opacity: 0; } 12% { opacity: 1; } 88% { opacity: 1; } 100% { offset-distance: 100%; opacity: 0; } }
+.pb-spin { transform-origin: 0 0; animation: pb-rotate 26s linear infinite; }
+.pb-spin-rev { transform-origin: 0 0; animation: pb-rotate 34s linear infinite reverse; }
+.pb-flow { animation: pb-travel 4.6s linear infinite; }
+@media (prefers-reduced-motion: reduce) {
+  .pb-spin, .pb-spin-rev, .pb-flow { animation: none; }
+}

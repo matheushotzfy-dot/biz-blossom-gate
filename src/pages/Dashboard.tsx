@@ -46,7 +46,7 @@ import type { DateRange } from "react-day-picker";
 import { Seo } from "@/components/Seo";
 import { accountNeedsVerification } from "@/components/AccountVerificationGate";
 import { toast } from "sonner";
-import { ChampionsBanner } from "@/components/dashboard/ChampionsBanner";
+import { PromoBanner } from "@/components/dashboard/PromoBanner";
 
 
 const PERIOD_PRESETS = [
@@ -713,8 +713,8 @@ export default function Dashboard() {
           </Popover>
         </header>
 
-        {/* ═══════════ HERO — RANKING BANNER ═══════════ */}
-        <ChampionsBanner hidden={privacy.hidden} />
+        {/* ═══════════ HERO — BRAND BANNER ═══════════ */}
+        <PromoBanner />
 
 
 
