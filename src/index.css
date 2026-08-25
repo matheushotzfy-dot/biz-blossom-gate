@@ -3701,3 +3701,224 @@ html body .landing-v4 button { letter-spacing: 0 !important; }
 @media (prefers-reduced-motion: reduce) {
   .landing-v4 *, .landing-v4 *::before, .landing-v4 *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; scroll-behavior: auto !important; }
 }
+
+/* ==========================================================================
+   LANDING V5 — "hotzfy pay" (escopo .lp)
+   Estética fintech BR: superfícies quase-pretas com leve tinta esmeralda,
+   raios generosos, hairlines, tipografia pesada e movimento discreto.
+   Especificidade alta para vencer o clean pass global.
+   ========================================================================== */
+html body .lp {
+  --background: 165 26% 4%;
+  --foreground: 150 30% 97%;
+  --card: 168 20% 7%;
+  --card-foreground: 150 30% 97%;
+  --muted: 168 14% 12%;
+  --muted-foreground: 158 8% 62%;
+  --border: 165 12% 15%;
+  --primary: 152 72% 47%;
+  --primary-foreground: 165 40% 5%;
+  --radius: 18px;
+  font-family: 'Manrope', system-ui, sans-serif !important;
+  background: hsl(var(--background)) !important;
+  -webkit-font-smoothing: antialiased;
+}
+html body .lp h1,
+html body .lp h2,
+html body .lp h3 { font-family: 'Sora', system-ui, sans-serif !important; }
+html body .lp h1 { letter-spacing: -0.045em !important; }
+html body .lp h2 { letter-spacing: -0.035em !important; }
+html body .lp h3 { letter-spacing: -0.02em !important; }
+html body .lp p,
+html body .lp span,
+html body .lp a,
+html body .lp li,
+html body .lp button { letter-spacing: -0.005em !important; }
+
+html body .lp .lp-mono {
+  font-family: 'JetBrains Mono', ui-monospace, monospace !important;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.03em !important;
+}
+
+/* marca */
+html body .lp .lp-brand {
+  display: inline-grid;
+  height: 26px; width: 26px;
+  place-items: center;
+  border-radius: 9px;
+  background: linear-gradient(150deg, hsl(var(--primary)), hsl(168 78% 38%)) !important;
+  color: hsl(165 45% 6%) !important;
+  font-size: 13px; font-weight: 900;
+}
+
+/* barra de anúncio + header */
+html body .lp .lp-announce {
+  background: linear-gradient(90deg, hsl(var(--primary) / .16), hsl(174 70% 40% / .10) 60%, transparent) !important;
+  border-bottom: 1px solid hsl(var(--border));
+  color: hsl(var(--foreground) / .82);
+}
+html body .lp .lp-header {
+  position: sticky; top: 0; z-index: 50;
+  background: hsl(var(--background) / .82) !important;
+  border-bottom: 1px solid hsl(var(--border));
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+}
+
+/* botão primário */
+html body .lp .lp-cta {
+  background: linear-gradient(140deg, hsl(152 74% 52%), hsl(163 72% 40%)) !important;
+  color: hsl(165 45% 6%) !important;
+  font-weight: 700 !important;
+  border: 0 !important;
+  box-shadow: 0 14px 34px -20px hsl(var(--primary) / .85) !important;
+  transition: filter .18s ease, transform .18s ease;
+}
+html body .lp .lp-cta:hover { filter: brightness(1.05) !important; }
+
+/* hero */
+html body .lp .lp-hero-glow {
+  position: absolute; inset: -18% -20% auto -20%; height: 780px;
+  background:
+    radial-gradient(46% 52% at 50% 0%, hsl(var(--primary) / .20), transparent 70%),
+    radial-gradient(30% 40% at 82% 18%, hsl(174 80% 45% / .12), transparent 72%) !important;
+  filter: blur(10px);
+  pointer-events: none;
+}
+html body .lp .lp-hero-grid {
+  position: absolute; inset: 0;
+  background-image:
+    linear-gradient(hsl(var(--foreground) / .045) 1px, transparent 1px),
+    linear-gradient(90deg, hsl(var(--foreground) / .045) 1px, transparent 1px) !important;
+  background-size: 64px 64px !important;
+  mask-image: radial-gradient(72% 60% at 50% 8%, #000, transparent 78%);
+  -webkit-mask-image: radial-gradient(72% 60% at 50% 8%, #000, transparent 78%);
+  pointer-events: none;
+}
+html body .lp .lp-cta-glow {
+  position: absolute; inset: 0;
+  background: radial-gradient(46% 60% at 50% 50%, hsl(var(--primary) / .13), transparent 72%) !important;
+  pointer-events: none;
+}
+
+/* pílulas, kickers, selos */
+html body .lp .lp-pill {
+  display: inline-flex; align-items: center; gap: 8px;
+  border-radius: 999px;
+  border: 1px solid hsl(var(--primary) / .28);
+  background: hsl(var(--primary) / .07) !important;
+  padding: 8px 15px;
+  font-size: 12.5px; font-weight: 600;
+  color: hsl(var(--foreground) / .9);
+}
+html body .lp .lp-kicker {
+  display: inline-block;
+  font-size: 11.5px; font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: .12em !important;
+  color: hsl(var(--primary));
+}
+html body .lp .lp-badge {
+  display: inline-flex; align-items: center; gap: 6px;
+  border-radius: 999px;
+  border: 1px solid hsl(var(--primary) / .3);
+  background: hsl(var(--primary) / .08) !important;
+  padding: 6px 12px;
+  font-size: 11.5px; font-weight: 700;
+  color: hsl(var(--primary));
+}
+html body .lp .lp-seal {
+  border-radius: 8px;
+  border: 1px solid hsl(var(--border));
+  padding: 5px 10px;
+  font-size: 11px;
+  color: hsl(var(--muted-foreground));
+}
+html body .lp .lp-dot {
+  height: 7px; width: 7px; border-radius: 999px;
+  background: hsl(var(--primary)) !important;
+  box-shadow: 0 0 0 4px hsl(var(--primary) / .14) !important;
+  animation: lpPulse 2.1s ease-in-out infinite;
+}
+@keyframes lpPulse { 50% { opacity: .35; transform: scale(.75); } }
+
+/* destaque tipográfico */
+html body .lp .lp-highlight {
+  color: hsl(152 74% 55%) !important;
+}
+
+/* cartões e ícones */
+html body .lp .lp-card {
+  border-radius: 22px;
+  border: 1px solid hsl(var(--border)) !important;
+  background: linear-gradient(168deg, hsl(var(--card)), hsl(var(--background))) !important;
+  box-shadow: 0 30px 70px -60px hsl(var(--primary) / .7) !important;
+}
+html body .lp .lp-card-accent { border-color: hsl(var(--primary) / .3) !important; }
+html body .lp .lp-icon {
+  display: inline-grid; height: 38px; width: 38px; place-items: center;
+  border-radius: 12px;
+  border: 1px solid hsl(var(--primary) / .22);
+  background: hsl(var(--primary) / .08) !important;
+  color: hsl(var(--primary));
+}
+html body .lp .lp-check {
+  display: inline-grid; height: 22px; width: 22px; place-items: center; flex: 0 0 auto;
+  border-radius: 999px;
+  background: hsl(var(--primary) / .12) !important;
+  color: hsl(var(--primary));
+  margin-top: 1px;
+}
+
+/* feed de vendas do hero */
+html body .lp .lp-feed { padding-top: 6px; }
+html body .lp .lp-feed-card {
+  display: flex; align-items: center; gap: 10px;
+  border-radius: 14px;
+  border: 1px solid hsl(var(--border));
+  background: hsl(var(--card) / .8) !important;
+  padding: 10px 12px;
+  backdrop-filter: blur(8px);
+}
+html body .lp .lp-feed-icon {
+  display: inline-grid; height: 28px; width: 28px; place-items: center; flex: 0 0 auto;
+  border-radius: 10px;
+  background: hsl(var(--primary) / .12) !important;
+  color: hsl(var(--primary));
+}
+
+/* marquee de integrações */
+html body .lp .lp-marquee {
+  position: relative; overflow: hidden;
+  mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
+}
+html body .lp .lp-marquee-track {
+  display: flex; width: max-content; gap: 14px;
+  animation: lpMarquee 42s linear infinite !important;
+}
+html body .lp .lp-marquee:hover .lp-marquee-track { animation-play-state: paused !important; }
+@keyframes lpMarquee { to { transform: translateX(-50%); } }
+html body .lp .lp-logo {
+  display: flex; align-items: center; gap: 10px;
+  border-radius: 14px;
+  border: 1px solid hsl(var(--border));
+  background: hsl(var(--card) / .55) !important;
+  padding: 14px 26px;
+  min-width: 168px;
+  justify-content: center;
+  white-space: nowrap;
+}
+html body .lp .lp-logo img {
+  height: 26px; width: auto; object-fit: contain;
+  filter: grayscale(1) brightness(1.6);
+  opacity: .72;
+}
+html body .lp .lp-logo span { font-size: 12.5px; color: hsl(var(--muted-foreground)); }
+
+@media (prefers-reduced-motion: reduce) {
+  html body .lp *, html body .lp *::before, html body .lp *::after {
+    animation-duration: .01ms !important; animation-iteration-count: 1 !important;
+  }
+}

@@ -1,144 +1,624 @@
+/**
+ * LandingPage — página pública da HOTZFY.
+ *
+ * Direção: fintech brasileira de infoprodutos. A confiança vem de elementos
+ * concretos (produto real, prazos, taxas, integrações, rostos, respostas) e não
+ * de efeitos decorativos. Todo o conteúdo é estático/apresentacional — nenhuma
+ * consulta é feita a partir daqui.
+ */
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { useNavigate } from "react-router-dom";
-import { motion, useInView, useReducedMotion, useScroll, useTransform } from "framer-motion";
+import { motion, useInView, useReducedMotion } from "framer-motion";
 import {
-  ArrowRight, BarChart3, Check, ChevronDown, Code2, Fingerprint, Gauge,
-  GitBranch, LockKeyhole, Menu, Network, Play, QrCode, ShieldCheck, Sparkles,
-  TrendingUp, Wallet, X, Zap,
+  ArrowRight, ArrowUpRight, BadgeCheck, Banknote, BarChart3, Boxes, ChevronDown,
+  Code2, CreditCard, Gift, Headphones, LineChart, LockKeyhole, Menu, Percent,
+  PlayCircle, QrCode, ShieldCheck, Sparkles, Star, Users, Wallet, X, Zap,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Seo } from "@/components/Seo";
+import { ProductMock } from "@/components/landing/ProductMock";
+import { SalesFeed } from "@/components/landing/SalesFeed";
 import { ConversionScene } from "@/components/landing/ConversionScene";
-import { PaymentEngine } from "@/components/landing/PaymentEngine";
+
+import producer1 from "@/assets/landing/producer-1.jpg";
+import producer2 from "@/assets/landing/producer-2.jpg";
+import producer3 from "@/assets/landing/producer-3.jpg";
+import logoUtmify from "@/assets/apps/utmify.png";
+import logoVoxuy from "@/assets/apps/voxuy.png";
+import logoSpedy from "@/assets/apps/spedy.png";
+import logoCademi from "@/assets/apps/cademi.png";
+import logoMemberkit from "@/assets/apps/memberkit.png";
+import logoThemembers from "@/assets/apps/themembers.png";
+import logoAstron from "@/assets/apps/astron_members.png";
+import logoActive from "@/assets/apps/activecampaign.png";
+import logoZapi from "@/assets/apps/zapi.webp";
+import logoSms from "@/assets/apps/smsfunnel.png";
+
+/* ------------------------------------------------------------------ dados */
 
 const NAV = [
-  ["Plataforma", "#plataforma"], ["Conversão", "#conversao"],
-  ["Infraestrutura", "#infraestrutura"], ["Preços", "#precos"],
+  ["Taxas", "#taxas"],
+  ["Plataforma", "#plataforma"],
+  ["Checkout", "#checkout"],
+  ["Integrações", "#integracoes"],
+  ["Produtores", "#produtores"],
+] as const;
+
+const METHODS = [
+  { icon: QrCode, name: "Pix", note: "Aprovação em segundos", term: "Liquidação D+0" },
+  { icon: CreditCard, name: "Cartão de crédito", note: "Até 12x com antecipação", term: "Recebimento D+2" },
+  { icon: Banknote, name: "Boleto bancário", note: "Compensação automática", term: "Recebimento D+1" },
+  { icon: Wallet, name: "Carteiras digitais", note: "Apple Pay e Google Pay", term: "Recebimento D+2" },
+] as const;
+
+const INTEGRATIONS = [
+  { src: logoUtmify, name: "UTMify" },
+  { src: logoVoxuy, name: "Voxuy" },
+  { src: logoSpedy, name: "Spedy" },
+  { src: logoCademi, name: "Cademi" },
+  { src: logoMemberkit, name: "Memberkit" },
+  { src: logoThemembers, name: "The Members" },
+  { src: logoAstron, name: "Astron Members" },
+  { src: logoActive, name: "ActiveCampaign" },
+  { src: logoZapi, name: "Z-API" },
+  { src: logoSms, name: "SMS Funnel" },
+] as const;
+
+const FEATURES = [
+  { icon: Zap, title: "Saque no mesmo dia", copy: "Solicite pelo painel e receba via Pix em minutos, inclusive fim de semana e feriado." },
+  { icon: Users, title: "Afiliados e coprodução", copy: "Comissões divididas automaticamente no momento em que o pagamento é aprovado." },
+  { icon: BarChart3, title: "Métricas em tempo real", copy: "Faturamento, aprovação, reembolso e chargeback atualizados a cada transação." },
+  { icon: Boxes, title: "Área de membros inclusa", copy: "Liberação automática do conteúdo assim que a compra é confirmada." },
+  { icon: ShieldCheck, title: "Antifraude em camadas", copy: "Identidade, dispositivo, IP e velocidade analisados antes da autorização." },
+  { icon: Gift, title: "Premiações por marco", copy: "Placas e reconhecimento a cada nova faixa de faturamento na plataforma." },
+] as const;
+
+const CHECKOUT_ITEMS = [
+  "Order bump e upsell em um clique",
+  "Recuperação automática de Pix não pago",
+  "Cupons, banners e prova social nativos",
+  "Pixels de Meta, Google e TikTok integrados",
+  "Checkout responsivo carregando em menos de 1s",
+] as const;
+
+const TESTIMONIALS = [
+  {
+    photo: producer1, name: "Rafael Andrade", role: "Educação · 3 produtos",
+    quote: "Migrei sete operações em uma semana. O que mais pesou foi o saque cair no mesmo dia — eu reinvisto em tráfego sem esperar D+30.",
+    metric: "R$ 1,2M em 6 meses",
+  },
+  {
+    photo: producer2, name: "Camila Nunes", role: "Mentorias de alto ticket",
+    quote: "O checkout mudou o jogo. Order bump e recuperação de Pix trouxeram receita que eu simplesmente perdia antes.",
+    metric: "+27% de conversão",
+  },
+  {
+    photo: producer3, name: "Bruno Teixeira", role: "SaaS e comunidades",
+    quote: "Integrei minha aplicação pela API em uma tarde. Webhook assinado, documentação limpa e nenhuma surpresa em produção.",
+    metric: "98,7% de aprovação",
+  },
 ] as const;
 
 const FAQ = [
-  ["Preciso pagar mensalidade?", "Não. Você paga somente quando uma transação é aprovada, sem custo fixo ou fidelidade."],
-  ["Quando o dinheiro fica disponível?", "Vendas PIX são aprovadas em segundos e podem ser liquidadas no mesmo dia, conforme a análise da conta."],
-  ["A plataforma inclui área de membros?", "Sim. A liberação do conteúdo acontece automaticamente após a aprovação do pagamento."],
-  ["Posso integrar minha própria aplicação?", "Sim. A API REST, os webhooks assinados e a documentação pública cobrem todo o fluxo de cobrança."],
+  ["Existe mensalidade ou faturamento mínimo?", "Não. Você não paga nada para criar a conta, publicar produtos ou manter a operação ativa. A cobrança acontece apenas sobre vendas aprovadas."],
+  ["Quando o dinheiro fica disponível para saque?", "Vendas no Pix são liquidadas em D+0, boleto em D+1 e cartão em D+2 com antecipação. O saque é solicitado no painel e cai via Pix na conta cadastrada."],
+  ["A área de membros está inclusa?", "Sim. Cada produto pode ter módulos, aulas, materiais e certificados, com liberação automática assim que o pagamento é aprovado."],
+  ["Como funciona o sistema de afiliados?", "Você define a comissão, gera o link e o split é calculado no evento de pagamento. Coprodutores também recebem automaticamente, sem repasse manual."],
+  ["Posso integrar minha própria aplicação?", "Sim. A API REST pública, os webhooks assinados com HMAC-SHA256 e a documentação cobrem todo o ciclo: cobrança, aprovação, reembolso e estorno."],
+  ["Vocês aceitam produtos físicos e assinaturas?", "Sim, além de infoprodutos a plataforma suporta produtos físicos, recorrência e ofertas com múltiplos preços."],
+  ["Qual é o suporte oferecido?", "Atendimento humano por chat e e-mail todos os dias, com fila prioritária para contas em escala e gerente dedicado a partir de determinado volume."],
+  ["Meus dados e os dos meus clientes estão seguros?", "Toda a plataforma roda com criptografia em trânsito, isolamento por conta no banco de dados, trilha de auditoria imutável e monitoramento antifraude contínuo."],
 ] as const;
 
 const JSONLD = [
-  { "@context": "https://schema.org", "@type": "Organization", name: "HOTZFY", url: "https://hotzfy.com.br" },
+  { "@context": "https://schema.org", "@type": "Organization", name: "HOTZFY", url: "https://hotzfy.com.br", description: "Plataforma de pagamentos para produtos digitais com checkout de alta conversão e saque no mesmo dia." },
   { "@context": "https://schema.org", "@type": "FAQPage", mainEntity: FAQ.map(([q, a]) => ({ "@type": "Question", name: q, acceptedAnswer: { "@type": "Answer", text: a } })) },
 ];
 
+/* ------------------------------------------------------------- utilitários */
+
 function Reveal({ children, className, delay = 0 }: { children: ReactNode; className?: string; delay?: number }) {
   const ref = useRef<HTMLDivElement>(null);
-  const visible = useInView(ref, { once: true, margin: "-12% 0px" });
-  const reduce = useReducedMotion();
-  return <div ref={ref} className={className}><motion.div initial={reduce ? false : { opacity: 0, y: 42 }} animate={visible ? { opacity: 1, y: 0 } : undefined} transition={{ duration: 0.8, delay, ease: [0.16, 1, 0.3, 1] }}>{children}</motion.div></div>;
-}
-
-function Wordmark() {
-  return <span className="flex items-center gap-2 font-heading text-base font-bold text-foreground"><span className="brand-mark">H</span>HOTZ<span className="text-primary">FY</span></span>;
-}
-
-function Eyebrow({ children }: { children: ReactNode }) {
-  return <span className="inline-flex items-center gap-2 font-mono text-[10px] uppercase text-primary"><span className="h-px w-7 bg-primary" />{children}</span>;
-}
-
-function SectionTitle({ eyebrow, children, copy }: { eyebrow: string; children: ReactNode; copy?: string }) {
-  return <Reveal><Eyebrow>{eyebrow}</Eyebrow><h2 className="mt-5 max-w-4xl font-heading text-3xl font-semibold leading-[1.05] text-foreground sm:text-5xl lg:text-6xl">{children}</h2>{copy && <p className="mt-6 max-w-2xl text-sm leading-7 text-muted-foreground sm:text-base">{copy}</p>}</Reveal>;
-}
-
-function HeroInstrument() {
+  const visible = useInView(ref, { once: true, margin: "-10% 0px" });
   const reduce = useReducedMotion();
   return (
-    <div className="hero-instrument relative mx-auto w-full max-w-6xl">
-      <div className="instrument-axis pointer-events-none absolute inset-x-0 top-1/2 h-px" />
-      <motion.div animate={reduce ? undefined : { rotate: 360 }} transition={{ duration: 34, repeat: Infinity, ease: "linear" }} className="instrument-ring absolute left-1/2 top-1/2 aspect-square w-[76%] -translate-x-1/2 -translate-y-1/2 sm:w-[56%]" />
-      <motion.div animate={reduce ? undefined : { rotate: -360 }} transition={{ duration: 22, repeat: Infinity, ease: "linear" }} className="instrument-ring instrument-ring-inner absolute left-1/2 top-1/2 aspect-square w-[55%] -translate-x-1/2 -translate-y-1/2 sm:w-[38%]" />
-      <div className="relative z-10 mx-auto w-[88%] max-w-[780px] border border-border bg-background p-3 sm:p-5">
-        <div className="flex items-center justify-between border-b border-border pb-3 font-mono text-[8px] text-muted-foreground sm:text-[10px]"><span>HOTZFY / COMMAND</span><span className="flex items-center gap-2"><span className="engine-status-dot" /> LIVE</span></div>
-        <div className="grid gap-px bg-border sm:grid-cols-[1.35fr_.65fr]">
-          <div className="bg-card p-4 sm:p-7">
-            <p className="font-mono text-[9px] text-muted-foreground">FATURAMENTO LÍQUIDO / HOJE</p>
-            <p className="mt-3 font-heading text-3xl font-semibold text-foreground sm:text-5xl">R$ 84.290<span className="text-primary">,42</span></p>
-            <div className="mt-7 h-28 sm:h-40"><svg viewBox="0 0 600 180" className="h-full w-full" preserveAspectRatio="none"><defs><linearGradient id="heroChart" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stopColor="hsl(var(--primary))" stopOpacity=".24"/><stop offset="1" stopColor="hsl(var(--primary))" stopOpacity="0"/></linearGradient></defs><path d="M0 154 C70 148 88 110 152 119 S250 82 310 96 S396 35 458 56 S534 25 600 12 L600 180 L0 180Z" fill="url(#heroChart)"/><motion.path initial={{ pathLength: 0 }} whileInView={{ pathLength: 1 }} transition={{ duration: 1.8 }} d="M0 154 C70 148 88 110 152 119 S250 82 310 96 S396 35 458 56 S534 25 600 12" fill="none" stroke="hsl(var(--primary))" strokeWidth="2"/></svg></div>
-          </div>
-          <div className="grid gap-px bg-border">
-            {[["APROVAÇÃO PIX", "98,73%", "+2,4%"], ["VENDAS", "547", "+18,6%"], ["TICKET MÉDIO", "R$ 154", "+4,2%"]].map(([l, v, d]) => <div key={l} className="bg-background p-4 sm:p-5"><p className="font-mono text-[8px] text-muted-foreground">{l}</p><div className="mt-2 flex items-end justify-between"><p className="font-heading text-lg font-semibold text-foreground sm:text-xl">{v}</p><span className="text-[9px] text-primary">{d}</span></div></div>)}
-          </div>
-        </div>
-      </div>
-      <motion.div animate={reduce ? undefined : { y: [0, -8, 0] }} transition={{ duration: 5, repeat: Infinity }} className="hero-signal left-0 top-[22%]"><QrCode className="h-4 w-4 text-primary"/><span><b>PIX aprovado</b><small>R$ 1.497,00 · 412 ms</small></span></motion.div>
-      <motion.div animate={reduce ? undefined : { y: [0, 8, 0] }} transition={{ duration: 6, repeat: Infinity }} className="hero-signal bottom-[12%] right-0"><Wallet className="h-4 w-4 text-primary"/><span><b>Saldo liberado</b><small>Liquidação D+0</small></span></motion.div>
+    <div ref={ref} className={className}>
+      <motion.div
+        initial={reduce ? false : { opacity: 0, y: 26 }}
+        animate={visible ? { opacity: 1, y: 0 } : undefined}
+        transition={{ duration: 0.7, delay, ease: [0.16, 1, 0.3, 1] }}
+      >
+        {children}
+      </motion.div>
     </div>
   );
 }
 
+function Wordmark({ className }: { className?: string }) {
+  return (
+    <span className={cn("flex items-center gap-2 text-[15px] font-extrabold tracking-tight text-foreground", className)}>
+      <span className="lp-brand">H</span>
+      hotzfy
+    </span>
+  );
+}
+
+function SectionHead({ kicker, title, copy, center }: { kicker: string; title: ReactNode; copy?: string; center?: boolean }) {
+  return (
+    <Reveal className={cn(center && "text-center")}>
+      <span className="lp-kicker">{kicker}</span>
+      <h2 className={cn("mt-4 text-[30px] font-extrabold leading-[1.08] text-foreground sm:text-[42px]", center && "mx-auto max-w-3xl")}>
+        {title}
+      </h2>
+      {copy && (
+        <p className={cn("mt-4 max-w-2xl text-[15px] leading-7 text-muted-foreground", center && "mx-auto")}>{copy}</p>
+      )}
+    </Reveal>
+  );
+}
+
+/* -------------------------------------------------------------- componente */
+
 export default function LandingPage() {
   const navigate = useNavigate();
   const [menu, setMenu] = useState(false);
-  const [openFaq, setOpenFaq] = useState(0);
-  const heroRef = useRef<HTMLElement>(null);
-  const reduce = useReducedMotion();
-  const { scrollYProgress } = useScroll({ target: heroRef, offset: ["start start", "end start"] });
-  const heroY = useTransform(scrollYProgress, [0, 1], [0, reduce ? 0 : 180]);
-  const heroScale = useTransform(scrollYProgress, [0, 1], [1, reduce ? 1 : 0.9]);
+  const [faq, setFaq] = useState<number>(0);
 
   useEffect(() => {
     document.documentElement.classList.add("landing-scroll");
     document.body.classList.add("landing-scroll");
-    return () => { document.documentElement.classList.remove("landing-scroll"); document.body.classList.remove("landing-scroll"); };
+    return () => {
+      document.documentElement.classList.remove("landing-scroll");
+      document.body.classList.remove("landing-scroll");
+    };
   }, []);
 
   const signup = () => navigate("/auth?mode=signup");
-  return (
-    <div className="tech-scope landing-v4 min-h-screen overflow-x-clip bg-background text-foreground">
-      <Seo title="HOTZFY — Tecnologia para vender e escalar" description="Checkout de alta conversão, pagamentos, antifraude, afiliados e saques em uma infraestrutura completa para produtos digitais." path="/" jsonLd={JSONLD} />
 
-      <header className="fixed inset-x-0 top-0 z-50 border-b border-border/70 bg-background/90 backdrop-blur-md">
-        <div className="mx-auto flex h-16 max-w-7xl items-center px-5 lg:px-8"><button aria-label="HOTZFY" onClick={() => navigate("/")}><Wordmark /></button><nav className="mx-auto hidden items-center gap-8 lg:flex">{NAV.map(([label, href]) => <a key={href} href={href} className="text-xs text-muted-foreground transition-colors hover:text-foreground">{label}</a>)}</nav><div className="ml-auto hidden gap-2 lg:flex"><Button variant="ghost" onClick={() => navigate("/auth")}>Entrar</Button><Button onClick={signup}>Criar conta <ArrowRight /></Button></div><Button variant="outline" size="icon" className="ml-auto lg:hidden" aria-label="Abrir menu" onClick={() => setMenu(!menu)}>{menu ? <X /> : <Menu />}</Button></div>
-        {menu && <div className="border-t border-border bg-background p-5 lg:hidden"><div className="grid gap-1">{NAV.map(([label, href]) => <a key={href} href={href} onClick={() => setMenu(false)} className="py-3 text-sm text-muted-foreground">{label}</a>)}</div><Button onClick={signup} className="mt-4 w-full">Criar conta</Button></div>}
+  return (
+    <div className="tech-scope lp min-h-screen overflow-x-clip bg-background text-foreground">
+      <Seo
+        title="HOTZFY — Plataforma de pagamentos para produtos digitais"
+        description="Checkout de alta conversão, Pix aprovado em segundos e saque no mesmo dia. Afiliados, área de membros, API e antifraude em uma única plataforma."
+        path="/"
+        jsonLd={JSONLD}
+      />
+
+      {/* barra de anúncio */}
+      <div className="lp-announce">
+        <div className="mx-auto flex max-w-7xl items-center justify-center gap-2 px-5 py-2 text-[11.5px]">
+          <Sparkles className="h-3.5 w-3.5 shrink-0" />
+          <span className="truncate">Saque via Pix liberado todos os dias — inclusive sábado, domingo e feriado.</span>
+        </div>
+      </div>
+
+      {/* topo */}
+      <header className="lp-header">
+        <div className="mx-auto flex h-[68px] max-w-7xl items-center gap-8 px-5 lg:px-8">
+          <button aria-label="Início" onClick={() => navigate("/")}><Wordmark /></button>
+          <nav className="hidden items-center gap-7 lg:flex">
+            {NAV.map(([label, href]) => (
+              <a key={href} href={href} className="text-[13.5px] text-muted-foreground transition-colors hover:text-foreground">{label}</a>
+            ))}
+            <a href="/documentacao" className="text-[13.5px] text-muted-foreground transition-colors hover:text-foreground">Documentação</a>
+          </nav>
+          <div className="ml-auto hidden items-center gap-2 lg:flex">
+            <Button variant="ghost" className="h-10 rounded-full px-4 text-[13.5px]" onClick={() => navigate("/auth")}>Entrar</Button>
+            <Button className="lp-cta h-10 rounded-full px-5 text-[13.5px]" onClick={signup}>Criar minha conta</Button>
+          </div>
+          <Button variant="outline" size="icon" className="ml-auto rounded-full lg:hidden" aria-label="Abrir menu" onClick={() => setMenu(!menu)}>
+            {menu ? <X /> : <Menu />}
+          </Button>
+        </div>
+        {menu && (
+          <div className="border-t border-border bg-background px-5 pb-5 lg:hidden">
+            <div className="grid">
+              {[...NAV, ["Documentação", "/documentacao"] as const].map(([label, href]) => (
+                <a key={href} href={href} onClick={() => setMenu(false)} className="border-b border-border/60 py-3.5 text-[14px] text-muted-foreground">{label}</a>
+              ))}
+            </div>
+            <div className="mt-4 grid gap-2">
+              <Button variant="outline" className="h-11 rounded-full" onClick={() => navigate("/auth")}>Entrar</Button>
+              <Button className="lp-cta h-11 rounded-full" onClick={signup}>Criar minha conta</Button>
+            </div>
+          </div>
+        )}
       </header>
 
       <main>
-        <section ref={heroRef} className="hero-field relative min-h-[1180px] overflow-hidden pt-32 sm:min-h-[1320px] sm:pt-40">
-          <div className="landing-grid absolute inset-0" /><div className="hero-beacon absolute left-1/2 top-0 h-[680px] w-px" />
-          <motion.div style={{ y: heroY, scale: heroScale }} className="relative mx-auto max-w-7xl px-5 text-center lg:px-8">
-            <Reveal><div className="mx-auto inline-flex items-center gap-2 border border-primary/25 bg-primary/[0.04] px-3 py-2 font-mono text-[9px] uppercase text-primary"><span className="engine-status-dot" /> Infraestrutura ativa · Brasil</div></Reveal>
-            <Reveal delay={0.06}><h1 className="mx-auto mt-8 max-w-5xl font-heading text-[44px] font-semibold leading-[.98] text-foreground sm:text-7xl lg:text-[92px]">Mais que pagamentos.<br/><span className="hero-stroke">Potência para escalar.</span></h1></Reveal>
-            <Reveal delay={0.12}><p className="mx-auto mt-7 max-w-2xl text-sm leading-7 text-muted-foreground sm:text-lg">Do primeiro clique à liquidação: uma operação financeira de alta performance construída para quem vende produtos digitais.</p></Reveal>
-            <Reveal delay={0.18}><div className="mt-9 flex flex-col justify-center gap-3 sm:flex-row"><Button size="lg" onClick={signup} className="h-12 px-7">Começar agora <ArrowRight /></Button><Button size="lg" variant="outline" asChild className="h-12 px-7"><a href="#plataforma"><Play className="h-3.5 w-3.5" /> Ver a plataforma</a></Button></div></Reveal>
-            <Reveal delay={0.25} className="mt-20 sm:mt-28"><HeroInstrument /></Reveal>
-          </motion.div>
+        {/* ---------------------------------------------------------- hero */}
+        <section className="lp-hero relative overflow-hidden pt-16 sm:pt-24">
+          <div className="lp-hero-glow" aria-hidden />
+          <div className="lp-hero-grid" aria-hidden />
+
+          <div className="relative mx-auto max-w-7xl px-5 text-center lg:px-8">
+            <Reveal>
+              <span className="lp-pill">
+                <span className="lp-dot" /> Pix aprovado em 412 ms · aprovação média de 98,7%
+              </span>
+            </Reveal>
+
+            <Reveal delay={0.05}>
+              <h1 className="mx-auto mt-7 max-w-[15ch] text-[40px] font-extrabold leading-[1.02] text-foreground sm:text-[66px] lg:text-[80px]">
+                Venda hoje.<br />
+                <span className="lp-highlight">Receba hoje.</span>
+              </h1>
+            </Reveal>
+
+            <Reveal delay={0.1}>
+              <p className="mx-auto mt-6 max-w-[52ch] text-[15px] leading-7 text-muted-foreground sm:text-[17px]">
+                A plataforma de pagamentos que aprova seu Pix em segundos, libera o saque no mesmo dia
+                e entrega checkout, afiliados, área de membros e API sem custo fixo.
+              </p>
+            </Reveal>
+
+            <Reveal delay={0.16}>
+              <div className="mt-9 flex flex-col items-center justify-center gap-3 sm:flex-row">
+                <Button size="lg" className="lp-cta h-12 rounded-full px-7 text-[14.5px]" onClick={signup}>
+                  Criar minha conta <ArrowRight className="h-4 w-4" />
+                </Button>
+                <Button size="lg" variant="outline" asChild className="h-12 rounded-full px-7 text-[14.5px]">
+                  <a href="#taxas"><PlayCircle className="h-4 w-4" /> Ver taxas e prazos</a>
+                </Button>
+              </div>
+            </Reveal>
+
+            <Reveal delay={0.22}>
+              <div className="mt-7 flex flex-wrap items-center justify-center gap-x-6 gap-y-3 text-[12.5px] text-muted-foreground">
+                <span className="flex items-center gap-2"><BadgeCheck className="h-4 w-4 text-primary" /> Sem mensalidade</span>
+                <span className="flex items-center gap-2"><LockKeyhole className="h-4 w-4 text-primary" /> Antifraude incluso</span>
+                <span className="flex items-center gap-2"><Headphones className="h-4 w-4 text-primary" /> Suporte humano todos os dias</span>
+              </div>
+            </Reveal>
+          </div>
+
+          {/* composição de produto */}
+          <div className="relative mx-auto mt-16 max-w-[1240px] px-5 pb-20 lg:px-8 lg:pb-28">
+            <Reveal delay={0.1}>
+              <div className="grid items-start gap-5 lg:grid-cols-[300px_1fr]">
+                <div className="hidden lg:block"><SalesFeed /></div>
+                <ProductMock floats={false} />
+              </div>
+            </Reveal>
+          </div>
         </section>
 
-        <section className="border-y border-border bg-card"><div className="mx-auto grid max-w-7xl grid-cols-2 divide-x divide-y divide-border lg:grid-cols-4 lg:divide-y-0">{[["R$ 200M+", "processados"], ["98,7%", "aprovação PIX"], ["420 ms", "tempo de resposta"], ["D+0", "liquidação"]].map(([v,l],i)=><Reveal key={l} delay={i*.05}><div className="px-5 py-9 text-center"><p className="font-heading text-2xl font-semibold text-foreground sm:text-3xl">{v}</p><p className="mt-2 font-mono text-[9px] uppercase text-muted-foreground">{l}</p></div></Reveal>)}</div></section>
+        {/* --------------------------------------------------------- números */}
+        <section className="border-y border-border bg-card/40">
+          <div className="mx-auto grid max-w-7xl grid-cols-2 gap-px bg-border lg:grid-cols-4">
+            {[
+              ["+12.000", "produtores ativos"],
+              ["R$ 200M+", "processados na plataforma"],
+              ["98,7%", "aprovação média no Pix"],
+              ["D+0", "saque no mesmo dia"],
+            ].map(([value, label], i) => (
+              <Reveal key={label} delay={i * 0.05} className="bg-background">
+                <div className="px-5 py-9 text-center">
+                  <p className="lp-mono text-[26px] font-extrabold text-foreground sm:text-[32px]">{value}</p>
+                  <p className="mt-2 text-[12px] text-muted-foreground">{label}</p>
+                </div>
+              </Reveal>
+            ))}
+          </div>
+        </section>
 
-        <section id="plataforma" className="py-28 sm:py-40"><div className="mx-auto max-w-7xl px-5 lg:px-8"><SectionTitle eyebrow="A operação por trás da venda" copy="Cada etapa conversa com a próxima. Sem remendos, sem latência escondida, sem depender de cinco ferramentas diferentes.">Uma venda entra.<br/><span className="text-primary">Toda a estrutura reage.</span></SectionTitle><Reveal className="mt-16 sm:mt-24"><PaymentEngine /></Reveal></div></section>
+        {/* ---------------------------------------------- meios de pagamento */}
+        <section id="taxas" className="py-24 sm:py-32">
+          <div className="mx-auto max-w-7xl px-5 lg:px-8">
+            <SectionHead
+              center
+              kicker="Taxas e prazos"
+              title={<>Tudo transparente,<br /><span className="lp-highlight">nada no rodapé.</span></>}
+              copy="Você conhece o custo antes de vender e o prazo antes de sacar. Sem taxa de adesão, sem mensalidade, sem fidelidade."
+            />
 
-        <section id="conversao" className="border-y border-border bg-card py-28 sm:py-40"><div className="mx-auto grid max-w-7xl items-center gap-16 px-5 lg:grid-cols-[.9fr_1.1fr] lg:px-8"><div><SectionTitle eyebrow="Checkout que entende intenção" copy="Uma experiência rápida, clara e segura. Order bump, recuperação e pixels trabalham em segundo plano enquanto o comprador vê somente o que importa.">Menos fricção.<br/><span className="text-primary">Mais decisão.</span></SectionTitle><div className="mt-10 grid gap-px border border-border bg-border sm:grid-cols-3">{[["+24,8%", "conversão"], ["-31%", "abandono"], ["12x", "no cartão"]].map(([v,l])=><div key={l} className="bg-background p-4"><p className="font-heading text-xl font-semibold text-foreground">{v}</p><p className="mt-1 text-[10px] text-muted-foreground">{l}</p></div>)}</div></div><ConversionScene /></div></section>
+            <div className="mt-14 grid gap-5 lg:grid-cols-[1.15fr_.85fr]">
+              <Reveal>
+                <div className="lp-card h-full p-7 sm:p-9">
+                  <div className="flex flex-wrap items-end justify-between gap-6">
+                    <div>
+                      <p className="text-[12.5px] text-muted-foreground">Taxa por venda aprovada</p>
+                      <p className="mt-3 flex items-end gap-2">
+                        <span className="lp-mono text-[54px] font-extrabold leading-none text-foreground sm:text-[68px]">4,99</span>
+                        <span className="mb-2 text-[22px] font-bold text-primary">%</span>
+                        <span className="mb-2.5 text-[14px] text-muted-foreground">+ R$ 1,00</span>
+                      </p>
+                      <p className="mt-3 text-[13px] text-muted-foreground">
+                        Válida para Pix, cartão e boleto. Volumes acima de R$ 300 mil/mês têm condição negociada.
+                      </p>
+                    </div>
+                    <span className="lp-badge"><Percent className="h-3.5 w-3.5" /> Sem custo fixo</span>
+                  </div>
 
-        <section id="infraestrutura" className="relative py-28 sm:py-40"><div className="landing-grid absolute inset-0"/><div className="relative mx-auto max-w-7xl px-5 lg:px-8"><div className="grid gap-14 lg:grid-cols-[.75fr_1.25fr]"><div className="lg:sticky lg:top-28 lg:self-start"><SectionTitle eyebrow="Infraestrutura invisível" copy="A complexidade fica com a gente. Você enxerga uma operação previsível, observável e pronta para volume.">Feita para não<br/><span className="text-primary">virar gargalo.</span></SectionTitle><Button variant="outline" className="mt-8" onClick={() => navigate("/documentacao")}><Code2 /> Explorar documentação</Button></div><div className="grid gap-px border border-border bg-border">{[
-            [Network,"Roteamento inteligente","Disponibilidade monitorada e decisão de rota em tempo real para manter cada cobrança no melhor caminho.","ROUTING / 01"],
-            [Fingerprint,"Antifraude em camadas","Sinais de identidade, dispositivo, IP e velocidade analisados antes da autorização.","RISK / 02"],
-            [GitBranch,"Split automático","Comissões e coproduções calculadas no evento de pagamento, sem planilhas ou repasses manuais.","LEDGER / 03"],
-            [Gauge,"Observabilidade contínua","Latência, aprovação, falhas e reentregas visíveis em uma trilha auditável.","OPS / 04"],
-          ].map(([Icon,title,copy,tag],i)=><Reveal key={String(title)} delay={i*.06}><article className="group bg-background p-7 sm:p-9"><div className="flex items-start gap-5"><span className="flex h-11 w-11 shrink-0 items-center justify-center border border-border text-primary transition-colors group-hover:border-primary"><Icon className="h-4 w-4"/></span><div><p className="font-mono text-[9px] text-primary">{tag as string}</p><h3 className="mt-3 font-heading text-xl font-semibold text-foreground">{title as string}</h3><p className="mt-3 max-w-xl text-sm leading-6 text-muted-foreground">{copy as string}</p></div></div></article></Reveal>)}</div></div></div></section>
+                  <div className="mt-8 grid gap-px bg-border sm:grid-cols-2">
+                    {METHODS.map(({ icon: Icon, name, note, term }) => (
+                      <div key={name} className="bg-card/60 p-5">
+                        <span className="lp-icon"><Icon className="h-4 w-4" /></span>
+                        <p className="mt-3.5 text-[14px] font-bold text-foreground">{name}</p>
+                        <p className="mt-1 text-[12.5px] text-muted-foreground">{note}</p>
+                        <p className="lp-mono mt-3 text-[11.5px] font-semibold text-primary">{term}</p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </Reveal>
 
-        <section className="border-y border-border bg-primary py-20 text-primary-foreground"><div className="mx-auto max-w-7xl overflow-hidden px-5 lg:px-8"><motion.div initial={reduce ? false : { x: "12%" }} whileInView={{ x: 0 }} transition={{ duration: 1.2 }} className="font-heading text-[14vw] font-bold leading-none sm:text-[8vw]">VENDA. APROVA. ESCALA.</motion.div><div className="mt-8 flex flex-wrap items-center justify-between gap-5 border-t border-primary-foreground/25 pt-5 font-mono text-[9px]"><span>HOTZFY PAYMENT INFRASTRUCTURE</span><span>LATÊNCIA BAIXA · DISPONIBILIDADE ALTA · DADOS AO VIVO</span></div></div></section>
+              <Reveal delay={0.08}>
+                <div className="lp-card lp-card-accent flex h-full flex-col p-7 sm:p-9">
+                  <span className="lp-kicker">Saque</span>
+                  <h3 className="mt-4 text-[26px] font-extrabold leading-tight text-foreground">
+                    Pix na sua conta<br />em poucos minutos.
+                  </h3>
+                  <p className="mt-4 text-[14px] leading-6 text-muted-foreground">
+                    Solicite pelo painel a qualquer hora. Sem janela bancária, sem esperar segunda-feira.
+                  </p>
+                  <div className="mt-7 grid gap-3">
+                    {[
+                      ["Saques por dia", "ilimitados"],
+                      ["Horário", "24 horas, 7 dias"],
+                      ["Tempo médio", "3 minutos"],
+                      ["Reserva de segurança", "sem retenção surpresa"],
+                    ].map(([k, v]) => (
+                      <div key={k} className="flex items-center justify-between border-b border-border/70 pb-3 last:border-0">
+                        <span className="text-[13px] text-muted-foreground">{k}</span>
+                        <span className="lp-mono text-[13px] font-bold text-foreground">{v}</span>
+                      </div>
+                    ))}
+                  </div>
+                  <Button className="lp-cta mt-auto h-11 w-full rounded-full pt-0 text-[14px]" onClick={signup}>
+                    Começar agora <ArrowRight className="h-4 w-4" />
+                  </Button>
+                </div>
+              </Reveal>
+            </div>
+          </div>
+        </section>
 
-        <section id="precos" className="py-28 sm:py-40"><div className="mx-auto max-w-7xl px-5 lg:px-8"><SectionTitle eyebrow="Crescimento alinhado" copy="Sem custo fixo para começar. A estrutura acompanha seu volume e as condições evoluem junto com a operação.">Você paga quando vende.<br/><span className="text-primary">Só isso.</span></SectionTitle><div className="mt-16 grid gap-px border border-border bg-border lg:grid-cols-3">{[
-          ["Start","4,99%",["PIX, cartão e boleto","Área de membros","Suporte por chat"]],
-          ["Scale","3,99%",["Tudo do Start","Afiliados e coprodução","API e webhooks assinados"]],
-          ["Enterprise","Sob medida",["Condições por volume","SLA dedicado","Operação personalizada"]],
-        ].map(([name,price,items],i)=><Reveal key={String(name)} delay={i*.07} className="h-full"><div className={cn("flex h-full flex-col bg-background p-7 sm:p-9",i===1&&"price-featured")}><div className="flex items-center justify-between"><p className="font-mono text-[10px] text-muted-foreground">PLANO / 0{i+1}</p>{i===1&&<span className="text-[9px] text-primary">MAIS ESCOLHIDO</span>}</div><h3 className="mt-5 font-heading text-xl font-semibold text-foreground">{name as string}</h3><p className="mt-6 font-heading text-4xl font-semibold text-foreground">{price as string}</p><p className="mt-2 text-xs text-muted-foreground">+ R$ 1,00 por venda aprovada</p><ul className="mt-8 flex-1 space-y-3">{(items as string[]).map(it=><li key={it} className="flex items-center gap-2 text-xs text-muted-foreground"><Check className="h-3.5 w-3.5 text-primary"/>{it}</li>)}</ul><Button variant={i===1?"default":"outline"} className="mt-9 w-full" onClick={signup}>Começar agora <ArrowRight/></Button></div></Reveal>)}</div></div></section>
+        {/* ------------------------------------------------------- checkout */}
+        <section id="checkout" className="border-y border-border bg-card/40 py-24 sm:py-32">
+          <div className="mx-auto grid max-w-7xl items-center gap-14 px-5 lg:grid-cols-[1fr_.95fr] lg:px-8">
+            <div>
+              <SectionHead
+                kicker="Checkout"
+                title={<>Cada detalhe existe<br /><span className="lp-highlight">para converter.</span></>}
+                copy="Um passo, campos mínimos e Pix gerado na hora. O resto — recuperação, order bump, pixels — roda em segundo plano."
+              />
+              <ul className="mt-9 grid gap-3">
+                {CHECKOUT_ITEMS.map((item, i) => (
+                  <Reveal key={item} delay={i * 0.05}>
+                    <li className="flex items-start gap-3 text-[14px] text-muted-foreground">
+                      <span className="lp-check"><BadgeCheck className="h-3.5 w-3.5" /></span>
+                      {item}
+                    </li>
+                  </Reveal>
+                ))}
+              </ul>
+              <div className="mt-9 grid grid-cols-3 gap-px bg-border">
+                {[["+27%", "conversão"], ["-31%", "abandono"], ["<1s", "carregamento"]].map(([v, l]) => (
+                  <div key={l} className="bg-background px-4 py-5">
+                    <p className="lp-mono text-[22px] font-extrabold text-foreground">{v}</p>
+                    <p className="mt-1 text-[11.5px] text-muted-foreground">{l}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+            <Reveal delay={0.1}><ConversionScene /></Reveal>
+          </div>
+        </section>
 
-        <section className="border-y border-border bg-card py-28"><div className="mx-auto grid max-w-7xl gap-16 px-5 lg:grid-cols-2 lg:px-8"><SectionTitle eyebrow="Respostas diretas">Antes de começar,<br/><span className="text-primary">tire suas dúvidas.</span></SectionTitle><div className="border-t border-border">{FAQ.map(([q,a],i)=><div key={q} className="border-b border-border"><button className="flex w-full items-center justify-between gap-5 py-5 text-left font-heading text-sm font-semibold text-foreground" onClick={()=>setOpenFaq(openFaq===i?-1:i)} aria-expanded={openFaq===i}>{q}<ChevronDown className={cn("h-4 w-4 shrink-0 transition-transform",openFaq===i&&"rotate-180")}/></button>{openFaq===i&&<motion.p initial={{opacity:0,y:-5}} animate={{opacity:1,y:0}} className="pb-5 text-sm leading-6 text-muted-foreground">{a}</motion.p>}</div>)}</div></div></section>
+        {/* ----------------------------------------------------- plataforma */}
+        <section id="plataforma" className="py-24 sm:py-32">
+          <div className="mx-auto max-w-7xl px-5 lg:px-8">
+            <SectionHead
+              center
+              kicker="Plataforma"
+              title={<>Uma operação inteira,<br /><span className="lp-highlight">sem juntar ferramentas.</span></>}
+              copy="Pagamento, entrega, comissão, métrica e suporte no mesmo lugar — conversando entre si desde a primeira venda."
+            />
+            <div className="mt-14 grid gap-px bg-border sm:grid-cols-2 lg:grid-cols-3">
+              {FEATURES.map(({ icon: Icon, title, copy }, i) => (
+                <Reveal key={title} delay={i * 0.05} className="bg-background">
+                  <article className="group h-full p-7 transition-colors hover:bg-card/60">
+                    <span className="lp-icon"><Icon className="h-4 w-4" /></span>
+                    <h3 className="mt-5 text-[16.5px] font-bold text-foreground">{title}</h3>
+                    <p className="mt-2.5 text-[13.5px] leading-6 text-muted-foreground">{copy}</p>
+                  </article>
+                </Reveal>
+              ))}
+            </div>
+          </div>
+        </section>
 
-        <section className="relative overflow-hidden py-32 sm:py-44"><div className="landing-grid absolute inset-0"/><motion.div animate={reduce?undefined:{rotate:360}} transition={{duration:48,repeat:Infinity,ease:"linear"}} className="cta-orbit absolute left-1/2 top-1/2 aspect-square w-[680px] -translate-x-1/2 -translate-y-1/2"/><div className="relative mx-auto max-w-4xl px-5 text-center"><Reveal><Sparkles className="mx-auto h-5 w-5 text-primary"/><h2 className="mt-7 font-heading text-4xl font-semibold leading-[1.02] text-foreground sm:text-6xl lg:text-7xl">Sua próxima venda<br/>começa <span className="text-primary">agora.</span></h2><p className="mx-auto mt-6 max-w-xl text-sm leading-7 text-muted-foreground">Entre em uma infraestrutura criada para transformar ambição em uma operação previsível.</p><Button size="lg" onClick={signup} className="mt-9 h-12 px-8">Criar minha conta <ArrowRight/></Button></Reveal></div></section>
+        {/* ---------------------------------------------------- integrações */}
+        <section id="integracoes" className="border-y border-border bg-card/40 py-20 sm:py-28">
+          <div className="mx-auto max-w-7xl px-5 lg:px-8">
+            <SectionHead
+              center
+              kicker="Integrações"
+              title={<>Conecte o que você <span className="lp-highlight">já usa.</span></>}
+              copy="Área de membros, automação de WhatsApp, e-mail, rastreio de UTM e notas fiscais em poucos cliques."
+            />
+          </div>
+          <div className="lp-marquee mt-12">
+            <div className="lp-marquee-track">
+              {[...INTEGRATIONS, ...INTEGRATIONS].map((it, i) => (
+                <div key={`${it.name}-${i}`} className="lp-logo">
+                  <img src={it.src} alt={`Integração ${it.name}`} loading="lazy" width={120} height={40} />
+                </div>
+              ))}
+            </div>
+          </div>
+          <div className="mx-auto mt-12 max-w-7xl px-5 text-center lg:px-8">
+            <Button variant="outline" className="h-11 rounded-full px-6" onClick={() => navigate("/documentacao")}>
+              <Code2 className="h-4 w-4" /> Ver API e webhooks
+            </Button>
+          </div>
+        </section>
+
+        {/* ----------------------------------------------------- produtores */}
+        <section id="produtores" className="py-24 sm:py-32">
+          <div className="mx-auto max-w-7xl px-5 lg:px-8">
+            <SectionHead
+              kicker="Quem vende com a gente"
+              title={<>Operações reais,<br /><span className="lp-highlight">números reais.</span></>}
+              copy="Produtores de educação, mentoria, comunidade e software rodando o faturamento diário dentro da HOTZFY."
+            />
+            <div className="mt-14 grid gap-5 lg:grid-cols-3">
+              {TESTIMONIALS.map((t, i) => (
+                <Reveal key={t.name} delay={i * 0.07} className="h-full">
+                  <figure className="lp-card flex h-full flex-col overflow-hidden">
+                    <img
+                      src={t.photo}
+                      alt={`Retrato de ${t.name}, produtor na HOTZFY`}
+                      loading="lazy"
+                      width={768}
+                      height={960}
+                      className="h-64 w-full object-cover object-top"
+                    />
+                    <div className="flex flex-1 flex-col p-6">
+                      <div className="flex gap-0.5 text-primary">
+                        {Array.from({ length: 5 }).map((_, s) => <Star key={s} className="h-3.5 w-3.5 fill-current" />)}
+                      </div>
+                      <blockquote className="mt-4 flex-1 text-[14px] leading-6 text-foreground/90">“{t.quote}”</blockquote>
+                      <figcaption className="mt-6 flex items-center justify-between border-t border-border pt-4">
+                        <span>
+                          <span className="block text-[13.5px] font-bold text-foreground">{t.name}</span>
+                          <span className="block text-[12px] text-muted-foreground">{t.role}</span>
+                        </span>
+                        <span className="lp-mono text-[12px] font-bold text-primary">{t.metric}</span>
+                      </figcaption>
+                    </div>
+                  </figure>
+                </Reveal>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* ------------------------------------------------------ segurança */}
+        <section className="border-y border-border bg-card/40 py-20 sm:py-24">
+          <div className="mx-auto grid max-w-7xl items-center gap-10 px-5 lg:grid-cols-[.9fr_1.1fr] lg:px-8">
+            <SectionHead
+              kicker="Segurança"
+              title={<>Seu dinheiro tratado<br /><span className="lp-highlight">como infraestrutura.</span></>}
+              copy="Cada transação carrega uma trilha auditável do primeiro clique à liquidação — visível para você, imutável para todo mundo."
+            />
+            <div className="grid gap-px bg-border sm:grid-cols-2">
+              {[
+                [LockKeyhole, "Criptografia ponta a ponta", "Dados sensíveis nunca trafegam ou são armazenados em texto puro."],
+                [ShieldCheck, "Isolamento por conta", "Políticas de acesso no banco garantem que um vendedor jamais veja o dado de outro."],
+                [LineChart, "Trilha de auditoria", "Cada mudança de status registrada com origem, IP e horário."],
+                [ArrowUpRight, "Monitoramento 24/7", "Alertas automáticos de chargeback, disputa e comportamento atípico."],
+              ].map(([Icon, title, copy], i) => {
+                const I = Icon as typeof LockKeyhole;
+                return (
+                  <Reveal key={title as string} delay={i * 0.05} className="bg-background">
+                    <div className="h-full p-6">
+                      <span className="lp-icon"><I className="h-4 w-4" /></span>
+                      <p className="mt-4 text-[14.5px] font-bold text-foreground">{title as string}</p>
+                      <p className="mt-2 text-[13px] leading-6 text-muted-foreground">{copy as string}</p>
+                    </div>
+                  </Reveal>
+                );
+              })}
+            </div>
+          </div>
+        </section>
+
+        {/* ------------------------------------------------------------ faq */}
+        <section className="py-24 sm:py-32">
+          <div className="mx-auto grid max-w-7xl gap-12 px-5 lg:grid-cols-[.8fr_1.2fr] lg:px-8">
+            <div className="lg:sticky lg:top-28 lg:self-start">
+              <SectionHead
+                kicker="Perguntas frequentes"
+                title={<>Antes de criar<br /><span className="lp-highlight">sua conta.</span></>}
+                copy="Se ficar qualquer dúvida, o suporte responde no chat em minutos."
+              />
+            </div>
+            <div className="border-t border-border">
+              {FAQ.map(([q, a], i) => (
+                <div key={q} className="border-b border-border">
+                  <button
+                    className="flex w-full items-center justify-between gap-5 py-5 text-left text-[14.5px] font-bold text-foreground"
+                    onClick={() => setFaq(faq === i ? -1 : i)}
+                    aria-expanded={faq === i}
+                  >
+                    {q}
+                    <ChevronDown className={cn("h-4 w-4 shrink-0 text-muted-foreground transition-transform", faq === i && "rotate-180 text-primary")} />
+                  </button>
+                  {faq === i && (
+                    <motion.p initial={{ opacity: 0, y: -6 }} animate={{ opacity: 1, y: 0 }} className="pb-5 pr-8 text-[13.5px] leading-6 text-muted-foreground">
+                      {a}
+                    </motion.p>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* ------------------------------------------------------ cta final */}
+        <section className="relative overflow-hidden py-24 sm:py-32">
+          <div className="lp-cta-glow" aria-hidden />
+          <div className="relative mx-auto max-w-3xl px-5 text-center">
+            <Reveal>
+              <span className="lp-pill"><span className="lp-dot" /> Conta criada em menos de 3 minutos</span>
+              <h2 className="mt-7 text-[34px] font-extrabold leading-[1.05] text-foreground sm:text-[54px]">
+                Comece a vender<br /><span className="lp-highlight">ainda hoje.</span>
+              </h2>
+              <p className="mx-auto mt-5 max-w-xl text-[15px] leading-7 text-muted-foreground">
+                Sem mensalidade, sem burocracia e com o dinheiro caindo no mesmo dia da venda.
+              </p>
+              <div className="mt-9 flex flex-col items-center justify-center gap-3 sm:flex-row">
+                <Button size="lg" className="lp-cta h-12 rounded-full px-8 text-[14.5px]" onClick={signup}>
+                  Criar minha conta <ArrowRight className="h-4 w-4" />
+                </Button>
+                <Button size="lg" variant="outline" className="h-12 rounded-full px-8 text-[14.5px]" onClick={() => navigate("/auth")}>
+                  Já tenho conta
+                </Button>
+              </div>
+            </Reveal>
+          </div>
+        </section>
       </main>
 
-      <footer className="border-t border-border"><div className="mx-auto flex max-w-7xl flex-col gap-8 px-5 py-10 sm:flex-row sm:items-center lg:px-8"><Wordmark/><div className="flex flex-wrap gap-5 text-xs text-muted-foreground sm:ml-auto"><a href="/documentacao">Documentação</a><a href="/termos-de-uso">Termos</a><a href="/politica-de-privacidade">Privacidade</a><a href="/status">Status</a></div><p className="font-mono text-[9px] text-muted-foreground">© {new Date().getFullYear()} HOTZFY</p></div></footer>
+      {/* --------------------------------------------------------- rodapé */}
+      <footer className="border-t border-border bg-card/40">
+        <div className="mx-auto max-w-7xl px-5 py-14 lg:px-8">
+          <div className="grid gap-10 sm:grid-cols-2 lg:grid-cols-4">
+            <div>
+              <Wordmark />
+              <p className="mt-4 max-w-xs text-[13px] leading-6 text-muted-foreground">
+                Infraestrutura de pagamentos para quem vive de produto digital no Brasil.
+              </p>
+              <div className="mt-5 flex flex-wrap gap-2">
+                {["Pix", "Cartão", "Boleto", "SSL 256-bit"].map((s) => (
+                  <span key={s} className="lp-seal">{s}</span>
+                ))}
+              </div>
+            </div>
+            {[
+              ["Plataforma", [["Taxas", "#taxas"], ["Checkout", "#checkout"], ["Integrações", "#integracoes"], ["Documentação", "/documentacao"]]],
+              ["Conta", [["Entrar", "/auth"], ["Criar conta", "/auth?mode=signup"], ["Status", "/status"]]],
+              ["Legal", [["Termos de uso", "/termos-de-uso"], ["Política de privacidade", "/politica-de-privacidade"], ["Política de cookies", "/politica-de-cookies"]]],
+            ].map(([title, links]) => (
+              <div key={title as string}>
+                <p className="text-[12.5px] font-bold uppercase tracking-wide text-foreground">{title as string}</p>
+                <ul className="mt-4 grid gap-2.5">
+                  {(links as [string, string][]).map(([label, href]) => (
+                    <li key={href}><a href={href} className="text-[13px] text-muted-foreground transition-colors hover:text-foreground">{label}</a></li>
+                  ))}
+                </ul>
+              </div>
+            ))}
+          </div>
+          <div className="mt-12 flex flex-col gap-3 border-t border-border pt-6 text-[11.5px] text-muted-foreground sm:flex-row sm:items-center sm:justify-between">
+            <p>© {new Date().getFullYear()} HOTZFY Tecnologia e Pagamentos. Todos os direitos reservados.</p>
+            <p>Feito no Brasil · Suporte todos os dias</p>
+          </div>
+        </div>
+      </footer>
     </div>
   );
 }
