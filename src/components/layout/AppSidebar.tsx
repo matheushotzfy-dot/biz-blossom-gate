@@ -1,28 +1,10 @@
 import {
-  LayoutDashboard,
-  BarChart3,
-  Package,
-  GraduationCap,
-  Users,
-  Layers,
-  Trophy,
-  FileText,
-  ArrowDownToLine,
-  Building2,
-  Puzzle,
-  User,
   LogOut,
   Headphones,
   MessageSquare,
-  Repeat,
-  Ticket,
-  Zap,
   ChevronRight,
-  Activity,
-  Crown,
-  type LucideIcon,
 } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, type ComponentType, type SVGProps } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { NavLink } from "@/components/NavLink";
 import { VenxpayLogo } from "@/components/VenxpayLogo";
@@ -30,6 +12,19 @@ import { useAuth } from "@/hooks/useAuth";
 import { useSupportUnread } from "@/hooks/useSupportUnread";
 import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
+import {
+  PinIcon,
+  GlyphDashboard,
+  GlyphSales,
+  GlyphProduct,
+  GlyphCoupon,
+  GlyphWithdraw,
+  GlyphFees,
+  GlyphApps,
+  GlyphProfile,
+  GlyphTrophy,
+  GlyphSupport,
+} from "@/components/icons/ShellIcons";
 import {
   Sidebar,
   SidebarContent,
@@ -45,10 +40,13 @@ import {
 
 import { MILESTONES, getMilestone } from "@/lib/tiers";
 
+type GlyphIcon = ComponentType<SVGProps<SVGSVGElement> & { size?: number }>;
+
+
 type SidebarItem = {
   title: string;
   url: string;
-  icon: LucideIcon;
+  icon: GlyphIcon;
   badge?: string;
   count?: number;
   exact?: boolean;
@@ -159,76 +157,74 @@ type SidebarSectionNavProps = {
 function SidebarSectionNav({ section, pathname, isFirst }: SidebarSectionNavProps) {
   return (
     <SidebarGroup className="px-0 py-0">
+      {/* Cabeçalho de seção: filete + rótulo técnico (some no modo reduzido) */}
+      <div
+        className={cn(
+          "flex items-center gap-2 px-3 pb-1.5 group-data-[collapsible=icon]:hidden",
+          isFirst ? "pt-0" : "pt-4",
+        )}
+      >
+        <span className="h-px w-3 bg-primary/60" />
+        <span className="text-[9px] font-semibold uppercase tracking-[0.22em] text-sidebar-foreground/35">
+          {section.label}
+        </span>
+        <span className="h-px flex-1 bg-sidebar-border/40" />
+      </div>
       {!isFirst && (
-        <div className="mx-4 my-2.5 h-px bg-sidebar-border/50 group-data-[collapsible=icon]:mx-3 group-data-[collapsible=icon]:my-2.5" />
+        <div className="mx-auto my-2 hidden h-px w-6 bg-sidebar-border/50 group-data-[collapsible=icon]:block" />
       )}
       <SidebarGroupContent>
-        <SidebarMenu className="gap-1 px-0 group-data-[collapsible=icon]:gap-2">
-
-
+        <SidebarMenu className="gap-[2px] px-0 group-data-[collapsible=icon]:gap-1.5">
           {section.items.map((item) => {
             const isActive = isItemActive(pathname, item);
             return (
               <SidebarMenuItem key={item.url}>
-                <SidebarMenuButton asChild className="h-auto rounded-[12px] p-0 hover:bg-transparent active:bg-transparent group-data-[collapsible=icon]:!size-auto group-data-[collapsible=icon]:!p-0">
+                <SidebarMenuButton asChild className="h-auto rounded-none p-0 hover:bg-transparent active:bg-transparent group-data-[collapsible=icon]:!size-auto group-data-[collapsible=icon]:!p-0">
                   <NavLink
                     to={item.url}
                     end={item.exact}
                     activeClassName=""
                     className={cn(
-                      "seller-nav-option group/nav relative flex h-[44px] w-full items-center gap-3 rounded-[10px] border border-transparent px-3 text-[13.5px] font-medium",
+                      "group/nav relative flex h-[38px] w-full items-center gap-3 pl-4 pr-3 text-[13.5px]",
                       "transition-colors duration-200 ease-out",
- "group-data-[collapsible=icon]:h-11 group-data-[collapsible=icon]:w-11 group-data-[collapsible=icon]:mx-auto group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0 group-data-[collapsible=icon]:gap-0",
+                      "group-data-[collapsible=icon]:h-10 group-data-[collapsible=icon]:w-10 group-data-[collapsible=icon]:mx-auto group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0 group-data-[collapsible=icon]:gap-0 group-data-[collapsible=icon]:rounded-[10px]",
                       isActive
-                        ? "border-primary/60 bg-primary/[0.07] font-semibold text-foreground"
-                        : "text-sidebar-foreground/65 hover:border-sidebar-border/70 hover:text-foreground",
+                        ? "font-semibold text-foreground group-data-[collapsible=icon]:bg-primary/10"
+                        : "font-medium text-sidebar-foreground/60 hover:text-foreground",
                     )}
                   >
-                    {/* Active indicator rail */}
-                    {isActive && (
-                      <span className="absolute left-0 top-1/2 h-5 w-[2px] -translate-y-1/2 rounded-r-full bg-primary group-data-[collapsible=icon]:hidden" />
-                    )}
-                    {/* Collapsed active dot */}
-                    {isActive && (
-                      <span className="hidden group-data-[collapsible=icon]:block absolute -bottom-1 left-1/2 -translate-x-1/2 h-1 w-1 rounded-full bg-primary" />
-                    )}
-                    <item.icon
+                    {/* Marcador de estado — filete vertical */}
+                    <span
                       className={cn(
- "h-[18px] w-[18px] transition-colors duration-150 ease-out group-data-[collapsible=icon]:h-5 group-data-[collapsible=icon]:w-5",
+                        "absolute left-0 top-1/2 h-[18px] w-[2px] -translate-y-1/2 transition-all duration-200 group-data-[collapsible=icon]:hidden",
                         isActive
-                          ? "text-primary"
-                          : "text-muted-foreground/55 group-hover/nav:text-foreground",
+                          ? "bg-primary opacity-100"
+                          : "bg-sidebar-foreground/30 opacity-0 group-hover/nav:opacity-60",
                       )}
-                      strokeWidth={isActive ? 2.1 : 1.75}
+                    />
+                    <item.icon
+                      size={18}
+                      className={cn(
+                        "shrink-0 transition-colors duration-150 ease-out",
+                        isActive ? "text-primary" : "text-sidebar-foreground/45 group-hover/nav:text-foreground/80",
+                      )}
+                      strokeWidth={isActive ? 1.8 : 1.4}
                     />
 
                     <span className="truncate group-data-[collapsible=icon]:hidden">
                       {item.title}
                     </span>
-                    {item.badge && (
-                      <span className="ml-auto inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-[0.15em] text-sidebar-primary group-data-[collapsible=icon]:hidden">
-                        <span className="relative flex h-1.5 w-1.5">
-                          <span className="absolute inset-0 animate-ping rounded-full bg-sidebar-primary opacity-70" />
-                          <span className="relative h-1.5 w-1.5 rounded-full bg-sidebar-primary" />
-                        </span>
-                        {item.badge}
-                      </span>
-                    )}
-                    {item.count !== undefined && item.count > 0 && !item.badge && (
+                    {item.count !== undefined && item.count > 0 && (
                       <span className={cn(
- "ml-auto rounded-[6px] px-2 py-0.5 text-[11px] font-semibold tabular-nums group-data-[collapsible=icon]:hidden",
- "transition-colors duration-[260ms] ease-[cubic-bezier(0.32,0.72,0,1)]",
-                        isActive
-                          ? "bg-primary/15 text-primary"
-                          : "bg-sidebar-border/50 text-sidebar-foreground/65 group-hover/nav:bg-sidebar-border group-hover/nav:text-foreground",
+                        "ml-auto font-numbers text-[11px] font-semibold tabular-nums group-data-[collapsible=icon]:hidden",
+                        isActive ? "text-primary" : "text-sidebar-foreground/35 group-hover/nav:text-sidebar-foreground/60",
                       )}>
-                        {item.count}
+                        {String(item.count).padStart(2, "0")}
                       </span>
                     )}
                   </NavLink>
                 </SidebarMenuButton>
               </SidebarMenuItem>
-
             );
           })}
         </SidebarMenu>
@@ -237,11 +233,20 @@ function SidebarSectionNav({ section, pathname, isFirst }: SidebarSectionNavProp
   );
 }
 
-export function AppSidebar() {
+
+type AppSidebarProps = {
+  pinned?: boolean;
+  onTogglePin?: () => void;
+  onHoverChange?: (hovering: boolean) => void;
+};
+
+export function AppSidebar({ pinned = true, onTogglePin, onHoverChange }: AppSidebarProps) {
   const navigate = useNavigate();
   const location = useLocation();
-  const { state } = useSidebar();
+  const { state, isMobile } = useSidebar();
   const collapsed = state === "collapsed";
+  const overlaying = !pinned && !collapsed && !isMobile;
+
   const { user } = useAuth();
   const [revenue, setRevenue] = useState(0);
   const [todayRevenue, setTodayRevenue] = useState(0);
@@ -298,39 +303,40 @@ export function AppSidebar() {
     {
       label: "COMANDO",
       items: [
-        { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard, exact: true },
-        { title: "Vendas", url: "/vendas", icon: BarChart3, exact: true },
+        { title: "Dashboard", url: "/dashboard", icon: GlyphDashboard, exact: true },
+        { title: "Vendas", url: "/vendas", icon: GlyphSales, exact: true },
       ],
     },
     {
       label: "INFOPRODUTOS",
       items: [
-        { title: "Produtos", url: "/vendas/produtos", icon: Package, count: counts.products },
-        { title: "Cupons", url: "/vendas/cupons", icon: Ticket, count: counts.coupons },
+        { title: "Produtos", url: "/vendas/produtos", icon: GlyphProduct, count: counts.products },
+        { title: "Cupons", url: "/vendas/cupons", icon: GlyphCoupon, count: counts.coupons },
       ],
     },
     {
       label: "FINANCEIRO",
       items: [
-        { title: "Financeiro", url: "/financeiro/saques", icon: ArrowDownToLine },
-        { title: "Taxas", url: "/financeiro/config", icon: Building2 },
+        { title: "Financeiro", url: "/financeiro/saques", icon: GlyphWithdraw },
+        { title: "Taxas", url: "/financeiro/config", icon: GlyphFees },
       ],
     },
     {
       label: "FERRAMENTAS",
       items: [
-        { title: "Apps & Integrações", url: "/integracoes", icon: Puzzle },
+        { title: "Apps & Integrações", url: "/integracoes", icon: GlyphApps },
       ],
     },
     {
       label: "CONTA",
       items: [
-        { title: "Meu Perfil & KYC", url: "/perfil", icon: User },
-        { title: "Premiações", url: "/premiacoes", icon: Trophy },
-        { title: "Suporte", url: "/suporte", icon: MessageSquare, count: supportUnread },
+        { title: "Meu Perfil & KYC", url: "/perfil", icon: GlyphProfile },
+        { title: "Premiações", url: "/premiacoes", icon: GlyphTrophy },
+        { title: "Suporte", url: "/suporte", icon: GlyphSupport, count: supportUnread },
       ],
     },
   ], [counts, supportUnread]);
+
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
@@ -341,20 +347,43 @@ export function AppSidebar() {
   const userName = user?.email?.split("@")[0] ?? "Vendedor";
 
   return (
-    <Sidebar collapsible="icon" className="border-r border-sidebar-border/70 bg-sidebar">
-      <SidebarHeader className="relative border-b border-sidebar-border/70 px-4 pb-4 pt-4">
-        {/* Brand */}
+    <Sidebar
+      collapsible="icon"
+      onMouseEnter={() => onHoverChange?.(true)}
+      onMouseLeave={() => onHoverChange?.(false)}
+      className={cn(
+        "border-r border-sidebar-border/60 transition-colors duration-200",
+        overlaying ? "bg-background" : "bg-transparent",
+      )}
+    >
+      <SidebarHeader className="relative px-4 pb-3 pt-4 group-data-[collapsible=icon]:px-0">
+        {/* Brand + pino */}
         <div className={cn("flex items-center gap-3", collapsed && "justify-center")}>
-          <div className="relative h-10 w-10 shrink-0 flex items-center justify-center overflow-hidden rounded-[10px] border border-sidebar-border/70 bg-transparent">
+          <div className="relative flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden">
             <VenxpayLogo size={30} />
           </div>
           <div className="min-w-0 flex-1 group-data-[collapsible=icon]:hidden">
-            <div className="flex items-center gap-1.5">
-              <h1 className="font-heading text-[16px] leading-none tracking-[-0.02em] text-sidebar-accent-foreground">
-                VENXPAY
-              </h1>
-            </div>
+            <h1 className="font-heading text-[15px] leading-none tracking-[-0.02em] text-sidebar-accent-foreground">
+              VENXPAY
+            </h1>
           </div>
+          {onTogglePin && (
+            <button
+              type="button"
+              onClick={onTogglePin}
+              aria-pressed={pinned}
+              aria-label={pinned ? "Soltar menu (expandir ao passar o mouse)" : "Fixar menu"}
+              title={pinned ? "Soltar menu" : "Fixar menu"}
+              className={cn(
+                "hidden md:flex h-7 w-7 shrink-0 items-center justify-center rounded-[8px] transition-colors group-data-[collapsible=icon]:hidden",
+                pinned
+                  ? "text-primary"
+                  : "text-sidebar-foreground/40 hover:text-foreground",
+              )}
+            >
+              <PinIcon size={15} active={pinned} />
+            </button>
+          )}
         </div>
         <RevenueCard
           collapsed={collapsed}
@@ -363,6 +392,7 @@ export function AppSidebar() {
           onOpenRewards={() => navigate("/premiacoes")}
         />
       </SidebarHeader>
+
 
 
       <SidebarContent className="relative gap-0 overflow-y-auto px-2.5 py-3 group-data-[collapsible=icon]:py-4">
