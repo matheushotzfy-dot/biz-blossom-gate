@@ -46,6 +46,8 @@ import type { DateRange } from "react-day-picker";
 import { Seo } from "@/components/Seo";
 import { accountNeedsVerification } from "@/components/AccountVerificationGate";
 import { toast } from "sonner";
+import { ChampionsBanner } from "@/components/dashboard/ChampionsBanner";
+
 
 const PERIOD_PRESETS = [
   { label: "Hoje", days: 0 },
