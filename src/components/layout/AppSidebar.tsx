@@ -18,7 +18,6 @@ import {
   Ticket,
   Zap,
   ChevronRight,
-  TrendingUp,
   Activity,
   Crown,
   type LucideIcon,
