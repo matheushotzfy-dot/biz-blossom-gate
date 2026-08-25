@@ -179,7 +179,7 @@ export default function QuickPixDialog({ open, onOpenChange }: Props) {
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-[440px] p-0 overflow-hidden rounded-2xl border border-primary/35 bg-card shadow-2xl">
+      <DialogContent className="max-w-[440px] max-h-[88vh] overflow-y-auto p-0 rounded-2xl border border-border bg-card">
         {/* Header — solid, no gradients/blur */}
         <div className="relative px-6 pt-6 pb-5 border-b border-border bg-card">
           <span className="absolute left-0 top-6 bottom-6 w-[3px] rounded-r-full bg-primary/80" />
