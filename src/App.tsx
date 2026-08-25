@@ -100,7 +100,7 @@ const queryClient = new QueryClient({
 const persister = typeof window !== "undefined"
   ? createSyncStoragePersister({
       storage: window.localStorage,
-      key: "hotzfy-query-cache",
+      key: "venxpay-query-cache",
       throttleTime: 1000,
     })
   : undefined;

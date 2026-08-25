@@ -488,7 +488,7 @@ export default function CoursePage() {
               </div>
               <div>
                 <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-primary/60">Sua Conquista</p>
-                <p className="text-lg font-display font-bold text-foreground">Hotzfy Pioneer</p>
+                <p className="text-lg font-display font-bold text-foreground">Venxpay Pioneer</p>
               </div>
             </div>
             <p className="text-xs text-muted-foreground leading-relaxed mb-6 font-medium">Continue sua jornada para desbloquear novos módulos e certificações exclusivas.</p>

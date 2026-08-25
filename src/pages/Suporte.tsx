@@ -51,7 +51,7 @@ type TicketMessage = {
 };
 
 const ROLE_LABEL: Record<string, string> = {
-  admin: "Equipe Hotzfy",
+  admin: "Equipe Venxpay",
   manager: "Gerente de Suporte",
   employee: "Atendente",
   staff: "Suporte",
@@ -107,9 +107,9 @@ const formatFull = (iso: string) =>
   new Intl.DateTimeFormat("pt-BR", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" }).format(new Date(iso));
 
 const initials = (name: string | null | undefined) => {
-  if (!name) return "H";
+  if (!name) return "V";
   const parts = name.trim().split(/\s+/);
-  return ((parts[0]?.[0] ?? "") + (parts[1]?.[0] ?? "")).toUpperCase() || "H";
+  return ((parts[0]?.[0] ?? "") + (parts[1]?.[0] ?? "")).toUpperCase() || "V";
 };
 
 export default function Suporte() {
@@ -297,7 +297,7 @@ export default function Suporte() {
 
   return (
     <div className="space-y-4 animate-in fade-in duration-300 pb-8">
-      <Seo title="Suporte | Hotzfy" description="Central de ajuda — abra tickets e converse com o time de suporte." path="/suporte" noindex />
+      <Seo title="Suporte | Venxpay" description="Central de ajuda — abra tickets e converse com o time de suporte." path="/suporte" noindex />
 
       {/* Premium Hero */}
       <section className="relative overflow-hidden rounded-3xl border border-border/60 bg-gradient-to-br from-card via-card to-primary/[0.08] p-6 md:p-7">
@@ -637,7 +637,7 @@ export default function Suporte() {
                   </div>
                 ) : messages.map(m => {
                   const isMe = m.sender_type === "customer";
-                  const roleLabel = m.sender_role ? (ROLE_LABEL[m.sender_role] || "Equipe") : "Equipe Hotzfy";
+                  const roleLabel = m.sender_role ? (ROLE_LABEL[m.sender_role] || "Equipe") : "Equipe Venxpay";
                   return (
                     <div key={m.id} className={cn("flex gap-3 animate-in fade-in slide-in-from-bottom-2 duration-200", isMe && "flex-row-reverse")}>
                       <div className={cn(

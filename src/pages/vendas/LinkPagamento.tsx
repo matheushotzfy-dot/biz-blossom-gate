@@ -233,7 +233,7 @@ export default function LinkPagamento() {
 
   return (
     <HDShell>
-      <Seo title="Links de Pagamento | Hotzfy" description="Crie links de pagamento avulsos e receba via PIX, cartão ou boleto." path="/vendas/link-pagamento" noindex />
+      <Seo title="Links de Pagamento | Venxpay" description="Crie links de pagamento avulsos e receba via PIX, cartão ou boleto." path="/vendas/link-pagamento" noindex />
 
       <HDHeader
         eyebrow="Checkout"

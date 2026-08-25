@@ -19,7 +19,7 @@ import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { motion, AnimatePresence } from "framer-motion";
 import { AuthAside } from "@/components/auth/AuthAside";
-import { HotzfyLogo } from "@/components/HotzfyLogo";
+import { VenxpayLogo } from "@/components/VenxpayLogo";
 import { Seo } from "@/components/Seo";
 import { friendlyError } from "@/lib/friendlyError";
 
@@ -352,8 +352,8 @@ export default function Auth() {
   return (
     <div className="min-h-screen bg-[#0a0b0a] text-foreground">
       <Seo
-        title={isLogin ? "Entrar — HOTZFY" : "Criar conta grátis — HOTZFY"}
-        description={isLogin ? "Acesse seu painel HOTZFY: produtos, vendas, saques e área de membros em um só lugar." : "Crie sua conta HOTZFY gratuitamente e comece a vender infoprodutos com checkout de alta conversão."}
+        title={isLogin ? "Entrar — VENXPAY" : "Criar conta grátis — VENXPAY"}
+        description={isLogin ? "Acesse seu painel VENXPAY: produtos, vendas, saques e área de membros em um só lugar." : "Crie sua conta VENXPAY gratuitamente e comece a vender infoprodutos com checkout de alta conversão."}
         path="/auth"
       />
 
@@ -361,8 +361,8 @@ export default function Auth() {
         {/* ═══ LEFT — form ═══ */}
         <div className="relative flex min-h-screen flex-col justify-between px-6 py-10 sm:px-12 lg:px-14">
           <a href="/" className="inline-flex w-fit items-center gap-2.5 opacity-95 transition-opacity hover:opacity-100">
-            <HotzfyLogo size={30} />
-            <span className="text-[19px] font-heading tracking-[-0.02em] text-foreground">hotzfy</span>
+            <VenxpayLogo size={30} />
+            <span className="text-[19px] font-heading tracking-[-0.02em] text-foreground">venxpay</span>
           </a>
 
           <div className="mx-auto w-full max-w-[420px] py-10">
@@ -667,7 +667,7 @@ export default function Auth() {
                             </div>
                           </div>
                           <div>
-                            <Label className={labelCls}>Onde conheceu a HOTZFY?</Label>
+                            <Label className={labelCls}>Onde conheceu a VENXPAY?</Label>
                             <Select value={referralSource} onValueChange={setReferralSource}>
                               <SelectTrigger className={inputCls}><SelectValue placeholder="Selecione uma opção" /></SelectTrigger>
                               <SelectContent className="rounded-[10px] border-border/70">

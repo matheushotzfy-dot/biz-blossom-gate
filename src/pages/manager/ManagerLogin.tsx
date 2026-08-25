@@ -94,7 +94,7 @@ export default function ManagerLogin() {
  </motion.div>
 
  <h1 className="text-[28px] font-bold text-white tracking-tight">Painel Gerente</h1>
- <p className="text-[13px] text-white/25 mt-1.5 font-medium tracking-wide">Gestão de Contas · HOTZFY</p>
+ <p className="text-[13px] text-white/25 mt-1.5 font-medium tracking-wide">Gestão de Contas · VENXPAY</p>
  </div>
 
  {/* Card */}

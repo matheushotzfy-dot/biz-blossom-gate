@@ -23,7 +23,7 @@ const Loading = () => (
 export default function ConfigFinanceiro() {
   return (
     <div className="space-y-6">
-      <Seo title="Configurações Financeiras | Hotzfy" description="Taxas, adquirentes e regras financeiras da sua conta." path="/financeiro/config" noindex />
+      <Seo title="Configurações Financeiras | Venxpay" description="Taxas, adquirentes e regras financeiras da sua conta." path="/financeiro/config" noindex />
       <Suspense fallback={<Loading />}>
         <Taxas />
       </Suspense>

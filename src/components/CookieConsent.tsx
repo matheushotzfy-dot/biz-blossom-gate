@@ -16,7 +16,7 @@ import { Cookie, Shield, BarChart3, Target, X, Check } from "lucide-react";
 import { Link } from "react-router-dom";
 import { cn } from "@/lib/utils";
 
-const STORAGE_KEY = "hotzfy-cookie-consent-v1";
+const STORAGE_KEY = "venxpay-cookie-consent-v1";
 
 export type CookiePreferences = {
   necessary: true; // sempre true (base legal: legítimo interesse / execução de contrato)
@@ -48,11 +48,11 @@ function saveConsent(prefs: Omit<CookiePreferences, "timestamp" | "version" | "n
     version: 1,
   };
   localStorage.setItem(STORAGE_KEY, JSON.stringify(value));
-  window.dispatchEvent(new CustomEvent("hotzfy:cookie-consent", { detail: value }));
+  window.dispatchEvent(new CustomEvent("venxpay:cookie-consent", { detail: value }));
 }
 
 export function openCookieSettings() {
-  window.dispatchEvent(new Event("hotzfy:open-cookie-settings"));
+  window.dispatchEvent(new Event("venxpay:open-cookie-settings"));
 }
 
 type Category = { key: "necessary" | "analytics" | "marketing"; icon: typeof Shield; title: string; desc: string; locked?: boolean };
@@ -102,8 +102,8 @@ export function CookieConsent() {
       setManaging(true);
       setVisible(true);
     };
-    window.addEventListener("hotzfy:open-cookie-settings", handler);
-    return () => window.removeEventListener("hotzfy:open-cookie-settings", handler);
+    window.addEventListener("venxpay:open-cookie-settings", handler);
+    return () => window.removeEventListener("venxpay:open-cookie-settings", handler);
   }, []);
 
   const acceptAll = () => {

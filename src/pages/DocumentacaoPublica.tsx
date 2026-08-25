@@ -1,7 +1,7 @@
 import { Link } from "react-router-dom";
 import { ArrowLeft, ExternalLink } from "lucide-react";
 import { Seo } from "@/components/Seo";
-import { HotzfyLogo } from "@/components/HotzfyLogo";
+import { VenxpayLogo } from "@/components/VenxpayLogo";
 import Documentacao from "./vendas/Documentacao";
 
 /**
@@ -14,17 +14,17 @@ export default function DocumentacaoPublica() {
   return (
     <div className="min-h-screen bg-background text-foreground">
       <Seo
-        title="Documentação da API PIX | Hotzfy"
-        description="Referência completa da API Hotzfy: autenticação por chave secreta, criação de cobranças PIX, consulta de status e webhooks assinados com HMAC-SHA256."
+        title="Documentação da API PIX | Venxpay"
+        description="Referência completa da API Venxpay: autenticação por chave secreta, criação de cobranças PIX, consulta de status e webhooks assinados com HMAC-SHA256."
         path="/documentacao"
         jsonLd={{
           "@context": "https://schema.org",
           "@type": "TechArticle",
-          headline: "Documentação da API PIX Hotzfy",
+          headline: "Documentação da API PIX Venxpay",
           description:
-            "Guia de integração da API Hotzfy: autenticação, cobranças PIX e webhooks.",
+            "Guia de integração da API Venxpay: autenticação, cobranças PIX e webhooks.",
           inLanguage: "pt-BR",
-          publisher: { "@type": "Organization", name: "Hotzfy" },
+          publisher: { "@type": "Organization", name: "Venxpay" },
         }}
       />
 
@@ -32,7 +32,7 @@ export default function DocumentacaoPublica() {
         <div className="mx-auto flex h-14 max-w-[1400px] items-center justify-between gap-4 px-4 sm:px-6">
           <Link to="/" className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground">
             <ArrowLeft className="h-4 w-4" />
-            <HotzfyLogo className="h-5 w-auto" />
+            <VenxpayLogo className="h-5 w-auto" />
           </Link>
           <div className="flex items-center gap-2">
             <span className="hidden text-[12px] text-muted-foreground sm:inline">Documentação pública da API</span>

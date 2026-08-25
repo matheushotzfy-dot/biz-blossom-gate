@@ -16,7 +16,7 @@ const CHIPS = [
 
 function LiquidityPlate() {
   return (
-    <svg viewBox="0 0 420 260" className="h-full w-full" role="img" aria-label="Ilustração do motor de liquidez Hotzfy">
+    <svg viewBox="0 0 420 260" className="h-full w-full" role="img" aria-label="Ilustração do motor de liquidez Venxpay">
       <defs>
         <linearGradient id="pb-arc" x1="0" y1="0" x2="1" y2="1">
           <stop offset="0%" stopColor="hsl(var(--primary))" stopOpacity="0.95" />
@@ -81,7 +81,7 @@ function LiquidityPlate() {
         {/* core monogram — angular H cut */}
         <g>
           <rect x="-30" y="-34" width="60" height="68" rx="16" fill="hsl(var(--background))" stroke="hsl(var(--primary)/0.35)" />
-          <path d="M -13 -19 L -13 19 M 13 -19 L 13 19 M -13 -2 L 13 -8" stroke="hsl(var(--primary))" strokeWidth="4.5" strokeLinecap="round" fill="none" />
+          <path d="M -15 -19 L 0 19 L 15 -19" stroke="hsl(var(--primary))" strokeWidth="4.5" strokeLinecap="round" fill="none" />
         </g>
       </g>
 
@@ -121,7 +121,7 @@ export function PromoBanner() {
       />
       {/* oversized monogram slab bleeding off the left edge */}
       <svg aria-hidden viewBox="0 0 200 200" className="pointer-events-none absolute -left-16 -top-10 h-[130%] w-auto opacity-[0.06]">
-        <path d="M40 10 L40 190 M160 10 L160 190 M40 88 L160 74" stroke="hsl(var(--primary))" strokeWidth="26" strokeLinecap="round" fill="none" />
+        <path d="M38 14 L100 188 L162 14" stroke="hsl(var(--primary))" strokeWidth="26" strokeLinecap="round" fill="none" />
       </svg>
       {/* hairline frame */}
       <div aria-hidden className="pointer-events-none absolute inset-3 rounded-[20px] border border-primary/10 md:inset-4" />
@@ -131,7 +131,7 @@ export function PromoBanner() {
         <div className="min-w-0">
           <div className="flex items-center gap-2.5">
             <span className="h-px w-6 bg-primary/60" />
-            <span className="text-[9px] font-bold uppercase tracking-[0.3em] text-primary">Infraestrutura Hotzfy</span>
+            <span className="text-[9px] font-bold uppercase tracking-[0.3em] text-primary">Infraestrutura Venxpay</span>
           </div>
 
           <h2 className="mt-2.5 max-w-[16ch] font-display text-[22px] font-extrabold leading-[0.95] tracking-[-0.04em] text-foreground sm:text-[26px] lg:text-[30px]">

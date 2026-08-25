@@ -244,8 +244,8 @@ export default function AdminConteudo() {
         <div className="flex flex-wrap items-end justify-between gap-8 animate-fade-in relative z-10">
           <div className="min-w-0">
             <div className="flex items-center gap-3 text-[11px] font-bold uppercase tracking-[0.3em] text-primary mb-4">
-              <div className="h-6 w-6 rounded-lg bg-primary/10 border border-primary/20 flex items-center justify-center text-[10px] font-bold text-primary shadow-[0_0_20px_rgba(var(--primary),0.1)]">H</div>
-              HOTZFY STUDIO
+              <div className="h-6 w-6 rounded-lg bg-primary/10 border border-primary/20 flex items-center justify-center text-[10px] font-bold text-primary shadow-[0_0_20px_rgba(var(--primary),0.1)]">V</div>
+              VENXPAY STUDIO
             </div>
             <h1 className="font-display text-[48px] font-bold leading-[0.9] tracking-[-0.05em] text-foreground sm:text-[72px]">
               Gestão de <span className="text-transparent bg-clip-text bg-gradient-to-r from-foreground via-foreground to-foreground/40">Conteúdo</span>

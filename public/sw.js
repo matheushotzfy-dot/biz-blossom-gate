@@ -1,4 +1,4 @@
-const CACHE_NAME = 'hotzfy-v2';
+const CACHE_NAME = 'venxpay-v3';
 const STATIC_ASSETS = ['/'];
 
 self.addEventListener('install', (event) => {
@@ -58,7 +58,7 @@ self.addEventListener('fetch', (event) => {
 
 // Push notification handler
 self.addEventListener('push', (event) => {
-  const data = event.data ? event.data.json() : { title: 'HOTZFY', body: 'Nova notificação' };
+  const data = event.data ? event.data.json() : { title: 'VENXPAY', body: 'Nova notificação' };
   event.waitUntil(
     self.registration.showNotification(data.title, {
       body: data.body,

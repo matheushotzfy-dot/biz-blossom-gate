@@ -109,7 +109,7 @@ export default function ThankYou() {
 
  return (
  <div className="min-h-screen bg-background flex items-center justify-center p-4">
- <Seo title="Obrigado pela compra — HOTZFY" description="Sua compra foi confirmada. Veja os próximos passos para acessar seu produto." path="/obrigado" noindex />
+ <Seo title="Obrigado pela compra — VENXPAY" description="Sua compra foi confirmada. Veja os próximos passos para acessar seu produto." path="/obrigado" noindex />
  <motion.div
  initial={{ opacity: 0, scale: 0.95, y: 20 }}
  animate={{ opacity: 1, scale: 1, y: 0 }}

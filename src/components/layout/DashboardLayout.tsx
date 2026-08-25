@@ -68,7 +68,7 @@ function DashboardLayoutInner() {
 
  useEffect(() => {
  if (!user?.id || !profile?.account_status) return;
- const key = `hotzfy_account_approved_shown_${user.id}`;
+ const key = `venxpay_account_approved_shown_${user.id}`;
  // Only show once ever per user. If the flag already exists, never show again.
  if (profile.account_status === "approved" && !localStorage.getItem(key)) {
  // Mark as seen immediately so future logins don't trigger it, even if user dismisses via reload.

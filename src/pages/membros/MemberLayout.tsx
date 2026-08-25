@@ -148,7 +148,7 @@ export default function MemberLayout() {
                   onClick={e => e.stopPropagation()}
                 >
                   <div className="p-4 border-b border-white/5">
-                    <p className="text-[10px] uppercase tracking-[0.18em] text-zinc-500 font-bold mb-1">Conta Hotzfy</p>
+                    <p className="text-[10px] uppercase tracking-[0.18em] text-zinc-500 font-bold mb-1">Conta Venxpay</p>
                     <p className="font-bold text-white truncate">{displayName}</p>
                   </div>
                   <div className="py-2">

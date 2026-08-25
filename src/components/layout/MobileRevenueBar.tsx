@@ -8,7 +8,7 @@ import { Sun, Moon, Bell, Search } from "lucide-react";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { useNavigate } from "react-router-dom";
 import { GlobalSearchDialog } from "./GlobalSearchDialog";
-import { HotzfyLogo } from "@/components/HotzfyLogo";
+import { VenxpayLogo } from "@/components/VenxpayLogo";
 
 const fmtCompact = (v: number) => {
  if (v >= 1000000) return `R$ ${(v / 1000000).toFixed(1)}M`;
@@ -42,8 +42,8 @@ export function MobileRevenueBar() {
  <div className="flex items-center gap-2 px-3 py-2.5">
  {/* Logo */}
  <div className="flex items-center gap-2 shrink-0">
- <HotzfyLogo size={28} />
- <span className="text-sm font-display font-bold text-foreground tracking-tight">HOTZFY</span>
+ <VenxpayLogo size={28} />
+ <span className="text-sm font-display font-bold text-foreground tracking-tight">VENXPAY</span>
  </div>
 
  <div className="flex-1" />

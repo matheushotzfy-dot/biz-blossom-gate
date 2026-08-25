@@ -92,7 +92,7 @@ export default function Marketplace() {
 
  return (
  <div className="mx-auto w-full max-w-[1440px] pb-20 px-1 relative overflow-x-hidden">
- <Seo title="Marketplace de Afiliados | Hotzfy" description="Descubra produtos para promover, ganhe comissões e amplie seu portfólio de afiliado." path="/marketplace" noindex />
+ <Seo title="Marketplace de Afiliados | Venxpay" description="Descubra produtos para promover, ganhe comissões e amplie seu portfólio de afiliado." path="/marketplace" noindex />
  {/* ════════════════════════════════════════════════════════════════ */}
  {/* HERO */}
  {/* ════════════════════════════════════════════════════════════════ */}

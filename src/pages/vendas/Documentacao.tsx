@@ -3,7 +3,7 @@ import { BookOpen, Copy, Check, Zap, Shield, Terminal, Globe, Lock, AlertTriangl
 import { cn } from "@/lib/utils";
 
 /**
- * Public API reference for the Hotzfy PIX gateway.
+ * Public API reference for the Venxpay PIX gateway.
  * Endpoint base: `${SUPABASE_URL}/functions/v1/pix-api`
  * Auth:         `Authorization: Bearer sk_live_...` OR `X-API-Key: sk_live_...`
  * Versioned:    `/v1/*`
@@ -201,7 +201,7 @@ export default function Documentacao() {
           <section id="intro" ref={registerRef("intro")} className="scroll-mt-24 space-y-4">
             <SectionTitle number="1" title="Introdução" />
             <p className="text-[13px] text-muted-foreground leading-relaxed">
-              A API Hotzfy é uma REST API server-to-server para gerar cobranças PIX. Retorna QR Code e código copia-e-cola em uma única chamada, notifica seu backend via webhook quando o pagamento é confirmado e expõe endpoints para consultar e listar cobranças.
+              A API Venxpay é uma REST API server-to-server para gerar cobranças PIX. Retorna QR Code e código copia-e-cola em uma única chamada, notifica seu backend via webhook quando o pagamento é confirmado e expõe endpoints para consultar e listar cobranças.
             </p>
             <div className="space-y-2">
               <p className="text-[12px] font-semibold text-foreground">Base URL</p>
@@ -423,9 +423,9 @@ X-API-Key: sk_live_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx`} language="header" />
 }`} language="json" />
 
             <h4 className="text-[13px] font-semibold text-foreground mt-6">Headers enviados</h4>
-            <CopyBlock code={`x-hotzfy-signature: <hex HMAC-SHA256 do body>
-x-hotzfy-event: payment.completed
-x-hotzfy-delivery: <uuid da entrega>
+            <CopyBlock code={`x-venxpay-signature: <hex HMAC-SHA256 do body>
+x-venxpay-event: payment.completed
+x-venxpay-delivery: <uuid da entrega>
 Content-Type: application/json`} language="header" />
 
             <h4 className="text-[13px] font-semibold text-foreground mt-6">Verificação da assinatura</h4>
@@ -575,7 +575,7 @@ Content-Type: application/json`} language="header" />
 const res = await fetch('${BASE_URL}/v1/pix/charges', {
   method: 'POST',
   headers: {
-    'Authorization': \`Bearer \${process.env.HOTZFY_SECRET_KEY}\`,
+    'Authorization': \`Bearer \${process.env.VENXPAY_SECRET_KEY}\`,
     'Content-Type': 'application/json',
     'Idempotency-Key': crypto.randomUUID(),
   },
@@ -613,10 +613,10 @@ if (error) throw new Error(error.message);
               <CopyBlock code={`// Express — Node.js
 import crypto from 'crypto';
 
-app.post('/webhook/hotzfy', express.raw({ type: 'application/json' }), (req, res) => {
-  const signature = req.header('x-hotzfy-signature') || '';
+app.post('/webhook/venxpay', express.raw({ type: 'application/json' }), (req, res) => {
+  const signature = req.header('x-venxpay-signature') || '';
   const computed = crypto
-    .createHmac('sha256', process.env.HOTZFY_WEBHOOK_SECRET)
+    .createHmac('sha256', process.env.VENXPAY_WEBHOOK_SECRET)
     .update(req.body)  // Buffer bruto
     .digest('hex');
 
@@ -715,9 +715,9 @@ function WebhookCodeExamples() {
     node: `import crypto from 'crypto';
 
 app.post('/webhook', express.raw({ type: 'application/json' }), (req, res) => {
-  const signature = req.header('x-hotzfy-signature') || '';
+  const signature = req.header('x-venxpay-signature') || '';
   const computed = crypto
-    .createHmac('sha256', process.env.HOTZFY_WEBHOOK_SECRET)
+    .createHmac('sha256', process.env.VENXPAY_WEBHOOK_SECRET)
     .update(req.body)
     .digest('hex');
 
@@ -741,8 +741,8 @@ from flask import request, jsonify
 
 @app.route('/webhook', methods=['POST'])
 def webhook():
-    secret = os.environ['HOTZFY_WEBHOOK_SECRET'].encode()
-    signature = request.headers.get('x-hotzfy-signature', '')
+    secret = os.environ['VENXPAY_WEBHOOK_SECRET'].encode()
+    signature = request.headers.get('x-venxpay-signature', '')
     computed = hmac.new(secret, request.data, hashlib.sha256).hexdigest()
 
     if not hmac.compare_digest(computed, signature):
@@ -754,8 +754,8 @@ def webhook():
     return jsonify(received=True)`,
     php: `<?php
 $rawBody   = file_get_contents('php://input');
-$signature = $_SERVER['HTTP_X_HOTZFY_SIGNATURE'] ?? '';
-$secret    = getenv('HOTZFY_WEBHOOK_SECRET');
+$signature = $_SERVER['HTTP_X_VENXPAY_SIGNATURE'] ?? '';
+$secret    = getenv('VENXPAY_WEBHOOK_SECRET');
 
 $computed = hash_hmac('sha256', $rawBody, $secret);
 
