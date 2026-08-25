@@ -172,13 +172,40 @@ input[type="number"]::-webkit-inner-spin-button {
     background: linear-gradient(135deg, hsl(var(--primary)), hsl(var(--info)));
   }
 
+  /* Fundo único do app — cobre sidebar + topbar + conteúdo, sem emenda */
   .platform-shell {
+    position: relative;
+    isolation: isolate;
     background-color: hsl(var(--background));
-    background-image:
-      linear-gradient(hsl(var(--border) / 0.34) 1px, transparent 1px),
-      linear-gradient(90deg, hsl(var(--border) / 0.24) 1px, transparent 1px);
-    background-size: 48px 48px;
   }
+
+  .platform-shell::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    background:
+      radial-gradient(circle 900px at 6% -6%, hsl(var(--primary) / 0.11), transparent 55%),
+      radial-gradient(circle 700px at 100% 0%, hsl(var(--info) / 0.07), transparent 55%);
+  }
+
+  .platform-shell > * {
+    position: relative;
+    z-index: 1;
+  }
+
+  /* Sidebar sem "quadro dentro de quadro": só um filete vertical */
+  .platform-shell [data-sidebar="sidebar"] {
+    background: transparent;
+  }
+
+  /* Sidebar não fixada: expande por cima do conteúdo no hover */
+  .sidebar-unpinned [data-sidebar="gap"] {
+    width: var(--sidebar-width-icon) !important;
+  }
+
+
 
   .platform-card,
   .dashboard-panel,
