@@ -49,6 +49,7 @@ import { accountNeedsVerification } from "@/components/AccountVerificationGate";
 import { toast } from "sonner";
 import { PromoBanner } from "@/components/dashboard/PromoBanner";
 import { SellerOnboarding } from "@/components/dashboard/SellerOnboarding";
+import { Button } from "@/components/ui/button";
 
 
 const PERIOD_PRESETS = [
@@ -61,6 +62,50 @@ const PERIOD_PRESETS = [
 type PeriodPreset = (typeof PERIOD_PRESETS)[number];
 
 const CENSORED = "••••••";
+
+type MetricArtworkKind = "balance" | "received" | "secure" | "volume";
+
+function MetricArtwork({ kind }: { kind: MetricArtworkKind }) {
+  if (kind === "balance") {
+    return (
+      <svg aria-hidden viewBox="0 0 116 112" className="h-full w-full" fill="none">
+        <circle cx="58" cy="56" r="34" className="stroke-instrument-accent/25" />
+        <circle cx="58" cy="56" r="22" className="stroke-instrument-accent/55" strokeDasharray="3 5" />
+        <path d="M58 34v44M36 56h44" className="stroke-instrument-accent/80" strokeWidth="1.5" />
+        <circle cx="58" cy="56" r="4" className="fill-instrument-accent" />
+      </svg>
+    );
+  }
+  if (kind === "received") {
+    return (
+      <svg aria-hidden viewBox="0 0 116 112" className="h-full w-full" fill="none">
+        <path d="M22 72h19V55h18V41h33" className="stroke-instrument-accent/70" strokeWidth="2" />
+        <path d="m79 31 13 10-13 10" className="stroke-instrument-accent" strokeWidth="2" />
+        <path d="M22 83h70" className="stroke-instrument-accent/20" />
+        <circle cx="41" cy="72" r="3" className="fill-instrument-accent" />
+        <circle cx="59" cy="55" r="3" className="fill-instrument-accent" />
+      </svg>
+    );
+  }
+  if (kind === "secure") {
+    return (
+      <svg aria-hidden viewBox="0 0 116 112" className="h-full w-full" fill="none">
+        <path d="M58 22 87 34v23c0 19-11 29-29 35-18-6-29-16-29-35V34l29-12Z" className="stroke-destructive/45" strokeWidth="1.5" />
+        <path d="M46 56h24v19H46zM51 56v-6a7 7 0 0 1 14 0v6" className="stroke-destructive/80" strokeWidth="1.7" />
+        <circle cx="58" cy="65" r="2.5" className="fill-destructive" />
+      </svg>
+    );
+  }
+  return (
+    <svg aria-hidden viewBox="0 0 116 112" className="h-full w-full" fill="none">
+      <path d="M20 79 39 62l15 8 25-31 17 13" className="stroke-instrument-accent" strokeWidth="2" />
+      <path d="M20 88h76M29 25v63" className="stroke-instrument-accent/20" />
+      <path d="m82 39 14 13-18 2" className="fill-instrument-accent/20 stroke-instrument-accent/60" />
+      <circle cx="39" cy="62" r="3" className="fill-instrument-accent" />
+      <circle cx="54" cy="70" r="3" className="fill-instrument-accent" />
+    </svg>
+  );
+}
 
 function usePrivacyMode() {
   const [hidden, setHidden] = useState(() => {
