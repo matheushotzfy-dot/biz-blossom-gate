@@ -17,7 +17,7 @@ import {
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { motion, AnimatePresence } from "framer-motion";
-import authCinematic from "@/assets/auth-cinematic.jpg";
+import { AuthAside } from "@/components/auth/AuthAside";
 import { HotzfyLogo } from "@/components/HotzfyLogo";
 import { Seo } from "@/components/Seo";
 import { friendlyError } from "@/lib/friendlyError";
