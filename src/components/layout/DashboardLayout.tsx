@@ -93,19 +93,25 @@ function DashboardLayoutInner() {
 
  return (
       <SidebarProvider
-        style={{ "--sidebar-width": "19.5rem", "--sidebar-width-icon": "5rem" } as { [key: string]: string }}
+        open={sidebarPinned || sidebarHover}
+        onOpenChange={(v) => setSidebarPinned(v)}
+        style={{ "--sidebar-width": "19.5rem", "--sidebar-width-icon": "4.5rem" } as { [key: string]: string }}
       >
- <div className="flex w-full h-full bg-background platform-shell">
- <AppSidebar />
+ <div className={cn("flex w-full h-full platform-shell", !sidebarPinned && "sidebar-unpinned")}>
+ <AppSidebar
+   pinned={sidebarPinned}
+   onTogglePin={togglePin}
+   onHoverChange={setSidebarHover}
+ />
 
-  <SidebarInset className="ambient-backdrop relative min-w-0 bg-background flex flex-col h-full min-h-0 overflow-hidden">
-   {/* Ambient light is handled by .ambient-backdrop CSS — no extra blobs needed */}
+  <SidebarInset className="ambient-backdrop relative min-w-0 bg-transparent flex flex-col h-full min-h-0 overflow-hidden">
 
-          <header className="relative z-30 h-[52px] flex items-center gap-1.5 border-b border-border bg-card px-3 lg:px-5 sticky top-0 md:flex transition-colors duration-300">
-            <SidebarTrigger className="seller-clickable icon-only relative h-8 w-8 rounded-[9px] border border-transparent bg-transparent flex items-center justify-center text-muted-foreground transition-colors duration-200 hover:border-border/70 hover:text-foreground [&>svg]:hidden">
+          <header className="relative z-30 h-[52px] flex items-center gap-1.5 border-b border-border/60 bg-transparent px-3 lg:px-5 sticky top-0 md:flex transition-colors duration-300">
+            <SidebarTrigger className="seller-clickable icon-only relative md:hidden h-8 w-8 rounded-[9px] border border-transparent bg-transparent flex items-center justify-center text-muted-foreground transition-colors duration-200 hover:border-border/70 hover:text-foreground [&>svg]:hidden">
               <PanelToggleIcon size={17} />
               <span className="sr-only">Alternar menu</span>
             </SidebarTrigger>
+
 
             {/* ─── SEARCH (ícone apenas) ─── */}
             <button
