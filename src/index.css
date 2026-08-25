@@ -3566,3 +3566,18 @@ html body .cmd-live::after {
   border: 1px solid hsl(var(--primary) / 0.5);
   animation: techPulse 2.4s ease-in-out infinite;
 }
+
+/* ── TECH LAYER · tipografia da landing (v3) ───────────────────────────────
+   O clean pass global aperta letter-spacing e remove gradientes; dentro da
+   landing (.tech-scope) devolvemos respiro tipográfico e o balanceamento de
+   títulos, sem afetar o restante da plataforma. */
+html body .tech-scope h1 { letter-spacing: -0.04em !important; line-height: 1.04 !important; }
+html body .tech-scope h2 { letter-spacing: -0.03em !important; line-height: 1.1 !important; }
+html body .tech-scope h3 { letter-spacing: -0.02em !important; }
+html body .tech-scope p,
+html body .tech-scope li,
+html body .tech-scope span,
+html body .tech-scope a,
+html body .tech-scope button { letter-spacing: 0 !important; }
+html body .tech-scope .text-balance { text-wrap: balance; }
+html body .tech-scope section { scroll-margin-top: 80px; }
