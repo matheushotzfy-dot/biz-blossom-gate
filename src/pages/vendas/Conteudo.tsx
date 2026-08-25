@@ -243,7 +243,7 @@ export default function AdminConteudo() {
 
         <div className="flex flex-wrap items-end justify-between gap-8 animate-fade-in relative z-10">
           <div className="min-w-0">
-            <div className="flex items-center gap-3 text-[11px] font-bold uppercase tracking-[0.3em] text-primary mb-4">
+            <div className="flex items-center gap-3 text-[11px] font-medium text-primary mb-4">
               <div className="h-6 w-6 rounded-lg bg-primary/10 border border-primary/20 flex items-center justify-center text-[10px] font-bold text-primary ">V</div>
               VENXPAY STUDIO
             </div>
@@ -256,7 +256,7 @@ export default function AdminConteudo() {
           </div>
           <button
             onClick={openNew}
-            className="group relative inline-flex h-12 items-center gap-2.5 overflow-hidden rounded-md bg-primary px-8 text-[12px] font-bold uppercase tracking-[0.18em] text-primary-foreground transition-all duration-300 hover:bg-primary/90 "
+            className="group relative inline-flex h-12 items-center gap-2.5 overflow-hidden rounded-md bg-primary px-8 text-[12px] font-medium text-primary-foreground transition-all duration-300 hover:bg-primary/90 "
           >
             <Plus className="h-4.5 w-4.5" strokeWidth={3} />
             Novo curso
@@ -269,7 +269,7 @@ export default function AdminConteudo() {
             const Icon = item.icon;
             return (
               <div key={item.label} className="relative overflow-hidden rounded-xl border border-border/40 bg-card p-6 transition-all hover:border-primary/20 hover: ">
-                <div className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.22em] text-muted-foreground">
+                <div className="flex items-center gap-2 text-[11px] font-medium text-muted-foreground">
                   <div className="h-7 w-7 rounded-lg bg-primary/5 flex items-center justify-center text-primary">
                     <Icon className="h-3.5 w-3.5" strokeWidth={2.5} />
                   </div>
@@ -278,7 +278,7 @@ export default function AdminConteudo() {
                 <div className="mt-4 font-display text-[32px] font-bold leading-none tracking-[-0.03em] text-foreground tabular-nums">
                   {item.value}
                 </div>
-                <p className="mt-2 text-[10px] font-bold uppercase tracking-[0.16em] text-muted-foreground/60">{item.meta}</p>
+                <p className="mt-2 text-[11px] font-medium text-muted-foreground/60">{item.meta}</p>
               </div>
             );
           })}
@@ -294,7 +294,7 @@ export default function AdminConteudo() {
                   key={tab.value}
                   onClick={() => setFilter(tab.value)}
                   className={cn(
- "relative flex items-center gap-2.5 h-10 px-5 text-[11px] font-bold uppercase tracking-[0.16em] rounded-md transition-all duration-200",
+ "relative flex items-center gap-2.5 h-10 px-5 text-[11px] font-medium rounded-md transition-all duration-200",
                     active
                       ? "bg-primary text-primary-foreground "
                       : "text-muted-foreground hover:text-foreground hover:bg-accent"
@@ -372,7 +372,7 @@ export default function AdminConteudo() {
             </div>
             <h3 className="font-display text-xl font-bold tracking-tight text-foreground mb-2">Falha ao carregar conteúdos</h3>
             <p className="max-w-sm text-[13px] text-muted-foreground mb-6">Não foi possível buscar suas áreas. Verifique a conexão e tente novamente.</p>
-            <button onClick={() => refetch()} className="h-11 px-8 rounded-md bg-primary text-primary-foreground text-[12px] font-bold uppercase tracking-[0.2em] hover:bg-primary/90 transition-all">Tentar novamente</button>
+            <button onClick={() => refetch()} className="h-11 px-8 rounded-md bg-primary text-primary-foreground text-[12px] font-medium hover:bg-primary/90 transition-all">Tentar novamente</button>
           </div>
         ) : filteredCourses.length === 0 ? (
           <div className="flex min-h-[500px] flex-col items-center justify-center px-6 text-center animate-fade-in">
@@ -389,7 +389,7 @@ export default function AdminConteudo() {
             {!emptyFiltered && (
               <button
                 onClick={openNew}
-                className="inline-flex h-12 items-center gap-3 rounded-md bg-primary px-10 text-[12px] font-bold uppercase tracking-[0.2em] text-primary-foreground hover:bg-primary/90 transition-all "
+                className="inline-flex h-12 items-center gap-3 rounded-md bg-primary px-10 text-[12px] font-medium text-primary-foreground hover:bg-primary/90 transition-all "
               >
                 <Plus className="h-5 w-5" strokeWidth={3} />
                 Criar área
@@ -423,9 +423,9 @@ export default function AdminConteudo() {
                 <table className="w-full text-left">
                   <thead>
                     <tr className="border-b border-white/[0.06] bg-zinc-900/30">
-                      <th className="px-8 py-5 text-[11px] font-black uppercase tracking-[0.25em] text-zinc-500">Área de Membros</th>
-                      <th className="px-8 py-5 text-[11px] font-black uppercase tracking-[0.25em] text-zinc-500">Status</th>
-                      <th className="px-8 py-5 text-[11px] font-black uppercase tracking-[0.25em] text-zinc-500 text-right">Configurações</th>
+                      <th className="px-8 py-5 text-[11px] font-semibold text-zinc-500">Área de Membros</th>
+                      <th className="px-8 py-5 text-[11px] font-semibold text-zinc-500">Status</th>
+                      <th className="px-8 py-5 text-[11px] font-semibold text-zinc-500 text-right">Configurações</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-white/[0.04]">

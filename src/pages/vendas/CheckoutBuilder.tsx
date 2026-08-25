@@ -102,7 +102,7 @@ function SectionHeader({ title, desc, icon: Icon, badge }: { title: string; desc
  <div className="flex items-center gap-2">
  <p className="text-sm font-display font-bold text-foreground">{title}</p>
  {badge && (
- <span className="text-[8px] font-bold uppercase tracking-widest bg-primary/10 text-primary px-2 py-0.5 rounded-full border border-primary/10">{badge}</span>
+ <span className="text-[11px] font-medium bg-primary/10 text-primary px-2 py-0.5 rounded-full border border-primary/10">{badge}</span>
  )}
  </div>
  <p className="text-xs text-muted-foreground leading-snug">{desc}</p>
@@ -137,7 +137,7 @@ function ToggleRow({ icon: Icon, title, desc, checked, onChange, extra, badge }:
  <div className="flex items-center gap-2">
  <p className={cn("text-xs font-semibold transition-colors", checked ? "text-foreground" : "text-foreground/70")}>{title}</p>
  {badge && (
- <span className="text-[7px] font-bold uppercase tracking-widest bg-primary/10 text-primary px-1.5 py-0.5 rounded-full">{badge}</span>
+ <span className="text-[11px] font-medium bg-primary/10 text-primary px-1.5 py-0.5 rounded-full">{badge}</span>
  )}
  </div>
  <p className="text-[11px] text-muted-foreground leading-snug">{desc}</p>
@@ -159,7 +159,7 @@ function ConversionTip({ text, icon: Icon = Zap }: { text: string; icon?: React.
  <Icon className="h-3 w-3 text-primary" />
  </div>
  <div>
- <p className="text-[10px] font-bold uppercase tracking-wider text-primary/70 mb-0.5">Dica de conversão</p>
+ <p className="text-[11px] font-medium text-primary/70 mb-0.5">Dica de conversão</p>
  <p className="text-[11px] text-muted-foreground leading-relaxed">{text}</p>
  </div>
  </div>
@@ -170,7 +170,7 @@ function ConversionTip({ text, icon: Icon = Zap }: { text: string; icon?: React.
 function PreviewField({ label, theme }: { label: string; theme?: string }) {
  return (
  <div>
- <p className="text-[10px] font-semibold text-gray-500 mb-1.5 uppercase tracking-wider">{label}</p>
+ <p className="text-[11px] font-semibold text-gray-500 mb-1.5 ">{label}</p>
  <div className={cn(
  "h-10 rounded-lg border",
  theme === "white" ? "bg-white border-gray-200" : theme === "dark" ? "bg-[hsl(220_15%_16%)] border-[hsl(220_12%_24%)]" : "bg-white/70 border-gray-200"
@@ -467,7 +467,7 @@ export default function CheckoutBuilder() {
  key={tab.id}
  onClick={() => setActiveTab(tab.id)}
  className={cn(
- "relative flex-1 flex flex-col items-center gap-1 py-2 px-1 rounded-md text-[9px] font-bold uppercase tracking-wider transition-all duration-200",
+ "relative flex-1 flex flex-col items-center gap-1 py-2 px-1 rounded-md text-[11px] font-medium transition-all duration-200",
  isActive ? "text-foreground" : "text-muted-foreground hover:text-foreground/70"
  )}
  >
@@ -510,7 +510,7 @@ export default function CheckoutBuilder() {
 
  {/* Theme Selector */}
  <SectionCard>
- <Label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground block">Tema Visual</Label>
+ <Label className="text-[11px] font-medium text-muted-foreground block">Tema Visual</Label>
  <div className="grid grid-cols-3 gap-2.5">
  {[
  { key: "gray" as const, name: "Cinza Suave", preview: "bg-gradient-to-b from-gray-100 to-gray-200", ring: "border-gray-300" },
@@ -542,7 +542,7 @@ export default function CheckoutBuilder() {
 
  {/* Color Picker */}
  <SectionCard>
- <Label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground block">Cor do Botão CTA</Label>
+ <Label className="text-[11px] font-medium text-muted-foreground block">Cor do Botão CTA</Label>
  <div className="flex gap-2 flex-wrap">
  {PRESET_COLORS.map(c => (
  <button
@@ -593,7 +593,7 @@ export default function CheckoutBuilder() {
 
  {/* Banners */}
  <SectionCard>
- <Label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground block">Banners</Label>
+ <Label className="text-[11px] font-medium text-muted-foreground block">Banners</Label>
  {[
  { type: "desktop" as const, label: "Desktop", icon: Monitor, ref: desktopRef, preview: bannerDesktopPreview, setFile: setBannerDesktopFile, setPreview: setBannerDesktopPreview, size: "1200×400" },
  { type: "mobile" as const, label: "Mobile", icon: Smartphone, ref: mobileRef, preview: bannerMobilePreview, setFile: setBannerMobileFile, setPreview: setBannerMobilePreview, size: "600×300" },
@@ -684,7 +684,7 @@ export default function CheckoutBuilder() {
  <p className="text-[11px] text-muted-foreground leading-snug">Obrigatório — campo sempre ativo</p>
  </div>
  </div>
- <span className="text-[9px] font-bold uppercase tracking-wider bg-primary/10 text-primary px-2 py-1 rounded-full border border-primary/15">Obrigatório</span>
+ <span className="text-[11px] font-medium bg-primary/10 text-primary px-2 py-1 rounded-full border border-primary/15">Obrigatório</span>
  </div>
  <ToggleRow icon={MapPin} title="Endereço completo" desc="CEP com auto-preenchimento" checked={addressRequired} onChange={setAddressRequired} />
  <ToggleRow icon={CreditCard} title="Nome no cartão" desc="Campo separado" checked={nameOnCardRequired} onChange={setNameOnCardRequired} badge="Novo" />
@@ -732,7 +732,7 @@ export default function CheckoutBuilder() {
 
  {availableForBump.length > 0 ? (
  <SectionCard>
- <Label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground block">Adicionar Bump</Label>
+ <Label className="text-[11px] font-medium text-muted-foreground block">Adicionar Bump</Label>
  <div className="max-h-[200px] overflow-y-auto divide-y divide-border/20 rounded-lg border border-border/30 bg-muted/10">
  {availableForBump.map(p => (
  <button
@@ -927,7 +927,7 @@ export default function CheckoutBuilder() {
  </div>
  <div className="flex items-center gap-1">
  <span className="h-1.5 w-1.5 rounded-full bg-success animate-pulse" />
- <span className="text-[7px] font-bold text-success/60 uppercase tracking-widest">Live</span>
+ <span className="text-[11px] font-medium text-success/60 ">Live</span>
  </div>
  </div>
 
@@ -1086,7 +1086,7 @@ export default function CheckoutBuilder() {
  <div className="h-4 w-4 rounded-md flex items-center justify-center" style={{ backgroundColor: buttonColor + "18" }}>
  <Sparkles className="h-2.5 w-2.5" style={{ color: buttonColor }} />
  </div>
- <span className="text-[10px] font-extrabold uppercase tracking-widest" style={{ color: buttonColor }}>Oferta exclusiva</span>
+ <span className="text-[11px] font-extrabold " style={{ color: buttonColor }}>Oferta exclusiva</span>
  <div className="flex-1 h-px" style={{ backgroundColor: buttonColor + "15" }} />
  </div>
  {orderBumps.map(bump => {
@@ -1139,7 +1139,7 @@ export default function CheckoutBuilder() {
  <div className="h-6 w-6 rounded-md bg-gray-100 flex items-center justify-center border border-gray-200">
  <b.icon className="h-3 w-3 text-gray-400" />
  </div>
- <span className="text-[7px] font-bold text-gray-400 uppercase tracking-wider">{b.label}</span>
+ <span className="text-[11px] font-medium text-gray-400 ">{b.label}</span>
  </div>
  ))}
  </div>

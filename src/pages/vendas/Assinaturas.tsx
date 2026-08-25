@@ -68,7 +68,7 @@ function Kpi({ label, value, sub, icon: Icon, tone = "neutral" }: {
   return (
     <div className="bg-card px-5 py-4 flex flex-col gap-2.5">
       <div className="flex items-center justify-between">
-        <span className="text-[10px] font-bold uppercase tracking-[0.18em] text-muted-foreground/70">{label}</span>
+        <span className="text-[11px] font-medium text-muted-foreground/70">{label}</span>
         <div className={cn("h-7 w-7 rounded-md flex items-center justify-center", iconBg[tone])}>
           <Icon className="h-3.5 w-3.5" strokeWidth={2.25} />
         </div>
@@ -175,7 +175,7 @@ export default function Assinaturas() {
           <div className="space-y-3">
             <div className="inline-flex items-center gap-2 rounded-full border border-border/50 bg-card/60 px-2.5 py-1">
               <span className="h-1.5 w-1.5 rounded-full bg-success animate-pulse" />
-              <span className="text-[10px] font-bold uppercase tracking-[0.18em] text-muted-foreground">
+              <span className="text-[11px] font-medium text-muted-foreground">
                 {activeSubs.length} {activeSubs.length === 1 ? "assinatura ativa" : "assinaturas ativas"}
               </span>
             </div>
@@ -189,7 +189,7 @@ export default function Assinaturas() {
 
           <Dialog open={showCreate} onOpenChange={setShowCreate}>
             <DialogTrigger asChild>
-              <button className="group inline-flex h-11 items-center gap-2 rounded-xl bg-primary px-5 text-[12px] font-black uppercase tracking-[0.12em] text-primary-foreground transition-all duration-300  hover:bg-primary/90">
+              <button className="group inline-flex h-11 items-center gap-2 rounded-xl bg-primary px-5 text-[12px] font-semibold text-primary-foreground transition-all duration-300  hover:bg-primary/90">
                 <Plus className="h-4 w-4 transition-transform duration-300 group-hover:rotate-90" />
                 Novo plano
               </button>
@@ -207,20 +207,20 @@ export default function Assinaturas() {
               </div>
               <div className="p-6 space-y-4">
                 <div>
-                  <Label className="text-[10px] text-muted-foreground uppercase tracking-[0.15em] font-bold">Nome do Plano</Label>
+                  <Label className="text-[11px] text-muted-foreground font-medium">Nome do Plano</Label>
                   <Input value={fName} onChange={e => setFName(e.target.value)} placeholder="Ex: Plano Premium" className="mt-1.5 rounded-xl h-11" />
                 </div>
                 <div>
-                  <Label className="text-[10px] text-muted-foreground uppercase tracking-[0.15em] font-bold">Descrição (opcional)</Label>
+                  <Label className="text-[11px] text-muted-foreground font-medium">Descrição (opcional)</Label>
                   <Input value={fDesc} onChange={e => setFDesc(e.target.value)} placeholder="Acesso completo ao curso..." className="mt-1.5 rounded-xl h-11" />
                 </div>
                 <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <Label className="text-[10px] text-muted-foreground uppercase tracking-[0.15em] font-bold">Preço (R$)</Label>
+                    <Label className="text-[11px] text-muted-foreground font-medium">Preço (R$)</Label>
                     <Input value={fPrice} onChange={e => setFPrice(e.target.value)} placeholder="49,90" className="mt-1.5 rounded-xl h-11" />
                   </div>
                   <div>
-                    <Label className="text-[10px] text-muted-foreground uppercase tracking-[0.15em] font-bold">Intervalo</Label>
+                    <Label className="text-[11px] text-muted-foreground font-medium">Intervalo</Label>
                     <Select value={fInterval} onValueChange={setFInterval}>
                       <SelectTrigger className="mt-1.5 rounded-xl h-11"><SelectValue /></SelectTrigger>
                       <SelectContent>
@@ -233,12 +233,12 @@ export default function Assinaturas() {
                   </div>
                 </div>
                 <div>
-                  <Label className="text-[10px] text-muted-foreground uppercase tracking-[0.15em] font-bold">Dias de trial grátis</Label>
+                  <Label className="text-[11px] text-muted-foreground font-medium">Dias de trial grátis</Label>
                   <Input type="number" value={fTrial} onChange={e => setFTrial(e.target.value)} min={0} max={365} className="mt-1.5 rounded-xl h-11" />
                 </div>
                 {products && products.length > 0 && (
                   <div>
-                    <Label className="text-[10px] text-muted-foreground uppercase tracking-[0.15em] font-bold">Vincular a produto (opcional)</Label>
+                    <Label className="text-[11px] text-muted-foreground font-medium">Vincular a produto (opcional)</Label>
                     <Select value={fProduct} onValueChange={setFProduct}>
                       <SelectTrigger className="mt-1.5 rounded-xl h-11"><SelectValue placeholder="Nenhum" /></SelectTrigger>
                       <SelectContent>
@@ -369,7 +369,7 @@ export default function Assinaturas() {
                             <div className="flex items-center gap-2 mb-1">
                               <h3 className="text-[14px] font-display font-black text-foreground truncate tracking-tight">{plan.name}</h3>
                               <span className={cn(
- "inline-flex items-center gap-1 text-[9px] font-black uppercase tracking-[0.12em] px-1.5 py-0.5 rounded border",
+ "inline-flex items-center gap-1 text-[11px] font-semibold px-1.5 py-0.5 rounded border",
                                 plan.is_active
                                   ? "bg-success/10 text-success border-success/20"
                                   : "bg-muted/10 text-muted-foreground border-border/40"
@@ -418,10 +418,10 @@ export default function Assinaturas() {
                 <table className="w-full">
                   <thead>
                     <tr className="border-b border-border/40 bg-secondary/40">
-                      <th className="text-left px-5 py-3 text-[10px] font-display font-black uppercase tracking-[0.15em] text-muted-foreground">Assinante</th>
-                      <th className="text-left px-4 py-3 text-[10px] font-display font-black uppercase tracking-[0.15em] text-muted-foreground">Plano</th>
-                      <th className="text-left px-4 py-3 text-[10px] font-display font-black uppercase tracking-[0.15em] text-muted-foreground">Status</th>
-                      <th className="text-left px-4 py-3 text-[10px] font-display font-black uppercase tracking-[0.15em] text-muted-foreground">Desde</th>
+                      <th className="text-left px-5 py-3 text-[11px] font-display font-semibold text-muted-foreground">Assinante</th>
+                      <th className="text-left px-4 py-3 text-[11px] font-display font-semibold text-muted-foreground">Plano</th>
+                      <th className="text-left px-4 py-3 text-[11px] font-display font-semibold text-muted-foreground">Status</th>
+                      <th className="text-left px-4 py-3 text-[11px] font-display font-semibold text-muted-foreground">Desde</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -440,7 +440,7 @@ export default function Assinaturas() {
                           <td className="py-3.5 px-4 text-[12px] text-foreground font-display font-bold">{plan?.name || "—"}</td>
                           <td className="py-3.5 px-4">
                             <span className={cn(
- "inline-flex items-center gap-1.5 rounded-md px-2 py-0.5 text-[10px] font-black uppercase tracking-[0.12em] border",
+ "inline-flex items-center gap-1.5 rounded-md px-2 py-0.5 text-[11px] font-semibold border",
                               cfg.bg, cfg.text
                             )}>
                               <span className={cn("h-1.5 w-1.5 rounded-full", cfg.dot)} />

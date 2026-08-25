@@ -48,7 +48,7 @@ function Badge({ children, variant = "default" }: { children: React.ReactNode; v
     error: "bg-destructive/10 text-destructive border-destructive/20",
     warn: "bg-warning/10 text-warning border-warning/20",
   };
-  return <span className={cn("inline-flex px-2 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider border", styles[variant])}>{children}</span>;
+  return <span className={cn("inline-flex px-2 py-0.5 rounded-md text-[11px] font-medium border", styles[variant])}>{children}</span>;
 }
 
 function ParamTable({ params }: { params: { name: string; type: string; required: boolean; desc: string }[] }) {
@@ -57,10 +57,10 @@ function ParamTable({ params }: { params: { name: string; type: string; required
       <table className="w-full text-[12px]">
         <thead>
           <tr className="bg-muted/20 border-b border-border/20">
-            <th className="text-left p-3 font-semibold text-foreground/80 text-[11px] uppercase tracking-wider">Parâmetro</th>
-            <th className="text-left p-3 font-semibold text-foreground/80 text-[11px] uppercase tracking-wider">Tipo</th>
-            <th className="text-left p-3 font-semibold text-foreground/80 text-[11px] uppercase tracking-wider">Obrig.</th>
-            <th className="text-left p-3 font-semibold text-foreground/80 text-[11px] uppercase tracking-wider">Descrição</th>
+            <th className="text-left p-3 font-semibold text-foreground/80 text-[11px] ">Parâmetro</th>
+            <th className="text-left p-3 font-semibold text-foreground/80 text-[11px] ">Tipo</th>
+            <th className="text-left p-3 font-semibold text-foreground/80 text-[11px] ">Obrig.</th>
+            <th className="text-left p-3 font-semibold text-foreground/80 text-[11px] ">Descrição</th>
           </tr>
         </thead>
         <tbody>
@@ -149,7 +149,7 @@ export default function Documentacao() {
         <div>
           <div className="flex items-center gap-2 text-[11px] font-medium text-muted-foreground/70 mb-1.5">
             <BookOpen className="h-3 w-3" />
-            <span className="uppercase tracking-[0.14em]">Integrações</span>
+            <span className="">Integrações</span>
             <span className="text-border">/</span>
             <span className="text-foreground/80">API Docs</span>
           </div>
@@ -172,7 +172,7 @@ export default function Documentacao() {
       <div className="flex gap-6 relative">
         <aside className="hidden lg:block w-[220px] shrink-0">
           <div className="sticky top-24 space-y-0.5">
-            <p className="text-[10px] font-bold uppercase tracking-[0.15em] text-muted-foreground/40 px-3 mb-2">Navegação</p>
+            <p className="text-[11px] font-medium text-muted-foreground/40 px-3 mb-2">Navegação</p>
             {TOC.map((item) => {
               const active = activeSection === item.id;
               return (
@@ -461,9 +461,9 @@ Content-Type: application/json`} language="header" />
               <table className="w-full text-[12px]">
                 <thead>
                   <tr className="bg-muted/20 border-b border-border/20">
-                    <th className="text-left p-3 font-semibold text-foreground/80 text-[11px] uppercase tracking-wider">Status</th>
-                    <th className="text-left p-3 font-semibold text-foreground/80 text-[11px] uppercase tracking-wider">Significado</th>
-                    <th className="text-left p-3 font-semibold text-foreground/80 text-[11px] uppercase tracking-wider">Final?</th>
+                    <th className="text-left p-3 font-semibold text-foreground/80 text-[11px] ">Status</th>
+                    <th className="text-left p-3 font-semibold text-foreground/80 text-[11px] ">Significado</th>
+                    <th className="text-left p-3 font-semibold text-foreground/80 text-[11px] ">Final?</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -511,9 +511,9 @@ Content-Type: application/json`} language="header" />
               <table className="w-full text-[12px]">
                 <thead>
                   <tr className="bg-muted/20 border-b border-border/20">
-                    <th className="text-left p-3 font-semibold text-foreground/80 text-[11px] uppercase tracking-wider">HTTP</th>
-                    <th className="text-left p-3 font-semibold text-foreground/80 text-[11px] uppercase tracking-wider">code</th>
-                    <th className="text-left p-3 font-semibold text-foreground/80 text-[11px] uppercase tracking-wider">Quando ocorre</th>
+                    <th className="text-left p-3 font-semibold text-foreground/80 text-[11px] ">HTTP</th>
+                    <th className="text-left p-3 font-semibold text-foreground/80 text-[11px] ">code</th>
+                    <th className="text-left p-3 font-semibold text-foreground/80 text-[11px] ">Quando ocorre</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -655,8 +655,8 @@ app.post('/webhook/venxpay', express.raw({ type: 'application/json' }), (req, re
               <table className="w-full text-[12px]">
                 <thead>
                   <tr className="bg-muted/20 border-b border-border/20">
-                    <th className="text-left p-3 font-semibold text-foreground/80 text-[11px] uppercase tracking-wider">Operação</th>
-                    <th className="text-left p-3 font-semibold text-foreground/80 text-[11px] uppercase tracking-wider">Onde ver</th>
+                    <th className="text-left p-3 font-semibold text-foreground/80 text-[11px] ">Operação</th>
+                    <th className="text-left p-3 font-semibold text-foreground/80 text-[11px] ">Onde ver</th>
                   </tr>
                 </thead>
                 <tbody>

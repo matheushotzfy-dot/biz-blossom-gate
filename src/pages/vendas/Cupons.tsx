@@ -208,10 +208,10 @@ export default function Cupons() {
               <div className="space-y-4">
                 <div className="flex items-center gap-2">
                   <span className="h-5 w-5 rounded-md bg-primary/10 text-primary text-[10px] font-black flex items-center justify-center">1</span>
-                  <span className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground/60">Identificação</span>
+                  <span className="text-[11px] font-medium text-muted-foreground/60">Identificação</span>
                 </div>
                 <div>
-                  <Label className="text-[10.5px] font-bold text-muted-foreground/60 uppercase tracking-wider">Código do Cupom</Label>
+                  <Label className="text-[11px] font-medium text-muted-foreground/60 ">Código do Cupom</Label>
                   <Input
                     placeholder="EX: BLACKFRIDAY10"
                     value={form.code}
@@ -226,11 +226,11 @@ export default function Cupons() {
               <div className="space-y-4 pt-4 border-t border-border/20">
                 <div className="flex items-center gap-2">
                   <span className="h-5 w-5 rounded-md bg-primary/10 text-primary text-[10px] font-black flex items-center justify-center">2</span>
-                  <span className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground/60">Valor do Desconto</span>
+                  <span className="text-[11px] font-medium text-muted-foreground/60">Valor do Desconto</span>
                 </div>
                 <div className="grid grid-cols-[1fr_auto] gap-2">
                   <div>
-                    <Label className="text-[10.5px] font-bold text-muted-foreground/60 uppercase tracking-wider">Valor</Label>
+                    <Label className="text-[11px] font-medium text-muted-foreground/60 ">Valor</Label>
                     <Input
                       type="number"
                       placeholder="10"
@@ -240,7 +240,7 @@ export default function Cupons() {
                     />
                   </div>
                   <div>
-                    <Label className="text-[10.5px] font-bold text-muted-foreground/60 uppercase tracking-wider">Tipo</Label>
+                    <Label className="text-[11px] font-medium text-muted-foreground/60 ">Tipo</Label>
                     <Select value={form.discount_type} onValueChange={v => setForm(f => ({ ...f, discount_type: v as "percentage" | "fixed" }))}>
                       <SelectTrigger className="mt-1.5 h-11 w-24 rounded-xl font-bold">
                         <SelectValue />
@@ -266,11 +266,11 @@ export default function Cupons() {
               <div className="space-y-4 pt-4 border-t border-border/20">
                 <div className="flex items-center gap-2">
                   <span className="h-5 w-5 rounded-md bg-primary/10 text-primary text-[10px] font-black flex items-center justify-center">3</span>
-                  <span className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground/60">Restrições <span className="text-muted-foreground/30 font-medium normal-case tracking-normal">(opcional)</span></span>
+                  <span className="text-[11px] font-medium text-muted-foreground/60">Restrições <span className="text-muted-foreground/30 font-medium normal-case tracking-normal">(opcional)</span></span>
                 </div>
 
                 <div>
-                  <Label className="text-[10.5px] font-bold text-muted-foreground/60 uppercase tracking-wider">Aplicar em</Label>
+                  <Label className="text-[11px] font-medium text-muted-foreground/60 ">Aplicar em</Label>
                   <Select value={form.product_id || "all"} onValueChange={v => setForm(f => ({ ...f, product_id: v === "all" ? "" : v }))}>
                     <SelectTrigger className="mt-1.5 h-11 rounded-xl">
                       <SelectValue />
@@ -292,7 +292,7 @@ export default function Cupons() {
 
                 <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <Label className="text-[10.5px] font-bold text-muted-foreground/60 uppercase tracking-wider">Limite de Usos</Label>
+                    <Label className="text-[11px] font-medium text-muted-foreground/60 ">Limite de Usos</Label>
                     <Input
                       type="number"
                       placeholder="Ilimitado"
@@ -302,7 +302,7 @@ export default function Cupons() {
                     />
                   </div>
                   <div>
-                    <Label className="text-[10.5px] font-bold text-muted-foreground/60 uppercase tracking-wider">Expira em</Label>
+                    <Label className="text-[11px] font-medium text-muted-foreground/60 ">Expira em</Label>
                     <Input
                       type="date"
                       value={form.expires_at}
@@ -409,13 +409,13 @@ export default function Cupons() {
         {/* Column headers */}
         {filtered.length > 0 && (
           <div className="hidden md:grid grid-cols-[minmax(0,1.5fr)_minmax(0,1.4fr)_minmax(0,0.9fr)_minmax(0,0.9fr)_minmax(0,0.9fr)_auto_auto] items-center gap-4 px-4 py-2.5 border-b border-border/30 bg-muted/10">
-            <span className="text-[9.5px] font-bold uppercase tracking-[0.14em] text-muted-foreground/50">Cupom</span>
-            <span className="text-[9.5px] font-bold uppercase tracking-[0.14em] text-muted-foreground/50">Produto</span>
-            <span className="text-[9.5px] font-bold uppercase tracking-[0.14em] text-muted-foreground/50 text-right">Desconto</span>
-            <span className="text-[9.5px] font-bold uppercase tracking-[0.14em] text-muted-foreground/50 text-right">Uso</span>
-            <span className="text-[9.5px] font-bold uppercase tracking-[0.14em] text-muted-foreground/50">Validade</span>
-            <span className="text-[9.5px] font-bold uppercase tracking-[0.14em] text-muted-foreground/50">Status</span>
-            <span className="text-[9.5px] font-bold uppercase tracking-[0.14em] text-muted-foreground/50 w-[72px] text-right">Ações</span>
+            <span className="text-[11px] font-medium text-muted-foreground/50">Cupom</span>
+            <span className="text-[11px] font-medium text-muted-foreground/50">Produto</span>
+            <span className="text-[11px] font-medium text-muted-foreground/50 text-right">Desconto</span>
+            <span className="text-[11px] font-medium text-muted-foreground/50 text-right">Uso</span>
+            <span className="text-[11px] font-medium text-muted-foreground/50">Validade</span>
+            <span className="text-[11px] font-medium text-muted-foreground/50">Status</span>
+            <span className="text-[11px] font-medium text-muted-foreground/50 w-[72px] text-right">Ações</span>
           </div>
         )}
 
@@ -466,7 +466,7 @@ export default function Cupons() {
                     <p className="text-[14px] font-display font-black text-foreground tabular-nums leading-none">
                       {c.discount_type === "percentage" ? `${Number(c.discount_value)}%` : fmt(Number(c.discount_value))}
                     </p>
-                    <p className="text-[9.5px] text-muted-foreground/40 uppercase tracking-wider font-bold mt-0.5">
+                    <p className="text-[11px] text-muted-foreground/40 font-medium mt-0.5">
                       {c.discount_type === "percentage" ? "percentual" : "fixo"}
                     </p>
                   </div>
@@ -488,7 +488,7 @@ export default function Cupons() {
                         />
                       </div>
                     ) : (
-                      <p className="text-[9.5px] text-muted-foreground/40 uppercase tracking-wider font-bold mt-0.5 inline-flex items-center gap-1 justify-end">
+                      <p className="text-[11px] text-muted-foreground/40 font-medium mt-0.5 inline-flex items-center gap-1 justify-end">
                         <InfinityIcon className="h-2.5 w-2.5" /> ilimitado
                       </p>
                     )}

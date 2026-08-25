@@ -189,13 +189,13 @@ export default function Afiliados() {
             </div>
             <div className="px-8 pb-8 pt-4 space-y-6">
               <div className="space-y-2">
-                <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/60 ml-1">Produto</Label>
+                <Label className="text-[11px] font-semibold text-muted-foreground/60 ml-1">Produto</Label>
                 <Select value={selectedProduct} onValueChange={setSelectedProduct}>
                   <SelectTrigger className="h-12 rounded-[12px] border-border/50 bg-muted/30 px-4 font-bold"><SelectValue placeholder="Selecione um produto" /></SelectTrigger>
                   <SelectContent className="rounded-[12px] border-border/50  p-2">
                     {affiliateProducts.length > 0 && (
                       <>
-                        <div className="px-3 py-2 text-[9px] font-black uppercase tracking-widest text-muted-foreground/40">Seus Produtos</div>
+                        <div className="px-3 py-2 text-[11px] font-semibold text-muted-foreground/40">Seus Produtos</div>
                         {affiliateProducts.map(p => (
                           <SelectItem key={`own-${p.id}`} value={p.id} className="rounded-xl font-bold py-2.5">
                             {p.name} — {fmt(Number(p.price))}
@@ -205,7 +205,7 @@ export default function Afiliados() {
                     )}
                     {marketProducts.filter(mp => !affiliateProducts.some(ap => ap.id === mp.id)).length > 0 && (
                       <>
-                        <div className="px-3 py-2 text-[9px] font-black uppercase tracking-widest text-muted-foreground/40 mt-2 border-t border-border/10 pt-4">Marketplace</div>
+                        <div className="px-3 py-2 text-[11px] font-semibold text-muted-foreground/40 mt-2 border-t border-border/10 pt-4">Marketplace</div>
                         {marketProducts.filter(mp => !affiliateProducts.some(ap => ap.id === mp.id)).map(p => (
                           <SelectItem key={`mkt-${p.id}`} value={p.id} className="rounded-xl font-bold py-2.5">
                             {p.name} — {fmt(Number(p.price))}
@@ -264,7 +264,7 @@ export default function Afiliados() {
             key={t.id}
             onClick={() => { setTab(t.id); }}
             className={cn(
- "px-6 py-2.5 rounded-xl text-xs font-black uppercase tracking-wider transition-all flex items-center gap-2",
+ "px-6 py-2.5 rounded-xl text-xs font-semibold transition-all flex items-center gap-2",
               tab === t.id ? "bg-card text-foreground  ring-1 ring-border" : "text-muted-foreground hover:text-foreground"
             )}
           >
@@ -292,7 +292,7 @@ export default function Afiliados() {
             <CardHeader className="flex flex-row items-center justify-between border-b border-border/40 px-8 py-6">
               <div>
                 <CardTitle className="text-xl font-black">Programas Ativos</CardTitle>
-                <CardDescription className="text-xs font-bold uppercase tracking-wider">{affiliateProducts.length} produtos configurados</CardDescription>
+                <CardDescription className="text-xs font-medium ">{affiliateProducts.length} produtos configurados</CardDescription>
               </div>
             </CardHeader>
             <CardContent className="p-0">
@@ -307,12 +307,12 @@ export default function Afiliados() {
                   <table className="w-full">
                     <thead>
                       <tr className="border-b border-border/30 bg-muted/10">
-                        <th className="text-left px-8 py-4 text-[10px] font-black uppercase tracking-[0.15em] text-muted-foreground/60">Produto</th>
-                        <th className="text-right px-8 py-4 text-[10px] font-black uppercase tracking-[0.15em] text-muted-foreground/60">Preço</th>
-                        <th className="text-right px-8 py-4 text-[10px] font-black uppercase tracking-[0.15em] text-muted-foreground/60">Comissão</th>
-                        <th className="text-right px-8 py-4 text-[10px] font-black uppercase tracking-[0.15em] text-muted-foreground/60">Afiliados</th>
-                        <th className="text-right px-8 py-4 text-[10px] font-black uppercase tracking-[0.15em] text-muted-foreground/60">Vendas</th>
-                        <th className="text-right px-8 py-4 text-[10px] font-black uppercase tracking-[0.15em] text-muted-foreground/60">Receita</th>
+                        <th className="text-left px-8 py-4 text-[11px] font-semibold text-muted-foreground/60">Produto</th>
+                        <th className="text-right px-8 py-4 text-[11px] font-semibold text-muted-foreground/60">Preço</th>
+                        <th className="text-right px-8 py-4 text-[11px] font-semibold text-muted-foreground/60">Comissão</th>
+                        <th className="text-right px-8 py-4 text-[11px] font-semibold text-muted-foreground/60">Afiliados</th>
+                        <th className="text-right px-8 py-4 text-[11px] font-semibold text-muted-foreground/60">Vendas</th>
+                        <th className="text-right px-8 py-4 text-[11px] font-semibold text-muted-foreground/60">Receita</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-border/30">
@@ -335,7 +335,7 @@ export default function Afiliados() {
                             </td>
                             <td className="px-8 py-4 text-right text-sm font-bold text-muted-foreground tabular-nums">{fmt(Number(p.price))}</td>
                             <td className="px-8 py-4 text-right">
-                              <span className="text-[10px] font-black text-success bg-success/10 px-2.5 py-1 rounded-lg border border-success/20 tabular-nums uppercase">
+                              <span className="text-[11px] font-semibold text-success bg-success/10 px-2.5 py-1 rounded-lg border border-success/20 tabular-nums ">
                                 {p.affiliate_commission || 30}%
                               </span>
                             </td>
@@ -363,7 +363,7 @@ export default function Afiliados() {
             <CardHeader className="flex flex-row items-center justify-between border-b border-border/40 px-8 py-6">
               <div>
                 <CardTitle className="text-xl font-black">Meus Links</CardTitle>
-                <CardDescription className="text-xs font-bold uppercase tracking-wider">{myLinks.length} links operacionais</CardDescription>
+                <CardDescription className="text-xs font-medium ">{myLinks.length} links operacionais</CardDescription>
               </div>
             </CardHeader>
             <CardContent className="p-0">
@@ -378,14 +378,14 @@ export default function Afiliados() {
                   <table className="w-full">
                     <thead>
                       <tr className="border-b border-border/30 bg-muted/10">
-                        <th className="text-left px-8 py-4 text-[10px] font-black uppercase tracking-[0.15em] text-muted-foreground/60">Produto / Link</th>
-                        <th className="text-right px-8 py-4 text-[10px] font-black uppercase tracking-[0.15em] text-muted-foreground/60">Comissão</th>
-                        <th className="text-right px-8 py-4 text-[10px] font-black uppercase tracking-[0.15em] text-muted-foreground/60">Cliques</th>
-                        <th className="text-right px-8 py-4 text-[10px] font-black uppercase tracking-[0.15em] text-muted-foreground/60">Vendas</th>
-                        <th className="text-right px-8 py-4 text-[10px] font-black uppercase tracking-[0.15em] text-muted-foreground/60">Conv.</th>
-                        <th className="text-right px-8 py-4 text-[10px] font-black uppercase tracking-[0.15em] text-muted-foreground/60">Ganho</th>
-                        <th className="text-center px-8 py-4 text-[10px] font-black uppercase tracking-[0.15em] text-muted-foreground/60">Status</th>
-                        <th className="text-right px-8 py-4 text-[10px] font-black uppercase tracking-[0.15em] text-muted-foreground/60">Ações</th>
+                        <th className="text-left px-8 py-4 text-[11px] font-semibold text-muted-foreground/60">Produto / Link</th>
+                        <th className="text-right px-8 py-4 text-[11px] font-semibold text-muted-foreground/60">Comissão</th>
+                        <th className="text-right px-8 py-4 text-[11px] font-semibold text-muted-foreground/60">Cliques</th>
+                        <th className="text-right px-8 py-4 text-[11px] font-semibold text-muted-foreground/60">Vendas</th>
+                        <th className="text-right px-8 py-4 text-[11px] font-semibold text-muted-foreground/60">Conv.</th>
+                        <th className="text-right px-8 py-4 text-[11px] font-semibold text-muted-foreground/60">Ganho</th>
+                        <th className="text-center px-8 py-4 text-[11px] font-semibold text-muted-foreground/60">Status</th>
+                        <th className="text-right px-8 py-4 text-[11px] font-semibold text-muted-foreground/60">Ações</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-border/30">
@@ -400,7 +400,7 @@ export default function Afiliados() {
                               <p className="font-mono text-[10px] text-muted-foreground/50 truncate mt-0.5">/pay/{link.slug}</p>
                             </td>
                             <td className="px-8 py-4 text-right">
-                              <span className="text-[10px] font-black text-primary bg-primary/10 px-2.5 py-1 rounded-lg border border-primary/20 tabular-nums uppercase">
+                              <span className="text-[11px] font-semibold text-primary bg-primary/10 px-2.5 py-1 rounded-lg border border-primary/20 tabular-nums ">
                                 {link.commission_pct}%
                               </span>
                             </td>
@@ -410,7 +410,7 @@ export default function Afiliados() {
                             <td className="px-8 py-4 text-right text-sm font-black text-success tabular-nums">{fmt(linkRevenue)}</td>
                             <td className="px-8 py-4 text-center">
                               <span className={cn(
- "inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-[10px] font-black border uppercase",
+ "inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-[11px] font-semibold border ",
                                 link.is_active
                                   ? "bg-success/10 text-success border-success/20"
                                   : "bg-muted/30 text-muted-foreground border-border/30"
@@ -455,7 +455,7 @@ export default function Afiliados() {
               <CardHeader className="flex flex-row items-center justify-between border-b border-border/40 px-8 py-6">
                 <div>
                   <CardTitle className="text-xl font-black">Histórico de Comissões</CardTitle>
-                  <CardDescription className="text-xs font-bold uppercase tracking-wider">{mySales.length} transações registradas</CardDescription>
+                  <CardDescription className="text-xs font-medium ">{mySales.length} transações registradas</CardDescription>
                 </div>
               </CardHeader>
               <CardContent className="p-0">
@@ -463,12 +463,12 @@ export default function Afiliados() {
                   <table className="w-full">
                     <thead>
                       <tr className="border-b border-border/30 bg-muted/10">
-                        <th className="text-left px-8 py-4 text-[10px] font-black uppercase tracking-[0.15em] text-muted-foreground/60">Data</th>
-                        <th className="text-left px-8 py-4 text-[10px] font-black uppercase tracking-[0.15em] text-muted-foreground/60">Produto</th>
-                        <th className="text-right px-8 py-4 text-[10px] font-black uppercase tracking-[0.15em] text-muted-foreground/60">Venda</th>
-                        <th className="text-right px-8 py-4 text-[10px] font-black uppercase tracking-[0.15em] text-muted-foreground/60">%</th>
-                        <th className="text-right px-8 py-4 text-[10px] font-black uppercase tracking-[0.15em] text-muted-foreground/60">Comissão</th>
-                        <th className="text-center px-8 py-4 text-[10px] font-black uppercase tracking-[0.15em] text-muted-foreground/60">Status</th>
+                        <th className="text-left px-8 py-4 text-[11px] font-semibold text-muted-foreground/60">Data</th>
+                        <th className="text-left px-8 py-4 text-[11px] font-semibold text-muted-foreground/60">Produto</th>
+                        <th className="text-right px-8 py-4 text-[11px] font-semibold text-muted-foreground/60">Venda</th>
+                        <th className="text-right px-8 py-4 text-[11px] font-semibold text-muted-foreground/60">%</th>
+                        <th className="text-right px-8 py-4 text-[11px] font-semibold text-muted-foreground/60">Comissão</th>
+                        <th className="text-center px-8 py-4 text-[11px] font-semibold text-muted-foreground/60">Status</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-border/30">
@@ -508,7 +508,7 @@ export default function Afiliados() {
                 className="h-12 pl-12 rounded-[12px] border-border/50 bg-card font-bold"
               />
             </div>
-            <div className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/40">
+            <div className="text-[11px] font-semibold text-muted-foreground/40">
               {affiliateProducts.filter(p => !search || p.name.toLowerCase().includes(search.toLowerCase())).length} produtos encontrados
             </div>
           </div>
@@ -530,7 +530,7 @@ export default function Afiliados() {
                       <div className="flex-1 min-w-0 space-y-1">
                         <div className="flex items-center justify-between gap-2">
                            <h3 className="text-lg font-black truncate">{p.name}</h3>
-                           <span className="text-[10px] font-black text-success bg-success/10 px-2.5 py-1 rounded-lg border border-success/20 uppercase tabular-nums">
+                           <span className="text-[11px] font-semibold text-success bg-success/10 px-2.5 py-1 rounded-lg border border-success/20 tabular-nums">
                               {pct}% COMISSÃO
                            </span>
                         </div>
@@ -539,12 +539,12 @@ export default function Afiliados() {
                         </p>
                         <div className="pt-4 flex items-center justify-between">
                            <div className="space-y-0.5">
-                              <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/40">Ganho Estimado</p>
+                              <p className="text-[11px] font-semibold text-muted-foreground/40">Ganho Estimado</p>
                               <p className="text-xl font-black text-success tabular-nums">{fmt(earnPerSale)}</p>
                            </div>
                            <Button
                               onClick={() => { setSelectedProduct(p.id); setOpenCreate(true); }}
-                              className="h-10 px-6 rounded-xl font-black text-[11px] uppercase tracking-wider gap-2 "
+                              className="h-10 px-6 rounded-xl font-semibold text-[11px] gap-2 "
                            >
                               Solicitar Afiliação
                               <ArrowUpRight className="h-4 w-4" />

@@ -147,8 +147,8 @@ export default function DadosBancarios() {
               <Key size={18} strokeWidth={2.5} />
             </div>
             <div className="min-w-0">
-              <h2 className="font-black text-foreground uppercase tracking-tight text-sm">Chaves PIX</h2>
-              <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mt-0.5">
+              <h2 className="font-semibold text-foreground tracking-tight text-sm">Chaves PIX</h2>
+              <p className="text-[11px] font-medium text-muted-foreground mt-0.5">
                 {pixKeys.length}/3 cadastradas · usadas para receber saques
               </p>
             </div>
@@ -157,7 +157,7 @@ export default function DadosBancarios() {
             <DialogTrigger asChild>
               <Button
                 disabled={pixKeys.length >= 3}
-                className="h-10 px-4 rounded-xl font-black text-[10px] uppercase tracking-widest"
+                className="h-10 px-4 rounded-xl font-semibold text-[11px] "
               >
                 <Plus size={14} strokeWidth={3} className="mr-1.5" /> Nova Chave
               </Button>
@@ -196,7 +196,7 @@ export default function DadosBancarios() {
         </div>
 
         {pixKeys.length === 0 ? (
-          <div className="p-10 text-center text-[11px] font-bold text-muted-foreground/60 uppercase tracking-widest">
+          <div className="p-10 text-center text-[11px] font-medium text-muted-foreground/60 ">
             Nenhuma chave PIX cadastrada
           </div>
         ) : (
@@ -205,7 +205,7 @@ export default function DadosBancarios() {
               <div key={pk.id} className="px-5 py-4 flex items-center justify-between gap-3">
                 <div className="min-w-0">
                   <p className="text-sm font-black text-foreground truncate">{pk.key_value ?? (pk as any).key_value_masked ?? "•••"}</p>
-                  <p className="text-[10px] font-bold text-muted-foreground/70 uppercase tracking-widest mt-0.5">
+                  <p className="text-[11px] font-medium text-muted-foreground/70 mt-0.5">
                     {PIX_TYPES.find(t => t.value === pk.key_type)?.label || pk.key_type}
                   </p>
                 </div>
@@ -226,15 +226,15 @@ export default function DadosBancarios() {
               <Building2 size={18} strokeWidth={2.5} />
             </div>
             <div className="min-w-0">
-              <h2 className="font-black text-foreground uppercase tracking-tight text-sm">Contas Bancárias</h2>
-              <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mt-0.5">
+              <h2 className="font-semibold text-foreground tracking-tight text-sm">Contas Bancárias</h2>
+              <p className="text-[11px] font-medium text-muted-foreground mt-0.5">
                 {accounts.length} cadastrada(s)
               </p>
             </div>
           </div>
           <Dialog open={bankOpen} onOpenChange={(o) => { setBankOpen(o); if (!o) setBankErrors({}); }}>
             <DialogTrigger asChild>
-              <Button className="h-10 px-4 rounded-xl font-black text-[10px] uppercase tracking-widest">
+              <Button className="h-10 px-4 rounded-xl font-semibold text-[11px] ">
                 <Plus size={14} strokeWidth={3} className="mr-1.5" /> Nova Conta
               </Button>
             </DialogTrigger>
@@ -322,7 +322,7 @@ export default function DadosBancarios() {
         </div>
 
         {accounts.length === 0 ? (
-          <div className="p-10 text-center text-[11px] font-bold text-muted-foreground/60 uppercase tracking-widest">
+          <div className="p-10 text-center text-[11px] font-medium text-muted-foreground/60 ">
             Nenhuma conta bancária cadastrada
           </div>
         ) : (
@@ -333,7 +333,7 @@ export default function DadosBancarios() {
                   <p className="text-sm font-black text-foreground truncate">
                     {acc.bank_name} {acc.is_primary && <CheckCircle2 size={12} className="inline text-emerald-500 ml-1" />}
                   </p>
-                  <p className="text-[10px] font-bold text-muted-foreground/70 uppercase tracking-widest mt-0.5 tabular-nums">
+                  <p className="text-[11px] font-medium text-muted-foreground/70 mt-0.5 tabular-nums">
                     Ag {acc.agency} · {acc.account_type === "poupanca" ? "Poup" : "CC"} {(acc as any).account_number_masked ?? acc.account_number ?? "••••"} · {acc.holder_name}
                   </p>
                 </div>

@@ -80,7 +80,7 @@ export default function ABTesting() {
  <div className="flex items-center gap-2 mb-1">
  <h3 className="text-base font-bold text-foreground">{test.name}</h3>
  <span className={cn(
- "rounded-full px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider",
+ "rounded-full px-2.5 py-0.5 text-[11px] font-medium ",
  test.status === "running" ? "bg-success/10 text-success" :
  test.status === "paused" ? "bg-warning/10 text-warning" :
  "bg-muted/30 text-muted-foreground"

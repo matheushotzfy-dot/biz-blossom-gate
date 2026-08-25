@@ -223,7 +223,7 @@ export default function SaquesCrypto() {
         <header className="border-b border-border pb-7">
           <div className="flex flex-col gap-5 xl:flex-row xl:items-start xl:justify-between">
             <div className="min-w-0">
-              <h1 className="text-[13px] font-black uppercase tracking-[0.18em] text-muted-foreground">
+              <h1 className="text-[13px] font-semibold text-muted-foreground">
                 Tesouraria · Crypto
               </h1>
               <div className="mt-4 flex flex-wrap items-end gap-x-6 gap-y-2">
@@ -295,7 +295,7 @@ export default function SaquesCrypto() {
                   <form onSubmit={handleSubmit} className="space-y-4 p-6">
                     {/* Asset selector */}
                     <div>
-                      <Label className="text-[10px] font-black uppercase tracking-[0.18em] text-muted-foreground">Moeda</Label>
+                      <Label className="text-[11px] font-semibold text-muted-foreground">Moeda</Label>
                       <div className="mt-2 grid grid-cols-3 gap-2">
                         {CRYPTO_ASSETS.map(asset => {
                           const isSel = selectedAsset.id === asset.id;
@@ -331,7 +331,7 @@ export default function SaquesCrypto() {
 
                     {/* Network */}
                     <div>
-                      <Label className="text-[10px] font-black uppercase tracking-[0.18em] text-muted-foreground flex items-center gap-1.5">
+                      <Label className="text-[11px] font-semibold text-muted-foreground flex items-center gap-1.5">
                         <Globe className="h-3 w-3" /> Rede · {selectedAsset.symbol}
                       </Label>
                       <div className="mt-2 flex flex-wrap gap-1.5">
@@ -361,7 +361,7 @@ export default function SaquesCrypto() {
 
                     {/* Address */}
                     <div>
-                      <Label className="text-[10px] font-black uppercase tracking-[0.18em] text-muted-foreground flex items-center gap-1.5">
+                      <Label className="text-[11px] font-semibold text-muted-foreground flex items-center gap-1.5">
                         <Link2 className="h-3 w-3" /> Endereço da carteira
                       </Label>
                       <div className="relative mt-2">
@@ -379,7 +379,7 @@ export default function SaquesCrypto() {
                           type="button"
                           onClick={handlePasteAddress}
                           className={cn(
- "absolute right-2 top-1/2 -translate-y-1/2 inline-flex items-center gap-1 h-7 px-2.5 rounded-md bg-secondary border border-border text-[10px] font-black uppercase tracking-[0.12em] text-foreground/80",
+ "absolute right-2 top-1/2 -translate-y-1/2 inline-flex items-center gap-1 h-7 px-2.5 rounded-md bg-secondary border border-border text-[11px] font-semibold text-foreground/80",
  "hover:bg-muted active:scale-95",
                             ease,
                           )}
@@ -394,7 +394,7 @@ export default function SaquesCrypto() {
 
                     {/* Amount */}
                     <div>
-                      <Label className="text-[10px] font-black uppercase tracking-[0.18em] text-muted-foreground">Valor em BRL</Label>
+                      <Label className="text-[11px] font-semibold text-muted-foreground">Valor em BRL</Label>
                       <div className="relative mt-2">
                         <span className="absolute left-3.5 top-1/2 -translate-y-1/2 font-display text-[15px] font-black text-muted-foreground">R$</span>
                         <Input
@@ -452,7 +452,7 @@ export default function SaquesCrypto() {
                       type="submit"
                       disabled={numAmount <= fee || !cryptoAddress.trim()}
                       className={cn(
- "w-full h-12 rounded-xl font-display font-black text-[12px] uppercase tracking-[0.14em] flex items-center justify-center gap-2",
+ "w-full h-12 rounded-xl font-display font-semibold text-[12px] flex items-center justify-center gap-2",
  "bg-primary text-primary-foreground border border-primary/40",
  "hover:bg-primary/90 ",
                         ease,
@@ -492,7 +492,7 @@ export default function SaquesCrypto() {
                   idx === 3 && "sm:border-l border-border lg:border-l",
                 )}
               >
-                <p className="text-[10.5px] font-black uppercase tracking-[0.22em] text-muted-foreground">{k.label}</p>
+                <p className="text-[11px] font-semibold text-muted-foreground">{k.label}</p>
                 <p
                   className={cn(
  "mt-3.5 font-display text-[32px] font-black leading-[0.9] tracking-[-0.06em] tabular-nums sm:text-[40px]",
@@ -602,14 +602,14 @@ export default function SaquesCrypto() {
               <table className="w-full min-w-[640px] text-sm">
                 <thead className="bg-muted/30">
                   <tr className="border-b border-border">
-                    <th className="py-3 px-4 text-[10px] font-bold text-muted-foreground uppercase tracking-[0.14em] text-left w-[14%]">Identificador</th>
-                    <th className="py-3 px-4 text-[10px] font-bold text-muted-foreground uppercase tracking-[0.14em] text-left w-[14%]">Moeda</th>
-                    <th className="py-3 px-4 text-[10px] font-bold text-muted-foreground uppercase tracking-[0.14em] text-left w-[12%]">Rede</th>
-                    <th className="py-3 px-4 text-[10px] font-bold text-muted-foreground uppercase tracking-[0.14em] text-right w-[12%]">Bruto</th>
-                    <th className="py-3 px-4 text-[10px] font-bold text-muted-foreground uppercase tracking-[0.14em] text-right w-[10%]">Taxa</th>
-                    <th className="py-3 px-4 text-[10px] font-bold text-muted-foreground uppercase tracking-[0.14em] text-right w-[14%]">Líquido</th>
-                    <th className="py-3 px-4 text-[10px] font-bold text-muted-foreground uppercase tracking-[0.14em] text-left w-[12%]">Status</th>
-                    <th className="py-3 px-4 text-[10px] font-bold text-muted-foreground uppercase tracking-[0.14em] text-left w-[12%]">Solicitado em</th>
+                    <th className="py-3 px-4 text-[11px] font-medium text-muted-foreground text-left w-[14%]">Identificador</th>
+                    <th className="py-3 px-4 text-[11px] font-medium text-muted-foreground text-left w-[14%]">Moeda</th>
+                    <th className="py-3 px-4 text-[11px] font-medium text-muted-foreground text-left w-[12%]">Rede</th>
+                    <th className="py-3 px-4 text-[11px] font-medium text-muted-foreground text-right w-[12%]">Bruto</th>
+                    <th className="py-3 px-4 text-[11px] font-medium text-muted-foreground text-right w-[10%]">Taxa</th>
+                    <th className="py-3 px-4 text-[11px] font-medium text-muted-foreground text-right w-[14%]">Líquido</th>
+                    <th className="py-3 px-4 text-[11px] font-medium text-muted-foreground text-left w-[12%]">Status</th>
+                    <th className="py-3 px-4 text-[11px] font-medium text-muted-foreground text-left w-[12%]">Solicitado em</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -639,7 +639,7 @@ export default function SaquesCrypto() {
                           </div>
                         </td>
                         <td className="py-3 px-4">
-                          <span className="inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider border border-border bg-secondary text-foreground/80">
+                          <span className="inline-flex items-center px-2 py-0.5 rounded-md text-[11px] font-medium border border-border bg-secondary text-foreground/80">
                             {wa.crypto_network || "—"}
                           </span>
                         </td>
@@ -710,11 +710,11 @@ export default function SaquesCrypto() {
                   <div className="flex items-end justify-between pt-3 border-t border-border">
                     <div className="flex items-center gap-4">
                       <div>
-                        <p className="text-[8px] text-muted-foreground uppercase tracking-[0.16em] font-bold">Taxa</p>
+                        <p className="text-[11px] text-muted-foreground font-medium">Taxa</p>
                         <p className="text-warning font-display font-bold text-[11px] mt-0.5 tabular-nums">{hidden ? HIDE : `- ${fmt(Number(w.fee_amount))}`}</p>
                       </div>
                       <div>
-                        <p className="text-[8px] text-muted-foreground uppercase tracking-[0.16em] font-bold">Líquido</p>
+                        <p className="text-[11px] text-muted-foreground font-medium">Líquido</p>
                         <p className="text-success font-display font-black text-[13px] mt-0.5 tabular-nums">{hidden ? HIDE : fmt(Number(w.net_amount))}</p>
                       </div>
                     </div>
@@ -722,7 +722,7 @@ export default function SaquesCrypto() {
                   </div>
                   {wa.crypto_address && (
                     <div className="mt-3 pt-3 border-t border-border">
-                      <p className="text-[8px] text-muted-foreground uppercase tracking-[0.18em] font-bold mb-1">Endereço</p>
+                      <p className="text-[11px] text-muted-foreground font-medium mb-1">Endereço</p>
                       <p className="font-mono text-[10px] text-muted-foreground break-all">{wa.crypto_address}</p>
                     </div>
                   )}
@@ -746,7 +746,7 @@ export default function SaquesCrypto() {
                 Taxa de 5% + R$ 5,00 por operação · Primeiro saque limitado a R$ 500 · Após aprovação, limite diário de R$ 6.000.
               </p>
             </div>
-            <div className="hidden md:flex items-center gap-1.5 text-[10px] font-black text-success uppercase tracking-[0.16em]">
+            <div className="hidden md:flex items-center gap-1.5 text-[11px] font-semibold text-success ">
               <Clock className="h-3 w-3" />
               ATÉ 24H
             </div>

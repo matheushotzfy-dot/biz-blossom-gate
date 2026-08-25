@@ -122,7 +122,7 @@ export function ProductActionsMenu({
           className={cn(
             "group relative flex items-center justify-center rounded-xl border border-border/60 bg-card transition-all duration-200",
             labeledTrigger
-              ? "h-10 gap-2 px-4 text-[11px] font-black uppercase tracking-[0.18em] text-foreground/80 hover:border-primary/40 hover:bg-muted/40 active:scale-[0.98]"
+              ? "h-10 gap-2 px-4 text-[11px] font-semibold text-foreground/80 hover:border-primary/40 hover:bg-muted/40 active:scale-[0.98]"
               : "h-10 w-10 text-muted-foreground hover:border-primary/40 hover:bg-muted/40 hover:text-foreground active:scale-95",
             triggerClassName,
           )}

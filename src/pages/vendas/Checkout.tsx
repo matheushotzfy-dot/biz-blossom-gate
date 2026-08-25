@@ -147,7 +147,7 @@ export default function Checkout() {
  <div className="absolute inset-0 bg-gradient-to-t from-card/80 via-transparent to-transparent pointer-events-none" />
  <div className="absolute top-3 right-3 flex items-center gap-1.5 flex-wrap">
  {getPaymentMethods(p).map((m) => (
- <span key={m} className="text-[9px] font-bold px-2 py-0.5 rounded-md bg-card/80 backdrop-blur-sm border border-border/30 text-muted-foreground/80 uppercase tracking-wider">{m}</span>
+ <span key={m} className="text-[11px] font-medium px-2 py-0.5 rounded-md bg-card/80 backdrop-blur-sm border border-border/30 text-muted-foreground/80 ">{m}</span>
  ))}
  {p.checkout_timer_enabled && (
  <span className="text-[9px] font-bold px-2 py-0.5 rounded-md bg-warning/20 backdrop-blur-sm border border-warning/20 text-warning">Timer</span>
@@ -217,11 +217,11 @@ export default function Checkout() {
  </div>
  <form onSubmit={handleCreateCoupon} className="space-y-4 p-6 relative">
  <div>
- <Label className="text-[10px] text-muted-foreground/50 uppercase tracking-[0.15em] font-bold">Código</Label>
- <Input value={couponForm.code} onChange={(e) => setCouponForm({ ...couponForm, code: e.target.value })} placeholder="DESCONTO10" required className="uppercase mt-1.5 rounded-xl h-11" maxLength={30} />
+ <Label className="text-[11px] text-muted-foreground/50 font-medium">Código</Label>
+ <Input value={couponForm.code} onChange={(e) => setCouponForm({ ...couponForm, code: e.target.value })} placeholder="DESCONTO10" required className="mt-1.5 rounded-xl h-11" maxLength={30} />
  </div>
  <div>
- <Label className="text-[10px] text-muted-foreground/50 uppercase tracking-[0.15em] font-bold">Produto</Label>
+ <Label className="text-[11px] text-muted-foreground/50 font-medium">Produto</Label>
  <Select value={couponForm.product_id || "all"} onValueChange={(v) => setCouponForm({ ...couponForm, product_id: v })}>
  <SelectTrigger className="mt-1.5 rounded-xl h-11"><SelectValue /></SelectTrigger>
  <SelectContent>
@@ -231,7 +231,7 @@ export default function Checkout() {
  </Select>
  </div>
  <div>
- <Label className="text-[10px] text-muted-foreground/50 uppercase tracking-[0.15em] font-bold">Tipo de Desconto</Label>
+ <Label className="text-[11px] text-muted-foreground/50 font-medium">Tipo de Desconto</Label>
  <Select value={couponForm.discount_type} onValueChange={(v) => setCouponForm({ ...couponForm, discount_type: v })}>
  <SelectTrigger className="mt-1.5 rounded-xl h-11"><SelectValue /></SelectTrigger>
  <SelectContent>
@@ -242,11 +242,11 @@ export default function Checkout() {
  </div>
  <div className="grid grid-cols-2 gap-3">
  <div>
- <Label className="text-[10px] text-muted-foreground/50 uppercase tracking-[0.15em] font-bold">Valor</Label>
+ <Label className="text-[11px] text-muted-foreground/50 font-medium">Valor</Label>
  <Input type="number" step="0.01" min="0.01" max={couponForm.discount_type === "percentage" ? "100" : "99999"} value={couponForm.discount_value} onChange={(e) => setCouponForm({ ...couponForm, discount_value: e.target.value })} required className="mt-1.5 rounded-xl h-11" />
  </div>
  <div>
- <Label className="text-[10px] text-muted-foreground/50 uppercase tracking-[0.15em] font-bold">Max. usos</Label>
+ <Label className="text-[11px] text-muted-foreground/50 font-medium">Max. usos</Label>
  <Input type="number" min="1" value={couponForm.max_uses} onChange={(e) => setCouponForm({ ...couponForm, max_uses: e.target.value })} placeholder="∞" className="mt-1.5 rounded-xl h-11" />
  </div>
  </div>

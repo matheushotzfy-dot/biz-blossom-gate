@@ -199,7 +199,7 @@ export default function ControleGastos() {
       <SharedPanel>
         <div className="grid grid-cols-2 lg:grid-cols-5 divide-y lg:divide-y-0 lg:divide-x divide-border/30">
           <div className="p-5">
-            <p className="text-[10px] uppercase tracking-[0.14em] font-bold text-muted-foreground/60 mb-2">
+            <p className="text-[11px] font-medium text-muted-foreground/60 mb-2">
               Receita do mês
             </p>
             <p className="text-2xl font-display font-black text-foreground font-numbers tracking-tight">
@@ -210,7 +210,7 @@ export default function ControleGastos() {
             </p>
           </div>
           <div className="p-5">
-            <p className="text-[10px] uppercase tracking-[0.14em] font-bold text-muted-foreground/60 mb-2">
+            <p className="text-[11px] font-medium text-muted-foreground/60 mb-2">
               Total de gastos
             </p>
             <p className="text-2xl font-display font-black text-destructive font-numbers tracking-tight">
@@ -221,7 +221,7 @@ export default function ControleGastos() {
             </p>
           </div>
           <div className="p-5">
-            <p className="text-[10px] uppercase tracking-[0.14em] font-bold text-muted-foreground/60 mb-2">
+            <p className="text-[11px] font-medium text-muted-foreground/60 mb-2">
               Lucro líquido
             </p>
             <p className={cn("text-2xl font-display font-black font-numbers tracking-tight", lucroTone)}>
@@ -234,7 +234,7 @@ export default function ControleGastos() {
             </p>
           </div>
           <div className="p-5">
-            <p className="text-[10px] uppercase tracking-[0.14em] font-bold text-muted-foreground/60 mb-2">
+            <p className="text-[11px] font-medium text-muted-foreground/60 mb-2">
               Margem
             </p>
             <p className={cn("text-2xl font-display font-black font-numbers tracking-tight", marginTone)}>
@@ -245,7 +245,7 @@ export default function ControleGastos() {
             </p>
           </div>
           <div className="p-5 col-span-2 lg:col-span-1">
-            <p className="text-[10px] uppercase tracking-[0.14em] font-bold text-muted-foreground/60 mb-2">
+            <p className="text-[11px] font-medium text-muted-foreground/60 mb-2">
               Média por dia
             </p>
             <p className="text-2xl font-display font-black text-foreground font-numbers tracking-tight">
@@ -447,7 +447,7 @@ export default function ControleGastos() {
           </DialogHeader>
           <form onSubmit={handleSubmit} className="space-y-5 mt-2">
             <div>
-              <Label className="text-[10px] text-muted-foreground/60 uppercase tracking-[0.12em] font-bold">Categoria</Label>
+              <Label className="text-[11px] text-muted-foreground/60 font-medium">Categoria</Label>
               <div className="grid grid-cols-3 gap-2 mt-2.5">
                 {CATEGORIES.map(c => (
                   <button
@@ -479,7 +479,7 @@ export default function ControleGastos() {
             </div>
 
             <div>
-              <Label className="text-[10px] text-muted-foreground/60 uppercase tracking-[0.12em] font-bold">Descrição</Label>
+              <Label className="text-[11px] text-muted-foreground/60 font-medium">Descrição</Label>
               <Input
                 value={form.description}
                 onChange={(e) => setForm({ ...form, description: e.target.value })}
@@ -490,7 +490,7 @@ export default function ControleGastos() {
 
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <Label className="text-[10px] text-muted-foreground/60 uppercase tracking-[0.12em] font-bold">Valor (R$)</Label>
+                <Label className="text-[11px] text-muted-foreground/60 font-medium">Valor (R$)</Label>
                 <Input
                   type="number"
                   step="0.01"
@@ -503,7 +503,7 @@ export default function ControleGastos() {
                 />
               </div>
               <div>
-                <Label className="text-[10px] text-muted-foreground/60 uppercase tracking-[0.12em] font-bold">Data</Label>
+                <Label className="text-[11px] text-muted-foreground/60 font-medium">Data</Label>
                 <Input
                   type="date"
                   value={form.expense_date}

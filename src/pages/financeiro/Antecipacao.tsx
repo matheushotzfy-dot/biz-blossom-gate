@@ -87,7 +87,7 @@ export default function Antecipacao() {
           pulse: stats.eligibleCount > 0,
         }}
         actions={
-          <div className="hidden sm:inline-flex items-center gap-1.5 rounded-xl border border-border/50 bg-card/60 px-3 h-11 text-[11px] font-black uppercase tracking-[0.12em] text-muted-foreground">
+          <div className="hidden sm:inline-flex items-center gap-1.5 rounded-xl border border-border/50 bg-card/60 px-3 h-11 text-[11px] font-semibold text-muted-foreground">
             <Percent className="h-3.5 w-3.5 text-info" /> 2,5% / 15 dias
           </div>
         }
@@ -146,7 +146,7 @@ export default function Antecipacao() {
           <div className="lg:col-span-3 bg-card p-5 space-y-5">
             <div>
               <div className="flex items-center justify-between mb-3">
-                <span className="text-[10px] font-black uppercase tracking-[0.14em] text-muted-foreground">
+                <span className="text-[11px] font-semibold text-muted-foreground">
                   Período de antecipação
                 </span>
                 <div className="flex items-center gap-2">
@@ -178,7 +178,7 @@ export default function Antecipacao() {
             </div>
 
             <div className="flex items-center gap-1.5 flex-wrap">
-              <span className="text-[10px] font-black uppercase tracking-[0.14em] text-muted-foreground/70 mr-1">
+              <span className="text-[11px] font-semibold text-muted-foreground/70 mr-1">
                 Atalhos
               </span>
               {[7, 15, 30, 60, 90].map(d => (
@@ -218,7 +218,7 @@ export default function Antecipacao() {
 
           {/* Result */}
           <div className="lg:col-span-2 bg-card p-5">
-            <p className="text-[10px] font-black uppercase tracking-[0.18em] text-muted-foreground mb-4">
+            <p className="text-[11px] font-semibold text-muted-foreground mb-4">
               Resumo da operação
             </p>
 
@@ -230,7 +230,7 @@ export default function Antecipacao() {
 
             <div className="mt-4 pt-4 border-t border-border/50">
               <div className="flex items-baseline justify-between mb-3">
-                <span className="text-[10px] font-black uppercase tracking-[0.14em] text-success">Líquido a receber</span>
+                <span className="text-[11px] font-semibold text-success">Líquido a receber</span>
                 <span className="text-[22px] font-display font-black text-success tabular-nums tracking-tight">
                   {fmt(antecipationCalc.totalNet)}
                 </span>
@@ -239,7 +239,7 @@ export default function Antecipacao() {
               <Button
                 disabled={antecipationCalc.count === 0}
                 onClick={() => toast.info("Funcionalidade de antecipação será ativada em breve junto à adquirente.")}
-                className="w-full gap-2 rounded-xl font-display font-black uppercase tracking-[0.12em] text-[12px] h-11"
+                className="w-full gap-2 rounded-xl font-display font-semibold text-[12px] h-11"
               >
                 <Banknote className="h-4 w-4" /> Solicitar antecipação
                 <ArrowRight className="h-3.5 w-3.5" />
@@ -277,11 +277,11 @@ export default function Antecipacao() {
             <Table>
               <TableHeader className="sticky top-0 bg-secondary/40 z-10">
                 <TableRow className="border-border/50 hover:bg-transparent">
-                  <TableHead className="w-[100px] text-[10px] font-display font-black uppercase tracking-[0.15em] text-muted-foreground">Vencimento</TableHead>
-                  <TableHead className="w-[140px] text-[10px] font-display font-black uppercase tracking-[0.15em] text-muted-foreground">Status</TableHead>
-                  <TableHead className="text-right text-[10px] font-display font-black uppercase tracking-[0.15em] text-muted-foreground">Valor retido</TableHead>
-                  <TableHead className="text-right text-[10px] font-display font-black uppercase tracking-[0.15em] text-muted-foreground">Taxa</TableHead>
-                  <TableHead className="text-right text-[10px] font-display font-black uppercase tracking-[0.15em] text-muted-foreground">Líquido</TableHead>
+                  <TableHead className="w-[100px] text-[11px] font-display font-semibold text-muted-foreground">Vencimento</TableHead>
+                  <TableHead className="w-[140px] text-[11px] font-display font-semibold text-muted-foreground">Status</TableHead>
+                  <TableHead className="text-right text-[11px] font-display font-semibold text-muted-foreground">Valor retido</TableHead>
+                  <TableHead className="text-right text-[11px] font-display font-semibold text-muted-foreground">Taxa</TableHead>
+                  <TableHead className="text-right text-[11px] font-display font-semibold text-muted-foreground">Líquido</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -290,11 +290,11 @@ export default function Antecipacao() {
                     <TableCell className="font-mono text-[12px] font-bold text-foreground tabular-nums">{tx.daysLeft}d</TableCell>
                     <TableCell>
                       {tx.inWindow ? (
-                        <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md text-[10px] font-black uppercase tracking-[0.12em] bg-primary/10 text-primary border border-primary/20">
+                        <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md text-[11px] font-semibold bg-primary/10 text-primary border border-primary/20">
                           <CheckCircle2 className="h-3 w-3" /> Elegível
                         </span>
                       ) : (
-                        <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md text-[10px] font-black uppercase tracking-[0.12em] bg-muted/10 text-muted-foreground border border-border/40">
+                        <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md text-[11px] font-semibold bg-muted/10 text-muted-foreground border border-border/40">
                           Fora
                         </span>
                       )}
@@ -331,7 +331,7 @@ export default function Antecipacao() {
                   <div className={cn("h-7 w-7 rounded-md flex items-center justify-center", tone)}>
                     <item.icon className="h-3.5 w-3.5" strokeWidth={2.25} />
                   </div>
-                  <h3 className="text-[12px] font-display font-black text-foreground uppercase tracking-[0.12em]">{item.title}</h3>
+                  <h3 className="text-[12px] font-display font-semibold text-foreground ">{item.title}</h3>
                 </div>
                 <p className="text-[12px] text-muted-foreground/80 leading-relaxed font-medium">{item.desc}</p>
               </div>

@@ -311,7 +311,7 @@ export default function Vendas() {
                       key={p.id}
                       onClick={() => selectPreset(p.id)}
                       className={cn(
- "relative px-3.5 flex items-center justify-center text-[11px] font-black uppercase tracking-[0.14em] tabular-nums transition-colors duration-200 min-w-[54px]",
+ "relative px-3.5 flex items-center justify-center text-[11px] font-semibold tabular-nums transition-colors duration-200 min-w-[54px]",
                         isActive
                           ? "text-primary bg-primary/[0.08]"
                           : "text-muted-foreground/60 hover:text-foreground hover:bg-secondary/40"
@@ -327,7 +327,7 @@ export default function Vendas() {
                   <PopoverTrigger asChild>
                     <button
                       className={cn(
- "relative px-3.5 flex items-center gap-1.5 text-[11px] font-black uppercase tracking-[0.14em] transition-colors duration-200",
+ "relative px-3.5 flex items-center gap-1.5 text-[11px] font-semibold transition-colors duration-200",
                         preset === "custom"
                           ? "text-primary bg-primary/[0.08]"
                           : "text-muted-foreground/60 hover:text-foreground hover:bg-secondary/40"
@@ -344,14 +344,14 @@ export default function Vendas() {
                   </PopoverTrigger>
                   <PopoverContent align="end" sideOffset={8} className="w-[320px] p-0 overflow-hidden rounded-xl border border-border bg-card">
                     <div className="flex items-center justify-between gap-3 px-3.5 py-2.5 border-b border-border">
-                      <span className="text-[10px] font-black uppercase tracking-[0.16em] text-muted-foreground/80">
+                      <span className="text-[11px] font-semibold text-muted-foreground/80">
                         {tempRange?.from
                           ? format(tempRange.from, "dd MMM", { locale: ptBR }) +
                             (tempRange.to ? " — " + format(tempRange.to, "dd MMM", { locale: ptBR }) : " — fim?")
                           : "Selecione o intervalo"}
                       </span>
                       {tempRange?.from && tempRange?.to && (
-                        <span className="text-[10px] font-black uppercase tracking-[0.14em] text-primary tabular-nums px-1.5 py-0.5 rounded-md bg-primary/10 border border-primary/20">
+                        <span className="text-[11px] font-semibold text-primary tabular-nums px-1.5 py-0.5 rounded-md bg-primary/10 border border-primary/20">
                           {differenceInDays(tempRange.to, tempRange.from) + 1}d
                         </span>
                       )}
@@ -366,8 +366,8 @@ export default function Vendas() {
                       className="pointer-events-auto p-2"
                     />
                     <div className="flex items-center justify-between gap-2 px-3.5 py-2 border-t border-border">
-                      <button onClick={() => setDateOpen(false)} className="text-[10px] font-black uppercase tracking-[0.14em] text-muted-foreground/60 hover:text-foreground transition-colors">Cancelar</button>
-                      <button onClick={applyCustom} disabled={!tempRange?.from || !tempRange?.to} className="px-3 py-1.5 rounded-md text-[10px] font-black uppercase tracking-[0.14em] bg-primary text-primary-foreground hover:bg-primary/90 disabled:opacity-40 disabled:cursor-not-allowed transition-all">Aplicar</button>
+                      <button onClick={() => setDateOpen(false)} className="text-[11px] font-semibold text-muted-foreground/60 hover:text-foreground transition-colors">Cancelar</button>
+                      <button onClick={applyCustom} disabled={!tempRange?.from || !tempRange?.to} className="px-3 py-1.5 rounded-md text-[11px] font-semibold bg-primary text-primary-foreground hover:bg-primary/90 disabled:opacity-40 disabled:cursor-not-allowed transition-all">Aplicar</button>
                     </div>
                   </PopoverContent>
                 </Popover>
@@ -377,18 +377,18 @@ export default function Vendas() {
               variant="outline"
               size="sm"
               onClick={togglePrivacy}
-              className="h-10 px-3 rounded-xl border-border/60 hover:bg-muted/50 font-bold text-xs uppercase tracking-wider gap-2"
+              className="h-10 px-3 rounded-xl border-border/60 hover:bg-muted/50 font-medium text-xs gap-2"
             >
               {privacyHidden ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
             </Button>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button disabled={!filtered.length} className="h-10 px-4 rounded-xl font-black text-xs uppercase tracking-widest gap-2">
+                <Button disabled={!filtered.length} className="h-10 px-4 rounded-xl font-semibold text-xs gap-2">
                   <Download className="h-4 w-4" /> Exportar
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-64">
-                <DropdownMenuLabel className="text-[10px] font-black uppercase tracking-[0.14em] text-muted-foreground">
+                <DropdownMenuLabel className="text-[11px] font-semibold text-muted-foreground">
                   Exportar dados da tabela
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator />
@@ -439,7 +439,7 @@ export default function Vendas() {
             </div>
             <div>
               <h2 className="font-black text-foreground tracking-tight leading-none">Transações</h2>
-              <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mt-1">
+              <p className="text-[11px] font-medium text-muted-foreground mt-1">
                 {filtered.length} Registros · {rangeLabel}
               </p>
             </div>
@@ -484,7 +484,7 @@ export default function Vendas() {
                 <p className="text-[13px] font-black text-foreground">Erro ao carregar vendas</p>
                 <p className="text-[11px] text-muted-foreground/70 mt-1">Verifique sua conexão e tente novamente.</p>
               </div>
-              <button onClick={() => refetchTx()} className="h-9 px-4 rounded-xl bg-primary text-primary-foreground text-[11px] font-black uppercase tracking-wider">
+              <button onClick={() => refetchTx()} className="h-9 px-4 rounded-xl bg-primary text-primary-foreground text-[11px] font-semibold ">
                 Tentar novamente
               </button>
             </div>
@@ -512,7 +512,7 @@ export default function Vendas() {
                   className="w-full text-left px-4 py-3.5 flex items-center gap-3 active:bg-muted/30 transition-colors"
                 >
                   <Avatar className="h-10 w-10 rounded-xl border border-border/40 shrink-0">
-                    <AvatarFallback className="bg-primary/5 text-primary text-[10px] font-black uppercase">
+                    <AvatarFallback className="bg-primary/5 text-primary text-[11px] font-semibold ">
                       {(t.customer_name || "C").slice(0, 2)}
                     </AvatarFallback>
                   </Avatar>
@@ -532,7 +532,7 @@ export default function Vendas() {
                       </p>
                     </div>
                     <div className="flex items-center gap-1.5 mt-2">
-                      <span className={cn("inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider border", status.cls)}>
+                      <span className={cn("inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-semibold border", status.cls)}>
                         <span className={cn("h-1 w-1 rounded-full", status.dot)} />
                         {status.label}
                       </span>
@@ -552,7 +552,7 @@ export default function Vendas() {
         <div className="hidden md:block overflow-x-auto">
           <table className="w-full text-left">
             <thead>
-              <tr className="bg-muted/30 text-[10px] uppercase font-black tracking-[0.2em] text-muted-foreground/60 border-b border-border/40">
+              <tr className="bg-muted/30 text-[11px] font-semibold text-muted-foreground/60 border-b border-border/40">
                 <th className="px-8 py-5">Cliente / Produto</th>
                 <th className="px-8 py-5 text-center">Status</th>
                 <th className="px-8 py-5 text-center">Pagamento</th>
@@ -566,7 +566,7 @@ export default function Vendas() {
                   <td colSpan={5} className="px-8 py-20 text-center">
                     <div className="flex flex-col items-center opacity-30">
                       <ShoppingCart size={48} strokeWidth={1} />
-                      <p className="mt-4 text-[11px] font-black uppercase tracking-widest">Nenhuma transação encontrada</p>
+                      <p className="mt-4 text-[11px] font-semibold ">Nenhuma transação encontrada</p>
                     </div>
                   </td>
                 </tr>
@@ -580,7 +580,7 @@ export default function Vendas() {
                       <td className="px-8 py-5">
                         <div className="flex items-center gap-3">
                           <Avatar className="h-9 w-9 rounded-xl border border-border/40 shrink-0">
-                            <AvatarFallback className="bg-primary/5 text-primary text-[10px] font-black uppercase">
+                            <AvatarFallback className="bg-primary/5 text-primary text-[11px] font-semibold ">
                               {(t.customer_name || "C").slice(0, 2)}
                             </AvatarFallback>
                           </Avatar>
@@ -594,7 +594,7 @@ export default function Vendas() {
                       </td>
                       <td className="px-8 py-5">
                         <div className="flex justify-center">
-                          <span className={cn("inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest border", status.cls)}>
+                          <span className={cn("inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-semibold border", status.cls)}>
                             <span className={cn("h-1.5 w-1.5 rounded-full", status.dot)} />
                             {status.label}
                           </span>
@@ -627,7 +627,7 @@ export default function Vendas() {
                         <div className="text-[11px] font-bold text-foreground">
                           {spDate(t.created_at)}
                         </div>
-                        <div className="text-[10px] font-medium text-muted-foreground/50 mt-1 uppercase">
+                        <div className="text-[11px] font-medium text-muted-foreground/50 mt-1 ">
                           {spHour(t.created_at)}
                         </div>
                       </td>
@@ -643,7 +643,7 @@ export default function Vendas() {
         {/* Pagination */}
         {filtered.length > 0 && (
           <div className="px-6 py-4 border-t border-border/40 flex flex-col sm:flex-row items-center justify-between gap-3">
-            <div className="text-[10px] font-black uppercase tracking-[0.18em] text-muted-foreground/70 tabular-nums">
+            <div className="text-[11px] font-semibold text-muted-foreground/70 tabular-nums">
               Mostrando {(currentPage - 1) * PAGE_SIZE + 1}–{Math.min(currentPage * PAGE_SIZE, filtered.length)} de {filtered.length}
             </div>
             <div className="flex items-center gap-1.5">

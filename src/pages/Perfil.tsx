@@ -57,7 +57,7 @@ function InfoRow({ label, value, copyable, locked, valueClass }: {
     <div className="flex items-center justify-between py-3 border-b border-border/40 last:border-0">
       <div className="flex items-center gap-2 min-w-0">
         {locked && <Lock className="h-3 w-3 text-muted-foreground/50 shrink-0" />}
-        <span className="text-[11px] text-muted-foreground font-bold uppercase tracking-[0.12em]">{label}</span>
+        <span className="text-[11px] text-muted-foreground font-medium ">{label}</span>
       </div>
       <div className="flex items-center gap-1.5 min-w-0">
         <span className={cn("text-sm font-bold text-foreground tabular-nums truncate", valueClass)}>
@@ -101,7 +101,7 @@ function Panel({
 
 function FieldLabel({ children, locked }: { children: React.ReactNode; locked?: boolean }) {
   return (
-    <Label className="text-[10px] text-muted-foreground font-bold uppercase tracking-[0.14em] flex items-center gap-1.5">
+    <Label className="text-[11px] text-muted-foreground font-medium flex items-center gap-1.5">
       {locked && <Lock className="h-2.5 w-2.5" />}
       {children}
     </Label>
@@ -394,7 +394,7 @@ export default function Perfil() {
               {profile?.email || "—"}
             </p>
             <div className="flex items-center gap-1.5 flex-wrap">
-              <span className="inline-flex items-center gap-1.5 px-2 py-1 rounded-md bg-secondary border border-border/40 text-[10px] font-bold text-muted-foreground uppercase tracking-[0.1em]">
+              <span className="inline-flex items-center gap-1.5 px-2 py-1 rounded-md bg-secondary border border-border/40 text-[11px] font-medium text-muted-foreground ">
                 <Fingerprint className="h-3 w-3" />
                 {profile?.seller_type === "empresa" ? "Pessoa Jurídica" : "Pessoa Física"}
               </span>
@@ -523,7 +523,7 @@ export default function Perfil() {
           title="Progresso de faturamento"
           subtitle={`Próxima meta: ${milestone.next.label}`}
           action={
-            <span className="inline-flex items-center gap-1.5 px-2 py-1 rounded-md bg-primary/10 border border-primary/20 text-[10px] font-bold text-primary uppercase tracking-[0.1em]">
+            <span className="inline-flex items-center gap-1.5 px-2 py-1 rounded-md bg-primary/10 border border-primary/20 text-[11px] font-medium text-primary ">
               <Sparkles className="h-3 w-3" /> {tierLabel}
             </span>
           }
@@ -554,7 +554,7 @@ export default function Perfil() {
             <div className="mb-4">
               <div className="flex items-center justify-between mb-2">
                 <span className="text-xs font-bold text-foreground tabular-nums">{milestone.pct.toFixed(0)}%</span>
-                <span className="text-[10px] text-muted-foreground tabular-nums font-bold uppercase tracking-[0.12em]">
+                <span className="text-[11px] text-muted-foreground tabular-nums font-medium ">
                   até {milestone.next.label}
                 </span>
               </div>
@@ -601,7 +601,7 @@ export default function Perfil() {
           <div className="mb-3 p-4 rounded-xl bg-warning text-warning-foreground border-2 border-warning shadow-lg flex items-start gap-3 animate-fade-in">
             <AlertTriangle className="h-5 w-5 shrink-0 mt-0.5" />
             <div>
-              <p className="text-sm font-black uppercase tracking-wide">Atenção!</p>
+              <p className="text-sm font-semibold tracking-wide">Atenção!</p>
               <p className="text-xs font-medium mt-1">Para realizar saques, preencha seu endereço corretamente abaixo.</p>
             </div>
           </div>
@@ -613,11 +613,11 @@ export default function Perfil() {
         subtitle={isAddressLocked ? "Bloqueado — contate seu gerente para alterações" : "Obrigatório para realizar saques"}
 
         action={isAddressLocked ? (
-          <span className="inline-flex items-center gap-1.5 px-2 py-1 rounded-md text-[10px] font-bold bg-success/10 border border-success/20 text-success uppercase tracking-[0.1em]">
+          <span className="inline-flex items-center gap-1.5 px-2 py-1 rounded-md text-[11px] font-medium bg-success/10 border border-success/20 text-success ">
             <Lock className="h-3 w-3" /> Bloqueado
           </span>
         ) : (
-          <span className="inline-flex items-center gap-1.5 px-2 py-1 rounded-md text-[10px] font-bold bg-warning/10 border border-warning/20 text-warning uppercase tracking-[0.1em]">
+          <span className="inline-flex items-center gap-1.5 px-2 py-1 rounded-md text-[11px] font-medium bg-warning/10 border border-warning/20 text-warning ">
             <Activity className="h-3 w-3" /> Editável
           </span>
         )}
@@ -702,7 +702,7 @@ export default function Perfil() {
                 <Input
                   value={addressForm.state}
                   onChange={(e) => setAddressForm(prev => ({ ...prev, state: e.target.value.toUpperCase().slice(0, 2) }))}
-                  className="mt-1.5 h-10 rounded-lg uppercase tabular-nums"
+                  className="mt-1.5 h-10 rounded-lg tabular-nums"
                   placeholder="SP"
                   disabled={isAddressLocked}
                 />

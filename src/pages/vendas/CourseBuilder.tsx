@@ -422,8 +422,8 @@ export default function CourseBuilder() {
  <div className="h-6 w-6 border-2 border-primary border-t-transparent rounded-full animate-spin" />
  </div>
  <div className="text-center">
- <p className="text-[11px] font-display font-bold uppercase tracking-[0.2em] text-foreground">Carregando curso</p>
- <p className="text-[10px] text-muted-foreground mt-1.5 font-display uppercase tracking-widest">Preparando o editor</p>
+ <p className="text-[11px] font-display font-medium text-foreground">Carregando curso</p>
+ <p className="text-[11px] text-muted-foreground mt-1.5 font-display ">Preparando o editor</p>
  </div>
  </div>
  </div>
@@ -436,9 +436,9 @@ export default function CourseBuilder() {
  </div>
  <div className="text-center">
  <p className="text-foreground text-base font-display font-black tracking-tight">Curso não encontrado</p>
- <p className="text-xs text-muted-foreground mt-1.5 uppercase tracking-widest font-bold">O curso pode ter sido excluído</p>
+ <p className="text-xs text-muted-foreground mt-1.5 font-medium">O curso pode ter sido excluído</p>
  </div>
- <Button variant="ghost" onClick={() => navigate("/vendas/conteudo")} className="rounded-none border border-border bg-card font-display font-bold gap-2 text-[11px] uppercase tracking-[0.16em] hover:border-primary hover:text-primary">
+ <Button variant="ghost" onClick={() => navigate("/vendas/conteudo")} className="rounded-none border border-border bg-card font-display font-medium gap-2 text-[11px] hover:border-primary hover:text-primary">
  <ArrowLeft className="h-4 w-4" /> Voltar
  </Button>
  </div>
@@ -474,13 +474,13 @@ export default function CourseBuilder() {
 
           <div className="hidden sm:flex flex-col min-w-0">
             <div className="flex items-center gap-2.5">
-              <span className="text-[10px] font-black uppercase tracking-[0.25em] text-zinc-500/80">Builder</span>
+              <span className="text-[11px] font-semibold text-zinc-500/80">Builder</span>
               {course.is_published ? (
-                <span className="flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-[9px] font-black uppercase tracking-wider text-emerald-400">
+                <span className="flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-[11px] font-semibold text-emerald-400">
                   <span className="h-1 w-1 rounded-full bg-emerald-400 animate-pulse" /> Live
                 </span>
               ) : (
-                <span className="px-2 py-0.5 rounded-full bg-zinc-800 border border-white/[0.05] text-[9px] font-black uppercase tracking-wider text-zinc-500">
+                <span className="px-2 py-0.5 rounded-full bg-zinc-800 border border-white/[0.05] text-[11px] font-semibold text-zinc-500">
                   Rascunho
                 </span>
               )}
@@ -507,17 +507,17 @@ export default function CourseBuilder() {
               exit={{ opacity: 0, y: -5 }} 
               className="hidden md:flex items-center gap-2 h-9 px-3 rounded-lg border border-white/[0.05] bg-white/[0.02]"
             >
-              {saveStatus === "idle" && <span className="text-[10px] text-zinc-600 font-bold uppercase tracking-widest">Aguardando</span>}
+              {saveStatus === "idle" && <span className="text-[11px] text-zinc-600 font-medium ">Aguardando</span>}
               {saveStatus === "saving" && (
                 <div className="flex items-center gap-2">
                   <Loader2 className="h-3 w-3 animate-spin text-emerald-400" />
-                  <span className="text-[10px] text-zinc-400 font-bold uppercase tracking-widest">Salvando...</span>
+                  <span className="text-[11px] text-zinc-400 font-medium ">Salvando...</span>
                 </div>
               )}
               {saveStatus === "saved" && (
                 <div className="flex items-center gap-2">
                   <CheckCircle2 className="h-3 w-3 text-emerald-400" />
-                  <span className="text-[10px] text-emerald-400 font-bold uppercase tracking-widest">Sincronizado</span>
+                  <span className="text-[11px] text-emerald-400 font-medium ">Sincronizado</span>
                 </div>
               )}
             </motion.div>
@@ -546,7 +546,7 @@ export default function CourseBuilder() {
             {course.is_published && (
               <button
                 onClick={() => window.open(`/membros-area/curso/${courseId}`, "_blank")}
-                className="hidden lg:flex h-10 px-5 rounded-xl border border-white/[0.05] bg-white/[0.02] text-[11px] font-black uppercase tracking-widest text-zinc-300 items-center gap-2 hover:bg-white/[0.05] hover:border-white/[0.1] transition-all"
+                className="hidden lg:flex h-10 px-5 rounded-xl border border-white/[0.05] bg-white/[0.02] text-[11px] font-semibold text-zinc-300 items-center gap-2 hover:bg-white/[0.05] hover:border-white/[0.1] transition-all"
               >
                 <Eye className="h-4 w-4" /> Visualizar
               </button>
@@ -555,7 +555,7 @@ export default function CourseBuilder() {
             <button
               onClick={togglePublish}
               className={cn(
- "h-10 px-6 rounded-xl text-[11px] font-black uppercase tracking-widest flex items-center gap-2.5 transition-all duration-300 ",
+ "h-10 px-6 rounded-xl text-[11px] font-semibold flex items-center gap-2.5 transition-all duration-300 ",
                 course.is_published
                   ? "bg-white text-black hover:bg-zinc-200"
                   : "bg-emerald-500 text-white hover:bg-emerald-400 shadow-emerald-500/20"
@@ -600,8 +600,8 @@ export default function CourseBuilder() {
                     <Layers className="h-5 w-5 text-emerald-400" />
                   </div>
                   <div className="min-w-0">
-                    <h2 className="text-[13px] font-display font-black uppercase tracking-widest text-white block leading-tight">Conteúdo</h2>
-                    <span className="text-[10px] text-zinc-500 font-bold uppercase tracking-widest">
+                    <h2 className="text-[13px] font-display font-semibold text-white block leading-tight">Conteúdo</h2>
+                    <span className="text-[11px] text-zinc-500 font-medium ">
                       {totalLessons} Aulas no total
                     </span>
                   </div>
@@ -686,7 +686,7 @@ export default function CourseBuilder() {
                             </p>
                           )}
                           <div className="flex items-center gap-3 mt-1.5">
-                            <span className="text-[10px] text-zinc-500 font-bold uppercase tracking-widest tabular-nums">
+                            <span className="text-[11px] text-zinc-500 font-medium tabular-nums">
                               {mod.lessons.length} {mod.lessons.length === 1 ? "aula" : "aulas"}
                             </span>
                             {mod.lessons.length > 0 && (
@@ -771,11 +771,11 @@ export default function CourseBuilder() {
                                         </p>
                                         <div className="flex items-center gap-2.5 mt-1">
                                           {lesson.is_free && (
-                                            <span className="text-[8px] font-black uppercase tracking-widest text-emerald-400 bg-emerald-500/10 px-1.5 py-0.5 rounded">FREE</span>
+                                            <span className="text-[11px] font-semibold text-emerald-400 bg-emerald-500/10 px-1.5 py-0.5 rounded">FREE</span>
                                           )}
                                           <div className="flex items-center gap-1.5">
                                             <div className={cn("h-1 w-1 rounded-full", hasVideo ? "bg-emerald-500 " : "bg-zinc-700")} />
-                                            <span className="text-[10px] font-bold text-zinc-600 uppercase tracking-widest">
+                                            <span className="text-[11px] font-medium text-zinc-600 ">
                                               {hasVideo ? "Pronta" : "Vazia"}
                                             </span>
                                           </div>
@@ -806,7 +806,7 @@ export default function CourseBuilder() {
                                 className="w-full mt-2 flex items-center justify-center gap-2 py-3 rounded-xl border border-dashed border-white/[0.05] bg-white/[0.01] text-zinc-500 hover:text-emerald-400 hover:border-emerald-500/30 hover:bg-emerald-500/[0.02] transition-all group/add"
                               >
                                 <Plus className="h-4 w-4 group-hover/add:scale-110 transition-transform" />
-                                <span className="text-[11px] font-black uppercase tracking-widest">Nova Aula</span>
+                                <span className="text-[11px] font-semibold ">Nova Aula</span>
                               </button>
                             </div>
                           </motion.div>
@@ -819,7 +819,7 @@ export default function CourseBuilder() {
  {/* New Module */}
  {showNewModule ? (
  <motion.div initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} className="bg-card border border-primary p-3 space-y-2.5">
-   <div className="text-[10px] font-black uppercase tracking-[0.18em] text-primary">Novo módulo</div>
+   <div className="text-[11px] font-semibold text-primary">Novo módulo</div>
  <input
  autoFocus value={newModuleTitle}
  onChange={e => setNewModuleTitle(e.target.value)}
@@ -828,8 +828,8 @@ export default function CourseBuilder() {
  className="w-full bg-card-elevated border border-border px-2.5 py-2 text-[13px] font-display font-semibold text-foreground placeholder:text-muted-foreground/60 focus:outline-none focus:border-primary"
  />
  <div className="flex gap-1.5">
- <button onClick={createModule} className="flex-1 h-9 bg-primary text-primary-foreground text-[10px] font-display font-black uppercase tracking-[0.14em] hover:bg-primary/90 transition-colors">Criar módulo</button>
- <button onClick={() => { setShowNewModule(false); setNewModuleTitle(""); }} className="h-9 px-3 bg-card-elevated border border-border text-muted-foreground text-[10px] font-display font-black uppercase tracking-[0.14em] hover:text-foreground transition-colors">Cancelar</button>
+ <button onClick={createModule} className="flex-1 h-9 bg-primary text-primary-foreground text-[11px] font-display font-semibold hover:bg-primary/90 transition-colors">Criar módulo</button>
+ <button onClick={() => { setShowNewModule(false); setNewModuleTitle(""); }} className="h-9 px-3 bg-card-elevated border border-border text-muted-foreground text-[11px] font-display font-semibold hover:text-foreground transition-colors">Cancelar</button>
  </div>
  </motion.div>
  ) : (
@@ -838,7 +838,7 @@ export default function CourseBuilder() {
  className="w-full border border-dashed border-border py-3 flex items-center justify-center gap-2 text-muted-foreground hover:text-primary hover:border-primary hover:bg-primary/[0.06] transition-colors"
  >
  <Plus className="h-3.5 w-3.5" strokeWidth={2.5} />
- <span className="text-[10.5px] font-display font-black uppercase tracking-[0.14em]">Novo módulo</span>
+ <span className="text-[11px] font-display font-semibold ">Novo módulo</span>
  </button>
  )}
  </div>
@@ -871,12 +871,12 @@ export default function CourseBuilder() {
               <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}>
                 <div className="flex items-center gap-3 mb-6">
                   <div className="px-3 py-1 rounded-full bg-white/[0.03] border border-white/[0.05] flex items-center gap-2">
-                    <span className="text-[10px] font-black uppercase tracking-[0.25em] text-zinc-500">
+                    <span className="text-[11px] font-semibold text-zinc-500">
                       {modules.find(m => m.lessons.some(l => l.id === selectedLesson.id))?.title}
                     </span>
                   </div>
                   <div className="h-1 w-1 rounded-full bg-zinc-800" />
-                  <span className="text-[10px] font-black uppercase tracking-[0.25em] text-emerald-500/80">Aula Atual</span>
+                  <span className="text-[11px] font-semibold text-emerald-500/80">Aula Atual</span>
                 </div>
 
                 {editingLessonTitle ? (
@@ -911,7 +911,7 @@ export default function CourseBuilder() {
                       key={tab.id}
                       onClick={() => setActiveEditorTab(tab.id)}
                       className={cn(
- "relative flex items-center gap-2.5 px-6 h-11 rounded-xl text-[11px] font-black uppercase tracking-widest transition-all duration-300",
+ "relative flex items-center gap-2.5 px-6 h-11 rounded-xl text-[11px] font-semibold transition-all duration-300",
                         isActive
                           ? "bg-white text-black "
                           : "text-zinc-500 hover:text-zinc-300 hover:bg-white/[0.03]"
@@ -948,14 +948,14 @@ export default function CourseBuilder() {
                           </div>
                           <div className="w-full max-w-sm">
                             <div className="flex justify-between text-[12px] mb-3">
-                              <span className="font-black uppercase tracking-widest text-white">Processando Vídeo</span>
+                              <span className="font-semibold text-white">Processando Vídeo</span>
                               <span className="font-black text-emerald-400 tabular-nums">{Math.round(videoUploadProgress)}%</span>
                             </div>
                             <div className="h-1.5 bg-white/[0.03] rounded-full overflow-hidden border border-white/[0.05]">
                               <motion.div className="h-full bg-emerald-500 " animate={{ width: `${videoUploadProgress}%` }} transition={{ ease: "easeOut" }} />
                             </div>
                           </div>
-                          <p className="text-[10px] text-zinc-500 font-bold uppercase tracking-[0.2em]">Otimizando para 4K • Não feche a aba</p>
+                          <p className="text-[11px] text-zinc-500 font-medium ">Otimizando para 4K • Não feche a aba</p>
                         </div>
                       ) : lessonVideoUrl ? (
                         <div className="relative aspect-video bg-black  overflow-hidden group">
@@ -971,7 +971,7 @@ export default function CourseBuilder() {
                           ) : (
                             <div className="w-full h-full flex flex-col items-center justify-center bg-white/[0.02] gap-4">
                               <Video className="h-12 w-12 text-emerald-500/40" />
-                              <p className="text-zinc-500 font-bold text-sm tracking-widest uppercase">Streaming Ativo</p>
+                              <p className="text-zinc-500 font-medium text-sm ">Streaming Ativo</p>
                             </div>
                           )}
                           
@@ -996,8 +996,8 @@ export default function CourseBuilder() {
                             <div className="absolute -inset-4 rounded-[14px] border border-emerald-500/0 group-hover/upload:border-emerald-500/10 transition-all duration-700 animate-[ping_3s_infinite_alternate]" />
                           </div>
                           <div className="text-center relative z-10">
-                            <h3 className="text-[14px] font-black uppercase tracking-[0.25em] text-white">Upload de Vídeo</h3>
-                            <p className="text-[11px] text-zinc-500 mt-2 font-bold uppercase tracking-widest">Arraste arquivos 4K (MP4, MKV, MOV) • Máx 500MB</p>
+                            <h3 className="text-[14px] font-semibold text-white">Upload de Vídeo</h3>
+                            <p className="text-[11px] text-zinc-500 mt-2 font-medium ">Arraste arquivos 4K (MP4, MKV, MOV) • Máx 500MB</p>
                           </div>
                         </div>
                       )}
@@ -1027,8 +1027,8 @@ export default function CourseBuilder() {
                             <FileText className="h-5 w-5 text-emerald-400" />
                           </div>
                           <div>
-                            <h3 className="text-[12px] font-black uppercase tracking-widest text-white">Resumo da Aula</h3>
-                            <span className="text-[10px] text-zinc-500 font-bold uppercase tracking-widest mt-0.5 block">Explique os pontos chave</span>
+                            <h3 className="text-[12px] font-semibold text-white">Resumo da Aula</h3>
+                            <span className="text-[11px] text-zinc-500 font-medium mt-0.5 block">Explique os pontos chave</span>
                           </div>
                         </div>
                         <textarea
@@ -1048,7 +1048,7 @@ export default function CourseBuilder() {
                             <div className="h-9 w-9 rounded-xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center">
                               <Paperclip className="h-4 w-4 text-blue-400" />
                             </div>
-                            <h3 className="text-[12px] font-black uppercase tracking-widest text-white">Materiais</h3>
+                            <h3 className="text-[12px] font-semibold text-white">Materiais</h3>
                           </div>
                           <button
                             onClick={() => attachmentInputRef.current?.click()}
@@ -1069,7 +1069,7 @@ export default function CourseBuilder() {
                                   </div>
                                   <div className="flex-1 min-w-0">
                                     <p className="text-[11px] font-bold text-zinc-200 truncate tracking-tight">{att.file_name}</p>
-                                    <p className="text-[9px] text-zinc-600 font-bold uppercase tracking-widest mt-0.5">{formatFileSize(att.file_size)}</p>
+                                    <p className="text-[11px] text-zinc-600 font-medium mt-0.5">{formatFileSize(att.file_size)}</p>
                                   </div>
                                   <div className="flex items-center gap-1 opacity-0 group-hover/att:opacity-100 transition-all">
                                     <a href={att.file_url} target="_blank" rel="noopener noreferrer" className="h-7 w-7 rounded-md bg-white/[0.05] flex items-center justify-center hover:bg-white/[0.1] transition-all">
@@ -1090,7 +1090,7 @@ export default function CourseBuilder() {
                               <div className="h-12 w-12 rounded-[12px] bg-zinc-900 border border-white/[0.05] flex items-center justify-center">
                                 <Plus className="h-5 w-5" />
                               </div>
-                              <p className="text-[10px] font-black uppercase tracking-[0.2em]">Adicionar Anexos</p>
+                              <p className="text-[11px] font-semibold ">Adicionar Anexos</p>
                             </div>
                           )}
                         </div>
@@ -1110,8 +1110,8 @@ export default function CourseBuilder() {
                             <Clock className="h-5 w-5 text-blue-400" />
                           </div>
                           <div>
-                            <p className="text-[12px] font-black uppercase tracking-widest text-white leading-none">Duração Estimada</p>
-                            <p className="text-[10px] text-zinc-500 mt-1.5 font-bold uppercase tracking-widest">Informação visual para o aluno</p>
+                            <p className="text-[12px] font-semibold text-white leading-none">Duração Estimada</p>
+                            <p className="text-[11px] text-zinc-500 mt-1.5 font-medium ">Informação visual para o aluno</p>
                           </div>
                         </div>
                         <div className="flex items-center gap-3">
@@ -1120,7 +1120,7 @@ export default function CourseBuilder() {
                             onChange={e => { const v = parseInt(e.target.value) || 0; setLessonDuration(v); debouncedSave("duration_minutes", v); }}
                             className="h-12 w-20 rounded-xl bg-[#080808] border border-white/[0.05] text-center text-[15px] font-black tabular-nums text-white focus:outline-none focus:border-blue-500/40 transition-all"
                           />
-                          <span className="text-[10px] text-zinc-600 font-bold uppercase tracking-widest">min</span>
+                          <span className="text-[11px] text-zinc-600 font-medium ">min</span>
                         </div>
                       </div>
                     </div>
@@ -1133,8 +1133,8 @@ export default function CourseBuilder() {
                             <Globe className="h-5 w-5 text-emerald-400" />
                           </div>
                           <div>
-                            <p className="text-[12px] font-black uppercase tracking-widest text-white leading-none">Aula de Degustação</p>
-                            <p className="text-[10px] text-zinc-500 mt-1.5 font-bold uppercase tracking-widest">Disponível sem compra ativa</p>
+                            <p className="text-[12px] font-semibold text-white leading-none">Aula de Degustação</p>
+                            <p className="text-[11px] text-zinc-500 mt-1.5 font-medium ">Disponível sem compra ativa</p>
                           </div>
                         </div>
                         <Switch checked={lessonIsFree} onCheckedChange={v => { setLessonIsFree(v); autoSave("is_free", v); }} />
@@ -1149,8 +1149,8 @@ export default function CourseBuilder() {
                             <Calendar className="h-5 w-5 text-orange-400" />
                           </div>
                           <div>
-                            <p className="text-[12px] font-black uppercase tracking-widest text-white leading-none">Liberação Programada (Drip)</p>
-                            <p className="text-[10px] text-zinc-500 mt-1.5 font-bold uppercase tracking-widest">Gotejamento por dias após a compra</p>
+                            <p className="text-[12px] font-semibold text-white leading-none">Liberação Programada (Drip)</p>
+                            <p className="text-[11px] text-zinc-500 mt-1.5 font-medium ">Gotejamento por dias após a compra</p>
                           </div>
                         </div>
                         <div className="flex items-center gap-4">
@@ -1169,7 +1169,7 @@ export default function CourseBuilder() {
                                   onChange={e => { const v = parseInt(e.target.value) || 0; setLessonDripDays(v); debouncedSave("drip_days", v); }}
                                   className="h-12 w-20 rounded-xl bg-[#080808] border border-white/[0.05] text-center text-[15px] font-black tabular-nums text-white focus:outline-none focus:border-orange-500/40 transition-all"
                                 />
-                                <span className="text-[10px] text-zinc-600 font-bold uppercase tracking-widest whitespace-nowrap">dias</span>
+                                <span className="text-[11px] text-zinc-600 font-medium whitespace-nowrap">dias</span>
                               </motion.div>
                             )}
                           </AnimatePresence>
@@ -1185,14 +1185,14 @@ export default function CourseBuilder() {
                             <Trash2 className="h-5 w-5 text-red-400" />
                           </div>
                           <div>
-                            <p className="text-[12px] font-black uppercase tracking-widest text-red-400 leading-none">Zona Crítica</p>
-                            <p className="text-[10px] text-zinc-500 mt-1.5 font-bold uppercase tracking-widest">Esta ação removerá permanentemente a aula</p>
+                            <p className="text-[12px] font-semibold text-red-400 leading-none">Zona Crítica</p>
+                            <p className="text-[11px] text-zinc-500 mt-1.5 font-medium ">Esta ação removerá permanentemente a aula</p>
                           </div>
                         </div>
                         <Button
                           variant="ghost"
                           onClick={() => deleteLesson(selectedLesson.id)}
-                          className="h-12 px-6 rounded-xl border border-red-500/20 bg-red-500/5 text-red-400 text-[11px] font-black uppercase tracking-widest hover:bg-red-500 hover:text-white transition-all"
+                          className="h-12 px-6 rounded-xl border border-red-500/20 bg-red-500/5 text-red-400 text-[11px] font-semibold hover:bg-red-500 hover:text-white transition-all"
                         >
                           <Trash2 className="h-4 w-4 mr-2" /> Excluir Aula
                         </Button>
@@ -1224,7 +1224,7 @@ export default function CourseBuilder() {
                 <Layers className="h-5 w-5 text-primary" strokeWidth={1.8} />
               </div>
               <div>
-                <div className="text-[10px] font-bold uppercase tracking-[0.16em] text-primary tabular-nums">Passo 01 / 02</div>
+                <div className="text-[11px] font-medium text-primary tabular-nums">Passo 01 / 02</div>
                 <h3 className="font-display text-lg font-black tracking-tight text-foreground">Crie o primeiro módulo</h3>
               </div>
             </div>
@@ -1232,10 +1232,10 @@ export default function CourseBuilder() {
               Módulos são as <span className="text-foreground font-semibold">seções</span> do seu curso. Cada módulo agrupa várias aulas em vídeo, anexos e configurações de acesso.
             </p>
             <div className="flex items-center gap-2">
-              <Button onClick={() => { setSidebarCollapsed(false); setShowNewModule(true); }} className="gap-2 rounded-none bg-primary text-primary-foreground font-display font-bold text-[11px] uppercase tracking-[0.16em] h-11 px-6 hover:bg-primary/90">
+              <Button onClick={() => { setSidebarCollapsed(false); setShowNewModule(true); }} className="gap-2 rounded-none bg-primary text-primary-foreground font-display font-medium text-[11px] h-11 px-6 hover:bg-primary/90">
                 <Plus className="h-4 w-4" /> Criar módulo
               </Button>
-              <Button variant="ghost" onClick={openCourseSettings} className="gap-2 rounded-none border border-border bg-card font-display font-bold text-[11px] uppercase tracking-[0.16em] h-11 px-4 text-muted-foreground hover:border-primary hover:text-primary">
+              <Button variant="ghost" onClick={openCourseSettings} className="gap-2 rounded-none border border-border bg-card font-display font-medium text-[11px] h-11 px-4 text-muted-foreground hover:border-primary hover:text-primary">
                 <Settings className="h-4 w-4" /> Configurar curso
               </Button>
             </div>
@@ -1248,7 +1248,7 @@ export default function CourseBuilder() {
                 <div key={s.label} className="text-center">
                   <s.icon className="h-3.5 w-3.5 mx-auto text-muted-foreground" strokeWidth={1.8} />
                   <div className="mt-1 font-numbers text-base font-black tabular-nums text-foreground">{s.value}</div>
-                  <div className="text-[9px] uppercase tracking-[0.16em] font-bold text-muted-foreground">{s.label}</div>
+                  <div className="text-[11px] font-medium text-muted-foreground">{s.label}</div>
                 </div>
               ))}
             </div>
@@ -1260,7 +1260,7 @@ export default function CourseBuilder() {
                 <PlayCircle className="h-5 w-5 text-primary" strokeWidth={1.8} />
               </div>
               <div>
-                <div className="text-[10px] font-bold uppercase tracking-[0.16em] text-primary tabular-nums">Passo 02 / 02</div>
+                <div className="text-[11px] font-medium text-primary tabular-nums">Passo 02 / 02</div>
                 <h3 className="font-display text-lg font-black tracking-tight text-foreground">Adicione a primeira aula</h3>
               </div>
             </div>
@@ -1278,11 +1278,11 @@ export default function CourseBuilder() {
                     {String(i + 1).padStart(2, "0")}
                   </span>
                   <span className="flex-1 truncate text-sm font-semibold text-foreground">{m.title}</span>
-                  <span className="text-[10px] font-bold uppercase tracking-[0.16em] text-muted-foreground group-hover:text-primary">+ Aula</span>
+                  <span className="text-[11px] font-medium text-muted-foreground group-hover:text-primary">+ Aula</span>
                 </button>
               ))}
             </div>
-            <Button onClick={() => createLesson(modules[0].id)} className="gap-2 rounded-none bg-primary text-primary-foreground font-display font-bold text-[11px] uppercase tracking-[0.16em] h-11 px-6 w-full hover:bg-primary/90">
+            <Button onClick={() => createLesson(modules[0].id)} className="gap-2 rounded-none bg-primary text-primary-foreground font-display font-medium text-[11px] h-11 px-6 w-full hover:bg-primary/90">
               <Plus className="h-4 w-4" /> Criar aula no primeiro módulo
             </Button>
           </div>
@@ -1299,12 +1299,12 @@ export default function CourseBuilder() {
              {(() => {
                const firstLesson = modules.flatMap(m => m.lessons)[0];
                return firstLesson ? (
-                  <Button onClick={() => selectLesson(firstLesson)} className="gap-2 rounded-none bg-primary text-primary-foreground font-display font-bold text-[11px] uppercase tracking-[0.16em] h-11 px-6 hover:bg-primary/90">
+                  <Button onClick={() => selectLesson(firstLesson)} className="gap-2 rounded-none bg-primary text-primary-foreground font-display font-medium text-[11px] h-11 px-6 hover:bg-primary/90">
                     <PlayCircle className="h-4 w-4" /> Abrir "{firstLesson.title.length > 24 ? firstLesson.title.slice(0, 24) + "…" : firstLesson.title}"
                   </Button>
                 ) : null;
               })()}
-              <Button variant="ghost" onClick={() => createLesson(modules[0].id)} className="gap-2 rounded-none border border-border bg-card font-display font-bold text-[11px] uppercase tracking-[0.16em] h-11 px-4 text-muted-foreground hover:border-primary hover:text-primary">
+              <Button variant="ghost" onClick={() => createLesson(modules[0].id)} className="gap-2 rounded-none border border-border bg-card font-display font-medium text-[11px] h-11 px-4 text-muted-foreground hover:border-primary hover:text-primary">
                 <Plus className="h-4 w-4" /> Nova aula
               </Button>
            </div>
@@ -1342,11 +1342,11 @@ export default function CourseBuilder() {
  </AlertDialogDescription>
  </AlertDialogHeader>
  <AlertDialogFooter>
- <AlertDialogCancel disabled={deletingItem} className="rounded-none border border-border bg-card font-display font-bold text-[11px] uppercase tracking-[0.16em] hover:border-primary hover:text-primary">Cancelar</AlertDialogCancel>
+ <AlertDialogCancel disabled={deletingItem} className="rounded-none border border-border bg-card font-display font-medium text-[11px] hover:border-primary hover:text-primary">Cancelar</AlertDialogCancel>
  <AlertDialogAction
  onClick={confirmDelete}
  disabled={deletingItem}
- className="rounded-none font-display font-bold text-[11px] uppercase tracking-[0.16em] bg-destructive text-destructive-foreground hover:bg-destructive/90 gap-2"
+ className="rounded-none font-display font-medium text-[11px] bg-destructive text-destructive-foreground hover:bg-destructive/90 gap-2"
  >
  {deletingItem && <Loader2 className="h-4 w-4 animate-spin" />}
  {deletingItem ? "Excluindo..." : "Excluir"}
@@ -1370,7 +1370,7 @@ export default function CourseBuilder() {
  <div className="space-y-6">
  {/* Thumbnail */}
  <div>
- <Label className="text-[10px] font-display font-bold text-muted-foreground uppercase tracking-[0.18em] mb-2.5 block">Thumbnail</Label>
+ <Label className="text-[11px] font-display font-medium text-muted-foreground mb-2.5 block">Thumbnail</Label>
  <div
  onClick={() => thumbnailInputRef.current?.click()}
  className="relative border border-dashed border-border hover:border-primary transition-colors cursor-pointer overflow-hidden h-44 group bg-card-elevated"
@@ -1385,10 +1385,10 @@ export default function CourseBuilder() {
  ) : (
  <div className="w-full h-full flex flex-col items-center justify-center">
  <ImageIcon className="h-9 w-9 text-primary mb-3" />
- <p className="text-[11px] font-display font-bold uppercase tracking-[0.16em] text-foreground">
+ <p className="text-[11px] font-display font-medium text-foreground">
  {uploadingThumbnail ? "Enviando..." : "Clique para enviar"}
  </p>
- <p className="text-[10px] text-muted-foreground mt-1.5 font-display font-bold uppercase tracking-widest">JPG, PNG até 5MB</p>
+ <p className="text-[11px] text-muted-foreground mt-1.5 font-display font-medium ">JPG, PNG até 5MB</p>
  </div>
  )}
  </div>
@@ -1397,7 +1397,7 @@ export default function CourseBuilder() {
 
   {/* Title */}
   <div className="space-y-3">
-  <Label className="text-[11px] font-black uppercase tracking-[0.2em] text-zinc-500">Título da Área</Label>
+  <Label className="text-[11px] font-semibold text-zinc-500">Título da Área</Label>
   <input
   value={courseTitle}
   onChange={e => setCourseTitle(e.target.value)}
@@ -1407,7 +1407,7 @@ export default function CourseBuilder() {
 
  {/* Description */}
  <div>
- <Label className="text-[10px] font-display font-bold text-muted-foreground uppercase tracking-[0.18em] mb-2.5 block">Descrição</Label>
+ <Label className="text-[11px] font-display font-medium text-muted-foreground mb-2.5 block">Descrição</Label>
  <textarea
  value={courseDescription}
  onChange={e => setCourseDescription(e.target.value)}
@@ -1419,25 +1419,25 @@ export default function CourseBuilder() {
 
  {/* Stats */}
  <div className="border border-border bg-card-elevated p-4">
- <p className="text-[10px] font-display font-bold uppercase tracking-[0.18em] text-muted-foreground mb-3">Informações</p>
+ <p className="text-[11px] font-display font-medium text-muted-foreground mb-3">Informações</p>
  <div className="grid grid-cols-3 gap-3">
  <div className="text-center">
  <p className="text-lg font-display font-black text-foreground tabular-nums">{String(modules.length).padStart(2, "0")}</p>
- <p className="text-[10px] text-muted-foreground font-display font-bold uppercase tracking-widest mt-1">Módulos</p>
+ <p className="text-[11px] text-muted-foreground font-display font-medium mt-1">Módulos</p>
  </div>
  <div className="text-center">
  <p className="text-lg font-display font-black text-foreground tabular-nums">{String(totalLessons).padStart(2, "0")}</p>
- <p className="text-[10px] text-muted-foreground font-display font-bold uppercase tracking-widest mt-1">Aulas</p>
+ <p className="text-[11px] text-muted-foreground font-display font-medium mt-1">Aulas</p>
  </div>
  <div className="text-center">
  <p className="text-lg font-display font-black text-primary tabular-nums">{String(studentCount).padStart(2, "0")}</p>
- <p className="text-[10px] text-muted-foreground font-display font-bold uppercase tracking-widest mt-1">Alunos</p>
+ <p className="text-[11px] text-muted-foreground font-display font-medium mt-1">Alunos</p>
  </div>
  </div>
  </div>
 
  {/* Save */}
- <Button onClick={saveCourseSettings} className="w-full h-11 rounded-none bg-primary text-primary-foreground font-display font-bold text-[11px] uppercase tracking-[0.16em] gap-2 hover:bg-primary/90">
+ <Button onClick={saveCourseSettings} className="w-full h-11 rounded-none bg-primary text-primary-foreground font-display font-medium text-[11px] gap-2 hover:bg-primary/90">
  <CheckCircle2 className="h-4 w-4" /> Salvar Configurações
  </Button>
  </div>

@@ -156,25 +156,25 @@ export default function Saques() {
       {/* Header */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div className="space-y-1">
-          <h1 className="text-2xl font-black text-foreground tracking-tight uppercase tracking-tight">Saques</h1>
-          <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.2em] flex items-center gap-2">
+          <h1 className="text-2xl font-semibold text-foreground tracking-tight tracking-tight">Saques</h1>
+          <p className="text-[11px] font-medium text-muted-foreground flex items-center gap-2">
             <ArrowDownToLine className="h-3.5 w-3.5 text-primary" />
             Solicite a transferência dos seus lucros
           </p>
         </div>
         <Dialog open={open} onOpenChange={handleOpenChange}>
           <DialogTrigger asChild>
-            <button className="bg-primary text-primary-foreground h-11 px-6 rounded-xl font-black text-sm hover:opacity-90 transition-all flex items-center gap-2  uppercase tracking-widest">
+            <button className="bg-primary text-primary-foreground h-11 px-6 rounded-xl font-semibold text-sm hover:opacity-90 transition-all flex items-center gap-2  ">
               <Plus size={18} strokeWidth={3} /> Solicitar Saque
             </button>
           </DialogTrigger>
           <DialogContent className="max-w-md bg-card border-border/60 max-h-[92vh] overflow-y-auto">
             <DialogHeader>
-              <DialogTitle className="text-xl font-black uppercase tracking-tight">Solicitar Saque</DialogTitle>
+              <DialogTitle className="text-xl font-semibold tracking-tight">Solicitar Saque</DialogTitle>
             </DialogHeader>
             <form onSubmit={handleSubmit} className="space-y-5 pt-4">
               <div className="space-y-2">
-                <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Valor do Saque</label>
+                <label className="text-[11px] font-semibold text-muted-foreground">Valor do Saque</label>
                 <div className="relative">
                   <span className="absolute left-4 top-1/2 -translate-y-1/2 font-black text-muted-foreground">R$</span>
                   <Input
@@ -192,14 +192,14 @@ export default function Saques() {
               </div>
 
               <div className="space-y-2">
-                <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Chave de recebimento</label>
+                <label className="text-[11px] font-semibold text-muted-foreground">Chave de recebimento</label>
                 <div className="overflow-hidden rounded-[12px] border border-border/60 bg-background">
                   <div className="grid grid-cols-2 border-b border-border/40 p-1.5">
                     <button
                       type="button"
                       onClick={() => setPickedKey(pixKeys[0]?.id ?? "")}
                       className={cn(
- "flex h-10 items-center justify-center gap-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all duration-200",
+ "flex h-10 items-center justify-center gap-2 rounded-xl text-[11px] font-semibold transition-all duration-200",
                         pickedKey !== "copy_paste"
                           ? "bg-primary text-primary-foreground"
                           : "text-muted-foreground hover:bg-primary/[0.06] hover:text-foreground",
@@ -211,7 +211,7 @@ export default function Saques() {
                       type="button"
                       onClick={() => setPickedKey("copy_paste")}
                       className={cn(
- "flex h-10 items-center justify-center gap-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all duration-200",
+ "flex h-10 items-center justify-center gap-2 rounded-xl text-[11px] font-semibold transition-all duration-200",
                         pickedKey === "copy_paste"
                           ? "bg-primary text-primary-foreground"
                           : "text-muted-foreground hover:bg-primary/[0.06] hover:text-foreground",
@@ -235,7 +235,7 @@ export default function Saques() {
                         </div>
                       </div>
                       <div className="space-y-2">
-                        <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Código BR Code</label>
+                        <label className="text-[11px] font-semibold text-muted-foreground">Código BR Code</label>
                         <textarea
                           value={copyPasteCode}
                           onChange={(e) => setCopyPasteCode(e.target.value)}
@@ -255,7 +255,7 @@ export default function Saques() {
                     <div className="space-y-2 p-3">
                       {pixKeys.length === 0 ? (
                         <div className="rounded-xl border border-dashed border-border/70 p-5 text-center">
-                          <p className="text-[11px] font-black uppercase tracking-widest text-muted-foreground">Nenhuma chave PIX cadastrada</p>
+                          <p className="text-[11px] font-semibold text-muted-foreground">Nenhuma chave PIX cadastrada</p>
                         </div>
                       ) : (
                         pixKeys.map((pk) => {
@@ -282,10 +282,10 @@ export default function Saques() {
                               </span>
                               <div className="min-w-0 flex-1 space-y-1">
                                 <div className="flex items-center gap-2">
-                                  <span className="rounded-md border border-primary/20 bg-primary/[0.06] px-2 py-0.5 text-[9px] font-black uppercase tracking-widest text-primary">
+                                  <span className="rounded-md border border-primary/20 bg-primary/[0.06] px-2 py-0.5 text-[11px] font-semibold text-primary">
                                     {typeLabel}
                                   </span>
-                                  {active && <span className="text-[9px] font-black uppercase tracking-widest text-primary">Selecionada</span>}
+                                  {active && <span className="text-[11px] font-semibold text-primary">Selecionada</span>}
                                 </div>
                                 <p className="break-all font-mono text-[12px] font-black leading-relaxed text-foreground">
                                   {label}
@@ -303,15 +303,15 @@ export default function Saques() {
 
               <div className="bg-muted/30 p-5 rounded-[12px] border border-border/60 space-y-3">
                 <div className="flex justify-between text-xs font-bold">
-                  <span className="text-muted-foreground uppercase tracking-widest">Taxa Administrativa</span>
+                  <span className="text-muted-foreground ">Taxa Administrativa</span>
                   <span className="text-red-500">-{fmt(withdrawFee)}</span>
                 </div>
                 <div className="flex justify-between border-t border-border/40 pt-4 items-center">
-                  <span className="text-[11px] font-black uppercase tracking-widest text-muted-foreground">Você receberá</span>
+                  <span className="text-[11px] font-semibold text-muted-foreground">Você receberá</span>
                   <span className="text-2xl font-black text-emerald-500 tabular-nums">{fmt(netPreview)}</span>
                 </div>
               </div>
-              <button type="submit" className="w-full bg-primary text-primary-foreground h-14 rounded-[12px] font-black uppercase tracking-widest text-xs ">
+              <button type="submit" className="w-full bg-primary text-primary-foreground h-14 rounded-[12px] font-semibold text-xs ">
                 Confirmar Solicitação
               </button>
             </form>
@@ -327,7 +327,7 @@ export default function Saques() {
               <div className="relative z-10">
                 <div className="flex items-center gap-2 text-muted-foreground/60 mb-3">
                   <Wallet size={16} />
-                  <span className="text-[10px] font-black uppercase tracking-[0.15em]">Saldo Disponível</span>
+                  <span className="text-[11px] font-semibold ">Saldo Disponível</span>
                 </div>
                 <p className="text-4xl font-black text-foreground tabular-nums tracking-tighter">{fmt(availableBalance)}</p>
               </div>
@@ -339,7 +339,7 @@ export default function Saques() {
               <div className="relative z-10">
                 <div className="flex items-center gap-2 text-muted-foreground/60 mb-3">
                   <Clock size={16} />
-                  <span className="text-[10px] font-black uppercase tracking-[0.15em]">Aguardando Liberação</span>
+                  <span className="text-[11px] font-semibold ">Aguardando Liberação</span>
                 </div>
                 <p className="text-4xl font-black text-foreground tabular-nums tracking-tighter">{fmt(retainedAmount)}</p>
               </div>
@@ -357,8 +357,8 @@ export default function Saques() {
                   <History size={20} strokeWidth={2.5} />
                 </div>
                 <div>
-                  <h2 className="font-black text-foreground tracking-tight leading-none uppercase">Histórico</h2>
-                  <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mt-1">Ultimos registros</p>
+                  <h2 className="font-semibold text-foreground tracking-tight leading-none ">Histórico</h2>
+                  <p className="text-[11px] font-medium text-muted-foreground mt-1">Ultimos registros</p>
                 </div>
               </div>
               <div className="relative w-full md:w-64">
@@ -376,7 +376,7 @@ export default function Saques() {
             <div className="overflow-x-auto">
               <table className="w-full min-w-[640px] text-left">
                 <thead>
-                  <tr className="bg-muted/30 text-[10px] uppercase font-black tracking-[0.2em] text-muted-foreground/60 border-b border-border/40">
+                  <tr className="bg-muted/30 text-[11px] font-semibold text-muted-foreground/60 border-b border-border/40">
                     <th className="px-8 py-5">ID / Data</th>
                     <th className="px-8 py-5 text-center">Status</th>
                     <th className="px-8 py-5 text-right">Valores</th>
@@ -388,10 +388,10 @@ export default function Saques() {
                       <td colSpan={3} className="px-8 py-20 text-center">
                         <div className="flex flex-col items-center gap-3">
                           <History size={48} strokeWidth={1} className="opacity-30" />
-                          <p className="text-[11px] font-black uppercase tracking-widest text-destructive">Falha ao carregar histórico</p>
+                          <p className="text-[11px] font-semibold text-destructive">Falha ao carregar histórico</p>
                           <button
                             onClick={() => refetchWithdrawals()}
-                            className="px-4 py-2 bg-primary text-primary-foreground text-[10px] font-black uppercase tracking-widest rounded-lg hover:bg-primary/90 transition-colors"
+                            className="px-4 py-2 bg-primary text-primary-foreground text-[11px] font-semibold rounded-lg hover:bg-primary/90 transition-colors"
                           >
                             Tentar novamente
                           </button>
@@ -403,7 +403,7 @@ export default function Saques() {
                       <td colSpan={3} className="px-8 py-20 text-center">
                         <div className="flex flex-col items-center opacity-30">
                           <History size={48} strokeWidth={1} />
-                          <p className="mt-4 text-[11px] font-black uppercase tracking-widest">Sem saques registrados</p>
+                          <p className="mt-4 text-[11px] font-semibold ">Sem saques registrados</p>
                         </div>
                       </td>
                     </tr>
@@ -418,18 +418,18 @@ export default function Saques() {
                                 #{w.id.slice(0, 8).toUpperCase()}
                               </p>
                               {(w as any).origin === "auto" && (
-                                <span className="inline-flex items-center px-1.5 py-0.5 rounded-md text-[8px] font-black uppercase tracking-widest bg-primary/10 text-primary border border-primary/20">
+                                <span className="inline-flex items-center px-1.5 py-0.5 rounded-md text-[11px] font-semibold bg-primary/10 text-primary border border-primary/20">
                                   Auto
                                 </span>
                               )}
                             </div>
-                            <p className="text-[10px] font-bold text-muted-foreground/50 mt-1 uppercase">
+                            <p className="text-[11px] font-medium text-muted-foreground/50 mt-1 ">
                               {format(new Date(w.created_at), "dd/MM/yyyy 'às' HH:mm", { locale: ptBR })}
                             </p>
                           </td>
                           <td className="px-8 py-6">
                             <div className="flex justify-center">
-                              <span className={cn("inline-flex items-center px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest border", status.bg, status.color, "border-current/10")}>
+                              <span className={cn("inline-flex items-center px-3 py-1 rounded-full text-[11px] font-semibold border", status.bg, status.color, "border-current/10")}>
                                 {status.label}
                               </span>
                             </div>
@@ -463,8 +463,8 @@ export default function Saques() {
                   <Building2 size={20} strokeWidth={2.5} />
                 </div>
                 <div>
-                  <h2 className="font-black text-foreground tracking-tight leading-none uppercase">Destino</h2>
-                  <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mt-1">Configurações</p>
+                  <h2 className="font-semibold text-foreground tracking-tight leading-none ">Destino</h2>
+                  <p className="text-[11px] font-medium text-muted-foreground mt-1">Configurações</p>
                 </div>
               </div>
             </div>
@@ -473,7 +473,7 @@ export default function Saques() {
               {/* Simplified PIX Section */}
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
-                  <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground flex items-center gap-2">
+                  <span className="text-[11px] font-semibold text-muted-foreground flex items-center gap-2">
                     <Key size={12} className="text-primary" /> Chaves PIX
                   </span>
                   <span className="text-[9px] font-bold text-muted-foreground/40">{pixKeys.length}/3</span>
@@ -481,7 +481,7 @@ export default function Saques() {
                 
                 {pixKeys.length === 0 ? (
                   <div className="p-4 rounded-[12px] bg-muted/30 border border-dashed border-border/60 text-center">
-                    <p className="text-[10px] font-bold text-muted-foreground/60 uppercase">Nenhuma chave</p>
+                    <p className="text-[11px] font-medium text-muted-foreground/60 ">Nenhuma chave</p>
                   </div>
                 ) : (
                   <div className="space-y-2">
@@ -489,7 +489,7 @@ export default function Saques() {
                       <div key={pk.id} className="p-3 rounded-xl bg-muted/30 border border-border/60 flex items-center justify-between group">
                         <div className="min-w-0">
                           <p className="text-[11px] font-black text-foreground truncate">{pk.key_value ?? (pk as any).key_value_masked ?? "•••"}</p>
-                          <p className="text-[9px] font-bold text-muted-foreground/60 uppercase">{pk.key_type}</p>
+                          <p className="text-[11px] font-medium text-muted-foreground/60 ">{pk.key_type}</p>
                         </div>
                         <CheckCircle2 size={12} className="text-emerald-500" />
                       </div>
@@ -501,21 +501,21 @@ export default function Saques() {
               {/* Simplified Bank Section */}
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
-                  <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground flex items-center gap-2">
+                  <span className="text-[11px] font-semibold text-muted-foreground flex items-center gap-2">
                     <Building2 size={12} className="text-primary" /> Contas
                   </span>
                 </div>
                 
                 {bankAccounts.length === 0 ? (
                   <div className="p-4 rounded-[12px] bg-muted/30 border border-dashed border-border/60 text-center">
-                    <p className="text-[10px] font-bold text-muted-foreground/60 uppercase">Nenhuma conta</p>
+                    <p className="text-[11px] font-medium text-muted-foreground/60 ">Nenhuma conta</p>
                   </div>
                 ) : (
                   <div className="space-y-2">
                     {bankAccounts.slice(0, 1).map((acc) => (
                       <div key={acc.id} className="p-3 rounded-xl bg-muted/30 border border-border/60 group">
-                        <p className="text-[11px] font-black text-foreground truncate uppercase">{acc.bank_name}</p>
-                        <p className="text-[9px] font-bold text-muted-foreground/60 uppercase mt-0.5">Ag {acc.agency} · CC {(acc as any).account_number_masked ?? acc.account_number ?? "••••"}</p>
+                        <p className="text-[11px] font-semibold text-foreground truncate ">{acc.bank_name}</p>
+                        <p className="text-[11px] font-medium text-muted-foreground/60 mt-0.5">Ag {acc.agency} · CC {(acc as any).account_number_masked ?? acc.account_number ?? "••••"}</p>
                       </div>
                     ))}
                   </div>
@@ -524,7 +524,7 @@ export default function Saques() {
 
               <Dialog>
                 <DialogTrigger asChild>
-                  <button className="w-full h-11 rounded-xl bg-muted/50 border border-border/60 text-[10px] font-black uppercase tracking-widest text-foreground hover:bg-muted transition-all">
+                  <button className="w-full h-11 rounded-xl bg-muted/50 border border-border/60 text-[11px] font-semibold text-foreground hover:bg-muted transition-all">
                     Gerenciar Dados Bancários
                   </button>
                 </DialogTrigger>

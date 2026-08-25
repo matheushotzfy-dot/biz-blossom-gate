@@ -753,7 +753,7 @@ export default function ProductEditor() {
   <div className="hidden sm:flex items-center gap-2.5 px-3.5 py-2 rounded-xl bg-secondary border border-border">
   <CompletionRing percent={completionPercent} />
   <div>
-  <p className="text-[8px] font-display font-bold uppercase tracking-[0.15em] text-muted-foreground">Completo</p>
+  <p className="text-[11px] font-display font-medium text-muted-foreground">Completo</p>
   <p className="text-[11px] font-numbers font-bold text-foreground tabular-nums leading-tight">{completionPercent}%</p>
   </div>
   </div>
@@ -799,7 +799,7 @@ export default function ProductEditor() {
   <nav className="hidden lg:flex flex-col w-56 shrink-0 overflow-y-auto overscroll-contain pb-6 scrollbar-none space-y-3">
   <div className="rounded-[12px] border border-border bg-card p-2.5 space-y-0.5">
   <div className="px-3 py-2.5 mb-1">
-  <p className="text-[9px] font-display font-bold uppercase tracking-[0.15em] text-muted-foreground">Navegação</p>
+  <p className="text-[11px] font-display font-medium text-muted-foreground">Navegação</p>
   </div>
   {TABS.map((tab) => {
   const isActive = activeTab === tab.key;
@@ -848,7 +848,7 @@ export default function ProductEditor() {
   {/* eslint-disable-next-line no-constant-binary-expression */}
   {false && !tabsLocked && product?.checkout_url && (
   <div className="rounded-[12px] border border-border bg-card p-3.5 space-y-2.5">
-  <p className="text-[9px] font-display font-bold uppercase tracking-[0.15em] text-muted-foreground">Ações Rápidas</p>
+  <p className="text-[11px] font-display font-medium text-muted-foreground">Ações Rápidas</p>
   <Button
   variant="outline" size="sm"
   onClick={() => copyLink(getCheckoutLink())}
@@ -1106,7 +1106,7 @@ function TabGeral({ name, setName, description, setDescription, price, setPrice,
             </div>
             <div className="p-5 space-y-5">
               <div className="space-y-1.5">
-                <label className="text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">Nome do produto</label>
+                <label className="text-[11px] font-semibold text-muted-foreground">Nome do produto</label>
                 <Input value={name} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setName(e.target.value)} placeholder="Ex: Curso Completo de Marketing Digital" className="h-12 bg-secondary border-border text-lg font-display font-bold tracking-[-0.01em]" required maxLength={200} />
                 <div className="flex items-center justify-between text-[10px] text-muted-foreground/60">
                   <span>{name.length > 0 ? "Visível no checkout e área de membros" : "Obrigatório"}</span>
@@ -1114,7 +1114,7 @@ function TabGeral({ name, setName, description, setDescription, price, setPrice,
                 </div>
               </div>
               <div className="space-y-1.5">
-                <label className="text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">Descrição</label>
+                <label className="text-[11px] font-semibold text-muted-foreground">Descrição</label>
                 <Textarea value={description} onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setDescription(e.target.value)} rows={4} placeholder="Descreva o que o aluno vai receber, principais benefícios e diferenciais (mínimo 50 caracteres)..." className={cn("resize-none bg-secondary border-border text-sm leading-relaxed", description.length > 0 && !descValid && "border-destructive/50")} maxLength={2000} />
                 <div className="flex items-center justify-between text-[10px]">
                   <span className={cn(descValid ? "text-success" : description.length > 0 ? "text-destructive" : "text-muted-foreground/60")}>
@@ -1136,7 +1136,7 @@ function TabGeral({ name, setName, description, setDescription, price, setPrice,
         </header>
         <div className="rounded-[12px] border border-border bg-card divide-y divide-border">
           <div className="p-5 space-y-3">
-            <label className="text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">Categoria</label>
+            <label className="text-[11px] font-semibold text-muted-foreground">Categoria</label>
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
               {CATEGORIES.map((opt) => {
                 const Icon = opt.icon;
@@ -1167,7 +1167,7 @@ function TabGeral({ name, setName, description, setDescription, price, setPrice,
             </div>
           </div>
           <div className="p-5 space-y-2">
-            <label className="text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">Tipo de pagamento</label>
+            <label className="text-[11px] font-semibold text-muted-foreground">Tipo de pagamento</label>
             <SegmentedChoice
               value={paymentType}
               onValueChange={setPaymentType}
@@ -1181,7 +1181,7 @@ function TabGeral({ name, setName, description, setDescription, price, setPrice,
           <div className="p-5">
             <div className="flex items-end justify-between gap-6">
               <div className="flex-1 space-y-1.5">
-                <label className="text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">Preço de venda</label>
+                <label className="text-[11px] font-semibold text-muted-foreground">Preço de venda</label>
                 <div className="relative">
                   <span className="absolute left-4 top-1/2 -translate-y-1/2 text-base font-display font-bold text-muted-foreground">R$</span>
                   <Input
@@ -1200,7 +1200,7 @@ function TabGeral({ name, setName, description, setDescription, price, setPrice,
                 )}
               </div>
               <div className="w-[300px] space-y-1.5">
-                <label className="text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">Garantia</label>
+                <label className="text-[11px] font-semibold text-muted-foreground">Garantia</label>
                 <SegmentedChoice
                   value={warrantyDays}
                   onValueChange={setWarrantyDays}
@@ -1227,14 +1227,14 @@ function TabGeral({ name, setName, description, setDescription, price, setPrice,
         <div className="rounded-[12px] border border-border bg-card p-5 space-y-5">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
             <div className="space-y-1.5">
-              <label className="text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground flex items-center gap-1.5">
+              <label className="text-[11px] font-semibold text-muted-foreground flex items-center gap-1.5">
                 <ExternalLink className="h-3 w-3" /> Página de vendas
               </label>
               <Input value={pageUrl} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setPageUrl(e.target.value)} placeholder="seuproduto.com" type="text" className={cn("h-11 bg-secondary border-border", pageUrl && !urlValid && "border-destructive/50")} required />
               <p className={cn("text-[10px]", urlValid ? "text-success" : "text-muted-foreground/60")}>{urlValid ? "URL válida — o https:// é adicionado automaticamente" : "Insira o domínio (ex: seusite.com.br) — o https:// é opcional"}</p>
             </div>
             <div className="space-y-1.5">
-              <label className="text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground flex items-center gap-1.5">
+              <label className="text-[11px] font-semibold text-muted-foreground flex items-center gap-1.5">
                 <Mail className="h-3 w-3" /> E-mail de suporte
               </label>
               <Input value={supportEmail} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSupportEmail(e.target.value)} placeholder="suporte@seuproduto.com" type="email" className={cn("h-11 bg-secondary border-border", supportEmail && !emailValid && "border-destructive/50")} required />
@@ -1243,7 +1243,7 @@ function TabGeral({ name, setName, description, setDescription, price, setPrice,
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
             <div className="space-y-1.5">
-              <label className="text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground flex items-center gap-1.5">
+              <label className="text-[11px] font-semibold text-muted-foreground flex items-center gap-1.5">
                 <Phone className="h-3 w-3" /> Telefone de suporte
               </label>
               <Input
@@ -1257,7 +1257,7 @@ function TabGeral({ name, setName, description, setDescription, price, setPrice,
               <p className={cn("text-[10px]", phoneValid ? "text-success" : "text-muted-foreground/60")}>{phoneValid ? "Telefone válido" : "Insira o DDD + número (10 ou 11 dígitos)"}</p>
             </div>
             <div className="space-y-1.5">
-              <label className="text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground flex items-center gap-1.5">
+              <label className="text-[11px] font-semibold text-muted-foreground flex items-center gap-1.5">
                 <Users className="h-3 w-3" /> Nome de exibição do produtor
               </label>
               <Input value={displayName} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setDisplayName(e.target.value)} placeholder="Nome que aparecerá no checkout" className="h-11 bg-secondary border-border" required />
@@ -1311,7 +1311,7 @@ function TabConfiguracoes({ price, pixEnabled, setPixEnabled, boletoEnabled, set
  {/* eslint-disable-next-line no-constant-binary-expression */}
  {false && price && parseFloat(price) > 0 && (
  <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="rounded-xl bg-muted/5 border border-border p-3 space-y-2">
- <p className="text-[9px] font-display font-black uppercase tracking-[0.15em] text-muted-foreground/40">Simulação de taxas (R$ {Number(price).toFixed(2)})</p>
+ <p className="text-[11px] font-display font-semibold text-muted-foreground/40">Simulação de taxas (R$ {Number(price).toFixed(2)})</p>
  <div className="grid grid-cols-3 gap-3">
  {pixEnabled && (
  <div className="text-center">
@@ -1558,11 +1558,11 @@ function TabUpsell({ isNew, name, price, imagePreview, hasCustomThankYou, setHas
  <div className="rounded-[12px] border border-border bg-card overflow-hidden">
  <div className="px-5 py-4 border-b border-border flex items-center justify-between">
  <div>
- <p className="text-[11px] uppercase tracking-[0.12em] text-muted-foreground/70 font-display font-bold">Sequência do funil</p>
+ <p className="text-[11px] text-muted-foreground/70 font-display font-medium">Sequência do funil</p>
  <p className="text-[15px] font-display font-black text-foreground mt-0.5 tracking-[-0.02em]">Jornada do comprador</p>
  </div>
  <div className="text-right">
- <p className="text-[10px] uppercase tracking-wider text-muted-foreground/60 font-medium">Ticket projetado</p>
+ <p className="text-[11px] text-muted-foreground/60 font-medium">Ticket projetado</p>
  <p className="text-base font-numbers font-black text-success tabular-nums">
  R$ {projectedAov.toFixed(2)}
  {upliftPct > 0 && <span className="text-[10px] font-display font-bold text-success/80 ml-1.5">+{upliftPct}%</span>}
@@ -1810,7 +1810,7 @@ function FunnelStep({ step, status, label, title, price, thumb, badge, icon: Ico
  </div>
  )}
  <div className="min-w-0 flex-1">
- <p className={cn("text-[10px] uppercase tracking-wider font-display font-bold leading-tight", isEmpty ? "text-muted-foreground/50" : "text-muted-foreground/70")}>{label}</p>
+ <p className={cn("text-[11px] font-display font-medium leading-tight", isEmpty ? "text-muted-foreground/50" : "text-muted-foreground/70")}>{label}</p>
  <p className={cn("text-[13px] font-display font-bold truncate leading-tight mt-0.5", isEmpty ? "text-muted-foreground/60" : "text-foreground")}>{title}</p>
  </div>
  </div>
@@ -1990,7 +1990,7 @@ function TabCheckout({ isNew, name, price, productId, buttonColor, setButtonColo
  </div>
  {/* Quick color presets */}
  <div className="flex items-center gap-2 mt-2">
- <span className="text-[9px] font-display font-bold text-muted-foreground/40 uppercase tracking-wider mr-1">Cores populares</span>
+ <span className="text-[11px] font-display font-medium text-muted-foreground/40 mr-1">Cores populares</span>
  {["#10b981", "#3b82f6", "#8b5cf6", "#ef4444", "#f59e0b", "#ec4899", "#06b6d4", "#000000"].map(c => (
  <button
  key={c}
@@ -2190,7 +2190,7 @@ function TabCupons({ isNew, coupons, newCouponCode, setNewCouponCode, newCouponT
  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
  <div className="space-y-2">
  <EditorLabel>Código do cupom</EditorLabel>
- <Input value={newCouponCode} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setNewCouponCode(e.target.value.toUpperCase())} placeholder="EX: DESCONTO20" className="h-11 bg-secondary border-border font-mono uppercase" maxLength={30} />
+ <Input value={newCouponCode} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setNewCouponCode(e.target.value.toUpperCase())} placeholder="EX: DESCONTO20" className="h-11 bg-secondary border-border font-mono " maxLength={30} />
  </div>
  <div className="space-y-2">
  <EditorLabel>Tipo de desconto</EditorLabel>
@@ -2443,9 +2443,9 @@ function TabLinks({ isNew, product, pageUrl, affiliateEnabled, productId, getChe
         <div className="rounded-xl border border-border bg-card overflow-hidden">
           {/* Header row */}
           <div className="hidden md:grid grid-cols-[140px_1fr_auto] gap-4 px-4 py-2.5 border-b border-border bg-muted/20">
-            <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Tipo</span>
-            <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Link</span>
-            <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground text-right">Ações</span>
+            <span className="text-[11px] font-medium text-muted-foreground">Tipo</span>
+            <span className="text-[11px] font-medium text-muted-foreground">Link</span>
+            <span className="text-[11px] font-medium text-muted-foreground text-right">Ações</span>
           </div>
 
           {rows.map((row, idx) => (
@@ -2457,7 +2457,7 @@ function TabLinks({ isNew, product, pageUrl, affiliateEnabled, productId, getChe
                     <row.icon className="h-3.5 w-3.5 text-foreground/70" />
                   </div>
                   <div className="min-w-0">
-                    <span className={cn("inline-flex items-center rounded-md px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wider border", row.typeColor)}>
+                    <span className={cn("inline-flex items-center rounded-md px-1.5 py-0.5 text-[11px] font-medium border", row.typeColor)}>
                       {row.type}
                     </span>
                     <p className="text-[11px] text-muted-foreground/70 mt-1 truncate md:hidden">{row.description}</p>
@@ -2525,7 +2525,7 @@ function TabLinks({ isNew, product, pageUrl, affiliateEnabled, productId, getChe
         <div>
           <div className="flex items-center gap-2 mb-2.5">
             <Share2 className="h-3.5 w-3.5 text-muted-foreground" />
-            <h4 className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">Compartilhamento Rápido</h4>
+            <h4 className="text-[11px] font-medium text-muted-foreground">Compartilhamento Rápido</h4>
           </div>
           <div className="grid grid-cols-3 gap-2">
             {shareLinks.map(sl => (
@@ -2659,17 +2659,17 @@ function TabConteudo({ productId, isNew }: { productId?: string; isNew: boolean 
           {/* Stats strip */}
           <div className="grid grid-cols-3 rounded-[12px] border border-border bg-card divide-x divide-border overflow-hidden">
             <div className="p-4">
-              <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">Cursos</p>
+              <p className="text-[11px] font-semibold text-muted-foreground">Cursos</p>
               <p className="mt-1.5 text-xl font-display font-black tabular-nums text-foreground">{courses.length}</p>
               <p className="text-[10px] text-muted-foreground mt-0.5">{publishedCount} publicado{publishedCount !== 1 ? "s" : ""}</p>
             </div>
             <div className="p-4">
-              <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">Módulos</p>
+              <p className="text-[11px] font-semibold text-muted-foreground">Módulos</p>
               <p className="mt-1.5 text-xl font-display font-black tabular-nums text-foreground">{totalModules}</p>
               <p className="text-[10px] text-muted-foreground mt-0.5">no total</p>
             </div>
             <div className="p-4">
-              <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">Aulas</p>
+              <p className="text-[11px] font-semibold text-muted-foreground">Aulas</p>
               <p className="mt-1.5 text-xl font-display font-black tabular-nums text-foreground">{totalLessons}</p>
               <p className="text-[10px] text-muted-foreground mt-0.5">disponíveis</p>
             </div>
@@ -2678,7 +2678,7 @@ function TabConteudo({ productId, isNew }: { productId?: string; isNew: boolean 
           {/* Course list — dense rows */}
           <div className="rounded-[12px] border border-border bg-card overflow-hidden">
             <div className="flex items-center justify-between px-4 py-2.5 border-b border-border bg-secondary/30">
-              <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">Cursos vinculados</p>
+              <p className="text-[11px] font-semibold text-muted-foreground">Cursos vinculados</p>
               <p className="text-[10px] text-muted-foreground tabular-nums">{courses.length} {courses.length === 1 ? "item" : "itens"}</p>
             </div>
             <div className="divide-y divide-border">
@@ -2706,7 +2706,7 @@ function TabConteudo({ productId, isNew }: { productId?: string; isNew: boolean 
                       <div className="flex items-center gap-2">
                         <h3 className="text-sm font-semibold text-foreground truncate">{c.title}</h3>
                         <span className={cn(
- "inline-flex items-center gap-1 rounded-md px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-wider border",
+ "inline-flex items-center gap-1 rounded-md px-1.5 py-0.5 text-[11px] font-semibold border",
                           c.is_published
                             ? "bg-success/10 text-success border-success/20"
                             : "bg-secondary text-muted-foreground border-border"
@@ -2767,7 +2767,7 @@ function EditorCard({ children, accentColor = "bg-primary" }: { children: React.
 
 function EditorLabel({ icon: Icon, children }: { icon?: React.ComponentType<{ className?: string }>; children: React.ReactNode }) {
   return (
-  <Label className="text-[10px] font-display font-bold uppercase tracking-[0.14em] text-muted-foreground flex items-center gap-1.5">
+  <Label className="text-[11px] font-display font-medium text-muted-foreground flex items-center gap-1.5">
   {Icon && <Icon className="h-3 w-3 text-muted-foreground/60" />}
   {children}
   </Label>

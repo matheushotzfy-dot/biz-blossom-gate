@@ -207,7 +207,7 @@ export default function Produtos() {
         actions={
           <button
             onClick={() => navigate("/vendas/produtos/novo/editar")}
-            className="group inline-flex h-10 items-center gap-2 rounded-lg bg-primary px-4 text-[12px] font-bold uppercase tracking-wider text-primary-foreground transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] hover:bg-primary/90"
+            className="group inline-flex h-10 items-center gap-2 rounded-lg bg-primary px-4 text-[12px] font-medium text-primary-foreground transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] hover:bg-primary/90"
           >
             <Plus className="h-4 w-4 transition-transform duration-300 group-hover:rotate-90" strokeWidth={2.5} />
             Novo produto
@@ -264,7 +264,7 @@ export default function Produtos() {
           {showClearDraftsBtn && (
             <button
               onClick={() => setClearDraftsOpen(true)}
-              className="inline-flex h-9 shrink-0 items-center gap-1.5 rounded-lg border border-destructive/40 bg-destructive/[0.06] px-3 text-[11px] font-bold uppercase tracking-wider text-destructive transition-all duration-200 hover:bg-destructive hover:text-destructive-foreground"
+              className="inline-flex h-9 shrink-0 items-center gap-1.5 rounded-lg border border-destructive/40 bg-destructive/[0.06] px-3 text-[11px] font-medium text-destructive transition-all duration-200 hover:bg-destructive hover:text-destructive-foreground"
             >
               <Trash2 className="h-3.5 w-3.5" strokeWidth={2.5} />
               <span className="hidden sm:inline">Limpar rascunhos</span>
@@ -337,7 +337,7 @@ export default function Produtos() {
             {!search && tab === "all" && (
               <button
                 onClick={() => navigate("/vendas/produtos/novo/editar")}
-                className="group mt-7 inline-flex h-10 items-center gap-2 rounded-xl bg-primary px-5 text-[12px] font-black uppercase tracking-wider text-primary-foreground transition-all duration-300 hover:bg-primary/90  hover:"
+                className="group mt-7 inline-flex h-10 items-center gap-2 rounded-xl bg-primary px-5 text-[12px] font-semibold text-primary-foreground transition-all duration-300 hover:bg-primary/90  hover:"
               >
                 <Plus className="h-4 w-4 transition-transform duration-300 group-hover:rotate-90" strokeWidth={2.75} />
                 Criar primeiro produto
