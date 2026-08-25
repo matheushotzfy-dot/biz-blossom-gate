@@ -99,86 +99,93 @@ function DashboardLayoutInner() {
   <SidebarInset className="ambient-backdrop relative min-w-0 bg-background flex flex-col h-full min-h-0 overflow-hidden">
    {/* Ambient light is handled by .ambient-backdrop CSS — no extra blobs needed */}
 
-          <header className="relative z-30 h-16 flex items-center gap-2 border-b border-border bg-card px-4 lg:px-6 sticky top-0 md:flex transition-colors duration-300">
-            <SidebarTrigger className="seller-clickable icon-only relative h-9 w-9 rounded-[10px] border border-border/70 bg-transparent flex items-center justify-center text-muted-foreground transition-colors duration-200 hover:border-border hover:text-foreground" />
+          <header className="relative z-30 h-[52px] flex items-center gap-1.5 border-b border-border bg-card px-3 lg:px-5 sticky top-0 md:flex transition-colors duration-300">
+            <SidebarTrigger className="seller-clickable icon-only relative h-8 w-8 rounded-[9px] border border-transparent bg-transparent flex items-center justify-center text-muted-foreground transition-colors duration-200 hover:border-border/70 hover:text-foreground" />
 
-            {/* ─── COMMAND BAR ─── */}
+            {/* ─── SEARCH (ícone apenas) ─── */}
             <button
               onClick={() => setSearchOpen(true)}
-              aria-label="Pesquisar"
-              className="seller-clickable group ml-1 mr-auto flex h-9 items-center gap-2 rounded-[10px] border border-border/70 bg-transparent px-3 text-muted-foreground transition-colors duration-200 hover:border-border hover:text-foreground md:min-w-[240px]"
+              aria-label="Pesquisar (⌘K)"
+              title="Buscar em tudo · ⌘K"
+              className="seller-clickable icon-only mr-auto h-8 w-8 rounded-[9px] border border-transparent bg-transparent flex items-center justify-center text-muted-foreground transition-colors duration-200 hover:border-border/70 hover:text-foreground"
             >
-              <Search className="h-4 w-4" strokeWidth={2} />
-              <span className="hidden md:inline text-[12.5px] font-medium">Buscar em tudo…</span>
-              <kbd className="ml-auto hidden md:inline-flex items-center rounded-[6px] border border-border/70 px-1.5 py-0.5 text-[10px] font-medium tabular-nums text-muted-foreground/70">
-                ⌘K
-              </kbd>
+              <Search className="h-[15px] w-[15px]" strokeWidth={1.9} />
             </button>
 
             {/* ─── BALANCE ─── */}
-            <div className="hidden md:flex items-center justify-center px-3">
-              <div className="group/balance relative flex h-[46px] items-center gap-3 overflow-hidden rounded-[10px] border border-border/70 bg-transparent px-4 transition-colors duration-200 hover:border-border">
-                <div className="relative flex h-7 w-7 items-center justify-center rounded-[8px] border border-primary/30 bg-primary/[0.07] text-primary">
-                  <Wallet className="h-3.5 w-3.5" strokeWidth={2.5} />
-                </div>
+            <div className="hidden md:flex items-center justify-center pr-1">
+              <div className="flex h-9 items-center gap-2.5 rounded-[10px] border border-border/70 bg-transparent px-3 transition-colors duration-200 hover:border-border">
+                <Wallet className="h-3.5 w-3.5 text-primary" strokeWidth={2.2} />
                 <div className="leading-none">
-                  <p className="text-[11px] font-medium text-muted-foreground/60">Saldo disponível</p>
-                  <p className="mt-1 font-numbers text-[15.5px] font-semibold tabular-nums tracking-[-0.02em] text-foreground">
+                  <p className="text-[9.5px] font-medium text-muted-foreground/60">Saldo disponível</p>
+                  <p className="mt-[3px] font-numbers text-[13px] font-semibold tabular-nums tracking-[-0.02em] text-foreground">
                     {privacyHidden ? "••••••" : formatBRL(Math.max(balance, 0))}
                   </p>
                 </div>
                 <button
                   onClick={() => navigate("/financeiro/saques")}
-                  className="ml-2 hidden lg:inline-flex h-7 items-center rounded-[8px] bg-primary px-3 text-[11.5px] font-semibold text-primary-foreground transition-colors hover:brightness-105"
+                  className="ml-1 hidden lg:inline-flex h-6 items-center rounded-[7px] bg-primary px-2.5 text-[11px] font-semibold text-primary-foreground transition-colors hover:brightness-105"
                 >
                   Sacar
                 </button>
               </div>
             </div>
 
-
-            {/* ─── ACTION CLUSTER — perfectly aligned ─── */}
-            <div className="flex items-center gap-1.5 ml-auto md:ml-0">
+            {/* ─── ACTION CLUSTER ─── */}
+            <div className="flex items-center gap-0.5">
               <button
                 onClick={togglePrivacy}
                 aria-label={privacyHidden ? "Mostrar saldo" : "Ocultar saldo"}
-                className="seller-clickable icon-only h-9 w-9 rounded-[10px] border border-border/70 bg-transparent text-muted-foreground hover:border-border hover:text-foreground flex items-center justify-center transition-colors duration-200"
+                className={cn(
+                  "seller-clickable icon-only h-8 w-8 rounded-[9px] border border-transparent bg-transparent flex items-center justify-center transition-colors duration-200 hover:border-border/70 hover:text-foreground",
+                  privacyHidden ? "text-primary" : "text-muted-foreground",
+                )}
               >
-                {privacyHidden ? <EyeOff className="h-4 w-4" strokeWidth={2} /> : <Eye className="h-4 w-4" strokeWidth={2} />}
+                {privacyHidden ? <EyeOff className="h-[15px] w-[15px]" strokeWidth={1.9} /> : <Eye className="h-[15px] w-[15px]" strokeWidth={1.9} />}
               </button>
 
               <button
                 onClick={toggleTheme}
                 aria-label="Alternar tema"
-                className="seller-clickable icon-only h-9 w-9 rounded-[10px] border border-border/70 bg-transparent text-muted-foreground hover:border-border hover:text-foreground flex items-center justify-center transition-colors duration-200"
+                className="seller-clickable icon-only h-8 w-8 rounded-[9px] border border-transparent bg-transparent text-muted-foreground hover:border-border/70 hover:text-foreground flex items-center justify-center transition-colors duration-200"
               >
-                {theme === "dark" ? <Sun className="h-4 w-4" strokeWidth={2} /> : <Moon className="h-4 w-4" strokeWidth={2} />}
+                {theme === "dark" ? <Sun className="h-[15px] w-[15px]" strokeWidth={1.9} /> : <Moon className="h-[15px] w-[15px]" strokeWidth={1.9} />}
               </button>
 
               <button
                 onClick={() => setNotifOpen(!notifOpen)}
                 aria-label="Notificações"
-                className="seller-clickable icon-only relative h-9 w-9 rounded-[10px] border border-border/70 bg-transparent text-muted-foreground hover:border-border hover:text-foreground flex items-center justify-center transition-colors duration-200"
+                className="seller-clickable icon-only relative h-8 w-8 rounded-[9px] border border-transparent bg-transparent text-muted-foreground hover:border-border/70 hover:text-foreground flex items-center justify-center transition-colors duration-200"
               >
-                <Bell className="h-4 w-4" strokeWidth={2} />
+                <Bell className="h-[15px] w-[15px]" strokeWidth={1.9} />
                 {unreadCount > 0 && (
-                  <span className="absolute -top-0.5 -right-0.5 h-2 w-2 rounded-full bg-primary ring-2 ring-card" />
+                  <span className="absolute top-1 right-1 h-1.5 w-1.5 rounded-full bg-primary ring-2 ring-card" />
                 )}
               </button>
-
             </div>
 
-            <div className="mx-2 h-6 w-px bg-border/60" />
+            <div className="mx-1.5 h-5 w-px bg-border/60" />
 
-            <button onClick={() => navigate("/perfil")} className="seller-clickable flex items-center rounded-[10px] border-transparent p-0.5">
-              <Avatar className="h-8 w-8 ring-1 ring-border/70 hover:ring-border transition-colors cursor-pointer">
+            <button
+              onClick={() => navigate("/perfil")}
+              aria-label="Meu perfil"
+              className="seller-clickable relative flex items-center rounded-full p-[2px] transition-colors"
+            >
+              <Avatar className="h-7 w-7 ring-1 ring-border/70 hover:ring-primary/50 transition-colors cursor-pointer">
                 <AvatarImage src={profile?.avatar_url || undefined} className="object-cover" />
-                <AvatarFallback className="bg-muted text-foreground text-[11px] font-semibold">
+                <AvatarFallback className="bg-muted font-display text-foreground text-[10.5px] font-bold">
                   {(profile?.full_name || "U").charAt(0).toUpperCase()}
                 </AvatarFallback>
               </Avatar>
+              <span
+                className={cn(
+                  "absolute -bottom-0 -right-0 h-2 w-2 rounded-full ring-2 ring-card",
+                  profile?.account_status === "approved" ? "bg-success" : "bg-warning",
+                )}
+              />
             </button>
           </header>
+
 
 
  {/* ─── VERIFICATION BANNER ─── */}
