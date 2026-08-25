@@ -2127,7 +2127,7 @@ button svg, a svg, [role="button"] svg {
   display: none !important;
 }
 
-/* ─── Fundo contínuo do shell (cobre toda a viewport, sem corte) ─── */
+/* ─── Fundo do shell: grade apenas nas faixas laterais ─── */
 .platform-shell {
   position: relative;
   isolation: isolate;
@@ -2138,21 +2138,40 @@ button svg, a svg, [role="button"] svg {
   content: '';
   position: fixed;
   inset: 0;
-  z-index: -1;
+  z-index: 0;
   pointer-events: none;
   background:
     radial-gradient(circle 900px at 4% -6%, hsl(var(--primary) / 0.13), transparent 58%),
-    radial-gradient(circle 760px at 100% 108%, hsl(var(--primary) / 0.09), transparent 62%),
     linear-gradient(hsl(var(--border) / 0.30) 1px, transparent 1px),
     linear-gradient(90deg, hsl(var(--border) / 0.22) 1px, transparent 1px),
     hsl(var(--background));
-  background-size: auto, auto, 48px 48px, 48px 48px, auto;
+  background-size: auto, 48px 48px, 48px 48px, auto;
+}
+
+/* Campo central sólido desde o topo; a grade permanece visível só nas laterais. */
+.platform-shell .dashboard-content-field::before {
+  content: '';
+  display: block !important;
+  position: absolute;
+  inset: 0 clamp(12px, 1.7vw, 24px) 0 0;
+  z-index: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(circle 760px at 72% 0%, hsl(var(--primary) / 0.09), transparent 58%),
+    hsl(var(--background));
 }
 
 /* a área rolável e a sidebar deixam o fundo do shell aparecer */
 .platform-shell .ambient-backdrop,
 .platform-shell [data-sidebar="sidebar"] {
   background-color: transparent !important;
+}
+
+/* Quando solta, a lateral mantém uma coluna estável e abre por cima do conteúdo. */
+.sidebar-unpinned [data-sidebar="gap"] {
+  width: var(--sidebar-width-icon) !important;
+  min-width: var(--sidebar-width-icon);
+  transition: none !important;
 }
 
 /* ─── Calendário compacto do seletor de período ─── */

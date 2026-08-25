@@ -187,7 +187,7 @@ function SidebarSectionNav({ section, pathname, isFirst }: SidebarSectionNavProp
                     className={cn(
                       "group/nav relative flex h-[38px] w-full items-center gap-3 pl-4 pr-3 text-[13.5px]",
                       "transition-colors duration-200 ease-out",
-                      "group-data-[collapsible=icon]:h-10 group-data-[collapsible=icon]:w-10 group-data-[collapsible=icon]:mx-auto group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0 group-data-[collapsible=icon]:gap-0 group-data-[collapsible=icon]:rounded-[10px]",
+                      "group-data-[collapsible=icon]:h-11 group-data-[collapsible=icon]:w-11 group-data-[collapsible=icon]:mx-auto group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0 group-data-[collapsible=icon]:gap-0 group-data-[collapsible=icon]:rounded-[10px]",
                       isActive
                         ? "font-semibold text-foreground group-data-[collapsible=icon]:bg-primary/10"
                         : "font-medium text-sidebar-foreground/60 hover:text-foreground",
@@ -205,7 +205,7 @@ function SidebarSectionNav({ section, pathname, isFirst }: SidebarSectionNavProp
                     <item.icon
                       size={18}
                       className={cn(
-                        "shrink-0 transition-colors duration-150 ease-out",
+                        "shrink-0 transition-colors duration-150 ease-out group-data-[collapsible=icon]:!h-[22px] group-data-[collapsible=icon]:!w-[22px]",
                         isActive ? "text-primary" : "text-sidebar-foreground/45 group-hover/nav:text-foreground/80",
                       )}
                       strokeWidth={isActive ? 1.8 : 1.4}
@@ -352,7 +352,7 @@ export function AppSidebar({ pinned = true, onTogglePin, onHoverChange }: AppSid
       onMouseEnter={() => onHoverChange?.(true)}
       onMouseLeave={() => onHoverChange?.(false)}
       className={cn(
-        "border-r border-sidebar-border/60 transition-colors duration-200",
+        "z-40 border-r border-sidebar-border/60 transition-[width,background-color,border-color] duration-200 ease-out",
         overlaying ? "bg-background" : "bg-transparent",
       )}
     >
