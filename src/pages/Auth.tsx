@@ -304,7 +304,10 @@ export default function Auth() {
               document_type: digits.length === 11 ? "cpf" : "cnpj",
               phone: cleanPhone,
               referral_source: referralSource,
-            },
+              company_name: accountType === "cnpj" ? companyName.trim() : null,
+              segment,
+              monthly_revenue_band: monthlyRevenue,
+
             emailRedirectTo: `${window.location.origin}/auth/callback`,
           },
         });
