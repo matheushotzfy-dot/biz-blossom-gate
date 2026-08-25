@@ -8,7 +8,7 @@
  */
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { useNavigate } from "react-router-dom";
-import { motion, useInView, useReducedMotion } from "framer-motion";
+import { motion, useInView, useReducedMotion, useScroll, useSpring, useTransform } from "framer-motion";
 import {
   ArrowRight, ArrowUpRight, BadgeCheck, Banknote, BarChart3, Boxes, ChevronDown,
   Code2, CreditCard, Gift, Headphones, LineChart, LockKeyhole, Menu, Percent,
@@ -18,7 +18,7 @@ import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Seo } from "@/components/Seo";
 import { ProductMock } from "@/components/landing/ProductMock";
-import { SalesFeed } from "@/components/landing/SalesFeed";
+import { HeroStage } from "@/components/landing/HeroStage";
 import { ConversionScene } from "@/components/landing/ConversionScene";
 
 import producer1 from "@/assets/landing/producer-1.jpg";
@@ -158,6 +158,33 @@ function SectionHead({ kicker, title, copy, center }: { kicker: string; title: R
   );
 }
 
+
+/** Painel real da plataforma que se "desdobra" conforme o scroll avança. */
+function UnfoldMock() {
+  const ref = useRef<HTMLDivElement>(null);
+  const reduce = useReducedMotion();
+  const { scrollYProgress } = useScroll({ target: ref, offset: ["start 90%", "end 40%"] });
+  const smooth = useSpring(scrollYProgress, { stiffness: 80, damping: 24, mass: 0.4 });
+  const rotateX = useTransform(smooth, [0, 0.7], [14, 0]);
+  const scale = useTransform(smooth, [0, 0.7], [0.93, 1]);
+  const opacity = useTransform(smooth, [0, 0.35], [0, 1]);
+
+  return (
+    <div ref={ref} className="mt-16" style={{ perspective: 1500 }}>
+      <motion.div style={reduce ? undefined : { rotateX, scale, opacity, transformPerspective: 1500 }}>
+        <ProductMock floats={false} />
+      </motion.div>
+    </div>
+  );
+}
+
+/** Barra fina de progresso de leitura no topo da página. */
+function ScrollProgress() {
+  const { scrollYProgress } = useScroll();
+  const scaleX = useSpring(scrollYProgress, { stiffness: 120, damping: 30, mass: 0.3 });
+  return <motion.div aria-hidden className="lp-progress" style={{ scaleX }} />;
+}
+
 /* -------------------------------------------------------------- componente */
 
 export default function LandingPage() {
@@ -184,6 +211,8 @@ export default function LandingPage() {
         path="/"
         jsonLd={JSONLD}
       />
+
+      <ScrollProgress />
 
       {/* barra de anúncio */}
       <div className="lp-announce">
@@ -273,14 +302,9 @@ export default function LandingPage() {
             </Reveal>
           </div>
 
-          {/* composição de produto */}
-          <div className="relative mx-auto mt-16 max-w-[1240px] px-5 pb-20 lg:px-8 lg:pb-28">
-            <Reveal delay={0.1}>
-              <div className="grid items-start gap-5 lg:grid-cols-[300px_1fr]">
-                <div className="hidden lg:block"><SalesFeed /></div>
-                <ProductMock floats={false} />
-              </div>
-            </Reveal>
+          {/* malha de liquidação em tempo real */}
+          <div className="relative mx-auto mt-16 max-w-[1180px] px-5 pb-20 lg:px-8 lg:pb-28">
+            <HeroStage />
           </div>
         </section>
 
@@ -427,6 +451,8 @@ export default function LandingPage() {
                 </Reveal>
               ))}
             </div>
+
+            <UnfoldMock />
           </div>
         </section>
 
