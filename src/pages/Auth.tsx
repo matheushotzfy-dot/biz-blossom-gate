@@ -679,10 +679,11 @@ export default function Auth() {
                             Voltar
                           </Button>
                         )}
-                        {step < 4 ? (
+                        {step < TOTAL_STEPS ? (
                           <Button type="button" onClick={() => setStep((c) => c + 1)} disabled={!canAdvanceStep(step)} className="h-[52px] flex-[1.6] rounded-[10px] bg-primary text-[15px] font-semibold text-primary-foreground hover:brightness-105">
-                            Continuar
+                            Continuar <ArrowRight className="ml-2 h-4 w-4" />
                           </Button>
+
                         ) : (
                           <Button type="button" onClick={() => handleSubmit()} disabled={loading || !acceptTerms} className="h-[52px] flex-[1.6] rounded-[10px] bg-primary text-[15px] font-semibold text-primary-foreground hover:brightness-105">
                             {loading ? <div className="h-5 w-5 animate-spin rounded-full border-2 border-primary-foreground/30 border-t-primary-foreground" /> : "Criar conta"}
