@@ -303,39 +303,40 @@ export function AppSidebar({ pinned = true, onTogglePin, onHoverChange }: AppSid
     {
       label: "COMANDO",
       items: [
-        { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard, exact: true },
-        { title: "Vendas", url: "/vendas", icon: BarChart3, exact: true },
+        { title: "Dashboard", url: "/dashboard", icon: GlyphDashboard, exact: true },
+        { title: "Vendas", url: "/vendas", icon: GlyphSales, exact: true },
       ],
     },
     {
       label: "INFOPRODUTOS",
       items: [
-        { title: "Produtos", url: "/vendas/produtos", icon: Package, count: counts.products },
-        { title: "Cupons", url: "/vendas/cupons", icon: Ticket, count: counts.coupons },
+        { title: "Produtos", url: "/vendas/produtos", icon: GlyphProduct, count: counts.products },
+        { title: "Cupons", url: "/vendas/cupons", icon: GlyphCoupon, count: counts.coupons },
       ],
     },
     {
       label: "FINANCEIRO",
       items: [
-        { title: "Financeiro", url: "/financeiro/saques", icon: ArrowDownToLine },
-        { title: "Taxas", url: "/financeiro/config", icon: Building2 },
+        { title: "Financeiro", url: "/financeiro/saques", icon: GlyphWithdraw },
+        { title: "Taxas", url: "/financeiro/config", icon: GlyphFees },
       ],
     },
     {
       label: "FERRAMENTAS",
       items: [
-        { title: "Apps & Integrações", url: "/integracoes", icon: Puzzle },
+        { title: "Apps & Integrações", url: "/integracoes", icon: GlyphApps },
       ],
     },
     {
       label: "CONTA",
       items: [
-        { title: "Meu Perfil & KYC", url: "/perfil", icon: User },
-        { title: "Premiações", url: "/premiacoes", icon: Trophy },
-        { title: "Suporte", url: "/suporte", icon: MessageSquare, count: supportUnread },
+        { title: "Meu Perfil & KYC", url: "/perfil", icon: GlyphProfile },
+        { title: "Premiações", url: "/premiacoes", icon: GlyphTrophy },
+        { title: "Suporte", url: "/suporte", icon: GlyphSupport, count: supportUnread },
       ],
     },
   ], [counts, supportUnread]);
+
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
