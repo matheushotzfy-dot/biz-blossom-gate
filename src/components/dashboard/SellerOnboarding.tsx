@@ -78,7 +78,7 @@ export function SellerOnboarding() {
         label: "Dados de recebimento",
         desc: "Conta bancária ou chave PIX para saques",
         icon: Landmark,
-        to: "/financeiro/dados-bancarios",
+        to: "/financeiro/config",
         state: hasPayout ? "done" : "pending",
       },
       {
