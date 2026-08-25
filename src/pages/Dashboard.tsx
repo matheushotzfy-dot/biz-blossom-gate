@@ -782,9 +782,8 @@ export default function Dashboard() {
 
 
 
-        {/* ═══════════ FINANCIAL INSTRUMENT RAIL ═══════════ */}
-        <section className="overflow-hidden rounded-[14px] border border-border/60 bg-transparent">
-          <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4">
+        {/* ═══════════ KPI CARDS ═══════════ */}
+        <section className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
           {[
             { label: "Saldo disponível", value: fmt(Math.max(0, balance)), sub: "Pronto para saque", icon: Wallet, tone: "neutral" as const, code: "BAL" },
             { label: "Recebido hoje", value: fmt(receivedToday), sub: "Movimento confirmado", icon: RefreshCw, tone: "neutral" as const, code: "D+0" },
@@ -794,27 +793,35 @@ export default function Dashboard() {
             const Icon = k.icon;
             const isDanger = k.tone === "danger";
             return (
-              <div key={k.label} className="group relative min-h-[148px] border-b border-border/40 bg-card/30 px-5 py-5 last:border-b-0 sm:[&:nth-child(odd)]:border-r sm:[&:nth-last-child(-n+2)]:border-b-0 xl:border-b-0 xl:border-r xl:last:border-r-0">
-                <div className="flex items-center justify-between gap-3">
+              <div
+                key={k.label}
+                className="group relative min-h-[150px] overflow-hidden rounded-[14px] border border-border bg-card px-5 py-5 transition-colors hover:border-primary/40"
+              >
+                {/* Ghost icon watermark */}
+                <Icon
+                  aria-hidden
+                  className={cn(
+                    "pointer-events-none absolute -right-4 -bottom-4 h-[104px] w-[104px] transition-opacity duration-300",
+                    isDanger ? "text-destructive/[0.13]" : "text-primary/[0.13]",
+                    "group-hover:opacity-80",
+                  )}
+                  strokeWidth={1.1}
+                />
+                <div className="relative flex items-center justify-between gap-3">
                   <p className={cn("text-[12px] font-semibold", isDanger ? "text-destructive" : "text-muted-foreground")}>{k.label}</p>
-                  <span className="font-mono text-[9px] text-muted-foreground/40">{k.code}</span>
+                  <span className="font-mono text-[9px] text-muted-foreground/50">{k.code}</span>
                 </div>
-                <p className="mt-5 font-display text-[27px] font-bold leading-none tracking-[-0.03em] text-foreground tabular-nums">
+                <p className="relative mt-5 font-display text-[28px] font-bold leading-none tracking-[-0.03em] text-foreground tabular-nums">
                   {privacy.hidden ? CENSORED : k.value}
                 </p>
-                <div className="mt-3 flex items-center justify-between gap-3">
-                  <p className="text-[11px] text-muted-foreground/55">{k.sub}</p>
-                  <Icon aria-hidden className={cn("h-4 w-4", isDanger ? "text-destructive/55" : "text-primary/55")} strokeWidth={1.7} />
-                </div>
-                <span className={cn("absolute inset-x-5 bottom-0 h-px origin-left scale-x-0 transition-transform duration-300 group-hover:scale-x-100", isDanger ? "bg-destructive" : "bg-primary")} />
+                <p className="relative mt-3 text-[11px] text-muted-foreground/75">{k.sub}</p>
               </div>
             );
           })}
-          </div>
         </section>
 
-        {/* ═══════════ COMMAND STRIP ═══════════ */}
-        <section className="grid grid-cols-2 overflow-hidden rounded-[14px] border border-border/60 bg-transparent xl:grid-cols-4">
+        {/* ═══════════ QUICK ACTIONS ═══════════ */}
+        <section className="grid grid-cols-2 gap-3 xl:grid-cols-4">
           {[
             { label: "Gerar PIX", sub: "QR Code para receber", icon: QrCode, onClick: () => { if (!requireApprovedAccount()) setPixDialogOpen(true); } },
             { label: "Solicitar Saque", sub: "Transferir via PIX", icon: ArrowDownRight, onClick: () => { if (!requireApprovedAccount()) navigate("/financeiro/saques"); } },
@@ -826,27 +833,33 @@ export default function Dashboard() {
               <button
                 key={a.label}
                 onClick={a.onClick}
-                 className="group relative flex min-h-[78px] items-center gap-3 border-b border-r border-border/40 bg-card/20 px-4 py-4 text-left transition-colors hover:bg-primary/[0.04] [&:nth-child(even)]:border-r-0 [&:nth-last-child(-n+2)]:border-b-0 xl:border-b-0 xl:border-r xl:last:border-r-0"
+                className="group relative flex min-h-[82px] items-center gap-3 overflow-hidden rounded-[14px] border border-border bg-card px-4 py-4 text-left transition-colors hover:border-primary/40 hover:bg-primary/[0.05]"
               >
-                 <span className="flex h-9 w-9 shrink-0 items-center justify-center border-l border-primary/50 text-muted-foreground transition-colors group-hover:text-primary">
-                   <Icon className="h-[18px] w-[18px]" strokeWidth={1.75} />
-                 </span>
-                 <div className="min-w-0 flex-1 pr-2">
-                   <p className="font-display font-bold text-[13px] 2xl:text-[14px] tracking-[-0.01em] leading-tight text-foreground">{a.label}</p>
-                  <p className="text-[12px] text-muted-foreground/60 truncate">{a.sub}</p>
+                <Icon
+                  aria-hidden
+                  className="pointer-events-none absolute -right-3 -bottom-3 h-[68px] w-[68px] text-primary/[0.10]"
+                  strokeWidth={1.1}
+                />
+                <span className="relative flex h-9 w-9 shrink-0 items-center justify-center rounded-[10px] border border-border bg-background/60 text-primary">
+                  <Icon className="h-[18px] w-[18px]" strokeWidth={1.9} />
+                </span>
+                <div className="relative min-w-0 flex-1 pr-4">
+                  <p className="font-display text-[13px] font-bold leading-tight tracking-[-0.01em] text-foreground 2xl:text-[14px]">{a.label}</p>
+                  <p className="truncate text-[12px] text-muted-foreground/75">{a.sub}</p>
                 </div>
-                 <ChevronRight className="absolute right-3 h-4 w-4 shrink-0 text-muted-foreground/30 transition-colors group-hover:text-foreground/60" />
+                <ChevronRight className="relative h-4 w-4 shrink-0 text-muted-foreground/40 transition-colors group-hover:text-foreground/70" />
               </button>
             );
           })}
         </section>
 
 
+
         {/* ═══════════ CHART + SIDE PANEL ═══════════ */}
         <section className="grid grid-cols-1 xl:grid-cols-3 gap-4">
 
           {/* Faturamento — Clean line chart (Cakto-style) */}
-          <div className="xl:col-span-2 overflow-hidden rounded-[14px] border border-border/60 bg-transparent">
+          <div className="xl:col-span-2 overflow-hidden rounded-[14px] border border-border bg-card">
             <div className="flex items-center justify-between gap-3 border-b border-border/40 px-6 py-5 md:px-8">
               <div className="min-w-0">
                 <h4 className="font-display font-bold text-xl tracking-[-0.02em] text-foreground">Faturamento</h4>
@@ -917,7 +930,7 @@ export default function Dashboard() {
           {/* Right side: donuts + links */}
           <div className="space-y-4">
             {/* Donuts card */}
-             <div className="rounded-[14px] border border-border/60 bg-transparent p-7">
+             <div className="rounded-[14px] border border-border bg-card p-7">
               <div className="mb-6">
                 <h4 className="font-display font-bold text-xl tracking-[-0.02em]">Índices</h4>
                 <p className="text-[11px] text-muted-foreground/60 mt-1">Conversão por método de pagamento</p>
@@ -968,7 +981,7 @@ export default function Dashboard() {
             </div>
 
             {/* Payment links */}
-             <button type="button" onClick={() => { if (!requireApprovedAccount()) navigate("/vendas/link-pagamento"); }} className="group block w-full rounded-[14px] border border-border/60 bg-transparent p-7 text-left transition-colors hover:border-primary/40">
+             <button type="button" onClick={() => { if (!requireApprovedAccount()) navigate("/vendas/link-pagamento"); }} className="group block w-full rounded-[14px] border border-border bg-card p-7 text-left transition-colors hover:border-primary/40">
               <div className="flex items-start justify-between gap-3">
                 <div className="min-w-0">
                   <h3 className="font-display font-black text-base tracking-[-0.01em] flex items-center gap-2"><Link2 className="h-4 w-4 text-primary" /> Links de pagamentos</h3>
@@ -982,7 +995,7 @@ export default function Dashboard() {
         </section>
 
         {/* ═══════════ ÚLTIMAS TRANSAÇÕES — clean table ═══════════ */}
-        <section className="overflow-hidden rounded-[14px] border border-border/60 bg-transparent">
+        <section className="overflow-hidden rounded-[14px] border border-border bg-card">
           <div className="flex items-center justify-between gap-3 px-5 md:px-6 pt-5 pb-4">
             <div className="min-w-0">
               <h3 className="font-display font-bold text-[15px] tracking-[-0.01em] text-foreground">Últimas transações</h3>
