@@ -1,9 +1,10 @@
 import { cn } from "@/lib/utils";
 
 /**
- * VENXPAY logomark — futuristic "H" built from two vertical rails
- * bridged by a diagonal circuit slash and a payment node.
- * Fully inline SVG. Colors adapt via `currentColor` fallback + gradient stops.
+ * VENXPAY logomark — a minimalist "V" cut from two beveled rails:
+ * the left rail is solid (capital in), the right rail is a gradient blade
+ * (settlement out), joined by a payment node at the vertex.
+ * 100% inline SVG — no external assets, scales cleanly at any size.
  */
 type Props = {
   className?: string;
@@ -20,58 +21,53 @@ export function VenxpayLogo({ className, size = 32, withWordmark = false, animat
         height={size}
         viewBox="0 0 64 64"
         fill="none"
+        role="img"
         aria-label="VENXPAY"
-        className={cn("shrink-0", animated && "drop-shadow-[0_0_12px_rgba(16,185,129,0.35)]")}
+        className="shrink-0"
       >
         <defs>
-          <linearGradient id="hzMark" x1="0" y1="0" x2="64" y2="64" gradientUnits="userSpaceOnUse">
-            <stop offset="0%" stopColor="#34d399" />
-            <stop offset="50%" stopColor="#22d3ee" />
-            <stop offset="100%" stopColor="#a78bfa" />
+          <linearGradient id="vxBlade" x1="32" y1="8" x2="56" y2="56" gradientUnits="userSpaceOnUse">
+            <stop offset="0%" stopColor="hsl(var(--primary))" />
+            <stop offset="100%" stopColor="hsl(var(--primary))" stopOpacity="0.45" />
           </linearGradient>
-          <linearGradient id="hzMarkSoft" x1="0" y1="0" x2="0" y2="64" gradientUnits="userSpaceOnUse">
-            <stop offset="0%" stopColor="#34d399" stopOpacity="0.9" />
-            <stop offset="100%" stopColor="#22d3ee" stopOpacity="0.9" />
+          <linearGradient id="vxRail" x1="10" y1="8" x2="32" y2="56" gradientUnits="userSpaceOnUse">
+            <stop offset="0%" stopColor="currentColor" stopOpacity="0.95" />
+            <stop offset="100%" stopColor="currentColor" stopOpacity="0.7" />
           </linearGradient>
         </defs>
 
-        {/* outer hex frame */}
-        <path
-          d="M32 3 L57 17 V47 L32 61 L7 47 V17 Z"
-          stroke="url(#hzMark)"
-          strokeWidth="1.5"
-          strokeLinejoin="round"
-          opacity="0.35"
-        />
+        {/* squircle plate — hairline, no glow */}
+        <rect x="2.5" y="2.5" width="59" height="59" rx="17" stroke="currentColor" strokeOpacity="0.16" />
 
-        {/* left rail */}
-        <rect x="15" y="16" width="6" height="32" rx="2" fill="url(#hzMarkSoft)" />
-        {/* right rail */}
-        <rect x="43" y="16" width="6" height="32" rx="2" fill="url(#hzMarkSoft)" />
-
-        {/* diagonal circuit bridge (the H bar as a slash) */}
+        {/* left rail of the V (thick, structural) */}
         <path
-          d="M21 34 L43 30"
-          stroke="url(#hzMark)"
-          strokeWidth="4"
+          d="M17 17 L32 48"
+          stroke="url(#vxRail)"
+          strokeWidth="7"
           strokeLinecap="round"
         />
+        {/* right blade of the V (gradient, tapering) */}
+        <path
+          d="M47 17 L32 48"
+          stroke="url(#vxBlade)"
+          strokeWidth="7"
+          strokeLinecap="round"
+        />
+        {/* clearing notch — the detail that makes the mark */}
+        <path d="M24.5 30 H39.5" stroke="hsl(var(--background))" strokeWidth="3.4" strokeLinecap="round" />
+        <path d="M25.5 30 H38.5" stroke="hsl(var(--primary))" strokeWidth="1.5" strokeLinecap="round" opacity="0.85" />
 
-        {/* payment node */}
-        <circle cx="32" cy="32" r="4.5" fill="#0b0f14" stroke="url(#hzMark)" strokeWidth="2" />
-        <circle cx="32" cy="32" r="1.5" fill="url(#hzMark)">
+        {/* settlement node at the vertex */}
+        <circle cx="32" cy="48" r="3.2" fill="hsl(var(--primary))">
           {animated && (
-            <animate attributeName="r" values="1.2;2.2;1.2" dur="2.4s" repeatCount="indefinite" />
+            <animate attributeName="opacity" values="1;0.35;1" dur="2.6s" repeatCount="indefinite" />
           )}
         </circle>
-
-        {/* corner ticks */}
-        <path d="M7 17 L11 17 M53 17 L57 17 M7 47 L11 47 M53 47 L57 47" stroke="url(#hzMark)" strokeWidth="1.5" strokeLinecap="round" />
       </svg>
 
       {withWordmark && (
-        <span className="font-display font-black tracking-[-0.04em] text-[1.15em] leading-none text-foreground">
-          VENX<span className="bg-gradient-to-r from-emerald-400 via-cyan-400 to-violet-400 bg-clip-text text-transparent">FY</span>
+        <span className="font-display font-black tracking-[-0.045em] text-[1.15em] leading-none text-foreground">
+          VENX<span className="text-primary">PAY</span>
         </span>
       )}
     </span>
