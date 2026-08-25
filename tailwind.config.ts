@@ -15,6 +15,8 @@ export default {
       fontFamily: {
         sans: ["Plus Jakarta Sans", "Manrope", "Inter", "system-ui", "sans-serif"],
         display: ["Sora", "Space Grotesk", "Outfit", "system-ui", "sans-serif"],
+        instrument: ["Archivo Black", "Sora", "system-ui", "sans-serif"],
+        dashboard: ["Hind", "Manrope", "system-ui", "sans-serif"],
         mono: ["JetBrains Mono", "monospace"],
         numbers: ["Space Grotesk", "JetBrains Mono", "monospace"],
         heading: ["Sora", "Space Grotesk", "system-ui", "sans-serif"],
@@ -54,6 +56,11 @@ export default {
           foreground: "hsl(var(--card-foreground))",
           elevated: "hsl(var(--card-elevated))",
           inset: "hsl(var(--card-inset))",
+        },
+        instrument: {
+          surface: "hsl(var(--instrument-surface))",
+          foreground: "hsl(var(--instrument-foreground))",
+          accent: "hsl(var(--instrument-accent))",
         },
         sidebar: {
           DEFAULT: "hsl(var(--sidebar-background))",

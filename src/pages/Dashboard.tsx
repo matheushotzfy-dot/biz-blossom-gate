@@ -49,6 +49,7 @@ import { accountNeedsVerification } from "@/components/AccountVerificationGate";
 import { toast } from "sonner";
 import { PromoBanner } from "@/components/dashboard/PromoBanner";
 import { SellerOnboarding } from "@/components/dashboard/SellerOnboarding";
+import { Button } from "@/components/ui/button";
 
 
 const PERIOD_PRESETS = [
@@ -61,6 +62,50 @@ const PERIOD_PRESETS = [
 type PeriodPreset = (typeof PERIOD_PRESETS)[number];
 
 const CENSORED = "••••••";
+
+type MetricArtworkKind = "balance" | "received" | "secure" | "volume";
+
+function MetricArtwork({ kind }: { kind: MetricArtworkKind }) {
+  if (kind === "balance") {
+    return (
+      <svg aria-hidden viewBox="0 0 116 112" className="h-full w-full" fill="none">
+        <circle cx="58" cy="56" r="34" className="stroke-instrument-accent/25" />
+        <circle cx="58" cy="56" r="22" className="stroke-instrument-accent/55" strokeDasharray="3 5" />
+        <path d="M58 34v44M36 56h44" className="stroke-instrument-accent/80" strokeWidth="1.5" />
+        <circle cx="58" cy="56" r="4" className="fill-instrument-accent" />
+      </svg>
+    );
+  }
+  if (kind === "received") {
+    return (
+      <svg aria-hidden viewBox="0 0 116 112" className="h-full w-full" fill="none">
+        <path d="M22 72h19V55h18V41h33" className="stroke-instrument-accent/70" strokeWidth="2" />
+        <path d="m79 31 13 10-13 10" className="stroke-instrument-accent" strokeWidth="2" />
+        <path d="M22 83h70" className="stroke-instrument-accent/20" />
+        <circle cx="41" cy="72" r="3" className="fill-instrument-accent" />
+        <circle cx="59" cy="55" r="3" className="fill-instrument-accent" />
+      </svg>
+    );
+  }
+  if (kind === "secure") {
+    return (
+      <svg aria-hidden viewBox="0 0 116 112" className="h-full w-full" fill="none">
+        <path d="M58 22 87 34v23c0 19-11 29-29 35-18-6-29-16-29-35V34l29-12Z" className="stroke-destructive/45" strokeWidth="1.5" />
+        <path d="M46 56h24v19H46zM51 56v-6a7 7 0 0 1 14 0v6" className="stroke-destructive/80" strokeWidth="1.7" />
+        <circle cx="58" cy="65" r="2.5" className="fill-destructive" />
+      </svg>
+    );
+  }
+  return (
+    <svg aria-hidden viewBox="0 0 116 112" className="h-full w-full" fill="none">
+      <path d="M20 79 39 62l15 8 25-31 17 13" className="stroke-instrument-accent" strokeWidth="2" />
+      <path d="M20 88h76M29 25v63" className="stroke-instrument-accent/20" />
+      <path d="m82 39 14 13-18 2" className="fill-instrument-accent/20 stroke-instrument-accent/60" />
+      <circle cx="39" cy="62" r="3" className="fill-instrument-accent" />
+      <circle cx="54" cy="70" r="3" className="fill-instrument-accent" />
+    </svg>
+  );
+}
 
 function usePrivacyMode() {
   const [hidden, setHidden] = useState(() => {
@@ -783,45 +828,45 @@ export default function Dashboard() {
 
 
         {/* ═══════════ KPI CARDS ═══════════ */}
-        <section className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
+        <section className="grid grid-cols-1 gap-3 font-dashboard sm:grid-cols-2 xl:grid-cols-[1.25fr_1.15fr_1fr_1.1fr]">
           {[
-            { label: "Saldo disponível", value: fmt(Math.max(0, balance)), sub: "Pronto para saque", icon: Wallet, tone: "neutral" as const, code: "\n" },
-            { label: "Recebido hoje", value: fmt(receivedToday), sub: "Movimento confirmado", icon: RefreshCw, tone: "neutral" as const, code: "\n" },
-            { label: "Em segurança", value: fmt(disputedAmount), sub: "MEDs e reservas", icon: Lock, tone: "danger" as const, code: "\n" },
-            { label: "Volume total", value: fmt(revenue), sub: "Vendas acumuladas", icon: TrendingUp, tone: "revenue" as const, code: "\n" },
-          ].map((k) => {
-            const Icon = k.icon;
+            { label: "Saldo disponível", value: fmt(Math.max(0, balance)), sub: "Pronto para saque", tone: "neutral" as const, art: "balance" as const },
+            { label: "Recebido hoje", value: fmt(receivedToday), sub: "Movimento confirmado", tone: "neutral" as const, art: "received" as const },
+            { label: "Em segurança", value: fmt(disputedAmount), sub: "MEDs e reservas", tone: "danger" as const, art: "secure" as const },
+            { label: "Volume total", value: fmt(revenue), sub: "Vendas acumuladas", tone: "revenue" as const, art: "volume" as const },
+          ].map((k, index) => {
             const isDanger = k.tone === "danger";
             return (
               <div
                 key={k.label}
-                className="group relative min-h-[150px] overflow-hidden rounded-[14px] border border-border bg-card px-5 py-5 transition-colors hover:border-primary/40"
+                className={cn(
+                  "group relative min-h-[158px] overflow-hidden rounded-[12px] border border-border bg-instrument-surface px-5 py-5 text-instrument-foreground transition-colors duration-200 hover:border-instrument-accent/55",
+                  index === 0 && "sm:col-span-2 xl:col-span-1",
+                )}
               >
-                {/* Ghost icon watermark */}
-                <Icon
-                  aria-hidden
-                  className={cn(
-                    "pointer-events-none absolute -right-4 -bottom-4 h-[104px] w-[104px] transition-opacity duration-300",
-                    isDanger ? "text-destructive/[0.13]" : "text-primary/[0.13]",
-                    "group-hover:opacity-80",
-                  )}
-                  strokeWidth={1.1}
-                />
-                <div className="relative flex items-center justify-between gap-3">
-                  <p className={cn("text-[12px] font-semibold", isDanger ? "text-destructive" : "text-muted-foreground")}>{k.label}</p>
-                  <span className="font-mono text-[9px] text-muted-foreground/50">{k.code}</span>
+                <div className="pointer-events-none absolute inset-y-0 right-0 w-[42%] min-w-[104px] border-l border-border/70 bg-card-inset/55 p-2 transition-colors duration-200 group-hover:bg-card-inset/80">
+                  <MetricArtwork kind={k.art} />
                 </div>
-                <p className="relative mt-5 font-display text-[28px] font-bold leading-none tracking-[-0.03em] text-foreground tabular-nums">
+                <div className="relative z-10 flex h-full max-w-[68%] flex-col">
+                  <div className="flex items-center gap-2">
+                    <span className={cn("h-1.5 w-1.5 rounded-full", isDanger ? "bg-destructive" : "bg-instrument-accent")} />
+                    <p className={cn("text-[13px] font-medium", isDanger ? "text-destructive" : "text-muted-foreground")}>{k.label}</p>
+                  </div>
+                  <p className="mt-5 whitespace-nowrap font-instrument text-[25px] leading-none text-instrument-foreground tabular-nums sm:text-[28px]">
                   {privacy.hidden ? CENSORED : k.value}
-                </p>
-                <p className="relative mt-3 text-[11px] text-muted-foreground/75">{k.sub}</p>
+                  </p>
+                  <div className="mt-auto flex items-center gap-2 pt-4 text-[11px] font-medium text-muted-foreground">
+                    <span className={cn("h-px w-5", isDanger ? "bg-destructive/55" : "bg-instrument-accent/55")} />
+                    <span className="truncate">{k.sub}</span>
+                  </div>
+                </div>
               </div>
             );
           })}
         </section>
 
         {/* ═══════════ QUICK ACTIONS ═══════════ */}
-        <section className="grid grid-cols-2 gap-3 xl:grid-cols-4">
+        <section className="grid grid-cols-2 gap-px overflow-hidden rounded-[12px] border border-border bg-border font-dashboard xl:grid-cols-4">
           {[
             { label: "Gerar PIX", sub: "QR Code para receber", icon: QrCode, onClick: () => { if (!requireApprovedAccount()) setPixDialogOpen(true); } },
             { label: "Solicitar Saque", sub: "Transferir via PIX", icon: ArrowDownRight, onClick: () => { if (!requireApprovedAccount()) navigate("/financeiro/saques"); } },
@@ -830,25 +875,24 @@ export default function Dashboard() {
           ].map((a) => {
             const Icon = a.icon;
             return (
-              <button
+              <Button
+                type="button"
+                variant="ghost"
                 key={a.label}
                 onClick={a.onClick}
-                className="group relative flex min-h-[82px] items-center gap-3 overflow-hidden rounded-[14px] border border-border bg-card px-4 py-4 text-left transition-colors hover:border-primary/40 hover:bg-primary/[0.05]"
+                className="group relative h-auto min-h-[78px] justify-start gap-3 overflow-hidden rounded-none border-0 bg-instrument-surface px-4 py-3 text-left text-instrument-foreground hover:bg-card-inset"
               >
-                <Icon
-                  aria-hidden
-                  className="pointer-events-none absolute -right-3 -bottom-3 h-[68px] w-[68px] text-primary/[0.10]"
-                  strokeWidth={1.1}
-                />
-                <span className="relative flex h-9 w-9 shrink-0 items-center justify-center rounded-[10px] border border-border bg-background/60 text-primary">
-                  <Icon className="h-[18px] w-[18px]" strokeWidth={1.9} />
+                <span className="relative flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-instrument-accent/30 bg-instrument-accent/10 text-instrument-accent transition-colors group-hover:bg-instrument-accent group-hover:text-primary-foreground">
+                  <Icon className="h-[17px] w-[17px]" strokeWidth={1.8} />
                 </span>
-                <div className="relative min-w-0 flex-1 pr-4">
-                  <p className="font-display text-[13px] font-bold leading-tight tracking-[-0.01em] text-foreground 2xl:text-[14px]">{a.label}</p>
-                  <p className="truncate text-[12px] text-muted-foreground/75">{a.sub}</p>
+                <div className="relative min-w-0 flex-1">
+                  <p className="text-[13px] font-semibold leading-tight text-instrument-foreground 2xl:text-[14px]">{a.label}</p>
+                  <p className="truncate text-[11px] font-normal text-muted-foreground">{a.sub}</p>
                 </div>
-                <ChevronRight className="relative h-4 w-4 shrink-0 text-muted-foreground/40 transition-colors group-hover:text-foreground/70" />
-              </button>
+                <span className="relative flex h-7 w-7 shrink-0 items-center justify-center rounded-full border border-border text-muted-foreground transition-colors group-hover:border-instrument-accent/35 group-hover:text-instrument-accent">
+                  <ChevronRight className="h-3.5 w-3.5" />
+                </span>
+              </Button>
             );
           })}
         </section>
