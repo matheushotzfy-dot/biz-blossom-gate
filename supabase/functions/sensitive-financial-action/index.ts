@@ -96,6 +96,34 @@ Deno.serve(async (req) => {
     const parsed = RequestSchema.safeParse(await req.json().catch(() => null));
     if (!parsed.success) return json(req, { success: false, error: "Dados inválidos." }, 400);
 
+    const admin = createClient(supabaseUrl, serviceRoleKey, {
+      auth: { persistSession: false, autoRefreshToken: false },
+    });
+
+    // ===== Rate limit obrigatório =====
+    // Sem isso o endpoint que autoriza saques vira oráculo de brute force da
+    // senha do seller. Limitamos por usuário (10/15min) e por IP (30/15min).
+    const requestIp = req.headers.get("cf-connecting-ip")
+      || req.headers.get("x-forwarded-for")?.split(",")[0]?.trim()
+      || "0.0.0.0";
+    const [byUser, byIp] = await Promise.all([
+      admin.rpc("bump_rate_limit", { _bucket_key: `sfa_user:${user.id}`, _window_seconds: 900, _max_count: 10 }),
+      admin.rpc("bump_rate_limit", { _bucket_key: `sfa_ip:${requestIp}`, _window_seconds: 900, _max_count: 30 }),
+    ]);
+    const allowed = (r: { data: unknown }) => {
+      const row = Array.isArray(r.data) ? r.data[0] : r.data;
+      return row == null || (row as { allowed?: boolean }).allowed !== false;
+    };
+    if (!allowed(byUser) || !allowed(byIp)) {
+      await admin.from("security_audit_log").insert({
+        event_type: "sensitive_financial_rate_limited",
+        user_id: user.id,
+        endpoint: "sensitive-financial-action",
+        status_code: 429,
+      }).then(() => undefined, () => undefined);
+      return json(req, { success: false, error: "Muitas tentativas. Aguarde alguns minutos." }, 429, { "Retry-After": "900" });
+    }
+
     const verificationClient = createClient(supabaseUrl, anonKey, {
       auth: { persistSession: false, autoRefreshToken: false },
     });
@@ -104,12 +132,16 @@ Deno.serve(async (req) => {
       password: parsed.data.password,
     });
     if (verificationError || verified.user?.id !== user.id) {
+      await admin.from("security_audit_log").insert({
+        event_type: "sensitive_financial_bad_password",
+        user_id: user.id,
+        endpoint: "sensitive-financial-action",
+        status_code: 403,
+      }).then(() => undefined, () => undefined);
       return json(req, { success: false, error: "Senha atual incorreta." }, 403);
     }
 
-    const admin = createClient(supabaseUrl, serviceRoleKey, {
-      auth: { persistSession: false, autoRefreshToken: false },
-    });
+
     const { action, payload } = parsed.data;
     let operationError: { message: string } | null = null;
 
