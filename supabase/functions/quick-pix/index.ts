@@ -26,7 +26,10 @@ function safeLog(message: string, context: Record<string, unknown> = {}) {
 }
 
 Deno.serve(async (req) => {
+  // CORS restrito à allowlist (endpoint autenticado chamado pelo painel).
+  const corsHeaders = buildCorsHeaders(req);
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
+
 
   try {
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
