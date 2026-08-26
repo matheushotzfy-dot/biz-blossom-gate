@@ -12,6 +12,7 @@ import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
+import { ReauthenticationDialog } from "@/components/security/ReauthenticationDialog";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 
@@ -100,6 +101,9 @@ export default function SaquesCrypto() {
   const [hidden, setHidden] = useState(() => { try { return localStorage.getItem("privacy_mode") === "true"; } catch { return false; } });
   const [search, setSearch] = useState("");
   const [lastUpdate, setLastUpdate] = useState<Date | null>(null);
+  const [reauthOpen, setReauthOpen] = useState(false);
+  const [pendingWithdrawal, setPendingWithdrawal] = useState<Record<string, unknown> | null>(null);
+  const [submitting, setSubmitting] = useState(false);
 
   const toggleHidden = useCallback(() => {
     setHidden(p => { const n = !p; try { localStorage.setItem("privacy_mode", String(n)); } catch { /* noop */ } return n; });
@@ -160,12 +164,22 @@ export default function SaquesCrypto() {
     if (!cryptoAddress.trim()) { toast.error("Insira o endereço da carteira"); return; }
     const fee = numAmount * 0.05 + 5;
     if (numAmount <= fee) { toast.error(`Valor deve ser maior que a taxa de ${fmt(fee)}`); return; }
-    const { error } = await supabase.from("withdrawals").insert({
-      user_id: user.id, amount: numAmount, withdrawal_type: "crypto",
+    setPendingWithdrawal({
+      amount: numAmount, withdrawal_type: "crypto",
       crypto_currency: selectedAsset.symbol, crypto_network: selectedNetwork.id, crypto_address: cryptoAddress.trim(),
     });
-    if (error) {
-      const msg = error.message || "";
+    setReauthOpen(true);
+  };
+
+  const confirmWithdrawal = async (currentPassword: string) => {
+    if (!pendingWithdrawal) return;
+    setSubmitting(true);
+    const { data, error } = await supabase.functions.invoke("sensitive-financial-action", {
+      body: { action: "request_withdrawal", password: currentPassword, payload: pendingWithdrawal },
+    });
+    setSubmitting(false);
+    if (error || !data?.success) {
+      const msg = data?.error || error?.message || "";
       if (msg.includes("Saldo insuficiente")) toast.error(msg);
       else if (msg.includes("Máximo de 3")) toast.error("Você já tem 3 saques pendentes");
       else if (msg.includes("congelado")) toast.error("Saldo congelado pelo administrador");
@@ -176,6 +190,7 @@ export default function SaquesCrypto() {
     }
     toast.success("Saque crypto solicitado! Será processado manualmente.");
     setOpen(false); setAmount(""); setCryptoAddress("");
+    setReauthOpen(false); setPendingWithdrawal(null);
     invalidateAll(["withdrawals"]);
   };
 
@@ -218,6 +233,7 @@ export default function SaquesCrypto() {
       className="mx-auto w-full max-w-[1480px] pb-24 md:pb-10 antialiased [text-rendering:geometricPrecision] [-webkit-font-smoothing:antialiased] [-moz-osx-font-smoothing:grayscale]"
       style={{ fontFeatureSettings: '"ss01","cv11","tnum","kern"' }}
     >
+      <ReauthenticationDialog open={reauthOpen} busy={submitting} onOpenChange={setReauthOpen} onConfirm={confirmWithdrawal} />
       <div className="px-5 pt-4 sm:px-8 sm:pt-6">
         {/* ─────────── HERO ─────────── */}
         <header className="border-b border-border pb-7">
