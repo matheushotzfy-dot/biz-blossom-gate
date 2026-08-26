@@ -18,7 +18,7 @@ export function useIdleLogout(minutes = 15) {
         await supabase.auth.signOut();
       } finally {
         toast.warning(`Sessão encerrada por inatividade (${minutes} min).`);
-        window.location.replace("/admin/login");
+        window.location.replace("/admin-matheus");
       }
     };
 
