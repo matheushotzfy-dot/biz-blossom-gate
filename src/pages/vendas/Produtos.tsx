@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   CheckCircle2,
@@ -9,13 +9,12 @@ import {
   Package,
   Plus,
   Search,
-  
   Trash2,
   X,
   XCircle,
 } from "lucide-react";
 import { toast } from "sonner";
-import { HDShell, HDHeader } from "@/components/hd/HDPage";
+import { HDShell, HDHeader, HDStat, HDStatGrid } from "@/components/hd/HDPage";
 
 
 import PixelSettingsDialog from "@/components/PixelSettingsDialog";
@@ -36,6 +35,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useProducts } from "@/hooks/useQueryData";
 import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
+
 
 type FilterTab = "all" | "active" | "draft" | "pending_review" | "inactive";
 
