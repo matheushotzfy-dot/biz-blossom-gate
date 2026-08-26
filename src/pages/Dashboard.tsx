@@ -210,7 +210,37 @@ export default function Dashboard() {
   const [detailTx, setDetailTx] = useState<Tables<"transactions"> | null>(null);
   const [pixDialogOpen, setPixDialogOpen] = useState(false);
   const { data: availableBalance = 0 } = useLedgerBalance();
-  const accountLocked = accountNeedsVerification(profile?.account_status);
+  const kyc = useKycStatus();
+  const accountLocked = !kyc.approved;
+
+  // Valor normalizado do seletor de período (fonte única para o PeriodPicker).
+  const periodValue = useMemo<PeriodValue>(() => {
+    if (isCustom && customRange?.from) {
+      const from = new Date(customRange.from); from.setHours(0, 0, 0, 0);
+      const to = new Date(customRange.to ?? customRange.from); to.setHours(23, 59, 59, 999);
+      const monthStart = new Date(from.getFullYear(), from.getMonth(), 1);
+      const isMonth = from.getTime() === monthStart.getTime() && to.toDateString() === brasiliaToday().toDateString();
+      const y = new Date(brasiliaToday()); y.setDate(y.getDate() - 1);
+      const isYesterday = from.toDateString() === y.toDateString() && to.toDateString() === y.toDateString();
+      return { presetId: isMonth ? "month" : isYesterday ? "yesterday" : null, from, to };
+    }
+    const map: Record<number, PeriodPresetId> = { 0: "today", 7: "7d", 15: "15d", 30: "30d" };
+    return buildPeriod(map[selectedPeriod.days] ?? "today");
+  }, [isCustom, customRange, selectedPeriod]);
+
+  const applyPeriod = useCallback((v: PeriodValue) => {
+    const presetDays: Partial<Record<PeriodPresetId, number>> = { today: 0, "7d": 7, "15d": 15, "30d": 30 };
+    if (v.presetId && v.presetId in presetDays) {
+      const days = presetDays[v.presetId]!;
+      const preset = PERIOD_PRESETS.find((p) => p.days === days) ?? PERIOD_PRESETS[0];
+      setSelectedPeriod(preset);
+      setIsCustom(false);
+      setCustomRange(undefined);
+      return;
+    }
+    setCustomRange({ from: v.from, to: v.to });
+    setIsCustom(true);
+  }, []);
 
   const requireApprovedAccount = useCallback((target = "/perfil?tab=identidade&scrollTo=kyc") => {
     if (!accountLocked) return false;
@@ -218,6 +248,7 @@ export default function Dashboard() {
     navigate(target);
     return true;
   }, [accountLocked, navigate]);
+
 
   const filteredTx = useMemo(() => {
     if (isCustom && customRange?.from) {
