@@ -159,8 +159,8 @@ function SidebarSectionNav({ section, pathname, isFirst }: SidebarSectionNavProp
     <SidebarGroup className="px-0 py-0.5">
       <div
         className={cn(
-          "flex items-center gap-2.5 px-3 pb-2 group-data-[collapsible=icon]:hidden",
-          isFirst ? "pt-0" : "pt-4",
+          "flex items-center gap-2.5 px-3 pb-1.5 group-data-[collapsible=icon]:hidden",
+          isFirst ? "pt-0" : "pt-3.5",
         )}
       >
         <span className="h-px w-4 shrink-0 bg-sidebar-foreground/20" aria-hidden />
@@ -172,7 +172,7 @@ function SidebarSectionNav({ section, pathname, isFirst }: SidebarSectionNavProp
         <div className="mx-auto my-2 hidden h-px w-5 bg-sidebar-border/60 group-data-[collapsible=icon]:block" />
       )}
       <SidebarGroupContent>
-        <SidebarMenu className="gap-1 px-0 group-data-[collapsible=icon]:gap-2">
+        <SidebarMenu className="gap-1.5 px-0 group-data-[collapsible=icon]:gap-2">
           {section.items.map((item) => {
             const isActive = isItemActive(pathname, item);
             return (
@@ -188,24 +188,24 @@ function SidebarSectionNav({ section, pathname, isFirst }: SidebarSectionNavProp
                     end={item.exact}
                     activeClassName=""
                     className={cn(
-                      "group/nav relative flex h-[50px] items-center gap-3 overflow-hidden rounded-[17px] px-3 text-[13.5px] outline-none",
+                      "group/nav relative flex h-[52px] items-center gap-3 overflow-hidden rounded-[18px] px-3 text-[13.5px] outline-none",
                       "transition-[background-color,border-color,color,transform] duration-[220ms] ease-out",
                       "group-data-[collapsible=icon]:mx-auto group-data-[collapsible=icon]:h-11 group-data-[collapsible=icon]:w-11 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:gap-0 group-data-[collapsible=icon]:rounded-[14px] group-data-[collapsible=icon]:px-0",
                       isActive
-                        ? "border border-primary/35 bg-sidebar-accent font-semibold text-sidebar-accent-foreground"
-                        : "border border-transparent font-medium text-sidebar-foreground/62 hover:border-sidebar-border/60 hover:bg-sidebar-accent/45 hover:text-sidebar-accent-foreground",
+                        ? "border border-primary/30 bg-primary/[0.12] font-semibold text-sidebar-accent-foreground"
+                        : "border border-transparent font-medium text-sidebar-foreground/62 hover:bg-sidebar-accent/55 hover:text-sidebar-accent-foreground",
                     )}
                   >
                     <span
                       className={cn(
-                        "relative z-10 flex h-7 w-7 shrink-0 items-center justify-center transition-[color,transform] duration-[220ms] ease-out",
+                        "relative z-10 flex h-8 w-8 shrink-0 items-center justify-center rounded-[11px] transition-[background-color,color,transform] duration-[220ms] ease-out",
                         isActive
-                          ? "text-primary"
-                          : "text-sidebar-foreground/48 group-hover/nav:translate-x-0.5 group-hover/nav:text-sidebar-accent-foreground",
+                          ? "bg-primary text-primary-foreground"
+                          : "text-sidebar-foreground/48 group-hover/nav:translate-x-0.5 group-hover/nav:bg-sidebar-foreground/[0.07] group-hover/nav:text-sidebar-accent-foreground",
                       )}
                     >
                       <item.icon
-                        size={20}
+                        size={18}
                         className="group-data-[collapsible=icon]:!h-5 group-data-[collapsible=icon]:!w-5"
                         strokeWidth={isActive ? 2 : 1.65}
                       />
@@ -230,7 +230,7 @@ function SidebarSectionNav({ section, pathname, isFirst }: SidebarSectionNavProp
                       <>
                         <span
                           aria-hidden
-                          className="absolute inset-y-2 left-0 w-[3px] rounded-r-full bg-primary group-data-[collapsible=icon]:hidden"
+                          className="absolute inset-y-3 left-0 w-[3px] rounded-r-full bg-primary group-data-[collapsible=icon]:hidden"
                         />
                         <span
                           aria-hidden
@@ -238,7 +238,7 @@ function SidebarSectionNav({ section, pathname, isFirst }: SidebarSectionNavProp
                         />
                         <span
                           aria-hidden
-                          className="absolute bottom-0 left-10 right-10 h-px bg-gradient-to-r from-transparent via-primary/55 to-transparent group-data-[collapsible=icon]:hidden"
+                          className="absolute bottom-0 left-12 right-12 h-px bg-gradient-to-r from-transparent via-primary/50 to-transparent group-data-[collapsible=icon]:hidden"
                         />
                       </>
                     )}
