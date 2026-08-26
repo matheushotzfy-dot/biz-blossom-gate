@@ -213,7 +213,7 @@ function DashboardLayoutInner() {
               <span
                 className={cn(
                   "absolute -bottom-0 -right-0 h-2 w-2 rounded-full ring-2 ring-card",
-                  profile?.account_status === "approved" ? "bg-success" : "bg-warning",
+                  kyc.approved ? "bg-success" : "bg-warning",
                 )}
               />
             </button>
@@ -222,7 +222,7 @@ function DashboardLayoutInner() {
 
 
  {/* ─── VERIFICATION BANNER ─── */}
- {profile && profile.account_status !== "approved" && (
+ {kyc.resolved && kyc.showOnboarding && (
  <button
  onClick={() => navigate("/perfil?tab=identidade&scrollTo=kyc")}
   className="seller-clickable relative z-20 flex w-full cursor-pointer items-center gap-2.5 border-b border-warning/20 bg-warning/[0.08] px-4 py-2.5 text-warning hover:bg-warning/[0.12] lg:px-8"

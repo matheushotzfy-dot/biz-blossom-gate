@@ -6,6 +6,7 @@ import { useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useProfile } from "@/hooks/useProfile";
+import { useKycStatus } from "@/hooks/useKycStatus";
 import { usePixKeys } from "@/hooks/useQueryData";
 import { toast } from "sonner";
 import { Zap, Loader2, ShieldAlert, ChevronRight, CheckCircle2, X, Mail, Phone, Hash, Fingerprint, Sparkles, PlusCircle } from "lucide-react";
@@ -42,7 +43,7 @@ export default function AutoWithdrawalSettings() {
   const [amountStr, setAmountStr] = useState("");
   const [pixKeyId, setPixKeyId] = useState("");
 
-  const kycOk = profile?.account_status === "approved";
+  const kycOk = kyc.approved;
   const activeKeys = useMemo(
     () => (pixKeys as Array<{ id: string; key_type: string; key_value?: string | null; key_value_masked?: string | null }>),
     [pixKeys]
