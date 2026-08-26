@@ -9,7 +9,7 @@ import {
   Package,
   Plus,
   Search,
-  Sparkles,
+  
   Trash2,
   X,
   XCircle,
@@ -199,7 +199,7 @@ export default function Produtos() {
 
   return (
     <HDShell>
-      {/* ── Hero (Financeiro pattern) ── */}
+      {/* ── Hero ── */}
       <HDHeader
         eyebrow={`${products.length} ${products.length === 1 ? "produto" : "produtos"} no catálogo`}
         title="Produtos"
@@ -207,22 +207,18 @@ export default function Produtos() {
         actions={
           <button
             onClick={() => navigate("/vendas/produtos/novo/editar")}
-            className="group inline-flex h-10 items-center gap-2 rounded-lg bg-primary px-4 text-[12px] font-medium text-primary-foreground transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] hover:bg-primary/90"
+            className="inline-flex h-9 items-center gap-2 rounded-[10px] bg-primary px-4 text-[12px] font-semibold text-primary-foreground transition-colors hover:bg-primary/90"
           >
-            <Plus className="h-4 w-4 transition-transform duration-300 group-hover:rotate-90" strokeWidth={2.5} />
+            <Plus className="h-4 w-4" strokeWidth={2.25} />
             Novo produto
           </button>
         }
       />
 
-
-
-
-
-      {/* ── Tabs + Search row ── */}
-      <div className="flex flex-col gap-3 animate-fade-in stagger-2 lg:flex-row lg:items-center lg:justify-between">
-        <div className="-mx-3 sm:mx-0 overflow-x-auto scrollbar-none">
-          <div className="inline-flex min-w-full lg:min-w-0 lg:w-fit items-center gap-1 rounded-xl border border-border/50 bg-card p-1 mx-3 sm:mx-0">
+      {/* ── Filtros + busca (linha seca, sem elevação) ── */}
+      <div className="flex flex-col gap-2.5 animate-fade-in stagger-2 lg:flex-row lg:items-center lg:justify-between">
+        <div className="-mx-3 overflow-x-auto scrollbar-none sm:mx-0">
+          <div className="inline-flex min-w-full items-center gap-px rounded-[10px] border border-border/60 bg-card p-px mx-3 sm:mx-0 lg:w-fit lg:min-w-0">
             {tabs.map((item) => {
               const active = tab === item.value;
               return (
@@ -230,27 +226,18 @@ export default function Produtos() {
                   key={item.value}
                   onClick={() => setTab(item.value)}
                   className={cn(
- "group/tab relative inline-flex h-8 shrink-0 items-center gap-2 overflow-hidden rounded-lg px-3 text-[12px] font-bold tracking-tight transition-all duration-300  active:translate-y-0  whitespace-nowrap",
+                    "inline-flex h-8 shrink-0 items-center gap-1.5 whitespace-nowrap rounded-[9px] px-3 text-[12px] font-medium transition-colors",
                     active
-                      ? "bg-secondary text-foreground ring-1 ring-border/60"
-                      : "text-muted-foreground/80 hover:bg-secondary/70 hover:text-foreground"
+                      ? "bg-muted/50 text-foreground"
+                      : "text-muted-foreground/70 hover:text-foreground"
                   )}
                 >
-                  <span className="pointer-events-none absolute inset-x-2 top-0 h-px bg-primary/50 opacity-0 transition-opacity duration-300 group-hover/tab:opacity-100" />
-                  <span className={cn(
- "flex h-4 w-4 items-center justify-center transition-all duration-300",
-                    active ? tabAccent[item.value] : "text-muted-foreground/50 group-hover/tab:scale-110 group-hover/tab:text-primary"
-                  )}>
+                  <span className={cn("flex h-3.5 w-3.5 items-center justify-center", active ? tabAccent[item.value] : "text-muted-foreground/40")}>
                     {tabIcon[item.value]}
                   </span>
-                  <span className="font-display">{item.label}</span>
+                  {item.label}
                   {item.count > 0 && (
-                    <span className={cn(
- "inline-flex h-[18px] min-w-[20px] items-center justify-center rounded-md px-1.5 text-[10px] font-black tabular-nums tracking-tight border transition-colors",
-                      active
-                        ? "bg-background/80 text-foreground border-border/40"
-                        : "bg-muted/30 text-muted-foreground/60 border-transparent"
-                    )}>
+                    <span className={cn("text-[11px] tabular-nums", active ? "text-foreground/60" : "text-muted-foreground/40")}>
                       {item.count}
                     </span>
                   )}
@@ -260,86 +247,72 @@ export default function Produtos() {
           </div>
         </div>
 
-        <div className="flex items-center gap-2 w-full lg:w-auto">
+        <div className="flex w-full items-center gap-2 lg:w-auto">
           {showClearDraftsBtn && (
             <button
               onClick={() => setClearDraftsOpen(true)}
-              className="inline-flex h-9 shrink-0 items-center gap-1.5 rounded-lg border border-destructive/40 bg-destructive/[0.06] px-3 text-[11px] font-medium text-destructive transition-all duration-200 hover:bg-destructive hover:text-destructive-foreground"
+              className="inline-flex h-9 shrink-0 items-center gap-1.5 rounded-[10px] border border-border/60 bg-card px-3 text-[11.5px] font-medium text-muted-foreground transition-colors hover:border-destructive/40 hover:text-destructive"
             >
-              <Trash2 className="h-3.5 w-3.5" strokeWidth={2.5} />
+              <Trash2 className="h-3.5 w-3.5" strokeWidth={2} />
               <span className="hidden sm:inline">Limpar rascunhos</span>
-              <span className="rounded bg-destructive/20 px-1.5 py-px text-[10px] tabular-nums">{draftIds.length}</span>
+              <span className="tabular-nums">{draftIds.length}</span>
             </button>
           )}
-          <div className="relative group flex-1 lg:flex-none">
-            <Search className="absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground/50 transition-colors group-focus-within:text-primary" />
+          <div className="relative flex-1 lg:flex-none">
+            <Search className="absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground/40" />
             <input
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              placeholder="Buscar produto..."
-              className="h-9 w-full rounded-lg border border-border/60 bg-secondary/40 pl-9 pr-8 text-xs font-medium text-foreground placeholder:text-muted-foreground/60 transition-all focus:border-primary/50 focus:bg-card focus:outline-none focus:ring-2 focus:ring-primary/15 lg:w-72"
+              placeholder="Buscar produto"
+              className="h-9 w-full rounded-[10px] border border-border/60 bg-card pl-9 pr-8 text-[12px] text-foreground placeholder:text-muted-foreground/50 transition-colors focus:border-border focus:outline-none lg:w-72"
             />
             {search && (
-              <button onClick={() => setSearch("")} className="absolute right-2.5 top-1/2 -translate-y-1/2 rounded p-0.5 text-muted-foreground/50 transition-colors hover:bg-secondary hover:text-foreground">
-                <X className="h-3 w-3" />
+              <button onClick={() => setSearch("")} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-muted-foreground/40 transition-colors hover:text-foreground">
+                <X className="h-3.5 w-3.5" />
               </button>
             )}
           </div>
         </div>
       </div>
 
-
-
-      {/* ── Product workspace ── */}
+      {/* ── Catálogo ── */}
       <div>
-
         {productsLoading ? (
-          <div className="grid grid-cols-1 gap-3 sm:gap-5 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="grid grid-cols-1 gap-3 lg:grid-cols-2 2xl:grid-cols-3">
             {Array.from({ length: 6 }).map((_, i) => (
-              <div key={i} className="rounded-[20px] border border-border/40 bg-card/40 overflow-hidden animate-pulse">
-                <div className="aspect-[16/10] w-full bg-muted/50" />
-                <div className="p-4 space-y-3">
-                  <div className="h-4 w-3/4 rounded bg-muted/60" />
-                  <div className="h-3 w-1/2 rounded bg-muted/40" />
-                  <div className="grid grid-cols-2 gap-2 pt-1">
-                    <div className="h-12 rounded-xl bg-muted/30" />
-                    <div className="h-12 rounded-xl bg-muted/30" />
+              <div key={i} className="animate-pulse overflow-hidden rounded-[12px] border border-border/60 bg-card">
+                <div className="flex items-start gap-3.5 p-4">
+                  <div className="h-[52px] w-[52px] shrink-0 rounded-[10px] bg-muted/40" />
+                  <div className="flex-1 space-y-2">
+                    <div className="h-3.5 w-1/2 rounded bg-muted/40" />
+                    <div className="h-2.5 w-2/3 rounded bg-muted/25" />
+                    <div className="h-5 w-24 rounded bg-muted/30" />
                   </div>
-                  <div className="h-10 rounded-lg bg-muted/40" />
                 </div>
+                <div className="h-10 border-t border-border/40" />
+                <div className="h-11 border-t border-border/40" />
               </div>
             ))}
           </div>
         ) : filtered.length === 0 ? (
-          <div className="relative flex flex-col items-center justify-center overflow-hidden rounded-[14px] border border-dashed border-border/60 bg-card/40 px-6 py-24 text-center animate-fade-in stagger-3">
-            <div
-              aria-hidden
-              className="pointer-events-none absolute inset-0 -z-[1] opacity-50"
-              style={{
-                background:
- "radial-gradient(50% 50% at 50% 30%, hsl(var(--primary) / 0.08), transparent 70%)",
-              }}
-            />
-            <div className="relative flex h-20 w-20 items-center justify-center rounded-[12px] border border-border/60 bg-secondary/60 ">
-              <Package className="h-8 w-8 text-muted-foreground/80" strokeWidth={1.4} />
-              <span className="absolute -right-1.5 -top-1.5 flex h-6 w-6 items-center justify-center rounded-lg border border-primary/30 bg-card">
-                <Sparkles className="h-3 w-3 text-primary" strokeWidth={2.5} />
-              </span>
+          <div className="flex flex-col items-center justify-center rounded-[12px] border border-dashed border-border/60 bg-card px-6 py-20 text-center animate-fade-in stagger-3">
+            <div className="flex h-14 w-14 items-center justify-center rounded-[12px] border border-border/60 bg-background">
+              <Package className="h-6 w-6 text-muted-foreground/50" strokeWidth={1.5} />
             </div>
-            <p className="mt-6 font-display text-base font-black tracking-tight text-foreground">
+            <p className="mt-5 font-display text-[15px] font-bold tracking-[-0.02em] text-foreground">
               {search || tab !== "all" ? "Nenhum resultado encontrado" : "Comece seu catálogo"}
             </p>
-            <p className="mt-1.5 max-w-[320px] text-[13px] leading-relaxed text-muted-foreground">
+            <p className="mt-1.5 max-w-[320px] text-[12.5px] leading-relaxed text-muted-foreground/70">
               {search || tab !== "all"
-                ? "Tente ajustar os filtros ou termo de busca para encontrar o que procura."
+                ? "Ajuste os filtros ou o termo de busca para encontrar o que procura."
                 : "Crie seu primeiro produto, configure o checkout e comece a faturar hoje mesmo."}
             </p>
             {!search && tab === "all" && (
               <button
                 onClick={() => navigate("/vendas/produtos/novo/editar")}
-                className="group mt-7 inline-flex h-10 items-center gap-2 rounded-xl bg-primary px-5 text-[12px] font-semibold text-primary-foreground transition-all duration-300 hover:bg-primary/90  hover:"
+                className="mt-6 inline-flex h-9 items-center gap-2 rounded-[10px] bg-primary px-4 text-[12px] font-semibold text-primary-foreground transition-colors hover:bg-primary/90"
               >
-                <Plus className="h-4 w-4 transition-transform duration-300 group-hover:rotate-90" strokeWidth={2.75} />
+                <Plus className="h-4 w-4" strokeWidth={2.25} />
                 Criar primeiro produto
               </button>
             )}
@@ -354,6 +327,7 @@ export default function Produtos() {
           </div>
         )}
       </div>
+
 
       {/* ── Dialogs ── */}
       {pixelProduct && (
