@@ -37,21 +37,20 @@ const OK_JSON_STATUS = 200;
 function getLoginFailure(authError: { code?: string; message?: string } | null) {
   const code = String(authError?.code ?? "").toLowerCase();
   const message = String(authError?.message ?? "").toLowerCase();
-
-  if (code === "email_not_confirmed" || message.includes("email not confirmed")) {
-    return {
-      status: 403,
-      code: "email_not_confirmed",
-      error: "Confirme seu e-mail antes de acessar.",
-    };
-  }
+  // Anti-enumeração: a resposta ao cliente é sempre idêntica. O motivo real
+  // fica apenas no `internalCode`, gravado no log de segurança do servidor.
+  const internalCode = (code === "email_not_confirmed" || message.includes("email not confirmed"))
+    ? "email_not_confirmed"
+    : "invalid_credentials";
 
   return {
     status: 401,
     code: "invalid_credentials",
+    internalCode,
     error: "E-mail ou senha incorretos.",
   };
 }
+
 
 Deno.serve(async (req) => {
   const corsHeaders = buildCors(req);
