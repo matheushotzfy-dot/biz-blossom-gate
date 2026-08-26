@@ -18,6 +18,7 @@ import { format, startOfDay, endOfDay, subDays, startOfMonth, endOfMonth, subMon
 import { ptBR } from "date-fns/locale";
 import type { DateRange } from "react-day-picker";
 import { HDShell, HDHeader, HDStat, HDStatGrid } from "@/components/hd/HDPage";
+import { PeriodPicker, buildPeriod, periodLabel, type PeriodValue, type PeriodPresetId } from "@/components/PeriodPicker";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import ExcelJS from "exceljs";
 import { toast } from "sonner";
@@ -95,10 +96,8 @@ export default function Vendas() {
   const [search, setSearch] = useState("");
   const [detailTx, setDetailTx] = useState<Tables<"transactions"> | null>(null);
   const [privacyHidden, setPrivacyHidden] = useState(() => localStorage.getItem("privacy_mode") === "true");
-  const [preset, setPreset] = useState<PresetId>("today");
-  const [range, setRange] = useState<DateRange | undefined>(() => buildPreset("today"));
-  const [tempRange, setTempRange] = useState<DateRange | undefined>(range);
-  const [dateOpen, setDateOpen] = useState(false);
+  const [periodValue, setPeriodValue] = useState<PeriodValue>(() => buildPeriod("today"));
+  const range = useMemo<DateRange>(() => ({ from: periodValue.from, to: periodValue.to }), [periodValue]);
   const [page, setPage] = useState(1);
 
   const togglePrivacy = () => {
@@ -109,25 +108,7 @@ export default function Vendas() {
     });
   };
 
-  const selectPreset = (id: PresetId) => {
-    setPreset(id);
-    if (id === "custom") {
-      setTempRange(range);
-      return;
-    }
-    const r = buildPreset(id);
-    setRange(r);
-    setTempRange(r);
-    setDateOpen(false);
-  };
-
-  const applyCustom = () => {
-    if (tempRange?.from && tempRange?.to) {
-      setRange(tempRange);
-      setPreset("custom");
-      setDateOpen(false);
-    }
-  };
+  const applyPeriod = (v: PeriodValue) => setPeriodValue(v);
 
   const prodsMap = useMemo(() => {
     const m: Record<string, string> = {};
@@ -276,14 +257,7 @@ export default function Vendas() {
 
   const CENSORED = "••••••";
 
-  const rangeLabel = useMemo(() => {
-    const p = PRESETS.find(p => p.id === preset);
-    if (preset !== "custom" && p) return p.label;
-    if (range?.from && range?.to) {
-      return `${format(range.from, "dd MMM", { locale: ptBR })} — ${format(range.to, "dd MMM", { locale: ptBR })}`;
-    }
-    return "Selecionar período";
-  }, [preset, range]);
+  const rangeLabel = periodLabel(periodValue);
 
   return (
     <HDShell>
