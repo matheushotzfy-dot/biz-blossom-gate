@@ -588,6 +588,7 @@ export type Database = {
         Row: {
           created_at: string
           expires_at: string | null
+          hash_version: string
           id: string
           ip_allowlist: string[]
           is_active: boolean
@@ -604,6 +605,7 @@ export type Database = {
         Insert: {
           created_at?: string
           expires_at?: string | null
+          hash_version?: string
           id?: string
           ip_allowlist?: string[]
           is_active?: boolean
@@ -620,6 +622,7 @@ export type Database = {
         Update: {
           created_at?: string
           expires_at?: string | null
+          hash_version?: string
           id?: string
           ip_allowlist?: string[]
           is_active?: boolean
@@ -2376,6 +2379,9 @@ export type Database = {
           created_by_admin: string | null
           credit_card_enabled: boolean
           document_number: string | null
+          document_number_enc: string | null
+          document_number_fingerprint: string | null
+          document_number_masked: string | null
           document_type: string | null
           email: string | null
           frozen: boolean
@@ -2415,6 +2421,9 @@ export type Database = {
           created_by_admin?: string | null
           credit_card_enabled?: boolean
           document_number?: string | null
+          document_number_enc?: string | null
+          document_number_fingerprint?: string | null
+          document_number_masked?: string | null
           document_type?: string | null
           email?: string | null
           frozen?: boolean
@@ -2454,6 +2463,9 @@ export type Database = {
           created_by_admin?: string | null
           credit_card_enabled?: boolean
           document_number?: string | null
+          document_number_enc?: string | null
+          document_number_fingerprint?: string | null
+          document_number_masked?: string | null
           document_type?: string | null
           email?: string | null
           frozen?: boolean
@@ -4914,6 +4926,15 @@ export type Database = {
       }
       verify_api_secret: {
         Args: { _hash: string; _prefix: string }
+        Returns: {
+          api_key_id: string
+          ip_allowlist: string[]
+          permissions: string[]
+          user_id: string
+        }[]
+      }
+      verify_api_secret_v2: {
+        Args: { _hmac_hash: string; _legacy_hash: string; _prefix: string }
         Returns: {
           api_key_id: string
           ip_allowlist: string[]
