@@ -146,7 +146,7 @@ Deno.serve(async (req) => {
 
     if (authError || !authData.user || !authData.session) {
       const failure = getLoginFailure(authError);
-      if (failure.code !== "email_not_confirmed") {
+      if (failure.internalCode !== "email_not_confirmed") {
         await adminClient.from("admin_login_attempts").insert({
           email: trimmedEmail, success: false, scope,
         });
@@ -155,7 +155,7 @@ Deno.serve(async (req) => {
         supabaseUrl, serviceKey: serviceRoleKey,
         event_type: "login_failed", endpoint: "gated-login",
         status_code: failure.status, identifier: trimmedEmail, req,
-        metadata: { scope, code: failure.code },
+        metadata: { scope, code: failure.internalCode },
       });
       return new Response(
         JSON.stringify({ success: false, error: failure.error, code: failure.code }),
