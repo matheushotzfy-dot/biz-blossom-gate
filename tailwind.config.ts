@@ -77,6 +77,13 @@ export default {
           DEFAULT: "hsl(var(--info))",
           foreground: "hsl(var(--info-foreground))",
         },
+        awards: {
+          obsidian: "hsl(var(--awards-obsidian))",
+          surface: "hsl(var(--awards-surface))",
+          accent: "hsl(var(--awards-accent))",
+          steel: "hsl(var(--awards-steel))",
+          ink: "hsl(var(--awards-ink))",
+        },
         chart: {
           "1": "hsl(var(--chart-1))",
           "2": "hsl(var(--chart-2))",
