@@ -3,7 +3,7 @@ import {
   amountMatches,
   isAllowedTransactionTransition,
   verifyHmacSha256,
-} from "./payment-webhook.ts";
+} from "../_shared/payment-webhook.ts";
 
 async function sign(body: string, secret: string): Promise<string> {
   const encoder = new TextEncoder();
