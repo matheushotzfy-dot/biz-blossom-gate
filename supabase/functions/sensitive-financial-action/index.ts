@@ -55,7 +55,21 @@ const WithdrawalSchema = z.object({
   }
 });
 
-const RequestSchema = z.union([PixSchema, BankSchema, DeleteSchema, WithdrawalSchema]);
+const AutoWithdrawalSchema = z.object({
+  action: z.literal("configure_auto_withdraw"),
+  password: z.string().min(6).max(128),
+  payload: z.object({
+    enabled: z.boolean(),
+    target_amount: z.number().finite().min(50).max(10_000),
+    pix_key_id: z.string().uuid().nullable(),
+  }).strict(),
+}).strict().superRefine(({ payload }, ctx) => {
+  if (payload.enabled && !payload.pix_key_id) {
+    ctx.addIssue({ code: z.ZodIssueCode.custom, path: ["payload", "pix_key_id"], message: "Chave PIX obrigatória" });
+  }
+});
+
+const RequestSchema = z.union([PixSchema, BankSchema, DeleteSchema, WithdrawalSchema, AutoWithdrawalSchema]);
 
 Deno.serve(async (req) => {
   const pre = preflight(req);
@@ -109,7 +123,7 @@ Deno.serve(async (req) => {
       const table = action === "delete_pix_key" ? "pix_keys" : "bank_accounts";
       const result = await admin.from(table).delete().eq("id", payload.id).eq("user_id", user.id);
       operationError = result.error;
-    } else {
+    } else if (action === "request_withdrawal") {
       if (payload.pix_key_id) {
         const { data: key } = await admin.from("pix_keys").select("id").eq("id", payload.pix_key_id).eq("user_id", user.id).maybeSingle();
         if (!key) return json(req, { success: false, error: "Chave PIX inválida." }, 400);
@@ -124,6 +138,20 @@ Deno.serve(async (req) => {
         crypto_network: payload.crypto_network ?? null,
         crypto_address: payload.crypto_address ?? null,
       });
+      operationError = result.error;
+    } else {
+      if (payload.pix_key_id) {
+        const { data: key } = await admin.from("pix_keys").select("id").eq("id", payload.pix_key_id).eq("user_id", user.id).maybeSingle();
+        if (!key) return json(req, { success: false, error: "Chave PIX inválida." }, 400);
+      }
+      const result = await admin.from("seller_auto_withdraw").upsert({
+        user_id: user.id,
+        admin_user_id: user.id,
+        enabled: payload.enabled,
+        target_amount: payload.target_amount,
+        max_amount: payload.target_amount,
+        pix_key_id: payload.pix_key_id,
+      }, { onConflict: "user_id" });
       operationError = result.error;
     }
 

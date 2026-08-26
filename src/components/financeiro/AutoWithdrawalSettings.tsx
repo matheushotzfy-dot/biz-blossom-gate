@@ -11,6 +11,8 @@ import { toast } from "sonner";
 import { Zap, Loader2, ShieldAlert, ChevronRight, CheckCircle2, X, Mail, Phone, Hash, Fingerprint, Sparkles, PlusCircle } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import { ReauthenticationDialog } from "@/components/security/ReauthenticationDialog";
+import { friendlyError } from "@/lib/friendlyError";
 
 type Config = {
   id: string;
@@ -33,6 +35,7 @@ export default function AutoWithdrawalSettings() {
   const [loading, setLoading] = useState(true);
   const [open, setOpen] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [reauthOpen, setReauthOpen] = useState(false);
 
   // form state
   const [enabled, setEnabled] = useState(false);
@@ -77,25 +80,35 @@ export default function AutoWithdrawalSettings() {
   const selectedKey = activeKeys.find(k => k.id === (config?.pix_key_id || ""));
   const maskedKey = (k?: typeof selectedKey) => k ? (k.key_value ?? k.key_value_masked ?? "•••") : "";
 
-  async function handleSave() {
+  function handleSave() {
+    if (!user?.id || !canSave) return;
+    setReauthOpen(true);
+  }
+
+  async function confirmSave(password: string) {
     if (!user?.id || !canSave) return;
     setSaving(true);
     const payload = {
-      user_id: user.id,
-      admin_user_id: user.id,
       enabled,
       target_amount: enabled ? amountNum : (config?.target_amount ?? MIN),
       pix_key_id: enabled ? pixKeyId : (config?.pix_key_id ?? null),
-      max_amount: enabled ? amountNum : (config?.target_amount ?? MIN),
     };
-    const { data, error } = await supabase
-      .from("seller_auto_withdraw")
-      .upsert(payload, { onConflict: "user_id" })
-      .select("id, user_id, enabled, target_amount, pix_key_id")
-      .maybeSingle();
+    const { data, error } = await supabase.functions.invoke("sensitive-financial-action", {
+      body: { action: "configure_auto_withdraw", password, payload },
+    });
     setSaving(false);
-    if (error) { toast.error(error.message || "Erro ao salvar"); return; }
-    setConfig(data as Config);
+    if (error || !data?.success) {
+      toast.error(data?.error || friendlyError(error, "Não foi possível salvar a configuração"));
+      return;
+    }
+    setConfig((current) => ({
+      id: current?.id ?? "pending-refresh",
+      user_id: user.id,
+      enabled: payload.enabled,
+      target_amount: payload.target_amount,
+      pix_key_id: payload.pix_key_id,
+    }));
+    setReauthOpen(false);
     setOpen(false);
     toast.success(enabled ? "Saque automático ativado" : "Saque automático desativado");
   }
@@ -104,6 +117,14 @@ export default function AutoWithdrawalSettings() {
 
   return (
     <>
+      <ReauthenticationDialog
+        open={reauthOpen}
+        busy={saving}
+        title="Autorizar saque automático"
+        description="Digite sua senha atual para confirmar esta configuração financeira."
+        onOpenChange={setReauthOpen}
+        onConfirm={confirmSave}
+      />
       <button
         type="button"
         onClick={() => setOpen(true)}
