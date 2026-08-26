@@ -60,18 +60,81 @@ function safeLog(message: string, context: Record<string, unknown> = {}) {
   console.log(`[veopag-postback] ${message}`, JSON.stringify(safe));
 }
 
+/** HMAC-SHA256 hex, usado quando VEOPAG_WEBHOOK_SECRET está configurado. */
+async function hmacSha256Hex(secret: string, message: string): Promise<string> {
+  const key = await crypto.subtle.importKey(
+    "raw",
+    new TextEncoder().encode(secret),
+    { name: "HMAC", hash: "SHA-256" },
+    false,
+    ["sign"],
+  );
+  const sig = await crypto.subtle.sign("HMAC", key, new TextEncoder().encode(message));
+  return Array.from(new Uint8Array(sig)).map((b) => b.toString(16).padStart(2, "0")).join("");
+}
+
+function timingSafeEqual(a: string, b: string): boolean {
+  if (a.length !== b.length) return false;
+  let diff = 0;
+  for (let i = 0; i < a.length; i++) diff |= a.charCodeAt(i) ^ b.charCodeAt(i);
+  return diff === 0;
+}
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
   if (req.method !== "POST") return new Response("Method not allowed", { status: 405, headers: corsHeaders });
 
   try {
-    const payload = (await req.json().catch(() => null)) as any;
+    const rawBody = await req.text();
+
+    // ===== Rate limit por IP =====
+    // O endpoint é anônimo por contrato da adquirente; sem limite, qualquer um
+    // força reconciliações server-to-server em massa (DoS / custo).
+    const rlClient = createClient(
+      Deno.env.get("SUPABASE_URL")!,
+      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
+    );
+    const callerIp = req.headers.get("cf-connecting-ip")
+      || req.headers.get("x-forwarded-for")?.split(",")[0]?.trim()
+      || "0.0.0.0";
+    const { data: rlRows } = await rlClient.rpc("bump_rate_limit", {
+      _bucket_key: `veopag_postback_ip:${callerIp}`,
+      _window_seconds: 60,
+      _max_count: 120,
+    });
+    const rlRow = Array.isArray(rlRows) ? (rlRows[0] as { allowed?: boolean } | undefined) : undefined;
+    if (rlRow?.allowed === false) {
+      return new Response(
+        JSON.stringify({ success: false, error: "rate_limited" }),
+        { status: 429, headers: { ...corsHeaders, "Content-Type": "application/json", "Retry-After": "60" } },
+      );
+    }
+
+    // ===== Assinatura HMAC (obrigatória quando o segredo está configurado) =====
+    const webhookSecret = Deno.env.get("VEOPAG_WEBHOOK_SECRET") ?? "";
+    if (webhookSecret) {
+      const provided = (req.headers.get("x-webhook-signature")
+        || req.headers.get("x-signature")
+        || "").replace(/^sha256=/i, "").trim().toLowerCase();
+      const expected = await hmacSha256Hex(webhookSecret, rawBody);
+      if (!provided || !timingSafeEqual(provided, expected)) {
+        safeLog("invalid signature", { error: "signature_mismatch" });
+        return new Response(
+          JSON.stringify({ success: false, error: "invalid_signature" }),
+          { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+        );
+      }
+    }
+
+    let payload: any = null;
+    try { payload = JSON.parse(rawBody); } catch { payload = null; }
     if (!payload || typeof payload !== "object") {
       return new Response(
         JSON.stringify({ success: false, error: "Invalid JSON" }),
         { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } },
       );
     }
+
 
     const nested = payload.transaction ?? payload.data ?? payload.payment ?? payload.qrCodeResponse ?? {};
     const type = String(payload.type ?? payload.event ?? nested.type ?? "").toLowerCase();

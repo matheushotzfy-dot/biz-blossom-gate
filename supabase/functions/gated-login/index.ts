@@ -37,21 +37,20 @@ const OK_JSON_STATUS = 200;
 function getLoginFailure(authError: { code?: string; message?: string } | null) {
   const code = String(authError?.code ?? "").toLowerCase();
   const message = String(authError?.message ?? "").toLowerCase();
-
-  if (code === "email_not_confirmed" || message.includes("email not confirmed")) {
-    return {
-      status: 403,
-      code: "email_not_confirmed",
-      error: "Confirme seu e-mail antes de acessar.",
-    };
-  }
+  // Anti-enumeração: a resposta ao cliente é sempre idêntica. O motivo real
+  // fica apenas no `internalCode`, gravado no log de segurança do servidor.
+  const internalCode = (code === "email_not_confirmed" || message.includes("email not confirmed"))
+    ? "email_not_confirmed"
+    : "invalid_credentials";
 
   return {
     status: 401,
     code: "invalid_credentials",
+    internalCode,
     error: "E-mail ou senha incorretos.",
   };
 }
+
 
 Deno.serve(async (req) => {
   const corsHeaders = buildCors(req);
@@ -147,7 +146,7 @@ Deno.serve(async (req) => {
 
     if (authError || !authData.user || !authData.session) {
       const failure = getLoginFailure(authError);
-      if (failure.code !== "email_not_confirmed") {
+      if (failure.internalCode !== "email_not_confirmed") {
         await adminClient.from("admin_login_attempts").insert({
           email: trimmedEmail, success: false, scope,
         });
@@ -156,7 +155,7 @@ Deno.serve(async (req) => {
         supabaseUrl, serviceKey: serviceRoleKey,
         event_type: "login_failed", endpoint: "gated-login",
         status_code: failure.status, identifier: trimmedEmail, req,
-        metadata: { scope, code: failure.code },
+        metadata: { scope, code: failure.internalCode },
       });
       return new Response(
         JSON.stringify({ success: false, error: failure.error, code: failure.code }),

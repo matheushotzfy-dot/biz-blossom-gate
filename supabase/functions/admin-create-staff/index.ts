@@ -79,7 +79,7 @@ Deno.serve(async (req) => {
         data: { full_name, created_by_admin: true, staff_role: role },
       });
       if (inviteErr || !invited.user) {
-        return new Response(JSON.stringify({ error: inviteErr?.message ?? "Falha ao enviar convite." }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+        return new Response(JSON.stringify({ error: "Falha ao enviar convite." }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
       }
       newId = invited.user.id;
     } else {
@@ -90,7 +90,7 @@ Deno.serve(async (req) => {
         user_metadata: { full_name, created_by_admin: true },
       });
       if (createErr || !created.user) {
-        return new Response(JSON.stringify({ error: createErr?.message ?? "Falha ao criar conta." }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+        return new Response(JSON.stringify({ error: "Falha ao criar conta." }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
       }
       newId = created.user.id;
     }

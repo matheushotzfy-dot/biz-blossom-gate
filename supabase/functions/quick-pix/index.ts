@@ -1,15 +1,22 @@
 // Quick PIX generation — creates a standalone PIX cobrança without a product
 // Auth required: user_id is derived from the JWT
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { z } from "npm:zod@3.23.8";
 import { createVeopagDeposit, resolveAcquirerSlug } from "../_shared/veopag.ts";
 import { createPodpayAppPix } from "../_shared/podpay-app.ts";
 import { blockIfPaymentsPaused } from "../_shared/kill-switch.ts";
+import { buildCorsHeaders } from "../_shared/security.ts";
 
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers":
-    "authorization, x-client-info, apikey, content-type",
-};
+// Schema estrito do corpo: tipo, range e formato validados no servidor.
+const BodySchema = z.object({
+  amount: z.coerce.number().finite().min(1).max(100_000),
+  customerName: z.string().trim().min(3).max(200),
+  customerEmail: z.string().trim().max(255).optional().nullable(),
+  customerDocument: z.string().trim().min(11).max(20),
+  description: z.string().trim().max(500).optional().nullable(),
+  idempotencyKey: z.string().trim().regex(/^[a-zA-Z0-9:_-]{8,200}$/),
+}).passthrough();
+
 
 function safeLog(message: string, context: Record<string, unknown> = {}) {
   const safe: Record<string, unknown> = {};
@@ -19,7 +26,10 @@ function safeLog(message: string, context: Record<string, unknown> = {}) {
 }
 
 Deno.serve(async (req) => {
+  // CORS restrito à allowlist (endpoint autenticado chamado pelo painel).
+  const corsHeaders = buildCorsHeaders(req);
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
+
 
   try {
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
@@ -47,37 +57,27 @@ Deno.serve(async (req) => {
     }
     const userId = userData.user.id;
 
-    // === Input ===
-    const body = await req.json().catch(() => ({}));
-    const {
-      amount,
-      customerName,
-      customerEmail,
-      customerDocument,
-      description,
-    } = body ?? {};
-
-    const amt = Number(amount);
-    if (!amt || amt < 1 || amt > 100000) {
+    // === Input validado por schema (tipo, range e formato) ===
+    const rawBody = await req.json().catch(() => ({}));
+    const parsedBody = BodySchema.safeParse(rawBody ?? {});
+    if (!parsedBody.success) {
       return new Response(
-        JSON.stringify({ success: false, error: "Valor inválido (mín. R$ 1, máx. R$ 100.000)" }),
+        JSON.stringify({ success: false, error: "Dados inválidos para gerar o PIX." }),
         { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } },
       );
     }
-    const cleanDoc = String(customerDocument || "").replace(/\D/g, "");
+    const body = parsedBody.data;
+    const { amount, customerName, customerEmail, customerDocument, description } = body;
+
+    const amt = Number(amount);
+    const cleanDoc = String(customerDocument).replace(/\D/g, "");
     if (cleanDoc.length !== 11 && cleanDoc.length !== 14) {
       return new Response(
         JSON.stringify({ success: false, error: "CPF ou CNPJ inválido" }),
         { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } },
       );
     }
-    const safeName = String(customerName || "").trim().slice(0, 200);
-    if (safeName.length < 3) {
-      return new Response(
-        JSON.stringify({ success: false, error: "Nome obrigatório" }),
-        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } },
-      );
-    }
+    const safeName = String(customerName).trim().slice(0, 200);
     const emailRaw = String(customerEmail || "").trim().toLowerCase().slice(0, 255);
     const safeEmail = emailRaw && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailRaw)
       ? emailRaw
@@ -89,16 +89,30 @@ Deno.serve(async (req) => {
     const paused = await blockIfPaymentsPaused(supabase as never, corsHeaders);
     if (paused) return paused;
 
-    const requestIp = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "0.0.0.0";
+    const requestIp = req.headers.get("cf-connecting-ip")
+      || req.headers.get("x-forwarded-for")?.split(",")[0]?.trim()
+      || "0.0.0.0";
+
+    // === Rate limit: 10 cobranças/min por usuário, 30/min por IP ===
+    {
+      const limits = await Promise.all([
+        supabase.rpc("bump_rate_limit", { _bucket_key: `quick_pix_user:${userId}`, _window_seconds: 60, _max_count: 10 }),
+        supabase.rpc("bump_rate_limit", { _bucket_key: `quick_pix_ip:${requestIp}`, _window_seconds: 60, _max_count: 30 }),
+      ]);
+      const blocked = limits.some((r) =>
+        Array.isArray(r.data) ? (r.data[0] as { allowed?: boolean } | undefined)?.allowed === false : false
+      );
+      if (blocked) {
+        return new Response(
+          JSON.stringify({ success: false, error: "Muitas cobranças em pouco tempo. Aguarde um instante." }),
+          { status: 429, headers: { ...corsHeaders, "Content-Type": "application/json", "Retry-After": "60" } },
+        );
+      }
+    }
 
     // === Idempotency — obrigatória para impedir dupla cobrança em retries ===
-    const rawIdem = String(body?.idempotencyKey || "").slice(0, 200).trim();
-    if (!rawIdem || !/^[a-zA-Z0-9:_-]{8,200}$/.test(rawIdem)) {
-      return new Response(
-        JSON.stringify({ success: false, error: "Chave de idempotência inválida" }),
-        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } },
-      );
-    }
+    const rawIdem = body.idempotencyKey;
+
 
     {
       // Escopar por usuário para evitar colisão global cross-tenant
