@@ -66,12 +66,19 @@ async function deliverOne(
     return;
   }
 
+  if (!wc.secret) {
+    await admin.from("webhook_deliveries").update({
+      status: "exhausted",
+      error: "Webhook secret is missing; unsigned delivery blocked.",
+      next_retry_at: null,
+    }).eq("id", d.id);
+    return;
+  }
+
   const body = JSON.stringify(d.payload);
   const timestamp = Math.floor(Date.now() / 1000).toString();
   const signedPayload = `${timestamp}.${body}`;
-  const signature = wc.secret
-    ? await hmacSha256Hex(wc.secret, signedPayload)
-    : "";
+  const signature = await hmacSha256Hex(wc.secret, signedPayload);
 
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), DELIVERY_TIMEOUT_MS);
@@ -89,7 +96,7 @@ async function deliverOne(
         "X-Venxpay-Event": d.event,
         "X-Venxpay-Delivery": d.id,
         "X-Venxpay-Timestamp": timestamp,
-        "X-Venxpay-Signature": signature ? `t=${timestamp},v1=${signature}` : "",
+        "X-Venxpay-Signature": `t=${timestamp},v1=${signature}`,
       },
       body,
       signal: controller.signal,

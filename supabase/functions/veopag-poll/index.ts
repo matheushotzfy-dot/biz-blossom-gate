@@ -11,15 +11,13 @@
  * Roda a cada 2 minutos via pg_cron (ver migration).
  */
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
-import { getVeopagToken } from "../_shared/veopag.ts";
+import { fetchVeopagTransactionStatus } from "../_shared/veopag.ts";
 import { isInternalCall, unauthorizedResponse } from "../_shared/cron-auth.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, content-type, apikey",
 };
-
-const VEOPAG_BASE = "https://api.veopag.com";
 
 const STATUS_MAP: Record<string, string> = {
   PENDING: "pending",
@@ -39,34 +37,6 @@ const STATUS_MAP: Record<string, string> = {
 };
 
 const FINAL = new Set(["completed", "refunded", "chargeback", "expired"]);
-
-async function fetchVeopagStatus(token: string, txId: string): Promise<{ status: string; amount?: number } | null> {
-  // Tenta os endpoints conhecidos da VeoPag (ordem por popularidade).
-  const paths = [
-    `/api/payments/deposit/${txId}`,
-    `/api/transactions/${txId}`,
-    `/api/payments/${txId}`,
-  ];
-  for (const path of paths) {
-    try {
-      const resp = await fetch(`${VEOPAG_BASE}${path}`, {
-        headers: { Authorization: `Bearer ${token}`, Accept: "application/json" },
-      });
-      if (resp.status === 404) continue;
-      if (!resp.ok) continue;
-      const data = await resp.json().catch(() => ({} as any));
-      const node = (data?.transaction ?? data?.data ?? data?.qrCodeResponse ?? data) as any;
-      const rawStatus = String(node?.status ?? data?.status ?? "").toUpperCase();
-      if (!rawStatus) continue;
-      const amtRaw = node?.amount ?? data?.amount ?? node?.value ?? data?.value;
-      const amount = typeof amtRaw === "number" ? amtRaw : (typeof amtRaw === "string" ? Number(amtRaw) : undefined);
-      return { status: rawStatus, amount: Number.isFinite(amount as number) ? (amount as number) : undefined };
-    } catch (_) {
-      continue;
-    }
-  }
-  return null;
-}
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
@@ -112,7 +82,6 @@ Deno.serve(async (req) => {
       });
     }
 
-    const token = await getVeopagToken(supabase);
     let updated = 0;
     let checked = 0;
 
@@ -121,7 +90,7 @@ Deno.serve(async (req) => {
       if (Date.now() - started > 25_000) break;
       checked++;
 
-      const result = await fetchVeopagStatus(token, String(tx.podpay_payment_id));
+      const result = await fetchVeopagTransactionStatus(String(tx.podpay_payment_id), supabase).catch(() => null);
       if (!result) continue;
 
       const mapped = STATUS_MAP[result.status] ?? "pending";
@@ -129,7 +98,8 @@ Deno.serve(async (req) => {
       if (FINAL.has(tx.status)) continue;
 
       // Amount guard quando marca como pago.
-      if (mapped === "completed" && result.amount != null) {
+      if (mapped === "completed") {
+        if (result.amount == null) continue;
         let amt = result.amount;
         if (amt > Number(tx.amount) * 10 && Math.abs(amt / 100 - Number(tx.amount)) <= 0.01) amt = amt / 100;
         if (Math.abs(amt - Number(tx.amount)) > 0.01) continue;

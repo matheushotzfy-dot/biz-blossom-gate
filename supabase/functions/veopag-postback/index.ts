@@ -1,15 +1,17 @@
 /**
  * VeoPag webhook receiver.
  *
- * Per user requirement, signature validation is intentionally skipped —
- * the upstream gateway forwards VeoPag events to this endpoint and we
- * trust the source. We still enforce:
+ * VeoPag does not expose a reliable signed-callback contract in this
+ * integration. Every callback is therefore verified server-to-server against
+ * VeoPag's authenticated transaction endpoint before local state is changed.
  *   - amount match on completion
  *   - PIX expiration guard
  *   - no downgrade from a final status
  *   - lookup by our internal tx.id (external_id) first, then by veopag transactionId.
  */
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { fetchVeopagTransactionStatus } from "../_shared/veopag.ts";
+import { amountMatches, isAllowedTransactionTransition } from "../_shared/payment-webhook.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -43,14 +45,6 @@ function firstString(...values: unknown[]): string | null {
   return null;
 }
 
-function normalizeAmount(raw: unknown, txAmount: number): number | null {
-  const parsed = typeof raw === "string" ? Number(raw.replace(",", ".")) : Number(raw);
-  if (!Number.isFinite(parsed)) return null;
-  // VeoPag/webhook bridges may send cents; local transactions store BRL.
-  if (parsed > txAmount * 10 && Math.abs(parsed / 100 - txAmount) <= 0.01) return parsed / 100;
-  return parsed;
-}
-
 function safeLog(message: string, context: Record<string, unknown> = {}) {
   const safe: Record<string, unknown> = {};
   const ALLOWED = [
@@ -68,6 +62,7 @@ function safeLog(message: string, context: Record<string, unknown> = {}) {
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
+  if (req.method !== "POST") return new Response("Method not allowed", { status: 405, headers: corsHeaders });
 
   try {
     const payload = (await req.json().catch(() => null)) as any;
@@ -100,10 +95,9 @@ Deno.serve(async (req) => {
       nested.external_ref,
       nested.externalRef,
     );
-    const rawStatus = String(payload.status ?? nested.status ?? "").toUpperCase();
-    const mapped = STATUS_MAP[rawStatus] ?? "pending";
+    const claimedStatus = String(payload.status ?? nested.status ?? "").toUpperCase();
 
-    safeLog("received", { type, veopagId: veoTxId, externalId, status: rawStatus });
+    safeLog("received", { type, veopagId: veoTxId, externalId, status: claimedStatus });
 
     // Withdrawals aren't wired yet — ack so VeoPag stops retrying.
     if (type === "withdrawal") {
@@ -139,38 +133,49 @@ Deno.serve(async (req) => {
 
     if (!tx) {
       safeLog("no match — ignoring", { externalId, veopagId: veoTxId });
-      // 200 so VeoPag doesn't retry forever on an unknown event.
       return new Response(
-        JSON.stringify({ success: true, ignored: "no_match" }),
+        JSON.stringify({ success: false, error: "transaction_not_found" }),
+        { status: 503, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+      );
+    }
+
+    if (!veoTxId) {
+      return new Response(JSON.stringify({ success: false, error: "missing_gateway_id" }), {
+        status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+    if (tx.podpay_payment_id && veoTxId !== String(tx.podpay_payment_id)) {
+      return new Response(JSON.stringify({ success: false, error: "gateway_id_mismatch" }), {
+        status: 409, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    // Never trust callback fields as proof of payment. Fetch the canonical state
+    // with our private VeoPag credentials and use only that response.
+    const canonical = await fetchVeopagTransactionStatus(veoTxId, supabase);
+    if (!canonical) {
+      return new Response(JSON.stringify({ success: false, error: "provider_verification_failed" }), {
+        status: 503, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+    const rawStatus = canonical.status;
+    const mapped = STATUS_MAP[rawStatus] ?? "pending";
+
+    if (!isAllowedTransactionTransition(String(tx.status), mapped)) {
+      safeLog("invalid transition", { transactionId: tx.id, status: `${tx.status}->${mapped}` });
+      return new Response(
+        JSON.stringify({ success: true, ignored: "invalid_transition" }),
         { headers: { ...corsHeaders, "Content-Type": "application/json" } },
       );
     }
 
-    // Don't downgrade a final status.
-    const finalStatuses = ["completed", "refunded", "chargeback", "expired"];
-    if (finalStatuses.includes(tx.status) && !finalStatuses.includes(mapped)) {
-      safeLog("skipping downgrade", { transactionId: tx.id, status: `${tx.status}->${mapped}` });
-      return new Response(
-        JSON.stringify({ success: true, ignored: "no_downgrade" }),
-        { headers: { ...corsHeaders, "Content-Type": "application/json" } },
-      );
-    }
-
-    // Amount + expiration guard only when marking as paid.
     if (mapped === "completed") {
-      const amountRaw = payload.amount ?? payload.value ?? nested.amount ?? nested.value;
-      if (amountRaw != null) {
-        const payloadAmt = normalizeAmount(amountRaw, Number(tx.amount));
-        if (payloadAmt !== null && Math.abs(payloadAmt - Number(tx.amount)) > 0.01) {
-          safeLog("amount mismatch — rejecting", {
-            transactionId: tx.id,
-            error: `payload=${payloadAmt} tx=${tx.amount}`,
-          });
-          return new Response(
-            JSON.stringify({ success: false, error: "Amount mismatch" }),
-            { status: 409, headers: { ...corsHeaders, "Content-Type": "application/json" } },
-          );
-        }
+      if (!amountMatches(canonical.amount, Number(tx.amount))) {
+        safeLog("canonical amount missing or mismatched", { transactionId: tx.id });
+        return new Response(
+          JSON.stringify({ success: false, error: "Amount mismatch" }),
+          { status: 409, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+        );
       }
       // Gateway-confirmed payment is the source of truth. Do not reject a paid
       // webhook only because the local PIX timer already passed; that creates
@@ -188,10 +193,13 @@ Deno.serve(async (req) => {
     };
     if (veoTxId && !tx.podpay_payment_id) patch.podpay_payment_id = veoTxId;
 
-    const { error: updErr } = await supabase
+    const { data: updatedTx, error: updErr } = await supabase
       .from("transactions")
       .update(patch)
-      .eq("id", tx.id);
+      .eq("id", tx.id)
+      .eq("status", tx.status)
+      .select("id")
+      .maybeSingle();
 
     // Audit log — postback received (admin-only; keeps raw gateway status for debugging)
     try {
@@ -217,6 +225,11 @@ Deno.serve(async (req) => {
         JSON.stringify({ success: false, error: "update_failed" }),
         { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } },
       );
+    }
+    if (!updatedTx) {
+      return new Response(JSON.stringify({ success: true, ignored: "state_changed" }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
     }
 
     safeLog("updated", { transactionId: tx.id, status: mapped });

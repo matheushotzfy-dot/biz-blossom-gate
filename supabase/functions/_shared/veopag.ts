@@ -121,6 +121,42 @@ export interface VeopagDepositResult {
   status: string;
 }
 
+export interface VeopagTransactionStatus {
+  status: string;
+  amount: number | null;
+}
+
+/** Reads the canonical transaction state directly from VeoPag. */
+export async function fetchVeopagTransactionStatus(
+  transactionId: string,
+  supabase?: any,
+): Promise<VeopagTransactionStatus | null> {
+  const token = await getVeopagToken(supabase);
+  const paths = [
+    `/api/payments/deposit/${encodeURIComponent(transactionId)}`,
+    `/api/transactions/${encodeURIComponent(transactionId)}`,
+    `/api/payments/${encodeURIComponent(transactionId)}`,
+  ];
+
+  for (const path of paths) {
+    const response = await fetch(`${VEOPAG_BASE}${path}`, {
+      headers: { Authorization: `Bearer ${token}`, Accept: "application/json" },
+    });
+    if (response.status === 404) continue;
+    if (!response.ok) throw new Error(`VeoPag status lookup failed: HTTP ${response.status}`);
+
+    const payload = await response.json().catch(() => null) as any;
+    const node = payload?.transaction ?? payload?.data ?? payload?.qrCodeResponse ?? payload;
+    const status = String(node?.status ?? payload?.status ?? "").trim().toUpperCase();
+    if (!status) throw new Error("VeoPag status lookup returned no status");
+    const amountRaw = node?.amount ?? payload?.amount ?? node?.value ?? payload?.value;
+    const amount = typeof amountRaw === "string" ? Number(amountRaw.replace(",", ".")) : Number(amountRaw);
+    return { status, amount: Number.isFinite(amount) ? amount : null };
+  }
+
+  return null;
+}
+
 /**
  * Create a PIX deposit on VeoPag.
  * Throws on any non-2xx response. Never logs payer info or full payload.
