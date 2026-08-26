@@ -325,42 +325,9 @@ export default function Produtos() {
         <ProductGridView
           copiedId={copiedId}
           products={filtered}
-          toolbar={
-            <div className="flex flex-col items-center justify-between gap-4 md:flex-row">
-              <div className="flex w-full items-center gap-3 md:w-auto">
-                <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-primary/10 bg-primary/10 text-primary">
-                  <Package size={20} strokeWidth={2.5} />
-                </div>
-                <div>
-                  <h2 className="font-black leading-none tracking-tight text-foreground">Catálogo</h2>
-                  <p className="mt-1 text-[11px] font-medium text-muted-foreground">
-                    {filtered.length} {filtered.length === 1 ? "produto" : "produtos"} · {tabs.find((t) => t.value === tab)?.label}
-                  </p>
-                </div>
-              </div>
-              <div className="relative w-full md:w-80">
-                <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground/50" size={16} />
-                <input
-                  type="text"
-                  value={search}
-                  onChange={(e) => setSearch(e.target.value)}
-                  placeholder="Buscar produto..."
-                  className="h-11 w-full rounded-xl border border-border/60 bg-muted/30 pl-11 pr-9 text-sm font-bold text-foreground transition-colors placeholder:text-muted-foreground/40 focus:outline-none focus:ring-2 focus:ring-primary/20"
-                />
-                {search && (
-                  <button
-                    onClick={() => setSearch("")}
-                    aria-label="Limpar busca"
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground/40 transition-colors hover:text-foreground"
-                  >
-                    <X className="h-3.5 w-3.5" />
-                  </button>
-                )}
-              </div>
-            </div>
-          }
           {...menuHandlers}
         />
+
       )}
 
 
