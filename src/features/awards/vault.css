@@ -8,22 +8,32 @@
 
 .venx-vault-bg {
   background:
-    radial-gradient(120% 90% at 50% 0%, hsl(var(--awards-accent) / 0.14), transparent 62%),
-    radial-gradient(90% 70% at 100% 100%, hsl(200 90% 50% / 0.08), transparent 60%),
+    linear-gradient(180deg, hsl(var(--awards-accent) / 0.06), transparent 34%),
     hsl(var(--awards-obsidian));
 }
 
-.venx-vault-rings {
+.awards-stage {
   background-image:
-    repeating-radial-gradient(circle at 50% 46%, hsl(var(--awards-steel) / 0.07) 0 1px, transparent 1px 58px);
+    linear-gradient(hsl(var(--awards-steel) / 0.04) 1px, transparent 1px),
+    linear-gradient(90deg, hsl(var(--awards-steel) / 0.04) 1px, transparent 1px);
+  background-size: 42px 42px;
+  background-position: center bottom;
 }
 
-.venx-orbit-spin {
-  animation: venx-orbit 42s linear infinite;
+.awards-stage-light {
+  background: radial-gradient(ellipse at center, hsl(var(--awards-accent) / 0.18), transparent 70%);
+  filter: blur(32px);
 }
 
-@keyframes venx-orbit {
-  to { transform: rotate(360deg); }
+.awards-stage-floor {
+  border: 1px solid hsl(var(--awards-accent) / 0.28);
+  background: hsl(var(--awards-surface));
+  box-shadow: inset 0 1px 0 hsl(var(--awards-accent) / 0.18);
+}
+
+.awards-gallery {
+  scrollbar-color: hsl(var(--awards-accent) / 0.5) transparent;
+  scrollbar-width: thin;
 }
 
 .venx-sheen {

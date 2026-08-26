@@ -1,10 +1,10 @@
 import { useEffect, useRef, useState } from "react";
 import { motion, useReducedMotion } from "framer-motion";
-import { AlertTriangle, CheckCircle2, ChevronLeft, ChevronRight, Clock, Package, Truck, XCircle } from "lucide-react";
+import { AlertTriangle, CheckCircle2, ChevronLeft, ChevronRight, Clock, Package, Trophy, Truck, XCircle } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { ArtifactViewer } from "@/features/awards/ArtifactViewer";
-import { VaultDial } from "@/features/awards/VaultDial";
+import { AwardGallery } from "@/features/awards/AwardGallery";
 import { ClaimDialog } from "@/features/awards/ClaimDialog";
 import { AWARDS, formatMoney } from "@/features/awards/awards-data";
 import { useAwards } from "@/features/awards/use-awards";
@@ -28,7 +28,6 @@ export default function Premiacoes() {
 
   const award = AWARDS[activeIndex];
   const claimed = claims.some((claim) => claim.tier_id === award.id && claim.status !== "cancelled");
-  const awardProgress = Math.min((revenue / award.value) * 100, 100);
 
   useEffect(() => {
     if (loading || touched.current) return;
@@ -59,54 +58,50 @@ export default function Premiacoes() {
         if (event.key === "ArrowRight") select(activeIndex + 1);
       }}
     >
-      <section className="venx-vault-bg relative isolate overflow-hidden rounded-none border border-awards-steel/12 sm:rounded-[28px]">
-        <div aria-hidden className="venx-vault-rings pointer-events-none absolute inset-0 opacity-60" />
-
-        <header className="relative z-10 flex flex-wrap items-center justify-between gap-3 border-b border-awards-steel/12 px-4 py-4 sm:px-8">
+      <section className="venx-vault-bg relative isolate overflow-hidden rounded-none border border-awards-steel/12 sm:rounded-lg">
+        <header className="relative z-10 grid gap-5 border-b border-awards-steel/12 px-4 py-5 sm:px-7 lg:grid-cols-[1fr_auto] lg:items-end">
           <div>
-            <p className="font-mono text-[10px] uppercase tracking-[0.24em] text-awards-accent">VENXPAY / Vault</p>
-            <h1 className="mt-1.5 font-display text-2xl font-bold text-awards-ink sm:text-3xl">Cofre de conquistas</h1>
+            <p className="flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.24em] text-awards-accent"><Trophy className="h-3.5 w-3.5" /> Hall de conquistas</p>
+            <h1 className="mt-2 font-display text-3xl font-bold text-awards-ink sm:text-4xl">Sua operação merece ser vista.</h1>
+            <p className="mt-2 max-w-2xl text-sm leading-6 text-awards-steel">Cada marco libera uma peça física VENXPAY, produzida para registrar o tamanho da sua operação.</p>
           </div>
-          <div className="flex items-center gap-6">
-            <div>
-              <p className="font-mono text-[9px] uppercase text-awards-steel">Volume validado</p>
+          <div className="grid grid-cols-2 gap-px overflow-hidden rounded-md border border-awards-steel/15 bg-awards-steel/15">
+            <div className="bg-awards-obsidian px-4 py-3 sm:min-w-[170px]">
+              <p className="font-mono text-[9px] uppercase text-awards-steel">Faturamento validado</p>
               <p className="mt-1 font-display text-lg font-bold tabular-nums text-awards-ink">{loading ? "—" : formatMoney(revenue)}</p>
             </div>
-            <div>
-              <p className="font-mono text-[9px] uppercase text-awards-steel">Artefatos</p>
-              <p className="mt-1 font-display text-lg font-bold tabular-nums text-awards-ink">{unlocked}/{AWARDS.length}</p>
+            <div className="bg-awards-obsidian px-4 py-3 sm:min-w-[120px]">
+              <p className="font-mono text-[9px] uppercase text-awards-steel">Conquistadas</p>
+              <p className="mt-1 font-display text-lg font-bold tabular-nums text-awards-ink">{unlocked} <span className="text-xs text-awards-steel">/ {AWARDS.length}</span></p>
             </div>
           </div>
         </header>
 
-        <div className="relative z-10 grid gap-8 px-4 py-8 sm:px-8 lg:grid-cols-[minmax(0,360px)_minmax(0,1fr)] lg:gap-12">
-          <div className="flex flex-col items-center gap-6">
-            <VaultDial activeIndex={activeIndex} revenue={revenue} progress={awardProgress} onSelect={select} />
-            <div className="flex items-center gap-3">
-              <Button variant="outline" size="icon" aria-label="Marco anterior" disabled={activeIndex === 0} onClick={() => select(activeIndex - 1)} className="h-10 w-10 rounded-full border-awards-steel/25 bg-transparent text-awards-ink hover:bg-awards-accent/10"><ChevronLeft /></Button>
-              <span className="font-mono text-[10px] uppercase tracking-[0.2em] text-awards-steel">{String(activeIndex + 1).padStart(2, "0")} / {String(AWARDS.length).padStart(2, "0")}</span>
-              <Button variant="outline" size="icon" aria-label="Próximo marco" disabled={activeIndex === AWARDS.length - 1} onClick={() => select(activeIndex + 1)} className="h-10 w-10 rounded-full border-awards-steel/25 bg-transparent text-awards-ink hover:bg-awards-accent/10"><ChevronRight /></Button>
-            </div>
-          </div>
-
+        <div className="relative z-10 border-b border-awards-steel/12">
           <ArtifactViewer index={activeIndex} revenue={revenue} claimed={claimed} onClaim={() => setClaimOpen(true)} onShare={share} />
+          <div className="absolute left-3 top-1/2 z-20 -translate-y-1/2 sm:left-5">
+            <Button variant="outline" size="icon" aria-label="Marco anterior" disabled={activeIndex === 0} onClick={() => select(activeIndex - 1)} className="h-10 w-10 rounded-full border-awards-steel/25 bg-awards-obsidian text-awards-ink hover:bg-awards-accent/10"><ChevronLeft /></Button>
+          </div>
+          <div className="absolute right-3 top-1/2 z-20 -translate-y-1/2 sm:right-5">
+            <Button variant="outline" size="icon" aria-label="Próximo marco" disabled={activeIndex === AWARDS.length - 1} onClick={() => select(activeIndex + 1)} className="h-10 w-10 rounded-full border-awards-steel/25 bg-awards-obsidian text-awards-ink hover:bg-awards-accent/10"><ChevronRight /></Button>
+          </div>
         </div>
 
-        <motion.div
-          initial={reduceMotion ? false : { opacity: 0 }}
-          animate={{ opacity: 1 }}
-          className="relative z-10 border-t border-awards-steel/12 px-4 py-5 sm:px-8"
-        >
-          <div className="flex items-end justify-between gap-4">
+        <motion.div initial={reduceMotion ? false : { opacity: 0 }} animate={{ opacity: 1 }} className="relative z-10 px-4 py-5 sm:px-7">
+          <div className="mb-4 flex flex-col justify-between gap-3 sm:flex-row sm:items-end">
             <div>
-              <p className="font-mono text-[9px] uppercase text-awards-steel">Próxima conquista</p>
-              <p className="mt-1 font-display text-base font-bold text-awards-ink">{next.title}</p>
+              <p className="font-mono text-[9px] uppercase text-awards-steel">Coleção VENXPAY · selecione uma peça</p>
+              <p className="mt-1 font-display text-base font-bold text-awards-ink">{next.title} é sua próxima conquista</p>
             </div>
-            <p className="font-mono text-[10px] uppercase text-awards-steel">
-              {revenue >= next.value ? "Jornada máxima concluída" : `Faltam ${formatMoney(Math.max(next.value - revenue, 0))}`}
-            </p>
+            <div className="min-w-0 sm:w-[310px]">
+              <div className="flex justify-between gap-3 font-mono text-[9px] uppercase text-awards-steel">
+                <span>{Math.round(targetProgress)}% concluído</span>
+                <span>{revenue >= next.value ? "Jornada concluída" : `Faltam ${formatMoney(Math.max(next.value - revenue, 0))}`}</span>
+              </div>
+              <progress className="venx-meter mt-2 h-1.5 w-full rounded-full" value={targetProgress} max={100} aria-label={`Progresso até ${next.label}`} />
+            </div>
           </div>
-          <progress className="venx-meter mt-3 h-1.5 w-full rounded-full" value={targetProgress} max={100} aria-label={`Progresso até ${next.label}`} />
+          <AwardGallery activeIndex={activeIndex} revenue={revenue} onSelect={select} />
         </motion.div>
       </section>
 
@@ -116,7 +111,7 @@ export default function Premiacoes() {
         </div>
       )}
 
-      <section className="mt-4 rounded-none border border-border bg-card p-5 sm:rounded-[24px] sm:p-6">
+      <section className="mt-4 rounded-none border border-border bg-card p-5 sm:rounded-lg sm:p-6">
         <p className="font-mono text-[9px] uppercase text-muted-foreground">Registro logístico</p>
         {claims.length === 0 ? (
           <p className="mt-4 max-w-md text-sm leading-6 text-muted-foreground">
