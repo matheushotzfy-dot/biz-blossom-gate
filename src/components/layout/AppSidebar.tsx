@@ -87,63 +87,60 @@ function RevenueBar({ collapsed, revenue, milestone, onOpenRewards }: RevenueBar
 
   const pct = Math.max(0, Math.min(100, milestone.pct));
   const pctDisplay = Math.round(pct);
-  const parts = splitRevenue(revenue);
+  const current = formatRevenue(revenue);
+  const goal = milestone.next.label.replace(",", ".");
 
   return (
     <button
       type="button"
       onClick={onOpenRewards}
-      title={`${formatRevenue(revenue)} — ${pctDisplay}% de ${milestone.next.label}`}
-      className="seller-clickable group/rev relative block w-full rounded-[12px] px-2 pb-2 pt-1.5 text-left transition-colors hover:bg-sidebar-accent/35"
+      title={`${current} de ${goal} — ${pctDisplay}% • ${milestone.current.tier}`}
+      className="seller-clickable group/rev relative mt-3 block w-full overflow-hidden rounded-[16px] border border-sidebar-border/70 bg-sidebar-accent/30 px-3.5 py-3 text-left transition-colors hover:border-primary/35 hover:bg-sidebar-accent/50"
     >
-      <div className="flex items-center gap-2.5">
-        {/* Logo mark */}
-        <span className="relative flex h-7 w-7 shrink-0 items-center justify-center rounded-[9px] border border-primary/25 bg-primary/[0.07]">
-          <VenxpayLogo size={16} />
-        </span>
+      {/* Marca d'água da logo */}
+      <span
+        aria-hidden
+        className="pointer-events-none absolute -right-1 top-1/2 -translate-y-1/2 opacity-[0.13] transition-opacity duration-300 group-hover/rev:opacity-25"
+      >
+        <VenxpayLogo size={54} />
+      </span>
 
-        {/* Figure */}
-        <span className="flex min-w-0 flex-1 items-baseline gap-1">
-          <span className="font-numbers text-[10.5px] font-medium leading-none tabular-nums text-sidebar-foreground/40">
-            {parts.prefix}
+      <div className="relative">
+        <div className="flex items-baseline gap-1.5">
+          <span className="font-numbers text-[19px] font-bold leading-none tracking-[-0.035em] tabular-nums text-sidebar-accent-foreground">
+            {current}
           </span>
-          <span className="font-numbers truncate text-[16px] font-bold leading-none tracking-[-0.03em] tabular-nums text-sidebar-accent-foreground">
-            {parts.value}
-            <span className="ml-0.5 text-[11px] font-bold text-sidebar-foreground/50">{parts.suffix}</span>
+          <span className="font-numbers text-[12px] font-semibold leading-none tabular-nums text-sidebar-foreground/35">
+            / {goal}
           </span>
-        </span>
+        </div>
 
-        {/* Tier + chevron */}
-        <span className="flex shrink-0 items-center gap-0.5 text-[9.5px] font-semibold uppercase tracking-[0.1em] text-primary">
-          {milestone.current.tier}
+        {/* Trilho */}
+        <div className="mt-2.5 h-[6px] w-[calc(100%-46px)] overflow-hidden rounded-full bg-sidebar-border/70">
+          <div
+            className="h-full rounded-full bg-gradient-to-r from-primary/70 to-primary transition-[width] duration-700 ease-out"
+            style={{ width: `${pct}%` }}
+          />
+        </div>
+
+        <div className="mt-2 flex items-center gap-2">
+          <span className="text-[9px] font-bold uppercase tracking-[0.14em] text-primary">
+            {milestone.current.tier}
+          </span>
+          <span className="h-[3px] w-[3px] rounded-full bg-sidebar-foreground/25" />
+          <span className="font-numbers text-[10px] font-semibold tabular-nums text-sidebar-foreground/45">
+            {pctDisplay}%
+          </span>
           <ChevronRight
-            className="h-3 w-3 transition-transform duration-200 group-hover/rev:translate-x-0.5"
+            className="ml-auto mr-[46px] h-3 w-3 text-sidebar-foreground/30 transition-transform duration-200 group-hover/rev:translate-x-0.5 group-hover/rev:text-primary"
             strokeWidth={2.2}
           />
-        </span>
-      </div>
-
-      {/* Progress rail */}
-      <div className="relative mt-2 h-[3px] w-full overflow-hidden rounded-full bg-sidebar-border/60">
-        <div
-          className="h-full rounded-full bg-primary transition-[width] duration-700 ease-out"
-          style={{ width: `${pct}%` }}
-        />
-        <span
-          className="absolute top-1/2 h-[7px] w-[7px] -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-sidebar bg-primary transition-[left] duration-700 ease-out"
-          style={{ left: `${pct}%` }}
-        />
-      </div>
-
-      <div className="mt-1.5 flex items-center justify-between font-numbers text-[9.5px] font-medium tabular-nums text-sidebar-foreground/40">
-        <span>
-          <span className="font-semibold text-sidebar-foreground/70">{pctDisplay}%</span> da meta
-        </span>
-        <span>{milestone.next.label.replace(",", ".")}</span>
+        </div>
       </div>
     </button>
   );
 }
+
 
 
 
@@ -406,6 +403,12 @@ export function AppSidebar({ pinned = true, onTogglePin, onHoverChange }: AppSid
             </button>
           )}
         </div>
+        <RevenueBar
+          collapsed={collapsed}
+          revenue={revenue}
+          milestone={milestone}
+          onOpenRewards={() => navigate("/premiacoes")}
+        />
       </SidebarHeader>
 
       <SidebarContent className="relative gap-0 overflow-y-auto px-3 py-3 group-data-[collapsible=icon]:px-1.5 group-data-[collapsible=icon]:py-4">
@@ -419,14 +422,7 @@ export function AppSidebar({ pinned = true, onTogglePin, onHoverChange }: AppSid
         ))}
       </SidebarContent>
 
-      <div className="px-2.5 pb-1 group-data-[collapsible=icon]:hidden">
-        <RevenueBar
-          collapsed={collapsed}
-          revenue={revenue}
-          milestone={milestone}
-          onOpenRewards={() => navigate("/premiacoes")}
-        />
-      </div>
+
 
       <SidebarFooter className="relative border-t border-sidebar-border/60 p-2.5 pb-3">
 
