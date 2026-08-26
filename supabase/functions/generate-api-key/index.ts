@@ -22,9 +22,12 @@ async function hashKey(key: string): Promise<string> {
 }
 
 Deno.serve(async (req) => {
+  // CORS restrito à allowlist do projeto (endpoint autenticado de browser).
+  const corsHeaders = buildCorsHeaders(req);
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }
+
 
   try {
     const authHeader = req.headers.get('Authorization');
