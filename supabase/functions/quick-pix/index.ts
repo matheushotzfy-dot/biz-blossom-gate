@@ -1,15 +1,22 @@
 // Quick PIX generation — creates a standalone PIX cobrança without a product
 // Auth required: user_id is derived from the JWT
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { z } from "npm:zod@3.23.8";
 import { createVeopagDeposit, resolveAcquirerSlug } from "../_shared/veopag.ts";
 import { createPodpayAppPix } from "../_shared/podpay-app.ts";
 import { blockIfPaymentsPaused } from "../_shared/kill-switch.ts";
+import { buildCorsHeaders } from "../_shared/security.ts";
 
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers":
-    "authorization, x-client-info, apikey, content-type",
-};
+// Schema estrito do corpo: tipo, range e formato validados no servidor.
+const BodySchema = z.object({
+  amount: z.coerce.number().finite().min(1).max(100_000),
+  customerName: z.string().trim().min(3).max(200),
+  customerEmail: z.string().trim().max(255).optional().nullable(),
+  customerDocument: z.string().trim().min(11).max(20),
+  description: z.string().trim().max(500).optional().nullable(),
+  idempotencyKey: z.string().trim().regex(/^[a-zA-Z0-9:_-]{8,200}$/),
+}).passthrough();
+
 
 function safeLog(message: string, context: Record<string, unknown> = {}) {
   const safe: Record<string, unknown> = {};
