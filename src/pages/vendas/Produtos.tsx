@@ -90,13 +90,13 @@ export default function Produtos() {
     { label: "Inativos", value: "inactive" as const, count: counts.inactive },
   ];
 
-  const handleEditProduct = (product: Product) => navigate(`/vendas/produtos/${product.id}/editar`);
-  const handleOpenMembers = (product: Product) => navigate(`/vendas/conteudo/${product.id}/builder`);
-  const handleOpenCheckout = (product: Product) => {
+  const handleEditProduct = useCallback((product: Product) => navigate(`/vendas/produtos/${product.id}/editar`), [navigate]);
+  const handleOpenMembers = useCallback((product: Product) => navigate(`/vendas/conteudo/${product.id}/builder`), [navigate]);
+  const handleOpenCheckout = useCallback((product: Product) => {
     if (!product.checkout_url) return;
     window.open(getCheckoutLink(product.checkout_url), "_blank", "noopener,noreferrer");
-  };
-  const handleCopyLink = async (product: Product) => {
+  }, []);
+  const handleCopyLink = useCallback(async (product: Product) => {
     if (!product.checkout_url) return;
     try {
       await navigator.clipboard.writeText(getCheckoutLink(product.checkout_url));
@@ -106,7 +106,7 @@ export default function Produtos() {
     } catch {
       toast.error("Não foi possível copiar o link.");
     }
-  };
+  }, []);
   const confirmDelete = async () => {
     if (!user || !deleteTarget) return;
     setDeleting(true);
