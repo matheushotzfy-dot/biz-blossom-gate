@@ -132,166 +132,35 @@ function timeAgo(dateStr: string) {
   return `${Math.floor(hours / 24)}d`;
 }
 
-// ═══════════ DASHBOARD PERIOD FILTER ═══════════
-type PeriodFilterProps = {
-  selectedPeriod: PeriodPreset;
-  setSelectedPeriod: (p: PeriodPreset) => void;
-  isCustom: boolean;
-  setIsCustom: (v: boolean) => void;
-  customRange: DateRange | undefined;
-  setCustomRange: (r: DateRange | undefined) => void;
-  open: boolean;
-  setOpen: (v: boolean) => void;
-};
-
-function DashboardPeriodFilter({
-  selectedPeriod, setSelectedPeriod, isCustom, setIsCustom, customRange, setCustomRange, open, setOpen,
-}: PeriodFilterProps) {
-  const now = brasiliaToday();
-
-  const applyPreset = (p: PeriodPreset) => {
-    setSelectedPeriod(p);
-    setIsCustom(false);
-    setCustomRange(undefined);
-    setOpen(false);
-  };
-
-  const applyYesterday = () => {
-    const y = new Date(now);
-    y.setDate(y.getDate() - 1);
-    const from = new Date(y); from.setHours(0, 0, 0, 0);
-    const to = new Date(y); to.setHours(23, 59, 59, 999);
-    setCustomRange({ from, to });
-    setIsCustom(true);
-    setOpen(false);
-  };
-
-  const applyThisMonth = () => {
-    const from = new Date(now.getFullYear(), now.getMonth(), 1, 0, 0, 0, 0);
-    const to = new Date(now); to.setHours(23, 59, 59, 999);
-    setCustomRange({ from, to });
-    setIsCustom(true);
-    setOpen(false);
-  };
-
-  const isYesterdayActive = (() => {
-    if (!isCustom || !customRange?.from || !customRange?.to) return false;
-    const y = new Date(now); y.setDate(y.getDate() - 1);
-    return customRange.from.toDateString() === y.toDateString() && customRange.to.toDateString() === y.toDateString();
-  })();
-
-  const isThisMonthActive = (() => {
-    if (!isCustom || !customRange?.from || !customRange?.to) return false;
-    const first = new Date(now.getFullYear(), now.getMonth(), 1);
-    return customRange.from.toDateString() === first.toDateString() && customRange.to.toDateString() === now.toDateString();
-  })();
-
-  const label = isCustom
-    ? (isYesterdayActive ? "Ontem"
-      : isThisMonthActive ? "Este mês"
-      : customRange?.from ? `${format(customRange.from, "dd/MM")}${customRange.to ? ` — ${format(customRange.to, "dd/MM")}` : ""}`
-      : "Personalizado")
-    : selectedPeriod.label;
-
-  return (
-    <Popover open={open} onOpenChange={setOpen}>
-      <PopoverTrigger asChild>
-        <button className="inline-flex items-center gap-2 rounded-[12px] border border-border/60 bg-card/80 backdrop-blur px-4 py-3 hover:border-primary/40 transition-all">
-          <CalendarDays className="h-4 w-4 text-primary" />
-          <div className="text-left">
-            <p className="text-[11px] font-medium text-muted-foreground/70">Período</p>
-            <p className="text-[13px] font-black tabular-nums leading-none mt-0.5">{label}</p>
-          </div>
-          <ChevronRight className="h-4 w-4 text-muted-foreground/50 rotate-90" />
-        </button>
-      </PopoverTrigger>
-      <PopoverContent align="end" className="w-[320px] p-3 rounded-[12px] border-border/60">
-        <div className="grid grid-cols-2 gap-1.5 mb-3">
-          <button onClick={() => applyPreset(PERIOD_PRESETS[0])}
-            className={cn("h-9 rounded-xl text-[12px] font-bold transition-all",
-              !isCustom && selectedPeriod.label === "Hoje" ? "bg-primary text-primary-foreground" : "bg-muted/40 text-muted-foreground hover:bg-muted")}>
-            Hoje
-          </button>
-          <button onClick={applyYesterday}
-            className={cn("h-9 rounded-xl text-[12px] font-bold transition-all",
-              isYesterdayActive ? "bg-primary text-primary-foreground" : "bg-muted/40 text-muted-foreground hover:bg-muted")}>
-            Ontem
-          </button>
-          <button onClick={() => applyPreset(PERIOD_PRESETS[1])}
-            className={cn("h-9 rounded-xl text-[12px] font-bold transition-all",
-              !isCustom && selectedPeriod.label === "7 dias" ? "bg-primary text-primary-foreground" : "bg-muted/40 text-muted-foreground hover:bg-muted")}>
-            7 dias
-          </button>
-          <button onClick={() => applyPreset(PERIOD_PRESETS[2])}
-            className={cn("h-9 rounded-xl text-[12px] font-bold transition-all",
-              !isCustom && selectedPeriod.label === "15 dias" ? "bg-primary text-primary-foreground" : "bg-muted/40 text-muted-foreground hover:bg-muted")}>
-            15 dias
-          </button>
-          <button onClick={() => applyPreset(PERIOD_PRESETS[3])}
-            className={cn("h-9 rounded-xl text-[12px] font-bold transition-all",
-              !isCustom && selectedPeriod.label === "30 dias" ? "bg-primary text-primary-foreground" : "bg-muted/40 text-muted-foreground hover:bg-muted")}>
-            30 dias
-          </button>
-          <button onClick={applyThisMonth}
-            className={cn("h-9 rounded-xl text-[12px] font-bold transition-all",
-              isThisMonthActive ? "bg-primary text-primary-foreground" : "bg-muted/40 text-muted-foreground hover:bg-muted")}>
-            Este mês
-          </button>
-        </div>
-        <div className="border-t border-border/40 pt-3">
-          <p className="text-[11.5px] font-medium text-muted-foreground mb-2">Personalizado</p>
-          <Calendar
-            mode="range"
-            selected={customRange}
-            onSelect={(r) => {
-              if (r?.from) {
-                setCustomRange(r);
-                setIsCustom(true);
-                if (r.from && r.to) setOpen(false);
-              }
-            }}
-            locale={ptBR}
-            className="p-0 pointer-events-auto"
-          />
-        </div>
-      </PopoverContent>
-    </Popover>
-  );
-}
-
-// ═══════════ PERIOD DIAL — calendário futurista (canto do banner) ═══════════
+// ═══════════ PERIOD DIAL — gatilho do seletor de período ═══════════
 type PeriodDialProps = {
   open: boolean;
   setOpen: (v: boolean) => void;
   label: string;
   goalPct: number;
   revenueLabel: string;
-  presets: readonly PeriodPreset[];
-  selectedLabel: string | null;
-  onPreset: (p: PeriodPreset) => void;
-  onThisMonth: () => void;
-  isCustom: boolean;
-  customRange: DateRange | undefined;
-  onRange: (r: DateRange | undefined) => void;
+  value: PeriodValue;
+  onChange: (v: PeriodValue) => void;
 };
 
-function PeriodDial({
-  open, setOpen, label, goalPct, revenueLabel, presets, selectedLabel, onPreset, onThisMonth, isCustom, customRange, onRange,
-}: PeriodDialProps) {
+function PeriodDial({ open, setOpen, label, goalPct, revenueLabel, value, onChange }: PeriodDialProps) {
   const today = new Date();
   const dayNum = today.getDate();
   const pct = Math.max(0, Math.min(100, goalPct));
 
-  const isMobile = useIsMobile();
-
   return (
-    <Popover open={open} onOpenChange={setOpen}>
-      <PopoverTrigger asChild>
+    <PeriodPicker
+      open={open}
+      onOpenChange={setOpen}
+      value={value}
+      onChange={onChange}
+      align="end"
+      side="bottom"
+      trigger={
         <button
           aria-label="Selecionar período"
           className="group relative flex items-end gap-3 border-b border-primary/30 bg-transparent px-1 pb-1.5 pt-1 text-left transition-colors hover:border-primary/70"
         >
-          {/* marcação do dia */}
           <span className="flex items-baseline gap-[3px] leading-none">
             <span className="font-display text-[22px] font-extrabold leading-none tracking-[-0.05em] tabular-nums text-foreground">
               {String(dayNum).padStart(2, "0")}
@@ -314,72 +183,15 @@ function PeriodDial({
 
           <ChevronRight className="mb-[3px] h-3.5 w-3.5 text-muted-foreground/40 transition-transform duration-200 group-hover:translate-x-0.5 group-hover:text-primary" />
 
-          {/* filete de progresso da meta */}
           <span aria-hidden className="pointer-events-none absolute inset-x-0 -bottom-px h-[2px] overflow-hidden">
-            <span
-              className="block h-full bg-primary transition-[width] duration-700 ease-out"
-              style={{ width: `${pct}%` }}
-            />
+            <span className="block h-full bg-primary transition-[width] duration-700 ease-out" style={{ width: `${pct}%` }} />
           </span>
         </button>
-      </PopoverTrigger>
-      <PopoverContent
-        side={isMobile ? "bottom" : "left"}
-        align={isMobile ? "end" : "start"}
-        sideOffset={10}
-        collisionPadding={12}
-        className="w-[min(94vw,430px)] rounded-[12px] border-border/60 p-3"
-      >
-        <div className="flex flex-col gap-3 sm:flex-row">
-          {/* presets */}
-          <div className="flex shrink-0 flex-row flex-wrap gap-1.5 sm:w-[112px] sm:flex-col">
-            {presets.map((p) => (
-              <button
-                key={p.label}
-                onClick={() => onPreset(p)}
-                className={cn(
-                  "h-8 flex-1 rounded-[9px] border px-2 text-[12px] font-semibold transition-colors sm:flex-none",
-                  selectedLabel === p.label
-                    ? "border-primary bg-primary/10 text-primary"
-                    : "border-transparent text-muted-foreground hover:border-border/70 hover:text-foreground",
-                )}
-              >
-                {p.label}
-              </button>
-            ))}
-            <button
-              onClick={onThisMonth}
-              className={cn(
-                "h-8 flex-1 rounded-[9px] border px-2 text-[12px] font-semibold transition-colors sm:flex-none",
-                isCustom
-                  ? "border-primary bg-primary/10 text-primary"
-                  : "border-transparent text-muted-foreground hover:border-border/70 hover:text-foreground",
-              )}
-            >
-              Este mês
-            </button>
-          </div>
-
-          <div className="hidden w-px bg-border/50 sm:block" />
-
-          {/* calendário compacto */}
-          <div className="min-w-0 flex-1">
-            <p className="mb-1.5 text-[9.5px] font-medium uppercase tracking-[0.16em] text-muted-foreground/55">
-              Personalizado
-            </p>
-            <Calendar
-              mode="range"
-              selected={customRange}
-              onSelect={onRange}
-              locale={ptBR}
-              className="period-calendar p-0 pointer-events-auto"
-            />
-          </div>
-        </div>
-      </PopoverContent>
-    </Popover>
+      }
+    />
   );
 }
+
 
 
 export default function Dashboard() {
