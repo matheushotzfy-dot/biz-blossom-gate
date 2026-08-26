@@ -44,11 +44,19 @@ Deno.serve(async (req) => {
       );
     }
 
-    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
-    const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+    const supabaseUrl = Deno.env.get("SUPABASE_URL");
+    const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
+    const anonKey = Deno.env.get("SUPABASE_ANON_KEY");
+    if (!supabaseUrl || !serviceRoleKey || !anonKey) {
+      console.error("[admin-impersonate] Missing required server configuration");
+      return new Response(
+        JSON.stringify({ success: false, error: "Service unavailable" }),
+        { status: 503, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
 
     // Verify caller with their own token
-    const callerClient = createClient(supabaseUrl, Deno.env.get("SUPABASE_ANON_KEY")!, {
+    const callerClient = createClient(supabaseUrl, anonKey, {
       global: { headers: { Authorization: authHeader } },
     });
     const { data: { user: caller }, error: callerErr } = await callerClient.auth.getUser();
@@ -121,35 +129,24 @@ Deno.serve(async (req) => {
       );
     }
 
-    // Generate a one-time recovery link, then exchange it server-side for a session.
-    // generateLink (magiclink) does NOT return access/refresh tokens directly; the
-    // returned `hashed_token` must be verified via auth.verifyOtp to mint a session.
+    if (!targetUser.user.email) {
+      return new Response(
+        JSON.stringify({ success: false, error: "Target user has no login email" }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    // Generate a one-time link. The receiver exchanges this short-lived token
+    // directly with Auth, so no access or refresh token ever crosses browser tabs.
     const { data: linkData, error: linkError } = await adminClient.auth.admin.generateLink({
       type: "magiclink",
-      email: targetUser.user.email!,
+      email: targetUser.user.email,
     });
 
     if (linkError || !linkData?.properties?.hashed_token) {
       console.error("[admin-impersonate] Failed to generate link:", linkError?.message);
       return new Response(
         JSON.stringify({ success: false, error: "Failed to generate impersonation session" }),
-        { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
-    }
-
-    // Exchange the hashed token for an actual session using a fresh anon client
-    const exchangeClient = createClient(supabaseUrl, Deno.env.get("SUPABASE_ANON_KEY")!, {
-      auth: { persistSession: false, autoRefreshToken: false },
-    });
-    const { data: verifyData, error: verifyError } = await exchangeClient.auth.verifyOtp({
-      token_hash: linkData.properties.hashed_token,
-      type: "magiclink",
-    });
-
-    if (verifyError || !verifyData.session) {
-      console.error("[admin-impersonate] OTP exchange failed:", verifyError?.message);
-      return new Response(
-        JSON.stringify({ success: false, error: "Failed to mint impersonation session" }),
         { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
@@ -186,14 +183,15 @@ Deno.serve(async (req) => {
       },
     });
 
+    const expiresAt = new Date(Date.now() + 15 * 60 * 1000).toISOString();
     return new Response(
       JSON.stringify({
         success: true,
-        access_token: verifyData.session.access_token,
-        refresh_token: verifyData.session.refresh_token,
+        impersonation_token: linkData.properties.hashed_token,
         target_user_id: targetUserId,
         target_email: targetEmail,
         target_name: targetName,
+        expires_at: expiresAt,
       }),
       { headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );

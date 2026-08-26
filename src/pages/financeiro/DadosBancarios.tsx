@@ -18,6 +18,7 @@ import {
 } from "@/lib/validation";
 import { InlineError, errorInputClass } from "@/components/ui/inline-error";
 import { friendlyError } from "@/lib/friendlyError";
+import { ReauthenticationDialog } from "@/components/security/ReauthenticationDialog";
 
 const PIX_TYPES = [
   { value: "cpf" as const, label: "CPF", description: "Documento pessoal", icon: User },
@@ -49,6 +50,8 @@ export default function DadosBancarios() {
   const [pixOpen, setPixOpen] = useState(false);
   const [bankOpen, setBankOpen] = useState(false);
   const [busy, setBusy] = useState(false);
+  const [reauthOpen, setReauthOpen] = useState(false);
+  const [pendingAction, setPendingAction] = useState<{ action: string; payload: Record<string, unknown>; onSuccess: () => void } | null>(null);
 
   const [pixForm, setPixForm] = useState<PixForm>({ key_type: "cpf", key_value: "" });
   const [pixErrors, setPixErrors] = useState<FieldErrors<PixForm>>({});
@@ -70,26 +73,26 @@ export default function DadosBancarios() {
       return;
     }
     setPixErrors({});
-    setBusy(true);
-    const { error } = await supabase.from("pix_keys").insert({
-      user_id: user.id,
-      key_type: parsed.data.key_type,
-      key_value: parsed.data.key_value.trim(),
+    setPendingAction({
+      action: "add_pix_key",
+      payload: { key_type: parsed.data.key_type, key_value: parsed.data.key_value.trim() },
+      onSuccess: () => {
+        toast.success("Chave PIX adicionada");
+        setPixForm({ key_type: "cpf", key_value: "" });
+        setPixOpen(false);
+        invalidateAll(["pix_keys"]);
+      },
     });
-    setBusy(false);
-    if (error) { toast.error(friendlyError(error, "Erro ao adicionar chave")); return; }
-    toast.success("Chave PIX adicionada");
-    setPixForm({ key_type: "cpf", key_value: "" });
-    setPixOpen(false);
-    invalidateAll(["pix_keys"]);
+    setReauthOpen(true);
   };
 
   const handleDeletePix = async (id: string) => {
     if (!user || !confirm("Remover esta chave PIX?")) return;
-    const { error } = await supabase.from("pix_keys").delete().eq("id", id).eq("user_id", user.id);
-    if (error) { toast.error("Erro ao remover"); return; }
-    toast.success("Chave removida");
-    invalidateAll(["pix_keys"]);
+    setPendingAction({ action: "delete_pix_key", payload: { id }, onSuccess: () => {
+      toast.success("Chave removida");
+      invalidateAll(["pix_keys"]);
+    } });
+    setReauthOpen(true);
   };
 
   const handleAddBank = async (e: React.FormEvent) => {
@@ -103,9 +106,9 @@ export default function DadosBancarios() {
       return;
     }
     setBankErrors({});
-    setBusy(true);
-    const { error } = await supabase.from("bank_accounts").insert({
-      user_id: user.id,
+    setPendingAction({
+      action: "add_bank_account",
+      payload: {
       bank_name: parsed.data.bank_name,
       bank_code: parsed.data.bank_code || null,
       agency: parsed.data.agency,
@@ -113,21 +116,40 @@ export default function DadosBancarios() {
       account_type: parsed.data.account_type,
       holder_name: parsed.data.holder_name,
       holder_document: parsed.data.holder_document.replace(/\D/g, ""),
+      },
+      onSuccess: () => {
+        toast.success("Conta bancária adicionada");
+        setBankForm({ bank_name: "", bank_code: "", agency: "", account_number: "", account_type: "corrente", holder_name: "", holder_document: "" });
+        setBankOpen(false);
+        invalidateAll(["bank_accounts"]);
+      },
     });
-    setBusy(false);
-    if (error) { toast.error(friendlyError(error, "Erro ao adicionar conta")); return; }
-    toast.success("Conta bancária adicionada");
-    setBankForm({ bank_name: "", bank_code: "", agency: "", account_number: "", account_type: "corrente", holder_name: "", holder_document: "" });
-    setBankOpen(false);
-    invalidateAll(["bank_accounts"]);
+    setReauthOpen(true);
   };
 
   const handleDeleteBank = async (id: string) => {
     if (!user || !confirm("Remover esta conta bancária?")) return;
-    const { error } = await supabase.from("bank_accounts").delete().eq("id", id).eq("user_id", user.id);
-    if (error) { toast.error("Erro ao remover"); return; }
-    toast.success("Conta removida");
-    invalidateAll(["bank_accounts"]);
+    setPendingAction({ action: "delete_bank_account", payload: { id }, onSuccess: () => {
+      toast.success("Conta removida");
+      invalidateAll(["bank_accounts"]);
+    } });
+    setReauthOpen(true);
+  };
+
+  const confirmSensitiveAction = async (currentPassword: string) => {
+    if (!pendingAction) return;
+    setBusy(true);
+    const { data, error } = await supabase.functions.invoke("sensitive-financial-action", {
+      body: { action: pendingAction.action, password: currentPassword, payload: pendingAction.payload },
+    });
+    setBusy(false);
+    if (error || !data?.success) {
+      toast.error(data?.error || friendlyError(error, "Não foi possível concluir a operação"));
+      return;
+    }
+    pendingAction.onSuccess();
+    setPendingAction(null);
+    setReauthOpen(false);
   };
 
   const clearPixError = (field: keyof PixForm) => {
@@ -139,6 +161,12 @@ export default function DadosBancarios() {
 
   return (
     <div className="space-y-6">
+      <ReauthenticationDialog
+        open={reauthOpen}
+        busy={busy}
+        onOpenChange={(open) => { setReauthOpen(open); if (!open) setPendingAction(null); }}
+        onConfirm={confirmSensitiveAction}
+      />
       {/* PIX KEYS */}
       <div className="bg-card rounded-[12px] border border-border/60 overflow-hidden">
         <div className="p-5 border-b border-border/40 flex items-center justify-between gap-3">

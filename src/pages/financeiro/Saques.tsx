@@ -17,6 +17,7 @@ import { ptBR } from "date-fns/locale";
 import DadosBancarios from "./DadosBancarios";
 import AutoWithdrawalSettings from "@/components/financeiro/AutoWithdrawalSettings";
 import { friendlyError } from "@/lib/friendlyError";
+import { ReauthenticationDialog } from "@/components/security/ReauthenticationDialog";
 
 const fmt = (v: number) =>
   `R$ ${(Number.isFinite(v) ? v : 0).toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
@@ -58,6 +59,9 @@ export default function Saques() {
   const [retainedAmount, setRetainedAmount] = useState<number>(0);
   const [withdrawFee, setWithdrawFee] = useState<number>(DEFAULT_WITHDRAW_FEE);
   const [search, setSearch] = useState("");
+  const [reauthOpen, setReauthOpen] = useState(false);
+  const [pendingWithdrawal, setPendingWithdrawal] = useState<Record<string, unknown> | null>(null);
+  const [submitting, setSubmitting] = useState(false);
   const invalidateAll = useInvalidateAll();
 
   const hasAddress = !!profile?.zip_code && !!profile?.street
@@ -120,7 +124,7 @@ export default function Saques() {
       return;
     }
 
-    const payload: Record<string, unknown> = { user_id: user.id, amount: numAmount };
+    const payload: Record<string, unknown> = { amount: numAmount };
     if (pickedKey === "copy_paste") {
       payload.withdrawal_type = "pix_copy_paste";
       payload.pix_copy_paste_code = copyPasteCode.trim();
@@ -129,14 +133,24 @@ export default function Saques() {
       payload.pix_key_id = pickedKey;
     }
 
-    const { error } = await supabase.from("withdrawals").insert(payload as any);
-    if (error) {
-      // O banco bloqueia solicitações quando o admin ativa o kill switch de saques.
-      const paused = /pausad/i.test(error.message ?? "");
-      toast.error(paused ? "Saques temporariamente pausados. Tente novamente mais tarde." : friendlyError(error));
+    setPendingWithdrawal(payload);
+    setReauthOpen(true);
+  };
+
+  const confirmWithdrawal = async (currentPassword: string) => {
+    if (!pendingWithdrawal) return;
+    setSubmitting(true);
+    const { data, error } = await supabase.functions.invoke("sensitive-financial-action", {
+      body: { action: "request_withdrawal", password: currentPassword, payload: pendingWithdrawal },
+    });
+    setSubmitting(false);
+    if (error || !data?.success) {
+      toast.error(data?.error || friendlyError(error));
       return;
     }
     toast.success("Solicitação enviada!");
+    setReauthOpen(false);
+    setPendingWithdrawal(null);
     setOpen(false);
     setAmount("");
     setCopyPasteCode("");
@@ -149,6 +163,12 @@ export default function Saques() {
 
   return (
     <div className="space-y-6 animate-in fade-in duration-500">
+      <ReauthenticationDialog
+        open={reauthOpen}
+        busy={submitting}
+        onOpenChange={(nextOpen) => { setReauthOpen(nextOpen); if (!nextOpen) setPendingWithdrawal(null); }}
+        onConfirm={confirmWithdrawal}
+      />
       {/* Header */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div className="space-y-1">

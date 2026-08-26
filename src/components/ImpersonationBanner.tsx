@@ -7,6 +7,7 @@ type Info = {
   target_name: string | null;
   target_user_id: string | null;
   started_at: string;
+  expires_at: string;
 };
 
 /**
@@ -17,17 +18,6 @@ type Info = {
 export default function ImpersonationBanner() {
   const [info, setInfo] = useState<Info | null>(null);
 
-  useEffect(() => {
-    try {
-      const raw = sessionStorage.getItem("impersonation_session");
-      if (raw) setInfo(JSON.parse(raw));
-    } catch { /* noop */ }
-  }, []);
-
-  if (!info) return null;
-
-  const label = info.target_name || info.target_email || info.target_user_id?.slice(0, 8) || "usuário";
-
   const handleExit = async () => {
     try { sessionStorage.removeItem("impersonation_session"); } catch { /* noop */ }
     await supabase.auth.signOut();
@@ -35,6 +25,28 @@ export default function ImpersonationBanner() {
     // Fallback if the tab can't be closed programmatically
     window.location.replace("/auth");
   };
+
+  useEffect(() => {
+    try {
+      const raw = sessionStorage.getItem("impersonation_session");
+      if (raw) setInfo(JSON.parse(raw));
+    } catch { /* noop */ }
+  }, []);
+
+  useEffect(() => {
+    if (!info) return;
+    const remaining = new Date(info.expires_at).getTime() - Date.now();
+    if (!Number.isFinite(remaining) || remaining <= 0) {
+      void handleExit();
+      return;
+    }
+    const timeout = window.setTimeout(() => void handleExit(), remaining);
+    return () => window.clearTimeout(timeout);
+  }, [info]);
+
+  if (!info) return null;
+
+  const label = info.target_name || info.target_email || info.target_user_id?.slice(0, 8) || "usuário";
 
   return (
     <div className="fixed top-0 inset-x-0 z-[100] bg-warning text-warning-foreground border-b border-warning/50">

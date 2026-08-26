@@ -24,10 +24,20 @@ const MAX_ATTEMPTS = 5;
 Deno.serve(async (req) => {
   const corsHeaders = cors(req);
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
+  if (req.method !== "POST") {
+    return new Response(JSON.stringify({ success: false, error: "Método não permitido." }),
+      { status: 405, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+  }
 
   try {
-    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
-    const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+    const supabaseUrl = Deno.env.get("SUPABASE_URL");
+    const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
+    const anonKey = Deno.env.get("SUPABASE_ANON_KEY");
+    if (!supabaseUrl || !serviceRoleKey || !anonKey) {
+      console.error("[admin-2fa-verify] Missing required server configuration");
+      return new Response(JSON.stringify({ success: false, error: "Serviço indisponível." }),
+        { status: 503, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    }
     const admin = createClient(supabaseUrl, serviceRoleKey, {
       auth: { persistSession: false, autoRefreshToken: false },
     });
@@ -57,33 +67,38 @@ Deno.serve(async (req) => {
         { status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
 
-    const hashBuf = await crypto.subtle.digest(
-      "SHA-256", new TextEncoder().encode(code + row.email),
-    );
-    const hash = Array.from(new Uint8Array(hashBuf)).map(b => b.toString(16).padStart(2, "0")).join("");
-
-    if (hash !== row.code_hash) {
+    const authClient = createClient(supabaseUrl, anonKey, {
+      auth: { persistSession: false, autoRefreshToken: false },
+    });
+    const { data: verified, error: verifyError } = await authClient.auth.verifyOtp({
+      email: row.email,
+      token: code,
+      type: "email",
+    });
+    if (verifyError || !verified.user || !verified.session || verified.user.id !== row.user_id) {
       await admin.from("admin_2fa_codes")
         .update({ attempts: (row.attempts ?? 0) + 1 }).eq("id", row.id);
       return new Response(JSON.stringify({ success: false, error: "Código incorreto." }),
         { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
 
-    // Success — release tokens and burn the challenge row (single-use).
-    const access = row.access_token;
-    const refresh = row.refresh_token;
-    const role = row.role;
-    await admin.from("admin_2fa_codes").delete().eq("id", row.id);
-
-    if (!access || !refresh) {
-      return new Response(JSON.stringify({ success: false, error: "Sessão inválida." }),
-        { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    const { data: roleRows, error: roleError } = await admin
+      .from("user_roles").select("role").eq("user_id", verified.user.id);
+    const roles = (roleRows ?? []).map((entry: { role: string }) => entry.role);
+    const role = roles.includes("admin") ? "admin" : roles.includes("employee") ? "employee" : null;
+    if (roleError || !role || role !== row.role) {
+      await admin.from("admin_2fa_codes").delete().eq("id", row.id);
+      return new Response(JSON.stringify({ success: false, error: "Acesso não autorizado." }),
+        { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
+
+    // Success — burn the challenge before releasing the newly minted session.
+    await admin.from("admin_2fa_codes").delete().eq("id", row.id);
 
     return new Response(JSON.stringify({
       success: true,
-      access_token: access,
-      refresh_token: refresh,
+      access_token: verified.session.access_token,
+      refresh_token: verified.session.refresh_token,
       role,
     }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
   } catch (e) {

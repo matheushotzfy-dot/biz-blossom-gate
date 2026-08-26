@@ -21,20 +21,28 @@ function buildCors(req: Request): Record<string, string> {
     : CORS_BASE_HEADERS;
 }
 
-/**
- * Server-side admin login — direct auth without 2FA.
- * Authenticates, checks role, returns session tokens.
- */
+/** Password validation followed by a mandatory, single-use email OTP. */
 Deno.serve(async (req) => {
   const corsHeaders = buildCors(req);
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
+  if (req.method !== "POST") {
+    return new Response(
+      JSON.stringify({ success: false, error: "Método não permitido." }),
+      { status: 405, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+    );
+  }
 
   try {
-    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
-    const anonKey = Deno.env.get("SUPABASE_ANON_KEY")!;
-    const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+    const supabaseUrl = Deno.env.get("SUPABASE_URL");
+    const anonKey = Deno.env.get("SUPABASE_ANON_KEY");
+    const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
+    if (!supabaseUrl || !anonKey || !serviceRoleKey) {
+      console.error("[admin-login] Missing required server configuration");
+      return new Response(JSON.stringify({ success: false, error: "Serviço indisponível." }),
+        { status: 503, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    }
     const authClient = createClient(supabaseUrl, anonKey, {
       auth: { persistSession: false, autoRefreshToken: false },
     });
@@ -151,19 +159,44 @@ Deno.serve(async (req) => {
 
     const role = isAdmin ? "admin" : "employee";
 
-    // 2FA disabled — direct login for both admins and employees
-    console.log(`[admin-login] Direct login for ${trimmedEmail} (${role})`);
+    // Never persist or return the password-authenticated session. The final
+    // session is minted only after the email OTP is validated by Auth.
+    const tempToken = crypto.randomUUID();
+    const expiresAt = new Date(Date.now() + 10 * 60 * 1000).toISOString();
+    await adminClient.from("admin_2fa_codes").delete().eq("email", trimmedEmail);
 
+    const { error: otpError } = await authClient.auth.signInWithOtp({
+      email: trimmedEmail,
+      options: { shouldCreateUser: false },
+    });
+    if (otpError) {
+      console.error("[admin-login] OTP delivery failed");
+      return new Response(
+        JSON.stringify({ success: false, error: "Não foi possível enviar o código de acesso." }),
+        { status: 503, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+      );
+    }
+
+    const { error: challengeError } = await adminClient.from("admin_2fa_codes").insert({
+      email: trimmedEmail,
+      user_id: userId,
+      code_hash: null,
+      temp_token: tempToken,
+      role,
+      expires_at: expiresAt,
+      attempts: 0,
+    });
+    if (challengeError) {
+      console.error("[admin-login] Challenge creation failed");
+      return new Response(
+        JSON.stringify({ success: false, error: "Não foi possível iniciar a verificação." }),
+        { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+      );
+    }
 
     return new Response(
-      JSON.stringify({
-        success: true,
-        requires2FA: false,
-        access_token: authData.session.access_token,
-        refresh_token: authData.session.refresh_token,
-        role,
-      }),
-      { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      JSON.stringify({ success: true, requires2FA: true, temp_token: tempToken }),
+      { headers: { ...corsHeaders, "Content-Type": "application/json" } },
     );
   } catch (error) {
     console.error("[admin-login] Error:", error instanceof Error ? error.message : "unknown");
