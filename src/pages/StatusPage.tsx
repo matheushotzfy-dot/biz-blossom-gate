@@ -75,10 +75,10 @@ export default function StatusPage() {
  newServices[3] = { ...newServices[3], status: "down" };
  }
 
- // Check webhooks (webhook_configs table)
+ // Check the public integration surface without querying internal acquirer data.
  try {
  const start = Date.now();
- const { error } = await supabase.from("acquirers").select("id").limit(1);
+ const { error } = await supabase.from("products_public").select("id").limit(1);
  const latency = Date.now() - start;
  newServices[4] = { ...newServices[4], status: error ? "degraded" : "operational", latency };
  } catch {
