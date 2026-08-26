@@ -91,9 +91,16 @@ Deno.serve(async (req) => {
 
     const requestIp = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "0.0.0.0";
 
-    // === Idempotency — opcional, evita dupla-cobrança em retry de rede ===
+    // === Idempotency — obrigatória para impedir dupla cobrança em retries ===
     const rawIdem = String(body?.idempotencyKey || "").slice(0, 200).trim();
-    if (rawIdem) {
+    if (!rawIdem || !/^[a-zA-Z0-9:_-]{8,200}$/.test(rawIdem)) {
+      return new Response(
+        JSON.stringify({ success: false, error: "Chave de idempotência inválida" }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+      );
+    }
+
+    {
       // Escopar por usuário para evitar colisão global cross-tenant
       const scopedKey = `qpix:${userId}:${rawIdem}`;
       const { data: cached } = await supabase
@@ -111,9 +118,37 @@ Deno.serve(async (req) => {
       const { error: claimErr } = await supabase
         .from("idempotency_keys")
         .insert({ key: scopedKey, response: null });
-      if (claimErr && !String(claimErr.message).includes("duplicate")) {
-        safeLog("Idempotency claim error", { error: claimErr.message });
+      if (claimErr && String(claimErr.message).includes("duplicate")) {
+        return new Response(
+          JSON.stringify({ success: false, error: "Cobrança em processamento. Aguarde alguns segundos." }),
+          { status: 409, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+        );
       }
+      if (claimErr) {
+        safeLog("Idempotency claim error", { error: claimErr.message });
+        return new Response(
+          JSON.stringify({ success: false, error: "Não foi possível reservar a cobrança" }),
+          { status: 503, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+        );
+      }
+    }
+
+    // O limite deve ser validado antes de criar a cobrança na adquirente.
+    const { data: maxTicket, error: maxTicketError } = await supabase
+      .rpc("get_user_max_ticket", { _user_id: userId });
+    if (maxTicketError) {
+      safeLog("Max ticket lookup failed", { error: maxTicketError.message });
+      return new Response(
+        JSON.stringify({ success: false, error: "Não foi possível validar o limite da cobrança" }),
+        { status: 503, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+      );
+    }
+    const allowedMax = Number(maxTicket);
+    if (Number.isFinite(allowedMax) && allowedMax > 0 && amt > allowedMax) {
+      return new Response(
+        JSON.stringify({ success: false, error: `Valor excede o limite máximo de R$ ${allowedMax.toFixed(2)}` }),
+        { status: 422, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+      );
     }
 
 
@@ -215,10 +250,8 @@ Deno.serve(async (req) => {
         },
       };
 
-      if (rawIdem) {
-        const scopedKey = `qpix:${userId}:${rawIdem}`;
-        await supabase.from("idempotency_keys").update({ response: responsePayload }).eq("key", scopedKey);
-      }
+      const scopedKey = `qpix:${userId}:${rawIdem}`;
+      await supabase.from("idempotency_keys").update({ response: responsePayload }).eq("key", scopedKey);
 
       safeLog("VeoPag quick PIX created", { transactionId: transaction?.id });
       return new Response(
@@ -288,10 +321,8 @@ Deno.serve(async (req) => {
         },
       };
 
-      if (rawIdem) {
-        const scopedKey = `qpix:${userId}:${rawIdem}`;
-        await supabase.from("idempotency_keys").update({ response: responsePayload }).eq("key", scopedKey);
-      }
+      const scopedKey = `qpix:${userId}:${rawIdem}`;
+      await supabase.from("idempotency_keys").update({ response: responsePayload }).eq("key", scopedKey);
 
       safeLog("PodPay quick PIX created", { transactionId: transaction?.id });
       return new Response(
@@ -412,10 +443,8 @@ Deno.serve(async (req) => {
     };
 
     // Persistir resposta idempotente para retries subsequentes
-    if (rawIdem) {
-      const scopedKey = `qpix:${userId}:${rawIdem}`;
-      await supabase.from("idempotency_keys").update({ response: responsePayload }).eq("key", scopedKey);
-    }
+    const scopedKey = `qpix:${userId}:${rawIdem}`;
+    await supabase.from("idempotency_keys").update({ response: responsePayload }).eq("key", scopedKey);
 
     return new Response(
       JSON.stringify(responsePayload),
