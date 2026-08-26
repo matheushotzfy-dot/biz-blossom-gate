@@ -13,12 +13,19 @@ function generateKey(prefix: string, length: number): string {
   return result;
 }
 
-async function hashKey(key: string): Promise<string> {
+async function hmacKey(key: string, pepper: string): Promise<string> {
   const encoder = new TextEncoder();
-  const data = encoder.encode(key);
-  const hashBuffer = await crypto.subtle.digest('SHA-256', data);
-  const hashArray = Array.from(new Uint8Array(hashBuffer));
-  return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+  const cryptoKey = await crypto.subtle.importKey(
+    "raw",
+    encoder.encode(pepper),
+    { name: "HMAC", hash: "SHA-256" },
+    false,
+    ["sign"],
+  );
+  const signature = await crypto.subtle.sign("HMAC", cryptoKey, encoder.encode(key));
+  return Array.from(new Uint8Array(signature))
+    .map((byte) => byte.toString(16).padStart(2, "0"))
+    .join("");
 }
 
 Deno.serve(async (req) => {
@@ -40,6 +47,14 @@ Deno.serve(async (req) => {
 
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
     const supabaseKey = Deno.env.get('SUPABASE_ANON_KEY') || Deno.env.get('SUPABASE_PUBLISHABLE_KEY')!;
+    const serviceRoleKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
+    const apiKeyPepper = Deno.env.get('API_KEY_PEPPER');
+    if (!supabaseUrl || !supabaseKey || !serviceRoleKey || !apiKeyPepper) {
+      return new Response(JSON.stringify({ error: 'Serviço indisponível' }), {
+        status: 503,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
     const supabase = createClient(supabaseUrl, supabaseKey, {
       global: { headers: { Authorization: authHeader } },
     });
@@ -55,18 +70,29 @@ Deno.serve(async (req) => {
     const body = await req.json().catch(() => ({}));
     const action = body.action || 'create';
 
+    const serviceClient = createClient(supabaseUrl, serviceRoleKey, {
+      auth: { persistSession: false, autoRefreshToken: false },
+    });
+    const { data: rateRows, error: rateError } = await serviceClient.rpc('bump_rate_limit', {
+      _bucket_key: `api_key_management:${user.id}`,
+      _window_seconds: 600,
+      _max_count: 20,
+    });
+    const rateRow = Array.isArray(rateRows) ? rateRows[0] : rateRows;
+    if (rateError || rateRow?.allowed !== true) {
+      return new Response(JSON.stringify({ error: 'Muitas tentativas. Aguarde alguns minutos.' }), {
+        status: 429,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
     if (action === 'create') {
       const name = String(body.name || 'Chave API').slice(0, 100).trim();
       
       const publicKey = generateKey('pk_live_', 32);
       const secretKey = generateKey('sk_live_', 48);
-      const secretKeyHash = await hashKey(secretKey);
+      const secretKeyHash = await hmacKey(secretKey, apiKeyPepper);
       const secretKeyPrefix = secretKey.slice(0, 12);
-
-      const serviceClient = createClient(
-        supabaseUrl,
-        Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
-      );
 
       const { data, error } = await serviceClient.from('api_keys').insert({
         user_id: user.id,
@@ -74,7 +100,9 @@ Deno.serve(async (req) => {
         public_key: publicKey,
         secret_key_hash: secretKeyHash,
         secret_key_prefix: secretKeyPrefix,
-      }).select('id, name, public_key, secret_key_prefix, is_active, created_at').single();
+        hash_version: 'hmac-sha256',
+        expires_at: new Date(Date.now() + 90 * 24 * 60 * 60 * 1000).toISOString(),
+      }).select('id, name, public_key, secret_key_prefix, is_active, expires_at, created_at').single();
 
       if (error) {
         const msg = error.message?.includes('Limite') ? error.message : 'Erro ao criar chave';

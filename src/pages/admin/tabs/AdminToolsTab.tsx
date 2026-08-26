@@ -156,7 +156,6 @@ export default function AdminToolsTab({ transactions, profiles, withdrawals }: A
         seller: nameOf(t.user_id),
         cliente: t.customer_name ?? "",
         email: t.customer_email ?? "",
-        documento: t.customer_document ?? "",
         metodo: t.payment_method ?? "",
       })),
     );
@@ -168,7 +167,6 @@ export default function AdminToolsTab({ transactions, profiles, withdrawals }: A
         id: p.id,
         nome: p.full_name ?? "",
         email: p.email ?? "",
-        documento: p.document_number ?? "",
         telefone: p.phone ?? "",
         status: p.account_status ?? "",
         criado_em: p.created_at,

@@ -54,6 +54,21 @@ async function sha256Hex(input: string): Promise<string> {
     .join("");
 }
 
+async function hmacSha256Hex(input: string, pepper: string): Promise<string> {
+  const encoder = new TextEncoder();
+  const key = await crypto.subtle.importKey(
+    "raw",
+    encoder.encode(pepper),
+    { name: "HMAC", hash: "SHA-256" },
+    false,
+    ["sign"],
+  );
+  const signature = await crypto.subtle.sign("HMAC", key, encoder.encode(input));
+  return Array.from(new Uint8Array(signature))
+    .map((byte) => byte.toString(16).padStart(2, "0"))
+    .join("");
+}
+
 function randomRequestId(): string {
   return "req_" + crypto.randomUUID().replace(/-/g, "").slice(0, 24);
 }
@@ -186,11 +201,19 @@ async function authenticateRequest(
   }
 
   const prefix = secret.slice(0, 12);
-  const hash = await sha256Hex(secret);
+  const pepper = Deno.env.get("API_KEY_PEPPER");
+  if (!pepper) {
+    return {
+      error: { status: 503, code: "service_unavailable", message: "API authentication is temporarily unavailable." },
+    };
+  }
+  const hmacHash = await hmacSha256Hex(secret, pepper);
+  const legacyHash = await sha256Hex(secret);
 
-  const { data, error } = await admin.rpc("verify_api_secret", {
+  const { data, error } = await admin.rpc("verify_api_secret_v2", {
     _prefix: prefix,
-    _hash: hash,
+    _hmac_hash: hmacHash,
+    _legacy_hash: legacyHash,
   });
 
   if (error || !data || (Array.isArray(data) && data.length === 0)) {
