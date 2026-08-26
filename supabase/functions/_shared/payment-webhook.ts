@@ -19,6 +19,7 @@ const ALLOWED_TRANSITIONS: Readonly<Record<string, ReadonlySet<string>>> = {
 };
 
 export function isAllowedTransactionTransition(current: string, next: string): boolean {
+  if (current === next) return false;
   return ALLOWED_TRANSITIONS[current]?.has(next) ?? false;
 }
 

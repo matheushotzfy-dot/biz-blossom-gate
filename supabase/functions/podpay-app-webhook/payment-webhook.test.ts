@@ -31,6 +31,8 @@ Deno.test("webhook HMAC verification is strict and constant-time", async () => {
 Deno.test("completed transitions require a valid source state", () => {
   assert(isAllowedTransactionTransition("pending", "completed"));
   assert(isAllowedTransactionTransition("expired", "completed"));
+  assertFalse(isAllowedTransactionTransition("completed", "completed"));
+  assertFalse(isAllowedTransactionTransition("pending", "pending"));
   assertFalse(isAllowedTransactionTransition("refunded", "completed"));
   assertFalse(isAllowedTransactionTransition("chargeback", "completed"));
   assertFalse(isAllowedTransactionTransition("failed", "completed"));
