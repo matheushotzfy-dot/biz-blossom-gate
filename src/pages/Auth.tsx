@@ -168,12 +168,15 @@ export default function Auth() {
     setRecoveryLoading(true);
     setRecoveryError("");
     try {
-      const { error } = await supabase.auth.resetPasswordForEmail(targetEmail, {
-        redirectTo: `${window.location.origin}/auth`,
+      // Passa pelo gate server-side (rate limit por IP e por e-mail + resposta
+      // genérica). Nunca chamamos resetPasswordForEmail direto do cliente.
+      const { error } = await supabase.functions.invoke("password-reset-request", {
+        body: { email: targetEmail, redirectTo: `${window.location.origin}/auth` },
       });
       // Recovery initiation deliberately has an indistinguishable response for
       // existing and non-existing accounts. Provider details are never exposed.
       if (error) console.warn("Password recovery request was not accepted by the provider");
+
       setRecoveryEmail(targetEmail);
       setRecoveryMode("code");
       toast.success("Se o e-mail estiver cadastrado, você receberá um código de recuperação.");
