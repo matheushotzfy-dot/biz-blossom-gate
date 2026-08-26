@@ -295,84 +295,26 @@ export default function Vendas() {
         title="Vendas & Recebíveis"
         subtitle={`${filtered.length} transações · ${rangeLabel} — histórico completo, filtros avançados e exportação.`}
         actions={
-          <div className="flex items-center gap-2 flex-wrap">
-            {/* Period selector — institutional, segmented */}
-            <div className="inline-flex items-stretch h-10 rounded-xl border border-border bg-card overflow-hidden">
-              <div className="flex items-stretch divide-x divide-border">
-                {PRESETS.filter(p => p.id !== "custom").map((p) => {
-                  const isActive = preset === p.id;
-                  const short =
-                    p.id === "today" ? "Hoje" :
-                    p.id === "7d" ? "7D" :
-                    p.id === "15d" ? "15D" :
- "30D";
-                  return (
-                    <button
-                      key={p.id}
-                      onClick={() => selectPreset(p.id)}
-                      className={cn(
- "relative px-3.5 flex items-center justify-center text-[11px] font-semibold tabular-nums transition-colors duration-200 min-w-[54px]",
-                        isActive
-                          ? "text-primary bg-primary/[0.08]"
-                          : "text-muted-foreground/60 hover:text-foreground hover:bg-secondary/40"
-                      )}
-                    >
-                      {isActive && <span className="absolute inset-x-0 bottom-0 h-[2px] bg-primary" />}
-                      {short}
-                    </button>
-                  );
-                })}
+          <div className="flex items-center gap-2">
+            {/* Seletor de período — popover no desktop, bottom sheet no mobile */}
+            <PeriodPicker
+              value={periodValue}
+              onChange={applyPeriod}
+              trigger={
+                <button
+                  className="group inline-flex h-10 flex-1 items-center gap-2 rounded-xl border border-border bg-card px-3.5 text-left transition-colors hover:border-primary/40 md:flex-none"
+                  aria-label="Selecionar período"
+                >
+                  <CalendarIcon className="h-4 w-4 shrink-0 text-primary" strokeWidth={2} />
+                  <span className="min-w-0 leading-none">
+                    <span className="block text-[9px] font-semibold uppercase tracking-[0.14em] text-muted-foreground/60">Período</span>
+                    <span className="mt-1 block truncate text-[12px] font-bold tabular-nums text-foreground">{rangeLabel}</span>
+                  </span>
+                  <ChevronRight className="ml-auto h-3.5 w-3.5 shrink-0 text-muted-foreground/40 transition-transform group-hover:translate-x-0.5 group-hover:text-primary" />
+                </button>
+              }
+            />
 
-                <Popover open={dateOpen} onOpenChange={setDateOpen}>
-                  <PopoverTrigger asChild>
-                    <button
-                      className={cn(
- "relative px-3.5 flex items-center gap-1.5 text-[11px] font-semibold transition-colors duration-200",
-                        preset === "custom"
-                          ? "text-primary bg-primary/[0.08]"
-                          : "text-muted-foreground/60 hover:text-foreground hover:bg-secondary/40"
-                      )}
-                    >
-                      {preset === "custom" && <span className="absolute inset-x-0 bottom-0 h-[2px] bg-primary" />}
-                      <CalendarIcon className="h-3.5 w-3.5" strokeWidth={2.25} />
-                      <span className="tabular-nums">
-                        {preset === "custom" && range?.from
-                          ? format(range.from, "dd/MM") + (range.to ? " – " + format(range.to, "dd/MM") : "")
-                          : ""}
-                      </span>
-                    </button>
-                  </PopoverTrigger>
-                  <PopoverContent align="end" sideOffset={8} className="w-[320px] p-0 overflow-hidden rounded-xl border border-border bg-card">
-                    <div className="flex items-center justify-between gap-3 px-3.5 py-2.5 border-b border-border">
-                      <span className="text-[11px] font-semibold text-muted-foreground/80">
-                        {tempRange?.from
-                          ? format(tempRange.from, "dd MMM", { locale: ptBR }) +
-                            (tempRange.to ? " — " + format(tempRange.to, "dd MMM", { locale: ptBR }) : " — fim?")
-                          : "Selecione o intervalo"}
-                      </span>
-                      {tempRange?.from && tempRange?.to && (
-                        <span className="text-[11px] font-semibold text-primary tabular-nums px-1.5 py-0.5 rounded-md bg-primary/10 border border-primary/20">
-                          {differenceInDays(tempRange.to, tempRange.from) + 1}d
-                        </span>
-                      )}
-                    </div>
-                    <Calendar
-                      mode="range"
-                      selected={tempRange}
-                      onSelect={(r) => { setTempRange(r); setPreset("custom"); }}
-                      numberOfMonths={1}
-                      locale={ptBR}
-                      defaultMonth={tempRange?.from ?? new Date()}
-                      className="pointer-events-auto p-2"
-                    />
-                    <div className="flex items-center justify-between gap-2 px-3.5 py-2 border-t border-border">
-                      <button onClick={() => setDateOpen(false)} className="text-[11px] font-semibold text-muted-foreground/60 hover:text-foreground transition-colors">Cancelar</button>
-                      <button onClick={applyCustom} disabled={!tempRange?.from || !tempRange?.to} className="px-3 py-1.5 rounded-md text-[11px] font-semibold bg-primary text-primary-foreground hover:bg-primary/90 disabled:opacity-40 disabled:cursor-not-allowed transition-all">Aplicar</button>
-                    </div>
-                  </PopoverContent>
-                </Popover>
-              </div>
-            </div>
             <Button
               variant="outline"
               size="sm"
