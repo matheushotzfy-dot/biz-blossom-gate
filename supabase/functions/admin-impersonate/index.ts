@@ -121,9 +121,8 @@ Deno.serve(async (req) => {
       );
     }
 
-    // Generate a one-time recovery link, then exchange it server-side for a session.
-    // generateLink (magiclink) does NOT return access/refresh tokens directly; the
-    // returned `hashed_token` must be verified via auth.verifyOtp to mint a session.
+    // Generate a one-time link. The receiver exchanges this short-lived token
+    // directly with Auth, so no access or refresh token ever crosses browser tabs.
     const { data: linkData, error: linkError } = await adminClient.auth.admin.generateLink({
       type: "magiclink",
       email: targetUser.user.email!,
@@ -133,23 +132,6 @@ Deno.serve(async (req) => {
       console.error("[admin-impersonate] Failed to generate link:", linkError?.message);
       return new Response(
         JSON.stringify({ success: false, error: "Failed to generate impersonation session" }),
-        { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
-    }
-
-    // Exchange the hashed token for an actual session using a fresh anon client
-    const exchangeClient = createClient(supabaseUrl, Deno.env.get("SUPABASE_ANON_KEY")!, {
-      auth: { persistSession: false, autoRefreshToken: false },
-    });
-    const { data: verifyData, error: verifyError } = await exchangeClient.auth.verifyOtp({
-      token_hash: linkData.properties.hashed_token,
-      type: "magiclink",
-    });
-
-    if (verifyError || !verifyData.session) {
-      console.error("[admin-impersonate] OTP exchange failed:", verifyError?.message);
-      return new Response(
-        JSON.stringify({ success: false, error: "Failed to mint impersonation session" }),
         { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
@@ -190,7 +172,7 @@ Deno.serve(async (req) => {
     return new Response(
       JSON.stringify({
         success: true,
-        access_token: verifyData.session.access_token,
+        impersonation_token: linkData.properties.hashed_token,
         target_user_id: targetUserId,
         target_email: targetEmail,
         target_name: targetName,
