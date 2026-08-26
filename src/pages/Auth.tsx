@@ -284,21 +284,11 @@ export default function Auth() {
         if (!referralSource) { toast.error("Selecione onde conheceu a plataforma"); setLoading(false); return; }
 
         const cleanPhone = phone.replace(/\D/g, "");
-        const { data: conflict, error: conflictErr } = await supabase.rpc("check_signup_conflicts", {
-          _email: email.toLowerCase().trim(),
-          _document_number: digits,
-          _phone: cleanPhone,
-        });
-        if (conflictErr) { toast.error("Erro ao verificar dados. Tente novamente."); setLoading(false); return; }
-        if (conflict === "email") { toast.error("Este e-mail já está cadastrado. Faça login ou use outro e-mail."); setLoading(false); return; }
-        if (conflict === "document") { toast.error("Este CPF/CNPJ já está vinculado a outra conta."); setLoading(false); return; }
-        if (conflict === "phone") { toast.error("Este telefone já está vinculado a outra conta."); setLoading(false); return; }
-
-        const { error } = await supabase.auth.signUp({
-          email: email.toLowerCase().trim(),
-          password,
-          options: {
-            data: {
+        const { data: signupData, error: signupError } = await supabase.functions.invoke("secure-signup", {
+          body: {
+            email: email.toLowerCase().trim(),
+            password,
+            metadata: {
               full_name: fullName,
               nickname,
               document_number: digits,
@@ -309,23 +299,15 @@ export default function Auth() {
               segment,
               monthly_revenue_band: monthlyRevenue,
             },
-
-
-            emailRedirectTo: `${window.location.origin}/auth/callback`,
           },
         });
-        if (error) throw error;
+        if (signupError || !signupData?.success) {
+          toast.error(signupData?.error || "Não foi possível criar a conta com os dados informados.");
+          return;
+        }
 
-        let autoConfirmed = false;
-        try {
-          const { data: cfn } = await supabase.functions.invoke("auto-confirm-signup", {
-            body: { email: email.toLowerCase().trim() },
-          });
-          autoConfirmed = !!(cfn as { confirmed?: boolean } | null)?.confirmed;
-        } catch { /* fallback: keep verification flow */ }
-
-        if (autoConfirmed) toast.success("Conta criada com sucesso! Faça login para continuar.");
-        else toast.success("Conta criada com sucesso! Verifique seu e-mail para ativar a conta.");
+        if (signupData.requireVerification) toast.success("Conta criada com sucesso! Verifique seu e-mail para ativar a conta.");
+        else toast.success("Conta criada com sucesso! Faça login para continuar.");
         setIsLogin(true);
         setStep(1);
       }
