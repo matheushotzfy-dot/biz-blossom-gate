@@ -232,7 +232,7 @@ function DashboardLayoutInner() {
  >
  <AlertTriangle className="h-4 w-4 shrink-0" />
  <p className="flex-1 text-left text-[12.5px] font-semibold leading-snug">
- {profile.document_number
+ {profile?.document_number
  ? "Conta em análise — será aprovada o quanto antes!"
  : "Complete sua verificação para realizar saques na plataforma"}
  </p>
