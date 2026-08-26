@@ -9,7 +9,7 @@ import {
   Package,
   Plus,
   Search,
-  Sparkles,
+  
   Trash2,
   X,
   XCircle,
