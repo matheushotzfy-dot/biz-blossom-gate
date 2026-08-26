@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { AlertTriangle, CheckCircle2, Clock, Package, Truck, XCircle } from "lucide-react";
 import { toast } from "sonner";
@@ -22,9 +22,20 @@ export default function Premiacoes() {
   const { user, revenue, claims, setClaims, loading, failed, unlocked, next, targetProgress } = useAwards();
   const [activeIndex, setActiveIndex] = useState(() => Math.max(AWARDS.findIndex((award) => award.id === next.id), 0));
   const [claimOpen, setClaimOpen] = useState(false);
+  const userSelectedAward = useRef(false);
   const reduceMotion = useReducedMotion();
   const award = AWARDS[activeIndex];
   const claimed = claims.some((claim) => claim.tier_id === award.id && claim.status !== "cancelled");
+
+  useEffect(() => {
+    if (loading || userSelectedAward.current) return;
+    setActiveIndex(Math.max(AWARDS.findIndex((item) => item.id === next.id), 0));
+  }, [loading, next.id]);
+
+  const selectAward = (index: number) => {
+    userSelectedAward.current = true;
+    setActiveIndex(index);
+  };
 
   const share = async () => {
     const text = revenue >= award.value ? `Conquistei ${award.title} na VENXPAY.` : `Minha próxima meta na VENXPAY é ${award.label}.`;
@@ -44,8 +55,8 @@ export default function Premiacoes() {
       {failed && <div role="alert" className="flex items-center gap-2 border border-destructive/30 bg-destructive/5 px-4 py-3 text-sm text-destructive"><AlertTriangle className="h-4 w-4" /> Alguns dados não puderam ser sincronizados.</div>}
 
       <motion.div initial={reduceMotion ? false : { opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: .36 }}>
-        <AwardsStage activeIndex={activeIndex} revenue={revenue} claimed={claimed} onSelect={setActiveIndex} onClaim={() => setClaimOpen(true)} onShare={share} />
-        <AwardsRail activeIndex={activeIndex} revenue={revenue} onSelect={setActiveIndex} />
+        <AwardsStage activeIndex={activeIndex} revenue={revenue} claimed={claimed} onSelect={selectAward} onClaim={() => setClaimOpen(true)} onShare={share} />
+        <AwardsRail activeIndex={activeIndex} revenue={revenue} onSelect={selectAward} />
       </motion.div>
 
       <section className="grid gap-px border border-border bg-border md:grid-cols-[1.2fr_.8fr]">
