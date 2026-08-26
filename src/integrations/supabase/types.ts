@@ -1586,21 +1586,21 @@ export type Database = {
           expires_at: string
           id: string
           key: string
-          response: Json
+          response: Json | null
         }
         Insert: {
           created_at?: string
           expires_at?: string
           id?: string
           key: string
-          response?: Json
+          response?: Json | null
         }
         Update: {
           created_at?: string
           expires_at?: string
           id?: string
           key?: string
-          response?: Json
+          response?: Json | null
         }
         Relationships: []
       }
