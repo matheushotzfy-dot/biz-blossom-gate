@@ -1,13 +1,11 @@
 import { createClient } from "npm:@supabase/supabase-js@2";
-
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
-  "Access-Control-Allow-Methods": "POST, OPTIONS",
-};
+import { buildCorsHeaders } from "../_shared/security.ts";
 
 Deno.serve(async (req) => {
+  // CORS restrito à allowlist do projeto (endpoint autenticado de browser).
+  const corsHeaders = { ...buildCorsHeaders(req), "Access-Control-Allow-Methods": "POST, OPTIONS" };
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
+
 
   try {
     const authHeader = req.headers.get("Authorization");
