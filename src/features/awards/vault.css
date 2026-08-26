@@ -1,0 +1,61 @@
+.venx-vault {
+  --awards-obsidian: 172 30% 4%;
+  --awards-surface: 168 26% 7%;
+  --awards-accent: 158 100% 48%;
+  --awards-steel: 200 12% 70%;
+  --awards-ink: 160 18% 97%;
+}
+
+.venx-vault-bg {
+  background:
+    radial-gradient(120% 90% at 50% 0%, hsl(var(--awards-accent) / 0.14), transparent 62%),
+    radial-gradient(90% 70% at 100% 100%, hsl(200 90% 50% / 0.08), transparent 60%),
+    hsl(var(--awards-obsidian));
+}
+
+.venx-vault-rings {
+  background-image:
+    repeating-radial-gradient(circle at 50% 46%, hsl(var(--awards-steel) / 0.07) 0 1px, transparent 1px 58px);
+}
+
+.venx-orbit-spin {
+  animation: venx-orbit 42s linear infinite;
+}
+
+@keyframes venx-orbit {
+  to { transform: rotate(360deg); }
+}
+
+.venx-sheen {
+  background: linear-gradient(115deg, transparent 30%, hsl(var(--awards-ink) / 0.18) 48%, transparent 62%);
+  background-size: 260% 100%;
+  animation: venx-sheen 5.5s ease-in-out infinite;
+}
+
+@keyframes venx-sheen {
+  0%, 100% { background-position: 160% 0; }
+  50% { background-position: -60% 0; }
+}
+
+.venx-meter {
+  appearance: none;
+  border: 0;
+  overflow: hidden;
+  background: hsl(var(--awards-steel) / 0.14);
+}
+.venx-meter::-webkit-progress-bar { background: hsl(var(--awards-steel) / 0.14); }
+.venx-meter::-webkit-progress-value {
+  background: linear-gradient(90deg, hsl(var(--awards-accent) / 0.55), hsl(var(--awards-accent)));
+  transition: width 520ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+.venx-meter::-moz-progress-bar { background: hsl(var(--awards-accent)); }
+
+@media (prefers-reduced-motion: reduce) {
+  .venx-vault *,
+  .venx-vault *::before,
+  .venx-vault *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
