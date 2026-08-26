@@ -27,12 +27,14 @@ interface Step {
 
 export function SellerOnboarding() {
   const { user } = useAuth();
-  const { profile, loading } = useProfile();
+  const { profile } = useProfile();
+  const kyc = useKycStatus();
   const [hasDocs, setHasDocs] = useState<boolean | null>(null);
   const [hasPayout, setHasPayout] = useState<boolean | null>(null);
 
   // Conta aprovada = ativação concluída. Nada é buscado nem exibido.
-  const approved = profile?.account_status === "approved";
+  const approved = kyc.approved;
+
 
   useEffect(() => {
     if (!user?.id || approved) return;
