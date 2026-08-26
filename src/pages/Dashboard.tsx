@@ -45,7 +45,8 @@ import { calculateTransactionConversions, cn, deriveTransactionStatus, isApprove
 
 import type { DateRange } from "react-day-picker";
 import { Seo } from "@/components/Seo";
-import { accountNeedsVerification } from "@/components/AccountVerificationGate";
+import { useKycStatus } from "@/hooks/useKycStatus";
+import { PeriodPicker, buildPeriod, type PeriodValue, type PeriodPresetId } from "@/components/PeriodPicker";
 import { toast } from "sonner";
 import { PromoBanner } from "@/components/dashboard/PromoBanner";
 import { SellerOnboarding } from "@/components/dashboard/SellerOnboarding";
@@ -602,23 +603,8 @@ export default function Dashboard() {
               label={isCustom ? "Período" : selectedPeriod.label}
               goalPct={goalPct}
               revenueLabel={privacy.hidden ? CENSORED : fmt(revenue)}
-              presets={PERIOD_PRESETS}
-              selectedLabel={!isCustom ? selectedPeriod.label : null}
-              onPreset={(p) => { setSelectedPeriod(p); setIsCustom(false); setCustomRange(undefined); setDatePickerOpen(false); }}
-              onThisMonth={() => {
-                const now = brasiliaToday();
-                const from = new Date(now.getFullYear(), now.getMonth(), 1, 0, 0, 0, 0);
-                const to = new Date(now); to.setHours(23, 59, 59, 999);
-                setCustomRange({ from, to }); setIsCustom(true); setDatePickerOpen(false);
-              }}
-              isCustom={isCustom}
-              customRange={customRange}
-              onRange={(r) => {
-                if (r?.from) {
-                  setCustomRange(r); setIsCustom(true);
-                  if (r.from && r.to) setDatePickerOpen(false);
-                }
-              }}
+              value={periodValue}
+              onChange={applyPeriod}
             />
           }
         />
