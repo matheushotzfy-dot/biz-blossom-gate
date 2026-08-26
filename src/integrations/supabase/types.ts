@@ -3159,7 +3159,7 @@ export type Database = {
           entity_type: string | null
           id: string
           metadata: Json | null
-          staff_user_id: string
+          staff_user_id: string | null
         }
         Insert: {
           action: string
@@ -3170,7 +3170,7 @@ export type Database = {
           entity_type?: string | null
           id?: string
           metadata?: Json | null
-          staff_user_id: string
+          staff_user_id?: string | null
         }
         Update: {
           action?: string
@@ -3181,7 +3181,7 @@ export type Database = {
           entity_type?: string | null
           id?: string
           metadata?: Json | null
-          staff_user_id?: string
+          staff_user_id?: string | null
         }
         Relationships: []
       }
