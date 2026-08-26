@@ -124,7 +124,7 @@ export default function Saques() {
       return;
     }
 
-    const payload: Record<string, unknown> = { user_id: user.id, amount: numAmount };
+    const payload: Record<string, unknown> = { amount: numAmount };
     if (pickedKey === "copy_paste") {
       payload.withdrawal_type = "pix_copy_paste";
       payload.pix_copy_paste_code = copyPasteCode.trim();
@@ -133,7 +133,6 @@ export default function Saques() {
       payload.pix_key_id = pickedKey;
     }
 
-    delete payload.user_id;
     setPendingWithdrawal(payload);
     setReauthOpen(true);
   };
@@ -164,7 +163,12 @@ export default function Saques() {
 
   return (
     <div className="space-y-6 animate-in fade-in duration-500">
-      <ReauthenticationDialog open={reauthOpen} busy={submitting} onOpenChange={setReauthOpen} onConfirm={confirmWithdrawal} />
+      <ReauthenticationDialog
+        open={reauthOpen}
+        busy={submitting}
+        onOpenChange={(nextOpen) => { setReauthOpen(nextOpen); if (!nextOpen) setPendingWithdrawal(null); }}
+        onConfirm={confirmWithdrawal}
+      />
       {/* Header */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div className="space-y-1">

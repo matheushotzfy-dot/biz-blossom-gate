@@ -233,7 +233,12 @@ export default function SaquesCrypto() {
       className="mx-auto w-full max-w-[1480px] pb-24 md:pb-10 antialiased [text-rendering:geometricPrecision] [-webkit-font-smoothing:antialiased] [-moz-osx-font-smoothing:grayscale]"
       style={{ fontFeatureSettings: '"ss01","cv11","tnum","kern"' }}
     >
-      <ReauthenticationDialog open={reauthOpen} busy={submitting} onOpenChange={setReauthOpen} onConfirm={confirmWithdrawal} />
+      <ReauthenticationDialog
+        open={reauthOpen}
+        busy={submitting}
+        onOpenChange={(nextOpen) => { setReauthOpen(nextOpen); if (!nextOpen) setPendingWithdrawal(null); }}
+        onConfirm={confirmWithdrawal}
+      />
       <div className="px-5 pt-4 sm:px-8 sm:pt-6">
         {/* ─────────── HERO ─────────── */}
         <header className="border-b border-border pb-7">
