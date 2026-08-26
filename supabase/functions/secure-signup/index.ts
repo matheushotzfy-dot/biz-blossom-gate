@@ -51,10 +51,14 @@ Deno.serve(async (req) => {
 
   try {
     const supabaseUrl = Deno.env.get("SUPABASE_URL");
+    const anonKey = Deno.env.get("SUPABASE_ANON_KEY");
     const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
-    if (!supabaseUrl || !serviceRoleKey) return json({ success: false, error: "Serviço indisponível." }, 503, corsHeaders);
+    if (!supabaseUrl || !anonKey || !serviceRoleKey) return json({ success: false, error: "Serviço indisponível." }, 503, corsHeaders);
 
     const admin = createClient(supabaseUrl, serviceRoleKey, {
+      auth: { persistSession: false, autoRefreshToken: false },
+    });
+    const authClient = createClient(supabaseUrl, anonKey, {
       auth: { persistSession: false, autoRefreshToken: false },
     });
     const { data: rateRows, error: rateError } = await admin.rpc("bump_rate_limit", {
@@ -85,12 +89,25 @@ Deno.serve(async (req) => {
     const { data: setting } = await admin.from("platform_settings")
       .select("value").eq("key", "require_email_verification").maybeSingle();
     const requireVerification = (setting?.value as { enabled?: boolean } | null)?.enabled ?? true;
-    const { error: createError } = await admin.auth.admin.createUser({
-      email, password, email_confirm: !requireVerification, user_metadata: metadata,
+    const origin = req.headers.get("origin");
+    const { data: signupData, error: createError } = await authClient.auth.signUp({
+      email,
+      password,
+      options: {
+        data: metadata,
+        emailRedirectTo: origin ? `${origin}/auth/callback` : undefined,
+      },
     });
     if (createError) {
       console.warn("[secure-signup] create rejected", createError.code ?? "unknown");
       return json({ success: false, error: "Não foi possível criar a conta com os dados informados." }, 400, corsHeaders);
+    }
+    if (!requireVerification && signupData.user?.id && !signupData.user.email_confirmed_at) {
+      const { error: confirmError } = await admin.auth.admin.updateUserById(signupData.user.id, { email_confirm: true });
+      if (confirmError) {
+        console.error("[secure-signup] confirmation failed", confirmError.message);
+        return json({ success: false, error: "Conta criada, mas a ativação está pendente. Verifique seu e-mail." }, 500, corsHeaders);
+      }
     }
     return json({ success: true, requireVerification }, 200, corsHeaders);
   } catch (error) {
