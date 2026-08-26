@@ -55,7 +55,7 @@ const WithdrawalSchema = z.object({
   }
 });
 
-const RequestSchema = z.discriminatedUnion("action", [PixSchema, BankSchema, DeleteSchema, WithdrawalSchema]);
+const RequestSchema = z.union([PixSchema, BankSchema, DeleteSchema, WithdrawalSchema]);
 
 Deno.serve(async (req) => {
   const pre = preflight(req);

@@ -18,6 +18,14 @@ type Info = {
 export default function ImpersonationBanner() {
   const [info, setInfo] = useState<Info | null>(null);
 
+  const handleExit = async () => {
+    try { sessionStorage.removeItem("impersonation_session"); } catch { /* noop */ }
+    await supabase.auth.signOut();
+    window.close();
+    // Fallback if the tab can't be closed programmatically
+    window.location.replace("/auth");
+  };
+
   useEffect(() => {
     try {
       const raw = sessionStorage.getItem("impersonation_session");
@@ -39,14 +47,6 @@ export default function ImpersonationBanner() {
   if (!info) return null;
 
   const label = info.target_name || info.target_email || info.target_user_id?.slice(0, 8) || "usuário";
-
-  const handleExit = async () => {
-    try { sessionStorage.removeItem("impersonation_session"); } catch { /* noop */ }
-    await supabase.auth.signOut();
-    window.close();
-    // Fallback if the tab can't be closed programmatically
-    window.location.replace("/auth");
-  };
 
   return (
     <div className="fixed top-0 inset-x-0 z-[100] bg-warning text-warning-foreground border-b border-warning/50">
