@@ -75,77 +75,76 @@ function isItemActive(pathname: string, item: SidebarItem) {
   return item.exact ? pathname === item.url : pathname.startsWith(item.url);
 }
 
-type RevenueCardProps = {
+type RevenueBarProps = {
   collapsed: boolean;
   revenue: number;
   milestone: ReturnType<typeof getMilestone>;
   onOpenRewards: () => void;
 };
 
-function RevenueCard({ collapsed, revenue, milestone, onOpenRewards }: RevenueCardProps) {
+function RevenueBar({ collapsed, revenue, milestone, onOpenRewards }: RevenueBarProps) {
   if (collapsed) return null;
 
   const pct = Math.max(0, Math.min(100, milestone.pct));
   const pctDisplay = Math.round(pct);
-  
-  const tierName = milestone.current.tier;
-
   const parts = splitRevenue(revenue);
 
   return (
     <button
       type="button"
       onClick={onOpenRewards}
-      className="seller-clickable group/rev relative mt-3 block w-full overflow-hidden rounded-[10px] border border-sidebar-border/70 bg-transparent px-3 py-2.5 text-left transition-colors hover:border-border"
+      title={`${formatRevenue(revenue)} — ${pctDisplay}% de ${milestone.next.label}`}
+      className="seller-clickable group/rev relative block w-full rounded-[12px] px-2 pb-2 pt-1.5 text-left transition-colors hover:bg-sidebar-accent/35"
     >
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <span className="text-[11.5px] font-medium text-sidebar-foreground/55">Faturamento total</span>
-        <span className="rounded-[6px] border border-primary/30 px-1.5 py-[1px] text-[9.5px] font-semibold uppercase tracking-[0.1em] text-primary">
-          {tierName}
+      <div className="flex items-center gap-2.5">
+        {/* Logo mark */}
+        <span className="relative flex h-7 w-7 shrink-0 items-center justify-center rounded-[9px] border border-primary/25 bg-primary/[0.07]">
+          <VenxpayLogo size={16} />
         </span>
-      </div>
 
-      {/* Main figure */}
-      <div className="mt-1.5 flex items-baseline gap-1">
-        <span className="font-numbers text-[12px] font-medium leading-none text-sidebar-foreground/45 tabular-nums">
-          {parts.prefix}
+        {/* Figure */}
+        <span className="flex min-w-0 flex-1 items-baseline gap-1">
+          <span className="font-numbers text-[10.5px] font-medium leading-none tabular-nums text-sidebar-foreground/40">
+            {parts.prefix}
+          </span>
+          <span className="font-numbers truncate text-[16px] font-bold leading-none tracking-[-0.03em] tabular-nums text-sidebar-accent-foreground">
+            {parts.value}
+            <span className="ml-0.5 text-[11px] font-bold text-sidebar-foreground/50">{parts.suffix}</span>
+          </span>
         </span>
-        <p className="font-numbers text-[21px] font-bold leading-none tracking-[-0.03em] text-sidebar-accent-foreground tabular-nums">
-          {parts.value}
-          <span className="ml-0.5 text-[14px] font-bold text-sidebar-foreground/55">{parts.suffix}</span>
-        </p>
-      </div>
 
-      {/* Progress bar */}
-      <div className="relative mt-2.5">
-        <div className="h-[3px] w-full overflow-hidden rounded-full bg-sidebar-border/60">
-          <div
-            className="h-full rounded-full bg-primary transition-[width] duration-700 ease-out"
-            style={{ width: `${pct}%` }}
+        {/* Tier + chevron */}
+        <span className="flex shrink-0 items-center gap-0.5 text-[9.5px] font-semibold uppercase tracking-[0.1em] text-primary">
+          {milestone.current.tier}
+          <ChevronRight
+            className="h-3 w-3 transition-transform duration-200 group-hover/rev:translate-x-0.5"
+            strokeWidth={2.2}
           />
-        </div>
+        </span>
       </div>
 
-      {/* Scale */}
-      <div className="mt-1.5 flex items-center justify-between font-numbers text-[10px] font-medium tabular-nums text-sidebar-foreground/40">
-        <span>{milestone.current.label.replace(",", ".")}</span>
+      {/* Progress rail */}
+      <div className="relative mt-2 h-[3px] w-full overflow-hidden rounded-full bg-sidebar-border/60">
+        <div
+          className="h-full rounded-full bg-primary transition-[width] duration-700 ease-out"
+          style={{ width: `${pct}%` }}
+        />
+        <span
+          className="absolute top-1/2 h-[7px] w-[7px] -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-sidebar bg-primary transition-[left] duration-700 ease-out"
+          style={{ left: `${pct}%` }}
+        />
+      </div>
+
+      <div className="mt-1.5 flex items-center justify-between font-numbers text-[9.5px] font-medium tabular-nums text-sidebar-foreground/40">
+        <span>
+          <span className="font-semibold text-sidebar-foreground/70">{pctDisplay}%</span> da meta
+        </span>
         <span>{milestone.next.label.replace(",", ".")}</span>
-      </div>
-
-      {/* Footer */}
-      <div className="mt-2 flex items-center justify-between border-t border-sidebar-border/50 pt-2">
-        <span className="text-[11px] font-medium text-sidebar-foreground/50">
-          <span className="font-numbers font-semibold tabular-nums text-sidebar-accent-foreground">{pctDisplay}%</span> da meta
-        </span>
-        <span className="inline-flex items-center gap-0.5 text-[11px] font-medium text-primary">
-          Premiações
-          <ChevronRight className="h-3 w-3" strokeWidth={2.2} />
-        </span>
       </div>
     </button>
   );
 }
+
 
 
 type SidebarSectionNavProps = {
@@ -407,15 +406,7 @@ export function AppSidebar({ pinned = true, onTogglePin, onHoverChange }: AppSid
             </button>
           )}
         </div>
-        <RevenueCard
-          collapsed={collapsed}
-          revenue={revenue}
-          milestone={milestone}
-          onOpenRewards={() => navigate("/premiacoes")}
-        />
       </SidebarHeader>
-
-
 
       <SidebarContent className="relative gap-0 overflow-y-auto px-3 py-3 group-data-[collapsible=icon]:px-1.5 group-data-[collapsible=icon]:py-4">
         {sections.map((section, idx) => (
@@ -428,8 +419,17 @@ export function AppSidebar({ pinned = true, onTogglePin, onHoverChange }: AppSid
         ))}
       </SidebarContent>
 
+      <div className="px-2.5 pb-1 group-data-[collapsible=icon]:hidden">
+        <RevenueBar
+          collapsed={collapsed}
+          revenue={revenue}
+          milestone={milestone}
+          onOpenRewards={() => navigate("/premiacoes")}
+        />
+      </div>
 
       <SidebarFooter className="relative border-t border-sidebar-border/60 p-2.5 pb-3">
+
         {/* Expanded footer */}
         <div className="group-data-[collapsible=icon]:hidden flex flex-col gap-2">
           {/* User row: avatar + info + logout */}
