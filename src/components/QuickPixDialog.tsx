@@ -73,6 +73,7 @@ export default function QuickPixDialog({ open, onOpenChange }: Props) {
   const [amountCents, setAmountCents] = useState(0);
 
   const pollRef = useRef<number | null>(null);
+  const idempotencyKeyRef = useRef(crypto.randomUUID());
 
   const reset = () => {
     setStep("form");
@@ -86,6 +87,7 @@ export default function QuickPixDialog({ open, onOpenChange }: Props) {
     setEmail("");
     setDesc("");
     setAmountCents(0);
+    idempotencyKeyRef.current = crypto.randomUUID();
     if (pollRef.current) {
       window.clearInterval(pollRef.current);
       pollRef.current = null;
@@ -142,6 +144,7 @@ export default function QuickPixDialog({ open, onOpenChange }: Props) {
           customerDocument: docClean,
           customerEmail: email.trim() || undefined,
           description: desc.trim() || undefined,
+          idempotencyKey: idempotencyKeyRef.current,
         },
       });
 
