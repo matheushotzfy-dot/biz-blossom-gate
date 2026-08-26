@@ -35,7 +35,7 @@ export function AwardsStage({ activeIndex, revenue, claimed, onSelect, onClaim, 
 
       <div className="relative z-10 grid min-h-[575px] lg:grid-cols-[minmax(0,1.3fr)_minmax(310px,.7fr)]">
         <div className="relative flex min-h-[410px] items-center justify-center overflow-hidden border-b border-awards-steel/15 lg:border-b-0 lg:border-r">
-          {previous && <button type="button" aria-label={`Ver ${previous.title}`} onClick={() => onSelect(activeIndex - 1)} className="absolute -left-16 z-10 hidden w-44 -rotate-6 opacity-25 grayscale transition-all hover:left-1 hover:opacity-70 lg:block"><img src={previous.image} alt="" className="aspect-square w-full object-contain" /></button>}
+          {previous && <Button type="button" variant="ghost" aria-label={`Ver ${previous.title}`} onClick={() => onSelect(activeIndex - 1)} className="absolute -left-16 z-10 hidden h-auto w-44 -rotate-6 rounded-none p-0 opacity-25 grayscale transition-all hover:left-1 hover:bg-transparent hover:opacity-70 lg:block"><img src={previous.image} alt="" className="aspect-square w-full object-contain" /></Button>}
           <AnimatePresence mode="wait">
             <motion.div key={award.id} initial={reduceMotion ? false : { opacity: 0, scale: .88, rotateY: -16 }} animate={{ opacity: 1, scale: 1, rotateY: 0 }} exit={reduceMotion ? undefined : { opacity: 0, scale: .9, rotateY: 16 }} transition={{ duration: .36, ease: [0.16, 1, 0.3, 1] }} className="relative flex h-full w-full items-center justify-center p-10 sm:p-16">
               <span aria-hidden className="absolute h-[58%] w-px bg-awards-accent/25" />
@@ -44,7 +44,7 @@ export function AwardsStage({ activeIndex, revenue, claimed, onSelect, onClaim, 
               <span className="absolute bottom-5 left-5 font-mono text-[9px] uppercase text-awards-steel/60">Object {award.reference} · Verified edition</span>
             </motion.div>
           </AnimatePresence>
-          {next && <button type="button" aria-label={`Ver ${next.title}`} onClick={() => onSelect(activeIndex + 1)} className="absolute -right-16 z-10 hidden w-44 rotate-6 opacity-25 grayscale transition-all hover:right-1 hover:opacity-70 lg:block"><img src={next.image} alt="" className="aspect-square w-full object-contain" /></button>}
+          {next && <Button type="button" variant="ghost" aria-label={`Ver ${next.title}`} onClick={() => onSelect(activeIndex + 1)} className="absolute -right-16 z-10 hidden h-auto w-44 rotate-6 rounded-none p-0 opacity-25 grayscale transition-all hover:right-1 hover:bg-transparent hover:opacity-70 lg:block"><img src={next.image} alt="" className="aspect-square w-full object-contain" /></Button>}
           <div className="absolute inset-x-4 bottom-10 z-20 flex justify-between lg:hidden">
             <Button variant="outline" size="icon" aria-label="Premiação anterior" onClick={() => previous && onSelect(activeIndex - 1)} disabled={!previous} className="border-awards-steel/20 bg-awards-obsidian"><ArrowLeft /></Button>
             <Button variant="outline" size="icon" aria-label="Próxima premiação" onClick={() => next && onSelect(activeIndex + 1)} disabled={!next} className="border-awards-steel/20 bg-awards-obsidian"><ArrowRight /></Button>
