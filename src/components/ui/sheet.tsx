@@ -49,22 +49,28 @@ const sheetVariants = cva(
 
 interface SheetContentProps
  extends React.ComponentPropsWithoutRef<typeof SheetPrimitive.Content>,
- VariantProps<typeof sheetVariants> {}
+ VariantProps<typeof sheetVariants> {
+ /** Oculta o botão de fechar padrão (usado em sheets com header próprio). */
+ hideClose?: boolean;
+}
 
 const SheetContent = React.forwardRef<React.ElementRef<typeof SheetPrimitive.Content>, SheetContentProps>(
- ({ side = "right", className, children, ...props }, ref) => (
+ ({ side = "right", className, children, hideClose = false, ...props }, ref) => (
  <SheetPortal>
  <SheetOverlay />
  <SheetPrimitive.Content ref={ref} className={cn(sheetVariants({ side }), className)} {...props}>
  {children}
+ {!hideClose && (
  <SheetPrimitive.Close className="absolute right-4 top-4 rounded-lg h-8 w-8 flex items-center justify-center opacity-50 ring-offset-background transition-all duration-[250ms] ease-[cubic-bezier(0.16,1,0.3,1)] hover:opacity-100 hover:bg-muted/60 focus:outline-none focus:ring-2 focus:ring-ring/30 disabled:pointer-events-none data-[state=open]:bg-secondary">
  <X className="h-4 w-4" />
  <span className="sr-only">Close</span>
  </SheetPrimitive.Close>
+ )}
  </SheetPrimitive.Content>
  </SheetPortal>
  ),
 );
+
 SheetContent.displayName = SheetPrimitive.Content.displayName;
 
 const SheetHeader = ({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) => (
