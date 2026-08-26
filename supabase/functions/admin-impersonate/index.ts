@@ -121,11 +121,18 @@ Deno.serve(async (req) => {
       );
     }
 
+    if (!targetUser.user.email) {
+      return new Response(
+        JSON.stringify({ success: false, error: "Target user has no login email" }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
     // Generate a one-time link. The receiver exchanges this short-lived token
     // directly with Auth, so no access or refresh token ever crosses browser tabs.
     const { data: linkData, error: linkError } = await adminClient.auth.admin.generateLink({
       type: "magiclink",
-      email: targetUser.user.email!,
+      email: targetUser.user.email,
     });
 
     if (linkError || !linkData?.properties?.hashed_token) {
