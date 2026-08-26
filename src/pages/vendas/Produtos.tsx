@@ -14,7 +14,7 @@ import {
   XCircle,
 } from "lucide-react";
 import { toast } from "sonner";
-import { HDShell, HDHeader, HDStat, HDStatGrid } from "@/components/hd/HDPage";
+import { HDShell, HDHeader } from "@/components/hd/HDPage";
 
 
 import PixelSettingsDialog from "@/components/PixelSettingsDialog";
