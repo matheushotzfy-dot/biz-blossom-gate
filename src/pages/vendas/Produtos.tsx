@@ -135,7 +135,7 @@ export default function Produtos() {
     await loadProducts();
   };
 
-  const handleDuplicate = async (product: Product) => {
+  const handleDuplicate = useCallback(async (product: Product) => {
     if (!user) return;
     const slug = crypto.randomUUID().slice(0, 8);
     const checkoutUrl = `${window.location.origin}/pay/${slug}`;
@@ -153,9 +153,9 @@ export default function Produtos() {
     if (error) { toast.error("Erro ao duplicar produto"); return; }
     toast.success("Produto duplicado! Aguardando revisão.");
     await loadProducts();
-  };
+  }, [user, loadProducts]);
 
-  const handleToggleStatus = async (product: Product) => {
+  const handleToggleStatus = useCallback(async (product: Product) => {
     if (!user) return;
     const next = product.status === "active" ? "inactive" : "active";
     const { error } = await supabase
@@ -166,18 +166,21 @@ export default function Produtos() {
     if (error) { toast.error("Erro ao alterar status"); return; }
     toast.success(next === "active" ? "Vendas reativadas!" : "Vendas pausadas. Produto fora do checkout público.");
     await loadProducts();
-  };
+  }, [user, loadProducts]);
 
-  const menuHandlers = {
+  const handleDeleteProduct = useCallback((product: Product) => setDeleteTarget(product.id), []);
+  const handleOpenPixels = useCallback((product: Product) => setPixelProduct(product), []);
+
+  const menuHandlers = useMemo(() => ({
     onCopyLink: handleCopyLink,
-    onDeleteProduct: (product: Product) => setDeleteTarget(product.id),
+    onDeleteProduct: handleDeleteProduct,
     onEditProduct: handleEditProduct,
     onOpenCheckout: handleOpenCheckout,
     onOpenMembers: handleOpenMembers,
-    onOpenPixels: (product: Product) => setPixelProduct(product),
+    onOpenPixels: handleOpenPixels,
     onDuplicateProduct: handleDuplicate,
     onToggleStatus: handleToggleStatus,
-  };
+  }), [handleCopyLink, handleDeleteProduct, handleEditProduct, handleOpenCheckout, handleOpenMembers, handleOpenPixels, handleDuplicate, handleToggleStatus]);
 
   const showClearDraftsBtn = tab === "draft" && draftIds.length > 0;
 
