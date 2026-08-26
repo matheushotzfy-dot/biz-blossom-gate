@@ -17,13 +17,13 @@ import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 
 import heroStage from "@/assets/awards/premiacoes-hero-stage.jpg";
-import braceletCard from "@/assets/awards/bracelet-card-10k.png";
-import plaque100k from "@/assets/awards/plaque-100k.png";
-import plaque250k from "@/assets/awards/plaque-250k.png";
-import plaque500k from "@/assets/awards/plaque-500k.png";
-import plaque1m from "@/assets/awards/plaque-1m.png";
-import plaque5m from "@/assets/awards/plaque-5m.png";
-import plaque10m from "@/assets/awards/plaque-10m.png";
+import braceletCard from "@/assets/awards/venx-bracelet-10k.png";
+import plaque100k from "@/assets/awards/venx-plaque-100k.png";
+import plaque250k from "@/assets/awards/venx-plaque-250k.png";
+import plaque500k from "@/assets/awards/venx-plaque-500k.png";
+import plaque1m from "@/assets/awards/venx-plaque-1m.png";
+import plaque5m from "@/assets/awards/venx-plaque-5m.png";
+import plaque10m from "@/assets/awards/venx-plaque-10m.png";
 
 type AwardItem = {
   id: string; value: number; label: string; tier: string; roman: string;
@@ -33,13 +33,13 @@ type AwardItem = {
 };
 
 const AWARDS: AwardItem[] = [
-  { id: "10k",  roman: "I",   value: 10_000,     label: "R$ 10K",  tier: "Iniciante", title: "Kit Couro & Cartão Black",  description: "Pulseira de couro premium costurada à mão e Cartão Black numerado. Entregue em estojo lacrado.", image: braceletCard, rewards: ["Pulseira de couro premium", "Cartão Black numerado"], phrase: "Toda jornada bilionária começa com a primeira venda.", ref: "HZF-001", icon: Flame, accent: "24 95% 60%" },
-  { id: "100k", roman: "II",  value: 100_000,    label: "R$ 100K", tier: "Bronze",    title: "Placa Bronze Patinado",     description: "Placa em mármore negro com chapa de bronze envelhecido. Numerada, gravada com o seu nome.",     image: plaque100k,   rewards: ["Placa em bronze numerada"], phrase: "Bronze não é metal — é a prova de que você começou.", ref: "HZF-100", icon: Award, accent: "28 70% 55%" },
-  { id: "250k", roman: "III", value: 250_000,    label: "R$ 250K", tier: "Prata",     title: "Placa Prata Platinada",     description: "Acabamento prata platinada sobre base em mármore negro. Marco intermediário de prestígio.",       image: plaque250k,   rewards: ["Placa prata platinada"], phrase: "Prata pesa porque foi merecida.", ref: "HZF-250", icon: Star, accent: "210 15% 75%" },
-  { id: "500k", roman: "IV",  value: 500_000,    label: "R$ 500K", tier: "Ouro 24K",  title: "Placa Ouro 24K",            description: "Banhada a ouro 24K com detalhes em esmeralda. Para sellers que dominaram seu mercado.",         image: plaque500k,   rewards: ["Placa banhada a ouro 24K", "Acesso ao grupo VIP"], phrase: "Ouro não brilha sozinho. Você fez ele brilhar.", ref: "HZF-500", icon: Crown, accent: "45 95% 60%" },
-  { id: "1m",   roman: "V",   value: 1_000_000,  label: "R$ 1M",   tier: "Diamante",  title: "Placa Diamante",            description: "Cravejada em diamante autêntico. O primeiro milhão registrado em catálogo.",                     image: plaque1m,     rewards: ["Placa cravejada", "Convite Venxpay Inner Circle"], phrase: "Diamante é carbono que resistiu à pressão.", ref: "HZF-1MM", icon: Gem, accent: "190 90% 65%" },
-  { id: "5m",   roman: "VI",  value: 5_000_000,  label: "R$ 5M",   tier: "Elite",     title: "Placa Elite Rose Gold",     description: "Rose Gold com diamantes negros. Reservada à elite — menos de 0,5% dos sellers atingem.",         image: plaque5m,     rewards: ["Placa Rose Gold", "Jantar privado com a fundação"], phrase: "Elite não é título — é hábito.", ref: "HZF-5MM", icon: Sparkles, accent: "340 80% 65%" },
-  { id: "10m",  roman: "VII", value: 10_000_000, label: "R$ 10M",  tier: "Lenda",     title: "Placa Lenda",               description: "Gemas preciosas multicoloridas, peça única numerada, assinada pela fundação VENXPAY.",             image: plaque10m,    rewards: ["Placa Lenda numerada", "Hall of Fame VENXPAY", "Bonificação personalizada"], phrase: "Lendas não morrem. Faturam.", ref: "HZF-10M", icon: Trophy, accent: "152 76% 52%" },
+  { id: "10k",  roman: "I",   value: 10_000,     label: "R$ 10K",  tier: "Iniciante", title: "Kit Couro & Cartão Black",  description: "Pulseira de couro premium costurada à mão e Cartão Black numerado. Entregue em estojo lacrado.", image: braceletCard, rewards: ["Pulseira de couro premium", "Cartão Black numerado"], phrase: "Toda jornada bilionária começa com a primeira venda.", ref: "VNX-001", icon: Flame, accent: "24 95% 60%" },
+  { id: "100k", roman: "II",  value: 100_000,    label: "R$ 100K", tier: "Bronze",    title: "Placa Bronze Patinado",     description: "Placa em mármore negro com chapa de bronze envelhecido. Numerada, gravada com o seu nome.",     image: plaque100k,   rewards: ["Placa em bronze numerada"], phrase: "Bronze não é metal — é a prova de que você começou.", ref: "VNX-100", icon: Award, accent: "28 70% 55%" },
+  { id: "250k", roman: "III", value: 250_000,    label: "R$ 250K", tier: "Prata",     title: "Placa Prata Platinada",     description: "Acabamento prata platinada sobre base em mármore negro. Marco intermediário de prestígio.",       image: plaque250k,   rewards: ["Placa prata platinada"], phrase: "Prata pesa porque foi merecida.", ref: "VNX-250", icon: Star, accent: "210 15% 75%" },
+  { id: "500k", roman: "IV",  value: 500_000,    label: "R$ 500K", tier: "Ouro 24K",  title: "Placa Ouro 24K",            description: "Banhada a ouro 24K com detalhes em esmeralda. Para sellers que dominaram seu mercado.",         image: plaque500k,   rewards: ["Placa banhada a ouro 24K", "Acesso ao grupo VIP"], phrase: "Ouro não brilha sozinho. Você fez ele brilhar.", ref: "VNX-500", icon: Crown, accent: "45 95% 60%" },
+  { id: "1m",   roman: "V",   value: 1_000_000,  label: "R$ 1M",   tier: "Diamante",  title: "Placa Diamante",            description: "Cravejada em diamante autêntico. O primeiro milhão registrado em catálogo.",                     image: plaque1m,     rewards: ["Placa cravejada", "Convite Venxpay Inner Circle"], phrase: "Diamante é carbono que resistiu à pressão.", ref: "VNX-1MM", icon: Gem, accent: "190 90% 65%" },
+  { id: "5m",   roman: "VI",  value: 5_000_000,  label: "R$ 5M",   tier: "Elite",     title: "Placa Elite Rose Gold",     description: "Rose Gold com diamantes negros. Reservada à elite — menos de 0,5% dos sellers atingem.",         image: plaque5m,     rewards: ["Placa Rose Gold", "Jantar privado com a fundação"], phrase: "Elite não é título — é hábito.", ref: "VNX-5MM", icon: Sparkles, accent: "340 80% 65%" },
+  { id: "10m",  roman: "VII", value: 10_000_000, label: "R$ 10M",  tier: "Lenda",     title: "Placa Lenda",               description: "Gemas preciosas multicoloridas, peça única numerada, assinada pela fundação VENXPAY.",             image: plaque10m,    rewards: ["Placa Lenda numerada", "Hall of Fame VENXPAY", "Bonificação personalizada"], phrase: "Lendas não morrem. Faturam.", ref: "VNX-10M", icon: Trophy, accent: "152 76% 52%" },
 ];
 
 const fmtFull = (v: number) =>
