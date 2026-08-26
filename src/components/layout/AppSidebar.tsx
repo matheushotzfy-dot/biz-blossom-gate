@@ -152,98 +152,95 @@ type SidebarSectionNavProps = {
   section: SidebarSection;
   pathname: string;
   isFirst: boolean;
-  index: number;
 };
 
-function SidebarSectionNav({ section, pathname, isFirst, index }: SidebarSectionNavProps) {
+function SidebarSectionNav({ section, pathname, isFirst }: SidebarSectionNavProps) {
   return (
-    <SidebarGroup className="px-0 py-0">
-      {/* Cabeçalho: índice mono + label */}
+    <SidebarGroup className="px-0 py-0.5">
       <div
         className={cn(
-          "flex items-baseline gap-2 px-2 pb-2 group-data-[collapsible=icon]:hidden",
-          isFirst ? "pt-0" : "pt-5",
+          "flex items-center gap-2.5 px-3 pb-2 group-data-[collapsible=icon]:hidden",
+          isFirst ? "pt-0" : "pt-4",
         )}
       >
-        <span className="font-numbers text-[9.5px] font-bold leading-none tabular-nums text-primary/70">
-          {String(index + 1).padStart(2, "0")}
-        </span>
-        <span className="text-[9.5px] font-semibold uppercase tracking-[0.28em] text-sidebar-foreground/30">
+        <span className="h-px w-4 shrink-0 bg-sidebar-foreground/20" aria-hidden />
+        <span className="text-[9px] font-bold uppercase tracking-[0.2em] text-sidebar-foreground/35">
           {section.label}
         </span>
       </div>
       {!isFirst && (
-        <div className="mx-auto my-2.5 hidden h-px w-5 bg-sidebar-border/50 group-data-[collapsible=icon]:block" />
+        <div className="mx-auto my-2 hidden h-px w-5 bg-sidebar-border/60 group-data-[collapsible=icon]:block" />
       )}
       <SidebarGroupContent>
-        <SidebarMenu className="gap-[2px] px-0 group-data-[collapsible=icon]:gap-1.5">
+        <SidebarMenu className="gap-1 px-0 group-data-[collapsible=icon]:gap-2">
           {section.items.map((item) => {
             const isActive = isItemActive(pathname, item);
             return (
               <SidebarMenuItem key={item.url}>
                 <SidebarMenuButton
                   asChild
-                  className="h-auto rounded-none p-0 hover:bg-transparent active:bg-transparent group-data-[collapsible=icon]:!size-auto group-data-[collapsible=icon]:!p-0"
+                  tooltip={item.title}
+                  isActive={isActive}
+                  className="h-auto rounded-none p-0 hover:bg-transparent active:bg-transparent data-[active=true]:bg-transparent group-data-[collapsible=icon]:!size-auto group-data-[collapsible=icon]:!p-0"
                 >
                   <NavLink
                     to={item.url}
                     end={item.exact}
                     activeClassName=""
                     className={cn(
-                      "group/nav relative flex h-[40px] items-center gap-2.5 overflow-hidden rounded-[14px] pl-2 pr-2.5 text-[13px]",
-                      "transition-[background-color,color,transform] duration-200 ease-out",
-                      "group-data-[collapsible=icon]:mx-auto group-data-[collapsible=icon]:h-11 group-data-[collapsible=icon]:w-11 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:gap-0 group-data-[collapsible=icon]:px-0",
+                      "group/nav relative flex h-[50px] items-center gap-3 overflow-hidden rounded-[17px] px-3 text-[13.5px] outline-none",
+                      "transition-[background-color,border-color,color,transform] duration-[220ms] ease-out",
+                      "group-data-[collapsible=icon]:mx-auto group-data-[collapsible=icon]:h-11 group-data-[collapsible=icon]:w-11 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:gap-0 group-data-[collapsible=icon]:rounded-[14px] group-data-[collapsible=icon]:px-0",
                       isActive
-                        ? "bg-gradient-to-r from-primary/[0.13] via-primary/[0.05] to-transparent font-semibold tracking-[-0.01em] text-foreground"
-                        : "font-medium text-sidebar-foreground/55 hover:translate-x-[3px] hover:text-foreground",
+                        ? "border border-primary/35 bg-sidebar-accent font-semibold text-sidebar-accent-foreground"
+                        : "border border-transparent font-medium text-sidebar-foreground/62 hover:border-sidebar-border/60 hover:bg-sidebar-accent/45 hover:text-sidebar-accent-foreground",
                     )}
                   >
-                    {/* Marcador de borda */}
-                    <span
-                      aria-hidden
-                      className={cn(
-                        "absolute left-0 top-1/2 w-[3px] -translate-y-1/2 rounded-r-full bg-primary transition-[height,opacity] duration-200 ease-out group-data-[collapsible=icon]:hidden",
-                        isActive ? "h-[18px] opacity-100" : "h-[6px] opacity-0 group-hover/nav:opacity-40",
-                      )}
-                    />
-
-                    {/* Ícone em squircle com contorno */}
                     <span
                       className={cn(
-                        "flex h-[26px] w-[26px] shrink-0 items-center justify-center rounded-[8px] border transition-colors duration-200 ease-out",
+                        "relative z-10 flex h-7 w-7 shrink-0 items-center justify-center transition-[color,transform] duration-[220ms] ease-out",
                         isActive
-                          ? "border-primary/35 bg-primary/[0.10]"
-                          : "border-sidebar-border/50 bg-transparent group-hover/nav:border-sidebar-border",
+                          ? "text-primary"
+                          : "text-sidebar-foreground/48 group-hover/nav:translate-x-0.5 group-hover/nav:text-sidebar-accent-foreground",
                       )}
                     >
                       <item.icon
-                        size={15}
-                        className={cn(
-                          "transition-colors duration-150 ease-out group-data-[collapsible=icon]:!h-[19px] group-data-[collapsible=icon]:!w-[19px]",
-                          isActive ? "text-primary" : "text-sidebar-foreground/45 group-hover/nav:text-foreground/85",
-                        )}
-                        strokeWidth={isActive ? 2 : 1.5}
+                        size={20}
+                        className="group-data-[collapsible=icon]:!h-5 group-data-[collapsible=icon]:!w-5"
+                        strokeWidth={isActive ? 2 : 1.65}
                       />
                     </span>
 
-                    <span className="truncate group-data-[collapsible=icon]:hidden">{item.title}</span>
+                    <span className="relative z-10 truncate group-data-[collapsible=icon]:hidden">{item.title}</span>
 
                     {item.count !== undefined && item.count > 0 && (
                       <span
                         className={cn(
-                          "ml-auto inline-flex items-center gap-1.5 font-numbers text-[10.5px] font-semibold leading-none tabular-nums transition-colors duration-200 group-data-[collapsible=icon]:hidden",
-                          isActive ? "text-primary" : "text-sidebar-foreground/35 group-hover/nav:text-sidebar-foreground/65",
+                          "relative z-10 ml-auto inline-flex min-w-5 items-center justify-center rounded-full px-1.5 py-1 font-numbers text-[9.5px] font-bold leading-none tabular-nums group-data-[collapsible=icon]:hidden",
+                          isActive
+                            ? "bg-primary/14 text-primary"
+                            : "bg-sidebar-foreground/[0.07] text-sidebar-foreground/45 group-hover/nav:text-sidebar-foreground/70",
                         )}
                       >
+                        {item.count > 99 ? "99+" : item.count}
+                      </span>
+                    )}
+
+                    {isActive && (
+                      <>
                         <span
                           aria-hidden
-                          className={cn(
-                            "h-[3px] w-[3px] rounded-full",
-                            isActive ? "bg-primary" : "bg-sidebar-foreground/25",
-                          )}
+                          className="absolute inset-y-2 left-0 w-[3px] rounded-r-full bg-primary group-data-[collapsible=icon]:hidden"
                         />
-                        {String(item.count).padStart(2, "0")}
-                      </span>
+                        <span
+                          aria-hidden
+                          className="absolute right-3 h-1.5 w-1.5 rounded-full bg-primary group-data-[collapsible=icon]:right-1 group-data-[collapsible=icon]:top-1"
+                        />
+                        <span
+                          aria-hidden
+                          className="absolute bottom-0 left-10 right-10 h-px bg-gradient-to-r from-transparent via-primary/55 to-transparent group-data-[collapsible=icon]:hidden"
+                        />
+                      </>
                     )}
                   </NavLink>
                 </SidebarMenuButton>
@@ -420,15 +417,13 @@ export function AppSidebar({ pinned = true, onTogglePin, onHoverChange }: AppSid
 
 
 
-      <SidebarContent className="relative gap-0 overflow-y-auto px-2.5 py-3 group-data-[collapsible=icon]:py-4">
+      <SidebarContent className="relative gap-0 overflow-y-auto px-3 py-3 group-data-[collapsible=icon]:px-1.5 group-data-[collapsible=icon]:py-4">
         {sections.map((section, idx) => (
           <SidebarSectionNav
             key={section.label}
             section={section}
             pathname={location.pathname}
             isFirst={idx === 0}
-            index={idx}
-
           />
         ))}
       </SidebarContent>
