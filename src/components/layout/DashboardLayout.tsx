@@ -225,10 +225,10 @@ function DashboardLayoutInner() {
  {profile && profile.account_status !== "approved" && (
  <button
  onClick={() => navigate("/perfil?tab=identidade&scrollTo=kyc")}
-  className="seller-clickable relative z-20 flex items-center gap-3 w-full px-5 lg:px-8 py-3 border-b cursor-pointer bg-warning/8 border-warning/20 text-warning hover:bg-warning/12"
+  className="seller-clickable relative z-20 flex w-full cursor-pointer items-center gap-2.5 border-b border-warning/20 bg-warning/[0.08] px-4 py-2.5 text-warning hover:bg-warning/[0.12] lg:px-8"
  >
  <AlertTriangle className="h-4 w-4 shrink-0" />
- <p className="text-[13px] font-semibold flex-1 text-left">
+ <p className="flex-1 text-left text-[12.5px] font-semibold leading-snug">
  {profile.document_number
  ? "Conta em análise — será aprovada o quanto antes!"
  : "Complete sua verificação para realizar saques na plataforma"}
@@ -239,7 +239,7 @@ function DashboardLayoutInner() {
 
  <MobileRevenueBar />
 
- <div ref={scrollRef} className="dashboard-scroll-field relative z-10 flex-1 overflow-y-auto overscroll-contain px-3 sm:px-4 md:px-7 xl:px-10 pb-20 md:pb-10 min-h-0">
+ <div ref={scrollRef} className="dashboard-scroll-field relative z-10 flex-1 overflow-y-auto overscroll-contain px-3 sm:px-4 md:px-7 xl:px-10 pb-28 md:pb-10 min-h-0">
   <div className="mx-auto w-full max-w-[1180px] py-2 md:py-4">
   <div key={routeKey} className="page-fluid">
   <Outlet />
