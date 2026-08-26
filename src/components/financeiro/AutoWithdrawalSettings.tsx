@@ -31,6 +31,7 @@ const parseBRL = (v: string) => Number(v.replace(/\./g, "").replace(",", ".")) |
 export default function AutoWithdrawalSettings() {
   const { user } = useAuth();
   const { profile } = useProfile();
+  const kyc = useKycStatus();
   const { data: pixKeys = [] } = usePixKeys();
   const [config, setConfig] = useState<Config | null>(null);
   const [loading, setLoading] = useState(true);

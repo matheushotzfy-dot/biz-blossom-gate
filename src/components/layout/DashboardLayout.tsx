@@ -23,6 +23,7 @@ function DashboardLayoutInner() {
  const { user } = useAuth();
  const { theme, toggleTheme } = useTheme();
  const { profile } = useProfile();
+ const kyc = useKycStatus();
  usePrefetchDashboardData();
  useRealtimeSync();
  const navigate = useNavigate();

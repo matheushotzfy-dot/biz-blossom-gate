@@ -30,6 +30,7 @@ const CNPJ_STEP = { type: "cnpj_card", label: "Cartão CNPJ", desc: "Envie o com
 export function KycOnboardingPopup() {
  const { user } = useAuth();
  const { profile } = useProfile();
+ const kyc = useKycStatus();
  const [open, setOpen] = useState(false);
  const isCnpj = profile?.document_type === "cnpj";
  const STEPS = isCnpj ? [...BASE_STEPS, CNPJ_STEP] : BASE_STEPS;
