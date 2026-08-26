@@ -57,37 +57,27 @@ Deno.serve(async (req) => {
     }
     const userId = userData.user.id;
 
-    // === Input ===
-    const body = await req.json().catch(() => ({}));
-    const {
-      amount,
-      customerName,
-      customerEmail,
-      customerDocument,
-      description,
-    } = body ?? {};
-
-    const amt = Number(amount);
-    if (!amt || amt < 1 || amt > 100000) {
+    // === Input validado por schema (tipo, range e formato) ===
+    const rawBody = await req.json().catch(() => ({}));
+    const parsedBody = BodySchema.safeParse(rawBody ?? {});
+    if (!parsedBody.success) {
       return new Response(
-        JSON.stringify({ success: false, error: "Valor inválido (mín. R$ 1, máx. R$ 100.000)" }),
+        JSON.stringify({ success: false, error: "Dados inválidos para gerar o PIX." }),
         { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } },
       );
     }
-    const cleanDoc = String(customerDocument || "").replace(/\D/g, "");
+    const body = parsedBody.data;
+    const { amount, customerName, customerEmail, customerDocument, description } = body;
+
+    const amt = Number(amount);
+    const cleanDoc = String(customerDocument).replace(/\D/g, "");
     if (cleanDoc.length !== 11 && cleanDoc.length !== 14) {
       return new Response(
         JSON.stringify({ success: false, error: "CPF ou CNPJ inválido" }),
         { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } },
       );
     }
-    const safeName = String(customerName || "").trim().slice(0, 200);
-    if (safeName.length < 3) {
-      return new Response(
-        JSON.stringify({ success: false, error: "Nome obrigatório" }),
-        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } },
-      );
-    }
+    const safeName = String(customerName).trim().slice(0, 200);
     const emailRaw = String(customerEmail || "").trim().toLowerCase().slice(0, 255);
     const safeEmail = emailRaw && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailRaw)
       ? emailRaw
@@ -99,16 +89,30 @@ Deno.serve(async (req) => {
     const paused = await blockIfPaymentsPaused(supabase as never, corsHeaders);
     if (paused) return paused;
 
-    const requestIp = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "0.0.0.0";
+    const requestIp = req.headers.get("cf-connecting-ip")
+      || req.headers.get("x-forwarded-for")?.split(",")[0]?.trim()
+      || "0.0.0.0";
+
+    // === Rate limit: 10 cobranças/min por usuário, 30/min por IP ===
+    {
+      const limits = await Promise.all([
+        supabase.rpc("bump_rate_limit", { _bucket_key: `quick_pix_user:${userId}`, _window_seconds: 60, _max_count: 10 }),
+        supabase.rpc("bump_rate_limit", { _bucket_key: `quick_pix_ip:${requestIp}`, _window_seconds: 60, _max_count: 30 }),
+      ]);
+      const blocked = limits.some((r) =>
+        Array.isArray(r.data) ? (r.data[0] as { allowed?: boolean } | undefined)?.allowed === false : false
+      );
+      if (blocked) {
+        return new Response(
+          JSON.stringify({ success: false, error: "Muitas cobranças em pouco tempo. Aguarde um instante." }),
+          { status: 429, headers: { ...corsHeaders, "Content-Type": "application/json", "Retry-After": "60" } },
+        );
+      }
+    }
 
     // === Idempotency — obrigatória para impedir dupla cobrança em retries ===
-    const rawIdem = String(body?.idempotencyKey || "").slice(0, 200).trim();
-    if (!rawIdem || !/^[a-zA-Z0-9:_-]{8,200}$/.test(rawIdem)) {
-      return new Response(
-        JSON.stringify({ success: false, error: "Chave de idempotência inválida" }),
-        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } },
-      );
-    }
+    const rawIdem = body.idempotencyKey;
+
 
     {
       // Escopar por usuário para evitar colisão global cross-tenant
