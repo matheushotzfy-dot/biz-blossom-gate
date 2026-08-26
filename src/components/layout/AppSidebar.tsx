@@ -4,7 +4,7 @@ import {
   MessageSquare,
   ChevronRight,
 } from "lucide-react";
-import { useEffect, useMemo, useState, type ComponentType, type SVGProps } from "react";
+import { useEffect, useLayoutEffect, useMemo, useRef, useState, type ComponentType, type SVGProps } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { NavLink } from "@/components/NavLink";
 import { VenxpayLogo } from "@/components/VenxpayLogo";
@@ -155,9 +155,23 @@ type SidebarSectionNavProps = {
 };
 
 function SidebarSectionNav({ section, pathname, isFirst }: SidebarSectionNavProps) {
+  const listRef = useRef<HTMLUListElement | null>(null);
+  const itemRefs = useRef<Record<string, HTMLLIElement | null>>({});
+  const [marker, setMarker] = useState<{ top: number; height: number } | null>(null);
+
+  const activeUrl = section.items.find((item) => isItemActive(pathname, item))?.url ?? null;
+
+  useLayoutEffect(() => {
+    if (!activeUrl) { setMarker(null); return; }
+    const el = itemRefs.current[activeUrl];
+    const list = listRef.current;
+    if (!el || !list) return;
+    setMarker({ top: el.offsetTop + 8, height: Math.max(12, el.offsetHeight - 16) });
+  }, [activeUrl, section.items.length]);
+
   return (
     <SidebarGroup className="px-0 py-0">
-      {/* Cabeçalho de seção: filete + rótulo técnico (some no modo reduzido) */}
+      {/* Cabeçalho de seção: micro-label com traço */}
       <div
         className={cn(
           "flex items-center gap-2 px-3 pb-1.5 group-data-[collapsible=icon]:hidden",
@@ -165,59 +179,80 @@ function SidebarSectionNav({ section, pathname, isFirst }: SidebarSectionNavProp
         )}
       >
         <span className="h-px w-3 bg-primary/60" />
-        <span className="text-[9px] font-semibold uppercase tracking-[0.22em] text-sidebar-foreground/35">
+        <span className="text-[9.5px] font-semibold uppercase tracking-[0.24em] text-sidebar-foreground/32">
           {section.label}
         </span>
-        <span className="h-px flex-1 bg-sidebar-border/40" />
+        <span className="h-px flex-1 bg-sidebar-border/35" />
       </div>
       {!isFirst && (
         <div className="mx-auto my-2 hidden h-px w-6 bg-sidebar-border/50 group-data-[collapsible=icon]:block" />
       )}
-      <SidebarGroupContent>
-        <SidebarMenu className="gap-[2px] px-0 group-data-[collapsible=icon]:gap-1.5">
+      <SidebarGroupContent className="relative">
+        {/* Trilho vivo + indicador deslizante */}
+        <span
+          aria-hidden
+          className="pointer-events-none absolute inset-y-0 left-[10px] w-px bg-sidebar-border/40 group-data-[collapsible=icon]:hidden"
+        />
+        <span
+          aria-hidden
+          className={cn(
+            "pointer-events-none absolute left-[9px] w-[2px] rounded-full bg-primary group-data-[collapsible=icon]:hidden",
+            "transition-[top,height,opacity] duration-[260ms] ease-out",
+            marker ? "opacity-100" : "opacity-0",
+          )}
+          style={marker ? { top: marker.top, height: marker.height } : { top: 0, height: 0 }}
+        />
+
+        <SidebarMenu ref={listRef} className="gap-[3px] px-0 group-data-[collapsible=icon]:gap-1.5">
           {section.items.map((item) => {
             const isActive = isItemActive(pathname, item);
             return (
-              <SidebarMenuItem key={item.url}>
+              <SidebarMenuItem
+                key={item.url}
+                ref={(el) => { itemRefs.current[item.url] = el; }}
+              >
                 <SidebarMenuButton asChild className="h-auto rounded-none p-0 hover:bg-transparent active:bg-transparent group-data-[collapsible=icon]:!size-auto group-data-[collapsible=icon]:!p-0">
                   <NavLink
                     to={item.url}
                     end={item.exact}
                     activeClassName=""
                     className={cn(
-                      "group/nav relative flex h-[38px] w-full items-center gap-3 pl-4 pr-3 text-[13.5px]",
+                      "group/nav relative mx-2 ml-[18px] mr-2 flex h-[42px] items-center gap-2.5 rounded-[12px] pl-1.5 pr-2.5 text-[13.5px]",
                       "transition-colors duration-200 ease-out",
-                      "group-data-[collapsible=icon]:h-11 group-data-[collapsible=icon]:w-11 group-data-[collapsible=icon]:mx-auto group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0 group-data-[collapsible=icon]:gap-0 group-data-[collapsible=icon]:rounded-[10px]",
+                      "group-data-[collapsible=icon]:mx-auto group-data-[collapsible=icon]:h-11 group-data-[collapsible=icon]:w-11 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:gap-0 group-data-[collapsible=icon]:px-0",
                       isActive
-                        ? "font-semibold text-foreground group-data-[collapsible=icon]:bg-primary/10"
-                        : "font-medium text-sidebar-foreground/60 hover:text-foreground",
+                        ? "bg-sidebar-accent/70 font-semibold text-foreground"
+                        : "font-medium text-sidebar-foreground/60 hover:bg-sidebar-accent/35 hover:text-foreground",
                     )}
                   >
-                    {/* Marcador de estado — filete vertical */}
+                    {/* Cápsula do ícone */}
                     <span
                       className={cn(
-                        "absolute left-0 top-1/2 h-[18px] w-[2px] -translate-y-1/2 transition-all duration-200 group-data-[collapsible=icon]:hidden",
+                        "flex h-[28px] w-[28px] shrink-0 items-center justify-center rounded-[9px] transition-colors duration-200 ease-out",
                         isActive
-                          ? "bg-primary opacity-100"
-                          : "bg-sidebar-foreground/30 opacity-0 group-hover/nav:opacity-60",
+                          ? "bg-primary/12"
+                          : "bg-transparent group-hover/nav:bg-sidebar-foreground/[0.06]",
                       )}
-                    />
-                    <item.icon
-                      size={18}
-                      className={cn(
-                        "shrink-0 transition-colors duration-150 ease-out group-data-[collapsible=icon]:!h-[22px] group-data-[collapsible=icon]:!w-[22px]",
-                        isActive ? "text-primary" : "text-sidebar-foreground/45 group-hover/nav:text-foreground/80",
-                      )}
-                      strokeWidth={isActive ? 1.8 : 1.4}
-                    />
+                    >
+                      <item.icon
+                        size={17}
+                        className={cn(
+                          "transition-colors duration-150 ease-out group-data-[collapsible=icon]:!h-[20px] group-data-[collapsible=icon]:!w-[20px]",
+                          isActive ? "text-primary" : "text-sidebar-foreground/45 group-hover/nav:text-foreground/85",
+                        )}
+                        strokeWidth={isActive ? 1.9 : 1.45}
+                      />
+                    </span>
 
                     <span className="truncate group-data-[collapsible=icon]:hidden">
                       {item.title}
                     </span>
                     {item.count !== undefined && item.count > 0 && (
                       <span className={cn(
-                        "ml-auto font-numbers text-[11px] font-semibold tabular-nums group-data-[collapsible=icon]:hidden",
-                        isActive ? "text-primary" : "text-sidebar-foreground/35 group-hover/nav:text-sidebar-foreground/60",
+                        "ml-auto rounded-full px-1.5 py-[2px] font-numbers text-[10.5px] font-semibold leading-none tabular-nums transition-colors duration-200 group-data-[collapsible=icon]:hidden",
+                        isActive
+                          ? "bg-primary/12 text-primary"
+                          : "bg-sidebar-foreground/[0.06] text-sidebar-foreground/40 group-hover/nav:text-sidebar-foreground/70",
                       )}>
                         {String(item.count).padStart(2, "0")}
                       </span>
@@ -232,6 +267,7 @@ function SidebarSectionNav({ section, pathname, isFirst }: SidebarSectionNavProp
     </SidebarGroup>
   );
 }
+
 
 
 type AppSidebarProps = {

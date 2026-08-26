@@ -34,7 +34,6 @@ const PAGE_SIZE = 24;
 type ProductGridViewProps = ProductMenuHandlers & {
   copiedId: string | null;
   products: Product[];
-  toolbar?: React.ReactNode;
 };
 
 const STATUS_META: Record<string, { label: string; cls: string; dot: string }> = {
@@ -74,8 +73,9 @@ const ProductCard = memo(function ProductCard({ product, copied, ...handlers }: 
   return (
     <article
       className={cn(
-        "group flex h-full flex-col overflow-hidden rounded-[24px] border border-border/60 bg-card",
-        "transition-[border-color,transform] duration-200 ease-out hover:-translate-y-0.5 hover:border-primary/25",
+        "group relative flex h-full flex-col overflow-hidden rounded-[24px] border border-border/60 bg-card",
+        "transition-[border-color,transform,box-shadow] duration-[220ms] ease-out",
+        "hover:-translate-y-[3px] hover:border-primary/35 hover:shadow-[0_18px_40px_-24px_hsl(var(--primary)/0.55)]",
       )}
     >
       {/* Capa */}
@@ -86,13 +86,17 @@ const ProductCard = memo(function ProductCard({ product, copied, ...handlers }: 
             alt=""
             loading="lazy"
             decoding="async"
-            className="h-full w-full object-cover"
+            className="h-full w-full object-cover transition-transform duration-[400ms] ease-out group-hover:scale-[1.04]"
           />
         ) : (
-          <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-primary/15 to-transparent">
+          <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-primary/15 to-transparent transition-transform duration-[400ms] ease-out group-hover:scale-[1.04]">
             <span className="text-[34px] font-black leading-none text-primary/45">{initial}</span>
           </div>
         )}
+        <span
+          aria-hidden
+          className="pointer-events-none absolute inset-x-0 bottom-0 h-2/3 bg-gradient-to-t from-background/70 to-transparent opacity-0 transition-opacity duration-[220ms] ease-out group-hover:opacity-100"
+        />
         <span
           className={cn(
             "absolute right-3 top-3 inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-semibold backdrop-blur-sm",
@@ -156,7 +160,7 @@ const ProductCard = memo(function ProductCard({ product, copied, ...handlers }: 
             <Pencil className="h-3.5 w-3.5" strokeWidth={2.25} />
             Editar
           </button>
-          <div className="ml-auto flex items-center">
+          <div className="ml-auto flex items-center opacity-100 transition-opacity duration-[220ms] ease-out md:opacity-60 md:group-hover:opacity-100">
             <button
               type="button"
               onClick={() => navigate(`/vendas/produtos/${product.id}/checkout-builder`, { state: { product } })}
@@ -194,7 +198,7 @@ const ProductCard = memo(function ProductCard({ product, copied, ...handlers }: 
   );
 });
 
-export function ProductGridView({ products, copiedId, toolbar, ...handlers }: ProductGridViewProps) {
+export function ProductGridView({ products, copiedId, ...handlers }: ProductGridViewProps) {
   const [page, setPage] = useState(1);
 
   useEffect(() => { setPage(1); }, [products.length]);
@@ -210,10 +214,6 @@ export function ProductGridView({ products, copiedId, toolbar, ...handlers }: Pr
 
   return (
     <div className="space-y-5">
-      {toolbar && (
-        <div className="rounded-[24px] border border-border/60 bg-card px-5 py-4">{toolbar}</div>
-      )}
-
       {paged.length === 0 ? (
         <div className="flex flex-col items-center gap-3 rounded-[24px] border border-dashed border-border/60 bg-card px-6 py-16 text-center">
           <div className="flex h-14 w-14 items-center justify-center rounded-full bg-muted/40">

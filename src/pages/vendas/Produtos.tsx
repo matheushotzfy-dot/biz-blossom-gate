@@ -14,7 +14,7 @@ import {
   XCircle,
 } from "lucide-react";
 import { toast } from "sonner";
-import { HDShell, HDHeader, HDStat, HDStatGrid } from "@/components/hd/HDPage";
+import { HDShell, HDHeader } from "@/components/hd/HDPage";
 
 
 import PixelSettingsDialog from "@/components/PixelSettingsDialog";
@@ -230,42 +230,57 @@ export default function Produtos() {
         }
       />
 
-      {/* ── KPIs (mesmo kit da aba de Vendas) ── */}
-      <HDStatGrid>
-        <HDStat label="Produtos no catálogo" value={String(products.length)} sub="Total cadastrado" icon={Package} tone="primary" />
-        <HDStat label="Ativos" value={String(counts.active)} sub="Vendendo agora" icon={CheckCircle2} tone="success" />
-        <HDStat label="Rascunhos" value={String(counts.draft)} sub="Faltam informações" icon={FileEdit} tone="neutral" />
-        <HDStat label="Em revisão" value={String(counts.pending_review)} sub="Aguardando equipe" icon={Clock} tone="warning" />
-      </HDStatGrid>
-
-      {/* ── Filtros ── */}
-      <div className="-mx-2 overflow-x-auto scrollbar-none sm:mx-0">
-        <div className="mx-2 inline-flex min-w-full items-center gap-px rounded-xl border border-border/60 bg-card p-px sm:mx-0 lg:w-fit lg:min-w-0">
-          {tabs.map((item) => {
-            const active = tab === item.value;
-            return (
-              <button
-                key={item.value}
-                onClick={() => setTab(item.value)}
-                className={cn(
-                  "inline-flex h-9 shrink-0 items-center gap-1.5 whitespace-nowrap rounded-[10px] px-3.5 text-[12px] font-medium transition-colors",
-                  active ? "bg-muted/50 text-foreground" : "text-muted-foreground/70 hover:text-foreground",
-                )}
-              >
-                <span className={cn("flex h-3.5 w-3.5 items-center justify-center", active ? tabAccent[item.value] : "text-muted-foreground/40")}>
-                  {tabIcon[item.value]}
-                </span>
-                {item.label}
-                {item.count > 0 && (
-                  <span className={cn("text-[11px] tabular-nums", active ? "text-foreground/60" : "text-muted-foreground/40")}>
-                    {item.count}
+      {/* ── Filtros + busca ── */}
+      <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+        <div className="-mx-2 overflow-x-auto scrollbar-none sm:mx-0">
+          <div className="mx-2 inline-flex min-w-full items-center gap-px rounded-xl border border-border/60 bg-card p-px sm:mx-0 lg:w-fit lg:min-w-0">
+            {tabs.map((item) => {
+              const active = tab === item.value;
+              return (
+                <button
+                  key={item.value}
+                  onClick={() => setTab(item.value)}
+                  className={cn(
+                    "inline-flex h-9 shrink-0 items-center gap-1.5 whitespace-nowrap rounded-[10px] px-3.5 text-[12px] font-medium transition-colors",
+                    active ? "bg-muted/50 text-foreground" : "text-muted-foreground/70 hover:text-foreground",
+                  )}
+                >
+                  <span className={cn("flex h-3.5 w-3.5 items-center justify-center", active ? tabAccent[item.value] : "text-muted-foreground/40")}>
+                    {tabIcon[item.value]}
                   </span>
-                )}
-              </button>
-            );
-          })}
+                  {item.label}
+                  {item.count > 0 && (
+                    <span className={cn("text-[11px] tabular-nums", active ? "text-foreground/60" : "text-muted-foreground/40")}>
+                      {item.count}
+                    </span>
+                  )}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        <div className="relative w-full lg:w-72">
+          <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted-foreground/45" size={15} />
+          <input
+            type="text"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="Buscar produto..."
+            className="h-10 w-full rounded-xl border border-border/60 bg-card pl-10 pr-9 text-[12.5px] font-medium text-foreground transition-colors placeholder:text-muted-foreground/40 focus:border-primary/30 focus:outline-none"
+          />
+          {search && (
+            <button
+              onClick={() => setSearch("")}
+              aria-label="Limpar busca"
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground/40 transition-colors hover:text-foreground"
+            >
+              <X className="h-3.5 w-3.5" />
+            </button>
+          )}
         </div>
       </div>
+
 
       {/* ── Catálogo ── */}
       {productsLoading ? (
@@ -310,42 +325,9 @@ export default function Produtos() {
         <ProductGridView
           copiedId={copiedId}
           products={filtered}
-          toolbar={
-            <div className="flex flex-col items-center justify-between gap-4 md:flex-row">
-              <div className="flex w-full items-center gap-3 md:w-auto">
-                <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-primary/10 bg-primary/10 text-primary">
-                  <Package size={20} strokeWidth={2.5} />
-                </div>
-                <div>
-                  <h2 className="font-black leading-none tracking-tight text-foreground">Catálogo</h2>
-                  <p className="mt-1 text-[11px] font-medium text-muted-foreground">
-                    {filtered.length} {filtered.length === 1 ? "produto" : "produtos"} · {tabs.find((t) => t.value === tab)?.label}
-                  </p>
-                </div>
-              </div>
-              <div className="relative w-full md:w-80">
-                <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground/50" size={16} />
-                <input
-                  type="text"
-                  value={search}
-                  onChange={(e) => setSearch(e.target.value)}
-                  placeholder="Buscar produto..."
-                  className="h-11 w-full rounded-xl border border-border/60 bg-muted/30 pl-11 pr-9 text-sm font-bold text-foreground transition-colors placeholder:text-muted-foreground/40 focus:outline-none focus:ring-2 focus:ring-primary/20"
-                />
-                {search && (
-                  <button
-                    onClick={() => setSearch("")}
-                    aria-label="Limpar busca"
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground/40 transition-colors hover:text-foreground"
-                  >
-                    <X className="h-3.5 w-3.5" />
-                  </button>
-                )}
-              </div>
-            </div>
-          }
           {...menuHandlers}
         />
+
       )}
 
 
