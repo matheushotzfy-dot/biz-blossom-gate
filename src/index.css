@@ -205,12 +205,18 @@ input[type="number"]::-webkit-inner-spin-button {
     background: transparent;
   }
 
-  /* Sidebar não fixada: expande por cima do conteúdo no hover */
+  /* Sidebar não fixada: expande por cima do conteúdo no hover (sem reflow) */
   .sidebar-unpinned [data-sidebar="gap"] {
     width: var(--sidebar-width-icon) !important;
+    transition: none !important;
   }
 
-
+  .sidebar-unpinned [data-sidebar="sidebar"] {
+    transition: width 200ms cubic-bezier(0.22, 1, 0.36, 1),
+                left 200ms cubic-bezier(0.22, 1, 0.36, 1),
+                right 200ms cubic-bezier(0.22, 1, 0.36, 1);
+    will-change: width;
+  }
 
   .platform-card,
   .dashboard-panel,
@@ -226,10 +232,7 @@ input[type="number"]::-webkit-inner-spin-button {
     background-color: hsl(var(--card)) !important;
     background-image: none !important;
     box-shadow: none !important;
-    transition: transform 420ms cubic-bezier(0.22, 1, 0.36, 1),
-                border-color 360ms cubic-bezier(0.22, 1, 0.36, 1),
-                background-color 360ms cubic-bezier(0.22, 1, 0.36, 1),
-                filter 360ms cubic-bezier(0.22, 1, 0.36, 1);
+    transition: border-color 180ms linear, background-color 180ms linear;
   }
 
   .platform-card:hover,
@@ -239,10 +242,10 @@ input[type="number"]::-webkit-inner-spin-button {
   .dashboard-tile:hover,
   .seller-panel:hover,
   .seller-shell:hover {
-    transform: translateY(-3px);
     border-color: hsl(var(--primary) / 0.5) !important;
     background-color: hsl(var(--card-elevated)) !important;
   }
+
 
   .platform-card:active,
   .dashboard-panel:active,
