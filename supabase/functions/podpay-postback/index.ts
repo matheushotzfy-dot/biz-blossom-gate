@@ -105,6 +105,9 @@ Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }
+  if (req.method !== 'POST') {
+    return new Response('Method not allowed', { status: 405, headers: corsHeaders });
+  }
 
   try {
     const rawBody = await req.text();
@@ -159,18 +162,13 @@ Deno.serve(async (req) => {
 
     // === Replay protection: reject events older than 5 min based on PodPay timestamp ===
     const tsHeader = req.headers.get('x-podpay-timestamp') || req.headers.get('x-timestamp');
-    if (tsHeader) {
-      const tsSec = Number(tsHeader);
-      if (Number.isFinite(tsSec)) {
-        const ageSec = Math.abs(Math.floor(Date.now() / 1000) - tsSec);
-        if (ageSec > 300) {
-          safeLog('Webhook rejected: stale timestamp', { eventId: String(payload.event_id ?? '') });
-          return new Response(
-            JSON.stringify({ success: false, error: 'Stale event' }),
-            { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-          );
-        }
-      }
+    const tsSec = Number(tsHeader);
+    if (!tsHeader || !Number.isFinite(tsSec) || Math.abs(Math.floor(Date.now() / 1000) - tsSec) > 300) {
+      safeLog('Webhook rejected: missing or stale timestamp', { eventId: String(payload.event_id ?? '') });
+      return new Response(
+        JSON.stringify({ success: false, error: 'Missing or stale timestamp' }),
+        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
     }
 
     const eventId = payload.event_id ? String(payload.event_id) : null;
@@ -284,7 +282,7 @@ Deno.serve(async (req) => {
         // ===== Amount validation (only when marking as paid) =====
         if (ourStatus === 'completed') {
           const payloadAmount = extractAmount();
-          if (payloadAmount != null && Math.abs(payloadAmount - Number(tx.amount)) > 0.01) {
+          if (payloadAmount == null || Math.abs(payloadAmount - Number(tx.amount)) > 0.01) {
             safeLog('Amount mismatch — rejecting', { transactionId: tx.id, error: `payload=${payloadAmount} tx=${tx.amount}` });
             await finishLog('rejected_amount_mismatch', tx.id, `payload=${payloadAmount} tx=${tx.amount}`);
             return new Response(
@@ -304,7 +302,8 @@ Deno.serve(async (req) => {
         const { error } = await supabase
           .from('transactions')
           .update(updateData)
-          .eq('id', tx.id);
+          .eq('id', tx.id)
+          .eq('status', tx.status);
 
         try {
           await supabase.rpc('log_transaction_event', {
@@ -321,6 +320,10 @@ Deno.serve(async (req) => {
         if (error) {
           safeLog('Error updating transaction', { transactionId: tx.id, error: error.message });
           await finishLog('update_error', tx.id, error.message);
+          return new Response(
+            JSON.stringify({ success: false, error: 'Update failed' }),
+            { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+          );
         } else {
           safeLog('Transaction updated', { transactionId: tx.id, status: ourStatus });
           await finishLog('updated', tx.id);

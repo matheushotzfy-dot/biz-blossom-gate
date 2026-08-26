@@ -2,11 +2,11 @@
  * PodPay v1 (nova) — webhook receiver.
  * Endpoint público: /functions/v1/podpay-app-webhook
  *
- * Guardas: amount match, no downgrade de status final, lookup por external_id (tx.id) primeiro.
- * Assinatura HMAC opcional: se PODPAY_APP_WEBHOOK_SECRET estiver setada e o payload vier
- * assinado (header x-signature ou x-podpay-signature), validamos HMAC-SHA256 do corpo bruto.
+ * Guardas: assinatura HMAC obrigatória, amount match obrigatório em pagamento,
+ * transições de estado explícitas e update atômico.
  */
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { amountMatches, isAllowedTransactionTransition, verifyHmacSha256 } from "../_shared/payment-webhook.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -41,14 +41,6 @@ function firstString(...values: unknown[]): string | null {
   return null;
 }
 
-function normalizeAmount(raw: unknown, txAmount: number): number | null {
-  const parsed = typeof raw === "string" ? Number(raw.replace(",", ".")) : Number(raw);
-  if (!Number.isFinite(parsed)) return null;
-  // PodPay envia em centavos; converte se claramente for cents.
-  if (parsed > txAmount * 10 && Math.abs(parsed / 100 - txAmount) <= 0.01) return parsed / 100;
-  return parsed;
-}
-
 function safeLog(msg: string, ctx: Record<string, unknown> = {}) {
   const ALLOWED = ["transactionId", "podpayId", "externalId", "status", "type", "error", "ignored"];
   const safe: Record<string, unknown> = {};
@@ -56,45 +48,27 @@ function safeLog(msg: string, ctx: Record<string, unknown> = {}) {
   console.log(`[podpay-app-webhook] ${msg}`, JSON.stringify(safe));
 }
 
-async function verifyHmac(rawBody: string, signature: string, secret: string): Promise<boolean> {
-  try {
-    const enc = new TextEncoder();
-    const key = await crypto.subtle.importKey(
-      "raw",
-      enc.encode(secret),
-      { name: "HMAC", hash: "SHA-256" },
-      false,
-      ["sign"],
-    );
-    const sigBuf = await crypto.subtle.sign("HMAC", key, enc.encode(rawBody));
-    const hex = Array.from(new Uint8Array(sigBuf))
-      .map((b) => b.toString(16).padStart(2, "0")).join("");
-    // Compara insensível ao case e a prefixos comuns
-    const clean = signature.trim().toLowerCase().replace(/^sha256=/, "");
-    return clean === hex;
-  } catch {
-    return false;
-  }
-}
-
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
+  if (req.method !== "POST") return new Response("Method not allowed", { status: 405, headers: corsHeaders });
 
   try {
     const rawBody = await req.text();
 
-    // Validação de assinatura (opcional)
+    // Fail closed: unsigned callbacks can never mutate financial state.
     const secret = Deno.env.get("PODPAY_APP_WEBHOOK_SECRET");
     const sig = req.headers.get("x-signature") ?? req.headers.get("x-podpay-signature");
-    if (secret && sig) {
-      const ok = await verifyHmac(rawBody, sig, secret);
-      if (!ok) {
-        safeLog("invalid signature");
-        return new Response(JSON.stringify({ success: false, error: "invalid_signature" }), {
-          status: 401,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
-      }
+    if (!secret) {
+      return new Response(JSON.stringify({ success: false, error: "webhook_not_configured" }), {
+        status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+    if (!sig || !(await verifyHmacSha256(rawBody, sig, secret))) {
+      safeLog("invalid signature");
+      return new Response(JSON.stringify({ success: false, error: "invalid_signature" }), {
+        status: 401,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
     }
 
     const payload = (() => { try { return JSON.parse(rawBody); } catch { return null; } }) as any;
@@ -152,29 +126,26 @@ Deno.serve(async (req) => {
 
     if (!tx) {
       safeLog("no match", { externalId, podpayId });
-      return new Response(JSON.stringify({ success: true, ignored: "no_match" }), {
+      return new Response(JSON.stringify({ success: false, error: "transaction_not_found" }), {
+        status: 503,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
-    const finalStatuses = ["completed", "refunded", "chargeback", "expired"];
-    if (finalStatuses.includes(tx.status) && !finalStatuses.includes(mapped)) {
-      safeLog("skip downgrade", { transactionId: tx.id, status: `${tx.status}->${mapped}` });
-      return new Response(JSON.stringify({ success: true, ignored: "no_downgrade" }), {
+    if (!isAllowedTransactionTransition(String(tx.status), mapped)) {
+      safeLog("invalid transition", { transactionId: tx.id, status: `${tx.status}->${mapped}` });
+      return new Response(JSON.stringify({ success: true, ignored: "invalid_transition" }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
     if (mapped === "completed") {
       const amountRaw = (payload as any).amount ?? nested?.amount ?? nested?.value;
-      if (amountRaw != null) {
-        const payloadAmt = normalizeAmount(amountRaw, Number(tx.amount));
-        if (payloadAmt !== null && Math.abs(payloadAmt - Number(tx.amount)) > 0.01) {
-          safeLog("amount mismatch", { transactionId: tx.id, error: `payload=${payloadAmt} tx=${tx.amount}` });
-          return new Response(JSON.stringify({ success: false, error: "amount_mismatch" }), {
-            status: 409, headers: { ...corsHeaders, "Content-Type": "application/json" },
-          });
-        }
+      if (!amountMatches(amountRaw, Number(tx.amount))) {
+        safeLog("amount missing or mismatched", { transactionId: tx.id });
+        return new Response(JSON.stringify({ success: false, error: "amount_mismatch" }), {
+          status: 409, headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
       }
     }
 
@@ -192,7 +163,9 @@ Deno.serve(async (req) => {
     const { error: updErr } = await supabase
       .from("transactions").update(patch)
       .eq("id", tx.id)
-      .in("status", ["pending", "waiting_payment", "failed"]); // claim atômico
+      .eq("status", tx.status)
+      .select("id")
+      .maybeSingle();
 
     try {
       await supabase.rpc("log_transaction_event", {
