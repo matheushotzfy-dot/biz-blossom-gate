@@ -28,7 +28,6 @@ export default function Premiacoes() {
 
   const award = AWARDS[activeIndex];
   const claimed = claims.some((claim) => claim.tier_id === award.id && claim.status !== "cancelled");
-  const awardProgress = Math.min((revenue / award.value) * 100, 100);
 
   useEffect(() => {
     if (loading || touched.current) return;
