@@ -9,7 +9,7 @@ import { supabase } from "@/integrations/supabase/client";
  *  2) This page posts { type: "IMPERSONATE_READY" } to window.opener.
  *  3) Opener responds with a single-use Auth token; no session token crosses tabs.
  *  4) We validate event.source === window.opener AND event.origin === window.location.origin,
- *     then call supabase.auth.setSession and redirect to /dashboard.
+ *     exchange the single-use token and redirect to /dashboard.
  *
  * No tokens ever touch localStorage / sessionStorage / URL.
  */
