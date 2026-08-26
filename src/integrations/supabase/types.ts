@@ -3159,7 +3159,7 @@ export type Database = {
           entity_type: string | null
           id: string
           metadata: Json | null
-          staff_user_id: string
+          staff_user_id: string | null
         }
         Insert: {
           action: string
@@ -3170,7 +3170,7 @@ export type Database = {
           entity_type?: string | null
           id?: string
           metadata?: Json | null
-          staff_user_id: string
+          staff_user_id?: string | null
         }
         Update: {
           action?: string
@@ -3181,7 +3181,7 @@ export type Database = {
           entity_type?: string | null
           id?: string
           metadata?: Json | null
-          staff_user_id?: string
+          staff_user_id?: string | null
         }
         Relationships: []
       }
@@ -4675,6 +4675,7 @@ export type Database = {
         Returns: boolean
       }
       decrypt_field: { Args: { _cipher: string }; Returns: string }
+      detect_negative_balances: { Args: never; Returns: Json }
       encrypt_field: { Args: { _plain: string }; Returns: string }
       enqueue_test_webhook: { Args: { _config_id: string }; Returns: string }
       expire_stale_pix_transactions: { Args: never; Returns: number }
@@ -4905,6 +4906,7 @@ export type Database = {
         Args: { _tx_id: string }
         Returns: undefined
       }
+      run_ledger_reconciliation: { Args: never; Returns: Json }
       run_monitoring_checks: { Args: never; Returns: Json }
       set_max_ticket_for_all: { Args: { _new_value: number }; Returns: Json }
       set_max_ticket_new_users_only: {
