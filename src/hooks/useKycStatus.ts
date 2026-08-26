@@ -38,8 +38,11 @@ export function useKycStatus(): KycStatus {
   const { profile, loading } = useProfile();
 
   return useMemo<KycStatus>(() => {
-    const resolved = Boolean(user?.id) && !loading && Boolean(profile);
+    // Resolvido = há sessão e o fetch do perfil terminou. Perfil ausente após o
+    // fetch conta como "não aprovado" (nunca como aprovado por omissão).
+    const resolved = Boolean(user?.id) && !loading;
     const raw = profile?.account_status ?? null;
+
 
     if (!resolved) {
       return {
