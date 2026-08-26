@@ -30,7 +30,6 @@ type Profile = {
   email: string | null;
   phone: string | null;
   account_status: string;
-  document_number: string | null;
   seller_type: string | null;
   created_at: string;
 };
@@ -112,8 +111,8 @@ export default function ManagerDashboard() {
       const sellerIds = assignments.map((a) => a.seller_user_id);
 
       const [profilesRes, txRes, feeLimitsRes] = await Promise.all([
-        supabase.from("profiles").select("*").in("user_id", sellerIds),
-        supabase.from("transactions").select("*").in("user_id", sellerIds).order("created_at", { ascending: false }).limit(200),
+        supabase.from("profiles").select("id,user_id,full_name,email,phone,account_status,seller_type,created_at").in("user_id", sellerIds),
+        supabase.from("transactions").select("id,amount,net_amount,status,payment_method,customer_name,created_at,user_id").in("user_id", sellerIds).order("created_at", { ascending: false }).limit(200),
         supabase.from("manager_fee_limits").select("*").limit(1),
       ]);
 
@@ -160,8 +159,7 @@ export default function ManagerDashboard() {
     const q = search.toLowerCase();
     return sellers.filter(s =>
       s.full_name?.toLowerCase().includes(q) ||
-      s.email?.toLowerCase().includes(q) ||
-      s.document_number?.includes(q)
+      s.email?.toLowerCase().includes(q)
     );
   }, [sellers, search]);
 
