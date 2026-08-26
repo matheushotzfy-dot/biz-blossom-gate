@@ -269,16 +269,20 @@ export default function Produtos() {
 
       {/* ── Catálogo ── */}
       {productsLoading ? (
-        <div className="overflow-hidden rounded-[24px] border border-border/60 bg-card">
-          {Array.from({ length: 6 }).map((_, i) => (
-            <div key={i} className="flex items-center gap-4 border-b border-border/40 px-6 py-4 last:border-b-0">
-              <div className="h-10 w-10 shrink-0 rounded-xl bg-muted/40" />
-              <div className="h-3 flex-1 rounded bg-muted/30" />
-              <div className="hidden h-3 w-20 rounded bg-muted/25 md:block" />
-              <div className="hidden h-3 w-24 rounded bg-muted/25 md:block" />
+        <div className="grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4">
+          {Array.from({ length: 8 }).map((_, i) => (
+            <div key={i} className="overflow-hidden rounded-[24px] border border-border/60 bg-card">
+              <div className="aspect-[16/9] w-full animate-pulse bg-muted/30" />
+              <div className="space-y-2.5 p-4">
+                <div className="h-3 w-3/4 animate-pulse rounded-full bg-muted/40" />
+                <div className="h-2.5 w-1/2 animate-pulse rounded-full bg-muted/25" />
+                <div className="h-4 w-24 animate-pulse rounded-full bg-muted/35" />
+                <div className="h-7 w-full animate-pulse rounded-full bg-muted/20" />
+              </div>
             </div>
           ))}
         </div>
+
       ) : filtered.length === 0 ? (
         <div className="flex flex-col items-center justify-center rounded-[24px] border border-dashed border-border/60 bg-card px-6 py-20 text-center">
           <div className="flex h-14 w-14 items-center justify-center rounded-[12px] border border-border/60 bg-muted/30">
