@@ -7,6 +7,7 @@ type Info = {
   target_name: string | null;
   target_user_id: string | null;
   started_at: string;
+  expires_at: string;
 };
 
 /**
@@ -23,6 +24,17 @@ export default function ImpersonationBanner() {
       if (raw) setInfo(JSON.parse(raw));
     } catch { /* noop */ }
   }, []);
+
+  useEffect(() => {
+    if (!info) return;
+    const remaining = new Date(info.expires_at).getTime() - Date.now();
+    if (!Number.isFinite(remaining) || remaining <= 0) {
+      void handleExit();
+      return;
+    }
+    const timeout = window.setTimeout(() => void handleExit(), remaining);
+    return () => window.clearTimeout(timeout);
+  }, [info]);
 
   if (!info) return null;
 

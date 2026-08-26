@@ -186,14 +186,15 @@ Deno.serve(async (req) => {
       },
     });
 
+    const expiresAt = new Date(Date.now() + 15 * 60 * 1000).toISOString();
     return new Response(
       JSON.stringify({
         success: true,
         access_token: verifyData.session.access_token,
-        refresh_token: verifyData.session.refresh_token,
         target_user_id: targetUserId,
         target_email: targetEmail,
         target_name: targetName,
+        expires_at: expiresAt,
       }),
       { headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );

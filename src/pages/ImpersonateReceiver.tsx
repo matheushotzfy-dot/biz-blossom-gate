@@ -7,7 +7,7 @@ import { supabase } from "@/integrations/supabase/client";
  * Flow:
  *  1) Admin tab opens this page in a new tab (window.open).
  *  2) This page posts { type: "IMPERSONATE_READY" } to window.opener.
- *  3) Opener (same origin) responds with { type: "IMPERSONATE_TOKENS", access_token, refresh_token }.
+ *  3) Opener responds with a short-lived access token; no refresh token crosses tabs.
  *  4) We validate event.source === window.opener AND event.origin === window.location.origin,
  *     then call supabase.auth.setSession and redirect to /dashboard.
  *
@@ -32,7 +32,9 @@ export default function ImpersonateReceiver() {
       if (event.source !== window.opener) return;
       const data = event.data;
       if (!data || data.type !== "IMPERSONATE_TOKENS") return;
-      if (!data.access_token || !data.refresh_token) return;
+       if (!data.access_token || !data.expires_at) return;
+       const expiresAt = new Date(data.expires_at).getTime();
+       if (!Number.isFinite(expiresAt) || expiresAt <= Date.now() || expiresAt > Date.now() + 16 * 60 * 1000) return;
       if (timedOut) return;
 
       window.removeEventListener("message", onMessage);
@@ -40,7 +42,7 @@ export default function ImpersonateReceiver() {
 
       const { error } = await supabase.auth.setSession({
         access_token: data.access_token,
-        refresh_token: data.refresh_token,
+         refresh_token: data.access_token,
       });
 
       if (error) {
@@ -56,6 +58,7 @@ export default function ImpersonateReceiver() {
           target_name: data.target_name || null,
           target_user_id: data.target_user_id || null,
           started_at: new Date().toISOString(),
+           expires_at: data.expires_at,
         }));
       } catch { /* noop */ }
 

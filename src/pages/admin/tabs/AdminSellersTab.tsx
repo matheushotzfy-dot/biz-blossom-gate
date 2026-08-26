@@ -351,8 +351,8 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
     try {
       const { data, error } = await supabase.functions.invoke("admin-impersonate", { body: { targetUserId: userId } });
       if (error || !data?.success) { toast.error(data?.error || "Erro ao acessar como usuário"); return; }
-      const { access_token, refresh_token, target_email, target_name, target_user_id } = data;
-      if (!access_token || !refresh_token) { toast.error("Tokens de impersonação não disponíveis"); return; }
+       const { access_token, target_email, target_name, target_user_id, expires_at } = data;
+       if (!access_token || !expires_at) { toast.error("Sessão de impersonação indisponível"); return; }
       const expectedOrigin = window.location.origin;
       const target = window.open(expectedOrigin + "/impersonate-receiver", "_blank");
       if (!target) { toast.error("Permita pop-ups para impersonar este usuário"); return; }
@@ -367,10 +367,10 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
           target.postMessage({
             type: "IMPERSONATE_TOKENS",
             access_token,
-            refresh_token,
             target_email,
             target_name,
             target_user_id,
+             expires_at,
           }, expectedOrigin);
         } catch { /* noop */ }
         window.removeEventListener("message", onMessage);
