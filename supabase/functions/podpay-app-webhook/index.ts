@@ -132,6 +132,13 @@ Deno.serve(async (req) => {
       });
     }
 
+    if (tx.podpay_payment_id && podpayId !== String(tx.podpay_payment_id)) {
+      safeLog("gateway id mismatch", { transactionId: tx.id, podpayId });
+      return new Response(JSON.stringify({ success: false, error: "gateway_id_mismatch" }), {
+        status: 409, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
     if (!isAllowedTransactionTransition(String(tx.status), mapped)) {
       safeLog("invalid transition", { transactionId: tx.id, status: `${tx.status}->${mapped}` });
       return new Response(JSON.stringify({ success: true, ignored: "invalid_transition" }), {
@@ -160,7 +167,7 @@ Deno.serve(async (req) => {
     };
     if (podpayId && !tx.podpay_payment_id) patch.podpay_payment_id = podpayId;
 
-    const { error: updErr } = await supabase
+    const { data: updatedTx, error: updErr } = await supabase
       .from("transactions").update(patch)
       .eq("id", tx.id)
       .eq("status", tx.status)
@@ -183,6 +190,11 @@ Deno.serve(async (req) => {
       safeLog("update error", { transactionId: tx.id, error: updErr.message });
       return new Response(JSON.stringify({ success: false, error: "update_failed" }), {
         status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+    if (!updatedTx) {
+      return new Response(JSON.stringify({ success: true, ignored: "state_changed" }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 

@@ -144,6 +144,11 @@ Deno.serve(async (req) => {
         status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
+    if (tx.podpay_payment_id && veoTxId !== String(tx.podpay_payment_id)) {
+      return new Response(JSON.stringify({ success: false, error: "gateway_id_mismatch" }), {
+        status: 409, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
 
     // Never trust callback fields as proof of payment. Fetch the canonical state
     // with our private VeoPag credentials and use only that response.
@@ -188,7 +193,7 @@ Deno.serve(async (req) => {
     };
     if (veoTxId && !tx.podpay_payment_id) patch.podpay_payment_id = veoTxId;
 
-    const { error: updErr } = await supabase
+    const { data: updatedTx, error: updErr } = await supabase
       .from("transactions")
       .update(patch)
       .eq("id", tx.id)
@@ -220,6 +225,11 @@ Deno.serve(async (req) => {
         JSON.stringify({ success: false, error: "update_failed" }),
         { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } },
       );
+    }
+    if (!updatedTx) {
+      return new Response(JSON.stringify({ success: true, ignored: "state_changed" }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
     }
 
     safeLog("updated", { transactionId: tx.id, status: mapped });
