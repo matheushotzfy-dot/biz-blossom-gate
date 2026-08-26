@@ -6,23 +6,14 @@
 // attacker cannot confirm someone else's account or enumerate registered
 // e-mails by trial-and-error.
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
-
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
-};
-
-function clientIp(req: Request): string {
-  return (
-    req.headers.get("cf-connecting-ip") ||
-    req.headers.get("x-real-ip") ||
-    req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
-    "0.0.0.0"
-  );
-}
+// CORS restrito à allowlist do projeto: esta função é chamada pelo browser
+// autenticado, portanto não pode aceitar qualquer origem.
+import { baseHeaders, clientIp, preflight, safeError } from "../_shared/security.ts";
 
 Deno.serve(async (req) => {
-  if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
+  const pre = preflight(req);
+  if (pre) return pre;
+  const corsHeaders = baseHeaders(req);
 
   try {
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
@@ -91,7 +82,7 @@ Deno.serve(async (req) => {
         email_confirm: true,
       });
       if (updErr) {
-        console.error("[auto-confirm-signup] update failed", updErr.message);
+        safeError("auto-confirm-signup", updErr);
         return new Response(JSON.stringify({ error: "internal" }), {
           status: 500,
           headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -104,7 +95,7 @@ Deno.serve(async (req) => {
       { headers: { ...corsHeaders, "Content-Type": "application/json" } },
     );
   } catch (e) {
-    console.error("[auto-confirm-signup]", (e as Error).message);
+    safeError("auto-confirm-signup", e);
     return new Response(JSON.stringify({ error: "internal" }), {
       status: 500,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
