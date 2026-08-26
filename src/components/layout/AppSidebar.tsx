@@ -427,6 +427,8 @@ export function AppSidebar({ pinned = true, onTogglePin, onHoverChange }: AppSid
             section={section}
             pathname={location.pathname}
             isFirst={idx === 0}
+            index={idx}
+
           />
         ))}
       </SidebarContent>
