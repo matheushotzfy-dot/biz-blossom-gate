@@ -1,14 +1,12 @@
-import { Copy, Crosshair, ExternalLink, Link2, Palette, Pencil, Check, BookOpen, Trash2, FileEdit } from "lucide-react";
+import { Copy, Crosshair, ExternalLink, Palette, Pencil, Check, Trash2, Link2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { ProductActionsMenu, type ProductMenuHandlers } from "./ProductActionsMenu";
 import { DELIVERY_LABELS, formatCurrency, type Product, getCheckoutLink, getEffectiveStatus, getProductRequirements } from "./productPresentation";
 import { cn } from "@/lib/utils";
 
 /**
- * Grade de produtos no idioma visual do dashboard:
- * superfícies 100% sólidas, bordas de 1px, cantos de 12px, numerais tabulares,
- * ícone "fantasma" ao fundo e hover seco (apenas cor de borda / fundo).
- * Sem sombras, sem blur, sem elevação.
+ * Grade de produtos — linguagem "soft round": superfícies sólidas, cantos generosos (20px),
+ * pílulas arredondadas, hover apenas de cor (150ms). Sem sombras, sem blur, sem transform.
  */
 
 type ProductGridViewProps = ProductMenuHandlers & {
@@ -17,11 +15,11 @@ type ProductGridViewProps = ProductMenuHandlers & {
   toolbar?: React.ReactNode;
 };
 
-const STATUS_META: Record<string, { label: string; dot: string; text: string }> = {
-  active: { label: "Ativo", dot: "bg-success", text: "text-success" },
-  inactive: { label: "Inativo", dot: "bg-destructive", text: "text-destructive" },
-  pending_review: { label: "Em revisão", dot: "bg-warning", text: "text-warning" },
-  draft: { label: "Rascunho", dot: "bg-muted-foreground/50", text: "text-muted-foreground" },
+const STATUS_META: Record<string, { label: string; dot: string; chip: string }> = {
+  active: { label: "Ativo", dot: "bg-success", chip: "bg-success/10 text-success" },
+  inactive: { label: "Inativo", dot: "bg-destructive", chip: "bg-destructive/10 text-destructive" },
+  pending_review: { label: "Em revisão", dot: "bg-warning", chip: "bg-warning/10 text-warning" },
+  draft: { label: "Rascunho", dot: "bg-muted-foreground/60", chip: "bg-muted/40 text-muted-foreground" },
 };
 
 const THEME_LABELS: Record<string, string> = {
@@ -39,6 +37,9 @@ const shortenLink = (url: string) => {
   }
 };
 
+const iconBtn =
+  "flex h-9 w-9 items-center justify-center rounded-full border border-border/50 bg-background text-muted-foreground/70 transition-colors duration-150 hover:border-primary/40 hover:bg-primary/10 hover:text-primary";
+
 export function ProductGridView({ products, copiedId, toolbar, ...handlers }: ProductGridViewProps) {
   const navigate = useNavigate();
 
@@ -46,7 +47,7 @@ export function ProductGridView({ products, copiedId, toolbar, ...handlers }: Pr
     <div className="w-full">
       {toolbar && <div className="mb-4">{toolbar}</div>}
 
-      <div className="grid grid-cols-1 gap-3 lg:grid-cols-2 2xl:grid-cols-3">
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-2 2xl:grid-cols-3">
         {products.map((product) => {
           const effectiveStatus = getEffectiveStatus(product);
           const status = STATUS_META[effectiveStatus] || STATUS_META.inactive;
@@ -64,68 +65,58 @@ export function ProductGridView({ products, copiedId, toolbar, ...handlers }: Pr
           return (
             <article
               key={product.id}
-              className={cn(
-                "group relative flex flex-col overflow-hidden rounded-[12px] border border-border/60 bg-card",
-                "transition-colors duration-200 hover:border-border",
-                isInactive && "border-destructive/25 hover:border-destructive/40",
-                isPending && "border-warning/25 hover:border-warning/40",
-                isDraft && "border-dashed",
-              )}
+              className="group flex flex-col rounded-[20px] border border-border/50 bg-card p-4 transition-colors duration-150 hover:border-border sm:p-5"
             >
-              {/* Ícone fantasma ao fundo — mesma marca d'água dos KPIs do dashboard */}
-              <BookOpen
-                aria-hidden
-                strokeWidth={1.25}
-                className="pointer-events-none absolute -right-4 top-6 h-24 w-24 text-foreground/[0.045]"
-              />
-
-              {/* ── Cabeçalho: identidade + preço ── */}
-              <div className="relative flex items-start gap-3.5 px-4 pt-4">
-                <div className="h-[52px] w-[52px] shrink-0 overflow-hidden rounded-[10px] border border-border/70 bg-background">
+              {/* Identidade */}
+              <div className="flex items-center gap-3.5">
+                <div className="h-14 w-14 shrink-0 overflow-hidden rounded-[16px] border border-border/50 bg-background">
                   {product.image_url ? (
                     <img
                       src={product.image_url}
                       alt={product.name}
                       loading="lazy"
+                      decoding="async"
                       className="h-full w-full object-cover"
                     />
                   ) : (
-                    <span className="flex h-full w-full items-center justify-center font-display text-[19px] font-bold leading-none tracking-[-0.03em] text-muted-foreground/60">
+                    <span className="flex h-full w-full items-center justify-center font-display text-[20px] font-bold leading-none tracking-[-0.03em] text-muted-foreground/50">
                       {initial}
                     </span>
                   )}
                 </div>
 
                 <div className="min-w-0 flex-1">
-                  <div className="flex items-start justify-between gap-3">
-                    <h3 className="truncate font-display text-[15px] font-bold leading-tight tracking-[-0.02em] text-foreground">
+                  <div className="flex items-center gap-2.5">
+                    <h3 className="truncate font-display text-[15.5px] font-bold leading-tight tracking-[-0.02em] text-foreground">
                       {product.name}
                     </h3>
-                    <span className={cn("mt-0.5 inline-flex shrink-0 items-center gap-1.5 text-[11px] font-medium", status.text)}>
+                    <span
+                      className={cn(
+                        "inline-flex shrink-0 items-center gap-1.5 rounded-full px-2.5 py-1 text-[10.5px] font-semibold",
+                        status.chip,
+                      )}
+                    >
                       <span className={cn("h-1.5 w-1.5 rounded-full", status.dot)} />
                       {status.label}
                     </span>
                   </div>
-
-                  <p className="mt-1 truncate text-[11.5px] text-muted-foreground/60">
+                  <p className="mt-1.5 truncate text-[11.5px] text-muted-foreground/60">
                     {deliveryLabel} · Layout {themeLabel}
                     {product.affiliate_enabled ? ` · Afiliados ${product.affiliate_commission}%` : ""}
                   </p>
-
-                  <p className="mt-2.5 font-display text-[24px] font-bold leading-none tracking-[-0.03em] tabular-nums text-foreground">
-                    {formatCurrency(Number(product.price))}
-                  </p>
                 </div>
+
+                <p className="shrink-0 self-start text-right font-display text-[22px] font-bold leading-none tracking-[-0.03em] tabular-nums text-foreground">
+                  {formatCurrency(Number(product.price))}
+                </p>
               </div>
 
-              {/* ── Aviso de moderação (linha seca, sem animação) ── */}
+              {/* Aviso de moderação */}
               {(isInactive || isPending) && (
                 <p
                   className={cn(
-                    "relative mx-4 mt-3.5 rounded-[8px] border px-3 py-2 text-[11.5px] font-medium",
-                    isInactive
-                      ? "border-destructive/25 bg-destructive/[0.06] text-destructive"
-                      : "border-warning/25 bg-warning/[0.06] text-warning",
+                    "mt-3.5 rounded-[14px] px-3.5 py-2.5 text-[11.5px] font-medium",
+                    isInactive ? "bg-destructive/10 text-destructive" : "bg-warning/10 text-warning",
                   )}
                 >
                   {isInactive ? "Vendas inativadas pela equipe." : "Produto em análise pela equipe."}
@@ -133,24 +124,23 @@ export function ProductGridView({ products, copiedId, toolbar, ...handlers }: Pr
               )}
 
               {isDraft ? (
-                <div className="relative mt-3.5 flex flex-1 flex-col">
-                  {/* Checklist do rascunho */}
-                  <div className="border-t border-border/40 px-4 py-3.5">
+                <>
+                  <div className="mt-4 rounded-[16px] bg-muted/25 px-4 py-3.5">
                     <div className="flex items-center justify-between">
-                      <p className="inline-flex items-center gap-1.5 text-[11px] font-medium text-muted-foreground">
-                        <FileEdit className="h-3 w-3" strokeWidth={2} /> Falta terminar
+                      <p className="text-[11px] font-semibold uppercase tracking-[0.04em] text-muted-foreground/70">
+                        Falta terminar
                       </p>
-                      <span className="text-[11px] font-semibold tabular-nums text-foreground/70">
+                      <span className="rounded-full bg-background px-2.5 py-0.5 text-[11px] font-semibold tabular-nums text-foreground/70">
                         {missingCount} {missingCount === 1 ? "item" : "itens"}
                       </span>
                     </div>
-                    <ul className="mt-2.5 space-y-1.5">
+                    <ul className="mt-3 space-y-2">
                       {requirements.map((r) => (
-                        <li key={r.key} className="flex items-center gap-2 text-[11.5px]">
+                        <li key={r.key} className="flex items-center gap-2.5 text-[12px]">
                           {r.done ? (
                             <Check className="h-3.5 w-3.5 shrink-0 text-success" strokeWidth={2.5} />
                           ) : (
-                            <span className="h-3.5 w-3.5 shrink-0 rounded-full border border-dashed border-muted-foreground/40" />
+                            <span className="h-3.5 w-3.5 shrink-0 rounded-full border border-muted-foreground/35" />
                           )}
                           <span className={cn(r.done ? "text-muted-foreground/50 line-through" : "text-foreground/80")}>
                             {r.label}
@@ -160,11 +150,11 @@ export function ProductGridView({ products, copiedId, toolbar, ...handlers }: Pr
                     </ul>
                   </div>
 
-                  <div className="mt-auto grid grid-cols-[1fr_auto] gap-px border-t border-border/40 bg-border/40">
+                  <div className="mt-4 flex items-center gap-2">
                     <button
                       type="button"
                       onClick={(e) => { e.stopPropagation(); handlers.onEditProduct(product); }}
-                      className="flex h-11 items-center justify-center gap-2 bg-card text-[12px] font-semibold text-foreground transition-colors hover:bg-primary/[0.08] hover:text-primary"
+                      className="flex h-9 flex-1 items-center justify-center gap-2 rounded-full bg-primary/10 text-[12.5px] font-semibold text-primary transition-colors duration-150 hover:bg-primary/[0.16]"
                     >
                       <Pencil className="h-3.5 w-3.5" strokeWidth={2} />
                       Continuar edição
@@ -172,43 +162,44 @@ export function ProductGridView({ products, copiedId, toolbar, ...handlers }: Pr
                     <button
                       type="button"
                       onClick={(e) => { e.stopPropagation(); handlers.onDeleteProduct(product); }}
-                      className="flex h-11 items-center justify-center gap-2 bg-card px-4 text-[12px] font-medium text-muted-foreground transition-colors hover:bg-destructive/[0.08] hover:text-destructive"
-                      title="Excluir rascunho"
+                      className="flex h-9 items-center justify-center gap-2 rounded-full border border-border/50 bg-background px-4 text-[12.5px] font-medium text-muted-foreground transition-colors duration-150 hover:border-destructive/40 hover:bg-destructive/10 hover:text-destructive"
                     >
                       <Trash2 className="h-3.5 w-3.5" strokeWidth={2} />
                       Excluir
                     </button>
                   </div>
-                </div>
+                </>
               ) : (
-                <div className="relative mt-3.5 flex flex-1 flex-col">
-                  {/* Link do checkout — linha monoespaçada com cópia */}
+                <>
+                  {/* Link do checkout — pílula copiável */}
                   {linkPreview ? (
                     <button
                       type="button"
                       onClick={(e) => { e.stopPropagation(); handlers.onCopyLink(product); }}
-                      className="flex items-center gap-2.5 border-t border-border/40 px-4 py-3 text-left transition-colors hover:bg-muted/20"
+                      className="mt-4 flex w-full items-center gap-2.5 rounded-full bg-muted/30 py-2.5 pl-4 pr-3 text-left transition-colors duration-150 hover:bg-muted/50"
                     >
                       <Link2 className="h-3.5 w-3.5 shrink-0 text-muted-foreground/50" strokeWidth={2} />
-                      <span className="flex-1 truncate font-mono text-[11px] text-muted-foreground/70">{linkPreview}</span>
+                      <span className="flex-1 truncate font-mono text-[11px] text-muted-foreground/75">{linkPreview}</span>
                       {isCopied ? (
-                        <Check className="h-3.5 w-3.5 shrink-0 text-success" strokeWidth={2.5} />
+                        <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-success/12 px-2 py-0.5 text-[10.5px] font-semibold text-success">
+                          <Check className="h-3 w-3" strokeWidth={2.5} /> Copiado
+                        </span>
                       ) : (
-                        <Copy className="h-3.5 w-3.5 shrink-0 text-muted-foreground/40" strokeWidth={2} />
+                        <Copy className="h-3.5 w-3.5 shrink-0 text-muted-foreground/45" strokeWidth={2} />
                       )}
                     </button>
                   ) : (
-                    <p className="border-t border-border/40 px-4 py-3 text-[11.5px] text-muted-foreground/50">
+                    <p className="mt-4 rounded-full bg-muted/25 px-4 py-2.5 text-[11.5px] text-muted-foreground/55">
                       Checkout ainda não publicado
                     </p>
                   )}
 
-                  {/* Barra de ações — divisórias de 1px, hover seco */}
-                  <div className="mt-auto grid grid-cols-[1fr_auto_auto_auto_auto] gap-px border-t border-border/40 bg-border/40">
+                  {/* Ações */}
+                  <div className="mt-4 flex items-center gap-2">
                     <button
                       type="button"
                       onClick={(e) => { e.stopPropagation(); handlers.onEditProduct(product); }}
-                      className="flex h-11 items-center justify-center gap-2 bg-card text-[12px] font-semibold text-foreground transition-colors hover:bg-primary/[0.08] hover:text-primary"
+                      className="flex h-9 flex-1 items-center justify-center gap-2 rounded-full bg-primary/10 text-[12.5px] font-semibold text-primary transition-colors duration-150 hover:bg-primary/[0.16]"
                     >
                       <Pencil className="h-3.5 w-3.5" strokeWidth={2} />
                       Editar produto
@@ -216,7 +207,7 @@ export function ProductGridView({ products, copiedId, toolbar, ...handlers }: Pr
                     <button
                       type="button"
                       onClick={(e) => { e.stopPropagation(); navigate(`/vendas/produtos/${product.id}/checkout-builder`, { state: { product } }); }}
-                      className="flex h-11 w-11 items-center justify-center bg-card text-muted-foreground/60 transition-colors hover:bg-primary/[0.08] hover:text-primary"
+                      className={iconBtn}
                       title="Checkout builder"
                       aria-label="Checkout builder"
                     >
@@ -225,35 +216,33 @@ export function ProductGridView({ products, copiedId, toolbar, ...handlers }: Pr
                     <button
                       type="button"
                       onClick={(e) => { e.stopPropagation(); handlers.onOpenPixels(product); }}
-                      className="flex h-11 w-11 items-center justify-center bg-card text-muted-foreground/60 transition-colors hover:bg-primary/[0.08] hover:text-primary"
+                      className={iconBtn}
                       title="Pixels & tracking"
                       aria-label="Pixels & tracking"
                     >
                       <Crosshair className="h-3.5 w-3.5" strokeWidth={2} />
                     </button>
-                    {product.checkout_url ? (
+                    {product.checkout_url && (
                       <button
                         type="button"
                         onClick={(e) => { e.stopPropagation(); handlers.onOpenCheckout(product); }}
-                        className="flex h-11 w-11 items-center justify-center bg-card text-muted-foreground/60 transition-colors hover:bg-primary/[0.08] hover:text-primary"
+                        className={iconBtn}
                         title="Abrir checkout"
                         aria-label="Abrir checkout"
                       >
                         <ExternalLink className="h-3.5 w-3.5" strokeWidth={2} />
                       </button>
-                    ) : (
-                      <span className="hidden" />
                     )}
-                    <div onClick={(e) => e.stopPropagation()} className="flex bg-card">
+                    <div onClick={(e) => e.stopPropagation()}>
                       <ProductActionsMenu
                         copied={isCopied}
                         product={product}
-                        triggerClassName="flex h-11 w-11 items-center justify-center rounded-none border-0 bg-transparent text-muted-foreground/60 transition-colors hover:bg-primary/[0.08] hover:text-primary data-[state=open]:bg-primary/[0.08] data-[state=open]:text-primary"
+                        triggerClassName={iconBtn}
                         {...handlers}
                       />
                     </div>
                   </div>
-                </div>
+                </>
               )}
             </article>
           );

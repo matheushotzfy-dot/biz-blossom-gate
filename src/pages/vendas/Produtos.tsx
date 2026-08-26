@@ -207,7 +207,7 @@ export default function Produtos() {
         actions={
           <button
             onClick={() => navigate("/vendas/produtos/novo/editar")}
-            className="inline-flex h-9 items-center gap-2 rounded-[10px] bg-primary px-4 text-[12px] font-semibold text-primary-foreground transition-colors hover:bg-primary/90"
+            className="inline-flex h-9 items-center gap-2 rounded-full bg-primary px-4 text-[12px] font-semibold text-primary-foreground transition-colors hover:bg-primary/90"
           >
             <Plus className="h-4 w-4" strokeWidth={2.25} />
             Novo produto
@@ -218,7 +218,7 @@ export default function Produtos() {
       {/* ── Filtros + busca (linha seca, sem elevação) ── */}
       <div className="flex flex-col gap-2.5 animate-fade-in stagger-2 lg:flex-row lg:items-center lg:justify-between">
         <div className="-mx-3 overflow-x-auto scrollbar-none sm:mx-0">
-          <div className="inline-flex min-w-full items-center gap-px rounded-[10px] border border-border/60 bg-card p-px mx-3 sm:mx-0 lg:w-fit lg:min-w-0">
+          <div className="inline-flex min-w-full items-center gap-px rounded-full border border-border/60 bg-card p-px mx-3 sm:mx-0 lg:w-fit lg:min-w-0">
             {tabs.map((item) => {
               const active = tab === item.value;
               return (
@@ -226,7 +226,7 @@ export default function Produtos() {
                   key={item.value}
                   onClick={() => setTab(item.value)}
                   className={cn(
-                    "inline-flex h-8 shrink-0 items-center gap-1.5 whitespace-nowrap rounded-[9px] px-3 text-[12px] font-medium transition-colors",
+                    "inline-flex h-8 shrink-0 items-center gap-1.5 whitespace-nowrap rounded-full px-3 text-[12px] font-medium transition-colors",
                     active
                       ? "bg-muted/50 text-foreground"
                       : "text-muted-foreground/70 hover:text-foreground"
@@ -251,7 +251,7 @@ export default function Produtos() {
           {showClearDraftsBtn && (
             <button
               onClick={() => setClearDraftsOpen(true)}
-              className="inline-flex h-9 shrink-0 items-center gap-1.5 rounded-[10px] border border-border/60 bg-card px-3 text-[11.5px] font-medium text-muted-foreground transition-colors hover:border-destructive/40 hover:text-destructive"
+              className="inline-flex h-9 shrink-0 items-center gap-1.5 rounded-full border border-border/60 bg-card px-3 text-[11.5px] font-medium text-muted-foreground transition-colors hover:border-destructive/40 hover:text-destructive"
             >
               <Trash2 className="h-3.5 w-3.5" strokeWidth={2} />
               <span className="hidden sm:inline">Limpar rascunhos</span>
@@ -264,7 +264,7 @@ export default function Produtos() {
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Buscar produto"
-              className="h-9 w-full rounded-[10px] border border-border/60 bg-card pl-9 pr-8 text-[12px] text-foreground placeholder:text-muted-foreground/50 transition-colors focus:border-border focus:outline-none lg:w-72"
+              className="h-9 w-full rounded-[14px] border border-border/60 bg-card pl-9 pr-8 text-[12px] text-foreground placeholder:text-muted-foreground/50 transition-colors focus:border-border focus:outline-none lg:w-72"
             />
             {search && (
               <button onClick={() => setSearch("")} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-muted-foreground/40 transition-colors hover:text-foreground">
@@ -280,9 +280,9 @@ export default function Produtos() {
         {productsLoading ? (
           <div className="grid grid-cols-1 gap-3 lg:grid-cols-2 2xl:grid-cols-3">
             {Array.from({ length: 6 }).map((_, i) => (
-              <div key={i} className="animate-pulse overflow-hidden rounded-[12px] border border-border/60 bg-card">
+              <div key={i} className="animate-pulse overflow-hidden rounded-[20px] border border-border/60 bg-card">
                 <div className="flex items-start gap-3.5 p-4">
-                  <div className="h-[52px] w-[52px] shrink-0 rounded-[10px] bg-muted/40" />
+                  <div className="h-[52px] w-[52px] shrink-0 rounded-[16px] bg-muted/40" />
                   <div className="flex-1 space-y-2">
                     <div className="h-3.5 w-1/2 rounded bg-muted/40" />
                     <div className="h-2.5 w-2/3 rounded bg-muted/25" />
@@ -295,8 +295,8 @@ export default function Produtos() {
             ))}
           </div>
         ) : filtered.length === 0 ? (
-          <div className="flex flex-col items-center justify-center rounded-[12px] border border-dashed border-border/60 bg-card px-6 py-20 text-center animate-fade-in stagger-3">
-            <div className="flex h-14 w-14 items-center justify-center rounded-[12px] border border-border/60 bg-background">
+          <div className="flex flex-col items-center justify-center rounded-[20px] border border-dashed border-border/60 bg-card px-6 py-20 text-center animate-fade-in stagger-3">
+            <div className="flex h-14 w-14 items-center justify-center rounded-[16px] border border-border/60 bg-background">
               <Package className="h-6 w-6 text-muted-foreground/50" strokeWidth={1.5} />
             </div>
             <p className="mt-5 font-display text-[15px] font-bold tracking-[-0.02em] text-foreground">
@@ -310,7 +310,7 @@ export default function Produtos() {
             {!search && tab === "all" && (
               <button
                 onClick={() => navigate("/vendas/produtos/novo/editar")}
-                className="mt-6 inline-flex h-9 items-center gap-2 rounded-[10px] bg-primary px-4 text-[12px] font-semibold text-primary-foreground transition-colors hover:bg-primary/90"
+                className="mt-6 inline-flex h-9 items-center gap-2 rounded-full bg-primary px-4 text-[12px] font-semibold text-primary-foreground transition-colors hover:bg-primary/90"
               >
                 <Plus className="h-4 w-4" strokeWidth={2.25} />
                 Criar primeiro produto
