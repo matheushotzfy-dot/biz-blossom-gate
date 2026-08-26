@@ -1,7 +1,6 @@
 import { memo, useCallback, useEffect, useMemo, useState } from "react";
 import {
   Check,
-  ChevronDown,
   ChevronLeft,
   ChevronRight,
   Copy,
@@ -289,5 +288,3 @@ export function ProductGridView({ products, copiedId, toolbar, ...handlers }: Pr
     </div>
   );
 }
-
-export { ChevronDown };
