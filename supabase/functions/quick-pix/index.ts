@@ -134,9 +134,10 @@ Deno.serve(async (req) => {
     }
 
     // O limite deve ser validado antes de criar a cobrança na adquirente.
-    const { data: maxTicket, error: maxTicketError } = await supabase
+    const { data: maxTicket, error: maxTicketError } = await supaUser
       .rpc("get_user_max_ticket", { _user_id: userId });
     if (maxTicketError) {
+      await supabase.from("idempotency_keys").delete().eq("key", `qpix:${userId}:${rawIdem}`);
       safeLog("Max ticket lookup failed", { error: maxTicketError.message });
       return new Response(
         JSON.stringify({ success: false, error: "Não foi possível validar o limite da cobrança" }),
@@ -145,6 +146,7 @@ Deno.serve(async (req) => {
     }
     const allowedMax = Number(maxTicket);
     if (Number.isFinite(allowedMax) && allowedMax > 0 && amt > allowedMax) {
+      await supabase.from("idempotency_keys").delete().eq("key", `qpix:${userId}:${rawIdem}`);
       return new Response(
         JSON.stringify({ success: false, error: `Valor excede o limite máximo de R$ ${allowedMax.toFixed(2)}` }),
         { status: 422, headers: { ...corsHeaders, "Content-Type": "application/json" } },
