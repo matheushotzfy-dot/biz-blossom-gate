@@ -286,36 +286,36 @@ export type Database = {
       admin_2fa_codes: {
         Row: {
           attempts: number | null
-          code_hash: string
+          code_hash: string | null
           created_at: string | null
           email: string
           expires_at: string
           id: string
           role: string | null
           temp_token: string | null
-          user_id: string | null
+          user_id: string
         }
         Insert: {
           attempts?: number | null
-          code_hash: string
+          code_hash?: string | null
           created_at?: string | null
           email: string
           expires_at: string
           id?: string
           role?: string | null
           temp_token?: string | null
-          user_id?: string | null
+          user_id: string
         }
         Update: {
           attempts?: number | null
-          code_hash?: string
+          code_hash?: string | null
           created_at?: string | null
           email?: string
           expires_at?: string
           id?: string
           role?: string | null
           temp_token?: string | null
-          user_id?: string | null
+          user_id?: string
         }
         Relationships: []
       }
