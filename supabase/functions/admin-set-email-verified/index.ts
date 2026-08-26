@@ -78,7 +78,7 @@ Deno.serve(async (req) => {
 
     if (action === "status") {
       const { data: user, error } = await admin.auth.admin.getUserById(targetUserId);
-      if (error) return json({ success: false, error: error.message }, corsHeaders, 500);
+      if (error) return json({ success: false, error: "Não foi possível atualizar o cadastro." }, corsHeaders, 500);
       return json({
         success: true,
         verified: !!user?.user?.email_confirmed_at,
@@ -90,7 +90,7 @@ Deno.serve(async (req) => {
 
     if (verified) {
       const { error } = await admin.auth.admin.updateUserById(targetUserId, { email_confirm: true });
-      if (error) return json({ success: false, error: error.message }, corsHeaders, 500);
+      if (error) return json({ success: false, error: "Não foi possível atualizar o cadastro." }, corsHeaders, 500);
 
       const { data: userData } = await admin.auth.admin.getUserById(targetUserId);
       const verifiedEmail = userData?.user?.email?.trim().toLowerCase();
@@ -105,7 +105,7 @@ Deno.serve(async (req) => {
     } else {
       // updateUserById cannot un-confirm; use privileged SQL via RPC helper.
       const { error } = await admin.rpc("admin_unverify_email", { _user_id: targetUserId });
-      if (error) return json({ success: false, error: error.message }, corsHeaders, 500);
+      if (error) return json({ success: false, error: "Não foi possível atualizar o cadastro." }, corsHeaders, 500);
     }
 
     await admin.from("audit_logs").insert({
