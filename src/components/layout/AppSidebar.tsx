@@ -403,6 +403,12 @@ export function AppSidebar({ pinned = true, onTogglePin, onHoverChange }: AppSid
             </button>
           )}
         </div>
+        <RevenueBar
+          collapsed={collapsed}
+          revenue={revenue}
+          milestone={milestone}
+          onOpenRewards={() => navigate("/premiacoes")}
+        />
       </SidebarHeader>
 
       <SidebarContent className="relative gap-0 overflow-y-auto px-3 py-3 group-data-[collapsible=icon]:px-1.5 group-data-[collapsible=icon]:py-4">
@@ -416,14 +422,7 @@ export function AppSidebar({ pinned = true, onTogglePin, onHoverChange }: AppSid
         ))}
       </SidebarContent>
 
-      <div className="px-2.5 pb-1 group-data-[collapsible=icon]:hidden">
-        <RevenueBar
-          collapsed={collapsed}
-          revenue={revenue}
-          milestone={milestone}
-          onOpenRewards={() => navigate("/premiacoes")}
-        />
-      </div>
+
 
       <SidebarFooter className="relative border-t border-sidebar-border/60 p-2.5 pb-3">
 
