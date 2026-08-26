@@ -99,15 +99,16 @@ export function SellerOnboarding() {
     ];
   }, [profile?.full_name, profile?.phone, profile?.document_number, profile?.account_status, hasDocs, hasPayout]);
 
-  if (loading || !profile) return null;
-  if (approved) return null;
+  // Fonte única de verdade: só renderiza quando o perfil resolveu E não está aprovado.
+  if (!kyc.resolved || !kyc.showOnboarding || !profile) return null;
   if (hasDocs === null || hasPayout === null) return null;
 
   const doneCount = steps.filter((s) => s.state === "done").length;
   const pct = Math.round((doneCount / steps.length) * 100);
   const next = steps.find((s) => s.state === "pending");
-  const inReview = profile.account_status === "pending_review";
-  const rejected = profile.account_status === "rejected";
+  const inReview = kyc.inReview;
+  const rejected = kyc.rejected;
+
 
   const headline = rejected
     ? "Precisamos revisar seus documentos"
