@@ -135,14 +135,29 @@ export function HDStat({ label, value, sub, icon: Icon, tone = "neutral", classN
   );
 }
 
-/** Responsive grid for HDStat cards. */
+/**
+ * Grid de KPIs. No mobile vira um carrossel horizontal com snap (padrão app),
+ * a partir de `sm` volta a ser grid responsivo.
+ */
 export function HDStatGrid({ children, className, ...rest }: ComponentProps<"div">) {
   return (
-    <div className={cn("grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4", className)} {...rest}>
+    <div
+      className={cn(
+        // mobile: carrossel com snap e sangria nas bordas
+        "-mx-2 flex snap-x snap-mandatory gap-3 overflow-x-auto px-2 pb-1 scrollbar-none",
+        "[&>*]:min-w-[76%] [&>*]:snap-start [&>*]:shrink-0",
+        // desktop: grid clássico
+        "sm:mx-0 sm:grid sm:grid-cols-2 sm:gap-4 sm:overflow-visible sm:px-0 sm:pb-0 xl:grid-cols-4",
+        "sm:[&>*]:min-w-0 sm:[&>*]:shrink",
+        className,
+      )}
+      {...rest}
+    >
       {children}
     </div>
   );
 }
+
 
 /** Solid section card with optional header. */
 export function HDCard({

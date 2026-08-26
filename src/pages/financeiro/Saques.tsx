@@ -338,26 +338,27 @@ export default function Saques() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Balances Column */}
         <div className="lg:col-span-2 space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="bg-card p-8 rounded-[24px] border border-border/60  relative overflow-hidden group">
+          {/* Saldos — carrossel com snap no mobile, grid no desktop */}
+          <div className="-mx-2 flex snap-x snap-mandatory gap-3 overflow-x-auto px-2 pb-1 scrollbar-none md:mx-0 md:grid md:grid-cols-2 md:gap-4 md:overflow-visible md:px-0 [&>*]:min-w-[82%] [&>*]:shrink-0 [&>*]:snap-start md:[&>*]:min-w-0 md:[&>*]:shrink">
+            <div className="bg-card p-5 sm:p-8 rounded-[20px] sm:rounded-[24px] border border-border/60 relative overflow-hidden group">
               <div className="relative z-10">
                 <div className="flex items-center gap-2 text-muted-foreground/60 mb-3">
                   <Wallet size={16} />
                   <span className="text-[11px] font-semibold ">Saldo Disponível</span>
                 </div>
-                <p className="text-4xl font-black text-foreground tabular-nums tracking-tighter">{fmt(availableBalance)}</p>
+                <p className="text-[30px] sm:text-4xl font-black text-foreground tabular-nums tracking-tighter">{fmt(availableBalance)}</p>
               </div>
               <div className="absolute right-[-20px] bottom-[-20px] opacity-[0.03] rotate-[-15deg] group-hover:scale-110 transition-transform duration-500">
                 <Wallet size={160} />
               </div>
             </div>
-            <div className="bg-card p-8 rounded-[24px] border border-border/60  relative overflow-hidden group">
+            <div className="bg-card p-5 sm:p-8 rounded-[20px] sm:rounded-[24px] border border-border/60 relative overflow-hidden group">
               <div className="relative z-10">
                 <div className="flex items-center gap-2 text-muted-foreground/60 mb-3">
                   <Clock size={16} />
                   <span className="text-[11px] font-semibold ">Aguardando Liberação</span>
                 </div>
-                <p className="text-4xl font-black text-foreground tabular-nums tracking-tighter">{fmt(retainedAmount)}</p>
+                <p className="text-[30px] sm:text-4xl font-black text-foreground tabular-nums tracking-tighter">{fmt(retainedAmount)}</p>
               </div>
               <div className="absolute right-[-20px] bottom-[-20px] opacity-[0.03] rotate-[-15deg] group-hover:scale-110 transition-transform duration-500">
                 <Clock size={160} />
@@ -389,7 +390,46 @@ export default function Saques() {
               </div>
             </div>
 
-            <div className="overflow-x-auto">
+            {/* Lista mobile — linhas amplas, alvo de toque confortável */}
+            <div className="divide-y divide-border/40 md:hidden">
+              {filtered.length === 0 ? (
+                <div className="flex flex-col items-center gap-2 px-4 py-14 opacity-40">
+                  <History size={40} strokeWidth={1} />
+                  <p className="text-[12px] font-semibold">Sem saques registrados</p>
+                </div>
+              ) : (
+                filtered.map((w) => {
+                  const status = STATUS_CONFIG[w.status] || STATUS_CONFIG.pending;
+                  return (
+                    <div key={w.id} className="flex items-center gap-3 px-4 py-4 active:bg-muted/25">
+                      <span className={cn("flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-border/50", status.bg, status.color)}>
+                        <History className="h-4 w-4" strokeWidth={2} />
+                      </span>
+                      <div className="min-w-0 flex-1">
+                        <div className="flex items-center justify-between gap-2">
+                          <p className="truncate font-mono text-[11px] font-bold text-muted-foreground">
+                            #{w.id.slice(0, 8).toUpperCase()}
+                          </p>
+                          <p className="shrink-0 text-[14px] font-black tabular-nums tracking-tight text-foreground">
+                            {fmt(Number(w.amount))}
+                          </p>
+                        </div>
+                        <div className="mt-1 flex items-center justify-between gap-2">
+                          <p className="truncate text-[11px] font-medium text-muted-foreground/60">
+                            {format(new Date(w.created_at), "dd/MM/yyyy 'às' HH:mm", { locale: ptBR })}
+                          </p>
+                          <span className={cn("shrink-0 rounded-full px-2 py-0.5 text-[10px] font-semibold", status.bg, status.color)}>
+                            {status.label}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })
+              )}
+            </div>
+
+            <div className="hidden overflow-x-auto md:block">
               <table className="w-full min-w-[640px] text-left">
                 <thead>
                   <tr className="bg-muted/30 text-[11px] font-semibold text-muted-foreground/60 border-b border-border/40">

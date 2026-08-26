@@ -5,6 +5,7 @@ import { useState, useRef, useEffect, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useProfile } from "@/hooks/useProfile";
+import { useKycStatus } from "@/hooks/useKycStatus";
 import {
  X as XIcon, Shield, Upload, Camera, Image, Loader2, CheckCircle2,
  AlertTriangle, ArrowRight, ArrowLeft, FileCheck, Fingerprint, Sparkles,
@@ -29,6 +30,7 @@ const CNPJ_STEP = { type: "cnpj_card", label: "Cartão CNPJ", desc: "Envie o com
 export function KycOnboardingPopup() {
  const { user } = useAuth();
  const { profile } = useProfile();
+ const kyc = useKycStatus();
  const [open, setOpen] = useState(false);
  const isCnpj = profile?.document_type === "cnpj";
  const STEPS = isCnpj ? [...BASE_STEPS, CNPJ_STEP] : BASE_STEPS;
@@ -40,15 +42,15 @@ export function KycOnboardingPopup() {
 
  useEffect(() => {
  if (!user?.id || !profile) return;
- if (profile.account_status === "approved") return;
+ if (kyc.approved || !kyc.resolved) return;
  const key = `venxpay_kyc_popup_dismissed_${user.id}`;
  if (localStorage.getItem(key)) return;
  const timer = setTimeout(() => setOpen(true), 800);
  return () => clearTimeout(timer);
- }, [user?.id, profile?.account_status, profile?.document_type]);
+ }, [user?.id, kyc.approved, kyc.resolved, profile?.document_type]);
 
  useEffect(() => {
- if (!user?.id) return;
+ if (!user?.id || kyc.approved || !kyc.resolved) return;
  (async () => {
  const types = isCnpj ? ["front", "back", "selfie", "cnpj_card"] : ["front", "back", "selfie"];
  const results = await Promise.all(
@@ -63,7 +65,7 @@ export function KycOnboardingPopup() {
  setDocs(d);
  if (firstMissing >= 0) setCurrentStep(firstMissing);
  })();
- }, [user?.id, isCnpj]);
+ }, [user?.id, isCnpj, kyc.approved, kyc.resolved]);
 
   const handleUpload = useCallback(async (type: string, file: File) => {
     if (!user) return;

@@ -11,6 +11,7 @@ import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useProfile } from "@/hooks/useProfile";
+import { useKycStatus } from "@/hooks/useKycStatus";
 import { ArrowRight, Check, Fingerprint, Landmark, ShieldCheck, Sparkles, UserRound } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -27,12 +28,14 @@ interface Step {
 
 export function SellerOnboarding() {
   const { user } = useAuth();
-  const { profile, loading } = useProfile();
+  const { profile } = useProfile();
+  const kyc = useKycStatus();
   const [hasDocs, setHasDocs] = useState<boolean | null>(null);
   const [hasPayout, setHasPayout] = useState<boolean | null>(null);
 
   // Conta aprovada = ativação concluída. Nada é buscado nem exibido.
-  const approved = profile?.account_status === "approved";
+  const approved = kyc.approved;
+
 
   useEffect(() => {
     if (!user?.id || approved) return;
@@ -97,15 +100,16 @@ export function SellerOnboarding() {
     ];
   }, [profile?.full_name, profile?.phone, profile?.document_number, profile?.account_status, hasDocs, hasPayout]);
 
-  if (loading || !profile) return null;
-  if (approved) return null;
+  // Fonte única de verdade: só renderiza quando o perfil resolveu E não está aprovado.
+  if (!kyc.resolved || !kyc.showOnboarding || !profile) return null;
   if (hasDocs === null || hasPayout === null) return null;
 
   const doneCount = steps.filter((s) => s.state === "done").length;
   const pct = Math.round((doneCount / steps.length) * 100);
   const next = steps.find((s) => s.state === "pending");
-  const inReview = profile.account_status === "pending_review";
-  const rejected = profile.account_status === "rejected";
+  const inReview = kyc.inReview;
+  const rejected = kyc.rejected;
+
 
   const headline = rejected
     ? "Precisamos revisar seus documentos"

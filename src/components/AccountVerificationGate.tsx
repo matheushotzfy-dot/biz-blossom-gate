@@ -2,6 +2,7 @@ import { Link, useLocation } from "react-router-dom";
 import { AlertTriangle, ArrowRight, CheckCircle2, Clock3, FileCheck, ShieldAlert } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ProfileProvider, useProfile } from "@/hooks/useProfile";
+import { useKycStatus } from "@/hooks/useKycStatus";
 import { cn } from "@/lib/utils";
 
 type AccountStatus = "approved" | "pending" | "pending_review" | "rejected" | "blocked" | string;
@@ -120,9 +121,9 @@ export function AccountVerificationNotice({ compact = false }: { compact?: boole
 }
 
 export function AccountVerificationGate({ children }: { children: React.ReactNode }) {
-  const { profile, loading } = useProfile();
+  const kyc = useKycStatus();
 
-  if (loading) {
+  if (!kyc.resolved) {
     return (
       <div className="flex min-h-[50vh] items-center justify-center">
         <div className="h-8 w-8 animate-spin rounded-full border-2 border-primary border-t-transparent" />
@@ -130,7 +131,7 @@ export function AccountVerificationGate({ children }: { children: React.ReactNod
     );
   }
 
-  if (!profile || accountNeedsVerification(profile.account_status)) {
+  if (!kyc.approved) {
     return <AccountVerificationNotice />;
   }
 
