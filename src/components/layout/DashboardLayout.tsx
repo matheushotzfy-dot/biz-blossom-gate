@@ -54,7 +54,7 @@ function DashboardLayoutInner() {
         setSidebarHover(true);
         return;
       }
-      sidebarHoverTimer.current = setTimeout(() => setSidebarHover(false), 140);
+      sidebarHoverTimer.current = setTimeout(() => setSidebarHover(false), 220);
     };
    const togglePin = () => {
      setSidebarPinned((prev) => {
