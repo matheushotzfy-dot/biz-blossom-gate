@@ -4,7 +4,7 @@ import {
   MessageSquare,
   ChevronRight,
 } from "lucide-react";
-import { useEffect, useLayoutEffect, useMemo, useRef, useState, type ComponentType, type SVGProps } from "react";
+import { useEffect, useMemo, useState, type ComponentType, type SVGProps } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { NavLink } from "@/components/NavLink";
 import { VenxpayLogo } from "@/components/VenxpayLogo";
@@ -152,108 +152,96 @@ type SidebarSectionNavProps = {
   section: SidebarSection;
   pathname: string;
   isFirst: boolean;
+  index: number;
 };
 
-function SidebarSectionNav({ section, pathname, isFirst }: SidebarSectionNavProps) {
-  const listRef = useRef<HTMLUListElement | null>(null);
-  const itemRefs = useRef<Record<string, HTMLLIElement | null>>({});
-  const [marker, setMarker] = useState<{ top: number; height: number } | null>(null);
-
-  const activeUrl = section.items.find((item) => isItemActive(pathname, item))?.url ?? null;
-
-  useLayoutEffect(() => {
-    if (!activeUrl) { setMarker(null); return; }
-    const el = itemRefs.current[activeUrl];
-    const list = listRef.current;
-    if (!el || !list) return;
-    setMarker({ top: el.offsetTop + 8, height: Math.max(12, el.offsetHeight - 16) });
-  }, [activeUrl, section.items.length]);
-
+function SidebarSectionNav({ section, pathname, isFirst, index }: SidebarSectionNavProps) {
   return (
     <SidebarGroup className="px-0 py-0">
-      {/* Cabeçalho de seção: micro-label com traço */}
+      {/* Cabeçalho: índice mono + label */}
       <div
         className={cn(
-          "flex items-center gap-2 px-3 pb-1.5 group-data-[collapsible=icon]:hidden",
-          isFirst ? "pt-0" : "pt-4",
+          "flex items-baseline gap-2 px-2 pb-2 group-data-[collapsible=icon]:hidden",
+          isFirst ? "pt-0" : "pt-5",
         )}
       >
-        <span className="h-px w-3 bg-primary/60" />
-        <span className="text-[9.5px] font-semibold uppercase tracking-[0.24em] text-sidebar-foreground/32">
+        <span className="font-numbers text-[9.5px] font-bold leading-none tabular-nums text-primary/70">
+          {String(index + 1).padStart(2, "0")}
+        </span>
+        <span className="text-[9.5px] font-semibold uppercase tracking-[0.28em] text-sidebar-foreground/30">
           {section.label}
         </span>
-        <span className="h-px flex-1 bg-sidebar-border/35" />
       </div>
       {!isFirst && (
-        <div className="mx-auto my-2 hidden h-px w-6 bg-sidebar-border/50 group-data-[collapsible=icon]:block" />
+        <div className="mx-auto my-2.5 hidden h-px w-5 bg-sidebar-border/50 group-data-[collapsible=icon]:block" />
       )}
-      <SidebarGroupContent className="relative">
-        {/* Trilho vivo + indicador deslizante */}
-        <span
-          aria-hidden
-          className="pointer-events-none absolute inset-y-0 left-[10px] w-px bg-sidebar-border/40 group-data-[collapsible=icon]:hidden"
-        />
-        <span
-          aria-hidden
-          className={cn(
-            "pointer-events-none absolute left-[9px] w-[2px] rounded-full bg-primary group-data-[collapsible=icon]:hidden",
-            "transition-[top,height,opacity] duration-[260ms] ease-out",
-            marker ? "opacity-100" : "opacity-0",
-          )}
-          style={marker ? { top: marker.top, height: marker.height } : { top: 0, height: 0 }}
-        />
-
-        <SidebarMenu ref={listRef} className="gap-[3px] px-0 group-data-[collapsible=icon]:gap-1.5">
+      <SidebarGroupContent>
+        <SidebarMenu className="gap-[2px] px-0 group-data-[collapsible=icon]:gap-1.5">
           {section.items.map((item) => {
             const isActive = isItemActive(pathname, item);
             return (
-              <SidebarMenuItem
-                key={item.url}
-                ref={(el) => { itemRefs.current[item.url] = el; }}
-              >
-                <SidebarMenuButton asChild className="h-auto rounded-none p-0 hover:bg-transparent active:bg-transparent group-data-[collapsible=icon]:!size-auto group-data-[collapsible=icon]:!p-0">
+              <SidebarMenuItem key={item.url}>
+                <SidebarMenuButton
+                  asChild
+                  className="h-auto rounded-none p-0 hover:bg-transparent active:bg-transparent group-data-[collapsible=icon]:!size-auto group-data-[collapsible=icon]:!p-0"
+                >
                   <NavLink
                     to={item.url}
                     end={item.exact}
                     activeClassName=""
                     className={cn(
-                      "group/nav relative mx-2 ml-[18px] mr-2 flex h-[42px] items-center gap-2.5 rounded-[12px] pl-1.5 pr-2.5 text-[13.5px]",
-                      "transition-colors duration-200 ease-out",
+                      "group/nav relative flex h-[40px] items-center gap-2.5 overflow-hidden rounded-[14px] pl-2 pr-2.5 text-[13px]",
+                      "transition-[background-color,color,transform] duration-200 ease-out",
                       "group-data-[collapsible=icon]:mx-auto group-data-[collapsible=icon]:h-11 group-data-[collapsible=icon]:w-11 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:gap-0 group-data-[collapsible=icon]:px-0",
                       isActive
-                        ? "bg-sidebar-accent/70 font-semibold text-foreground"
-                        : "font-medium text-sidebar-foreground/60 hover:bg-sidebar-accent/35 hover:text-foreground",
+                        ? "bg-gradient-to-r from-primary/[0.13] via-primary/[0.05] to-transparent font-semibold tracking-[-0.01em] text-foreground"
+                        : "font-medium text-sidebar-foreground/55 hover:translate-x-[3px] hover:text-foreground",
                     )}
                   >
-                    {/* Cápsula do ícone */}
+                    {/* Marcador de borda */}
+                    <span
+                      aria-hidden
+                      className={cn(
+                        "absolute left-0 top-1/2 w-[3px] -translate-y-1/2 rounded-r-full bg-primary transition-[height,opacity] duration-200 ease-out group-data-[collapsible=icon]:hidden",
+                        isActive ? "h-[18px] opacity-100" : "h-[6px] opacity-0 group-hover/nav:opacity-40",
+                      )}
+                    />
+
+                    {/* Ícone em squircle com contorno */}
                     <span
                       className={cn(
-                        "flex h-[28px] w-[28px] shrink-0 items-center justify-center rounded-[9px] transition-colors duration-200 ease-out",
+                        "flex h-[26px] w-[26px] shrink-0 items-center justify-center rounded-[8px] border transition-colors duration-200 ease-out",
                         isActive
-                          ? "bg-primary/12"
-                          : "bg-transparent group-hover/nav:bg-sidebar-foreground/[0.06]",
+                          ? "border-primary/35 bg-primary/[0.10]"
+                          : "border-sidebar-border/50 bg-transparent group-hover/nav:border-sidebar-border",
                       )}
                     >
                       <item.icon
-                        size={17}
+                        size={15}
                         className={cn(
-                          "transition-colors duration-150 ease-out group-data-[collapsible=icon]:!h-[20px] group-data-[collapsible=icon]:!w-[20px]",
+                          "transition-colors duration-150 ease-out group-data-[collapsible=icon]:!h-[19px] group-data-[collapsible=icon]:!w-[19px]",
                           isActive ? "text-primary" : "text-sidebar-foreground/45 group-hover/nav:text-foreground/85",
                         )}
-                        strokeWidth={isActive ? 1.9 : 1.45}
+                        strokeWidth={isActive ? 2 : 1.5}
                       />
                     </span>
 
-                    <span className="truncate group-data-[collapsible=icon]:hidden">
-                      {item.title}
-                    </span>
+                    <span className="truncate group-data-[collapsible=icon]:hidden">{item.title}</span>
+
                     {item.count !== undefined && item.count > 0 && (
-                      <span className={cn(
-                        "ml-auto rounded-full px-1.5 py-[2px] font-numbers text-[10.5px] font-semibold leading-none tabular-nums transition-colors duration-200 group-data-[collapsible=icon]:hidden",
-                        isActive
-                          ? "bg-primary/12 text-primary"
-                          : "bg-sidebar-foreground/[0.06] text-sidebar-foreground/40 group-hover/nav:text-sidebar-foreground/70",
-                      )}>
+                      <span
+                        className={cn(
+                          "ml-auto inline-flex items-center gap-1.5 font-numbers text-[10.5px] font-semibold leading-none tabular-nums transition-colors duration-200 group-data-[collapsible=icon]:hidden",
+                          isActive ? "text-primary" : "text-sidebar-foreground/35 group-hover/nav:text-sidebar-foreground/65",
+                        )}
+                      >
+                        <span
+                          aria-hidden
+                          className={cn(
+                            "h-[3px] w-[3px] rounded-full",
+                            isActive ? "bg-primary" : "bg-sidebar-foreground/25",
+                          )}
+                        />
                         {String(item.count).padStart(2, "0")}
                       </span>
                     )}
@@ -267,6 +255,7 @@ function SidebarSectionNav({ section, pathname, isFirst }: SidebarSectionNavProp
     </SidebarGroup>
   );
 }
+
 
 
 
@@ -438,6 +427,8 @@ export function AppSidebar({ pinned = true, onTogglePin, onHoverChange }: AppSid
             section={section}
             pathname={location.pathname}
             isFirst={idx === 0}
+            index={idx}
+
           />
         ))}
       </SidebarContent>
