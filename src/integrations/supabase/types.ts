@@ -4595,6 +4595,7 @@ export type Database = {
           reset_at: string
         }[]
       }
+      calculate_ledger_balance: { Args: { _user_id: string }; Returns: number }
       check_and_block_abuse: {
         Args: {
           _block_minutes?: number
@@ -4779,6 +4780,10 @@ export type Database = {
       }
       is_ip_blocked: { Args: { _ip_hash: string }; Returns: boolean }
       is_product_active: { Args: { _product_id: string }; Returns: boolean }
+      ledger_entry_effect: {
+        Args: { _amount: number; _entry_type: string }
+        Returns: number
+      }
       list_visible_acquirers: {
         Args: never
         Returns: {
