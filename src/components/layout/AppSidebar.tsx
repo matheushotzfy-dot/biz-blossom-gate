@@ -218,7 +218,7 @@ function SidebarSectionNav({ section, pathname, isFirst }: SidebarSectionNavProp
                         className={cn(
                           "relative z-10 ml-auto inline-flex min-w-5 items-center justify-center rounded-full px-1.5 py-1 font-numbers text-[9.5px] font-bold leading-none tabular-nums group-data-[collapsible=icon]:hidden",
                           isActive
-                            ? "bg-primary/14 text-primary"
+                            ? "bg-primary/[0.14] text-primary"
                             : "bg-sidebar-foreground/[0.07] text-sidebar-foreground/45 group-hover/nav:text-sidebar-foreground/70",
                         )}
                       >
