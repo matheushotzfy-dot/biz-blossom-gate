@@ -118,12 +118,22 @@ function LiquidityPlate() {
           <path d="M 0 64 A 64 64 0 0 1 -55.4 -32" fill="none" stroke="hsl(var(--primary))" strokeOpacity="0.5" strokeWidth="1.4" strokeLinecap="round" />
         </g>
 
-        {/* core monogram — angular H cut */}
+        {/* core monogram — logomark VENXPAY oficial */}
         <g>
-          <rect x="-30" y="-34" width="60" height="68" rx="16" fill="hsl(var(--background))" stroke="hsl(var(--primary)/0.35)" />
-          <path d="M -15 -19 L 0 19 L 15 -19" stroke="hsl(var(--primary))" strokeWidth="4.5" strokeLinecap="round" fill="none" />
+          <rect x="-34" y="-34" width="68" height="68" rx="18" fill="hsl(var(--background))" stroke="hsl(var(--primary)/0.35)" />
+          <g transform="translate(-34 -34) scale(1.0625)">
+            {/* rails do V (viewBox 64x64 do logomark) */}
+            <path d="M17 17 L32 48" stroke="hsl(var(--foreground))" strokeOpacity="0.9" strokeWidth="7" strokeLinecap="round" />
+            <path d="M47 17 L32 48" stroke="url(#pb-arc)" strokeWidth="7" strokeLinecap="round" />
+            {/* clearing notch */}
+            <path d="M24.5 30 H39.5" stroke="hsl(var(--background))" strokeWidth="3.4" strokeLinecap="round" />
+            <path d="M25.5 30 H38.5" stroke="hsl(var(--primary))" strokeWidth="1.5" strokeLinecap="round" opacity="0.85" />
+            {/* settlement node */}
+            <circle cx="32" cy="48" r="3.2" fill="hsl(var(--primary))" />
+          </g>
         </g>
       </g>
+
 
       {/* liquidity rails travelling into the core */}
       {[54, 96, 168, 210].map((y, i) => (
