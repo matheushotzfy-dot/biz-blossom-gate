@@ -20,23 +20,34 @@ const ProfileContext = createContext<ProfileContextType>({
 export function ProfileProvider({ children }: { children: React.ReactNode }) {
   const { user } = useAuth();
   const [profile, setProfile] = useState<Tables<"profiles"> | null>(null);
-  const [loading, setLoading] = useState(true);
+  /**
+   * Id do usuário cujo perfil já foi carregado. Enquanto for diferente do
+   * usuário atual, o perfil NÃO é confiável — é o que evita o flash do aviso
+   * de KYC logo após o login (perfil ainda null, sessão já presente).
+   */
+  const [loadedFor, setLoadedFor] = useState<string | null>(null);
 
   const fetchProfile = useCallback(async () => {
-    if (!user?.id) { setProfile(null); setLoading(false); return; }
+    if (!user?.id) { setProfile(null); setLoadedFor(null); return; }
     const { data, error } = await supabase
       .from("profiles")
       .select("*")
       .eq("user_id", user.id)
       .maybeSingle();
     if (error) {
+      // Falha de rede/RLS não pode ser lida como "conta não aprovada":
+      // mantemos o estado como não resolvido.
       console.error("[useProfile] fetch error:", error.message);
+      return;
     }
     setProfile(data ?? null);
-    setLoading(false);
+    setLoadedFor(user.id);
   }, [user?.id]);
 
   useEffect(() => { fetchProfile(); }, [fetchProfile]);
+
+  const loading = !user?.id ? false : loadedFor !== user.id;
+
 
   const updateProfile = useCallback((updates: Partial<Tables<"profiles">>) => {
     setProfile(prev => prev ? { ...prev, ...updates } : prev);

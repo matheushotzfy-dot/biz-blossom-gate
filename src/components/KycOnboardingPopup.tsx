@@ -42,12 +42,15 @@ export function KycOnboardingPopup() {
 
  useEffect(() => {
  if (!user?.id || !profile) return;
- if (kyc.approved || !kyc.resolved) return;
+ // Status real da conta manda: aprovada nunca abre (e fecha se estiver aberta).
+ if (kyc.approved) { setOpen(false); return; }
+ if (!kyc.resolved) return;
  const key = `venxpay_kyc_popup_dismissed_${user.id}`;
  if (localStorage.getItem(key)) return;
  const timer = setTimeout(() => setOpen(true), 800);
  return () => clearTimeout(timer);
  }, [user?.id, kyc.approved, kyc.resolved, profile?.document_type]);
+
 
  useEffect(() => {
  if (!user?.id || kyc.approved || !kyc.resolved) return;
