@@ -4236,3 +4236,33 @@ html body .lp .lp-progress {
 .admin-shell section,
 .admin-shell article,
 .admin-shell .admin-card { box-shadow: none !important; }
+
+/* ─── OVERLAY STABILITY ─────────────────────────────────────────────
+   Popups (dialog, sheet, popover, select, dropdown) são camadas
+   compostas: sem filtros/blur e sem hover que mova a superfície.
+   Isso elimina o "tremor"/re-render ao abrir ou passar o mouse. */
+.overlay-surface {
+  transform-style: flat;
+  backface-visibility: hidden;
+  -webkit-font-smoothing: antialiased;
+  will-change: opacity;
+  contain: paint;
+}
+
+.overlay-surface:hover,
+[data-radix-popper-content-wrapper]:hover { filter: none; }
+
+/* Nada dentro de um popup pode levantar/escalar a própria superfície */
+.overlay-surface .seller-clickable:hover,
+.overlay-surface .hover-lift:hover,
+.overlay-surface [class*="hover:scale"]:hover,
+.overlay-surface [class*="hover:-translate"]:hover {
+  transform: none !important;
+}
+
+/* Interações internas ficam apenas em cor/opacidade */
+.overlay-surface button,
+.overlay-surface a,
+.overlay-surface [role="button"] {
+  transition: background-color 160ms ease, border-color 160ms ease, color 160ms ease, opacity 160ms ease;
+}
