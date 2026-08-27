@@ -40,8 +40,12 @@ export function useKycStatus(): KycStatus {
   return useMemo<KycStatus>(() => {
     // Resolvido = há sessão e o fetch do perfil terminou. Perfil ausente após o
     // fetch conta como "não aprovado" (nunca como aprovado por omissão).
-    const resolved = Boolean(user?.id) && !loading;
+    // Resolvido = há sessão, o fetch do perfil terminou E o perfil existe.
+    // Perfil ausente (fetch pendente, RLS ou falha de rede) nunca conta como
+    // pendência de KYC — apenas como "ainda não resolvido".
+    const resolved = Boolean(user?.id) && !loading && Boolean(profile);
     const raw = profile?.account_status ?? null;
+
 
 
     if (!resolved) {
