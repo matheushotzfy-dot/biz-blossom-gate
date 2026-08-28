@@ -32,6 +32,7 @@ import {
 import {
   Sidebar,
   SidebarContent,
+  SidebarFooter,
   SidebarGroup,
   SidebarGroupContent,
   SidebarHeader,
@@ -357,45 +358,39 @@ export function AppSidebar({ pinned = true, onTogglePin, onHoverChange }: AppSid
 
       <SidebarContent className="relative gap-0 overflow-y-auto px-1.5 py-3">
         <SidebarNavList items={items} pathname={location.pathname} />
-        <div className="mt-2 flex flex-col gap-1">
+      </SidebarContent>
+
+      <SidebarFooter className="relative shrink-0 border-t border-sidebar-border/60 p-2.5">
+        <div className="flex items-center justify-center gap-2 group-data-[collapsible=icon]:flex-col group-data-[collapsible=icon]:gap-1">
           <button
             type="button"
             onClick={() => window.open("https://wa.me/5511999999999?text=Preciso%20de%20suporte%20para%20escalar!", "_blank")}
             aria-label="Fale conosco"
             title="Fale conosco"
-            className="group/action flex h-12 w-full items-center gap-3 overflow-hidden rounded-[14px] border border-transparent px-3 text-primary transition-colors duration-200 hover:border-primary/20 hover:bg-primary/[0.08]"
+            className="flex h-11 flex-1 items-center justify-center rounded-[12px] border border-transparent text-primary transition-colors duration-200 hover:border-primary/20 hover:bg-primary/[0.08] group-data-[collapsible=icon]:h-11 group-data-[collapsible=icon]:w-11 group-data-[collapsible=icon]:flex-none"
           >
-            <span className="flex h-9 w-9 shrink-0 items-center justify-center">
-              <Headset size={22} strokeWidth={1.8} />
-            </span>
-            <span className="sidebar-item-label whitespace-nowrap text-[13px] font-semibold">Fale conosco</span>
+            <Headset size={22} strokeWidth={1.8} />
           </button>
           <button
             type="button"
             onClick={() => navigate("/suporte")}
             aria-label="Central de ajuda"
             title="Central de ajuda"
-            className="group/action flex h-12 w-full items-center gap-3 overflow-hidden rounded-[14px] border border-transparent px-3 text-sidebar-foreground/58 transition-colors duration-200 hover:border-sidebar-border/70 hover:bg-sidebar-accent/45 hover:text-sidebar-accent-foreground"
+            className="flex h-11 flex-1 items-center justify-center rounded-[12px] border border-transparent text-sidebar-foreground/65 transition-colors duration-200 hover:border-sidebar-border/70 hover:bg-sidebar-accent/45 hover:text-sidebar-accent-foreground group-data-[collapsible=icon]:h-11 group-data-[collapsible=icon]:w-11 group-data-[collapsible=icon]:flex-none"
           >
-            <span className="flex h-9 w-9 shrink-0 items-center justify-center">
-              <CircleHelp size={22} strokeWidth={1.7} />
-            </span>
-            <span className="sidebar-item-label whitespace-nowrap text-[13px] font-medium">Central de ajuda</span>
+            <CircleHelp size={22} strokeWidth={1.7} />
           </button>
           <button
             type="button"
             onClick={handleLogout}
             aria-label="Sair da conta"
             title="Sair da conta"
-            className="group/action flex h-12 w-full items-center gap-3 overflow-hidden rounded-[14px] border border-transparent px-3 text-sidebar-foreground/58 transition-colors duration-200 hover:border-destructive/20 hover:bg-destructive/10 hover:text-destructive"
+            className="flex h-11 flex-1 items-center justify-center rounded-[12px] border border-transparent text-sidebar-foreground/65 transition-colors duration-200 hover:border-destructive/20 hover:bg-destructive/10 hover:text-destructive group-data-[collapsible=icon]:h-11 group-data-[collapsible=icon]:w-11 group-data-[collapsible=icon]:flex-none"
           >
-            <span className="flex h-9 w-9 shrink-0 items-center justify-center">
-              <LogOut size={22} strokeWidth={1.7} />
-            </span>
-            <span className="sidebar-item-label whitespace-nowrap text-[13px] font-medium">Sair da conta</span>
+            <LogOut size={22} strokeWidth={1.7} />
           </button>
         </div>
-      </SidebarContent>
+      </SidebarFooter>
     </Sidebar>
   );
 }
