@@ -14,7 +14,8 @@ import {
   Wallet,
 } from "lucide-react";
 
-import { useEffect, useMemo, useState, type ComponentType, type SVGProps } from "react";
+import { useEffect, useMemo, useState } from "react";
+import type { LucideIcon } from "lucide-react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { NavLink } from "@/components/NavLink";
 import { VenxpayLogo } from "@/components/VenxpayLogo";
@@ -42,13 +43,10 @@ import {
 
 import { MILESTONES, getMilestone } from "@/lib/tiers";
 
-type GlyphIcon = ComponentType<SVGProps<SVGSVGElement> & { size?: number }>;
-
-
 type SidebarItem = {
   title: string;
   url: string;
-  icon: GlyphIcon;
+  icon: LucideIcon;
   badge?: string;
   count?: number;
   exact?: boolean;
