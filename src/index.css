@@ -3296,9 +3296,12 @@ button svg, a svg, [role="button"] svg {
   }
 
   /* 2. Sem levitação, escala ou rotação em hover — o app fica "seco". */
-  .group:hover [class*="group-hover:scale-"],
-  *:hover {
-    --tw-translate-y: 0;
+  /* Nunca altere variáveis Tailwind em `*:hover`: elas são herdáveis.
+     Isso sobrescrevia o `-translate-y-1/2` dos dialogs portaled quando
+     qualquer filho recebia hover e fazia a janela saltar para baixo. */
+  .group:hover [class*="group-hover:scale-"] {
+    --tw-scale-x: 1;
+    --tw-scale-y: 1;
   }
   button:hover, a:hover, [role="button"]:hover, .card:hover, section:hover, li:hover {
     transform: none !important;
@@ -4265,4 +4268,12 @@ html body .lp .lp-progress {
 .overlay-surface a,
 .overlay-surface [role="button"] {
   transition: background-color 160ms ease, border-color 160ms ease, color 160ms ease, opacity 160ms ease;
+}
+
+/* O feedback global de clique nunca pode disputar o transform usado pelo
+   posicionamento dos overlays. Mantém os controles táteis sem mover a janela. */
+.overlay-surface button:active:not(:disabled),
+.overlay-surface a:active,
+.overlay-surface [role="button"]:active {
+  transform: none !important;
 }
