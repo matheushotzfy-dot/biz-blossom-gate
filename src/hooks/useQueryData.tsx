@@ -85,6 +85,81 @@ export function useTransactions(limit = 500) {
   });
 }
 
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+export type TransactionsPageParams = {
+  from: Date;
+  to: Date;
+  page: number;
+  pageSize: number;
+  search?: string;
+};
+
+/**
+ * Página de transações do seller resolvida no servidor (filtro por período + busca).
+ * Evita divergência entre a lista e os agregados: ambos passam a olhar a mesma janela
+ * de datas, sem o teto de 500 linhas no cliente.
+ */
+export function useTransactionsPage({ from, to, page, pageSize, search }: TransactionsPageParams) {
+  const { user } = useAuth();
+  const fromIso = from.toISOString();
+  const toIso = to.toISOString();
+  const term = (search ?? "").trim();
+
+  return useQuery({
+    queryKey: ["transactions_page", user?.id, fromIso, toIso, page, pageSize, term],
+    queryFn: async () => {
+      const offset = (page - 1) * pageSize;
+      let query = supabase
+        .from("transactions")
+        .select("*", { count: "exact" })
+        .eq("user_id", user!.id)
+        .gte("created_at", fromIso)
+        .lte("created_at", toIso);
+
+      if (term) {
+        if (UUID_RE.test(term)) {
+          query = query.eq("id", term);
+        } else {
+          const safe = term.replace(/[%,()]/g, "");
+          query = query.or(`customer_name.ilike.%${safe}%,customer_email.ilike.%${safe}%`);
+        }
+      }
+
+      const { data, error, count } = await query
+        .order("created_at", { ascending: false })
+        .range(offset, offset + pageSize - 1);
+      if (error) throw error;
+      return { rows: (data || []) as Tables<"transactions">[], total: count ?? 0 };
+    },
+    enabled: !!user?.id,
+    staleTime: 15 * 1000,
+    refetchInterval: 45 * 1000,
+    refetchIntervalInBackground: false,
+    refetchOnWindowFocus: true,
+    placeholderData: (prev) => prev,
+  });
+}
+
+/** Busca (limitada) das transações do período para exportação de relatórios. */
+export async function fetchTransactionsForExport(
+  userId: string,
+  from: Date,
+  to: Date,
+  max = 5000,
+): Promise<Tables<"transactions">[]> {
+  const { data, error } = await supabase
+    .from("transactions")
+    .select("*")
+    .eq("user_id", userId)
+    .gte("created_at", from.toISOString())
+    .lte("created_at", to.toISOString())
+    .order("created_at", { ascending: false })
+    .limit(max);
+  if (error) throw error;
+  return (data || []) as Tables<"transactions">[];
+}
+
 export type DashboardBucket = "hour" | "day" | "month";
 
 export type DashboardStats = {
