@@ -4788,7 +4788,7 @@ export type Database = {
         Args: { _bucket?: string; _from: string; _to: string }
         Returns: Json
       }
-      get_seller_month_revenue: { Args: { _month: string }; Returns: number }
+      get_seller_month_revenue: { Args: { _month: string }; Returns: Json }
       get_seller_product_revenue: {
         Args: never
         Returns: {
