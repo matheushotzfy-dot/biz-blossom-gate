@@ -1,21 +1,30 @@
 /**
  * PeriodPicker — seletor de período único da plataforma.
  *
- * Desktop: popover compacto (presets à esquerda, calendário à direita).
- * Mobile: bottom sheet com alça, presets em grade de toque (44px+),
- * calendário fluido e barra de ação fixa com safe-area.
+ * Grade de mês própria (sem react-day-picker), no padrão VENXPAY:
+ * bordas hairline, cantos suaves, esmeralda sólido nas extremidades do
+ * intervalo e trilho suave nos dias intermediários.
  *
- * Fonte única de verdade para "Hoje / Ontem / 7d / 15d / 30d / Este mês
- * / intervalo personalizado" — usado no Dashboard e em Vendas.
+ * Desktop: popover fluido (presets à esquerda, calendário à direita).
+ * Mobile: bottom sheet com células de toque e ação fixa com safe-area.
  */
 import { useEffect, useMemo, useState } from "react";
 import type { ReactNode } from "react";
-import { CalendarDays, Check, X } from "lucide-react";
-import { differenceInCalendarDays, endOfDay, format, startOfDay, startOfMonth, subDays } from "date-fns";
+import { CalendarDays, Check, ChevronLeft, ChevronRight, X } from "lucide-react";
+import {
+  addMonths,
+  differenceInCalendarDays,
+  endOfDay,
+  format,
+  isAfter,
+  isSameDay,
+  isSameMonth,
+  startOfDay,
+  startOfMonth,
+  subDays,
+} from "date-fns";
 import { ptBR } from "date-fns/locale";
-import type { DateRange } from "react-day-picker";
 
-import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Sheet, SheetContent, SheetTitle } from "@/components/ui/sheet";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -72,6 +81,121 @@ export function periodLabel(value: PeriodValue | undefined): string {
     : `${format(value.from, "dd MMM", { locale: ptBR })} — ${format(value.to, "dd MMM", { locale: ptBR })}`;
 }
 
+/* ═════════════ Grade de mês própria ═════════════ */
+
+const WEEK_LABELS = ["D", "S", "T", "Q", "Q", "S", "S"];
+
+/** Matriz de 6 semanas × 7 dias cobrindo o mês informado. */
+function buildMonthMatrix(month: Date): Date[] {
+  const first = startOfMonth(month);
+  const offset = first.getDay();
+  const start = new Date(first.getFullYear(), first.getMonth(), 1 - offset);
+  return Array.from({ length: 42 }, (_, i) =>
+    new Date(start.getFullYear(), start.getMonth(), start.getDate() + i),
+  );
+}
+
+interface MonthGridProps {
+  month: Date;
+  onMonthChange: (d: Date) => void;
+  from: Date | null;
+  to: Date | null;
+  onPick: (d: Date) => void;
+  compact: boolean;
+}
+
+function MonthGrid({ month, onMonthChange, from, to, onPick, compact }: MonthGridProps) {
+  const today = todayInSaoPaulo();
+  const days = useMemo(() => buildMonthMatrix(month), [month]);
+  const canGoNext = !isSameMonth(month, today) && !isAfter(startOfMonth(month), today);
+
+  const inRange = (d: Date) => Boolean(from && to && d > from && d < to);
+  const isEdge = (d: Date) => Boolean((from && isSameDay(d, from)) || (to && isSameDay(d, to)));
+
+  return (
+    <div className="min-w-0">
+      {/* Navegação */}
+      <div className="mb-2 flex items-center justify-between">
+        <button
+          type="button"
+          aria-label="Mês anterior"
+          onClick={() => onMonthChange(addMonths(month, -1))}
+          className="flex h-8 w-8 items-center justify-center rounded-[10px] border border-border/60 text-muted-foreground transition-colors hover:border-primary/40 hover:text-primary"
+        >
+          <ChevronLeft className="h-4 w-4" />
+        </button>
+        <span className="font-display text-[13px] font-bold capitalize tracking-[-0.01em] text-foreground">
+          {format(month, "MMMM yyyy", { locale: ptBR })}
+        </span>
+        <button
+          type="button"
+          aria-label="Próximo mês"
+          disabled={!canGoNext}
+          onClick={() => onMonthChange(addMonths(month, 1))}
+          className="flex h-8 w-8 items-center justify-center rounded-[10px] border border-border/60 text-muted-foreground transition-colors hover:border-primary/40 hover:text-primary disabled:opacity-30 disabled:hover:border-border/60 disabled:hover:text-muted-foreground"
+        >
+          <ChevronRight className="h-4 w-4" />
+        </button>
+      </div>
+
+      {/* Cabeçalho de semana */}
+      <div className="grid grid-cols-7">
+        {WEEK_LABELS.map((w, i) => (
+          <span
+            key={`${w}-${i}`}
+            className="flex h-6 items-center justify-center font-display text-[9.5px] font-bold uppercase tracking-[0.12em] text-muted-foreground/45"
+          >
+            {w}
+          </span>
+        ))}
+      </div>
+
+      {/* Dias */}
+      <div className="grid grid-cols-7 gap-y-1">
+        {days.map((d) => {
+          const outside = !isSameMonth(d, month);
+          const future = isAfter(startOfDay(d), startOfDay(today));
+          const edge = isEdge(d);
+          const middle = inRange(d);
+          const disabled = future;
+
+          return (
+            <div
+              key={d.toISOString()}
+              className={cn(
+                "relative flex items-center justify-center",
+                compact ? "h-9" : "h-11",
+                middle && "bg-primary/[0.10]",
+                from && to && isSameDay(d, from) && !isSameDay(from, to) && "rounded-l-[10px] bg-primary/[0.10]",
+                from && to && isSameDay(d, to) && !isSameDay(from, to) && "rounded-r-[10px] bg-primary/[0.10]",
+              )}
+            >
+              <button
+                type="button"
+                disabled={disabled}
+                onClick={() => onPick(d)}
+                className={cn(
+                  "relative z-10 flex items-center justify-center rounded-[10px] font-display font-semibold tabular-nums transition-colors",
+                  compact ? "h-9 w-9 text-[12.5px]" : "h-10 w-10 text-[13.5px]",
+                  disabled && "cursor-not-allowed text-muted-foreground/20",
+                  !disabled && outside && "text-muted-foreground/30",
+                  !disabled && !outside && "text-foreground/85 hover:bg-secondary/60",
+                  edge && "!bg-primary !text-primary-foreground",
+                  !edge && !disabled && isSameDay(d, today) && "border border-primary/40 text-primary",
+                )}
+              >
+                {d.getDate()}
+              </button>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+/* ═════════════ Painel ═════════════ */
+
 interface PanelProps {
   value: PeriodValue;
   onApply: (v: PeriodValue) => void;
@@ -81,36 +205,58 @@ interface PanelProps {
 
 function PeriodPanel({ value, onApply, onClose, mobile }: PanelProps) {
   const [draft, setDraft] = useState<PeriodValue>(value);
-  const [range, setRange] = useState<DateRange | undefined>({ from: value.from, to: value.to });
+  const [from, setFrom] = useState<Date | null>(value.from);
+  const [to, setTo] = useState<Date | null>(value.to);
+  const [month, setMonth] = useState<Date>(startOfMonth(value.from ?? todayInSaoPaulo()));
 
   useEffect(() => {
     setDraft(value);
-    setRange({ from: value.from, to: value.to });
+    setFrom(value.from);
+    setTo(value.to);
+    setMonth(startOfMonth(value.from ?? todayInSaoPaulo()));
   }, [value]);
 
-  const days = useMemo(() => {
-    if (!range?.from) return 0;
-    return differenceInCalendarDays(range.to ?? range.from, range.from) + 1;
-  }, [range]);
+  const days = from ? differenceInCalendarDays(to ?? from, from) + 1 : 0;
 
-  const summary = range?.from
-    ? `${format(range.from, "dd MMM yyyy", { locale: ptBR })}${range.to ? ` → ${format(range.to, "dd MMM yyyy", { locale: ptBR })}` : ""}`
+  const summary = from
+    ? `${format(from, "dd MMM yyyy", { locale: ptBR })}${to ? ` → ${format(to, "dd MMM yyyy", { locale: ptBR })}` : ""}`
     : "Escolha uma data inicial";
 
   const choosePreset = (id: PeriodPresetId) => {
     const next = buildPeriod(id);
     setDraft(next);
-    setRange({ from: next.from, to: next.to });
+    setFrom(next.from);
+    setTo(next.to);
+    setMonth(startOfMonth(next.from));
     onApply(next);
   };
 
+  const pickDay = (d: Date) => {
+    const day = startOfDay(d);
+    // Primeiro clique (ou reinício após intervalo fechado) define o início.
+    if (!from || (from && to)) {
+      setFrom(day);
+      setTo(null);
+      setDraft({ presetId: null, from: day, to: day });
+      return;
+    }
+    if (day < from) {
+      setFrom(day);
+      setTo(from);
+      setDraft({ presetId: null, from: day, to: from });
+      return;
+    }
+    setTo(day);
+    setDraft({ presetId: null, from, to: day });
+  };
+
   const applyCustom = () => {
-    if (!range?.from) return;
-    onApply({ presetId: null, from: startOfDay(range.from), to: endOfDay(range.to ?? range.from) });
+    if (!from) return;
+    onApply({ presetId: null, from: startOfDay(from), to: endOfDay(to ?? from) });
   };
 
   return (
-    <div className={cn("flex flex-col", mobile ? "max-h-[86vh]" : "w-[560px]")}>
+    <div className={cn("flex flex-col", mobile ? "max-h-[88vh]" : "w-[min(600px,88vw)]")}>
       {/* Cabeçalho */}
       <div className={cn("flex items-start justify-between gap-3", mobile ? "px-5 pt-1 pb-4" : "px-5 pt-4 pb-3")}>
         <div className="min-w-0">
@@ -118,7 +264,6 @@ function PeriodPanel({ value, onApply, onClose, mobile }: PanelProps) {
           <p className="mt-1 font-display text-[19px] font-bold leading-none tracking-[-0.03em] text-foreground">
             {periodLabel(draft)}
           </p>
-          <p className="mt-1.5 truncate text-[12px] text-muted-foreground/60">{summary}</p>
         </div>
         <div className="flex shrink-0 items-center gap-2">
           {days > 0 && (
@@ -131,7 +276,7 @@ function PeriodPanel({ value, onApply, onClose, mobile }: PanelProps) {
               type="button"
               onClick={onClose}
               aria-label="Fechar"
-              className="flex h-9 w-9 items-center justify-center rounded-full border border-border/60 text-muted-foreground active:scale-95"
+              className="flex h-9 w-9 items-center justify-center rounded-full border border-border/60 text-muted-foreground"
             >
               <X className="h-4 w-4" />
             </button>
@@ -142,7 +287,7 @@ function PeriodPanel({ value, onApply, onClose, mobile }: PanelProps) {
       <div className={cn("flex-1 overflow-y-auto", mobile ? "px-5 pb-2" : "px-5 pb-4")}>
         <div className={cn(mobile ? "space-y-5" : "flex gap-5")}>
           {/* Presets */}
-          <div className={cn(mobile ? "grid grid-cols-3 gap-2" : "grid w-[150px] shrink-0 grid-cols-1 gap-1.5")}>
+          <div className={cn(mobile ? "grid grid-cols-3 gap-2" : "grid w-[146px] shrink-0 grid-cols-1 gap-1.5")}>
             {PERIOD_PRESETS.map((p) => {
               const active = draft.presetId === p.id;
               return (
@@ -151,22 +296,18 @@ function PeriodPanel({ value, onApply, onClose, mobile }: PanelProps) {
                   type="button"
                   onClick={() => choosePreset(p.id)}
                   className={cn(
-                    "group relative flex flex-col justify-center overflow-hidden rounded-[14px] border text-left transition-colors",
-                    mobile ? "h-[54px] px-3 active:scale-[0.97]" : "h-[42px] px-3",
+                    "relative flex flex-col justify-center overflow-hidden rounded-[12px] border px-3 text-left transition-colors",
+                    mobile ? "h-[52px]" : "h-[40px]",
                     active
-                      ? "border-primary/50 bg-primary/12 text-foreground"
+                      ? "border-primary/45 bg-primary/[0.12] text-primary"
                       : "border-border/50 bg-transparent text-muted-foreground hover:border-border hover:text-foreground",
                   )}
                 >
-                  <span className={cn("text-[13px] font-bold leading-none tracking-[-0.01em]", active && "text-primary")}>
-                    {p.label}
-                  </span>
+                  <span className="text-[12.5px] font-bold leading-none tracking-[-0.01em]">{p.label}</span>
                   {mobile && (
                     <span className="mt-1 truncate text-[10px] font-medium text-muted-foreground/55">{p.hint}</span>
                   )}
-                  {active && (
-                    <Check className="absolute right-2 top-2 h-3.5 w-3.5 text-primary" strokeWidth={3} />
-                  )}
+                  {active && <Check className="absolute right-2 top-2 h-3.5 w-3.5 text-primary" strokeWidth={3} />}
                 </button>
               );
             })}
@@ -179,37 +320,14 @@ function PeriodPanel({ value, onApply, onClose, mobile }: PanelProps) {
             <p className="mb-2 text-[10px] font-semibold uppercase tracking-[0.18em] text-muted-foreground/55">
               Intervalo personalizado
             </p>
-            <div className="rounded-[16px] border border-border/50 p-1.5">
-              <Calendar
-                mode="range"
-                selected={range}
-                onSelect={(r) => {
-                  setRange(r);
-                  if (r?.from) setDraft({ presetId: null, from: r.from, to: r.to ?? r.from });
-                }}
-                defaultMonth={range?.from ?? new Date()}
-                locale={ptBR}
-                showOutsideDays={false}
-                className="pointer-events-auto w-full p-1"
-                classNames={{
-                  months: "flex w-full flex-col",
-                  month: "w-full space-y-3",
-                  table: "w-full border-collapse",
-                  head_row: "flex w-full",
-                  head_cell:
-                    "flex-1 text-muted-foreground/45 font-display font-bold text-[9.5px] uppercase tracking-[0.14em] flex items-center justify-center h-6",
-                  row: "flex w-full mt-1",
-                  cell: cn(
-                    "relative flex-1 p-0 text-center tabular-nums",
-                    mobile ? "h-11 text-[13.5px]" : "h-9 text-[12.5px]",
-                    "[&:has([aria-selected])]:bg-primary/[0.07]",
-                    "first:[&:has([aria-selected])]:rounded-l-[10px] last:[&:has([aria-selected])]:rounded-r-[10px]",
-                  ),
-                  day: cn(
-                    "mx-auto flex items-center justify-center rounded-[10px] font-display font-semibold tabular-nums text-foreground/85 transition-colors hover:bg-secondary/60",
-                    mobile ? "h-11 w-11" : "h-9 w-9",
-                  ),
-                }}
+            <div className="rounded-[16px] border border-border/50 p-2.5">
+              <MonthGrid
+                month={month}
+                onMonthChange={setMonth}
+                from={from}
+                to={to}
+                onPick={pickDay}
+                compact={!mobile}
               />
             </div>
           </div>
@@ -219,22 +337,25 @@ function PeriodPanel({ value, onApply, onClose, mobile }: PanelProps) {
       {/* Ação */}
       <div
         className={cn(
-          "flex items-center gap-3 border-t border-border/50 bg-card/60 backdrop-blur",
+          "flex items-center gap-3 border-t border-border/50 bg-card",
           mobile ? "px-5 pb-[max(1rem,env(safe-area-inset-bottom))] pt-3" : "px-5 py-3",
         )}
       >
         {!mobile && (
-          <button type="button" onClick={onClose} className="text-[12px] font-semibold text-muted-foreground/70 hover:text-foreground">
+          <span className="min-w-0 truncate text-[11.5px] font-medium text-muted-foreground/70">{summary}</span>
+        )}
+        {!mobile && (
+          <button type="button" onClick={onClose} className="ml-auto text-[12px] font-semibold text-muted-foreground/70 hover:text-foreground">
             Cancelar
           </button>
         )}
         <button
           type="button"
           onClick={applyCustom}
-          disabled={!range?.from}
+          disabled={!from}
           className={cn(
-            "ml-auto inline-flex items-center justify-center gap-2 rounded-[14px] bg-primary font-bold text-primary-foreground transition-transform disabled:opacity-40",
-            mobile ? "h-[52px] w-full text-[14px] active:scale-[0.98]" : "h-9 px-5 text-[12.5px]",
+            "inline-flex items-center justify-center gap-2 rounded-[12px] bg-primary font-bold text-primary-foreground transition-colors hover:bg-primary/90 disabled:opacity-40",
+            mobile ? "h-[52px] w-full text-[14px]" : "h-9 px-5 text-[12.5px]",
           )}
         >
           <CalendarDays className="h-4 w-4" />
@@ -293,7 +414,7 @@ export function PeriodPicker({ value, onChange, trigger, open, onOpenChange, ali
         side={side}
         sideOffset={10}
         collisionPadding={14}
-        className="w-auto rounded-[18px] border-border/60 p-0"
+        className="w-auto max-w-[92vw] rounded-[18px] border-border/60 bg-card p-0"
       >
         <PeriodPanel value={value} onApply={handleApply} onClose={() => setOpen(false)} mobile={false} />
       </PopoverContent>
