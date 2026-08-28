@@ -182,7 +182,10 @@ function SidebarSectionNav({ section, pathname, isFirst }: SidebarSectionNavProp
                   <NavLink
                     to={item.url}
                     end={item.exact}
+                    onMouseEnter={() => prefetchRoute(item.url)}
+                    onTouchStart={() => prefetchRoute(item.url)}
                     activeClassName=""
+
                     className={cn(
                       "group/nav relative flex h-[52px] items-center gap-3 overflow-hidden rounded-[18px] px-3 text-[13.5px] outline-none",
                       "transition-[background-color,border-color,color,transform] duration-[220ms] ease-out",
