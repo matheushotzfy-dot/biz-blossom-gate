@@ -667,7 +667,7 @@ export default function AdminDashboard() {
                 <AdminAnalyticsTab transactions={transactions} profiles={profiles} products={products} withdrawals={withdrawals} fmtCurrency={fmtCurrency} />
               )}
               {activeTab === "transactions" && (
-                <AdminTransactionsTab transactions={transactions} profiles={profiles} products={products} fmtCurrency={fmtCurrency} onReload={loadData} />
+                <AdminTransactionsTab transactions={transactions} profiles={profiles} products={products} fmtCurrency={fmtCurrency} onReload={loadData} dateRange={dateRange} />
               )}
               {activeTab === "sellers" && (
                 <AdminSellersTab profiles={profiles} transactions={transactions} withdrawals={withdrawals} onReload={loadData} fmtCurrency={fmtCurrency} isAdmin={isAdmin} />

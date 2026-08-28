@@ -1,4 +1,4 @@
-import { useState, useMemo, useCallback } from "react";
+import { useState, useMemo, useCallback, useEffect } from "react";
 import {
   Search, Download, CreditCard, Smartphone, FileText, ChevronDown, Eye,
   RotateCcw, Upload, Clock, CheckCircle2, AlertTriangle, ShieldAlert,
@@ -18,7 +18,7 @@ import type { Tables } from "@/integrations/supabase/types";
 import { supabase } from "@/integrations/supabase/client";
 import { logAdminAction } from "@/lib/auditLog";
 import { toast } from "sonner";
-import { cn, deriveTransactionStatus } from "@/lib/utils";
+import { cn, deriveTransactionStatus, isApprovedTransaction } from "@/lib/utils";
 import { FinanceiroHero } from "@/components/financeiro/FinanceiroHero";
 import { PremiumMetric, PremiumMetricGrid, PremiumPanel, PremiumSegmented, PremiumEmpty, premiumTable } from "./AdminPremium";
 
@@ -28,6 +28,7 @@ interface Props {
   products: Tables<"products">[];
   fmtCurrency: (v: number) => string;
   onReload: () => void;
+  dateRange?: { from: Date; to: Date };
 }
 
 const PAGE_SIZE = 80;
@@ -45,7 +46,9 @@ const copy = (v: string) => { navigator.clipboard.writeText(v); toast.success("C
 
 type StatusKey = "all" | "completed" | "pending" | "failed" | "refunded" | "chargeback";
 
-export default function AdminTransactionsTab({ transactions, profiles, products, fmtCurrency, onReload }: Props) {
+type PageResponse = { items: Tables<"transactions">[]; total: number; page: number; page_size: number };
+
+export default function AdminTransactionsTab({ transactions, profiles, products, fmtCurrency, onReload, dateRange }: Props) {
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<StatusKey>("all");
   const [methodFilter, setMethodFilter] = useState("all");
@@ -53,6 +56,10 @@ export default function AdminTransactionsTab({ transactions, profiles, products,
   const [sortField, setSortField] = useState<"date" | "amount">("date");
   const [sortAsc, setSortAsc] = useState(false);
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
+  const [serverItems, setServerItems] = useState<Tables<"transactions">[]>(transactions.slice(0, PAGE_SIZE));
+  const [serverTotal, setServerTotal] = useState(transactions.length);
+  const [serverPage, setServerPage] = useState(1);
+  const [serverLoading, setServerLoading] = useState(false);
 
   const [selectedTx, setSelectedTx] = useState<Tables<"transactions"> | null>(null);
   const [sheetOpen, setSheetOpen] = useState(false);
@@ -87,16 +94,40 @@ export default function AdminTransactionsTab({ transactions, profiles, products,
     return <span className="h-3 w-3 inline-block" />;
   };
 
+  const effectiveTransactions = dateRange ? serverItems : transactions;
+
+  const loadPage = useCallback(async (page: number, append: boolean) => {
+    if (!dateRange) return;
+    setServerLoading(true);
+    const { data, error } = await supabase.rpc("get_admin_transactions_page" as never, {
+      _from: dateRange.from.toISOString(), _to: dateRange.to.toISOString(), _page: page, _page_size: PAGE_SIZE,
+      _status: statusFilter, _method: methodFilter, _seller_id: sellerFilter === "all" ? null : sellerFilter,
+      _search: search.trim() || null,
+    } as never);
+    setServerLoading(false);
+    if (error) { toast.error("Erro ao carregar transações"); return; }
+    const payload = data as unknown as PageResponse;
+    setServerItems(current => append ? [...current, ...(payload.items || [])] : (payload.items || []));
+    setServerTotal(Number(payload.total || 0));
+    setServerPage(page);
+  }, [dateRange, statusFilter, methodFilter, sellerFilter, search]);
+
+  useEffect(() => {
+    const timer = window.setTimeout(() => { void loadPage(1, false); }, 250);
+    return () => window.clearTimeout(timer);
+  }, [loadPage]);
+
   const sellerOptions = useMemo(() => {
     const s = new Map<string, string>();
-    for (const t of transactions) if (!s.has(t.user_id)) s.set(t.user_id, getSellerName(t.user_id));
+    for (const p of profiles) s.set(p.user_id, p.full_name || p.email || "—");
     return Array.from(s.entries()).sort((a, b) => a[1].localeCompare(b[1]));
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [transactions, profileNameMap]);
+  }, [profiles, profileNameMap]);
 
   const filtered = useMemo(() => {
     const s = search.toLowerCase();
-    const result = transactions.filter(t => {
+    const result = effectiveTransactions.filter(t => {
+      if (dateRange) return true;
       if (statusFilter !== "all") {
         if (statusFilter === "completed" && !(t.status === "completed" || t.status === "approved")) return false;
         if (statusFilter !== "completed" && t.status !== statusFilter) return false;
@@ -119,17 +150,20 @@ export default function AdminTransactionsTab({ transactions, profiles, products,
     });
     return result;
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [transactions, search, statusFilter, methodFilter, sellerFilter, sortField, sortAsc]);
+  }, [effectiveTransactions, search, statusFilter, methodFilter, sellerFilter, sortField, sortAsc, dateRange]);
 
-  const visibleItems = useMemo(() => filtered.slice(0, visibleCount), [filtered, visibleCount]);
-  const loadMore = useCallback(() => setVisibleCount(c => c + PAGE_SIZE), []);
+  const visibleItems = useMemo(() => dateRange ? filtered : filtered.slice(0, visibleCount), [filtered, visibleCount, dateRange]);
+  const loadMore = useCallback(() => {
+    if (dateRange) void loadPage(serverPage + 1, true);
+    else setVisibleCount(c => c + PAGE_SIZE);
+  }, [dateRange, loadPage, serverPage]);
 
   const kpis = useMemo(() => {
     const todayStr = new Date().toDateString();
     let completed = 0, pending = 0, failed = 0, chargebacks = 0, refunded = 0, todayN = 0, todayV = 0;
     let totalGross = 0, totalFees = 0, totalNet = 0, retained = 0, simulated = 0, discountTotal = 0;
-    for (const t of transactions) {
-      if (t.status === "completed" || t.status === "approved") { completed++; totalGross += Number(t.amount); totalFees += Number(t.fee_amount); totalNet += Number(t.net_amount); }
+    for (const t of effectiveTransactions) {
+      if (isApprovedTransaction(t.status)) { completed++; totalGross += Number(t.amount); totalFees += Number(t.fee_amount); totalNet += Number(t.net_amount); }
       else if (t.status === "pending") pending++;
       else if (t.status === "failed" || t.status === "expired") failed++;
       else if (t.status === "chargeback") chargebacks++;
@@ -139,13 +173,13 @@ export default function AdminTransactionsTab({ transactions, profiles, products,
       if (t.discount_amount) discountTotal += Number(t.discount_amount);
       if (new Date(t.created_at).toDateString() === todayStr) {
         todayN++;
-        if (t.status === "completed" || t.status === "approved") todayV += Number(t.amount);
+        if (isApprovedTransaction(t.status)) todayV += Number(t.amount);
       }
     }
-    const approvalRate = transactions.length ? (completed / transactions.length) * 100 : 0;
+    const approvalRate = effectiveTransactions.length ? (completed / effectiveTransactions.length) * 100 : 0;
     const cbRate = (completed + chargebacks) ? (chargebacks / (completed + chargebacks)) * 100 : 0;
     return { completed, pending, failed, chargebacks, refunded, todayN, todayV, totalGross, totalFees, totalNet, approvalRate, cbRate, retained, simulated, discountTotal };
-  }, [transactions]);
+  }, [effectiveTransactions]);
 
   const openXRay = (t: Tables<"transactions">) => { setSelectedTx(t); setSheetOpen(true); };
 
@@ -162,7 +196,7 @@ export default function AdminTransactionsTab({ transactions, profiles, products,
     if (!refundReason.trim() || refundReason.trim().length < 5) { toast.error("Justificativa obrigatória (mín. 5 caracteres)"); return; }
     const amount = refundType === "full" ? Number(selectedTx.amount) : Number(refundAmount);
     if (isNaN(amount) || amount <= 0 || amount > Number(selectedTx.amount)) { toast.error("Valor inválido"); return; }
-    if (selectedTx.status !== "completed" && selectedTx.status !== "approved") { toast.error("Só é possível estornar transações aprovadas"); return; }
+    if (!isApprovedTransaction(selectedTx.status)) { toast.error("Só é possível estornar transações aprovadas"); return; }
     if (!window.confirm(`Confirma estorno de R$ ${amount.toFixed(2)}?`)) return;
     setRefunding(true);
     try {
@@ -185,7 +219,7 @@ export default function AdminTransactionsTab({ transactions, profiles, products,
     events.push({ time: t.created_at, label: "Transação criada", tone: "neutral" });
     if (t.payment_method === "pix" && t.pix_expires_at) events.push({ time: t.pix_expires_at, label: "Expiração PIX agendada", tone: "neutral" });
     if (t.status === "pending") events.push({ time: t.updated_at || t.created_at, label: "Aguardando pagamento", tone: "warning" });
-    if (t.status === "completed" || t.status === "approved") events.push({ time: t.updated_at || t.created_at, label: "Pagamento aprovado", tone: "success" });
+    if (isApprovedTransaction(t.status)) events.push({ time: t.updated_at || t.created_at, label: "Pagamento aprovado", tone: "success" });
     if (t.status === "failed") events.push({ time: t.updated_at || t.created_at, label: "Pagamento recusado", tone: "danger" });
     if (t.status === "expired") events.push({ time: t.updated_at || t.created_at, label: "Transação expirada", tone: "neutral" });
     if (t.status === "refunded") events.push({ time: t.updated_at || t.created_at, label: "Estorno processado", tone: "warning" });
@@ -216,7 +250,7 @@ export default function AdminTransactionsTab({ transactions, profiles, products,
   };
 
   const statusPills: { value: StatusKey; label: string }[] = [
-    { value: "all", label: `Tudo · ${transactions.length}` },
+    { value: "all", label: `Tudo · ${dateRange ? serverTotal : transactions.length}` },
     { value: "completed", label: `Aprovadas · ${kpis.completed}` },
     { value: "pending", label: `Pendentes · ${kpis.pending}` },
     { value: "failed", label: `Recusadas · ${kpis.failed}` },
@@ -328,7 +362,7 @@ export default function AdminTransactionsTab({ transactions, profiles, products,
             </Button>
           )}
           <div className="ml-auto text-[11px] text-muted-foreground tabular-nums">
-            Mostrando <span className="font-bold text-foreground">{visibleItems.length.toLocaleString("pt-BR")}</span> de <span className="font-bold text-foreground">{filtered.length.toLocaleString("pt-BR")}</span>
+            {serverLoading ? "Atualizando…" : <>Mostrando <span className="font-bold text-foreground">{visibleItems.length.toLocaleString("pt-BR")}</span> de <span className="font-bold text-foreground">{(dateRange ? serverTotal : filtered.length).toLocaleString("pt-BR")}</span></>}
           </div>
         </div>
 
@@ -392,10 +426,10 @@ export default function AdminTransactionsTab({ transactions, profiles, products,
             <PremiumEmpty icon={Filter} title="Nenhuma transação encontrada" subtitle="Ajuste os filtros e tente novamente" />
           )}
         </div>
-        {visibleCount < filtered.length && (
+        {(dateRange ? visibleItems.length < serverTotal : visibleCount < filtered.length) && (
           <div className="mt-4 text-center">
             <Button variant="outline" size="sm" onClick={loadMore} className="h-8 text-[11px] gap-1.5 rounded-xl">
-              <ChevronDown className="h-3.5 w-3.5" /> Carregar mais ({(filtered.length - visibleCount).toLocaleString("pt-BR")} restantes)
+              <ChevronDown className="h-3.5 w-3.5" /> Carregar mais ({((dateRange ? serverTotal - visibleItems.length : filtered.length - visibleCount)).toLocaleString("pt-BR")} restantes)
             </Button>
           </div>
         )}
@@ -554,7 +588,7 @@ export default function AdminTransactionsTab({ transactions, profiles, products,
 
                 {/* Actions */}
                 <div className="flex flex-wrap gap-2 pt-3 border-t border-border">
-                  {(selectedTx.status === "completed" || selectedTx.status === "approved") && (
+                  {isApprovedTransaction(selectedTx.status) && (
                     <Button variant="destructive" size="sm" className="h-8 gap-1.5 text-[11px] rounded-xl" onClick={openRefund}>
                       <RotateCcw className="h-3.5 w-3.5" /> Estornar pagamento
                     </Button>
