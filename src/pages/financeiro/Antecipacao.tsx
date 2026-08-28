@@ -21,8 +21,12 @@ const fmt = (v: number) => `R$ ${v.toLocaleString("pt-BR", { minimumFractionDigi
 
 export default function Antecipacao() {
   const { user } = useAuth();
-  const { data: transactions } = useTransactions();
+  // A lista abaixo é apenas uma amostra das retenções mais recentes (visualização).
+  // Todos os totais vêm agregados do servidor, sem teto de linhas.
+  const { data: transactions } = useTransactions(200);
   const [antecipationDays, setAntecipationDays] = useState(15);
+  const { data: summary } = useAnticipationSummary(antecipationDays);
+
 
   const stats = useMemo(() => {
     if (!transactions || !user) return { retainedTotal: 0, eligibleCount: 0, eligible: [] as Tx[] };
