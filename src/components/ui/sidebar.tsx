@@ -183,7 +183,7 @@ const Sidebar = React.forwardRef<
  <div
  data-sidebar="gap"
  className={cn(
- "relative h-svh w-[--sidebar-width] bg-transparent transition-[width] duration-300 ease-[cubic-bezier(0.22,1,0.36,1)]",
+  "relative h-svh w-[--sidebar-width] shrink-0 bg-transparent transition-[width] duration-300 ease-[cubic-bezier(0.22,1,0.36,1)]",
 
  "group-data-[collapsible=offcanvas]:w-0",
  "group-data-[side=right]:rotate-180",
@@ -208,7 +208,7 @@ const Sidebar = React.forwardRef<
  >
  <div
  data-sidebar="sidebar"
- className="flex h-full w-full flex-col bg-sidebar group-data-[variant=floating]:rounded-lg group-data-[variant=floating]:border group-data-[variant=floating]:border-sidebar-border group-data-[variant=floating]:shadow"
+  className="flex h-full w-[--sidebar-width] min-w-[--sidebar-width] flex-col bg-sidebar group-data-[variant=floating]:rounded-lg group-data-[variant=floating]:border group-data-[variant=floating]:border-sidebar-border group-data-[variant=floating]:shadow"
  >
  {children}
  </div>

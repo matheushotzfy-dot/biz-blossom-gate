@@ -55,11 +55,11 @@ function DashboardLayoutInner() {
     const sidebarHoverTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
     const handleSidebarHover = (hovering: boolean) => {
       if (sidebarHoverTimer.current) clearTimeout(sidebarHoverTimer.current);
-      // Pequeno atraso na abertura evita disparos acidentais; o fechamento é mais lento
-      // para a transição parecer contínua quando o mouse sai e volta.
+      // A abertura responde imediatamente; uma tolerância curta no fechamento evita
+      // oscilações quando o cursor cruza a borda do painel.
       sidebarHoverTimer.current = setTimeout(
         () => setSidebarHover(hovering),
-        hovering ? 60 : 180,
+        hovering ? 0 : 100,
       );
     };
    const togglePin = () => {

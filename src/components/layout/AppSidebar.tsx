@@ -82,8 +82,6 @@ type RevenueBarProps = {
 };
 
 function RevenueBar({ collapsed, revenue, milestone, onOpenRewards }: RevenueBarProps) {
-  if (collapsed) return null;
-
   const pct = Math.max(0, Math.min(100, milestone.pct));
   const pctDisplay = Math.round(pct);
   const current = formatRevenue(revenue);
@@ -93,8 +91,10 @@ function RevenueBar({ collapsed, revenue, milestone, onOpenRewards }: RevenueBar
     <button
       type="button"
       onClick={onOpenRewards}
+      aria-hidden={collapsed}
+      tabIndex={collapsed ? -1 : 0}
       title={`${current} de ${goal} — ${pctDisplay}% • ${milestone.current.tier}`}
-      className="seller-clickable group/rev relative mt-3 block w-full overflow-hidden rounded-[16px] border border-sidebar-border/70 bg-sidebar-accent/30 px-3.5 py-3 text-left transition-colors hover:border-primary/35 hover:bg-sidebar-accent/50"
+      className="sidebar-revenue-bar seller-clickable group/rev relative mt-3 block w-full overflow-hidden rounded-[16px] border border-sidebar-border/70 bg-sidebar-accent/30 px-3.5 py-3 text-left transition-colors hover:border-primary/35 hover:bg-sidebar-accent/50"
     >
       {/* Marca d'água da logo */}
       <span
@@ -152,7 +152,7 @@ function SidebarNavList({ items, pathname }: SidebarNavListProps) {
   return (
     <SidebarGroup className="px-0 py-0">
       <SidebarGroupContent>
-        <SidebarMenu className="gap-1 px-0 group-data-[collapsible=icon]:gap-1.5">
+        <SidebarMenu className="gap-1 px-0">
           {items.map((item) => {
             const isActive = isItemActive(pathname, item);
             return (
@@ -161,7 +161,7 @@ function SidebarNavList({ items, pathname }: SidebarNavListProps) {
                   asChild
                   tooltip={item.title}
                   isActive={isActive}
-                  className="h-auto rounded-none p-0 hover:bg-transparent active:bg-transparent data-[active=true]:bg-transparent group-data-[collapsible=icon]:!size-auto group-data-[collapsible=icon]:!p-0"
+                  className="h-auto rounded-none p-0 hover:bg-transparent active:bg-transparent data-[active=true]:bg-transparent"
                 >
                   <NavLink
                     to={item.url}
@@ -173,7 +173,6 @@ function SidebarNavList({ items, pathname }: SidebarNavListProps) {
                     className={cn(
                       "group/nav relative flex h-[56px] items-center gap-3.5 overflow-hidden rounded-[16px] px-3.5 text-[14px] outline-none",
                       "transition-colors duration-300 ease-out",
-                      "group-data-[collapsible=icon]:mx-auto group-data-[collapsible=icon]:h-11 group-data-[collapsible=icon]:w-11 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:gap-0 group-data-[collapsible=icon]:rounded-[14px] group-data-[collapsible=icon]:px-0",
                       isActive
                         ? "border border-primary/25 bg-primary/[0.10] font-semibold text-sidebar-accent-foreground"
                         : "border border-transparent font-medium text-sidebar-foreground/62 hover:bg-sidebar-accent/45 hover:text-sidebar-accent-foreground",
@@ -189,17 +188,16 @@ function SidebarNavList({ items, pathname }: SidebarNavListProps) {
                     >
                       <item.icon
                         size={19}
-                        className="group-data-[collapsible=icon]:!h-5 group-data-[collapsible=icon]:!w-5"
                         strokeWidth={isActive ? 2 : 1.65}
                       />
                     </span>
 
-                    <span className="relative z-10 truncate group-data-[collapsible=icon]:hidden">{item.title}</span>
+                    <span className="sidebar-item-label relative z-10 truncate">{item.title}</span>
 
                     {item.count !== undefined && item.count > 0 && (
                       <span
                         className={cn(
-                          "relative z-10 ml-auto inline-flex min-w-5 items-center justify-center rounded-full px-1.5 py-1 font-numbers text-[9.5px] font-bold leading-none tabular-nums group-data-[collapsible=icon]:hidden",
+                          "sidebar-item-meta relative z-10 ml-auto inline-flex min-w-5 items-center justify-center rounded-full px-1.5 py-1 font-numbers text-[9.5px] font-bold leading-none tabular-nums",
                           isActive
                             ? "bg-primary/[0.14] text-primary"
                             : "bg-sidebar-foreground/[0.07] text-sidebar-foreground/45 group-hover/nav:text-sidebar-foreground/70",
@@ -212,7 +210,7 @@ function SidebarNavList({ items, pathname }: SidebarNavListProps) {
                     {isActive && (
                       <span
                         aria-hidden
-                        className="absolute right-3.5 h-1.5 w-1.5 rounded-full bg-primary group-data-[collapsible=icon]:right-1 group-data-[collapsible=icon]:top-1"
+                        className="sidebar-item-meta absolute right-3.5 h-1.5 w-1.5 rounded-full bg-primary"
                       />
                     )}
                   </NavLink>
@@ -322,17 +320,17 @@ export function AppSidebar({ pinned = true, onTogglePin, onHoverChange }: AppSid
       onMouseEnter={() => onHoverChange?.(true)}
       onMouseLeave={() => onHoverChange?.(false)}
       className={cn(
-        "technical-sidebar z-40 border-r border-sidebar-border/60 transition-[width,border-color] duration-300 ease-[cubic-bezier(0.22,1,0.36,1)]",
+        "technical-sidebar z-40 overflow-hidden border-r border-sidebar-border/60",
         overlaying && "technical-sidebar-overlay",
       )}
     >
-      <SidebarHeader className="relative px-4 pb-3 pt-4 group-data-[collapsible=icon]:px-0">
+      <SidebarHeader className="relative px-4 pb-3 pt-4">
         {/* Brand + pino */}
-        <div className={cn("flex items-center gap-3", collapsed && "justify-center")}>
+        <div className="flex items-center gap-3">
           <div className="relative flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden">
             <VenxpayLogo size={30} />
           </div>
-          <div className="min-w-0 flex-1 group-data-[collapsible=icon]:hidden">
+          <div className="sidebar-expanded-detail min-w-0 flex-1">
             <h1 className="font-heading text-[15px] leading-none tracking-[-0.02em] text-sidebar-accent-foreground">
               VENXPAY
             </h1>
@@ -345,7 +343,7 @@ export function AppSidebar({ pinned = true, onTogglePin, onHoverChange }: AppSid
               aria-label={pinned ? "Soltar menu (expandir ao passar o mouse)" : "Fixar menu"}
               title={pinned ? "Soltar menu" : "Fixar menu"}
               className={cn(
-                "hidden md:flex h-7 w-7 shrink-0 items-center justify-center rounded-[8px] transition-colors group-data-[collapsible=icon]:hidden",
+                "sidebar-expanded-detail hidden md:flex h-7 w-7 shrink-0 items-center justify-center rounded-[8px] transition-colors",
                 pinned
                   ? "text-primary"
                   : "text-sidebar-foreground/40 hover:text-foreground",
@@ -363,7 +361,7 @@ export function AppSidebar({ pinned = true, onTogglePin, onHoverChange }: AppSid
         />
       </SidebarHeader>
 
-      <SidebarContent className="relative gap-0 overflow-y-auto px-3 py-3 group-data-[collapsible=icon]:px-1.5 group-data-[collapsible=icon]:py-4">
+      <SidebarContent className="relative gap-0 overflow-y-auto px-1.5 py-3">
         <SidebarNavList items={items} pathname={location.pathname} />
       </SidebarContent>
 
