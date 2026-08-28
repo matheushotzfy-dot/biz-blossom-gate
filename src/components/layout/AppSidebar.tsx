@@ -12,6 +12,8 @@ import { useAuth } from "@/hooks/useAuth";
 import { useSupportUnread } from "@/hooks/useSupportUnread";
 import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
+import { prefetchRoute } from "@/lib/routePrefetch";
+
 import {
   PinIcon,
   GlyphDashboard,
