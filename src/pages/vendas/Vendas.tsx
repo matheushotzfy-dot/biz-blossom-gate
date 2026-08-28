@@ -91,14 +91,43 @@ const PRESETS: { id: PresetId; label: string }[] = [
 
 
 export default function Vendas() {
-  const { data: transactions = [], isLoading: txLoading, isError: txError, refetch: refetchTx } = useTransactions();
   const { data: products = [] } = useProducts();
   const [search, setSearch] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
   const [detailTx, setDetailTx] = useState<Tables<"transactions"> | null>(null);
   const [privacyHidden, setPrivacyHidden] = useState(() => localStorage.getItem("privacy_mode") === "true");
   const [periodValue, setPeriodValue] = useState<PeriodValue>(() => buildPeriod("today"));
   const range = useMemo<DateRange>(() => ({ from: periodValue.from, to: periodValue.to }), [periodValue]);
   const [page, setPage] = useState(1);
+  const [exporting, setExporting] = useState(false);
+
+  // Debounce da busca: cada tecla dispara uma query no servidor.
+  useEffect(() => {
+    const id = window.setTimeout(() => setDebouncedSearch(search.trim()), 350);
+    return () => window.clearTimeout(id);
+  }, [search]);
+
+  // Janela do período — mesma fonte usada pelos agregados do servidor.
+  const rangeStart = periodValue.from;
+  const rangeEnd = periodValue.to;
+  const bucket = useMemo<"hour" | "day" | "month">(() => {
+    const span = differenceInDays(rangeEnd, rangeStart) + 1;
+    return span <= 1 ? "hour" : span > 60 ? "month" : "day";
+  }, [rangeStart, rangeEnd]);
+
+  // Agregados idênticos aos do Dashboard (mesma RPC, mesma janela) — sem cálculo no cliente.
+  const { data: dashStats } = useDashboardStats(rangeStart, rangeEnd, bucket);
+  const cur = dashStats?.current;
+
+  const {
+    data: pageData,
+    isLoading: txLoading,
+    isError: txError,
+    refetch: refetchTx,
+  } = useTransactionsPage({ from: rangeStart, to: rangeEnd, page, pageSize: PAGE_SIZE, search: debouncedSearch });
+
+  const paged = pageData?.rows ?? [];
+  const totalRows = pageData?.total ?? 0;
 
   const togglePrivacy = () => {
     setPrivacyHidden(prev => {
@@ -116,27 +145,9 @@ export default function Vendas() {
     return m;
   }, [products]);
 
-  const filteredByDate = useMemo(() => {
-    if (!range?.from || !range?.to) return transactions;
-    const fromMs = range.from.getTime();
-    const toMs = range.to.getTime();
-    return transactions.filter((t) => {
-      const ts = new Date(t.created_at).getTime();
-      return ts >= fromMs && ts <= toMs;
-    });
-  }, [transactions, range]);
+  useEffect(() => { setPage(1); }, [debouncedSearch, rangeStart, rangeEnd]);
 
-  const filtered = useMemo(() => {
-    if (!search) return filteredByDate;
-    const q = search.toLowerCase();
-    return filteredByDate.filter((t) =>
-      t.customer_name?.toLowerCase().includes(q) ||
-      t.customer_email?.toLowerCase().includes(q) ||
-      t.id.toLowerCase().includes(q)
-    );
-  }, [filteredByDate, search]);
 
-  useEffect(() => { setPage(1); }, [search, range]);
 
   const buildRows = () => filtered.map((t) => ({
  "ID da Transação": t.id,
