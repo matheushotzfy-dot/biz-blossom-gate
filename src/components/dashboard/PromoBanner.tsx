@@ -223,7 +223,7 @@ export function PromoBanner({ periodControl }: { periodControl?: React.ReactNode
               <ArrowUpRight className="h-3.5 w-3.5 transition-transform group- group-hover:translate-x-0.5" />
             </Link>
             <Link
-              to="/taxas"
+              to="/financeiro/taxas"
               className="inline-flex items-center gap-2 rounded-xl border border-border/70 px-4 py-2.5 text-[12.5px] font-semibold text-foreground transition-colors hover:border-primary/40 hover:text-primary"
             >
               Ver minhas taxas
