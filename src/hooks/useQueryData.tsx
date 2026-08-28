@@ -141,24 +141,121 @@ export function useTransactionsPage({ from, to, page, pageSize, search }: Transa
   });
 }
 
-/** Busca (limitada) das transações do período para exportação de relatórios. */
+/**
+ * Exportação do período sem teto de linhas: pagina no servidor (keyset por
+ * created_at + id) até esgotar o período. Suporta contas com milhões de vendas.
+ */
 export async function fetchTransactionsForExport(
   userId: string,
   from: Date,
   to: Date,
-  max = 5000,
+  onProgress?: (loaded: number) => void,
 ): Promise<Tables<"transactions">[]> {
-  const { data, error } = await supabase
-    .from("transactions")
-    .select("*")
-    .eq("user_id", userId)
-    .gte("created_at", from.toISOString())
-    .lte("created_at", to.toISOString())
-    .order("created_at", { ascending: false })
-    .limit(max);
-  if (error) throw error;
-  return (data || []) as Tables<"transactions">[];
+  const CHUNK = 1000;
+  const out: Tables<"transactions">[] = [];
+  let cursor = to.toISOString();
+  let guardId: string | null = null;
+
+  // eslint-disable-next-line no-constant-condition
+  while (true) {
+    let query = supabase
+      .from("transactions")
+      .select("*")
+      .eq("user_id", userId)
+      .gte("created_at", from.toISOString())
+      .lte("created_at", cursor)
+      .order("created_at", { ascending: false })
+      .order("id", { ascending: false })
+      .limit(CHUNK);
+
+    const { data, error } = await query;
+    if (error) throw error;
+    const rows = (data || []) as Tables<"transactions">[];
+    // Remove sobreposição do cursor (mesmo timestamp em páginas consecutivas).
+    const fresh = guardId ? rows.filter((r) => r.id !== guardId) : rows;
+    const seen = new Set(out.map((r) => r.id));
+    for (const r of fresh) if (!seen.has(r.id)) out.push(r);
+
+    onProgress?.(out.length);
+    if (rows.length < CHUNK) break;
+
+    const last = rows[rows.length - 1];
+    if (!last?.created_at || last.created_at === cursor && last.id === guardId) break;
+    cursor = last.created_at;
+    guardId = last.id;
+  }
+
+  return out;
 }
+
+/** Receita líquida aprovada por produto (agregada no servidor). */
+export function useProductRevenue() {
+  const { user } = useAuth();
+  return useQuery({
+    queryKey: ["product_revenue", user?.id],
+    queryFn: async () => {
+      const { data, error } = await supabase.rpc("get_seller_product_revenue");
+      if (error) throw error;
+      const map: Record<string, number> = {};
+      (data || []).forEach((r: { product_id: string; net_revenue: number }) => {
+        map[r.product_id] = Number(r.net_revenue) || 0;
+      });
+      return map;
+    },
+    enabled: !!user?.id,
+    staleTime: 60 * 1000,
+  });
+}
+
+/** Receita líquida aprovada de um mês (`YYYY-MM`), agregada no servidor. */
+export function useMonthRevenue(month: string) {
+  const { user } = useAuth();
+  return useQuery({
+    queryKey: ["month_revenue", user?.id, month],
+    queryFn: async () => {
+      const { data, error } = await supabase.rpc("get_seller_month_revenue", { _month: month });
+      if (error) throw error;
+      return Number(data ?? 0);
+    },
+    enabled: !!user?.id && /^\d{4}-\d{2}$/.test(month),
+    staleTime: 60 * 1000,
+  });
+}
+
+export type AnticipationSummary = {
+  retained_total: number;
+  eligible_count: number;
+  calc_count: number;
+  calc_total: number;
+  calc_fee: number;
+  calc_net: number;
+};
+
+/** Resumo de antecipação calculado no servidor (sem baixar transações). */
+export function useAnticipationSummary(maxDays: number) {
+  const { user } = useAuth();
+  return useQuery({
+    queryKey: ["anticipation_summary", user?.id, maxDays],
+    queryFn: async () => {
+      const { data, error } = await supabase.rpc("get_seller_anticipation_summary", { _max_days: maxDays });
+      if (error) throw error;
+      const r = (data ?? {}) as Partial<Record<keyof AnticipationSummary, number | string>>;
+      const n = (v: number | string | undefined) => Number(v ?? 0);
+      return {
+        retained_total: n(r.retained_total),
+        eligible_count: n(r.eligible_count),
+        calc_count: n(r.calc_count),
+        calc_total: n(r.calc_total),
+        calc_fee: n(r.calc_fee),
+        calc_net: n(r.calc_net),
+      } as AnticipationSummary;
+    },
+    enabled: !!user?.id,
+    staleTime: 30 * 1000,
+    placeholderData: (prev) => prev,
+  });
+}
+
 
 export type DashboardBucket = "hour" | "day" | "month";
 
