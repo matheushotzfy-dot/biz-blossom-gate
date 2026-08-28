@@ -7,6 +7,8 @@ import {
 } from "lucide-react";
 import { NavLink, useLocation, useNavigate } from "react-router-dom";
 import { cn } from "@/lib/utils";
+import { prefetchRoute } from "@/lib/routePrefetch";
+
 import { supabase } from "@/integrations/supabase/client";
 
 const tabs = [
