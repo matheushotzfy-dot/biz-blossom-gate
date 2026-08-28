@@ -4310,7 +4310,12 @@ html body .lp .lp-progress {
 .platform-shell .technical-sidebar .sidebar-item-label,
 .platform-shell .technical-sidebar .sidebar-item-meta,
 .platform-shell .technical-sidebar .sidebar-revenue-bar {
-  transition: opacity 150ms ease-out, transform 220ms var(--sidebar-ease);
+  transition: opacity 150ms ease-out,
+    transform 220ms var(--sidebar-ease),
+    max-height var(--sidebar-motion) var(--sidebar-ease),
+    margin var(--sidebar-motion) var(--sidebar-ease),
+    padding var(--sidebar-motion) var(--sidebar-ease),
+    border-width var(--sidebar-motion) var(--sidebar-ease);
   opacity: 1;
   transform: translateX(0);
 }
@@ -4322,6 +4327,14 @@ html body .lp .lp-progress {
   opacity: 0;
   transform: translateX(-5px);
   pointer-events: none;
+}
+
+.platform-shell .group[data-state="collapsed"] .technical-sidebar .sidebar-revenue-bar {
+  max-height: 0;
+  margin-top: 0;
+  padding-top: 0;
+  padding-bottom: 0;
+  border-width: 0;
 }
 
 /* Itens do menu não competem com a animação de largura */
@@ -4344,6 +4357,7 @@ html body .lp .lp-progress {
 }
 
 .platform-shell .group[data-state="collapsed"] .technical-sidebar .group\/nav {
+  background: transparent;
   border-color: transparent;
   border-radius: 0;
 }
