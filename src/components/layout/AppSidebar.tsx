@@ -4,6 +4,7 @@ import {
   MessageSquare,
   ChevronRight,
 } from "lucide-react";
+
 import { useEffect, useMemo, useState, type ComponentType, type SVGProps } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { NavLink } from "@/components/NavLink";
@@ -54,10 +55,6 @@ type SidebarItem = {
   exact?: boolean;
 };
 
-type SidebarSection = {
-  label: string;
-  items: SidebarItem[];
-};
 
 
 
@@ -146,32 +143,17 @@ function RevenueBar({ collapsed, revenue, milestone, onOpenRewards }: RevenueBar
 
 
 
-type SidebarSectionNavProps = {
-  section: SidebarSection;
+type SidebarNavListProps = {
+  items: SidebarItem[];
   pathname: string;
-  isFirst: boolean;
 };
 
-function SidebarSectionNav({ section, pathname, isFirst }: SidebarSectionNavProps) {
+function SidebarNavList({ items, pathname }: SidebarNavListProps) {
   return (
-    <SidebarGroup className="px-0 py-0.5">
-      <div
-        className={cn(
-          "flex items-center gap-2.5 px-3 pb-1.5 group-data-[collapsible=icon]:hidden",
-          isFirst ? "pt-0" : "pt-3.5",
-        )}
-      >
-        <span className="h-px w-4 shrink-0 bg-sidebar-foreground/20" aria-hidden />
-        <span className="text-[9px] font-bold uppercase tracking-[0.2em] text-sidebar-foreground/35">
-          {section.label}
-        </span>
-      </div>
-      {!isFirst && (
-        <div className="mx-auto my-2 hidden h-px w-5 bg-sidebar-border/60 group-data-[collapsible=icon]:block" />
-      )}
+    <SidebarGroup className="px-0 py-0">
       <SidebarGroupContent>
-        <SidebarMenu className="gap-1.5 px-0 group-data-[collapsible=icon]:gap-2">
-          {section.items.map((item) => {
+        <SidebarMenu className="gap-1 px-0 group-data-[collapsible=icon]:gap-1.5">
+          {items.map((item) => {
             const isActive = isItemActive(pathname, item);
             return (
               <SidebarMenuItem key={item.url}>
@@ -189,24 +171,24 @@ function SidebarSectionNav({ section, pathname, isFirst }: SidebarSectionNavProp
                     activeClassName=""
 
                     className={cn(
-                      "group/nav relative flex h-[52px] items-center gap-3 overflow-hidden rounded-[18px] px-3 text-[13.5px] outline-none",
-                      "transition-[background-color,border-color,color,transform] duration-[220ms] ease-out",
+                      "group/nav relative flex h-[56px] items-center gap-3.5 overflow-hidden rounded-[16px] px-3.5 text-[14px] outline-none",
+                      "transition-colors duration-300 ease-out",
                       "group-data-[collapsible=icon]:mx-auto group-data-[collapsible=icon]:h-11 group-data-[collapsible=icon]:w-11 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:gap-0 group-data-[collapsible=icon]:rounded-[14px] group-data-[collapsible=icon]:px-0",
                       isActive
-                        ? "border border-primary/30 bg-primary/[0.12] font-semibold text-sidebar-accent-foreground"
-                        : "border border-transparent font-medium text-sidebar-foreground/62 hover:bg-sidebar-accent/55 hover:text-sidebar-accent-foreground",
+                        ? "border border-primary/25 bg-primary/[0.10] font-semibold text-sidebar-accent-foreground"
+                        : "border border-transparent font-medium text-sidebar-foreground/62 hover:bg-sidebar-accent/45 hover:text-sidebar-accent-foreground",
                     )}
                   >
                     <span
                       className={cn(
-                        "relative z-10 flex h-8 w-8 shrink-0 items-center justify-center transition-colors duration-[220ms] ease-out",
+                        "relative z-10 flex h-8 w-8 shrink-0 items-center justify-center transition-colors duration-300 ease-out",
                         isActive
                           ? "text-primary"
                           : "text-sidebar-foreground/48 group-hover/nav:text-sidebar-accent-foreground",
                       )}
                     >
                       <item.icon
-                        size={18}
+                        size={19}
                         className="group-data-[collapsible=icon]:!h-5 group-data-[collapsible=icon]:!w-5"
                         strokeWidth={isActive ? 2 : 1.65}
                       />
@@ -228,20 +210,10 @@ function SidebarSectionNav({ section, pathname, isFirst }: SidebarSectionNavProp
                     )}
 
                     {isActive && (
-                      <>
-                        <span
-                          aria-hidden
-                          className="absolute inset-y-3 left-0 w-[3px] rounded-r-full bg-primary group-data-[collapsible=icon]:hidden"
-                        />
-                        <span
-                          aria-hidden
-                          className="absolute right-3 h-1.5 w-1.5 rounded-full bg-primary group-data-[collapsible=icon]:right-1 group-data-[collapsible=icon]:top-1"
-                        />
-                        <span
-                          aria-hidden
-                          className="absolute bottom-0 left-12 right-12 h-px bg-gradient-to-r from-transparent via-primary/50 to-transparent group-data-[collapsible=icon]:hidden"
-                        />
-                      </>
+                      <span
+                        aria-hidden
+                        className="absolute right-3.5 h-1.5 w-1.5 rounded-full bg-primary group-data-[collapsible=icon]:right-1 group-data-[collapsible=icon]:top-1"
+                      />
                     )}
                   </NavLink>
                 </SidebarMenuButton>
@@ -322,42 +294,17 @@ export function AppSidebar({ pinned = true, onTogglePin, onHoverChange }: AppSid
 
   const milestone = useMemo(() => getMilestone(revenue), [revenue]);
 
-  const sections: SidebarSection[] = useMemo(() => [
-    {
-      label: "COMANDO",
-      items: [
-        { title: "Dashboard", url: "/dashboard", icon: GlyphDashboard, exact: true },
-        { title: "Vendas", url: "/vendas", icon: GlyphSales, exact: true },
-      ],
-    },
-    {
-      label: "INFOPRODUTOS",
-      items: [
-        { title: "Produtos", url: "/vendas/produtos", icon: GlyphProduct, count: counts.products },
-        { title: "Cupons", url: "/vendas/cupons", icon: GlyphCoupon, count: counts.coupons },
-      ],
-    },
-    {
-      label: "FINANCEIRO",
-      items: [
-        { title: "Financeiro", url: "/financeiro/saques", icon: GlyphWithdraw },
-        { title: "Taxas", url: "/financeiro/config", icon: GlyphFees },
-      ],
-    },
-    {
-      label: "FERRAMENTAS",
-      items: [
-        { title: "Apps & Integrações", url: "/integracoes", icon: GlyphApps },
-      ],
-    },
-    {
-      label: "CONTA",
-      items: [
-        { title: "Meu Perfil & KYC", url: "/perfil", icon: GlyphProfile },
-        { title: "Premiações", url: "/premiacoes", icon: GlyphTrophy },
-        { title: "Suporte", url: "/suporte", icon: GlyphSupport, count: supportUnread },
-      ],
-    },
+  const items: SidebarItem[] = useMemo(() => [
+    { title: "Dashboard", url: "/dashboard", icon: GlyphDashboard, exact: true },
+    { title: "Vendas", url: "/vendas", icon: GlyphSales, exact: true },
+    { title: "Produtos", url: "/vendas/produtos", icon: GlyphProduct, count: counts.products },
+    { title: "Cupons", url: "/vendas/cupons", icon: GlyphCoupon, count: counts.coupons },
+    { title: "Financeiro", url: "/financeiro/saques", icon: GlyphWithdraw },
+    { title: "Taxas", url: "/financeiro/config", icon: GlyphFees },
+    { title: "Apps & Integrações", url: "/integracoes", icon: GlyphApps },
+    { title: "Meu Perfil & KYC", url: "/perfil", icon: GlyphProfile },
+    { title: "Premiações", url: "/premiacoes", icon: GlyphTrophy },
+    { title: "Suporte", url: "/suporte", icon: GlyphSupport, count: supportUnread },
   ], [counts, supportUnread]);
 
 
@@ -375,7 +322,7 @@ export function AppSidebar({ pinned = true, onTogglePin, onHoverChange }: AppSid
       onMouseEnter={() => onHoverChange?.(true)}
       onMouseLeave={() => onHoverChange?.(false)}
       className={cn(
-        "technical-sidebar z-40 border-r border-sidebar-border/60 transition-[width,border-color] duration-200 ease-out",
+        "technical-sidebar z-40 border-r border-sidebar-border/60 transition-[width,border-color] duration-300 ease-[cubic-bezier(0.22,1,0.36,1)]",
         overlaying && "technical-sidebar-overlay",
       )}
     >
@@ -417,14 +364,7 @@ export function AppSidebar({ pinned = true, onTogglePin, onHoverChange }: AppSid
       </SidebarHeader>
 
       <SidebarContent className="relative gap-0 overflow-y-auto px-3 py-3 group-data-[collapsible=icon]:px-1.5 group-data-[collapsible=icon]:py-4">
-        {sections.map((section, idx) => (
-          <SidebarSectionNav
-            key={section.label}
-            section={section}
-            pathname={location.pathname}
-            isFirst={idx === 0}
-          />
-        ))}
+        <SidebarNavList items={items} pathname={location.pathname} />
       </SidebarContent>
 
 
