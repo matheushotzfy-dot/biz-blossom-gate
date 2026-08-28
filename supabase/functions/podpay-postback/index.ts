@@ -299,11 +299,13 @@ Deno.serve(async (req) => {
         const updateData: Record<string, unknown> = { status: ourStatus };
         if (podpayEventId) updateData.podpay_event_id = podpayEventId;
 
-        const { error } = await supabase
+        const { data: updatedTransaction, error } = await supabase
           .from('transactions')
           .update(updateData)
           .eq('id', tx.id)
-          .eq('status', tx.status);
+          .eq('status', tx.status)
+          .select('id, status')
+          .maybeSingle();
 
         try {
           await supabase.rpc('log_transaction_event', {
@@ -323,6 +325,13 @@ Deno.serve(async (req) => {
           return new Response(
             JSON.stringify({ success: false, error: 'Update failed' }),
             { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+          );
+        } else if (!updatedTransaction) {
+          safeLog('Concurrent status update detected', { transactionId: tx.id, expectedStatus: tx.status });
+          await finishLog('concurrent_update', tx.id, `Expected status ${tx.status}`);
+          return new Response(
+            JSON.stringify({ success: false, error: 'Concurrent update; retry event' }),
+            { status: 409, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
           );
         } else {
           safeLog('Transaction updated', { transactionId: tx.id, status: ourStatus });
@@ -367,13 +376,23 @@ Deno.serve(async (req) => {
           if (podpayPaymentId) updateData.podpay_payment_id = podpayPaymentId;
           if (podpayEventId) updateData.podpay_event_id = podpayEventId;
 
-          const { error } = await supabase
+          const { data: updatedFallback, error } = await supabase
             .from('transactions')
             .update(updateData)
-            .eq('id', pendingTx.id);
+            .eq('id', pendingTx.id)
+            .eq('status', 'pending')
+            .select('id')
+            .maybeSingle();
 
           if (error) {
             safeLog('Error updating transaction by strict fallback', { productId: externalRef, error: error.message });
+          } else if (!updatedFallback) {
+            safeLog('Strict fallback lost optimistic lock', { transactionId: pendingTx.id });
+            await finishLog('concurrent_update', pendingTx.id, 'Fallback expected pending status');
+            return new Response(
+              JSON.stringify({ success: false, error: 'Concurrent update; retry event' }),
+              { status: 409, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+            );
           } else {
             transactionId = pendingTx.id;
             safeLog('Transaction updated via strict fallback (product+email+amount)', { transactionId: pendingTx.id, status: fallbackStatus });
