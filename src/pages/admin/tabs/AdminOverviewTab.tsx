@@ -43,7 +43,7 @@ interface Props {
 }
 
 export interface AdminFinancialOverview {
-  summary?: { gross_volume?: number; platform_fees?: number; profit?: number; approved_count?: number; pending_count?: number; chargeback_count?: number; retained_amount?: number; active_sellers?: number };
+  summary?: { gross_volume?: number; net_volume?: number; platform_fees?: number; acquirer_fees?: number; profit?: number; total_count?: number; approved_count?: number; pending_count?: number; chargeback_count?: number; refunded_amount?: number; retained_amount?: number; simulated_count?: number; active_sellers?: number };
   month?: { gross_volume?: number; approved_count?: number; platform_fees?: number; profit?: number };
   operations?: { pending_withdrawals_count?: number; pending_withdrawals_amount?: number; open_disputes_count?: number; open_disputes_amount?: number };
 }
