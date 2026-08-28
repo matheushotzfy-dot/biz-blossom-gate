@@ -276,7 +276,7 @@ export default function Dashboard() {
     return { rangeStart: start, rangeEnd: end, bucket: b, spanDays: span };
   }, [isCustom, customRange, selectedPeriod]);
 
-  const { data: stats, isError: statsError, refetch: refetchStats } = useDashboardStats(rangeStart, rangeEnd, bucket);
+  const { data: stats, isError: statsError, isPending: statsLoading, refetch: refetchStats } = useDashboardStats(rangeStart, rangeEnd, bucket);
 
   const cur = stats?.current;
   const rate = (a?: number, t?: number) => (t && t > 0 ? ((a ?? 0) / t) * 100 : 0);
