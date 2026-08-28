@@ -184,14 +184,14 @@ function SidebarNavList({ items, pathname }: SidebarNavListProps) {
                   >
                     <span
                       className={cn(
-                        "relative z-10 flex h-8 w-8 shrink-0 items-center justify-center transition-colors duration-[220ms] ease-out",
+                        "relative z-10 flex h-8 w-8 shrink-0 items-center justify-center transition-colors duration-300 ease-out",
                         isActive
                           ? "text-primary"
                           : "text-sidebar-foreground/48 group-hover/nav:text-sidebar-accent-foreground",
                       )}
                     >
                       <item.icon
-                        size={18}
+                        size={19}
                         className="group-data-[collapsible=icon]:!h-5 group-data-[collapsible=icon]:!w-5"
                         strokeWidth={isActive ? 2 : 1.65}
                       />
