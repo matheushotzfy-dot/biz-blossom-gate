@@ -212,9 +212,6 @@ input[type="number"]::-webkit-inner-spin-button {
   }
 
   .sidebar-unpinned [data-sidebar="sidebar"] {
-    transition: width 200ms cubic-bezier(0.22, 1, 0.36, 1),
-                left 200ms cubic-bezier(0.22, 1, 0.36, 1),
-                right 200ms cubic-bezier(0.22, 1, 0.36, 1);
     will-change: width;
   }
 
@@ -4282,17 +4279,18 @@ html body .lp .lp-progress {
    Uma única duração e curva para TODOS os elementos envolvidos,
    evitando velocidades diferentes entre trilho, painel e conteúdo. */
 .platform-shell {
-  --sidebar-motion: 340ms;
-  --sidebar-ease: cubic-bezier(0.4, 0, 0.2, 1);
+  --sidebar-motion: 300ms;
+  --sidebar-ease: cubic-bezier(0.25, 0.8, 0.25, 1);
 }
 
 .platform-shell .group:has(.technical-sidebar) > [data-sidebar="gap"],
 .platform-shell .technical-sidebar,
 .platform-shell .technical-sidebar > [data-sidebar="sidebar"] {
-  transition-property: width, left, right, opacity !important;
+  transition-property: width, left, right !important;
   transition-duration: var(--sidebar-motion) !important;
   transition-timing-function: var(--sidebar-ease) !important;
   will-change: width;
+  contain: layout paint;
 }
 
 /* O painel flutuante sobe suavemente por cima do conteúdo */
@@ -4301,23 +4299,29 @@ html body .lp .lp-progress {
   box-shadow: 24px 0 48px -32px hsl(0 0% 0% / 0.55);
 }
 
-/* A grade de fundo não "estica" durante a expansão */
+/* O conteúdo mantém a largura final e é apenas revelado pelo painel externo.
+   Isso evita reflow de texto, ícones e blocos durante cada frame. */
 .platform-shell .technical-sidebar [data-sidebar="sidebar"] {
-  background-attachment: local, fixed, fixed !important;
+  overflow: hidden;
 }
 
-/* Conteúdo acompanha a largura com fade simétrico (abrir E fechar),
-   sem keyframes escalonados que causavam a sensação de "travadinha". */
-.platform-shell .technical-sidebar [data-sidebar="header"],
-.platform-shell .technical-sidebar [data-sidebar="content"],
-.platform-shell .technical-sidebar [data-sidebar="footer"] {
-  transition: opacity var(--sidebar-motion) var(--sidebar-ease);
+/* Detalhes entram juntos, sem alternância display:none e sem reposicionar ícones. */
+.platform-shell .technical-sidebar .sidebar-expanded-detail,
+.platform-shell .technical-sidebar .sidebar-item-label,
+.platform-shell .technical-sidebar .sidebar-item-meta,
+.platform-shell .technical-sidebar .sidebar-revenue-bar {
+  transition: opacity 150ms ease-out, transform 220ms var(--sidebar-ease);
   opacity: 1;
+  transform: translateX(0);
 }
-.platform-shell .group[data-state="collapsed"] .technical-sidebar [data-sidebar="header"],
-.platform-shell .group[data-state="collapsed"] .technical-sidebar [data-sidebar="content"],
-.platform-shell .group[data-state="collapsed"] .technical-sidebar [data-sidebar="footer"] {
-  opacity: 0.92;
+
+.platform-shell .group[data-state="collapsed"] .technical-sidebar .sidebar-expanded-detail,
+.platform-shell .group[data-state="collapsed"] .technical-sidebar .sidebar-item-label,
+.platform-shell .group[data-state="collapsed"] .technical-sidebar .sidebar-item-meta,
+.platform-shell .group[data-state="collapsed"] .technical-sidebar .sidebar-revenue-bar {
+  opacity: 0;
+  transform: translateX(-5px);
+  pointer-events: none;
 }
 
 /* Itens do menu não competem com a animação de largura */
@@ -4333,10 +4337,12 @@ html body .lp .lp-progress {
     --sidebar-motion: 1ms;
   }
   .platform-shell .technical-sidebar,
-  .platform-shell .technical-sidebar [data-sidebar="header"],
-  .platform-shell .technical-sidebar [data-sidebar="content"],
-  .platform-shell .technical-sidebar [data-sidebar="footer"] {
+  .platform-shell .technical-sidebar .sidebar-expanded-detail,
+  .platform-shell .technical-sidebar .sidebar-item-label,
+  .platform-shell .technical-sidebar .sidebar-item-meta,
+  .platform-shell .technical-sidebar .sidebar-revenue-bar {
     animation: none !important;
+    transition-duration: 1ms !important;
   }
 }
 
