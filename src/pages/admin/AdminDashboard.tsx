@@ -18,12 +18,13 @@ import {
 import { toast } from "sonner";
 import type { Tables } from "@/integrations/supabase/types";
 import { logAdminAction } from "@/lib/auditLog";
-import { cn } from "@/lib/utils";
+import { cn, isApprovedTransaction } from "@/lib/utils";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar as CalendarComponent } from "@/components/ui/calendar";
 import { subDays, startOfDay, endOfDay } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import AdminOverviewTab from "./tabs/AdminOverviewTab";
+import type { AdminFinancialOverview } from "./tabs/AdminOverviewTab";
 import AdminSellersTab from "./tabs/AdminSellersTab";
 import AdminProductsTab from "./tabs/AdminProductsTab";
 import AdminDisputesTab from "./tabs/AdminDisputesTab";
@@ -142,6 +143,7 @@ export default function AdminDashboard() {
   const [profiles, setProfiles] = useState<Tables<"profiles">[]>([]);
   const [products, setProducts] = useState<Tables<"products">[]>([]);
   const [withdrawals, setWithdrawals] = useState<Tables<"withdrawals">[]>([]);
+  const [financialOverview, setFinancialOverview] = useState<AdminFinancialOverview | null>(null);
   const [isAdmin, setIsAdmin] = useState(false);
   const [isEmployee, setIsEmployee] = useState(false);
   const [hasSupportPerm, setHasSupportPerm] = useState(false);
@@ -168,11 +170,16 @@ export default function AdminDashboard() {
     try {
       const fromIso = dateRange.from.toISOString();
       const toIso = dateRange.to.toISOString();
-      const { data, error } = await supabase.rpc("get_admin_dashboard_data" as never, {
-        _from: fromIso, _to: toIso,
-        _tx_limit: 5000, _profile_limit: 2000, _product_limit: 2000, _withdrawal_limit: 5000,
-      } as never);
-      if (error) throw error;
+      const [dashboardResult, overviewResult] = await Promise.all([
+        supabase.rpc("get_admin_dashboard_data" as never, {
+          _from: fromIso, _to: toIso,
+          _tx_limit: 5000, _profile_limit: 2000, _product_limit: 2000, _withdrawal_limit: 5000,
+        } as never),
+        supabase.rpc("get_admin_financial_overview" as never, { _from: fromIso, _to: toIso, _bucket: "day" } as never),
+      ]);
+      if (dashboardResult.error) throw dashboardResult.error;
+      if (overviewResult.error) throw overviewResult.error;
+      const data = dashboardResult.data;
       const payload = (data ?? {}) as {
         transactions?: Tables<"transactions">[];
         profiles?: Tables<"profiles">[];
@@ -183,6 +190,7 @@ export default function AdminDashboard() {
       setProfiles(payload.profiles ?? []);
       setProducts(payload.products ?? []);
       setWithdrawals(payload.withdrawals ?? []);
+      setFinancialOverview((overviewResult.data ?? null) as AdminFinancialOverview | null);
       setLastSync(new Date());
     } catch (e) {
       const msg = e instanceof Error ? e.message : "desconhecido";
@@ -229,6 +237,29 @@ export default function AdminDashboard() {
       if (!cancelled) setLoading(false);
     })();
     return () => { cancelled = true; };
+  }, [roleChecked, loadData]);
+
+  useEffect(() => {
+    if (!roleChecked) return;
+    let timer: ReturnType<typeof setTimeout> | null = null;
+    const reconcile = () => {
+      if (timer) return;
+      timer = setTimeout(() => { timer = null; void loadData(); }, 500);
+    };
+    const channel = supabase.channel("admin-financial-sync")
+      .on("postgres_changes", { event: "*", schema: "public", table: "transactions" }, reconcile)
+      .on("postgres_changes", { event: "*", schema: "public", table: "withdrawals" }, reconcile)
+      .on("postgres_changes", { event: "*", schema: "public", table: "disputes" }, reconcile)
+      .on("postgres_changes", { event: "*", schema: "public", table: "financial_ledger" }, reconcile)
+      .on("postgres_changes", { event: "*", schema: "public", table: "balance_adjustments" }, reconcile)
+      .subscribe((status) => { if (status === "CHANNEL_ERROR" || status === "TIMED_OUT") reconcile(); });
+    const onFocus = () => { if (document.visibilityState === "visible") void loadData(); };
+    window.addEventListener("focus", onFocus);
+    return () => {
+      if (timer) clearTimeout(timer);
+      window.removeEventListener("focus", onFocus);
+      void supabase.removeChannel(channel);
+    };
   }, [roleChecked, loadData]);
 
   const handleDatePreset = (preset: DatePresetId) => {
@@ -335,7 +366,7 @@ export default function AdminDashboard() {
         .filter(s => s.items.length > 0)
     : visibleSections;
 
-  const approvedTx = transactions.filter(t => t.status === "completed" || t.status === "approved");
+  const approvedTx = transactions.filter(t => isApprovedTransaction(t.status));
   const totalRevenue = approvedTx.reduce((a, t) => a + Number(t.net_amount), 0);
 
   if (loading) {
@@ -616,6 +647,7 @@ export default function AdminDashboard() {
                   withdrawals={withdrawals} onWithdrawalAction={handleWithdrawalAction}
                   onUserStatus={handleUserStatus} fmtCurrency={fmtCurrency}
                   isEmployee={isEmployee} dateRange={dateRange}
+                   financialOverview={financialOverview}
                   onNavigate={(id) => handleTabChange(id as TabId)}
                 />
               )}

@@ -8,7 +8,7 @@ import {
   DollarSign, Send, Clock, FileText, Plus, Eye,
 } from "lucide-react";
 import { toast } from "sonner";
-import { cn } from "@/lib/utils";
+import { cn, isApprovedTransaction } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -165,7 +165,7 @@ export default function ManagerDashboard() {
 
   const getSellerStats = (userId: string) => {
     const stx = transactions.filter(t => t.user_id === userId);
-    const completed = stx.filter(t => t.status === "completed");
+    const completed = stx.filter(t => isApprovedTransaction(t.status));
     return {
       totalTx: stx.length,
       totalRevenue: completed.reduce((s, t) => s + Number(t.net_amount), 0),
@@ -335,7 +335,7 @@ export default function ManagerDashboard() {
             { label: "Sellers", value: sellers.length, icon: Users, color: "from-emerald-500 to-teal-600" },
             { label: "Pendentes KYC", value: sellers.filter(s => s.account_status === "pending_review").length, icon: Clock, color: "from-amber-500 to-orange-600" },
             { label: "Transações", value: transactions.length, icon: CreditCard, color: "from-blue-500 to-indigo-600" },
-            { label: "Receita Total", value: `R$ ${transactions.filter(t => t.status === "completed").reduce((s, t) => s + Number(t.net_amount), 0).toLocaleString("pt-BR", { minimumFractionDigits: 2 })}`, icon: DollarSign, color: "from-violet-500 to-purple-600" },
+            { label: "Receita Total", value: `R$ ${transactions.filter(t => isApprovedTransaction(t.status)).reduce((s, t) => s + Number(t.net_amount), 0).toLocaleString("pt-BR", { minimumFractionDigits: 2 })}`, icon: DollarSign, color: "from-violet-500 to-purple-600" },
           ].map(kpi => (
             <div key={kpi.label} className="bg-white/[0.02] rounded-2xl border border-white/[0.06] p-5">
               <div className="flex items-center gap-3 mb-3">

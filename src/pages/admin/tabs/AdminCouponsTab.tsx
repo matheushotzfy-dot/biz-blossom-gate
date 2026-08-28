@@ -10,7 +10,7 @@ import { GlassPanel as AdminPanel, GlassPanelTitle as PanelTitle, AdminKpi } fro
 import { FinanceiroHero } from "@/components/financeiro/FinanceiroHero";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
+import { cn, isApprovedTransaction } from "@/lib/utils";
 
 interface Props {
   profiles: Tables<"profiles">[];
@@ -55,7 +55,7 @@ export default function AdminCouponsTab({ profiles, products, transactions, fmtC
 
   const getCouponStats = (cid: string) => {
     const txs = txByCoupon.get(cid) || [];
-    const completed = txs.filter(t => t.status === "completed");
+    const completed = txs.filter(t => isApprovedTransaction(t.status));
     const discount = completed.reduce((a, t) => a + Number(t.discount_amount || 0), 0);
     const gross = completed.reduce((a, t) => a + Number(t.amount), 0);
     const uniqueBuyers = new Set(completed.map(t => t.customer_email).filter(Boolean)).size;

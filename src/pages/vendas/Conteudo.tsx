@@ -44,7 +44,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { supabase } from "@/integrations/supabase/client";
-import { cn } from "@/lib/utils";
+import { cn, isApprovedTransaction } from "@/lib/utils";
 import { useAuth } from "@/hooks/useAuth";
 import { useCourses as useCoursesQuery, useInvalidateAll, useProducts as useProductsQuery, useTransactions } from "@/hooks/useQueryData";
 
@@ -127,7 +127,7 @@ export default function AdminConteudo() {
     const map: Record<string, number> = {};
 
     transactions
-      .filter((transaction) => transaction.status === "completed" && transaction.product_id)
+      .filter((transaction) => isApprovedTransaction(transaction.status) && transaction.product_id)
       .forEach((transaction) => {
         map[transaction.product_id!] = (map[transaction.product_id!] || 0) + Number(transaction.net_amount);
       });

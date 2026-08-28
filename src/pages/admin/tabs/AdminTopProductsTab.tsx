@@ -8,7 +8,7 @@ import { FinanceiroHero } from "@/components/financeiro/FinanceiroHero";
 import {
   PremiumPanel, PremiumMetric, PremiumMetricGrid, PremiumSegmented, PremiumEmpty, premiumTable,
 } from "./AdminPremium";
-import { cn } from "@/lib/utils";
+import { cn, isApprovedTransaction } from "@/lib/utils";
 
 interface Props {
   products: Tables<"products">[];
@@ -66,7 +66,7 @@ export default function AdminTopProductsTab({ products, profiles, transactions, 
       }
       row.total += 1;
       if (t.customer_email) buyerSets.get(t.product_id)!.add(t.customer_email);
-      if (t.status === "completed") {
+      if (isApprovedTransaction(t.status)) {
         row.completed += 1; row.gross += Number(t.amount); row.net += Number(t.net_amount || 0); row.fees += Number(t.fee_amount || 0);
       } else if (t.status === "pending") row.pending += 1;
       else if (t.status === "refunded") { row.refunded += 1; row.refundedAmt += Number(t.amount); }
