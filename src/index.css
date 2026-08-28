@@ -3296,9 +3296,12 @@ button svg, a svg, [role="button"] svg {
   }
 
   /* 2. Sem levitação, escala ou rotação em hover — o app fica "seco". */
-  .group:hover [class*="group-hover:scale-"],
-  *:hover {
-    --tw-translate-y: 0;
+  /* Nunca altere variáveis Tailwind em `*:hover`: elas são herdáveis.
+     Isso sobrescrevia o `-translate-y-1/2` dos dialogs portaled quando
+     qualquer filho recebia hover e fazia a janela saltar para baixo. */
+  .group:hover [class*="group-hover:scale-"] {
+    --tw-scale-x: 1;
+    --tw-scale-y: 1;
   }
   button:hover, a:hover, [role="button"]:hover, .card:hover, section:hover, li:hover {
     transform: none !important;
