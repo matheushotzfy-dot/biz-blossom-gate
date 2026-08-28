@@ -388,7 +388,7 @@ export default function Vendas() {
         <HDStat label="Faturamento Líquido" value={privacyHidden ? CENSORED : fmt(stats.revenue)} sub="Total após taxas" icon={Wallet} tone="success" />
         <HDStat label="Vendas Aprovadas" value={privacyHidden ? CENSORED : String(stats.count)} sub={privacyHidden ? "•••" : "Pedidos concluídos"} icon={Check} tone="primary" />
         <HDStat label="Ticket Médio" value={privacyHidden ? CENSORED : fmt(stats.avg)} sub="Média por venda" icon={BarChart3} tone="neutral" />
-        <HDStat label="Conversão Pix" value={privacyHidden ? CENSORED : `${stats.pixConversion.toFixed(0)}%`} sub={privacyHidden ? "•••" : `${stats.pixApproved} de ${stats.pixTotal} pagos`} icon={Zap} tone="info" />
+        <HDStat label="Conversão" value={privacyHidden ? CENSORED : `${stats.conversion.toFixed(1)}%`} sub={privacyHidden ? "•••" : `${stats.count.toLocaleString("pt-BR")} de ${stats.totalCount.toLocaleString("pt-BR")} · Pix ${stats.pixConversion.toFixed(0)}%`} icon={Zap} tone="info" />
       </HDStatGrid>
 
 
