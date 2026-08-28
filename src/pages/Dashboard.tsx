@@ -366,13 +366,9 @@ export default function Dashboard() {
 
     const granularity = chartData[0]?.granularity;
 
-    // Horário: marcas fixas a cada 4h (0h, 4h, 8h, 12h, 16h, 20h) — espaçamento
-    // perfeitamente uniforme, sem índices arredondados que geravam "15h/19h".
+    // Horário: todas as 24 horas do dia (0h até 23h), espaçamento uniforme.
     if (granularity === "hour") {
-      const step = 4;
-      return chartData
-        .filter((_, i) => i % step === 0)
-        .map((p) => p.timestamp);
+      return chartData.map((p) => p.timestamp);
     }
 
     const maxTicks = granularity === "month"
