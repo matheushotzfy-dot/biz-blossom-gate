@@ -361,7 +361,7 @@ export function AppSidebar({ pinned = true, onTogglePin, onHoverChange }: AppSid
       </SidebarContent>
 
       <SidebarFooter className="relative shrink-0 border-t border-sidebar-border/60 p-2.5">
-        <div className="flex items-center justify-center gap-2 group-data-[collapsible=icon]:flex-col group-data-[collapsible=icon]:gap-1">
+        <div className="flex w-full items-center justify-center gap-2 group-data-[collapsible=icon]:w-[51px] group-data-[collapsible=icon]:flex-col group-data-[collapsible=icon]:gap-1">
           <button
             type="button"
             onClick={() => window.open("https://wa.me/5511999999999?text=Preciso%20de%20suporte%20para%20escalar!", "_blank")}
