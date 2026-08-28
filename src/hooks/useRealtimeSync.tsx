@@ -21,17 +21,18 @@ export function useRealtimeSync() {
       keys.forEach((k) => qc.invalidateQueries({ queryKey: [k, uid] }));
     };
 
+
     const channel = supabase
       .channel(`rt-user-${uid}`)
       .on(
         "postgres_changes",
         { event: "*", schema: "public", table: "transactions", filter: `user_id=eq.${uid}` },
-        () => invalidate(["transactions", "ledger_balance"])
+        () => invalidate(["transactions", "ledger_balance", "dashboard_stats"])
       )
       .on(
         "postgres_changes",
         { event: "*", schema: "public", table: "financial_ledger", filter: `user_id=eq.${uid}` },
-        () => invalidate(["ledger_balance", "transactions"])
+        () => invalidate(["ledger_balance", "transactions", "dashboard_stats"])
       )
       .on(
         "postgres_changes",

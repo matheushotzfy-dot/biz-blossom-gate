@@ -57,23 +57,76 @@ export function useProducts() {
   });
 }
 
-export function useTransactions() {
+/**
+ * Lista de transações do usuário.
+ * IMPORTANTE: contas com alto volume (100k+ vendas) não podem baixar tudo para o
+ * navegador — a query é limitada às mais recentes e os totais agregados vêm da RPC
+ * `get_seller_dashboard_stats` (cálculo no servidor).
+ */
+export function useTransactions(limit = 500) {
   const { user } = useAuth();
   return useQuery({
-    queryKey: ["transactions", user?.id],
+    queryKey: ["transactions", user?.id, limit],
     queryFn: async () => {
       const { data, error } = await supabase
         .from("transactions")
         .select("*")
         .eq("user_id", user!.id)
-        .order("created_at", { ascending: false });
+        .order("created_at", { ascending: false })
+        .limit(limit);
       if (error) throw error;
       return (data || []) as Tables<"transactions">[];
     },
     enabled: !!user?.id,
-    staleTime: STALE_TIME,
+
+    staleTime: 15 * 1000,
   });
 }
+
+export type DashboardBucket = "hour" | "day" | "month";
+
+export type DashboardStats = {
+  current: {
+    total_count: number;
+    approved_count: number;
+    revenue: number;
+    net_revenue: number;
+    unique_customers: number;
+    chargeback_count: number;
+    pix_total: number; pix_approved: number;
+    card_total: number; card_approved: number;
+    boleto_total: number; boleto_approved: number;
+  };
+  previous: { approved_count: number; revenue: number };
+  series: Array<{ bucket: string; revenue: number; count: number }>;
+  global: { pending_balance: number; received_today: number; disputed_amount: number };
+};
+
+/**
+ * Agregados do dashboard calculados no banco (suporta centenas de milhares de vendas).
+ */
+export function useDashboardStats(from: Date, to: Date, bucket: DashboardBucket) {
+  const { user } = useAuth();
+  const fromIso = from.toISOString();
+  const toIso = to.toISOString();
+  return useQuery({
+    queryKey: ["dashboard_stats", user?.id, fromIso, toIso, bucket],
+    queryFn: async () => {
+      const { data, error } = await supabase.rpc("get_seller_dashboard_stats", {
+        _from: fromIso,
+        _to: toIso,
+        _bucket: bucket,
+      });
+      if (error) throw error;
+      return data as unknown as DashboardStats;
+    },
+    enabled: !!user?.id,
+    staleTime: 10 * 1000,
+    placeholderData: (prev) => prev,
+  });
+}
+
+
 
 export function useWithdrawals(limit?: number) {
   const { user } = useAuth();
