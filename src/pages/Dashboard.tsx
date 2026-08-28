@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useProfile } from "@/hooks/useProfile";
-import { useTransactions, useWithdrawals, useProducts as useProductsQuery, useDisputes, useLedgerBalance } from "@/hooks/useQueryData";
+import { useTransactions, useWithdrawals, useProducts as useProductsQuery, useDisputes, useLedgerBalance, useDashboardStats } from "@/hooks/useQueryData";
 import {
   Activity,
   ArrowDownRight,
@@ -251,98 +251,76 @@ export default function Dashboard() {
   }, [accountLocked, navigate]);
 
 
-  const filteredTx = useMemo(() => {
-    if (isCustom && customRange?.from) {
-      const start = new Date(customRange.from);
-      start.setHours(0, 0, 0, 0);
-      const end = customRange.to ? new Date(customRange.to) : new Date(customRange.from);
-      end.setHours(23, 59, 59, 999);
-      return transactions.filter((t) => {
-        const d = new Date(t.created_at);
-        return d >= start && d <= end;
-      });
-    }
-
+  // Janela do período selecionado (fonte única para agregados e gráfico)
+  const { rangeStart, rangeEnd, bucket, spanDays } = useMemo(() => {
     const today = brasiliaToday();
-    if (selectedPeriod.days === 0) {
-      const todayStr = today.toLocaleDateString("pt-BR", { timeZone: "America/Sao_Paulo" });
-      return transactions.filter((t) => toBrasiliaDate(t.created_at) === todayStr);
+    let start: Date;
+    let end: Date;
+
+    if (isCustom && customRange?.from) {
+      start = new Date(customRange.from);
+      end = new Date(customRange.to ?? customRange.from);
+    } else if (selectedPeriod.days === 0) {
+      start = new Date(today);
+      end = new Date(today);
+    } else {
+      start = new Date(today);
+      start.setDate(start.getDate() - (selectedPeriod.days - 1));
+      end = new Date(today);
     }
-    
-    const start = new Date(today);
-    start.setDate(start.getDate() - (selectedPeriod.days - 1));
     start.setHours(0, 0, 0, 0);
+    end.setHours(23, 59, 59, 999);
 
-    return transactions.filter((t) => new Date(t.created_at) >= start);
-  }, [transactions, selectedPeriod, isCustom, customRange]);
+    const span = differenceInDays(end, start) + 1;
+    const b: "hour" | "day" | "month" = span <= 1 ? "hour" : span > 60 ? "month" : "day";
+    return { rangeStart: start, rangeEnd: end, bucket: b, spanDays: span };
+  }, [isCustom, customRange, selectedPeriod]);
 
-  const { approved, revenue, conversion, uniqueCustomers, pixConversion, cardConversion, boletoConversion, chargebackRate, pixApprovedCount, pixTotalCount, cardApprovedCount, cardTotalCount, boletoApprovedCount, boletoTotalCount } = useMemo(() => {
-    const _approved = filteredTx.filter((t) => isApprovedTransaction(t.status));
-    const _revenue = _approved.reduce((acc, t) => acc + Number(t.amount), 0);
-    const conversions = calculateTransactionConversions(filteredTx);
+  const { data: stats, isError: statsError, refetch: refetchStats } = useDashboardStats(rangeStart, rangeEnd, bucket);
 
-    const _chargebackRate = filteredTx.length > 0 ? (filteredTx.filter(t => deriveTransactionStatus(t) === "chargeback").length / filteredTx.length) * 100 : 0;
-    const _uniqueCustomers = new Set(filteredTx.map(t => t.customer_email).filter(Boolean)).size;
+  const cur = stats?.current;
+  const rate = (a?: number, t?: number) => (t && t > 0 ? ((a ?? 0) / t) * 100 : 0);
 
-    return {
-      approved: _approved,
-      revenue: _revenue,
-      conversion: conversions.overall.rate,
-      uniqueCustomers: _uniqueCustomers,
-      pixConversion: conversions.pix.rate,
-      cardConversion: conversions.card.rate,
-      boletoConversion: conversions.boleto.rate,
-      chargebackRate: _chargebackRate,
-      pixApprovedCount: conversions.pix.approved, pixTotalCount: conversions.pix.total,
-      cardApprovedCount: conversions.card.approved, cardTotalCount: conversions.card.total,
-      boletoApprovedCount: conversions.boleto.approved, boletoTotalCount: conversions.boleto.total,
-    };
-  }, [filteredTx]);
+  const approvedCount = Number(cur?.approved_count ?? 0);
+  const revenue = Number(cur?.revenue ?? 0);
+  const uniqueCustomers = Number(cur?.unique_customers ?? 0);
+  const conversion = rate(cur?.approved_count, cur?.total_count);
+  const pixConversion = rate(cur?.pix_approved, cur?.pix_total);
+  const cardConversion = rate(cur?.card_approved, cur?.card_total);
+  const boletoConversion = rate(cur?.boleto_approved, cur?.boleto_total);
+  const chargebackRate = rate(cur?.chargeback_count, cur?.total_count);
+  const pixApprovedCount = Number(cur?.pix_approved ?? 0);
+  const pixTotalCount = Number(cur?.pix_total ?? 0);
+  const cardApprovedCount = Number(cur?.card_approved ?? 0);
+  const cardTotalCount = Number(cur?.card_total ?? 0);
+  const boletoApprovedCount = Number(cur?.boleto_approved ?? 0);
+  const boletoTotalCount = Number(cur?.boleto_total ?? 0);
+
 
   // Using availableBalance from RPC now
   const balance = availableBalance;
 
   const chartData = useMemo(() => {
-    // Resolve the actual window (start/end) for the selected period or custom range
-    let start: Date;
-    let end: Date;
-    const today = brasiliaToday();
+    const start = rangeStart;
+    const end = rangeEnd;
 
-    if (isCustom && customRange?.from) {
-      start = new Date(customRange.from);
-      start.setHours(0, 0, 0, 0);
-      end = new Date(customRange.to ?? customRange.from);
-      end.setHours(23, 59, 59, 999);
-    } else if (selectedPeriod.days === 0) {
-      start = new Date(today);
-      start.setHours(0, 0, 0, 0);
-      end = new Date(today);
-      end.setHours(23, 59, 59, 999);
-    } else {
-      end = new Date(today);
-      end.setHours(23, 59, 59, 999);
-      start = new Date(today);
-      start.setDate(start.getDate() - (selectedPeriod.days - 1));
-      start.setHours(0, 0, 0, 0);
-    }
-
-    const spanDays = differenceInDays(end, start) + 1;
-    const isSingleDay = spanDays <= 1;
+    // Série agregada no servidor: chave = timestamp local (America/Sao_Paulo) truncado
+    const byKey = new Map<string, number>();
+    (stats?.series ?? []).forEach((point) => {
+      const raw = String(point.bucket);
+      byKey.set(raw.slice(0, 13), (byKey.get(raw.slice(0, 13)) || 0) + Number(point.revenue));
+    });
+    const pad = (n: number) => String(n).padStart(2, "0");
+    const dayKey = (d: Date) => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
 
     // 1) HOURLY (single day)
-    if (isSingleDay) {
-      const salesByHour = new Map<number, number>();
-      filteredTx.forEach(t => {
-        if (!isApprovedTransaction(t.status)) return;
-        const hour = brasiliaParts(t.created_at).hour;
-        salesByHour.set(hour, (salesByHour.get(hour) || 0) + Number(t.amount));
-      });
+    if (bucket === "hour") {
       return Array.from({ length: 24 }, (_, i): ChartPoint => {
         const point = new Date(start);
         point.setHours(i, 0, 0, 0);
         return {
           name: `${i}h`,
-          vendas: salesByHour.get(i) || 0,
+          vendas: byKey.get(`${dayKey(point)}T${pad(i)}`) || 0,
           fullLabel: `${i}:00`,
           timestamp: point.getTime(),
           granularity: "hour",
@@ -351,22 +329,14 @@ export default function Dashboard() {
     }
 
     // 2) MONTHLY (span > 60 days)
-    if (spanDays > 60) {
-      const byMonth = new Map<string, number>();
-      filteredTx.forEach(t => {
-        if (!isApprovedTransaction(t.status)) return;
-        const p = brasiliaParts(t.created_at);
-        const key = `${p.year}-${String(p.month).padStart(2, "0")}`;
-        byMonth.set(key, (byMonth.get(key) || 0) + Number(t.amount));
-      });
+    if (bucket === "month") {
       const result: ChartPoint[] = [];
       const cursor = new Date(start.getFullYear(), start.getMonth(), 1);
       const last = new Date(end.getFullYear(), end.getMonth(), 1);
       while (cursor <= last) {
-        const key = `${cursor.getFullYear()}-${String(cursor.getMonth() + 1).padStart(2, "0")}`;
         result.push({
           name: cursor.toLocaleDateString("pt-BR", { month: "short" }).replace(".", ""),
-          vendas: byMonth.get(key) || 0,
+          vendas: byKey.get(`${dayKey(cursor)}T00`) || 0,
           fullLabel: cursor.toLocaleDateString("pt-BR", { month: "long", year: "numeric" }),
           timestamp: cursor.getTime(),
           granularity: "month",
@@ -377,25 +347,19 @@ export default function Dashboard() {
     }
 
     // 3) DAILY (default)
-    const revenueByDate = new Map<string, number>();
-    filteredTx.forEach(t => {
-      if (!isApprovedTransaction(t.status)) return;
-      const dateKey = toBrasiliaDate(t.created_at);
-      revenueByDate.set(dateKey, (revenueByDate.get(dateKey) || 0) + Number(t.amount));
-    });
     return Array.from({ length: spanDays }, (_, i): ChartPoint => {
       const d = new Date(start);
       d.setDate(d.getDate() + i);
-      const dateStr = d.toLocaleDateString("pt-BR", { timeZone: "America/Sao_Paulo" });
       return {
         name: d.toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit" }),
-        vendas: revenueByDate.get(dateStr) || 0,
+        vendas: byKey.get(`${dayKey(d)}T00`) || 0,
         fullLabel: d.toLocaleDateString("pt-BR", { day: "2-digit", month: "long" }),
         timestamp: d.getTime(),
         granularity: "day",
       };
     });
-  }, [filteredTx, selectedPeriod.days, isCustom, customRange]);
+  }, [stats, bucket, rangeStart, rangeEnd, spanDays]);
+
 
   const chartTicks = useMemo(() => {
     if (chartData.length <= 1) return chartData.map((p) => p.timestamp);
@@ -461,93 +425,33 @@ export default function Dashboard() {
     : s === 'refunded' ? 'text-muted-foreground'
     : 'text-red-500';
 
-  // Saldo Pendente = (1) reserva ainda retida (D+N) + (2) líquido aprovado mas ainda não disponível para saque
-  const pendingBalance = useMemo(() => {
-    const now = Date.now();
-    let retained = 0;
-    let toRelease = 0;
-    for (const t of transactions) {
-      if (!isApprovedTransaction(t.status)) continue;
-      const retUntil = t.retained_until ? new Date(t.retained_until).getTime() : 0;
-      if (retUntil > now) {
-        retained += Number(t.retained_amount || 0);
-        toRelease += Number(t.net_amount || 0) - Number(t.retained_amount || 0);
-      }
-    }
-    return retained + Math.max(0, toRelease);
-  }, [transactions]);
+  // Saldo Pendente e período anterior vêm agregados do servidor (suporta alto volume)
+  const pendingBalance = Number(stats?.global?.pending_balance ?? 0);
+  const prevApprovedCount = Number(stats?.previous?.approved_count ?? 0);
+  const prevRevenue = Number(stats?.previous?.revenue ?? 0);
 
-  // Compare to previous period (same length) for trend deltas — anchored in America/Sao_Paulo
-  const { prevApprovedCount, prevRevenue } = useMemo(() => {
-    const today = brasiliaToday();
-    let start: Date;
-    let end: Date;
-
-    if (isCustom && customRange?.from) {
-      start = new Date(customRange.from);
-      end = customRange.to ? new Date(customRange.to) : new Date(customRange.from);
-    } else if (selectedPeriod.days === 0) {
-      start = new Date(today);
-      end = new Date(today);
-    } else {
-      start = new Date(today);
-      start.setDate(start.getDate() - (selectedPeriod.days - 1));
-      end = new Date(today);
-    }
-    start.setHours(0, 0, 0, 0);
-    end.setHours(23, 59, 59, 999);
-
-    const lenMs = end.getTime() - start.getTime();
-    const prevEnd = new Date(start.getTime() - 1);
-    const prevStart = new Date(prevEnd.getTime() - lenMs);
-
-    // Compare using SP calendar date to avoid browser-tz drift
-    const spDay = (iso: string) => toBrasiliaDate(iso);
-    const prevStartKey = prevStart.toLocaleDateString("pt-BR", { timeZone: "America/Sao_Paulo" });
-    const prevEndKey = prevEnd.toLocaleDateString("pt-BR", { timeZone: "America/Sao_Paulo" });
-    const toKey = (k: string) => { const [d, m, y] = k.split("/"); return `${y}-${m}-${d}`; };
-    const lo = toKey(prevStartKey), hi = toKey(prevEndKey);
-
-    const prevTx = transactions.filter(t => {
-      const k = toKey(spDay(t.created_at));
-      return k >= lo && k <= hi;
-    });
-    const prevApp = prevTx.filter(t => isApprovedTransaction(t.status));
-    return {
-      prevApprovedCount: prevApp.length,
-      prevRevenue: prevApp.reduce((acc, t) => acc + Number(t.amount), 0),
-    };
-  }, [transactions, selectedPeriod, isCustom, customRange]);
 
   const pctChange = (curr: number, prev: number): number | undefined => {
     if (prev === 0) return curr === 0 ? 0 : undefined;
     return Math.round(((curr - prev) / prev) * 100);
   };
 
-  const ordersTrend = pctChange(approved.length, prevApprovedCount);
+  const ordersTrend = pctChange(approvedCount, prevApprovedCount);
   const revenueTrend = pctChange(revenue, prevRevenue);
   const compareLabel = (!isCustom && selectedPeriod.days === 0) ? "vs ontem" : "vs período anterior";
 
   const financialCards: Array<{ label: string; value: string | number; icon: typeof BarChart3; color: "neutral" | "success" | "warning" | "destructive"; sub: string; trend?: number }> = [
-    { label: "Ticket Médio", value: privacy.hidden ? CENSORED : fmt(approved.length > 0 ? revenue / approved.length : 0), icon: BarChart3, color: "neutral", sub: "Média bruta por venda" },
-    { label: "Pedidos Pagos", value: approved.length, icon: Zap, color: "success", sub: "Vendas concluídas" },
+    { label: "Ticket Médio", value: privacy.hidden ? CENSORED : fmt(approvedCount > 0 ? revenue / approvedCount : 0), icon: BarChart3, color: "neutral", sub: "Média bruta por venda" },
+    { label: "Pedidos Pagos", value: approvedCount, icon: Zap, color: "success", sub: "Vendas concluídas" },
     { label: "Saldo Pendente", value: privacy.hidden ? CENSORED : fmt(pendingBalance), icon: Clock3, color: "warning", sub: "Reserva + a liberar (D+N)" },
     { label: "Faturamento Total", value: privacy.hidden ? CENSORED : fmt(revenue), icon: TrendingUp, color: "success", sub: `Valor bruto · ${compareLabel}`, trend: revenueTrend },
+
   ];
 
-  // ═══ Derived data for new layout ═══
-  const receivedToday = useMemo(() => {
-    const todayStr = brasiliaToday().toLocaleDateString("pt-BR", { timeZone: "America/Sao_Paulo" });
-    return transactions
-      .filter(t => isApprovedTransaction(t.status) && toBrasiliaDate(t.created_at) === todayStr)
-      .reduce((acc, t) => acc + Number(t.amount), 0);
-  }, [transactions]);
+  // ═══ Derived data for new layout (agregados do servidor) ═══
+  const receivedToday = Number(stats?.global?.received_today ?? 0);
+  const disputedAmount = Number(stats?.global?.disputed_amount ?? 0);
 
-  const disputedAmount = useMemo(() => {
-    return transactions
-      .filter(t => ["med", "mediation", "dispute", "disputed", "chargeback"].includes(t.status))
-      .reduce((acc, t) => acc + Number(t.amount), 0);
-  }, [transactions]);
 
   const goalTarget = 100000;
   const goalPct = Math.min(100, (revenue / goalTarget) * 100);
@@ -570,10 +474,10 @@ export default function Dashboard() {
 
       <div className="relative z-10 px-2 sm:px-4 md:px-6 pt-2 pb-24 max-w-[1600px] mx-auto space-y-4">
 
-        {(txError || productsError) && (
+        {(txError || statsError || productsError) && (
           <div className="flex items-center justify-between gap-3 rounded-[12px] border border-destructive/40 bg-destructive/5 px-4 py-2.5 text-[12px] text-destructive">
             <span className="font-semibold">Falha ao carregar métricas</span>
-            <button onClick={() => refetchTx()} className="rounded-lg border border-destructive/50 px-3 py-1 text-[11px] font-bold hover:bg-destructive/10">Tentar novamente</button>
+            <button onClick={() => { refetchTx(); refetchStats(); }} className="rounded-lg border border-destructive/50 px-3 py-1 text-[11px] font-bold hover:bg-destructive/10">Tentar novamente</button>
           </div>
         )}
 

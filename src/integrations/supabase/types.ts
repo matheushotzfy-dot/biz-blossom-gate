@@ -4763,6 +4763,10 @@ export type Database = {
           sort_order: number
         }[]
       }
+      get_seller_dashboard_stats: {
+        Args: { _bucket?: string; _from: string; _to: string }
+        Returns: Json
+      }
       get_staff_commission_balance: {
         Args: { _staff: string }
         Returns: number
@@ -4911,6 +4915,10 @@ export type Database = {
       set_max_ticket_for_all: { Args: { _new_value: number }; Returns: Json }
       set_max_ticket_new_users_only: {
         Args: { _new_value: number }
+        Returns: Json
+      }
+      simulate_demo_sales: {
+        Args: { _new_sales?: number; _user_id: string }
         Returns: Json
       }
       touch_api_key: { Args: { _api_key_id: string }; Returns: undefined }
