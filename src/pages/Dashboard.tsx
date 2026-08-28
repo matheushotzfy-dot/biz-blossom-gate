@@ -635,8 +635,14 @@ export default function Dashboard() {
                     domain={[chartData[0]?.timestamp ?? 0, chartData[chartData.length - 1]?.timestamp ?? 0]}
                     ticks={chartTicks} tickFormatter={chartTickFormatter}
                     axisLine={false} tickLine={false}
-                    tick={{ fill: "hsl(var(--muted-foreground)/0.7)", fontSize: 11, fontWeight: 500 }}
-                    dy={10} interval={0} padding={{ left: 6, right: 6 }}
+                    tick={{
+                      fill: "hsl(var(--muted-foreground)/0.7)",
+                      fontSize: chartData[0]?.granularity === "hour" ? 9 : 11,
+                      fontWeight: 500,
+                    }}
+                    dy={10} interval={0}
+                    minTickGap={chartData[0]?.granularity === "hour" ? -1 : 5}
+                    padding={{ left: 6, right: 6 }}
                   />
                   <YAxis width={52} axisLine={false} tickLine={false}
                     tick={{ fill: "hsl(var(--muted-foreground)/0.55)", fontSize: 10, fontWeight: 500 }}
