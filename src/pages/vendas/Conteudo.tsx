@@ -46,7 +46,7 @@ import {
 import { supabase } from "@/integrations/supabase/client";
 import { cn, isApprovedTransaction } from "@/lib/utils";
 import { useAuth } from "@/hooks/useAuth";
-import { useCourses as useCoursesQuery, useInvalidateAll, useProducts as useProductsQuery, useTransactions } from "@/hooks/useQueryData";
+import { useCourses as useCoursesQuery, useInvalidateAll, useProducts as useProductsQuery, useProductRevenue } from "@/hooks/useQueryData";
 
 const numberAnimator = (value: number) => new Intl.NumberFormat("pt-BR").format(value);
 

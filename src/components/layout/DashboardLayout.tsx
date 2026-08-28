@@ -13,7 +13,7 @@ import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { useAuth } from "@/hooks/useAuth";
 import { useTheme } from "@/hooks/useTheme";
 import { ProfileProvider, useProfile } from "@/hooks/useProfile";
-import { usePrefetchDashboardData, useTransactions, useWithdrawals, useLedgerBalance } from "@/hooks/useQueryData";
+import { usePrefetchDashboardData, useWithdrawals, useLedgerBalance } from "@/hooks/useQueryData";
 import { useRealtimeSync } from "@/hooks/useRealtimeSync";
 import { useEffect, useRef, useState } from "react";
 import { useLocation } from "react-router-dom";
