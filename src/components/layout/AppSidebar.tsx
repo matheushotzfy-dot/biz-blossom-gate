@@ -326,7 +326,7 @@ export function AppSidebar({ pinned = true, onTogglePin, onHoverChange }: AppSid
       onMouseEnter={() => onHoverChange?.(true)}
       onMouseLeave={() => onHoverChange?.(false)}
       className={cn(
-        "technical-sidebar z-40 border-r border-sidebar-border/60 transition-[width,border-color] duration-200 ease-out",
+        "technical-sidebar z-40 border-r border-sidebar-border/60 transition-[width,border-color] duration-300 ease-[cubic-bezier(0.22,1,0.36,1)]",
         overlaying && "technical-sidebar-overlay",
       )}
     >
