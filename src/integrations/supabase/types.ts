@@ -4780,9 +4780,22 @@ export type Database = {
           sort_order: number
         }[]
       }
+      get_seller_anticipation_summary: {
+        Args: { _max_days?: number }
+        Returns: Json
+      }
       get_seller_dashboard_stats: {
         Args: { _bucket?: string; _from: string; _to: string }
         Returns: Json
+      }
+      get_seller_month_revenue: { Args: { _month: string }; Returns: number }
+      get_seller_product_revenue: {
+        Args: never
+        Returns: {
+          approved_count: number
+          net_revenue: number
+          product_id: string
+        }[]
       }
       get_staff_commission_balance: {
         Args: { _staff: string }
