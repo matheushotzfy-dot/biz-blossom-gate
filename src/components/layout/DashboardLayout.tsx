@@ -19,6 +19,8 @@ import { useEffect, useRef, useState } from "react";
 import { useLocation } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { useKycStatus } from "@/hooks/useKycStatus";
+import { prefetchIdleRoutes } from "@/lib/routePrefetch";
+
 
 
 function DashboardLayoutInner() {
