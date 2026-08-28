@@ -617,7 +617,7 @@ export default function Dashboard() {
           {[
             { label: "Saldo disponível", value: fmt(Math.max(0, balance)), sub: "Pronto para saque", tone: "success" as const, icon: Wallet },
             { label: "Recebido hoje", value: fmt(receivedToday), sub: "Movimento confirmado", tone: "primary" as const, icon: RefreshCw },
-            { label: "Em segurança", value: fmt(disputedAmount), sub: "MEDs e reservas", tone: "danger" as const, icon: ShieldCheck },
+            { label: "Reembolsos", value: fmt(disputedAmount), sub: "MEDs e Reembolsos", tone: "danger" as const, icon: ShieldCheck },
             { label: "Volume total", value: fmt(revenue), sub: "Vendas acumuladas", tone: "success" as const, icon: TrendingUp },
           ].map((k) => {
             const isDanger = k.tone === "danger";
