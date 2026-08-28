@@ -365,13 +365,21 @@ export default function Dashboard() {
     if (chartData.length <= 1) return chartData.map((p) => p.timestamp);
 
     const granularity = chartData[0]?.granularity;
-    const maxTicks = granularity === "hour"
-      ? 7
-      : granularity === "month"
-        ? Math.min(chartData.length, 8)
-        : chartData.length <= 31
-          ? chartData.length
-          : 8;
+
+    // Horário: marcas fixas a cada 4h (0h, 4h, 8h, 12h, 16h, 20h) — espaçamento
+    // perfeitamente uniforme, sem índices arredondados que geravam "15h/19h".
+    if (granularity === "hour") {
+      const step = 4;
+      return chartData
+        .filter((_, i) => i % step === 0)
+        .map((p) => p.timestamp);
+    }
+
+    const maxTicks = granularity === "month"
+      ? Math.min(chartData.length, 8)
+      : chartData.length <= 31
+        ? chartData.length
+        : 8;
 
     const indexes = new Set<number>();
     for (let i = 0; i < maxTicks; i++) {
@@ -614,42 +622,47 @@ export default function Dashboard() {
 
             <div className="h-[300px] w-full pr-4 pb-4">
               <ResponsiveContainer width="100%" height="100%">
-                <AreaChart data={chartData} margin={{ top: 10, right: 8, left: 8, bottom: 8 }}>
+                <AreaChart data={chartData} margin={{ top: 14, right: 8, left: 8, bottom: 4 }}>
                   <defs>
                     <linearGradient id="revGrad" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="0%" stopColor="hsl(var(--primary))" stopOpacity={0.18} />
+                      <stop offset="0%" stopColor="hsl(var(--primary))" stopOpacity={0.28} />
+                      <stop offset="55%" stopColor="hsl(var(--primary))" stopOpacity={0.08} />
                       <stop offset="100%" stopColor="hsl(var(--primary))" stopOpacity={0} />
                     </linearGradient>
+                    <linearGradient id="revStroke" x1="0" y1="0" x2="1" y2="0">
+                      <stop offset="0%" stopColor="hsl(var(--primary))" stopOpacity={0.85} />
+                      <stop offset="100%" stopColor="hsl(var(--primary))" stopOpacity={1} />
+                    </linearGradient>
                   </defs>
-                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="hsl(var(--border)/0.35)" />
+                  <CartesianGrid strokeDasharray="2 4" vertical={false} stroke="hsl(var(--border)/0.28)" />
                   <XAxis dataKey="timestamp" type="number" scale="time"
                     domain={[chartData[0]?.timestamp ?? 0, chartData[chartData.length - 1]?.timestamp ?? 0]}
                     ticks={chartTicks} tickFormatter={chartTickFormatter}
                     axisLine={false} tickLine={false}
-                    tick={{ fill: "hsl(var(--muted-foreground)/0.6)", fontSize: 11 }}
-                    dy={8} interval="preserveStartEnd" minTickGap={20}
+                    tick={{ fill: "hsl(var(--muted-foreground)/0.7)", fontSize: 11, fontWeight: 500 }}
+                    dy={10} interval={0} padding={{ left: 6, right: 6 }}
                   />
-                  <YAxis width={48} axisLine={false} tickLine={false}
-                    tick={{ fill: "hsl(var(--muted-foreground)/0.55)", fontSize: 10 }}
+                  <YAxis width={52} axisLine={false} tickLine={false}
+                    tick={{ fill: "hsl(var(--muted-foreground)/0.55)", fontSize: 10, fontWeight: 500 }}
                     tickFormatter={(v) => Number(v) >= 1000 ? `${Math.round(Number(v) / 1000)}k` : `${v}`}
                   />
-                  <Tooltip cursor={{ stroke: "hsl(var(--primary)/0.4)", strokeWidth: 1, strokeDasharray: "3 3" }} wrapperStyle={{ outline: "none" }}
+                  <Tooltip cursor={{ stroke: "hsl(var(--primary)/0.45)", strokeWidth: 1, strokeDasharray: "4 4" }} wrapperStyle={{ outline: "none" }}
                     content={({ active, payload }) => {
                       if (active && payload && payload.length) {
                         const p = payload[0];
                         return (
-                          <div className="rounded-lg border border-border bg-card px-3 py-2 ">
-                            <p className="text-[10px] text-muted-foreground/70 mb-1">{p.payload.fullLabel}</p>
-                            <p className="text-foreground font-display font-bold text-[13px] tabular-nums">{fmt(p.value as number)}</p>
+                          <div className="rounded-[10px] border border-border bg-card px-3.5 py-2.5">
+                            <p className="text-[10px] font-medium text-muted-foreground/70 mb-1">{p.payload.fullLabel}</p>
+                            <p className="text-foreground font-display font-bold text-[14px] tabular-nums">{fmt(p.value as number)}</p>
                           </div>
                         );
                       }
                       return null;
                     }}
                   />
-                  <Area type="monotone" dataKey="vendas" stroke="hsl(var(--primary))" strokeWidth={2} fill="url(#revGrad)"
+                  <Area type="monotone" dataKey="vendas" stroke="url(#revStroke)" strokeWidth={2.5} fill="url(#revGrad)"
                     dot={false}
-                    activeDot={{ r: 4, fill: "hsl(var(--primary))", stroke: "hsl(var(--background))", strokeWidth: 2 }}
+                    activeDot={{ r: 5, fill: "hsl(var(--primary))", stroke: "hsl(var(--background))", strokeWidth: 2.5 }}
                     isAnimationActive={false}
                   />
                 </AreaChart>
