@@ -41,7 +41,6 @@ function DashboardLayoutInner() {
  const [searchOpen, setSearchOpen] = useState(false);
  const [notifOpen, setNotifOpen] = useState(false);
    const unreadCount = useNotificationCount();
-   const { data: transactions = [] } = useTransactions();
    const { data: withdrawals = [] } = useWithdrawals();
    const { data: ledgerBalance = 0 } = useLedgerBalance();
    const [privacyHidden, setPrivacyHidden] = useState(() => {

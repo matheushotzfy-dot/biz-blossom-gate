@@ -207,7 +207,7 @@ export function useProductRevenue() {
   });
 }
 
-/** Receita líquida aprovada de um mês (`YYYY-MM`), agregada no servidor. */
+/** Receita líquida e quantidade aprovada de um mês (`YYYY-MM`), agregadas no servidor. */
 export function useMonthRevenue(month: string) {
   const { user } = useAuth();
   return useQuery({
@@ -215,7 +215,8 @@ export function useMonthRevenue(month: string) {
     queryFn: async () => {
       const { data, error } = await supabase.rpc("get_seller_month_revenue", { _month: month });
       if (error) throw error;
-      return Number(data ?? 0);
+      const r = (data ?? {}) as { revenue?: number | string; count?: number | string };
+      return { revenue: Number(r.revenue ?? 0), count: Number(r.count ?? 0) };
     },
     enabled: !!user?.id && /^\d{4}-\d{2}$/.test(month),
     staleTime: 60 * 1000,

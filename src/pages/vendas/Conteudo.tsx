@@ -57,7 +57,7 @@ export default function AdminConteudo() {
   const navigate = useNavigate();
   const { data: coursesRaw = [], isLoading, isError, refetch } = useCoursesQuery();
   const { data: productsRaw = [] } = useProductsQuery();
-  const { data: transactions = [] } = useTransactions();
+  const { data: revenueByProduct = {} } = useProductRevenue();
   const invalidateAll = useInvalidateAll();
 
   const [studentCounts, setStudentCounts] = useState<Record<string, number>>({});
@@ -122,18 +122,6 @@ export default function AdminConteudo() {
 
     return stats;
   }, [coursesRaw]);
-
-  const revenueByProduct = useMemo(() => {
-    const map: Record<string, number> = {};
-
-    transactions
-      .filter((transaction) => isApprovedTransaction(transaction.status) && transaction.product_id)
-      .forEach((transaction) => {
-        map[transaction.product_id!] = (map[transaction.product_id!] || 0) + Number(transaction.net_amount);
-      });
-
-    return map;
-  }, [transactions]);
 
   const getCourseRevenue = (course: ContentCourse) => (course.product_id ? revenueByProduct[course.product_id] || 0 : 0);
 
