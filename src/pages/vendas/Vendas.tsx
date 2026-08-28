@@ -1,5 +1,5 @@
 import { useState, useMemo, useEffect } from "react";
-import { useTransactions, useProducts } from "@/hooks/useQueryData";
+import { useProducts, useDashboardStats, useTransactionsPage, fetchTransactionsForExport } from "@/hooks/useQueryData";
 import {
   Search, EyeOff, Eye, Check, Download, FileText,
   CreditCard, ShoppingCart, Zap, History, BarChart3, TrendingUp, Wallet,
@@ -10,7 +10,7 @@ import { TransactionDetailPanel } from "@/components/transactions/TransactionDet
 import { PixLogoMark } from "@/components/icons/PixLogoMark";
 import type { Tables } from "@/integrations/supabase/types";
 import { Button } from "@/components/ui/button";
-import { calculateTransactionConversions, cn, deriveTransactionStatus, isApprovedTransaction } from "@/lib/utils";
+import { cn, deriveTransactionStatus } from "@/lib/utils";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
@@ -314,7 +314,7 @@ export default function Vendas() {
       <HDHeader
         eyebrow="Minhas vendas"
         title="Vendas & Recebíveis"
-        subtitle={`${filtered.length} transações · ${rangeLabel} — histórico completo, filtros avançados e exportação.`}
+        subtitle={`${totalRows.toLocaleString("pt-BR")} transações · ${rangeLabel} — histórico completo, filtros avançados e exportação.`}
         actions={
           <div className="flex items-center gap-2">
             {/* Seletor de período — popover no desktop, bottom sheet no mobile */}
@@ -346,7 +346,7 @@ export default function Vendas() {
             </Button>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button disabled={!filtered.length} className="h-10 px-4 rounded-xl font-semibold text-xs gap-2">
+                <Button disabled={exporting || totalRows === 0} className="h-10 px-4 rounded-xl font-semibold text-xs gap-2">
                   <Download className="h-4 w-4" /> Exportar
                 </Button>
               </DropdownMenuTrigger>
@@ -375,7 +375,7 @@ export default function Vendas() {
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <div className="px-2 py-1.5 text-[10px] text-muted-foreground">
-                  {filtered.length} {filtered.length === 1 ? "linha" : "linhas"} • Período atual
+                  {totalRows.toLocaleString("pt-BR")} {totalRows === 1 ? "linha" : "linhas"} • Período atual
                 </div>
               </DropdownMenuContent>
             </DropdownMenu>
@@ -403,7 +403,7 @@ export default function Vendas() {
             <div>
               <h2 className="font-black text-foreground tracking-tight leading-none">Transações</h2>
               <p className="text-[11px] font-medium text-muted-foreground mt-1">
-                {filtered.length} Registros · {rangeLabel}
+                {totalRows.toLocaleString("pt-BR")} Registros · {rangeLabel}
               </p>
             </div>
           </div>
@@ -604,10 +604,10 @@ export default function Vendas() {
 
 
         {/* Pagination */}
-        {filtered.length > 0 && (
+        {totalRows > 0 && (
           <div className="px-6 py-4 border-t border-border/40 flex flex-col sm:flex-row items-center justify-between gap-3">
             <div className="text-[11px] font-semibold text-muted-foreground/70 tabular-nums">
-              Mostrando {(currentPage - 1) * PAGE_SIZE + 1}–{Math.min(currentPage * PAGE_SIZE, filtered.length)} de {filtered.length}
+              Mostrando {(currentPage - 1) * PAGE_SIZE + 1}–{Math.min(currentPage * PAGE_SIZE, totalRows)} de {totalRows.toLocaleString("pt-BR")}
             </div>
             <div className="flex items-center gap-1.5">
               <Button
