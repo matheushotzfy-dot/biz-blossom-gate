@@ -78,8 +78,10 @@ export function useTransactions(limit = 500) {
       return (data || []) as Tables<"transactions">[];
     },
     enabled: !!user?.id,
-
     staleTime: 15 * 1000,
+    refetchInterval: 45 * 1000,
+    refetchIntervalInBackground: false,
+    refetchOnWindowFocus: true,
   });
 }
 
@@ -122,6 +124,9 @@ export function useDashboardStats(from: Date, to: Date, bucket: DashboardBucket)
     },
     enabled: !!user?.id,
     staleTime: 10 * 1000,
+    refetchInterval: 45 * 1000,
+    refetchIntervalInBackground: false,
+    refetchOnWindowFocus: true,
     placeholderData: (prev) => prev,
   });
 }
