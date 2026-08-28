@@ -17,8 +17,21 @@ export function useRealtimeSync() {
     if (!user?.id) return;
     const uid = user.id;
 
+    const pendingKeys = new Set<string>();
+    let invalidateTimer: ReturnType<typeof setTimeout> | null = null;
+
+    const flushInvalidations = () => {
+      pendingKeys.forEach((key) => {
+        void qc.invalidateQueries({ queryKey: [key, uid], exact: false });
+      });
+      pendingKeys.clear();
+      invalidateTimer = null;
+    };
+
     const invalidate = (keys: string[]) => {
-      keys.forEach((k) => qc.invalidateQueries({ queryKey: [k, uid] }));
+      keys.forEach((key) => pendingKeys.add(key));
+      if (invalidateTimer) return;
+      invalidateTimer = setTimeout(flushInvalidations, 400);
     };
 
 
@@ -39,10 +52,20 @@ export function useRealtimeSync() {
         { event: "*", schema: "public", table: "withdrawals", filter: `user_id=eq.${uid}` },
         () => invalidate(["withdrawals", "ledger_balance"])
       )
-      .subscribe();
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "disputes", filter: `seller_user_id=eq.${uid}` },
+        () => invalidate(["disputes", "dashboard_stats"])
+      )
+      .subscribe((status) => {
+        if (status === "CHANNEL_ERROR" || status === "TIMED_OUT") {
+          invalidate(["transactions", "ledger_balance", "dashboard_stats", "withdrawals", "disputes"]);
+        }
+      });
 
     return () => {
-      supabase.removeChannel(channel);
+      if (invalidateTimer) clearTimeout(invalidateTimer);
+      void supabase.removeChannel(channel);
     };
   }, [user?.id, qc]);
 }
