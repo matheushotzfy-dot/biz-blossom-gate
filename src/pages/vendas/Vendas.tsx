@@ -220,71 +220,91 @@ export default function Vendas() {
     }
   };
 
-  const exportCSV = () => {
-    if (!filtered.length) return toast.error("Nenhuma transação para exportar");
-    const rows = buildRows();
-    const headers = Object.keys(rows[0]);
-    const esc = (v: unknown) => {
-      const s = v == null ? "" : String(v);
-      return /[",\n;]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
-    };
-    const csv = "\uFEFF" + [
-      headers.join(";"),
-      ...rows.map((r) => headers.map((h) => esc(r[h as keyof typeof r])).join(";")),
-    ].join("\n");
-    download(new Blob([csv], { type: "text/csv;charset=utf-8;" }), fileName("csv"));
-    void logExport("csv", rows.length);
-    toast.success(`${rows.length} transações exportadas (CSV)`);
+  const exportCSV = async () => {
+    if (exporting) return;
+    setExporting(true);
+    try {
+      const rows = await loadExportRows();
+      if (!rows) return;
+      const headers = Object.keys(rows[0]);
+      const esc = (v: unknown) => {
+        const s = v == null ? "" : String(v);
+        return /[",\n;]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
+      };
+      const csv = "\uFEFF" + [
+        headers.join(";"),
+        ...rows.map((r) => headers.map((h) => esc(r[h as keyof typeof r])).join(";")),
+      ].join("\n");
+      download(new Blob([csv], { type: "text/csv;charset=utf-8;" }), fileName("csv"));
+      void logExport("csv", rows.length);
+      toast.success(`${rows.length} transações exportadas (CSV)`);
+    } catch (err) {
+      console.error("[Vendas] export CSV failed:", err);
+      toast.error("Falha ao exportar CSV");
+    } finally {
+      setExporting(false);
+    }
   };
 
   const exportXLSX = async () => {
-    if (!filtered.length) return toast.error("Nenhuma transação para exportar");
-    const rows = buildRows();
-    const headers = Object.keys(rows[0]);
-    const wb = new ExcelJS.Workbook();
-    wb.creator = "Venxpay";
-    wb.created = new Date();
-    const ws = wb.addWorksheet("Vendas");
-    ws.columns = headers.map((h) => ({
-      header: h,
-      key: h,
-      width: Math.min(40, Math.max(h.length + 2, ...rows.map((r) => String(r[h as keyof typeof r] ?? "").length + 2))),
-    }));
-    ws.getRow(1).font = { bold: true };
-    rows.forEach((r) => ws.addRow(r));
-    const buf = await wb.xlsx.writeBuffer();
-    download(new Blob([buf], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" }), fileName("xlsx"));
-    void logExport("xlsx", rows.length);
-    toast.success(`${rows.length} transações exportadas (Excel)`);
+    if (exporting) return;
+    setExporting(true);
+    try {
+      const rows = await loadExportRows();
+      if (!rows) return;
+      const headers = Object.keys(rows[0]);
+      const wb = new ExcelJS.Workbook();
+      wb.creator = "Venxpay";
+      wb.created = new Date();
+      const ws = wb.addWorksheet("Vendas");
+      ws.columns = headers.map((h) => ({
+        header: h,
+        key: h,
+        width: Math.min(40, Math.max(h.length + 2, ...rows.map((r) => String(r[h as keyof typeof r] ?? "").length + 2))),
+      }));
+      ws.getRow(1).font = { bold: true };
+      rows.forEach((r) => ws.addRow(r));
+      const buf = await wb.xlsx.writeBuffer();
+      download(new Blob([buf], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" }), fileName("xlsx"));
+      void logExport("xlsx", rows.length);
+      toast.success(`${rows.length} transações exportadas (Excel)`);
+    } catch (err) {
+      console.error("[Vendas] export XLSX failed:", err);
+      toast.error("Falha ao exportar Excel");
+    } finally {
+      setExporting(false);
+    }
   };
 
 
+  // Agregados vindos da RPC — mesma fórmula do Dashboard e do painel admin.
   const stats = useMemo(() => {
-    const approved = filteredByDate.filter(t => isApprovedTransaction(t.status));
-    const revenue = approved.reduce((acc, t) => acc + Number(t.net_amount), 0);
-    const gross = approved.reduce((acc, t) => acc + Number(t.amount), 0);
-    const conversions = calculateTransactionConversions(filteredByDate);
+    const totalCount = Number(cur?.total_count ?? 0);
+    const approvedCount = Number(cur?.approved_count ?? 0);
+    const netRevenue = Number(cur?.net_revenue ?? 0);
+    const grossRevenue = Number(cur?.revenue ?? 0);
+    const pixTotal = Number(cur?.pix_total ?? 0);
+    const pixApproved = Number(cur?.pix_approved ?? 0);
     return {
-      count: approved.length,
-      revenue,
-      gross,
-      avg: approved.length > 0 ? revenue / approved.length : 0,
-      pixConversion: conversions.pix.rate,
-      pixApproved: conversions.pix.approved,
-      pixTotal: conversions.pix.total,
+      count: approvedCount,
+      totalCount,
+      revenue: netRevenue,
+      gross: grossRevenue,
+      avg: approvedCount > 0 ? netRevenue / approvedCount : 0,
+      conversion: totalCount > 0 ? (approvedCount / totalCount) * 100 : 0,
+      pixConversion: pixTotal > 0 ? (pixApproved / pixTotal) * 100 : 0,
+      pixApproved,
+      pixTotal,
     };
-  }, [filteredByDate]);
+  }, [cur]);
 
-  const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
+  const totalPages = Math.max(1, Math.ceil(totalRows / PAGE_SIZE));
   const currentPage = Math.min(page, totalPages);
-  const paged = useMemo(() => {
-    const start = (currentPage - 1) * PAGE_SIZE;
-    return filtered.slice(start, start + PAGE_SIZE);
-  }, [filtered, currentPage]);
 
   const CENSORED = "••••••";
 
   const rangeLabel = periodLabel(periodValue);
+
 
   return (
     <HDShell>
