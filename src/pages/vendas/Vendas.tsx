@@ -149,7 +149,7 @@ export default function Vendas() {
 
 
 
-  const buildRows = () => filtered.map((t) => ({
+  const buildRows = (source: Tables<"transactions">[]) => source.map((t) => ({
  "ID da Transação": t.id,
  "Data": spDateTime(t.created_at),
  "Cliente": t.customer_name ?? "",
@@ -163,6 +163,22 @@ export default function Vendas() {
  "Taxa (R$)": Number(t.fee_amount ?? 0),
  "Valor Líquido (R$)": Number(t.net_amount ?? 0),
   }));
+
+  /** Exportação sempre lê o período completo no servidor (não apenas a página atual). */
+  const loadExportRows = async () => {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
+      toast.error("Sessão expirada. Entre novamente.");
+      return null;
+    }
+    const rows = await fetchTransactionsForExport(user.id, rangeStart, rangeEnd);
+    if (!rows.length) {
+      toast.error("Nenhuma transação para exportar");
+      return null;
+    }
+    return buildRows(rows);
+  };
+
 
   const fileName = (ext: string) => {
     const tag = range?.from && range?.to
