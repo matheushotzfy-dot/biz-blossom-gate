@@ -276,7 +276,7 @@ export default function Dashboard() {
     return { rangeStart: start, rangeEnd: end, bucket: b, spanDays: span };
   }, [isCustom, customRange, selectedPeriod]);
 
-  const { data: stats, isError: statsError, refetch: refetchStats } = useDashboardStats(rangeStart, rangeEnd, bucket);
+  const { data: stats, isError: statsError, isPending: statsLoading, refetch: refetchStats } = useDashboardStats(rangeStart, rangeEnd, bucket);
 
   const cur = stats?.current;
   const rate = (a?: number, t?: number) => (t && t > 0 ? ((a ?? 0) / t) * 100 : 0);
@@ -547,9 +547,14 @@ export default function Dashboard() {
                 </div>
                 <div className="relative z-10 flex h-full min-w-0 flex-col pr-11">
                   <p className={cn("text-[13px] font-medium", isDanger ? "text-destructive/90" : "text-muted-foreground")}>{k.label}</p>
+                  {statsLoading ? (
+                    <div className="mt-5 h-[25px] w-32 animate-pulse rounded-[6px] bg-muted/50 sm:h-[28px]" aria-label="Carregando" />
+                  ) : (
                   <p className={cn("mt-5 whitespace-nowrap font-display text-[25px] font-bold leading-none tracking-[-0.02em] tabular-nums sm:text-[28px]", isDanger ? "text-destructive" : "text-foreground")}>
                   {privacy.hidden ? CENSORED : k.value}
                   </p>
+                  )}
+
                   <p className="mt-auto truncate pt-4 text-[11px] font-medium text-muted-foreground/65">{k.sub}</p>
                 </div>
               </div>

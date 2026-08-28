@@ -43,7 +43,7 @@ interface Props {
 }
 
 export interface AdminFinancialOverview {
-  summary?: { gross_volume?: number; platform_fees?: number; profit?: number; approved_count?: number; pending_count?: number; chargeback_count?: number; retained_amount?: number; active_sellers?: number };
+  summary?: { gross_volume?: number; net_volume?: number; platform_fees?: number; acquirer_fees?: number; profit?: number; total_count?: number; approved_count?: number; pending_count?: number; chargeback_count?: number; refunded_amount?: number; retained_amount?: number; simulated_count?: number; active_sellers?: number };
   month?: { gross_volume?: number; approved_count?: number; platform_fees?: number; profit?: number };
   operations?: { pending_withdrawals_count?: number; pending_withdrawals_amount?: number; open_disputes_count?: number; open_disputes_amount?: number };
 }
@@ -236,13 +236,24 @@ export default function AdminOverviewTab({
     .filter(t => !t.retention_released && Number(t.retained_amount) > 0)
     .reduce((a, t) => a + Number(t.retained_amount), 0));
 
-  const chargebackTx = filteredTx.filter(t => t.status === "chargeback");
-  const chargebackRate = filteredApproved.length > 0 ? ((chargebackTx.length / filteredApproved.length) * 100) : 0;
+  // Contagens autoritativas do servidor (RPC) — a lista carregada no cliente é paginada
+  // e não pode ser usada como denominador de conversão/ticket sob alto volume.
+  const summaryTotalCount = financialOverview?.summary?.total_count != null
+    ? Number(financialOverview.summary.total_count)
+    : filteredTx.length;
+  const summaryApprovedCount = financialOverview?.summary?.approved_count != null
+    ? Number(financialOverview.summary.approved_count)
+    : filteredApproved.length;
+  const summaryChargebackCount = financialOverview?.summary?.chargeback_count != null
+    ? Number(financialOverview.summary.chargeback_count)
+    : filteredTx.filter(t => t.status === "chargeback").length;
+
+  const chargebackRate = summaryApprovedCount > 0 ? ((summaryChargebackCount / summaryApprovedCount) * 100) : 0;
   const chargebackAlert = chargebackRate > 1;
 
   const activeSellersToday = new Set(todayTx.map(t => t.user_id)).size;
-  const conversionRate = filteredTx.length > 0 ? ((filteredApproved.length / filteredTx.length) * 100).toFixed(1) : "0.0";
-  const ticketMedio = filteredApproved.length > 0 ? totalVolume / filteredApproved.length : 0;
+  const conversionRate = summaryTotalCount > 0 ? ((summaryApprovedCount / summaryTotalCount) * 100).toFixed(1) : "0.0";
+  const ticketMedio = summaryApprovedCount > 0 ? totalVolume / summaryApprovedCount : 0;
 
   const last30Start = useMemo(() => { const d = new Date(); d.setDate(d.getDate() - 30); return d; }, []);
   const last30Tx = useMemo(() => approved.filter(t => new Date(t.created_at) >= last30Start), [approved, last30Start]);
@@ -341,7 +352,7 @@ export default function AdminOverviewTab({
           <PremiumMetric icon={Users} label="Sellers" value={String(profiles.length)} sub="Cadastrados" tone="primary" />
           <PremiumMetric icon={Package} label="Produtos" value={String(products.length)} sub={`${products.filter(p => p.status === "active").length} ativos`} tone="info" />
           <PremiumMetric icon={CreditCard} label="Transações" value={String(allTx.length)} sub={`${approved.length} aprovadas`} tone="success" />
-          <PremiumMetric icon={Percent} label="Conversão" value={`${conversionRate}%`} sub={`${approved.length}/${allTx.length}`} tone="warning" />
+          <PremiumMetric icon={Percent} label="Conversão" value={`${conversionRate}%`} sub={`${summaryApprovedCount.toLocaleString("pt-BR")}/${summaryTotalCount.toLocaleString("pt-BR")}`} tone="warning" />
         </PremiumMetricGrid>
       </div>
     );
@@ -367,7 +378,7 @@ export default function AdminOverviewTab({
 
       {/* ── Hero KPI strip · 1px divider grid ── */}
       <div className="grid grid-cols-2 gap-px overflow-hidden rounded-2xl border border-border/60 bg-border/60 lg:grid-cols-6">
-        <HeroBigStat label="Volume no período" value={fmtCurrency(totalVolume)} sub={`${filteredApproved.length}/${filteredTx.length} tx`} tone="primary" wide />
+        <HeroBigStat label="Volume no período" value={fmtCurrency(totalVolume)} sub={`${summaryApprovedCount.toLocaleString("pt-BR")}/${summaryTotalCount.toLocaleString("pt-BR")} tx`} tone="primary" wide />
         <HeroBigStat label="Lucro líquido" value={fmtCurrency(takeRateTotal)} sub={`Take ${takeRatePct}%`} tone="success" />
         <HeroBigStat label="Ticket médio" value={fmtCurrency(ticketMedio)} sub="por venda" tone="info" />
         <HeroBigStat label="Conversão" value={`${conversionRate}%`} sub="aprovação geral" tone="warning" />

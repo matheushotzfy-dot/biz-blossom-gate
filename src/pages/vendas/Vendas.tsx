@@ -1,5 +1,5 @@
 import { useState, useMemo, useEffect } from "react";
-import { useTransactions, useProducts } from "@/hooks/useQueryData";
+import { useProducts, useDashboardStats, useTransactionsPage, fetchTransactionsForExport } from "@/hooks/useQueryData";
 import {
   Search, EyeOff, Eye, Check, Download, FileText,
   CreditCard, ShoppingCart, Zap, History, BarChart3, TrendingUp, Wallet,
@@ -10,7 +10,7 @@ import { TransactionDetailPanel } from "@/components/transactions/TransactionDet
 import { PixLogoMark } from "@/components/icons/PixLogoMark";
 import type { Tables } from "@/integrations/supabase/types";
 import { Button } from "@/components/ui/button";
-import { calculateTransactionConversions, cn, deriveTransactionStatus, isApprovedTransaction } from "@/lib/utils";
+import { cn, deriveTransactionStatus } from "@/lib/utils";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
@@ -91,14 +91,43 @@ const PRESETS: { id: PresetId; label: string }[] = [
 
 
 export default function Vendas() {
-  const { data: transactions = [], isLoading: txLoading, isError: txError, refetch: refetchTx } = useTransactions();
   const { data: products = [] } = useProducts();
   const [search, setSearch] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
   const [detailTx, setDetailTx] = useState<Tables<"transactions"> | null>(null);
   const [privacyHidden, setPrivacyHidden] = useState(() => localStorage.getItem("privacy_mode") === "true");
   const [periodValue, setPeriodValue] = useState<PeriodValue>(() => buildPeriod("today"));
   const range = useMemo<DateRange>(() => ({ from: periodValue.from, to: periodValue.to }), [periodValue]);
   const [page, setPage] = useState(1);
+  const [exporting, setExporting] = useState(false);
+
+  // Debounce da busca: cada tecla dispara uma query no servidor.
+  useEffect(() => {
+    const id = window.setTimeout(() => setDebouncedSearch(search.trim()), 350);
+    return () => window.clearTimeout(id);
+  }, [search]);
+
+  // Janela do período — mesma fonte usada pelos agregados do servidor.
+  const rangeStart = periodValue.from;
+  const rangeEnd = periodValue.to;
+  const bucket = useMemo<"hour" | "day" | "month">(() => {
+    const span = differenceInDays(rangeEnd, rangeStart) + 1;
+    return span <= 1 ? "hour" : span > 60 ? "month" : "day";
+  }, [rangeStart, rangeEnd]);
+
+  // Agregados idênticos aos do Dashboard (mesma RPC, mesma janela) — sem cálculo no cliente.
+  const { data: dashStats } = useDashboardStats(rangeStart, rangeEnd, bucket);
+  const cur = dashStats?.current;
+
+  const {
+    data: pageData,
+    isLoading: txLoading,
+    isError: txError,
+    refetch: refetchTx,
+  } = useTransactionsPage({ from: rangeStart, to: rangeEnd, page, pageSize: PAGE_SIZE, search: debouncedSearch });
+
+  const paged = pageData?.rows ?? [];
+  const totalRows = pageData?.total ?? 0;
 
   const togglePrivacy = () => {
     setPrivacyHidden(prev => {
@@ -116,29 +145,11 @@ export default function Vendas() {
     return m;
   }, [products]);
 
-  const filteredByDate = useMemo(() => {
-    if (!range?.from || !range?.to) return transactions;
-    const fromMs = range.from.getTime();
-    const toMs = range.to.getTime();
-    return transactions.filter((t) => {
-      const ts = new Date(t.created_at).getTime();
-      return ts >= fromMs && ts <= toMs;
-    });
-  }, [transactions, range]);
+  useEffect(() => { setPage(1); }, [debouncedSearch, rangeStart, rangeEnd]);
 
-  const filtered = useMemo(() => {
-    if (!search) return filteredByDate;
-    const q = search.toLowerCase();
-    return filteredByDate.filter((t) =>
-      t.customer_name?.toLowerCase().includes(q) ||
-      t.customer_email?.toLowerCase().includes(q) ||
-      t.id.toLowerCase().includes(q)
-    );
-  }, [filteredByDate, search]);
 
-  useEffect(() => { setPage(1); }, [search, range]);
 
-  const buildRows = () => filtered.map((t) => ({
+  const buildRows = (source: Tables<"transactions">[]) => source.map((t) => ({
  "ID da Transação": t.id,
  "Data": spDateTime(t.created_at),
  "Cliente": t.customer_name ?? "",
@@ -152,6 +163,22 @@ export default function Vendas() {
  "Taxa (R$)": Number(t.fee_amount ?? 0),
  "Valor Líquido (R$)": Number(t.net_amount ?? 0),
   }));
+
+  /** Exportação sempre lê o período completo no servidor (não apenas a página atual). */
+  const loadExportRows = async () => {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
+      toast.error("Sessão expirada. Entre novamente.");
+      return null;
+    }
+    const rows = await fetchTransactionsForExport(user.id, rangeStart, rangeEnd);
+    if (!rows.length) {
+      toast.error("Nenhuma transação para exportar");
+      return null;
+    }
+    return buildRows(rows);
+  };
+
 
   const fileName = (ext: string) => {
     const tag = range?.from && range?.to
@@ -193,71 +220,91 @@ export default function Vendas() {
     }
   };
 
-  const exportCSV = () => {
-    if (!filtered.length) return toast.error("Nenhuma transação para exportar");
-    const rows = buildRows();
-    const headers = Object.keys(rows[0]);
-    const esc = (v: unknown) => {
-      const s = v == null ? "" : String(v);
-      return /[",\n;]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
-    };
-    const csv = "\uFEFF" + [
-      headers.join(";"),
-      ...rows.map((r) => headers.map((h) => esc(r[h as keyof typeof r])).join(";")),
-    ].join("\n");
-    download(new Blob([csv], { type: "text/csv;charset=utf-8;" }), fileName("csv"));
-    void logExport("csv", rows.length);
-    toast.success(`${rows.length} transações exportadas (CSV)`);
+  const exportCSV = async () => {
+    if (exporting) return;
+    setExporting(true);
+    try {
+      const rows = await loadExportRows();
+      if (!rows) return;
+      const headers = Object.keys(rows[0]);
+      const esc = (v: unknown) => {
+        const s = v == null ? "" : String(v);
+        return /[",\n;]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
+      };
+      const csv = "\uFEFF" + [
+        headers.join(";"),
+        ...rows.map((r) => headers.map((h) => esc(r[h as keyof typeof r])).join(";")),
+      ].join("\n");
+      download(new Blob([csv], { type: "text/csv;charset=utf-8;" }), fileName("csv"));
+      void logExport("csv", rows.length);
+      toast.success(`${rows.length} transações exportadas (CSV)`);
+    } catch (err) {
+      console.error("[Vendas] export CSV failed:", err);
+      toast.error("Falha ao exportar CSV");
+    } finally {
+      setExporting(false);
+    }
   };
 
   const exportXLSX = async () => {
-    if (!filtered.length) return toast.error("Nenhuma transação para exportar");
-    const rows = buildRows();
-    const headers = Object.keys(rows[0]);
-    const wb = new ExcelJS.Workbook();
-    wb.creator = "Venxpay";
-    wb.created = new Date();
-    const ws = wb.addWorksheet("Vendas");
-    ws.columns = headers.map((h) => ({
-      header: h,
-      key: h,
-      width: Math.min(40, Math.max(h.length + 2, ...rows.map((r) => String(r[h as keyof typeof r] ?? "").length + 2))),
-    }));
-    ws.getRow(1).font = { bold: true };
-    rows.forEach((r) => ws.addRow(r));
-    const buf = await wb.xlsx.writeBuffer();
-    download(new Blob([buf], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" }), fileName("xlsx"));
-    void logExport("xlsx", rows.length);
-    toast.success(`${rows.length} transações exportadas (Excel)`);
+    if (exporting) return;
+    setExporting(true);
+    try {
+      const rows = await loadExportRows();
+      if (!rows) return;
+      const headers = Object.keys(rows[0]);
+      const wb = new ExcelJS.Workbook();
+      wb.creator = "Venxpay";
+      wb.created = new Date();
+      const ws = wb.addWorksheet("Vendas");
+      ws.columns = headers.map((h) => ({
+        header: h,
+        key: h,
+        width: Math.min(40, Math.max(h.length + 2, ...rows.map((r) => String(r[h as keyof typeof r] ?? "").length + 2))),
+      }));
+      ws.getRow(1).font = { bold: true };
+      rows.forEach((r) => ws.addRow(r));
+      const buf = await wb.xlsx.writeBuffer();
+      download(new Blob([buf], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" }), fileName("xlsx"));
+      void logExport("xlsx", rows.length);
+      toast.success(`${rows.length} transações exportadas (Excel)`);
+    } catch (err) {
+      console.error("[Vendas] export XLSX failed:", err);
+      toast.error("Falha ao exportar Excel");
+    } finally {
+      setExporting(false);
+    }
   };
 
 
+  // Agregados vindos da RPC — mesma fórmula do Dashboard e do painel admin.
   const stats = useMemo(() => {
-    const approved = filteredByDate.filter(t => isApprovedTransaction(t.status));
-    const revenue = approved.reduce((acc, t) => acc + Number(t.net_amount), 0);
-    const gross = approved.reduce((acc, t) => acc + Number(t.amount), 0);
-    const conversions = calculateTransactionConversions(filteredByDate);
+    const totalCount = Number(cur?.total_count ?? 0);
+    const approvedCount = Number(cur?.approved_count ?? 0);
+    const netRevenue = Number(cur?.net_revenue ?? 0);
+    const grossRevenue = Number(cur?.revenue ?? 0);
+    const pixTotal = Number(cur?.pix_total ?? 0);
+    const pixApproved = Number(cur?.pix_approved ?? 0);
     return {
-      count: approved.length,
-      revenue,
-      gross,
-      avg: approved.length > 0 ? revenue / approved.length : 0,
-      pixConversion: conversions.pix.rate,
-      pixApproved: conversions.pix.approved,
-      pixTotal: conversions.pix.total,
+      count: approvedCount,
+      totalCount,
+      revenue: netRevenue,
+      gross: grossRevenue,
+      avg: approvedCount > 0 ? netRevenue / approvedCount : 0,
+      conversion: totalCount > 0 ? (approvedCount / totalCount) * 100 : 0,
+      pixConversion: pixTotal > 0 ? (pixApproved / pixTotal) * 100 : 0,
+      pixApproved,
+      pixTotal,
     };
-  }, [filteredByDate]);
+  }, [cur]);
 
-  const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
+  const totalPages = Math.max(1, Math.ceil(totalRows / PAGE_SIZE));
   const currentPage = Math.min(page, totalPages);
-  const paged = useMemo(() => {
-    const start = (currentPage - 1) * PAGE_SIZE;
-    return filtered.slice(start, start + PAGE_SIZE);
-  }, [filtered, currentPage]);
 
   const CENSORED = "••••••";
 
   const rangeLabel = periodLabel(periodValue);
+
 
   return (
     <HDShell>
@@ -267,7 +314,7 @@ export default function Vendas() {
       <HDHeader
         eyebrow="Minhas vendas"
         title="Vendas & Recebíveis"
-        subtitle={`${filtered.length} transações · ${rangeLabel} — histórico completo, filtros avançados e exportação.`}
+        subtitle={`${totalRows.toLocaleString("pt-BR")} transações · ${rangeLabel} — histórico completo, filtros avançados e exportação.`}
         actions={
           <div className="flex items-center gap-2">
             {/* Seletor de período — popover no desktop, bottom sheet no mobile */}
@@ -299,7 +346,7 @@ export default function Vendas() {
             </Button>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button disabled={!filtered.length} className="h-10 px-4 rounded-xl font-semibold text-xs gap-2">
+                <Button disabled={exporting || totalRows === 0} className="h-10 px-4 rounded-xl font-semibold text-xs gap-2">
                   <Download className="h-4 w-4" /> Exportar
                 </Button>
               </DropdownMenuTrigger>
@@ -328,7 +375,7 @@ export default function Vendas() {
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <div className="px-2 py-1.5 text-[10px] text-muted-foreground">
-                  {filtered.length} {filtered.length === 1 ? "linha" : "linhas"} • Período atual
+                  {totalRows.toLocaleString("pt-BR")} {totalRows === 1 ? "linha" : "linhas"} • Período atual
                 </div>
               </DropdownMenuContent>
             </DropdownMenu>
@@ -341,7 +388,7 @@ export default function Vendas() {
         <HDStat label="Faturamento Líquido" value={privacyHidden ? CENSORED : fmt(stats.revenue)} sub="Total após taxas" icon={Wallet} tone="success" />
         <HDStat label="Vendas Aprovadas" value={privacyHidden ? CENSORED : String(stats.count)} sub={privacyHidden ? "•••" : "Pedidos concluídos"} icon={Check} tone="primary" />
         <HDStat label="Ticket Médio" value={privacyHidden ? CENSORED : fmt(stats.avg)} sub="Média por venda" icon={BarChart3} tone="neutral" />
-        <HDStat label="Conversão Pix" value={privacyHidden ? CENSORED : `${stats.pixConversion.toFixed(0)}%`} sub={privacyHidden ? "•••" : `${stats.pixApproved} de ${stats.pixTotal} pagos`} icon={Zap} tone="info" />
+        <HDStat label="Conversão" value={privacyHidden ? CENSORED : `${stats.conversion.toFixed(1)}%`} sub={privacyHidden ? "•••" : `${stats.count.toLocaleString("pt-BR")} de ${stats.totalCount.toLocaleString("pt-BR")} · Pix ${stats.pixConversion.toFixed(0)}%`} icon={Zap} tone="info" />
       </HDStatGrid>
 
 
@@ -356,7 +403,7 @@ export default function Vendas() {
             <div>
               <h2 className="font-black text-foreground tracking-tight leading-none">Transações</h2>
               <p className="text-[11px] font-medium text-muted-foreground mt-1">
-                {filtered.length} Registros · {rangeLabel}
+                {totalRows.toLocaleString("pt-BR")} Registros · {rangeLabel}
               </p>
             </div>
           </div>
@@ -557,10 +604,10 @@ export default function Vendas() {
 
 
         {/* Pagination */}
-        {filtered.length > 0 && (
+        {totalRows > 0 && (
           <div className="px-6 py-4 border-t border-border/40 flex flex-col sm:flex-row items-center justify-between gap-3">
             <div className="text-[11px] font-semibold text-muted-foreground/70 tabular-nums">
-              Mostrando {(currentPage - 1) * PAGE_SIZE + 1}–{Math.min(currentPage * PAGE_SIZE, filtered.length)} de {filtered.length}
+              Mostrando {(currentPage - 1) * PAGE_SIZE + 1}–{Math.min(currentPage * PAGE_SIZE, totalRows)} de {totalRows.toLocaleString("pt-BR")}
             </div>
             <div className="flex items-center gap-1.5">
               <Button
