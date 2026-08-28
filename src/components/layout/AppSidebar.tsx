@@ -3,7 +3,8 @@ import {
   CircleUserRound,
   Grid2X2,
   LogOut,
-  Headphones,
+  Headset,
+  CircleHelp,
   LayoutDashboard,
   MessageSquare,
   ChevronRight,
@@ -31,7 +32,6 @@ import {
 import {
   Sidebar,
   SidebarContent,
-  SidebarFooter,
   SidebarGroup,
   SidebarGroupContent,
   SidebarHeader,
@@ -308,9 +308,6 @@ export function AppSidebar({ pinned = true, onTogglePin, onHoverChange }: AppSid
     navigate("/auth");
   };
 
-  const userInitial = (user?.email || "U").charAt(0).toUpperCase();
-  const userName = user?.email?.split("@")[0] ?? "Vendedor";
-
   return (
     <Sidebar
       collapsible="icon"
@@ -360,111 +357,45 @@ export function AppSidebar({ pinned = true, onTogglePin, onHoverChange }: AppSid
 
       <SidebarContent className="relative gap-0 overflow-y-auto px-1.5 py-3">
         <SidebarNavList items={items} pathname={location.pathname} />
-      </SidebarContent>
-
-
-
-      <SidebarFooter className="relative border-t border-sidebar-border/60 p-2.5 pb-3">
-
-        {/* Expanded footer */}
-        <div className="group-data-[collapsible=icon]:hidden flex flex-col gap-2">
-          {/* User row: avatar + info + logout */}
-          <div className="flex items-center gap-2">
-            <button
-              type="button"
-              onClick={() => navigate("/perfil")}
-              className="seller-clickable flex items-center gap-2.5 rounded-[10px] p-1.5 text-left hover:bg-sidebar-accent/40"
-            >
-              <div className="relative flex h-8 w-8 shrink-0 items-center justify-center rounded-[9px] border border-primary/30 bg-primary/[0.07] text-[12px] font-semibold text-primary">
-                {userInitial}
-                <span className="absolute -bottom-0.5 -right-0.5 h-2 w-2 rounded-full border-2 border-sidebar bg-success" />
-              </div>
-              <div className="min-w-0 flex-1">
-                <p className="truncate text-[12px] font-bold leading-tight text-sidebar-accent-foreground">
-                  {userName}
-                </p>
-                <p className="truncate text-[10px] leading-tight text-sidebar-foreground/50">
-                  {user?.email}
-                </p>
-              </div>
-            </button>
-            <button
-              type="button"
-              onClick={handleLogout}
-              aria-label="Sair da conta"
-              className="seller-clickable ml-auto flex h-9 w-9 items-center justify-center rounded-[10px] text-sidebar-foreground/45 transition-colors hover:bg-destructive/10 hover:text-destructive"
-            >
-              <LogOut size={19} strokeWidth={1.7} />
-            </button>
-          </div>
-
-          {/* Compact help row */}
-          <div className="flex items-center gap-2">
-            <button
-              type="button"
-              onClick={() => window.open("https://wa.me/5511999999999?text=Preciso%20de%20suporte%20para%20escalar!", "_blank")}
-              className="flex flex-1 items-center justify-center gap-2 h-9 rounded-[10px] border border-primary/25 bg-primary/[0.06] px-2 text-[11.5px] font-semibold text-primary transition-colors hover:bg-primary/[0.11]"
-            >
-              <Headphones size={17} strokeWidth={1.8} />
-              Fale conosco
-            </button>
-            <button
-              type="button"
-              onClick={() => navigate("/suporte")}
-              className="flex flex-1 items-center justify-center gap-2 h-9 rounded-[10px] border border-border/60 px-2 text-[11.5px] font-medium text-sidebar-foreground/65 transition-colors hover:border-border hover:text-foreground"
-            >
-              <MessageSquare size={17} strokeWidth={1.7} />
-              Central de ajuda
-            </button>
-          </div>
-
-          <button
-            type="button"
-            onClick={() => window.dispatchEvent(new Event("venxpay:open-cookie-settings"))}
-            className="text-[10px] font-medium uppercase tracking-[0.12em] text-sidebar-foreground/40 transition-colors hover:text-sidebar-foreground/70"
-          >
-            Preferências de cookies
-          </button>
-        </div>
-
-        {/* Collapsed footer */}
-        <div className="hidden group-data-[collapsible=icon]:flex flex-col items-center gap-1">
-          <button
-            type="button"
-            onClick={() => navigate("/perfil")}
-            aria-label="Meu perfil"
-            className="relative flex h-9 w-9 items-center justify-center rounded-[10px] border border-primary/25 bg-primary/[0.06] text-[12px] font-semibold text-primary transition-colors hover:bg-primary/[0.11]"
-          >
-            {userInitial}
-            <span className="absolute -bottom-0.5 -right-0.5 h-2 w-2 rounded-full border-2 border-sidebar bg-success" />
-          </button>
+        <div className="mt-2 flex flex-col gap-1">
           <button
             type="button"
             onClick={() => window.open("https://wa.me/5511999999999?text=Preciso%20de%20suporte%20para%20escalar!", "_blank")}
             aria-label="Fale conosco"
-            className="flex h-9 w-9 items-center justify-center rounded-[10px] text-primary transition-colors hover:bg-primary/[0.10]"
+            title="Fale conosco"
+            className="group/action flex h-12 w-full items-center gap-3 overflow-hidden rounded-[14px] border border-transparent px-3 text-primary transition-colors duration-200 hover:border-primary/20 hover:bg-primary/[0.08]"
           >
-            <Headphones size={22} strokeWidth={1.8} />
+            <span className="flex h-9 w-9 shrink-0 items-center justify-center">
+              <Headset size={22} strokeWidth={1.8} />
+            </span>
+            <span className="sidebar-item-label whitespace-nowrap text-[13px] font-semibold">Fale conosco</span>
           </button>
           <button
             type="button"
             onClick={() => navigate("/suporte")}
             aria-label="Central de ajuda"
-            className="flex h-9 w-9 items-center justify-center rounded-[10px] text-sidebar-foreground/48 transition-colors hover:bg-sidebar-accent/40 hover:text-sidebar-accent-foreground"
+            title="Central de ajuda"
+            className="group/action flex h-12 w-full items-center gap-3 overflow-hidden rounded-[14px] border border-transparent px-3 text-sidebar-foreground/58 transition-colors duration-200 hover:border-sidebar-border/70 hover:bg-sidebar-accent/45 hover:text-sidebar-accent-foreground"
           >
-            <MessageSquare size={22} strokeWidth={1.6} />
+            <span className="flex h-9 w-9 shrink-0 items-center justify-center">
+              <CircleHelp size={22} strokeWidth={1.7} />
+            </span>
+            <span className="sidebar-item-label whitespace-nowrap text-[13px] font-medium">Central de ajuda</span>
           </button>
           <button
             type="button"
             onClick={handleLogout}
             aria-label="Sair da conta"
-            className="flex h-9 w-9 items-center justify-center rounded-[10px] text-sidebar-foreground/48 transition-colors hover:bg-destructive/10 hover:text-destructive"
+            title="Sair da conta"
+            className="group/action flex h-12 w-full items-center gap-3 overflow-hidden rounded-[14px] border border-transparent px-3 text-sidebar-foreground/58 transition-colors duration-200 hover:border-destructive/20 hover:bg-destructive/10 hover:text-destructive"
           >
-            <LogOut size={22} strokeWidth={1.6} />
+            <span className="flex h-9 w-9 shrink-0 items-center justify-center">
+              <LogOut size={22} strokeWidth={1.7} />
+            </span>
+            <span className="sidebar-item-label whitespace-nowrap text-[13px] font-medium">Sair da conta</span>
           </button>
         </div>
-
-      </SidebarFooter>
+      </SidebarContent>
     </Sidebar>
   );
 }
