@@ -4332,6 +4332,22 @@ html body .lp .lp-progress {
   transition-timing-function: ease-out !important;
 }
 
+/* A coluna dos glifos usa exatamente a largura do trilho fechado (72px).
+   O mesmo eixo de 36px é preservado durante toda a abertura, sem o salto
+   causado pelo size-8 padrão do componente base. */
+.platform-shell .technical-sidebar [data-sidebar="content"] {
+  scrollbar-gutter: stable;
+}
+
+.platform-shell .technical-sidebar .group\/nav {
+  min-width: calc(var(--sidebar-width) - 0.75rem);
+}
+
+.platform-shell .group[data-state="collapsed"] .technical-sidebar .group\/nav {
+  border-color: transparent;
+  border-radius: 0;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .platform-shell {
     --sidebar-motion: 1ms;
