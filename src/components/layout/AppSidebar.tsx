@@ -368,14 +368,7 @@ export function AppSidebar({ pinned = true, onTogglePin, onHoverChange }: AppSid
       </SidebarHeader>
 
       <SidebarContent className="relative gap-0 overflow-y-auto px-3 py-3 group-data-[collapsible=icon]:px-1.5 group-data-[collapsible=icon]:py-4">
-        {sections.map((section, idx) => (
-          <SidebarSectionNav
-            key={section.label}
-            section={section}
-            pathname={location.pathname}
-            isFirst={idx === 0}
-          />
-        ))}
+        <SidebarNavList items={items} pathname={location.pathname} />
       </SidebarContent>
 
 
