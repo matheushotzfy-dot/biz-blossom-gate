@@ -102,7 +102,7 @@ function RevenueBar({ collapsed, revenue, milestone, onOpenRewards }: RevenueBar
         aria-hidden
         className="pointer-events-none absolute -right-1 top-1/2 -translate-y-1/2 opacity-[0.13] transition-opacity duration-300 group-hover/rev:opacity-25"
       >
-        <VenxpayLogo size={54} />
+        <VenxpayLogo size={54} plate={false} />
       </span>
 
       <div className="relative">
@@ -194,10 +194,10 @@ function SidebarSectionNav({ section, pathname, isFirst }: SidebarSectionNavProp
                   >
                     <span
                       className={cn(
-                        "relative z-10 flex h-8 w-8 shrink-0 items-center justify-center rounded-[11px] transition-[background-color,color,transform] duration-[220ms] ease-out",
+                        "relative z-10 flex h-8 w-8 shrink-0 items-center justify-center transition-colors duration-[220ms] ease-out",
                         isActive
-                          ? "bg-primary text-primary-foreground"
-                          : "text-sidebar-foreground/48 group-hover/nav:translate-x-0.5 group-hover/nav:bg-sidebar-foreground/[0.07] group-hover/nav:text-sidebar-accent-foreground",
+                          ? "text-primary"
+                          : "text-sidebar-foreground/48 group-hover/nav:text-sidebar-accent-foreground",
                       )}
                     >
                       <item.icon

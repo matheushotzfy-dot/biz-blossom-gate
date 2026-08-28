@@ -11,9 +11,11 @@ type Props = {
   size?: number;
   withWordmark?: boolean;
   animated?: boolean;
+  /** Renderiza a placa (squircle) em volta do "V". Padrão: true. */
+  plate?: boolean;
 };
 
-export function VenxpayLogo({ className, size = 32, withWordmark = false, animated = true }: Props) {
+export function VenxpayLogo({ className, size = 32, withWordmark = false, animated = true, plate = true }: Props) {
   return (
     <span className={cn("inline-flex items-center gap-2.5 select-none", className)}>
       <svg
@@ -37,7 +39,9 @@ export function VenxpayLogo({ className, size = 32, withWordmark = false, animat
         </defs>
 
         {/* squircle plate — hairline, no glow */}
-        <rect x="2.5" y="2.5" width="59" height="59" rx="17" stroke="currentColor" strokeOpacity="0.16" />
+        {plate && (
+          <rect x="2.5" y="2.5" width="59" height="59" rx="17" stroke="currentColor" strokeOpacity="0.16" />
+        )}
 
         {/* left rail of the V (thick, structural) */}
         <path

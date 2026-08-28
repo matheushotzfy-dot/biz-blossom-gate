@@ -697,20 +697,9 @@ export default function Dashboard() {
                 <h4 className="font-display font-bold text-xl tracking-[-0.02em] text-foreground">Faturamento</h4>
                 <p className="text-[11px] text-muted-foreground/60 mt-1">Comparativo de entradas e saídas</p>
               </div>
-              <div className="flex items-center rounded-[12px] border border-border/60 bg-background p-1.5">
-                {PERIOD_PRESETS.filter(p => ["Hoje", "7 dias", "30 dias"].includes(p.label)).map((p) => {
-                  const isActive = !isCustom && selectedPeriod.label === p.label;
-                  const short = p.label === "Hoje" ? "Hoje" : p.label === "7 dias" ? "7d" : "30d";
-                  return (
-                    <button key={p.label} onClick={() => { setSelectedPeriod(p); setIsCustom(false); }}
-                      className={cn("px-4 py-1.5 rounded-xl text-[11px] font-bold transition-colors",
-                        isActive ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground"
-                      )}>
-                      {short}
-                    </button>
-                  );
-                })}
-              </div>
+              <span className="shrink-0 rounded-[10px] border border-border/60 bg-background px-3 py-1.5 text-[11px] font-bold uppercase tracking-[0.08em] text-muted-foreground">
+                {isCustom ? "Período personalizado" : selectedPeriod.label}
+              </span>
             </div>
 
 
