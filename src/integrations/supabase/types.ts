@@ -4691,11 +4691,28 @@ export type Database = {
         }
         Returns: Json
       }
+      get_admin_financial_overview: {
+        Args: { _bucket?: string; _from: string; _to: string }
+        Returns: Json
+      }
       get_admin_inactive_sellers: {
         Args: { _days_threshold?: number }
         Returns: Json
       }
       get_admin_top_sellers: { Args: { _period_days?: number }; Returns: Json }
+      get_admin_transactions_page: {
+        Args: {
+          _from: string
+          _method?: string
+          _page?: number
+          _page_size?: number
+          _search?: string
+          _seller_id?: string
+          _status?: string
+          _to: string
+        }
+        Returns: Json
+      }
       get_affiliate_product_owner: {
         Args: { _product_id: string }
         Returns: string
@@ -4868,6 +4885,15 @@ export type Database = {
       reap_stuck_webhook_deliveries: { Args: never; Returns: number }
       reconcile_stuck_transactions: { Args: never; Returns: number }
       reconcile_stuck_withdrawals: { Args: never; Returns: number }
+      record_transaction_refund: {
+        Args: {
+          _admin_user_id: string
+          _amount: number
+          _reason: string
+          _transaction_id: string
+        }
+        Returns: Json
+      }
       release_due_card_holds: { Args: never; Returns: number }
       request_anticipation: {
         Args: { _idempotency_key: string; _max_days: number; _user_id: string }
