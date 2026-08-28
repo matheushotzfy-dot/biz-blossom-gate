@@ -298,42 +298,17 @@ export function AppSidebar({ pinned = true, onTogglePin, onHoverChange }: AppSid
 
   const milestone = useMemo(() => getMilestone(revenue), [revenue]);
 
-  const sections: SidebarSection[] = useMemo(() => [
-    {
-      label: "COMANDO",
-      items: [
-        { title: "Dashboard", url: "/dashboard", icon: GlyphDashboard, exact: true },
-        { title: "Vendas", url: "/vendas", icon: GlyphSales, exact: true },
-      ],
-    },
-    {
-      label: "INFOPRODUTOS",
-      items: [
-        { title: "Produtos", url: "/vendas/produtos", icon: GlyphProduct, count: counts.products },
-        { title: "Cupons", url: "/vendas/cupons", icon: GlyphCoupon, count: counts.coupons },
-      ],
-    },
-    {
-      label: "FINANCEIRO",
-      items: [
-        { title: "Financeiro", url: "/financeiro/saques", icon: GlyphWithdraw },
-        { title: "Taxas", url: "/financeiro/config", icon: GlyphFees },
-      ],
-    },
-    {
-      label: "FERRAMENTAS",
-      items: [
-        { title: "Apps & Integrações", url: "/integracoes", icon: GlyphApps },
-      ],
-    },
-    {
-      label: "CONTA",
-      items: [
-        { title: "Meu Perfil & KYC", url: "/perfil", icon: GlyphProfile },
-        { title: "Premiações", url: "/premiacoes", icon: GlyphTrophy },
-        { title: "Suporte", url: "/suporte", icon: GlyphSupport, count: supportUnread },
-      ],
-    },
+  const items: SidebarItem[] = useMemo(() => [
+    { title: "Dashboard", url: "/dashboard", icon: GlyphDashboard, exact: true },
+    { title: "Vendas", url: "/vendas", icon: GlyphSales, exact: true },
+    { title: "Produtos", url: "/vendas/produtos", icon: GlyphProduct, count: counts.products },
+    { title: "Cupons", url: "/vendas/cupons", icon: GlyphCoupon, count: counts.coupons },
+    { title: "Financeiro", url: "/financeiro/saques", icon: GlyphWithdraw },
+    { title: "Taxas", url: "/financeiro/config", icon: GlyphFees },
+    { title: "Apps & Integrações", url: "/integracoes", icon: GlyphApps },
+    { title: "Meu Perfil & KYC", url: "/perfil", icon: GlyphProfile },
+    { title: "Premiações", url: "/premiacoes", icon: GlyphTrophy },
+    { title: "Suporte", url: "/suporte", icon: GlyphSupport, count: supportUnread },
   ], [counts, supportUnread]);
 
 
