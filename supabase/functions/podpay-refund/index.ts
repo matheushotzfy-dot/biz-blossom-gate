@@ -221,7 +221,9 @@ Deno.serve(async (req) => {
       _admin_user_id: user.id,
     });
     if (recordError) {
-      await supabase.from('idempotency_keys').delete().eq('key', idemKey);
+      await supabase.from('idempotency_keys').update({
+        response: { success: false, reconciliation_required: true, transactionId, amount: roundedAmount },
+      }).eq('key', idemKey);
       throw new Error(`Refund confirmed by acquirer but local reconciliation failed: ${recordError.message}`);
     }
 

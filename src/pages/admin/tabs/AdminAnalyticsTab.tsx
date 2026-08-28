@@ -8,7 +8,7 @@ import {
   BarChart, Bar, Cell, Line, ComposedChart,
 } from "recharts";
 import type { Tables } from "@/integrations/supabase/types";
-import { cn } from "@/lib/utils";
+import { cn, isApprovedTransaction } from "@/lib/utils";
 import { FinanceiroHero } from "@/components/financeiro/FinanceiroHero";
 import { PremiumPanel, PremiumSegmented } from "./AdminPremium";
 import { supabase } from "@/integrations/supabase/client";
@@ -286,7 +286,7 @@ export default function AdminAnalyticsTab({ fmtCurrency }: Props) {
               <div className="space-y-2.5">
                 {statusMix.map(({ status, count }) => {
                   const pctVal = txCount > 0 ? (count / txCount) * 100 : 0;
-                  const tone = status === "approved" || status === "completed" ? "success"
+                  const tone = isApprovedTransaction(status) ? "success"
                     : status === "pending" ? "warning"
                     : status === "failed" || status === "expired" ? "destructive"
                     : status === "refunded" || status === "chargeback" ? "destructive"

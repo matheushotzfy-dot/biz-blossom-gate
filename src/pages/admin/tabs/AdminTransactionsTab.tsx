@@ -129,7 +129,7 @@ export default function AdminTransactionsTab({ transactions, profiles, products,
     const result = effectiveTransactions.filter(t => {
       if (dateRange) return true;
       if (statusFilter !== "all") {
-        if (statusFilter === "completed" && !(t.status === "completed" || t.status === "approved")) return false;
+        if (statusFilter === "completed" && !isApprovedTransaction(t.status)) return false;
         if (statusFilter !== "completed" && t.status !== statusFilter) return false;
       }
       if (methodFilter !== "all" && t.payment_method !== methodFilter) return false;
