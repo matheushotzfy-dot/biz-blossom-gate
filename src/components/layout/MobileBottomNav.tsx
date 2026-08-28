@@ -117,7 +117,9 @@ export function MobileBottomNav() {
                         <NavLink
                           key={item.url}
                           to={item.url}
+                          onTouchStart={() => prefetchRoute(item.url)}
                           onClick={() => setMoreOpen(false)}
+
                           className={cn(
  "flex items-center gap-3 px-3.5 py-3 active:bg-muted/40 transition-colors",
                             isActive && "bg-primary/[0.06]"
