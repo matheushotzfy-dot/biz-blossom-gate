@@ -14,7 +14,7 @@ import { Slider } from "@/components/ui/slider";
 import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { toast } from "sonner";
-import { cn } from "@/lib/utils";
+import { cn, isApprovedTransaction } from "@/lib/utils";
 import { FinanceiroHero, FinanceiroKpi, FinanceiroKpiGrid } from "@/components/financeiro/FinanceiroHero";
 
 const fmt = (v: number) => `R$ ${v.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
@@ -29,7 +29,7 @@ export default function Antecipacao() {
     const now = new Date();
     const retained = transactions.filter(t =>
       t.user_id === user.id &&
-      t.status === "completed" && !t.is_simulated && t.retained_amount > 0 &&
+      isApprovedTransaction(t.status) && !t.is_simulated && t.retained_amount > 0 &&
       !t.retention_released && t.retained_until && new Date(t.retained_until) > now
     );
     return {
