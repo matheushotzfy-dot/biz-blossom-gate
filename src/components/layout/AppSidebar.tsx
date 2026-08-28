@@ -146,32 +146,17 @@ function RevenueBar({ collapsed, revenue, milestone, onOpenRewards }: RevenueBar
 
 
 
-type SidebarSectionNavProps = {
-  section: SidebarSection;
+type SidebarNavListProps = {
+  items: SidebarItem[];
   pathname: string;
-  isFirst: boolean;
 };
 
-function SidebarSectionNav({ section, pathname, isFirst }: SidebarSectionNavProps) {
+function SidebarNavList({ items, pathname }: SidebarNavListProps) {
   return (
-    <SidebarGroup className="px-0 py-0.5">
-      <div
-        className={cn(
-          "flex items-center gap-2.5 px-3 pb-1.5 group-data-[collapsible=icon]:hidden",
-          isFirst ? "pt-0" : "pt-3.5",
-        )}
-      >
-        <span className="h-px w-4 shrink-0 bg-sidebar-foreground/20" aria-hidden />
-        <span className="text-[9px] font-bold uppercase tracking-[0.2em] text-sidebar-foreground/35">
-          {section.label}
-        </span>
-      </div>
-      {!isFirst && (
-        <div className="mx-auto my-2 hidden h-px w-5 bg-sidebar-border/60 group-data-[collapsible=icon]:block" />
-      )}
+    <SidebarGroup className="px-0 py-0">
       <SidebarGroupContent>
-        <SidebarMenu className="gap-1.5 px-0 group-data-[collapsible=icon]:gap-2">
-          {section.items.map((item) => {
+        <SidebarMenu className="gap-1 px-0 group-data-[collapsible=icon]:gap-1.5">
+          {items.map((item) => {
             const isActive = isItemActive(pathname, item);
             return (
               <SidebarMenuItem key={item.url}>
