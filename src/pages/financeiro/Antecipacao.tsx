@@ -4,7 +4,7 @@ import type { Tables } from "@/integrations/supabase/types";
 type Tx = Tables<"transactions">;
 type EligibleTx = Tx & { daysLeft: number; inWindow: boolean; fee: number; net: number };
 import { useAuth } from "@/hooks/useAuth";
-import { useTransactions } from "@/hooks/useQueryData";
+import { useTransactions, useAnticipationSummary } from "@/hooks/useQueryData";
 import {
   Banknote, Clock, Calculator, Shield,
   CheckCircle2, Percent, ArrowRight, Info, Wallet, TrendingUp,
