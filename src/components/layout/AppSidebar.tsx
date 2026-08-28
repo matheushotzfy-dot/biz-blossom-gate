@@ -161,7 +161,7 @@ function SidebarNavList({ items, pathname }: SidebarNavListProps) {
                   asChild
                   tooltip={item.title}
                   isActive={isActive}
-                   className="h-auto rounded-none p-0 hover:bg-transparent active:bg-transparent data-[active=true]:bg-transparent group-data-[collapsible=icon]:!h-[56px] group-data-[collapsible=icon]:!w-full group-data-[collapsible=icon]:!p-0"
+                   className="h-auto rounded-none p-0 hover:bg-transparent active:bg-transparent data-[active=true]:bg-transparent group-data-[collapsible=icon]:!h-[56px] group-data-[collapsible=icon]:!w-full group-data-[collapsible=icon]:!px-3 group-data-[collapsible=icon]:!py-0"
                 >
                   <NavLink
                     to={item.url}
