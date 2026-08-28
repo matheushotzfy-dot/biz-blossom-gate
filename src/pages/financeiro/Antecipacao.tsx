@@ -28,41 +28,31 @@ export default function Antecipacao() {
   const { data: summary } = useAnticipationSummary(antecipationDays);
 
 
-  const stats = useMemo(() => {
-    if (!transactions || !user) return { retainedTotal: 0, eligibleCount: 0, eligible: [] as Tx[] };
+  // Amostra local só para a tabela; os números oficiais vêm do servidor.
+  const eligibleSample = useMemo(() => {
+    if (!transactions || !user) return [] as Tx[];
     const now = new Date();
-    const retained = transactions.filter(t =>
+    return transactions.filter(t =>
       t.user_id === user.id &&
       isApprovedTransaction(t.status) && !t.is_simulated && t.retained_amount > 0 &&
       !t.retention_released && t.retained_until && new Date(t.retained_until) > now
     );
-    return {
-      retainedTotal: retained.reduce((a, t) => a + t.retained_amount, 0),
-      eligibleCount: retained.length,
-      eligible: retained,
-    };
   }, [transactions, user?.id]);
 
+  const stats = {
+    retainedTotal: summary?.retained_total ?? 0,
+    eligibleCount: summary?.eligible_count ?? 0,
+    eligible: eligibleSample,
+  };
+
   const antecipationFeeRate = 0.025;
-  const antecipationCalc = useMemo(() => {
-    const now = new Date();
-    let totalOriginal = 0;
-    let totalFee = 0;
-    let count = 0;
-    stats.eligible.forEach((tx) => {
-      if (!tx.retained_until) return;
-      const daysRemaining = Math.max(0, Math.ceil((new Date(tx.retained_until).getTime() - now.getTime()) / (1000 * 60 * 60 * 24)));
-      if (daysRemaining <= antecipationDays) {
-        // Cap multiplier at 1 — fee never exceeds the base 2.5%
-        const multiplier = Math.min(daysRemaining / 15, 1);
-        const fee = tx.retained_amount * antecipationFeeRate * multiplier;
-        totalOriginal += tx.retained_amount;
-        totalFee += fee;
-        count += 1;
-      }
-    });
-    return { totalOriginal, totalFee, totalNet: totalOriginal - totalFee, count };
-  }, [stats.eligible, antecipationDays]);
+  const antecipationCalc = {
+    totalOriginal: summary?.calc_total ?? 0,
+    totalFee: summary?.calc_fee ?? 0,
+    totalNet: summary?.calc_net ?? 0,
+    count: summary?.calc_count ?? 0,
+  };
+
 
   const feePercent = antecipationCalc.totalOriginal > 0
     ? (antecipationCalc.totalFee / antecipationCalc.totalOriginal) * 100
