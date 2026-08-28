@@ -213,20 +213,10 @@ function SidebarNavList({ items, pathname }: SidebarNavListProps) {
                     )}
 
                     {isActive && (
-                      <>
-                        <span
-                          aria-hidden
-                          className="absolute inset-y-3 left-0 w-[3px] rounded-r-full bg-primary group-data-[collapsible=icon]:hidden"
-                        />
-                        <span
-                          aria-hidden
-                          className="absolute right-3 h-1.5 w-1.5 rounded-full bg-primary group-data-[collapsible=icon]:right-1 group-data-[collapsible=icon]:top-1"
-                        />
-                        <span
-                          aria-hidden
-                          className="absolute bottom-0 left-12 right-12 h-px bg-gradient-to-r from-transparent via-primary/50 to-transparent group-data-[collapsible=icon]:hidden"
-                        />
-                      </>
+                      <span
+                        aria-hidden
+                        className="absolute right-3.5 h-1.5 w-1.5 rounded-full bg-primary group-data-[collapsible=icon]:right-1 group-data-[collapsible=icon]:top-1"
+                      />
                     )}
                   </NavLink>
                 </SidebarMenuButton>
