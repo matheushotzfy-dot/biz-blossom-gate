@@ -352,7 +352,7 @@ export default function AdminOverviewTab({
           <PremiumMetric icon={Users} label="Sellers" value={String(profiles.length)} sub="Cadastrados" tone="primary" />
           <PremiumMetric icon={Package} label="Produtos" value={String(products.length)} sub={`${products.filter(p => p.status === "active").length} ativos`} tone="info" />
           <PremiumMetric icon={CreditCard} label="Transações" value={String(allTx.length)} sub={`${approved.length} aprovadas`} tone="success" />
-          <PremiumMetric icon={Percent} label="Conversão" value={`${conversionRate}%`} sub={`${approved.length}/${allTx.length}`} tone="warning" />
+          <PremiumMetric icon={Percent} label="Conversão" value={`${conversionRate}%`} sub={`${summaryApprovedCount.toLocaleString("pt-BR")}/${summaryTotalCount.toLocaleString("pt-BR")}`} tone="warning" />
         </PremiumMetricGrid>
       </div>
     );
@@ -378,7 +378,7 @@ export default function AdminOverviewTab({
 
       {/* ── Hero KPI strip · 1px divider grid ── */}
       <div className="grid grid-cols-2 gap-px overflow-hidden rounded-2xl border border-border/60 bg-border/60 lg:grid-cols-6">
-        <HeroBigStat label="Volume no período" value={fmtCurrency(totalVolume)} sub={`${filteredApproved.length}/${filteredTx.length} tx`} tone="primary" wide />
+        <HeroBigStat label="Volume no período" value={fmtCurrency(totalVolume)} sub={`${summaryApprovedCount.toLocaleString("pt-BR")}/${summaryTotalCount.toLocaleString("pt-BR")} tx`} tone="primary" wide />
         <HeroBigStat label="Lucro líquido" value={fmtCurrency(takeRateTotal)} sub={`Take ${takeRatePct}%`} tone="success" />
         <HeroBigStat label="Ticket médio" value={fmtCurrency(ticketMedio)} sub="por venda" tone="info" />
         <HeroBigStat label="Conversão" value={`${conversionRate}%`} sub="aprovação geral" tone="warning" />
