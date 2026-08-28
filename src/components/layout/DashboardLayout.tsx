@@ -19,6 +19,8 @@ import { useEffect, useRef, useState } from "react";
 import { useLocation } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { useKycStatus } from "@/hooks/useKycStatus";
+import { prefetchIdleRoutes } from "@/lib/routePrefetch";
+
 
 
 function DashboardLayoutInner() {
@@ -28,7 +30,10 @@ function DashboardLayoutInner() {
  const kyc = useKycStatus();
  usePrefetchDashboardData();
  useRealtimeSync();
+ // Aquece os chunks das abas mais usadas em segundo plano (evita "só carregando").
+ useEffect(() => { prefetchIdleRoutes(); }, []);
  const navigate = useNavigate();
+
   const { pathname, search } = useLocation();
   const routeKey = pathname + search;
  const scrollRef = useRef<HTMLDivElement>(null);
