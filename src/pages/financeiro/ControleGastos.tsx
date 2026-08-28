@@ -15,7 +15,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { toast } from "sonner";
 import { PageShell, PageTitle, EmptyState, Panel as SharedPanel } from "@/components/PageShell";
-import { cn } from "@/lib/utils";
+import { cn, isApprovedTransaction } from "@/lib/utils";
 import { motion } from "framer-motion";
 
 const CATEGORIES = [
@@ -71,7 +71,7 @@ export default function ControleGastos() {
 
   // ─── Metrics ───────────────────────────────────────────────────
   const monthTx = useMemo(
-    () => txData.filter(t => t.status === "completed" && t.created_at.startsWith(filterMonth)),
+    () => txData.filter(t => isApprovedTransaction(t.status) && t.created_at.startsWith(filterMonth)),
     [txData, filterMonth]
   );
   const monthRevenue = monthTx.reduce((a, t) => a + Number(t.net_amount), 0);
