@@ -59,7 +59,7 @@ function DashboardLayoutInner() {
       // para a transição parecer contínua quando o mouse sai e volta.
       sidebarHoverTimer.current = setTimeout(
         () => setSidebarHover(hovering),
-        hovering ? 90 : 260,
+        hovering ? 60 : 180,
       );
     };
    const togglePin = () => {
