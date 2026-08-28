@@ -55,10 +55,6 @@ type SidebarItem = {
   exact?: boolean;
 };
 
-type SidebarSection = {
-  label: string;
-  items: SidebarItem[];
-};
 
 
 
