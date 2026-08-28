@@ -547,9 +547,14 @@ export default function Dashboard() {
                 </div>
                 <div className="relative z-10 flex h-full min-w-0 flex-col pr-11">
                   <p className={cn("text-[13px] font-medium", isDanger ? "text-destructive/90" : "text-muted-foreground")}>{k.label}</p>
+                  {statsLoading ? (
+                    <div className="mt-5 h-[25px] w-32 animate-pulse rounded-[6px] bg-muted/50 sm:h-[28px]" aria-label="Carregando" />
+                  ) : (
                   <p className={cn("mt-5 whitespace-nowrap font-display text-[25px] font-bold leading-none tracking-[-0.02em] tabular-nums sm:text-[28px]", isDanger ? "text-destructive" : "text-foreground")}>
                   {privacy.hidden ? CENSORED : k.value}
                   </p>
+                  )}
+
                   <p className="mt-auto truncate pt-4 text-[11px] font-medium text-muted-foreground/65">{k.sub}</p>
                 </div>
               </div>
