@@ -161,7 +161,7 @@ function SidebarNavList({ items, pathname }: SidebarNavListProps) {
                   asChild
                   tooltip={item.title}
                   isActive={isActive}
-                  className="h-auto rounded-none p-0 hover:bg-transparent active:bg-transparent data-[active=true]:bg-transparent"
+                   className="h-auto rounded-none p-0 hover:bg-transparent active:bg-transparent data-[active=true]:bg-transparent group-data-[collapsible=icon]:!h-[56px] group-data-[collapsible=icon]:!w-full group-data-[collapsible=icon]:!p-0"
                 >
                   <NavLink
                     to={item.url}
@@ -171,7 +171,7 @@ function SidebarNavList({ items, pathname }: SidebarNavListProps) {
                     activeClassName=""
 
                     className={cn(
-                      "group/nav relative flex h-[56px] items-center gap-3.5 overflow-hidden rounded-[16px] px-3.5 text-[14px] outline-none",
+                       "group/nav relative flex h-[56px] w-full items-center gap-3 overflow-hidden rounded-[16px] px-3 text-[14px] outline-none",
                       "transition-colors duration-300 ease-out",
                       isActive
                         ? "border border-primary/25 bg-primary/[0.10] font-semibold text-sidebar-accent-foreground"
@@ -180,15 +180,15 @@ function SidebarNavList({ items, pathname }: SidebarNavListProps) {
                   >
                     <span
                       className={cn(
-                        "relative z-10 flex h-8 w-8 shrink-0 items-center justify-center transition-colors duration-300 ease-out",
+                         "relative z-10 flex h-9 w-9 shrink-0 items-center justify-center transition-colors duration-300 ease-out",
                         isActive
                           ? "text-primary"
                           : "text-sidebar-foreground/48 group-hover/nav:text-sidebar-accent-foreground",
                       )}
                     >
                       <item.icon
-                        size={19}
-                        strokeWidth={isActive ? 2 : 1.65}
+                         size={22}
+                         strokeWidth={isActive ? 1.9 : 1.6}
                       />
                     </span>
 
