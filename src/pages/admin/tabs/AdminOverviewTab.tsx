@@ -236,13 +236,24 @@ export default function AdminOverviewTab({
     .filter(t => !t.retention_released && Number(t.retained_amount) > 0)
     .reduce((a, t) => a + Number(t.retained_amount), 0));
 
-  const chargebackTx = filteredTx.filter(t => t.status === "chargeback");
-  const chargebackRate = filteredApproved.length > 0 ? ((chargebackTx.length / filteredApproved.length) * 100) : 0;
+  // Contagens autoritativas do servidor (RPC) — a lista carregada no cliente é paginada
+  // e não pode ser usada como denominador de conversão/ticket sob alto volume.
+  const summaryTotalCount = financialOverview?.summary?.total_count != null
+    ? Number(financialOverview.summary.total_count)
+    : filteredTx.length;
+  const summaryApprovedCount = financialOverview?.summary?.approved_count != null
+    ? Number(financialOverview.summary.approved_count)
+    : filteredApproved.length;
+  const summaryChargebackCount = financialOverview?.summary?.chargeback_count != null
+    ? Number(financialOverview.summary.chargeback_count)
+    : filteredTx.filter(t => t.status === "chargeback").length;
+
+  const chargebackRate = summaryApprovedCount > 0 ? ((summaryChargebackCount / summaryApprovedCount) * 100) : 0;
   const chargebackAlert = chargebackRate > 1;
 
   const activeSellersToday = new Set(todayTx.map(t => t.user_id)).size;
-  const conversionRate = filteredTx.length > 0 ? ((filteredApproved.length / filteredTx.length) * 100).toFixed(1) : "0.0";
-  const ticketMedio = filteredApproved.length > 0 ? totalVolume / filteredApproved.length : 0;
+  const conversionRate = summaryTotalCount > 0 ? ((summaryApprovedCount / summaryTotalCount) * 100).toFixed(1) : "0.0";
+  const ticketMedio = summaryApprovedCount > 0 ? totalVolume / summaryApprovedCount : 0;
 
   const last30Start = useMemo(() => { const d = new Date(); d.setDate(d.getDate() - 30); return d; }, []);
   const last30Tx = useMemo(() => approved.filter(t => new Date(t.created_at) >= last30Start), [approved, last30Start]);
