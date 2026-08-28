@@ -102,7 +102,7 @@ function RevenueBar({ collapsed, revenue, milestone, onOpenRewards }: RevenueBar
         aria-hidden
         className="pointer-events-none absolute -right-1 top-1/2 -translate-y-1/2 opacity-[0.13] transition-opacity duration-300 group-hover/rev:opacity-25"
       >
-        <VenxpayLogo size={54} />
+        <VenxpayLogo size={54} plate={false} />
       </span>
 
       <div className="relative">
