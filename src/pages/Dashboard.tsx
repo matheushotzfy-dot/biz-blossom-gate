@@ -365,13 +365,21 @@ export default function Dashboard() {
     if (chartData.length <= 1) return chartData.map((p) => p.timestamp);
 
     const granularity = chartData[0]?.granularity;
-    const maxTicks = granularity === "hour"
-      ? 7
-      : granularity === "month"
-        ? Math.min(chartData.length, 8)
-        : chartData.length <= 31
-          ? chartData.length
-          : 8;
+
+    // Horário: marcas fixas a cada 4h (0h, 4h, 8h, 12h, 16h, 20h) — espaçamento
+    // perfeitamente uniforme, sem índices arredondados que geravam "15h/19h".
+    if (granularity === "hour") {
+      const step = 4;
+      return chartData
+        .filter((_, i) => i % step === 0)
+        .map((p) => p.timestamp);
+    }
+
+    const maxTicks = granularity === "month"
+      ? Math.min(chartData.length, 8)
+      : chartData.length <= 31
+        ? chartData.length
+        : 8;
 
     const indexes = new Set<number>();
     for (let i = 0; i < maxTicks; i++) {
