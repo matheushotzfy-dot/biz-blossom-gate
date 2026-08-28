@@ -26,7 +26,7 @@ import type { Tables, TablesInsert, TablesUpdate } from "@/integrations/supabase
 import { FinanceiroHero, FinanceiroKpi, FinanceiroKpiGrid } from "@/components/financeiro/FinanceiroHero";
 import { PremiumPanel, PremiumEmpty, premiumTable } from "./AdminPremium";
 import { logAdminAction } from "@/lib/auditLog";
-import { cn } from "@/lib/utils";
+import { cn, isApprovedTransaction } from "@/lib/utils";
 import { z } from "zod";
 import { friendlyError } from "@/lib/friendlyError";
 
@@ -544,7 +544,7 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
     const byUser = new Map<string, { gross: number; count: number }>();
     for (const t of transactions) {
       if (!t.created_at || new Date(t.created_at) < todayStart) continue;
-      if (t.status !== "completed" && t.status !== "approved") continue;
+      if (!isApprovedTransaction(t.status)) continue;
       const cur = byUser.get(t.user_id) || { gross: 0, count: 0 };
       cur.gross += Number(t.amount); cur.count += 1;
       byUser.set(t.user_id, cur);
@@ -558,7 +558,7 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
 
   const getSellerStats = (userId: string) => {
     const txs = transactions.filter(t => t.user_id === userId);
-    const completed = txs.filter(t => t.status === "completed" || t.status === "approved");
+    const completed = txs.filter(t => isApprovedTransaction(t.status));
     const totalGross = completed.reduce((a, t) => a + Number(t.amount), 0);
     const totalNet = completed.reduce((a, t) => a + Number(t.net_amount), 0);
     const totalFees = completed.reduce((a, t) => a + Number(t.fee_amount), 0);
@@ -577,7 +577,7 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
     };
   });
 
-  const userApproved = userTransactions.filter(t => t.status === "approved" || t.status === "completed");
+  const userApproved = userTransactions.filter(t => isApprovedTransaction(t.status));
   const userTotalGross = userApproved.reduce((a, t) => a + Number(t.amount), 0);
   const userTotalNet = userApproved.reduce((a, t) => a + Number(t.net_amount), 0);
   const userTotalFees = userApproved.reduce((a, t) => a + Number(t.fee_amount), 0);
@@ -1410,7 +1410,7 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
                       {userProducts.length === 0 && <PremiumEmpty icon={Package} title="Nenhum produto ativo" />}
                       {userProducts.map(p => {
                         const prodTxs = userTransactions.filter(t => t.product_id === p.id);
-                        const prodApproved = prodTxs.filter(t => t.status === "completed" || t.status === "approved");
+                        const prodApproved = prodTxs.filter(t => isApprovedTransaction(t.status));
                         const prodGross = prodApproved.reduce((a, t) => a + Number(t.amount), 0);
                         const prodNet = prodApproved.reduce((a, t) => a + Number(t.net_amount), 0);
                         const prodFees = prodApproved.reduce((a, t) => a + Number(t.fee_amount), 0);
@@ -1485,7 +1485,7 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
                       <tbody>
                         {buyers.map((b, i) => {
                           const lastTx = b.txs[0];
-                          const lastCompleted = b.txs.find(t => t.status === "completed" || t.status === "approved");
+                          const lastCompleted = b.txs.find(t => isApprovedTransaction(t.status));
                           return (
                             <tr key={i} className={premiumTable.row}>
                               <td className={premiumTable.td}>

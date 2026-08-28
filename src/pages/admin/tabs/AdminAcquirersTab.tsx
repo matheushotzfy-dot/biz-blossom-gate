@@ -22,7 +22,7 @@ import {
   PremiumMetric, PremiumMetricGrid, PremiumPanel, PremiumSegmented, PremiumEmpty, premiumTable,
 } from "./AdminPremium";
 import { logAdminAction } from "@/lib/auditLog";
-import { cn } from "@/lib/utils";
+import { cn, isApprovedTransaction } from "@/lib/utils";
 import { friendlyError } from "@/lib/friendlyError";
 
 // ============== Types ==============
@@ -157,7 +157,7 @@ export default function AdminAcquirersTab() {
     acqs.forEach(a => { stats[a.id] = { sales: 0, volume: 0, refused: 0, refunded: 0, medpix: 0, sellers: acqSellers.get(a.id)?.size || 0, fees: 0, net: 0 }; });
     txList.forEach(t => {
       const aid = sellerAcq.get(t.user_id); if (!aid || !stats[aid]) return;
-      if (t.status === "completed") {
+      if (isApprovedTransaction(t.status)) {
         stats[aid].sales++;
         stats[aid].volume += Number(t.amount);
         stats[aid].fees += Number(t.fee_amount || 0);
@@ -683,7 +683,7 @@ export default function AdminAcquirersTab() {
                           <td className={cn(premiumTable.td, "text-[10px] uppercase font-bold text-muted-foreground")}>{t.payment_method}</td>
                           <td className={premiumTable.td}>
                             <span className={cn("px-1.5 py-0.5 rounded text-[9px] font-black uppercase",
-                              t.status === "completed" ? "bg-success/15 text-success" :
+                              isApprovedTransaction(t.status) ? "bg-success/15 text-success" :
                               t.status === "pending" ? "bg-warning/15 text-warning" :
                               t.status === "refunded" ? "bg-info/15 text-info" :
                               "bg-destructive/15 text-destructive")}>{t.status}</span>
@@ -987,7 +987,7 @@ function AcquirerDetail({ acq, stats, healthEvents, failovers, sellersOfAcq, txs
                       TX {shortId(t.id, 12)} <Copy className="h-2.5 w-2.5" />
                     </button>
                     <span className={cn("px-1.5 py-0.5 rounded text-[9px] font-black uppercase",
-                      t.status === "completed" ? "bg-success/15 text-success" :
+                      isApprovedTransaction(t.status) ? "bg-success/15 text-success" :
                       t.status === "pending" ? "bg-warning/15 text-warning" :
                       t.status === "refunded" ? "bg-info/15 text-info" :
                       "bg-destructive/15 text-destructive")}>{t.status}</span>

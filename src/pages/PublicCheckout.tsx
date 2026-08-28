@@ -376,7 +376,7 @@ export default function PublicCheckout() {
  pollCount++;
  try {
  const { data: status } = await supabase.rpc("get_checkout_status", { _transaction_id: transactionId });
- if (status === "completed") {
+ if (status === "completed" || status === "approved" || status === "paid") {
  setCheckoutState("approved"); clearCheckoutSession(slug || "");
  if (product) firePixelEvent(productPixels, "Purchase", { content_name: product.name, content_id: product.id, value: Number(product.price), session_key: slug || "default" });
  return;

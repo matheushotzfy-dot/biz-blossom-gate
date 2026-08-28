@@ -24,7 +24,7 @@ import type { Tables } from "@/integrations/supabase/types";
 import { FinanceiroHero } from "@/components/financeiro/FinanceiroHero";
 import { PremiumMetric, PremiumMetricGrid, PremiumPanel, PremiumEmpty, premiumTable } from "./AdminPremium";
 import { logAdminAction } from "@/lib/auditLog";
-import { cn } from "@/lib/utils";
+import { cn, isApprovedTransaction } from "@/lib/utils";
 
 interface Props {
   products: Tables<"products">[];
@@ -95,7 +95,7 @@ export default function AdminProductsTab({ products, profiles, transactions, fmt
 
   const getProductStats = (pid: string) => {
     const txs = txByProduct.get(pid) || [];
-    const completed = txs.filter(t => t.status === "completed");
+    const completed = txs.filter(t => isApprovedTransaction(t.status));
     const pending = txs.filter(t => t.status === "pending");
     const refunded = txs.filter(t => t.status === "refunded");
     const chargebacks = txs.filter(t => t.status === "chargeback");
@@ -450,10 +450,10 @@ export default function AdminProductsTab({ products, profiles, transactions, fmt
                   </div>
 
                   {/* Breakdown por método */}
-                  <PaymentMethodBreakdown txs={stats.txs.filter(t => t.status === "completed")} fmtCurrency={fmtCurrency} />
+                  <PaymentMethodBreakdown txs={stats.txs.filter(t => isApprovedTransaction(t.status))} fmtCurrency={fmtCurrency} />
 
                   {/* Transações */}
-                  <TxHistory title="Transações Aprovadas" icon={CheckCircle2} color="emerald" txs={stats.txs.filter(t => t.status === "completed").slice(0, 50)} fmtCurrency={fmtCurrency} />
+                  <TxHistory title="Transações Aprovadas" icon={CheckCircle2} color="emerald" txs={stats.txs.filter(t => isApprovedTransaction(t.status)).slice(0, 50)} fmtCurrency={fmtCurrency} />
                   {stats.pending > 0 && <TxHistory title="Pendentes" icon={Clock} color="amber" txs={stats.txs.filter(t => t.status === "pending").slice(0, 20)} fmtCurrency={fmtCurrency} />}
                   {stats.refunded > 0 && <TxHistory title="Reembolsos" icon={RefreshCw} color="orange" txs={stats.txs.filter(t => t.status === "refunded").slice(0, 20)} fmtCurrency={fmtCurrency} />}
                   {stats.chargebacks > 0 && <TxHistory title="Chargebacks" icon={AlertTriangle} color="red" txs={stats.txs.filter(t => t.status === "chargeback").slice(0, 20)} fmtCurrency={fmtCurrency} />}

@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { AlertTriangle, Search, Plus, Save, MessageSquare, Clock, CheckCircle2, XCircle, Package, User } from "lucide-react";
@@ -44,8 +44,12 @@ export default function AdminDisputesTab({ type, title, profiles, transactions, 
  const [form, setForm] = useState({ seller_user_id: "", buyer_name: "", buyer_email: "", buyer_phone: "", reason: "", amount: "", transaction_id: "" });
  const [editNotes, setEditNotes] = useState("");
  const [editStatus, setEditStatus] = useState("");
+ const [linkedTransactions, setLinkedTransactions] = useState<Map<string, Tables<"transactions">>>(new Map());
+ const transactionsRef = useRef(transactions);
 
-  const load = async () => {
+ useEffect(() => { transactionsRef.current = transactions; }, [transactions]);
+
+  const load = useCallback(async () => {
     try {
       const { data, error } = await supabase
         .from("disputes")
@@ -54,14 +58,29 @@ export default function AdminDisputesTab({ type, title, profiles, transactions, 
         .order("created_at", { ascending: false })
         .limit(500);
       if (error) throw error;
-      setDisputes((data || []) as unknown as Dispute[]);
+      const nextDisputes = (data || []) as unknown as Dispute[];
+      setDisputes(nextDisputes);
+      const missingIds = nextDisputes.map(d => d.transaction_id).filter((id): id is string => Boolean(id) && !transactionsRef.current.some(t => t.id === id));
+      if (missingIds.length > 0) {
+        const { data: linked } = await supabase.from("transactions").select("*").in("id", missingIds);
+        setLinkedTransactions(new Map((linked || []).map(tx => [tx.id, tx])));
+      } else {
+        setLinkedTransactions(new Map());
+      }
     } catch (e) {
       console.error("[AdminDisputesTab] load error:", e);
       toast.error("Erro ao carregar disputas");
     }
-  };
+  }, [type]);
 
-  useEffect(() => { load(); }, [type]);
+  useEffect(() => { void load(); }, [load]);
+
+  useEffect(() => {
+    const channel = supabase.channel(`admin-disputes-${type}`)
+      .on("postgres_changes", { event: "*", schema: "public", table: "disputes" }, () => { void load(); })
+      .subscribe();
+    return () => { void supabase.removeChannel(channel); };
+  }, [type, load]);
 
   const handleCreate = async () => {
     if (!user || !form.seller_user_id || !form.amount) { toast.error("Preencha os campos obrigatórios"); return; }
@@ -132,7 +151,7 @@ export default function AdminDisputesTab({ type, title, profiles, transactions, 
 
  const getTransactionDetails = (txId: string | null) => {
  if (!txId) return null;
- return transactions.find(t => t.id === txId) || null;
+  return transactions.find(t => t.id === txId) || linkedTransactions.get(txId) || null;
  };
 
  const getProductName = (productId: string | null) => {

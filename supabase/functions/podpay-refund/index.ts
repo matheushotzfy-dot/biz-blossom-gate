@@ -94,24 +94,10 @@ Deno.serve(async (req) => {
     }
 
     // === IDEMPOTENCY CHECK ===
-    const idemKey = `refund_${transactionId}`;
-    const { data: existingIdem } = await supabase
-      .from('idempotency_keys')
-      .select('response, expires_at')
-      .eq('key', idemKey)
-      .maybeSingle();
-
-    if (existingIdem && new Date(existingIdem.expires_at) > new Date()) {
-      return new Response(
-        JSON.stringify(existingIdem.response),
-        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
-    }
-
     // Get transaction with explicit columns (no select *)
     const { data: tx, error: txError } = await supabase
       .from('transactions')
-      .select('id, user_id, amount, status, podpay_payment_id, is_simulated, metadata')
+      .select('id, user_id, amount, status, refunded_amount, podpay_payment_id, is_simulated, metadata')
       .eq('id', transactionId)
       .single();
 
@@ -121,16 +107,35 @@ Deno.serve(async (req) => {
       });
     }
 
-    // Only refund completed/approved transactions
-    if (tx.status !== 'completed' && tx.status !== 'approved') {
+    if (!['completed', 'approved', 'paid', 'partially_refunded'].includes(tx.status)) {
       return new Response(JSON.stringify({ success: false, error: 'Transaction is not refundable' }), {
         status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
 
-    if (roundedAmount > Number(tx.amount)) {
+    const currentRefunded = Number(tx.refunded_amount || 0);
+    const remainingAmount = Number(tx.amount) - currentRefunded;
+    if (roundedAmount > remainingAmount) {
       return new Response(JSON.stringify({ success: false, error: 'Refund amount exceeds transaction' }), {
         status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
+    // The cumulative amount makes retries idempotent while still allowing
+    // multiple legitimate partial refunds for the same transaction.
+    const targetRefunded = Math.round((currentRefunded + roundedAmount) * 100) / 100;
+    const idemKey = `refund_${transactionId}_${targetRefunded.toFixed(2)}`;
+    const { error: claimError } = await supabase.from('idempotency_keys').insert({
+      key: idemKey,
+      response: { success: false, processing: true },
+      expires_at: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
+    });
+    if (claimError) {
+      const { data: existingIdem } = await supabase
+        .from('idempotency_keys').select('response').eq('key', idemKey).maybeSingle();
+      return new Response(JSON.stringify(existingIdem?.response || { success: false, error: 'Refund already processing' }), {
+        status: existingIdem?.response && (existingIdem.response as Record<string, unknown>).success ? 200 : 409,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
 
@@ -161,23 +166,7 @@ Deno.serve(async (req) => {
       }
     }
 
-    // === ATOMIC STATUS UPDATE (only if still completed/approved) ===
-    const { data: updatedTx } = await supabase
-      .from('transactions')
-      .update({ status: 'refunded' })
-      .eq('id', transactionId)
-      .in('status', ['completed', 'approved'])
-      .select('id')
-      .maybeSingle();
-
-    if (!updatedTx) {
-      // Race condition: another request already changed the status
-      return new Response(JSON.stringify({ success: false, error: 'Transaction already processed' }), {
-        status: 409, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      });
-    }
-
-    // Call PodPay refund API (non-blocking for simulated)
+    // The acquirer must confirm before local financial state changes.
     if (tx.podpay_payment_id && !tx.is_simulated) {
       const publicKey = Deno.env.get('PODPAY_PUBLIC_KEY')!;
       const secretKey = Deno.env.get('PODPAY_SECRET_KEY')!;
@@ -202,12 +191,7 @@ Deno.serve(async (req) => {
 
         if (!refundResp.ok) {
           console.log('[podpay-refund] PodPay error:', refundResp.status);
-          // Revert transaction status if PodPay fails
-          await supabase
-            .from('transactions')
-            .update({ status: 'completed' })
-            .eq('id', transactionId)
-            .eq('status', 'refunded');
+          await supabase.from('idempotency_keys').delete().eq('key', idemKey);
           
           clearTimeout(timeout);
           return new Response(
@@ -217,12 +201,7 @@ Deno.serve(async (req) => {
         }
       } catch (e) {
         console.log('[podpay-refund] PodPay call failed:', e instanceof Error ? e.message : 'unknown');
-        // Revert on timeout/network failure
-        await supabase
-          .from('transactions')
-          .update({ status: 'completed' })
-          .eq('id', transactionId)
-          .eq('status', 'refunded');
+        await supabase.from('idempotency_keys').delete().eq('key', idemKey);
         
         clearTimeout(timeout);
         return new Response(
@@ -234,15 +213,19 @@ Deno.serve(async (req) => {
       }
     }
 
-    // Create balance adjustment
-    const isPartial = roundedAmount < Number(tx.amount);
-    await supabase.from('balance_adjustments').insert({
-      user_id: tx.user_id,
-      admin_user_id: user.id,
-      amount: roundedAmount,
-      type: 'debit',
-      reason: `Estorno ${isPartial ? 'parcial' : 'total'}: ${safeReason}`,
+    const isPartial = targetRefunded < Number(tx.amount);
+    const { data: recorded, error: recordError } = await supabase.rpc('record_transaction_refund', {
+      _transaction_id: transactionId,
+      _amount: roundedAmount,
+      _reason: safeReason,
+      _admin_user_id: user.id,
     });
+    if (recordError) {
+      await supabase.from('idempotency_keys').update({
+        response: { success: false, reconciliation_required: true, transactionId, amount: roundedAmount },
+      }).eq('key', idemKey);
+      throw new Error(`Refund confirmed by acquirer but local reconciliation failed: ${recordError.message}`);
+    }
 
     // Audit log
     await supabase.from('audit_logs').insert({
@@ -253,7 +236,7 @@ Deno.serve(async (req) => {
       details: { amount: roundedAmount, reason: safeReason, partial: isPartial },
     });
 
-    const responseBody = { success: true, data: { refunded: true, amount: roundedAmount } };
+    const responseBody = { success: true, data: { refunded: true, amount: roundedAmount, reconciliation: recorded } };
 
     // Store idempotency key (24h TTL)
     await supabase.from('idempotency_keys').upsert({

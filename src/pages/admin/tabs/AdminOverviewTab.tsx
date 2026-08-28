@@ -14,7 +14,7 @@ import {
 } from "recharts";
 import KycReviewDialog from "@/components/admin/KycReviewDialog";
 import type { Tables } from "@/integrations/supabase/types";
-import { cn } from "@/lib/utils";
+import { cn, isApprovedTransaction } from "@/lib/utils";
 import React from "react";
 import { TransactionDetailPanel } from "@/components/transactions/TransactionDetailPanel";
 import { FinanceiroHero } from "@/components/financeiro/FinanceiroHero";
@@ -39,6 +39,13 @@ interface Props {
   isEmployee?: boolean;
   dateRange?: { from: Date; to: Date };
   onNavigate?: (tabId: string) => void;
+  financialOverview?: AdminFinancialOverview | null;
+}
+
+export interface AdminFinancialOverview {
+  summary?: { gross_volume?: number; platform_fees?: number; profit?: number; approved_count?: number; pending_count?: number; chargeback_count?: number; retained_amount?: number; active_sellers?: number };
+  month?: { gross_volume?: number; approved_count?: number; platform_fees?: number; profit?: number };
+  operations?: { pending_withdrawals_count?: number; pending_withdrawals_amount?: number; open_disputes_count?: number; open_disputes_amount?: number };
 }
 
 type Tone = "primary" | "success" | "warning" | "destructive" | "info" | "neutral";
@@ -125,7 +132,7 @@ function ChartTip({ active, payload, label, fmtCurrency }: ChartTipProps) {
 export default function AdminOverviewTab({
   transactions, profiles, products, withdrawals,
   onWithdrawalAction, onUserStatus, fmtCurrency,
-  isEmployee = false, dateRange, onNavigate,
+  isEmployee = false, dateRange, onNavigate, financialOverview,
 }: Props) {
   const [disputes, setDisputes] = useState<Dispute[]>([]);
   const [realtimeTx, setRealtimeTx] = useState<Tables<"transactions">[]>([]);
@@ -181,6 +188,9 @@ export default function AdminOverviewTab({
 
   useEffect(() => {
     setRealtimeTx(transactions.slice(0, 25));
+  }, [transactions]);
+
+  useEffect(() => {
     const channel = supabase
       .channel("admin-god-mode-tx")
       .on("postgres_changes", { event: "INSERT", schema: "public", table: "transactions" }, (payload) => {
@@ -191,16 +201,16 @@ export default function AdminOverviewTab({
       })
       .subscribe();
     return () => { supabase.removeChannel(channel); };
-  }, [transactions]);
+  }, []);
 
   /* ── Computations (preserved verbatim) ── */
   const allTx = transactions;
-  const approved = useMemo(() => allTx.filter(t => t.status === "approved" || t.status === "completed"), [allTx]);
+  const approved = useMemo(() => allTx.filter(t => isApprovedTransaction(t.status)), [allTx]);
   const filteredTx = useMemo(() => {
     if (!dateRange) return allTx;
     return allTx.filter(t => { const d = new Date(t.created_at); return d >= dateRange.from && d <= dateRange.to; });
   }, [allTx, dateRange]);
-  const filteredApproved = useMemo(() => filteredTx.filter(t => t.status === "approved" || t.status === "completed"), [filteredTx]);
+  const filteredApproved = useMemo(() => filteredTx.filter(t => isApprovedTransaction(t.status)), [filteredTx]);
 
   // Fuso São Paulo (America/Sao_Paulo) — normaliza "hoje" para o dia comercial brasileiro
   const spDayKey = (d: Date) =>
@@ -214,17 +224,17 @@ export default function AdminOverviewTab({
   const monthTx = useMemo(() => approved.filter(t => spMonthKey(new Date(t.created_at)) === thisMonthKey), [approved, thisMonthKey]);
 
   const tpvToday = todayTx.reduce((a, t) => a + Number(t.amount), 0);
-  const tpvMonth = monthTx.reduce((a, t) => a + Number(t.amount), 0);
-  const totalVolume = filteredApproved.reduce((a, t) => a + Number(t.amount), 0);
+  const tpvMonth = Number(financialOverview?.month?.gross_volume ?? monthTx.reduce((a, t) => a + Number(t.amount), 0));
+  const totalVolume = Number(financialOverview?.summary?.gross_volume ?? filteredApproved.reduce((a, t) => a + Number(t.amount), 0));
   const takeRateToday = todayTx.reduce((a, t) => a + Number(t.fee_amount), 0);
-  const takeRateTotal = filteredApproved.reduce((a, t) => a + Number(t.fee_amount), 0);
+  const takeRateTotal = Number(financialOverview?.summary?.platform_fees ?? filteredApproved.reduce((a, t) => a + Number(t.fee_amount), 0));
   const takeRatePct = totalVolume > 0 ? ((takeRateTotal / totalVolume) * 100).toFixed(2) : "0.00";
 
   const pendingWd = withdrawals.filter(w => w.status === "pending");
-  const pendingWdAmount = pendingWd.reduce((a, w) => a + Number(w.amount), 0);
-  const totalRetained = filteredApproved
+  const pendingWdAmount = Number(financialOverview?.operations?.pending_withdrawals_amount ?? pendingWd.reduce((a, w) => a + Number(w.amount), 0));
+  const totalRetained = Number(financialOverview?.summary?.retained_amount ?? filteredApproved
     .filter(t => !t.retention_released && Number(t.retained_amount) > 0)
-    .reduce((a, t) => a + Number(t.retained_amount), 0);
+    .reduce((a, t) => a + Number(t.retained_amount), 0));
 
   const chargebackTx = filteredTx.filter(t => t.status === "chargeback");
   const chargebackRate = filteredApproved.length > 0 ? ((chargebackTx.length / filteredApproved.length) * 100) : 0;
@@ -247,7 +257,7 @@ export default function AdminOverviewTab({
       const m = t.payment_method || "other";
       if (!methods[m]) methods[m] = { total: 0, approved: 0, volume: 0 };
       methods[m].total++;
-      if (t.status === "approved" || t.status === "completed") {
+      if (isApprovedTransaction(t.status)) {
         methods[m].approved++; methods[m].volume += Number(t.amount);
       }
     });

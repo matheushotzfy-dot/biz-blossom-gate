@@ -77,7 +77,7 @@ export default function Saques() {
         .from("transactions")
         .select("retained_amount")
         .eq("user_id", user.id)
-        .eq("status", "completed")
+        .in("status", ["approved", "paid", "completed"])
         .eq("retention_released", false);
       if (tx) setRetainedAmount(tx.reduce((acc, t) => acc + Number(t.retained_amount || 0), 0));
 

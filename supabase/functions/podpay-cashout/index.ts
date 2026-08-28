@@ -119,6 +119,7 @@ Deno.serve(async (req) => {
 
     if (!decryptedPixKey || !profile?.pix_key_type) {
       await supabase.from('withdrawals').update({
+        status: 'rejected',
         failure_code: 'pix_key_missing',
         rejection_reason: 'Usuário não possui chave PIX cadastrada',
         last_attempt_at: new Date().toISOString(),
@@ -159,6 +160,7 @@ Deno.serve(async (req) => {
 
     if (podpayAcquirer?.is_active !== true) {
       await supabase.from('withdrawals').update({
+        status: 'rejected',
         failure_code: 'acquirer_disabled',
         rejection_reason: 'PodPay está desativada no painel de adquirentes',
         last_attempt_at: new Date().toISOString(),
@@ -237,6 +239,7 @@ Deno.serve(async (req) => {
       const failureCode = (podpayData?.code || podpayData?.error_code || `podpay_${response.status}`) as string;
       console.error('PodPay cashout error:', JSON.stringify({ status: response.status, code: failureCode, message: acquirerMsg }));
       await supabase.from('withdrawals').update({
+        status: response.status >= 400 && response.status < 500 ? 'rejected' : 'pending',
         failure_code: failureCode,
         rejection_reason: acquirerMsg,
         acquirer_response: { http_status: response.status, body: podpayData },

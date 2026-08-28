@@ -1,6 +1,4 @@
-import { useEffect, useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
-import { useAuth } from "@/hooks/useAuth";
+import { useMemo, useState } from "react";
 import { useTheme } from "@/hooks/useTheme";
 import { useProfile } from "@/hooks/useProfile";
 import { NotificationPanel, useNotificationCount } from "@/components/NotificationPanel";
@@ -9,6 +7,7 @@ import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { useNavigate } from "react-router-dom";
 import { GlobalSearchDialog } from "./GlobalSearchDialog";
 import { VenxpayLogo } from "@/components/VenxpayLogo";
+import { useDashboardStats } from "@/hooks/useQueryData";
 
 const fmtCompact = (v: number) => {
  if (v >= 1000000) return `R$ ${(v / 1000000).toFixed(1)}M`;
@@ -17,24 +16,15 @@ const fmtCompact = (v: number) => {
 };
 
 export function MobileRevenueBar() {
- const { user } = useAuth();
  const { theme, toggleTheme } = useTheme();
  const { profile } = useProfile();
  const navigate = useNavigate();
  const unreadCount = useNotificationCount();
- const [revenue, setRevenue] = useState(0);
- const [loading, setLoading] = useState(true);
+ const range = useMemo(() => ({ from: new Date(0), to: new Date() }), []);
+ const { data: stats, isLoading: loading } = useDashboardStats(range.from, range.to, "month");
+ const revenue = Number(stats?.current?.revenue || 0);
  const [notifOpen, setNotifOpen] = useState(false);
  const [searchOpen, setSearchOpen] = useState(false);
-
- useEffect(() => {
- if (!user) return;
- supabase.from("transactions").select("net_amount").eq("user_id", user.id).eq("status", "completed").limit(1000)
- .then(({ data }) => {
- if (data) setRevenue(data.reduce((a, t) => a + Number(t.net_amount), 0));
- setLoading(false);
- });
- }, [user]);
 
  return (
  <>
