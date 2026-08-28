@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { AlertTriangle, Search, Plus, Save, MessageSquare, Clock, CheckCircle2, XCircle, Package, User } from "lucide-react";
@@ -45,8 +45,11 @@ export default function AdminDisputesTab({ type, title, profiles, transactions, 
  const [editNotes, setEditNotes] = useState("");
  const [editStatus, setEditStatus] = useState("");
  const [linkedTransactions, setLinkedTransactions] = useState<Map<string, Tables<"transactions">>>(new Map());
+ const transactionsRef = useRef(transactions);
 
-  const load = async () => {
+ useEffect(() => { transactionsRef.current = transactions; }, [transactions]);
+
+  const load = useCallback(async () => {
     try {
       const { data, error } = await supabase
         .from("disputes")
@@ -57,7 +60,7 @@ export default function AdminDisputesTab({ type, title, profiles, transactions, 
       if (error) throw error;
       const nextDisputes = (data || []) as unknown as Dispute[];
       setDisputes(nextDisputes);
-      const missingIds = nextDisputes.map(d => d.transaction_id).filter((id): id is string => Boolean(id) && !transactions.some(t => t.id === id));
+      const missingIds = nextDisputes.map(d => d.transaction_id).filter((id): id is string => Boolean(id) && !transactionsRef.current.some(t => t.id === id));
       if (missingIds.length > 0) {
         const { data: linked } = await supabase.from("transactions").select("*").in("id", missingIds);
         setLinkedTransactions(new Map((linked || []).map(tx => [tx.id, tx])));
@@ -68,16 +71,16 @@ export default function AdminDisputesTab({ type, title, profiles, transactions, 
       console.error("[AdminDisputesTab] load error:", e);
       toast.error("Erro ao carregar disputas");
     }
-  };
+  }, [type]);
 
-  useEffect(() => { void load(); }, [type, transactions]);
+  useEffect(() => { void load(); }, [load]);
 
   useEffect(() => {
     const channel = supabase.channel(`admin-disputes-${type}`)
       .on("postgres_changes", { event: "*", schema: "public", table: "disputes" }, () => { void load(); })
       .subscribe();
     return () => { void supabase.removeChannel(channel); };
-  }, [type, transactions]);
+  }, [type, load]);
 
   const handleCreate = async () => {
     if (!user || !form.seller_user_id || !form.amount) { toast.error("Preencha os campos obrigatórios"); return; }
