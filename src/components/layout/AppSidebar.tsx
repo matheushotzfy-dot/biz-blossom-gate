@@ -1,8 +1,17 @@
 import {
+  BadgePercent,
+  CircleUserRound,
+  Grid2X2,
   LogOut,
   Headphones,
+  LayoutDashboard,
   MessageSquare,
   ChevronRight,
+  Package,
+  TicketPercent,
+  TrendingUp,
+  Trophy,
+  Wallet,
 } from "lucide-react";
 
 import { useEffect, useMemo, useState, type ComponentType, type SVGProps } from "react";
@@ -17,16 +26,6 @@ import { prefetchRoute } from "@/lib/routePrefetch";
 
 import {
   PinIcon,
-  GlyphDashboard,
-  GlyphSales,
-  GlyphProduct,
-  GlyphCoupon,
-  GlyphWithdraw,
-  GlyphFees,
-  GlyphApps,
-  GlyphProfile,
-  GlyphTrophy,
-  GlyphSupport,
 } from "@/components/icons/ShellIcons";
 import {
   Sidebar,
@@ -94,7 +93,7 @@ function RevenueBar({ collapsed, revenue, milestone, onOpenRewards }: RevenueBar
       aria-hidden={collapsed}
       tabIndex={collapsed ? -1 : 0}
       title={`${current} de ${goal} — ${pctDisplay}% • ${milestone.current.tier}`}
-      className="sidebar-revenue-bar seller-clickable group/rev relative mt-3 block w-full overflow-hidden rounded-[16px] border border-sidebar-border/70 bg-sidebar-accent/30 px-3.5 py-3 text-left transition-colors hover:border-primary/35 hover:bg-sidebar-accent/50"
+      className="sidebar-revenue-bar seller-clickable group/rev relative mt-3 block max-h-28 w-full overflow-hidden rounded-[16px] border border-sidebar-border/70 bg-sidebar-accent/30 px-3.5 py-3 text-left hover:border-primary/35 hover:bg-sidebar-accent/50"
     >
       {/* Marca d'água da logo */}
       <span
@@ -293,16 +292,16 @@ export function AppSidebar({ pinned = true, onTogglePin, onHoverChange }: AppSid
   const milestone = useMemo(() => getMilestone(revenue), [revenue]);
 
   const items: SidebarItem[] = useMemo(() => [
-    { title: "Dashboard", url: "/dashboard", icon: GlyphDashboard, exact: true },
-    { title: "Vendas", url: "/vendas", icon: GlyphSales, exact: true },
-    { title: "Produtos", url: "/vendas/produtos", icon: GlyphProduct, count: counts.products },
-    { title: "Cupons", url: "/vendas/cupons", icon: GlyphCoupon, count: counts.coupons },
-    { title: "Financeiro", url: "/financeiro/saques", icon: GlyphWithdraw },
-    { title: "Taxas", url: "/financeiro/config", icon: GlyphFees },
-    { title: "Apps & Integrações", url: "/integracoes", icon: GlyphApps },
-    { title: "Meu Perfil & KYC", url: "/perfil", icon: GlyphProfile },
-    { title: "Premiações", url: "/premiacoes", icon: GlyphTrophy },
-    { title: "Suporte", url: "/suporte", icon: GlyphSupport, count: supportUnread },
+    { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard, exact: true },
+    { title: "Vendas", url: "/vendas", icon: TrendingUp, exact: true },
+    { title: "Produtos", url: "/vendas/produtos", icon: Package, count: counts.products },
+    { title: "Cupons", url: "/vendas/cupons", icon: TicketPercent, count: counts.coupons },
+    { title: "Financeiro", url: "/financeiro/saques", icon: Wallet },
+    { title: "Taxas", url: "/financeiro/config", icon: BadgePercent },
+    { title: "Apps & Integrações", url: "/integracoes", icon: Grid2X2 },
+    { title: "Meu Perfil & KYC", url: "/perfil", icon: CircleUserRound },
+    { title: "Premiações", url: "/premiacoes", icon: Trophy },
+    { title: "Suporte", url: "/suporte", icon: MessageSquare, count: supportUnread },
   ], [counts, supportUnread]);
 
 
