@@ -366,13 +366,9 @@ export default function Dashboard() {
 
     const granularity = chartData[0]?.granularity;
 
-    // Horário: marcas fixas a cada 4h (0h, 4h, 8h, 12h, 16h, 20h) — espaçamento
-    // perfeitamente uniforme, sem índices arredondados que geravam "15h/19h".
+    // Horário: todas as 24 horas do dia (0h até 23h), espaçamento uniforme.
     if (granularity === "hour") {
-      const step = 4;
-      return chartData
-        .filter((_, i) => i % step === 0)
-        .map((p) => p.timestamp);
+      return chartData.map((p) => p.timestamp);
     }
 
     const maxTicks = granularity === "month"
@@ -639,8 +635,14 @@ export default function Dashboard() {
                     domain={[chartData[0]?.timestamp ?? 0, chartData[chartData.length - 1]?.timestamp ?? 0]}
                     ticks={chartTicks} tickFormatter={chartTickFormatter}
                     axisLine={false} tickLine={false}
-                    tick={{ fill: "hsl(var(--muted-foreground)/0.7)", fontSize: 11, fontWeight: 500 }}
-                    dy={10} interval={0} padding={{ left: 6, right: 6 }}
+                    tick={{
+                      fill: "hsl(var(--muted-foreground)/0.7)",
+                      fontSize: chartData[0]?.granularity === "hour" ? 9 : 11,
+                      fontWeight: 500,
+                    }}
+                    dy={10} interval={0}
+                    minTickGap={chartData[0]?.granularity === "hour" ? -1 : 5}
+                    padding={{ left: 6, right: 6 }}
                   />
                   <YAxis width={52} axisLine={false} tickLine={false}
                     tick={{ fill: "hsl(var(--muted-foreground)/0.55)", fontSize: 10, fontWeight: 500 }}
