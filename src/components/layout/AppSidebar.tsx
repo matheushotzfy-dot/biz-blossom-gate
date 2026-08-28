@@ -174,12 +174,12 @@ function SidebarNavList({ items, pathname }: SidebarNavListProps) {
                     activeClassName=""
 
                     className={cn(
-                      "group/nav relative flex h-[52px] items-center gap-3 overflow-hidden rounded-[18px] px-3 text-[13.5px] outline-none",
-                      "transition-[background-color,border-color,color,transform] duration-[220ms] ease-out",
+                      "group/nav relative flex h-[56px] items-center gap-3.5 overflow-hidden rounded-[16px] px-3.5 text-[14px] outline-none",
+                      "transition-colors duration-300 ease-out",
                       "group-data-[collapsible=icon]:mx-auto group-data-[collapsible=icon]:h-11 group-data-[collapsible=icon]:w-11 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:gap-0 group-data-[collapsible=icon]:rounded-[14px] group-data-[collapsible=icon]:px-0",
                       isActive
-                        ? "border border-primary/30 bg-primary/[0.12] font-semibold text-sidebar-accent-foreground"
-                        : "border border-transparent font-medium text-sidebar-foreground/62 hover:bg-sidebar-accent/55 hover:text-sidebar-accent-foreground",
+                        ? "border border-primary/25 bg-primary/[0.10] font-semibold text-sidebar-accent-foreground"
+                        : "border border-transparent font-medium text-sidebar-foreground/62 hover:bg-sidebar-accent/45 hover:text-sidebar-accent-foreground",
                     )}
                   >
                     <span
