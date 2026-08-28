@@ -392,9 +392,9 @@ export function AppSidebar({ pinned = true, onTogglePin, onHoverChange }: AppSid
               type="button"
               onClick={handleLogout}
               aria-label="Sair da conta"
-              className="seller-clickable ml-auto flex h-8 w-8 items-center justify-center rounded-[9px] text-sidebar-foreground/50 hover:bg-destructive/10 hover:text-destructive transition-colors"
+              className="seller-clickable ml-auto flex h-9 w-9 items-center justify-center rounded-[10px] text-sidebar-foreground/45 transition-colors hover:bg-destructive/10 hover:text-destructive"
             >
-              <LogOut className="h-4 w-4" strokeWidth={2} />
+              <LogOut size={19} strokeWidth={1.7} />
             </button>
           </div>
 
@@ -403,17 +403,17 @@ export function AppSidebar({ pinned = true, onTogglePin, onHoverChange }: AppSid
             <button
               type="button"
               onClick={() => window.open("https://wa.me/5511999999999?text=Preciso%20de%20suporte%20para%20escalar!", "_blank")}
-              className="flex flex-1 items-center justify-center gap-1.5 h-8 rounded-[9px] border border-primary/30 bg-primary/[0.07] px-2 text-[11.5px] font-semibold text-primary transition-colors hover:bg-primary/[0.12]"
+              className="flex flex-1 items-center justify-center gap-2 h-9 rounded-[10px] border border-primary/25 bg-primary/[0.06] px-2 text-[11.5px] font-semibold text-primary transition-colors hover:bg-primary/[0.11]"
             >
-              <Headphones className="h-3.5 w-3.5" strokeWidth={2.5} />
+              <Headphones size={17} strokeWidth={1.8} />
               Fale conosco
             </button>
             <button
               type="button"
               onClick={() => navigate("/suporte")}
-              className="flex flex-1 items-center justify-center gap-1.5 h-8 rounded-[9px] border border-border/70 px-2 text-[11.5px] font-medium text-sidebar-foreground/70 transition-colors hover:border-border hover:text-foreground"
+              className="flex flex-1 items-center justify-center gap-2 h-9 rounded-[10px] border border-border/60 px-2 text-[11.5px] font-medium text-sidebar-foreground/65 transition-colors hover:border-border hover:text-foreground"
             >
-              <MessageSquare className="h-3.5 w-3.5" strokeWidth={2} />
+              <MessageSquare size={17} strokeWidth={1.7} />
               Central de ajuda
             </button>
           </div>
@@ -428,12 +428,12 @@ export function AppSidebar({ pinned = true, onTogglePin, onHoverChange }: AppSid
         </div>
 
         {/* Collapsed footer */}
-        <div className="hidden group-data-[collapsible=icon]:flex flex-col items-center gap-2">
+        <div className="hidden group-data-[collapsible=icon]:flex flex-col items-center gap-1">
           <button
             type="button"
             onClick={() => navigate("/perfil")}
             aria-label="Meu perfil"
-            className="relative flex h-9 w-9 items-center justify-center rounded-[10px] border border-primary/30 bg-primary/[0.07] text-[12px] font-semibold text-primary hover:bg-primary/[0.12]"
+            className="relative flex h-9 w-9 items-center justify-center rounded-[10px] border border-primary/25 bg-primary/[0.06] text-[12px] font-semibold text-primary transition-colors hover:bg-primary/[0.11]"
           >
             {userInitial}
             <span className="absolute -bottom-0.5 -right-0.5 h-2 w-2 rounded-full border-2 border-sidebar bg-success" />
@@ -442,27 +442,28 @@ export function AppSidebar({ pinned = true, onTogglePin, onHoverChange }: AppSid
             type="button"
             onClick={() => window.open("https://wa.me/5511999999999?text=Preciso%20de%20suporte%20para%20escalar!", "_blank")}
             aria-label="Fale conosco"
-            className="flex h-9 w-9 items-center justify-center rounded-[10px] border border-primary/30 bg-primary/[0.07] text-primary hover:bg-primary/[0.12]"
+            className="flex h-9 w-9 items-center justify-center rounded-[10px] text-primary transition-colors hover:bg-primary/[0.10]"
           >
-            <Headphones className="h-4 w-4" strokeWidth={2.5} />
+            <Headphones size={22} strokeWidth={1.8} />
           </button>
           <button
             type="button"
             onClick={() => navigate("/suporte")}
             aria-label="Central de ajuda"
-            className="flex h-9 w-9 items-center justify-center rounded-[10px] border border-border/70 text-sidebar-foreground/70 hover:border-border hover:text-foreground"
+            className="flex h-9 w-9 items-center justify-center rounded-[10px] text-sidebar-foreground/48 transition-colors hover:bg-sidebar-accent/40 hover:text-sidebar-accent-foreground"
           >
-            <MessageSquare className="h-4 w-4" strokeWidth={2} />
+            <MessageSquare size={22} strokeWidth={1.6} />
           </button>
           <button
             type="button"
             onClick={handleLogout}
             aria-label="Sair da conta"
-            className="flex h-9 w-9 items-center justify-center rounded-[10px] text-sidebar-foreground/50 hover:bg-destructive/10 hover:text-destructive"
+            className="flex h-9 w-9 items-center justify-center rounded-[10px] text-sidebar-foreground/48 transition-colors hover:bg-destructive/10 hover:text-destructive"
           >
-            <LogOut className="h-4 w-4" strokeWidth={2} />
+            <LogOut size={22} strokeWidth={1.6} />
           </button>
         </div>
+
       </SidebarFooter>
     </Sidebar>
   );
