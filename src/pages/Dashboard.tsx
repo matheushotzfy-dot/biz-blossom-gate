@@ -199,7 +199,7 @@ export default function Dashboard() {
   const navigate = useNavigate();
   const { user } = useAuth();
   const { profile } = useProfile();
-  const { data: transactions = [], isError: txError, refetch: refetchTx } = useTransactions();
+  const { data: transactions = [], isError: txError, refetch: refetchTx } = useTransactions(25);
   const { data: withdrawals = [] } = useWithdrawals(10);
   const { data: disputes = [] } = useDisputes();
   const { data: productsData, isError: productsError } = useProductsQuery();

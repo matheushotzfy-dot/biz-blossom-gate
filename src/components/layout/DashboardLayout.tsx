@@ -13,7 +13,7 @@ import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { useAuth } from "@/hooks/useAuth";
 import { useTheme } from "@/hooks/useTheme";
 import { ProfileProvider, useProfile } from "@/hooks/useProfile";
-import { usePrefetchDashboardData, useTransactions, useWithdrawals, useLedgerBalance } from "@/hooks/useQueryData";
+import { usePrefetchDashboardData, useWithdrawals, useLedgerBalance } from "@/hooks/useQueryData";
 import { useRealtimeSync } from "@/hooks/useRealtimeSync";
 import { useEffect, useRef, useState } from "react";
 import { useLocation } from "react-router-dom";
@@ -41,7 +41,6 @@ function DashboardLayoutInner() {
  const [searchOpen, setSearchOpen] = useState(false);
  const [notifOpen, setNotifOpen] = useState(false);
    const unreadCount = useNotificationCount();
-   const { data: transactions = [] } = useTransactions();
    const { data: withdrawals = [] } = useWithdrawals();
    const { data: ledgerBalance = 0 } = useLedgerBalance();
    const [privacyHidden, setPrivacyHidden] = useState(() => {

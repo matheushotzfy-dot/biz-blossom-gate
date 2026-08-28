@@ -1,7 +1,7 @@
 import { useState, useMemo, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
-import { useExpenses, useTransactions, useInvalidateAll } from "@/hooks/useQueryData";
+import { useExpenses, useMonthRevenue, useInvalidateAll } from "@/hooks/useQueryData";
 import {
   Plus, Trash2, TrendingDown, TrendingUp, CalendarDays,
   Target, BarChart3, Activity, Zap, Layers, Filter, Receipt,
@@ -40,7 +40,6 @@ export default function ControleGastos() {
   const { user } = useAuth();
   const { data: expensesData = [] } = useExpenses();
   const expenses = expensesData as Expense[];
-  const { data: txData = [] } = useTransactions();
   const invalidateAll = useInvalidateAll();
 
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -70,11 +69,10 @@ export default function ControleGastos() {
   }, [expenses, filterCat, filterMonth, search]);
 
   // ─── Metrics ───────────────────────────────────────────────────
-  const monthTx = useMemo(
-    () => txData.filter(t => isApprovedTransaction(t.status) && t.created_at.startsWith(filterMonth)),
-    [txData, filterMonth]
-  );
-  const monthRevenue = monthTx.reduce((a, t) => a + Number(t.net_amount), 0);
+  // Agregado no servidor: funciona com qualquer volume de vendas.
+  const { data: monthAgg } = useMonthRevenue(filterMonth);
+  const monthRevenue = monthAgg?.revenue ?? 0;
+  const monthTxCount = monthAgg?.count ?? 0;
   const totalExpenses = filtered.reduce((a, e) => a + Number(e.amount), 0);
   const lucro = monthRevenue - totalExpenses;
   const margin = monthRevenue > 0 ? ((lucro / monthRevenue) * 100) : 0;
@@ -206,7 +204,7 @@ export default function ControleGastos() {
               {fmt(monthRevenue)}
             </p>
             <p className="text-[11px] text-muted-foreground/50 mt-1">
-              {monthTx.length} vendas líquidas
+              {monthTxCount} vendas líquidas
             </p>
           </div>
           <div className="p-5">
