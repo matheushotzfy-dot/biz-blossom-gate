@@ -39,7 +39,9 @@ export function VenxpayLogo({ className, size = 32, withWordmark = false, animat
         </defs>
 
         {/* squircle plate — hairline, no glow */}
-        <rect x="2.5" y="2.5" width="59" height="59" rx="17" stroke="currentColor" strokeOpacity="0.16" />
+        {plate && (
+          <rect x="2.5" y="2.5" width="59" height="59" rx="17" stroke="currentColor" strokeOpacity="0.16" />
+        )}
 
         {/* left rail of the V (thick, structural) */}
         <path
