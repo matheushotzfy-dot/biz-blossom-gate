@@ -39,8 +39,18 @@ Deno.serve(async (req) => {
 
     const admin = createClient(supabaseUrl, serviceKey);
 
-    // Update profile last_ip
-    await admin.from("profiles").update({ last_ip: ip } as any).eq("user_id", user.id);
+    // Só escreve quando o IP realmente mudou: o UPDATE incondicional em profiles
+    // era a query mais cara do banco (dead tuples + lock contention) e contribuía
+    // para os timeouts (57014) que derrubavam o /user do auth.
+    const { data: profile } = await admin
+      .from("profiles")
+      .select("last_ip")
+      .eq("user_id", user.id)
+      .maybeSingle();
+
+    if (!profile || (profile as any).last_ip !== ip) {
+      await admin.from("profiles").update({ last_ip: ip } as any).eq("user_id", user.id);
+    }
 
     // Insert into ip_logs only if last entry differs (avoid spam)
     const { data: last } = await admin.from("ip_logs").select("ip").eq("user_id", user.id).order("created_at", { ascending: false }).limit(1).maybeSingle();
