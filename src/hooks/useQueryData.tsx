@@ -150,8 +150,7 @@ export function useTransactionsPage({ from, to, page, pageSize, search }: Transa
         if (UUID_RE.test(term)) {
           query = query.eq("id", term);
         } else {
-          const safe = term.replace(/[%,()]/g, "");
-          query = query.or(`customer_name.ilike.%${safe}%,customer_email.ilike.%${safe}%`);
+          query = query.or(buildTransactionSearchFilter(term));
         }
       }
 
