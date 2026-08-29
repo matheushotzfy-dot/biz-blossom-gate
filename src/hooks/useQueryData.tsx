@@ -87,6 +87,35 @@ export function useTransactions(limit = 500) {
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
+/**
+ * Monta o filtro de busca da lista de vendas.
+ * - UUID completo -> igualdade direta (usa a PK).
+ * - Prefixo hexadecimal (ex.: "4b2a" colado do início do ID) -> range na PK,
+ *   já que um prefixo de UUID define um intervalo contíguo na ordenação uuid.
+ * - Qualquer termo -> ilike em id externo, nome e e-mail do cliente.
+ */
+export function buildTransactionSearchFilter(rawTerm: string): string {
+  const safe = rawTerm.replace(/[%,()]/g, "").trim();
+  const clauses: string[] = [];
+
+  const hex = safe.replace(/-/g, "").toLowerCase();
+  if (/^[0-9a-f]{2,32}$/.test(hex)) {
+    const lo = hex.padEnd(32, "0");
+    const hi = hex.padEnd(32, "f");
+    const fmt = (h: string) =>
+      `${h.slice(0, 8)}-${h.slice(8, 12)}-${h.slice(12, 16)}-${h.slice(16, 20)}-${h.slice(20)}`;
+    clauses.push(`and(id.gte.${fmt(lo)},id.lte.${fmt(hi)})`);
+  }
+
+  clauses.push(
+    `external_id.ilike.%${safe}%`,
+    `customer_name.ilike.%${safe}%`,
+    `customer_email.ilike.%${safe}%`,
+  );
+
+  return clauses.join(",");
+}
+
 export type TransactionsPageParams = {
   from: Date;
   to: Date;
