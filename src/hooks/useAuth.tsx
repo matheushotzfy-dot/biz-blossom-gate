@@ -3,18 +3,33 @@ import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import type { User } from "@supabase/supabase-js";
 
+/**
+ * Dedupe do rastreio de IP em escopo de módulo: `useAuth` é montado por dezenas de
+ * componentes e cada montagem disparava um `track-user-ip` (que faz auth.getUser()
+ * + UPDATE em profiles). Isso gerava milhares de writes/segundo em profiles e
+ * timeouts (57014) no endpoint /user do auth. Agora é 1 chamada por usuário a cada
+ * 30 minutos, em toda a aba.
+ */
+const IP_TRACK_INTERVAL_MS = 30 * 60 * 1000;
+let lastTrackedUser: string | null = null;
+let lastTrackedAt = 0;
+
+function trackIp(uid: string, source: string) {
+  const now = Date.now();
+  if (lastTrackedUser === uid && now - lastTrackedAt < IP_TRACK_INTERVAL_MS) return;
+  lastTrackedUser = uid;
+  lastTrackedAt = now;
+  // Fire-and-forget — não bloqueia a UI
+  supabase.functions.invoke("track-user-ip", { body: { source } }).catch(() => {
+    // falha de tracking não pode derrubar a sessão; libera nova tentativa depois
+  });
+}
+
 export function useAuth() {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    let lastTrackedUser: string | null = null;
-    const trackIp = (uid: string, source: string) => {
-      if (lastTrackedUser === uid) return;
-      lastTrackedUser = uid;
-      // Fire-and-forget — don't block UI
-      supabase.functions.invoke("track-user-ip", { body: { source } }).catch(() => {});
-    };
 
     // Set up auth listener FIRST to avoid missing events
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
