@@ -57,10 +57,11 @@ export default function LandingPage() {
       <LandingNav onLogin={goLogin} onSignup={goSignup} />
 
       <main>
-        <HeroScene onSignup={goSignup} />
+        <HeroCinema onSignup={goSignup} onLogin={goLogin} />
+        <AlertScene />
         <EngineScene />
+        <ConsoleScene />
         <CheckoutScene />
-        <OperationScene />
         <TrustScene />
         <EcosystemScene />
         <VoicesScene />
