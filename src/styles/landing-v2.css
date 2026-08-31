@@ -1,0 +1,178 @@
+/* ==========================================================================
+   VENXPAY · Landing pública v2 — escopo isolado em .vx-land
+   "Sala de controle financeira à noite": grafite profundo, halo esmeralda,
+   tipografia editorial e grade técnica exposta.
+   Nenhuma regra vaza para o painel, admin ou área de membros.
+   ========================================================================== */
+
+.vx-land {
+  --background: 168 22% 4%;
+  --foreground: 150 30% 97%;
+  --card: 170 18% 7%;
+  --card-foreground: 150 30% 97%;
+  --muted: 170 14% 12%;
+  --muted-foreground: 160 10% 60%;
+  --border: 168 12% 16%;
+  --input: 168 12% 16%;
+  --ring: 156 82% 46%;
+  --primary: 156 82% 46%;
+  --primary-foreground: 168 30% 5%;
+  --secondary: 170 14% 12%;
+  --secondary-foreground: 150 30% 97%;
+  --accent: 156 82% 46%;
+  --radius: 4px;
+
+  background-color: hsl(var(--background));
+  color: hsl(var(--foreground));
+  font-family: "Manrope", system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* o app interno trava o scroll do documento; a landing precisa dele liberado */
+html.vx-scroll,
+html.vx-scroll body {
+  height: auto !important;
+  min-height: 100% !important;
+  overflow-x: hidden !important;
+  overscroll-behavior-y: auto !important;
+}
+html.vx-scroll {
+  overflow-y: auto !important;
+}
+html.vx-scroll body {
+  overflow: visible !important;
+}
+
+.vx-land h1,
+.vx-land h2,
+.vx-land h3 {
+  font-family: "Sora", system-ui, sans-serif !important;
+  letter-spacing: -0.04em !important;
+  line-height: 0.96 !important;
+  text-wrap: balance;
+}
+.vx-land section {
+  position: relative;
+  scroll-margin-top: 84px;
+}
+.vx-land .vx-num {
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.02em;
+}
+.vx-land .vx-mono {
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.28em;
+  color: hsl(var(--muted-foreground));
+}
+.vx-land .vx-mono-on {
+  color: hsl(var(--primary));
+}
+
+/* ------------------------------------------------------------- superfícies */
+.vx-grid {
+  background-image:
+    linear-gradient(hsl(var(--border) / 0.7) 1px, transparent 1px),
+    linear-gradient(90deg, hsl(var(--border) / 0.7) 1px, transparent 1px);
+  background-size: 64px 64px;
+}
+.vx-grid-fine {
+  background-image:
+    linear-gradient(hsl(var(--border) / 0.45) 1px, transparent 1px),
+    linear-gradient(90deg, hsl(var(--border) / 0.45) 1px, transparent 1px);
+  background-size: 16px 16px;
+}
+.vx-fade-edges {
+  -webkit-mask-image: radial-gradient(ellipse 70% 60% at 50% 40%, #000 20%, transparent 78%);
+  mask-image: radial-gradient(ellipse 70% 60% at 50% 40%, #000 20%, transparent 78%);
+}
+.vx-halo {
+  background: radial-gradient(
+    ellipse 55% 45% at 50% 45%,
+    hsl(var(--primary) / 0.22),
+    hsl(var(--primary) / 0.05) 45%,
+    transparent 72%
+  );
+  filter: blur(4px);
+}
+.vx-rule {
+  height: 1px;
+  background: hsl(var(--border));
+}
+
+/* ---------------------------------------------------------------- controles */
+.vx-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  height: 50px;
+  padding: 0 26px;
+  border-radius: 3px;
+  background: hsl(var(--primary));
+  color: hsl(var(--primary-foreground));
+  font-size: 14.5px;
+  font-weight: 800;
+  border: 1px solid hsl(var(--primary));
+  transition: transform 0.22s cubic-bezier(0.16, 1, 0.3, 1), background-color 0.22s ease;
+}
+.vx-btn:hover {
+  background: hsl(var(--primary) / 0.88);
+  transform: translateY(-1px);
+}
+.vx-btn:active {
+  transform: translateY(0) scale(0.99);
+}
+.vx-btn-ghost {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  height: 50px;
+  padding: 0 22px;
+  border-radius: 3px;
+  border: 1px solid hsl(var(--border));
+  color: hsl(var(--foreground));
+  font-size: 14.5px;
+  font-weight: 700;
+  transition: border-color 0.22s ease, color 0.22s ease;
+}
+.vx-btn-ghost:hover {
+  border-color: hsl(var(--primary) / 0.6);
+  color: hsl(var(--primary));
+}
+
+/* --------------------------------------------------------------- estruturas */
+.vx-frame {
+  border: 1px solid hsl(var(--border));
+  background: hsl(var(--card));
+}
+.vx-cv {
+  content-visibility: auto;
+  contain-intrinsic-size: 900px;
+}
+.vx-line-clip {
+  display: block;
+  overflow: hidden;
+}
+
+/* faixa de notificações */
+.vx-strip {
+  display: flex;
+  width: max-content;
+  gap: 14px;
+  animation: vx-strip-move 46s linear infinite;
+}
+@keyframes vx-strip-move {
+  from { transform: translate3d(0, 0, 0); }
+  to { transform: translate3d(-50%, 0, 0); }
+}
+.vx-strip-wrap:hover .vx-strip {
+  animation-play-state: paused;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .vx-strip { animation: none; }
+}

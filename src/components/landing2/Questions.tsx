@@ -1,24 +1,22 @@
 /**
- * FaqScene — perguntas frequentes com abertura controlada e animação de altura.
+ * Questions — acordeão minimalista de linhas.
  */
 import { useState } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
-import { Plus } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { SectionHead } from "./parts";
 
-export const FAQ_ITEMS = [
+export const QA = [
   {
     q: "Quanto tempo leva para o dinheiro ficar disponível?",
     a: "Vendas no Pix ficam disponíveis no mesmo dia. Cartão segue o prazo padrão de recebíveis, com antecipação opcional direto no painel.",
   },
   {
     q: "Preciso ter CNPJ para vender?",
-    a: "Não. Pessoa física pode operar normalmente. O CNPJ é opcional e traz benefícios adicionais na emissão de nota fiscal.",
+    a: "Não. Pessoa física opera normalmente. O CNPJ é opcional e traz benefícios adicionais na emissão de nota fiscal.",
   },
   {
     q: "Como funciona o split com afiliados e coprodutores?",
-    a: "Você define os percentuais uma vez no produto. No momento da aprovação, cada parte é creditada automaticamente no próprio saldo.",
+    a: "Você define os percentuais uma vez no produto. Na aprovação, cada parte é creditada automaticamente no próprio saldo.",
   },
   {
     q: "Existe mensalidade ou taxa de adesão?",
@@ -34,33 +32,45 @@ export const FAQ_ITEMS = [
   },
 ];
 
-export function FaqScene() {
+export function Questions() {
   const [open, setOpen] = useState<number | null>(0);
   const reduce = useReducedMotion();
 
   return (
-    <section id="faq" className="venx-cv relative py-28 sm:py-36">
-      <div className="mx-auto grid max-w-6xl gap-12 px-5 lg:grid-cols-[0.8fr_1.2fr] lg:gap-16">
-        <SectionHead kicker="Dúvidas" title={<>Respostas diretas, sem letra miúda</>} />
+    <section id="perguntas" className="vx-cv relative py-28 sm:py-36">
+      <div className="mx-auto max-w-[1280px] px-5">
+        <span className="vx-mono">perguntas</span>
+        <h2 className="mt-5 max-w-[16ch] text-[38px] font-extrabold text-foreground sm:text-[58px]">
+          Respostas diretas, sem letra miúda
+        </h2>
 
-        <div className="divide-y divide-border border-y border-border">
-          {FAQ_ITEMS.map((item, i) => {
+        <div className="mt-14 border-t border-border">
+          {QA.map((item, i) => {
             const isOpen = open === i;
             return (
-              <div key={item.q}>
+              <div key={item.q} className="border-b border-border">
                 <button
                   type="button"
                   aria-expanded={isOpen}
                   onClick={() => setOpen(isOpen ? null : i)}
-                  className="flex w-full items-start justify-between gap-6 py-6 text-left transition-colors duration-300 hover:text-primary"
+                  className="flex w-full items-center justify-between gap-8 py-6 text-left"
                 >
-                  <span className="text-[15.5px] font-bold text-foreground">{item.q}</span>
-                  <Plus
+                  <span
                     className={cn(
-                      "mt-0.5 h-4.5 w-4.5 shrink-0 text-primary transition-transform duration-400",
-                      isOpen && "rotate-45",
+                      "text-[16px] font-bold transition-colors duration-300 sm:text-[19px]",
+                      isOpen ? "text-primary" : "text-foreground",
                     )}
-                  />
+                  >
+                    {item.q}
+                  </span>
+                  <span
+                    className={cn(
+                      "vx-mono shrink-0 transition-colors duration-300",
+                      isOpen && "vx-mono-on",
+                    )}
+                  >
+                    {isOpen ? "fechar" : "abrir"}
+                  </span>
                 </button>
                 <AnimatePresence initial={false}>
                   {isOpen && (
@@ -68,10 +78,10 @@ export function FaqScene() {
                       initial={reduce ? false : { height: 0, opacity: 0 }}
                       animate={{ height: "auto", opacity: 1 }}
                       exit={reduce ? undefined : { height: 0, opacity: 0 }}
-                      transition={{ duration: 0.38, ease: [0.16, 1, 0.3, 1] }}
+                      transition={{ duration: 0.36, ease: [0.16, 1, 0.3, 1] }}
                       className="overflow-hidden"
                     >
-                      <p className="max-w-2xl pb-6 text-[14px] leading-[1.75] text-muted-foreground">{item.a}</p>
+                      <p className="max-w-[70ch] pb-7 text-[14px] leading-[1.8] text-muted-foreground">{item.a}</p>
                     </motion.div>
                   )}
                 </AnimatePresence>
