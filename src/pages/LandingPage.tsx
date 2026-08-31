@@ -33,8 +33,15 @@ const FAQ_JSONLD = {
 export default function LandingPage() {
   const navigate = useNavigate();
 
+  // O app interno trava o scroll no <body>; a landing precisa dele liberado.
+  useEffect(() => {
+    document.documentElement.classList.add("venx-scroll");
+    return () => document.documentElement.classList.remove("venx-scroll");
+  }, []);
+
   const goSignup = useCallback(() => navigate("/auth?mode=signup"), [navigate]);
   const goLogin = useCallback(() => navigate("/auth"), [navigate]);
+
 
   return (
     <div id="topo" className="venx relative min-h-dvh overflow-x-hidden bg-background text-foreground">
