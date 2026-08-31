@@ -44,7 +44,7 @@ export default function LandingPage() {
 
 
   return (
-    <div id="topo" className="venx relative min-h-dvh overflow-x-hidden bg-background text-foreground">
+    <div id="topo" className="venx relative min-h-dvh bg-background text-foreground">
       <Seo
         title="VENXPAY — infraestrutura de pagamentos para produtos digitais"
         description="Checkout de alta conversão, liquidação no mesmo dia, área de membros, afiliados e API. A plataforma completa para vender produtos digitais no Brasil."
