@@ -300,3 +300,96 @@ html.venx-scroll body {
     transition-duration: 0.001ms !important;
   }
 }
+
+/* ------------------------------------------------ palco cinematográfico */
+.venx-persp {
+  perspective: 1600px;
+  transform-style: preserve-3d;
+}
+
+.venx-stage {
+  position: relative;
+  border-radius: 26px;
+}
+.venx-stage::before {
+  content: "";
+  position: absolute;
+  inset: -14% -6% -22% -6%;
+  border-radius: 40px;
+  background: radial-gradient(ellipse at 50% 40%, hsl(var(--primary) / 0.16), transparent 70%);
+  pointer-events: none;
+}
+
+/* janela do gateway (réplica do painel real) */
+.venx-window {
+  position: relative;
+  overflow: hidden;
+  border: 1px solid hsl(var(--border));
+  border-radius: 22px;
+  background: hsl(175 28% 4%);
+  box-shadow: 0 80px 140px -70px hsl(var(--primary) / 0.5),
+    0 30px 70px -50px hsl(0 0% 0% / 0.9);
+}
+
+/* iPhone */
+.venx-phone {
+  position: relative;
+  aspect-ratio: 9 / 19.5;
+  width: 100%;
+  padding: 9px;
+  border-radius: 46px;
+  background: linear-gradient(160deg, hsl(170 8% 26%), hsl(170 10% 9%) 45%, hsl(170 8% 22%));
+  box-shadow: 0 50px 110px -50px hsl(0 0% 0% / 0.95), 0 0 0 1px hsl(0 0% 100% / 0.06);
+}
+.venx-phone-screen {
+  position: relative;
+  height: 100%;
+  overflow: hidden;
+  border-radius: 38px;
+  background:
+    radial-gradient(ellipse 80% 55% at 50% 8%, hsl(158 60% 22% / 0.65), transparent 70%),
+    linear-gradient(180deg, hsl(176 40% 7%), hsl(175 35% 3%));
+}
+.venx-phone-island {
+  position: absolute;
+  top: 10px;
+  left: 50%;
+  width: 33%;
+  height: 20px;
+  transform: translateX(-50%);
+  border-radius: 999px;
+  background: hsl(0 0% 0%);
+}
+.venx-phone-bar {
+  position: absolute;
+  bottom: 8px;
+  left: 50%;
+  width: 34%;
+  height: 4px;
+  transform: translateX(-50%);
+  border-radius: 999px;
+  background: hsl(0 0% 100% / 0.55);
+}
+
+/* notificação estilo iOS */
+.venx-notif {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 10px 11px;
+  border-radius: 18px;
+  border: 1px solid hsl(0 0% 100% / 0.1);
+  background: hsl(175 22% 10% / 0.86);
+  backdrop-filter: blur(14px);
+}
+.venx-notif-icon {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  flex-shrink: 0;
+  border-radius: 10px;
+  border: 1px solid hsl(var(--primary) / 0.35);
+  background: hsl(var(--primary) / 0.12);
+  color: hsl(var(--primary));
+}

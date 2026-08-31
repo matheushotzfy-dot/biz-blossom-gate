@@ -8,10 +8,11 @@ import { useCallback, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Seo } from "@/components/Seo";
 import { LandingNav } from "@/components/landing/LandingNav";
-import { HeroScene } from "@/components/landing/HeroScene";
+import { HeroCinema } from "@/components/landing/HeroCinema";
+import { AlertScene } from "@/components/landing/AlertScene";
 import { EngineScene } from "@/components/landing/EngineScene";
+import { ConsoleScene } from "@/components/landing/ConsoleScene";
 import { CheckoutScene } from "@/components/landing/CheckoutScene";
-import { OperationScene } from "@/components/landing/OperationScene";
 import { TrustScene } from "@/components/landing/TrustScene";
 import { EcosystemScene } from "@/components/landing/EcosystemScene";
 import { VoicesScene } from "@/components/landing/VoicesScene";
@@ -56,10 +57,11 @@ export default function LandingPage() {
       <LandingNav onLogin={goLogin} onSignup={goSignup} />
 
       <main>
-        <HeroScene onSignup={goSignup} />
+        <HeroCinema onSignup={goSignup} onLogin={goLogin} />
+        <AlertScene />
         <EngineScene />
+        <ConsoleScene />
         <CheckoutScene />
-        <OperationScene />
         <TrustScene />
         <EcosystemScene />
         <VoicesScene />
