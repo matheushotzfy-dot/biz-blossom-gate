@@ -41,9 +41,10 @@ export default function LandingPage() {
       <Seo
         title="VENXPAY — infraestrutura de pagamentos para produtos digitais"
         description="Checkout de alta conversão, liquidação no mesmo dia, área de membros, afiliados e API. A plataforma completa para vender produtos digitais no Brasil."
-        canonical="https://www.hotzfy.com.br/"
+        path="/"
+        jsonLd={FAQ_JSONLD}
       />
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(FAQ_JSONLD) }} />
+
 
       <LandingNav onLogin={goLogin} onSignup={goSignup} />
 
