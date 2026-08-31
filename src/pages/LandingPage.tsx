@@ -4,7 +4,7 @@
  * Composição de cenas independentes, todas apresentacionais: nenhuma consulta a
  * banco, nenhuma regra de negócio. A navegação leva para /auth (login/cadastro).
  */
-import { useCallback } from "react";
+import { useCallback, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Seo } from "@/components/Seo";
 import { LandingNav } from "@/components/landing/LandingNav";
