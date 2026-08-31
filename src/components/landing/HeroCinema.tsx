@@ -97,7 +97,7 @@ export function HeroCinema({ onSignup, onLogin }: { onSignup: () => void; onLogi
             initial={reduce ? false : { opacity: 0, y: 70, x: 24 }}
             animate={{ opacity: 1, y: 0, x: 0 }}
             transition={{ duration: 1.1, delay: 0.85, ease: [0.16, 1, 0.3, 1] }}
-            className="pointer-events-none absolute -bottom-10 right-2 hidden w-[248px] lg:block"
+            className="pointer-events-none absolute -bottom-16 -right-4 hidden w-[236px] xl:block"
           >
             <PhoneApprovals />
           </motion.div>
