@@ -28,14 +28,23 @@
   -webkit-font-smoothing: antialiased;
 }
 
-html.venx-scroll,
-html.venx-scroll body {
+html.venx-scroll {
   height: auto !important;
   min-height: 100% !important;
   overflow-x: hidden !important;
   overflow-y: auto !important;
   overscroll-behavior-y: auto !important;
 }
+
+/* o body precisa ficar com overflow visível: qualquer clipping aqui quebra o
+   position: sticky das cenas, já que o scroller é o próprio <html>. */
+html.venx-scroll body {
+  height: auto !important;
+  min-height: 100% !important;
+  overflow: visible !important;
+  overscroll-behavior-y: auto !important;
+}
+
 
 .venx h1,
 .venx h2,
