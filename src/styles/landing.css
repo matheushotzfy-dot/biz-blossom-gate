@@ -1,0 +1,302 @@
+/* ==========================================================================
+   VENXPAY · Landing pública (escopo isolado em .venx)
+   Nenhuma regra aqui vaza para o painel, admin ou área de membros.
+   ========================================================================== */
+
+.venx {
+  /* tokens locais — sobrescrevem os do app apenas dentro da landing */
+  --background: 175 30% 3.5%;
+  --foreground: 150 40% 97%;
+  --card: 176 24% 6.5%;
+  --card-foreground: 150 40% 97%;
+  --muted: 174 18% 11%;
+  --muted-foreground: 165 12% 62%;
+  --border: 170 16% 15%;
+  --input: 170 16% 15%;
+  --ring: 158 84% 48%;
+  --primary: 158 84% 48%;
+  --primary-foreground: 175 40% 4%;
+  --secondary: 174 18% 11%;
+  --secondary-foreground: 150 40% 97%;
+  --accent: 200 70% 55%;
+  --steel: 202 62% 62%;
+  --radius: 18px;
+
+  background-color: hsl(var(--background));
+  color: hsl(var(--foreground));
+  font-family: "Manrope", system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+html.venx-scroll {
+  height: auto !important;
+  min-height: 100% !important;
+  overflow-x: hidden !important;
+  overflow-y: auto !important;
+  overscroll-behavior-y: auto !important;
+}
+
+/* o body precisa ficar com overflow visível: qualquer clipping aqui quebra o
+   position: sticky das cenas, já que o scroller é o próprio <html>. */
+html.venx-scroll body {
+  height: auto !important;
+  min-height: 100% !important;
+  overflow: visible !important;
+  overscroll-behavior-y: auto !important;
+}
+
+
+.venx h1,
+.venx h2,
+.venx h3 {
+  font-family: "Sora", system-ui, sans-serif !important;
+  letter-spacing: -0.035em !important;
+  line-height: 1.03 !important;
+  text-wrap: balance;
+}
+.venx p,
+.venx span,
+.venx a,
+.venx button,
+.venx li {
+  letter-spacing: 0 !important;
+}
+.venx section {
+  scroll-margin-top: 90px;
+  position: relative;
+}
+.venx .num {
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.01em !important;
+}
+
+/* --------------------------------------------------------------- primitivos */
+.venx-kicker {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  font-size: 10.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.22em !important;
+  color: hsl(var(--primary));
+}
+.venx-kicker::before {
+  content: "";
+  width: 22px;
+  height: 1px;
+  background: hsl(var(--primary) / 0.7);
+}
+
+.venx-hairline {
+  height: 1px;
+  background: linear-gradient(90deg, transparent, hsl(var(--border)), transparent);
+}
+
+.venx-panel {
+  border: 1px solid hsl(var(--border));
+  background: hsl(var(--card));
+  border-radius: var(--radius);
+}
+
+.venx-mesh {
+  background-image:
+    linear-gradient(hsl(var(--border) / 0.55) 1px, transparent 1px),
+    linear-gradient(90deg, hsl(var(--border) / 0.55) 1px, transparent 1px);
+  background-size: 88px 88px;
+  -webkit-mask-image: radial-gradient(ellipse 80% 60% at 50% 30%, #000, transparent 75%);
+  mask-image: radial-gradient(ellipse 80% 60% at 50% 30%, #000, transparent 75%);
+  opacity: 0.5;
+}
+
+.venx-vignette {
+  background:
+    radial-gradient(ellipse 60% 45% at 50% 0%, hsl(var(--primary) / 0.14), transparent 70%),
+    radial-gradient(ellipse 50% 40% at 85% 65%, hsl(var(--steel) / 0.08), transparent 70%);
+}
+
+.venx-grain::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.16;
+  mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)' opacity='0.5'/%3E%3C/svg%3E");
+}
+
+/* revelação de título por máscara */
+.venx-line {
+  display: block;
+  overflow: hidden;
+  padding-bottom: 0.08em;
+}
+
+/* botão principal */
+.venx-cta {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  height: 54px;
+  padding: 0 26px;
+  border-radius: 999px;
+  background: hsl(var(--primary));
+  color: hsl(var(--primary-foreground));
+  font-weight: 800;
+  font-size: 14.5px;
+  overflow: hidden;
+  transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.35s;
+  box-shadow: 0 18px 45px -22px hsl(var(--primary) / 0.9);
+}
+.venx-cta::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  transform: translateX(-120%);
+  background: linear-gradient(90deg, transparent, hsl(0 0% 100% / 0.4), transparent);
+  transition: transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.venx-cta:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 26px 60px -24px hsl(var(--primary) / 1);
+}
+.venx-cta:hover::after {
+  transform: translateX(120%);
+}
+.venx-cta:active {
+  transform: translateY(0) scale(0.985);
+}
+
+.venx-ghost {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  height: 54px;
+  padding: 0 22px;
+  border-radius: 999px;
+  border: 1px solid hsl(var(--border));
+  color: hsl(var(--foreground));
+  font-weight: 700;
+  font-size: 14.5px;
+  transition: border-color 0.3s, background-color 0.3s, transform 0.3s;
+}
+.venx-ghost:hover {
+  border-color: hsl(var(--primary) / 0.55);
+  background: hsl(var(--primary) / 0.06);
+  transform: translateY(-2px);
+}
+
+/* marca */
+.venx-mark {
+  display: inline-grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 10px;
+  background: linear-gradient(150deg, hsl(var(--primary)), hsl(168 80% 34%));
+  color: hsl(var(--primary-foreground));
+  font-family: "Sora", sans-serif;
+  font-weight: 800;
+  font-size: 15px;
+}
+
+/* trilha do motor de pagamento */
+.venx-rail {
+  position: relative;
+  height: 1px;
+  background: hsl(var(--border));
+  overflow: visible;
+}
+.venx-rail-fill {
+  position: absolute;
+  inset: 0 auto 0 0;
+  height: 1px;
+  background: linear-gradient(90deg, hsl(var(--primary) / 0.2), hsl(var(--primary)));
+  transform-origin: left center;
+}
+
+.venx-node {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 46px;
+  height: 46px;
+  border-radius: 14px;
+  border: 1px solid hsl(var(--border));
+  background: hsl(var(--card));
+  transition: border-color 0.4s, color 0.4s, background-color 0.4s, transform 0.4s;
+  color: hsl(var(--muted-foreground));
+}
+.venx-node[data-on="true"] {
+  border-color: hsl(var(--primary) / 0.7);
+  color: hsl(var(--primary));
+  background: hsl(var(--primary) / 0.1);
+  transform: translateY(-3px);
+}
+
+/* dashboard/checkout mocks */
+.venx-glass {
+  border: 1px solid hsl(var(--border));
+  background: hsl(176 25% 5.5%);
+  border-radius: 22px;
+  box-shadow: 0 60px 120px -70px hsl(var(--primary) / 0.55);
+}
+
+.venx-row-in {
+  animation: venxRowIn 0.55s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+@keyframes venxRowIn {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.venx-pulse-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: hsl(var(--primary));
+  box-shadow: 0 0 0 0 hsl(var(--primary) / 0.5);
+  animation: venxPulse 2.2s ease-out infinite;
+}
+@keyframes venxPulse {
+  70% { box-shadow: 0 0 0 10px hsl(var(--primary) / 0); }
+  100% { box-shadow: 0 0 0 0 hsl(var(--primary) / 0); }
+}
+
+.venx-orbit {
+  border-radius: 999px;
+  border: 1px dashed hsl(var(--primary) / 0.18);
+}
+
+.venx-marquee {
+  display: flex;
+  gap: 56px;
+  width: max-content;
+  animation: venxMarquee 38s linear infinite;
+}
+@keyframes venxMarquee {
+  to { transform: translateX(-50%); }
+}
+.venx-marquee-wrap:hover .venx-marquee {
+  animation-play-state: paused;
+}
+
+/* seções fora da viewport não pagam layout/paint */
+.venx-cv {
+  content-visibility: auto;
+  contain-intrinsic-size: 900px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .venx *,
+  .venx *::before,
+  .venx *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+}
