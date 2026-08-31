@@ -32,7 +32,7 @@ export function EngineScene() {
   });
 
   return (
-    <section id="motor" ref={ref} className="relative h-[380vh]">
+    <section id="motor" ref={ref} className="relative h-[240vh]">
       <div className="sticky top-0 flex min-h-screen items-center overflow-hidden py-20">
         <div aria-hidden className="pointer-events-none absolute inset-0 venx-mesh opacity-40" />
         <div className="mx-auto w-full max-w-6xl px-5">
