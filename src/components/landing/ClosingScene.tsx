@@ -18,7 +18,7 @@ const FOOTER_LINKS: { title: string; items: { label: string; to: string }[] }[] 
   {
     title: "Recursos",
     items: [
-      { label: "Documentação da API", to: "/docs" },
+      { label: "Documentação da API", to: "/documentacao" },
       { label: "Status dos serviços", to: "/status" },
       { label: "Dúvidas frequentes", to: "#faq" },
     ],
@@ -26,8 +26,8 @@ const FOOTER_LINKS: { title: string; items: { label: string; to: string }[] }[] 
   {
     title: "Legal",
     items: [
-      { label: "Termos de uso", to: "/termos" },
-      { label: "Política de privacidade", to: "/privacidade" },
+      { label: "Termos de uso", to: "/termos-de-uso" },
+      { label: "Política de privacidade", to: "/politica-de-privacidade" },
     ],
   },
 ];
