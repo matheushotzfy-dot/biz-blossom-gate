@@ -28,7 +28,7 @@ export function ConsoleScene() {
   const reduce = useReducedMotion();
   const [active, setActive] = useState(0);
   const { scrollYProgress } = useScroll({ target: ref, offset: ["start start", "end end"] });
-  const rotate = useTransform(scrollYProgress, [0, 1], reduce ? [0, 0] : [7, -3]);
+  const rotateY = useTransform(scrollYProgress, [0, 1], reduce ? [0, 0] : [10, -4]);
   const scale = useTransform(scrollYProgress, [0, 0.4, 1], reduce ? [1, 1, 1] : [0.94, 1, 0.97]);
 
   useMotionValueEvent(scrollYProgress, "change", (v) => {
@@ -76,7 +76,7 @@ export function ConsoleScene() {
             </div>
           </div>
 
-          <motion.div style={{ rotate, scale }} className="venx-stage">
+          <motion.div style={{ rotateY, scale }} className="venx-stage venx-persp">
             <GatewayWindow />
           </motion.div>
         </div>
