@@ -28,7 +28,7 @@ const NAV = [
   { icon: Puzzle, label: "Integrações" },
   { icon: Trophy, label: "Premiações" },
   { icon: LifeBuoy, label: "Suporte" },
-] as const;
+] satisfies { icon: typeof LayoutGrid; label: string; active?: boolean }[];
 
 const NAMES = [
   "Ana Beatriz S.", "Lucas Moreira", "Fernanda Lima", "Ricardo Alves",
