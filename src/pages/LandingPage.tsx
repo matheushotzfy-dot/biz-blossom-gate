@@ -1,30 +1,29 @@
 /**
- * LandingPage — página pública da VENXPAY.
+ * LandingPage — página pública da VENXPAY (v2).
  *
  * Composição de cenas independentes, todas apresentacionais: nenhuma consulta a
- * banco, nenhuma regra de negócio. A navegação leva para /auth (login/cadastro).
+ * banco, nenhuma regra de negócio. A navegação leva para /auth.
  */
 import { useCallback, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Seo } from "@/components/Seo";
-import { LandingNav } from "@/components/landing/LandingNav";
-import { HeroCinema } from "@/components/landing/HeroCinema";
-import { AlertScene } from "@/components/landing/AlertScene";
-import { EngineScene } from "@/components/landing/EngineScene";
-import { ConsoleScene } from "@/components/landing/ConsoleScene";
-import { CheckoutScene } from "@/components/landing/CheckoutScene";
-import { TrustScene } from "@/components/landing/TrustScene";
-import { EcosystemScene } from "@/components/landing/EcosystemScene";
-import { VoicesScene } from "@/components/landing/VoicesScene";
-import { OfferScene } from "@/components/landing/OfferScene";
-import { FaqScene, FAQ_ITEMS } from "@/components/landing/FaqScene";
-import { ClosingScene } from "@/components/landing/ClosingScene";
-import "@/styles/landing.css";
+import { TopBar } from "@/components/landing2/TopBar";
+import { Opening } from "@/components/landing2/Opening";
+import { ApprovalStrip } from "@/components/landing2/ApprovalStrip";
+import { MoneyTimeline } from "@/components/landing2/MoneyTimeline";
+import { RealScreen } from "@/components/landing2/RealScreen";
+import { CheckoutDemo } from "@/components/landing2/CheckoutDemo";
+import { Included } from "@/components/landing2/Included";
+import { Integrations } from "@/components/landing2/Integrations";
+import { Terms } from "@/components/landing2/Terms";
+import { Questions, QA } from "@/components/landing2/Questions";
+import { Closing } from "@/components/landing2/Closing";
+import "@/styles/landing-v2.css";
 
 const FAQ_JSONLD = {
   "@context": "https://schema.org",
   "@type": "FAQPage",
-  mainEntity: FAQ_ITEMS.map((item) => ({
+  mainEntity: QA.map((item) => ({
     "@type": "Question",
     name: item.q,
     acceptedAnswer: { "@type": "Answer", text: item.a },
@@ -34,40 +33,37 @@ const FAQ_JSONLD = {
 export default function LandingPage() {
   const navigate = useNavigate();
 
-  // O app interno trava o scroll no <body>; a landing precisa dele liberado.
+  // O app interno trava o scroll no documento; a landing precisa dele liberado.
   useEffect(() => {
-    document.documentElement.classList.add("venx-scroll");
-    return () => document.documentElement.classList.remove("venx-scroll");
+    document.documentElement.classList.add("vx-scroll");
+    return () => document.documentElement.classList.remove("vx-scroll");
   }, []);
 
   const goSignup = useCallback(() => navigate("/auth?mode=signup"), [navigate]);
   const goLogin = useCallback(() => navigate("/auth"), [navigate]);
 
-
   return (
-    <div id="topo" className="venx relative min-h-dvh bg-background text-foreground">
+    <div id="topo" className="vx-land relative min-h-dvh bg-background text-foreground">
       <Seo
-        title="VENXPAY — infraestrutura de pagamentos para produtos digitais"
-        description="Checkout de alta conversão, liquidação no mesmo dia, área de membros, afiliados e API. A plataforma completa para vender produtos digitais no Brasil."
+        title="VENXPAY — o dinheiro entra e não some no caminho"
+        description="Checkout, antifraude, split e liquidação no mesmo núcleo. Saque quando quiser, área de membros, afiliados e API para vender produtos digitais no Brasil."
         path="/"
         jsonLd={FAQ_JSONLD}
       />
 
-
-      <LandingNav onLogin={goLogin} onSignup={goSignup} />
+      <TopBar onLogin={goLogin} onSignup={goSignup} />
 
       <main>
-        <HeroCinema onSignup={goSignup} onLogin={goLogin} />
-        <AlertScene />
-        <EngineScene />
-        <ConsoleScene />
-        <CheckoutScene />
-        <TrustScene />
-        <EcosystemScene />
-        <VoicesScene />
-        <OfferScene onSignup={goSignup} />
-        <FaqScene />
-        <ClosingScene onSignup={goSignup} />
+        <Opening onSignup={goSignup} onLogin={goLogin} />
+        <ApprovalStrip />
+        <MoneyTimeline />
+        <RealScreen />
+        <CheckoutDemo />
+        <Included />
+        <Integrations />
+        <Terms onSignup={goSignup} />
+        <Questions />
+        <Closing onSignup={goSignup} />
       </main>
     </div>
   );
