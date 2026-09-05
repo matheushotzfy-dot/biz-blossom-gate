@@ -22,6 +22,7 @@ import { AuthAside } from "@/components/auth/AuthAside";
 import { VenxpayLogo } from "@/components/VenxpayLogo";
 import { Seo } from "@/components/Seo";
 import { friendlyError } from "@/lib/friendlyError";
+import authHeroPerson from "@/assets/auth-hero-person.jpg";
 
 /* ─────────────────── Document helpers ─────────────────── */
 function formatDocument(value: string): string {
@@ -339,7 +340,7 @@ export default function Auth() {
     : STEP_TITLES[step - 1];
 
   return (
-    <div className="min-h-screen bg-background text-foreground">
+    <div className="h-[100dvh] overflow-y-auto bg-background text-foreground">
       <Seo
         title={isLogin ? "Entrar — VENXPAY" : "Criar conta grátis — VENXPAY"}
         description={isLogin ? "Acesse seu painel VENXPAY: produtos, vendas, saques e área de membros em um só lugar." : "Crie sua conta VENXPAY gratuitamente e comece a vender infoprodutos com checkout de alta conversão."}
@@ -353,6 +354,21 @@ export default function Auth() {
             <VenxpayLogo size={32} plate={false} />
             <span className="text-[18px] font-heading font-semibold text-foreground">VENXPAY</span>
           </a>
+
+          {!isLogin && (
+            <div className="relative mt-7 h-28 overflow-hidden rounded-2xl border border-border/60 lg:hidden">
+              <img src={authHeroPerson} alt="Seller acompanhando vendas pela VENXPAY" className="h-full w-full object-cover object-[center_32%]" />
+              <div className="absolute inset-0 bg-gradient-to-r from-background/80 via-background/15 to-transparent" />
+              <div className="absolute inset-y-0 left-4 flex items-center">
+                <div>
+                  <span className="inline-flex items-center gap-1.5 text-[11px] font-semibold text-primary">
+                    <span className="h-1.5 w-1.5 rounded-full bg-primary" /> Operação ao vivo
+                  </span>
+                  <p className="mt-1 max-w-[170px] font-heading text-[16px] font-semibold leading-tight text-foreground">Venda aprovada em tempo real.</p>
+                </div>
+              </div>
+            </div>
+          )}
 
           <div className="mx-auto w-full max-w-[430px] py-8 sm:py-10">
             <AnimatePresence mode="wait">
