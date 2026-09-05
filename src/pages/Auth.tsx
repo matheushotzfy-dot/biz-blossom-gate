@@ -22,6 +22,7 @@ import { AuthAside } from "@/components/auth/AuthAside";
 import { VenxpayLogo } from "@/components/VenxpayLogo";
 import { Seo } from "@/components/Seo";
 import { friendlyError } from "@/lib/friendlyError";
+import authHeroPerson from "@/assets/auth-hero-person.jpg";
 
 /* ─────────────────── Document helpers ─────────────────── */
 function formatDocument(value: string): string {
@@ -331,30 +332,45 @@ export default function Auth() {
   };
 
   const inputCls =
-    "h-[52px] rounded-[10px] border-border/70 bg-transparent px-4 text-[15px] text-foreground placeholder:text-muted-foreground/50 focus-visible:border-primary/60 focus-visible:ring-0";
-  const labelCls = "mb-2 block text-[13px] font-semibold tracking-normal text-foreground/90";
+    "h-[54px] rounded-xl border-border/70 bg-muted/25 px-4 text-[15px] text-foreground placeholder:text-muted-foreground/55 hover:border-border focus-visible:border-primary/70 focus-visible:bg-background focus-visible:ring-2 focus-visible:ring-primary/10";
+  const labelCls = "mb-2 block text-[12px] font-semibold text-foreground/85";
 
   const heading = isLogin
     ? { title: "Bem-vindo de volta", sub: "Entre para acompanhar sua operação." }
     : STEP_TITLES[step - 1];
 
   return (
-    <div className="min-h-screen bg-[#0a0b0a] text-foreground">
+    <div className="h-[100dvh] overflow-y-auto bg-background text-foreground">
       <Seo
         title={isLogin ? "Entrar — VENXPAY" : "Criar conta grátis — VENXPAY"}
         description={isLogin ? "Acesse seu painel VENXPAY: produtos, vendas, saques e área de membros em um só lugar." : "Crie sua conta VENXPAY gratuitamente e comece a vender infoprodutos com checkout de alta conversão."}
         path="/auth"
       />
 
-      <div className="grid min-h-screen lg:grid-cols-[minmax(0,540px)_minmax(0,1fr)]">
+      <div className="grid min-h-screen lg:grid-cols-[minmax(0,560px)_minmax(0,1fr)]">
         {/* ═══ LEFT — form ═══ */}
-        <div className="relative flex min-h-screen flex-col justify-between px-6 py-10 sm:px-12 lg:px-14">
+        <div className="relative flex min-h-screen flex-col justify-between border-r border-border/50 px-5 py-7 sm:px-10 sm:py-9 lg:px-16 lg:py-10">
           <a href="/" className="inline-flex w-fit items-center gap-2.5 opacity-95 transition-opacity hover:opacity-100">
-            <VenxpayLogo size={30} />
-            <span className="text-[19px] font-heading tracking-[-0.02em] text-foreground">venxpay</span>
+            <VenxpayLogo size={32} plate={false} />
+            <span className="text-[18px] font-heading font-semibold text-foreground">VENXPAY</span>
           </a>
 
-          <div className="mx-auto w-full max-w-[420px] py-10">
+          {!isLogin && (
+            <div className="relative mt-7 h-28 overflow-hidden rounded-2xl border border-border/60 lg:hidden">
+              <img src={authHeroPerson} alt="Seller acompanhando vendas pela VENXPAY" className="h-full w-full object-cover object-[center_32%]" />
+              <div className="absolute inset-0 bg-gradient-to-r from-background/80 via-background/15 to-transparent" />
+              <div className="absolute inset-y-0 left-4 flex items-center">
+                <div>
+                  <span className="inline-flex items-center gap-1.5 text-[11px] font-semibold text-primary">
+                    <span className="h-1.5 w-1.5 rounded-full bg-primary" /> Operação ao vivo
+                  </span>
+                  <p className="mt-1 max-w-[170px] font-heading text-[16px] font-semibold leading-tight text-foreground">Venda aprovada em tempo real.</p>
+                </div>
+              </div>
+            </div>
+          )}
+
+          <div className="mx-auto w-full max-w-[430px] py-8 sm:py-10">
             <AnimatePresence mode="wait">
               <motion.div
                 key={isLogin ? "login-h" : `signup-h-${step}`}
@@ -363,10 +379,10 @@ export default function Auth() {
                 exit={{ opacity: 0, y: -6 }}
                 transition={{ duration: 0.22 }}
               >
-                <h1 className="text-[30px] font-heading leading-[1.1] tracking-[-0.03em] text-foreground sm:text-[34px]">
+                <h1 className="text-[30px] font-heading font-semibold leading-[1.12] text-foreground sm:text-[36px]">
                   {recoveryMode !== "idle" && isLogin ? "Recuperar acesso" : heading.title}
                 </h1>
-                <p className="mt-2 text-[14px] text-muted-foreground">
+                <p className="mt-2.5 max-w-[390px] text-[14px] leading-relaxed text-muted-foreground">
                   {recoveryMode !== "idle" && isLogin ? "Vamos enviar um código para o seu e-mail." : heading.sub}
                 </p>
               </motion.div>
@@ -374,10 +390,10 @@ export default function Auth() {
 
             {/* Step rail */}
             {!isLogin && (
-              <div className="mt-6">
-                <div className="flex items-center gap-1.5">
+              <div className="mt-7 rounded-2xl border border-border/60 bg-muted/15 p-4">
+                <div className="flex items-center gap-2">
                   {Array.from({ length: TOTAL_STEPS }, (_, i) => i + 1).map((s) => (
-                    <div key={s} className="h-[3px] flex-1 overflow-hidden rounded-full bg-white/10">
+                    <div key={s} className="h-1 flex-1 overflow-hidden rounded-full bg-muted">
                       <motion.div
                         className="h-full bg-primary"
                         initial={false}
@@ -387,15 +403,15 @@ export default function Auth() {
                     </div>
                   ))}
                 </div>
-                <div className="mt-2.5 flex items-center justify-between text-[11px] text-muted-foreground">
-                  <span className="uppercase tracking-[0.18em]">{STEP_TITLES[step - 1].tag}</span>
-                  <span className="tabular-nums">Etapa {step} de {TOTAL_STEPS}</span>
+                <div className="mt-3 flex items-center justify-between text-[11px] text-muted-foreground">
+                  <span className="font-semibold text-foreground/70">{STEP_TITLES[step - 1].tag}</span>
+                  <span className="font-medium tabular-nums">{String(step).padStart(2, "0")} / {String(TOTAL_STEPS).padStart(2, "0")}</span>
                 </div>
               </div>
             )}
 
 
-            <div className="mt-8">
+            <div className="mt-7">
               <AnimatePresence mode="wait">
                 <motion.div
                   key={isLogin ? `login-${recoveryMode}` : `signup-${step}`}
@@ -531,12 +547,12 @@ export default function Auth() {
                                   onClick={() => { setAccountType(t.value); setDocument(""); setDocumentError(""); }}
                                   aria-pressed={active}
                                   className={cn(
-                                    "group relative rounded-[12px] border p-4 text-left transition-colors duration-200",
-                                    active ? "border-primary/70 bg-primary/[0.06]" : "border-border/60 hover:border-border",
+                                    "group relative min-h-[112px] rounded-2xl border p-4 text-left transition-colors duration-200",
+                                    active ? "border-primary/70 bg-primary/[0.08]" : "border-border/60 bg-muted/15 hover:border-border hover:bg-muted/25",
                                   )}
                                 >
                                   <div className="flex items-center justify-between">
-                                    <Icon className={cn("h-[18px] w-[18px]", active ? "text-primary" : "text-muted-foreground")} />
+                                    <span className={cn("flex h-9 w-9 items-center justify-center rounded-xl", active ? "bg-primary/15 text-primary" : "bg-muted text-muted-foreground")}><Icon className="h-[18px] w-[18px]" /></span>
                                     <span className={cn("flex h-[18px] w-[18px] items-center justify-center rounded-full border transition-colors", active ? "border-primary bg-primary" : "border-border/70")}>
                                       {active && <Check className="h-3 w-3 text-primary-foreground" />}
                                     </span>
@@ -740,17 +756,17 @@ export default function Auth() {
 
                       <div className="flex gap-3 pt-1">
                         {step > 1 && (
-                          <Button type="button" variant="outline" onClick={() => setStep((c) => c - 1)} className="h-[52px] flex-1 rounded-[10px] border-border/70 bg-transparent text-[15px] font-medium text-muted-foreground hover:text-foreground">
+                          <Button type="button" variant="outline" onClick={() => setStep((c) => c - 1)} className="h-[54px] flex-1 rounded-xl border-border/70 bg-transparent text-[15px] font-medium text-muted-foreground hover:text-foreground">
                             Voltar
                           </Button>
                         )}
                         {step < TOTAL_STEPS ? (
-                          <Button type="button" onClick={() => setStep((c) => c + 1)} disabled={!canAdvanceStep(step)} className="h-[52px] flex-[1.6] rounded-[10px] bg-primary text-[15px] font-semibold text-primary-foreground hover:brightness-105">
+                          <Button type="button" onClick={() => setStep((c) => c + 1)} disabled={!canAdvanceStep(step)} className="h-[54px] flex-[1.6] rounded-xl bg-primary text-[15px] font-semibold text-primary-foreground hover:brightness-105">
                             Continuar <ArrowRight className="ml-2 h-4 w-4" />
                           </Button>
 
                         ) : (
-                          <Button type="button" onClick={() => handleSubmit()} disabled={loading || !acceptTerms} className="h-[52px] flex-[1.6] rounded-[10px] bg-primary text-[15px] font-semibold text-primary-foreground hover:brightness-105">
+                          <Button type="button" onClick={() => handleSubmit()} disabled={loading || !acceptTerms} className="h-[54px] flex-[1.6] rounded-xl bg-primary text-[15px] font-semibold text-primary-foreground hover:brightness-105">
                             {loading ? <div className="h-5 w-5 animate-spin rounded-full border-2 border-primary-foreground/30 border-t-primary-foreground" /> : "Criar conta"}
                           </Button>
                         )}
@@ -767,7 +783,7 @@ export default function Auth() {
             </div>
           </div>
 
-          <div className="flex flex-wrap items-center justify-between gap-3 text-[12px] text-muted-foreground">
+          <div className="flex flex-wrap items-center justify-between gap-3 border-t border-border/50 pt-5 text-[11px] text-muted-foreground">
             <span className="inline-flex items-center gap-1.5"><Lock className="h-3.5 w-3.5" /> Conexão protegida com SSL 256-bit</span>
             <span className="inline-flex items-center gap-1.5"><Shield className="h-3.5 w-3.5" /> LGPD</span>
           </div>
