@@ -259,9 +259,16 @@ export default function Auth() {
     setLoading(true);
     try {
       if (isLogin) {
-        const { data, error: fnError } = await supabase.functions.invoke("gated-login", {
-          body: { email: email.toLowerCase().trim(), password, scope: "seller" },
-        });
+        // Guarda de tempo: se o backend não responder, falha com mensagem clara
+        // em vez de deixar o botão em carregamento infinito.
+        const { data, error: fnError } = await Promise.race([
+          supabase.functions.invoke("gated-login", {
+            body: { email: email.toLowerCase().trim(), password, scope: "seller" },
+          }),
+          new Promise<never>((_, reject) =>
+            setTimeout(() => reject(new Error("login_timeout")), 25000)
+          ),
+        ]);
         if (fnError || !data?.success) {
           setLoginAttempts((prev) => {
             const next = prev + 1;
@@ -321,7 +328,8 @@ export default function Auth() {
       }
     } catch (error: unknown) {
       const msg = (error as { message?: string })?.message || "";
-      if (msg.includes("Invalid login")) toast.error("E-mail ou senha incorretos.");
+      if (msg === "login_timeout") toast.error("O servidor demorou para responder. Tente novamente.");
+      else if (msg.includes("Invalid login")) toast.error("E-mail ou senha incorretos.");
       else if (msg.includes("already registered")) toast.error("Este e-mail já está cadastrado.");
       else if (msg.includes("Email not confirmed")) toast.error("Confirme seu e-mail antes de acessar.");
       else if (msg.includes("duplicate key") || msg.includes("unique")) toast.error("CPF/CNPJ, e-mail ou telefone já cadastrado em outra conta.");
