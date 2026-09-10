@@ -1,0 +1,2 @@
+REVOKE ALL ON FUNCTION public.cleanup_simulated_transactions_batch() FROM PUBLIC, anon, authenticated;
+GRANT EXECUTE ON FUNCTION public.cleanup_simulated_transactions_batch() TO service_role, postgres;
