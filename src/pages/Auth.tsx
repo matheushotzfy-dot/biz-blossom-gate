@@ -328,7 +328,8 @@ export default function Auth() {
       }
     } catch (error: unknown) {
       const msg = (error as { message?: string })?.message || "";
-      if (msg.includes("Invalid login")) toast.error("E-mail ou senha incorretos.");
+      if (msg === "login_timeout") toast.error("O servidor demorou para responder. Tente novamente.");
+      else if (msg.includes("Invalid login")) toast.error("E-mail ou senha incorretos.");
       else if (msg.includes("already registered")) toast.error("Este e-mail já está cadastrado.");
       else if (msg.includes("Email not confirmed")) toast.error("Confirme seu e-mail antes de acessar.");
       else if (msg.includes("duplicate key") || msg.includes("unique")) toast.error("CPF/CNPJ, e-mail ou telefone já cadastrado em outra conta.");
