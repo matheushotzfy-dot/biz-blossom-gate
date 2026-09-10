@@ -4669,6 +4669,7 @@ export type Database = {
           webhook_config_id: string
         }[]
       }
+      cleanup_simulated_transactions_batch: { Args: never; Returns: number }
       current_user_email: { Args: never; Returns: string }
       current_user_has_role: {
         Args: { _role: Database["public"]["Enums"]["app_role"] }
@@ -4954,10 +4955,6 @@ export type Database = {
       set_max_ticket_for_all: { Args: { _new_value: number }; Returns: Json }
       set_max_ticket_new_users_only: {
         Args: { _new_value: number }
-        Returns: Json
-      }
-      simulate_demo_sales: {
-        Args: { _new_sales?: number; _user_id: string }
         Returns: Json
       }
       touch_api_key: { Args: { _api_key_id: string }; Returns: undefined }
