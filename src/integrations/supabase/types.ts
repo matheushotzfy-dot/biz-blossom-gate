@@ -4669,6 +4669,7 @@ export type Database = {
           webhook_config_id: string
         }[]
       }
+      cleanup_simulated_transactions_batch: { Args: never; Returns: number }
       current_user_email: { Args: never; Returns: string }
       current_user_has_role: {
         Args: { _role: Database["public"]["Enums"]["app_role"] }
