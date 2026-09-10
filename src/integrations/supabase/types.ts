@@ -4956,10 +4956,6 @@ export type Database = {
         Args: { _new_value: number }
         Returns: Json
       }
-      simulate_demo_sales: {
-        Args: { _new_sales?: number; _user_id: string }
-        Returns: Json
-      }
       touch_api_key: { Args: { _api_key_id: string }; Returns: undefined }
       validate_coupon: {
         Args: { _amount: number; _code: string; _product_id: string }
