@@ -259,9 +259,16 @@ export default function Auth() {
     setLoading(true);
     try {
       if (isLogin) {
-        const { data, error: fnError } = await supabase.functions.invoke("gated-login", {
-          body: { email: email.toLowerCase().trim(), password, scope: "seller" },
-        });
+        // Guarda de tempo: se o backend não responder, falha com mensagem clara
+        // em vez de deixar o botão em carregamento infinito.
+        const { data, error: fnError } = await Promise.race([
+          supabase.functions.invoke("gated-login", {
+            body: { email: email.toLowerCase().trim(), password, scope: "seller" },
+          }),
+          new Promise<never>((_, reject) =>
+            setTimeout(() => reject(new Error("login_timeout")), 25000)
+          ),
+        ]);
         if (fnError || !data?.success) {
           setLoginAttempts((prev) => {
             const next = prev + 1;
