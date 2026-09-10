@@ -1,0 +1,2 @@
+ALTER FUNCTION public.get_admin_financial_overview(timestamptz,timestamptz,text) SECURITY INVOKER;
+ALTER FUNCTION public.get_admin_transactions_page(timestamptz,timestamptz,integer,integer,text,text,uuid,text) SECURITY INVOKER;
