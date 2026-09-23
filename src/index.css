@@ -9,6 +9,143 @@ input[type="number"] {
   -moz-appearance: textfield;
   appearance: textfield;
 }
+
+/* ════════════════════════════════════════════════════════════
+   VENXPAY EXECUTIVE — marfim financeiro + carvão equilibrado
+   Base compartilhada por todas as superfícies seller.
+   ════════════════════════════════════════════════════════════ */
+@layer base {
+  :root {
+    --background: 140 13% 96%;
+    --foreground: 160 17% 11%;
+    --card: 0 0% 100%;
+    --card-elevated: 140 14% 98%;
+    --card-inset: 140 10% 94%;
+    --card-foreground: 160 17% 11%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 160 17% 11%;
+    --primary: 160 100% 33%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 140 11% 93%;
+    --secondary-foreground: 160 17% 15%;
+    --muted: 140 10% 93%;
+    --muted-foreground: 155 8% 39%;
+    --accent: 150 14% 92%;
+    --accent-foreground: 160 17% 13%;
+    --border: 145 9% 84%;
+    --input: 145 9% 80%;
+    --ring: 160 100% 33%;
+    --radius: 1rem;
+    --sidebar-background: 0 0% 100%;
+    --sidebar-foreground: 155 8% 34%;
+    --sidebar-primary: 160 100% 33%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 140 13% 94%;
+    --sidebar-accent-foreground: 160 17% 11%;
+    --sidebar-border: 145 9% 86%;
+    --sidebar-ring: 160 100% 33%;
+  }
+
+  .dark {
+    --background: 156 12% 10%;
+    --foreground: 140 14% 94%;
+    --card: 158 11% 14%;
+    --card-elevated: 157 10% 17%;
+    --card-inset: 158 11% 12%;
+    --card-foreground: 140 14% 94%;
+    --popover: 158 11% 15%;
+    --popover-foreground: 140 14% 94%;
+    --primary: 160 88% 40%;
+    --primary-foreground: 158 20% 7%;
+    --secondary: 157 9% 19%;
+    --secondary-foreground: 140 14% 94%;
+    --muted: 157 9% 19%;
+    --muted-foreground: 145 8% 67%;
+    --accent: 157 9% 21%;
+    --accent-foreground: 140 14% 96%;
+    --border: 155 8% 25%;
+    --input: 155 8% 29%;
+    --ring: 160 88% 40%;
+    --sidebar-background: 158 12% 12%;
+    --sidebar-foreground: 145 8% 72%;
+    --sidebar-primary: 160 88% 40%;
+    --sidebar-primary-foreground: 158 20% 7%;
+    --sidebar-accent: 157 9% 19%;
+    --sidebar-accent-foreground: 140 14% 96%;
+    --sidebar-border: 155 8% 23%;
+    --sidebar-ring: 160 88% 40%;
+  }
+
+  body {
+    font-family: "Manrope", system-ui, sans-serif;
+    letter-spacing: 0;
+  }
+}
+
+.venx-executive-shell {
+  --sidebar-motion: 360ms;
+  --sidebar-ease: cubic-bezier(0.16, 1, 0.3, 1);
+  background: hsl(var(--background));
+}
+
+.venx-executive-shell.platform-shell::before {
+  display: none;
+}
+
+.venx-executive-shell .technical-topbar {
+  background: hsl(var(--background) / 0.94);
+  backdrop-filter: blur(14px);
+}
+
+.venx-executive-shell .technical-sidebar [data-sidebar="sidebar"] {
+  background: hsl(var(--sidebar-background));
+}
+
+.venx-executive-shell .dashboard-scroll-field {
+  scrollbar-color: hsl(var(--border)) transparent;
+}
+
+.venx-executive-shell :is(h1, h2, h3, h4) {
+  font-family: "Sora", system-ui, sans-serif;
+  letter-spacing: 0;
+}
+
+.venx-executive-shell :is(button, a, [role="button"], input, select, textarea) {
+  transition-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
+  transition-duration: 300ms;
+}
+
+.venx-executive-shell :is(.platform-card, .dashboard-panel, .dashboard-surface, .dashboard-tile, .seller-panel, .seller-shell) {
+  border-color: hsl(var(--border)) !important;
+  border-radius: 22px;
+}
+
+.venx-executive-shell :is(.platform-card, .dashboard-panel, .dashboard-surface, .dashboard-tile, .seller-panel, .seller-shell):hover {
+  border-color: hsl(var(--primary) / 0.32) !important;
+  transform: none;
+}
+
+.seller-dashboard > div > section,
+.seller-dashboard > div > div {
+  animation: venx-editorial-enter 520ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.seller-dashboard > div > :nth-child(3) { animation-delay: 35ms; }
+.seller-dashboard > div > :nth-child(4) { animation-delay: 70ms; }
+.seller-dashboard > div > :nth-child(5) { animation-delay: 105ms; }
+.seller-dashboard > div > :nth-child(6) { animation-delay: 140ms; }
+
+@keyframes venx-editorial-enter {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .seller-dashboard > div > section,
+  .seller-dashboard > div > div {
+    animation: none;
+  }
+}
 input[type="number"]::-webkit-outer-spin-button,
 input[type="number"]::-webkit-inner-spin-button {
   -webkit-appearance: none;

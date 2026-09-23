@@ -92,7 +92,7 @@ function RevenueBar({ collapsed, revenue, milestone, onOpenRewards }: RevenueBar
       aria-hidden={collapsed}
       tabIndex={collapsed ? -1 : 0}
       title={`${current} de ${goal} — ${pctDisplay}% • ${milestone.current.tier}`}
-      className="sidebar-revenue-bar seller-clickable group/rev relative mt-3 block max-h-28 w-full overflow-hidden rounded-[16px] border border-sidebar-border/70 bg-sidebar-accent/30 px-3.5 py-3 text-left hover:border-primary/35 hover:bg-sidebar-accent/50"
+      className="sidebar-revenue-bar seller-clickable group/rev relative mt-4 block max-h-28 w-full overflow-hidden rounded-[18px] border border-sidebar-border bg-sidebar-accent/55 px-4 py-3.5 text-left hover:border-primary/35 hover:bg-sidebar-accent"
     >
       {/* Marca d'água da logo */}
       <span
@@ -169,11 +169,11 @@ function SidebarNavList({ items, pathname }: SidebarNavListProps) {
                     activeClassName=""
 
                     className={cn(
-                       "group/nav relative flex h-[56px] w-full items-center gap-3 overflow-hidden rounded-[16px] px-3 text-[14px] outline-none",
+                       "group/nav relative flex h-[52px] w-full items-center gap-3 overflow-hidden rounded-[14px] px-3 text-[13px] outline-none",
                       "transition-colors duration-300 ease-out",
                       isActive
-                        ? "border border-primary/25 bg-primary/[0.10] font-semibold text-sidebar-accent-foreground"
-                        : "border border-transparent font-medium text-sidebar-foreground/62 hover:bg-sidebar-accent/45 hover:text-sidebar-accent-foreground",
+                        ? "border border-primary/20 bg-primary/[0.09] font-semibold text-sidebar-accent-foreground"
+                        : "border border-transparent font-medium text-sidebar-foreground/72 hover:bg-sidebar-accent/70 hover:text-sidebar-accent-foreground",
                     )}
                   >
                     <span
@@ -319,7 +319,7 @@ export function AppSidebar({ pinned = true, onTogglePin, onHoverChange }: AppSid
         overlaying && "technical-sidebar-overlay",
       )}
     >
-      <SidebarHeader className="relative px-4 pb-3 pt-4">
+      <SidebarHeader className="relative px-4 pb-4 pt-5">
         {/* Brand + pino */}
         <div className="flex items-center gap-3">
           <div className="relative flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden">
@@ -356,7 +356,7 @@ export function AppSidebar({ pinned = true, onTogglePin, onHoverChange }: AppSid
         />
       </SidebarHeader>
 
-      <SidebarContent className="relative gap-0 overflow-y-auto px-1.5 py-3">
+      <SidebarContent className="relative gap-0 overflow-y-auto px-1.5 py-4">
         <SidebarNavList items={items} pathname={location.pathname} />
       </SidebarContent>
 

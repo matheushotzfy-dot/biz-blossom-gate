@@ -473,10 +473,10 @@ export default function Dashboard() {
 
 
   return (
-    <div className="relative min-h-full w-full text-foreground animate-in fade-in duration-500">
+    <div className="seller-dashboard relative min-h-full w-full text-foreground animate-in fade-in duration-500">
       <Seo title="Dashboard | Venxpay" description="Painel operacional Venxpay — saldos, ranking, aprovação e liquidações em tempo real." path="/dashboard" noindex />
 
-      <div className="relative z-10 px-2 sm:px-4 md:px-6 pt-2 pb-24 max-w-[1600px] mx-auto space-y-4">
+      <div className="relative z-10 px-1 sm:px-2 md:px-3 pt-2 pb-24 max-w-[1280px] mx-auto space-y-6">
 
         {(txError || statsError || productsError) && (
           <div className="flex items-center justify-between gap-3 rounded-[12px] border border-destructive/40 bg-destructive/5 px-4 py-2.5 text-[12px] text-destructive">
@@ -488,8 +488,8 @@ export default function Dashboard() {
         <SellerOnboarding />
 
         {/* ═══════════ GREETING ═══════════ */}
-        <header className="min-w-0 pt-1">
-          <h1 className="font-display font-extrabold tracking-[-0.035em] text-[20px] md:text-[25px] leading-[1.1] truncate">
+        <header className="min-w-0 pt-2 md:pt-3">
+          <h1 className="font-display font-bold text-[22px] md:text-[28px] leading-[1.15] truncate">
             Seja bem-vindo, {nickname}
             <button
               onClick={privacy.toggle}
@@ -499,7 +499,7 @@ export default function Dashboard() {
               {privacy.hidden ? <EyeOff className="h-3.5 w-3.5" strokeWidth={2} /> : <Eye className="h-3.5 w-3.5" strokeWidth={2} />}
             </button>
           </h1>
-          <p className="text-muted-foreground/70 text-[12px] font-medium mt-0.5">Que essa jornada seja leve, produtiva e cheia de conquistas!</p>
+          <p className="text-muted-foreground text-[13px] font-medium mt-1.5">Que essa jornada seja leve, produtiva e cheia de conquistas!</p>
         </header>
 
         {/* ═══════════ HERO — BRAND BANNER (com dial de período) ═══════════ */}
@@ -521,7 +521,7 @@ export default function Dashboard() {
 
 
         {/* ═══════════ KPI CARDS ═══════════ */}
-        <section className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
+        <section className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
           {[
             { label: "Saldo disponível", value: fmt(Math.max(0, balance)), sub: "Pronto para saque", tone: "success" as const, icon: Wallet },
             { label: "Recebido hoje", value: fmt(receivedToday), sub: "Movimento confirmado", tone: "primary" as const, icon: RefreshCw },
@@ -533,7 +533,7 @@ export default function Dashboard() {
             return (
               <div
                 key={k.label}
-                className="group relative min-h-[154px] overflow-hidden rounded-[12px] border border-border/70 bg-card px-5 py-5 transition-colors duration-200 hover:border-primary/35 hover:bg-card/95"
+                className="group relative min-h-[160px] overflow-hidden rounded-[22px] border border-border bg-card px-5 py-5 transition-colors duration-300 hover:border-primary/30 hover:bg-card-elevated"
               >
                 <Icon
                   aria-hidden
@@ -567,7 +567,7 @@ export default function Dashboard() {
         </section>
 
         {/* ═══════════ QUICK ACTIONS ═══════════ */}
-        <section className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
+        <section className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
           {[
             { label: "Gerar PIX", sub: "QR Code para receber", icon: QrCode, onClick: () => { if (!requireApprovedAccount()) setPixDialogOpen(true); } },
             { label: "Solicitar Saque", sub: "Transferir via PIX", icon: ArrowDownRight, onClick: () => { if (!requireApprovedAccount()) navigate("/financeiro/saques"); } },
@@ -581,7 +581,7 @@ export default function Dashboard() {
                 variant="ghost"
                 key={a.label}
                 onClick={a.onClick}
-                className="group relative h-auto min-h-[78px] justify-start gap-3 overflow-hidden rounded-[12px] border border-border/70 bg-card px-4 py-3 text-left text-foreground transition-colors duration-200 hover:border-primary/30 hover:bg-accent/30"
+                className="group relative h-auto min-h-[82px] justify-start gap-3 overflow-hidden rounded-[18px] border border-border bg-card px-4 py-3 text-left text-foreground transition-colors duration-300 hover:border-primary/30 hover:bg-accent/55"
               >
                 <span className="relative flex h-10 w-10 shrink-0 items-center justify-center rounded-[10px] border border-primary/20 bg-primary/8 text-primary transition-colors duration-200 group-hover:border-primary/35 group-hover:bg-primary/12">
                   <Icon className="h-[17px] w-[17px]" strokeWidth={1.8} />
@@ -604,7 +604,7 @@ export default function Dashboard() {
         <section className="grid grid-cols-1 xl:grid-cols-3 gap-4">
 
           {/* Faturamento — Clean line chart (Cakto-style) */}
-          <div className="xl:col-span-2 overflow-hidden rounded-[14px] border border-border bg-card">
+          <div className="xl:col-span-2 overflow-hidden rounded-[24px] border border-border bg-card">
             <div className="flex items-center justify-between gap-3 border-b border-border/40 px-6 py-5 md:px-8">
               <div className="min-w-0">
                 <h4 className="font-display font-bold text-xl tracking-[-0.02em] text-foreground">Faturamento</h4>
@@ -675,7 +675,7 @@ export default function Dashboard() {
           {/* Right side: donuts + links */}
           <div className="space-y-4">
             {/* Donuts card */}
-             <div className="rounded-[14px] border border-border bg-card p-7">
+             <div className="rounded-[24px] border border-border bg-card p-7">
               <div className="mb-6">
                 <h4 className="font-display font-bold text-xl tracking-[-0.02em]">Índices</h4>
                 <p className="text-[11px] text-muted-foreground/60 mt-1">Conversão por método de pagamento</p>
@@ -726,7 +726,7 @@ export default function Dashboard() {
             </div>
 
             {/* Payment links */}
-             <button type="button" onClick={() => { if (!requireApprovedAccount()) navigate("/vendas/link-pagamento"); }} className="group block w-full rounded-[14px] border border-border bg-card p-7 text-left transition-colors hover:border-primary/40">
+             <button type="button" onClick={() => { if (!requireApprovedAccount()) navigate("/vendas/link-pagamento"); }} className="group block w-full rounded-[24px] border border-border bg-card p-7 text-left transition-colors duration-300 hover:border-primary/35 hover:bg-card-elevated">
               <div className="flex items-start justify-between gap-3">
                 <div className="min-w-0">
                   <h3 className="font-display font-black text-base tracking-[-0.01em] flex items-center gap-2"><Link2 className="h-4 w-4 text-primary" /> Links de pagamentos</h3>
@@ -740,7 +740,7 @@ export default function Dashboard() {
         </section>
 
         {/* ═══════════ ÚLTIMAS TRANSAÇÕES — clean table ═══════════ */}
-        <section className="overflow-hidden rounded-[14px] border border-border bg-card">
+        <section className="overflow-hidden rounded-[24px] border border-border bg-card">
           <div className="flex items-center justify-between gap-3 px-5 md:px-6 pt-5 pb-4">
             <div className="min-w-0">
               <h3 className="font-display font-bold text-[15px] tracking-[-0.01em] text-foreground">Últimas transações</h3>
