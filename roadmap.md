@@ -1,5 +1,6 @@
 # Roadmap
 
+- [x] Aplicar o novo sistema visual clean e sofisticado nos modos claro/escuro e validar seller/admin/mobile.
 - [ ] Remover com segurança todas as transações simuladas e dependências.
 - [ ] Excluir dados simulados de todos os agregados seller/admin e desativar o simulador.
 - [ ] Unificar status financeiros e período comercial de São Paulo.
