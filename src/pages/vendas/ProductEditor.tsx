@@ -913,7 +913,7 @@ function TabGeral({ name, setName, description, setDescription, price, setPrice,
   ];
 
   return (
-    <div className="mx-auto grid w-full max-w-[920px] grid-cols-1 gap-3 xl:grid-cols-2">
+    <div className="mx-auto grid w-full max-w-[920px] grid-cols-1 gap-3 lg:grid-cols-2">
       {/* Identidade */}
       <section className="rounded-xl border border-border bg-card p-4">
         <p className="mb-3 text-[10px] font-display font-bold uppercase tracking-[0.14em] text-primary">Identidade do produto</p>
@@ -1027,9 +1027,9 @@ function TabGeral({ name, setName, description, setDescription, price, setPrice,
       </section>
 
       {/* Produtor */}
-      <section className="xl:col-span-2 rounded-xl border border-border bg-card p-4">
+      <section className="lg:col-span-2 rounded-xl border border-border bg-card p-4">
         <p className="mb-3 text-[10px] font-display font-bold uppercase tracking-[0.14em] text-primary">Informações do produtor</p>
-        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
           <div className="space-y-1">
             <label className="text-[11px] font-semibold text-muted-foreground">Página de vendas</label>
             <Input value={pageUrl} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setPageUrl(e.target.value)} placeholder="seuproduto.com" type="text" className={cn("h-9 rounded-lg border-border bg-background px-3.5 focus-visible:border-primary focus-visible:ring-primary/20", pageUrl && !urlValid && "border-destructive/50")} required />
