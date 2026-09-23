@@ -686,40 +686,40 @@ export default function ProductEditor() {
  return (
   <div className="product-studio h-[100dvh] overflow-hidden bg-background">
    <div ref={contentRef} className="product-studio-canvas h-full overflow-y-auto overscroll-contain" style={{ WebkitOverflowScrolling: "touch" }}>
-    <div className="mx-auto w-full max-w-[1380px] px-4 py-6 sm:px-7 sm:py-9 xl:px-10">
-     <header className="mb-8 flex flex-col gap-6 border-b border-border pb-7 md:flex-row md:items-end md:justify-between">
-      <div className="min-w-0">
-       <button onClick={() => navigate("/vendas/produtos")} className="mb-4 inline-flex items-center gap-2 text-[11px] font-display font-bold uppercase tracking-[0.12em] text-muted-foreground transition-colors hover:text-primary">
-        <ArrowLeft className="h-3.5 w-3.5" /> Produtos <ChevronRight className="h-3 w-3" /> {isNew ? "Novo produto" : "Editar produto"}
-       </button>
-       <div className="flex items-center gap-4">
-        <div className="hidden h-12 w-12 items-center justify-center rounded-2xl bg-primary text-primary-foreground sm:flex">
-         <Package className="h-5 w-5" />
-        </div>
-        <div className="min-w-0">
-         <h1 className="truncate text-2xl font-display font-bold text-foreground sm:text-[30px]">{name || "Configure seu novo produto"}</h1>
-         <p className="mt-1 text-sm text-muted-foreground">{isNew ? "Preencha as informações essenciais para começar." : "Revise a oferta e publique suas alterações."}</p>
+     <div className="mx-auto w-full max-w-[1024px] px-4 py-5 sm:px-7 sm:py-7">
+      <header className="mb-6 flex flex-col gap-4 border-b border-border pb-5 md:flex-row md:items-center md:justify-between">
+       <div className="min-w-0">
+        <button onClick={() => navigate("/vendas/produtos")} className="mb-2 inline-flex items-center gap-2 text-[10px] font-display font-bold uppercase tracking-[0.12em] text-muted-foreground transition-colors hover:text-primary">
+         <ArrowLeft className="h-3 w-3" /> Produtos <ChevronRight className="h-2.5 w-2.5" /> {isNew ? "Novo produto" : "Editar produto"}
+        </button>
+        <div className="flex items-center gap-3">
+         <div className="hidden h-9 w-9 items-center justify-center rounded-xl bg-primary text-primary-foreground sm:flex">
+          <Package className="h-4 w-4" />
+         </div>
+         <div className="min-w-0">
+          <h1 className="truncate text-lg font-display font-bold text-foreground sm:text-xl">{name || "Configure seu novo produto"}</h1>
+          <p className="text-xs text-muted-foreground">{isNew ? "Preencha as informações essenciais para começar." : "Revise a oferta e publique suas alterações."}</p>
+         </div>
         </div>
        </div>
-      </div>
-      <div className="flex shrink-0 items-center gap-2.5">
-       {!tabsLocked && (
-        <>
-         <Button variant="outline" onClick={handleDuplicate} className="hidden h-11 gap-2 rounded-xl px-4 sm:flex"><Copy className="h-4 w-4" /> Duplicar</Button>
-         <Button variant="outline" onClick={handleDelete} aria-label="Excluir produto" className="hidden h-11 w-11 rounded-xl p-0 text-destructive sm:flex"><Trash2 className="h-4 w-4" /></Button>
-        </>
-       )}
-       <Button onClick={handleSave} disabled={saving} className={cn("h-11 gap-2 rounded-xl px-6 font-display font-bold", saved && "bg-success hover:bg-success")}>
-        {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : saved ? <Check className="h-4 w-4" /> : <Save className="h-4 w-4" />}
-        {saving ? "Salvando" : saved ? "Salvo" : "Salvar produto"}
-       </Button>
-      </div>
-     </header>
+       <div className="flex shrink-0 items-center gap-2">
+        {!tabsLocked && (
+         <>
+          <Button variant="outline" onClick={handleDuplicate} className="hidden h-9 gap-2 rounded-lg px-3 text-xs sm:flex"><Copy className="h-3.5 w-3.5" /> Duplicar</Button>
+          <Button variant="outline" onClick={handleDelete} aria-label="Excluir produto" className="hidden h-9 w-9 rounded-lg p-0 text-destructive sm:flex"><Trash2 className="h-3.5 w-3.5" /></Button>
+         </>
+        )}
+        <Button onClick={handleSave} disabled={saving} className={cn("h-9 gap-2 rounded-lg px-4 text-xs font-display font-bold", saved && "bg-success hover:bg-success")}>
+         {saving ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : saved ? <Check className="h-3.5 w-3.5" /> : <Save className="h-3.5 w-3.5" />}
+         {saving ? "Salvando" : saved ? "Salvo" : "Salvar produto"}
+        </Button>
+       </div>
+      </header>
 
-     <div className="grid grid-cols-1 gap-7 lg:grid-cols-[220px_minmax(0,1fr)] xl:gap-10">
-      <aside className="hidden lg:block">
-       <div className="product-studio-rail sticky top-6 space-y-1 border-l border-border pl-4">
-        <div className="mb-5 px-3">
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-[200px_minmax(0,1fr)] xl:gap-8">
+       <aside className="hidden lg:block">
+        <div className="product-studio-rail sticky top-5 space-y-1 border-l border-border pl-3">
+         <div className="mb-4 px-3">
          <div className="mb-2 flex items-center justify-between text-[10px] font-bold uppercase tracking-[0.12em] text-muted-foreground"><span>Configuração</span><span className="text-primary">{completionPercent}%</span></div>
          <div className="h-1 overflow-hidden rounded-full bg-secondary"><motion.div className="h-full bg-primary" animate={{ width: `${completionPercent}%` }} transition={{ duration: 0.45 }} /></div>
         </div>
@@ -728,7 +728,7 @@ export default function ProductEditor() {
          const completed = tabCompleted(tab.key);
          const locked = tab.key !== "geral" && tabsLocked;
          return (
-          <button key={tab.key} disabled={locked} onClick={() => { if (locked) { toast.error("Preencha e salve a aba Geral primeiro"); return; } setActiveTab(tab.key); }} className={cn("group/tab relative flex min-h-[48px] w-full items-center gap-3 rounded-xl px-3 text-left text-[13px] font-display font-semibold transition-all duration-300", locked ? "cursor-not-allowed opacity-30" : isActive ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:bg-secondary hover:text-foreground")}>
+          <button key={tab.key} disabled={locked} onClick={() => { if (locked) { toast.error("Preencha e salve a aba Geral primeiro"); return; } setActiveTab(tab.key); }} className={cn("group/tab relative flex min-h-[42px] w-full items-center gap-3 rounded-xl px-3 text-left text-[12.5px] font-display font-semibold transition-all duration-300", locked ? "cursor-not-allowed opacity-30" : isActive ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:bg-secondary hover:text-foreground")}>
            {locked ? <Lock className="h-4 w-4" /> : <tab.icon className="h-4 w-4" />}
            <span className="truncate">{tab.label}</span>
            {completed && !isActive && !locked && <Check className="ml-auto h-3.5 w-3.5 text-success" />}
@@ -808,7 +808,7 @@ export default function ProductEditor() {
    };
    const goPrev = () => { if (prev && !tabsLocked) setActiveTab(prev.key); };
    return (
-     <div className="mt-8 flex items-center justify-between gap-3 pt-4 border-t border-border">
+     <div className="mt-6 flex items-center justify-between gap-3 pt-4 border-t border-border">
        <Button
          variant="outline"
          onClick={goPrev}
@@ -913,221 +913,152 @@ function TabGeral({ name, setName, description, setDescription, price, setPrice,
   ];
 
   return (
-     <div className="product-general-grid grid grid-cols-1 items-start gap-6 xl:grid-cols-12">
-      {/* Section 1: Identity */}
-       <section className="xl:col-span-8">
-         <header className="mb-5">
-           <p className="mb-2 text-[10px] font-display font-bold uppercase tracking-[0.14em] text-primary">Visão principal</p>
-           <h2 className="text-[22px] font-display font-bold text-foreground">Identidade do produto</h2>
-           <p className="mt-1 text-[13px] text-muted-foreground">Como seu produto aparece para clientes e afiliados.</p>
-        </header>
-         <div className="product-studio-panel overflow-hidden rounded-2xl border border-border bg-card">
-           <div className="grid grid-cols-1 md:grid-cols-[220px_1fr]">
-            <div
-               className={cn("relative m-5 overflow-hidden rounded-xl border border-border transition-colors md:mr-0", isDragging ? "bg-primary/10 border-primary/40" : "bg-secondary")}
-              onDragOver={(e) => { e.preventDefault(); setIsDragging(true); }}
-              onDragLeave={() => setIsDragging(false)}
-              onDrop={handleDrop}
-            >
-              <input ref={fileInputRef} type="file" accept="image/jpeg,image/png,image/webp,image/gif" onChange={handleFileChange} className="hidden" />
-              {imagePreview ? (
-                 <div className="relative h-full min-h-[250px] group/img">
-                  <img src={imagePreview} alt="Preview" className="absolute inset-0 h-full w-full object-cover" />
-                  <div className="absolute inset-0 bg-background/85 opacity-0 group-hover/img:opacity-100 transition-opacity flex items-center justify-center gap-2">
-                    <button type="button" onClick={() => fileInputRef.current?.click()} className="h-9 px-3 rounded-lg bg-card border border-border text-xs font-semibold text-foreground hover:border-primary/40 transition-colors flex items-center gap-1.5">
-                      <ImagePlus className="h-3.5 w-3.5" /> Trocar
-                    </button>
-                    <button type="button" onClick={() => { setImageFile(null); setImagePreview(null); }} className="h-9 w-9 rounded-lg bg-card border border-border text-destructive hover:border-destructive/40 transition-colors flex items-center justify-center">
-                      <X className="h-3.5 w-3.5" />
-                    </button>
-                  </div>
-                </div>
-              ) : (
-                 <button type="button" onClick={() => fileInputRef.current?.click()} className="h-full min-h-[250px] w-full flex flex-col items-center justify-center gap-3 text-muted-foreground hover:text-primary transition-colors p-6">
-                   <div className="h-12 w-12 rounded-2xl bg-primary/10 border border-primary/20 text-primary flex items-center justify-center">
-                    <Upload className="h-5 w-5" />
-                  </div>
-                  <div className="text-center">
-                    <p className="text-xs font-semibold text-foreground">{isDragging ? "Solte aqui" : "Adicionar imagem"}</p>
-                    <p className="mt-1 text-[10px] text-muted-foreground/70">JPG, PNG, WebP — até 10MB</p>
-                    <p className="text-[10px] text-muted-foreground/50">Recomendado 300×250px</p>
-                  </div>
-                </button>
-              )}
-            </div>
-             <div className="p-5 md:p-7 space-y-6">
-              <div className="space-y-1.5">
-                <label className="text-[11px] font-semibold text-muted-foreground">Nome do produto</label>
-                 <Input value={name} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setName(e.target.value)} placeholder="Ex: Curso Completo de Marketing Digital" className="h-14 rounded-2xl bg-background border-border px-4 text-base font-display font-bold focus-visible:border-primary focus-visible:ring-primary/20" required maxLength={200} />
-                <div className="flex items-center justify-between text-[10px] text-muted-foreground/60">
-                  <span>{name.length > 0 ? "Visível no checkout e área de membros" : "Obrigatório"}</span>
-                  <span className="tabular-nums">{name.length}/200</span>
+    <div className="mx-auto w-full max-w-[620px] space-y-4">
+      {/* Identidade */}
+      <section className="rounded-2xl border border-border bg-card p-5">
+        <p className="mb-4 text-[10px] font-display font-bold uppercase tracking-[0.14em] text-primary">Identidade do produto</p>
+        <div className="flex gap-4">
+          <div
+            className={cn("relative h-[88px] w-[88px] shrink-0 overflow-hidden rounded-xl border transition-colors", isDragging ? "border-primary/40 bg-primary/10" : "border-border bg-secondary")}
+            onDragOver={(e) => { e.preventDefault(); setIsDragging(true); }}
+            onDragLeave={() => setIsDragging(false)}
+            onDrop={handleDrop}
+          >
+            <input ref={fileInputRef} type="file" accept="image/jpeg,image/png,image/webp,image/gif" onChange={handleFileChange} className="hidden" />
+            {imagePreview ? (
+              <div className="group/img relative h-full w-full">
+                <img src={imagePreview} alt="Preview" className="absolute inset-0 h-full w-full object-cover" />
+                <div className="absolute inset-0 flex items-center justify-center gap-1.5 bg-background/85 opacity-0 transition-opacity group-hover/img:opacity-100">
+                  <button type="button" onClick={() => fileInputRef.current?.click()} className="flex h-7 w-7 items-center justify-center rounded-lg border border-border bg-card text-foreground transition-colors hover:border-primary/40">
+                    <ImagePlus className="h-3 w-3" />
+                  </button>
+                  <button type="button" onClick={() => { setImageFile(null); setImagePreview(null); }} className="flex h-7 w-7 items-center justify-center rounded-lg border border-border bg-card text-destructive transition-colors hover:border-destructive/40">
+                    <X className="h-3 w-3" />
+                  </button>
                 </div>
               </div>
-              <div className="space-y-1.5">
-                <label className="text-[11px] font-semibold text-muted-foreground">Descrição</label>
-                 <Textarea value={description} onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setDescription(e.target.value)} rows={5} placeholder="Descreva o que o aluno vai receber, principais benefícios e diferenciais (mínimo 50 caracteres)..." className={cn("resize-none rounded-2xl bg-background border-border px-4 py-3 text-sm leading-relaxed focus-visible:border-primary focus-visible:ring-primary/20", description.length > 0 && !descValid && "border-destructive/50")} maxLength={2000} />
-                <div className="flex items-center justify-between text-[10px]">
-                  <span className={cn(descValid ? "text-success" : description.length > 0 ? "text-destructive" : "text-muted-foreground/60")}>
-                    {descValid ? "Descrição válida" : description.length > 0 ? `Faltam ${50 - description.length} caracteres` : "Mínimo 50 caracteres"}
-                  </span>
-                  <span className="tabular-nums text-muted-foreground/60">{description.length}/2000</span>
-                </div>
-              </div>
-            </div>
+            ) : (
+              <button type="button" onClick={() => fileInputRef.current?.click()} className="flex h-full w-full flex-col items-center justify-center gap-1.5 text-muted-foreground transition-colors hover:text-primary">
+                <Upload className="h-4 w-4" />
+                <span className="text-[10px] font-semibold">{isDragging ? "Solte aqui" : "Capa 300×250"}</span>
+              </button>
+            )}
+          </div>
+          <div className="min-w-0 flex-1 space-y-1.5">
+            <label className="text-[11px] font-semibold text-muted-foreground">Nome do produto</label>
+            <Input value={name} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setName(e.target.value)} placeholder="Ex: Curso Completo de Marketing Digital" className="h-11 rounded-xl border-border bg-background px-3.5 text-sm font-display font-bold focus-visible:border-primary focus-visible:ring-primary/20" required maxLength={200} />
+            <p className="tabular-nums text-[10px] text-muted-foreground/60">{name.length}/200 caracteres</p>
+          </div>
+        </div>
+        <div className="mt-4 space-y-1.5">
+          <label className="text-[11px] font-semibold text-muted-foreground">Descrição</label>
+          <Textarea value={description} onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setDescription(e.target.value)} rows={3} placeholder="O que o comprador vai receber, benefícios e diferenciais (mínimo 50 caracteres)..." className={cn("resize-none rounded-xl border-border bg-background px-3.5 py-2.5 text-sm leading-relaxed focus-visible:border-primary focus-visible:ring-primary/20", description.length > 0 && !descValid && "border-destructive/50")} maxLength={2000} />
+          <div className="flex items-center justify-between text-[10px]">
+            <span className={cn(descValid ? "text-success" : description.length > 0 ? "text-destructive" : "text-muted-foreground/60")}>
+              {descValid ? "Descrição válida" : description.length > 0 ? `Faltam ${50 - description.length} caracteres` : "Mínimo 50 caracteres"}
+            </span>
+            <span className="tabular-nums text-muted-foreground/60">{description.length}/2000</span>
           </div>
         </div>
       </section>
 
-      {/* Section 2: Classification & Pricing */}
-       <section className="xl:col-span-4 xl:row-span-2">
-         <header className="mb-5">
-           <p className="mb-2 text-[10px] font-display font-bold uppercase tracking-[0.14em] text-primary">Oferta</p>
-           <h2 className="text-[22px] font-display font-bold text-foreground">Categoria e preço</h2>
-           <p className="mt-1 text-[13px] text-muted-foreground">Como seu produto é classificado e cobrado.</p>
-        </header>
-         <div className="product-studio-panel divide-y divide-border overflow-hidden rounded-2xl border border-border bg-card">
-           <div className="p-5 md:p-7 space-y-4">
+      {/* Categoria e preço */}
+      <section className="rounded-2xl border border-border bg-card p-5">
+        <p className="mb-4 text-[10px] font-display font-bold uppercase tracking-[0.14em] text-primary">Categoria e preço</p>
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+          <div className="space-y-1.5">
             <label className="text-[11px] font-semibold text-muted-foreground">Categoria</label>
-             <div className="grid grid-cols-2 gap-3">
-              {CATEGORIES.map((opt) => {
-                const Icon = opt.icon;
-                const active = category === opt.value;
-                return (
-                  <button
-                    key={opt.value}
-                    type="button"
-                    onClick={() => setCategory(opt.value)}
-                    className={cn(
-  "relative flex min-h-[106px] flex-col items-start justify-between gap-3 rounded-xl border p-3.5 text-left transition-all duration-300",
-                      active
-                         ? "bg-primary/10 border-primary/50"
-                         : "bg-secondary border-border hover:border-primary/30 hover:bg-accent/60"
-                    )}
-                  >
-                    {active && <div className="absolute left-0 top-2 bottom-2 w-[3px] rounded-full bg-primary" />}
-                     <div className={cn("h-10 w-10 rounded-[14px] flex items-center justify-center border", active ? "bg-primary border-primary text-primary-foreground" : "bg-card border-border text-muted-foreground")}>
-                      <Icon className="h-4 w-4" />
-                    </div>
-                    <div className="min-w-0">
-                      <p className={cn("text-[12px] font-display font-bold leading-tight truncate", active ? "text-primary" : "text-foreground")}>{opt.label}</p>
-                      <p className="text-[10px] text-muted-foreground/70 leading-tight mt-0.5 line-clamp-1">{opt.desc}</p>
-                    </div>
-                  </button>
-                );
-              })}
-            </div>
+            <Select value={category} onValueChange={setCategory}>
+              <SelectTrigger className="h-11 rounded-xl border-border bg-background px-3.5 text-sm focus-visible:border-primary focus-visible:ring-primary/20">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {CATEGORIES.map((opt) => (
+                  <RichSelectItem key={opt.value} value={opt.value} icon={opt.icon} label={opt.label} desc={opt.desc} />
+                ))}
+              </SelectContent>
+            </Select>
           </div>
-           <div className="p-5 md:p-7 space-y-3">
+          <div className="space-y-1.5">
+            <label className="text-[11px] font-semibold text-muted-foreground">Garantia</label>
+            <SegmentedChoice
+              value={warrantyDays}
+              onValueChange={setWarrantyDays}
+              columns={3}
+              size="sm"
+              options={[
+                { value: "7", label: "7 dias" },
+                { value: "14", label: "14 dias" },
+                { value: "30", label: "30 dias" },
+              ]}
+            />
+          </div>
+          <div className="space-y-1.5">
+            <label className="text-[11px] font-semibold text-muted-foreground">Preço de venda</label>
+            <div className="relative">
+              <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-sm font-display font-bold text-muted-foreground">R$</span>
+              <Input
+                type="text"
+                inputMode="decimal"
+                value={price}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => handlePriceChange(e.target.value)}
+                className="h-11 rounded-xl border-border bg-background pl-10 pr-3 font-numbers text-lg font-black text-primary focus-visible:border-primary focus-visible:ring-primary/20"
+                placeholder="0,00"
+              />
+            </div>
+            {priceNumber > 0 && (
+              <p className="text-[10px] text-muted-foreground/60">Cobrado: R$ {priceNumber.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
+            )}
+          </div>
+          <div className="space-y-1.5">
             <label className="text-[11px] font-semibold text-muted-foreground">Tipo de pagamento</label>
             <SegmentedChoice
               value={paymentType}
               onValueChange={setPaymentType}
-              columns={2}
+              columns={1}
+              size="sm"
               options={[
-                { value: "unico", label: "Pagamento único", description: "Cobrança única", icon: DollarSign },
-                { value: "assinatura", label: "Assinatura recorrente", description: "Cobrança automática mensal", icon: RefreshCw, disabled: true, badge: "Em breve" },
+                { value: "unico", label: "Pagamento único" },
+                { value: "assinatura", label: "Assinatura recorrente", disabled: true, badge: "Em breve" },
               ]}
             />
           </div>
-           <div className="p-5 md:p-7">
-             <div className="flex flex-col gap-6">
-              <div className="flex-1 space-y-1.5">
-                <label className="text-[11px] font-semibold text-muted-foreground">Preço de venda</label>
-                <div className="relative">
-                  <span className="absolute left-4 top-1/2 -translate-y-1/2 text-base font-display font-bold text-muted-foreground">R$</span>
-                  <Input
-                    type="text"
-                    inputMode="decimal"
-                    value={price}
-                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => handlePriceChange(e.target.value)}
-                     className="h-16 rounded-2xl pl-12 text-3xl font-numbers font-black bg-background border-border text-primary focus-visible:border-primary focus-visible:ring-primary/20"
-                    placeholder="0,00"
-                  />
-                </div>
-                {priceNumber > 0 && (
-                  <p className="text-[10px] font-bold text-muted-foreground">
-                    Valor cobrado: R$ {priceNumber.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                  </p>
-                )}
-              </div>
-               <div className="w-full space-y-1.5">
-                <label className="text-[11px] font-semibold text-muted-foreground">Garantia</label>
-                <SegmentedChoice
-                  value={warrantyDays}
-                  onValueChange={setWarrantyDays}
-                  columns={3}
-                  size="sm"
-                  options={[
-                    { value: "7", label: "7 dias" },
-                    { value: "14", label: "14 dias" },
-                    { value: "30", label: "30 dias" },
-                  ]}
-                />
-              </div>
-            </div>
-          </div>
         </div>
       </section>
 
-      {/* Section 3: Producer info */}
-       <section className="xl:col-span-8">
-         <header className="mb-5">
-           <p className="mb-2 text-[10px] font-display font-bold uppercase tracking-[0.14em] text-primary">Responsável</p>
-           <h2 className="text-[22px] font-display font-bold text-foreground">Informações do produtor</h2>
-           <p className="mt-1 text-[13px] text-muted-foreground">Dados obrigatórios exibidos ao comprador no checkout.</p>
-        </header>
-         <div className="product-studio-panel space-y-6 rounded-2xl border border-border bg-card p-5 md:p-7">
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-            <div className="space-y-1.5">
-              <label className="text-[11px] font-semibold text-muted-foreground flex items-center gap-1.5">
-                <ExternalLink className="h-3 w-3" /> Página de vendas
-              </label>
-               <Input value={pageUrl} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setPageUrl(e.target.value)} placeholder="seuproduto.com" type="text" className={cn("h-12 rounded-2xl bg-background border-border focus-visible:border-primary focus-visible:ring-primary/20", pageUrl && !urlValid && "border-destructive/50")} required />
-              <p className={cn("text-[10px]", urlValid ? "text-success" : "text-muted-foreground/60")}>{urlValid ? "URL válida — o https:// é adicionado automaticamente" : "Insira o domínio (ex: seusite.com.br) — o https:// é opcional"}</p>
-            </div>
-            <div className="space-y-1.5">
-              <label className="text-[11px] font-semibold text-muted-foreground flex items-center gap-1.5">
-                <Mail className="h-3 w-3" /> E-mail de suporte
-              </label>
-               <Input value={supportEmail} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSupportEmail(e.target.value)} placeholder="suporte@seuproduto.com" type="email" className={cn("h-12 rounded-2xl bg-background border-border focus-visible:border-primary focus-visible:ring-primary/20", supportEmail && !emailValid && "border-destructive/50")} required />
-              <p className={cn("text-[10px]", emailValid ? "text-success" : "text-muted-foreground/60")}>{emailValid ? "E-mail válido" : "Insira um e-mail válido"}</p>
-            </div>
+      {/* Produtor */}
+      <section className="rounded-2xl border border-border bg-card p-5">
+        <p className="mb-4 text-[10px] font-display font-bold uppercase tracking-[0.14em] text-primary">Informações do produtor</p>
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+          <div className="space-y-1.5">
+            <label className="text-[11px] font-semibold text-muted-foreground">Página de vendas</label>
+            <Input value={pageUrl} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setPageUrl(e.target.value)} placeholder="seuproduto.com" type="text" className={cn("h-11 rounded-xl border-border bg-background px-3.5 focus-visible:border-primary focus-visible:ring-primary/20", pageUrl && !urlValid && "border-destructive/50")} required />
+            <p className={cn("text-[10px]", urlValid ? "text-success" : "text-muted-foreground/60")}>{urlValid ? "URL válida" : "O https:// é adicionado automaticamente"}</p>
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-            <div className="space-y-1.5">
-              <label className="text-[11px] font-semibold text-muted-foreground flex items-center gap-1.5">
-                <Phone className="h-3 w-3" /> Telefone de suporte
-              </label>
-              <Input
-                value={supportPhone}
-                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSupportPhone(formatPhone(e.target.value))}
-                placeholder="(11) 91234-5678"
-                inputMode="tel"
-                 className={cn("h-12 rounded-2xl bg-background border-border focus-visible:border-primary focus-visible:ring-primary/20", supportPhone && !phoneValid && "border-destructive/50")}
-                required
-              />
-              <p className={cn("text-[10px]", phoneValid ? "text-success" : "text-muted-foreground/60")}>{phoneValid ? "Telefone válido" : "Insira o DDD + número (10 ou 11 dígitos)"}</p>
-            </div>
-            <div className="space-y-1.5">
-              <label className="text-[11px] font-semibold text-muted-foreground flex items-center gap-1.5">
-                <Users className="h-3 w-3" /> Nome de exibição do produtor
-              </label>
-               <Input value={displayName} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setDisplayName(e.target.value)} placeholder="Nome que aparecerá no checkout" className="h-12 rounded-2xl bg-background border-border focus-visible:border-primary focus-visible:ring-primary/20" required />
-              <p className="text-[10px] text-muted-foreground/60">Aparecerá no rodapé do checkout</p>
-            </div>
+          <div className="space-y-1.5">
+            <label className="text-[11px] font-semibold text-muted-foreground">E-mail de suporte</label>
+            <Input value={supportEmail} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSupportEmail(e.target.value)} placeholder="suporte@seuproduto.com" type="email" className={cn("h-11 rounded-xl border-border bg-background px-3.5 focus-visible:border-primary focus-visible:ring-primary/20", supportEmail && !emailValid && "border-destructive/50")} required />
+            <p className={cn("text-[10px]", emailValid ? "text-success" : "text-muted-foreground/60")}>{emailValid ? "E-mail válido" : "Exibido no checkout"}</p>
+          </div>
+          <div className="space-y-1.5">
+            <label className="text-[11px] font-semibold text-muted-foreground">Telefone de suporte</label>
+            <Input
+              value={supportPhone}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSupportPhone(formatPhone(e.target.value))}
+              placeholder="(11) 91234-5678"
+              inputMode="tel"
+              className={cn("h-11 rounded-xl border-border bg-background px-3.5 focus-visible:border-primary focus-visible:ring-primary/20", supportPhone && !phoneValid && "border-destructive/50")}
+              required
+            />
+            <p className={cn("text-[10px]", phoneValid ? "text-success" : "text-muted-foreground/60")}>{phoneValid ? "Telefone válido" : "DDD + número"}</p>
+          </div>
+          <div className="space-y-1.5">
+            <label className="text-[11px] font-semibold text-muted-foreground">Nome de exibição do produtor</label>
+            <Input value={displayName} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setDisplayName(e.target.value)} placeholder="Nome que aparecerá no checkout" className="h-11 rounded-xl border-border bg-background px-3.5 focus-visible:border-primary focus-visible:ring-primary/20" required />
+            <p className="text-[10px] text-muted-foreground/60">Aparece no rodapé do checkout</p>
           </div>
         </div>
       </section>
-
-      {/* Bottom Next/Save button — easier than scrolling up */}
-      {onNext && (
-        <div className="flex justify-end pt-2 xl:col-span-12">
-          <Button onClick={onNext} size="lg" className="gap-2 rounded-xl font-display font-bold px-8 h-12">
-            Salvar e continuar <ChevronRight className="h-4 w-4" />
-          </Button>
-        </div>
-      )}
     </div>
   );
 }
