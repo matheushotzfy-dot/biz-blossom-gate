@@ -835,6 +835,7 @@ export default function ProductEditor() {
      </div>
     </div>
    </div>
+   </div>
  );
 }
 
