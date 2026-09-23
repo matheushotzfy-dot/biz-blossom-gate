@@ -4414,32 +4414,32 @@ html body .lp .lp-progress {
   }
 
   .dark {
-    --background: 156 12% 10%;
+    --background: 156 10% 13%;
     --foreground: 140 14% 94%;
-    --card: 158 11% 14%;
-    --card-elevated: 157 10% 17%;
-    --card-inset: 158 11% 12%;
+    --card: 157 9% 17%;
+    --card-elevated: 157 9% 20%;
+    --card-inset: 158 10% 15%;
     --card-foreground: 140 14% 94%;
-    --popover: 158 11% 15%;
+    --popover: 157 9% 18%;
     --popover-foreground: 140 14% 94%;
     --primary: 160 88% 40%;
     --primary-foreground: 158 20% 7%;
-    --secondary: 157 9% 19%;
+    --secondary: 157 8% 22%;
     --secondary-foreground: 140 14% 94%;
-    --muted: 157 9% 19%;
-    --muted-foreground: 145 8% 67%;
-    --accent: 157 9% 21%;
+    --muted: 157 8% 22%;
+    --muted-foreground: 145 8% 72%;
+    --accent: 157 8% 24%;
     --accent-foreground: 140 14% 96%;
-    --border: 155 8% 25%;
-    --input: 155 8% 29%;
+    --border: 155 8% 30%;
+    --input: 155 8% 34%;
     --ring: 160 88% 40%;
-    --sidebar-background: 158 12% 12%;
-    --sidebar-foreground: 145 8% 72%;
+    --sidebar-background: 158 10% 15%;
+    --sidebar-foreground: 145 8% 76%;
     --sidebar-primary: 160 88% 40%;
     --sidebar-primary-foreground: 158 20% 7%;
-    --sidebar-accent: 157 9% 19%;
+    --sidebar-accent: 157 8% 22%;
     --sidebar-accent-foreground: 140 14% 96%;
-    --sidebar-border: 155 8% 23%;
+    --sidebar-border: 155 8% 28%;
     --sidebar-ring: 160 88% 40%;
   }
 
@@ -4462,6 +4462,53 @@ html body .lp .lp-progress {
 .venx-executive-shell .technical-topbar {
   background: hsl(var(--background) / 0.94);
   backdrop-filter: blur(14px);
+}
+
+/* O console administrativo compartilha a mesma leitura clara e sóbria. */
+.admin-shell,
+.admin-frame {
+  --as-bg: #f2f5f2;
+  --as-bg-soft: #f7f9f7;
+  --as-surface: #ffffff;
+  --as-surface-2: #edf1ee;
+  --as-elev: #ffffff;
+  --as-border: #d3dad5;
+  --as-border-soft: #e3e8e4;
+  --as-border-strong: #b8c3bb;
+  --as-text: #17201d;
+  --as-text-2: #34423d;
+  --as-text-3: #5a6b64;
+  --as-muted: #687771;
+  --as-muted-2: #8b9893;
+  --as-accent: #00a878;
+  --as-accent-hover: #008f67;
+  --as-accent-soft: #e3f5ef;
+  --as-on-accent: #ffffff;
+  --as-rail: #00a878;
+  --as-radius: 14px;
+  --as-ring: 0 0 0 3px rgba(0, 168, 120, 0.14);
+}
+
+.dark .admin-shell,
+.dark .admin-frame {
+  --as-bg: #1b211f;
+  --as-bg-soft: #202725;
+  --as-surface: #252d2a;
+  --as-surface-2: #2b3431;
+  --as-elev: #303a36;
+  --as-border: #414c48;
+  --as-border-soft: #36413d;
+  --as-border-strong: #56635e;
+  --as-text: #f0f4f1;
+  --as-text-2: #d2dad5;
+  --as-text-3: #a7b4ae;
+  --as-muted: #9aa8a1;
+  --as-muted-2: #78867f;
+  --as-accent: #21c892;
+  --as-accent-hover: #36d5a1;
+  --as-accent-soft: rgba(33, 200, 146, 0.12);
+  --as-on-accent: #0e1814;
+  --as-rail: #21c892;
 }
 
 .venx-executive-shell .technical-sidebar [data-sidebar="sidebar"] {
