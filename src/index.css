@@ -1138,6 +1138,45 @@ input[type="number"]::-webkit-inner-spin-button {
   }
 }
 
+/* Product Studio — ultra-clean editor with electric-blue operational focus */
+.product-studio {
+  background:
+    linear-gradient(180deg, hsl(var(--primary) / 0.045), transparent 260px),
+    hsl(var(--background));
+}
+
+.product-studio-topbar {
+  background: hsl(var(--card) / 0.94);
+  backdrop-filter: blur(16px);
+}
+
+.product-studio-rail,
+.product-studio-canvas {
+  scrollbar-width: thin;
+  scrollbar-color: hsl(var(--primary) / 0.35) transparent;
+}
+
+.product-studio-panel {
+  box-shadow: 0 1px 0 hsl(var(--primary) / 0.08);
+  transition: border-color 360ms cubic-bezier(0.16, 1, 0.3, 1), background-color 360ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.product-studio-panel:focus-within {
+  border-color: hsl(var(--primary) / 0.38);
+}
+
+.dark .product-studio {
+  background:
+    linear-gradient(180deg, hsl(var(--primary) / 0.085), transparent 300px),
+    hsl(var(--background));
+}
+
+@media (max-width: 1023px) {
+  .product-studio-canvas {
+    padding-right: 0;
+  }
+}
+
 /* ─── Page-level rise-in (applied on route change) ─── */
 @keyframes pageRise {
   0%   { opacity: 0; transform: translateY(10px); filter: blur(1.5px); }

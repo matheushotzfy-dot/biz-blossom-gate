@@ -684,7 +684,7 @@ export default function ProductEditor() {
  const currentTabIdx = TABS.findIndex(t => t.key === activeTab);
 
  return (
- <div className="h-[100dvh] bg-background flex flex-col overflow-hidden">
+  <div className="product-studio h-[100dvh] bg-background flex flex-col overflow-hidden">
  {/* ───── Progress Bar (Top) ───── */}
  <div className="shrink-0 h-[2px] bg-border/10 relative z-[60]">
  <motion.div
@@ -698,16 +698,16 @@ export default function ProductEditor() {
  </div>
 
  {/* ───── Top Bar ───── */}
-  <div className="shrink-0 z-50 bg-card border-b border-border">
-  <div className="max-w-7xl mx-auto px-3 sm:px-6 flex items-center justify-between h-14 sm:h-[60px]">
+   <div className="product-studio-topbar shrink-0 z-50 bg-card border-b border-border">
+   <div className="max-w-[1440px] mx-auto px-3 sm:px-7 flex items-center justify-between h-16 sm:h-[68px]">
   <div className="flex items-center gap-3">
-  <button onClick={() => navigate("/vendas/produtos")} className="flex h-9 w-9 items-center justify-center rounded-xl border border-border bg-secondary hover:bg-muted text-muted-foreground hover:text-foreground transition-all duration-200 ">
+   <button onClick={() => navigate("/vendas/produtos")} aria-label="Voltar para produtos" className="flex h-10 w-10 items-center justify-center rounded-2xl border border-border bg-secondary hover:bg-accent text-muted-foreground hover:text-primary transition-all duration-300">
   <ArrowLeft className="h-4 w-4" />
   </button>
 
   {/* Product chip */}
   {name && (
-  <div className="hidden md:flex items-center gap-2.5 px-3.5 py-2 rounded-xl bg-secondary border border-border">
+   <div className="hidden md:flex items-center gap-3 px-3.5 py-2 rounded-2xl bg-secondary border border-border">
   {imagePreview ? (
   <img src={imagePreview} alt="" className="h-7 w-7 rounded-lg object-cover border border-border" />
   ) : (
@@ -730,7 +730,7 @@ export default function ProductEditor() {
 
   <div className="flex items-center gap-2.5">
   {/* Step indicator */}
-  <div className="hidden lg:flex items-center gap-1 px-3 py-2.5 rounded-xl bg-secondary border border-border">
+   <div className="hidden xl:flex items-center gap-1 px-3 py-2.5 rounded-2xl bg-secondary border border-border">
   {TABS.map((tab) => {
   const isActive = activeTab === tab.key;
   const locked = tab.key !== "geral" && tabsLocked;
@@ -750,7 +750,7 @@ export default function ProductEditor() {
   </div>
 
   {/* Completion */}
-  <div className="hidden sm:flex items-center gap-2.5 px-3.5 py-2 rounded-xl bg-secondary border border-border">
+   <div className="hidden sm:flex items-center gap-2.5 px-3.5 py-2 rounded-2xl bg-secondary border border-border">
   <CompletionRing percent={completionPercent} />
   <div>
   <p className="text-[11px] font-display font-medium text-muted-foreground">Completo</p>
@@ -793,13 +793,14 @@ export default function ProductEditor() {
 
  {/* ───── Main Area ───── */}
  <div className="flex-1 min-h-0 flex overflow-hidden">
- <div className="max-w-7xl mx-auto px-3 sm:px-6 w-full flex gap-6 py-5 min-h-0">
+  <div className="max-w-[1440px] mx-auto px-3 sm:px-7 w-full flex gap-8 xl:gap-12 py-6 min-h-0">
 
  {/* ───── Sidebar ───── */}
-  <nav className="hidden lg:flex flex-col w-56 shrink-0 overflow-y-auto overscroll-contain pb-6 scrollbar-none space-y-3">
-  <div className="rounded-[12px] border border-border bg-card p-2.5 space-y-0.5">
-  <div className="px-3 py-2.5 mb-1">
-  <p className="text-[11px] font-display font-medium text-muted-foreground">Navegação</p>
+   <nav className="product-studio-rail hidden lg:flex flex-col w-60 shrink-0 overflow-y-auto overscroll-contain pb-6 scrollbar-none space-y-3">
+   <div className="rounded-[24px] border border-border bg-card p-2.5 space-y-1">
+   <div className="px-3 py-3 mb-1 flex items-center justify-between">
+   <p className="text-[10px] font-display font-bold uppercase tracking-[0.14em] text-muted-foreground">Configuração</p>
+   <span className="text-[10px] font-numbers font-bold text-primary">{completionPercent}%</span>
   </div>
   {TABS.map((tab) => {
   const isActive = activeTab === tab.key;
@@ -814,25 +815,25 @@ export default function ProductEditor() {
   }}
   disabled={locked}
   className={cn(
- "w-full flex items-center gap-2.5 px-3.5 py-2.5 rounded-xl text-[13px] font-display font-bold transition-all duration-200 text-left relative group/tab",
+  "w-full flex min-h-[52px] items-center gap-3 px-3.5 py-2.5 rounded-2xl text-[13px] font-display font-bold transition-all duration-300 text-left relative group/tab",
   locked
   ? "opacity-25 cursor-not-allowed text-muted-foreground"
   : isActive
-  ? "bg-primary/10 text-primary border border-primary/15"
-  : "text-muted-foreground hover:text-foreground hover:bg-muted/30"
+  ? "bg-primary/10 text-primary border border-primary/25"
+  : "border border-transparent text-muted-foreground hover:text-foreground hover:bg-accent/70"
   )}
   >
   {isActive && (
-  <motion.div layoutId="sidebar-accent" className="absolute left-0 top-1.5 bottom-1.5 w-[3px] rounded-full bg-primary" transition={{ type: "spring", stiffness: 400, damping: 30 }} />
+   <motion.div layoutId="sidebar-accent" className="absolute left-0 top-2 bottom-2 w-[3px] rounded-full bg-primary" transition={{ type: "spring", stiffness: 360, damping: 32 }} />
   )}
   {locked ? (
   <Lock className="h-3.5 w-3.5 shrink-0" />
   ) : (
   <div className={cn(
- "h-7 w-7 rounded-lg flex items-center justify-center shrink-0 border transition-all duration-200",
-  isActive ? "bg-primary/10 border-primary/20" : "bg-secondary border-border group-hover/tab:border-muted-foreground/20"
+  "h-8 w-8 rounded-xl flex items-center justify-center shrink-0 border transition-all duration-300",
+   isActive ? "bg-primary text-primary-foreground border-primary" : "bg-secondary border-border group-hover/tab:border-primary/25 group-hover/tab:text-primary"
   )}>
-  <tab.icon className={cn("h-3.5 w-3.5 transition-colors duration-200", isActive ? "text-primary" : "text-muted-foreground/50 group-hover/tab:text-muted-foreground")} />
+   <tab.icon className={cn("h-4 w-4 transition-colors duration-300", isActive ? "text-primary-foreground" : "text-muted-foreground group-hover/tab:text-primary")} />
   </div>
   )}
   <span className="truncate">{tab.label}</span>
@@ -895,7 +896,7 @@ export default function ProductEditor() {
   </div>
 
  {/* ───── Content Area ───── */}
- <div ref={contentRef} className="flex-1 min-w-0 overflow-y-auto pb-28 sm:pb-24 lg:pb-6 overscroll-contain" style={{ WebkitOverflowScrolling: "touch" }}>
+  <div ref={contentRef} className="product-studio-canvas flex-1 min-w-0 overflow-y-auto pb-28 sm:pb-24 lg:pb-8 overscroll-contain pr-0 lg:pr-2" style={{ WebkitOverflowScrolling: "touch" }}>
  <AnimatePresence mode="wait">
  <motion.div
  key={activeTab}
@@ -1063,24 +1064,25 @@ function TabGeral({ name, setName, description, setDescription, price, setPrice,
   ];
 
   return (
-    <div className="space-y-8">
+     <div className="space-y-10">
       {/* Section 1: Identity */}
       <section>
-        <header className="mb-4">
-          <h2 className="text-[15px] font-display font-black tracking-[-0.02em] text-foreground">Identidade do produto</h2>
-          <p className="mt-0.5 text-xs text-muted-foreground">Como seu produto aparece para clientes e afiliados.</p>
+         <header className="mb-5">
+           <p className="mb-2 text-[10px] font-display font-bold uppercase tracking-[0.14em] text-primary">Visão principal</p>
+           <h2 className="text-[22px] font-display font-bold text-foreground">Identidade do produto</h2>
+           <p className="mt-1 text-[13px] text-muted-foreground">Como seu produto aparece para clientes e afiliados.</p>
         </header>
-        <div className="rounded-[12px] border border-border bg-card overflow-hidden">
-          <div className="grid grid-cols-1 md:grid-cols-[260px_1fr]">
+         <div className="product-studio-panel rounded-[28px] border border-border bg-card overflow-hidden">
+           <div className="grid grid-cols-1 md:grid-cols-[280px_1fr]">
             <div
-              className={cn("relative border-b md:border-b-0 md:border-r border-border transition-colors", isDragging ? "bg-primary/5" : "bg-secondary/40")}
+               className={cn("relative m-4 md:m-5 md:mr-0 overflow-hidden rounded-[22px] border border-border transition-colors", isDragging ? "bg-primary/10 border-primary/40" : "bg-secondary")}
               onDragOver={(e) => { e.preventDefault(); setIsDragging(true); }}
               onDragLeave={() => setIsDragging(false)}
               onDrop={handleDrop}
             >
               <input ref={fileInputRef} type="file" accept="image/jpeg,image/png,image/webp,image/gif" onChange={handleFileChange} className="hidden" />
               {imagePreview ? (
-                <div className="relative h-full min-h-[220px] group/img">
+                 <div className="relative h-full min-h-[250px] group/img">
                   <img src={imagePreview} alt="Preview" className="absolute inset-0 h-full w-full object-cover" />
                   <div className="absolute inset-0 bg-background/85 opacity-0 group-hover/img:opacity-100 transition-opacity flex items-center justify-center gap-2">
                     <button type="button" onClick={() => fileInputRef.current?.click()} className="h-9 px-3 rounded-lg bg-card border border-border text-xs font-semibold text-foreground hover:border-primary/40 transition-colors flex items-center gap-1.5">
@@ -1092,8 +1094,8 @@ function TabGeral({ name, setName, description, setDescription, price, setPrice,
                   </div>
                 </div>
               ) : (
-                <button type="button" onClick={() => fileInputRef.current?.click()} className="h-full min-h-[220px] w-full flex flex-col items-center justify-center gap-3 text-muted-foreground hover:text-foreground transition-colors p-6">
-                  <div className="h-12 w-12 rounded-xl bg-card border border-border flex items-center justify-center">
+                 <button type="button" onClick={() => fileInputRef.current?.click()} className="h-full min-h-[250px] w-full flex flex-col items-center justify-center gap-3 text-muted-foreground hover:text-primary transition-colors p-6">
+                   <div className="h-12 w-12 rounded-2xl bg-primary/10 border border-primary/20 text-primary flex items-center justify-center">
                     <Upload className="h-5 w-5" />
                   </div>
                   <div className="text-center">
@@ -1104,10 +1106,10 @@ function TabGeral({ name, setName, description, setDescription, price, setPrice,
                 </button>
               )}
             </div>
-            <div className="p-5 space-y-5">
+             <div className="p-5 md:p-7 space-y-6">
               <div className="space-y-1.5">
                 <label className="text-[11px] font-semibold text-muted-foreground">Nome do produto</label>
-                <Input value={name} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setName(e.target.value)} placeholder="Ex: Curso Completo de Marketing Digital" className="h-12 bg-secondary border-border text-lg font-display font-bold tracking-[-0.01em]" required maxLength={200} />
+                 <Input value={name} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setName(e.target.value)} placeholder="Ex: Curso Completo de Marketing Digital" className="h-14 rounded-2xl bg-background border-border px-4 text-base font-display font-bold focus-visible:border-primary focus-visible:ring-primary/20" required maxLength={200} />
                 <div className="flex items-center justify-between text-[10px] text-muted-foreground/60">
                   <span>{name.length > 0 ? "Visível no checkout e área de membros" : "Obrigatório"}</span>
                   <span className="tabular-nums">{name.length}/200</span>
@@ -1115,7 +1117,7 @@ function TabGeral({ name, setName, description, setDescription, price, setPrice,
               </div>
               <div className="space-y-1.5">
                 <label className="text-[11px] font-semibold text-muted-foreground">Descrição</label>
-                <Textarea value={description} onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setDescription(e.target.value)} rows={4} placeholder="Descreva o que o aluno vai receber, principais benefícios e diferenciais (mínimo 50 caracteres)..." className={cn("resize-none bg-secondary border-border text-sm leading-relaxed", description.length > 0 && !descValid && "border-destructive/50")} maxLength={2000} />
+                 <Textarea value={description} onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setDescription(e.target.value)} rows={5} placeholder="Descreva o que o aluno vai receber, principais benefícios e diferenciais (mínimo 50 caracteres)..." className={cn("resize-none rounded-2xl bg-background border-border px-4 py-3 text-sm leading-relaxed focus-visible:border-primary focus-visible:ring-primary/20", description.length > 0 && !descValid && "border-destructive/50")} maxLength={2000} />
                 <div className="flex items-center justify-between text-[10px]">
                   <span className={cn(descValid ? "text-success" : description.length > 0 ? "text-destructive" : "text-muted-foreground/60")}>
                     {descValid ? "Descrição válida" : description.length > 0 ? `Faltam ${50 - description.length} caracteres` : "Mínimo 50 caracteres"}
@@ -1130,14 +1132,15 @@ function TabGeral({ name, setName, description, setDescription, price, setPrice,
 
       {/* Section 2: Classification & Pricing */}
       <section>
-        <header className="mb-4">
-          <h2 className="text-[15px] font-display font-black tracking-[-0.02em] text-foreground">Categoria e preço</h2>
-          <p className="mt-0.5 text-xs text-muted-foreground">Como seu produto é classificado e cobrado.</p>
+         <header className="mb-5">
+           <p className="mb-2 text-[10px] font-display font-bold uppercase tracking-[0.14em] text-primary">Oferta</p>
+           <h2 className="text-[22px] font-display font-bold text-foreground">Categoria e preço</h2>
+           <p className="mt-1 text-[13px] text-muted-foreground">Como seu produto é classificado e cobrado.</p>
         </header>
-        <div className="rounded-[12px] border border-border bg-card divide-y divide-border">
-          <div className="p-5 space-y-3">
+         <div className="product-studio-panel rounded-[28px] border border-border bg-card divide-y divide-border overflow-hidden">
+           <div className="p-5 md:p-7 space-y-4">
             <label className="text-[11px] font-semibold text-muted-foreground">Categoria</label>
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+             <div className="grid grid-cols-2 xl:grid-cols-4 gap-3">
               {CATEGORIES.map((opt) => {
                 const Icon = opt.icon;
                 const active = category === opt.value;
@@ -1147,14 +1150,14 @@ function TabGeral({ name, setName, description, setDescription, price, setPrice,
                     type="button"
                     onClick={() => setCategory(opt.value)}
                     className={cn(
- "relative flex flex-col items-start gap-2 p-3 rounded-xl border text-left transition-colors duration-200",
+  "relative flex min-h-[118px] flex-col items-start justify-between gap-3 p-4 rounded-[20px] border text-left transition-all duration-300",
                       active
-                        ? "bg-primary/5 border-primary/40"
-                        : "bg-secondary/40 border-border hover:border-primary/20"
+                         ? "bg-primary/10 border-primary/50"
+                         : "bg-secondary border-border hover:border-primary/30 hover:bg-accent/60"
                     )}
                   >
                     {active && <div className="absolute left-0 top-2 bottom-2 w-[3px] rounded-full bg-primary" />}
-                    <div className={cn("h-8 w-8 rounded-lg flex items-center justify-center border", active ? "bg-primary/10 border-primary/30 text-primary" : "bg-card border-border text-muted-foreground")}>
+                     <div className={cn("h-10 w-10 rounded-[14px] flex items-center justify-center border", active ? "bg-primary border-primary text-primary-foreground" : "bg-card border-border text-muted-foreground")}>
                       <Icon className="h-4 w-4" />
                     </div>
                     <div className="min-w-0">
@@ -1166,7 +1169,7 @@ function TabGeral({ name, setName, description, setDescription, price, setPrice,
               })}
             </div>
           </div>
-          <div className="p-5 space-y-2">
+           <div className="p-5 md:p-7 space-y-3">
             <label className="text-[11px] font-semibold text-muted-foreground">Tipo de pagamento</label>
             <SegmentedChoice
               value={paymentType}
@@ -1178,8 +1181,8 @@ function TabGeral({ name, setName, description, setDescription, price, setPrice,
               ]}
             />
           </div>
-          <div className="p-5">
-            <div className="flex items-end justify-between gap-6">
+           <div className="p-5 md:p-7">
+             <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-6">
               <div className="flex-1 space-y-1.5">
                 <label className="text-[11px] font-semibold text-muted-foreground">Preço de venda</label>
                 <div className="relative">
@@ -1189,7 +1192,7 @@ function TabGeral({ name, setName, description, setDescription, price, setPrice,
                     inputMode="decimal"
                     value={price}
                     onChange={(e: React.ChangeEvent<HTMLInputElement>) => handlePriceChange(e.target.value)}
-                    className="h-14 pl-12 text-3xl font-numbers font-black tracking-[-0.03em] bg-secondary border-border text-success"
+                     className="h-16 rounded-2xl pl-12 text-3xl font-numbers font-black bg-background border-border text-primary focus-visible:border-primary focus-visible:ring-primary/20"
                     placeholder="0,00"
                   />
                 </div>
@@ -1199,7 +1202,7 @@ function TabGeral({ name, setName, description, setDescription, price, setPrice,
                   </p>
                 )}
               </div>
-              <div className="w-[300px] space-y-1.5">
+               <div className="w-full sm:w-[300px] space-y-1.5">
                 <label className="text-[11px] font-semibold text-muted-foreground">Garantia</label>
                 <SegmentedChoice
                   value={warrantyDays}
@@ -1220,24 +1223,25 @@ function TabGeral({ name, setName, description, setDescription, price, setPrice,
 
       {/* Section 3: Producer info */}
       <section>
-        <header className="mb-4">
-          <h2 className="text-[15px] font-display font-black tracking-[-0.02em] text-foreground">Informações do produtor</h2>
-          <p className="mt-0.5 text-xs text-muted-foreground">Dados obrigatórios exibidos ao comprador no checkout.</p>
+         <header className="mb-5">
+           <p className="mb-2 text-[10px] font-display font-bold uppercase tracking-[0.14em] text-primary">Responsável</p>
+           <h2 className="text-[22px] font-display font-bold text-foreground">Informações do produtor</h2>
+           <p className="mt-1 text-[13px] text-muted-foreground">Dados obrigatórios exibidos ao comprador no checkout.</p>
         </header>
-        <div className="rounded-[12px] border border-border bg-card p-5 space-y-5">
+         <div className="product-studio-panel rounded-[28px] border border-border bg-card p-5 md:p-7 space-y-6">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
             <div className="space-y-1.5">
               <label className="text-[11px] font-semibold text-muted-foreground flex items-center gap-1.5">
                 <ExternalLink className="h-3 w-3" /> Página de vendas
               </label>
-              <Input value={pageUrl} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setPageUrl(e.target.value)} placeholder="seuproduto.com" type="text" className={cn("h-11 bg-secondary border-border", pageUrl && !urlValid && "border-destructive/50")} required />
+               <Input value={pageUrl} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setPageUrl(e.target.value)} placeholder="seuproduto.com" type="text" className={cn("h-12 rounded-2xl bg-background border-border focus-visible:border-primary focus-visible:ring-primary/20", pageUrl && !urlValid && "border-destructive/50")} required />
               <p className={cn("text-[10px]", urlValid ? "text-success" : "text-muted-foreground/60")}>{urlValid ? "URL válida — o https:// é adicionado automaticamente" : "Insira o domínio (ex: seusite.com.br) — o https:// é opcional"}</p>
             </div>
             <div className="space-y-1.5">
               <label className="text-[11px] font-semibold text-muted-foreground flex items-center gap-1.5">
                 <Mail className="h-3 w-3" /> E-mail de suporte
               </label>
-              <Input value={supportEmail} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSupportEmail(e.target.value)} placeholder="suporte@seuproduto.com" type="email" className={cn("h-11 bg-secondary border-border", supportEmail && !emailValid && "border-destructive/50")} required />
+               <Input value={supportEmail} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSupportEmail(e.target.value)} placeholder="suporte@seuproduto.com" type="email" className={cn("h-12 rounded-2xl bg-background border-border focus-visible:border-primary focus-visible:ring-primary/20", supportEmail && !emailValid && "border-destructive/50")} required />
               <p className={cn("text-[10px]", emailValid ? "text-success" : "text-muted-foreground/60")}>{emailValid ? "E-mail válido" : "Insira um e-mail válido"}</p>
             </div>
           </div>
@@ -1251,7 +1255,7 @@ function TabGeral({ name, setName, description, setDescription, price, setPrice,
                 onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSupportPhone(formatPhone(e.target.value))}
                 placeholder="(11) 91234-5678"
                 inputMode="tel"
-                className={cn("h-11 bg-secondary border-border", supportPhone && !phoneValid && "border-destructive/50")}
+                 className={cn("h-12 rounded-2xl bg-background border-border focus-visible:border-primary focus-visible:ring-primary/20", supportPhone && !phoneValid && "border-destructive/50")}
                 required
               />
               <p className={cn("text-[10px]", phoneValid ? "text-success" : "text-muted-foreground/60")}>{phoneValid ? "Telefone válido" : "Insira o DDD + número (10 ou 11 dígitos)"}</p>
@@ -1260,7 +1264,7 @@ function TabGeral({ name, setName, description, setDescription, price, setPrice,
               <label className="text-[11px] font-semibold text-muted-foreground flex items-center gap-1.5">
                 <Users className="h-3 w-3" /> Nome de exibição do produtor
               </label>
-              <Input value={displayName} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setDisplayName(e.target.value)} placeholder="Nome que aparecerá no checkout" className="h-11 bg-secondary border-border" required />
+               <Input value={displayName} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setDisplayName(e.target.value)} placeholder="Nome que aparecerá no checkout" className="h-12 rounded-2xl bg-background border-border focus-visible:border-primary focus-visible:ring-primary/20" required />
               <p className="text-[10px] text-muted-foreground/60">Aparecerá no rodapé do checkout</p>
             </div>
           </div>
@@ -2744,13 +2748,13 @@ function TabConteudo({ productId, isNew }: { productId?: string; isNew: boolean 
 
 function SectionHeader({ icon: Icon, title, subtitle }: { icon: React.ComponentType<{ className?: string }>; title: string; subtitle: string }) {
   return (
-  <div className="flex items-center gap-3.5 mb-6">
-  <div className="h-11 w-11 shrink-0 rounded-xl bg-primary/10 border border-border flex items-center justify-center">
+  <div className="flex items-center gap-4 mb-7">
+  <div className="h-12 w-12 shrink-0 rounded-2xl bg-primary text-primary-foreground border border-primary flex items-center justify-center">
   <Icon className="h-5 w-5 text-primary" />
   </div>
   <div>
-  <h2 className="text-[15px] font-display font-bold text-foreground tracking-[-0.02em]">{title}</h2>
-  <p className="text-xs text-muted-foreground mt-0.5 font-display">{subtitle}</p>
+  <h2 className="text-[20px] font-display font-bold text-foreground">{title}</h2>
+  <p className="text-[13px] text-muted-foreground mt-1 font-sans">{subtitle}</p>
   </div>
   </div>
   );
@@ -2758,8 +2762,8 @@ function SectionHeader({ icon: Icon, title, subtitle }: { icon: React.ComponentT
 
 function EditorCard({ children, accentColor = "bg-primary" }: { children: React.ReactNode; accentColor?: string }) {
   return (
-  <div className="rounded-[12px] border border-border bg-card p-5 sm:p-6 space-y-4 relative overflow-hidden hover:border-muted-foreground/20 transition-colors duration-250">
-  <div className={cn("absolute left-0 top-0 bottom-0 w-[3px] rounded-full", accentColor)} />
+  <div className="product-studio-panel rounded-[24px] border border-border bg-card p-5 sm:p-7 space-y-5 relative overflow-hidden hover:border-primary/25 transition-colors duration-300">
+  <div className={cn("absolute left-0 top-6 bottom-6 w-[3px] rounded-full", accentColor)} />
   {children}
   </div>
   );
