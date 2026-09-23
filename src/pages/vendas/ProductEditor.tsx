@@ -686,10 +686,10 @@ export default function ProductEditor() {
  return (
   <div className="product-studio h-[100dvh] overflow-hidden bg-background">
    <div ref={contentRef} className="product-studio-canvas h-full overflow-y-auto overscroll-contain" style={{ WebkitOverflowScrolling: "touch" }}>
-     <div className="mx-auto w-full max-w-[1024px] px-4 py-5 sm:px-7 sm:py-7">
-      <header className="mb-6 flex flex-col gap-4 border-b border-border pb-5 md:flex-row md:items-center md:justify-between">
+     <div className="mx-auto w-full max-w-[960px] px-4 py-4 sm:px-6">
+      <header className="mb-3 flex flex-col gap-3 pb-1 md:flex-row md:items-center md:justify-between">
        <div className="min-w-0">
-        <button onClick={() => navigate("/vendas/produtos")} className="mb-2 inline-flex items-center gap-2 text-[10px] font-display font-bold uppercase tracking-[0.12em] text-muted-foreground transition-colors hover:text-primary">
+        <button onClick={() => navigate("/vendas/produtos")} className="mb-1 inline-flex items-center gap-2 text-[10px] font-display font-bold uppercase tracking-[0.12em] text-muted-foreground transition-colors hover:text-primary">
          <ArrowLeft className="h-3 w-3" /> Produtos <ChevronRight className="h-2.5 w-2.5" /> {isNew ? "Novo produto" : "Editar produto"}
         </button>
         <div className="flex items-center gap-3">
@@ -697,7 +697,7 @@ export default function ProductEditor() {
           <Package className="h-4 w-4" />
          </div>
          <div className="min-w-0">
-          <h1 className="truncate text-lg font-display font-bold text-foreground sm:text-xl">{name || "Configure seu novo produto"}</h1>
+          <h1 className="truncate text-base font-display font-bold text-foreground">{name || "Configure seu novo produto"}</h1>
           <p className="text-xs text-muted-foreground">{isNew ? "Preencha as informações essenciais para começar." : "Revise a oferta e publique suas alterações."}</p>
          </div>
         </div>
@@ -716,8 +716,8 @@ export default function ProductEditor() {
        </div>
       </header>
 
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-[200px_minmax(0,1fr)] xl:gap-8">
-       <aside className="hidden lg:block">
+      <div className="grid grid-cols-1 gap-6 ">
+       <aside className="hidden">
         <div className="product-studio-rail sticky top-5 space-y-1 border-l border-border pl-3">
          <div className="mb-4 px-3">
          <div className="mb-2 flex items-center justify-between text-[10px] font-bold uppercase tracking-[0.12em] text-muted-foreground"><span>Configuração</span><span className="text-primary">{completionPercent}%</span></div>
@@ -739,10 +739,10 @@ export default function ProductEditor() {
       </aside>
 
       <div className="min-w-0 pb-24 lg:pb-8">
-       <div className="mb-6 flex gap-1 overflow-x-auto border-b border-border pb-3 lg:hidden">
+       <div className="mb-4 flex gap-1 overflow-x-auto border-b border-border pb-2">
         {TABS.map((tab) => {
          const locked = tab.key !== "geral" && tabsLocked;
-         return <button key={tab.key} disabled={locked} onClick={() => { if (!locked) setActiveTab(tab.key); }} className={cn("flex shrink-0 items-center gap-2 rounded-xl px-3 py-2 text-xs font-bold", locked ? "opacity-30" : activeTab === tab.key ? "bg-primary text-primary-foreground" : "bg-secondary text-muted-foreground")}><tab.icon className="h-3.5 w-3.5" />{tab.label}</button>;
+         return <button key={tab.key} disabled={locked} onClick={() => { if (!locked) setActiveTab(tab.key); }} className={cn("flex shrink-0 items-center gap-2 rounded-lg px-2.5 py-1.5 text-[11.5px] font-bold", locked ? "opacity-30" : activeTab === tab.key ? "bg-primary text-primary-foreground" : "bg-secondary text-muted-foreground")}><tab.icon className="h-3.5 w-3.5" />{tab.label}</button>;
         })}
        </div>
  <AnimatePresence mode="wait">
@@ -913,13 +913,13 @@ function TabGeral({ name, setName, description, setDescription, price, setPrice,
   ];
 
   return (
-    <div className="mx-auto w-full max-w-[620px] space-y-4">
+    <div className="mx-auto grid w-full max-w-[920px] grid-cols-1 gap-3 lg:grid-cols-2">
       {/* Identidade */}
-      <section className="rounded-2xl border border-border bg-card p-5">
-        <p className="mb-4 text-[10px] font-display font-bold uppercase tracking-[0.14em] text-primary">Identidade do produto</p>
+      <section className="rounded-xl border border-border bg-card p-4">
+        <p className="mb-3 text-[10px] font-display font-bold uppercase tracking-[0.14em] text-primary">Identidade do produto</p>
         <div className="flex gap-4">
           <div
-            className={cn("relative h-[88px] w-[88px] shrink-0 overflow-hidden rounded-xl border transition-colors", isDragging ? "border-primary/40 bg-primary/10" : "border-border bg-secondary")}
+            className={cn("relative h-[72px] w-[72px] shrink-0 overflow-hidden rounded-xl border transition-colors", isDragging ? "border-primary/40 bg-primary/10" : "border-border bg-secondary")}
             onDragOver={(e) => { e.preventDefault(); setIsDragging(true); }}
             onDragLeave={() => setIsDragging(false)}
             onDrop={handleDrop}
@@ -944,15 +944,15 @@ function TabGeral({ name, setName, description, setDescription, price, setPrice,
               </button>
             )}
           </div>
-          <div className="min-w-0 flex-1 space-y-1.5">
+          <div className="min-w-0 flex-1 space-y-1">
             <label className="text-[11px] font-semibold text-muted-foreground">Nome do produto</label>
-            <Input value={name} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setName(e.target.value)} placeholder="Ex: Curso Completo de Marketing Digital" className="h-11 rounded-xl border-border bg-background px-3.5 text-sm font-display font-bold focus-visible:border-primary focus-visible:ring-primary/20" required maxLength={200} />
+            <Input value={name} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setName(e.target.value)} placeholder="Ex: Curso Completo de Marketing Digital" className="h-9 rounded-lg border-border bg-background px-3.5 text-sm font-display font-bold focus-visible:border-primary focus-visible:ring-primary/20" required maxLength={200} />
             <p className="tabular-nums text-[10px] text-muted-foreground/60">{name.length}/200 caracteres</p>
           </div>
         </div>
-        <div className="mt-4 space-y-1.5">
+        <div className="mt-3 space-y-1">
           <label className="text-[11px] font-semibold text-muted-foreground">Descrição</label>
-          <Textarea value={description} onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setDescription(e.target.value)} rows={3} placeholder="O que o comprador vai receber, benefícios e diferenciais (mínimo 50 caracteres)..." className={cn("resize-none rounded-xl border-border bg-background px-3.5 py-2.5 text-sm leading-relaxed focus-visible:border-primary focus-visible:ring-primary/20", description.length > 0 && !descValid && "border-destructive/50")} maxLength={2000} />
+          <Textarea value={description} onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setDescription(e.target.value)} rows={2} placeholder="O que o comprador vai receber, benefícios e diferenciais (mínimo 50 caracteres)..." className={cn("resize-none rounded-xl border-border bg-background px-3.5 py-2.5 text-sm leading-relaxed focus-visible:border-primary focus-visible:ring-primary/20", description.length > 0 && !descValid && "border-destructive/50")} maxLength={2000} />
           <div className="flex items-center justify-between text-[10px]">
             <span className={cn(descValid ? "text-success" : description.length > 0 ? "text-destructive" : "text-muted-foreground/60")}>
               {descValid ? "Descrição válida" : description.length > 0 ? `Faltam ${50 - description.length} caracteres` : "Mínimo 50 caracteres"}
@@ -963,13 +963,13 @@ function TabGeral({ name, setName, description, setDescription, price, setPrice,
       </section>
 
       {/* Categoria e preço */}
-      <section className="rounded-2xl border border-border bg-card p-5">
-        <p className="mb-4 text-[10px] font-display font-bold uppercase tracking-[0.14em] text-primary">Categoria e preço</p>
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-          <div className="space-y-1.5">
+      <section className="rounded-xl border border-border bg-card p-4">
+        <p className="mb-3 text-[10px] font-display font-bold uppercase tracking-[0.14em] text-primary">Categoria e preço</p>
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+          <div className="space-y-1">
             <label className="text-[11px] font-semibold text-muted-foreground">Categoria</label>
             <Select value={category} onValueChange={setCategory}>
-              <SelectTrigger className="h-11 rounded-xl border-border bg-background px-3.5 text-sm focus-visible:border-primary focus-visible:ring-primary/20">
+              <SelectTrigger className="h-9 rounded-lg border-border bg-background px-3.5 text-sm focus-visible:border-primary focus-visible:ring-primary/20">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -979,7 +979,7 @@ function TabGeral({ name, setName, description, setDescription, price, setPrice,
               </SelectContent>
             </Select>
           </div>
-          <div className="space-y-1.5">
+          <div className="space-y-1">
             <label className="text-[11px] font-semibold text-muted-foreground">Garantia</label>
             <SegmentedChoice
               value={warrantyDays}
@@ -993,7 +993,7 @@ function TabGeral({ name, setName, description, setDescription, price, setPrice,
               ]}
             />
           </div>
-          <div className="space-y-1.5">
+          <div className="space-y-1">
             <label className="text-[11px] font-semibold text-muted-foreground">Preço de venda</label>
             <div className="relative">
               <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-sm font-display font-bold text-muted-foreground">R$</span>
@@ -1002,7 +1002,7 @@ function TabGeral({ name, setName, description, setDescription, price, setPrice,
                 inputMode="decimal"
                 value={price}
                 onChange={(e: React.ChangeEvent<HTMLInputElement>) => handlePriceChange(e.target.value)}
-                className="h-11 rounded-xl border-border bg-background pl-10 pr-3 font-numbers text-lg font-black text-primary focus-visible:border-primary focus-visible:ring-primary/20"
+                className="h-9 rounded-lg border-border bg-background pl-10 pr-3 font-numbers text-base font-black text-primary focus-visible:border-primary focus-visible:ring-primary/20"
                 placeholder="0,00"
               />
             </div>
@@ -1010,7 +1010,7 @@ function TabGeral({ name, setName, description, setDescription, price, setPrice,
               <p className="text-[10px] text-muted-foreground/60">Cobrado: R$ {priceNumber.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
             )}
           </div>
-          <div className="space-y-1.5">
+          <div className="space-y-1">
             <label className="text-[11px] font-semibold text-muted-foreground">Tipo de pagamento</label>
             <SegmentedChoice
               value={paymentType}
@@ -1027,34 +1027,34 @@ function TabGeral({ name, setName, description, setDescription, price, setPrice,
       </section>
 
       {/* Produtor */}
-      <section className="rounded-2xl border border-border bg-card p-5">
-        <p className="mb-4 text-[10px] font-display font-bold uppercase tracking-[0.14em] text-primary">Informações do produtor</p>
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-          <div className="space-y-1.5">
+      <section className="lg:col-span-2 rounded-xl border border-border bg-card p-4">
+        <p className="mb-3 text-[10px] font-display font-bold uppercase tracking-[0.14em] text-primary">Informações do produtor</p>
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="space-y-1">
             <label className="text-[11px] font-semibold text-muted-foreground">Página de vendas</label>
-            <Input value={pageUrl} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setPageUrl(e.target.value)} placeholder="seuproduto.com" type="text" className={cn("h-11 rounded-xl border-border bg-background px-3.5 focus-visible:border-primary focus-visible:ring-primary/20", pageUrl && !urlValid && "border-destructive/50")} required />
+            <Input value={pageUrl} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setPageUrl(e.target.value)} placeholder="seuproduto.com" type="text" className={cn("h-9 rounded-lg border-border bg-background px-3.5 focus-visible:border-primary focus-visible:ring-primary/20", pageUrl && !urlValid && "border-destructive/50")} required />
             <p className={cn("text-[10px]", urlValid ? "text-success" : "text-muted-foreground/60")}>{urlValid ? "URL válida" : "O https:// é adicionado automaticamente"}</p>
           </div>
-          <div className="space-y-1.5">
+          <div className="space-y-1">
             <label className="text-[11px] font-semibold text-muted-foreground">E-mail de suporte</label>
-            <Input value={supportEmail} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSupportEmail(e.target.value)} placeholder="suporte@seuproduto.com" type="email" className={cn("h-11 rounded-xl border-border bg-background px-3.5 focus-visible:border-primary focus-visible:ring-primary/20", supportEmail && !emailValid && "border-destructive/50")} required />
+            <Input value={supportEmail} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSupportEmail(e.target.value)} placeholder="suporte@seuproduto.com" type="email" className={cn("h-9 rounded-lg border-border bg-background px-3.5 focus-visible:border-primary focus-visible:ring-primary/20", supportEmail && !emailValid && "border-destructive/50")} required />
             <p className={cn("text-[10px]", emailValid ? "text-success" : "text-muted-foreground/60")}>{emailValid ? "E-mail válido" : "Exibido no checkout"}</p>
           </div>
-          <div className="space-y-1.5">
+          <div className="space-y-1">
             <label className="text-[11px] font-semibold text-muted-foreground">Telefone de suporte</label>
             <Input
               value={supportPhone}
               onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSupportPhone(formatPhone(e.target.value))}
               placeholder="(11) 91234-5678"
               inputMode="tel"
-              className={cn("h-11 rounded-xl border-border bg-background px-3.5 focus-visible:border-primary focus-visible:ring-primary/20", supportPhone && !phoneValid && "border-destructive/50")}
+              className={cn("h-9 rounded-lg border-border bg-background px-3.5 focus-visible:border-primary focus-visible:ring-primary/20", supportPhone && !phoneValid && "border-destructive/50")}
               required
             />
             <p className={cn("text-[10px]", phoneValid ? "text-success" : "text-muted-foreground/60")}>{phoneValid ? "Telefone válido" : "DDD + número"}</p>
           </div>
-          <div className="space-y-1.5">
+          <div className="space-y-1">
             <label className="text-[11px] font-semibold text-muted-foreground">Nome de exibição do produtor</label>
-            <Input value={displayName} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setDisplayName(e.target.value)} placeholder="Nome que aparecerá no checkout" className="h-11 rounded-xl border-border bg-background px-3.5 focus-visible:border-primary focus-visible:ring-primary/20" required />
+            <Input value={displayName} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setDisplayName(e.target.value)} placeholder="Nome que aparecerá no checkout" className="h-9 rounded-lg border-border bg-background px-3.5 focus-visible:border-primary focus-visible:ring-primary/20" required />
             <p className="text-[10px] text-muted-foreground/60">Aparece no rodapé do checkout</p>
           </div>
         </div>
