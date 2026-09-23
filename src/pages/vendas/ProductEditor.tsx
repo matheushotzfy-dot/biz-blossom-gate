@@ -683,68 +683,54 @@ export default function ProductEditor() {
  const availableForBump = allProducts.filter(p => !orderBumps.some(b => b.bump_product_id === p.id));
  const currentTabIdx = TABS.findIndex(t => t.key === activeTab);
 
- return (
-  <div className="product-studio h-[100dvh] overflow-hidden bg-background">
-   <div ref={contentRef} className="product-studio-canvas h-full overflow-y-auto overscroll-contain" style={{ WebkitOverflowScrolling: "touch" }}>
-     <div className="mx-auto w-full max-w-[960px] px-4 py-4 sm:px-6">
-      <header className="mb-3 flex flex-col gap-3 pb-1 md:flex-row md:items-center md:justify-between">
-       <div className="min-w-0">
-        <button onClick={() => navigate("/vendas/produtos")} className="mb-1 inline-flex items-center gap-2 text-[10px] font-display font-bold uppercase tracking-[0.12em] text-muted-foreground transition-colors hover:text-primary">
-         <ArrowLeft className="h-3 w-3" /> Produtos <ChevronRight className="h-2.5 w-2.5" /> {isNew ? "Novo produto" : "Editar produto"}
-        </button>
-        <div className="flex items-center gap-3">
-         <div className="hidden h-9 w-9 items-center justify-center rounded-xl bg-primary text-primary-foreground sm:flex">
-          <Package className="h-4 w-4" />
+  return (
+   <div className="product-studio h-[100dvh] overflow-hidden bg-background">
+    <div ref={contentRef} className="product-studio-canvas h-full overflow-y-auto overscroll-contain">
+     <div className="mx-auto w-full max-w-[1080px] px-3 py-3 sm:px-5 sm:py-5">
+      <header className="mb-4 flex items-center justify-between gap-3">
+       <div className="flex min-w-0 items-center gap-2.5">
+        <Button variant="ghost" size="icon" onClick={() => navigate("/vendas/produtos")} aria-label="Voltar para produtos" className="h-9 w-9 shrink-0 border border-border bg-card"><ArrowLeft className="h-4 w-4" /></Button>
+        <div className="min-w-0">
+         <div className="flex items-center gap-2">
+          <h1 className="truncate font-display text-[15px] font-bold text-foreground">{name || (isNew ? "Novo produto" : "Editar produto")}</h1>
+          <span className="hidden rounded-md border border-border bg-secondary px-1.5 py-0.5 text-[9px] font-bold uppercase text-muted-foreground sm:inline">{status === "active" ? "Ativo" : "Rascunho"}</span>
          </div>
-         <div className="min-w-0">
-          <h1 className="truncate text-base font-display font-bold text-foreground">{name || "Configure seu novo produto"}</h1>
-          <p className="text-xs text-muted-foreground">{isNew ? "Preencha as informações essenciais para começar." : "Revise a oferta e publique suas alterações."}</p>
-         </div>
+         <p className="hidden text-[11px] text-muted-foreground sm:block">Construa a oferta por etapas, sem distrações.</p>
         </div>
        </div>
        <div className="flex shrink-0 items-center gap-2">
-        {!tabsLocked && (
-         <>
-          <Button variant="outline" onClick={handleDuplicate} className="hidden h-9 gap-2 rounded-lg px-3 text-xs sm:flex"><Copy className="h-3.5 w-3.5" /> Duplicar</Button>
-          <Button variant="outline" onClick={handleDelete} aria-label="Excluir produto" className="hidden h-9 w-9 rounded-lg p-0 text-destructive sm:flex"><Trash2 className="h-3.5 w-3.5" /></Button>
-         </>
-        )}
-        <Button onClick={handleSave} disabled={saving} className={cn("h-9 gap-2 rounded-lg px-4 text-xs font-display font-bold", saved && "bg-success hover:bg-success")}>
+        {!tabsLocked && <Button variant="ghost" onClick={handleDuplicate} className="hidden h-9 gap-2 px-3 text-xs md:flex"><Copy className="h-3.5 w-3.5" /> Duplicar</Button>}
+        {!tabsLocked && <Button variant="ghost" size="icon" onClick={handleDelete} aria-label="Excluir produto" className="hidden h-9 w-9 text-destructive md:inline-flex"><Trash2 className="h-3.5 w-3.5" /></Button>}
+        <Button onClick={handleSave} disabled={saving} className={cn("h-9 gap-2 px-4 text-xs font-display font-bold", saved && "bg-success hover:bg-success")}>
          {saving ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : saved ? <Check className="h-3.5 w-3.5" /> : <Save className="h-3.5 w-3.5" />}
-         {saving ? "Salvando" : saved ? "Salvo" : "Salvar produto"}
+         {saving ? "Salvando" : saved ? "Salvo" : isNew ? "Criar produto" : "Salvar"}
         </Button>
        </div>
       </header>
 
-      <div className="grid grid-cols-1 gap-6 ">
-       <aside className="hidden">
-        <div className="product-studio-rail sticky top-5 space-y-1 border-l border-border pl-3">
-         <div className="mb-4 px-3">
-         <div className="mb-2 flex items-center justify-between text-[10px] font-bold uppercase tracking-[0.12em] text-muted-foreground"><span>Configuração</span><span className="text-primary">{completionPercent}%</span></div>
-         <div className="h-1 overflow-hidden rounded-full bg-secondary"><motion.div className="h-full bg-primary" animate={{ width: `${completionPercent}%` }} transition={{ duration: 0.45 }} /></div>
-        </div>
-        {TABS.map((tab) => {
-         const isActive = activeTab === tab.key;
-         const completed = tabCompleted(tab.key);
-         const locked = tab.key !== "geral" && tabsLocked;
-         return (
-          <button key={tab.key} disabled={locked} onClick={() => { if (locked) { toast.error("Preencha e salve a aba Geral primeiro"); return; } setActiveTab(tab.key); }} className={cn("group/tab relative flex min-h-[42px] w-full items-center gap-3 rounded-xl px-3 text-left text-[12.5px] font-display font-semibold transition-all duration-300", locked ? "cursor-not-allowed opacity-30" : isActive ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:bg-secondary hover:text-foreground")}>
-           {locked ? <Lock className="h-4 w-4" /> : <tab.icon className="h-4 w-4" />}
-           <span className="truncate">{tab.label}</span>
-           {completed && !isActive && !locked && <Check className="ml-auto h-3.5 w-3.5 text-success" />}
-          </button>
-         );
-        })}
-       </div>
-      </aside>
-
-      <div className="min-w-0 pb-24 lg:pb-8">
-       <div className="mb-4 flex gap-1 overflow-x-auto border-b border-border pb-2">
-        {TABS.map((tab) => {
-         const locked = tab.key !== "geral" && tabsLocked;
-         return <button key={tab.key} disabled={locked} onClick={() => { if (!locked) setActiveTab(tab.key); }} className={cn("flex shrink-0 items-center gap-2 rounded-lg px-2.5 py-1.5 text-[11.5px] font-bold", locked ? "opacity-30" : activeTab === tab.key ? "bg-primary text-primary-foreground" : "bg-secondary text-muted-foreground")}><tab.icon className="h-3.5 w-3.5" />{tab.label}</button>;
-        })}
-       </div>
+      <div className="product-studio-shell overflow-hidden rounded-2xl">
+       <div className="grid min-h-[590px] grid-cols-1 md:grid-cols-[184px_minmax(0,1fr)]">
+        <aside className="product-studio-nav border-b border-border p-2 md:border-b-0 md:border-r md:p-3">
+         <div className="mb-2 hidden px-2 py-2 md:block">
+          <div className="mb-2 flex items-center justify-between text-[10px] font-bold text-muted-foreground"><span>Progresso</span><span className="text-primary">{completionPercent}%</span></div>
+          <div className="h-1 overflow-hidden rounded-full bg-border"><motion.div className="h-full bg-primary" animate={{ width: `${completionPercent}%` }} transition={{ duration: 0.4 }} /></div>
+         </div>
+         <nav aria-label="Etapas do produto" className="flex gap-1 overflow-x-auto md:flex-col md:overflow-visible">
+          {TABS.map((tab) => {
+           const isActive = activeTab === tab.key;
+           const completed = tabCompleted(tab.key);
+           const locked = tab.key !== "geral" && tabsLocked;
+           return (
+            <Button key={tab.key} type="button" variant="ghost" disabled={locked} onClick={() => { if (locked) { toast.error("Crie o produto antes de acessar esta etapa"); return; } setActiveTab(tab.key); }} className={cn("h-9 shrink-0 justify-start gap-2 px-2.5 text-[11px] font-semibold md:w-full", locked ? "opacity-35" : isActive ? "bg-primary text-primary-foreground hover:bg-primary hover:text-primary-foreground" : "text-muted-foreground hover:bg-card hover:text-foreground")}>
+             {locked ? <Lock className="h-3.5 w-3.5" /> : <tab.icon className="h-3.5 w-3.5" />}
+             <span>{tab.label}</span>
+             {completed && !isActive && !locked && <Check className="ml-auto hidden h-3 w-3 text-success md:block" />}
+            </Button>
+           );
+          })}
+         </nav>
+        </aside>
+        <main className="product-studio-workspace min-w-0 p-3 sm:p-5 md:p-6">
  <AnimatePresence mode="wait">
  <motion.div
  key={activeTab}
@@ -796,7 +782,7 @@ export default function ProductEditor() {
  </motion.div>
  </AnimatePresence>
 
- {/* Navegação inferior — Anterior / Próximo em todas as abas */}
+  {/* Navegação sequencial */}
  {(() => {
    const idx = TABS.findIndex(t => t.key === activeTab);
    const prev = idx > 0 ? TABS[idx - 1] : null;
@@ -808,34 +794,35 @@ export default function ProductEditor() {
    };
    const goPrev = () => { if (prev && !tabsLocked) setActiveTab(prev.key); };
    return (
-     <div className="mt-6 flex items-center justify-between gap-3 pt-4 border-t border-border">
+      <div className="mt-5 flex items-center justify-between gap-3 border-t border-border pt-4">
        <Button
          variant="outline"
          onClick={goPrev}
          disabled={!prev || tabsLocked}
-         className="gap-2 rounded-xl font-display font-bold h-11 px-5"
+          className="h-9 gap-2 px-3 text-xs font-display font-bold"
        >
          <ChevronRight className="h-4 w-4 rotate-180" />
          {prev ? prev.label : "Anterior"}
        </Button>
        {next ? (
-         <Button onClick={goNext} disabled={saving} className="gap-2 rounded-xl font-display font-bold h-11 px-6">
+          <Button onClick={goNext} disabled={saving} className="h-9 gap-2 px-4 text-xs font-display font-bold">
            {tabsLocked ? "Salvar e continuar" : `Próximo: ${next.label}`}
            <ChevronRight className="h-4 w-4" />
          </Button>
        ) : (
-         <Button onClick={handleSave} disabled={saving} className="gap-2 rounded-xl font-display font-bold h-11 px-6">
+          <Button onClick={handleSave} disabled={saving} className="h-9 gap-2 px-4 text-xs font-display font-bold">
            <Save className="h-4 w-4" /> Salvar alterações
          </Button>
        )}
      </div>
    );
  })()}
+        </main>
+       </div>
       </div>
      </div>
     </div>
-   </div>
-   </div>
+    </div>
  );
 }
 
@@ -913,152 +900,116 @@ function TabGeral({ name, setName, description, setDescription, price, setPrice,
   ];
 
   return (
-    <div className="mx-auto grid w-full max-w-[920px] grid-cols-1 gap-3 lg:grid-cols-2">
-      {/* Identidade */}
-      <section className="rounded-xl border border-border bg-card p-4">
-        <p className="mb-3 text-[10px] font-display font-bold uppercase tracking-[0.14em] text-primary">Identidade do produto</p>
-        <div className="flex gap-4">
-          <div
-            className={cn("relative h-[72px] w-[72px] shrink-0 overflow-hidden rounded-xl border transition-colors", isDragging ? "border-primary/40 bg-primary/10" : "border-border bg-secondary")}
-            onDragOver={(e) => { e.preventDefault(); setIsDragging(true); }}
-            onDragLeave={() => setIsDragging(false)}
-            onDrop={handleDrop}
-          >
-            <input ref={fileInputRef} type="file" accept="image/jpeg,image/png,image/webp,image/gif" onChange={handleFileChange} className="hidden" />
-            {imagePreview ? (
-              <div className="group/img relative h-full w-full">
-                <img src={imagePreview} alt="Preview" className="absolute inset-0 h-full w-full object-cover" />
-                <div className="absolute inset-0 flex items-center justify-center gap-1.5 bg-background/85 opacity-0 transition-opacity group-hover/img:opacity-100">
-                  <button type="button" onClick={() => fileInputRef.current?.click()} className="flex h-7 w-7 items-center justify-center rounded-lg border border-border bg-card text-foreground transition-colors hover:border-primary/40">
-                    <ImagePlus className="h-3 w-3" />
-                  </button>
-                  <button type="button" onClick={() => { setImageFile(null); setImagePreview(null); }} className="flex h-7 w-7 items-center justify-center rounded-lg border border-border bg-card text-destructive transition-colors hover:border-destructive/40">
-                    <X className="h-3 w-3" />
-                  </button>
+    <div className="mx-auto max-w-[760px]">
+      <div className="mb-5 flex items-end justify-between gap-4">
+        <div>
+          <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-primary">Etapa 01</p>
+          <h2 className="mt-1 font-display text-xl font-bold text-foreground">O essencial da sua oferta</h2>
+          <p className="mt-1 text-xs text-muted-foreground">Comece com o que o cliente precisa entender para comprar.</p>
+        </div>
+        <span className="hidden text-[10px] font-semibold text-muted-foreground sm:block">Campos obrigatórios *</span>
+      </div>
+
+      <div className="grid gap-4 lg:grid-cols-[minmax(0,1.45fr)_240px]">
+        <div className="space-y-4">
+          <section className="product-studio-panel rounded-xl border border-border bg-card p-4 sm:p-5">
+            <div className="mb-4 flex items-center gap-3">
+              <div
+                className={cn("relative h-16 w-16 shrink-0 overflow-hidden rounded-lg border transition-colors", isDragging ? "border-primary bg-primary/10" : "border-border bg-secondary")}
+                onDragOver={(event) => { event.preventDefault(); setIsDragging(true); }}
+                onDragLeave={() => setIsDragging(false)}
+                onDrop={handleDrop}
+              >
+                <input ref={fileInputRef} type="file" accept="image/jpeg,image/png,image/webp,image/gif" onChange={handleFileChange} className="hidden" />
+                {imagePreview ? (
+                  <div className="group/image relative h-full w-full">
+                    <img src={imagePreview} alt="Capa do produto" className="h-full w-full object-cover" />
+                    <div className="absolute inset-0 flex items-center justify-center gap-1 bg-background/85 opacity-0 transition-opacity group-hover/image:opacity-100">
+                      <Button type="button" variant="outline" size="icon" onClick={() => fileInputRef.current?.click()} aria-label="Trocar capa" className="h-7 w-7"><ImagePlus className="h-3 w-3" /></Button>
+                      <Button type="button" variant="outline" size="icon" onClick={() => { setImageFile(null); setImagePreview(null); }} aria-label="Remover capa" className="h-7 w-7 text-destructive"><X className="h-3 w-3" /></Button>
+                    </div>
+                  </div>
+                ) : (
+                  <Button type="button" variant="ghost" onClick={() => fileInputRef.current?.click()} className="h-full w-full flex-col gap-1 rounded-none p-0 text-muted-foreground hover:text-primary">
+                    <Upload className="h-4 w-4" />
+                    <span className="text-[9px]">Adicionar capa</span>
+                  </Button>
+                )}
+              </div>
+              <div className="min-w-0 flex-1">
+                <Label htmlFor="product-name" className="text-xs font-semibold text-foreground">Nome do produto *</Label>
+                <Input id="product-name" value={name} onChange={(event) => setName(event.target.value)} placeholder="Ex: Formação em Marketing" className="mt-1 h-10 border-border bg-background px-3 text-sm font-semibold" required maxLength={200} />
+              </div>
+            </div>
+            <div>
+              <div className="flex items-center justify-between gap-3">
+                <Label htmlFor="product-description" className="text-xs font-semibold text-foreground">Descrição *</Label>
+                <span className={cn("text-[10px] tabular-nums", description.length > 0 && !descValid ? "text-destructive" : "text-muted-foreground")}>{description.length}/2000</span>
+              </div>
+              <Textarea id="product-description" value={description} onChange={(event) => setDescription(event.target.value)} rows={3} placeholder="Explique com clareza o que o comprador recebe e qual transformação esperar." className={cn("mt-1 resize-none border-border bg-background px-3 py-2.5 text-sm leading-relaxed", description.length > 0 && !descValid && "border-destructive/50")} maxLength={2000} />
+              {description.length > 0 && !descValid && <p className="mt-1 text-[10px] text-destructive">Complete mais {50 - description.length} caracteres.</p>}
+            </div>
+          </section>
+
+          <section className="product-studio-panel rounded-xl border border-border bg-card p-4 sm:p-5">
+            <div className="grid gap-3 sm:grid-cols-2">
+              <div>
+                <Label className="text-xs font-semibold text-foreground">Categoria *</Label>
+                <Select value={category} onValueChange={setCategory}>
+                  <SelectTrigger className="mt-1 h-10 border-border bg-background px-3 text-sm"><SelectValue /></SelectTrigger>
+                  <SelectContent>{CATEGORIES.map((option) => <RichSelectItem key={option.value} value={option.value} icon={option.icon} label={option.label} desc={option.desc} />)}</SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label htmlFor="product-price" className="text-xs font-semibold text-foreground">Preço de venda *</Label>
+                <div className="relative mt-1">
+                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs font-bold text-muted-foreground">R$</span>
+                  <Input id="product-price" inputMode="decimal" value={price} onChange={(event) => handlePriceChange(event.target.value)} className="h-10 border-border bg-background pl-9 pr-3 font-numbers text-base font-bold text-primary" placeholder="0,00" />
                 </div>
               </div>
-            ) : (
-              <button type="button" onClick={() => fileInputRef.current?.click()} className="flex h-full w-full flex-col items-center justify-center gap-1.5 text-muted-foreground transition-colors hover:text-primary">
-                <Upload className="h-4 w-4" />
-                <span className="text-[10px] font-semibold">{isDragging ? "Solte aqui" : "Capa 300×250"}</span>
-              </button>
-            )}
-          </div>
-          <div className="min-w-0 flex-1 space-y-1">
-            <label className="text-[11px] font-semibold text-muted-foreground">Nome do produto</label>
-            <Input value={name} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setName(e.target.value)} placeholder="Ex: Curso Completo de Marketing Digital" className="h-9 rounded-lg border-border bg-background px-3.5 text-sm font-display font-bold focus-visible:border-primary focus-visible:ring-primary/20" required maxLength={200} />
-            <p className="tabular-nums text-[10px] text-muted-foreground/60">{name.length}/200 caracteres</p>
-          </div>
-        </div>
-        <div className="mt-3 space-y-1">
-          <label className="text-[11px] font-semibold text-muted-foreground">Descrição</label>
-          <Textarea value={description} onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setDescription(e.target.value)} rows={2} placeholder="O que o comprador vai receber, benefícios e diferenciais (mínimo 50 caracteres)..." className={cn("resize-none rounded-xl border-border bg-background px-3.5 py-2.5 text-sm leading-relaxed focus-visible:border-primary focus-visible:ring-primary/20", description.length > 0 && !descValid && "border-destructive/50")} maxLength={2000} />
-          <div className="flex items-center justify-between text-[10px]">
-            <span className={cn(descValid ? "text-success" : description.length > 0 ? "text-destructive" : "text-muted-foreground/60")}>
-              {descValid ? "Descrição válida" : description.length > 0 ? `Faltam ${50 - description.length} caracteres` : "Mínimo 50 caracteres"}
-            </span>
-            <span className="tabular-nums text-muted-foreground/60">{description.length}/2000</span>
-          </div>
-        </div>
-      </section>
-
-      {/* Categoria e preço */}
-      <section className="rounded-xl border border-border bg-card p-4">
-        <p className="mb-3 text-[10px] font-display font-bold uppercase tracking-[0.14em] text-primary">Categoria e preço</p>
-        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-          <div className="space-y-1">
-            <label className="text-[11px] font-semibold text-muted-foreground">Categoria</label>
-            <Select value={category} onValueChange={setCategory}>
-              <SelectTrigger className="h-9 rounded-lg border-border bg-background px-3.5 text-sm focus-visible:border-primary focus-visible:ring-primary/20">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {CATEGORIES.map((opt) => (
-                  <RichSelectItem key={opt.value} value={opt.value} icon={opt.icon} label={opt.label} desc={opt.desc} />
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-          <div className="space-y-1">
-            <label className="text-[11px] font-semibold text-muted-foreground">Garantia</label>
-            <SegmentedChoice
-              value={warrantyDays}
-              onValueChange={setWarrantyDays}
-              columns={3}
-              size="sm"
-              options={[
-                { value: "7", label: "7 dias" },
-                { value: "14", label: "14 dias" },
-                { value: "30", label: "30 dias" },
-              ]}
-            />
-          </div>
-          <div className="space-y-1">
-            <label className="text-[11px] font-semibold text-muted-foreground">Preço de venda</label>
-            <div className="relative">
-              <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-sm font-display font-bold text-muted-foreground">R$</span>
-              <Input
-                type="text"
-                inputMode="decimal"
-                value={price}
-                onChange={(e: React.ChangeEvent<HTMLInputElement>) => handlePriceChange(e.target.value)}
-                className="h-9 rounded-lg border-border bg-background pl-10 pr-3 font-numbers text-base font-black text-primary focus-visible:border-primary focus-visible:ring-primary/20"
-                placeholder="0,00"
-              />
             </div>
-            {priceNumber > 0 && (
-              <p className="text-[10px] text-muted-foreground/60">Cobrado: R$ {priceNumber.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
-            )}
-          </div>
-          <div className="space-y-1">
-            <label className="text-[11px] font-semibold text-muted-foreground">Tipo de pagamento</label>
-            <SegmentedChoice
-              value={paymentType}
-              onValueChange={setPaymentType}
-              columns={1}
-              size="sm"
-              options={[
-                { value: "unico", label: "Pagamento único" },
-                { value: "assinatura", label: "Assinatura recorrente", disabled: true, badge: "Em breve" },
-              ]}
-            />
-          </div>
-        </div>
-      </section>
+            <div className="mt-3 border-t border-border pt-3">
+              <Label className="text-xs font-semibold text-foreground">Cobrança</Label>
+              <SegmentedChoice value={paymentType} onValueChange={setPaymentType} columns={2} size="sm" className="mt-1" options={[{ value: "unico", label: "Pagamento único" }, { value: "assinatura", label: "Assinatura", disabled: true, badge: "Em breve" }]} />
+            </div>
+          </section>
 
-      {/* Produtor */}
-      <section className="lg:col-span-2 rounded-xl border border-border bg-card p-4">
-        <p className="mb-3 text-[10px] font-display font-bold uppercase tracking-[0.14em] text-primary">Informações do produtor</p>
-        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
-          <div className="space-y-1">
-            <label className="text-[11px] font-semibold text-muted-foreground">Página de vendas</label>
-            <Input value={pageUrl} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setPageUrl(e.target.value)} placeholder="seuproduto.com" type="text" className={cn("h-9 rounded-lg border-border bg-background px-3.5 focus-visible:border-primary focus-visible:ring-primary/20", pageUrl && !urlValid && "border-destructive/50")} required />
-            <p className={cn("text-[10px]", urlValid ? "text-success" : "text-muted-foreground/60")}>{urlValid ? "URL válida" : "O https:// é adicionado automaticamente"}</p>
-          </div>
-          <div className="space-y-1">
-            <label className="text-[11px] font-semibold text-muted-foreground">E-mail de suporte</label>
-            <Input value={supportEmail} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSupportEmail(e.target.value)} placeholder="suporte@seuproduto.com" type="email" className={cn("h-9 rounded-lg border-border bg-background px-3.5 focus-visible:border-primary focus-visible:ring-primary/20", supportEmail && !emailValid && "border-destructive/50")} required />
-            <p className={cn("text-[10px]", emailValid ? "text-success" : "text-muted-foreground/60")}>{emailValid ? "E-mail válido" : "Exibido no checkout"}</p>
-          </div>
-          <div className="space-y-1">
-            <label className="text-[11px] font-semibold text-muted-foreground">Telefone de suporte</label>
-            <Input
-              value={supportPhone}
-              onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSupportPhone(formatPhone(e.target.value))}
-              placeholder="(11) 91234-5678"
-              inputMode="tel"
-              className={cn("h-9 rounded-lg border-border bg-background px-3.5 focus-visible:border-primary focus-visible:ring-primary/20", supportPhone && !phoneValid && "border-destructive/50")}
-              required
-            />
-            <p className={cn("text-[10px]", phoneValid ? "text-success" : "text-muted-foreground/60")}>{phoneValid ? "Telefone válido" : "DDD + número"}</p>
-          </div>
-          <div className="space-y-1">
-            <label className="text-[11px] font-semibold text-muted-foreground">Nome de exibição do produtor</label>
-            <Input value={displayName} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setDisplayName(e.target.value)} placeholder="Nome que aparecerá no checkout" className="h-9 rounded-lg border-border bg-background px-3.5 focus-visible:border-primary focus-visible:ring-primary/20" required />
-            <p className="text-[10px] text-muted-foreground/60">Aparece no rodapé do checkout</p>
-          </div>
+          <details className="group rounded-xl border border-border bg-card">
+            <summary className="flex cursor-pointer list-none items-center justify-between gap-3 px-4 py-3.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30">
+              <div>
+                <p className="text-xs font-semibold text-foreground">Dados para publicação</p>
+                <p className="mt-0.5 text-[10px] text-muted-foreground">Suporte, página de vendas, garantia e visibilidade.</p>
+              </div>
+              <ChevronRight className="h-4 w-4 text-muted-foreground transition-transform group-open:rotate-90" />
+            </summary>
+            <div className="grid gap-3 border-t border-border p-4 sm:grid-cols-2">
+              <div><Label className="text-[11px] text-muted-foreground">Página de vendas *</Label><Input value={pageUrl} onChange={(event) => setPageUrl(event.target.value)} placeholder="seuproduto.com" className={cn("mt-1 h-9 bg-background", pageUrl && !urlValid && "border-destructive/50")} /></div>
+              <div><Label className="text-[11px] text-muted-foreground">E-mail de suporte *</Label><Input value={supportEmail} onChange={(event) => setSupportEmail(event.target.value)} placeholder="suporte@seuproduto.com" type="email" className={cn("mt-1 h-9 bg-background", supportEmail && !emailValid && "border-destructive/50")} /></div>
+              <div><Label className="text-[11px] text-muted-foreground">Telefone de suporte *</Label><Input value={supportPhone} onChange={(event) => setSupportPhone(formatPhone(event.target.value))} placeholder="(11) 91234-5678" inputMode="tel" className={cn("mt-1 h-9 bg-background", supportPhone && !phoneValid && "border-destructive/50")} /></div>
+              <div><Label className="text-[11px] text-muted-foreground">Nome do produtor *</Label><Input value={displayName} onChange={(event) => setDisplayName(event.target.value)} placeholder="Nome exibido no checkout" className="mt-1 h-9 bg-background" /></div>
+              <div><Label className="text-[11px] text-muted-foreground">Garantia</Label><Select value={warrantyDays} onValueChange={setWarrantyDays}><SelectTrigger className="mt-1 h-9 bg-background"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="7">7 dias</SelectItem><SelectItem value="14">14 dias</SelectItem><SelectItem value="30">30 dias</SelectItem></SelectContent></Select></div>
+              <div><Label className="text-[11px] text-muted-foreground">Visibilidade</Label><Select value={status} onValueChange={setStatus}><SelectTrigger className="mt-1 h-9 bg-background"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="pending_review">Rascunho</SelectItem><SelectItem value="active">Ativo</SelectItem></SelectContent></Select></div>
+            </div>
+          </details>
         </div>
-      </section>
+
+        <aside className="hidden lg:block">
+          <div className="sticky top-5 overflow-hidden rounded-xl border border-border bg-card">
+            <div className="aspect-[4/3] bg-secondary">
+              {imagePreview ? <img src={imagePreview} alt="Prévia do produto" className="h-full w-full object-cover" /> : <div className="flex h-full items-center justify-center"><Package className="h-8 w-8 text-muted-foreground/35" /></div>}
+            </div>
+            <div className="p-4">
+              <p className="text-[9px] font-bold uppercase text-primary">Prévia da oferta</p>
+              <h3 className="mt-1.5 line-clamp-2 font-display text-sm font-bold text-foreground">{name || "Seu produto"}</h3>
+              <p className="mt-2 line-clamp-3 text-[10px] leading-relaxed text-muted-foreground">{description || "A descrição aparecerá aqui enquanto você constrói a oferta."}</p>
+              <div className="mt-4 border-t border-border pt-3">
+                <p className="font-numbers text-xl font-bold text-foreground">{priceNumber > 0 ? `R$ ${priceNumber.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}` : "R$ 0,00"}</p>
+                <p className="mt-0.5 text-[9px] text-muted-foreground">Pagamento único via checkout seguro</p>
+              </div>
+            </div>
+          </div>
+        </aside>
+      </div>
     </div>
   );
 }
