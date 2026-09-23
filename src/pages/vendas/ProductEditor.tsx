@@ -700,6 +700,7 @@ export default function ProductEditor() {
        </div>
        <div className="flex shrink-0 items-center gap-2">
         {!tabsLocked && <Button variant="ghost" onClick={handleDuplicate} className="hidden h-9 gap-2 px-3 text-xs md:flex"><Copy className="h-3.5 w-3.5" /> Duplicar</Button>}
+        {!tabsLocked && <Button variant="ghost" size="icon" onClick={handleDelete} aria-label="Excluir produto" className="hidden h-9 w-9 text-destructive md:inline-flex"><Trash2 className="h-3.5 w-3.5" /></Button>}
         <Button onClick={handleSave} disabled={saving} className={cn("h-9 gap-2 px-4 text-xs font-display font-bold", saved && "bg-success hover:bg-success")}>
          {saving ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : saved ? <Check className="h-3.5 w-3.5" /> : <Save className="h-3.5 w-3.5" />}
          {saving ? "Salvando" : saved ? "Salvo" : isNew ? "Criar produto" : "Salvar"}
