@@ -104,6 +104,7 @@ function CompletionRing({ percent }: { percent: number }) {
  <span className={cn("text-[9px] font-display font-black tabular-nums", percent >= 80 ? "text-success" : percent >= 50 ? "text-warning" : "text-primary")}>{percent}%</span>
  </div>
  </div>
+    </div>
  );
 }
 
