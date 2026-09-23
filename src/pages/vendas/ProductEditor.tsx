@@ -683,68 +683,53 @@ export default function ProductEditor() {
  const availableForBump = allProducts.filter(p => !orderBumps.some(b => b.bump_product_id === p.id));
  const currentTabIdx = TABS.findIndex(t => t.key === activeTab);
 
- return (
-  <div className="product-studio h-[100dvh] overflow-hidden bg-background">
-   <div ref={contentRef} className="product-studio-canvas h-full overflow-y-auto overscroll-contain" style={{ WebkitOverflowScrolling: "touch" }}>
-     <div className="mx-auto w-full max-w-[960px] px-4 py-4 sm:px-6">
-      <header className="mb-3 flex flex-col gap-3 pb-1 md:flex-row md:items-center md:justify-between">
-       <div className="min-w-0">
-        <button onClick={() => navigate("/vendas/produtos")} className="mb-1 inline-flex items-center gap-2 text-[10px] font-display font-bold uppercase tracking-[0.12em] text-muted-foreground transition-colors hover:text-primary">
-         <ArrowLeft className="h-3 w-3" /> Produtos <ChevronRight className="h-2.5 w-2.5" /> {isNew ? "Novo produto" : "Editar produto"}
-        </button>
-        <div className="flex items-center gap-3">
-         <div className="hidden h-9 w-9 items-center justify-center rounded-xl bg-primary text-primary-foreground sm:flex">
-          <Package className="h-4 w-4" />
+  return (
+   <div className="product-studio h-[100dvh] overflow-hidden bg-background">
+    <div ref={contentRef} className="product-studio-canvas h-full overflow-y-auto overscroll-contain">
+     <div className="mx-auto w-full max-w-[1080px] px-3 py-3 sm:px-5 sm:py-5">
+      <header className="mb-4 flex items-center justify-between gap-3">
+       <div className="flex min-w-0 items-center gap-2.5">
+        <Button variant="ghost" size="icon" onClick={() => navigate("/vendas/produtos")} aria-label="Voltar para produtos" className="h-9 w-9 shrink-0 border border-border bg-card"><ArrowLeft className="h-4 w-4" /></Button>
+        <div className="min-w-0">
+         <div className="flex items-center gap-2">
+          <h1 className="truncate font-display text-[15px] font-bold text-foreground">{name || (isNew ? "Novo produto" : "Editar produto")}</h1>
+          <span className="hidden rounded-md border border-border bg-secondary px-1.5 py-0.5 text-[9px] font-bold uppercase text-muted-foreground sm:inline">{status === "active" ? "Ativo" : "Rascunho"}</span>
          </div>
-         <div className="min-w-0">
-          <h1 className="truncate text-base font-display font-bold text-foreground">{name || "Configure seu novo produto"}</h1>
-          <p className="text-xs text-muted-foreground">{isNew ? "Preencha as informações essenciais para começar." : "Revise a oferta e publique suas alterações."}</p>
-         </div>
+         <p className="hidden text-[11px] text-muted-foreground sm:block">Construa a oferta por etapas, sem distrações.</p>
         </div>
        </div>
        <div className="flex shrink-0 items-center gap-2">
-        {!tabsLocked && (
-         <>
-          <Button variant="outline" onClick={handleDuplicate} className="hidden h-9 gap-2 rounded-lg px-3 text-xs sm:flex"><Copy className="h-3.5 w-3.5" /> Duplicar</Button>
-          <Button variant="outline" onClick={handleDelete} aria-label="Excluir produto" className="hidden h-9 w-9 rounded-lg p-0 text-destructive sm:flex"><Trash2 className="h-3.5 w-3.5" /></Button>
-         </>
-        )}
-        <Button onClick={handleSave} disabled={saving} className={cn("h-9 gap-2 rounded-lg px-4 text-xs font-display font-bold", saved && "bg-success hover:bg-success")}>
+        {!tabsLocked && <Button variant="ghost" onClick={handleDuplicate} className="hidden h-9 gap-2 px-3 text-xs md:flex"><Copy className="h-3.5 w-3.5" /> Duplicar</Button>}
+        <Button onClick={handleSave} disabled={saving} className={cn("h-9 gap-2 px-4 text-xs font-display font-bold", saved && "bg-success hover:bg-success")}>
          {saving ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : saved ? <Check className="h-3.5 w-3.5" /> : <Save className="h-3.5 w-3.5" />}
-         {saving ? "Salvando" : saved ? "Salvo" : "Salvar produto"}
+         {saving ? "Salvando" : saved ? "Salvo" : isNew ? "Criar produto" : "Salvar"}
         </Button>
        </div>
       </header>
 
-      <div className="grid grid-cols-1 gap-6 ">
-       <aside className="hidden">
-        <div className="product-studio-rail sticky top-5 space-y-1 border-l border-border pl-3">
-         <div className="mb-4 px-3">
-         <div className="mb-2 flex items-center justify-between text-[10px] font-bold uppercase tracking-[0.12em] text-muted-foreground"><span>Configuração</span><span className="text-primary">{completionPercent}%</span></div>
-         <div className="h-1 overflow-hidden rounded-full bg-secondary"><motion.div className="h-full bg-primary" animate={{ width: `${completionPercent}%` }} transition={{ duration: 0.45 }} /></div>
-        </div>
-        {TABS.map((tab) => {
-         const isActive = activeTab === tab.key;
-         const completed = tabCompleted(tab.key);
-         const locked = tab.key !== "geral" && tabsLocked;
-         return (
-          <button key={tab.key} disabled={locked} onClick={() => { if (locked) { toast.error("Preencha e salve a aba Geral primeiro"); return; } setActiveTab(tab.key); }} className={cn("group/tab relative flex min-h-[42px] w-full items-center gap-3 rounded-xl px-3 text-left text-[12.5px] font-display font-semibold transition-all duration-300", locked ? "cursor-not-allowed opacity-30" : isActive ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:bg-secondary hover:text-foreground")}>
-           {locked ? <Lock className="h-4 w-4" /> : <tab.icon className="h-4 w-4" />}
-           <span className="truncate">{tab.label}</span>
-           {completed && !isActive && !locked && <Check className="ml-auto h-3.5 w-3.5 text-success" />}
-          </button>
-         );
-        })}
-       </div>
-      </aside>
-
-      <div className="min-w-0 pb-24 lg:pb-8">
-       <div className="mb-4 flex gap-1 overflow-x-auto border-b border-border pb-2">
-        {TABS.map((tab) => {
-         const locked = tab.key !== "geral" && tabsLocked;
-         return <button key={tab.key} disabled={locked} onClick={() => { if (!locked) setActiveTab(tab.key); }} className={cn("flex shrink-0 items-center gap-2 rounded-lg px-2.5 py-1.5 text-[11.5px] font-bold", locked ? "opacity-30" : activeTab === tab.key ? "bg-primary text-primary-foreground" : "bg-secondary text-muted-foreground")}><tab.icon className="h-3.5 w-3.5" />{tab.label}</button>;
-        })}
-       </div>
+      <div className="product-studio-shell overflow-hidden rounded-2xl">
+       <div className="grid min-h-[590px] grid-cols-1 md:grid-cols-[184px_minmax(0,1fr)]">
+        <aside className="product-studio-nav border-b border-border p-2 md:border-b-0 md:border-r md:p-3">
+         <div className="mb-2 hidden px-2 py-2 md:block">
+          <div className="mb-2 flex items-center justify-between text-[10px] font-bold text-muted-foreground"><span>Progresso</span><span className="text-primary">{completionPercent}%</span></div>
+          <div className="h-1 overflow-hidden rounded-full bg-border"><motion.div className="h-full bg-primary" animate={{ width: `${completionPercent}%` }} transition={{ duration: 0.4 }} /></div>
+         </div>
+         <nav aria-label="Etapas do produto" className="flex gap-1 overflow-x-auto md:flex-col md:overflow-visible">
+          {TABS.map((tab) => {
+           const isActive = activeTab === tab.key;
+           const completed = tabCompleted(tab.key);
+           const locked = tab.key !== "geral" && tabsLocked;
+           return (
+            <Button key={tab.key} type="button" variant="ghost" disabled={locked} onClick={() => { if (locked) { toast.error("Crie o produto antes de acessar esta etapa"); return; } setActiveTab(tab.key); }} className={cn("h-9 shrink-0 justify-start gap-2 px-2.5 text-[11px] font-semibold md:w-full", locked ? "opacity-35" : isActive ? "bg-primary text-primary-foreground hover:bg-primary hover:text-primary-foreground" : "text-muted-foreground hover:bg-card hover:text-foreground")}>
+             {locked ? <Lock className="h-3.5 w-3.5" /> : <tab.icon className="h-3.5 w-3.5" />}
+             <span>{tab.label}</span>
+             {completed && !isActive && !locked && <Check className="ml-auto hidden h-3 w-3 text-success md:block" />}
+            </Button>
+           );
+          })}
+         </nav>
+        </aside>
+        <main className="product-studio-workspace min-w-0 p-3 sm:p-5 md:p-6">
  <AnimatePresence mode="wait">
  <motion.div
  key={activeTab}
@@ -796,7 +781,7 @@ export default function ProductEditor() {
  </motion.div>
  </AnimatePresence>
 
- {/* Navegação inferior — Anterior / Próximo em todas as abas */}
+  {/* Navegação sequencial */}
  {(() => {
    const idx = TABS.findIndex(t => t.key === activeTab);
    const prev = idx > 0 ? TABS[idx - 1] : null;
@@ -808,34 +793,34 @@ export default function ProductEditor() {
    };
    const goPrev = () => { if (prev && !tabsLocked) setActiveTab(prev.key); };
    return (
-     <div className="mt-6 flex items-center justify-between gap-3 pt-4 border-t border-border">
+      <div className="mt-5 flex items-center justify-between gap-3 border-t border-border pt-4">
        <Button
          variant="outline"
          onClick={goPrev}
          disabled={!prev || tabsLocked}
-         className="gap-2 rounded-xl font-display font-bold h-11 px-5"
+          className="h-9 gap-2 px-3 text-xs font-display font-bold"
        >
          <ChevronRight className="h-4 w-4 rotate-180" />
          {prev ? prev.label : "Anterior"}
        </Button>
        {next ? (
-         <Button onClick={goNext} disabled={saving} className="gap-2 rounded-xl font-display font-bold h-11 px-6">
+          <Button onClick={goNext} disabled={saving} className="h-9 gap-2 px-4 text-xs font-display font-bold">
            {tabsLocked ? "Salvar e continuar" : `Próximo: ${next.label}`}
            <ChevronRight className="h-4 w-4" />
          </Button>
        ) : (
-         <Button onClick={handleSave} disabled={saving} className="gap-2 rounded-xl font-display font-bold h-11 px-6">
+          <Button onClick={handleSave} disabled={saving} className="h-9 gap-2 px-4 text-xs font-display font-bold">
            <Save className="h-4 w-4" /> Salvar alterações
          </Button>
        )}
      </div>
    );
  })()}
+        </main>
+       </div>
       </div>
      </div>
     </div>
-   </div>
-   </div>
  );
 }
 
