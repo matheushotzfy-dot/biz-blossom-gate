@@ -684,219 +684,67 @@ export default function ProductEditor() {
  const currentTabIdx = TABS.findIndex(t => t.key === activeTab);
 
  return (
-  <div className="product-studio h-[100dvh] bg-background flex flex-col overflow-hidden">
- {/* ───── Progress Bar (Top) ───── */}
- <div className="shrink-0 h-[2px] bg-border/10 relative z-[60]">
- <motion.div
- className="h-full bg-gradient-to-r from-primary to-primary/60 rounded-full relative"
- initial={{ width: "0%" }}
- animate={{ width: `${completionPercent}%` }}
- transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
- >
- {completionPercent > 5 && <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/25 to-transparent animate-shimmer" />}
- </motion.div>
- </div>
+  <div className="product-studio h-[100dvh] overflow-hidden bg-background">
+   <div ref={contentRef} className="product-studio-canvas h-full overflow-y-auto overscroll-contain" style={{ WebkitOverflowScrolling: "touch" }}>
+    <div className="mx-auto w-full max-w-[1380px] px-4 py-6 sm:px-7 sm:py-9 xl:px-10">
+     <header className="mb-8 flex flex-col gap-6 border-b border-border pb-7 md:flex-row md:items-end md:justify-between">
+      <div className="min-w-0">
+       <button onClick={() => navigate("/vendas/produtos")} className="mb-4 inline-flex items-center gap-2 text-[11px] font-display font-bold uppercase tracking-[0.12em] text-muted-foreground transition-colors hover:text-primary">
+        <ArrowLeft className="h-3.5 w-3.5" /> Produtos <ChevronRight className="h-3 w-3" /> {isNew ? "Novo produto" : "Editar produto"}
+       </button>
+       <div className="flex items-center gap-4">
+        <div className="hidden h-12 w-12 items-center justify-center rounded-2xl bg-primary text-primary-foreground sm:flex">
+         <Package className="h-5 w-5" />
+        </div>
+        <div className="min-w-0">
+         <h1 className="truncate text-2xl font-display font-bold text-foreground sm:text-[30px]">{name || "Configure seu novo produto"}</h1>
+         <p className="mt-1 text-sm text-muted-foreground">{isNew ? "Preencha as informações essenciais para começar." : "Revise a oferta e publique suas alterações."}</p>
+        </div>
+       </div>
+      </div>
+      <div className="flex shrink-0 items-center gap-2.5">
+       {!tabsLocked && (
+        <>
+         <Button variant="outline" onClick={handleDuplicate} className="hidden h-11 gap-2 rounded-xl px-4 sm:flex"><Copy className="h-4 w-4" /> Duplicar</Button>
+         <Button variant="outline" onClick={handleDelete} aria-label="Excluir produto" className="hidden h-11 w-11 rounded-xl p-0 text-destructive sm:flex"><Trash2 className="h-4 w-4" /></Button>
+        </>
+       )}
+       <Button onClick={handleSave} disabled={saving} className={cn("h-11 gap-2 rounded-xl px-6 font-display font-bold", saved && "bg-success hover:bg-success")}>
+        {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : saved ? <Check className="h-4 w-4" /> : <Save className="h-4 w-4" />}
+        {saving ? "Salvando" : saved ? "Salvo" : "Salvar produto"}
+       </Button>
+      </div>
+     </header>
 
- {/* ───── Top Bar ───── */}
-   <div className="product-studio-topbar shrink-0 z-50 bg-card border-b border-border">
-   <div className="max-w-[1440px] mx-auto px-3 sm:px-7 flex items-center justify-between h-16 sm:h-[68px]">
-  <div className="flex items-center gap-3">
-   <button onClick={() => navigate("/vendas/produtos")} aria-label="Voltar para produtos" className="flex h-10 w-10 items-center justify-center rounded-2xl border border-border bg-secondary hover:bg-accent text-muted-foreground hover:text-primary transition-all duration-300">
-  <ArrowLeft className="h-4 w-4" />
-  </button>
+     <div className="grid grid-cols-1 gap-7 lg:grid-cols-[220px_minmax(0,1fr)] xl:gap-10">
+      <aside className="hidden lg:block">
+       <div className="product-studio-rail sticky top-6 space-y-1 border-l border-border pl-4">
+        <div className="mb-5 px-3">
+         <div className="mb-2 flex items-center justify-between text-[10px] font-bold uppercase tracking-[0.12em] text-muted-foreground"><span>Configuração</span><span className="text-primary">{completionPercent}%</span></div>
+         <div className="h-1 overflow-hidden rounded-full bg-secondary"><motion.div className="h-full bg-primary" animate={{ width: `${completionPercent}%` }} transition={{ duration: 0.45 }} /></div>
+        </div>
+        {TABS.map((tab) => {
+         const isActive = activeTab === tab.key;
+         const completed = tabCompleted(tab.key);
+         const locked = tab.key !== "geral" && tabsLocked;
+         return (
+          <button key={tab.key} disabled={locked} onClick={() => { if (locked) { toast.error("Preencha e salve a aba Geral primeiro"); return; } setActiveTab(tab.key); }} className={cn("group/tab relative flex min-h-[48px] w-full items-center gap-3 rounded-xl px-3 text-left text-[13px] font-display font-semibold transition-all duration-300", locked ? "cursor-not-allowed opacity-30" : isActive ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:bg-secondary hover:text-foreground")}>
+           {locked ? <Lock className="h-4 w-4" /> : <tab.icon className="h-4 w-4" />}
+           <span className="truncate">{tab.label}</span>
+           {completed && !isActive && !locked && <Check className="ml-auto h-3.5 w-3.5 text-success" />}
+          </button>
+         );
+        })}
+       </div>
+      </aside>
 
-  {/* Product chip */}
-  {name && (
-   <div className="hidden md:flex items-center gap-3 px-3.5 py-2 rounded-2xl bg-secondary border border-border">
-  {imagePreview ? (
-  <img src={imagePreview} alt="" className="h-7 w-7 rounded-lg object-cover border border-border" />
-  ) : (
-  <div className="h-7 w-7 rounded-lg bg-primary/10 border border-border flex items-center justify-center">
-  <Package className="h-3.5 w-3.5 text-primary" />
-  </div>
-  )}
-  <div>
-  <p className="text-xs font-display font-bold text-foreground truncate max-w-[200px] leading-tight">{name}</p>
-  {price && (
-  <p className="text-[10px] font-numbers font-bold text-primary leading-tight flex items-center gap-1.5">
-  R$ {Number(price).toFixed(2)}
-  <span className={cn("h-1.5 w-1.5 rounded-full", status === "active" ? "bg-success" : "bg-muted-foreground/40")} />
-  </p>
-  )}
-  </div>
-  </div>
-  )}
-  </div>
-
-  <div className="flex items-center gap-2.5">
-  {/* Step indicator */}
-   <div className="hidden xl:flex items-center gap-1 px-3 py-2.5 rounded-2xl bg-secondary border border-border">
-  {TABS.map((tab) => {
-  const isActive = activeTab === tab.key;
-  const locked = tab.key !== "geral" && tabsLocked;
-  return (
-  <motion.div
-  key={tab.key}
-  animate={{ width: isActive ? 20 : 6, opacity: locked ? 0.2 : 1 }}
-  transition={{ duration: 0.25 }}
-  className={cn(
- "h-1.5 rounded-full transition-colors duration-200",
-  isActive ? "bg-primary" : "bg-muted-foreground/25"
-  )}
-  title={tab.label}
-  />
-  );
-  })}
-  </div>
-
-  {/* Completion */}
-   <div className="hidden sm:flex items-center gap-2.5 px-3.5 py-2 rounded-2xl bg-secondary border border-border">
-  <CompletionRing percent={completionPercent} />
-  <div>
-  <p className="text-[11px] font-display font-medium text-muted-foreground">Completo</p>
-  <p className="text-[11px] font-numbers font-bold text-foreground tabular-nums leading-tight">{completionPercent}%</p>
-  </div>
-  </div>
-
-  <div className="h-5 w-px bg-border hidden sm:block" />
-
-  {/* Actions */}
-  <div className="flex items-center gap-1.5">
-  {!tabsLocked && (
-  <>
-  <Button variant="ghost" size="sm" onClick={handleDuplicate} className="text-muted-foreground gap-1.5 text-xs rounded-xl h-9 hidden sm:flex hover:text-foreground hover:bg-muted font-display font-bold transition-colors duration-200">
-  <Copy className="h-3 w-3" /> <span className="hidden lg:inline">Duplicar</span>
-  </Button>
-  <Button variant="ghost" size="sm" onClick={handleDelete} className="text-destructive/50 hover:text-destructive hover:bg-destructive/10 h-9 w-9 p-0 rounded-xl hidden sm:flex transition-colors duration-200">
-  <Trash2 className="h-3.5 w-3.5" />
-  </Button>
-  </>
-  )}
-  <Button onClick={handleSave} disabled={saving} size="sm" className={cn(
- "gap-1.5 rounded-xl text-xs font-display font-bold h-9 px-5 transition-all duration-250",
-  saved ? "bg-success hover:bg-success" : ""
-  )}>
-  {saved ? (
-  <><Check className="h-3.5 w-3.5" /> <span className="hidden sm:inline">Salvo!</span></>
-  ) : saving ? (
-  <><Loader2 className="h-3 w-3 animate-spin" /> <span className="hidden sm:inline">Salvando...</span></>
-  ) : isNew && !createdProductId ? (
-  <><ChevronRight className="h-3 w-3" /> <span>Próximo</span></>
-  ) : (
-  <><Save className="h-3 w-3" /> <span>Salvar</span></>
-  )}
-  </Button>
-  </div>
-  </div>
-  </div>
-  </div>
-
- {/* ───── Main Area ───── */}
- <div className="flex-1 min-h-0 flex overflow-hidden">
-  <div className="max-w-[1440px] mx-auto px-3 sm:px-7 w-full flex gap-8 xl:gap-12 py-6 min-h-0">
-
- {/* ───── Sidebar ───── */}
-   <nav className="product-studio-rail hidden lg:flex flex-col w-60 shrink-0 overflow-y-auto overscroll-contain pb-6 scrollbar-none space-y-3">
-   <div className="rounded-[24px] border border-border bg-card p-2.5 space-y-1">
-   <div className="px-3 py-3 mb-1 flex items-center justify-between">
-   <p className="text-[10px] font-display font-bold uppercase tracking-[0.14em] text-muted-foreground">Configuração</p>
-   <span className="text-[10px] font-numbers font-bold text-primary">{completionPercent}%</span>
-  </div>
-  {TABS.map((tab) => {
-  const isActive = activeTab === tab.key;
-  const completed = tabCompleted(tab.key);
-  const locked = tab.key !== "geral" && tabsLocked;
-  return (
-  <button
-  key={tab.key}
-  onClick={() => {
-  if (locked) { toast.error("Preencha e salve a aba Geral primeiro"); return; }
-  setActiveTab(tab.key);
-  }}
-  disabled={locked}
-  className={cn(
-  "w-full flex min-h-[52px] items-center gap-3 px-3.5 py-2.5 rounded-2xl text-[13px] font-display font-bold transition-all duration-300 text-left relative group/tab",
-  locked
-  ? "opacity-25 cursor-not-allowed text-muted-foreground"
-  : isActive
-  ? "bg-primary/10 text-primary border border-primary/25"
-  : "border border-transparent text-muted-foreground hover:text-foreground hover:bg-accent/70"
-  )}
-  >
-  {isActive && (
-   <motion.div layoutId="sidebar-accent" className="absolute left-0 top-2 bottom-2 w-[3px] rounded-full bg-primary" transition={{ type: "spring", stiffness: 360, damping: 32 }} />
-  )}
-  {locked ? (
-  <Lock className="h-3.5 w-3.5 shrink-0" />
-  ) : (
-  <div className={cn(
-  "h-8 w-8 rounded-xl flex items-center justify-center shrink-0 border transition-all duration-300",
-   isActive ? "bg-primary text-primary-foreground border-primary" : "bg-secondary border-border group-hover/tab:border-primary/25 group-hover/tab:text-primary"
-  )}>
-   <tab.icon className={cn("h-4 w-4 transition-colors duration-300", isActive ? "text-primary-foreground" : "text-muted-foreground group-hover/tab:text-primary")} />
-  </div>
-  )}
-  <span className="truncate">{tab.label}</span>
-  {completed && !isActive && !locked && (
-  <div className="ml-auto h-2 w-2 rounded-full bg-success shrink-0" />
-  )}
-  </button>
-  );
-  })}
-  </div>
-
-  {/* Quick info — temporariamente desativado, voltaremos depois */}
-  {/* eslint-disable-next-line no-constant-binary-expression */}
-  {false && !tabsLocked && product?.checkout_url && (
-  <div className="rounded-[12px] border border-border bg-card p-3.5 space-y-2.5">
-  <p className="text-[11px] font-display font-medium text-muted-foreground">Ações Rápidas</p>
-  <Button
-  variant="outline" size="sm"
-  onClick={() => copyLink(getCheckoutLink())}
-  className="w-full gap-1.5 h-9 text-[11px] rounded-xl font-display font-bold transition-colors duration-200"
-  >
-  <Copy className="h-3 w-3" /> Copiar Link
-  </Button>
-  <Button
-  variant="outline" size="sm"
-  onClick={() => navigate(`/vendas/produtos/${effectiveProductId}/checkout-builder`)}
-  className="w-full gap-1.5 h-9 text-[11px] rounded-xl font-display font-bold transition-colors duration-200"
-  >
-  <Palette className="h-3 w-3" /> Checkout Builder
-  </Button>
-  </div>
-  )}
-  </nav>
-
- {/* ── Mobile Tab Bar ── */}
-  <div className="fixed bottom-0 left-0 right-0 z-50 lg:hidden bg-card border-t border-border safe-area-bottom">
-  <div className="flex overflow-x-auto gap-0.5 px-2 py-1.5 scrollbar-none">
-  {TABS.map(tab => {
-  const locked = tab.key !== "geral" && tabsLocked;
-  return (
-  <button
-  key={tab.key}
-  onClick={() => {
-  if (locked) { toast.error("Salve a aba Geral primeiro"); return; }
-  setActiveTab(tab.key);
-  }}
-  disabled={locked}
-  className={cn(
- "flex flex-col items-center gap-0.5 px-2.5 py-1.5 rounded-lg text-[9px] font-bold whitespace-nowrap transition-colors duration-200 min-w-[50px]",
-  locked ? "opacity-30 text-muted-foreground" :
-  activeTab === tab.key ? "bg-primary/10 text-primary" : "text-muted-foreground hover:text-foreground"
-  )}
-  >
-  {locked ? <Lock className="h-3.5 w-3.5" /> : <tab.icon className="h-3.5 w-3.5" />}
-  <span className="truncate max-w-[48px]">{tab.label}</span>
-  </button>
-  );
-  })}
-  </div>
-  </div>
-
- {/* ───── Content Area ───── */}
-  <div ref={contentRef} className="product-studio-canvas flex-1 min-w-0 overflow-y-auto pb-28 sm:pb-24 lg:pb-8 overscroll-contain pr-0 lg:pr-2" style={{ WebkitOverflowScrolling: "touch" }}>
+      <div className="min-w-0 pb-24 lg:pb-8">
+       <div className="mb-6 flex gap-1 overflow-x-auto border-b border-border pb-3 lg:hidden">
+        {TABS.map((tab) => {
+         const locked = tab.key !== "geral" && tabsLocked;
+         return <button key={tab.key} disabled={locked} onClick={() => { if (!locked) setActiveTab(tab.key); }} className={cn("flex shrink-0 items-center gap-2 rounded-xl px-3 py-2 text-xs font-bold", locked ? "opacity-30" : activeTab === tab.key ? "bg-primary text-primary-foreground" : "bg-secondary text-muted-foreground")}><tab.icon className="h-3.5 w-3.5" />{tab.label}</button>;
+        })}
+       </div>
  <AnimatePresence mode="wait">
  <motion.div
  key={activeTab}
@@ -983,10 +831,11 @@ export default function ProductEditor() {
      </div>
    );
  })()}
- </div>
- </div>
- </div>
- </div>
+      </div>
+     </div>
+    </div>
+   </div>
+   </div>
  );
 }
 
@@ -1064,18 +913,18 @@ function TabGeral({ name, setName, description, setDescription, price, setPrice,
   ];
 
   return (
-     <div className="space-y-10">
+     <div className="product-general-grid grid grid-cols-1 items-start gap-6 xl:grid-cols-12">
       {/* Section 1: Identity */}
-      <section>
+       <section className="xl:col-span-8">
          <header className="mb-5">
            <p className="mb-2 text-[10px] font-display font-bold uppercase tracking-[0.14em] text-primary">Visão principal</p>
            <h2 className="text-[22px] font-display font-bold text-foreground">Identidade do produto</h2>
            <p className="mt-1 text-[13px] text-muted-foreground">Como seu produto aparece para clientes e afiliados.</p>
         </header>
-         <div className="product-studio-panel rounded-[28px] border border-border bg-card overflow-hidden">
-           <div className="grid grid-cols-1 md:grid-cols-[280px_1fr]">
+         <div className="product-studio-panel overflow-hidden rounded-2xl border border-border bg-card">
+           <div className="grid grid-cols-1 md:grid-cols-[220px_1fr]">
             <div
-               className={cn("relative m-4 md:m-5 md:mr-0 overflow-hidden rounded-[22px] border border-border transition-colors", isDragging ? "bg-primary/10 border-primary/40" : "bg-secondary")}
+               className={cn("relative m-5 overflow-hidden rounded-xl border border-border transition-colors md:mr-0", isDragging ? "bg-primary/10 border-primary/40" : "bg-secondary")}
               onDragOver={(e) => { e.preventDefault(); setIsDragging(true); }}
               onDragLeave={() => setIsDragging(false)}
               onDrop={handleDrop}
@@ -1131,16 +980,16 @@ function TabGeral({ name, setName, description, setDescription, price, setPrice,
       </section>
 
       {/* Section 2: Classification & Pricing */}
-      <section>
+       <section className="xl:col-span-4 xl:row-span-2">
          <header className="mb-5">
            <p className="mb-2 text-[10px] font-display font-bold uppercase tracking-[0.14em] text-primary">Oferta</p>
            <h2 className="text-[22px] font-display font-bold text-foreground">Categoria e preço</h2>
            <p className="mt-1 text-[13px] text-muted-foreground">Como seu produto é classificado e cobrado.</p>
         </header>
-         <div className="product-studio-panel rounded-[28px] border border-border bg-card divide-y divide-border overflow-hidden">
+         <div className="product-studio-panel divide-y divide-border overflow-hidden rounded-2xl border border-border bg-card">
            <div className="p-5 md:p-7 space-y-4">
             <label className="text-[11px] font-semibold text-muted-foreground">Categoria</label>
-             <div className="grid grid-cols-2 xl:grid-cols-4 gap-3">
+             <div className="grid grid-cols-2 gap-3">
               {CATEGORIES.map((opt) => {
                 const Icon = opt.icon;
                 const active = category === opt.value;
@@ -1150,7 +999,7 @@ function TabGeral({ name, setName, description, setDescription, price, setPrice,
                     type="button"
                     onClick={() => setCategory(opt.value)}
                     className={cn(
-  "relative flex min-h-[118px] flex-col items-start justify-between gap-3 p-4 rounded-[20px] border text-left transition-all duration-300",
+  "relative flex min-h-[106px] flex-col items-start justify-between gap-3 rounded-xl border p-3.5 text-left transition-all duration-300",
                       active
                          ? "bg-primary/10 border-primary/50"
                          : "bg-secondary border-border hover:border-primary/30 hover:bg-accent/60"
@@ -1182,7 +1031,7 @@ function TabGeral({ name, setName, description, setDescription, price, setPrice,
             />
           </div>
            <div className="p-5 md:p-7">
-             <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-6">
+             <div className="flex flex-col gap-6">
               <div className="flex-1 space-y-1.5">
                 <label className="text-[11px] font-semibold text-muted-foreground">Preço de venda</label>
                 <div className="relative">
@@ -1202,7 +1051,7 @@ function TabGeral({ name, setName, description, setDescription, price, setPrice,
                   </p>
                 )}
               </div>
-               <div className="w-full sm:w-[300px] space-y-1.5">
+               <div className="w-full space-y-1.5">
                 <label className="text-[11px] font-semibold text-muted-foreground">Garantia</label>
                 <SegmentedChoice
                   value={warrantyDays}
@@ -1222,13 +1071,13 @@ function TabGeral({ name, setName, description, setDescription, price, setPrice,
       </section>
 
       {/* Section 3: Producer info */}
-      <section>
+       <section className="xl:col-span-8">
          <header className="mb-5">
            <p className="mb-2 text-[10px] font-display font-bold uppercase tracking-[0.14em] text-primary">Responsável</p>
            <h2 className="text-[22px] font-display font-bold text-foreground">Informações do produtor</h2>
            <p className="mt-1 text-[13px] text-muted-foreground">Dados obrigatórios exibidos ao comprador no checkout.</p>
         </header>
-         <div className="product-studio-panel rounded-[28px] border border-border bg-card p-5 md:p-7 space-y-6">
+         <div className="product-studio-panel space-y-6 rounded-2xl border border-border bg-card p-5 md:p-7">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
             <div className="space-y-1.5">
               <label className="text-[11px] font-semibold text-muted-foreground flex items-center gap-1.5">
@@ -1273,7 +1122,7 @@ function TabGeral({ name, setName, description, setDescription, price, setPrice,
 
       {/* Bottom Next/Save button — easier than scrolling up */}
       {onNext && (
-        <div className="flex justify-end pt-2">
+        <div className="flex justify-end pt-2 xl:col-span-12">
           <Button onClick={onNext} size="lg" className="gap-2 rounded-xl font-display font-bold px-8 h-12">
             Salvar e continuar <ChevronRight className="h-4 w-4" />
           </Button>
