@@ -4378,69 +4378,69 @@ html body .lp .lp-progress {
 }
 
 /* ════════════════════════════════════════════════════════════
-   VENXPAY EXECUTIVE — marfim financeiro + carvão equilibrado
+   VENXPAY EXECUTIVE — azul financeiro + superfícies frias
    Base compartilhada por todas as superfícies seller.
    ════════════════════════════════════════════════════════════ */
 @layer base {
   :root {
-    --background: 140 13% 96%;
-    --foreground: 160 17% 11%;
+    --background: 215 28% 97%;
+    --foreground: 222 47% 13%;
     --card: 0 0% 100%;
-    --card-elevated: 140 14% 98%;
-    --card-inset: 140 10% 94%;
-    --card-foreground: 160 17% 11%;
+    --card-elevated: 214 32% 98%;
+    --card-inset: 214 28% 94%;
+    --card-foreground: 222 47% 13%;
     --popover: 0 0% 100%;
-    --popover-foreground: 160 17% 11%;
-    --primary: 160 100% 33%;
+    --popover-foreground: 222 47% 13%;
+    --primary: 211 72% 43%;
     --primary-foreground: 0 0% 100%;
-    --secondary: 140 11% 93%;
-    --secondary-foreground: 160 17% 15%;
-    --muted: 140 10% 93%;
-    --muted-foreground: 155 8% 39%;
-    --accent: 150 14% 92%;
-    --accent-foreground: 160 17% 13%;
-    --border: 145 9% 84%;
-    --input: 145 9% 80%;
-    --ring: 160 100% 33%;
+    --secondary: 214 27% 93%;
+    --secondary-foreground: 222 40% 18%;
+    --muted: 214 24% 94%;
+    --muted-foreground: 217 15% 42%;
+    --accent: 211 32% 92%;
+    --accent-foreground: 222 47% 15%;
+    --border: 214 22% 84%;
+    --input: 214 22% 79%;
+    --ring: 211 72% 43%;
     --radius: 1rem;
     --sidebar-background: 0 0% 100%;
-    --sidebar-foreground: 155 8% 34%;
-    --sidebar-primary: 160 100% 33%;
+    --sidebar-foreground: 217 16% 35%;
+    --sidebar-primary: 211 72% 43%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 140 13% 94%;
-    --sidebar-accent-foreground: 160 17% 11%;
-    --sidebar-border: 145 9% 86%;
-    --sidebar-ring: 160 100% 33%;
+    --sidebar-accent: 214 30% 94%;
+    --sidebar-accent-foreground: 222 47% 13%;
+    --sidebar-border: 214 22% 86%;
+    --sidebar-ring: 211 72% 43%;
   }
 
   .dark {
-    --background: 156 10% 13%;
-    --foreground: 140 14% 94%;
-    --card: 157 9% 17%;
-    --card-elevated: 157 9% 20%;
-    --card-inset: 158 10% 15%;
-    --card-foreground: 140 14% 94%;
-    --popover: 157 9% 18%;
-    --popover-foreground: 140 14% 94%;
-    --primary: 160 88% 40%;
-    --primary-foreground: 158 20% 7%;
-    --secondary: 157 8% 22%;
-    --secondary-foreground: 140 14% 94%;
-    --muted: 157 8% 22%;
-    --muted-foreground: 145 8% 72%;
-    --accent: 157 8% 24%;
-    --accent-foreground: 140 14% 96%;
-    --border: 155 8% 30%;
-    --input: 155 8% 34%;
-    --ring: 160 88% 40%;
-    --sidebar-background: 158 10% 15%;
-    --sidebar-foreground: 145 8% 76%;
-    --sidebar-primary: 160 88% 40%;
-    --sidebar-primary-foreground: 158 20% 7%;
-    --sidebar-accent: 157 8% 22%;
-    --sidebar-accent-foreground: 140 14% 96%;
-    --sidebar-border: 155 8% 28%;
-    --sidebar-ring: 160 88% 40%;
+    --background: 222 44% 10%;
+    --foreground: 214 32% 94%;
+    --card: 220 38% 14%;
+    --card-elevated: 219 34% 18%;
+    --card-inset: 222 39% 12%;
+    --card-foreground: 214 32% 94%;
+    --popover: 220 38% 16%;
+    --popover-foreground: 214 32% 94%;
+    --primary: 208 88% 62%;
+    --primary-foreground: 222 47% 9%;
+    --secondary: 219 28% 21%;
+    --secondary-foreground: 214 32% 94%;
+    --muted: 219 27% 20%;
+    --muted-foreground: 215 20% 70%;
+    --accent: 215 30% 23%;
+    --accent-foreground: 210 40% 96%;
+    --border: 217 25% 29%;
+    --input: 216 25% 34%;
+    --ring: 208 88% 62%;
+    --sidebar-background: 223 45% 11%;
+    --sidebar-foreground: 215 22% 74%;
+    --sidebar-primary: 208 88% 62%;
+    --sidebar-primary-foreground: 222 47% 9%;
+    --sidebar-accent: 218 30% 20%;
+    --sidebar-accent-foreground: 210 40% 96%;
+    --sidebar-border: 218 27% 26%;
+    --sidebar-ring: 208 88% 62%;
   }
 
   body {
@@ -4467,48 +4467,48 @@ html body .lp .lp-progress {
 /* O console administrativo compartilha a mesma leitura clara e sóbria. */
 .admin-shell,
 .admin-frame {
-  --as-bg: #f2f5f2;
-  --as-bg-soft: #f7f9f7;
+  --as-bg: #f3f6fa;
+  --as-bg-soft: #f7f9fc;
   --as-surface: #ffffff;
-  --as-surface-2: #edf1ee;
+  --as-surface-2: #edf2f8;
   --as-elev: #ffffff;
-  --as-border: #d3dad5;
-  --as-border-soft: #e3e8e4;
-  --as-border-strong: #b8c3bb;
-  --as-text: #17201d;
-  --as-text-2: #34423d;
-  --as-text-3: #5a6b64;
-  --as-muted: #687771;
-  --as-muted-2: #8b9893;
-  --as-accent: #00a878;
-  --as-accent-hover: #008f67;
-  --as-accent-soft: #e3f5ef;
+  --as-border: #d2dce9;
+  --as-border-soft: #e4eaf2;
+  --as-border-strong: #b5c3d5;
+  --as-text: #101c35;
+  --as-text-2: #2e4264;
+  --as-text-3: #54739a;
+  --as-muted: #64748b;
+  --as-muted-2: #8ca0ba;
+  --as-accent: #276eb4;
+  --as-accent-hover: #205e9b;
+  --as-accent-soft: #e5effa;
   --as-on-accent: #ffffff;
-  --as-rail: #00a878;
+  --as-rail: #4c91d4;
   --as-radius: 14px;
-  --as-ring: 0 0 0 3px rgba(0, 168, 120, 0.14);
+  --as-ring: 0 0 0 3px rgba(39, 110, 180, 0.14);
 }
 
 .dark .admin-shell,
 .dark .admin-frame {
-  --as-bg: #1b211f;
-  --as-bg-soft: #202725;
-  --as-surface: #252d2a;
-  --as-surface-2: #2b3431;
-  --as-elev: #303a36;
-  --as-border: #414c48;
-  --as-border-soft: #36413d;
-  --as-border-strong: #56635e;
-  --as-text: #f0f4f1;
-  --as-text-2: #d2dad5;
-  --as-text-3: #a7b4ae;
-  --as-muted: #9aa8a1;
-  --as-muted-2: #78867f;
-  --as-accent: #21c892;
-  --as-accent-hover: #36d5a1;
-  --as-accent-soft: rgba(33, 200, 146, 0.12);
-  --as-on-accent: #0e1814;
-  --as-rail: #21c892;
+  --as-bg: #0e172a;
+  --as-bg-soft: #111d34;
+  --as-surface: #16233b;
+  --as-surface-2: #1b2b47;
+  --as-elev: #203352;
+  --as-border: #304665;
+  --as-border-soft: #263b59;
+  --as-border-strong: #456183;
+  --as-text: #eef5fc;
+  --as-text-2: #ccdaea;
+  --as-text-3: #9eb5d0;
+  --as-muted: #91a5bd;
+  --as-muted-2: #7087a3;
+  --as-accent: #5aa2e8;
+  --as-accent-hover: #70b2f0;
+  --as-accent-soft: rgba(90, 162, 232, 0.13);
+  --as-on-accent: #0a1627;
+  --as-rail: #69b0f2;
 }
 
 .venx-executive-shell .technical-sidebar [data-sidebar="sidebar"] {
