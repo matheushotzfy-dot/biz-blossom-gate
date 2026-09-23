@@ -912,18 +912,18 @@ function TabGeral({ name, setName, description, setDescription, price, setPrice,
   ];
 
   return (
-     <div className="space-y-10">
+     <div className="product-general-grid grid grid-cols-1 items-start gap-6 xl:grid-cols-12">
       {/* Section 1: Identity */}
-      <section>
+       <section className="xl:col-span-8">
          <header className="mb-5">
            <p className="mb-2 text-[10px] font-display font-bold uppercase tracking-[0.14em] text-primary">Visão principal</p>
            <h2 className="text-[22px] font-display font-bold text-foreground">Identidade do produto</h2>
            <p className="mt-1 text-[13px] text-muted-foreground">Como seu produto aparece para clientes e afiliados.</p>
         </header>
-         <div className="product-studio-panel rounded-[28px] border border-border bg-card overflow-hidden">
-           <div className="grid grid-cols-1 md:grid-cols-[280px_1fr]">
+         <div className="product-studio-panel overflow-hidden rounded-2xl border border-border bg-card">
+           <div className="grid grid-cols-1 md:grid-cols-[220px_1fr]">
             <div
-               className={cn("relative m-4 md:m-5 md:mr-0 overflow-hidden rounded-[22px] border border-border transition-colors", isDragging ? "bg-primary/10 border-primary/40" : "bg-secondary")}
+               className={cn("relative m-5 overflow-hidden rounded-xl border border-border transition-colors md:mr-0", isDragging ? "bg-primary/10 border-primary/40" : "bg-secondary")}
               onDragOver={(e) => { e.preventDefault(); setIsDragging(true); }}
               onDragLeave={() => setIsDragging(false)}
               onDrop={handleDrop}
@@ -979,16 +979,16 @@ function TabGeral({ name, setName, description, setDescription, price, setPrice,
       </section>
 
       {/* Section 2: Classification & Pricing */}
-      <section>
+       <section className="xl:col-span-4 xl:row-span-2">
          <header className="mb-5">
            <p className="mb-2 text-[10px] font-display font-bold uppercase tracking-[0.14em] text-primary">Oferta</p>
            <h2 className="text-[22px] font-display font-bold text-foreground">Categoria e preço</h2>
            <p className="mt-1 text-[13px] text-muted-foreground">Como seu produto é classificado e cobrado.</p>
         </header>
-         <div className="product-studio-panel rounded-[28px] border border-border bg-card divide-y divide-border overflow-hidden">
+         <div className="product-studio-panel divide-y divide-border overflow-hidden rounded-2xl border border-border bg-card">
            <div className="p-5 md:p-7 space-y-4">
             <label className="text-[11px] font-semibold text-muted-foreground">Categoria</label>
-             <div className="grid grid-cols-2 xl:grid-cols-4 gap-3">
+             <div className="grid grid-cols-2 gap-3">
               {CATEGORIES.map((opt) => {
                 const Icon = opt.icon;
                 const active = category === opt.value;
@@ -998,7 +998,7 @@ function TabGeral({ name, setName, description, setDescription, price, setPrice,
                     type="button"
                     onClick={() => setCategory(opt.value)}
                     className={cn(
-  "relative flex min-h-[118px] flex-col items-start justify-between gap-3 p-4 rounded-[20px] border text-left transition-all duration-300",
+  "relative flex min-h-[106px] flex-col items-start justify-between gap-3 rounded-xl border p-3.5 text-left transition-all duration-300",
                       active
                          ? "bg-primary/10 border-primary/50"
                          : "bg-secondary border-border hover:border-primary/30 hover:bg-accent/60"
@@ -1030,7 +1030,7 @@ function TabGeral({ name, setName, description, setDescription, price, setPrice,
             />
           </div>
            <div className="p-5 md:p-7">
-             <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-6">
+             <div className="flex flex-col gap-6">
               <div className="flex-1 space-y-1.5">
                 <label className="text-[11px] font-semibold text-muted-foreground">Preço de venda</label>
                 <div className="relative">
@@ -1050,7 +1050,7 @@ function TabGeral({ name, setName, description, setDescription, price, setPrice,
                   </p>
                 )}
               </div>
-               <div className="w-full sm:w-[300px] space-y-1.5">
+               <div className="w-full space-y-1.5">
                 <label className="text-[11px] font-semibold text-muted-foreground">Garantia</label>
                 <SegmentedChoice
                   value={warrantyDays}
@@ -1070,13 +1070,13 @@ function TabGeral({ name, setName, description, setDescription, price, setPrice,
       </section>
 
       {/* Section 3: Producer info */}
-      <section>
+       <section className="xl:col-span-8">
          <header className="mb-5">
            <p className="mb-2 text-[10px] font-display font-bold uppercase tracking-[0.14em] text-primary">Responsável</p>
            <h2 className="text-[22px] font-display font-bold text-foreground">Informações do produtor</h2>
            <p className="mt-1 text-[13px] text-muted-foreground">Dados obrigatórios exibidos ao comprador no checkout.</p>
         </header>
-         <div className="product-studio-panel rounded-[28px] border border-border bg-card p-5 md:p-7 space-y-6">
+         <div className="product-studio-panel space-y-6 rounded-2xl border border-border bg-card p-5 md:p-7">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
             <div className="space-y-1.5">
               <label className="text-[11px] font-semibold text-muted-foreground flex items-center gap-1.5">
@@ -1121,7 +1121,7 @@ function TabGeral({ name, setName, description, setDescription, price, setPrice,
 
       {/* Bottom Next/Save button — easier than scrolling up */}
       {onNext && (
-        <div className="flex justify-end pt-2">
+        <div className="flex justify-end pt-2 xl:col-span-12">
           <Button onClick={onNext} size="lg" className="gap-2 rounded-xl font-display font-bold px-8 h-12">
             Salvar e continuar <ChevronRight className="h-4 w-4" />
           </Button>

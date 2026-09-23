@@ -1140,14 +1140,13 @@ input[type="number"]::-webkit-inner-spin-button {
 
 /* Product Studio — ultra-clean editor with electric-blue operational focus */
 .product-studio {
-  background:
-    linear-gradient(180deg, hsl(var(--primary) / 0.045), transparent 260px),
-    hsl(var(--background));
+  --product-electric: 214 100% 52%;
+  --product-cyan: 190 100% 59%;
+  background: hsl(216 45% 98%);
 }
 
 .product-studio-topbar {
-  background: hsl(var(--card) / 0.94);
-  backdrop-filter: blur(16px);
+  background: hsl(var(--card));
 }
 
 .product-studio-rail,
@@ -1157,18 +1156,17 @@ input[type="number"]::-webkit-inner-spin-button {
 }
 
 .product-studio-panel {
-  box-shadow: 0 1px 0 hsl(var(--primary) / 0.08);
-  transition: border-color 360ms cubic-bezier(0.16, 1, 0.3, 1), background-color 360ms cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 8px 24px -22px hsl(220 45% 12% / 0.32);
+  transition: border-color 320ms cubic-bezier(0.16, 1, 0.3, 1), box-shadow 320ms cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .product-studio-panel:focus-within {
-  border-color: hsl(var(--primary) / 0.38);
+  border-color: hsl(var(--product-electric) / 0.38);
+  box-shadow: 0 16px 36px -28px hsl(var(--product-electric) / 0.42);
 }
 
 .dark .product-studio {
-  background:
-    linear-gradient(180deg, hsl(var(--primary) / 0.085), transparent 300px),
-    hsl(var(--background));
+  background: hsl(218 67% 8%);
 }
 
 @media (max-width: 1023px) {
