@@ -1138,15 +1138,30 @@ input[type="number"]::-webkit-inner-spin-button {
   }
 }
 
-/* Product Studio — ultra-clean editor with electric-blue operational focus */
+/* Product Studio — focused authoring workspace */
 .product-studio {
   --product-electric: 214 100% 52%;
   --product-cyan: 190 100% 59%;
-  background: hsl(216 45% 98%);
+  background:
+    linear-gradient(180deg, hsl(var(--primary) / 0.045), transparent 220px),
+    hsl(var(--background));
 }
 
 .product-studio-topbar {
   background: hsl(var(--card));
+}
+
+.product-studio-shell {
+  border: 1px solid hsl(var(--border));
+  background: hsl(var(--card));
+}
+
+.product-studio-nav {
+  background: hsl(var(--secondary) / 0.44);
+}
+
+.product-studio-workspace {
+  background: hsl(var(--background));
 }
 
 .product-studio-rail,
@@ -1156,17 +1171,17 @@ input[type="number"]::-webkit-inner-spin-button {
 }
 
 .product-studio-panel {
-  box-shadow: 0 8px 24px -22px hsl(220 45% 12% / 0.32);
-  transition: border-color 320ms cubic-bezier(0.16, 1, 0.3, 1), box-shadow 320ms cubic-bezier(0.16, 1, 0.3, 1);
+  transition: border-color 260ms cubic-bezier(0.16, 1, 0.3, 1), background-color 260ms cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .product-studio-panel:focus-within {
   border-color: hsl(var(--product-electric) / 0.38);
-  box-shadow: 0 16px 36px -28px hsl(var(--product-electric) / 0.42);
 }
 
 .dark .product-studio {
-  background: hsl(218 67% 8%);
+  background:
+    linear-gradient(180deg, hsl(var(--primary) / 0.08), transparent 220px),
+    hsl(var(--background));
 }
 
 @media (max-width: 1023px) {

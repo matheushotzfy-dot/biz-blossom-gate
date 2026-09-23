@@ -2,6 +2,7 @@
 
 - [x] Substituir a paleta esverdeada por azul financeiro escuro em seller e admin.
 - [x] Remodelar o editor de produtos no estilo ultra-clean azul elétrico, mantendo todos os fluxos.
+- [ ] Reconstruir o editor de produto como experiência focada, sofisticada e com detalhes progressivos.
 - [ ] Remover com segurança todas as transações simuladas e dependências.
 - [ ] Excluir dados simulados de todos os agregados seller/admin e desativar o simulador.
 - [ ] Unificar status financeiros e período comercial de São Paulo.
