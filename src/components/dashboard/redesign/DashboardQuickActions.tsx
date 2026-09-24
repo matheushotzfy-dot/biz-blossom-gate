@@ -1,40 +1,22 @@
 import { ChevronRight, type LucideIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
-interface Action {
-  label: string;
-  sub: string;
-  icon: LucideIcon;
-  onClick: () => void;
-}
-
-interface DashboardQuickActionsProps {
-  actions: Action[];
-}
+interface Action { label: string; sub: string; icon: LucideIcon; onClick: () => void; }
+interface DashboardQuickActionsProps { actions: Action[]; }
 
 export function DashboardQuickActions({ actions }: DashboardQuickActionsProps) {
   return (
-    <section className="dashboard-actions-band grid grid-cols-1 gap-3 border-y border-border py-4 sm:grid-cols-2 xl:grid-cols-4">
-      {actions.map((a) => {
-        const Icon = a.icon;
+    <section aria-label="Ações rápidas" className="grid grid-cols-2 gap-2 lg:grid-cols-4">
+      {actions.map((action) => {
+        const Icon = action.icon;
         return (
-          <Button
-            type="button"
-            variant="ghost"
-            key={a.label}
-            onClick={a.onClick}
-            className="dashboard-action group relative h-auto min-h-[78px] justify-start gap-3 overflow-hidden rounded-lg border border-border bg-card px-4 py-3 text-left text-foreground transition-[border-color,background-color,transform] duration-300 hover:-translate-y-0.5 hover:border-primary/45 hover:bg-accent/55"
-          >
-            <span className="relative flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-primary/25 bg-primary/10 text-primary transition-[border-color,background-color,transform] duration-300 group-hover:scale-105 group-hover:border-primary/50 group-hover:bg-primary/15">
-              <Icon className="h-[17px] w-[17px]" strokeWidth={2} />
+          <Button key={action.label} type="button" variant="ghost" onClick={action.onClick} className="dashboard-action group h-auto min-h-[64px] justify-start gap-3 rounded-lg border border-border bg-card px-3 py-2.5 text-left text-foreground hover:border-primary/40 hover:bg-card-elevated">
+            <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md border border-border bg-muted text-primary"><Icon className="h-4 w-4" /></span>
+            <span className="min-w-0 flex-1">
+              <span className="block truncate text-xs font-bold">{action.label}</span>
+              <span className="hidden truncate text-[10px] font-normal text-muted-foreground sm:block">{action.sub}</span>
             </span>
-            <div className="relative min-w-0 flex-1">
-              <p className="text-[13px] font-bold leading-tight text-foreground 2xl:text-[14px]">{a.label}</p>
-              <p className="truncate text-[11px] font-normal text-muted-foreground">{a.sub}</p>
-            </div>
-            <span className="relative flex h-7 w-7 shrink-0 items-center justify-center rounded-[8px] text-muted-foreground/60 transition-colors duration-200 group-hover:text-primary">
-              <ChevronRight className="h-3.5 w-3.5" />
-            </span>
+            <ChevronRight className="hidden h-3.5 w-3.5 shrink-0 text-muted-foreground transition-transform group-hover:translate-x-0.5 sm:block" />
           </Button>
         );
       })}

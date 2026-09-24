@@ -21,7 +21,6 @@ import { toast } from "sonner";
 import { SellerOnboarding } from "@/components/dashboard/SellerOnboarding";
 import QuickPixDialog from "@/components/QuickPixDialog";
 import { useProfile } from "@/hooks/useProfile";
-import { useAuth } from "@/hooks/useAuth";
 import { differenceInDays } from "date-fns";
 import { isApprovedTransaction, deriveTransactionStatus } from "@/lib/utils";
 import type { DateRange } from "react-day-picker";
@@ -30,7 +29,8 @@ import type { DateRange } from "react-day-picker";
 import { DashboardHeader } from "@/components/dashboard/redesign/DashboardHeader";
 import { DashboardKpis } from "@/components/dashboard/redesign/DashboardKpis";
 import { DashboardQuickActions } from "@/components/dashboard/redesign/DashboardQuickActions";
-import { DashboardCharts } from "@/components/dashboard/redesign/DashboardCharts";
+import { DashboardRevenueChart } from "@/components/dashboard/redesign/DashboardRevenueChart";
+import { DashboardSideInsights } from "@/components/dashboard/redesign/DashboardSideInsights";
 import { DashboardActivity } from "@/components/dashboard/redesign/DashboardActivity";
 import { PeriodDial } from "@/components/dashboard/redesign/PeriodDial";
 
@@ -58,16 +58,6 @@ function brasiliaToday() {
   const m = parts.find(p => p.type === "month")!.value;
   const d = parts.find(p => p.type === "day")!.value;
   return new Date(Number(y), Number(m) - 1, Number(d));
-}
-
-function timeAgo(dateStr: string) {
-  const diff = Date.now() - new Date(dateStr).getTime();
-  const mins = Math.floor(diff / 60000);
-  if (mins < 1) return "agora";
-  if (mins < 60) return `${mins}m`;
-  const hours = Math.floor(mins / 60);
-  if (hours < 24) return `${hours}h`;
-  return `${Math.floor(hours / 24)}d`;
 }
 
 export default function Dashboard() {
@@ -117,7 +107,7 @@ export default function Dashboard() {
     return true;
   }, [accountLocked, navigate]);
 
-  const { rangeStart, rangeEnd, bucket, spanDays } = useMemo(() => {
+  const { rangeStart, rangeEnd, bucket } = useMemo(() => {
     const today = brasiliaToday();
     let start: Date;
     let end: Date;
@@ -138,7 +128,7 @@ export default function Dashboard() {
 
     const span = differenceInDays(end, start) + 1;
     const b: "hour" | "day" | "month" = span <= 1 ? "hour" : span > 60 ? "month" : "day";
-    return { rangeStart: start, rangeEnd: end, bucket: b, spanDays: span };
+    return { rangeStart: start, rangeEnd: end, bucket: b };
   }, [isCustom, customRange, selectedPeriod]);
 
   const { data: stats, isError: statsError, isPending: statsLoading, refetch: refetchStats } = useDashboardStats(rangeStart, rangeEnd, bucket);
@@ -188,7 +178,6 @@ export default function Dashboard() {
     return map;
   }, [productsData]);
 
-  const nickname = profile?.nickname || profile?.full_name?.split(" ")[0] || "Vendedor";
   const goalTarget = 100000;
   const goalPct = Math.min(100, (formattedStats.revenue / goalTarget) * 100);
 
@@ -203,7 +192,7 @@ export default function Dashboard() {
     <div className="seller-dashboard relative min-h-full w-full text-foreground animate-in fade-in duration-500">
       <Seo title="Dashboard | Venxpay" description="Painel operacional Venxpay — saldos, ranking, aprovação e liquidações em tempo real." path="/dashboard" noindex />
 
-      <div className="relative z-10 mx-auto max-w-[1320px] space-y-5 px-1 pb-20 pt-1 sm:px-2 md:px-3 lg:space-y-6">
+      <div className="relative z-10 mx-auto max-w-[1440px] space-y-4 px-1 pb-20 pt-1 sm:px-2 md:px-3">
         {(txError || statsError || productsError) && (
           <div className="flex items-center justify-between gap-3 rounded-[12px] border border-destructive/40 bg-destructive/5 px-4 py-2.5 text-[12px] text-destructive">
             <span className="font-semibold">Falha ao carregar métricas</span>
@@ -214,7 +203,6 @@ export default function Dashboard() {
         <SellerOnboarding />
 
         <DashboardHeader 
-          nickname={nickname} 
           privacyHidden={privacy.hidden} 
           onPrivacyToggle={privacy.toggle} 
           periodControl={
@@ -230,12 +218,16 @@ export default function Dashboard() {
           }
         />
 
-        <DashboardKpis 
+        <DashboardKpis
           balance={balance}
-          receivedToday={formattedStats.receivedToday}
-          disputedAmount={formattedStats.disputedAmount}
           revenue={formattedStats.revenue}
-          revenueTrend={formattedStats.revenueTrend}
+          approvedCount={formattedStats.approvedCount}
+          conversion={formattedStats.conversion}
+          averageTicket={formattedStats.averageTicket}
+          pendingBalance={formattedStats.pendingBalance}
+          disputedAmount={formattedStats.disputedAmount}
+          chargebackRate={formattedStats.chargebackRate}
+          productsCount={(productsData ?? []).length}
           isLoading={statsLoading}
           privacyHidden={privacy.hidden}
           formatCurrency={fmt}
@@ -243,17 +235,23 @@ export default function Dashboard() {
 
         <DashboardQuickActions actions={quickActions} />
 
-        <DashboardCharts 
-          chartData={formattedStats.chartData}
-          chartTicks={chartTicks}
-          chartTickFormatter={chartTickFormatter}
-          pixConversion={formattedStats.pixConversion}
-          chargebackRate={formattedStats.chargebackRate}
-          periodLabel={selectedPeriod.label}
-          isCustom={isCustom}
-          formatCurrency={fmt}
-          onPaymentLinkClick={() => { if (!requireApprovedAccount()) navigate("/vendas/link-pagamento"); }}
-        />
+        <section className="grid grid-cols-1 gap-4 xl:grid-cols-3">
+          <DashboardRevenueChart
+            chartData={formattedStats.chartData}
+            chartTicks={chartTicks}
+            chartTickFormatter={chartTickFormatter}
+            revenue={formattedStats.revenue}
+            periodLabel={isCustom ? "período personalizado" : selectedPeriod.label}
+            formatCurrency={fmt}
+          />
+          <DashboardSideInsights
+            chartData={formattedStats.chartData}
+            chartTickFormatter={chartTickFormatter}
+            pixConversion={formattedStats.pixConversion}
+            chargebackRate={formattedStats.chargebackRate}
+            onPaymentLinkClick={() => { if (!requireApprovedAccount()) navigate("/vendas/link-pagamento"); }}
+          />
+        </section>
 
         <DashboardActivity 
           activity={activity}

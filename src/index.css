@@ -5119,3 +5119,47 @@ html body .lp .lp-progress {
     transition-duration: 1ms !important;
   }
 }
+
+/* Dashboard reference system — compact, data-led and solid. */
+.seller-dashboard {
+  --primary: 211 92% 58%;
+  --primary-foreground: 0 0% 100%;
+  --info: 194 82% 58%;
+  --ring: 211 92% 58%;
+  background-color: hsl(var(--background));
+  background-image: radial-gradient(hsl(var(--border) / 0.38) 0.7px, transparent 0.7px);
+  background-size: 18px 18px;
+}
+
+.seller-dashboard .dashboard-heading-band { border: 0; }
+.seller-dashboard .stat-hero-card,
+.seller-dashboard .dashboard-action,
+.seller-dashboard .dashboard-data-panel {
+  background: hsl(var(--card)) !important;
+  border-color: hsl(var(--border)) !important;
+  box-shadow: none !important;
+}
+.seller-dashboard .stat-hero-card::before { display: none; }
+.seller-dashboard .stat-hero-card:hover,
+.seller-dashboard .dashboard-action:hover,
+.seller-dashboard .dashboard-data-panel:hover {
+  transform: none !important;
+  border-color: hsl(var(--primary) / 0.42) !important;
+  background: hsl(var(--card-elevated)) !important;
+}
+
+.seller-dashboard .dashboard-progress {
+  display: block;
+  width: 100%;
+  height: 6px;
+  overflow: hidden;
+  border: 0;
+  border-radius: 999px;
+  background: hsl(var(--muted));
+  appearance: none;
+}
+.seller-dashboard .dashboard-progress::-webkit-progress-bar { background: hsl(var(--muted)); }
+.seller-dashboard .dashboard-progress::-webkit-progress-value { border-radius: 999px; background: hsl(var(--primary)); }
+.seller-dashboard .dashboard-progress::-moz-progress-bar { border-radius: 999px; background: hsl(var(--primary)); }
+.seller-dashboard .dashboard-progress-danger::-webkit-progress-value { background: hsl(var(--destructive)); }
+.seller-dashboard .dashboard-progress-danger::-moz-progress-bar { background: hsl(var(--destructive)); }
