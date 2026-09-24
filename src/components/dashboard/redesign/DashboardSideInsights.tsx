@@ -54,9 +54,12 @@ function MetricBar({ label, value, inverse = false }: { label: string; value: nu
         <span className="font-semibold text-foreground">{label}</span>
         <span className="font-numbers font-bold tabular-nums text-foreground">{value.toFixed(1)}%</span>
       </div>
-      <div className="h-1.5 overflow-hidden rounded-full bg-muted">
-        <div className={inverse && value >= 1 ? "h-full rounded-full bg-destructive" : "h-full rounded-full bg-primary"} style={{ width: `${width}%` }} />
-      </div>
+      <progress
+        className={inverse && value >= 1 ? "dashboard-progress dashboard-progress-danger" : "dashboard-progress"}
+        value={width}
+        max={100}
+        aria-label={`${label}: ${value.toFixed(1)}%`}
+      />
     </div>
   );
 }

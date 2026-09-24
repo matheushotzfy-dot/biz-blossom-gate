@@ -5147,3 +5147,19 @@ html body .lp .lp-progress {
   border-color: hsl(var(--primary) / 0.42) !important;
   background: hsl(var(--card-elevated)) !important;
 }
+
+.seller-dashboard .dashboard-progress {
+  display: block;
+  width: 100%;
+  height: 6px;
+  overflow: hidden;
+  border: 0;
+  border-radius: 999px;
+  background: hsl(var(--muted));
+  appearance: none;
+}
+.seller-dashboard .dashboard-progress::-webkit-progress-bar { background: hsl(var(--muted)); }
+.seller-dashboard .dashboard-progress::-webkit-progress-value { border-radius: 999px; background: hsl(var(--primary)); }
+.seller-dashboard .dashboard-progress::-moz-progress-bar { border-radius: 999px; background: hsl(var(--primary)); }
+.seller-dashboard .dashboard-progress-danger::-webkit-progress-value { background: hsl(var(--destructive)); }
+.seller-dashboard .dashboard-progress-danger::-moz-progress-bar { background: hsl(var(--destructive)); }

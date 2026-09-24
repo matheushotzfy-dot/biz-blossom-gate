@@ -21,7 +21,6 @@ import { toast } from "sonner";
 import { SellerOnboarding } from "@/components/dashboard/SellerOnboarding";
 import QuickPixDialog from "@/components/QuickPixDialog";
 import { useProfile } from "@/hooks/useProfile";
-import { useAuth } from "@/hooks/useAuth";
 import { differenceInDays } from "date-fns";
 import { isApprovedTransaction, deriveTransactionStatus } from "@/lib/utils";
 import type { DateRange } from "react-day-picker";
@@ -59,16 +58,6 @@ function brasiliaToday() {
   const m = parts.find(p => p.type === "month")!.value;
   const d = parts.find(p => p.type === "day")!.value;
   return new Date(Number(y), Number(m) - 1, Number(d));
-}
-
-function timeAgo(dateStr: string) {
-  const diff = Date.now() - new Date(dateStr).getTime();
-  const mins = Math.floor(diff / 60000);
-  if (mins < 1) return "agora";
-  if (mins < 60) return `${mins}m`;
-  const hours = Math.floor(mins / 60);
-  if (hours < 24) return `${hours}h`;
-  return `${Math.floor(hours / 24)}d`;
 }
 
 export default function Dashboard() {
@@ -118,7 +107,7 @@ export default function Dashboard() {
     return true;
   }, [accountLocked, navigate]);
 
-  const { rangeStart, rangeEnd, bucket, spanDays } = useMemo(() => {
+  const { rangeStart, rangeEnd, bucket } = useMemo(() => {
     const today = brasiliaToday();
     let start: Date;
     let end: Date;
@@ -139,7 +128,7 @@ export default function Dashboard() {
 
     const span = differenceInDays(end, start) + 1;
     const b: "hour" | "day" | "month" = span <= 1 ? "hour" : span > 60 ? "month" : "day";
-    return { rangeStart: start, rangeEnd: end, bucket: b, spanDays: span };
+    return { rangeStart: start, rangeEnd: end, bucket: b };
   }, [isCustom, customRange, selectedPeriod]);
 
   const { data: stats, isError: statsError, isPending: statsLoading, refetch: refetchStats } = useDashboardStats(rangeStart, rangeEnd, bucket);
@@ -189,7 +178,6 @@ export default function Dashboard() {
     return map;
   }, [productsData]);
 
-  const nickname = profile?.nickname || profile?.full_name?.split(" ")[0] || "Vendedor";
   const goalTarget = 100000;
   const goalPct = Math.min(100, (formattedStats.revenue / goalTarget) * 100);
 
