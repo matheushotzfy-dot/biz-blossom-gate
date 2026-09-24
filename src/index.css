@@ -169,6 +169,33 @@ input[type="number"]::-webkit-inner-spin-button {
 }
 
 @layer utilities {
+  .auth-shell {
+    --background: 0 0% 2%;
+    --foreground: 0 0% 97%;
+    --card: 0 0% 4%;
+    --card-foreground: 0 0% 97%;
+    --muted: 0 0% 8%;
+    --muted-foreground: 0 0% 58%;
+    --border: 0 0% 12%;
+    --input: 0 0% 12%;
+    --primary: 49 100% 55%;
+    --primary-foreground: 0 0% 3%;
+    --ring: 49 100% 55%;
+    font-family: 'Manrope', system-ui, sans-serif;
+  }
+
+  .auth-network {
+    background: hsl(0 0% 8%);
+  }
+
+  .auth-network-grid {
+    opacity: 0.42;
+    background-image: radial-gradient(circle, hsl(var(--foreground) / 0.12) 1px, transparent 1px);
+    background-size: 18px 18px;
+    -webkit-mask-image: radial-gradient(ellipse 72% 68% at 50% 50%, #000 20%, transparent 78%);
+    mask-image: radial-gradient(ellipse 72% 68% at 50% 50%, #000 20%, transparent 78%);
+  }
+
   .gradient-primary {
     background: linear-gradient(135deg, hsl(var(--primary)), hsl(var(--info)));
   }

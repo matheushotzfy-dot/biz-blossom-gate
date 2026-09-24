@@ -22,7 +22,6 @@ import { AuthAside } from "@/components/auth/AuthAside";
 import { VenxpayLogo } from "@/components/VenxpayLogo";
 import { Seo } from "@/components/Seo";
 import { friendlyError } from "@/lib/friendlyError";
-import authHeroPerson from "@/assets/auth-hero-person.jpg";
 
 /* ─────────────────── Document helpers ─────────────────── */
 function formatDocument(value: string): string {
@@ -340,45 +339,30 @@ export default function Auth() {
   };
 
   const inputCls =
-    "h-[54px] rounded-xl border-border/70 bg-muted/25 px-4 text-[15px] text-foreground placeholder:text-muted-foreground/55 hover:border-border focus-visible:border-primary/70 focus-visible:bg-background focus-visible:ring-2 focus-visible:ring-primary/10";
-  const labelCls = "mb-2 block text-[12px] font-semibold text-foreground/85";
+    "h-[48px] rounded-md border-border bg-card px-4 text-[14px] text-foreground placeholder:text-muted-foreground/60 hover:border-foreground/25 focus-visible:border-primary focus-visible:bg-card focus-visible:ring-2 focus-visible:ring-primary/10";
+  const labelCls = "mb-2 block text-[11px] font-semibold text-foreground/80";
 
   const heading = isLogin
     ? { title: "Bem-vindo de volta", sub: "Entre para acompanhar sua operação." }
     : STEP_TITLES[step - 1];
 
   return (
-    <div className="h-[100dvh] overflow-y-auto bg-background text-foreground">
+    <div className="auth-shell h-[100dvh] overflow-y-auto bg-background text-foreground">
       <Seo
         title={isLogin ? "Entrar — VENXPAY" : "Criar conta grátis — VENXPAY"}
         description={isLogin ? "Acesse seu painel VENXPAY: produtos, vendas, saques e área de membros em um só lugar." : "Crie sua conta VENXPAY gratuitamente e comece a vender infoprodutos com checkout de alta conversão."}
         path="/auth"
       />
 
-      <div className="grid min-h-screen lg:grid-cols-[minmax(0,560px)_minmax(0,1fr)]">
+      <div className="grid min-h-screen lg:grid-cols-[minmax(0,51.25%)_minmax(0,48.75%)]">
         {/* ═══ LEFT — form ═══ */}
-        <div className="relative flex min-h-screen flex-col justify-between border-r border-border/50 px-5 py-7 sm:px-10 sm:py-9 lg:px-16 lg:py-10">
+        <div className="relative flex min-h-screen flex-col justify-between border-r border-border px-5 py-7 sm:px-10 sm:py-9 lg:rounded-r-[22px] lg:px-16 lg:py-10 xl:px-24">
           <a href="/" className="inline-flex w-fit items-center gap-2.5 opacity-95 transition-opacity hover:opacity-100">
             <VenxpayLogo size={32} plate={false} />
             <span className="text-[18px] font-heading font-semibold text-foreground">VENXPAY</span>
           </a>
 
-          {!isLogin && (
-            <div className="relative mt-7 h-28 overflow-hidden rounded-2xl border border-border/60 lg:hidden">
-              <img src={authHeroPerson} alt="Seller acompanhando vendas pela VENXPAY" className="h-full w-full object-cover object-[center_32%]" />
-              <div className="absolute inset-0 bg-gradient-to-r from-background/80 via-background/15 to-transparent" />
-              <div className="absolute inset-y-0 left-4 flex items-center">
-                <div>
-                  <span className="inline-flex items-center gap-1.5 text-[11px] font-semibold text-primary">
-                    <span className="h-1.5 w-1.5 rounded-full bg-primary" /> Operação ao vivo
-                  </span>
-                  <p className="mt-1 max-w-[170px] font-heading text-[16px] font-semibold leading-tight text-foreground">Venda aprovada em tempo real.</p>
-                </div>
-              </div>
-            </div>
-          )}
-
-          <div className="mx-auto w-full max-w-[430px] py-8 sm:py-10">
+          <div className="mx-auto w-full max-w-[390px] py-10 sm:py-12">
             <AnimatePresence mode="wait">
               <motion.div
                 key={isLogin ? "login-h" : `signup-h-${step}`}
@@ -387,10 +371,10 @@ export default function Auth() {
                 exit={{ opacity: 0, y: -6 }}
                 transition={{ duration: 0.22 }}
               >
-                <h1 className="text-[30px] font-heading font-semibold leading-[1.12] text-foreground sm:text-[36px]">
+                <h1 className="text-[26px] font-heading font-semibold leading-[1.12] text-foreground sm:text-[30px]">
                   {recoveryMode !== "idle" && isLogin ? "Recuperar acesso" : heading.title}
                 </h1>
-                <p className="mt-2.5 max-w-[390px] text-[14px] leading-relaxed text-muted-foreground">
+                <p className="mt-2 max-w-[390px] text-[13px] leading-relaxed text-muted-foreground">
                   {recoveryMode !== "idle" && isLogin ? "Vamos enviar um código para o seu e-mail." : heading.sub}
                 </p>
               </motion.div>
@@ -398,7 +382,7 @@ export default function Auth() {
 
             {/* Step rail */}
             {!isLogin && (
-              <div className="mt-7 rounded-2xl border border-border/60 bg-muted/15 p-4">
+              <div className="mt-6 border-y border-border py-4">
                 <div className="flex items-center gap-2">
                   {Array.from({ length: TOTAL_STEPS }, (_, i) => i + 1).map((s) => (
                     <div key={s} className="h-1 flex-1 overflow-hidden rounded-full bg-muted">
@@ -419,7 +403,7 @@ export default function Auth() {
             )}
 
 
-            <div className="mt-7">
+            <div className="mt-6">
               <AnimatePresence mode="wait">
                 <motion.div
                   key={isLogin ? `login-${recoveryMode}` : `signup-${step}`}
@@ -450,7 +434,7 @@ export default function Auth() {
                               Esqueceu a senha?
                             </button>
                           </div>
-                          <Button type="submit" disabled={loading} className="h-[52px] w-full rounded-[10px] bg-primary text-[15px] font-semibold text-primary-foreground hover:brightness-105">
+                          <Button type="submit" disabled={loading} className="h-[48px] w-full rounded-md bg-primary text-[14px] font-semibold text-primary-foreground hover:brightness-105">
                             {loading ? <div className="h-5 w-5 animate-spin rounded-full border-2 border-primary-foreground/30 border-t-primary-foreground" /> : "Entrar"}
                           </Button>
                           <p className="text-center text-[13px] text-muted-foreground">
@@ -791,7 +775,7 @@ export default function Auth() {
             </div>
           </div>
 
-          <div className="flex flex-wrap items-center justify-between gap-3 border-t border-border/50 pt-5 text-[11px] text-muted-foreground">
+          <div className="flex flex-wrap items-center justify-between gap-3 border-t border-border pt-5 text-[10px] text-muted-foreground">
             <span className="inline-flex items-center gap-1.5"><Lock className="h-3.5 w-3.5" /> Conexão protegida com SSL 256-bit</span>
             <span className="inline-flex items-center gap-1.5"><Shield className="h-3.5 w-3.5" /> LGPD</span>
           </div>
