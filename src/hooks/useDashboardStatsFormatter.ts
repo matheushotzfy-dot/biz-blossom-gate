@@ -38,10 +38,13 @@ export function useDashboardStatsFormatter(
     const revenueTrend = pctChange(revenue, prevRevenue);
 
     // Chart Data logic
-    const byKey = new Map<string, number>();
+    const revenueByKey = new Map<string, number>();
+    const ordersByKey = new Map<string, number>();
     (stats?.series ?? []).forEach((point) => {
       const raw = String(point.bucket);
-      byKey.set(raw.slice(0, 13), (byKey.get(raw.slice(0, 13)) || 0) + Number(point.revenue));
+      const key = raw.slice(0, 13);
+      revenueByKey.set(key, (revenueByKey.get(key) || 0) + Number(point.revenue));
+      ordersByKey.set(key, (ordersByKey.get(key) || 0) + Number(point.count));
     });
     
     const pad = (n: number) => String(n).padStart(2, "0");

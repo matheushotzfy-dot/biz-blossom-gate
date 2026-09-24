@@ -30,7 +30,8 @@ import type { DateRange } from "react-day-picker";
 import { DashboardHeader } from "@/components/dashboard/redesign/DashboardHeader";
 import { DashboardKpis } from "@/components/dashboard/redesign/DashboardKpis";
 import { DashboardQuickActions } from "@/components/dashboard/redesign/DashboardQuickActions";
-import { DashboardCharts } from "@/components/dashboard/redesign/DashboardCharts";
+import { DashboardRevenueChart } from "@/components/dashboard/redesign/DashboardRevenueChart";
+import { DashboardSideInsights } from "@/components/dashboard/redesign/DashboardSideInsights";
 import { DashboardActivity } from "@/components/dashboard/redesign/DashboardActivity";
 import { PeriodDial } from "@/components/dashboard/redesign/PeriodDial";
 
@@ -203,7 +204,7 @@ export default function Dashboard() {
     <div className="seller-dashboard relative min-h-full w-full text-foreground animate-in fade-in duration-500">
       <Seo title="Dashboard | Venxpay" description="Painel operacional Venxpay — saldos, ranking, aprovação e liquidações em tempo real." path="/dashboard" noindex />
 
-      <div className="relative z-10 mx-auto max-w-[1320px] space-y-5 px-1 pb-20 pt-1 sm:px-2 md:px-3 lg:space-y-6">
+      <div className="relative z-10 mx-auto max-w-[1440px] space-y-4 px-1 pb-20 pt-1 sm:px-2 md:px-3">
         {(txError || statsError || productsError) && (
           <div className="flex items-center justify-between gap-3 rounded-[12px] border border-destructive/40 bg-destructive/5 px-4 py-2.5 text-[12px] text-destructive">
             <span className="font-semibold">Falha ao carregar métricas</span>
@@ -214,7 +215,6 @@ export default function Dashboard() {
         <SellerOnboarding />
 
         <DashboardHeader 
-          nickname={nickname} 
           privacyHidden={privacy.hidden} 
           onPrivacyToggle={privacy.toggle} 
           periodControl={
@@ -230,12 +230,16 @@ export default function Dashboard() {
           }
         />
 
-        <DashboardKpis 
+        <DashboardKpis
           balance={balance}
-          receivedToday={formattedStats.receivedToday}
-          disputedAmount={formattedStats.disputedAmount}
           revenue={formattedStats.revenue}
-          revenueTrend={formattedStats.revenueTrend}
+          approvedCount={formattedStats.approvedCount}
+          conversion={formattedStats.conversion}
+          averageTicket={formattedStats.averageTicket}
+          pendingBalance={formattedStats.pendingBalance}
+          disputedAmount={formattedStats.disputedAmount}
+          chargebackRate={formattedStats.chargebackRate}
+          productsCount={(productsData ?? []).length}
           isLoading={statsLoading}
           privacyHidden={privacy.hidden}
           formatCurrency={fmt}
@@ -243,17 +247,23 @@ export default function Dashboard() {
 
         <DashboardQuickActions actions={quickActions} />
 
-        <DashboardCharts 
-          chartData={formattedStats.chartData}
-          chartTicks={chartTicks}
-          chartTickFormatter={chartTickFormatter}
-          pixConversion={formattedStats.pixConversion}
-          chargebackRate={formattedStats.chargebackRate}
-          periodLabel={selectedPeriod.label}
-          isCustom={isCustom}
-          formatCurrency={fmt}
-          onPaymentLinkClick={() => { if (!requireApprovedAccount()) navigate("/vendas/link-pagamento"); }}
-        />
+        <section className="grid grid-cols-1 gap-4 xl:grid-cols-3">
+          <DashboardRevenueChart
+            chartData={formattedStats.chartData}
+            chartTicks={chartTicks}
+            chartTickFormatter={chartTickFormatter}
+            revenue={formattedStats.revenue}
+            periodLabel={isCustom ? "período personalizado" : selectedPeriod.label}
+            formatCurrency={fmt}
+          />
+          <DashboardSideInsights
+            chartData={formattedStats.chartData}
+            chartTickFormatter={chartTickFormatter}
+            pixConversion={formattedStats.pixConversion}
+            chargebackRate={formattedStats.chargebackRate}
+            onPaymentLinkClick={() => { if (!requireApprovedAccount()) navigate("/vendas/link-pagamento"); }}
+          />
+        </section>
 
         <DashboardActivity 
           activity={activity}
