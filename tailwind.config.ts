@@ -14,10 +14,10 @@ export default {
     extend: {
       fontFamily: {
         sans: ["Plus Jakarta Sans", "Manrope", "Inter", "system-ui", "sans-serif"],
-        display: ["Sora", "Space Grotesk", "Outfit", "system-ui", "sans-serif"],
+        display: ["Plus Jakarta Sans", "Manrope", "system-ui", "sans-serif"],
         mono: ["JetBrains Mono", "monospace"],
-        numbers: ["Space Grotesk", "JetBrains Mono", "monospace"],
-        heading: ["Sora", "Space Grotesk", "system-ui", "sans-serif"],
+        numbers: ["Plus Jakarta Sans", "Manrope", "system-ui", "sans-serif"],
+        heading: ["Plus Jakarta Sans", "Manrope", "system-ui", "sans-serif"],
       },
       colors: {
         border: "hsl(var(--border))",
