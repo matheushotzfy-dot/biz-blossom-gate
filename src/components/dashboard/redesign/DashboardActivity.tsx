@@ -21,11 +21,11 @@ export function DashboardActivity({
   const CENSORED = "••••••";
 
   return (
-    <section className="rounded-[24px] border border-border bg-card overflow-hidden">
+    <section className="dashboard-data-panel overflow-hidden rounded-lg border border-border bg-card">
       <div className="flex items-center justify-between gap-3 border-b border-border/40 px-6 py-5 md:px-8">
         <div>
-          <h4 className="font-display font-bold text-xl tracking-[-0.02em]">Últimas Transações</h4>
-          <p className="text-[11px] text-muted-foreground/60 mt-1">Atividade em tempo real</p>
+          <h4 className="font-display text-xl font-bold">Últimas Transações</h4>
+          <p className="mt-1 flex items-center gap-1.5 text-[11px] font-medium text-muted-foreground"><span className="h-1.5 w-1.5 rounded-full bg-success" />Atividade em tempo real</p>
         </div>
         <button 
           onClick={onViewAllClick}
@@ -60,14 +60,14 @@ export function DashboardActivity({
             
             const isApproved = isApprovedTransaction(item.status);
             const dot =
-              isApproved ? "bg-emerald-500"
-              : item.status === "pending" ? "bg-amber-500"
-              : item.status === "chargeback" || item.status === "med" || item.status === "dispute" || item.status === "disputed" ? "bg-red-500"
+              isApproved ? "bg-success"
+              : item.status === "pending" ? "bg-warning"
+              : item.status === "chargeback" || item.status === "med" || item.status === "dispute" || item.status === "disputed" ? "bg-destructive"
               : "bg-muted-foreground/50";
             const statusColor =
-              isApproved ? "text-emerald-600 dark:text-emerald-500"
-              : item.status === "pending" ? "text-amber-600 dark:text-amber-500"
-              : item.status === "chargeback" || item.status === "med" || item.status === "dispute" || item.status === "disputed" ? "text-red-600 dark:text-red-500"
+              isApproved ? "text-success"
+              : item.status === "pending" ? "text-warning"
+              : item.status === "chargeback" || item.status === "med" || item.status === "dispute" || item.status === "disputed" ? "text-destructive"
               : "text-muted-foreground";
 
             return (
@@ -75,7 +75,7 @@ export function DashboardActivity({
                 <button
                   type="button"
                   onClick={() => onTxClick(item.tx)}
-                  className="group w-full grid md:grid-cols-[1fr_100px_120px_110px_20px] grid-cols-[1fr_auto] gap-4 items-center px-5 md:px-6 py-4 text-left hover:bg-muted/30 transition-colors"
+                  className="group grid w-full grid-cols-[1fr_auto] items-center gap-4 border-l-2 border-l-transparent px-5 py-4 text-left transition-[background-color,border-color] hover:border-l-primary hover:bg-primary/[0.04] md:grid-cols-[1fr_100px_120px_110px_20px] md:px-6"
                 >
                   <div className="min-w-0">
                     <p className="text-[14px] font-semibold text-foreground truncate">{custName}</p>

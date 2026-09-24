@@ -29,13 +29,13 @@ export function DashboardCharts({
   const donutChb = useMemo(() => [{ name: "on", value: chargebackRate }, { name: "off", value: Math.max(0, 100 - chargebackRate) }], [chargebackRate]);
 
   return (
-    <section className="grid grid-cols-1 xl:grid-cols-3 gap-4">
+    <section className="dashboard-analytics-band grid grid-cols-1 gap-4 xl:grid-cols-3">
       {/* Faturamento — Clean line chart */}
-      <div className="xl:col-span-2 overflow-hidden rounded-[24px] border border-border bg-card">
+      <div className="dashboard-data-panel overflow-hidden rounded-lg border border-border bg-card xl:col-span-2">
         <div className="flex items-center justify-between gap-3 border-b border-border/40 px-6 py-5 md:px-8">
           <div className="min-w-0">
-            <h4 className="font-display font-bold text-xl tracking-[-0.02em] text-foreground">Faturamento</h4>
-            <p className="text-[11px] text-muted-foreground/60 mt-1">Comparativo de entradas e saídas</p>
+            <h4 className="font-display text-xl font-bold text-foreground">Faturamento</h4>
+            <p className="mt-1 text-[11px] font-medium text-muted-foreground">Comparativo de entradas e saídas</p>
           </div>
           <span className="shrink-0 rounded-[10px] border border-border/60 bg-background px-3 py-1.5 text-[11px] font-bold uppercase tracking-[0.08em] text-muted-foreground">
             {isCustom ? "Período personalizado" : periodLabel}
@@ -116,10 +116,10 @@ export function DashboardCharts({
 
       {/* Right side: donuts + links */}
       <div className="space-y-4">
-         <div className="rounded-[24px] border border-border bg-card p-7">
+         <div className="dashboard-data-panel rounded-lg border border-border bg-card p-6 md:p-7">
           <div className="mb-6">
-            <h4 className="font-display font-bold text-xl tracking-[-0.02em]">Índices</h4>
-            <p className="text-[11px] text-muted-foreground/60 mt-1">Conversão por método de pagamento</p>
+            <h4 className="font-display text-xl font-bold">Índices</h4>
+            <p className="mt-1 text-[11px] font-medium text-muted-foreground">Conversão por método de pagamento</p>
           </div>
           <div className="space-y-5">
             {/* Pix */}
@@ -168,10 +168,10 @@ export function DashboardCharts({
         <button 
           type="button" 
           onClick={onPaymentLinkClick}
-          className="group block w-full rounded-[24px] border border-border bg-card p-7 text-left transition-colors duration-300 hover:border-primary/35 hover:bg-card-elevated"
+          className="dashboard-payment-link group block w-full rounded-lg border border-primary/25 bg-card p-6 text-left transition-[border-color,background-color,transform] duration-300 hover:-translate-y-0.5 hover:border-primary/55 hover:bg-card-elevated md:p-7"
         >
-          <h4 className="font-display font-bold text-lg tracking-[-0.02em]">Links de Pagamento</h4>
-          <p className="text-[11px] text-muted-foreground/60 mt-1 mb-4">Crie e gerencie seus links</p>
+          <h4 className="font-display text-lg font-bold">Links de Pagamento</h4>
+          <p className="mb-4 mt-1 text-[11px] font-medium text-muted-foreground">Crie e gerencie seus links</p>
           <div className="flex items-center gap-2 text-primary font-bold text-[12px]">
             Acessar agora
             <span className="transition-transform duration-300 group-hover:translate-x-1">→</span>

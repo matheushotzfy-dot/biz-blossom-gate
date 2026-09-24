@@ -81,7 +81,7 @@ export function StatCard({
   return (
     <div
       className={cn(
- "stat-hero-card group relative flex h-full min-h-[116px] flex-col overflow-hidden rounded-xl border border-border/90 bg-card p-4 shadow-[0_1px_0_hsl(var(--foreground)/0.025)] animate-in fade-in slide-in-from-bottom-2 transition-[border-color,background-color,box-shadow] duration-200 hover:border-foreground/15 sm:min-h-[136px] sm:p-5",
+ "stat-hero-card group relative flex h-full min-h-[124px] flex-col overflow-hidden rounded-lg border border-border bg-card p-4 animate-in fade-in slide-in-from-bottom-2 transition-[border-color,background-color,transform] duration-300 hover:border-primary/45 sm:min-h-[144px] sm:p-5",
         className
       )}
       style={{
@@ -90,7 +90,7 @@ export function StatCard({
     >
       {/* Header: title + icon */}
       <div className="relative z-[2] flex items-center justify-between gap-3">
-         <p className="truncate text-[10px] font-semibold uppercase leading-none tracking-[0.08em] text-muted-foreground/80 transition-colors duration-200 sm:text-[10.5px]">
+         <p className="truncate text-[10px] font-bold uppercase leading-none tracking-[0.08em] text-muted-foreground transition-colors duration-200 group-hover:text-foreground sm:text-[10.5px]">
           {title}
         </p>
         <div className="flex items-center gap-1.5">
@@ -106,7 +106,7 @@ export function StatCard({
           )}
           {Icon && (
             <div className={cn(
- "flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-border/70 bg-card-inset transition-colors duration-200 sm:h-10 sm:w-10",
+ "flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-current/20 bg-current/[0.08] transition-[border-color,background-color,transform] duration-300 group-hover:scale-105 sm:h-10 sm:w-10",
               c.text,
             )}>
               <Icon className="relative h-4 w-4 sm:h-[17px] sm:w-[17px]" strokeWidth={2} />
@@ -118,7 +118,7 @@ export function StatCard({
 
       {/* Value */}
       <div className="relative mt-3 sm:mt-4">
-         <h3 className={cn("truncate font-numbers text-[22px] font-semibold leading-none tabular-nums sm:text-[27px]", c.text)}>
+         <h3 className={cn("truncate font-numbers text-[22px] font-bold leading-none tabular-nums sm:text-[27px]", c.text)}>
           {displayValue}
         </h3>
       </div>

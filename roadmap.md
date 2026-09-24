@@ -19,3 +19,4 @@
 - [ ] Auditar e endurecer superfícies críticas de seller, admin e páginas públicas.
 - [ ] Validar dados, testes, execução e telas desktop/mobile.
 - [x] Reconstruir o dashboard seller com visual clean, sólido e profissional, removendo o banner promocional experimental.
+- [x] Elevar o dashboard seller com azul elétrico, Sora + Manrope e faixas abertas mais vivas e profissionais.
