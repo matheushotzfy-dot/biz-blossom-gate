@@ -1,6 +1,6 @@
 # Roadmap
 
-- [ ] Aplicar o sistema visual do cadastro GoatPay em toda a plataforma seller e admin.
+- [x] Aplicar o sistema visual do cadastro GoatPay em toda a plataforma seller e admin.
 - [x] Reconstruir a entrada e o cadastro VENXPAY no padrão visual minimalista da referência GoatPay.
 - [x] Substituir a paleta esverdeada por azul financeiro escuro em seller e admin.
 - [x] Remodelar o editor de produtos no estilo ultra-clean azul elétrico, mantendo todos os fluxos.
