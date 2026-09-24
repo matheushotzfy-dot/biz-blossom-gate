@@ -5120,32 +5120,25 @@ html body .lp .lp-progress {
   }
 }
 
-/* Dashboard reference system — compact, data-led and solid. */
+/* Dashboard seller — continuous financial workspace. */
 .seller-dashboard {
   --primary: 211 92% 58%;
   --primary-foreground: 0 0% 100%;
   --info: 194 82% 58%;
   --ring: 211 92% 58%;
   background-color: hsl(var(--background));
-  background-image: radial-gradient(hsl(var(--border) / 0.38) 0.7px, transparent 0.7px);
-  background-size: 18px 18px;
+  background-image: none;
 }
 
 .seller-dashboard .dashboard-heading-band { border: 0; }
-.seller-dashboard .stat-hero-card,
-.seller-dashboard .dashboard-action,
-.seller-dashboard .dashboard-data-panel {
+.seller-dashboard :is(.dashboard-summary, .dashboard-analytics, .dashboard-activity) {
   background: hsl(var(--card)) !important;
   border-color: hsl(var(--border)) !important;
   box-shadow: none !important;
+  transition: border-color 240ms cubic-bezier(0.16, 1, 0.3, 1);
 }
-.seller-dashboard .stat-hero-card::before { display: none; }
-.seller-dashboard .stat-hero-card:hover,
-.seller-dashboard .dashboard-action:hover,
-.seller-dashboard .dashboard-data-panel:hover {
-  transform: none !important;
-  border-color: hsl(var(--primary) / 0.42) !important;
-  background: hsl(var(--card-elevated)) !important;
+.seller-dashboard :is(.dashboard-summary, .dashboard-analytics, .dashboard-activity):hover {
+  border-color: hsl(var(--primary) / 0.3) !important;
 }
 
 .seller-dashboard .dashboard-progress {

@@ -28,7 +28,6 @@ import type { DateRange } from "react-day-picker";
 // Redesigned Components
 import { DashboardHeader } from "@/components/dashboard/redesign/DashboardHeader";
 import { DashboardKpis } from "@/components/dashboard/redesign/DashboardKpis";
-import { DashboardQuickActions } from "@/components/dashboard/redesign/DashboardQuickActions";
 import { DashboardRevenueChart } from "@/components/dashboard/redesign/DashboardRevenueChart";
 import { DashboardSideInsights } from "@/components/dashboard/redesign/DashboardSideInsights";
 import { DashboardActivity } from "@/components/dashboard/redesign/DashboardActivity";
@@ -203,6 +202,7 @@ export default function Dashboard() {
         <SellerOnboarding />
 
         <DashboardHeader 
+          name={profile?.full_name}
           privacyHidden={privacy.hidden} 
           onPrivacyToggle={privacy.toggle} 
           periodControl={
@@ -228,14 +228,13 @@ export default function Dashboard() {
           disputedAmount={formattedStats.disputedAmount}
           chargebackRate={formattedStats.chargebackRate}
           productsCount={(productsData ?? []).length}
+          actions={quickActions}
           isLoading={statsLoading}
           privacyHidden={privacy.hidden}
           formatCurrency={fmt}
         />
 
-        <DashboardQuickActions actions={quickActions} />
-
-        <section className="grid grid-cols-1 gap-4 xl:grid-cols-3">
+        <section className="dashboard-analytics grid overflow-hidden rounded-lg border border-border bg-card lg:grid-cols-[minmax(0,2fr)_minmax(280px,0.85fr)]">
           <DashboardRevenueChart
             chartData={formattedStats.chartData}
             chartTicks={chartTicks}

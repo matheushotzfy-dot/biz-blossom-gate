@@ -12,8 +12,8 @@ interface DashboardSideInsightsProps {
 
 export function DashboardSideInsights({ chartData, chartTickFormatter, pixConversion, chargebackRate, onPaymentLinkClick }: DashboardSideInsightsProps) {
   return (
-    <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-1">
-      <section className="dashboard-data-panel rounded-lg border border-border bg-card p-5 sm:p-6">
+    <aside className="grid sm:grid-cols-2 lg:grid-cols-1">
+      <div className="border-b border-border p-5 sm:border-b-0 sm:border-r sm:p-6 lg:border-b lg:border-r-0">
         <h2 className="font-display text-base font-bold text-foreground">Pedidos</h2>
         <p className="mt-1 text-xs text-muted-foreground">Volume no período selecionado</p>
         <div className="mt-5 h-[150px]">
@@ -27,9 +27,9 @@ export function DashboardSideInsights({ chartData, chartTickFormatter, pixConver
             </BarChart>
           </ResponsiveContainer>
         </div>
-      </section>
+      </div>
 
-      <section className="dashboard-data-panel rounded-lg border border-border bg-card p-5 sm:p-6">
+      <div className="p-5 sm:p-6">
         <div className="flex items-center justify-between gap-4">
           <div>
             <h2 className="font-display text-base font-bold text-foreground">Formas de pagamento</h2>
@@ -41,8 +41,8 @@ export function DashboardSideInsights({ chartData, chartTickFormatter, pixConver
           <MetricBar label="Conversão PIX" value={pixConversion} />
           <MetricBar label="Taxa de estorno" value={chargebackRate} inverse />
         </div>
-      </section>
-    </div>
+      </div>
+    </aside>
   );
 }
 

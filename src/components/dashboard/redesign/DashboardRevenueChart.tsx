@@ -22,15 +22,15 @@ export function DashboardRevenueChart({ chartData, chartTicks, chartTickFormatte
   const lastTimestamp = chartData[chartData.length - 1]?.timestamp ?? firstTimestamp;
 
   return (
-    <section className="dashboard-data-panel overflow-hidden rounded-lg border border-border bg-card xl:col-span-2">
-      <header className="flex items-start justify-between gap-4 px-5 pb-1 pt-5 sm:px-6">
+    <div className="min-w-0 overflow-hidden border-b border-border lg:border-b-0 lg:border-r">
+      <header className="flex items-start justify-between gap-4 px-5 pb-1 pt-5 sm:px-6 sm:pt-6">
         <div>
           <h2 className="font-display text-base font-bold text-foreground">Faturamento</h2>
           <p className="mt-1 text-xs text-muted-foreground">Receita aprovada por {periodLabel.toLowerCase()}</p>
         </div>
         <p className="font-numbers text-lg font-bold tabular-nums text-foreground">{formatCurrency(revenue)}</p>
       </header>
-      <div className="h-[290px] w-full px-2 pb-3 pt-4 sm:h-[350px] sm:px-4">
+      <div className="h-[280px] w-full px-2 pb-3 pt-4 sm:h-[340px] sm:px-4">
         <ResponsiveContainer width="100%" height="100%">
           <AreaChart data={chartData} margin={{ top: 8, right: 10, left: 0, bottom: 4 }}>
             <defs>
@@ -52,6 +52,6 @@ export function DashboardRevenueChart({ chartData, chartTicks, chartTickFormatte
           </AreaChart>
         </ResponsiveContainer>
       </div>
-    </section>
+    </div>
   );
 }

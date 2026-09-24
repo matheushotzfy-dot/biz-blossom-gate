@@ -1,12 +1,23 @@
 import { ChevronRight, ArrowRight } from "lucide-react";
 import { cn, isApprovedTransaction } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
+import type { Tables } from "@/integrations/supabase/types";
+
+interface ActivityItem {
+  id: string;
+  createdAt: string;
+  amount: number;
+  status: string;
+  label: string;
+  tx: Tables<"transactions">;
+}
 
 interface DashboardActivityProps {
-  activity: any[];
+  activity: ActivityItem[];
   statusLabel: (s: string) => string;
   formatCurrency: (v: number) => string;
   privacyHidden: boolean;
-  onTxClick: (tx: any) => void;
+  onTxClick: (tx: Tables<"transactions">) => void;
   onViewAllClick: () => void;
 }
 
@@ -21,19 +32,22 @@ export function DashboardActivity({
   const CENSORED = "••••••";
 
   return (
-    <section className="dashboard-data-panel overflow-hidden rounded-lg border border-border bg-card">
-      <div className="flex items-center justify-between gap-3 border-b border-border/40 px-6 py-5 md:px-8">
+    <section className="dashboard-activity overflow-hidden rounded-lg border border-border bg-card">
+      <div className="flex items-center justify-between gap-3 border-b border-border px-5 py-4 md:px-6">
         <div>
-          <h4 className="font-display text-xl font-bold">Últimas Transações</h4>
+          <h2 className="font-display text-base font-bold">Últimas transações</h2>
           <p className="mt-1 flex items-center gap-1.5 text-[11px] font-medium text-muted-foreground"><span className="h-1.5 w-1.5 rounded-full bg-success" />Atividade em tempo real</p>
         </div>
-        <button 
+        <Button
+          type="button"
+          variant="ghost"
+          size="sm"
           onClick={onViewAllClick}
-          className="text-[11px] font-bold text-primary hover:underline flex items-center gap-1"
+          className="text-[11px] font-bold text-primary"
         >
           Ver todas
           <ArrowRight className="h-3 w-3" />
-        </button>
+        </Button>
       </div>
 
       {activity.length > 0 && (
