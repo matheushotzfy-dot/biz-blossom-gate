@@ -389,7 +389,7 @@ export default function AdminDashboard() {
     <div className="admin-frame h-screen flex overflow-hidden af-bg-soft af-text">
       {/* Mobile overlay */}
       {mobileMenuOpen && (
-        <div className="fixed inset-0 z-[60] lg:hidden" style={{ background: "rgba(0,0,0,0.45)" }} onClick={() => setMobileMenuOpen(false)} />
+        <div className="fixed inset-0 z-[60] bg-background/80 lg:hidden" onClick={() => setMobileMenuOpen(false)} />
       )}
 
       {/* ═══ SIDEBAR ═══ */}
@@ -403,7 +403,7 @@ export default function AdminDashboard() {
       >
         {/* Brand */}
         <div className="h-[64px] flex items-center px-4 gap-3 af-border border-b shrink-0">
-          <div className="h-9 w-9 rounded-md af-accent-bg flex items-center justify-center shrink-0">
+           <div className="h-9 w-9 rounded-md af-accent-bg flex items-center justify-center shrink-0 text-primary-foreground">
             <Shield className="h-[18px] w-[18px]" strokeWidth={2.25} />
           </div>
           {!sidebarCollapsed && (
@@ -474,9 +474,9 @@ export default function AdminDashboard() {
                       )}
                       {hasBadge && (
                         <span className={cn(
-                          "h-4 min-w-[16px] px-1 rounded-full text-white text-[9px] font-bold flex items-center justify-center",
+                           "h-4 min-w-[16px] px-1 rounded-full bg-destructive text-destructive-foreground text-[9px] font-bold flex items-center justify-center",
                           sidebarCollapsed ? "absolute -top-0.5 -right-0.5 h-3.5 min-w-[14px]" : "ml-auto"
-                        )} style={{ background: "var(--as-danger)" }}>
+                         )}>
                           {pendingWdCount}
                         </span>
                       )}
@@ -593,11 +593,10 @@ export default function AdminDashboard() {
           {/* Right controls */}
           <div className="flex items-center gap-2 shrink-0">
             {isEmployee && (
-              <span className="text-[10px] font-semibold rounded-md px-2 py-0.5"
-                style={{ background: "rgba(217,119,6,0.12)", color: "var(--as-warning)", border: "1px solid rgba(217,119,6,0.30)" }}>STAFF</span>
+              <span className="rounded-md border border-warning/30 bg-warning/10 px-2 py-0.5 text-[10px] font-semibold text-warning">STAFF</span>
             )}
               <span className="hidden lg:flex items-center gap-1.5 text-[12px] font-medium af-muted af-surface-2 af-border border rounded-md px-3 py-1.5">
-              <span className="h-1.5 w-1.5 rounded-full" style={{ background: "var(--as-success)" }} />
+              <span className="h-1.5 w-1.5 rounded-full bg-success" />
               Volume {totalRevenue >= 1000 ? `R$ ${(totalRevenue / 1000).toFixed(1)}K` : fmtCurrency(totalRevenue)}
             </span>
 
@@ -619,8 +618,7 @@ export default function AdminDashboard() {
             >
               <Bell className="h-4 w-4" />
               {pendingWdCount > 0 && (
-                <span className="absolute -top-1 -right-1 h-3.5 min-w-[14px] px-1 rounded-full text-white text-[9px] font-bold flex items-center justify-center"
-                  style={{ background: "var(--as-danger)" }}>
+                <span className="absolute -right-1 -top-1 flex h-3.5 min-w-[14px] items-center justify-center rounded-full bg-destructive px-1 text-[9px] font-bold text-destructive-foreground">
                   {pendingWdCount}
                 </span>
               )}
