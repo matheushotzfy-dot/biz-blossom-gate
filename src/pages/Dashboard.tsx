@@ -467,7 +467,7 @@ export default function Dashboard() {
         {(txError || statsError || productsError) && (
           <div className="flex items-center justify-between gap-3 rounded-[12px] border border-destructive/40 bg-destructive/5 px-4 py-2.5 text-[12px] text-destructive">
             <span className="font-semibold">Falha ao carregar métricas</span>
-            <button onClick={() => { refetchTx(); refetchStats(); }} className="rounded-lg border border-destructive/50 px-3 py-1 text-[11px] font-bold hover:bg-destructive/10">Tentar novamente</button>
+            <Button type="button" variant="outline" size="sm" onClick={() => { refetchTx(); refetchStats(); }} className="h-8 border-destructive/40 text-xs text-destructive hover:bg-destructive/10 hover:text-destructive">Tentar novamente</Button>
           </div>
         )}
 
@@ -495,7 +495,7 @@ export default function Dashboard() {
 
 
         {/* ═══════════ KPI CARDS ═══════════ */}
-        <section className="grid grid-cols-1 overflow-hidden rounded-xl border border-border bg-card sm:grid-cols-2 xl:grid-cols-4">
+        <section className="grid grid-cols-2 overflow-hidden rounded-xl border border-border bg-card xl:grid-cols-4">
           {[
             { label: "Saldo disponível", value: fmt(Math.max(0, balance)), sub: "Pronto para saque", tone: "success" as const, icon: Wallet },
             { label: "Recebido hoje", value: fmt(receivedToday), sub: "Movimento confirmado", tone: "primary" as const, icon: RefreshCw },
@@ -507,7 +507,7 @@ export default function Dashboard() {
             return (
               <div
                 key={k.label}
-                className="group relative min-h-[132px] overflow-hidden border-b border-border px-5 py-4 transition-colors hover:bg-accent/35 sm:[&:nth-child(odd)]:border-r xl:border-b-0 xl:border-r xl:last:border-r-0"
+                className="group relative min-h-[126px] overflow-hidden border-b border-r border-border px-3.5 py-4 transition-colors even:border-r-0 hover:bg-accent/35 sm:px-5 xl:border-b-0 xl:even:border-r xl:last:border-r-0"
               >
                 <Icon
                   aria-hidden
@@ -528,7 +528,7 @@ export default function Dashboard() {
                   {statsLoading ? (
                     <div className="mt-5 h-[25px] w-32 animate-pulse rounded-[6px] bg-muted/50 sm:h-[28px]" aria-label="Carregando" />
                   ) : (
-                   <p className={cn("mt-4 whitespace-nowrap font-numbers text-[24px] font-semibold leading-none tabular-nums sm:text-[26px]", isDanger ? "text-destructive" : "text-foreground")}>
+                   <p className={cn("mt-4 whitespace-nowrap font-numbers text-xl font-semibold leading-none tabular-nums sm:text-[26px]", isDanger ? "text-destructive" : "text-foreground")}>
                   {privacy.hidden ? CENSORED : k.value}
                   </p>
                   )}
@@ -754,14 +754,14 @@ export default function Dashboard() {
               const methodLabel = method === "pix" ? "PIX" : method === "credit_card" ? "Cartão" : method === "boleto" ? "Boleto" : "—";
               const custName = item.tx.customer_name || item.tx.customer_email || "Cliente";
               const dot =
-                isApproved ? "bg-emerald-500"
-                : item.status === "pending" ? "bg-amber-500"
-                : item.status === "chargeback" || item.status === "med" || item.status === "dispute" || item.status === "disputed" ? "bg-red-500"
+                 isApproved ? "bg-success"
+                 : item.status === "pending" ? "bg-warning"
+                 : item.status === "chargeback" || item.status === "med" || item.status === "dispute" || item.status === "disputed" ? "bg-destructive"
                 : "bg-muted-foreground/50";
               const statusColor =
-                isApproved ? "text-emerald-600 dark:text-emerald-500"
-                : item.status === "pending" ? "text-amber-600 dark:text-amber-500"
-                : item.status === "chargeback" || item.status === "med" || item.status === "dispute" || item.status === "disputed" ? "text-red-600 dark:text-red-500"
+                 isApproved ? "text-success"
+                 : item.status === "pending" ? "text-warning"
+                 : item.status === "chargeback" || item.status === "med" || item.status === "dispute" || item.status === "disputed" ? "text-destructive"
                 : "text-muted-foreground";
               return (
                 <li key={item.id}>
