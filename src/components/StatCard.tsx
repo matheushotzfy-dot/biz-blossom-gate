@@ -81,7 +81,7 @@ export function StatCard({
   return (
     <div
       className={cn(
- "stat-hero-card group relative flex h-full min-h-[120px] flex-col overflow-hidden rounded-xl border border-border bg-card p-4 animate-in fade-in slide-in-from-bottom-2 sm:min-h-[144px] sm:p-5",
+ "stat-hero-card group relative flex h-full min-h-[116px] flex-col overflow-hidden rounded-xl border border-border/90 bg-card p-4 shadow-[0_1px_0_hsl(var(--foreground)/0.025)] animate-in fade-in slide-in-from-bottom-2 transition-[border-color,background-color,box-shadow] duration-200 hover:border-foreground/15 sm:min-h-[136px] sm:p-5",
         className
       )}
       style={{
@@ -90,7 +90,7 @@ export function StatCard({
     >
       {/* Header: title + icon */}
       <div className="relative z-[2] flex items-center justify-between gap-3">
-        <p className="truncate text-[10px] font-bold uppercase leading-none tracking-[0.18em] text-muted-foreground/80 transition-colors duration-300 sm:text-[11px]">
+         <p className="truncate text-[10px] font-semibold uppercase leading-none tracking-[0.08em] text-muted-foreground/80 transition-colors duration-200 sm:text-[10.5px]">
           {title}
         </p>
         <div className="flex items-center gap-1.5">
@@ -99,17 +99,17 @@ export function StatCard({
               type="button"
               onClick={() => setSelfHidden((v) => !v)}
               aria-label={selfHidden ? "Mostrar valor" : "Ocultar valor"}
-              className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md border border-border/60 bg-background/40 text-muted-foreground/70 transition-colors hover:text-foreground hover:border-border"
+               className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md border border-transparent bg-transparent text-muted-foreground/70 transition-[background-color,border-color,color,transform] duration-200 hover:border-border hover:bg-accent/50 hover:text-foreground active:scale-[0.96]"
             >
               {selfHidden ? <EyeOff className="h-3.5 w-3.5" strokeWidth={2.25} /> : <Eye className="h-3.5 w-3.5" strokeWidth={2.25} />}
             </button>
           )}
           {Icon && (
             <div className={cn(
- "flex h-10 w-10 shrink-0 items-center justify-center rounded-[11px] border border-border/60 bg-background/40 transition-colors duration-300 sm:h-11 sm:w-11",
+ "flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-border/70 bg-card-inset transition-colors duration-200 sm:h-10 sm:w-10",
               c.text,
             )}>
-              <Icon className="relative h-[16px] w-[16px] sm:h-[17px] sm:w-[17px]" strokeWidth={2.5} />
+              <Icon className="relative h-4 w-4 sm:h-[17px] sm:w-[17px]" strokeWidth={2} />
             </div>
           )}
         </div>
@@ -118,7 +118,7 @@ export function StatCard({
 
       {/* Value */}
       <div className="relative mt-3 sm:mt-4">
-        <h3 className={cn("truncate text-[22px] font-display font-semibold leading-none tabular-nums sm:text-[28px]", c.text)}>
+         <h3 className={cn("truncate font-numbers text-[22px] font-semibold leading-none tabular-nums sm:text-[27px]", c.text)}>
           {displayValue}
         </h3>
       </div>
