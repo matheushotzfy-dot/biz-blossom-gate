@@ -1166,6 +1166,155 @@ input[type="number"]::-webkit-inner-spin-button {
   }
 }
 
+/* ════════════════════════════════════════════════════════════
+   VENXPAY PRODUCT FINISH — Lovable-inspired precision layer
+   Preserves the existing layout while unifying motion and finish.
+   ════════════════════════════════════════════════════════════ */
+:root {
+  --venx-control-radius: 8px;
+  --venx-surface-radius: 12px;
+  --venx-motion-fast: 180ms;
+  --venx-motion-base: 240ms;
+  --venx-ease: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.font-display,
+.font-heading {
+  font-family: "Sora", system-ui, sans-serif;
+  letter-spacing: 0;
+}
+
+.font-numbers,
+.tabular-nums {
+  font-family: "JetBrains Mono", "Manrope", monospace;
+  font-variant-numeric: tabular-nums slashed-zero;
+  letter-spacing: 0;
+}
+
+.platform-shell,
+.admin-frame {
+  font-feature-settings: "ss01", "cv11", "tnum";
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+.platform-shell :is(button, a, [role="button"], [role="tab"], [role="option"]),
+.admin-frame :is(button, a, [role="button"], [role="tab"], [role="option"]) {
+  transition-duration: var(--venx-motion-fast);
+  transition-timing-function: var(--venx-ease);
+}
+
+.platform-shell :is(button, a, [role="button"]):active:not(:disabled),
+.admin-frame :is(button, a, [role="button"]):active:not(:disabled) {
+  transform: scale(0.98);
+}
+
+.platform-shell :is(button, a, [role="button"]):focus-visible,
+.admin-frame :is(button, a, [role="button"]):focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px hsl(var(--ring) / 0.18);
+}
+
+.platform-card,
+.dashboard-panel,
+.dashboard-hero-surface,
+.dashboard-surface,
+.dashboard-tile,
+.seller-panel,
+.seller-shell,
+.stat-hero-card {
+  border-radius: var(--venx-surface-radius) !important;
+  box-shadow: 0 1px 0 hsl(var(--foreground) / 0.025) !important;
+}
+
+:is(.platform-card, .dashboard-panel, .dashboard-hero-surface, .dashboard-surface, .dashboard-tile, .seller-panel, .seller-shell, .stat-hero-card):hover {
+  border-color: hsl(var(--foreground) / 0.15) !important;
+  box-shadow: 0 1px 0 hsl(var(--foreground) / 0.04) !important;
+}
+
+.technical-sidebar [data-sidebar="sidebar"],
+.technical-topbar {
+  box-shadow: none !important;
+}
+
+.technical-topbar {
+  backdrop-filter: none !important;
+}
+
+.seller-clickable,
+.seller-action {
+  transition-property: background-color, border-color, color, opacity, transform;
+  transition-duration: var(--venx-motion-fast);
+  transition-timing-function: var(--venx-ease);
+}
+
+.seller-clickable:hover,
+.seller-action:hover {
+  border-color: hsl(var(--foreground) / 0.14);
+  background-color: hsl(var(--accent) / 0.55);
+}
+
+.seller-clickable:active,
+.seller-action:active {
+  opacity: 1;
+  transform: scale(0.98);
+}
+
+.platform-shell svg,
+.admin-frame svg {
+  shape-rendering: geometricPrecision;
+}
+
+.admin-frame {
+  --as-radius: 10px;
+  --as-ring: 0 0 0 3px hsl(var(--primary) / 0.16);
+}
+
+.admin-nav-item {
+  border-radius: var(--venx-control-radius) !important;
+  transition: background-color var(--venx-motion-fast) var(--venx-ease), border-color var(--venx-motion-fast) var(--venx-ease), color var(--venx-motion-fast) var(--venx-ease), transform var(--venx-motion-fast) var(--venx-ease) !important;
+}
+
+.admin-nav-item[data-active="true"] {
+  border-color: var(--as-border) !important;
+  box-shadow: inset 2px 0 0 var(--as-rail) !important;
+}
+
+.admin-shell input:not([type="checkbox"]):not([type="radio"]):not([type="range"]),
+.admin-shell textarea,
+.admin-shell select,
+.admin-shell [role="combobox"],
+.admin-frame .af-input {
+  border-radius: var(--venx-control-radius) !important;
+  transition: border-color var(--venx-motion-fast) var(--venx-ease), box-shadow var(--venx-motion-fast) var(--venx-ease), background-color var(--venx-motion-fast) var(--venx-ease);
+}
+
+.admin-shell button,
+.admin-frame button {
+  border-radius: var(--venx-control-radius) !important;
+  transition: background-color var(--venx-motion-fast) var(--venx-ease), border-color var(--venx-motion-fast) var(--venx-ease), color var(--venx-motion-fast) var(--venx-ease), transform var(--venx-motion-fast) var(--venx-ease) !important;
+}
+
+.admin-shell table :is(td, th),
+.admin-shell [class*="font-mono"],
+.admin-shell [class*="tabular-nums"] {
+  font-variant-numeric: tabular-nums slashed-zero;
+}
+
+.overlay-surface {
+  border-radius: var(--venx-surface-radius);
+  box-shadow: 0 18px 56px hsl(var(--background) / 0.5);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .platform-shell *,
+  .admin-frame * {
+    animation-duration: 1ms !important;
+    transition-duration: 1ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
 /* Product Studio — focused authoring workspace */
 .product-studio {
   --product-electric: 214 100% 52%;
