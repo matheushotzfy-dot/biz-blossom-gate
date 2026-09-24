@@ -59,7 +59,8 @@ export function useDashboardStatsFormatter(
         point.setHours(i, 0, 0, 0);
         return {
           name: `${i}h`,
-          vendas: byKey.get(`${dayKey(point)}T${pad(i)}`) || 0,
+          vendas: revenueByKey.get(`${dayKey(point)}T${pad(i)}`) || 0,
+          pedidos: ordersByKey.get(`${dayKey(point)}T${pad(i)}`) || 0,
           fullLabel: `${i}:00`,
           timestamp: point.getTime(),
           granularity: "hour",
@@ -71,7 +72,8 @@ export function useDashboardStatsFormatter(
       while (cursor <= last) {
         chartData.push({
           name: cursor.toLocaleDateString("pt-BR", { month: "short" }).replace(".", ""),
-          vendas: byKey.get(`${dayKey(cursor)}T00`) || 0,
+          vendas: revenueByKey.get(`${dayKey(cursor)}T00`) || 0,
+          pedidos: ordersByKey.get(`${dayKey(cursor)}T00`) || 0,
           fullLabel: cursor.toLocaleDateString("pt-BR", { month: "long", year: "numeric" }),
           timestamp: cursor.getTime(),
           granularity: "month",
@@ -84,7 +86,8 @@ export function useDashboardStatsFormatter(
         d.setDate(d.getDate() + i);
         return {
           name: d.toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit" }),
-          vendas: byKey.get(`${dayKey(d)}T00`) || 0,
+          vendas: revenueByKey.get(`${dayKey(d)}T00`) || 0,
+          pedidos: ordersByKey.get(`${dayKey(d)}T00`) || 0,
           fullLabel: d.toLocaleDateString("pt-BR", { day: "2-digit", month: "long" }),
           timestamp: d.getTime(),
           granularity: "day",
@@ -97,6 +100,7 @@ export function useDashboardStatsFormatter(
       revenue,
       uniqueCustomers,
       conversion,
+      averageTicket: approvedCount > 0 ? revenue / approvedCount : 0,
       pixConversion,
       cardConversion,
       boletoConversion,
