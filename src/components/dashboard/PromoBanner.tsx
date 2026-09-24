@@ -34,8 +34,10 @@ function MonolithV() {
       <div aria-hidden className="absolute -inset-6 rounded-full border border-primary/[0.07]" />
       {/* rotating settlement arc */}
       <svg aria-hidden viewBox="0 0 132 132" className="pb-spin absolute -inset-1.5 h-[calc(100%+12px)] w-[calc(100%+12px)]">
-        <path d="M 66 12 A 54 54 0 0 1 112.8 81" fill="none" stroke="hsl(var(--primary))" strokeOpacity="0.55" strokeWidth="1.6" strokeLinecap="round" />
-        <circle cx="66" cy="12" r="3" fill="hsl(var(--primary))" />
+        <g transform="translate(66 66)">
+          <path d="M 0 -54 A 54 54 0 0 1 46.8 15" fill="none" stroke="hsl(var(--primary))" strokeOpacity="0.55" strokeWidth="1.6" strokeLinecap="round" />
+          <circle cx="0" cy="-54" r="3" fill="hsl(var(--primary))" />
+        </g>
       </svg>
       {/* plate */}
       <div className="absolute inset-0 flex items-center justify-center rounded-[24px] border border-primary/25 bg-background shadow-[0_0_44px_-10px_hsl(var(--primary)/0.45)]">
