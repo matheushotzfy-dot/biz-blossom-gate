@@ -18,3 +18,4 @@
 - [ ] Refazer o calendário e validar presets/intervalos.
 - [ ] Auditar e endurecer superfícies críticas de seller, admin e páginas públicas.
 - [ ] Validar dados, testes, execução e telas desktop/mobile.
+- [x] Reconstruir o dashboard seller com visual clean, sólido e profissional, removendo o banner promocional experimental.
