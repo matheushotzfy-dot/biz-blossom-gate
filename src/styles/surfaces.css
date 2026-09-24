@@ -1,17 +1,28 @@
-@layer components {
-  .venx-surface-glass {
-    @apply bg-background/70 backdrop-blur-xl border-border/50;
-  }
-  
-  .venx-surface-card {
-    @apply bg-card border-border/60 shadow-sm hover:shadow-md transition-all duration-300;
-  }
-  
-  .venx-surface-elevated {
-    @apply bg-card border-border/80 shadow-lg;
-  }
-  
-  .venx-button-tactile {
-    @apply active:scale-[0.98] transition-transform duration-100;
-  }
+.venx-surface-glass {
+  background: hsl(var(--card));
+  border-color: hsl(var(--border));
+}
+
+.venx-surface-card {
+  background: hsl(var(--card));
+  border-color: hsl(var(--border));
+  transition: background-color 240ms var(--venx-ease), border-color 240ms var(--venx-ease);
+}
+
+.venx-surface-card:hover {
+  background: hsl(var(--card-elevated));
+  border-color: hsl(var(--primary) / 0.3);
+}
+
+.venx-surface-elevated {
+  background: hsl(var(--card-elevated));
+  border-color: hsl(var(--border));
+}
+
+.venx-button-tactile {
+  transition: transform 180ms var(--venx-ease);
+}
+
+.venx-button-tactile:active {
+  transform: scale(0.98);
 }
