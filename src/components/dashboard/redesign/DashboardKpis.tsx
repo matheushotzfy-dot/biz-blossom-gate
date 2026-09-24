@@ -1,5 +1,5 @@
 import type { LucideIcon } from "lucide-react";
-import { CircleDollarSign, ReceiptText, ShieldCheck, ShoppingBag, Target, Wallet } from "lucide-react";
+import { CircleDollarSign, Wallet } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
