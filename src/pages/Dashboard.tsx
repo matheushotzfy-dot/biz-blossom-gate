@@ -203,7 +203,7 @@ export default function Dashboard() {
     <div className="seller-dashboard relative min-h-full w-full text-foreground animate-in fade-in duration-500">
       <Seo title="Dashboard | Venxpay" description="Painel operacional Venxpay — saldos, ranking, aprovação e liquidações em tempo real." path="/dashboard" noindex />
 
-      <div className="relative z-10 px-1 sm:px-2 md:px-3 pt-1 pb-20 max-w-[1280px] mx-auto space-y-6">
+      <div className="relative z-10 mx-auto max-w-[1320px] space-y-5 px-1 pb-20 pt-1 sm:px-2 md:px-3 lg:space-y-6">
         {(txError || statsError || productsError) && (
           <div className="flex items-center justify-between gap-3 rounded-[12px] border border-destructive/40 bg-destructive/5 px-4 py-2.5 text-[12px] text-destructive">
             <span className="font-semibold">Falha ao carregar métricas</span>

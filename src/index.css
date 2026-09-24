@@ -1166,6 +1166,107 @@ input[type="number"]::-webkit-inner-spin-button {
   }
 }
 
+/* Dashboard seller — electric blue, open bands, solid financial surfaces. */
+.seller-dashboard {
+  --primary: 211 100% 54%;
+  --primary-foreground: 222 72% 11%;
+  --info: 197 100% 71%;
+  --ring: 211 100% 54%;
+  font-family: "Manrope", system-ui, sans-serif;
+}
+
+.seller-dashboard :is(.font-display, .font-heading) {
+  font-family: "Sora", system-ui, sans-serif;
+  letter-spacing: 0;
+}
+
+.seller-dashboard :is(.font-numbers, .tabular-nums) {
+  font-family: "Manrope", system-ui, sans-serif;
+  font-variant-numeric: tabular-nums lining-nums;
+  font-feature-settings: "tnum" 1, "lnum" 1;
+  letter-spacing: 0;
+}
+
+.seller-dashboard .dashboard-heading-band {
+  border-color: hsl(var(--primary) / 0.24);
+}
+
+.seller-dashboard .stat-hero-card {
+  border-radius: 8px !important;
+  border-color: hsl(var(--border)) !important;
+  background: hsl(var(--card)) !important;
+}
+
+.seller-dashboard .stat-hero-card::before {
+  top: 0;
+  bottom: auto;
+  width: 100%;
+  height: 2px;
+  border-radius: 0;
+  background: hsl(var(--primary));
+  opacity: 0.72;
+  transform: scaleX(0.22);
+  transform-origin: left;
+}
+
+.seller-dashboard .stat-hero-card::after {
+  display: none;
+}
+
+.seller-dashboard .stat-hero-card:hover {
+  transform: translateY(-2px) !important;
+  border-color: hsl(var(--primary) / 0.48) !important;
+  background: hsl(var(--card-elevated)) !important;
+}
+
+.seller-dashboard .stat-hero-card:hover::before {
+  opacity: 1;
+  transform: scaleX(1);
+}
+
+.seller-dashboard .dashboard-actions-band {
+  border-color: hsl(var(--primary) / 0.16);
+}
+
+.seller-dashboard :is(.dashboard-action, .dashboard-data-panel, .dashboard-payment-link) {
+  position: relative;
+  isolation: isolate;
+}
+
+.seller-dashboard .dashboard-action::after,
+.seller-dashboard .dashboard-payment-link::after {
+  content: "";
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 2px;
+  background: hsl(var(--primary));
+  opacity: 0;
+  transition: opacity 300ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.seller-dashboard .dashboard-action:hover::after,
+.seller-dashboard .dashboard-payment-link:hover::after {
+  opacity: 1;
+}
+
+.seller-dashboard .dashboard-data-panel {
+  border-color: hsl(var(--border));
+  background: hsl(var(--card));
+  transition: border-color 300ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.seller-dashboard .dashboard-data-panel:hover {
+  border-color: hsl(var(--primary) / 0.3);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .seller-dashboard .stat-hero-card,
+  .seller-dashboard .dashboard-action,
+  .seller-dashboard .dashboard-payment-link {
+    transform: none !important;
+  }
+}
+
 /* ════════════════════════════════════════════════════════════
    VENXPAY PRODUCT FINISH — Lovable-inspired precision layer
    Preserves the existing layout while unifying motion and finish.
