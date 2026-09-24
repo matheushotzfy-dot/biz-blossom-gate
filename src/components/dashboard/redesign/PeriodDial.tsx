@@ -1,5 +1,6 @@
-import { ChevronRight } from "lucide-react";
+import { CalendarDays, ChevronRight } from "lucide-react";
 import { PeriodPicker, type PeriodValue } from "@/components/PeriodPicker";
+import { Button } from "@/components/ui/button";
 
 interface PeriodDialProps {
   open: boolean;
@@ -12,8 +13,6 @@ interface PeriodDialProps {
 }
 
 export function PeriodDial({ open, setOpen, label, goalPct, revenueLabel, value, onChange }: PeriodDialProps) {
-  const today = new Date();
-  const dayNum = today.getDate();
   const pct = Math.max(0, Math.min(100, goalPct));
 
   return (
@@ -25,36 +24,24 @@ export function PeriodDial({ open, setOpen, label, goalPct, revenueLabel, value,
       align="end"
       side="bottom"
       trigger={
-        <button
+        <Button
+          type="button"
+          variant="outline"
           aria-label="Selecionar período"
-          className="group relative flex items-end gap-3 border-b border-primary/30 bg-transparent px-1 pb-1.5 pt-1 text-left transition-colors hover:border-primary/70"
+          className="group relative h-10 w-full justify-between gap-4 overflow-hidden rounded-lg border-border bg-card px-3 text-left shadow-none hover:border-primary/35 hover:bg-accent/50 md:w-auto"
         >
-          <span className="flex items-baseline gap-[3px] leading-none">
-            <span className="font-display text-[22px] font-extrabold leading-none tracking-[-0.05em] tabular-nums text-foreground">
-              {String(dayNum).padStart(2, "0")}
-            </span>
-            <span className="font-display text-[9px] font-bold uppercase leading-none tracking-[0.14em] text-muted-foreground/60">
-              {today.toLocaleDateString("pt-BR", { month: "short" }).replace(".", "")}
-            </span>
-          </span>
-
-          <span className="h-6 w-px bg-border/70" />
-
-          <span className="min-w-0 leading-none">
-            <span className="block text-[9.5px] font-medium uppercase tracking-[0.16em] text-muted-foreground/60">
-              {label}
-            </span>
-            <span className="mt-1 block font-display text-[14px] font-bold leading-none tabular-nums tracking-[-0.03em] text-foreground">
-              {revenueLabel}
+          <span className="flex min-w-0 items-center gap-2.5">
+            <CalendarDays className="h-4 w-4 shrink-0 text-primary" />
+            <span className="min-w-0">
+              <span className="block text-[10px] font-medium leading-none text-muted-foreground">{label}</span>
+              <span className="mt-1 block truncate font-numbers text-xs font-semibold leading-none text-foreground">{revenueLabel}</span>
             </span>
           </span>
-
-          <ChevronRight className="mb-[3px] h-3.5 w-3.5 text-muted-foreground/40 transition-transform duration-200 group-hover:translate-x-0.5 group-hover:text-primary" />
-
-          <span aria-hidden className="pointer-events-none absolute inset-x-0 -bottom-px h-[2px] overflow-hidden">
+          <ChevronRight className="h-3.5 w-3.5 shrink-0 text-muted-foreground transition-transform group-hover:translate-x-0.5" />
+          <span aria-hidden className="pointer-events-none absolute inset-x-0 bottom-0 h-px overflow-hidden bg-border">
             <span className="block h-full bg-primary transition-[width] duration-700 ease-out" style={{ width: `${pct}%` }} />
           </span>
-        </button>
+        </Button>
       }
     />
   );

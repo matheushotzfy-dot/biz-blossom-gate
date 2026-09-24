@@ -18,7 +18,6 @@ import { Seo } from "@/components/Seo";
 import { useKycStatus } from "@/hooks/useKycStatus";
 import { buildPeriod, type PeriodValue, type PeriodPresetId } from "@/components/PeriodPicker";
 import { toast } from "sonner";
-import { PromoBanner } from "@/components/dashboard/PromoBanner";
 import { SellerOnboarding } from "@/components/dashboard/SellerOnboarding";
 import QuickPixDialog from "@/components/QuickPixDialog";
 import { useProfile } from "@/hooks/useProfile";
@@ -218,9 +217,6 @@ export default function Dashboard() {
           nickname={nickname} 
           privacyHidden={privacy.hidden} 
           onPrivacyToggle={privacy.toggle} 
-        />
-
-        <PromoBanner
           periodControl={
             <PeriodDial
               open={datePickerOpen}
