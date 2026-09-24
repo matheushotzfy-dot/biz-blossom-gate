@@ -52,49 +52,49 @@ export default function Premiacoes() {
 
   return (
     <main
-      className="venx-vault -mx-3 -mt-1 pb-14 sm:mx-0"
+      className="venx-vault -mx-3 -my-3 min-h-[calc(100dvh-3.5rem)] sm:-mx-5 md:-mx-8 md:-my-7 xl:-mx-12"
       onKeyDown={(event) => {
         if (event.key === "ArrowLeft") select(activeIndex - 1);
         if (event.key === "ArrowRight") select(activeIndex + 1);
       }}
     >
-      <section className="venx-vault-bg relative isolate overflow-hidden rounded-none border border-awards-steel/12 sm:rounded-lg">
-        <header className="relative z-10 grid gap-5 border-b border-awards-steel/12 px-4 py-5 sm:px-7 lg:grid-cols-[1fr_auto] lg:items-end">
+      <section className="venx-vault-bg relative isolate min-h-[calc(100dvh-3.5rem)] overflow-hidden border-b border-awards-steel/12 pt-[76px]">
+        <header className="relative z-10 grid gap-4 px-5 pb-3 pt-4 sm:px-7 lg:grid-cols-[1fr_auto] lg:items-end lg:px-10">
           <div>
-            <p className="flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.24em] text-awards-accent"><Trophy className="h-3.5 w-3.5" /> Hall de conquistas</p>
-            <h1 className="mt-2 font-display text-3xl font-bold text-awards-ink sm:text-4xl">Sua operação merece ser vista.</h1>
-            <p className="mt-2 max-w-2xl text-sm leading-6 text-awards-steel">Cada marco libera uma peça física VENXPAY, produzida para registrar o tamanho da sua operação.</p>
+            <p className="flex items-center gap-2 text-[10px] font-semibold uppercase tracking-[0.16em] text-awards-accent"><Trophy className="h-3.5 w-3.5" /> Hall de conquistas</p>
+            <h1 className="mt-1.5 font-display text-2xl font-semibold text-awards-ink sm:text-3xl">Sua jornada, materializada.</h1>
+            <p className="mt-1 max-w-2xl text-[13px] leading-5 text-awards-steel">Marcos reais para operações que continuam avançando.</p>
           </div>
-          <div className="grid grid-cols-2 gap-px overflow-hidden rounded-md border border-awards-steel/15 bg-awards-steel/15">
-            <div className="bg-awards-obsidian px-4 py-3 sm:min-w-[170px]">
-              <p className="font-mono text-[9px] uppercase text-awards-steel">Faturamento validado</p>
-              <p className="mt-1 font-display text-lg font-bold tabular-nums text-awards-ink">{loading ? "—" : formatMoney(revenue)}</p>
+          <div className="grid grid-cols-2 overflow-hidden rounded-lg border border-awards-steel/15 bg-awards-surface">
+            <div className="border-r border-awards-steel/15 px-4 py-2.5 sm:min-w-[170px]">
+              <p className="text-[9px] font-medium uppercase tracking-[0.1em] text-awards-steel">Faturamento validado</p>
+              <p className="mt-1 text-base font-semibold tabular-nums text-awards-ink">{loading ? "—" : formatMoney(revenue)}</p>
             </div>
-            <div className="bg-awards-obsidian px-4 py-3 sm:min-w-[120px]">
-              <p className="font-mono text-[9px] uppercase text-awards-steel">Conquistadas</p>
-              <p className="mt-1 font-display text-lg font-bold tabular-nums text-awards-ink">{unlocked} <span className="text-xs text-awards-steel">/ {AWARDS.length}</span></p>
+            <div className="px-4 py-2.5 sm:min-w-[120px]">
+              <p className="text-[9px] font-medium uppercase tracking-[0.1em] text-awards-steel">Conquistadas</p>
+              <p className="mt-1 text-base font-semibold tabular-nums text-awards-ink">{unlocked} <span className="text-xs text-awards-steel">/ {AWARDS.length}</span></p>
             </div>
           </div>
         </header>
 
-        <div className="relative z-10 border-b border-awards-steel/12">
+        <div className="relative z-10">
           <ArtifactViewer index={activeIndex} revenue={revenue} claimed={claimed} onClaim={() => setClaimOpen(true)} onShare={share} />
-          <div className="absolute left-3 top-1/2 z-20 -translate-y-1/2 sm:left-5">
-            <Button variant="outline" size="icon" aria-label="Marco anterior" disabled={activeIndex === 0} onClick={() => select(activeIndex - 1)} className="h-10 w-10 rounded-full border-awards-steel/25 bg-awards-obsidian text-awards-ink hover:bg-awards-accent/10"><ChevronLeft /></Button>
+          <div className="absolute left-3 top-[42%] z-20 -translate-y-1/2 sm:left-6">
+            <Button variant="outline" size="icon" aria-label="Marco anterior" disabled={activeIndex === 0} onClick={() => select(activeIndex - 1)} className="h-9 w-9 rounded-lg border-awards-steel/20 bg-awards-surface text-awards-ink hover:bg-awards-accent/10"><ChevronLeft /></Button>
           </div>
-          <div className="absolute right-3 top-1/2 z-20 -translate-y-1/2 sm:right-5">
-            <Button variant="outline" size="icon" aria-label="Próximo marco" disabled={activeIndex === AWARDS.length - 1} onClick={() => select(activeIndex + 1)} className="h-10 w-10 rounded-full border-awards-steel/25 bg-awards-obsidian text-awards-ink hover:bg-awards-accent/10"><ChevronRight /></Button>
+          <div className="absolute right-3 top-[42%] z-20 -translate-y-1/2 sm:right-6">
+            <Button variant="outline" size="icon" aria-label="Próximo marco" disabled={activeIndex === AWARDS.length - 1} onClick={() => select(activeIndex + 1)} className="h-9 w-9 rounded-lg border-awards-steel/20 bg-awards-surface text-awards-ink hover:bg-awards-accent/10"><ChevronRight /></Button>
           </div>
         </div>
 
-        <motion.div initial={reduceMotion ? false : { opacity: 0 }} animate={{ opacity: 1 }} className="relative z-10 px-4 py-5 sm:px-7">
-          <div className="mb-4 flex flex-col justify-between gap-3 sm:flex-row sm:items-end">
+        <motion.div initial={reduceMotion ? false : { opacity: 0 }} animate={{ opacity: 1 }} className="relative z-10 border-t border-awards-steel/12 px-4 py-4 sm:px-7 lg:px-10">
+          <div className="mb-3 flex flex-col justify-between gap-2 sm:flex-row sm:items-end">
             <div>
-              <p className="font-mono text-[9px] uppercase text-awards-steel">Coleção VENXPAY · selecione uma peça</p>
-              <p className="mt-1 font-display text-base font-bold text-awards-ink">{next.title} é sua próxima conquista</p>
+              <p className="text-[9px] font-medium uppercase tracking-[0.1em] text-awards-steel">Coleção VENXPAY</p>
+              <p className="mt-1 text-sm font-semibold text-awards-ink">Próxima conquista: {next.title}</p>
             </div>
             <div className="min-w-0 sm:w-[310px]">
-              <div className="flex justify-between gap-3 font-mono text-[9px] uppercase text-awards-steel">
+              <div className="flex justify-between gap-3 text-[9px] font-medium uppercase text-awards-steel">
                 <span>{Math.round(targetProgress)}% concluído</span>
                 <span>{revenue >= next.value ? "Jornada concluída" : `Faltam ${formatMoney(Math.max(next.value - revenue, 0))}`}</span>
               </div>
@@ -105,14 +105,15 @@ export default function Premiacoes() {
         </motion.div>
       </section>
 
+      <div className="bg-background px-4 py-5 sm:px-7 lg:px-10">
       {failed && (
-        <div role="alert" className="mt-4 flex items-center gap-2 rounded-2xl border border-destructive/30 bg-destructive/5 px-4 py-3 text-sm text-destructive">
+        <div role="alert" className="mb-4 flex items-center gap-2 rounded-lg border border-destructive/30 bg-destructive/5 px-4 py-3 text-sm text-destructive">
           <AlertTriangle className="h-4 w-4" /> Alguns dados não puderam ser sincronizados.
         </div>
       )}
 
-      <section className="mt-4 rounded-none border border-border bg-card p-5 sm:rounded-lg sm:p-6">
-        <p className="font-mono text-[9px] uppercase text-muted-foreground">Registro logístico</p>
+      <section className="mx-auto max-w-[1180px] border-t border-border py-5">
+        <p className="text-[9px] font-medium uppercase tracking-[0.1em] text-muted-foreground">Registro logístico</p>
         {claims.length === 0 ? (
           <p className="mt-4 max-w-md text-sm leading-6 text-muted-foreground">
             Nenhuma peça solicitada ainda. Ao conquistar um marco, o resgate abre aqui com rastreio completo.
@@ -127,9 +128,9 @@ export default function Premiacoes() {
                   <Package className="h-4 w-4 shrink-0 text-muted-foreground" />
                   <div className="min-w-0 flex-1">
                     <p className="truncate text-sm font-semibold text-foreground">{claim.tier_label}</p>
-                    <p className="font-mono text-[9px] text-muted-foreground">{new Date(claim.created_at).toLocaleDateString("pt-BR")}</p>
+                    <p className="text-[9px] text-muted-foreground">{new Date(claim.created_at).toLocaleDateString("pt-BR")}</p>
                   </div>
-                  <span className={cn("flex items-center gap-1 font-mono text-[9px] uppercase", status.tone)}>
+                  <span className={cn("flex items-center gap-1 text-[9px] font-medium uppercase", status.tone)}>
                     <StatusIcon className="h-3 w-3" />{status.label}
                   </span>
                 </li>
@@ -138,6 +139,7 @@ export default function Premiacoes() {
           </ul>
         )}
       </section>
+      </div>
 
       <ClaimDialog open={claimOpen} userId={user?.id} award={award} onOpenChange={setClaimOpen} onCreated={(claim) => setClaims((current) => [claim, ...current])} />
     </main>

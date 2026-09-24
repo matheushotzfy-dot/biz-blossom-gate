@@ -14,8 +14,8 @@ export function AwardGallery({ activeIndex, revenue, onSelect }: AwardGalleryPro
   const reduceMotion = useReducedMotion();
 
   return (
-    <nav aria-label="Galeria de premiações" className="awards-gallery overflow-x-auto pb-2">
-      <div className="grid min-w-[850px] grid-cols-7 gap-2.5 lg:min-w-0">
+    <nav aria-label="Galeria de premiações" className="awards-gallery overflow-x-auto pb-1">
+      <div className="grid min-w-[720px] grid-cols-7 gap-2 lg:min-w-0">
         {AWARDS.map((award, index) => {
           const unlocked = revenue >= award.value;
           const active = activeIndex === index;
@@ -34,7 +34,7 @@ export function AwardGallery({ activeIndex, revenue, onSelect }: AwardGalleryPro
                 aria-label={`Ver ${award.title}`}
                 onClick={() => onSelect(index)}
                 className={cn(
-                  "group relative h-[154px] w-full flex-col justify-end overflow-hidden rounded-md border px-2 pb-2 pt-1 transition-colors duration-200",
+                  "group relative h-[108px] w-full flex-col justify-end overflow-hidden rounded-lg border px-2 pb-2 pt-1 transition-colors duration-200",
                   active
                     ? "border-awards-accent bg-awards-accent/10"
                     : "border-awards-steel/15 bg-awards-surface/80 hover:border-awards-steel/35 hover:bg-awards-surface",
@@ -47,7 +47,7 @@ export function AwardGallery({ activeIndex, revenue, onSelect }: AwardGalleryPro
                   height={115}
                   loading="lazy"
                   className={cn(
-                    "absolute inset-x-0 top-0 mx-auto h-[112px] w-full object-contain px-1 transition-transform duration-200 group-hover:-translate-y-1 group-hover:scale-[1.03]",
+                    "absolute inset-x-0 top-0 mx-auto h-[74px] w-full object-contain px-1 transition-transform duration-200 group-hover:-translate-y-0.5 group-hover:scale-[1.03]",
                     !unlocked && "grayscale",
                   )}
                 />
