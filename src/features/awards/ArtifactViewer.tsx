@@ -104,7 +104,7 @@ export function ArtifactViewer({ index, revenue, claimed, onClaim, onShare }: Ar
             <Share2 />
           </Button>
         </div>
-        <p className="mt-3 text-[9px] font-medium uppercase tracking-[0.08em] text-awards-steel/60">Série {award.reference} · edição verificada VENXPAY</p>
+        <p className="mt-3 text-[9px] font-medium uppercase tracking-[0.08em] text-awards-steel/60">{"\n"}</p>
       </div>
     </div>
   );
