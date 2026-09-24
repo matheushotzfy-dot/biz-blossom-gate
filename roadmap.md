@@ -2,6 +2,7 @@
 
 - [x] Refinar globalmente seller, admin e mobile no estilo visual e interativo do Lovable, preservando o layout atual.
 - [x] Refinar tipografia de textos e valores e substituir o preto puro por grafite azulado com contraste vivo.
+- [x] Reconstruir Premiações em tela inteira, sem recorte dos artefatos e com composição mais clean.
 - [x] Aplicar o sistema visual do cadastro GoatPay em toda a plataforma seller e admin.
 - [x] Reconstruir a entrada e o cadastro VENXPAY no padrão visual minimalista da referência GoatPay.
 - [x] Substituir a paleta esverdeada por azul financeiro escuro em seller e admin.
