@@ -102,16 +102,18 @@ export function PromoBanner({ periodControl }: { periodControl?: React.ReactNode
         }}
       />
       {/* corner glow */}
-      <div aria-hidden className="pointer-events-none absolute -bottom-28 -right-24 h-80 w-80 rounded-full bg-primary/15 blur-[110px]" />
+      <div aria-hidden className="pointer-events-none absolute -bottom-24 -right-20 h-56 w-56 rounded-full bg-primary/10 blur-[90px] sm:-bottom-28 sm:-right-24 sm:h-80 sm:w-80 sm:bg-primary/15 sm:blur-[110px]" />
       <div aria-hidden className="pointer-events-none absolute inset-0 bg-gradient-to-l from-primary/[0.07] via-transparent to-transparent" />
       {/* hairline frame */}
       <div aria-hidden className="pointer-events-none absolute inset-2.5 rounded-[12px] border border-primary/10 md:inset-3 md:rounded-[16px]" />
 
       {periodControl && (
-        <div className="absolute right-4 top-4 z-20 md:right-5 md:top-5">{periodControl}</div>
+        <div className="relative z-20 mb-3 flex justify-end sm:absolute sm:right-4 sm:top-4 md:right-5 md:top-5 sm:mb-0">
+          {periodControl}
+        </div>
       )}
 
-      <div className="relative grid gap-5 p-5 sm:grid-cols-[minmax(0,1.15fr)_minmax(0,0.85fr)] md:gap-6 md:p-6 lg:p-7">
+      <div className="relative grid gap-5 p-5 pt-1 sm:grid-cols-[minmax(0,1.15fr)_minmax(0,0.85fr)] sm:pt-5 md:gap-6 md:p-6 lg:p-7">
         {/* ── Copy + actions ── */}
         <div className="min-w-0">
           <div className="flex flex-wrap items-center gap-1.5">
