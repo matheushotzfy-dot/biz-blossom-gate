@@ -1,5 +1,6 @@
 # Roadmap
 
+- [x] Refinar globalmente seller, admin e mobile no estilo visual e interativo do Lovable, preservando o layout atual.
 - [x] Aplicar o sistema visual do cadastro GoatPay em toda a plataforma seller e admin.
 - [x] Reconstruir a entrada e o cadastro VENXPAY no padrão visual minimalista da referência GoatPay.
 - [x] Substituir a paleta esverdeada por azul financeiro escuro em seller e admin.
