@@ -125,7 +125,7 @@ function DashboardLayoutInner() {
       <SidebarProvider
         open={sidebarPinned || sidebarHover}
         onOpenChange={(v) => setSidebarPinned(v)}
-        style={{ "--sidebar-width": "19.5rem", "--sidebar-width-icon": "4.5rem" } as { [key: string]: string }}
+        style={{ "--sidebar-width": "17.5rem", "--sidebar-width-icon": "4.25rem" } as { [key: string]: string }}
       >
   <div className={cn("flex w-full h-full platform-shell venx-executive-shell", !sidebarPinned && "sidebar-unpinned")}>
  <AppSidebar
@@ -136,7 +136,7 @@ function DashboardLayoutInner() {
 
   <SidebarInset className="ambient-backdrop dashboard-content-field relative min-w-0 bg-transparent flex flex-col h-full min-h-0 overflow-hidden">
 
-          <header className="technical-topbar relative z-30 h-[60px] flex items-center gap-1.5 border-b border-border/70 px-3 lg:px-7 sticky top-0 md:flex transition-colors duration-300">
+          <header className="technical-topbar relative z-30 flex h-16 items-center gap-1.5 border-b border-border px-3 transition-colors duration-200 lg:px-7 sticky top-0 md:flex">
             <SidebarTrigger className="seller-clickable icon-only relative md:hidden h-8 w-8 rounded-[9px] border border-transparent bg-transparent flex items-center justify-center text-muted-foreground transition-colors duration-200 hover:border-border/70 hover:text-foreground [&>svg]:hidden">
               <PanelToggleIcon size={17} />
               <span className="sr-only">Alternar menu</span>
@@ -155,7 +155,7 @@ function DashboardLayoutInner() {
 
             {/* ─── BALANCE ─── */}
             <div className="hidden md:flex items-center justify-center pr-1">
-              <div className="flex h-9 items-center gap-2.5 rounded-[10px] border border-border/70 bg-transparent px-3 transition-colors duration-200 hover:border-border">
+              <div className="flex h-9 items-center gap-2.5 rounded-lg border border-border bg-card px-3 transition-colors duration-200 hover:border-primary/30">
                 <Wallet className="h-3.5 w-3.5 text-primary" strokeWidth={2.2} />
                 <div className="leading-none">
                   <p className="text-[9.5px] font-medium text-muted-foreground/60">Saldo disponível</p>

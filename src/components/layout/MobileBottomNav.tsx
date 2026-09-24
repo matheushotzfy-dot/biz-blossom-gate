@@ -79,12 +79,12 @@ export function MobileBottomNav() {
       {moreOpen && (
         <div className="fixed inset-0 z-[60] md:hidden">
           <div
-            className="absolute inset-0 bg-foreground/40 backdrop-blur-sm animate-in fade-in duration-200"
+            className="absolute inset-0 bg-background/80 animate-in fade-in duration-200"
             onClick={() => setMoreOpen(false)}
           />
-          <div className="absolute bottom-0 left-0 right-0 bg-card border-t border-border rounded-t-[28px] max-h-[88vh] overflow-y-auto  animate-slide-up">
+          <div className="absolute bottom-0 left-0 right-0 max-h-[88vh] overflow-y-auto rounded-t-2xl border-t border-border bg-card animate-slide-up">
             {/* Handle */}
-            <div className="sticky top-0 z-10 bg-card pt-3 pb-1 rounded-t-[28px]">
+            <div className="sticky top-0 z-10 rounded-t-2xl bg-card pb-1 pt-3">
               <div className="flex justify-center">
                 <div className="h-1 w-10 rounded-full bg-border" />
               </div>
@@ -161,7 +161,7 @@ export function MobileBottomNav() {
 
       {/* ═══ Bottom Tab Bar ═══ */}
       <nav className="fixed bottom-0 left-0 right-0 z-50 md:hidden">
-        <div className="border-t border-border/70 bg-card/90 backdrop-blur-2xl">
+        <div className="border-t border-border bg-card">
           <div className="flex items-stretch justify-around px-1.5 pt-2 pb-[max(env(safe-area-inset-bottom,0px),8px)]">
             {tabs.map((tab) => {
               const isMore = tab.path === "__more__";

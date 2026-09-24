@@ -3,7 +3,7 @@ import * as React from "react";
 import { cn } from "@/lib/utils";
 
 const Card = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement>>(({ className, ...props }, ref) => (
-  <div ref={ref} className={cn("platform-card group relative overflow-hidden rounded-2xl border border-border bg-card text-card-foreground transition-colors duration-[220ms] ease-[cubic-bezier(0.16,1,0.3,1)]", className)} {...props}>
+  <div ref={ref} className={cn("platform-card group relative overflow-hidden rounded-xl border border-border bg-card text-card-foreground transition-colors duration-200 ease-out", className)} {...props}>
     <div className="relative z-10 h-full">
       {props.children}
     </div>

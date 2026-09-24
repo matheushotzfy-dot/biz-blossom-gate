@@ -81,7 +81,7 @@ export function StatCard({
   return (
     <div
       className={cn(
- "stat-hero-card group relative flex h-full min-h-[120px] flex-col overflow-hidden rounded-[1.35rem] border border-border bg-card p-4 animate-in fade-in slide-in-from-bottom-2 sm:min-h-[152px] sm:rounded-[14px] sm:p-5",
+ "stat-hero-card group relative flex h-full min-h-[120px] flex-col overflow-hidden rounded-xl border border-border bg-card p-4 animate-in fade-in slide-in-from-bottom-2 sm:min-h-[144px] sm:p-5",
         className
       )}
       style={{
@@ -118,7 +118,7 @@ export function StatCard({
 
       {/* Value */}
       <div className="relative mt-3 sm:mt-4">
-        <h3 className={cn("truncate text-[22px] font-display font-bold leading-none tracking-[-0.025em] tabular-nums sm:text-[28px]", c.text)}>
+        <h3 className={cn("truncate text-[22px] font-display font-semibold leading-none tabular-nums sm:text-[28px]", c.text)}>
           {displayValue}
         </h3>
       </div>

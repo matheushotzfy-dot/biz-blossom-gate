@@ -18,15 +18,14 @@ export function Panel({ children, className, onClick, style, accent }: { childre
  return (
  <div
  className={cn(
- "relative overflow-hidden rounded-2xl border border-border/40 bg-card/60 p-5 md:p-6 backdrop-blur-xl transition-all duration-300",
- "shadow-[0_2px_12px_hsl(var(--foreground)/0.03)]",
- "hover:border-border/55 hover:bg-card/65 hover:shadow-[0_6px_24px_hsl(var(--foreground)/0.06)]",
+ "relative overflow-hidden rounded-xl border border-border bg-card p-5 transition-colors duration-200 md:p-6",
+ "hover:border-primary/30 hover:bg-card-elevated",
  className,
  )}
  onClick={onClick}
  style={style}
  >
- {accent && <div className={cn("absolute left-0 top-0 bottom-0 w-[3px] rounded-full", accent)} />}
+ {accent && <div className={cn("absolute inset-y-4 left-0 w-0.5", accent)} />}
  {children}
  </div>
  );
@@ -45,15 +44,14 @@ export function GlowPanel({ children, className, onClick, style, glow = "primary
  return (
  <div
  className={cn(
- "group relative overflow-hidden rounded-2xl border border-border/40 bg-card/60 p-5 md:p-6 backdrop-blur-xl transition-all duration-300",
- "shadow-[0_2px_12px_hsl(var(--foreground)/0.03)]",
- "hover:border-border/55 hover:bg-card/65 hover:shadow-[0_6px_24px_hsl(var(--foreground)/0.06)]",
+ "group relative overflow-hidden rounded-xl border border-border bg-card p-5 transition-colors duration-200 md:p-6",
+ "hover:border-primary/30 hover:bg-card-elevated",
  className,
  )}
  onClick={onClick}
  style={style}
  >
- <div className={cn("pointer-events-none absolute inset-0 bg-gradient-to-br opacity-55 transition-opacity duration-500 group-hover:opacity-70", glowColors[glow])} />
+  <div className={cn("pointer-events-none absolute inset-y-4 left-0 w-0.5 opacity-70", glowColors[glow].replace("from-", "bg-").split(" ")[0])} />
  <div className="relative z-[1]">{children}</div>
  </div>
  );
@@ -63,11 +61,11 @@ export function SectionHeader({ icon, title, subtitle, action }: { icon: React.R
  return (
  <div className="flex items-center justify-between">
  <div className="flex items-center gap-3.5">
- <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-border/35 bg-card/50 backdrop-blur-xl shadow-sm">
+  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-border bg-card-inset">
  <span className="text-primary">{icon}</span>
  </div>
  <div>
- <h3 className="text-[15px] font-display font-bold leading-tight text-foreground tracking-[-0.02em]">{title}</h3>
+  <h3 className="text-[15px] font-display font-semibold leading-tight text-foreground">{title}</h3>
  {subtitle && <p className="mt-0.5 text-[11px] text-muted-foreground/70">{subtitle}</p>}
  </div>
  </div>
@@ -79,11 +77,11 @@ export function SectionHeader({ icon, title, subtitle, action }: { icon: React.R
 export function PageTitle({ icon, title, subtitle }: { icon: React.ReactNode; title: string; subtitle: string }) {
  return (
  <div className="flex items-center gap-3 md:gap-4">
- <div className="flex h-10 w-10 md:h-11 md:w-11 shrink-0 items-center justify-center rounded-xl md:rounded-2xl border border-border/35 bg-card/50 backdrop-blur-xl shadow-sm">
+  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-border bg-card-inset md:h-11 md:w-11">
  <span className="text-primary">{icon}</span>
  </div>
  <div className="space-y-0.5 md:space-y-1 min-w-0">
- <h1 className="font-display text-lg md:text-2xl font-black leading-none tracking-[-0.03em] text-foreground truncate">{title}</h1>
+  <h1 className="truncate font-display text-lg font-semibold leading-none text-foreground md:text-2xl">{title}</h1>
  <p className="text-[12px] md:text-[13px] text-muted-foreground/70 truncate">{subtitle}</p>
  </div>
  </div>

@@ -92,7 +92,7 @@ function RevenueBar({ collapsed, revenue, milestone, onOpenRewards }: RevenueBar
       aria-hidden={collapsed}
       tabIndex={collapsed ? -1 : 0}
       title={`${current} de ${goal} — ${pctDisplay}% • ${milestone.current.tier}`}
-      className="sidebar-revenue-bar seller-clickable group/rev relative mt-4 block max-h-28 w-full overflow-hidden rounded-[18px] border border-sidebar-border bg-sidebar-accent/55 px-4 py-3.5 text-left hover:border-primary/35 hover:bg-sidebar-accent"
+      className="sidebar-revenue-bar seller-clickable group/rev relative mt-4 block max-h-28 w-full overflow-hidden rounded-xl border border-sidebar-border bg-sidebar-accent px-4 py-3.5 text-left hover:border-primary/40"
     >
       {/* Marca d'água da logo */}
       <span
@@ -169,11 +169,11 @@ function SidebarNavList({ items, pathname }: SidebarNavListProps) {
                     activeClassName=""
 
                     className={cn(
-                       "group/nav relative flex h-[52px] w-full items-center gap-3 overflow-hidden rounded-[14px] px-3 text-[13px] outline-none",
-                      "transition-colors duration-300 ease-out",
+                       "group/nav relative flex h-11 w-full items-center gap-3 overflow-hidden rounded-lg px-3 text-[13px] outline-none",
+                      "transition-colors duration-200 ease-out",
                       isActive
-                        ? "border border-primary/20 bg-primary/[0.09] font-semibold text-sidebar-accent-foreground"
-                        : "border border-transparent font-medium text-sidebar-foreground/72 hover:bg-sidebar-accent/70 hover:text-sidebar-accent-foreground",
+                         ? "border border-primary/25 bg-primary/[0.10] font-semibold text-sidebar-accent-foreground"
+                         : "border border-transparent font-medium text-sidebar-foreground/72 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
                     )}
                   >
                     <span
