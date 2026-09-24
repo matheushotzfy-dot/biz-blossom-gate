@@ -1,5 +1,4 @@
-import { ChevronRight, ArrowRight, Eye, EyeOff } from "lucide-react";
-import { Link } from "react-router-dom";
+import { ChevronRight, ArrowRight } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface Transaction {
@@ -13,10 +12,7 @@ interface Transaction {
 interface DashboardActivityProps {
   activity: any[];
   statusLabel: (s: string) => string;
-  statusBg: (s: string) => string;
-  statusColor: (s: string) => string;
   formatCurrency: (v: number) => string;
-  timeAgo: (d: string) => string;
   privacyHidden: boolean;
   onTxClick: (tx: any) => void;
   onViewAllClick: () => void;
@@ -25,10 +21,7 @@ interface DashboardActivityProps {
 export function DashboardActivity({
   activity,
   statusLabel,
-  statusBg,
-  statusColor,
   formatCurrency,
-  timeAgo,
   privacyHidden,
   onTxClick,
   onViewAllClick,
@@ -36,7 +29,7 @@ export function DashboardActivity({
   const CENSORED = "••••••";
 
   return (
-    <div className="rounded-[24px] border border-border bg-card overflow-hidden">
+    <section className="rounded-[24px] border border-border bg-card overflow-hidden">
       <div className="flex items-center justify-between gap-3 border-b border-border/40 px-6 py-5 md:px-8">
         <div>
           <h4 className="font-display font-bold text-xl tracking-[-0.02em]">Últimas Transações</h4>
@@ -51,49 +44,77 @@ export function DashboardActivity({
         </button>
       </div>
 
-      <div className="divide-y divide-border/30">
-        {activity.length === 0 ? (
-          <div className="py-12 text-center">
-            <p className="text-[13px] text-muted-foreground">Nenhuma transação encontrada</p>
-          </div>
-        ) : (
-          activity.map((item) => (
-            <button
-              key={item.id}
-              onClick={() => onTxClick(item.tx)}
-              className="flex w-full items-center justify-between gap-4 px-6 py-4 transition-colors hover:bg-muted/30 md:px-8"
-            >
-              <div className="flex items-center gap-4 min-w-0">
-                <div className={cn("flex h-10 w-10 shrink-0 items-center justify-center rounded-[12px]", statusBg(item.status))}>
-                   <span className={cn("text-[10px] font-bold uppercase", statusColor(item.status))}>
-                    {statusLabel(item.status).substring(0, 3)}
-                   </span>
-                </div>
-                <div className="min-w-0 text-left">
-                  <p className="truncate text-[14px] font-semibold text-foreground">
-                    {item.label || "Venda"}
-                  </p>
-                  <p className="text-[11px] text-muted-foreground mt-0.5">
-                    {timeAgo(item.createdAt)} • {statusLabel(item.status)}
-                  </p>
-                </div>
-              </div>
+      {activity.length > 0 && (
+        <div className="hidden md:grid grid-cols-[1fr_100px_120px_110px_20px] gap-4 px-5 md:px-6 py-2 border-y border-border/40 bg-muted/20 text-[11px] font-medium text-muted-foreground/60">
+          <span>Cliente</span>
+          <span>Método</span>
+          <span className="text-right">Valor</span>
+          <span>Status</span>
+          <span />
+        </div>
+      )}
 
-              <div className="flex items-center gap-4">
-                <div className="text-right">
-                  <p className="text-[14px] font-bold text-foreground tabular-nums">
+      <ul className="divide-y divide-border/30">
+        {activity.length === 0 ? (
+          <li className="px-6 py-14 text-center">
+            <p className="text-[13px] text-muted-foreground">Nenhuma transação ainda.</p>
+            <p className="text-[11px] text-muted-foreground/60 mt-1">Suas vendas aparecerão aqui em tempo real.</p>
+          </li>
+        ) : (
+          activity.map((item) => {
+            const method = item.label;
+            const methodLabel = method === "pix" ? "PIX" : method === "credit_card" ? "Cartão" : method === "boleto" ? "Boleto" : "—";
+            const custName = item.tx.customer_name || item.tx.customer_email || "Cliente";
+            
+            const isApproved = item.status === 'approved' || item.status === 'paid' || item.status === 'completed';
+            const dot =
+              isApproved ? "bg-emerald-500"
+              : item.status === "pending" ? "bg-amber-500"
+              : item.status === "chargeback" || item.status === "med" || item.status === "dispute" || item.status === "disputed" ? "bg-red-500"
+              : "bg-muted-foreground/50";
+            const statusColor =
+              isApproved ? "text-emerald-600 dark:text-emerald-500"
+              : item.status === "pending" ? "text-amber-600 dark:text-amber-500"
+              : item.status === "chargeback" || item.status === "med" || item.status === "dispute" || item.status === "disputed" ? "text-red-600 dark:text-red-500"
+              : "text-muted-foreground";
+
+            return (
+              <li key={item.id}>
+                <button
+                  type="button"
+                  onClick={() => onTxClick(item.tx)}
+                  className="group w-full grid md:grid-cols-[1fr_100px_120px_110px_20px] grid-cols-[1fr_auto] gap-4 items-center px-5 md:px-6 py-4 text-left hover:bg-muted/30 transition-colors"
+                >
+                  <div className="min-w-0">
+                    <p className="text-[14px] font-semibold text-foreground truncate">{custName}</p>
+                    <p className="text-[11px] text-muted-foreground/70 tabular-nums mt-0.5">
+                      {new Date(item.createdAt).toLocaleString("pt-BR", { day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit" })}
+                    </p>
+                  </div>
+                  <span className="hidden md:inline text-[12px] text-muted-foreground font-medium">{methodLabel}</span>
+                  <span className="hidden md:block text-right font-display font-bold text-[14px] tabular-nums text-foreground">
                     {privacyHidden ? CENSORED : formatCurrency(item.amount)}
-                  </p>
-                  <p className="text-[10px] text-muted-foreground mt-0.5">
-                    ID: {item.id.substring(0, 8)}
-                  </p>
-                </div>
-                <ChevronRight className="h-4 w-4 text-muted-foreground/40" />
-              </div>
-            </button>
-          ))
+                  </span>
+                  <span className={cn("hidden md:inline-flex items-center gap-1.5 text-[11px] font-bold", statusColor)}>
+                    <span className={cn("h-1.5 w-1.5 rounded-full", dot)} />
+                    {statusLabel(item.status)}
+                  </span>
+                  <div className="md:hidden flex flex-col items-end gap-1">
+                    <span className="font-display font-bold text-[14px] tabular-nums text-foreground">
+                      {privacyHidden ? CENSORED : formatCurrency(item.amount)}
+                    </span>
+                    <span className={cn("inline-flex items-center gap-1 text-[10px] font-bold", statusColor)}>
+                      <span className={cn("h-1.5 w-1.5 rounded-full", dot)} />
+                      {statusLabel(item.status)}
+                    </span>
+                  </div>
+                  <ChevronRight className="hidden md:block h-3.5 w-3.5 text-muted-foreground/30 group-hover:text-primary transition-colors" />
+                </button>
+              </li>
+            );
+          })
         )}
-      </div>
-    </div>
+      </ul>
+    </section>
   );
 }
