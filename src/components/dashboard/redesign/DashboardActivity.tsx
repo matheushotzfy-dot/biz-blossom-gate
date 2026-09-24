@@ -1,13 +1,5 @@
 import { ChevronRight, ArrowRight } from "lucide-react";
-import { cn } from "@/lib/utils";
-
-interface Transaction {
-  id: string;
-  created_at: string;
-  amount: number;
-  payment_method: string | null;
-  [key: string]: any;
-}
+import { cn, isApprovedTransaction } from "@/lib/utils";
 
 interface DashboardActivityProps {
   activity: any[];
@@ -65,17 +57,17 @@ export function DashboardActivity({
             const method = item.label;
             const methodLabel = method === "pix" ? "PIX" : method === "credit_card" ? "Cartão" : method === "boleto" ? "Boleto" : "—";
             const custName = item.tx.customer_name || item.tx.customer_email || "Cliente";
-
-            const isApproved = item.status === 'approved' || item.status === 'paid' || item.status === 'completed';
+            
+            const isApproved = isApprovedTransaction(item.status);
             const dot =
-              isApproved ? "bg-success"
-              : item.status === "pending" ? "bg-warning"
-              : item.status === "chargeback" || item.status === "med" || item.status === "dispute" || item.status === "disputed" ? "bg-destructive"
+              isApproved ? "bg-emerald-500"
+              : item.status === "pending" ? "bg-amber-500"
+              : item.status === "chargeback" || item.status === "med" || item.status === "dispute" || item.status === "disputed" ? "bg-red-500"
               : "bg-muted-foreground/50";
             const statusColor =
-              isApproved ? "text-success"
-              : item.status === "pending" ? "text-warning"
-              : item.status === "chargeback" || item.status === "med" || item.status === "dispute" || item.status === "disputed" ? "text-destructive"
+              isApproved ? "text-emerald-600 dark:text-emerald-500"
+              : item.status === "pending" ? "text-amber-600 dark:text-amber-500"
+              : item.status === "chargeback" || item.status === "med" || item.status === "dispute" || item.status === "disputed" ? "text-red-600 dark:text-red-500"
               : "text-muted-foreground";
 
             return (
