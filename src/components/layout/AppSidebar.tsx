@@ -92,7 +92,7 @@ function RevenueBar({ collapsed, revenue, milestone, onOpenRewards }: RevenueBar
       aria-hidden={collapsed}
       tabIndex={collapsed ? -1 : 0}
       title={`${current} de ${goal} — ${pctDisplay}% • ${milestone.current.tier}`}
-      className="sidebar-revenue-bar seller-clickable group/rev relative mt-4 block max-h-28 w-full overflow-hidden rounded-xl border border-sidebar-border bg-sidebar-accent px-4 py-3.5 text-left hover:border-primary/40"
+      className="sidebar-revenue-bar seller-clickable group/rev relative mt-4 block max-h-28 w-full overflow-hidden rounded-xl border border-sidebar-border bg-sidebar-accent/50 backdrop-blur-sm border-sidebar-border/40 px-4 py-3.5 text-left hover:border-primary/40 transition-all duration-300 shadow-sm"
     >
       {/* Marca d'água da logo */}
       <span

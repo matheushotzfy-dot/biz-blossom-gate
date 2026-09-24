@@ -136,7 +136,7 @@ function DashboardLayoutInner() {
 
   <SidebarInset className="ambient-backdrop dashboard-content-field relative min-w-0 bg-transparent flex flex-col h-full min-h-0 overflow-hidden">
 
-          <header className="technical-topbar relative z-30 flex h-16 items-center gap-1.5 border-b border-border px-3 transition-colors duration-200 lg:px-7 sticky top-0 md:flex">
+          <header className="technical-topbar relative z-30 flex h-16 items-center gap-1.5 border-b border-border/50 bg-background/70 backdrop-blur-md px-3 transition-all duration-300 lg:px-7 sticky top-0 md:flex">
             <SidebarTrigger className="seller-clickable icon-only relative md:hidden h-8 w-8 rounded-[9px] border border-transparent bg-transparent flex items-center justify-center text-muted-foreground transition-colors duration-200 hover:border-border/70 hover:text-foreground [&>svg]:hidden">
               <PanelToggleIcon size={17} />
               <span className="sr-only">Alternar menu</span>
@@ -155,7 +155,7 @@ function DashboardLayoutInner() {
 
             {/* ─── BALANCE ─── */}
             <div className="hidden md:flex items-center justify-center pr-1">
-              <div className="flex h-9 items-center gap-2.5 rounded-lg border border-border bg-card px-3 transition-colors duration-200 hover:border-primary/30">
+              <div className="flex h-9 items-center gap-2.5 rounded-full border border-border/60 bg-background/50 px-3 transition-all duration-300 hover:border-primary/40 hover:bg-background shadow-sm">
                 <Wallet className="h-3.5 w-3.5 text-primary" strokeWidth={2.2} />
                 <div className="leading-none">
                   <p className="text-[9.5px] font-medium text-muted-foreground/60">Saldo disponível</p>
@@ -165,7 +165,7 @@ function DashboardLayoutInner() {
                 </div>
                 <button
                   onClick={() => navigate("/financeiro/saques")}
-                  className="ml-1 hidden lg:inline-flex h-6 items-center rounded-[7px] bg-primary px-2.5 text-[11px] font-semibold text-primary-foreground transition-colors hover:brightness-105"
+                  className="ml-1 hidden lg:inline-flex h-6 items-center rounded-full bg-primary px-3 text-[10px] font-bold uppercase tracking-wider text-primary-foreground transition-all hover:brightness-110 shadow-sm"
                 >
                   Sacar
                 </button>
@@ -249,7 +249,7 @@ function DashboardLayoutInner() {
 
              <div ref={scrollRef} className="dashboard-scroll-field relative z-10 flex-1 overflow-y-auto overscroll-contain px-3 sm:px-5 md:px-8 xl:px-12 pb-28 md:pb-12 min-h-0">
    <div className="mx-auto w-full max-w-[1280px] py-3 md:py-7">
-  <div key={routeKey} className="page-fluid">
+  <div key={routeKey} className="page-fluid animate-in fade-in slide-in-from-bottom-2 duration-500">
   <Outlet />
   </div>
   </div>

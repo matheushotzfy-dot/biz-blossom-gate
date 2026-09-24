@@ -1,3 +1,4 @@
+@import "./styles/surfaces.css";
 @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&family=JetBrains+Mono:wght@400;500;600;700&family=Sora:wght@400;500;600;700;800&family=Manrope:wght@300;400;500;600;700;800&display=swap');
 
 @tailwind base;
@@ -40,7 +41,7 @@ input[type="number"]::-webkit-inner-spin-button {
     --border: 220 13% 93%;
     --input: 220 13% 91%;
     --ring: 160 84% 45%;
-    --radius: 0.75rem;
+    --radius: 0.875rem;
 
     --sidebar-background: 0 0% 100%;
     --sidebar-foreground: 220 9% 38%;
@@ -145,7 +146,7 @@ input[type="number"]::-webkit-inner-spin-button {
   /* Ultra-smooth press feel */
   button:active:not(:disabled),
   [role="button"]:active {
-    transform: scale(0.965);
+    transform: scale(0.975);
     transition-duration: 80ms;
   }
 

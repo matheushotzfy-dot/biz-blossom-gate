@@ -1,0 +1,17 @@
+@layer components {
+  .venx-surface-glass {
+    @apply bg-background/70 backdrop-blur-xl border-border/50;
+  }
+  
+  .venx-surface-card {
+    @apply bg-card border-border/60 shadow-sm hover:shadow-md transition-all duration-300;
+  }
+  
+  .venx-surface-elevated {
+    @apply bg-card border-border/80 shadow-lg;
+  }
+  
+  .venx-button-tactile {
+    @apply active:scale-[0.98] transition-transform duration-100;
+  }
+}
