@@ -376,7 +376,47 @@ export default function ControleGastos() {
             />
           </div>
         ) : (
-          <div className="max-h-[560px] overflow-y-auto scrollbar-thin">
+          <>
+          {/* Mobile cards */}
+          <div className="divide-y divide-border/20 md:hidden">
+            {sortedList.map((exp) => {
+              const cat = getCatInfo(exp.category);
+              const CatIcon = cat.icon || Filter;
+              return (
+                <div key={exp.id} className="flex items-center gap-3 px-4 py-3.5 active:bg-muted/20">
+                  <div
+                    className="h-9 w-9 rounded-lg flex items-center justify-center shrink-0"
+                    style={{ background: `color-mix(in srgb, ${cat.color} 10%, transparent)` }}
+                  >
+                    <CatIcon className="h-4 w-4" style={{ color: cat.color }} />
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <p className="text-sm font-semibold text-foreground truncate">
+                      {exp.description || <span className="text-muted-foreground/50 italic">Sem descrição</span>}
+                    </p>
+                    <p className="text-[11px] text-muted-foreground/60 mt-0.5">
+                      {cat.label} · {new Date(exp.expense_date + "T12:00:00").toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit", year: "2-digit" })}
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-1 shrink-0">
+                    <span className="text-sm font-display font-bold text-destructive font-numbers tracking-tight">
+                      −{fmt(Number(exp.amount))}
+                    </span>
+                    <Button
+                      variant="ghost" size="icon"
+                      className="text-destructive/40 hover:text-destructive hover:bg-destructive/5 h-7 w-7 rounded-md"
+                      onClick={() => handleDelete(exp.id)}
+                    >
+                      <Trash2 className="h-3.5 w-3.5" />
+                    </Button>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+
+          {/* Desktop table */}
+          <div className="hidden md:block max-h-[560px] overflow-y-auto scrollbar-thin">
             <Table>
               <TableHeader className="sticky top-0 bg-card/95 backdrop-blur z-10">
                 <TableRow className="border-border/20 hover:bg-transparent">
@@ -434,6 +474,7 @@ export default function ControleGastos() {
               </TableBody>
             </Table>
           </div>
+          </>
         )}
       </SharedPanel>
 
